@@ -1,0 +1,17 @@
+packages:
+  # Main projects
+  - 'maerchenzauber'
+  - 'manacore'
+  - 'manadeck'
+  - 'memoro'
+
+  # Sub-apps within projects
+  - 'maerchenzauber/apps/*'
+  - 'maerchenzauber/packages/*'
+  - 'manacore/apps/*'
+  - 'manadeck/apps/*'
+  - 'manadeck/backend'
+  - 'memoro/apps/*'
+
+  # Future shared packages
+  - 'packages/*'

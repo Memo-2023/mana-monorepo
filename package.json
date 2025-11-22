@@ -1,0 +1,29 @@
+{
+  "name": "manacore-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Manacore Monorepo containing maerchenzauber, manacore, manadeck, and memoro",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
+    "maerchenzauber:dev": "turbo run dev --filter=maerchenzauber...",
+    "manacore:dev": "turbo run dev --filter=manacore...",
+    "manadeck:dev": "turbo run dev --filter=manadeck...",
+    "memoro:dev": "turbo run dev --filter=memoro..."
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "turbo": "^2.3.0",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
