@@ -22,13 +22,13 @@
   "dependencies": {
     "@mana-core/nestjs-integration": "git+https://github.com/Memo-2023/mana-core-nestjs-package.git",
     "@nestjs/axios": "^4.0.1",
-    "axios": "^1.7.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/terminus": "^11.0.0",
-    "@supabase/supabase-js": "^2.58.0",
+    "@supabase/supabase-js": "^2.81.1",
+    "axios": "^1.7.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "joi": "^18.0.1",
@@ -58,7 +58,7 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.3",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.20.0"
   },
   "jest": {
