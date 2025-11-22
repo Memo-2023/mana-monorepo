@@ -1,0 +1,255 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/navigation/Navbar.astro';
+import Footer from '../../components/navigation/Footer.astro';
+import Section from '../../components/content/Section.astro';
+import Container from '../../components/layout/Container.astro';
+import Heading from '../../components/typography/Heading.astro';
+import Text from '../../components/typography/Text.astro';
+import Button from '../../components/ui/Button.astro';
+import Card from '../../components/ui/Card.astro';
+import Grid from '../../components/layout/Grid.astro';
+import Flex from '../../components/layout/Flex.astro';
+import { Icon } from 'astro-icon/components';
+
+export async function getStaticPaths() {
+  const clients = await getCollection('clients');
+  return clients.map(client => ({
+    params: { slug: client.slug },
+    props: { client },
+  }));
+}
+
+const { client } = Astro.props;
+const { Content } = await client.render();
+
+// Get other client stories
+const allClients = await getCollection('clients');
+const otherClients = allClients
+  .filter(c => c.slug !== client.slug)
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 2);
+---
+
+<Layout title={`${client.data.company} - Erfolgsgeschichte mit Mana`}>
+  <Navbar />
+  
+  <Section spacing="large" class="pt-32">
+    <Container>
+      <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+          <div class="mb-6">
+            <img 
+              src={client.data.logo} 
+              alt={`${client.data.company} Logo`}
+              class="h-16 mx-auto"
+            />
+          </div>
+          
+          <Heading as="h1" size="1" class="mb-4">
+            {client.data.company}
+          </Heading>
+          
+          <div class="flex items-center justify-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+            <span>{client.data.industry}</span>
+            <span>·</span>
+            <span>{client.data.location}</span>
+            <span>·</span>
+            <span>
+              {client.data.size === 'startup' && 'Startup'}
+              {client.data.size === 'mittelstand' && 'Mittelstand'}
+              {client.data.size === 'enterprise' && 'Enterprise'}
+            </span>
+          </div>
+        </div>
+        
+        <!-- Testimonial Quote -->
+        <Card variant="elevated" padding="large" class="mb-12 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
+          <div class="text-center">
+            <Icon name="mdi:format-quote-open" class="w-8 h-8 text-mana-blue mb-4 mx-auto" />
+            <Text size="xl" class="mb-6 italic">
+              "{client.data.testimonial.quote}"
+            </Text>
+            <div>
+              <Text weight="semibold">{client.data.testimonial.author}</Text>
+              <Text size="sm" color="muted">{client.data.testimonial.role}</Text>
+            </div>
+          </div>
+        </Card>
+        
+        <!-- Key Stats -->
+        <Grid cols={client.data.stats.length} gap="large" class="mb-16 max-w-4xl mx-auto">
+          {client.data.stats.map(stat => (
+            <div class="text-center">
+              <div class="text-4xl font-bold text-mana-blue mb-2">{stat.value}</div>
+              <Text color="muted">{stat.label}</Text>
+            </div>
+          ))}
+        </Grid>
+        
+        <!-- Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+          <!-- Main Content -->
+          <div class="lg:col-span-2">
+            <div class="prose prose-lg dark:prose-invert max-w-none">
+              <Content />
+            </div>
+          </div>
+          
+          <!-- Sidebar -->
+          <div class="lg:col-span-1">
+            <div class="sticky top-24 space-y-6">
+              <!-- Quick Facts -->
+              <Card variant="bordered" padding="medium">
+                <Heading as="h3" size="6" class="mb-4">
+                  <Icon name="mdi:information" class="w-5 h-5 inline mr-2" />
+                  Quick Facts
+                </Heading>
+                
+                <div class="space-y-3">
+                  <div>
+                    <Text size="sm" color="muted">Challenge</Text>
+                    <Text size="sm" weight="semibold">{client.data.challenge}</Text>
+                  </div>
+                  
+                  <div>
+                    <Text size="sm" color="muted">Lösung</Text>
+                    <Text size="sm" weight="semibold">{client.data.solution}</Text>
+                  </div>
+                </div>
+              </Card>
+              
+              <!-- Mana Usage -->
+              <Card variant="bordered" padding="medium">
+                <Heading as="h3" size="6" class="mb-4">
+                  <Icon name="mdi:chart-line" class="w-5 h-5 inline mr-2" />
+                  Mana-Nutzung
+                </Heading>
+                
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <Text size="sm" color="muted">Monatliche Credits</Text>
+                    <Text size="sm" weight="semibold">{client.data.manaUsage.monthlyCredits.toLocaleString('de-DE')}</Text>
+                  </div>
+                  
+                  <div class="flex justify-between items-center">
+                    <Text size="sm" color="muted">Team-Größe</Text>
+                    <Text size="sm" weight="semibold">{client.data.manaUsage.teamSize} Nutzer</Text>
+                  </div>
+                  
+                  <div>
+                    <Text size="sm" color="muted" class="mb-2">Hauptsächlich genutzte Tools</Text>
+                    <div class="flex flex-wrap gap-2">
+                      {client.data.manaUsage.mainTools.map(tool => (
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800">
+                          {tool}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+              
+              <!-- Key Results -->
+              <Card variant="bordered" padding="medium">
+                <Heading as="h3" size="6" class="mb-4">
+                  <Icon name="mdi:check-circle" class="w-5 h-5 inline mr-2 text-green-500" />
+                  Wichtigste Ergebnisse
+                </Heading>
+                
+                <ul class="space-y-2">
+                  {client.data.results.map(result => (
+                    <li class="flex items-start gap-2">
+                      <Icon name="mdi:check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <Text size="sm">{result}</Text>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+              
+              <!-- CTA -->
+              <Card variant="elevated" padding="medium" class="bg-mana-blue text-white">
+                <Heading as="h3" size="6" class="mb-3 text-white">
+                  Bereit für Ihren Erfolg?
+                </Heading>
+                <Text size="sm" class="mb-4 text-gray-100">
+                  Starten Sie noch heute mit Mana und transformieren Sie Ihre KI-Nutzung.
+                </Text>
+                <Button href="/start" variant="secondary" size="small" class="w-full">
+                  Kostenlos testen
+                </Button>
+              </Card>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Other Success Stories -->
+        {otherClients.length > 0 && (
+          <div>
+            <Heading as="h2" size="3" align="center" class="mb-8">
+              Weitere Erfolgsgeschichten
+            </Heading>
+            
+            <Grid cols={2} gap="large" class="max-w-4xl mx-auto">
+              {otherClients.map(otherClient => (
+                <a href={`/clients/${otherClient.slug}`} class="block group">
+                  <Card variant="bordered" padding="large" class="h-full hover:border-mana-blue transition-all hover:shadow-lg">
+                    <div class="mb-4">
+                      <img 
+                        src={otherClient.data.logo} 
+                        alt={`${otherClient.data.company} Logo`}
+                        class="h-12 grayscale group-hover:grayscale-0 transition-all"
+                      />
+                    </div>
+                    
+                    <Heading as="h3" size="5" class="mb-2 group-hover:text-mana-blue transition-colors">
+                      {otherClient.data.company}
+                    </Heading>
+                    
+                    <Text size="sm" color="muted" class="mb-4">
+                      {otherClient.data.industry} · {otherClient.data.location}
+                    </Text>
+                    
+                    <Text size="sm" class="italic">
+                      "{otherClient.data.testimonial.quote.substring(0, 100)}..."
+                    </Text>
+                  </Card>
+                </a>
+              ))}
+            </Grid>
+          </div>
+        )}
+      </div>
+    </Container>
+  </Section>
+  
+  <Footer />
+</Layout>
+
+<style>
+  .prose h2 {
+    @apply text-2xl font-bold mt-8 mb-4;
+  }
+  
+  .prose h3 {
+    @apply text-xl font-semibold mt-6 mb-3;
+  }
+  
+  .prose p {
+    @apply mb-4 leading-relaxed;
+  }
+  
+  .prose ul {
+    @apply space-y-2 mb-4;
+  }
+  
+  .prose li {
+    @apply ml-6 list-disc;
+  }
+  
+  .prose strong {
+    @apply font-semibold text-gray-900 dark:text-gray-100;
+  }
+</style>

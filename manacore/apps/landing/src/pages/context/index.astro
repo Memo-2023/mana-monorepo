@@ -1,0 +1,96 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/navigation/Navbar.astro';
+import Footer from '../../components/navigation/Footer.astro';
+import HeroSection from '../../components/content/HeroSection.astro';
+import Section from '../../components/content/Section.astro';
+import Container from '../../components/layout/Container.astro';
+import Grid from '../../components/layout/Grid.astro';
+import Card from '../../components/ui/Card.astro';
+import Heading from '../../components/typography/Heading.astro';
+import Text from '../../components/typography/Text.astro';
+import Button from '../../components/ui/Button.astro';
+import { getCollection } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+
+const contextPages = await getCollection('context');
+const sortedPages = contextPages.sort((a, b) => a.data.order - b.data.order);
+---
+
+<Layout title="Kontext - Alles über Mana">
+  <Navbar />
+  
+  <HeroSection
+    title="Verstehen Sie Mana"
+    subtitle="Detaillierte Informationen und Antworten auf alle Ihre Fragen"
+    background="gradient"
+    minHeight="small"
+    titleSize="2"
+    containerClass="pt-16 pb-8"
+  />
+
+  <Section spacing="xlarge">
+    <Container>
+      <div class="max-w-4xl mx-auto">
+        <Grid cols={1} gap="large">
+          {sortedPages.map((page) => (
+            <Card variant="bordered" padding="large" class="hover:border-mana-blue transition-colors">
+              <a href={`/context/${page.slug}`} class="block">
+                <div class="flex items-start gap-4">
+                  {page.data.icon && (
+                    <div class="flex-shrink-0">
+                      <div class="w-12 h-12 bg-mana-blue/10 rounded-lg flex items-center justify-center">
+                        <Icon name={page.data.icon} class="w-6 h-6 text-mana-blue" />
+                      </div>
+                    </div>
+                  )}
+                  <div class="flex-1">
+                    <Heading as="h2" size="4" class="mb-2 group-hover:text-mana-blue transition-colors">
+                      {page.data.title}
+                    </Heading>
+                    <Text color="muted" class="mb-4">
+                      {page.data.description}
+                    </Text>
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-4 text-sm text-gray-500">
+                        {page.data.publishedAt && (
+                          <span>
+                            Veröffentlicht: {new Date(page.data.publishedAt).toLocaleDateString('de-DE')}
+                          </span>
+                        )}
+                        {page.data.updatedAt && (
+                          <span>
+                            Aktualisiert: {new Date(page.data.updatedAt).toLocaleDateString('de-DE')}
+                          </span>
+                        )}
+                      </div>
+                      <Button variant="ghost" size="small">
+                        Weiterlesen
+                        <Icon name="mdi:arrow-right" class="w-4 h-4 ml-1" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </Card>
+          ))}
+        </Grid>
+
+        <div class="mt-12 text-center">
+          <Card variant="elevated" padding="large" class="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
+            <Icon name="mdi:help-circle" class="w-12 h-12 text-mana-blue mx-auto mb-4" />
+            <Heading as="h3" size="4" class="mb-2">Noch Fragen?</Heading>
+            <Text color="muted" class="mb-6">
+              Unser Support-Team hilft Ihnen gerne weiter
+            </Text>
+            <Button href="/kontakt" variant="primary">
+              Kontakt aufnehmen
+            </Button>
+          </Card>
+        </div>
+      </div>
+    </Container>
+  </Section>
+
+  <Footer />
+</Layout>

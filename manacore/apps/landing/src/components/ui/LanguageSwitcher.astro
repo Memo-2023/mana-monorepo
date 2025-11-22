@@ -1,0 +1,156 @@
+---
+import { Icon } from 'astro-icon/components';
+import { languages, type Language } from '../../lib/i18n/config';
+import { getRouteFromUrl, getLocalizedRoute } from '../../lib/i18n/utils';
+
+export interface Props {
+  currentLang: Language;
+}
+
+const { currentLang } = Astro.props;
+const currentRoute = getRouteFromUrl(Astro.url);
+
+// Get language labels and flag emojis
+const languageLabels = {
+  de: 'DE',
+  en: 'EN',
+  it: 'IT',
+  fr: 'FR',
+  es: 'ES'
+};
+
+const flagEmojis = {
+  de: '🇩🇪',
+  en: '🇬🇧',
+  it: '🇮🇹',
+  fr: '🇫🇷',
+  es: '🇪🇸'
+};
+
+// Generate unique ID for this instance
+const uniqueId = `lang-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<div class="relative language-switcher">
+  <button
+    id={`language-toggle-${uniqueId}`}
+    class="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-300 hover:text-white transition-all"
+    aria-label="Change language"
+    aria-expanded="false"
+  >
+    <span class="text-base" aria-hidden="true">{flagEmojis[currentLang]}</span>
+    <span class="text-sm font-medium">{languageLabels[currentLang]}</span>
+    <Icon name="mdi:chevron-down" class="w-4 h-4 transition-transform language-chevron" />
+  </button>
+
+  <div
+    id={`language-menu-${uniqueId}`}
+    class="language-menu absolute right-0 bottom-full mb-2 w-48 rounded-lg shadow-lg hidden"
+  >
+    <div class="py-1">
+      {Object.entries(languages).map(([lang, label]) => {
+        const isActive = lang === currentLang;
+        const href = getLocalizedRoute(currentRoute, lang as Language);
+
+        return (
+          <a
+            href={href}
+            class={`flex items-center gap-3 px-4 py-2 text-sm transition-all ${
+              isActive
+                ? 'text-white bg-blue-500/20'
+                : 'text-gray-300 hover:text-white hover:bg-blue-500/10'
+            }`}
+          >
+            <span class="text-base" aria-hidden="true">{flagEmojis[lang as Language]}</span>
+            <span class="flex-1">{label}</span>
+            {isActive && (
+              <Icon name="mdi:check" class="w-4 h-4 text-blue-500" />
+            )}
+          </a>
+        );
+      })}
+    </div>
+  </div>
+</div>
+
+<style>
+  .language-menu {
+    z-index: 9999;
+    transition: all 0.2s ease;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(248, 250, 252, 0.1);
+  }
+
+  .language-switcher button:hover {
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+  .language-switcher:hover .language-chevron,
+  .language-switcher[data-open="true"] .language-chevron {
+    transform: rotate(180deg);
+  }
+
+  .language-switcher[data-open="true"] .language-menu {
+    display: block;
+  }
+</style>
+
+<script>
+  function initLanguageSwitchers() {
+    const switchers = document.querySelectorAll('.language-switcher');
+
+    switchers.forEach((switcher) => {
+      const toggle = switcher.querySelector('button') as HTMLElement;
+      const menu = switcher.querySelector('.language-menu') as HTMLElement;
+
+      if (!toggle || !menu) {
+        console.log('Language switcher missing elements');
+        return;
+      }
+
+      // Toggle menu
+      toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const isOpen = switcher.getAttribute('data-open') === 'true';
+
+        // Close all other switchers
+        document.querySelectorAll('.language-switcher').forEach((otherSwitcher) => {
+          if (otherSwitcher !== switcher) {
+            otherSwitcher.setAttribute('data-open', 'false');
+          }
+        });
+
+        // Toggle current switcher
+        switcher.setAttribute('data-open', isOpen ? 'false' : 'true');
+        toggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+      });
+
+      // Prevent menu from closing when clicking inside
+      menu.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    });
+
+    // Close all menus when clicking outside
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.language-switcher')) {
+        document.querySelectorAll('.language-switcher').forEach((switcher) => {
+          switcher.setAttribute('data-open', 'false');
+          const toggle = switcher.querySelector('button');
+          toggle?.setAttribute('aria-expanded', 'false');
+        });
+      }
+    });
+  }
+
+  // Init on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLanguageSwitchers);
+  } else {
+    initLanguageSwitchers();
+  }
+</script>

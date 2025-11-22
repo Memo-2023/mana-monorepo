@@ -1,0 +1,227 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/navigation/Navbar.astro';
+import Footer from '../../components/navigation/Footer.astro';
+import Section from '../../components/content/Section.astro';
+import Container from '../../components/layout/Container.astro';
+import Heading from '../../components/typography/Heading.astro';
+import Text from '../../components/typography/Text.astro';
+import Button from '../../components/ui/Button.astro';
+import Card from '../../components/ui/Card.astro';
+
+export async function getStaticPaths() {
+  const privacyEntries = await getCollection('privacy');
+  return privacyEntries.map(entry => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+// Get other privacy articles for sidebar
+const allPrivacyArticles = await getCollection('privacy');
+const otherArticles = allPrivacyArticles
+  .filter(article => article.slug !== entry.slug)
+  .sort((a, b) => a.data.order - b.data.order);
+
+// Format date
+const lastUpdated = new Date(entry.data.lastUpdated).toLocaleDateString('de-DE', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+
+// Get category color
+const categoryColors = {
+  'compliance': 'blue',
+  'security': 'green',
+  'ai-ethics': 'purple',
+  'transparency': 'orange'
+};
+const categoryColor = categoryColors[entry.data.category] || 'gray';
+---
+
+<Layout title={`${entry.data.title} | Mana Datenschutz`}>
+  <Navbar />
+  
+  <Section spacing="large" class="pt-32">
+    <Container>
+      <div class="max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <!-- Main Content -->
+          <div class="lg:col-span-3">
+            <!-- Header -->
+            <div class="mb-8">
+              <div class="flex items-center gap-3 mb-4">
+                <span class={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-${categoryColor}-100 dark:bg-${categoryColor}-900/30 text-${categoryColor}-700 dark:text-${categoryColor}-300`}>
+                  {entry.data.category === 'compliance' && 'Compliance'}
+                  {entry.data.category === 'security' && 'Sicherheit'}
+                  {entry.data.category === 'ai-ethics' && 'KI-Ethik'}
+                  {entry.data.category === 'transparency' && 'Transparenz'}
+                </span>
+                {entry.data.featured && (
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300">
+                    ⭐ Empfohlen
+                  </span>
+                )}
+              </div>
+              
+              <Heading as="h1" size="1" class="mb-4">
+                {entry.data.title}
+              </Heading>
+              
+              <Text size="xl" color="muted" class="mb-6">
+                {entry.data.description}
+              </Text>
+              
+              <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                <span>Zuletzt aktualisiert: {lastUpdated}</span>
+              </div>
+            </div>
+            
+            <!-- Tags -->
+            {entry.data.tags && entry.data.tags.length > 0 && (
+              <div class="flex flex-wrap gap-2 mb-8">
+                {entry.data.tags.map((tag) => (
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            
+            <!-- Article Content -->
+            <div class="prose prose-lg dark:prose-invert max-w-none">
+              <Content />
+            </div>
+            
+            <!-- Contact CTA -->
+            <Card variant="elevated" padding="large" class="mt-12 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
+              <div class="text-center">
+                <Heading as="h3" size="4" class="mb-3">
+                  Haben Sie Fragen zum Datenschutz?
+                </Heading>
+                <Text color="muted" class="mb-6">
+                  Unser Datenschutzteam steht Ihnen gerne zur Verfügung.
+                </Text>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button href="mailto:datenschutz@mana.ai" variant="primary">
+                    E-Mail schreiben
+                  </Button>
+                  <Button href="/kontakt" variant="outline">
+                    Kontaktformular
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+          
+          <!-- Sidebar -->
+          <div class="lg:col-span-1">
+            <div class="sticky top-24">
+              <!-- Other Articles -->
+              <Card variant="bordered" padding="medium" class="mb-6">
+                <Heading as="h3" size="6" class="mb-4">
+                  Weitere Datenschutz-Themen
+                </Heading>
+                <div class="space-y-3">
+                  {otherArticles.map((article) => (
+                    <a 
+                      href={`/privacy/${article.slug}`}
+                      class="block group"
+                    >
+                      <div class="p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <Text size="sm" weight="semibold" class="mb-1 group-hover:text-mana-blue transition-colors">
+                          {article.data.title}
+                        </Text>
+                        <Text size="xs" color="muted" class="line-clamp-2">
+                          {article.data.description}
+                        </Text>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </Card>
+              
+              <!-- Quick Links -->
+              <Card variant="bordered" padding="medium">
+                <Heading as="h3" size="6" class="mb-4">
+                  Schnellzugriff
+                </Heading>
+                <div class="space-y-2">
+                  <a href="/datenschutz" class="flex items-center gap-2 text-sm hover:text-mana-blue transition-colors">
+                    <span>📄</span> Datenschutzerklärung
+                  </a>
+                  <a href="/legal/agb" class="flex items-center gap-2 text-sm hover:text-mana-blue transition-colors">
+                    <span>📋</span> AGB
+                  </a>
+                  <a href="/impressum" class="flex items-center gap-2 text-sm hover:text-mana-blue transition-colors">
+                    <span>ℹ️</span> Impressum
+                  </a>
+                  <a href="/cookies" class="flex items-center gap-2 text-sm hover:text-mana-blue transition-colors">
+                    <span>🍪</span> Cookie-Richtlinie
+                  </a>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Container>
+  </Section>
+  
+  <Footer />
+</Layout>
+
+<style>
+  .prose h2 {
+    @apply text-2xl font-bold mt-8 mb-4;
+  }
+  
+  .prose h3 {
+    @apply text-xl font-semibold mt-6 mb-3;
+  }
+  
+  .prose p {
+    @apply mb-4 leading-relaxed;
+  }
+  
+  .prose ul {
+    @apply space-y-2 mb-4;
+  }
+  
+  .prose li {
+    @apply ml-6 list-disc;
+  }
+  
+  .prose table {
+    @apply w-full border-collapse mb-6;
+  }
+  
+  .prose th {
+    @apply bg-gray-50 dark:bg-gray-800 font-semibold text-left p-3 border border-gray-200 dark:border-gray-700;
+  }
+  
+  .prose td {
+    @apply p-3 border border-gray-200 dark:border-gray-700;
+  }
+  
+  .prose code {
+    @apply bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm;
+  }
+  
+  .prose pre {
+    @apply bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4;
+  }
+  
+  .prose blockquote {
+    @apply border-l-4 border-mana-blue pl-4 italic mb-4;
+  }
+  
+  .prose hr {
+    @apply my-8 border-gray-200 dark:border-gray-700;
+  }
+</style>

@@ -1,0 +1,88 @@
+---
+import Card from '../ui/Card.astro';
+
+const steps = [
+  {
+    number: '1',
+    title: 'Charakter erstellen',
+    description: 'Gib deinem Helden einen Namen und beschreibe sein Aussehen. Wähle aus drei generierten Bildern deinen Favoriten.',
+    image: '/screenshots/create-character.png'
+  },
+  {
+    number: '2',
+    title: 'Geschichte beschreiben',
+    description: 'Erzähle uns, wovon deine Geschichte handeln soll. Die KI verwandelt deine Idee in ein spannendes Abenteuer.',
+    image: '/screenshots/create-story.png'
+  },
+  {
+    number: '3',
+    title: 'Magie erleben',
+    description: 'Lehne dich zurück und genieße deine personalisierte Geschichte mit wunderschönen Illustrationen.',
+    image: '/screenshots/view-story.png'
+  }
+];
+---
+
+<section id="how-it-works" class="section bg-bg-primary">
+  <div class="container-custom">
+    <!-- Section Header -->
+    <div class="text-center mb-12 md:mb-16">
+      <h2 class="font-grandstander font-bold text-3xl md:text-4xl lg:text-5xl text-text-primary mb-4">
+        So einfach funktioniert's
+      </h2>
+      <p class="text-text-secondary text-lg max-w-3xl mx-auto">
+        In nur drei Schritten zu deiner personalisierten Geschichte
+      </p>
+    </div>
+
+    <!-- Steps -->
+    <div class="space-y-16 md:space-y-24">
+      {steps.map((step, index) => (
+        <div class={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-8 lg:gap-16 items-center`}>
+          <!-- Text Content -->
+          <div class="flex-1 text-center lg:text-left">
+            <div class="flex items-center gap-4 mb-6 justify-center lg:justify-start">
+              <div class="w-12 h-12 md:w-16 md:h-16 bg-yellow-dark rounded-full flex items-center justify-center">
+                <span class="text-white font-bold text-xl md:text-2xl">{step.number}</span>
+              </div>
+              <h3 class="font-grandstander font-bold text-2xl md:text-3xl text-text-primary">
+                {step.title}
+              </h3>
+            </div>
+            <p class="text-text-secondary text-lg leading-relaxed">
+              {step.description}
+            </p>
+          </div>
+
+          <!-- Screenshot -->
+          <div class="flex-1">
+            <Card padding="none" className="overflow-hidden">
+              <div class="relative aspect-[16/9] bg-bg-darker">
+                <img 
+                  src={step.image} 
+                  alt={step.title}
+                  class="w-full h-full object-cover"
+                />
+                <!-- Overlay gradient for better text visibility if needed -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center mt-16">
+      <p class="text-text-secondary text-lg mb-6">
+        Bereit, deine erste Geschichte zu erstellen?
+      </p>
+      <a href="#download" class="btn-primary inline-flex items-center gap-2">
+        Jetzt starten
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>

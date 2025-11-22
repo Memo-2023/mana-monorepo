@@ -1,0 +1,301 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/navigation/Navbar.astro';
+import Footer from '../../components/navigation/Footer.astro';
+import Section from '../../components/content/Section.astro';
+import Container from '../../components/layout/Container.astro';
+import Heading from '../../components/typography/Heading.astro';
+import Text from '../../components/typography/Text.astro';
+import Card from '../../components/ui/Card.astro';
+import Grid from '../../components/layout/Grid.astro';
+import Button from '../../components/ui/Button.astro';
+import HeroSection from '../../components/content/HeroSection.astro';
+import { Icon } from 'astro-icon/components';
+
+const branchen = await getCollection('branchen');
+const sortedBranchen = branchen.sort((a, b) => a.data.order - b.data.order);
+---
+
+<Layout title="Für wen ist Mana? - Maßgeschneiderte Lösungen">
+  <div class="bg-gradient-to-b from-blue-50/30 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
+  <Navbar />
+  
+  <!-- Hero Section -->
+  <div class="relative">
+    <div class="absolute inset-0 -bottom-32">
+      <div class="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-transparent dark:from-gray-900 dark:to-transparent"></div>
+      <div class="absolute top-0 right-0 w-96 h-96 bg-mana-blue/10 dark:bg-mana-blue/5 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-3xl"></div>
+    </div>
+    
+    <HeroSection
+      title="Für wen ist Mana gemacht?"
+      subtitle="Egal ob Startup, Mittelstand oder Enterprise - Mana passt sich flexibel an Ihre Bedürfnisse an. Entdecken Sie maßgeschneiderte Lösungen für Ihre Branche."
+      background="none"
+      minHeight="small"
+      spacing="small"
+      containerClass="py-16 relative z-10"
+      debug={false}
+    />
+  </div>
+  
+  <!-- Target Groups Grid -->
+  <Section spacing="xlarge" class="relative">
+    {/* Continuous background flow */}
+    <div class="absolute inset-0 -top-32 -bottom-32"></div>
+    <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/15 dark:bg-blue-500/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-mana-blue/15 dark:bg-mana-blue/5 rounded-full blur-3xl"></div>
+    
+    <Container class="relative z-10">
+      <Grid cols={2} gap="large" class="max-w-6xl mx-auto">
+        {sortedBranchen.map((group) => (
+          <a href={`/fuer/${group.slug}`} class="block group">
+            <div class="relative h-full">
+              {/* Gradient border effect */}
+              <div class="absolute -inset-0.5 bg-gradient-to-r from-mana-blue/0 via-mana-blue/20 to-mana-blue/0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur"></div>
+              
+              {/* Card content */}
+              <div class="relative h-full bg-white/80 backdrop-blur-sm dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 group-hover:border-mana-blue/50 transition-all duration-300 overflow-hidden">
+                {/* Special pricing ribbon */}
+                {group.data.pricing.special && (
+                  <div class="absolute top-4 right-4 z-10">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg">
+                      <Icon name="mdi:star" class="w-3 h-3 mr-1" />
+                      {group.data.pricing.discount || 'Sonderkonditionen'}
+                    </span>
+                  </div>
+                )}
+                
+                <div class="p-8">
+                  {/* Icon and Title Section */}
+                  <div class="mb-6">
+                    <div class="relative mb-4">
+                      <div class="absolute inset-0 bg-gradient-to-br from-mana-blue/10 to-blue-500/10 rounded-3xl blur-2xl group-hover:from-mana-blue/20 group-hover:to-blue-500/20 transition-all duration-300"></div>
+                      <div class="relative w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-3xl flex items-center justify-center text-5xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                        {group.data.icon}
+                      </div>
+                    </div>
+                    <Heading as="h3" size="3" class="mb-3 group-hover:text-mana-blue transition-colors">
+                      {group.data.title}
+                    </Heading>
+                    <Text size="base" class="text-gray-600 dark:text-gray-400">
+                      {group.data.description}
+                    </Text>
+                  </div>
+                  
+                  {/* Benefits Preview */}
+                  <div class="mb-6 space-y-3">
+                    {group.data.benefits.slice(0, 3).map((benefit) => (
+                      <div class="flex items-start gap-3 group/item">
+                        <div class="mt-0.5 flex-shrink-0 w-5 h-5 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center group-hover/item:scale-110 transition-transform">
+                          <Icon name="mdi:check" class="w-3 h-3 text-green-600 dark:text-green-400" />
+                        </div>
+                        <Text size="sm" class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                          {benefit}
+                        </Text>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* CTA */}
+                  <div class="pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <div class="flex items-center justify-between">
+                      <span class="text-mana-blue font-medium">Mehr erfahren</span>
+                      <div class="flex items-center gap-2 text-mana-blue">
+                        <span class="text-sm opacity-0 group-hover:opacity-100 transition-opacity">Details ansehen</span>
+                        <Icon name="mdi:arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        ))}
+      </Grid>
+    </Container>
+  </Section>
+  
+  <!-- Benefits Overview -->
+  <Section spacing="xlarge" class="relative">
+    {/* Continuous background flow */}
+    <div class="absolute inset-0 -top-32 -bottom-32 bg-gradient-to-b from-transparent via-blue-50/40 to-transparent dark:from-transparent dark:via-blue-500/3 dark:to-transparent"></div>
+    <div class="absolute top-1/3 right-0 w-[500px] h-[500px] bg-blue-500/20 dark:bg-blue-500/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-1/3 left-0 w-[500px] h-[500px] bg-mana-blue/20 dark:bg-mana-blue/5 rounded-full blur-3xl"></div>
+    
+    <Container class="relative z-10">
+      <div class="text-center mb-16">
+        <Heading as="h2" size="2" class="mb-4 text-center">
+          Warum Mana für alle funktioniert
+        </Heading>
+        <Text size="xl" class="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto text-center">
+          Eine Plattform, die sich an Ihre Bedürfnisse anpasst – nicht umgekehrt
+        </Text>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        {/* Faire Preise */}
+        <div class="group relative">
+          <div class="absolute inset-0 bg-gradient-to-br from-green-500/0 to-emerald-500/0 rounded-3xl group-hover:from-green-500/10 group-hover:to-emerald-500/10 transition-all duration-300"></div>
+          <div class="relative bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-3xl p-8 h-full border border-gray-200 dark:border-gray-700 group-hover:border-green-500/30 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-green-500/10">
+            <div class="mb-6">
+              <div class="relative">
+                <div class="absolute inset-0 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-2xl blur-xl group-hover:from-green-500/30 group-hover:to-emerald-500/30 transition-all duration-300"></div>
+                <div class="relative w-16 h-16 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Icon name="mdi:scale-balance" class="w-8 h-8 text-green-600 dark:text-green-500" />
+                </div>
+              </div>
+            </div>
+            <Heading as="h3" size="4" class="mb-3">Faire Preise</Heading>
+            <Text size="base" class="text-gray-600 dark:text-gray-400 leading-relaxed">
+              Spezielle Konditionen für Bildung, NGOs und Startups. Keine versteckten Kosten.
+            </Text>
+            <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+              <div class="flex items-center gap-2 text-green-600 dark:text-green-500">
+                <Icon name="mdi:arrow-right" class="w-4 h-4" />
+                <Text size="sm" class="font-medium">Bis zu 90% sparen</Text>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Flexible Integration */}
+        <div class="group relative">
+          <div class="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-pink-500/0 rounded-3xl group-hover:from-purple-500/10 group-hover:to-pink-500/10 transition-all duration-300"></div>
+          <div class="relative bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-3xl p-8 h-full border border-gray-200 dark:border-gray-700 group-hover:border-purple-500/30 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-purple-500/10">
+            <div class="mb-6">
+              <div class="relative">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl blur-xl group-hover:from-purple-500/30 group-hover:to-pink-500/30 transition-all duration-300"></div>
+                <div class="relative w-16 h-16 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Icon name="mdi:puzzle" class="w-8 h-8 text-purple-600 dark:text-purple-500" />
+                </div>
+              </div>
+            </div>
+            <Heading as="h3" size="4" class="mb-3">Flexible Integration</Heading>
+            <Text size="base" class="text-gray-600 dark:text-gray-400 leading-relaxed">
+              Nahtlose Einbindung in bestehende Workflows. API-first für maximale Anpassbarkeit.
+            </Text>
+            <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+              <div class="flex items-center gap-2 text-purple-600 dark:text-purple-500">
+                <Icon name="mdi:arrow-right" class="w-4 h-4" />
+                <Text size="sm" class="font-medium">Plug & Play</Text>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Skalierbar */}
+        <div class="group relative">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-cyan-500/0 rounded-3xl group-hover:from-blue-500/10 group-hover:to-cyan-500/10 transition-all duration-300"></div>
+          <div class="relative bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-3xl p-8 h-full border border-gray-200 dark:border-gray-700 group-hover:border-blue-500/30 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-blue-500/10">
+            <div class="mb-6">
+              <div class="relative">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl blur-xl group-hover:from-blue-500/30 group-hover:to-cyan-500/30 transition-all duration-300"></div>
+                <div class="relative w-16 h-16 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Icon name="mdi:rocket-launch" class="w-8 h-8 text-blue-600 dark:text-blue-500" />
+                </div>
+              </div>
+            </div>
+            <Heading as="h3" size="4" class="mb-3">Unbegrenzt skalierbar</Heading>
+            <Text size="base" class="text-gray-600 dark:text-gray-400 leading-relaxed">
+              Von Solo-Gründer bis Großkonzern. Wächst automatisch mit Ihrem Erfolg mit.
+            </Text>
+            <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+              <div class="flex items-center gap-2 text-blue-600 dark:text-blue-500">
+                <Icon name="mdi:arrow-right" class="w-4 h-4" />
+                <Text size="sm" class="font-medium">1 bis 10.000+ User</Text>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Additional value props */}
+      <div class="mt-16 text-center">
+        <div class="inline-flex items-center gap-8 flex-wrap justify-center">
+          <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <Icon name="mdi:shield-check" class="w-5 h-5 text-green-500" />
+            <Text size="sm">DSGVO-konform</Text>
+          </div>
+          <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <Icon name="mdi:headset" class="w-5 h-5 text-blue-500" />
+            <Text size="sm">24/7 Support</Text>
+          </div>
+          <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <Icon name="mdi:update" class="w-5 h-5 text-purple-500" />
+            <Text size="sm">Wöchentliche Updates</Text>
+          </div>
+          <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <Icon name="mdi:earth" class="w-5 h-5 text-emerald-500" />
+            <Text size="sm">CO2-neutral</Text>
+          </div>
+        </div>
+      </div>
+    </Container>
+  </Section>
+  
+  <!-- CTA Section -->
+  <Section spacing="xlarge" class="relative">
+    {/* Continuous background flow - final crescendo */}
+    <div class="absolute -inset-y-32 left-1/2 -translate-x-1/2 w-[200vw]"></div>
+    <div class="absolute bottom-0 right-1/3 w-[600px] h-[600px] bg-mana-blue/25 dark:bg-mana-blue/8 rounded-full blur-3xl"></div>
+    <div class="absolute top-0 left-1/3 w-[600px] h-[600px] bg-blue-500/25 dark:bg-blue-500/8 rounded-full blur-3xl"></div>
+    
+    <Container class="relative z-10">
+      <div class="max-w-4xl mx-auto">
+        {/* Main CTA Card */}
+        <div class="relative group">
+          <div class="relative bg-white/95 backdrop-blur-sm dark:bg-gray-800 rounded-3xl p-12 md:p-16 text-center border border-gray-200 dark:border-gray-700 shadow-xl">
+            {/* Icon */}
+            <div class="relative inline-block mb-8">
+              <div class="absolute inset-0 bg-mana-blue/20 rounded-full blur-2xl scale-150"></div>
+              <div class="relative w-20 h-20 bg-gradient-to-br from-mana-blue to-blue-600 rounded-2xl flex items-center justify-center transform rotate-3 group-hover:rotate-6 transition-transform duration-300">
+                <Icon name="mdi:compass" class="w-10 h-10 text-white" />
+              </div>
+            </div>
+            
+            <Heading as="h2" size="2" class="mb-4 text-center">
+              Finden Sie die perfekte Lösung
+            </Heading>
+            
+            <Text size="xl" class="mb-10 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-center">
+              Nicht sicher, welches Angebot zu Ihnen passt? Wir beraten Sie gerne 
+              unverbindlich zu den besten Optionen für Ihre Anforderungen.
+            </Text>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+              <Button href="/beratung" size="large" class="bg-gradient-to-r from-mana-blue to-blue-600 hover:from-blue-600 hover:to-mana-blue text-white px-8 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300">
+                <Icon name="mdi:calendar-check" class="w-5 h-5 mr-2" />
+                Kostenlose Beratung buchen
+              </Button>
+              <Button href="/pricing" variant="outline" size="large" class="border-2 border-gray-300 dark:border-gray-600 hover:border-mana-blue dark:hover:border-mana-blue px-8 py-4 text-lg">
+                <Icon name="mdi:currency-eur" class="w-5 h-5 mr-2" />
+                Preise ansehen
+              </Button>
+            </div>
+            
+            {/* Trust indicators */}
+            <div class="flex items-center justify-center gap-8 pt-8 border-t border-gray-100 dark:border-gray-700">
+              <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <Icon name="mdi:clock-fast" class="w-5 h-5 text-mana-blue" />
+                <Text size="sm">15 Min. Gespräch</Text>
+              </div>
+              <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <Icon name="mdi:account-group" class="w-5 h-5 text-mana-blue" />
+                <Text size="sm">KI-Experten</Text>
+              </div>
+              <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <Icon name="mdi:hand-heart" class="w-5 h-5 text-mana-blue" />
+                <Text size="sm">Unverbindlich</Text>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Container>
+  </Section>
+  
+  <Footer />
+  </div>
+</Layout>

@@ -1,0 +1,336 @@
+---
+import Container from '../layout/Container.astro';
+import Heading from '../typography/Heading.astro';
+import Text from '../typography/Text.astro';
+import Image from '../ui/Image.astro';
+import Section from './Section.astro';
+import { Icon } from 'astro-icon/components';
+
+export interface Props {
+  title: string;
+  subtitle?: string;
+  centered?: boolean;
+  backgroundImage?: string;
+  overlay?: boolean;
+  minHeight?: 'screen' | 'large' | 'medium' | 'small';
+  sideImage?: boolean;
+  imagePosition?: 'left' | 'right';
+  imageSrc?: string;
+  imageAlt?: string;
+  background?: 'none' | 'gray' | 'gradient' | 'mana-blue';
+  icon?: string;
+  iconSize?: 'small' | 'medium' | 'large';
+  titleSize?: '1' | '2' | '3' | '4' | '5' | '6' | '7';
+  titleClass?: string;
+  subtitleClass?: string;
+  spacing?: 'none' | 'small' | 'medium' | 'large' | 'xlarge';
+  containerClass?: string;
+  showIcon?: boolean;
+  animatedIcon?: boolean;
+  debug?: boolean;
+}
+
+const {
+  title,
+  subtitle,
+  centered = true,
+  backgroundImage,
+  overlay = true,
+  minHeight = 'large',
+  sideImage = false,
+  imagePosition = 'right',
+  imageSrc,
+  imageAlt = '',
+  background = 'none',
+  icon,
+  iconSize = 'medium',
+  titleSize = '1',
+  titleClass = '',
+  subtitleClass = '',
+  spacing = 'large',
+  containerClass = '',
+  showIcon = false,
+  animatedIcon = false,
+  debug = false,
+  ...rest
+} = Astro.props;
+
+const heights = {
+  screen: 'min-h-screen',
+  large: 'min-h-[600px]',
+  medium: 'min-h-[400px]',
+  small: 'min-h-[300px]'
+};
+
+const iconSizes = {
+  small: 'w-12 h-12',
+  medium: 'w-16 h-16',
+  large: 'w-20 h-20'
+};
+
+const backgrounds = {
+  none: '',
+  gray: 'bg-gray-50 dark:bg-gray-900',
+  gradient: 'bg-gradient-to-br from-blue-50 to-transparent dark:from-blue-950/20 dark:to-transparent',
+  'mana-blue': 'bg-mana-blue text-white'
+};
+
+const containerClasses = `relative ${heights[minHeight]} flex items-center ${backgrounds[background]} pt-20 ${debug ? 'debug-border debug-border-red' : ''} ${backgroundImage ? 'bg-cover bg-center bg-no-repeat' : ''}`;
+const contentClasses = centered ? 'text-center' : '';
+const backgroundStyles = backgroundImage ? `background-image: url('${backgroundImage}');` : '';
+
+// Debug info
+const debugInfo = debug ? {
+  minHeight,
+  background,
+  sideImage,
+  imagePosition,
+  centered,
+  titleSize,
+  iconSize,
+  spacing
+} : null;
+---
+
+<Section spacing={spacing} class={containerClasses} style={backgroundStyles} {...rest}>
+  {backgroundImage && overlay && (
+    <div class="absolute inset-0 bg-black bg-opacity-50 dark:bg-opacity-70"></div>
+  )}
+  
+  <Container class={`relative z-10 ${containerClass} ${sideImage ? '!px-0' : ''} ${debug ? 'debug-border debug-border-blue' : ''}`}>
+    {debug && debugInfo && (
+      <div class="absolute top-0 left-0 bg-black/80 text-white text-xs p-2 rounded-br-lg z-50 font-mono">
+        <div class="font-bold mb-1 text-yellow-300">🐛 HeroSection Debug</div>
+        {Object.entries(debugInfo).map(([key, value]) => (
+          <div>{key}: <span class="text-green-300">{String(value)}</span></div>
+        ))}
+      </div>
+    )}
+    
+    {sideImage ? (
+      <div class={`grid grid-cols-1 lg:grid-cols-2 gap-0 items-center ${debug ? 'debug-border debug-border-green' : ''}`}>
+        <!-- Mobile: Image first, Desktop: Based on imagePosition -->
+        <div class={`order-1 lg:order-${imagePosition === 'left' ? '1' : '2'} ${debug ? 'debug-border debug-border-yellow' : ''}`}>
+          <slot name="image">
+            {imageSrc ? (
+              <img 
+                src={imageSrc}
+                alt={imageAlt}
+                class="w-full h-full object-cover"
+              />
+            ) : (
+              <Image 
+                placeholder="dashboard" 
+                alt="Manacore Dashboard" 
+                width={600} 
+                height={400} 
+                rounded 
+                class="w-full h-full object-cover"
+              />
+            )}
+          </slot>
+        </div>
+        
+        <div class={`order-2 lg:order-${imagePosition === 'left' ? '2' : '1'} ${contentClasses} px-8 lg:px-16 ${debug ? 'debug-border debug-border-purple' : ''}`}>
+          {(icon || showIcon) && (
+            <div class={`mb-6 ${centered ? 'flex justify-center' : ''}`}>
+              {animatedIcon ? (
+                <div class="relative">
+                  <div class="absolute inset-0 bg-mana-blue/20 blur-3xl animate-pulse"></div>
+                  {icon ? (
+                    typeof icon === 'string' && icon.startsWith('mdi:') ? (
+                      <Icon name={icon} class={`${iconSizes[iconSize]} relative animate-float`} />
+                    ) : (
+                      <img src={icon} alt="" class={`${iconSizes[iconSize]} relative animate-float`} />
+                    )
+                  ) : (
+                    <slot name="icon" />
+                  )}
+                </div>
+              ) : (
+                icon ? (
+                  typeof icon === 'string' && icon.startsWith('mdi:') ? (
+                    <div class={`${iconSizes[iconSize]} bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center`}>
+                      <Icon name={icon} class="w-1/2 h-1/2" />
+                    </div>
+                  ) : (
+                    <img src={icon} alt="" class={`${iconSizes[iconSize]}`} />
+                  )
+                ) : (
+                  <slot name="icon" />
+                )
+              )}
+            </div>
+          )}
+          
+          <Heading as="h1" size={titleSize} class={`mb-6 ${titleClass} ${debug ? 'debug-border debug-border-orange' : ''}`}>
+            <Fragment set:html={title} />
+          </Heading>
+          
+          {subtitle && (
+            <Text size="xl" color="muted" class={`mb-8 ${subtitleClass} ${debug ? 'debug-border debug-border-cyan' : ''}`}>
+              <Fragment set:html={subtitle} />
+            </Text>
+          )}
+          
+          <div class={debug ? 'debug-border debug-border-pink' : ''}>
+            <slot name="content" />
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div class={`${contentClasses} ${centered ? 'max-w-5xl mx-auto' : ''} ${debug ? 'debug-border debug-border-purple' : ''}`}>
+        {(icon || showIcon) && (
+          <div class={`mb-6 ${centered ? 'flex justify-center' : ''}`}>
+            {animatedIcon ? (
+              <div class="relative">
+                <div class="absolute inset-0 bg-mana-blue/20 blur-3xl animate-pulse"></div>
+                {icon ? (
+                  typeof icon === 'string' && icon.startsWith('mdi:') ? (
+                    <Icon name={icon} class={`${iconSizes[iconSize]} relative animate-float`} />
+                  ) : (
+                    <img src={icon} alt="" class={`${iconSizes[iconSize]} relative animate-float`} />
+                  )
+                ) : (
+                  <slot name="icon" />
+                )}
+              </div>
+            ) : (
+              icon ? (
+                typeof icon === 'string' && icon.startsWith('mdi:') ? (
+                  <div class={`${iconSizes[iconSize]} bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto`}>
+                    <Icon name={icon} class="w-1/2 h-1/2" />
+                  </div>
+                ) : (
+                  <img src={icon} alt="" class={`${iconSizes[iconSize]} ${centered ? 'mx-auto' : ''}`} />
+                )
+              ) : (
+                <slot name="icon" />
+              )
+            )}
+          </div>
+        )}
+        
+        <Heading as="h1" size={titleSize} class={`mb-6 ${titleClass} ${debug ? 'debug-border debug-border-orange' : ''}`}>
+          <Fragment set:html={title} />
+        </Heading>
+        
+        {subtitle && (
+          <Text size="xl" color={background === 'mana-blue' ? 'default' : 'muted'} class={`mb-8 ${centered ? 'max-w-3xl mx-auto' : ''} ${subtitleClass} ${debug ? 'debug-border debug-border-cyan' : ''}`}>
+            <Fragment set:html={subtitle} />
+          </Text>
+        )}
+        
+        <div class={debug ? 'debug-border debug-border-pink' : ''}>
+          <slot />
+        </div>
+      </div>
+    )}
+  </Container>
+</Section>
+
+<style>
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+  
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  /* Debug Borders */
+  .debug-border {
+    position: relative;
+    border: 2px dashed;
+  }
+  
+  .debug-border::before {
+    content: attr(class);
+    position: absolute;
+    top: -20px;
+    left: 0;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    z-index: 100;
+    pointer-events: none;
+  }
+  
+  .debug-border-red {
+    border-color: #ef4444;
+  }
+  .debug-border-red::before {
+    background-color: #ef4444;
+    color: white;
+    content: 'Section Container';
+  }
+  
+  .debug-border-blue {
+    border-color: #3b82f6;
+  }
+  .debug-border-blue::before {
+    background-color: #3b82f6;
+    color: white;
+    content: 'Container';
+  }
+  
+  .debug-border-green {
+    border-color: #10b981;
+  }
+  .debug-border-green::before {
+    background-color: #10b981;
+    color: white;
+    content: 'Grid Layout';
+  }
+  
+  .debug-border-yellow {
+    border-color: #f59e0b;
+  }
+  .debug-border-yellow::before {
+    background-color: #f59e0b;
+    color: black;
+    content: 'Image Container';
+  }
+  
+  .debug-border-purple {
+    border-color: #8b5cf6;
+  }
+  .debug-border-purple::before {
+    background-color: #8b5cf6;
+    color: white;
+    content: 'Content Container';
+  }
+  
+  .debug-border-orange {
+    border-color: #f97316;
+  }
+  .debug-border-orange::before {
+    background-color: #f97316;
+    color: white;
+    content: 'Title';
+  }
+  
+  .debug-border-cyan {
+    border-color: #06b6d4;
+  }
+  .debug-border-cyan::before {
+    background-color: #06b6d4;
+    color: white;
+    content: 'Subtitle';
+  }
+  
+  .debug-border-pink {
+    border-color: #ec4899;
+  }
+  .debug-border-pink::before {
+    background-color: #ec4899;
+    color: white;
+    content: 'Slot Content';
+  }
+</style>

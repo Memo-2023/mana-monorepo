@@ -1,0 +1,258 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navigation from '../components/layout/Navigation.astro';
+import Footer from '../components/layout/Footer.astro';
+import Card from '../components/ui/Card.astro';
+---
+
+<BaseLayout>
+  <Navigation />
+
+  <main>
+    <!-- Download Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+      <!-- Background gradient overlay -->
+      <div class="absolute inset-0 bg-gradient-overlay opacity-30"></div>
+
+      <!-- Animated particles background -->
+      <div class="absolute inset-0">
+        <div class="particle particle-1"></div>
+        <div class="particle particle-2"></div>
+        <div class="particle particle-3"></div>
+      </div>
+
+      <div class="container-custom relative z-10">
+        <div class="max-w-4xl mx-auto text-center">
+          <!-- Success Icon -->
+          <div class="inline-flex items-center justify-center w-20 h-20 bg-yellow-dark/20 rounded-full mb-8 animate-fadeIn">
+            <svg class="w-10 h-10 text-yellow-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+            </svg>
+          </div>
+
+          <!-- Headline -->
+          <h1 class="font-grandstander font-bold text-4xl md:text-5xl lg:text-6xl text-text-primary mb-6 leading-tight animate-fadeIn">
+            Lade Märchenzauber jetzt herunter
+          </h1>
+
+          <p class="text-text-secondary text-lg md:text-xl mb-12 leading-relaxed max-w-2xl mx-auto animate-fadeIn">
+            Starte deine magische Reise in die Welt der personalisierten Kindergeschichten. Verfügbar für iOS und Android.
+          </p>
+
+          <!-- Download Buttons -->
+          <div class="flex flex-col sm:flex-row gap-6 justify-center mb-12 animate-fadeIn">
+            <!-- App Store Button -->
+            <a
+              href="#"
+              data-download-platform="ios"
+              class="download-button group relative overflow-hidden bg-bg-card hover:bg-bg-darker border-2 border-yellow-dark/30 hover:border-yellow-dark rounded-2xl px-8 py-6 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+            >
+              <div class="flex items-center gap-4">
+                <!-- Apple Icon -->
+                <div class="text-text-primary">
+                  <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                  </svg>
+                </div>
+                <div class="text-left">
+                  <div class="text-text-secondary text-sm">Herunterladen im</div>
+                  <div class="text-text-primary font-bold text-xl">App Store</div>
+                </div>
+              </div>
+            </a>
+
+            <!-- Google Play Button -->
+            <a
+              href="#"
+              data-download-platform="android"
+              class="download-button group relative overflow-hidden bg-bg-card hover:bg-bg-darker border-2 border-yellow-dark/30 hover:border-yellow-dark rounded-2xl px-8 py-6 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+            >
+              <div class="flex items-center gap-4">
+                <!-- Google Play Icon -->
+                <div class="text-text-primary">
+                  <svg class="w-12 h-12" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                  </svg>
+                </div>
+                <div class="text-left">
+                  <div class="text-text-secondary text-sm">Jetzt bei</div>
+                  <div class="text-text-primary font-bold text-xl">Google Play</div>
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <!-- Coming Soon Badge (Optional - remove if apps are already live) -->
+          <div class="inline-block mb-8">
+            <Card variant="default" className="bg-yellow-dark/10" padding="sm">
+              <div class="flex items-center gap-2 text-yellow-light">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="text-sm font-semibold">Apps werden gerade in den Stores geprüft - bald verfügbar!</span>
+              </div>
+            </Card>
+          </div>
+
+          <!-- Features Grid -->
+          <div class="grid md:grid-cols-3 gap-6 mt-16 max-w-5xl mx-auto">
+            <Card variant="hover" padding="lg">
+              <div class="text-center">
+                <div class="text-4xl mb-3">🎁</div>
+                <h3 class="font-semibold text-text-primary mb-2">100 Mana gratis</h3>
+                <p class="text-text-secondary text-sm">Erstelle sofort deine ersten Geschichten kostenlos</p>
+              </div>
+            </Card>
+
+            <Card variant="hover" padding="lg">
+              <div class="text-center">
+                <div class="text-4xl mb-3">⚡</div>
+                <h3 class="font-semibold text-text-primary mb-2">In Sekunden bereit</h3>
+                <p class="text-text-secondary text-sm">Download, Registrierung und los geht's</p>
+              </div>
+            </Card>
+
+            <Card variant="hover" padding="lg">
+              <div class="text-center">
+                <div class="text-4xl mb-3">🔒</div>
+                <h3 class="font-semibold text-text-primary mb-2">Sicher & kindgerecht</h3>
+                <p class="text-text-secondary text-sm">Alle Inhalte speziell für Kinder entwickelt</p>
+              </div>
+            </Card>
+          </div>
+
+          <!-- Back to Home Link -->
+          <div class="mt-12">
+            <a href="/" class="text-text-secondary hover:text-yellow-light transition-colors inline-flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              </svg>
+              Zurück zur Startseite
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QR Code Section (Optional - for easy mobile access) -->
+    <section class="section bg-bg-darker">
+      <div class="container-custom">
+        <div class="max-w-4xl mx-auto text-center">
+          <h2 class="font-grandstander font-bold text-3xl md:text-4xl text-text-primary mb-6">
+            Schnellzugriff vom Handy
+          </h2>
+          <p class="text-text-secondary mb-8">
+            Scanne den QR-Code mit deinem Smartphone für direkten Zugriff
+          </p>
+
+          <Card variant="glow" className="inline-block" padding="lg">
+            <div class="flex flex-col md:flex-row items-center gap-8">
+              <!-- Placeholder for QR Code -->
+              <div class="w-48 h-48 bg-white rounded-lg p-4 flex items-center justify-center">
+                <div class="text-text-dark text-sm text-center">
+                  QR Code<br/>hier einfügen
+                </div>
+              </div>
+              <div class="text-left max-w-xs">
+                <h3 class="font-semibold text-text-primary mb-3 text-xl">So funktioniert's:</h3>
+                <ol class="space-y-2 text-text-secondary">
+                  <li class="flex items-start gap-2">
+                    <span class="text-yellow-light font-bold">1.</span>
+                    <span>Öffne die Kamera-App auf deinem Smartphone</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="text-yellow-light font-bold">2.</span>
+                    <span>Halte die Kamera über den QR-Code</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="text-yellow-light font-bold">3.</span>
+                    <span>Tippe auf die Benachrichtigung zum Download</span>
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #F8D62B;
+    border-radius: 50%;
+    opacity: 0.5;
+    animation: float-particle 20s infinite;
+  }
+
+  .particle-1 {
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+  }
+
+  .particle-2 {
+    top: 60%;
+    left: 80%;
+    animation-delay: 5s;
+  }
+
+  .particle-3 {
+    top: 40%;
+    left: 60%;
+    animation-delay: 10s;
+  }
+
+  @keyframes float-particle {
+    0%, 100% {
+      transform: translateY(0) translateX(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.5;
+    }
+    90% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateY(-100vh) translateX(100px);
+      opacity: 0;
+    }
+  }
+
+  /* Add data attributes for tracking */
+  .download-button {
+    /* Analytics tools can track clicks on elements with data-download-platform attribute */
+  }
+</style>
+
+<script>
+  // Download tracking - ready for Google Analytics, Plausible, etc.
+  document.addEventListener('DOMContentLoaded', () => {
+    const downloadButtons = document.querySelectorAll('.download-button');
+
+    downloadButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        const platform = button.getAttribute('data-download-platform');
+
+        // Track download click event
+        // Example for Google Analytics (uncomment when GA is set up):
+        // gtag('event', 'download_click', {
+        //   'platform': platform,
+        //   'page_location': window.location.href
+        // });
+
+        // Example for Plausible Analytics (uncomment when Plausible is set up):
+        // plausible('Download Click', { props: { platform: platform } });
+
+        console.log(`Download clicked: ${platform}`);
+      });
+    });
+  });
+</script>

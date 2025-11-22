@@ -1,0 +1,7 @@
+# Netlify redirects file
+# Character sharing routes
+/character/*  /character.html  200
+
+# .well-known files should be served with correct content type
+/.well-known/apple-app-site-association  /.well-known/apple-app-site-association  200!
+/.well-known/assetlinks.json  /.well-known/assetlinks.json  200!

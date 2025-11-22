@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Primary colors from mobile app */
+    --color-yellow-dark: #6D5B00;
+    --color-yellow-light: #F8D62B;
+    
+    /* Background colors */
+    --color-bg-primary: #181818;
+    --color-bg-secondary: #333333;
+    --color-bg-card: #2C2C2C;
+    --color-bg-input: #333333;
+    --color-bg-dark: #121212;
+    --color-bg-darker: #1a1a1a;
+    
+    /* Text colors */
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #999999;
+    --color-text-muted: #666666;
+    --color-text-light: #CCCCCC;
+    
+    /* UI elements */
+    --color-border: #444444;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary antialiased font-grandstander;
+  }
+
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-bg-secondary;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-yellow-dark rounded;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-yellow-light;
+  }
+}
+
+@layer components {
+  /* Button styles from mobile app */
+  .btn-primary {
+    @apply bg-yellow-dark text-white rounded-md px-6 py-3 font-semibold text-base transition-opacity hover:opacity-80 active:opacity-70;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent border border-yellow-dark text-yellow-dark rounded-md px-6 py-3 font-semibold text-base transition-opacity hover:opacity-80 active:opacity-70;
+  }
+
+  .btn-icon {
+    @apply w-10 h-10 rounded-md flex items-center justify-center;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-bg-card rounded-md shadow-card;
+  }
+
+  /* Input styles */
+  .input {
+    @apply bg-bg-input rounded-lg text-text-primary px-3 py-3 text-base border-none outline-none focus:ring-2 focus:ring-yellow-dark;
+  }
+
+  /* Skeleton loader */
+  .skeleton {
+    @apply bg-bg-card animate-pulse rounded-md;
+  }
+
+  /* Section spacing */
+  .section {
+    @apply py-16 md:py-24;
+  }
+
+  /* Container */
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Text gradients */
+  .text-gradient {
+    @apply bg-gradient-to-r from-yellow-dark to-yellow-light bg-clip-text text-transparent;
+  }
+
+  /* Glow effect */
+  .glow-yellow {
+    filter: drop-shadow(0 0 20px rgba(248, 214, 43, 0.5));
+  }
+}

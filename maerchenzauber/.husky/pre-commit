@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+
+# Fix SSH URLs in backend package-lock.json
+if [ -f "backend/package-lock.json" ]; then
+  if grep -q "git+ssh://" backend/package-lock.json; then
+    echo "⚠️  Fixing SSH URLs in backend/package-lock.json..."
+    sed -i.bak 's|git+ssh://git@github.com/|git+https://github.com/|g' backend/package-lock.json
+    rm -f backend/package-lock.json.bak
+    git add backend/package-lock.json
+    echo "✅ SSH URLs fixed and staged"
+  fi
+fi

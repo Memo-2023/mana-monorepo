@@ -1,0 +1,184 @@
+---
+import Section from '../content/Section.astro';
+import Container from '../layout/Container.astro';
+import Heading from '../typography/Heading.astro';
+import Text from '../typography/Text.astro';
+import { Icon } from 'astro-icon/components';
+
+export interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+
+const costBreakdown = [
+  { percentage: 40, label: "KI & Server", color: "bg-blue-500", description: "Modernste KI-Modelle" },
+  { percentage: 25, label: "Entwicklung", color: "bg-purple-500", description: "Ständig neue Features" },
+  { percentage: 15, label: "App Stores", color: "bg-gray-500", description: "Für deine Sicherheit" },
+  { percentage: 10, label: "Klimaschutz", color: "bg-green-500", description: "CO2-neutral" },
+  { percentage: 10, label: "Free Users", color: "bg-yellow-500", description: "Bildung & NGOs" }
+];
+---
+
+<Section id="mana-principle" background="default" class={className}>
+  <Container grid>
+    <div class="text-center mb-12" style="grid-column: 1 / -1;">
+      <Heading as="h2" size="3" class="mb-4">
+        Fair. Transparent. Nachhaltig.
+      </Heading>
+      <Text size="xl" class="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+        Das revolutionäre Credit-System, das mit dir wächst
+      </Text>
+    </div>
+
+    <!-- Three Pillars - Each spans 4 columns on desktop, full width on mobile/tablet -->
+      <!-- Regeneration -->
+      <div class="group relative grid-pillar">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 h-full border border-gray-200 dark:border-gray-700 hover:border-mana-blue/30 transition-all duration-300 hover:shadow-lg">
+          <div class="flex flex-col items-center text-center">
+            <div class="relative mb-6">
+              <div class="absolute inset-0 bg-gradient-to-br from-mana-blue/20 to-blue-500/20 rounded-3xl blur-xl group-hover:from-mana-blue/30 group-hover:to-blue-500/30 transition-all duration-300"></div>
+              <div class="relative w-24 h-24 bg-gradient-to-br from-mana-blue/10 to-blue-500/10 rounded-3xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Icon name="mdi:refresh" class="w-12 h-12 text-mana-blue" />
+              </div>
+            </div>
+            <Heading as="h3" size="h4" class="mb-3">Regeneration</Heading>
+            <Text size="base" class="text-gray-600 dark:text-gray-400 leading-relaxed">
+              Täglich neue Credits - sammle bis zu deinem Limit
+            </Text>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pay-per-Value -->
+      <div class="group relative grid-pillar">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 h-full border border-gray-200 dark:border-gray-700 hover:border-mana-blue/30 transition-all duration-300 hover:shadow-lg">
+          <div class="flex flex-col items-center text-center">
+            <div class="relative mb-6">
+              <div class="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl blur-xl group-hover:from-purple-500/30 group-hover:to-pink-500/30 transition-all duration-300"></div>
+              <div class="relative w-24 h-24 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-3xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Icon name="mdi:cash-multiple" class="w-12 h-12 text-purple-600 dark:text-purple-500" />
+              </div>
+            </div>
+            <Heading as="h3" size="h4" class="mb-3">Pay-per-Value</Heading>
+            <Text size="base" class="text-gray-600 dark:text-gray-400 leading-relaxed">
+              Zahle nur was du nutzt - keine versteckten Kosten
+            </Text>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transparenz -->
+      <div class="group relative grid-pillar">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 h-full border border-gray-200 dark:border-gray-700 hover:border-mana-blue/30 transition-all duration-300 hover:shadow-lg">
+          <div class="flex flex-col items-center text-center">
+            <div class="relative mb-6">
+              <div class="absolute inset-0 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-3xl blur-xl group-hover:from-green-500/30 group-hover:to-emerald-500/30 transition-all duration-300"></div>
+              <div class="relative w-24 h-24 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-3xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Icon name="mdi:eye" class="w-12 h-12 text-green-600 dark:text-green-500" />
+              </div>
+            </div>
+            <Heading as="h3" size="h4" class="mb-3">Transparenz</Heading>
+            <Text size="base" class="text-gray-600 dark:text-gray-400 leading-relaxed">
+              Jeder Cent aufgeschlüsselt - 10% für die Umwelt
+            </Text>
+          </div>
+        </div>
+      </div>
+
+    <!-- Cost Breakdown Visualization -->
+    <div class="mb-16" style="grid-column: 1 / -1;">
+      <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-3xl p-10 shadow-xl border border-gray-200 dark:border-gray-700">
+        <Heading as="h3" size="h3" class="text-center mb-12">
+          Wohin fließt dein Mana?
+        </Heading>
+
+        <!-- Visual Breakdown Grid - Keeps own grid for 5 items -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-10 max-w-6xl mx-auto">
+          {costBreakdown.map((item, index) => (
+            <div class="group relative">
+              <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 h-full border border-gray-200 dark:border-gray-700 hover:border-mana-blue/30 transition-all duration-300 hover:shadow-lg text-center">
+                <!-- Percentage Circle -->
+                <div class="relative mb-4">
+                  <svg class="w-24 h-24 mx-auto transform -rotate-90">
+                    <circle
+                      cx="48"
+                      cy="48"
+                      r="36"
+                      stroke="currentColor"
+                      stroke-width="8"
+                      fill="none"
+                      class="text-gray-200 dark:text-gray-700"
+                    />
+                    <circle
+                      cx="48"
+                      cy="48"
+                      r="36"
+                      stroke="currentColor"
+                      stroke-width="8"
+                      fill="none"
+                      stroke-dasharray={`${(item.percentage / 100) * 226} 226`}
+                      class={`${
+                        index === 0 ? 'text-blue-500' :
+                        index === 1 ? 'text-purple-500' :
+                        index === 2 ? 'text-gray-500' :
+                        index === 3 ? 'text-green-500' :
+                        'text-yellow-500'
+                      } transition-all duration-500`}
+                    />
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <span class="text-2xl font-bold text-gray-800 dark:text-gray-200">{item.percentage}%</span>
+                  </div>
+                </div>
+                
+                <!-- Label -->
+                <Heading as="h4" size="h6" class="mb-2">
+                  {item.label}
+                </Heading>
+                
+                <!-- Description -->
+                <Text size="xs" class="text-gray-600 dark:text-gray-400">
+                  {item.description}
+                </Text>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <!-- Summary Bar -->
+        <div class="relative">
+          <div class="h-8 bg-white dark:bg-gray-800 rounded-full overflow-hidden shadow-inner">
+            <div class="flex h-full">
+              {costBreakdown.map((item, index) => (
+                <div 
+                  class={`relative group transition-all duration-300 ${
+                    index === 0 ? 'bg-gradient-to-r from-blue-400 to-blue-500' :
+                    index === 1 ? 'bg-gradient-to-r from-purple-400 to-purple-500' :
+                    index === 2 ? 'bg-gradient-to-r from-gray-400 to-gray-500' :
+                    index === 3 ? 'bg-gradient-to-r from-green-400 to-green-500' :
+                    'bg-gradient-to-r from-yellow-400 to-yellow-500'
+                  } hover:brightness-110`}
+                  style={`width: ${item.percentage}%`}
+                >
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <span class="text-white font-medium text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                      {item.percentage}%
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Message -->
+        <div class="text-center mt-8">
+          <Text size="lg" class="text-gray-600 dark:text-gray-400">
+            Jeder Euro wird transparent und verantwortungsvoll eingesetzt
+          </Text>
+        </div>
+      </div>
+    </div>
+  </Container>
+</Section>

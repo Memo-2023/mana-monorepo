@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memoro Storyteller Database Schema</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+        }
+        .instruction {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .diagram-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        iframe {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        p.note {
+            color: #666;
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Memoro Storyteller Database Schema</h1>
+    </header>
+    <div class="container">
+        <div class="instruction">
+            <p>To view the database schema diagram:</p>
+            <ol>
+                <li>Copy the DBML code below</li>
+                <li>Open <a href="https://dbdiagram.io/d" target="_blank">dbdiagram.io/d</a> in a new tab</li>
+                <li>Paste the code in the left panel</li>
+                <li>The diagram will be automatically generated in the right panel</li>
+            </ol>
+            <p>Alternatively, you can also use the direct link below:</p>
+            <p><a href="https://dbdiagram.io/embed/memoro-storyteller" target="_blank">Open DB Diagram directly</a></p>
+        </div>
+        
+        <div class="diagram-container">
+            <h3>DBML Code:</h3>
+            <pre style="background-color: #f8f9fa; padding: 1rem; overflow: auto; height: 300px;">
+              // DBDiagram.io schema for Memoro Storyteller
+              Table characters {
+                id uuid [pk]
+                user_id text [not null, note: 'Supabase auth.uid()']
+                name varchar [not null]
+                original_description text [not null]
+                character_description_prompt text [not null]
+                image_url text [not null]
+                source_image_url text
+                is_animal boolean [default: false]
+                animal_type varchar [default: 'unspecified animal']
+                created_at timestamptz [not null, default: 'NOW()']
+                updated_at timestamptz [not null, default: 'NOW()']
+                images_data jsonb [note: 'Denormalized character_images data']
+              
+                indexes {
+                  (user_id, id) [unique]
+                }
+              }
+              
+              Table character_images {
+                id uuid [pk]
+                character_id uuid [not null, ref: > characters.id]
+                description text [not null]
+                image_url text [not null]
+                created_at timestamptz [not null, default: 'NOW()']
+              }
+              
+              Table stories {
+                id uuid [pk]
+                user_id text [not null, note: 'Supabase auth.uid()']
+                title varchar
+                story_prompt text [not null]
+                story_text text
+                is_animal_story boolean [default: false]
+                animal_type varchar [default: 'unspecified animal']
+                character_id uuid [ref: > characters.id]
+                character_name varchar
+                created_at timestamptz [not null, default: 'NOW()']
+                updated_at timestamptz [not null, default: 'NOW()']
+                used_settings jsonb
+                characters_data jsonb [note: 'Denormalized story_characters data']
+                pages_data jsonb [note: 'Denormalized story_pages data']
+              
+                indexes {
+                  (user_id, id) [unique]
+                }
+              }
+              
+              Table story_pages {
+                id uuid [pk]
+                story_id uuid [not null, ref: > stories.id]
+                page_number integer [not null]
+                story_text text [not null]
+                illustration_description text
+                image_url text
+                created_at timestamptz [not null, default: 'NOW()']
+                updated_at timestamptz [not null, default: 'NOW()']
+              
+                indexes {
+                  (story_id, page_number) [unique]
+                }
+              }
+              
+              Table story_characters {
+                id uuid [pk]
+                story_id uuid [not null, ref: > stories.id]
+                character_description text [not null]
+                pages integer[] [not null]
+                created_at timestamptz [not null, default: 'NOW()']
+              }
+              
+              Table creators {
+                id uuid [pk]
+                creator_id varchar [unique, not null]
+                name varchar [not null]
+                type varchar [not null, note: 'illustrator or author']
+                system_prompt text [not null]
+                description text [not null]
+                profile_picture text
+                extra_prompt_beginning text
+                extra_prompt_end text
+                created_at timestamptz [not null, default: 'NOW()']
+                updated_at timestamptz [not null, default: 'NOW()']
+              }
+              
+              Table errors {
+                id uuid [pk]
+                user_id text [not null, note: 'Supabase auth.uid()']
+                story_id uuid [ref: > stories.id]
+                character_id uuid [ref: > characters.id]
+                error_type varchar [not null]
+                error_details jsonb [not null]
+                created_at timestamptz [not null, default: 'NOW()']
+              }
+              
+            </pre>
+            <p class="note">Note: Copy this code to dbdiagram.io to visualize the schema with all relationships.</p>
+        </div>
+    </div>
+</body>
+</html>

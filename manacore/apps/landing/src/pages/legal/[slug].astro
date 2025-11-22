@@ -1,0 +1,138 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/navigation/Navbar.astro';
+import Footer from '../../components/navigation/Footer.astro';
+import Section from '../../components/content/Section.astro';
+import Container from '../../components/layout/Container.astro';
+import Heading from '../../components/typography/Heading.astro';
+import Text from '../../components/typography/Text.astro';
+import Card from '../../components/ui/Card.astro';
+import { Icon } from 'astro-icon/components';
+
+export async function getStaticPaths() {
+  const legalEntries = await getCollection('legal');
+  return legalEntries.map(entry => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+// Get other legal documents
+const allLegalDocs = await getCollection('legal');
+const otherDocs = allLegalDocs
+  .filter(doc => doc.slug !== entry.slug)
+  .sort((a, b) => a.data.order - b.data.order);
+
+// Format date
+const lastUpdated = new Date(entry.data.lastUpdated).toLocaleDateString('de-DE', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+---
+
+<Layout title={`${entry.data.title} | Mana`}>
+  <Navbar />
+  
+  <Section spacing="large" class="pt-32">
+    <Container>
+      <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="mb-12">
+          <Heading as="h1" size="1" class="mb-4">
+            {entry.data.title}
+          </Heading>
+          
+          <Text size="xl" color="muted" class="mb-6">
+            {entry.data.description}
+          </Text>
+          
+          <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+            <span>Stand: {lastUpdated}</span>
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="prose prose-lg dark:prose-invert max-w-none">
+          <Content />
+        </div>
+        
+        <!-- Navigation -->
+        {otherDocs.length > 0 && (
+          <Card variant="bordered" padding="large" class="mt-16">
+            <Heading as="h3" size="5" class="mb-4">
+              Weitere rechtliche Dokumente
+            </Heading>
+            
+            <div class="space-y-3">
+              {otherDocs.map(doc => (
+                <a 
+                  href={`/legal/${doc.slug}`}
+                  class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
+                >
+                  <div>
+                    <Text weight="semibold" class="group-hover:text-mana-blue transition-colors">
+                      {doc.data.title}
+                    </Text>
+                    <Text size="sm" color="muted">
+                      {doc.data.description}
+                    </Text>
+                  </div>
+                  <Icon name="mdi:arrow-right" class="w-5 h-5 text-gray-400 group-hover:text-mana-blue transition-colors" />
+                </a>
+              ))}
+            </div>
+          </Card>
+        )}
+        
+        <!-- Contact -->
+        <Card variant="elevated" padding="large" class="mt-8 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
+          <div class="text-center">
+            <Heading as="h3" size="5" class="mb-3">
+              Haben Sie Fragen?
+            </Heading>
+            <Text color="muted" class="mb-6">
+              Unser Rechtsabteilung steht Ihnen gerne zur Verfügung.
+            </Text>
+            <a href="mailto:legal@mana.ai" class="inline-flex items-center gap-2 text-mana-blue hover:underline">
+              <Icon name="mdi:email" class="w-5 h-5" />
+              legal@mana.ai
+            </a>
+          </div>
+        </Card>
+      </div>
+    </Container>
+  </Section>
+  
+  <Footer />
+</Layout>
+
+<style>
+  .prose h2 {
+    @apply text-2xl font-bold mt-8 mb-4;
+  }
+  
+  .prose h3 {
+    @apply text-xl font-semibold mt-6 mb-3;
+  }
+  
+  .prose p {
+    @apply mb-4 leading-relaxed;
+  }
+  
+  .prose ul {
+    @apply space-y-2 mb-4;
+  }
+  
+  .prose li {
+    @apply ml-6 list-disc;
+  }
+  
+  .prose strong {
+    @apply font-semibold text-gray-900 dark:text-gray-100;
+  }
+</style>

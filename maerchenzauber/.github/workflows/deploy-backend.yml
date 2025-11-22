@@ -1,0 +1,208 @@
+name: Deploy Backend to Cloud Run
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'packages/shared-types/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: mana-core-453821
+  REGION: europe-west3
+  ARTIFACT_REGISTRY: europe-west3-docker.pkg.dev
+  NODE_VERSION: '20'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Configure git for private packages
+        env:
+          GH_TOKEN: ${{ secrets.GH_PERSONAL_TOKEN }}
+        run: |
+          git config --global url."https://${GH_TOKEN}@github.com/".insteadOf ssh://git@github.com/
+          git config --global url."https://${GH_TOKEN}@github.com/".insteadOf git@github.com:
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: Patch package-lock.json with authenticated URLs
+        env:
+          GH_TOKEN: ${{ secrets.GH_PERSONAL_TOKEN }}
+        working-directory: backend
+        run: |
+          # Handle both SSH and HTTPS URLs
+          if grep -q "git+ssh://git@github.com" package-lock.json; then
+            echo "⚠️  SSH URLs found - patching to HTTPS with token..."
+            sed -i "s|git+ssh://git@github.com/Memo-2023/|git+https://${GH_TOKEN}@github.com/Memo-2023/|g" package-lock.json
+            echo "✓ Lockfile patched successfully"
+          else
+            echo "⚠️  HTTPS URLs found - injecting token..."
+            sed -i "s|git+https://github.com/Memo-2023/|git+https://${GH_TOKEN}@github.com/Memo-2023/|g" package-lock.json
+            echo "✓ Token injected successfully"
+          fi
+
+      - name: Clear npm cache (if needed)
+        run: npm cache clean --force || true
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci --loglevel verbose
+
+      - name: Run backend tests
+        run: cd backend && npm run test
+        env:
+          NODE_ENV: test
+
+      - name: Type check
+        run: cd backend && npm run build
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    
+    env:
+      SERVICE_NAME: storyteller-backend
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Google Auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY_PROD }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: 'latest'
+      
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker ${{ env.ARTIFACT_REGISTRY }}
+      
+      - name: Build and Push Docker Image
+        env:
+          GH_TOKEN: ${{ secrets.GH_PERSONAL_TOKEN }}
+          DOCKER_BUILDKIT: 1
+        run: |
+          IMAGE_NAME="${{ env.ARTIFACT_REGISTRY }}/${{ env.PROJECT_ID }}/storyteller/${{ env.SERVICE_NAME }}"
+          IMAGE_TAG="${IMAGE_NAME}:${{ github.sha }}"
+          LATEST_TAG="${IMAGE_NAME}:latest"
+
+          echo "Building Docker image with BuildKit..."
+          docker build \
+            -f backend/Dockerfile \
+            -t ${IMAGE_TAG} \
+            -t ${LATEST_TAG} \
+            --secret id=github_token,env=GH_TOKEN \
+            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+            --build-arg VCS_REF=${{ github.sha }} \
+            --build-arg VERSION=${{ github.sha }} \
+            .
+          
+          echo "Pushing Docker image..."
+          docker push ${IMAGE_TAG}
+          docker push ${LATEST_TAG}
+          
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+      
+      - name: Deploy to Cloud Run
+        run: |
+          echo "Deploying to Cloud Run..."
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image="${{ env.IMAGE_TAG }}" \
+            --project=${{ env.PROJECT_ID }} \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --min-instances=1 \
+            --max-instances=3 \
+            --memory=2Gi \
+            --cpu=2 \
+            --timeout=1200 \
+            --concurrency=80 \
+            --port=8080 \
+            --service-account=${{ secrets.CLOUD_RUN_SERVICE_ACCOUNT }} \
+            --set-env-vars="NODE_ENV=production,GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }},GOOGLE_CLOUD_LOCATION=${{ env.REGION }}" \
+            --set-secrets="MANA_SERVICE_URL=MANA_SERVICE_URL:latest,APP_ID=MAERCHENZAUBER_APP_ID:latest,MANA_SUPABASE_SECRET_KEY=MANA_SUPABASE_SECRET_KEY:latest,MAERCHENZAUBER_SUPABASE_URL=MAERCHENZAUBER_SUPABASE_URL:latest,MAERCHENZAUBER_SUPABASE_ANON_KEY=MAERCHENZAUBER_SUPABASE_PUBLISHABLE_KEY:latest,MAERCHENZAUBER_SUPABASE_SERVICE_ROLE_KEY=MAERCHENZAUBER_SECRET_KEY:latest,MAERCHENZAUBER_GOOGLE_GENAI_API_KEY=MAERCHENZAUBER_GOOGLE_GENAI_API_KEY:latest,MAERCHENZAUBER_REPLICATE_API_KEY=MAERCHENZAUBER_REPLICATE_API_TOKEN:latest,MAERCHENZAUBER_AZURE_OPENAI_KEY=MAERCHENZAUBER_AZURE_OPENAI_KEY:latest,MAERCHENZAUBER_AZURE_OPENAI_ENDPOINT=MAERCHENZAUBER_AZURE_OPENAI_ENDPOINT:latest" \
+            --labels="environment=production,commit=${{ github.sha }},branch=${{ github.ref_name }}"
+
+          # Ensure 100% traffic goes to the new revision
+          echo "Ensuring traffic is routed to the new revision..."
+          gcloud run services update-traffic ${{ env.SERVICE_NAME }} \
+            --to-latest \
+            --project=${{ env.PROJECT_ID }} \
+            --region=${{ env.REGION }} \
+            --platform=managed
+
+          echo "✅ Traffic routed to latest revision"
+      
+      - name: Get Service URL
+        id: service-url
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --project=${{ env.PROJECT_ID }} \
+            --region=${{ env.REGION }} \
+            --format='value(status.url)')
+          echo "Service deployed at: ${SERVICE_URL}"
+          echo "service_url=${SERVICE_URL}" >> $GITHUB_OUTPUT
+          
+          # Create deployment summary
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Service**: ${{ env.SERVICE_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: production" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: ${SERVICE_URL}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image**: ${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Smoke Test
+        run: |
+          echo "Running smoke test..."
+          SERVICE_URL="${{ steps.service-url.outputs.service_url }}"
+          
+          # Wait for service to be ready
+          sleep 10
+          
+          # Check health endpoint
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" ${SERVICE_URL}/health)
+          if [ $HTTP_CODE -eq 200 ]; then
+            echo "✅ Health check passed"
+          else
+            echo "❌ Health check failed with HTTP ${HTTP_CODE}"
+            exit 1
+          fi
+      
+      - name: Notify Deployment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ job.status }}' === 'success' ? '✅' : '❌';
+            const serviceUrl = '${{ steps.service-url.outputs.service_url }}';
+            
+            const comment = `## ${status} Backend Deployment
+            
+            **Environment**: production
+            **Service URL**: ${serviceUrl}
+            **Commit**: ${{ github.sha }}
+            **Status**: ${{ job.status }}
+            `;
+            
+            console.log('Deployment completed with status:', '${{ job.status }}');

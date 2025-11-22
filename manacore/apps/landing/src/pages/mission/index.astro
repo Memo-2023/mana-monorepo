@@ -1,0 +1,118 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/navigation/Navbar.astro';
+import Footer from '../../components/navigation/Footer.astro';
+import Section from '../../components/content/Section.astro';
+import Container from '../../components/layout/Container.astro';
+import Heading from '../../components/typography/Heading.astro';
+import Text from '../../components/typography/Text.astro';
+import Card from '../../components/ui/Card.astro';
+import Grid from '../../components/layout/Grid.astro';
+import HeroSection from '../../components/content/HeroSection.astro';
+import { Icon } from 'astro-icon/components';
+
+import { getLangFromUrl } from '../../lib/i18n/config';
+
+const lang = getLangFromUrl(Astro.url);
+const missionArticles = await getCollection('mission', ({ id }) => {
+  return id.startsWith(`${lang}/`);
+});
+const sortedArticles = missionArticles.sort((a, b) => a.data.order - b.data.order);
+
+const categoryIcons = {
+  vision: 'mdi:eye-outline',
+  values: 'mdi:heart-outline',
+  approach: 'mdi:lightbulb-outline',
+  team: 'mdi:account-group-outline',
+  future: 'mdi:rocket-launch-outline',
+};
+---
+
+<Layout title="Unsere Mission | Mana">
+  <Navbar />
+  
+  <!-- Hero Section -->
+  <HeroSection
+    title="Unsere Mission"
+    subtitle="Wir demokratisieren den Zugang zu KI-Technologie. Erfahren Sie mehr über unsere Vision, Werte und die Menschen, die Mana zu dem machen, was es ist."
+    background="gradient"
+    minHeight="large"
+    sideImage={true}
+    imageSrc="/images/Mana_Sea_Sun_Manacore_AI_Credits.jpg"
+    imageAlt="Mana Nautilus - Evolution der KI-Nutzung"
+    containerClass=""
+    debug={false}
+  />
+  
+  <!-- Mission Articles -->
+  <Section spacing="xlarge">
+    <Container>
+      <Grid cols={1} gap="xlarge" class="max-w-5xl mx-auto">
+        {sortedArticles.map((article, index) => (
+          <a href={`/mission/${article.slug}`} class="block group">
+            <Card variant={article.data.featured ? "elevated" : "bordered"} padding="xlarge" 
+                  class="hover:border-mana-blue transition-all hover:shadow-xl">
+              <div class="flex flex-col md:flex-row gap-8">
+                {/* Icon */}
+                <div class="flex-shrink-0">
+                  <div class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center group-hover:bg-mana-blue/10 transition-colors">
+                    <Icon name={categoryIcons[article.data.category]} class="w-10 h-10 text-mana-blue" />
+                  </div>
+                </div>
+                
+                {/* Content */}
+                <div class="flex-1">
+                  <Heading as="h2" size="3" class="mb-3 group-hover:text-mana-blue transition-colors">
+                    {article.data.title}
+                  </Heading>
+                  
+                  <Text size="lg" color="muted" class="mb-4">
+                    {article.data.description}
+                  </Text>
+                  
+                  {/* Read more link */}
+                  <div class="flex items-center gap-2 text-mana-blue font-medium">
+                    <span>Mehr erfahren</span>
+                    <Icon name="mdi:arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </a>
+        ))}
+      </Grid>
+    </Container>
+  </Section>
+  
+  <!-- Call to Action -->
+  <Section spacing="xlarge" class="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
+    <Container>
+      <Card variant="elevated" padding="xlarge" class="max-w-4xl mx-auto text-center">
+        <Icon name="mdi:handshake" class="w-16 h-16 text-mana-blue mx-auto mb-6" />
+        
+        <Heading as="h2" size="2" class="mb-4">
+          Werden Sie Teil unserer Mission
+        </Heading>
+        
+        <Text size="lg" class="mb-8 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          Ob als Kunde, Partner oder Teammitglied - es gibt viele Wege, 
+          Teil der Mana-Revolution zu werden.
+        </Text>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/start" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-mana-orange text-white rounded-lg hover:bg-orange-600 transition-colors">
+            <Icon name="mdi:rocket-launch" class="w-5 h-5" />
+            Jetzt starten
+          </a>
+          <a href="/careers" class="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-mana-blue transition-colors">
+            <Icon name="mdi:briefcase" class="w-5 h-5" />
+            Karriere bei Mana
+          </a>
+        </div>
+      </Card>
+    </Container>
+  </Section>
+  
+  <Footer />
+</Layout>

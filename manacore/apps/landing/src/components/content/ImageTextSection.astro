@@ -1,0 +1,74 @@
+---
+import Section from './Section.astro';
+import Container from '../layout/Container.astro';
+import Grid from '../layout/Grid.astro';
+import Card from '../ui/Card.astro';
+import Heading from '../typography/Heading.astro';
+import Text from '../typography/Text.astro';
+import Image from '../ui/Image.astro';
+import Button from '../ui/Button.astro';
+
+export interface Props {
+  title: string;
+  content: string;
+  imagePosition?: 'left' | 'right';
+  imageSrc?: string;
+  imageAlt?: string;
+}
+
+const { 
+  title, 
+  content, 
+  imagePosition = 'left',
+  imageSrc,
+  imageAlt = ''
+} = Astro.props;
+
+const imageOrder = imagePosition === 'left' ? 'lg:order-1' : 'lg:order-2';
+const textOrder = imagePosition === 'left' ? 'lg:order-2' : 'lg:order-1';
+---
+
+<Section spacing="large">
+  <Container grid class="items-center">
+    <!-- Image Column - Spans half grid on desktop -->
+    <div class={`grid-half ${imageOrder}`}>
+      <div class="relative max-w-md mx-auto lg:mx-0 ${imagePosition === 'right' ? 'lg:ml-auto' : ''}">
+        {imageSrc ? (
+          <img
+            src={imageSrc}
+            alt={imageAlt}
+            class="w-full rounded-3xl shadow-lg"
+          />
+        ) : (
+          <div class="aspect-square bg-gray-50 dark:bg-gray-900 rounded-3xl flex items-center justify-center border border-gray-200 dark:border-gray-800 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-radial from-mana-blue/10 to-transparent"></div>
+            <img
+              src="/icons/mana-icon.svg"
+              alt="Mana Icon"
+              class="w-32 h-32 opacity-30 relative z-10"
+            />
+          </div>
+        )}
+      </div>
+    </div>
+
+    <!-- Text Column with 3:4 aspect ratio - Spans half grid on desktop -->
+    <div class={`grid-half ${textOrder}`}>
+      <div class="relative group max-w-sm mx-auto lg:mx-0 ${imagePosition === 'left' ? 'lg:ml-auto' : ''}">
+        <!-- Subtle glow effect -->
+        <div class="absolute -inset-1 bg-mana-blue/10 rounded-3xl blur-xl group-hover:bg-mana-blue/20 transition-all duration-500"></div>
+
+        <!-- Card with 3:4 aspect ratio -->
+        <div class="relative overflow-hidden bg-gray-900 dark:bg-gray-950 border border-gray-800 dark:border-gray-700 hover:border-gray-700 dark:hover:border-gray-600 transition-all duration-300 rounded-3xl shadow-xl" style="aspect-ratio: 3/4;">
+          <div class="p-8 md:p-10 h-full flex flex-col justify-center">
+            <Text size="lg" class="leading-relaxed">
+              <span class="text-white font-medium">{title}</span>
+              <span class="text-gray-400"> {content}</span>
+            </Text>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </Container>
+</Section>

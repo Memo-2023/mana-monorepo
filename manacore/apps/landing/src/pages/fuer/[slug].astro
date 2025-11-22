@@ -1,0 +1,167 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/navigation/Navbar.astro';
+import Footer from '../../components/navigation/Footer.astro';
+import Section from '../../components/content/Section.astro';
+import Container from '../../components/layout/Container.astro';
+import Grid from '../../components/layout/Grid.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+import Heading from '../../components/typography/Heading.astro';
+import Text from '../../components/typography/Text.astro';
+import Flex from '../../components/layout/Flex.astro';
+import { getCollection, getEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const branchen = await getCollection('branchen');
+  return branchen.map((group) => ({
+    params: { slug: group.slug },
+    props: { group },
+  }));
+}
+
+const { group } = Astro.props;
+const { Content } = await group.render();
+---
+
+<Layout title={`${group.data.title} - Mana für Ihre Branche`}>
+  <Navbar />
+  
+  <!-- Hero Section -->
+  <Section spacing="large" class="bg-gray-50 dark:bg-gray-900">
+    <Container>
+      <div class="max-w-4xl mx-auto text-center">
+        <div class="text-6xl mb-6">{group.data.icon}</div>
+        <Heading as="h1" size="1" class="mb-6">
+          Mana für {group.data.title}
+        </Heading>
+        <Text size="xl" class="text-gray-600 dark:text-gray-400 mb-8">
+          {group.data.description}
+        </Text>
+        
+        {group.data.pricing.special && (
+          <div class="inline-block bg-mana-blue/10 text-mana-blue px-6 py-3 rounded-full text-lg font-medium mb-8">
+            {group.data.pricing.discount || group.data.pricing.details}
+          </div>
+        )}
+        
+        <Flex gap="medium" justify="center">
+          <Button href="/start" size="large" class="bg-mana-blue hover:bg-blue-600 text-white">
+            Jetzt starten
+          </Button>
+          <Button href="/demo" variant="outline" size="large">
+            Demo anfordern
+          </Button>
+        </Flex>
+      </div>
+    </Container>
+  </Section>
+  
+  <!-- Benefits Section -->
+  <Section spacing="xlarge">
+    <Container>
+      <Heading as="h2" size="2" align="center" class="mb-12">
+        Ihre Vorteile mit Mana
+      </Heading>
+      
+      <Grid cols={3} gap="large" class="max-w-5xl mx-auto">
+        {group.data.benefits.map((benefit, index) => (
+          <Card variant="elevated" padding="large">
+            <div class="w-12 h-12 bg-mana-blue/10 rounded-lg flex items-center justify-center mb-4">
+              <span class="text-2xl font-bold text-mana-blue">{index + 1}</span>
+            </div>
+            <Text>{benefit}</Text>
+          </Card>
+        ))}
+      </Grid>
+    </Container>
+  </Section>
+  
+  <!-- Content Section -->
+  <Section spacing="xlarge" class="bg-gray-50 dark:bg-gray-900">
+    <Container>
+      <div class="max-w-4xl mx-auto prose prose-lg dark:prose-invert">
+        <Content />
+      </div>
+    </Container>
+  </Section>
+  
+  <!-- Use Cases Section -->
+  <Section spacing="xlarge">
+    <Container>
+      <Heading as="h2" size="2" align="center" class="mb-12">
+        So nutzen {group.data.title} Mana
+      </Heading>
+      
+      <Grid cols={2} gap="large" class="max-w-4xl mx-auto">
+        {group.data.useCases.map((useCase) => (
+          <Card variant="bordered" padding="medium">
+            <Flex align="center" gap="small">
+              <span class="text-2xl">💡</span>
+              <Text>{useCase}</Text>
+            </Flex>
+          </Card>
+        ))}
+      </Grid>
+    </Container>
+  </Section>
+  
+  <!-- Testimonial Section -->
+  {group.data.testimonial && (
+    <Section spacing="xlarge" class="bg-mana-blue">
+      <Container>
+        <div class="max-w-3xl mx-auto text-center">
+          <div class="text-6xl mb-6 text-white opacity-50">❝</div>
+          <Text size="2xl" class="text-white mb-6 italic">
+            {group.data.testimonial.quote}
+          </Text>
+          <div>
+            <Text weight="semibold" class="text-white">
+              {group.data.testimonial.author}
+            </Text>
+            <Text size="sm" class="text-gray-200">
+              {group.data.testimonial.role}
+              {group.data.testimonial.company && `, ${group.data.testimonial.company}`}
+            </Text>
+          </div>
+        </div>
+      </Container>
+    </Section>
+  )}
+  
+  <!-- CTA Section -->
+  <Section spacing="xlarge">
+    <Container class="text-center">
+      <Heading as="h2" size="2" class="mb-6">
+        Bereit für flexiblere KI-Nutzung?
+      </Heading>
+      <Text size="xl" class="mb-8 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        Starten Sie noch heute und erleben Sie, wie Mana Ihre Arbeitsweise revolutioniert.
+      </Text>
+      
+      <Grid cols={3} gap="large" class="max-w-3xl mx-auto mb-8">
+        <Card class="text-center">
+          <div class="text-3xl mb-2">🎯</div>
+          <Text weight="semibold">Kostenlos testen</Text>
+          <Text size="sm" color="muted">150 Mana gratis</Text>
+        </Card>
+        <Card class="text-center">
+          <div class="text-3xl mb-2">🚀</div>
+          <Text weight="semibold">Sofort starten</Text>
+          <Text size="sm" color="muted">Keine Kreditkarte</Text>
+        </Card>
+        <Card class="text-center">
+          <div class="text-3xl mb-2">💬</div>
+          <Text weight="semibold">Support inklusive</Text>
+          <Text size="sm" color="muted">Persönliche Betreuung</Text>
+        </Card>
+      </Grid>
+      
+      <Button href="/start" size="large" class="bg-mana-blue hover:bg-blue-600 text-white">
+        Jetzt für {group.data.title} starten
+      </Button>
+    </Container>
+  </Section>
+  
+  <Footer />
+</Layout>

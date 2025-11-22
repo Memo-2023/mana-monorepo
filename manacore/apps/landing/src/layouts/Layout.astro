@@ -1,0 +1,267 @@
+---
+import AlternateLinks from '../components/seo/AlternateLinks.astro';
+import Sidebar from '../components/navigation/Sidebar.astro';
+import { getLangFromUrl } from '../lib/i18n/config';
+
+export interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title,
+  description = "Manacore - AI-powered platform to measure and improve team performance through intelligent analytics and insights.",
+  image = "/og-image.png"
+} = Astro.props;
+
+const lang = getLangFromUrl(Astro.url);
+---
+
+<!DOCTYPE html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <script is:inline>
+      // Apply dark mode immediately to prevent flash
+      (() => {
+        const theme = localStorage.getItem('theme');
+        // Always apply dark color scheme and add bg class to body
+        document.documentElement.style.colorScheme = 'dark';
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+        // Add background class to body when it's available
+        if (document.body) {
+          document.body.classList.add('bg-mana-background');
+        }
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/icons/mana-icon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    
+    <!-- Primary Meta Tags -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://manacore.ai/" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://manacore.ai/" />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={image} />
+    
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Umami Analytics -->
+    <script defer src="https://umami.manacore.ai/script.js" data-website-id="dbafd5bb-f192-4cea-a857-593956c5ef00"></script>
+    
+    <!-- Alternate language links for SEO -->
+    <AlternateLinks />
+    
+    <!-- Critical dark mode styles -->
+    <style>
+      /* Ensure dark mode styles are applied immediately */
+      html {
+        color-scheme: dark;
+      }
+      
+      html.dark {
+        color-scheme: dark !important;
+      }
+    </style>
+  </head>
+  <body class="bg-mana-background">
+    <!-- Skip Navigation for Accessibility -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-mana-orange text-white px-4 py-2 rounded-lg z-50">
+      Zum Hauptinhalt springen
+    </a>
+
+    <!-- Gradient Overlay for Buttons - Desktop (Top) -->
+    <div class="fixed top-0 left-0 right-0 h-20 z-[100] pointer-events-none hidden md:block" id="nav-gradient-top"></div>
+
+    <!-- Gradient Overlay for Buttons - Mobile (Bottom) -->
+    <div class="fixed bottom-0 left-0 right-0 h-48 z-[100] pointer-events-none md:hidden" id="nav-gradient-bottom"></div>
+
+    <!-- Logo Home Button -->
+    <a
+      href="/"
+      id="logo-home-button"
+      class="fixed md:top-6 bottom-6 md:bottom-auto left-6 z-[101] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all text-white"
+      style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);"
+      aria-label="Zur Startseite"
+    >
+      <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12.3047 1C12.3392 1.04573 19.608 10.6706 19.6084 14.6953C19.6084 18.7293 16.3386 21.9998 12.3047 22C8.27061 22 5 18.7294 5 14.6953C5.00041 10.661 12.3047 1 12.3047 1ZM12.3047 7.3916C12.2811 7.42276 8.65234 12.2288 8.65234 14.2393C8.65241 16.2562 10.2877 17.8916 12.3047 17.8916C14.3217 17.8916 15.957 16.2562 15.957 14.2393C15.957 12.2301 12.3331 7.42917 12.3047 7.3916Z" fill="currentColor"/>
+      </svg>
+    </a>
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <!-- FAB Sidebar Navigation -->
+    <Sidebar />
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    /* Grid Paper System - 10mm Grid (40px) */
+    --grid-unit: 40px; /* 10mm ~= 40px */
+    --grid-small: 10px; /* 2.5mm for finer grid lines */
+    --grid-cols: 12; /* Default: Desktop 12 Spalten */
+  }
+
+  /* Responsive Grid Columns */
+  @media (min-width: 1200px) {
+    :root {
+      --grid-cols: 12; /* Desktop: 12 Spalten */
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1199px) {
+    :root {
+      --grid-cols: 8; /* Tablet: 8 Spalten */
+    }
+  }
+
+  @media (max-width: 767px) {
+    :root {
+      --grid-cols: 4; /* Mobile: 4 Spalten */
+    }
+  }
+
+  /* Grid System */
+  .page-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), var(--grid-column-width));
+    gap: var(--grid-gutter);
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 var(--grid-gutter);
+  }
+
+  /* Baseline Grid - all elements align to 8px baseline */
+  * {
+    box-sizing: border-box;
+  }
+
+  h1, h2, h3, h4, h5, h6, p, div, section {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Visual Grid Overlay - Kariertes Papier Effect (10mm Grid) */
+  .grid-visual-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99999;
+    /* Main 10mm grid */
+    background-size: var(--grid-unit) var(--grid-unit);
+    background-image:
+      /* Bold lines every 10mm (40px) */
+      linear-gradient(to right, rgba(59, 130, 246, 0.3) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(59, 130, 246, 0.3) 1px, transparent 1px);
+  }
+
+  .dark .grid-visual-overlay {
+    background-image:
+      linear-gradient(to right, rgba(59, 130, 246, 0.25) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(59, 130, 246, 0.25) 1px, transparent 1px);
+  }
+
+  /* Fine grid lines (optional - can be toggled) */
+  .grid-visual-overlay.with-fine-grid {
+    background-size: var(--grid-small) var(--grid-small), var(--grid-unit) var(--grid-unit);
+    background-image:
+      /* Fine lines every 2.5mm (10px) */
+      linear-gradient(to right, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+      /* Bold lines every 10mm (40px) */
+      linear-gradient(to right, rgba(59, 130, 246, 0.3) 2px, transparent 2px),
+      linear-gradient(to bottom, rgba(59, 130, 246, 0.3) 2px, transparent 2px);
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    color: #f3f4f6;
+  }
+
+  html.dark body {
+    color: #f3f4f6;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .focus\:not-sr-only:focus {
+    position: absolute;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  /* Logo Home Button hover effect */
+  #logo-home-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5), 0 0 0 4px rgba(59, 130, 246, 0.2) !important;
+  }
+
+  #logo-home-button:active {
+    transform: translateY(0);
+  }
+
+  /* Navigation Gradient Overlays */
+  #nav-gradient-top {
+    background-image:
+      /* Diagonal shadow from top-left corner */
+      radial-gradient(ellipse 250px 150px at top left, rgba(0, 0, 0, 0.4) 0%, transparent 85%),
+      /* Diagonal shadow from top-right corner */
+      radial-gradient(ellipse 250px 150px at top right, rgba(0, 0, 0, 0.4) 0%, transparent 85%),
+      /* Main gradient from top to bottom */
+      linear-gradient(to bottom, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.3) 40%, rgba(15, 23, 42, 0.05) 70%, transparent 100%);
+  }
+
+  #nav-gradient-bottom {
+    background-image:
+      /* Diagonal shadow from bottom-left corner */
+      radial-gradient(ellipse 600px 400px at bottom left, rgba(0, 0, 0, 0.7) 0%, transparent 60%),
+      /* Diagonal shadow from bottom-right corner */
+      radial-gradient(ellipse 600px 400px at bottom right, rgba(0, 0, 0, 0.7) 0%, transparent 60%),
+      /* Main gradient from bottom to top */
+      linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.7) 30%, transparent 100%);
+  }
+</style>

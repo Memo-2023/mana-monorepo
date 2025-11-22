@@ -1,0 +1,70 @@
+---
+export interface Props {
+  type?: 'text' | 'email' | 'password' | 'search' | 'tel' | 'url' | 'number';
+  name?: string;
+  id?: string;
+  placeholder?: string;
+  value?: string;
+  required?: boolean;
+  disabled?: boolean;
+  readonly?: boolean;
+  class?: string;
+  label?: string;
+  error?: string;
+}
+
+const {
+  type = 'text',
+  name,
+  id,
+  placeholder,
+  value,
+  required = false,
+  disabled = false,
+  readonly = false,
+  class: className = '',
+  label,
+  error,
+  ...rest
+} = Astro.props;
+
+const inputId = id || name;
+const hasError = !!error;
+
+const baseStyles = "w-full px-4 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-200";
+const normalStyles = "border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400";
+const errorStyles = "border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400";
+const disabledStyles = "bg-gray-50 dark:bg-gray-700 cursor-not-allowed opacity-60";
+
+const inputClasses = `${baseStyles} ${hasError ? errorStyles : normalStyles} ${disabled ? disabledStyles : ''} ${className}`;
+---
+
+<div class="w-full">
+  {label && (
+    <label for={inputId} class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+      {label}
+      {required && <span class="text-red-500 ml-1">*</span>}
+    </label>
+  )}
+  
+  <input
+    type={type}
+    name={name}
+    id={inputId}
+    placeholder={placeholder}
+    value={value}
+    required={required}
+    disabled={disabled}
+    readonly={readonly}
+    class={inputClasses}
+    aria-invalid={hasError}
+    aria-describedby={hasError ? `${inputId}-error` : undefined}
+    {...rest}
+  />
+  
+  {error && (
+    <p id={`${inputId}-error`} class="mt-1 text-sm text-red-600 dark:text-red-400">
+      {error}
+    </p>
+  )}
+</div>

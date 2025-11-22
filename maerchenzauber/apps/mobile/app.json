@@ -1,0 +1,126 @@
+{
+  "expo": {
+    "name": "Märchenzauber",
+    "slug": "maerchen-zauber",
+    "version": "1.2.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "maerchenzauber",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.memoro.maerchenzauber",
+      "jsEngine": "jsc",
+      "associatedDomains": [
+        "applinks:märchen-zauber.de",
+        "applinks:xn--mrchen-zauber-bfb.de"
+      ],
+      "config": {
+        "googleSignIn": {
+          "reservedClientId": "111768794939-dtmimmtn6op11a39bo1v4o7et4h913dd.apps.googleusercontent.com"
+        }
+      },
+      "usesAppleSignIn": true,
+      "appleTeamId": "QP3GLU8PH3",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "Wir benötigen Zugriff auf Ihre Fotobibliothek, um Fotos für die Charaktererstellung hochzuladen.",
+        "NSCameraUsageDescription": "Wir benötigen Zugriff auf die Kamera, um Fotos für die Charaktererstellung aufzunehmen.",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": ["maerchenzauber"]
+          }
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.memoro.maerchenzauber",
+      "jsEngine": "hermes",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "maerchenzauber",
+              "host": "share",
+              "pathPrefix": "/character"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "märchen-zauber.de",
+              "pathPrefix": "/character"
+            },
+            {
+              "scheme": "https",
+              "host": "xn--mrchen-zauber-bfb.de",
+              "pathPrefix": "/character"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-localization",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Wir benötigen Zugriff auf Ihre Fotobibliothek, um Fotos für die Charaktererstellung hochzuladen.",
+          "cameraPermission": "Wir benötigen Zugriff auf die Kamera, um Fotos für die Charaktererstellung aufzunehmen."
+        }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.111768794939-dtmimmtn6op11a39bo1v4o7et4h913dd",
+          "iosClientId": "111768794939-dtmimmtn6op11a39bo1v4o7et4h913dd.apps.googleusercontent.com"
+        }
+      ],
+      "expo-apple-authentication",
+      "expo-web-browser",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#1a1a2e",
+          "image": "./assets/images/icon.png",
+          "imageWidth": 200,
+          "dark": {
+            "backgroundColor": "#0f0f1e",
+            "image": "./assets/images/icon.png"
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7986fb21-467b-492e-8d34-407eb5bf7c63"
+      },
+      "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "${EXPO_PUBLIC_REVENUECAT_IOS_KEY}",
+      "EXPO_PUBLIC_REVENUECAT_ANDROID_KEY": "${EXPO_PUBLIC_REVENUECAT_ANDROID_KEY}"
+    },
+    "owner": "memoro"
+  }
+}

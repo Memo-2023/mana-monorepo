@@ -1,0 +1,10 @@
+https://replicate.com/google/imagen-4-fast
+https://replicate.com/bytedance/seedream-4
+https://replicate.com/ideogram-ai/ideogram-v3-turbo
+https://replicate.com/qwen/qwen-image
+https://replicate.com/black-forest-labs/flux-schnell
+https://replicate.com/black-forest-labs/flux-1.1-pro
+https://replicate.com/stability-ai/stable-diffusion-3.5-large-turbo
+https://replicate.com/google/imagen-4
+https://replicate.com/stability-ai/stable-diffusion-3.5-medium
+https://replicate.com/google/nano-banana

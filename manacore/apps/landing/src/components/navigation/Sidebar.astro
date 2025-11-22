@@ -1,0 +1,162 @@
+---
+import ThemeToggle from '../ui/ThemeToggle.astro';
+import LanguageSwitcher from '../ui/LanguageSwitcher.astro';
+import { getLangFromUrl, useTranslations } from '../../lib/i18n/config';
+import { getLocalizedRoute } from '../../lib/i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const navLinks = [
+  { href: getLocalizedRoute('/apps', lang), label: t('nav.apps'), icon: 'M4 6h16M4 12h16M4 18h16' },
+  { href: getLocalizedRoute('/pricing', lang), label: t('nav.pricing'), icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' },
+  { href: getLocalizedRoute('/clients', lang), label: t('nav.references'), icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+  { href: getLocalizedRoute('/privacy', lang), label: t('nav.privacy'), icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' },
+];
+---
+
+<!-- FAB Menu Button -->
+<button
+  id="fab-toggle"
+  class="fixed md:top-6 bottom-6 md:bottom-auto right-6 z-[101] w-14 h-14 text-white rounded-full shadow-2xl flex items-center justify-center transition-all"
+  style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4), 0 0 0 0 rgba(59, 130, 246, 0.5);"
+  aria-label="Menü öffnen"
+>
+  <svg id="fab-icon" class="w-6 h-6 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+  </svg>
+</button>
+
+<!-- Menu Container -->
+<aside id="sidebar" class="fixed md:top-6 bottom-24 md:bottom-auto md:right-24 right-6 z-[100] transition-all duration-300 opacity-0 pointer-events-none scale-95">
+  <div class="backdrop-blur-xl rounded-2xl w-auto" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(248, 250, 252, 0.1);">
+    <!-- Navigation Links -->
+    <nav class="p-2">
+      <ul class="space-y-1 md:space-y-0 md:flex md:items-center md:gap-1">
+        {navLinks.map(link => (
+          <li>
+            <a
+              href={link.href}
+              class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm text-gray-300 hover:text-white transition-all whitespace-nowrap group"
+              style="transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"
+              title={link.label}
+            >
+              <svg class="w-4 h-4 flex-shrink-0 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={link.icon}></path>
+              </svg>
+              <span class="font-medium">{link.label}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <!-- Bottom Actions -->
+    <div class="p-2 border-t md:border-t-0 md:border-l border-gray-200/10">
+      <div class="flex items-center gap-2 justify-center md:justify-start relative">
+        <ThemeToggle />
+        <LanguageSwitcher currentLang={lang} />
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Overlay -->
+<div id="menu-overlay" class="fixed inset-0 z-[99] hidden"></div>
+
+<style>
+  /* Menu open state */
+  #sidebar.menu-open {
+    opacity: 1;
+    pointer-events: auto;
+    scale: 1;
+  }
+
+  /* FAB Button hover effect */
+  #fab-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5), 0 0 0 4px rgba(59, 130, 246, 0.2) !important;
+  }
+
+  #fab-toggle:active {
+    transform: translateY(0);
+  }
+
+  /* FAB rotation when menu is open */
+  #fab-toggle.menu-open #fab-icon {
+    transform: rotate(45deg);
+  }
+
+  /* Link hover effect */
+  #sidebar a:hover {
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+  /* Desktop: Horizontal layout */
+  @media (min-width: 768px) {
+    #sidebar > div {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    #sidebar nav {
+      padding-right: 0.5rem;
+    }
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 767px) {
+    #sidebar {
+      right: 1rem;
+      left: auto;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const fabToggle = document.getElementById('fab-toggle');
+    const overlay = document.getElementById('menu-overlay');
+
+    // Toggle menu
+    fabToggle?.addEventListener('click', () => {
+      const isOpen = sidebar?.classList.contains('menu-open');
+
+      if (isOpen) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+
+    // Close on overlay click
+    overlay?.addEventListener('click', closeMenu);
+
+    // Close menu on navigation
+    const navLinks = sidebar?.querySelectorAll('a');
+    navLinks?.forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
+
+    function openMenu() {
+      sidebar?.classList.add('menu-open');
+      fabToggle?.classList.add('menu-open');
+      overlay?.classList.remove('hidden');
+    }
+
+    function closeMenu() {
+      sidebar?.classList.remove('menu-open');
+      fabToggle?.classList.remove('menu-open');
+      overlay?.classList.add('hidden');
+    }
+
+    // Close on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sidebar?.classList.contains('menu-open')) {
+        closeMenu();
+      }
+    });
+  });
+</script>

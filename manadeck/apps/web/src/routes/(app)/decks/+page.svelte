@@ -1,0 +1,79 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { deckStore } from '$lib/stores/deckStore.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import DeckCard from '$lib/components/deck/DeckCard.svelte';
+	import CreateDeckModal from '$lib/components/deck/CreateDeckModal.svelte';
+
+	let showCreateModal = $state(false);
+
+	onMount(() => {
+		deckStore.fetchDecks();
+	});
+
+	function handleDeckClick(deckId: string) {
+		goto(`/decks/${deckId}`);
+	}
+</script>
+
+<svelte:head>
+	<title>My Decks - Manadeck</title>
+</svelte:head>
+
+<div class="space-y-6">
+	<!-- Header -->
+	<div class="flex items-center justify-between">
+		<div>
+			<h1 class="text-3xl font-bold">My Decks</h1>
+			<p class="text-muted-foreground mt-1">
+				Organize your learning materials into decks
+			</p>
+		</div>
+		<Button onclick={() => (showCreateModal = true)}>
+			<span class="mr-2">+</span>
+			New Deck
+		</Button>
+	</div>
+
+	<!-- Loading State -->
+	{#if deckStore.loading && deckStore.decks.length === 0}
+		<div class="flex justify-center py-12">
+			<div class="text-center">
+				<div class="inline-block animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+				<p class="mt-4 text-muted-foreground">Loading decks...</p>
+			</div>
+		</div>
+	{:else if deckStore.error}
+		<!-- Error State -->
+		<div class="p-4 rounded-lg bg-destructive/10 text-destructive">
+			<p class="font-medium">Error loading decks</p>
+			<p class="text-sm mt-1">{deckStore.error}</p>
+			<Button variant="outline" class="mt-3" onclick={() => deckStore.fetchDecks()}>
+				Try Again
+			</Button>
+		</div>
+	{:else if deckStore.decks.length === 0}
+		<!-- Empty State -->
+		<div class="text-center py-12">
+			<div class="text-6xl mb-4">📚</div>
+			<h3 class="text-xl font-semibold mb-2">No decks yet</h3>
+			<p class="text-muted-foreground mb-6">
+				Create your first deck to start organizing your learning materials
+			</p>
+			<Button onclick={() => (showCreateModal = true)}>
+				Create Your First Deck
+			</Button>
+		</div>
+	{:else}
+		<!-- Decks Grid -->
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+			{#each deckStore.decks as deck (deck.id)}
+				<DeckCard {deck} onclick={() => handleDeckClick(deck.id)} />
+			{/each}
+		</div>
+	{/if}
+</div>
+
+<!-- Create Deck Modal -->
+<CreateDeckModal bind:open={showCreateModal} />

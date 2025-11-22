@@ -1,0 +1,5 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#2C2C2C"/>
+  <text x="400" y="300" font-family="Grandstander, sans-serif" font-size="32" fill="#F8D62B" text-anchor="middle">Geschichte ansehen</text>
+  <text x="400" y="350" font-family="Arial" font-size="18" fill="#999" text-anchor="middle">Screenshot Platzhalter</text>
+</svg>

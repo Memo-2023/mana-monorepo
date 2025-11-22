@@ -1,0 +1,59 @@
+---
+export interface Props {
+  direction?: 'row' | 'column';
+  wrap?: boolean;
+  align?: 'start' | 'center' | 'end' | 'stretch' | 'baseline';
+  justify?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
+  gap?: 'none' | 'small' | 'medium' | 'large';
+  class?: string;
+}
+
+const {
+  direction = 'row',
+  wrap = false,
+  align = 'stretch',
+  justify = 'start',
+  gap = 'none',
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const baseStyles = "flex";
+
+const directions = {
+  row: "flex-row",
+  column: "flex-col"
+};
+
+const alignments = {
+  start: "items-start",
+  center: "items-center",
+  end: "items-end",
+  stretch: "items-stretch",
+  baseline: "items-baseline"
+};
+
+const justifications = {
+  start: "justify-start",
+  center: "justify-center",
+  end: "justify-end",
+  between: "justify-between",
+  around: "justify-around",
+  evenly: "justify-evenly"
+};
+
+const gaps = {
+  none: "",
+  small: "gap-2",
+  medium: "gap-4",
+  large: "gap-6"
+};
+
+const wrapStyle = wrap ? "flex-wrap" : "";
+
+const classes = `${baseStyles} ${directions[direction]} ${alignments[align]} ${justifications[justify]} ${gaps[gap]} ${wrapStyle} ${className}`;
+---
+
+<div class={classes} {...rest}>
+  <slot />
+</div>

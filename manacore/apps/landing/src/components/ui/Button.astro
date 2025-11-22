@@ -1,0 +1,47 @@
+---
+export interface Props {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'outline';
+  size?: 'small' | 'medium' | 'large';
+  href?: string;
+  type?: 'button' | 'submit' | 'reset';
+  class?: string;
+  disabled?: boolean;
+}
+
+const { 
+  variant = 'primary', 
+  size = 'medium', 
+  href, 
+  type = 'button',
+  class: className = '',
+  disabled = false,
+  ...rest 
+} = Astro.props;
+
+const baseStyles = "inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed";
+
+const variants = {
+  primary: "text-white bg-mana-blue hover:bg-blue-600 dark:bg-mana-blue dark:hover:bg-blue-600 focus:ring-mana-blue",
+  secondary: "text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-gray-500",
+  ghost: "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 focus:ring-gray-500",
+  outline: "text-mana-blue dark:text-mana-blue border-2 border-mana-blue dark:border-mana-blue hover:bg-blue-50 dark:hover:bg-blue-950 focus:ring-mana-blue"
+};
+
+const sizes = {
+  small: "px-3 py-1.5 text-sm",
+  medium: "px-5 py-2.5 text-base",
+  large: "px-7 py-3.5 text-lg"
+};
+
+const classes = `${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`;
+---
+
+{href ? (
+  <a href={href} class={classes} {...rest}>
+    <slot />
+  </a>
+) : (
+  <button type={type} class={classes} disabled={disabled} {...rest}>
+    <slot />
+  </button>
+)}

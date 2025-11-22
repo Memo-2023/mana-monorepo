@@ -1,0 +1,148 @@
+# Memoro Monorepo .gitignore
+
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+
+# Package Manager Locks (optional - include if you want to ignore them)
+# package-lock.json
+# pnpm-lock.yaml
+# yarn.lock
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+!.env.example
+!.env.dev.example
+!.env.prod.example
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Operating System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDEs and Editors
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.iml
+.project
+.classpath
+.settings/
+*.code-workspace
+
+# AI Tools & Assistants
+.junie/
+.claude-flow/
+**/.claude/settings.local.json
+.windsurfrules
+
+# Build Outputs
+dist/
+build/
+.output/
+out/
+
+# Deployment
+.vercel/
+.netlify/
+.wrangler/
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+*.bak
+*.cache
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# TypeScript
+*.tsbuildinfo
+*.tsbuildinfo.*
+
+# Miscellaneous
+.cache/
+*.stackdump
+*.hprof
+.expo-shared/
+
+# Python (if any scripts use it)
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+ENV/
+
+# Mobile App Specific (apps/mobile/)
+# These are already covered by apps/mobile/.gitignore
+# but listed here for reference of what's ignored
+# - .expo/
+# - android/
+# - ios/
+# - web-build/
+
+# Web App Specific (apps/web/)
+# These are already covered by apps/web/.gitignore
+# but listed here for reference of what's ignored
+# - .svelte-kit/
+
+# Documentation Artifacts
+*.pdf
+*.docx
+!docs/**/*.pdf
+!docs/**/*.docx
+
+# Sensitive Files
+*.pem
+*.p8
+*.p12
+*.key
+*.jks
+*.mobileprovision
+*.cer
+*.certSigningRequest
+credentials.json
+service-account.json
+google-services.json
+GoogleService-Info.plist
+
+# Local Configuration
+.mcp.json.local
+config.local.*
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z

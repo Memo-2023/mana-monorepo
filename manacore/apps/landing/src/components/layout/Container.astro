@@ -1,0 +1,14 @@
+---
+export interface Props {
+  class?: string;
+}
+
+const {
+  class: className = '',
+  ...rest
+} = Astro.props;
+---
+
+<div class={`page-grid ${className}`} {...rest}>
+  <slot />
+</div>

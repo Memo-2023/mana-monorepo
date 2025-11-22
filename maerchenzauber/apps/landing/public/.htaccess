@@ -1,0 +1,13 @@
+# Apache rewrite rules for character sharing
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Serve character.html for /character/{id}/{shareCode} URLs
+  RewriteRule ^character/([^/]+)/([^/]+)/?$ /character.html [L]
+
+  # Ensure .well-known files are served with correct MIME type
+  <FilesMatch "apple-app-site-association">
+    Header set Content-Type "application/json"
+  </FilesMatch>
+</IfModule>

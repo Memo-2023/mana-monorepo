@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navigation from '../components/layout/Navigation.astro';
+import Footer from '../components/layout/Footer.astro';
+import Hero from '../components/sections/Hero.astro';
+import Features from '../components/sections/Features.astro';
+import HowItWorks from '../components/sections/HowItWorks.astro';
+import StoryShowcase from '../components/sections/StoryShowcase.astro';
+import CharacterGallery from '../components/sections/CharacterGallery.astro';
+import Testimonials from '../components/sections/Testimonials.astro';
+import Pricing from '../components/sections/Pricing.astro';
+import FAQ from '../components/sections/FAQ.astro';
+import CTA from '../components/sections/CTA.astro';
+---
+
+<BaseLayout>
+  <Navigation />
+  
+  <main class="pb-20 md:pb-28 lg:pb-32">
+    <Hero />
+    <Features />
+    <HowItWorks />
+    <StoryShowcase />
+    <CharacterGallery />
+    <Testimonials />
+    <Pricing />
+    <FAQ />
+    <CTA />
+  </main>
+
+  <Footer />
+</BaseLayout>

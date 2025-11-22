@@ -1,0 +1,38 @@
+{
+  "fill" : "system-dark",
+  "groups" : [
+    {
+      "blur-material" : null,
+      "hidden" : false,
+      "layers" : [
+        {
+          "image-name" : "Mawrchenzauber-App-Icon-01.1.svg",
+          "name" : "Mawrchenzauber-App-Icon-01.1"
+        }
+      ],
+      "lighting" : "individual",
+      "position" : {
+        "scale" : 0.89,
+        "translation-in-points" : [
+          3,
+          4
+        ]
+      },
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 1
+      },
+      "specular" : false,
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
