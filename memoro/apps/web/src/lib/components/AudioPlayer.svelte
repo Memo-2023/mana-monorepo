@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import Text from '$lib/components/atoms/Text.svelte';
+	import { Text } from '@manacore/shared-ui';
 
 	let { src, duration }: { src: string; duration?: number } = $props();
 

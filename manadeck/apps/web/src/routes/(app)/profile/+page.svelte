@@ -9,9 +9,9 @@
 	async function loadCredits() {
 		loadingCredits = true;
 		try {
-			const { authService } = await import('$lib/services/authService');
-			const balance = await authService.getCreditBalance();
-			credits = balance.credits;
+			const { authService } = await import('$lib/auth');
+			const balance = await authService.getUserCredits();
+			credits = balance?.credits ?? null;
 		} catch (error) {
 			console.error('Failed to load credits:', error);
 		} finally {

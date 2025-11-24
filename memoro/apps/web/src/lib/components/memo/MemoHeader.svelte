@@ -2,7 +2,7 @@
 	import type { Memo } from '$lib/types/memo.types';
 	import { formatDuration, getMemooDuration, formatTimestamp } from '$lib/utils/formatters';
 	import TagBadge from '$lib/components/TagBadge.svelte';
-	import Text from '$lib/components/atoms/Text.svelte';
+	import { Text } from '@manacore/shared-ui';
 
 	interface Props {
 		memo: Memo;

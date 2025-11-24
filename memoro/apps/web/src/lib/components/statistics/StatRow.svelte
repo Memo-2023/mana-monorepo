@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Text from '$lib/components/atoms/Text.svelte';
+	import { Text } from '@manacore/shared-ui';
 
 	interface Props {
 		title: string;

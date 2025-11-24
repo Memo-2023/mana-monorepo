@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { recording } from '$lib/stores/recording';
-	import Text from '$lib/components/atoms/Text.svelte';
+	import { Text } from '@manacore/shared-ui';
 
 	let mediaRecorder: MediaRecorder | null = null;
 	let audioChunks: Blob[] = [];
 	let stream: MediaStream | null = null;
-	let durationInterval: number;
+	let durationInterval: ReturnType<typeof setInterval> | undefined;
 	let startTime: number = 0;
 
 	let hasPermission = $state(false);

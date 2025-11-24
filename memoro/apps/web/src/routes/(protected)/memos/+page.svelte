@@ -13,7 +13,7 @@
 	import { supabase, createAuthClient } from '$lib/supabaseClient';
 	import SplitView from '$lib/components/SplitView.svelte';
 	import ContextMenu from '$lib/components/ContextMenu.svelte';
-	import Modal from '$lib/components/Modal.svelte';
+	import { Modal } from '@manacore/shared-ui';
 	import VirtualList from '$lib/components/VirtualList.svelte';
 	import { DashboardSkeleton } from '$lib/components/skeletons';
 	import type { Memo } from '$lib/types/memo.types';
@@ -599,17 +599,18 @@ ${memo.memories && memo.memories.length > 0 ? '\nKI-Analyse:\n' + memo.memories.
 
 <!-- Context Menu -->
 {#if contextMenu}
+	{@const menuMemo = contextMenu.memo}
 	<ContextMenu
 		items={[
 			{
 				label: $t('memo.open_in_new_tab'),
 				icon: 'open',
-				action: () => handleOpenInNewTab(contextMenu.memo)
+				action: () => handleOpenInNewTab(menuMemo)
 			},
 			{
-				label: contextMenu.memo.is_pinned ? $t('memo.unpin') : $t('memo.pin'),
+				label: menuMemo.is_pinned ? $t('memo.unpin') : $t('memo.pin'),
 				icon: 'pin',
-				action: () => handlePinMemo(contextMenu.memo)
+				action: () => handlePinMemo(menuMemo)
 			},
 			{
 				separator: true,
@@ -619,17 +620,17 @@ ${memo.memories && memo.memories.length > 0 ? '\nKI-Analyse:\n' + memo.memories.
 			{
 				label: $t('memo.edit_title'),
 				icon: 'edit',
-				action: () => handleEditTitle(contextMenu.memo)
+				action: () => handleEditTitle(menuMemo)
 			},
 			{
 				label: $t('memo.share'),
 				icon: 'share',
-				action: () => handleShareMemo(contextMenu.memo)
+				action: () => handleShareMemo(menuMemo)
 			},
 			{
 				label: $t('memo.export_text'),
 				icon: 'download',
-				action: () => handleExportMemo(contextMenu.memo)
+				action: () => handleExportMemo(menuMemo)
 			},
 			{
 				separator: true,
@@ -640,7 +641,7 @@ ${memo.memories && memo.memories.length > 0 ? '\nKI-Analyse:\n' + memo.memories.
 				label: $t('common.delete'),
 				icon: 'delete',
 				danger: true,
-				action: () => handleDeleteMemo(contextMenu.memo)
+				action: () => handleDeleteMemo(menuMemo)
 			}
 		]}
 		x={contextMenu.x}

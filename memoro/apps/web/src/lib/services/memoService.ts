@@ -347,9 +347,9 @@ export class MemoService {
 				.eq('id', memoId)
 				.single();
 
-			const currentMetadata = memo?.metadata || {};
-			const currentStats = currentMetadata.stats || {};
-			const newViewCount = (currentStats.viewCount || 0) + 1;
+			const currentMetadata = (memo?.metadata as Record<string, unknown>) || {};
+			const currentStats = (currentMetadata.stats as Record<string, unknown>) || {};
+			const newViewCount = ((currentStats.viewCount as number) || 0) + 1;
 
 			const { error: updateError } = await supabase
 				.from('memos')

@@ -29,7 +29,7 @@ function createRecordingStore() {
 				audioBlob: blob,
 				audioUrl: URL.createObjectURL(blob)
 			})),
-		setError: (error: string) => update((state) => ({ ...state, error })),
+		setError: (error: string | null) => update((state) => ({ ...state, error })),
 		reset: () =>
 			set({
 				status: 'idle',

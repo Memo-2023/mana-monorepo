@@ -96,11 +96,10 @@ export async function uploadAndProcessAudio({
 			fileName,
 			duration: Math.floor(duration),
 			memoId,
-			spaceId,
+			spaceId: spaceId ?? undefined,
 			title,
-			blueprintId,
+			blueprintId: blueprintId ?? undefined,
 			recordingLanguages,
-			enableDiarization,
 			appToken
 		});
 

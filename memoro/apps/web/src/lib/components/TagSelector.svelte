@@ -22,7 +22,7 @@
 	let newTagName = $state('');
 	let newTagColor = $state('#3b82f6');
 
-	const tagService = new TagService(supabase);
+	const tagService = new TagService();
 
 	onMount(async () => {
 		if ($tags.length === 0) {

@@ -7,7 +7,7 @@
 		parseAppleAuthorizationResponse,
 		getStoredReturnUrl,
 		clearAppleSignInSession
-	} from '$lib/utils/appleAuth';
+	} from '@manacore/shared-auth-ui';
 
 	let error = $state<string | null>(null);
 	let processing = $state(true);

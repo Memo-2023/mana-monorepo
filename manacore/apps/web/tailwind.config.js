@@ -1,9 +1,17 @@
+import preset from '@manacore/shared-tailwind/preset';
+
 /** @type {import('tailwindcss').Config} */
 export default {
-	content: ['./src/**/*.{html,js,svelte,ts}'],
+	presets: [preset],
+	content: [
+		'./src/**/*.{html,js,svelte,ts}',
+		'../../packages/shared-ui/src/**/*.{html,js,svelte,ts}',
+		'../../packages/shared-auth-ui/src/**/*.{html,js,svelte,ts}'
+	],
 	theme: {
 		extend: {
 			colors: {
+				// ManaCore specific primary blue
 				primary: {
 					50: '#eff6ff',
 					100: '#dbeafe',
@@ -19,6 +27,5 @@ export default {
 				}
 			}
 		}
-	},
-	plugins: []
+	}
 };

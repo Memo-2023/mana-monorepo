@@ -1,3 +1,18 @@
+export interface MemoPhoto {
+	id: string;
+	url: string;
+	thumbnail_url?: string;
+	caption?: string;
+	created_at: string;
+}
+
+export interface AdditionalRecording {
+	id: string;
+	audio_url: string;
+	duration_millis: number;
+	created_at: string;
+}
+
 export interface Memo {
 	id: string;
 	user_id: string;
@@ -8,6 +23,7 @@ export interface Memo {
 	duration_millis: number | null;
 	created_at: string;
 	updated_at: string;
+	recorded_at?: string;
 	space_id: string | null;
 	blueprint_id: string | null;
 	language: string | null;
@@ -35,6 +51,8 @@ export interface Memo {
 	memories?: Memory[];
 	tags?: Tag[];
 	space?: Space;
+	photos?: MemoPhoto[];
+	additional_recordings?: AdditionalRecording[];
 }
 
 export type ProcessingStatus = 'pending' | 'processing' | 'completed' | 'failed';
@@ -64,6 +82,7 @@ export interface Tag {
 	created_at: string;
 	is_pinned?: boolean;
 	sort_order?: number;
+	usage?: number;
 }
 
 export interface MemoTag {
@@ -80,12 +99,25 @@ export interface Space {
 	updated_at: string;
 }
 
+export interface Prompt {
+	id: string;
+	memory_title: string;
+	prompt_text: string;
+	name?: string;
+	description?: string | null;
+	created_at?: string;
+	updated_at?: string;
+}
+
 export interface Blueprint {
 	id: string;
 	name: string;
 	description: string | null;
-	prompt: string;
+	prompt?: string;
 	user_id: string | null;
 	is_public: boolean;
 	created_at: string;
+	updated_at?: string;
+	category?: string | null;
+	prompts?: Prompt[];
 }

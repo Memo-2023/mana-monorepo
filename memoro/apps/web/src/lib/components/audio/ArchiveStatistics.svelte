@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { AudioArchiveStats } from '$lib/services/audioStorageService';
 	import { audioStorageService } from '$lib/services/audioStorageService';
-	import Text from '$lib/components/atoms/Text.svelte';
+	import { Text } from '@manacore/shared-ui';
 
 	interface Props {
 		stats: AudioArchiveStats;

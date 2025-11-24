@@ -1,9 +1,21 @@
 import type { ManaUser } from '$lib/types/auth';
-import { authService } from '$lib/services/authService';
+import { authService, type UserData } from '$lib/auth';
 
 // Svelte 5 runes-based auth store
 let user = $state<ManaUser | null>(null);
 let loading = $state(true);
+
+/**
+ * Convert UserData from shared-auth to ManaUser
+ */
+function toManaUser(userData: UserData | null): ManaUser | null {
+	if (!userData) return null;
+	return {
+		id: userData.id,
+		email: userData.email,
+		role: userData.role,
+	};
+}
 
 export const authStore = {
 	get user() {
@@ -22,8 +34,10 @@ export const authStore = {
 	async initialize() {
 		loading = true;
 		try {
-			if (authService.isAuthenticated()) {
-				user = authService.getCurrentUser();
+			const isAuth = await authService.isAuthenticated();
+			if (isAuth) {
+				const userData = await authService.getUserFromToken();
+				user = toManaUser(userData);
 			}
 		} catch (error) {
 			console.error('Failed to initialize auth:', error);
@@ -55,11 +69,43 @@ export const authStore = {
 	/**
 	 * Check authentication status
 	 */
-	checkAuth() {
-		if (!authService.isAuthenticated()) {
+	async checkAuth() {
+		const isAuth = await authService.isAuthenticated();
+		if (!isAuth) {
 			user = null;
 			return false;
 		}
 		return true;
+	},
+
+	/**
+	 * Sign in with email and password
+	 */
+	async signIn(email: string, password: string) {
+		const result = await authService.signIn(email, password);
+		if (result.success) {
+			const userData = await authService.getUserFromToken();
+			user = toManaUser(userData);
+		}
+		return result;
+	},
+
+	/**
+	 * Sign up with email and password
+	 */
+	async signUp(email: string, password: string) {
+		const result = await authService.signUp(email, password);
+		if (result.success && !result.needsVerification) {
+			const userData = await authService.getUserFromToken();
+			user = toManaUser(userData);
+		}
+		return result;
+	},
+
+	/**
+	 * Send password reset email
+	 */
+	async forgotPassword(email: string) {
+		return authService.forgotPassword(email);
 	}
 };

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Modal from '$lib/components/Modal.svelte';
+	import { Modal } from '@manacore/shared-ui';
 	import type { Tag } from '$lib/types/memo.types';
 
 	interface Props {

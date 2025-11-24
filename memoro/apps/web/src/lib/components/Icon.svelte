@@ -1,21 +1,18 @@
 <script lang="ts">
 	/**
-	 * Central Icon Component for Memoro Web App
-	 * Uses Phosphor Icons (Bold weight) from @phosphor-icons/core
-	 *
-	 * Usage:
-	 * <Icon name="user-plus" size={24} />
-	 * <Icon name="sign-in" size={20} class="text-primary" />
+	 * Icon Component - Re-exports from @manacore/shared-icons
+	 * Uses Phosphor Icons (Bold weight)
 	 */
-	import { iconPaths } from './icons/iconPaths';
+	import { iconPaths } from '@manacore/shared-icons';
 
 	interface Props {
 		name: keyof typeof iconPaths;
 		size?: number;
 		class?: string;
+		color?: string;
 	}
 
-	let { name, size = 24, class: className = '' }: Props = $props();
+	let { name, size = 24, class: className = '', color }: Props = $props();
 
 	const path = $derived(iconPaths[name]);
 </script>
@@ -25,7 +22,7 @@
 		xmlns="http://www.w3.org/2000/svg"
 		width={size}
 		height={size}
-		fill="currentColor"
+		fill={color || 'currentColor'}
 		viewBox="0 0 256 256"
 		class={className}
 		aria-hidden="true"

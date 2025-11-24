@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Toggle from './Toggle.svelte';
+	import { Toggle } from '@manacore/shared-ui';
 
 	interface Props {
 		title: string;

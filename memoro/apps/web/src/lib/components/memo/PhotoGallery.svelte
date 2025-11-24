@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Text from '$lib/components/atoms/Text.svelte';
+	import { Text } from '@manacore/shared-ui';
 
 	interface Photo {
 		id: string;
@@ -50,7 +50,8 @@
 	function navigatePhoto(direction: number) {
 		if (!selectedPhoto) return;
 
-		const currentIndex = photos.findIndex((p) => p.id === selectedPhoto.id);
+		const currentPhoto = selectedPhoto;
+		const currentIndex = photos.findIndex((p) => p.id === currentPhoto.id);
 		const newIndex = currentIndex + direction;
 
 		if (newIndex >= 0 && newIndex < photos.length) {
@@ -162,6 +163,7 @@
 
 <!-- Lightbox Modal -->
 {#if showLightbox && selectedPhoto}
+	{@const currentPhoto = selectedPhoto}
 	<!-- Backdrop -->
 	<div
 		class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm"
@@ -173,15 +175,15 @@
 		<div class="relative max-h-full max-w-5xl" onclick={(e) => e.stopPropagation()}>
 			<!-- Image -->
 			<img
-				src={selectedPhoto.url}
-				alt={selectedPhoto.caption || 'Photo'}
+				src={currentPhoto.url}
+				alt={currentPhoto.caption || 'Photo'}
 				class="max-h-[90vh] w-auto rounded-lg shadow-2xl"
 			/>
 
 			<!-- Caption -->
-			{#if selectedPhoto.caption}
+			{#if currentPhoto.caption}
 				<div class="mt-4 rounded-lg bg-menu p-4">
-					<Text variant="body">{selectedPhoto.caption}</Text>
+					<Text variant="body">{currentPhoto.caption}</Text>
 				</div>
 			{/if}
 
@@ -206,7 +208,7 @@
 				<button
 					onclick={() => navigatePhoto(-1)}
 					class="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-black/50 p-3 text-white transition-colors hover:bg-black/70 disabled:opacity-50"
-					disabled={photos.findIndex((p) => p.id === selectedPhoto.id) === 0}
+					disabled={photos.findIndex((p) => p.id === currentPhoto.id) === 0}
 					title="Previous (←)"
 				>
 					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,7 +224,7 @@
 				<button
 					onclick={() => navigatePhoto(1)}
 					class="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-black/50 p-3 text-white transition-colors hover:bg-black/70 disabled:opacity-50"
-					disabled={photos.findIndex((p) => p.id === selectedPhoto.id) === photos.length - 1}
+					disabled={photos.findIndex((p) => p.id === currentPhoto.id) === photos.length - 1}
 					title="Next (→)"
 				>
 					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,7 +241,7 @@
 			<!-- Photo Counter -->
 			<div class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-4 py-2">
 				<Text variant="small" class="text-white">
-					{photos.findIndex((p) => p.id === selectedPhoto.id) + 1} / {photos.length}
+					{photos.findIndex((p) => p.id === currentPhoto.id) + 1} / {photos.length}
 				</Text>
 			</div>
 		</div>

@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { user } from '$lib/stores/auth';
 	import { theme } from '$lib/stores/theme';
-	import Text from '$lib/components/atoms/Text.svelte';
+	import { Text } from '@manacore/shared-ui';
 
 	interface Props {
 		onLogout: () => void;

@@ -5,7 +5,7 @@
 	import { uploadAndProcessAudio } from '$lib/services/audioUploadService';
 	import { createAuthClient } from '$lib/supabaseClient';
 	import { UploadPageSkeleton } from '$lib/components/skeletons';
-	import Text from '$lib/components/atoms/Text.svelte';
+	import { Text } from '@manacore/shared-ui';
 
 	// Upload state
 	let uploading = $state(false);

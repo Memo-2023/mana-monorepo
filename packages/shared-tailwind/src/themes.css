@@ -1,0 +1,265 @@
+/**
+ * CSS Custom Properties for ManaCore themes
+ * 
+ * Usage:
+ * 1. Import in your app.css: @import '@manacore/shared-tailwind/themes.css';
+ * 2. Set theme with data-theme attribute: <html data-theme="lume">
+ * 3. Dark mode is automatic with .dark class or prefers-color-scheme
+ */
+
+/* Default: Lume Light Theme */
+:root,
+[data-theme="lume"] {
+  --color-primary: #f8d62b;
+  --color-primary-button: #f8d62b;
+  --color-primary-button-text: #000000;
+  --color-secondary: #D4B200;
+  --color-secondary-button: #FFE9A3;
+  
+  --color-background: #dddddd;
+  --color-foreground: #2c2c2c;
+  --color-content: #ffffff;
+  --color-content-hover: #f5f5f5;
+  --color-content-page: #ffffff;
+  --color-menu: #dddddd;
+  --color-menu-hover: #cccccc;
+  
+  --color-text: #2c2c2c;
+  --color-text-secondary: #666666;
+  
+  --color-border-light: #f2f2f2;
+  --color-border: #e6e6e6;
+  --color-border-strong: #cccccc;
+  
+  --color-error: #e74c3c;
+  --color-success: #27ae60;
+  --color-warning: #f39c12;
+}
+
+/* Lume Dark */
+.dark,
+[data-theme="lume"].dark,
+[data-theme="lume"] .dark {
+  --color-primary: #f8d62b;
+  --color-primary-button: #7C6B16;
+  --color-primary-button-text: #ffffff;
+  --color-secondary: #D4B200;
+  --color-secondary-button: #1E1E1E;
+  
+  --color-background: #101010;
+  --color-foreground: #ffffff;
+  --color-content: #1E1E1E;
+  --color-content-hover: #333333;
+  --color-content-page: #121212;
+  --color-menu: #101010;
+  --color-menu-hover: #333333;
+  
+  --color-text: #ffffff;
+  --color-text-secondary: #a0a0a0;
+  
+  --color-border-light: #333333;
+  --color-border: #424242;
+  --color-border-strong: #616161;
+  
+  --color-error: #e74c3c;
+  --color-success: #2ecc71;
+  --color-warning: #f1c40f;
+}
+
+/* Nature Theme */
+[data-theme="nature"] {
+  --color-primary: #4CAF50;
+  --color-primary-button: #A08500;
+  --color-primary-button-text: #ffffff;
+  --color-secondary: #81C784;
+  --color-secondary-button: #F1F8E9;
+  
+  --color-background: #FBFDF8;
+  --color-foreground: #1B5E20;
+  --color-content: #F1F8E9;
+  --color-content-hover: #E8F5E9;
+  --color-content-page: #ffffff;
+  --color-menu: #E8F5E9;
+  --color-menu-hover: #C8E6C9;
+  
+  --color-text: #1B5E20;
+  --color-text-secondary: #388E3C;
+  
+  --color-border-light: #E8F5E9;
+  --color-border: #C8E6C9;
+  --color-border-strong: #A5D6A7;
+  
+  --color-error: #E57373;
+  --color-success: #66BB6A;
+  --color-warning: #FFB74D;
+}
+
+[data-theme="nature"].dark,
+[data-theme="nature"] .dark {
+  --color-primary: #4CAF50;
+  --color-primary-button: #FF9500;
+  --color-primary-button-text: #000000;
+  --color-secondary: #81C784;
+  --color-secondary-button: #1E1E1E;
+  
+  --color-background: #121212;
+  --color-foreground: #FFFFFF;
+  --color-content: #1E1E1E;
+  --color-content-hover: #2E7D32;
+  --color-content-page: #121212;
+  --color-menu: #252525;
+  --color-menu-hover: #2E7D32;
+  
+  --color-text: #FFFFFF;
+  --color-text-secondary: #A5D6A7;
+  
+  --color-border-light: #1B5E20;
+  --color-border: #2E7D32;
+  --color-border-strong: #388E3C;
+  
+  --color-error: #CF6679;
+  --color-success: #81C784;
+  --color-warning: #FFD54F;
+}
+
+/* Stone Theme */
+[data-theme="stone"] {
+  --color-primary: #607D8B;
+  --color-primary-button: #FF9500;
+  --color-primary-button-text: #000000;
+  --color-secondary: #90A4AE;
+  --color-secondary-button: #ECEFF1;
+  
+  --color-background: #F5F7F9;
+  --color-foreground: #263238;
+  --color-content: #ECEFF1;
+  --color-content-hover: #E0E6EA;
+  --color-content-page: #ffffff;
+  --color-menu: #E0E6EA;
+  --color-menu-hover: #CFD8DC;
+  
+  --color-text: #263238;
+  --color-text-secondary: #546E7A;
+  
+  --color-border-light: #ECEFF1;
+  --color-border: #CFD8DC;
+  --color-border-strong: #B0BEC5;
+  
+  --color-error: #EF5350;
+  --color-success: #66BB6A;
+  --color-warning: #FFA726;
+}
+
+[data-theme="stone"].dark,
+[data-theme="stone"] .dark {
+  --color-primary: #78909C;
+  --color-primary-button: #FF9500;
+  --color-primary-button-text: #000000;
+  --color-secondary: #90A4AE;
+  --color-secondary-button: #1E1E1E;
+  
+  --color-background: #121212;
+  --color-foreground: #FFFFFF;
+  --color-content: #1E1E1E;
+  --color-content-hover: #37474F;
+  --color-content-page: #121212;
+  --color-menu: #252525;
+  --color-menu-hover: #37474F;
+  
+  --color-text: #FFFFFF;
+  --color-text-secondary: #B0BEC5;
+  
+  --color-border-light: #37474F;
+  --color-border: #455A64;
+  --color-border-strong: #546E7A;
+  
+  --color-error: #CF6679;
+  --color-success: #81C784;
+  --color-warning: #FFD54F;
+}
+
+/* Ocean Theme */
+[data-theme="ocean"] {
+  --color-primary: #039BE5;
+  --color-primary-button: #FF9500;
+  --color-primary-button-text: #000000;
+  --color-secondary: #4FC3F7;
+  --color-secondary-button: #E1F5FE;
+  
+  --color-background: #F5FCFF;
+  --color-foreground: #01579B;
+  --color-content: #E1F5FE;
+  --color-content-hover: #B3E5FC;
+  --color-content-page: #ffffff;
+  --color-menu: #E1F5FE;
+  --color-menu-hover: #B3E5FC;
+  
+  --color-text: #01579B;
+  --color-text-secondary: #0277BD;
+  
+  --color-border-light: #E1F5FE;
+  --color-border: #B3E5FC;
+  --color-border-strong: #81D4FA;
+  
+  --color-error: #EF5350;
+  --color-success: #66BB6A;
+  --color-warning: #FFA726;
+}
+
+[data-theme="ocean"].dark,
+[data-theme="ocean"] .dark {
+  --color-primary: #039BE5;
+  --color-primary-button: #FF9500;
+  --color-primary-button-text: #000000;
+  --color-secondary: #4FC3F7;
+  --color-secondary-button: #1E1E1E;
+  
+  --color-background: #121212;
+  --color-foreground: #FFFFFF;
+  --color-content: #1E1E1E;
+  --color-content-hover: #0277BD;
+  --color-content-page: #121212;
+  --color-menu: #252525;
+  --color-menu-hover: #0277BD;
+  
+  --color-text: #FFFFFF;
+  --color-text-secondary: #81D4FA;
+  
+  --color-border-light: #01579B;
+  --color-border: #0277BD;
+  --color-border-strong: #0288D1;
+  
+  --color-error: #CF6679;
+  --color-success: #81C784;
+  --color-warning: #FFD54F;
+}
+
+/* Dark mode via media query */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-primary: #f8d62b;
+    --color-primary-button: #7C6B16;
+    --color-primary-button-text: #ffffff;
+    --color-secondary: #D4B200;
+    --color-secondary-button: #1E1E1E;
+    
+    --color-background: #101010;
+    --color-foreground: #ffffff;
+    --color-content: #1E1E1E;
+    --color-content-hover: #333333;
+    --color-content-page: #121212;
+    --color-menu: #101010;
+    --color-menu-hover: #333333;
+    
+    --color-text: #ffffff;
+    --color-text-secondary: #a0a0a0;
+    
+    --color-border-light: #333333;
+    --color-border: #424242;
+    --color-border-strong: #616161;
+    
+    --color-error: #e74c3c;
+    --color-success: #2ecc71;
+    --color-warning: #f1c40f;
+  }
+}

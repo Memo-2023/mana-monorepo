@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createAuthClient } from '$lib/supabaseClient';
-	import Modal from './Modal.svelte';
+	import { Modal } from '@manacore/shared-ui';
 
 	interface Prompt {
 		id: string;
@@ -107,7 +107,7 @@
 			}
 
 			// Sort prompts by sort_order (ascending) then created_at (descending)
-			const sortedPrompts = [...promptsData].sort((a, b) => {
+			const sortedPrompts = [...(promptsData as Prompt[])].sort((a, b) => {
 				// First sort by sort_order (ascending)
 				if (a.sort_order !== undefined && b.sort_order !== undefined) {
 					if (a.sort_order !== b.sort_order) {

@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import type { Session } from '@supabase/supabase-js';
 
-	let { data } = $props();
+	interface PageData {
+		session?: Session | null;
+	}
+
+	let { data }: { data: PageData } = $props();
 
 	onMount(() => {
 		if (data.session) {

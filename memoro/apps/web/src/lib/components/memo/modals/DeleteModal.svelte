@@ -1,6 +1,5 @@
 <script lang="ts">
-	import Modal from '$lib/components/Modal.svelte';
-	import Text from '$lib/components/atoms/Text.svelte';
+	import { Modal, Text } from '@manacore/shared-ui';
 
 	interface Props {
 		visible: boolean;

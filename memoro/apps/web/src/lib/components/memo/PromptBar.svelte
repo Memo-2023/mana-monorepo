@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import Text from '$lib/components/atoms/Text.svelte';
+	import { Text } from '@manacore/shared-ui';
 
 	interface Props {
 		visible: boolean;
@@ -175,6 +175,8 @@
 
 <style>
 	.kbd {
-		@apply rounded border border-theme bg-menu-hover px-1.5 py-0.5 font-mono;
+		@apply rounded border px-1.5 py-0.5 font-mono text-xs;
+		border-color: var(--color-border);
+		background-color: var(--color-menu-bg-hover);
 	}
 </style>

@@ -1,6 +1,6 @@
 import type { Deck, CreateDeckInput, UpdateDeckInput } from '$lib/types/deck';
 import { getAuthenticatedSupabase } from '$lib/utils/supabase';
-import { authService } from '$lib/services/authService';
+import { authService } from '$lib/auth';
 
 // Svelte 5 runes-based deck store
 let decks = $state<Deck[]>([]);
@@ -30,12 +30,12 @@ export const deckStore = {
 		error = null;
 
 		try {
-			const appToken = authService.getAppToken();
+			const appToken = await authService.getAppToken();
 			if (!appToken) {
 				throw new Error('Not authenticated');
 			}
 
-			const user = authService.getCurrentUser();
+			const user = await authService.getUserFromToken();
 			if (!user) {
 				throw new Error('No user found');
 			}
@@ -71,7 +71,7 @@ export const deckStore = {
 		error = null;
 
 		try {
-			const appToken = authService.getAppToken();
+			const appToken = await authService.getAppToken();
 			if (!appToken) throw new Error('Not authenticated');
 
 			const supabase = await getAuthenticatedSupabase(appToken);
@@ -104,10 +104,10 @@ export const deckStore = {
 		error = null;
 
 		try {
-			const appToken = authService.getAppToken();
+			const appToken = await authService.getAppToken();
 			if (!appToken) throw new Error('Not authenticated');
 
-			const user = authService.getCurrentUser();
+			const user = await authService.getUserFromToken();
 			if (!user) throw new Error('No user found');
 
 			const supabase = await getAuthenticatedSupabase(appToken);
@@ -150,7 +150,7 @@ export const deckStore = {
 		error = null;
 
 		try {
-			const appToken = authService.getAppToken();
+			const appToken = await authService.getAppToken();
 			if (!appToken) throw new Error('Not authenticated');
 
 			const supabase = await getAuthenticatedSupabase(appToken);
@@ -187,7 +187,7 @@ export const deckStore = {
 		error = null;
 
 		try {
-			const appToken = authService.getAppToken();
+			const appToken = await authService.getAppToken();
 			if (!appToken) throw new Error('Not authenticated');
 
 			const supabase = await getAuthenticatedSupabase(appToken);

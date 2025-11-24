@@ -4,7 +4,19 @@
  * This package contains common TypeScript types used across all projects.
  */
 
-// Common user types
+// Theme types
+export * from './theme';
+
+// Auth types
+export * from './auth';
+
+// UI types
+export * from './ui';
+
+// Common utility types
+export * from './common';
+
+// API types
 export interface User {
   id: string;
   email: string;
@@ -12,7 +24,6 @@ export interface User {
   updated_at: string;
 }
 
-// Common API response types
 export interface ApiResponse<T> {
   data: T | null;
   error: ApiError | null;

@@ -36,6 +36,18 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "@manacore/shared-auth": "workspace:*",
+    "@manacore/shared-auth-ui": "workspace:*",
+    "@manacore/shared-config": "workspace:*",
+    "@manacore/shared-i18n": "workspace:*",
+    "@manacore/shared-icons": "workspace:*",
+    "@manacore/shared-supabase": "workspace:*",
+    "@manacore/shared-subscription-types": "workspace:*",
+    "@manacore/shared-subscription-ui": "workspace:*",
+    "@manacore/shared-tailwind": "workspace:*",
+    "@manacore/shared-types": "workspace:*",
+    "@manacore/shared-ui": "workspace:*",
+    "@manacore/shared-utils": "workspace:*",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.81.1"
   },

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GlassCard from './GlassCard.svelte';
 	import StatRow from './StatRow.svelte';
-	import Text from '$lib/components/atoms/Text.svelte';
+	import { Text } from '@manacore/shared-ui';
 
 	interface Props {
 		averageAudioDuration: number;

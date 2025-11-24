@@ -120,7 +120,7 @@
 			});
 
 			// Optimistic UI update
-			tags.updateTag(updatedTag);
+			tags.updateTag(tagId, updatedTag);
 		} catch (error) {
 			console.error('Failed to update tag:', error);
 			actionError = error instanceof Error ? error.message : 'Fehler beim Speichern des Tags';

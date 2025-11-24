@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { Tag } from '$lib/types/memo.types';
-	import Modal from '$lib/components/Modal.svelte';
+	import { Modal, Text } from '@manacore/shared-ui';
 	import Icon from '$lib/components/Icon.svelte';
-	import Text from '$lib/components/atoms/Text.svelte';
 
 	interface Props {
 		tag: Tag;
@@ -65,9 +64,9 @@
 	{#snippet children()}
 		<!-- Tag Name -->
 		<div class="mb-6">
-			<Text variant="small" weight="medium" class="mb-2 block" for="tag-name">
+			<label for="tag-name" class="mb-2 block text-sm font-medium text-theme">
 				Tag-Name
-			</Text>
+			</label>
 			<input
 				id="tag-name"
 				type="text"

@@ -142,7 +142,7 @@
 			// Create a lookup for prompts by ID
 			const promptsById: Record<string, any> = {};
 			if (allPrompts) {
-				for (const prompt of allPrompts) {
+				for (const prompt of allPrompts as Prompt[]) {
 					promptsById[prompt.id] = prompt;
 				}
 			}
@@ -151,10 +151,17 @@
 			const blueprintsWithPrompts: Blueprint[] = [];
 			for (const blueprint of blueprintsData || []) {
 				const promptIds = promptLinksByBlueprintId[blueprint.id] || [];
-				const promptsForBlueprint = promptIds.map((id) => promptsById[id]).filter(Boolean);
+				const promptsForBlueprint = promptIds.map((id) => promptsById[id]).filter(Boolean) as Prompt[];
 
 				blueprintsWithPrompts.push({
-					...blueprint,
+					id: blueprint.id,
+					name: blueprint.name as { de?: string; en?: string },
+					description: blueprint.description as { de?: string; en?: string } | undefined,
+					category: blueprint.category as unknown as Category | undefined,
+					is_public: blueprint.is_public,
+					created_at: blueprint.created_at,
+					updated_at: blueprint.updated_at,
+					user_id: blueprint.user_id || '',
 					prompts: promptsForBlueprint
 				});
 			}

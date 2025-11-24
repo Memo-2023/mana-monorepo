@@ -1,11 +1,16 @@
 <script lang="ts">
-	import BillingToggle, { type BillingCycle } from '$lib/components/BillingToggle.svelte';
-	import SubscriptionCard, {
-		type SubscriptionPlan
-	} from '$lib/components/SubscriptionCard.svelte';
-	import PackageCard, { type Package } from '$lib/components/PackageCard.svelte';
-	import UsageCard, { type UsageData } from '$lib/components/UsageCard.svelte';
-	import CostCard, { type CostItem } from '$lib/components/CostCard.svelte';
+	import {
+		BillingToggle,
+		SubscriptionCard,
+		PackageCard,
+		UsageCard,
+		CostCard,
+		type BillingCycle,
+		type SubscriptionPlan,
+		type ManaPackage,
+		type UsageData,
+		type CostItem
+	} from '@manacore/shared-subscription-ui';
 
 	import subscriptionData from '$lib/data/subscriptionData.json';
 	import appCostsData from '$lib/data/appCosts.json';
@@ -16,7 +21,7 @@
 
 	// Data from JSON files
 	const subscriptionOptions = subscriptionData.subscriptions as SubscriptionPlan[];
-	const manaPackages = subscriptionData.packages as Package[];
+	const manaPackages = subscriptionData.packages as ManaPackage[];
 	const appCosts = appCostsData.costs as CostItem[];
 	const usage = usageData.usage as UsageData;
 

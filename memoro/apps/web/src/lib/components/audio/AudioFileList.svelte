@@ -2,7 +2,7 @@
 	import type { AudioFileInfo } from '$lib/services/audioStorageService';
 	import AudioFileCard from './AudioFileCard.svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import Text from '$lib/components/atoms/Text.svelte';
+	import { Text } from '@manacore/shared-ui';
 
 	interface Props {
 		audioFiles: AudioFileInfo[];

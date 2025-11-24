@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Modal from '$lib/components/Modal.svelte';
+	import { Modal } from '@manacore/shared-ui';
 
 	interface Speaker {
 		id: string;

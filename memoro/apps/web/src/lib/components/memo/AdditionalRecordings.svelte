@@ -1,18 +1,10 @@
 <script lang="ts">
 	import AudioPlayer from '$lib/components/AudioPlayer.svelte';
-	import Text from '$lib/components/atoms/Text.svelte';
-
-	interface Recording {
-		id: string;
-		url: string;
-		duration?: number;
-		created_at: string;
-		label?: string;
-		size?: number;
-	}
+	import { Text } from '@manacore/shared-ui';
+	import type { AdditionalRecording } from '$lib/types/memo.types';
 
 	interface Props {
-		recordings: Recording[];
+		recordings: AdditionalRecording[];
 		onRecordingAdd?: () => void;
 		onRecordingDelete?: (recordingId: string) => void;
 		onRecordingRename?: (recordingId: string, newLabel: string) => void;
@@ -25,12 +17,13 @@
 	let editingId = $state<string | null>(null);
 	let editLabel = $state('');
 
-	function formatDuration(seconds?: number): string {
-		if (!seconds) return '--:--';
+	function formatDuration(millis?: number): string {
+		if (!millis) return '--:--';
 
-		const hours = Math.floor(seconds / 3600);
-		const minutes = Math.floor((seconds % 3600) / 60);
-		const secs = Math.floor(seconds % 60);
+		const totalSeconds = Math.floor(millis / 1000);
+		const hours = Math.floor(totalSeconds / 3600);
+		const minutes = Math.floor((totalSeconds % 3600) / 60);
+		const secs = Math.floor(totalSeconds % 60);
 
 		if (hours > 0) {
 			return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -60,9 +53,9 @@
 		});
 	}
 
-	function startEditing(recording: Recording) {
+	function startEditing(recording: AdditionalRecording) {
 		editingId = recording.id;
-		editLabel = recording.label || '';
+		editLabel = '';
 	}
 
 	function cancelEditing() {
@@ -140,7 +133,7 @@
 									<!-- View Mode -->
 									<div class="flex items-center gap-2">
 										<Text variant="body" weight="semibold">
-											{recording.label || `Recording ${recordings.indexOf(recording) + 1}`}
+											Recording {recordings.indexOf(recording) + 1}
 										</Text>
 										{#if canEdit && onRecordingRename}
 											<button
@@ -172,7 +165,7 @@
 												d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
 											/>
 										</svg>
-										{formatDuration(recording.duration)}
+										{formatDuration(recording.duration_millis)}
 									</Text>
 									<Text variant="muted" class="flex items-center gap-1">
 										<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,7 +176,7 @@
 												d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
 											/>
 										</svg>
-										{formatSize(recording.size)}
+										--
 									</Text>
 									<Text variant="muted" class="flex items-center gap-1">
 										<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,7 +216,7 @@
 						</div>
 
 						<!-- Audio Player -->
-						<AudioPlayer src={recording.url} />
+						<AudioPlayer src={recording.audio_url} />
 					</div>
 				{/each}
 			</div>

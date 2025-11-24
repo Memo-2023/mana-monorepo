@@ -1,0 +1,247 @@
+# Shared Packages Roadmap
+
+This document outlines the plan to unify common code across all web apps in the monorepo.
+
+## Current Shared Packages
+
+- [x] `@manacore/shared-icons` - Unified Phosphor Icons for all web apps
+- [x] `@manacore/shared-ui` - Unified UI Components (Text, Button, Badge, Toggle, Input, Modal)
+- [x] `@manacore/shared-auth` - Unified Auth Logic (Supabase client, token management)
+- [x] `@manacore/shared-auth-ui` - Unified Auth UI (LoginPage, RegisterPage, OAuth buttons)
+- [x] `@manacore/shared-tailwind` - Unified Tailwind Config (4 themes, colors, preset)
+- [x] `@manacore/shared-utils` - Unified Utilities (formatting, validation, async)
+- [x] `@manacore/shared-types` - Unified TypeScript Types
+- [x] `@manacore/shared-supabase` - Unified Supabase Client Factory
+- [x] `@manacore/shared-i18n` - Unified i18n (languages, locale detection, translations)
+- [x] `@manacore/shared-config` - Unified Config (env validation)
+
+---
+
+## Planned Shared Packages
+
+### 1. Shared UI Components (`@manacore/shared-ui`)
+
+**Status**: Done
+**Priority**: High
+**Estimated LOC Savings**: 500-800 per app
+
+**Components to unify**:
+- `Button.svelte` - Primary, secondary, ghost, danger variants
+- `Input.svelte` - Text input with label, error states
+- `Text.svelte` - Typography component with variants
+- `Modal.svelte` - Overlay modal with header, body, footer slots
+- `Spinner.svelte` - Loading indicator
+- `Toast.svelte` - Notification toasts
+- `Badge.svelte` - Status badges
+- `Card.svelte` - Content container
+- `Dropdown.svelte` - Select/dropdown menus
+
+**Apps using these**:
+- ManaCore Web
+- Memoro Web
+- Maerchenzauber Web
+- ManaDeck Web
+
+---
+
+### 2. Shared Auth (`@manacore/shared-auth`)
+
+**Status**: Done
+**Priority**: High
+**Estimated LOC Savings**: 800-1200 per app
+
+**Modules to unify**:
+- `tokenManager.ts` - JWT token storage, refresh, validation
+- `authService.ts` - Login, logout, register, password reset
+- `supabaseClient.ts` - Authenticated Supabase client factory
+- `authStore.ts` - Svelte store for auth state
+- `authGuard.ts` - Route protection utilities
+
+**Considerations**:
+- Each app may have different Supabase projects
+- Token storage strategy (localStorage vs cookies)
+- OAuth providers per app
+
+---
+
+### 3. Shared Tailwind Config (`@manacore/shared-tailwind`)
+
+**Status**: Done
+**Priority**: High
+**Estimated Benefit**: Consistent branding, easier theme updates
+
+**Config unified**:
+- Color palette (primary, secondary, accent colors)
+- Theme variants (Lume, Nature, Stone, Ocean) with light/dark modes
+- Typography scale (font sizes, line heights)
+- Border radius tokens
+- Shadow tokens
+- CSS variable-based theming system
+
+**Structure**:
+```
+packages/shared-tailwind/
+├── package.json
+├── src/
+│   ├── index.js           # Main exports
+│   ├── preset.js          # Tailwind preset with all tokens
+│   ├── colors.js          # Color definitions (4 themes)
+│   ├── theme-variables.css # CSS variables for themes
+│   └── components.css     # Component utilities
+```
+
+**Apps using this**:
+- Memoro Web (full migration with theme.css + components.css)
+- ManaCore Web (preset only, keeps local colors)
+- ManaDeck Web (colors import, HSL-based system)
+- Maerchenzauber Web (dependency added)
+
+---
+
+### 4. Shared Utilities (`@manacore/shared-utils`)
+
+**Status**: Done
+**Priority**: Medium
+**Estimated LOC Savings**: 200-400 per app
+
+**Utilities included**:
+- `date.ts` - formatDate, formatRelativeTime, toISOString
+- `format.ts` - formatDuration, formatFileSize, formatNumber, formatCurrency, formatPercent
+- `validation.ts` - isValidEmail, isValidUrl, isValidPhone, validatePassword, isValidUuid
+- `string.ts` - truncate, capitalize, generateId, slugify
+- `async.ts` - sleep, retry, debounce
+
+---
+
+### 5. Shared Types (`@manacore/shared-types`)
+
+**Status**: Planned
+**Priority**: Medium
+**Estimated Benefit**: Type safety across packages
+
+**Types to unify**:
+- `User` - Common user type
+- `ApiResponse<T>` - Standard API response wrapper
+- `PaginatedResponse<T>` - Pagination types
+- `Theme` - Theme configuration types
+- `Locale` - i18n locale types
+
+**Note**: App-specific database types (Supabase generated) should remain in each app.
+
+---
+
+### 6. Shared i18n (`@manacore/shared-i18n`)
+
+**Status**: Done
+**Priority**: Medium
+**Estimated LOC Savings**: 100-300 per app
+
+**Modules to unify**:
+- `i18n.ts` - svelte-i18n setup and initialization
+- `detectLocale.ts` - Browser language detection
+- Common translations:
+  - Error messages
+  - UI labels (Save, Cancel, Delete, etc.)
+  - Date/time formats
+  - Validation messages
+
+**Structure**:
+```
+packages/shared-i18n/
+├── package.json
+├── src/
+│   ├── index.ts
+│   ├── setup.ts
+│   ├── detectLocale.ts
+│   └── translations/
+│       ├── common/
+│       │   ├── en.json
+│       │   └── de.json
+│       └── errors/
+│           ├── en.json
+│           └── de.json
+```
+
+---
+
+### 7. Shared Config (`@manacore/shared-config`)
+
+**Status**: Planned
+**Priority**: Low
+**Estimated Benefit**: Consistent env handling
+
+**Config to unify**:
+- Environment variable validation (Zod schemas)
+- API endpoint construction
+- Feature flag utilities
+- App metadata (version, name, etc.)
+
+---
+
+## Implementation Order
+
+1. **Phase 1** (Completed)
+   - [x] `@manacore/shared-icons`
+   - [x] `@manacore/shared-ui`
+
+2. **Phase 2** (Completed)
+   - [x] `@manacore/shared-auth`
+   - [x] `@manacore/shared-auth-ui`
+   - [x] `@manacore/shared-tailwind`
+
+3. **Phase 3** (Completed)
+   - [x] `@manacore/shared-utils`
+   - [x] `@manacore/shared-types`
+   - [x] `@manacore/shared-supabase`
+
+4. **Phase 4** (Completed)
+   - [x] `@manacore/shared-i18n`
+   - [x] `@manacore/shared-config`
+
+---
+
+## Guidelines for Shared Packages
+
+### Package Structure
+```
+packages/shared-{name}/
+├── package.json
+├── tsconfig.json
+├── src/
+│   ├── index.ts        # Public exports
+│   └── ...
+└── README.md
+```
+
+### Package.json Template
+```json
+{
+  "name": "@manacore/shared-{name}",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  }
+}
+```
+
+### Best Practices
+1. **Keep it minimal** - Only share truly common code
+2. **Document props** - Use TypeScript interfaces with JSDoc
+3. **Version carefully** - Coordinate updates across apps
+4. **Test thoroughly** - Changes affect all apps
+5. **Avoid breaking changes** - Use deprecation warnings
+
+---
+
+## Notes
+
+- Created: 2025-11-24
+- Last Updated: 2025-11-24
+- Author: Claude Code

@@ -56,7 +56,7 @@
 
 				while (hasMore) {
 					const { data, error } = await supabase
-						.from(tableName)
+						.from(tableName as any)
 						.select(selectFields)
 						.range(from, from + batchSize - 1);
 

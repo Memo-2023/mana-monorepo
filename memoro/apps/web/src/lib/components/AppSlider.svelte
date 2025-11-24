@@ -123,6 +123,7 @@
 	$effect(() => {
 		if (selectedApp !== null && modalScrollContainer) {
 			setTimeout(() => {
+				if (selectedApp === null) return;
 				const cardWidth = 360 + 24; // card width + gap
 				const scrollPosition = selectedApp * cardWidth;
 				modalScrollContainer?.scrollTo({

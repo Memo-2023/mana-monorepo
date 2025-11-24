@@ -10,6 +10,8 @@
 		class?: string;
 		autocomplete?: 'email' | 'current-password' | 'new-password' | 'username' | 'off' | string;
 		oninput?: (event: Event) => void;
+		minlength?: number;
+		maxlength?: number;
 	}
 
 	let {
@@ -22,7 +24,9 @@
 		disabled = false,
 		class: className = '',
 		autocomplete,
-		oninput
+		oninput,
+		minlength,
+		maxlength
 	}: Props = $props();
 </script>
 
@@ -33,6 +37,8 @@
 	{placeholder}
 	{required}
 	{disabled}
+	{minlength}
+	{maxlength}
 	autocomplete={autocomplete as any}
 	bind:value
 	oninput={oninput}

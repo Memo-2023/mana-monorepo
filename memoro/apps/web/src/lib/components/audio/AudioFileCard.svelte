@@ -4,7 +4,7 @@
 	import { formatDistanceToNow } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import Icon from '$lib/components/Icon.svelte';
-	import Text from '$lib/components/atoms/Text.svelte';
+	import { Text } from '@manacore/shared-ui';
 
 	interface Props {
 		audioFile: AudioFileInfo;

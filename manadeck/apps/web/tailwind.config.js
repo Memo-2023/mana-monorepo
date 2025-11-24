@@ -1,10 +1,19 @@
+import { themeColors } from '@manacore/shared-tailwind/colors';
+
 /** @type {import('tailwindcss').Config} */
 export default {
-	content: ['./src/**/*.{html,js,svelte,ts}'],
+	content: [
+		'./src/**/*.{html,js,svelte,ts}',
+		'../../packages/shared-ui/src/**/*.{html,js,svelte,ts}',
+		'../../packages/shared-auth-ui/src/**/*.{html,js,svelte,ts}'
+	],
 	darkMode: 'class',
 	theme: {
 		extend: {
 			colors: {
+				// Shared theme colors
+				...themeColors,
+				// ManaDeck specific HSL-based colors
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				surface: 'hsl(var(--surface))',

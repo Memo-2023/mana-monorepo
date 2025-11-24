@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Modal from '$lib/components/Modal.svelte';
+	import { Modal } from '@manacore/shared-ui';
 	import type { ShortcutGroup } from '$lib/utils/keyboardShortcuts';
 	import { formatShortcut } from '$lib/utils/keyboardShortcuts';
 
@@ -74,6 +74,9 @@
 
 <style>
 	.kbd {
-		@apply inline-flex items-center gap-1 rounded border border-theme bg-menu-hover px-2 py-1 font-mono text-xs font-semibold text-theme;
+		@apply inline-flex items-center gap-1 rounded border px-2 py-1 font-mono text-xs font-semibold;
+		border-color: var(--color-border);
+		background-color: var(--color-menu-bg-hover);
+		color: var(--color-text);
 	}
 </style>

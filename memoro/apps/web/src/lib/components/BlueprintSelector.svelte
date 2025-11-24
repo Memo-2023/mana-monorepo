@@ -73,7 +73,7 @@
 				return;
 			}
 
-			blueprints = data || [];
+			blueprints = (data || []) as Blueprint[];
 		} catch (err) {
 			console.error('Unexpected error:', err);
 			error = $t('errors.unexpected');

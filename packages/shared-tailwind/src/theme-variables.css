@@ -1,0 +1,183 @@
+/* Shared Theme CSS Variables for Manacore Apps
+ * Import this in your app.css: @import '@manacore/shared-tailwind/theme.css';
+ *
+ * Features:
+ * - 4 Theme Variants: Lume (default), Nature, Stone, Ocean
+ * - Light and Dark mode for each theme
+ * - Uses data-theme attribute for variant switching
+ * - Uses .dark class for dark mode
+ */
+
+:root {
+  --font-body: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-mono: 'Fira Mono', monospace;
+}
+
+/* Default Theme: Lume Light */
+:root {
+  --color-primary: #f8d62b;
+  --color-primary-button: #f8d62b;
+  --color-primary-button-text: #000000;
+  --color-secondary: #d4b200;
+  --color-secondary-button: #ffe9a3;
+  --color-content-bg: #ffffff;
+  --color-content-bg-hover: #f5f5f5;
+  --color-content-page-bg: #ffffff;
+  --color-menu-bg: #dddddd;
+  --color-menu-bg-hover: #cccccc;
+  --color-panel-bg: #e8e8e8;
+  --color-page-bg: #dddddd;
+  --color-text: #2c2c2c;
+  --color-border-light: #f2f2f2;
+  --color-border: #999999;
+  --color-border-strong: #cccccc;
+  --color-error: #e74c3c;
+}
+
+/* Lume Dark */
+:root.dark {
+  --color-primary: #f8d62b;
+  --color-primary-button: #7c6b16;
+  --color-primary-button-text: #ffffff;
+  --color-secondary: #d4b200;
+  --color-secondary-button: #1e1e1e;
+  --color-content-bg: #1e1e1e;
+  --color-content-bg-hover: #333333;
+  --color-content-page-bg: #121212;
+  --color-menu-bg: #101010;
+  --color-menu-bg-hover: #333333;
+  --color-panel-bg: #1a1a1a;
+  --color-page-bg: #101010;
+  --color-text: #ffffff;
+  --color-border-light: #333333;
+  --color-border: #424242;
+  --color-border-strong: #616161;
+  --color-error: #e74c3c;
+}
+
+/* Nature Light */
+:root[data-theme='nature'] {
+  --color-primary: #4caf50;
+  --color-primary-button: #a08500;
+  --color-primary-button-text: #ffffff;
+  --color-secondary: #81c784;
+  --color-secondary-button: #f1f8e9;
+  --color-content-bg: #f1f8e9;
+  --color-content-bg-hover: #e8f5e9;
+  --color-content-page-bg: #ffffff;
+  --color-menu-bg: #e8f5e9;
+  --color-menu-bg-hover: #c8e6c9;
+  --color-panel-bg: #eff8f0;
+  --color-page-bg: #fbfdf8;
+  --color-text: #1b5e20;
+  --color-border-light: #e8f5e9;
+  --color-border: #c8e6c9;
+  --color-border-strong: #a5d6a7;
+  --color-error: #e57373;
+}
+
+/* Nature Dark */
+:root[data-theme='nature'].dark {
+  --color-primary: #4caf50;
+  --color-primary-button: #ff9500;
+  --color-primary-button-text: #000000;
+  --color-secondary: #81c784;
+  --color-secondary-button: #1e1e1e;
+  --color-content-bg: #1e1e1e;
+  --color-content-bg-hover: #2e7d32;
+  --color-content-page-bg: #121212;
+  --color-menu-bg: #252525;
+  --color-menu-bg-hover: #2e7d32;
+  --color-panel-bg: #2a2a2a;
+  --color-page-bg: #121212;
+  --color-text: #ffffff;
+  --color-border-light: #1b5e20;
+  --color-border: #2e7d32;
+  --color-border-strong: #388e3c;
+  --color-error: #cf6679;
+}
+
+/* Stone Light */
+:root[data-theme='stone'] {
+  --color-primary: #607d8b;
+  --color-primary-button: #ff9500;
+  --color-primary-button-text: #000000;
+  --color-secondary: #90a4ae;
+  --color-secondary-button: #eceff1;
+  --color-content-bg: #eceff1;
+  --color-content-bg-hover: #e0e6ea;
+  --color-content-page-bg: #ffffff;
+  --color-menu-bg: #e0e6ea;
+  --color-menu-bg-hover: #cfd8dc;
+  --color-panel-bg: #e8edf0;
+  --color-page-bg: #f5f7f9;
+  --color-text: #263238;
+  --color-border-light: #eceff1;
+  --color-border: #cfd8dc;
+  --color-border-strong: #b0bec5;
+  --color-error: #ef5350;
+}
+
+/* Stone Dark */
+:root[data-theme='stone'].dark {
+  --color-primary: #78909c;
+  --color-primary-button: #ff9500;
+  --color-primary-button-text: #000000;
+  --color-secondary: #90a4ae;
+  --color-secondary-button: #1e1e1e;
+  --color-content-bg: #1e1e1e;
+  --color-content-bg-hover: #37474f;
+  --color-content-page-bg: #121212;
+  --color-menu-bg: #252525;
+  --color-menu-bg-hover: #37474f;
+  --color-panel-bg: #2a2a2a;
+  --color-page-bg: #121212;
+  --color-text: #ffffff;
+  --color-border-light: #37474f;
+  --color-border: #455a64;
+  --color-border-strong: #546e7a;
+  --color-error: #cf6679;
+}
+
+/* Ocean Light */
+:root[data-theme='ocean'] {
+  --color-primary: #039be5;
+  --color-primary-button: #ff9500;
+  --color-primary-button-text: #000000;
+  --color-secondary: #4fc3f7;
+  --color-secondary-button: #e1f5fe;
+  --color-content-bg: #e1f5fe;
+  --color-content-bg-hover: #b3e5fc;
+  --color-content-page-bg: #ffffff;
+  --color-menu-bg: #e1f5fe;
+  --color-menu-bg-hover: #b3e5fc;
+  --color-panel-bg: #ecf8fe;
+  --color-page-bg: #f5fcff;
+  --color-text: #01579b;
+  --color-border-light: #e1f5fe;
+  --color-border: #b3e5fc;
+  --color-border-strong: #81d4fa;
+  --color-error: #ef5350;
+}
+
+/* Ocean Dark */
+:root[data-theme='ocean'].dark {
+  --color-primary: #039be5;
+  --color-primary-button: #ff9500;
+  --color-primary-button-text: #000000;
+  --color-secondary: #4fc3f7;
+  --color-secondary-button: #1e1e1e;
+  --color-content-bg: #1e1e1e;
+  --color-content-bg-hover: #0277bd;
+  --color-content-page-bg: #121212;
+  --color-menu-bg: #252525;
+  --color-menu-bg-hover: #0277bd;
+  --color-panel-bg: #2a2a2a;
+  --color-page-bg: #121212;
+  --color-text: #ffffff;
+  --color-border-light: #01579b;
+  --color-border: #0277bd;
+  --color-border-strong: #0288d1;
+  --color-error: #cf6679;
+}

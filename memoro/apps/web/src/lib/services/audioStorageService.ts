@@ -114,7 +114,8 @@ export class AudioStorageService {
 
 			if (memos) {
 				totalDurationSeconds = memos.reduce((sum, memo) => {
-					const duration = memo.source?.duration_seconds || memo.source?.duration || 0;
+					const source = memo.source as { duration_seconds?: number; duration?: number } | null;
+					const duration = source?.duration_seconds || source?.duration || 0;
 					return sum + duration;
 				}, 0);
 			}
@@ -167,14 +168,22 @@ export class AudioStorageService {
 		try {
 			const supabase = await createAuthClient();
 
-			// Try to find memo by audio_url
-			const { data: memo, error } = await supabase
+			// Try to find memo by source containing the audio file name
+			const { data: memos, error } = await supabase
 				.from('memos')
-				.select('id, title, audio_url')
-				.ilike('audio_url', `%${audioFileName}%`)
-				.single();
+				.select('id, title, source')
+				.not('source', 'is', null);
 
-			if (error || !memo) return null;
+			if (error || !memos) return null;
+
+			// Find memo where source contains the audio file name
+			const memo = memos.find((m) => {
+				const source = m.source as { audioUrl?: string; audio_url?: string } | null;
+				const audioUrl = source?.audioUrl || source?.audio_url || '';
+				return audioUrl.includes(audioFileName);
+			});
+
+			if (!memo) return null;
 
 			return {
 				id: memo.id,

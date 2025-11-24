@@ -6,6 +6,7 @@
 import { env } from '$lib/config/env';
 import { tokenManager } from './tokenManager';
 import { createAuthClient } from '$lib/supabaseClient';
+import type { Memory } from '$lib/types/memo.types';
 
 export interface QuestionResult {
 	success: boolean;
@@ -14,12 +15,7 @@ export interface QuestionResult {
 	creditsConsumed?: number;
 }
 
-export interface Memory {
-	id: string;
-	title: string;
-	content: string;
-	metadata?: Record<string, unknown>;
-}
+export type { Memory };
 
 class QuestionService {
 	/**
@@ -131,7 +127,7 @@ class QuestionService {
 
 			const { data, error } = await supabase
 				.from('memories')
-				.select('id, title, content, metadata')
+				.select('id, memo_id, title, content, metadata, style, media, created_at, updated_at')
 				.eq('memo_id', memoId)
 				.order('sort_order', { ascending: true })
 				.order('created_at', { ascending: false });
@@ -141,7 +137,18 @@ class QuestionService {
 				return [];
 			}
 
-			return data || [];
+			// Transform data to match Memory interface
+			return (data || []).map(item => ({
+				id: item.id,
+				memo_id: item.memo_id,
+				title: item.title,
+				content: item.content,
+				metadata: item.metadata as Record<string, any> | null | undefined,
+				style: item.style as Record<string, any> | null | undefined,
+				media: item.media as Record<string, any> | null | undefined,
+				created_at: item.created_at,
+				updated_at: item.updated_at
+			}));
 		} catch (error) {
 			console.error('Error loading memories:', error);
 			return [];

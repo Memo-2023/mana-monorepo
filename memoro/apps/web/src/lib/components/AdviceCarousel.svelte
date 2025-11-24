@@ -69,7 +69,7 @@
 			}
 
 			if (data && data.advice) {
-				advice = data.advice as AdviceData;
+				advice = data.advice as unknown as AdviceData;
 				currentIndex = 0; // Reset to first section
 			} else {
 				advice = null;

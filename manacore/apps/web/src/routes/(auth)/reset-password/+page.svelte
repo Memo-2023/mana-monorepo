@@ -136,12 +136,6 @@
 					</div>
 				{/if}
 
-				{#if form?.success}
-					<div class="mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
-						Password updated successfully! Redirecting to dashboard...
-					</div>
-				{/if}
-
 				<div class="space-y-4">
 					<div>
 						<label for="password" class="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -154,7 +148,7 @@
 							autocomplete="new-password"
 							placeholder="••••••••"
 							required
-							minlength="6"
+							minlength={6}
 						/>
 						<p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
 							Must be at least 6 characters
@@ -172,7 +166,7 @@
 							autocomplete="new-password"
 							placeholder="••••••••"
 							required
-							minlength="6"
+							minlength={6}
 						/>
 					</div>
 
