@@ -2,7 +2,7 @@
  * Date utility functions
  */
 
-import { format, formatDistanceToNow, parseISO } from 'date-fns';
+import { format, formatDistanceToNow, parseISO, isToday, isYesterday } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 
 const locales = {
@@ -41,3 +41,40 @@ export function formatRelativeTime(date: string | Date, locale: LocaleKey = 'de'
 export function toISOString(date: Date): string {
   return date.toISOString();
 }
+
+/**
+ * Format timestamp with relative day labels (Today, Yesterday, or full date)
+ *
+ * Examples:
+ * - Today → "Today, 14:30" / "Heute, 14:30"
+ * - Yesterday → "Yesterday, 14:30" / "Gestern, 14:30"
+ * - Other → "15. März 2024, 14:30" / "March 15, 2024, 2:30 PM"
+ */
+export function formatTimestamp(
+  date: string | Date,
+  locale: LocaleKey = 'de'
+): string {
+  const dateObj = typeof date === 'string' ? parseISO(date) : date;
+  const timeFormat = locale === 'de' ? 'HH:mm' : 'h:mm a';
+
+  const labels = {
+    de: { today: 'Heute', yesterday: 'Gestern' },
+    en: { today: 'Today', yesterday: 'Yesterday' },
+  };
+
+  if (isToday(dateObj)) {
+    return `${labels[locale].today}, ${format(dateObj, timeFormat)}`;
+  }
+
+  if (isYesterday(dateObj)) {
+    return `${labels[locale].yesterday}, ${format(dateObj, timeFormat)}`;
+  }
+
+  const dateFormat = locale === 'de' ? 'd. MMMM yyyy' : 'MMMM d, yyyy';
+  return `${format(dateObj, dateFormat, { locale: locales[locale] })}, ${format(dateObj, timeFormat)}`;
+}
+
+/**
+ * Check if a date is today
+ */
+export { isToday, isYesterday } from 'date-fns';
