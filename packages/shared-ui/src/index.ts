@@ -21,12 +21,12 @@ export { SkeletonBox, SkeletonText } from './molecules';
 export { EmptyState } from './molecules';
 
 // Layout
-export { ModalFooter, DataCard, PageHeader } from './molecules';
+export { ModalFooter, DataCard, PageHeader, KeyboardShortcutsPanel } from './molecules';
 
 // Organisms
 export { Modal, ConfirmationModal, FormModal, AppSlider } from './organisms';
 export type { AppItem } from './organisms';
 
 // Navigation
-export { NavLink, Navbar, Sidebar } from './navigation';
-export type { NavItem, NavbarProps, SidebarProps, NavLinkProps } from './navigation';
+export { NavLink, Navbar, Sidebar, SidebarSection } from './navigation';
+export type { NavItem, NavbarProps, SidebarProps, NavLinkProps, KeyboardShortcut } from './navigation';

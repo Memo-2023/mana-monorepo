@@ -1,5 +1,14 @@
 import type { Snippet } from 'svelte';
 
+export interface KeyboardShortcut {
+	/** Key combination (e.g., ['Ctrl', 'S'] or ['Cmd', 'Shift', 'P']) */
+	keys: string[];
+	/** Description of what the shortcut does */
+	label: string;
+	/** Category for grouping (optional) */
+	category?: string;
+}
+
 export interface NavItem {
 	/** Display label for the navigation item */
 	label: string;
