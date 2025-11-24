@@ -1,1 +1,5 @@
-@import "tailwindcss";
+@import '@manacore/shared-tailwind/themes.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

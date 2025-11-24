@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { LoginPage } from '@manacore/shared-auth-ui';
 	import StorytellerLogo from '$lib/components/StorytellerLogo.svelte';
+	import AppSlider from '$lib/components/AppSlider.svelte';
 	import { authStore } from '$lib/stores/authStore.svelte';
 
 	async function handleSignIn(email: string, password: string) {
@@ -18,9 +19,9 @@
 </script>
 
 <LoginPage
-	appName="Storyteller"
+	appName="Märchenzauber"
 	logo={StorytellerLogo}
-	primaryColor="#6366f1"
+	primaryColor="#FF6B9D"
 	onSignIn={handleSignIn}
 	onSignInWithGoogle={handleSignInWithGoogle}
 	onForgotPassword={handleForgotPassword}
@@ -29,6 +30,10 @@
 	enableApple={true}
 	successRedirect="/dashboard"
 	registerPath="/register"
-	lightBackground="#f5f5f5"
-	darkBackground="#121212"
-/>
+	lightBackground="#fff5f8"
+	darkBackground="#1a1218"
+>
+	{#snippet appSlider()}
+		<AppSlider />
+	{/snippet}
+</LoginPage>

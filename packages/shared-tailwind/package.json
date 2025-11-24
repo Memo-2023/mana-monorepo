@@ -9,6 +9,7 @@
     "./preset": "./src/preset.js",
     "./colors": "./src/colors.js",
     "./theme.css": "./src/theme-variables.css",
+    "./themes.css": "./src/themes.css",
     "./components.css": "./src/components.css"
   },
   "peerDependencies": {

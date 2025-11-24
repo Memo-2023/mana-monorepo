@@ -1,6 +1,5 @@
 <script lang="ts">
-	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import { Card, Button } from '@manacore/shared-ui';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

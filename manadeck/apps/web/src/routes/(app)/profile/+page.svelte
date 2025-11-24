@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { authStore } from '$lib/stores/authStore.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import { Card, Button } from '@manacore/shared-ui';
 
 	let credits = $state<number | null>(null);
 	let loadingCredits = $state(false);

@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { LoginPage } from '@manacore/shared-auth-ui';
 	import ManaDeckLogo from '$lib/components/ManaDeckLogo.svelte';
+	import AppSlider from '$lib/components/AppSlider.svelte';
 	import { authStore } from '$lib/stores/authStore.svelte';
 
 	async function handleSignIn(email: string, password: string) {
@@ -26,4 +27,8 @@
 	registerPath="/register"
 	lightBackground="#faf5ff"
 	darkBackground="#1a1625"
-/>
+>
+	{#snippet appSlider()}
+		<AppSlider />
+	{/snippet}
+</LoginPage>

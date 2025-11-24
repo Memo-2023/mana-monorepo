@@ -7,6 +7,7 @@
 		{ label: 'Decks', href: '/decks', icon: '📚' },
 		{ label: 'Explore', href: '/explore', icon: '🔍' },
 		{ label: 'Progress', href: '/progress', icon: '📊' },
+		{ label: 'Mana', href: '/subscription', icon: '⚡' },
 		{ label: 'Profile', href: '/profile', icon: '👤' }
 	];
 

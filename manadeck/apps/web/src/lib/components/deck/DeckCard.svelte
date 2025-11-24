@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Deck } from '$lib/types/deck';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
+	import { Card, Badge } from '@manacore/shared-ui';
 
 	interface Props {
 		deck: Deck;

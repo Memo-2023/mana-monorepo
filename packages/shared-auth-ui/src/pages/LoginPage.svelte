@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Component } from 'svelte';
+	import type { Component, Snippet } from 'svelte';
 	import type { AuthResult } from '../types';
 	import Icon from '../components/Icon.svelte';
 	import GoogleSignInButton from '../components/GoogleSignInButton.svelte';
@@ -36,6 +36,10 @@
 		lightBackground?: string;
 		/** Dark background color */
 		darkBackground?: string;
+		/** AppSlider snippet to render at the bottom (optional) */
+		appSlider?: Snippet;
+		/** Header snippet for controls like theme toggle and language selector */
+		headerControls?: Snippet;
 	}
 
 	let {
@@ -52,7 +56,9 @@
 		successRedirect = '/dashboard',
 		registerPath = '/register',
 		lightBackground = '#f5f5f5',
-		darkBackground = '#121212'
+		darkBackground = '#121212',
+		appSlider,
+		headerControls
 	}: Props = $props();
 
 	let loading = $state(false);
@@ -163,6 +169,13 @@
 	class="flex min-h-screen flex-col justify-between"
 	style="background-color: {getPageBackground()};"
 >
+	<!-- Header Controls (Theme Toggle, Language Selector, etc.) -->
+	{#if headerControls}
+		<div class="absolute right-4 top-4 z-50 flex items-center gap-3 opacity-60">
+			{@render headerControls()}
+		</div>
+	{/if}
+
 	<!-- Top Section - Logo -->
 	<div class="flex flex-col items-center justify-center pt-16 pb-8">
 		<div
@@ -433,6 +446,13 @@
 		</div>
 	</div>
 
-	<!-- Bottom padding -->
-	<div class="pb-8"></div>
+	<!-- App Slider (shown on initial mode) -->
+	{#if appSlider && mode === 'initial'}
+		<div class="w-full pb-8 px-2 pt-4">
+			{@render appSlider()}
+		</div>
+	{:else}
+		<!-- Bottom padding -->
+		<div class="pb-8"></div>
+	{/if}
 </div>

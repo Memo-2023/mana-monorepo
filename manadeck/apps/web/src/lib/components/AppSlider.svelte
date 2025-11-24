@@ -12,6 +12,15 @@
 			status: 'published'
 		},
 		{
+			name: 'ManaDeck',
+			description: 'AI Flashcards',
+			longDescription: 'Create and study smart flashcards with AI-powered spaced repetition for efficient learning.',
+			icon: '/images/app-icons/manadeck-logo-gradient.png',
+			color: '#8b5cf6',
+			comingSoon: false,
+			status: 'development'
+		},
+		{
 			name: 'Märchenzauber',
 			description: 'AI Story Creator',
 			longDescription: 'Create magical personalized stories for children with AI-generated illustrations and consistent characters.',
@@ -21,21 +30,12 @@
 			status: 'beta'
 		},
 		{
-			name: 'Moodlit',
-			description: 'AI Mood Tracker',
-			longDescription: 'Track your emotional well-being with AI-powered insights and personalized recommendations.',
-			icon: '/images/app-icons/moodlit-logo-gradient.png',
-			color: '#9C27B0',
-			comingSoon: true,
-			status: 'beta'
-		},
-		{
 			name: 'Manacore',
 			description: 'Central Hub',
 			longDescription: 'Your central hub for managing all Mana applications, subscriptions, and account settings.',
 			icon: '/images/app-icons/manacore-logo-gradient.png',
 			color: '#6366f1',
-			comingSoon: false,
+			comingSoon: true,
 			status: 'development'
 		}
 	];

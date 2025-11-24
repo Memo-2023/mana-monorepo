@@ -1,4 +1,4 @@
-@import '@manacore/shared-tailwind/theme.css';
+@import '@manacore/shared-tailwind/themes.css';
 
 @tailwind base;
 @tailwind components;

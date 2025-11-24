@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { deckStore } from '$lib/stores/deckStore.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import { Button } from '@manacore/shared-ui';
 	import DeckCard from '$lib/components/deck/DeckCard.svelte';
 	import CreateDeckModal from '$lib/components/deck/CreateDeckModal.svelte';
 

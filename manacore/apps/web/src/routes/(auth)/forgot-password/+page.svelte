@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Input from '$lib/components/ui/Input.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
+	import { Button, Input, Card } from '@manacore/shared-ui';
 
 	let { form } = $props();
 	let loading = $state(false);

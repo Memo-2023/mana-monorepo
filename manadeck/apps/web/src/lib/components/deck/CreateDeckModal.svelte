@@ -1,7 +1,5 @@
 <script lang="ts">
-	import Modal from '$lib/components/ui/Modal.svelte';
-	import Input from '$lib/components/ui/Input.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import { Modal, Input, Button } from '@manacore/shared-ui';
 	import { deckStore } from '$lib/stores/deckStore.svelte';
 
 	interface Props {

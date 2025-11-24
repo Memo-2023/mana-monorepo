@@ -3,9 +3,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { deckStore } from '$lib/stores/deckStore.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
+	import { Button, Badge, Card } from '@manacore/shared-ui';
 
 	let deckId = $derived($page.params.id);
 	let showDeleteConfirm = $state(false);

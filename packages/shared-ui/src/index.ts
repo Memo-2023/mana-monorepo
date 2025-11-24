@@ -1,8 +1,9 @@
 // Atoms
-export { Text, Button, Badge } from './atoms';
+export { Text, Button, Badge, Card } from './atoms';
 
 // Molecules
 export { Toggle, Input } from './molecules';
 
 // Organisms
-export { Modal } from './organisms';
+export { Modal, AppSlider } from './organisms';
+export type { AppItem } from './organisms';

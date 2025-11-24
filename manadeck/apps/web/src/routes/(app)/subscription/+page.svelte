@@ -11,7 +11,7 @@
 </script>
 
 <SubscriptionPage
-	appName="Memoro"
+	appName="ManaDeck"
 	onSubscribe={handleSubscribe}
 	onBuyPackage={handleBuyPackage}
 	currentPlanId="free"

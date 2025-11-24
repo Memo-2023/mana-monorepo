@@ -16,6 +16,7 @@
 		{ name: 'Dashboard', href: '/dashboard' },
 		{ name: 'Organizations', href: '/organizations' },
 		{ name: 'Teams', href: '/teams' },
+		{ name: 'Subscription', href: '/subscription' },
 		{ name: 'Settings', href: '/settings' }
 	];
 
