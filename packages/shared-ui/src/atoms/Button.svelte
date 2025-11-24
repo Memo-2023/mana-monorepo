@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-	type ButtonSize = 'sm' | 'md' | 'lg';
+	type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline' | 'success';
+	type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
 
 	interface Props {
 		variant?: ButtonVariant;
@@ -30,13 +30,16 @@
 		primary: 'bg-primary text-white hover:bg-primary/90 border-transparent',
 		secondary: 'bg-menu text-theme hover:bg-menu-hover border-theme',
 		ghost: 'bg-transparent text-theme hover:bg-menu-hover border-transparent',
-		danger: 'bg-red-600 text-white hover:bg-red-700 border-transparent'
+		danger: 'bg-red-600 text-white hover:bg-red-700 border-transparent',
+		outline: 'bg-transparent text-primary border-primary hover:bg-primary/10',
+		success: 'bg-green-600 text-white hover:bg-green-700 border-transparent'
 	};
 
 	const sizeClasses: Record<ButtonSize, string> = {
 		sm: 'px-3 py-1.5 text-sm',
 		md: 'px-4 py-2 text-base',
-		lg: 'px-6 py-3 text-lg'
+		lg: 'px-6 py-3 text-lg',
+		xl: 'px-8 py-4 text-xl'
 	};
 
 	const classes = $derived(
