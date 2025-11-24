@@ -15,7 +15,10 @@
     "maerchenzauber:dev": "turbo run dev --filter=maerchenzauber...",
     "manacore:dev": "turbo run dev --filter=manacore...",
     "manadeck:dev": "turbo run dev --filter=manadeck...",
-    "memoro:dev": "turbo run dev --filter=memoro..."
+    "memoro:dev": "turbo run dev --filter=memoro...",
+    "dev:web": "turbo run dev --filter=@storyteller/web --filter=manacore-web --filter=web --filter=memoro-web",
+    "dev:landing": "turbo run dev --filter=@storyteller/landing --filter=manacore-landing --filter=landing --filter=memoro-landing",
+    "dev:mobile": "turbo run dev --filter=@storyteller/mobile --filter=manacore --filter=manadeck --filter=memoro"
   },
   "devDependencies": {
     "prettier": "^3.3.3",

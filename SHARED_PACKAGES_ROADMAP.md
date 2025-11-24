@@ -8,7 +8,9 @@ This document outlines the plan to unify common code across all web apps in the 
 - [x] `@manacore/shared-ui` - Unified UI Components (Text, Button, Badge, Toggle, Input, Modal)
 - [x] `@manacore/shared-auth` - Unified Auth Logic (Supabase client, token management)
 - [x] `@manacore/shared-auth-ui` - Unified Auth UI (LoginPage, RegisterPage, OAuth buttons)
-- [x] `@manacore/shared-tailwind` - Unified Tailwind Config (4 themes, colors, preset)
+- [x] `@manacore/shared-tailwind` - Unified Tailwind Config (HSL colors, preset, themes.css)
+- [x] `@manacore/shared-theme` - **NEW** Unified Theme Store (Svelte 5, 4 variants, light/dark/system)
+- [x] `@manacore/shared-theme-ui` - **NEW** Theme UI Components (ThemeToggle, ThemeSelector)
 - [x] `@manacore/shared-utils` - Unified Utilities (formatting, validation, async)
 - [x] `@manacore/shared-types` - Unified TypeScript Types
 - [x] `@manacore/shared-supabase` - Unified Supabase Client Factory
