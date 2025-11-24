@@ -1,13 +1,33 @@
-import { format, isToday, isYesterday } from 'date-fns';
-import { de } from 'date-fns/locale';
+/**
+ * Memoro Formatters
+ * Re-exports shared utilities and adds Memoro-specific helpers
+ */
+
+// Re-export date/time utilities from shared package
+export {
+	formatTimestamp,
+	formatShortDate,
+	formatRelativeTime,
+	isToday,
+	isYesterday,
+	type LocaleKey
+} from '@manacore/shared-utils';
+
+// Re-export format utilities from shared package (with explicit names for clarity)
+export {
+	formatDuration as formatDurationCompact,
+	parseDuration,
+	formatDurationWithUnits,
+	formatDurationHumanReadable
+} from '@manacore/shared-utils';
 
 /**
- * Format duration from seconds to human-readable string with units
+ * Format duration from seconds to human-readable string with German units
  *
- * Examples:
- * - 45 seconds → "45 Sekunden"
- * - 90 seconds → "1:30 Minuten"
- * - 3665 seconds → "1:01:05 Stunden"
+ * This is the Memoro-specific format that displays:
+ * - "45 Sekunden" for seconds only
+ * - "1:30 Minuten" for minutes and seconds
+ * - "1:01:05 Stunden" for hours, minutes, and seconds
  */
 export function formatDuration(durationSeconds: number): string {
 	if (!durationSeconds || durationSeconds === 0) return '0 Sekunden';
@@ -35,26 +55,4 @@ export function formatDuration(durationSeconds: number): string {
  */
 export function getMemooDuration(memo: any): number {
 	return memo.source?.duration_seconds || memo.source?.duration || 0;
-}
-
-/**
- * Format timestamp to localized German format
- *
- * Examples:
- * - Today → "Heute, 14:30"
- * - Yesterday → "Gestern, 14:30"
- * - Other → "15. März 2024, 14:30"
- */
-export function formatTimestamp(date: Date | string): string {
-	const dateObj = typeof date === 'string' ? new Date(date) : date;
-
-	if (isToday(dateObj)) {
-		return `Heute, ${format(dateObj, 'HH:mm')}`;
-	}
-
-	if (isYesterday(dateObj)) {
-		return `Gestern, ${format(dateObj, 'HH:mm')}`;
-	}
-
-	return format(dateObj, 'd. MMMM yyyy, HH:mm', { locale: de });
 }

@@ -44,3 +44,6 @@ export {
   getCommonTranslations,
   mergeWithCommon,
 } from './translations/common';
+
+// Components
+export { LanguageSelector } from './components';

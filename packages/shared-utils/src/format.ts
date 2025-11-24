@@ -150,3 +150,29 @@ export function formatPercent(
     maximumFractionDigits: decimals,
   }).format(value);
 }
+
+/**
+ * Format duration as compact string (alias for formatDuration)
+ * Kept for compatibility - returns MM:SS or HH:MM:SS
+ */
+export const formatDurationCompact = formatDuration;
+
+/**
+ * Parse duration string to seconds
+ *
+ * @param duration - Duration string (e.g., "1:30" or "1:01:05")
+ * @returns Duration in seconds
+ */
+export function parseDuration(duration: string): number {
+  const parts = duration.split(':').map(Number);
+
+  if (parts.length === 3) {
+    // Hours:Minutes:Seconds
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  } else if (parts.length === 2) {
+    // Minutes:Seconds
+    return parts[0] * 60 + parts[1];
+  }
+
+  return parts[0] || 0;
+}

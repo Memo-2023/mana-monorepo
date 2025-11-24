@@ -10,7 +10,7 @@ const locales = {
   en: enUS,
 };
 
-type LocaleKey = keyof typeof locales;
+export type LocaleKey = keyof typeof locales;
 
 /**
  * Format a date string to a readable format
@@ -78,3 +78,16 @@ export function formatTimestamp(
  * Check if a date is today
  */
 export { isToday, isYesterday } from 'date-fns';
+
+/**
+ * Format timestamp as short date
+ *
+ * @param date - Date to format
+ * @param locale - Locale for formatting ('de' or 'en')
+ * @returns Formatted short date string (e.g., "15 Mar 2024" or "15. Mär. 2024")
+ */
+export function formatShortDate(date: Date | string, locale: LocaleKey = 'de'): string {
+  const dateObj = typeof date === 'string' ? parseISO(date) : date;
+
+  return format(dateObj, 'dd MMM yyyy', { locale: locales[locale] });
+}

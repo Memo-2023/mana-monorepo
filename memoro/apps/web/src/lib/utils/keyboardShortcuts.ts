@@ -1,79 +1,26 @@
 /**
- * Keyboard Shortcuts Utility
- * Provides centralized keyboard shortcut handling for the application
+ * Memoro Keyboard Shortcuts
+ * Re-exports shared utilities and adds Memoro-specific shortcuts
  */
 
-export interface ShortcutAction {
-	key: string;
-	ctrl?: boolean;
-	shift?: boolean;
-	alt?: boolean;
-	meta?: boolean; // Command key on Mac
-	description: string;
-	action: () => void;
-	preventDefault?: boolean;
-}
+// Re-export all keyboard shortcut utilities from shared package
+export {
+	type ShortcutAction,
+	type ShortcutGroup,
+	matchesShortcut,
+	formatShortcut,
+	formatShortcutMac,
+	createShortcutHandler,
+	createShortcuts,
+	shortcuts,
+	isMac,
+	getPlatformShortcut
+} from '@manacore/shared-utils';
 
-export interface ShortcutGroup {
-	name: string;
-	shortcuts: ShortcutAction[];
-}
-
-/**
- * Check if a keyboard event matches a shortcut
- */
-export function matchesShortcut(event: KeyboardEvent, shortcut: ShortcutAction): boolean {
-	const keyMatches = event.key.toLowerCase() === shortcut.key.toLowerCase();
-	const ctrlMatches = shortcut.ctrl ? event.ctrlKey || event.metaKey : !event.ctrlKey && !event.metaKey;
-	const shiftMatches = shortcut.shift ? event.shiftKey : !event.shiftKey;
-	const altMatches = shortcut.alt ? event.altKey : !event.altKey;
-
-	return keyMatches && ctrlMatches && shiftMatches && altMatches;
-}
+import type { ShortcutAction, ShortcutGroup } from '@manacore/shared-utils';
 
 /**
- * Format shortcut for display
- */
-export function formatShortcut(shortcut: ShortcutAction): string {
-	const parts: string[] = [];
-
-	if (shortcut.ctrl) parts.push('Ctrl');
-	if (shortcut.shift) parts.push('Shift');
-	if (shortcut.alt) parts.push('Alt');
-	parts.push(shortcut.key.toUpperCase());
-
-	return parts.join('+');
-}
-
-/**
- * Create keyboard shortcut handler
- */
-export function createShortcutHandler(shortcuts: ShortcutAction[]) {
-	return (event: KeyboardEvent) => {
-		// Don't handle shortcuts if user is typing in an input
-		const target = event.target as HTMLElement;
-		if (
-			target.tagName === 'INPUT' ||
-			target.tagName === 'TEXTAREA' ||
-			target.isContentEditable
-		) {
-			return;
-		}
-
-		for (const shortcut of shortcuts) {
-			if (matchesShortcut(event, shortcut)) {
-				if (shortcut.preventDefault !== false) {
-					event.preventDefault();
-				}
-				shortcut.action();
-				break;
-			}
-		}
-	};
-}
-
-/**
- * Default memo panel shortcuts
+ * Memoro-specific memo panel shortcuts
  */
 export function getMemoPanelShortcuts(actions: {
 	onEdit?: () => void;
@@ -211,24 +158,4 @@ export function getMemoPanelShortcuts(actions: {
 	}
 
 	return shortcuts;
-}
-
-/**
- * Svelte action for keyboard shortcuts
- */
-export function shortcuts(node: HTMLElement, shortcutActions: ShortcutAction[]) {
-	const handler = createShortcutHandler(shortcutActions);
-
-	node.addEventListener('keydown', handler);
-
-	return {
-		destroy() {
-			node.removeEventListener('keydown', handler);
-		},
-		update(newShortcutActions: ShortcutAction[]) {
-			node.removeEventListener('keydown', handler);
-			const newHandler = createShortcutHandler(newShortcutActions);
-			node.addEventListener('keydown', newHandler);
-		}
-	};
 }
