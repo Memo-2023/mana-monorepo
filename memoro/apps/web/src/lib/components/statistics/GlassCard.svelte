@@ -1,21 +1,19 @@
 <script lang="ts">
+	/**
+	 * Memoro GlassCard
+	 * Re-exports from @manacore/shared-ui for backward compatibility
+	 */
+	import { GlassCard } from '@manacore/shared-ui';
+	import type { Snippet } from 'svelte';
+
 	interface Props {
-		children: any;
+		children: Snippet;
 		class?: string;
 	}
 
 	let { children, class: className = '' }: Props = $props();
 </script>
 
-<div
-	class="relative overflow-hidden rounded-3xl border border-theme bg-black/[0.02] dark:bg-white/[0.02] p-6 shadow-lg {className}"
->
+<GlassCard class={className}>
 	{@render children()}
-</div>
-
-<style>
-	/* Additional glassmorphism effect */
-	div {
-		backdrop-filter: blur(10px);
-	}
-</style>
+</GlassCard>

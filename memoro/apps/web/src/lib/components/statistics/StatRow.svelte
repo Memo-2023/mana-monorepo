@@ -1,4 +1,9 @@
 <script lang="ts">
+	/**
+	 * Memoro StatRow
+	 * Custom version with Memoro-specific icon set
+	 * Note: shared-ui provides a generic StatRow with snippet-based icons
+	 */
 	import { Text } from '@manacore/shared-ui';
 
 	interface Props {
