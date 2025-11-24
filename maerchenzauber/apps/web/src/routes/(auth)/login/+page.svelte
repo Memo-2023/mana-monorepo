@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { LoginPage } from '@manacore/shared-auth-ui';
-	import StorytellerLogo from '$lib/components/StorytellerLogo.svelte';
+	import { StorytellerLogo } from '@manacore/shared-branding';
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import { authStore } from '$lib/stores/authStore.svelte';
 

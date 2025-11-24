@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { RegisterPage } from '@manacore/shared-auth-ui';
-	import StorytellerLogo from '$lib/components/StorytellerLogo.svelte';
+	import { StorytellerLogo } from '@manacore/shared-branding';
+	import AppSlider from '$lib/components/AppSlider.svelte';
 	import { authStore } from '$lib/stores/authStore.svelte';
 
 	async function handleSignUp(email: string, password: string) {
@@ -10,13 +11,17 @@
 </script>
 
 <RegisterPage
-	appName="Storyteller"
+	appName="Märchenzauber"
 	logo={StorytellerLogo}
-	primaryColor="#6366f1"
+	primaryColor="#FF6B9D"
 	onSignUp={handleSignUp}
 	goto={goto}
 	successRedirect="/dashboard"
 	loginPath="/login"
-	lightBackground="#f5f5f5"
-	darkBackground="#121212"
-/>
+	lightBackground="#fff5f8"
+	darkBackground="#1a1218"
+>
+	{#snippet appSlider()}
+		<AppSlider />
+	{/snippet}
+</RegisterPage>
