@@ -19,3 +19,8 @@ export { SkeletonBox, SkeletonText } from './loaders';
 
 // Feedback components
 export { EmptyState } from './feedback';
+
+// Layout components
+export { default as ModalFooter } from './ModalFooter.svelte';
+export { default as DataCard } from './DataCard.svelte';
+export { default as PageHeader } from './PageHeader.svelte';

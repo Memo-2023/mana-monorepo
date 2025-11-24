@@ -20,8 +20,11 @@ export { SkeletonBox, SkeletonText } from './molecules';
 // Feedback
 export { EmptyState } from './molecules';
 
+// Layout
+export { ModalFooter, DataCard, PageHeader } from './molecules';
+
 // Organisms
-export { Modal, ConfirmationModal, AppSlider } from './organisms';
+export { Modal, ConfirmationModal, FormModal, AppSlider } from './organisms';
 export type { AppItem } from './organisms';
 
 // Navigation
