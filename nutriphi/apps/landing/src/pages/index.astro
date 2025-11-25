@@ -1,0 +1,287 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+
+// Shared components
+import HeroSection from '@manacore/shared-landing-ui/sections/HeroSection.astro';
+import FeatureSection from '@manacore/shared-landing-ui/sections/FeatureSection.astro';
+import StepsSection from '@manacore/shared-landing-ui/sections/StepsSection.astro';
+import FAQSection from '@manacore/shared-landing-ui/sections/FAQSection.astro';
+import CTASection from '@manacore/shared-landing-ui/sections/CTASection.astro';
+import PricingSection from '@manacore/shared-landing-ui/sections/PricingSection.astro';
+import Card from '@manacore/shared-landing-ui/atoms/Card.astro';
+
+// Feature data
+const features = [
+  {
+    icon: '📸',
+    title: 'Foto-Analyse',
+    description: 'Fotografiere deine Mahlzeit und erhalte in Sekunden detaillierte Nährwertinformationen.'
+  },
+  {
+    icon: '🤖',
+    title: 'Google Gemini KI',
+    description: 'Modernste KI-Technologie erkennt Zutaten und berechnet Kalorien, Protein, Kohlenhydrate und Fett.'
+  },
+  {
+    icon: '📊',
+    title: 'Tagesbilanz',
+    description: 'Behalte deine gesamte Nährwertaufnahme im Blick mit übersichtlichen Tages- und Wochenstatistiken.'
+  },
+  {
+    icon: '🎯',
+    title: 'Persönliche Ziele',
+    description: 'Setze individuelle Ernährungsziele für Kalorien, Makros und Mikronährstoffe.'
+  },
+  {
+    icon: '📱',
+    title: 'Plattformübergreifend',
+    description: 'Nutze Nutriphi auf iOS, Android und im Web - deine Daten sind überall synchronisiert.'
+  },
+  {
+    icon: '💡',
+    title: 'Gesundheitstipps',
+    description: 'Erhalte personalisierte Empfehlungen basierend auf deinen Essgewohnheiten.'
+  }
+];
+
+// Steps data
+const steps = [
+  {
+    number: '1',
+    title: 'Mahlzeit fotografieren',
+    description: 'Mache einfach ein Foto von deinem Essen mit deinem Smartphone - egal ob Frühstück, Mittag oder Abendessen.',
+    image: '/screenshots/photo.png'
+  },
+  {
+    number: '2',
+    title: 'KI analysiert',
+    description: 'Unsere Google Gemini KI erkennt automatisch alle Zutaten, schätzt Portionsgrößen und berechnet die Nährwerte.',
+    image: '/screenshots/analyze.png'
+  },
+  {
+    number: '3',
+    title: 'Fortschritt verfolgen',
+    description: 'Sieh deine Tagesbilanz, verfolge deinen Fortschritt und erreiche deine Gesundheitsziele.',
+    image: '/screenshots/track.png'
+  }
+];
+
+// Pricing data
+const pricingPlans = [
+  {
+    name: 'Free',
+    price: '0',
+    period: '/Monat',
+    description: 'Perfekt zum Ausprobieren',
+    features: [
+      { text: '10 Foto-Analysen/Tag', included: true },
+      { text: 'Basis-Nährwertdaten', included: true },
+      { text: 'Tagesübersicht', included: true },
+      { text: 'Mahlzeit-Historie (7 Tage)', included: true },
+      { text: 'Unbegrenzte Analysen', included: false },
+      { text: 'Erweiterte Statistiken', included: false }
+    ],
+    cta: {
+      text: 'Kostenlos starten',
+      href: '#download'
+    }
+  },
+  {
+    name: 'Pro',
+    price: '6,99',
+    period: '/Monat',
+    description: 'Für ernsthafte Tracker',
+    features: [
+      { text: 'Unbegrenzte Foto-Analysen', included: true },
+      { text: 'Detaillierte Mikronährstoffe', included: true },
+      { text: 'Wochen- & Monatsstatistiken', included: true },
+      { text: 'Unbegrenzte Historie', included: true },
+      { text: 'Export als CSV/PDF', included: true },
+      { text: 'Prioritäts-Analyse', included: true }
+    ],
+    cta: {
+      text: 'Pro werden',
+      href: '#download'
+    },
+    highlighted: true,
+    badge: 'Beliebt'
+  },
+  {
+    name: 'Family',
+    price: '12,99',
+    period: '/Monat',
+    description: 'Für die ganze Familie',
+    features: [
+      { text: 'Alles aus Pro', included: true },
+      { text: 'Bis zu 5 Profile', included: true },
+      { text: 'Familien-Dashboard', included: true },
+      { text: 'Gemeinsame Mahlzeiten', included: true },
+      { text: 'Kinder-Modus', included: true },
+      { text: 'Premium-Support', included: true }
+    ],
+    cta: {
+      text: 'Family starten',
+      href: '#download'
+    }
+  }
+];
+
+// FAQ data
+const faqs = [
+  {
+    question: 'Wie genau ist die KI-Analyse?',
+    answer: 'Nutriphi verwendet Google Gemini Vision, eine der fortschrittlichsten Bild-KIs. Die Genauigkeit liegt bei typischen Mahlzeiten bei etwa 85-95%. Bei komplexen oder verdeckten Zutaten kann die Genauigkeit variieren. Du kannst die Ergebnisse jederzeit manuell anpassen.'
+  },
+  {
+    question: 'Welche Nährwerte werden analysiert?',
+    answer: 'Die Analyse umfasst Kalorien, Protein, Kohlenhydrate, Fett, Ballaststoffe und Zucker. Im Pro-Plan erhältst du zusätzlich detaillierte Mikronährstoffe wie Vitamine und Mineralstoffe.'
+  },
+  {
+    question: 'Funktioniert die App auch offline?',
+    answer: 'Die Foto-Analyse benötigt eine Internetverbindung, da sie auf unseren Servern durchgeführt wird. Deine bereits analysierten Mahlzeiten und Statistiken sind jedoch offline verfügbar.'
+  },
+  {
+    question: 'Kann ich auch Mahlzeiten manuell eingeben?',
+    answer: 'Ja! Neben der Foto-Analyse kannst du Mahlzeiten auch per Text beschreiben oder aus einer Datenbank mit über 500.000 Lebensmitteln auswählen.'
+  },
+  {
+    question: 'Wie werden meine Daten geschützt?',
+    answer: 'Deine Daten werden verschlüsselt übertragen und gespeichert. Fotos werden nur für die Analyse verwendet und nicht dauerhaft gespeichert. Wir sind vollständig DSGVO-konform.'
+  },
+  {
+    question: 'Kann ich mein Abo jederzeit kündigen?',
+    answer: 'Ja, du kannst dein Pro- oder Family-Abo jederzeit kündigen. Nach der Kündigung hast du noch bis zum Ende des Abrechnungszeitraums Zugang zu allen Premium-Features.'
+  }
+];
+---
+
+<Layout title="Nutriphi - KI-gestützter Ernährungs-Tracker">
+  <Navigation />
+
+  <main class="pt-16">
+    <HeroSection
+      title="Ernährung tracken war nie einfacher"
+      subtitle="Fotografiere deine Mahlzeit und erhalte sofort detaillierte Nährwertinformationen. Nutriphi nutzt Google Gemini KI für präzise Analysen - kein mühsames manuelles Eingeben mehr."
+      variant="default"
+      primaryCta={{
+        text: 'Jetzt kostenlos starten',
+        href: '#download'
+      }}
+      secondaryCta={{
+        text: 'Features entdecken',
+        href: '#features',
+        variant: 'secondary'
+      }}
+      trustBadges={[
+        { icon: '📸', text: 'Foto-Analyse' },
+        { icon: '🔒', text: 'DSGVO-konform' },
+        { icon: '📱', text: 'iOS, Android & Web' }
+      ]}
+    />
+
+    <FeatureSection
+      id="features"
+      title="Alles für dein Ernährungstracking"
+      subtitle="Nutriphi kombiniert modernste KI mit intuitivem Design für müheloses Ernährungstracking."
+      features={features}
+      columns={3}
+      variant="cards"
+      class="bg-[var(--color-background-card)]"
+    >
+      <!-- AI Technology Highlight -->
+      <div class="mt-12 md:mt-16 px-4" slot="highlight">
+        <Card variant="glow" class="max-w-4xl mx-auto" padding="lg">
+          <div class="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+            <div class="text-5xl sm:text-6xl">🧠</div>
+            <div class="flex-1 text-center md:text-left">
+              <h3 class="font-bold text-xl sm:text-2xl text-[var(--color-text-primary)] mb-2 sm:mb-3">
+                Powered by Google Gemini
+              </h3>
+              <p class="text-[var(--color-text-secondary)] text-sm sm:text-base leading-relaxed">
+                Nutriphi nutzt die neueste Vision-KI von Google, um Mahlzeiten präzise zu analysieren.
+                Die KI erkennt Zutaten, schätzt Portionsgrößen und berechnet Nährwerte mit hoher Genauigkeit.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-[var(--color-primary)] rounded-full flex items-center justify-center">
+                <span class="text-white font-bold text-sm sm:text-base">AI</span>
+              </div>
+              <div class="text-left">
+                <div class="text-[var(--color-text-primary)] font-semibold text-sm sm:text-base">85-95%</div>
+                <div class="text-[var(--color-text-secondary)] text-xs sm:text-sm">Genauigkeit</div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </FeatureSection>
+
+    <StepsSection
+      id="how-it-works"
+      title="In 3 Schritten zum Ziel"
+      subtitle="So einfach trackst du deine Ernährung mit Nutriphi"
+      steps={steps}
+      showImages={false}
+      alternateLayout={true}
+    />
+
+    <PricingSection
+      id="pricing"
+      title="Wähle deinen Plan"
+      subtitle="Starte kostenlos und upgrade, wenn du bereit bist"
+      plans={pricingPlans}
+      class="bg-[var(--color-background-card)]"
+    />
+
+    <FAQSection
+      id="faq"
+      title="Häufig gestellte Fragen"
+      subtitle="Alles was du über Nutriphi wissen musst"
+      faqs={faqs}
+    />
+
+    <CTASection
+      id="download"
+      title="Starte deine gesunde Ernährungsreise"
+      subtitle="Lade Nutriphi jetzt herunter und entdecke, wie einfach Ernährungstracking sein kann. Kostenlos und ohne Kreditkarte."
+      primaryCta={{ text: 'App herunterladen', href: '#' }}
+      variant="highlighted"
+    >
+      <!-- App Store Buttons -->
+      <div class="flex flex-wrap items-center justify-center gap-4 mt-8">
+        <a href="#" class="inline-block hover:opacity-80 transition-opacity">
+          <img src="/app-store-badge.svg" alt="Download im App Store" class="h-12" />
+        </a>
+        <a href="#" class="inline-block hover:opacity-80 transition-opacity">
+          <img src="/google-play-badge.svg" alt="Jetzt bei Google Play" class="h-12" />
+        </a>
+      </div>
+
+      <!-- Trust Indicators -->
+      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <span class="text-[var(--color-text-secondary)] text-sm">100% Kostenlos starten</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+          </svg>
+          <span class="text-[var(--color-text-secondary)] text-sm">DSGVO-konform</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"></path>
+          </svg>
+          <span class="text-[var(--color-text-secondary)] text-sm">Keine Kreditkarte nötig</span>
+        </div>
+      </div>
+    </CTASection>
+  </main>
+
+  <Footer />
+</Layout>

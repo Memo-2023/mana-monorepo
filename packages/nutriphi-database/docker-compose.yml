@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nutriphi-postgres
+    restart: unless-stopped
+    ports:
+      - '5435:5432'
+    environment:
+      POSTGRES_DB: nutriphi
+      POSTGRES_USER: nutriphi
+      POSTGRES_PASSWORD: nutriphi_dev_password
+    volumes:
+      - nutriphi_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U nutriphi -d nutriphi']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: nutriphi-pgadmin
+    restart: unless-stopped
+    ports:
+      - '5052:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@nutriphi.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - nutriphi_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
+volumes:
+  nutriphi_postgres_data:
+  nutriphi_pgadmin_data:
