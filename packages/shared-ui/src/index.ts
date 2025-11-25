@@ -28,5 +28,14 @@ export { Modal, ConfirmationModal, FormModal, AppSlider } from './organisms';
 export type { AppItem } from './organisms';
 
 // Navigation
-export { NavLink, Navbar, Sidebar, SidebarSection } from './navigation';
-export type { NavItem, NavbarProps, SidebarProps, NavLinkProps, KeyboardShortcut } from './navigation';
+export { NavLink, Navbar, Sidebar, SidebarSection, PillNavigation, PillDropdown } from './navigation';
+export type {
+	NavItem,
+	NavbarProps,
+	SidebarProps,
+	NavLinkProps,
+	KeyboardShortcut,
+	PillNavItem,
+	PillDropdownItem,
+	PillNavigationProps
+} from './navigation';

@@ -9,6 +9,73 @@ export interface KeyboardShortcut {
 	category?: string;
 }
 
+// ============ Pill Navigation Types ============
+
+export interface PillNavItem {
+	/** Display label for the navigation item */
+	label: string;
+	/** URL to navigate to */
+	href: string;
+	/** Icon name (predefined) or 'mana' for special mana icon */
+	icon?: string;
+	/** Custom SVG icon HTML (for custom icons) */
+	iconSvg?: string;
+}
+
+export interface PillDropdownItem {
+	/** Unique identifier */
+	id: string;
+	/** Display label */
+	label: string;
+	/** Icon name */
+	icon?: string;
+	/** Click handler */
+	onClick: () => void;
+	/** Whether item is disabled */
+	disabled?: boolean;
+	/** Whether item should be styled as danger/destructive */
+	danger?: boolean;
+	/** Whether this item is currently active/selected */
+	active?: boolean;
+}
+
+export interface PillNavigationProps {
+	/** Navigation items */
+	items: PillNavItem[];
+	/** Current active path */
+	currentPath?: string;
+	/** Logo snippet */
+	logo?: Snippet;
+	/** App name */
+	appName?: string;
+	/** Home/default route */
+	homeRoute?: string;
+	/** Called when logout is clicked */
+	onLogout?: () => void;
+	/** Called when theme toggle is clicked */
+	onToggleTheme?: () => void;
+	/** Whether dark mode is active */
+	isDark?: boolean;
+	/** Whether sidebar mode is enabled (controlled) */
+	isSidebarMode?: boolean;
+	/** Called when sidebar mode changes */
+	onModeChange?: (isSidebar: boolean) => void;
+	/** Whether navigation is collapsed (controlled) */
+	isCollapsed?: boolean;
+	/** Called when collapsed state changes */
+	onCollapsedChange?: (isCollapsed: boolean) => void;
+	/** Language dropdown items */
+	languageItems?: PillDropdownItem[];
+	/** Current language label */
+	currentLanguageLabel?: string;
+	/** Show language switcher */
+	showLanguageSwitcher?: boolean;
+	/** Show theme toggle */
+	showThemeToggle?: boolean;
+	/** Primary color for active state */
+	primaryColor?: string;
+}
+
 export interface NavItem {
 	/** Display label for the navigation item */
 	label: string;

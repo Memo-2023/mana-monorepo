@@ -1,19 +1,11 @@
 <script lang="ts">
-	interface DropdownItem {
-		id: string;
-		label: string;
-		icon?: string;
-		onClick: () => void;
-		disabled?: boolean;
-		danger?: boolean;
-		active?: boolean;
-	}
+	import type { PillDropdownItem } from './types';
 
 	interface Props {
-		items: DropdownItem[];
+		items: PillDropdownItem[];
 		direction?: 'up' | 'down';
 		label: string;
-		icon?: string;
+		icon?: 'globe' | 'language' | 'chevronDown' | 'check' | string;
 		isOpen?: boolean;
 		onToggle?: (open: boolean) => void;
 	}
@@ -64,19 +56,20 @@
 		}
 	}
 
-	function handleItemClick(item: DropdownItem) {
+	function handleItemClick(item: PillDropdownItem) {
 		item.onClick();
 		close();
 	}
 
+	const iconPaths: Record<string, string> = {
+		language: 'M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129',
+		check: 'M5 13l4 4L19 7',
+		chevronDown: 'M19 9l-7 7-7-7',
+		globe: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9'
+	};
+
 	function getIcon(iconName: string) {
-		const icons: Record<string, string> = {
-			language: 'M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129',
-			check: 'M5 13l4 4L19 7',
-			chevronDown: 'M19 9l-7 7-7-7',
-			globe: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9'
-		};
-		return icons[iconName] || '';
+		return iconPaths[iconName] || iconName;
 	}
 </script>
 
@@ -277,13 +270,13 @@
 	}
 
 	.active-pill {
-		background: rgba(248, 214, 43, 0.2);
-		border-color: rgba(248, 214, 43, 0.3);
+		background: var(--color-primary-100, rgba(248, 214, 43, 0.2));
+		border-color: var(--color-primary-200, rgba(248, 214, 43, 0.3));
 	}
 
 	:global(.dark) .active-pill {
-		background: rgba(248, 214, 43, 0.15);
-		border-color: rgba(248, 214, 43, 0.25);
+		background: var(--color-primary-900, rgba(248, 214, 43, 0.15));
+		border-color: var(--color-primary-800, rgba(248, 214, 43, 0.25));
 	}
 
 	.danger-pill {
@@ -309,7 +302,7 @@
 		width: 0.875rem;
 		height: 0.875rem;
 		margin-left: 0.25rem;
-		color: #f8d62b;
+		color: var(--color-primary-500, #f8d62b);
 	}
 
 	.pill-label {
