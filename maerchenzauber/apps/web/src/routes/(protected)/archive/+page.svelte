@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { dataService } from '$lib/api';
+	import { toastStore } from '$lib/stores/toast.svelte';
 	import type { Story } from '$lib/types/story';
 	import type { Character } from '$lib/types/character';
 
@@ -43,8 +44,10 @@
 		try {
 			await dataService.updateStory(storyId, { archived: false });
 			archivedStories = archivedStories.filter((s) => s.id !== storyId);
+			toastStore.success('Geschichte wiederhergestellt');
 		} catch (err) {
 			console.error('[Archive] Failed to restore story:', err);
+			toastStore.error('Geschichte konnte nicht wiederhergestellt werden');
 		}
 	}
 
@@ -53,8 +56,10 @@
 		try {
 			await dataService.updateCharacter(characterId, { archived: false });
 			archivedCharacters = archivedCharacters.filter((c) => c.id !== characterId);
+			toastStore.success('Charakter wiederhergestellt');
 		} catch (err) {
 			console.error('[Archive] Failed to restore character:', err);
+			toastStore.error('Charakter konnte nicht wiederhergestellt werden');
 		}
 	}
 
@@ -65,8 +70,10 @@
 		try {
 			await dataService.deleteStory(storyId);
 			archivedStories = archivedStories.filter((s) => s.id !== storyId);
+			toastStore.success('Geschichte gelöscht');
 		} catch (err) {
 			console.error('[Archive] Failed to delete story:', err);
+			toastStore.error('Geschichte konnte nicht gelöscht werden');
 		}
 	}
 
@@ -77,8 +84,10 @@
 		try {
 			await dataService.deleteCharacter(characterId);
 			archivedCharacters = archivedCharacters.filter((c) => c.id !== characterId);
+			toastStore.success('Charakter gelöscht');
 		} catch (err) {
 			console.error('[Archive] Failed to delete character:', err);
+			toastStore.error('Charakter konnte nicht gelöscht werden');
 		}
 	}
 

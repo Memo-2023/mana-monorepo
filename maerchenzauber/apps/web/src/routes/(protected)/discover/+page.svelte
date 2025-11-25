@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { dataService } from '$lib/api';
+	import { toastStore } from '$lib/stores/toast.svelte';
 	import type { Story } from '$lib/types/story';
 	import type { Character } from '$lib/types/character';
 
@@ -137,11 +139,14 @@
 	// Clone a character
 	async function handleCloneCharacter(characterId: string) {
 		try {
+			toastStore.info('Charakter wird geklont...');
 			const cloned = await dataService.cloneCharacter(characterId);
+			toastStore.success('Charakter erfolgreich geklont!');
 			// Navigate to the cloned character
-			window.location.href = `/characters/${cloned.id}`;
+			goto(`/characters/${cloned.id}`);
 		} catch (err) {
 			console.error('[Discover] Clone failed:', err);
+			toastStore.error('Charakter konnte nicht geklont werden');
 		}
 	}
 

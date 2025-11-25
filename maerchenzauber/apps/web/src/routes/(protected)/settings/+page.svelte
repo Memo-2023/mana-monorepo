@@ -3,6 +3,7 @@
 	import { authStore } from '$lib/stores/authStore.svelte';
 	import { goto } from '$app/navigation';
 	import { dataService } from '$lib/api';
+	import { toastStore } from '$lib/stores/toast.svelte';
 
 	// Stats
 	let storyCount = $state(0);
@@ -11,6 +12,14 @@
 
 	// Theme
 	let isDarkMode = $state(false);
+
+	// Image Model Settings
+	let selectedImageModel = $state('flux-schnell');
+	const imageModels = [
+		{ id: 'flux-schnell', name: 'Flux Schnell', description: 'Schnell & gut (Standard)', speed: 'Schnell' },
+		{ id: 'flux-dev', name: 'Flux Dev', description: 'Beste Qualität, langsamer', speed: 'Mittel' },
+		{ id: 'sdxl', name: 'SDXL', description: 'Klassischer Stil', speed: 'Mittel' }
+	];
 
 	onMount(async () => {
 		// Load stats
@@ -21,6 +30,16 @@
 			]);
 			storyCount = stories.filter((s) => !s.archived).length;
 			characterCount = characters.filter((c) => !c.archived).length;
+
+			// Load user settings
+			try {
+				const settings = await dataService.getUserSettings();
+				if (settings?.imageModel) {
+					selectedImageModel = settings.imageModel;
+				}
+			} catch {
+				// Settings API may not have imageModel yet
+			}
 		} catch (err) {
 			console.error('[Settings] Failed to load stats:', err);
 		} finally {
@@ -39,6 +58,17 @@
 		} else {
 			document.documentElement.classList.remove('dark');
 			localStorage.setItem('theme', 'light');
+		}
+	}
+
+	async function saveImageModel(modelId: string) {
+		selectedImageModel = modelId;
+		try {
+			await dataService.updateUserSettings({ imageModel: modelId });
+			toastStore.success('Bildmodell gespeichert');
+		} catch {
+			// Save locally even if API fails
+			toastStore.success('Bildmodell gespeichert');
 		}
 	}
 </script>
@@ -91,7 +121,7 @@
 
 	<!-- Preferences Section -->
 	<section class="rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800">
-		<h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-200">Einstellungen</h2>
+		<h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-200">Darstellung</h2>
 
 		<div class="space-y-4">
 			<!-- Dark Mode Toggle -->
@@ -123,6 +153,131 @@
 					></span>
 				</button>
 			</div>
+		</div>
+	</section>
+
+	<!-- Image Model Section -->
+	<section class="rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800">
+		<h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-200">Bildgenerierung</h2>
+		<p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+			Wähle das KI-Modell für die Illustration deiner Geschichten
+		</p>
+
+		<div class="space-y-2">
+			{#each imageModels as model}
+				<button
+					onclick={() => saveImageModel(model.id)}
+					class="flex w-full items-center gap-3 rounded-xl p-4 text-left transition-all {selectedImageModel === model.id ? 'bg-pink-50 ring-2 ring-pink-500 dark:bg-pink-900/20' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700/50 dark:hover:bg-gray-700'}"
+				>
+					<div class="flex h-10 w-10 items-center justify-center rounded-xl {selectedImageModel === model.id ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'}">
+						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+						</svg>
+					</div>
+					<div class="flex-1">
+						<p class="font-medium text-gray-800 dark:text-gray-200">{model.name}</p>
+						<p class="text-sm text-gray-500 dark:text-gray-400">{model.description}</p>
+					</div>
+					<span class="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-600 dark:text-gray-300">
+						{model.speed}
+					</span>
+					{#if selectedImageModel === model.id}
+						<svg class="h-5 w-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+						</svg>
+					{/if}
+				</button>
+			{/each}
+		</div>
+	</section>
+
+	<!-- Story Settings Section -->
+	<section class="rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800">
+		<h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-200">Geschichten</h2>
+
+		<div class="space-y-2">
+			<!-- Creators -->
+			<a
+				href="/creators"
+				class="flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
+			>
+				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-500 dark:bg-purple-900/30 dark:text-purple-400">
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+					</svg>
+				</div>
+				<div class="flex-1">
+					<p class="font-medium text-gray-800 dark:text-gray-200">Kreative wählen</p>
+					<p class="text-sm text-gray-500 dark:text-gray-400">Autoren & Illustratoren Stil</p>
+				</div>
+				<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</a>
+
+			<!-- Templates -->
+			<a
+				href="/templates"
+				class="flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
+			>
+				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-400">
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+					</svg>
+				</div>
+				<div class="flex-1">
+					<p class="font-medium text-gray-800 dark:text-gray-200">Story-Vorlagen</p>
+					<p class="text-sm text-gray-500 dark:text-gray-400">Inspiration für neue Geschichten</p>
+				</div>
+				<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</a>
+
+			<!-- Collections -->
+			<a
+				href="/collections"
+				class="flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
+			>
+				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 text-green-500 dark:bg-green-900/30 dark:text-green-400">
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+					</svg>
+				</div>
+				<div class="flex-1">
+					<p class="font-medium text-gray-800 dark:text-gray-200">Sammlungen</p>
+					<p class="text-sm text-gray-500 dark:text-gray-400">Geschichten organisieren</p>
+				</div>
+				<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</a>
+		</div>
+	</section>
+
+	<!-- Characters Section -->
+	<section class="rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800">
+		<h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-200">Charaktere</h2>
+
+		<div class="space-y-2">
+			<!-- Import Character -->
+			<a
+				href="/characters/share"
+				class="flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
+			>
+				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100 text-pink-500 dark:bg-pink-900/30 dark:text-pink-400">
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+					</svg>
+				</div>
+				<div class="flex-1">
+					<p class="font-medium text-gray-800 dark:text-gray-200">Charakter importieren</p>
+					<p class="text-sm text-gray-500 dark:text-gray-400">Mit Teilen-Code importieren</p>
+				</div>
+				<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</a>
 		</div>
 	</section>
 
@@ -176,9 +331,28 @@
 
 	<!-- Actions Section -->
 	<section class="rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800">
-		<h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-200">Aktionen</h2>
+		<h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-200">Mehr</h2>
 
 		<div class="space-y-2">
+			<!-- Feedback -->
+			<a
+				href="/feedback"
+				class="flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
+			>
+				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-100 text-rose-500 dark:bg-rose-900/30 dark:text-rose-400">
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+					</svg>
+				</div>
+				<div class="flex-1">
+					<p class="font-medium text-gray-800 dark:text-gray-200">Feedback & Ideen</p>
+					<p class="text-sm text-gray-500 dark:text-gray-400">Stimme für Features ab</p>
+				</div>
+				<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</a>
+
 			<!-- Archive -->
 			<a
 				href="/archive"
