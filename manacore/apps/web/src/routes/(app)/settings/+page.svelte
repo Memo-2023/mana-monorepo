@@ -50,7 +50,7 @@
 						<Input
 							type="email"
 							id="email"
-							value={data.user?.email || ''}
+							value={data.session?.user?.email || ''}
 							disabled
 							class="bg-gray-50 dark:bg-gray-900"
 						/>

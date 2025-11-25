@@ -37,5 +37,10 @@ export type {
   IconName
 } from './types';
 
+// Page Translation Types
+export type { LoginTranslations } from './pages/LoginPage.svelte';
+export type { RegisterTranslations } from './pages/RegisterPage.svelte';
+export type { ForgotPasswordTranslations } from './pages/ForgotPasswordPage.svelte';
+
 // Icon paths
 export { iconPaths } from './icons/iconPaths';

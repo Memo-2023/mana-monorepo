@@ -1,12 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { locale } from 'svelte-i18n';
 	import { LoginPage, setGoogleClientId, setAppleConfig } from '@manacore/shared-auth-ui';
 	import { MemoroLogo } from '@manacore/shared-branding';
+	import { getLoginTranslations } from '@manacore/shared-i18n';
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import { auth } from '$lib/stores/auth';
 	import { env } from '$lib/config/env';
 	import { onMount } from 'svelte';
+
+	// Get translations based on current locale
+	const translations = $derived(getLoginTranslations($locale || 'de'));
 
 	// Configure OAuth on mount
 	onMount(() => {
@@ -42,6 +47,7 @@
 	forgotPasswordPath="/forgot-password"
 	lightBackground="#dddddd"
 	darkBackground="#101010"
+	{translations}
 >
 	{#snippet headerControls()}
 		<LanguageSelector />

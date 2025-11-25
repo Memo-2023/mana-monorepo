@@ -5,6 +5,60 @@
 	import GoogleSignInButton from '../components/GoogleSignInButton.svelte';
 	import AppleSignInButton from '../components/AppleSignInButton.svelte';
 
+	/** Translation strings for the login page */
+	export interface LoginTranslations {
+		title: string;
+		subtitle: string;
+		emailPlaceholder: string;
+		passwordPlaceholder: string;
+		rememberMe: string;
+		forgotPassword: string;
+		signInButton: string;
+		signingIn: string;
+		success: string;
+		orDivider: string;
+		noAccount: string;
+		createAccount: string;
+		skipToForm: string;
+		showPassword: string;
+		hidePassword: string;
+		// Error messages
+		emailRequired: string;
+		emailInvalid: string;
+		passwordRequired: string;
+		signInFailed: string;
+		googleSignInFailed: string;
+		// Success messages
+		signInSuccess: string;
+		googleSignInSuccess: string;
+	}
+
+	/** Default English translations */
+	const defaultTranslations: LoginTranslations = {
+		title: 'Sign In',
+		subtitle: 'Sign in with your Mana account',
+		emailPlaceholder: 'Email',
+		passwordPlaceholder: 'Password',
+		rememberMe: 'Remember me',
+		forgotPassword: 'Forgot password?',
+		signInButton: 'Sign In',
+		signingIn: 'Signing in...',
+		success: 'Success!',
+		orDivider: 'or',
+		noAccount: "Don't have an account?",
+		createAccount: 'Create one',
+		skipToForm: 'Skip to login form',
+		showPassword: 'Show password',
+		hidePassword: 'Hide password',
+		emailRequired: 'Email is required',
+		emailInvalid: 'Please enter a valid email address',
+		passwordRequired: 'Password is required',
+		signInFailed: 'Sign in failed',
+		googleSignInFailed: 'Google sign in failed',
+		signInSuccess: 'Successfully signed in. Redirecting...',
+		googleSignInSuccess: 'Successfully signed in with Google. Redirecting...'
+	};
+
 	interface Props {
 		/** App name */
 		appName: string;
@@ -38,6 +92,8 @@
 		appSlider?: Snippet;
 		/** Header snippet for controls like theme toggle and language selector */
 		headerControls?: Snippet;
+		/** Translations for i18n support */
+		translations?: Partial<LoginTranslations>;
 	}
 
 	let {
@@ -56,8 +112,12 @@
 		lightBackground = '#f5f5f5',
 		darkBackground = '#121212',
 		appSlider,
-		headerControls
+		headerControls,
+		translations = {}
 	}: Props = $props();
+
+	// Merge provided translations with defaults
+	const t = $derived({ ...defaultTranslations, ...translations });
 
 	let loading = $state(false);
 	let error = $state<string | null>(null);
@@ -135,19 +195,19 @@
 		clearError();
 
 		if (!email) {
-			setError('Email is required', 'email');
+			setError(t.emailRequired, 'email');
 			loading = false;
 			return;
 		}
 
 		if (!isValidEmail(email)) {
-			setError('Please enter a valid email address', 'email');
+			setError(t.emailInvalid, 'email');
 			loading = false;
 			return;
 		}
 
 		if (!password) {
-			setError('Password is required', 'password');
+			setError(t.passwordRequired, 'password');
 			loading = false;
 			return;
 		}
@@ -159,12 +219,12 @@
 		if (result.success) {
 			// Show success feedback before redirect
 			showSuccess = true;
-			successAnnouncement = 'Successfully signed in. Redirecting...';
+			successAnnouncement = t.signInSuccess;
 			setTimeout(() => {
 				goto(successRedirect);
 			}, 600);
 		} else {
-			setError(result.error || 'Sign in failed', 'general');
+			setError(result.error || t.signInFailed, 'general');
 		}
 	}
 
@@ -179,12 +239,12 @@
 
 		if (result.success) {
 			showSuccess = true;
-			successAnnouncement = 'Successfully signed in with Google. Redirecting...';
+			successAnnouncement = t.googleSignInSuccess;
 			setTimeout(() => {
 				goto(successRedirect);
 			}, 600);
 		} else {
-			setError(result.error || 'Google sign in failed', 'general');
+			setError(result.error || t.googleSignInFailed, 'general');
 		}
 	}
 
@@ -285,7 +345,7 @@
 	onclick={skipToForm}
 	type="button"
 >
-	Skip to login form
+	{t.skipToForm}
 </button>
 
 <!-- Screen reader announcements -->
@@ -340,13 +400,13 @@
 						class="text-center text-xl font-semibold"
 						style="color: {isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)'};"
 					>
-						Sign In
+						{t.title}
 					</h2>
 					<p
 						class="mt-2 text-sm text-center"
 						style="color: {isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};"
 					>
-						Sign in with your Mana account
+						{t.subtitle}
 					</p>
 				</div>
 
@@ -375,13 +435,13 @@
 				>
 					<!-- Email Field -->
 					<div class="mb-3">
-						<label for="email" class="sr-only">Email address</label>
+						<label for="email" class="sr-only">{t.emailPlaceholder}</label>
 						<input
 							id="email"
 							type="email"
 							bind:this={emailInput}
 							bind:value={email}
-							placeholder="Email"
+							placeholder={t.emailPlaceholder}
 							required
 							autocomplete="email"
 							aria-invalid={errorField === 'email'}
@@ -393,13 +453,13 @@
 
 					<!-- Password Field -->
 					<div class="mb-3 relative">
-						<label for="password" class="sr-only">Password</label>
+						<label for="password" class="sr-only">{t.passwordPlaceholder}</label>
 						<input
 							id="password"
 							type={showPassword ? 'text' : 'password'}
 							bind:this={passwordInput}
 							bind:value={password}
-							placeholder="Password"
+							placeholder={t.passwordPlaceholder}
 							required
 							autocomplete="current-password"
 							aria-invalid={errorField === 'password'}
@@ -411,9 +471,9 @@
 							type="button"
 							onclick={() => (showPassword = !showPassword)}
 							class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors touch-target flex items-center justify-center"
-							aria-label={showPassword ? 'Hide password' : 'Show password'}
+							aria-label={showPassword ? t.hidePassword : t.showPassword}
 							aria-pressed={showPassword}
-							title={showPassword ? 'Hide password' : 'Show password'}
+							title={showPassword ? t.hidePassword : t.showPassword}
 						>
 							<Icon
 								name={showPassword ? 'eye-off' : 'eye'}
@@ -436,7 +496,7 @@
 								class="text-sm"
 								style="color: {isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'};"
 							>
-								Remember me
+								{t.rememberMe}
 							</span>
 						</label>
 
@@ -446,7 +506,7 @@
 							class="text-sm font-medium transition-opacity hover:opacity-70 touch-target flex items-center justify-center px-2"
 							style="color: {primaryColor};"
 						>
-							Forgot password?
+							{t.forgotPassword}
 						</button>
 					</div>
 
@@ -470,13 +530,13 @@
 								<circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
 								<path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
 							</svg>
-							<span>Signing in...</span>
+							<span>{t.signingIn}</span>
 						{:else if showSuccess}
 							<Icon name="check" size={20} />
-							<span>Success!</span>
+							<span>{t.success}</span>
 						{:else}
 							<Icon name="sign-in" size={20} />
-							<span>Sign In</span>
+							<span>{t.signInButton}</span>
 						{/if}
 					</button>
 				</form>
@@ -485,7 +545,7 @@
 				{#if enableGoogle || enableApple}
 					<div class="my-4 flex items-center gap-3" role="separator" aria-orientation="horizontal">
 						<div class="flex-1 border-t" style="border-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"></div>
-						<span class="text-xs" style="color: {isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'};">or</span>
+						<span class="text-xs" style="color: {isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'};">{t.orDivider}</span>
 						<div class="flex-1 border-t" style="border-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"></div>
 					</div>
 
@@ -505,14 +565,14 @@
 						class="text-sm"
 						style="color: {isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};"
 					>
-						Don't have an account?
+						{t.noAccount}
 						<button
 							type="button"
 							onclick={() => goto(registerPath)}
 							class="font-medium transition-opacity hover:opacity-70 touch-target inline-flex items-center justify-center px-1"
 							style="color: {primaryColor};"
 						>
-							Create one
+							{t.createAccount}
 						</button>
 					</p>
 				</div>

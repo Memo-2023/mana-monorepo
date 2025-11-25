@@ -45,5 +45,21 @@ export {
   mergeWithCommon,
 } from './translations/common';
 
+// Auth translations
+export {
+  en as authTranslationsEn,
+  de as authTranslationsDe,
+  it as authTranslationsIt,
+  fr as authTranslationsFr,
+  es as authTranslationsEs,
+  type AuthTranslations,
+  type AuthLocale,
+  authTranslations,
+  getAuthTranslations,
+  getLoginTranslations,
+  getRegisterTranslations,
+  getForgotPasswordTranslations,
+} from './translations/auth';
+
 // Components
 export { LanguageSelector } from './components';

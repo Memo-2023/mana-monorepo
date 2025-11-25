@@ -4,9 +4,12 @@ import { init, register, locale, waitLocale } from 'svelte-i18n';
 // Register all available locales
 register('de', () => import('./locales/de.json'));
 register('en', () => import('./locales/en.json'));
+register('it', () => import('./locales/it.json'));
+register('fr', () => import('./locales/fr.json'));
+register('es', () => import('./locales/es.json'));
 
 // List of supported locales
-export const supportedLocales = ['de', 'en'] as const;
+export const supportedLocales = ['de', 'en', 'it', 'fr', 'es'] as const;
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 // Default locale

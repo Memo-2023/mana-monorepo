@@ -29,7 +29,7 @@
 	<div class="mb-8">
 		<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
 		<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-			Welcome back, {data.profile?.first_name || data.user?.email}
+			Welcome back, {data.profile?.first_name || data.session?.user?.email}
 		</p>
 	</div>
 

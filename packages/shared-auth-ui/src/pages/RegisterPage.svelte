@@ -5,6 +5,52 @@
 
 	import type { Snippet } from 'svelte';
 
+	/** Translation strings for the register page */
+	export interface RegisterTranslations {
+		title: string;
+		emailPlaceholder: string;
+		passwordPlaceholder: string;
+		confirmPasswordPlaceholder: string;
+		passwordRequirements: string;
+		createAccountButton: string;
+		creatingAccount: string;
+		backToLogin: string;
+		showPassword: string;
+		hidePassword: string;
+		// Error messages
+		emailRequired: string;
+		passwordRequired: string;
+		confirmPasswordRequired: string;
+		passwordsDoNotMatch: string;
+		passwordTooShort: string;
+		passwordStrengthError: string;
+		registrationFailed: string;
+		// Success messages
+		accountCreated: string;
+	}
+
+	/** Default English translations */
+	const defaultTranslations: RegisterTranslations = {
+		title: 'Create Account',
+		emailPlaceholder: 'Email',
+		passwordPlaceholder: 'Password',
+		confirmPasswordPlaceholder: 'Confirm Password',
+		passwordRequirements: 'Password must be at least 8 characters with lowercase, uppercase, number, and special character.',
+		createAccountButton: 'Create Account',
+		creatingAccount: 'Creating Account...',
+		backToLogin: 'Back to Login',
+		showPassword: 'Show password',
+		hidePassword: 'Hide password',
+		emailRequired: 'Email is required',
+		passwordRequired: 'Password is required',
+		confirmPasswordRequired: 'Please confirm your password',
+		passwordsDoNotMatch: 'Passwords do not match',
+		passwordTooShort: 'Password must be at least 8 characters',
+		passwordStrengthError: 'Password must include lowercase, uppercase, number, and special character',
+		registrationFailed: 'Registration failed',
+		accountCreated: 'Account created! Please check your email to verify your account.'
+	};
+
 	interface Props {
 		/** App name */
 		appName: string;
@@ -26,6 +72,8 @@
 		darkBackground?: string;
 		/** App slider snippet */
 		appSlider?: Snippet;
+		/** Translations for i18n support */
+		translations?: Partial<RegisterTranslations>;
 	}
 
 	let {
@@ -38,8 +86,12 @@
 		loginPath = '/login',
 		lightBackground = '#f5f5f5',
 		darkBackground = '#121212',
-		appSlider
+		appSlider,
+		translations = {}
 	}: Props = $props();
+
+	// Merge provided translations with defaults
+	const t = $derived({ ...defaultTranslations, ...translations });
 
 	let loading = $state(false);
 	let error = $state<string | null>(null);
@@ -98,31 +150,31 @@
 
 		// Validation
 		if (!email) {
-			error = 'Email is required';
+			error = t.emailRequired;
 			loading = false;
 			return;
 		}
 
 		if (!password) {
-			error = 'Password is required';
+			error = t.passwordRequired;
 			loading = false;
 			return;
 		}
 
 		if (!confirmPassword) {
-			error = 'Please confirm your password';
+			error = t.confirmPasswordRequired;
 			loading = false;
 			return;
 		}
 
 		if (password !== confirmPassword) {
-			error = 'Passwords do not match';
+			error = t.passwordsDoNotMatch;
 			loading = false;
 			return;
 		}
 
 		if (password.length < 8) {
-			error = 'Password must be at least 8 characters';
+			error = t.passwordTooShort;
 			loading = false;
 			return;
 		}
@@ -134,7 +186,7 @@
 		const hasSymbol = /[^a-zA-Z0-9]/.test(password);
 
 		if (!hasLowercase || !hasUppercase || !hasDigit || !hasSymbol) {
-			error = 'Password must include lowercase, uppercase, number, and special character';
+			error = t.passwordStrengthError;
 			loading = false;
 			return;
 		}
@@ -153,7 +205,7 @@
 				goto(successRedirect);
 			}
 		} else {
-			error = result.error || 'Registration failed';
+			error = result.error || t.registrationFailed;
 		}
 	}
 </script>
@@ -192,7 +244,7 @@
 				class="mb-6 text-center text-xl font-semibold"
 				style="color: {isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)'};"
 			>
-				Create Account
+				{t.title}
 			</h2>
 
 			<!-- Error Messages -->
@@ -206,7 +258,7 @@
 			{#if success && needsVerification}
 				<div class="mb-4 rounded-xl bg-green-500/20 border border-green-500/30 p-3">
 					<p class="text-sm text-green-500">
-						Account created! Please check your email to verify your account.
+						{t.accountCreated}
 					</p>
 				</div>
 			{/if}
@@ -223,7 +275,7 @@
 					<input
 						type="email"
 						bind:value={email}
-						placeholder="Email"
+						placeholder={t.emailPlaceholder}
 						required
 						class="h-14 w-full rounded-xl border px-4 text-lg transition-colors focus:outline-none focus:ring-2"
 						style="background-color: {isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'}; --tw-ring-color: {primaryColor};"
@@ -234,7 +286,7 @@
 					<input
 						type={showPassword ? 'text' : 'password'}
 						bind:value={password}
-						placeholder="Password"
+						placeholder={t.passwordPlaceholder}
 						required
 						minlength={8}
 						class="h-14 w-full rounded-xl border px-4 pr-12 text-lg transition-colors focus:outline-none focus:ring-2"
@@ -244,6 +296,7 @@
 						type="button"
 						onclick={() => (showPassword = !showPassword)}
 						class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+						aria-label={showPassword ? t.hidePassword : t.showPassword}
 					>
 						<Icon
 							name={showPassword ? 'eye-off' : 'eye'}
@@ -257,7 +310,7 @@
 					<input
 						type={showConfirmPassword ? 'text' : 'password'}
 						bind:value={confirmPassword}
-						placeholder="Confirm Password"
+						placeholder={t.confirmPasswordPlaceholder}
 						required
 						minlength={8}
 						class="h-14 w-full rounded-xl border px-4 pr-12 text-lg transition-colors focus:outline-none focus:ring-2"
@@ -267,6 +320,7 @@
 						type="button"
 						onclick={() => (showConfirmPassword = !showConfirmPassword)}
 						class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+						aria-label={showConfirmPassword ? t.hidePassword : t.showPassword}
 					>
 						<Icon
 							name={showConfirmPassword ? 'eye-off' : 'eye'}
@@ -281,8 +335,7 @@
 					class="mb-4 mt-2 text-xs"
 					style="color: {isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};"
 				>
-					Password must be at least 8 characters with lowercase, uppercase, number, and special
-					character.
+					{t.passwordRequirements}
 				</p>
 
 				<button
@@ -292,7 +345,7 @@
 					style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
 				>
 					<Icon name="user-plus" size={20} />
-					{loading ? 'Creating Account...' : 'Create Account'}
+					{loading ? t.creatingAccount : t.createAccountButton}
 				</button>
 			</form>
 
@@ -304,7 +357,7 @@
 					style="color: {isDark ? '#ffffff' : '#000000'};"
 				>
 					<Icon name="arrow-left" size={20} />
-					Back to Login
+					{t.backToLogin}
 				</button>
 			</div>
 		</div>

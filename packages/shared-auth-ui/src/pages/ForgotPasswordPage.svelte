@@ -5,6 +5,38 @@
 
 	type PageMode = 'form' | 'success';
 
+	/** Translation strings for the forgot password page */
+	export interface ForgotPasswordTranslations {
+		titleForm: string;
+		titleSuccess: string;
+		description: string;
+		emailPlaceholder: string;
+		sendResetLinkButton: string;
+		sending: string;
+		backToLogin: string;
+		resendEmail: string;
+		// Success message (uses template with email)
+		successMessage: string;
+		// Error messages
+		emailRequired: string;
+		sendFailed: string;
+	}
+
+	/** Default English translations */
+	const defaultTranslations: ForgotPasswordTranslations = {
+		titleForm: 'Reset Password',
+		titleSuccess: 'Email Sent',
+		description: "Enter your email address and we'll send you a link to reset your password.",
+		emailPlaceholder: 'Email',
+		sendResetLinkButton: 'Send Reset Link',
+		sending: 'Sending...',
+		backToLogin: 'Back to Login',
+		resendEmail: 'Resend Email',
+		successMessage: "We've sent a password reset link to {email}. Please check your inbox.",
+		emailRequired: 'Email is required',
+		sendFailed: 'Failed to send reset email'
+	};
+
 	interface Props {
 		/** App name */
 		appName: string;
@@ -24,6 +56,8 @@
 		darkBackground?: string;
 		/** App slider snippet */
 		appSlider?: Snippet;
+		/** Translations for i18n support */
+		translations?: Partial<ForgotPasswordTranslations>;
 	}
 
 	let {
@@ -35,8 +69,17 @@
 		loginPath = '/login',
 		lightBackground = '#f5f5f5',
 		darkBackground = '#121212',
-		appSlider
+		appSlider,
+		translations = {}
 	}: Props = $props();
+
+	// Merge provided translations with defaults
+	const t = $derived({ ...defaultTranslations, ...translations });
+
+	// Helper to interpolate success message with email
+	function getSuccessMessage(email: string): string {
+		return t.successMessage.replace('{email}', email);
+	}
 
 	let loading = $state(false);
 	let error = $state<string | null>(null);
@@ -68,7 +111,7 @@
 		error = null;
 
 		if (!email) {
-			error = 'Email is required';
+			error = t.emailRequired;
 			loading = false;
 			return;
 		}
@@ -82,7 +125,7 @@
 			email = '';
 			mode = 'success';
 		} else {
-			error = result.error || 'Failed to send reset email';
+			error = result.error || t.sendFailed;
 		}
 	}
 </script>
@@ -121,7 +164,7 @@
 				class="mb-6 text-center text-xl font-semibold"
 				style="color: {isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)'};"
 			>
-				{mode === 'form' ? 'Reset Password' : 'Email Sent'}
+				{mode === 'form' ? t.titleForm : t.titleSuccess}
 			</h2>
 
 			<!-- Error Messages -->
@@ -144,14 +187,14 @@
 						class="mb-4 text-sm"
 						style="color: {isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'};"
 					>
-						Enter your email address and we'll send you a link to reset your password.
+						{t.description}
 					</p>
 
 					<div class="mb-4">
 						<input
 							type="email"
 							bind:value={email}
-							placeholder="Email"
+							placeholder={t.emailPlaceholder}
 							required
 							class="h-14 w-full rounded-xl border px-4 text-lg transition-colors focus:outline-none focus:ring-2"
 							style="background-color: {isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'}; --tw-ring-color: {primaryColor};"
@@ -165,7 +208,7 @@
 						style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
 					>
 						<Icon name="key" size={20} />
-						{loading ? 'Sending...' : 'Send Reset Link'}
+						{loading ? t.sending : t.sendResetLinkButton}
 					</button>
 				</form>
 
@@ -177,7 +220,7 @@
 						style="color: {isDark ? '#ffffff' : '#000000'};"
 					>
 						<Icon name="arrow-left" size={20} />
-						Back to Login
+						{t.backToLogin}
 					</button>
 				</div>
 
@@ -196,8 +239,7 @@
 							class="text-sm text-center px-2"
 							style="color: {isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'};"
 						>
-							We've sent a password reset link to <strong>{resetEmail}</strong>. Please check your
-							inbox.
+							{@html getSuccessMessage(resetEmail).replace(resetEmail, `<strong>${resetEmail}</strong>`)}
 						</p>
 					</div>
 
@@ -208,7 +250,7 @@
 							style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
 						>
 							<Icon name="sign-in" size={20} />
-							Back to Login
+							{t.backToLogin}
 						</button>
 
 						<button
@@ -219,7 +261,7 @@
 							class="flex h-10 items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 border"
 							style="background-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'};"
 						>
-							Resend Email
+							{t.resendEmail}
 						</button>
 					</div>
 				</div>
