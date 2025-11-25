@@ -13,6 +13,7 @@
     "@iconify-json/heroicons": "^1.2.2",
     "@iconify-json/mdi": "^1.2.3",
     "@iconify-json/tabler": "^1.2.19",
+    "@manacore/shared-landing-ui": "workspace:*",
     "astro": "^5.16.0",
     "astro-icon": "^1.1.5",
     "react": "^18.3.1",

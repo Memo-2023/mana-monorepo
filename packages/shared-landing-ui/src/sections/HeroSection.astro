@@ -1,0 +1,246 @@
+---
+/**
+ * Shared Hero Section component
+ * Supports multiple variants: default (split), fullwidth, widescreen
+ */
+import Container from '../atoms/Container.astro';
+import Button from '../atoms/Button.astro';
+
+interface CTA {
+  text: string;
+  href: string;
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  icon?: string;
+}
+
+interface TrustBadge {
+  icon: string;
+  text: string;
+}
+
+interface Props {
+  title: string;
+  subtitle: string;
+  variant?: 'default' | 'fullwidth' | 'centered';
+  image?: {
+    src: string;
+    alt: string;
+    position?: 'left' | 'right';
+  };
+  primaryCta?: CTA;
+  secondaryCta?: CTA;
+  microCopy?: string;
+  trustBadges?: TrustBadge[];
+  class?: string;
+  showScrollIndicator?: boolean;
+}
+
+const {
+  title,
+  subtitle,
+  variant = 'default',
+  image,
+  primaryCta,
+  secondaryCta,
+  microCopy,
+  trustBadges,
+  class: className = '',
+  showScrollIndicator = false
+} = Astro.props;
+
+const imagePosition = image?.position ?? 'right';
+---
+
+<section class:list={[
+  "relative overflow-hidden",
+  variant === 'default' && "py-12 md:py-20",
+  variant === 'fullwidth' && "py-8 md:py-12",
+  variant === 'centered' && "py-16 md:py-24 min-h-[80vh] flex items-center",
+  className
+]}>
+  <Container>
+    {variant === 'default' && (
+      <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+        <!-- Text Content -->
+        <div class:list={[
+          "text-center md:text-left space-y-6",
+          imagePosition === 'left' ? 'md:order-2' : 'md:order-1'
+        ]}>
+          <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--color-text-primary)] leading-tight">
+            <slot name="title">{title}</slot>
+          </h1>
+
+          <p class="text-base sm:text-lg md:text-xl text-[var(--color-text-secondary)] leading-relaxed max-w-xl mx-auto md:mx-0">
+            {subtitle}
+          </p>
+
+          {(primaryCta || secondaryCta) && (
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
+              {primaryCta && (
+                <Button href={primaryCta.href} variant={primaryCta.variant ?? 'primary'} size="lg">
+                  <slot name="primaryCtaIcon" />
+                  {primaryCta.text}
+                </Button>
+              )}
+              {secondaryCta && (
+                <Button href={secondaryCta.href} variant={secondaryCta.variant ?? 'secondary'} size="lg">
+                  <slot name="secondaryCtaIcon" />
+                  {secondaryCta.text}
+                </Button>
+              )}
+            </div>
+          )}
+
+          {microCopy && (
+            <p class="text-sm text-[var(--color-text-muted)]">{microCopy}</p>
+          )}
+
+          {trustBadges && trustBadges.length > 0 && (
+            <div class="flex flex-wrap gap-3 justify-center md:justify-start mt-6">
+              {trustBadges.map((badge) => (
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 backdrop-blur-sm">
+                  <span class="text-base">{badge.icon}</span>
+                  <span class="text-xs font-medium text-[var(--color-text-secondary)]">{badge.text}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <!-- Image -->
+        {image && (
+          <div class:list={[
+            "relative",
+            imagePosition === 'left' ? 'md:order-1' : 'md:order-2'
+          ]}>
+            <div class="relative w-full aspect-square md:aspect-[4/3] overflow-hidden rounded-2xl group">
+              <img
+                src={image.src}
+                alt={image.alt}
+                class="w-full h-full object-cover shadow-2xl transform group-hover:scale-105 transition-transform duration-700"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+            </div>
+            <slot name="imageDecoration" />
+          </div>
+        )}
+      </div>
+    )}
+
+    {variant === 'fullwidth' && image && (
+      <div class="space-y-6">
+        <!-- Full-width Image -->
+        <div class="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden rounded-2xl">
+          <img
+            src={image.src}
+            alt={image.alt}
+            class="absolute inset-0 w-full h-full object-cover"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+
+          <!-- Overlay text on desktop -->
+          <div class="hidden md:flex absolute inset-0 items-end justify-center pb-8">
+            <div class="text-center max-w-3xl px-8 space-y-4">
+              <h1 class="text-3xl md:text-5xl text-white font-bold leading-tight">
+                <slot name="title">{title}</slot>
+              </h1>
+              <p class="text-lg md:text-xl text-gray-200 leading-relaxed">
+                {subtitle}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Text below on mobile -->
+        <div class="md:hidden text-center space-y-4">
+          <h1 class="text-2xl sm:text-3xl font-bold text-[var(--color-text-primary)] leading-tight">
+            <slot name="title">{title}</slot>
+          </h1>
+          <p class="text-base text-[var(--color-text-secondary)] leading-relaxed">
+            {subtitle}
+          </p>
+        </div>
+
+        <!-- CTAs -->
+        {(primaryCta || secondaryCta) && (
+          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            {primaryCta && (
+              <Button href={primaryCta.href} variant={primaryCta.variant ?? 'primary'} size="lg">
+                <slot name="primaryCtaIcon" />
+                {primaryCta.text}
+              </Button>
+            )}
+            {secondaryCta && (
+              <Button href={secondaryCta.href} variant={secondaryCta.variant ?? 'secondary'} size="lg">
+                <slot name="secondaryCtaIcon" />
+                {secondaryCta.text}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {trustBadges && trustBadges.length > 0 && (
+          <div class="flex flex-wrap gap-3 justify-center">
+            {trustBadges.map((badge) => (
+              <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 backdrop-blur-sm">
+                <span class="text-base">{badge.icon}</span>
+                <span class="text-xs font-medium text-gray-300">{badge.text}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+
+    {variant === 'centered' && (
+      <div class="text-center max-w-4xl mx-auto space-y-8">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--color-text-primary)] leading-tight">
+          <slot name="title">{title}</slot>
+        </h1>
+
+        <p class="text-lg md:text-xl text-[var(--color-text-secondary)] leading-relaxed max-w-2xl mx-auto">
+          {subtitle}
+        </p>
+
+        {(primaryCta || secondaryCta) && (
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            {primaryCta && (
+              <Button href={primaryCta.href} variant={primaryCta.variant ?? 'primary'} size="lg">
+                <slot name="primaryCtaIcon" />
+                {primaryCta.text}
+              </Button>
+            )}
+            {secondaryCta && (
+              <Button href={secondaryCta.href} variant={secondaryCta.variant ?? 'secondary'} size="lg">
+                <slot name="secondaryCtaIcon" />
+                {secondaryCta.text}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {microCopy && (
+          <p class="text-sm text-[var(--color-text-muted)]">{microCopy}</p>
+        )}
+
+        <slot name="content" />
+      </div>
+    )}
+  </Container>
+
+  {showScrollIndicator && (
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <svg class="w-6 h-6 text-[var(--color-text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+      </svg>
+    </div>
+  )}
+
+  <slot name="background" />
+</section>

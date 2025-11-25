@@ -1,0 +1,49 @@
+---
+/**
+ * Shared Section Header component for consistent section titles
+ */
+interface Props {
+  title: string;
+  subtitle?: string;
+  align?: 'left' | 'center' | 'right';
+  class?: string;
+  titleClass?: string;
+  subtitleClass?: string;
+}
+
+const {
+  title,
+  subtitle,
+  align = 'center',
+  class: className = '',
+  titleClass = '',
+  subtitleClass = ''
+} = Astro.props;
+
+const alignStyles = {
+  left: 'text-left',
+  center: 'text-center mx-auto',
+  right: 'text-right'
+};
+
+const containerStyles = `mb-8 md:mb-12 ${alignStyles[align]} ${className}`;
+---
+
+<div class={containerStyles}>
+  <h2 class:list={[
+    "text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--color-text-primary)] mb-3 md:mb-4 leading-tight",
+    titleClass
+  ]}>
+    <slot name="title">{title}</slot>
+  </h2>
+  {subtitle && (
+    <p class:list={[
+      "text-base sm:text-lg text-[var(--color-text-secondary)] max-w-3xl leading-relaxed",
+      align === 'center' && 'mx-auto',
+      subtitleClass
+    ]}>
+      <slot name="subtitle">{subtitle}</slot>
+    </p>
+  )}
+  <slot />
+</div>

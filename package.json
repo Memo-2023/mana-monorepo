@@ -16,9 +16,10 @@
     "manacore:dev": "turbo run dev --filter=manacore...",
     "manadeck:dev": "turbo run dev --filter=manadeck...",
     "memoro:dev": "turbo run dev --filter=memoro...",
-    "dev:web": "turbo run dev --filter=@storyteller/web --filter=manacore-web --filter=web --filter=memoro-web",
-    "dev:landing": "turbo run dev --filter=@storyteller/landing --filter=manacore-landing --filter=landing --filter=memoro-landing",
-    "dev:mobile": "turbo run dev --filter=@storyteller/mobile --filter=manacore --filter=manadeck --filter=memoro"
+    "picture:dev": "turbo run dev --filter=picture...",
+    "dev:web": "turbo run dev --filter=@storyteller/web --filter=manacore-web --filter=web --filter=memoro-web --filter=@picture/web",
+    "dev:landing": "turbo run dev --filter=@storyteller/landing --filter=manacore-landing --filter=landing --filter=memoro-landing --filter=@picture/landing",
+    "dev:mobile": "turbo run dev --filter=@storyteller/mobile --filter=manacore --filter=manadeck --filter=memoro --filter=@picture/mobile"
   },
   "devDependencies": {
     "prettier": "^3.3.3",

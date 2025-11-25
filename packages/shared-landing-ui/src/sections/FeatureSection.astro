@@ -1,0 +1,95 @@
+---
+/**
+ * Shared Feature Section component
+ * Displays features in a responsive grid
+ */
+import Container from '../atoms/Container.astro';
+import Card from '../atoms/Card.astro';
+import SectionHeader from '../atoms/SectionHeader.astro';
+
+interface Feature {
+  icon: string;
+  title: string;
+  description: string;
+  href?: string;
+}
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  features: Feature[];
+  columns?: 2 | 3 | 4;
+  variant?: 'cards' | 'simple' | 'icons-left';
+  class?: string;
+  id?: string;
+}
+
+const {
+  title,
+  subtitle,
+  features,
+  columns = 3,
+  variant = 'cards',
+  class: className = '',
+  id
+} = Astro.props;
+
+const gridCols = {
+  2: 'md:grid-cols-2',
+  3: 'md:grid-cols-2 lg:grid-cols-3',
+  4: 'md:grid-cols-2 lg:grid-cols-4'
+};
+---
+
+<section id={id} class:list={["py-16 md:py-24", className]}>
+  <Container>
+    <SectionHeader title={title} subtitle={subtitle} />
+
+    <div class:list={["grid gap-6 md:gap-8", gridCols[columns]]}>
+      {features.map((feature) => (
+        variant === 'cards' ? (
+          <Card variant="hover" padding="lg" as={feature.href ? 'a' : 'div'} href={feature.href}>
+            <div class="flex flex-col items-center text-center h-full">
+              <div class="text-4xl sm:text-5xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
+                {feature.icon}
+              </div>
+              <h3 class="font-semibold text-lg sm:text-xl text-[var(--color-text-primary)] mb-3">
+                {feature.title}
+              </h3>
+              <p class="text-[var(--color-text-secondary)] text-sm sm:text-base leading-relaxed">
+                {feature.description}
+              </p>
+            </div>
+          </Card>
+        ) : variant === 'icons-left' ? (
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 text-3xl">
+              {feature.icon}
+            </div>
+            <div>
+              <h3 class="font-semibold text-lg text-[var(--color-text-primary)] mb-2">
+                {feature.title}
+              </h3>
+              <p class="text-[var(--color-text-secondary)] text-sm leading-relaxed">
+                {feature.description}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div class="text-center">
+            <div class="text-4xl mb-4">{feature.icon}</div>
+            <h3 class="font-semibold text-lg text-[var(--color-text-primary)] mb-2">
+              {feature.title}
+            </h3>
+            <p class="text-[var(--color-text-secondary)] text-sm leading-relaxed">
+              {feature.description}
+            </p>
+          </div>
+        )
+      ))}
+    </div>
+
+    <slot name="highlight" />
+    <slot />
+  </Container>
+</section>

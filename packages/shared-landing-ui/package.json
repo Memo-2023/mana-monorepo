@@ -1,0 +1,39 @@
+{
+  "name": "@manacore/shared-landing-ui",
+  "version": "0.1.0",
+  "description": "Shared Astro landing page components for Manacore monorepo",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./atoms/*": "./src/atoms/*",
+    "./sections/*": "./src/sections/*",
+    "./layouts/*": "./src/layouts/*",
+    "./utils": "./src/utils/index.ts",
+    "./themes": "./src/themes/index.css",
+    "./themes/memoro": "./src/themes/memoro.css",
+    "./themes/manacore": "./src/themes/manacore.css",
+    "./themes/maerchenzauber": "./src/themes/maerchenzauber.css",
+    "./themes/manadeck": "./src/themes/manadeck.css"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "type-check": "astro check"
+  },
+  "peerDependencies": {
+    "astro": ">=5.0.0",
+    "astro-icon": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.0",
+    "astro": "^5.16.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "astro",
+    "landing",
+    "components",
+    "manacore"
+  ]
+}

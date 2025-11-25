@@ -1,0 +1,24 @@
+/**
+ * ManaCore Theme - Blue Dark Theme
+ * Import this file in your landing page to use the ManaCore color scheme
+ */
+:root {
+  /* Primary colors - ManaCore Blue */
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-primary-glow: rgba(59, 130, 246, 0.3);
+
+  /* Text colors */
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #d1d5db;
+  --color-text-muted: #6b7280;
+
+  /* Background colors */
+  --color-background-page: #081320;
+  --color-background-card: #1e293b;
+  --color-background-card-hover: #334155;
+
+  /* Border colors */
+  --color-border: #334155;
+  --color-border-hover: #475569;
+}

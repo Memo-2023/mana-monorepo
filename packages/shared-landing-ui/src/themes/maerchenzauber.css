@@ -1,0 +1,24 @@
+/**
+ * Märchenzauber Theme - Golden/Yellow Dark Theme (Children's App)
+ * Import this file in your landing page to use the Märchenzauber color scheme
+ */
+:root {
+  /* Primary colors - Märchenzauber Gold */
+  --color-primary: #6D5B00;
+  --color-primary-hover: #F8D62B;
+  --color-primary-glow: rgba(248, 214, 43, 0.3);
+
+  /* Text colors */
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #999999;
+  --color-text-muted: #666666;
+
+  /* Background colors */
+  --color-background-page: #181818;
+  --color-background-card: #2C2C2C;
+  --color-background-card-hover: #333333;
+
+  /* Border colors */
+  --color-border: #444444;
+  --color-border-hover: #555555;
+}

@@ -7,7 +7,7 @@
     /* Primary colors from mobile app */
     --color-yellow-dark: #6D5B00;
     --color-yellow-light: #F8D62B;
-    
+
     /* Background colors */
     --color-bg-primary: #181818;
     --color-bg-secondary: #333333;
@@ -15,15 +15,24 @@
     --color-bg-input: #333333;
     --color-bg-dark: #121212;
     --color-bg-darker: #1a1a1a;
-    
+
     /* Text colors */
     --color-text-primary: #FFFFFF;
     --color-text-secondary: #999999;
     --color-text-muted: #666666;
     --color-text-light: #CCCCCC;
-    
+
     /* UI elements */
     --color-border: #444444;
+
+    /* === Shared Landing UI Variables (aliases) === */
+    --color-primary: var(--color-yellow-dark);
+    --color-primary-hover: var(--color-yellow-light);
+    --color-primary-glow: rgba(248, 214, 43, 0.3);
+    --color-background-page: var(--color-bg-primary);
+    --color-background-card: var(--color-bg-card);
+    --color-background-card-hover: var(--color-bg-secondary);
+    --color-border-hover: #555555;
   }
 
   html {

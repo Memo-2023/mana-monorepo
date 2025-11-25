@@ -1,0 +1,88 @@
+---
+/**
+ * Shared Steps/How It Works Section component
+ * Displays a step-by-step guide with alternating image positions
+ */
+import Container from '../atoms/Container.astro';
+import Card from '../atoms/Card.astro';
+import SectionHeader from '../atoms/SectionHeader.astro';
+
+interface Step {
+  number: string | number;
+  title: string;
+  description: string;
+  image?: string;
+  imageAlt?: string;
+}
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  steps: Step[];
+  showImages?: boolean;
+  alternateLayout?: boolean;
+  class?: string;
+  id?: string;
+}
+
+const {
+  title,
+  subtitle,
+  steps,
+  showImages = true,
+  alternateLayout = true,
+  class: className = '',
+  id
+} = Astro.props;
+---
+
+<section id={id} class:list={["py-16 md:py-24", className]}>
+  <Container>
+    <SectionHeader title={title} subtitle={subtitle} />
+
+    <div class="space-y-12 md:space-y-20">
+      {steps.map((step, index) => (
+        <div class:list={[
+          "flex flex-col gap-8 lg:gap-12 items-center",
+          alternateLayout && index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
+        ]}>
+          <!-- Text Content -->
+          <div class="flex-1 text-center lg:text-left">
+            <div class="flex items-center gap-4 mb-4 justify-center lg:justify-start">
+              <div class="w-12 h-12 md:w-14 md:h-14 bg-[var(--color-primary)] rounded-full flex items-center justify-center shadow-lg">
+                <span class="text-white font-bold text-xl md:text-2xl">{step.number}</span>
+              </div>
+              <h3 class="font-bold text-xl md:text-2xl text-[var(--color-text-primary)]">
+                {step.title}
+              </h3>
+            </div>
+            <p class="text-[var(--color-text-secondary)] text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">
+              {step.description}
+            </p>
+          </div>
+
+          <!-- Image -->
+          {showImages && step.image && (
+            <div class="flex-1 w-full max-w-md lg:max-w-none">
+              <Card padding="none" class="overflow-hidden">
+                <div class="relative aspect-video bg-[var(--color-background-card-hover)]">
+                  <img
+                    src={step.image}
+                    alt={step.imageAlt || step.title}
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+                </div>
+              </Card>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+
+    <slot name="cta" />
+    <slot />
+  </Container>
+</section>

@@ -1,0 +1,81 @@
+/**
+ * Default Theme - Neutral Dark Theme
+ * This is a generic dark theme that works well for any app
+ * Import this file or one of the app-specific themes
+ */
+:root {
+  /* Primary colors - Neutral Blue */
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-primary-glow: rgba(59, 130, 246, 0.3);
+
+  /* Text colors */
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #d1d5db;
+  --color-text-muted: #6b7280;
+
+  /* Background colors */
+  --color-background-page: #111827;
+  --color-background-card: #1f2937;
+  --color-background-card-hover: #374151;
+
+  /* Border colors */
+  --color-border: #374151;
+  --color-border-hover: #4b5563;
+}
+
+/* Light mode support */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-primary: #2563eb;
+    --color-primary-hover: #1d4ed8;
+    --color-primary-glow: rgba(37, 99, 235, 0.3);
+
+    --color-text-primary: #111827;
+    --color-text-secondary: #4b5563;
+    --color-text-muted: #9ca3af;
+
+    --color-background-page: #ffffff;
+    --color-background-card: #f9fafb;
+    --color-background-card-hover: #f3f4f6;
+
+    --color-border: #e5e7eb;
+    --color-border-hover: #d1d5db;
+  }
+}
+
+/* Force dark mode class */
+.dark {
+  --color-primary: #3b82f6;
+  --color-primary-hover: #60a5fa;
+  --color-primary-glow: rgba(59, 130, 246, 0.3);
+
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #d1d5db;
+  --color-text-muted: #6b7280;
+
+  --color-background-page: #111827;
+  --color-background-card: #1f2937;
+  --color-background-card-hover: #374151;
+
+  --color-border: #374151;
+  --color-border-hover: #4b5563;
+}
+
+/* Force light mode class */
+.light {
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-glow: rgba(37, 99, 235, 0.3);
+
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #9ca3af;
+
+  --color-background-page: #ffffff;
+  --color-background-card: #f9fafb;
+  --color-background-card-hover: #f3f4f6;
+
+  --color-border: #e5e7eb;
+  --color-border-hover: #d1d5db;
+}

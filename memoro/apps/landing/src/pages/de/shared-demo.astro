@@ -1,0 +1,150 @@
+---
+/**
+ * Demo page showcasing shared landing UI components in Memoro
+ */
+import Layout from '../../layouts/Layout.astro';
+
+// Import shared components
+import Button from '@manacore/shared-landing-ui/atoms/Button.astro';
+import Card from '@manacore/shared-landing-ui/atoms/Card.astro';
+import Badge from '@manacore/shared-landing-ui/atoms/Badge.astro';
+import Container from '@manacore/shared-landing-ui/atoms/Container.astro';
+import HeroSection from '@manacore/shared-landing-ui/sections/HeroSection.astro';
+import FeatureSection from '@manacore/shared-landing-ui/sections/FeatureSection.astro';
+import FAQSection from '@manacore/shared-landing-ui/sections/FAQSection.astro';
+import CTASection from '@manacore/shared-landing-ui/sections/CTASection.astro';
+
+const features = [
+  {
+    icon: '🎙️',
+    title: 'Sprachaufnahme',
+    description: 'Nimm Gespräche, Meetings und Ideen einfach per Sprache auf.'
+  },
+  {
+    icon: '🤖',
+    title: 'KI-Transkription',
+    description: 'Automatische Umwandlung von Sprache in Text mit höchster Genauigkeit.'
+  },
+  {
+    icon: '📝',
+    title: 'Smart Summaries',
+    description: 'KI-generierte Zusammenfassungen und Erkenntnisse aus deinen Aufnahmen.'
+  },
+  {
+    icon: '🔒',
+    title: 'Datenschutz',
+    description: 'Deine Daten bleiben privat. Keine Weitergabe an Dritte.'
+  },
+  {
+    icon: '📱',
+    title: 'Cross-Platform',
+    description: 'Verfügbar auf iOS, Android und Web.'
+  },
+  {
+    icon: '🌍',
+    title: '32 Sprachen',
+    description: 'Unterstützung für über 32 Sprachen weltweit.'
+  }
+];
+
+const faqs = [
+  {
+    question: 'Wie funktioniert die Transkription?',
+    answer: 'Memoro verwendet modernste KI-Technologie, um deine Sprachaufnahmen automatisch in Text umzuwandeln. Die Genauigkeit liegt bei über 95%.'
+  },
+  {
+    question: 'Ist meine Privatsphäre geschützt?',
+    answer: 'Ja! Alle Aufnahmen werden verschlüsselt übertragen und gespeichert. Wir verkaufen keine Daten an Dritte.'
+  },
+  {
+    question: 'Welche Sprachen werden unterstützt?',
+    answer: 'Memoro unterstützt über 32 Sprachen, darunter Deutsch, Englisch, Französisch, Spanisch, Italienisch und viele mehr.'
+  }
+];
+---
+
+<Layout
+  title="Shared Components Demo - Memoro"
+  description="Demonstration der shared landing UI components"
+  lang="de"
+>
+  <main class="bg-[var(--color-background-page)]">
+    <HeroSection
+      title="Shared Landing UI Demo"
+      subtitle="Diese Seite zeigt die wiederverwendbaren Komponenten aus @manacore/shared-landing-ui im Memoro-Design."
+      variant="centered"
+      primaryCta={{
+        text: 'Zurück zur Startseite',
+        href: '/de'
+      }}
+      secondaryCta={{
+        text: 'Features ansehen',
+        href: '#features',
+        variant: 'secondary'
+      }}
+    />
+
+    <section class="py-16 bg-[var(--color-background-card)]">
+      <Container>
+        <h2 class="text-3xl font-bold text-[var(--color-text-primary)] text-center mb-8">Atom Components</h2>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <Card variant="bordered" padding="lg">
+            <h3 class="font-semibold text-lg text-[var(--color-text-primary)] mb-4">Buttons</h3>
+            <div class="space-y-3">
+              <Button href="#" variant="primary" fullWidth>Primary</Button>
+              <Button href="#" variant="secondary" fullWidth>Secondary</Button>
+              <Button href="#" variant="outline" fullWidth>Outline</Button>
+            </div>
+          </Card>
+
+          <Card variant="bordered" padding="lg">
+            <h3 class="font-semibold text-lg text-[var(--color-text-primary)] mb-4">Badges</h3>
+            <div class="flex flex-wrap gap-2">
+              <Badge variant="primary">Primary</Badge>
+              <Badge variant="success">Success</Badge>
+              <Badge variant="warning">Warning</Badge>
+              <Badge variant="error">Error</Badge>
+            </div>
+          </Card>
+
+          <Card variant="bordered" padding="lg">
+            <h3 class="font-semibold text-lg text-[var(--color-text-primary)] mb-4">Cards</h3>
+            <div class="space-y-2">
+              <Card variant="hover" padding="sm">
+                <p class="text-sm text-[var(--color-text-secondary)]">Hover Card</p>
+              </Card>
+              <Card variant="glow" padding="sm">
+                <p class="text-sm text-[var(--color-text-secondary)]">Glow Card</p>
+              </Card>
+            </div>
+          </Card>
+        </div>
+      </Container>
+    </section>
+
+    <FeatureSection
+      id="features"
+      title="Feature Section"
+      subtitle="Automatisch generiertes Feature-Grid"
+      features={features}
+      columns={3}
+    />
+
+    <FAQSection
+      title="FAQ Section"
+      faqs={faqs}
+      class="bg-[var(--color-background-card)]"
+    />
+
+    <CTASection
+      title="Bereit loszulegen?"
+      subtitle="Nutze die shared components in deinem Projekt."
+      primaryCta={{
+        text: 'Dokumentation',
+        href: '#'
+      }}
+      variant="highlighted"
+    />
+  </main>
+</Layout>

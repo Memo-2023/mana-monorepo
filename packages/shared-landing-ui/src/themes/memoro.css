@@ -1,0 +1,24 @@
+/**
+ * Memoro Theme - Yellow/Gold Dark Theme
+ * Import this file in your landing page to use the Memoro color scheme
+ */
+:root {
+  /* Primary colors - Memoro Yellow/Gold */
+  --color-primary: #806b00;
+  --color-primary-hover: #ae9200;
+  --color-primary-glow: rgba(248, 214, 43, 0.3);
+
+  /* Text colors */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #9ca3af;
+  --color-text-muted: #6b7280;
+
+  /* Background colors */
+  --color-background-page: #0D0C12;
+  --color-background-card: #1a1a1a;
+  --color-background-card-hover: #262626;
+
+  /* Border colors */
+  --color-border: #333333;
+  --color-border-hover: #404040;
+}

@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === Shared Landing UI CSS Variables === */
+:root {
+  /* Primary colors - ManaCore Blue */
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-primary-glow: rgba(59, 130, 246, 0.3);
+
+  /* Text colors */
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #d1d5db;
+  --color-text-muted: #6b7280;
+
+  /* Background colors */
+  --color-background-page: #081320;
+  --color-background-card: #1e293b;
+  --color-background-card-hover: #334155;
+
+  /* Border colors */
+  --color-border: #334155;
+  --color-border-hover: #475569;
+}
+
+/* Light mode overrides */
+.light {
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-glow: rgba(37, 99, 235, 0.3);
+
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #9ca3af;
+
+  --color-background-page: #ffffff;
+  --color-background-card: #f9fafb;
+  --color-background-card-hover: #f3f4f6;
+
+  --color-border: #e5e7eb;
+  --color-border-hover: #d1d5db;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-background-page);
+  color: var(--color-text-primary);
+}

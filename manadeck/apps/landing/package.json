@@ -1,32 +1,27 @@
 {
-  "name": "landing",
+  "name": "@manadeck/landing",
+  "version": "1.0.0",
+  "private": true,
   "type": "module",
-  "version": "2.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "start": "astro dev",
+    "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "netlify:dev": "netlify dev",
-    "netlify:functions": "netlify functions:serve"
+    "type-check": "astro check"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.4",
-    "@astrojs/mdx": "^4.0.8",
-    "@astrojs/rss": "^4.0.12",
+    "@astrojs/check": "^0.9.0",
     "@astrojs/sitemap": "^3.2.1",
-    "@iconify-json/mdi": "^1.2.3",
     "@manacore/shared-landing-ui": "workspace:*",
     "astro": "^5.16.0",
     "astro-icon": "^1.1.5",
-    "marked": "^16.1.1",
-    "sharp": "^0.34.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.0.0"
   },
   "devDependencies": {
     "@astrojs/tailwind": "^6.0.0",
     "@tailwindcss/typography": "^0.5.16",
-    "@types/marked": "^5.0.2",
     "tailwindcss": "^3.4.17"
   }
 }

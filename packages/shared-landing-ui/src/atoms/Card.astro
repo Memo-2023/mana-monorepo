@@ -1,0 +1,50 @@
+---
+/**
+ * Shared Card component for landing pages
+ * Uses CSS custom properties for theming - define these in your project:
+ * --color-background-card, --color-border, --color-primary
+ */
+export interface Props {
+  variant?: 'default' | 'hover' | 'glow' | 'bordered';
+  class?: string;
+  padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  as?: 'div' | 'article' | 'section' | 'a';
+  href?: string;
+}
+
+const {
+  variant = 'default',
+  class: className = '',
+  padding = 'md',
+  as: Element = 'div',
+  href
+} = Astro.props;
+
+const paddingStyles = {
+  none: '',
+  sm: 'p-3 sm:p-4',
+  md: 'p-4 sm:p-6',
+  lg: 'p-6 sm:p-8',
+  xl: 'p-8 sm:p-10'
+};
+
+const variantStyles = {
+  default: 'bg-[var(--color-background-card)]',
+  hover: 'bg-[var(--color-background-card)] hover:bg-[var(--color-background-card-hover)] hover:shadow-xl hover:scale-[1.02] transition-all duration-300',
+  glow: 'bg-[var(--color-background-card)] hover:shadow-[0_0_30px_var(--color-primary-glow,rgba(59,130,246,0.3))] transition-all duration-300',
+  bordered: 'bg-[var(--color-background-card)] border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors duration-200'
+};
+
+const baseStyles = 'rounded-xl shadow-lg';
+const finalClassName = `${baseStyles} ${variantStyles[variant]} ${paddingStyles[padding]} ${className}`;
+---
+
+{Element === 'a' ? (
+  <a href={href} class={finalClassName}>
+    <slot />
+  </a>
+) : (
+  <Element class={finalClassName}>
+    <slot />
+  </Element>
+)}

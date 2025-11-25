@@ -1,0 +1,75 @@
+---
+/**
+ * Shared Button component for landing pages
+ * Uses CSS custom properties for theming - define these in your project:
+ * --color-primary, --color-primary-hover, --color-text-primary,
+ * --color-background-card, --color-border
+ */
+interface Props {
+  href?: string;
+  variant?: "primary" | "secondary" | "outline" | "ghost";
+  size?: "sm" | "md" | "lg";
+  class?: string;
+  target?: string;
+  rel?: string;
+  download?: boolean | string;
+  id?: string;
+  onclick?: string;
+  'aria-label'?: string;
+  fullWidth?: boolean;
+  [key: string]: any;
+}
+
+const {
+  href,
+  variant = "primary",
+  size = "md",
+  class: className = "",
+  target,
+  rel,
+  download,
+  id,
+  onclick,
+  'aria-label': ariaLabel,
+  fullWidth = false,
+  ...rest
+} = Astro.props;
+
+const variants = {
+  primary:
+    "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] border-2 border-[var(--color-primary)] hover:border-[var(--color-primary-hover)]",
+  secondary:
+    "bg-transparent text-[var(--color-text-primary)] hover:bg-[var(--color-background-card)] border-2 border-[var(--color-border)] hover:border-[var(--color-primary)]",
+  outline:
+    "bg-transparent text-[var(--color-text-primary)] hover:bg-[var(--color-background-card-hover)] border-2 border-[var(--color-border)]",
+  ghost:
+    "bg-transparent text-[var(--color-text-primary)] hover:bg-[var(--color-background-card-hover)] border-transparent",
+};
+
+const sizes = {
+  sm: "text-sm px-3 py-1.5",
+  md: "text-base px-4 py-2",
+  lg: "text-lg px-6 py-3",
+};
+
+const baseStyles =
+  "inline-flex items-center justify-center rounded-lg transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 whitespace-nowrap";
+const widthStyle = fullWidth ? "w-full" : "";
+const styles = `${baseStyles} ${variants[variant]} ${sizes[size]} ${widthStyle} ${className}`;
+
+const Element = href ? "a" : "button";
+---
+
+<Element
+  href={href}
+  target={target}
+  rel={rel}
+  download={download}
+  class={styles}
+  id={id}
+  onclick={onclick}
+  aria-label={ariaLabel}
+  {...rest}
+>
+  <slot />
+</Element>

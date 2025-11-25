@@ -4,6 +4,7 @@ packages:
   - 'manacore'
   - 'manadeck'
   - 'memoro'
+  - 'picture'
 
   # Sub-apps within projects
   - 'maerchenzauber/apps/*'
@@ -12,6 +13,8 @@ packages:
   - 'manadeck/apps/*'
   - 'manadeck/backend'
   - 'memoro/apps/*'
+  - 'picture/apps/*'
+  - 'picture/packages/*'
 
-  # Future shared packages
+  # Shared packages
   - 'packages/*'
