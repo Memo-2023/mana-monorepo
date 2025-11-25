@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="ManaChat - AI Chat Assistant">
+  <main class="min-h-screen">
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden bg-gradient-to-br from-blue-600 to-purple-700 py-20 text-white">
+      <div class="container mx-auto px-4 text-center">
+        <h1 class="mb-6 text-5xl font-bold md:text-6xl">
+          ManaChat
+        </h1>
+        <p class="mb-8 text-xl text-blue-100 md:text-2xl">
+          Dein intelligenter KI-Chat-Assistent
+        </p>
+        <p class="mx-auto mb-12 max-w-2xl text-lg text-blue-200">
+          Chatte mit den leistungsstärksten KI-Modellen. GPT-4o, GPT-4o-Mini und mehr -
+          alles in einer einfachen, eleganten Oberfläche.
+        </p>
+        <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <a
+            href="#features"
+            class="rounded-full bg-white px-8 py-3 font-semibold text-blue-600 transition hover:bg-blue-50"
+          >
+            Mehr erfahren
+          </a>
+          <a
+            href="https://apps.apple.com"
+            class="rounded-full border-2 border-white px-8 py-3 font-semibold text-white transition hover:bg-white hover:text-blue-600"
+          >
+            App herunterladen
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20">
+      <div class="container mx-auto px-4">
+        <h2 class="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white">
+          Funktionen
+        </h2>
+        <div class="grid gap-8 md:grid-cols-3">
+          <div class="rounded-xl bg-gray-50 p-6 dark:bg-gray-800">
+            <div class="mb-4 text-4xl">🤖</div>
+            <h3 class="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
+              Mehrere KI-Modelle
+            </h3>
+            <p class="text-gray-600 dark:text-gray-300">
+              Wähle zwischen GPT-4o, GPT-4o-Mini und weiteren Modellen für deine Gespräche.
+            </p>
+          </div>
+          <div class="rounded-xl bg-gray-50 p-6 dark:bg-gray-800">
+            <div class="mb-4 text-4xl">💬</div>
+            <h3 class="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
+              Konversationen speichern
+            </h3>
+            <p class="text-gray-600 dark:text-gray-300">
+              Alle deine Chats werden sicher gespeichert und sind jederzeit abrufbar.
+            </p>
+          </div>
+          <div class="rounded-xl bg-gray-50 p-6 dark:bg-gray-800">
+            <div class="mb-4 text-4xl">📱</div>
+            <h3 class="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
+              Plattformübergreifend
+            </h3>
+            <p class="text-gray-600 dark:text-gray-300">
+              Nutze ManaChat auf iOS, Android und im Web - deine Daten sind überall synchronisiert.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="bg-gray-100 py-20 dark:bg-gray-800">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="mb-6 text-3xl font-bold text-gray-900 dark:text-white">
+          Bereit für intelligente Gespräche?
+        </h2>
+        <p class="mb-8 text-lg text-gray-600 dark:text-gray-300">
+          Starte jetzt kostenlos mit ManaChat.
+        </p>
+        <a
+          href="https://apps.apple.com"
+          class="inline-block rounded-full bg-blue-600 px-8 py-3 font-semibold text-white transition hover:bg-blue-700"
+        >
+          Jetzt herunterladen
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 py-8 text-gray-400">
+      <div class="container mx-auto px-4 text-center">
+        <p>&copy; 2024 ManaChat. Powered by Mana Core.</p>
+      </div>
+    </footer>
+  </main>
+</BaseLayout>

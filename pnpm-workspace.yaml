@@ -6,6 +6,7 @@ packages:
   - 'memoro'
   - 'picture'
   - 'uload'
+  - 'chat'
 
   # Sub-apps within projects
   - 'maerchenzauber/apps/*'
@@ -17,6 +18,9 @@ packages:
   - 'picture/apps/*'
   - 'picture/packages/*'
   - 'uload/apps/*'
+  - 'chat/apps/*'
+  - 'chat/backend'
+  - 'chat/packages/*'
 
   # Shared packages
   - 'packages/*'

@@ -19,6 +19,7 @@
     "memoro:dev": "turbo run dev --filter=memoro...",
     "picture:dev": "turbo run dev --filter=picture...",
     "uload:dev": "turbo run dev --filter=uload...",
+    "chat:dev": "turbo run dev --filter=chat...",
 
     "dev:maerchenzauber:web": "pnpm --filter @maerchenzauber/web dev",
     "dev:maerchenzauber:landing": "pnpm --filter @maerchenzauber/landing dev",
@@ -42,7 +43,12 @@
     "dev:picture:landing": "pnpm --filter @picture/landing dev",
     "dev:picture:mobile": "pnpm --filter @picture/mobile dev",
 
-    "dev:uload:web": "pnpm --filter @uload/web dev"
+    "dev:uload:web": "pnpm --filter @uload/web dev",
+
+    "dev:chat:mobile": "pnpm --filter @chat/mobile dev",
+    "dev:chat:web": "pnpm --filter @chat/web dev",
+    "dev:chat:landing": "pnpm --filter @chat/landing dev",
+    "dev:chat:backend": "pnpm --filter @chat/backend start:dev"
   },
   "devDependencies": {
     "prettier": "^3.3.3",
