@@ -35,10 +35,10 @@
 		{#if deck.tags && deck.tags.length > 0}
 			<div class="flex flex-wrap gap-2">
 				{#each deck.tags.slice(0, 3) as tag}
-					<Badge variant="secondary">{tag}</Badge>
+					<Badge variant="default">{tag}</Badge>
 				{/each}
 				{#if deck.tags.length > 3}
-					<Badge variant="outline">+{deck.tags.length - 3}</Badge>
+					<Badge variant="default">+{deck.tags.length - 3}</Badge>
 				{/if}
 			</div>
 		{/if}
@@ -48,7 +48,7 @@
 			<div class="flex items-center space-x-2">
 				<span>📇 {deck.card_count || 0} cards</span>
 				{#if deck.is_public}
-					<Badge variant="outline">Public</Badge>
+					<Badge variant="info">Public</Badge>
 				{/if}
 			</div>
 			<span>{formatDate(deck.updated_at)}</span>
