@@ -1,5 +1,7 @@
 import { browser } from '$app/environment';
-import { setLocale, getLocale } from '$paraglide/runtime.js';
+import { locale } from 'svelte-i18n';
+import { get } from 'svelte/store';
+import '$lib/i18n'; // Initialize i18n
 
 export function initLocale() {
 	if (browser) {
@@ -16,18 +18,25 @@ export function initLocale() {
 		}
 
 		try {
-			setLocale(targetLang as any, { reload: false });
+			locale.set(targetLang);
 		} catch (e) {
 			console.warn('Failed to set locale:', e);
-			setLocale('en' as any, { reload: false });
+			locale.set('en');
 		}
 	}
 }
 
-export function getCurrentLocale() {
+export function getCurrentLocale(): string {
 	try {
-		return getLocale();
+		return get(locale) || 'en';
 	} catch {
 		return 'en';
+	}
+}
+
+export function setCurrentLocale(lang: string) {
+	locale.set(lang);
+	if (browser) {
+		localStorage.setItem('preferred-language', lang);
 	}
 }

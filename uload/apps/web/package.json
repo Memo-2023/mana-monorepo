@@ -3,10 +3,9 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"dev": "pnpm run paraglide:compile && vite dev",
-		"build": "pnpm run paraglide:compile && vite build",
+		"dev": "vite dev",
+		"build": "vite build",
 		"preview": "vite preview",
-		"paraglide:compile": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide",
 		"test": "pnpm run test:unit && pnpm run test:e2e",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -22,7 +21,6 @@
 	"type": "module",
 	"devDependencies": {
 		"@eslint/js": "^9.20.0",
-		"@inlang/paraglide-js": "^2.2.0",
 		"@playwright/test": "^1.51.0",
 		"@sveltejs/adapter-auto": "^4.0.0",
 		"@sveltejs/adapter-node": "^5.0.0",
@@ -70,6 +68,7 @@
 		"postgres": "^3.4.7",
 		"resend": "^6.5.1",
 		"stripe": "^18.4.0",
+		"svelte-i18n": "^4.0.1",
 		"svelte-sonner": "^1.0.5"
 	}
 }

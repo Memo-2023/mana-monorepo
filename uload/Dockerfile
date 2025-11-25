@@ -3,22 +3,25 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Dependencies installieren
-COPY package*.json ./
+# Copy package files from apps/web
+COPY apps/web/package*.json ./
+
+# Install dependencies
 RUN npm ci --legacy-peer-deps
 
-# App bauen
-COPY . .
+# Copy web app source
+COPY apps/web/ .
 
 # Generate .svelte-kit directory first by running vite in prepare mode
 RUN npx vite build --mode prepare || true
+
 # Sync SvelteKit files
 RUN npx svelte-kit sync
 
-# Compile paraglide messages before build (using the correct output directory)
+# Compile paraglide messages before build
 RUN npx @inlang/paraglide-js compile --project ./project.inlang --outdir ./src/paraglide
 
-# Now build the app
+# Build the app
 RUN npm run build
 
 # Production Stage
@@ -26,7 +29,7 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Nur Node.js App
+# Copy built app and dependencies
 COPY --from=builder /app/build build/
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules node_modules/
@@ -42,5 +45,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 EXPOSE 3000
 
-# Direkt Node starten (kein Supervisor nötig)
+# Start Node server
 CMD ["node", "build"]
