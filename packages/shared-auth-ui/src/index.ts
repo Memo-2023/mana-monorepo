@@ -1,6 +1,7 @@
 // Pages
 export { default as LoginPage } from './pages/LoginPage.svelte';
 export { default as RegisterPage } from './pages/RegisterPage.svelte';
+export { default as ForgotPasswordPage } from './pages/ForgotPasswordPage.svelte';
 
 // Components
 export { default as Icon } from './components/Icon.svelte';

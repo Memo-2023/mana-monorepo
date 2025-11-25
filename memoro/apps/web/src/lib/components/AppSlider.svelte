@@ -3,8 +3,8 @@
 	import { theme } from '$lib/stores/theme';
 	import { t } from 'svelte-i18n';
 
-	let currentTheme = $derived($theme);
-	let isDark = $derived(currentTheme.effectiveMode === 'dark');
+	// theme is a Svelte 5 runes-based store, access properties directly
+	let isDark = $derived(theme.isDark);
 
 	let apps = $derived<AppItem[]>([
 		{

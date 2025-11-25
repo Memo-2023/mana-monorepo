@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
+	import type { Snippet } from 'svelte';
 
 	type TextVariant = 'body' | 'body-secondary' | 'small' | 'large' | 'muted';
 	type TextAlign = 'left' | 'center' | 'right';
@@ -10,7 +11,7 @@
 		align?: TextAlign;
 		weight?: TextWeight;
 		class?: string;
-		children?: any;
+		children?: Snippet;
 	}
 
 	let {

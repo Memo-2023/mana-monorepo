@@ -1,9 +1,5 @@
 <script lang="ts">
-	export interface SelectOption {
-		value: string;
-		label: string;
-		disabled?: boolean;
-	}
+	import type { SelectOption } from './Select.types';
 
 	interface Props {
 		/** Current selected value */
@@ -24,6 +20,8 @@
 		required?: boolean;
 		/** Additional CSS classes */
 		class?: string;
+		/** Unique ID for accessibility */
+		id?: string;
 	}
 
 	let {
@@ -35,7 +33,8 @@
 		error,
 		disabled = false,
 		required = false,
-		class: className = ''
+		class: className = '',
+		id = `select-${Math.random().toString(36).slice(2, 9)}`
 	}: Props = $props();
 
 	function handleChange(e: Event) {
@@ -47,7 +46,7 @@
 
 <div class="select-wrapper {className}">
 	{#if label}
-		<label class="select-label">
+		<label for={id} class="select-label">
 			{label}
 			{#if required}
 				<span class="select-required">*</span>
@@ -57,6 +56,7 @@
 
 	<div class="select-container">
 		<select
+			{id}
 			{value}
 			{disabled}
 			{required}

@@ -13,6 +13,8 @@
 		required?: boolean;
 		autocomplete?: HTMLInputAttributes['autocomplete'];
 		class?: string;
+		id?: string;
+		name?: string;
 	}
 
 	let {
@@ -26,7 +28,9 @@
 		disabled = false,
 		required = false,
 		autocomplete,
-		class: className = ''
+		class: className = '',
+		id = `input-${Math.random().toString(36).slice(2, 9)}`,
+		name
 	}: Props = $props();
 
 	function handleInput(e: Event) {
@@ -43,15 +47,17 @@
 
 <div class="flex flex-col gap-1.5 {className}">
 	{#if label}
-		<label class="text-sm font-medium text-theme">
+		<label for={id} class="text-sm font-medium text-theme">
 			{label}
 			{#if required}
 				<span class="text-red-500">*</span>
 			{/if}
 		</label>
 	{/if}
-	
+
 	<input
+		{id}
+		{name}
 		{type}
 		{value}
 		{placeholder}

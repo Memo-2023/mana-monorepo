@@ -2,10 +2,6 @@
 	import '../app.css';
 	import { theme } from '$lib/stores/theme';
 	import { onMount } from 'svelte';
-	import { initI18n } from '$lib/i18n';
-
-	// Initialize i18n
-	initI18n();
 
 	let { children } = $props();
 

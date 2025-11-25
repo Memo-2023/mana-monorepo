@@ -5,17 +5,41 @@ This document outlines the plan to unify common code across all web apps in the 
 ## Current Shared Packages
 
 - [x] `@manacore/shared-icons` - Unified Phosphor Icons for all web apps
-- [x] `@manacore/shared-ui` - Unified UI Components (Text, Button, Badge, Toggle, Input, Modal)
+- [x] `@manacore/shared-ui` - Unified UI Components (Text, Button, Badge, Toggle, Input, Modal, Card, Navigation, Forms)
 - [x] `@manacore/shared-auth` - Unified Auth Logic (Supabase client, token management)
 - [x] `@manacore/shared-auth-ui` - Unified Auth UI (LoginPage, RegisterPage, OAuth buttons)
 - [x] `@manacore/shared-tailwind` - Unified Tailwind Config (HSL colors, preset, themes.css)
-- [x] `@manacore/shared-theme` - **NEW** Unified Theme Store (Svelte 5, 4 variants, light/dark/system)
-- [x] `@manacore/shared-theme-ui` - **NEW** Theme UI Components (ThemeToggle, ThemeSelector)
-- [x] `@manacore/shared-utils` - Unified Utilities (formatting, validation, async)
+- [x] `@manacore/shared-theme` - Unified Theme Store (Svelte 5, 4 variants, light/dark/system)
+- [x] `@manacore/shared-theme-ui` - Theme UI Components (ThemeToggle, ThemeSelector)
+- [x] `@manacore/shared-utils` - Unified Utilities (formatting, validation, async, date, keyboard)
 - [x] `@manacore/shared-types` - Unified TypeScript Types
 - [x] `@manacore/shared-supabase` - Unified Supabase Client Factory
 - [x] `@manacore/shared-i18n` - Unified i18n (languages, locale detection, translations)
 - [x] `@manacore/shared-config` - Unified Config (env validation)
+- [x] `@manacore/shared-branding` - **NEW** Unified App Branding (logos, colors, app config)
+- [x] `@manacore/shared-subscription-types` - Subscription Type Definitions
+- [x] `@manacore/shared-subscription-ui` - Subscription UI Components
+
+---
+
+## Recently Completed (2025-11-24)
+
+### App Migration to Shared Packages
+
+All web apps now use the shared packages consistently:
+
+**Logo Components** - Migrated to `@manacore/shared-branding`:
+- `memoro/apps/web/src/lib/components/MemoroLogo.svelte` → uses `AppLogo`
+- `manadeck/apps/web/src/lib/components/ManaDeckLogo.svelte` → uses `AppLogo`
+- `manacore/apps/web/src/lib/components/ManaCoreLogo.svelte` → uses `AppLogo`
+- `maerchenzauber/apps/web/src/lib/components/StorytellerLogo.svelte` → uses `AppLogo`
+
+**Formatter Functions** - Migrated to `@manacore/shared-utils`:
+- `memoro/apps/web/src/lib/components/memo/AdditionalRecordings.svelte` → uses `formatDurationFromMs`, `formatFileSize`
+- `memoro/apps/web/src/lib/components/RecordingButton.svelte` → uses `formatDuration`
+- `memoro/apps/web/src/lib/components/statistics/OverviewCard.svelte` → uses `formatDurationWithUnits`
+- `memoro/apps/web/src/lib/components/statistics/InsightsCard.svelte` → uses `formatDurationWithUnits`
+- `memoro/apps/web/src/lib/components/statistics/ProductivityCard.svelte` → uses `formatDurationWithUnits`
 
 ---
 
@@ -239,6 +263,45 @@ packages/shared-{name}/
 3. **Version carefully** - Coordinate updates across apps
 4. **Test thoroughly** - Changes affect all apps
 5. **Avoid breaking changes** - Use deprecation warnings
+
+---
+
+## Package Details
+
+### `@manacore/shared-branding`
+
+Centralized branding configuration for all Mana ecosystem apps.
+
+**Exports**:
+- `AppLogo` - SVG logo component that renders app-specific logo
+- `AppLogoWithName` - Logo with app name and tagline
+- `ManaIcon` - Generic Mana icon component
+- `APP_BRANDING` - Configuration object with colors, names, taglines
+- `AppId` type - Union type of all app IDs
+
+**Usage**:
+```svelte
+<script>
+  import { AppLogo } from '@manacore/shared-branding';
+</script>
+
+<AppLogo app="memoro" size={32} />
+<AppLogo app="manacore" size={55} color="#fff" />
+```
+
+### `@manacore/shared-utils/format`
+
+Duration and formatting utilities.
+
+**Exports**:
+- `formatDuration(seconds)` - Returns `MM:SS` or `HH:MM:SS`
+- `formatDurationFromMs(ms)` - Converts milliseconds first
+- `formatDurationWithUnits(seconds, locale)` - Returns `2h 30m` style
+- `formatDurationHumanReadable(seconds, locale)` - Returns `2 Stunden 30 Minuten`
+- `formatFileSize(bytes)` - Returns `1.5 MB`
+- `formatNumber(num, locale)` - Locale-aware number formatting
+- `formatCurrency(amount, currency, locale)` - Currency formatting
+- `formatPercent(value, decimals, locale)` - Percentage formatting
 
 ---
 

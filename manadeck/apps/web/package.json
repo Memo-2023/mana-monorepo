@@ -28,6 +28,7 @@
 	"dependencies": {
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
+		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-config": "workspace:*",
 		"@manacore/shared-i18n": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
@@ -40,6 +41,7 @@
 		"@manacore/shared-types": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
 		"@manacore/shared-utils": "workspace:*",
-		"@supabase/supabase-js": "^2.81.1"
+		"@supabase/supabase-js": "^2.81.1",
+		"svelte-i18n": "^4.0.1"
 	}
 }

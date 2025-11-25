@@ -13,9 +13,10 @@ const config = {
 			edge: false, // Use Node-based Netlify Functions (better for OAuth)
 			split: false // Single function for all routes (simpler deployment)
 		}),
-		// Disable built-in CSRF check - we'll handle it in hooks.server.ts
+		// Disable built-in CSRF check - we handle it in hooks.server.ts
+		// Using empty array allows all origins (equivalent to checkOrigin: false)
 		csrf: {
-			checkOrigin: false
+			trustedOrigins: []
 		}
 	}
 };

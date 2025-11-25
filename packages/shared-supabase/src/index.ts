@@ -38,22 +38,39 @@ export function createSupabaseAdminClient(config: SupabaseConfig): SupabaseClien
 }
 
 /**
+ * Supabase error type
+ */
+export interface SupabaseError {
+  message: string;
+  code?: string;
+  details?: string;
+  hint?: string;
+}
+
+/**
+ * Standardized query result type
+ */
+export interface QueryResult<T> {
+  data: T | null;
+  error: SupabaseError | null;
+}
+
+/**
  * Common database query helpers
  */
 export const dbHelpers = {
   /**
    * Handle Supabase query result and return standardized response
    */
-  handleQueryResult<T>(result: { data: T | null; error: any }): {
-    data: T | null;
-    error: { message: string; code?: string } | null;
-  } {
+  handleQueryResult<T>(result: { data: T | null; error: SupabaseError | null }): QueryResult<T> {
     if (result.error) {
       return {
         data: null,
         error: {
           message: result.error.message,
           code: result.error.code,
+          details: result.error.details,
+          hint: result.error.hint,
         },
       };
     }

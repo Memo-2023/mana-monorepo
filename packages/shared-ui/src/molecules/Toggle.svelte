@@ -27,6 +27,7 @@
 		: 'bg-menu'} {disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}"
 	role="switch"
 	aria-checked={isOn}
+	aria-label="Toggle"
 	{disabled}
 >
 	<span

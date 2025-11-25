@@ -3,6 +3,8 @@
 	import type { AuthResult } from '../types';
 	import Icon from '../components/Icon.svelte';
 
+	import type { Snippet } from 'svelte';
+
 	interface Props {
 		/** App name */
 		appName: string;
@@ -22,6 +24,8 @@
 		lightBackground?: string;
 		/** Dark background color */
 		darkBackground?: string;
+		/** App slider snippet */
+		appSlider?: Snippet;
 	}
 
 	let {
@@ -33,7 +37,8 @@
 		successRedirect = '/dashboard',
 		loginPath = '/login',
 		lightBackground = '#f5f5f5',
-		darkBackground = '#121212'
+		darkBackground = '#121212',
+		appSlider
 	}: Props = $props();
 
 	let loading = $state(false);
@@ -305,6 +310,13 @@
 		</div>
 	</div>
 
-	<!-- Bottom padding -->
-	<div class="pb-8"></div>
+	<!-- App Slider -->
+	{#if appSlider}
+		<div class="w-full px-4 pb-8">
+			{@render appSlider()}
+		</div>
+	{:else}
+		<!-- Bottom padding -->
+		<div class="pb-8"></div>
+	{/if}
 </div>

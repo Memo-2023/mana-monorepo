@@ -3,13 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "svelte": "./src/index.ts",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./ThemeToggle.svelte": "./src/ThemeToggle.svelte",
-    "./ThemeSelector.svelte": "./src/ThemeSelector.svelte",
-    "./ThemeModeSelector.svelte": "./src/ThemeModeSelector.svelte"
+    ".": {
+      "svelte": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./ThemeToggle.svelte": {
+      "svelte": "./src/ThemeToggle.svelte",
+      "default": "./src/ThemeToggle.svelte"
+    },
+    "./ThemeSelector.svelte": {
+      "svelte": "./src/ThemeSelector.svelte",
+      "default": "./src/ThemeSelector.svelte"
+    },
+    "./ThemeModeSelector.svelte": {
+      "svelte": "./src/ThemeModeSelector.svelte",
+      "default": "./src/ThemeModeSelector.svelte"
+    }
   },
   "peerDependencies": {
     "svelte": "^5.0.0"

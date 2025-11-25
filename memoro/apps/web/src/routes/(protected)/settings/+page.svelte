@@ -8,7 +8,8 @@
 	import SectionHeader from '$lib/components/SectionHeader.svelte';
 	import { onMount } from 'svelte';
 
-	let currentTheme = $derived($theme);
+	// theme is a Svelte 5 runes-based store, access properties directly
+	let currentMode = $derived(theme.mode);
 	let currentUser = $derived($user);
 	let currentSettings = $derived($settings);
 
@@ -24,11 +25,11 @@
 		activeMode = mode;
 	}
 
-	let activeMode = $state<ThemeMode>(currentTheme.mode);
+	let activeMode = $state<ThemeMode>(currentMode);
 
 	// Update activeMode when theme changes
 	$effect(() => {
-		activeMode = currentTheme.mode;
+		activeMode = currentMode;
 	});
 
 	// Collapsible sections state

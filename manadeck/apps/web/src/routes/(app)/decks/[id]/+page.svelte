@@ -63,7 +63,7 @@
 				{#if deck.tags && deck.tags.length > 0}
 					<div class="flex flex-wrap gap-2">
 						{#each deck.tags as tag}
-							<Badge variant="secondary">{tag}</Badge>
+							<Badge variant="default">{tag}</Badge>
 						{/each}
 					</div>
 				{/if}
@@ -71,9 +71,9 @@
 
 			<div class="flex items-center space-x-2">
 				{#if deck.is_public}
-					<Badge variant="outline">Public</Badge>
+					<Badge variant="info">Public</Badge>
 				{/if}
-				<Button variant="destructive" size="sm" onclick={() => (showDeleteConfirm = true)}>
+				<Button variant="danger" size="sm" onclick={() => (showDeleteConfirm = true)}>
 					Delete
 				</Button>
 			</div>
@@ -140,7 +140,7 @@
 						<Button variant="ghost" onclick={() => (showDeleteConfirm = false)}>
 							Cancel
 						</Button>
-						<Button variant="destructive" loading={deleting} onclick={handleDelete}>
+						<Button variant="danger" loading={deleting} onclick={handleDelete}>
 							Delete Deck
 						</Button>
 					</div>

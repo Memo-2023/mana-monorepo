@@ -7,10 +7,26 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./atoms": "./src/atoms/index.ts",
-    "./molecules": "./src/molecules/index.ts",
-    "./organisms": "./src/organisms/index.ts"
+    ".": {
+      "svelte": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./atoms": {
+      "svelte": "./src/atoms/index.ts",
+      "types": "./src/atoms/index.ts",
+      "default": "./src/atoms/index.ts"
+    },
+    "./molecules": {
+      "svelte": "./src/molecules/index.ts",
+      "types": "./src/molecules/index.ts",
+      "default": "./src/molecules/index.ts"
+    },
+    "./organisms": {
+      "svelte": "./src/organisms/index.ts",
+      "types": "./src/organisms/index.ts",
+      "default": "./src/organisms/index.ts"
+    }
   },
   "peerDependencies": {
     "svelte": "^5.0.0"

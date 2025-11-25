@@ -42,16 +42,21 @@
 
 {#if visible}
 	<!-- Modal Backdrop -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
 		onclick={handleBackdropClick}
+		onkeydown={(e) => e.key === 'Enter' && handleBackdropClick(e as unknown as MouseEvent)}
 		role="dialog"
 		aria-modal="true"
+		tabindex="-1"
 	>
 		<!-- Modal Content -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="relative flex max-h-[90vh] w-full {maxWidthClasses[maxWidth]} flex-col rounded-xl border border-theme bg-menu shadow-xl"
 			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
 		>
 			{#if showHeader}
 				<!-- Header -->

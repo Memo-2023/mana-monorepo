@@ -3,6 +3,7 @@
 	import { LoginPage } from '@manacore/shared-auth-ui';
 	import { StorytellerLogo } from '@manacore/shared-branding';
 	import AppSlider from '$lib/components/AppSlider.svelte';
+	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import { authStore } from '$lib/stores/authStore.svelte';
 
 	async function handleSignIn(email: string, password: string) {
@@ -12,10 +13,6 @@
 	async function handleSignInWithGoogle(idToken: string) {
 		return authStore.signInWithGoogle(idToken);
 	}
-
-	async function handleForgotPassword(email: string) {
-		return authStore.forgotPassword(email);
-	}
 </script>
 
 <LoginPage
@@ -24,15 +21,18 @@
 	primaryColor="#FF6B9D"
 	onSignIn={handleSignIn}
 	onSignInWithGoogle={handleSignInWithGoogle}
-	onForgotPassword={handleForgotPassword}
 	goto={goto}
 	enableGoogle={true}
 	enableApple={true}
 	successRedirect="/dashboard"
 	registerPath="/register"
+	forgotPasswordPath="/forgot-password"
 	lightBackground="#fff5f8"
 	darkBackground="#1a1218"
 >
+	{#snippet headerControls()}
+		<LanguageSelector />
+	{/snippet}
 	{#snippet appSlider()}
 		<AppSlider />
 	{/snippet}

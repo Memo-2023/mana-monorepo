@@ -2,6 +2,7 @@
 	import { onDestroy } from 'svelte';
 	import { t } from 'svelte-i18n';
 	import { recording } from '$lib/stores/recording';
+	import { formatDuration } from '@manacore/shared-utils';
 	import type { RecordingStatus } from '$lib/stores/recording';
 
 	// Props
@@ -37,13 +38,6 @@
 	const themeColor = '#F7D44C'; // Primary gold color from theme
 	const borderColor = themeColor;
 	const backgroundColor = isRecording ? themeColor : 'transparent';
-
-	// Format duration MM:SS
-	function formatDuration(seconds: number): string {
-		const mins = Math.floor(seconds / 60);
-		const secs = seconds % 60;
-		return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-	}
 
 	// Animation functions
 	function startRotationAnimation() {

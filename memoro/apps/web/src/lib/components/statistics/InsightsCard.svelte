@@ -2,6 +2,7 @@
 	import GlassCard from './GlassCard.svelte';
 	import StatRow from './StatRow.svelte';
 	import { Text } from '@manacore/shared-ui';
+	import { formatDurationWithUnits } from '@manacore/shared-utils';
 
 	interface Props {
 		averageAudioDuration: number;
@@ -26,19 +27,6 @@
 		mostUsedTags,
 		topLocations
 	}: Props = $props();
-
-	function formatDuration(seconds: number): string {
-		const hours = Math.floor(seconds / 3600);
-		const minutes = Math.floor((seconds % 3600) / 60);
-
-		if (hours > 0) {
-			return `${hours}h ${minutes}m`;
-		} else if (minutes > 0) {
-			return `${minutes}m`;
-		} else {
-			return `${seconds}s`;
-		}
-	}
 </script>
 
 <GlassCard>
@@ -53,7 +41,7 @@
 			<div class="mb-4 -space-y-px">
 				<StatRow
 					title="Ø Aufnahmedauer"
-					value={formatDuration(averageAudioDuration)}
+					value={formatDurationWithUnits(averageAudioDuration, 'de')}
 					subtitle="pro Memo"
 					icon="time-outline"
 				/>
@@ -65,7 +53,7 @@
 				/>
 				<StatRow
 					title="Längste Aufnahme"
-					value={formatDuration(longestRecording)}
+					value={formatDurationWithUnits(longestRecording, 'de')}
 					icon="timer-outline"
 				/>
 			</div>

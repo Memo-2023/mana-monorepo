@@ -3,14 +3,11 @@
 	import { LoginPage } from '@manacore/shared-auth-ui';
 	import { ManaCoreLogo } from '@manacore/shared-branding';
 	import AppSlider from '$lib/components/AppSlider.svelte';
+	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import { authStore } from '$lib/stores/authStore.svelte';
 
 	async function handleSignIn(email: string, password: string) {
 		return authStore.signIn(email, password);
-	}
-
-	async function handleForgotPassword(email: string) {
-		return authStore.forgotPassword(email);
 	}
 </script>
 
@@ -19,15 +16,18 @@
 	logo={ManaCoreLogo}
 	primaryColor="#6366f1"
 	onSignIn={handleSignIn}
-	onForgotPassword={handleForgotPassword}
 	goto={goto}
 	enableGoogle={false}
 	enableApple={false}
 	successRedirect="/dashboard"
 	registerPath="/register"
+	forgotPasswordPath="/forgot-password"
 	lightBackground="#f3f4f6"
 	darkBackground="#121212"
 >
+	{#snippet headerControls()}
+		<LanguageSelector />
+	{/snippet}
 	{#snippet appSlider()}
 		<AppSlider />
 	{/snippet}

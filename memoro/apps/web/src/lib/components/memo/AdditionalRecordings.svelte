@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AudioPlayer from '$lib/components/AudioPlayer.svelte';
 	import { Text } from '@manacore/shared-ui';
+	import { formatDurationFromMs, formatFileSize } from '@manacore/shared-utils';
 	import type { AdditionalRecording } from '$lib/types/memo.types';
 
 	interface Props {
@@ -16,32 +17,6 @@
 
 	let editingId = $state<string | null>(null);
 	let editLabel = $state('');
-
-	function formatDuration(millis?: number): string {
-		if (!millis) return '--:--';
-
-		const totalSeconds = Math.floor(millis / 1000);
-		const hours = Math.floor(totalSeconds / 3600);
-		const minutes = Math.floor((totalSeconds % 3600) / 60);
-		const secs = Math.floor(totalSeconds % 60);
-
-		if (hours > 0) {
-			return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-		}
-		return `${minutes}:${secs.toString().padStart(2, '0')}`;
-	}
-
-	function formatSize(bytes?: number): string {
-		if (!bytes) return '--';
-
-		const mb = bytes / (1024 * 1024);
-		if (mb > 1) {
-			return `${mb.toFixed(1)} MB`;
-		}
-
-		const kb = bytes / 1024;
-		return `${kb.toFixed(1)} KB`;
-	}
 
 	function formatDate(date: string): string {
 		return new Date(date).toLocaleDateString('de-DE', {
@@ -165,7 +140,7 @@
 												d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
 											/>
 										</svg>
-										{formatDuration(recording.duration_millis)}
+										{recording.duration_millis ? formatDurationFromMs(recording.duration_millis) : '--:--'}
 									</Text>
 									<Text variant="muted" class="flex items-center gap-1">
 										<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

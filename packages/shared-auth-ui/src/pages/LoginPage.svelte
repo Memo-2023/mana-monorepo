@@ -5,8 +5,6 @@
 	import GoogleSignInButton from '../components/GoogleSignInButton.svelte';
 	import AppleSignInButton from '../components/AppleSignInButton.svelte';
 
-	type AuthMode = 'initial' | 'login' | 'forgot-password' | 'password-reset-success';
-
 	interface Props {
 		/** App name */
 		appName: string;
@@ -20,8 +18,6 @@
 		onSignInWithGoogle?: (idToken: string) => Promise<AuthResult>;
 		/** Sign in with Apple function */
 		onSignInWithApple?: (identityToken: string) => Promise<AuthResult>;
-		/** Forgot password function */
-		onForgotPassword: (email: string) => Promise<AuthResult>;
 		/** Navigation function */
 		goto: (path: string) => void;
 		/** Enable Google Sign-In */
@@ -32,6 +28,8 @@
 		successRedirect?: string;
 		/** Register page path */
 		registerPath?: string;
+		/** Forgot password page path */
+		forgotPasswordPath?: string;
 		/** Light background color */
 		lightBackground?: string;
 		/** Dark background color */
@@ -49,12 +47,12 @@
 		onSignIn,
 		onSignInWithGoogle,
 		onSignInWithApple,
-		onForgotPassword,
 		goto,
 		enableGoogle = false,
 		enableApple = false,
 		successRedirect = '/dashboard',
 		registerPath = '/register',
+		forgotPasswordPath = '/forgot-password',
 		lightBackground = '#f5f5f5',
 		darkBackground = '#121212',
 		appSlider,
@@ -63,11 +61,16 @@
 
 	let loading = $state(false);
 	let error = $state<string | null>(null);
+	let errorField = $state<'email' | 'password' | 'general' | null>(null);
 	let email = $state('');
 	let password = $state('');
-	let mode = $state<AuthMode>('initial');
-	let resetEmail = $state('');
 	let showPassword = $state(false);
+	let rememberMe = $state(false);
+	let showSuccess = $state(false);
+	let shakeError = $state(false);
+	let emailInput: HTMLInputElement;
+	let passwordInput: HTMLInputElement;
+	let successAnnouncement = $state('');
 
 	// Check for dark mode
 	let isDark = $state(false);
@@ -84,22 +87,67 @@
 		}
 	});
 
+	// Autofocus email field on mount
+	$effect(() => {
+		if (emailInput) {
+			emailInput.focus();
+		}
+	});
+
 	function getPageBackground() {
 		return isDark ? darkBackground : lightBackground;
 	}
 
+	function isValidEmail(email: string): boolean {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return emailRegex.test(email);
+	}
+
+	function triggerErrorShake() {
+		shakeError = true;
+		setTimeout(() => {
+			shakeError = false;
+		}, 500);
+	}
+
+	function setError(message: string, field: 'email' | 'password' | 'general' = 'general') {
+		error = message;
+		errorField = field;
+		triggerErrorShake();
+
+		// Focus the problematic field for better accessibility
+		setTimeout(() => {
+			if (field === 'email' && emailInput) {
+				emailInput.focus();
+			} else if (field === 'password' && passwordInput) {
+				passwordInput.focus();
+			}
+		}, 100);
+	}
+
+	function clearError() {
+		error = null;
+		errorField = null;
+	}
+
 	async function handleLogin() {
 		loading = true;
-		error = null;
+		clearError();
 
 		if (!email) {
-			error = 'Email is required';
+			setError('Email is required', 'email');
+			loading = false;
+			return;
+		}
+
+		if (!isValidEmail(email)) {
+			setError('Please enter a valid email address', 'email');
 			loading = false;
 			return;
 		}
 
 		if (!password) {
-			error = 'Password is required';
+			setError('Password is required', 'password');
 			loading = false;
 			return;
 		}
@@ -109,61 +157,141 @@
 		loading = false;
 
 		if (result.success) {
-			goto(successRedirect);
+			// Show success feedback before redirect
+			showSuccess = true;
+			successAnnouncement = 'Successfully signed in. Redirecting...';
+			setTimeout(() => {
+				goto(successRedirect);
+			}, 600);
 		} else {
-			error = result.error || 'Sign in failed';
-		}
-	}
-
-	async function handleForgotPassword() {
-		loading = true;
-		error = null;
-
-		if (!email) {
-			error = 'Email is required';
-			loading = false;
-			return;
-		}
-
-		const result = await onForgotPassword(email);
-
-		loading = false;
-
-		if (result.success) {
-			resetEmail = email;
-			resetForm();
-			switchMode('password-reset-success');
-		} else {
-			error = result.error || 'Failed to send reset email';
+			setError(result.error || 'Sign in failed', 'general');
 		}
 	}
 
 	async function handleGoogleSuccess(idToken: string) {
 		if (!onSignInWithGoogle) return;
 
+		loading = true;
+		clearError();
+
 		const result = await onSignInWithGoogle(idToken);
+		loading = false;
+
 		if (result.success) {
-			goto(successRedirect);
+			showSuccess = true;
+			successAnnouncement = 'Successfully signed in with Google. Redirecting...';
+			setTimeout(() => {
+				goto(successRedirect);
+			}, 600);
 		} else {
-			error = result.error || 'Google sign in failed';
+			setError(result.error || 'Google sign in failed', 'general');
 		}
 	}
 
-	function resetForm() {
-		email = '';
-		password = '';
-		error = null;
-	}
-
-	function switchMode(newMode: AuthMode) {
-		mode = newMode;
-		error = null;
+	function skipToForm() {
+		if (emailInput) {
+			emailInput.focus();
+		}
 	}
 </script>
 
 <svelte:head>
 	<title>Login - {appName}</title>
 </svelte:head>
+
+<style>
+	@keyframes shake {
+		0%, 100% { transform: translateX(0); }
+		10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+		20%, 40%, 60%, 80% { transform: translateX(4px); }
+	}
+
+	.shake {
+		animation: shake 0.5s ease-in-out;
+	}
+
+	@keyframes spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
+	}
+
+	.spinner {
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes success-pulse {
+		0% { transform: scale(1); opacity: 1; }
+		50% { transform: scale(1.05); opacity: 0.9; }
+		100% { transform: scale(1); opacity: 1; }
+	}
+
+	.success-pulse {
+		animation: success-pulse 0.6s ease-in-out;
+	}
+
+	/* Respect reduced motion preference */
+	@media (prefers-reduced-motion: reduce) {
+		.shake,
+		.spinner,
+		.success-pulse {
+			animation: none;
+		}
+
+		* {
+			transition-duration: 0.01ms !important;
+			animation-duration: 0.01ms !important;
+		}
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border-width: 0;
+	}
+
+	/* Skip link styling */
+	.skip-link {
+		position: absolute;
+		top: -40px;
+		left: 0;
+		background: #000;
+		color: #fff;
+		padding: 8px 16px;
+		z-index: 100;
+		text-decoration: none;
+		font-weight: 500;
+	}
+
+	.skip-link:focus {
+		top: 0;
+	}
+
+	/* Ensure minimum touch target size (44x44px) */
+	.touch-target {
+		min-width: 44px;
+		min-height: 44px;
+	}
+</style>
+
+<!-- Skip Link for keyboard users -->
+<button
+	class="skip-link"
+	onclick={skipToForm}
+	type="button"
+>
+	Skip to login form
+</button>
+
+<!-- Screen reader announcements -->
+<div aria-live="polite" aria-atomic="true" class="sr-only">
+	{successAnnouncement}
+</div>
 
 <div
 	class="flex min-h-screen flex-col justify-between"
@@ -176,115 +304,116 @@
 		</div>
 	{/if}
 
-	<!-- Top Section - Logo -->
-	<div class="flex flex-col items-center justify-center pt-16 pb-8">
-		<div
-			class="flex items-center justify-center rounded-full transition-all mb-4"
-			style="width: 120px; height: 120px; border: 3px solid {primaryColor}; background-color: {isDark ? '#000' : '#fff'}; box-shadow: {isDark
-				? '0 6px 12px rgba(0, 0, 0, 0.4)'
-				: '0 6px 12px rgba(0, 0, 0, 0.15)'};"
-		>
-			<Logo size={55} color={primaryColor} />
+	<main>
+		<!-- Top Section - Logo -->
+		<div class="flex flex-col items-center justify-center pt-16 pb-8">
+			<div
+				class="flex items-center justify-center rounded-full transition-all mb-4"
+				class:success-pulse={showSuccess}
+				style="width: 120px; height: 120px; border: 3px solid {showSuccess ? '#22c55e' : primaryColor}; background-color: {isDark ? '#000' : '#fff'}; box-shadow: {isDark
+					? '0 6px 12px rgba(0, 0, 0, 0.4)'
+					: '0 6px 12px rgba(0, 0, 0, 0.15)'};"
+				role="img"
+				aria-label="{appName} logo"
+			>
+				{#if showSuccess}
+					<Icon name="check" size={55} color="#22c55e" />
+				{:else}
+					<Logo size={55} color={primaryColor} />
+				{/if}
+			</div>
+			<h1 class="text-2xl font-semibold" style="color: {isDark ? '#ffffff' : '#000000'};">
+				{appName}
+			</h1>
 		</div>
-		<h1 class="text-2xl font-semibold" style="color: {isDark ? '#ffffff' : '#000000'};">
-			{appName}
-		</h1>
-	</div>
 
-	<!-- Middle Section - Auth Form -->
-	<div class="flex-1 flex items-start justify-center px-5 pt-8 pb-8">
-		<div
-			class="w-full max-w-md rounded-xl p-6"
-			style="background-color: {isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.7)'}; backdrop-filter: blur(10px); border: 1px solid {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"
-		>
-			<!-- Title -->
-			<div class="mb-6">
-				<h2
-					class="text-center text-xl font-semibold flex items-center justify-center gap-2"
-					style="color: {isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)'};"
-				>
-					{#if mode === 'initial'}
-						Mana Login
-					{:else if mode === 'login'}
+		<!-- Middle Section - Auth Form -->
+		<div class="flex-1 flex items-start justify-center px-5 pt-8 pb-8">
+			<div
+				class="w-full max-w-md rounded-xl p-6"
+				class:shake={shakeError}
+				style="background-color: {isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.7)'}; backdrop-filter: blur(10px); border: 1px solid {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"
+			>
+				<!-- Title -->
+				<div class="mb-6">
+					<h2
+						class="text-center text-xl font-semibold"
+						style="color: {isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)'};"
+					>
 						Sign In
-					{:else if mode === 'forgot-password'}
-						Reset Password
-					{:else if mode === 'password-reset-success'}
-						Email Sent
-					{/if}
-				</h2>
-				{#if mode === 'initial'}
+					</h2>
 					<p
-						class="mt-3 text-sm text-center"
+						class="mt-2 text-sm text-center"
 						style="color: {isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};"
 					>
 						Sign in with your Mana account
 					</p>
+				</div>
+
+				<!-- Error Messages -->
+				{#if error}
+					<div
+						id="form-error"
+						role="alert"
+						aria-live="assertive"
+						class="mb-4 rounded-xl bg-red-500/20 border border-red-500/30 p-3 flex items-center gap-2"
+					>
+						<Icon name="warning" size={18} color="#ef4444" />
+						<p class="text-sm text-red-500">{error}</p>
+					</div>
 				{/if}
-			</div>
 
-			<!-- Error Messages -->
-			{#if error}
-				<div class="mb-4 rounded-xl bg-red-500/20 border border-red-500/30 p-3">
-					<p class="text-sm text-red-500">{error}</p>
-				</div>
-			{/if}
-
-			<!-- Initial Mode -->
-			{#if mode === 'initial'}
-				<div class="mb-2 flex flex-col gap-3">
-					<button
-						onclick={() => goto(registerPath)}
-						class="flex h-14 items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 border-2"
-						style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
-					>
-						<Icon name="user-plus" size={20} />
-						Create Account
-					</button>
-
-					<button
-						onclick={() => switchMode('login')}
-						class="flex h-14 items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 border"
-						style="background-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'};"
-					>
-						<Icon name="sign-in" size={20} />
-						Sign In
-					</button>
-				</div>
-
-			<!-- Login Mode -->
-			{:else if mode === 'login'}
+				<!-- Login Form -->
 				<form
 					onsubmit={(e) => {
 						e.preventDefault();
 						handleLogin();
 					}}
 					class="pb-4"
+					aria-busy={loading}
+					aria-describedby={error ? 'form-error' : undefined}
 				>
-					<div class="mb-2">
+					<!-- Email Field -->
+					<div class="mb-3">
+						<label for="email" class="sr-only">Email address</label>
 						<input
+							id="email"
 							type="email"
+							bind:this={emailInput}
 							bind:value={email}
 							placeholder="Email"
 							required
+							autocomplete="email"
+							aria-invalid={errorField === 'email'}
+							aria-describedby={errorField === 'email' ? 'form-error' : undefined}
 							class="h-14 w-full rounded-xl border px-4 text-lg transition-colors focus:outline-none focus:ring-2"
-							style="background-color: {isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'}; --tw-ring-color: {primaryColor};"
+							style="background-color: {isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {errorField === 'email' ? '#ef4444' : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)')}; color: {isDark ? '#ffffff' : '#000000'}; --tw-ring-color: {errorField === 'email' ? '#ef4444' : primaryColor};"
 						/>
 					</div>
 
-					<div class="mb-2 relative">
+					<!-- Password Field -->
+					<div class="mb-3 relative">
+						<label for="password" class="sr-only">Password</label>
 						<input
+							id="password"
 							type={showPassword ? 'text' : 'password'}
+							bind:this={passwordInput}
 							bind:value={password}
 							placeholder="Password"
 							required
+							autocomplete="current-password"
+							aria-invalid={errorField === 'password'}
+							aria-describedby={errorField === 'password' ? 'form-error' : undefined}
 							class="h-14 w-full rounded-xl border px-4 pr-12 text-lg transition-colors focus:outline-none focus:ring-2"
-							style="background-color: {isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'}; --tw-ring-color: {primaryColor};"
+							style="background-color: {isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {errorField === 'password' ? '#ef4444' : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)')}; color: {isDark ? '#ffffff' : '#000000'}; --tw-ring-color: {errorField === 'password' ? '#ef4444' : primaryColor};"
 						/>
 						<button
 							type="button"
 							onclick={() => (showPassword = !showPassword)}
-							class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+							class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors touch-target flex items-center justify-center"
+							aria-label={showPassword ? 'Hide password' : 'Show password'}
+							aria-pressed={showPassword}
+							title={showPassword ? 'Hide password' : 'Show password'}
 						>
 							<Icon
 								name={showPassword ? 'eye-off' : 'eye'}
@@ -294,35 +423,73 @@
 						</button>
 					</div>
 
-					<button
-						type="button"
-						onclick={() => switchMode('forgot-password')}
-						class="mb-4 flex h-10 w-full items-center justify-center rounded-xl font-medium transition-all hover:opacity-80 border"
-						style="background-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'};"
-					>
-						Forgot Password?
-					</button>
+					<!-- Remember Me & Forgot Password Row -->
+					<div class="mb-4 flex items-center justify-between">
+						<label class="flex items-center gap-2 cursor-pointer touch-target">
+							<input
+								type="checkbox"
+								bind:checked={rememberMe}
+								class="w-5 h-5 rounded border-2 transition-colors cursor-pointer"
+								style="accent-color: {primaryColor};"
+							/>
+							<span
+								class="text-sm"
+								style="color: {isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'};"
+							>
+								Remember me
+							</span>
+						</label>
 
+						<button
+							type="button"
+							onclick={() => goto(forgotPasswordPath)}
+							class="text-sm font-medium transition-opacity hover:opacity-70 touch-target flex items-center justify-center px-2"
+							style="color: {primaryColor};"
+						>
+							Forgot password?
+						</button>
+					</div>
+
+					<!-- Submit Button -->
 					<button
 						type="submit"
-						disabled={loading}
-						class="flex h-14 w-full items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 disabled:opacity-50 border-2"
-						style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
+						disabled={loading || showSuccess}
+						aria-disabled={loading || showSuccess}
+						class="flex h-14 w-full items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 disabled:opacity-50 border-2 touch-target"
+						style="background-color: {showSuccess ? '#22c55e' : primaryColor + '60'}; border-color: {showSuccess ? '#22c55e' : primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
 					>
-						<Icon name="sign-in" size={20} />
-						{loading ? 'Signing in...' : 'Sign In'}
+						{#if loading}
+							<svg
+								class="spinner w-5 h-5"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								aria-hidden="true"
+							>
+								<circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
+								<path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
+							</svg>
+							<span>Signing in...</span>
+						{:else if showSuccess}
+							<Icon name="check" size={20} />
+							<span>Success!</span>
+						{:else}
+							<Icon name="sign-in" size={20} />
+							<span>Sign In</span>
+						{/if}
 					</button>
 				</form>
 
 				<!-- Social Login -->
 				{#if enableGoogle || enableApple}
-					<div class="my-4 flex items-center gap-3">
+					<div class="my-4 flex items-center gap-3" role="separator" aria-orientation="horizontal">
 						<div class="flex-1 border-t" style="border-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"></div>
-						<p class="text-xs" style="color: {isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'};">or</p>
+						<span class="text-xs" style="color: {isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'};">or</span>
 						<div class="flex-1 border-t" style="border-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"></div>
 					</div>
 
-					<div class="mb-4 flex flex-col gap-2">
+					<div class="mb-4 flex flex-col gap-2" role="group" aria-label="Social login options">
 						{#if enableGoogle && onSignInWithGoogle}
 							<GoogleSignInButton onSuccess={handleGoogleSuccess} />
 						{/if}
@@ -332,122 +499,29 @@
 					</div>
 				{/if}
 
-				<!-- Back Button -->
-				<div class="mt-4">
-					<button
-						onclick={() => {
-							resetForm();
-							switchMode('initial');
-						}}
-						class="flex h-10 w-full items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80"
-						style="color: {isDark ? '#ffffff' : '#000000'};"
-					>
-						<Icon name="arrow-left" size={20} />
-						Back
-					</button>
-				</div>
-
-			<!-- Forgot Password Mode -->
-			{:else if mode === 'forgot-password'}
-				<form
-					onsubmit={(e) => {
-						e.preventDefault();
-						handleForgotPassword();
-					}}
-					class="pb-4"
-				>
+				<!-- Register Link -->
+				<div class="mt-4 text-center">
 					<p
-						class="mb-4 text-sm"
-						style="color: {isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'};"
+						class="text-sm"
+						style="color: {isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};"
 					>
-						Enter your email address and we'll send you a link to reset your password.
-					</p>
-
-					<div class="mb-4">
-						<input
-							type="email"
-							bind:value={email}
-							placeholder="Email"
-							required
-							class="h-14 w-full rounded-xl border px-4 text-lg transition-colors focus:outline-none focus:ring-2"
-							style="background-color: {isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'}; --tw-ring-color: {primaryColor};"
-						/>
-					</div>
-
-					<div class="flex flex-col gap-4">
-						<button
-							type="submit"
-							disabled={loading}
-							class="flex h-14 items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 disabled:opacity-50 border-2"
-							style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
-						>
-							<Icon name="key" size={20} />
-							{loading ? 'Sending...' : 'Reset Password'}
-						</button>
-
+						Don't have an account?
 						<button
 							type="button"
-							onclick={() => {
-								resetForm();
-								switchMode('login');
-							}}
-							class="flex h-10 items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80"
-							style="color: {isDark ? '#ffffff' : '#000000'};"
+							onclick={() => goto(registerPath)}
+							class="font-medium transition-opacity hover:opacity-70 touch-target inline-flex items-center justify-center px-1"
+							style="color: {primaryColor};"
 						>
-							<Icon name="arrow-left" size={20} />
-							Back
+							Create one
 						</button>
-					</div>
-				</form>
-
-			<!-- Password Reset Success Mode -->
-			{:else if mode === 'password-reset-success'}
-				<div class="pb-4">
-					<div class="flex flex-col items-center mb-6">
-						<div
-							class="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-							style="background-color: {primaryColor}30;"
-						>
-							<Icon name="mail-open" size={40} color={primaryColor} />
-						</div>
-
-						<p
-							class="text-sm text-center px-2"
-							style="color: {isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'};"
-						>
-							We've sent a password reset link to <strong>{resetEmail}</strong>. Please check your
-							inbox.
-						</p>
-					</div>
-
-					<div class="flex flex-col gap-3">
-						<button
-							onclick={() => {
-								resetEmail = '';
-								switchMode('login');
-							}}
-							class="flex h-14 items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 border-2"
-							style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
-						>
-							<Icon name="sign-in" size={20} />
-							Back to Login
-						</button>
-
-						<button
-							onclick={() => switchMode('forgot-password')}
-							class="flex h-10 items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 border"
-							style="background-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'};"
-						>
-							Resend Email
-						</button>
-					</div>
+					</p>
 				</div>
-			{/if}
+			</div>
 		</div>
-	</div>
+	</main>
 
-	<!-- App Slider (shown on initial mode) -->
-	{#if appSlider && mode === 'initial'}
+	<!-- App Slider -->
+	{#if appSlider}
 		<div class="w-full pb-8 px-2 pt-4">
 			{@render appSlider()}
 		</div>

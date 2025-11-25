@@ -10,7 +10,8 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-    "noEmit": true
+    "noEmit": true,
+    "types": ["svelte"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

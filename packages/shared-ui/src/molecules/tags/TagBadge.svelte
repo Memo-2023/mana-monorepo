@@ -69,7 +69,7 @@
 	onclick={handleClick}
 	onkeydown={handleKeyDown}
 	role={clickable ? 'button' : undefined}
-	tabindex={clickable ? 0 : -1}
+	tabindex={clickable ? 0 : undefined}
 >
 	<!-- Color indicator dot -->
 	<div class="h-2 w-2 rounded-full" style="background-color: {tagColor}"></div>

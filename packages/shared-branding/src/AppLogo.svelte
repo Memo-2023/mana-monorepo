@@ -45,6 +45,8 @@
 		<path
 			d={branding.logoPath}
 			fill={fillColor}
+			fill-rule="evenodd"
+			clip-rule="evenodd"
 		/>
 	{/if}
 </svg>

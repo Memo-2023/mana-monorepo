@@ -57,6 +57,7 @@
 	let isHovered = $state(false);
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="relative rounded-xl p-4 transition-all duration-200 bg-content border hover:-translate-y-0.5 hover:shadow-lg"
 	class:border-2={isCurrentPlan}

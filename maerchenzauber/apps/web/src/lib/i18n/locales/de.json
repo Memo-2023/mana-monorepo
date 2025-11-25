@@ -1,0 +1,12 @@
+{
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "back": "Zurück",
+    "loading": "Lädt..."
+  },
+  "app_slider": {
+    "title": "Teil des Mana Ökosystems"
+  }
+}

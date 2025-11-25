@@ -2,6 +2,7 @@
 	import GlassCard from './GlassCard.svelte';
 	import StatRow from './StatRow.svelte';
 	import { Text } from '@manacore/shared-ui';
+	import { formatDurationWithUnits } from '@manacore/shared-utils';
 
 	interface Props {
 		todayStats: {
@@ -30,19 +31,6 @@
 		activestWeek,
 		activestMonth
 	}: Props = $props();
-
-	function formatDuration(seconds: number): string {
-		const hours = Math.floor(seconds / 3600);
-		const minutes = Math.floor((seconds % 3600) / 60);
-
-		if (hours > 0) {
-			return `${hours}h ${minutes}m`;
-		} else if (minutes > 0) {
-			return `${minutes}m`;
-		} else {
-			return `${seconds}s`;
-		}
-	}
 </script>
 
 <GlassCard>
@@ -63,7 +51,7 @@
 				/>
 				<StatRow
 					title="Aufnahmedauer"
-					value={formatDuration(todayStats.duration)}
+					value={formatDurationWithUnits(todayStats.duration, 'de')}
 					icon="volume-high-outline"
 				/>
 				<StatRow title="Wörter" value={todayStats.words.toLocaleString()} icon="text-outline" />
@@ -86,7 +74,7 @@
 				/>
 				<StatRow
 					title="Aufnahmedauer"
-					value={formatDuration(last30DaysStats.duration)}
+					value={formatDurationWithUnits(last30DaysStats.duration, 'de')}
 					icon="volume-high-outline"
 				/>
 				<StatRow

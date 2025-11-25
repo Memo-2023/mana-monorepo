@@ -41,6 +41,7 @@
 	const isInteractive = $derived(interactive || !!onclick);
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
 	class="card card--{variant} card--padding-{padding} {isInteractive ? 'card--interactive' : ''} {fullWidth ? 'card--full-width' : ''} {className}"
 	{onclick}

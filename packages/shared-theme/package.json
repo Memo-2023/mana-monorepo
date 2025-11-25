@@ -3,14 +3,29 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "svelte": "./src/index.ts",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./store": "./src/store.svelte.ts",
-    "./types": "./src/types.ts",
-    "./constants": "./src/constants.ts",
-    "./utils": "./src/utils.ts"
+    ".": {
+      "svelte": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./store": {
+      "svelte": "./src/store.svelte.ts",
+      "default": "./src/store.svelte.ts"
+    },
+    "./types": {
+      "types": "./src/types.ts",
+      "default": "./src/types.ts"
+    },
+    "./constants": {
+      "default": "./src/constants.ts"
+    },
+    "./utils": {
+      "default": "./src/utils.ts"
+    }
   },
   "peerDependencies": {
     "svelte": "^5.0.0"

@@ -1,15 +1,5 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-
-	export interface AppItem {
-		name: string;
-		description: string;
-		longDescription: string;
-		icon?: string;
-		color: string;
-		comingSoon?: boolean;
-		status: 'published' | 'beta' | 'development' | 'planning';
-	}
+	import type { AppItem } from './AppSlider.types';
 
 	interface Props {
 		apps: AppItem[];
@@ -120,17 +110,10 @@
 		<div class="flex gap-4 justify-center overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory scroll-smooth px-4 py-4" style="perspective: 1000px;">
 			{#each apps as app, index}
 				<button
-					class="group relative flex-shrink-0 rounded-2xl p-5 cursor-pointer snap-center"
-					style="width: 160px; background-color: {hoveredApp === index
-						? isDark
-							? 'rgba(255, 255, 255, 0.08)'
-							: 'rgba(0, 0, 0, 0.08)'
-						: isDark
-							? 'rgba(255, 255, 255, 0.05)'
-							: 'rgba(0, 0, 0, 0.05)'}; border: 1px solid {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}; box-shadow: 0 4px 20px rgba(0, 0, 0, {isDark ? '0.3' : '0.15'}); transform: perspective(1000px) rotateX({cardRotations[index]?.rotateX || 0}deg) rotateY({cardRotations[index]?.rotateY || 0}deg); transform-style: preserve-3d; transition: transform 0.1s ease-out, background-color 0.2s ease-out;"
+					class="group relative flex-shrink-0 rounded-xl p-5 cursor-pointer snap-center transition-transform hover:scale-105"
+					style="width: 160px; background-color: {isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.7)'}; backdrop-filter: blur(10px); border: 1px solid {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"
 					onmouseenter={() => hoveredApp = index}
-					onmousemove={(e) => handleCardMouseMove(e, index, e.currentTarget)}
-					onmouseleave={() => { handleCardMouseLeave(index); hoveredApp = null; }}
+					onmouseleave={() => hoveredApp = null}
 					onclick={() => openModal(index)}
 				>
 					<div

@@ -26,6 +26,8 @@
 		autoResize?: boolean;
 		/** Additional CSS classes */
 		class?: string;
+		/** Unique ID for accessibility */
+		id?: string;
 	}
 
 	let {
@@ -41,7 +43,8 @@
 		disabled = false,
 		required = false,
 		autoResize = false,
-		class: className = ''
+		class: className = '',
+		id = `textarea-${Math.random().toString(36).slice(2, 9)}`
 	}: Props = $props();
 
 	let textareaElement: HTMLTextAreaElement | null = $state(null);
@@ -68,7 +71,7 @@
 
 <div class="textarea-wrapper {className}">
 	{#if label}
-		<label class="textarea-label">
+		<label for={id} class="textarea-label">
 			{label}
 			{#if required}
 				<span class="textarea-required">*</span>
@@ -77,6 +80,7 @@
 	{/if}
 
 	<textarea
+		{id}
 		bind:this={textareaElement}
 		{value}
 		{placeholder}

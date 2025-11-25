@@ -1,19 +1,16 @@
 import { browser } from '$app/environment';
 import { init, register, locale, waitLocale } from 'svelte-i18n';
 
-// Register all available locales
-register('de', () => import('./locales/de.json'));
-register('en', () => import('./locales/en.json'));
-register('fr', () => import('./locales/fr.json'));
-register('it', () => import('./locales/it.json'));
-register('es', () => import('./locales/es.json'));
-
 // List of supported locales
-export const supportedLocales = ['de', 'en', 'fr', 'it', 'es'] as const;
+export const supportedLocales = ['de', 'en'] as const;
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 // Default locale
-const defaultLocale = 'en';
+const defaultLocale = 'de';
+
+// Register all available locales
+register('de', () => import('./locales/de.json'));
+register('en', () => import('./locales/en.json'));
 
 // Get initial locale from browser or localStorage
 function getInitialLocale(): SupportedLocale {
@@ -34,7 +31,13 @@ function getInitialLocale(): SupportedLocale {
 	return defaultLocale;
 }
 
-// Initialize i18n
+// Initialize i18n at module scope (required for SSR)
+init({
+	fallbackLocale: defaultLocale,
+	initialLocale: getInitialLocale()
+});
+
+// Also export initI18n for backwards compatibility
 export function initI18n() {
 	init({
 		fallbackLocale: defaultLocale,

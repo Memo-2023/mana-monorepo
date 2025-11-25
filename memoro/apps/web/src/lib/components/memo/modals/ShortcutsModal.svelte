@@ -74,7 +74,17 @@
 
 <style>
 	.kbd {
-		@apply inline-flex items-center gap-1 rounded border px-2 py-1 font-mono text-xs font-semibold;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		border-radius: 0.25rem;
+		border-width: 1px;
+		padding: 0.25rem 0.5rem;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+			'Courier New', monospace;
+		font-size: 0.75rem;
+		line-height: 1rem;
+		font-weight: 600;
 		border-color: var(--color-border);
 		background-color: var(--color-menu-bg-hover);
 		color: var(--color-text);

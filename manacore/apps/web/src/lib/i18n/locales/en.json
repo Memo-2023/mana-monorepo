@@ -1,0 +1,12 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "back": "Back",
+    "loading": "Loading..."
+  },
+  "app_slider": {
+    "title": "Part of the Mana Ecosystem"
+  }
+}
