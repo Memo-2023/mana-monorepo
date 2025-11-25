@@ -12,14 +12,37 @@
     "clean": "turbo run clean",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
+
     "maerchenzauber:dev": "turbo run dev --filter=maerchenzauber...",
     "manacore:dev": "turbo run dev --filter=manacore...",
     "manadeck:dev": "turbo run dev --filter=manadeck...",
     "memoro:dev": "turbo run dev --filter=memoro...",
     "picture:dev": "turbo run dev --filter=picture...",
-    "dev:web": "turbo run dev --filter=@storyteller/web --filter=manacore-web --filter=web --filter=memoro-web --filter=@picture/web",
-    "dev:landing": "turbo run dev --filter=@storyteller/landing --filter=manacore-landing --filter=landing --filter=memoro-landing --filter=@picture/landing",
-    "dev:mobile": "turbo run dev --filter=@storyteller/mobile --filter=manacore --filter=manadeck --filter=memoro --filter=@picture/mobile"
+    "uload:dev": "turbo run dev --filter=uload...",
+
+    "dev:maerchenzauber:web": "pnpm --filter @maerchenzauber/web dev",
+    "dev:maerchenzauber:landing": "pnpm --filter @maerchenzauber/landing dev",
+    "dev:maerchenzauber:backend": "pnpm --filter @maerchenzauber/backend dev",
+    "dev:maerchenzauber:mobile": "pnpm --filter @maerchenzauber/mobile dev",
+
+    "dev:manacore:web": "pnpm --filter @manacore/web dev",
+    "dev:manacore:landing": "pnpm --filter @manacore/landing dev",
+    "dev:manacore:mobile": "pnpm --filter @manacore/mobile dev",
+
+    "dev:manadeck:web": "pnpm --filter @manadeck/web dev",
+    "dev:manadeck:landing": "pnpm --filter @manadeck/landing dev",
+    "dev:manadeck:backend": "pnpm --filter @manadeck/backend dev",
+    "dev:manadeck:mobile": "pnpm --filter @manadeck/mobile dev",
+
+    "dev:memoro:web": "pnpm --filter @memoro/web dev",
+    "dev:memoro:landing": "pnpm --filter @memoro/landing dev",
+    "dev:memoro:mobile": "pnpm --filter @memoro/mobile dev",
+
+    "dev:picture:web": "pnpm --filter @picture/web dev",
+    "dev:picture:landing": "pnpm --filter @picture/landing dev",
+    "dev:picture:mobile": "pnpm --filter @picture/mobile dev",
+
+    "dev:uload:web": "pnpm --filter @uload/web dev"
   },
   "devDependencies": {
     "prettier": "^3.3.3",
@@ -34,7 +57,11 @@
     "peerDependencyRules": {
       "allowedVersions": {
         "@mana-core/nestjs-integration>@nestjs/common": "^11.0.0",
-        "@mana-core/nestjs-integration>@nestjs/core": "^11.0.0"
+        "@mana-core/nestjs-integration>@nestjs/core": "^11.0.0",
+        "react-native>react": ">=18.0.0",
+        "react-native>@types/react": ">=18.0.0",
+        "@sveltejs/vite-plugin-svelte>vite": ">=6.0.0",
+        "@sveltejs/vite-plugin-svelte-inspector>vite": ">=6.0.0"
       }
     }
   }

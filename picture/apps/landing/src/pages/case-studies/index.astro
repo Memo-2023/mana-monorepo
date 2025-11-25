@@ -1,0 +1,214 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CaseStudyCard from '../../components/caseStudies/CaseStudyCard.astro';
+import CaseStudyFilters from '../../components/caseStudies/CaseStudyFilters.astro';
+import {
+	getAllCaseStudies,
+	getFeaturedCaseStudies,
+	getCaseStudyCategories,
+	getCaseStudyStats,
+} from '../../utils/caseStudies';
+
+const allCaseStudies = await getAllCaseStudies();
+const featuredCaseStudies = await getFeaturedCaseStudies();
+const categories = await getCaseStudyCategories();
+const stats = await getCaseStudyStats();
+
+const pageTitle = 'Customer Success Stories & Case Studies | Picture';
+const pageDescription =
+	'See how businesses use Picture AI to transform their creative workflows. Real results from real customers across e-commerce, marketing, SaaS, and more.';
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+	<main class="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+		<!-- Hero Section -->
+		<section class="px-6 py-16 text-center">
+			<div class="mx-auto max-w-4xl">
+				<div class="mb-4 text-sm font-semibold text-blue-600 uppercase tracking-wide">
+					Success Stories
+				</div>
+				<h1 class="mb-4 text-5xl font-bold text-gray-900 dark:text-white md:text-6xl">
+					Real Results from Real Customers
+				</h1>
+				<p class="mb-8 text-xl text-gray-600 dark:text-gray-300">
+					Discover how businesses across industries are using Picture AI to save time, reduce costs,
+					and create better content.
+				</p>
+
+				<!-- Stats -->
+				<div
+					class="mx-auto grid max-w-3xl grid-cols-2 gap-4 rounded-2xl bg-white p-6 shadow-lg dark:bg-gray-800 md:grid-cols-4"
+				>
+					<div>
+						<div class="text-3xl font-bold text-blue-600">{stats.totalCaseStudies}</div>
+						<div class="text-sm text-gray-600 dark:text-gray-400">Case Studies</div>
+					</div>
+					<div>
+						<div class="text-3xl font-bold text-purple-600">{stats.industriesCount}+</div>
+						<div class="text-sm text-gray-600 dark:text-gray-400">Industries</div>
+					</div>
+					<div>
+						<div class="text-3xl font-bold text-pink-600">
+							{stats.totalViews.toLocaleString()}
+						</div>
+						<div class="text-sm text-gray-600 dark:text-gray-400">Reads</div>
+					</div>
+					<div>
+						<div class="text-3xl font-bold text-green-600">
+							{stats.averageViews.toLocaleString()}
+						</div>
+						<div class="text-sm text-gray-600 dark:text-gray-400">Avg. Engagement</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Featured Case Studies -->
+		{
+			featuredCaseStudies.length > 0 && (
+				<section class="px-6 py-12">
+					<div class="mx-auto max-w-7xl">
+						<div class="mb-8">
+							<h2 class="text-3xl font-bold text-gray-900 dark:text-white">⭐ Featured Stories</h2>
+							<p class="mt-2 text-gray-600 dark:text-gray-400">
+								Our most impressive customer transformations
+							</p>
+						</div>
+						<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+							{featuredCaseStudies.slice(0, 4).map((caseStudy) => (
+								<CaseStudyCard caseStudy={caseStudy} featured={true} />
+							))}
+						</div>
+					</div>
+				</section>
+			)
+		}
+
+		<!-- Filter by Category -->
+		<section class="bg-white px-6 py-16 dark:bg-gray-800">
+			<div class="mx-auto max-w-7xl">
+				<div class="mb-8">
+					<h2 class="text-3xl font-bold text-gray-900 dark:text-white">Browse by Industry</h2>
+					<p class="mt-2 text-gray-600 dark:text-gray-400">
+						Find success stories from your industry
+					</p>
+				</div>
+
+				<!-- Category Pills -->
+				<div class="mb-8 flex flex-wrap gap-3">
+					<button
+						data-filter="all"
+						class="category-filter active rounded-full bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
+					>
+						All ({allCaseStudies.length})
+					</button>
+					{
+						categories.map((cat) => (
+							<button
+								data-filter={cat.category}
+								class="category-filter rounded-full bg-gray-100 px-6 py-3 font-semibold text-gray-700 transition hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+							>
+								{cat.category} ({cat.count})
+							</button>
+						))
+					}
+				</div>
+
+				<!-- Filters -->
+				<CaseStudyFilters categories={categories} />
+
+				<!-- Case Studies Grid -->
+				<div
+					id="case-studies-grid"
+					class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+				>
+					{allCaseStudies.map((caseStudy) => <CaseStudyCard caseStudy={caseStudy} />)}
+				</div>
+			</div>
+		</section>
+
+		<!-- Social Proof Stats -->
+		<section class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-16 text-white">
+			<div class="mx-auto max-w-5xl text-center">
+				<h2 class="mb-4 text-4xl font-bold">Trusted by Innovative Companies</h2>
+				<p class="mb-12 text-xl text-blue-100">
+					From startups to enterprises, businesses worldwide choose Picture AI
+				</p>
+
+				<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+					<div class="rounded-2xl bg-white/10 p-8 backdrop-blur-sm">
+						<div class="mb-2 text-4xl font-bold">90%</div>
+						<div class="text-lg text-blue-100">Average Cost Reduction</div>
+					</div>
+					<div class="rounded-2xl bg-white/10 p-8 backdrop-blur-sm">
+						<div class="mb-2 text-4xl font-bold">10x</div>
+						<div class="text-lg text-blue-100">Faster Content Creation</div>
+					</div>
+					<div class="rounded-2xl bg-white/10 p-8 backdrop-blur-sm">
+						<div class="mb-2 text-4xl font-bold">67%</div>
+						<div class="text-lg text-blue-100">Higher Engagement</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- CTA Section -->
+		<section class="px-6 py-16 text-center">
+			<div class="mx-auto max-w-3xl">
+				<h2 class="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
+					Ready to Write Your Success Story?
+				</h2>
+				<p class="mb-8 text-xl text-gray-600 dark:text-gray-300">
+					Join thousands of businesses transforming their creative workflows with Picture AI
+				</p>
+				<div class="flex flex-col justify-center gap-4 sm:flex-row">
+					<a
+						href="/signup"
+						class="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 font-bold text-white shadow-lg transition hover:from-blue-700 hover:to-purple-700"
+					>
+						Start Free Trial
+					</a>
+					<a
+						href="/demo"
+						class="rounded-xl border-2 border-gray-300 px-8 py-4 font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+					>
+						Book a Demo
+					</a>
+				</div>
+			</div>
+		</section>
+	</main>
+</Layout>
+
+<style>
+	.category-filter.active {
+		@apply bg-blue-600 text-white;
+	}
+</style>
+
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		const filterButtons = document.querySelectorAll('.category-filter');
+		const caseStudyCards = document.querySelectorAll('[data-category]');
+
+		filterButtons.forEach((button) => {
+			button.addEventListener('click', () => {
+				const filter = button.getAttribute('data-filter');
+
+				// Update active state
+				filterButtons.forEach((btn) => btn.classList.remove('active'));
+				button.classList.add('active');
+
+				// Filter cards
+				caseStudyCards.forEach((card) => {
+					const category = card.getAttribute('data-category');
+					if (filter === 'all' || category === filter) {
+						(card as HTMLElement).style.display = '';
+					} else {
+						(card as HTMLElement).style.display = 'none';
+					}
+				});
+			});
+		});
+	});
+</script>

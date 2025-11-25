@@ -1,0 +1,558 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Pricing Plans Data
+const plans = [
+	{
+		name: 'Free',
+		price: 0,
+		period: 'forever',
+		description: 'Perfect for trying out Picture and casual creators',
+		featured: false,
+		cta: 'Get Started Free',
+		ctaLink: '#',
+		features: [
+			{ text: '100 images per month', included: true },
+			{ text: 'FLUX Schnell model', included: true },
+			{ text: 'Basic image editing', included: true },
+			{ text: 'Gallery storage (30 days)', included: true },
+			{ text: 'Community support', included: true },
+			{ text: 'Watermark on exports', included: true, note: 'Small watermark' },
+			{ text: 'FLUX Dev & Pro models', included: false },
+			{ text: 'Priority generation', included: false },
+			{ text: 'API access', included: false },
+			{ text: 'Commercial usage', included: false },
+		],
+		limits: {
+			images: 100,
+			storage: '30 days',
+			models: ['FLUX Schnell'],
+		}
+	},
+	{
+		name: 'Pro',
+		price: 19,
+		period: 'month',
+		description: 'For professionals and content creators who need more',
+		featured: true,
+		cta: 'Start Free Trial',
+		ctaLink: '#',
+		badge: 'Most Popular',
+		features: [
+			{ text: '2,000 images per month', included: true },
+			{ text: 'All AI models (FLUX Schnell, Dev, Pro)', included: true },
+			{ text: 'Advanced image editing', included: true },
+			{ text: 'Unlimited gallery storage', included: true },
+			{ text: 'Priority support', included: true },
+			{ text: 'No watermarks', included: true },
+			{ text: 'Batch generation (up to 10)', included: true },
+			{ text: 'Custom style presets', included: true },
+			{ text: 'Priority generation queue', included: true },
+			{ text: 'Commercial usage', included: true },
+			{ text: 'API access', included: false },
+			{ text: 'Team collaboration', included: false },
+		],
+		limits: {
+			images: 2000,
+			storage: 'Unlimited',
+			models: ['FLUX Schnell', 'FLUX Dev', 'FLUX Pro'],
+		}
+	},
+	{
+		name: 'Enterprise',
+		price: 'Custom',
+		period: null,
+		description: 'For teams and businesses with advanced needs',
+		featured: false,
+		cta: 'Contact Sales',
+		ctaLink: '#',
+		features: [
+			{ text: 'Unlimited images', included: true },
+			{ text: 'All AI models + early access to new models', included: true },
+			{ text: 'Full editing suite + AI upscaling', included: true },
+			{ text: 'Unlimited storage + CDN delivery', included: true },
+			{ text: 'Dedicated account manager', included: true },
+			{ text: 'No watermarks', included: true },
+			{ text: 'Unlimited batch generation', included: true },
+			{ text: 'Custom models & fine-tuning', included: true },
+			{ text: 'Priority generation (fastest)', included: true },
+			{ text: 'Commercial usage', included: true },
+			{ text: 'Full API access + webhooks', included: true },
+			{ text: 'Team collaboration + SSO', included: true },
+			{ text: 'SLA guarantee (99.9% uptime)', included: true },
+			{ text: 'Custom integrations', included: true },
+		],
+		limits: {
+			images: 'Unlimited',
+			storage: 'Unlimited',
+			models: 'All models + Custom',
+		}
+	},
+];
+
+// FAQ Data
+const faqs = [
+	{
+		question: 'Can I change plans later?',
+		answer: 'Yes! You can upgrade or downgrade your plan at any time. When upgrading, you\'ll get immediate access to new features. When downgrading, changes take effect at the end of your current billing cycle.',
+	},
+	{
+		question: 'What happens if I exceed my monthly limit?',
+		answer: 'On the Free plan, generation will pause until next month. On paid plans, you can purchase additional image packs at $5 per 500 images, or upgrade to a higher tier.',
+	},
+	{
+		question: 'Do you offer a free trial for Pro?',
+		answer: 'Yes! We offer a 14-day free trial of Pro with no credit card required. You\'ll get full access to all Pro features during the trial.',
+	},
+	{
+		question: 'What payment methods do you accept?',
+		answer: 'We accept all major credit cards (Visa, Mastercard, American Express), PayPal, and for Enterprise customers, we can arrange invoicing and wire transfers.',
+	},
+	{
+		question: 'Can I use generated images commercially?',
+		answer: 'Yes on Pro and Enterprise plans! Free plan images are for personal use only. All images generated on paid plans can be used commercially without attribution.',
+	},
+	{
+		question: 'What is your refund policy?',
+		answer: 'We offer a 30-day money-back guarantee on all paid plans. If you\'re not satisfied for any reason, contact support for a full refund within 30 days of purchase.',
+	},
+	{
+		question: 'Do you offer discounts for non-profits or education?',
+		answer: 'Yes! We offer 50% discounts for verified educational institutions and registered non-profit organizations. Contact sales@picture.com with your credentials.',
+	},
+	{
+		question: 'What about data privacy and ownership?',
+		answer: 'You own all images you generate. We don\'t use your images to train models. Images on paid plans are private by default. See our privacy policy for full details.',
+	},
+];
+
+// Model comparison data
+const models = [
+	{
+		name: 'FLUX Schnell',
+		speed: '~2 seconds',
+		quality: 'Good',
+		free: true,
+		pro: true,
+		enterprise: true,
+	},
+	{
+		name: 'FLUX Dev',
+		speed: '~8 seconds',
+		quality: 'Excellent',
+		free: false,
+		pro: true,
+		enterprise: true,
+	},
+	{
+		name: 'FLUX Pro',
+		speed: '~12 seconds',
+		quality: 'Outstanding',
+		free: false,
+		pro: true,
+		enterprise: true,
+	},
+	{
+		name: 'Custom Models',
+		speed: 'Variable',
+		quality: 'Custom',
+		free: false,
+		pro: false,
+		enterprise: true,
+	},
+];
+---
+
+<Layout
+	title="Pricing - Choose Your Plan | Picture"
+	description="Transparent pricing for AI image generation. Start free, upgrade as you grow. Pro plans from $19/month. Enterprise solutions for teams."
+>
+	<div class="bg-dark-bg min-h-screen">
+		<!-- Hero -->
+		<div class="bg-gradient-to-b from-dark-elevated to-dark-bg py-16 md:py-24">
+			<div class="max-w-6xl mx-auto px-6 text-center">
+				<div class="inline-block px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full mb-6">
+					<span class="text-primary text-sm font-medium">💰 Pricing</span>
+				</div>
+				<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+					Simple, Transparent Pricing
+				</h1>
+				<p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+					Start for free, upgrade as you grow. No hidden fees, cancel anytime.
+				</p>
+
+				<!-- Billing Toggle -->
+				<div class="flex items-center justify-center gap-4 mb-12">
+					<span class="text-gray-400">Monthly</span>
+					<button id="billing-toggle" class="relative w-14 h-7 bg-dark-elevated border border-dark-border rounded-full cursor-pointer transition">
+						<span class="toggle-indicator"></span>
+					</button>
+					<span class="text-gray-400">
+						Yearly
+						<span class="ml-2 px-2 py-0.5 bg-green-500/10 text-green-400 text-xs font-medium rounded">Save 20%</span>
+					</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Pricing Cards -->
+		<div class="max-w-7xl mx-auto px-6 pb-16 -mt-8">
+			<div class="grid md:grid-cols-3 gap-8">
+				{plans.map((plan) => (
+					<div class={`pricing-card ${plan.featured ? 'featured' : ''}`}>
+						{plan.badge && (
+							<div class="badge">{plan.badge}</div>
+						)}
+
+						<div class="card-header">
+							<h3 class="plan-name">{plan.name}</h3>
+							<div class="price-container">
+								{typeof plan.price === 'number' ? (
+									<>
+										<span class="currency">$</span>
+										<span class="price" data-monthly={plan.price} data-yearly={Math.floor(plan.price * 12 * 0.8)}>
+											{plan.price}
+										</span>
+										<span class="period">/{plan.period}</span>
+									</>
+								) : (
+									<span class="price-custom">{plan.price}</span>
+								)}
+							</div>
+							<p class="description">{plan.description}</p>
+						</div>
+
+						<div class="card-body">
+							<ul class="feature-list">
+								{plan.features.map((feature) => (
+									<li class={`feature-item ${feature.included ? 'included' : 'excluded'}`}>
+										<span class="feature-icon">
+											{feature.included ? (
+												<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+													<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+												</svg>
+											) : (
+												<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+													<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+												</svg>
+											)}
+										</span>
+										<span class="feature-text">
+											{feature.text}
+											{feature.note && <span class="feature-note"> ({feature.note})</span>}
+										</span>
+									</li>
+								))}
+							</ul>
+						</div>
+
+						<div class="card-footer">
+							<a href={plan.ctaLink} class={`cta-button ${plan.featured ? 'primary' : 'secondary'}`}>
+								{plan.cta}
+							</a>
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
+
+		<!-- Model Comparison -->
+		<div class="max-w-6xl mx-auto px-6 py-16">
+			<div class="text-center mb-12">
+				<h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+					AI Model Comparison
+				</h2>
+				<p class="text-gray-400">
+					All plans include access to cutting-edge AI models
+				</p>
+			</div>
+
+			<div class="bg-dark-elevated border border-dark-border rounded-2xl overflow-hidden">
+				<div class="overflow-x-auto">
+					<table class="comparison-table">
+						<thead>
+							<tr>
+								<th>Model</th>
+								<th>Speed</th>
+								<th>Quality</th>
+								<th>Free</th>
+								<th>Pro</th>
+								<th>Enterprise</th>
+							</tr>
+						</thead>
+						<tbody>
+							{models.map((model) => (
+								<tr>
+									<td class="font-semibold text-white">{model.name}</td>
+									<td>{model.speed}</td>
+									<td>{model.quality}</td>
+									<td>{model.free ? '✅' : '❌'}</td>
+									<td>{model.pro ? '✅' : '❌'}</td>
+									<td>{model.enterprise ? '✅' : '❌'}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<!-- FAQ -->
+		<div class="max-w-4xl mx-auto px-6 py-16">
+			<div class="text-center mb-12">
+				<h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+					Frequently Asked Questions
+				</h2>
+				<p class="text-gray-400">
+					Everything you need to know about our pricing
+				</p>
+			</div>
+
+			<div class="space-y-4">
+				{faqs.map((faq, index) => (
+					<div class="faq-item">
+						<button class="faq-question" data-faq={index}>
+							<span>{faq.question}</span>
+							<svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							</svg>
+						</button>
+						<div class="faq-answer" data-answer={index}>
+							<p>{faq.answer}</p>
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
+
+		<!-- CTA -->
+		<div class="max-w-4xl mx-auto px-6 py-16">
+			<div class="bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20 rounded-2xl p-12 text-center">
+				<h2 class="text-3xl font-bold text-white mb-4">Still have questions?</h2>
+				<p class="text-gray-300 mb-8">
+					Our team is here to help you find the perfect plan for your needs.
+				</p>
+				<div class="flex items-center justify-center gap-4 flex-wrap">
+					<a href="#" class="px-8 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition">
+						Contact Sales
+					</a>
+					<a href="#" class="px-8 py-3 bg-dark-elevated border border-dark-border text-gray-300 font-medium rounded-lg hover:border-primary hover:text-primary transition">
+						View Documentation
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Billing toggle
+		const toggle = document.getElementById('billing-toggle');
+		const prices = document.querySelectorAll('.price');
+		let isYearly = false;
+
+		toggle?.addEventListener('click', () => {
+			isYearly = !isYearly;
+			toggle.classList.toggle('active');
+
+			prices.forEach((priceEl) => {
+				const monthly = priceEl.getAttribute('data-monthly');
+				const yearly = priceEl.getAttribute('data-yearly');
+				if (monthly && yearly) {
+					priceEl.textContent = isYearly ? yearly : monthly;
+				}
+			});
+		});
+
+		// FAQ accordion
+		const faqQuestions = document.querySelectorAll('.faq-question');
+
+		faqQuestions.forEach((question) => {
+			question.addEventListener('click', () => {
+				const index = question.getAttribute('data-faq');
+				const answer = document.querySelector(`[data-answer="${index}"]`);
+				const chevron = question.querySelector('.chevron');
+
+				// Toggle current
+				answer?.classList.toggle('open');
+				chevron?.classList.toggle('rotate');
+
+				// Close others
+				faqQuestions.forEach((q) => {
+					if (q !== question) {
+						const otherIndex = q.getAttribute('data-faq');
+						const otherAnswer = document.querySelector(`[data-answer="${otherIndex}"]`);
+						const otherChevron = q.querySelector('.chevron');
+						otherAnswer?.classList.remove('open');
+						otherChevron?.classList.remove('rotate');
+					}
+				});
+			});
+		});
+	</script>
+
+	<style>
+		/* Pricing Cards */
+		.pricing-card {
+			@apply bg-dark-elevated border border-dark-border rounded-2xl p-8 flex flex-col relative transition-all hover:-translate-y-1;
+		}
+
+		.pricing-card.featured {
+			@apply border-primary shadow-xl shadow-primary/10 scale-105;
+		}
+
+		.badge {
+			@apply absolute top-0 right-8 -translate-y-1/2 px-4 py-1.5 bg-primary text-white text-sm font-medium rounded-full;
+		}
+
+		.card-header {
+			@apply mb-8;
+		}
+
+		.plan-name {
+			@apply text-2xl font-bold text-white mb-4;
+		}
+
+		.price-container {
+			@apply flex items-baseline mb-4;
+		}
+
+		.currency {
+			@apply text-2xl text-gray-400;
+		}
+
+		.price {
+			@apply text-5xl font-bold text-white mx-1;
+		}
+
+		.period {
+			@apply text-xl text-gray-400;
+		}
+
+		.price-custom {
+			@apply text-4xl font-bold text-white;
+		}
+
+		.description {
+			@apply text-gray-400 leading-relaxed;
+		}
+
+		.card-body {
+			@apply flex-grow mb-8;
+		}
+
+		.feature-list {
+			@apply space-y-3;
+		}
+
+		.feature-item {
+			@apply flex items-start gap-3;
+		}
+
+		.feature-item.included {
+			@apply text-gray-300;
+		}
+
+		.feature-item.included .feature-icon {
+			@apply text-primary;
+		}
+
+		.feature-item.excluded {
+			@apply text-gray-600;
+		}
+
+		.feature-item.excluded .feature-icon {
+			@apply text-gray-600;
+		}
+
+		.feature-icon {
+			@apply flex-shrink-0 mt-0.5;
+		}
+
+		.feature-text {
+			@apply text-sm;
+		}
+
+		.feature-note {
+			@apply text-gray-500 text-xs;
+		}
+
+		.card-footer {
+			@apply mt-auto;
+		}
+
+		.cta-button {
+			@apply w-full py-3 px-6 rounded-lg font-medium text-center transition;
+		}
+
+		.cta-button.primary {
+			@apply bg-primary text-white hover:bg-primary/90;
+		}
+
+		.cta-button.secondary {
+			@apply bg-dark-bg border border-dark-border text-gray-300 hover:border-primary hover:text-primary;
+		}
+
+		/* Billing Toggle */
+		#billing-toggle {
+			@apply relative;
+		}
+
+		.toggle-indicator {
+			@apply absolute left-1 top-1 w-5 h-5 bg-gray-600 rounded-full transition-all;
+		}
+
+		#billing-toggle.active .toggle-indicator {
+			@apply left-8 bg-primary;
+		}
+
+		/* Comparison Table */
+		.comparison-table {
+			@apply w-full text-left;
+		}
+
+		.comparison-table thead {
+			@apply bg-dark-bg;
+		}
+
+		.comparison-table th {
+			@apply px-6 py-4 text-sm font-semibold text-gray-400 uppercase tracking-wider;
+		}
+
+		.comparison-table td {
+			@apply px-6 py-4 text-gray-300 border-t border-dark-border;
+		}
+
+		.comparison-table tbody tr:hover {
+			@apply bg-dark-bg;
+		}
+
+		/* FAQ */
+		.faq-item {
+			@apply bg-dark-elevated border border-dark-border rounded-xl overflow-hidden;
+		}
+
+		.faq-question {
+			@apply w-full flex items-center justify-between p-6 text-left text-white font-semibold hover:text-primary transition cursor-pointer;
+		}
+
+		.chevron {
+			@apply w-5 h-5 flex-shrink-0 transition-transform;
+		}
+
+		.chevron.rotate {
+			@apply rotate-180;
+		}
+
+		.faq-answer {
+			@apply max-h-0 overflow-hidden transition-all duration-300;
+		}
+
+		.faq-answer.open {
+			@apply max-h-96 pb-6 px-6;
+		}
+
+		.faq-answer p {
+			@apply text-gray-400 leading-relaxed;
+		}
+	</style>
+</Layout>

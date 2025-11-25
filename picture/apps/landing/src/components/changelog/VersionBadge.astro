@@ -1,0 +1,47 @@
+---
+import type { ReleaseType } from '../../utils/changelog';
+import {
+	formatVersion,
+	getReleaseTypeIcon,
+	getReleaseTypeColor,
+	getReleaseTypeDisplayName,
+} from '../../utils/changelog';
+
+interface Props {
+	version: string;
+	type: ReleaseType;
+	showLabel?: boolean;
+}
+
+const { version, type, showLabel = true } = Astro.props;
+const formattedVersion = formatVersion(version);
+const icon = getReleaseTypeIcon(type);
+const colorClass = getReleaseTypeColor(type);
+const label = getReleaseTypeDisplayName(type);
+---
+
+<div class={`version-badge ${colorClass}`}>
+	<span class="version-icon">{icon}</span>
+	<span class="version-number">{formattedVersion}</span>
+	{showLabel && (
+		<span class="version-label">{label}</span>
+	)}
+</div>
+
+<style>
+	.version-badge {
+		@apply inline-flex items-center gap-2 px-3 py-1.5 border rounded-lg text-sm font-medium;
+	}
+
+	.version-icon {
+		@apply text-base;
+	}
+
+	.version-number {
+		@apply font-mono font-semibold;
+	}
+
+	.version-label {
+		@apply opacity-80 text-xs;
+	}
+</style>

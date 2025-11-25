@@ -1,0 +1,201 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ChangelogEntry from '../../components/changelog/ChangelogEntry.astro';
+import VersionBadge from '../../components/changelog/VersionBadge.astro';
+import {
+	getChangelog,
+	getLatestRelease,
+	getAllReleaseYears,
+	getChangelogStats,
+	getChangelogGroupedByYearMonth,
+} from '../../utils/changelog';
+
+const language = 'en';
+const allReleases = await getChangelog(language);
+const latestRelease = await getLatestRelease(language);
+const years = await getAllReleaseYears(language);
+const stats = await getChangelogStats(language);
+const groupedByYearMonth = await getChangelogGroupedByYearMonth(language);
+---
+
+<Layout
+	title="Changelog - Product Updates & Release Notes | Picture"
+	description="Stay up to date with the latest Picture updates, new features, improvements, and bug fixes. See what's new in AI image generation."
+>
+	<div class="bg-dark-bg min-h-screen">
+		<!-- Hero -->
+		<div class="bg-gradient-to-b from-dark-elevated to-dark-bg py-16 md:py-24">
+			<div class="max-w-6xl mx-auto px-6">
+				<div class="text-center mb-12">
+					<div class="inline-block px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full mb-6">
+						<span class="text-primary text-sm font-medium">📝 Changelog</span>
+					</div>
+					<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+						What's New in Picture
+					</h1>
+					<p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+						Stay up to date with new features, improvements, and bug fixes. We ship updates regularly to make Picture better for you.
+					</p>
+
+					<!-- Stats -->
+					<div class="flex items-center justify-center gap-8 text-sm text-gray-400 flex-wrap">
+						<div><span class="text-2xl font-bold text-primary">{stats.totalReleases}</span> releases</div>
+						<div><span class="text-2xl font-bold text-primary">{stats.latestVersion}</span> latest</div>
+						<div><span class="text-2xl font-bold text-primary">{years.length}</span> years</div>
+					</div>
+				</div>
+
+				<!-- Latest Release Highlight -->
+				{latestRelease && (
+					<div class="bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20 rounded-2xl p-8 mb-12">
+						<div class="flex items-start justify-between mb-4 flex-wrap gap-4">
+							<div>
+								<div class="flex items-center gap-3 mb-3">
+									<VersionBadge version={latestRelease.data.version} type={latestRelease.data.type} />
+									<span class="text-sm text-gray-400">
+										{new Date(latestRelease.data.releaseDate).toLocaleDateString('en-US', {
+											month: 'long',
+											day: 'numeric',
+											year: 'numeric',
+										})}
+									</span>
+								</div>
+								<h2 class="text-3xl font-bold text-white mb-2">{latestRelease.data.title}</h2>
+								<p class="text-gray-300 text-lg">{latestRelease.data.summary}</p>
+							</div>
+							<a
+								href={`/changelog/${latestRelease.data.slug}`}
+								class="px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition whitespace-nowrap"
+							>
+								Read Full Release
+							</a>
+						</div>
+					</div>
+				)}
+
+				<!-- Filter Tabs -->
+				<div class="flex items-center gap-3 flex-wrap mb-8">
+					<button class="filter-btn active" data-year="all">
+						All Releases ({stats.totalReleases})
+					</button>
+					{years.map((year) => (
+						<button class="filter-btn" data-year={year}>
+							{year} ({stats.yearCounts.find((y) => y.year === year)?.count || 0})
+						</button>
+					))}
+				</div>
+
+				<!-- Subscribe -->
+				<div class="bg-dark-elevated border border-dark-border rounded-xl p-6 mb-12">
+					<div class="flex items-center justify-between flex-wrap gap-4">
+						<div>
+							<h3 class="text-lg font-semibold text-white mb-1">Get Release Notifications</h3>
+							<p class="text-sm text-gray-400">Subscribe to receive updates about new releases and features.</p>
+						</div>
+						<div class="flex gap-3">
+							<a
+								href="https://twitter.com/picture"
+								class="px-4 py-2 bg-dark-bg border border-dark-border rounded-lg text-sm text-gray-300 hover:border-primary hover:text-primary transition"
+							>
+								Twitter
+							</a>
+							<a
+								href="https://discord.gg/picture"
+								class="px-4 py-2 bg-dark-bg border border-dark-border rounded-lg text-sm text-gray-300 hover:border-primary hover:text-primary transition"
+							>
+								Discord
+							</a>
+							<a
+								href="/blog/rss.xml"
+								class="px-4 py-2 bg-dark-bg border border-dark-border rounded-lg text-sm text-gray-300 hover:border-primary hover:text-primary transition"
+							>
+								RSS Feed
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Changelog Entries -->
+		<div class="max-w-6xl mx-auto px-6 pb-16">
+			<!-- Grouped by Year & Month -->
+			{Object.entries(groupedByYearMonth)
+				.sort(([yearA], [yearB]) => parseInt(yearB) - parseInt(yearA))
+				.map(([year, months]) => (
+					<div class="changelog-year mb-16" data-year={year}>
+						<h2 class="text-3xl font-bold text-white mb-8 sticky top-20 bg-dark-bg py-4 z-10">
+							{year}
+						</h2>
+
+						{Object.entries(months)
+							.sort((a, b) => {
+								const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+								return monthOrder.indexOf(b[0]) - monthOrder.indexOf(a[0]);
+							})
+							.map(([month, releases]) => (
+								<div class="changelog-month mb-12">
+									<h3 class="text-xl font-semibold text-gray-400 mb-6">{month}</h3>
+									<div class="space-y-8">
+										{releases.map((release) => (
+											<ChangelogEntry entry={release} />
+										))}
+									</div>
+								</div>
+							))}
+					</div>
+				))}
+		</div>
+
+		<!-- CTA -->
+		<div class="max-w-4xl mx-auto px-6 py-16">
+			<div class="bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20 rounded-2xl p-12 text-center">
+				<h2 class="text-3xl font-bold text-white mb-4">Ready to try the latest features?</h2>
+				<p class="text-gray-300 mb-8">
+					Experience all the new improvements and features we've built for you.
+				</p>
+				<a
+					href="#"
+					class="px-8 py-3 bg-primary text-white font-medium rounded-lg inline-block hover:bg-primary/90 transition"
+				>
+					Get Started Free
+				</a>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const filterBtns = document.querySelectorAll('.filter-btn');
+		const yearSections = document.querySelectorAll('.changelog-year');
+
+		filterBtns.forEach((btn) => {
+			btn.addEventListener('click', () => {
+				const selectedYear = btn.getAttribute('data-year');
+
+				// Update active button
+				filterBtns.forEach((b) => b.classList.remove('active'));
+				btn.classList.add('active');
+
+				// Filter sections
+				yearSections.forEach((section) => {
+					const sectionYear = section.getAttribute('data-year');
+
+					if (selectedYear === 'all' || sectionYear === selectedYear) {
+						(section as HTMLElement).style.display = 'block';
+					} else {
+						(section as HTMLElement).style.display = 'none';
+					}
+				});
+			});
+		});
+	</script>
+
+	<style>
+		.filter-btn {
+			@apply px-4 py-2 bg-dark-elevated border border-dark-border rounded-lg text-sm text-gray-300 hover:border-primary hover:text-primary transition;
+		}
+		.filter-btn.active {
+			@apply bg-primary/10 border-primary text-primary;
+		}
+	</style>
+</Layout>

@@ -5,6 +5,7 @@ packages:
   - 'manadeck'
   - 'memoro'
   - 'picture'
+  - 'uload'
 
   # Sub-apps within projects
   - 'maerchenzauber/apps/*'
@@ -15,6 +16,7 @@ packages:
   - 'memoro/apps/*'
   - 'picture/apps/*'
   - 'picture/packages/*'
+  - 'uload/apps/*'
 
   # Shared packages
   - 'packages/*'

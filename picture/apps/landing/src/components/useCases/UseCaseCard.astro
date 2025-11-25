@@ -1,0 +1,107 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getDifficultyColor, getDifficultyDisplayName } from '../../utils/useCases';
+
+interface Props {
+	useCase: CollectionEntry<'useCases'>;
+}
+
+const { useCase } = Astro.props;
+const { data } = useCase;
+---
+
+<a
+	href={`/use-cases/${data.slug}`}
+	class="use-case-card group"
+>
+	<div class="card-content">
+		<!-- Icon & Badges -->
+		<div class="flex items-start justify-between mb-4">
+			<div class="icon">{data.icon}</div>
+			<div class="flex gap-2">
+				{data.featured && (
+					<span class="badge badge-primary">Featured</span>
+				)}
+				{data.popular && (
+					<span class="badge badge-secondary">Popular</span>
+				)}
+			</div>
+		</div>
+
+		<!-- Title & Description -->
+		<h3 class="title">{data.title}</h3>
+		<p class="description">{data.description}</p>
+
+		<!-- Meta Info -->
+		<div class="meta">
+			<span class="meta-item">
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+				</svg>
+				{data.estimatedTime || '5-10 min'}
+			</span>
+			<span class={`meta-item ${getDifficultyColor(data.difficulty)}`}>
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+				</svg>
+				{getDifficultyDisplayName(data.difficulty)}
+			</span>
+		</div>
+
+		<!-- CTA Arrow -->
+		<div class="cta-arrow">
+			<span>Learn more</span>
+			<svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+			</svg>
+		</div>
+	</div>
+</a>
+
+<style>
+	.use-case-card {
+		@apply block bg-dark-elevated border border-dark-border rounded-2xl p-6
+		       transition-all duration-300 hover:border-primary hover:shadow-xl
+		       hover:shadow-primary/10 hover:-translate-y-1;
+	}
+
+	.card-content {
+		@apply flex flex-col h-full;
+	}
+
+	.icon {
+		@apply text-4xl;
+	}
+
+	.badge {
+		@apply px-2 py-1 rounded-full text-xs font-medium;
+	}
+
+	.badge-primary {
+		@apply bg-primary/10 text-primary border border-primary/20;
+	}
+
+	.badge-secondary {
+		@apply bg-purple-500/10 text-purple-400 border border-purple-500/20;
+	}
+
+	.title {
+		@apply text-xl font-bold text-white mb-3 group-hover:text-primary transition-colors;
+	}
+
+	.description {
+		@apply text-gray-400 text-sm leading-relaxed mb-4 flex-grow;
+	}
+
+	.meta {
+		@apply flex items-center gap-4 text-sm text-gray-500 mb-4 pb-4 border-b border-dark-border;
+	}
+
+	.meta-item {
+		@apply flex items-center gap-1.5;
+	}
+
+	.cta-arrow {
+		@apply flex items-center justify-between text-sm font-medium text-primary;
+	}
+</style>

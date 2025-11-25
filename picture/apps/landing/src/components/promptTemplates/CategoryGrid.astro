@@ -1,0 +1,54 @@
+---
+import { formatCategoryName } from '../../utils/promptTemplates';
+
+export interface Props {
+	categories: Array<{ category: string; count: number; icon: string }>;
+	interactive?: boolean;
+}
+
+const { categories, interactive = true } = Astro.props;
+---
+
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+	{
+		categories.map((cat) => (
+			<a
+				href={interactive ? `/prompt-templates?category=${cat.category}` : undefined}
+				class={`p-6 bg-gray-50 hover:bg-purple-50 border border-gray-200 hover:border-purple-300 rounded-xl transition-all duration-300 text-center group ${interactive ? 'category-btn cursor-pointer' : 'cursor-default'}`}
+				data-category={cat.category}
+			>
+				<div class="text-4xl mb-2">{cat.icon}</div>
+				<div class="font-semibold text-gray-900 group-hover:text-purple-600">
+					{formatCategoryName(cat.category)}
+				</div>
+				<div class="text-sm text-gray-500 mt-1">{cat.count} templates</div>
+			</a>
+		))
+	}
+</div>
+
+{
+	interactive && (
+		<script>
+			const categoryButtons = document.querySelectorAll('.category-btn');
+			const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement;
+			const templatesGrid = document.getElementById('templates-grid') as HTMLElement;
+
+			categoryButtons.forEach((btn) => {
+				btn.addEventListener('click', (e) => {
+					e.preventDefault();
+					const category = (btn as HTMLElement).dataset.category || '';
+
+					if (categoryFilter) {
+						categoryFilter.value = category;
+						categoryFilter.dispatchEvent(new Event('change'));
+					}
+
+					if (templatesGrid) {
+						templatesGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+					}
+				});
+			});
+		</script>
+	)
+}

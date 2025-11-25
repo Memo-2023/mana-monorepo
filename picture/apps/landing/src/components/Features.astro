@@ -1,0 +1,76 @@
+---
+import { t } from '../i18n';
+
+const features = [
+	{
+		icon: '🎨',
+		titleKey: 'features.items.models.title',
+		descriptionKey: 'features.items.models.description'
+	},
+	{
+		icon: '⚡',
+		titleKey: 'features.items.fast.title',
+		descriptionKey: 'features.items.fast.description'
+	},
+	{
+		icon: '🎯',
+		titleKey: 'features.items.control.title',
+		descriptionKey: 'features.items.control.description'
+	},
+	{
+		icon: '📱',
+		titleKey: 'features.items.platform.title',
+		descriptionKey: 'features.items.platform.description'
+	},
+	{
+		icon: '💾',
+		titleKey: 'features.items.storage.title',
+		descriptionKey: 'features.items.storage.description'
+	},
+	{
+		icon: '🔒',
+		titleKey: 'features.items.privacy.title',
+		descriptionKey: 'features.items.privacy.description'
+	}
+];
+---
+
+<section id="features" class="relative py-24 bg-gradient-to-b from-dark-surface to-dark-bg">
+	<div class="container mx-auto px-4">
+		<!-- Section Header -->
+		<div class="text-center mb-16">
+			<div class="inline-flex items-center px-4 py-2 mb-4 bg-primary/10 border border-primary/20 rounded-full">
+				<span class="text-sm text-primary-300">{t('features.badge')}</span>
+			</div>
+			<h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+				{t('features.title')}
+			</h2>
+			<p class="text-xl text-gray-400 max-w-2xl mx-auto">
+				{t('features.subtitle')}
+			</p>
+		</div>
+
+		<!-- Features Grid -->
+		<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+			{features.map((feature) => (
+				<div class="group relative p-8 bg-dark-elevated/50 rounded-2xl border border-dark-border hover:border-primary/50 transition-all duration-300 hover:scale-105">
+					<!-- Icon -->
+					<div class="text-5xl mb-4">{feature.icon}</div>
+
+					<!-- Title -->
+					<h3 class="text-xl font-bold text-white mb-3 group-hover:text-primary transition-colors">
+						{t(feature.titleKey)}
+					</h3>
+
+					<!-- Description -->
+					<p class="text-gray-400 leading-relaxed">
+						{t(feature.descriptionKey)}
+					</p>
+
+					<!-- Hover Effect -->
+					<div class="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-secondary/0 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
+				</div>
+			))}
+		</div>
+	</div>
+</section>

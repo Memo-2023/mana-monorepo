@@ -1,0 +1,203 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import GalleryCard from '../../components/gallery/GalleryCard.astro';
+import GalleryFilters from '../../components/gallery/GalleryFilters.astro';
+import {
+	getAllGalleryImages,
+	getFeaturedGalleryImages,
+	getTrendingGalleryImages,
+	getStaffPickGalleryImages,
+	getGalleryCategories,
+	getGalleryStats,
+} from '../../utils/gallery';
+
+const allImages = await getAllGalleryImages();
+const featuredImages = await getFeaturedGalleryImages();
+const trendingImages = await getTrendingGalleryImages();
+const staffPicks = await getStaffPickGalleryImages();
+const categories = await getGalleryCategories();
+const stats = await getGalleryStats();
+
+const pageTitle = 'AI Image Gallery - Stunning Examples | Picture';
+const pageDescription =
+	'Explore our gallery of AI-generated images. Get inspired by stunning examples, see what\'s possible, and discover prompts used to create them.';
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+	<main class="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+		<!-- Hero Section -->
+		<section class="px-6 py-16 text-center">
+			<div class="mx-auto max-w-4xl">
+				<h1 class="mb-4 text-5xl font-bold text-gray-900 dark:text-white md:text-6xl">
+					AI Image Gallery
+				</h1>
+				<p class="mb-8 text-xl text-gray-600 dark:text-gray-300">
+					Explore stunning AI-generated images. Get inspired, discover prompts, and see what's
+					possible with Picture.
+				</p>
+
+				<!-- Stats -->
+				<div
+					class="mx-auto grid max-w-3xl grid-cols-2 gap-4 rounded-2xl bg-white p-6 shadow-lg dark:bg-gray-800 md:grid-cols-4"
+				>
+					<div>
+						<div class="text-3xl font-bold text-blue-600">{stats.totalImages}</div>
+						<div class="text-sm text-gray-600 dark:text-gray-400">Images</div>
+					</div>
+					<div>
+						<div class="text-3xl font-bold text-pink-600">{stats.totalLikes.toLocaleString()}</div>
+						<div class="text-sm text-gray-600 dark:text-gray-400">Likes</div>
+					</div>
+					<div>
+						<div class="text-3xl font-bold text-purple-600">
+							{stats.totalDownloads.toLocaleString()}
+						</div>
+						<div class="text-sm text-gray-600 dark:text-gray-400">Downloads</div>
+					</div>
+					<div>
+						<div class="text-3xl font-bold text-green-600">{stats.totalViews.toLocaleString()}</div>
+						<div class="text-sm text-gray-600 dark:text-gray-400">Views</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Featured Section -->
+		{
+			featuredImages.length > 0 && (
+				<section class="px-6 py-12">
+					<div class="mx-auto max-w-7xl">
+						<div class="mb-8 flex items-center justify-between">
+							<h2 class="text-3xl font-bold text-gray-900 dark:text-white">🌟 Featured</h2>
+							<span class="text-sm text-gray-600 dark:text-gray-400">
+								{featuredImages.length} images
+							</span>
+						</div>
+						<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+							{featuredImages.map((image) => (
+								<GalleryCard image={image} />
+							))}
+						</div>
+					</div>
+				</section>
+			)
+		}
+
+		<!-- Trending Section -->
+		{
+			trendingImages.length > 0 && (
+				<section class="bg-gradient-to-br from-pink-50 to-purple-50 px-6 py-12 dark:from-gray-800 dark:to-gray-900">
+					<div class="mx-auto max-w-7xl">
+						<div class="mb-8 flex items-center justify-between">
+							<h2 class="text-3xl font-bold text-gray-900 dark:text-white">🔥 Trending</h2>
+							<span class="text-sm text-gray-600 dark:text-gray-400">
+								{trendingImages.length} images
+							</span>
+						</div>
+						<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+							{trendingImages.map((image) => (
+								<GalleryCard image={image} />
+							))}
+						</div>
+					</div>
+				</section>
+			)
+		}
+
+		<!-- Staff Picks Section -->
+		{
+			staffPicks.length > 0 && (
+				<section class="px-6 py-12">
+					<div class="mx-auto max-w-7xl">
+						<div class="mb-8 flex items-center justify-between">
+							<h2 class="text-3xl font-bold text-gray-900 dark:text-white">✨ Staff Picks</h2>
+							<span class="text-sm text-gray-600 dark:text-gray-400">
+								{staffPicks.length} images
+							</span>
+						</div>
+						<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+							{staffPicks.map((image) => (
+								<GalleryCard image={image} />
+							))}
+						</div>
+					</div>
+				</section>
+			)
+		}
+
+		<!-- All Images with Filters -->
+		<section class="bg-white px-6 py-16 dark:bg-gray-800">
+			<div class="mx-auto max-w-7xl">
+				<div class="mb-8 flex items-center justify-between">
+					<h2 class="text-3xl font-bold text-gray-900 dark:text-white">All Images</h2>
+					<span class="text-sm text-gray-600 dark:text-gray-400">
+						{allImages.length} images
+					</span>
+				</div>
+
+				<!-- Filters -->
+				<GalleryFilters categories={categories} />
+
+				<!-- Images Grid -->
+				<div
+					id="gallery-grid"
+					class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+				>
+					{allImages.map((image) => <GalleryCard image={image} />)}
+				</div>
+			</div>
+		</section>
+
+		<!-- CTA Section -->
+		<section class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-16 text-center text-white">
+			<div class="mx-auto max-w-3xl">
+				<h2 class="mb-4 text-4xl font-bold">Ready to Create Your Own?</h2>
+				<p class="mb-8 text-xl text-blue-100">
+					Join Picture and start generating stunning AI images in seconds.
+				</p>
+				<div class="flex flex-col justify-center gap-4 sm:flex-row">
+					<a
+						href="/signup"
+						class="rounded-xl bg-white px-8 py-4 font-semibold text-blue-600 shadow-lg transition hover:bg-gray-100"
+					>
+						Get Started Free
+					</a>
+					<a
+						href="/pricing"
+						class="rounded-xl border-2 border-white px-8 py-4 font-semibold text-white transition hover:bg-white/10"
+					>
+						View Pricing
+					</a>
+				</div>
+			</div>
+		</section>
+	</main>
+</Layout>
+
+<script>
+	// Client-side filtering (optional enhancement)
+	document.addEventListener('DOMContentLoaded', () => {
+		const filterButtons = document.querySelectorAll('[data-filter]');
+		const galleryItems = document.querySelectorAll('[data-category]');
+
+		filterButtons.forEach((button) => {
+			button.addEventListener('click', () => {
+				const filter = button.getAttribute('data-filter');
+
+				// Update active button
+				filterButtons.forEach((btn) => btn.classList.remove('active'));
+				button.classList.add('active');
+
+				// Filter items
+				galleryItems.forEach((item) => {
+					const category = item.getAttribute('data-category');
+					if (filter === 'all' || category === filter) {
+						(item as HTMLElement).style.display = '';
+					} else {
+						(item as HTMLElement).style.display = 'none';
+					}
+				});
+			});
+		});
+	});
+</script>

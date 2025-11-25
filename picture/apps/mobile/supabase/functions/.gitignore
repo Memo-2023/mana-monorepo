@@ -1,0 +1,6 @@
+# Never commit environment variables
+.env
+.env.local
+
+# Deno
+deno.lock

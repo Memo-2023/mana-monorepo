@@ -1,0 +1,120 @@
+---
+import Layout from '@layouts/Layout.astro';
+import { getTestimonials, getTestimonialStats, getAllTestimonialCategories } from '@/utils/testimonials';
+import TestimonialCard from '@components/testimonials/TestimonialCard.astro';
+import { t } from '../../i18n';
+import { localizePath } from '../../i18n';
+
+const allTestimonials = await getTestimonials();
+const stats = await getTestimonialStats();
+const categories = getAllTestimonialCategories();
+
+// Separate featured from non-featured
+const featured = allTestimonials.filter(t => t.data.featured);
+const regular = allTestimonials.filter(t => !t.data.featured);
+---
+
+<Layout title="Testimonials - Picture" description="Read what creators, designers, and businesses say about Picture. Real reviews from real users.">
+	<div class="min-h-screen bg-dark-bg">
+		<!-- Hero Section -->
+		<section class="relative py-24 overflow-hidden">
+			<div class="absolute inset-0 bg-gradient-to-br from-primary-900/20 via-dark-surface to-secondary-900/20"></div>
+
+			<div class="relative z-10 container mx-auto px-4">
+				<div class="max-w-3xl mx-auto text-center mb-16">
+					<div class="inline-flex items-center px-4 py-2 mb-6 bg-primary/10 border border-primary/20 rounded-full">
+						<span class="text-sm text-primary-300">💬 Testimonials</span>
+					</div>
+					<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+						Loved by Creators Worldwide
+					</h1>
+					<p class="text-xl text-gray-400 mb-8">
+						See what {stats.total} creators have to say about Picture. Real reviews from real users.
+					</p>
+
+					<!-- Stats Bar -->
+					<div class="flex flex-wrap justify-center gap-8 p-6 bg-dark-elevated border border-dark-border rounded-xl">
+						<div class="text-center">
+							<div class="text-3xl font-bold text-white mb-1">{stats.averageRating.toFixed(1)}</div>
+							<div class="text-sm text-gray-400">Average Rating</div>
+							<div class="flex items-center justify-center gap-1 mt-2">
+								{Array.from({ length: 5 }, (_, i) => (
+									<svg
+										class={`w-5 h-5 ${i < Math.round(stats.averageRating) ? 'text-yellow-400' : 'text-gray-600'}`}
+										fill="currentColor"
+										viewBox="0 0 20 20"
+									>
+										<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+									</svg>
+								))}
+							</div>
+						</div>
+						<div class="h-16 w-px bg-dark-border"></div>
+						<div class="text-center">
+							<div class="text-3xl font-bold text-white mb-1">{stats.total}</div>
+							<div class="text-sm text-gray-400">Total Reviews</div>
+						</div>
+						<div class="h-16 w-px bg-dark-border"></div>
+						<div class="text-center">
+							<div class="text-3xl font-bold text-white mb-1">{stats.verified}</div>
+							<div class="text-sm text-gray-400">Verified Customers</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Category Filter (Optional - for future) -->
+		<!-- You can add category filtering here later -->
+
+		<!-- Featured Testimonials -->
+		{featured.length > 0 && (
+			<section class="py-16 bg-dark-surface">
+				<div class="container mx-auto px-4">
+					<h2 class="text-3xl font-bold text-white mb-8">Featured Reviews</h2>
+					<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+						{featured.map(testimonial => (
+							<TestimonialCard testimonial={testimonial} featured={true} />
+						))}
+					</div>
+				</div>
+			</section>
+		)}
+
+		<!-- All Testimonials -->
+		<section class="py-16">
+			<div class="container mx-auto px-4">
+				<h2 class="text-3xl font-bold text-white mb-8">All Reviews</h2>
+				<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+					{regular.map(testimonial => (
+						<TestimonialCard testimonial={testimonial} />
+					))}
+				</div>
+
+				{allTestimonials.length === 0 && (
+					<div class="text-center py-16">
+						<p class="text-xl text-gray-400">No testimonials yet. Check back soon!</p>
+					</div>
+				)}
+			</div>
+		</section>
+
+		<!-- CTA Section -->
+		<section class="py-24 bg-gradient-to-r from-primary-900/30 via-secondary-900/30 to-primary-900/30">
+			<div class="container mx-auto px-4 text-center">
+				<h2 class="text-4xl font-bold text-white mb-6">
+					Join These Happy Creators
+				</h2>
+				<p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+					Start creating stunning AI-generated images today. No credit card required to get started.
+				</p>
+				<a
+					href="#"
+					class="inline-block px-8 py-4 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white rounded-lg font-semibold text-lg transition-all duration-300 shadow-lg shadow-primary/50 hover:shadow-primary/70 hover:scale-105"
+				>
+					Get Started Free
+				</a>
+			</div>
+		</section>
+	</div>
+</Layout>

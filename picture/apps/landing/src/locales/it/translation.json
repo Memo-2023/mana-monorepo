@@ -1,0 +1,145 @@
+{
+	"hero": {
+		"badge": "✨ Generazione di immagini con IA",
+		"title": "Crea immagini straordinarie",
+		"subtitle": "con l'IA",
+		"description": "Trasforma le tue idee in immagini bellissime utilizzando modelli di IA all'avanguardia. Semplice, veloce e potente.",
+		"cta_primary": "Inizia gratis",
+		"cta_secondary": "Scopri di più",
+		"stats": {
+			"images": "Immagini create",
+			"models": "Modelli IA",
+			"satisfaction": "Soddisfazione"
+		}
+	},
+	"features": {
+		"badge": "Funzionalità",
+		"title": "Tutto ciò di cui hai bisogno per creare",
+		"subtitle": "Funzionalità potenti progettate per rendere la generazione di immagini IA semplice e piacevole",
+		"items": {
+			"models": {
+				"title": "Più modelli IA",
+				"description": "Accedi a oltre 10 modelli di IA all'avanguardia tra cui FLUX, Stable Diffusion e altro ancora."
+			},
+			"fast": {
+				"title": "Velocità fulminea",
+				"description": "Genera immagini di alta qualità in pochi secondi con la nostra infrastruttura ottimizzata."
+			},
+			"control": {
+				"title": "Controllo preciso",
+				"description": "Perfeziona ogni aspetto delle tue immagini con parametri e impostazioni avanzate."
+			},
+			"platform": {
+				"title": "Multi-piattaforma",
+				"description": "Disponibile su iOS, Android e Web. Crea ovunque, in qualsiasi momento."
+			},
+			"storage": {
+				"title": "Archiviazione cloud",
+				"description": "Tutte le tue immagini sono archiviate in modo sicuro e accessibili da qualsiasi dispositivo."
+			},
+			"privacy": {
+				"title": "Privacy prima di tutto",
+				"description": "Le tue creazioni sono private per impostazione predefinita. Possiedi le tue immagini."
+			}
+		}
+	},
+	"cta": {
+		"title": "Pronto a creare immagini straordinarie?",
+		"subtitle": "Unisciti a migliaia di creatori che utilizzano Picture per dare vita alle loro idee. Inizia a creare gratuitamente oggi stesso.",
+		"button_primary": "Inizia ora",
+		"button_secondary": "Vedi i prezzi",
+		"trust": {
+			"no_credit_card": "Nessuna carta di credito richiesta",
+			"free_plan": "Piano gratuito per sempre",
+			"cancel_anytime": "Annulla in qualsiasi momento"
+		}
+	},
+	"footer": {
+		"description": "Crea facilmente immagini straordinarie generate dall'IA.",
+		"product": {
+			"title": "Prodotto",
+			"features": "Funzionalità",
+			"pricing": "Prezzi",
+			"models": "Modelli",
+			"api": "API"
+		},
+		"company": {
+			"title": "Azienda",
+			"about": "Chi siamo",
+			"blog": "Blog",
+			"testimonials": "Testimonianze",
+			"faq": "FAQ",
+			"careers": "Carriere",
+			"contact": "Contatti"
+		},
+		"legal": {
+			"title": "Legale",
+			"privacy": "Privacy",
+			"terms": "Termini",
+			"cookie_policy": "Politica sui cookie",
+			"licenses": "Licenze"
+		},
+		"bottom": {
+			"copyright": "© {{year}} Picture. Tutti i diritti riservati.",
+			"status": "Stato",
+			"documentation": "Documentazione",
+			"support": "Supporto"
+		}
+	},
+	"meta": {
+		"title": "Picture - Piattaforma di generazione immagini IA",
+		"description": "Crea facilmente immagini straordinarie generate dall'IA. Accedi a oltre 10 modelli IA, generazione ultra veloce e archiviazione cloud. Inizia gratuitamente oggi stesso."
+	},
+	"legal": {
+		"back_home": "Torna alla home",
+		"last_updated": "Ultimo aggiornamento",
+		"privacy": {
+			"title": "Informativa sulla privacy",
+			"content": "<h2>Informazioni che raccogliamo</h2><p>Raccogliamo le informazioni che ci fornisci direttamente quando crei un account, utilizzi i nostri servizi o comunichi con noi.</p><h2>Come utilizziamo le tue informazioni</h2><p>Utilizziamo le informazioni raccolte per fornire, mantenere e migliorare i nostri servizi.</p><h2>I tuoi diritti</h2><p>Hai il diritto di accedere, correggere o eliminare i tuoi dati personali.</p><h2>Contattaci</h2><p>Per qualsiasi domanda su questa informativa sulla privacy, contattaci a privacy@picture.app</p>"
+		},
+		"terms": {
+			"title": "Termini di servizio",
+			"content": "<h2>Accettazione dei termini</h2><p>Accedendo e utilizzando Picture, accetti di essere vincolato da questi Termini di servizio.</p><h2>Uso del servizio</h2><p>Puoi utilizzare il nostro servizio solo per scopi legali e in conformità con questi Termini.</p><h2>Proprietà intellettuale</h2><p>Mantieni la proprietà delle immagini che generi.</p><h2>Contattaci</h2><p>Per qualsiasi domanda, contattaci a legal@picture.app</p>"
+		},
+		"cookies": {
+			"title": "Politica sui cookie",
+			"content": "<h2>Cosa sono i cookie</h2><p>I cookie sono piccoli file di testo che vengono inseriti sul tuo dispositivo quando visiti il nostro sito web.</p><h2>Tipi di cookie utilizzati</h2><p>Utilizziamo cookie essenziali, analitici e di preferenza.</p><h2>Gestione dei cookie</h2><p>Puoi controllare e gestire i cookie nelle impostazioni del tuo browser.</p>"
+		},
+		"imprint": {
+			"title": "Note legali",
+			"content": "<h2>Informazioni sull'azienda</h2><p><strong>Picture AI Image Generation</strong><br/>Via Esempio 123<br/>12345 Città<br/>Italia</p><h2>Contatti</h2><p>Email: legal@picture.app<br/>Telefono: +39 012 345 6789</p>"
+		}
+	},
+	"features": {
+		"badge": "Funzionalità",
+		"title": "Funzionalità potenti per i creatori",
+		"subtitle": "Tutto ciò di cui hai bisogno per creare immagini straordinarie generate dall'IA",
+		"description": "Esplora tutte le potenti funzionalità che Picture offre per dare vita alle tue visioni creative.",
+		"all_features": "Tutte le funzionalità",
+		"featured_features": "Funzionalità in evidenza",
+		"no_features": "Nessuna funzionalità disponibile.",
+		"learn_more": "Scopri di più",
+		"back_to_features": "Torna alle funzionalità",
+		"key_benefits": "Vantaggi principali",
+		"use_cases": "Casi d'uso",
+		"try_feature": "Pronto per provare questa funzionalità?",
+		"try_feature_subtitle": "Inizia a creare immagini straordinarie con Picture oggi.",
+		"get_started": "Inizia gratis",
+		"available_now": "Disponibile ora",
+		"coming_soon": "Prossimamente",
+		"not_available": "Non disponibile",
+		"featured": "In evidenza",
+		"related_features": "Funzionalità correlate",
+		"cta_title": "Pronto per creare con Picture?",
+		"cta_subtitle": "Unisciti a migliaia di creatori che utilizzano le potenti funzionalità di Picture per dare vita alle loro idee.",
+		"cta_button": "Inizia a creare gratis",
+		"categories": {
+			"generation": "Generazione",
+			"editing": "Modifica",
+			"organization": "Organizzazione",
+			"collaboration": "Collaborazione",
+			"api": "API e integrazioni",
+			"models": "Modelli IA"
+		}
+	}
+}

@@ -1,0 +1,221 @@
+---
+interface Props {
+	steps: { title: string; duration?: string }[];
+}
+
+const { steps } = Astro.props;
+---
+
+<div id="step-indicator" class="step-indicator">
+	<div class="step-indicator-content">
+		<div class="step-header">
+			<h3 class="step-title">Tutorial Steps</h3>
+			<button id="toggle-steps" class="toggle-btn">
+				<svg id="chevron-icon" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+				</svg>
+			</button>
+		</div>
+		<div id="steps-list" class="steps-list">
+			<ol class="steps">
+				{steps.map((step, index) => (
+					<li class="step-item" data-step={index}>
+						<div class="step-number">{index + 1}</div>
+						<div class="step-content">
+							<span class="step-name">{step.title}</span>
+							{step.duration && <span class="step-duration">{step.duration}</span>}
+						</div>
+						<div class="step-check hidden">
+							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									fill-rule="evenodd"
+									d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						</div>
+					</li>
+				))}
+			</ol>
+		</div>
+	</div>
+</div>
+
+<script>
+	// Sticky step indicator functionality
+	const indicator = document.getElementById('step-indicator');
+	const toggleBtn = document.getElementById('toggle-steps');
+	const stepsList = document.getElementById('steps-list');
+	const chevronIcon = document.getElementById('chevron-icon');
+	const stepItems = document.querySelectorAll('.step-item');
+
+	let isExpanded = true;
+
+	// Toggle steps visibility
+	toggleBtn?.addEventListener('click', () => {
+		isExpanded = !isExpanded;
+		stepsList?.classList.toggle('collapsed');
+		chevronIcon?.classList.toggle('rotate-180');
+	});
+
+	// Track scroll position and highlight current step
+	const headings = document.querySelectorAll('article h2');
+
+	function updateActiveStep() {
+		const scrollPos = window.scrollY + 200;
+
+		headings.forEach((heading, index) => {
+			const headingPos = (heading as HTMLElement).offsetTop;
+			const nextHeading = headings[index + 1];
+			const nextHeadingPos = nextHeading
+				? (nextHeading as HTMLElement).offsetTop
+				: document.body.scrollHeight;
+
+			if (scrollPos >= headingPos && scrollPos < nextHeadingPos) {
+				// Remove active from all steps
+				stepItems.forEach(item => item.classList.remove('active'));
+
+				// Add active to current step
+				const currentStep = document.querySelector(`[data-step="${index}"]`);
+				if (currentStep) {
+					currentStep.classList.add('active');
+				}
+			}
+		});
+	}
+
+	// Intersection Observer for step completion
+	const observerOptions = {
+		root: null,
+		rootMargin: '0px',
+		threshold: 0.5
+	};
+
+	const observer = new IntersectionObserver((entries) => {
+		entries.forEach(entry => {
+			if (entry.isIntersecting) {
+				const heading = entry.target;
+				const index = Array.from(headings).indexOf(heading as Element);
+
+				// Mark all previous steps as completed
+				stepItems.forEach((item, i) => {
+					if (i < index) {
+						item.classList.add('completed');
+						const check = item.querySelector('.step-check');
+						check?.classList.remove('hidden');
+					}
+				});
+			}
+		});
+	}, observerOptions);
+
+	// Observe all h2 headings
+	headings.forEach(heading => observer.observe(heading));
+
+	// Update on scroll
+	window.addEventListener('scroll', updateActiveStep);
+	updateActiveStep();
+
+	// Click on step to scroll to section
+	stepItems.forEach((item, index) => {
+		item.addEventListener('click', () => {
+			const heading = headings[index];
+			if (heading) {
+				heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}
+		});
+	});
+</script>
+
+<style>
+	.step-indicator {
+		@apply sticky top-20 z-40 mb-12;
+	}
+
+	.step-indicator-content {
+		@apply bg-dark-elevated border border-dark-border rounded-xl overflow-hidden shadow-lg;
+	}
+
+	.step-header {
+		@apply flex items-center justify-between p-4 border-b border-dark-border;
+	}
+
+	.step-title {
+		@apply text-lg font-semibold text-white;
+	}
+
+	.toggle-btn {
+		@apply p-2 hover:bg-dark-bg rounded-lg transition text-gray-400 hover:text-white;
+	}
+
+	.steps-list {
+		@apply max-h-[400px] overflow-y-auto transition-all duration-300;
+	}
+
+	.steps-list.collapsed {
+		@apply max-h-0;
+	}
+
+	.steps {
+		@apply p-4 space-y-2;
+	}
+
+	.step-item {
+		@apply flex items-center gap-3 p-3 rounded-lg cursor-pointer
+		       transition-all hover:bg-dark-bg;
+	}
+
+	.step-item.active {
+		@apply bg-primary/10 border border-primary/20;
+	}
+
+	.step-item.completed .step-number {
+		@apply bg-green-500 text-white;
+	}
+
+	.step-number {
+		@apply w-8 h-8 flex items-center justify-center rounded-full
+		       bg-dark-bg text-gray-400 text-sm font-medium flex-shrink-0;
+	}
+
+	.step-item.active .step-number {
+		@apply bg-primary text-white;
+	}
+
+	.step-content {
+		@apply flex-grow;
+	}
+
+	.step-name {
+		@apply block text-sm text-gray-300 font-medium;
+	}
+
+	.step-item.active .step-name {
+		@apply text-primary;
+	}
+
+	.step-duration {
+		@apply block text-xs text-gray-500 mt-0.5;
+	}
+
+	.step-check {
+		@apply text-green-500 flex-shrink-0;
+	}
+
+	/* Custom scrollbar */
+	.steps-list::-webkit-scrollbar {
+		@apply w-2;
+	}
+
+	.steps-list::-webkit-scrollbar-track {
+		@apply bg-dark-bg;
+	}
+
+	.steps-list::-webkit-scrollbar-thumb {
+		@apply bg-dark-border rounded-full;
+	}
+
+	.steps-list::-webkit-scrollbar-thumb:hover {
+		@apply bg-gray-600;
+	}
+</style>

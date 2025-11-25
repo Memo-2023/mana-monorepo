@@ -1,0 +1,79 @@
+---
+// import { HeadHrefLangs } from 'astro-i18next/components';
+import { t } from '../i18n';
+import LanguageSwitcher from '@components/LanguageSwitcher.astro';
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const {
+	title = t('meta.title') || 'Picture AI - AI Image Generator',
+	description = t('meta.description') || 'Generate stunning AI images with Picture'
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content={description} />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+
+		<!-- SEO Meta Tags -->
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+
+		<!-- Language alternates -->
+		<!-- <HeadHrefLangs /> -->
+
+		<!-- Umami Analytics -->
+		{import.meta.env.PUBLIC_UMAMI_WEBSITE_ID && import.meta.env.PUBLIC_UMAMI_URL && (
+			<script
+				defer
+				src={`${import.meta.env.PUBLIC_UMAMI_URL}/script.js`}
+				data-website-id={import.meta.env.PUBLIC_UMAMI_WEBSITE_ID}
+				data-do-not-track="true"
+			></script>
+		)}
+
+		<title>{title}</title>
+	</head>
+	<body class="antialiased">
+		<!-- Language Switcher -->
+		<div class="fixed top-4 right-4 z-50">
+			<LanguageSwitcher />
+		</div>
+
+		<slot />
+	</body>
+</html>
+
+<style is:global>
+	* {
+		box-sizing: border-box;
+	}
+
+	html {
+		font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+		@apply bg-dark-bg text-white;
+	}
+
+	body {
+		margin: 0;
+		padding: 0;
+		overflow-x: hidden;
+	}
+
+	/* Smooth scroll behavior */
+	html.scroll-smooth {
+		scroll-behavior: smooth;
+	}
+</style>

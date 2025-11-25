@@ -1,0 +1,52 @@
+{
+  "name": "@picture/design-tokens",
+  "version": "0.1.0",
+  "description": "Shared design tokens for picture apps - colors, spacing, typography",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./tailwind/preset": {
+      "require": "./tailwind/preset.js"
+    },
+    "./native": {
+      "require": "./native/theme.js",
+      "types": "./native/theme.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "tailwind",
+    "native"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts && tsup native/theme.ts --format cjs --dts --out-dir native --no-splitting",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "clean": "rm -rf dist native/*.js native/*.d.ts"
+  },
+  "keywords": [
+    "design-tokens",
+    "design-system",
+    "colors",
+    "theming",
+    "picture"
+  ],
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "tailwindcss": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    }
+  }
+}

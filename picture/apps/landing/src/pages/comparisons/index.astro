@@ -1,0 +1,240 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ComparisonCard from '../../components/comparisons/ComparisonCard.astro';
+import {
+	getComparisons,
+	getFeaturedComparisons,
+	getComparisonsByType,
+	getComparisonStats,
+	getTypeDisplayName,
+	getTypeIcon,
+} from '../../utils/comparisons';
+
+const language = 'en';
+const allComparisons = await getComparisons(language);
+const featuredComparisons = await getFeaturedComparisons(language);
+const stats = await getComparisonStats(language);
+
+// Group by type
+const versusComparisons = await getComparisonsByType('versus', language);
+const roundupComparisons = await getComparisonsByType('roundup', language);
+const alternativeComparisons = await getComparisonsByType('alternative', language);
+---
+
+<Layout
+	title="AI Image Generator Comparisons - Picture vs Midjourney, DALL-E & More"
+	description="Compare Picture with Midjourney, DALL-E 3, Stable Diffusion, and other AI image generators. Find the best tool for your needs with detailed comparisons."
+>
+	<div class="bg-dark-bg min-h-screen">
+		<!-- Hero & Search -->
+		<div class="bg-gradient-to-b from-dark-elevated to-dark-bg py-16 md:py-24">
+			<div class="max-w-6xl mx-auto px-6 text-center">
+				<div class="inline-block px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full mb-6">
+					<span class="text-primary text-sm font-medium">⚔️ AI Image Generator Comparisons</span>
+				</div>
+				<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+					Find the Best AI Image Generator
+				</h1>
+				<p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+					Compare Picture with Midjourney, DALL-E 3, Stable Diffusion, and more. Unbiased comparisons to help you choose the right tool.
+				</p>
+
+				<!-- Search -->
+				<div class="max-w-2xl mx-auto mb-8">
+					<div class="relative">
+						<input
+							type="text"
+							id="comparison-search"
+							placeholder="Search comparisons (e.g., 'vs midjourney', 'best ai generator')..."
+							class="w-full px-6 py-4 pl-14 bg-dark-elevated border border-dark-border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary"
+						/>
+						<svg class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+						</svg>
+					</div>
+				</div>
+
+				<!-- Stats -->
+				<div class="flex items-center justify-center gap-8 text-sm text-gray-400">
+					<div><span class="text-2xl font-bold text-primary">{stats.totalComparisons}</span> comparisons</div>
+					<div><span class="text-2xl font-bold text-primary">{stats.featuredCount}</span> featured</div>
+					<div><span class="text-2xl font-bold text-primary">{stats.competitors.length}</span> competitors</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Featured Comparisons -->
+		{featuredComparisons.length > 0 && (
+			<div class="max-w-6xl mx-auto px-6 py-12">
+				<h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+					<span>⭐</span><span>Featured Comparisons</span>
+				</h2>
+				<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+					{featuredComparisons.map((comparison) => (
+						<ComparisonCard comparison={comparison} />
+					))}
+				</div>
+			</div>
+		)}
+
+		<!-- Type Filter -->
+		<div class="max-w-6xl mx-auto px-6 py-8">
+			<div class="flex flex-wrap gap-3 mb-8">
+				<button class="type-btn active" data-type="all">
+					<span>📚 All Comparisons ({stats.totalComparisons})</span>
+				</button>
+				<button class="type-btn" data-type="versus">
+					<span>{getTypeIcon('versus')} {getTypeDisplayName('versus')} ({stats.typeCounts.versus || 0})</span>
+				</button>
+				<button class="type-btn" data-type="roundup">
+					<span>{getTypeIcon('roundup')} {getTypeDisplayName('roundup')} ({stats.typeCounts.roundup || 0})</span>
+				</button>
+				{stats.typeCounts.alternative && stats.typeCounts.alternative > 0 && (
+					<button class="type-btn" data-type="alternative">
+						<span>{getTypeIcon('alternative')} {getTypeDisplayName('alternative')} ({stats.typeCounts.alternative})</span>
+					</button>
+				)}
+			</div>
+		</div>
+
+		<!-- Comparisons by Type -->
+		<div class="max-w-6xl mx-auto px-6 pb-16">
+			<div id="comparisons-grid" class="space-y-12">
+				<!-- Roundup (Best Of) -->
+				{roundupComparisons.length > 0 && (
+					<div class="comparison-type" data-type="roundup">
+						<h3 class="text-xl font-bold text-white mb-6">
+							{getTypeIcon('roundup')} {getTypeDisplayName('roundup')} ({roundupComparisons.length})
+						</h3>
+						<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+							{roundupComparisons.map((comparison) => (
+								<ComparisonCard comparison={comparison} />
+							))}
+						</div>
+					</div>
+				)}
+
+				<!-- Versus (Head-to-Head) -->
+				{versusComparisons.length > 0 && (
+					<div class="comparison-type" data-type="versus">
+						<h3 class="text-xl font-bold text-white mb-6">
+							{getTypeIcon('versus')} {getTypeDisplayName('versus')} ({versusComparisons.length})
+						</h3>
+						<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+							{versusComparisons.map((comparison) => (
+								<ComparisonCard comparison={comparison} />
+							))}
+						</div>
+					</div>
+				)}
+
+				<!-- Alternatives -->
+				{alternativeComparisons.length > 0 && (
+					<div class="comparison-type" data-type="alternative">
+						<h3 class="text-xl font-bold text-white mb-6">
+							{getTypeIcon('alternative')} {getTypeDisplayName('alternative')} ({alternativeComparisons.length})
+						</h3>
+						<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+							{alternativeComparisons.map((comparison) => (
+								<ComparisonCard comparison={comparison} />
+							))}
+						</div>
+					</div>
+				)}
+			</div>
+
+			<!-- No Results -->
+			<div id="no-results" class="hidden text-center py-12">
+				<div class="text-6xl mb-4">🔍</div>
+				<h3 class="text-xl text-white mb-2">No comparisons found</h3>
+				<p class="text-gray-400">Try a different search term</p>
+			</div>
+		</div>
+
+		<!-- Popular Competitors -->
+		<div class="max-w-6xl mx-auto px-6 pb-16">
+			<div class="bg-dark-elevated border border-dark-border rounded-2xl p-8">
+				<h3 class="text-xl font-bold text-white mb-6">Compare Picture With:</h3>
+				<div class="grid md:grid-cols-3 gap-4">
+					{stats.competitors.map((competitor) => (
+						<button
+							class="competitor-chip"
+							onclick={`document.getElementById('comparison-search').value = '${competitor.toLowerCase()}'; document.getElementById('comparison-search').dispatchEvent(new Event('input'));`}
+						>
+							🔍 {competitor}
+						</button>
+					))}
+				</div>
+			</div>
+		</div>
+
+		<!-- CTA -->
+		<div class="max-w-4xl mx-auto px-6 py-16">
+			<div class="bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20 rounded-2xl p-12 text-center">
+				<h2 class="text-3xl font-bold text-white mb-4">Ready to try Picture?</h2>
+				<p class="text-gray-300 mb-8">Start with 50 free images - no credit card required.</p>
+				<a href="#" class="px-8 py-3 bg-primary text-white font-medium rounded-lg inline-block hover:bg-primary/90 transition-colors">
+					Get Started Free
+				</a>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const search = document.getElementById('comparison-search') as HTMLInputElement;
+		const btns = document.querySelectorAll('.type-btn');
+		const types = document.querySelectorAll('.comparison-type');
+		const noRes = document.getElementById('no-results');
+		let activeType = 'all';
+
+		search?.addEventListener('input', (e) => filter((e.target as HTMLInputElement).value.toLowerCase(), activeType));
+
+		btns.forEach((btn) => {
+			btn.addEventListener('click', () => {
+				const type = btn.getAttribute('data-type') || 'all';
+				activeType = type;
+				btns.forEach((b) => b.classList.remove('active'));
+				btn.classList.add('active');
+				filter(search?.value.toLowerCase() || '', type);
+			});
+		});
+
+		function filter(q: string, type: string) {
+			let visible = 0;
+			types.forEach((t) => {
+				const name = t.getAttribute('data-type');
+				const matches = type === 'all' || name === type;
+				if (!matches) { (t as HTMLElement).style.display = 'none'; return; }
+
+				const cards = t.querySelectorAll('.comparison-card');
+				let hasVisible = false;
+				cards.forEach((card) => {
+					const text = card.textContent?.toLowerCase() || '';
+					if (!q || text.includes(q)) {
+						(card as HTMLElement).style.display = 'block';
+						hasVisible = true;
+						visible++;
+					} else {
+						(card as HTMLElement).style.display = 'none';
+					}
+				});
+				(t as HTMLElement).style.display = hasVisible ? 'block' : 'none';
+			});
+			if (noRes) noRes.style.display = visible === 0 ? 'block' : 'none';
+		}
+	</script>
+
+	<style>
+		.type-btn {
+			@apply px-4 py-2 bg-dark-elevated border border-dark-border rounded-lg text-sm text-gray-300
+			       hover:border-primary hover:text-primary transition-colors;
+		}
+		.type-btn.active {
+			@apply bg-primary/10 border-primary text-primary;
+		}
+		.competitor-chip {
+			@apply px-4 py-3 bg-dark-bg border border-dark-border rounded-lg text-sm text-gray-300
+			       hover:border-primary hover:text-primary transition-colors;
+		}
+	</style>
+</Layout>

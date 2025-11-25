@@ -1,0 +1,24 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+	faqs: CollectionEntry<'faq'>[];
+}
+
+const { faqs } = Astro.props;
+
+const faqSchema = {
+	'@context': 'https://schema.org',
+	'@type': 'FAQPage',
+	mainEntity: faqs.map((faq) => ({
+		'@type': 'Question',
+		name: faq.data.question,
+		acceptedAnswer: {
+			'@type': 'Answer',
+			text: faq.body,
+		},
+	})),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />

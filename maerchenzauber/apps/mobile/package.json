@@ -1,5 +1,5 @@
 {
-  "name": "@storyteller/mobile",
+  "name": "@maerchenzauber/mobile",
   "main": "expo-router/entry",
   "version": "1.1.0",
   "scripts": {

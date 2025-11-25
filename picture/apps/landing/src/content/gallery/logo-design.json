@@ -1,0 +1,42 @@
+{
+  "title": "Modern Coffee Shop Logo Design",
+  "slug": "modern-coffee-shop-logo",
+  "imageUrl": "/gallery/coffee-logo.jpg",
+  "prompt": "Modern minimalist logo design for 'Brew & Co.' coffee shop, coffee cup icon with steam, clean typography, warm brown and cream colors, professional branding",
+  "model": "ideogram-v3-turbo",
+  "settings": {
+    "seed": 777,
+    "guidanceScale": 4.0,
+    "width": 1024,
+    "height": 1024,
+    "aspectRatio": "1:1"
+  },
+  "category": "illustration",
+  "style": ["modern", "minimalist", "professional", "clean"],
+  "tags": ["logo", "branding", "coffee", "typography", "design"],
+  "creator": {
+    "name": "Picture Gallery"
+  },
+  "featured": true,
+  "trending": true,
+  "staffPick": false,
+  "published": true,
+  "likes": 1534,
+  "downloads": 512,
+  "views": 6789,
+  "qualityScore": 5,
+  "nsfw": false,
+  "moderationStatus": "approved",
+  "relatedImages": ["tech-startup-logo", "restaurant-branding"],
+  "relatedTutorials": ["advanced-prompt-engineering"],
+  "relatedModels": ["ideogram-v3-turbo", "imagen-4-fast"],
+  "description": "Perfect example of Ideogram V3 Turbo's outstanding text rendering capabilities. The text 'Brew & Co.' is crisp and perfectly integrated into the logo design.",
+  "seoKeywords": ["logo design AI", "text rendering", "branding AI", "coffee shop logo"],
+  "createdAt": "2025-01-16T09:15:00Z",
+  "language": "en",
+  "fileSize": 1234567,
+  "dimensions": {
+    "width": 1024,
+    "height": 1024
+  }
+}

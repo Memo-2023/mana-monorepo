@@ -1,0 +1,109 @@
+---
+import i18next from '../i18n';
+
+const currentLocale = i18next.language;
+
+const languages = [
+	{ code: 'en', name: 'English', flag: '🇬🇧' },
+	{ code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+	{ code: 'fr', name: 'Français', flag: '🇫🇷' },
+	{ code: 'it', name: 'Italiano', flag: '🇮🇹' },
+	{ code: 'es', name: 'Español', flag: '🇪🇸' }
+];
+
+const currentLanguage = languages.find(lang => lang.code === currentLocale) || languages[0];
+---
+
+<div class="language-switcher relative inline-block">
+	<button
+		class="flex items-center gap-2 px-4 py-2 bg-dark-elevated border border-dark-border rounded-lg hover:border-primary/50 transition-colors"
+		id="language-button"
+		aria-label="Change language"
+	>
+		<span class="text-xl">{currentLanguage.flag}</span>
+		<span class="text-sm text-white">{currentLanguage.name}</span>
+		<svg class="w-4 h-4 text-gray-400 transition-transform" id="dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+		</svg>
+	</button>
+
+	<div
+		class="language-dropdown absolute right-0 mt-2 w-48 bg-dark-elevated border border-dark-border rounded-lg shadow-xl opacity-0 invisible transition-all duration-200 z-50"
+		id="language-dropdown"
+	>
+		{languages.map((lang) => (
+			<button
+				data-lang={lang.code}
+				class={`w-full flex items-center gap-3 px-4 py-3 hover:bg-dark-surface transition-colors ${
+					lang.code === currentLocale ? 'bg-dark-surface' : ''
+				}`}
+			>
+				<span class="text-xl">{lang.flag}</span>
+				<span class="text-sm text-white">{lang.name}</span>
+				{lang.code === currentLocale && (
+					<svg class="w-4 h-4 text-primary ml-auto" fill="currentColor" viewBox="0 0 20 20">
+						<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+					</svg>
+				)}
+			</button>
+		))}
+	</div>
+</div>
+
+<script>
+	const button = document.getElementById('language-button');
+	const dropdown = document.getElementById('language-dropdown');
+	const arrow = document.getElementById('dropdown-arrow');
+
+	// Function to change language
+	function changeLanguage(lang: string) {
+		// Store in localStorage
+		localStorage.setItem('language', lang);
+		// Reload page
+		window.location.reload();
+	}
+
+	button?.addEventListener('click', () => {
+		const isOpen = dropdown?.classList.contains('opacity-100');
+
+		if (isOpen) {
+			dropdown?.classList.remove('opacity-100', 'visible');
+			dropdown?.classList.add('opacity-0', 'invisible');
+			arrow?.classList.remove('rotate-180');
+		} else {
+			dropdown?.classList.remove('opacity-0', 'invisible');
+			dropdown?.classList.add('opacity-100', 'visible');
+			arrow?.classList.add('rotate-180');
+		}
+	});
+
+	// Handle language selection
+	const languageButtons = dropdown?.querySelectorAll('button[data-lang]');
+	languageButtons?.forEach((btn) => {
+		btn.addEventListener('click', () => {
+			const lang = btn.getAttribute('data-lang');
+			if (lang) {
+				changeLanguage(lang);
+			}
+		});
+	});
+
+	// Close dropdown when clicking outside
+	document.addEventListener('click', (e) => {
+		if (!button?.contains(e.target as Node) && !dropdown?.contains(e.target as Node)) {
+			dropdown?.classList.remove('opacity-100', 'visible');
+			dropdown?.classList.add('opacity-0', 'invisible');
+			arrow?.classList.remove('rotate-180');
+		}
+	});
+</script>
+
+<style>
+	.language-dropdown button:first-child {
+		border-radius: 0.5rem 0.5rem 0 0;
+	}
+
+	.language-dropdown button:last-child {
+		border-radius: 0 0 0.5rem 0.5rem;
+	}
+</style>

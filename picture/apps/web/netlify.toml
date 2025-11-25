@@ -1,0 +1,30 @@
+[build]
+  # Build command for the web app in monorepo
+  command = "cd ../.. && pnpm install --no-frozen-lockfile && pnpm --filter @picture/web... build"
+  # Directory where the build output is located
+  publish = ".svelte-kit/netlify"
+
+[build.environment]
+  # Node version
+  NODE_VERSION = "20"
+  # Use pnpm
+  NPM_FLAGS = "--version"
+
+# Headers for security and performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

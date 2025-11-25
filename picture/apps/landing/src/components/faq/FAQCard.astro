@@ -1,0 +1,122 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { marked } from 'marked';
+
+interface Props {
+	faq: CollectionEntry<'faq'>;
+	open?: boolean;
+}
+
+const { faq, open = false } = Astro.props;
+const { Content } = await faq.render();
+---
+
+<details class="faq-item group" open={open}>
+	<summary class="faq-question">
+		<span class="question-text">{faq.data.question}</span>
+		<svg
+			class="chevron"
+			width="20"
+			height="20"
+			viewBox="0 0 20 20"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M5 7.5L10 12.5L15 7.5"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			></path>
+		</svg>
+	</summary>
+	<div class="faq-answer">
+		<Content />
+	</div>
+</details>
+
+<style>
+	.faq-item {
+		@apply bg-dark-elevated border border-dark-border rounded-xl overflow-hidden transition-all duration-200;
+	}
+
+	.faq-item:hover {
+		@apply border-dark-hover;
+	}
+
+	.faq-question {
+		@apply flex items-center justify-between w-full p-6 cursor-pointer select-none text-left;
+		@apply font-medium text-lg text-gray-100;
+	}
+
+	.faq-question:hover {
+		@apply text-primary;
+	}
+
+	.chevron {
+		@apply flex-shrink-0 ml-4 text-gray-400 transition-transform duration-200;
+	}
+
+	.group[open] .chevron {
+		@apply rotate-180;
+	}
+
+	.faq-answer {
+		@apply px-6 pb-6 text-gray-300 prose prose-invert max-w-none;
+	}
+
+	/* Markdown content styling */
+	.faq-answer :global(h2) {
+		@apply text-xl font-semibold text-gray-100 mt-6 mb-3;
+	}
+
+	.faq-answer :global(h3) {
+		@apply text-lg font-semibold text-gray-200 mt-4 mb-2;
+	}
+
+	.faq-answer :global(p) {
+		@apply mb-4 leading-relaxed;
+	}
+
+	.faq-answer :global(ul),
+	.faq-answer :global(ol) {
+		@apply mb-4 pl-6 space-y-2;
+	}
+
+	.faq-answer :global(li) {
+		@apply leading-relaxed;
+	}
+
+	.faq-answer :global(strong) {
+		@apply text-gray-100 font-semibold;
+	}
+
+	.faq-answer :global(a) {
+		@apply text-primary hover:underline;
+	}
+
+	.faq-answer :global(code) {
+		@apply bg-dark-bg px-1.5 py-0.5 rounded text-sm font-mono text-primary;
+	}
+
+	.faq-answer :global(pre) {
+		@apply bg-dark-bg p-4 rounded-lg overflow-x-auto my-4;
+	}
+
+	.faq-answer :global(table) {
+		@apply w-full border-collapse my-4;
+	}
+
+	.faq-answer :global(th) {
+		@apply bg-dark-bg text-left p-3 font-semibold text-gray-100 border border-dark-border;
+	}
+
+	.faq-answer :global(td) {
+		@apply p-3 border border-dark-border;
+	}
+
+	.faq-answer :global(blockquote) {
+		@apply border-l-4 border-primary pl-4 italic text-gray-400 my-4;
+	}
+</style>

@@ -1,0 +1,43 @@
+{
+  "title": "Mystical Fantasy Landscape with Floating Islands",
+  "slug": "mystical-fantasy-landscape",
+  "imageUrl": "/gallery/fantasy-landscape.jpg",
+  "prompt": "Epic fantasy landscape with floating islands, waterfalls cascading into clouds, magical crystals glowing, volumetric lighting, concept art style, highly detailed",
+  "model": "flux-dev",
+  "settings": {
+    "seed": 1337,
+    "steps": 20,
+    "guidanceScale": 7.5,
+    "width": 1024,
+    "height": 768,
+    "aspectRatio": "4:3"
+  },
+  "category": "landscape",
+  "style": ["fantasy", "magical", "epic", "detailed"],
+  "tags": ["fantasy", "landscape", "floating-islands", "concept-art", "magical"],
+  "creator": {
+    "name": "Picture Gallery"
+  },
+  "featured": true,
+  "trending": false,
+  "staffPick": true,
+  "published": true,
+  "likes": 892,
+  "downloads": 234,
+  "views": 3421,
+  "qualityScore": 5,
+  "nsfw": false,
+  "moderationStatus": "approved",
+  "relatedImages": ["mountain-vista", "alien-world"],
+  "relatedTutorials": ["getting-started-first-image"],
+  "relatedModels": ["flux-dev"],
+  "description": "A breathtaking fantasy landscape showcasing FLUX Dev's ability to create detailed, imaginative worlds. Perfect for game concept art and storytelling.",
+  "seoKeywords": ["fantasy landscape", "AI concept art", "floating islands", "magical scenery"],
+  "createdAt": "2025-01-14T15:30:00Z",
+  "language": "en",
+  "fileSize": 1923456,
+  "dimensions": {
+    "width": 1024,
+    "height": 768
+  }
+}

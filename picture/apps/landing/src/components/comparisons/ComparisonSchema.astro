@@ -1,0 +1,138 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+	comparison: CollectionEntry<'comparisons'>;
+}
+
+const { comparison } = Astro.props;
+const { data } = comparison;
+
+// Create ComparisonSchema for SEO
+// This helps Google show rich snippets in search results
+const comparisonSchema = {
+	'@context': 'https://schema.org',
+	'@type': 'Article',
+	headline: data.title,
+	description: data.description,
+	datePublished: data.publishDate.toISOString(),
+	dateModified: data.lastUpdated.toISOString(),
+	author: {
+		'@type': 'Organization',
+		name: 'Picture',
+		url: 'https://picture.com',
+	},
+	publisher: {
+		'@type': 'Organization',
+		name: 'Picture',
+		url: 'https://picture.com',
+	},
+	mainEntityOfPage: {
+		'@type': 'WebPage',
+		'@id': `https://picture.com/comparisons/${data.slug}`,
+	},
+	...(data.coverImage && {
+		image: {
+			'@type': 'ImageObject',
+			url: data.coverImage,
+		},
+	}),
+};
+
+// Add Product comparison schema for versus comparisons
+const productComparisonSchema = data.type === 'versus' ? {
+	'@context': 'https://schema.org',
+	'@type': 'ComparisonTable',
+	about: [
+		{
+			'@type': 'Product',
+			name: 'Picture AI Image Generator',
+			description: 'Fast, affordable AI image generation with FLUX and Stable Diffusion',
+			offers: {
+				'@type': 'Offer',
+				price: data.comparisonTable.pricing.picture,
+				priceCurrency: 'USD',
+			},
+		},
+		{
+			'@type': 'Product',
+			name: data.competitor,
+			description: `${data.competitor} AI image generator`,
+			...(data.competitorPricing && {
+				offers: {
+					'@type': 'Offer',
+					price: data.competitorPricing,
+					priceCurrency: 'USD',
+				},
+			}),
+		},
+	],
+} : null;
+
+// BreadcrumbList schema for better navigation
+const breadcrumbSchema = {
+	'@context': 'https://schema.org',
+	'@type': 'BreadcrumbList',
+	itemListElement: [
+		{
+			'@type': 'ListItem',
+			position: 1,
+			name: 'Home',
+			item: 'https://picture.com',
+		},
+		{
+			'@type': 'ListItem',
+			position: 2,
+			name: 'Comparisons',
+			item: 'https://picture.com/comparisons',
+		},
+		{
+			'@type': 'ListItem',
+			position: 3,
+			name: data.title,
+			item: `https://picture.com/comparisons/${data.slug}`,
+		},
+	],
+};
+
+// HowTo schema for "best of" roundup articles
+const howToSchema = data.type === 'roundup' ? {
+	'@context': 'https://schema.org',
+	'@type': 'HowTo',
+	name: data.title,
+	description: data.description,
+	step: [
+		{
+			'@type': 'HowToStep',
+			name: 'Compare Features',
+			text: 'Review the feature comparison table to understand capabilities',
+		},
+		{
+			'@type': 'HowToStep',
+			name: 'Compare Pricing',
+			text: 'Evaluate pricing models and value for your use case',
+		},
+		{
+			'@type': 'HowToStep',
+			name: 'Choose Best Tool',
+			text: 'Select the AI image generator that best fits your needs',
+		},
+	],
+} : null;
+---
+
+<!-- Main Article Schema -->
+<script type="application/ld+json" set:html={JSON.stringify(comparisonSchema)} />
+
+<!-- Product Comparison Schema (for versus comparisons) -->
+{productComparisonSchema && (
+	<script type="application/ld+json" set:html={JSON.stringify(productComparisonSchema)} />
+)}
+
+<!-- Breadcrumb Schema -->
+<script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+
+<!-- HowTo Schema (for roundup articles) -->
+{howToSchema && (
+	<script type="application/ld+json" set:html={JSON.stringify(howToSchema)} />
+)}

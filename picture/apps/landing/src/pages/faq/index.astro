@@ -1,0 +1,309 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import FAQCard from '../../components/faq/FAQCard.astro';
+import FAQSchema from '../../components/faq/FAQSchema.astro';
+import {
+	getFAQs,
+	getFeaturedFAQs,
+	getAllFAQCategories,
+	getCategoryDisplayName,
+	getCategoryIcon,
+	getFAQStats,
+} from '../../utils/faq';
+
+// For now, default to English - will add i18n later
+const language = 'en';
+
+const allFAQs = await getFAQs(language);
+const featuredFAQs = await getFeaturedFAQs(language);
+const categories = getAllFAQCategories();
+const stats = await getFAQStats(language);
+
+// Group FAQs by category
+const faqsByCategory = categories.map((category) => ({
+	category,
+	displayName: getCategoryDisplayName(category),
+	icon: getCategoryIcon(category),
+	faqs: allFAQs.filter((faq) => faq.data.category === category),
+}));
+---
+
+<Layout
+	title="FAQ - Frequently Asked Questions | Picture"
+	description="Find answers to common questions about Picture AI image generation. Learn about pricing, features, technical details, and more."
+>
+	<FAQSchema faqs={allFAQs} />
+
+	<div class="bg-dark-bg min-h-screen">
+		<!-- Hero Section -->
+		<div class="bg-gradient-to-b from-dark-elevated to-dark-bg py-16 md:py-24">
+			<div class="max-w-4xl mx-auto px-6 text-center">
+				<div
+					class="inline-block px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full mb-6"
+				>
+					<span class="text-primary text-sm font-medium">💡 FAQ</span>
+				</div>
+				<h1
+					class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6"
+				>
+					Frequently Asked Questions
+				</h1>
+				<p class="text-xl text-gray-300 mb-8">
+					Everything you need to know about Picture AI image generation
+				</p>
+
+				<!-- Search Box -->
+				<div class="max-w-2xl mx-auto">
+					<div class="relative">
+						<input
+							type="text"
+							id="faq-search"
+							placeholder="Search FAQs..."
+							class="w-full px-6 py-4 pl-14 bg-dark-elevated border border-dark-border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary transition-colors"
+						/>
+						<svg
+							class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+						</svg>
+					</div>
+				</div>
+
+				<!-- Stats -->
+				<div class="flex items-center justify-center gap-8 mt-8 text-sm text-gray-400">
+					<div class="flex items-center gap-2">
+						<span class="text-2xl font-bold text-primary"
+							>{stats.totalFAQs}</span
+						>
+						<span>articles</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<span class="text-2xl font-bold text-primary"
+							>{categories.length}</span
+						>
+						<span>categories</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Featured FAQs -->
+		{
+			featuredFAQs.length > 0 && (
+				<div class="max-w-4xl mx-auto px-6 py-12">
+					<h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+						<span>⭐</span>
+						<span>Most Popular Questions</span>
+					</h2>
+					<div class="space-y-4">
+						{featuredFAQs.slice(0, 8).map((faq) => (
+							<FAQCard faq={faq} />
+						))}
+					</div>
+				</div>
+			)
+		}
+
+		<!-- All FAQs by Category -->
+		<div class="max-w-4xl mx-auto px-6 py-12">
+			<h2 class="text-2xl font-bold text-white mb-8">Browse by Category</h2>
+
+			<!-- Category Filter Tabs -->
+			<div
+				class="flex flex-wrap gap-3 mb-8 pb-6 border-b border-dark-border"
+			>
+				<button
+					class="category-filter-btn active"
+					data-category="all"
+				>
+					<span class="text-lg">📚</span>
+					<span>All</span>
+					<span class="count">{stats.totalFAQs}</span>
+				</button>
+				{
+					faqsByCategory.map(({ category, displayName, icon, faqs }) => (
+						<button
+							class="category-filter-btn"
+							data-category={category}
+						>
+							<span class="text-lg">{icon}</span>
+							<span>{displayName}</span>
+							<span class="count">{faqs.length}</span>
+						</button>
+					))
+				}
+			</div>
+
+			<!-- FAQ Categories -->
+			<div id="faq-categories" class="space-y-12">
+				{
+					faqsByCategory.map(({ category, displayName, icon, faqs }) => (
+						<div
+							class="faq-category"
+							data-category={category}
+						>
+							{faqs.length > 0 && (
+								<>
+									<h3 class="text-xl font-bold text-white mb-6 flex items-center gap-3">
+										<span class="text-2xl">{icon}</span>
+										<span>{displayName}</span>
+										<span class="text-sm font-normal text-gray-400">
+											({faqs.length})
+										</span>
+									</h3>
+									<div class="space-y-4">
+										{faqs.map((faq) => (
+											<FAQCard faq={faq} />
+										))}
+									</div>
+								</>
+							)}
+						</div>
+					))
+				}
+			</div>
+
+			<!-- No Results Message -->
+			<div
+				id="no-results"
+				class="hidden text-center py-12"
+			>
+				<div class="text-6xl mb-4">🔍</div>
+				<h3 class="text-xl font-semibold text-white mb-2">No results found</h3>
+				<p class="text-gray-400">
+					Try a different search term or browse by category
+				</p>
+			</div>
+		</div>
+
+		<!-- CTA Section -->
+		<div class="max-w-4xl mx-auto px-6 py-16">
+			<div
+				class="bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20 rounded-2xl p-8 md:p-12 text-center"
+			>
+				<h2 class="text-3xl font-bold text-white mb-4">
+					Still have questions?
+				</h2>
+				<p class="text-gray-300 mb-8 max-w-2xl mx-auto">
+					Can't find what you're looking for? Our support team is here to help.
+				</p>
+				<div class="flex flex-col sm:flex-row gap-4 justify-center">
+					<a
+						href="mailto:support@picture.app"
+						class="px-8 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors"
+					>
+						Contact Support
+					</a>
+					<a
+						href="/"
+						class="px-8 py-3 bg-dark-elevated border border-dark-border text-white font-medium rounded-lg hover:border-primary transition-colors"
+					>
+						Back to Home
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Search functionality
+		const searchInput = document.getElementById(
+			'faq-search'
+		) as HTMLInputElement;
+		const faqCategories = document.querySelectorAll('.faq-category');
+		const faqItems = document.querySelectorAll('.faq-item');
+		const noResults = document.getElementById('no-results');
+		const categoryButtons = document.querySelectorAll('.category-filter-btn');
+
+		let activeCategory = 'all';
+
+		// Search filter
+		searchInput?.addEventListener('input', (e) => {
+			const query = (e.target as HTMLInputElement).value.toLowerCase();
+			filterFAQs(query, activeCategory);
+		});
+
+		// Category filter
+		categoryButtons.forEach((button) => {
+			button.addEventListener('click', () => {
+				const category = button.getAttribute('data-category') || 'all';
+				activeCategory = category;
+
+				// Update active button
+				categoryButtons.forEach((btn) => btn.classList.remove('active'));
+				button.classList.add('active');
+
+				// Filter FAQs
+				const query = searchInput?.value.toLowerCase() || '';
+				filterFAQs(query, category);
+			});
+		});
+
+		function filterFAQs(query: string, category: string) {
+			let visibleCount = 0;
+
+			faqCategories.forEach((categoryEl) => {
+				const categoryName = categoryEl.getAttribute('data-category');
+				const categoryMatches = category === 'all' || categoryName === category;
+
+				if (!categoryMatches) {
+					(categoryEl as HTMLElement).style.display = 'none';
+					return;
+				}
+
+				const items = categoryEl.querySelectorAll('.faq-item');
+				let categoryHasVisible = false;
+
+				items.forEach((item) => {
+					const question =
+						item
+							.querySelector('.question-text')
+							?.textContent?.toLowerCase() || '';
+					const answer =
+						item.querySelector('.faq-answer')?.textContent?.toLowerCase() || '';
+
+					const matches =
+						!query || question.includes(query) || answer.includes(query);
+
+					if (matches) {
+						(item as HTMLElement).style.display = 'block';
+						categoryHasVisible = true;
+						visibleCount++;
+					} else {
+						(item as HTMLElement).style.display = 'none';
+					}
+				});
+
+				(categoryEl as HTMLElement).style.display = categoryHasVisible
+					? 'block'
+					: 'none';
+			});
+
+			// Show/hide no results message
+			if (noResults) {
+				noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+			}
+		}
+	</script>
+
+	<style>
+		.category-filter-btn {
+			@apply flex items-center gap-2 px-4 py-2 bg-dark-elevated border border-dark-border rounded-lg text-sm font-medium text-gray-300 transition-all hover:border-primary hover:text-primary;
+		}
+
+		.category-filter-btn.active {
+			@apply bg-primary/10 border-primary text-primary;
+		}
+
+		.category-filter-btn .count {
+			@apply ml-1 px-2 py-0.5 bg-dark-bg rounded-full text-xs;
+		}
+	</style>
+</Layout>

@@ -1,0 +1,11 @@
+---
+import Layout from '@layouts/Layout.astro';
+import LegalPage from '@components/LegalPage.astro';
+import { t } from '../i18n';
+---
+
+<Layout title={t('legal.imprint.title')}>
+	<LegalPage title={t('legal.imprint.title')}>
+		<div set:html={t('legal.imprint.content')} />
+	</LegalPage>
+</Layout>

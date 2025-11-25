@@ -1,0 +1,165 @@
+{
+	"hero": {
+		"badge": "✨ KI-gestützte Bildgenerierung",
+		"title": "Erstelle atemberaubende Bilder",
+		"subtitle": "mit KI",
+		"description": "Verwandle deine Ideen in wunderschöne Bilder mit modernsten KI-Modellen. Einfach, schnell und leistungsstark.",
+		"cta_primary": "Kostenlos starten",
+		"cta_secondary": "Mehr erfahren",
+		"stats": {
+			"images": "Erstellte Bilder",
+			"models": "KI-Modelle",
+			"satisfaction": "Zufriedenheit"
+		}
+	},
+	"features": {
+		"badge": "Funktionen",
+		"title": "Alles, was du zum Erstellen brauchst",
+		"subtitle": "Leistungsstarke Funktionen, die KI-Bildgenerierung einfach und angenehm machen",
+		"items": {
+			"models": {
+				"title": "Mehrere KI-Modelle",
+				"description": "Zugriff auf über 10 modernste KI-Modelle einschließlich FLUX, Stable Diffusion und mehr."
+			},
+			"fast": {
+				"title": "Blitzschnell",
+				"description": "Generiere hochwertige Bilder in Sekunden mit unserer optimierten Infrastruktur."
+			},
+			"control": {
+				"title": "Präzise Kontrolle",
+				"description": "Feinabstimmung jeden Aspekts deiner Bilder mit erweiterten Parametern und Einstellungen."
+			},
+			"platform": {
+				"title": "Plattformübergreifend",
+				"description": "Verfügbar auf iOS, Android und Web. Erstelle überall und jederzeit."
+			},
+			"storage": {
+				"title": "Cloud-Speicher",
+				"description": "Alle deine Bilder sind sicher gespeichert und von jedem Gerät aus zugänglich."
+			},
+			"privacy": {
+				"title": "Datenschutz zuerst",
+				"description": "Deine Kreationen sind standardmäßig privat. Du besitzt deine Bilder."
+			}
+		}
+	},
+	"cta": {
+		"title": "Bereit, großartige Bilder zu erstellen?",
+		"subtitle": "Schließe dich Tausenden von Kreativen an, die Picture nutzen, um ihre Ideen zum Leben zu erwecken. Beginne noch heute kostenlos.",
+		"button_primary": "Jetzt erstellen",
+		"button_secondary": "Preise ansehen",
+		"trust": {
+			"no_credit_card": "Keine Kreditkarte erforderlich",
+			"free_plan": "Für immer kostenloser Plan",
+			"cancel_anytime": "Jederzeit kündbar"
+		}
+	},
+	"footer": {
+		"description": "Erstelle mühelos atemberaubende KI-generierte Bilder.",
+		"product": {
+			"title": "Produkt",
+			"features": "Funktionen",
+			"pricing": "Preise",
+			"models": "Modelle",
+			"api": "API"
+		},
+		"company": {
+			"title": "Unternehmen",
+			"about": "Über uns",
+			"blog": "Blog",
+			"testimonials": "Erfahrungsberichte",
+			"faq": "FAQ",
+			"careers": "Karriere",
+			"contact": "Kontakt"
+		},
+		"legal": {
+			"title": "Rechtliches",
+			"privacy": "Datenschutz",
+			"terms": "Nutzungsbedingungen",
+			"cookie_policy": "Cookie-Richtlinie",
+			"licenses": "Lizenzen"
+		},
+		"bottom": {
+			"copyright": "© {{year}} Picture. Alle Rechte vorbehalten.",
+			"status": "Status",
+			"documentation": "Dokumentation",
+			"support": "Support"
+		}
+	},
+	"meta": {
+		"title": "Picture - KI-Bildgenerierungsplattform",
+		"description": "Erstelle mühelos atemberaubende KI-generierte Bilder. Zugriff auf über 10 KI-Modelle, blitzschnelle Generierung und Cloud-Speicher. Beginne noch heute kostenlos."
+	},
+	"legal": {
+		"back_home": "Zurück zur Startseite",
+		"last_updated": "Zuletzt aktualisiert",
+		"privacy": {
+			"title": "Datenschutzerklärung",
+			"content": "<h2>Erfasste Informationen</h2><p>Wir erfassen Informationen, die Sie uns direkt zur Verfügung stellen, wenn Sie ein Konto erstellen, unsere Dienste nutzen oder mit uns kommunizieren. Dazu gehören:</p><ul><li>Kontoinformationen (E-Mail, Benutzername)</li><li>Generierte Bilder und Prompts</li><li>Nutzungsdaten und Analysen</li><li>Zahlungsinformationen (sicher über Drittanbieter verarbeitet)</li></ul><h2>Verwendung Ihrer Informationen</h2><p>Wir verwenden die gesammelten Informationen, um:</p><ul><li>Unsere Dienste bereitzustellen, zu warten und zu verbessern</li><li>Ihre Transaktionen zu verarbeiten und zugehörige Informationen zu senden</li><li>Technische Hinweise und Support-Nachrichten zu senden</li><li>Auf Ihre Kommentare und Fragen zu antworten</li><li>Nutzungsmuster zu analysieren, um die Benutzererfahrung zu verbessern</li></ul><h2>Datenspeicherung und Sicherheit</h2><p>Wir implementieren angemessene technische und organisatorische Maßnahmen zum Schutz Ihrer personenbezogenen Daten. Ihre Bilder werden sicher in der Cloud gespeichert und sind standardmäßig privat. Wir verwenden branchenübliche Verschlüsselung für Datenübertragung und -speicherung.</p><h2>Ihre Rechte</h2><p>Sie haben das Recht:</p><ul><li>Auf Ihre personenbezogenen Daten zuzugreifen</li><li>Unrichtige Daten zu korrigieren</li><li>Die Löschung Ihrer Daten zu beantragen</li><li>Der Verarbeitung Ihrer Daten zu widersprechen</li><li>Ihre Daten zu exportieren</li></ul><h2>Drittanbieterdienste</h2><p>Wir nutzen Drittanbieterdienste für:</p><ul><li>Cloud-Infrastruktur (Bildspeicherung und -verarbeitung)</li><li>Zahlungsabwicklung</li><li>Analyse und Leistungsüberwachung</li></ul><h2>Kontakt</h2><p>Bei Fragen zu dieser Datenschutzerklärung kontaktieren Sie uns bitte unter privacy@picture.app</p>"
+		},
+		"terms": {
+			"title": "Nutzungsbedingungen",
+			"content": "<h2>Annahme der Bedingungen</h2><p>Durch den Zugriff auf und die Nutzung von Picture akzeptieren Sie diese Nutzungsbedingungen und stimmen diesen zu. Wenn Sie mit diesen Bedingungen nicht einverstanden sind, nutzen Sie bitte unseren Dienst nicht.</p><h2>Nutzung des Dienstes</h2><p>Sie dürfen unseren Dienst nur für rechtmäßige Zwecke und in Übereinstimmung mit diesen Bedingungen nutzen. Sie verpflichten sich:</p><ul><li>Keine illegalen, schädlichen Inhalte zu generieren oder die Rechte anderer zu verletzen</li><li>Nicht zu versuchen, unbefugten Zugriff auf unsere Systeme zu erlangen</li><li>Den Dienst nicht zum Spammen oder Belästigen anderer zu verwenden</li><li>Unsere Technologie nicht zurückzuentwickeln oder zu kopieren</li><li>Keine geltenden Gesetze oder Vorschriften zu verletzen</li></ul><h2>Kontoverantwortlichkeiten</h2><p>Sie sind verantwortlich für:</p><ul><li>Die Sicherheit Ihres Kontos</li><li>Alle Aktivitäten, die unter Ihrem Konto stattfinden</li><li>Die Einhaltung dieser Bedingungen bei Ihrer Nutzung</li></ul><h2>Geistiges Eigentum</h2><p>Sie behalten das Eigentum an den von Ihnen generierten Bildern. Picture behält das Eigentum an der Plattform, Technologie und den Diensten. Durch die Nutzung unseres Dienstes gewähren Sie uns eine Lizenz zum Speichern und Verarbeiten Ihrer Bilder zum Zweck der Bereitstellung des Dienstes.</p><h2>Änderungen des Dienstes</h2><p>Wir behalten uns das Recht vor, Teile unseres Dienstes jederzeit zu ändern, auszusetzen oder einzustellen. Wir werden nach Möglichkeit über wesentliche Änderungen informieren.</p><h2>Haftungsbeschränkung</h2><p>Picture wird \"wie besehen\" ohne jegliche Garantien bereitgestellt. Wir haften nicht für indirekte, zufällige oder Folgeschäden, die sich aus Ihrer Nutzung des Dienstes ergeben.</p><h2>Kündigung</h2><p>Wir können Ihr Konto jederzeit bei Verstößen gegen diese Bedingungen kündigen oder aussetzen. Sie können Ihr Konto jederzeit über Ihre Kontoeinstellungen kündigen.</p>"
+		},
+		"cookies": {
+			"title": "Cookie-Richtlinie",
+			"content": "<h2>Was sind Cookies</h2><p>Cookies sind kleine Textdateien, die auf Ihrem Gerät abgelegt werden, wenn Sie unsere Website besuchen. Sie helfen uns, Ihnen ein besseres Erlebnis zu bieten, indem sie Ihre Präferenzen speichern und verstehen, wie Sie unseren Dienst nutzen.</p><h2>Von uns verwendete Cookie-Typen</h2><h3>Notwendige Cookies</h3><p>Diese Cookies sind für das ordnungsgemäße Funktionieren der Website erforderlich. Sie ermöglichen Kernfunktionen wie Sicherheit, Authentifizierung und Sitzungsverwaltung.</p><h3>Analyse-Cookies</h3><p>Wir verwenden Analyse-Cookies, um zu verstehen, wie Besucher mit unserer Website interagieren. Dies hilft uns, unseren Service und die Benutzererfahrung zu verbessern.</p><h3>Präferenz-Cookies</h3><p>Diese Cookies speichern Ihre Einstellungen und Präferenzen, wie z.B. Sprachauswahl und Anzeigeeinstellungen.</p><h2>Cookies verwalten</h2><p>Sie können Cookies in Ihren Browsereinstellungen steuern und verwalten. Die meisten Browser ermöglichen es Ihnen:</p><ul><li>Zu sehen, welche Cookies gespeichert sind</li><li>Cookies zu löschen</li><li>Cookies von bestimmten Websites zu blockieren</li><li>Alle Cookies zu blockieren</li><li>Alle Cookies beim Schließen des Browsers zu löschen</li></ul><p>Bitte beachten Sie, dass das Blockieren oder Löschen von Cookies Ihre Erfahrung auf unserer Website beeinträchtigen kann.</p><h2>Cookies von Drittanbietern</h2><p>Wir können Drittanbieterdienste nutzen, die in unserem Namen Cookies für Analyse und Leistungsüberwachung setzen. Diese Drittanbieter haben ihre eigenen Datenschutzrichtlinien.</p>"
+		},
+		"imprint": {
+			"title": "Impressum",
+			"content": "<h2>Angaben gemäß § 5 TMG</h2><p><strong>Picture KI-Bildgenerierung</strong><br/>Musterstraße 123<br/>12345 Musterstadt<br/>Deutschland</p><h2>Kontakt</h2><p>E-Mail: legal@picture.app<br/>Telefon: +49 (0) 123 456789</p><h2>Vertreten durch</h2><p>Geschäftsführer: [Name]<br/>Handelsregister: [Registernummer]<br/>Umsatzsteuer-ID: [USt-IdNr.]</p><h2>Verantwortlich für den Inhalt</h2><p>[Name]<br/>[Adresse]</p><h2>Streitschlichtung</h2><p>Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: https://ec.europa.eu/consumers/odr/</p><p>Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p><h2>Haftungsausschluss</h2><p>Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.</p>"
+		}
+	},
+	"blog": {
+		"badge": "Blog",
+		"title": "Blog & Ressourcen",
+		"subtitle": "Tutorials, Tipps und Einblicke zur KI-Bildgenerierung",
+		"description": "Lerne über KI-Bildgenerierung mit unseren Tutorials, Tipps und Brancheneinblicken.",
+		"all_posts": "Alle Beiträge",
+		"no_posts": "Noch keine Blog-Beiträge. Schau bald wieder vorbei!",
+		"min_read": "Min. Lesezeit",
+		"back_to_blog": "Zurück zum Blog",
+		"tags": "Tags",
+		"related_posts": "Verwandte Beiträge",
+		"author_bio": "Teil des Picture-Teams, leidenschaftlich über KI und Kreativität.",
+		"categories": {
+			"tutorial": "Tutorial",
+			"tips": "Tipps & Tricks",
+			"updates": "Updates",
+			"use-case": "Anwendungsfälle",
+			"news": "News"
+		}
+	},
+	"features": {
+		"badge": "Features",
+		"title": "Leistungsstarke Features für Kreative",
+		"subtitle": "Alles, was du brauchst, um atemberaubende KI-generierte Bilder zu erstellen",
+		"description": "Entdecke alle leistungsstarken Features, die Picture bietet, um deine kreativen Visionen zum Leben zu erwecken.",
+		"all_features": "Alle Features",
+		"featured_features": "Hervorgehobene Features",
+		"no_features": "Keine Features verfügbar.",
+		"learn_more": "Mehr erfahren",
+		"back_to_features": "Zurück zu Features",
+		"key_benefits": "Hauptvorteile",
+		"use_cases": "Anwendungsfälle",
+		"try_feature": "Bereit, dieses Feature auszuprobieren?",
+		"try_feature_subtitle": "Beginne heute mit der Erstellung erstaunlicher Bilder mit Picture.",
+		"get_started": "Kostenlos starten",
+		"available_now": "Jetzt verfügbar",
+		"coming_soon": "Demnächst",
+		"not_available": "Nicht verfügbar",
+		"featured": "Hervorgehoben",
+		"related_features": "Verwandte Features",
+		"cta_title": "Bereit, mit Picture zu erstellen?",
+		"cta_subtitle": "Schließe dich Tausenden von Kreativen an, die Pictures leistungsstarke Features nutzen, um ihre Ideen zum Leben zu erwecken.",
+		"cta_button": "Kostenlos starten",
+		"categories": {
+			"generation": "Generierung",
+			"editing": "Bearbeitung",
+			"organization": "Organisation",
+			"collaboration": "Zusammenarbeit",
+			"api": "API & Integrationen",
+			"models": "KI-Modelle"
+		}
+	}
+}

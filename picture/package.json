@@ -1,0 +1,31 @@
+{
+  "name": "picture",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm run --filter=@picture/* --parallel dev",
+    "dev:mobile": "pnpm --filter @picture/mobile dev",
+    "dev:web": "pnpm --filter @picture/web dev",
+    "dev:landing": "pnpm --filter @picture/landing dev",
+    "build": "pnpm run --recursive build",
+    "build:mobile": "pnpm --filter @picture/mobile build:prod",
+    "build:web": "pnpm --filter @picture/web build",
+    "build:landing": "pnpm --filter @picture/landing build",
+    "lint": "pnpm run --recursive lint",
+    "type-check": "pnpm run --recursive type-check",
+    "clean": "pnpm run --recursive clean && rm -rf node_modules",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.8.3",
+    "prettier": "^3.2.5",
+    "eslint": "^9.25.1"
+  },
+  "dependencies": {
+    "expo": "~54.0.12",
+    "react": "19.1.0",
+    "react-native": "0.81.4"
+  }
+}

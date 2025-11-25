@@ -1,0 +1,141 @@
+{
+	"collections": [
+		{
+			"id": "links",
+			"name": "links",
+			"type": "base",
+			"system": false,
+			"schema": [
+				{
+					"id": "title",
+					"name": "title",
+					"type": "text",
+					"required": true,
+					"options": {
+						"min": 1,
+						"max": 200
+					}
+				},
+				{
+					"id": "url",
+					"name": "url",
+					"type": "url",
+					"required": true
+				},
+				{
+					"id": "short_code",
+					"name": "short_code",
+					"type": "text",
+					"required": true,
+					"unique": true,
+					"options": {
+						"min": 3,
+						"max": 50,
+						"pattern": "^[a-zA-Z0-9_-]+$"
+					}
+				},
+				{
+					"id": "user",
+					"name": "user",
+					"type": "relation",
+					"required": true,
+					"options": {
+						"collectionId": "users",
+						"cascadeDelete": true,
+						"maxSelect": 1
+					}
+				},
+				{
+					"id": "clicks",
+					"name": "clicks",
+					"type": "number",
+					"required": false,
+					"options": {
+						"min": 0
+					}
+				},
+				{
+					"id": "active",
+					"name": "active",
+					"type": "bool",
+					"required": false,
+					"options": {}
+				}
+			],
+			"listRule": "@request.auth.id = user",
+			"viewRule": "@request.auth.id = user || active = true",
+			"createRule": "@request.auth.id != ''",
+			"updateRule": "@request.auth.id = user",
+			"deleteRule": "@request.auth.id = user"
+		},
+		{
+			"id": "analytics",
+			"name": "analytics",
+			"type": "base",
+			"system": false,
+			"schema": [
+				{
+					"id": "link",
+					"name": "link",
+					"type": "relation",
+					"required": true,
+					"options": {
+						"collectionId": "links",
+						"cascadeDelete": true,
+						"maxSelect": 1
+					}
+				},
+				{
+					"id": "ip",
+					"name": "ip",
+					"type": "text",
+					"required": false
+				},
+				{
+					"id": "user_agent",
+					"name": "user_agent",
+					"type": "text",
+					"required": false
+				},
+				{
+					"id": "referer",
+					"name": "referer",
+					"type": "text",
+					"required": false
+				},
+				{
+					"id": "country",
+					"name": "country",
+					"type": "text",
+					"required": false
+				},
+				{
+					"id": "device",
+					"name": "device",
+					"type": "text",
+					"required": false
+				}
+			],
+			"listRule": "@request.auth.id = link.user",
+			"viewRule": "@request.auth.id = link.user",
+			"createRule": "",
+			"updateRule": null,
+			"deleteRule": "@request.auth.id = link.user"
+		}
+	],
+	"settings": {
+		"meta": {
+			"appName": "uLoad",
+			"appUrl": "https://your-domain.com",
+			"hideControls": false,
+			"senderName": "uLoad",
+			"senderAddress": "noreply@your-domain.com",
+			"verificationTemplate": {
+				"body": "Hello,\n\nPlease verify your email by clicking the link below:\n\n{ACTION_URL}\n\nThanks,\nuLoad Team"
+			},
+			"resetPasswordTemplate": {
+				"body": "Hello,\n\nYou requested to reset your password. Click the link below:\n\n{ACTION_URL}\n\nIf you didn't request this, please ignore this email.\n\nThanks,\nuLoad Team"
+			}
+		}
+	}
+}

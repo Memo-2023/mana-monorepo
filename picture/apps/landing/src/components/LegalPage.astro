@@ -1,0 +1,76 @@
+---
+import { localizePath } from '../i18n';
+import { t } from '../i18n';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="min-h-screen bg-dark-bg py-24">
+	<div class="container mx-auto px-4 max-w-4xl">
+		<!-- Back Button -->
+		<a
+			href={localizePath('/')}
+			class="inline-flex items-center gap-2 text-primary hover:text-primary-400 transition-colors mb-8"
+		>
+			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+			</svg>
+			<span>{t('legal.back_home')}</span>
+		</a>
+
+		<!-- Page Header -->
+		<div class="mb-12">
+			<h1 class="text-4xl md:text-5xl font-bold text-white mb-4">{title}</h1>
+			<p class="text-gray-400">{t('legal.last_updated')}: {new Date().toLocaleDateString()}</p>
+		</div>
+
+		<!-- Content -->
+		<div class="prose prose-invert prose-primary max-w-none">
+			<div class="bg-dark-surface border border-dark-border rounded-2xl p-8 md:p-12">
+				<slot />
+			</div>
+		</div>
+	</div>
+</div>
+
+<style>
+	:global(.prose) {
+		color: #e5e7eb;
+	}
+
+	:global(.prose h2) {
+		@apply text-2xl font-bold text-white mt-8 mb-4;
+	}
+
+	:global(.prose h3) {
+		@apply text-xl font-semibold text-white mt-6 mb-3;
+	}
+
+	:global(.prose p) {
+		@apply text-gray-300 mb-4 leading-relaxed;
+	}
+
+	:global(.prose ul) {
+		@apply list-disc pl-6 mb-4 space-y-2;
+	}
+
+	:global(.prose ol) {
+		@apply list-decimal pl-6 mb-4 space-y-2;
+	}
+
+	:global(.prose li) {
+		@apply text-gray-300;
+	}
+
+	:global(.prose a) {
+		@apply text-primary hover:text-primary-400 transition-colors;
+	}
+
+	:global(.prose strong) {
+		@apply text-white font-semibold;
+	}
+</style>

@@ -1,0 +1,160 @@
+---
+export interface Props {
+	categories: Array<{ category: string; count: number; icon: string }>;
+	difficulties: string[];
+	models: string[];
+	stats: {
+		byDifficulty: {
+			beginner: number;
+			intermediate: number;
+			advanced: number;
+		};
+	};
+}
+
+const { categories, difficulties, models, stats } = Astro.props;
+
+import { formatCategoryName } from '../../utils/promptTemplates';
+---
+
+<section class="bg-gray-50 border-b sticky top-0 z-10">
+	<div class="container mx-auto px-4 py-6">
+		<div class="flex flex-wrap gap-4 items-center">
+			<!-- Category Filter -->
+			<div class="flex-1 min-w-[200px]">
+				<label for="category-filter" class="block text-sm font-medium text-gray-700 mb-1">
+					Category
+				</label>
+				<select
+					id="category-filter"
+					class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+				>
+					<option value="">All Categories</option>
+					{
+						categories.map((cat) => (
+							<option value={cat.category}>
+								{cat.icon} {formatCategoryName(cat.category)} ({cat.count})
+							</option>
+						))
+					}
+				</select>
+			</div>
+
+			<!-- Difficulty Filter -->
+			<div class="flex-1 min-w-[200px]">
+				<label for="difficulty-filter" class="block text-sm font-medium text-gray-700 mb-1">
+					Difficulty
+				</label>
+				<select
+					id="difficulty-filter"
+					class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+				>
+					<option value="">All Levels</option>
+					{
+						difficulties.map((diff) => (
+							<option value={diff}>
+								{diff.charAt(0).toUpperCase() + diff.slice(1)} ({stats.byDifficulty[diff]})
+							</option>
+						))
+					}
+				</select>
+			</div>
+
+			<!-- Model Filter -->
+			<div class="flex-1 min-w-[200px]">
+				<label for="model-filter" class="block text-sm font-medium text-gray-700 mb-1">
+					Model
+				</label>
+				<select
+					id="model-filter"
+					class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+				>
+					<option value="">All Models</option>
+					{models.map((model) => <option value={model}>{model}</option>)}
+				</select>
+			</div>
+
+			<!-- Sort -->
+			<div class="flex-1 min-w-[200px]">
+				<label for="sort-select" class="block text-sm font-medium text-gray-700 mb-1">
+					Sort By
+				</label>
+				<select
+					id="sort-select"
+					class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+				>
+					<option value="popular">Most Popular</option>
+					<option value="recent">Most Recent</option>
+					<option value="rating">Highest Rated</option>
+					<option value="uses">Most Used</option>
+				</select>
+			</div>
+		</div>
+
+		<!-- Active Filters -->
+		<div id="active-filters" class="flex flex-wrap gap-2 mt-4 hidden"></div>
+	</div>
+</section>
+
+<script>
+	const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement;
+	const difficultyFilter = document.getElementById('difficulty-filter') as HTMLSelectElement;
+	const modelFilter = document.getElementById('model-filter') as HTMLSelectElement;
+	const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
+	const activeFiltersContainer = document.getElementById('active-filters') as HTMLElement;
+
+	let currentFilters = {
+		category: '',
+		difficulty: '',
+		model: '',
+		sort: 'popular',
+	};
+
+	function updateActiveFilters() {
+		const filters: string[] = [];
+
+		if (currentFilters.category) filters.push(`Category: ${currentFilters.category}`);
+		if (currentFilters.difficulty) filters.push(`Difficulty: ${currentFilters.difficulty}`);
+		if (currentFilters.model) filters.push(`Model: ${currentFilters.model}`);
+
+		if (filters.length > 0) {
+			activeFiltersContainer.innerHTML = filters
+				.map(
+					(filter) => `
+				<span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium flex items-center gap-2">
+					${filter}
+					<button class="hover:text-purple-900" onclick="this.parentElement.remove();">×</button>
+				</span>
+			`
+				)
+				.join('');
+			activeFiltersContainer.classList.remove('hidden');
+		} else {
+			activeFiltersContainer.classList.add('hidden');
+		}
+	}
+
+	// Event listeners
+	categoryFilter.addEventListener('change', (e) => {
+		currentFilters.category = (e.target as HTMLSelectElement).value;
+		updateActiveFilters();
+		window.dispatchEvent(new CustomEvent('filters-changed', { detail: currentFilters }));
+	});
+
+	difficultyFilter.addEventListener('change', (e) => {
+		currentFilters.difficulty = (e.target as HTMLSelectElement).value;
+		updateActiveFilters();
+		window.dispatchEvent(new CustomEvent('filters-changed', { detail: currentFilters }));
+	});
+
+	modelFilter.addEventListener('change', (e) => {
+		currentFilters.model = (e.target as HTMLSelectElement).value;
+		updateActiveFilters();
+		window.dispatchEvent(new CustomEvent('filters-changed', { detail: currentFilters }));
+	});
+
+	sortSelect.addEventListener('change', (e) => {
+		currentFilters.sort = (e.target as HTMLSelectElement).value;
+		window.dispatchEvent(new CustomEvent('filters-changed', { detail: currentFilters }));
+	});
+</script>

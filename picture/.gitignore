@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+.astro/
+.svelte-kit/
+web-build/
+
+# Expo
+.expo/
+expo-env.d.ts
+
+# Native builds
+ios/
+android/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Debug & logs
+npm-debug.*
+*.log
+.metro-health-check*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Certificates & keys
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+.cache/
+# Local Netlify folder
+.netlify

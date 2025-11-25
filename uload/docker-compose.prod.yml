@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      ORIGIN: ${ORIGIN:-https://ulo.ad}
+      PUBLIC_POCKETBASE_URL: ${PUBLIC_POCKETBASE_URL}
+      PUBLIC_UMAMI_URL: ${PUBLIC_UMAMI_URL}
+      PUBLIC_UMAMI_WEBSITE_ID: ${PUBLIC_UMAMI_WEBSITE_ID}
+    restart: unless-stopped

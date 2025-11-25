@@ -1,0 +1,48 @@
+---
+import { getFeaturedTestimonials } from '@/utils/testimonials';
+import TestimonialCard from '@components/testimonials/TestimonialCard.astro';
+import { t } from '../i18n';
+import { localizePath } from '../i18n';
+
+const featuredTestimonials = await getFeaturedTestimonials();
+---
+
+<section class="relative py-24 bg-dark-surface overflow-hidden">
+	<!-- Background gradient -->
+	<div class="absolute inset-0 bg-gradient-to-b from-dark-bg via-dark-surface to-dark-bg opacity-50"></div>
+
+	<div class="relative z-10 container mx-auto px-4">
+		<!-- Section Header -->
+		<div class="max-w-3xl mx-auto text-center mb-16">
+			<div class="inline-flex items-center px-4 py-2 mb-6 bg-primary/10 border border-primary/20 rounded-full">
+				<span class="text-sm text-primary-300">💬 Testimonials</span>
+			</div>
+			<h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+				Loved by Creators Worldwide
+			</h2>
+			<p class="text-xl text-gray-400">
+				Join thousands of satisfied creators, designers, and businesses using Picture to bring their ideas to life.
+			</p>
+		</div>
+
+		<!-- Testimonials Grid -->
+		<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+			{featuredTestimonials.map(testimonial => (
+				<TestimonialCard testimonial={testimonial} featured={true} />
+			))}
+		</div>
+
+		<!-- View All Link -->
+		<div class="text-center">
+			<a
+				href={localizePath('/testimonials')}
+				class="inline-flex items-center gap-2 px-6 py-3 bg-dark-elevated border border-primary/30 hover:border-primary/50 text-primary hover:text-primary-400 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
+			>
+				<span>View All Testimonials</span>
+				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+				</svg>
+			</a>
+		</div>
+	</div>
+</section>

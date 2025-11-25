@@ -1,0 +1,37 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import TemplateCard from './TemplateCard.astro';
+
+export interface Props {
+	templates: CollectionEntry<'promptTemplates'>[];
+	title?: string;
+	description?: string;
+}
+
+const {
+	templates,
+	title = 'Featured Templates',
+	description = 'Hand-picked templates for the best results',
+} = Astro.props;
+---
+
+{
+	templates.length > 0 && (
+		<section class="py-16 bg-white">
+			<div class="container mx-auto px-4">
+				<div class="flex items-center justify-between mb-8">
+					<div>
+						<h2 class="text-3xl font-bold text-gray-900">{title}</h2>
+						<p class="text-gray-600 mt-2">{description}</p>
+					</div>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+					{templates.map((template) => (
+						<TemplateCard template={template} />
+					))}
+				</div>
+			</div>
+		</section>
+	)
+}

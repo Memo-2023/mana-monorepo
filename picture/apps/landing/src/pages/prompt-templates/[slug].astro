@@ -1,0 +1,610 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import {
+	getRelatedTemplates,
+	fillTemplate,
+	extractVariables,
+	formatCategoryName,
+	getDifficultyColor,
+} from '../../utils/promptTemplates';
+import { t } from '../../i18n';
+
+export const getStaticPaths = (async () => {
+	const templates = await getCollection('promptTemplates');
+	return templates.map((template) => ({
+		params: { slug: template.slug },
+		props: { template },
+	}));
+}) satisfies GetStaticPaths;
+
+const { template } = Astro.props;
+const { Content } = await template.render();
+
+const relatedTemplates = await getRelatedTemplates(template, 3);
+const variables = extractVariables(template.data.promptTemplate);
+
+// Example filled prompt
+const exampleValues: Record<string, string> = {};
+template.data.variables.forEach((v) => {
+	const placeholderParts = v.placeholder.split('/');
+	exampleValues[v.name] = placeholderParts[0].trim();
+});
+const examplePrompt = fillTemplate(template.data.promptTemplate, exampleValues);
+
+const difficultyColor = getDifficultyColor(template.data.difficulty);
+---
+
+<Layout
+	title={`${template.data.title} - AI Prompt Template | Picture`}
+	description={template.data.description}
+>
+	<!-- Hero Section -->
+	<section class="bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white py-12">
+		<div class="container mx-auto px-4">
+			<div class="max-w-5xl mx-auto">
+				<!-- Breadcrumb -->
+				<nav class="mb-6">
+					<ol class="flex items-center gap-2 text-sm text-purple-200">
+						<li><a href="/" class="hover:text-white">Home</a></li>
+						<li>/</li>
+						<li>
+							<a href="/prompt-templates" class="hover:text-white">Prompt Templates</a>
+						</li>
+						<li>/</li>
+						<li>
+							<a
+								href={`/prompt-templates?category=${template.data.category}`}
+								class="hover:text-white"
+							>
+								{formatCategoryName(template.data.category)}
+							</a>
+						</li>
+						<li>/</li>
+						<li class="text-white font-medium">{template.data.title}</li>
+					</ol>
+				</nav>
+
+				<!-- Header -->
+				<div class="flex items-start gap-6">
+					<div class="text-6xl">{template.data.icon}</div>
+					<div class="flex-1">
+						<div class="flex items-center gap-3 mb-3">
+							<h1 class="text-4xl md:text-5xl font-bold">{template.data.title}</h1>
+							{
+								template.data.featured && (
+									<span class="px-3 py-1 bg-yellow-400 text-yellow-900 text-sm font-bold rounded-full">
+										⭐ Featured
+									</span>
+								)
+							}
+						</div>
+
+						<p class="text-xl text-purple-100 mb-6">
+							{template.data.description}
+						</p>
+
+						<div class="flex flex-wrap items-center gap-4">
+							<!-- Difficulty Badge -->
+							<span
+								class={`px-4 py-2 rounded-full font-semibold ${
+									template.data.difficulty === 'beginner'
+										? 'bg-green-500 text-white'
+										: template.data.difficulty === 'intermediate'
+											? 'bg-yellow-500 text-white'
+											: 'bg-red-500 text-white'
+								}`}
+							>
+								{template.data.difficulty.charAt(0).toUpperCase() +
+									template.data.difficulty.slice(1)}
+							</span>
+
+							<!-- Category -->
+							<span class="px-4 py-2 bg-white/20 rounded-full font-medium">
+								{formatCategoryName(template.data.category)}
+							</span>
+
+							<!-- Stats -->
+							<div class="flex items-center gap-4 text-purple-100">
+								<span class="flex items-center gap-2">
+									⭐ {template.data.rating} rating
+								</span>
+								<span>•</span>
+								<span>{template.data.uses.toLocaleString()} uses</span>
+								<span>•</span>
+								<span>{template.data.likes.toLocaleString()} likes</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Main Content -->
+	<div class="container mx-auto px-4 py-12">
+		<div class="max-w-7xl mx-auto">
+			<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+				<!-- Main Content Column -->
+				<div class="lg:col-span-2 space-y-8">
+					<!-- Interactive Prompt Builder -->
+					<div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+						<h2 class="text-2xl font-bold text-gray-900 mb-6">
+							🛠️ Build Your Prompt
+						</h2>
+
+						<form id="prompt-form" class="space-y-6">
+							{
+								template.data.variables.map((variable) => (
+									<div>
+										<label
+											for={`var-${variable.name}`}
+											class="block text-sm font-semibold text-gray-900 mb-2"
+										>
+											{variable.description}
+											{variable.required ? (
+												<span class="text-red-500">*</span>
+											) : (
+												<span class="text-gray-500 font-normal">(optional)</span>
+											)}
+										</label>
+										<input
+											type="text"
+											id={`var-${variable.name}`}
+											name={variable.name}
+											placeholder={variable.placeholder}
+											required={variable.required}
+											class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+										/>
+									</div>
+								))
+							}
+
+							<button
+								type="button"
+								id="generate-prompt-btn"
+								class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 rounded-lg transition-colors"
+							>
+								Generate Prompt
+							</button>
+						</form>
+
+						<!-- Generated Prompt Display -->
+						<div id="generated-prompt-container" class="mt-6 hidden">
+							<div class="flex items-center justify-between mb-3">
+								<h3 class="text-lg font-bold text-gray-900">Your Generated Prompt</h3>
+								<button
+									id="copy-prompt-btn"
+									class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors flex items-center gap-2"
+								>
+									<svg
+										class="w-4 h-4"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+										></path>
+									</svg>
+									Copy
+								</button>
+							</div>
+							<div
+								id="generated-prompt"
+								class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-gray-800 font-mono text-sm"
+							>
+							</div>
+
+							<!-- CTA to app -->
+							<div class="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+								<p class="text-sm text-gray-700 mb-3">
+									Ready to generate your image? Use this prompt in Picture!
+								</p>
+								<a
+									href="/app"
+									class="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
+								>
+									Open Picture App →
+								</a>
+							</div>
+						</div>
+					</div>
+
+					<!-- Example Prompt -->
+					<div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 border border-blue-200">
+						<h3 class="text-xl font-bold text-gray-900 mb-4">💡 Example Prompt</h3>
+						<div class="bg-white rounded-lg p-4 text-gray-800 font-mono text-sm border border-blue-200 mb-4">
+							{examplePrompt}
+						</div>
+						<p class="text-sm text-gray-600">
+							This is an example of what your prompt will look like when filled out.
+						</p>
+					</div>
+
+					<!-- Template Details (from markdown content) -->
+					<div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200 prose prose-lg max-w-none">
+						<Content />
+					</div>
+
+					<!-- Use Cases -->
+					{
+						template.data.useCases.length > 0 && (
+							<div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+								<h2 class="text-2xl font-bold text-gray-900 mb-4">
+									🎯 Perfect For
+								</h2>
+								<ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
+									{template.data.useCases.map((useCase) => (
+										<li class="flex items-center gap-3">
+											<svg
+												class="w-5 h-5 text-green-500 flex-shrink-0"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M5 13l4 4L19 7"
+												/>
+											</svg>
+											<span class="text-gray-700">{useCase}</span>
+										</li>
+									))}
+								</ul>
+							</div>
+						)
+					}
+
+					<!-- Tips & Best Practices -->
+					{
+						template.data.tips.length > 0 && (
+							<div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+								<h2 class="text-2xl font-bold text-gray-900 mb-4">
+									💡 Tips & Best Practices
+								</h2>
+								<ul class="space-y-3">
+									{template.data.tips.map((tip) => (
+										<li class="flex items-start gap-3">
+											<span class="text-purple-600 font-bold flex-shrink-0">•</span>
+											<span class="text-gray-700">{tip}</span>
+										</li>
+									))}
+								</ul>
+							</div>
+						)
+					}
+
+					<!-- Common Mistakes -->
+					{
+						template.data.commonMistakes && template.data.commonMistakes.length > 0 && (
+							<div class="bg-red-50 rounded-xl p-8 border border-red-200">
+								<h2 class="text-2xl font-bold text-gray-900 mb-4">
+									⚠️ Common Mistakes to Avoid
+								</h2>
+								<ul class="space-y-3">
+									{template.data.commonMistakes.map((mistake) => (
+										<li class="flex items-start gap-3">
+											<span class="text-red-600 font-bold flex-shrink-0">×</span>
+											<span class="text-gray-700">{mistake}</span>
+										</li>
+									))}
+								</ul>
+							</div>
+						)
+					}
+
+					<!-- Variations -->
+					{
+						template.data.variations.length > 0 && (
+							<div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+								<h2 class="text-2xl font-bold text-gray-900 mb-6">
+									🔄 Template Variations
+								</h2>
+								<div class="space-y-4">
+									{template.data.variations.map((variation) => (
+										<div class="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors">
+											<h3 class="font-bold text-gray-900 mb-2">
+												{variation.title}
+											</h3>
+											{variation.description && (
+												<p class="text-sm text-gray-600 mb-3">
+													{variation.description}
+												</p>
+											)}
+											<div class="bg-gray-50 rounded p-3 text-sm font-mono text-gray-700">
+												{variation.prompt}
+											</div>
+										</div>
+									))}
+								</div>
+							</div>
+						)
+					}
+				</div>
+
+				<!-- Sidebar -->
+				<div class="space-y-6">
+					<!-- Recommended Settings -->
+					<div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 sticky top-6">
+						<h3 class="text-xl font-bold text-gray-900 mb-4">⚙️ Settings</h3>
+
+						<div class="space-y-4">
+							<!-- Recommended Model -->
+							<div>
+								<div class="text-sm font-semibold text-gray-600 mb-1">
+									Recommended Model
+								</div>
+								<div class="text-lg font-bold text-purple-600">
+									{template.data.recommendedModel}
+								</div>
+							</div>
+
+							<!-- Alternative Models -->
+							{
+								template.data.alternativeModels.length > 0 && (
+									<div>
+										<div class="text-sm font-semibold text-gray-600 mb-2">
+											Alternative Models
+										</div>
+										<div class="flex flex-wrap gap-2">
+											{template.data.alternativeModels.map((model) => (
+												<span class="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
+													{model}
+												</span>
+											))}
+										</div>
+									</div>
+								)
+							}
+
+							<!-- Recommended Settings -->
+							{
+								template.data.recommendedSettings && (
+									<div class="pt-4 border-t border-gray-200">
+										<div class="text-sm font-semibold text-gray-600 mb-3">
+											Recommended Settings
+										</div>
+										<div class="space-y-2 text-sm">
+											{template.data.recommendedSettings.aspectRatio && (
+												<div class="flex justify-between">
+													<span class="text-gray-600">Aspect Ratio:</span>
+													<span class="font-semibold text-gray-900">
+														{template.data.recommendedSettings.aspectRatio}
+													</span>
+												</div>
+											)}
+											{template.data.recommendedSettings.steps && (
+												<div class="flex justify-between">
+													<span class="text-gray-600">Steps:</span>
+													<span class="font-semibold text-gray-900">
+														{template.data.recommendedSettings.steps}
+													</span>
+												</div>
+											)}
+											{template.data.recommendedSettings.guidanceScale && (
+												<div class="flex justify-between">
+													<span class="text-gray-600">Guidance Scale:</span>
+													<span class="font-semibold text-gray-900">
+														{template.data.recommendedSettings.guidanceScale}
+													</span>
+												</div>
+											)}
+										</div>
+									</div>
+								)
+							}
+
+							<!-- Success Rate -->
+							{
+								template.data.successRate && (
+									<div class="pt-4 border-t border-gray-200">
+										<div class="text-sm font-semibold text-gray-600 mb-2">
+											Success Rate
+										</div>
+										<div class="flex items-center gap-3">
+											<div class="flex-1 bg-gray-200 rounded-full h-2">
+												<div
+													class="bg-green-500 h-2 rounded-full"
+													style={`width: ${template.data.successRate}%`}
+												/>
+											</div>
+											<span class="text-sm font-bold text-gray-900">
+												{template.data.successRate}%
+											</span>
+										</div>
+									</div>
+								)
+							}
+						</div>
+
+						<!-- CTA Button -->
+						<a
+							href="/app"
+							class="block mt-6 w-full text-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
+						>
+							Try This Template
+						</a>
+					</div>
+
+					<!-- Ideal For -->
+					{
+						template.data.idealFor.length > 0 && (
+							<div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+								<h3 class="text-xl font-bold text-gray-900 mb-4">
+									👥 Ideal For
+								</h3>
+								<ul class="space-y-2">
+									{template.data.idealFor.map((audience) => (
+										<li class="flex items-center gap-2 text-gray-700">
+											<svg
+												class="w-4 h-4 text-purple-600"
+												fill="currentColor"
+												viewBox="0 0 20 20"
+											>
+												<path
+													fill-rule="evenodd"
+													d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+													clip-rule="evenodd"
+												/>
+											</svg>
+											{audience}
+										</li>
+									))}
+								</ul>
+							</div>
+						)
+					}
+
+					<!-- Tags -->
+					<div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+						<h3 class="text-xl font-bold text-gray-900 mb-4">🏷️ Tags</h3>
+						<div class="flex flex-wrap gap-2">
+							{
+								template.data.tags.map((tag) => (
+									<a
+										href={`/prompt-templates?tag=${tag}`}
+										class="px-3 py-1 bg-gray-100 hover:bg-purple-100 text-gray-700 hover:text-purple-700 text-sm rounded-full transition-colors"
+									>
+										#{tag}
+									</a>
+								))
+							}
+						</div>
+					</div>
+
+					<!-- Share -->
+					<div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+						<h3 class="text-xl font-bold text-gray-900 mb-4">📤 Share</h3>
+						<div class="flex gap-2">
+							<button
+								class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+								onclick="window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(document.title) + '&url=' + encodeURIComponent(window.location.href), '_blank')"
+							>
+								Twitter
+							</button>
+							<button
+								class="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+								onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href), '_blank')"
+							>
+								Facebook
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Related Templates -->
+	{
+		relatedTemplates.length > 0 && (
+			<section class="py-16 bg-gray-50">
+				<div class="container mx-auto px-4">
+					<h2 class="text-3xl font-bold text-gray-900 mb-8">Related Templates</h2>
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+						{relatedTemplates.map((related) => (
+							<a
+								href={`/prompt-templates/${related.slug}`}
+								class="group bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+							>
+								<div class="p-6">
+									<div class="flex items-center gap-3 mb-3">
+										<span class="text-3xl">{related.data.icon}</span>
+										<h3 class="text-lg font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
+											{related.data.title}
+										</h3>
+									</div>
+									<p class="text-gray-600 text-sm mb-4 line-clamp-2">
+										{related.data.description}
+									</p>
+									<div class="flex items-center justify-between text-sm text-gray-500">
+										<span>⭐ {related.data.rating}</span>
+										<span>{related.data.uses} uses</span>
+									</div>
+								</div>
+							</a>
+						))}
+					</div>
+				</div>
+			</section>
+		)
+	}
+
+	<!-- CTA Section -->
+	<section class="py-20 bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white">
+		<div class="container mx-auto px-4 text-center">
+			<h2 class="text-4xl font-bold mb-6">Start Creating with This Template</h2>
+			<p class="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
+				Generate professional-quality AI images in seconds using this prompt template.
+			</p>
+			<a
+				href="/app"
+				class="inline-block px-8 py-4 bg-white text-purple-600 font-semibold rounded-full hover:bg-purple-50 transition-colors"
+			>
+				Try It Now - Free
+			</a>
+		</div>
+	</section>
+
+	<script define:vars={{ templateData: template.data }}>
+		const form = document.getElementById('prompt-form');
+		const generateBtn = document.getElementById('generate-prompt-btn');
+		const generatedContainer = document.getElementById('generated-prompt-container');
+		const generatedPromptDiv = document.getElementById('generated-prompt');
+		const copyBtn = document.getElementById('copy-prompt-btn');
+
+		generateBtn?.addEventListener('click', () => {
+			const formData = new FormData(form);
+			const values = {};
+
+			templateData.variables.forEach((variable) => {
+				const value = formData.get(variable.name);
+				if (value) {
+					values[variable.name] = value;
+				} else if (variable.required) {
+					alert(`Please fill in: ${variable.description}`);
+					return;
+				}
+			});
+
+			// Fill template
+			let filledPrompt = templateData.promptTemplate;
+			Object.entries(values).forEach(([key, value]) => {
+				const regex = new RegExp(`\\{${key}\\}`, 'g');
+				filledPrompt = filledPrompt.replace(regex, value);
+			});
+
+			// Display result
+			generatedPromptDiv.textContent = filledPrompt;
+			generatedContainer?.classList.remove('hidden');
+
+			// Smooth scroll to result
+			generatedContainer?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		});
+
+		copyBtn?.addEventListener('click', async () => {
+			const text = generatedPromptDiv?.textContent || '';
+			try {
+				await navigator.clipboard.writeText(text);
+				copyBtn.textContent = '✓ Copied!';
+				setTimeout(() => {
+					copyBtn.innerHTML = `
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+						</svg>
+						Copy
+					`;
+				}, 2000);
+			} catch (err) {
+				alert('Failed to copy to clipboard');
+			}
+		});
+	</script>
+</Layout>

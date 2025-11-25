@@ -1,0 +1,354 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import ComparisonCard from '../../components/comparisons/ComparisonCard.astro';
+import ComparisonSchema from '../../components/comparisons/ComparisonSchema.astro';
+import { getWinnerBadgeColor, getWinnerBadgeText, calculateOverallWinner } from '../../utils/comparisons';
+
+export async function getStaticPaths() {
+	const comparisons = await getCollection('comparisons');
+	return comparisons.map((comparison) => ({
+		params: { slug: comparison.data.slug },
+		props: { comparison },
+	}));
+}
+
+interface Props {
+	comparison: CollectionEntry<'comparisons'>;
+}
+
+const { comparison } = Astro.props;
+const { data } = comparison;
+const { Content } = await comparison.render();
+
+// Calculate overall winner
+const overallWinner = data.winnerBadge || calculateOverallWinner(data.comparisonTable);
+
+// Get related comparisons
+const allComparisons = await getCollection('comparisons');
+const relatedComparisons = allComparisons
+	.filter((c) =>
+		data.relatedComparisons.includes(c.data.slug) &&
+		c.data.slug !== data.slug &&
+		c.data.language === data.language
+	)
+	.slice(0, 3);
+---
+
+<Layout
+	title={data.title}
+	description={data.description}
+>
+	<ComparisonSchema comparison={comparison} slot="head" />
+
+	<article class="bg-dark-bg min-h-screen">
+		<!-- Hero Section -->
+		<div class="bg-gradient-to-b from-dark-elevated to-dark-bg py-16 border-b border-dark-border">
+			<div class="max-w-4xl mx-auto px-6">
+				<!-- Breadcrumb -->
+				<nav class="text-sm text-gray-400 mb-6">
+					<a href="/" class="hover:text-primary">Home</a>
+					<span class="mx-2">/</span>
+					<a href="/comparisons" class="hover:text-primary">Comparisons</a>
+					<span class="mx-2">/</span>
+					<span class="text-white">{data.competitor}</span>
+				</nav>
+
+				<!-- Icon & Badges -->
+				<div class="flex items-center gap-4 mb-6">
+					<div class="text-6xl">{data.icon}</div>
+					<div class="flex flex-wrap gap-2">
+						{data.featured && (
+							<span class="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-sm text-primary">
+								⭐ Featured
+							</span>
+						)}
+						{data.trending && (
+							<span class="px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full text-sm text-orange-400">
+								🔥 Trending
+							</span>
+						)}
+						<span class="px-3 py-1 bg-dark-bg border border-dark-border rounded-full text-sm text-gray-400">
+							Updated {data.lastUpdated.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+						</span>
+					</div>
+				</div>
+
+				<!-- Title -->
+				<h1 class="text-4xl md:text-5xl font-bold text-white mb-6">
+					{data.title}
+				</h1>
+
+				<!-- Verdict -->
+				<div class="bg-dark-elevated border border-primary/20 rounded-xl p-6 mb-6">
+					<div class="flex items-start gap-4">
+						<div class="text-3xl">⚖️</div>
+						<div class="flex-1">
+							<div class="text-sm font-semibold text-primary mb-2">VERDICT</div>
+							<p class="text-lg text-gray-200 leading-relaxed">{data.verdict}</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Overall Winner Badge -->
+				<div class={`text-center py-4 px-6 rounded-xl font-bold text-lg ${
+					overallWinner === 'picture'
+						? 'bg-green-500/10 border border-green-500/20 text-green-400'
+						: overallWinner === 'competitor'
+						? 'bg-blue-500/10 border border-blue-500/20 text-blue-400'
+						: 'bg-yellow-500/10 border border-yellow-500/20 text-yellow-400'
+				}`}>
+					{getWinnerBadgeText(overallWinner)}
+				</div>
+			</div>
+		</div>
+
+		<!-- Comparison Table -->
+		<div class="max-w-4xl mx-auto px-6 py-12">
+			<h2 class="text-2xl font-bold text-white mb-6">Quick Comparison</h2>
+			<div class="bg-dark-elevated border border-dark-border rounded-xl overflow-hidden">
+				<table class="w-full">
+					<thead>
+						<tr class="border-b border-dark-border">
+							<th class="px-6 py-4 text-left text-sm font-semibold text-gray-400">Feature</th>
+							<th class="px-6 py-4 text-left text-sm font-semibold text-primary">Picture</th>
+							<th class="px-6 py-4 text-left text-sm font-semibold text-gray-400">{data.competitor}</th>
+							<th class="px-6 py-4 text-center text-sm font-semibold text-gray-400">Winner</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- Pricing -->
+						<tr class="border-b border-dark-border hover:bg-dark-bg/50">
+							<td class="px-6 py-4 text-sm text-gray-300">💰 Pricing</td>
+							<td class="px-6 py-4 text-sm text-white">{data.comparisonTable.pricing.picture}</td>
+							<td class="px-6 py-4 text-sm text-white">{data.comparisonTable.pricing.competitor}</td>
+							<td class="px-6 py-4 text-center">
+								{data.comparisonTable.pricing.winner === 'picture' && <span class="text-green-400">✓</span>}
+								{data.comparisonTable.pricing.winner === 'competitor' && <span class="text-blue-400">✓</span>}
+								{data.comparisonTable.pricing.winner === 'tie' && <span class="text-yellow-400">=</span>}
+							</td>
+						</tr>
+						<!-- Image Quality -->
+						<tr class="border-b border-dark-border hover:bg-dark-bg/50">
+							<td class="px-6 py-4 text-sm text-gray-300">🎨 Image Quality</td>
+							<td class="px-6 py-4 text-sm text-white">{data.comparisonTable.imageQuality.picture}</td>
+							<td class="px-6 py-4 text-sm text-white">{data.comparisonTable.imageQuality.competitor}</td>
+							<td class="px-6 py-4 text-center">
+								{data.comparisonTable.imageQuality.winner === 'picture' && <span class="text-green-400">✓</span>}
+								{data.comparisonTable.imageQuality.winner === 'competitor' && <span class="text-blue-400">✓</span>}
+								{data.comparisonTable.imageQuality.winner === 'tie' && <span class="text-yellow-400">=</span>}
+							</td>
+						</tr>
+						<!-- Speed -->
+						<tr class="border-b border-dark-border hover:bg-dark-bg/50">
+							<td class="px-6 py-4 text-sm text-gray-300">⚡ Speed</td>
+							<td class="px-6 py-4 text-sm text-white">{data.comparisonTable.speed.picture}</td>
+							<td class="px-6 py-4 text-sm text-white">{data.comparisonTable.speed.competitor}</td>
+							<td class="px-6 py-4 text-center">
+								{data.comparisonTable.speed.winner === 'picture' && <span class="text-green-400">✓</span>}
+								{data.comparisonTable.speed.winner === 'competitor' && <span class="text-blue-400">✓</span>}
+								{data.comparisonTable.speed.winner === 'tie' && <span class="text-yellow-400">=</span>}
+							</td>
+						</tr>
+						<!-- Ease of Use -->
+						<tr class="border-b border-dark-border hover:bg-dark-bg/50">
+							<td class="px-6 py-4 text-sm text-gray-300">🎯 Ease of Use</td>
+							<td class="px-6 py-4 text-sm text-white">{data.comparisonTable.easeOfUse.picture}</td>
+							<td class="px-6 py-4 text-sm text-white">{data.comparisonTable.easeOfUse.competitor}</td>
+							<td class="px-6 py-4 text-center">
+								{data.comparisonTable.easeOfUse.winner === 'picture' && <span class="text-green-400">✓</span>}
+								{data.comparisonTable.easeOfUse.winner === 'competitor' && <span class="text-blue-400">✓</span>}
+								{data.comparisonTable.easeOfUse.winner === 'tie' && <span class="text-yellow-400">=</span>}
+							</td>
+						</tr>
+						<!-- Features -->
+						<tr class="hover:bg-dark-bg/50">
+							<td class="px-6 py-4 text-sm text-gray-300">✨ Features</td>
+							<td class="px-6 py-4 text-sm text-white">{data.comparisonTable.features.picture}</td>
+							<td class="px-6 py-4 text-sm text-white">{data.comparisonTable.features.competitor}</td>
+							<td class="px-6 py-4 text-center">
+								{data.comparisonTable.features.winner === 'picture' && <span class="text-green-400">✓</span>}
+								{data.comparisonTable.features.winner === 'competitor' && <span class="text-blue-400">✓</span>}
+								{data.comparisonTable.features.winner === 'tie' && <span class="text-yellow-400">=</span>}
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<!-- Pros & Cons -->
+		<div class="max-w-4xl mx-auto px-6 pb-12">
+			<h2 class="text-2xl font-bold text-white mb-6">Pros & Cons</h2>
+			<div class="grid md:grid-cols-2 gap-6">
+				<!-- Picture Pros/Cons -->
+				<div class="space-y-4">
+					<h3 class="text-lg font-semibold text-primary mb-3">Picture</h3>
+
+					<div class="bg-green-500/5 border border-green-500/20 rounded-xl p-5">
+						<div class="font-semibold text-green-400 mb-3">Pros</div>
+						<ul class="space-y-2">
+							{data.picturePros.map((pro) => (
+								<li class="text-sm text-gray-300 flex items-start gap-2">
+									<span class="text-green-400 flex-shrink-0">✓</span>
+									<span>{pro}</span>
+								</li>
+							))}
+						</ul>
+					</div>
+
+					<div class="bg-red-500/5 border border-red-500/20 rounded-xl p-5">
+						<div class="font-semibold text-red-400 mb-3">Cons</div>
+						<ul class="space-y-2">
+							{data.pictureCons.map((con) => (
+								<li class="text-sm text-gray-300 flex items-start gap-2">
+									<span class="text-red-400 flex-shrink-0">✗</span>
+									<span>{con}</span>
+								</li>
+							))}
+						</ul>
+					</div>
+				</div>
+
+				<!-- Competitor Pros/Cons -->
+				<div class="space-y-4">
+					<h3 class="text-lg font-semibold text-gray-300 mb-3">{data.competitor}</h3>
+
+					<div class="bg-green-500/5 border border-green-500/20 rounded-xl p-5">
+						<div class="font-semibold text-green-400 mb-3">Pros</div>
+						<ul class="space-y-2">
+							{data.competitorPros.map((pro) => (
+								<li class="text-sm text-gray-300 flex items-start gap-2">
+									<span class="text-green-400 flex-shrink-0">✓</span>
+									<span>{pro}</span>
+								</li>
+							))}
+						</ul>
+					</div>
+
+					<div class="bg-red-500/5 border border-red-500/20 rounded-xl p-5">
+						<div class="font-semibold text-red-400 mb-3">Cons</div>
+						<ul class="space-y-2">
+							{data.competitorCons.map((con) => (
+								<li class="text-sm text-gray-300 flex items-start gap-2">
+									<span class="text-red-400 flex-shrink-0">✗</span>
+									<span>{con}</span>
+								</li>
+							))}
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Best For Section -->
+		<div class="max-w-4xl mx-auto px-6 pb-12">
+			<h2 class="text-2xl font-bold text-white mb-6">Which Should You Choose?</h2>
+			<div class="grid md:grid-cols-2 gap-6">
+				<!-- Choose Picture -->
+				<div class="bg-primary/5 border border-primary/20 rounded-xl p-6">
+					<div class="flex items-center gap-3 mb-4">
+						<div class="text-3xl">{data.icon}</div>
+						<h3 class="text-lg font-bold text-primary">Choose Picture</h3>
+					</div>
+					<ul class="space-y-2">
+						{data.bestFor.picture.map((reason) => (
+							<li class="text-sm text-gray-300 flex items-start gap-2">
+								<span class="text-primary flex-shrink-0">✓</span>
+								<span>{reason}</span>
+							</li>
+						))}
+					</ul>
+					<a href="#" class="mt-6 block w-full px-6 py-3 bg-primary text-white font-medium rounded-lg text-center hover:bg-primary/90 transition-colors">
+						Try Picture Free
+					</a>
+				</div>
+
+				<!-- Choose Competitor -->
+				<div class="bg-dark-elevated border border-dark-border rounded-xl p-6">
+					<div class="flex items-center gap-3 mb-4">
+						<div class="text-3xl">🔄</div>
+						<h3 class="text-lg font-bold text-gray-300">Choose {data.competitor}</h3>
+					</div>
+					<ul class="space-y-2">
+						{data.bestFor.competitor.map((reason) => (
+							<li class="text-sm text-gray-300 flex items-start gap-2">
+								<span class="text-gray-500 flex-shrink-0">•</span>
+								<span>{reason}</span>
+							</li>
+						))}
+					</ul>
+					{data.competitorWebsite && (
+						<a
+							href={data.competitorWebsite}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="mt-6 block w-full px-6 py-3 bg-dark-bg border border-dark-border text-gray-300 font-medium rounded-lg text-center hover:border-primary transition-colors"
+						>
+							Visit {data.competitor} →
+						</a>
+					)}
+				</div>
+			</div>
+		</div>
+
+		<!-- Full Article Content -->
+		<div class="max-w-4xl mx-auto px-6 pb-12">
+			<div class="prose prose-invert prose-lg max-w-none">
+				<Content />
+			</div>
+		</div>
+
+		<!-- Related Comparisons -->
+		{relatedComparisons.length > 0 && (
+			<div class="max-w-6xl mx-auto px-6 pb-16">
+				<h2 class="text-2xl font-bold text-white mb-6">Related Comparisons</h2>
+				<div class="grid md:grid-cols-3 gap-6">
+					{relatedComparisons.map((comp) => (
+						<ComparisonCard comparison={comp} />
+					))}
+				</div>
+			</div>
+		)}
+
+		<!-- Final CTA -->
+		<div class="max-w-4xl mx-auto px-6 py-16">
+			<div class="bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20 rounded-2xl p-12 text-center">
+				<h2 class="text-3xl font-bold text-white mb-4">Try Picture Free</h2>
+				<p class="text-gray-300 mb-8">
+					Experience the difference with 50 free images - no credit card required.
+				</p>
+				<a href="#" class="px-8 py-3 bg-primary text-white font-medium rounded-lg inline-block hover:bg-primary/90 transition-colors">
+					Start Creating Now
+				</a>
+			</div>
+		</div>
+	</article>
+
+	<style>
+		.prose {
+			@apply text-gray-300;
+		}
+		.prose h2 {
+			@apply text-2xl font-bold text-white mt-12 mb-6;
+		}
+		.prose h3 {
+			@apply text-xl font-bold text-white mt-8 mb-4;
+		}
+		.prose p {
+			@apply mb-4 leading-relaxed;
+		}
+		.prose ul {
+			@apply list-disc list-inside mb-4 space-y-2;
+		}
+		.prose table {
+			@apply w-full border border-dark-border rounded-lg overflow-hidden mb-8;
+		}
+		.prose th {
+			@apply bg-dark-elevated px-4 py-3 text-left font-semibold;
+		}
+		.prose td {
+			@apply px-4 py-3 border-t border-dark-border;
+		}
+	</style>
+</Layout>
