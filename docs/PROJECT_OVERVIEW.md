@@ -13,6 +13,7 @@ Dieses Dokument bietet eine umfassende Übersicht über alle Projekte im Manacor
    - [Picture](#picture)
    - [uLoad](#uload)
    - [Chat](#chat)
+   - [Nutriphi](#nutriphi)
 3. [Shared Packages](#shared-packages)
 4. [Technologie-Stack](#technologie-stack)
 5. [Entwicklung](#entwicklung)
@@ -49,6 +50,7 @@ pnpm run manadeck:dev
 pnpm run memoro:dev
 pnpm run picture:dev
 pnpm run uload:dev
+pnpm run nutriphi:dev
 ```
 
 ---
@@ -344,6 +346,69 @@ Chat ist eine mobile Chat-Anwendung mit Supabase-Backend und Markdown-Unterstüt
 chat/
 ├── apps/
 │   └── mobile/       # Expo React Native App
+```
+
+---
+
+### Nutriphi
+
+**KI-gestützter Ernährungs-Tracker**
+
+Nutriphi ist ein intelligenter Ernährungs-Tracker, der mithilfe von Google Gemini Vision API Fotos von Mahlzeiten analysiert und automatisch Nährwertinformationen extrahiert.
+
+#### Features
+- KI-gestützte Mahlzeitenanalyse aus Fotos
+- Automatische Erkennung von Kalorien, Protein, Kohlenhydraten, Fett
+- Tägliche Ernährungsbilanz und Statistiken
+- Manuelle Eingabe über Textbeschreibung
+- Personalisierte Gesundheitstipps
+- Offline-Speicherung mit SQLite
+- Cloud-Sync mit Supabase
+
+#### Tech-Stack
+| Komponente | Technologie |
+|------------|-------------|
+| Backend | NestJS (Port 3002) |
+| Mobile | Expo SDK 53 + React Native 0.79 |
+| Web | SvelteKit |
+| Landing | Astro |
+| KI | Google Gemini Vision API |
+| Datenbank | Supabase (PostgreSQL), SQLite (lokal) |
+| State | Zustand |
+
+#### Projektstruktur
+```
+nutriphi/
+├── apps/
+│   ├── mobile/       # Expo React Native App (@nutriphi/mobile)
+│   ├── web/          # SvelteKit Web App (@nutriphi/web)
+│   └── landing/      # Astro Landing Page (@nutriphi/landing)
+├── backend/          # NestJS API Server (@nutriphi/backend)
+```
+
+#### API Endpoints
+| Endpoint | Methode | Beschreibung |
+|----------|---------|--------------|
+| `/api/health` | GET | Health Check |
+| `/api/meals/analyze/image` | POST | Mahlzeit-Foto analysieren |
+| `/api/meals/analyze/text` | POST | Mahlzeit-Text analysieren |
+| `/api/meals` | POST | Mahlzeit speichern |
+| `/api/meals/user/:userId` | GET | Mahlzeiten eines Users |
+| `/api/meals/user/:userId/summary` | GET | Tagesbilanz |
+
+#### Entwicklung
+```bash
+# Backend starten
+pnpm dev:nutriphi:backend
+
+# Mobile App starten
+pnpm dev:nutriphi:mobile
+
+# Web App starten
+pnpm dev:nutriphi:web
+
+# Landing Page starten
+pnpm dev:nutriphi:landing
 ```
 
 ---
