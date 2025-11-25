@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@manacore/manadeck-database": "workspace:*",
     "@mana-core/nestjs-integration": "git+https://github.com/Memo-2023/mana-core-nestjs-package.git",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/common": "^11.0.1",

@@ -11,6 +11,13 @@ import { PublicController } from './controllers/public.controller';
 import { HealthController } from './controllers/health.controller';
 import { SupabaseService } from './services/supabase.service';
 import { validationSchema } from './config/validation.schema';
+import {
+  DatabaseModule,
+  DeckRepository,
+  CardRepository,
+  UserStatsRepository,
+  DeckTemplateRepository,
+} from './database';
 
 @Module({
   imports: [
@@ -46,6 +53,9 @@ import { validationSchema } from './config/validation.schema';
     // Health checks
     TerminusModule,
     HttpModule,
+
+    // Database (Drizzle/PostgreSQL)
+    DatabaseModule,
   ],
   controllers: [
     AppController,
@@ -53,7 +63,15 @@ import { validationSchema } from './config/validation.schema';
     PublicController,
     HealthController,
   ],
-  providers: [AppService, SupabaseService],
+  providers: [
+    AppService,
+    SupabaseService,
+    // Database repositories
+    DeckRepository,
+    CardRepository,
+    UserStatsRepository,
+    DeckTemplateRepository,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

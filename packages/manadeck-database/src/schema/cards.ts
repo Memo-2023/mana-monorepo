@@ -11,8 +11,8 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { decks } from './decks';
-import { cardProgress } from './cardProgress';
+import { decks } from './decks.js';
+import { cardProgress } from './cardProgress.js';
 
 // Card type enum
 export const cardTypeEnum = pgEnum('card_type', ['text', 'flashcard', 'quiz', 'mixed']);

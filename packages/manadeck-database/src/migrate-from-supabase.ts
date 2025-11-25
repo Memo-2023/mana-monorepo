@@ -11,7 +11,7 @@
  */
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { getDb, closeDb } from './client';
+import { getDb, closeDb } from './client.js';
 import {
   decks,
   cards,
@@ -21,7 +21,7 @@ import {
   aiGenerations,
   userStats,
   dailyProgress,
-} from './schema';
+} from './schema/index.js';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;

@@ -9,9 +9,9 @@ import {
   index,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { cards } from './cards';
-import { studySessions } from './studySessions';
-import { aiGenerations } from './aiGenerations';
+import { cards } from './cards.js';
+import { studySessions } from './studySessions.js';
+import { aiGenerations } from './aiGenerations.js';
 
 export const decks = pgTable(
   'decks',

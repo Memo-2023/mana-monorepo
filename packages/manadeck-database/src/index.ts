@@ -1,7 +1,7 @@
 // Main entry point for @manacore/manadeck-database
 
 // Export database client utilities
-export { createClient, getDb, closeDb, type Database } from './client';
+export { createClient, getDb, closeDb, type Database } from './client.js';
 
 // Export Drizzle utilities
 export {
@@ -28,7 +28,7 @@ export {
   avg,
   min,
   max,
-} from './client';
+} from './client.js';
 
 // Export all schemas and types
-export * from './schema';
+export * from './schema/index.js';

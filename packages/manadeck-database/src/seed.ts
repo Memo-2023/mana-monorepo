@@ -1,5 +1,5 @@
-import { getDb, closeDb } from './client';
-import { deckTemplates } from './schema';
+import { getDb, closeDb } from './client.js';
+import { deckTemplates } from './schema/index.js';
 
 /**
  * Seed the database with initial data

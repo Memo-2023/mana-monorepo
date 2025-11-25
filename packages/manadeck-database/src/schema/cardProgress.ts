@@ -9,7 +9,7 @@ import {
   unique,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { cards } from './cards';
+import { cards } from './cards.js';
 
 // Progress status enum (SM-2 algorithm states)
 export const progressStatusEnum = pgEnum('progress_status', [

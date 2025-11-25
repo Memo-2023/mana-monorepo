@@ -4,6 +4,7 @@ import { CurrentUser } from '@mana-core/nestjs-integration/decorators';
 import { CreditClientService } from '@mana-core/nestjs-integration';
 import { CreditOperationType, getCreditCost, getOperationDescription } from '../config/credit-operations';
 import { SupabaseService } from '../services/supabase.service';
+import { DeckRepository, CardRepository, UserStatsRepository } from '../database';
 
 @Controller('api')
 @UseGuards(AuthGuard)
@@ -13,6 +14,9 @@ export class ApiController {
   constructor(
     private readonly creditClient: CreditClientService,
     private readonly supabaseService: SupabaseService,
+    private readonly deckRepository: DeckRepository,
+    private readonly cardRepository: CardRepository,
+    private readonly userStatsRepository: UserStatsRepository,
   ) {}
 
   @Get('profile')
@@ -58,12 +62,13 @@ export class ApiController {
   }
 
   @Get('decks')
-  getUserDecks(@CurrentUser() user: any) {
-    // This would fetch from Supabase in a real implementation
+  async getUserDecks(@CurrentUser() user: any) {
+    this.logger.log(`Getting decks for user: ${user.sub}`);
+    const decks = await this.deckRepository.findByUserId(user.sub);
     return {
       userId: user.sub,
-      decks: [],
-      message: 'Fetch user decks from Supabase',
+      decks,
+      count: decks.length,
     };
   }
 
@@ -96,24 +101,27 @@ export class ApiController {
         });
       }
 
-      // 2. Perform the operation (create deck in Supabase)
-      // TODO: Implement actual deck creation logic with Supabase
-      const newDeck = {
-        id: `deck_${Date.now()}`,
-        ...deckData,
+      // 2. Perform the operation (create deck in PostgreSQL)
+      const newDeck = await this.deckRepository.create({
         userId: user.sub,
-        createdAt: new Date(),
-      };
+        title: deckData.name || deckData.title || 'Untitled Deck',
+        description: deckData.description,
+        coverImageUrl: deckData.coverImageUrl,
+        isPublic: deckData.isPublic ?? false,
+        settings: deckData.settings || {},
+        tags: deckData.tags || [],
+        metadata: deckData.metadata || {},
+      });
 
       // 3. Success - Consume credits
       await this.creditClient.consumeCredits(
         user.sub,
         operationType,
         creditCost,
-        `Created deck: ${deckData.name || 'Unnamed Deck'}`,
+        `Created deck: ${newDeck.title}`,
         {
           deckId: newDeck.id,
-          deckName: deckData.name,
+          deckName: newDeck.title,
         },
       );
 
@@ -260,59 +268,115 @@ export class ApiController {
   }
 
   @Put('decks/:id')
-  updateDeck(
+  async updateDeck(
     @CurrentUser() user: any,
     @Param('id') deckId: string,
     @Body() deckData: any,
   ) {
     this.logger.log(`Updating deck ${deckId} for user: ${user.sub}`);
+
+    const updatedDeck = await this.deckRepository.update(deckId, user.sub, {
+      title: deckData.title,
+      description: deckData.description,
+      coverImageUrl: deckData.coverImageUrl,
+      isPublic: deckData.isPublic,
+      settings: deckData.settings,
+      tags: deckData.tags,
+      metadata: deckData.metadata,
+    });
+
+    if (!updatedDeck) {
+      throw new BadRequestException({
+        error: 'deck_not_found',
+        message: 'Deck not found or you do not have permission to update it',
+      });
+    }
+
     return {
+      success: true,
       userId: user.sub,
-      deckId,
-      deck: deckData,
-      message: 'Deck would be updated in Supabase',
+      deck: updatedDeck,
     };
   }
 
   @Delete('decks/:id')
-  deleteDeck(@CurrentUser() user: any, @Param('id') deckId: string) {
+  async deleteDeck(@CurrentUser() user: any, @Param('id') deckId: string) {
     this.logger.log(`Deleting deck ${deckId} for user: ${user.sub}`);
+
+    const deleted = await this.deckRepository.delete(deckId, user.sub);
+
+    if (!deleted) {
+      throw new BadRequestException({
+        error: 'deck_not_found',
+        message: 'Deck not found or you do not have permission to delete it',
+      });
+    }
+
     return {
+      success: true,
       userId: user.sub,
       deckId,
-      message: 'Deck would be deleted from Supabase',
     };
   }
 
   @Get('cards')
-  getUserCards(@CurrentUser() user: any) {
+  async getUserCards(@CurrentUser() user: any) {
+    this.logger.log(`Getting cards for user: ${user.sub}`);
+    const cards = await this.cardRepository.findByUserDecks(user.sub);
     return {
       userId: user.sub,
-      cards: [],
-      message: 'Fetch user cards from Supabase',
+      cards,
+      count: cards.length,
     };
   }
 
   @Post('cards')
-  createCard(@CurrentUser() user: any, @Body() cardData: any) {
+  async createCard(@CurrentUser() user: any, @Body() cardData: any) {
     this.logger.log(`Creating card for user: ${user.sub}`);
+
+    // Verify the deck belongs to the user
+    const deck = await this.deckRepository.findByIdAndUserId(cardData.deckId, user.sub);
+    if (!deck) {
+      throw new BadRequestException({
+        error: 'deck_not_found',
+        message: 'Deck not found or you do not have permission to add cards to it',
+      });
+    }
+
+    const card = await this.cardRepository.create({
+      deckId: cardData.deckId,
+      title: cardData.title,
+      content: cardData.content,
+      cardType: cardData.cardType || 'flashcard',
+      position: cardData.position ?? 0,
+      aiModel: cardData.aiModel,
+      aiPrompt: cardData.aiPrompt,
+    });
+
     return {
+      success: true,
       userId: user.sub,
-      card: cardData,
-      message: 'Card would be created in Supabase',
+      card,
     };
   }
 
   @Get('stats')
-  getUserStats(@CurrentUser() user: any) {
+  async getUserStats(@CurrentUser() user: any) {
+    this.logger.log(`Getting stats for user: ${user.sub}`);
+
+    const [stats, totalDecks, totalCards] = await Promise.all([
+      this.userStatsRepository.findOrCreate(user.sub),
+      this.deckRepository.countByUserId(user.sub),
+      this.cardRepository.countByUserId(user.sub),
+    ]);
+
     return {
       userId: user.sub,
       stats: {
-        totalDecks: 0,
-        totalCards: 0,
-        lastActive: new Date(),
+        ...stats,
+        totalDecks,
+        totalCards,
       },
-      message: 'Fetch user stats from Supabase',
     };
   }
 }

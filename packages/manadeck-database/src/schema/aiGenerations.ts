@@ -9,7 +9,7 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { decks } from './decks';
+import { decks } from './decks.js';
 
 // AI generation status enum
 export const aiGenerationStatusEnum = pgEnum('ai_generation_status', [

@@ -8,7 +8,7 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { decks } from './decks';
+import { decks } from './decks.js';
 
 // Study mode enum
 export const studyModeEnum = pgEnum('study_mode', ['all', 'new', 'review', 'favorites', 'random']);

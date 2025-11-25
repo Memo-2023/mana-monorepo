@@ -3,7 +3,7 @@
  * Usage: pnpm db:test
  */
 
-import { getDb, closeDb, sql } from './client';
+import { getDb, closeDb, sql } from './client.js';
 
 async function testConnection() {
   console.log('Testing database connection...\n');
