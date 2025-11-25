@@ -10,6 +10,7 @@ import { ApiController } from './controllers/api.controller';
 import { PublicController } from './controllers/public.controller';
 import { HealthController } from './controllers/health.controller';
 import { validationSchema } from './config/validation.schema';
+import { AiService } from './services/ai.service';
 import {
   DatabaseModule,
   DeckRepository,
@@ -64,6 +65,8 @@ import {
   ],
   providers: [
     AppService,
+    // AI Service
+    AiService,
     // Database repositories
     DeckRepository,
     CardRepository,

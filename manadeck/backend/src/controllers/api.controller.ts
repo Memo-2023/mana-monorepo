@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Logger, BadRequestException, NotImplementedException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Logger, BadRequestException, ServiceUnavailableException } from '@nestjs/common';
 import { AuthGuard } from '@mana-core/nestjs-integration/guards';
 import { CurrentUser } from '@mana-core/nestjs-integration/decorators';
 import { CreditClientService } from '@mana-core/nestjs-integration';
 import { CreditOperationType, getCreditCost, getOperationDescription } from '../config/credit-operations';
 import { DeckRepository, CardRepository, UserStatsRepository } from '../database';
+import { AiService, CardType } from '../services/ai.service';
 
 @Controller('api')
 @UseGuards(AuthGuard)
@@ -15,6 +16,7 @@ export class ApiController {
     private readonly deckRepository: DeckRepository,
     private readonly cardRepository: CardRepository,
     private readonly userStatsRepository: UserStatsRepository,
+    private readonly aiService: AiService,
   ) {}
 
   @Get('profile')
@@ -151,12 +153,157 @@ export class ApiController {
   async generateDeckWithAI(@CurrentUser() user: any, @Body() requestData: any) {
     this.logger.log(`AI deck generation requested by user: ${user.sub}`);
 
-    // TODO: Implement AI deck generation with a self-hosted solution
-    // This endpoint previously used Supabase Edge Functions which are no longer available
-    throw new NotImplementedException({
-      error: 'not_implemented',
-      message: 'AI deck generation is currently being migrated to a new infrastructure. Please check back later.',
-    });
+    // Check if AI service is available
+    if (!this.aiService.isAvailable()) {
+      throw new ServiceUnavailableException({
+        error: 'ai_service_unavailable',
+        message: 'AI service is not configured. Please contact support.',
+      });
+    }
+
+    // Validate request
+    const { prompt, deckTitle, deckDescription, cardCount = 10, cardTypes, difficulty, tags, language } = requestData;
+
+    if (!prompt || !deckTitle) {
+      throw new BadRequestException({
+        error: 'validation_failed',
+        message: 'prompt and deckTitle are required',
+      });
+    }
+
+    if (cardCount < 1 || cardCount > 50) {
+      throw new BadRequestException({
+        error: 'validation_failed',
+        message: 'cardCount must be between 1 and 50',
+      });
+    }
+
+    // Validate card types
+    const validCardTypes: CardType[] = ['text', 'flashcard', 'quiz', 'mixed'];
+    const requestedTypes: CardType[] = cardTypes || ['flashcard', 'quiz'];
+    const invalidTypes = requestedTypes.filter(t => !validCardTypes.includes(t));
+    if (invalidTypes.length > 0) {
+      throw new BadRequestException({
+        error: 'validation_failed',
+        message: `Invalid card types: ${invalidTypes.join(', ')}. Valid types: ${validCardTypes.join(', ')}`,
+      });
+    }
+
+    const operationType = CreditOperationType.AI_DECK_GENERATION;
+    const creditCost = getCreditCost(operationType);
+
+    try {
+      // 1. Pre-flight credit validation
+      const validation = await this.creditClient.validateCredits(
+        user.sub,
+        operationType,
+        creditCost,
+      );
+
+      if (!validation.hasCredits) {
+        this.logger.warn(
+          `User ${user.sub} has insufficient credits for AI deck generation. Required: ${creditCost}, Available: ${validation.availableCredits}`,
+        );
+
+        throw new BadRequestException({
+          error: 'insufficient_credits',
+          message: `Insufficient mana. Required: ${creditCost}, Available: ${validation.availableCredits}`,
+          requiredCredits: creditCost,
+          availableCredits: validation.availableCredits,
+          operation: getOperationDescription(operationType),
+        });
+      }
+
+      // 2. Generate cards with AI
+      this.logger.log(`Generating ${cardCount} cards with AI for user ${user.sub}...`);
+      const aiResult = await this.aiService.generateDeck({
+        prompt,
+        deckTitle,
+        deckDescription,
+        cardCount,
+        cardTypes: requestedTypes,
+        difficulty: difficulty || 'intermediate',
+        language: language || 'en',
+      });
+
+      if (!aiResult.success || aiResult.cards.length === 0) {
+        throw new BadRequestException({
+          error: 'ai_generation_failed',
+          message: aiResult.error || 'Failed to generate cards with AI',
+        });
+      }
+
+      // 3. Create deck in database
+      const newDeck = await this.deckRepository.create({
+        userId: user.sub,
+        title: deckTitle,
+        description: deckDescription,
+        isPublic: false,
+        settings: { aiGenerated: true, difficulty },
+        tags: tags || [],
+        metadata: {
+          aiModel: aiResult.metadata.model,
+          generationTime: aiResult.metadata.generationTime,
+          prompt,
+        },
+      });
+
+      // 4. Create cards in database
+      const cardsToCreate = aiResult.cards.map((card, index) => ({
+        deckId: newDeck.id,
+        title: card.title || `Card ${index + 1}`,
+        content: card.content,
+        cardType: card.cardType,
+        position: index,
+        aiModel: aiResult.metadata.model,
+        aiPrompt: prompt,
+      }));
+
+      await this.cardRepository.createMany(cardsToCreate);
+
+      // 5. Consume credits
+      await this.creditClient.consumeCredits(
+        user.sub,
+        operationType,
+        creditCost,
+        `Generated AI deck: ${deckTitle}`,
+        {
+          deckId: newDeck.id,
+          deckTitle,
+          cardCount: aiResult.cards.length,
+          prompt,
+        },
+      );
+
+      this.logger.log(
+        `AI deck generated successfully for user ${user.sub}. ` +
+        `${aiResult.cards.length} cards created in ${aiResult.metadata.generationTime}ms. ` +
+        `${creditCost} credits consumed.`
+      );
+
+      return {
+        success: true,
+        userId: user.sub,
+        deck: newDeck,
+        cards: aiResult.cards,
+        cardCount: aiResult.cards.length,
+        creditsUsed: creditCost,
+        metadata: aiResult.metadata,
+        message: 'Deck generated successfully with AI',
+      };
+    } catch (error) {
+      // If it's already a known exception, rethrow it
+      if (error instanceof BadRequestException || error instanceof ServiceUnavailableException) {
+        throw error;
+      }
+
+      // Log other errors
+      this.logger.error(`Error generating AI deck for user ${user.sub}:`, error);
+      throw new BadRequestException({
+        error: 'deck_generation_failed',
+        message: error.message || 'Failed to generate deck with AI',
+      });
+    }
   }
 
   @Put('decks/:id')

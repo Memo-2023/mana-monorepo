@@ -20,4 +20,7 @@ export const validationSchema = Joi.object({
 
   // CORS
   FRONTEND_URL: Joi.string().uri().optional(),
+
+  // AI Services
+  GOOGLE_GENAI_API_KEY: Joi.string().optional(),
 });
