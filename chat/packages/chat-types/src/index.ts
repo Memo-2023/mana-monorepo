@@ -64,12 +64,21 @@ export interface ChatCompletionResponse {
 // Template Types
 export interface Template {
   id: string;
+  user_id: string;
   name: string;
-  description: string;
+  description: string | null;
   system_prompt: string;
+  initial_question: string | null;
+  model_id: string | null;
+  color: string;
+  is_default: boolean;
+  document_mode: boolean;
   created_at: string;
   updated_at: string;
 }
+
+export type TemplateCreate = Omit<Template, 'id' | 'created_at' | 'updated_at'>;
+export type TemplateUpdate = Partial<Omit<Template, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
 
 // Space Types
 export interface Space {
@@ -77,6 +86,23 @@ export interface Space {
   name: string;
   description?: string;
   owner_id: string;
+  is_archived: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SpaceCreate = Pick<Space, 'name' | 'description' | 'owner_id'>;
+export type SpaceUpdate = Partial<Pick<Space, 'name' | 'description' | 'is_archived'>>;
+
+export interface SpaceMember {
+  id: string;
+  space_id: string;
+  user_id: string;
+  role: 'owner' | 'admin' | 'member' | 'viewer';
+  invitation_status: 'pending' | 'accepted' | 'declined';
+  invited_by?: string;
+  invited_at: string;
+  joined_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -85,9 +111,12 @@ export interface Space {
 export interface Document {
   id: string;
   conversation_id: string;
-  title: string;
   content: string;
   version: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface DocumentWithConversation extends Document {
+  conversation_title: string;
 }

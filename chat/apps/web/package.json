@@ -27,6 +27,7 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
+    "@chat/types": "workspace:*",
     "@manacore/shared-auth-ui": "workspace:*",
     "@manacore/shared-branding": "workspace:*",
     "@manacore/shared-i18n": "workspace:*",
@@ -36,6 +37,8 @@
     "@manacore/shared-theme": "workspace:*",
     "@manacore/shared-theme-ui": "workspace:*",
     "@manacore/shared-ui": "workspace:*",
+    "@manacore/shared-utils": "workspace:*",
+    "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.81.1",
     "marked": "^17.0.0"
   }

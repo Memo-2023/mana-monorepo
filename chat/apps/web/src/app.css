@@ -1,1 +1,8 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+@import "@manacore/shared-tailwind/themes.css";
+
+/* Scan shared packages for Tailwind classes */
+@source "../../../../packages/shared-ui/src";
+@source "../../../../packages/shared-auth-ui/src";
+@source "../../../../packages/shared-branding/src";
+@source "../../../../packages/shared-theme-ui/src";

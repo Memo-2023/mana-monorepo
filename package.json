@@ -2,7 +2,7 @@
   "name": "manacore-monorepo",
   "version": "1.0.0",
   "private": true,
-  "description": "Manacore Monorepo containing maerchenzauber, manacore, manadeck, and memoro",
+  "description": "Manacore Monorepo containing maerchenzauber, manacore, manadeck, memoro, picture, uload, chat, and nutriphi",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -25,6 +25,7 @@
     "dev:maerchenzauber:landing": "pnpm --filter @maerchenzauber/landing dev",
     "dev:maerchenzauber:backend": "pnpm --filter @maerchenzauber/backend dev",
     "dev:maerchenzauber:mobile": "pnpm --filter @maerchenzauber/mobile dev",
+    "dev:maerchenzauber:app": "turbo run dev --filter=@maerchenzauber/web --filter=@maerchenzauber/backend",
 
     "dev:manacore:web": "pnpm --filter @manacore/web dev",
     "dev:manacore:landing": "pnpm --filter @manacore/landing dev",
@@ -34,6 +35,7 @@
     "dev:manadeck:landing": "pnpm --filter @manadeck/landing dev",
     "dev:manadeck:backend": "pnpm --filter @manadeck/backend dev",
     "dev:manadeck:mobile": "pnpm --filter @manadeck/mobile dev",
+    "dev:manadeck:app": "turbo run dev --filter=@manadeck/web --filter=@manadeck/backend",
 
     "dev:memoro:web": "pnpm --filter @memoro/web dev",
     "dev:memoro:landing": "pnpm --filter @memoro/landing dev",
@@ -48,7 +50,15 @@
     "dev:chat:mobile": "pnpm --filter @chat/mobile dev",
     "dev:chat:web": "pnpm --filter @chat/web dev",
     "dev:chat:landing": "pnpm --filter @chat/landing dev",
-    "dev:chat:backend": "pnpm --filter @chat/backend start:dev"
+    "dev:chat:backend": "pnpm --filter @chat/backend start:dev",
+    "dev:chat:app": "turbo run dev --filter=@chat/web --filter=@chat/backend",
+
+    "nutriphi:dev": "turbo run dev --filter=nutriphi...",
+    "dev:nutriphi:mobile": "pnpm --filter @nutriphi/mobile dev",
+    "dev:nutriphi:web": "pnpm --filter @nutriphi/web dev",
+    "dev:nutriphi:landing": "pnpm --filter @nutriphi/landing dev",
+    "dev:nutriphi:backend": "pnpm --filter @nutriphi/backend start:dev",
+    "dev:nutriphi:app": "turbo run dev --filter=@nutriphi/web --filter=@nutriphi/backend"
   },
   "devDependencies": {
     "prettier": "^3.3.3",

@@ -19,7 +19,8 @@ export {
 	ManaCoreLogo,
 	ManaDeckLogo,
 	StorytellerLogo,
-	UloadLogo
+	UloadLogo,
+	ChatLogo
 } from './logos';
 
 // Configuration
