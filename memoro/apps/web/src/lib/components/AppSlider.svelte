@@ -26,13 +26,22 @@
 			status: 'beta'
 		},
 		{
+			name: 'ManaDeck',
+			description: $t('app_slider.manadeck_desc'),
+			longDescription: $t('app_slider.manadeck_long_desc'),
+			icon: '/images/app-icons/manadeck-logo-gradient.png',
+			color: '#8b5cf6',
+			comingSoon: true,
+			status: 'development'
+		},
+		{
 			name: 'Moodlit',
 			description: $t('app_slider.moodlit_desc'),
 			longDescription: $t('app_slider.moodlit_long_desc'),
 			icon: '/images/app-icons/moodlit-logo-gradient.png',
 			color: '#9C27B0',
 			comingSoon: true,
-			status: 'beta'
+			status: 'planning'
 		},
 		{
 			name: 'Manacore',

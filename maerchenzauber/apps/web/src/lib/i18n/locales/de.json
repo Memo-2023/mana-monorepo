@@ -7,6 +7,22 @@
     "loading": "Lädt..."
   },
   "app_slider": {
-    "title": "Teil des Mana Ökosystems"
+    "title": "Teil des Mana Ökosystems",
+    "memoro_desc": "KI-gestützte Sprachnotizen",
+    "memoro_long_desc": "Erfasse deine Gedanken durch Sprache und lasse sie von KI in strukturierte Notizen verwandeln.",
+    "maerchenzauber_desc": "Magische Kindergeschichten",
+    "maerchenzauber_long_desc": "Erstelle personalisierte Kindergeschichten mit KI-generierten Illustrationen.",
+    "manadeck_desc": "KI Lernkarten",
+    "manadeck_long_desc": "Erstelle und lerne mit smarten Lernkarten und KI-gestützter Wiederholung.",
+    "moodlit_desc": "Stimmungslicht-Steuerung",
+    "moodlit_long_desc": "Steuere deine smarten Lichter basierend auf deiner Stimmung und Aktivität.",
+    "manacore_desc": "Zentrale Verwaltung",
+    "manacore_long_desc": "Verwalte alle deine Mana-Apps und Einstellungen an einem Ort.",
+    "status_published": "Verfügbar",
+    "status_beta": "Beta",
+    "status_development": "In Entwicklung",
+    "status_planning": "Geplant",
+    "coming_soon": "Bald verfügbar",
+    "download": "App öffnen"
   }
 }
