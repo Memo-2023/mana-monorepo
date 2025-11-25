@@ -1,6 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import {
+  type AsyncResult,
+  ok,
+  err,
+  ServiceError,
+  DatabaseError,
+  NotFoundError,
+} from '@manacore/shared-errors';
 
 export interface Conversation {
   id: string;
@@ -23,7 +31,7 @@ export interface Message {
 @Injectable()
 export class ConversationService {
   private readonly logger = new Logger(ConversationService.name);
-  private supabase: SupabaseClient;
+  private supabase: SupabaseClient | null = null;
 
   constructor(private configService: ConfigService) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
@@ -36,10 +44,9 @@ export class ConversationService {
     }
   }
 
-  async getConversations(userId: string): Promise<Conversation[]> {
+  async getConversations(userId: string): AsyncResult<Conversation[]> {
     if (!this.supabase) {
-      this.logger.warn('Supabase not configured');
-      return [];
+      return err(ServiceError.unavailable('Database'));
     }
 
     const { data, error } = await this.supabase
@@ -51,15 +58,15 @@ export class ConversationService {
 
     if (error) {
       this.logger.error('Error fetching conversations', error);
-      throw error;
+      return err(DatabaseError.queryFailed('Failed to fetch conversations'));
     }
 
-    return data || [];
+    return ok(data || []);
   }
 
-  async getConversation(id: string): Promise<Conversation | null> {
+  async getConversation(id: string): AsyncResult<Conversation> {
     if (!this.supabase) {
-      return null;
+      return err(ServiceError.unavailable('Database'));
     }
 
     const { data, error } = await this.supabase
@@ -70,15 +77,18 @@ export class ConversationService {
 
     if (error) {
       this.logger.error('Error fetching conversation', error);
-      return null;
+      if (error.code === 'PGRST116') {
+        return err(new NotFoundError('Conversation', id));
+      }
+      return err(DatabaseError.queryFailed('Failed to fetch conversation'));
     }
 
-    return data;
+    return ok(data);
   }
 
-  async getMessages(conversationId: string): Promise<Message[]> {
+  async getMessages(conversationId: string): AsyncResult<Message[]> {
     if (!this.supabase) {
-      return [];
+      return err(ServiceError.unavailable('Database'));
     }
 
     const { data, error } = await this.supabase
@@ -89,19 +99,19 @@ export class ConversationService {
 
     if (error) {
       this.logger.error('Error fetching messages', error);
-      throw error;
+      return err(DatabaseError.queryFailed('Failed to fetch messages'));
     }
 
-    return data || [];
+    return ok(data || []);
   }
 
   async createConversation(
     userId: string,
     modelId: string,
     title?: string,
-  ): Promise<Conversation> {
+  ): AsyncResult<Conversation> {
     if (!this.supabase) {
-      throw new Error('Supabase not configured');
+      return err(ServiceError.unavailable('Database'));
     }
 
     const { data, error } = await this.supabase
@@ -117,19 +127,19 @@ export class ConversationService {
 
     if (error) {
       this.logger.error('Error creating conversation', error);
-      throw error;
+      return err(DatabaseError.queryFailed('Failed to create conversation'));
     }
 
-    return data;
+    return ok(data);
   }
 
   async addMessage(
     conversationId: string,
     sender: 'user' | 'assistant' | 'system',
     messageText: string,
-  ): Promise<Message> {
+  ): AsyncResult<Message> {
     if (!this.supabase) {
-      throw new Error('Supabase not configured');
+      return err(ServiceError.unavailable('Database'));
     }
 
     const { data, error } = await this.supabase
@@ -144,7 +154,7 @@ export class ConversationService {
 
     if (error) {
       this.logger.error('Error adding message', error);
-      throw error;
+      return err(DatabaseError.queryFailed('Failed to add message'));
     }
 
     // Update conversation updated_at
@@ -153,6 +163,6 @@ export class ConversationService {
       .update({ updated_at: new Date().toISOString() })
       .eq('id', conversationId);
 
-    return data;
+    return ok(data);
   }
 }

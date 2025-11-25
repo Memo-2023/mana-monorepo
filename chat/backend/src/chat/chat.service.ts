@@ -1,5 +1,12 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import {
+  type AsyncResult,
+  ok,
+  err,
+  ValidationError,
+  ServiceError,
+} from '@manacore/shared-errors';
 import { ChatCompletionDto, ChatCompletionResponseDto } from './dto/chat-completion.dto';
 
 export interface AIModel {
@@ -84,11 +91,23 @@ export class ChatService {
     return this.availableModels.find((m) => m.id === modelId);
   }
 
-  async createCompletion(dto: ChatCompletionDto): Promise<ChatCompletionResponseDto> {
+  async createCompletion(
+    dto: ChatCompletionDto,
+    userId?: string,
+  ): AsyncResult<ChatCompletionResponseDto> {
     const model = this.getModelById(dto.modelId);
 
     if (!model) {
-      throw new BadRequestException(`Model with ID ${dto.modelId} not found`);
+      return err(
+        ValidationError.invalidInput('modelId', `Model ${dto.modelId} not found`),
+      );
+    }
+
+    // Log user context for tracking (optional)
+    if (userId) {
+      this.logger.log(
+        `User ${userId} creating chat completion with model ${dto.modelId}`,
+      );
     }
 
     const deployment = model.parameters.deployment;
@@ -104,7 +123,8 @@ export class ChatService {
     };
 
     // Model-specific parameters
-    const isGPTOModel = deployment.includes('gpt-o') || deployment.includes('gpt-4o');
+    const isGPTOModel =
+      deployment.includes('gpt-o') || deployment.includes('gpt-4o');
 
     if (!isGPTOModel) {
       requestBody.max_tokens = maxTokens;
@@ -128,7 +148,12 @@ export class ChatService {
       if (!response.ok) {
         const errorText = await response.text();
         this.logger.error(`API error: ${response.status} - ${errorText}`);
-        throw new BadRequestException(`Azure OpenAI API error: ${response.status}`);
+        return err(
+          ServiceError.externalError(
+            'Azure OpenAI',
+            `API error: ${response.status}`,
+          ),
+        );
       }
 
       const data = await response.json();
@@ -137,20 +162,28 @@ export class ChatService {
 
       if (!messageContent) {
         this.logger.warn('No message content in response');
-        throw new BadRequestException('No response generated');
+        return err(
+          ServiceError.generationFailed('Azure OpenAI', 'No response generated'),
+        );
       }
 
-      return {
+      return ok({
         content: messageContent,
         usage: {
           prompt_tokens: data.usage?.prompt_tokens || 0,
           completion_tokens: data.usage?.completion_tokens || 0,
           total_tokens: data.usage?.total_tokens || 0,
         },
-      };
+      });
     } catch (error) {
       this.logger.error('Error calling Azure OpenAI API', error);
-      throw error;
+      return err(
+        ServiceError.generationFailed(
+          'Azure OpenAI',
+          error instanceof Error ? error.message : 'Unknown error',
+          error instanceof Error ? error : undefined,
+        ),
+      );
     }
   }
 }

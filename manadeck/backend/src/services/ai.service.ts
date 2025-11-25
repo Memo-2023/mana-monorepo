@@ -1,6 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI, Type } from '@google/genai';
+import {
+  type AsyncResult,
+  ok,
+  err,
+  ServiceError,
+} from '@manacore/shared-errors';
 
 export type CardType = 'text' | 'flashcard' | 'quiz' | 'mixed';
 
@@ -37,15 +43,13 @@ export interface DeckGenerationRequest {
   language?: string;
 }
 
-export interface DeckGenerationResult {
-  success: boolean;
+export interface DeckGenerationData {
   cards: GeneratedCard[];
   metadata: {
     model: string;
     tokensUsed?: number;
     generationTime: number;
   };
-  error?: string;
 }
 
 @Injectable()
@@ -70,16 +74,13 @@ export class AiService {
     return this.ai !== null;
   }
 
-  async generateDeck(request: DeckGenerationRequest): Promise<DeckGenerationResult> {
+  async generateDeck(request: DeckGenerationRequest): AsyncResult<DeckGenerationData> {
     const startTime = Date.now();
 
     if (!this.ai) {
-      return {
-        success: false,
-        cards: [],
-        metadata: { model: this.model, generationTime: 0 },
-        error: 'AI service not configured. Please set GOOGLE_GENAI_API_KEY.',
-      };
+      return err(
+        ServiceError.unavailable('AI (Google Gemini not configured)'),
+      );
     }
 
     const {
@@ -94,7 +95,13 @@ export class AiService {
 
     try {
       const systemPrompt = this.buildSystemPrompt(cardTypes, difficulty, language);
-      const userPrompt = this.buildUserPrompt(prompt, deckTitle, deckDescription, cardCount, cardTypes);
+      const userPrompt = this.buildUserPrompt(
+        prompt,
+        deckTitle,
+        deckDescription,
+        cardCount,
+        cardTypes,
+      );
 
       const response = await this.ai.models.generateContent({
         model: this.model,
@@ -110,38 +117,40 @@ export class AiService {
       const responseText = response.text?.trim();
 
       if (!responseText) {
-        return {
-          success: false,
-          cards: [],
-          metadata: { model: this.model, generationTime },
-          error: 'Empty response from AI',
-        };
+        return err(
+          ServiceError.generationFailed('Google Gemini', 'Empty response from AI'),
+        );
       }
 
       const parsed = JSON.parse(responseText);
       const cards: GeneratedCard[] = parsed.cards || [];
 
+      if (cards.length === 0) {
+        return err(
+          ServiceError.generationFailed('Google Gemini', 'No cards generated'),
+        );
+      }
+
       this.logger.log(`Generated ${cards.length} cards in ${generationTime}ms`);
 
-      return {
-        success: true,
+      return ok({
         cards,
         metadata: {
           model: this.model,
           tokensUsed: response.usageMetadata?.totalTokenCount,
           generationTime,
         },
-      };
+      });
     } catch (error) {
-      const generationTime = Date.now() - startTime;
       this.logger.error('AI deck generation failed:', error);
 
-      return {
-        success: false,
-        cards: [],
-        metadata: { model: this.model, generationTime },
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-      };
+      return err(
+        ServiceError.generationFailed(
+          'Google Gemini',
+          error instanceof Error ? error.message : 'Unknown error occurred',
+          error instanceof Error ? error : undefined,
+        ),
+      );
     }
   }
 

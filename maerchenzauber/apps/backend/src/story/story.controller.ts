@@ -14,6 +14,7 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
+import { isOk } from '@manacore/shared-errors';
 import {
   CreateStoryDto,
   CreateStoryWithAnimalCharacterDto,
@@ -323,19 +324,17 @@ export class StoryController {
         updateDto.storyTextGerman,
       );
 
-      if (updateResult.error || !updateResult.data) {
+      if (!isOk(updateResult)) {
         this.logger.error(
-          `[StoryController] Error updating page: ${updateResult.error?.message}`,
+          `[StoryController] Error updating page: ${updateResult.error.message}`,
         );
-        throw new BadRequestException(
-          updateResult.error?.message || 'Failed to update page',
-        );
+        throw updateResult.error; // Caught by AppExceptionFilter
       }
 
       // 6. Update the story in the database with new pages data
       const updatedStory = await this.supabaseService.updateStory(
         storyId,
-        { pages_data: updateResult.data },
+        { pages_data: updateResult.value },
         token,
       );
 

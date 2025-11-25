@@ -1,8 +1,11 @@
+import { Injectable } from '@nestjs/common';
 import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+  type AsyncResult,
+  ok,
+  err,
+  NotFoundError,
+  DatabaseError,
+} from '@manacore/shared-errors';
 
 // Define interfaces for our character data
 export interface CharacterCreateDto {
@@ -23,6 +26,21 @@ export interface CharacterUpdateDto {
   images_data?: any[];
 }
 
+// Character type for return values
+export interface Character {
+  id: string;
+  name: string;
+  original_description?: string;
+  character_description_prompt?: string;
+  character_description?: string;
+  image_url?: string;
+  animal_type?: string;
+  images_data?: any[];
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 @Injectable()
 export class CharacterService {
   constructor() {}
@@ -32,13 +50,13 @@ export class CharacterService {
    * @param execute The execute function from SupabaseAuthService
    * @param userId The authenticated user ID
    * @param characterData The character data to create
-   * @returns The created character
+   * @returns Result containing the created character or error
    */
   async createCharacter(
     execute: <T>(operation: string, params?: any) => Promise<T>,
     _userId: string,
     characterData: CharacterCreateDto,
-  ) {
+  ): AsyncResult<Character> {
     try {
       // Ensure animalType has a default value if undefined (based on memory)
       if (characterData.animalType === undefined) {
@@ -46,7 +64,7 @@ export class CharacterService {
       }
 
       // Use the execute function to create a character as the authenticated user
-      const character = await execute('create_character', {
+      const character = await execute<Character>('create_character', {
         name: characterData.name,
         description: characterData.original_description,
         prompt: characterData.character_description_prompt,
@@ -54,11 +72,16 @@ export class CharacterService {
         images_data: characterData.images_data || [],
       });
 
-      return character;
+      return ok(character);
     } catch (error) {
       console.error('Error creating character:', error);
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      throw new BadRequestException(`Failed to create character: ${message}`);
+      return err(
+        DatabaseError.queryFailed(
+          'create_character',
+          error instanceof Error ? error.message : 'Unknown error',
+          error instanceof Error ? error : undefined,
+        ),
+      );
     }
   }
 
@@ -66,26 +89,29 @@ export class CharacterService {
    * Get a character by ID
    * @param execute The execute function from SupabaseAuthService
    * @param characterId The character ID to get
-   * @returns The character
+   * @returns Result containing the character or error
    */
   async getCharacter(
     execute: <T>(operation: string, params?: any) => Promise<T>,
     characterId: string,
-  ) {
+  ): AsyncResult<Character> {
     try {
-      const character = await execute('get_character', { id: characterId });
+      const character = await execute<Character | null>('get_character', { id: characterId });
 
       if (!character) {
-        throw new NotFoundException(
-          `Character with ID ${characterId} not found`,
-        );
+        return err(NotFoundError.resource('Character', characterId));
       }
 
-      return character;
+      return ok(character);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      throw new BadRequestException(`Failed to get character: ${message}`);
+      console.error('Error getting character:', error);
+      return err(
+        DatabaseError.queryFailed(
+          'get_character',
+          error instanceof Error ? error.message : 'Unknown error',
+          error instanceof Error ? error : undefined,
+        ),
+      );
     }
   }
 
@@ -94,13 +120,13 @@ export class CharacterService {
    * @param execute The execute function from SupabaseAuthService
    * @param characterId The character ID to update
    * @param updateData The character data to update
-   * @returns The updated character
+   * @returns Result containing the updated character or error
    */
   async updateCharacter(
     execute: <T>(operation: string, params?: any) => Promise<T>,
     characterId: string,
     updateData: CharacterUpdateDto,
-  ) {
+  ): AsyncResult<Character> {
     try {
       // Check if this is Finnia and ensure she's described as a magical fox (based on memory)
       if (updateData.name === 'Finnia' && updateData.original_description) {
@@ -109,7 +135,7 @@ export class CharacterService {
         }
       }
 
-      const character = await execute('update_character', {
+      const character = await execute<Character | null>('update_character', {
         id: characterId,
         name: updateData.name,
         description: updateData.original_description,
@@ -119,16 +145,19 @@ export class CharacterService {
       });
 
       if (!character) {
-        throw new NotFoundException(
-          `Character with ID ${characterId} not found`,
-        );
+        return err(NotFoundError.resource('Character', characterId));
       }
 
-      return character;
+      return ok(character);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      throw new BadRequestException(`Failed to update character: ${message}`);
+      console.error('Error updating character:', error);
+      return err(
+        DatabaseError.queryFailed(
+          'update_character',
+          error instanceof Error ? error.message : 'Unknown error',
+          error instanceof Error ? error : undefined,
+        ),
+      );
     }
   }
 
@@ -136,43 +165,52 @@ export class CharacterService {
    * Delete a character
    * @param execute The execute function from SupabaseAuthService
    * @param characterId The character ID to delete
-   * @returns The deleted character
+   * @returns Result containing the deleted character or error
    */
   async deleteCharacter(
     execute: <T>(operation: string, params?: any) => Promise<T>,
     characterId: string,
-  ) {
+  ): AsyncResult<Character> {
     try {
-      const character = await execute('delete_character', { id: characterId });
+      const character = await execute<Character | null>('delete_character', { id: characterId });
 
       if (!character) {
-        throw new NotFoundException(
-          `Character with ID ${characterId} not found`,
-        );
+        return err(NotFoundError.resource('Character', characterId));
       }
 
-      return character;
+      return ok(character);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      throw new BadRequestException(`Failed to delete character: ${message}`);
+      console.error('Error deleting character:', error);
+      return err(
+        DatabaseError.queryFailed(
+          'delete_character',
+          error instanceof Error ? error.message : 'Unknown error',
+          error instanceof Error ? error : undefined,
+        ),
+      );
     }
   }
 
   /**
    * List all characters for the authenticated user
    * @param execute The execute function from SupabaseAuthService
-   * @returns An array of characters
+   * @returns Result containing an array of characters or error
    */
   async listCharacters(
     execute: <T>(operation: string, params?: any) => Promise<T>,
-  ) {
+  ): AsyncResult<Character[]> {
     try {
-      const characters = await execute('list_characters', {});
-      return characters || [];
+      const characters = await execute<Character[] | null>('list_characters', {});
+      return ok(characters || []);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      throw new BadRequestException(`Failed to list characters: ${message}`);
+      console.error('Error listing characters:', error);
+      return err(
+        DatabaseError.queryFailed(
+          'list_characters',
+          error instanceof Error ? error.message : 'Unknown error',
+          error instanceof Error ? error : undefined,
+        ),
+      );
     }
   }
 }
