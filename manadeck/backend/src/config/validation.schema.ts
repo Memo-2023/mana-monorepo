@@ -12,10 +12,8 @@ export const validationSchema = Joi.object({
   MANA_SUPABASE_SECRET_KEY: Joi.string().optional(),
   SIGNUP_REDIRECT_URL: Joi.string().uri().optional(),
 
-  // Your app's database
-  SUPABASE_URL: Joi.string().uri().required(),
-  SUPABASE_ANON_KEY: Joi.string().required(),
-  SUPABASE_SERVICE_KEY: Joi.string().required(), // Required for edge functions
+  // PostgreSQL Database
+  DATABASE_URL: Joi.string().required(),
 
   // JWT
   JWT_SECRET: Joi.string().optional(),

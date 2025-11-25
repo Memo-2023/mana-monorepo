@@ -9,7 +9,6 @@ import { AppService } from './app.service';
 import { ApiController } from './controllers/api.controller';
 import { PublicController } from './controllers/public.controller';
 import { HealthController } from './controllers/health.controller';
-import { SupabaseService } from './services/supabase.service';
 import { validationSchema } from './config/validation.schema';
 import {
   DatabaseModule,
@@ -65,7 +64,6 @@ import {
   ],
   providers: [
     AppService,
-    SupabaseService,
     // Database repositories
     DeckRepository,
     CardRepository,

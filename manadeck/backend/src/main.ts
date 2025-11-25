@@ -11,7 +11,7 @@ async function bootstrap() {
   // Debug: Log environment variables before validation
   logger.log('=== Environment Variables Debug ===');
   logger.log(`APP_ID: ${process.env.APP_ID ? process.env.APP_ID.substring(0, 20) + '...' : 'NOT SET'}`);
-  logger.log(`SUPABASE_URL: ${process.env.SUPABASE_URL || 'NOT SET'}`);
+  logger.log(`DATABASE_URL: ${process.env.DATABASE_URL ? '[SET]' : 'NOT SET'}`);
   logger.log(`MANA_SERVICE_URL: ${process.env.MANA_SERVICE_URL || 'NOT SET'}`);
   logger.log('===================================');
 

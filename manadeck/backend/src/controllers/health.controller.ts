@@ -20,11 +20,10 @@ export class HealthController {
   @HealthCheck()
   check() {
     const manaServiceUrl = this.configService.get<string>('MANA_SERVICE_URL')!;
-    const supabaseUrl = this.configService.get<string>('SUPABASE_URL')!;
 
     return this.health.check([
       () => this.http.pingCheck('mana-core', manaServiceUrl),
-      () => this.http.pingCheck('supabase', `${supabaseUrl}/rest/v1/`),
+      // PostgreSQL health is checked via database module initialization
     ]);
   }
 

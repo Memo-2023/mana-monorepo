@@ -34,14 +34,12 @@
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-subscription-types": "workspace:*",
 		"@manacore/shared-subscription-ui": "workspace:*",
-		"@manacore/shared-supabase": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-types": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
 		"@manacore/shared-utils": "workspace:*",
-		"@supabase/supabase-js": "^2.81.1",
 		"svelte-i18n": "^4.0.1"
 	}
 }

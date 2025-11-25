@@ -1,9 +1,8 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Logger, BadRequestException, Req } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Logger, BadRequestException, NotImplementedException } from '@nestjs/common';
 import { AuthGuard } from '@mana-core/nestjs-integration/guards';
 import { CurrentUser } from '@mana-core/nestjs-integration/decorators';
 import { CreditClientService } from '@mana-core/nestjs-integration';
 import { CreditOperationType, getCreditCost, getOperationDescription } from '../config/credit-operations';
-import { SupabaseService } from '../services/supabase.service';
 import { DeckRepository, CardRepository, UserStatsRepository } from '../database';
 
 @Controller('api')
@@ -13,7 +12,6 @@ export class ApiController {
 
   constructor(
     private readonly creditClient: CreditClientService,
-    private readonly supabaseService: SupabaseService,
     private readonly deckRepository: DeckRepository,
     private readonly cardRepository: CardRepository,
     private readonly userStatsRepository: UserStatsRepository,
@@ -150,121 +148,15 @@ export class ApiController {
   }
 
   @Post('decks/generate')
-  async generateDeckWithAI(@CurrentUser() user: any, @Body() requestData: any, @Req() req: any) {
-    this.logger.log(`Generating AI deck for user: ${user.sub}`);
+  async generateDeckWithAI(@CurrentUser() user: any, @Body() requestData: any) {
+    this.logger.log(`AI deck generation requested by user: ${user.sub}`);
 
-    const { prompt, deckTitle, deckDescription, cardCount = 10, cardTypes, difficulty, tags } = requestData;
-
-    // Validate required fields
-    if (!prompt || !deckTitle) {
-      throw new BadRequestException({
-        error: 'validation_failed',
-        message: 'prompt and deckTitle are required',
-      });
-    }
-
-    if (cardCount < 1 || cardCount > 50) {
-      throw new BadRequestException({
-        error: 'validation_failed',
-        message: 'cardCount must be between 1 and 50',
-      });
-    }
-
-    const operationType = CreditOperationType.AI_DECK_GENERATION;
-    const creditCost = getCreditCost(operationType);
-
-    try {
-      // 1. Pre-flight credit validation
-      const validation = await this.creditClient.validateCredits(
-        user.sub,
-        operationType,
-        creditCost,
-      );
-
-      if (!validation.hasCredits) {
-        this.logger.warn(
-          `User ${user.sub} has insufficient credits for AI deck generation. Required: ${creditCost}, Available: ${validation.availableCredits}`,
-        );
-
-        throw new BadRequestException({
-          error: 'insufficient_credits',
-          message: `Insufficient mana. Required: ${creditCost}, Available: ${validation.availableCredits}`,
-          requiredCredits: creditCost,
-          availableCredits: validation.availableCredits,
-          operation: getOperationDescription(operationType),
-        });
-      }
-
-      // 2. Get the Mana token from the request
-      const authHeader = req.headers.authorization;
-      if (!authHeader) {
-        throw new BadRequestException({
-          error: 'authentication_failed',
-          message: 'No authorization token found',
-        });
-      }
-      const manaToken = authHeader.replace('Bearer ', '');
-
-      // 3. Call the edge function via Supabase
-      const result = await this.supabaseService.generateDeckWithAI(
-        user.sub,
-        {
-          prompt,
-          deckTitle,
-          deckDescription,
-          cardCount,
-          cardTypes,
-          difficulty,
-          tags,
-        },
-        manaToken,
-      );
-
-      // 4. Check if the edge function was successful
-      if (!result.success) {
-        throw new BadRequestException({
-          error: 'deck_generation_failed',
-          message: result.error || 'Failed to generate deck',
-        });
-      }
-
-      // 5. Success - Consume credits
-      await this.creditClient.consumeCredits(
-        user.sub,
-        operationType,
-        creditCost,
-        `Generated AI deck: ${deckTitle}`,
-        {
-          deckId: result.deck?.id,
-          deckTitle,
-          cardCount: result.deck?.card_count,
-          prompt,
-        },
-      );
-
-      this.logger.log(`AI deck generated successfully for user ${user.sub}. ${creditCost} credits consumed.`);
-
-      return {
-        success: true,
-        userId: user.sub,
-        deck: result.deck,
-        cards: result.cards,
-        creditsUsed: creditCost,
-        message: result.message || 'Deck generated successfully with AI',
-      };
-    } catch (error) {
-      // If it's already a BadRequestException, rethrow it
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-
-      // Log other errors
-      this.logger.error(`Error generating AI deck for user ${user.sub}:`, error);
-      throw new BadRequestException({
-        error: 'deck_generation_failed',
-        message: error.message || 'Failed to generate deck with AI',
-      });
-    }
+    // TODO: Implement AI deck generation with a self-hosted solution
+    // This endpoint previously used Supabase Edge Functions which are no longer available
+    throw new NotImplementedException({
+      error: 'not_implemented',
+      message: 'AI deck generation is currently being migrated to a new infrastructure. Please check back later.',
+    });
   }
 
   @Put('decks/:id')
