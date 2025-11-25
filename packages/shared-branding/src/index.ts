@@ -18,7 +18,8 @@ export {
 	MemoroLogo,
 	ManaCoreLogo,
 	ManaDeckLogo,
-	StorytellerLogo
+	StorytellerLogo,
+	UloadLogo
 } from './logos';
 
 // Configuration

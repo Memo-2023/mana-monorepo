@@ -1,6 +1,24 @@
-version: '3.8'
+# =============================================================================
+# uload Docker Compose - Local Development
+# =============================================================================
+#
+# Usage:
+#   docker compose up -d              # Start all services
+#   docker compose up -d postgres     # Start only PostgreSQL
+#   docker compose logs -f            # Follow logs
+#   docker compose down               # Stop all services
+#   docker compose down -v            # Stop and remove volumes
+#
+# Connection strings for local development:
+#   DATABASE_URL=postgresql://uload:uload_dev_password_123@localhost:5432/uload_dev
+#   REDIS_URL=redis://localhost:6379
+#
+# =============================================================================
 
 services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
   postgres:
     image: postgres:16-alpine
     container_name: uload-db-dev
@@ -22,6 +40,28 @@ services:
     networks:
       - uload-network
 
+  # ---------------------------------------------------------------------------
+  # Redis Cache
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: uload-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - uload-network
+
+  # ---------------------------------------------------------------------------
+  # pgAdmin (Database GUI)
+  # ---------------------------------------------------------------------------
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: uload-pgadmin-dev
@@ -42,6 +82,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
     driver: local
   pgadmin_data:
     driver: local

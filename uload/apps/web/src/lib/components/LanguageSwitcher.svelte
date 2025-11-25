@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { setLocale, getLocale } from '$paraglide/runtime.js';
+	import { locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
+	import '$lib/i18n';
 
 	let showDropdown = $state(false);
 
@@ -14,7 +16,7 @@
 	// Get current language on mount
 	$effect(() => {
 		if (browser) {
-			const currentCode = getLocale();
+			const currentCode = get(locale) || 'en';
 			currentLanguage = languages.find((lang) => lang.code === currentCode) || languages[0];
 		}
 	});
@@ -23,8 +25,8 @@
 		if (browser) {
 			// Save preference
 			localStorage.setItem('preferred-language', langCode);
-			// Update Paraglide locale
-			setLocale(langCode as any);
+			// Update svelte-i18n locale
+			locale.set(langCode);
 			// Update current language display
 			currentLanguage = languages.find((lang) => lang.code === langCode) || languages[0];
 			// Close dropdown

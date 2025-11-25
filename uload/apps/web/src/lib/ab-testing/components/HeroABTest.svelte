@@ -7,7 +7,8 @@
 		getFreeText,
 		type VariantContent
 	} from '../config/variants';
-	import { getLocale } from '$paraglide/runtime.js';
+	import { locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 	import type { PageData, ActionData } from '../../../routes/$types';
 
 	interface Props {
@@ -42,14 +43,14 @@
 		// Log for debugging
 		if (showDebug) {
 			console.log('A/B Test Variant:', variant, content);
-			console.log('Current Locale:', getLocale());
+			console.log('Current Locale:', get(locale));
 		}
 	});
 
 	// React to locale changes - use derived state
 	$effect(() => {
 		// This will re-run when locale changes
-		const currentLocale = getLocale();
+		const currentLocale = get(locale);
 
 		// Update content based on current locale
 		content = getVariantContent(variant);
@@ -82,7 +83,7 @@
 			<div class="font-bold text-green-400">A/B Test Debug</div>
 			<div>Variant: <span class="text-yellow-400">{variant}</span></div>
 			<div>Name: {content.name}</div>
-			<div>Locale: <span class="text-blue-400">{getLocale()}</span></div>
+			<div>Locale: <span class="text-blue-400">{get(locale)}</span></div>
 			<div class="mt-2">
 				<button
 					onclick={() => {

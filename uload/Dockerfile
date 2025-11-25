@@ -1,47 +1,71 @@
-# Build Stage
+# =============================================================================
+# uload Web Application Dockerfile
+# Multi-stage build for production deployment with Coolify
+#
+# IMPORTANT: This Dockerfile must be built from the MONOREPO ROOT, not from uload/
+#   docker build -f uload/Dockerfile -t uload-web .
+#
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Stage 1: Builder
+# -----------------------------------------------------------------------------
 FROM node:20-alpine AS builder
 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
 WORKDIR /app
 
-# Copy package files from apps/web
-COPY apps/web/package*.json ./
+# Copy workspace configuration
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 
-# Install dependencies
-RUN npm ci --legacy-peer-deps
+# Copy the uload web app
+COPY uload/apps/web/ ./uload/apps/web/
 
-# Copy web app source
-COPY apps/web/ .
+# Copy required shared packages
+COPY packages/shared-auth-ui/ ./packages/shared-auth-ui/
+COPY packages/shared-branding/ ./packages/shared-branding/
 
-# Generate .svelte-kit directory first by running vite in prepare mode
-RUN npx vite build --mode prepare || true
-
-# Sync SvelteKit files
-RUN npx svelte-kit sync
-
-# Compile paraglide messages before build
-RUN npx @inlang/paraglide-js compile --project ./project.inlang --outdir ./src/paraglide
+# Install dependencies with flat structure for Docker compatibility
+RUN pnpm install --filter @uload/web... --shamefully-hoist
 
 # Build the app
-RUN npm run build
+WORKDIR /app/uload/apps/web
 
-# Production Stage
-FROM node:20-alpine
+# Note: RESEND_API_KEY is needed at build time for SvelteKit prerendering
+ENV RESEND_API_KEY=build_placeholder
+RUN pnpm build
+
+# -----------------------------------------------------------------------------
+# Stage 2: Production Runner
+# -----------------------------------------------------------------------------
+FROM node:20-alpine AS runner
+
+# Security: Run as non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 sveltekit
 
 WORKDIR /app
 
-# Copy built app and dependencies
-COPY --from=builder /app/build build/
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules node_modules/
-COPY --from=builder /app/drizzle drizzle/
+# Copy built app from the correct path
+COPY --from=builder --chown=sveltekit:nodejs /app/uload/apps/web/build ./build
+COPY --from=builder --chown=sveltekit:nodejs /app/uload/apps/web/package.json ./
+
+# Copy hoisted node_modules from root (contains all deps with flat structure)
+COPY --from=builder --chown=sveltekit:nodejs /app/node_modules ./node_modules
 
 # Environment
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV HOST=0.0.0.0
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {r.statusCode === 200 ? process.exit(0) : process.exit(1)})"
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
+
+# Switch to non-root user
+USER sveltekit
 
 EXPOSE 3000
 

@@ -6,3 +6,4 @@ export { default as MemoroLogo } from './MemoroLogo.svelte';
 export { default as ManaCoreLogo } from './ManaCoreLogo.svelte';
 export { default as ManaDeckLogo } from './ManaDeckLogo.svelte';
 export { default as StorytellerLogo } from './StorytellerLogo.svelte';
+export { default as UloadLogo } from './UloadLogo.svelte';

@@ -1,8 +1,9 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 import type { DB } from '$lib/db';
-import type { AvailableLanguageTag } from '$paraglide/runtime';
-import type { ParaglideLocals } from '@inlang/paraglide-sveltekit';
+
+// Supported locales
+export type SupportedLocale = 'en' | 'de' | 'es' | 'fr' | 'it';
 
 // User type (will be replaced by external auth later)
 export interface User {
@@ -20,7 +21,7 @@ declare global {
 		interface Locals {
 			db: DB;
 			user: User | null;
-			paraglide: ParaglideLocals<AvailableLanguageTag>;
+			locale: SupportedLocale;
 		}
 		interface PageData {
 			user: User | null;
