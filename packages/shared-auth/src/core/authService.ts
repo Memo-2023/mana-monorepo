@@ -30,18 +30,18 @@ const DEFAULT_STORAGE_KEYS: StorageKeys = {
 };
 
 /**
- * Default API endpoints
+ * Default API endpoints - Updated for Mana Core Auth
  */
 const DEFAULT_ENDPOINTS: AuthEndpoints = {
-  signIn: '/auth/signin',
-  signUp: '/auth/signup',
-  signOut: '/auth/logout',
-  refresh: '/auth/refresh',
-  validate: '/auth/validate',
-  forgotPassword: '/auth/forgot-password',
-  googleSignIn: '/auth/google-signin',
-  appleSignIn: '/auth/apple-signin',
-  credits: '/auth/credits',
+  signIn: '/api/v1/auth/login',
+  signUp: '/api/v1/auth/register',
+  signOut: '/api/v1/auth/logout',
+  refresh: '/api/v1/auth/refresh',
+  validate: '/api/v1/auth/validate',
+  forgotPassword: '/api/v1/auth/forgot-password',
+  googleSignIn: '/api/v1/auth/google-signin',
+  appleSignIn: '/api/v1/auth/apple-signin',
+  credits: '/api/v1/credits/balance',
 };
 
 /**
@@ -68,7 +68,12 @@ export function createAuthService(config: AuthServiceConfig) {
         const response = await fetch(`${baseUrl}${endpoints.signIn}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password, deviceInfo }),
+          body: JSON.stringify({
+            email,
+            password,
+            deviceId: deviceInfo?.deviceId,
+            deviceName: deviceInfo?.deviceName
+          }),
         });
 
         if (!response.ok) {
@@ -76,7 +81,9 @@ export function createAuthService(config: AuthServiceConfig) {
           return service.handleAuthError(response.status, errorData);
         }
 
-        const { appToken, refreshToken } = await response.json();
+        const data = await response.json();
+        const appToken = data.accessToken; // Mana Core Auth uses 'accessToken'
+        const refreshToken = data.refreshToken;
 
         await Promise.all([
           storage.setItem(storageKeys.APP_TOKEN, appToken),
@@ -106,7 +113,7 @@ export function createAuthService(config: AuthServiceConfig) {
         const response = await fetch(`${baseUrl}${endpoints.signUp}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password, deviceInfo }),
+          body: JSON.stringify({ email, password }),
         });
 
         if (!response.ok) {
@@ -123,22 +130,9 @@ export function createAuthService(config: AuthServiceConfig) {
 
         const responseData = await response.json();
 
-        // Check if email verification is required
-        if (responseData.confirmationRequired) {
-          return { success: true, needsVerification: true };
-        }
-
-        const { appToken, refreshToken } = responseData;
-
-        if (appToken && refreshToken) {
-          await Promise.all([
-            storage.setItem(storageKeys.APP_TOKEN, appToken),
-            storage.setItem(storageKeys.REFRESH_TOKEN, refreshToken),
-            storage.setItem(storageKeys.USER_EMAIL, email),
-          ]);
-        }
-
-        return { success: true };
+        // Mana Core Auth returns user data immediately on registration
+        // User needs to sign in separately to get tokens
+        return { success: true, needsVerification: false };
       } catch (error) {
         console.error('Error signing up:', error);
         return {
@@ -219,7 +213,7 @@ export function createAuthService(config: AuthServiceConfig) {
       const response = await fetch(`${baseUrl}${endpoints.refresh}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: currentRefreshToken, deviceInfo }),
+        body: JSON.stringify({ refreshToken: currentRefreshToken }),
       });
 
       if (!response.ok) {
@@ -232,7 +226,9 @@ export function createAuthService(config: AuthServiceConfig) {
         throw new Error(errorData.message || 'Failed to refresh tokens');
       }
 
-      const { appToken, refreshToken } = await response.json();
+      const data = await response.json();
+      const appToken = data.accessToken; // Mana Core Auth uses 'accessToken'
+      const refreshToken = data.refreshToken;
 
       if (!appToken || !refreshToken) {
         throw new Error('Invalid response from token refresh - missing tokens');
@@ -431,9 +427,9 @@ export function createAuthService(config: AuthServiceConfig) {
 
         const data = await response.json();
         return {
-          credits: data.credits || 0,
-          maxCreditLimit: data.max_credit_limit || 1000,
-          userId: data.id || 'unknown',
+          credits: (data.balance || 0) + (data.freeCreditsRemaining || 0),
+          maxCreditLimit: data.maxCreditLimit || 1000,
+          userId: data.userId || 'unknown',
         };
       } catch (error) {
         console.error('Error fetching user credits:', error);

@@ -1,8 +1,18 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { isOk } from '@manacore/shared-errors';
 import { ChatService } from './chat.service';
-import { ChatCompletionDto, ChatCompletionResponseDto } from './dto/chat-completion.dto';
+import {
+  ChatCompletionDto,
+  ChatCompletionResponseDto,
+} from './dto/chat-completion.dto';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import {
+  CurrentUser,
+  CurrentUserData,
+} from '../common/decorators/current-user.decorator';
 
 @Controller('chat')
+@UseGuards(JwtAuthGuard)
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
@@ -14,7 +24,14 @@ export class ChatController {
   @Post('completions')
   async createCompletion(
     @Body() dto: ChatCompletionDto,
+    @CurrentUser() user: CurrentUserData,
   ): Promise<ChatCompletionResponseDto> {
-    return this.chatService.createCompletion(dto);
+    const result = await this.chatService.createCompletion(dto, user.userId);
+
+    if (!isOk(result)) {
+      throw result.error; // Caught by AppExceptionFilter
+    }
+
+    return result.value;
   }
 }

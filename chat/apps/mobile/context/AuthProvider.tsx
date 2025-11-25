@@ -1,23 +1,99 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../utils/supabase';
-import { Session, User } from '@supabase/supabase-js';
 import { ActivityIndicator, View, Text } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import {
+  createAuthService,
+  createTokenManager,
+  setStorageAdapter,
+  setDeviceAdapter,
+  setNetworkAdapter,
+  createMemoryStorageAdapter,
+  type UserData,
+} from '@manacore/shared-auth';
 
-// Definiere den Typ für den Auth-Kontext
+// Mana Core Auth URL from environment
+const MANA_AUTH_URL = process.env.EXPO_PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+
+// Create SecureStore adapter for React Native
+const createSecureStoreAdapter = () => ({
+  async getItem<T>(key: string): Promise<T | null> {
+    try {
+      const value = await SecureStore.getItemAsync(key);
+      return value ? JSON.parse(value) : null;
+    } catch {
+      return null;
+    }
+  },
+  async setItem(key: string, value: unknown): Promise<void> {
+    await SecureStore.setItemAsync(key, JSON.stringify(value));
+  },
+  async removeItem(key: string): Promise<void> {
+    await SecureStore.deleteItemAsync(key);
+  },
+});
+
+// Create device adapter for React Native
+const createReactNativeDeviceAdapter = () => {
+  let deviceId: string | null = null;
+
+  return {
+    async getDeviceInfo() {
+      if (!deviceId) {
+        // Try to get stored device ID
+        deviceId = await SecureStore.getItemAsync('@device/id');
+
+        if (!deviceId) {
+          // Generate new device ID
+          deviceId = `rn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          await SecureStore.setItemAsync('@device/id', deviceId);
+        }
+      }
+
+      return {
+        deviceId,
+        deviceName: 'React Native Device',
+        platform: 'react-native',
+      };
+    },
+    async getStoredDeviceId() {
+      return deviceId || (await SecureStore.getItemAsync('@device/id'));
+    },
+  };
+};
+
+// Create network adapter (basic implementation)
+const createReactNativeNetworkAdapter = () => ({
+  async isConnected() {
+    return true; // Always assume connected for now
+  },
+  async hasStableConnection() {
+    return true;
+  },
+});
+
+// Initialize adapters
+setStorageAdapter(createSecureStoreAdapter());
+setDeviceAdapter(createReactNativeDeviceAdapter());
+setNetworkAdapter(createReactNativeNetworkAdapter());
+
+// Create auth service
+const authService = createAuthService({ baseUrl: MANA_AUTH_URL });
+const tokenManager = createTokenManager(authService);
+
+// Auth context type
 type AuthContextType = {
-  session: Session | null;
-  user: User | null;
+  user: UserData | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: any | null, data: any | null }>;
+  signUp: (email: string, password: string) => Promise<{ error: any | null; data: any | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any | null }>;
 };
 
-// Erstelle den Auth-Kontext
+// Create auth context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Hook für den Zugriff auf den Auth-Kontext
+// Hook to access auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -26,57 +102,51 @@ export const useAuth = () => {
   return context;
 };
 
-// AuthProvider-Komponente
+// AuthProvider component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Initialisiere den Auth-Status
+  // Initialize auth state
   useEffect(() => {
-    // Hole die aktuelle Session
-    const getInitialSession = async () => {
+    const initialize = async () => {
       try {
         setLoading(true);
-        
-        // Prüfe, ob bereits eine Session existiert
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Abonniere Änderungen am Auth-Status
-        const { data: { subscription } } = await supabase.auth.onAuthStateChange(
-          (_event, session) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-          }
-        );
-        
-        return () => {
-          subscription.unsubscribe();
-        };
+
+        // Check if user is authenticated
+        const authenticated = await authService.isAuthenticated();
+
+        if (authenticated) {
+          const userData = await authService.getUserFromToken();
+          setUser(userData);
+        }
       } catch (error) {
         console.error('Fehler beim Initialisieren der Auth-Session:', error);
+        setUser(null);
       } finally {
         setLoading(false);
       }
     };
-    
-    getInitialSession();
+
+    initialize();
   }, []);
 
-  // Anmelden mit E-Mail und Passwort
+  // Sign in with email and password
   const signIn = async (email: string, password: string) => {
     try {
       console.log('Versuche Anmeldung mit:', email);
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (error) {
-        console.error('Supabase Auth Fehler:', error.message, error.status);
-        return { error };
+      const result = await authService.signIn(email, password);
+
+      if (!result.success) {
+        console.error('Auth Fehler:', result.error);
+        return { error: { message: result.error } };
       }
-      
-      console.log('Anmeldung erfolgreich:', data.user?.id);
+
+      // Get user data from token
+      const userData = await authService.getUserFromToken();
+      setUser(userData);
+
+      console.log('Anmeldung erfolgreich:', userData?.userId);
       return { error: null };
     } catch (error: any) {
       console.error('Unerwarteter Fehler beim Anmelden:', error.message || error);
@@ -84,55 +154,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Registrieren mit E-Mail und Passwort
+  // Sign up with email and password
   const signUp = async (email: string, password: string) => {
     try {
-      // Registriere den Benutzer mit autoConfirm=true, um die E-Mail-Bestätigung zu umgehen
-      const { data, error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          data: {
-            email_confirmed: true
-          }
-        }
-      });
-      
-      if (!error && data?.user) {
-        // Wenn die Registrierung erfolgreich war, melde den Benutzer direkt an
-        await signIn(email, password);
+      const result = await authService.signUp(email, password);
+
+      if (!result.success) {
+        return { data: null, error: { message: result.error } };
       }
-      
-      return { data, error };
+
+      // Auto sign in after successful signup
+      const signInResult = await signIn(email, password);
+
+      if (signInResult.error) {
+        return { data: null, error: signInResult.error };
+      }
+
+      return { data: user, error: null };
     } catch (error) {
       console.error('Fehler beim Registrieren:', error);
       return { data: null, error };
     }
   };
 
-  // Abmelden
+  // Sign out
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      await authService.signOut();
+      setUser(null);
     } catch (error) {
       console.error('Fehler beim Abmelden:', error);
     }
   };
 
-  // Passwort zurücksetzen
+  // Reset password
   const resetPassword = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'exp://localhost:8081/reset-password',
-      });
-      return { error };
+      const result = await authService.forgotPassword(email);
+
+      if (!result.success) {
+        return { error: { message: result.error } };
+      }
+
+      return { error: null };
     } catch (error) {
       console.error('Fehler beim Zurücksetzen des Passworts:', error);
       return { error };
     }
   };
 
-  // Zeige Ladeindikator während der Initialisierung
+  // Show loading indicator during initialization
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -142,11 +213,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Stelle den Auth-Kontext bereit
+  // Provide auth context
   return (
     <AuthContext.Provider
       value={{
-        session,
         user,
         loading,
         signIn,

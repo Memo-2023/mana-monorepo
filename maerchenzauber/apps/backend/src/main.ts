@@ -3,8 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from './config/app.config';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { ErrorLoggingService } from './core/services/error-logging.service';
+import { AppExceptionFilter } from '@manacore/shared-errors/nestjs';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -45,9 +44,8 @@ async function bootstrap() {
     }),
   );
 
-  // Get ErrorLoggingService from DI container and pass to filter
-  const errorLoggingService = app.get(ErrorLoggingService);
-  app.useGlobalFilters(new HttpExceptionFilter(errorLoggingService));
+  // Global exception filter for standardized error responses
+  app.useGlobalFilters(new AppExceptionFilter());
 
   // Use PORT env variable (required by Cloud Run) or fallback to config
   const port = process.env.PORT || config?.port || 3000;

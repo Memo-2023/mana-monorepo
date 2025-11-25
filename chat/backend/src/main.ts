@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { AppExceptionFilter } from '@manacore/shared-errors/nestjs';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -16,6 +17,9 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
+
+  // Global exception filter for standardized error responses
+  app.useGlobalFilters(new AppExceptionFilter());
 
   // Enable validation
   app.useGlobalPipes(

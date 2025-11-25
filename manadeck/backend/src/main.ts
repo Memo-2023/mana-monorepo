@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { AppExceptionFilter } from '@manacore/shared-errors/nestjs';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -20,6 +21,9 @@ async function bootstrap() {
   });
 
   const configService = app.get(ConfigService);
+
+  // Global exception filter for standardized error responses
+  app.useGlobalFilters(new AppExceptionFilter());
 
   // Enable CORS
   app.enableCors({

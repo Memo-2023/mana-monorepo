@@ -2,7 +2,15 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { Character } from '../core/models/character';
-import { Result } from '../core/models/error';
+import {
+  type AsyncResult,
+  type Result,
+  ok,
+  err,
+  ServiceError,
+  ValidationError,
+  NotFoundError,
+} from '@manacore/shared-errors';
 import {
   STORY_RESPONSE_FORMAT,
   STORY_TITLE_FORMAT_GERMAN,
@@ -51,7 +59,7 @@ export class StoryService {
     storyDescription: string,
     character: Character,
     authorSystemPrompt: string,
-  ): Promise<Result<StoryResponse>> {
+  ): AsyncResult<StoryResponse> {
     // Log character data for debugging
     this.logger.log(`Creating storyline for character: ${character.name}`);
     this.logger.log(
@@ -125,30 +133,29 @@ export class StoryService {
         }
       }
 
-      return {
-        data: {
-          pages: parsedResponse.pages,
-        },
-        error: null,
-      };
+      return ok({ pages: parsedResponse.pages });
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error('API Error:', {
+        this.logger.error('API Error:', {
           status: error.response?.status,
           data: error.response?.data,
         });
-        return {
-          data: null,
-          error: new Error(`Failed to create story: ${error.message}`),
-        };
+        return err(
+          ServiceError.generationFailed(
+            'Azure OpenAI',
+            `Failed to create story: ${error.message}`,
+            error,
+          ),
+        );
       }
-      console.error('Error creating story:', error);
-      return {
-        data: null,
-        error: new Error(
+      this.logger.error('Error creating story:', error);
+      return err(
+        ServiceError.generationFailed(
+          'Azure OpenAI',
           error instanceof Error ? error.message : String(error),
+          error instanceof Error ? error : undefined,
         ),
-      };
+      );
     }
   }
 
@@ -163,7 +170,7 @@ export class StoryService {
     storyDescription: string,
     character: Character,
     authorSystemPrompt: string,
-  ): Promise<Result<StoryResponse>> {
+  ): AsyncResult<StoryResponse> {
     try {
       // Log character data for debugging
       this.logger.log(`Creating animal story for character: ${character.name}`);
@@ -239,49 +246,45 @@ export class StoryService {
         }
       }
 
-      return {
-        data: {
-          pages: parsedResponse.pages,
-        },
-        error: null,
-      };
+      return ok({ pages: parsedResponse.pages });
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error('API Error:', {
+        this.logger.error('API Error:', {
           status: error.response?.status,
           data: error.response?.data,
         });
 
         // Try with Gemini as fallback for axios errors too
         try {
-          console.log('Falling back to Gemini after axios error...');
+          this.logger.log('Falling back to Gemini after axios error...');
           const geminiResult = await this.createAnimalStoryWithGemini(
             storyDescription,
             character.animal_type,
             authorSystemPrompt,
           );
           if (geminiResult.pages) {
-            return {
-              data: { pages: geminiResult.pages },
-              error: null,
-            };
+            return ok({ pages: geminiResult.pages });
           }
         } catch (geminiError) {
-          console.error('Gemini fallback also failed:', geminiError);
+          this.logger.error('Gemini fallback also failed:', geminiError);
         }
 
-        return {
-          data: null,
-          error: new Error(`Failed to create animal story: ${error.message}`),
-        };
+        return err(
+          ServiceError.generationFailed(
+            'Azure OpenAI',
+            `Failed to create animal story: ${error.message}`,
+            error,
+          ),
+        );
       }
-      console.error('Error creating animal story:', error);
-      return {
-        data: null,
-        error: new Error(
+      this.logger.error('Error creating animal story:', error);
+      return err(
+        ServiceError.generationFailed(
+          'Azure OpenAI',
           error instanceof Error ? error.message : String(error),
+          error instanceof Error ? error : undefined,
         ),
-      };
+      );
     }
   }
 
@@ -362,7 +365,7 @@ export class StoryService {
 
   public async generateStoryTitle(
     story: StoryResponse['pages'],
-  ): Promise<Result<string>> {
+  ): AsyncResult<string> {
     const combinedStory = story.map((page) => page.text).join(' ');
     const messages = [
       {
@@ -391,25 +394,23 @@ export class StoryService {
         },
       );
 
-      return {
-        error: null,
-        data: JSON.parse(response.data.choices[0].message.content)?.title,
-      };
+      const title = JSON.parse(response.data.choices[0].message.content)?.title;
+      return ok(title);
     } catch (error) {
-      console.error('Error generating story title:', error);
-
-      return {
-        data: null,
-        error: new Error(
+      this.logger.error('Error generating story title:', error);
+      return err(
+        ServiceError.generationFailed(
+          'Azure OpenAI',
           error instanceof Error ? error.message : String(error),
+          error instanceof Error ? error : undefined,
         ),
-      };
+      );
     }
   }
 
   /**
    * Update story page text
-   * @param storyId The ID of the story
+   * @param pagesData The pages data array
    * @param pageNumber The page number to update
    * @param storyText The new story text (optional)
    * @param storyTextGerman The new German story text (optional)
@@ -421,59 +422,40 @@ export class StoryService {
     storyText?: string,
     storyTextGerman?: string,
   ): Result<any[]> {
-    try {
-      this.logger.log(`[StoryService] Updating page ${pageNumber}`);
+    this.logger.log(`[StoryService] Updating page ${pageNumber}`);
 
-      if (!pagesData || !Array.isArray(pagesData)) {
-        return {
-          data: null,
-          error: new Error('Invalid pages data'),
-        };
-      }
-
-      // Find the page to update
-      const pageIndex = pagesData.findIndex(
-        (page) => page.page_number === pageNumber,
-      );
-
-      if (pageIndex === -1) {
-        return {
-          data: null,
-          error: new Error(`Page ${pageNumber} not found`),
-        };
-      }
-
-      // Create updated pages array
-      const updatedPages = [...pagesData];
-      const updatedPage = { ...updatedPages[pageIndex] };
-
-      // Update the text fields if provided
-      if (storyText !== undefined) {
-        updatedPage.story_text = storyText;
-      }
-
-      // If German text is provided, update it
-      // Otherwise keep the existing German text
-      if (storyTextGerman !== undefined) {
-        updatedPage.story_text = storyTextGerman;
-      }
-
-      updatedPages[pageIndex] = updatedPage;
-
-      this.logger.log(`[StoryService] Successfully updated page ${pageNumber}`);
-
-      return {
-        data: updatedPages,
-        error: null,
-      };
-    } catch (error) {
-      this.logger.error('[StoryService] Error updating page text:', error);
-      return {
-        data: null,
-        error: new Error(
-          error instanceof Error ? error.message : String(error),
-        ),
-      };
+    if (!pagesData || !Array.isArray(pagesData)) {
+      return err(ValidationError.invalidInput('pagesData', 'Invalid pages data'));
     }
+
+    // Find the page to update
+    const pageIndex = pagesData.findIndex(
+      (page) => page.page_number === pageNumber,
+    );
+
+    if (pageIndex === -1) {
+      return err(NotFoundError.resource('Page', String(pageNumber)));
+    }
+
+    // Create updated pages array
+    const updatedPages = [...pagesData];
+    const updatedPage = { ...updatedPages[pageIndex] };
+
+    // Update the text fields if provided
+    if (storyText !== undefined) {
+      updatedPage.story_text = storyText;
+    }
+
+    // If German text is provided, update it
+    // Otherwise keep the existing German text
+    if (storyTextGerman !== undefined) {
+      updatedPage.story_text = storyTextGerman;
+    }
+
+    updatedPages[pageIndex] = updatedPage;
+
+    this.logger.log(`[StoryService] Successfully updated page ${pageNumber}`);
+
+    return ok(updatedPages);
   }
 }

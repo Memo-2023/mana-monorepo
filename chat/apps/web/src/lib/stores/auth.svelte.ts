@@ -1,32 +1,24 @@
 /**
  * Auth Store - Manages authentication state using Svelte 5 runes
- * Compatible with Chat mobile app (same Supabase instance)
+ * Now using Mana Core Auth instead of Supabase Auth
  */
 
-import { createSupabaseBrowserClient } from '$lib/services/supabase';
-import type { Session, User } from '@supabase/supabase-js';
+import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
+import { PUBLIC_MANA_CORE_AUTH_URL } from '$env/static/public';
+
+// Initialize Mana Core Auth
+const MANA_AUTH_URL = PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+const { authService, tokenManager } = initializeWebAuth({
+  baseUrl: MANA_AUTH_URL,
+});
 
 // State
-let session = $state<Session | null>(null);
-let user = $state<User | null>(null);
+let user = $state<UserData | null>(null);
 let loading = $state(true);
 let initialized = $state(false);
 
-// Create browser client
-let supabase: ReturnType<typeof createSupabaseBrowserClient> | null = null;
-
-function getSupabase() {
-  if (!supabase) {
-    supabase = createSupabaseBrowserClient();
-  }
-  return supabase;
-}
-
 export const authStore = {
   // Getters
-  get session() {
-    return session;
-  },
   get user() {
     return user;
   },
@@ -41,33 +33,21 @@ export const authStore = {
   },
 
   /**
-   * Initialize auth state from Supabase session
+   * Initialize auth state from stored tokens
    */
   async initialize() {
     if (initialized) return;
 
     loading = true;
     try {
-      const sb = getSupabase();
-
-      // Get current session
-      const {
-        data: { session: currentSession },
-      } = await sb.auth.getSession();
-
-      session = currentSession;
-      user = currentSession?.user ?? null;
-
-      // Subscribe to auth changes
-      sb.auth.onAuthStateChange((_event, newSession) => {
-        session = newSession;
-        user = newSession?.user ?? null;
-      });
-
+      const authenticated = await authService.isAuthenticated();
+      if (authenticated) {
+        const userData = await authService.getUserFromToken();
+        user = userData;
+      }
       initialized = true;
     } catch (error) {
       console.error('Failed to initialize auth:', error);
-      session = null;
       user = null;
     } finally {
       loading = false;
@@ -78,83 +58,98 @@ export const authStore = {
    * Sign in with email and password
    */
   async signIn(email: string, password: string) {
-    const sb = getSupabase();
-    const { data, error } = await sb.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const result = await authService.signIn(email, password);
 
-    if (error) {
-      return { success: false, error: error.message };
+      if (!result.success) {
+        return { success: false, error: result.error || 'Login failed' };
+      }
+
+      // Get user data from token
+      const userData = await authService.getUserFromToken();
+      user = userData;
+
+      return { success: true, error: null };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return { success: false, error: errorMessage };
     }
-
-    session = data.session;
-    user = data.user;
-    return { success: true, error: null };
   },
 
   /**
    * Sign up with email and password
    */
   async signUp(email: string, password: string) {
-    const sb = getSupabase();
-    const { data, error } = await sb.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          email_confirmed: true,
-        },
-      },
-    });
+    try {
+      const result = await authService.signUp(email, password);
 
-    if (error) {
-      return { success: false, error: error.message, needsVerification: false };
+      if (!result.success) {
+        return { success: false, error: result.error || 'Signup failed', needsVerification: false };
+      }
+
+      // Mana Core Auth requires separate login after signup
+      if (result.needsVerification) {
+        return { success: true, error: null, needsVerification: true };
+      }
+
+      // Auto sign in after successful signup
+      const signInResult = await this.signIn(email, password);
+      return { ...signInResult, needsVerification: false };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return { success: false, error: errorMessage, needsVerification: false };
     }
-
-    // Check if email confirmation is required
-    if (data.user && !data.session) {
-      return { success: true, error: null, needsVerification: true };
-    }
-
-    session = data.session;
-    user = data.user;
-    return { success: true, error: null, needsVerification: false };
   },
 
   /**
    * Sign out
    */
   async signOut() {
-    const sb = getSupabase();
-    await sb.auth.signOut();
-    session = null;
-    user = null;
+    try {
+      await authService.signOut();
+      user = null;
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Clear user even if sign out fails
+      user = null;
+    }
   },
 
   /**
    * Send password reset email
    */
   async resetPassword(email: string) {
-    const sb = getSupabase();
-    const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
-    });
+    try {
+      const result = await authService.forgotPassword(email);
 
-    if (error) {
-      return { success: false, error: error.message };
+      if (!result.success) {
+        return { success: false, error: result.error || 'Password reset failed' };
+      }
+
+      return { success: true, error: null };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return { success: false, error: errorMessage };
     }
-
-    return { success: true, error: null };
   },
 
   /**
-   * Set session from server-side data
+   * Get user credit balance
    */
-  setSession(newSession: Session | null) {
-    session = newSession;
-    user = newSession?.user ?? null;
-    initialized = true;
-    loading = false;
+  async getCredits() {
+    try {
+      const credits = await authService.getUserCredits();
+      return credits;
+    } catch (error) {
+      console.error('Failed to get credits:', error);
+      return null;
+    }
+  },
+
+  /**
+   * Get access token for API calls
+   */
+  async getAccessToken() {
+    return await authService.getAppToken();
   },
 };
