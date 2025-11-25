@@ -2,7 +2,7 @@
   "name": "manacore-monorepo",
   "version": "1.0.0",
   "private": true,
-  "description": "Manacore Monorepo containing maerchenzauber, manacore, manadeck, memoro, picture, uload, chat, and nutriphi",
+  "description": "Manacore Monorepo containing maerchenzauber, manacore, manadeck, memoro, picture, uload, chat, nutriphi, and news",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -58,7 +58,16 @@
     "dev:nutriphi:web": "pnpm --filter @nutriphi/web dev",
     "dev:nutriphi:landing": "pnpm --filter @nutriphi/landing dev",
     "dev:nutriphi:backend": "pnpm --filter @nutriphi/backend start:dev",
-    "dev:nutriphi:app": "turbo run dev --filter=@nutriphi/web --filter=@nutriphi/backend"
+    "dev:nutriphi:app": "turbo run dev --filter=@nutriphi/web --filter=@nutriphi/backend",
+
+    "news:dev": "turbo run dev --filter=news...",
+    "dev:news:mobile": "pnpm --filter @news/mobile dev",
+    "dev:news:web": "pnpm --filter @news/web dev",
+    "dev:news:landing": "pnpm --filter @news/landing dev",
+    "dev:news:api": "pnpm --filter @news/api start:dev",
+    "dev:news:app": "turbo run dev --filter=@news/web --filter=@news/api",
+    "news:db:push": "pnpm --filter @manacore/news-database db:push",
+    "news:db:studio": "pnpm --filter @manacore/news-database db:studio"
   },
   "devDependencies": {
     "prettier": "^3.3.3",

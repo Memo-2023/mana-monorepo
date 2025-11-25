@@ -1,0 +1,80 @@
+---
+const footerLinks = {
+  product: [
+    { href: '#features', label: 'Features' },
+    { href: '#pricing', label: 'Preise' },
+    { href: '#faq', label: 'FAQ' }
+  ],
+  legal: [
+    { href: '/privacy', label: 'Datenschutz' },
+    { href: '/terms', label: 'AGB' },
+    { href: '/imprint', label: 'Impressum' }
+  ]
+};
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="bg-background-card border-t border-border">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <!-- Brand -->
+      <div class="col-span-1 md:col-span-2">
+        <a href="/" class="flex items-center gap-2 mb-4">
+          <svg class="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
+          </svg>
+          <span class="font-bold text-xl text-text-primary">News Hub</span>
+        </a>
+        <p class="text-text-secondary text-sm max-w-md">
+          KI-kuratierte Nachrichten, personalisiert für dich. Feed, Zusammenfassungen und
+          ausführliche Analysen - alles in einer eleganten App.
+        </p>
+      </div>
+
+      <!-- Product Links -->
+      <div>
+        <h3 class="font-semibold text-text-primary mb-4">Produkt</h3>
+        <ul class="space-y-2">
+          {footerLinks.product.map(link => (
+            <li>
+              <a
+                href={link.href}
+                class="text-text-secondary hover:text-text-primary transition-colors text-sm"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Legal Links -->
+      <div>
+        <h3 class="font-semibold text-text-primary mb-4">Rechtliches</h3>
+        <ul class="space-y-2">
+          {footerLinks.legal.map(link => (
+            <li>
+              <a
+                href={link.href}
+                class="text-text-secondary hover:text-text-primary transition-colors text-sm"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom -->
+    <div class="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4">
+      <p class="text-text-muted text-sm">
+        &copy; {currentYear} News Hub. Alle Rechte vorbehalten.
+      </p>
+      <p class="text-text-muted text-sm">
+        Made with 💜 in Germany
+      </p>
+    </div>
+  </div>
+</footer>

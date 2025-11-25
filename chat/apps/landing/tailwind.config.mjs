@@ -1,28 +1,39 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+  content: [
+    './src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}',
+    '../../packages/shared-landing-ui/src/**/*.{astro,html,js,jsx,ts,tsx}'
+  ],
   theme: {
     extend: {
       colors: {
+        // ManaChat Sky Blue Theme
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#0A84FF',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          DEFAULT: '#0ea5e9',
+          hover: '#38bdf8',
+          glow: 'rgba(14, 165, 233, 0.3)'
         },
-        secondary: {
-          500: '#5E5CE6',
+        background: {
+          page: '#0c1929',
+          card: '#142236',
+          'card-hover': '#1e3a50'
+        },
+        text: {
+          primary: '#f9fafb',
+          secondary: '#d1d5db',
+          muted: '#6b7280'
+        },
+        border: {
+          DEFAULT: '#1e3a50',
+          hover: '#2d5a73'
         }
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif']
       }
-    },
+    }
   },
   plugins: [
-    require('@tailwindcss/typography'),
-  ],
+    require('@tailwindcss/typography')
+  ]
 };

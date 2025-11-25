@@ -8,6 +8,7 @@ packages:
   - 'uload'
   - 'chat'
   - 'nutriphi'
+  - 'news'
 
   # Sub-apps within projects
   - 'maerchenzauber/apps/*'
@@ -24,6 +25,8 @@ packages:
   - 'chat/packages/*'
   - 'nutriphi/apps/*'
   - 'nutriphi/backend'
+  - 'news/apps/*'
+  - 'news/packages/*'
 
   # Shared packages
   - 'packages/*'
