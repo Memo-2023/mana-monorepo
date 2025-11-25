@@ -9,14 +9,10 @@ import FeatureCard from '@components/features/FeatureCard.astro';
 
 export async function getStaticPaths() {
 	const allFeatures = await getCollection('features');
-	return allFeatures.map(feature => {
-		// Remove language prefix from slug (e.g., "en/cross-platform-apps" -> "cross-platform-apps")
-		const slug = feature.slug.split('/').pop() || feature.slug;
-		return {
-			params: { slug },
-			props: { feature },
-		};
-	});
+	return allFeatures.map(feature => ({
+		params: { slug: feature.id },
+		props: { feature },
+	}));
 }
 
 interface Props {

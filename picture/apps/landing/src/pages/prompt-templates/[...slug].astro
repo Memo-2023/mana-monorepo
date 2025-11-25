@@ -14,7 +14,7 @@ import { t } from '../../i18n';
 export const getStaticPaths = (async () => {
 	const templates = await getCollection('promptTemplates');
 	return templates.map((template) => ({
-		params: { slug: template.slug },
+		params: { slug: template.id },
 		props: { template },
 	}));
 }) satisfies GetStaticPaths;

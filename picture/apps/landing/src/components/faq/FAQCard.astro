@@ -1,6 +1,5 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { marked } from 'marked';
 
 interface Props {
 	faq: CollectionEntry<'faq'>;
@@ -42,7 +41,7 @@ const { Content } = await faq.render();
 	}
 
 	.faq-item:hover {
-		@apply border-dark-hover;
+		@apply border-border-hover;
 	}
 
 	.faq-question {

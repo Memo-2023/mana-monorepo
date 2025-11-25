@@ -5,6 +5,92 @@ import Features from '@components/Features.astro';
 import Testimonials from '@components/Testimonials.astro';
 import CTA from '@components/CTA.astro';
 import Footer from '@components/Footer.astro';
+
+// Shared components
+import StepsSection from '@manacore/shared-landing-ui/sections/StepsSection.astro';
+import PricingSection from '@manacore/shared-landing-ui/sections/PricingSection.astro';
+
+// Steps data
+const steps = [
+	{
+		number: '1',
+		title: 'Describe Your Vision',
+		description: 'Enter a text prompt describing the image you want to create. Be as detailed or simple as you like.',
+		image: '/screenshots/prompt.png'
+	},
+	{
+		number: '2',
+		title: 'Choose Your Model',
+		description: 'Select from multiple AI models - FLUX Schnell for speed, Dev for balance, or Pro for maximum quality.',
+		image: '/screenshots/model.png'
+	},
+	{
+		number: '3',
+		title: 'Generate & Download',
+		description: 'Watch as your image is created in seconds. Download in high resolution or save to your gallery.',
+		image: '/screenshots/download.png'
+	}
+];
+
+// Pricing preview data
+const pricingPlans = [
+	{
+		name: 'Free',
+		price: '0',
+		period: '/month',
+		description: 'Perfect for trying out Picture',
+		features: [
+			{ text: '100 images/month', included: true },
+			{ text: 'FLUX Schnell model', included: true },
+			{ text: 'Basic editing tools', included: true },
+			{ text: 'Gallery storage (30 days)', included: true },
+			{ text: 'Pro models', included: false },
+			{ text: 'Priority generation', included: false }
+		],
+		cta: {
+			text: 'Get Started Free',
+			href: '#'
+		}
+	},
+	{
+		name: 'Pro',
+		price: '19',
+		period: '/month',
+		description: 'For professionals & creators',
+		features: [
+			{ text: '2,000 images/month', included: true },
+			{ text: 'All AI models', included: true },
+			{ text: 'Advanced editing', included: true },
+			{ text: 'Unlimited storage', included: true },
+			{ text: 'Priority queue', included: true },
+			{ text: 'Commercial usage', included: true }
+		],
+		cta: {
+			text: 'Start Free Trial',
+			href: '#'
+		},
+		highlighted: true,
+		badge: 'Most Popular'
+	},
+	{
+		name: 'Enterprise',
+		price: 'Custom',
+		period: '',
+		description: 'For teams & businesses',
+		features: [
+			{ text: 'Unlimited images', included: true },
+			{ text: 'All models + early access', included: true },
+			{ text: 'Custom fine-tuning', included: true },
+			{ text: 'API access', included: true },
+			{ text: 'Team collaboration', included: true },
+			{ text: 'SLA guarantee', included: true }
+		],
+		cta: {
+			text: 'Contact Sales',
+			href: '#'
+		}
+	}
+];
 ---
 
 <Layout
@@ -13,6 +99,25 @@ import Footer from '@components/Footer.astro';
 >
 	<Hero />
 	<Features />
+
+	<StepsSection
+		id="how-it-works"
+		title="Create Stunning Images in 3 Steps"
+		subtitle="From text to image in seconds - no design skills required"
+		steps={steps}
+		showImages={false}
+		alternateLayout={true}
+		class="bg-dark-surface"
+	/>
+
+	<PricingSection
+		id="pricing"
+		title="Simple, Transparent Pricing"
+		subtitle="Start for free, upgrade as you grow. No hidden fees."
+		plans={pricingPlans}
+		class="bg-dark-bg"
+	/>
+
 	<Testimonials />
 	<CTA />
 	<Footer />

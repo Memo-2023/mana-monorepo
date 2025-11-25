@@ -29,7 +29,7 @@ const comparisonSchema = {
 	},
 	mainEntityOfPage: {
 		'@type': 'WebPage',
-		'@id': `https://picture.com/comparisons/${data.slug}`,
+		'@id': `https://picture.com/comparisons/${comparison.id}`,
 	},
 	...(data.coverImage && {
 		image: {
@@ -90,7 +90,7 @@ const breadcrumbSchema = {
 			'@type': 'ListItem',
 			position: 3,
 			name: data.title,
-			item: `https://picture.com/comparisons/${data.slug}`,
+			item: `https://picture.com/comparisons/${comparison.id}`,
 		},
 	],
 };

@@ -185,12 +185,12 @@ export async function getRelatedTutorials(
 	const allTutorials = await getTutorials(tutorial.data.language);
 
 	// Filter out current tutorial
-	const otherTutorials = allTutorials.filter((t) => t.slug !== tutorial.slug);
+	const otherTutorials = allTutorials.filter((t) => t.id !== tutorial.id);
 
 	// Get tutorials from related slugs
 	const relatedSlugs = tutorial.data.relatedTutorials;
 	const relatedBySlug = otherTutorials.filter((t) =>
-		relatedSlugs.includes(t.data.slug)
+		relatedSlugs.includes(t.id)
 	);
 
 	// Get tutorials from same category

@@ -43,13 +43,13 @@ export async function getRelatedFeatures(
 
 	// Filter out current feature and same category
 	const relatedFeatures = allFeatures
-		.filter(f => f.slug !== feature.slug && f.data.category === feature.data.category)
+		.filter(f => f.id !== feature.id && f.data.category === feature.data.category)
 		.slice(0, limit);
 
 	// If not enough, add from other categories
 	if (relatedFeatures.length < limit) {
 		const remaining = allFeatures
-			.filter(f => f.slug !== feature.slug && !relatedFeatures.includes(f))
+			.filter(f => f.id !== feature.id && !relatedFeatures.includes(f))
 			.slice(0, limit - relatedFeatures.length);
 		relatedFeatures.push(...remaining);
 	}

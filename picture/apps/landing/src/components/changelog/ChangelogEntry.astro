@@ -45,7 +45,7 @@ const isRecent = isRecentRelease(data.releaseDate);
 					)}
 				</div>
 
-				<a href={`/changelog/${data.slug}`} class="entry-title-link">
+				<a href={`/changelog/${entry.id}`} class="entry-title-link">
 					<h3 class="entry-title">{data.title}</h3>
 				</a>
 
@@ -74,7 +74,7 @@ const isRecent = isRecentRelease(data.releaseDate);
 				</div>
 			</div>
 
-			<a href={`/changelog/${data.slug}`} class="read-more-btn">
+			<a href={`/changelog/${entry.id}`} class="read-more-btn">
 				Read More
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

@@ -120,7 +120,7 @@ const allModels = [
 						{
 							difficulties.map((diff) => (
 								<option value={diff}>
-									{diff.charAt(0).toUpperCase() + diff.slice(1)} ({stats.byDifficulty[diff]})
+									{diff.charAt(0).toUpperCase() + diff.slice(1)} ({stats.byDifficulty[diff as keyof typeof stats.byDifficulty]})
 								</option>
 							))
 						}
@@ -180,7 +180,7 @@ const allModels = [
 					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 						{featuredTemplates.map((template) => (
 							<a
-								href={`/prompt-templates/${template.slug}`}
+								href={`/prompt-templates/${template.id}`}
 								class="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
 							>
 								{/* Template Card */}

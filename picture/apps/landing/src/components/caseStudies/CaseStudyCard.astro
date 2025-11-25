@@ -103,7 +103,7 @@ const primaryMetric = data.metrics[0] || null;
 			{
 				!featured && data.metrics.length > 0 && (
 					<div class="mb-4 grid grid-cols-3 gap-2">
-						{data.metrics.slice(0, 3).map((metric) => (
+						{data.metrics.slice(0, 3).map((metric: { value: string; label: string }) => (
 							<div class="rounded-lg bg-gray-50 p-2 text-center dark:bg-gray-700">
 								<div class="text-sm font-bold text-blue-600">{metric.value}</div>
 								<div class="text-xs text-gray-600 dark:text-gray-400">{metric.label}</div>
@@ -117,7 +117,7 @@ const primaryMetric = data.metrics[0] || null;
 			{
 				data.tags.length > 0 && (
 					<div class="mb-4 flex flex-wrap gap-2">
-						{data.tags.slice(0, 3).map((tag) => (
+						{data.tags.slice(0, 3).map((tag: string) => (
 							<span class="rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300">
 								{tag}
 							</span>

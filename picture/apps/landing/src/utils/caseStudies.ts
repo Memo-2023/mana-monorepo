@@ -138,7 +138,7 @@ export async function getRelatedCaseStudies(
 	const caseStudies = await getAllCaseStudies();
 
 	// Filter out current case study
-	const others = caseStudies.filter((cs) => cs.data.slug !== currentCaseStudy.data.slug);
+	const others = caseStudies.filter((cs) => cs.id !== currentCaseStudy.id);
 
 	// Score based on similarity
 	const scored = others.map((cs) => {
@@ -176,7 +176,7 @@ export async function getRelatedCaseStudies(
 		score += sharedModels.length;
 
 		// Explicit related case studies = +20 points
-		if (currentCaseStudy.data.relatedCaseStudies.includes(cs.data.slug)) {
+		if (currentCaseStudy.data.relatedCaseStudies.includes(cs.id)) {
 			score += 20;
 		}
 
@@ -215,7 +215,7 @@ export async function searchCaseStudies(query: string): Promise<CaseStudyEntry[]
  */
 export async function getCaseStudyBySlug(slug: string): Promise<CaseStudyEntry | undefined> {
 	const caseStudies = await getAllCaseStudies();
-	return caseStudies.find((cs) => cs.data.slug === slug);
+	return caseStudies.find((cs) => cs.id === slug || cs.id.replace('en/', '') === slug);
 }
 
 /**

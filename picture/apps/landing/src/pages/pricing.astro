@@ -239,7 +239,7 @@ const models = [
 										</span>
 										<span class="feature-text">
 											{feature.text}
-											{feature.note && <span class="feature-note"> ({feature.note})</span>}
+											{'note' in feature && feature.note && <span class="feature-note"> ({feature.note})</span>}
 										</span>
 									</li>
 								))}

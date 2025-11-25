@@ -42,7 +42,7 @@ export async function getRelatedPosts(
 	const allPosts = await getBlogPosts(post.data.language);
 
 	// Filter out current post
-	const otherPosts = allPosts.filter(p => p.slug !== post.slug);
+	const otherPosts = allPosts.filter(p => p.id !== post.id);
 
 	// Score posts by relevance (same category, shared tags)
 	const scoredPosts = otherPosts.map(p => {

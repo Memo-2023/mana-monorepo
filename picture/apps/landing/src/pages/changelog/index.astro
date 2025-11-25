@@ -64,7 +64,7 @@ const groupedByYearMonth = await getChangelogGroupedByYearMonth(language);
 								<p class="text-gray-300 text-lg">{latestRelease.data.summary}</p>
 							</div>
 							<a
-								href={`/changelog/${latestRelease.data.slug}`}
+								href={`/changelog/${latestRelease.id}`}
 								class="px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition whitespace-nowrap"
 							>
 								Read Full Release

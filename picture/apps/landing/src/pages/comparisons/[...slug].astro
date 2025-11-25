@@ -8,7 +8,7 @@ import { getWinnerBadgeColor, getWinnerBadgeText, calculateOverallWinner } from 
 export async function getStaticPaths() {
 	const comparisons = await getCollection('comparisons');
 	return comparisons.map((comparison) => ({
-		params: { slug: comparison.data.slug },
+		params: { slug: comparison.id },
 		props: { comparison },
 	}));
 }
@@ -28,8 +28,8 @@ const overallWinner = data.winnerBadge || calculateOverallWinner(data.comparison
 const allComparisons = await getCollection('comparisons');
 const relatedComparisons = allComparisons
 	.filter((c) =>
-		data.relatedComparisons.includes(c.data.slug) &&
-		c.data.slug !== data.slug &&
+		data.relatedComparisons.includes(c.id) &&
+		c.id !== comparison.id &&
 		c.data.language === data.language
 	)
 	.slice(0, 3);
