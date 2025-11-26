@@ -211,6 +211,26 @@ const APP_CONFIGS = [
 			PUBLIC_SUPABASE_ANON_KEY: (env) => env.MANADECK_SUPABASE_ANON_KEY,
 		},
 	},
+
+	// Picture Mobile (Expo)
+	{
+		path: 'apps/picture/apps/mobile/.env',
+		vars: {
+			EXPO_PUBLIC_SUPABASE_URL: (env) => env.PICTURE_SUPABASE_URL,
+			EXPO_PUBLIC_SUPABASE_ANON_KEY: (env) => env.PICTURE_SUPABASE_ANON_KEY,
+		},
+	},
+
+	// Picture Web (SvelteKit)
+	{
+		path: 'apps/picture/apps/web/.env',
+		vars: {
+			PUBLIC_SUPABASE_URL: (env) => env.PICTURE_SUPABASE_URL,
+			PUBLIC_SUPABASE_ANON_KEY: (env) => env.PICTURE_SUPABASE_ANON_KEY,
+			PUBLIC_GOOGLE_CLIENT_ID: (env) => env.PICTURE_GOOGLE_CLIENT_ID || '',
+			PUBLIC_APPLE_CLIENT_ID: (env) => env.PICTURE_APPLE_CLIENT_ID || '',
+		},
+	},
 ];
 
 function main() {
