@@ -14,7 +14,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
 
     "setup:env": "node scripts/generate-env.mjs",
-    "postinstall": "node scripts/generate-env.mjs || true",
+    "build:packages": "pnpm --filter '@manacore/*' build",
+    "postinstall": "node scripts/generate-env.mjs || true && pnpm run build:packages || true",
 
     "maerchenzauber:dev": "turbo run dev --filter=maerchenzauber...",
     "manacore:dev": "turbo run dev --filter=manacore...",
