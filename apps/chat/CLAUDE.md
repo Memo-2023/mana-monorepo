@@ -3,12 +3,12 @@
 ## Project Structure
 
 ```
-chat/
+apps/chat/
 ├── apps/
+│   ├── backend/      # NestJS API server (@chat/backend)
 │   ├── landing/      # Astro marketing landing page (@chat/landing)
 │   ├── web/          # SvelteKit web application (@chat/web)
 │   └── mobile/       # Expo/React Native mobile app (@chat/mobile)
-├── backend/          # NestJS API server (@chat/backend)
 ├── packages/
 │   └── chat-types/   # Shared TypeScript types (@chat/types)
 └── package.json
@@ -35,7 +35,7 @@ pnpm build:preview               # Build preview version
 pnpm build:prod                  # Build production version
 ```
 
-### Backend (chat/backend)
+### Backend (apps/chat/apps/backend)
 ```bash
 pnpm start:dev                   # Start with hot reload
 pnpm build                       # Build for production

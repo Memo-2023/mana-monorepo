@@ -49,9 +49,29 @@ Each project has its own `CLAUDE.md` with detailed project-specific commands.
 
 ## Architecture Patterns
 
-### Standard Project Structure
+### Monorepo Structure
 ```
-project/
+manacore-monorepo/
+├── apps/                    # All product applications
+│   ├── chat/
+│   │   ├── apps/
+│   │   │   ├── backend/     # NestJS API
+│   │   │   ├── mobile/      # Expo React Native app
+│   │   │   ├── web/         # SvelteKit web app
+│   │   │   └── landing/     # Astro marketing page
+│   │   └── packages/        # Project-specific shared code
+│   ├── maerchenzauber/
+│   ├── manadeck/
+│   └── ...
+├── services/                # Standalone microservices
+│   └── mana-core-auth/      # Central authentication service
+├── packages/                # Monorepo-wide shared packages
+└── docker/                  # Docker configuration files
+```
+
+### Standard Project Structure (inside apps/)
+```
+apps/{project}/
 ├── apps/
 │   ├── backend/     # NestJS API (when present)
 │   ├── mobile/      # Expo React Native app
@@ -174,11 +194,12 @@ PORT=...
 ## Project-Specific Documentation
 
 Each project has its own `CLAUDE.md` with detailed information:
-- `maerchenzauber/CLAUDE.md` - Story generation specifics, AI services
-- `manacore/CLAUDE.md` - Multi-app ecosystem, auth details
-- `memoro/CLAUDE.md` - Audio recording, AI processing
-- `uload/CLAUDE.md` - URL shortener, Drizzle ORM
-- `chat/CLAUDE.md` - Chat API endpoints, AI models
+- `apps/maerchenzauber/CLAUDE.md` - Story generation specifics, AI services
+- `apps/manacore/CLAUDE.md` - Multi-app ecosystem, auth details
+- `apps/memoro/CLAUDE.md` - Audio recording, AI processing
+- `apps/uload/CLAUDE.md` - URL shortener, Drizzle ORM
+- `apps/chat/CLAUDE.md` - Chat API endpoints, AI models
+- `services/mana-core-auth/` - Central authentication service
 
 Navigate to the specific project directory to work on it.
 

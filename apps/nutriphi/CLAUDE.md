@@ -9,12 +9,13 @@ Nutriphi is a KI-gestützter Ernährungs-Tracker (AI-powered nutrition tracker) 
 ## Project Structure
 
 ```
-nutriphi/
+apps/nutriphi/
 ├── apps/
+│   ├── backend/      # NestJS API server (@nutriphi/backend)
 │   ├── mobile/       # Expo/React Native mobile app (@nutriphi/mobile)
 │   ├── web/          # SvelteKit web application (@nutriphi/web)
 │   └── landing/      # Astro marketing landing page (@nutriphi/landing)
-├── backend/          # NestJS API server (@nutriphi/backend)
+├── packages/
 └── package.json
 ```
 
@@ -40,7 +41,7 @@ pnpm build:prod                # Build production version
 pnpm type-check                # Run TypeScript checks
 ```
 
-### Backend (nutriphi/backend)
+### Backend (apps/nutriphi/apps/backend)
 ```bash
 pnpm start:dev                 # Start with hot reload
 pnpm build                     # Build for production

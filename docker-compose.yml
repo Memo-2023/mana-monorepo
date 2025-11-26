@@ -39,7 +39,7 @@ services:
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --auth=scram-sha-256"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./mana-core-auth/postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./services/mana-core-auth/postgres/init:/docker-entrypoint-initdb.d:ro
     ports:
       - "5432:5432"
     networks:
@@ -102,7 +102,7 @@ services:
   mana-core-auth:
     build:
       context: .
-      dockerfile: ./mana-core-auth/Dockerfile
+      dockerfile: ./services/mana-core-auth/Dockerfile
     container_name: manacore-auth
     restart: unless-stopped
     environment:

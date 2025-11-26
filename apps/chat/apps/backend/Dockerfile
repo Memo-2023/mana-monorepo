@@ -15,7 +15,7 @@ COPY pnpm-lock.yaml ./
 COPY packages/shared-errors ./packages/shared-errors
 
 # Copy chat backend
-COPY chat/backend ./chat/backend
+COPY apps/chat/apps/backend ./apps/chat/apps/backend
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
@@ -25,7 +25,7 @@ WORKDIR /app/packages/shared-errors
 RUN pnpm build
 
 # Build the backend
-WORKDIR /app/chat/backend
+WORKDIR /app/apps/chat/apps/backend
 RUN pnpm build
 
 # Production stage
@@ -43,13 +43,13 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/pnpm-lock.yaml ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/chat/backend ./chat/backend
+COPY --from=builder /app/apps/chat/apps/backend ./apps/chat/apps/backend
 
 # Copy entrypoint script
-COPY chat/backend/docker-entrypoint.sh /usr/local/bin/
+COPY apps/chat/apps/backend/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-WORKDIR /app/chat/backend
+WORKDIR /app/apps/chat/apps/backend
 
 # Expose port
 EXPOSE 3002

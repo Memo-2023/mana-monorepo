@@ -109,7 +109,7 @@ cd apps/web && npm run dev
 ## Project Structure
 
 ```
-storyteller-project/
+apps/maerchenzauber/
 ├── apps/
 │   ├── backend/             # NestJS backend
 │   │   ├── src/

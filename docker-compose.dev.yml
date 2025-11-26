@@ -49,7 +49,7 @@ services:
     profiles: ["auth", "all"]
     build:
       context: .
-      dockerfile: ./mana-core-auth/Dockerfile
+      dockerfile: ./services/mana-core-auth/Dockerfile
     container_name: manacore-auth
     restart: unless-stopped
     environment:
@@ -83,7 +83,7 @@ services:
     profiles: ["chat", "all"]
     build:
       context: .
-      dockerfile: chat/backend/Dockerfile
+      dockerfile: ./apps/chat/apps/backend/Dockerfile
     container_name: chat-backend
     restart: unless-stopped
     environment:

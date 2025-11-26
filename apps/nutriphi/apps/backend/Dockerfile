@@ -14,7 +14,7 @@ COPY package.json pnpm-lock.yaml ./
 COPY packages/nutriphi-database ./packages/nutriphi-database
 
 # Copy the backend
-COPY nutriphi/backend ./nutriphi/backend
+COPY apps/nutriphi/apps/backend ./apps/nutriphi/apps/backend
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile --filter @nutriphi/backend...
@@ -33,9 +33,9 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
 # Copy built files
-COPY --from=builder /app/nutriphi/backend/dist ./dist
-COPY --from=builder /app/nutriphi/backend/package.json ./
-COPY --from=builder /app/nutriphi/backend/node_modules ./node_modules
+COPY --from=builder /app/apps/nutriphi/apps/backend/dist ./dist
+COPY --from=builder /app/apps/nutriphi/apps/backend/package.json ./
+COPY --from=builder /app/apps/nutriphi/apps/backend/node_modules ./node_modules
 COPY --from=builder /app/packages/nutriphi-database/dist ./node_modules/@manacore/nutriphi-database/dist
 COPY --from=builder /app/packages/nutriphi-database/package.json ./node_modules/@manacore/nutriphi-database/
 

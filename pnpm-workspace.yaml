@@ -1,32 +1,15 @@
 packages:
-  # Main projects
-  - 'maerchenzauber'
-  - 'manacore'
-  - 'manadeck'
-  - 'memoro'
-  - 'picture'
-  - 'uload'
-  - 'chat'
-  - 'nutriphi'
-  - 'news'
+  # Product applications (root level)
+  - 'apps/*'
 
-  # Sub-apps within projects
-  - 'maerchenzauber/apps/*'
-  - 'maerchenzauber/packages/*'
-  - 'manacore/apps/*'
-  - 'manadeck/apps/*'
-  - 'manadeck/backend'
-  - 'memoro/apps/*'
-  - 'picture/apps/*'
-  - 'picture/packages/*'
-  - 'uload/apps/*'
-  - 'chat/apps/*'
-  - 'chat/backend'
-  - 'chat/packages/*'
-  - 'nutriphi/apps/*'
-  - 'nutriphi/backend'
-  - 'news/apps/*'
-  - 'news/packages/*'
+  # Sub-apps within products (mobile, web, landing, backend)
+  - 'apps/*/apps/*'
 
-  # Shared packages
+  # Product-specific packages
+  - 'apps/*/packages/*'
+
+  # Standalone microservices
+  - 'services/*'
+
+  # Monorepo-wide shared packages
   - 'packages/*'
