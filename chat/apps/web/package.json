@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@chat/types": "workspace:*",
+    "@manacore/shared-auth": "workspace:*",
     "@manacore/shared-auth-ui": "workspace:*",
     "@manacore/shared-branding": "workspace:*",
     "@manacore/shared-i18n": "workspace:*",

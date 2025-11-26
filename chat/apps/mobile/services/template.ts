@@ -1,9 +1,9 @@
 /**
- * Template-Service für Chat-Vorlagen
+ * Template Service - CRUD operations via Backend API
  */
-import { supabase } from '../utils/supabase';
+import { templateApi, type Template as ApiTemplate } from './api';
 
-// Typdefinition für eine Vorlage
+// Re-export type with backwards-compatible naming (snake_case for mobile)
 export interface Template {
   id: string;
   user_id: string;
@@ -19,25 +19,31 @@ export interface Template {
   updated_at: string;
 }
 
+// Helper to convert API response to local format
+function toLocalTemplate(template: ApiTemplate): Template {
+  return {
+    id: template.id,
+    user_id: template.userId,
+    name: template.name,
+    description: template.description || null,
+    system_prompt: template.systemPrompt,
+    initial_question: template.initialQuestion || null,
+    model_id: template.modelId || null,
+    color: template.color,
+    is_default: template.isDefault,
+    document_mode: template.documentMode,
+    created_at: template.createdAt,
+    updated_at: template.updatedAt,
+  };
+}
+
 /**
  * Lädt alle Vorlagen eines Benutzers
- * @param userId Die ID des Benutzers
- * @returns Liste der Vorlagen
  */
 export async function getTemplates(userId: string): Promise<Template[]> {
   try {
-    const { data, error } = await supabase
-      .from('templates')
-      .select('*')
-      .eq('user_id', userId)
-      .order('name');
-
-    if (error) {
-      console.error('Fehler beim Laden der Vorlagen:', error);
-      return [];
-    }
-
-    return data as Template[];
+    const templates = await templateApi.getTemplates();
+    return templates.map(toLocalTemplate);
   } catch (error) {
     console.error('Fehler beim Laden der Vorlagen:', error);
     return [];
@@ -46,23 +52,14 @@ export async function getTemplates(userId: string): Promise<Template[]> {
 
 /**
  * Lädt eine bestimmte Vorlage anhand ihrer ID
- * @param templateId Die ID der Vorlage
- * @returns Die Vorlage oder null, wenn nicht gefunden
  */
 export async function getTemplateById(templateId: string): Promise<Template | null> {
   try {
-    const { data, error } = await supabase
-      .from('templates')
-      .select('*')
-      .eq('id', templateId)
-      .single();
-
-    if (error) {
-      console.error('Fehler beim Laden der Vorlage:', error);
+    const template = await templateApi.getTemplate(templateId);
+    if (!template) {
       return null;
     }
-
-    return data as Template;
+    return toLocalTemplate(template);
   } catch (error) {
     console.error('Fehler beim Laden der Vorlage:', error);
     return null;
@@ -71,23 +68,27 @@ export async function getTemplateById(templateId: string): Promise<Template | nu
 
 /**
  * Erstellt eine neue Vorlage
- * @param template Die zu erstellende Vorlage (ohne ID)
- * @returns Die erstellte Vorlage mit ID oder null bei Fehler
  */
-export async function createTemplate(template: Omit<Template, 'id' | 'created_at' | 'updated_at'>): Promise<Template | null> {
+export async function createTemplate(
+  template: Omit<Template, 'id' | 'created_at' | 'updated_at'>
+): Promise<Template | null> {
   try {
-    const { data, error } = await supabase
-      .from('templates')
-      .insert(template)
-      .select()
-      .single();
+    const result = await templateApi.createTemplate({
+      name: template.name,
+      description: template.description || undefined,
+      systemPrompt: template.system_prompt,
+      initialQuestion: template.initial_question || undefined,
+      modelId: template.model_id || undefined,
+      color: template.color,
+      documentMode: template.document_mode,
+    });
 
-    if (error) {
-      console.error('Fehler beim Erstellen der Vorlage:', error);
+    if (!result) {
+      console.error('Fehler beim Erstellen der Vorlage');
       return null;
     }
 
-    return data as Template;
+    return toLocalTemplate(result);
   } catch (error) {
     console.error('Fehler beim Erstellen der Vorlage:', error);
     return null;
@@ -96,26 +97,25 @@ export async function createTemplate(template: Omit<Template, 'id' | 'created_at
 
 /**
  * Aktualisiert eine bestehende Vorlage
- * @param templateId Die ID der zu aktualisierenden Vorlage
- * @param updates Die zu aktualisierenden Felder
- * @returns true bei Erfolg, false bei Fehler
  */
 export async function updateTemplate(
-  templateId: string, 
+  templateId: string,
   updates: Partial<Omit<Template, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
 ): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('templates')
-      .update(updates)
-      .eq('id', templateId);
+    const apiUpdates: Parameters<typeof templateApi.updateTemplate>[1] = {};
 
-    if (error) {
-      console.error('Fehler beim Aktualisieren der Vorlage:', error);
-      return false;
-    }
+    if (updates.name !== undefined) apiUpdates.name = updates.name;
+    if (updates.description !== undefined)
+      apiUpdates.description = updates.description || undefined;
+    if (updates.system_prompt !== undefined) apiUpdates.systemPrompt = updates.system_prompt;
+    if (updates.initial_question !== undefined)
+      apiUpdates.initialQuestion = updates.initial_question || undefined;
+    if (updates.model_id !== undefined) apiUpdates.modelId = updates.model_id || undefined;
+    if (updates.color !== undefined) apiUpdates.color = updates.color;
+    if (updates.document_mode !== undefined) apiUpdates.documentMode = updates.document_mode;
 
-    return true;
+    return await templateApi.updateTemplate(templateId, apiUpdates);
   } catch (error) {
     console.error('Fehler beim Aktualisieren der Vorlage:', error);
     return false;
@@ -124,22 +124,10 @@ export async function updateTemplate(
 
 /**
  * Löscht eine Vorlage
- * @param templateId Die ID der zu löschenden Vorlage
- * @returns true bei Erfolg, false bei Fehler
  */
 export async function deleteTemplate(templateId: string): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('templates')
-      .delete()
-      .eq('id', templateId);
-
-    if (error) {
-      console.error('Fehler beim Löschen der Vorlage:', error);
-      return false;
-    }
-
-    return true;
+    return await templateApi.deleteTemplate(templateId);
   } catch (error) {
     console.error('Fehler beim Löschen der Vorlage:', error);
     return false;
@@ -148,31 +136,10 @@ export async function deleteTemplate(templateId: string): Promise<boolean> {
 
 /**
  * Setzt eine Vorlage als Standard
- * @param templateId Die ID der Vorlage, die als Standard gesetzt werden soll
- * @param userId Die ID des Benutzers
- * @returns true bei Erfolg, false bei Fehler
  */
 export async function setDefaultTemplate(templateId: string, userId: string): Promise<boolean> {
   try {
-    // Zuerst alle Vorlagen des Benutzers auf nicht-Standard setzen
-    await supabase
-      .from('templates')
-      .update({ is_default: false })
-      .eq('user_id', userId);
-
-    // Dann die ausgewählte Vorlage als Standard setzen
-    const { error } = await supabase
-      .from('templates')
-      .update({ is_default: true })
-      .eq('id', templateId)
-      .eq('user_id', userId);
-
-    if (error) {
-      console.error('Fehler beim Setzen der Standard-Vorlage:', error);
-      return false;
-    }
-
-    return true;
+    return await templateApi.setDefaultTemplate(templateId);
   } catch (error) {
     console.error('Fehler beim Setzen der Standard-Vorlage:', error);
     return false;
@@ -181,24 +148,14 @@ export async function setDefaultTemplate(templateId: string, userId: string): Pr
 
 /**
  * Holt die Standard-Vorlage des Benutzers
- * @param userId Die ID des Benutzers
- * @returns Die Standard-Vorlage oder null, wenn keine gefunden wurde
  */
 export async function getDefaultTemplate(userId: string): Promise<Template | null> {
   try {
-    const { data, error } = await supabase
-      .from('templates')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_default', true)
-      .single();
-
-    if (error) {
-      console.error('Fehler beim Laden der Standard-Vorlage:', error);
+    const template = await templateApi.getDefaultTemplate();
+    if (!template) {
       return null;
     }
-
-    return data as Template;
+    return toLocalTemplate(template);
   } catch (error) {
     console.error('Fehler beim Laden der Standard-Vorlage:', error);
     return null;

@@ -1,62 +1,40 @@
 /**
- * Document Service - Manage documents in document mode conversations
+ * Document Service - CRUD operations via Backend API
  */
 
-import { createSupabaseBrowserClient } from './supabase';
-import type { Document, DocumentWithConversation } from '@chat/types';
+import { documentApi, conversationApi, type Document } from './api';
 
-let supabase: ReturnType<typeof createSupabaseBrowserClient> | null = null;
+export type { Document };
 
-function getSupabase() {
-  if (!supabase) {
-    supabase = createSupabaseBrowserClient();
-  }
-  return supabase;
-}
+export type DocumentWithConversation = Document & {
+  conversation_title: string;
+};
 
 export const documentService = {
   /**
    * Get all documents for a user (latest version of each)
+   * This requires fetching conversations first, then documents
    */
   async getUserDocuments(userId: string): Promise<DocumentWithConversation[]> {
-    const sb = getSupabase();
+    // Get all conversations (the API will filter by user)
+    const conversations = await conversationApi.getConversations();
 
-    // Get all conversations with document_mode enabled
-    const { data: conversations, error: convError } = await sb
-      .from('conversations')
-      .select('id, title, document_mode')
-      .eq('user_id', userId)
-      .eq('document_mode', true);
+    // Filter to only document mode conversations
+    const documentConversations = conversations.filter((c) => c.documentMode);
 
-    if (convError) {
-      console.error('Error loading conversations:', convError);
-      return [];
-    }
-
-    if (!conversations || conversations.length === 0) {
+    if (documentConversations.length === 0) {
       return [];
     }
 
     // For each conversation, load the latest document version
     const documents: DocumentWithConversation[] = [];
 
-    for (const conv of conversations) {
-      const { data: docData, error: docError } = await sb
-        .from('documents')
-        .select('*')
-        .eq('conversation_id', conv.id)
-        .order('version', { ascending: false })
-        .limit(1)
-        .single();
+    for (const conv of documentConversations) {
+      const doc = await documentApi.getLatestDocument(conv.id);
 
-      if (docError && docError.code !== 'PGRST116') {
-        console.error(`Error loading document for conversation ${conv.id}:`, docError);
-        continue;
-      }
-
-      if (docData) {
+      if (doc) {
         documents.push({
-          ...docData,
+          ...doc,
           conversation_title: conv.title || 'Unbenannte Konversation',
         });
       }
@@ -69,108 +47,44 @@ export const documentService = {
    * Get the latest document for a conversation
    */
   async getLatestDocument(conversationId: string): Promise<Document | null> {
-    const sb = getSupabase();
-
-    const { data, error } = await sb
-      .from('documents')
-      .select('*')
-      .eq('conversation_id', conversationId)
-      .order('version', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) {
-      if (error.code !== 'PGRST116') {
-        console.error('Error loading document:', error);
-      }
-      return null;
-    }
-
-    return data as Document;
+    return documentApi.getLatestDocument(conversationId);
   },
 
   /**
    * Create a new document
    */
   async createDocument(conversationId: string, content: string): Promise<Document | null> {
-    const sb = getSupabase();
-
-    const { data, error } = await sb
-      .from('documents')
-      .insert({
-        conversation_id: conversationId,
-        version: 1,
-        content,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating document:', error);
-      return null;
-    }
-
-    return data as Document;
+    return documentApi.createDocument(conversationId, content);
   },
 
   /**
    * Create a new version of a document
    */
-  async createDocumentVersion(conversationId: string, content: string): Promise<Document | null> {
-    const sb = getSupabase();
-
-    // Get the current highest version
-    const { data: latestVersionData, error: versionError } = await sb
-      .from('documents')
-      .select('version')
-      .eq('conversation_id', conversationId)
-      .order('version', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (versionError && versionError.code !== 'PGRST116') {
-      console.error('Error loading latest document version:', versionError);
-      return null;
-    }
-
-    const newVersion = (latestVersionData?.version || 0) + 1;
-
-    // Create a new document version
-    const { data, error } = await sb
-      .from('documents')
-      .insert({
-        conversation_id: conversationId,
-        version: newVersion,
-        content,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating document version:', error);
-      return null;
-    }
-
-    return data as Document;
+  async createDocumentVersion(
+    conversationId: string,
+    content: string,
+  ): Promise<Document | null> {
+    return documentApi.createDocumentVersion(conversationId, content);
   },
 
   /**
    * Get all versions of a document
    */
   async getAllDocumentVersions(conversationId: string): Promise<Document[]> {
-    const sb = getSupabase();
+    return documentApi.getAllDocumentVersions(conversationId);
+  },
 
-    const { data, error } = await sb
-      .from('documents')
-      .select('*')
-      .eq('conversation_id', conversationId)
-      .order('version', { ascending: false });
+  /**
+   * Check if a document exists for a conversation
+   */
+  async hasDocument(conversationId: string): Promise<boolean> {
+    return documentApi.hasDocument(conversationId);
+  },
 
-    if (error) {
-      console.error('Error loading document versions:', error);
-      return [];
-    }
-
-    return data as Document[];
+  /**
+   * Delete a specific document version
+   */
+  async deleteDocumentVersion(documentId: string): Promise<boolean> {
+    return documentApi.deleteDocumentVersion(documentId);
   },
 };

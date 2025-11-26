@@ -1,151 +1,60 @@
 /**
- * Space Service - CRUD operations via Supabase
+ * Space Service - CRUD operations via Backend API
  */
 
-import { createSupabaseBrowserClient } from './supabase';
-import type { Space, SpaceMember, SpaceCreate, SpaceUpdate } from '@chat/types';
+import { spaceApi, type Space, type SpaceMember } from './api';
 
-let supabase: ReturnType<typeof createSupabaseBrowserClient> | null = null;
-
-function getSupabase() {
-  if (!supabase) {
-    supabase = createSupabaseBrowserClient();
-  }
-  return supabase;
-}
+export type { Space, SpaceMember };
 
 export const spaceService = {
   /**
-   * Get all spaces for a user (both owned and member of)
+   * Get all spaces for the current user (both owned and member of)
    */
   async getUserSpaces(userId: string): Promise<Space[]> {
-    const sb = getSupabase();
-
-    // Get space IDs the user is a member of (with accepted status)
-    const { data: memberData, error: memberError } = await sb
-      .from('space_members')
-      .select('space_id')
-      .eq('user_id', userId)
-      .eq('invitation_status', 'accepted');
-
-    if (memberError) {
-      console.error('Error fetching user space memberships:', memberError);
-      return [];
-    }
-
-    if (!memberData || memberData.length === 0) {
-      return [];
-    }
-
-    const spaceIds = memberData.map((m) => m.space_id);
-
-    // Fetch the actual space data
-    const { data: spaces, error: spacesError } = await sb
-      .from('spaces')
-      .select('*')
-      .in('id', spaceIds)
-      .eq('is_archived', false)
-      .order('created_at', { ascending: false });
-
-    if (spacesError) {
-      console.error('Error fetching spaces:', spacesError);
-      return [];
-    }
-
-    return spaces as Space[];
+    return spaceApi.getUserSpaces();
   },
 
   /**
    * Get a single space by ID
    */
   async getSpace(spaceId: string): Promise<Space | null> {
-    const sb = getSupabase();
-
-    const { data, error } = await sb.from('spaces').select('*').eq('id', spaceId).single();
-
-    if (error) {
-      console.error('Error fetching space:', error);
-      return null;
-    }
-
-    return data as Space;
+    return spaceApi.getSpace(spaceId);
   },
 
   /**
    * Create a new space
    */
-  async createSpace(space: SpaceCreate): Promise<string | null> {
-    const sb = getSupabase();
-
-    const { data, error } = await sb
-      .from('spaces')
-      .insert({
-        name: space.name,
-        description: space.description,
-        owner_id: space.owner_id,
-      })
-      .select('id')
-      .single();
-
-    if (error) {
-      console.error('Error creating space:', error);
-      return null;
-    }
-
-    return data.id;
+  async createSpace(space: {
+    name: string;
+    description?: string;
+    owner_id: string;
+  }): Promise<string | null> {
+    const result = await spaceApi.createSpace(space.name, space.description);
+    return result?.id || null;
   },
 
   /**
    * Update a space
    */
-  async updateSpace(spaceId: string, updates: SpaceUpdate): Promise<boolean> {
-    const sb = getSupabase();
-
-    const { error } = await sb.from('spaces').update(updates).eq('id', spaceId);
-
-    if (error) {
-      console.error('Error updating space:', error);
-      return false;
-    }
-
-    return true;
+  async updateSpace(
+    spaceId: string,
+    updates: { name?: string; description?: string; isArchived?: boolean },
+  ): Promise<boolean> {
+    return spaceApi.updateSpace(spaceId, updates);
   },
 
   /**
    * Delete a space
    */
   async deleteSpace(spaceId: string): Promise<boolean> {
-    const sb = getSupabase();
-
-    const { error } = await sb.from('spaces').delete().eq('id', spaceId);
-
-    if (error) {
-      console.error('Error deleting space:', error);
-      return false;
-    }
-
-    return true;
+    return spaceApi.deleteSpace(spaceId);
   },
 
   /**
    * Get members of a space
    */
   async getSpaceMembers(spaceId: string): Promise<SpaceMember[]> {
-    const sb = getSupabase();
-
-    const { data, error } = await sb
-      .from('space_members')
-      .select('*')
-      .eq('space_id', spaceId)
-      .order('role', { ascending: true })
-      .order('joined_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching space members:', error);
-      return [];
-    }
-
-    return data as SpaceMember[];
+    return spaceApi.getSpaceMembers(spaceId);
   },
 
   /**
@@ -153,62 +62,63 @@ export const spaceService = {
    */
   async getUserRoleInSpace(
     spaceId: string,
-    userId: string
+    userId: string,
   ): Promise<'owner' | 'admin' | 'member' | 'viewer' | null> {
-    const sb = getSupabase();
-
-    // First check if they're the owner
-    const { data: space, error: spaceError } = await sb
-      .from('spaces')
-      .select('owner_id')
-      .eq('id', spaceId)
-      .single();
-
-    if (spaceError) {
-      console.error('Error checking space ownership:', spaceError);
-      return null;
-    }
-
-    if (space.owner_id === userId) {
-      return 'owner';
-    }
-
-    // If not owner, check membership
-    const { data: member, error: memberError } = await sb
-      .from('space_members')
-      .select('role, invitation_status')
-      .eq('space_id', spaceId)
-      .eq('user_id', userId)
-      .single();
-
-    if (memberError) {
-      return null;
-    }
-
-    if (member && member.invitation_status === 'accepted') {
-      return member.role as 'admin' | 'member' | 'viewer';
-    }
-
-    return null;
+    return spaceApi.getUserRoleInSpace(spaceId);
   },
 
   /**
-   * Leave a space
+   * Leave a space (remove self from members)
    */
   async leaveSpace(spaceId: string, userId: string): Promise<boolean> {
-    const sb = getSupabase();
+    return spaceApi.removeMember(spaceId, userId);
+  },
 
-    const { error } = await sb
-      .from('space_members')
-      .delete()
-      .eq('space_id', spaceId)
-      .eq('user_id', userId);
+  /**
+   * Invite a user to a space
+   */
+  async inviteUserToSpace(
+    spaceId: string,
+    userId: string,
+    role: 'admin' | 'member' | 'viewer' = 'member',
+  ): Promise<boolean> {
+    return spaceApi.inviteUser(spaceId, userId, role);
+  },
 
-    if (error) {
-      console.error('Error leaving space:', error);
-      return false;
-    }
+  /**
+   * Respond to a space invitation
+   */
+  async respondToInvitation(
+    spaceId: string,
+    status: 'accepted' | 'declined',
+  ): Promise<boolean> {
+    return spaceApi.respondToInvitation(spaceId, status);
+  },
 
-    return true;
+  /**
+   * Get pending invitations for the current user
+   */
+  async getPendingInvitations(): Promise<
+    Array<{ invitation: SpaceMember; space: Space }>
+  > {
+    return spaceApi.getPendingInvitations();
+  },
+
+  /**
+   * Remove a member from a space
+   */
+  async removeMember(spaceId: string, userId: string): Promise<boolean> {
+    return spaceApi.removeMember(spaceId, userId);
+  },
+
+  /**
+   * Change a member's role
+   */
+  async changeMemberRole(
+    spaceId: string,
+    userId: string,
+    newRole: 'admin' | 'member' | 'viewer',
+  ): Promise<boolean> {
+    return spaceApi.changeMemberRole(spaceId, userId, newRole);
   },
 };

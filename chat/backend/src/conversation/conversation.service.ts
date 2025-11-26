@@ -1,168 +1,319 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { Injectable, Inject, Logger } from '@nestjs/common';
+import { eq, and, desc, asc, sql } from 'drizzle-orm';
 import {
   type AsyncResult,
   ok,
   err,
-  ServiceError,
   DatabaseError,
   NotFoundError,
 } from '@manacore/shared-errors';
-
-export interface Conversation {
-  id: string;
-  user_id: string;
-  model_id: string;
-  title?: string;
-  is_archived: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Message {
-  id: string;
-  conversation_id: string;
-  sender: 'user' | 'assistant' | 'system';
-  message_text: string;
-  created_at: string;
-}
+import { DATABASE_CONNECTION } from '../db/database.module';
+import { type Database } from '../db/connection';
+import {
+  conversations,
+  type Conversation,
+  type NewConversation,
+} from '../db/schema/conversations.schema';
+import { messages, type Message, type NewMessage } from '../db/schema/messages.schema';
 
 @Injectable()
 export class ConversationService {
   private readonly logger = new Logger(ConversationService.name);
-  private supabase: SupabaseClient | null = null;
 
-  constructor(private configService: ConfigService) {
-    const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
-    const supabaseKey = this.configService.get<string>('SUPABASE_SERVICE_KEY');
+  constructor(
+    @Inject(DATABASE_CONNECTION) private readonly db: Database,
+  ) {}
 
-    if (supabaseUrl && supabaseKey) {
-      this.supabase = createClient(supabaseUrl, supabaseKey);
-    } else {
-      this.logger.warn('Supabase configuration missing');
-    }
-  }
+  async getConversations(
+    userId: string,
+    spaceId?: string,
+  ): AsyncResult<Conversation[]> {
+    try {
+      const conditions = [
+        eq(conversations.userId, userId),
+        eq(conversations.isArchived, false),
+      ];
 
-  async getConversations(userId: string): AsyncResult<Conversation[]> {
-    if (!this.supabase) {
-      return err(ServiceError.unavailable('Database'));
-    }
+      if (spaceId) {
+        conditions.push(eq(conversations.spaceId, spaceId));
+      }
 
-    const { data, error } = await this.supabase
-      .from('conversations')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_archived', false)
-      .order('updated_at', { ascending: false });
+      const result = await this.db
+        .select()
+        .from(conversations)
+        .where(and(...conditions))
+        .orderBy(desc(conversations.updatedAt));
 
-    if (error) {
+      return ok(result);
+    } catch (error) {
       this.logger.error('Error fetching conversations', error);
       return err(DatabaseError.queryFailed('Failed to fetch conversations'));
     }
-
-    return ok(data || []);
   }
 
-  async getConversation(id: string): AsyncResult<Conversation> {
-    if (!this.supabase) {
-      return err(ServiceError.unavailable('Database'));
+  async getArchivedConversations(userId: string): AsyncResult<Conversation[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(conversations)
+        .where(
+          and(
+            eq(conversations.userId, userId),
+            eq(conversations.isArchived, true),
+          ),
+        )
+        .orderBy(desc(conversations.updatedAt));
+
+      return ok(result);
+    } catch (error) {
+      this.logger.error('Error fetching archived conversations', error);
+      return err(DatabaseError.queryFailed('Failed to fetch archived conversations'));
     }
+  }
 
-    const { data, error } = await this.supabase
-      .from('conversations')
-      .select('*')
-      .eq('id', id)
-      .single();
+  async getConversation(id: string, userId: string): AsyncResult<Conversation> {
+    try {
+      const result = await this.db
+        .select()
+        .from(conversations)
+        .where(
+          and(eq(conversations.id, id), eq(conversations.userId, userId)),
+        )
+        .limit(1);
 
-    if (error) {
-      this.logger.error('Error fetching conversation', error);
-      if (error.code === 'PGRST116') {
+      if (result.length === 0) {
         return err(new NotFoundError('Conversation', id));
       }
+
+      return ok(result[0]);
+    } catch (error) {
+      this.logger.error('Error fetching conversation', error);
       return err(DatabaseError.queryFailed('Failed to fetch conversation'));
     }
-
-    return ok(data);
   }
 
-  async getMessages(conversationId: string): AsyncResult<Message[]> {
-    if (!this.supabase) {
-      return err(ServiceError.unavailable('Database'));
-    }
+  async getMessages(
+    conversationId: string,
+    userId: string,
+  ): AsyncResult<Message[]> {
+    try {
+      // First verify the conversation belongs to the user
+      const convResult = await this.getConversation(conversationId, userId);
+      if (!convResult.ok) {
+        return err(convResult.error);
+      }
 
-    const { data, error } = await this.supabase
-      .from('messages')
-      .select('*')
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true });
+      const result = await this.db
+        .select()
+        .from(messages)
+        .where(eq(messages.conversationId, conversationId))
+        .orderBy(asc(messages.createdAt));
 
-    if (error) {
+      return ok(result);
+    } catch (error) {
       this.logger.error('Error fetching messages', error);
       return err(DatabaseError.queryFailed('Failed to fetch messages'));
     }
-
-    return ok(data || []);
   }
 
   async createConversation(
     userId: string,
     modelId: string,
-    title?: string,
+    options?: {
+      title?: string;
+      templateId?: string;
+      conversationMode?: 'free' | 'guided' | 'template';
+      documentMode?: boolean;
+      spaceId?: string;
+    },
   ): AsyncResult<Conversation> {
-    if (!this.supabase) {
-      return err(ServiceError.unavailable('Database'));
-    }
+    try {
+      const newConversation: NewConversation = {
+        userId,
+        modelId,
+        title: options?.title || 'Neue Unterhaltung',
+        templateId: options?.templateId,
+        conversationMode: options?.conversationMode || 'free',
+        documentMode: options?.documentMode || false,
+        spaceId: options?.spaceId,
+        isArchived: false,
+      };
 
-    const { data, error } = await this.supabase
-      .from('conversations')
-      .insert({
-        user_id: userId,
-        model_id: modelId,
-        title: title || 'Neue Unterhaltung',
-        is_archived: false,
-      })
-      .select()
-      .single();
+      const result = await this.db
+        .insert(conversations)
+        .values(newConversation)
+        .returning();
 
-    if (error) {
+      return ok(result[0]);
+    } catch (error) {
       this.logger.error('Error creating conversation', error);
       return err(DatabaseError.queryFailed('Failed to create conversation'));
     }
-
-    return ok(data);
   }
 
   async addMessage(
     conversationId: string,
+    userId: string,
     sender: 'user' | 'assistant' | 'system',
     messageText: string,
   ): AsyncResult<Message> {
-    if (!this.supabase) {
-      return err(ServiceError.unavailable('Database'));
-    }
+    try {
+      // First verify the conversation belongs to the user
+      const convResult = await this.getConversation(conversationId, userId);
+      if (!convResult.ok) {
+        return err(convResult.error);
+      }
 
-    const { data, error } = await this.supabase
-      .from('messages')
-      .insert({
-        conversation_id: conversationId,
+      const newMessage: NewMessage = {
+        conversationId,
         sender,
-        message_text: messageText,
-      })
-      .select()
-      .single();
+        messageText,
+      };
 
-    if (error) {
+      const result = await this.db
+        .insert(messages)
+        .values(newMessage)
+        .returning();
+
+      // Update conversation updated_at
+      await this.db
+        .update(conversations)
+        .set({ updatedAt: new Date() })
+        .where(eq(conversations.id, conversationId));
+
+      return ok(result[0]);
+    } catch (error) {
       this.logger.error('Error adding message', error);
       return err(DatabaseError.queryFailed('Failed to add message'));
     }
+  }
 
-    // Update conversation updated_at
-    await this.supabase
-      .from('conversations')
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', conversationId);
+  async updateTitle(
+    conversationId: string,
+    userId: string,
+    title: string,
+  ): AsyncResult<Conversation> {
+    try {
+      // First verify the conversation belongs to the user
+      const convResult = await this.getConversation(conversationId, userId);
+      if (!convResult.ok) {
+        return err(convResult.error);
+      }
 
-    return ok(data);
+      const result = await this.db
+        .update(conversations)
+        .set({ title, updatedAt: new Date() })
+        .where(eq(conversations.id, conversationId))
+        .returning();
+
+      return ok(result[0]);
+    } catch (error) {
+      this.logger.error('Error updating title', error);
+      return err(DatabaseError.queryFailed('Failed to update title'));
+    }
+  }
+
+  async archiveConversation(
+    conversationId: string,
+    userId: string,
+  ): AsyncResult<Conversation> {
+    try {
+      // First verify the conversation belongs to the user
+      const convResult = await this.getConversation(conversationId, userId);
+      if (!convResult.ok) {
+        return err(convResult.error);
+      }
+
+      const result = await this.db
+        .update(conversations)
+        .set({ isArchived: true, updatedAt: new Date() })
+        .where(eq(conversations.id, conversationId))
+        .returning();
+
+      return ok(result[0]);
+    } catch (error) {
+      this.logger.error('Error archiving conversation', error);
+      return err(DatabaseError.queryFailed('Failed to archive conversation'));
+    }
+  }
+
+  async unarchiveConversation(
+    conversationId: string,
+    userId: string,
+  ): AsyncResult<Conversation> {
+    try {
+      // First verify the conversation belongs to the user
+      const convResult = await this.db
+        .select()
+        .from(conversations)
+        .where(
+          and(
+            eq(conversations.id, conversationId),
+            eq(conversations.userId, userId),
+          ),
+        )
+        .limit(1);
+
+      if (convResult.length === 0) {
+        return err(new NotFoundError('Conversation', conversationId));
+      }
+
+      const result = await this.db
+        .update(conversations)
+        .set({ isArchived: false, updatedAt: new Date() })
+        .where(eq(conversations.id, conversationId))
+        .returning();
+
+      return ok(result[0]);
+    } catch (error) {
+      this.logger.error('Error unarchiving conversation', error);
+      return err(DatabaseError.queryFailed('Failed to unarchive conversation'));
+    }
+  }
+
+  async deleteConversation(
+    conversationId: string,
+    userId: string,
+  ): AsyncResult<void> {
+    try {
+      // First verify the conversation belongs to the user
+      const convResult = await this.getConversation(conversationId, userId);
+      if (!convResult.ok) {
+        return err(convResult.error);
+      }
+
+      // Messages will be cascade deleted due to foreign key constraint
+      await this.db
+        .delete(conversations)
+        .where(eq(conversations.id, conversationId));
+
+      return ok(undefined);
+    } catch (error) {
+      this.logger.error('Error deleting conversation', error);
+      return err(DatabaseError.queryFailed('Failed to delete conversation'));
+    }
+  }
+
+  async getMessageCount(
+    conversationId: string,
+    userId: string,
+  ): AsyncResult<number> {
+    try {
+      // First verify the conversation belongs to the user
+      const convResult = await this.getConversation(conversationId, userId);
+      if (!convResult.ok) {
+        return err(convResult.error);
+      }
+
+      const result = await this.db
+        .select({ count: sql<number>`count(*)` })
+        .from(messages)
+        .where(eq(messages.conversationId, conversationId));
+
+      return ok(Number(result[0]?.count || 0));
+    } catch (error) {
+      this.logger.error('Error getting message count', error);
+      return err(DatabaseError.queryFailed('Failed to get message count'));
+    }
   }
 }

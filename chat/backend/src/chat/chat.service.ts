@@ -1,5 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { eq } from 'drizzle-orm';
 import {
   type AsyncResult,
   ok,
@@ -7,21 +8,10 @@ import {
   ValidationError,
   ServiceError,
 } from '@manacore/shared-errors';
+import { DATABASE_CONNECTION } from '../db/database.module';
+import { type Database } from '../db/connection';
+import { models, type Model } from '../db/schema/models.schema';
 import { ChatCompletionDto, ChatCompletionResponseDto } from './dto/chat-completion.dto';
-
-export interface AIModel {
-  id: string;
-  name: string;
-  description: string;
-  parameters: {
-    temperature: number;
-    max_tokens: number;
-    provider: string;
-    deployment: string;
-    endpoint: string;
-    api_version: string;
-  };
-}
 
 @Injectable()
 export class ChatService {
@@ -30,72 +20,55 @@ export class ChatService {
   private readonly endpoint: string;
   private readonly apiVersion: string;
 
-  // Available models configuration
-  private readonly availableModels: AIModel[] = [
-    {
-      id: '550e8400-e29b-41d4-a716-446655440000',
-      name: 'GPT-O3-Mini',
-      description: 'Azure OpenAI O3-Mini: Effizientes Modell für schnelle Antworten.',
-      parameters: {
-        temperature: 0.7,
-        max_tokens: 800,
-        provider: 'azure',
-        deployment: 'gpt-o3-mini-se',
-        endpoint: 'https://memoroseopenai.openai.azure.com',
-        api_version: '2024-12-01-preview',
-      },
-    },
-    {
-      id: '550e8400-e29b-41d4-a716-446655440004',
-      name: 'GPT-4o-Mini',
-      description: 'Azure OpenAI GPT-4o-Mini: Kompaktes, leistungsstarkes KI-Modell.',
-      parameters: {
-        temperature: 0.7,
-        max_tokens: 1000,
-        provider: 'azure',
-        deployment: 'gpt-4o-mini-se',
-        endpoint: 'https://memoroseopenai.openai.azure.com',
-        api_version: '2024-12-01-preview',
-      },
-    },
-    {
-      id: '550e8400-e29b-41d4-a716-446655440005',
-      name: 'GPT-4o',
-      description: 'Azure OpenAI GPT-4o: Das fortschrittlichste multimodale KI-Modell.',
-      parameters: {
-        temperature: 0.7,
-        max_tokens: 1200,
-        provider: 'azure',
-        deployment: 'gpt-4o-se',
-        endpoint: 'https://memoroseopenai.openai.azure.com',
-        api_version: '2024-12-01-preview',
-      },
-    },
-  ];
-
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    @Inject(DATABASE_CONNECTION) private readonly db: Database,
+  ) {
     this.apiKey = this.configService.get<string>('AZURE_OPENAI_API_KEY') || '';
-    this.endpoint = this.configService.get<string>('AZURE_OPENAI_ENDPOINT') || 'https://memoroseopenai.openai.azure.com';
-    this.apiVersion = this.configService.get<string>('AZURE_OPENAI_API_VERSION') || '2024-12-01-preview';
+    this.endpoint =
+      this.configService.get<string>('AZURE_OPENAI_ENDPOINT') ||
+      'https://memoroseopenai.openai.azure.com';
+    this.apiVersion =
+      this.configService.get<string>('AZURE_OPENAI_API_VERSION') ||
+      '2024-12-01-preview';
 
     if (!this.apiKey) {
       this.logger.warn('AZURE_OPENAI_API_KEY is not set!');
     }
   }
 
-  getAvailableModels(): AIModel[] {
-    return this.availableModels;
+  async getAvailableModels(): Promise<Model[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(models)
+        .where(eq(models.isActive, true));
+      return result;
+    } catch (error) {
+      this.logger.error('Error fetching models from database', error);
+      return [];
+    }
   }
 
-  getModelById(modelId: string): AIModel | undefined {
-    return this.availableModels.find((m) => m.id === modelId);
+  async getModelById(modelId: string): Promise<Model | undefined> {
+    try {
+      const result = await this.db
+        .select()
+        .from(models)
+        .where(eq(models.id, modelId))
+        .limit(1);
+      return result[0];
+    } catch (error) {
+      this.logger.error('Error fetching model from database', error);
+      return undefined;
+    }
   }
 
   async createCompletion(
     dto: ChatCompletionDto,
     userId?: string,
   ): AsyncResult<ChatCompletionResponseDto> {
-    const model = this.getModelById(dto.modelId);
+    const model = await this.getModelById(dto.modelId);
 
     if (!model) {
       return err(
@@ -110,9 +83,15 @@ export class ChatService {
       );
     }
 
-    const deployment = model.parameters.deployment;
-    const temperature = dto.temperature ?? model.parameters.temperature;
-    const maxTokens = dto.maxTokens ?? model.parameters.max_tokens;
+    const params = model.parameters as {
+      deployment?: string;
+      temperature?: number;
+      max_tokens?: number;
+    } | null;
+
+    const deployment = params?.deployment || 'gpt-4o-mini-se';
+    const temperature = dto.temperature ?? params?.temperature ?? 0.7;
+    const maxTokens = dto.maxTokens ?? params?.max_tokens ?? 1000;
 
     // Prepare request body
     const requestBody: Record<string, unknown> = {

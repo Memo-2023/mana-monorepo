@@ -17,7 +17,7 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @Get('models')
-  getModels() {
+  async getModels() {
     return this.chatService.getAvailableModels();
   }
 

@@ -1,9 +1,10 @@
 /**
- * Chat Service - AI Completions via Backend
+ * Chat Service - AI Completions via Backend API
  */
 
-import { api } from './api';
-import type { ChatMessage, ChatCompletionResponse, AIModel } from '@chat/types';
+import { chatApi, modelApi, type ChatMessage, type ChatCompletionResponse, type Model } from './api';
+
+export type { ChatMessage, ChatCompletionResponse };
 
 export interface ChatCompletionRequest {
   messages: ChatMessage[];
@@ -16,31 +17,19 @@ export const chatService = {
   /**
    * Get available AI models
    */
-  async getModels(): Promise<AIModel[]> {
-    const { data, error } = await api.get<AIModel[]>('/api/chat/models');
-    if (error) {
-      console.error('Failed to fetch models:', error);
-      return [];
-    }
-    return data || [];
+  async getModels(): Promise<Model[]> {
+    return modelApi.getModels();
   },
 
   /**
    * Send chat completion request
    */
   async createCompletion(request: ChatCompletionRequest): Promise<ChatCompletionResponse | null> {
-    const { data, error } = await api.post<ChatCompletionResponse>('/api/chat/completions', {
+    return chatApi.createCompletion({
       messages: request.messages,
       modelId: request.modelId,
       temperature: request.temperature ?? 0.7,
       maxTokens: request.maxTokens ?? 1000,
     });
-
-    if (error) {
-      console.error('Chat completion failed:', error);
-      return null;
-    }
-
-    return data || null;
   },
 };

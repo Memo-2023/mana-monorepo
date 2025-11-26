@@ -1,157 +1,86 @@
 /**
- * Template Service - CRUD operations via Supabase
+ * Template Service - CRUD operations via Backend API
  */
 
-import { createSupabaseBrowserClient } from './supabase';
-import type { Template, TemplateCreate, TemplateUpdate } from '@chat/types';
+import { templateApi, type Template } from './api';
 
-let supabase: ReturnType<typeof createSupabaseBrowserClient> | null = null;
-
-function getSupabase() {
-  if (!supabase) {
-    supabase = createSupabaseBrowserClient();
-  }
-  return supabase;
-}
+export type { Template };
 
 export const templateService = {
   /**
-   * Get all templates for a user
+   * Get all templates for the current user
    */
   async getTemplates(userId: string): Promise<Template[]> {
-    const sb = getSupabase();
-
-    const { data, error } = await sb
-      .from('templates')
-      .select('*')
-      .eq('user_id', userId)
-      .order('name');
-
-    if (error) {
-      console.error('Error loading templates:', error);
-      return [];
-    }
-
-    return data as Template[];
+    return templateApi.getTemplates();
   },
 
   /**
    * Get a single template by ID
    */
   async getTemplate(templateId: string): Promise<Template | null> {
-    const sb = getSupabase();
-
-    const { data, error } = await sb
-      .from('templates')
-      .select('*')
-      .eq('id', templateId)
-      .single();
-
-    if (error) {
-      console.error('Error loading template:', error);
-      return null;
-    }
-
-    return data as Template;
+    return templateApi.getTemplate(templateId);
   },
 
   /**
-   * Get the default template for a user
+   * Get the default template for the current user
    */
   async getDefaultTemplate(userId: string): Promise<Template | null> {
-    const sb = getSupabase();
-
-    const { data, error } = await sb
-      .from('templates')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_default', true)
-      .single();
-
-    if (error) {
-      console.error('Error loading default template:', error);
-      return null;
-    }
-
-    return data as Template;
+    return templateApi.getDefaultTemplate();
   },
 
   /**
    * Create a new template
    */
-  async createTemplate(template: TemplateCreate): Promise<Template | null> {
-    const sb = getSupabase();
-
-    const { data, error } = await sb
-      .from('templates')
-      .insert(template)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating template:', error);
-      return null;
-    }
-
-    return data as Template;
+  async createTemplate(template: {
+    userId: string;
+    name: string;
+    description?: string;
+    systemPrompt: string;
+    initialQuestion?: string;
+    modelId?: string;
+    color?: string;
+    documentMode?: boolean;
+  }): Promise<Template | null> {
+    return templateApi.createTemplate({
+      name: template.name,
+      description: template.description,
+      systemPrompt: template.systemPrompt,
+      initialQuestion: template.initialQuestion,
+      modelId: template.modelId,
+      color: template.color,
+      documentMode: template.documentMode,
+    });
   },
 
   /**
-   * Update a template
+   * Update an existing template
    */
-  async updateTemplate(templateId: string, updates: TemplateUpdate): Promise<boolean> {
-    const sb = getSupabase();
-
-    const { error } = await sb
-      .from('templates')
-      .update(updates)
-      .eq('id', templateId);
-
-    if (error) {
-      console.error('Error updating template:', error);
-      return false;
-    }
-
-    return true;
+  async updateTemplate(
+    templateId: string,
+    updates: Partial<{
+      name: string;
+      description: string;
+      systemPrompt: string;
+      initialQuestion: string;
+      modelId: string;
+      color: string;
+      documentMode: boolean;
+    }>,
+  ): Promise<boolean> {
+    return templateApi.updateTemplate(templateId, updates);
   },
 
   /**
    * Delete a template
    */
   async deleteTemplate(templateId: string): Promise<boolean> {
-    const sb = getSupabase();
-
-    const { error } = await sb.from('templates').delete().eq('id', templateId);
-
-    if (error) {
-      console.error('Error deleting template:', error);
-      return false;
-    }
-
-    return true;
+    return templateApi.deleteTemplate(templateId);
   },
 
   /**
    * Set a template as default
    */
   async setDefaultTemplate(templateId: string, userId: string): Promise<boolean> {
-    const sb = getSupabase();
-
-    // First, unset all defaults for this user
-    await sb.from('templates').update({ is_default: false }).eq('user_id', userId);
-
-    // Then set the selected template as default
-    const { error } = await sb
-      .from('templates')
-      .update({ is_default: true })
-      .eq('id', templateId)
-      .eq('user_id', userId);
-
-    if (error) {
-      console.error('Error setting default template:', error);
-      return false;
-    }
-
-    return true;
+    return templateApi.setDefaultTemplate(templateId);
   },
 };

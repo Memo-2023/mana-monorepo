@@ -3,14 +3,26 @@
  * Now using Mana Core Auth instead of Supabase Auth
  */
 
+import { browser } from '$app/environment';
 import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
 import { PUBLIC_MANA_CORE_AUTH_URL } from '$env/static/public';
 
-// Initialize Mana Core Auth
+// Initialize Mana Core Auth only on the client side
 const MANA_AUTH_URL = PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
-const { authService, tokenManager } = initializeWebAuth({
-  baseUrl: MANA_AUTH_URL,
-});
+
+// Lazy initialization to avoid SSR issues with localStorage
+let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
+let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null = null;
+
+function getAuthService() {
+  if (!browser) return null;
+  if (!_authService) {
+    const auth = initializeWebAuth({ baseUrl: MANA_AUTH_URL });
+    _authService = auth.authService;
+    _tokenManager = auth.tokenManager;
+  }
+  return _authService;
+}
 
 // State
 let user = $state<UserData | null>(null);
@@ -38,6 +50,13 @@ export const authStore = {
   async initialize() {
     if (initialized) return;
 
+    const authService = getAuthService();
+    if (!authService) {
+      initialized = true;
+      loading = false;
+      return;
+    }
+
     loading = true;
     try {
       const authenticated = await authService.isAuthenticated();
@@ -58,6 +77,11 @@ export const authStore = {
    * Sign in with email and password
    */
   async signIn(email: string, password: string) {
+    const authService = getAuthService();
+    if (!authService) {
+      return { success: false, error: 'Auth not available on server' };
+    }
+
     try {
       const result = await authService.signIn(email, password);
 
@@ -80,6 +104,11 @@ export const authStore = {
    * Sign up with email and password
    */
   async signUp(email: string, password: string) {
+    const authService = getAuthService();
+    if (!authService) {
+      return { success: false, error: 'Auth not available on server', needsVerification: false };
+    }
+
     try {
       const result = await authService.signUp(email, password);
 
@@ -105,6 +134,12 @@ export const authStore = {
    * Sign out
    */
   async signOut() {
+    const authService = getAuthService();
+    if (!authService) {
+      user = null;
+      return;
+    }
+
     try {
       await authService.signOut();
       user = null;
@@ -119,6 +154,11 @@ export const authStore = {
    * Send password reset email
    */
   async resetPassword(email: string) {
+    const authService = getAuthService();
+    if (!authService) {
+      return { success: false, error: 'Auth not available on server' };
+    }
+
     try {
       const result = await authService.forgotPassword(email);
 
@@ -137,6 +177,11 @@ export const authStore = {
    * Get user credit balance
    */
   async getCredits() {
+    const authService = getAuthService();
+    if (!authService) {
+      return null;
+    }
+
     try {
       const credits = await authService.getUserCredits();
       return credits;
@@ -150,6 +195,10 @@ export const authStore = {
    * Get access token for API calls
    */
   async getAccessToken() {
+    const authService = getAuthService();
+    if (!authService) {
+      return null;
+    }
     return await authService.getAppToken();
   },
 };

@@ -1,0 +1,116 @@
+# Development Docker Compose - Unified local development setup
+# Start infrastructure: pnpm docker:up
+# Start all services: pnpm docker:up:all
+# Stop: pnpm docker:down
+
+services:
+  # Shared PostgreSQL Database (multiple databases)
+  postgres:
+    image: postgres:16-alpine
+    container_name: manacore-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: manacore
+      POSTGRES_USER: ${POSTGRES_USER:-manacore}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/init-db:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - manacore-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-manacore}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis cache
+  redis:
+    image: redis:7-alpine
+    container_name: manacore-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-devpassword} --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - manacore-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-devpassword}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Mana Core Auth Service
+  mana-core-auth:
+    profiles: ["auth", "all"]
+    build:
+      context: .
+      dockerfile: ./mana-core-auth/Dockerfile
+    container_name: manacore-auth
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-manacore}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/manacore
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-devpassword}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWT_ACCESS_TOKEN_EXPIRY: ${JWT_ACCESS_TOKEN_EXPIRY:-15m}
+      JWT_REFRESH_TOKEN_EXPIRY: ${JWT_REFRESH_TOKEN_EXPIRY:-7d}
+      JWT_ISSUER: ${JWT_ISSUER:-manacore}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-manacore}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173,http://localhost:8081}
+      CREDITS_SIGNUP_BONUS: ${CREDITS_SIGNUP_BONUS:-150}
+      CREDITS_DAILY_FREE: ${CREDITS_DAILY_FREE:-5}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    networks:
+      - manacore-network
+
+  # Chat Backend Service
+  chat-backend:
+    profiles: ["chat", "all"]
+    build:
+      context: .
+      dockerfile: chat/backend/Dockerfile
+    container_name: chat-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      DATABASE_URL: postgresql://${POSTGRES_USER:-manacore}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/chat
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-manacore}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+      DB_NAME: chat
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY}
+      AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-2024-12-01-preview}
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3002:3002"
+    networks:
+      - manacore-network
+
+networks:
+  manacore-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:

@@ -1,19 +1,20 @@
-// Chat Service - AI API Aufrufe werden über das Backend gehandhabt
+/**
+ * Chat Service - AI API calls via Backend
+ * This service wraps the backend API for AI completions
+ */
 import { availableModels } from '../config/azure';
-import { sendChatRequest as sendChatRequestApi } from '../utils/api';
-import { supabase } from '../utils/supabase';
+import { chatApi, modelApi, usageApi, type ChatMessage, type TokenUsage } from './api';
 
-// Typdefinition für eine Nachricht
-export type ChatMessage = {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-};
+// Re-export types for backward compatibility
+export type { ChatMessage };
 
-// Typdefinition für die Chat-Antwort vom o3-mini-Modell
+// Re-export TokenUsage
+export type { TokenUsage };
+
+// Chat response type (kept for compatibility)
 export type ChatResponse = {
   id: string;
   choices: {
-    // Für o3-mini-Modell
     content_filter_results?: any;
     finish_reason: string;
     index: number;
@@ -38,34 +39,20 @@ export type ChatResponse = {
   };
 };
 
-// Token-Nutzungsinformationen
-export type TokenUsage = {
-  prompt_tokens: number;
-  completion_tokens: number;
-  total_tokens: number;
-};
-
-// Rückgabetyp für die Chat-Anfrage
+// Return type for chat request
 export type ChatRequestResult = {
   content: string;
   usage: TokenUsage;
 };
 
-// Backend-URL für sichere API-Aufrufe
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:3001';
-
-// Logging der Konfiguration
+// Logging configuration
 console.log('Chat Service Konfiguration:', {
-  backendUrl: BACKEND_URL,
+  backendUrl: process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:3001',
   availableModels: availableModels.length,
 });
 
 /**
- * Berechnet die geschätzten Kosten einer LLM-Anfrage
- * @param promptTokens Anzahl der Eingabe-Tokens
- * @param completionTokens Anzahl der Ausgabe-Tokens
- * @param modelId ID des verwendeten Modells
- * @returns Geschätzte Kosten in der kleinsten Währungseinheit (z.B. Cent)
+ * Calculates estimated cost for an LLM request
  */
 export async function calculateTokenCost(
   promptTokens: number,
@@ -73,45 +60,31 @@ export async function calculateTokenCost(
   modelId: string
 ): Promise<number> {
   try {
-    // Hole die Kosteninformationen aus dem Modell
-    const { data: modelData, error } = await supabase
-      .from('models')
-      .select('cost_settings')
-      .eq('id', modelId)
-      .single();
-      
-    if (error || !modelData || !modelData.cost_settings) {
-      console.warn('Fehler beim Laden der Kosteninformationen, verwende Standardwerte:', error);
-      // Standardwerte verwenden
-      const promptCost = 0.0001; // pro 1K Tokens
-      const completionCost = 0.0002; // pro 1K Tokens
-      
-      // Berechne die Kosten
+    // Get cost settings from model
+    const modelData = await modelApi.getModel(modelId);
+
+    if (!modelData || !modelData.costSettings) {
+      console.warn('Fehler beim Laden der Kosteninformationen, verwende Standardwerte');
+      const promptCost = 0.0001;
+      const completionCost = 0.0002;
+
       const cost = (promptTokens * promptCost + completionTokens * completionCost) / 1000;
       return Number(cost.toFixed(6));
     }
-    
-    // Extrahiere die Kostensätze
-    const promptCost = parseFloat(modelData.cost_settings.prompt_per_1k_tokens) || 0.0001;
-    const completionCost = parseFloat(modelData.cost_settings.completion_per_1k_tokens) || 0.0002;
-    
-    // Berechne die Kosten
+
+    const promptCost = modelData.costSettings.prompt_per_1k_tokens || 0.0001;
+    const completionCost = modelData.costSettings.completion_per_1k_tokens || 0.0002;
+
     const cost = (promptTokens * promptCost + completionTokens * completionCost) / 1000;
     return Number(cost.toFixed(6));
   } catch (error) {
     console.error('Fehler bei der Kostenberechnung:', error);
-    // Fallback: vereinfachte Berechnung
     return Number(((promptTokens * 0.0001 + completionTokens * 0.0002) / 1000).toFixed(6));
   }
 }
 
 /**
- * Speichert die Token-Nutzung in der Datenbank
- * @param usage Token-Nutzungsinformationen
- * @param conversationId ID der Konversation
- * @param messageId ID der Nachricht
- * @param userId ID des Benutzers
- * @param modelId ID des verwendeten Modells
+ * Logs token usage to the database
  */
 export async function logTokenUsage(
   usage: TokenUsage,
@@ -121,36 +94,31 @@ export async function logTokenUsage(
   modelId: string
 ): Promise<void> {
   try {
-    // Berechne die geschätzten Kosten
     const estimatedCost = await calculateTokenCost(
       usage.prompt_tokens,
       usage.completion_tokens,
       modelId
     );
-    
-    // Speichere die Nutzungsinformationen
-    const { error } = await supabase
-      .from('usage_logs')
-      .insert({
-        conversation_id: conversationId,
-        message_id: messageId,
-        user_id: userId,
-        model_id: modelId,
-        prompt_tokens: usage.prompt_tokens,
-        completion_tokens: usage.completion_tokens,
-        total_tokens: usage.total_tokens,
-        estimated_cost: estimatedCost
-      });
-      
-    if (error) {
-      console.error('Fehler beim Speichern der Token-Nutzung:', error);
-    } else {
+
+    const success = await usageApi.logTokenUsage({
+      conversationId,
+      messageId,
+      modelId,
+      promptTokens: usage.prompt_tokens,
+      completionTokens: usage.completion_tokens,
+      totalTokens: usage.total_tokens,
+      estimatedCost,
+    });
+
+    if (success) {
       console.log('Token-Nutzung erfolgreich gespeichert:', {
         conversationId,
         messageId,
         totalTokens: usage.total_tokens,
-        estimatedCost
+        estimatedCost,
       });
+    } else {
+      console.error('Fehler beim Speichern der Token-Nutzung');
     }
   } catch (error) {
     console.error('Fehler beim Loggen der Token-Nutzung:', error);
@@ -158,12 +126,7 @@ export async function logTokenUsage(
 }
 
 /**
- * Sendet eine Chat-Anfrage über das Backend
- * Das Backend handhabt die Azure OpenAI API Aufrufe sicher
- * @param messages Array von Nachrichten im Chat
- * @param temperature Kreativität der Antwort (0.0 - 1.0)
- * @param maxTokens Maximale Anzahl der Tokens in der Antwort
- * @returns Die Antwort des LLM-Modells und Tokeninformationen
+ * Sends a chat request via the backend
  */
 export async function sendChatRequest(
   messages: ChatMessage[],
@@ -172,57 +135,66 @@ export async function sendChatRequest(
 ): Promise<string | ChatRequestResult> {
   console.log('sendChatRequest gestartet mit:', {
     messagesCount: messages.length,
-    maxTokens
+    maxTokens,
   });
 
   try {
-    // Hole aktuelle Modellparameter aus der Konversation (für Modellwechsel)
-    let deployment = '';
+    // Find model deployment from system message
+    let modelId = '550e8400-e29b-41d4-a716-446655440000'; // Default to GPT-O3-Mini
 
-    // System-Nachricht mit Modell-Präfix suchen
-    const systemMessage = messages.find(msg => msg.role === 'system' && msg.content.startsWith('MODEL:'));
+    const systemMessage = messages.find(
+      (msg) => msg.role === 'system' && msg.content.startsWith('MODEL:')
+    );
     if (systemMessage) {
-      deployment = systemMessage.content.split(':')[1].trim();
+      const deployment = systemMessage.content.split(':')[1].trim();
       console.log('Modell in system Nachricht erkannt:', deployment);
+
+      // Map deployment to model ID
+      const deploymentToModelId: Record<string, string> = {
+        'gpt-o3-mini-se': '550e8400-e29b-41d4-a716-446655440000',
+        'gpt-4o-mini-se': '550e8400-e29b-41d4-a716-446655440004',
+        'gpt-4o-se': '550e8400-e29b-41d4-a716-446655440005',
+      };
+
+      modelId = deploymentToModelId[deployment] || modelId;
     } else {
       console.warn('Keine System-Nachricht mit MODEL-Präfix gefunden!');
     }
 
-    // Falls kein Modell angegeben wurde, setze auf Fallback gpt-o3-mini-se
-    const deploymentToUse = deployment || 'gpt-o3-mini-se';
-    console.log('Verwende Deployment:', deploymentToUse);
+    console.log('Verwende Model ID:', modelId);
 
-    // Konfiguration für den API-Wrapper (Backend benötigt nur deployment)
-    const config = {
-      deployment: deploymentToUse
-    };
+    // Filter out MODEL: system messages before sending to API
+    const filteredMessages = messages.filter(
+      (msg) => !(msg.role === 'system' && msg.content.startsWith('MODEL:'))
+    );
 
-    // Verwende den zentralen API-Wrapper - dieser ruft das Backend auf
-    const result = await sendChatRequestApi(messages, temperature, maxTokens, config);
+    // Send request to backend
+    const result = await chatApi.createCompletion({
+      messages: filteredMessages,
+      modelId,
+      temperature,
+      maxTokens,
+    });
 
-    // Wenn es ein einfacher String ist (Fehlerfall), diesen zurückgeben
-    if (typeof result === 'string') {
-      return result;
+    if (!result) {
+      return 'Es tut mir leid, aber ich konnte keine Antwort generieren. Bitte stelle sicher, dass das Backend läuft.';
     }
 
-    // Ansonsten die vollständige Antwort mit Token-Nutzung zurückgeben
     return {
       content: result.content,
-      usage: result.usage
+      usage: result.usage,
     };
   } catch (error) {
     console.error('Fehler bei der Chat-Anfrage:', error);
 
-    // Versuche, mehr Informationen über den Fehler zu erhalten
     if (error instanceof Error) {
       console.error('Fehlerdetails:', {
         name: error.name,
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
     }
 
-    // Gib eine benutzerfreundliche Fehlermeldung zurück, anstatt den Fehler zu werfen
     return `Es tut mir leid, aber ich konnte keine Antwort generieren. Bitte stelle sicher, dass das Backend läuft. Fehlerdetails: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`;
   }
 }

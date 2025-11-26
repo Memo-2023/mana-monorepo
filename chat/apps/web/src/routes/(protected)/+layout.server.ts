@@ -1,22 +1,13 @@
 /**
  * Protected routes layout server
- * Validates session and redirects to login if not authenticated
+ * Auth checking is now done client-side via Mana Core Auth
  */
 
-import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({ locals, url }) => {
-  const { session, user } = await locals.safeGetSession();
-
-  if (!session) {
-    // Redirect to login with return URL
-    const redirectTo = encodeURIComponent(url.pathname);
-    redirect(303, `/login?redirectTo=${redirectTo}`);
-  }
-
+export const load: LayoutServerLoad = async ({ url }) => {
+  // Return the current path for client-side redirect logic
   return {
-    session,
-    user,
+    pathname: url.pathname,
   };
 };

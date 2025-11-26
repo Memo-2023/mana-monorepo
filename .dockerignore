@@ -1,0 +1,37 @@
+# TypeScript build cache - must be excluded to prevent incremental build issues
+**/*.tsbuildinfo
+
+# Dependencies
+**/node_modules
+**/.pnpm-store
+
+# Build outputs are excluded to force fresh builds
+**/dist
+
+# Development files
+**/.env
+**/.env.local
+**/.env.*.local
+
+# IDE
+**/.idea
+**/.vscode
+**/*.swp
+**/*.swo
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
+
+# Logs
+**/*.log
+**/npm-debug.log*
+**/pnpm-debug.log*
+
+# Test files
+**/coverage
+**/.nyc_output
+
+# Git
+.git
+.gitignore

@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { LoginPage } from '@manacore/shared-auth-ui';
 	import { ChatLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
+
+	// Get redirect URL from query params
+	const redirectTo = $derived($page.url.searchParams.get('redirectTo') || '/chat');
 
 	// German translations
 	const translations = {
@@ -47,7 +51,7 @@
 	goto={goto}
 	enableGoogle={false}
 	enableApple={false}
-	successRedirect="/chat"
+	successRedirect={redirectTo}
 	registerPath="/register"
 	forgotPasswordPath="/forgot-password"
 	lightBackground="#e0f2fe"
