@@ -25,6 +25,9 @@ ios/
 .env.production.local
 .env*.local
 
+# BUT commit the central development env file
+!.env.development
+
 # IDE
 .idea/
 .vscode/

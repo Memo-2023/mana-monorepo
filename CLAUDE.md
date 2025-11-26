@@ -169,7 +169,34 @@ pnpm add <package> --filter @manacore/shared-utils
 
 ## Environment Variables
 
-Each project/app has its own `.env` file. Common patterns:
+### Centralized Development Environment
+
+All development environment variables are managed from a single file: `.env.development`
+
+```bash
+# First-time setup: generates all app-specific .env files
+pnpm setup:env
+
+# This also runs automatically after `pnpm install`
+```
+
+The script reads `.env.development` and generates platform-specific `.env` files for each app with the correct prefixes:
+- **Expo mobile**: `EXPO_PUBLIC_*` prefix
+- **SvelteKit web**: `PUBLIC_*` prefix
+- **NestJS backend**: No prefix
+
+### Key Files
+- `.env.development` - Central source of truth (committed to git)
+- `scripts/generate-env.mjs` - Generation script
+- `apps/**/apps/**/.env` - Generated files (gitignored)
+
+### Adding New Variables
+
+1. Add the variable to `.env.development`
+2. Update `scripts/generate-env.mjs` to map it to the appropriate apps
+3. Run `pnpm setup:env` to regenerate
+
+### Platform Prefix Patterns
 
 **Mobile (Expo):**
 ```
@@ -192,6 +219,8 @@ PORT=...
 ```
 
 ## Project-Specific Documentation
+
+- **[docs/ENVIRONMENT_VARIABLES.md](docs/ENVIRONMENT_VARIABLES.md)** - Complete environment setup guide
 
 Each project has its own `CLAUDE.md` with detailed information:
 - `apps/maerchenzauber/CLAUDE.md` - Story generation specifics, AI services

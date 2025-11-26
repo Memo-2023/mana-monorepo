@@ -1,9 +1,17 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "NODE_ENV",
+    "MANA_CORE_AUTH_URL",
+    "JWT_PUBLIC_KEY",
+    "AZURE_OPENAI_ENDPOINT",
+    "AZURE_OPENAI_API_KEY"
+  ],
   "tasks": {
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "dotEnv": [".env", ".env.development", ".env.local"]
     },
     "build": {
       "dependsOn": ["^build"],
