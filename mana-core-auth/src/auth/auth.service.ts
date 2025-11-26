@@ -1,15 +1,16 @@
 import { Injectable, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { nanoid } from 'nanoid';
+import { randomUUID } from 'crypto';
 import { getDb } from '../db/connection';
 import { users, passwords, sessions } from '../db/schema';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
-interface TokenPayload {
+export interface TokenPayload {
   sub: string;
   email: string;
   role: string;
@@ -136,7 +137,7 @@ export class AuthService {
     const [session] = await db
       .select()
       .from(sessions)
-      .where(and(eq(sessions.refreshToken, refreshToken), eq(sessions.revokedAt, null)))
+      .where(and(eq(sessions.refreshToken, refreshToken), isNull(sessions.revokedAt)))
       .limit(1);
 
     if (!session) {
@@ -166,8 +167,8 @@ export class AuthService {
       user.id,
       user.email,
       user.role,
-      session.deviceId,
-      session.deviceName,
+      session.deviceId ?? undefined,
+      session.deviceName ?? undefined,
       ipAddress,
       userAgent,
     );
@@ -205,14 +206,18 @@ export class AuthService {
   ) {
     const db = this.getDb();
 
-    const privateKey = this.configService.get<string>('jwt.privateKey');
+    const privateKeyRaw = this.configService.get<string>('jwt.privateKey');
+    if (!privateKeyRaw) {
+      throw new Error('JWT private key not configured');
+    }
+    const privateKey: string = privateKeyRaw;
     const accessTokenExpiry = this.configService.get<string>('jwt.accessTokenExpiry') || '15m';
     const refreshTokenExpiry = this.configService.get<string>('jwt.refreshTokenExpiry') || '7d';
     const issuer = this.configService.get<string>('jwt.issuer');
     const audience = this.configService.get<string>('jwt.audience');
 
-    // Generate session ID
-    const sessionId = nanoid();
+    // Generate session ID (must be UUID for database)
+    const sessionId = randomUUID();
 
     // Create session record
     const refreshTokenString = nanoid(64);
@@ -233,7 +238,7 @@ export class AuthService {
     });
 
     // Generate JWT payload
-    const tokenPayload: TokenPayload = {
+    const tokenPayload: Record<string, unknown> = {
       sub: userId,
       email,
       role,
@@ -243,10 +248,10 @@ export class AuthService {
 
     // Sign access token
     const accessToken = jwt.sign(tokenPayload, privateKey, {
-      algorithm: 'RS256',
-      expiresIn: accessTokenExpiry,
-      issuer,
-      audience,
+      algorithm: 'RS256' as const,
+      expiresIn: accessTokenExpiry as jwt.SignOptions['expiresIn'],
+      ...(issuer && { issuer }),
+      ...(audience && { audience }),
     });
 
     return {
@@ -260,6 +265,9 @@ export class AuthService {
   async validateToken(token: string) {
     try {
       const publicKey = this.configService.get<string>('jwt.publicKey');
+      if (!publicKey) {
+        throw new Error('JWT public key not configured');
+      }
       const audience = this.configService.get<string>('jwt.audience');
       const issuer = this.configService.get<string>('jwt.issuer');
 

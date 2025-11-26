@@ -16,6 +16,9 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const publicKey = this.configService.get<string>('jwt.publicKey');
+      if (!publicKey) {
+        throw new UnauthorizedException('JWT configuration error');
+      }
       const audience = this.configService.get<string>('jwt.audience');
       const issuer = this.configService.get<string>('jwt.issuer');
 

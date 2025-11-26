@@ -1,5 +1,9 @@
+import { config } from 'dotenv';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import { getDb, closeConnection } from './connection';
+
+// Load environment variables
+config();
 
 async function runMigrations() {
   const databaseUrl = process.env.DATABASE_URL;
