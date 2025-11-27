@@ -18,7 +18,7 @@
       "type": "state-management"
     },
     {
-      "name": "supabase",
+      "name": "mana-core-auth",
       "type": "authentication"
     }
   ],
