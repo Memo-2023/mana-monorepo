@@ -1,14 +1,13 @@
-Dirk Zimanky 
-  Direkter Kontakt1.
+Dirk Zimanky
+Direkter Kontakt1.
 Gründer von adCura - Wir beratenEigentümer, Investoren und Verwaltungsräte. Experte in Electronic Manufacturing Services (EMS)
 
 edisconet
 
 University of Konstanz
-Zürich Metropolitan Area  Kontaktinfo
-1.195 Follower:innen 
+Zürich Metropolitan Area Kontaktinfo
+1.195 Follower:innen
 500+ Kontakte
-
 
 Alex Vasileva, Tobias Müller und 19 weitere gemeinsame KontakteAlex Vasileva, Tobias Müller und 19 weitere gemeinsame Kontakte
 
@@ -94,7 +93,6 @@ adCura’s highly experienced team & associates with deep understanding about le
 AktivitätenAktivitäten
 1.195 Follower:innen1.195 Follower:innen
 
-
 Follower:in
 
 Beiträge
@@ -104,25 +102,24 @@ Kommentare
 Profilfoto von Dirk Zimanky
 Dirk Zimanky hat dies repostet
 
-Link zur Grafik von Stephanie Kaudela-Baum, Prof. Dr.  anzeigen
+Link zur Grafik von Stephanie Kaudela-Baum, Prof. Dr. anzeigen
 Stephanie Kaudela-Baum, Prof. Dr.Stephanie Kaudela-Baum, Prof. Dr.
-   • 2.Verifiziert • 2.
+• 2.Verifiziert • 2.
 Professor of Leadership and Innovation I Co-Head Competence Center Business Development, Leadership and HR I Lecturer I Speaker I #leadership I #innovation I #creativityProfessor of Leadership and Innovation I Co-Head Competence Center Business Development, Leadership and HR I Lecturer I Speaker I #leadership I #innovation I #creativity
-2 Wochen •  vor 2 Wochen • Alle Mitglieder und Nicht-Mitglieder von LinkedIn
+2 Wochen • vor 2 Wochen • Alle Mitglieder und Nicht-Mitglieder von LinkedIn
 In Lucerne, you definitely get into the continuous innovation flow. Late summer, lake, mountains, chocolate and great conference participants :) - register now and network with the CINet community! HSLU Hochschule Luzern HSLU – Institut für Betriebs- und Regionalökonomie IBR HSLU – Lucerne School of Business – International
 … mehr
 
 Continuous Innovation Network (CINet)Continuous Innovation Network (CINet)
 597 Follower:innen597 Follower:innen
-The 26th CINet conference is coming! 
-Join us on 7-9 September 2025 in the beautiful Lucerne! 
+The 26th CINet conference is coming!
+Join us on 7-9 September 2025 in the beautiful Lucerne!
 Registrations are still open: https://lnkd.in/dQ_ix6FG
-
 
 CINet Board
 Maria Carmela Annosi, Harry Boer, Tim Schweisfurth, Luca Gastaldi, René Chester Goduscheit, Katharina Hölzle, Nicolette Lakemond, Mats Magnusson, Luisa Pellegrini, Magnus Persson, Daniel Trabucchi, Jeannette Visser-Groeneveld, Melanie Wiener, Patricia Wolf
 
-Local Organizers Committee 
+Local Organizers Committee
 Patricia Wolf, Stephanie Kaudela-Baum, Prof. Dr., Julien Alain Nussbaum, Christian Hohmann, Shaun West, Prof. Dr. Petra Müller-Csernetzky
 … mehr
 
@@ -134,15 +131,12 @@ like
 16
 2 Reposts
 
-
-
-
-Link zur Grafik von Dirk Zimanky  anzeigen
+Link zur Grafik von Dirk Zimanky anzeigen
 Dirk ZimankyDirk Zimanky
-   • 1.Premium • 1.
+• 1.Premium • 1.
 Gründer von adCura - Wir beratenEigentümer, Investoren und Verwaltungsräte. Experte in Electronic Manufacturing Services (EMS)Gründer von adCura - Wir beratenEigentümer, Investoren und Verwaltungsräte. Experte in Electronic Manufacturing Services (EMS)
 Ihre Serviceleistungen anzeigen
-2 Monate •  vor 2 Monaten • Alle Mitglieder und Nicht-Mitglieder von LinkedIn
+2 Monate • vor 2 Monaten • Alle Mitglieder und Nicht-Mitglieder von LinkedIn
 
 Most companies don't have a knowledge deficit – they just don't know what they already know. How can generative AI help to make hidden knowledge visible – without overwhelming employees?
 We have published a new article at edisconet, take a look:
@@ -154,6 +148,7 @@ Die meisten Unternehmen haben kein Wissensdefizit – sie wissen nur nicht, was 
 Wie kann generative KI helfen, verborgenes Wissen sichtbar zu machen – ganz ohne Ihre Mitarbeitenden zu überfordern?
 
 In unserem neuen Artikel zeigen wir,
+
 - wie KI stilles Wissen in nutzbares Wissen verwandelt
 - was das mit CRM-Daten, Vertriebsprozessen und Transparenz zu tun hat
 - und warum wir gemeinsam mit der HSLU eine Sandbox für wissensintensive Organisationen entwickeln.
@@ -162,7 +157,6 @@ In unserem neuen Artikel zeigen wir,
 🔗 https://lnkd.in/eu6iEB4a
 
 🎯 Neugierig geworden? Am Ende des Artikels erfahren Sie, wie Sie Teil unseres spannenden Forschungsprojekts werden können.
-
 
 Hashtag#Wissensmanagement Hashtag#GenerativeAI Hashtag#TacitKnowledge Hashtag#AIimUnternehmen Hashtag#edisconetCommons Hashtag#FutureOfWork
 
@@ -173,10 +167,6 @@ Wissensmanagement und KI_edisconet, HSLU
 Größere Bilddarstellung aktivieren,
 likecelebrate
 15
-
-
-
-
 
 Alle Beiträge anzeigen
 BerufserfahrungBerufserfahrung
@@ -217,8 +207,8 @@ Director, Business Development Business Area Communication Network Equipment & I
 Director, Business Development Business Area Communication Network Equipment & Industrial Electronic
 2002–2004 · 2 Jahre2002–2004 · 2 Jahre
 Elcoteq trat dem Unternehmen auf dem Höhepunkt des Wachstums des Mobilfunkmarktes bei und erbrachte elektronische Fertigungsdienstleistungen für Mobiltelefone und Basisstationen von Kommunikationsnetzwerken. Wir verzeichneten ein sehr schnelles Umsatzwachstum, haben in einigen Jahren den Umsatz mehr als verdoppelt und betrieben ein Fertigungsnetzwerk in 16 Geschäftsbereichen in Japan, China, Estland, USA, Mexiko, Russland und Finnland. Während meiner Zeit bei Elcoteq hatte ich von 2002 bis 2004 verschiedene Positionen als Director, Business Development Business Area Communication Network Equipment und Industrial Electronic inne. Von 2000 bis 2002 Director, Sales Industrial Electronic und von 1999 bis 2000 als Account Manager, Geographical Area Europe.Elcoteq trat dem Unternehmen auf dem Höhepunkt des Wachstums des Mobilfunkmarktes bei und erbrachte elektronische Fertigungsdienstleistungen für Mobiltelefone und Basisstationen von Kommunikationsnetzwerken. Wir verzeichneten ein sehr schnelles Umsatzwachstum, haben in einigen Jahren den Umsatz mehr als verdoppelt und betrieben ein Fertigungsnetzwerk in 16 Geschäftsbereichen in Japan, China, Estland, USA, Mexiko, Russland und Finnland. Während meiner Zeit bei Elcoteq hatte ich von 2002 bis 2004 verschiedene Positionen als Director, Business Development Business Area Communication Network Equipment und Industrial Electronic inne. Von 2000 bis 2002 Director, Sales Industrial Electronic und von 1999 bis 2000 als Account Manager, Geographical Area Europe.… mehr anzeigen
-Director, Sales Industrial Electronic 
-Director, Sales Industrial Electronic 
+Director, Sales Industrial Electronic
+Director, Sales Industrial Electronic
 2000–2002 · 2 Jahre2000–2002 · 2 Jahre
 Account Manager, Geographical Area Europe
 Account Manager, Geographical Area Europe

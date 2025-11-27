@@ -28,7 +28,7 @@
 		try {
 			const tags = await pb.collection('tags').getList<Tag>(1, 100, {
 				filter: `user_id="${userId}"`,
-				sort: '-usage_count,name'
+				sort: '-usage_count,name',
 			});
 			availableTags = tags.items;
 		} catch (err) {
@@ -76,7 +76,7 @@
 				color: randomColor,
 				user_id: userId,
 				is_public: false,
-				usage_count: 0
+				usage_count: 0,
 			});
 
 			availableTags = [...availableTags, newTag];
@@ -129,12 +129,12 @@
 			{placeholder}
 			onfocus={handleInputFocus}
 			onblur={handleInputBlur}
-			class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+			class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 		/>
 
 		{#if isDropdownOpen && (filteredTags.length > 0 || canCreateNewTag || isCreatingTag)}
 			<div
-				class="absolute top-full right-0 left-0 z-50 mt-1 max-h-60 overflow-auto rounded-md border border-theme-border bg-white shadow-lg dark:bg-gray-800"
+				class="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-md border border-theme-border bg-white shadow-lg dark:bg-gray-800"
 			>
 				{#if isCreatingTag}
 					<div class="border-b border-theme-border p-3">
@@ -143,7 +143,7 @@
 								bind:value={newTagName}
 								type="text"
 								placeholder="Enter tag name"
-								class="flex-1 rounded border border-theme-border bg-theme-surface px-2 py-1 text-sm focus:ring-1 focus:ring-theme-accent focus:outline-none"
+								class="flex-1 rounded border border-theme-border bg-theme-surface px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-theme-accent"
 								onkeydown={(e) => {
 									if (e.key === 'Enter') {
 										e.preventDefault();

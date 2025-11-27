@@ -56,8 +56,7 @@
 					<div class="flex-1">
 						<p class="text-sm font-medium text-blue-800 dark:text-blue-200">Pro Tip</p>
 						<p class="text-xs text-blue-700 dark:text-blue-300 mt-1">
-							Press <kbd class="kbd inline text-xs">?</kbd> to toggle this shortcuts panel at any
-							time.
+							Press <kbd class="kbd inline text-xs">?</kbd> to toggle this shortcuts panel at any time.
 						</p>
 					</div>
 				</div>
@@ -80,8 +79,9 @@
 		border-radius: 0.25rem;
 		border-width: 1px;
 		padding: 0.25rem 0.5rem;
-		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-			'Courier New', monospace;
+		font-family:
+			ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+			monospace;
 		font-size: 0.75rem;
 		line-height: 1rem;
 		font-weight: 600;

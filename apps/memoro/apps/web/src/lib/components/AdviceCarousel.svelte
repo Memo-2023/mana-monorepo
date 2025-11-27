@@ -32,9 +32,7 @@
 	let { blueprintId, language = 'de' }: Props = $props();
 
 	// Don't show advice for standard blueprint
-	const isStandardBlueprint = $derived(
-		!blueprintId || blueprintId === STANDARD_BLUEPRINT_ID
-	);
+	const isStandardBlueprint = $derived(!blueprintId || blueprintId === STANDARD_BLUEPRINT_ID);
 
 	let advice = $state<AdviceData | null>(null);
 	let loading = $state(false);
@@ -108,7 +106,7 @@
 			const cardWidth = scrollContainer.offsetWidth;
 			scrollContainer.scrollTo({
 				left: index * cardWidth,
-				behavior: 'smooth'
+				behavior: 'smooth',
 			});
 		}
 	}
@@ -146,7 +144,12 @@
 				aria-label={$t('blueprints.previous_tip')}
 			>
 				<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M15 19l-7-7 7-7"
+					/>
 				</svg>
 			</button>
 		{:else if sortedSections.length > 1}
@@ -154,7 +157,9 @@
 		{/if}
 
 		<!-- Scrollable Card Container -->
-		<div class="w-full max-w-lg overflow-hidden rounded-xl border border-theme bg-content shadow-lg">
+		<div
+			class="w-full max-w-lg overflow-hidden rounded-xl border border-theme bg-content shadow-lg"
+		>
 			<div
 				bind:this={scrollContainer}
 				onscroll={handleScroll}
@@ -162,7 +167,8 @@
 				class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar"
 			>
 				{#each sortedSections as section, index}
-					{@const content = section?.content?.[language as 'de' | 'en'] ||
+					{@const content =
+						section?.content?.[language as 'de' | 'en'] ||
 						section?.content?.en ||
 						section?.content?.de ||
 						''}

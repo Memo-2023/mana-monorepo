@@ -22,92 +22,108 @@ const groupedByYearMonth = await getChangelogGroupedByYearMonth(language);
 	title="Changelog - Product Updates & Release Notes | Picture"
 	description="Stay up to date with the latest Picture updates, new features, improvements, and bug fixes. See what's new in AI image generation."
 >
-	<div class="bg-dark-bg min-h-screen">
+	<div class="min-h-screen bg-dark-bg">
 		<!-- Hero -->
 		<div class="bg-gradient-to-b from-dark-elevated to-dark-bg py-16 md:py-24">
-			<div class="max-w-6xl mx-auto px-6">
-				<div class="text-center mb-12">
-					<div class="inline-block px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full mb-6">
-						<span class="text-primary text-sm font-medium">📝 Changelog</span>
+			<div class="mx-auto max-w-6xl px-6">
+				<div class="mb-12 text-center">
+					<div
+						class="mb-6 inline-block rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5"
+					>
+						<span class="text-sm font-medium text-primary">📝 Changelog</span>
 					</div>
-					<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+					<h1 class="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">
 						What's New in Picture
 					</h1>
-					<p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-						Stay up to date with new features, improvements, and bug fixes. We ship updates regularly to make Picture better for you.
+					<p class="mx-auto mb-8 max-w-3xl text-xl text-gray-300">
+						Stay up to date with new features, improvements, and bug fixes. We ship updates
+						regularly to make Picture better for you.
 					</p>
 
 					<!-- Stats -->
-					<div class="flex items-center justify-center gap-8 text-sm text-gray-400 flex-wrap">
-						<div><span class="text-2xl font-bold text-primary">{stats.totalReleases}</span> releases</div>
-						<div><span class="text-2xl font-bold text-primary">{stats.latestVersion}</span> latest</div>
+					<div class="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-400">
+						<div>
+							<span class="text-2xl font-bold text-primary">{stats.totalReleases}</span> releases
+						</div>
+						<div>
+							<span class="text-2xl font-bold text-primary">{stats.latestVersion}</span> latest
+						</div>
 						<div><span class="text-2xl font-bold text-primary">{years.length}</span> years</div>
 					</div>
 				</div>
 
 				<!-- Latest Release Highlight -->
-				{latestRelease && (
-					<div class="bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20 rounded-2xl p-8 mb-12">
-						<div class="flex items-start justify-between mb-4 flex-wrap gap-4">
-							<div>
-								<div class="flex items-center gap-3 mb-3">
-									<VersionBadge version={latestRelease.data.version} type={latestRelease.data.type} />
-									<span class="text-sm text-gray-400">
-										{new Date(latestRelease.data.releaseDate).toLocaleDateString('en-US', {
-											month: 'long',
-											day: 'numeric',
-											year: 'numeric',
-										})}
-									</span>
+				{
+					latestRelease && (
+						<div class="mb-12 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 to-purple-500/10 p-8">
+							<div class="mb-4 flex flex-wrap items-start justify-between gap-4">
+								<div>
+									<div class="mb-3 flex items-center gap-3">
+										<VersionBadge
+											version={latestRelease.data.version}
+											type={latestRelease.data.type}
+										/>
+										<span class="text-sm text-gray-400">
+											{new Date(latestRelease.data.releaseDate).toLocaleDateString('en-US', {
+												month: 'long',
+												day: 'numeric',
+												year: 'numeric',
+											})}
+										</span>
+									</div>
+									<h2 class="mb-2 text-3xl font-bold text-white">{latestRelease.data.title}</h2>
+									<p class="text-lg text-gray-300">{latestRelease.data.summary}</p>
 								</div>
-								<h2 class="text-3xl font-bold text-white mb-2">{latestRelease.data.title}</h2>
-								<p class="text-gray-300 text-lg">{latestRelease.data.summary}</p>
+								<a
+									href={`/changelog/${latestRelease.id}`}
+									class="whitespace-nowrap rounded-lg bg-primary px-6 py-3 font-medium text-white transition hover:bg-primary/90"
+								>
+									Read Full Release
+								</a>
 							</div>
-							<a
-								href={`/changelog/${latestRelease.id}`}
-								class="px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition whitespace-nowrap"
-							>
-								Read Full Release
-							</a>
 						</div>
-					</div>
-				)}
+					)
+				}
 
 				<!-- Filter Tabs -->
-				<div class="flex items-center gap-3 flex-wrap mb-8">
+				<div class="mb-8 flex flex-wrap items-center gap-3">
 					<button class="filter-btn active" data-year="all">
 						All Releases ({stats.totalReleases})
 					</button>
-					{years.map((year) => (
-						<button class="filter-btn" data-year={year}>
-							{year} ({stats.yearCounts.find((y) => y.year === year)?.count || 0})
-						</button>
-					))}
+					{
+						years.map((year) => (
+							<button class="filter-btn" data-year={year}>
+								{year} ({stats.yearCounts.find((y) => y.year === year)?.count || 0})
+							</button>
+						))
+					}
 				</div>
 
 				<!-- Subscribe -->
-				<div class="bg-dark-elevated border border-dark-border rounded-xl p-6 mb-12">
-					<div class="flex items-center justify-between flex-wrap gap-4">
+				<div class="mb-12 rounded-xl border border-dark-border bg-dark-elevated p-6">
+					<div class="flex flex-wrap items-center justify-between gap-4">
 						<div>
-							<h3 class="text-lg font-semibold text-white mb-1">Get Release Notifications</h3>
-							<p class="text-sm text-gray-400">Subscribe to receive updates about new releases and features.</p>
+							<h3 class="mb-1 text-lg font-semibold text-white">Get Release Notifications</h3>
+							<p class="text-sm text-gray-400">
+								Subscribe to receive updates about new releases and features.
+							</p>
 						</div>
 						<div class="flex gap-3">
 							<a
 								href="https://twitter.com/picture"
-								class="px-4 py-2 bg-dark-bg border border-dark-border rounded-lg text-sm text-gray-300 hover:border-primary hover:text-primary transition"
+								class="rounded-lg border border-dark-border bg-dark-bg px-4 py-2 text-sm text-gray-300 transition hover:border-primary hover:text-primary"
 							>
 								Twitter
 							</a>
 							<a
 								href="https://discord.gg/picture"
-								class="px-4 py-2 bg-dark-bg border border-dark-border rounded-lg text-sm text-gray-300 hover:border-primary hover:text-primary transition"
+								class="rounded-lg border border-dark-border bg-dark-bg px-4 py-2 text-sm text-gray-300 transition hover:border-primary hover:text-primary"
 							>
 								Discord
 							</a>
 							<a
 								href="/blog/rss.xml"
-								class="px-4 py-2 bg-dark-bg border border-dark-border rounded-lg text-sm text-gray-300 hover:border-primary hover:text-primary transition"
+								class="rounded-lg border border-dark-border bg-dark-bg px-4 py-2 text-sm text-gray-300 transition hover:border-primary hover:text-primary"
 							>
 								RSS Feed
 							</a>
@@ -118,45 +134,62 @@ const groupedByYearMonth = await getChangelogGroupedByYearMonth(language);
 		</div>
 
 		<!-- Changelog Entries -->
-		<div class="max-w-6xl mx-auto px-6 pb-16">
+		<div class="mx-auto max-w-6xl px-6 pb-16">
 			<!-- Grouped by Year & Month -->
-			{Object.entries(groupedByYearMonth)
-				.sort(([yearA], [yearB]) => parseInt(yearB) - parseInt(yearA))
-				.map(([year, months]) => (
-					<div class="changelog-year mb-16" data-year={year}>
-						<h2 class="text-3xl font-bold text-white mb-8 sticky top-20 bg-dark-bg py-4 z-10">
-							{year}
-						</h2>
+			{
+				Object.entries(groupedByYearMonth)
+					.sort(([yearA], [yearB]) => parseInt(yearB) - parseInt(yearA))
+					.map(([year, months]) => (
+						<div class="changelog-year mb-16" data-year={year}>
+							<h2 class="sticky top-20 z-10 mb-8 bg-dark-bg py-4 text-3xl font-bold text-white">
+								{year}
+							</h2>
 
-						{Object.entries(months)
-							.sort((a, b) => {
-								const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-								return monthOrder.indexOf(b[0]) - monthOrder.indexOf(a[0]);
-							})
-							.map(([month, releases]) => (
-								<div class="changelog-month mb-12">
-									<h3 class="text-xl font-semibold text-gray-400 mb-6">{month}</h3>
-									<div class="space-y-8">
-										{releases.map((release) => (
-											<ChangelogEntry entry={release} />
-										))}
+							{Object.entries(months)
+								.sort((a, b) => {
+									const monthOrder = [
+										'January',
+										'February',
+										'March',
+										'April',
+										'May',
+										'June',
+										'July',
+										'August',
+										'September',
+										'October',
+										'November',
+										'December',
+									];
+									return monthOrder.indexOf(b[0]) - monthOrder.indexOf(a[0]);
+								})
+								.map(([month, releases]) => (
+									<div class="changelog-month mb-12">
+										<h3 class="mb-6 text-xl font-semibold text-gray-400">{month}</h3>
+										<div class="space-y-8">
+											{releases.map((release) => (
+												<ChangelogEntry entry={release} />
+											))}
+										</div>
 									</div>
-								</div>
-							))}
-					</div>
-				))}
+								))}
+						</div>
+					))
+			}
 		</div>
 
 		<!-- CTA -->
-		<div class="max-w-4xl mx-auto px-6 py-16">
-			<div class="bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20 rounded-2xl p-12 text-center">
-				<h2 class="text-3xl font-bold text-white mb-4">Ready to try the latest features?</h2>
-				<p class="text-gray-300 mb-8">
+		<div class="mx-auto max-w-4xl px-6 py-16">
+			<div
+				class="rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 to-purple-500/10 p-12 text-center"
+			>
+				<h2 class="mb-4 text-3xl font-bold text-white">Ready to try the latest features?</h2>
+				<p class="mb-8 text-gray-300">
 					Experience all the new improvements and features we've built for you.
 				</p>
 				<a
 					href="#"
-					class="px-8 py-3 bg-primary text-white font-medium rounded-lg inline-block hover:bg-primary/90 transition"
+					class="inline-block rounded-lg bg-primary px-8 py-3 font-medium text-white transition hover:bg-primary/90"
 				>
 					Get Started Free
 				</a>
@@ -192,10 +225,10 @@ const groupedByYearMonth = await getChangelogGroupedByYearMonth(language);
 
 	<style>
 		.filter-btn {
-			@apply px-4 py-2 bg-dark-elevated border border-dark-border rounded-lg text-sm text-gray-300 hover:border-primary hover:text-primary transition;
+			@apply rounded-lg border border-dark-border bg-dark-elevated px-4 py-2 text-sm text-gray-300 transition hover:border-primary hover:text-primary;
 		}
 		.filter-btn.active {
-			@apply bg-primary/10 border-primary text-primary;
+			@apply border-primary bg-primary/10 text-primary;
 		}
 	</style>
 </Layout>

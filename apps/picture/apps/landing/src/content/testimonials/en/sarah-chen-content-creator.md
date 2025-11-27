@@ -1,13 +1,13 @@
 ---
-name: "Sarah Chen"
-role: "Content Creator & Influencer"
-company: "Instagram @sarahcreates"
-avatar: "/testimonials/sarah-chen.jpg"
+name: 'Sarah Chen'
+role: 'Content Creator & Influencer'
+company: 'Instagram @sarahcreates'
+avatar: '/testimonials/sarah-chen.jpg'
 rating: 5
 featured: true
-category: "content-creator"
-useCase: "Daily Instagram and TikTok content creation"
-language: "en"
+category: 'content-creator'
+useCase: 'Daily Instagram and TikTok content creation'
+language: 'en'
 date: 2024-09-15
 verified: true
 ---

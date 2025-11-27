@@ -138,6 +138,7 @@ pnpm add -D @sveltejs/adapter-netlify
 ```
 
 Update `svelte.config.js`:
+
 ```javascript
 import adapter from '@sveltejs/adapter-netlify';
 ```
@@ -168,12 +169,14 @@ netlify deploy --prod --site manacore --dir build
 ```
 
 The build process creates:
+
 - `build/` - Static assets and client code
 - `.netlify/` - Serverless functions for SSR
 
 #### Build Output
 
 After running `pnpm build`, you should see:
+
 - ✅ Client bundle in `build/`
 - ✅ Server functions in `.netlify/`
 - ✅ Netlify configuration (`_headers`, `_redirects`)

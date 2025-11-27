@@ -1,6 +1,6 @@
 ---
-title: "Unsere Werte: Was uns antreibt"
-description: "Transparenz, Fairness und Innovation - die Grundpfeiler, auf denen Mana aufgebaut ist."
+title: 'Unsere Werte: Was uns antreibt'
+description: 'Transparenz, Fairness und Innovation - die Grundpfeiler, auf denen Mana aufgebaut ist.'
 category: values
 order: 2
 featured: true
@@ -41,6 +41,7 @@ Unsere Werte spiegeln sich in unserer täglichen Arbeit wider:
 ### Kundenorientierung
 
 Der Kunde steht im Mittelpunkt:
+
 - 24/7 Support in Ihrer Sprache
 - Persönliche Beratung für Enterprise-Kunden
 - Community-getriebene Feature-Entwicklung
@@ -48,6 +49,7 @@ Der Kunde steht im Mittelpunkt:
 ### Nachhaltigkeit
 
 Verantwortung für die Zukunft:
+
 - CO2-neutrale Server-Infrastruktur
 - Förderung von KI-Bildung
 - Ethische KI-Nutzung als Priorität
@@ -55,6 +57,7 @@ Verantwortung für die Zukunft:
 ### Teamgeist
 
 Gemeinsam sind wir stärker:
+
 - Diverse Teams aus 15+ Ländern
 - Flache Hierarchien und offene Türen
 - Work-Life-Balance als Grundrecht

@@ -16,7 +16,7 @@ features:
   - Entdeckungs-Statistiken und Achievements
   - Schöne, teilbare Karten-Visualisierungen
   - Privatsphäre-Fokus mit lokaler Datenverarbeitung
-  - "Gamification: Challenges und Stadtteile freischalten"
+  - 'Gamification: Challenges und Stadtteile freischalten'
 status: coming-soon
 releaseDate: Geplant Q4 2025
 order: 9
@@ -30,15 +30,19 @@ Traces verwandelt deinen täglichen Weg durch die Stadt in ein Abenteuer. Die Ap
 ## Hauptfunktionen
 
 ### 🗺️ Stadtentdecker
+
 Sieh auf einen Blick, welche Straßen und Stadtteile du bereits besucht hast. Weße Flecken auf der Karte motivieren dich, neue Ecken zu erkunden.
 
 ### 🎯 Intelligente Routenvorschläge
+
 Unsere KI schlägt dir interessante Routen vor, die durch noch unerforschte Gebiete führen - angepasst an deine Vorlieben und verfügbare Zeit.
 
 ### 📊 Detaillierte Statistiken
+
 Wie viel Prozent deiner Stadt hast du schon gesehen? Welche Stadtteile kennst du am besten? Traces zeigt dir spannende Insights zu deinen Bewegungsmustern.
 
 ### 🎨 Schöne Visualisierungen
+
 Erstelle kunstvolle Karten deiner Wege und teile sie mit Freunden. Jede Stadt wird zu deinem persönlichen Kunstwerk.
 
 ## Für wen ist Traces?

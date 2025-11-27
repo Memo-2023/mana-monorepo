@@ -1,13 +1,13 @@
 ---
-name: "James Kim"
-role: "Professional Photographer"
-company: "Kim Photography Studio"
-avatar: "/testimonials/james-kim.jpg"
+name: 'James Kim'
+role: 'Professional Photographer'
+company: 'Kim Photography Studio'
+avatar: '/testimonials/james-kim.jpg'
 rating: 4
 featured: false
-category: "photographer"
-useCase: "Concept art and pre-visualization"
-language: "en"
+category: 'photographer'
+useCase: 'Concept art and pre-visualization'
+language: 'en'
 date: 2024-09-20
 verified: true
 ---

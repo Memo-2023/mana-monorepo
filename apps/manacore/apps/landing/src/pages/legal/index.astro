@@ -17,147 +17,163 @@ const sortedDocs = legalDocs.sort((a, b) => a.data.order - b.data.order);
 ---
 
 <Layout title="Rechtliches - AGB, Datenschutz & mehr | Mana">
-  <Navbar />
-  
-  <!-- Hero Section -->
-  <HeroSection
-    title="Rechtliche Informationen"
-    subtitle="Transparenz ist uns wichtig. Hier finden Sie alle rechtlichen Dokumente und Informationen zu unseren Services."
-    background="gradient"
-    minHeight="medium"
-    icon="mdi:scale-balance"
-    containerClass=""
-    debug={true}
-  />
-  
-  <!-- Legal Documents -->
-  <Section spacing="xlarge">
-    <Container>
-      <Grid cols={1} gap="large" class="max-w-4xl mx-auto">
-        {sortedDocs.map((doc) => (
-          <a href={`/legal/${doc.slug}`} class="block group">
-            <Card variant="bordered" padding="large" class="hover:border-mana-blue transition-all hover:shadow-lg">
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <div class="flex items-center gap-3 mb-3">
-                    <Icon name="mdi:file-document" class="w-6 h-6 text-gray-400" />
-                    <Heading as="h3" size="4" class="group-hover:text-mana-blue transition-colors">
-                      {doc.data.title}
-                    </Heading>
-                  </div>
-                  
-                  <Text color="muted" class="mb-4">
-                    {doc.data.description}
-                  </Text>
-                  
-                  <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                    <span>
-                      Stand: {new Date(doc.data.lastUpdated).toLocaleDateString('de-DE', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </span>
-                  </div>
-                </div>
-                
-                <Icon name="mdi:arrow-right" class="w-6 h-6 text-gray-400 group-hover:text-mana-blue transition-colors flex-shrink-0" />
-              </div>
-            </Card>
-          </a>
-        ))}
-      </Grid>
-    </Container>
-  </Section>
-  
-  <!-- Additional Resources -->
-  <Section spacing="xlarge" class="bg-gray-50 dark:bg-gray-900">
-    <Container>
-      <div class="text-center mb-12">
-        <Heading as="h2" size="3" class="mb-4">
-          Weitere wichtige Informationen
-        </Heading>
-      </div>
-      
-      <Grid cols={3} gap="large" class="max-w-4xl mx-auto">
-        <Card variant="bordered" padding="large" class="text-center">
-          <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <Icon name="mdi:shield-check" class="w-6 h-6" />
-          </div>
-          <Heading as="h3" size="6" class="mb-2">
-            Datenschutz-Center
-          </Heading>
-          <Text size="sm" color="muted" class="mb-4">
-            Detaillierte Informationen zu DSGVO und KI-Ethik
-          </Text>
-          <a href="/privacy" class="text-mana-blue hover:underline text-sm font-medium">
-            Zum Datenschutz-Center →
-          </a>
-        </Card>
-        
-        <Card variant="bordered" padding="large" class="text-center">
-          <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <Icon name="mdi:headset" class="w-6 h-6" />
-          </div>
-          <Heading as="h3" size="6" class="mb-2">
-            Support
-          </Heading>
-          <Text size="sm" color="muted" class="mb-4">
-            Hilfe und Antworten auf Ihre Fragen
-          </Text>
-          <a href="/support" class="text-mana-blue hover:underline text-sm font-medium">
-            Zum Support →
-          </a>
-        </Card>
-        
-        <Card variant="bordered" padding="large" class="text-center">
-          <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <Icon name="mdi:information" class="w-6 h-6" />
-          </div>
-          <Heading as="h3" size="6" class="mb-2">
-            Impressum
-          </Heading>
-          <Text size="sm" color="muted" class="mb-4">
-            Angaben gemäß § 5 TMG
-          </Text>
-          <a href="/impressum" class="text-mana-blue hover:underline text-sm font-medium">
-            Zum Impressum →
-          </a>
-        </Card>
-      </Grid>
-    </Container>
-  </Section>
-  
-  <!-- Contact -->
-  <Section spacing="xlarge">
-    <Container>
-      <Card variant="elevated" padding="xlarge" class="max-w-4xl mx-auto bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
-        <div class="text-center">
-          <Icon name="mdi:email" class="w-12 h-12 text-mana-blue mx-auto mb-4" />
-          
-          <Heading as="h2" size="3" class="mb-4">
-            Rechtliche Fragen?
-          </Heading>
-          
-          <Text size="lg" color="muted" class="mb-6 max-w-2xl mx-auto">
-            Unsere Rechtsabteilung steht Ihnen für alle Fragen zu unseren 
-            Bedingungen und rechtlichen Dokumenten zur Verfügung.
-          </Text>
-          
-          <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="mailto:legal@mana.ai" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-mana-blue text-white rounded-lg hover:bg-blue-600 transition-colors">
-              <Icon name="mdi:email" class="w-5 h-5" />
-              legal@mana.ai
-            </a>
-            <a href="tel:+4912345678" class="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-mana-blue transition-colors">
-              <Icon name="mdi:phone" class="w-5 h-5" />
-              +49 123 456 78
-            </a>
-          </div>
-        </div>
-      </Card>
-    </Container>
-  </Section>
-  
-  <Footer />
+	<Navbar />
+
+	<!-- Hero Section -->
+	<HeroSection
+		title="Rechtliche Informationen"
+		subtitle="Transparenz ist uns wichtig. Hier finden Sie alle rechtlichen Dokumente und Informationen zu unseren Services."
+		background="gradient"
+		minHeight="medium"
+		icon="mdi:scale-balance"
+		containerClass=""
+		debug={true}
+	/>
+
+	<!-- Legal Documents -->
+	<Section spacing="xlarge">
+		<Container>
+			<Grid cols={1} gap="large" class="max-w-4xl mx-auto">
+				{
+					sortedDocs.map((doc) => (
+						<a href={`/legal/${doc.slug}`} class="block group">
+							<Card
+								variant="bordered"
+								padding="large"
+								class="hover:border-mana-blue transition-all hover:shadow-lg"
+							>
+								<div class="flex items-start justify-between">
+									<div class="flex-1">
+										<div class="flex items-center gap-3 mb-3">
+											<Icon name="mdi:file-document" class="w-6 h-6 text-gray-400" />
+											<Heading
+												as="h3"
+												size="4"
+												class="group-hover:text-mana-blue transition-colors"
+											>
+												{doc.data.title}
+											</Heading>
+										</div>
+
+										<Text color="muted" class="mb-4">
+											{doc.data.description}
+										</Text>
+
+										<div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+											<span>
+												Stand:{' '}
+												{new Date(doc.data.lastUpdated).toLocaleDateString('de-DE', {
+													year: 'numeric',
+													month: 'long',
+													day: 'numeric',
+												})}
+											</span>
+										</div>
+									</div>
+
+									<Icon
+										name="mdi:arrow-right"
+										class="w-6 h-6 text-gray-400 group-hover:text-mana-blue transition-colors flex-shrink-0"
+									/>
+								</div>
+							</Card>
+						</a>
+					))
+				}
+			</Grid>
+		</Container>
+	</Section>
+
+	<!-- Additional Resources -->
+	<Section spacing="xlarge" class="bg-gray-50 dark:bg-gray-900">
+		<Container>
+			<div class="text-center mb-12">
+				<Heading as="h2" size="3" class="mb-4"> Weitere wichtige Informationen </Heading>
+			</div>
+
+			<Grid cols={3} gap="large" class="max-w-4xl mx-auto">
+				<Card variant="bordered" padding="large" class="text-center">
+					<div
+						class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-4"
+					>
+						<Icon name="mdi:shield-check" class="w-6 h-6" />
+					</div>
+					<Heading as="h3" size="6" class="mb-2"> Datenschutz-Center </Heading>
+					<Text size="sm" color="muted" class="mb-4">
+						Detaillierte Informationen zu DSGVO und KI-Ethik
+					</Text>
+					<a href="/privacy" class="text-mana-blue hover:underline text-sm font-medium">
+						Zum Datenschutz-Center →
+					</a>
+				</Card>
+
+				<Card variant="bordered" padding="large" class="text-center">
+					<div
+						class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-4"
+					>
+						<Icon name="mdi:headset" class="w-6 h-6" />
+					</div>
+					<Heading as="h3" size="6" class="mb-2"> Support </Heading>
+					<Text size="sm" color="muted" class="mb-4"> Hilfe und Antworten auf Ihre Fragen </Text>
+					<a href="/support" class="text-mana-blue hover:underline text-sm font-medium">
+						Zum Support →
+					</a>
+				</Card>
+
+				<Card variant="bordered" padding="large" class="text-center">
+					<div
+						class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-4"
+					>
+						<Icon name="mdi:information" class="w-6 h-6" />
+					</div>
+					<Heading as="h3" size="6" class="mb-2"> Impressum </Heading>
+					<Text size="sm" color="muted" class="mb-4"> Angaben gemäß § 5 TMG </Text>
+					<a href="/impressum" class="text-mana-blue hover:underline text-sm font-medium">
+						Zum Impressum →
+					</a>
+				</Card>
+			</Grid>
+		</Container>
+	</Section>
+
+	<!-- Contact -->
+	<Section spacing="xlarge">
+		<Container>
+			<Card
+				variant="elevated"
+				padding="xlarge"
+				class="max-w-4xl mx-auto bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20"
+			>
+				<div class="text-center">
+					<Icon name="mdi:email" class="w-12 h-12 text-mana-blue mx-auto mb-4" />
+
+					<Heading as="h2" size="3" class="mb-4"> Rechtliche Fragen? </Heading>
+
+					<Text size="lg" color="muted" class="mb-6 max-w-2xl mx-auto">
+						Unsere Rechtsabteilung steht Ihnen für alle Fragen zu unseren Bedingungen und
+						rechtlichen Dokumenten zur Verfügung.
+					</Text>
+
+					<div class="flex flex-col sm:flex-row gap-4 justify-center">
+						<a
+							href="mailto:legal@mana.ai"
+							class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-mana-blue text-white rounded-lg hover:bg-blue-600 transition-colors"
+						>
+							<Icon name="mdi:email" class="w-5 h-5" />
+							legal@mana.ai
+						</a>
+						<a
+							href="tel:+4912345678"
+							class="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-mana-blue transition-colors"
+						>
+							<Icon name="mdi:phone" class="w-5 h-5" />
+							+49 123 456 78
+						</a>
+					</div>
+				</div>
+			</Card>
+		</Container>
+	</Section>
+
+	<Footer />
 </Layout>

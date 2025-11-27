@@ -3,6 +3,7 @@
 ## TL;DR
 
 **Two-layer approach:**
+
 1. **CI test stage**: Patch lockfile SSH → HTTPS for `npm ci` (for tests)
 2. **Docker build**: Clone private repo, build tarball, replace with `file:` (for production image)
 
@@ -13,14 +14,17 @@ Your local machine converts HTTPS → SSH during `npm install`, baking SSH URLs 
 ## Why Fighting It Locally Doesn't Work
 
 ❌ **Approach 1**: "Fix package.json to use HTTPS"
+
 - Doesn't work if git config rewrites it during install
 
 ❌ **Approach 2**: "Remove SSH rewrites from git config"
+
 - Inconvenient for developers
 - Easy to forget
 - Breaks other workflows
 
 ❌ **Approach 3**: "Temporarily disable git config during install"
+
 - Doesn't persist
 - Every developer needs to remember
 
@@ -36,7 +40,7 @@ The GitHub Actions workflow uses the proven pattern to handle both SSH and HTTPS
 - name: Checkout code
   uses: actions/checkout@v4
   with:
-    persist-credentials: false  # Don't let default GITHUB_TOKEN interfere
+    persist-credentials: false # Don't let default GITHUB_TOKEN interfere
 
 - name: Configure git for private packages
   env:
@@ -148,11 +152,11 @@ sed -i 's|"git+https://..."|"file:mana-core.tgz"|g' package.json
 
 ## Why This is Better Than Alternatives
 
-| Approach | Developer Impact | Reliability | Production Quality | Maintenance |
-|----------|-----------------|-------------|-------------------|-------------|
-| Fix git config locally | 😡 High | 🔴 Low | ⚠️ Medium | 😱 High |
-| Require HTTPS in lockfile | 😡 High | 🔴 Low | ⚠️ Medium | 😱 High |
-| **Two-layer (sed + tarball)** | 😊 None | 🟢 100% | ✅ Excellent | 😌 None |
+| Approach                      | Developer Impact | Reliability | Production Quality | Maintenance |
+| ----------------------------- | ---------------- | ----------- | ------------------ | ----------- |
+| Fix git config locally        | 😡 High          | 🔴 Low      | ⚠️ Medium          | 😱 High     |
+| Require HTTPS in lockfile     | 😡 High          | 🔴 Low      | ⚠️ Medium          | 😱 High     |
+| **Two-layer (sed + tarball)** | 😊 None          | 🟢 100%     | ✅ Excellent       | 😌 None     |
 
 ## Lessons Learned
 
@@ -167,6 +171,7 @@ sed -i 's|"git+https://..."|"file:mana-core.tgz"|g' package.json
 ## References
 
 This solution combines proven approaches:
+
 - **sed patching**: Used in `storyteller-project` for CI/CD
 - **tarball approach**: Used in memoro-service for production Docker images
 - Battle-tested across multiple projects

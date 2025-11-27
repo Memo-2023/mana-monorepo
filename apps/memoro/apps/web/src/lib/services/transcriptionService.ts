@@ -50,7 +50,7 @@ async function transcribeViaMemoryService(
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${appToken}`
+			Authorization: `Bearer ${appToken}`,
 		},
 		body: JSON.stringify({
 			filePath: audioPath,
@@ -59,8 +59,8 @@ async function transcribeViaMemoryService(
 			spaceId,
 			recordingLanguages,
 			title,
-			blueprintId
-		})
+			blueprintId,
+		}),
 	});
 }
 
@@ -76,7 +76,7 @@ export async function triggerTranscription({
 	recordingLanguages,
 	title,
 	blueprintId,
-	appToken
+	appToken,
 }: TranscriptionParams & { appToken: string }): Promise<TranscriptionRequestResult> {
 	try {
 		if (!appToken) {
@@ -93,7 +93,7 @@ export async function triggerTranscription({
 			spaceId,
 			title,
 			blueprintId,
-			recordingLanguages
+			recordingLanguages,
 		});
 
 		// Let memoro-service handle the intelligent routing
@@ -114,7 +114,7 @@ export async function triggerTranscription({
 			console.debug('Error calling transcription via Memoro Service:', {
 				status: transcribeResponse.status,
 				statusText: transcribeResponse.statusText,
-				errorText
+				errorText,
 			});
 
 			return {
@@ -122,7 +122,7 @@ export async function triggerTranscription({
 				error: errorText,
 				isNetworkError: transcribeResponse.status >= 500,
 				userMessage: 'Transcription could not be started',
-				technicalMessage: errorText
+				technicalMessage: errorText,
 			};
 		}
 
@@ -136,7 +136,7 @@ export async function triggerTranscription({
 			error: String(error),
 			isNetworkError: true,
 			userMessage: 'An error occurred while starting transcription',
-			technicalMessage: String(error)
+			technicalMessage: String(error),
 		};
 	}
 }

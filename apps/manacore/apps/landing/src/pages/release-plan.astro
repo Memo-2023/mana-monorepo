@@ -1,445 +1,458 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Manacore Release Plan v.0.2">
-    <style is:inline>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+	<style is:inline>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
-            color: #e0e0e0;
-            min-height: 100vh;
-            padding: 20px;
-        }
+		body {
+			font-family:
+				-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+			background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+			color: #e0e0e0;
+			min-height: 100vh;
+			padding: 20px;
+		}
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+		.container {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 20px;
+		}
 
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 1.8rem;
-            color: #ffffff;
-            font-weight: 600;
-        }
+		h1 {
+			text-align: center;
+			margin-bottom: 10px;
+			font-size: 1.8rem;
+			color: #ffffff;
+			font-weight: 600;
+		}
 
-        .version {
-            text-align: center;
-            color: #666;
-            font-size: 0.85rem;
-            margin-bottom: 30px;
-        }
+		.version {
+			text-align: center;
+			color: #666;
+			font-size: 0.85rem;
+			margin-bottom: 30px;
+		}
 
-        .add-button {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+		.add-button {
+			width: 100%;
+			padding: 15px;
+			margin-bottom: 30px;
+			background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+			border: none;
+			border-radius: 12px;
+			color: white;
+			font-size: 1rem;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
 
-        .add-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
-        }
+		.add-button:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+		}
 
-        .release-list {
-            list-style: none;
-        }
+		.release-list {
+			list-style: none;
+		}
 
-        .release-item {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            cursor: move;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+		.release-item {
+			background: rgba(255, 255, 255, 0.05);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			border-radius: 12px;
+			padding: 20px;
+			margin-bottom: 15px;
+			cursor: move;
+			transition: all 0.3s ease;
+			display: flex;
+			align-items: center;
+			gap: 15px;
+		}
 
-        .release-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(5px);
-        }
+		.release-item:hover {
+			background: rgba(255, 255, 255, 0.08);
+			transform: translateX(5px);
+		}
 
-        .release-item.dragging {
-            opacity: 0.5;
-            transform: scale(0.95);
-        }
+		.release-item.dragging {
+			opacity: 0.5;
+			transform: scale(0.95);
+		}
 
-        .release-item.drag-over {
-            background: rgba(102, 126, 234, 0.2);
-            border-color: #667eea;
-        }
+		.release-item.drag-over {
+			background: rgba(102, 126, 234, 0.2);
+			border-color: #667eea;
+		}
 
-        /* Past events styling */
-        .release-item.past {
-            opacity: 0.5;
-        }
+		/* Past events styling */
+		.release-item.past {
+			opacity: 0.5;
+		}
 
-        /* Upcoming event highlights */
-        .release-item.upcoming-soon {
-            border-color: #ef4444;
-            background: rgba(239, 68, 68, 0.15);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-        }
+		/* Upcoming event highlights */
+		.release-item.upcoming-soon {
+			border-color: #ef4444;
+			background: rgba(239, 68, 68, 0.15);
+			box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+		}
 
-        .release-item.upcoming-near {
-            border-color: #f97316;
-            background: rgba(249, 115, 22, 0.12);
-            box-shadow: 0 0 15px rgba(249, 115, 22, 0.25);
-        }
+		.release-item.upcoming-near {
+			border-color: #f97316;
+			background: rgba(249, 115, 22, 0.12);
+			box-shadow: 0 0 15px rgba(249, 115, 22, 0.25);
+		}
 
-        .release-item.upcoming-moderate {
-            border-color: #eab308;
-            background: rgba(234, 179, 8, 0.1);
-            box-shadow: 0 0 10px rgba(234, 179, 8, 0.2);
-        }
+		.release-item.upcoming-moderate {
+			border-color: #eab308;
+			background: rgba(234, 179, 8, 0.1);
+			box-shadow: 0 0 10px rgba(234, 179, 8, 0.2);
+		}
 
-        /* Today marker */
-        .today-marker {
-            position: relative;
-            margin: 30px 0;
-            text-align: center;
-            color: #667eea;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-        }
+		/* Today marker */
+		.today-marker {
+			position: relative;
+			margin: 30px 0;
+			text-align: center;
+			color: #667eea;
+			font-size: 0.9rem;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 2px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 20px;
+		}
 
-        .today-marker::before,
-        .today-marker::after {
-            content: '';
-            flex: 1;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #667eea);
-        }
+		.today-marker::before,
+		.today-marker::after {
+			content: '';
+			flex: 1;
+			height: 2px;
+			background: linear-gradient(90deg, transparent, #667eea);
+		}
 
-        .today-marker::after {
-            background: linear-gradient(270deg, transparent, #667eea);
-        }
+		.today-marker::after {
+			background: linear-gradient(270deg, transparent, #667eea);
+		}
 
-        .drag-handle {
-            color: #666;
-            font-size: 1.2rem;
-            cursor: grab;
-        }
+		.drag-handle {
+			color: #666;
+			font-size: 1.2rem;
+			cursor: grab;
+		}
 
-        .drag-handle:active {
-            cursor: grabbing;
-        }
+		.drag-handle:active {
+			cursor: grabbing;
+		}
 
-        .release-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-        }
+		.release-content {
+			flex: 1;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 15px;
+		}
 
-        .release-main {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex: 1;
-        }
+		.release-main {
+			display: flex;
+			align-items: center;
+			gap: 15px;
+			flex: 1;
+		}
 
-        .release-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+		.release-actions {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
 
-        .date-weekday-wrapper {
-            display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 0;
-            transition: all 0.3s ease;
-            width: 260px;
-            min-width: 260px;
-        }
+		.date-weekday-wrapper {
+			display: flex;
+			align-items: center;
+			background: rgba(255, 255, 255, 0.1);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			border-radius: 8px;
+			padding: 0;
+			transition: all 0.3s ease;
+			width: 260px;
+			min-width: 260px;
+		}
 
-        .date-weekday-wrapper:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: #667eea;
-        }
+		.date-weekday-wrapper:hover {
+			background: rgba(255, 255, 255, 0.15);
+			border-color: #667eea;
+		}
 
-        .weekday {
-            padding: 8px 12px;
-            background: rgba(102, 126, 234, 0.2);
-            border-radius: 8px 0 0 8px;
-            font-size: 0.85rem;
-            color: #a0b4f3;
-            font-weight: 500;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            white-space: nowrap;
-            width: 110px;
-            text-align: center;
-        }
+		.weekday {
+			padding: 8px 12px;
+			background: rgba(102, 126, 234, 0.2);
+			border-radius: 8px 0 0 8px;
+			font-size: 0.85rem;
+			color: #a0b4f3;
+			font-weight: 500;
+			border-right: 1px solid rgba(255, 255, 255, 0.1);
+			white-space: nowrap;
+			width: 110px;
+			text-align: center;
+		}
 
-        .date-input {
-            background: transparent;
-            border: none;
-            border-radius: 0 8px 8px 0;
-            padding: 8px 12px;
-            color: #e0e0e0;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex: 1;
-        }
+		.date-input {
+			background: transparent;
+			border: none;
+			border-radius: 0 8px 8px 0;
+			padding: 8px 12px;
+			color: #e0e0e0;
+			font-size: 0.95rem;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			flex: 1;
+		}
 
-        .date-input:focus {
-            outline: none;
-        }
+		.date-input:focus {
+			outline: none;
+		}
 
-        /* Style the calendar icon */
-        .date-input::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            cursor: pointer;
-            margin-right: 4px;
-        }
+		/* Style the calendar icon */
+		.date-input::-webkit-calendar-picker-indicator {
+			filter: invert(1);
+			cursor: pointer;
+			margin-right: 4px;
+		}
 
-        .date-input::-webkit-datetime-edit {
-            padding-left: 4px;
-        }
+		.date-input::-webkit-datetime-edit {
+			padding-left: 4px;
+		}
 
-        .project-name {
-            flex: 1;
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: #fff;
-            background: transparent;
-            border: 1px solid transparent;
-            padding: 8px 12px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
+		.project-name {
+			flex: 1;
+			font-weight: 600;
+			font-size: 1.1rem;
+			color: #fff;
+			background: transparent;
+			border: 1px solid transparent;
+			padding: 8px 12px;
+			border-radius: 8px;
+			transition: all 0.3s ease;
+		}
 
-        .project-name:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
+		.project-name:hover {
+			background: rgba(255, 255, 255, 0.1);
+			border-color: rgba(255, 255, 255, 0.2);
+		}
 
-        .project-name:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #667eea;
-            outline: none;
-        }
+		.project-name:focus {
+			background: rgba(255, 255, 255, 0.1);
+			border-color: #667eea;
+			outline: none;
+		}
 
-        .delete-btn {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #ef4444;
-            border-radius: 8px;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
+		.delete-btn {
+			background: rgba(239, 68, 68, 0.2);
+			border: 1px solid rgba(239, 68, 68, 0.3);
+			color: #ef4444;
+			border-radius: 8px;
+			padding: 8px 12px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			font-size: 0.9rem;
+		}
 
-        .delete-btn:hover {
-            background: rgba(239, 68, 68, 0.3);
-            border-color: #ef4444;
-        }
+		.delete-btn:hover {
+			background: rgba(239, 68, 68, 0.3);
+			border-color: #ef4444;
+		}
 
-        .menu-btn {
-            background: transparent;
-            border: none;
-            color: #666;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
+		.menu-btn {
+			background: transparent;
+			border: none;
+			color: #666;
+			font-size: 1.2rem;
+			cursor: pointer;
+			padding: 4px 8px;
+			border-radius: 6px;
+			transition: all 0.3s ease;
+			position: relative;
+		}
 
-        .menu-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #999;
-        }
+		.menu-btn:hover {
+			background: rgba(255, 255, 255, 0.1);
+			color: #999;
+		}
 
-        .menu-dropdown {
-            position: absolute;
-            right: 0;
-            top: 100%;
-            margin-top: 5px;
-            background: rgba(30, 30, 30, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 5px;
-            min-width: 120px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            display: none;
-        }
+		.menu-dropdown {
+			position: absolute;
+			right: 0;
+			top: 100%;
+			margin-top: 5px;
+			background: rgba(30, 30, 30, 0.95);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			border-radius: 8px;
+			padding: 5px;
+			min-width: 120px;
+			box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+			z-index: 1000;
+			display: none;
+		}
 
-        .menu-dropdown.show {
-            display: block;
-        }
+		.menu-dropdown.show {
+			display: block;
+		}
 
-        .menu-item {
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: #ef4444;
-            font-size: 0.9rem;
-        }
+		.menu-item {
+			padding: 8px 12px;
+			border-radius: 6px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			color: #ef4444;
+			font-size: 0.9rem;
+		}
 
-        .menu-item:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
+		.menu-item:hover {
+			background: rgba(239, 68, 68, 0.2);
+		}
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-            font-size: 1.1rem;
-        }
+		.empty-state {
+			text-align: center;
+			padding: 60px 20px;
+			color: #666;
+			font-size: 1.1rem;
+		}
 
-        @media (max-width: 600px) {
-            .release-content {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .project-name {
-                width: 100%;
-            }
-        }
-    </style>
+		@media (max-width: 600px) {
+			.release-content {
+				flex-direction: column;
+				align-items: stretch;
+			}
 
-    <div class="container">
-        <h1>💧 Manacore Release Plan</h1>
-        <div class="version">v.0.2</div>
-        <button class="add-button" onclick="addNewRelease()">+ Neues Release hinzufügen</button>
-        <ul class="release-list" id="releaseList"></ul>
-        <div class="empty-state" id="emptyState" style="display: none;">
-            Keine Releases geplant. Füge dein erstes Release hinzu!
-        </div>
-    </div>
+			.project-name {
+				width: 100%;
+			}
+		}
+	</style>
 
-    <script is:inline>
-        // Initial data
-        let releases = [
-            { date: '2025-08-18', name: 'Memoro Closed Beta' },
-            { date: '2025-09-02', name: 'Memoro Open Beta' },
-            { date: '2025-09-05', name: 'Märchenzauber Closed Beta' },
-            { date: '2025-09-08', name: 'Memoro Release' },
-            { date: '2025-09-13', name: 'Märchenzauber Open Beta' },
-            { date: '2025-09-18', name: 'Manadeck Closed Beta' },
-            { date: '2025-09-23', name: 'Märchenzauber Release' },
-            { date: '2025-09-28', name: 'AI News Closed Beta (Kann auch vorgeschoben werden, einfach ohne auth)' },
-            { date: '2025-10-01', name: 'Manadeck Open Beta' }
-        ];
+	<div class="container">
+		<h1>💧 Manacore Release Plan</h1>
+		<div class="version">v.0.2</div>
+		<button class="add-button" onclick="addNewRelease()">+ Neues Release hinzufügen</button>
+		<ul class="release-list" id="releaseList"></ul>
+		<div class="empty-state" id="emptyState" style="display: none;">
+			Keine Releases geplant. Füge dein erstes Release hinzu!
+		</div>
+	</div>
 
-        let draggedElement = null;
-        let draggedIndex = null;
+	<script is:inline>
+		// Initial data
+		let releases = [
+			{ date: '2025-08-18', name: 'Memoro Closed Beta' },
+			{ date: '2025-09-02', name: 'Memoro Open Beta' },
+			{ date: '2025-09-05', name: 'Märchenzauber Closed Beta' },
+			{ date: '2025-09-08', name: 'Memoro Release' },
+			{ date: '2025-09-13', name: 'Märchenzauber Open Beta' },
+			{ date: '2025-09-18', name: 'Manadeck Closed Beta' },
+			{ date: '2025-09-23', name: 'Märchenzauber Release' },
+			{
+				date: '2025-09-28',
+				name: 'AI News Closed Beta (Kann auch vorgeschoben werden, einfach ohne auth)',
+			},
+			{ date: '2025-10-01', name: 'Manadeck Open Beta' },
+		];
 
-        function getWeekday(dateString) {
-            const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
-            const date = new Date(dateString);
-            return days[date.getDay()];
-        }
+		let draggedElement = null;
+		let draggedIndex = null;
 
-        function formatDateForDisplay(dateString) {
-            const date = new Date(dateString);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = String(date.getFullYear()).slice(-2);
-            return `${day}.${month}.${year}`;
-        }
+		function getWeekday(dateString) {
+			const days = [
+				'Sonntag',
+				'Montag',
+				'Dienstag',
+				'Mittwoch',
+				'Donnerstag',
+				'Freitag',
+				'Samstag',
+			];
+			const date = new Date(dateString);
+			return days[date.getDay()];
+		}
 
-        function formatTodayDate() {
-            const today = new Date();
-            const weekday = getWeekday(today.toISOString().split('T')[0]);
-            const formatted = formatDateForDisplay(today.toISOString().split('T')[0]);
-            return `${weekday}, ${formatted}`;
-        }
+		function formatDateForDisplay(dateString) {
+			const date = new Date(dateString);
+			const day = String(date.getDate()).padStart(2, '0');
+			const month = String(date.getMonth() + 1).padStart(2, '0');
+			const year = String(date.getFullYear()).slice(-2);
+			return `${day}.${month}.${year}`;
+		}
 
-        function renderReleases() {
-            const list = document.getElementById('releaseList');
-            const emptyState = document.getElementById('emptyState');
-            
-            if (releases.length === 0) {
-                list.style.display = 'none';
-                emptyState.style.display = 'block';
-                return;
-            }
-            
-            list.style.display = 'block';
-            emptyState.style.display = 'none';
-            
-            // Sort releases by date
-            releases.sort((a, b) => new Date(a.date) - new Date(b.date));
-            
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            let todayMarkerAdded = false;
-            let firstUpcomingIndex = -1;
-            
-            list.innerHTML = '';
-            
-            releases.forEach((release, index) => {
-                const releaseDate = new Date(release.date);
-                releaseDate.setHours(0, 0, 0, 0);
-                const daysUntil = Math.ceil((releaseDate - today) / (1000 * 60 * 60 * 24));
-                
-                // Add today marker
-                if (!todayMarkerAdded && daysUntil >= 0) {
-                    todayMarkerAdded = true;
-                    if (index > 0) { // Only add marker if there are past events
-                        list.innerHTML += `<div class="today-marker" id="todayMarker">Heute - ${formatTodayDate()}</div>`;
-                    }
-                    if (firstUpcomingIndex === -1) {
-                        firstUpcomingIndex = index;
-                    }
-                }
-                
-                // Determine CSS classes
-                let classes = 'release-item';
-                if (daysUntil < 0) {
-                    classes += ' past';
-                } else if (daysUntil <= 3) {
-                    classes += ' upcoming-soon';
-                } else if (daysUntil <= 7) {
-                    classes += ' upcoming-near';
-                } else if (daysUntil <= 14) {
-                    classes += ' upcoming-moderate';
-                }
-                
-                list.innerHTML += `
+		function formatTodayDate() {
+			const today = new Date();
+			const weekday = getWeekday(today.toISOString().split('T')[0]);
+			const formatted = formatDateForDisplay(today.toISOString().split('T')[0]);
+			return `${weekday}, ${formatted}`;
+		}
+
+		function renderReleases() {
+			const list = document.getElementById('releaseList');
+			const emptyState = document.getElementById('emptyState');
+
+			if (releases.length === 0) {
+				list.style.display = 'none';
+				emptyState.style.display = 'block';
+				return;
+			}
+
+			list.style.display = 'block';
+			emptyState.style.display = 'none';
+
+			// Sort releases by date
+			releases.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+
+			let todayMarkerAdded = false;
+			let firstUpcomingIndex = -1;
+
+			list.innerHTML = '';
+
+			releases.forEach((release, index) => {
+				const releaseDate = new Date(release.date);
+				releaseDate.setHours(0, 0, 0, 0);
+				const daysUntil = Math.ceil((releaseDate - today) / (1000 * 60 * 60 * 24));
+
+				// Add today marker
+				if (!todayMarkerAdded && daysUntil >= 0) {
+					todayMarkerAdded = true;
+					if (index > 0) {
+						// Only add marker if there are past events
+						list.innerHTML += `<div class="today-marker" id="todayMarker">Heute - ${formatTodayDate()}</div>`;
+					}
+					if (firstUpcomingIndex === -1) {
+						firstUpcomingIndex = index;
+					}
+				}
+
+				// Determine CSS classes
+				let classes = 'release-item';
+				if (daysUntil < 0) {
+					classes += ' past';
+				} else if (daysUntil <= 3) {
+					classes += ' upcoming-soon';
+				} else if (daysUntil <= 7) {
+					classes += ' upcoming-near';
+				} else if (daysUntil <= 14) {
+					classes += ' upcoming-moderate';
+				}
+
+				list.innerHTML += `
                     <li class="${classes}" draggable="true" data-index="${index}">
                         <span class="drag-handle">⋮⋮</span>
                         <div class="release-content">
@@ -464,177 +477,179 @@ import Layout from "../layouts/Layout.astro";
                         </div>
                     </li>
                 `;
-            });
+			});
 
-            // Add drag and drop event listeners
-            document.querySelectorAll('.release-item').forEach(item => {
-                item.addEventListener('dragstart', handleDragStart);
-                item.addEventListener('dragover', handleDragOver);
-                item.addEventListener('drop', handleDrop);
-                item.addEventListener('dragend', handleDragEnd);
-                item.addEventListener('dragenter', handleDragEnter);
-                item.addEventListener('dragleave', handleDragLeave);
-            });
-            
-            // Scroll to today marker after a short delay
-            setTimeout(() => {
-                const marker = document.getElementById('todayMarker');
-                if (marker) {
-                    marker.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } else if (firstUpcomingIndex >= 0) {
-                    // If no marker (no past events), scroll to first upcoming
-                    const firstUpcoming = document.querySelector(`.release-item:nth-child(${firstUpcomingIndex + 1})`);
-                    if (firstUpcoming) {
-                        firstUpcoming.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }
-            }, 100);
-        }
+			// Add drag and drop event listeners
+			document.querySelectorAll('.release-item').forEach((item) => {
+				item.addEventListener('dragstart', handleDragStart);
+				item.addEventListener('dragover', handleDragOver);
+				item.addEventListener('drop', handleDrop);
+				item.addEventListener('dragend', handleDragEnd);
+				item.addEventListener('dragenter', handleDragEnter);
+				item.addEventListener('dragleave', handleDragLeave);
+			});
 
-        function handleDragStart(e) {
-            draggedElement = this;
-            draggedIndex = parseInt(this.dataset.index);
-            this.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-        }
+			// Scroll to today marker after a short delay
+			setTimeout(() => {
+				const marker = document.getElementById('todayMarker');
+				if (marker) {
+					marker.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				} else if (firstUpcomingIndex >= 0) {
+					// If no marker (no past events), scroll to first upcoming
+					const firstUpcoming = document.querySelector(
+						`.release-item:nth-child(${firstUpcomingIndex + 1})`
+					);
+					if (firstUpcoming) {
+						firstUpcoming.scrollIntoView({ behavior: 'smooth', block: 'center' });
+					}
+				}
+			}, 100);
+		}
 
-        function handleDragOver(e) {
-            if (e.preventDefault) {
-                e.preventDefault();
-            }
-            e.dataTransfer.dropEffect = 'move';
-            return false;
-        }
+		function handleDragStart(e) {
+			draggedElement = this;
+			draggedIndex = parseInt(this.dataset.index);
+			this.classList.add('dragging');
+			e.dataTransfer.effectAllowed = 'move';
+		}
 
-        function handleDragEnter(e) {
-            if (this !== draggedElement) {
-                this.classList.add('drag-over');
-            }
-        }
+		function handleDragOver(e) {
+			if (e.preventDefault) {
+				e.preventDefault();
+			}
+			e.dataTransfer.dropEffect = 'move';
+			return false;
+		}
 
-        function handleDragLeave(e) {
-            this.classList.remove('drag-over');
-        }
+		function handleDragEnter(e) {
+			if (this !== draggedElement) {
+				this.classList.add('drag-over');
+			}
+		}
 
-        function handleDrop(e) {
-            if (e.stopPropagation) {
-                e.stopPropagation();
-            }
+		function handleDragLeave(e) {
+			this.classList.remove('drag-over');
+		}
 
-            const dropIndex = parseInt(this.dataset.index);
-            
-            if (draggedIndex !== dropIndex) {
-                const draggedRelease = releases[draggedIndex];
-                releases.splice(draggedIndex, 1);
-                
-                if (draggedIndex < dropIndex) {
-                    releases.splice(dropIndex - 1, 0, draggedRelease);
-                } else {
-                    releases.splice(dropIndex, 0, draggedRelease);
-                }
-                
-                saveToLocalStorage();
-                renderReleases();
-            }
+		function handleDrop(e) {
+			if (e.stopPropagation) {
+				e.stopPropagation();
+			}
 
-            return false;
-        }
+			const dropIndex = parseInt(this.dataset.index);
 
-        function handleDragEnd(e) {
-            document.querySelectorAll('.release-item').forEach(item => {
-                item.classList.remove('dragging');
-                item.classList.remove('drag-over');
-            });
-        }
+			if (draggedIndex !== dropIndex) {
+				const draggedRelease = releases[draggedIndex];
+				releases.splice(draggedIndex, 1);
 
-        function updateDate(index, newDate) {
-            // Find the actual release by matching the original index
-            const sortedReleases = [...releases].sort((a, b) => new Date(a.date) - new Date(b.date));
-            const releaseToUpdate = sortedReleases[index];
-            const originalIndex = releases.indexOf(releaseToUpdate);
-            
-            if (originalIndex !== -1) {
-                releases[originalIndex].date = newDate;
-                saveToLocalStorage();
-                renderReleases();
-            }
-        }
+				if (draggedIndex < dropIndex) {
+					releases.splice(dropIndex - 1, 0, draggedRelease);
+				} else {
+					releases.splice(dropIndex, 0, draggedRelease);
+				}
 
-        function updateName(index, newName) {
-            // Find the actual release by matching the original index
-            const sortedReleases = [...releases].sort((a, b) => new Date(a.date) - new Date(b.date));
-            const releaseToUpdate = sortedReleases[index];
-            const originalIndex = releases.indexOf(releaseToUpdate);
-            
-            if (originalIndex !== -1) {
-                releases[originalIndex].name = newName;
-                saveToLocalStorage();
-            }
-        }
+				saveToLocalStorage();
+				renderReleases();
+			}
 
-        function deleteRelease(index) {
-            closeAllMenus();
-            if (confirm('Möchtest du dieses Release wirklich löschen?')) {
-                releases.splice(index, 1);
-                renderReleases();
-                saveToLocalStorage();
-            }
-        }
+			return false;
+		}
 
-        function toggleMenu(event, index) {
-            event.stopPropagation();
-            const menu = document.getElementById(`menu-${index}`);
-            const isOpen = menu.classList.contains('show');
-            
-            closeAllMenus();
-            
-            if (!isOpen) {
-                menu.classList.add('show');
-            }
-        }
+		function handleDragEnd(e) {
+			document.querySelectorAll('.release-item').forEach((item) => {
+				item.classList.remove('dragging');
+				item.classList.remove('drag-over');
+			});
+		}
 
-        function closeAllMenus() {
-            document.querySelectorAll('.menu-dropdown').forEach(menu => {
-                menu.classList.remove('show');
-            });
-        }
+		function updateDate(index, newDate) {
+			// Find the actual release by matching the original index
+			const sortedReleases = [...releases].sort((a, b) => new Date(a.date) - new Date(b.date));
+			const releaseToUpdate = sortedReleases[index];
+			const originalIndex = releases.indexOf(releaseToUpdate);
 
-        // Close menus when clicking outside
-        document.addEventListener('click', closeAllMenus);
+			if (originalIndex !== -1) {
+				releases[originalIndex].date = newDate;
+				saveToLocalStorage();
+				renderReleases();
+			}
+		}
 
-        function addNewRelease() {
-            const today = new Date();
-            const dateString = today.toISOString().split('T')[0];
-            releases.push({
-                date: dateString,
-                name: 'Neues Release'
-            });
-            renderReleases();
-            saveToLocalStorage();
-            
-            // Focus on the new item's name input
-            setTimeout(() => {
-                const inputs = document.querySelectorAll('.project-name');
-                if (inputs.length > 0) {
-                    inputs[inputs.length - 1].focus();
-                    inputs[inputs.length - 1].select();
-                }
-            }, 100);
-        }
+		function updateName(index, newName) {
+			// Find the actual release by matching the original index
+			const sortedReleases = [...releases].sort((a, b) => new Date(a.date) - new Date(b.date));
+			const releaseToUpdate = sortedReleases[index];
+			const originalIndex = releases.indexOf(releaseToUpdate);
 
-        function saveToLocalStorage() {
-            localStorage.setItem('releases', JSON.stringify(releases));
-        }
+			if (originalIndex !== -1) {
+				releases[originalIndex].name = newName;
+				saveToLocalStorage();
+			}
+		}
 
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem('releases');
-            if (saved) {
-                releases = JSON.parse(saved);
-            }
-        }
+		function deleteRelease(index) {
+			closeAllMenus();
+			if (confirm('Möchtest du dieses Release wirklich löschen?')) {
+				releases.splice(index, 1);
+				renderReleases();
+				saveToLocalStorage();
+			}
+		}
 
-        // Initialize
-        loadFromLocalStorage();
-        renderReleases();
-    </script>
+		function toggleMenu(event, index) {
+			event.stopPropagation();
+			const menu = document.getElementById(`menu-${index}`);
+			const isOpen = menu.classList.contains('show');
+
+			closeAllMenus();
+
+			if (!isOpen) {
+				menu.classList.add('show');
+			}
+		}
+
+		function closeAllMenus() {
+			document.querySelectorAll('.menu-dropdown').forEach((menu) => {
+				menu.classList.remove('show');
+			});
+		}
+
+		// Close menus when clicking outside
+		document.addEventListener('click', closeAllMenus);
+
+		function addNewRelease() {
+			const today = new Date();
+			const dateString = today.toISOString().split('T')[0];
+			releases.push({
+				date: dateString,
+				name: 'Neues Release',
+			});
+			renderReleases();
+			saveToLocalStorage();
+
+			// Focus on the new item's name input
+			setTimeout(() => {
+				const inputs = document.querySelectorAll('.project-name');
+				if (inputs.length > 0) {
+					inputs[inputs.length - 1].focus();
+					inputs[inputs.length - 1].select();
+				}
+			}, 100);
+		}
+
+		function saveToLocalStorage() {
+			localStorage.setItem('releases', JSON.stringify(releases));
+		}
+
+		function loadFromLocalStorage() {
+			const saved = localStorage.getItem('releases');
+			if (saved) {
+				releases = JSON.parse(saved);
+			}
+		}
+
+		// Initialize
+		loadFromLocalStorage();
+		renderReleases();
+	</script>
 </Layout>

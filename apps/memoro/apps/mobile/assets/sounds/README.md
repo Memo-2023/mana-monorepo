@@ -17,9 +17,11 @@ This directory contains UI sounds for the recording button.
    - Character: Finalizing, like a camera shutter or soft thud
 
 ## File Requirements:
+
 - Format: MP3 (for best compatibility)
 - Bitrate: 128kbps (good quality/size balance)
 - Volume: Normalized to -12dB
 
 ## Placeholder Files:
+
 Currently using silent placeholder files. Replace with actual sounds.

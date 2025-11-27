@@ -45,6 +45,7 @@ The team invitation system is fully implemented and ready to send emails. To ena
    - Copy the API key
 
 3. **Add to `.env`**
+
    ```env
    BREVO_API_KEY=your-api-key-here
    ```
@@ -60,6 +61,7 @@ The team invitation system is fully implemented and ready to send emails. To ena
 3. **Get your API key**
 
 4. **Add to `.env`**
+
    ```env
    RESEND_API_KEY=your-api-key-here
    ```
@@ -71,6 +73,7 @@ The team invitation system is fully implemented and ready to send emails. To ena
 ## Testing Email Setup
 
 1. **Restart the dev server** (if you added environment variables)
+
    ```bash
    npm run dev
    ```

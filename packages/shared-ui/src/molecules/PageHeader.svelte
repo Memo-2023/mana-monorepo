@@ -69,22 +69,22 @@
 		breadcrumb,
 		actions,
 		tabs,
-		class: className = ''
+		class: className = '',
 	}: Props = $props();
 
 	const sizeClasses: Record<HeaderSize, { container: string; title: string }> = {
 		sm: {
 			container: 'py-3',
-			title: 'text-lg'
+			title: 'text-lg',
 		},
 		md: {
 			container: 'py-4',
-			title: 'text-xl'
+			title: 'text-xl',
 		},
 		lg: {
 			container: 'py-6',
-			title: 'text-2xl'
-		}
+			title: 'text-2xl',
+		},
 	};
 </script>
 

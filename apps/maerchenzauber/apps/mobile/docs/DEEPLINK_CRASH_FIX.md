@@ -14,12 +14,14 @@ The app was crashing when users opened deeplinks to shared characters (`maerchen
 ## The Problem
 
 ### Initial Symptoms
+
 - App crashes ~1 second after opening a character sharing deeplink
 - Only happens on physical iOS devices (not simulator)
 - User sees "Opening character..." loading screen, then crash
 - No obvious error message in logs before crash
 
 ### Deeplink Flow
+
 ```
 1. User clicks: maerchenzauber://share/character/{id}
 2. App opens: app/share/character/[id].tsx
@@ -35,6 +37,7 @@ The app was crashing when users opened deeplinks to shared characters (`maerchen
 ### Crash #1: LinearGradient Rendering (FALSE LEAD)
 
 **Symptoms**:
+
 ```
 Thread 0 (Main):
 RNSScreen setViewToSnapshot + 1416
@@ -45,6 +48,7 @@ UIKit snapshotViewAfterScreenUpdates + 148
 Misdiagnosed as LinearGradient rendering issue based on Stack Overflow comment.
 
 **Action Taken**:
+
 - Updated `expo-linear-gradient` from 14.0.1 → 15.0.7
 - Added explicit layout bounds to all LinearGradient components
 - Added `minHeight: 100` to login screen gradient
@@ -58,6 +62,7 @@ Misdiagnosed as LinearGradient rendering issue based on Stack Overflow comment.
 ### Crash #2: CoreGraphics Image Deallocation
 
 **Symptoms**:
+
 ```
 Thread 0 (Main):
 CoreGraphics vm_allocator_deallocate + 44
@@ -69,6 +74,7 @@ QuartzCore CA::Layer::~Layer() + 328
 Image loading race condition during rapid navigation - images being deallocated while CoreGraphics still rendering them.
 
 **Root Cause**:
+
 ```typescript
 <Image
   source={{ uri: currentImage }}
@@ -77,6 +83,7 @@ Image loading race condition during rapid navigation - images being deallocated 
 ```
 
 **Solution**:
+
 ```typescript
 <Image
   source={{ uri: currentImage }}
@@ -87,6 +94,7 @@ Image loading race condition during rapid navigation - images being deallocated 
 ```
 
 **Files Modified**:
+
 - `app/character/preview/[characterId].tsx:360`
 
 **Result**: Fixed image crashes, but navigation still crashed.
@@ -96,6 +104,7 @@ Image loading race condition during rapid navigation - images being deallocated 
 ### Crash #3: RNSScreen Snapshot on Share Route
 
 **Symptoms**:
+
 ```
 Thread 0 (Main):
 RNSScreen setViewToSnapshot + 1416
@@ -106,6 +115,7 @@ react-native-screens snapshot creation
 The `/share/` route wasn't inheriting the root Stack configuration that disables snapshots.
 
 **Root Cause**:
+
 ```
 app/
 ├── _layout.tsx          // Has freezeOnBlur: false
@@ -116,6 +126,7 @@ app/
 ```
 
 **Solution 1**: Created dedicated Stack layout for share route
+
 ```typescript
 // app/share/_layout.tsx
 export default function ShareLayout() {
@@ -133,6 +144,7 @@ export default function ShareLayout() {
 ```
 
 **Solution 2**: Bypassed screen rendering entirely
+
 ```typescript
 // app/share/character/[id].tsx - BEFORE
 export default function ShareCharacterDeeplink() {
@@ -147,6 +159,7 @@ export default function ShareCharacterDeeplink() {
 ```
 
 **Files Created/Modified**:
+
 - Created: `app/share/_layout.tsx`
 - Modified: `app/share/character/[id].tsx`
 
@@ -157,6 +170,7 @@ export default function ShareCharacterDeeplink() {
 ### Crash #4: THE ACTUAL LinearGradient Crash
 
 **Symptoms**:
+
 ```
 Thread 0 (Main):
 5   CoreGraphics    CGContextDrawLinearGradient + 236
@@ -168,6 +182,7 @@ Thread 0 (Main):
 LinearGradient components using `width: '100%'` had **undefined dimensions** during navigation before parent layout was fully calculated.
 
 **Root Cause**:
+
 ```typescript
 // During navigation, this sequence happens:
 1. Component mounts
@@ -178,33 +193,36 @@ LinearGradient components using `width: '100%'` had **undefined dimensions** dur
 ```
 
 **Why This Happens During Deeplinks**:
+
 - Deeplink navigation bypasses normal React Native navigation lifecycle
 - Components mount before layout calculations complete
 - Normal navigation has timing that masks this issue
 
 **Solution Pattern**:
+
 ```typescript
 // ❌ BEFORE - Crash during navigation
 const styles = StyleSheet.create({
   gradientStyle: {
-    width: '100%',  // Can be undefined during layout
+    width: '100%', // Can be undefined during layout
     justifyContent: 'center',
-  }
+  },
 });
 
 // ✅ AFTER - Safe during navigation
 const styles = StyleSheet.create({
   gradientStyle: {
-    alignSelf: 'stretch',  // More reliable than width: '100%'
-    minWidth: 200,  // Ensures CoreGraphics has valid dimensions
+    alignSelf: 'stretch', // More reliable than width: '100%'
+    minWidth: 200, // Ensures CoreGraphics has valid dimensions
     justifyContent: 'center',
-  }
+  },
 });
 ```
 
 **Files Fixed** (3 components):
 
 1. **app/login.tsx:1141** - `manaInfoBanner`
+
    ```typescript
    manaInfoBanner: {
      alignSelf: 'stretch',  // Changed from width: '100%'
@@ -212,9 +230,11 @@ const styles = StyleSheet.create({
      minHeight: 100,
    }
    ```
+
    Also removed `locations={[0, 0.7, 1]}` prop for simpler gradient distribution.
 
 2. **components/story/EndScreen.tsx:280** - `buttonGradient`
+
    ```typescript
    buttonGradient: {
      alignSelf: 'stretch',  // Changed from width: '100%'
@@ -237,6 +257,7 @@ const styles = StyleSheet.create({
 ### Crash #5: MagicalLoadingScreen Missing Prop
 
 **Symptoms**:
+
 ```
 ERROR  [TypeError: Cannot convert undefined value to object]
 Code: MagicalLoadingScreen.tsx:173
@@ -247,6 +268,7 @@ Code: MagicalLoadingScreen.tsx:173
 Simple prop missing - `MagicalLoadingScreen` requires `context` prop to determine which phrases to show.
 
 **Root Cause**:
+
 ```typescript
 // app/character/preview/[characterId].tsx:315
 return <MagicalLoadingScreen />;  // ❌ Missing context prop
@@ -257,11 +279,13 @@ phrases[currentPhrase]  // ❌ Cannot convert undefined to object
 ```
 
 **Solution**:
+
 ```typescript
 return <MagicalLoadingScreen context="character" />;  // ✅ Fixed
 ```
 
 **Files Modified**:
+
 - `app/character/preview/[characterId].tsx:315`
 
 **Result**: All crashes resolved! ✅
@@ -274,6 +298,7 @@ return <MagicalLoadingScreen context="character" />;  // ✅ Fixed
 **Context**: Universal links implementation for character sharing
 
 **Symptoms**:
+
 ```
 Thread 0 (Main):
 9   Mrchenzauber     LinearGradientLayer.display() + 64  ← CRASH
@@ -284,6 +309,7 @@ Thread 0 (Main):
 Another LinearGradient component with `width: '100%'` and `height: '100%'` causing the same crash pattern as Crash #4, but this time in a different component during app startup.
 
 **Root Cause**:
+
 ```typescript
 // components/atoms/TimeOfDayBackground.tsx:66-74
 gradient: {
@@ -301,6 +327,7 @@ gradient: {
 When a component has `position: 'absolute'` with all four edges defined (`top`, `left`, `right`, `bottom`), the `width` and `height` properties are redundant. During rapid navigation or startup, these percentage-based dimensions can be undefined/0/NaN before parent layout is calculated, causing CoreGraphics to crash.
 
 **Solution**:
+
 ```typescript
 // components/atoms/TimeOfDayBackground.tsx:66-74
 gradient: {
@@ -315,6 +342,7 @@ gradient: {
 ```
 
 **Files Modified**:
+
 - `components/atoms/TimeOfDayBackground.tsx:66-74`
 
 **Result**: App startup crashes resolved! ✅
@@ -329,6 +357,7 @@ gradient: {
 **Context**: Universal links route configuration
 
 **Symptoms**:
+
 ```
 ERROR: A navigator cannot contain multiple 'Screen' components
 with the same name (found duplicate screen named 'character/[id]')
@@ -338,6 +367,7 @@ with the same name (found duplicate screen named 'character/[id]')
 Expo-router was finding duplicate route definitions due to having both a file and a directory with the same dynamic segment name.
 
 **Root Cause**:
+
 ```
 app/
 ├── character/
@@ -347,6 +377,7 @@ app/
 ```
 
 And similarly:
+
 ```
 app/share/character/
 ├── [id].tsx                  ← Screen: share/character/[id]
@@ -356,6 +387,7 @@ app/share/character/
 
 **Why This Happens**:
 Expo-router generates screen names from file paths. When you have both:
+
 - A file: `character/[id].tsx`
 - A directory: `character/[id]/`
 
@@ -363,6 +395,7 @@ Both register as the same screen name `character/[id]`, causing a conflict.
 
 **Solution**:
 Remove the unnecessary file routes and keep only the nested routes:
+
 ```
 app/
 ├── character/
@@ -374,10 +407,12 @@ app/
 ```
 
 **Files Removed**:
+
 - ✅ Deleted: `app/character/[id]/[shareCode].tsx` (duplicate)
 - ✅ Deleted: `app/share/character/[id].tsx` (unnecessary)
 
 **Important**: After removing route files, you MUST clear Metro cache:
+
 ```bash
 rm -rf .expo node_modules/.cache
 watchman watch-del-all
@@ -387,6 +422,7 @@ npx expo start --clear
 **Result**: Route conflicts resolved! ✅
 
 **Learning**:
+
 1. Never have both a file and directory with the same dynamic segment name
 2. Metro aggressively caches route configuration - always clear cache after route changes
 3. Use `watchman watch-del-all` to clear file system watch caches
@@ -395,31 +431,34 @@ npx expo start --clear
 
 ## Summary of Solutions
 
-| Issue | Root Cause | Solution | Files |
-|-------|------------|----------|-------|
-| Image crashes | Transition animation conflicts with navigation | Disable transitions, add recycling keys | `character/preview/[characterId].tsx` |
-| Snapshot crashes | Share route missing Stack config | Created `share/_layout.tsx` with snapshot prevention | `share/_layout.tsx` (new) |
-| Navigation crashes | Loading screen triggers snapshot creation | Use immediate `<Redirect>` instead | `share/character/[id].tsx` |
-| LinearGradient crashes | `width: '100%'` undefined during layout | Use `alignSelf: 'stretch'` + `minWidth` | `login.tsx`, `EndScreen.tsx`, `PremiumCuddlyToyCard.tsx` |
-| Loading screen crash | Missing required prop | Add `context="character"` prop | `character/preview/[characterId].tsx` |
-| TimeOfDayBackground crash | `width/height: '100%'` on absolute positioned gradient | Remove width/height, use edge constraints only | `TimeOfDayBackground.tsx` |
-| Route naming conflict | Duplicate screen names in expo-router | Remove conflicting file routes, clear Metro cache | Route structure cleanup |
+| Issue                     | Root Cause                                             | Solution                                             | Files                                                    |
+| ------------------------- | ------------------------------------------------------ | ---------------------------------------------------- | -------------------------------------------------------- |
+| Image crashes             | Transition animation conflicts with navigation         | Disable transitions, add recycling keys              | `character/preview/[characterId].tsx`                    |
+| Snapshot crashes          | Share route missing Stack config                       | Created `share/_layout.tsx` with snapshot prevention | `share/_layout.tsx` (new)                                |
+| Navigation crashes        | Loading screen triggers snapshot creation              | Use immediate `<Redirect>` instead                   | `share/character/[id].tsx`                               |
+| LinearGradient crashes    | `width: '100%'` undefined during layout                | Use `alignSelf: 'stretch'` + `minWidth`              | `login.tsx`, `EndScreen.tsx`, `PremiumCuddlyToyCard.tsx` |
+| Loading screen crash      | Missing required prop                                  | Add `context="character"` prop                       | `character/preview/[characterId].tsx`                    |
+| TimeOfDayBackground crash | `width/height: '100%'` on absolute positioned gradient | Remove width/height, use edge constraints only       | `TimeOfDayBackground.tsx`                                |
+| Route naming conflict     | Duplicate screen names in expo-router                  | Remove conflicting file routes, clear Metro cache    | Route structure cleanup                                  |
 
 ---
 
 ## Key Technical Learnings
 
 ### 1. React Native Navigation Lifecycle
+
 - Deeplinks bypass normal navigation timing
 - Components can mount before layout calculations complete
 - Always ensure components handle undefined dimensions gracefully
 
 ### 2. expo-router File-Based Routing
+
 - Each directory can have its own `_layout.tsx`
 - Child layouts don't automatically inherit parent Stack settings
 - Use `freezeOnBlur: false` to prevent snapshot crashes
 
 ### 3. react-native-screens Snapshots
+
 - iOS creates snapshots during screen transitions for animations
 - Snapshots can fail when:
   - Views have complex gradients/blurs during rapid navigation
@@ -432,6 +471,7 @@ npx expo start --clear
   - Use `<Redirect>` to avoid rendering intermediate screens
 
 ### 4. expo-linear-gradient Rendering
+
 - `width: '100%'` can be undefined during navigation
 - `alignSelf: 'stretch'` is more reliable
 - Always provide minimum dimensions for CoreGraphics:
@@ -442,6 +482,7 @@ npx expo start --clear
 - Avoid `locations` prop unless necessary - simpler is safer
 
 ### 5. expo-image Best Practices for Navigation
+
 ```typescript
 <Image
   source={{ uri }}
@@ -452,6 +493,7 @@ npx expo start --clear
 ```
 
 ### 6. Debugging Complex Issues
+
 - One symptom can have multiple root causes
 - Fix each issue, test, document what changed
 - Don't assume first diagnosis is correct
@@ -477,6 +519,7 @@ After implementing fixes, test:
 ### Code Review Guidelines
 
 1. **Never use `width: '100%'` with LinearGradient**
+
    ```typescript
    // ❌ AVOID
    <LinearGradient style={{ width: '100%' }} />
@@ -486,6 +529,7 @@ After implementing fixes, test:
    ```
 
 2. **Never use width/height on absolute positioned elements with all edges defined**
+
    ```typescript
    // ❌ AVOID
    style={{
@@ -510,6 +554,7 @@ After implementing fixes, test:
    ```
 
 3. **Always provide context prop to MagicalLoadingScreen**
+
    ```typescript
    // ❌ AVOID
    <MagicalLoadingScreen />
@@ -519,6 +564,7 @@ After implementing fixes, test:
    ```
 
 4. **Disable image transitions for navigation screens**
+
    ```typescript
    // ❌ RISKY
    <Image transition={300} />
@@ -527,7 +573,8 @@ After implementing fixes, test:
    <Image transition={0} recyclingKey={id} />
    ```
 
-5. **Configure Stack settings in every _layout.tsx**
+5. **Configure Stack settings in every \_layout.tsx**
+
    ```typescript
    export default function Layout() {
      return (
@@ -542,6 +589,7 @@ After implementing fixes, test:
    ```
 
 6. **Avoid expo-router file/directory naming conflicts**
+
    ```typescript
    // ❌ AVOID - Creates duplicate screens
    app/
@@ -570,11 +618,12 @@ After implementing fixes, test:
 ### Automated Testing
 
 Add E2E test for deeplink navigation:
+
 ```typescript
 describe('Deeplink Navigation', () => {
   it('should open character preview without crashing', async () => {
     await device.launchApp({
-      url: 'maerchenzauber://share/character/test-id'
+      url: 'maerchenzauber://share/character/test-id',
     });
     await expect(element(by.id('character-preview'))).toBeVisible();
   });
@@ -586,6 +635,7 @@ describe('Deeplink Navigation', () => {
 ## Related Files
 
 ### Modified Files
+
 - `app/_layout.tsx` - Navigation timeout increased
 - `app/login.tsx` - LinearGradient dimensions fixed
 - `app/character/preview/[characterId].tsx` - Image transitions disabled, MagicalLoadingScreen prop added
@@ -594,6 +644,7 @@ describe('Deeplink Navigation', () => {
 - `package.json` - Updated expo-linear-gradient to 15.0.7
 
 ### Created Files
+
 - `app/share/_layout.tsx` - Stack configuration for share routes
 - `docs/DEEPLINK_CRASH_FIX.md` - This document
 
@@ -613,17 +664,17 @@ describe('Deeplink Navigation', () => {
 What seemed like a single crash was actually **7 distinct issues** across two debugging sessions:
 
 **Session 1 (2025-11-02):**
+
 1. Image transition race conditions
 2. Missing Stack layout configuration
 3. Snapshot creation during intermediate screens
 4. LinearGradient rendering with undefined dimensions
 5. Missing required component prop
 
-**Session 2 (2025-11-04 - Universal Links):**
-6. TimeOfDayBackground LinearGradient crash (same pattern as #4)
-7. Expo-router duplicate screen names
+**Session 2 (2025-11-04 - Universal Links):** 6. TimeOfDayBackground LinearGradient crash (same pattern as #4) 7. Expo-router duplicate screen names
 
 The key to solving this was:
+
 - **Methodical testing** after each fix
 - **Documenting each crash** with stack traces
 - **Not assuming** the first diagnosis was correct

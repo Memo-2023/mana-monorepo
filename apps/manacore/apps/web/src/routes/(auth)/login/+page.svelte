@@ -21,7 +21,7 @@
 	logo={ManaCoreLogo}
 	primaryColor="#6366f1"
 	onSignIn={handleSignIn}
-	goto={goto}
+	{goto}
 	enableGoogle={false}
 	enableApple={false}
 	successRedirect="/dashboard"

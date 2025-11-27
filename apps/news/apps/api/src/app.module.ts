@@ -8,17 +8,17 @@ import { UsersModule } from './users/users.module';
 import { ContentExtractionModule } from './content-extraction/content-extraction.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '../../.env',
-    }),
-    DatabaseModule,
-    AuthModule,
-    ArticlesModule,
-    CategoriesModule,
-    UsersModule,
-    ContentExtractionModule,
-  ],
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			envFilePath: '../../.env',
+		}),
+		DatabaseModule,
+		AuthModule,
+		ArticlesModule,
+		CategoriesModule,
+		UsersModule,
+		ContentExtractionModule,
+	],
 })
 export class AppModule {}

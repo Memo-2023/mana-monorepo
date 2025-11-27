@@ -4,20 +4,20 @@ import TutorialLayout from '../../layouts/TutorialLayout.astro';
 import { defaultLang } from '../../i18n/ui';
 
 export async function getStaticPaths() {
-  const tutorials = await getCollection('tutorials', ({ id }) => {
-    return id.startsWith('de/'); // Only default language (German)
-  });
-  
-  return tutorials.map(tutorial => {
-    // Get just the filename part from the slug
-    const slugParts = tutorial.slug.split('/');
-    const fileName = slugParts[slugParts.length - 1];
-    
-    return {
-      params: { slug: fileName },
-      props: { tutorial },
-    };
-  });
+	const tutorials = await getCollection('tutorials', ({ id }) => {
+		return id.startsWith('de/'); // Only default language (German)
+	});
+
+	return tutorials.map((tutorial) => {
+		// Get just the filename part from the slug
+		const slugParts = tutorial.slug.split('/');
+		const fileName = slugParts[slugParts.length - 1];
+
+		return {
+			params: { slug: fileName },
+			props: { tutorial },
+		};
+	});
 }
 
 // In template logic - redirect to /de/tutorials/...
@@ -30,5 +30,5 @@ const { Content } = await tutorial.render();
 ---
 
 <TutorialLayout tutorial={tutorial}>
-  <Content />
+	<Content />
 </TutorialLayout>

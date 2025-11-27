@@ -13,7 +13,7 @@ import { PUBLIC_APP_URL } from '$env/static/public';
 import type { RequestHandler } from './$types';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
-	apiVersion: '2024-11-20'
+	apiVersion: '2024-11-20',
 });
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -40,15 +40,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				name: user.name || undefined,
 				metadata: {
 					pocketbase_id: user.id,
-					username: user.username || ''
-				}
+					username: user.username || '',
+				},
 			});
 
 			stripeCustomerId = customer.id;
 
 			// Save customer ID for future use
 			await locals.pb.collection('users').update(user.id, {
-				stripe_customer_id: stripeCustomerId
+				stripe_customer_id: stripeCustomerId,
 			});
 		}
 
@@ -63,34 +63,34 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			line_items: [
 				{
 					price: priceId,
-					quantity: 1
-				}
+					quantity: 1,
+				},
 			],
 			mode: 'subscription',
 			allow_promotion_codes: true,
 			subscription_data: {
 				metadata: {
-					pocketbase_user_id: user.id
-				}
+					pocketbase_user_id: user.id,
+				},
 			},
 			success_url: `${PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
 			cancel_url: `${PUBLIC_APP_URL}/pricing?cancelled=true`,
 			locale: 'de',
 			metadata: {
 				user_id: user.id,
-				user_email: user.email
-			}
+				user_email: user.email,
+			},
 		});
 
 		return json({
 			sessionId: session.id,
-			url: session.url
+			url: session.url,
 		});
 	} catch (error) {
 		console.error('Stripe checkout error:', error);
 		return json(
 			{
-				error: 'Fehler beim Erstellen der Checkout-Session'
+				error: 'Fehler beim Erstellen der Checkout-Session',
 			},
 			{ status: 500 }
 		);
@@ -107,7 +107,7 @@ import { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from '$env/static/private';
 import type { RequestHandler } from './$types';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
-	apiVersion: '2024-11-20'
+	apiVersion: '2024-11-20',
 });
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -149,7 +149,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					stripe_customer_id: session.customer,
 					stripe_subscription_id: subscription.id,
 					current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-					subscription_interval: subscription.items.data[0].price.recurring?.interval || 'month'
+					subscription_interval: subscription.items.data[0].price.recurring?.interval || 'month',
 				});
 
 				// Reset usage counter for new subscribers
@@ -159,7 +159,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 						new Date().getFullYear(),
 						new Date().getMonth() + 1,
 						1
-					).toISOString()
+					).toISOString(),
 				});
 
 				console.log(`User ${userId} upgraded to Pro`);
@@ -199,7 +199,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				// Update user subscription status
 				await locals.pb.collection('users').update(userId, {
 					subscription_status: status,
-					current_period_end: new Date(subscription.current_period_end * 1000).toISOString()
+					current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
 				});
 
 				console.log(`User ${userId} subscription status: ${status}`);
@@ -224,7 +224,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				await locals.pb.collection('users').update(userId, {
 					subscription_status: 'free',
 					stripe_subscription_id: null,
-					current_period_end: null
+					current_period_end: null,
 				});
 
 				console.log(`User ${userId} downgraded to Free`);
@@ -244,7 +244,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 				// Mark as past_due
 				await locals.pb.collection('users').update(userId, {
-					subscription_status: 'past_due'
+					subscription_status: 'past_due',
 				});
 
 				// TODO: Send email notification to user
@@ -267,7 +267,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				const user = await locals.pb.collection('users').getOne(userId);
 				if (user.subscription_status === 'past_due') {
 					await locals.pb.collection('users').update(userId, {
-						subscription_status: 'pro'
+						subscription_status: 'pro',
 					});
 					console.log(`User ${userId} reactivated after payment`);
 				}
@@ -297,7 +297,7 @@ import { PUBLIC_APP_URL } from '$env/static/public';
 import type { RequestHandler } from './$types';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
-	apiVersion: '2024-11-20'
+	apiVersion: '2024-11-20',
 });
 
 export const POST: RequestHandler = async ({ locals }) => {
@@ -316,7 +316,7 @@ export const POST: RequestHandler = async ({ locals }) => {
 		const session = await stripe.billingPortal.sessions.create({
 			customer: user.stripe_customer_id,
 			return_url: `${PUBLIC_APP_URL}/account`,
-			locale: 'de'
+			locale: 'de',
 		});
 
 		return json({ url: session.url });
@@ -348,7 +348,7 @@ export class SubscriptionService {
 		if (user.subscription_status === 'past_due') {
 			return {
 				allowed: false,
-				reason: 'Bitte aktualisiere deine Zahlungsmethode'
+				reason: 'Bitte aktualisiere deine Zahlungsmethode',
 			};
 		}
 
@@ -361,7 +361,7 @@ export class SubscriptionService {
 		if (linksUsed >= 10) {
 			return {
 				allowed: false,
-				reason: `Du hast bereits ${linksUsed} von 10 kostenlosen Links diesen Monat erstellt`
+				reason: `Du hast bereits ${linksUsed} von 10 kostenlosen Links diesen Monat erstellt`,
 			};
 		}
 
@@ -377,14 +377,14 @@ export class SubscriptionService {
 		const currentCount = user.links_created_this_month || 0;
 
 		await this.pb.collection('users').update(userId, {
-			links_created_this_month: currentCount + 1
+			links_created_this_month: currentCount + 1,
 		});
 
 		// Log usage
 		await this.pb.collection('usage_logs').create({
 			user: userId,
 			action: 'link_created',
-			timestamp: new Date().toISOString()
+			timestamp: new Date().toISOString(),
 		});
 	}
 
@@ -398,7 +398,7 @@ export class SubscriptionService {
 
 			await this.pb.collection('users').update(userId, {
 				links_created_this_month: 0,
-				monthly_reset_date: nextReset.toISOString()
+				monthly_reset_date: nextReset.toISOString(),
 			});
 		}
 	}
@@ -416,7 +416,7 @@ export class SubscriptionService {
 				used: 0,
 				limit: 0,
 				unlimited: true,
-				daysUntilReset: 0
+				daysUntilReset: 0,
 			};
 		}
 
@@ -431,7 +431,7 @@ export class SubscriptionService {
 			used: updatedUser.links_created_this_month || 0,
 			limit: 10,
 			unlimited: false,
-			daysUntilReset
+			daysUntilReset,
 		};
 	}
 }
@@ -463,7 +463,7 @@ export class SubscriptionService {
 			const response = await fetch('/api/stripe/checkout', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ interval })
+				body: JSON.stringify({ interval }),
 			});
 
 			if (!response.ok) {
@@ -556,11 +556,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 			return new Response(
 				JSON.stringify({
 					error: reason,
-					requiresUpgrade: true
+					requiresUpgrade: true,
 				}),
 				{
 					status: 403,
-					headers: { 'Content-Type': 'application/json' }
+					headers: { 'Content-Type': 'application/json' },
 				}
 			);
 		}
@@ -587,7 +587,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 		try {
 			const response = await fetch('/api/stripe/portal', {
-				method: 'POST'
+				method: 'POST',
 			});
 
 			const { url } = await response.json();
@@ -665,7 +665,7 @@ export async function createTestSubscription(pb: PocketBase, userId: string) {
 		subscription_status: 'pro',
 		stripe_customer_id: 'cus_test_' + Date.now(),
 		stripe_subscription_id: 'sub_test_' + Date.now(),
-		current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+		current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
 	});
 }
 
@@ -674,12 +674,12 @@ export async function simulateWebhook(eventType: string, data: any) {
 		method: 'POST',
 		headers: {
 			'stripe-signature': 'test_signature',
-			'Content-Type': 'application/json'
+			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
 			type: eventType,
-			data: { object: data }
-		})
+			data: { object: data },
+		}),
 	});
 
 	return response;
@@ -705,41 +705,41 @@ async function addStripeFields() {
 			name: 'subscription_status',
 			type: 'select',
 			options: {
-				values: ['free', 'pro', 'cancelled', 'past_due']
+				values: ['free', 'pro', 'cancelled', 'past_due'],
 			},
-			required: true
+			required: true,
 		},
 		{
 			name: 'stripe_customer_id',
 			type: 'text',
-			required: false
+			required: false,
 		},
 		{
 			name: 'stripe_subscription_id',
 			type: 'text',
-			required: false
+			required: false,
 		},
 		{
 			name: 'current_period_end',
 			type: 'date',
-			required: false
+			required: false,
 		},
 		{
 			name: 'links_created_this_month',
 			type: 'number',
 			min: 0,
-			required: true
+			required: true,
 		},
 		{
 			name: 'monthly_reset_date',
 			type: 'date',
-			required: false
-		}
+			required: false,
+		},
 	];
 
 	// Update collection
 	await pb.collections.update('users', {
-		schema: updatedSchema
+		schema: updatedSchema,
 	});
 
 	console.log('✅ Migration completed');

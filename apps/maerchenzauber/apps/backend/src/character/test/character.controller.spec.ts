@@ -6,57 +6,57 @@ import { SupabaseJsonbAuthService } from '../../core/services/supabase-jsonb-aut
 import { AuthGuard, CreditClientService } from '@mana-core/nestjs-integration';
 
 describe('CharacterController', () => {
-  let controller: CharacterController;
+	let controller: CharacterController;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [CharacterController],
-      providers: [
-        {
-          provide: ImageSupabaseService,
-          useValue: {
-            generateImage: jest.fn(),
-            saveUploadedImage: jest.fn(),
-            analyzeImage: jest.fn(),
-          },
-        },
-        {
-          provide: PromptingService,
-          useValue: {
-            createCharacterDescriptionPrompt: jest.fn(),
-            createAnimalCharacterDescriptionPrompt: jest.fn(),
-            detectAnimalType: jest.fn(),
-          },
-        },
-        {
-          provide: SupabaseJsonbAuthService,
-          useValue: {
-            createCharacter: jest.fn(),
-            getUserCharacters: jest.fn(),
-            getCharacterById: jest.fn(),
-            updateCharacter: jest.fn(),
-            deleteCharacter: jest.fn(),
-          },
-        },
-        {
-          provide: CreditClientService,
-          useValue: {
-            validateCredits: jest
-              .fn()
-              .mockResolvedValue({ hasCredits: true, availableCredits: 100 }),
-            consumeCredits: jest.fn().mockResolvedValue({}),
-          },
-        },
-      ],
-    })
-      .overrideGuard(AuthGuard)
-      .useValue({ canActivate: () => true })
-      .compile();
+	beforeEach(async () => {
+		const module: TestingModule = await Test.createTestingModule({
+			controllers: [CharacterController],
+			providers: [
+				{
+					provide: ImageSupabaseService,
+					useValue: {
+						generateImage: jest.fn(),
+						saveUploadedImage: jest.fn(),
+						analyzeImage: jest.fn(),
+					},
+				},
+				{
+					provide: PromptingService,
+					useValue: {
+						createCharacterDescriptionPrompt: jest.fn(),
+						createAnimalCharacterDescriptionPrompt: jest.fn(),
+						detectAnimalType: jest.fn(),
+					},
+				},
+				{
+					provide: SupabaseJsonbAuthService,
+					useValue: {
+						createCharacter: jest.fn(),
+						getUserCharacters: jest.fn(),
+						getCharacterById: jest.fn(),
+						updateCharacter: jest.fn(),
+						deleteCharacter: jest.fn(),
+					},
+				},
+				{
+					provide: CreditClientService,
+					useValue: {
+						validateCredits: jest
+							.fn()
+							.mockResolvedValue({ hasCredits: true, availableCredits: 100 }),
+						consumeCredits: jest.fn().mockResolvedValue({}),
+					},
+				},
+			],
+		})
+			.overrideGuard(AuthGuard)
+			.useValue({ canActivate: () => true })
+			.compile();
 
-    controller = module.get<CharacterController>(CharacterController);
-  });
+		controller = module.get<CharacterController>(CharacterController);
+	});
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
+	it('should be defined', () => {
+		expect(controller).toBeDefined();
+	});
 });

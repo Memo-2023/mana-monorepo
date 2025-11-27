@@ -15,7 +15,7 @@ if (REDIS_ENABLED) {
 		retryDelayOnFailover: 100,
 		maxRetriesPerRequest: 3,
 		lazyConnect: true,
-		enableOfflineQueue: false // Don't queue commands when offline
+		enableOfflineQueue: false, // Don't queue commands when offline
 	};
 
 	redis = new Redis(redisConfig);
@@ -97,14 +97,14 @@ export const cache = {
 		} catch (error) {
 			console.error('Cache setWithExpiry error:', error);
 		}
-	}
+	},
 };
 
 // Ensure connection is established
 export async function ensureRedisConnection() {
 	if (!redis) return false;
 	if (redisAvailable) return true;
-	
+
 	try {
 		await redis.connect();
 		redisAvailable = true;

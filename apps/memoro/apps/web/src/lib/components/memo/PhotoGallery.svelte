@@ -70,9 +70,7 @@
 {#if photos.length > 0 || canEdit}
 	<div class="space-y-3">
 		<div class="flex items-center justify-between">
-			<Text variant="small" weight="semibold" class="uppercase text-theme-secondary">
-				Photos
-			</Text>
+			<Text variant="small" weight="semibold" class="uppercase text-theme-secondary">Photos</Text>
 			{#if canEdit && onPhotoAdd}
 				<button
 					onclick={onPhotoAdd}
@@ -165,10 +163,7 @@
 {#if showLightbox && selectedPhoto}
 	{@const currentPhoto = selectedPhoto}
 	<!-- Backdrop -->
-	<div
-		class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm"
-		onclick={closeLightbox}
-	></div>
+	<div class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm" onclick={closeLightbox}></div>
 
 	<!-- Lightbox Content -->
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">

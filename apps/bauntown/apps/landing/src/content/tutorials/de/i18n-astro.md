@@ -1,8 +1,8 @@
 ---
-title: "Mehrsprachige Websites mit Astro"
-description: "Ein umfassender Leitfaden zur Implementierung von i18n in Astro-Projekten."
+title: 'Mehrsprachige Websites mit Astro'
+description: 'Ein umfassender Leitfaden zur Implementierung von i18n in Astro-Projekten.'
 pubDate: 2025-03-20
-category: "Branding"
+category: 'Branding'
 ---
 
 # Mehrsprachige Websites mit Astro
@@ -39,7 +39,7 @@ const { lang } = Astro.params;
 ---
 
 <html lang={lang}>
-  <!-- Seiteninhalt -->
+	<!-- Seiteninhalt -->
 </html>
 ```
 
@@ -50,21 +50,21 @@ Erstelle eine zentrale Datei für Übersetzungen:
 ```typescript
 // src/i18n/ui.ts
 export const languages = {
-  de: 'Deutsch',
-  en: 'English',
+	de: 'Deutsch',
+	en: 'English',
 };
 
 export const defaultLang = 'de';
 
 export const ui = {
-  de: {
-    'nav.home': 'Startseite',
-    'nav.about': 'Über uns',
-  },
-  en: {
-    'nav.home': 'Home',
-    'nav.about': 'About',
-  },
+	de: {
+		'nav.home': 'Startseite',
+		'nav.about': 'Über uns',
+	},
+	en: {
+		'nav.home': 'Home',
+		'nav.about': 'About',
+	},
 };
 ```
 
@@ -75,15 +75,15 @@ Und Hilfsfunktionen:
 import { ui, defaultLang } from '../i18n/ui';
 
 export function getLangFromUrl(url: URL) {
-  const [, lang] = url.pathname.split('/');
-  if (lang in ui) return lang as keyof typeof ui;
-  return defaultLang;
+	const [, lang] = url.pathname.split('/');
+	if (lang in ui) return lang as keyof typeof ui;
+	return defaultLang;
 }
 
 export function useTranslations(lang: keyof typeof ui) {
-  return function t(key: keyof typeof ui[typeof defaultLang]) {
-    return ui[lang][key] || ui[defaultLang][key];
-  };
+	return function t(key: keyof (typeof ui)[typeof defaultLang]) {
+		return ui[lang][key] || ui[defaultLang][key];
+	};
 }
 ```
 
@@ -98,8 +98,8 @@ const t = useTranslations(lang);
 ---
 
 <nav>
-  <a href="/">{t('nav.home')}</a>
-  <a href="/about">{t('nav.about')}</a>
+	<a href="/">{t('nav.home')}</a>
+	<a href="/about">{t('nav.about')}</a>
 </nav>
 ```
 
@@ -123,14 +123,18 @@ const { lang } = Astro.params;
 
 // Get posts in the current language
 const posts = await getCollection('blog', ({ id }) => {
-  return id.startsWith(`${lang}/`);
+	return id.startsWith(`${lang}/`);
 });
 ---
 
 <ul>
-  {posts.map(post => (
-    <li><a href={`/${lang}/blog/${post.slug.split('/')[1]}`}>{post.data.title}</a></li>
-  ))}
+	{
+		posts.map((post) => (
+			<li>
+				<a href={`/${lang}/blog/${post.slug.split('/')[1]}`}>{post.data.title}</a>
+			</li>
+		))
+	}
 </ul>
 ```
 
@@ -149,13 +153,13 @@ import { defineConfig } from 'astro/config';
 import i18n from 'astro-i18n-aut/integration';
 
 export default defineConfig({
-  integrations: [
-    i18n({
-      defaultLang: 'de',
-      supportedLangs: ['de', 'en'],
-      showDefaultLang: false
-    })
-  ]
+	integrations: [
+		i18n({
+			defaultLang: 'de',
+			supportedLangs: ['de', 'en'],
+			showDefaultLang: false,
+		}),
+	],
 });
 ```
 
@@ -173,32 +177,31 @@ const { currentLang } = Astro.props;
 const currentPath = Astro.url.pathname;
 
 const getPathInLang = (targetLang: string) => {
-  // Pfad in eine andere Sprache umwandeln
-  const segments = currentPath.split('/').filter(Boolean);
-  
-  if (segments.length === 0) {
-    return targetLang === 'de' ? '/' : `/${targetLang}`;
-  }
-  
-  if (Object.keys(languages).includes(segments[0])) {
-    segments[0] = targetLang;
-  } else {
-    segments.unshift(targetLang);
-  }
-  
-  return `/${segments.join('/')}`;
+	// Pfad in eine andere Sprache umwandeln
+	const segments = currentPath.split('/').filter(Boolean);
+
+	if (segments.length === 0) {
+		return targetLang === 'de' ? '/' : `/${targetLang}`;
+	}
+
+	if (Object.keys(languages).includes(segments[0])) {
+		segments[0] = targetLang;
+	} else {
+		segments.unshift(targetLang);
+	}
+
+	return `/${segments.join('/')}`;
 };
 ---
 
 <div class="language-selector">
-  {Object.entries(languages).map(([code, name]) => (
-    <a 
-      href={getPathInLang(code)} 
-      class={currentLang === code ? 'active' : ''}
-    >
-      {name}
-    </a>
-  ))}
+	{
+		Object.entries(languages).map(([code, name]) => (
+			<a href={getPathInLang(code)} class={currentLang === code ? 'active' : ''}>
+				{name}
+			</a>
+		))
+	}
 </div>
 ```
 

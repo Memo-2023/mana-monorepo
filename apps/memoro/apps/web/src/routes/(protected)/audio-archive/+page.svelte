@@ -3,7 +3,7 @@
 	import {
 		audioStorageService,
 		type AudioFileInfo,
-		type AudioArchiveStats
+		type AudioArchiveStats,
 	} from '$lib/services/audioStorageService';
 	import ArchiveStatistics from '$lib/components/audio/ArchiveStatistics.svelte';
 	import AudioFileList from '$lib/components/audio/AudioFileList.svelte';
@@ -13,7 +13,7 @@
 	let stats = $state<AudioArchiveStats>({
 		totalCount: 0,
 		totalDurationSeconds: 0,
-		totalSizeBytes: 0
+		totalSizeBytes: 0,
 	});
 	let isLoading = $state(false);
 	let hasMore = $state(true);

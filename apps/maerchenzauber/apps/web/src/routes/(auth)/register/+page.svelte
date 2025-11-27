@@ -15,7 +15,7 @@
 	logo={StorytellerLogo}
 	primaryColor="#FF6B9D"
 	onSignUp={handleSignUp}
-	goto={goto}
+	{goto}
 	successRedirect="/dashboard"
 	loginPath="/login"
 	lightBackground="#fff5f8"

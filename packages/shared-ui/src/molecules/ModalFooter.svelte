@@ -60,14 +60,14 @@
 		loading = false,
 		disabled = false,
 		align = 'end',
-		class: className = ''
+		class: className = '',
 	}: Props = $props();
 
 	const alignClasses: Record<string, string> = {
 		start: 'justify-start',
 		center: 'justify-center',
 		end: 'justify-end',
-		between: 'justify-between'
+		between: 'justify-between',
 	};
 </script>
 
@@ -78,7 +78,7 @@
 		</Button>
 	{/if}
 	{#if confirmLabel && onConfirm}
-		<Button variant={confirmVariant} onclick={onConfirm} {loading} disabled={disabled}>
+		<Button variant={confirmVariant} onclick={onConfirm} {loading} {disabled}>
 			{confirmLabel}
 		</Button>
 	{/if}

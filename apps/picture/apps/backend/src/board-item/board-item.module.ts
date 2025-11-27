@@ -3,8 +3,8 @@ import { BoardItemController } from './board-item.controller';
 import { BoardItemService } from './board-item.service';
 
 @Module({
-  controllers: [BoardItemController],
-  providers: [BoardItemService],
-  exports: [BoardItemService],
+	controllers: [BoardItemController],
+	providers: [BoardItemService],
+	exports: [BoardItemService],
 })
 export class BoardItemModule {}

@@ -26,11 +26,11 @@ const bgCtx = bgCanvas.getContext('2d');
 bgCtx.fillStyle = '#222233';
 bgCtx.fillRect(0, 0, 800, 600);
 for (let i = 0; i < 100; i++) {
-    bgCtx.fillStyle = '#1a1a2a';
-    const x = Math.random() * 800;
-    const y = Math.random() * 600;
-    const size = Math.random() * 5 + 2;
-    bgCtx.fillRect(x, y, size, size);
+	bgCtx.fillStyle = '#1a1a2a';
+	const x = Math.random() * 800;
+	const y = Math.random() * 600;
+	const size = Math.random() * 5 + 2;
+	bgCtx.fillRect(x, y, size, size);
 }
 document.getElementById('bgData').textContent = 'Save this image as background.png';
 

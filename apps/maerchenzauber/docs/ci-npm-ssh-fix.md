@@ -3,7 +3,9 @@
 ## 🔴 What We Tried (That Didn't Work)
 
 ### Attempt 1: Git Config URL Rewriting
+
 **What we did:**
+
 ```yaml
 - name: Configure git for private packages
   run: |
@@ -13,32 +15,41 @@
 ```
 
 **Why it failed:**
+
 - npm ci reads URLs directly from `package-lock.json`
 - npm's internal git client doesn't reliably honor git config `url.insteadOf` rules
 - npm fell back to SSH when it couldn't authenticate via HTTPS
 
 ### Attempt 2: Invalid .npmrc Configuration
+
 **What we did:**
+
 ```
 # backend/.npmrc
 git-ssh-url = https://github.com/
 ```
 
 **Why it failed:**
+
 - `git-ssh-url` is not a valid npm configuration option
 - npm doesn't recognize this setting
 
 ### Attempt 3: Reordering Steps (Git Config Before Node Setup)
+
 **What we did:**
+
 - Moved git config step before `actions/setup-node`
 - Added npm cache clearing
 
 **Why it failed:**
+
 - While this helped with caching issues, it didn't solve the root problem
 - npm ci still ignored git config and used lockfile URLs directly
 
 ### Attempt 4: persist-credentials: false
+
 **What we did:**
+
 ```yaml
 - uses: actions/checkout@v4
   with:
@@ -46,11 +57,14 @@ git-ssh-url = https://github.com/
 ```
 
 **Why it failed (partially):**
+
 - This fixed the token override issue (actions/checkout was setting default GITHUB_TOKEN)
 - But npm ci still couldn't authenticate because the lockfile URL had no token
 
 ### Attempt 5: Local Git Config Override
+
 **What we did:**
+
 ```bash
 # Try to override global SSH rewrites with local HTTPS config
 cd project-root
@@ -61,6 +75,7 @@ npm install
 ```
 
 **Why it failed:**
+
 - npm's internal git client doesn't consistently honor local git config during package resolution
 - Even with correct local config, npm still generated SSH URLs in `package-lock.json`
 - The git config order of precedence (local > global > system) doesn't reliably apply to npm's git subprocess
@@ -72,19 +87,23 @@ npm install
 ## ✅ What Finally Worked
 
 ### The Root Cause
+
 **npm ci uses URLs from package-lock.json directly and ignores git config url.insteadOf**
 
 Even though:
+
 - ✅ package.json had `git+https://github.com/...`
 - ✅ package-lock.json had `git+https://github.com/...` (no SSH)
 - ✅ git config was properly set
 
 npm would run:
+
 ```bash
 git ls-remote https://github.com/Memo-2023/mana-core-nestjs-package.git
 ```
 
 This failed with "Permission denied" because:
+
 1. The URL had no authentication token
 2. npm fell back to SSH (which wasn't configured)
 3. Git config rewrites were ignored by npm's git subprocess
@@ -92,13 +111,15 @@ This failed with "Permission denied" because:
 ### The Solution: Runtime Token Injection
 
 **Step 1: Prevent Token Override**
+
 ```yaml
 - uses: actions/checkout@v4
   with:
-    persist-credentials: false  # Don't let default GITHUB_TOKEN interfere
+    persist-credentials: false # Don't let default GITHUB_TOKEN interfere
 ```
 
 **Step 2a: If lockfile has HTTPS URLs - Verify and Inject Token**
+
 ```yaml
 - name: Verify no SSH URLs in lockfile
   run: |
@@ -116,6 +137,7 @@ This failed with "Permission denied" because:
 ```
 
 **Step 2b: If lockfile has SSH URLs - Patch to HTTPS with Token**
+
 ```yaml
 - name: Patch SSH URLs to HTTPS with token
   env:
@@ -135,6 +157,7 @@ This failed with "Permission denied" because:
 > **Note**: Use Step 2a if you can generate HTTPS lockfiles locally. Use Step 2b if your local git config always generates SSH URLs (accepts either format).
 
 **Step 4: Run npm ci**
+
 ```yaml
 - name: Install dependencies
   run: npm ci
@@ -148,6 +171,7 @@ This failed with "Permission denied" because:
 4. **Consistent Behavior**: Works across npm v7, v8, v9+ and all CI environments
 
 ### The Execution Order (Critical)
+
 ```
 1. Checkout (persist-credentials: false)
 2. Configure git (defense in depth, may help in edge cases)
@@ -161,24 +185,26 @@ This failed with "Permission denied" because:
 
 ## 📊 Key Learnings
 
-| Issue | What We Learned |
-|-------|----------------|
-| Git config ignored | npm ci reads package-lock.json directly, bypasses git config |
-| persist-credentials | Default checkout token can override custom PAT config |
-| npm v7+ behavior | Modern npm converts HTTPS to SSH for private repos if auth fails |
-| Token placement | Must inject token into lockfile URL, not just configure git |
-| sed is reliable | Runtime patching with sed is more reliable than git rewrites |
+| Issue                  | What We Learned                                                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Git config ignored     | npm ci reads package-lock.json directly, bypasses git config                                                                 |
+| persist-credentials    | Default checkout token can override custom PAT config                                                                        |
+| npm v7+ behavior       | Modern npm converts HTTPS to SSH for private repos if auth fails                                                             |
+| Token placement        | Must inject token into lockfile URL, not just configure git                                                                  |
+| sed is reliable        | Runtime patching with sed is more reliable than git rewrites                                                                 |
 | Local git config fails | npm's git subprocess doesn't honor local config consistently - even `git ls-remote` works but `npm install` still writes SSH |
-| Don't fight it locally | Stop trying to generate HTTPS lockfiles locally - accept SSH and patch in CI |
+| Don't fight it locally | Stop trying to generate HTTPS lockfiles locally - accept SSH and patch in CI                                                 |
 
 ## 🎯 The One-Liner That Fixed It
 
 **For HTTPS lockfiles:**
+
 ```bash
 sed -i "s|https://github.com/Memo-2023/|https://${GH_TOKEN}@github.com/Memo-2023/|g" package-lock.json
 ```
 
 **For SSH lockfiles (if your local git config generates SSH URLs):**
+
 ```bash
 sed -i "s|git+ssh://git@github.com/Memo-2023/|git+https://${GH_TOKEN}@github.com/Memo-2023/|g" package-lock.json
 ```
@@ -267,6 +293,7 @@ Make sure you have set up in your repository:
 If your local git config **always** generates SSH URLs in `package-lock.json` (despite attempts to fix it locally), you have two options:
 
 ### Option 1: Accept SSH and Patch in CI (Recommended)
+
 1. **Stop fighting with local git config** - it's unreliable
 2. **Commit the lockfile with SSH URLs** as-is
 3. **Use the flexible sed command** in CI that handles both SSH and HTTPS:
@@ -285,6 +312,7 @@ If your local git config **always** generates SSH URLs in `package-lock.json` (d
 ```
 
 ### Option 2: Force HTTPS Locally (Fragile)
+
 If you insist on HTTPS lockfiles, you must ensure NO global git config rewrites exist:
 
 ```bash

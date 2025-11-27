@@ -5,27 +5,27 @@ industry: IT & Beratung
 size: startup
 location: Zürich, Schweiz
 testimonial:
-  quote: "Als IT-Dienstleister müssen wir technologisch immer einen Schritt voraus sein. Mit Mana können wir unseren Kunden modernste KI-Lösungen anbieten und gleichzeitig unsere eigenen Prozesse optimieren."
+  quote: 'Als IT-Dienstleister müssen wir technologisch immer einen Schritt voraus sein. Mit Mana können wir unseren Kunden modernste KI-Lösungen anbieten und gleichzeitig unsere eigenen Prozesse optimieren.'
   author: Marco Brunner
   role: CEO
   image: /images/clients/marco-brunner.jpg
 stats:
-  - value: "75"
-    label: "Mitarbeiter"
-  - value: "3x"
-    label: "Produktivitätssteigerung"
-  - value: "60%"
-    label: "Weniger Entwicklungszeit"
-challenge: "Als innovatives Startup musste edisconet mit den KI-Capabilities großer Konzerne mithalten, ohne deren Budgets für teure Enterprise-Lizenzen."
-solution: "Mana als zentrale KI-Plattform für interne Nutzung und Kundenprojekte mit flexibler Credit-Verwaltung pro Projekt."
+  - value: '75'
+    label: 'Mitarbeiter'
+  - value: '3x'
+    label: 'Produktivitätssteigerung'
+  - value: '60%'
+    label: 'Weniger Entwicklungszeit'
+challenge: 'Als innovatives Startup musste edisconet mit den KI-Capabilities großer Konzerne mithalten, ohne deren Budgets für teure Enterprise-Lizenzen.'
+solution: 'Mana als zentrale KI-Plattform für interne Nutzung und Kundenprojekte mit flexibler Credit-Verwaltung pro Projekt.'
 results:
-  - "Drastische Reduzierung der Entwicklungszeiten"
-  - "Neue KI-basierte Dienstleistungen im Portfolio"
-  - "Höhere Kundenzufriedenheit durch schnellere Lieferung"
-  - "Wettbewerbsvorteil gegenüber größeren Beratungshäusern"
+  - 'Drastische Reduzierung der Entwicklungszeiten'
+  - 'Neue KI-basierte Dienstleistungen im Portfolio'
+  - 'Höhere Kundenzufriedenheit durch schnellere Lieferung'
+  - 'Wettbewerbsvorteil gegenüber größeren Beratungshäusern'
 manaUsage:
   monthlyCredits: 50000
-  mainTools: ["ChatGPT", "Claude", "GitHub Copilot", "Cursor", "Perplexity"]
+  mainTools: ['ChatGPT', 'Claude', 'GitHub Copilot', 'Cursor', 'Perplexity']
   teamSize: 75
 featured: true
 order: 4

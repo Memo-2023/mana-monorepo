@@ -4,7 +4,7 @@
 		generateQRCodeURL,
 		downloadQRCode,
 		type QRCodeColor,
-		type QRCodeFormat
+		type QRCodeFormat,
 	} from '$lib/qrcode';
 	import { trackEvent, EVENTS } from '$lib/analytics';
 	import { onMount } from 'svelte';
@@ -18,7 +18,7 @@
 		// Track analytics page view
 		trackEvent(EVENTS.ANALYTICS_VIEWED, {
 			short_code: data.link.short_code,
-			total_clicks: String(data.totalClicks)
+			total_clicks: String(data.totalClicks),
 		});
 	});
 
@@ -51,9 +51,7 @@
 					<h1 class="text-2xl font-bold text-gray-900">Link Analytics</h1>
 					<p class="mt-1 text-sm text-gray-600">{data.link.title || 'Untitled Link'}</p>
 				</div>
-				<a href="/my" class="text-sm text-blue-600 hover:text-blue-800">
-					← Back to Dashboard
-				</a>
+				<a href="/my" class="text-sm text-blue-600 hover:text-blue-800"> ← Back to Dashboard </a>
 			</div>
 		</div>
 	</header>
@@ -168,7 +166,7 @@
 							<select
 								id="format"
 								bind:value={qrFormat}
-								class="rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+								class="rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
 							>
 								<option value="png">PNG (High Quality)</option>
 								<option value="svg">SVG (Vector)</option>
@@ -230,7 +228,7 @@
 					<div class="space-y-3">
 						{#each data.deviceStats as [device, count]}
 							<div class="flex items-center justify-between">
-								<span class="text-sm text-gray-700 capitalize">{device}</span>
+								<span class="text-sm capitalize text-gray-700">{device}</span>
 								<div class="flex items-center gap-2">
 									<div class="h-2 w-32 rounded-full bg-gray-200">
 										<div
@@ -297,15 +295,15 @@
 					<table class="min-w-full divide-y divide-gray-200">
 						<thead class="bg-gray-50">
 							<tr>
-								<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Time</th
+								<th class="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500">Time</th
 								>
-								<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+								<th class="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500"
 									>Browser</th
 								>
-								<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+								<th class="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500"
 									>Device</th
 								>
-								<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+								<th class="px-4 py-2 text-left text-xs font-medium uppercase text-gray-500"
 									>Referrer</th
 								>
 							</tr>
@@ -316,8 +314,10 @@
 									<td class="px-4 py-2 text-sm text-gray-900">
 										{new Date(click.created).toLocaleString()}
 									</td>
-									<td class="px-4 py-2 text-sm text-gray-900">{getBrowserFromUserAgent(click.user_agent) || 'Unknown'}</td>
-									<td class="px-4 py-2 text-sm text-gray-900 capitalize"
+									<td class="px-4 py-2 text-sm text-gray-900"
+										>{getBrowserFromUserAgent(click.user_agent) || 'Unknown'}</td
+									>
+									<td class="px-4 py-2 text-sm capitalize text-gray-900"
 										>{click.device || 'Unknown'}</td
 									>
 									<td class="px-4 py-2 text-sm text-gray-900">

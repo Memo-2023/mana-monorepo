@@ -14,7 +14,13 @@ export interface DataProcessingPurpose {
 	id: string;
 	name: string;
 	description: string;
-	legalBasis: 'consent' | 'contract' | 'legal_obligation' | 'vital_interests' | 'public_task' | 'legitimate_interests';
+	legalBasis:
+		| 'consent'
+		| 'contract'
+		| 'legal_obligation'
+		| 'vital_interests'
+		| 'public_task'
+		| 'legitimate_interests';
 	dataTypes: string[];
 	retention: string;
 	required: boolean;
@@ -29,7 +35,7 @@ export const DATA_PROCESSING_PURPOSES: DataProcessingPurpose[] = [
 		legalBasis: 'contract',
 		dataTypes: ['email', 'username', 'password_hash', 'profile_data'],
 		retention: 'Bis zur Kontolöschung',
-		required: true
+		required: true,
 	},
 	{
 		id: 'link_service',
@@ -38,7 +44,7 @@ export const DATA_PROCESSING_PURPOSES: DataProcessingPurpose[] = [
 		legalBasis: 'contract',
 		dataTypes: ['original_urls', 'short_codes', 'link_metadata'],
 		retention: 'Bis zur manuellen Löschung oder Kontolöschung',
-		required: true
+		required: true,
 	},
 	{
 		id: 'click_analytics',
@@ -47,7 +53,7 @@ export const DATA_PROCESSING_PURPOSES: DataProcessingPurpose[] = [
 		legalBasis: 'legitimate_interests',
 		dataTypes: ['anonymized_ip', 'user_agent', 'referer', 'timestamp'],
 		retention: '12 Monate',
-		required: false
+		required: false,
 	},
 	{
 		id: 'security',
@@ -56,7 +62,7 @@ export const DATA_PROCESSING_PURPOSES: DataProcessingPurpose[] = [
 		legalBasis: 'legitimate_interests',
 		dataTypes: ['ip_address', 'user_agent', 'access_logs'],
 		retention: '6 Monate',
-		required: true
+		required: true,
 	},
 	{
 		id: 'communication',
@@ -65,7 +71,7 @@ export const DATA_PROCESSING_PURPOSES: DataProcessingPurpose[] = [
 		legalBasis: 'contract',
 		dataTypes: ['email', 'communication_preferences'],
 		retention: 'Bis zur Kontolöschung',
-		required: true
+		required: true,
 	},
 	{
 		id: 'marketing',
@@ -74,7 +80,7 @@ export const DATA_PROCESSING_PURPOSES: DataProcessingPurpose[] = [
 		legalBasis: 'consent',
 		dataTypes: ['email', 'usage_patterns', 'preferences'],
 		retention: 'Bis zum Widerruf der Einwilligung',
-		required: false
+		required: false,
 	},
 	{
 		id: 'analytics',
@@ -83,8 +89,8 @@ export const DATA_PROCESSING_PURPOSES: DataProcessingPurpose[] = [
 		legalBasis: 'consent',
 		dataTypes: ['anonymized_usage_data', 'page_views', 'session_data'],
 		retention: '14 Monate',
-		required: false
-	}
+		required: false,
+	},
 ];
 
 // Standard GDPR Consent
@@ -94,7 +100,7 @@ export const DEFAULT_CONSENT: GDPRConsent = {
 	marketing: false,
 	preferences: false,
 	timestamp: new Date().toISOString(),
-	version: '1.0'
+	version: '1.0',
 };
 
 // GDPR Consent Manager
@@ -105,19 +111,19 @@ export class GDPRManager {
 	// Aktuelle Einwilligung laden
 	static getConsent(): GDPRConsent | null {
 		if (typeof localStorage === 'undefined') return null;
-		
+
 		try {
 			const stored = localStorage.getItem(this.CONSENT_KEY);
 			if (!stored) return null;
-			
+
 			const consent = JSON.parse(stored) as GDPRConsent;
-			
+
 			// Prüfe Version - bei Änderungen neue Einwilligung erforderlich
 			if (consent.version !== this.CONSENT_VERSION) {
 				this.clearConsent();
 				return null;
 			}
-			
+
 			return consent;
 		} catch (error) {
 			console.error('Error loading GDPR consent:', error);
@@ -128,22 +134,24 @@ export class GDPRManager {
 	// Einwilligung speichern
 	static setConsent(consent: Partial<GDPRConsent>): void {
 		if (typeof localStorage === 'undefined') return;
-		
+
 		const fullConsent: GDPRConsent = {
 			...DEFAULT_CONSENT,
 			...consent,
 			timestamp: new Date().toISOString(),
-			version: this.CONSENT_VERSION
+			version: this.CONSENT_VERSION,
 		};
-		
+
 		try {
 			localStorage.setItem(this.CONSENT_KEY, JSON.stringify(fullConsent));
-			
+
 			// Event für andere Teile der App
-			window.dispatchEvent(new CustomEvent('gdpr:consent-updated', {
-				detail: fullConsent
-			}));
-			
+			window.dispatchEvent(
+				new CustomEvent('gdpr:consent-updated', {
+					detail: fullConsent,
+				})
+			);
+
 			console.log('GDPR consent updated:', fullConsent);
 		} catch (error) {
 			console.error('Error saving GDPR consent:', error);
@@ -153,9 +161,9 @@ export class GDPRManager {
 	// Einwilligung löschen
 	static clearConsent(): void {
 		if (typeof localStorage === 'undefined') return;
-		
+
 		localStorage.removeItem(this.CONSENT_KEY);
-		
+
 		window.dispatchEvent(new CustomEvent('gdpr:consent-cleared'));
 		console.log('GDPR consent cleared');
 	}
@@ -170,7 +178,7 @@ export class GDPRManager {
 	static hasConsent(type: keyof Omit<GDPRConsent, 'timestamp' | 'version'>): boolean {
 		const consent = this.getConsent();
 		if (!consent) return type === 'necessary'; // Nur notwendige Cookies ohne Einwilligung
-		
+
 		return consent[type];
 	}
 
@@ -201,31 +209,31 @@ export class GDPRManager {
 			account: {
 				email: request.userEmail,
 				created: request.accountCreated,
-				lastLogin: request.lastLogin
+				lastLogin: request.lastLogin,
 			},
 			links: request.userLinks || [],
 			analytics: request.userAnalytics || [],
 			consent: this.getConsent(),
-			purposes: DATA_PROCESSING_PURPOSES.filter(p => 
-				p.required || this.hasConsent(p.id as any)
-			)
+			purposes: DATA_PROCESSING_PURPOSES.filter((p) => p.required || this.hasConsent(p.id as any)),
 		};
 
 		return {
 			success: true,
 			type: 'access',
 			data: userData,
-			message: 'Ihre personenbezogenen Daten wurden zusammengestellt'
+			message: 'Ihre personenbezogenen Daten wurden zusammengestellt',
 		};
 	}
 
 	// Recht auf Berichtigung (Art. 16 DSGVO)
-	private static async handleDataRectification(request: UserRightRequest): Promise<UserRightResponse> {
+	private static async handleDataRectification(
+		request: UserRightRequest
+	): Promise<UserRightResponse> {
 		// In einer echten Implementation würde hier eine API-Anfrage an den Server gehen
 		return {
 			success: true,
 			type: 'rectification',
-			message: 'Ihr Antrag auf Datenberichtigung wurde eingereicht'
+			message: 'Ihr Antrag auf Datenberichtigung wurde eingereicht',
 		};
 	}
 
@@ -233,54 +241,60 @@ export class GDPRManager {
 	private static async handleDataErasure(request: UserRightRequest): Promise<UserRightResponse> {
 		// Lokale Consent-Daten löschen
 		this.clearConsent();
-		
+
 		return {
 			success: true,
 			type: 'erasure',
-			message: 'Ihr Antrag auf Datenlöschung wurde eingereicht'
+			message: 'Ihr Antrag auf Datenlöschung wurde eingereicht',
 		};
 	}
 
 	// Recht auf Datenübertragbarkeit (Art. 20 DSGVO)
-	private static async handleDataPortability(request: UserRightRequest): Promise<UserRightResponse> {
+	private static async handleDataPortability(
+		request: UserRightRequest
+	): Promise<UserRightResponse> {
 		const exportData = {
 			links: request.userLinks || [],
 			analytics: request.userAnalytics || [],
 			profile: request.userProfile || {},
 			exportDate: new Date().toISOString(),
-			format: 'JSON'
+			format: 'JSON',
 		};
 
 		return {
 			success: true,
 			type: 'portability',
 			data: exportData,
-			message: 'Ihre Daten wurden für den Export vorbereitet'
+			message: 'Ihre Daten wurden für den Export vorbereitet',
 		};
 	}
 
 	// Recht auf Einschränkung (Art. 18 DSGVO)
-	private static async handleProcessingRestriction(request: UserRightRequest): Promise<UserRightResponse> {
+	private static async handleProcessingRestriction(
+		request: UserRightRequest
+	): Promise<UserRightResponse> {
 		return {
 			success: true,
 			type: 'restriction',
-			message: 'Ihr Antrag auf Verarbeitungseinschränkung wurde eingereicht'
+			message: 'Ihr Antrag auf Verarbeitungseinschränkung wurde eingereicht',
 		};
 	}
 
 	// Widerspruchsrecht (Art. 21 DSGVO)
-	private static async handleProcessingObjection(request: UserRightRequest): Promise<UserRightResponse> {
+	private static async handleProcessingObjection(
+		request: UserRightRequest
+	): Promise<UserRightResponse> {
 		// Analytics und Marketing deaktivieren
 		this.setConsent({
 			...this.getConsent(),
 			analytics: false,
-			marketing: false
+			marketing: false,
 		});
 
 		return {
 			success: true,
 			type: 'objection',
-			message: 'Ihr Widerspruch wurde verarbeitet'
+			message: 'Ihr Widerspruch wurde verarbeitet',
 		};
 	}
 }
@@ -315,7 +329,7 @@ export function acceptAllCookies(): void {
 		necessary: true,
 		analytics: true,
 		marketing: true,
-		preferences: true
+		preferences: true,
 	});
 }
 
@@ -324,7 +338,7 @@ export function acceptNecessaryOnly(): void {
 		necessary: true,
 		analytics: false,
 		marketing: false,
-		preferences: false
+		preferences: false,
 	});
 }
 
@@ -335,27 +349,27 @@ export function generateProcessingRecord(): any {
 			name: 'uLoad',
 			contact: 'privacy@ulo.ad',
 			representative: 'Till Schneider',
-			dpo: null // Falls kein Datenschutzbeauftragter erforderlich
+			dpo: null, // Falls kein Datenschutzbeauftragter erforderlich
 		},
 		purposes: DATA_PROCESSING_PURPOSES,
 		categories: {
 			dataSubjects: ['users', 'visitors'],
 			personalData: ['identification', 'contact', 'usage', 'technical'],
 			recipients: ['hosting_provider', 'analytics_provider', 'payment_provider'],
-			transfers: ['within_eu']
+			transfers: ['within_eu'],
 		},
 		retention: {
 			criteria: 'Purpose-based retention',
-			periods: DATA_PROCESSING_PURPOSES.map(p => ({
+			periods: DATA_PROCESSING_PURPOSES.map((p) => ({
 				purpose: p.name,
-				period: p.retention
-			}))
+				period: p.retention,
+			})),
 		},
 		security: {
 			measures: ['encryption', 'access_control', 'regular_backups', 'monitoring'],
-			certifications: []
+			certifications: [],
 		},
-		lastUpdated: new Date().toISOString()
+		lastUpdated: new Date().toISOString(),
 	};
 }
 
@@ -377,21 +391,24 @@ export function isDataMinimal(dataCollection: any): boolean {
 	const requiredFields = ['email', 'username'];
 	const optionalFields = ['name', 'bio', 'website'];
 	const collectedFields = Object.keys(dataCollection);
-	
+
 	// Prüfe ob nur notwendige und explizit gewünschte Felder gesammelt werden
-	const unnecessary = collectedFields.filter(field => 
-		!requiredFields.includes(field) && 
-		!optionalFields.includes(field)
+	const unnecessary = collectedFields.filter(
+		(field) => !requiredFields.includes(field) && !optionalFields.includes(field)
 	);
-	
+
 	return unnecessary.length === 0;
 }
 
 // Legal Basis Validation
-export function validateLegalBasis(purpose: string, hasConsent: boolean, isRequired: boolean): boolean {
-	const purposeConfig = DATA_PROCESSING_PURPOSES.find(p => p.id === purpose);
+export function validateLegalBasis(
+	purpose: string,
+	hasConsent: boolean,
+	isRequired: boolean
+): boolean {
+	const purposeConfig = DATA_PROCESSING_PURPOSES.find((p) => p.id === purpose);
 	if (!purposeConfig) return false;
-	
+
 	switch (purposeConfig.legalBasis) {
 		case 'consent':
 			return hasConsent;

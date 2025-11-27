@@ -8,7 +8,7 @@
  * @returns Always returns null since PostHog is removed
  */
 export async function getExperiment(experimentKey: string): Promise<string | null> {
-  return null;
+	return null;
 }
 
 /**
@@ -18,12 +18,12 @@ export async function getExperiment(experimentKey: string): Promise<string | nul
  * @param additionalProperties - Any additional properties to track
  */
 export function trackExperimentConversion(
-  experimentKey: string,
-  conversionType: string,
-  additionalProperties?: Record<string, any>
+	experimentKey: string,
+	conversionType: string,
+	additionalProperties?: Record<string, any>
 ) {
-  // No-op since PostHog is removed
-  console.log('Experiment conversion:', experimentKey, conversionType, additionalProperties);
+	// No-op since PostHog is removed
+	console.log('Experiment conversion:', experimentKey, conversionType, additionalProperties);
 }
 
 /**
@@ -32,8 +32,8 @@ export function trackExperimentConversion(
  * @param properties - Event properties
  */
 export function trackEvent(eventName: string, properties?: Record<string, any>) {
-  // No-op since PostHog is removed
-  console.log('Event:', eventName, properties);
+	// No-op since PostHog is removed
+	console.log('Event:', eventName, properties);
 }
 
 /**
@@ -43,11 +43,11 @@ export function trackEvent(eventName: string, properties?: Record<string, any>) 
  * @param variantClasses - Object mapping variant names to classes
  */
 export async function applyExperimentClasses(
-  elementId: string,
-  experimentKey: string,
-  variantClasses: Record<string, string>
+	elementId: string,
+	experimentKey: string,
+	variantClasses: Record<string, string>
 ) {
-  // No-op since PostHog is removed
+	// No-op since PostHog is removed
 }
 
 /**
@@ -55,5 +55,5 @@ export async function applyExperimentClasses(
  * @returns Empty object since PostHog is removed
  */
 export async function getAllExperiments(): Promise<Record<string, any>> {
-  return {};
+	return {};
 }

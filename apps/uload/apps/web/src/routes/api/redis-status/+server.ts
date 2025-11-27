@@ -9,7 +9,7 @@ export const GET: RequestHandler = async () => {
 		enabled: !!redis,
 		available: redisAvailable,
 		cachedLinks: 0,
-		error: null as string | null
+		error: null as string | null,
 	};
 
 	try {

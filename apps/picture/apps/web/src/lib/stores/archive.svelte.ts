@@ -11,60 +11,60 @@ let hasMoreArchive = $state(true);
 let currentArchivePage = $state(1);
 
 export const archiveStore = {
-  get images() {
-    return archivedImages;
-  },
-  get isLoading() {
-    return isLoadingArchive;
-  },
-  get hasMore() {
-    return hasMoreArchive;
-  },
-  get currentPage() {
-    return currentArchivePage;
-  },
+	get images() {
+		return archivedImages;
+	},
+	get isLoading() {
+		return isLoadingArchive;
+	},
+	get hasMore() {
+		return hasMoreArchive;
+	},
+	get currentPage() {
+		return currentArchivePage;
+	},
 
-  setImages(images: Image[]) {
-    archivedImages = images;
-  },
+	setImages(images: Image[]) {
+		archivedImages = images;
+	},
 
-  appendImages(images: Image[]) {
-    archivedImages = [...archivedImages, ...images];
-  },
+	appendImages(images: Image[]) {
+		archivedImages = [...archivedImages, ...images];
+	},
 
-  addImage(image: Image) {
-    archivedImages = [image, ...archivedImages];
-  },
+	addImage(image: Image) {
+		archivedImages = [image, ...archivedImages];
+	},
 
-  removeImage(id: string) {
-    archivedImages = archivedImages.filter((img) => img.id !== id);
-  },
+	removeImage(id: string) {
+		archivedImages = archivedImages.filter((img) => img.id !== id);
+	},
 
-  setLoading(loading: boolean) {
-    isLoadingArchive = loading;
-  },
+	setLoading(loading: boolean) {
+		isLoadingArchive = loading;
+	},
 
-  setHasMore(more: boolean) {
-    hasMoreArchive = more;
-  },
+	setHasMore(more: boolean) {
+		hasMoreArchive = more;
+	},
 
-  setCurrentPage(page: number) {
-    currentArchivePage = page;
-  },
+	setCurrentPage(page: number) {
+		currentArchivePage = page;
+	},
 
-  incrementPage() {
-    currentArchivePage++;
-  },
+	incrementPage() {
+		currentArchivePage++;
+	},
 
-  reset() {
-    archivedImages = [];
-    isLoadingArchive = false;
-    hasMoreArchive = true;
-    currentArchivePage = 1;
-  },
+	reset() {
+		archivedImages = [];
+		isLoadingArchive = false;
+		hasMoreArchive = true;
+		currentArchivePage = 1;
+	},
 };
 
 // Export individual getters for backwards compatibility
 export function getArchivedImages() {
-  return archivedImages;
+	return archivedImages;
 }

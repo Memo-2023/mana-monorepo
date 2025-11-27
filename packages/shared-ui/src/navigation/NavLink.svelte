@@ -6,7 +6,7 @@
 		active = false,
 		variant = 'default',
 		minimized = false,
-		class: className = ''
+		class: className = '',
 	}: NavLinkProps = $props();
 
 	let showTooltip = $state(false);
@@ -24,7 +24,9 @@
 
 <a
 	href={item.href}
-	class="nav-link nav-link--{variant} {active ? 'nav-link--active' : ''} {minimized ? 'nav-link--minimized' : ''} {className}"
+	class="nav-link nav-link--{variant} {active ? 'nav-link--active' : ''} {minimized
+		? 'nav-link--minimized'
+		: ''} {className}"
 	class:nav-link--disabled={item.disabled}
 	onmouseenter={handleMouseEnter}
 	onmouseleave={handleMouseLeave}
@@ -35,7 +37,9 @@
 		<span class="nav-link__icon">
 			{#if item.icon.startsWith('<svg') || item.icon.startsWith('M')}
 				<!-- SVG path or element -->
-				{@html item.icon.startsWith('M') ? `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="${item.icon}"/></svg>` : item.icon}
+				{@html item.icon.startsWith('M')
+					? `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="${item.icon}"/></svg>`
+					: item.icon}
 			{:else}
 				<!-- Emoji or text icon -->
 				<span class="text-lg">{item.icon}</span>

@@ -3,6 +3,7 @@
 ### 📦 What was created:
 
 **1. Collection Schema** (`config.ts`)
+
 - Full model specifications
 - Performance metrics (speed, quality, reliability)
 - Pricing & availability
@@ -14,6 +15,7 @@
 - Related content
 
 **2. Example Models**
+
 - FLUX Schnell (fast, general purpose)
 - FLUX Dev (professional, balanced)
 
@@ -38,32 +40,31 @@
 
 ```yaml
 ---
-name: "Model Name"
-slug: "model-slug"
-provider: "Provider Name"
-description: "Short description"
-type: "text-to-image"
-category: "general"
-availability: "available"
+name: 'Model Name'
+slug: 'model-slug'
+provider: 'Provider Name'
+description: 'Short description'
+type: 'text-to-image'
+category: 'general'
+availability: 'available'
 featured: true
 pricing:
   free: false
   pro: true
   enterprise: true
 performance:
-  speed: "~5 seconds"
+  speed: '~5 seconds'
   speedScore: 4
-  quality: "excellent"
+  quality: 'excellent'
   qualityScore: 4
 strengths:
-  - "Strength 1"
-  - "Strength 2"
+  - 'Strength 1'
+  - 'Strength 2'
 bestFor:
-  - "Use case 1"
-language: "en"
+  - 'Use case 1'
+language: 'en'
 lastUpdated: 2025-01-15T00:00:00.000Z
 ---
-
 Content here...
 ```
 

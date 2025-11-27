@@ -7,38 +7,37 @@ import { languages } from '../../../i18n/ui';
 export const prerender = true;
 
 export async function getStaticPaths() {
-  const tutorialsEntries = await Promise.all(
-    Object.keys(languages)
-      .map(async (lang) => {
-        const langTutorials = await getCollection('tutorials', ({ id }) => {
-          return id.startsWith(`${lang}/`);
-        });
-        
-        return langTutorials.map(tutorial => {
-          // Get just the filename part from the slug
-          const slugParts = tutorial.slug.split('/');
-          const fileName = slugParts[slugParts.length - 1];
-          
-          return {
-            params: { 
-              lang, 
-              slug: fileName 
-            },
-            props: { tutorial },
-          };
-        });
-      })
-  );
-  
-  // Flatten array of arrays
-  return tutorialsEntries.flat();
+	const tutorialsEntries = await Promise.all(
+		Object.keys(languages).map(async (lang) => {
+			const langTutorials = await getCollection('tutorials', ({ id }) => {
+				return id.startsWith(`${lang}/`);
+			});
+
+			return langTutorials.map((tutorial) => {
+				// Get just the filename part from the slug
+				const slugParts = tutorial.slug.split('/');
+				const fileName = slugParts[slugParts.length - 1];
+
+				return {
+					params: {
+						lang,
+						slug: fileName,
+					},
+					props: { tutorial },
+				};
+			});
+		})
+	);
+
+	// Flatten array of arrays
+	return tutorialsEntries.flat();
 }
 
 const { tutorial } = Astro.props;
 
 // Sicherheitsabfrage für Tutorial
 if (!tutorial) {
-  return Astro.redirect('/404');
+	return Astro.redirect('/404');
 }
 
 const { Content } = await tutorial.render();
@@ -47,12 +46,14 @@ const { Content } = await tutorial.render();
 const isCourseLesson = tutorial.data.course !== undefined;
 ---
 
-{isCourseLesson ? (
-  <CourseLayout tutorial={tutorial} courseName={tutorial.data.course || ''}>
-    <Content />
-  </CourseLayout>
-) : (
-  <TutorialLayout tutorial={tutorial}>
-    <Content />
-  </TutorialLayout>
-)}
+{
+	isCourseLesson ? (
+		<CourseLayout tutorial={tutorial} courseName={tutorial.data.course || ''}>
+			<Content />
+		</CourseLayout>
+	) : (
+		<TutorialLayout tutorial={tutorial}>
+			<Content />
+		</TutorialLayout>
+	)
+}

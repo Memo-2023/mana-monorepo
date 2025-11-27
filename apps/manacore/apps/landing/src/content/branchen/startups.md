@@ -15,14 +15,14 @@ useCases:
   - Market Research und Competitor Analysis
   - Team-Dokumentation und Knowledge Base
 testimonial:
-  quote: "Wir sind in 6 Monaten von 3 auf 25 Mitarbeiter gewachsen. Mit traditionellen Lizenzen wäre das ein Verwaltungs-Nightmare gewesen. Mana skaliert einfach mit."
-  author: "Jana Fischer"
-  role: "Co-Founder & CEO"
-  company: "TechVenture GmbH"
+  quote: 'Wir sind in 6 Monaten von 3 auf 25 Mitarbeiter gewachsen. Mit traditionellen Lizenzen wäre das ein Verwaltungs-Nightmare gewesen. Mana skaliert einfach mit.'
+  author: 'Jana Fischer'
+  role: 'Co-Founder & CEO'
+  company: 'TechVenture GmbH'
 pricing:
   special: true
-  discount: "Startup-Programm verfügbar"
-  details: "Spezielle Konditionen für Startups unter 3 Jahren mit VC-Backing"
+  discount: 'Startup-Programm verfügbar'
+  details: 'Spezielle Konditionen für Startups unter 3 Jahren mit VC-Backing'
 order: 5
 ---
 
@@ -47,24 +47,28 @@ Startups müssen schnell sein, flexibel bleiben und jeden Euro optimal einsetzen
 ## KI für jede Growth-Phase
 
 ### 🎯 Pre-Seed & MVP Phase
+
 - **Ideen-Validierung**: Customer Discovery Interviews mit Memoro
 - **Prototyping**: Mockups und Demos mit KI erstellen
 - **Market Research**: Wettbewerbsanalyse und Trends
 - **Pitch Deck**: Investoren-Präsentationen optimieren
 
 ### 🚀 Seed & Product-Market Fit
+
 - **User Interviews**: Systematisch mit Memoro dokumentieren
 - **Feature Development**: KI-gestütztes Brainstorming
 - **Content Creation**: Landing Pages und Marketing
 - **Documentation**: Erste Prozesse festhalten
 
 ### 📈 Series A & Scaling
+
 - **Team Onboarding**: Schulungsmaterialien generieren
 - **Sales Enablement**: Pitch-Scripts und Demos
 - **Customer Success**: Support-Dokumentation
 - **Data Analysis**: Metriken und Reports
 
 ### 🎢 Series B & Beyond
+
 - **Internationalisierung**: Übersetzungen und Lokalisierung
 - **Process Automation**: Workflows mit KI optimieren
 - **Knowledge Management**: Company Wiki aufbauen
@@ -73,24 +77,28 @@ Startups müssen schnell sein, flexibel bleiben und jeden Euro optimal einsetzen
 ## Use Cases nach Teams
 
 ### 👥 Product Team
+
 - User Research Sessions transkribieren
 - PRDs mit KI-Unterstützung schreiben
 - Wireframes und Mockups generieren
 - A/B Test Hypothesen entwickeln
 
 ### 💰 Sales & Marketing
+
 - Sales Calls mit Memoro aufzeichnen
 - Email-Sequenzen optimieren
 - Social Media Content skalieren
 - SEO-optimierte Blogposts
 
 ### 🛠️ Engineering
+
 - Code-Dokumentation generieren
 - Architecture Decisions dokumentieren
 - Bug Reports analysieren
 - Technical Writing
 
 ### 📊 Operations
+
 - Meeting-Protokolle automatisieren
 - SOPs und Playbooks erstellen
 - Investor Updates verfassen
@@ -99,22 +107,26 @@ Startups müssen schnell sein, flexibel bleiben und jeden Euro optimal einsetzen
 ## Kostenbeispiel für Wachstum
 
 **10-Person Startup (traditionell)**:
+
 - 10× ChatGPT Plus: 200€/Monat
 - 5× Design-Tools: 150€/Monat
 - 3× Transcription: 60€/Monat
 - **Total: 410€/Monat**
 
 **10-Person Startup (mit Mana)**:
+
 - Durchschnitt: 200-250€/Monat
 - **Ersparnis: ~40%**
 - **Plus**: Unbegrenzte Tool-Auswahl
 
 **50-Person Scale-up (traditionell)**:
+
 - Enterprise-Lizenzen: 2.000-3.000€/Monat
 - Minimum User Requirements
 - Lange Vertragsverhandlungen
 
 **50-Person Scale-up (mit Mana)**:
+
 - Durchschnitt: 800-1.200€/Monat
 - **Ersparnis: ~60%**
 - **Plus**: Sofort startbereit
@@ -122,17 +134,20 @@ Startups müssen schnell sein, flexibel bleiben und jeden Euro optimal einsetzen
 ## Startup-Programm Benefits
 
 ### 🎁 Welcome Package
+
 - 5.000 Bonus-Mana bei Anmeldung
 - Onboarding-Workshop für das Team
 - Dedizierter Startup Success Manager
 
 ### 💎 Growth Perks
+
 - Volume Discounts ab 10.000 Mana/Monat
 - Priority Support
 - Early Access zu neuen Features
 - Quarterly Business Reviews
 
 ### 🤝 Partner Network
+
 - Zugang zu anderen Startups im Netzwerk
 - Gemeinsame Best Practices
 - Tool-Empfehlungen
@@ -141,12 +156,15 @@ Startups müssen schnell sein, flexibel bleiben und jeden Euro optimal einsetzen
 ## Success Stories
 
 ### FinTech Startup (Berlin)
+
 "Von der Idee zum ersten Kunden in 3 Monaten – Mana war dabei unser schweizer Taschenmesser für alles von User Research bis Pitch Deck."
 
 ### SaaS Scale-up (München)
+
 "Wir sparen nicht nur 70% unserer Tool-Kosten, sondern auch unzählige Stunden Admin-Aufwand."
 
 ### DeepTech Spin-off (Aachen)
+
 "Besonders Memoro hat unsere Forschungsinterviews revolutioniert. Was früher Tage dauerte, erledigen wir jetzt in Stunden."
 
 ## Quick Start für Startups
@@ -157,6 +175,7 @@ Startups müssen schnell sein, flexibel bleiben und jeden Euro optimal einsetzen
 4. **Scale**: Wachsen Sie mit Mana
 
 ### Qualifikation für Startup-Programm
+
 - Gegründet in den letzten 3 Jahren
 - Weniger als 50 Mitarbeiter
 - VC-Backing oder Accelerator-Teilnahme
@@ -165,6 +184,7 @@ Startups müssen schnell sein, flexibel bleiben und jeden Euro optimal einsetzen
 ## ROI für Investoren
 
 Zeigen Sie Ihren Investoren:
+
 - **Reduzierte Burn-Rate**: Bis zu 50% weniger Tool-Kosten
 - **Höhere Produktivität**: Team arbeitet effizienter mit KI
 - **Skalierbarkeit**: Kosten wachsen linear mit Nutzung

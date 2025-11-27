@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 Storyteller is a magical children's story generation app with:
+
 - AI-powered story creation with consistent characters
 - Custom character generation from descriptions or photos
 - Multi-page illustrated stories
@@ -24,6 +25,7 @@ Storyteller is a magical children's story generation app with:
 ### Local Development Setup (Mobile + Local Backend)
 
 **Step 1: Configure mobile to use local backend**
+
 ```bash
 # Edit apps/mobile/.env and set:
 echo "EXPO_PUBLIC_STORYTELLER_BACKEND_URL=http://localhost:3002" > apps/mobile/.env
@@ -34,6 +36,7 @@ echo "EXPO_ROUTER_APP_ROOT=app" >> apps/mobile/.env
 ```
 
 **Step 2: Start backend and mobile**
+
 ```bash
 # Terminal 1 - Backend
 cd apps/backend && npm run dev
@@ -46,6 +49,7 @@ cd apps/mobile && npm run dev
 ```
 
 **Step 3: Verify connection**
+
 ```bash
 # In Terminal 1 (backend), you should see incoming requests from mobile app
 # Check health endpoint:
@@ -65,43 +69,49 @@ cd apps/mobile && npx expo start -c
 
 ### Quick Backend Switch Reference
 
-| Setup | apps/mobile/.env Value | Terminal Setup |
-|-------|------------------|----------------|
-| **Local Backend** | `http://localhost:3002` | Run both backend + mobile |
-| **Physical Device** | `http://YOUR_IP:3002` | Run both backend + mobile |
-| **Production Backend** | `https://storyteller-backend-111768794939.europe-west3.run.app` | Run mobile only |
+| Setup                  | apps/mobile/.env Value                                          | Terminal Setup            |
+| ---------------------- | --------------------------------------------------------------- | ------------------------- |
+| **Local Backend**      | `http://localhost:3002`                                         | Run both backend + mobile |
+| **Physical Device**    | `http://YOUR_IP:3002`                                           | Run both backend + mobile |
+| **Production Backend** | `https://storyteller-backend-111768794939.europe-west3.run.app` | Run mobile only           |
 
 **Remember:** Always restart Expo with `-c` flag after changing `.env`
 
 ### Other Development Commands
 
 **Install dependencies (first time):**
+
 ```bash
 pnpm install
 ```
 
 **Start everything via Turborepo:**
+
 ```bash
 pnpm run dev  # From root - starts all services
 ```
 
 **Backend only:**
+
 ```bash
 cd apps/backend && npm run dev
 # Test: curl http://localhost:3002/health | jq
 ```
 
 **Mobile only:**
+
 ```bash
 cd apps/mobile && npm run dev
 ```
 
 **Landing page:**
+
 ```bash
 cd apps/landing && npm run dev
 ```
 
 **Web app:**
+
 ```bash
 cd apps/web && npm run dev
 ```
@@ -153,6 +163,7 @@ apps/maerchenzauber/
 ## Key Implementation Details
 
 ### Story Generation Flow
+
 1. **Character Selection**: User selects existing character or creates new one
 2. **Story Request**: User provides story description, system selects author/illustrator personas
 3. **Generation Pipeline**:
@@ -167,6 +178,7 @@ apps/maerchenzauber/
 ### System Characters
 
 System characters are special read-only characters visible to all users:
+
 - Identified by system user ID: `00000000-0000-0000-0000-000000000000`
 - Accessible to all authenticated users via RLS policies
 - Cannot be edited or deleted by regular users
@@ -176,12 +188,14 @@ System characters are special read-only characters visible to all users:
 **See detailed documentation**: [docs/SYSTEM_CHARACTERS.md](docs/SYSTEM_CHARACTERS.md)
 
 Key implementation points:
+
 - **Database**: Characters table with system `user_id`
 - **Backend**: Validation allows both owned and system characters
 - **Frontend**: Conditional rendering based on `user_id` check
 - **Storage**: Images stored in system user folder in Supabase Storage
 
 ### AI Services Architecture
+
 - **Prompting**: `backend/src/core/services/prompting.service.ts` handles all AI interactions
 - **System Prompts**: Stored in `backend/src/core/consts/`
 - **Image Generation**: `backend/src/core/services/image-supabase.service.ts`
@@ -189,11 +203,13 @@ Key implementation points:
 - **Models**: Azure OpenAI (GPT-4), Google Gemini, Replicate (Flux for images)
 
 ### Database (Supabase)
+
 - **Client**: `backend/src/supabase/supabase.provider.ts`
 - **Data Service**: `backend/src/core/services/supabase-data.service.ts`
 - **Tables**: `characters`, `stories`, `story_collections`, `user_settings`
 
 ### Authentication
+
 - Uses Mana Core for authentication
 - Backend acts as proxy: `backend/src/auth/`
 - Mobile token management: `mobile/src/services/tokenManager.ts`
@@ -204,6 +220,7 @@ Key implementation points:
 This project uses **PNPM** as the package manager for better performance and disk space efficiency.
 
 **Key PNPM commands:**
+
 ```bash
 pnpm install              # Install all dependencies
 pnpm add <package>        # Add a dependency to workspace root
@@ -214,6 +231,7 @@ pnpm add <package> --filter @storyteller/backend  # Add to specific app
 ## Available Scripts
 
 ### Root Level
+
 - `pnpm run dev` - Start all services (Turborepo)
 - `pnpm run build` - Build all applications
 - `pnpm run lint` - Lint all packages
@@ -222,6 +240,7 @@ pnpm add <package> --filter @storyteller/backend  # Add to specific app
 - `pnpm run clean` - Clean build artifacts
 
 ### Backend (cd apps/backend)
+
 - `pnpm run dev` - Start with hot reload (port 3002)
 - `pnpm run build` - Build production bundle
 - `pnpm run start:prod` - Run production build
@@ -231,6 +250,7 @@ pnpm add <package> --filter @storyteller/backend  # Add to specific app
 - `pnpm run type-check` - TypeScript validation
 
 ### Mobile (cd apps/mobile)
+
 - `pnpm run dev` - Start Expo dev server
 - `pnpm run ios` - Run on iOS simulator
 - `pnpm run android` - Run on Android emulator
@@ -240,11 +260,13 @@ pnpm add <package> --filter @storyteller/backend  # Add to specific app
 - `pnpm run type-check` - TypeScript validation
 
 ### Landing Page (cd apps/landing)
+
 - `pnpm run dev` - Start Astro dev server
 - `pnpm run build` - Build static site
 - `pnpm run preview` - Preview production build
 
 ### Web App (cd apps/web)
+
 - `pnpm run dev` - Start SvelteKit dev server
 - `pnpm run build` - Build production bundle
 - `pnpm run preview` - Preview production build
@@ -252,6 +274,7 @@ pnpm add <package> --filter @storyteller/backend  # Add to specific app
 ## Troubleshooting
 
 ### Backend Won't Start
+
 ```bash
 # Port 3002 already in use
 lsof -i :3002
@@ -267,6 +290,7 @@ cat backend/.env | grep -v "^#" | grep -v "^$"
 ```
 
 ### Mobile Can't Connect to Backend
+
 ```bash
 # For physical devices, use computer IP instead of localhost
 ifconfig | grep "inet " | grep -v 127.0.0.1
@@ -279,6 +303,7 @@ cd apps/mobile && npx expo start -c  # -c flag clears cache
 ```
 
 ### Environment Variables Not Loading
+
 ```bash
 # Mobile app: Environment changes require restart
 # 1. Stop Expo dev server (Ctrl+C)
@@ -295,17 +320,21 @@ cd apps/backend && npm run dev
 ```
 
 ### AI Service Errors
+
 Check these environment variables in `apps/backend/.env`:
+
 - `MAERCHENZAUBER_AZURE_OPENAI_ENDPOINT` and `_KEY`
 - `MAERCHENZAUBER_GOOGLE_GENAI_API_KEY`
 - `MAERCHENZAUBER_REPLICATE_API_KEY`
 
 ### iOS Deeplink Crashes
+
 If the app crashes when opening deeplinks on iOS (especially character sharing links):
 
 See **[complete debugging guide](mobile/docs/DEEPLINK_CRASH_FIX.md)** for detailed solutions.
 
 **Quick fixes**:
+
 1. Check `expo-linear-gradient` version is 15.0.7+
 2. Ensure all `LinearGradient` styles use `alignSelf: 'stretch'` instead of `width: '100%'`
 3. Verify `MagicalLoadingScreen` has `context` prop
@@ -313,6 +342,7 @@ See **[complete debugging guide](mobile/docs/DEEPLINK_CRASH_FIX.md)** for detail
 5. Ensure each route directory has proper `_layout.tsx` with `freezeOnBlur: false`
 
 **Common symptoms**:
+
 - Crash during navigation after deeplink opens
 - `CoreGraphics CGContextDrawLinearGradient` errors
 - `RNSScreen setViewToSnapshot` crashes
@@ -321,6 +351,7 @@ See **[complete debugging guide](mobile/docs/DEEPLINK_CRASH_FIX.md)** for detail
 ## API Testing
 
 ### Health Checks
+
 ```bash
 # Full health check
 curl http://localhost:3002/health | jq
@@ -333,6 +364,7 @@ curl http://localhost:3002/health/live | jq
 ```
 
 ### Main Endpoints
+
 ```bash
 # Authentication
 POST /auth/signin           # Sign in with email/password
@@ -372,7 +404,9 @@ POST /credits/consume       # Consume credits
 ## Environment Variables
 
 ### Backend (`backend/.env`)
+
 **Required:**
+
 - `MANA_SERVICE_URL` - Mana Core auth service URL
 - `APP_ID` - Mana Core application ID
 - `SERVICE_KEY` - Mana Core service key
@@ -386,11 +420,14 @@ POST /credits/consume       # Consume credits
 - `MAERCHENZAUBER_STORAGE_BUCKET` - Supabase storage bucket name (default: `maerchenzauber`)
 
 **Optional:**
+
 - `PORT` - Server port (default: 3002)
 - `NODE_ENV` - Environment (development/production)
 
 ### Mobile (`apps/mobile/.env`)
+
 **Required:**
+
 - `EXPO_PUBLIC_STORYTELLER_BACKEND_URL` - Backend API URL
   - Local: `http://localhost:3002`
   - Production: `https://storyteller-backend-111768794939.europe-west3.run.app`
@@ -400,6 +437,7 @@ POST /credits/consume       # Consume credits
 ## Code Patterns & Standards
 
 ### Backend (NestJS/TypeScript)
+
 - **Dependency Injection**: Use NestJS DI with `@Injectable()` decorators
 - **Error Handling**: Return `Result<T>` type: `{ data: T | null, error: Error | null }`
 - **DTOs**: Use `class-validator` decorators for validation
@@ -407,6 +445,7 @@ POST /credits/consume       # Consume credits
 - **Database**: All queries through `supabase-data.service.ts`
 
 ### Mobile (React Native/Expo)
+
 - **Components**: Functional components with hooks only
 - **Navigation**: Use `expo-router` file-based routing
 - **API Calls**: Through `src/utils/api.ts` with automatic token refresh
@@ -414,31 +453,33 @@ POST /credits/consume       # Consume credits
 - **State**: Local state with `useState`, no global state library currently
 
 ### Error Handling Pattern
+
 ```typescript
 // Backend
 async function operation(): Promise<Result<Data>> {
-  try {
-    const result = await doSomething();
-    return { data: result, error: null };
-  } catch (error) {
-    console.error('[ServiceName] Operation failed:', error);
-    return { data: null, error };
-  }
+	try {
+		const result = await doSomething();
+		return { data: result, error: null };
+	} catch (error) {
+		console.error('[ServiceName] Operation failed:', error);
+		return { data: null, error };
+	}
 }
 
 // Mobile
 const response = await fetchWithAuth('/endpoint', {
-  method: 'POST',
-  body: JSON.stringify(data)
+	method: 'POST',
+	body: JSON.stringify(data),
 });
 if (!response.ok) {
-  throw new Error(`API error: ${response.status}`);
+	throw new Error(`API error: ${response.status}`);
 }
 ```
 
 ## Deployment
 
 ### Backend (Google Cloud Run)
+
 Current production: `https://storyteller-backend-111768794939.europe-west3.run.app`
 
 ```bash
@@ -458,6 +499,7 @@ gcloud run deploy storyteller-backend \
 ```
 
 ### Mobile (EAS Build)
+
 EAS configuration in `eas.json` at project root.
 
 ```bash
@@ -478,6 +520,7 @@ eas submit --platform android
 ```
 
 ### Landing Page (Netlify/Vercel)
+
 ```bash
 cd apps/landing
 
@@ -488,6 +531,7 @@ npm run build
 ```
 
 ### Web App (SvelteKit)
+
 ```bash
 cd apps/web
 
@@ -501,6 +545,7 @@ npm run preview
 ## Debugging
 
 ### Backend Debugging
+
 ```bash
 # Check logs in production
 gcloud run services logs read storyteller-backend --limit=100
@@ -510,12 +555,14 @@ gcloud logging read "resource.type=cloud_run_revision AND resource.labels.servic
 ```
 
 ### Mobile Debugging
+
 - **Network**: Check API calls in `apps/mobile/src/utils/api.ts`
 - **Storage**: Use React Native Debugger to inspect AsyncStorage/SecureStore
 - **Logs**: Use `console.log('[ComponentName]', message)` format
 - **Expo**: Use `npx expo start --dev-client` for more debugging tools
 
 ### Database Debugging
+
 - Use Supabase Dashboard for direct queries
 - Add `.select('*')` to see all returned fields
 - Check RLS policies if queries return empty results

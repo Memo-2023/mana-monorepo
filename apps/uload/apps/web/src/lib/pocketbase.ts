@@ -4,7 +4,8 @@ import { dev } from '$app/environment';
 // URL Konfiguration - automatische Umgebungserkennung
 // Development: http://localhost:8090 (aus .env.development)
 // Production: https://pb.ulo.ad (aus .env.production)
-const POCKETBASE_URL = import.meta.env.PUBLIC_POCKETBASE_URL || (dev ? 'http://localhost:8090' : 'https://pb.ulo.ad');
+const POCKETBASE_URL =
+	import.meta.env.PUBLIC_POCKETBASE_URL || (dev ? 'http://localhost:8090' : 'https://pb.ulo.ad');
 
 // Debug logging (nur in Development)
 if (dev) {
@@ -143,7 +144,7 @@ export const DEFAULT_TAG_COLORS = [
 	'#06B6D4', // cyan
 	'#84CC16', // lime
 	'#F97316', // orange
-	'#6366F1' // indigo
+	'#6366F1', // indigo
 ];
 
 export function parseUserAgent(userAgent: string) {
@@ -190,7 +191,7 @@ export async function getLocationFromIP(
 			const data = await response.json();
 			return {
 				country: data.country_name || 'Unknown',
-				city: data.city || 'Unknown'
+				city: data.city || 'Unknown',
 			};
 		}
 	} catch (error) {

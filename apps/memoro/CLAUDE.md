@@ -55,6 +55,7 @@ npm run check:watch          # Watch mode for svelte-check
 ### Mobile App Architecture
 
 **Framework Stack:**
+
 - React Native 0.81.4 + Expo SDK 54
 - Expo Router (file-based routing)
 - TypeScript
@@ -91,6 +92,7 @@ Mobile App → Middleware Auth Service → Supabase
 ```
 
 **Key Points:**
+
 - Middleware issues three tokens: `manaToken`, `appToken` (Supabase-compatible JWT), `refreshToken`
 - Tokens stored securely via platform-specific `safeStorage` utility
 - Auth state managed via `AuthContext` provider
@@ -116,6 +118,7 @@ See `apps/mobile/features/auth/README.md` for detailed authentication flow.
 - **Background recording works correctly** - continues when app is backgrounded or locked
 
 **iOS Background Recording:**
+
 - Uses `interruptionMode: 'mixWithOthers'` for background recording support
 - Recording continues when pressing home button, switching apps, or locking device
 - Audio session automatically restored when returning to foreground
@@ -123,6 +126,7 @@ See `apps/mobile/features/auth/README.md` for detailed authentication flow.
 - Handles real interruptions (phone calls, Siri) automatically
 
 **Recording Options:**
+
 - High quality: M4A format with AAC encoding (MONO for compatibility)
 - Presets: HIGH_QUALITY, MEDIUM_QUALITY, LOW_QUALITY, VOICE_MEMO
 - Max duration and size limits
@@ -131,6 +135,7 @@ See `apps/mobile/features/auth/README.md` for detailed authentication flow.
 - Optimized for voice (MONO, 96 quality) to prevent FFmpeg 'chnl' box errors
 
 **Key Technical Details:**
+
 - MONO recording prevents iOS spatial audio metadata issues
 - Audio session verification on cold start prevents first-recording failures
 - Status polling restarts when app returns from background
@@ -142,18 +147,21 @@ See `apps/mobile/features/audioRecordingV2/TROUBLESHOOTING.md` for bug fixes and
 ### AI Processing System
 
 **Blueprints:**
+
 - Reusable AI analysis patterns for different use cases
 - Examples: Text Analysis, Creative Writing, Meeting Notes
 - Each blueprint has localized advice tips (32 languages)
 - Stored in Supabase with public/private visibility
 
 **Prompts:**
+
 - Specific AI tasks for content transformation
 - Examples: Summary, To-Do extraction, Translation, Q&A
 - Associated with blueprints via `blueprint_prompts` join table
 - Multi-language support (German/English minimum)
 
 **Content Organization:**
+
 - 8 categories: Coaching, Crafts, Healthcare, Journal, Journalism, Office, Sales, University
 - Categories provide contextual grouping for blueprints/prompts
 
@@ -162,6 +170,7 @@ See `apps/mobile/docs/blueprints_and_prompts.md` for full documentation.
 ### Theme System
 
 **Multi-Theme Support:**
+
 - 4 theme variants: Lume (gold), Nature (green), Stone (slate), Ocean (blue)
 - Each theme has light and dark mode variants
 - 13 semantic color tokens per theme (primary, secondary, borders, backgrounds, text)
@@ -170,6 +179,7 @@ See `apps/mobile/docs/blueprints_and_prompts.md` for full documentation.
 - All colors defined in `tailwind.config.js`
 
 **Markdown Rendering:**
+
 - Full Markdown support in memo display
 - Theme-aware styles adapt to light/dark mode
 - Centralized styles in `features/theme/markdownStyles.ts`
@@ -178,6 +188,7 @@ See `apps/mobile/docs/blueprints_and_prompts.md` for full documentation.
 ### Spaces (Collaboration)
 
 **Team Workspaces:**
+
 - Create unlimited collaborative spaces
 - Role-based permissions (owner, member)
 - Memo sharing within spaces
@@ -186,6 +197,7 @@ See `apps/mobile/docs/blueprints_and_prompts.md` for full documentation.
 - Real-time sync via Supabase Realtime
 
 **Backend Integration:**
+
 - RESTful API for space management
 - RLS policies for access control
 - Space-specific memo filtering
@@ -195,6 +207,7 @@ See `apps/mobile/docs/SPACES.md` for implementation details.
 ### Subscription & Credits
 
 **Mana Credit System:**
+
 - Backend-driven transparent pricing
 - Real-time credit validation before operations
 - Usage tracking and analytics
@@ -202,6 +215,7 @@ See `apps/mobile/docs/SPACES.md` for implementation details.
 - Free tier: 150 Mana + 5 daily Mana
 
 **RevenueCat Integration:**
+
 - Cross-platform (iOS, Android, Web)
 - Subscription lifecycle management
 - User identification tied to auth
@@ -212,9 +226,11 @@ See `apps/mobile/docs/SPACES.md` for implementation details.
 ### Internationalization
 
 **32 Languages Supported:**
+
 - Arabic, Bengali, Bulgarian, Chinese, Czech, Danish, Dutch, English, Estonian, Finnish, French, Gaelic, German, Greek, Hindi, Croatian, Hungarian, Indonesian, Italian, Japanese, Korean, Lithuanian, Latvian, Maltese, Norwegian, Persian, Polish, Portuguese, Romanian, Russian, Serbian, Slovak, Slovenian, Spanish, Swedish, Turkish, Ukrainian, Urdu, Vietnamese
 
 **Implementation:**
+
 - `react-i18next` for translations
 - Automatic device language detection
 - Persistent user preference storage
@@ -224,6 +240,7 @@ See `apps/mobile/docs/SPACES.md` for implementation details.
 ### Real-Time Features
 
 **Supabase Realtime:**
+
 - Live memo updates (INSERT, UPDATE, DELETE)
 - Real-time collaboration in spaces
 - `MemoRealtimeProvider` context for subscriptions
@@ -233,18 +250,21 @@ See `apps/mobile/docs/SPACES.md` for implementation details.
 ### Platform-Specific Notes
 
 **Web Platform:**
+
 - Uses `.web.ts` file extensions for web-specific implementations
 - `safeStorage.web.ts` uses localStorage (vs AsyncStorage on native)
 - Web Audio API for recording (vs expo-audio)
 - Some features unavailable: push notifications, haptics, native gestures
 
 **iOS:**
+
 - Background audio capability required
 - Audio session management
 - Apple Sign-In integration
 - RevenueCat StoreKit 2
 
 **Android:**
+
 - Foreground service for recording
 - Wake lock to prevent sleep
 - Android 16+ requires foreground to start recording
@@ -259,6 +279,7 @@ The mobile app uses environment-specific `.env` files:
 - `.env.local`: Active environment (auto-generated by npm scripts)
 
 **Key Environment Variables:**
+
 - `EXPO_PUBLIC_SUPABASE_URL`: Supabase project URL
 - `EXPO_PUBLIC_SUPABASE_ANON_KEY`: Supabase anon key
 - `EXPO_PUBLIC_MIDDLEWARE_API_URL`: Middleware auth service URL
@@ -268,16 +289,19 @@ The mobile app uses environment-specific `.env` files:
 ## Code Quality
 
 **Linting:**
+
 - ESLint with TypeScript plugin
 - React/React Native rules
 - Unused imports auto-removal
 - Configuration in `eslint.config.js`
 
 **Formatting:**
+
 - Prettier with Tailwind plugin
 - Auto-format on save recommended
 
 **TypeScript:**
+
 - Strict mode enabled
 - Typed routes from Expo Router
 - Type definitions in `types/` and feature-specific types
@@ -285,12 +309,14 @@ The mobile app uses environment-specific `.env` files:
 ## Migration Notes
 
 **Expo SDK 54 Migration:**
+
 - Migrated from `expo-av` to `expo-audio`
 - New audio recording API (`AudioModule.AudioRecorder`)
 - Status polling instead of callbacks
 - See `EXPO_54_AUDIO_RECORDING_MIGRATION.md`
 
 **SvelteKit Web App:**
+
 - Separate web app being built as companion
 - Shares Supabase backend with mobile app
 - See `SVELTEKIT_MIGRATION_ANALYSIS.md` for migration plan
@@ -298,12 +324,14 @@ The mobile app uses environment-specific `.env` files:
 ## Testing Strategy
 
 **Manual Testing:**
+
 - Test on both iOS and Android before commits
 - Verify web platform compatibility
 - Check dark mode and all theme variants
 - Test with different languages
 
 **Platform Matrix:**
+
 - iOS (simulator + device)
 - Android (emulator + device)
 - Web (Chrome, Safari, Firefox)
@@ -331,24 +359,26 @@ The mobile app uses environment-specific `.env` files:
 ```typescript
 // Create store
 export const useMyStore = create<MyState>((set, get) => ({
-  // state
-  data: null,
+	// state
+	data: null,
 
-  // actions
-  setData: (data) => set({ data }),
+	// actions
+	setData: (data) => set({ data }),
 
-  // computed/derived
-  getData: () => get().data,
+	// computed/derived
+	getData: () => get().data,
 }));
 ```
 
 Stores are located in:
+
 - Global: `store/store.ts`
 - Feature-specific: `features/[feature]/store/`
 
 ### Platform-Specific Code
 
 Use file extensions for platform-specific implementations:
+
 - `file.ts`: Default (mobile)
 - `file.web.ts`: Web platform
 - `file.ios.ts`: iOS only
@@ -367,6 +397,7 @@ Metro bundler automatically resolves based on platform.
 ## Build and Deployment
 
 **EAS Build Profiles:**
+
 - `development`: Dev client with debugging
 - `preview`: Internal distribution (TestFlight/Google Play Internal)
 - `simulator`: iOS simulator build
@@ -376,6 +407,7 @@ Metro bundler automatically resolves based on platform.
 EAS profiles automatically load correct environment via `EXPO_PUBLIC_USE_ENV_FILE` in `eas.json`.
 
 **Version Management:**
+
 - iOS: `buildNumber` in `app.json`
 - Android: `versionCode` in `app.json`
 - Production profile auto-increments both
@@ -394,6 +426,7 @@ EAS profiles automatically load correct environment via `EXPO_PUBLIC_USE_ENV_FIL
 ## Database Schema
 
 The app uses Supabase with the following key tables:
+
 - `memos`: Audio recordings and transcriptions
 - `memories`: AI-generated insights from memos
 - `blueprints`: AI analysis templates

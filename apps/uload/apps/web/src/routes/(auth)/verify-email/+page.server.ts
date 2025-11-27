@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ url }) => {
 			status: error?.status,
 			response: error?.response?.data || error?.response,
 			data: error?.data,
-			originalError: error?.originalError
+			originalError: error?.originalError,
 		});
 
 		// Get the error message and code from various possible locations

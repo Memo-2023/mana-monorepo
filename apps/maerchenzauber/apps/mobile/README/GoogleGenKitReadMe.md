@@ -1,4 +1,4 @@
-Jetzt starten 
+Jetzt starten
 
 bookmark_border
 In diesem Leitfaden erfahren Sie, wie Sie mit Genkit in einer Node.js-App beginnen.
@@ -24,12 +24,10 @@ API-Schlüssel von Google AI Studio abrufen
 
 Nachdem Sie den API-Schlüssel erstellt haben, legen Sie die Umgebungsvariable MAERCHENZAUBER_GOOGLE_GENAI_API_KEY mit dem folgenden Befehl auf Ihren Schlüssel fest:
 
-
 export MAERCHENZAUBER_GOOGLE_GENAI_API_KEY=<your API key>
 Hinweis: In diesem Tutorial wird die Gemini API von AI Studio verwendet. Genkit unterstützt jedoch eine Vielzahl von Modellanbietern, darunter Gemini von Vertex AI, die Claude 3-Modelle von Anthropoic und Llama 3.1 über die Vertex AI Model Garden, Open-Source-Modelle über Ollama und mehrere andere von der Community unterstützte Anbieter wie OpenAI und Cohere.
 Erste Anfrage senden
 In Genkit können Sie mit nur wenigen Codezeilen loslegen.
-
 
 // import the Genkit and Google AI plugin libraries
 import { gemini15Flash, googleAI } from '@genkit-ai/googleai';
@@ -37,14 +35,14 @@ import { genkit } from 'genkit';
 
 // configure a Genkit instance
 const ai = genkit({
-  plugins: [googleAI()],
-  model: gemini15Flash, // set default model
+plugins: [googleAI()],
+model: gemini15Flash, // set default model
 });
 
 (async () => {
-  // make a generation request
-  const { text } = await ai.generate('Hello, Gemini!');
-  console.log(text);
+// make a generation request
+const { text } = await ai.generate('Hello, Gemini!');
+console.log(text);
 })();
 Nächste Schritte
 Sie haben die Voraussetzungen für Modellanfragen mit Genkit geschaffen. Es gibt jedoch noch weitere Genkit-Funktionen zum Erstellen KI-basierter Apps und Workflows. Informationen zu den ersten Schritten mit diesen zusätzlichen Genkit-Funktionen finden Sie in diesen Anleitungen:
@@ -54,7 +52,7 @@ Inhalte generieren: Hier erfahren Sie, wie Sie die einheitliche Generierungs-API
 Flows erstellen: Wir zeigen Ihnen, wie Sie spezielle Genkit-Funktionen, sogenannte Flows, verwenden, die eine End-to-End-Beobachtbarkeit für Workflows sowie umfangreiches Debugging mit Genkit-Tools ermöglichen.
 Prompts verwalten: Hier finden Sie Informationen dazu, wie Sie mit Genkit Prompts und Konfigurationen als Code verwalten.
 
-Firebase Genkit-Entwicklertools 
+Firebase Genkit-Entwicklertools
 
 bookmark_border
 Firebase Genkit bietet zwei wichtige Entwicklertools:
@@ -64,7 +62,6 @@ Eine optionale lokale Webanwendung, die als Entwickleroberfläche bezeichnet wir
 Befehlszeile
 Installieren Sie die Befehlszeile in Ihrem Projekt mit:
 
-
 npm install -D genkit-cli
 Die Befehlszeile unterstützt verschiedene Befehle, um die Arbeit mit Genkit-Projekten zu erleichtern:
 
@@ -72,7 +69,6 @@ genkit start -- <command to run your code>: Starten Sie die Entwickler-Benutzero
 genkit flow:run <flowName>: Einen bestimmten Ablauf ausführen.
 genkit eval:flow <flowName>: Einen bestimmten Ablauf bewerten.
 Eine vollständige Liste der Befehle erhalten Sie mit:
-
 
 npx genkit --help
 Genkit-Benutzeroberfläche für Entwickler
@@ -82,28 +78,29 @@ Die Entwickleroberfläche kann anhand eines laufenden Codeprozesses ermitteln, w
 
 Führen Sie den folgenden Befehl aus, um die Benutzeroberfläche zu starten:
 
-
 npx genkit start -- <command to run your code>
 Die <command to run your code> variiert je nach Projekteinrichtung und Datei, die Sie ausführen möchten. Hier sind einige Beispiele:
 
-
 # Running a typical development server
+
 npx genkit start -- npm run dev
+
 # Running a TypeScript file directly
+
 npx genkit start -- npx tsx --watch src/index.ts
+
 # Running a JavaScript file directly
+
 npx genkit start -- node --watch src/index.js
 Wenn Sie die Option --watch angeben, werden gespeicherte Änderungen am Code in der Entwickleroberfläche erkannt und berücksichtigt, ohne dass der Code neu gestartet werden muss.
 
 Nach der Ausführung des Befehls erhalten Sie eine Ausgabe wie die folgende:
-
 
 Telemetry API running on http://localhost:4033
 Genkit Developer UI: http://localhost:4000
 Öffnen Sie die lokale Hostadresse für die Genkit-Entwickler-UI in Ihrem Browser, um sie aufzurufen. Sie können sie auch im einfachen Browser von VS Code öffnen, um sie neben Ihrem Code anzusehen.
 
 Alternativ können Sie dem Startbefehl die Option -o hinzufügen, um die Entwickleroberfläche automatisch in Ihrem Standardbrowsertab zu öffnen.
-
 
 npx genkit start -o -- <command to run your code>
 Willkommen bei der Genkit-Benutzeroberfläche für Entwickler
@@ -119,14 +116,12 @@ Die Genkit-Befehlszeile und die Entwickler-Benutzeroberfläche verwenden Cookies
 
 Wenn Sie die Analyse deaktivieren möchten, können Sie den folgenden Befehl ausführen:
 
-
 npx genkit config set analyticsOptOut true
 Sie können die aktuelle Einstellung mit folgendem Befehl aufrufen:
 
-
 npx genkit config get analyticsOptOut
 
-Inhalte mit KI-Modellen generieren 
+Inhalte mit KI-Modellen generieren
 
 bookmark_border
 Im Mittelpunkt der generativen KI stehen KI-Modelle. Die beiden derzeit bekanntesten Beispiele für generative Modelle sind Large Language Models (LLMs) und Modelle zur Bildgenerierung. Diese Modelle nehmen eine Eingabe, einen sogenannten Prompt (am häufigsten Text, ein Bild oder eine Kombination aus beiden), und generieren daraus Text, ein Bild oder sogar Audio- oder Videoinhalte.
@@ -177,23 +172,21 @@ In Genkit ist die generate()-Methode die primäre Schnittstelle, über die Sie m
 
 Der einfachste generate()-Aufruf gibt das gewünschte Modell und einen Textprompt an:
 
-
 import { gemini15Flash, googleAI } from '@genkit-ai/googleai';
 import { genkit } from 'genkit';
 
 const ai = genkit({
-  plugins: [googleAI()],
-  model: gemini15Flash,
+plugins: [googleAI()],
+model: gemini15Flash,
 });
 
 (async () => {
-  const { text } = await ai.generate(
-    'Invent a menu item for a pirate themed restaurant.'
-  );
-  console.log(text);
+const { text } = await ai.generate(
+'Invent a menu item for a pirate themed restaurant.'
+);
+console.log(text);
 })();
 Wenn Sie dieses kurze Beispiel ausführen, werden einige Informationen zur Fehlerbehebung und dann die Ausgabe des generate()-Aufrufs ausgegeben. Dies ist in der Regel Markdown-Text wie im folgenden Beispiel:
-
 
 ## The Blackheart's Bounty
 
@@ -213,17 +206,15 @@ Im vorherigen Codebeispiel wurde die Generierungsanfrage an das Standardmodell g
 
 Sie können auch ein Modell für einen einzelnen generate()-Aufruf angeben:
 
-
 const { text } = await ai.generate({
-  model: gemini15Pro,
-  prompt: 'Invent a menu item for a pirate themed restaurant.',
+model: gemini15Pro,
+prompt: 'Invent a menu item for a pirate themed restaurant.',
 });
 In diesem Beispiel wird eine vom Modell-Plug-in exportierte Modellreferenz verwendet. Eine weitere Möglichkeit ist, das Modell mit einer Stringkennzeichnung anzugeben:
 
-
 const { text } = await ai.generate({
-  model: 'googleai/gemini-1.5-pro-latest',
-  prompt: 'Invent a menu item for a pirate themed restaurant.',
+model: 'googleai/gemini-1.5-pro-latest',
+prompt: 'Invent a menu item for a pirate themed restaurant.',
 });
 Eine Modell-String-ID sieht so aus: providerid/modelid. Dabei identifiziert die Anbieter-ID (in diesem Fall googleai) das Plug-in und die Modell-ID ist eine plug-inspezifische String-ID für eine bestimmte Version eines Modells.
 
@@ -238,24 +229,22 @@ Einige Modelle unterstützen die Angabe eines Systemprompts, der dem Modell Anwe
 
 Wenn das von Ihnen verwendete Modell Systemaufforderungen unterstützt, können Sie eine mit dem Parameter system angeben:
 
-
 const { text } = await ai.generate({
-  system: 'You are a food industry marketing consultant.',
-  prompt: 'Invent a menu item for a pirate themed restaurant.',
+system: 'You are a food industry marketing consultant.',
+prompt: 'Invent a menu item for a pirate themed restaurant.',
 });
 Modellparameter
 Die Funktion generate() verwendet den Parameter config, mit dem Sie optionale Einstellungen angeben können, die steuern, wie das Modell Inhalte generiert:
 
-
 const { text } = await ai.generate({
-  prompt: 'Invent a menu item for a pirate themed restaurant.',
-  config: {
-    maxOutputTokens: 400,
-    stopSequences: ['<end>', '<fin>'],
-    temperature: 1.2,
-    topP: 0.4,
-    topK: 50,
-  },
+prompt: 'Invent a menu item for a pirate themed restaurant.',
+config: {
+maxOutputTokens: 400,
+stopSequences: ['<end>', '<fin>'],
+temperature: 1.2,
+topP: 0.4,
+topK: 50,
+},
 });
 Die genauen unterstützten Parameter hängen vom jeweiligen Modell und der jeweiligen Modell-API ab. Die Parameter im vorherigen Beispiel sind jedoch für fast alle Modelle üblich. Im Folgenden werden diese Parameter erläutert:
 
@@ -301,19 +290,18 @@ Wenn Sie generative KI als Komponente in Ihrer Anwendung verwenden, möchten Sie
 
 In Genkit können Sie eine strukturierte Ausgabe von einem Modell anfordern, indem Sie beim Aufrufen von generate() ein Schema angeben:
 
-
 import { z } from 'genkit'; // Import Zod, which is re-exported by Genkit.
 
 const MenuItemSchema = z.object({
-  name: z.string(),
-  description: z.string(),
-  calories: z.number(),
-  allergens: z.array(z.string()),
+name: z.string(),
+description: z.string(),
+calories: z.number(),
+allergens: z.array(z.string()),
 });
 
 const { output } = await ai.generate({
-  prompt: 'Invent a menu item for a pirate themed restaurant.',
-  output: { schema: MenuItemSchema },
+prompt: 'Invent a menu item for a pirate themed restaurant.',
+output: { schema: MenuItemSchema },
 });
 Modellausgabeschemata werden mit der Zod-Bibliothek angegeben. Neben einer Schemadefinitionsprache bietet Zod auch eine Laufzeittypprüfung, die die Lücke zwischen statischen TypeScript-Typen und der unvorhersehbaren Ausgabe generativer KI-Modelle schließt. Mit Zod können Sie Code schreiben, bei dem Sie sich darauf verlassen können, dass ein erfolgreicher generate-Aufruf immer eine Ausgabe zurückgibt, die Ihren TypeScript-Typen entspricht.
 
@@ -324,9 +312,8 @@ Parst die Modellausgabe in ein JavaScript-Objekt.
 Prüft, ob die Ausgabe dem Schema entspricht.
 Wenn Sie eine strukturierte Ausgabe aus einem erfolgreichen generate-Aufruf erhalten möchten, verwenden Sie die Property output des Antwortobjekts:
 
-
 if (output) {
-  const { name, description, calories, allergens } = output;
+const { name, description, calories, allergens } = output;
 }
 Fehlerbehebung
 Beachten Sie im vorherigen Beispiel, dass das Attribut output null sein kann. Das kann passieren, wenn das Modell keine Ausgabe generiert, die dem Schema entspricht. Die beste Strategie für den Umgang mit solchen Fehlern hängt von Ihrem genauen Anwendungsfall ab. Hier sind einige allgemeine Hinweise:
@@ -335,12 +322,11 @@ Versuchen Sie es mit einem anderen Modell. Damit eine strukturierte Ausgabe mög
 
 Verwenden Sie die Erzwingungsfunktionen von Zod: Sie können in Ihren Schemas angeben, dass Zod versuchen soll, nicht konforme Typen in den vom Schema angegebenen Typ zu zwingen. Wenn Ihr Schema neben Strings auch andere primitive Typen enthält, können Sie mithilfe der Zod-Erzwigung die Anzahl der generate()-Fehler reduzieren. In der folgenden Version von MenuItemSchema werden Situationen, in denen das Modell Kalorieninformationen als String anstelle einer Zahl generiert, automatisch durch Typumwandlung korrigiert:
 
-
 const MenuItemSchema = z.object({
-  name: z.string(),
-  description: z.string(),
-  calories: z.coerce.number(),
-  allergens: z.array(z.string()),
+name: z.string(),
+description: z.string(),
+calories: z.coerce.number(),
+allergens: z.array(z.string()),
 });
 Wiederholen Sie den Aufruf von „generate()“. Wenn das von Ihnen ausgewählte Modell nur selten keine konforme Ausgabe generiert, können Sie den Fehler wie einen Netzwerkfehler behandeln und die Anfrage einfach mit einer Art inkrementellem Backoff wiederholen.
 
@@ -349,37 +335,33 @@ Wenn Sie große Mengen an Text generieren, können Sie die Nutzerfreundlichkeit 
 
 In Genkit können Sie die Ausgabe mit der Methode generateStream() streamen. Die Syntax ähnelt der der generate()-Methode:
 
-
 const { response, stream } = await ai.generateStream(
-  'Suggest a complete menu for a pirate themed restaurant.'
+'Suggest a complete menu for a pirate themed restaurant.'
 );
 Das Antwortobjekt hat das Attribut stream, mit dem Sie die Streamingausgabe der Anfrage iterieren können, während sie generiert wird:
 
-
 for await (const chunk of stream) {
-  console.log(chunk.text);
+console.log(chunk.text);
 }
 Wie bei einer nicht streamenden Anfrage können Sie auch die vollständige Ausgabe der Anfrage abrufen:
-
 
 const completeText = (await response).text;
 Streaming funktioniert auch mit strukturierter Ausgabe:
 
-
 const MenuSchema = z.object({
-  starters: z.array(MenuItemSchema),
-  mains: z.array(MenuItemSchema),
-  desserts: z.array(MenuItemSchema),
+starters: z.array(MenuItemSchema),
+mains: z.array(MenuItemSchema),
+desserts: z.array(MenuItemSchema),
 });
 
 const { response, stream } = await ai.generateStream({
-  prompt: 'Suggest a complete menu for a pirate themed restaurant.',
-  output: { schema: MenuSchema },
+prompt: 'Suggest a complete menu for a pirate themed restaurant.',
+output: { schema: MenuSchema },
 });
 
 for await (const chunk of stream) {
-  // `output` is an object representing the entire output so far.
-  console.log(chunk.output);
+// `output` is an object representing the entire output so far.
+console.log(chunk.output);
 }
 
 // Get the completed output.
@@ -388,35 +370,34 @@ Der Streaming von strukturierten Daten funktioniert etwas anders als der Streami
 
 Die ersten fünf Ausgaben aus dem vorherigen Beispiel könnten beispielsweise so aussehen:
 
-
 null
 
 { starters: [ {} ] }
 
 {
-  starters: [ { name: "Captain's Treasure Chest", description: 'A' } ]
+starters: [ { name: "Captain's Treasure Chest", description: 'A' } ]
 }
 
 {
-  starters: [
-    {
-      name: "Captain's Treasure Chest",
-      description: 'A mix of spiced nuts, olives, and marinated cheese served in a treasure chest.',
-      calories: 350
-    }
-  ]
+starters: [
+{
+name: "Captain's Treasure Chest",
+description: 'A mix of spiced nuts, olives, and marinated cheese served in a treasure chest.',
+calories: 350
+}
+]
 }
 
 {
-  starters: [
-    {
-      name: "Captain's Treasure Chest",
-      description: 'A mix of spiced nuts, olives, and marinated cheese served in a treasure chest.',
-      calories: 350,
-      allergens: [Array]
-    },
-    { name: 'Shipwreck Salad', description: 'Fresh' }
-  ]
+starters: [
+{
+name: "Captain's Treasure Chest",
+description: 'A mix of spiced nuts, olives, and marinated cheese served in a treasure chest.',
+calories: 350,
+allergens: [Array]
+},
+{ name: 'Shipwreck Salad', description: 'Fresh' }
+]
 }
 Multimodale Eingabe
 In den bisherigen Beispielen wurden Textstrings als Prompts für das Modell verwendet. Dies ist zwar die gängigste Methode, um generative KI-Modelle zu steuern, aber viele Modelle können auch andere Medien als Prompts akzeptieren. Medien-Prompts werden am häufigsten in Kombination mit Text-Prompts verwendet, die das Modell anweisen, eine bestimmte Aktion an den Medien auszuführen, z. B. ein Bild zu beschriften oder eine Audioaufnahme zu transkribieren.
@@ -425,13 +406,11 @@ Ob Medieneingabe akzeptiert wird und welche Medientypen verwendet werden können
 
 Wenn Sie einem Modell, das dies unterstützt, einen Medien-Prompt geben möchten, übergeben Sie anstelle eines einfachen Text-Prompts an generate ein Array, das aus einem Medien- und einem Textteil besteht:
 
-
 const { text } = await ai.generate([
-  { media: { url: 'https://example.com/photo.jpg' } },
-  { text: 'Compose a poem about this image.' },
+{ media: { url: 'https://example.com/photo.jpg' } },
+{ text: 'Compose a poem about this image.' },
 ]);
 Im obigen Beispiel haben Sie ein Bild mit einer öffentlich zugänglichen HTTPS-URL angegeben. Du kannst Mediendaten auch direkt übergeben, indem du sie als Daten-URL codierst. Beispiel:
-
 
 import { readFile } from 'node:fs/promises';
 
@@ -439,8 +418,8 @@ const b64Data = await readFile('photo.jpg', { encoding: 'base64url' });
 const dataUrl = `data:image/jpeg;base64,${b64Data}`;
 
 const { text } = await ai.generate([
-  { media: { url: dataUrl } },
-  { text: 'Compose a poem about this image.' },
+{ media: { url: dataUrl } },
+{ text: 'Compose a poem about this image.' },
 ]);
 Alle Modelle, die Medieneingabe unterstützen, unterstützen sowohl Daten- als auch HTTPS-URLs. Einige Modell-Plug-ins bieten Unterstützung für andere Medienquellen. Mit dem Vertex AI-Plug-in können Sie beispielsweise Cloud Storage-URLs (gs://) verwenden.
 
@@ -449,11 +428,9 @@ Bisher ging es in den meisten Beispielen auf dieser Seite um die Generierung von
 
 Genkit verwendet data:-URLs als Standardausgabeformat für generierte Medien. Das ist ein Standardformat, für das viele Bibliotheken zur Verfügung stehen. In diesem Beispiel wird das data-urls-Paket von jsdom verwendet:
 
-
 npm i --save data-urls
 npm i --save-dev @types/data-urls
 Wenn Sie ein Bild generieren und in einer Datei speichern möchten, rufen Sie generate() auf und geben Sie ein Bildgenerierungsmodell und den Medientyp des Ausgabeformats an:
-
 
 import { imagen3Fast, vertexAI } from '@genkit-ai/vertexai';
 import parseDataURL from 'data-urls';
@@ -462,22 +439,22 @@ import { genkit } from 'genkit';
 import { writeFile } from 'node:fs/promises';
 
 const ai = genkit({
-  plugins: [vertexAI({ location: 'us-central1' })],
+plugins: [vertexAI({ location: 'us-central1' })],
 });
 
 (async () => {
-  const { media } = await ai.generate({
-    model: imagen3Fast,
-    prompt: 'photo of a meal fit for a pirate',
-    output: { format: 'media' },
-  });
+const { media } = await ai.generate({
+model: imagen3Fast,
+prompt: 'photo of a meal fit for a pirate',
+output: { format: 'media' },
+});
 
-  if (media === null) throw new Error('No media generated.');
+if (media === null) throw new Error('No media generated.');
 
-  const data = parseDataURL(media.url);
-  if (data === null) throw new Error('Invalid "data:" URL.');
+const data = parseDataURL(media.url);
+if (data === null) throw new Error('Invalid "data:" URL.');
 
-  await writeFile(`output.${data.mimeType.subtype}`, data.body);
+await writeFile(`output.${data.mimeType.subtype}`, data.body);
 })();
 Nächste Schritte
 Weitere Informationen zu Genkit

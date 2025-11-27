@@ -19,6 +19,7 @@ ORDER BY ordinal_position;
 ```
 
 **Wichtig:** Prüfe ob diese Spalten existieren:
+
 - ✓ `is_favorite` (boolean) - für private Favoriten
 - ✓ `is_published` (boolean) - für veröffentlichte Stories
 - ✓ `visibility` (varchar) - für Sichtbarkeit
@@ -182,15 +183,18 @@ WHERE tablename = 'story_votes';
 Nach erfolgreicher Migration solltest du haben:
 
 ✅ **stories Tabelle**
+
 - `is_favorite` Spalte (boolean, default: false)
 - Index auf `(user_id, is_favorite)` für Performance
 
 ✅ **story_votes Tabelle**
+
 - Vollständige Struktur für öffentliche Story-Votes
 - RLS Policies aktiviert
 - Indexes für Performance
 - Unique Constraint (ein Vote pro User pro Story)
 
 ✅ **Voting System**
+
 - Eigene Stories: `is_favorite` Flag im `stories` Eintrag
 - Öffentliche Stories: Separater Eintrag in `story_votes` Tabelle

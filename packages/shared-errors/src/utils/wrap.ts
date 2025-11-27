@@ -20,22 +20,18 @@ import { isAppError } from '../guards/type-guards';
  * }
  * ```
  */
-export function wrap(
-  error: unknown,
-  context: string,
-  additionalContext?: ErrorContext
-): AppError {
-  if (isAppError(error)) {
-    return error.wrap(context, additionalContext);
-  }
+export function wrap(error: unknown, context: string, additionalContext?: ErrorContext): AppError {
+	if (isAppError(error)) {
+		return error.wrap(context, additionalContext);
+	}
 
-  const message = error instanceof Error ? error.message : String(error);
-  return new AppError({
-    code: ErrorCode.UNKNOWN_ERROR,
-    message: `${context}: ${message}`,
-    cause: error instanceof Error ? error : undefined,
-    context: additionalContext,
-  });
+	const message = error instanceof Error ? error.message : String(error);
+	return new AppError({
+		code: ErrorCode.UNKNOWN_ERROR,
+		message: `${context}: ${message}`,
+		cause: error instanceof Error ? error : undefined,
+		context: additionalContext,
+	});
 }
 
 /**
@@ -52,22 +48,22 @@ export function wrap(
  * ```
  */
 export function toAppError(error: unknown): AppError {
-  if (isAppError(error)) {
-    return error;
-  }
+	if (isAppError(error)) {
+		return error;
+	}
 
-  if (error instanceof Error) {
-    return new AppError({
-      code: ErrorCode.UNKNOWN_ERROR,
-      message: error.message,
-      cause: error,
-    });
-  }
+	if (error instanceof Error) {
+		return new AppError({
+			code: ErrorCode.UNKNOWN_ERROR,
+			message: error.message,
+			cause: error,
+		});
+	}
 
-  return new AppError({
-    code: ErrorCode.UNKNOWN_ERROR,
-    message: String(error),
-  });
+	return new AppError({
+		code: ErrorCode.UNKNOWN_ERROR,
+		message: String(error),
+	});
 }
 
 /**
@@ -79,7 +75,7 @@ export function toAppError(error: unknown): AppError {
  * ```
  */
 export function cause(error: AppError): Error | undefined {
-  return error.cause;
+	return error.cause;
 }
 
 /**
@@ -92,5 +88,5 @@ export function cause(error: AppError): Error | undefined {
  * ```
  */
 export function rootCause(error: AppError): Error {
-  return error.rootCause();
+	return error.rootCause();
 }

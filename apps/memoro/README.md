@@ -80,6 +80,7 @@ cp .env.example .env
 ```
 
 **Required Environment Variables:**
+
 - `EXPO_PUBLIC_SUPABASE_URL` - Your Supabase project URL
 - `EXPO_PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anonymous key
 - `EXPO_PUBLIC_MIDDLEWARE_API_URL` - Middleware authentication service URL
@@ -88,6 +89,7 @@ cp .env.example .env
 ### Running the Apps
 
 **Mobile App (iOS & Android):**
+
 ```bash
 cd apps/mobile
 
@@ -106,6 +108,7 @@ npm run start:prod   # Production environment
 ```
 
 **Web App:**
+
 ```bash
 cd apps/web
 
@@ -137,53 +140,60 @@ npm run preview
 
 ### Mobile App (`apps/mobile/`)
 
-| Category | Technologies |
-|----------|-------------|
-| **Framework** | React Native 0.81.4, Expo SDK 54 |
-| **Language** | TypeScript 5.x |
-| **Navigation** | Expo Router (file-based) |
-| **Styling** | NativeWind (Tailwind CSS) |
-| **State** | Zustand, React Context |
-| **Backend** | Supabase (PostgreSQL, Storage, Realtime) |
-| **Audio** | expo-audio, Azure Speech Services |
-| **Payments** | RevenueCat (iOS, Android) |
-| **Analytics** | PostHog, Sentry |
-| **i18n** | react-i18next (32 languages) |
+| Category       | Technologies                             |
+| -------------- | ---------------------------------------- |
+| **Framework**  | React Native 0.81.4, Expo SDK 54         |
+| **Language**   | TypeScript 5.x                           |
+| **Navigation** | Expo Router (file-based)                 |
+| **Styling**    | NativeWind (Tailwind CSS)                |
+| **State**      | Zustand, React Context                   |
+| **Backend**    | Supabase (PostgreSQL, Storage, Realtime) |
+| **Audio**      | expo-audio, Azure Speech Services        |
+| **Payments**   | RevenueCat (iOS, Android)                |
+| **Analytics**  | PostHog, Sentry                          |
+| **i18n**       | react-i18next (32 languages)             |
 
 ### Web App (`apps/web/`)
 
-| Category | Technologies |
-|----------|-------------|
-| **Framework** | SvelteKit 2.x |
-| **Language** | TypeScript 5.x |
-| **Styling** | TailwindCSS 3.x |
-| **State** | Svelte Stores |
-| **Backend** | Supabase (shared with mobile) |
-| **i18n** | svelte-i18n |
+| Category      | Technologies                  |
+| ------------- | ----------------------------- |
+| **Framework** | SvelteKit 2.x                 |
+| **Language**  | TypeScript 5.x                |
+| **Styling**   | TailwindCSS 3.x               |
+| **State**     | Svelte Stores                 |
+| **Backend**   | Supabase (shared with mobile) |
+| **i18n**      | svelte-i18n                   |
 
 ## 🏛 Architecture Highlights
 
 ### Feature-Based Structure
+
 The mobile app uses a feature-based architecture with **33 self-contained modules** (auth, audioRecordingV2, memos, spaces, credits, subscription, i18n, theme, etc.), each with its own services, hooks, components, and stores.
 
 ### Atomic Design System
+
 Components are organized using atomic design principles:
+
 - **Atoms**: Button, Input, Text, Icon (16 components)
 - **Molecules**: MemoPreview, RecordingBar, TagSelector (21 components)
 - **Organisms**: AudioRecorder, Memory, TranscriptDisplay (9 components)
 - **Statistics**: Analytics components (14 components)
 
 ### Middleware Authentication
+
 Uses a custom middleware service as a bridge between the app and Supabase:
+
 ```
 Mobile/Web App → Middleware Auth → Supabase (with JWT + RLS)
 ```
+
 - Three token types: `manaToken`, `appToken`, `refreshToken`
 - Platform-specific secure storage
 - Automatic token refresh
 - Supports email/password, Google, and Apple Sign-In
 
 ### AI Processing Pipeline
+
 - **Blueprints**: Reusable analysis patterns (Text Analysis, Creative Writing, Meeting Notes)
 - **Prompts**: Specific AI tasks (Summary, To-Do, Translation, Q&A)
 - **Categories**: 8 organizational categories (Office, Healthcare, University, etc.)
@@ -192,6 +202,7 @@ Mobile/Web App → Middleware Auth → Supabase (with JWT + RLS)
 ## 🎯 Key Features Deep Dive
 
 ### Audio Recording System (V2)
+
 - High-quality M4A/AAC recording
 - Background recording with foreground service (Android)
 - Pause/resume support
@@ -201,6 +212,7 @@ Mobile/Web App → Middleware Auth → Supabase (with JWT + RLS)
 - Zero-byte recording prevention
 
 ### Collaborative Spaces
+
 - Create unlimited team workspaces
 - Role-based permissions (owner, member)
 - Email-based invitation system
@@ -208,7 +220,9 @@ Mobile/Web App → Middleware Auth → Supabase (with JWT + RLS)
 - Real-time collaboration via Supabase Realtime
 
 ### Theme System
+
 4 complete theme variants with light/dark modes:
+
 - **Lume**: Modern gold & dark
 - **Nature**: Soothing green
 - **Stone**: Elegant slate
@@ -217,7 +231,9 @@ Mobile/Web App → Middleware Auth → Supabase (with JWT + RLS)
 Each theme includes 13 semantic color tokens for consistent UI.
 
 ### Internationalization
+
 **32 supported languages** with:
+
 - Automatic device language detection
 - Persistent user preferences
 - RTL support (Arabic, Hebrew)
@@ -246,6 +262,7 @@ npm run check:watch    # Watch mode
 ### Building for Production
 
 **Mobile App (EAS Build):**
+
 ```bash
 cd apps/mobile
 
@@ -260,6 +277,7 @@ eas build --profile production
 ```
 
 **Web App:**
+
 ```bash
 cd apps/web
 
@@ -301,6 +319,7 @@ npm run preview
 ## 📝 Common Development Tasks
 
 ### Adding a New Feature
+
 ```bash
 # 1. Create feature directory in mobile app
 mkdir -p apps/mobile/features/my-feature/{components,hooks,services,store,types}
@@ -315,6 +334,7 @@ touch apps/mobile/features/my-feature/README.md
 ```
 
 ### Adding a New Route (Mobile)
+
 ```bash
 # File-based routing with Expo Router
 # Protected route:
@@ -325,6 +345,7 @@ touch apps/mobile/app/\(public\)/my-route.tsx
 ```
 
 ### Platform-Specific Code (Mobile App Only)
+
 ```bash
 # Create platform variants for iOS/Android differences
 touch apps/mobile/features/my-feature/myService.ts        # Default/shared
@@ -336,6 +357,7 @@ touch apps/mobile/features/my-feature/myService.android.ts # Android-specific
 ```
 
 ### Adding a New Route (Web App)
+
 ```bash
 # SvelteKit file-based routing
 # Protected route:

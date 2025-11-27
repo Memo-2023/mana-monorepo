@@ -21,12 +21,14 @@
 	<div class="container mx-auto px-4">
 		<div class="flex h-16 items-center justify-between">
 			<!-- Logo -->
-			<a href="/app/gallery" class="text-xl font-bold text-gray-900 dark:text-gray-100"> Picture </a>
+			<a href="/app/gallery" class="text-xl font-bold text-gray-900 dark:text-gray-100">
+				Picture
+			</a>
 
 			<!-- Mobile Menu Button -->
 			<button
 				onclick={() => (showMobileMenu = !showMobileMenu)}
-				class="flex items-center justify-center rounded-lg p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 md:hidden"
+				class="flex items-center justify-center rounded-lg p-2 text-gray-700 hover:bg-gray-100 md:hidden dark:text-gray-300 dark:hover:bg-gray-800"
 				aria-label="Menu"
 			>
 				<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -81,15 +83,12 @@
 					onclick={() => (showUserMenu = !showUserMenu)}
 					class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
 				>
-					<div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white dark:bg-blue-500">
+					<div
+						class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white dark:bg-blue-500"
+					>
 						{$user?.email?.charAt(0).toUpperCase()}
 					</div>
-					<svg
-						class="h-4 w-4"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
+					<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -125,14 +124,12 @@
 
 		<!-- Mobile Menu -->
 		{#if showMobileMenu}
-			<div class="border-t border-gray-200 pb-4 pt-2 dark:border-gray-700 md:hidden">
+			<div class="border-t border-gray-200 pb-4 pt-2 md:hidden dark:border-gray-700">
 				<nav class="flex flex-col space-y-1">
 					<a
 						href="/app/gallery"
 						onclick={() => (showMobileMenu = false)}
-						class="block px-4 py-2 text-sm font-medium transition-colors {isActive(
-							'/app/gallery'
-						)
+						class="block px-4 py-2 text-sm font-medium transition-colors {isActive('/app/gallery')
 							? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
 							: 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'}"
 					>
@@ -141,9 +138,7 @@
 					<a
 						href="/app/explore"
 						onclick={() => (showMobileMenu = false)}
-						class="block px-4 py-2 text-sm font-medium transition-colors {isActive(
-							'/app/explore'
-						)
+						class="block px-4 py-2 text-sm font-medium transition-colors {isActive('/app/explore')
 							? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
 							: 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'}"
 					>
@@ -152,9 +147,7 @@
 					<a
 						href="/app/generate"
 						onclick={() => (showMobileMenu = false)}
-						class="block px-4 py-2 text-sm font-medium transition-colors {isActive(
-							'/app/generate'
-						)
+						class="block px-4 py-2 text-sm font-medium transition-colors {isActive('/app/generate')
 							? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
 							: 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'}"
 					>
@@ -163,9 +156,7 @@
 					<a
 						href="/app/archive"
 						onclick={() => (showMobileMenu = false)}
-						class="block px-4 py-2 text-sm font-medium transition-colors {isActive(
-							'/app/archive'
-						)
+						class="block px-4 py-2 text-sm font-medium transition-colors {isActive('/app/archive')
 							? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
 							: 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'}"
 					>
@@ -174,9 +165,7 @@
 					<a
 						href="/app/profile"
 						onclick={() => (showMobileMenu = false)}
-						class="block px-4 py-2 text-sm font-medium transition-colors {isActive(
-							'/app/profile'
-						)
+						class="block px-4 py-2 text-sm font-medium transition-colors {isActive('/app/profile')
 							? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
 							: 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'}"
 					>

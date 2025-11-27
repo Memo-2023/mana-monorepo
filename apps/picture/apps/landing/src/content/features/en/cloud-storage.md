@@ -1,25 +1,25 @@
 ---
-title: "Unlimited Cloud Storage"
-description: "All your AI-generated images are automatically saved and synced across all devices. Access your creations anywhere, anytime."
-icon: "☁️"
-coverImage: "/features/cloud-storage.jpg"
-category: "organization"
+title: 'Unlimited Cloud Storage'
+description: 'All your AI-generated images are automatically saved and synced across all devices. Access your creations anywhere, anytime.'
+icon: '☁️'
+coverImage: '/features/cloud-storage.jpg'
+category: 'organization'
 featured: true
 order: 3
 available: true
 comingSoon: false
-language: "en"
+language: 'en'
 benefits:
-  - "Unlimited storage for all your images"
-  - "Automatic sync across devices"
-  - "Fast CDN delivery worldwide"
-  - "Secure encryption at rest"
-  - "Organized galleries and collections"
+  - 'Unlimited storage for all your images'
+  - 'Automatic sync across devices'
+  - 'Fast CDN delivery worldwide'
+  - 'Secure encryption at rest'
+  - 'Organized galleries and collections'
 useCases:
-  - "Access from any device"
-  - "Team collaboration"
-  - "Portfolio management"
-  - "Backup and archiving"
+  - 'Access from any device'
+  - 'Team collaboration'
+  - 'Portfolio management'
+  - 'Backup and archiving'
 ---
 
 ## Never Worry About Storage Again
@@ -40,6 +40,7 @@ Your images are instantly available on:
 ### Automatic Collections
 
 Images are automatically organized by:
+
 - Generation date
 - Model used
 - Prompt keywords
@@ -49,6 +50,7 @@ Images are automatically organized by:
 ### Manual Organization
 
 Create your own structure:
+
 - **Folders**: Organize by project
 - **Tags**: Add custom labels
 - **Favorites**: Star your best work
@@ -106,6 +108,7 @@ Track your usage:
 ### Easy Sharing
 
 Share your creations:
+
 - **Public Links**: Share with anyone
 - **Download Links**: Let others download
 - **Embed Codes**: Embed in websites
@@ -114,6 +117,7 @@ Share your creations:
 ### Team Workspaces
 
 For teams and agencies:
+
 - Shared folders
 - Team libraries
 - Permission management
@@ -122,6 +126,7 @@ For teams and agencies:
 ## File Formats
 
 Download in multiple formats:
+
 - **PNG**: Lossless quality
 - **JPG**: Smaller file size
 - **WebP**: Modern format
@@ -130,6 +135,7 @@ Download in multiple formats:
 ## Metadata Management
 
 Every image includes:
+
 - Generation prompt
 - Model used
 - Parameters
@@ -139,6 +145,7 @@ Every image includes:
 ## Integration Ready
 
 Connect your storage:
+
 - REST API access
 - Webhook notifications
 - Zapier integration
@@ -147,6 +154,7 @@ Connect your storage:
 ## Mobile Optimization
 
 Images optimized for mobile:
+
 - Automatic resizing
 - Format conversion
 - Progressive loading

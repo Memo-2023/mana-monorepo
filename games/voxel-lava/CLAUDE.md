@@ -21,6 +21,7 @@ games/voxel-lava/
 ## Commands
 
 ### Root Level (from monorepo root)
+
 ```bash
 pnpm voxel-lava:dev              # Run web + backend
 pnpm dev:voxel-lava:web          # Start web app only
@@ -30,6 +31,7 @@ pnpm voxel-lava:db:studio        # Open Drizzle Studio
 ```
 
 ### Backend (games/voxel-lava/apps/backend)
+
 ```bash
 pnpm start:dev                   # Start with hot reload
 pnpm build                       # Build for production
@@ -40,6 +42,7 @@ pnpm db:studio                   # Open Drizzle Studio
 ```
 
 ### Web App (games/voxel-lava/apps/web)
+
 ```bash
 pnpm dev                         # Start dev server (port 5180)
 pnpm build                       # Build for production
@@ -58,23 +61,24 @@ pnpm check                       # Type check
 
 ### Backend API Endpoints
 
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/api/health` | GET | No | Health check |
-| `/api/levels/public` | GET | No | List public levels (paginated) |
-| `/api/levels` | GET | Yes | List user's levels |
-| `/api/levels/:id` | GET | No | Get level by ID |
-| `/api/levels` | POST | Yes | Create new level |
-| `/api/levels/:id` | PUT | Yes | Update level (owner only) |
-| `/api/levels/:id` | DELETE | Yes | Delete level (owner only) |
-| `/api/levels/:id/like` | POST | Yes | Toggle like |
-| `/api/levels/:id/liked` | GET | Yes | Check if liked |
-| `/api/levels/:id/play` | POST | No | Record play attempt |
-| `/api/levels/:id/leaderboard` | GET | No | Get top completions |
+| Endpoint                      | Method | Auth | Description                    |
+| ----------------------------- | ------ | ---- | ------------------------------ |
+| `/api/health`                 | GET    | No   | Health check                   |
+| `/api/levels/public`          | GET    | No   | List public levels (paginated) |
+| `/api/levels`                 | GET    | Yes  | List user's levels             |
+| `/api/levels/:id`             | GET    | No   | Get level by ID                |
+| `/api/levels`                 | POST   | Yes  | Create new level               |
+| `/api/levels/:id`             | PUT    | Yes  | Update level (owner only)      |
+| `/api/levels/:id`             | DELETE | Yes  | Delete level (owner only)      |
+| `/api/levels/:id/like`        | POST   | Yes  | Toggle like                    |
+| `/api/levels/:id/liked`       | GET    | Yes  | Check if liked                 |
+| `/api/levels/:id/play`        | POST   | No   | Record play attempt            |
+| `/api/levels/:id/leaderboard` | GET    | No   | Get top completions            |
 
 ### Database Schema
 
 **levels** - Main level storage
+
 - `id`, `name`, `description`, `userId`
 - `voxelData` (JSONB) - Block data
 - `spawnPoint`, `worldSize` (JSONB)
@@ -98,6 +102,7 @@ pnpm check                       # Type check
 ## Environment Variables
 
 ### Backend (.env)
+
 ```
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/voxel_lava
 MANA_CORE_AUTH_URL=http://localhost:3001
@@ -105,6 +110,7 @@ PORT=3010
 ```
 
 ### Web (.env)
+
 ```
 PUBLIC_VOXEL_LAVA_API_URL=http://localhost:3010
 PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
@@ -113,16 +119,19 @@ PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
 ## Development Setup
 
 1. Start Docker infrastructure:
+
    ```bash
    pnpm docker:up
    ```
 
 2. Push database schema:
+
    ```bash
    pnpm voxel-lava:db:push
    ```
 
 3. Start development:
+
    ```bash
    pnpm voxel-lava:dev
    ```

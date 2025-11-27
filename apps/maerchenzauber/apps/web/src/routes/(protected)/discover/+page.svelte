@@ -95,16 +95,12 @@
 			if (story?.user_vote) {
 				await dataService.unvoteStory(storyId);
 				stories = stories.map((s) =>
-					s.id === storyId
-						? { ...s, user_vote: null, vote_count: (s.vote_count || 1) - 1 }
-						: s
+					s.id === storyId ? { ...s, user_vote: null, vote_count: (s.vote_count || 1) - 1 } : s
 				);
 			} else {
 				await dataService.voteForStory(storyId, 'like');
 				stories = stories.map((s) =>
-					s.id === storyId
-						? { ...s, user_vote: 'like', vote_count: (s.vote_count || 0) + 1 }
-						: s
+					s.id === storyId ? { ...s, user_vote: 'like', vote_count: (s.vote_count || 0) + 1 } : s
 				);
 			}
 		} catch (err) {
@@ -119,9 +115,7 @@
 			if (character?.user_vote) {
 				await dataService.removeCharacterVote(characterId);
 				characters = characters.map((c) =>
-					c.id === characterId
-						? { ...c, user_vote: null, vote_count: (c.vote_count || 1) - 1 }
-						: c
+					c.id === characterId ? { ...c, user_vote: null, vote_count: (c.vote_count || 1) - 1 } : c
 				);
 			} else {
 				await dataService.voteForCharacter(characterId, 'like');
@@ -176,8 +170,18 @@
 
 		<!-- Search -->
 		<div class="relative w-full sm:max-w-xs">
-			<svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+			<svg
+				class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+				/>
 			</svg>
 			<input
 				type="text"
@@ -192,19 +196,35 @@
 	<div class="flex gap-2">
 		<button
 			onclick={() => (activeSection = 'stories')}
-			class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {activeSection === 'stories' ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}"
+			class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {activeSection ===
+			'stories'
+				? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg'
+				: 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}"
 		>
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+				/>
 			</svg>
 			Geschichten
 		</button>
 		<button
 			onclick={() => (activeSection = 'characters')}
-			class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {activeSection === 'characters' ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}"
+			class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {activeSection ===
+			'characters'
+				? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg'
+				: 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}"
 		>
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+				/>
 			</svg>
 			Charaktere
 		</button>
@@ -214,19 +234,25 @@
 	<div class="flex gap-2 border-b border-gray-200 pb-3 dark:border-gray-700">
 		<button
 			onclick={() => (activeFilter = 'popular')}
-			class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all {activeFilter === 'popular' ? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}"
+			class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all {activeFilter === 'popular'
+				? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400'
+				: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}"
 		>
 			🔥 Beliebt
 		</button>
 		<button
 			onclick={() => (activeFilter = 'new')}
-			class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all {activeFilter === 'new' ? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}"
+			class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all {activeFilter === 'new'
+				? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400'
+				: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}"
 		>
 			✨ Neu
 		</button>
 		<button
 			onclick={() => (activeFilter = 'featured')}
-			class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all {activeFilter === 'featured' ? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}"
+			class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all {activeFilter === 'featured'
+				? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400'
+				: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}"
 		>
 			⭐ Featured
 		</button>
@@ -243,8 +269,18 @@
 			</div>
 		{:else if storiesError}
 			<div class="rounded-2xl bg-red-50 p-6 text-center dark:bg-red-900/20">
-				<svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+				<svg
+					class="mx-auto h-12 w-12 text-red-400"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+					/>
 				</svg>
 				<p class="mt-2 text-red-600 dark:text-red-400">{storiesError}</p>
 				<button
@@ -256,10 +292,22 @@
 			</div>
 		{:else if filteredStories.length === 0}
 			<div class="rounded-2xl bg-gray-50 p-8 text-center dark:bg-gray-800/50">
-				<svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+				<svg
+					class="mx-auto h-16 w-16 text-gray-400"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="1.5"
+						d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+					/>
 				</svg>
-				<h3 class="mt-4 font-medium text-gray-700 dark:text-gray-300">Keine Geschichten gefunden</h3>
+				<h3 class="mt-4 font-medium text-gray-700 dark:text-gray-300">
+					Keine Geschichten gefunden
+				</h3>
 				<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
 					{searchQuery ? 'Versuche es mit anderen Suchbegriffen' : 'Schau später nochmal vorbei'}
 				</p>
@@ -283,18 +331,36 @@
 
 						<!-- Featured Badge -->
 						{#if story.visibility === 'featured'}
-							<div class="absolute left-3 top-3 rounded-full bg-amber-500 px-2 py-0.5 text-xs font-medium text-white shadow">
+							<div
+								class="absolute left-3 top-3 rounded-full bg-amber-500 px-2 py-0.5 text-xs font-medium text-white shadow"
+							>
 								⭐ Featured
 							</div>
 						{/if}
 
 						<!-- Vote Count -->
 						<button
-							onclick={(e) => { e.preventDefault(); e.stopPropagation(); handleVoteStory(story.id); }}
-							class="absolute right-3 top-3 flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium shadow backdrop-blur {story.user_vote ? 'bg-pink-500 text-white' : 'bg-white/90 text-gray-700 dark:bg-gray-800/90 dark:text-gray-300'}"
+							onclick={(e) => {
+								e.preventDefault();
+								e.stopPropagation();
+								handleVoteStory(story.id);
+							}}
+							class="absolute right-3 top-3 flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium shadow backdrop-blur {story.user_vote
+								? 'bg-pink-500 text-white'
+								: 'bg-white/90 text-gray-700 dark:bg-gray-800/90 dark:text-gray-300'}"
 						>
-							<svg class="h-4 w-4" fill={story.user_vote ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+							<svg
+								class="h-4 w-4"
+								fill={story.user_vote ? 'currentColor' : 'none'}
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+								/>
 							</svg>
 							{story.vote_count || 0}
 						</button>
@@ -325,8 +391,18 @@
 			</div>
 		{:else if charactersError}
 			<div class="rounded-2xl bg-red-50 p-6 text-center dark:bg-red-900/20">
-				<svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+				<svg
+					class="mx-auto h-12 w-12 text-red-400"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+					/>
 				</svg>
 				<p class="mt-2 text-red-600 dark:text-red-400">{charactersError}</p>
 				<button
@@ -338,8 +414,18 @@
 			</div>
 		{:else if filteredCharacters.length === 0}
 			<div class="rounded-2xl bg-gray-50 p-8 text-center dark:bg-gray-800/50">
-				<svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+				<svg
+					class="mx-auto h-16 w-16 text-gray-400"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="1.5"
+						d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+					/>
 				</svg>
 				<h3 class="mt-4 font-medium text-gray-700 dark:text-gray-300">Keine Charaktere gefunden</h3>
 				<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -367,11 +453,23 @@
 							<!-- Vote Button -->
 							<button
 								onclick={() => handleVoteCharacter(character.id)}
-								class="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full shadow transition-all {character.user_vote ? 'bg-pink-500 text-white' : 'bg-white text-gray-500 hover:text-pink-500 dark:bg-gray-800 dark:text-gray-400'}"
+								class="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full shadow transition-all {character.user_vote
+									? 'bg-pink-500 text-white'
+									: 'bg-white text-gray-500 hover:text-pink-500 dark:bg-gray-800 dark:text-gray-400'}"
 								title="Gefällt mir"
 							>
-								<svg class="h-4 w-4" fill={character.user_vote ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+								<svg
+									class="h-4 w-4"
+									fill={character.user_vote ? 'currentColor' : 'none'}
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+									/>
 								</svg>
 							</button>
 
@@ -382,7 +480,12 @@
 								title="Charakter übernehmen"
 							>
 								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+									/>
 								</svg>
 							</button>
 						</div>

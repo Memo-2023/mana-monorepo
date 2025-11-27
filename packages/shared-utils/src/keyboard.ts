@@ -24,7 +24,9 @@ export interface ShortcutGroup {
  */
 export function matchesShortcut(event: KeyboardEvent, shortcut: ShortcutAction): boolean {
 	const keyMatches = event.key.toLowerCase() === shortcut.key.toLowerCase();
-	const ctrlMatches = shortcut.ctrl ? event.ctrlKey || event.metaKey : !event.ctrlKey && !event.metaKey;
+	const ctrlMatches = shortcut.ctrl
+		? event.ctrlKey || event.metaKey
+		: !event.ctrlKey && !event.metaKey;
 	const shiftMatches = shortcut.shift ? event.shiftKey : !event.shiftKey;
 	const altMatches = shortcut.alt ? event.altKey : !event.altKey;
 
@@ -75,11 +77,7 @@ export function createShortcutHandler(
 		// Don't handle shortcuts if user is typing in an input (unless explicitly allowed)
 		if (!options?.allowInInputs) {
 			const target = event.target as HTMLElement;
-			if (
-				target.tagName === 'INPUT' ||
-				target.tagName === 'TEXTAREA' ||
-				target.isContentEditable
-			) {
+			if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
 				return;
 			}
 		}
@@ -120,7 +118,7 @@ export function createShortcuts(actions: {
 			key: 'f',
 			ctrl: true,
 			description: 'Search',
-			action: actions.onSearch
+			action: actions.onSearch,
 		});
 	}
 
@@ -129,7 +127,7 @@ export function createShortcuts(actions: {
 			key: 's',
 			ctrl: true,
 			description: 'Save',
-			action: actions.onSave
+			action: actions.onSave,
 		});
 	}
 
@@ -138,7 +136,7 @@ export function createShortcuts(actions: {
 			key: 'e',
 			ctrl: true,
 			description: 'Edit',
-			action: actions.onEdit
+			action: actions.onEdit,
 		});
 	}
 
@@ -146,7 +144,7 @@ export function createShortcuts(actions: {
 		generalShortcuts.push({
 			key: 'Escape',
 			description: 'Cancel',
-			action: actions.onCancel
+			action: actions.onCancel,
 		});
 	}
 
@@ -155,7 +153,7 @@ export function createShortcuts(actions: {
 			key: 'n',
 			ctrl: true,
 			description: 'New',
-			action: actions.onNew
+			action: actions.onNew,
 		});
 	}
 
@@ -164,7 +162,7 @@ export function createShortcuts(actions: {
 			key: 'Delete',
 			ctrl: true,
 			description: 'Delete',
-			action: actions.onDelete
+			action: actions.onDelete,
 		});
 	}
 
@@ -174,7 +172,7 @@ export function createShortcuts(actions: {
 			ctrl: true,
 			shift: true,
 			description: 'Copy',
-			action: actions.onCopy
+			action: actions.onCopy,
 		});
 	}
 
@@ -183,7 +181,7 @@ export function createShortcuts(actions: {
 			key: 'z',
 			ctrl: true,
 			description: 'Undo',
-			action: actions.onUndo
+			action: actions.onUndo,
 		});
 	}
 
@@ -193,14 +191,14 @@ export function createShortcuts(actions: {
 			ctrl: true,
 			shift: true,
 			description: 'Redo',
-			action: actions.onRedo
+			action: actions.onRedo,
 		});
 	}
 
 	if (generalShortcuts.length > 0) {
 		shortcuts.push({
 			name: 'General',
-			shortcuts: generalShortcuts
+			shortcuts: generalShortcuts,
 		});
 	}
 
@@ -224,7 +222,7 @@ export function shortcuts(node: HTMLElement, shortcutActions: ShortcutAction[]) 
 			node.removeEventListener('keydown', handler);
 			const newHandler = createShortcutHandler(newShortcutActions);
 			node.addEventListener('keydown', newHandler);
-		}
+		},
 	};
 }
 

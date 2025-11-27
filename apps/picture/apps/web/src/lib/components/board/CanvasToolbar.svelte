@@ -14,7 +14,7 @@
 		canRedo,
 		selectedItemIds,
 		removeSelectedItems,
-		deselectAll
+		deselectAll,
 	} from '$lib/stores/canvas';
 	import { boardSettings } from '$lib/stores/boards';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -40,7 +40,7 @@
 		// Create download link
 		const dataURL = stage.toDataURL({
 			pixelRatio: 2, // Retina quality
-			mimeType: 'image/png'
+			mimeType: 'image/png',
 		});
 
 		const link = document.createElement('a');
@@ -146,7 +146,9 @@
 				</svg>
 			</button>
 
-			<div class="flex h-10 min-w-[4rem] items-center justify-center rounded-lg bg-gray-100 px-3 text-sm font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100">
+			<div
+				class="flex h-10 min-w-[4rem] items-center justify-center rounded-lg bg-gray-100 px-3 text-sm font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+			>
 				{zoomPercentage}%
 			</div>
 
@@ -167,7 +169,7 @@
 
 			<button
 				onclick={handleZoomToFit}
-				class="flex h-10 px-3 items-center justify-center rounded-lg text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+				class="flex h-10 items-center justify-center rounded-lg px-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
 				title="An Fenster anpassen"
 			>
 				Fit
@@ -175,7 +177,7 @@
 
 			<button
 				onclick={resetZoom}
-				class="flex h-10 px-3 items-center justify-center rounded-lg text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+				class="flex h-10 items-center justify-center rounded-lg px-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
 				title="100%"
 			>
 				100%

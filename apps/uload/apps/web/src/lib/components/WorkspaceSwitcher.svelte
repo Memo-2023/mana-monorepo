@@ -16,29 +16,29 @@
 	let showDropdown = $state(false);
 	let workspaces = $derived($allWorkspaces);
 	let workspacesState = $derived($workspacesStore);
-	
+
 	// Use activeWorkspace store as the primary source
 	let activeWorkspaceId = $state(activeWorkspace.getId());
 	let activeWorkspaceData = $state(activeWorkspace.getData());
-	
+
 	// Subscribe to activeWorkspace changes
 	$effect(() => {
-		const unsubId = activeWorkspace.id.subscribe(id => {
+		const unsubId = activeWorkspace.id.subscribe((id) => {
 			activeWorkspaceId = id;
 		});
-		const unsubData = activeWorkspace.data.subscribe(data => {
+		const unsubData = activeWorkspace.data.subscribe((data) => {
 			activeWorkspaceData = data;
 		});
-		
+
 		return () => {
 			unsubId();
 			unsubData();
 		};
 	});
-	
+
 	// Derive current workspace from activeWorkspace or fallback to old store
 	let current = $derived(activeWorkspaceData || $currentWorkspace);
-	
+
 	function toggleDropdown() {
 		showDropdown = !showDropdown;
 	}
@@ -49,7 +49,7 @@
 
 	async function switchToWorkspace(workspaceId: string) {
 		// Find the workspace data
-		const workspace = workspaces.find(w => w.id === workspaceId);
+		const workspace = workspaces.find((w) => w.id === workspaceId);
 		if (workspace) {
 			// Set in the new active workspace store
 			activeWorkspace.set(workspace);
@@ -68,7 +68,7 @@
 		if (!workspace) return 'Unknown';
 		return workspace.name || 'Unnamed Workspace';
 	}
-	
+
 	function createWorkspace() {
 		showDropdown = false;
 		// Navigate to workspace creation page with current workspace context
@@ -92,20 +92,30 @@
 			<span class="max-w-[150px] truncate">
 				{getWorkspaceDisplayName(activeWorkspaceData || current)}
 			</span>
-			<ChevronDown class="h-4 w-4 text-theme-text-muted transition-transform {showDropdown ? 'rotate-180' : ''}" />
+			<ChevronDown
+				class="h-4 w-4 text-theme-text-muted transition-transform {showDropdown
+					? 'rotate-180'
+					: ''}"
+			/>
 		{:else}
 			<Building2 class="h-4 w-4 text-theme-text-muted" />
-			<span class="max-w-[150px] truncate">
-				Select Workspace
-			</span>
-			<ChevronDown class="h-4 w-4 text-theme-text-muted transition-transform {showDropdown ? 'rotate-180' : ''}" />
+			<span class="max-w-[150px] truncate"> Select Workspace </span>
+			<ChevronDown
+				class="h-4 w-4 text-theme-text-muted transition-transform {showDropdown
+					? 'rotate-180'
+					: ''}"
+			/>
 		{/if}
 	</button>
 
 	{#if showDropdown}
 		<div
 			transition:scale={{ duration: 200, start: 0.95 }}
-			class="absolute z-50 {position === 'left-outside' ? 'left-0 top-full mt-2' : 'right-0 mt-2'} w-72 {position === 'left-outside' ? 'origin-top-left' : 'origin-top-right'} rounded-lg border border-theme-border bg-theme-surface shadow-xl"
+			class="absolute z-50 {position === 'left-outside'
+				? 'left-0 top-full mt-2'
+				: 'right-0 mt-2'} w-72 {position === 'left-outside'
+				? 'origin-top-left'
+				: 'origin-top-right'} rounded-lg border border-theme-border bg-theme-surface shadow-xl"
 		>
 			<!-- Personal Workspace Section -->
 			{#if workspacesState.personalWorkspace}
@@ -114,17 +124,17 @@
 						Personal Workspace
 					</div>
 					<button
-						onclick={() => workspacesState.personalWorkspace && switchToWorkspace(workspacesState.personalWorkspace.id)}
+						onclick={() =>
+							workspacesState.personalWorkspace &&
+							switchToWorkspace(workspacesState.personalWorkspace.id)}
 						class="group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-theme-surface-hover"
 					>
 						<User class="h-5 w-5 text-theme-text-muted" />
-						<div class="flex-1 min-w-0">
+						<div class="min-w-0 flex-1">
 							<div class="text-sm font-medium text-theme-text">
 								{getWorkspaceDisplayName(workspacesState.personalWorkspace)}
 							</div>
-							<div class="text-xs text-theme-text-muted">
-								Your personal workspace
-							</div>
+							<div class="text-xs text-theme-text-muted">Your personal workspace</div>
 						</div>
 						{#if activeWorkspaceId === workspacesState.personalWorkspace.id}
 							<Check class="h-4 w-4 text-theme-primary" />
@@ -132,7 +142,7 @@
 					</button>
 				</div>
 			{/if}
-			
+
 			<!-- Team Workspaces Section -->
 			{#if workspacesState.teamWorkspaces && workspacesState.teamWorkspaces.length > 0}
 				<div class="border-b border-theme-border p-2">
@@ -145,7 +155,7 @@
 							class="group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-theme-surface-hover"
 						>
 							<Users class="h-5 w-5 text-purple-500" />
-							<div class="flex-1 min-w-0">
+							<div class="min-w-0 flex-1">
 								<div class="text-sm font-medium text-theme-text">
 									{getWorkspaceDisplayName(workspace)}
 								</div>
@@ -164,28 +174,25 @@
 			{:else}
 				<!-- Empty State for Team Workspaces -->
 				<div class="border-b border-theme-border p-4">
-					<p class="text-center text-xs text-theme-text-muted">
-						No team workspaces yet
-					</p>
+					<p class="text-center text-xs text-theme-text-muted">No team workspaces yet</p>
 					<p class="mt-1 text-center text-xs text-theme-text-muted">
 						Create or join a team workspace to collaborate
 					</p>
 				</div>
 			{/if}
-			
+
 			<!-- Create Workspace Button -->
 			<div class="border-t border-theme-border p-2">
 				<button
 					onclick={createWorkspace}
-					class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-theme-primary/10"
+					class="hover:bg-theme-primary/10 flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all"
 				>
-					<div class="flex h-5 w-5 items-center justify-center rounded-full bg-theme-primary/10">
+					<div class="bg-theme-primary/10 flex h-5 w-5 items-center justify-center rounded-full">
 						<Plus class="h-3.5 w-3.5 text-theme-primary" />
 					</div>
 					<span class="text-theme-text">Create Workspace</span>
 				</button>
 			</div>
-
 		</div>
 	{/if}
 </div>

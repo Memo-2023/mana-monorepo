@@ -7,12 +7,14 @@ This guide documents the migration from `expo-av` to `expo-audio` completed as p
 ## Background
 
 ### Why We Migrated
+
 1. **Deprecation**: `expo-av` was deprecated in Expo SDK 54
 2. **Android 16 Issues**: Recording functionality broken on Android 16 devices
 3. **Performance**: `expo-audio` offers better performance and smaller bundle size
 4. **Future Support**: `expo-audio` is actively maintained and developed
 
 ### Timeline
+
 - **Date**: January 2025
 - **Expo SDK**: 53 → 54
 - **React Native**: 0.79.2 → 0.81.4
@@ -37,31 +39,29 @@ npx expo install --fix
 ### 2. Import Changes
 
 #### Recording
+
 ```typescript
 // Before (expo-av)
 import { Audio } from 'expo-av';
 
 // After (expo-audio)
 import {
-  AudioRecorder,
-  RecordingPresets,
-  setAudioModeAsync,
-  requestRecordingPermissionsAsync,
-  getRecordingPermissionsAsync
+	AudioRecorder,
+	RecordingPresets,
+	setAudioModeAsync,
+	requestRecordingPermissionsAsync,
+	getRecordingPermissionsAsync,
 } from 'expo-audio';
 ```
 
 #### Playback
+
 ```typescript
 // Before (expo-av)
 import { Audio } from 'expo-av';
 
 // After (expo-audio)
-import {
-  AudioPlayer,
-  createAudioPlayer,
-  setAudioModeAsync
-} from 'expo-audio';
+import { AudioPlayer, createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 ```
 
 ### 3. API Changes
@@ -69,6 +69,7 @@ import {
 #### Recording API
 
 ##### Starting Recording
+
 ```typescript
 // Before (expo-av)
 const recording = new Audio.Recording();
@@ -82,6 +83,7 @@ recorder.record(); // Note: synchronous, not async
 ```
 
 ##### Stopping Recording
+
 ```typescript
 // Before (expo-av)
 await recording.stopAndUnloadAsync();
@@ -93,6 +95,7 @@ const uri = recorder.uri; // Direct property access
 ```
 
 ##### Pause/Resume
+
 ```typescript
 // Before (expo-av)
 await recording.pauseAsync();
@@ -106,12 +109,10 @@ recorder.record(); // Resume (same as start)
 #### Playback API
 
 ##### Creating Player
+
 ```typescript
 // Before (expo-av)
-const { sound } = await Audio.Sound.createAsync(
-  { uri },
-  { progressUpdateIntervalMillis: 100 }
-);
+const { sound } = await Audio.Sound.createAsync({ uri }, { progressUpdateIntervalMillis: 100 });
 
 // After (expo-audio)
 const player = createAudioPlayer(uri);
@@ -119,6 +120,7 @@ const player = createAudioPlayer(uri);
 ```
 
 ##### Playback Control
+
 ```typescript
 // Before (expo-av)
 await sound.playAsync();
@@ -136,19 +138,20 @@ player.release(); // Synchronous cleanup
 ```
 
 ##### Status Updates
+
 ```typescript
 // Before (expo-av)
 sound.setOnPlaybackStatusUpdate((status) => {
-  if (status.isLoaded) {
-    console.log(status.positionMillis, status.durationMillis);
-  }
+	if (status.isLoaded) {
+		console.log(status.positionMillis, status.durationMillis);
+	}
 });
 
 // After (expo-audio)
 // No built-in status updates; use polling
 setInterval(() => {
-  console.log(player.currentTime, player.duration); // In seconds
-  console.log(player.playing); // Boolean
+	console.log(player.currentTime, player.duration); // In seconds
+	console.log(player.playing); // Boolean
 }, 100);
 ```
 
@@ -157,22 +160,22 @@ setInterval(() => {
 ```typescript
 // Before (expo-av)
 await Audio.setAudioModeAsync({
-  allowsRecordingIOS: true,
-  playsInSilentModeIOS: true,
-  staysActiveInBackground: true,
-  interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-  interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-  shouldDuckAndroid: true,
-  playThroughEarpieceAndroid: false,
+	allowsRecordingIOS: true,
+	playsInSilentModeIOS: true,
+	staysActiveInBackground: true,
+	interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+	interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+	shouldDuckAndroid: true,
+	playThroughEarpieceAndroid: false,
 });
 
 // After (expo-audio)
 await setAudioModeAsync({
-  allowsRecording: true,
-  playsInSilentMode: true,
-  shouldPlayInBackground: true,
-  interruptionMode: 'doNotMix', // String literals instead of enums
-  // Note: Some options like shouldDuckAndroid are not available
+	allowsRecording: true,
+	playsInSilentMode: true,
+	shouldPlayInBackground: true,
+	interruptionMode: 'doNotMix', // String literals instead of enums
+	// Note: Some options like shouldDuckAndroid are not available
 });
 ```
 
@@ -191,6 +194,7 @@ const { granted } = await getRecordingPermissionsAsync();
 ## Files Modified
 
 ### Core Recording Services
+
 - `features/audioRecording/audioRecording.service.ts`
 - `features/audioRecording/audioRecording.service.android.ts`
 - `features/audioRecording/audioRecording.service.ios.ts`
@@ -198,48 +202,58 @@ const { granted } = await getRecordingPermissionsAsync();
 - `features/audioRecording/audioRecording.types.ts`
 
 ### Audio Player
+
 - `features/audioPlayer/useAudioPlayer.ts`
 - `features/audioPlayer/store/audioPlaybackStore.ts`
 
 ### Storage & Utilities
+
 - `features/storage/fileStorage.service.ts`
 - `features/storage/fileStorage.service.web.ts`
 - `utils/mediaUtils.ts`
 
 ### Sound Effects
+
 - `features/audioRecording/services/recordingSoundManager.ts`
 
 ### Configuration
+
 - `package.json`
 - `app.json` (plugin configuration)
 
 ## Platform-Specific Considerations
 
 ### Android 16
+
 - Added foreground state verification before recording
 - Implemented AppState monitoring for background restrictions
 - Added explicit error handling for permission denials
 
 ### iOS
+
 - Maintained compatibility with existing iOS audio session configuration
 - No significant changes required for iOS implementation
 
 ### Web
+
 - Updated to use Web Audio API compatible methods
 - Maintained fallback for permissions API
 
 ## Known Issues & Workarounds
 
 ### 1. Zero-byte Audio Files (Expo SDK 54)
+
 **Issue**: Some Android devices create zero-byte audio files
 **Reference**: GitHub issue #39646
 **Workaround**: Added logging and validation after recording stops
 
 ### 2. Missing Status Updates
+
 **Issue**: No built-in playback status updates like expo-av
 **Solution**: Implemented polling mechanism with setInterval
 
 ### 3. Time Units Difference
+
 **Issue**: expo-audio uses seconds, expo-av used milliseconds
 **Solution**: Added conversion where necessary (÷ 1000 for ms → s)
 

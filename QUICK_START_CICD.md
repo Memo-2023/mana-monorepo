@@ -108,6 +108,7 @@ git push origin test/ci-pipeline
 If you want to test quickly, here's the absolute minimum:
 
 ### For PR Testing Only (No Deployment)
+
 ```
 # Just these 3 secrets to test PR workflow:
 DOCKER_USERNAME=your-username
@@ -116,6 +117,7 @@ DOCKER_REGISTRY=your-username
 ```
 
 ### For Staging Deployment
+
 ```
 # Add these 5 more secrets:
 STAGING_HOST=your-server-ip
@@ -175,6 +177,7 @@ ssh -i ~/.ssh/github-staging deploy@staging.example.com 'echo "Success"'
 ## Troubleshooting
 
 ### "Permission denied (publickey)"
+
 ```bash
 # Check SSH key was added to server
 ssh deploy@staging.example.com 'cat ~/.ssh/authorized_keys'
@@ -184,6 +187,7 @@ ssh deploy@staging.example.com 'cat ~/.ssh/authorized_keys'
 ```
 
 ### "Docker command not found"
+
 ```bash
 # Install Docker on server
 curl -fsSL https://get.docker.com | sh
@@ -192,6 +196,7 @@ sudo usermod -aG docker deploy
 ```
 
 ### "Health checks failing"
+
 ```bash
 # Check service logs
 ssh deploy@staging.example.com

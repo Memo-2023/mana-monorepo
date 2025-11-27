@@ -1,19 +1,19 @@
 ---
-title: "Revolution der KI-Bildgenerierung: OpenAIs GPT-4o setzt neue Maßstäbe"
-description: "OpenAI hat kürzlich sein neuestes Modell, GPT-4o, vorgestellt, das die Bildgenerierung direkt integriert und damit einen bedeutenden Fortschritt in der KI-Technologie markiert."
+title: 'Revolution der KI-Bildgenerierung: OpenAIs GPT-4o setzt neue Maßstäbe'
+description: 'OpenAI hat kürzlich sein neuestes Modell, GPT-4o, vorgestellt, das die Bildgenerierung direkt integriert und damit einen bedeutenden Fortschritt in der KI-Technologie markiert.'
 pubDate: 2025-03-25
-category: "Bild"
+category: 'Bild'
 featured: true
-author: "BaunTown"
-tags: ["GPT-4o", "OpenAI", "KI", "Multimodal", "Bildgenerierung"]
-image: "/images/models/openai-gpt4o-imagemode-bauntown.png"
+author: 'BaunTown'
+tags: ['GPT-4o', 'OpenAI', 'KI', 'Multimodal', 'Bildgenerierung']
+image: '/images/models/openai-gpt4o-imagemode-bauntown.png'
 externalLinks:
-  - title: "Offizielle OpenAI Ankündigung"
-    url: "https://openai.com/index/introducing-4o-image-generation/"
-  - title: "ChatGPT - Bilder erstellen"
-    url: "https://chat.openai.com"
+  - title: 'Offizielle OpenAI Ankündigung'
+    url: 'https://openai.com/index/introducing-4o-image-generation/'
+  - title: 'ChatGPT - Bilder erstellen'
+    url: 'https://chat.openai.com'
   - title: "Sora - OpenAI's Video & Bild Plattform"
-    url: "https://sora.com"
+    url: 'https://sora.com'
 ---
 
 OpenAI hat kürzlich sein neuestes Modell, GPT-4o, vorgestellt, das die Bildgenerierung direkt integriert und damit einen bedeutenden Fortschritt in der KI-Technologie markiert. Dieses Modell kann Bilder basierend auf Textaufforderungen erstellen, hochgeladene Bilder bearbeiten und sogar mehrere Objekte präzise darstellen. Es zeichnet sich durch eine verbesserte Textdarstellung in Bildern aus, ein Bereich, in dem frühere Modelle wie DALL-E oft Schwierigkeiten hatten.

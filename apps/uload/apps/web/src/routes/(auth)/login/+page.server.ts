@@ -3,14 +3,14 @@ import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const isAdditional = url.searchParams.get('additional') === 'true';
-	
+
 	// Only redirect if user is logged in AND not trying to add additional account
 	if (locals.user && !isAdditional) {
 		redirect(303, '/my/links');
 	}
-	
+
 	return {
-		isAdditional
+		isAdditional,
 	};
 };
 
@@ -37,7 +37,10 @@ export const actions = {
 		// Handle redirect based on login type
 		if (isAdditional) {
 			// For additional accounts, show success message
-			redirect(303, `/my?message=${encodeURIComponent('Account erfolgreich hinzugefügt! Du kannst nun zwischen deinen Accounts wechseln.')}&type=success`);
+			redirect(
+				303,
+				`/my?message=${encodeURIComponent('Account erfolgreich hinzugefügt! Du kannst nun zwischen deinen Accounts wechseln.')}&type=success`
+			);
 		} else {
 			// Normal login flow
 			redirect(303, '/my');
@@ -47,5 +50,5 @@ export const actions = {
 	logout: async ({ locals }) => {
 		locals.pb.authStore.clear();
 		redirect(303, '/');
-	}
+	},
 } satisfies Actions;

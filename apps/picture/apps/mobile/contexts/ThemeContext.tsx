@@ -7,54 +7,50 @@ import type { NativeTheme as Theme, ThemeVariant, ColorMode } from '@picture/des
 type ThemeMode = ColorMode | 'system';
 
 interface ThemeContextValue {
-  theme: Theme;
-  variant: ThemeVariant;
-  mode: ThemeMode;
-  actualMode: 'light' | 'dark';
-  isLoading: boolean;
-  setVariant: (variant: ThemeVariant) => Promise<void>;
-  setMode: (mode: ThemeMode) => Promise<void>;
-  toggleMode: () => void;
+	theme: Theme;
+	variant: ThemeVariant;
+	mode: ThemeMode;
+	actualMode: 'light' | 'dark';
+	isLoading: boolean;
+	setVariant: (variant: ThemeVariant) => Promise<void>;
+	setMode: (mode: ThemeMode) => Promise<void>;
+	toggleMode: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 interface ThemeProviderProps {
-  children: ReactNode;
+	children: ReactNode;
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const loadTheme = useThemeStore((state) => state.loadTheme);
-  const themeData = useThemeHook();
+	const loadTheme = useThemeStore((state) => state.loadTheme);
+	const themeData = useThemeHook();
 
-  // Load theme on mount
-  useEffect(() => {
-    loadTheme();
-  }, []);
+	// Load theme on mount
+	useEffect(() => {
+		loadTheme();
+	}, []);
 
-  // Update StatusBar when theme changes
-  useEffect(() => {
-    if (!themeData.isLoading) {
-      StatusBar.setBarStyle(
-        themeData.actualMode === 'dark' ? 'light-content' : 'dark-content',
-        true
-      );
-    }
-  }, [themeData.actualMode, themeData.isLoading]);
+	// Update StatusBar when theme changes
+	useEffect(() => {
+		if (!themeData.isLoading) {
+			StatusBar.setBarStyle(
+				themeData.actualMode === 'dark' ? 'light-content' : 'dark-content',
+				true
+			);
+		}
+	}, [themeData.actualMode, themeData.isLoading]);
 
-  return (
-    <ThemeContext.Provider value={themeData}>
-      {children}
-    </ThemeContext.Provider>
-  );
+	return <ThemeContext.Provider value={themeData}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme(): ThemeContextValue {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    // During initial render, return the hook directly as fallback
-    // This prevents crashes when components render before ThemeProvider is ready
-    return useThemeHook();
-  }
-  return context;
+	const context = useContext(ThemeContext);
+	if (context === undefined) {
+		// During initial render, return the hook directly as fallback
+		// This prevents crashes when components render before ThemeProvider is ready
+		return useThemeHook();
+	}
+	return context;
 }

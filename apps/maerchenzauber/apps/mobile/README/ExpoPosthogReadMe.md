@@ -7,9 +7,8 @@ In this tutorial, we show how to create a basic React Native app using Expo (a s
 
 Already know how to set up a React Native app? Click here to skip to the PostHog setup.
 
-
 1. Creating the basic React Native app with Expo
-To start, we need a directory for the app to live in, the Expo CLI installed, and the Expo Go app on either Android or iOS. This assumes you have Node and Git already installed. If you’re on Mac, you also must install watchman by running brew install watchman.
+   To start, we need a directory for the app to live in, the Expo CLI installed, and the Expo Go app on either Android or iOS. This assumes you have Node and Git already installed. If you’re on Mac, you also must install watchman by running brew install watchman.
 
 Once done, you can initialize the app by running create-expo-app and giving it a name (we are calling ours rn-tutorial). Once initialized, you can go into the folder and start the app.
 
@@ -24,9 +23,8 @@ Basic app
 
 Now that we are up and running, we can add some functionality to help us showcase the features of PostHog.
 
-
 2. Adding functionality to our React Native app
-To start, we want a home page, an about page, and a button to go between the two. Navigation is needed to make this happen, and we use the react-navigation library to do it. PostHog autocaptures screens from the react-navigation library, which makes it the best choice for us.
+   To start, we want a home page, an about page, and a button to go between the two. Navigation is needed to make this happen, and we use the react-navigation library to do it. PostHog autocaptures screens from the react-navigation library, which makes it the best choice for us.
 
 To setup react-navigation, first, install it:
 
@@ -43,35 +41,33 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 function Home() {
-  return (
-    <View style={styles.container}>
-      <Text>Welcome to the home page</Text>
-    </View>
-  );
+return (
+<View style={styles.container}>
+<Text>Welcome to the home page</Text>
+</View>
+);
 }
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={Home} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+return (
+<NavigationContainer>
+<Stack.Navigator>
+<Stack.Screen name="Home" component={Home} />
+</Stack.Navigator>
+</NavigationContainer>
+);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-  },
+container: {
+flex: 1,
+backgroundColor: '#fff',
+alignItems: 'center',
+},
 });
 A navigation bar was added to the top of the app and our home page changed:
-
-
 
 We still need a second function for the About() page, and a button that uses a navigation prop to navigate between the two. Also, set the initialRouteName in the Stack.Navigator to “Home.”
 
@@ -82,41 +78,40 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 function Home({ navigation }) {
-  return (
-    <View style={styles.container}>
-      <Text>Welcome to the home page</Text>
-      <Button
-        title="Go to About"
-        onPress={() => navigation.navigate("About")}
-      />
-    </View>
-  );
+return (
+<View style={styles.container}>
+<Text>Welcome to the home page</Text>
+<Button
+title="Go to About"
+onPress={() => navigation.navigate("About")}
+/>
+</View>
+);
 }
 
 function About() {
-  return (
-    <View style={styles.container}>
-      <Text>Welcome to the About page</Text>
-    </View>
-  );
+return (
+<View style={styles.container}>
+<Text>Welcome to the About page</Text>
+</View>
+);
 }
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="About" component={About} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+return (
+<NavigationContainer>
+<Stack.Navigator initialRouteName="Home">
+<Stack.Screen name="Home" component={Home} />
+<Stack.Screen name="About" component={About} />
+</Stack.Navigator>
+</NavigationContainer>
+);
 }
 
 // ...
 After setting all this up, reload your app and click the button to go to the About screen page. When there, you see you automatically get a back button added via navigation.
-
 
 Adding a form
 We want a form where users can submit their email so we can identify them later. To do this, import the TextInput component and useState from React (so we can keep that value). We then add and style the TextInput, Button, and a Text component to show the submitted value. After doing all of this, your Home() function looks like this:
@@ -129,37 +124,37 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useState } from 'react';
 
 function Home({ navigation }) {
-  const [text, setText] = useState('')
-  const [submit, setSubmit] = useState('')
+const [text, setText] = useState('')
+const [submit, setSubmit] = useState('')
 
-  function getText() {
-    setSubmit(text)
-  }
+function getText() {
+setSubmit(text)
+}
 
-  return (
-    <View style={styles.container}>
-      <Text>Welcome to the home page</Text>
-      <Button
-        title="Go to About"
-        onPress={() => navigation.navigate("About")}
-      />
-      <TextInput
-        style={{
+return (
+<View style={styles.container}>
+<Text>Welcome to the home page</Text>
+<Button
+title="Go to About"
+onPress={() => navigation.navigate("About")}
+/>
+<TextInput
+style={{
           height: 40,
           borderColor: 'gray',
           borderWidth: 1
         }}
-        placeholder="enter text here"
-        onChangeText={text => setText(text)}
-      />
-      <Button
+placeholder="enter text here"
+onChangeText={text => setText(text)}
+/>
+<Button
         onPress={getText}
         title="Get Text"
         color="orange"
       />
-      <Text>Last submit: {submit}</Text>
-    </View>
-  );
+<Text>Last submit: {submit}</Text>
+</View>
+);
 }
 
 // ...
@@ -169,9 +164,8 @@ A functional, ugly app
 
 Feel free to add features and make it look better, but for the sake of our tutorial, this app is ready to integrate with PostHog.
 
-
 3. Adding PostHog to our React Native app
-To get analytics, user identification, feature flags, and all the other features of PostHog into our app, we must install and set up PostHog. The first step to doing this is installing all the relevant libraries for using PostHog:
+   To get analytics, user identification, feature flags, and all the other features of PostHog into our app, we must install and set up PostHog. The first step to doing this is installing all the relevant libraries for using PostHog:
 
 Terminal
 
@@ -189,21 +183,20 @@ import { PostHogProvider } from 'posthog-react-native'
 // ...
 
 export default function App() {
-  return (
-    <NavigationContainer>
-      <PostHogProvider 
-        apiKey="phc_SdmYfeCIZDgIfj87SNCpId18a5edPqtnmam6f0H4dWJ"
-        options={{
+return (
+<NavigationContainer>
+<PostHogProvider
+apiKey="phc_SdmYfeCIZDgIfj87SNCpId18a5edPqtnmam6f0H4dWJ"
+options={{
           host: "https://eu.i.posthog.com",
-        }}
-      >
-        <Stack.Navigator initialRouteName="Home">
-          <Stack.Screen name="Home" component={Home} />
-          <Stack.Screen name="About" component={About} />
-        </Stack.Navigator>
-      </PostHogProvider>
-    </NavigationContainer>
-  );
+        }} >
+<Stack.Navigator initialRouteName="Home">
+<Stack.Screen name="Home" component={Home} />
+<Stack.Screen name="About" component={About} />
+</Stack.Navigator>
+</PostHogProvider>
+</NavigationContainer>
+);
 }
 
 // ...
@@ -211,10 +204,8 @@ Once you save this, reload the app, and click around, you should see autocapture
 
 Auto capture
 
-
 4. Setting up user identification, event capture, and feature flags
-With PostHog added to our app, we can set up more of the tools it has to offer such as user identification, event capture, and feature flags.
-
+   With PostHog added to our app, we can set up more of the tools it has to offer such as user identification, event capture, and feature flags.
 
 Identifying users
 You see in your autocapture events that users have anonymous IDs. This can cause inaccuracies in your data, for example, a single person can end up with multiple IDs if they use different devices. To ensure the most accurate data possible, it is best to identify users using a distinct ID of some kind, like email or a username.
@@ -227,19 +218,18 @@ JavaScript
 import { PostHogProvider, usePostHog } from 'posthog-react-native'
 
 function Home({ navigation }) {
-  const [text, setText] = useState('')
-  const [submit, setSubmit] = useState('')
-  const posthog = usePostHog()
+const [text, setText] = useState('')
+const [submit, setSubmit] = useState('')
+const posthog = usePostHog()
 
-  function getText() {
-    setSubmit(text)
-    posthog.identify(text, {
-      email: text
-    })
-  }
+function getText() {
+setSubmit(text)
+posthog.identify(text, {
+email: text
+})
+}
 //...
 When a user submits an email, an identify event triggers which connects their anonymous ID to their distinct ID (email). Now, future events (autocapture and custom) connect to a single user.
-
 
 Custom event capture
 Setting up custom event capture is similar to user identification. To set it up, just call posthog.capture with the event name and any properties you want to add. PostHog automatically connects a user to the event.
@@ -252,20 +242,19 @@ JavaScript
 import { PostHogProvider, usePostHog } from 'posthog-react-native'
 
 function Home({ navigation }) {
-  const [text, setText] = useState('')
-  const [submit, setSubmit] = useState('')
-  const posthog = usePostHog()
+const [text, setText] = useState('')
+const [submit, setSubmit] = useState('')
+const posthog = usePostHog()
 
-  function getText() {
-    setSubmit(text)
-    posthog.capture("submitted", {
-      value: text
-    })
-  }
+function getText() {
+setSubmit(text)
+posthog.capture("submitted", {
+value: text
+})
+}
 }
 //...
 In your PostHog instance, you then see “submitted” events every time you submit the form.
-
 
 Feature flags
 Last, but not least, is feature flags. Feature flags are a powerful way to release new features safely. They are especially important for mobile app developers whose apps go through review. Feature flags enable you to roll out change slowly to check for issues, and roll back quickly if discovered, without needing redeployment or reviews.
@@ -284,14 +273,14 @@ import { PostHogProvider, usePostHog, useFeatureFlag } from 'posthog-react-nativ
 // ...
 
 function About() {
-  const showCTA = useFeatureFlag('about-cta')
+const showCTA = useFeatureFlag('about-cta')
 
-  return (
-    <View style={styles.container}>
-      <Text>Welcome to the About page</Text>
-      {showCTA && <Button title="Click me!"/>}
-    </View>
-  );
+return (
+<View style={styles.container}>
+<Text>Welcome to the About page</Text>
+{showCTA && <Button title="Click me!"/>}
+</View>
+);
 }
 
 // ...
@@ -302,5 +291,3 @@ CTA
 To confirm the feature flag is working, you can go back to PostHog and set the release condition to 0%. When you reload the app, the CTA should disappear.
 
 Once you confirm that, you successfully set up a React Native along with PostHog and many of the tools we offer. Check out our React Native documentation for more details about what you can do with PostHog.
-
-

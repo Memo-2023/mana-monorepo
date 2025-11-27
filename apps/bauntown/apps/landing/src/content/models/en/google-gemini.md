@@ -1,17 +1,17 @@
 ---
-title: "Google Gemini 2.5 Pro: A Breakthrough in AI Technology"
+title: 'Google Gemini 2.5 Pro: A Breakthrough in AI Technology'
 description: "Google recently unveiled the Gemini 2.5 Pro model, considered the company's most advanced AI model, setting new standards with its massive context window."
 pubDate: 2025-03-25
-category: "Text"
+category: 'Text'
 featured: true
-author: "BaunTown"
-tags: ["Google", "Gemini", "AI", "Multimodal", "Context Window"]
-image: "/images/models/google-gemini-2.5pro-bauntown.png"
+author: 'BaunTown'
+tags: ['Google', 'Gemini', 'AI', 'Multimodal', 'Context Window']
+image: '/images/models/google-gemini-2.5pro-bauntown.png'
 externalLinks:
-  - title: "Official Google Announcement"
-    url: "https://blog.google/technology/google-deepmind/gemini-model-thinking-updates-march-2025/#gemini-2-5-thinking"
-  - title: "Try Gemini"
-    url: "https://gemini.google.com"
+  - title: 'Official Google Announcement'
+    url: 'https://blog.google/technology/google-deepmind/gemini-model-thinking-updates-march-2025/#gemini-2-5-thinking'
+  - title: 'Try Gemini'
+    url: 'https://gemini.google.com'
 ---
 
 Google recently unveiled the Gemini 2.5 Pro model, considered the company's most advanced AI model. With groundbreaking features such as multimodal processing, improved problem-solving capabilities, and an enormous context window of up to 2 million tokens, this model sets new standards in AI development. Reactions to this innovation are diverse worldwide, reflecting both enthusiasm and critical reflection.

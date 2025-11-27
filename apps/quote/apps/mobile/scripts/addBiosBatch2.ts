@@ -8,27 +8,27 @@ import * as path from 'path';
 import { Author } from '../services/contentLoader';
 
 function loadAuthors(lang: 'de' | 'en'): Author[] {
-  const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const match = content.match(/export const authors[A-Z]{2}: Author\[\] = (\[[\s\S]*\]);/);
-  return eval(match[1]) as Author[];
+	const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
+	const content = fs.readFileSync(filePath, 'utf-8');
+	const match = content.match(/export const authors[A-Z]{2}: Author\[\] = (\[[\s\S]*\]);/);
+	return eval(match[1]) as Author[];
 }
 
 function writeAuthors(authors: Author[], lang: 'de' | 'en'): void {
-  const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
-  const backupPath = filePath.replace('.ts', `.backup-${Date.now()}.ts`);
-  fs.copyFileSync(filePath, backupPath);
-  const authorsJson = JSON.stringify(authors, null, 2);
-  const tsContent = `import { Author } from '../../contentLoader';
+	const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
+	const backupPath = filePath.replace('.ts', `.backup-${Date.now()}.ts`);
+	fs.copyFileSync(filePath, backupPath);
+	const authorsJson = JSON.stringify(authors, null, 2);
+	const tsContent = `import { Author } from '../../contentLoader';
 
 export const authors${lang.toUpperCase()}: Author[] = ${authorsJson};
 `;
-  fs.writeFileSync(filePath, tsContent, 'utf-8');
-  console.log(`✅ ${lang}.ts aktualisiert`);
+	fs.writeFileSync(filePath, tsContent, 'utf-8');
+	console.log(`✅ ${lang}.ts aktualisiert`);
 }
 
 const batch2Bios: Record<string, string> = {
-  'epiktet': `# Epiktet
+	epiktet: `# Epiktet
 *ca. 50 - ca. 138 n. Chr.*
 
 ## Kurzbiografie
@@ -284,7 +284,7 @@ Das Encheiridion ist vielleicht der beste Beweis, dass Philosophie keine akademi
 
 Sein Einfluss reicht von Marc Aurel bis zur modernen Psychotherapie. Wann immer Menschen lernen müssen, mit Unverfügbarem umzugehen, bleibt Epiktet aktuell. In unsicheren Zeiten ist sein Rat zeitlos: Konzentriere dich auf das, was du ändern kannst, und akzeptiere, was du nicht ändern kannst.`,
 
-  'coelho-paulo': `# Paulo Coelho
+	'coelho-paulo': `# Paulo Coelho
 *24. August 1947 - heute*
 
 ## Kurzbiografie
@@ -490,7 +490,7 @@ Seine Größe liegt nicht in literarischer Kunstfertigkeit (die Kritiker vermiss
 
 Ob man seine Philosophie teilt oder nicht: Der Einfluss ist unbestreitbar. Ganze Generationen wurden von ihm inspiriert, ihre "persönliche Legende" zu suchen. In einer desillusionierenden Welt bietet er Hoffnung - und das ist vielleicht wichtiger als literarische Perfektion.`,
 
-  'gibran-khalil': `# Khalil Gibran
+	'gibran-khalil': `# Khalil Gibran
 *6. Januar 1883 - 10. April 1931*
 
 ## Kurzbiografie
@@ -695,48 +695,48 @@ In einer fragmentierten Welt bot er die Vision der Einheit. In einer Zeit des Ma
 };
 
 async function main() {
-  console.log('📝 Batch 2: Featured Autoren\n');
+	console.log('📝 Batch 2: Featured Autoren\n');
 
-  const authorsDE = loadAuthors('de');
-  const authorsEN = loadAuthors('en');
+	const authorsDE = loadAuthors('de');
+	const authorsEN = loadAuthors('en');
 
-  let updated = 0;
+	let updated = 0;
 
-  const updatedDE = authorsDE.map(author => {
-    if (batch2Bios[author.id]) {
-      console.log(`✅ ${author.name} (${author.id})`);
-      updated++;
-      return {
-        ...author,
-        biography: {
-          ...author.biography,
-          long: batch2Bios[author.id]
-        }
-      };
-    }
-    return author;
-  });
+	const updatedDE = authorsDE.map((author) => {
+		if (batch2Bios[author.id]) {
+			console.log(`✅ ${author.name} (${author.id})`);
+			updated++;
+			return {
+				...author,
+				biography: {
+					...author.biography,
+					long: batch2Bios[author.id],
+				},
+			};
+		}
+		return author;
+	});
 
-  const updatedEN = authorsEN.map(author => {
-    const deAuthor = updatedDE.find(a => a.id === author.id);
-    if (deAuthor?.biography?.long && batch2Bios[author.id]) {
-      return {
-        ...author,
-        biography: {
-          ...author.biography,
-          long: deAuthor.biography.long
-        }
-      };
-    }
-    return author;
-  });
+	const updatedEN = authorsEN.map((author) => {
+		const deAuthor = updatedDE.find((a) => a.id === author.id);
+		if (deAuthor?.biography?.long && batch2Bios[author.id]) {
+			return {
+				...author,
+				biography: {
+					...author.biography,
+					long: deAuthor.biography.long,
+				},
+			};
+		}
+		return author;
+	});
 
-  console.log(`\n📊 ${updated} Biografien hinzugefügt\n`);
+	console.log(`\n📊 ${updated} Biografien hinzugefügt\n`);
 
-  writeAuthors(updatedDE, 'de');
-  writeAuthors(updatedEN, 'en');
+	writeAuthors(updatedDE, 'de');
+	writeAuthors(updatedEN, 'en');
 
-  console.log('\n✨ Batch 2 fertig!\n');
+	console.log('\n✨ Batch 2 fertig!\n');
 }
 
 main();

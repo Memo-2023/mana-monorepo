@@ -1,6 +1,6 @@
 ---
 export interface Props {
-  navLinks: { href: string; label: string; }[];
+	navLinks: { href: string; label: string }[];
 }
 
 const { navLinks } = Astro.props;
@@ -8,65 +8,75 @@ const { navLinks } = Astro.props;
 
 <!-- Mobile Menu Overlay -->
 <div id="mobile-menu" class="fixed inset-0 z-50 hidden">
-  <!-- Background overlay -->
-  <div class="fixed inset-0 bg-black/50 z-40" id="mobile-menu-overlay"></div>
+	<!-- Background overlay -->
+	<div class="fixed inset-0 bg-black/50 z-40" id="mobile-menu-overlay"></div>
 
-  <!-- Menu panel -->
-  <div class="fixed right-0 top-0 h-full w-full max-w-sm bg-white dark:bg-gray-900 shadow-xl overflow-y-auto z-50 transform transition-transform duration-300 translate-x-full">
-    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-      <span class="text-xl font-bold text-mana-blue">
-        Manacore
-      </span>
-      <button
-        id="mobile-menu-close"
-        class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-        aria-label="Menü schließen"
-      >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-    </div>
+	<!-- Menu panel -->
+	<div
+		class="fixed right-0 top-0 h-full w-full max-w-sm bg-white dark:bg-gray-900 shadow-xl overflow-y-auto z-50 transform transition-transform duration-300 translate-x-full"
+	>
+		<div
+			class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900"
+		>
+			<span class="text-xl font-bold text-mana-blue"> Manacore </span>
+			<button
+				id="mobile-menu-close"
+				class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+				aria-label="Menü schließen"
+			>
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"></path>
+				</svg>
+			</button>
+		</div>
 
-    <!-- Navigation Links -->
-    <nav class="p-4 bg-white dark:bg-gray-900">
-      <ul class="space-y-2">
-        {navLinks.map(link => (
-          <li>
-            <a 
-              href={link.href}
-              class="block px-4 py-3 text-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              {link.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-      
-      <!-- CTA Buttons -->
-      <div class="mt-8 space-y-3">
-        <a
-          href="/demo"
-          class="block w-full px-6 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-        >
-          Demo buchen
-        </a>
-        <a
-          href="/start"
-          class="block w-full px-6 py-3 text-center font-semibold text-white bg-mana-orange rounded-lg hover:bg-orange-600 transition-colors"
-        >
-          Kostenlos testen
-        </a>
-      </div>
-      
-      <!-- Contact Info -->
-      <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Kontakt:</p>
-        <a href="mailto:till.schneider@mana.ai" class="text-sm text-mana-blue hover:text-mana-purple transition-colors">
-          till.schneider@mana.ai
-        </a>
-      </div>
-    </nav>
-  </div>
+		<!-- Navigation Links -->
+		<nav class="p-4 bg-white dark:bg-gray-900">
+			<ul class="space-y-2">
+				{
+					navLinks.map((link) => (
+						<li>
+							<a
+								href={link.href}
+								class="block px-4 py-3 text-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+							>
+								{link.label}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+
+			<!-- CTA Buttons -->
+			<div class="mt-8 space-y-3">
+				<a
+					href="/demo"
+					class="block w-full px-6 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+				>
+					Demo buchen
+				</a>
+				<a
+					href="/start"
+					class="block w-full px-6 py-3 text-center font-semibold text-white bg-mana-orange rounded-lg hover:bg-orange-600 transition-colors"
+				>
+					Kostenlos testen
+				</a>
+			</div>
+
+			<!-- Contact Info -->
+			<div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
+				<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Kontakt:</p>
+				<a
+					href="mailto:till.schneider@mana.ai"
+					class="text-sm text-mana-blue hover:text-mana-purple transition-colors"
+				>
+					till.schneider@mana.ai
+				</a>
+			</div>
+		</nav>
+	</div>
 </div>
-

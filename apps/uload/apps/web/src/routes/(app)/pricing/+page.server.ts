@@ -5,8 +5,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		user: locals.user
 			? {
 					email: locals.user.email,
-					username: locals.user.username
+					username: locals.user.username,
 				}
-			: null
+			: null,
 	};
 };

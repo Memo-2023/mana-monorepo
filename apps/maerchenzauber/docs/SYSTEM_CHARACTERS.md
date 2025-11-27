@@ -22,6 +22,7 @@ const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
 ```
 
 This UUID is used consistently across:
+
 - Database records (`user_id` field)
 - Backend validation logic
 - Frontend UI conditional rendering
@@ -62,6 +63,7 @@ INSERT INTO public.characters (
 The database uses RLS policies to allow all authenticated users to read system characters while protecting them from modification:
 
 **Read Access Policy:**
+
 ```sql
 CREATE POLICY "Users can view their own characters and system characters"
   ON public.characters
@@ -92,6 +94,7 @@ if (!isSystemCharacter && !isOwnCharacter) {
 ```
 
 This pattern is applied in:
+
 - `getCharacterById()` - GET /character/:id
 - `updateCharacter()` - PUT /character/:id
 - `deleteCharacter()` - DELETE /character/:id
@@ -145,6 +148,7 @@ path: 00000000-0000-0000-0000-000000000000/characters/[filename]
 ```
 
 Example URL:
+
 ```
 https://dyywxrmonxoiojsjmymc.supabase.co/storage/v1/object/public/user-uploads/00000000-0000-0000-0000-000000000000/characters/1762453771144-cmngxj-large.webp
 ```
@@ -201,9 +205,9 @@ Use Supabase MCP tools to apply the migration to both development and production
 ```typescript
 // Example using MCP tools
 await mcp__supabase__apply_migration({
-  project_id: "your-project-id",
-  name: "add_[character_name]_system_character",
-  query: "INSERT INTO ..."
+  project_id: 'your-project-id',
+  name: 'add_[character_name]_system_character',
+  query: 'INSERT INTO ...',
 });
 ```
 
@@ -218,6 +222,7 @@ await mcp__supabase__apply_migration({
 - **Languages**: German (user_description) and English (character_description)
 
 **Image Location**:
+
 ```
 https://dyywxrmonxoiojsjmymc.supabase.co/storage/v1/object/public/user-uploads/00000000-0000-0000-0000-000000000000/characters/1762453771144-cmngxj-large.webp
 ```
@@ -225,23 +230,27 @@ https://dyywxrmonxoiojsjmymc.supabase.co/storage/v1/object/public/user-uploads/0
 ## Best Practices
 
 ### Character Selection
+
 - Choose characters with broad appeal for diverse story types
 - Ensure high-quality, consistent character images
 - Provide both German and English descriptions
 - Make characters suitable for children's stories
 
 ### Naming Conventions
+
 - Use descriptive, memorable names
 - Consider cultural appropriateness
 - Ensure uniqueness from user-created characters
 
 ### Image Requirements
+
 - High resolution (recommended: 1024x1024 or higher)
 - Consistent art style across system characters
 - Child-appropriate content
 - Clear, recognizable character features
 
 ### Database Management
+
 - Always use migrations for changes
 - Test in development before production
 - Include rollback procedures in migrations
@@ -252,6 +261,7 @@ https://dyywxrmonxoiojsjmymc.supabase.co/storage/v1/object/public/user-uploads/0
 ### Character Not Visible to Users
 
 **Check RLS Policies:**
+
 ```sql
 -- Verify the SELECT policy exists
 SELECT * FROM pg_policies
@@ -260,6 +270,7 @@ WHERE tablename = 'characters'
 ```
 
 **Verify User ID:**
+
 ```sql
 -- Ensure character has correct system user_id
 SELECT id, name, user_id
@@ -282,6 +293,7 @@ if (!isSystemCharacter && !isOwnCharacter) {
 ```
 
 Check these files:
+
 - `backend/src/character/character.controller.ts` (GET, PUT, DELETE)
 - `backend/src/story/services/story-creation.service.ts` (character validation)
 
@@ -299,18 +311,22 @@ Ensure the character object includes the `user_id` field from the API response.
 ## Related Files
 
 ### Backend
+
 - `backend/src/character/character.controller.ts` - Character CRUD endpoints
 - `backend/src/story/services/story-creation.service.ts` - Story creation validation
 - `backend/src/core/services/supabase-data.service.ts` - Database operations
 
 ### Frontend
+
 - `mobile/app/character/[id].tsx` - Character detail screen
 - `mobile/src/utils/dataService.ts` - Character data service (removed hardcoded logic)
 
 ### Database
+
 - Migration: `add_finnia_system_character_fixed`
 - Migration: `cleanup_conflicting_character_policies`
 
 ### Documentation
+
 - `CLAUDE.md` - Main project documentation
 - This file - System characters documentation

@@ -1,31 +1,31 @@
 {
-  "default_model": "small",
-  "default_language": "de",
-  "models": {
-    "tiny": {
-      "size_mb": 39,
-      "speed": "~10x Echtzeit",
-      "accuracy": "75%"
-    },
-    "base": {
-      "size_mb": 74,
-      "speed": "~7x Echtzeit",
-      "accuracy": "85%"
-    },
-    "small": {
-      "size_mb": 244,
-      "speed": "~4x Echtzeit",
-      "accuracy": "91%"
-    },
-    "medium": {
-      "size_mb": 769,
-      "speed": "~2x Echtzeit",
-      "accuracy": "94%"
-    },
-    "large": {
-      "size_mb": 1550,
-      "speed": "~1x Echtzeit",
-      "accuracy": "96-98%"
-    }
-  }
+	"default_model": "small",
+	"default_language": "de",
+	"models": {
+		"tiny": {
+			"size_mb": 39,
+			"speed": "~10x Echtzeit",
+			"accuracy": "75%"
+		},
+		"base": {
+			"size_mb": 74,
+			"speed": "~7x Echtzeit",
+			"accuracy": "85%"
+		},
+		"small": {
+			"size_mb": 244,
+			"speed": "~4x Echtzeit",
+			"accuracy": "91%"
+		},
+		"medium": {
+			"size_mb": 769,
+			"speed": "~2x Echtzeit",
+			"accuracy": "94%"
+		},
+		"large": {
+			"size_mb": 1550,
+			"speed": "~1x Echtzeit",
+			"accuracy": "96-98%"
+		}
+	}
 }

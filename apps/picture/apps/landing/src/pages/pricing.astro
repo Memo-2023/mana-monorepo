@@ -27,7 +27,7 @@ const plans = [
 			images: 100,
 			storage: '30 days',
 			models: ['FLUX Schnell'],
-		}
+		},
 	},
 	{
 		name: 'Pro',
@@ -56,7 +56,7 @@ const plans = [
 			images: 2000,
 			storage: 'Unlimited',
 			models: ['FLUX Schnell', 'FLUX Dev', 'FLUX Pro'],
-		}
+		},
 	},
 	{
 		name: 'Enterprise',
@@ -86,7 +86,7 @@ const plans = [
 			images: 'Unlimited',
 			storage: 'Unlimited',
 			models: 'All models + Custom',
-		}
+		},
 	},
 ];
 
@@ -94,35 +94,43 @@ const plans = [
 const faqs = [
 	{
 		question: 'Can I change plans later?',
-		answer: 'Yes! You can upgrade or downgrade your plan at any time. When upgrading, you\'ll get immediate access to new features. When downgrading, changes take effect at the end of your current billing cycle.',
+		answer:
+			"Yes! You can upgrade or downgrade your plan at any time. When upgrading, you'll get immediate access to new features. When downgrading, changes take effect at the end of your current billing cycle.",
 	},
 	{
 		question: 'What happens if I exceed my monthly limit?',
-		answer: 'On the Free plan, generation will pause until next month. On paid plans, you can purchase additional image packs at $5 per 500 images, or upgrade to a higher tier.',
+		answer:
+			'On the Free plan, generation will pause until next month. On paid plans, you can purchase additional image packs at $5 per 500 images, or upgrade to a higher tier.',
 	},
 	{
 		question: 'Do you offer a free trial for Pro?',
-		answer: 'Yes! We offer a 14-day free trial of Pro with no credit card required. You\'ll get full access to all Pro features during the trial.',
+		answer:
+			"Yes! We offer a 14-day free trial of Pro with no credit card required. You'll get full access to all Pro features during the trial.",
 	},
 	{
 		question: 'What payment methods do you accept?',
-		answer: 'We accept all major credit cards (Visa, Mastercard, American Express), PayPal, and for Enterprise customers, we can arrange invoicing and wire transfers.',
+		answer:
+			'We accept all major credit cards (Visa, Mastercard, American Express), PayPal, and for Enterprise customers, we can arrange invoicing and wire transfers.',
 	},
 	{
 		question: 'Can I use generated images commercially?',
-		answer: 'Yes on Pro and Enterprise plans! Free plan images are for personal use only. All images generated on paid plans can be used commercially without attribution.',
+		answer:
+			'Yes on Pro and Enterprise plans! Free plan images are for personal use only. All images generated on paid plans can be used commercially without attribution.',
 	},
 	{
 		question: 'What is your refund policy?',
-		answer: 'We offer a 30-day money-back guarantee on all paid plans. If you\'re not satisfied for any reason, contact support for a full refund within 30 days of purchase.',
+		answer:
+			"We offer a 30-day money-back guarantee on all paid plans. If you're not satisfied for any reason, contact support for a full refund within 30 days of purchase.",
 	},
 	{
 		question: 'Do you offer discounts for non-profits or education?',
-		answer: 'Yes! We offer 50% discounts for verified educational institutions and registered non-profit organizations. Contact sales@picture.com with your credentials.',
+		answer:
+			'Yes! We offer 50% discounts for verified educational institutions and registered non-profit organizations. Contact sales@picture.com with your credentials.',
 	},
 	{
 		question: 'What about data privacy and ownership?',
-		answer: 'You own all images you generate. We don\'t use your images to train models. Images on paid plans are private by default. See our privacy policy for full details.',
+		answer:
+			"You own all images you generate. We don't use your images to train models. Images on paid plans are private by default. See our privacy policy for full details.",
 	},
 ];
 
@@ -167,107 +175,128 @@ const models = [
 	title="Pricing - Choose Your Plan | Picture"
 	description="Transparent pricing for AI image generation. Start free, upgrade as you grow. Pro plans from $19/month. Enterprise solutions for teams."
 >
-	<div class="bg-dark-bg min-h-screen">
+	<div class="min-h-screen bg-dark-bg">
 		<!-- Hero -->
 		<div class="bg-gradient-to-b from-dark-elevated to-dark-bg py-16 md:py-24">
-			<div class="max-w-6xl mx-auto px-6 text-center">
-				<div class="inline-block px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full mb-6">
-					<span class="text-primary text-sm font-medium">💰 Pricing</span>
+			<div class="mx-auto max-w-6xl px-6 text-center">
+				<div
+					class="mb-6 inline-block rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5"
+				>
+					<span class="text-sm font-medium text-primary">💰 Pricing</span>
 				</div>
-				<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+				<h1 class="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">
 					Simple, Transparent Pricing
 				</h1>
-				<p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+				<p class="mx-auto mb-8 max-w-3xl text-xl text-gray-300">
 					Start for free, upgrade as you grow. No hidden fees, cancel anytime.
 				</p>
 
 				<!-- Billing Toggle -->
-				<div class="flex items-center justify-center gap-4 mb-12">
+				<div class="mb-12 flex items-center justify-center gap-4">
 					<span class="text-gray-400">Monthly</span>
-					<button id="billing-toggle" class="relative w-14 h-7 bg-dark-elevated border border-dark-border rounded-full cursor-pointer transition">
+					<button
+						id="billing-toggle"
+						class="relative h-7 w-14 cursor-pointer rounded-full border border-dark-border bg-dark-elevated transition"
+					>
 						<span class="toggle-indicator"></span>
 					</button>
 					<span class="text-gray-400">
 						Yearly
-						<span class="ml-2 px-2 py-0.5 bg-green-500/10 text-green-400 text-xs font-medium rounded">Save 20%</span>
+						<span
+							class="ml-2 rounded bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-400"
+							>Save 20%</span
+						>
 					</span>
 				</div>
 			</div>
 		</div>
 
 		<!-- Pricing Cards -->
-		<div class="max-w-7xl mx-auto px-6 pb-16 -mt-8">
-			<div class="grid md:grid-cols-3 gap-8">
-				{plans.map((plan) => (
-					<div class={`pricing-card ${plan.featured ? 'featured' : ''}`}>
-						{plan.badge && (
-							<div class="badge">{plan.badge}</div>
-						)}
+		<div class="mx-auto -mt-8 max-w-7xl px-6 pb-16">
+			<div class="grid gap-8 md:grid-cols-3">
+				{
+					plans.map((plan) => (
+						<div class={`pricing-card ${plan.featured ? 'featured' : ''}`}>
+							{plan.badge && <div class="badge">{plan.badge}</div>}
 
-						<div class="card-header">
-							<h3 class="plan-name">{plan.name}</h3>
-							<div class="price-container">
-								{typeof plan.price === 'number' ? (
-									<>
-										<span class="currency">$</span>
-										<span class="price" data-monthly={plan.price} data-yearly={Math.floor(plan.price * 12 * 0.8)}>
-											{plan.price}
-										</span>
-										<span class="period">/{plan.period}</span>
-									</>
-								) : (
-									<span class="price-custom">{plan.price}</span>
-								)}
+							<div class="card-header">
+								<h3 class="plan-name">{plan.name}</h3>
+								<div class="price-container">
+									{typeof plan.price === 'number' ? (
+										<>
+											<span class="currency">$</span>
+											<span
+												class="price"
+												data-monthly={plan.price}
+												data-yearly={Math.floor(plan.price * 12 * 0.8)}
+											>
+												{plan.price}
+											</span>
+											<span class="period">/{plan.period}</span>
+										</>
+									) : (
+										<span class="price-custom">{plan.price}</span>
+									)}
+								</div>
+								<p class="description">{plan.description}</p>
 							</div>
-							<p class="description">{plan.description}</p>
-						</div>
 
-						<div class="card-body">
-							<ul class="feature-list">
-								{plan.features.map((feature) => (
-									<li class={`feature-item ${feature.included ? 'included' : 'excluded'}`}>
-										<span class="feature-icon">
-											{feature.included ? (
-												<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-													<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-												</svg>
-											) : (
-												<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-													<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-												</svg>
-											)}
-										</span>
-										<span class="feature-text">
-											{feature.text}
-											{'note' in feature && feature.note && <span class="feature-note"> ({feature.note})</span>}
-										</span>
-									</li>
-								))}
-							</ul>
-						</div>
+							<div class="card-body">
+								<ul class="feature-list">
+									{plan.features.map((feature) => (
+										<li class={`feature-item ${feature.included ? 'included' : 'excluded'}`}>
+											<span class="feature-icon">
+												{feature.included ? (
+													<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+														<path
+															fill-rule="evenodd"
+															d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+															clip-rule="evenodd"
+														/>
+													</svg>
+												) : (
+													<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+														<path
+															fill-rule="evenodd"
+															d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+															clip-rule="evenodd"
+														/>
+													</svg>
+												)}
+											</span>
+											<span class="feature-text">
+												{feature.text}
+												{'note' in feature && feature.note && (
+													<span class="feature-note"> ({feature.note})</span>
+												)}
+											</span>
+										</li>
+									))}
+								</ul>
+							</div>
 
-						<div class="card-footer">
-							<a href={plan.ctaLink} class={`cta-button ${plan.featured ? 'primary' : 'secondary'}`}>
-								{plan.cta}
-							</a>
+							<div class="card-footer">
+								<a
+									href={plan.ctaLink}
+									class={`cta-button ${plan.featured ? 'primary' : 'secondary'}`}
+								>
+									{plan.cta}
+								</a>
+							</div>
 						</div>
-					</div>
-				))}
+					))
+				}
 			</div>
 		</div>
 
 		<!-- Model Comparison -->
-		<div class="max-w-6xl mx-auto px-6 py-16">
-			<div class="text-center mb-12">
-				<h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
-					AI Model Comparison
-				</h2>
-				<p class="text-gray-400">
-					All plans include access to cutting-edge AI models
-				</p>
+		<div class="mx-auto max-w-6xl px-6 py-16">
+			<div class="mb-12 text-center">
+				<h2 class="mb-4 text-3xl font-bold text-white md:text-4xl">AI Model Comparison</h2>
+				<p class="text-gray-400">All plans include access to cutting-edge AI models</p>
 			</div>
 
-			<div class="bg-dark-elevated border border-dark-border rounded-2xl overflow-hidden">
+			<div class="overflow-hidden rounded-2xl border border-dark-border bg-dark-elevated">
 				<div class="overflow-x-auto">
 					<table class="comparison-table">
 						<thead>
@@ -281,16 +310,18 @@ const models = [
 							</tr>
 						</thead>
 						<tbody>
-							{models.map((model) => (
-								<tr>
-									<td class="font-semibold text-white">{model.name}</td>
-									<td>{model.speed}</td>
-									<td>{model.quality}</td>
-									<td>{model.free ? '✅' : '❌'}</td>
-									<td>{model.pro ? '✅' : '❌'}</td>
-									<td>{model.enterprise ? '✅' : '❌'}</td>
-								</tr>
-							))}
+							{
+								models.map((model) => (
+									<tr>
+										<td class="font-semibold text-white">{model.name}</td>
+										<td>{model.speed}</td>
+										<td>{model.quality}</td>
+										<td>{model.free ? '✅' : '❌'}</td>
+										<td>{model.pro ? '✅' : '❌'}</td>
+										<td>{model.enterprise ? '✅' : '❌'}</td>
+									</tr>
+								))
+							}
 						</tbody>
 					</table>
 				</div>
@@ -298,45 +329,56 @@ const models = [
 		</div>
 
 		<!-- FAQ -->
-		<div class="max-w-4xl mx-auto px-6 py-16">
-			<div class="text-center mb-12">
-				<h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
-					Frequently Asked Questions
-				</h2>
-				<p class="text-gray-400">
-					Everything you need to know about our pricing
-				</p>
+		<div class="mx-auto max-w-4xl px-6 py-16">
+			<div class="mb-12 text-center">
+				<h2 class="mb-4 text-3xl font-bold text-white md:text-4xl">Frequently Asked Questions</h2>
+				<p class="text-gray-400">Everything you need to know about our pricing</p>
 			</div>
 
 			<div class="space-y-4">
-				{faqs.map((faq, index) => (
-					<div class="faq-item">
-						<button class="faq-question" data-faq={index}>
-							<span>{faq.question}</span>
-							<svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-							</svg>
-						</button>
-						<div class="faq-answer" data-answer={index}>
-							<p>{faq.answer}</p>
+				{
+					faqs.map((faq, index) => (
+						<div class="faq-item">
+							<button class="faq-question" data-faq={index}>
+								<span>{faq.question}</span>
+								<svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M19 9l-7 7-7-7"
+									/>
+								</svg>
+							</button>
+							<div class="faq-answer" data-answer={index}>
+								<p>{faq.answer}</p>
+							</div>
 						</div>
-					</div>
-				))}
+					))
+				}
 			</div>
 		</div>
 
 		<!-- CTA -->
-		<div class="max-w-4xl mx-auto px-6 py-16">
-			<div class="bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20 rounded-2xl p-12 text-center">
-				<h2 class="text-3xl font-bold text-white mb-4">Still have questions?</h2>
-				<p class="text-gray-300 mb-8">
+		<div class="mx-auto max-w-4xl px-6 py-16">
+			<div
+				class="rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 to-purple-500/10 p-12 text-center"
+			>
+				<h2 class="mb-4 text-3xl font-bold text-white">Still have questions?</h2>
+				<p class="mb-8 text-gray-300">
 					Our team is here to help you find the perfect plan for your needs.
 				</p>
-				<div class="flex items-center justify-center gap-4 flex-wrap">
-					<a href="#" class="px-8 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition">
+				<div class="flex flex-wrap items-center justify-center gap-4">
+					<a
+						href="#"
+						class="rounded-lg bg-primary px-8 py-3 font-medium text-white transition hover:bg-primary/90"
+					>
 						Contact Sales
 					</a>
-					<a href="#" class="px-8 py-3 bg-dark-elevated border border-dark-border text-gray-300 font-medium rounded-lg hover:border-primary hover:text-primary transition">
+					<a
+						href="#"
+						class="rounded-lg border border-dark-border bg-dark-elevated px-8 py-3 font-medium text-gray-300 transition hover:border-primary hover:text-primary"
+					>
 						View Documentation
 					</a>
 				</div>
@@ -393,15 +435,15 @@ const models = [
 	<style>
 		/* Pricing Cards */
 		.pricing-card {
-			@apply bg-dark-elevated border border-dark-border rounded-2xl p-8 flex flex-col relative transition-all hover:-translate-y-1;
+			@apply relative flex flex-col rounded-2xl border border-dark-border bg-dark-elevated p-8 transition-all hover:-translate-y-1;
 		}
 
 		.pricing-card.featured {
-			@apply border-primary shadow-xl shadow-primary/10 scale-105;
+			@apply scale-105 border-primary shadow-xl shadow-primary/10;
 		}
 
 		.badge {
-			@apply absolute top-0 right-8 -translate-y-1/2 px-4 py-1.5 bg-primary text-white text-sm font-medium rounded-full;
+			@apply absolute right-8 top-0 -translate-y-1/2 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-white;
 		}
 
 		.card-header {
@@ -409,11 +451,11 @@ const models = [
 		}
 
 		.plan-name {
-			@apply text-2xl font-bold text-white mb-4;
+			@apply mb-4 text-2xl font-bold text-white;
 		}
 
 		.price-container {
-			@apply flex items-baseline mb-4;
+			@apply mb-4 flex items-baseline;
 		}
 
 		.currency {
@@ -421,7 +463,7 @@ const models = [
 		}
 
 		.price {
-			@apply text-5xl font-bold text-white mx-1;
+			@apply mx-1 text-5xl font-bold text-white;
 		}
 
 		.period {
@@ -433,11 +475,11 @@ const models = [
 		}
 
 		.description {
-			@apply text-gray-400 leading-relaxed;
+			@apply leading-relaxed text-gray-400;
 		}
 
 		.card-body {
-			@apply flex-grow mb-8;
+			@apply mb-8 flex-grow;
 		}
 
 		.feature-list {
@@ -465,7 +507,7 @@ const models = [
 		}
 
 		.feature-icon {
-			@apply flex-shrink-0 mt-0.5;
+			@apply mt-0.5 flex-shrink-0;
 		}
 
 		.feature-text {
@@ -473,7 +515,7 @@ const models = [
 		}
 
 		.feature-note {
-			@apply text-gray-500 text-xs;
+			@apply text-xs text-gray-500;
 		}
 
 		.card-footer {
@@ -481,7 +523,7 @@ const models = [
 		}
 
 		.cta-button {
-			@apply w-full py-3 px-6 rounded-lg font-medium text-center transition;
+			@apply w-full rounded-lg px-6 py-3 text-center font-medium transition;
 		}
 
 		.cta-button.primary {
@@ -489,7 +531,7 @@ const models = [
 		}
 
 		.cta-button.secondary {
-			@apply bg-dark-bg border border-dark-border text-gray-300 hover:border-primary hover:text-primary;
+			@apply border border-dark-border bg-dark-bg text-gray-300 hover:border-primary hover:text-primary;
 		}
 
 		/* Billing Toggle */
@@ -498,7 +540,7 @@ const models = [
 		}
 
 		.toggle-indicator {
-			@apply absolute left-1 top-1 w-5 h-5 bg-gray-600 rounded-full transition-all;
+			@apply absolute left-1 top-1 h-5 w-5 rounded-full bg-gray-600 transition-all;
 		}
 
 		#billing-toggle.active .toggle-indicator {
@@ -515,11 +557,11 @@ const models = [
 		}
 
 		.comparison-table th {
-			@apply px-6 py-4 text-sm font-semibold text-gray-400 uppercase tracking-wider;
+			@apply px-6 py-4 text-sm font-semibold uppercase tracking-wider text-gray-400;
 		}
 
 		.comparison-table td {
-			@apply px-6 py-4 text-gray-300 border-t border-dark-border;
+			@apply border-t border-dark-border px-6 py-4 text-gray-300;
 		}
 
 		.comparison-table tbody tr:hover {
@@ -528,15 +570,15 @@ const models = [
 
 		/* FAQ */
 		.faq-item {
-			@apply bg-dark-elevated border border-dark-border rounded-xl overflow-hidden;
+			@apply overflow-hidden rounded-xl border border-dark-border bg-dark-elevated;
 		}
 
 		.faq-question {
-			@apply w-full flex items-center justify-between p-6 text-left text-white font-semibold hover:text-primary transition cursor-pointer;
+			@apply flex w-full cursor-pointer items-center justify-between p-6 text-left font-semibold text-white transition hover:text-primary;
 		}
 
 		.chevron {
-			@apply w-5 h-5 flex-shrink-0 transition-transform;
+			@apply h-5 w-5 flex-shrink-0 transition-transform;
 		}
 
 		.chevron.rotate {
@@ -548,11 +590,11 @@ const models = [
 		}
 
 		.faq-answer.open {
-			@apply max-h-96 pb-6 px-6;
+			@apply max-h-96 px-6 pb-6;
 		}
 
 		.faq-answer p {
-			@apply text-gray-400 leading-relaxed;
+			@apply leading-relaxed text-gray-400;
 		}
 	</style>
 </Layout>

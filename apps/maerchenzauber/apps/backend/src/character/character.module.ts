@@ -7,9 +7,9 @@ import { CoreModule } from '../core/core.module';
 import { SupabaseModule } from '../supabase/supabase.module';
 
 @Module({
-  imports: [CoreModule, SupabaseModule],
-  controllers: [CharacterController, PublicCharacterController, TestController],
-  providers: [CharacterService],
-  exports: [CharacterService],
+	imports: [CoreModule, SupabaseModule],
+	controllers: [CharacterController, PublicCharacterController, TestController],
+	providers: [CharacterService],
+	exports: [CharacterService],
 })
 export class CharacterModule {}

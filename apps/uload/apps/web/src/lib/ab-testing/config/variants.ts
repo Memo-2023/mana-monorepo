@@ -31,7 +31,7 @@ export function getVariantContent(variantId: string): VariantContent {
 				subheadline: m.hero_control_subheadline(),
 				ctaText: m.hero_control_cta(),
 				ctaStyle: 'bg-theme-primary hover:bg-theme-primary-hover',
-				layout: 'standard'
+				layout: 'standard',
 			};
 
 		// Variant A - Value Focused
@@ -44,7 +44,7 @@ export function getVariantContent(variantId: string): VariantContent {
 				ctaText: m.hero_a1_cta(),
 				ctaStyle: 'bg-blue-600 hover:bg-blue-700',
 				features: [m.hero_a1_feature_1(), m.hero_a1_feature_2(), m.hero_a1_feature_3()],
-				layout: 'standard'
+				layout: 'standard',
 			};
 
 		case 'a2':
@@ -57,7 +57,7 @@ export function getVariantContent(variantId: string): VariantContent {
 				ctaStyle:
 					'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700',
 				features: ['3 hours saved weekly', '75% faster workflows', 'ROI in 2 weeks'],
-				layout: 'standard'
+				layout: 'standard',
 			};
 
 		case 'a3':
@@ -69,7 +69,7 @@ export function getVariantContent(variantId: string): VariantContent {
 				ctaText: 'Unlock Link Power →',
 				ctaStyle: 'bg-black hover:bg-gray-800',
 				features: ['10x more clicks', 'Conversion tracking', 'Smart redirects'],
-				layout: 'centered'
+				layout: 'centered',
 			};
 
 		// Variant B - Social Proof
@@ -83,9 +83,9 @@ export function getVariantContent(variantId: string): VariantContent {
 				ctaStyle: 'bg-purple-600 hover:bg-purple-700',
 				socialProof: {
 					type: 'numbers',
-					content: m.hero_b1_social()
+					content: m.hero_b1_social(),
 				},
-				layout: 'standard'
+				layout: 'standard',
 			};
 
 		case 'b2':
@@ -99,9 +99,9 @@ export function getVariantContent(variantId: string): VariantContent {
 					'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700',
 				socialProof: {
 					type: 'logos',
-					content: 'Google • Meta • Microsoft • Spotify • Netflix'
+					content: 'Google • Meta • Microsoft • Spotify • Netflix',
 				},
-				layout: 'standard'
+				layout: 'standard',
 			};
 
 		case 'b3':
@@ -114,9 +114,9 @@ export function getVariantContent(variantId: string): VariantContent {
 				ctaStyle: 'bg-green-600 hover:bg-green-700',
 				socialProof: {
 					type: 'testimonial',
-					content: '⭐⭐⭐⭐⭐ 4.9/5 from 1,000+ reviews'
+					content: '⭐⭐⭐⭐⭐ 4.9/5 from 1,000+ reviews',
 				},
-				layout: 'centered'
+				layout: 'centered',
 			};
 
 		// Variant C - Feature Focused
@@ -134,9 +134,9 @@ export function getVariantContent(variantId: string): VariantContent {
 					m.hero_c1_feature_3(),
 					m.hero_c1_feature_4(),
 					m.hero_c1_feature_5(),
-					m.hero_c1_feature_6()
+					m.hero_c1_feature_6(),
 				],
-				layout: 'standard'
+				layout: 'standard',
 			};
 
 		case 'c2':
@@ -148,7 +148,7 @@ export function getVariantContent(variantId: string): VariantContent {
 				ctaText: 'Create Your First QR Code',
 				ctaStyle: 'bg-orange-600 hover:bg-orange-700',
 				features: ['Dynamic QR codes', 'Custom designs', 'Scan analytics', 'Bulk generation'],
-				layout: 'split'
+				layout: 'split',
 			};
 
 		case 'c3':
@@ -163,9 +163,9 @@ export function getVariantContent(variantId: string): VariantContent {
 					'Zapier automation',
 					'Slack notifications',
 					'WordPress plugin',
-					'API & Webhooks'
+					'API & Webhooks',
 				],
-				layout: 'standard'
+				layout: 'standard',
 			};
 
 		// Default to control
@@ -177,7 +177,7 @@ export function getVariantContent(variantId: string): VariantContent {
 				subheadline: m.hero_control_subheadline(),
 				ctaText: m.hero_control_cta(),
 				ctaStyle: 'bg-theme-primary hover:bg-theme-primary-hover',
-				layout: 'standard'
+				layout: 'standard',
 			};
 	}
 }
@@ -198,7 +198,7 @@ export function getTrustBadges(): Array<{ icon: string; text: string }> {
 		{ icon: '🔒', text: m.hero_trust_badge_1() },
 		{ icon: '🇪🇺', text: m.hero_trust_badge_2() },
 		{ icon: '⚡', text: m.hero_trust_badge_3() },
-		{ icon: '🚀', text: m.hero_trust_badge_4() }
+		{ icon: '🚀', text: m.hero_trust_badge_4() },
 	];
 }
 

@@ -30,15 +30,19 @@ Orakel ist deine persönliche KI-Assistentin für alle Lebenslagen. Ob du komple
 ## Hauptfunktionen
 
 ### 🧠 Intelligente Gespräche
+
 Führe natürliche, kontextbewusste Gespräche mit modernsten KI-Modellen. Orakel merkt sich den Kontext und liefert präzise, hilfreiche Antworten.
 
 ### 📚 Dokument-Analyse
+
 Lade PDFs, Word-Dokumente oder Bilder hoch und stelle Fragen dazu. Orakel analysiert den Inhalt und hilft dir, wichtige Informationen zu extrahieren.
 
 ### 🌐 Web-Recherche
+
 Orakel kann aktuelle Informationen aus dem Internet abrufen und dir so die neuesten Daten und Fakten liefern.
 
 ### 💻 Code-Assistent
+
 Egal ob Python, JavaScript oder andere Sprachen - Orakel hilft dir beim Programmieren, erklärt Code und findet Fehler.
 
 ## Für wen ist Orakel?

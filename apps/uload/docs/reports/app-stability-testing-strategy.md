@@ -61,7 +61,7 @@ describe('Tags Integration', () => {
 		testUser = await pb.collection('users').create({
 			email: `test-${Date.now()}@example.com`,
 			password: 'testpassword123',
-			passwordConfirm: 'testpassword123'
+			passwordConfirm: 'testpassword123',
 		});
 
 		await pb.collection('users').authWithPassword(testUser.email, 'testpassword123');
@@ -73,7 +73,7 @@ describe('Tags Integration', () => {
 			slug: 'test-tag',
 			user_id: testUser.id,
 			color: '#3B82F6',
-			is_public: false
+			is_public: false,
 		});
 
 		expect(tag.name).toBe('Test Tag');
@@ -84,14 +84,14 @@ describe('Tags Integration', () => {
 		const tag = await pb.collection('tags').create({
 			name: 'My Tag',
 			slug: 'my-tag',
-			user_id: testUser.id
+			user_id: testUser.id,
 		});
 
 		// Try to update with different user
 		const otherUser = await pb.collection('users').create({
 			email: `other-${Date.now()}@example.com`,
 			password: 'testpassword123',
-			passwordConfirm: 'testpassword123'
+			passwordConfirm: 'testpassword123',
 		});
 
 		await pb.collection('users').authWithPassword(otherUser.email, 'testpassword123');
@@ -309,7 +309,7 @@ Sentry.init({
 	integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
 	tracesSampleRate: 1.0,
 	replaysSessionSampleRate: 0.1,
-	replaysOnErrorSampleRate: 1.0
+	replaysOnErrorSampleRate: 1.0,
 });
 
 export const handleError = Sentry.handleErrorWithSentry();
@@ -326,7 +326,7 @@ export async function GET() {
 	const checks = {
 		app: 'ok',
 		database: 'unknown',
-		timestamp: new Date().toISOString()
+		timestamp: new Date().toISOString(),
 	};
 
 	try {
@@ -423,7 +423,7 @@ const migrations = [
 			await pb.collections.update('tags', tagsCollection);
 
 			console.log('✓ Fixed tags collection rules');
-		}
+		},
 	},
 	{
 		version: 2,
@@ -431,8 +431,8 @@ const migrations = [
 		up: async (pb) => {
 			// Add indexes for performance
 			// Implementation here
-		}
-	}
+		},
+	},
 ];
 
 async function runMigrations() {

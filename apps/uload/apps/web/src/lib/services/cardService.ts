@@ -4,7 +4,7 @@ import type {
 	CardConfig,
 	CardMetadata,
 	RenderMode,
-	DBCard
+	DBCard,
 } from '$lib/components/cards/types';
 import { cardConverter } from './cardConverter';
 import { cardValidator } from './cardValidator';
@@ -32,7 +32,7 @@ export class CardService {
 
 		return {
 			...card,
-			config: newConfig
+			config: newConfig,
 		};
 	}
 
@@ -54,7 +54,7 @@ export class CardService {
 			config: JSON.stringify(card.config),
 			metadata: JSON.stringify(card.metadata),
 			constraints: JSON.stringify(card.constraints),
-			variant: card.variant
+			variant: card.variant,
 		};
 
 		let result;
@@ -96,7 +96,7 @@ export class CardService {
 
 		const records = await pb.collection('cards').getList<DBCard>(1, filters?.limit || 100, {
 			filter,
-			sort: 'metadata.position,created'
+			sort: 'metadata.position,created',
 		});
 
 		return records.items.map((item) => this.dbCardToCard(item));
@@ -126,8 +126,8 @@ export class CardService {
 				...card.metadata,
 				name: `${card.metadata?.name || 'Card'} (Copy)`,
 				created: new Date().toISOString(),
-				updated: new Date().toISOString()
-			}
+				updated: new Date().toISOString(),
+			},
 		};
 
 		const newId = await this.saveCard(newCard);
@@ -144,7 +144,7 @@ export class CardService {
 			config: JSON.parse(dbCard.config),
 			metadata: JSON.parse(dbCard.metadata),
 			constraints: JSON.parse(dbCard.constraints || '{}'),
-			variant: dbCard.variant as any
+			variant: dbCard.variant as any,
 		};
 	}
 }

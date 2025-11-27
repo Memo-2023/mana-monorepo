@@ -1,52 +1,52 @@
 ---
-import { getCollection } from "astro:content";
-import ToolLayout from "../../../layouts/ToolLayout.astro";
-import { languages } from "../../../i18n/ui";
+import { getCollection } from 'astro:content';
+import ToolLayout from '../../../layouts/ToolLayout.astro';
+import { languages } from '../../../i18n/ui';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-  const toolEntries = await Promise.all(
-    Object.keys(languages).map(async (lang) => {
-      const langTools = await getCollection("tools", ({ id }) => {
-        console.log("Tool ID in [...slug]:", id);
-        return id.startsWith(`${lang}/`);
-      });
+	const toolEntries = await Promise.all(
+		Object.keys(languages).map(async (lang) => {
+			const langTools = await getCollection('tools', ({ id }) => {
+				console.log('Tool ID in [...slug]:', id);
+				return id.startsWith(`${lang}/`);
+			});
 
-      console.log(`Found ${langTools.length} tools for language ${lang}`);
+			console.log(`Found ${langTools.length} tools for language ${lang}`);
 
-      return langTools.map((tool) => {
-        // Get just the filename part from the slug
-        const slugParts = tool.slug.split("/");
-        const fileName = slugParts[slugParts.length - 1];
-        
-        console.log("Tool slug:", tool.slug, "-> fileName:", fileName);
+			return langTools.map((tool) => {
+				// Get just the filename part from the slug
+				const slugParts = tool.slug.split('/');
+				const fileName = slugParts[slugParts.length - 1];
 
-        return {
-          params: {
-            lang,
-            slug: fileName,
-          },
-          props: { tool },
-        };
-      });
-    })
-  );
+				console.log('Tool slug:', tool.slug, '-> fileName:', fileName);
 
-  // Flatten array of arrays
-  return toolEntries.flat();
+				return {
+					params: {
+						lang,
+						slug: fileName,
+					},
+					props: { tool },
+				};
+			});
+		})
+	);
+
+	// Flatten array of arrays
+	return toolEntries.flat();
 }
 
 const { tool } = Astro.props;
 
 // Sicherheitsabfrage für Tools
 if (!tool) {
-  return Astro.redirect("/404");
+	return Astro.redirect('/404');
 }
 
 const { Content } = await tool.render();
 ---
 
 <ToolLayout tool={tool}>
-  <Content />
+	<Content />
 </ToolLayout>

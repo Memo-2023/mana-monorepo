@@ -217,7 +217,7 @@ const trafficDistribution = {
 	control: 40, // Baseline
 	a1: 20, // Value Test
 	b1: 20, // Social Test
-	c1: 20 // Feature Test
+	c1: 20, // Feature Test
 };
 ```
 
@@ -230,7 +230,7 @@ const trafficDistribution = {
 	control: 30, // Reduziert
 	a2: 30, // Winner A (neue Version)
 	b1: 20, // B bleibt
-	c2: 20 // C iteriert
+	c2: 20, // C iteriert
 };
 ```
 
@@ -241,7 +241,7 @@ const trafficDistribution = {
 	champion: 70, // Bester Performer
 	challenger1: 10, // Neue Idee
 	challenger2: 10, // Neue Idee
-	challenger3: 10 // Neue Idee
+	challenger3: 10, // Neue Idee
 };
 ```
 
@@ -445,7 +445,7 @@ export class HashManager {
 		control: 40,
 		a1: 20,
 		b1: 20,
-		c1: 20
+		c1: 20,
 	};
 
 	getVariant(): string {
@@ -508,7 +508,7 @@ export class HashManager {
 		control: HeroControl,
 		a1: HeroA1,
 		a2: HeroA2,
-		b1: HeroB1
+		b1: HeroB1,
 		// ... more mappings
 	};
 

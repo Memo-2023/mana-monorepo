@@ -28,7 +28,7 @@
 		name = '',
 		autocomplete = '',
 		onchange,
-		oninput
+		oninput,
 	}: Props = $props();
 
 	const inputId = id || name || `input-${Math.random().toString(36).substr(2, 9)}`;
@@ -60,8 +60,8 @@
 	{autocomplete}
 	id={inputId}
 	class={inputClass}
-	onchange={onchange}
-	oninput={oninput}
+	{onchange}
+	{oninput}
 />
 
 {#if error}

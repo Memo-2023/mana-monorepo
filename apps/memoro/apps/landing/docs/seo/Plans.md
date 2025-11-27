@@ -15,9 +15,7 @@ hochpotenzielle Landing Pages identifiziert:
 1. Branchen-Spezifisch (Hohe Impressionen, wenig Konkurrenz)
 
 1. /de/zahnarzt-dokumentation
-
-
-    - Keywords: "app patientendokumentation", "ki dokumentation zahnarzt" (125+
+   - Keywords: "app patientendokumentation", "ki dokumentation zahnarzt" (125+
 
 Impressionen) - Zielgruppe: 50.000+ Zahnärzte in Deutschland - USP: DSGVO-konforme Patientendokumentation 2. /de/pflegedokumentation-app - Keywords: "pflegedokumentation datenschutz", "app mobile pflegedokumentation" (40+
 Impressionen) - Großer Markt mit strengen Compliance-Anforderungen - Wenig digitale Konkurrenz 3. /de/aussendienst-dokumentation - Keywords: "außendienst dokumentation", "verfolgung außendiensteinsätze" (55+
@@ -26,43 +24,31 @@ Impressionen) - Breite Zielgruppe: Vertrieb, Service-Techniker, Handelsvertreter
 2. Feature-Fokussierte Pages (Transactional Intent)
 
 3. /de/automatische-transkription
+   - Suchvolumen: 1K-10K/Monat
+   - Direkter Produktbezug
+   - Conversion-optimiert
 
+4. /de/ki-meeting-assistent
+   - Trend-Keyword mit wachsendem Volumen
+   - Positionierung als KI-Innovator
 
-    - Suchvolumen: 1K-10K/Monat
-    - Direkter Produktbezug
-    - Conversion-optimiert
+5. /de/teams-integration-protokoll
+   - Spezifische Integration mit Microsoft Teams
+   - B2B-Fokus, Enterprise-Kunden
 
-6. /de/ki-meeting-assistent
+6. Vergleichs-/Alternative Pages (Commercial Intent)
 
+7. /de/otter-ai-alternative-deutschland
+   - Nutzt Markenbekanntheit von Otter.ai
+   - DSGVO als Differenzierung
 
-    - Trend-Keyword mit wachsendem Volumen
-    - Positionierung als KI-Innovator
+8. /de/fireflies-alternative-dsgvo
+   - Competitor-Traffic abgreifen
+   - Deutsche Server als USP
 
-7. /de/teams-integration-protokoll
+9. Problem-Solution Pages (Informational → Transactional)
 
-
-    - Spezifische Integration mit Microsoft Teams
-    - B2B-Fokus, Enterprise-Kunden
-
-3. Vergleichs-/Alternative Pages (Commercial Intent)
-
-4. /de/otter-ai-alternative-deutschland
-
-
-    - Nutzt Markenbekanntheit von Otter.ai
-    - DSGVO als Differenzierung
-
-9. /de/fireflies-alternative-dsgvo
-
-
-    - Competitor-Traffic abgreifen
-    - Deutsche Server als USP
-
-4. Problem-Solution Pages (Informational → Transactional)
-
-5. /de/meeting-zeit-sparen
-
-
+10. /de/meeting-zeit-sparen
     - Problem-orientiert
     - ROI-Kalkulator integrieren
     - Case Studies einbinden

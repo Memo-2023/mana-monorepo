@@ -1,25 +1,25 @@
 ---
-title: "How Luxe Fashion Reduced Product Photography Costs by 90%"
-slug: "luxe-fashion-ecommerce"
-description: "Discover how Luxe Fashion, a premium online clothing retailer, transformed their product photography workflow and saved €50,000/year using Picture AI."
+title: 'How Luxe Fashion Reduced Product Photography Costs by 90%'
+slug: 'luxe-fashion-ecommerce'
+description: 'Discover how Luxe Fashion, a premium online clothing retailer, transformed their product photography workflow and saved €50,000/year using Picture AI.'
 company:
-  name: "Luxe Fashion"
-  logo: "/case-studies/luxe-fashion-logo.png"
-  website: "https://luxefashion.example.com"
-  industry: "E-commerce - Fashion"
-  size: "medium"
-  location: "Berlin, Germany"
+  name: 'Luxe Fashion'
+  logo: '/case-studies/luxe-fashion-logo.png'
+  website: 'https://luxefashion.example.com'
+  industry: 'E-commerce - Fashion'
+  size: 'medium'
+  location: 'Berlin, Germany'
 contact:
-  name: "Sarah Mitchell"
-  role: "Creative Director"
-  avatar: "/case-studies/sarah-mitchell.jpg"
-  quote: "Picture AI has completely transformed how we create product visuals. What used to take days now takes hours."
-coverImage: "/case-studies/luxe-fashion-hero.jpg"
-category: "ecommerce"
-tags: ["product-photography", "fashion", "ecommerce", "cost-reduction"]
+  name: 'Sarah Mitchell'
+  role: 'Creative Director'
+  avatar: '/case-studies/sarah-mitchell.jpg'
+  quote: 'Picture AI has completely transformed how we create product visuals. What used to take days now takes hours.'
+coverImage: '/case-studies/luxe-fashion-hero.jpg'
+category: 'ecommerce'
+tags: ['product-photography', 'fashion', 'ecommerce', 'cost-reduction']
 featured: true
 trending: true
-language: "en"
+language: 'en'
 challenge: |
   Luxe Fashion was spending €60,000 annually on professional product photography, with 2-3 week turnaround times for new collections. This slow process limited their ability to test new product lines and respond quickly to market trends. Traditional photoshoots required expensive studio rentals, professional models, photographers, and extensive post-production work.
 solution: |
@@ -29,91 +29,91 @@ implementation: |
 results: |
   Within 6 months, Luxe Fashion reduced their photography budget from €60,000 to €6,000 annually - a 90% cost reduction. More importantly, their time-to-market decreased from 3 weeks to 2 days, allowing them to launch new collections 10x faster. The ability to generate unlimited variations led to a 45% increase in conversion rates as they could A/B test different visual styles.
 metrics:
-  - label: "Cost Reduction"
-    value: "90%"
-    description: "Saved €54,000 per year on photography"
-    icon: "💰"
-  - label: "Time Saved"
-    value: "95%"
-    description: "From 3 weeks to 2 days per collection"
-    icon: "⚡"
-  - label: "Images Generated"
-    value: "15,000+"
-    description: "High-quality product lifestyle images"
-    icon: "🖼️"
-  - label: "Conversion Increase"
-    value: "45%"
-    description: "Better visuals = more sales"
-    icon: "📈"
-featuresUsed: ["flux-1-1-pro", "flux-schnell", "batch-generation"]
-modelsUsed: ["flux-1-1-pro", "flux-schnell"]
+  - label: 'Cost Reduction'
+    value: '90%'
+    description: 'Saved €54,000 per year on photography'
+    icon: '💰'
+  - label: 'Time Saved'
+    value: '95%'
+    description: 'From 3 weeks to 2 days per collection'
+    icon: '⚡'
+  - label: 'Images Generated'
+    value: '15,000+'
+    description: 'High-quality product lifestyle images'
+    icon: '🖼️'
+  - label: 'Conversion Increase'
+    value: '45%'
+    description: 'Better visuals = more sales'
+    icon: '📈'
+featuresUsed: ['flux-1-1-pro', 'flux-schnell', 'batch-generation']
+modelsUsed: ['flux-1-1-pro', 'flux-schnell']
 useCases: []
 beforeAfter:
   before:
-    description: "Before Picture: €60K/year, 3 weeks per collection, limited product shots"
-    image: "/case-studies/luxe-before.jpg"
+    description: 'Before Picture: €60K/year, 3 weeks per collection, limited product shots'
+    image: '/case-studies/luxe-before.jpg'
     metrics:
-      - "€60,000 annual photography budget"
-      - "3 week turnaround per collection"
-      - "3-5 images per product maximum"
-      - "Difficult to test new concepts"
+      - '€60,000 annual photography budget'
+      - '3 week turnaround per collection'
+      - '3-5 images per product maximum'
+      - 'Difficult to test new concepts'
   after:
-    description: "After Picture: €6K/year, 2 days per collection, unlimited variations"
-    image: "/case-studies/luxe-after.jpg"
+    description: 'After Picture: €6K/year, 2 days per collection, unlimited variations'
+    image: '/case-studies/luxe-after.jpg'
     metrics:
-      - "€6,000 annual AI generation cost"
-      - "2 day turnaround per collection"
-      - "10-15+ images per product"
-      - "Easy A/B testing and iteration"
+      - '€6,000 annual AI generation cost'
+      - '2 day turnaround per collection'
+      - '10-15+ images per product'
+      - 'Easy A/B testing and iteration'
 exampleImages:
-  - url: "/case-studies/luxe-example-1.jpg"
-    caption: "Model wearing summer dress - FLUX 1.1 Pro"
-    prompt: "Fashion photography of elegant woman wearing flowing summer dress, natural outdoor setting, golden hour lighting, professional fashion editorial style"
-  - url: "/case-studies/luxe-example-2.jpg"
-    caption: "Product flat lay - FLUX 1.1 Pro"
-  - url: "/case-studies/luxe-example-3.jpg"
-    caption: "Street style shot - FLUX Schnell"
+  - url: '/case-studies/luxe-example-1.jpg'
+    caption: 'Model wearing summer dress - FLUX 1.1 Pro'
+    prompt: 'Fashion photography of elegant woman wearing flowing summer dress, natural outdoor setting, golden hour lighting, professional fashion editorial style'
+  - url: '/case-studies/luxe-example-2.jpg'
+    caption: 'Product flat lay - FLUX 1.1 Pro'
+  - url: '/case-studies/luxe-example-3.jpg'
+    caption: 'Street style shot - FLUX Schnell'
 timeline:
-  - date: "July 2024"
-    milestone: "Started Picture AI trial with 10 products"
-  - date: "August 2024"
-    milestone: "Rolled out to entire catalog (500+ products)"
-  - date: "September 2024"
-    milestone: "Generated 5,000th AI image"
-  - date: "December 2024"
-    milestone: "Achieved 90% cost reduction target"
+  - date: 'July 2024'
+    milestone: 'Started Picture AI trial with 10 products'
+  - date: 'August 2024'
+    milestone: 'Rolled out to entire catalog (500+ products)'
+  - date: 'September 2024'
+    milestone: 'Generated 5,000th AI image'
+  - date: 'December 2024'
+    milestone: 'Achieved 90% cost reduction target'
 keyTakeaways:
-  - "AI-generated product photography can match professional quality at 1/10th the cost"
-  - "Faster iteration cycles lead to better product-market fit"
-  - "Brand consistency is maintained through prompt templates"
-  - "A/B testing visuals dramatically improves conversion rates"
-  - "ROI was achieved within the first month"
+  - 'AI-generated product photography can match professional quality at 1/10th the cost'
+  - 'Faster iteration cycles lead to better product-market fit'
+  - 'Brand consistency is maintained through prompt templates'
+  - 'A/B testing visuals dramatically improves conversion rates'
+  - 'ROI was achieved within the first month'
 testimonial:
   quote: "Picture AI didn't just save us money - it transformed our entire creative process. We can now test ideas that would have been impossible before, and our conversion rates prove customers love the results."
-  author: "Sarah Mitchell"
-  role: "Creative Director, Luxe Fashion"
+  author: 'Sarah Mitchell'
+  role: 'Creative Director, Luxe Fashion'
 technicalDetails:
-  integrations: ["Shopify", "Canva"]
+  integrations: ['Shopify', 'Canva']
   workflow: "Product managers generate images directly in Shopify admin using Picture's integration. Images are automatically resized and optimized for web and mobile."
   team:
     size: 3
-    roles: ["Creative Director", "2 Product Managers"]
-relatedCaseStudies: ["bright-social-agency", "techstart-saas"]
-relatedTutorials: ["advanced-prompt-engineering"]
+    roles: ['Creative Director', '2 Product Managers']
+relatedCaseStudies: ['bright-social-agency', 'techstart-saas']
+relatedTutorials: ['advanced-prompt-engineering']
 relatedFeatures: []
 seoKeywords:
-  - "AI product photography"
-  - "ecommerce case study"
-  - "fashion photography AI"
-  - "reduce photography costs"
-ogImage: "/case-studies/luxe-fashion-og.jpg"
+  - 'AI product photography'
+  - 'ecommerce case study'
+  - 'fashion photography AI'
+  - 'reduce photography costs'
+ogImage: '/case-studies/luxe-fashion-og.jpg'
 publishDate: 2025-01-10T00:00:00.000Z
 lastUpdated: 2025-01-10T00:00:00.000Z
 views: 2847
 likes: 234
 cta:
-  text: "Start Generating Product Photos"
-  url: "/signup"
+  text: 'Start Generating Product Photos'
+  url: '/signup'
 ---
 
 ## The Challenge: Traditional Photography Was Too Slow and Expensive
@@ -121,6 +121,7 @@ cta:
 Luxe Fashion, a Berlin-based premium fashion e-commerce brand, faced a common but critical problem: **traditional product photography was killing their agility**.
 
 Every new collection required:
+
 - 📸 Professional photographer: €2,000-3,000 per day
 - 👗 Studio rental: €500-800 per day
 - 💃 Professional models: €1,000-2,000 per day
@@ -146,6 +147,7 @@ When adding a new product to Shopify, product managers now click the "Generate L
 
 **Step 2: Prompt Template Selection**
 They select from pre-made prompt templates:
+
 - "Elegant model shot - outdoor"
 - "Studio fashion photography"
 - "Street style casual"
@@ -177,16 +179,19 @@ Images are automatically optimized and published to their website.
 The implementation was surprisingly smooth:
 
 ### Month 1: Testing & Template Creation
+
 - Generated 200 test images
 - Created 15 prompt templates for brand consistency
 - Trained 3 team members on the workflow
 
 ### Month 2: Soft Launch
+
 - Applied to 50 products
 - Gathered customer feedback (98% positive!)
 - Refined prompt templates
 
 ### Month 3: Full Rollout
+
 - Integrated with Shopify
 - Applied to entire 500+ product catalog
 - Retired most traditional photoshoots
@@ -204,19 +209,19 @@ One concern was maintaining brand consistency across thousands of AI-generated i
 
 ### Financial Impact
 
-| Metric | Before Picture | After Picture | Improvement |
-|--------|---------------|---------------|-------------|
-| Annual Photography Cost | €60,000 | €6,000 | **-90%** |
-| Cost per Image | €120 | €0.40 | **-99.7%** |
-| Images per Budget | 500 | 15,000 | **+2,900%** |
+| Metric                  | Before Picture | After Picture | Improvement |
+| ----------------------- | -------------- | ------------- | ----------- |
+| Annual Photography Cost | €60,000        | €6,000        | **-90%**    |
+| Cost per Image          | €120           | €0.40         | **-99.7%**  |
+| Images per Budget       | 500            | 15,000        | **+2,900%** |
 
 ### Time Impact
 
-| Metric | Before Picture | After Picture | Improvement |
-|--------|---------------|---------------|-------------|
-| Time to Market | 21 days | 2 days | **-90%** |
-| Images per Hour | 5 | 150 | **+2,900%** |
-| Revision Cycles | 1 | Unlimited | **Infinite** |
+| Metric          | Before Picture | After Picture | Improvement  |
+| --------------- | -------------- | ------------- | ------------ |
+| Time to Market  | 21 days        | 2 days        | **-90%**     |
+| Images per Hour | 5              | 150           | **+2,900%**  |
+| Revision Cycles | 1              | Unlimited     | **Infinite** |
 
 ### Business Impact
 
@@ -229,10 +234,12 @@ One concern was maintaining brand consistency across thousands of AI-generated i
 ### Customer Response
 
 Initially, Luxe Fashion was concerned about customer reception of AI-generated images. They ran an A/B test:
+
 - Group A: Traditional photography (control)
 - Group B: Picture AI-generated images
 
 Results:
+
 - **No difference in perceived authenticity**
 - **AI images had 12% higher engagement** (more clicks)
 - **AI images had 8% higher conversion**
@@ -284,18 +291,21 @@ Total time: **~30 minutes per product** (vs 3 weeks)
 ## ROI Calculation
 
 ### Investment
+
 - Picture Pro Plan: €99/month × 12 = €1,188/year
 - Team training: €500 (one-time)
 - Shopify integration: €0 (included)
 - **Total Year 1 Cost: €1,688**
 
 ### Savings
+
 - Eliminated photography: €54,000/year
 - Reduced team size: €30,000/year (2 fewer people)
 - Faster time-to-market value: €20,000/year (estimated)
 - **Total Annual Savings: €104,000**
 
 ### ROI
+
 **6,064% return on investment** in year 1
 
 Payback period: **6 days** 🤯
@@ -325,4 +335,4 @@ Luxe Fashion's success isn't unique. Hundreds of e-commerce brands are achieving
 
 ---
 
-*Have questions about Picture AI for your e-commerce business? [Contact our team](/contact) for a personalized demo.*
+_Have questions about Picture AI for your e-commerce business? [Contact our team](/contact) for a personalized demo._

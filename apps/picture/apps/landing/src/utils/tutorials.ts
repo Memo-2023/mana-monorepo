@@ -189,14 +189,10 @@ export async function getRelatedTutorials(
 
 	// Get tutorials from related slugs
 	const relatedSlugs = tutorial.data.relatedTutorials;
-	const relatedBySlug = otherTutorials.filter((t) =>
-		relatedSlugs.includes(t.id)
-	);
+	const relatedBySlug = otherTutorials.filter((t) => relatedSlugs.includes(t.id));
 
 	// Get tutorials from same category
-	const sameCategory = otherTutorials.filter(
-		(t) => t.data.category === tutorial.data.category
-	);
+	const sameCategory = otherTutorials.filter((t) => t.data.category === tutorial.data.category);
 
 	// Get tutorials with similar difficulty
 	const sameDifficulty = otherTutorials.filter(
@@ -207,9 +203,7 @@ export async function getRelatedTutorials(
 	const related = [
 		...relatedBySlug,
 		...sameCategory.filter((t) => !relatedBySlug.includes(t)),
-		...sameDifficulty.filter(
-			(t) => !relatedBySlug.includes(t) && !sameCategory.includes(t)
-		),
+		...sameDifficulty.filter((t) => !relatedBySlug.includes(t) && !sameCategory.includes(t)),
 	];
 
 	return related.slice(0, limit);

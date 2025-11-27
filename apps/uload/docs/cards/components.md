@@ -148,7 +148,7 @@ const theme = {
 		text: '#111827',
 		textMuted: '#6b7280',
 		border: '#e5e7eb',
-		hover: '#f3f4f6'
+		hover: '#f3f4f6',
 	},
 	typography: {
 		fontFamily: 'Inter, sans-serif',
@@ -157,23 +157,23 @@ const theme = {
 			sm: '0.875rem',
 			md: '1rem',
 			lg: '1.125rem',
-			xl: '1.25rem'
-		}
+			xl: '1.25rem',
+		},
 	},
 	spacing: {
 		xs: '0.25rem',
 		sm: '0.5rem',
 		md: '1rem',
 		lg: '1.5rem',
-		xl: '2rem'
+		xl: '2rem',
 	},
 	borderRadius: {
 		sm: '0.25rem',
 		md: '0.5rem',
 		lg: '0.75rem',
 		xl: '1rem',
-		full: '9999px'
-	}
+		full: '9999px',
+	},
 };
 ```
 
@@ -279,7 +279,7 @@ interface LinksCardProps {
 	layout={{
 		padding: '1.5rem',
 		columns: 2,
-		gap: '1rem'
+		gap: '1rem',
 	}}
 	modules={[
 		{
@@ -287,8 +287,8 @@ interface LinksCardProps {
 			props: {
 				title: 'Dashboard',
 				subtitle: 'Übersicht deiner Aktivitäten',
-				icon: '📊'
-			}
+				icon: '📊',
+			},
 		},
 		{
 			type: 'stats',
@@ -296,21 +296,21 @@ interface LinksCardProps {
 				stats: [
 					{ label: 'Links', value: 42, icon: '🔗' },
 					{ label: 'Clicks', value: '1.2k', icon: '👆' },
-					{ label: 'Conversion', value: '24%', icon: '📈' }
+					{ label: 'Conversion', value: '24%', icon: '📈' },
 				],
-				layout: 'grid'
-			}
+				layout: 'grid',
+			},
 		},
 		{
 			type: 'actions',
 			props: {
 				actions: [
 					{ label: 'Neuer Link', variant: 'primary' },
-					{ label: 'Statistiken', variant: 'secondary' }
+					{ label: 'Statistiken', variant: 'secondary' },
 				],
-				layout: 'horizontal'
-			}
-		}
+				layout: 'horizontal',
+			},
+		},
 	]}
 />
 ```

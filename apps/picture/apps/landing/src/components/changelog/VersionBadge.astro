@@ -23,14 +23,12 @@ const label = getReleaseTypeDisplayName(type);
 <div class={`version-badge ${colorClass}`}>
 	<span class="version-icon">{icon}</span>
 	<span class="version-number">{formattedVersion}</span>
-	{showLabel && (
-		<span class="version-label">{label}</span>
-	)}
+	{showLabel && <span class="version-label">{label}</span>}
 </div>
 
 <style>
 	.version-badge {
-		@apply inline-flex items-center gap-2 px-3 py-1.5 border rounded-lg text-sm font-medium;
+		@apply inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium;
 	}
 
 	.version-icon {
@@ -42,6 +40,6 @@ const label = getReleaseTypeDisplayName(type);
 	}
 
 	.version-label {
-		@apply opacity-80 text-xs;
+		@apply text-xs opacity-80;
 	}
 </style>

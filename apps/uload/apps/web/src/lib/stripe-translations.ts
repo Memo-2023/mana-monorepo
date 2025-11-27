@@ -2,7 +2,7 @@ export const stripeTranslations = {
 	en: {
 		product: {
 			name: 'ulo.ad Pro',
-			description: 'Unlimited links, premium features and priority support'
+			description: 'Unlimited links, premium features and priority support',
 		},
 		pricing: {
 			monthly: '$4.99/month',
@@ -10,7 +10,7 @@ export const stripeTranslations = {
 			lifetime: '$129.99 one-time',
 			currency: 'USD',
 			free: 'Free',
-			freePeriod: 'forever'
+			freePeriod: 'forever',
 		},
 		features: {
 			free: ['10 links per month', 'Basic analytics', 'QR codes', 'Link customization'],
@@ -21,7 +21,7 @@ export const stripeTranslations = {
 				'Link customization',
 				'Priority support',
 				'No ads',
-				'API access'
+				'API access',
 			],
 			lifetime: [
 				'All Pro features',
@@ -30,28 +30,28 @@ export const stripeTranslations = {
 				'All future features',
 				'Priority support',
 				'Early access to new features',
-				'API access'
-			]
+				'API access',
+			],
 		},
 		savings: {
 			yearly: 'Save $20 per year!',
-			lifetime: 'Forever Pro!'
+			lifetime: 'Forever Pro!',
 		},
 		cta: {
 			upgrade: 'Upgrade to Pro',
 			current: 'Current Plan',
-			chooseplan: 'Choose Plan'
+			chooseplan: 'Choose Plan',
 		},
 		titles: {
 			pricing: 'Choose Your Plan',
 			subtitle: 'Start free and upgrade when you need more',
-			popular: 'POPULAR'
-		}
+			popular: 'POPULAR',
+		},
 	},
 	de: {
 		product: {
 			name: 'ulo.ad Pro',
-			description: 'Unbegrenzte Links, Premium Features und Priority Support'
+			description: 'Unbegrenzte Links, Premium Features und Priority Support',
 		},
 		pricing: {
 			monthly: '4,99€/Monat',
@@ -59,7 +59,7 @@ export const stripeTranslations = {
 			lifetime: '129,99€ einmalig',
 			currency: 'EUR',
 			free: 'Kostenlos',
-			freePeriod: 'für immer'
+			freePeriod: 'für immer',
 		},
 		features: {
 			free: ['10 Links pro Monat', 'Basis Analytics', 'QR Codes', 'Link Anpassung'],
@@ -70,7 +70,7 @@ export const stripeTranslations = {
 				'Link Anpassung',
 				'Priority Support',
 				'Keine Werbung',
-				'API Zugang'
+				'API Zugang',
 			],
 			lifetime: [
 				'Alle Pro Features',
@@ -79,28 +79,28 @@ export const stripeTranslations = {
 				'Alle zukünftigen Features',
 				'Priority Support',
 				'Early Access zu neuen Features',
-				'API Zugang'
-			]
+				'API Zugang',
+			],
 		},
 		savings: {
 			yearly: 'Spare 20€ pro Jahr!',
-			lifetime: 'Für immer Pro!'
+			lifetime: 'Für immer Pro!',
 		},
 		cta: {
 			upgrade: 'Upgrade auf Pro',
 			current: 'Aktueller Plan',
-			chooseplan: 'Plan wählen'
+			chooseplan: 'Plan wählen',
 		},
 		titles: {
 			pricing: 'Wähle deinen Plan',
 			subtitle: 'Starte kostenlos und upgrade wenn du mehr brauchst',
-			popular: 'BELIEBT'
-		}
+			popular: 'BELIEBT',
+		},
 	},
 	it: {
 		product: {
 			name: 'ulo.ad Pro',
-			description: 'Link illimitati, funzionalità premium e supporto prioritario'
+			description: 'Link illimitati, funzionalità premium e supporto prioritario',
 		},
 		pricing: {
 			monthly: '€4,99/mese',
@@ -108,7 +108,7 @@ export const stripeTranslations = {
 			lifetime: '€129,99 una tantum',
 			currency: 'EUR',
 			free: 'Gratis',
-			freePeriod: 'per sempre'
+			freePeriod: 'per sempre',
 		},
 		features: {
 			free: ['10 link al mese', 'Analisi di base', 'Codici QR', 'Personalizzazione link'],
@@ -119,7 +119,7 @@ export const stripeTranslations = {
 				'Personalizzazione link',
 				'Supporto prioritario',
 				'Nessuna pubblicità',
-				'Accesso API'
+				'Accesso API',
 			],
 			lifetime: [
 				'Tutte le funzionalità Pro',
@@ -128,28 +128,28 @@ export const stripeTranslations = {
 				'Tutte le funzionalità future',
 				'Supporto prioritario',
 				'Accesso anticipato alle nuove funzionalità',
-				'Accesso API'
-			]
+				'Accesso API',
+			],
 		},
 		savings: {
 			yearly: "Risparmia €20 all'anno!",
-			lifetime: 'Pro per sempre!'
+			lifetime: 'Pro per sempre!',
 		},
 		cta: {
 			upgrade: 'Passa a Pro',
 			current: 'Piano Attuale',
-			chooseplan: 'Scegli Piano'
+			chooseplan: 'Scegli Piano',
 		},
 		titles: {
 			pricing: 'Scegli il tuo piano',
 			subtitle: 'Inizia gratis e passa a Pro quando ne hai bisogno',
-			popular: 'POPOLARE'
-		}
+			popular: 'POPOLARE',
+		},
 	},
 	fr: {
 		product: {
 			name: 'ulo.ad Pro',
-			description: 'Liens illimités, fonctionnalités premium et support prioritaire'
+			description: 'Liens illimités, fonctionnalités premium et support prioritaire',
 		},
 		pricing: {
 			monthly: '4,99€/mois',
@@ -157,7 +157,7 @@ export const stripeTranslations = {
 			lifetime: '129,99€ paiement unique',
 			currency: 'EUR',
 			free: 'Gratuit',
-			freePeriod: 'pour toujours'
+			freePeriod: 'pour toujours',
 		},
 		features: {
 			free: ['10 liens par mois', 'Analyses de base', 'Codes QR', 'Personnalisation des liens'],
@@ -168,7 +168,7 @@ export const stripeTranslations = {
 				'Personnalisation des liens',
 				'Support prioritaire',
 				'Sans publicité',
-				'Accès API'
+				'Accès API',
 			],
 			lifetime: [
 				'Toutes les fonctionnalités Pro',
@@ -177,28 +177,28 @@ export const stripeTranslations = {
 				'Toutes les fonctionnalités futures',
 				'Support prioritaire',
 				'Accès anticipé aux nouvelles fonctionnalités',
-				'Accès API'
-			]
+				'Accès API',
+			],
 		},
 		savings: {
 			yearly: 'Économisez 20€ par an !',
-			lifetime: 'Pro pour toujours !'
+			lifetime: 'Pro pour toujours !',
 		},
 		cta: {
 			upgrade: 'Passer à Pro',
 			current: 'Plan Actuel',
-			chooseplan: 'Choisir le Plan'
+			chooseplan: 'Choisir le Plan',
 		},
 		titles: {
 			pricing: 'Choisissez votre plan',
 			subtitle: 'Commencez gratuitement et passez à Pro quand vous en avez besoin',
-			popular: 'POPULAIRE'
-		}
+			popular: 'POPULAIRE',
+		},
 	},
 	es: {
 		product: {
 			name: 'ulo.ad Pro',
-			description: 'Enlaces ilimitados, funciones premium y soporte prioritario'
+			description: 'Enlaces ilimitados, funciones premium y soporte prioritario',
 		},
 		pricing: {
 			monthly: '4,99€/mes',
@@ -206,7 +206,7 @@ export const stripeTranslations = {
 			lifetime: '129,99€ pago único',
 			currency: 'EUR',
 			free: 'Gratis',
-			freePeriod: 'para siempre'
+			freePeriod: 'para siempre',
 		},
 		features: {
 			free: ['10 enlaces por mes', 'Análisis básico', 'Códigos QR', 'Personalización de enlaces'],
@@ -217,7 +217,7 @@ export const stripeTranslations = {
 				'Personalización de enlaces',
 				'Soporte prioritario',
 				'Sin anuncios',
-				'Acceso API'
+				'Acceso API',
 			],
 			lifetime: [
 				'Todas las funciones Pro',
@@ -226,24 +226,24 @@ export const stripeTranslations = {
 				'Todas las funciones futuras',
 				'Soporte prioritario',
 				'Acceso anticipado a nuevas funciones',
-				'Acceso API'
-			]
+				'Acceso API',
+			],
 		},
 		savings: {
 			yearly: '¡Ahorra 20€ al año!',
-			lifetime: '¡Pro para siempre!'
+			lifetime: '¡Pro para siempre!',
 		},
 		cta: {
 			upgrade: 'Actualizar a Pro',
 			current: 'Plan Actual',
-			chooseplan: 'Elegir Plan'
+			chooseplan: 'Elegir Plan',
 		},
 		titles: {
 			pricing: 'Elige tu plan',
 			subtitle: 'Empieza gratis y actualiza cuando necesites más',
-			popular: 'POPULAR'
-		}
-	}
+			popular: 'POPULAR',
+		},
+	},
 };
 
 // Helper function to get translations for current locale
@@ -266,7 +266,7 @@ export function getStripeConfig(locale: string) {
 				de: 'de',
 				it: 'it',
 				fr: 'fr',
-				es: 'es'
-			}[locale] || 'auto'
+				es: 'es',
+			}[locale] || 'auto',
 	};
 }

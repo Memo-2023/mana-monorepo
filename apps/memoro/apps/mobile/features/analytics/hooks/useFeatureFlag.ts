@@ -13,8 +13,8 @@
  * }
  */
 export const useFeatureFlag = (_flagKey: string): boolean => {
-  // PostHog removed - feature flags disabled
-  return false;
+	// PostHog removed - feature flags disabled
+	return false;
 };
 
 /**
@@ -25,6 +25,6 @@ export const useFeatureFlag = (_flagKey: string): boolean => {
  * @returns Record of all feature flags (always empty)
  */
 export const useFeatureFlags = (): Record<string, boolean> => {
-  // PostHog removed - feature flags disabled
-  return {};
+	// PostHog removed - feature flags disabled
+	return {};
 };

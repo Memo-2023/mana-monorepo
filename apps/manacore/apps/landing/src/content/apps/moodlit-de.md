@@ -30,14 +30,18 @@ Moodlit ist dein digitaler Begleiter für mentale Gesundheit und emotionales Woh
 ## Hauptfunktionen
 
 ### 🌈 Intelligentes Stimmungs-Tracking
+
 Erfasse täglich deine Stimmung und lass unsere KI Muster und Zusammenhänge erkennen:
+
 - Einfaches Check-in mit wenigen Taps
 - Visualisierung deiner emotionalen Reise
 - Erkennung von Auslösern und Mustern
 - Personalisierte Einblicke und Empfehlungen
 
 ### 🧘 Personalisierte Achtsamkeit
+
 Moodlit passt sich deinen Bedürfnissen an und bietet maßgeschneiderte Übungen:
+
 - Geführte Meditationen (5-30 Minuten)
 - Atemübungen für akute Stresssituationen
 - Progressive Muskelentspannung
@@ -45,7 +49,9 @@ Moodlit passt sich deinen Bedürfnissen an und bietet maßgeschneiderte Übungen
 - Bodyscans und Visualisierungen
 
 ### 📔 KI-gestütztes Journaling
+
 Schreibe deine Gedanken auf und erhalte einfühlsame KI-Reflexionen:
+
 - Freies Schreiben mit Prompts
 - KI-Analyse für tiefere Selbsterkenntnis
 - Dankbarkeits-Journal
@@ -53,7 +59,9 @@ Schreibe deine Gedanken auf und erhalte einfühlsame KI-Reflexionen:
 - Export und Backup deiner Einträge
 
 ### 😴 Schlaf-Optimierung
+
 Verbessere deine Schlafqualität mit KI-Unterstützung:
+
 - Einschlaf-Meditationen
 - Beruhigende Soundscapes
 - Schlaftracking und -analyse
@@ -73,18 +81,21 @@ Der Mana-Verbrauch bei Moodlit ist transparent und fair:
 ## Anwendungsfälle
 
 ### Für den Alltag
+
 - Stress bei der Arbeit reduzieren
 - Emotionale Balance im Alltag finden
 - Besser schlafen und erholt aufwachen
 - Achtsamkeit in den Tag integrieren
 
 ### Bei Herausforderungen
+
 - Angst und Sorgen bewältigen
 - Burnout-Prävention
 - Trauerphasen begleiten
 - Selbstvertrauen stärken
 
 ### Für persönliches Wachstum
+
 - Emotionale Intelligenz entwickeln
 - Selbstreflexion vertiefen
 - Gewohnheiten ändern
@@ -93,6 +104,7 @@ Der Mana-Verbrauch bei Moodlit ist transparent und fair:
 ## Datenschutz & Sicherheit
 
 Deine mentale Gesundheit ist privat – und bleibt es auch:
+
 - **Ende-zu-Ende-Verschlüsselung** aller Journaleinträge
 - **Keine Weitergabe** an Dritte
 - **Anonymisierte KI-Analyse** ohne persönliche Identifikation
@@ -102,6 +114,7 @@ Deine mentale Gesundheit ist privat – und bleibt es auch:
 ## Wissenschaftliche Grundlage
 
 Moodlit basiert auf evidenzbasierten Methoden:
+
 - Kognitive Verhaltenstherapie (CBT)
 - Achtsamkeitsbasierte Stressreduktion (MBSR)
 - Positive Psychologie
@@ -115,6 +128,7 @@ Mit Mana-Credits nutzt du Moodlit flexibel nach deinem Bedarf. An stressigen Tag
 ## Verfügbarkeit
 
 Moodlit ist verfügbar für:
+
 - iOS (iPhone & iPad)
 - Android
 - Web-App

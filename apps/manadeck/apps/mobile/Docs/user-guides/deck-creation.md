@@ -19,11 +19,13 @@ Es gibt mehrere Wege, ein neues Deck zu erstellen:
 Beim Erstellen eines neuen Decks musst du folgende Informationen angeben:
 
 #### Grunddaten
+
 - **Titel**: Ein aussagekräftiger Name für dein Deck
 - **Beschreibung**: Eine kurze Erklärung, worum es in dem Deck geht
 - **Kategorie**: Wähle eine passende Kategorie (Sprachen, Wissenschaft, Mathematik, etc.)
 
 #### Sichtbarkeits-Einstellungen
+
 - **Privat**: Nur du kannst das Deck sehen und verwenden
 - **Öffentlich**: Andere Benutzer können dein Deck in der Explore-Sektion finden
 
@@ -32,6 +34,7 @@ Beim Erstellen eines neuen Decks musst du folgende Informationen angeben:
 Nach der Deck-Erstellung kannst du Karten hinzufügen:
 
 #### Kartentypen
+
 Manadeck unterstützt verschiedene Kartentypen:
 
 1. **Text-Karten**: Klassische Vorderseite/Rückseite Karten
@@ -40,6 +43,7 @@ Manadeck unterstützt verschiedene Kartentypen:
 4. **Multiple-Choice**: Karten mit Auswahlmöglichkeiten
 
 #### Karten-Erstellung
+
 - **Vorderseite**: Die Frage oder der Begriff
 - **Rückseite**: Die Antwort oder Erklärung
 - **Hinweise**: Optionale Hilfestellungen
@@ -50,22 +54,26 @@ Manadeck unterstützt verschiedene Kartentypen:
 Manadeck bietet KI-Features zur Deck-Erstellung:
 
 #### Smart Card Creator
+
 - Automatische Generierung von Karten basierend auf einem Thema
 - KI schlägt passende Fragen und Antworten vor
 - Unterstützt verschiedene Schwierigkeitsgrade
 
 #### Image Card Creator
+
 - Erstellung von Bildkarten mit KI-generierten oder hochgeladenen Bildern
 - Automatische Beschreibungen und Fragen zu Bildern
 
 ### 5. Deck-Verwaltung
 
 #### Einstellungen
+
 - **Metadaten bearbeiten**: Titel, Beschreibung, Kategorie ändern
 - **Sichtbarkeit**: Zwischen privat und öffentlich wechseln
 - **Tags**: Deck-Tags für bessere Organisation
 
 #### Organisation
+
 - **Favoriten**: Wichtige Decks als Favoriten markieren
 - **Sortierung**: Decks nach verschiedenen Kriterien sortieren
 - **Suchfunktion**: Decks schnell finden
@@ -73,18 +81,21 @@ Manadeck bietet KI-Features zur Deck-Erstellung:
 ## Best Practices
 
 ### Deck-Design
+
 1. **Klare Titel**: Verwende aussagekräftige und spezifische Titel
 2. **Gute Beschreibungen**: Erkläre kurz, was gelernt wird und für wen das Deck geeignet ist
 3. **Konsistente Struktur**: Halte das Format der Karten einheitlich
 4. **Angemessene Größe**: 20-50 Karten pro Deck für optimales Lernen
 
 ### Karten-Gestaltung
+
 1. **Eine Idee pro Karte**: Jede Karte sollte nur ein Konzept behandeln
 2. **Klare Formulierungen**: Vermeide mehrdeutige Fragen
 3. **Sinnvolle Reihenfolge**: Ordne Karten logisch an
 4. **Regelmäßige Updates**: Überarbeite und verbessere deine Karten
 
 ### Öffentliche Decks
+
 Wenn du dein Deck öffentlich machst:
 
 1. **Qualität sicherstellen**: Überprüfe alle Karten auf Richtigkeit
@@ -95,7 +106,9 @@ Wenn du dein Deck öffentlich machst:
 ## Technische Details
 
 ### Datenbankstruktur
+
 Decks werden in der `decks` Tabelle gespeichert mit folgenden Feldern:
+
 - `id`: Eindeutige ID
 - `title`: Deck-Titel
 - `description`: Beschreibung
@@ -106,6 +119,7 @@ Decks werden in der `decks` Tabelle gespeichert mit folgenden Feldern:
 - `metadata`: Zusätzliche Informationen (JSON)
 
 ### API-Endpunkte
+
 - `POST /api/decks`: Neues Deck erstellen
 - `PUT /api/decks/:id`: Deck bearbeiten
 - `DELETE /api/decks/:id`: Deck löschen
@@ -130,10 +144,11 @@ Decks werden in der `decks` Tabelle gespeichert mit folgenden Feldern:
 ## Support
 
 Bei Problemen oder Fragen:
+
 - Überprüfe diese Dokumentation
 - Schaue in die FAQ-Sektion
 - Kontaktiere den Support über die App
 
 ---
 
-*Letzte Aktualisierung: 2025-09-24*
+_Letzte Aktualisierung: 2025-09-24_

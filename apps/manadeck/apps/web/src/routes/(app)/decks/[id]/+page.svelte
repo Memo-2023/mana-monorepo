@@ -20,7 +20,7 @@
 			await Promise.all([
 				deckStore.fetchDeck(deckId),
 				progressStore.fetchDeckProgress(deckId),
-				cardStore.fetchCards(deckId)
+				cardStore.fetchCards(deckId),
 			]);
 
 			// Calculate progress
@@ -57,7 +57,9 @@
 {#if deckStore.loading && !deckStore.currentDeck}
 	<div class="flex justify-center py-12">
 		<div class="text-center">
-			<div class="inline-block animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+			<div
+				class="inline-block animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"
+			></div>
 			<p class="mt-4 text-muted-foreground">Loading deck...</p>
 		</div>
 	</div>
@@ -65,7 +67,10 @@
 	{@const deck = deckStore.currentDeck}
 	<div class="space-y-6">
 		<!-- Back Button -->
-		<button onclick={() => goto('/decks')} class="text-sm text-muted-foreground hover:text-foreground flex items-center">
+		<button
+			onclick={() => goto('/decks')}
+			class="text-sm text-muted-foreground hover:text-foreground flex items-center"
+		>
 			<span class="mr-2">←</span>
 			Back to Decks
 		</button>
@@ -137,9 +142,7 @@
 			<div class="text-center text-muted-foreground py-8">
 				{#if (deck.card_count || 0) === 0}
 					<p>No cards yet. Add your first card to get started!</p>
-					<Button class="mt-4" onclick={() => goto(`/decks/${deckId}/cards`)}>
-						Add Cards
-					</Button>
+					<Button class="mt-4" onclick={() => goto(`/decks/${deckId}/cards`)}>Add Cards</Button>
 				{:else}
 					<p>Card list coming soon...</p>
 				{/if}
@@ -148,19 +151,22 @@
 
 		<!-- Delete Confirmation Modal -->
 		{#if showDeleteConfirm}
-			<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick={() => (showDeleteConfirm = false)}>
-				<div class="bg-surface-elevated rounded-lg shadow-xl max-w-md w-full mx-4 p-6" onclick={(e) => e.stopPropagation()}>
+			<div
+				class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+				onclick={() => (showDeleteConfirm = false)}
+			>
+				<div
+					class="bg-surface-elevated rounded-lg shadow-xl max-w-md w-full mx-4 p-6"
+					onclick={(e) => e.stopPropagation()}
+				>
 					<h3 class="text-xl font-semibold mb-2">Delete Deck?</h3>
 					<p class="text-muted-foreground mb-6">
-						Are you sure you want to delete "{deck.title}"? This action cannot be undone and will also delete all cards in this deck.
+						Are you sure you want to delete "{deck.title}"? This action cannot be undone and will
+						also delete all cards in this deck.
 					</p>
 					<div class="flex justify-end space-x-3">
-						<Button variant="ghost" onclick={() => (showDeleteConfirm = false)}>
-							Cancel
-						</Button>
-						<Button variant="danger" loading={deleting} onclick={handleDelete}>
-							Delete Deck
-						</Button>
+						<Button variant="ghost" onclick={() => (showDeleteConfirm = false)}>Cancel</Button>
+						<Button variant="danger" loading={deleting} onclick={handleDelete}>Delete Deck</Button>
 					</div>
 				</div>
 			</div>
@@ -169,8 +175,6 @@
 {:else}
 	<div class="text-center py-12">
 		<p class="text-muted-foreground">Deck not found</p>
-		<Button class="mt-4" onclick={() => goto('/decks')}>
-			Back to Decks
-		</Button>
+		<Button class="mt-4" onclick={() => goto('/decks')}>Back to Decks</Button>
 	</div>
 {/if}

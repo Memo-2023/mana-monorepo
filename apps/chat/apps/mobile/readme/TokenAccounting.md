@@ -41,10 +41,11 @@ ALTER TABLE public.models ADD COLUMN cost_settings JSONB DEFAULT '{"prompt_per_1
 ```
 
 Beispiel für `cost_settings`:
+
 ```json
 {
-  "prompt_per_1k_tokens": 0.003,  // Kosten pro 1000 Prompt-Tokens in Dollar
-  "completion_per_1k_tokens": 0.006  // Kosten pro 1000 Completion-Tokens in Dollar
+	"prompt_per_1k_tokens": 0.003, // Kosten pro 1000 Prompt-Tokens in Dollar
+	"completion_per_1k_tokens": 0.006 // Kosten pro 1000 Completion-Tokens in Dollar
 }
 ```
 
@@ -52,7 +53,7 @@ Beispiel für `cost_settings`:
 
 ### Erfassung der Token-Nutzung
 
-1. **API-Aufruf**: 
+1. **API-Aufruf**:
    - Jeder Aufruf eines LLM-Modells über `services/openai.ts` gibt Token-Nutzungsinformationen zurück
    - Diese werden aus der API-Antwort in `utils/api.ts` extrahiert
 
@@ -62,12 +63,12 @@ Beispiel für `cost_settings`:
 
 ```typescript
 export async function logTokenUsage(
-  usage: TokenUsage,
-  conversationId: string,
-  messageId: string,
-  userId: string,
-  modelId: string
-): Promise<void>
+	usage: TokenUsage,
+	conversationId: string,
+	messageId: string,
+	userId: string,
+	modelId: string
+): Promise<void>;
 ```
 
 3. **Kostenberechnung**:
@@ -76,10 +77,10 @@ export async function logTokenUsage(
 
 ```typescript
 export async function calculateTokenCost(
-  promptTokens: number,
-  completionTokens: number,
-  modelId: string
-): Promise<number>
+	promptTokens: number,
+	completionTokens: number,
+	modelId: string
+): Promise<number>;
 ```
 
 ### Abfrage und Analyse
@@ -87,22 +88,28 @@ export async function calculateTokenCost(
 Die folgenden SQL-Funktionen sind für die Abfrage der Token-Nutzung verfügbar:
 
 1. **Nutzung nach Modell**:
+
    ```sql
    SELECT * FROM get_user_model_usage(user_id);
    ```
+
    - Gibt die Summe der Token und Kosten pro Modell für einen Benutzer zurück
 
 2. **Nutzung nach Zeitraum**:
+
    ```sql
    SELECT * FROM get_user_usage_by_period(user_id, 'day');
    ```
+
    - Akzeptiert 'day', 'month' oder 'year' als Zeitraum
    - Gibt die Summe der Token und Kosten pro Zeiteinheit zurück
 
 3. **Nutzung pro Konversation**:
+
    ```sql
    SELECT * FROM get_conversation_usage(conversation_id);
    ```
+
    - Gibt die Token-Nutzung für jede Nachricht in einer Konversation zurück
 
 ## API-Endpunkte
@@ -121,14 +128,14 @@ Die API-Endpunkte für den Zugriff auf die Token-Nutzungsdaten sind:
 
 Die Standardpreise für verschiedene Modelle sind:
 
-| Modell | Prompt-Tokens (pro 1K) | Completion-Tokens (pro 1K) |
-|--------|------------------------|----------------------------|
-| GPT-O3-Mini | $0.0001 | $0.0002 |
-| GPT-4o-mini | $0.0001 | $0.0002 |
-| GPT-4o | $0.003 | $0.006 |
-| GPT-4 | $0.003 | $0.006 |
-| GPT-3.5 | $0.0001 | $0.0002 |
-| Claude | $0.0008 | $0.0024 |
+| Modell      | Prompt-Tokens (pro 1K) | Completion-Tokens (pro 1K) |
+| ----------- | ---------------------- | -------------------------- |
+| GPT-O3-Mini | $0.0001                | $0.0002                    |
+| GPT-4o-mini | $0.0001                | $0.0002                    |
+| GPT-4o      | $0.003                 | $0.006                     |
+| GPT-4       | $0.003                 | $0.006                     |
+| GPT-3.5     | $0.0001                | $0.0002                    |
+| Claude      | $0.0008                | $0.0024                    |
 
 ## Verwendungsbeispiele
 
@@ -140,9 +147,9 @@ const { data } = await supabase.rpc('get_user_model_usage', { user_id: userId })
 console.log('Token-Nutzung nach Modell:', data);
 
 // Beispiel: Abfrage der Token-Nutzung nach Monat
-const { data } = await supabase.rpc('get_user_usage_by_period', { 
-  user_id: userId, 
-  period: 'month' 
+const { data } = await supabase.rpc('get_user_usage_by_period', {
+	user_id: userId,
+	period: 'month',
 });
 console.log('Monatliche Token-Nutzung:', data);
 ```

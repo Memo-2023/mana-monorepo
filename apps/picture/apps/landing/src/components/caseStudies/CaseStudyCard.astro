@@ -49,9 +49,7 @@ const primaryMetric = data.metrics[0] || null;
 					{primaryMetric && (
 						<div class="absolute bottom-4 right-4 rounded-xl bg-white/90 px-4 py-2 backdrop-blur-sm dark:bg-gray-900/90">
 							<div class="text-2xl font-bold text-blue-600">{primaryMetric.value}</div>
-							<div class="text-xs text-gray-700 dark:text-gray-300">
-								{primaryMetric.label}
-							</div>
+							<div class="text-xs text-gray-700 dark:text-gray-300">{primaryMetric.label}</div>
 						</div>
 					)}
 				</div>
@@ -137,12 +135,7 @@ const primaryMetric = data.metrics[0] || null;
 					{
 						data.views > 0 && (
 							<span class="flex items-center gap-1">
-								<svg
-									class="h-4 w-4"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
+								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path
 										stroke-linecap="round"
 										stroke-linejoin="round"
@@ -177,11 +170,8 @@ const primaryMetric = data.metrics[0] || null;
 				>
 					Read Story
 					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 5l7 7-7 7"></path>
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+						></path>
 					</svg>
 				</span>
 			</div>

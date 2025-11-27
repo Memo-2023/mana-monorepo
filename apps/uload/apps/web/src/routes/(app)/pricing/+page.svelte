@@ -16,18 +16,10 @@
 			name: 'Free',
 			price: '0€',
 			period: 'für immer',
-			features: [
-				'10 Links pro Monat',
-				'Basis Analytics',
-				'QR Codes',
-				'Link Anpassung'
-			],
-			limitations: [
-				'Limitierte Links',
-				'Standard Support'
-			],
+			features: ['10 Links pro Monat', 'Basis Analytics', 'QR Codes', 'Link Anpassung'],
+			limitations: ['Limitierte Links', 'Standard Support'],
 			priceType: null,
-			popular: false
+			popular: false,
 		},
 		{
 			name: 'Pro Monatlich',
@@ -40,11 +32,11 @@
 				'Link Anpassung',
 				'Priority Support',
 				'Keine Werbung',
-				'API Zugang'
+				'API Zugang',
 			],
 			limitations: [],
 			priceType: 'monthly',
-			popular: false
+			popular: false,
 		},
 		{
 			name: 'Pro Jährlich',
@@ -58,11 +50,11 @@
 				'Link Anpassung',
 				'Priority Support',
 				'Keine Werbung',
-				'API Zugang'
+				'API Zugang',
 			],
 			limitations: [],
 			priceType: 'yearly',
-			popular: true
+			popular: true,
 		},
 		{
 			name: 'Pro Lifetime',
@@ -76,12 +68,12 @@
 				'Alle zukünftigen Features',
 				'Priority Support',
 				'Early Access zu neuen Features',
-				'API Zugang'
+				'API Zugang',
 			],
 			limitations: [],
 			priceType: 'lifetime',
-			popular: false
-		}
+			popular: false,
+		},
 	];
 
 	let openFaq = $state<number | null>(null);
@@ -130,7 +122,7 @@
 		</div>
 
 		<!-- Pricing Cards -->
-		<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4 max-w-5xl mx-auto">
+		<div class="mx-auto grid max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-4">
 			{#each plans as plan}
 				<div
 					class="relative flex flex-col rounded-xl {plan.popular
@@ -142,7 +134,7 @@
 							class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-theme-primary px-4 py-1"
 						>
 							<div class="flex items-center gap-1">
-								<Star class="h-4 w-4 text-white fill-white" />
+								<Star class="h-4 w-4 fill-white text-white" />
 								<span class="text-xs font-bold text-white">BELIEBT</span>
 							</div>
 						</div>
@@ -200,7 +192,6 @@
 			{/each}
 		</div>
 
-
 		<!-- FAQ Section -->
 		<div class="mt-16">
 			<h2 class="mb-8 text-center text-2xl font-bold text-theme-text">Häufige Fragen</h2>
@@ -221,15 +212,20 @@
 							stroke="currentColor"
 							viewBox="0 0 24 24"
 						>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 9l-7 7-7-7"
+							/>
 						</svg>
 					</button>
 					{#if openFaq === 1}
 						<div class="border-t border-theme-border px-4 pb-4">
 							<p class="text-theme-text-muted">
 								Alle Pro-Pläne haben die gleichen Features, unterscheiden sich aber im Preis:
-								Monatlich (4,99€/Monat), Jährlich (39,99€/Jahr - spare 20€), oder Lifetime 
-								(129,99€ einmalig - für immer Pro ohne weitere Zahlungen).
+								Monatlich (4,99€/Monat), Jährlich (39,99€/Jahr - spare 20€), oder Lifetime (129,99€
+								einmalig - für immer Pro ohne weitere Zahlungen).
 							</p>
 						</div>
 					{/if}
@@ -249,15 +245,20 @@
 							stroke="currentColor"
 							viewBox="0 0 24 24"
 						>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 9l-7 7-7-7"
+							/>
 						</svg>
 					</button>
 					{#if openFaq === 2}
 						<div class="border-t border-theme-border px-4 pb-4">
 							<p class="text-theme-text-muted">
-								Ja, du kannst jederzeit von Free zu Pro upgraden. Deine Links und
-								Einstellungen bleiben dabei erhalten. Du kannst auch zwischen den verschiedenen
-								Pro-Plänen wechseln.
+								Ja, du kannst jederzeit von Free zu Pro upgraden. Deine Links und Einstellungen
+								bleiben dabei erhalten. Du kannst auch zwischen den verschiedenen Pro-Plänen
+								wechseln.
 							</p>
 						</div>
 					{/if}
@@ -268,9 +269,7 @@
 						onclick={() => (openFaq = openFaq === 3 ? null : 3)}
 						class="flex w-full items-center justify-between p-4 text-left"
 					>
-						<span class="font-medium text-theme-text">
-							Lohnt sich der Lifetime-Plan?
-						</span>
+						<span class="font-medium text-theme-text"> Lohnt sich der Lifetime-Plan? </span>
 						<svg
 							class="h-5 w-5 text-theme-text-muted transition-transform {openFaq === 3
 								? 'rotate-180'
@@ -279,15 +278,20 @@
 							stroke="currentColor"
 							viewBox="0 0 24 24"
 						>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 9l-7 7-7-7"
+							/>
 						</svg>
 					</button>
 					{#if openFaq === 3}
 						<div class="border-t border-theme-border px-4 pb-4">
 							<p class="text-theme-text-muted">
-								Der Lifetime-Plan (129,99€) amortisiert sich bereits nach etwa 2,2 Jahren im Vergleich 
-								zum monatlichen Plan. Du erhältst alle Pro-Features für immer, ohne weitere monatliche
-								Gebühren und hast Zugang zu allen zukünftigen Features.
+								Der Lifetime-Plan (129,99€) amortisiert sich bereits nach etwa 2,2 Jahren im
+								Vergleich zum monatlichen Plan. Du erhältst alle Pro-Features für immer, ohne
+								weitere monatliche Gebühren und hast Zugang zu allen zukünftigen Features.
 							</p>
 						</div>
 					{/if}
@@ -307,15 +311,20 @@
 							stroke="currentColor"
 							viewBox="0 0 24 24"
 						>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 9l-7 7-7-7"
+							/>
 						</svg>
 					</button>
 					{#if openFaq === 4}
 						<div class="border-t border-theme-border px-4 pb-4">
 							<p class="text-theme-text-muted">
-								Ja, du kannst dein Abo jederzeit in den Einstellungen kündigen. Du behältst
-								den Zugang bis zum Ende des aktuellen Abrechnungszeitraums. Danach wechselst
-								du automatisch zum Free Plan.
+								Ja, du kannst dein Abo jederzeit in den Einstellungen kündigen. Du behältst den
+								Zugang bis zum Ende des aktuellen Abrechnungszeitraums. Danach wechselst du
+								automatisch zum Free Plan.
 							</p>
 						</div>
 					{/if}

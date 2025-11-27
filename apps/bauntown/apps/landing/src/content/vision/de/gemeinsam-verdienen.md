@@ -1,23 +1,18 @@
 ---
-title: "Gemeinsam Verdienen: Neue Modelle für kollektive Wertschöpfung"
-description: "Unsere Vision für faire, transparente und gemeinschaftsorientierte Modelle der wirtschaftlichen Teilhabe im digitalen Zeitalter."
+title: 'Gemeinsam Verdienen: Neue Modelle für kollektive Wertschöpfung'
+description: 'Unsere Vision für faire, transparente und gemeinschaftsorientierte Modelle der wirtschaftlichen Teilhabe im digitalen Zeitalter.'
 pubDate: 2025-04-03
-category: "future"
-timeline: "2025-2028"
-status: "exploring"
+category: 'future'
+timeline: '2025-2028'
+status: 'exploring'
 featured: true
-image: "/images/vision/gemeinsam-verdienen.png"
-contributors: ["Lena Fischer", "Till Schneider", "Michael Werner"]
-relatedLinks: [
-  {
-    title: "Platform Cooperativism",
-    url: "https://platform.coop/about/vision-and-advantages/"
-  },
-  {
-    title: "Web3 and Decentralized Value Creation",
-    url: "https://ethereum.org/en/dao/"
-  }
-]
+image: '/images/vision/gemeinsam-verdienen.png'
+contributors: ['Lena Fischer', 'Till Schneider', 'Michael Werner']
+relatedLinks:
+  [
+    { title: 'Platform Cooperativism', url: 'https://platform.coop/about/vision-and-advantages/' },
+    { title: 'Web3 and Decentralized Value Creation', url: 'https://ethereum.org/en/dao/' },
+  ]
 ---
 
 # Gemeinsam Verdienen: Neue Modelle für kollektive Wertschöpfung

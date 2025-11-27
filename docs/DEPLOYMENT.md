@@ -87,6 +87,7 @@ The manacore-monorepo uses a comprehensive CI/CD pipeline with the following fea
 Configure the following secrets in your GitHub repository (`Settings > Secrets and variables > Actions`):
 
 #### Docker Registry
+
 ```
 DOCKER_USERNAME=your-docker-username
 DOCKER_PASSWORD=your-docker-password
@@ -94,6 +95,7 @@ DOCKER_REGISTRY=wuesteon
 ```
 
 #### Staging Environment
+
 ```
 STAGING_HOST=staging.manacore.app
 STAGING_USER=deploy
@@ -117,6 +119,7 @@ STAGING_JWT_PRIVATE_KEY=<private-key>
 ```
 
 #### Production Environment
+
 ```
 PRODUCTION_HOST=api.manacore.app
 PRODUCTION_USER=deploy
@@ -126,12 +129,14 @@ PRODUCTION_API_URL=https://api.manacore.app
 ```
 
 #### Turbo Cache (Optional)
+
 ```
 TURBO_TOKEN=<vercel-token>
 TURBO_TEAM=<team-name>
 ```
 
 #### Code Coverage (Optional)
+
 ```
 CODECOV_TOKEN=<codecov-token>
 ```
@@ -147,6 +152,7 @@ The CI/CD pipeline consists of 6 GitHub Actions workflows:
 **Triggers**: Pull requests to `main` or `develop`
 
 **Steps**:
+
 1. Detect changed projects
 2. Run format check
 3. Run linting
@@ -163,6 +169,7 @@ The CI/CD pipeline consists of 6 GitHub Actions workflows:
 **Triggers**: Push to `main` branch
 
 **Steps**:
+
 1. Full validation (all projects)
 2. Build all projects
 3. Build and push Docker images
@@ -173,6 +180,7 @@ The CI/CD pipeline consists of 6 GitHub Actions workflows:
 **Triggers**: Manual or automated from main CI
 
 **Steps**:
+
 1. SSH to staging server
 2. Pull latest Docker images
 3. Update environment configuration
@@ -186,6 +194,7 @@ The CI/CD pipeline consists of 6 GitHub Actions workflows:
 **Triggers**: Manual only
 
 **Steps**:
+
 1. Validate deployment request
 2. Request manual approval
 3. Create database backup
@@ -201,6 +210,7 @@ The CI/CD pipeline consists of 6 GitHub Actions workflows:
 **Triggers**: PRs, pushes to main, weekly schedule
 
 **Steps**:
+
 1. Run all tests with coverage
 2. Collect coverage reports
 3. Upload to Codecov
@@ -212,6 +222,7 @@ The CI/CD pipeline consists of 6 GitHub Actions workflows:
 **Triggers**: Weekly schedule, manual
 
 **Steps**:
+
 1. Check for outdated dependencies
 2. Run security audit
 3. Create issue for critical vulnerabilities
@@ -259,6 +270,7 @@ FROM node:20-alpine AS production
 ```
 
 **Key Features**:
+
 - Non-root user (`nestjs`)
 - Health checks
 - Resource limits
@@ -269,6 +281,7 @@ FROM node:20-alpine AS production
 Template: `docker/templates/Dockerfile.sveltekit`
 
 **Key Features**:
+
 - SSR support
 - Static asset optimization
 - Non-root user
@@ -279,6 +292,7 @@ Template: `docker/templates/Dockerfile.sveltekit`
 Template: `docker/templates/Dockerfile.astro`
 
 **Key Features**:
+
 - Nginx-based serving
 - Gzip compression
 - Security headers
@@ -311,12 +325,14 @@ Two environments are provided:
 **URL**: `https://staging.manacore.app`
 
 **Characteristics**:
+
 - Automatic deployment from `main` branch
 - Separate database instances
 - Full feature parity with production
 - Verbose logging enabled
 
 **Access**:
+
 ```bash
 ssh deploy@staging.manacore.app
 cd ~/manacore-staging
@@ -330,6 +346,7 @@ docker compose ps
 **URL**: `https://api.manacore.app`
 
 **Characteristics**:
+
 - Manual deployment with approval
 - High availability configuration
 - Performance optimized
@@ -337,6 +354,7 @@ docker compose ps
 - Backup procedures
 
 **Access**:
+
 ```bash
 ssh deploy@api.manacore.app
 cd ~/manacore-production
@@ -378,6 +396,7 @@ Production requires manual trigger and approval:
 Go to GitHub Actions > CD - Production Deployment > Run workflow
 
 **Required Inputs**:
+
 - Service: `all` or specific service name
 - Environment: `production`
 - Confirm: Type `deploy`
@@ -391,6 +410,7 @@ Approve in: GitHub > Settings > Environments > production-approval
 #### Step 3: Automated Deployment
 
 Once approved:
+
 1. Creates database backup
 2. Tags current deployment
 3. Pulls latest images
@@ -471,6 +491,7 @@ export PRODUCTION_USER=deploy
 ```
 
 **What the script does**:
+
 1. Confirms rollback with user
 2. Checks for previous deployment backup
 3. Stops current services
@@ -545,6 +566,7 @@ docker system prune -a
 Automated backups are created before each production deployment.
 
 **Manual backup**:
+
 ```bash
 # Create backup
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
@@ -563,6 +585,7 @@ Set up external monitoring tools to ping health endpoints:
 - Chat Backend: `https://api.manacore.app/api/health`
 
 Recommended tools:
+
 - UptimeRobot
 - Pingdom
 - Better Uptime
@@ -575,6 +598,7 @@ Recommended tools:
 **Issue**: Deployment workflow fails
 
 **Solutions**:
+
 1. Check workflow logs in GitHub Actions
 2. Verify all required secrets are set
 3. Ensure SSH access to server works
@@ -593,6 +617,7 @@ echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 **Issue**: Service fails health checks after deployment
 
 **Solutions**:
+
 1. Check service logs
 2. Verify environment variables
 3. Check database connectivity
@@ -614,6 +639,7 @@ docker compose exec mana-core-auth env | grep -v PASSWORD
 **Issue**: Services can't connect to database
 
 **Solutions**:
+
 1. Verify database is running
 2. Check connection strings
 3. Verify credentials
@@ -632,6 +658,7 @@ docker compose exec mana-core-auth nc -zv postgres 5432
 **Issue**: Docker build fails in CI
 
 **Solutions**:
+
 1. Check Dockerfile syntax
 2. Verify all COPY paths exist
 3. Check for build dependency issues
@@ -650,6 +677,7 @@ docker buildx build --progress=plain --file apps/chat/apps/backend/Dockerfile .
 **Issue**: Server runs out of disk space
 
 **Solutions**:
+
 ```bash
 # Check disk usage
 df -h
@@ -670,6 +698,7 @@ ls -t | tail -n +10 | xargs rm -rf
 **Issue**: Docker Compose services fail to start
 
 **Solutions**:
+
 ```bash
 # Check service dependencies
 docker compose config
@@ -692,6 +721,7 @@ Never deploy directly to production without testing in staging.
 ### 2. Use Tagged Releases
 
 Tag important releases:
+
 ```bash
 git tag -a v1.2.3 -m "Release version 1.2.3"
 git push origin v1.2.3

@@ -11,26 +11,29 @@
 			title: 'Willkommen bei Märchenzauber',
 			description: 'Erstelle personalisierte Geschichten für deine Kinder mit der Kraft der KI.',
 			icon: 'sparkles',
-			color: 'from-pink-500 to-purple-600'
+			color: 'from-pink-500 to-purple-600',
 		},
 		{
 			title: 'Erstelle Charaktere',
-			description: 'Gestalte einzigartige Charaktere mit Namen, Aussehen und Persönlichkeit - oder nutze dein Kind als Hauptfigur!',
+			description:
+				'Gestalte einzigartige Charaktere mit Namen, Aussehen und Persönlichkeit - oder nutze dein Kind als Hauptfigur!',
 			icon: 'users',
-			color: 'from-purple-500 to-indigo-600'
+			color: 'from-purple-500 to-indigo-600',
 		},
 		{
 			title: 'Generiere Geschichten',
-			description: 'Wähle ein Thema, einen Stil und lass die KI magische Geschichten mit wunderschönen Illustrationen erstellen.',
+			description:
+				'Wähle ein Thema, einen Stil und lass die KI magische Geschichten mit wunderschönen Illustrationen erstellen.',
 			icon: 'book',
-			color: 'from-indigo-500 to-blue-600'
+			color: 'from-indigo-500 to-blue-600',
 		},
 		{
 			title: 'Teile dein Feedback',
-			description: 'Hilf uns, Märchenzauber zu verbessern! Stimme für Features ab und teile deine Ideen mit der Community.',
+			description:
+				'Hilf uns, Märchenzauber zu verbessern! Stimme für Features ab und teile deine Ideen mit der Community.',
 			icon: 'heart',
-			color: 'from-rose-500 to-pink-600'
-		}
+			color: 'from-rose-500 to-pink-600',
+		},
 	];
 
 	function nextStep() {
@@ -73,7 +76,9 @@
 	<title>Willkommen | Märchenzauber</title>
 </svelte:head>
 
-<div class="flex min-h-screen flex-col bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+<div
+	class="flex min-h-screen flex-col bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+>
 	<!-- Skip button -->
 	<div class="absolute right-4 top-4">
 		<button
@@ -87,22 +92,46 @@
 	<!-- Main content -->
 	<div class="flex flex-1 flex-col items-center justify-center px-6 py-12">
 		<!-- Icon -->
-		<div class="mb-8 flex h-32 w-32 items-center justify-center rounded-3xl bg-gradient-to-br {slides[currentStep].color} shadow-2xl">
+		<div
+			class="mb-8 flex h-32 w-32 items-center justify-center rounded-3xl bg-gradient-to-br {slides[
+				currentStep
+			].color} shadow-2xl"
+		>
 			{#if slides[currentStep].icon === 'sparkles'}
 				<svg class="h-16 w-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="1.5"
+						d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+					/>
 				</svg>
 			{:else if slides[currentStep].icon === 'users'}
 				<svg class="h-16 w-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="1.5"
+						d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+					/>
 				</svg>
 			{:else if slides[currentStep].icon === 'book'}
 				<svg class="h-16 w-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="1.5"
+						d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+					/>
 				</svg>
 			{:else if slides[currentStep].icon === 'heart'}
 				<svg class="h-16 w-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="1.5"
+						d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+					/>
 				</svg>
 			{/if}
 		</div>
@@ -122,7 +151,9 @@
 			{#each slides as _, index}
 				<button
 					onclick={() => (currentStep = index)}
-					class="h-2.5 rounded-full transition-all duration-300 {currentStep === index ? 'w-8 bg-gradient-to-r ' + slides[currentStep].color : 'w-2.5 bg-gray-300 dark:bg-gray-600'}"
+					class="h-2.5 rounded-full transition-all duration-300 {currentStep === index
+						? 'w-8 bg-gradient-to-r ' + slides[currentStep].color
+						: 'w-2.5 bg-gray-300 dark:bg-gray-600'}"
 					aria-label="Gehe zu Schritt {index + 1}"
 				></button>
 			{/each}
@@ -141,7 +172,8 @@
 
 		<button
 			onclick={nextStep}
-			class="rounded-xl bg-gradient-to-r {slides[currentStep].color} px-8 py-3 text-sm font-medium text-white shadow-lg transition-transform hover:scale-105"
+			class="rounded-xl bg-gradient-to-r {slides[currentStep]
+				.color} px-8 py-3 text-sm font-medium text-white shadow-lg transition-transform hover:scale-105"
 		>
 			{currentStep === slides.length - 1 ? 'Loslegen' : 'Weiter'}
 		</button>

@@ -14,10 +14,10 @@
 
 	let { card, onSave, onCancel }: Props = $props();
 
-	let editingCard = $state<Card>({ 
+	let editingCard = $state<Card>({
 		...card,
 		metadata: card.metadata || {},
-		constraints: card.constraints || {}
+		constraints: card.constraints || {},
 	});
 	let activeTab = $state<'config' | 'metadata' | 'preview'>('config');
 	let validationErrors = $state<string[]>([]);
@@ -26,7 +26,7 @@
 	const modes = [
 		{ value: 'beginner', label: 'Beginner', description: 'Visual modules' },
 		{ value: 'advanced', label: 'Advanced', description: 'HTML templates' },
-		{ value: 'expert', label: 'Expert', description: 'Custom HTML/CSS' }
+		{ value: 'expert', label: 'Expert', description: 'Custom HTML/CSS' },
 	];
 
 	// Validate card on changes
@@ -48,7 +48,7 @@
 				newConfig = {
 					mode: 'beginner',
 					modules: [],
-					layout: { columns: 1, gap: '1rem', padding: '1.5rem' }
+					layout: { columns: 1, gap: '1rem', padding: '1.5rem' },
 				};
 				break;
 			case 'advanced':
@@ -58,14 +58,14 @@
 						'<div class="card-content">\n  <h2>{{title}}</h2>\n  <p>{{content}}</p>\n</div>',
 					css: '',
 					variables: [],
-					values: {}
+					values: {},
 				};
 				break;
 			case 'expert':
 				newConfig = {
 					mode: 'expert',
 					html: '<div class="card-content">\n  <h2>Title</h2>\n  <p>Content</p>\n</div>',
-					css: '.card-content { padding: 1.5rem; }'
+					css: '.card-content { padding: 1.5rem; }',
 				};
 				break;
 			default:
@@ -74,7 +74,7 @@
 
 		editingCard = {
 			...editingCard,
-			config: newConfig
+			config: newConfig,
 		};
 	}
 
@@ -95,7 +95,7 @@
 			id: `module_${Date.now()}`,
 			type,
 			props: {},
-			order: editingCard.config.modules.length
+			order: editingCard.config.modules.length,
 		};
 
 		editingCard.config.modules = [...editingCard.config.modules, newModule];

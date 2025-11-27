@@ -15,7 +15,7 @@
 	let showDropdown = $state(false);
 	let accounts = $derived($accountsStore);
 	let currentAccount = $derived($currentViewingAccount);
-	
+
 	function toggleDropdown() {
 		showDropdown = !showDropdown;
 	}
@@ -35,7 +35,7 @@
 		if (!account) return 'Unknown';
 		return account.name || account.username || account.email;
 	}
-	
+
 	function addAccount() {
 		showDropdown = false;
 		// Navigate to login page for adding existing account
@@ -59,20 +59,32 @@
 			<span class="max-w-[150px] truncate">
 				{getAccountDisplayName(currentAccount)}
 			</span>
-			<ChevronDown class="h-4 w-4 text-theme-text-muted transition-transform {showDropdown ? 'rotate-180' : ''}" />
+			<ChevronDown
+				class="h-4 w-4 text-theme-text-muted transition-transform {showDropdown
+					? 'rotate-180'
+					: ''}"
+			/>
 		{:else if accounts.currentUser}
 			<User class="h-4 w-4 text-theme-text-muted" />
 			<span class="max-w-[150px] truncate">
 				{getAccountDisplayName(accounts.currentUser)}
 			</span>
-			<ChevronDown class="h-4 w-4 text-theme-text-muted transition-transform {showDropdown ? 'rotate-180' : ''}" />
+			<ChevronDown
+				class="h-4 w-4 text-theme-text-muted transition-transform {showDropdown
+					? 'rotate-180'
+					: ''}"
+			/>
 		{/if}
 	</button>
 
 	{#if showDropdown}
 		<div
 			transition:scale={{ duration: 200, start: 0.95 }}
-			class="absolute z-50 {position === 'left-outside' ? 'left-0 top-full mt-2' : 'right-0 mt-2'} w-72 {position === 'left-outside' ? 'origin-top-left' : 'origin-top-right'} rounded-lg border border-theme-border bg-theme-surface shadow-xl"
+			class="absolute z-50 {position === 'left-outside'
+				? 'left-0 top-full mt-2'
+				: 'right-0 mt-2'} w-72 {position === 'left-outside'
+				? 'origin-top-left'
+				: 'origin-top-right'} rounded-lg border border-theme-border bg-theme-surface shadow-xl"
 		>
 			<!-- Personal Account Section -->
 			{#if accounts.currentUser}
@@ -85,7 +97,7 @@
 						class="group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-theme-surface-hover"
 					>
 						<User class="h-5 w-5 text-theme-text-muted" />
-						<div class="flex-1 min-w-0">
+						<div class="min-w-0 flex-1">
 							<div class="text-sm font-medium text-theme-text">
 								{getAccountDisplayName(accounts.currentUser)}
 							</div>
@@ -99,7 +111,7 @@
 					</button>
 				</div>
 			{/if}
-			
+
 			<!-- Team Accounts Section -->
 			{#if accounts.sharedAccounts && accounts.sharedAccounts.length > 0}
 				<div class="border-b border-theme-border p-2">
@@ -113,7 +125,7 @@
 								class="group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-theme-surface-hover"
 							>
 								<Users class="h-5 w-5 text-purple-500" />
-								<div class="flex-1 min-w-0">
+								<div class="min-w-0 flex-1">
 									<div class="text-sm font-medium text-theme-text">
 										{getAccountDisplayName(shared.expand.owner)}
 									</div>
@@ -121,7 +133,9 @@
 										<span class="text-theme-text-muted">
 											@{shared.expand.owner.username}
 										</span>
-										<span class="rounded-full bg-purple-100 dark:bg-purple-900/20 px-1.5 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400">
+										<span
+											class="rounded-full bg-purple-100 px-1.5 py-0.5 text-xs font-medium text-purple-600 dark:bg-purple-900/20 dark:text-purple-400"
+										>
 											{m.account_team_member()}
 										</span>
 									</div>
@@ -144,20 +158,19 @@
 					</p>
 				</div>
 			{/if}
-			
+
 			<!-- Add Account Button -->
 			<div class="border-t border-theme-border p-2">
 				<button
 					onclick={addAccount}
-					class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-theme-primary/10"
+					class="hover:bg-theme-primary/10 flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all"
 				>
-					<div class="flex h-5 w-5 items-center justify-center rounded-full bg-theme-primary/10">
+					<div class="bg-theme-primary/10 flex h-5 w-5 items-center justify-center rounded-full">
 						<UserPlus class="h-3.5 w-3.5 text-theme-primary" />
 					</div>
 					<span class="text-theme-text">{m.account_add_account()}</span>
 				</button>
 			</div>
-
 		</div>
 	{/if}
 </div>

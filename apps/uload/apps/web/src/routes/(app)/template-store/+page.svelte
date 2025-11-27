@@ -27,7 +27,7 @@
 		{ value: 'minimal', label: 'Minimal' },
 		{ value: 'social', label: 'Social' },
 		{ value: 'portfolio', label: 'Portfolio' },
-		{ value: 'other', label: 'Other' }
+		{ value: 'other', label: 'Other' },
 	];
 
 	// Load templates
@@ -143,7 +143,7 @@
 				await navigator.share({
 					title: name,
 					text: description || `Check out this card template: ${name}`,
-					url
+					url,
 				});
 			} catch (error) {
 				console.error('Error sharing:', error);
@@ -196,10 +196,10 @@
 					type="text"
 					bind:value={searchQuery}
 					placeholder="Search templates by name, description, or tags..."
-					class="w-full rounded-lg border border-theme-border bg-theme-surface px-4 py-2 pl-10 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+					class="w-full rounded-lg border border-theme-border bg-theme-surface px-4 py-2 pl-10 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 				/>
 				<svg
-					class="absolute top-2.5 left-3 h-5 w-5 text-theme-text-muted"
+					class="absolute left-3 top-2.5 h-5 w-5 text-theme-text-muted"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -233,7 +233,7 @@
 				<!-- Sort Dropdown -->
 				<select
 					bind:value={sortBy}
-					class="rounded-lg border border-theme-border bg-theme-surface px-4 py-2 text-sm text-theme-text focus:ring-2 focus:ring-theme-accent focus:outline-none"
+					class="rounded-lg border border-theme-border bg-theme-surface px-4 py-2 text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-theme-accent"
 				>
 					<option value="popular">Most Popular</option>
 					<option value="recent">Most Recent</option>

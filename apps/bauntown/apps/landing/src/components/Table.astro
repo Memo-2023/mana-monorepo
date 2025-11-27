@@ -1,795 +1,854 @@
 ---
 export interface Column {
-  key: string;
-  title: string;
-  subtitle?: string;
-  width?: string;
-  formatter?: (value: any) => string;
-  align?: 'left' | 'center' | 'right';
-  sticky?: boolean;
+	key: string;
+	title: string;
+	subtitle?: string;
+	width?: string;
+	formatter?: (value: any) => string;
+	align?: 'left' | 'center' | 'right';
+	sticky?: boolean;
 }
 
 export interface TableProps {
-  data: any[];
-  columns: Column[];
-  stickyHeader?: boolean;
-  stickyFirstColumn?: boolean;
-  maxHeight?: string;
-  sortable?: boolean;
-  searchable?: boolean;
-  caption?: string;
-  id?: string;
-  className?: string;
+	data: any[];
+	columns: Column[];
+	stickyHeader?: boolean;
+	stickyFirstColumn?: boolean;
+	maxHeight?: string;
+	sortable?: boolean;
+	searchable?: boolean;
+	caption?: string;
+	id?: string;
+	className?: string;
 }
 
 const {
-  data,
-  columns,
-  stickyHeader = true,
-  stickyFirstColumn = false,
-  maxHeight = "70vh",
-  sortable = false,
-  searchable = false,
-  caption,
-  id,
-  className = ""
+	data,
+	columns,
+	stickyHeader = true,
+	stickyFirstColumn = false,
+	maxHeight = '70vh',
+	sortable = false,
+	searchable = false,
+	caption,
+	id,
+	className = '',
 } = Astro.props as TableProps;
 
 // Ensure first column is sticky if stickyFirstColumn is true
 const processedColumns = columns.map((col, index) => ({
-  ...col,
-  sticky: index === 0 ? stickyFirstColumn || col.sticky : col.sticky
+	...col,
+	sticky: index === 0 ? stickyFirstColumn || col.sticky : col.sticky,
 }));
 
 // Default formatter function
 const defaultFormatter = (value: any) => {
-  if (value === undefined || value === null) return "-";
-  if (typeof value === 'number') return value.toString();
-  return value;
+	if (value === undefined || value === null) return '-';
+	if (typeof value === 'number') return value.toString();
+	return value;
 };
 ---
 
 <div class={`table-component ${className}`} id={id}>
-  {caption && <h2 class="table-caption">{caption}</h2>}
-  
-  {searchable && 
-    <div class="search-container">
-      <input type="text" placeholder="Suchen..." class="search-input" />
-    </div>
-  }
-  
-  <div class="table-outer-container" style={`max-height: ${maxHeight};`}>
-    <!-- Fixed corner (top-left) if both sticky header and first column -->
-    {stickyHeader && stickyFirstColumn && 
-      <div class="corner-header">
-        {processedColumns[0]?.title || ""}
-        {processedColumns[0]?.subtitle && 
-          <div class="subtitle">{processedColumns[0].subtitle}</div>
-        }
-      </div>
-    }
-    
-    <!-- Fixed header row (without first cell if stickyFirstColumn is true) -->
-    {stickyHeader && 
-      <div class="header-container">
-        <table class="header-table">
-          <tr>
-            {processedColumns.map((column, index) => (
-              (!stickyFirstColumn || index > 0) && 
-              <th 
-                class:list={[
-                  { 'sortable': sortable },
-                  { 'sorted-asc': false },
-                  { 'sorted-desc': false }
-                ]}
-                data-key={column.key}
-                style={column.width ? `min-width: ${column.width}; width: ${column.width}` : 'min-width: 120px; width: 120px;'}
-                data-align={column.align || 'left'}
-              >
-                {column.title}
-                {column.subtitle && <div class="subtitle">{column.subtitle}</div>}
-                {sortable && <span class="sort-icon"></span>}
-              </th>
-            ))}
-          </tr>
-        </table>
-      </div>
-    }
-    
-    <!-- Fixed first column (without header cell if stickyHeader is true) -->
-    {stickyFirstColumn && 
-      <div class="first-col-container">
-        <table class="first-col-table">
-          {data.map((item, rowIndex) => (
-            <tr data-row-index={rowIndex}>
-              <td 
-                class="cell-content"
-                style={processedColumns[0]?.width ? `min-width: ${processedColumns[0].width}; width: ${processedColumns[0].width}` : 'min-width: 150px; width: 150px;'}
-                data-align={processedColumns[0]?.align || 'left'}
-                title={processedColumns[0] ? (processedColumns[0].formatter ? processedColumns[0].formatter(item[processedColumns[0].key]) : defaultFormatter(item[processedColumns[0].key])) : ""}
-              >
-                {processedColumns[0] ? (
-                  processedColumns[0].formatter 
-                    ? processedColumns[0].formatter(item[processedColumns[0].key]) 
-                    : defaultFormatter(item[processedColumns[0].key])
-                ) : ""}
-              </td>
-            </tr>
-          ))}
-        </table>
-      </div>
-    }
-    
-    <!-- Main scrollable content -->
-    <div class="main-container">
-      <table class="main-table">
-        {!stickyHeader && 
-          <thead>
-            <tr>
-              {processedColumns.map((column) => (
-                <th 
-                  class:list={[
-                    { 'sortable': sortable },
-                    { 'sorted-asc': false },
-                    { 'sorted-desc': false },
-                    { 'sticky-col': column.sticky }
-                  ]}
-                  data-key={column.key}
-                  style={column.width ? `min-width: ${column.width}; width: ${column.width}` : 'min-width: 120px;'}
-                  data-align={column.align || 'left'}
-                >
-                  {column.title}
-                  {column.subtitle && <div class="subtitle">{column.subtitle}</div>}
-                  {sortable && <span class="sort-icon"></span>}
-                </th>
-              ))}
-            </tr>
-          </thead>
-        }
-        <tbody>
-          {data.map((item, rowIndex) => (
-            <tr data-row-index={rowIndex}>
-              {processedColumns.map((column, colIndex) => (
-                (!stickyFirstColumn || colIndex > 0) && 
-                <td 
-                  class:list={[{ 'sticky-col': column.sticky }, 'cell-content']}
-                  style={column.width ? `min-width: ${column.width}; width: ${column.width}` : 'min-width: 120px; width: 120px;'}
-                  data-align={column.align || 'left'}
-                  title={column.formatter ? column.formatter(item[column.key]) : defaultFormatter(item[column.key])}
-                >
-                  {column.formatter 
-                    ? column.formatter(item[column.key]) 
-                    : defaultFormatter(item[column.key])}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
+	{caption && <h2 class="table-caption">{caption}</h2>}
+
+	{
+		searchable && (
+			<div class="search-container">
+				<input type="text" placeholder="Suchen..." class="search-input" />
+			</div>
+		)
+	}
+
+	<div class="table-outer-container" style={`max-height: ${maxHeight};`}>
+		<!-- Fixed corner (top-left) if both sticky header and first column -->
+		{
+			stickyHeader && stickyFirstColumn && (
+				<div class="corner-header">
+					{processedColumns[0]?.title || ''}
+					{processedColumns[0]?.subtitle && (
+						<div class="subtitle">{processedColumns[0].subtitle}</div>
+					)}
+				</div>
+			)
+		}
+
+		<!-- Fixed header row (without first cell if stickyFirstColumn is true) -->
+		{
+			stickyHeader && (
+				<div class="header-container">
+					<table class="header-table">
+						<tr>
+							{processedColumns.map(
+								(column, index) =>
+									(!stickyFirstColumn || index > 0) && (
+										<th
+											class:list={[
+												{ sortable: sortable },
+												{ 'sorted-asc': false },
+												{ 'sorted-desc': false },
+											]}
+											data-key={column.key}
+											style={
+												column.width
+													? `min-width: ${column.width}; width: ${column.width}`
+													: 'min-width: 120px; width: 120px;'
+											}
+											data-align={column.align || 'left'}
+										>
+											{column.title}
+											{column.subtitle && <div class="subtitle">{column.subtitle}</div>}
+											{sortable && <span class="sort-icon" />}
+										</th>
+									)
+							)}
+						</tr>
+					</table>
+				</div>
+			)
+		}
+
+		<!-- Fixed first column (without header cell if stickyHeader is true) -->
+		{
+			stickyFirstColumn && (
+				<div class="first-col-container">
+					<table class="first-col-table">
+						{data.map((item, rowIndex) => (
+							<tr data-row-index={rowIndex}>
+								<td
+									class="cell-content"
+									style={
+										processedColumns[0]?.width
+											? `min-width: ${processedColumns[0].width}; width: ${processedColumns[0].width}`
+											: 'min-width: 150px; width: 150px;'
+									}
+									data-align={processedColumns[0]?.align || 'left'}
+									title={
+										processedColumns[0]
+											? processedColumns[0].formatter
+												? processedColumns[0].formatter(item[processedColumns[0].key])
+												: defaultFormatter(item[processedColumns[0].key])
+											: ''
+									}
+								>
+									{processedColumns[0]
+										? processedColumns[0].formatter
+											? processedColumns[0].formatter(item[processedColumns[0].key])
+											: defaultFormatter(item[processedColumns[0].key])
+										: ''}
+								</td>
+							</tr>
+						))}
+					</table>
+				</div>
+			)
+		}
+
+		<!-- Main scrollable content -->
+		<div class="main-container">
+			<table class="main-table">
+				{
+					!stickyHeader && (
+						<thead>
+							<tr>
+								{processedColumns.map((column) => (
+									<th
+										class:list={[
+											{ sortable: sortable },
+											{ 'sorted-asc': false },
+											{ 'sorted-desc': false },
+											{ 'sticky-col': column.sticky },
+										]}
+										data-key={column.key}
+										style={
+											column.width
+												? `min-width: ${column.width}; width: ${column.width}`
+												: 'min-width: 120px;'
+										}
+										data-align={column.align || 'left'}
+									>
+										{column.title}
+										{column.subtitle && <div class="subtitle">{column.subtitle}</div>}
+										{sortable && <span class="sort-icon" />}
+									</th>
+								))}
+							</tr>
+						</thead>
+					)
+				}
+				<tbody>
+					{
+						data.map((item, rowIndex) => (
+							<tr data-row-index={rowIndex}>
+								{processedColumns.map(
+									(column, colIndex) =>
+										(!stickyFirstColumn || colIndex > 0) && (
+											<td
+												class:list={[{ 'sticky-col': column.sticky }, 'cell-content']}
+												style={
+													column.width
+														? `min-width: ${column.width}; width: ${column.width}`
+														: 'min-width: 120px; width: 120px;'
+												}
+												data-align={column.align || 'left'}
+												title={
+													column.formatter
+														? column.formatter(item[column.key])
+														: defaultFormatter(item[column.key])
+												}
+											>
+												{column.formatter
+													? column.formatter(item[column.key])
+													: defaultFormatter(item[column.key])}
+											</td>
+										)
+								)}
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
 </div>
 
 <style>
-  /* Container styles */
-  .table-component {
-    margin-bottom: 2.5rem;
-    background: var(--background-secondary, #f8fafc);
-    border-radius: 1rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    padding: 2rem 0;
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-    color: var(--text-color, #1e293b);
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-  
-  /* Dark mode styles */
-  :global(.dark) .table-component {
-    background: var(--card-bg, #1e293b);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  }
-  
-  .table-caption {
-    text-align: center;
-    margin: 0 0 1.5rem;
-    padding: 0 2rem;
-    color: var(--text-color, #1e293b);
-  }
-  
-  /* Search container */
-  .search-container {
-    padding: 0 2rem 1rem;
-  }
-  
-  .search-input {
-    width: 100%;
-    max-width: 300px;
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border-color, #e2e8f0);
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    background-color: var(--background-color, #ffffff);
-    color: var(--text-color, #1e293b);
-  }
-  
-  :global(.dark) .search-input {
-    background-color: var(--card-bg, #1e293b);
-    border-color: var(--border-color, #334155);
-  }
-  
-  /* Outer container for the table components */
-  .table-outer-container {
-    position: relative;
-    margin: 0 1rem;
-    height: 70vh;
-    overflow: hidden;
-  }
-  
-  /* Corner header (top-left cell) */
-  .corner-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 150px;
-    height: 60px;
-    background-color: var(--background-tertiary, #edf2f7);
-    font-weight: 700;
-    padding: 0.75rem 1.25rem;
-    border-bottom: 2px solid var(--border-color, #e2e8f0);
-    border-right: 2px solid var(--border-color, #e2e8f0);
-    z-index: 3;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-  }
-  
-  :global(.dark) .corner-header {
-    background-color: var(--card-bg, #1e293b);
-    border-color: var(--border-color, #334155);
-    box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-  }
-  
-  .corner-header .subtitle {
-    font-size: 0.8rem;
-    font-weight: 400;
-    opacity: 0.8;
-    margin-top: 0.25rem;
-  }
-  
-  /* Header row container */
-  .header-container {
-    position: absolute;
-    top: 0;
-    left: 150px; /* Width of first column */
-    right: 0;
-    height: 60px; /* Height of header */
-    overflow-x: auto;
-    overflow-y: hidden;
-    z-index: 2;
-    border-bottom: 2px solid var(--border-color, #e2e8f0);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    background-color: var(--background-tertiary, #edf2f7);
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-  }
-  
-  :global(.dark) .header-container {
-    background-color: var(--card-bg, #1e293b);
-    border-color: var(--border-color, #334155);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-  
-  /* First column container */
-  .first-col-container {
-    position: absolute;
-    top: 60px; /* Height of header */
-    left: 0;
-    width: 150px; /* Width of first column */
-    bottom: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    z-index: 1;
-    border-right: 2px solid var(--border-color, #e2e8f0);
-    box-shadow: 2px 0 4px rgba(0,0,0,0.1);
-    background-color: var(--background-tertiary, #edf2f7);
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-  }
-  
-  :global(.dark) .first-col-container {
-    background-color: var(--card-bg, #1e293b);
-    border-color: var(--border-color, #334155);
-    box-shadow: 2px 0 4px rgba(0,0,0,0.2);
-  }
-  
-  /* Main content container */
-  .main-container {
-    position: absolute;
-    top: 60px; /* Height of header */
-    left: 150px; /* Width of first column */
-    right: 0;
-    bottom: 0;
-    overflow: auto;
-    z-index: 0;
-    background-color: var(--background-secondary, #f8fafc);
-    transition: background-color 0.3s ease;
-  }
-  
-  :global(.dark) .main-container {
-    background-color: var(--background-color, #0f172a);
-  }
-  
-  /* Adjust positions when no sticky first column */
-  :global(.table-component:not(.sticky-first-column)) .header-container {
-    left: 0;
-  }
-  
-  :global(.table-component:not(.sticky-first-column)) .main-container {
-    left: 0;
-  }
-  
-  /* Adjust positions when no sticky header */
-  :global(.table-component:not(.sticky-header)) .first-col-container {
-    top: 0;
-  }
-  
-  :global(.table-component:not(.sticky-header)) .main-container {
-    top: 0;
-  }
-  
-  /* Table styles */
-  .header-table,
-  .first-col-table,
-  .main-table {
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-  }
-  
-  /* Header table specific */
-  .header-table {
-    table-layout: fixed;
-    width: auto;
-  }
-  
-  /* Main table specific */
-  .main-table {
-    table-layout: fixed;
-    width: auto;
-  }
-  
-  .header-table th,
-  .main-table th {
-    padding: 0.75rem 1.25rem;
-    text-align: left;
-    white-space: nowrap;
-    min-width: 120px;
-    font-weight: 700;
-    vertical-align: top;
-    background-color: var(--background-tertiary, #edf2f7);
-    position: relative;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  :global(.dark) .header-table th,
-  :global(.dark) .main-table th {
-    background-color: var(--card-bg, #1e293b);
-    color: var(--text-color, #f1f5f9);
-  }
-  
-  /* Alignment */
-  [data-align="center"] {
-    text-align: center;
-  }
-  
-  [data-align="right"] {
-    text-align: right;
-  }
-  
-  /* First column table specific */
-  .first-col-table td {
-    padding: 0.75rem 1.25rem;
-    text-align: left;
-    white-space: nowrap;
-    border-bottom: 1px solid var(--border-color, #e2e8f0);
-    font-weight: 600;
-    background-color: var(--background-tertiary, #edf2f7);
-    height: 57px; /* Match height of main table rows */
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-  }
-  
-  :global(.dark) .first-col-table td {
-    background-color: var(--card-bg, #1e293b);
-    border-color: var(--border-color, #334155);
-    color: var(--text-color, #f1f5f9);
-  }
-  
-  /* Main table specific */
-  .main-table td {
-    padding: 0.75rem 1.25rem;
-    text-align: left;
-    white-space: nowrap;
-    border-bottom: 1px solid var(--border-color, #e2e8f0);
-    min-width: 120px;
-    transition: border-color 0.3s ease, color 0.3s ease;
-  }
-  
-  :global(.dark) .main-table td {
-    border-color: var(--border-color, #334155);
-    color: var(--text-color, #f1f5f9);
-  }
-  
-  /* Cell content with ellipsis */
-  .cell-content {
-    position: relative;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    white-space: nowrap;
-  }
-  
-  .cell-content:hover,
-  .cell-content:focus,
-  .cell-content:active {
-    overflow: visible;
-    white-space: normal;
-    word-break: break-word;
-    z-index: 10;
-  }
-  
-  /* Tooltip for cell content on hover */
-  .cell-content[title]:hover::after {
-    content: attr(title);
-    position: absolute;
-    left: 0;
-    top: 100%;
-    background-color: var(--background-color, #ffffff);
-    color: var(--text-color, #1e293b);
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    z-index: 20;
-    min-width: 200px;
-    max-width: 300px;
-    white-space: normal;
-    word-break: break-word;
-    border: 1px solid var(--border-color, #e2e8f0);
-  }
-  
-  :global(.dark) .cell-content[title]:hover::after {
-    background-color: var(--card-bg, #1e293b);
-    color: var(--text-color, #f1f5f9);
-    border-color: var(--border-color, #334155);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-  }
-  
-  /* Sticky column in main table */
-  .main-table .sticky-col {
-    position: sticky;
-    left: 0;
-    background-color: var(--background-tertiary, #edf2f7);
-    z-index: 1;
-    box-shadow: 2px 0 4px rgba(0,0,0,0.1);
-    transition: background-color 0.3s ease;
-  }
-  
-  :global(.dark) .main-table .sticky-col {
-    background-color: var(--card-bg, #1e293b);
-    box-shadow: 2px 0 4px rgba(0,0,0,0.2);
-  }
-  
-  /* Subtitle in header */
-  .subtitle {
-    font-size: 0.8rem;
-    font-weight: 400;
-    opacity: 0.8;
-    margin-top: 0.25rem;
-  }
-  
-  /* Sortable columns */
-  .sortable {
-    cursor: pointer;
-    user-select: none;
-    transition: background-color 0.2s ease;
-  }
-  
-  .sortable:hover {
-    background-color: var(--hover-bg, rgba(243, 244, 246, 0.8));
-  }
-  
-  :global(.dark) .sortable:hover {
-    background-color: var(--hover-bg, rgba(30, 41, 59, 0.8));
-  }
-  
-  .sort-icon {
-    display: inline-block;
-    width: 0.8rem;
-    height: 0.8rem;
-    margin-left: 0.5rem;
-    position: relative;
-    opacity: 0.3;
-  }
-  
-  .sort-icon::before,
-  .sort-icon::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    width: 0;
-    height: 0;
-  }
-  
-  .sort-icon::before {
-    top: 0;
-    border-left: 0.4rem solid transparent;
-    border-right: 0.4rem solid transparent;
-    border-bottom: 0.4rem solid currentColor;
-  }
-  
-  .sort-icon::after {
-    bottom: 0;
-    border-left: 0.4rem solid transparent;
-    border-right: 0.4rem solid transparent;
-    border-top: 0.4rem solid currentColor;
-  }
-  
-  .sorted-asc .sort-icon::before {
-    opacity: 1;
-  }
-  
-  .sorted-desc .sort-icon::after {
-    opacity: 1;
-  }
-  
-  /* Custom scrollbar */
-  .header-container::-webkit-scrollbar,
-  .first-col-container::-webkit-scrollbar,
-  .main-container::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
-  }
-  
-  .header-container::-webkit-scrollbar-track,
-  .first-col-container::-webkit-scrollbar-track,
-  .main-container::-webkit-scrollbar-track {
-    background: var(--background-secondary, #f8fafc);
-  }
-  
-  .header-container::-webkit-scrollbar-thumb,
-  .first-col-container::-webkit-scrollbar-thumb,
-  .main-container::-webkit-scrollbar-thumb {
-    background-color: var(--border-color, #e2e8f0);
-    border-radius: 4px;
-  }
-  
-  :global(.dark) .header-container::-webkit-scrollbar-track,
-  :global(.dark) .first-col-container::-webkit-scrollbar-track,
-  :global(.dark) .main-container::-webkit-scrollbar-track {
-    background: var(--background-color, #0f172a);
-  }
-  
-  :global(.dark) .header-container::-webkit-scrollbar-thumb,
-  :global(.dark) .first-col-container::-webkit-scrollbar-thumb,
-  :global(.dark) .main-container::-webkit-scrollbar-thumb {
-    background-color: var(--border-color, #334155);
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .table-component {
-      width: calc(100vw - 2rem);
-      margin-left: calc(-50vw + 1rem);
-      margin-right: calc(-50vw + 1rem);
-    }
-    
-    .corner-header,
-    .first-col-container {
-      width: 120px;
-    }
-    
-    .header-container,
-    .main-container {
-      left: 120px;
-    }
-  }
+	/* Container styles */
+	.table-component {
+		margin-bottom: 2.5rem;
+		background: var(--background-secondary, #f8fafc);
+		border-radius: 1rem;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+		padding: 2rem 0;
+		width: 100%;
+		position: relative;
+		overflow: hidden;
+		color: var(--text-color, #1e293b);
+		transition:
+			background-color 0.3s ease,
+			color 0.3s ease;
+	}
+
+	/* Dark mode styles */
+	:global(.dark) .table-component {
+		background: var(--card-bg, #1e293b);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+	}
+
+	.table-caption {
+		text-align: center;
+		margin: 0 0 1.5rem;
+		padding: 0 2rem;
+		color: var(--text-color, #1e293b);
+	}
+
+	/* Search container */
+	.search-container {
+		padding: 0 2rem 1rem;
+	}
+
+	.search-input {
+		width: 100%;
+		max-width: 300px;
+		padding: 0.5rem 1rem;
+		border: 1px solid var(--border-color, #e2e8f0);
+		border-radius: 0.5rem;
+		font-size: 1rem;
+		background-color: var(--background-color, #ffffff);
+		color: var(--text-color, #1e293b);
+	}
+
+	:global(.dark) .search-input {
+		background-color: var(--card-bg, #1e293b);
+		border-color: var(--border-color, #334155);
+	}
+
+	/* Outer container for the table components */
+	.table-outer-container {
+		position: relative;
+		margin: 0 1rem;
+		height: 70vh;
+		overflow: hidden;
+	}
+
+	/* Corner header (top-left cell) */
+	.corner-header {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 150px;
+		height: 60px;
+		background-color: var(--background-tertiary, #edf2f7);
+		font-weight: 700;
+		padding: 0.75rem 1.25rem;
+		border-bottom: 2px solid var(--border-color, #e2e8f0);
+		border-right: 2px solid var(--border-color, #e2e8f0);
+		z-index: 3;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+		transition:
+			background-color 0.3s ease,
+			border-color 0.3s ease;
+	}
+
+	:global(.dark) .corner-header {
+		background-color: var(--card-bg, #1e293b);
+		border-color: var(--border-color, #334155);
+		box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+	}
+
+	.corner-header .subtitle {
+		font-size: 0.8rem;
+		font-weight: 400;
+		opacity: 0.8;
+		margin-top: 0.25rem;
+	}
+
+	/* Header row container */
+	.header-container {
+		position: absolute;
+		top: 0;
+		left: 150px; /* Width of first column */
+		right: 0;
+		height: 60px; /* Height of header */
+		overflow-x: auto;
+		overflow-y: hidden;
+		z-index: 2;
+		border-bottom: 2px solid var(--border-color, #e2e8f0);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		background-color: var(--background-tertiary, #edf2f7);
+		transition:
+			background-color 0.3s ease,
+			border-color 0.3s ease;
+	}
+
+	:global(.dark) .header-container {
+		background-color: var(--card-bg, #1e293b);
+		border-color: var(--border-color, #334155);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	}
+
+	/* First column container */
+	.first-col-container {
+		position: absolute;
+		top: 60px; /* Height of header */
+		left: 0;
+		width: 150px; /* Width of first column */
+		bottom: 0;
+		overflow-x: hidden;
+		overflow-y: auto;
+		z-index: 1;
+		border-right: 2px solid var(--border-color, #e2e8f0);
+		box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+		background-color: var(--background-tertiary, #edf2f7);
+		transition:
+			background-color 0.3s ease,
+			border-color 0.3s ease;
+	}
+
+	:global(.dark) .first-col-container {
+		background-color: var(--card-bg, #1e293b);
+		border-color: var(--border-color, #334155);
+		box-shadow: 2px 0 4px rgba(0, 0, 0, 0.2);
+	}
+
+	/* Main content container */
+	.main-container {
+		position: absolute;
+		top: 60px; /* Height of header */
+		left: 150px; /* Width of first column */
+		right: 0;
+		bottom: 0;
+		overflow: auto;
+		z-index: 0;
+		background-color: var(--background-secondary, #f8fafc);
+		transition: background-color 0.3s ease;
+	}
+
+	:global(.dark) .main-container {
+		background-color: var(--background-color, #0f172a);
+	}
+
+	/* Adjust positions when no sticky first column */
+	:global(.table-component:not(.sticky-first-column)) .header-container {
+		left: 0;
+	}
+
+	:global(.table-component:not(.sticky-first-column)) .main-container {
+		left: 0;
+	}
+
+	/* Adjust positions when no sticky header */
+	:global(.table-component:not(.sticky-header)) .first-col-container {
+		top: 0;
+	}
+
+	:global(.table-component:not(.sticky-header)) .main-container {
+		top: 0;
+	}
+
+	/* Table styles */
+	.header-table,
+	.first-col-table,
+	.main-table {
+		border-collapse: separate;
+		border-spacing: 0;
+		width: 100%;
+	}
+
+	/* Header table specific */
+	.header-table {
+		table-layout: fixed;
+		width: auto;
+	}
+
+	/* Main table specific */
+	.main-table {
+		table-layout: fixed;
+		width: auto;
+	}
+
+	.header-table th,
+	.main-table th {
+		padding: 0.75rem 1.25rem;
+		text-align: left;
+		white-space: nowrap;
+		min-width: 120px;
+		font-weight: 700;
+		vertical-align: top;
+		background-color: var(--background-tertiary, #edf2f7);
+		position: relative;
+		transition:
+			background-color 0.3s ease,
+			color 0.3s ease;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	:global(.dark) .header-table th,
+	:global(.dark) .main-table th {
+		background-color: var(--card-bg, #1e293b);
+		color: var(--text-color, #f1f5f9);
+	}
+
+	/* Alignment */
+	[data-align='center'] {
+		text-align: center;
+	}
+
+	[data-align='right'] {
+		text-align: right;
+	}
+
+	/* First column table specific */
+	.first-col-table td {
+		padding: 0.75rem 1.25rem;
+		text-align: left;
+		white-space: nowrap;
+		border-bottom: 1px solid var(--border-color, #e2e8f0);
+		font-weight: 600;
+		background-color: var(--background-tertiary, #edf2f7);
+		height: 57px; /* Match height of main table rows */
+		transition:
+			background-color 0.3s ease,
+			border-color 0.3s ease,
+			color 0.3s ease;
+	}
+
+	:global(.dark) .first-col-table td {
+		background-color: var(--card-bg, #1e293b);
+		border-color: var(--border-color, #334155);
+		color: var(--text-color, #f1f5f9);
+	}
+
+	/* Main table specific */
+	.main-table td {
+		padding: 0.75rem 1.25rem;
+		text-align: left;
+		white-space: nowrap;
+		border-bottom: 1px solid var(--border-color, #e2e8f0);
+		min-width: 120px;
+		transition:
+			border-color 0.3s ease,
+			color 0.3s ease;
+	}
+
+	:global(.dark) .main-table td {
+		border-color: var(--border-color, #334155);
+		color: var(--text-color, #f1f5f9);
+	}
+
+	/* Cell content with ellipsis */
+	.cell-content {
+		position: relative;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 100%;
+		white-space: nowrap;
+	}
+
+	.cell-content:hover,
+	.cell-content:focus,
+	.cell-content:active {
+		overflow: visible;
+		white-space: normal;
+		word-break: break-word;
+		z-index: 10;
+	}
+
+	/* Tooltip for cell content on hover */
+	.cell-content[title]:hover::after {
+		content: attr(title);
+		position: absolute;
+		left: 0;
+		top: 100%;
+		background-color: var(--background-color, #ffffff);
+		color: var(--text-color, #1e293b);
+		padding: 0.5rem;
+		border-radius: 0.25rem;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+		z-index: 20;
+		min-width: 200px;
+		max-width: 300px;
+		white-space: normal;
+		word-break: break-word;
+		border: 1px solid var(--border-color, #e2e8f0);
+	}
+
+	:global(.dark) .cell-content[title]:hover::after {
+		background-color: var(--card-bg, #1e293b);
+		color: var(--text-color, #f1f5f9);
+		border-color: var(--border-color, #334155);
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+	}
+
+	/* Sticky column in main table */
+	.main-table .sticky-col {
+		position: sticky;
+		left: 0;
+		background-color: var(--background-tertiary, #edf2f7);
+		z-index: 1;
+		box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+		transition: background-color 0.3s ease;
+	}
+
+	:global(.dark) .main-table .sticky-col {
+		background-color: var(--card-bg, #1e293b);
+		box-shadow: 2px 0 4px rgba(0, 0, 0, 0.2);
+	}
+
+	/* Subtitle in header */
+	.subtitle {
+		font-size: 0.8rem;
+		font-weight: 400;
+		opacity: 0.8;
+		margin-top: 0.25rem;
+	}
+
+	/* Sortable columns */
+	.sortable {
+		cursor: pointer;
+		user-select: none;
+		transition: background-color 0.2s ease;
+	}
+
+	.sortable:hover {
+		background-color: var(--hover-bg, rgba(243, 244, 246, 0.8));
+	}
+
+	:global(.dark) .sortable:hover {
+		background-color: var(--hover-bg, rgba(30, 41, 59, 0.8));
+	}
+
+	.sort-icon {
+		display: inline-block;
+		width: 0.8rem;
+		height: 0.8rem;
+		margin-left: 0.5rem;
+		position: relative;
+		opacity: 0.3;
+	}
+
+	.sort-icon::before,
+	.sort-icon::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.sort-icon::before {
+		top: 0;
+		border-left: 0.4rem solid transparent;
+		border-right: 0.4rem solid transparent;
+		border-bottom: 0.4rem solid currentColor;
+	}
+
+	.sort-icon::after {
+		bottom: 0;
+		border-left: 0.4rem solid transparent;
+		border-right: 0.4rem solid transparent;
+		border-top: 0.4rem solid currentColor;
+	}
+
+	.sorted-asc .sort-icon::before {
+		opacity: 1;
+	}
+
+	.sorted-desc .sort-icon::after {
+		opacity: 1;
+	}
+
+	/* Custom scrollbar */
+	.header-container::-webkit-scrollbar,
+	.first-col-container::-webkit-scrollbar,
+	.main-container::-webkit-scrollbar {
+		height: 8px;
+		width: 8px;
+	}
+
+	.header-container::-webkit-scrollbar-track,
+	.first-col-container::-webkit-scrollbar-track,
+	.main-container::-webkit-scrollbar-track {
+		background: var(--background-secondary, #f8fafc);
+	}
+
+	.header-container::-webkit-scrollbar-thumb,
+	.first-col-container::-webkit-scrollbar-thumb,
+	.main-container::-webkit-scrollbar-thumb {
+		background-color: var(--border-color, #e2e8f0);
+		border-radius: 4px;
+	}
+
+	:global(.dark) .header-container::-webkit-scrollbar-track,
+	:global(.dark) .first-col-container::-webkit-scrollbar-track,
+	:global(.dark) .main-container::-webkit-scrollbar-track {
+		background: var(--background-color, #0f172a);
+	}
+
+	:global(.dark) .header-container::-webkit-scrollbar-thumb,
+	:global(.dark) .first-col-container::-webkit-scrollbar-thumb,
+	:global(.dark) .main-container::-webkit-scrollbar-thumb {
+		background-color: var(--border-color, #334155);
+	}
+
+	/* Responsive adjustments */
+	@media (max-width: 768px) {
+		.table-component {
+			width: calc(100vw - 2rem);
+			margin-left: calc(-50vw + 1rem);
+			margin-right: calc(-50vw + 1rem);
+		}
+
+		.corner-header,
+		.first-col-container {
+			width: 120px;
+		}
+
+		.header-container,
+		.main-container {
+			left: 120px;
+		}
+	}
 </style>
 
 <script>
-  // Synchronize scrolling between table sections
-  document.addEventListener('DOMContentLoaded', () => {
-    const tableComponents = document.querySelectorAll('.table-component');
-    
-    tableComponents.forEach(tableComponent => {
-      const mainContainer = tableComponent.querySelector('.main-container') as HTMLElement | null;
-      const headerContainer = tableComponent.querySelector('.header-container') as HTMLElement | null;
-      const firstColContainer = tableComponent.querySelector('.first-col-container') as HTMLElement | null;
-      
-      if (mainContainer && headerContainer) {
-        // Sync horizontal scrolling between main content and header
-        mainContainer.addEventListener('scroll', () => {
-          headerContainer.scrollLeft = mainContainer.scrollLeft;
-        });
-        
-        // Also allow scrolling from header
-        headerContainer.addEventListener('scroll', () => {
-          mainContainer.scrollLeft = headerContainer.scrollLeft;
-        });
-      }
-      
-      if (mainContainer && firstColContainer) {
-        // Sync vertical scrolling between main content and first column
-        mainContainer.addEventListener('scroll', () => {
-          firstColContainer.scrollTop = mainContainer.scrollTop;
-        });
-        
-        // Also allow scrolling from first column
-        firstColContainer.addEventListener('scroll', () => {
-          mainContainer.scrollTop = firstColContainer.scrollTop;
-        });
-      }
-      
-      // Ensure consistent row heights
-      function matchRowHeights() {
-        if (mainContainer && firstColContainer) {
-          const mainRows = mainContainer.querySelectorAll('tbody tr');
-          const firstColRows = firstColContainer.querySelectorAll('tr');
-          
-          if (mainRows.length === firstColRows.length) {
-            for (let i = 0; i < mainRows.length; i++) {
-              const mainRow = mainRows[i] as HTMLElement;
-              const firstColRow = firstColRows[i] as HTMLElement;
-              const height = Math.max(mainRow.offsetHeight, firstColRow.offsetHeight);
-              mainRow.style.height = `${height}px`;
-              firstColRow.style.height = `${height}px`;
-            }
-          }
-        }
-      }
-      
-      // Implement sorting if table is sortable
-      if (tableComponent.querySelector('.sortable')) {
-        const sortableHeaders = tableComponent.querySelectorAll('.sortable');
-        
-        sortableHeaders.forEach(header => {
-          header.addEventListener('click', () => {
-            const key = (header as HTMLElement).dataset.key;
-            const isAsc = header.classList.contains('sorted-asc');
-            
-            // Remove sorted classes from all headers
-            sortableHeaders.forEach(h => {
-              h.classList.remove('sorted-asc', 'sorted-desc');
-            });
-            
-            // Add appropriate class to clicked header
-            header.classList.add(isAsc ? 'sorted-desc' : 'sorted-asc');
-            
-            // Sort the data
-            if (mainContainer && key) {
-              sortTable(tableComponent, key, !isAsc);
-            }
-          });
-        });
-      }
-      
-      // Implement search if table is searchable
-      const searchInput = tableComponent.querySelector('.search-input') as HTMLInputElement | null;
-      if (searchInput) {
-        searchInput.addEventListener('input', () => {
-          filterTable(tableComponent, searchInput.value.toLowerCase());
-        });
-      }
-      
-      // Run once on load and on window resize
-      setTimeout(matchRowHeights, 100);
-      window.addEventListener('resize', matchRowHeights);
-    });
-  });
-  
-  // Sort table function
-  function sortTable(tableComponent: Element, key: string, ascending: boolean) {
-    const mainContainer = tableComponent.querySelector('.main-container');
-    const firstColContainer = tableComponent.querySelector('.first-col-container');
-    
-    if (!mainContainer) return;
-    
-    const rows = Array.from(mainContainer.querySelectorAll('tbody tr'));
-    const sortedRows = rows.sort((a, b) => {
-      const rowIndexA = parseInt((a as HTMLElement).dataset.rowIndex || '0');
-      const rowIndexB = parseInt((b as HTMLElement).dataset.rowIndex || '0');
-      
-      // Get the cells that contain the values to compare
-      const cells = mainContainer.querySelectorAll(`tbody tr[data-row-index="${rowIndexA}"] td`);
-      const cellsB = mainContainer.querySelectorAll(`tbody tr[data-row-index="${rowIndexB}"] td`);
-      
-      // Find the index of the column with the specified key
-      const headers = tableComponent.querySelectorAll('th[data-key]');
-      let columnIndex = -1;
-      
-      headers.forEach((header, index) => {
-        if ((header as HTMLElement).dataset.key === key) {
-          columnIndex = index;
-        }
-      });
-      
-      if (columnIndex === -1) return 0;
-      
-      // Get the values to compare
-      const valueA = cells[columnIndex]?.textContent?.trim() || '';
-      const valueB = cellsB[columnIndex]?.textContent?.trim() || '';
-      
-      // Compare as numbers if possible
-      const numA = parseFloat(valueA);
-      const numB = parseFloat(valueB);
-      
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return ascending ? numA - numB : numB - numA;
-      }
-      
-      // Otherwise compare as strings
-      return ascending ? 
-        valueA.localeCompare(valueB) : 
-        valueB.localeCompare(valueA);
-    });
-    
-    // Reorder the rows in the main table
-    const tbody = mainContainer.querySelector('tbody');
-    if (tbody) {
-      sortedRows.forEach(row => {
-        tbody.appendChild(row);
-      });
-    }
-    
-    // Reorder the rows in the first column table if it exists
-    if (firstColContainer) {
-      const firstColRows = Array.from(firstColContainer.querySelectorAll('tr'));
-      const sortedFirstColRows = firstColRows.sort((a, b) => {
-        const rowIndexA = parseInt((a as HTMLElement).dataset.rowIndex || '0');
-        const rowIndexB = parseInt((b as HTMLElement).dataset.rowIndex || '0');
-        
-        // Find the position of these indices in the sorted rows
-        const posA = sortedRows.findIndex(row => 
-          parseInt((row as HTMLElement).dataset.rowIndex || '0') === rowIndexA
-        );
-        const posB = sortedRows.findIndex(row => 
-          parseInt((row as HTMLElement).dataset.rowIndex || '0') === rowIndexB
-        );
-        
-        return posA - posB;
-      });
-      
-      const firstColTable = firstColContainer.querySelector('table');
-      if (firstColTable) {
-        sortedFirstColRows.forEach(row => {
-          firstColTable.appendChild(row);
-        });
-      }
-    }
-  }
-  
-  // Filter table function
-  function filterTable(tableComponent: Element, searchText: string) {
-    const mainContainer = tableComponent.querySelector('.main-container');
-    const firstColContainer = tableComponent.querySelector('.first-col-container');
-    
-    if (!mainContainer) return;
-    
-    const rows = mainContainer.querySelectorAll('tbody tr');
-    
-    rows.forEach((row, index) => {
-      const rowText = row.textContent?.toLowerCase() || '';
-      const firstColRow = firstColContainer?.querySelector(`tr[data-row-index="${index}"]`);
-      const firstColText = firstColRow?.textContent?.toLowerCase() || '';
-      
-      const visible = rowText.includes(searchText) || firstColText.includes(searchText);
-      
-      (row as HTMLElement).style.display = visible ? '' : 'none';
-      if (firstColRow) {
-        (firstColRow as HTMLElement).style.display = visible ? '' : 'none';
-      }
-    });
-  }
+	// Synchronize scrolling between table sections
+	document.addEventListener('DOMContentLoaded', () => {
+		const tableComponents = document.querySelectorAll('.table-component');
+
+		tableComponents.forEach((tableComponent) => {
+			const mainContainer = tableComponent.querySelector('.main-container') as HTMLElement | null;
+			const headerContainer = tableComponent.querySelector(
+				'.header-container'
+			) as HTMLElement | null;
+			const firstColContainer = tableComponent.querySelector(
+				'.first-col-container'
+			) as HTMLElement | null;
+
+			if (mainContainer && headerContainer) {
+				// Sync horizontal scrolling between main content and header
+				mainContainer.addEventListener('scroll', () => {
+					headerContainer.scrollLeft = mainContainer.scrollLeft;
+				});
+
+				// Also allow scrolling from header
+				headerContainer.addEventListener('scroll', () => {
+					mainContainer.scrollLeft = headerContainer.scrollLeft;
+				});
+			}
+
+			if (mainContainer && firstColContainer) {
+				// Sync vertical scrolling between main content and first column
+				mainContainer.addEventListener('scroll', () => {
+					firstColContainer.scrollTop = mainContainer.scrollTop;
+				});
+
+				// Also allow scrolling from first column
+				firstColContainer.addEventListener('scroll', () => {
+					mainContainer.scrollTop = firstColContainer.scrollTop;
+				});
+			}
+
+			// Ensure consistent row heights
+			function matchRowHeights() {
+				if (mainContainer && firstColContainer) {
+					const mainRows = mainContainer.querySelectorAll('tbody tr');
+					const firstColRows = firstColContainer.querySelectorAll('tr');
+
+					if (mainRows.length === firstColRows.length) {
+						for (let i = 0; i < mainRows.length; i++) {
+							const mainRow = mainRows[i] as HTMLElement;
+							const firstColRow = firstColRows[i] as HTMLElement;
+							const height = Math.max(mainRow.offsetHeight, firstColRow.offsetHeight);
+							mainRow.style.height = `${height}px`;
+							firstColRow.style.height = `${height}px`;
+						}
+					}
+				}
+			}
+
+			// Implement sorting if table is sortable
+			if (tableComponent.querySelector('.sortable')) {
+				const sortableHeaders = tableComponent.querySelectorAll('.sortable');
+
+				sortableHeaders.forEach((header) => {
+					header.addEventListener('click', () => {
+						const key = (header as HTMLElement).dataset.key;
+						const isAsc = header.classList.contains('sorted-asc');
+
+						// Remove sorted classes from all headers
+						sortableHeaders.forEach((h) => {
+							h.classList.remove('sorted-asc', 'sorted-desc');
+						});
+
+						// Add appropriate class to clicked header
+						header.classList.add(isAsc ? 'sorted-desc' : 'sorted-asc');
+
+						// Sort the data
+						if (mainContainer && key) {
+							sortTable(tableComponent, key, !isAsc);
+						}
+					});
+				});
+			}
+
+			// Implement search if table is searchable
+			const searchInput = tableComponent.querySelector('.search-input') as HTMLInputElement | null;
+			if (searchInput) {
+				searchInput.addEventListener('input', () => {
+					filterTable(tableComponent, searchInput.value.toLowerCase());
+				});
+			}
+
+			// Run once on load and on window resize
+			setTimeout(matchRowHeights, 100);
+			window.addEventListener('resize', matchRowHeights);
+		});
+	});
+
+	// Sort table function
+	function sortTable(tableComponent: Element, key: string, ascending: boolean) {
+		const mainContainer = tableComponent.querySelector('.main-container');
+		const firstColContainer = tableComponent.querySelector('.first-col-container');
+
+		if (!mainContainer) return;
+
+		const rows = Array.from(mainContainer.querySelectorAll('tbody tr'));
+		const sortedRows = rows.sort((a, b) => {
+			const rowIndexA = parseInt((a as HTMLElement).dataset.rowIndex || '0');
+			const rowIndexB = parseInt((b as HTMLElement).dataset.rowIndex || '0');
+
+			// Get the cells that contain the values to compare
+			const cells = mainContainer.querySelectorAll(`tbody tr[data-row-index="${rowIndexA}"] td`);
+			const cellsB = mainContainer.querySelectorAll(`tbody tr[data-row-index="${rowIndexB}"] td`);
+
+			// Find the index of the column with the specified key
+			const headers = tableComponent.querySelectorAll('th[data-key]');
+			let columnIndex = -1;
+
+			headers.forEach((header, index) => {
+				if ((header as HTMLElement).dataset.key === key) {
+					columnIndex = index;
+				}
+			});
+
+			if (columnIndex === -1) return 0;
+
+			// Get the values to compare
+			const valueA = cells[columnIndex]?.textContent?.trim() || '';
+			const valueB = cellsB[columnIndex]?.textContent?.trim() || '';
+
+			// Compare as numbers if possible
+			const numA = parseFloat(valueA);
+			const numB = parseFloat(valueB);
+
+			if (!isNaN(numA) && !isNaN(numB)) {
+				return ascending ? numA - numB : numB - numA;
+			}
+
+			// Otherwise compare as strings
+			return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+		});
+
+		// Reorder the rows in the main table
+		const tbody = mainContainer.querySelector('tbody');
+		if (tbody) {
+			sortedRows.forEach((row) => {
+				tbody.appendChild(row);
+			});
+		}
+
+		// Reorder the rows in the first column table if it exists
+		if (firstColContainer) {
+			const firstColRows = Array.from(firstColContainer.querySelectorAll('tr'));
+			const sortedFirstColRows = firstColRows.sort((a, b) => {
+				const rowIndexA = parseInt((a as HTMLElement).dataset.rowIndex || '0');
+				const rowIndexB = parseInt((b as HTMLElement).dataset.rowIndex || '0');
+
+				// Find the position of these indices in the sorted rows
+				const posA = sortedRows.findIndex(
+					(row) => parseInt((row as HTMLElement).dataset.rowIndex || '0') === rowIndexA
+				);
+				const posB = sortedRows.findIndex(
+					(row) => parseInt((row as HTMLElement).dataset.rowIndex || '0') === rowIndexB
+				);
+
+				return posA - posB;
+			});
+
+			const firstColTable = firstColContainer.querySelector('table');
+			if (firstColTable) {
+				sortedFirstColRows.forEach((row) => {
+					firstColTable.appendChild(row);
+				});
+			}
+		}
+	}
+
+	// Filter table function
+	function filterTable(tableComponent: Element, searchText: string) {
+		const mainContainer = tableComponent.querySelector('.main-container');
+		const firstColContainer = tableComponent.querySelector('.first-col-container');
+
+		if (!mainContainer) return;
+
+		const rows = mainContainer.querySelectorAll('tbody tr');
+
+		rows.forEach((row, index) => {
+			const rowText = row.textContent?.toLowerCase() || '';
+			const firstColRow = firstColContainer?.querySelector(`tr[data-row-index="${index}"]`);
+			const firstColText = firstColRow?.textContent?.toLowerCase() || '';
+
+			const visible = rowText.includes(searchText) || firstColText.includes(searchText);
+
+			(row as HTMLElement).style.display = visible ? '' : 'none';
+			if (firstColRow) {
+				(firstColRow as HTMLElement).style.display = visible ? '' : 'none';
+			}
+		});
+	}
 </script>

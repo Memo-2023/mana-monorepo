@@ -17,38 +17,38 @@ export type JobType = 'generate-image' | 'download-image' | 'process-webhook' | 
 export type JobStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
 
 export interface JobQueueRow {
-  id: string;
-  job_type: JobType;
-  payload: Record<string, any>;
-  status: JobStatus;
-  attempts: number;
-  max_attempts: number;
-  scheduled_at: string;
-  started_at: string | null;
-  completed_at: string | null;
-  error_message: string | null;
-  error_details: Record<string, any> | null;
-  created_by: string | null;
-  priority: number;
-  created_at: string;
-  updated_at: string;
+	id: string;
+	job_type: JobType;
+	payload: Record<string, any>;
+	status: JobStatus;
+	attempts: number;
+	max_attempts: number;
+	scheduled_at: string;
+	started_at: string | null;
+	completed_at: string | null;
+	error_message: string | null;
+	error_details: Record<string, any> | null;
+	created_by: string | null;
+	priority: number;
+	created_at: string;
+	updated_at: string;
 }
 
 export interface EnqueueJobParams {
-  jobType: JobType;
-  payload: Record<string, any>;
-  priority?: number;
-  scheduledAt?: Date;
-  maxAttempts?: number;
+	jobType: JobType;
+	payload: Record<string, any>;
+	priority?: number;
+	scheduledAt?: Date;
+	maxAttempts?: number;
 }
 
 export interface JobStats {
-  total: number;
-  pending: number;
-  processing: number;
-  completed: number;
-  failed: number;
-  avgDurationSeconds: number;
+	total: number;
+	pending: number;
+	processing: number;
+	completed: number;
+	failed: number;
+	avgDurationSeconds: number;
 }
 
 // ============================================================================
@@ -68,182 +68,160 @@ export interface JobStats {
  * ```
  */
 export async function enqueueJob(
-  supabase: SupabaseClient<Database>,
-  params: EnqueueJobParams
+	supabase: SupabaseClient<Database>,
+	params: EnqueueJobParams
 ): Promise<string> {
-  const {
-    jobType,
-    payload,
-    priority = 0,
-    scheduledAt = new Date(),
-    maxAttempts = 3
-  } = params;
+	const { jobType, payload, priority = 0, scheduledAt = new Date(), maxAttempts = 3 } = params;
 
-  const { data, error } = await supabase.rpc('enqueue_job', {
-    p_job_type: jobType,
-    p_payload: payload as any,
-    p_priority: priority,
-    p_scheduled_at: scheduledAt.toISOString(),
-    p_max_attempts: maxAttempts
-  });
+	const { data, error } = await supabase.rpc('enqueue_job', {
+		p_job_type: jobType,
+		p_payload: payload as any,
+		p_priority: priority,
+		p_scheduled_at: scheduledAt.toISOString(),
+		p_max_attempts: maxAttempts,
+	});
 
-  if (error) {
-    console.error('Failed to enqueue job:', error);
-    throw new Error(`Failed to enqueue job: ${error.message}`);
-  }
+	if (error) {
+		console.error('Failed to enqueue job:', error);
+		throw new Error(`Failed to enqueue job: ${error.message}`);
+	}
 
-  return data as string;
+	return data as string;
 }
 
 /**
  * Get job by ID
  */
 export async function getJob(
-  supabase: SupabaseClient<Database>,
-  jobId: string
+	supabase: SupabaseClient<Database>,
+	jobId: string
 ): Promise<JobQueueRow | null> {
-  const { data, error } = await supabase
-    .from('job_queue')
-    .select('*')
-    .eq('id', jobId)
-    .single();
+	const { data, error } = await supabase.from('job_queue').select('*').eq('id', jobId).single();
 
-  if (error) {
-    if (error.code === 'PGRST116') {
-      return null; // Not found
-    }
-    throw error;
-  }
+	if (error) {
+		if (error.code === 'PGRST116') {
+			return null; // Not found
+		}
+		throw error;
+	}
 
-  return data as JobQueueRow;
+	return data as JobQueueRow;
 }
 
 /**
  * Get all jobs for current user
  */
 export async function getUserJobs(
-  supabase: SupabaseClient<Database>,
-  options?: {
-    status?: JobStatus;
-    limit?: number;
-    offset?: number;
-  }
+	supabase: SupabaseClient<Database>,
+	options?: {
+		status?: JobStatus;
+		limit?: number;
+		offset?: number;
+	}
 ): Promise<JobQueueRow[]> {
-  let query = supabase
-    .from('job_queue')
-    .select('*')
-    .order('created_at', { ascending: false });
+	let query = supabase.from('job_queue').select('*').order('created_at', { ascending: false });
 
-  if (options?.status) {
-    query = query.eq('status', options.status);
-  }
+	if (options?.status) {
+		query = query.eq('status', options.status);
+	}
 
-  if (options?.limit) {
-    query = query.limit(options.limit);
-  }
+	if (options?.limit) {
+		query = query.limit(options.limit);
+	}
 
-  if (options?.offset) {
-    query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
-  }
+	if (options?.offset) {
+		query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+	}
 
-  const { data, error } = await query;
+	const { data, error } = await query;
 
-  if (error) {
-    throw error;
-  }
+	if (error) {
+		throw error;
+	}
 
-  return (data || []) as JobQueueRow[];
+	return (data || []) as JobQueueRow[];
 }
 
 /**
  * Cancel a pending job
  */
-export async function cancelJob(
-  supabase: SupabaseClient<Database>,
-  jobId: string
-): Promise<void> {
-  const { error } = await supabase
-    .from('job_queue')
-    .update({ status: 'cancelled', updated_at: new Date().toISOString() })
-    .eq('id', jobId)
-    .eq('status', 'pending'); // Only cancel pending jobs
+export async function cancelJob(supabase: SupabaseClient<Database>, jobId: string): Promise<void> {
+	const { error } = await supabase
+		.from('job_queue')
+		.update({ status: 'cancelled', updated_at: new Date().toISOString() })
+		.eq('id', jobId)
+		.eq('status', 'pending'); // Only cancel pending jobs
 
-  if (error) {
-    throw new Error(`Failed to cancel job: ${error.message}`);
-  }
+	if (error) {
+		throw new Error(`Failed to cancel job: ${error.message}`);
+	}
 }
 
 /**
  * Get queue health statistics
  */
 export async function getQueueStats(
-  supabase: SupabaseClient<Database>,
-  jobType?: JobType
+	supabase: SupabaseClient<Database>,
+	jobType?: JobType
 ): Promise<JobStats> {
-  const { data, error } = await supabase
-    .from('queue_health')
-    .select('*');
+	const { data, error } = await supabase.from('queue_health').select('*');
 
-  if (error) {
-    throw error;
-  }
+	if (error) {
+		throw error;
+	}
 
-  // Aggregate stats
-  let stats: JobStats = {
-    total: 0,
-    pending: 0,
-    processing: 0,
-    completed: 0,
-    failed: 0,
-    avgDurationSeconds: 0
-  };
+	// Aggregate stats
+	let stats: JobStats = {
+		total: 0,
+		pending: 0,
+		processing: 0,
+		completed: 0,
+		failed: 0,
+		avgDurationSeconds: 0,
+	};
 
-  const filtered = jobType
-    ? data?.filter(row => row.job_type === jobType)
-    : data;
+	const filtered = jobType ? data?.filter((row) => row.job_type === jobType) : data;
 
-  filtered?.forEach(row => {
-    const count = row.count || 0;
-    stats.total += count;
+	filtered?.forEach((row) => {
+		const count = row.count || 0;
+		stats.total += count;
 
-    switch (row.status) {
-      case 'pending':
-        stats.pending += count;
-        break;
-      case 'processing':
-        stats.processing += count;
-        break;
-      case 'completed':
-        stats.completed += count;
-        break;
-      case 'failed':
-        stats.failed += count;
-        break;
-    }
+		switch (row.status) {
+			case 'pending':
+				stats.pending += count;
+				break;
+			case 'processing':
+				stats.processing += count;
+				break;
+			case 'completed':
+				stats.completed += count;
+				break;
+			case 'failed':
+				stats.failed += count;
+				break;
+		}
 
-    if (row.avg_duration_seconds) {
-      stats.avgDurationSeconds = row.avg_duration_seconds;
-    }
-  });
+		if (row.avg_duration_seconds) {
+			stats.avgDurationSeconds = row.avg_duration_seconds;
+		}
+	});
 
-  return stats;
+	return stats;
 }
 
 /**
  * Get failed jobs (last 24 hours)
  */
 export async function getRecentFailedJobs(
-  supabase: SupabaseClient<Database>
+	supabase: SupabaseClient<Database>
 ): Promise<JobQueueRow[]> {
-  const { data, error } = await supabase
-    .from('failed_jobs_recent')
-    .select('*');
+	const { data, error } = await supabase.from('failed_jobs_recent').select('*');
 
-  if (error) {
-    throw error;
-  }
+	if (error) {
+		throw error;
+	}
 
-  return (data || []) as JobQueueRow[];
+	return (data || []) as JobQueueRow[];
 }
 
 // ============================================================================
@@ -266,60 +244,60 @@ export type JobUpdateCallback = (job: JobQueueRow) => void;
  * ```
  */
 export function subscribeToJob(
-  supabase: SupabaseClient<Database>,
-  jobId: string,
-  callback: JobUpdateCallback
+	supabase: SupabaseClient<Database>,
+	jobId: string,
+	callback: JobUpdateCallback
 ): () => void {
-  const channel = supabase
-    .channel(`job:${jobId}`)
-    .on(
-      'postgres_changes',
-      {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'job_queue',
-        filter: `id=eq.${jobId}`
-      },
-      (payload) => {
-        callback(payload.new as JobQueueRow);
-      }
-    )
-    .subscribe();
+	const channel = supabase
+		.channel(`job:${jobId}`)
+		.on(
+			'postgres_changes',
+			{
+				event: 'UPDATE',
+				schema: 'public',
+				table: 'job_queue',
+				filter: `id=eq.${jobId}`,
+			},
+			(payload) => {
+				callback(payload.new as JobQueueRow);
+			}
+		)
+		.subscribe();
 
-  return () => {
-    channel.unsubscribe();
-  };
+	return () => {
+		channel.unsubscribe();
+	};
 }
 
 /**
  * Subscribe to all job updates for current user
  */
 export function subscribeToUserJobs(
-  supabase: SupabaseClient<Database>,
-  userId: string,
-  callback: JobUpdateCallback
+	supabase: SupabaseClient<Database>,
+	userId: string,
+	callback: JobUpdateCallback
 ): () => void {
-  const channel = supabase
-    .channel(`user-jobs:${userId}`)
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'job_queue',
-        filter: `created_by=eq.${userId}`
-      },
-      (payload) => {
-        if (payload.new) {
-          callback(payload.new as JobQueueRow);
-        }
-      }
-    )
-    .subscribe();
+	const channel = supabase
+		.channel(`user-jobs:${userId}`)
+		.on(
+			'postgres_changes',
+			{
+				event: '*',
+				schema: 'public',
+				table: 'job_queue',
+				filter: `created_by=eq.${userId}`,
+			},
+			(payload) => {
+				if (payload.new) {
+					callback(payload.new as JobQueueRow);
+				}
+			}
+		)
+		.subscribe();
 
-  return () => {
-    channel.unsubscribe();
-  };
+	return () => {
+		channel.unsubscribe();
+	};
 }
 
 // ============================================================================
@@ -327,18 +305,18 @@ export function subscribeToUserJobs(
 // ============================================================================
 
 export interface GenerateImageJobParams {
-  prompt: string;
-  model_id: string;
-  model_version?: string;
-  width?: number;
-  height?: number;
-  num_inference_steps?: number;
-  guidance_scale?: number;
-  seed?: number;
-  negative_prompt?: string;
-  source_image_url?: string;
-  strength?: number;
-  style?: string;
+	prompt: string;
+	model_id: string;
+	model_version?: string;
+	width?: number;
+	height?: number;
+	num_inference_steps?: number;
+	guidance_scale?: number;
+	seed?: number;
+	negative_prompt?: string;
+	source_image_url?: string;
+	strength?: number;
+	style?: string;
 }
 
 /**
@@ -358,55 +336,55 @@ export interface GenerateImageJobParams {
  * ```
  */
 export async function startImageGeneration(
-  supabase: SupabaseClient<Database>,
-  params: GenerateImageJobParams
+	supabase: SupabaseClient<Database>,
+	params: GenerateImageJobParams
 ): Promise<{ generationId: string; jobId: string }> {
-  // Call start-generation Edge Function
-  const { data, error } = await supabase.functions.invoke('start-generation', {
-    body: params
-  });
+	// Call start-generation Edge Function
+	const { data, error } = await supabase.functions.invoke('start-generation', {
+		body: params,
+	});
 
-  if (error) {
-    throw new Error(`Failed to start generation: ${error.message}`);
-  }
+	if (error) {
+		throw new Error(`Failed to start generation: ${error.message}`);
+	}
 
-  if (!data.success) {
-    throw new Error(data.error || 'Failed to start generation');
-  }
+	if (!data.success) {
+		throw new Error(data.error || 'Failed to start generation');
+	}
 
-  return {
-    generationId: data.generation_id,
-    jobId: data.job_id
-  };
+	return {
+		generationId: data.generation_id,
+		jobId: data.job_id,
+	};
 }
 
 /**
  * Subscribe to generation updates via Realtime
  */
 export function subscribeToGeneration(
-  supabase: SupabaseClient<Database>,
-  generationId: string,
-  callback: (generation: any) => void
+	supabase: SupabaseClient<Database>,
+	generationId: string,
+	callback: (generation: any) => void
 ): () => void {
-  const channel = supabase
-    .channel(`generation:${generationId}`)
-    .on(
-      'postgres_changes',
-      {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'image_generations',
-        filter: `id=eq.${generationId}`
-      },
-      (payload) => {
-        callback(payload.new);
-      }
-    )
-    .subscribe();
+	const channel = supabase
+		.channel(`generation:${generationId}`)
+		.on(
+			'postgres_changes',
+			{
+				event: 'UPDATE',
+				schema: 'public',
+				table: 'image_generations',
+				filter: `id=eq.${generationId}`,
+			},
+			(payload) => {
+				callback(payload.new);
+			}
+		)
+		.subscribe();
 
-  return () => {
-    channel.unsubscribe();
-  };
+	return () => {
+		channel.unsubscribe();
+	};
 }
 
 /**
@@ -428,17 +406,17 @@ export function subscribeToGeneration(
  * ```
  */
 export async function generateImageWithUpdates(
-  supabase: SupabaseClient<Database>,
-  params: GenerateImageJobParams,
-  onUpdate: (generation: any) => void
+	supabase: SupabaseClient<Database>,
+	params: GenerateImageJobParams,
+	onUpdate: (generation: any) => void
 ): Promise<{ generationId: string; jobId: string; unsubscribe: () => void }> {
-  // Start generation
-  const { generationId, jobId } = await startImageGeneration(supabase, params);
+	// Start generation
+	const { generationId, jobId } = await startImageGeneration(supabase, params);
 
-  // Subscribe to updates
-  const unsubscribe = subscribeToGeneration(supabase, generationId, onUpdate);
+	// Subscribe to updates
+	const unsubscribe = subscribeToGeneration(supabase, generationId, onUpdate);
 
-  return { generationId, jobId, unsubscribe };
+	return { generationId, jobId, unsubscribe };
 }
 
 // ============================================================================
@@ -449,86 +427,78 @@ export async function generateImageWithUpdates(
  * Poll for job status (fallback for environments without Realtime)
  */
 export async function pollJobUntilComplete(
-  supabase: SupabaseClient<Database>,
-  jobId: string,
-  options: {
-    maxAttempts?: number;
-    intervalMs?: number;
-    onUpdate?: JobUpdateCallback;
-  } = {}
+	supabase: SupabaseClient<Database>,
+	jobId: string,
+	options: {
+		maxAttempts?: number;
+		intervalMs?: number;
+		onUpdate?: JobUpdateCallback;
+	} = {}
 ): Promise<JobQueueRow> {
-  const {
-    maxAttempts = 60,
-    intervalMs = 2000,
-    onUpdate
-  } = options;
+	const { maxAttempts = 60, intervalMs = 2000, onUpdate } = options;
 
-  let attempts = 0;
+	let attempts = 0;
 
-  while (attempts < maxAttempts) {
-    const job = await getJob(supabase, jobId);
+	while (attempts < maxAttempts) {
+		const job = await getJob(supabase, jobId);
 
-    if (!job) {
-      throw new Error('Job not found');
-    }
+		if (!job) {
+			throw new Error('Job not found');
+		}
 
-    if (onUpdate) {
-      onUpdate(job);
-    }
+		if (onUpdate) {
+			onUpdate(job);
+		}
 
-    if (job.status === 'completed' || job.status === 'failed' || job.status === 'cancelled') {
-      return job;
-    }
+		if (job.status === 'completed' || job.status === 'failed' || job.status === 'cancelled') {
+			return job;
+		}
 
-    await new Promise(resolve => setTimeout(resolve, intervalMs));
-    attempts++;
-  }
+		await new Promise((resolve) => setTimeout(resolve, intervalMs));
+		attempts++;
+	}
 
-  throw new Error('Job polling timeout');
+	throw new Error('Job polling timeout');
 }
 
 /**
  * Poll for generation completion
  */
 export async function pollGenerationUntilComplete(
-  supabase: SupabaseClient<Database>,
-  generationId: string,
-  options: {
-    maxAttempts?: number;
-    intervalMs?: number;
-    onUpdate?: (generation: any) => void;
-  } = {}
+	supabase: SupabaseClient<Database>,
+	generationId: string,
+	options: {
+		maxAttempts?: number;
+		intervalMs?: number;
+		onUpdate?: (generation: any) => void;
+	} = {}
 ): Promise<any> {
-  const {
-    maxAttempts = 120,
-    intervalMs = 2000,
-    onUpdate
-  } = options;
+	const { maxAttempts = 120, intervalMs = 2000, onUpdate } = options;
 
-  let attempts = 0;
+	let attempts = 0;
 
-  while (attempts < maxAttempts) {
-    const { data: generation, error } = await supabase
-      .from('image_generations')
-      .select('*')
-      .eq('id', generationId)
-      .single();
+	while (attempts < maxAttempts) {
+		const { data: generation, error } = await supabase
+			.from('image_generations')
+			.select('*')
+			.eq('id', generationId)
+			.single();
 
-    if (error) {
-      throw error;
-    }
+		if (error) {
+			throw error;
+		}
 
-    if (onUpdate) {
-      onUpdate(generation);
-    }
+		if (onUpdate) {
+			onUpdate(generation);
+		}
 
-    if (generation.status === 'completed' || generation.status === 'failed') {
-      return generation;
-    }
+		if (generation.status === 'completed' || generation.status === 'failed') {
+			return generation;
+		}
 
-    await new Promise(resolve => setTimeout(resolve, intervalMs));
-    attempts++;
-  }
+		await new Promise((resolve) => setTimeout(resolve, intervalMs));
+		attempts++;
+	}
 
-  throw new Error('Generation polling timeout');
+	throw new Error('Generation polling timeout');
 }

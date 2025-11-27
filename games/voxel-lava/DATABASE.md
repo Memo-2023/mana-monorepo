@@ -10,51 +10,52 @@ Diese Dokumentation beschreibt den Aufbau und die Funktionsweise der Supabase-Da
 
 Speichert alle Level-Daten inklusive der Voxel-Informationen.
 
-| Spalte | Typ | Beschreibung |
-|--------|-----|-------------|
-| `id` | UUID | Primärschlüssel, automatisch generiert |
-| `name` | TEXT | Name des Levels |
-| `description` | TEXT | Optionale Beschreibung des Levels |
-| `user_id` | UUID | Fremdschlüssel zur `auth.users`-Tabelle, Ersteller des Levels |
-| `voxel_data` | JSONB | Speichert alle Blöcke mit Position und Typ als JSON |
-| `spawn_point` | JSONB | Position des Spawn-Punkts als JSON `{x, y, z}` |
-| `world_size` | JSONB | Größe der Welt als JSON `{width, height, depth}` |
-| `is_public` | BOOLEAN | Gibt an, ob das Level öffentlich ist (Standard: false) |
-| `created_at` | TIMESTAMP | Zeitpunkt der Erstellung |
-| `updated_at` | TIMESTAMP | Zeitpunkt der letzten Aktualisierung |
-| `play_count` | INTEGER | Anzahl der Aufrufe des Levels |
-| `likes_count` | INTEGER | Anzahl der Likes des Levels |
-| `difficulty` | TEXT | Optionaler Schwierigkeitsgrad des Levels |
-| `tags` | TEXT[] | Array von Tags zur Kategorisierung |
-| `thumbnail_url` | TEXT | Optionale URL zum Vorschaubild |
+| Spalte          | Typ       | Beschreibung                                                  |
+| --------------- | --------- | ------------------------------------------------------------- |
+| `id`            | UUID      | Primärschlüssel, automatisch generiert                        |
+| `name`          | TEXT      | Name des Levels                                               |
+| `description`   | TEXT      | Optionale Beschreibung des Levels                             |
+| `user_id`       | UUID      | Fremdschlüssel zur `auth.users`-Tabelle, Ersteller des Levels |
+| `voxel_data`    | JSONB     | Speichert alle Blöcke mit Position und Typ als JSON           |
+| `spawn_point`   | JSONB     | Position des Spawn-Punkts als JSON `{x, y, z}`                |
+| `world_size`    | JSONB     | Größe der Welt als JSON `{width, height, depth}`              |
+| `is_public`     | BOOLEAN   | Gibt an, ob das Level öffentlich ist (Standard: false)        |
+| `created_at`    | TIMESTAMP | Zeitpunkt der Erstellung                                      |
+| `updated_at`    | TIMESTAMP | Zeitpunkt der letzten Aktualisierung                          |
+| `play_count`    | INTEGER   | Anzahl der Aufrufe des Levels                                 |
+| `likes_count`   | INTEGER   | Anzahl der Likes des Levels                                   |
+| `difficulty`    | TEXT      | Optionaler Schwierigkeitsgrad des Levels                      |
+| `tags`          | TEXT[]    | Array von Tags zur Kategorisierung                            |
+| `thumbnail_url` | TEXT      | Optionale URL zum Vorschaubild                                |
 
 #### 2. `level_likes`
 
 Speichert die Likes für Levels.
 
-| Spalte | Typ | Beschreibung |
-|--------|-----|-------------|
-| `id` | UUID | Primärschlüssel, automatisch generiert |
-| `level_id` | UUID | Fremdschlüssel zur `levels`-Tabelle |
-| `user_id` | UUID | Fremdschlüssel zur `auth.users`-Tabelle |
-| `created_at` | TIMESTAMP | Zeitpunkt des Likes |
+| Spalte       | Typ       | Beschreibung                            |
+| ------------ | --------- | --------------------------------------- |
+| `id`         | UUID      | Primärschlüssel, automatisch generiert  |
+| `level_id`   | UUID      | Fremdschlüssel zur `levels`-Tabelle     |
+| `user_id`    | UUID      | Fremdschlüssel zur `auth.users`-Tabelle |
+| `created_at` | TIMESTAMP | Zeitpunkt des Likes                     |
 
 Constraints:
+
 - Unique-Constraint auf `(level_id, user_id)`, um doppelte Likes zu verhindern
 
 #### 3. `level_plays`
 
 Speichert Spielstatistiken für Levels.
 
-| Spalte | Typ | Beschreibung |
-|--------|-----|-------------|
-| `id` | UUID | Primärschlüssel, automatisch generiert |
-| `level_id` | UUID | Fremdschlüssel zur `levels`-Tabelle |
-| `user_id` | UUID | Fremdschlüssel zur `auth.users`-Tabelle |
-| `completion_time` | FLOAT | Zeit in Sekunden (null, wenn nicht abgeschlossen) |
-| `attempts` | INTEGER | Anzahl der Versuche (Standard: 1) |
-| `completed` | BOOLEAN | Gibt an, ob das Level abgeschlossen wurde |
-| `created_at` | TIMESTAMP | Zeitpunkt des Spielversuchs |
+| Spalte            | Typ       | Beschreibung                                      |
+| ----------------- | --------- | ------------------------------------------------- |
+| `id`              | UUID      | Primärschlüssel, automatisch generiert            |
+| `level_id`        | UUID      | Fremdschlüssel zur `levels`-Tabelle               |
+| `user_id`         | UUID      | Fremdschlüssel zur `auth.users`-Tabelle           |
+| `completion_time` | FLOAT     | Zeit in Sekunden (null, wenn nicht abgeschlossen) |
+| `attempts`        | INTEGER   | Anzahl der Versuche (Standard: 1)                 |
+| `completed`       | BOOLEAN   | Gibt an, ob das Level abgeschlossen wurde         |
+| `created_at`      | TIMESTAMP | Zeitpunkt des Spielversuchs                       |
 
 ### Indizes
 
@@ -155,23 +156,23 @@ Die Datenbank verwendet Row Level Security (RLS), um den Zugriff auf Daten zu ko
 
 ```sql
 -- Levels sind für Ersteller und öffentlich sichtbar
-CREATE POLICY "Levels sind für Ersteller und öffentlich sichtbar" 
-  ON levels FOR SELECT 
+CREATE POLICY "Levels sind für Ersteller und öffentlich sichtbar"
+  ON levels FOR SELECT
   USING (auth.uid() = user_id OR is_public = true);
 
 -- Levels können nur vom Ersteller bearbeitet werden
-CREATE POLICY "Levels können nur vom Ersteller bearbeitet werden" 
-  ON levels FOR UPDATE 
+CREATE POLICY "Levels können nur vom Ersteller bearbeitet werden"
+  ON levels FOR UPDATE
   USING (auth.uid() = user_id);
 
 -- Levels können nur vom Ersteller gelöscht werden
-CREATE POLICY "Levels können nur vom Ersteller gelöscht werden" 
-  ON levels FOR DELETE 
+CREATE POLICY "Levels können nur vom Ersteller gelöscht werden"
+  ON levels FOR DELETE
   USING (auth.uid() = user_id);
 
 -- Neue Levels können nur vom authentifizierten Benutzer erstellt werden
-CREATE POLICY "Neue Levels können nur vom authentifizierten Benutzer erstellt werden" 
-  ON levels FOR INSERT 
+CREATE POLICY "Neue Levels können nur vom authentifizierten Benutzer erstellt werden"
+  ON levels FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 ```
 
@@ -179,18 +180,18 @@ CREATE POLICY "Neue Levels können nur vom authentifizierten Benutzer erstellt w
 
 ```sql
 -- Likes können von jedem authentifizierten Benutzer gesehen werden
-CREATE POLICY "Likes können von jedem authentifizierten Benutzer gesehen werden" 
-  ON level_likes FOR SELECT 
+CREATE POLICY "Likes können von jedem authentifizierten Benutzer gesehen werden"
+  ON level_likes FOR SELECT
   USING (true);
 
 -- Likes können nur vom Benutzer selbst erstellt werden
-CREATE POLICY "Likes können nur vom Benutzer selbst erstellt werden" 
-  ON level_likes FOR INSERT 
+CREATE POLICY "Likes können nur vom Benutzer selbst erstellt werden"
+  ON level_likes FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 -- Likes können nur vom Benutzer selbst entfernt werden
-CREATE POLICY "Likes können nur vom Benutzer selbst entfernt werden" 
-  ON level_likes FOR DELETE 
+CREATE POLICY "Likes können nur vom Benutzer selbst entfernt werden"
+  ON level_likes FOR DELETE
   USING (auth.uid() = user_id);
 ```
 
@@ -198,22 +199,22 @@ CREATE POLICY "Likes können nur vom Benutzer selbst entfernt werden"
 
 ```sql
 -- Spielstatistiken sind für Level-Ersteller sichtbar
-CREATE POLICY "Spielstatistiken sind für Level-Ersteller sichtbar" 
-  ON level_plays FOR SELECT 
+CREATE POLICY "Spielstatistiken sind für Level-Ersteller sichtbar"
+  ON level_plays FOR SELECT
   USING (EXISTS (
-    SELECT 1 FROM levels 
-    WHERE levels.id = level_plays.level_id 
+    SELECT 1 FROM levels
+    WHERE levels.id = level_plays.level_id
     AND levels.user_id = auth.uid()
   ) OR auth.uid() = user_id);
 
 -- Spielstatistiken können von jedem authentifizierten Benutzer erstellt werden
-CREATE POLICY "Spielstatistiken können von jedem authentifizierten Benutzer erstellt werden" 
-  ON level_plays FOR INSERT 
+CREATE POLICY "Spielstatistiken können von jedem authentifizierten Benutzer erstellt werden"
+  ON level_plays FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 -- Spielstatistiken können nur vom Benutzer selbst aktualisiert werden
-CREATE POLICY "Spielstatistiken können nur vom Benutzer selbst aktualisiert werden" 
-  ON level_plays FOR UPDATE 
+CREATE POLICY "Spielstatistiken können nur vom Benutzer selbst aktualisiert werden"
+  ON level_plays FOR UPDATE
   USING (auth.uid() = user_id);
 ```
 
@@ -225,25 +226,26 @@ Die Voxel-Daten werden als JSONB in der `voxel_data`-Spalte gespeichert. Das For
 
 ```json
 {
-  "x,y,z": {
-    "type": "blockType",
-    "isSpawnPoint": false,
-    "isGoal": false
-  },
-  "1,1,1": {
-    "type": "grass",
-    "isSpawnPoint": true,
-    "isGoal": false
-  },
-  "5,1,5": {
-    "type": "goal",
-    "isSpawnPoint": false,
-    "isGoal": true
-  }
+	"x,y,z": {
+		"type": "blockType",
+		"isSpawnPoint": false,
+		"isGoal": false
+	},
+	"1,1,1": {
+		"type": "grass",
+		"isSpawnPoint": true,
+		"isGoal": false
+	},
+	"5,1,5": {
+		"type": "goal",
+		"isSpawnPoint": false,
+		"isGoal": true
+	}
 }
 ```
 
 Wobei:
+
 - Der Schlüssel ist eine Zeichenkette im Format "x,y,z", die die Position des Blocks angibt
 - `type` ist der Typ des Blocks (z.B. "grass", "stone", "lava")
 - `isSpawnPoint` gibt an, ob dieser Block ein Spawn-Punkt ist
@@ -263,11 +265,13 @@ import { LevelService } from '../services/LevelService';
 
 // Level speichern
 const level = {
-  name: 'Mein Level',
-  blocks: [/* ... */],
-  spawnPoint: { x: 1, y: 1, z: 1 },
-  worldSize: { width: 20, height: 10, depth: 20 },
-  isPublic: true
+	name: 'Mein Level',
+	blocks: [
+		/* ... */
+	],
+	spawnPoint: { x: 1, y: 1, z: 1 },
+	worldSize: { width: 20, height: 10, depth: 20 },
+	isPublic: true,
 };
 const levelId = await LevelService.saveLevel(level);
 

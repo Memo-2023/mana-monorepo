@@ -5,24 +5,28 @@ Backend API service for Memoro Admin with AI image generation via Replicate.
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 20+
 - Replicate API Token (get it from https://replicate.com/account/api-tokens)
 
 ### Installation
 
 1. **Install dependencies:**
+
 ```bash
 cd services/admin-api
 npm install
 ```
 
 2. **Configure environment:**
+
 ```bash
 cp .env.example .env
 # Edit .env and add your REPLICATE_API_TOKEN
 ```
 
 3. **Run in development:**
+
 ```bash
 npm run dev
 ```
@@ -32,20 +36,23 @@ The API will be available at `http://localhost:3001`
 ## 📝 API Endpoints
 
 ### Health Check
+
 ```bash
 GET /health
 # No auth required
 ```
 
 ### Test Replicate Configuration
+
 ```bash
 GET /api/personas/test?apiKey=your-api-key
 ```
 
 ### Generate Persona Images
+
 ```bash
 POST /api/personas/generate-images
-Headers: 
+Headers:
   X-API-Key: your-api-key
 Body:
 {
@@ -62,6 +69,7 @@ Body:
 ```
 
 ### Get Available Styles
+
 ```bash
 GET /api/personas/styles?apiKey=your-api-key
 ```
@@ -69,6 +77,7 @@ GET /api/personas/styles?apiKey=your-api-key
 ## 🐳 Docker Deployment
 
 ### Using Docker Compose:
+
 ```bash
 # Build and run
 docker-compose up -d
@@ -78,6 +87,7 @@ docker-compose logs -f admin-api
 ```
 
 ### Using Docker directly:
+
 ```bash
 # Build image
 docker build -t memoro-admin-api .
@@ -95,14 +105,14 @@ docker run -d \
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | API server port | `3001` |
-| `REPLICATE_API_TOKEN` | Your Replicate API token | Required |
-| `API_KEY` | API authentication key | `memoro-admin-api-key-2025` |
-| `CORS_ORIGIN` | Allowed CORS origin | `http://localhost:4321` |
-| `STORAGE_PATH` | Local image storage path | `./storage/images` |
-| `LOG_LEVEL` | Logging level | `debug` |
+| Variable              | Description              | Default                     |
+| --------------------- | ------------------------ | --------------------------- |
+| `PORT`                | API server port          | `3001`                      |
+| `REPLICATE_API_TOKEN` | Your Replicate API token | Required                    |
+| `API_KEY`             | API authentication key   | `memoro-admin-api-key-2025` |
+| `CORS_ORIGIN`         | Allowed CORS origin      | `http://localhost:4321`     |
+| `STORAGE_PATH`        | Local image storage path | `./storage/images`          |
+| `LOG_LEVEL`           | Logging level            | `debug`                     |
 
 ## 💰 Cost Estimation
 
@@ -131,6 +141,7 @@ admin-api/
 ## 🧪 Testing
 
 ### Test API locally:
+
 ```bash
 # 1. Check health
 curl http://localhost:3001/health

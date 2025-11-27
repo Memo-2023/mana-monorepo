@@ -69,7 +69,7 @@ const config = {
 	api: 'https://ulo.ad/api/collections/',
 
 	// Admin NUR über SSH oder separaten Port
-	admin: 'Nicht öffentlich!'
+	admin: 'Nicht öffentlich!',
 };
 ```
 

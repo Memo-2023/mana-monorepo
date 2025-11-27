@@ -42,7 +42,9 @@ GOOGLE_TTS_API_KEY=dein_api_key_hier
 ## 6. Verfügbare Google Cloud TTS Voices
 
 ### Deutsch (de-DE)
+
 #### Neural2 Voices (Empfohlen - beste Balance zwischen Qualität und Kosten)
+
 - `de-DE-Neural2-A` (weiblich)
 - `de-DE-Neural2-B` (männlich)
 - `de-DE-Neural2-C` (weiblich)
@@ -51,6 +53,7 @@ GOOGLE_TTS_API_KEY=dein_api_key_hier
 - `de-DE-Neural2-F` (männlich)
 
 #### WaveNet Voices (Hochqualitativ)
+
 - `de-DE-Wavenet-A` (weiblich)
 - `de-DE-Wavenet-B` (männlich)
 - `de-DE-Wavenet-C` (weiblich)
@@ -59,10 +62,12 @@ GOOGLE_TTS_API_KEY=dein_api_key_hier
 - `de-DE-Wavenet-F` (männlich)
 
 #### Studio Voices (Broadcast-Qualität)
+
 - `de-DE-Studio-B` (männlich)
 - `de-DE-Studio-C` (weiblich)
 
 #### Standard Voices (Basis-Qualität, günstigste Option)
+
 - `de-DE-Standard-A` (weiblich)
 - `de-DE-Standard-B` (männlich)
 - `de-DE-Standard-C` (weiblich)
@@ -71,12 +76,14 @@ GOOGLE_TTS_API_KEY=dein_api_key_hier
 - `de-DE-Standard-F` (männlich)
 
 ### Englisch (US)
+
 - `en-US-Neural2-A` (männlich)
 - `en-US-Neural2-C` (weiblich)
 - `en-US-Neural2-D` (männlich)
 - `en-US-Neural2-E` (weiblich)
 
 ### Englisch (UK)
+
 - `en-GB-Neural2-A` (weiblich)
 - `en-GB-Neural2-B` (männlich)
 - `en-GB-Neural2-C` (weiblich)
@@ -89,6 +96,7 @@ GOOGLE_TTS_API_KEY=dein_api_key_hier
 - **Erstes 1 Million Zeichen pro Monat**: Kostenlos
 
 ### Beispielrechnung für 10.000 Zeichen:
+
 - Standard: $0.04
 - Neural2: $0.16
 

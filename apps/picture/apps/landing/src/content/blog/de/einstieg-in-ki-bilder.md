@@ -1,12 +1,12 @@
 ---
-title: "Einstieg in die KI-Bildgenerierung: Ein Leitfaden für Anfänger"
-description: "Lerne die Grundlagen der KI-Bildgenerierung und erstelle deine ersten atemberaubenden Bilder mit unserem umfassenden Einsteiger-Leitfaden."
-author: "Picture Team"
+title: 'Einstieg in die KI-Bildgenerierung: Ein Leitfaden für Anfänger'
+description: 'Lerne die Grundlagen der KI-Bildgenerierung und erstelle deine ersten atemberaubenden Bilder mit unserem umfassenden Einsteiger-Leitfaden.'
+author: 'Picture Team'
 publishedAt: 2025-01-15
-coverImage: "/blog/getting-started.jpg"
-category: "tutorial"
-tags: ["anfänger", "tutorial", "ki-grundlagen", "einstieg"]
-language: "de"
+coverImage: '/blog/getting-started.jpg'
+category: 'tutorial'
+tags: ['anfänger', 'tutorial', 'ki-grundlagen', 'einstieg']
+language: 'de'
 ---
 
 ## Willkommen zur KI-Bildgenerierung
@@ -43,6 +43,7 @@ Anstatt "eine Katze", versuche "eine flauschige orange getigerte Katze auf einer
 ### Verwende Stil-Schlüsselwörter
 
 Füge Stil-Modifikatoren hinzu wie:
+
 - "fotorealistisch"
 - "Ölgemälde"
 - "digitale Kunst"

@@ -3,13 +3,13 @@ const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
 
 module.exports = defineConfig([
-  expoConfig,
-  {
-    ignores: ['dist/*', 'supabase/functions/**/*', '.expo/**/*'],
-  },
-  {
-    rules: {
-      'react/display-name': 'off',
-    },
-  },
+	expoConfig,
+	{
+		ignores: ['dist/*', 'supabase/functions/**/*', '.expo/**/*'],
+	},
+	{
+		rules: {
+			'react/display-name': 'off',
+		},
+	},
 ]);

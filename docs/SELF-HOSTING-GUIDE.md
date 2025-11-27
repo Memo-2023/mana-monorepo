@@ -35,35 +35,39 @@ Komplette Anleitung zum Hosten aller Projekte auf eigener Infrastruktur (VPS).
 
 ## Technologie-Stack pro Projekt
 
-| Projekt | Web App | Landing | Backend | Mobile | Datenbank |
-|---------|---------|---------|---------|--------|-----------|
-| **Maerchenzauber** | SvelteKit | Astro | NestJS | Expo | Supabase |
-| **Manacore** | SvelteKit | Astro | - | Expo | Supabase |
-| **Manadeck** | SvelteKit | Astro | NestJS | Expo | PostgreSQL |
-| **Memoro** | SvelteKit | Astro | - | Expo | Supabase |
-| **Picture** | SvelteKit | Astro | - | Expo | Supabase |
-| **uLoad** | SvelteKit | - | - | - | PostgreSQL + Redis |
+| Projekt            | Web App   | Landing | Backend | Mobile | Datenbank          |
+| ------------------ | --------- | ------- | ------- | ------ | ------------------ |
+| **Maerchenzauber** | SvelteKit | Astro   | NestJS  | Expo   | Supabase           |
+| **Manacore**       | SvelteKit | Astro   | -       | Expo   | Supabase           |
+| **Manadeck**       | SvelteKit | Astro   | NestJS  | Expo   | PostgreSQL         |
+| **Memoro**         | SvelteKit | Astro   | -       | Expo   | Supabase           |
+| **Picture**        | SvelteKit | Astro   | -       | Expo   | Supabase           |
+| **uLoad**          | SvelteKit | -       | -       | -      | PostgreSQL + Redis |
 
 ---
 
 ## Deployment-Optionen im Überblick
 
 ### Option A: Single VPS mit Coolify (Empfohlen für Start)
+
 - **Kosten:** ~€15-30/Monat
 - **Komplexität:** Niedrig
 - **Skalierung:** Begrenzt
 
 ### Option B: Multi-VPS mit Coolify
+
 - **Kosten:** ~€50-100/Monat
 - **Komplexität:** Mittel
 - **Skalierung:** Gut
 
 ### Option C: Kubernetes (K3s)
+
 - **Kosten:** ~€30-80/Monat
 - **Komplexität:** Hoch
 - **Skalierung:** Sehr gut
 
 ### Option D: Hybrid (Self-Hosted + Managed)
+
 - **Kosten:** ~€20-50/Monat + Supabase
 - **Komplexität:** Niedrig-Mittel
 - **Skalierung:** Flexibel
@@ -97,15 +101,15 @@ Die einfachste Lösung für den Start. Alle Services auf einem Server.
 
 ## Ressourcen-Anforderungen
 
-| Komponente | RAM | CPU | Disk |
-|------------|-----|-----|------|
-| PostgreSQL | 1GB | 0.5 | 10GB |
-| Redis | 256MB | 0.2 | 1GB |
-| Coolify | 512MB | 0.3 | 5GB |
-| Traefik | 128MB | 0.1 | - |
-| Pro Web App | 256MB | 0.3 | - |
-| Pro Backend | 512MB | 0.5 | - |
-| Pro Landing | 64MB | 0.1 | - |
+| Komponente        | RAM      | CPU    | Disk      |
+| ----------------- | -------- | ------ | --------- |
+| PostgreSQL        | 1GB      | 0.5    | 10GB      |
+| Redis             | 256MB    | 0.2    | 1GB       |
+| Coolify           | 512MB    | 0.3    | 5GB       |
+| Traefik           | 128MB    | 0.1    | -         |
+| Pro Web App       | 256MB    | 0.3    | -         |
+| Pro Backend       | 512MB    | 0.5    | -         |
+| Pro Landing       | 64MB     | 0.1    | -         |
 | **Gesamt (alle)** | **~6GB** | **~4** | **~30GB** |
 
 **Empfohlener Server:** Hetzner CX31 (4 vCPU, 8GB RAM, 80GB) - €8.98/Monat
@@ -128,6 +132,7 @@ curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
 ### 2. Datenbank-Services erstellen
 
 **PostgreSQL:**
+
 ```
 Name: shared-postgres
 Version: 16-alpine
@@ -135,6 +140,7 @@ Databases: manacore, manadeck, uload
 ```
 
 **Redis:**
+
 ```
 Name: shared-redis
 Version: 7-alpine
@@ -152,6 +158,7 @@ Version: 7-alpine
 #### Konfiguration pro Projekt
 
 **Alle SvelteKit Web Apps:**
+
 ```
 Base Directory: /
 Dockerfile: {projekt}/apps/web/Dockerfile  # Falls vorhanden
@@ -163,6 +170,7 @@ Port: 3000
 ```
 
 **Alle Astro Landing Pages:**
+
 ```
 Build Pack: Static
 Base Directory: {projekt}/apps/landing
@@ -171,6 +179,7 @@ Publish Directory: dist
 ```
 
 **NestJS Backends:**
+
 ```
 Base Directory: /
 Dockerfile: {projekt}/apps/backend/Dockerfile
@@ -181,21 +190,21 @@ Port: 4000
 
 ### 4. Domain-Mapping
 
-| Service | Domain | Port |
-|---------|--------|------|
-| uload-web | ulo.ad | 3000 |
-| maerchenzauber-web | app.maerchenzauber.de | 3001 |
-| maerchenzauber-landing | maerchenzauber.de | 8080 |
+| Service                | Domain                | Port |
+| ---------------------- | --------------------- | ---- |
+| uload-web              | ulo.ad                | 3000 |
+| maerchenzauber-web     | app.maerchenzauber.de | 3001 |
+| maerchenzauber-landing | maerchenzauber.de     | 8080 |
 | maerchenzauber-backend | api.maerchenzauber.de | 4000 |
-| manacore-web | app.manacore.io | 3002 |
-| manacore-landing | manacore.io | 8081 |
-| manadeck-web | app.manadeck.de | 3003 |
-| manadeck-landing | manadeck.de | 8082 |
-| manadeck-backend | api.manadeck.de | 4001 |
-| memoro-web | app.memoro.ai | 3004 |
-| memoro-landing | memoro.ai | 8083 |
-| picture-web | app.picture.io | 3005 |
-| picture-landing | picture.io | 8084 |
+| manacore-web           | app.manacore.io       | 3002 |
+| manacore-landing       | manacore.io           | 8081 |
+| manadeck-web           | app.manadeck.de       | 3003 |
+| manadeck-landing       | manadeck.de           | 8082 |
+| manadeck-backend       | api.manadeck.de       | 4001 |
+| memoro-web             | app.memoro.ai         | 3004 |
+| memoro-landing         | memoro.ai             | 8083 |
+| picture-web            | app.picture.io        | 3005 |
+| picture-landing        | picture.io            | 8084 |
 
 ---
 
@@ -228,16 +237,19 @@ Bessere Isolation und Skalierung durch mehrere Server.
 ## Server-Aufteilung
 
 ### VPS 1: Frontend (CX21 - €4.49/Monat)
+
 - Alle SvelteKit Web Apps
 - Alle Astro Landing Pages
 - Traefik Reverse Proxy
 
 ### VPS 2: Backends (CX21 - €4.49/Monat)
+
 - Maerchenzauber NestJS Backend
 - Manadeck NestJS Backend
 - Background Workers
 
 ### VPS 3: Datenbanken (CX31 - €8.98/Monat)
+
 - PostgreSQL (shared)
 - Redis (shared)
 - Automated Backups
@@ -424,22 +436,22 @@ Kombination aus Self-Hosting und Managed Services für beste Balance.
 
 ### Managed Services (empfohlen)
 
-| Service | Anbieter | Kosten | Grund |
-|---------|----------|--------|-------|
-| Datenbank | Supabase | Free-$25/M | Auth + Realtime inklusive |
-| Landing Pages | Vercel/Netlify | Free | CDN + Edge |
-| CDN | Cloudflare | Free | DDoS + Caching |
-| Email | Resend | Free-$20/M | Deliverability |
-| Payments | Stripe | % per Tx | Compliance |
+| Service       | Anbieter       | Kosten     | Grund                     |
+| ------------- | -------------- | ---------- | ------------------------- |
+| Datenbank     | Supabase       | Free-$25/M | Auth + Realtime inklusive |
+| Landing Pages | Vercel/Netlify | Free       | CDN + Edge                |
+| CDN           | Cloudflare     | Free       | DDoS + Caching            |
+| Email         | Resend         | Free-$20/M | Deliverability            |
+| Payments      | Stripe         | % per Tx   | Compliance                |
 
 ### Self-Hosted (VPS)
 
-| Service | Grund |
-|---------|-------|
+| Service  | Grund                                  |
+| -------- | -------------------------------------- |
 | Web Apps | Volle Kontrolle, günstiger bei Traffic |
-| Backends | Custom Code, API Keys |
-| uLoad | Komplett eigene Infra gewünscht |
-| Redis | Falls benötigt |
+| Backends | Custom Code, API Keys                  |
+| uLoad    | Komplett eigene Infra gewünscht        |
+| Redis    | Falls benötigt                         |
 
 ## Setup
 
@@ -472,13 +484,13 @@ curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
 
 ## Kosten-Vergleich
 
-| Komponente | Full Self-Hosted | Hybrid |
-|------------|------------------|--------|
-| VPS | €9-18/Monat | €4.50/Monat |
-| Supabase | - | Free-€25/Monat |
-| Vercel | - | Free |
-| Cloudflare | - | Free |
-| **Gesamt** | **€9-18/Monat** | **€4.50-30/Monat** |
+| Komponente | Full Self-Hosted | Hybrid             |
+| ---------- | ---------------- | ------------------ |
+| VPS        | €9-18/Monat      | €4.50/Monat        |
+| Supabase   | -                | Free-€25/Monat     |
+| Vercel     | -                | Free               |
+| Cloudflare | -                | Free               |
+| **Gesamt** | **€9-18/Monat**  | **€4.50-30/Monat** |
 
 ---
 
@@ -546,6 +558,7 @@ CMD ["nginx", "-g", "daemon off;"]
 ## NestJS Backends
 
 Bereits vorhanden in:
+
 - `maerchenzauber/apps/backend/Dockerfile`
 - `manadeck/backend/Dockerfile`
 
@@ -578,6 +591,7 @@ DATABASE_URL=postgresql://user:pass@host:5432/db
 ## Projekt-spezifische Variablen
 
 ### Maerchenzauber Backend
+
 ```env
 AZURE_OPENAI_ENDPOINT=https://xxx.openai.azure.com
 AZURE_OPENAI_API_KEY=xxx
@@ -587,11 +601,13 @@ GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
 ```
 
 ### Manadeck Backend
+
 ```env
 GOOGLE_GEMINI_API_KEY=xxx
 ```
 
 ### uLoad
+
 ```env
 REDIS_URL=redis://localhost:6379
 STRIPE_SECRET_KEY=sk_live_xxx
@@ -609,18 +625,21 @@ AUTH_SECRET=xxx
 # Checkliste: Komplettes Self-Hosting
 
 ## Infrastruktur
+
 - [ ] VPS bestellt (Hetzner CX21/CX31)
 - [ ] SSH-Zugang eingerichtet
 - [ ] Coolify installiert
 - [ ] Firewall konfiguriert
 
 ## Datenbanken
+
 - [ ] PostgreSQL läuft
 - [ ] Redis läuft (falls benötigt)
 - [ ] Backups eingerichtet
 - [ ] Connection Strings notiert
 
 ## Projekte (für jedes)
+
 - [ ] Dockerfile erstellt/geprüft
 - [ ] Environment Variables gesetzt
 - [ ] Domain konfiguriert
@@ -628,16 +647,19 @@ AUTH_SECRET=xxx
 - [ ] Health-Check funktioniert
 
 ## DNS (für jede Domain)
+
 - [ ] A-Record auf Server-IP
 - [ ] www CNAME (optional)
 - [ ] Propagation geprüft
 
 ## Monitoring
+
 - [ ] Logs erreichbar
 - [ ] Alerting eingerichtet (optional)
 - [ ] Uptime-Monitoring (optional)
 
 ## Backups
+
 - [ ] Datenbank-Backup automatisiert
 - [ ] Backup-Test durchgeführt
 - [ ] Offsite-Backup (optional)
@@ -654,6 +676,7 @@ AUTH_SECRET=xxx
 4. **Cloudflare** für DNS + CDN (Free)
 
 **Vorteile:**
+
 - Schneller Start
 - Geringe Kosten
 - Managed Auth & Realtime
@@ -662,6 +685,7 @@ AUTH_SECRET=xxx
 ## Für Wachstum: Option B (Multi-VPS)
 
 Wenn Traffic steigt:
+
 1. Datenbanken auf eigenen VPS migrieren
 2. Frontend/Backend trennen
 3. Load Balancing hinzufügen
@@ -669,6 +693,7 @@ Wenn Traffic steigt:
 ## Für Enterprise: Option C (Kubernetes)
 
 Wenn benötigt:
+
 - Auto-Scaling
 - Zero-Downtime Deployments
 - Multi-Region

@@ -27,29 +27,24 @@ A simple button that toggles between light and dark mode.
 
 ```svelte
 <script lang="ts">
-  import { theme } from '$lib/stores/theme';
-  import { ThemeToggle } from '@manacore/shared-theme-ui';
+	import { theme } from '$lib/stores/theme';
+	import { ThemeToggle } from '@manacore/shared-theme-ui';
 </script>
 
 <ThemeToggle {theme} />
 
 <!-- With options -->
-<ThemeToggle
-  {theme}
-  size={24}
-  showTooltip={true}
-  class="my-custom-class"
-/>
+<ThemeToggle {theme} size={24} showTooltip={true} class="my-custom-class" />
 ```
 
 #### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `theme` | `ThemeStore` | required | Theme store instance |
-| `size` | `number` | `20` | Icon size in pixels |
-| `showTooltip` | `boolean` | `false` | Show tooltip on hover |
-| `class` | `string` | `''` | Additional CSS classes |
+| Prop          | Type         | Default  | Description            |
+| ------------- | ------------ | -------- | ---------------------- |
+| `theme`       | `ThemeStore` | required | Theme store instance   |
+| `size`        | `number`     | `20`     | Icon size in pixels    |
+| `showTooltip` | `boolean`    | `false`  | Show tooltip on hover  |
+| `class`       | `string`     | `''`     | Additional CSS classes |
 
 ### ThemeSelector
 
@@ -57,31 +52,25 @@ A visual selector showing all theme variants with color dots.
 
 ```svelte
 <script lang="ts">
-  import { theme } from '$lib/stores/theme';
-  import { ThemeSelector } from '@manacore/shared-theme-ui';
+	import { theme } from '$lib/stores/theme';
+	import { ThemeSelector } from '@manacore/shared-theme-ui';
 </script>
 
 <ThemeSelector {theme} />
 
 <!-- With options -->
-<ThemeSelector
-  {theme}
-  showLabels={true}
-  showEmoji={true}
-  compact={false}
-  class="my-custom-class"
-/>
+<ThemeSelector {theme} showLabels={true} showEmoji={true} compact={false} class="my-custom-class" />
 ```
 
 #### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `theme` | `ThemeStore` | required | Theme store instance |
-| `showLabels` | `boolean` | `true` | Show variant labels |
-| `showEmoji` | `boolean` | `true` | Show variant emojis |
-| `compact` | `boolean` | `false` | Compact mode (smaller buttons) |
-| `class` | `string` | `''` | Additional CSS classes |
+| Prop         | Type         | Default  | Description                    |
+| ------------ | ------------ | -------- | ------------------------------ |
+| `theme`      | `ThemeStore` | required | Theme store instance           |
+| `showLabels` | `boolean`    | `true`   | Show variant labels            |
+| `showEmoji`  | `boolean`    | `true`   | Show variant emojis            |
+| `compact`    | `boolean`    | `false`  | Compact mode (smaller buttons) |
+| `class`      | `string`     | `''`     | Additional CSS classes         |
 
 ### ThemeModeSelector
 
@@ -89,57 +78,50 @@ A segmented control for selecting light, dark, or system mode.
 
 ```svelte
 <script lang="ts">
-  import { theme } from '$lib/stores/theme';
-  import { ThemeModeSelector } from '@manacore/shared-theme-ui';
+	import { theme } from '$lib/stores/theme';
+	import { ThemeModeSelector } from '@manacore/shared-theme-ui';
 </script>
 
 <ThemeModeSelector {theme} />
 
 <!-- With options -->
-<ThemeModeSelector
-  {theme}
-  class="my-custom-class"
-/>
+<ThemeModeSelector {theme} class="my-custom-class" />
 ```
 
 #### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `theme` | `ThemeStore` | required | Theme store instance |
-| `class` | `string` | `''` | Additional CSS classes |
+| Prop    | Type         | Default  | Description            |
+| ------- | ------------ | -------- | ---------------------- |
+| `theme` | `ThemeStore` | required | Theme store instance   |
+| `class` | `string`     | `''`     | Additional CSS classes |
 
 ## Complete Example
 
 ```svelte
 <script lang="ts">
-  import { theme } from '$lib/stores/theme';
-  import {
-    ThemeToggle,
-    ThemeSelector,
-    ThemeModeSelector
-  } from '@manacore/shared-theme-ui';
+	import { theme } from '$lib/stores/theme';
+	import { ThemeToggle, ThemeSelector, ThemeModeSelector } from '@manacore/shared-theme-ui';
 </script>
 
 <div class="settings-panel">
-  <h3>Appearance</h3>
+	<h3>Appearance</h3>
 
-  <!-- Quick toggle in header -->
-  <div class="header">
-    <ThemeToggle {theme} showTooltip />
-  </div>
+	<!-- Quick toggle in header -->
+	<div class="header">
+		<ThemeToggle {theme} showTooltip />
+	</div>
 
-  <!-- Mode selection -->
-  <section>
-    <label>Mode</label>
-    <ThemeModeSelector {theme} />
-  </section>
+	<!-- Mode selection -->
+	<section>
+		<label>Mode</label>
+		<ThemeModeSelector {theme} />
+	</section>
 
-  <!-- Variant selection -->
-  <section>
-    <label>Color Theme</label>
-    <ThemeSelector {theme} />
-  </section>
+	<!-- Variant selection -->
+	<section>
+		<label>Color Theme</label>
+		<ThemeSelector {theme} />
+	</section>
 </div>
 ```
 
@@ -154,12 +136,12 @@ You can override styles using the `class` prop or by targeting the component cla
 ```css
 /* Custom toggle button */
 .theme-toggle {
-  background-color: var(--my-custom-bg);
+	background-color: var(--my-custom-bg);
 }
 
 /* Custom selector buttons */
 .variant-button.active {
-  box-shadow: 0 0 0 2px var(--my-custom-ring);
+	box-shadow: 0 0 0 2px var(--my-custom-ring);
 }
 ```
 

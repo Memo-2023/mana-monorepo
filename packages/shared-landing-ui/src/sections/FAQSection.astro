@@ -7,109 +7,119 @@ import Container from '../atoms/Container.astro';
 import SectionHeader from '../atoms/SectionHeader.astro';
 
 interface FAQItem {
-  question: string;
-  answer: string;
+	question: string;
+	answer: string;
 }
 
 interface Props {
-  title?: string;
-  subtitle?: string;
-  faqs: FAQItem[];
-  class?: string;
-  id?: string;
-  singleExpand?: boolean;
+	title?: string;
+	subtitle?: string;
+	faqs: FAQItem[];
+	class?: string;
+	id?: string;
+	singleExpand?: boolean;
 }
 
 const {
-  title = 'Frequently Asked Questions',
-  subtitle,
-  faqs,
-  class: className = '',
-  id = 'faq',
-  singleExpand = true
+	title = 'Frequently Asked Questions',
+	subtitle,
+	faqs,
+	class: className = '',
+	id = 'faq',
+	singleExpand = true,
 } = Astro.props;
 
 const sectionId = `faq-section-${Math.random().toString(36).substring(7)}`;
 ---
 
-<section id={id} class:list={["py-16 md:py-24", className]}>
-  <Container size="md">
-    <SectionHeader title={title} subtitle={subtitle} />
+<section id={id} class:list={['py-16 md:py-24', className]}>
+	<Container size="md">
+		<SectionHeader title={title} subtitle={subtitle} />
 
-    <div class="max-w-3xl mx-auto space-y-4" data-faq-container={singleExpand ? sectionId : undefined}>
-      {faqs.map((faq, index) => (
-        <details class="group" data-faq-item={singleExpand ? sectionId : undefined}>
-          <summary class="cursor-pointer list-none">
-            <div class="bg-[var(--color-background-card)] rounded-xl p-5 sm:p-6 border border-[var(--color-border)] hover:bg-[var(--color-background-card-hover)] hover:border-[var(--color-border-hover,var(--color-border))] transition-all duration-200">
-              <div class="flex items-center justify-between gap-4">
-                <h3 class="font-semibold text-base sm:text-lg text-[var(--color-text-primary)] pr-4 group-open:text-[var(--color-primary)] transition-colors text-left">
-                  {faq.question}
-                </h3>
-                <div class="flex-shrink-0 w-5 h-5 text-[var(--color-primary)] transition-transform duration-300 group-open:rotate-180">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-              <div class="overflow-hidden max-h-0 group-open:max-h-[1000px] transition-all duration-300 ease-in-out">
-                <div class="pt-4 text-[var(--color-text-secondary)] leading-relaxed text-sm sm:text-base prose prose-sm max-w-none">
-                  <Fragment set:html={faq.answer} />
-                </div>
-              </div>
-            </div>
-          </summary>
-        </details>
-      ))}
-    </div>
+		<div
+			class="max-w-3xl mx-auto space-y-4"
+			data-faq-container={singleExpand ? sectionId : undefined}
+		>
+			{
+				faqs.map((faq, index) => (
+					<details class="group" data-faq-item={singleExpand ? sectionId : undefined}>
+						<summary class="cursor-pointer list-none">
+							<div class="bg-[var(--color-background-card)] rounded-xl p-5 sm:p-6 border border-[var(--color-border)] hover:bg-[var(--color-background-card-hover)] hover:border-[var(--color-border-hover,var(--color-border))] transition-all duration-200">
+								<div class="flex items-center justify-between gap-4">
+									<h3 class="font-semibold text-base sm:text-lg text-[var(--color-text-primary)] pr-4 group-open:text-[var(--color-primary)] transition-colors text-left">
+										{faq.question}
+									</h3>
+									<div class="flex-shrink-0 w-5 h-5 text-[var(--color-primary)] transition-transform duration-300 group-open:rotate-180">
+										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M19 9l-7 7-7-7"
+											/>
+										</svg>
+									</div>
+								</div>
+								<div class="overflow-hidden max-h-0 group-open:max-h-[1000px] transition-all duration-300 ease-in-out">
+									<div class="pt-4 text-[var(--color-text-secondary)] leading-relaxed text-sm sm:text-base prose prose-sm max-w-none">
+										<Fragment set:html={faq.answer} />
+									</div>
+								</div>
+							</div>
+						</summary>
+					</details>
+				))
+			}
+		</div>
 
-    <slot name="contact" />
-    <slot />
-  </Container>
+		<slot name="contact" />
+		<slot />
+	</Container>
 </section>
 
 <style>
-  details summary::-webkit-details-marker {
-    display: none;
-  }
+	details summary::-webkit-details-marker {
+		display: none;
+	}
 
-  details[open] summary ~ * {
-    animation: slideDown 0.3s ease-out;
-  }
+	details[open] summary ~ * {
+		animation: slideDown 0.3s ease-out;
+	}
 
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+	@keyframes slideDown {
+		from {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
 </style>
 
 <script define:vars={{ sectionId, singleExpand }}>
-  if (singleExpand) {
-    function setupFAQ() {
-      const container = document.querySelector(`[data-faq-container="${sectionId}"]`);
-      if (!container) return;
+	if (singleExpand) {
+		function setupFAQ() {
+			const container = document.querySelector(`[data-faq-container="${sectionId}"]`);
+			if (!container) return;
 
-      const items = container.querySelectorAll(`[data-faq-item="${sectionId}"]`);
+			const items = container.querySelectorAll(`[data-faq-item="${sectionId}"]`);
 
-      items.forEach((item) => {
-        item.addEventListener('toggle', (e) => {
-          if (e.target.open) {
-            items.forEach((otherItem) => {
-              if (otherItem !== e.target && otherItem.open) {
-                otherItem.open = false;
-              }
-            });
-          }
-        });
-      });
-    }
+			items.forEach((item) => {
+				item.addEventListener('toggle', (e) => {
+					if (e.target.open) {
+						items.forEach((otherItem) => {
+							if (otherItem !== e.target && otherItem.open) {
+								otherItem.open = false;
+							}
+						});
+					}
+				});
+			});
+		}
 
-    setupFAQ();
-    document.addEventListener('astro:page-load', setupFAQ);
-  }
+		setupFAQ();
+		document.addEventListener('astro:page-load', setupFAQ);
+	}
 </script>

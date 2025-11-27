@@ -1,37 +1,37 @@
 {
-  "name": "@manacore/shared-theme",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "svelte": "./src/index.ts",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "exports": {
-    ".": {
-      "svelte": "./src/index.ts",
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    },
-    "./store": {
-      "svelte": "./src/store.svelte.ts",
-      "default": "./src/store.svelte.ts"
-    },
-    "./types": {
-      "types": "./src/types.ts",
-      "default": "./src/types.ts"
-    },
-    "./constants": {
-      "default": "./src/constants.ts"
-    },
-    "./utils": {
-      "default": "./src/utils.ts"
-    }
-  },
-  "peerDependencies": {
-    "svelte": "^5.0.0"
-  },
-  "devDependencies": {
-    "svelte": "^5.0.0",
-    "typescript": "^5.0.0"
-  }
+	"name": "@manacore/shared-theme",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"svelte": "./src/index.ts",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": {
+			"svelte": "./src/index.ts",
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		},
+		"./store": {
+			"svelte": "./src/store.svelte.ts",
+			"default": "./src/store.svelte.ts"
+		},
+		"./types": {
+			"types": "./src/types.ts",
+			"default": "./src/types.ts"
+		},
+		"./constants": {
+			"default": "./src/constants.ts"
+		},
+		"./utils": {
+			"default": "./src/utils.ts"
+		}
+	},
+	"peerDependencies": {
+		"svelte": "^5.0.0"
+	},
+	"devDependencies": {
+		"svelte": "^5.0.0",
+		"typescript": "^5.0.0"
+	}
 }

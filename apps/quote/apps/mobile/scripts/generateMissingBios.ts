@@ -14,44 +14,44 @@ import { Author } from '../services/contentLoader';
  * Liest Autoren aus TypeScript-Datei
  */
 function loadAuthors(lang: 'de' | 'en'): Author[] {
-  const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const match = content.match(/export const authors[A-Z]{2}: Author\[\] = (\[[\s\S]*\]);/);
+	const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
+	const content = fs.readFileSync(filePath, 'utf-8');
+	const match = content.match(/export const authors[A-Z]{2}: Author\[\] = (\[[\s\S]*\]);/);
 
-  if (!match) {
-    throw new Error(`Konnte Authors nicht aus ${filePath} extrahieren`);
-  }
+	if (!match) {
+		throw new Error(`Konnte Authors nicht aus ${filePath} extrahieren`);
+	}
 
-  return eval(match[1]) as Author[];
+	return eval(match[1]) as Author[];
 }
 
 /**
  * Schreibt Authors zurück
  */
 function writeAuthors(authors: Author[], lang: 'de' | 'en'): void {
-  const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
+	const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
 
-  // Backup
-  const backupPath = filePath.replace('.ts', `.backup-${Date.now()}.ts`);
-  fs.copyFileSync(filePath, backupPath);
-  console.log(`💾 Backup: ${path.basename(backupPath)}`);
+	// Backup
+	const backupPath = filePath.replace('.ts', `.backup-${Date.now()}.ts`);
+	fs.copyFileSync(filePath, backupPath);
+	console.log(`💾 Backup: ${path.basename(backupPath)}`);
 
-  const authorsJson = JSON.stringify(authors, null, 2);
-  const tsContent = `import { Author } from '../../contentLoader';
+	const authorsJson = JSON.stringify(authors, null, 2);
+	const tsContent = `import { Author } from '../../contentLoader';
 
 export const authors${lang.toUpperCase()}: Author[] = ${authorsJson};
 `;
 
-  fs.writeFileSync(filePath, tsContent, 'utf-8');
-  console.log(`✅ ${lang}.ts aktualisiert (${authors.length} Autoren)\n`);
+	fs.writeFileSync(filePath, tsContent, 'utf-8');
+	console.log(`✅ ${lang}.ts aktualisiert (${authors.length} Autoren)\n`);
 }
 
 /**
  * Template-Biografien für verschiedene Autoren-Typen
  */
 const bioTemplates: Record<string, (author: Author) => string> = {
-  // Philosophen
-  'augustinus': (a) => `# ${a.name}
+	// Philosophen
+	augustinus: (a) => `# ${a.name}
 *${a.lifespan?.birth} - ${a.lifespan?.death || 'heute'}*
 
 ## Kurzbiografie
@@ -79,8 +79,8 @@ ${a.biography?.famousQuote ? `> "${a.biography.famousQuote}"` : ''}
 
 Seine Werke verbinden neuplatonische Philosophie mit christlicher Theologie und begründen eine Psychologie der Innerlichkeit.`,
 
-  // Wissenschaftler/Erfinder
-  'pasteur-louis': (a) => `# ${a.name}
+	// Wissenschaftler/Erfinder
+	'pasteur-louis': (a) => `# ${a.name}
 *${a.lifespan?.birth} - ${a.lifespan?.death || 'heute'}*
 
 ## Kurzbiografie
@@ -112,8 +112,8 @@ Pasteurs Arbeit legte die Grundlage für:
 
 Das Pasteur-Institut in Paris führt seine Arbeit bis heute fort.`,
 
-  // Politiker
-  'kennedy-john-f': (a) => `# ${a.name}
+	// Politiker
+	'kennedy-john-f': (a) => `# ${a.name}
 *${a.lifespan?.birth} - ${a.lifespan?.death || 'heute'}*
 
 ## Kurzbiografie
@@ -149,8 +149,8 @@ Kennedy verkörperte Hoffnung, Idealismus und eine neue Generation amerikanische
 
 > "Wer auf Veränderung hofft, ohne selbst etwas zu tun, ist wie jemand, der auf ein Schiff wartet, obwohl er am Flughafen steht."`,
 
-  // Schriftsteller
-  'hesse-hermann': (a) => `# ${a.name}
+	// Schriftsteller
+	'hesse-hermann': (a) => `# ${a.name}
 *${a.lifespan?.birth} - ${a.lifespan?.death || 'heute'}*
 
 ## Kurzbiografie
@@ -184,8 +184,8 @@ ${a.biography?.famousQuote ? `> "${a.biography.famousQuote}"` : ''}
 
 > "In jedem Anfang liegt ein Zauber inne."`,
 
-  // Default für andere
-  'default': (a) => `# ${a.name}
+	// Default für andere
+	default: (a) => `# ${a.name}
 *${a.lifespan?.birth ? `${a.lifespan.birth} - ${a.lifespan.death || 'heute'}` : 'Lebensdaten unbekannt'}*
 
 ## Kurzbiografie
@@ -202,115 +202,123 @@ ${a.lifespan ? `Geboren ${new Date(a.lifespan.birth).getFullYear()}${a.lifespan.
 
 Die Arbeit und das Denken von ${a.name} beeinflussten ${a.profession?.[0]?.includes('Phil') ? 'die Philosophie' : a.profession?.[0]?.includes('Writ') ? 'die Literatur' : a.profession?.[0]?.includes('Scien') ? 'die Wissenschaft' : 'ihre Zeit'} nachhaltig.
 
-${a.biography?.keyAchievements && a.biography.keyAchievements.length > 0 ? `### Wichtige Beiträge
+${
+	a.biography?.keyAchievements && a.biography.keyAchievements.length > 0
+		? `### Wichtige Beiträge
 
-${a.biography.keyAchievements.map(a => `- ${a}`).join('\n')}` : ''}
+${a.biography.keyAchievements.map((a) => `- ${a}`).join('\n')}`
+		: ''
+}
 
 ## Vermächtnis
 
 ${a.name} wird bis heute als ${a.profession?.[0] || 'bedeutende Persönlichkeit'} geschätzt und studiert.
 
-${a.biography?.famousQuote ? `## Berühmte Zitate
+${
+	a.biography?.famousQuote
+		? `## Berühmte Zitate
 
-> "${a.biography.famousQuote}"` : ''}
+> "${a.biography.famousQuote}"`
+		: ''
+}
 
-Die Ideen und Werke bleiben relevant und inspirierend für kommende Generationen.`
+Die Ideen und Werke bleiben relevant und inspirierend für kommende Generationen.`,
 };
 
 /**
  * Generiert ausführliche Biografie
  */
 function generateDetailedBio(author: Author): string {
-  // Wenn bereits eine lange Biografie existiert, behalten
-  if (author.biography?.long && author.biography.long.length > 200) {
-    return author.biography.long;
-  }
+	// Wenn bereits eine lange Biografie existiert, behalten
+	if (author.biography?.long && author.biography.long.length > 200) {
+		return author.biography.long;
+	}
 
-  // Prüfe ob Template existiert
-  if (bioTemplates[author.id]) {
-    return bioTemplates[author.id](author);
-  }
+	// Prüfe ob Template existiert
+	if (bioTemplates[author.id]) {
+		return bioTemplates[author.id](author);
+	}
 
-  // Default Template
-  return bioTemplates['default'](author);
+	// Default Template
+	return bioTemplates['default'](author);
 }
 
 /**
  * Main
  */
 async function main() {
-  console.log('🔄 Generiere fehlende ausführliche Biografien\n');
-  console.log('=' .repeat(60) + '\n');
+	console.log('🔄 Generiere fehlende ausführliche Biografien\n');
+	console.log('='.repeat(60) + '\n');
 
-  const authorsDE = loadAuthors('de');
-  const authorsEN = loadAuthors('en');
+	const authorsDE = loadAuthors('de');
+	const authorsEN = loadAuthors('en');
 
-  const withoutLongBio = authorsDE.filter(a =>
-    !a.biography?.long || a.biography.long.length < 200
-  );
+	const withoutLongBio = authorsDE.filter(
+		(a) => !a.biography?.long || a.biography.long.length < 200
+	);
 
-  console.log(`📊 Status:`);
-  console.log(`   Gesamt: ${authorsDE.length} Autoren`);
-  console.log(`   Ohne ausführliche Bio: ${withoutLongBio.length} Autoren\n`);
+	console.log(`📊 Status:`);
+	console.log(`   Gesamt: ${authorsDE.length} Autoren`);
+	console.log(`   Ohne ausführliche Bio: ${withoutLongBio.length} Autoren\n`);
 
-  if (withoutLongBio.length === 0) {
-    console.log('✨ Alle Autoren haben bereits ausführliche Biografien!\n');
-    return;
-  }
+	if (withoutLongBio.length === 0) {
+		console.log('✨ Alle Autoren haben bereits ausführliche Biografien!\n');
+		return;
+	}
 
-  console.log('🔨 Generiere Biografien...\n');
+	console.log('🔨 Generiere Biografien...\n');
 
-  let generated = 0;
+	let generated = 0;
 
-  // Aktualisiere Autoren
-  const updatedDE = authorsDE.map(author => {
-    if (!author.biography?.long || author.biography.long.length < 200) {
-      const detailedBio = generateDetailedBio(author);
-      generated++;
-      console.log(`   ✅ ${author.name} (${author.id})`);
+	// Aktualisiere Autoren
+	const updatedDE = authorsDE.map((author) => {
+		if (!author.biography?.long || author.biography.long.length < 200) {
+			const detailedBio = generateDetailedBio(author);
+			generated++;
+			console.log(`   ✅ ${author.name} (${author.id})`);
 
-      return {
-        ...author,
-        biography: {
-          ...author.biography,
-          short: author.biography?.short || detailedBio.substring(0, 200) + '...',
-          long: detailedBio
-        }
-      };
-    }
-    return author;
-  });
+			return {
+				...author,
+				biography: {
+					...author.biography,
+					short: author.biography?.short || detailedBio.substring(0, 200) + '...',
+					long: detailedBio,
+				},
+			};
+		}
+		return author;
+	});
 
-  const updatedEN = authorsEN.map(author => {
-    const deAuthor = updatedDE.find(a => a.id === author.id);
-    if (deAuthor && deAuthor.biography?.long) {
-      return {
-        ...author,
-        biography: {
-          ...author.biography,
-          long: deAuthor.biography.long // Kopiere die deutsche Bio auch ins Englische
-        }
-      };
-    }
-    return author;
-  });
+	const updatedEN = authorsEN.map((author) => {
+		const deAuthor = updatedDE.find((a) => a.id === author.id);
+		if (deAuthor && deAuthor.biography?.long) {
+			return {
+				...author,
+				biography: {
+					...author.biography,
+					long: deAuthor.biography.long, // Kopiere die deutsche Bio auch ins Englische
+				},
+			};
+		}
+		return author;
+	});
 
-  console.log(`\n📊 ${generated} Biografien generiert\n`);
+	console.log(`\n📊 ${generated} Biografien generiert\n`);
 
-  console.log('=' .repeat(60) + '\n');
-  console.log('💾 Speichere Änderungen...\n');
+	console.log('='.repeat(60) + '\n');
+	console.log('💾 Speichere Änderungen...\n');
 
-  writeAuthors(updatedDE, 'de');
-  writeAuthors(updatedEN, 'en');
+	writeAuthors(updatedDE, 'de');
+	writeAuthors(updatedEN, 'en');
 
-  console.log('=' .repeat(60) + '\n');
-  console.log('✨ Fertig!\n');
-  console.log(`📝 ${generated} Autoren haben jetzt ausführliche Biografien.\n`);
-  console.log('⚠️  Hinweis: Die generierten Biografien sind Templates.');
-  console.log('   Für noch bessere Qualität können diese manuell erweitert werden.\n');
+	console.log('='.repeat(60) + '\n');
+	console.log('✨ Fertig!\n');
+	console.log(`📝 ${generated} Autoren haben jetzt ausführliche Biografien.\n`);
+	console.log('⚠️  Hinweis: Die generierten Biografien sind Templates.');
+	console.log('   Für noch bessere Qualität können diese manuell erweitert werden.\n');
 }
 
-main().catch(error => {
-  console.error('❌ Fehler:', error);
-  process.exit(1);
+main().catch((error) => {
+	console.error('❌ Fehler:', error);
+	process.exit(1);
 });

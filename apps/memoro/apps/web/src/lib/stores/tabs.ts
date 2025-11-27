@@ -26,7 +26,7 @@ interface TabState {
 function createTabStore() {
 	const { subscribe, set, update } = writable<TabState>({
 		splits: [],
-		activeSplitId: null
+		activeSplitId: null,
 	});
 
 	return {
@@ -48,13 +48,13 @@ function createTabStore() {
 								memoId: memo.id,
 								memo,
 								audioUrl,
-								isActive: true
-							}
+								isActive: true,
+							},
 						],
-						activeTabId: tabId
-					}
+						activeTabId: tabId,
+					},
 				],
-				activeSplitId: splitId
+				activeSplitId: splitId,
 			});
 		},
 
@@ -80,12 +80,12 @@ function createTabStore() {
 										...s,
 										tabs: s.tabs.map((t) => ({
 											...t,
-											isActive: t.id === existingTab.id
+											isActive: t.id === existingTab.id,
 										})),
-										activeTabId: existingTab.id
+										activeTabId: existingTab.id,
 									}
 								: s
-						)
+						),
 					};
 				}
 
@@ -95,7 +95,7 @@ function createTabStore() {
 					memoId: memo.id,
 					memo,
 					audioUrl,
-					isActive: true
+					isActive: true,
 				};
 
 				return {
@@ -104,14 +104,11 @@ function createTabStore() {
 						i === splitIndex
 							? {
 									...s,
-									tabs: [
-										...s.tabs.map((t) => ({ ...t, isActive: false })),
-										newTab
-									],
-									activeTabId: newTab.id
+									tabs: [...s.tabs.map((t) => ({ ...t, isActive: false })), newTab],
+									activeTabId: newTab.id,
 								}
 							: s
-					)
+					),
 				};
 			});
 		},
@@ -131,16 +128,16 @@ function createTabStore() {
 							memoId: memo.id,
 							memo,
 							audioUrl,
-							isActive: true
-						}
+							isActive: true,
+						},
 					],
-					activeTabId: newTabId
+					activeTabId: newTabId,
 				};
 
 				return {
 					...state,
 					splits: [...state.splits, newSplit],
-					activeSplitId: newSplitId
+					activeSplitId: newSplitId,
 				};
 			});
 		},
@@ -155,13 +152,13 @@ function createTabStore() {
 								...split,
 								tabs: split.tabs.map((tab) => ({
 									...tab,
-									isActive: tab.id === tabId
+									isActive: tab.id === tabId,
 								})),
-								activeTabId: tabId
+								activeTabId: tabId,
 							}
 						: split
 				),
-				activeSplitId: splitId
+				activeSplitId: splitId,
 			}));
 		},
 
@@ -182,7 +179,7 @@ function createTabStore() {
 					const newSplits = state.splits.filter((s) => s.id !== splitId);
 					return {
 						splits: newSplits,
-						activeSplitId: newSplits.length > 0 ? newSplits[0].id : null
+						activeSplitId: newSplits.length > 0 ? newSplits[0].id : null,
 					};
 				}
 
@@ -201,10 +198,10 @@ function createTabStore() {
 							? {
 									...s,
 									tabs: newTabs,
-									activeTabId: newActiveTabId
+									activeTabId: newActiveTabId,
 								}
 							: s
-					)
+					),
 				};
 			});
 		},
@@ -218,7 +215,7 @@ function createTabStore() {
 					activeSplitId:
 						state.activeSplitId === splitId && newSplits.length > 0
 							? newSplits[0].id
-							: state.activeSplitId
+							: state.activeSplitId,
 				};
 			});
 		},
@@ -229,10 +226,8 @@ function createTabStore() {
 				...state,
 				splits: state.splits.map((split) => ({
 					...split,
-					tabs: split.tabs.map((tab) =>
-						tab.memoId === memoId ? { ...tab, memo } : tab
-					)
-				}))
+					tabs: split.tabs.map((tab) => (tab.memoId === memoId ? { ...tab, memo } : tab)),
+				})),
 			}));
 		},
 
@@ -240,9 +235,9 @@ function createTabStore() {
 		clear: () => {
 			set({
 				splits: [],
-				activeSplitId: null
+				activeSplitId: null,
 			});
-		}
+		},
 	};
 }
 

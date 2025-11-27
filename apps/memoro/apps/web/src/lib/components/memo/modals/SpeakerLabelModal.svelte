@@ -51,7 +51,7 @@
 		const updates = speakers
 			.map((speaker) => ({
 				id: speaker.id,
-				name: editedSpeakers.get(speaker.id) || ''
+				name: editedSpeakers.get(speaker.id) || '',
 			}))
 			.filter((update) => {
 				const original = speakers.find((s) => s.id === update.id);
@@ -79,7 +79,7 @@
 			'bg-pink-500',
 			'bg-teal-500',
 			'bg-red-500',
-			'bg-indigo-500'
+			'bg-indigo-500',
 		];
 		return colors[index % colors.length];
 	}
@@ -157,8 +157,8 @@
 					<div class="flex-1">
 						<p class="text-sm font-medium text-blue-800 dark:text-blue-200">Speaker labels</p>
 						<p class="text-xs text-blue-700 dark:text-blue-300 mt-1">
-							Speaker labels (S1, S2, etc.) are automatically detected from your transcript.
-							Assign meaningful names to make conversations easier to follow.
+							Speaker labels (S1, S2, etc.) are automatically detected from your transcript. Assign
+							meaningful names to make conversations easier to follow.
 						</p>
 					</div>
 				</div>

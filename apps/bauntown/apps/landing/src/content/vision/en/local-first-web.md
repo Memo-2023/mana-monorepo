@@ -1,23 +1,18 @@
 ---
-title: "Local-First Web: The Future of Application Development"
-description: "Our vision for developing web applications that work offline, respect data ownership, and enable real-time collaboration."
+title: 'Local-First Web: The Future of Application Development'
+description: 'Our vision for developing web applications that work offline, respect data ownership, and enable real-time collaboration.'
 pubDate: 2025-03-28
-category: "technology"
-timeline: "2025-2030"
-status: "current"
+category: 'technology'
+timeline: '2025-2030'
+status: 'current'
 featured: true
-image: "/images/vision/local-first-web.png"
-contributors: ["Marie Schmidt", "Thomas Weber", "Lisa Miller"]
-relatedLinks: [
-  {
-    title: "Local-First Software",
-    url: "https://www.inkandswitch.com/local-first/"
-  },
-  {
-    title: "CRDTs for Mortals",
-    url: "https://tinybase.org/blog/crdts-for-mortals/"
-  }
-]
+image: '/images/vision/local-first-web.png'
+contributors: ['Marie Schmidt', 'Thomas Weber', 'Lisa Miller']
+relatedLinks:
+  [
+    { title: 'Local-First Software', url: 'https://www.inkandswitch.com/local-first/' },
+    { title: 'CRDTs for Mortals', url: 'https://tinybase.org/blog/crdts-for-mortals/' },
+  ]
 ---
 
 # Local-First Web: The Future of Application Development

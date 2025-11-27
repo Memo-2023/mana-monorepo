@@ -4,8 +4,8 @@ import { MealsService } from './meals.service';
 import { GeminiModule } from '../gemini/gemini.module';
 
 @Module({
-  imports: [GeminiModule],
-  controllers: [MealsController],
-  providers: [MealsService],
+	imports: [GeminiModule],
+	controllers: [MealsController],
+	providers: [MealsService],
 })
 export class MealsModule {}

@@ -1,265 +1,295 @@
 <script lang="ts">
-  import type { Template, AIModel } from '@chat/types';
-  import { chatService } from '$lib/services/chat';
-  import { onMount } from 'svelte';
+	import type { Template, AIModel } from '@chat/types';
+	import { chatService } from '$lib/services/chat';
+	import { onMount } from 'svelte';
 
-  interface Props {
-    template?: Template;
-    onSubmit: (data: Partial<Template>) => void;
-    onCancel: () => void;
-  }
+	interface Props {
+		template?: Template;
+		onSubmit: (data: Partial<Template>) => void;
+		onCancel: () => void;
+	}
 
-  let { template, onSubmit, onCancel }: Props = $props();
+	let { template, onSubmit, onCancel }: Props = $props();
 
-  // Available colors
-  const TEMPLATE_COLORS = [
-    '#0A84FF', // Blue
-    '#32D74B', // Green
-    '#FF375F', // Red
-    '#FF9F0A', // Orange
-    '#5E5CE6', // Purple
-    '#BF5AF2', // Pink
-    '#64D2FF', // Light Blue
-    '#30D158', // Green 2
-    '#FF453A', // Red 2
-  ];
+	// Available colors
+	const TEMPLATE_COLORS = [
+		'#0A84FF', // Blue
+		'#32D74B', // Green
+		'#FF375F', // Red
+		'#FF9F0A', // Orange
+		'#5E5CE6', // Purple
+		'#BF5AF2', // Pink
+		'#64D2FF', // Light Blue
+		'#30D158', // Green 2
+		'#FF453A', // Red 2
+	];
 
-  // Form state
-  let name = $state(template?.name ?? '');
-  let description = $state(template?.description ?? '');
-  let systemPrompt = $state(template?.system_prompt ?? '');
-  let initialQuestion = $state(template?.initial_question ?? '');
-  let selectedColor = $state(template?.color ?? TEMPLATE_COLORS[0]);
-  let selectedModelId = $state(template?.model_id ?? '');
-  let documentMode = $state(template?.document_mode ?? false);
+	// Form state
+	let name = $state(template?.name ?? '');
+	let description = $state(template?.description ?? '');
+	let systemPrompt = $state(template?.system_prompt ?? '');
+	let initialQuestion = $state(template?.initial_question ?? '');
+	let selectedColor = $state(template?.color ?? TEMPLATE_COLORS[0]);
+	let selectedModelId = $state(template?.model_id ?? '');
+	let documentMode = $state(template?.document_mode ?? false);
 
-  // Models
-  let models = $state<AIModel[]>([]);
+	// Models
+	let models = $state<AIModel[]>([]);
 
-  // Validation
-  let errors = $state<{ name?: string; systemPrompt?: string }>({});
+	// Validation
+	let errors = $state<{ name?: string; systemPrompt?: string }>({});
 
-  const isEditMode = !!template?.id;
+	const isEditMode = !!template?.id;
 
-  onMount(async () => {
-    models = await chatService.getModels();
-  });
+	onMount(async () => {
+		models = await chatService.getModels();
+	});
 
-  function validateForm(): boolean {
-    const newErrors: { name?: string; systemPrompt?: string } = {};
+	function validateForm(): boolean {
+		const newErrors: { name?: string; systemPrompt?: string } = {};
 
-    if (!name.trim()) {
-      newErrors.name = 'Bitte gib einen Namen ein.';
-    }
+		if (!name.trim()) {
+			newErrors.name = 'Bitte gib einen Namen ein.';
+		}
 
-    if (!systemPrompt.trim()) {
-      newErrors.systemPrompt = 'Der System-Prompt darf nicht leer sein.';
-    }
+		if (!systemPrompt.trim()) {
+			newErrors.systemPrompt = 'Der System-Prompt darf nicht leer sein.';
+		}
 
-    errors = newErrors;
-    return Object.keys(newErrors).length === 0;
-  }
+		errors = newErrors;
+		return Object.keys(newErrors).length === 0;
+	}
 
-  function handleSubmit() {
-    if (!validateForm()) return;
+	function handleSubmit() {
+		if (!validateForm()) return;
 
-    onSubmit({
-      id: template?.id,
-      name,
-      description: description.trim() || null,
-      system_prompt: systemPrompt,
-      initial_question: initialQuestion.trim() || null,
-      color: selectedColor,
-      model_id: selectedModelId || null,
-      document_mode: documentMode,
-    });
-  }
+		onSubmit({
+			id: template?.id,
+			name,
+			description: description.trim() || null,
+			system_prompt: systemPrompt,
+			initial_question: initialQuestion.trim() || null,
+			color: selectedColor,
+			model_id: selectedModelId || null,
+			document_mode: documentMode,
+		});
+	}
 </script>
 
 <div class="bg-white dark:bg-gray-900 p-6 rounded-xl max-w-2xl mx-auto">
-  <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">
-    {isEditMode ? 'Vorlage bearbeiten' : 'Neue Vorlage erstellen'}
-  </h2>
+	<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">
+		{isEditMode ? 'Vorlage bearbeiten' : 'Neue Vorlage erstellen'}
+	</h2>
 
-  <form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="space-y-5">
-    <!-- Name -->
-    <div>
-      <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-        Name *
-      </label>
-      <input
-        type="text"
-        id="name"
-        bind:value={name}
-        maxlength={50}
-        placeholder="Name der Vorlage"
-        class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-800
+	<form
+		onsubmit={(e) => {
+			e.preventDefault();
+			handleSubmit();
+		}}
+		class="space-y-5"
+	>
+		<!-- Name -->
+		<div>
+			<label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+				Name *
+			</label>
+			<input
+				type="text"
+				id="name"
+				bind:value={name}
+				maxlength={50}
+				placeholder="Name der Vorlage"
+				class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-800
                text-gray-900 dark:text-white placeholder-gray-500
                {errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}
                focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      />
-      {#if errors.name}
-        <p class="mt-1 text-sm text-red-500">{errors.name}</p>
-      {/if}
-    </div>
+			/>
+			{#if errors.name}
+				<p class="mt-1 text-sm text-red-500">{errors.name}</p>
+			{/if}
+		</div>
 
-    <!-- Description -->
-    <div>
-      <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-        Beschreibung (optional)
-      </label>
-      <textarea
-        id="description"
-        bind:value={description}
-        maxlength={200}
-        rows={2}
-        placeholder="Kurze Beschreibung dieser Vorlage"
-        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+		<!-- Description -->
+		<div>
+			<label
+				for="description"
+				class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+			>
+				Beschreibung (optional)
+			</label>
+			<textarea
+				id="description"
+				bind:value={description}
+				maxlength={200}
+				rows={2}
+				placeholder="Kurze Beschreibung dieser Vorlage"
+				class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
                bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500
                focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-      ></textarea>
-    </div>
+			></textarea>
+		</div>
 
-    <!-- System Prompt -->
-    <div>
-      <label for="systemPrompt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-        System-Prompt *
-      </label>
-      <textarea
-        id="systemPrompt"
-        bind:value={systemPrompt}
-        rows={5}
-        placeholder="System-Prompt für die KI"
-        class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-800
+		<!-- System Prompt -->
+		<div>
+			<label
+				for="systemPrompt"
+				class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+			>
+				System-Prompt *
+			</label>
+			<textarea
+				id="systemPrompt"
+				bind:value={systemPrompt}
+				rows={5}
+				placeholder="System-Prompt für die KI"
+				class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-800
                text-gray-900 dark:text-white placeholder-gray-500
                {errors.systemPrompt ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}
                focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-      ></textarea>
-      {#if errors.systemPrompt}
-        <p class="mt-1 text-sm text-red-500">{errors.systemPrompt}</p>
-      {:else}
-        <p class="mt-1 text-xs text-gray-500">
-          Der System-Prompt definiert die Rolle und das Verhalten der KI.
-        </p>
-      {/if}
-    </div>
+			></textarea>
+			{#if errors.systemPrompt}
+				<p class="mt-1 text-sm text-red-500">{errors.systemPrompt}</p>
+			{:else}
+				<p class="mt-1 text-xs text-gray-500">
+					Der System-Prompt definiert die Rolle und das Verhalten der KI.
+				</p>
+			{/if}
+		</div>
 
-    <!-- Initial Question -->
-    <div>
-      <label for="initialQuestion" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-        Beispielfrage (optional)
-      </label>
-      <textarea
-        id="initialQuestion"
-        bind:value={initialQuestion}
-        rows={2}
-        placeholder="Beispiel für eine passende Frage oder Anweisung"
-        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+		<!-- Initial Question -->
+		<div>
+			<label
+				for="initialQuestion"
+				class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+			>
+				Beispielfrage (optional)
+			</label>
+			<textarea
+				id="initialQuestion"
+				bind:value={initialQuestion}
+				rows={2}
+				placeholder="Beispiel für eine passende Frage oder Anweisung"
+				class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
                bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500
                focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-      ></textarea>
-      <p class="mt-1 text-xs text-gray-500">
-        Diese Frage wird als Vorschlag angezeigt, wenn die Vorlage ausgewählt wird.
-      </p>
-    </div>
+			></textarea>
+			<p class="mt-1 text-xs text-gray-500">
+				Diese Frage wird als Vorschlag angezeigt, wenn die Vorlage ausgewählt wird.
+			</p>
+		</div>
 
-    <!-- Color -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        Farbe
-      </label>
-      <div class="flex flex-wrap gap-2">
-        {#each TEMPLATE_COLORS as color}
-          <button
-            type="button"
-            onclick={() => (selectedColor = color)}
-            class="w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-110
-                   {selectedColor === color ? 'ring-2 ring-offset-2 ring-gray-900 dark:ring-white' : ''}"
-            style="background-color: {color}"
-            aria-label="Farbe {color}"
-          >
-            {#if selectedColor === color}
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-              </svg>
-            {/if}
-          </button>
-        {/each}
-      </div>
-    </div>
+		<!-- Color -->
+		<div>
+			<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"> Farbe </label>
+			<div class="flex flex-wrap gap-2">
+				{#each TEMPLATE_COLORS as color}
+					<button
+						type="button"
+						onclick={() => (selectedColor = color)}
+						class="w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-110
+                   {selectedColor === color
+							? 'ring-2 ring-offset-2 ring-gray-900 dark:ring-white'
+							: ''}"
+						style="background-color: {color}"
+						aria-label="Farbe {color}"
+					>
+						{#if selectedColor === color}
+							<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="3"
+									d="M5 13l4 4L19 7"
+								/>
+							</svg>
+						{/if}
+					</button>
+				{/each}
+			</div>
+		</div>
 
-    <!-- Model -->
-    <div>
-      <label for="model" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-        Bevorzugtes Modell (optional)
-      </label>
-      <select
-        id="model"
-        bind:value={selectedModelId}
-        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+		<!-- Model -->
+		<div>
+			<label for="model" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+				Bevorzugtes Modell (optional)
+			</label>
+			<select
+				id="model"
+				bind:value={selectedModelId}
+				class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
                bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white
                focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      >
-        <option value="">Kein Modell ausgewählt</option>
-        {#each models as model}
-          <option value={model.id}>{model.name}</option>
-        {/each}
-      </select>
-      <p class="mt-1 text-xs text-gray-500">
-        Falls ausgewählt, wird dieses Modell automatisch mit der Vorlage verwendet.
-      </p>
-    </div>
+			>
+				<option value="">Kein Modell ausgewählt</option>
+				{#each models as model}
+					<option value={model.id}>{model.name}</option>
+				{/each}
+			</select>
+			<p class="mt-1 text-xs text-gray-500">
+				Falls ausgewählt, wird dieses Modell automatisch mit der Vorlage verwendet.
+			</p>
+		</div>
 
-    <!-- Document Mode -->
-    <div>
-      <button
-        type="button"
-        onclick={() => (documentMode = !documentMode)}
-        class="w-full flex items-center justify-between p-4 border rounded-lg transition-colors
+		<!-- Document Mode -->
+		<div>
+			<button
+				type="button"
+				onclick={() => (documentMode = !documentMode)}
+				class="w-full flex items-center justify-between p-4 border rounded-lg transition-colors
                {documentMode
-                 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                 : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800'}"
-      >
-        <div class="text-left">
-          <p class="font-medium text-gray-900 dark:text-white">Dokumentmodus aktivieren</p>
-          <p class="text-xs text-gray-500 mt-0.5">
-            Ermöglicht die Bearbeitung eines Dokuments während der Konversation
-          </p>
-        </div>
-        <div
-          class="w-6 h-6 rounded-full flex items-center justify-center
+					? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+					: 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800'}"
+			>
+				<div class="text-left">
+					<p class="font-medium text-gray-900 dark:text-white">Dokumentmodus aktivieren</p>
+					<p class="text-xs text-gray-500 mt-0.5">
+						Ermöglicht die Bearbeitung eines Dokuments während der Konversation
+					</p>
+				</div>
+				<div
+					class="w-6 h-6 rounded-full flex items-center justify-center
                  {documentMode ? 'bg-blue-500' : 'bg-gray-400'}"
-        >
-          {#if documentMode}
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-          {:else}
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          {/if}
-        </div>
-      </button>
-    </div>
+				>
+					{#if documentMode}
+						<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M5 13l4 4L19 7"
+							/>
+						</svg>
+					{:else}
+						<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
+						</svg>
+					{/if}
+				</div>
+			</button>
+		</div>
 
-    <!-- Buttons -->
-    <div class="flex gap-3 pt-4">
-      <button
-        type="button"
-        onclick={onCancel}
-        class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300
+		<!-- Buttons -->
+		<div class="flex gap-3 pt-4">
+			<button
+				type="button"
+				onclick={onCancel}
+				class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300
                rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-      >
-        Abbrechen
-      </button>
-      <button
-        type="submit"
-        class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium
+			>
+				Abbrechen
+			</button>
+			<button
+				type="submit"
+				class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium
                hover:bg-blue-700 transition-colors"
-      >
-        {isEditMode ? 'Speichern' : 'Erstellen'}
-      </button>
-    </div>
-  </form>
+			>
+				{isEditMode ? 'Speichern' : 'Erstellen'}
+			</button>
+		</div>
+	</form>
 </div>

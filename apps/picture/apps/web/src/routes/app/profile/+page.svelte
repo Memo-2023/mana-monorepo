@@ -28,7 +28,7 @@
 		return new Intl.DateTimeFormat('de-DE', {
 			day: '2-digit',
 			month: 'long',
-			year: 'numeric'
+			year: 'numeric',
 		}).format(date);
 	}
 </script>
@@ -47,11 +47,15 @@
 		<!-- Account Information -->
 		<Card>
 			<div class="p-6">
-				<h2 class="mb-6 text-xl font-semibold text-gray-900 dark:text-gray-100">Account Information</h2>
+				<h2 class="mb-6 text-xl font-semibold text-gray-900 dark:text-gray-100">
+					Account Information
+				</h2>
 
 				<div class="space-y-4">
 					<!-- Email -->
-					<div class="flex items-center justify-between border-b border-gray-200 pb-4 dark:border-gray-700">
+					<div
+						class="flex items-center justify-between border-b border-gray-200 pb-4 dark:border-gray-700"
+					>
 						<div>
 							<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</h3>
 							<p class="mt-1 text-gray-900 dark:text-gray-100">{$user?.email || 'Not available'}</p>
@@ -61,7 +65,9 @@
 								Verified
 							</span>
 						{:else}
-							<span class="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-800">
+							<span
+								class="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-800"
+							>
 								Not verified
 							</span>
 						{/if}
@@ -146,7 +152,9 @@
 				<h2 class="mb-6 text-xl font-semibold text-red-600">Danger Zone</h2>
 
 				<div class="space-y-4">
-					<div class="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4">
+					<div
+						class="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4"
+					>
 						<div>
 							<h3 class="font-medium text-red-900">Log Out</h3>
 							<p class="mt-1 text-sm text-red-700">Sign out of your account</p>
@@ -156,12 +164,12 @@
 						</Button>
 					</div>
 
-					<div class="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4">
+					<div
+						class="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4"
+					>
 						<div>
 							<h3 class="font-medium text-red-900">Delete Account</h3>
-							<p class="mt-1 text-sm text-red-700">
-								Permanently delete your account and all data
-							</p>
+							<p class="mt-1 text-sm text-red-700">Permanently delete your account and all data</p>
 						</div>
 						<Button
 							variant="danger"

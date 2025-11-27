@@ -61,9 +61,12 @@
 			OGG: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
 			AAC: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
 			FLAC: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
-			WEBM: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200'
+			WEBM: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200',
 		};
-		return colors[format.toUpperCase()] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+		return (
+			colors[format.toUpperCase()] ||
+			'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+		);
 	}
 </script>
 
@@ -127,13 +130,21 @@
 		<!-- Created Date -->
 		<div class="flex items-center gap-1.5">
 			<Icon name="calendar" size={16} class="text-theme-secondary" />
-			<Text variant="small">{formatDistanceToNow(new Date(audioFile.created_at), { addSuffix: true, locale: de })}</Text>
+			<Text variant="small"
+				>{formatDistanceToNow(new Date(audioFile.created_at), {
+					addSuffix: true,
+					locale: de,
+				})}</Text
+			>
 		</div>
 	</div>
 
 	<!-- Actions -->
 	<div class="flex gap-2">
-		<button onclick={handleDownload} class="btn-secondary flex-1 flex items-center justify-center gap-2">
+		<button
+			onclick={handleDownload}
+			class="btn-secondary flex-1 flex items-center justify-center gap-2"
+		>
 			<Icon name="download" size={16} />
 			<Text variant="small">Herunterladen</Text>
 		</button>

@@ -1,8 +1,8 @@
 ---
-title: "Content Collections in Astro"
-description: "Wie man Content Collections für strukturierte Inhalte in Astro nutzt."
+title: 'Content Collections in Astro'
+description: 'Wie man Content Collections für strukturierte Inhalte in Astro nutzt.'
 pubDate: 2025-03-18
-category: "Marketing"
+category: 'Marketing'
 ---
 
 # Content Collections in Astro
@@ -29,22 +29,22 @@ Hier ist ein Beispiel für eine Konfigurationsdatei:
 
 ```typescript
 // src/content/config.ts
-import { defineCollection, z } from "astro:content";
+import { defineCollection, z } from 'astro:content';
 
 const blogCollection = defineCollection({
-  type: "content", // 'content' oder 'data'
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    pubDate: z.date(),
-    updatedDate: z.date().optional(),
-    tags: z.array(z.string()).default(["allgemein"]),
-    image: z.string().optional(),
-  }),
+	type: 'content', // 'content' oder 'data'
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		pubDate: z.date(),
+		updatedDate: z.date().optional(),
+		tags: z.array(z.string()).default(['allgemein']),
+		image: z.string().optional(),
+	}),
 });
 
 export const collections = {
-  blog: blogCollection,
+	blog: blogCollection,
 };
 ```
 
@@ -54,10 +54,10 @@ Nach der Einrichtung kannst du Markdown oder MDX Dateien zu deinen Sammlungen hi
 
 ```markdown
 ---
-title: "Mein erster Beitrag"
-description: "Dies ist mein erster Blogbeitrag mit Astro Content Collections."
+title: 'Mein erster Beitrag'
+description: 'Dies ist mein erster Blogbeitrag mit Astro Content Collections.'
 pubDate: 2025-03-10
-tags: ["astro", "markdown"]
+tags: ['astro', 'markdown']
 ---
 
 # Mein erster Beitrag
@@ -78,7 +78,7 @@ const allBlogPosts = await getCollection('blog');
 
 // Nach bestimmten Kriterien filtern
 const featuredPosts = await getCollection('blog', ({ data }) => {
-  return data.tags.includes('featured');
+	return data.tags.includes('featured');
 });
 
 // Einen bestimmten Eintrag abrufen
@@ -86,11 +86,13 @@ const specificPost = await getEntry('blog', 'post-slug');
 ---
 
 <ul>
-  {allBlogPosts.map(post => (
-    <li>
-      <a href={`/blog/${post.slug}`}>{post.data.title}</a>
-    </li>
-  ))}
+	{
+		allBlogPosts.map((post) => (
+			<li>
+				<a href={`/blog/${post.slug}`}>{post.data.title}</a>
+			</li>
+		))
+	}
 </ul>
 ```
 
@@ -112,7 +114,7 @@ const { Content } = await entry.render();
 ---
 
 <BlogLayout frontmatter={entry.data}>
-  <Content />
+	<Content />
 </BlogLayout>
 ```
 
@@ -121,14 +123,14 @@ const { Content } = await entry.render();
 Content Collections bieten vollständige TypeScript-Integration, sodass du Zugriff auf Typen für deine Sammlungen hast:
 
 ```typescript
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from 'astro:content';
 
 // Typen für deine Sammlungen
-type BlogPost = CollectionEntry<"blog">;
+type BlogPost = CollectionEntry<'blog'>;
 
 // Komponenten-Prop-Typ
 interface Props {
-  post: BlogPost;
+	post: BlogPost;
 }
 ```
 

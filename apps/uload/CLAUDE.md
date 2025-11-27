@@ -90,25 +90,26 @@ pnpm run db:studio        # Open Drizzle Studio
 
 ```typescript
 // ✅ CORRECT - Svelte 5 runes
-let headerModule = $derived(card.config.modules?.find(m => m.type === 'header'));
+let headerModule = $derived(card.config.modules?.find((m) => m.type === 'header'));
 let count = $state(0);
 
 $effect(() => {
-  console.log('Count changed:', count);
+	console.log('Count changed:', count);
 });
 ```
 
 ### PocketBase Usage
 
 In server-side code (`+page.server.ts`, `+server.ts`):
+
 - **ALWAYS use `locals.pb`** from the request context
 - The imported `pb` is for client-side only
 
 ```typescript
 // Server-side
 export const load: PageServerLoad = async ({ locals }) => {
-  const items = await locals.pb.collection('items').getList();
-}
+	const items = await locals.pb.collection('items').getList();
+};
 
 // Client-side
 import { pb } from '$lib/pocketbase';

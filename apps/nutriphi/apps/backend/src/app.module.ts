@@ -8,17 +8,17 @@ import { MealsModule } from './meals/meals.module';
 import { SyncModule } from './sync/sync.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
-    DatabaseModule,
-    StorageModule,
-    HealthModule,
-    GeminiModule,
-    MealsModule,
-    SyncModule,
-  ],
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			envFilePath: '.env',
+		}),
+		DatabaseModule,
+		StorageModule,
+		HealthModule,
+		GeminiModule,
+		MealsModule,
+		SyncModule,
+	],
 })
 export class AppModule {}

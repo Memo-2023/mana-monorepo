@@ -1,6 +1,13 @@
 <script lang="ts">
 	import { user } from '$lib/stores/auth';
-	import { images, isLoading, hasMore, currentPage, selectedImage, showFavoritesOnly } from '$lib/stores/images';
+	import {
+		images,
+		isLoading,
+		hasMore,
+		currentPage,
+		selectedImage,
+		showFavoritesOnly,
+	} from '$lib/stores/images';
 	import { isUIVisible } from '$lib/stores/ui';
 	import { tags, selectedTags } from '$lib/stores/tags';
 	import { getImages } from '$lib/api/images';
@@ -30,7 +37,7 @@
 			},
 			{
 				threshold: 0.1,
-				rootMargin: '100px' // Load before reaching the trigger
+				rootMargin: '100px', // Load before reaching the trigger
 			}
 		);
 
@@ -68,7 +75,7 @@
 				userId: $user.id,
 				page: 1,
 				tagIds: $selectedTags.length > 0 ? $selectedTags : undefined,
-				favoritesOnly: $showFavoritesOnly
+				favoritesOnly: $showFavoritesOnly,
 			});
 			images.set(data);
 			currentPage.set(1);
@@ -91,7 +98,7 @@
 				userId: $user.id,
 				page: nextPage,
 				tagIds: $selectedTags.length > 0 ? $selectedTags : undefined,
-				favoritesOnly: $showFavoritesOnly
+				favoritesOnly: $showFavoritesOnly,
 			});
 			if (newImages.length > 0) {
 				images.update((current) => [...current, ...newImages]);

@@ -8,16 +8,16 @@ import { Platform } from 'react-native';
  * during deeplink navigation on iOS
  */
 export default function ShareLayout() {
-  return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        animation: Platform.OS === 'ios' ? 'none' : 'default',
-        // Disable all screen optimization features that could cause crashes
-        freezeOnBlur: false,
-        // Disable native stack on iOS to prevent snapshot creation
-        presentation: 'transparentModal',
-      }}
-    />
-  );
+	return (
+		<Stack
+			screenOptions={{
+				headerShown: false,
+				animation: Platform.OS === 'ios' ? 'none' : 'default',
+				// Disable all screen optimization features that could cause crashes
+				freezeOnBlur: false,
+				// Disable native stack on iOS to prevent snapshot creation
+				presentation: 'transparentModal',
+			}}
+		/>
+	);
 }

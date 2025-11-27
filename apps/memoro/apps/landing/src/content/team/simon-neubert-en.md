@@ -1,18 +1,18 @@
 ---
-name: "Dr. Simon Neubert"
-title: "Dr. Simon Neubert"
+name: 'Dr. Simon Neubert'
+title: 'Dr. Simon Neubert'
 description: "Develops the AI systems that power Memoro's intelligent conversation processing."
-role: "Data Scientist / AI Engineer"
-avatar: "/images/team/simon-neubert.jpg"
+role: 'Data Scientist / AI Engineer'
+avatar: '/images/team/simon-neubert.jpg'
 bio: "Develops the AI systems that power Memoro's intelligent conversation processing."
-category: "kernteam"
+category: 'kernteam'
 order: 7
 social:
-  linkedin: "dr-simon-neubert"
-  github: "sneubert-ai"
-  twitter: "simon_neubert_ml"
-lang: "en"
-slug: "simon-neubert"
+  linkedin: 'dr-simon-neubert'
+  github: 'sneubert-ai'
+  twitter: 'simon_neubert_ml'
+lang: 'en'
+slug: 'simon-neubert'
 ---
 
 ## The AI Behind Memoro

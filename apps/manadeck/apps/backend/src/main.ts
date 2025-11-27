@@ -5,47 +5,49 @@ import { AppExceptionFilter } from '@manacore/shared-errors/nestjs';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const logger = new Logger('Bootstrap');
+	const logger = new Logger('Bootstrap');
 
-  logger.log('Starting ManaDeck Backend...');
+	logger.log('Starting ManaDeck Backend...');
 
-  // Debug: Log environment variables before validation
-  logger.log('=== Environment Variables Debug ===');
-  logger.log(`APP_ID: ${process.env.APP_ID ? process.env.APP_ID.substring(0, 20) + '...' : 'NOT SET'}`);
-  logger.log(`DATABASE_URL: ${process.env.DATABASE_URL ? '[SET]' : 'NOT SET'}`);
-  logger.log(`MANA_SERVICE_URL: ${process.env.MANA_SERVICE_URL || 'NOT SET'}`);
-  logger.log('===================================');
+	// Debug: Log environment variables before validation
+	logger.log('=== Environment Variables Debug ===');
+	logger.log(
+		`APP_ID: ${process.env.APP_ID ? process.env.APP_ID.substring(0, 20) + '...' : 'NOT SET'}`
+	);
+	logger.log(`DATABASE_URL: ${process.env.DATABASE_URL ? '[SET]' : 'NOT SET'}`);
+	logger.log(`MANA_SERVICE_URL: ${process.env.MANA_SERVICE_URL || 'NOT SET'}`);
+	logger.log('===================================');
 
-  const app = await NestFactory.create(AppModule, {
-    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
-  });
+	const app = await NestFactory.create(AppModule, {
+		logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+	});
 
-  const configService = app.get(ConfigService);
+	const configService = app.get(ConfigService);
 
-  // Global exception filter for standardized error responses
-  app.useGlobalFilters(new AppExceptionFilter());
+	// Global exception filter for standardized error responses
+	app.useGlobalFilters(new AppExceptionFilter());
 
-  // Enable CORS
-  app.enableCors({
-    origin: configService.get('FRONTEND_URL') || true,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  });
+	// Enable CORS
+	app.enableCors({
+		origin: configService.get('FRONTEND_URL') || true,
+		credentials: true,
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+		allowedHeaders: ['Content-Type', 'Authorization'],
+	});
 
-  // Global prefix
-  app.setGlobalPrefix('v1', {
-    exclude: ['health', 'health/ready', 'health/live'],
-  });
+	// Global prefix
+	app.setGlobalPrefix('v1', {
+		exclude: ['health', 'health/ready', 'health/live'],
+	});
 
-  const port = configService.get<number>('PORT') || 8080;
+	const port = configService.get<number>('PORT') || 8080;
 
-  await app.listen(port);
+	await app.listen(port);
 
-  logger.log(`Environment: ${configService.get('NODE_ENV')}`);
-  logger.log(`Mana Service URL: ${configService.get('MANA_SERVICE_URL')}`);
-  logger.log(`App ID: ${configService.get('APP_ID')}`);
-  logger.log(`Application running on port ${port}`);
-  logger.log(`Health check available at http://localhost:${port}/health`);
+	logger.log(`Environment: ${configService.get('NODE_ENV')}`);
+	logger.log(`Mana Service URL: ${configService.get('MANA_SERVICE_URL')}`);
+	logger.log(`App ID: ${configService.get('APP_ID')}`);
+	logger.log(`Application running on port ${port}`);
+	logger.log(`Health check available at http://localhost:${port}/health`);
 }
 bootstrap();

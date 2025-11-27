@@ -1,19 +1,19 @@
 ---
-title: "Rivoluzione nella generazione di immagini AI: OpenAI GPT-4o stabilisce nuovi standard"
-description: "OpenAI ha recentemente svelato il suo ultimo modello, GPT-4o, che integra direttamente la generazione di immagini, segnando un significativo avanzamento nella tecnologia AI."
+title: 'Rivoluzione nella generazione di immagini AI: OpenAI GPT-4o stabilisce nuovi standard'
+description: 'OpenAI ha recentemente svelato il suo ultimo modello, GPT-4o, che integra direttamente la generazione di immagini, segnando un significativo avanzamento nella tecnologia AI.'
 pubDate: 2025-03-25
-category: "Bild"
+category: 'Bild'
 featured: true
-author: "BaunTown"
-tags: ["GPT-4o", "OpenAI", "AI", "Multimodale", "Generazione di immagini"]
-image: "/images/models/openai-gpt4o-imagemode-bauntown.png"
+author: 'BaunTown'
+tags: ['GPT-4o', 'OpenAI', 'AI', 'Multimodale', 'Generazione di immagini']
+image: '/images/models/openai-gpt4o-imagemode-bauntown.png'
 externalLinks:
-  - title: "Annuncio ufficiale di OpenAI"
-    url: "https://openai.com/index/introducing-4o-image-generation/"
-  - title: "ChatGPT - Crea immagini"
-    url: "https://chat.openai.com"
-  - title: "Sora - Piattaforma video e immagini di OpenAI"
-    url: "https://sora.com"
+  - title: 'Annuncio ufficiale di OpenAI'
+    url: 'https://openai.com/index/introducing-4o-image-generation/'
+  - title: 'ChatGPT - Crea immagini'
+    url: 'https://chat.openai.com'
+  - title: 'Sora - Piattaforma video e immagini di OpenAI'
+    url: 'https://sora.com'
 ---
 
 OpenAI ha recentemente presentato il suo ultimo modello, GPT-4o, che integra direttamente la generazione di immagini, segnando un importante progresso nella tecnologia dell'IA. Questo modello può creare immagini basate su prompt testuali, modificare immagini caricate e persino rappresentare con precisione oggetti multipli. Si distingue per la sua migliore rappresentazione del testo nelle immagini, un'area in cui modelli precedenti come DALL-E spesso avevano difficoltà.

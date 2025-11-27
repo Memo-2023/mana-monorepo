@@ -13,14 +13,22 @@
 		onDownload?: (file: AudioFileInfo) => void;
 	}
 
-	let { audioFiles, isLoading = false, hasMore = false, onLoadMore, onDelete, onDownload }: Props =
-		$props();
+	let {
+		audioFiles,
+		isLoading = false,
+		hasMore = false,
+		onLoadMore,
+		onDelete,
+		onDownload,
+	}: Props = $props();
 </script>
 
 {#if isLoading && audioFiles.length === 0}
 	<!-- Loading State -->
 	<div class="flex flex-col items-center justify-center py-16">
-		<div class="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+		<div
+			class="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"
+		></div>
 		<Text variant="body-secondary">Lade Aufnahmen...</Text>
 	</div>
 {:else if audioFiles.length === 0}
@@ -53,7 +61,9 @@
 				class="btn-secondary flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
 			>
 				{#if isLoading}
-					<div class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+					<div
+						class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
+					></div>
 					<Text variant="small">Lädt...</Text>
 				{:else}
 					<Icon name="arrow-down" size={16} />

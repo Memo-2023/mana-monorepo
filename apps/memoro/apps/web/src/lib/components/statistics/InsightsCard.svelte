@@ -25,7 +25,7 @@
 		memosWithoutTags,
 		averageTagsPerMemo,
 		mostUsedTags,
-		topLocations
+		topLocations,
 	}: Props = $props();
 </script>
 
@@ -35,9 +35,7 @@
 			<Text variant="large" weight="bold" class="mb-5 text-2xl">Insights</Text>
 
 			<!-- Audio Insights -->
-			<Text variant="muted" weight="semibold" class="mb-2 uppercase tracking-wide">
-				Audio
-			</Text>
+			<Text variant="muted" weight="semibold" class="mb-2 uppercase tracking-wide">Audio</Text>
 			<div class="mb-4 -space-y-px">
 				<StatRow
 					title="Ø Aufnahmedauer"
@@ -59,15 +57,9 @@
 			</div>
 
 			<!-- Tag Analytics -->
-			<Text variant="muted" weight="semibold" class="mb-2 uppercase tracking-wide">
-				Tags
-			</Text>
+			<Text variant="muted" weight="semibold" class="mb-2 uppercase tracking-wide">Tags</Text>
 			<div class="mb-4 -space-y-px">
-				<StatRow
-					title="Gesamt Tags"
-					value={totalTags.toString()}
-					icon="pricetag-outline"
-				/>
+				<StatRow title="Gesamt Tags" value={totalTags.toString()} icon="pricetag-outline" />
 				<StatRow
 					title="Zugewiesene Tags"
 					value={assignedTags.toString()}
@@ -99,11 +91,7 @@
 				</Text>
 				<div class="-space-y-px">
 					{#each topLocations as location}
-						<StatRow
-							title={location.city}
-							value={`${location.count}x`}
-							icon="location-outline"
-						/>
+						<StatRow title={location.city} value={`${location.count}x`} icon="location-outline" />
 					{/each}
 				</div>
 			{/if}

@@ -35,10 +35,7 @@
 					'success'
 				);
 			} else {
-				showToast(
-					`${successCount} von ${files.length} Bildern erfolgreich hochgeladen`,
-					'warning'
-				);
+				showToast(`${successCount} von ${files.length} Bildern erfolgreich hochgeladen`, 'warning');
 			}
 
 			// Redirect to gallery after successful upload
@@ -73,16 +70,24 @@
 			<div
 				class="mb-6 flex items-center gap-3 rounded-2xl border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950/20"
 			>
-				<svg class="h-6 w-6 flex-shrink-0 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+				<svg
+					class="h-6 w-6 flex-shrink-0 text-green-600 dark:text-green-400"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M5 13l4 4L19 7"
+					/>
 				</svg>
 				<div>
-					<p class="font-medium text-green-900 dark:text-green-100">
-						Upload erfolgreich!
-					</p>
+					<p class="font-medium text-green-900 dark:text-green-100">Upload erfolgreich!</p>
 					<p class="text-sm text-green-700 dark:text-green-300">
-						{successCount} {successCount === 1 ? 'Bild wurde' : 'Bilder wurden'} hochgeladen.
-						Du wirst zur Galerie weitergeleitet...
+						{successCount}
+						{successCount === 1 ? 'Bild wurde' : 'Bilder wurden'} hochgeladen. Du wirst zur Galerie weitergeleitet...
 					</p>
 				</div>
 			</div>
@@ -94,9 +99,18 @@
 		<!-- Tips -->
 		{#if !uploading && uploadProgress.length === 0}
 			<div class="mt-8 grid gap-4 sm:grid-cols-3">
-				<div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-					<div class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950">
-						<svg class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<div
+					class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+				>
+					<div
+						class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950"
+					>
+						<svg
+							class="h-5 w-5 text-blue-600 dark:text-blue-400"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -111,9 +125,18 @@
 					</p>
 				</div>
 
-				<div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-					<div class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-950">
-						<svg class="h-5 w-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<div
+					class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+				>
+					<div
+						class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-950"
+					>
+						<svg
+							class="h-5 w-5 text-purple-600 dark:text-purple-400"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -123,14 +146,21 @@
 						</svg>
 					</div>
 					<h3 class="mb-1 font-semibold text-gray-900 dark:text-white">Maximale Größe</h3>
-					<p class="text-sm text-gray-600 dark:text-gray-400">
-						Bis zu 10MB pro Bild
-					</p>
+					<p class="text-sm text-gray-600 dark:text-gray-400">Bis zu 10MB pro Bild</p>
 				</div>
 
-				<div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-					<div class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-950">
-						<svg class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<div
+					class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+				>
+					<div
+						class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-950"
+					>
+						<svg
+							class="h-5 w-5 text-green-600 dark:text-green-400"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"

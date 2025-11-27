@@ -1,7 +1,6 @@
 Safe areas
 Learn how to add safe areas for screen components inside your Expo project.
 
-
 Creating a safe area ensures your app screen's content is positioned correctly. This means it doesn't get overlapped by notches, status bars, home indicators, and other interface elements that are part of the device's physical hardware or are controlled by the operating system. When the content gets overlapped, it gets concealed by these interface elements.
 
 Here's an example of an app screen's content getting concealed by the status bar on Android. On iOS, the same content is concealed by rounded corners, notch, and the status bar.
@@ -30,16 +29,15 @@ app/index.tsx
 
 Copy
 
-
 import { Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Text>Content is in safe area.</Text>
-    </SafeAreaView>
-  );
+return (
+<SafeAreaView style={{ flex: 1 }}>
+<Text>Content is in safe area.</Text>
+</SafeAreaView>
+);
 }
 Using a different Expo template and don't have Expo Router installed?
 Alternate:
@@ -53,26 +51,25 @@ app/index.tsx
 
 Copy
 
-
 import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-  const insets = useSafeAreaInsets();
+const insets = useSafeAreaInsets();
 
-  return (
-    <View style={{ flex: 1, paddingTop: insets.top }}>
-      <Text>Content is in safe area.</Text>
-    </View>
-  );
+return (
+<View style={{ flex: 1, paddingTop: insets.top }}>
+<Text>Content is in safe area.</Text>
+</View>
+);
 }
 The hook provides the insets in the following object:
 
 {
-  top: number,
-  right: number,
-  bottom: number,
-  left: number
+top: number,
+right: number,
+bottom: number,
+left: number
 }
 Additional information
 Minimal example
@@ -82,28 +79,26 @@ Using react-native-safe-area-context
 
 Copy
 
-
 Open in Snack
-
 
 import { Text, View } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function HomeScreen() {
-  const insets = useSafeAreaInsets();
-  return (
-    <View style={{ flex: 1, paddingTop: insets.top }}>
-      <Text style={{ fontSize: 28 }}>Content is in safe area.</Text>
-    </View>
-  );
+const insets = useSafeAreaInsets();
+return (
+<View style={{ flex: 1, paddingTop: insets.top }}>
+<Text style={{ fontSize: 28 }}>Content is in safe area.</Text>
+</View>
+);
 }
 
 export default function App() {
-  return (
-    <SafeAreaProvider>
-      <HomeScreen />
-    </SafeAreaProvider>
-  );
+return (
+<SafeAreaProvider>
+<HomeScreen />
+</SafeAreaProvider>
+);
 }
 
 Show More

@@ -364,6 +364,7 @@ The pipeline handles deployment for:
 ```
 
 **What it does**:
+
 1. Confirms with user
 2. Checks for backup
 3. Stops current services
@@ -405,10 +406,12 @@ docker compose up -d
 ### Server Resources
 
 **Staging**:
+
 - 2 vCPU, 4GB RAM: ~$10-15/month
 - Hetzner CX21: €5.83/month
 
 **Production**:
+
 - 4 vCPU, 8GB RAM: ~$25-35/month
 - Hetzner CX31: €11.66/month
 

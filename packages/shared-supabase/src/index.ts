@@ -13,67 +13,67 @@ export { SupabaseClient } from '@supabase/supabase-js';
  * Create a Supabase client with the given configuration
  */
 export function createSupabaseClient(config: SupabaseConfig): SupabaseClient {
-  return createClient(config.url, config.anonKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-    },
-  });
+	return createClient(config.url, config.anonKey, {
+		auth: {
+			persistSession: true,
+			autoRefreshToken: true,
+		},
+	});
 }
 
 /**
  * Create a Supabase admin client with service role key
  */
 export function createSupabaseAdminClient(config: SupabaseConfig): SupabaseClient {
-  if (!config.serviceRoleKey) {
-    throw new Error('Service role key is required for admin client');
-  }
+	if (!config.serviceRoleKey) {
+		throw new Error('Service role key is required for admin client');
+	}
 
-  return createClient(config.url, config.serviceRoleKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
+	return createClient(config.url, config.serviceRoleKey, {
+		auth: {
+			persistSession: false,
+			autoRefreshToken: false,
+		},
+	});
 }
 
 /**
  * Supabase error type
  */
 export interface SupabaseError {
-  message: string;
-  code?: string;
-  details?: string;
-  hint?: string;
+	message: string;
+	code?: string;
+	details?: string;
+	hint?: string;
 }
 
 /**
  * Standardized query result type
  */
 export interface QueryResult<T> {
-  data: T | null;
-  error: SupabaseError | null;
+	data: T | null;
+	error: SupabaseError | null;
 }
 
 /**
  * Common database query helpers
  */
 export const dbHelpers = {
-  /**
-   * Handle Supabase query result and return standardized response
-   */
-  handleQueryResult<T>(result: { data: T | null; error: SupabaseError | null }): QueryResult<T> {
-    if (result.error) {
-      return {
-        data: null,
-        error: {
-          message: result.error.message,
-          code: result.error.code,
-          details: result.error.details,
-          hint: result.error.hint,
-        },
-      };
-    }
-    return { data: result.data, error: null };
-  },
+	/**
+	 * Handle Supabase query result and return standardized response
+	 */
+	handleQueryResult<T>(result: { data: T | null; error: SupabaseError | null }): QueryResult<T> {
+		if (result.error) {
+			return {
+				data: null,
+				error: {
+					message: result.error.message,
+					code: result.error.code,
+					details: result.error.details,
+					hint: result.error.hint,
+				},
+			};
+		}
+		return { data: result.data, error: null };
+	},
 };

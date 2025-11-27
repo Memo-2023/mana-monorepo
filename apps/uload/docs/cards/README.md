@@ -29,10 +29,10 @@ Das Card System in uload ist eine flexible, modulare Architektur für die Erstel
 				type: 'header',
 				props: {
 					title: 'Meine Karte',
-					subtitle: 'Eine Beispielkarte'
-				}
-			}
-		]
+					subtitle: 'Eine Beispielkarte',
+				},
+			},
+		],
 	};
 </script>
 

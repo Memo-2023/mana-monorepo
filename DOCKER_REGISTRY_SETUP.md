@@ -27,6 +27,7 @@ The Hive Mind has already configured your workflows to use GitHub Container Regi
 ### How It Works
 
 When GitHub Actions runs:
+
 1. Automatically logs in to ghcr.io using `GITHUB_TOKEN`
 2. Builds Docker images
 3. Pushes to: `ghcr.io/wuesteon/mana-core-auth`, `ghcr.io/wuesteon/chat-backend`, etc.
@@ -84,10 +85,10 @@ If you want to pull images on your Hetzner servers, add these secrets:
 
 **GitHub** → **Your Repo** → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
 
-| Secret Name | Value | Purpose |
-|-------------|-------|---------|
+| Secret Name     | Value                             | Purpose                       |
+| --------------- | --------------------------------- | ----------------------------- |
 | `GHCR_USERNAME` | `wuesteon` (your GitHub username) | For pulling images on servers |
-| `GHCR_TOKEN` | Your PAT from above | For pulling images on servers |
+| `GHCR_TOKEN`    | Your PAT from above               | For pulling images on servers |
 
 Then update `docker-compose.staging.yml` and `docker-compose.production.yml` to include login:
 
@@ -116,6 +117,7 @@ ghcr.io/wuesteon/maerchenzauber-backend:latest
 ```
 
 **Tags**:
+
 - `latest` - Most recent build from main branch
 - `main` - Same as latest (branch-based tag)
 - `main-a1b2c3d` - Specific commit SHA (for rollbacks)
@@ -168,6 +170,7 @@ Your colleague automatically has access because they have access to the reposito
 Update image references in `docker-compose.staging.yml` and `docker-compose.production.yml`:
 
 **Before** (if using Docker Hub):
+
 ```yaml
 services:
   mana-core-auth:
@@ -175,6 +178,7 @@ services:
 ```
 
 **After** (using GitHub Container Registry):
+
 ```yaml
 services:
   mana-core-auth:
@@ -186,10 +190,12 @@ services:
 ## Storage Limits
 
 **GitHub Container Registry Free Tier**:
+
 - **Storage**: 500 MB (across all packages)
 - **Data transfer**: 1 GB/month
 
 **How long until you hit limits?**:
+
 - Average Docker image size: 150 MB
 - You can store ~3 images before hitting 500 MB
 - **Recommendation**: Enable auto-delete for old images
@@ -203,7 +209,7 @@ name: Cleanup Old Container Images
 
 on:
   schedule:
-    - cron: '0 0 * * 0'  # Weekly on Sunday
+    - cron: '0 0 * * 0' # Weekly on Sunday
   workflow_dispatch:
 
 jobs:
@@ -228,6 +234,7 @@ This keeps only the 3 most recent versions and deletes untagged images.
 ### Issue: "Permission denied while trying to connect to the Docker daemon"
 
 **Solution**: Add your user to docker group on deployment server:
+
 ```bash
 sudo usermod -aG docker $USER
 newgrp docker
@@ -236,6 +243,7 @@ newgrp docker
 ### Issue: "unauthorized: unauthenticated"
 
 **Solution**: Login again with your PAT:
+
 ```bash
 echo YOUR_PAT_TOKEN | docker login ghcr.io -u wuesteon --password-stdin
 ```
@@ -247,6 +255,7 @@ echo YOUR_PAT_TOKEN | docker login ghcr.io -u wuesteon --password-stdin
 ### Issue: Images not appearing in GitHub Packages
 
 **Solution**:
+
 1. Check GitHub Actions workflow completed successfully
 2. Check the workflow pushed images (look for "Pushed to ghcr.io" in logs)
 3. Images may take 1-2 minutes to appear in Packages tab
@@ -255,16 +264,16 @@ echo YOUR_PAT_TOKEN | docker login ghcr.io -u wuesteon --password-stdin
 
 ## Comparison: Docker Hub vs ghcr.io
 
-| Feature | Docker Hub (Free) | GitHub Container Registry |
-|---------|-------------------|---------------------------|
-| **Cost** | Free (limited) | Free (generous) |
-| **Pull rate limits** | 100 pulls/6 hours | Unlimited |
-| **Storage** | 1 repo (free tier) | 500 MB (all packages) |
-| **Private repos** | 1 private repo | Unlimited private |
-| **Team access** | Manual invitation | Automatic via GitHub |
-| **Authentication** | Username + Token | GitHub account |
-| **Setup complexity** | Medium (create repos manually) | Low (automatic) |
-| **Integration** | Good | Excellent (native GitHub) |
+| Feature              | Docker Hub (Free)              | GitHub Container Registry |
+| -------------------- | ------------------------------ | ------------------------- |
+| **Cost**             | Free (limited)                 | Free (generous)           |
+| **Pull rate limits** | 100 pulls/6 hours              | Unlimited                 |
+| **Storage**          | 1 repo (free tier)             | 500 MB (all packages)     |
+| **Private repos**    | 1 private repo                 | Unlimited private         |
+| **Team access**      | Manual invitation              | Automatic via GitHub      |
+| **Authentication**   | Username + Token               | GitHub account            |
+| **Setup complexity** | Medium (create repos manually) | Low (automatic)           |
+| **Integration**      | Good                           | Excellent (native GitHub) |
 
 **Winner for 2-person team**: GitHub Container Registry ✅
 
@@ -283,6 +292,7 @@ echo YOUR_PAT_TOKEN | docker login ghcr.io -u wuesteon --password-stdin
 ## Summary
 
 **What you get with ghcr.io**:
+
 - ✅ Zero setup (already configured by Hive Mind)
 - ✅ Automatic authentication in GitHub Actions
 - ✅ Your colleague has instant access
@@ -291,6 +301,7 @@ echo YOUR_PAT_TOKEN | docker login ghcr.io -u wuesteon --password-stdin
 - ✅ Native GitHub integration
 
 **What you need to do**:
+
 - ✅ Nothing! (for CI/CD pipeline)
 - 🔧 Create PAT for deployment servers (5 minutes)
 - 🧹 Optional: Set up auto-cleanup (5 minutes)

@@ -3,34 +3,32 @@
  * Shared Badge component for landing pages
  */
 interface Props {
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'error';
-  size?: 'sm' | 'md' | 'lg';
-  class?: string;
+	variant?: 'default' | 'primary' | 'success' | 'warning' | 'error';
+	size?: 'sm' | 'md' | 'lg';
+	class?: string;
 }
 
-const {
-  variant = 'default',
-  size = 'md',
-  class: className = ''
-} = Astro.props;
+const { variant = 'default', size = 'md', class: className = '' } = Astro.props;
 
 const variants = {
-  default: 'bg-[var(--color-background-card)] text-[var(--color-text-secondary)] border-[var(--color-border)]',
-  primary: 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-[var(--color-primary)]/20',
-  success: 'bg-green-100 text-green-700 border-green-200',
-  warning: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  error: 'bg-red-100 text-red-700 border-red-200'
+	default:
+		'bg-[var(--color-background-card)] text-[var(--color-text-secondary)] border-[var(--color-border)]',
+	primary:
+		'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-[var(--color-primary)]/20',
+	success: 'bg-green-100 text-green-700 border-green-200',
+	warning: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+	error: 'bg-red-100 text-red-700 border-red-200',
 };
 
 const sizes = {
-  sm: 'text-xs px-2 py-0.5',
-  md: 'text-sm px-2.5 py-1',
-  lg: 'text-base px-3 py-1.5'
+	sm: 'text-xs px-2 py-0.5',
+	md: 'text-sm px-2.5 py-1',
+	lg: 'text-base px-3 py-1.5',
 };
 
 const styles = `inline-flex items-center rounded-full font-medium border ${variants[variant]} ${sizes[size]} ${className}`;
 ---
 
 <span class={styles}>
-  <slot />
+	<slot />
 </span>

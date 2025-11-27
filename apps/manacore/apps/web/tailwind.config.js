@@ -6,7 +6,7 @@ export default {
 	content: [
 		'./src/**/*.{html,js,svelte,ts}',
 		'../../../packages/shared-ui/src/**/*.{html,js,svelte,ts}',
-		'../../../packages/shared-auth-ui/src/**/*.{html,js,svelte,ts}'
+		'../../../packages/shared-auth-ui/src/**/*.{html,js,svelte,ts}',
 	],
 	theme: {
 		extend: {
@@ -23,9 +23,9 @@ export default {
 					700: '#1d4ed8',
 					800: '#1e40af',
 					900: '#1e3a8a',
-					950: '#172554'
-				}
-			}
-		}
-	}
+					950: '#172554',
+				},
+			},
+		},
+	},
 };

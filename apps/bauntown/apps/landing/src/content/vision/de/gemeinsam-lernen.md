@@ -1,23 +1,24 @@
 ---
-title: "Gemeinsam Lernen: Die Kraft kollektiver Bildung"
-description: "Unsere Vision für ein gemeinschaftsbasiertes Bildungsmodell, das traditionelle Lernformen ergänzt und erweitert."
+title: 'Gemeinsam Lernen: Die Kraft kollektiver Bildung'
+description: 'Unsere Vision für ein gemeinschaftsbasiertes Bildungsmodell, das traditionelle Lernformen ergänzt und erweitert.'
 pubDate: 2025-04-01
-category: "community"
-timeline: "2025-2027"
-status: "current"
+category: 'community'
+timeline: '2025-2027'
+status: 'current'
 featured: true
-image: "/images/vision/gemeinsam-lernen.png"
-contributors: ["Sophie Klein", "David Wagner", "Till Schneider"]
-relatedLinks: [
-  {
-    title: "Community of Practice Framework",
-    url: "https://www.communityofpractice.ca/background/what-is-a-community-of-practice/"
-  },
-  {
-    title: "Peer Learning Strategies",
-    url: "https://www.mckinsey.com/industries/education/our-insights/how-to-create-learning-communities-in-times-of-crisis-five-design-principles"
-  }
-]
+image: '/images/vision/gemeinsam-lernen.png'
+contributors: ['Sophie Klein', 'David Wagner', 'Till Schneider']
+relatedLinks:
+  [
+    {
+      title: 'Community of Practice Framework',
+      url: 'https://www.communityofpractice.ca/background/what-is-a-community-of-practice/',
+    },
+    {
+      title: 'Peer Learning Strategies',
+      url: 'https://www.mckinsey.com/industries/education/our-insights/how-to-create-learning-communities-in-times-of-crisis-five-design-principles',
+    },
+  ]
 ---
 
 # Gemeinsam Lernen: Die Kraft kollektiver Bildung

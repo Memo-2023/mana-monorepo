@@ -7,8 +7,8 @@ export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
 	resolve: {
 		alias: {
-			$tests: path.resolve('./src/tests')
-		}
+			$tests: path.resolve('./src/tests'),
+		},
 	},
 	build: {
 		target: 'esnext',
@@ -27,9 +27,9 @@ export default defineConfig({
 					if (id.includes('src/lib/components/cards')) return 'cards';
 					if (id.includes('src/lib/components/links')) return 'links';
 					if (id.includes('src/paraglide')) return 'i18n';
-				}
-			}
-		}
+				},
+			},
+		},
 	},
 	test: {
 		globals: true,
@@ -45,16 +45,16 @@ export default defineConfig({
 				'build/**',
 				'.svelte-kit/**',
 				'src/paraglide/**',
-				'src/app.html'
+				'src/app.html',
 			],
 			thresholds: {
 				global: {
 					branches: 70,
 					functions: 70,
 					lines: 70,
-					statements: 70
-				}
-			}
+					statements: 70,
+				},
+			},
 		},
 		projects: [
 			{
@@ -65,12 +65,12 @@ export default defineConfig({
 					browser: {
 						enabled: true,
 						provider: 'playwright',
-						instances: [{ browser: 'chromium' }]
+						instances: [{ browser: 'chromium' }],
 					},
 					include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
 					exclude: ['src/lib/server/**'],
-					setupFiles: ['./vitest-setup-client.ts', './src/tests/setup.ts']
-				}
+					setupFiles: ['./vitest-setup-client.ts', './src/tests/setup.ts'],
+				},
 			},
 			{
 				extends: './vite.config.ts',
@@ -79,9 +79,9 @@ export default defineConfig({
 					environment: 'node',
 					include: ['src/**/*.{test,spec}.{js,ts}'],
 					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}'],
-					setupFiles: ['./src/tests/setup.ts']
-				}
-			}
-		]
-	}
+					setupFiles: ['./src/tests/setup.ts'],
+				},
+			},
+		],
+	},
 });

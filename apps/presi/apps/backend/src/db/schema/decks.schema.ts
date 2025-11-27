@@ -5,21 +5,21 @@ import { themes } from './themes.schema';
 import { sharedDecks } from './shared-decks.schema';
 
 export const decks = pgTable('decks', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull(),
-  title: text('title').notNull(),
-  description: text('description'),
-  themeId: uuid('theme_id').references(() => themes.id),
-  isPublic: boolean('is_public').default(false).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+	id: uuid('id').primaryKey().defaultRandom(),
+	userId: uuid('user_id').notNull(),
+	title: text('title').notNull(),
+	description: text('description'),
+	themeId: uuid('theme_id').references(() => themes.id),
+	isPublic: boolean('is_public').default(false).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export const decksRelations = relations(decks, ({ many, one }) => ({
-  slides: many(slides),
-  theme: one(themes, {
-    fields: [decks.themeId],
-    references: [themes.id],
-  }),
-  sharedDecks: many(sharedDecks),
+	slides: many(slides),
+	theme: one(themes, {
+		fields: [decks.themeId],
+		references: [themes.id],
+	}),
+	sharedDecks: many(sharedDecks),
 }));

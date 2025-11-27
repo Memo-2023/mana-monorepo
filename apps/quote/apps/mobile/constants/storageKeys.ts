@@ -7,12 +7,12 @@
  * - Maintain consistency across the app
  */
 export const STORAGE_KEYS = {
-  QUOTES: 'quotes-storage',
-  LISTS: 'list-storage',
-  SETTINGS: 'settings-storage',
-  PREMIUM: 'premium-storage',
-  ONBOARDING: 'onboarding-storage',
+	QUOTES: 'quotes-storage',
+	LISTS: 'list-storage',
+	SETTINGS: 'settings-storage',
+	PREMIUM: 'premium-storage',
+	ONBOARDING: 'onboarding-storage',
 } as const;
 
 // Type for storage keys
-export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS];
+export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

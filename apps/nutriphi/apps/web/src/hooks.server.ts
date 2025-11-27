@@ -5,5 +5,5 @@ import { type Handle } from '@sveltejs/kit';
  * Authentication is handled client-side via Mana Middleware
  */
 export const handle: Handle = async ({ event, resolve }) => {
-  return resolve(event);
+	return resolve(event);
 };

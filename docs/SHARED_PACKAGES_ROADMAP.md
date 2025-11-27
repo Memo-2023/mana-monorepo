@@ -29,12 +29,14 @@ This document outlines the plan to unify common code across all web apps in the 
 All web apps now use the shared packages consistently:
 
 **Logo Components** - Migrated to `@manacore/shared-branding`:
+
 - `memoro/apps/web/src/lib/components/MemoroLogo.svelte` → uses `AppLogo`
 - `manadeck/apps/web/src/lib/components/ManaDeckLogo.svelte` → uses `AppLogo`
 - `manacore/apps/web/src/lib/components/ManaCoreLogo.svelte` → uses `AppLogo`
 - `maerchenzauber/apps/web/src/lib/components/StorytellerLogo.svelte` → uses `AppLogo`
 
 **Formatter Functions** - Migrated to `@manacore/shared-utils`:
+
 - `memoro/apps/web/src/lib/components/memo/AdditionalRecordings.svelte` → uses `formatDurationFromMs`, `formatFileSize`
 - `memoro/apps/web/src/lib/components/RecordingButton.svelte` → uses `formatDuration`
 - `memoro/apps/web/src/lib/components/statistics/OverviewCard.svelte` → uses `formatDurationWithUnits`
@@ -52,6 +54,7 @@ All web apps now use the shared packages consistently:
 **Estimated LOC Savings**: 500-800 per app
 
 **Components to unify**:
+
 - `Button.svelte` - Primary, secondary, ghost, danger variants
 - `Input.svelte` - Text input with label, error states
 - `Text.svelte` - Typography component with variants
@@ -63,6 +66,7 @@ All web apps now use the shared packages consistently:
 - `Dropdown.svelte` - Select/dropdown menus
 
 **Apps using these**:
+
 - ManaCore Web
 - Memoro Web
 - Maerchenzauber Web
@@ -77,6 +81,7 @@ All web apps now use the shared packages consistently:
 **Estimated LOC Savings**: 800-1200 per app
 
 **Modules to unify**:
+
 - `tokenManager.ts` - JWT token storage, refresh, validation
 - `authService.ts` - Login, logout, register, password reset
 - `supabaseClient.ts` - Authenticated Supabase client factory
@@ -84,6 +89,7 @@ All web apps now use the shared packages consistently:
 - `authGuard.ts` - Route protection utilities
 
 **Considerations**:
+
 - Each app may have different Supabase projects
 - Token storage strategy (localStorage vs cookies)
 - OAuth providers per app
@@ -97,6 +103,7 @@ All web apps now use the shared packages consistently:
 **Estimated Benefit**: Consistent branding, easier theme updates
 
 **Config unified**:
+
 - Color palette (primary, secondary, accent colors)
 - Theme variants (Lume, Nature, Stone, Ocean) with light/dark modes
 - Typography scale (font sizes, line heights)
@@ -105,6 +112,7 @@ All web apps now use the shared packages consistently:
 - CSS variable-based theming system
 
 **Structure**:
+
 ```
 packages/shared-tailwind/
 ├── package.json
@@ -117,6 +125,7 @@ packages/shared-tailwind/
 ```
 
 **Apps using this**:
+
 - Memoro Web (full migration with theme.css + components.css)
 - ManaCore Web (preset only, keeps local colors)
 - ManaDeck Web (colors import, HSL-based system)
@@ -131,6 +140,7 @@ packages/shared-tailwind/
 **Estimated LOC Savings**: 200-400 per app
 
 **Utilities included**:
+
 - `date.ts` - formatDate, formatRelativeTime, toISOString
 - `format.ts` - formatDuration, formatFileSize, formatNumber, formatCurrency, formatPercent
 - `validation.ts` - isValidEmail, isValidUrl, isValidPhone, validatePassword, isValidUuid
@@ -146,6 +156,7 @@ packages/shared-tailwind/
 **Estimated Benefit**: Type safety across packages
 
 **Types to unify**:
+
 - `User` - Common user type
 - `ApiResponse<T>` - Standard API response wrapper
 - `PaginatedResponse<T>` - Pagination types
@@ -163,6 +174,7 @@ packages/shared-tailwind/
 **Estimated LOC Savings**: 100-300 per app
 
 **Modules to unify**:
+
 - `i18n.ts` - svelte-i18n setup and initialization
 - `detectLocale.ts` - Browser language detection
 - Common translations:
@@ -172,6 +184,7 @@ packages/shared-tailwind/
   - Validation messages
 
 **Structure**:
+
 ```
 packages/shared-i18n/
 ├── package.json
@@ -197,6 +210,7 @@ packages/shared-i18n/
 **Estimated Benefit**: Consistent env handling
 
 **Config to unify**:
+
 - Environment variable validation (Zod schemas)
 - API endpoint construction
 - Feature flag utilities
@@ -229,6 +243,7 @@ packages/shared-i18n/
 ## Guidelines for Shared Packages
 
 ### Package Structure
+
 ```
 packages/shared-{name}/
 ├── package.json
@@ -240,24 +255,26 @@ packages/shared-{name}/
 ```
 
 ### Package.json Template
+
 ```json
 {
-  "name": "@manacore/shared-{name}",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "exports": {
-    ".": "./src/index.ts"
-  },
-  "peerDependencies": {
-    "svelte": "^5.0.0"
-  }
+	"name": "@manacore/shared-{name}",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"peerDependencies": {
+		"svelte": "^5.0.0"
+	}
 }
 ```
 
 ### Best Practices
+
 1. **Keep it minimal** - Only share truly common code
 2. **Document props** - Use TypeScript interfaces with JSDoc
 3. **Version carefully** - Coordinate updates across apps
@@ -273,6 +290,7 @@ packages/shared-{name}/
 Centralized branding configuration for all Mana ecosystem apps.
 
 **Exports**:
+
 - `AppLogo` - SVG logo component that renders app-specific logo
 - `AppLogoWithName` - Logo with app name and tagline
 - `ManaIcon` - Generic Mana icon component
@@ -280,9 +298,10 @@ Centralized branding configuration for all Mana ecosystem apps.
 - `AppId` type - Union type of all app IDs
 
 **Usage**:
+
 ```svelte
 <script>
-  import { AppLogo } from '@manacore/shared-branding';
+	import { AppLogo } from '@manacore/shared-branding';
 </script>
 
 <AppLogo app="memoro" size={32} />
@@ -294,6 +313,7 @@ Centralized branding configuration for all Mana ecosystem apps.
 Duration and formatting utilities.
 
 **Exports**:
+
 - `formatDuration(seconds)` - Returns `MM:SS` or `HH:MM:SS`
 - `formatDurationFromMs(ms)` - Converts milliseconds first
 - `formatDurationWithUnits(seconds, locale)` - Returns `2h 30m` style

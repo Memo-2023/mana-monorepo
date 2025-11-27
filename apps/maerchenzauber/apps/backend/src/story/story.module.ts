@@ -7,8 +7,8 @@ import { IllustrationService } from './illustration.service';
 import { SettingsModule } from '../settings/settings.module';
 
 @Module({
-  imports: [CoreModule, SettingsModule],
-  controllers: [StoryController],
-  providers: [StoryService, IllustrationService, StoryCreationService],
+	imports: [CoreModule, SettingsModule],
+	controllers: [StoryController],
+	providers: [StoryService, IllustrationService, StoryCreationService],
 })
 export class StoryModule {}

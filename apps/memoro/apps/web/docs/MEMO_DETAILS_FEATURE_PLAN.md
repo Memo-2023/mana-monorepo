@@ -238,6 +238,7 @@ Die Mobile App (`apps/mobile/app/(protected)/(memo)/[id].tsx`) bietet deutlich m
 ### Architektur-Überlegungen
 
 **Komponenten-Struktur:**
+
 ```
 src/lib/components/memo/
 ├── MemoPanel.svelte (Hauptkomponente - erweitert)
@@ -261,6 +262,7 @@ src/lib/components/memo/
 ```
 
 **Services:**
+
 ```
 src/lib/services/
 ├── memoService.ts (erweitert)
@@ -276,16 +278,19 @@ src/lib/services/
 ### Schritt 1: Grundlegende Komponenten (2-3 Tage)
 
 **Neue Komponenten:**
+
 - `MemoHeader.svelte` - Erweiterte Header-Komponente mit allen Metadaten
 - `MemoActions.svelte` - Action Button Bar (Edit, Delete, Share, etc.)
 - `PinButton.svelte` - Pin/Unpin Toggle mit Icon
 - `EditModeToolbar.svelte` - Save/Cancel Toolbar für Edit Mode
 
 **Erweiterungen:**
+
 - `MemoPanel.svelte` - Integration der neuen Komponenten
 - `memoService.ts` - Neue Methoden: `pinMemo()`, `updateMemo()`, `deleteMemo()`
 
 **Tasks:**
+
 - [ ] MemoHeader mit View Count, Word Count, Location, Language, Speaker Count
 - [ ] Pin/Unpin Funktionalität (UI + Backend)
 - [ ] Action Bar mit Buttons (Edit, Delete, Share, Copy, Search)
@@ -296,13 +301,16 @@ src/lib/services/
 ### Schritt 2: Tag Management (1-2 Tage)
 
 **Neue Komponenten:**
+
 - `TagSelectorModal.svelte` - Tag Auswahl Modal mit Suche
 - `TagManager.svelte` - Tag CRUD Operations Component
 
 **Erweiterungen:**
+
 - `tagService.ts` - Neue Methoden: `addTagToMemo()`, `removeTagFromMemo()`, `createTag()`
 
 **Tasks:**
+
 - [ ] Tag Selector Modal (Design + Logik)
 - [ ] Tags hinzufügen/entfernen Funktionalität
 - [ ] Neue Tags erstellen (Inline)
@@ -314,12 +322,14 @@ src/lib/services/
 ### Schritt 3: Aktionen & Modals (2-3 Tage)
 
 **Neue Komponenten:**
+
 - `DeleteModal.svelte` - Löschbestätigung mit Warning
 - `ShareModal.svelte` - Share-Optionen (Link, Export, Native Share)
 - `SearchOverlay.svelte` - Vollbild-Suche mit Highlighting
 - `CopyButton.svelte` - Copy-to-Clipboard Button
 
 **Tasks:**
+
 - [ ] Delete Modal mit Bestätigung
 - [ ] Share Modal (Link generieren, Export, Web Share API)
 - [ ] Search Overlay (UI + Search Logik)
@@ -332,14 +342,17 @@ src/lib/services/
 ### Schritt 4: Memories & Questions (2-3 Tage)
 
 **Neue Komponenten:**
+
 - `PromptBar.svelte` - Fragen stellen UI (Bottom Bar)
 - `CreateMemoryModal.svelte` - Neue Memory erstellen
 - `ReprocessModal.svelte` - Reprocess-Optionen
 
 **Neue Services:**
+
 - `memoryService.ts` - CRUD für Memories
 
 **Tasks:**
+
 - [ ] Prompt Bar UI (Input + Submit)
 - [ ] Ask Question API Integration
 - [ ] Create Memory Modal (Blueprint-Auswahl)
@@ -351,11 +364,13 @@ src/lib/services/
 ### Schritt 5: Speaker Features (2-3 Tage)
 
 **Neue Komponenten:**
+
 - `StructuredTranscript.svelte` - Transcript mit Speaker-Zuordnung
 - `SpeakerLabel.svelte` - Einzelner Speaker mit Avatar
 - `SpeakerLabelModal.svelte` - Sprecher benennen/zusammenführen
 
 **Tasks:**
+
 - [ ] Structured Transcript Rendering (Utterances)
 - [ ] Speaker Labels anzeigen
 - [ ] Speaker Label Modal (Name ändern)
@@ -367,14 +382,17 @@ src/lib/services/
 ### Schritt 6: Translation & Advanced (2-3 Tage)
 
 **Neue Komponenten:**
+
 - `TranslateModal.svelte` - Übersetzung mit Sprachauswahl
 - `ReplaceWordModal.svelte` - Wort ersetzen
 - `LanguageSelector.svelte` - Sprach-Dropdown
 
 **Neue Services:**
+
 - `translationService.ts` - Translation API
 
 **Tasks:**
+
 - [ ] Translate Modal (UI + API)
 - [ ] Replace Word Modal (Suchen & Ersetzen)
 - [ ] Multi-language Support
@@ -385,14 +403,17 @@ src/lib/services/
 ### Schritt 7: Media & Attachments (3-4 Tage)
 
 **Neue Komponenten:**
+
 - `PhotoGallery.svelte` - Grid-Layout mit Lightbox
 - `PhotoUpload.svelte` - Upload UI mit Drag & Drop
 - `AdditionalRecordings.svelte` - Liste zusätzlicher Aufnahmen
 
 **Neue Services:**
+
 - `photoService.ts` - Photo Upload & Management
 
 **Tasks:**
+
 - [ ] Photo Gallery Component (Grid + Lightbox)
 - [ ] Photo Upload (Drag & Drop)
 - [ ] Multiple Photos unterstützen
@@ -404,13 +425,16 @@ src/lib/services/
 ### Schritt 8: Spaces & Real-time (2-3 Tage)
 
 **Neue Komponenten:**
+
 - `SpaceSelectorModal.svelte` - Space Auswahl
 - `SpaceManager.svelte` - Space Zuordnung
 
 **Neue Services:**
+
 - `spacesService.ts` - Space Management
 
 **Tasks:**
+
 - [ ] Space Selector Modal
 - [ ] Memo zu Spaces zuordnen
 - [ ] Supabase Realtime Subscriptions
@@ -422,10 +446,12 @@ src/lib/services/
 ### Schritt 9: Navigation & Polish (1-2 Tage)
 
 **Neue Komponenten:**
+
 - `TableOfContents.svelte` - TOC für Memo-Sektionen
 - `KeyboardShortcuts.svelte` - Shortcut Cheatsheet
 
 **Tasks:**
+
 - [ ] Table of Contents (Sticky Sidebar)
 - [ ] Smooth Scrolling zu Sektionen
 - [ ] Keyboard Shortcuts implementieren
@@ -439,24 +465,27 @@ src/lib/services/
 
 ### Gesamtaufwand
 
-| Phase | Beschreibung | Dauer | Priorität |
-|-------|-------------|-------|-----------|
-| **Phase 1** | Basis-Features (Header, Tags, Actions) | 7-10 Tage | Must-Have |
-| **Phase 2** | Erweiterte Features (Memories, Speakers, Translation) | 6-9 Tage | Should-Have |
-| **Phase 3** | Premium Features (Media, Spaces, Navigation) | 6-9 Tage | Nice-to-Have |
-| **Gesamt** | Vollständige Feature-Parität | **19-28 Tage** | - |
+| Phase       | Beschreibung                                          | Dauer          | Priorität    |
+| ----------- | ----------------------------------------------------- | -------------- | ------------ |
+| **Phase 1** | Basis-Features (Header, Tags, Actions)                | 7-10 Tage      | Must-Have    |
+| **Phase 2** | Erweiterte Features (Memories, Speakers, Translation) | 6-9 Tage       | Should-Have  |
+| **Phase 3** | Premium Features (Media, Spaces, Navigation)          | 6-9 Tage       | Nice-to-Have |
+| **Gesamt**  | Vollständige Feature-Parität                          | **19-28 Tage** | -            |
 
 ### Empfohlene Priorisierung
 
 **Woche 1-2: Phase 1 (Must-Have)**
+
 - Grundlegende Funktionen, die für tägliche Nutzung essentiell sind
 - Pin/Unpin, Edit, Delete, Tag Management, Share, Search
 
 **Woche 3-4: Phase 2 (Should-Have)**
+
 - Erweiterte AI-Features und Advanced Editing
 - Memories, Questions, Speakers, Translation
 
 **Woche 5-6: Phase 3 (Nice-to-Have)**
+
 - Premium Features für Power-User
 - Photos, Spaces, Advanced Navigation
 

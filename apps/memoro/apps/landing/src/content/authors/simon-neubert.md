@@ -1,17 +1,29 @@
 ---
-name: "Dr. Simon Neubert"
-displayName: "Dr. Simon Neubert"
-bio: "Data Scientist & AI Engineer bei Memoro. Erforscht und entwickelt die KI-Systeme, die Memoros intelligente Gesprächsverarbeitung ermöglichen. Spezialist für NLP, maschinelles Lernen und ethische KI-Entwicklung."
-role: "Data Scientist / AI Engineer"
-avatar: "/images/team/simon-neubert.jpg"
-appearance: "Konzentrierter Mann Mitte 30 mit kurzen, dunkelblonden Haaren und einem sorgfältig gestutzten Bart. Seine blauen Augen strahlen Intelligenz und Neugier aus. Er trägt oft einen dunkelblauen Pullover über einem weißen Hemd oder ein schlichtes T-Shirt mit interessanten mathematischen oder wissenschaftlichen Motiven. Seine Brille mit dünnem Metallrahmen unterstreicht seinen akademischen Look. Auf Fotos sieht man ihn häufig vor mehreren Monitoren mit Code und Datenvisualisierungen, umgeben von Whiteboards voller Formeln und Diagramme."
+name: 'Dr. Simon Neubert'
+displayName: 'Dr. Simon Neubert'
+bio: 'Data Scientist & AI Engineer bei Memoro. Erforscht und entwickelt die KI-Systeme, die Memoros intelligente Gesprächsverarbeitung ermöglichen. Spezialist für NLP, maschinelles Lernen und ethische KI-Entwicklung.'
+role: 'Data Scientist / AI Engineer'
+avatar: '/images/team/simon-neubert.jpg'
+appearance: 'Konzentrierter Mann Mitte 30 mit kurzen, dunkelblonden Haaren und einem sorgfältig gestutzten Bart. Seine blauen Augen strahlen Intelligenz und Neugier aus. Er trägt oft einen dunkelblauen Pullover über einem weißen Hemd oder ein schlichtes T-Shirt mit interessanten mathematischen oder wissenschaftlichen Motiven. Seine Brille mit dünnem Metallrahmen unterstreicht seinen akademischen Look. Auf Fotos sieht man ihn häufig vor mehreren Monitoren mit Code und Datenvisualisierungen, umgeben von Whiteboards voller Formeln und Diagramme.'
 social:
-  linkedin: "dr-simon-neubert"
-  github: "sneubert-ai"
-  twitter: "simon_neubert_ml"
-  googleScholar: "simon-neubert"
-expertise: ["Natural Language Processing", "Machine Learning", "Deep Learning", "Data Science", "Python", "TensorFlow", "PyTorch", "MLOps", "Ethical AI", "Speech Recognition"]
-topics: ["KI-Forschung", "Sprachmodelle", "Datenethik", "Explainable AI", "ML Engineering"]
+  linkedin: 'dr-simon-neubert'
+  github: 'sneubert-ai'
+  twitter: 'simon_neubert_ml'
+  googleScholar: 'simon-neubert'
+expertise:
+  [
+    'Natural Language Processing',
+    'Machine Learning',
+    'Deep Learning',
+    'Data Science',
+    'Python',
+    'TensorFlow',
+    'PyTorch',
+    'MLOps',
+    'Ethical AI',
+    'Speech Recognition',
+  ]
+topics: ['KI-Forschung', 'Sprachmodelle', 'Datenethik', 'Explainable AI', 'ML Engineering']
 writingPrompt: "Schreibe als erfahrener Data Scientist namens Dr. Simon Neubert. Dein Stil ist präzise, wissenschaftlich fundiert aber verständlich. Du erklärst komplexe KI-Konzepte mit alltäglichen Analogien. Betone immer die ethischen Aspekte von KI und die Bedeutung von Transparenz. Dein Motto: 'KI sollte Menschen verstärken, nicht ersetzen.' Sei enthusiastisch über technische Durchbrüche, aber bleibe kritisch und reflektiert."
 isActive: true
 isFeatured: true
@@ -25,9 +37,9 @@ stats:
   totalViews: 78000
   totalLikes: 5200
   joinedDate: 2024-03-20
-lang: "de"
-preferredLanguages: ["de", "en"]
-slug: "simon-neubert"
+lang: 'de'
+preferredLanguages: ['de', 'en']
+slug: 'simon-neubert'
 createdAt: 2024-03-20
 lastActive: 2025-07-28
 ---
@@ -47,18 +59,21 @@ Nach seinem Informatikstudium an der TU München promovierte Simon am Max-Planck
 Simons Arbeit fokussiert sich auf:
 
 ### 1. Intelligente Gesprächsanalyse
+
 - **Echtzeit-Transkription**: Präzise Spracherkennung in 15+ Sprachen
 - **Kontextverständnis**: KI, die Zusammenhänge erkennt
 - **Themenextraktion**: Automatische Identifikation von Kernthemen
 - **Sentimentanalyse**: Erkennung emotionaler Nuancen
 
 ### 2. Ethische KI-Entwicklung
+
 - **Datenschutz by Design**: Verschlüsselung und Anonymisierung
 - **Bias-Reduktion**: Faire und inklusive Algorithmen
 - **Transparenz**: Erklärbare KI-Entscheidungen
 - **Nutzer-Kontrolle**: Volle Datenhoheit beim Nutzer
 
 ### 3. Innovation & Forschung
+
 - **Transformer-Architekturen**: State-of-the-art Sprachmodelle
 - **Few-Shot Learning**: Schnelle Anpassung an neue Domänen
 - **Multimodale Integration**: Text, Audio und visuelle Daten
@@ -78,6 +93,7 @@ Simons Arbeit fokussiert sich auf:
 ## Zusammenarbeit im Team
 
 Simon arbeitet eng mit:
+
 - **Oliver Wolkenstein**: Für die technische Implementierung
 - **Victoria Brückner**: Für die Produktvision
 - **Felix & Iris**: Für die nutzerfreundliche Visualisierung von KI-Features
@@ -92,6 +108,7 @@ Simon arbeitet eng mit:
 ## Persönliche Interessen
 
 Außerhalb des Büros:
+
 - **Schach**: Faszination für strategisches Denken
 - **Science Fiction**: Inspiration für ethische KI-Zukunft
 - **Wandern**: Beste Ideen kommen in der Natur

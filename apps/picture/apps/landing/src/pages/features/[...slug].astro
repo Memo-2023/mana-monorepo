@@ -9,7 +9,7 @@ import FeatureCard from '@components/features/FeatureCard.astro';
 
 export async function getStaticPaths() {
 	const allFeatures = await getCollection('features');
-	return allFeatures.map(feature => ({
+	return allFeatures.map((feature) => ({
 		params: { slug: feature.id },
 		props: { feature },
 	}));
@@ -21,7 +21,8 @@ interface Props {
 
 const { feature } = Astro.props;
 const { Content } = await feature.render();
-const { title, description, icon, category, benefits, useCases, available, comingSoon } = feature.data;
+const { title, description, icon, category, benefits, useCases, available, comingSoon } =
+	feature.data;
 
 const relatedFeatures = await getRelatedFeatures(feature, 3);
 ---
@@ -29,83 +30,106 @@ const relatedFeatures = await getRelatedFeatures(feature, 3);
 <Layout title={title} description={description}>
 	<article class="min-h-screen bg-dark-bg">
 		<!-- Hero Section -->
-		<div class="relative py-24 overflow-hidden">
-			<div class="absolute inset-0 bg-gradient-to-br from-primary-900/20 via-dark-surface to-secondary-900/20"></div>
+		<div class="relative overflow-hidden py-24">
+			<div
+				class="to-secondary-900/20 absolute inset-0 bg-gradient-to-br from-primary-900/20 via-dark-surface"
+			>
+			</div>
 
-			<div class="relative z-10 container mx-auto px-4">
-				<div class="max-w-4xl mx-auto">
+			<div class="container relative z-10 mx-auto px-4">
+				<div class="mx-auto max-w-4xl">
 					<!-- Back Button -->
 					<a
 						href={localizePath('/features')}
-						class="inline-flex items-center gap-2 text-primary hover:text-primary-400 transition-colors mb-8"
+						class="mb-8 inline-flex items-center gap-2 text-primary transition-colors hover:text-primary-400"
 					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M15 19l-7-7 7-7"></path>
 						</svg>
 						<span>{t('features.back_to_features')}</span>
 					</a>
 
 					<!-- Icon & Category -->
-					<div class="flex items-center gap-4 mb-6">
+					<div class="mb-6 flex items-center gap-4">
 						<span class="text-6xl">{icon}</span>
-						<span class="px-3 py-1 bg-primary/20 text-primary text-sm font-medium rounded-full capitalize">
+						<span
+							class="rounded-full bg-primary/20 px-3 py-1 text-sm font-medium capitalize text-primary"
+						>
 							{t(`features.categories.${category}`)}
 						</span>
 					</div>
 
 					<!-- Title -->
-					<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+					<h1 class="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">
 						{title}
 					</h1>
 
 					<!-- Description -->
-					<p class="text-xl text-gray-300 mb-8">
+					<p class="mb-8 text-xl text-gray-300">
 						{description}
 					</p>
 
 					<!-- Status Badges -->
 					<div class="flex flex-wrap gap-3">
-						{available && (
-							<span class="px-4 py-2 bg-success/20 text-success border border-success/30 rounded-lg font-medium">
-								✓ {t('features.available_now')}
-							</span>
-						)}
-						{comingSoon && (
-							<span class="px-4 py-2 bg-secondary/20 text-secondary border border-secondary/30 rounded-lg font-medium">
-								🚀 {t('features.coming_soon')}
-							</span>
-						)}
+						{
+							available && (
+								<span class="rounded-lg border border-success/30 bg-success/20 px-4 py-2 font-medium text-success">
+									✓ {t('features.available_now')}
+								</span>
+							)
+						}
+						{
+							comingSoon && (
+								<span class="rounded-lg border border-secondary/30 bg-secondary/20 px-4 py-2 font-medium text-secondary">
+									🚀 {t('features.coming_soon')}
+								</span>
+							)
+						}
 					</div>
 				</div>
 			</div>
 		</div>
 
 		<!-- Benefits Section -->
-		{benefits && benefits.length > 0 && (
-			<section class="py-16 bg-dark-surface">
-				<div class="container mx-auto px-4">
-					<div class="max-w-4xl mx-auto">
-						<h2 class="text-3xl font-bold text-white mb-8">{t('features.key_benefits')}</h2>
-						<div class="grid md:grid-cols-2 gap-4">
-							{benefits.map(benefit => (
-								<div class="flex items-start gap-3 p-4 bg-dark-elevated border border-dark-border rounded-lg">
-									<svg class="w-6 h-6 text-primary mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-										<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-									</svg>
-									<span class="text-gray-300">{benefit}</span>
-								</div>
-							))}
+		{
+			benefits && benefits.length > 0 && (
+				<section class="bg-dark-surface py-16">
+					<div class="container mx-auto px-4">
+						<div class="mx-auto max-w-4xl">
+							<h2 class="mb-8 text-3xl font-bold text-white">{t('features.key_benefits')}</h2>
+							<div class="grid gap-4 md:grid-cols-2">
+								{benefits.map((benefit) => (
+									<div class="flex items-start gap-3 rounded-lg border border-dark-border bg-dark-elevated p-4">
+										<svg
+											class="mt-0.5 h-6 w-6 flex-shrink-0 text-primary"
+											fill="currentColor"
+											viewBox="0 0 20 20"
+										>
+											<path
+												fill-rule="evenodd"
+												d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+												clip-rule="evenodd"
+											/>
+										</svg>
+										<span class="text-gray-300">{benefit}</span>
+									</div>
+								))}
+							</div>
 						</div>
 					</div>
-				</div>
-			</section>
-		)}
+				</section>
+			)
+		}
 
 		<!-- Content -->
 		<section class="py-16">
 			<div class="container mx-auto px-4">
-				<div class="max-w-4xl mx-auto">
-					<div class="prose prose-invert prose-primary prose-lg max-w-none">
+				<div class="mx-auto max-w-4xl">
+					<div class="prose-primary prose prose-lg prose-invert max-w-none">
 						<Content />
 					</div>
 				</div>
@@ -113,39 +137,43 @@ const relatedFeatures = await getRelatedFeatures(feature, 3);
 		</section>
 
 		<!-- Use Cases -->
-		{useCases && useCases.length > 0 && (
-			<section class="py-16 bg-dark-surface">
-				<div class="container mx-auto px-4">
-					<div class="max-w-4xl mx-auto">
-						<h2 class="text-3xl font-bold text-white mb-8">{t('features.use_cases')}</h2>
-						<div class="grid md:grid-cols-2 gap-6">
-							{useCases.map(useCase => (
-								<div class="p-6 bg-dark-elevated border border-dark-border rounded-xl">
-									<div class="flex items-start gap-3">
-										<span class="text-2xl">💡</span>
-										<p class="text-gray-300 flex-1">{useCase}</p>
+		{
+			useCases && useCases.length > 0 && (
+				<section class="bg-dark-surface py-16">
+					<div class="container mx-auto px-4">
+						<div class="mx-auto max-w-4xl">
+							<h2 class="mb-8 text-3xl font-bold text-white">{t('features.use_cases')}</h2>
+							<div class="grid gap-6 md:grid-cols-2">
+								{useCases.map((useCase) => (
+									<div class="rounded-xl border border-dark-border bg-dark-elevated p-6">
+										<div class="flex items-start gap-3">
+											<span class="text-2xl">💡</span>
+											<p class="flex-1 text-gray-300">{useCase}</p>
+										</div>
 									</div>
-								</div>
-							))}
+								))}
+							</div>
 						</div>
 					</div>
-				</div>
-			</section>
-		)}
+				</section>
+			)
+		}
 
 		<!-- CTA -->
 		<section class="py-16">
 			<div class="container mx-auto px-4">
-				<div class="max-w-4xl mx-auto text-center p-12 bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30 rounded-2xl">
-					<h2 class="text-3xl font-bold text-white mb-4">
+				<div
+					class="mx-auto max-w-4xl rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/20 to-secondary/20 p-12 text-center"
+				>
+					<h2 class="mb-4 text-3xl font-bold text-white">
 						{t('features.try_feature')}
 					</h2>
-					<p class="text-gray-300 mb-8 max-w-2xl mx-auto">
+					<p class="mx-auto mb-8 max-w-2xl text-gray-300">
 						{t('features.try_feature_subtitle')}
 					</p>
 					<a
 						href="#"
-						class="inline-block px-8 py-4 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white rounded-lg font-semibold text-lg transition-all duration-300 shadow-lg shadow-primary/50 hover:shadow-primary/70 hover:scale-105"
+						class="hover:to-secondary-700 inline-block rounded-lg bg-gradient-to-r from-primary-600 to-secondary-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-primary/50 transition-all duration-300 hover:scale-105 hover:from-primary-700 hover:shadow-primary/70"
 					>
 						{t('features.get_started')}
 					</a>
@@ -154,18 +182,20 @@ const relatedFeatures = await getRelatedFeatures(feature, 3);
 		</section>
 
 		<!-- Related Features -->
-		{relatedFeatures.length > 0 && (
-			<section class="py-16 bg-dark-surface">
-				<div class="container mx-auto px-4">
-					<h2 class="text-3xl font-bold text-white mb-8">{t('features.related_features')}</h2>
-					<div class="grid md:grid-cols-3 gap-8">
-						{relatedFeatures.map(relatedFeature => (
-							<FeatureCard feature={relatedFeature} />
-						))}
+		{
+			relatedFeatures.length > 0 && (
+				<section class="bg-dark-surface py-16">
+					<div class="container mx-auto px-4">
+						<h2 class="mb-8 text-3xl font-bold text-white">{t('features.related_features')}</h2>
+						<div class="grid gap-8 md:grid-cols-3">
+							{relatedFeatures.map((relatedFeature) => (
+								<FeatureCard feature={relatedFeature} />
+							))}
+						</div>
 					</div>
-				</div>
-			</section>
-		)}
+				</section>
+			)
+		}
 	</article>
 </Layout>
 
@@ -176,18 +206,19 @@ const relatedFeatures = await getRelatedFeatures(feature, 3);
 	}
 
 	.prose h2 {
-		@apply text-3xl font-bold text-white mt-12 mb-6;
+		@apply mb-6 mt-12 text-3xl font-bold text-white;
 	}
 
 	.prose h3 {
-		@apply text-2xl font-semibold text-white mt-8 mb-4;
+		@apply mb-4 mt-8 text-2xl font-semibold text-white;
 	}
 
 	.prose p {
 		@apply mb-6 leading-relaxed;
 	}
 
-	.prose ul, .prose ol {
+	.prose ul,
+	.prose ol {
 		@apply mb-6 space-y-2;
 	}
 
@@ -196,27 +227,27 @@ const relatedFeatures = await getRelatedFeatures(feature, 3);
 	}
 
 	.prose a {
-		@apply text-primary hover:text-primary-400 transition-colors underline;
+		@apply text-primary underline transition-colors hover:text-primary-400;
 	}
 
 	.prose strong {
-		@apply text-white font-semibold;
+		@apply font-semibold text-white;
 	}
 
 	.prose code {
-		@apply bg-dark-elevated px-2 py-1 rounded text-primary-300 text-sm;
+		@apply rounded bg-dark-elevated px-2 py-1 text-sm text-primary-300;
 	}
 
 	.prose pre {
-		@apply bg-dark-elevated border border-dark-border rounded-xl p-4 overflow-x-auto mb-6;
+		@apply mb-6 overflow-x-auto rounded-xl border border-dark-border bg-dark-elevated p-4;
 	}
 
 	.prose table {
-		@apply w-full mb-6;
+		@apply mb-6 w-full;
 	}
 
 	.prose th {
-		@apply bg-dark-elevated text-white font-semibold p-3 text-left;
+		@apply bg-dark-elevated p-3 text-left font-semibold text-white;
 	}
 
 	.prose td {

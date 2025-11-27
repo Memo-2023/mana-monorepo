@@ -11,16 +11,16 @@ const createMockElement = (width = 44, height = 44) => ({
 	getBoundingClientRect: () => ({ width, height, top: 0, left: 0, right: width, bottom: height }),
 	style: {},
 	appendChild: vi.fn(),
-	remove: vi.fn()
+	remove: vi.fn(),
 });
 
 // Mock global objects
 Object.defineProperty(window, 'navigator', {
 	value: {
 		maxTouchPoints: 0,
-		userAgent: 'Mozilla/5.0 (Test Browser)'
+		userAgent: 'Mozilla/5.0 (Test Browser)',
 	},
-	writable: true
+	writable: true,
 });
 
 describe('Touch Utilities', () => {
@@ -95,26 +95,25 @@ describe('Touch Actions (Integration)', () => {
 		test('should calculate touch distances correctly', () => {
 			const touch1 = { clientX: 0, clientY: 0 };
 			const touch2 = { clientX: 100, clientY: 100 };
-			
+
 			// Math.sqrt(100^2 + 100^2) = Math.sqrt(20000) ≈ 141.42
 			const expectedDistance = Math.sqrt(20000);
 			const actualDistance = Math.sqrt(
-				Math.pow(touch2.clientX - touch1.clientX, 2) + 
-				Math.pow(touch2.clientY - touch1.clientY, 2)
+				Math.pow(touch2.clientX - touch1.clientX, 2) + Math.pow(touch2.clientY - touch1.clientY, 2)
 			);
-			
+
 			expect(actualDistance).toBeCloseTo(expectedDistance, 2);
 		});
 
 		test('should detect horizontal swipes', () => {
 			const startTouch = { clientX: 0, clientY: 100 };
 			const endTouch = { clientX: 100, clientY: 100 };
-			
+
 			const deltaX = endTouch.clientX - startTouch.clientX;
 			const deltaY = endTouch.clientY - startTouch.clientY;
 			const absDeltaX = Math.abs(deltaX);
 			const absDeltaY = Math.abs(deltaY);
-			
+
 			// Horizontal swipe: |deltaX| > |deltaY|
 			expect(absDeltaX).toBeGreaterThan(absDeltaY);
 			expect(deltaX).toBeGreaterThan(0); // Right swipe
@@ -123,12 +122,12 @@ describe('Touch Actions (Integration)', () => {
 		test('should detect vertical swipes', () => {
 			const startTouch = { clientX: 100, clientY: 0 };
 			const endTouch = { clientX: 100, clientY: 100 };
-			
+
 			const deltaX = endTouch.clientX - startTouch.clientX;
 			const deltaY = endTouch.clientY - startTouch.clientY;
 			const absDeltaX = Math.abs(deltaX);
 			const absDeltaY = Math.abs(deltaY);
-			
+
 			// Vertical swipe: |deltaY| > |deltaX|
 			expect(absDeltaY).toBeGreaterThan(absDeltaX);
 			expect(deltaY).toBeGreaterThan(0); // Down swipe
@@ -142,7 +141,7 @@ describe('Touch Actions (Integration)', () => {
 				{ width: 48, height: 48, expected: true },
 				{ width: 40, height: 40, expected: false },
 				{ width: 44, height: 40, expected: false },
-				{ width: 40, height: 44, expected: false }
+				{ width: 40, height: 44, expected: false },
 			];
 
 			sizes.forEach(({ width, height, expected }) => {
@@ -158,22 +157,22 @@ describe('Touch Actions (Integration)', () => {
 			const events = Array.from({ length: 100 }, (_, i) => ({
 				clientX: i,
 				clientY: i,
-				timestamp: Date.now() + i
+				timestamp: Date.now() + i,
 			}));
 
 			// In einer echten Implementation würden wir Throttling/Debouncing testen
 			expect(events).toHaveLength(100);
-			
+
 			// Teste dass Events innerhalb vernünftiger Zeit verarbeitet werden können
 			const startTime = Date.now();
-			events.forEach(event => {
+			events.forEach((event) => {
 				// Simuliere Event-Verarbeitung
 				const deltaX = event.clientX;
 				const deltaY = event.clientY;
 				Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 			});
 			const endTime = Date.now();
-			
+
 			expect(endTime - startTime).toBeLessThan(100); // Sollte sehr schnell sein
 		});
 	});
@@ -182,11 +181,11 @@ describe('Touch Actions (Integration)', () => {
 		test('should maintain focus accessibility', () => {
 			// Touch-Actions sollten Keyboard-Navigation nicht beeinträchtigen
 			const element = createMockElement();
-			
+
 			// Simuliere dass Element fokussierbar bleibt
 			element.tabIndex = 0;
 			element.setAttribute = vi.fn();
-			
+
 			expect(element.tabIndex).toBe(0);
 		});
 
@@ -195,7 +194,7 @@ describe('Touch Actions (Integration)', () => {
 			const element = createMockElement();
 			element.getAttribute = vi.fn().mockReturnValue('button');
 			element.textContent = 'Touch Button';
-			
+
 			expect(element.getAttribute('role')).toBe('button');
 			expect(element.textContent).toBe('Touch Button');
 		});

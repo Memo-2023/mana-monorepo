@@ -84,12 +84,12 @@ The `AuthContext` provides a global authentication state and methods for authent
 ```typescript
 // Key properties and methods
 {
-  isAuthenticated: boolean;     // Whether the user is authenticated
-  user: User | null;            // Current user information
-  loading: boolean;             // Loading state for async operations
-  signIn: (email, password) => Promise<Result>; // Sign in with email/password
-  signUp: (email, password) => Promise<Result>; // Register a new user
-  signOut: () => Promise<void>; // Sign out the current user
+	isAuthenticated: boolean; // Whether the user is authenticated
+	user: User | null; // Current user information
+	loading: boolean; // Loading state for async operations
+	signIn: (email, password) => Promise<Result>; // Sign in with email/password
+	signUp: (email, password) => Promise<Result>; // Register a new user
+	signOut: () => Promise<void>; // Sign out the current user
 }
 ```
 
@@ -100,14 +100,14 @@ The `authService` provides core authentication functionality:
 ```typescript
 // Key methods
 {
-  signIn: (email, password) => Promise<Result>;    // Sign in with credentials
-  signUp: (email, password) => Promise<Result>;    // Register a new user
-  signOut: () => Promise<void>;                    // Sign out
-  refreshTokens: (refreshToken) => Promise<Tokens>; // Refresh expired tokens
-  validateToken: () => Promise<boolean>;           // Validate current token
-  getUserFromToken: () => Promise<UserData>;       // Extract user data from token
-  isAuthenticated: () => Promise<boolean>;         // Check authentication status
-  clearAuthStorage: () => Promise<void>;           // Clear all auth data
+	signIn: (email, password) => Promise<Result>; // Sign in with credentials
+	signUp: (email, password) => Promise<Result>; // Register a new user
+	signOut: () => Promise<void>; // Sign out
+	refreshTokens: (refreshToken) => Promise<Tokens>; // Refresh expired tokens
+	validateToken: () => Promise<boolean>; // Validate current token
+	getUserFromToken: () => Promise<UserData>; // Extract user data from token
+	isAuthenticated: () => Promise<boolean>; // Check authentication status
+	clearAuthStorage: () => Promise<void>; // Clear all auth data
 }
 ```
 
@@ -136,24 +136,24 @@ Example web storage implementation:
 ```typescript
 // Web storage implementation (safeStorage.web.ts)
 export const safeStorage = {
-  setItem: async <T>(key: string, value: T): Promise<void> => {
-    try {
-      const jsonValue = JSON.stringify(value);
-      localStorage.setItem(key, jsonValue);
-    } catch (e) {
-      console.error('Error saving data', e);
-    }
-  },
-  getItem: async <T>(key: string): Promise<T | null> => {
-    try {
-      const jsonValue = localStorage.getItem(key);
-      return jsonValue != null ? JSON.parse(jsonValue) : null;
-    } catch (e) {
-      console.error('Error reading data', e);
-      return null;
-    }
-  },
-  // ... other methods
+	setItem: async <T>(key: string, value: T): Promise<void> => {
+		try {
+			const jsonValue = JSON.stringify(value);
+			localStorage.setItem(key, jsonValue);
+		} catch (e) {
+			console.error('Error saving data', e);
+		}
+	},
+	getItem: async <T>(key: string): Promise<T | null> => {
+		try {
+			const jsonValue = localStorage.getItem(key);
+			return jsonValue != null ? JSON.parse(jsonValue) : null;
+		} catch (e) {
+			console.error('Error reading data', e);
+			return null;
+		}
+	},
+	// ... other methods
 };
 ```
 
@@ -169,24 +169,24 @@ Example native storage implementation:
 ```typescript
 // React Native storage implementation (safeStorage.ts)
 export const safeStorage = {
-  setItem: async <T>(key: string, value: T): Promise<void> => {
-    try {
-      const jsonValue = JSON.stringify(value);
-      await AsyncStorage.setItem(key, jsonValue);
-    } catch (e) {
-      console.error('Error saving data', e);
-    }
-  },
-  getItem: async <T>(key: string): Promise<T | null> => {
-    try {
-      const jsonValue = await AsyncStorage.getItem(key);
-      return jsonValue != null ? JSON.parse(jsonValue) : null;
-    } catch (e) {
-      console.error('Error reading data', e);
-      return null;
-    }
-  },
-  // ... other methods
+	setItem: async <T>(key: string, value: T): Promise<void> => {
+		try {
+			const jsonValue = JSON.stringify(value);
+			await AsyncStorage.setItem(key, jsonValue);
+		} catch (e) {
+			console.error('Error saving data', e);
+		}
+	},
+	getItem: async <T>(key: string): Promise<T | null> => {
+		try {
+			const jsonValue = await AsyncStorage.getItem(key);
+			return jsonValue != null ? JSON.parse(jsonValue) : null;
+		} catch (e) {
+			console.error('Error reading data', e);
+			return null;
+		}
+	},
+	// ... other methods
 };
 ```
 
@@ -199,10 +199,10 @@ All tokens are stored securely using the `safeStorage` utility:
 ```typescript
 // Keys used for token storage
 const STORAGE_KEYS = {
-  MANA_TOKEN: '@auth/manaToken',
-  APP_TOKEN: '@auth/appToken',
-  REFRESH_TOKEN: '@auth/refreshToken',
-  USER_EMAIL: '@auth/userEmail', // Email is stored separately to handle tokens without email
+	MANA_TOKEN: '@auth/manaToken',
+	APP_TOKEN: '@auth/appToken',
+	REFRESH_TOKEN: '@auth/refreshToken',
+	USER_EMAIL: '@auth/userEmail', // Email is stored separately to handle tokens without email
 };
 ```
 
@@ -215,6 +215,7 @@ Token refresh happens automatically when:
 3. The `authService.isAuthenticated()` method is called
 
 When a token is refreshed:
+
 1. New tokens are obtained from the middleware
 2. Tokens are stored securely
 3. User data is extracted and the AuthContext is updated
@@ -232,13 +233,13 @@ To handle cases where the refreshed token does not contain the email field:
 
 The middleware service provides the following endpoints for authentication:
 
-| Endpoint | Method | Description | Parameters |
-|----------|--------|-------------|------------|
-| `/auth/signin` | POST | Authenticate with email/password | `email`, `password`, `appId` |
-| `/auth/google-signin` | POST | Authenticate with Google | `token` (Google ID token), `appId` |
-| `/auth/refresh` | POST | Refresh an expired token | `refreshToken`, `appId` |
-| `/auth/validate` | POST | Validate an existing token | `appToken`, `appId` |
-| `/auth/logout` | POST | Log out and revoke refresh token | `refreshToken` |
+| Endpoint              | Method | Description                      | Parameters                         |
+| --------------------- | ------ | -------------------------------- | ---------------------------------- |
+| `/auth/signin`        | POST   | Authenticate with email/password | `email`, `password`, `appId`       |
+| `/auth/google-signin` | POST   | Authenticate with Google         | `token` (Google ID token), `appId` |
+| `/auth/refresh`       | POST   | Refresh an expired token         | `refreshToken`, `appId`            |
+| `/auth/validate`      | POST   | Validate an existing token       | `appToken`, `appId`                |
+| `/auth/logout`        | POST   | Log out and revoke refresh token | `refreshToken`                     |
 
 ## Row Level Security (RLS)
 

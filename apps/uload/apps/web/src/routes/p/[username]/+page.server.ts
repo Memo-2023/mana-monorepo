@@ -1,15 +1,15 @@
-import { error } from '@sveltejs/kit'
-import { RESERVED_USERNAMES } from '$lib/username'
-import type { PageServerLoad } from './$types'
-import { users, links, clicks } from '$lib/db/schema'
-import { eq, and, desc, count, gt } from 'drizzle-orm'
+import { error } from '@sveltejs/kit';
+import { RESERVED_USERNAMES } from '$lib/username';
+import type { PageServerLoad } from './$types';
+import { users, links, clicks } from '$lib/db/schema';
+import { eq, and, desc, count, gt } from 'drizzle-orm';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const { username } = params
+	const { username } = params;
 
 	// Check if it's a reserved username (route to 404)
 	if (RESERVED_USERNAMES.includes(username.toLowerCase())) {
-		error(404, 'Page not found')
+		error(404, 'Page not found');
 	}
 
 	try {
@@ -18,10 +18,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			.select()
 			.from(users)
 			.where(eq(users.username, username))
-			.limit(1)
+			.limit(1);
 
 		if (!user) {
-			error(404, 'User not found')
+			error(404, 'User not found');
 		}
 
 		// Get all active links for this user with click counts
@@ -38,12 +38,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				clickCount: links.clickCount,
 				qrCodeUrl: links.qrCodeUrl,
 				tags: links.tags,
-				createdAt: links.createdAt
+				createdAt: links.createdAt,
 			})
 			.from(links)
 			.where(and(eq(links.userId, user.id), eq(links.isActive, true)))
 			.orderBy(desc(links.createdAt))
-			.limit(100)
+			.limit(100);
 
 		// Get actual click counts from clicks table for more accuracy
 		const linksWithStats = await Promise.all(
@@ -51,31 +51,31 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				const [clickResult] = await locals.db
 					.select({ count: count() })
 					.from(clicks)
-					.where(eq(clicks.linkId, link.id))
+					.where(eq(clicks.linkId, link.id));
 
 				return {
 					...link,
-					clicks: clickResult?.count || 0
-				}
+					clicks: clickResult?.count || 0,
+				};
 			})
-		)
+		);
 
 		// Filter out expired links
-		const now = new Date()
+		const now = new Date();
 		const activeLinks = linksWithStats.filter((link) => {
 			if (link.expiresAt && new Date(link.expiresAt) < now) {
-				return false
+				return false;
 			}
-			return true
-		})
+			return true;
+		});
 
 		// All links go to the main list (no folders)
-		const linksByFolder = new Map<string | null, typeof activeLinks>()
-		linksByFolder.set(null, activeLinks)
+		const linksByFolder = new Map<string | null, typeof activeLinks>();
+		linksByFolder.set(null, activeLinks);
 
 		// TODO: Load cards when cards table is added to schema
 		// For now, return empty cards array
-		const cards: any[] = []
+		const cards: any[] = [];
 
 		return {
 			profileUser: {
@@ -93,16 +93,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				instagram: user.instagram,
 				showClickStats: user.showClickStats,
 				profileBackground: user.profileBackground || '#f9fafb',
-				created: user.createdAt
+				created: user.createdAt,
 			},
 			folders: [],
 			linksByFolder,
 			links: activeLinks,
 			totalClicks: activeLinks.reduce((sum, link) => sum + link.clicks, 0),
-			cards: cards
-		}
+			cards: cards,
+		};
 	} catch (err) {
-		console.error('[PROFILE] Error loading profile:', err)
-		error(404, 'User not found')
+		console.error('[PROFILE] Error loading profile:', err);
+		error(404, 'User not found');
 	}
-}
+};

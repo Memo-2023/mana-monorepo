@@ -40,7 +40,7 @@ export class AudioStorageService {
 			.list('', {
 				limit,
 				offset,
-				sortBy: { column: 'created_at', order: 'desc' }
+				sortBy: { column: 'created_at', order: 'desc' },
 			});
 
 		if (listError) throw listError;
@@ -54,9 +54,7 @@ export class AudioStorageService {
 			if (!this.isAudioFile(file.name)) continue;
 
 			// Get public URL
-			const { data: urlData } = supabase.storage
-				.from(this.BUCKET_NAME)
-				.getPublicUrl(file.name);
+			const { data: urlData } = supabase.storage.from(this.BUCKET_NAME).getPublicUrl(file.name);
 
 			// Try to find associated memo
 			const memoInfo = await this.getMemoInfoForAudio(file.name);
@@ -70,8 +68,8 @@ export class AudioStorageService {
 				metadata: {
 					format: this.getFileExtension(file.name),
 					memo_id: memoInfo?.id,
-					memo_title: memoInfo?.title
-				}
+					memo_title: memoInfo?.title,
+				},
 			});
 		}
 
@@ -86,7 +84,7 @@ export class AudioStorageService {
 
 		// Get all files (without limit for accurate stats)
 		const { data: files, error } = await supabase.storage.from(this.BUCKET_NAME).list('', {
-			limit: 1000
+			limit: 1000,
 		});
 
 		if (error) throw error;
@@ -94,7 +92,7 @@ export class AudioStorageService {
 			return {
 				totalCount: 0,
 				totalDurationSeconds: 0,
-				totalSizeBytes: 0
+				totalSizeBytes: 0,
 			};
 		}
 
@@ -126,7 +124,7 @@ export class AudioStorageService {
 		return {
 			totalCount: audioFiles.length,
 			totalDurationSeconds,
-			totalSizeBytes
+			totalSizeBytes,
 		};
 	}
 
@@ -187,7 +185,7 @@ export class AudioStorageService {
 
 			return {
 				id: memo.id,
-				title: memo.title || 'Untitled Memo'
+				title: memo.title || 'Untitled Memo',
 			};
 		} catch (err) {
 			return null;

@@ -15,7 +15,7 @@
 	logo={ManaDeckLogo}
 	primaryColor="#8b5cf6"
 	onSignUp={handleSignUp}
-	goto={goto}
+	{goto}
 	successRedirect="/decks"
 	loginPath="/login"
 	lightBackground="#faf5ff"

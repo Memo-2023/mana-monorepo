@@ -5,11 +5,13 @@
 Dieses Dokument beschreibt das Upgrade von **Expo SDK 51** (aktuell) auf **Expo SDK 54** für das Märchenzauber Projekt.
 
 ### Aktuelle Version
+
 - **Expo SDK**: 51.0.28
 - **React Native**: 0.74.5
 - **React**: 18.2.0
 
 ### Zielversion
+
 - **Expo SDK**: 54.0.0
 - **React Native**: 0.81.0
 - **React**: 19.1.0
@@ -17,20 +19,24 @@ Dieses Dokument beschreibt das Upgrade von **Expo SDK 51** (aktuell) auf **Expo 
 ## 🚀 Neue Features in SDK 54
 
 ### 1. Performance-Verbesserungen
+
 - **Precompiled XCFrameworks für iOS**: Reduziert Clean-Build-Zeiten von ~120 auf ~10 Sekunden
 - **Schnellere Builds**: Besonders bei großen Projekten spürbar
 
 ### 2. Native UI-Features
+
 - **Native Tabs (Beta)**: Liquid Glass Tabs mit automatischem Scrolling
 - **iOS 26 Support**: Liquid Glass Icons und Views
 - **Verbesserte Modals**: Web-Modals verhalten sich jetzt wie iPad/iPhone Modals
 
 ### 3. Technische Updates
+
 - **React Native 0.81** mit React 19.1
 - **Android 16 Target**: Edge-to-Edge standardmäßig aktiviert
 - **New Architecture Migration**: SDK 55 wird nur noch New Architecture unterstützen
 
 ### 4. API-Verbesserungen
+
 - **File System API**: Neue objektorientierte API
 - **SQLite localStorage**: Drop-in Ersatz für Web localStorage
 - **Streaming Support**: TextDecoderStream/TextEncoderStream für AI-Integration
@@ -40,14 +46,17 @@ Dieses Dokument beschreibt das Upgrade von **Expo SDK 51** (aktuell) auf **Expo 
 ### 1. Kritische Änderungen
 
 #### expo-av Deprecation
+
 ```diff
 - import { Audio, Video } from 'expo-av';
 + import { Audio } from 'expo-audio';
 + import { Video } from 'expo-video';
 ```
+
 **Wichtig**: expo-av wird in SDK 55 entfernt!
 
 #### File System API
+
 ```diff
 - import { ... } from 'expo-file-system/next';
 + import { ... } from 'expo-file-system';
@@ -56,22 +65,26 @@ Dieses Dokument beschreibt das Upgrade von **Expo SDK 51** (aktuell) auf **Expo 
 ```
 
 #### Reanimated v4
+
 - Nur New Architecture Support
 - Für Legacy Architecture: Bei Reanimated v3 bleiben
 
 ### 2. Platform-spezifische Änderungen
 
 #### iOS
+
 - **Xcode Requirement**: Xcode 16.1+ (empfohlen: Xcode 26)
 - **iOS Minimum**: iOS 15.1
 
 #### Android
+
 - **Target SDK**: Android 16
 - **Edge-to-Edge**: Standardmäßig aktiviert (nicht deaktivierbar)
 
 ## 📝 Upgrade-Schritte
 
 ### Schritt 1: Backup erstellen
+
 ```bash
 # Git-Status prüfen
 git status
@@ -87,6 +100,7 @@ git checkout -b upgrade/expo-sdk-54
 ### Schritt 2: Dependencies aktualisieren
 
 #### Mobile App (apps/mobile/package.json)
+
 ```json
 {
   "dependencies": {
@@ -127,6 +141,7 @@ git checkout -b upgrade/expo-sdk-54
 ```
 
 ### Schritt 3: Installation durchführen
+
 ```bash
 # Cache löschen
 cd apps/mobile
@@ -141,6 +156,7 @@ npx expo-doctor
 ```
 
 ### Schritt 4: Native Directories zurücksetzen (wenn vorhanden)
+
 ```bash
 # Alte native Directories löschen
 rm -rf ios android
@@ -152,6 +168,7 @@ npx expo prebuild --clean
 ### Schritt 5: Code-Anpassungen
 
 #### 1. File System API migrieren
+
 ```typescript
 // ALT (SDK 51)
 import * as FileSystem from 'expo-file-system';
@@ -164,12 +181,14 @@ import * as FileSystem from 'expo-file-system/legacy';
 ```
 
 #### 2. Router Updates (v3 → v4)
+
 ```typescript
 // Prüfe expo-router Imports und Konfiguration
 // Router v4 hat verbesserte TypeScript-Unterstützung
 ```
 
 #### 3. Native Tabs (Optional - Beta)
+
 ```typescript
 // Neue native Tabs verwenden (Beta)
 import { Tabs } from 'expo-router/unstable-native-tabs';
@@ -178,6 +197,7 @@ import { Tabs } from 'expo-router/unstable-native-tabs';
 ```
 
 ### Schritt 6: Metro-Konfiguration prüfen
+
 ```javascript
 // metro.config.js
 // Entferne veraltete Overrides
@@ -185,6 +205,7 @@ import { Tabs } from 'expo-router/unstable-native-tabs';
 ```
 
 ### Schritt 7: Tests durchführen
+
 ```bash
 # Unit Tests
 npm test
@@ -205,24 +226,29 @@ npm run android
 ## 🔧 Spezifische Anpassungen für Märchenzauber
 
 ### 1. Image Generation
+
 - Replicate Integration sollte weiterhin funktionieren
 - Prüfe expo-image v2.0 Breaking Changes
 
 ### 2. Supabase Integration
+
 - Keine direkten Änderungen erwartet
 - Auth-Flow testen
 
 ### 3. Character/Story Features
+
 - File System API für Caching anpassen
 - Image Picker API prüfen
 
 ### 4. Performance-Optimierungen nutzen
+
 - iOS Builds werden deutlich schneller
 - Android Edge-to-Edge für bessere UX
 
 ## 📱 Neue Features für Märchenzauber nutzen
 
 ### Native Tabs für Story-Navigation
+
 ```typescript
 import { Tabs } from 'expo-router/unstable-native-tabs';
 
@@ -240,6 +266,7 @@ import { Tabs } from 'expo-router/unstable-native-tabs';
 ```
 
 ### iOS 26 Liquid Glass Icons
+
 ```json
 // app.json
 {
@@ -252,6 +279,7 @@ import { Tabs } from 'expo-router/unstable-native-tabs';
 ```
 
 ### Verbesserte Modal-Präsentation
+
 ```typescript
 // Web-Modals verhalten sich jetzt nativ
 <Modal
@@ -265,6 +293,7 @@ import { Tabs } from 'expo-router/unstable-native-tabs';
 ## 🐛 Troubleshooting
 
 ### Problem: Build-Fehler nach Upgrade
+
 ```bash
 # Cache komplett zurücksetzen
 npx expo start -c
@@ -273,12 +302,14 @@ watchman watch-del-all
 ```
 
 ### Problem: Reanimated Fehler
+
 ```bash
 # Bei Legacy Architecture bleiben
 npm install react-native-reanimated@3.16.0
 ```
 
 ### Problem: Metro-Fehler
+
 ```javascript
 // metro.config.js anpassen
 // Entferne metro/src/... Imports
@@ -286,6 +317,7 @@ npm install react-native-reanimated@3.16.0
 ```
 
 ### Problem: Type-Fehler mit React 19
+
 ```bash
 # TypeScript-Definitionen aktualisieren
 npm install --save-dev @types/react@~19.1.0

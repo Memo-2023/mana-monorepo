@@ -1,47 +1,47 @@
 ---
-import { getCollection } from "astro:content";
-import ModelLayout from "../../../layouts/ModelLayout.astro";
-import { languages } from "../../../i18n/ui";
+import { getCollection } from 'astro:content';
+import ModelLayout from '../../../layouts/ModelLayout.astro';
+import { languages } from '../../../i18n/ui';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-  const modelEntries = await Promise.all(
-    Object.keys(languages).map(async (lang) => {
-      const langModels = await getCollection("models", ({ id }) => {
-        return id.startsWith(`${lang}/`);
-      });
+	const modelEntries = await Promise.all(
+		Object.keys(languages).map(async (lang) => {
+			const langModels = await getCollection('models', ({ id }) => {
+				return id.startsWith(`${lang}/`);
+			});
 
-      return langModels.map((model) => {
-        // Get just the filename part from the slug
-        const slugParts = model.slug.split("/");
-        const fileName = slugParts[slugParts.length - 1];
+			return langModels.map((model) => {
+				// Get just the filename part from the slug
+				const slugParts = model.slug.split('/');
+				const fileName = slugParts[slugParts.length - 1];
 
-        return {
-          params: {
-            lang,
-            slug: fileName,
-          },
-          props: { model },
-        };
-      });
-    })
-  );
+				return {
+					params: {
+						lang,
+						slug: fileName,
+					},
+					props: { model },
+				};
+			});
+		})
+	);
 
-  // Flatten array of arrays
-  return modelEntries.flat();
+	// Flatten array of arrays
+	return modelEntries.flat();
 }
 
 const { model } = Astro.props;
 
 // Sicherheitsabfrage für Models
 if (!model) {
-  return Astro.redirect("/404");
+	return Astro.redirect('/404');
 }
 
 const { Content } = await model.render();
 ---
 
 <ModelLayout model={model}>
-  <Content />
+	<Content />
 </ModelLayout>

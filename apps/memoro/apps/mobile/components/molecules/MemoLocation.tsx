@@ -5,115 +5,125 @@ import { useTheme } from '~/features/theme/ThemeProvider';
 import { useTranslation } from 'react-i18next';
 
 interface AddressInfo {
-  street?: string;
-  streetNumber?: string;
-  postalCode?: string;
-  city?: string;
-  district?: string;
-  region?: string;
-  country?: string;
-  name?: string;
-  formattedAddress?: string;
+	street?: string;
+	streetNumber?: string;
+	postalCode?: string;
+	city?: string;
+	district?: string;
+	region?: string;
+	country?: string;
+	name?: string;
+	formattedAddress?: string;
 }
 
 interface LocationData {
-  latitude?: number;
-  longitude?: number;
-  address?: AddressInfo;
-  memoId?: string; // ID des zugehörigen Memos
+	latitude?: number;
+	longitude?: number;
+	address?: AddressInfo;
+	memoId?: string; // ID des zugehörigen Memos
 }
 
 interface MemoLocationProps {
-  location: LocationData;
-  showLabel?: boolean;
-  fullOpacity?: boolean;
+	location: LocationData;
+	showLabel?: boolean;
+	fullOpacity?: boolean;
 }
 
 /**
  * Komponente zur Anzeige von Standortdaten in einem Memo
  */
-const MemoLocation: React.FC<MemoLocationProps> = ({ location, showLabel = true, fullOpacity = false }) => {
-  const { isDark } = useTheme();
-  const { t } = useTranslation();
+const MemoLocation: React.FC<MemoLocationProps> = ({
+	location,
+	showLabel = true,
+	fullOpacity = false,
+}) => {
+	const { isDark } = useTheme();
+	const { t } = useTranslation();
 
-  console.log('[MemoLocation] Received location prop:', location);
+	console.log('[MemoLocation] Received location prop:', location);
 
-  if (!location) {
-    console.log('[MemoLocation] No location data, returning null');
-    return null;
-  }
+	if (!location) {
+		console.log('[MemoLocation] No location data, returning null');
+		return null;
+	}
 
-  const { latitude, longitude, address } = location;
-  console.log('[MemoLocation] Extracted data:', { latitude, longitude, address });
+	const { latitude, longitude, address } = location;
+	console.log('[MemoLocation] Extracted data:', { latitude, longitude, address });
 
-  const screenWidth = Dimensions.get('window').width;
-  
-  const styles = StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      marginTop: 0,
-      paddingVertical: 0,
-    },
-    addressText: {
-      fontSize: 14,
-      color: fullOpacity ? (isDark ? '#FFFFFF' : '#000000') : (isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'),
-      lineHeight: 20,
-      flex: 1,
-      flexWrap: 'wrap',
-    },
-  });
+	const screenWidth = Dimensions.get('window').width;
 
-  // Formatiere die Adresse für die Anzeige
-  const getFormattedAddress = () => {
-    if (!address) return null;
+	const styles = StyleSheet.create({
+		container: {
+			flexDirection: 'row',
+			alignItems: 'flex-start',
+			marginTop: 0,
+			paddingVertical: 0,
+		},
+		addressText: {
+			fontSize: 14,
+			color: fullOpacity
+				? isDark
+					? '#FFFFFF'
+					: '#000000'
+				: isDark
+					? 'rgba(255, 255, 255, 0.7)'
+					: 'rgba(0, 0, 0, 0.7)',
+			lineHeight: 20,
+			flex: 1,
+			flexWrap: 'wrap',
+		},
+	});
 
-    if (address.formattedAddress) {
-      return address.formattedAddress;
-    }
+	// Formatiere die Adresse für die Anzeige
+	const getFormattedAddress = () => {
+		if (!address) return null;
 
-    const addressParts = [];
+		if (address.formattedAddress) {
+			return address.formattedAddress;
+		}
 
-    // Straße und Hausnummer
-    if (address.street) {
-      const streetPart = address.streetNumber
-        ? `${address.street} ${address.streetNumber}`
-        : address.street;
-      addressParts.push(streetPart);
-    }
+		const addressParts = [];
 
-    // PLZ und Stadt
-    if (address.city) {
-      const cityPart = address.postalCode ? `${address.postalCode} ${address.city}` : address.city;
-      addressParts.push(cityPart);
-    }
+		// Straße und Hausnummer
+		if (address.street) {
+			const streetPart = address.streetNumber
+				? `${address.street} ${address.streetNumber}`
+				: address.street;
+			addressParts.push(streetPart);
+		}
 
-    // Land
-    if (address.country) {
-      addressParts.push(address.country);
-    }
+		// PLZ und Stadt
+		if (address.city) {
+			const cityPart = address.postalCode ? `${address.postalCode} ${address.city}` : address.city;
+			addressParts.push(cityPart);
+		}
 
-    return addressParts.join(', ');
-  };
+		// Land
+		if (address.country) {
+			addressParts.push(address.country);
+		}
 
-  const formattedAddress = getFormattedAddress();
-  console.log('[MemoLocation] Formatted address:', formattedAddress);
+		return addressParts.join(', ');
+	};
 
-  // If no address, show coordinates as fallback
-  const displayText =
-    formattedAddress ||
-    (latitude && longitude ? `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` : null);
+	const formattedAddress = getFormattedAddress();
+	console.log('[MemoLocation] Formatted address:', formattedAddress);
 
-  if (!displayText) {
-    console.log('[MemoLocation] No location data to display, returning null');
-    return null;
-  }
+	// If no address, show coordinates as fallback
+	const displayText =
+		formattedAddress ||
+		(latitude && longitude ? `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` : null);
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.addressText}>{displayText}</Text>
-    </View>
-  );
+	if (!displayText) {
+		console.log('[MemoLocation] No location data to display, returning null');
+		return null;
+	}
+
+	return (
+		<View style={styles.container}>
+			<Text style={styles.addressText}>{displayText}</Text>
+		</View>
+	);
 };
 
 export default MemoLocation;

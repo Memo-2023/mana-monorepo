@@ -17,7 +17,7 @@
 		totalUsers: 0,
 		totalLinks: 0,
 		totalFolders: 0,
-		totalClicks: 0
+		totalClicks: 0,
 	});
 
 	let isVisible = $state(false);
@@ -77,26 +77,26 @@
 			icon: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
 			label: 'Users',
 			key: 'totalUsers' as const,
-			color: 'blue'
+			color: 'blue',
 		},
 		{
 			icon: 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71',
 			label: 'Links',
 			key: 'totalLinks' as const,
-			color: 'purple'
+			color: 'purple',
 		},
 		{
 			icon: 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z',
 			label: 'Folders',
 			key: 'totalFolders' as const,
-			color: 'green'
+			color: 'green',
 		},
 		{
 			icon: 'M22 12h-4l-3 9L9 3l-3 9H2',
 			label: 'Clicks',
 			key: 'totalClicks' as const,
-			color: 'orange'
-		}
+			color: 'orange',
+		},
 	];
 </script>
 

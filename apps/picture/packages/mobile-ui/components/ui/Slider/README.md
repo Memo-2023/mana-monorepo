@@ -17,6 +17,7 @@ npx @memoro/ui add slider
 ```
 
 **Dependencies:**
+
 - `react-native-reanimated`
 - `react-native-gesture-handler`
 
@@ -29,16 +30,9 @@ import { Slider } from '@/components/ui/Slider';
 import { useState } from 'react';
 
 function MyComponent() {
-  const [value, setValue] = useState(50);
+	const [value, setValue] = useState(50);
 
-  return (
-    <Slider
-      minimumValue={0}
-      maximumValue={100}
-      value={value}
-      onValueChange={setValue}
-    />
-  );
+	return <Slider minimumValue={0} maximumValue={100} value={value} onValueChange={setValue} />;
 }
 ```
 
@@ -46,13 +40,13 @@ function MyComponent() {
 
 ```tsx
 <Slider
-  minimumValue={0}
-  maximumValue={100}
-  value={value}
-  onValueChange={setValue}
-  minimumTrackTintColor="#3B82F6"
-  maximumTrackTintColor="#D1D5DB"
-  thumbTintColor="#2563EB"
+	minimumValue={0}
+	maximumValue={100}
+	value={value}
+	onValueChange={setValue}
+	minimumTrackTintColor="#3B82F6"
+	maximumTrackTintColor="#D1D5DB"
+	thumbTintColor="#2563EB"
 />
 ```
 
@@ -62,27 +56,27 @@ function MyComponent() {
 const [volume, setVolume] = useState(50);
 
 <Slider
-  minimumValue={0}
-  maximumValue={100}
-  value={volume}
-  onValueChange={setVolume}
-  minimumTrackTintColor="#10B981"
-  thumbTintColor="#059669"
-/>
+	minimumValue={0}
+	maximumValue={100}
+	value={volume}
+	onValueChange={setVolume}
+	minimumTrackTintColor="#10B981"
+	thumbTintColor="#059669"
+/>;
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `minimumValue` | `number` | - | **Required** - Minimum value |
-| `maximumValue` | `number` | - | **Required** - Maximum value |
-| `value` | `number` | - | **Required** - Current value |
-| `onValueChange` | `(value: number) => void` | - | **Required** - Value change callback |
-| `minimumTrackTintColor` | `string` | `'#6366f1'` | Filled track color |
-| `maximumTrackTintColor` | `string` | `'#374151'` | Unfilled track color |
-| `thumbTintColor` | `string` | `'#818cf8'` | Thumb color |
-| `style` | `ViewStyle` | - | Additional container styles |
+| Prop                    | Type                      | Default     | Description                          |
+| ----------------------- | ------------------------- | ----------- | ------------------------------------ |
+| `minimumValue`          | `number`                  | -           | **Required** - Minimum value         |
+| `maximumValue`          | `number`                  | -           | **Required** - Maximum value         |
+| `value`                 | `number`                  | -           | **Required** - Current value         |
+| `onValueChange`         | `(value: number) => void` | -           | **Required** - Value change callback |
+| `minimumTrackTintColor` | `string`                  | `'#6366f1'` | Filled track color                   |
+| `maximumTrackTintColor` | `string`                  | `'#374151'` | Unfilled track color                 |
+| `thumbTintColor`        | `string`                  | `'#818cf8'` | Thumb color                          |
+| `style`                 | `ViewStyle`               | -           | Additional container styles          |
 
 ## Default Colors
 
@@ -98,6 +92,7 @@ const [volume, setVolume] = useState(50);
 ## Dependencies
 
 Requires:
+
 - `react-native-reanimated` (v3+)
 - `react-native-gesture-handler` (v2+)
 

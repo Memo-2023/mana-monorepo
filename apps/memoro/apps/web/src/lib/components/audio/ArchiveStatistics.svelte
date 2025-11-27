@@ -66,7 +66,9 @@
 			</div>
 			<div>
 				<Text variant="small" class="text-theme-secondary">Gesamtdauer</Text>
-				<Text variant="large" weight="bold" class="text-2xl">{formatDuration(stats.totalDurationSeconds)}</Text>
+				<Text variant="large" weight="bold" class="text-2xl"
+					>{formatDuration(stats.totalDurationSeconds)}</Text
+				>
 			</div>
 		</div>
 	</div>
@@ -92,7 +94,9 @@
 			</div>
 			<div>
 				<Text variant="small" class="text-theme-secondary">Speicherplatz</Text>
-				<Text variant="large" weight="bold" class="text-2xl">{formatFileSize(stats.totalSizeBytes)}</Text>
+				<Text variant="large" weight="bold" class="text-2xl"
+					>{formatFileSize(stats.totalSizeBytes)}</Text
+				>
 			</div>
 		</div>
 	</div>

@@ -1,44 +1,44 @@
 {
-  "title": "Sci-Fi Character Concept Art",
-  "slug": "scifi-character-concept",
-  "imageUrl": "/gallery/scifi-character.jpg",
-  "prompt": "Sci-fi character design, cyberpunk soldier with advanced armor, neon blue accents, futuristic helmet, detailed concept art, full body, dramatic lighting, professional illustration",
-  "negativePrompt": "blurry, low quality, deformed",
-  "model": "flux-dev",
-  "settings": {
-    "seed": 5678,
-    "steps": 25,
-    "guidanceScale": 7.0,
-    "width": 768,
-    "height": 1024,
-    "aspectRatio": "3:4"
-  },
-  "category": "character",
-  "style": ["sci-fi", "cyberpunk", "detailed", "concept-art"],
-  "tags": ["character-design", "sci-fi", "cyberpunk", "concept-art", "armor"],
-  "creator": {
-    "name": "Picture Gallery"
-  },
-  "featured": true,
-  "trending": true,
-  "staffPick": true,
-  "published": true,
-  "likes": 1823,
-  "downloads": 456,
-  "views": 7234,
-  "qualityScore": 5,
-  "nsfw": false,
-  "moderationStatus": "approved",
-  "relatedImages": ["fantasy-warrior", "robot-character"],
-  "relatedTutorials": ["advanced-prompt-engineering"],
-  "relatedModels": ["flux-dev"],
-  "description": "Professional character concept art created with FLUX Dev. Perfect detail level for game development, animation, and storytelling projects.",
-  "seoKeywords": ["character design AI", "concept art", "cyberpunk character", "sci-fi art"],
-  "createdAt": "2025-01-11T16:00:00Z",
-  "language": "en",
-  "fileSize": 2123456,
-  "dimensions": {
-    "width": 768,
-    "height": 1024
-  }
+	"title": "Sci-Fi Character Concept Art",
+	"slug": "scifi-character-concept",
+	"imageUrl": "/gallery/scifi-character.jpg",
+	"prompt": "Sci-fi character design, cyberpunk soldier with advanced armor, neon blue accents, futuristic helmet, detailed concept art, full body, dramatic lighting, professional illustration",
+	"negativePrompt": "blurry, low quality, deformed",
+	"model": "flux-dev",
+	"settings": {
+		"seed": 5678,
+		"steps": 25,
+		"guidanceScale": 7.0,
+		"width": 768,
+		"height": 1024,
+		"aspectRatio": "3:4"
+	},
+	"category": "character",
+	"style": ["sci-fi", "cyberpunk", "detailed", "concept-art"],
+	"tags": ["character-design", "sci-fi", "cyberpunk", "concept-art", "armor"],
+	"creator": {
+		"name": "Picture Gallery"
+	},
+	"featured": true,
+	"trending": true,
+	"staffPick": true,
+	"published": true,
+	"likes": 1823,
+	"downloads": 456,
+	"views": 7234,
+	"qualityScore": 5,
+	"nsfw": false,
+	"moderationStatus": "approved",
+	"relatedImages": ["fantasy-warrior", "robot-character"],
+	"relatedTutorials": ["advanced-prompt-engineering"],
+	"relatedModels": ["flux-dev"],
+	"description": "Professional character concept art created with FLUX Dev. Perfect detail level for game development, animation, and storytelling projects.",
+	"seoKeywords": ["character design AI", "concept art", "cyberpunk character", "sci-fi art"],
+	"createdAt": "2025-01-11T16:00:00Z",
+	"language": "en",
+	"fileSize": 2123456,
+	"dimensions": {
+		"width": 768,
+		"height": 1024
+	}
 }

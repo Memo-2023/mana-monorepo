@@ -17,7 +17,7 @@
 		onClose,
 		placeholder = 'Ask a question about this memo...',
 		manaCost,
-		isLoading = false
+		isLoading = false,
 	}: Props = $props();
 
 	let prompt = $state('');
@@ -62,12 +62,7 @@
 				<!-- Header -->
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
-						<svg
-							class="h-5 w-5 text-primary"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
+						<svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -154,7 +149,9 @@
 
 				<!-- Footer Info -->
 				<div class="flex items-center justify-between">
-					<Text variant="muted"><kbd class="kbd">Enter</kbd> zum Senden • <kbd class="kbd">Shift+Enter</kbd> für neue Zeile</Text>
+					<Text variant="muted"
+						><kbd class="kbd">Enter</kbd> zum Senden • <kbd class="kbd">Shift+Enter</kbd> für neue Zeile</Text
+					>
 					{#if manaCost !== undefined}
 						<Text variant="muted" class="flex items-center gap-1">
 							<svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
@@ -178,8 +175,9 @@
 		border-radius: 0.25rem;
 		border-width: 1px;
 		padding: 0.125rem 0.375rem;
-		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-			'Courier New', monospace;
+		font-family:
+			ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+			monospace;
 		font-size: 0.75rem;
 		line-height: 1rem;
 		border-color: var(--color-border);

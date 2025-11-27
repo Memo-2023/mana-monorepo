@@ -5,9 +5,7 @@
 /**
  * Result type for operations that can fail
  */
-export type Result<T, E = Error> =
-  | { success: true; data: T }
-  | { success: false; error: E };
+export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
 
 /**
  * Async result type
@@ -18,7 +16,7 @@ export type AsyncResult<T, E = Error> = Promise<Result<T, E>>;
  * Make all properties optional recursively
  */
 export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+	[P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
 
 /**
@@ -70,8 +68,8 @@ export type SortDirection = 'asc' | 'desc';
  * Sort configuration
  */
 export interface SortConfig<T = string> {
-  field: T;
-  direction: SortDirection;
+	field: T;
+	direction: SortDirection;
 }
 
 /**
@@ -83,36 +81,48 @@ export type FilterOperator = 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like'
  * Filter configuration
  */
 export interface FilterConfig<T = string> {
-  field: T;
-  operator: FilterOperator;
-  value: unknown;
+	field: T;
+	operator: FilterOperator;
+	value: unknown;
 }
 
 /**
  * Entity with timestamps
  */
 export interface TimestampedEntity {
-  created_at: Timestamp;
-  updated_at: Timestamp;
+	created_at: Timestamp;
+	updated_at: Timestamp;
 }
 
 /**
  * Entity with user ownership
  */
 export interface OwnedEntity extends TimestampedEntity {
-  user_id: ID;
+	user_id: ID;
 }
 
 /**
  * Locale code
  */
-export type LocaleCode = 'en' | 'de' | 'fr' | 'es' | 'it' | 'pt' | 'nl' | 'pl' | 'ru' | 'ja' | 'ko' | 'zh';
+export type LocaleCode =
+	| 'en'
+	| 'de'
+	| 'fr'
+	| 'es'
+	| 'it'
+	| 'pt'
+	| 'nl'
+	| 'pl'
+	| 'ru'
+	| 'ja'
+	| 'ko'
+	| 'zh';
 
 /**
  * Localized string
  */
 export type LocalizedString = {
-  [key in LocaleCode]?: string;
+	[key in LocaleCode]?: string;
 };
 
 /**

@@ -1,6 +1,12 @@
 <script lang="ts">
 	import type { Database } from '@picture/shared/types';
-	import { archiveImage, deleteImage, downloadImage, publishImage, unpublishImage } from '$lib/api/images';
+	import {
+		archiveImage,
+		deleteImage,
+		downloadImage,
+		publishImage,
+		unpublishImage,
+	} from '$lib/api/images';
 	import { images, selectedImage } from '$lib/stores/images';
 	import { showToast } from '$lib/stores/toast';
 	import { fade, fly } from 'svelte/transition';
@@ -27,9 +33,7 @@
 	let isPublishing = $state(false);
 
 	// Get current image index
-	const currentIndex = $derived(
-		image ? $images.findIndex((img) => img.id === image.id) : -1
-	);
+	const currentIndex = $derived(image ? $images.findIndex((img) => img.id === image.id) : -1);
 
 	const hasPrevious = $derived(currentIndex > 0);
 	const hasNext = $derived(currentIndex >= 0 && currentIndex < $images.length - 1);
@@ -101,7 +105,11 @@
 
 	async function handleDelete() {
 		if (!image) return;
-		if (!confirm('Bist du sicher, dass du dieses Bild löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.'))
+		if (
+			!confirm(
+				'Bist du sicher, dass du dieses Bild löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.'
+			)
+		)
 			return;
 
 		isDeleting = true;
@@ -133,7 +141,7 @@
 			month: 'long',
 			year: 'numeric',
 			hour: '2-digit',
-			minute: '2-digit'
+			minute: '2-digit',
 		}).format(date);
 	}
 
@@ -242,7 +250,12 @@
 			aria-label="Schließen"
 		>
 			<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M6 18L18 6M6 6l12 12"
+				/>
 			</svg>
 		</button>
 
@@ -252,7 +265,9 @@
 				e.stopPropagation();
 				showInfo = !showInfo;
 			}}
-			class="fixed right-4 top-20 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-xl transition-all hover:bg-white/20 {showInfo ? 'bg-white/20' : ''}"
+			class="fixed right-4 top-20 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-xl transition-all hover:bg-white/20 {showInfo
+				? 'bg-white/20'
+				: ''}"
 			aria-label="Info anzeigen"
 		>
 			<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -337,7 +352,12 @@
 					aria-label="Vorheriges Bild"
 				>
 					<svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M15 19l-7-7 7-7"
+						/>
 					</svg>
 				</button>
 			{/if}
@@ -361,7 +381,12 @@
 					aria-label="Nächstes Bild"
 				>
 					<svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 5l7 7-7 7"
+						/>
 					</svg>
 				</button>
 			{/if}
@@ -371,10 +396,7 @@
 		<div class="fixed bottom-0 left-0 right-0 z-[60] p-4">
 			<div class="mx-auto max-w-4xl">
 				<!-- Prompt Preview (always visible) -->
-				<div
-					class="mb-2"
-					onclick={(e) => e.stopPropagation()}
-				>
+				<div class="mb-2" onclick={(e) => e.stopPropagation()}>
 					<p class="text-center text-sm text-white/90">
 						{image.prompt}
 					</p>
@@ -514,14 +536,21 @@
 						aria-label="Schließen"
 					>
 						<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
 						</svg>
 					</button>
 				</div>
 
 				{#if isLoadingTags}
 					<div class="flex items-center justify-center py-8">
-						<div class="h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+						<div
+							class="h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
+						></div>
 					</div>
 				{:else if allTags.length === 0}
 					<p class="py-8 text-center text-gray-500 dark:text-gray-400">Keine Tags verfügbar</p>
@@ -537,18 +566,30 @@
 							>
 								<div class="flex items-center gap-3">
 									{#if tag.color}
-										<span
-											class="h-4 w-4 rounded-full"
-											style="background-color: {tag.color};"
+										<span class="h-4 w-4 rounded-full" style="background-color: {tag.color};"
 										></span>
 									{/if}
-									<span class="font-medium {isSelected ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-gray-100'}">
+									<span
+										class="font-medium {isSelected
+											? 'text-blue-900 dark:text-blue-100'
+											: 'text-gray-900 dark:text-gray-100'}"
+									>
 										{tag.name}
 									</span>
 								</div>
 								{#if isSelected}
-									<svg class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+									<svg
+										class="h-5 w-5 text-blue-600 dark:text-blue-400"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M5 13l4 4L19 7"
+										/>
 									</svg>
 								{/if}
 							</button>
@@ -592,7 +633,12 @@
 						aria-label="Schließen"
 					>
 						<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
 						</svg>
 					</button>
 				</div>
@@ -600,7 +646,8 @@
 				{#if image.is_public}
 					<div class="mb-6">
 						<p class="text-gray-600 dark:text-gray-400">
-							Dieses Bild ist derzeit öffentlich und kann von anderen Nutzern im Explore-Bereich gesehen werden.
+							Dieses Bild ist derzeit öffentlich und kann von anderen Nutzern im Explore-Bereich
+							gesehen werden.
 						</p>
 						<p class="mt-2 text-gray-600 dark:text-gray-400">
 							Möchtest du die Veröffentlichung entfernen?
@@ -621,7 +668,9 @@
 							class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-red-500 dark:hover:bg-red-600"
 						>
 							{#if isPublishing}
-								<div class="h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"></div>
+								<div
+									class="h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"
+								></div>
 							{/if}
 							Entfernen
 						</button>
@@ -629,7 +678,8 @@
 				{:else}
 					<div class="mb-6">
 						<p class="text-gray-600 dark:text-gray-400">
-							Möchtest du dieses Bild veröffentlichen? Es wird dann im Explore-Bereich für alle Nutzer sichtbar sein.
+							Möchtest du dieses Bild veröffentlichen? Es wird dann im Explore-Bereich für alle
+							Nutzer sichtbar sein.
 						</p>
 						<div class="mt-4 rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
 							<p class="text-sm text-blue-800 dark:text-blue-300">
@@ -652,7 +702,9 @@
 							class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
 						>
 							{#if isPublishing}
-								<div class="h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"></div>
+								<div
+									class="h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"
+								></div>
 							{/if}
 							Veröffentlichen
 						</button>

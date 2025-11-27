@@ -34,15 +34,17 @@
 				: 'bg-gray-100/80 text-gray-700 backdrop-blur-xl hover:bg-gray-200/80 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700/80'}"
 		>
 			{#if tag.color}
-				<span
-					class="h-2 w-2 rounded-full"
-					style="background-color: {tag.color};"
-				></span>
+				<span class="h-2 w-2 rounded-full" style="background-color: {tag.color};"></span>
 			{/if}
 			<span>{tag.name}</span>
 			{#if selected}
 				<svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="3"
+						d="M5 13l4 4L19 7"
+					/>
 				</svg>
 			{/if}
 		</button>

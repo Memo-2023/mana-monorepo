@@ -85,11 +85,15 @@ describe('ExampleController', () => {
 				error: new Error('Validation failed'),
 			});
 
-			await expect(controller.create(invalidDto, { user: mockUser })).rejects.toThrow(BadRequestException);
+			await expect(controller.create(invalidDto, { user: mockUser })).rejects.toThrow(
+				BadRequestException
+			);
 		});
 
 		it('should throw UnauthorizedException when user is not authenticated', async () => {
-			await expect(controller.create(createDto, { user: null })).rejects.toThrow(UnauthorizedException);
+			await expect(controller.create(createDto, { user: null })).rejects.toThrow(
+				UnauthorizedException
+			);
 		});
 
 		it('should handle service errors gracefully', async () => {
@@ -155,7 +159,9 @@ describe('ExampleController', () => {
 				error: new Error('Not found'),
 			});
 
-			await expect(controller.findOne('invalid-id', { user: mockUser })).rejects.toThrow(NotFoundException);
+			await expect(controller.findOne('invalid-id', { user: mockUser })).rejects.toThrow(
+				NotFoundException
+			);
 		});
 
 		it('should not allow access to other users examples', async () => {
@@ -166,7 +172,9 @@ describe('ExampleController', () => {
 				error: null,
 			});
 
-			await expect(controller.findOne(exampleId, { user: mockUser })).rejects.toThrow(UnauthorizedException);
+			await expect(controller.findOne(exampleId, { user: mockUser })).rejects.toThrow(
+				UnauthorizedException
+			);
 		});
 	});
 
@@ -236,7 +244,9 @@ describe('ExampleController', () => {
 				error: new Error('Not found'),
 			});
 
-			await expect(controller.remove('invalid-id', { user: mockUser })).rejects.toThrow(NotFoundException);
+			await expect(controller.remove('invalid-id', { user: mockUser })).rejects.toThrow(
+				NotFoundException
+			);
 		});
 
 		it('should not allow deletion of other users examples', async () => {
@@ -245,7 +255,9 @@ describe('ExampleController', () => {
 				error: new Error('Unauthorized'),
 			});
 
-			await expect(controller.remove(exampleId, { user: mockUser })).rejects.toThrow(UnauthorizedException);
+			await expect(controller.remove(exampleId, { user: mockUser })).rejects.toThrow(
+				UnauthorizedException
+			);
 		});
 	});
 });

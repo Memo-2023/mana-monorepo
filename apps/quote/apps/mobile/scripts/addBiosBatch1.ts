@@ -8,27 +8,27 @@ import * as path from 'path';
 import { Author } from '../services/contentLoader';
 
 function loadAuthors(lang: 'de' | 'en'): Author[] {
-  const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const match = content.match(/export const authors[A-Z]{2}: Author\[\] = (\[[\s\S]*\]);/);
-  return eval(match[1]) as Author[];
+	const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
+	const content = fs.readFileSync(filePath, 'utf-8');
+	const match = content.match(/export const authors[A-Z]{2}: Author\[\] = (\[[\s\S]*\]);/);
+	return eval(match[1]) as Author[];
 }
 
 function writeAuthors(authors: Author[], lang: 'de' | 'en'): void {
-  const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
-  const backupPath = filePath.replace('.ts', `.backup-${Date.now()}.ts`);
-  fs.copyFileSync(filePath, backupPath);
-  const authorsJson = JSON.stringify(authors, null, 2);
-  const tsContent = `import { Author } from '../../contentLoader';
+	const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
+	const backupPath = filePath.replace('.ts', `.backup-${Date.now()}.ts`);
+	fs.copyFileSync(filePath, backupPath);
+	const authorsJson = JSON.stringify(authors, null, 2);
+	const tsContent = `import { Author } from '../../contentLoader';
 
 export const authors${lang.toUpperCase()}: Author[] = ${authorsJson};
 `;
-  fs.writeFileSync(filePath, tsContent, 'utf-8');
-  console.log(`✅ ${lang}.ts aktualisiert`);
+	fs.writeFileSync(filePath, tsContent, 'utf-8');
+	console.log(`✅ ${lang}.ts aktualisiert`);
 }
 
 const batch1Bios: Record<string, string> = {
-  'aristotle': `# Aristotle
+	aristotle: `# Aristotle
 *384 - 322 v. Chr.*
 
 ## Kurzbiografie
@@ -268,7 +268,7 @@ Seine Methode - Beobachtung, Klassifikation, systematische Darstellung - prägte
 
 Als Universalgelehrter verkörperte er ein Ideal von Bildung, das die gesamte Wirklichkeit umfassen wollte. Die Einheit seines Systems, das von der Logik über die Naturwissenschaften bis zur Ethik und Politik reicht, bleibt beeindruckend.`,
 
-  'hesse-hermann': `# Hermann Hesse
+	'hesse-hermann': `# Hermann Hesse
 *2. Juli 1877 - 9. August 1962*
 
 ## Kurzbiografie
@@ -461,7 +461,7 @@ Seine Romane sind Wegbegleiter für Suchende, Außenseiter und alle, die nach ei
 
 Hesses Größe liegt in der Ehrlichkeit, mit der er eigene Krisen darstellte, und im Mut, spirituelle Fragen in einer säkularen Zeit zu stellen. Er lebte das Künstlerleben, das er besang, und zahlte den Preis der Einsamkeit für seine Unabhängigkeit.`,
 
-  'marcus-aurelius': `# Marcus Aurelius
+	'marcus-aurelius': `# Marcus Aurelius
 *26. April 121 - 17. März 180 n. Chr.*
 
 ## Kurzbiografie
@@ -670,48 +670,48 @@ In einer Zeit, da das römische Reich bereits Risse zeigte, hielt er durch Chara
 };
 
 async function main() {
-  console.log('📝 Batch 1: Featured Autoren\n');
+	console.log('📝 Batch 1: Featured Autoren\n');
 
-  const authorsDE = loadAuthors('de');
-  const authorsEN = loadAuthors('en');
+	const authorsDE = loadAuthors('de');
+	const authorsEN = loadAuthors('en');
 
-  let updated = 0;
+	let updated = 0;
 
-  const updatedDE = authorsDE.map(author => {
-    if (batch1Bios[author.id]) {
-      console.log(`✅ ${author.name} (${author.id})`);
-      updated++;
-      return {
-        ...author,
-        biography: {
-          ...author.biography,
-          long: batch1Bios[author.id]
-        }
-      };
-    }
-    return author;
-  });
+	const updatedDE = authorsDE.map((author) => {
+		if (batch1Bios[author.id]) {
+			console.log(`✅ ${author.name} (${author.id})`);
+			updated++;
+			return {
+				...author,
+				biography: {
+					...author.biography,
+					long: batch1Bios[author.id],
+				},
+			};
+		}
+		return author;
+	});
 
-  const updatedEN = authorsEN.map(author => {
-    const deAuthor = updatedDE.find(a => a.id === author.id);
-    if (deAuthor?.biography?.long && batch1Bios[author.id]) {
-      return {
-        ...author,
-        biography: {
-          ...author.biography,
-          long: deAuthor.biography.long
-        }
-      };
-    }
-    return author;
-  });
+	const updatedEN = authorsEN.map((author) => {
+		const deAuthor = updatedDE.find((a) => a.id === author.id);
+		if (deAuthor?.biography?.long && batch1Bios[author.id]) {
+			return {
+				...author,
+				biography: {
+					...author.biography,
+					long: deAuthor.biography.long,
+				},
+			};
+		}
+		return author;
+	});
 
-  console.log(`\n📊 ${updated} Biografien hinzugefügt\n`);
+	console.log(`\n📊 ${updated} Biografien hinzugefügt\n`);
 
-  writeAuthors(updatedDE, 'de');
-  writeAuthors(updatedEN, 'en');
+	writeAuthors(updatedDE, 'de');
+	writeAuthors(updatedEN, 'en');
 
-  console.log('\n✨ Batch 1 fertig!\n');
+	console.log('\n✨ Batch 1 fertig!\n');
 }
 
 main();

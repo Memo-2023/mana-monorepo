@@ -21,63 +21,63 @@ import { ErrorCode } from '../types/error-codes';
  * ```
  */
 export function isAppError(error: unknown): error is AppError {
-  return error instanceof AppError;
+	return error instanceof AppError;
 }
 
 /**
  * Check if error is a ValidationError.
  */
 export function isValidationError(error: unknown): error is ValidationError {
-  return error instanceof ValidationError;
+	return error instanceof ValidationError;
 }
 
 /**
  * Check if error is an AuthError.
  */
 export function isAuthError(error: unknown): error is AuthError {
-  return error instanceof AuthError;
+	return error instanceof AuthError;
 }
 
 /**
  * Check if error is a NotFoundError.
  */
 export function isNotFoundError(error: unknown): error is NotFoundError {
-  return error instanceof NotFoundError;
+	return error instanceof NotFoundError;
 }
 
 /**
  * Check if error is a CreditError.
  */
 export function isCreditError(error: unknown): error is CreditError {
-  return error instanceof CreditError;
+	return error instanceof CreditError;
 }
 
 /**
  * Check if error is a ServiceError.
  */
 export function isServiceError(error: unknown): error is ServiceError {
-  return error instanceof ServiceError;
+	return error instanceof ServiceError;
 }
 
 /**
  * Check if error is a RateLimitError.
  */
 export function isRateLimitError(error: unknown): error is RateLimitError {
-  return error instanceof RateLimitError;
+	return error instanceof RateLimitError;
 }
 
 /**
  * Check if error is a NetworkError.
  */
 export function isNetworkError(error: unknown): error is NetworkError {
-  return error instanceof NetworkError;
+	return error instanceof NetworkError;
 }
 
 /**
  * Check if error is a DatabaseError.
  */
 export function isDatabaseError(error: unknown): error is DatabaseError {
-  return error instanceof DatabaseError;
+	return error instanceof DatabaseError;
 }
 
 /**
@@ -92,10 +92,10 @@ export function isDatabaseError(error: unknown): error is DatabaseError {
  * ```
  */
 export function hasErrorCode(error: unknown, code: ErrorCode): boolean {
-  if (!isAppError(error)) {
-    return false;
-  }
-  return error.hasCode(code);
+	if (!isAppError(error)) {
+		return false;
+	}
+	return error.hasCode(code);
 }
 
 /**
@@ -111,17 +111,17 @@ export function hasErrorCode(error: unknown, code: ErrorCode): boolean {
  * ```
  */
 export function findError<T extends AppError>(
-  error: unknown,
-  predicate: (e: AppError) => e is T
+	error: unknown,
+	predicate: (e: AppError) => e is T
 ): T | undefined {
-  let current: unknown = error;
-  while (current) {
-    if (isAppError(current) && predicate(current)) {
-      return current;
-    }
-    current = isAppError(current) ? current.cause : undefined;
-  }
-  return undefined;
+	let current: unknown = error;
+	while (current) {
+		if (isAppError(current) && predicate(current)) {
+			return current;
+		}
+		current = isAppError(current) ? current.cause : undefined;
+	}
+	return undefined;
 }
 
 /**
@@ -129,10 +129,10 @@ export function findError<T extends AppError>(
  * Works with both AppError and standard Error.
  */
 export function isRetryable(error: unknown): boolean {
-  if (isAppError(error)) {
-    return error.retryable;
-  }
-  return false;
+	if (isAppError(error)) {
+		return error.retryable;
+	}
+	return false;
 }
 
 /**
@@ -140,10 +140,10 @@ export function isRetryable(error: unknown): boolean {
  * Returns 500 for non-AppError errors.
  */
 export function getHttpStatus(error: unknown): number {
-  if (isAppError(error)) {
-    return error.httpStatus;
-  }
-  return 500;
+	if (isAppError(error)) {
+		return error.httpStatus;
+	}
+	return 500;
 }
 
 /**
@@ -151,8 +151,8 @@ export function getHttpStatus(error: unknown): number {
  * Returns UNKNOWN_ERROR for non-AppError errors.
  */
 export function getErrorCode(error: unknown): ErrorCode {
-  if (isAppError(error)) {
-    return error.code;
-  }
-  return ErrorCode.UNKNOWN_ERROR;
+	if (isAppError(error)) {
+		return error.code;
+	}
+	return ErrorCode.UNKNOWN_ERROR;
 }

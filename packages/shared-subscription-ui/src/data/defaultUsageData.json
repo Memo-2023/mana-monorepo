@@ -1,10 +1,10 @@
 {
-  "usage": {
-    "total": 0,
-    "lastWeek": 0,
-    "lastMonth": 0,
-    "currentMana": 150,
-    "maxMana": 150,
-    "history": []
-  }
+	"usage": {
+		"total": 0,
+		"lastWeek": 0,
+		"lastMonth": 0,
+		"currentMana": 150,
+		"maxMana": 150,
+		"history": []
+	}
 }

@@ -39,7 +39,11 @@ export class MemoService {
 	 * Get memos for list view - optimized for performance
 	 * Only fetches fields needed for the sidebar list, no memories
 	 */
-	async getMemosForList(userId: string, limit = 30, offset = 0): Promise<{ memos: Memo[]; hasMore: boolean }> {
+	async getMemosForList(
+		userId: string,
+		limit = 30,
+		offset = 0
+	): Promise<{ memos: Memo[]; hasMore: boolean }> {
 		const supabase = await createAuthClient();
 
 		// Fetch memos with count for pagination (use * to avoid field name issues)
@@ -77,7 +81,7 @@ export class MemoService {
 		const memos = data.map((memo: any) => ({
 			...memo,
 			tags: tagsMap.get(memo.id) || [],
-			memories: []
+			memories: [],
 		}));
 
 		const hasMore = count ? offset + limit < count : data.length === limit;
@@ -131,7 +135,7 @@ export class MemoService {
 		const memos = data.map((memo: any) => ({
 			...memo,
 			tags: tagsMap.get(memo.id) || [],
-			memories: []
+			memories: [],
 		}));
 
 		return memos as Memo[];
@@ -160,16 +164,14 @@ export class MemoService {
 			// Promote to memory cache for faster subsequent access
 			audioUrlCache.set(memoId, {
 				url: indexedDBCached,
-				expires: Date.now() + CACHE_EXPIRY_MS
+				expires: Date.now() + CACHE_EXPIRY_MS,
 			});
 			return indexedDBCached;
 		}
 
 		// Level 3: Generate new signed URL from API
 		const authClient = await createAuthClient();
-		const { data } = await authClient.storage
-			.from('user-uploads')
-			.createSignedUrl(audioPath, 3600); // 1 hour
+		const { data } = await authClient.storage.from('user-uploads').createSignedUrl(audioPath, 3600); // 1 hour
 
 		if (data?.signedUrl) {
 			// Store in both caches
@@ -178,7 +180,7 @@ export class MemoService {
 			// Memory cache
 			audioUrlCache.set(memoId, {
 				url: data.signedUrl,
-				expires
+				expires,
 			});
 
 			// IndexedDB cache (async, non-blocking)
@@ -196,22 +198,15 @@ export class MemoService {
 		// Fetch memo, tags, and memories in parallel (3 queries but concurrent)
 		const [memoResult, tagsResult, memoriesResult] = await Promise.all([
 			// Get memo data
-			supabase
-				.from('memos')
-				.select('*')
-				.eq('id', memoId)
-				.single(),
+			supabase.from('memos').select('*').eq('id', memoId).single(),
 			// Get tags
-			supabase
-				.from('memo_tags')
-				.select('tags(id, name, color)')
-				.eq('memo_id', memoId),
+			supabase.from('memo_tags').select('tags(id, name, color)').eq('memo_id', memoId),
 			// Get memories
 			supabase
 				.from('memories')
 				.select('*')
 				.eq('memo_id', memoId)
-				.order('created_at', { ascending: false })
+				.order('created_at', { ascending: false }),
 		]);
 
 		if (memoResult.error) throw memoResult.error;
@@ -220,7 +215,7 @@ export class MemoService {
 		const memo = {
 			...memoResult.data,
 			tags: tagsResult.data?.map((mt: any) => mt.tags).filter(Boolean) || [],
-			memories: memoriesResult.data || []
+			memories: memoriesResult.data || [],
 		};
 
 		return memo as Memo;
@@ -288,7 +283,7 @@ export class MemoService {
 		const memos = data.map((memo: any) => ({
 			...memo,
 			tags: tagsMap.get(memo.id) || [],
-			memories: memoriesMap.get(memo.id) || []
+			memories: memoriesMap.get(memo.id) || [],
 		}));
 
 		return memos as Memo[];
@@ -335,7 +330,7 @@ export class MemoService {
 		// Use RPC to atomically increment the view count
 		// This avoids race conditions and reduces to a single DB call
 		const { error } = await supabase.rpc('increment_memo_view_count', {
-			memo_id: memoId
+			memo_id: memoId,
 		});
 
 		// Fallback to read-then-write if RPC doesn't exist
@@ -358,9 +353,9 @@ export class MemoService {
 						...currentMetadata,
 						stats: {
 							...currentStats,
-							viewCount: newViewCount
-						}
-					}
+							viewCount: newViewCount,
+						},
+					},
 				})
 				.eq('id', memoId);
 
@@ -379,9 +374,7 @@ export class MemoService {
 
 	async addTagToMemo(memoId: string, tagId: string) {
 		const supabase = await createAuthClient();
-		const { error } = await supabase
-			.from('memo_tags')
-			.insert({ memo_id: memoId, tag_id: tagId });
+		const { error } = await supabase.from('memo_tags').insert({ memo_id: memoId, tag_id: tagId });
 
 		if (error) throw error;
 	}

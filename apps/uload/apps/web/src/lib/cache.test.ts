@@ -28,13 +28,13 @@ describe('Cache System', () => {
 			const shortTTL = 10; // 10ms
 
 			cache.set(key, value, shortTTL);
-			
+
 			// Should be available immediately
 			expect(cache.get(key)).toBe(value);
 
 			// Wait for TTL to expire
-			await new Promise(resolve => setTimeout(resolve, 20));
-			
+			await new Promise((resolve) => setTimeout(resolve, 20));
+
 			// Should be null after expiration
 			expect(cache.get(key)).toBeNull();
 		});
@@ -82,12 +82,12 @@ describe('Cache System', () => {
 	describe('Cache Cleanup', () => {
 		test('should cleanup expired entries', async () => {
 			const shortTTL = 10; // 10ms
-			
+
 			cache.set('key1', 'value1', shortTTL);
 			cache.set('key2', 'value2', 60000); // 1 minute
 
 			// Wait for first key to expire
-			await new Promise(resolve => setTimeout(resolve, 20));
+			await new Promise((resolve) => setTimeout(resolve, 20));
 
 			cache.cleanup();
 
@@ -120,10 +120,10 @@ describe('Cache System', () => {
 			const arrayValue = [1, 2, 3, 'test'];
 
 			const objectKey = 'object-test';
-			const objectValue = { 
-				nested: { deep: true }, 
+			const objectValue = {
+				nested: { deep: true },
 				array: [1, 2, 3],
-				date: new Date().toISOString()
+				date: new Date().toISOString(),
 			};
 
 			cache.set(arrayKey, arrayValue);
@@ -155,7 +155,7 @@ describe('Cache System', () => {
 
 		test('should handle concurrent access', () => {
 			const key = 'concurrent-test';
-			
+
 			// Simulate concurrent writes
 			cache.set(key, 'value1');
 			cache.set(key, 'value2');
@@ -203,15 +203,15 @@ describe('Cache System', () => {
 				nested: {
 					deep: {
 						very: {
-							deep: 'value'
-						}
-					}
-				}
+							deep: 'value',
+						},
+					},
+				},
 			};
 
 			const key = 'large-value-test';
 			cache.set(key, largeValue);
-			
+
 			const result = cache.get(key);
 			expect(result).toEqual(largeValue);
 		});

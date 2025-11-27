@@ -6,272 +6,319 @@ import Card from '../components/ui/Card.astro';
 ---
 
 <BaseLayout>
-  <Navigation />
+	<Navigation />
 
-  <main class="pt-24 pb-16">
-    <div class="container-custom max-w-4xl">
-      <!-- Header -->
-      <div class="text-center mb-12">
-        <h1 class="font-grandstander font-bold text-4xl md:text-5xl text-text-primary mb-4">
-          Datenschutzerklärung
-        </h1>
-        <p class="text-text-secondary">
-          Stand: {new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
-      </div>
+	<main class="pt-24 pb-16">
+		<div class="container-custom max-w-4xl">
+			<!-- Header -->
+			<div class="text-center mb-12">
+				<h1 class="font-grandstander font-bold text-4xl md:text-5xl text-text-primary mb-4">
+					Datenschutzerklärung
+				</h1>
+				<p class="text-text-secondary">
+					Stand: {
+						new Date().toLocaleDateString('de-DE', {
+							year: 'numeric',
+							month: 'long',
+							day: 'numeric',
+						})
+					}
+				</p>
+			</div>
 
-      <!-- Content -->
-      <Card variant="default" padding="lg">
-        <div class="prose prose-invert max-w-none">
+			<!-- Content -->
+			<Card variant="default" padding="lg">
+				<div class="prose prose-invert max-w-none">
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">1. Verantwortlicher</h2>
+						<p class="text-text-secondary mb-4">
+							Verantwortlich für die Datenverarbeitung im Sinne der Datenschutz-Grundverordnung
+							(DSGVO) ist:
+						</p>
+						<p class="text-text-secondary">
+							Memoro GmbH<br />
+							Reichenaustraße 11a<br />
+							78464 Konstanz<br />
+							E-Mail: <a href="mailto:kontakt@memoro.ai" class="text-yellow-light hover:underline"
+								>kontakt@memoro.ai</a
+							><br />
+							Telefon: +49 176 444 343 85
+						</p>
+					</section>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">1. Verantwortlicher</h2>
-            <p class="text-text-secondary mb-4">
-              Verantwortlich für die Datenverarbeitung im Sinne der Datenschutz-Grundverordnung (DSGVO) ist:
-            </p>
-            <p class="text-text-secondary">
-              Memoro GmbH<br />
-              Reichenaustraße 11a<br />
-              78464 Konstanz<br />
-              E-Mail: <a href="mailto:kontakt@memoro.ai" class="text-yellow-light hover:underline">kontakt@memoro.ai</a><br />
-              Telefon: +49 176 444 343 85
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">
+							2. Erhebung und Speicherung personenbezogener Daten
+						</h2>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">2. Erhebung und Speicherung personenbezogener Daten</h2>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							2.1 Registrierung und Nutzerkonto
+						</h3>
+						<p class="text-text-secondary mb-4">
+							Bei der Registrierung für Märchenzauber erheben wir folgende Daten:
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>E-Mail-Adresse</li>
+							<li>Passwort (verschlüsselt gespeichert)</li>
+							<li>Optional: Name</li>
+							<li>Bei Social Login (Google/Apple): Von Ihnen freigegebene Profildaten</li>
+						</ul>
+						<p class="text-text-secondary mb-4">
+							Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)
+						</p>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">2.1 Registrierung und Nutzerkonto</h3>
-            <p class="text-text-secondary mb-4">
-              Bei der Registrierung für Märchenzauber erheben wir folgende Daten:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>E-Mail-Adresse</li>
-              <li>Passwort (verschlüsselt gespeichert)</li>
-              <li>Optional: Name</li>
-              <li>Bei Social Login (Google/Apple): Von Ihnen freigegebene Profildaten</li>
-            </ul>
-            <p class="text-text-secondary mb-4">
-              Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)
-            </p>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">2.2 Erstellte Inhalte</h3>
+						<p class="text-text-secondary mb-4">Wir speichern die von Ihnen erstellten Inhalte:</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Charakterbeschreibungen und -bilder</li>
+							<li>Generierte Geschichten und Illustrationen</li>
+							<li>Ihre Eingaben und Präferenzen</li>
+						</ul>
+						<p class="text-text-secondary mb-4">
+							Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)
+						</p>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">2.2 Erstellte Inhalte</h3>
-            <p class="text-text-secondary mb-4">
-              Wir speichern die von Ihnen erstellten Inhalte:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Charakterbeschreibungen und -bilder</li>
-              <li>Generierte Geschichten und Illustrationen</li>
-              <li>Ihre Eingaben und Präferenzen</li>
-            </ul>
-            <p class="text-text-secondary mb-4">
-              Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)
-            </p>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">2.3 Zahlungsdaten</h3>
+						<p class="text-text-secondary mb-4">
+							Zahlungsdaten werden über unseren Payment-Provider verarbeitet. Wir speichern nur:
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Transaktions-IDs</li>
+							<li>Mana-Guthaben</li>
+							<li>Kaufhistorie</li>
+						</ul>
+						<p class="text-text-secondary mb-4">
+							Kreditkartendaten werden nicht bei uns gespeichert.
+						</p>
+					</section>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">2.3 Zahlungsdaten</h3>
-            <p class="text-text-secondary mb-4">
-              Zahlungsdaten werden über unseren Payment-Provider verarbeitet. Wir speichern nur:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Transaktions-IDs</li>
-              <li>Mana-Guthaben</li>
-              <li>Kaufhistorie</li>
-            </ul>
-            <p class="text-text-secondary mb-4">
-              Kreditkartendaten werden nicht bei uns gespeichert.
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">
+							3. KI-Dienste und Datenverarbeitung
+						</h2>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">3. KI-Dienste und Datenverarbeitung</h2>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							3.1 Azure OpenAI (Microsoft)
+						</h3>
+						<p class="text-text-secondary mb-4">
+							Zur Generierung von Geschichten nutzen wir Azure OpenAI. Ihre Eingaben werden
+							verarbeitet, um personalisierte Inhalte zu erstellen.
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Anbieter: Microsoft Corporation, USA</li>
+							<li>Datenverarbeitung: EU-Region (Europe West)</li>
+							<li>
+								Datenschutz: <a
+									href="https://privacy.microsoft.com"
+									class="text-yellow-light hover:underline">Microsoft Privacy Statement</a>
+							</li>
+						</ul>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">3.1 Azure OpenAI (Microsoft)</h3>
-            <p class="text-text-secondary mb-4">
-              Zur Generierung von Geschichten nutzen wir Azure OpenAI. Ihre Eingaben werden verarbeitet, um personalisierte Inhalte zu erstellen.
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Anbieter: Microsoft Corporation, USA</li>
-              <li>Datenverarbeitung: EU-Region (Europe West)</li>
-              <li>Datenschutz: <a href="https://privacy.microsoft.com" class="text-yellow-light hover:underline">Microsoft Privacy Statement</a></li>
-            </ul>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">3.2 Google Gemini</h3>
+						<p class="text-text-secondary mb-4">
+							Für bestimmte KI-Funktionen nutzen wir Google Gemini.
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Anbieter: Google LLC, USA</li>
+							<li>
+								Datenschutz: <a
+									href="https://policies.google.com/privacy"
+									class="text-yellow-light hover:underline">Google Privacy Policy</a>
+							</li>
+						</ul>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">3.2 Google Gemini</h3>
-            <p class="text-text-secondary mb-4">
-              Für bestimmte KI-Funktionen nutzen wir Google Gemini.
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Anbieter: Google LLC, USA</li>
-              <li>Datenschutz: <a href="https://policies.google.com/privacy" class="text-yellow-light hover:underline">Google Privacy Policy</a></li>
-            </ul>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							3.3 Replicate (Bildgenerierung)
+						</h3>
+						<p class="text-text-secondary mb-4">
+							Illustrationen werden über Replicate mit dem Flux-Modell generiert.
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Anbieter: Replicate, Inc., USA</li>
+							<li>
+								Datenschutz: <a
+									href="https://replicate.com/privacy"
+									class="text-yellow-light hover:underline">Replicate Privacy Policy</a>
+							</li>
+						</ul>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">3.3 Replicate (Bildgenerierung)</h3>
-            <p class="text-text-secondary mb-4">
-              Illustrationen werden über Replicate mit dem Flux-Modell generiert.
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Anbieter: Replicate, Inc., USA</li>
-              <li>Datenschutz: <a href="https://replicate.com/privacy" class="text-yellow-light hover:underline">Replicate Privacy Policy</a></li>
-            </ul>
+						<p class="text-text-secondary mb-4 mt-6">
+							<strong>Wichtig:</strong> Alle KI-Dienste verarbeiten Ihre Eingaben nur zur Generierung
+							der gewünschten Inhalte. Die Daten werden nicht für das Training der KI-Modelle verwendet.
+						</p>
+					</section>
 
-            <p class="text-text-secondary mb-4 mt-6">
-              <strong>Wichtig:</strong> Alle KI-Dienste verarbeiten Ihre Eingaben nur zur Generierung der gewünschten Inhalte.
-              Die Daten werden nicht für das Training der KI-Modelle verwendet.
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">4. Datenbank und Speicherung</h2>
+						<p class="text-text-secondary mb-4">
+							Wir nutzen Supabase (PostgreSQL) für die Datenspeicherung:
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Anbieter: Supabase, Inc.</li>
+							<li>Server-Standort: EU (Frankfurt, Deutschland)</li>
+							<li>Verschlüsselung: TLS/SSL für Übertragung, AES-256 für Speicherung</li>
+						</ul>
+					</section>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">4. Datenbank und Speicherung</h2>
-            <p class="text-text-secondary mb-4">
-              Wir nutzen Supabase (PostgreSQL) für die Datenspeicherung:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Anbieter: Supabase, Inc.</li>
-              <li>Server-Standort: EU (Frankfurt, Deutschland)</li>
-              <li>Verschlüsselung: TLS/SSL für Übertragung, AES-256 für Speicherung</li>
-            </ul>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">5. Cookies und Tracking</h2>
+						<p class="text-text-secondary mb-4">Unsere Website verwendet folgende Cookies:</p>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">5. Cookies und Tracking</h2>
-            <p class="text-text-secondary mb-4">
-              Unsere Website verwendet folgende Cookies:
-            </p>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							5.1 Notwendige Cookies
+						</h3>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Session-Cookies für Login-Status</li>
+							<li>Authentication-Token (sichere Speicherung)</li>
+						</ul>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">5.1 Notwendige Cookies</h3>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Session-Cookies für Login-Status</li>
-              <li>Authentication-Token (sichere Speicherung)</li>
-            </ul>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							5.2 Analytics (optional)
+						</h3>
+						<p class="text-text-secondary mb-4">
+							Wir können anonymisierte Nutzungsstatistiken erheben, um unseren Service zu
+							verbessern. Dies erfolgt nur mit Ihrer Einwilligung.
+						</p>
+					</section>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">5.2 Analytics (optional)</h3>
-            <p class="text-text-secondary mb-4">
-              Wir können anonymisierte Nutzungsstatistiken erheben, um unseren Service zu verbessern.
-              Dies erfolgt nur mit Ihrer Einwilligung.
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">6. Kinderschutz</h2>
+						<p class="text-text-secondary mb-4">
+							Märchenzauber ist für Kinder konzipiert. Wir erheben nur die minimal notwendigen
+							Daten:
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Charakternamen und -beschreibungen</li>
+							<li>Keine personenbezogenen Daten von Kindern</li>
+							<li>Eltern/Erziehungsberechtigte erstellen das Konto</li>
+							<li>Alle Inhalte sind kindgerecht und moderiert</li>
+						</ul>
+					</section>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">6. Kinderschutz</h2>
-            <p class="text-text-secondary mb-4">
-              Märchenzauber ist für Kinder konzipiert. Wir erheben nur die minimal notwendigen Daten:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Charakternamen und -beschreibungen</li>
-              <li>Keine personenbezogenen Daten von Kindern</li>
-              <li>Eltern/Erziehungsberechtigte erstellen das Konto</li>
-              <li>Alle Inhalte sind kindgerecht und moderiert</li>
-            </ul>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">7. Ihre Rechte</h2>
+						<p class="text-text-secondary mb-4">
+							Sie haben folgende Rechte bezüglich Ihrer personenbezogenen Daten:
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>
+								<strong>Auskunft</strong> (Art. 15 DSGVO): Informationen über gespeicherte Daten
+							</li>
+							<li><strong>Berichtigung</strong> (Art. 16 DSGVO): Korrektur falscher Daten</li>
+							<li><strong>Löschung</strong> (Art. 17 DSGVO): "Recht auf Vergessenwerden"</li>
+							<li><strong>Einschränkung</strong> (Art. 18 DSGVO): Beschränkung der Verarbeitung</li>
+							<li><strong>Datenübertragbarkeit</strong> (Art. 20 DSGVO): Export Ihrer Daten</li>
+							<li><strong>Widerspruch</strong> (Art. 21 DSGVO): Widerspruch gegen Verarbeitung</li>
+						</ul>
+						<p class="text-text-secondary mb-4">
+							Zur Ausübung Ihrer Rechte kontaktieren Sie uns unter:
+							<a href="mailto:kontakt@memoro.ai" class="text-yellow-light hover:underline"
+								>kontakt@memoro.ai</a
+							>
+						</p>
+					</section>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">7. Ihre Rechte</h2>
-            <p class="text-text-secondary mb-4">
-              Sie haben folgende Rechte bezüglich Ihrer personenbezogenen Daten:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li><strong>Auskunft</strong> (Art. 15 DSGVO): Informationen über gespeicherte Daten</li>
-              <li><strong>Berichtigung</strong> (Art. 16 DSGVO): Korrektur falscher Daten</li>
-              <li><strong>Löschung</strong> (Art. 17 DSGVO): "Recht auf Vergessenwerden"</li>
-              <li><strong>Einschränkung</strong> (Art. 18 DSGVO): Beschränkung der Verarbeitung</li>
-              <li><strong>Datenübertragbarkeit</strong> (Art. 20 DSGVO): Export Ihrer Daten</li>
-              <li><strong>Widerspruch</strong> (Art. 21 DSGVO): Widerspruch gegen Verarbeitung</li>
-            </ul>
-            <p class="text-text-secondary mb-4">
-              Zur Ausübung Ihrer Rechte kontaktieren Sie uns unter:
-              <a href="mailto:kontakt@memoro.ai" class="text-yellow-light hover:underline">kontakt@memoro.ai</a>
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">8. Datenlöschung</h2>
+						<p class="text-text-secondary mb-4">
+							Bei Löschung Ihres Kontos werden alle personenbezogenen Daten entfernt:
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Sofortige Löschung: Profildaten, Login-Informationen</li>
+							<li>Innerhalb 30 Tage: Geschichten, Charaktere, Bilder</li>
+							<li>Backup-Systeme: Vollständige Entfernung nach 90 Tagen</li>
+						</ul>
+					</section>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">8. Datenlöschung</h2>
-            <p class="text-text-secondary mb-4">
-              Bei Löschung Ihres Kontos werden alle personenbezogenen Daten entfernt:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Sofortige Löschung: Profildaten, Login-Informationen</li>
-              <li>Innerhalb 30 Tage: Geschichten, Charaktere, Bilder</li>
-              <li>Backup-Systeme: Vollständige Entfernung nach 90 Tagen</li>
-            </ul>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">9. Datensicherheit</h2>
+						<p class="text-text-secondary mb-4">
+							Wir setzen technische und organisatorische Maßnahmen ein:
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>SSL/TLS-Verschlüsselung für alle Verbindungen</li>
+							<li>Verschlüsselte Datenbanken (AES-256)</li>
+							<li>Regelmäßige Security-Audits</li>
+							<li>Zugriffskontrolle und Authentifizierung</li>
+							<li>Backup und Disaster Recovery</li>
+						</ul>
+					</section>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">9. Datensicherheit</h2>
-            <p class="text-text-secondary mb-4">
-              Wir setzen technische und organisatorische Maßnahmen ein:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>SSL/TLS-Verschlüsselung für alle Verbindungen</li>
-              <li>Verschlüsselte Datenbanken (AES-256)</li>
-              <li>Regelmäßige Security-Audits</li>
-              <li>Zugriffskontrolle und Authentifizierung</li>
-              <li>Backup und Disaster Recovery</li>
-            </ul>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">
+							10. Änderungen der Datenschutzerklärung
+						</h2>
+						<p class="text-text-secondary mb-4">
+							Wir behalten uns vor, diese Datenschutzerklärung anzupassen, um sie an geänderte
+							Rechtslagen oder bei Änderungen des Dienstes anzupassen. Bei wesentlichen Änderungen
+							informieren wir Sie per E-Mail.
+						</p>
+					</section>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">10. Änderungen der Datenschutzerklärung</h2>
-            <p class="text-text-secondary mb-4">
-              Wir behalten uns vor, diese Datenschutzerklärung anzupassen, um sie an geänderte Rechtslagen oder
-              bei Änderungen des Dienstes anzupassen. Bei wesentlichen Änderungen informieren wir Sie per E-Mail.
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">11. Beschwerderecht</h2>
+						<p class="text-text-secondary mb-4">
+							Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren:
+						</p>
+						<p class="text-text-secondary">
+							Bundesbeauftragter für den Datenschutz und die Informationsfreiheit<br />
+							Graurheindorfer Str. 153<br />
+							53117 Bonn<br />
+							<a href="https://www.bfdi.bund.de" class="text-yellow-light hover:underline"
+								>www.bfdi.bund.de</a
+							>
+						</p>
+					</section>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">11. Beschwerderecht</h2>
-            <p class="text-text-secondary mb-4">
-              Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren:
-            </p>
-            <p class="text-text-secondary">
-              Bundesbeauftragter für den Datenschutz und die Informationsfreiheit<br />
-              Graurheindorfer Str. 153<br />
-              53117 Bonn<br />
-              <a href="https://www.bfdi.bund.de" class="text-yellow-light hover:underline">www.bfdi.bund.de</a>
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">12. Kontakt</h2>
+						<p class="text-text-secondary mb-4">Bei Fragen zum Datenschutz kontaktieren Sie uns:</p>
+						<p class="text-text-secondary">
+							E-Mail: <a href="mailto:kontakt@memoro.ai" class="text-yellow-light hover:underline"
+								>kontakt@memoro.ai</a
+							><br />
+							Telefon: +49 176 444 343 85
+						</p>
+					</section>
+				</div>
+			</Card>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">12. Kontakt</h2>
-            <p class="text-text-secondary mb-4">
-              Bei Fragen zum Datenschutz kontaktieren Sie uns:
-            </p>
-            <p class="text-text-secondary">
-              E-Mail: <a href="mailto:kontakt@memoro.ai" class="text-yellow-light hover:underline">kontakt@memoro.ai</a><br />
-              Telefon: +49 176 444 343 85
-            </p>
-          </section>
+			<!-- Back to Home -->
+			<div class="text-center mt-8">
+				<a
+					href="/"
+					class="text-text-secondary hover:text-yellow-light transition-colors inline-flex items-center gap-2"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+					</svg>
+					Zurück zur Startseite
+				</a>
+			</div>
+		</div>
+	</main>
 
-        </div>
-      </Card>
-
-      <!-- Back to Home -->
-      <div class="text-center mt-8">
-        <a href="/" class="text-text-secondary hover:text-yellow-light transition-colors inline-flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-          </svg>
-          Zurück zur Startseite
-        </a>
-      </div>
-    </div>
-  </main>
-
-  <Footer />
+	<Footer />
 </BaseLayout>
 
 <style>
-  .prose h2 {
-    margin-top: 2rem;
-  }
+	.prose h2 {
+		margin-top: 2rem;
+	}
 
-  .prose h3 {
-    margin-top: 1.5rem;
-  }
+	.prose h3 {
+		margin-top: 1.5rem;
+	}
 
-  .prose p {
-    margin-bottom: 1rem;
-  }
+	.prose p {
+		margin-bottom: 1rem;
+	}
 
-  .prose ul {
-    margin-bottom: 1rem;
-  }
+	.prose ul {
+		margin-bottom: 1rem;
+	}
 </style>

@@ -9,25 +9,25 @@ import InsufficientCreditsModal from './InsufficientCreditsModal';
  * It intercepts 402 errors and displays the insufficient credits modal.
  */
 export default function GlobalInsufficientCreditsHandler() {
-  // Set up the global fetch interceptor
-  useInsufficientCreditsInterceptor();
+	// Set up the global fetch interceptor
+	useInsufficientCreditsInterceptor();
 
-  // Get modal state from the store
-  const { isModalVisible, requiredCredits, availableCredits, operation, closeModal } =
-    useInsufficientCreditsStore();
+	// Get modal state from the store
+	const { isModalVisible, requiredCredits, availableCredits, operation, closeModal } =
+		useInsufficientCreditsStore();
 
-  return (
-    <InsufficientCreditsModal
-      visible={isModalVisible}
-      requiredCredits={requiredCredits || 0}
-      availableCredits={availableCredits || 0}
-      operationType={operation === 'story_creation' ? 'story' : 'character'}
-      onClose={closeModal}
-      onGetCredits={() => {
-        // TODO: Navigate to credits purchase page
-        console.log('Navigate to credits purchase page');
-        closeModal();
-      }}
-    />
-  );
+	return (
+		<InsufficientCreditsModal
+			visible={isModalVisible}
+			requiredCredits={requiredCredits || 0}
+			availableCredits={availableCredits || 0}
+			operationType={operation === 'story_creation' ? 'story' : 'character'}
+			onClose={closeModal}
+			onGetCredits={() => {
+				// TODO: Navigate to credits purchase page
+				console.log('Navigate to credits purchase page');
+				closeModal();
+			}}
+		/>
+	);
 }

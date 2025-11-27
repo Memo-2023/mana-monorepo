@@ -10,7 +10,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 			currentWorkspaceId: null,
 			// Keep old fields for backwards compatibility during migration
 			sharedAccounts: [],
-			viewingAs: null
+			viewingAs: null,
 		};
 	}
 
@@ -20,9 +20,9 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		try {
 			const personalWorkspaces = await locals.pb.collection('workspaces').getList<Workspace>(1, 1, {
 				filter: `owner="${locals.user.id}" && type="personal"`,
-				sort: 'created'
+				sort: 'created',
 			});
-			
+
 			if (personalWorkspaces.items.length > 0) {
 				personalWorkspace = personalWorkspaces.items[0];
 			} else {
@@ -31,7 +31,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 					name: `${locals.user.name || locals.user.email}'s Workspace`,
 					owner: locals.user.id,
 					type: 'personal',
-					subscription_status: locals.user.subscription_status || 'free'
+					subscription_status: locals.user.subscription_status || 'free',
 				});
 			}
 		} catch (error) {
@@ -41,15 +41,17 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		// Get team workspaces where user is a member
 		let teamWorkspaces: Workspace[] = [];
 		try {
-			const memberships = await locals.pb.collection('workspace_members').getList<WorkspaceMember>(1, 50, {
-				filter: `user="${locals.user.id}" && invitation_status="accepted"`,
-				expand: 'workspace',
-				sort: 'created'
-			});
-			
+			const memberships = await locals.pb
+				.collection('workspace_members')
+				.getList<WorkspaceMember>(1, 50, {
+					filter: `user="${locals.user.id}" && invitation_status="accepted"`,
+					expand: 'workspace',
+					sort: 'created',
+				});
+
 			teamWorkspaces = memberships.items
-				.filter(m => m.expand?.workspace)
-				.map(m => m.expand!.workspace as Workspace);
+				.filter((m) => m.expand?.workspace)
+				.map((m) => m.expand!.workspace as Workspace);
 		} catch (error) {
 			console.error('Error loading team workspaces:', error);
 		}
@@ -58,11 +60,14 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		const currentWorkspaceId = url.searchParams.get('workspace') || personalWorkspace?.id || null;
 
 		// Keep backwards compatibility with old shared_access system
-		const sharedAccounts = await locals.pb.collection('shared_access').getList(1, 50, {
-			filter: `user="${locals.user.id}" && invitation_status="accepted"`,
-			expand: 'owner',
-			sort: 'created'
-		}).catch(() => ({ items: [] }));
+		const sharedAccounts = await locals.pb
+			.collection('shared_access')
+			.getList(1, 50, {
+				filter: `user="${locals.user.id}" && invitation_status="accepted"`,
+				expand: 'owner',
+				sort: 'created',
+			})
+			.catch(() => ({ items: [] }));
 
 		const viewingAs = url.searchParams.get('viewing_as') || locals.user.id;
 
@@ -73,7 +78,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 			currentWorkspaceId,
 			// Keep old fields for backwards compatibility
 			sharedAccounts: sharedAccounts.items,
-			viewingAs
+			viewingAs,
 		};
 	} catch (error) {
 		console.error('Error loading workspaces:', error);
@@ -83,7 +88,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 			teamWorkspaces: [],
 			currentWorkspaceId: null,
 			sharedAccounts: [],
-			viewingAs: locals.user.id
+			viewingAs: locals.user.id,
 		};
 	}
 };

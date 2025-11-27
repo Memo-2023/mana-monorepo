@@ -62,6 +62,7 @@ With our **completely new tech stack** we can:
 • Together develop the perfect app
 
 ## 🎁 As a Beta Tester You Get:
+
 • Exclusive access to new features
 • Direct line to the development team
 • 150 Mana starting credit
@@ -78,5 +79,6 @@ More details: https://memoro.ai/en/blog/memoro-2-0-release
 ---
 
 **Call-to-Action Buttons:**
+
 - Learn More → Link to memoro.ai
 - Try Beta → Links to TestFlight/Play Store

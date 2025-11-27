@@ -6,16 +6,16 @@ import { createTestTag, createTestUser } from '$tests/factories';
 
 // Mock @sveltejs/kit
 vi.mock('@sveltejs/kit', () => ({
-	fail: vi.fn((status, data) => ({ status, data }))
+	fail: vi.fn((status, data) => ({ status, data })),
 }));
 
 // Mock PocketBase
 vi.mock('$lib/pocketbase', () => ({
 	pb: {
-		collection: vi.fn()
+		collection: vi.fn(),
 	},
 	generateTagSlug: vi.fn((name) => name.toLowerCase().replace(/\s+/g, '-')),
-	DEFAULT_TAG_COLORS: ['#3B82F6', '#EF4444', '#10B981']
+	DEFAULT_TAG_COLORS: ['#3B82F6', '#EF4444', '#10B981'],
 }));
 
 describe('Tags Page Server Actions', () => {
@@ -27,7 +27,7 @@ describe('Tags Page Server Actions', () => {
 
 		testUser = createTestUser({
 			id: 'user123',
-			email: 'test@example.com'
+			email: 'test@example.com',
 		});
 
 		// Setup mock collection methods
@@ -35,7 +35,7 @@ describe('Tags Page Server Actions', () => {
 			getList: vi.fn(),
 			create: vi.fn(),
 			update: vi.fn(),
-			delete: vi.fn()
+			delete: vi.fn(),
 		};
 
 		(pb.collection as any).mockReturnValue(mockCollection);
@@ -45,26 +45,26 @@ describe('Tags Page Server Actions', () => {
 		it('should load tags for authenticated user', async () => {
 			const mockTags = [
 				createTestTag({ id: 'tag1', name: 'Work', user_id: 'user123' }),
-				createTestTag({ id: 'tag2', name: 'Personal', user_id: 'user123' })
+				createTestTag({ id: 'tag2', name: 'Personal', user_id: 'user123' }),
 			];
 
 			mockCollection.getList
 				.mockResolvedValueOnce({
 					items: mockTags,
-					totalItems: 2
+					totalItems: 2,
 				})
 				.mockResolvedValue({
 					items: [],
-					totalItems: 0
+					totalItems: 0,
 				});
 
 			const result = await actions.load({
-				locals: { user: testUser }
+				locals: { user: testUser },
 			} as any);
 
 			expect(mockCollection.getList).toHaveBeenCalledWith(1, 100, {
 				filter: `user_id="user123"`,
-				sort: '-usage_count,name'
+				sort: '-usage_count,name',
 			});
 
 			expect(result.tags).toHaveLength(2);
@@ -75,7 +75,7 @@ describe('Tags Page Server Actions', () => {
 			mockCollection.getList.mockRejectedValue(new Error('Database error'));
 
 			const result = await actions.load({
-				locals: { user: testUser }
+				locals: { user: testUser },
 			} as any);
 
 			expect(result.tags).toEqual([]);
@@ -87,15 +87,15 @@ describe('Tags Page Server Actions', () => {
 			mockCollection.getList
 				.mockResolvedValueOnce({
 					items: [mockTag],
-					totalItems: 1
+					totalItems: 1,
 				})
 				.mockResolvedValueOnce({
 					items: [],
-					totalItems: 5 // 5 links using this tag
+					totalItems: 5, // 5 links using this tag
 				});
 
 			const result = await actions.load({
-				locals: { user: testUser }
+				locals: { user: testUser },
 			} as any);
 
 			expect(result.tags[0].linkCount).toBe(5);
@@ -111,7 +111,7 @@ describe('Tags Page Server Actions', () => {
 			formData.append('is_public', 'on');
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			const expectedTag = {
@@ -122,14 +122,14 @@ describe('Tags Page Server Actions', () => {
 				icon: '🏷️',
 				user_id: 'user123',
 				is_public: true,
-				usage_count: 0
+				usage_count: 0,
 			};
 
 			mockCollection.create.mockResolvedValue(expectedTag);
 
 			const result = await actions.actions.create({
 				request: mockRequest,
-				locals: { user: testUser }
+				locals: { user: testUser },
 			} as any);
 
 			expect(mockCollection.create).toHaveBeenCalledWith({
@@ -139,7 +139,7 @@ describe('Tags Page Server Actions', () => {
 				icon: '🏷️',
 				user_id: 'user123',
 				is_public: true,
-				usage_count: 0
+				usage_count: 0,
 			});
 
 			expect(result).toEqual({ success: true, tag: expectedTag });
@@ -151,20 +151,20 @@ describe('Tags Page Server Actions', () => {
 			formData.append('color', '#3B82F6');
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			mockCollection.create.mockResolvedValue({ id: 'tag-id' });
 
 			await actions.actions.create({
 				request: mockRequest,
-				locals: { user: testUser }
+				locals: { user: testUser },
 			} as any);
 
 			expect(mockCollection.create).toHaveBeenCalledWith(
 				expect.objectContaining({
 					name: 'Trimmed Tag',
-					slug: 'trimmed-tag'
+					slug: 'trimmed-tag',
 				})
 			);
 		});
@@ -175,19 +175,19 @@ describe('Tags Page Server Actions', () => {
 			formData.append('color', '');
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			mockCollection.create.mockResolvedValue({ id: 'tag-id' });
 
 			await actions.actions.create({
 				request: mockRequest,
-				locals: { user: testUser }
+				locals: { user: testUser },
 			} as any);
 
 			expect(mockCollection.create).toHaveBeenCalledWith(
 				expect.objectContaining({
-					color: DEFAULT_TAG_COLORS[0]
+					color: DEFAULT_TAG_COLORS[0],
 				})
 			);
 		});
@@ -198,19 +198,19 @@ describe('Tags Page Server Actions', () => {
 			// is_public not set (checkbox unchecked)
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			mockCollection.create.mockResolvedValue({ id: 'tag-id' });
 
 			await actions.actions.create({
 				request: mockRequest,
-				locals: { user: testUser }
+				locals: { user: testUser },
 			} as any);
 
 			expect(mockCollection.create).toHaveBeenCalledWith(
 				expect.objectContaining({
-					is_public: false
+					is_public: false,
 				})
 			);
 		});
@@ -220,12 +220,12 @@ describe('Tags Page Server Actions', () => {
 			formData.append('name', '');
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			const result = await actions.actions.create({
 				request: mockRequest,
-				locals: { user: testUser }
+				locals: { user: testUser },
 			} as any);
 
 			expect(fail).toHaveBeenCalledWith(400, { error: 'Tag name is required' });
@@ -237,14 +237,14 @@ describe('Tags Page Server Actions', () => {
 			formData.append('name', 'Test Tag');
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			mockCollection.create.mockRejectedValue(new Error('Database error'));
 
 			const result = await actions.actions.create({
 				request: mockRequest,
-				locals: { user: testUser }
+				locals: { user: testUser },
 			} as any);
 
 			expect(fail).toHaveBeenCalledWith(400, { error: 'Failed to create tag' });
@@ -261,13 +261,13 @@ describe('Tags Page Server Actions', () => {
 			formData.append('is_public', 'on');
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			mockCollection.update.mockResolvedValue({ id: 'tag123' });
 
 			const result = await actions.actions.update({
-				request: mockRequest
+				request: mockRequest,
 			} as any);
 
 			expect(mockCollection.update).toHaveBeenCalledWith('tag123', {
@@ -275,7 +275,7 @@ describe('Tags Page Server Actions', () => {
 				slug: 'updated-tag',
 				color: '#EF4444',
 				icon: '⭐',
-				is_public: true
+				is_public: true,
 			});
 
 			expect(result).toEqual({ updated: true });
@@ -286,11 +286,11 @@ describe('Tags Page Server Actions', () => {
 			formData.append('name', 'Tag');
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			const result = await actions.actions.update({
-				request: mockRequest
+				request: mockRequest,
 			} as any);
 
 			expect(fail).toHaveBeenCalledWith(400, { error: 'Tag ID and name are required' });
@@ -303,11 +303,11 @@ describe('Tags Page Server Actions', () => {
 			formData.append('name', '');
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			const result = await actions.actions.update({
-				request: mockRequest
+				request: mockRequest,
 			} as any);
 
 			expect(fail).toHaveBeenCalledWith(400, { error: 'Tag ID and name are required' });
@@ -319,13 +319,13 @@ describe('Tags Page Server Actions', () => {
 			formData.append('name', 'Tag');
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			mockCollection.update.mockRejectedValue(new Error('Database error'));
 
 			const result = await actions.actions.update({
-				request: mockRequest
+				request: mockRequest,
 			} as any);
 
 			expect(fail).toHaveBeenCalledWith(400, { error: 'Failed to update tag' });
@@ -338,24 +338,24 @@ describe('Tags Page Server Actions', () => {
 			formData.append('id', 'tag123');
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			// Mock linktags relationships
 			mockCollection.getList.mockResolvedValue({
-				items: [{ id: 'link_tag_1' }, { id: 'link_tag_2' }]
+				items: [{ id: 'link_tag_1' }, { id: 'link_tag_2' }],
 			});
 
 			mockCollection.delete.mockResolvedValue(true);
 
 			const result = await actions.actions.delete({
-				request: mockRequest
+				request: mockRequest,
 			} as any);
 
 			// Should delete linktags first
 			expected(pb.collection).toHaveBeenCalledWith('linktags');
 			expect(mockCollection.getList).toHaveBeenCalledWith(1, 100, {
-				filter: `tag_id="tag123"`
+				filter: `tag_id="tag123"`,
 			});
 			expect(mockCollection.delete).toHaveBeenCalledWith('link_tag_1');
 			expect(mockCollection.delete).toHaveBeenCalledWith('link_tag_2');
@@ -372,17 +372,17 @@ describe('Tags Page Server Actions', () => {
 			formData.append('id', 'tag123');
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			mockCollection.getList.mockResolvedValue({
-				items: []
+				items: [],
 			});
 
 			mockCollection.delete.mockResolvedValue(true);
 
 			const result = await actions.actions.delete({
-				request: mockRequest
+				request: mockRequest,
 			} as any);
 
 			expect(mockCollection.delete).toHaveBeenCalledTimes(1);
@@ -394,11 +394,11 @@ describe('Tags Page Server Actions', () => {
 			const formData = new FormData();
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			const result = await actions.actions.delete({
-				request: mockRequest
+				request: mockRequest,
 			} as any);
 
 			expect(fail).toHaveBeenCalledWith(400, { error: 'Tag ID is required' });
@@ -410,13 +410,13 @@ describe('Tags Page Server Actions', () => {
 			formData.append('id', 'tag123');
 
 			const mockRequest = {
-				formData: vi.fn().mockResolvedValue(formData)
+				formData: vi.fn().mockResolvedValue(formData),
 			};
 
 			mockCollection.getList.mockRejectedValue(new Error('Database error'));
 
 			const result = await actions.actions.delete({
-				request: mockRequest
+				request: mockRequest,
 			} as any);
 
 			expect(fail).toHaveBeenCalledWith(400, { error: 'Failed to delete tag' });

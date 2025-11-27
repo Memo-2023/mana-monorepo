@@ -1,5 +1,13 @@
 import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import {
+	View,
+	TextInput,
+	TouchableOpacity,
+	Text,
+	ScrollView,
+	StyleSheet,
+	ActivityIndicator,
+} from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../theme/ThemeProvider';
@@ -11,431 +19,458 @@ import { Template, getTemplates } from '../services/template';
 import { Space, getUserSpaces } from '../services/space';
 
 type ConversationStarterProps = {
-  onSend?: (message: string) => void;
-  placeholder?: string;
-  spaceId?: string | null;
+	onSend?: (message: string) => void;
+	placeholder?: string;
+	spaceId?: string | null;
 };
 
 // Definiere die Ref-Methoden, die von außen aufgerufen werden können
 export interface ConversationStarterRef {
-  focus: () => void;
+	focus: () => void;
 }
 
-const ConversationStarter = forwardRef<ConversationStarterRef, ConversationStarterProps>(({ onSend, placeholder = 'Was möchtest du wissen?', spaceId }, ref) => {
-  const [text, setText] = useState('');
-  const [selectedModelId, setSelectedModelId] = useState('550e8400-e29b-41d4-a716-446655440000'); // Default to Azure OpenAI GPT-O3-Mini
-  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-  const [documentMode, setDocumentMode] = useState(false);
-  const [currentSpace, setCurrentSpace] = useState<Space | null>(null);
-  const { colors } = useTheme();
-  const { isDarkMode } = useAppTheme();
-  const router = useRouter();
-  const { user } = useAuth();
-  const inputRef = useRef<TextInput>(null);
-  
-  // Expose methods via ref
-  useImperativeHandle(ref, () => ({
-    focus: () => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }
-  }));
-  
-  // Laden der Vorlagen und des aktuellen Space beim ersten Rendern
-  useEffect(() => {
-    const loadTemplates = async () => {
-      if (!user) return;
-      
-      setIsLoadingTemplates(true);
-      try {
-        const userTemplates = await getTemplates(user.id);
-        setTemplates(userTemplates);
-      } catch (error) {
-        console.error('Fehler beim Laden der Vorlagen:', error);
-      } finally {
-        setIsLoadingTemplates(false);
-      }
-    };
-    
-    loadTemplates();
-  }, [user]);
-  
-  // Laden des Space-Namens, wenn eine spaceId vorhanden ist
-  useEffect(() => {
-    const loadSpace = async () => {
-      if (!spaceId) {
-        setCurrentSpace(null);
-        return;
-      }
-      
-      try {
-        const space = await getSpace(spaceId);
-        setCurrentSpace(space);
-      } catch (error) {
-        console.error('Fehler beim Laden des Space:', error);
-        setCurrentSpace(null);
-      }
-    };
-    
-    loadSpace();
-  }, [spaceId]);
+const ConversationStarter = forwardRef<ConversationStarterRef, ConversationStarterProps>(
+	({ onSend, placeholder = 'Was möchtest du wissen?', spaceId }, ref) => {
+		const [text, setText] = useState('');
+		const [selectedModelId, setSelectedModelId] = useState('550e8400-e29b-41d4-a716-446655440000'); // Default to Azure OpenAI GPT-O3-Mini
+		const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+		const [templates, setTemplates] = useState<Template[]>([]);
+		const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
+		const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+		const [documentMode, setDocumentMode] = useState(false);
+		const [currentSpace, setCurrentSpace] = useState<Space | null>(null);
+		const { colors } = useTheme();
+		const { isDarkMode } = useAppTheme();
+		const router = useRouter();
+		const { user } = useAuth();
+		const inputRef = useRef<TextInput>(null);
 
-  // Tastatur-Event-Handler für Enter-Taste (besonders wichtig für Web)
-  const handleKeyPress = (e: any) => {
-    // Prüfen auf Enter ohne Shift für Submit
-    if (e.nativeEvent.key === 'Enter' && !e.nativeEvent.shiftKey) {
-      e.preventDefault(); // Verhindert Zeilenumbruch
-      handleSend();
-    }
-  };
+		// Expose methods via ref
+		useImperativeHandle(ref, () => ({
+			focus: () => {
+				if (inputRef.current) {
+					inputRef.current.focus();
+				}
+			},
+		}));
 
-  const handleSend = async () => {
-    if (text.trim()) {
-      console.log("handleSend wird aufgerufen mit Text:", text.trim());
+		// Laden der Vorlagen und des aktuellen Space beim ersten Rendern
+		useEffect(() => {
+			const loadTemplates = async () => {
+				if (!user) return;
 
-      // Prüfen ob onSend-Prop existiert, aber für jetzt ignorieren
-      if (onSend && false) { // Deaktiviert: wir wollen immer unseren eigenen Code ausführen
-        console.log("onSend-Prop gefunden, rufe diese auf");
-        onSend(text.trim());
-        setText('');
-        return;
-      }
+				setIsLoadingTemplates(true);
+				try {
+					const userTemplates = await getTemplates(user.id);
+					setTemplates(userTemplates);
+				} catch (error) {
+					console.error('Fehler beim Laden der Vorlagen:', error);
+				} finally {
+					setIsLoadingTemplates(false);
+				}
+			};
 
-      // Andernfalls starte eine neue Konversation
-      try {
-        setIsCreatingConversation(true);
-        console.log("Starte Erstellung einer neuen Konversation...");
-        
-        // Verwende den Benutzer aus dem Auth-Kontext
-        if (!user) {
-          console.error('Kein Benutzer angemeldet');
-          router.replace('/auth/login');
-          return;
-        }
-        
-        console.log(`Chat starten mit Modell-ID: ${selectedModelId}`);
-        
-        const trimmedText = text.trim();
-        
-        // WICHTIG: Setze Text zurück, bevor wir navigieren (UI-Block vermeiden)
-        setText('');
-        
-        const mode = selectedTemplate ? 'template' : 'free';
-        const templateId = selectedTemplate?.id;
-        const modelToUse = selectedTemplate?.model_id || selectedModelId;
-        
-        // Versuche zwei verschiedene Methoden, damit eine davon funktioniert
-        try {
-          // 1. Methode: Mit Route-Parametern im Objekt
-          console.log(`Methode 1: Mit Parametern im Objekt (${mode}, ${templateId || 'keine Vorlage'}, documentMode: ${documentMode}, spaceId: ${spaceId || 'keiner'})`);
-          router.push({
-            pathname: '/conversation/new',
-            params: {
-              initialMessage: trimmedText,
-              modelId: modelToUse,
-              mode: mode,
-              documentMode: documentMode ? 'true' : 'false',
-              ...(templateId && { templateId }),
-              ...(spaceId && { spaceId })
-            }
-          });
-        } catch (routerError) {
-          console.error("Fehler bei Methode 1:", routerError);
-          
-          // 2. Methode: Mit Query-String
-          console.log(`Methode 2: Mit Query-String`);
-          let queryParams = `?initialMessage=${encodeURIComponent(
-            trimmedText
-          )}&modelId=${encodeURIComponent(
-            modelToUse
-          )}&mode=${encodeURIComponent(mode)}&documentMode=${encodeURIComponent(documentMode ? 'true' : 'false')}`;
-          
-          if (templateId) {
-            queryParams += `&templateId=${encodeURIComponent(templateId)}`;
-          }
-          
-          if (spaceId) {
-            queryParams += `&spaceId=${encodeURIComponent(spaceId)}`;
-          }
-          
-          router.push(`/conversation/new${queryParams}`);
-        }
-        
-        // Zurücksetzen der ausgewählten Vorlage nach Navigation
-        setSelectedTemplate(null);
-        
-        console.log(`Navigation zur Konversation ausgeführt`);
-      } catch (error) {
-        console.error('Fehler beim Erstellen der Konversation:', error);
-        alert(`Fehler: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`);
-      } finally {
-        setIsCreatingConversation(false);
-      }
-    } else {
-      console.log("Text ist leer, keine Aktion");
-    }
-  };
-  
-  // Handler für das Auswählen einer Vorlage
-  const handleTemplateSelect = (template: Template) => {
-    // Wenn die Vorlage bereits ausgewählt ist, deaktivieren wir sie
-    if (selectedTemplate?.id === template.id) {
-      setSelectedTemplate(null);
-      // Auch den Dokumentmodus zurücksetzen
-      setDocumentMode(false);
-    } else {
-      // Sonst wählen wir die Vorlage aus
-      setSelectedTemplate(template);
-      
-      // Modell automatisch auswählen, wenn die Vorlage eines definiert
-      if (template.model_id) {
-        setSelectedModelId(template.model_id);
-      }
-      
-      // Dokumentmodus automatisch übernehmen, wenn die Vorlage ihn aktiviert hat
-      setDocumentMode(template.document_mode || false);
-      console.log(`Template ${template.name} ausgewählt, Dokumentmodus: ${template.document_mode}`);
-    }
-    
-    // Nach der Auswahl/Abwahl einer Vorlage das Eingabefeld fokussieren
-    // Kurze Verzögerung, um UI-Updates abzuschließen
-    setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }, 50);
-  };
+			loadTemplates();
+		}, [user]);
 
-  return (
-    <View className="w-full px-4 max-w-3xl self-center">
-      {/* Container für den Titel mit fester Höhe - verhindert Layout-Verschiebung */}
-      <View className="h-7 flex-row items-center">
-        {selectedTemplate && (
-          <Text 
-            className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}
-            numberOfLines={1}
-          >
-            {selectedTemplate.name}
-          </Text>
-        )}
-        
-        {currentSpace && (
-          <View className="flex-row items-center ml-auto">
-            <Ionicons 
-              name="folder-open" 
-              size={16} 
-              color={colors.primary} 
-              style={{ marginRight: 4 }} 
-            />
-            <Text 
-              className={`text-sm font-medium`}
-              style={{ color: colors.primary }}
-              numberOfLines={1}
-            >
-              Space: {currentSpace.name}
-            </Text>
-          </View>
-        )}
-      </View>
-      <View className={`rounded-lg p-4 ${isDarkMode ? 'bg-[#2C2C2E]' : 'bg-white'}`}>
+		// Laden des Space-Namens, wenn eine spaceId vorhanden ist
+		useEffect(() => {
+			const loadSpace = async () => {
+				if (!spaceId) {
+					setCurrentSpace(null);
+					return;
+				}
 
-        <TextInput
-          ref={inputRef}
-          className={`w-full min-h-[40px] text-base ${isDarkMode ? 'text-white' : 'text-black'}`}
-          placeholder={selectedTemplate?.initial_question ? selectedTemplate.initial_question : placeholder}
-          placeholderTextColor={isDarkMode ? '#8E8E93' : '#8E8E93'}
-          value={text}
-          onChangeText={setText}
-          multiline
-          maxLength={1000}
-          onSubmitEditing={() => {
-            if (text.trim()) {
-              handleSend();
-            }
-          }}
-          blurOnSubmit={false}
-          onKeyPress={handleKeyPress}
-        />
-        
-        <View className="flex-row justify-between items-center mt-4">
-          <View className="flex-row flex-wrap">
-            <TouchableOpacity 
-              className={`flex-row items-center py-1 px-2 rounded-md mr-4 ${
-                documentMode 
-                  ? 'bg-[#0A84FF]40 border border-[#0A84FF]' 
-                  : isDarkMode 
-                    ? 'bg-[#2C2C2E] border border-[#38383A]' 
-                    : 'bg-[#F2F2F7] border border-[#E5E5EA]'
-              }`}
-              onPress={() => setDocumentMode(!documentMode)}
-            >
-              <Ionicons 
-                name={documentMode ? "document" : "document-outline"} 
-                size={18} 
-                color={documentMode ? '#0A84FF' : (isDarkMode ? '#FFFFFF' : '#000000')} 
-              />
-              <Text className={`ml-1 ${documentMode ? 'text-[#0A84FF] font-medium' : (isDarkMode ? 'text-white' : 'text-black')}`}>
-                Dokument
-              </Text>
-              {documentMode && (
-                <Ionicons name="checkmark-circle" size={14} color="#0A84FF" style={{marginLeft: 4}} />
-              )}
-            </TouchableOpacity>
-            
-            <TouchableOpacity className="flex-row items-center mr-4">
-              <Ionicons name="attach" size={20} color={isDarkMode ? '#FFFFFF' : '#000000'} />
-              <Text className={`ml-1 ${isDarkMode ? 'text-white' : 'text-black'}`}>Attach</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity className="flex-row items-center mr-4">
-              <Ionicons name="search" size={20} color={isDarkMode ? '#FFFFFF' : '#000000'} />
-              <Text className={`ml-1 ${isDarkMode ? 'text-white' : 'text-black'}`}>Search</Text>
-            </TouchableOpacity>
+				try {
+					const space = await getSpace(spaceId);
+					setCurrentSpace(space);
+				} catch (error) {
+					console.error('Fehler beim Laden des Space:', error);
+					setCurrentSpace(null);
+				}
+			};
 
-            <View className="flex-row items-center">
-              <ModelDropdown 
-                selectedModelId={selectedModelId} 
-                onSelectModel={setSelectedModelId} 
-              />
-            </View>
-          </View>
-          
-          <TouchableOpacity 
-            className={`flex-row items-center px-3 py-2 rounded-full ${text.trim() ? 'bg-[#0A84FF]' : 'bg-[#0A84FF]/20'}`}
-            onPress={() => {
-              console.log("Senden-Button gedrückt");
-              handleSend();
-            }}
-            disabled={!text.trim() || isCreatingConversation}
-            activeOpacity={0.7}
-          >
-            {isCreatingConversation ? (
-              <View className="flex-row items-center">
-                <View className="h-4 w-4 mr-1">
-                  <ActivityIndicator size="small" color="#FFFFFF" />
-                </View>
-                <Text className="text-white">Wird erstellt...</Text>
-              </View>
-            ) : (
-              <>
-                <Ionicons name="send" size={18} color={text.trim() ? '#FFFFFF' : '#0A84FF'} />
-                <Text className={`ml-1 ${text.trim() ? 'text-white' : 'text-[#0A84FF]'}`}>Senden</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-      
-      <View className="mt-4">
-        <View>
-          <Text className={`text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-            Vorlagen:
-          </Text>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false} 
-            className="flex-row"
-          >
-            {isLoadingTemplates ? (
-              <View className={`flex-row items-center justify-center mr-2 px-3 py-1 rounded-full border ${
-                isDarkMode ? 'bg-[#2C2C2E] border-[#38383A]' : 'bg-white border-[#E5E5EA]'
-              }`}>
-                <ActivityIndicator size="small" color={isDarkMode ? '#FFFFFF' : '#0A84FF'} style={{marginRight: 6}} />
-                <Text className={`text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>
-                  Laden...
-                </Text>
-              </View>
-            ) : templates.length > 0 ? (
-              templates.map((template) => (
-                <TouchableOpacity 
-                  key={template.id} 
-                  className={`flex-row items-center mr-2 px-3 py-1 rounded-full border ${
-                    selectedTemplate?.id === template.id
-                      ? isDarkMode 
-                        ? 'bg-[#0A84FF]80 border-[#0A84FF]' 
-                        : 'bg-[#0A84FF]40 border-[#0A84FF]'
-                      : isDarkMode 
-                        ? 'bg-[#2C2C2E] border-[#38383A]' 
-                        : 'bg-white border-[#E5E5EA]'
-                  }`}
-                  onPress={() => handleTemplateSelect(template)}
-                >
-                  <View 
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: 5,
-                      backgroundColor: template.color || '#0A84FF',
-                      marginRight: 6
-                    }}
-                  />
-                  <Text className={`text-sm ${
-                    selectedTemplate?.id === template.id
-                      ? isDarkMode ? 'text-white font-medium' : 'text-[#0A84FF] font-medium'
-                      : isDarkMode ? 'text-white' : 'text-black'
-                  }`}>
-                    {template.name}
-                  </Text>
-                  {selectedTemplate?.id === template.id && (
-                    <Ionicons 
-                      name="checkmark-circle" 
-                      size={14} 
-                      color={isDarkMode ? '#FFFFFF' : '#0A84FF'} 
-                      style={{marginLeft: 4}}
-                    />
-                  )}
-                </TouchableOpacity>
-              ))
-            ) : (
-              <TouchableOpacity 
-                className={`flex-row items-center mr-2 px-3 py-1 rounded-full border ${
-                  isDarkMode ? 'bg-[#2C2C2E] border-[#38383A]' : 'bg-white border-[#E5E5EA]'
-                }`}
-                onPress={() => router.push('/templates')}
-              >
-                <Ionicons 
-                  name="add-circle-outline" 
-                  size={16} 
-                  color={isDarkMode ? '#FFFFFF' : '#000000'} 
-                  style={styles.chipIcon} 
-                />
-                <Text className={`text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>
-                  Vorlage erstellen
-                </Text>
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity 
-              className={`flex-row items-center px-3 py-1 rounded-full border ${
-                isDarkMode ? 'bg-[#2C2C2E] border-[#38383A]' : 'bg-white border-[#E5E5EA]'
-              }`}
-              onPress={() => router.push('/templates')}
-            >
-              <Ionicons 
-                name="settings-outline" 
-                size={16} 
-                color={isDarkMode ? '#FFFFFF' : '#000000'} 
-                style={styles.chipIcon} 
-              />
-              <Text className={`text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>
-                Verwalten
-              </Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
-      </View>
-    </View>
-  );
-});
+			loadSpace();
+		}, [spaceId]);
+
+		// Tastatur-Event-Handler für Enter-Taste (besonders wichtig für Web)
+		const handleKeyPress = (e: any) => {
+			// Prüfen auf Enter ohne Shift für Submit
+			if (e.nativeEvent.key === 'Enter' && !e.nativeEvent.shiftKey) {
+				e.preventDefault(); // Verhindert Zeilenumbruch
+				handleSend();
+			}
+		};
+
+		const handleSend = async () => {
+			if (text.trim()) {
+				console.log('handleSend wird aufgerufen mit Text:', text.trim());
+
+				// Prüfen ob onSend-Prop existiert, aber für jetzt ignorieren
+				if (onSend && false) {
+					// Deaktiviert: wir wollen immer unseren eigenen Code ausführen
+					console.log('onSend-Prop gefunden, rufe diese auf');
+					onSend(text.trim());
+					setText('');
+					return;
+				}
+
+				// Andernfalls starte eine neue Konversation
+				try {
+					setIsCreatingConversation(true);
+					console.log('Starte Erstellung einer neuen Konversation...');
+
+					// Verwende den Benutzer aus dem Auth-Kontext
+					if (!user) {
+						console.error('Kein Benutzer angemeldet');
+						router.replace('/auth/login');
+						return;
+					}
+
+					console.log(`Chat starten mit Modell-ID: ${selectedModelId}`);
+
+					const trimmedText = text.trim();
+
+					// WICHTIG: Setze Text zurück, bevor wir navigieren (UI-Block vermeiden)
+					setText('');
+
+					const mode = selectedTemplate ? 'template' : 'free';
+					const templateId = selectedTemplate?.id;
+					const modelToUse = selectedTemplate?.model_id || selectedModelId;
+
+					// Versuche zwei verschiedene Methoden, damit eine davon funktioniert
+					try {
+						// 1. Methode: Mit Route-Parametern im Objekt
+						console.log(
+							`Methode 1: Mit Parametern im Objekt (${mode}, ${templateId || 'keine Vorlage'}, documentMode: ${documentMode}, spaceId: ${spaceId || 'keiner'})`
+						);
+						router.push({
+							pathname: '/conversation/new',
+							params: {
+								initialMessage: trimmedText,
+								modelId: modelToUse,
+								mode: mode,
+								documentMode: documentMode ? 'true' : 'false',
+								...(templateId && { templateId }),
+								...(spaceId && { spaceId }),
+							},
+						});
+					} catch (routerError) {
+						console.error('Fehler bei Methode 1:', routerError);
+
+						// 2. Methode: Mit Query-String
+						console.log(`Methode 2: Mit Query-String`);
+						let queryParams = `?initialMessage=${encodeURIComponent(
+							trimmedText
+						)}&modelId=${encodeURIComponent(
+							modelToUse
+						)}&mode=${encodeURIComponent(mode)}&documentMode=${encodeURIComponent(documentMode ? 'true' : 'false')}`;
+
+						if (templateId) {
+							queryParams += `&templateId=${encodeURIComponent(templateId)}`;
+						}
+
+						if (spaceId) {
+							queryParams += `&spaceId=${encodeURIComponent(spaceId)}`;
+						}
+
+						router.push(`/conversation/new${queryParams}`);
+					}
+
+					// Zurücksetzen der ausgewählten Vorlage nach Navigation
+					setSelectedTemplate(null);
+
+					console.log(`Navigation zur Konversation ausgeführt`);
+				} catch (error) {
+					console.error('Fehler beim Erstellen der Konversation:', error);
+					alert(`Fehler: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`);
+				} finally {
+					setIsCreatingConversation(false);
+				}
+			} else {
+				console.log('Text ist leer, keine Aktion');
+			}
+		};
+
+		// Handler für das Auswählen einer Vorlage
+		const handleTemplateSelect = (template: Template) => {
+			// Wenn die Vorlage bereits ausgewählt ist, deaktivieren wir sie
+			if (selectedTemplate?.id === template.id) {
+				setSelectedTemplate(null);
+				// Auch den Dokumentmodus zurücksetzen
+				setDocumentMode(false);
+			} else {
+				// Sonst wählen wir die Vorlage aus
+				setSelectedTemplate(template);
+
+				// Modell automatisch auswählen, wenn die Vorlage eines definiert
+				if (template.model_id) {
+					setSelectedModelId(template.model_id);
+				}
+
+				// Dokumentmodus automatisch übernehmen, wenn die Vorlage ihn aktiviert hat
+				setDocumentMode(template.document_mode || false);
+				console.log(
+					`Template ${template.name} ausgewählt, Dokumentmodus: ${template.document_mode}`
+				);
+			}
+
+			// Nach der Auswahl/Abwahl einer Vorlage das Eingabefeld fokussieren
+			// Kurze Verzögerung, um UI-Updates abzuschließen
+			setTimeout(() => {
+				if (inputRef.current) {
+					inputRef.current.focus();
+				}
+			}, 50);
+		};
+
+		return (
+			<View className="w-full max-w-3xl self-center px-4">
+				{/* Container für den Titel mit fester Höhe - verhindert Layout-Verschiebung */}
+				<View className="h-7 flex-row items-center">
+					{selectedTemplate && (
+						<Text
+							className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}
+							numberOfLines={1}
+						>
+							{selectedTemplate.name}
+						</Text>
+					)}
+
+					{currentSpace && (
+						<View className="ml-auto flex-row items-center">
+							<Ionicons
+								name="folder-open"
+								size={16}
+								color={colors.primary}
+								style={{ marginRight: 4 }}
+							/>
+							<Text
+								className={`text-sm font-medium`}
+								style={{ color: colors.primary }}
+								numberOfLines={1}
+							>
+								Space: {currentSpace.name}
+							</Text>
+						</View>
+					)}
+				</View>
+				<View className={`rounded-lg p-4 ${isDarkMode ? 'bg-[#2C2C2E]' : 'bg-white'}`}>
+					<TextInput
+						ref={inputRef}
+						className={`min-h-[40px] w-full text-base ${isDarkMode ? 'text-white' : 'text-black'}`}
+						placeholder={
+							selectedTemplate?.initial_question ? selectedTemplate.initial_question : placeholder
+						}
+						placeholderTextColor={isDarkMode ? '#8E8E93' : '#8E8E93'}
+						value={text}
+						onChangeText={setText}
+						multiline
+						maxLength={1000}
+						onSubmitEditing={() => {
+							if (text.trim()) {
+								handleSend();
+							}
+						}}
+						blurOnSubmit={false}
+						onKeyPress={handleKeyPress}
+					/>
+
+					<View className="mt-4 flex-row items-center justify-between">
+						<View className="flex-row flex-wrap">
+							<TouchableOpacity
+								className={`mr-4 flex-row items-center rounded-md px-2 py-1 ${
+									documentMode
+										? 'bg-[#0A84FF]40 border border-[#0A84FF]'
+										: isDarkMode
+											? 'border border-[#38383A] bg-[#2C2C2E]'
+											: 'border border-[#E5E5EA] bg-[#F2F2F7]'
+								}`}
+								onPress={() => setDocumentMode(!documentMode)}
+							>
+								<Ionicons
+									name={documentMode ? 'document' : 'document-outline'}
+									size={18}
+									color={documentMode ? '#0A84FF' : isDarkMode ? '#FFFFFF' : '#000000'}
+								/>
+								<Text
+									className={`ml-1 ${documentMode ? 'font-medium text-[#0A84FF]' : isDarkMode ? 'text-white' : 'text-black'}`}
+								>
+									Dokument
+								</Text>
+								{documentMode && (
+									<Ionicons
+										name="checkmark-circle"
+										size={14}
+										color="#0A84FF"
+										style={{ marginLeft: 4 }}
+									/>
+								)}
+							</TouchableOpacity>
+
+							<TouchableOpacity className="mr-4 flex-row items-center">
+								<Ionicons name="attach" size={20} color={isDarkMode ? '#FFFFFF' : '#000000'} />
+								<Text className={`ml-1 ${isDarkMode ? 'text-white' : 'text-black'}`}>Attach</Text>
+							</TouchableOpacity>
+
+							<TouchableOpacity className="mr-4 flex-row items-center">
+								<Ionicons name="search" size={20} color={isDarkMode ? '#FFFFFF' : '#000000'} />
+								<Text className={`ml-1 ${isDarkMode ? 'text-white' : 'text-black'}`}>Search</Text>
+							</TouchableOpacity>
+
+							<View className="flex-row items-center">
+								<ModelDropdown
+									selectedModelId={selectedModelId}
+									onSelectModel={setSelectedModelId}
+								/>
+							</View>
+						</View>
+
+						<TouchableOpacity
+							className={`flex-row items-center rounded-full px-3 py-2 ${text.trim() ? 'bg-[#0A84FF]' : 'bg-[#0A84FF]/20'}`}
+							onPress={() => {
+								console.log('Senden-Button gedrückt');
+								handleSend();
+							}}
+							disabled={!text.trim() || isCreatingConversation}
+							activeOpacity={0.7}
+						>
+							{isCreatingConversation ? (
+								<View className="flex-row items-center">
+									<View className="mr-1 h-4 w-4">
+										<ActivityIndicator size="small" color="#FFFFFF" />
+									</View>
+									<Text className="text-white">Wird erstellt...</Text>
+								</View>
+							) : (
+								<>
+									<Ionicons name="send" size={18} color={text.trim() ? '#FFFFFF' : '#0A84FF'} />
+									<Text className={`ml-1 ${text.trim() ? 'text-white' : 'text-[#0A84FF]'}`}>
+										Senden
+									</Text>
+								</>
+							)}
+						</TouchableOpacity>
+					</View>
+				</View>
+
+				<View className="mt-4">
+					<View>
+						<Text
+							className={`mb-1 text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}
+						>
+							Vorlagen:
+						</Text>
+						<ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
+							{isLoadingTemplates ? (
+								<View
+									className={`mr-2 flex-row items-center justify-center rounded-full border px-3 py-1 ${
+										isDarkMode ? 'border-[#38383A] bg-[#2C2C2E]' : 'border-[#E5E5EA] bg-white'
+									}`}
+								>
+									<ActivityIndicator
+										size="small"
+										color={isDarkMode ? '#FFFFFF' : '#0A84FF'}
+										style={{ marginRight: 6 }}
+									/>
+									<Text className={`text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>
+										Laden...
+									</Text>
+								</View>
+							) : templates.length > 0 ? (
+								templates.map((template) => (
+									<TouchableOpacity
+										key={template.id}
+										className={`mr-2 flex-row items-center rounded-full border px-3 py-1 ${
+											selectedTemplate?.id === template.id
+												? isDarkMode
+													? 'bg-[#0A84FF]80 border-[#0A84FF]'
+													: 'bg-[#0A84FF]40 border-[#0A84FF]'
+												: isDarkMode
+													? 'border-[#38383A] bg-[#2C2C2E]'
+													: 'border-[#E5E5EA] bg-white'
+										}`}
+										onPress={() => handleTemplateSelect(template)}
+									>
+										<View
+											style={{
+												width: 10,
+												height: 10,
+												borderRadius: 5,
+												backgroundColor: template.color || '#0A84FF',
+												marginRight: 6,
+											}}
+										/>
+										<Text
+											className={`text-sm ${
+												selectedTemplate?.id === template.id
+													? isDarkMode
+														? 'font-medium text-white'
+														: 'font-medium text-[#0A84FF]'
+													: isDarkMode
+														? 'text-white'
+														: 'text-black'
+											}`}
+										>
+											{template.name}
+										</Text>
+										{selectedTemplate?.id === template.id && (
+											<Ionicons
+												name="checkmark-circle"
+												size={14}
+												color={isDarkMode ? '#FFFFFF' : '#0A84FF'}
+												style={{ marginLeft: 4 }}
+											/>
+										)}
+									</TouchableOpacity>
+								))
+							) : (
+								<TouchableOpacity
+									className={`mr-2 flex-row items-center rounded-full border px-3 py-1 ${
+										isDarkMode ? 'border-[#38383A] bg-[#2C2C2E]' : 'border-[#E5E5EA] bg-white'
+									}`}
+									onPress={() => router.push('/templates')}
+								>
+									<Ionicons
+										name="add-circle-outline"
+										size={16}
+										color={isDarkMode ? '#FFFFFF' : '#000000'}
+										style={styles.chipIcon}
+									/>
+									<Text className={`text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>
+										Vorlage erstellen
+									</Text>
+								</TouchableOpacity>
+							)}
+							<TouchableOpacity
+								className={`flex-row items-center rounded-full border px-3 py-1 ${
+									isDarkMode ? 'border-[#38383A] bg-[#2C2C2E]' : 'border-[#E5E5EA] bg-white'
+								}`}
+								onPress={() => router.push('/templates')}
+							>
+								<Ionicons
+									name="settings-outline"
+									size={16}
+									color={isDarkMode ? '#FFFFFF' : '#000000'}
+									style={styles.chipIcon}
+								/>
+								<Text className={`text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>
+									Verwalten
+								</Text>
+							</TouchableOpacity>
+						</ScrollView>
+					</View>
+				</View>
+			</View>
+		);
+	}
+);
 
 // Styles für Elemente, die nicht mit NativeWind gestylt werden können
 const styles = StyleSheet.create({
-  chipIcon: {
-    marginRight: 6,
-  },
+	chipIcon: {
+		marginRight: 6,
+	},
 });
 
 export default ConversationStarter;

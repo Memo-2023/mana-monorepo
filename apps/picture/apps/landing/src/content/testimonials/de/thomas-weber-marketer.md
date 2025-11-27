@@ -1,13 +1,13 @@
 ---
-name: "Thomas Weber"
-role: "Marketing Manager"
-company: "StartUp GmbH"
-avatar: "/testimonials/thomas-weber.jpg"
+name: 'Thomas Weber'
+role: 'Marketing Manager'
+company: 'StartUp GmbH'
+avatar: '/testimonials/thomas-weber.jpg'
 rating: 5
 featured: true
-category: "marketer"
-useCase: "Marketing-Kampagnen und Social Media Ads"
-language: "de"
+category: 'marketer'
+useCase: 'Marketing-Kampagnen und Social Media Ads'
+language: 'de'
 date: 2024-10-01
 verified: true
 ---

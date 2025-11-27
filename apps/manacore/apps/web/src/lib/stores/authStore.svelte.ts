@@ -14,13 +14,13 @@ export const authStore = {
 		const supabase = getSupabaseClient();
 		const { error } = await supabase.auth.signInWithPassword({
 			email,
-			password
+			password,
 		});
 
 		if (error) {
 			return {
 				success: false,
-				error: error.message
+				error: error.message,
 			};
 		}
 
@@ -34,13 +34,13 @@ export const authStore = {
 		const supabase = getSupabaseClient();
 		const { data, error } = await supabase.auth.signUp({
 			email,
-			password
+			password,
 		});
 
 		if (error) {
 			return {
 				success: false,
-				error: error.message
+				error: error.message,
 			};
 		}
 
@@ -49,7 +49,7 @@ export const authStore = {
 
 		return {
 			success: true,
-			needsVerification
+			needsVerification,
 		};
 	},
 
@@ -59,13 +59,13 @@ export const authStore = {
 	async forgotPassword(email: string) {
 		const supabase = getSupabaseClient();
 		const { error } = await supabase.auth.resetPasswordForEmail(email, {
-			redirectTo: `${window.location.origin}/reset-password`
+			redirectTo: `${window.location.origin}/reset-password`,
 		});
 
 		if (error) {
 			return {
 				success: false,
-				error: error.message
+				error: error.message,
 			};
 		}
 
@@ -78,5 +78,5 @@ export const authStore = {
 	async signOut() {
 		const supabase = getSupabaseClient();
 		await supabase.auth.signOut();
-	}
+	},
 };

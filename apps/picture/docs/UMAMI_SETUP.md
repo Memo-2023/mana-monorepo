@@ -9,11 +9,13 @@ Umami Analytics has been integrated into both the landing page and web app to pr
 ## Architecture
 
 ### Landing Page (Astro)
+
 - **Location**: `apps/landing/src/layouts/Layout.astro`
 - **Framework**: Astro
 - **Integration**: Script tag in `<head>` section
 
 ### Web App (SvelteKit)
+
 - **Location**: `apps/web/src/routes/+layout.svelte`
 - **Framework**: SvelteKit
 - **Integration**: Script tag in `<svelte:head>` section
@@ -30,6 +32,7 @@ PUBLIC_UMAMI_WEBSITE_ID=your-website-id
 ### Setting up Environment Variables
 
 #### For Landing Page
+
 Create or update `apps/landing/.env`:
 
 ```bash
@@ -38,6 +41,7 @@ PUBLIC_UMAMI_WEBSITE_ID=your-landing-website-id
 ```
 
 #### For Web App
+
 Create or update `apps/web/.env`:
 
 ```bash
@@ -50,13 +54,16 @@ PUBLIC_UMAMI_WEBSITE_ID=your-webapp-website-id
 ## Features
 
 ### Privacy-First Tracking
+
 - ✅ **Do Not Track**: Respects browser DNT settings via `data-do-not-track="true"`
 - ✅ **No Cookies**: Umami doesn't use cookies by default
 - ✅ **GDPR Compliant**: No personal data collection
 - ✅ **Conditional Loading**: Only loads when environment variables are set
 
 ### Automatic Tracking
+
 The integration automatically tracks:
+
 - Page views
 - Referrers
 - Browser/device information (anonymized)
@@ -69,12 +76,14 @@ The integration automatically tracks:
 You have two options:
 
 #### Option A: Use Umami Cloud
+
 1. Sign up at [umami.is](https://umami.is)
 2. Create a new website for your landing page
 3. Create another website for your web app
 4. Copy the website IDs
 
 #### Option B: Self-Host Umami
+
 1. Follow the [Umami self-hosting guide](https://umami.is/docs/install)
 2. Deploy Umami to your preferred platform
 3. Create websites for both apps
@@ -83,6 +92,7 @@ You have two options:
 ### 2. Configure Environment Variables
 
 #### Development
+
 1. Copy `.env.example` to `.env` in both `apps/landing` and `apps/web`
 2. Add your Umami credentials:
    ```bash
@@ -91,19 +101,23 @@ You have two options:
    ```
 
 #### Production
+
 Add the environment variables to your deployment platform:
 
 **Vercel/Netlify:**
+
 - Go to Project Settings → Environment Variables
 - Add `PUBLIC_UMAMI_URL` and `PUBLIC_UMAMI_WEBSITE_ID`
 
 **Other platforms:**
+
 - Follow your platform's documentation for setting environment variables
 - Ensure variables are prefixed with `PUBLIC_` to be exposed to the client
 
 ### 3. Verify Integration
 
 1. Start your development servers:
+
    ```bash
    # Landing page
    cd apps/landing
@@ -140,67 +154,68 @@ To verify Umami is working:
 ## Troubleshooting
 
 ### Script Not Loading
+
 - ✅ Verify environment variables are set correctly
 - ✅ Ensure `PUBLIC_` prefix is used
 - ✅ Check that Umami instance is accessible
 - ✅ Restart dev server after adding env vars
 
 ### No Data in Dashboard
+
 - ✅ Verify website ID matches the one in Umami
 - ✅ Check browser console for errors
 - ✅ Ensure ad blocker is disabled
 - ✅ Verify network requests are successful
 
 ### Development vs Production
+
 - In development: Tracking works but may be blocked by ad blockers
 - In production: Use a custom domain for Umami to avoid ad blockers (e.g., `analytics.yourdomain.com`)
 
 ## Advanced Configuration
 
 ### Custom Events
+
 To track custom events, use the Umami JavaScript API:
 
 ```typescript
 // Track a custom event
 if (window.umami) {
-  window.umami.track('button_click', {
-    button_name: 'sign_up'
-  });
+	window.umami.track('button_click', {
+		button_name: 'sign_up',
+	});
 }
 ```
 
 ### Domain Filtering
+
 To only track specific domains, add `data-domains` attribute:
 
 ```html
 <script
-  defer
-  src="..."
-  data-website-id="..."
-  data-domains="yourdomain.com,www.yourdomain.com"
+	defer
+	src="..."
+	data-website-id="..."
+	data-domains="yourdomain.com,www.yourdomain.com"
 ></script>
 ```
 
 ### Disable Automatic Tracking
+
 To disable automatic page view tracking:
 
 ```html
-<script
-  defer
-  src="..."
-  data-website-id="..."
-  data-auto-track="false"
-></script>
+<script defer src="..." data-website-id="..." data-auto-track="false"></script>
 ```
 
 Then manually track page views:
 
 ```typescript
 if (window.umami) {
-  window.umami.track(props => ({
-    ...props,
-    url: '/custom-page'
-  }));
+	window.umami.track((props) => ({
+		...props,
+		url: '/custom-page',
+	}));
 }
 ```
 
@@ -222,5 +237,6 @@ if (window.umami) {
 ## Support
 
 For issues specific to:
+
 - **Umami**: [Umami Discord](https://discord.gg/4dz4zcXYrQ)
 - **Integration**: Create an issue in this repository

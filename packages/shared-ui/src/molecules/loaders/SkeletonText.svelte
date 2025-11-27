@@ -31,15 +31,12 @@
 		lineHeight = '16px',
 		gap = '8px',
 		lastLineWidth = '70%',
-		class: className = ''
+		class: className = '',
 	}: Props = $props();
 </script>
 
 <div class="skeleton-text {className}" style="display: flex; flex-direction: column; gap: {gap};">
 	{#each Array(lines) as _, i}
-		<SkeletonBox
-			width={i === lines - 1 ? lastLineWidth : '100%'}
-			height={lineHeight}
-		/>
+		<SkeletonBox width={i === lines - 1 ? lastLineWidth : '100%'} height={lineHeight} />
 	{/each}
 </div>

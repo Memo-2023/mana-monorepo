@@ -300,13 +300,13 @@ Same flow as character creation, but with:
 ```typescript
 // Defined in Storyteller
 type StorytellerOperations =
-  | 'character_creation'  // 20 credits
-  | 'story_creation';     // 100 credits
+  | 'character_creation' // 20 credits
+  | 'story_creation'; // 100 credits
 
 // Credit Costs
 const CREDIT_COSTS = {
-  character_creation: 20,  // 3 image variants
-  story_creation: 100,     // 10-page story with images + translation
+  character_creation: 20, // 3 image variants
+  story_creation: 100, // 10-page story with images + translation
 };
 ```
 
@@ -317,6 +317,7 @@ const CREDIT_COSTS = {
 ### Creating a Story with Credits
 
 1. **Frontend**: User fills story form
+
    ```typescript
    const createStory = async () => {
      const response = await fetchWithAuth('/story', {
@@ -341,6 +342,7 @@ const CREDIT_COSTS = {
    ```
 
 2. **Backend Controller**: Story creation endpoint
+
    ```typescript
    @Post()
    @UseGuards(AuthGuard)
@@ -466,6 +468,7 @@ async getCharacters(
 ```
 
 **Why Both Decorators?**
+
 - `@CurrentUser()`: Validated user data for business logic
 - `@UserToken()`: Raw JWT for database RLS enforcement
 
@@ -554,16 +557,19 @@ EXPO_PUBLIC_STORYTELLER_BACKEND_URL=http://localhost:3002
 ## Performance Considerations
 
 ### Token Caching
+
 - Frontend caches tokens in SecureStorage
 - Token validation is fast (local check + remote if needed)
 - Refresh only when needed (5-minute buffer)
 
 ### Credit Operations
+
 - Pre-flight validation is lightweight
 - Consumption happens after success
 - No blocking during operations
 
 ### Best Practices
+
 1. Always validate credits BEFORE expensive operations
 2. Consume credits AFTER successful operations
 3. Handle `InsufficientCreditsException` gracefully

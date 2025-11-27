@@ -24,13 +24,13 @@ pnpm add @manacore/shared-auth
 import { initializeWebAuth } from '@manacore/shared-auth';
 
 const { authService, tokenManager } = initializeWebAuth({
-  baseUrl: 'https://api.example.com',
+	baseUrl: 'https://api.example.com',
 });
 
 // Sign in
 const result = await authService.signIn('user@example.com', 'password');
 if (result.success) {
-  console.log('Signed in!');
+	console.log('Signed in!');
 }
 
 // Get current user
@@ -45,32 +45,32 @@ await authService.signOut();
 
 ```typescript
 import {
-  createAuthService,
-  createTokenManager,
-  setStorageAdapter,
-  setDeviceAdapter,
-  setNetworkAdapter,
-  setupFetchInterceptor,
+	createAuthService,
+	createTokenManager,
+	setStorageAdapter,
+	setDeviceAdapter,
+	setNetworkAdapter,
+	setupFetchInterceptor,
 } from '@manacore/shared-auth';
 import * as SecureStore from 'expo-secure-store';
 
 // Create storage adapter for Expo
 const expoStorageAdapter = {
-  async getItem<T = string>(key: string): Promise<T | null> {
-    const value = await SecureStore.getItemAsync(key);
-    if (!value) return null;
-    try {
-      return JSON.parse(value) as T;
-    } catch {
-      return value as T;
-    }
-  },
-  async setItem(key: string, value: string): Promise<void> {
-    await SecureStore.setItemAsync(key, value);
-  },
-  async removeItem(key: string): Promise<void> {
-    await SecureStore.deleteItemAsync(key);
-  },
+	async getItem<T = string>(key: string): Promise<T | null> {
+		const value = await SecureStore.getItemAsync(key);
+		if (!value) return null;
+		try {
+			return JSON.parse(value) as T;
+		} catch {
+			return value as T;
+		}
+	},
+	async setItem(key: string, value: string): Promise<void> {
+		await SecureStore.setItemAsync(key, value);
+	},
+	async removeItem(key: string): Promise<void> {
+		await SecureStore.deleteItemAsync(key);
+	},
 };
 
 // Set up adapters
@@ -80,7 +80,7 @@ setNetworkAdapter(yourNetworkAdapter);
 
 // Create services
 const authService = createAuthService({
-  baseUrl: process.env.EXPO_PUBLIC_API_URL,
+	baseUrl: process.env.EXPO_PUBLIC_API_URL,
 });
 const tokenManager = createTokenManager(authService);
 
@@ -96,17 +96,17 @@ Creates an authentication service instance.
 
 ```typescript
 const authService = createAuthService({
-  baseUrl: 'https://api.example.com',
-  storageKeys: {
-    APP_TOKEN: '@auth/appToken',
-    REFRESH_TOKEN: '@auth/refreshToken',
-    USER_EMAIL: '@auth/userEmail',
-  },
-  endpoints: {
-    signIn: '/auth/signin',
-    signUp: '/auth/signup',
-    // ... other endpoints
-  },
+	baseUrl: 'https://api.example.com',
+	storageKeys: {
+		APP_TOKEN: '@auth/appToken',
+		REFRESH_TOKEN: '@auth/refreshToken',
+		USER_EMAIL: '@auth/userEmail',
+	},
+	endpoints: {
+		signIn: '/auth/signin',
+		signUp: '/auth/signup',
+		// ... other endpoints
+	},
 });
 ```
 
@@ -116,15 +116,15 @@ Creates a token manager for handling token refresh and state.
 
 ```typescript
 const tokenManager = createTokenManager(authService, {
-  maxQueueSize: 50,
-  queueTimeoutMs: 30000,
-  maxRefreshAttempts: 3,
-  refreshCooldownMs: 5000,
+	maxQueueSize: 50,
+	queueTimeoutMs: 30000,
+	maxRefreshAttempts: 3,
+	refreshCooldownMs: 5000,
 });
 
 // Subscribe to state changes
 const unsubscribe = tokenManager.subscribe((state, token) => {
-  console.log('Token state:', state);
+	console.log('Token state:', state);
 });
 
 // Get valid token (refreshes if needed)
@@ -135,11 +135,11 @@ const token = await tokenManager.getValidToken();
 
 ```typescript
 import {
-  decodeToken,
-  isTokenValidLocally,
-  getUserFromToken,
-  isB2BUser,
-  getB2BInfo,
+	decodeToken,
+	isTokenValidLocally,
+	getUserFromToken,
+	isB2BUser,
+	getB2BInfo,
 } from '@manacore/shared-auth';
 
 const payload = decodeToken(token);
@@ -157,11 +157,7 @@ The package uses adapters for platform-specific functionality:
 - **NetworkAdapter**: For checking network connectivity
 
 ```typescript
-import {
-  setStorageAdapter,
-  setDeviceAdapter,
-  setNetworkAdapter,
-} from '@manacore/shared-auth';
+import { setStorageAdapter, setDeviceAdapter, setNetworkAdapter } from '@manacore/shared-auth';
 
 setStorageAdapter(myStorageAdapter);
 setDeviceAdapter(myDeviceAdapter);

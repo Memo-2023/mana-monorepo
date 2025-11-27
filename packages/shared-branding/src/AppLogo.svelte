@@ -13,12 +13,7 @@
 		class?: string;
 	}
 
-	let {
-		app,
-		size = 32,
-		color,
-		class: className = ''
-	}: Props = $props();
+	let { app, size = 32, color, class: className = '' }: Props = $props();
 
 	const branding = $derived(APP_BRANDING[app]);
 	const fillColor = $derived(color ?? branding.primaryColor);
@@ -42,11 +37,6 @@
 			stroke-linejoin="round"
 		/>
 	{:else}
-		<path
-			d={branding.logoPath}
-			fill={fillColor}
-			fill-rule="evenodd"
-			clip-rule="evenodd"
-		/>
+		<path d={branding.logoPath} fill={fillColor} fill-rule="evenodd" clip-rule="evenodd" />
 	{/if}
 </svg>

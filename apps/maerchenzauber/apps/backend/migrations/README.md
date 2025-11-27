@@ -1,9 +1,11 @@
 # Migration: Add is_favorite to stories
 
 ## Problem
+
 Die `is_favorite` Spalte fehlt in der `stories` Tabelle in Supabase.
 
 ## Lösung
+
 Führe folgendes SQL in **Supabase Dashboard > SQL Editor** aus:
 
 ```sql

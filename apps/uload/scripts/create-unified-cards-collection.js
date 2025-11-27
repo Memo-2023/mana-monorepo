@@ -34,8 +34,8 @@ async function createUnifiedCardsCollection() {
 						cascadeDelete: true,
 						minSelect: null,
 						maxSelect: 1,
-						displayFields: ['email', 'username']
-					}
+						displayFields: ['email', 'username'],
+					},
 				},
 
 				// Card type and origin
@@ -45,8 +45,8 @@ async function createUnifiedCardsCollection() {
 					required: true,
 					options: {
 						values: ['user', 'template', 'system'],
-						maxSelect: 1
-					}
+						maxSelect: 1,
+					},
 				},
 				{
 					name: 'source',
@@ -54,8 +54,8 @@ async function createUnifiedCardsCollection() {
 					required: false,
 					options: {
 						values: ['created', 'duplicated', 'imported', 'migrated'],
-						maxSelect: 1
-					}
+						maxSelect: 1,
+					},
 				},
 				{
 					name: 'template_id',
@@ -66,8 +66,8 @@ async function createUnifiedCardsCollection() {
 						cascadeDelete: false,
 						minSelect: null,
 						maxSelect: 1,
-						displayFields: ['metadata']
-					}
+						displayFields: ['metadata'],
+					},
 				},
 
 				// Card configuration (unified structure)
@@ -76,24 +76,24 @@ async function createUnifiedCardsCollection() {
 					type: 'json',
 					required: true,
 					options: {
-						maxSize: 1000000 // 1MB max
-					}
+						maxSize: 1000000, // 1MB max
+					},
 				},
 				{
 					name: 'metadata',
 					type: 'json',
 					required: false,
 					options: {
-						maxSize: 100000 // 100KB max
-					}
+						maxSize: 100000, // 100KB max
+					},
 				},
 				{
 					name: 'constraints',
 					type: 'json',
 					required: false,
 					options: {
-						maxSize: 10000 // 10KB max
-					}
+						maxSize: 10000, // 10KB max
+					},
 				},
 
 				// Organization
@@ -104,8 +104,8 @@ async function createUnifiedCardsCollection() {
 					options: {
 						min: 0,
 						max: 100,
-						pattern: ''
-					}
+						pattern: '',
+					},
 				},
 				{
 					name: 'position',
@@ -114,8 +114,8 @@ async function createUnifiedCardsCollection() {
 					options: {
 						min: 0,
 						max: 9999,
-						noDecimal: true
-					}
+						noDecimal: true,
+					},
 				},
 				{
 					name: 'folder_id',
@@ -126,8 +126,8 @@ async function createUnifiedCardsCollection() {
 						cascadeDelete: false,
 						minSelect: null,
 						maxSelect: 1,
-						displayFields: ['name']
-					}
+						displayFields: ['name'],
+					},
 				},
 
 				// Visibility and sharing
@@ -137,18 +137,18 @@ async function createUnifiedCardsCollection() {
 					required: true,
 					options: {
 						values: ['private', 'public', 'unlisted'],
-						maxSelect: 1
-					}
+						maxSelect: 1,
+					},
 				},
 				{
 					name: 'is_featured',
 					type: 'bool',
-					required: false
+					required: false,
 				},
 				{
 					name: 'allow_duplication',
 					type: 'bool',
-					required: false
+					required: false,
 				},
 
 				// Statistics
@@ -159,8 +159,8 @@ async function createUnifiedCardsCollection() {
 					options: {
 						min: 0,
 						max: 999999,
-						noDecimal: true
-					}
+						noDecimal: true,
+					},
 				},
 				{
 					name: 'likes_count',
@@ -169,8 +169,8 @@ async function createUnifiedCardsCollection() {
 					options: {
 						min: 0,
 						max: 999999,
-						noDecimal: true
-					}
+						noDecimal: true,
+					},
 				},
 
 				// Search and categorization
@@ -179,8 +179,8 @@ async function createUnifiedCardsCollection() {
 					type: 'json',
 					required: false,
 					options: {
-						maxSize: 10000
-					}
+						maxSize: 10000,
+					},
 				},
 				{
 					name: 'category',
@@ -188,8 +188,8 @@ async function createUnifiedCardsCollection() {
 					required: false,
 					options: {
 						values: ['personal', 'creative', 'minimal', 'social', 'portfolio', 'other'],
-						maxSelect: 1
-					}
+						maxSelect: 1,
+					},
 				},
 
 				// Variant for styling
@@ -199,9 +199,9 @@ async function createUnifiedCardsCollection() {
 					required: false,
 					options: {
 						values: ['default', 'compact', 'hero', 'minimal', 'glass', 'gradient'],
-						maxSelect: 1
-					}
-				}
+						maxSelect: 1,
+					},
+				},
 			],
 
 			// Indexes for performance
@@ -211,7 +211,7 @@ async function createUnifiedCardsCollection() {
 				'CREATE INDEX idx_cards_page ON cards (page)',
 				'CREATE INDEX idx_cards_visibility ON cards (visibility)',
 				'CREATE INDEX idx_cards_template_id ON cards (template_id)',
-				'CREATE INDEX idx_cards_position ON cards (position)'
+				'CREATE INDEX idx_cards_position ON cards (position)',
 			],
 
 			// API Rules
@@ -223,7 +223,7 @@ async function createUnifiedCardsCollection() {
 				'@request.auth.id = user_id || (@request.auth.id != "" && type = "system" && @request.auth.admin = true)',
 			deleteRule: '@request.auth.id = user_id && type != "system"',
 
-			options: {}
+			options: {},
 		};
 
 		// Create the collection
@@ -268,17 +268,17 @@ async function createDefaultTemplates(pb) {
 						type: 'header',
 						props: {
 							title: 'John Doe',
-							subtitle: 'Software Developer'
+							subtitle: 'Software Developer',
 						},
-						order: 0
+						order: 0,
 					},
 					{
 						id: 'content-1',
 						type: 'content',
 						props: {
-							text: 'Passionate about creating amazing digital experiences.'
+							text: 'Passionate about creating amazing digital experiences.',
 						},
-						order: 1
+						order: 1,
 					},
 					{
 						id: 'links-1',
@@ -286,25 +286,25 @@ async function createDefaultTemplates(pb) {
 						props: {
 							links: [
 								{ label: 'GitHub', href: 'https://github.com', icon: '🔗' },
-								{ label: 'LinkedIn', href: 'https://linkedin.com', icon: '💼' }
+								{ label: 'LinkedIn', href: 'https://linkedin.com', icon: '💼' },
 							],
-							style: 'button'
+							style: 'button',
 						},
-						order: 2
-					}
-				]
+						order: 2,
+					},
+				],
 			},
 			metadata: {
 				name: 'Simple Profile',
 				description: 'A clean and simple profile card',
 				version: '1.0.0',
-				tags: ['profile', 'minimal', 'clean']
+				tags: ['profile', 'minimal', 'clean'],
 			},
 			constraints: {
-				aspectRatio: '16/9'
+				aspectRatio: '16/9',
 			},
 			usage_count: 0,
-			likes_count: 0
+			likes_count: 0,
 		},
 		{
 			type: 'template',
@@ -352,27 +352,27 @@ async function createDefaultTemplates(pb) {
 					{ name: 'name', type: 'text', label: 'Your Name' },
 					{ name: 'tagline', type: 'text', label: 'Tagline' },
 					{ name: 'email', type: 'text', label: 'Email' },
-					{ name: 'phone', type: 'text', label: 'Phone' }
+					{ name: 'phone', type: 'text', label: 'Phone' },
 				],
 				values: {
 					name: 'Your Name',
 					tagline: 'Your tagline here',
 					email: 'contact@example.com',
-					phone: '+1 234 567 890'
-				}
+					phone: '+1 234 567 890',
+				},
 			},
 			metadata: {
 				name: 'Professional Card',
 				description: 'Professional contact card template',
 				version: '1.0.0',
-				tags: ['professional', 'contact']
+				tags: ['professional', 'contact'],
 			},
 			constraints: {
-				aspectRatio: '16/9'
+				aspectRatio: '16/9',
 			},
 			usage_count: 0,
-			likes_count: 0
-		}
+			likes_count: 0,
+		},
 	];
 
 	for (const template of templates) {

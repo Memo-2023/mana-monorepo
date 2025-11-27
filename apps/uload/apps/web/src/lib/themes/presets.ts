@@ -32,7 +32,7 @@ export const themes: Record<string, ThemePreset> = {
 		description: 'Ruhiges, minimalistisches Design',
 		font: {
 			family: 'Inter, system-ui, -apple-system, sans-serif',
-			import: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
+			import: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
 		},
 		colors: {
 			light: {
@@ -45,7 +45,7 @@ export const themes: Record<string, ThemePreset> = {
 				textMuted: '#737373',
 				border: '#d4d4d4',
 				accent: '#525252',
-				accentHover: '#404040'
+				accentHover: '#404040',
 			},
 			dark: {
 				primary: '#b8b8b8',
@@ -57,9 +57,9 @@ export const themes: Record<string, ThemePreset> = {
 				textMuted: '#a3a3a3',
 				border: '#404040',
 				accent: '#d4d4d4',
-				accentHover: '#e5e5e5'
-			}
-		}
+				accentHover: '#e5e5e5',
+			},
+		},
 	},
 	ocean: {
 		id: 'ocean',
@@ -67,7 +67,7 @@ export const themes: Record<string, ThemePreset> = {
 		description: 'Beruhigende Blautöne',
 		font: {
 			family: 'Poppins, system-ui, -apple-system, sans-serif',
-			import: 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap'
+			import: 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap',
 		},
 		colors: {
 			light: {
@@ -80,7 +80,7 @@ export const themes: Record<string, ThemePreset> = {
 				textMuted: '#475569',
 				border: '#7dd3fc',
 				accent: '#06b6d4',
-				accentHover: '#0891b2'
+				accentHover: '#0891b2',
 			},
 			dark: {
 				primary: '#38bdf8',
@@ -92,9 +92,9 @@ export const themes: Record<string, ThemePreset> = {
 				textMuted: '#94a3b8',
 				border: '#1e3a8a',
 				accent: '#22d3ee',
-				accentHover: '#67e8f9'
-			}
-		}
+				accentHover: '#67e8f9',
+			},
+		},
 	},
 	forest: {
 		id: 'forest',
@@ -102,7 +102,7 @@ export const themes: Record<string, ThemePreset> = {
 		description: 'Natürliche Grüntöne',
 		font: {
 			family: 'Lora, Georgia, serif',
-			import: 'https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap'
+			import: 'https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap',
 		},
 		colors: {
 			light: {
@@ -115,7 +115,7 @@ export const themes: Record<string, ThemePreset> = {
 				textMuted: '#4b5563',
 				border: '#86efac',
 				accent: '#84cc16',
-				accentHover: '#65a30d'
+				accentHover: '#65a30d',
 			},
 			dark: {
 				primary: '#4ade80',
@@ -127,9 +127,9 @@ export const themes: Record<string, ThemePreset> = {
 				textMuted: '#86b896',
 				border: '#15803d',
 				accent: '#a3e635',
-				accentHover: '#bef264'
-			}
-		}
+				accentHover: '#bef264',
+			},
+		},
 	},
 	sunset: {
 		id: 'sunset',
@@ -137,7 +137,7 @@ export const themes: Record<string, ThemePreset> = {
 		description: 'Warme Orange- und Rottöne',
 		font: {
 			family: 'Raleway, system-ui, -apple-system, sans-serif',
-			import: 'https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap'
+			import: 'https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap',
 		},
 		colors: {
 			light: {
@@ -150,7 +150,7 @@ export const themes: Record<string, ThemePreset> = {
 				textMuted: '#57534e',
 				border: '#fb923c',
 				accent: '#f97316',
-				accentHover: '#fb923c'
+				accentHover: '#fb923c',
 			},
 			dark: {
 				primary: '#fb923c',
@@ -162,9 +162,9 @@ export const themes: Record<string, ThemePreset> = {
 				textMuted: '#94a3b8',
 				border: '#c2410c',
 				accent: '#fbbf24',
-				accentHover: '#fcd34d'
-			}
-		}
+				accentHover: '#fcd34d',
+			},
+		},
 	},
 	lavender: {
 		id: 'lavender',
@@ -173,7 +173,7 @@ export const themes: Record<string, ThemePreset> = {
 		font: {
 			family: 'Playfair Display, Georgia, serif',
 			import:
-				'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap'
+				'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap',
 		},
 		colors: {
 			light: {
@@ -186,7 +186,7 @@ export const themes: Record<string, ThemePreset> = {
 				textMuted: '#525252',
 				border: '#d8b4fe',
 				accent: '#a855f7',
-				accentHover: '#c084fc'
+				accentHover: '#c084fc',
 			},
 			dark: {
 				primary: '#c084fc',
@@ -198,10 +198,10 @@ export const themes: Record<string, ThemePreset> = {
 				textMuted: '#94a3b8',
 				border: '#7e22ce',
 				accent: '#d946ef',
-				accentHover: '#e879f9'
-			}
-		}
-	}
+				accentHover: '#e879f9',
+			},
+		},
+	},
 };
 
 export const defaultTheme = 'minimal';

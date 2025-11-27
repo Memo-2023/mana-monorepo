@@ -7,6 +7,7 @@ This document outlines all the analytics events being tracked in the Storyteller
 ### Authentication Events
 
 #### Login/Registration
+
 - `auth_attempt`
   - Properties:
     - `method`: "email"
@@ -27,6 +28,7 @@ This document outlines all the analytics events being tracked in the Storyteller
     - `email_domain`: string
 
 #### Password Reset
+
 - `password_reset_requested`
   - Properties:
     - `email_provided`: boolean
@@ -36,6 +38,7 @@ This document outlines all the analytics events being tracked in the Storyteller
     - `email_domain`: string
 
 #### Logout
+
 - `user_logout_attempt`
 - `user_logout_success`
 - `user_logout_error`
@@ -59,6 +62,7 @@ This document outlines all the analytics events being tracked in the Storyteller
 ### Story Reading Events
 
 #### Core Story Events
+
 - `story_started`
   - Properties:
     - `story_id`: string
@@ -89,9 +93,11 @@ This document outlines all the analytics events being tracked in the Storyteller
 ### Character Creation Events
 
 #### Page Events
+
 - `character_creation_page_viewed`
 
 #### Core Character Events
+
 - `character_creation_started`
   - Properties:
     - `has_image`: boolean
@@ -104,6 +110,7 @@ This document outlines all the analytics events being tracked in the Storyteller
     - `character_id`: string
 
 #### Image Upload Flow
+
 - `character_image_upload_started`
   - Triggered when user initiates image upload process
 
@@ -114,10 +121,12 @@ This document outlines all the analytics events being tracked in the Storyteller
   - Triggered when user successfully selects an image
 
 #### Manual Creation
+
 - `character_creation_manual_started`
   - Triggered when user chooses to create character without image
 
 #### Performance Events
+
 - `character_analysis_performance`
   - Properties:
     - `duration_seconds`: number
@@ -135,9 +144,11 @@ This document outlines all the analytics events being tracked in the Storyteller
 ### Story Creation Events
 
 #### Page Events
+
 - `story_creation_page_viewed`
 
 #### Core Story Events
+
 - `story_creation_started`
   - Properties:
     - `character_id`: string
@@ -151,12 +162,14 @@ This document outlines all the analytics events being tracked in the Storyteller
     - `story_length`: number
 
 #### Character Selection
+
 - `character_selected_for_story`
   - Properties:
     - `character_id`: string
     - `character_name`: string
 
 #### Error Events
+
 - `story_creation_error`
   - Properties:
     - `error`: string
@@ -235,21 +248,21 @@ This document outlines all the analytics events being tracked in the Storyteller
    - Image analysis performance metrics
    - Error rate by step
 
-4. Story Creation Dashboard
+5. Story Creation Dashboard
    - Success rate funnel
    - Story generation performance trends
    - Average story length trends
    - Most used characters
    - Error rate and distribution
 
-5. Performance Monitoring Dashboard
+6. Performance Monitoring Dashboard
    - API response times
    - Story generation duration
    - Image analysis duration
    - Error rates by endpoint
    - Client-side performance metrics
 
-6. User Engagement Dashboard
+7. User Engagement Dashboard
    - Active users (daily/weekly/monthly)
    - Session frequency and duration
    - Feature usage heatmap
@@ -301,9 +314,9 @@ This document outlines all the analytics events being tracked in the Storyteller
   - Properties:
     - `feature`: string (e.g., "debug_borders")
     - `enabled`: boolean
-   - Stories per character
-   - Session duration
-   - Return rate
+  - Stories per character
+  - Session duration
+  - Return rate
 
 ## Implementation Details
 
@@ -319,13 +332,13 @@ The analytics are implemented using the `usePostHog` custom hook located in `src
 import { usePostHog } from '../src/hooks/usePostHog';
 
 function YourComponent() {
-  const posthog = usePostHog();
+	const posthog = usePostHog();
 
-  const handleAction = () => {
-    posthog?.capture('event_name', {
-      property1: 'value1',
-      property2: 'value2'
-    });
-  };
+	const handleAction = () => {
+		posthog?.capture('event_name', {
+			property1: 'value1',
+			property2: 'value2',
+		});
+	};
 }
 ```

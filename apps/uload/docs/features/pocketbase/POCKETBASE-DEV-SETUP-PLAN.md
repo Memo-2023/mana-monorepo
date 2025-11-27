@@ -1,11 +1,13 @@
 # PocketBase Development Setup - Implementierungsplan
 
 ## 🎯 Ziel
+
 Vollständige Trennung von Development und Production Datenbanken, ähnlich wie bei Redis.
 
 ## 📋 Aktuelle Situation
 
 ### Probleme:
+
 - ❌ Beide Umgebungen nutzen Production DB (`https://pb.ulo.ad`)
 - ❌ Gefahr von Testdaten in Production
 - ❌ Keine lokale Entwicklungsumgebung
@@ -13,6 +15,7 @@ Vollständige Trennung von Development und Production Datenbanken, ähnlich wie 
 - ❌ Inkonsistente Environment-Variable-Nutzung
 
 ### Vorhandene Ressourcen:
+
 - ✅ PocketBase Binary bereits in `backend/` vorhanden
 - ✅ `npm run backend` Script existiert
 - ✅ Lokale DB-Dateien in `backend/pb_data/`
@@ -23,12 +26,14 @@ Vollständige Trennung von Development und Production Datenbanken, ähnlich wie 
 ### Phase 1: Lokale PocketBase einrichten (15 Min)
 
 1. **PocketBase starten**
+
    ```bash
    cd backend
    ./pocketbase serve
    ```
+
    - Läuft auf http://localhost:8090
-   - Admin UI: http://localhost:8090/_/
+   - Admin UI: http://localhost:8090/\_/
 
 2. **Admin Account erstellen**
    - Beim ersten Start wird Admin-Account angelegt
@@ -43,11 +48,12 @@ Vollständige Trennung von Development und Production Datenbanken, ähnlich wie 
 ### Phase 2: Environment Variables korrigieren (10 Min)
 
 1. **.env.development anpassen**
+
    ```env
    # PocketBase Configuration (Local Development)
    PUBLIC_POCKETBASE_URL=http://localhost:8090
    POCKETBASE_URL=http://localhost:8090
-   
+
    # PocketBase Admin (for local development)
    POCKETBASE_ADMIN_EMAIL=admin@localhost
    POCKETBASE_ADMIN_PASSWORD=localdevpassword123
@@ -63,12 +69,13 @@ Vollständige Trennung von Development und Production Datenbanken, ähnlich wie 
 ### Phase 3: Code-Anpassungen (20 Min)
 
 1. **src/lib/pocketbase.ts**
+
    ```typescript
    import { dev } from '$app/environment';
-   
+
    // Automatic environment detection
-   const POCKETBASE_URL = import.meta.env.PUBLIC_POCKETBASE_URL || 
-                         (dev ? 'http://localhost:8090' : 'https://pb.ulo.ad');
+   const POCKETBASE_URL =
+   	import.meta.env.PUBLIC_POCKETBASE_URL || (dev ? 'http://localhost:8090' : 'https://pb.ulo.ad');
    ```
 
 2. **Hardcoded URLs entfernen**
@@ -82,6 +89,7 @@ Vollständige Trennung von Development und Production Datenbanken, ähnlich wie 
 ### Phase 4: Daten-Migration (30 Min)
 
 1. **Test-Daten erstellen**
+
    ```bash
    # Script für Sample-Daten
    npm run seed:dev
@@ -102,15 +110,16 @@ Vollständige Trennung von Development und Production Datenbanken, ähnlich wie 
 ### Phase 5: Development Workflow (10 Min)
 
 1. **Start-Scripts optimieren**
+
    ```json
    {
-     "scripts": {
-       "dev": "npm run dev:frontend",
-       "dev:frontend": "vite dev",
-       "dev:backend": "cd backend && ./pocketbase serve",
-       "dev:all": "concurrently \"npm:dev:backend\" \"npm:dev:frontend\"",
-       "dev:setup": "npm run dev:backend:setup && npm run dev:seed"
-     }
+   	"scripts": {
+   		"dev": "npm run dev:frontend",
+   		"dev:frontend": "vite dev",
+   		"dev:backend": "cd backend && ./pocketbase serve",
+   		"dev:all": "concurrently \"npm:dev:backend\" \"npm:dev:frontend\"",
+   		"dev:setup": "npm run dev:backend:setup && npm run dev:seed"
+   	}
    }
    ```
 
@@ -121,7 +130,7 @@ Vollständige Trennung von Development und Production Datenbanken, ähnlich wie 
      pocketbase:
        image: ghcr.io/pocketbase/pocketbase:latest
        ports:
-         - "8090:8090"
+         - '8090:8090'
        volumes:
          - ./backend/pb_data:/pb_data
    ```
@@ -150,7 +159,7 @@ Vollständige Trennung von Development und Production Datenbanken, ähnlich wie 
 # 1. Backend starten
 npm run dev:backend
 
-# 2. In neuem Terminal: Frontend starten  
+# 2. In neuem Terminal: Frontend starten
 npm run dev:frontend
 
 # Oder alles zusammen:
@@ -160,29 +169,32 @@ npm run dev:all
 ## ⚠️ Wichtige Überlegungen
 
 ### Daten-Synchronisation
+
 - **NICHT** Production-Daten lokal spiegeln
 - Nur Schema/Structure synchronisieren
 - Test-Daten separat verwalten
 
 ### Secrets Management
+
 - Lokale Admin-Credentials nur für Dev
 - Keine Production-Secrets in .env.development
 - Stripe Test-Keys für lokale Entwicklung
 
 ### Backup Strategy
+
 - Lokale DB regelmäßig committen? (ohne sensible Daten)
 - Schema-Änderungen als Migrations tracken
 - Production Backups separat
 
 ## 📊 Vergleich: Vorher vs Nachher
 
-| Aspekt | Vorher | Nachher |
-|--------|---------|---------|
-| Dev Database | Production (pb.ulo.ad) | Lokal (localhost:8090) |
-| Test-Daten | In Production! | Isoliert lokal |
-| Performance | Netzwerk-Latenz | Instant (lokal) |
-| Sicherheit | Risiko für Prod-Daten | Vollständig getrennt |
-| Offline-Arbeit | Nicht möglich | Voll funktionsfähig |
+| Aspekt         | Vorher                 | Nachher                |
+| -------------- | ---------------------- | ---------------------- |
+| Dev Database   | Production (pb.ulo.ad) | Lokal (localhost:8090) |
+| Test-Daten     | In Production!         | Isoliert lokal         |
+| Performance    | Netzwerk-Latenz        | Instant (lokal)        |
+| Sicherheit     | Risiko für Prod-Daten  | Vollständig getrennt   |
+| Offline-Arbeit | Nicht möglich          | Voll funktionsfähig    |
 
 ## 🔄 Migration Checkliste
 

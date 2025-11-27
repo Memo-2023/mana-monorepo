@@ -28,27 +28,33 @@
 
 	onMount(() => {
 		mounted = true;
-		
+
 		// Initialize both stores during migration
 		if (data.user) {
 			// Old accounts store for backwards compatibility
 			accountsStore.init(data.user, data.sharedAccounts || [], data.viewingAs);
 			// New workspaces store
-			workspacesStore.init(data.user, data.personalWorkspace, data.teamWorkspaces || [], data.currentWorkspaceId);
-			
+			workspacesStore.init(
+				data.user,
+				data.personalWorkspace,
+				data.teamWorkspaces || [],
+				data.currentWorkspaceId
+			);
+
 			// Initialize active workspace from URL or localStorage
 			const urlWorkspaceId = $page.url.searchParams.get('workspace');
 			if (urlWorkspaceId) {
 				activeWorkspace.initFromUrl(urlWorkspaceId);
 				// Try to find workspace data
-				const workspace = data.teamWorkspaces?.find(w => w.id === urlWorkspaceId) || 
-				                 (data.personalWorkspace?.id === urlWorkspaceId ? data.personalWorkspace : null);
+				const workspace =
+					data.teamWorkspaces?.find((w) => w.id === urlWorkspaceId) ||
+					(data.personalWorkspace?.id === urlWorkspaceId ? data.personalWorkspace : null);
 				if (workspace) {
 					activeWorkspace.set(workspace);
 				}
 			}
 		}
-		
+
 		if (typeof window !== 'undefined') {
 			const stored = localStorage.getItem('sidebar-collapsed');
 			if (stored !== null) {
@@ -81,7 +87,7 @@
 <!-- Top Navigation Bar with Menu Button for mobile/tablet -->
 {#if data.user}
 	<nav
-		class="sticky top-0 z-30 border-b border-theme-border bg-theme-surface/80 shadow-sm backdrop-blur-xl lg:hidden"
+		class="bg-theme-surface/80 sticky top-0 z-30 border-b border-theme-border shadow-sm backdrop-blur-xl lg:hidden"
 	>
 		<div class="mx-auto max-w-7xl px-4 sm:px-6">
 			<div class="flex h-16 items-center justify-between">

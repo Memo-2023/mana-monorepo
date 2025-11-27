@@ -21,39 +21,32 @@ Mit seiner Trial-and-Error-Mentalität hat sich Nils ein breites technisches Spe
 ```javascript
 // Nils' Approach to Tech
 function solveProblem(challenge, availableTools) {
-  const myApproach = "trial_and_error";
-  const timeToLearn = "as_long_as_it_takes";
+	const myApproach = 'trial_and_error';
+	const timeToLearn = 'as_long_as_it_takes';
 
-  const bestTool = findOptimalSolution(challenge, availableTools);
+	const bestTool = findOptimalSolution(challenge, availableTools);
 
-  // Whether it's Rust, Go, Python, TypeScript, or that new
-  // framework everyone's talking about...
-  const result = experiment(bestTool)
-    .then(() => "got it working!")
-    .catch((error) => {
-      learnFromMistakes(error);
-      const remainingTools = availableTools.filter((tool) => tool !== bestTool);
-      return solveProblem(challenge, remainingTools);
-    });
+	// Whether it's Rust, Go, Python, TypeScript, or that new
+	// framework everyone's talking about...
+	const result = experiment(bestTool)
+		.then(() => 'got it working!')
+		.catch((error) => {
+			learnFromMistakes(error);
+			const remainingTools = availableTools.filter((tool) => tool !== bestTool);
+			return solveProblem(challenge, remainingTools);
+		});
 
-  return result; // 🚀
+	return result; // 🚀
 }
 
 // Current toolkit (but always expanding):
 const expertise = {
-  frontend: ["Angular", "React", "Vue", "plain", "whatever_works"],
-  backend: [
-    "Node.js",
-    "SpringBoot",
-    "GO",
-    "Express",
-    "FastAPI",
-    "if_needed_anything",
-  ],
-  ai: ["MCP Tools", "AI Agents", "LLM Integration"],
-  testing: ["Jest", "Cypress", "the_art_of_breaking_things"],
-  devops: ["Git", "Docker", "CI/CD", "Terraform", "making_it_work_everywhere"],
-  philosophy: ["trial_and_error", "fail_fast_learn_faster"],
+	frontend: ['Angular', 'React', 'Vue', 'plain', 'whatever_works'],
+	backend: ['Node.js', 'SpringBoot', 'GO', 'Express', 'FastAPI', 'if_needed_anything'],
+	ai: ['MCP Tools', 'AI Agents', 'LLM Integration'],
+	testing: ['Jest', 'Cypress', 'the_art_of_breaking_things'],
+	devops: ['Git', 'Docker', 'CI/CD', 'Terraform', 'making_it_work_everywhere'],
+	philosophy: ['trial_and_error', 'fail_fast_learn_faster'],
 };
 ```
 

@@ -3,8 +3,8 @@ import { LevelController } from './level.controller';
 import { LevelService } from './level.service';
 
 @Module({
-  controllers: [LevelController],
-  providers: [LevelService],
-  exports: [LevelService],
+	controllers: [LevelController],
+	providers: [LevelService],
+	exports: [LevelService],
 })
 export class LevelModule {}

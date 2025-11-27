@@ -1,27 +1,28 @@
 ---
-import { getEntry } from "astro:content";
-import Layout from "../../layouts/Layout.astro";
-import { useTranslations } from "../../i18n/utils";
+import { getEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { useTranslations } from '../../i18n/utils';
 
 export async function getStaticPaths() {
-  return ['de', 'en'].map(lang => ({
-    params: { lang },
-    props: { lang }
-  }));
+	return ['de', 'en'].map((lang) => ({
+		params: { lang },
+		props: { lang },
+	}));
 }
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-const presskitPage = await getEntry("pages", `${lang}/presskit`);
+const presskitPage = await getEntry('pages', `${lang}/presskit`);
 if (!presskitPage) throw new Error(`Presskit page content not found for language: ${lang}`);
 const { Content } = await presskitPage.render();
 ---
 
 <Layout title={presskitPage.data.title}>
-  <main class="bg-background-page">
-    <div class="max-w-4xl mx-auto px-4 py-12">
-      <article class="prose prose-lg max-w-none
+	<main class="bg-background-page">
+		<div class="max-w-4xl mx-auto px-4 py-12">
+			<article
+				class="prose prose-lg max-w-none
         prose-headings:!text-text-primary
         prose-h1:!text-3xl prose-h1:!font-bold prose-h1:!text-text-primary
         prose-h2:!text-2xl prose-h2:!font-semibold prose-h2:!text-text-primary
@@ -41,9 +42,10 @@ const { Content } = await presskitPage.render();
         prose-table:!text-text-secondary
         prose-th:!text-text-primary prose-th:!font-semibold
         prose-td:!text-text-secondary
-        prose-img:!rounded-lg prose-img:!border prose-img:!border-border">
-        <Content />
-      </article>
-    </div>
-  </main>
+        prose-img:!rounded-lg prose-img:!border prose-img:!border-border"
+			>
+				<Content />
+			</article>
+		</div>
+	</main>
 </Layout>

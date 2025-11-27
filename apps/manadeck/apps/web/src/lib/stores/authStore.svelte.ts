@@ -107,5 +107,5 @@ export const authStore = {
 	 */
 	async forgotPassword(email: string) {
 		return authService.forgotPassword(email);
-	}
+	},
 };

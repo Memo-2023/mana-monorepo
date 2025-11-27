@@ -50,7 +50,7 @@ export const RESERVED_USERNAMES = [
 	'reset',
 	'verify',
 	'confirm',
-	'analytics'
+	'analytics',
 ];
 
 export function validateUsername(username: string): { valid: boolean; error?: string } {
@@ -66,7 +66,7 @@ export function validateUsername(username: string): { valid: boolean; error?: st
 	if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
 		return {
 			valid: false,
-			error: 'Username can only contain letters, numbers, underscore and hyphen'
+			error: 'Username can only contain letters, numbers, underscore and hyphen',
 		};
 	}
 

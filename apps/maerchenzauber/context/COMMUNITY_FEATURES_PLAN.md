@@ -1,7 +1,9 @@
 # Community Features Implementation Plan
+
 ## Märchenzauber - Story & Character Sharing System
 
 ### Overview
+
 Erweiterung der Märchenzauber App um Community-Features: Publishing, Voting, Collections und Character-Sharing.
 
 ---
@@ -9,6 +11,7 @@ Erweiterung der Märchenzauber App um Community-Features: Publishing, Voting, Co
 ## 1. Database Schema Changes
 
 ### 1.1 Stories Table Extensions
+
 ```sql
 ALTER TABLE stories ADD COLUMN is_published BOOLEAN DEFAULT FALSE;
 ALTER TABLE stories ADD COLUMN published_at TIMESTAMPTZ;
@@ -18,13 +21,14 @@ ALTER TABLE stories ADD COLUMN featured_score DECIMAL DEFAULT 0;
 ```
 
 ### 1.2 Characters Table Extensions
+
 ```sql
 ALTER TABLE characters ADD COLUMN is_published BOOLEAN DEFAULT FALSE;
 ALTER TABLE characters ADD COLUMN published_at TIMESTAMPTZ;
 ALTER TABLE characters ADD COLUMN share_code VARCHAR(12) UNIQUE;
 ALTER TABLE characters ADD COLUMN total_vote_score INTEGER DEFAULT 0;
 ALTER TABLE characters ADD COLUMN stories_count INTEGER DEFAULT 0;
-ALTER TABLE characters ADD COLUMN sharing_preference VARCHAR(20) DEFAULT 'private' 
+ALTER TABLE characters ADD COLUMN sharing_preference VARCHAR(20) DEFAULT 'private'
   CHECK (sharing_preference IN ('private', 'link_only', 'public', 'commons'));
 ALTER TABLE characters ADD COLUMN original_creator_id TEXT;
 ALTER TABLE characters ADD COLUMN original_character_id UUID;
@@ -33,6 +37,7 @@ ALTER TABLE characters ADD COLUMN original_character_id UUID;
 ### 1.3 New Tables
 
 #### Story Collections
+
 ```sql
 CREATE TABLE story_collections (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -61,6 +66,7 @@ CREATE TABLE collection_stories (
 ```
 
 #### Character Collections
+
 ```sql
 CREATE TABLE character_collections (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -85,6 +91,7 @@ CREATE TABLE collection_characters (
 ```
 
 #### Voting System
+
 ```sql
 CREATE TABLE story_votes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -108,6 +115,7 @@ CREATE TABLE character_votes (
 ```
 
 #### Character Usage Tracking
+
 ```sql
 CREATE TABLE character_usage (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -124,6 +132,7 @@ CREATE TABLE character_usage (
 ## 2. Row Level Security (RLS) Policies
 
 ### 2.1 Published Content Visibility
+
 ```sql
 -- Published stories visible to all
 CREATE POLICY "published_stories_visible" ON stories
@@ -132,7 +141,7 @@ CREATE POLICY "published_stories_visible" ON stories
 -- Published characters visible to all
 CREATE POLICY "published_characters_visible" ON characters
     FOR SELECT USING (
-        is_published = true 
+        is_published = true
         OR sharing_preference IN ('public', 'commons')
         OR user_id = auth.uid()::text
     );
@@ -150,6 +159,7 @@ CREATE POLICY "users_can_see_votes" ON story_votes
 ## 3. Database Functions & Triggers
 
 ### 3.1 Story Vote Cascade to Character
+
 ```sql
 CREATE OR REPLACE FUNCTION cascade_story_vote_to_character()
 RETURNS TRIGGER AS $$
@@ -159,21 +169,21 @@ BEGIN
     SELECT s.character_id, NEW.user_id, NEW.vote_type, 'story', NEW.story_id
     FROM stories s
     WHERE s.id = NEW.story_id AND s.character_id IS NOT NULL
-    ON CONFLICT (character_id, user_id, COALESCE(story_id, '00000000-0000-0000-0000-000000000000'::uuid)) 
+    ON CONFLICT (character_id, user_id, COALESCE(story_id, '00000000-0000-0000-0000-000000000000'::uuid))
     DO NOTHING;
-    
+
     -- Update character vote score
     UPDATE characters c
     SET total_vote_score = (
         SELECT COUNT(*) FROM character_votes WHERE character_id = c.id
     )
     WHERE c.id = (SELECT character_id FROM stories WHERE id = NEW.story_id);
-    
+
     -- Update story vote count
     UPDATE stories
     SET vote_count = vote_count + 1
     WHERE id = NEW.story_id;
-    
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -185,6 +195,7 @@ EXECUTE FUNCTION cascade_story_vote_to_character();
 ```
 
 ### 3.2 Auto-generate Share Code
+
 ```sql
 CREATE OR REPLACE FUNCTION generate_share_code()
 RETURNS TEXT AS $$
@@ -202,6 +213,7 @@ $$ LANGUAGE plpgsql;
 ```
 
 ### 3.3 Update Story Count for Characters
+
 ```sql
 CREATE OR REPLACE FUNCTION update_character_story_count()
 RETURNS TRIGGER AS $$
@@ -227,6 +239,7 @@ EXECUTE FUNCTION update_character_story_count();
 ## 4. Automatic Collections Management
 
 ### 4.1 Weekly Story Collection
+
 ```sql
 -- Function to create weekly story collection
 CREATE OR REPLACE FUNCTION create_weekly_story_collection()
@@ -236,7 +249,7 @@ DECLARE
     week_number INTEGER;
 BEGIN
     week_number := EXTRACT(WEEK FROM CURRENT_DATE);
-    
+
     -- Create collection
     INSERT INTO story_collections (name, description, type, is_official)
     VALUES (
@@ -246,10 +259,10 @@ BEGIN
         true
     )
     RETURNING id INTO collection_id;
-    
+
     -- Add top voted story
     INSERT INTO collection_stories (collection_id, story_id, position)
-    SELECT 
+    SELECT
         collection_id,
         s.id,
         1
@@ -267,23 +280,27 @@ $$ LANGUAGE plpgsql;
 ## 5. API Endpoints (Backend)
 
 ### 5.1 Story Publishing
+
 - `POST /api/stories/:id/publish` - Publish a story
 - `GET /api/stories/public` - Get all public stories
 - `GET /api/stories/trending` - Get trending stories
 
 ### 5.2 Character Sharing
+
 - `POST /api/characters/:id/share` - Generate share code
 - `GET /api/characters/shared/:shareCode` - Get character by share code
 - `POST /api/characters/:id/publish` - Publish character
 - `POST /api/characters/:id/import` - Import shared character
 
 ### 5.3 Voting
+
 - `POST /api/stories/:id/vote` - Vote for story
 - `DELETE /api/stories/:id/vote` - Remove vote
 - `POST /api/characters/:id/vote` - Vote for character
 - `GET /api/stories/:id/votes` - Get vote count
 
 ### 5.4 Collections
+
 - `GET /api/collections/stories` - Get story collections
 - `GET /api/collections/characters` - Get character collections
 - `GET /api/collections/:id/content` - Get collection content
@@ -293,24 +310,28 @@ $$ LANGUAGE plpgsql;
 ## 6. Implementation Phases
 
 ### Phase 1: Foundation (Week 1-2)
+
 1. Database schema updates
 2. RLS policies
 3. Basic publishing for stories
 4. Simple voting system
 
 ### Phase 2: Character Sharing (Week 3-4)
+
 1. Character publishing
 2. Share code generation
 3. Character import functionality
 4. Usage tracking
 
 ### Phase 3: Collections (Week 5-6)
+
 1. Collection tables and management
 2. Automatic weekly collections
 3. Admin tools for curation
 4. Collection browsing UI
 
 ### Phase 4: Advanced Features (Week 7-8)
+
 1. Trending algorithms
 2. Recommendation system
 3. Creator profiles
@@ -321,18 +342,21 @@ $$ LANGUAGE plpgsql;
 ## 7. Mobile App UI Changes
 
 ### 7.1 New Screens
+
 - **Discover**: Browse public stories and characters
 - **Collections**: View curated collections
 - **Voting**: Heart/star buttons on stories
 - **Share Modal**: Share code display and import
 
 ### 7.2 Profile Additions
+
 - "My Published Stories" section
 - "My Published Characters" section
 - Vote statistics
 - Achievement badges
 
 ### 7.3 Navigation Updates
+
 - New "Community" tab in bottom navigation
 - Share buttons on story/character detail views
 - Import character option in character creation
@@ -342,16 +366,19 @@ $$ LANGUAGE plpgsql;
 ## 8. Admin Dashboard Requirements
 
 ### 8.1 Content Moderation
+
 - Review published content
 - Remove inappropriate content
 - Feature/unfeature stories
 
 ### 8.2 Collection Management
+
 - Create/edit collections
 - Add/remove stories from collections
 - Schedule seasonal collections
 
 ### 8.3 Analytics
+
 - Vote trends
 - Popular characters tracking
 - User engagement metrics
@@ -361,16 +388,19 @@ $$ LANGUAGE plpgsql;
 ## 9. Privacy & Safety Considerations
 
 ### 9.1 Content Guidelines
+
 - Age-appropriate content only
 - No personal information in stories
 - Copyright respect for characters
 
 ### 9.2 Moderation Tools
+
 - Report button for inappropriate content
 - Automatic content scanning
 - User blocking functionality
 
 ### 9.3 Data Protection
+
 - Anonymous voting
 - Optional creator attribution
 - GDPR compliance for shared content
@@ -380,12 +410,14 @@ $$ LANGUAGE plpgsql;
 ## 10. Success Metrics
 
 ### 10.1 Engagement KPIs
+
 - Daily active voters
 - Stories published per week
 - Character reuse rate
 - Collection browse rate
 
 ### 10.2 Quality Metrics
+
 - Average votes per story
 - Repeat character usage
 - Time spent in collections
@@ -396,18 +428,21 @@ $$ LANGUAGE plpgsql;
 ## 11. Future Enhancements
 
 ### 11.1 Monetization Options
+
 - Premium collections
 - Character marketplace
 - Story printing service
 - Creator tips/donations
 
 ### 11.2 Social Features
+
 - Follow creators
 - Comments on stories
 - Story remixes
 - Collaborative stories
 
 ### 11.3 Gamification
+
 - Creator levels
 - Writing challenges
 - Seasonal events

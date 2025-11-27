@@ -70,10 +70,10 @@ export default defineConfig({
 	plugins: [
 		paraglide({
 			project: './project.inlang',
-			outdir: './src/paraglide' // Wichtig: Konsistenter Pfad!
+			outdir: './src/paraglide', // Wichtig: Konsistenter Pfad!
 		}),
-		sveltekit()
-	]
+		sveltekit(),
+	],
 });
 ```
 
@@ -94,15 +94,15 @@ export const i18n = createI18n(runtime, {
 			de: '/ueber-uns',
 			fr: '/a-propos',
 			it: '/chi-siamo',
-			es: '/acerca-de'
+			es: '/acerca-de',
 		},
 		'/dashboard': {
 			de: '/dashboard',
 			fr: '/tableau-de-bord',
 			it: '/cruscotto',
-			es: '/panel'
-		}
-	}
+			es: '/panel',
+		},
+	},
 });
 ```
 
@@ -195,9 +195,9 @@ const config = {
 		adapter: adapter(),
 		alias: {
 			$paraglide: './src/paraglide',
-			'$paraglide/*': './src/paraglide/*'
-		}
-	}
+			'$paraglide/*': './src/paraglide/*',
+		},
+	},
 };
 
 export default config;
@@ -248,7 +248,7 @@ export default config;
 		{ code: 'de', name: 'Deutsch', flag: '🇩🇪' },
 		{ code: 'it', name: 'Italiano', flag: '🇮🇹' },
 		{ code: 'fr', name: 'Français', flag: '🇫🇷' },
-		{ code: 'es', name: 'Español', flag: '🇪🇸' }
+		{ code: 'es', name: 'Español', flag: '🇪🇸' },
 	];
 
 	let currentLanguage = $derived(

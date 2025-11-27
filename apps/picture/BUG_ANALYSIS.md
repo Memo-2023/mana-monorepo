@@ -8,6 +8,7 @@
 ## Problem
 
 The `process-jobs` Edge Function fails with error:
+
 ```
 {"success":false,"error":"Cannot read properties of undefined (reading 'substring')"}
 ```
@@ -15,14 +16,17 @@ The `process-jobs` Edge Function fails with error:
 ## Investigation Steps
 
 ### Step 1: Test without imports
+
 Created `process-jobs-test` with minimal code (no imports).
 
 **Result:** ✅ Works perfectly
+
 - Environment variables present
 - Supabase client initializes
 - `claim_next_job()` RPC works
 
 ### Step 2: Test WITH process-generation import
+
 Added `import { processGeneration } from '../process-generation/index.ts';`
 
 **Result:** ❌ Same error returns
@@ -34,11 +38,12 @@ Added `import { processGeneration } from '../process-generation/index.ts';`
 ```typescript
 // Line 522-565 of process-generation/index.ts
 Deno.serve(async (req: Request) => {
-  // Handler code...
+	// Handler code...
 });
 ```
 
 **Why this causes the error:**
+
 1. Edge Functions can only have ONE `Deno.serve()` call
 2. When `process-jobs` imports `process-generation/index.ts`, it executes the file
 3. This tries to call `Deno.serve()` a second time
@@ -52,6 +57,7 @@ Deno.serve(async (req: Request) => {
 Create a new file `process-generation/lib.ts` that contains ONLY the `processGeneration()` function and helper functions (NO Deno.serve).
 
 **Structure:**
+
 ```
 supabase/functions/
 ├── process-generation/
@@ -62,6 +68,7 @@ supabase/functions/
 ```
 
 **Benefits:**
+
 - Clean separation
 - Reusable code
 - Each function has its own Deno.serve
@@ -71,11 +78,13 @@ supabase/functions/
 Copy-paste the `processGeneration()` function directly into `process-jobs/index.ts`.
 
 **Benefits:**
+
 - Simple
 - No import issues
 - All code in one place
 
 **Drawbacks:**
+
 - Code duplication
 - Harder to maintain
 - Larger file
@@ -85,6 +94,7 @@ Copy-paste the `processGeneration()` function directly into `process-jobs/index.
 Remove the Deno.serve handler from `process-generation/index.ts` entirely if it's not needed as a standalone function.
 
 **Drawbacks:**
+
 - Can't call process-generation directly for testing
 - Loses standalone functionality
 
@@ -97,6 +107,7 @@ Remove the Deno.serve handler from `process-generation/index.ts` entirely if it'
 ### Step 1: Create `process-generation/lib.ts`
 
 Extract these from `index.ts`:
+
 - All interfaces (ModelConfig, GenerationParams, GenerationResult)
 - All helper functions (gcd, simplifyAspectRatio, convertImageToBase64, buildModelInput, determineOutputFormat)
 - Main function: `processGeneration()`
@@ -104,13 +115,13 @@ Extract these from `index.ts`:
 ### Step 2: Update `process-generation/index.ts`
 
 ```typescript
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { processGeneration } from './lib.ts';
 
 Deno.serve(async (req: Request) => {
-  // Handler code...
-  const result = await processGeneration(params, replicateApiToken);
-  // Return response...
+	// Handler code...
+	const result = await processGeneration(params, replicateApiToken);
+	// Return response...
 });
 ```
 
@@ -133,6 +144,7 @@ npx supabase functions deploy process-jobs --project-ref mjuvnnjxwfwlmxjsgkqu
 ## Testing Plan
 
 1. **Test process-generation standalone:**
+
    ```bash
    curl -X POST https://.../ /functions/v1/process-generation \
      -H 'Authorization: Bearer SERVICE_ROLE_KEY' \
@@ -140,12 +152,14 @@ npx supabase functions deploy process-jobs --project-ref mjuvnnjxwfwlmxjsgkqu
    ```
 
 2. **Test process-jobs:**
+
    ```bash
    curl -X POST https://.../functions/v1/process-jobs \
      -H 'Authorization: Bearer SERVICE_ROLE_KEY'
    ```
 
 3. **Test with real job:**
+
    ```sql
    SELECT enqueue_job(
      'generate-image',
@@ -182,12 +196,14 @@ npx supabase functions deploy process-jobs --project-ref mjuvnnjxwfwlmxjsgkqu
 ## Impact
 
 **Before Fix:**
+
 - ❌ process-jobs fails immediately
 - ❌ Cron job fails every minute
 - ❌ Jobs stay pending forever
 - ✅ Other functions work fine
 
 **After Fix:**
+
 - ✅ process-jobs works
 - ✅ Cron job processes queue
 - ✅ End-to-end flow complete

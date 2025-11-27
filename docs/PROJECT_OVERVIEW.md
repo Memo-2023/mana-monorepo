@@ -64,6 +64,7 @@ pnpm run nutriphi:dev
 Maerchenzauber ist eine magische Geschichten-App für Kinder, die mithilfe von KI personalisierte Geschichten mit benutzerdefinierten Charakteren erstellt.
 
 #### Features
+
 - KI-gestützte Geschichtenerstellung mit konsistenten Charakteren
 - Benutzerdefinierte Charaktergenerierung aus Beschreibungen oder Fotos
 - Mehrseitige illustrierte Geschichten (10 Seiten)
@@ -72,17 +73,19 @@ Maerchenzauber ist eine magische Geschichten-App für Kinder, die mithilfe von K
 - System-Charaktere (z.B. "Finia" der weise Fuchs)
 
 #### Tech-Stack
-| Komponente | Technologie |
-|------------|-------------|
-| Backend | NestJS (Port 3002) |
-| Mobile | React Native + Expo |
-| Web | SvelteKit |
-| Landing | Astro |
-| KI | Azure OpenAI (GPT-4), Google Gemini, Replicate (Flux) |
-| Datenbank | Supabase (PostgreSQL) |
-| Storage | Supabase Storage |
+
+| Komponente | Technologie                                           |
+| ---------- | ----------------------------------------------------- |
+| Backend    | NestJS (Port 3002)                                    |
+| Mobile     | React Native + Expo                                   |
+| Web        | SvelteKit                                             |
+| Landing    | Astro                                                 |
+| KI         | Azure OpenAI (GPT-4), Google Gemini, Replicate (Flux) |
+| Datenbank  | Supabase (PostgreSQL)                                 |
+| Storage    | Supabase Storage                                      |
 
 #### Projektstruktur
+
 ```
 maerchenzauber/
 ├── apps/
@@ -93,6 +96,7 @@ maerchenzauber/
 ```
 
 #### Entwicklung
+
 ```bash
 # Backend starten
 cd maerchenzauber/apps/backend && npm run dev
@@ -113,6 +117,7 @@ cd maerchenzauber/apps/web && npm run dev
 Manacore ist die zentrale Plattform für Organisations-Management, Team-Kollaboration und Credit-Transfers. Es dient als Authentifizierungs-Hub für alle anderen Anwendungen.
 
 #### Features
+
 - Einheitliche Authentifizierung mit Supabase
 - Organisations-Management mit rollenbasiertem Zugriff
 - Team-Kollaboration und Mitgliederverwaltung
@@ -122,21 +127,24 @@ Manacore ist die zentrale Plattform für Organisations-Management, Team-Kollabor
 - Echtzeit-Updates
 
 #### Unterstützte Apps
+
 - **Memoro** - Sprachaufnahmen und Memory-Management
 - **ManaDeck** - KI-gestützte Lernkarten
 - **Storyteller** - Kreatives Schreiben mit KI
 - **ManaCore** - Zentrale Account- und Organisationsverwaltung
 
 #### Tech-Stack
-| Komponente | Technologie |
-|------------|-------------|
-| Web | SvelteKit 2 + Svelte 5 (Runes) |
-| Mobile | Expo 52 + React Native 0.76 |
-| Styling | TailwindCSS / NativeWind |
-| Auth | Supabase Auth mit SSR |
-| Testing | Vitest + Playwright |
+
+| Komponente | Technologie                    |
+| ---------- | ------------------------------ |
+| Web        | SvelteKit 2 + Svelte 5 (Runes) |
+| Mobile     | Expo 52 + React Native 0.76    |
+| Styling    | TailwindCSS / NativeWind       |
+| Auth       | Supabase Auth mit SSR          |
+| Testing    | Vitest + Playwright            |
 
 #### Projektstruktur
+
 ```
 manacore/
 ├── apps/
@@ -154,6 +162,7 @@ manacore/
 Manadeck ist ein Deck-Management-System mit KI-gestützter Kartenerstellung und dem integrierten Mana Credit-System.
 
 #### Features
+
 - Deck-Erstellung und -Verwaltung
 - KI-gestützte Kartengenerierung
 - Credit-System Integration (10 Mana pro Deck, 2 Mana pro Karte)
@@ -161,23 +170,26 @@ Manadeck ist ein Deck-Management-System mit KI-gestützter Kartenerstellung und 
 - NestJS Backend mit AuthGuard
 
 #### Credit-Kosten
-| Operation | Kosten |
-|-----------|--------|
-| Deck erstellen | 10 Mana |
-| Karte erstellen | 2 Mana |
-| KI-Kartengenerierung | 5 Mana |
-| Deck exportieren | 3 Mana |
+
+| Operation            | Kosten  |
+| -------------------- | ------- |
+| Deck erstellen       | 10 Mana |
+| Karte erstellen      | 2 Mana  |
+| KI-Kartengenerierung | 5 Mana  |
+| Deck exportieren     | 3 Mana  |
 
 #### Tech-Stack
-| Komponente | Technologie |
-|------------|-------------|
-| Backend | NestJS (Port 8080) |
-| Mobile | React Native + Expo |
-| Web | SvelteKit |
-| Landing | Astro |
-| Datenbank | Supabase |
+
+| Komponente | Technologie         |
+| ---------- | ------------------- |
+| Backend    | NestJS (Port 8080)  |
+| Mobile     | React Native + Expo |
+| Web        | SvelteKit           |
+| Landing    | Astro               |
+| Datenbank  | Supabase            |
 
 #### Projektstruktur
+
 ```
 manadeck/
 ├── backend/          # NestJS API Server
@@ -196,6 +208,7 @@ manadeck/
 Memoro transformiert Audio-Aufnahmen in strukturierte, durchsuchbare Inhalte mithilfe von KI. Ideal für Meetings, Interviews, Vorlesungen oder persönliche Notizen.
 
 #### Features
+
 - Hochwertige Audio-Aufnahme (Hintergrundaufnahme mit Pause/Resume)
 - KI-gestützte Analyse (Blueprints und Prompts)
 - Kollaborative Spaces für Teams
@@ -205,17 +218,19 @@ Memoro transformiert Audio-Aufnahmen in strukturierte, durchsuchbare Inhalte mit
 - Enterprise-Security mit Row-Level Security
 
 #### Tech-Stack
-| Komponente | Technologie |
-|------------|-------------|
-| Mobile | React Native 0.81.4 + Expo SDK 54 |
-| Web | SvelteKit 2.x |
-| Audio | expo-audio, Azure Speech Services |
-| State | Zustand |
-| Payments | RevenueCat |
-| Analytics | PostHog, Sentry |
-| i18n | react-i18next (32 Sprachen) |
+
+| Komponente | Technologie                       |
+| ---------- | --------------------------------- |
+| Mobile     | React Native 0.81.4 + Expo SDK 54 |
+| Web        | SvelteKit 2.x                     |
+| Audio      | expo-audio, Azure Speech Services |
+| State      | Zustand                           |
+| Payments   | RevenueCat                        |
+| Analytics  | PostHog, Sentry                   |
+| i18n       | react-i18next (32 Sprachen)       |
 
 #### Projektstruktur
+
 ```
 memoro/
 ├── apps/
@@ -227,6 +242,7 @@ memoro/
 ```
 
 #### Feature-Module
+
 - auth, audioRecordingV2, memos, spaces, credits
 - subscription, i18n, theme, blueprints, prompts
 - und 23 weitere...
@@ -240,20 +256,23 @@ memoro/
 Picture ist eine Cross-Platform Bildbearbeitungs-Anwendung mit Canvas-basierter Bearbeitung.
 
 #### Features
+
 - Canvas-basierte Bildbearbeitung (Konva)
 - Cross-Platform (iOS, Android, Web)
 - Theme-System Integration
 - Subscription-Management
 
 #### Tech-Stack
-| Komponente | Technologie |
-|------------|-------------|
-| Mobile | React Native + Expo SDK 54 |
-| Web | SvelteKit + Svelte 5 |
-| Canvas | Konva |
-| Styling | TailwindCSS 4.0 |
+
+| Komponente | Technologie                |
+| ---------- | -------------------------- |
+| Mobile     | React Native + Expo SDK 54 |
+| Web        | SvelteKit + Svelte 5       |
+| Canvas     | Konva                      |
+| Styling    | TailwindCSS 4.0            |
 
 #### Projektstruktur
+
 ```
 picture/
 ├── apps/
@@ -273,6 +292,7 @@ uLoad ist eine URL-Shortening und Link-Management Plattform mit umfangreichen An
 **Live:** https://ulo.ad
 
 #### Features
+
 - URL-Verkürzung
 - Link-Analytics und Tracking
 - Stripe-Integration für Zahlungen
@@ -280,19 +300,21 @@ uLoad ist eine URL-Shortening und Link-Management Plattform mit umfangreichen An
 - Cloudflare R2 Storage
 
 #### Tech-Stack
-| Komponente | Technologie |
-|------------|-------------|
-| Framework | SvelteKit v2.22 + Svelte 5.0 |
-| Backend | PocketBase (embedded SQLite) |
-| Datenbank | PostgreSQL via Drizzle ORM |
-| Cache | Redis |
-| Styling | Tailwind CSS v4.0 |
-| Testing | Vitest + Playwright |
-| Payments | Stripe |
-| Email | Resend |
-| Storage | Cloudflare R2 |
+
+| Komponente | Technologie                  |
+| ---------- | ---------------------------- |
+| Framework  | SvelteKit v2.22 + Svelte 5.0 |
+| Backend    | PocketBase (embedded SQLite) |
+| Datenbank  | PostgreSQL via Drizzle ORM   |
+| Cache      | Redis                        |
+| Styling    | Tailwind CSS v4.0            |
+| Testing    | Vitest + Playwright          |
+| Payments   | Stripe                       |
+| Email      | Resend                       |
+| Storage    | Cloudflare R2                |
 
 #### Projektstruktur
+
 ```
 uload/
 ├── apps/
@@ -305,6 +327,7 @@ uload/
 ```
 
 #### Entwicklung
+
 ```bash
 cd uload/apps/web
 
@@ -328,20 +351,23 @@ pnpm run test         # Unit + E2E Tests
 Chat ist eine mobile Chat-Anwendung mit Supabase-Backend und Markdown-Unterstützung.
 
 #### Features
+
 - Echtzeit-Chat mit Supabase
 - Markdown-Rendering
 - Expo Router Navigation
 - NativeWind Styling
 
 #### Tech-Stack
-| Komponente | Technologie |
-|------------|-------------|
-| Mobile | Expo SDK 52 + React Native 0.76.7 |
-| Navigation | Expo Router |
-| Styling | NativeWind (Tailwind CSS) |
-| Backend | Supabase |
+
+| Komponente | Technologie                       |
+| ---------- | --------------------------------- |
+| Mobile     | Expo SDK 52 + React Native 0.76.7 |
+| Navigation | Expo Router                       |
+| Styling    | NativeWind (Tailwind CSS)         |
+| Backend    | Supabase                          |
 
 #### Projektstruktur
+
 ```
 chat/
 ├── apps/
@@ -357,6 +383,7 @@ chat/
 Nutriphi ist ein intelligenter Ernährungs-Tracker, der mithilfe von Google Gemini Vision API Fotos von Mahlzeiten analysiert und automatisch Nährwertinformationen extrahiert.
 
 #### Features
+
 - KI-gestützte Mahlzeitenanalyse aus Fotos
 - Automatische Erkennung von Kalorien, Protein, Kohlenhydraten, Fett
 - Tägliche Ernährungsbilanz und Statistiken
@@ -366,17 +393,19 @@ Nutriphi ist ein intelligenter Ernährungs-Tracker, der mithilfe von Google Gemi
 - Cloud-Sync mit Supabase
 
 #### Tech-Stack
-| Komponente | Technologie |
-|------------|-------------|
-| Backend | NestJS (Port 3002) |
-| Mobile | Expo SDK 53 + React Native 0.79 |
-| Web | SvelteKit |
-| Landing | Astro |
-| KI | Google Gemini Vision API |
-| Datenbank | Supabase (PostgreSQL), SQLite (lokal) |
-| State | Zustand |
+
+| Komponente | Technologie                           |
+| ---------- | ------------------------------------- |
+| Backend    | NestJS (Port 3002)                    |
+| Mobile     | Expo SDK 53 + React Native 0.79       |
+| Web        | SvelteKit                             |
+| Landing    | Astro                                 |
+| KI         | Google Gemini Vision API              |
+| Datenbank  | Supabase (PostgreSQL), SQLite (lokal) |
+| State      | Zustand                               |
 
 #### Projektstruktur
+
 ```
 nutriphi/
 ├── apps/
@@ -387,16 +416,18 @@ nutriphi/
 ```
 
 #### API Endpoints
-| Endpoint | Methode | Beschreibung |
-|----------|---------|--------------|
-| `/api/health` | GET | Health Check |
-| `/api/meals/analyze/image` | POST | Mahlzeit-Foto analysieren |
-| `/api/meals/analyze/text` | POST | Mahlzeit-Text analysieren |
-| `/api/meals` | POST | Mahlzeit speichern |
-| `/api/meals/user/:userId` | GET | Mahlzeiten eines Users |
-| `/api/meals/user/:userId/summary` | GET | Tagesbilanz |
+
+| Endpoint                          | Methode | Beschreibung              |
+| --------------------------------- | ------- | ------------------------- |
+| `/api/health`                     | GET     | Health Check              |
+| `/api/meals/analyze/image`        | POST    | Mahlzeit-Foto analysieren |
+| `/api/meals/analyze/text`         | POST    | Mahlzeit-Text analysieren |
+| `/api/meals`                      | POST    | Mahlzeit speichern        |
+| `/api/meals/user/:userId`         | GET     | Mahlzeiten eines Users    |
+| `/api/meals/user/:userId/summary` | GET     | Tagesbilanz               |
 
 #### Entwicklung
+
 ```bash
 # Backend starten
 pnpm dev:nutriphi:backend
@@ -419,48 +450,48 @@ Alle Projekte teilen gemeinsame Packages unter `packages/`:
 
 ### Core Packages
 
-| Package | Beschreibung |
-|---------|--------------|
-| `@manacore/shared-types` | Gemeinsame TypeScript Types |
-| `@manacore/shared-utils` | Utility-Funktionen (Date, String, Async) |
-| `@manacore/shared-supabase` | Einheitlicher Supabase Client |
-| `@manacore/shared-config` | Gemeinsame Konfiguration |
+| Package                     | Beschreibung                             |
+| --------------------------- | ---------------------------------------- |
+| `@manacore/shared-types`    | Gemeinsame TypeScript Types              |
+| `@manacore/shared-utils`    | Utility-Funktionen (Date, String, Async) |
+| `@manacore/shared-supabase` | Einheitlicher Supabase Client            |
+| `@manacore/shared-config`   | Gemeinsame Konfiguration                 |
 
 ### Auth & Security
 
-| Package | Beschreibung |
-|---------|--------------|
-| `@manacore/shared-auth` | Authentifizierungs-Logik |
-| `@manacore/shared-auth-ui` | Auth UI-Komponenten |
-| `@manacore/shared-auth-stores` | Auth State Stores |
+| Package                        | Beschreibung             |
+| ------------------------------ | ------------------------ |
+| `@manacore/shared-auth`        | Authentifizierungs-Logik |
+| `@manacore/shared-auth-ui`     | Auth UI-Komponenten      |
+| `@manacore/shared-auth-stores` | Auth State Stores        |
 
 ### UI & Styling
 
-| Package | Beschreibung |
-|---------|--------------|
-| `@manacore/shared-ui` | React Native UI-Komponenten |
-| `@manacore/shared-icons` | Icon-Library |
-| `@manacore/shared-tailwind` | Tailwind Konfiguration |
-| `@manacore/shared-theme` | Theme-Logik |
-| `@manacore/shared-theme-ui` | Theme UI-Komponenten |
-| `@manacore/shared-branding` | Branding Assets |
-| `@manacore/shared-landing-ui` | Landing Page Komponenten |
+| Package                       | Beschreibung                |
+| ----------------------------- | --------------------------- |
+| `@manacore/shared-ui`         | React Native UI-Komponenten |
+| `@manacore/shared-icons`      | Icon-Library                |
+| `@manacore/shared-tailwind`   | Tailwind Konfiguration      |
+| `@manacore/shared-theme`      | Theme-Logik                 |
+| `@manacore/shared-theme-ui`   | Theme UI-Komponenten        |
+| `@manacore/shared-branding`   | Branding Assets             |
+| `@manacore/shared-landing-ui` | Landing Page Komponenten    |
 
 ### Business Logic
 
-| Package | Beschreibung |
-|---------|--------------|
+| Package                               | Beschreibung                  |
+| ------------------------------------- | ----------------------------- |
 | `@manacore/shared-subscription-types` | Subscription TypeScript Types |
-| `@manacore/shared-subscription-ui` | Subscription UI-Komponenten |
-| `@manacore/shared-credit-service` | Credit/Mana Service |
-| `@manacore/shared-i18n` | Internationalisierung |
+| `@manacore/shared-subscription-ui`    | Subscription UI-Komponenten   |
+| `@manacore/shared-credit-service`     | Credit/Mana Service           |
+| `@manacore/shared-i18n`               | Internationalisierung         |
 
 ### Datenbank
 
-| Package | Beschreibung |
-|---------|--------------|
+| Package             | Beschreibung              |
+| ------------------- | ------------------------- |
 | `manadeck-database` | Manadeck Datenbank-Schema |
-| `uload-database` | uLoad Datenbank-Schema |
+| `uload-database`    | uLoad Datenbank-Schema    |
 
 ### Verwendung
 
@@ -477,41 +508,41 @@ import { formatDate, truncate, retry } from '@manacore/shared-utils';
 
 ### Frontend
 
-| Kategorie | Web | Mobile |
-|-----------|-----|--------|
-| Framework | SvelteKit 2 / Astro | React Native + Expo |
-| UI Library | Svelte 5 (Runes) | React 18/19 |
-| Styling | TailwindCSS | NativeWind |
-| State | Svelte Stores | Zustand / Context |
-| Routing | File-based | Expo Router |
+| Kategorie  | Web                 | Mobile              |
+| ---------- | ------------------- | ------------------- |
+| Framework  | SvelteKit 2 / Astro | React Native + Expo |
+| UI Library | Svelte 5 (Runes)    | React 18/19         |
+| Styling    | TailwindCSS         | NativeWind          |
+| State      | Svelte Stores       | Zustand / Context   |
+| Routing    | File-based          | Expo Router         |
 
 ### Backend
 
-| Kategorie | Technologie |
-|-----------|-------------|
-| API | NestJS |
-| Auth | Mana Core Middleware / Supabase Auth |
-| Database | PostgreSQL (Supabase) / PocketBase |
-| Storage | Supabase Storage / Cloudflare R2 |
-| Cache | Redis |
+| Kategorie | Technologie                          |
+| --------- | ------------------------------------ |
+| API       | NestJS                               |
+| Auth      | Mana Core Middleware / Supabase Auth |
+| Database  | PostgreSQL (Supabase) / PocketBase   |
+| Storage   | Supabase Storage / Cloudflare R2     |
+| Cache     | Redis                                |
 
 ### AI/ML
 
-| Service | Verwendung |
-|---------|------------|
-| Azure OpenAI (GPT-4) | Text-Generierung |
-| Google Gemini | Text-Analyse |
-| Replicate (Flux) | Bild-Generierung |
-| Azure Speech Services | Sprache-zu-Text |
+| Service               | Verwendung       |
+| --------------------- | ---------------- |
+| Azure OpenAI (GPT-4)  | Text-Generierung |
+| Google Gemini         | Text-Analyse     |
+| Replicate (Flux)      | Bild-Generierung |
+| Azure Speech Services | Sprache-zu-Text  |
 
 ### DevOps
 
-| Kategorie | Technologie |
-|-----------|-------------|
-| Package Manager | pnpm 9.15.0 |
-| Build System | Turborepo |
-| CI/CD | EAS Build (Mobile), Vercel/Netlify (Web) |
-| Deployment | Google Cloud Run, Docker |
+| Kategorie       | Technologie                              |
+| --------------- | ---------------------------------------- |
+| Package Manager | pnpm 9.15.0                              |
+| Build System    | Turborepo                                |
+| CI/CD           | EAS Build (Mobile), Vercel/Netlify (Web) |
+| Deployment      | Google Cloud Run, Docker                 |
 
 ---
 
@@ -597,6 +628,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 ### Analyse des bestehenden Ökosystems
 
 **Stärken der Plattform:**
+
 - Etabliertes Credit-System (Mana) für Monetarisierung
 - Zentrale Authentifizierung über Manacore
 - Multi-Platform-Expertise (Web + Mobile)
@@ -606,6 +638,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Bewährte Shared Packages
 
 **Bestehende Domänen:**
+
 - Kreatives Schreiben (Maerchenzauber)
 - Sprachaufnahmen & Transkription (Memoro)
 - Lernen & Wissensmanagement (Manadeck)
@@ -622,6 +655,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Eine Notion-ähnliche Notiz-Anwendung mit tiefer KI-Integration und nahtloser Verbindung zu anderen Mana-Apps.
 
 **Kernfeatures:**
+
 - Block-basierter Editor (ähnlich Notion)
 - KI-gestützte Zusammenfassungen und Umstrukturierung
 - Automatische Verlinkung verwandter Notizen (Knowledge Graph)
@@ -630,6 +664,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Markdown-Export/Import
 
 **Synergien:**
+
 - **Memoro-Integration:** Audio-Memos werden automatisch als Notizen importiert
 - **Manadeck-Integration:** Aus Notizen Lernkarten generieren
 - **Chat-Integration:** Chat-Verläufe als Notizen speichern
@@ -645,6 +680,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Zielgruppe:** Studenten, Wissensarbeiter, Forscher, Journalisten
 
 **Technische Besonderheiten:**
+
 - Offline-first mit Sync
 - Echtzeit-Kollaboration
 - Versionierung & History
@@ -657,6 +693,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Ein schlankes, KI-gestütztes Projektmanagement-Tool, das sich auf Einzelpersonen und kleine Teams konzentriert.
 
 **Kernfeatures:**
+
 - Kanban-Boards, Listen und Kalender-Ansichten
 - KI-gestützte Task-Zerlegung (großes Ziel → Subtasks)
 - Intelligente Priorisierung basierend auf Deadlines und Abhängigkeiten
@@ -665,6 +702,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Focus Mode mit Pomodoro-Timer
 
 **Synergien:**
+
 - **Memoro-Integration:** Meeting-Aufnahmen → automatisch extrahierte Action Items
 - **ManaNote-Integration:** Projekt-Dokumentation verknüpfen
 - **Manacore-Integration:** Team-Spaces mit Rollen
@@ -688,6 +726,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Ein Kalender, der nicht nur Termine verwaltet, sondern aktiv bei der Zeitplanung hilft.
 
 **Kernfeatures:**
+
 - Smart Scheduling: Findet automatisch optimale Zeitslots
 - Meeting-Vorbereitung: Zeigt relevante Dokumente/Notizen vor Terminen
 - Time Blocking: KI schlägt Fokuszeiten vor
@@ -696,6 +735,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Reisezeit-Berechnung zwischen Terminen
 
 **Synergien:**
+
 - **Memoro-Integration:** Nach Meetings automatisch Transkript verlinken
 - **ManaTask-Integration:** Deadline-Visualisierung im Kalender
 - **ManaNote-Integration:** Meeting-Notizen direkt zum Termin
@@ -719,6 +759,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Während Maerchenzauber auf Kindergeschichten spezialisiert ist, richtet sich ManaWrite an professionelle Content-Erstellung.
 
 **Kernfeatures:**
+
 - Blog-Posts, Artikel, Essays
 - Marketing-Texte (Ads, Landing Pages, E-Mails)
 - Social Media Content mit Plattform-Anpassung
@@ -728,6 +769,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - A/B-Varianten-Generierung
 
 **Content-Typen:**
+
 - Blog-Artikel
 - Newsletter
 - Produktbeschreibungen
@@ -736,6 +778,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Reden und Präsentationen
 
 **Synergien:**
+
 - **Memoro-Integration:** Gesprochene Gedanken → ausformulierte Texte
 - **ManaNote-Integration:** Notizen → fertige Artikel
 - **uLoad-Integration:** Tracking-Links für veröffentlichte Inhalte
@@ -758,6 +801,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Ein mobiler Video-Editor für kurze Social-Media-Videos mit KI-Unterstützung.
 
 **Kernfeatures:**
+
 - Automatische Untertitel-Generierung (32 Sprachen)
 - KI-Schnitt: Erkennt beste Momente, entfernt "Ähms" und Pausen
 - Thumbnail-Generierung mit KI
@@ -767,6 +811,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Talking Head → Animated Avatar
 
 **Synergien:**
+
 - **Memoro-Integration:** Audio-Transkripte für Untertitel
 - **Picture-Integration:** Thumbnail-Bearbeitung
 - **ManaWrite-Integration:** Video-Skripte erstellen
@@ -788,6 +833,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Eine All-in-One Lösung für Podcast-Produktion - von der Aufnahme bis zur Veröffentlichung.
 
 **Kernfeatures:**
+
 - Multi-Track-Aufnahme (Remote-Interviews)
 - Automatische Audio-Verbesserung (Noise Reduction, Normalisierung)
 - KI-Kapitel-Generierung mit Timestamps
@@ -797,6 +843,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Analytics Dashboard
 
 **Synergien:**
+
 - **Memoro-Integration:** Gleiche Audio-Engine, Transkription
 - **ManaWrite-Integration:** Show Notes und Beschreibungen
 - **uLoad-Integration:** Tracking-Links für Episoden
@@ -819,6 +866,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Ergänzung zu Picture mit Fokus auf Brand-Design und Marketing-Materialien.
 
 **Kernfeatures:**
+
 - Logo-Generator mit Varianten
 - Brand Kit Management (Farben, Fonts, Assets)
 - Social Media Template-Generator
@@ -828,6 +876,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Infografik-Generator
 
 **Synergien:**
+
 - **Picture-Integration:** Detaillierte Bildbearbeitung
 - **ManaWrite-Integration:** Text für Marketing-Materialien
 - **uLoad-Integration:** QR-Codes mit Tracking
@@ -852,6 +901,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Eine Plattform zum Erstellen und Konsumieren von Mikro-Kursen mit KI-Unterstützung.
 
 **Kernfeatures:**
+
 - Kurs-Builder mit Drag & Drop
 - KI-generierte Quizze und Tests
 - Lernpfade mit Abhängigkeiten
@@ -861,6 +911,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Spaced Repetition Integration
 
 **Synergien:**
+
 - **Manadeck-Integration:** Kursinhalte → Lernkarten
 - **Memoro-Integration:** Vorlesungen aufnehmen und transkribieren
 - **ManaNote-Integration:** Kurs-Notizen
@@ -883,6 +934,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Ein Tool zum schnellen Erfassen und Verarbeiten von Dokumenten, Artikeln und Büchern.
 
 **Kernfeatures:**
+
 - PDF/EPUB-Import und -Annotation
 - Web-Artikel-Clipper
 - KI-Zusammenfassungen (verschiedene Längen)
@@ -892,6 +944,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Text-to-Speech für Dokumente
 
 **Synergien:**
+
 - **Manadeck-Integration:** Highlights → Lernkarten
 - **ManaNote-Integration:** Exzerpte in Notizen überführen
 - **ManaLearn-Integration:** Leselisten für Kurse
@@ -913,6 +966,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Mehr als ein einfacher Übersetzer - ein Tool für professionelle Lokalisierung.
 
 **Kernfeatures:**
+
 - Dokumenten-Übersetzung (PDF, DOCX, etc.)
 - Kontext-bewusste Übersetzung
 - Terminologie-Management (Glossare)
@@ -922,6 +976,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Batch-Übersetzung für Websites
 
 **Synergien:**
+
 - **ManaWrite-Integration:** Mehrsprachige Content-Erstellung
 - **Shared i18n:** Gleiche 32-Sprachen-Basis
 - **ManaRead-Integration:** Fremdsprachige Dokumente verstehen
@@ -945,6 +1000,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Ein personalisierter Fitness-Begleiter mit adaptiven Trainingsplänen.
 
 **Kernfeatures:**
+
 - KI-generierte Trainingspläne basierend auf Zielen
 - Video-Übungsanleitungen
 - Progressive Overload Tracking
@@ -970,6 +1026,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Eine App für mentales Wohlbefinden mit geführten Meditationen und Journaling.
 
 **Kernfeatures:**
+
 - Geführte Meditationen (verschiedene Längen und Themen)
 - Atemübungen mit Visualisierung
 - Stimmungs-Tracking
@@ -979,6 +1036,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Therapie-Vorbereitung (Gedanken strukturieren)
 
 **Synergien:**
+
 - **Maerchenzauber-Integration:** Beruhigende Geschichten
 - **Memoro-Integration:** Gedanken aufnehmen statt schreiben
 
@@ -999,6 +1057,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Ein Rezept-Manager mit KI-Funktionen für Planung und Anpassung.
 
 **Kernfeatures:**
+
 - Rezept-Import aus URLs
 - KI-Rezeptgenerierung basierend auf Zutaten ("Was kann ich kochen?")
 - Automatische Skalierung von Portionen
@@ -1027,6 +1086,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Ein intelligentes Tool zur Verwaltung persönlicher Finanzen mit KI-Insights.
 
 **Kernfeatures:**
+
 - Bank-Synchronisation (via Plaid/ähnlich)
 - Automatische Kategorisierung von Transaktionen
 - Budget-Erstellung und -Tracking
@@ -1053,6 +1113,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Einfache Rechnungsstellung für Freelancer und kleine Unternehmen.
 
 **Kernfeatures:**
+
 - Professionelle Rechnungs-Templates
 - Automatische Nummerierung
 - Wiederkehrende Rechnungen
@@ -1064,6 +1125,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Kunden-Verwaltung (CRM-light)
 
 **Synergien:**
+
 - **ManaDesign-Integration:** Gebrandete Rechnungen
 - **uLoad-Integration:** Zahlungslinks
 
@@ -1083,6 +1145,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Ein Tool zur Erstellung überzeugender Pitch-Decks und Präsentationen.
 
 **Kernfeatures:**
+
 - KI-generierte Präsentations-Struktur
 - Design-Vorlagen für verschiedene Anlässe
 - Storytelling-Unterstützung
@@ -1093,6 +1156,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Pitch-Timer mit Übung
 
 **Synergien:**
+
 - **ManaDesign-Integration:** Visuelle Assets
 - **ManaWrite-Integration:** Texte und Skripte
 - **Memoro-Integration:** Präsentation aufnehmen und analysieren
@@ -1116,6 +1180,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Eine Video-Konferenz-Lösung mit eingebauter KI-Unterstützung.
 
 **Kernfeatures:**
+
 - HD Video-Calls
 - Echtzeit-Transkription
 - Live-Untertitel in verschiedenen Sprachen
@@ -1127,6 +1192,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Aufnahme mit automatischer Verarbeitung
 
 **Synergien:**
+
 - **Memoro-Integration:** Gleiche Transkriptions-Engine
 - **ManaNote-Integration:** Meeting Notes direkt speichern
 - **ManaTask-Integration:** Action Items → Tasks
@@ -1149,6 +1215,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Eine moderne Forum/Community-Plattform für Marken und Communities.
 
 **Kernfeatures:**
+
 - Threads und Diskussionen
 - Q&A-Bereich mit Voting
 - KI-Moderation
@@ -1159,6 +1226,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Integration mit Chat
 
 **Synergien:**
+
 - **Chat-Integration:** Private Nachrichten
 - **ManaLearn-Integration:** Community-Kurse
 - **Manacore-Integration:** Organisation/Team als Community
@@ -1181,6 +1249,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Eine intelligente Bibliothek für Code-Snippets mit KI-Unterstützung.
 
 **Kernfeatures:**
+
 - Snippet-Organisation mit Tags und Ordnern
 - Syntax-Highlighting für alle gängigen Sprachen
 - KI-Code-Erklärung
@@ -1207,6 +1276,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Automatische API-Dokumentation und Testing.
 
 **Kernfeatures:**
+
 - OpenAPI/Swagger-Import
 - Automatische Docs-Generierung
 - Interaktiver API-Explorer
@@ -1233,6 +1303,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Ein KI-gestützter Reiseplaner für die perfekte Reise.
 
 **Kernfeatures:**
+
 - KI-Reiserouten basierend auf Interessen und Budget
 - Tag-für-Tag-Itineraries
 - Restaurant- und Aktivitäts-Empfehlungen
@@ -1243,6 +1314,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Erinnerungsbuch nach der Reise
 
 **Synergien:**
+
 - **Picture-Integration:** Reisefotos bearbeiten
 - **ManaNote-Integration:** Reisenotizen
 - **ManaFinance-Integration:** Reise-Budget
@@ -1264,6 +1336,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Eine Erweiterung von Maerchenzauber für interaktive "Choose Your Own Adventure"-Geschichten.
 
 **Kernfeatures:**
+
 - Interaktive Entscheidungs-Geschichten
 - KI-generierte Verzweigungen
 - Verschiedene Genres (Fantasy, Krimi, Romance, Horror)
@@ -1273,6 +1346,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Multiplayer-Abenteuer (Gruppen-Entscheidungen)
 
 **Synergien:**
+
 - **Maerchenzauber-Integration:** Charaktere und Illustrationen
 - **Chat-Integration:** Multiplayer-Koordination
 
@@ -1293,6 +1367,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Konzept:** Ein Tool zur KI-gestützten Musikerstellung für Content Creator.
 
 **Kernfeatures:**
+
 - Hintergrundmusik-Generierung
 - Stil- und Stimmungs-basierte Musik
 - Podcast-Intro/Outro-Generator
@@ -1303,6 +1378,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 - Loops und Samples
 
 **Synergien:**
+
 - **ManaPodcast-Integration:** Musik für Podcasts
 - **ManaVideo-Integration:** Hintergrundmusik
 - **ManaMind-Integration:** Entspannungsmusik
@@ -1325,32 +1401,32 @@ Basierend auf Synergien mit bestehenden Apps, Marktpotenzial und technischer Mac
 
 #### Hohe Priorität (Sofortiges Potenzial)
 
-| App | Begründung |
-|-----|------------|
-| **ManaNote** | Natürliche Erweiterung von Memoro, hohe Synergien |
-| **ManaWrite** | Nutzt bestehende KI-Infrastruktur, klarer Markt |
-| **ManaRead** | Ergänzt Manadeck perfekt, Bildungsmarkt |
-| **ManaMeet** | Memoro-Technologie wiederverwendbar |
+| App           | Begründung                                        |
+| ------------- | ------------------------------------------------- |
+| **ManaNote**  | Natürliche Erweiterung von Memoro, hohe Synergien |
+| **ManaWrite** | Nutzt bestehende KI-Infrastruktur, klarer Markt   |
+| **ManaRead**  | Ergänzt Manadeck perfekt, Bildungsmarkt           |
+| **ManaMeet**  | Memoro-Technologie wiederverwendbar               |
 
 #### Mittlere Priorität (Strategisch wichtig)
 
-| App | Begründung |
-|-----|------------|
-| **ManaTask** | Produktivitäts-Suite vervollständigen |
-| **ManaCalendar** | Verbindet alle Produktivitäts-Apps |
-| **ManaPodcast** | Wachsender Markt, Memoro-Basis |
-| **ManaDesign** | Picture erweitern, Marketing-Use-Cases |
-| **ManaLearn** | Manadeck + Memoro + Video kombinieren |
+| App              | Begründung                             |
+| ---------------- | -------------------------------------- |
+| **ManaTask**     | Produktivitäts-Suite vervollständigen  |
+| **ManaCalendar** | Verbindet alle Produktivitäts-Apps     |
+| **ManaPodcast**  | Wachsender Markt, Memoro-Basis         |
+| **ManaDesign**   | Picture erweitern, Marketing-Use-Cases |
+| **ManaLearn**    | Manadeck + Memoro + Video kombinieren  |
 
 #### Langfristig (Exploration)
 
-| App | Begründung |
-|-----|------------|
-| **ManaVideo** | Komplex, aber hoher Bedarf |
+| App             | Begründung                         |
+| --------------- | ---------------------------------- |
+| **ManaVideo**   | Komplex, aber hoher Bedarf         |
 | **ManaFinance** | Andere Domäne, aber hohe Nachfrage |
-| **ManaFit** | Großer Markt, wenig Synergien |
-| **ManaMusic** | KI-Musik im Aufwind |
-| **ManaTrip** | Saisonal, aber emotional |
+| **ManaFit**     | Großer Markt, wenig Synergien      |
+| **ManaMusic**   | KI-Musik im Aufwind                |
+| **ManaTrip**    | Saisonal, aber emotional           |
 
 ---
 
@@ -1388,4 +1464,4 @@ Die Vision: **Ein zusammenhängendes Ökosystem, in dem Daten nahtlos zwischen A
 
 ---
 
-*Zuletzt aktualisiert: November 2025*
+_Zuletzt aktualisiert: November 2025_

@@ -53,7 +53,6 @@ firebaseConfig.js
 
 Copy
 
-
 import { initializeApp } from 'firebase/app';
 
 // Optionally import the services that you want to use
@@ -65,14 +64,14 @@ import { initializeApp } from 'firebase/app';
 
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: 'api-key',
-  authDomain: 'project-id.firebaseapp.com',
-  databaseURL: 'https://project-id.firebaseio.com',
-  projectId: 'project-id',
-  storageBucket: 'project-id.appspot.com',
-  messagingSenderId: 'sender-id',
-  appId: 'app-id',
-  measurementId: 'G-measurement-id',
+apiKey: 'api-key',
+authDomain: 'project-id.firebaseapp.com',
+databaseURL: 'https://project-id.firebaseio.com',
+projectId: 'project-id',
+storageBucket: 'project-id.appspot.com',
+messagingSenderId: 'sender-id',
+appId: 'app-id',
+measurementId: 'G-measurement-id',
 };
 
 const app = initializeApp(firebaseConfig);
@@ -104,10 +103,9 @@ metro.config.js
 
 Copy
 
-
 const { getDefaultConfig } = require('@expo/metro-config');
 
-const defaultConfig = getDefaultConfig(__dirname);
+const defaultConfig = getDefaultConfig(\_\_dirname);
 defaultConfig.resolver.sourceExts.push('cjs');
 
 module.exports = defaultConfig;

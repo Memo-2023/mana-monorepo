@@ -19,7 +19,7 @@
 		popularLabel = 'Popular',
 		manaLabel = 'Mana',
 		oneTimeLabel = 'Einmalig',
-		buyLabel = 'Kaufen'
+		buyLabel = 'Kaufen',
 	}: Props = $props();
 
 	function formatPrice(pkg: ManaPackage) {
@@ -64,7 +64,10 @@
 	<!-- Three column layout -->
 	<div class="mb-5 flex justify-between gap-2">
 		<!-- Mana Icon with background -->
-		<div class="flex aspect-square flex-1 items-center justify-center rounded-xl bg-menu" style="min-height: 80px;">
+		<div
+			class="flex aspect-square flex-1 items-center justify-center rounded-xl bg-menu"
+			style="min-height: 80px;"
+		>
 			<div
 				class="flex items-center justify-center rounded-lg"
 				style="width: {packageStyles.bgSize}; height: {packageStyles.bgSize}; background-color: {packageStyles.bg};"
@@ -74,7 +77,10 @@
 		</div>
 
 		<!-- Mana Amount -->
-		<div class="flex aspect-square flex-1 flex-col items-center justify-center rounded-xl bg-menu" style="min-height: 80px;">
+		<div
+			class="flex aspect-square flex-1 flex-col items-center justify-center rounded-xl bg-menu"
+			style="min-height: 80px;"
+		>
 			<p class="mb-0.5 text-2xl font-bold text-theme">
 				{pkg.manaAmount}
 			</p>
@@ -82,7 +88,10 @@
 		</div>
 
 		<!-- Price -->
-		<div class="flex aspect-square flex-1 flex-col items-center justify-center rounded-xl bg-menu" style="min-height: 80px;">
+		<div
+			class="flex aspect-square flex-1 flex-col items-center justify-center rounded-xl bg-menu"
+			style="min-height: 80px;"
+		>
 			<p class="text-xl font-bold text-theme">
 				{formatPrice(pkg)}
 			</p>

@@ -8,25 +8,25 @@ import { CreditsModule } from './credits/credits.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [configuration],
-    }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000, // 60 seconds
-        limit: 100, // 100 requests per minute
-      },
-    ]),
-    AuthModule,
-    CreditsModule,
-  ],
-  providers: [
-    {
-      provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
-    },
-  ],
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			load: [configuration],
+		}),
+		ThrottlerModule.forRoot([
+			{
+				ttl: 60000, // 60 seconds
+				limit: 100, // 100 requests per minute
+			},
+		]),
+		AuthModule,
+		CreditsModule,
+	],
+	providers: [
+		{
+			provide: APP_FILTER,
+			useClass: HttpExceptionFilter,
+		},
+	],
 })
 export class AppModule {}

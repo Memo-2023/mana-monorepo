@@ -76,7 +76,9 @@
 										class="h-20 w-20 rounded-full object-cover"
 									/>
 								{:else}
-									<div class="flex h-20 w-20 items-center justify-center rounded-full bg-theme-surface">
+									<div
+										class="flex h-20 w-20 items-center justify-center rounded-full bg-theme-surface"
+									>
 										<span class="text-2xl font-semibold text-theme-text-muted">
 											{(data.user?.name || data.user?.username || 'U').charAt(0).toUpperCase()}
 										</span>
@@ -90,9 +92,7 @@
 										accept="image/*"
 										class="block w-full text-sm text-theme-text file:mr-4 file:rounded-full file:border-0 file:bg-theme-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-theme-primary-hover"
 									/>
-									<p class="mt-1 text-xs text-theme-text-muted">
-										JPG, PNG oder GIF. Max 5MB.
-									</p>
+									<p class="mt-1 text-xs text-theme-text-muted">JPG, PNG oder GIF. Max 5MB.</p>
 								</div>
 							</div>
 						</div>
@@ -133,7 +133,7 @@
 								name="name"
 								value={data.user?.name || ''}
 								placeholder="John Doe"
-								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 							/>
 						</div>
 
@@ -150,7 +150,7 @@
 								name="email"
 								value={data.user?.email || ''}
 								required
-								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 							/>
 						</div>
 
@@ -167,7 +167,7 @@
 								rows="3"
 								value={data.user?.bio || ''}
 								placeholder="Tell visitors about yourself..."
-								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 							></textarea>
 						</div>
 
@@ -184,7 +184,7 @@
 								name="location"
 								value={data.user?.location || ''}
 								placeholder="San Francisco, CA"
-								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 							/>
 						</div>
 
@@ -193,7 +193,7 @@
 							<h3 class="mb-3 text-sm font-medium text-theme-text dark:text-theme-text">
 								Profile Appearance
 							</h3>
-							
+
 							<div class="mb-4">
 								<label for="profileBackground" class="mb-2 block text-xs text-theme-text-muted">
 									Profile Background
@@ -209,7 +209,9 @@
 									<select
 										name="profileBackgroundPreset"
 										onchange={(e) => {
-											const input = document.getElementById('profileBackground') as HTMLInputElement;
+											const input = document.getElementById(
+												'profileBackground'
+											) as HTMLInputElement;
 											if (input && e.currentTarget.value) {
 												input.value = e.currentTarget.value;
 											}
@@ -235,13 +237,11 @@
 
 							<!-- Card Appearance Customization -->
 							<div class="mb-6 border-t border-theme-border pt-4">
-								<h4 class="mb-3 text-sm font-medium text-theme-text">
-									Card Appearance
-								</h4>
+								<h4 class="mb-3 text-sm font-medium text-theme-text">Card Appearance</h4>
 								<p class="mb-4 text-xs text-theme-text-muted">
 									Customize the colors of your cards to match your style
 								</p>
-								
+
 								<div class="grid gap-4 sm:grid-cols-2">
 									<!-- Card Background Color -->
 									<div>
@@ -314,9 +314,7 @@
 
 								<!-- Card Color Presets -->
 								<div class="mt-4">
-									<label class="mb-2 block text-xs text-theme-text-muted">
-										Quick Presets
-									</label>
+									<label class="mb-2 block text-xs text-theme-text-muted"> Quick Presets </label>
 									<div class="flex flex-wrap gap-2">
 										<button
 											type="button"
@@ -368,7 +366,7 @@
 										name="website"
 										value={data.user?.website || ''}
 										placeholder="https://example.com"
-										class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+										class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 									/>
 								</div>
 
@@ -382,7 +380,7 @@
 										name="github"
 										value={data.user?.github || ''}
 										placeholder="username"
-										class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+										class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 									/>
 								</div>
 
@@ -396,7 +394,7 @@
 										name="twitter"
 										value={data.user?.twitter || ''}
 										placeholder="username"
-										class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+										class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 									/>
 								</div>
 
@@ -410,7 +408,7 @@
 										name="linkedin"
 										value={data.user?.linkedin || ''}
 										placeholder="username"
-										class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+										class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 									/>
 								</div>
 
@@ -424,7 +422,7 @@
 										name="instagram"
 										value={data.user?.instagram || ''}
 										placeholder="username"
-										class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+										class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 									/>
 								</div>
 							</div>
@@ -489,7 +487,7 @@
 								id="currentPassword"
 								name="currentPassword"
 								required
-								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 							/>
 						</div>
 
@@ -506,7 +504,7 @@
 								name="newPassword"
 								minlength="8"
 								required
-								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 							/>
 						</div>
 
@@ -523,7 +521,7 @@
 								name="confirmPassword"
 								minlength="8"
 								required
-								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 							/>
 						</div>
 
@@ -557,26 +555,24 @@
 			<div class="rounded-xl bg-white p-6 shadow-xl dark:bg-theme-surface">
 				<div class="flex items-center justify-between">
 					<div>
-						<h2 class="text-xl font-semibold text-theme-text dark:text-white">
-							Workspaces
-						</h2>
+						<h2 class="text-xl font-semibold text-theme-text dark:text-white">Workspaces</h2>
 						<p class="mt-1 text-sm text-theme-text-muted">
 							Manage your workspaces and team collaboration
 						</p>
 					</div>
 					<a
 						href="/settings/workspaces"
-						class="rounded-lg bg-theme-primary px-4 py-2 text-sm font-medium text-white hover:bg-theme-primary-hover transition-colors"
+						class="rounded-lg bg-theme-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-theme-primary-hover"
 					>
 						Manage Workspaces
 					</a>
 				</div>
-				
+
 				<div class="mt-4 rounded-lg bg-theme-surface p-4">
 					<div class="flex items-center justify-between">
 						<div>
 							<p class="text-sm text-theme-text-muted">Current Plan</p>
-							<p class="font-medium text-theme-text capitalize">
+							<p class="font-medium capitalize text-theme-text">
 								{data.user?.subscription_status || 'free'}
 							</p>
 						</div>
@@ -677,7 +673,7 @@
 								max="365"
 								value={data.user?.defaultExpiry || ''}
 								placeholder="Never"
-								class="w-full max-w-xs rounded-md border border-theme-border bg-white px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-theme-border dark:bg-theme-surface dark:text-white"
+								class="w-full max-w-xs rounded-md border border-theme-border bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-theme-border dark:bg-theme-surface dark:text-white"
 							/>
 						</div>
 
@@ -736,7 +732,7 @@
 								type="text"
 								bind:value={deleteConfirmText}
 								placeholder="Type DELETE"
-								class="w-full max-w-xs rounded-md border border-red-300 bg-white px-3 py-2 focus:ring-2 focus:ring-red-500 focus:outline-none dark:border-red-600 dark:bg-theme-surface dark:text-white"
+								class="w-full max-w-xs rounded-md border border-red-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-red-600 dark:bg-theme-surface dark:text-white"
 							/>
 							<div class="flex gap-3">
 								<form

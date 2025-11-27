@@ -48,16 +48,16 @@
 		onToggleSelect?: () => void;
 	}
 
-	let { 
-		link, 
-		username, 
-		onCopy = () => {}, 
+	let {
+		link,
+		username,
+		onCopy = () => {},
 		copiedStates = {},
 		isSelectMode = false,
 		isSelected = false,
-		onToggleSelect = () => {}
+		onToggleSelect = () => {},
 	}: Props = $props();
-	
+
 	const isExpired = link.expires_at ? new Date(link.expires_at) < new Date() : false;
 	const isNearLimit = link.max_clicks ? link.clicks >= link.max_clicks * 0.8 : false;
 
@@ -75,7 +75,13 @@
 </script>
 
 <!-- Desktop View -->
-<div class="hidden lg:grid {isSelectMode ? 'grid-cols-[40px_200px_200px_1fr_100px_120px_180px]' : 'grid-cols-[200px_200px_1fr_100px_120px_180px]'} items-center gap-4 border-b border-theme-border {isSelected ? 'bg-theme-primary/5' : 'bg-theme-surface'} px-6 py-4 transition-colors hover:bg-theme-surface-hover">
+<div
+	class="hidden lg:grid {isSelectMode
+		? 'grid-cols-[40px_200px_200px_1fr_100px_120px_180px]'
+		: 'grid-cols-[200px_200px_1fr_100px_120px_180px]'} items-center gap-4 border-b border-theme-border {isSelected
+		? 'bg-theme-primary/5'
+		: 'bg-theme-surface'} px-6 py-4 transition-colors hover:bg-theme-surface-hover"
+>
 	<!-- Checkbox Column -->
 	{#if isSelectMode}
 		<div>
@@ -83,7 +89,7 @@
 				type="checkbox"
 				checked={isSelected}
 				onchange={onToggleSelect}
-				class="h-4 w-4 rounded border-theme-border text-theme-primary focus:ring-theme-primary cursor-pointer"
+				class="h-4 w-4 cursor-pointer rounded border-theme-border text-theme-primary focus:ring-theme-primary"
 			/>
 		</div>
 	{/if}
@@ -96,16 +102,17 @@
 
 	<!-- Short URL Column -->
 	<div>
-		<a 
+		<a
 			href={formatUrl(link.short_code)}
 			target="_blank"
-			class="text-sm text-theme-primary hover:underline truncate block"
-			onclick={() => trackLinkClick({
-				shortCode: link.short_code,
-				username: username || 'direct',
-				hasPassword: !!link.password,
-				isExpiring: !!link.expires_at
-			})}
+			class="block truncate text-sm text-theme-primary hover:underline"
+			onclick={() =>
+				trackLinkClick({
+					shortCode: link.short_code,
+					username: username || 'direct',
+					hasPassword: !!link.password,
+					isExpiring: !!link.expires_at,
+				})}
 			title="ulo.ad/{link.short_code}"
 		>
 			ulo.ad/{link.short_code}
@@ -114,15 +121,15 @@
 
 	<!-- Destination Column -->
 	<div class="min-w-0">
-		<div class="text-sm text-theme-text-muted flex items-center gap-2">
+		<div class="flex items-center gap-2 text-sm text-theme-text-muted">
 			<span class="truncate" title={link.original_url}>
 				{link.original_url}
 			</span>
 			{#if !link.is_active}
-				<span class="text-xs text-red-600 font-medium flex-shrink-0">Inactive</span>
+				<span class="flex-shrink-0 text-xs font-medium text-red-600">Inactive</span>
 			{/if}
 			{#if link.password}
-				<Lock class="h-3 w-3 text-yellow-600 flex-shrink-0" title="Password protected" />
+				<Lock class="h-3 w-3 flex-shrink-0 text-yellow-600" title="Password protected" />
 			{/if}
 		</div>
 	</div>
@@ -131,7 +138,7 @@
 	<div class="text-sm text-theme-text-muted">
 		<div class="flex items-center gap-1">
 			<MousePointer class="h-3 w-3" />
-			<span class="{isNearLimit ? 'text-orange-600 font-medium' : ''}">
+			<span class={isNearLimit ? 'font-medium text-orange-600' : ''}>
 				{link.clicks || 0}
 			</span>
 		</div>
@@ -141,17 +148,17 @@
 	<div class="text-xs text-theme-text-muted">
 		<div>{new Date(link.created).toLocaleDateString('de-DE')}</div>
 		{#if link.last_clicked_at}
-			<div class="text-theme-accent text-xs mt-1">
+			<div class="mt-1 text-xs text-theme-accent">
 				Last: {new Date(link.last_clicked_at).toLocaleDateString('de-DE')}
 			</div>
 		{/if}
 	</div>
 
 	<!-- Actions Column -->
-	<div class="flex items-center gap-2 justify-end">
+	<div class="flex items-center justify-end gap-2">
 		<button
 			onclick={() => copyToClipboard(formatUrl(link.short_code), link.id, link.short_code)}
-			class="rounded-lg bg-theme-primary/10 px-3 py-1.5 text-sm font-medium text-theme-primary transition hover:bg-theme-primary/20"
+			class="bg-theme-primary/10 hover:bg-theme-primary/20 rounded-lg px-3 py-1.5 text-sm font-medium text-theme-primary transition"
 			title="Copy URL"
 		>
 			{#if copiedStates[link.id]}
@@ -167,7 +174,7 @@
 					label: 'Analytics',
 					href: `/my/analytics/${link.short_code}`,
 					icon: '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>',
-					color: '#2563eb'
+					color: '#2563eb',
 				},
 				{
 					label: 'QR Code',
@@ -175,7 +182,7 @@
 					color: '#16a34a',
 					action: () => {
 						window.dispatchEvent(new CustomEvent('show-qr-modal', { detail: link }));
-					}
+					},
 				},
 				{
 					label: 'Edit',
@@ -183,20 +190,20 @@
 					color: '#9333ea',
 					action: () => {
 						window.dispatchEvent(new CustomEvent('edit-link', { detail: link }));
-					}
+					},
 				},
 				{
 					label: link.is_active ? 'Deactivate' : 'Activate',
 					type: 'form',
 					formAction: '?/toggle',
 					formData: { id: link.id, is_active: String(link.is_active) },
-					icon: link.is_active 
+					icon: link.is_active
 						? '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
 						: '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
-					color: link.is_active ? '#ea580c' : '#16a34a'
+					color: link.is_active ? '#ea580c' : '#16a34a',
 				},
 				{
-					divider: true
+					divider: true,
 				},
 				{
 					label: 'Delete',
@@ -214,13 +221,13 @@
 							await update();
 							if (result.type === 'success') {
 								trackEvent(EVENTS.LINK_DELETED, {
-									short_code: link.short_code
+									short_code: link.short_code,
 								});
 								toastMessages.linkDeleted();
 							}
 						};
-					}
-				}
+					},
+				},
 			]}
 			buttonText="Actions"
 			size="sm"
@@ -229,7 +236,13 @@
 </div>
 
 <!-- Tablet View -->
-<div class="hidden md:grid lg:hidden {isSelectMode ? 'grid-cols-[40px_minmax(200px,1fr)_200px_100px_140px]' : 'grid-cols-[minmax(200px,1fr)_200px_100px_140px]'} items-center gap-4 border-b border-theme-border {isSelected ? 'bg-theme-primary/5' : 'bg-theme-surface'} px-4 py-4 transition-colors hover:bg-theme-surface-hover">
+<div
+	class="hidden md:grid lg:hidden {isSelectMode
+		? 'grid-cols-[40px_minmax(200px,1fr)_200px_100px_140px]'
+		: 'grid-cols-[minmax(200px,1fr)_200px_100px_140px]'} items-center gap-4 border-b border-theme-border {isSelected
+		? 'bg-theme-primary/5'
+		: 'bg-theme-surface'} px-4 py-4 transition-colors hover:bg-theme-surface-hover"
+>
 	<!-- Checkbox Column -->
 	{#if isSelectMode}
 		<div>
@@ -237,7 +250,7 @@
 				type="checkbox"
 				checked={isSelected}
 				onchange={onToggleSelect}
-				class="h-4 w-4 rounded border-theme-border text-theme-primary focus:ring-theme-primary cursor-pointer"
+				class="h-4 w-4 cursor-pointer rounded border-theme-border text-theme-primary focus:ring-theme-primary"
 			/>
 		</div>
 	{/if}
@@ -247,7 +260,7 @@
 			{link.title || link.short_code}
 		</div>
 		{#if link.expand?.['link_tags(link_id)']?.length > 0}
-			<div class="flex flex-wrap gap-1 mt-1">
+			<div class="mt-1 flex flex-wrap gap-1">
 				{#each link.expand['link_tags(link_id)'].slice(0, 2) as linkTag}
 					{#if linkTag.expand?.tag_id}
 						<TagBadge tag={linkTag.expand.tag_id} size="xs" />
@@ -259,16 +272,17 @@
 
 	<!-- Short URL Column -->
 	<div>
-		<a 
+		<a
 			href={formatUrl(link.short_code)}
 			target="_blank"
-			class="text-sm text-theme-primary hover:underline truncate block"
-			onclick={() => trackLinkClick({
-				shortCode: link.short_code,
-				username: username || 'direct',
-				hasPassword: !!link.password,
-				isExpiring: !!link.expires_at
-			})}
+			class="block truncate text-sm text-theme-primary hover:underline"
+			onclick={() =>
+				trackLinkClick({
+					shortCode: link.short_code,
+					username: username || 'direct',
+					hasPassword: !!link.password,
+					isExpiring: !!link.expires_at,
+				})}
 			title="ulo.ad/{link.short_code}"
 		>
 			ulo.ad/{link.short_code}
@@ -279,17 +293,17 @@
 	<div class="text-sm text-theme-text-muted">
 		<div class="flex items-center gap-1">
 			<MousePointer class="h-3 w-3" />
-			<span class="{isNearLimit ? 'text-orange-600 font-medium' : ''}">
+			<span class={isNearLimit ? 'font-medium text-orange-600' : ''}>
 				{link.clicks || 0}
 			</span>
 		</div>
 	</div>
 
 	<!-- Actions Column -->
-	<div class="flex items-center gap-2 justify-end">
+	<div class="flex items-center justify-end gap-2">
 		<button
 			onclick={() => copyToClipboard(formatUrl(link.short_code), link.id, link.short_code)}
-			class="rounded-lg bg-theme-primary/10 px-3 py-1.5 text-sm font-medium text-theme-primary transition hover:bg-theme-primary/20"
+			class="bg-theme-primary/10 hover:bg-theme-primary/20 rounded-lg px-3 py-1.5 text-sm font-medium text-theme-primary transition"
 			title="Copy URL"
 		>
 			{#if copiedStates[link.id]}
@@ -305,7 +319,7 @@
 					label: 'Analytics',
 					href: `/my/analytics/${link.short_code}`,
 					icon: '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>',
-					color: '#2563eb'
+					color: '#2563eb',
 				},
 				{
 					label: 'QR Code',
@@ -313,7 +327,7 @@
 					color: '#16a34a',
 					action: () => {
 						window.dispatchEvent(new CustomEvent('show-qr-modal', { detail: link }));
-					}
+					},
 				},
 				{
 					label: 'Edit',
@@ -321,20 +335,20 @@
 					color: '#9333ea',
 					action: () => {
 						window.dispatchEvent(new CustomEvent('edit-link', { detail: link }));
-					}
+					},
 				},
 				{
 					label: link.is_active ? 'Deactivate' : 'Activate',
 					type: 'form',
 					formAction: '?/toggle',
 					formData: { id: link.id, is_active: String(link.is_active) },
-					icon: link.is_active 
+					icon: link.is_active
 						? '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
 						: '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
-					color: link.is_active ? '#ea580c' : '#16a34a'
+					color: link.is_active ? '#ea580c' : '#16a34a',
 				},
 				{
-					divider: true
+					divider: true,
 				},
 				{
 					label: 'Delete',
@@ -352,13 +366,13 @@
 							await update();
 							if (result.type === 'success') {
 								trackEvent(EVENTS.LINK_DELETED, {
-									short_code: link.short_code
+									short_code: link.short_code,
 								});
 								toastMessages.linkDeleted();
 							}
 						};
-					}
-				}
+					},
+				},
 			]}
 			buttonText="•••"
 			size="sm"
@@ -367,12 +381,16 @@
 </div>
 
 <!-- Mobile View -->
-<div class="md:hidden border-b border-theme-border {isSelected ? 'bg-theme-primary/5' : 'bg-theme-surface'} p-4 transition-colors hover:bg-theme-surface-hover">
+<div
+	class="border-b border-theme-border md:hidden {isSelected
+		? 'bg-theme-primary/5'
+		: 'bg-theme-surface'} p-4 transition-colors hover:bg-theme-surface-hover"
+>
 	<div class="space-y-3">
 		<!-- Checkbox for mobile -->
 		{#if isSelectMode}
 			<div class="flex items-center justify-between">
-				<label class="flex items-center gap-2 cursor-pointer">
+				<label class="flex cursor-pointer items-center gap-2">
 					<input
 						type="checkbox"
 						checked={isSelected}
@@ -385,19 +403,20 @@
 		{/if}
 		<!-- Title and URL -->
 		<div>
-			<div class="font-medium text-theme-text mb-1">
+			<div class="mb-1 font-medium text-theme-text">
 				{link.title || link.short_code}
 			</div>
-			<a 
+			<a
 				href={formatUrl(link.short_code)}
 				target="_blank"
 				class="text-sm text-theme-primary hover:underline"
-				onclick={() => trackLinkClick({
-					shortCode: link.short_code,
-					username: username || 'direct',
-					hasPassword: !!link.password,
-					isExpiring: !!link.expires_at
-				})}
+				onclick={() =>
+					trackLinkClick({
+						shortCode: link.short_code,
+						username: username || 'direct',
+						hasPassword: !!link.password,
+						isExpiring: !!link.expires_at,
+					})}
 			>
 				ulo.ad/{link.short_code}
 			</a>
@@ -427,13 +446,13 @@
 					{link.clicks || 0} clicks
 				</span>
 				<span>
-					<Calendar class="h-3 w-3 inline" />
+					<Calendar class="inline h-3 w-3" />
 					{new Date(link.created).toLocaleDateString('de-DE')}
 				</span>
 			</div>
 			<div class="flex items-center gap-2">
 				{#if !link.is_active}
-					<span class="text-xs text-red-600 font-medium">Inactive</span>
+					<span class="text-xs font-medium text-red-600">Inactive</span>
 				{/if}
 				{#if link.password}
 					<Lock class="h-3 w-3 text-yellow-600" title="Password protected" />
@@ -445,7 +464,7 @@
 		<div class="flex gap-2">
 			<button
 				onclick={() => copyToClipboard(formatUrl(link.short_code), link.id, link.short_code)}
-				class="flex-1 rounded-lg bg-theme-primary/10 px-3 py-2 text-sm font-medium text-theme-primary transition hover:bg-theme-primary/20"
+				class="bg-theme-primary/10 hover:bg-theme-primary/20 flex-1 rounded-lg px-3 py-2 text-sm font-medium text-theme-primary transition"
 			>
 				{#if copiedStates[link.id]}
 					✓ Copied
@@ -455,7 +474,7 @@
 			</button>
 			<a
 				href="/my/analytics/{link.short_code}"
-				class="flex-1 rounded-lg border border-theme-border bg-theme-surface px-3 py-2 text-sm font-medium text-theme-text text-center transition hover:bg-theme-surface-hover"
+				class="flex-1 rounded-lg border border-theme-border bg-theme-surface px-3 py-2 text-center text-sm font-medium text-theme-text transition hover:bg-theme-surface-hover"
 			>
 				Analytics
 			</a>
@@ -467,7 +486,7 @@
 						color: '#16a34a',
 						action: () => {
 							window.dispatchEvent(new CustomEvent('show-qr-modal', { detail: link }));
-						}
+						},
 					},
 					{
 						label: 'Edit',
@@ -475,20 +494,20 @@
 						color: '#9333ea',
 						action: () => {
 							window.dispatchEvent(new CustomEvent('edit-link', { detail: link }));
-						}
+						},
 					},
 					{
 						label: link.is_active ? 'Deactivate' : 'Activate',
 						type: 'form',
 						formAction: '?/toggle',
 						formData: { id: link.id, is_active: String(link.is_active) },
-						icon: link.is_active 
+						icon: link.is_active
 							? '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
 							: '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
-						color: link.is_active ? '#ea580c' : '#16a34a'
+						color: link.is_active ? '#ea580c' : '#16a34a',
 					},
 					{
-						divider: true
+						divider: true,
 					},
 					{
 						label: 'Delete',
@@ -506,13 +525,13 @@
 								await update();
 								if (result.type === 'success') {
 									trackEvent(EVENTS.LINK_DELETED, {
-										short_code: link.short_code
+										short_code: link.short_code,
 									});
 									toastMessages.linkDeleted();
 								}
 							};
-						}
-					}
+						},
+					},
 				]}
 				buttonText="•••"
 				size="sm"

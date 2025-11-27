@@ -20,7 +20,7 @@
 		supportedLocales,
 		onLocaleChange,
 		isDark = false,
-		primaryColor = '#6366f1'
+		primaryColor = '#6366f1',
 	}: Props = $props();
 
 	let isOpen = $state(false);
@@ -32,13 +32,13 @@
 			return {
 				flag: info.emoji,
 				name: info.nativeName,
-				code: code.toUpperCase().substring(0, 2)
+				code: code.toUpperCase().substring(0, 2),
 			};
 		}
 		return {
 			flag: '🌐',
 			name: code,
-			code: code.toUpperCase().substring(0, 2)
+			code: code.toUpperCase().substring(0, 2),
 		};
 	}
 

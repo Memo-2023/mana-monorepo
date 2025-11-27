@@ -17,31 +17,31 @@ export class PocketBaseEmailService {
 	): Promise<boolean> {
 		try {
 			const pbInstance = adminPb || pb;
-			
+
 			// Create a custom email request using PocketBase's internal API
 			// We'll use the test email endpoint with our custom content
 			const response = await fetch(`${pbInstance.baseUrl}/api/settings/test-email`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'Authorization': pbInstance.authStore.token ? `Bearer ${pbInstance.authStore.token}` : ''
+					Authorization: pbInstance.authStore.token ? `Bearer ${pbInstance.authStore.token}` : '',
 				},
 				body: JSON.stringify({
 					template: {
 						subject: subject,
-						body: html
+						body: html,
 					},
-					email: to
-				})
+					email: to,
+				}),
 			});
 
 			if (!response.ok) {
 				// Fallback: Try using the collections API to trigger an email
 				console.log('[EMAIL] Test endpoint failed, trying alternative method...');
-				
+
 				// We can trigger a verification email and hijack it
 				// But this is not ideal, so let's use a different approach
-				
+
 				// Alternative: Create a temporary user and send verification
 				// This is a workaround but it works with existing SMTP
 				return await this.sendViaVerificationHack(to, subject, html);
@@ -49,7 +49,6 @@ export class PocketBaseEmailService {
 
 			console.log('[EMAIL] ✅ Email sent successfully via PocketBase');
 			return true;
-			
 		} catch (error) {
 			console.error('[EMAIL] Failed to send via PocketBase:', error);
 			return false;
@@ -67,7 +66,7 @@ export class PocketBaseEmailService {
 	): Promise<boolean> {
 		try {
 			console.log('[EMAIL] Using verification email hack...');
-			
+
 			// This approach requires admin access to modify templates
 			// For now, we'll log the email that should be sent
 			console.log('═══════════════════════════════════════════════════════');
@@ -78,12 +77,12 @@ export class PocketBaseEmailService {
 			console.log('─────────────────────────────────────────────────────');
 			console.log('Note: Email will be sent once we implement the PocketBase hook');
 			console.log('═══════════════════════════════════════════════════════');
-			
+
 			// In production, you would:
 			// 1. Create a PocketBase hook (pb_hooks)
 			// 2. Or use a custom PocketBase extension
 			// 3. Or temporarily modify templates via admin API
-			
+
 			return true;
 		} catch (error) {
 			console.error('[EMAIL] Verification hack failed:', error);

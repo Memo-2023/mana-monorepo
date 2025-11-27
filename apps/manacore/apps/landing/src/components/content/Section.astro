@@ -1,35 +1,30 @@
 ---
 export interface Props {
-  background?: 'white' | 'gray' | 'primary' | 'gradient';
-  spacing?: 'none' | 'small' | 'medium' | 'large' | 'xlarge';
-  class?: string;
+	background?: 'white' | 'gray' | 'primary' | 'gradient';
+	spacing?: 'none' | 'small' | 'medium' | 'large' | 'xlarge';
+	class?: string;
 }
 
-const {
-  background = 'white',
-  spacing = 'large',
-  class: className = '',
-  ...rest
-} = Astro.props;
+const { background = 'white', spacing = 'large', class: className = '', ...rest } = Astro.props;
 
 const backgrounds = {
-  white: '',  // Inherit from body
-  gray: '',   // Inherit from body
-  primary: '', // Inherit from body
-  gradient: 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800'
+	white: '', // Inherit from body
+	gray: '', // Inherit from body
+	primary: '', // Inherit from body
+	gradient: 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800',
 };
 
 const spacings = {
-  none: '',
-  small: 'py-8 md:py-12',
-  medium: 'py-12 md:py-16',
-  large: 'py-16 md:py-24',
-  xlarge: 'py-24 md:py-32'
+	none: '',
+	small: 'py-8 md:py-12',
+	medium: 'py-12 md:py-16',
+	large: 'py-16 md:py-24',
+	xlarge: 'py-24 md:py-32',
 };
 
 const classes = `${backgrounds[background]} ${spacings[spacing]} ${className}`;
 ---
 
 <section class={classes} {...rest}>
-  <slot />
+	<slot />
 </section>

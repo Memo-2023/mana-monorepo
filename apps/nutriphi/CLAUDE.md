@@ -22,6 +22,7 @@ apps/nutriphi/
 ## Commands
 
 ### Root Level (from monorepo root)
+
 ```bash
 pnpm nutriphi:dev              # Run all nutriphi apps
 pnpm dev:nutriphi:mobile       # Start mobile app
@@ -31,6 +32,7 @@ pnpm dev:nutriphi:backend      # Start backend server
 ```
 
 ### Mobile App (nutriphi/apps/mobile)
+
 ```bash
 pnpm dev                       # Start Expo dev server
 pnpm ios                       # Run on iOS simulator
@@ -42,6 +44,7 @@ pnpm type-check                # Run TypeScript checks
 ```
 
 ### Backend (apps/nutriphi/apps/backend)
+
 ```bash
 pnpm start:dev                 # Start with hot reload
 pnpm build                     # Build for production
@@ -50,6 +53,7 @@ pnpm type-check                # Run TypeScript checks
 ```
 
 ### Web App (nutriphi/apps/web)
+
 ```bash
 pnpm dev                       # Start dev server
 pnpm build                     # Build for production
@@ -58,6 +62,7 @@ pnpm type-check                # Run type checks
 ```
 
 ### Landing Page (nutriphi/apps/landing)
+
 ```bash
 pnpm dev                       # Start dev server
 pnpm build                     # Build for production
@@ -81,28 +86,31 @@ pnpm type-check                # Run Astro checks
 All endpoints (except health) require JWT authentication via `Authorization: Bearer <token>` header.
 
 #### Meals API
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/health` | GET | Health check (public) |
-| `/api/meals/analyze/image` | POST | Analyze food image with AI |
-| `/api/meals/analyze/text` | POST | Analyze food description |
-| `/api/meals` | GET | Get user's meals |
-| `/api/meals` | POST | Create new meal entry |
-| `/api/meals/summary` | GET | Get daily nutrition summary |
-| `/api/meals/:id` | GET | Get meal by ID |
-| `/api/meals/:id` | PUT | Update meal |
-| `/api/meals/:id` | DELETE | Delete meal |
+
+| Endpoint                   | Method | Description                 |
+| -------------------------- | ------ | --------------------------- |
+| `/api/health`              | GET    | Health check (public)       |
+| `/api/meals/analyze/image` | POST   | Analyze food image with AI  |
+| `/api/meals/analyze/text`  | POST   | Analyze food description    |
+| `/api/meals`               | GET    | Get user's meals            |
+| `/api/meals`               | POST   | Create new meal entry       |
+| `/api/meals/summary`       | GET    | Get daily nutrition summary |
+| `/api/meals/:id`           | GET    | Get meal by ID              |
+| `/api/meals/:id`           | PUT    | Update meal                 |
+| `/api/meals/:id`           | DELETE | Delete meal                 |
 
 #### Sync API
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/sync/push` | POST | Push local changes to server |
-| `/api/sync/pull` | GET | Pull changes from server |
-| `/api/sync/status` | GET | Get sync status |
+
+| Endpoint           | Method | Description                  |
+| ------------------ | ------ | ---------------------------- |
+| `/api/sync/push`   | POST   | Push local changes to server |
+| `/api/sync/pull`   | GET    | Pull changes from server     |
+| `/api/sync/status` | GET    | Get sync status              |
 
 ### Environment Variables
 
 #### Backend (.env)
+
 ```
 DATABASE_URL=postgresql://nutriphi:password@localhost:5435/nutriphi
 GEMINI_API_KEY=your-gemini-api-key
@@ -117,6 +125,7 @@ PORT=3002
 ```
 
 #### Mobile (.env)
+
 ```
 EXPO_PUBLIC_MANA_MIDDLEWARE_URL=https://api.manacore.de
 EXPO_PUBLIC_MIDDLEWARE_APP_ID=nutriphi
@@ -124,6 +133,7 @@ EXPO_PUBLIC_BACKEND_URL=http://localhost:3002
 ```
 
 #### Web (.env)
+
 ```
 PUBLIC_NUTRIPHI_MIDDLEWARE_URL=https://api.manacore.de
 PUBLIC_MIDDLEWARE_APP_ID=nutriphi
@@ -143,6 +153,7 @@ PUBLIC_BACKEND_URL=http://localhost:3002
 ## Mobile App Architecture
 
 ### File Structure (apps/mobile)
+
 - `app/` - Expo Router pages and layouts
   - `(tabs)/` - Tab-based navigation screens
   - `_layout.tsx` - Root layout with Stack navigation
@@ -160,15 +171,18 @@ PUBLIC_BACKEND_URL=http://localhost:3002
 - `utils/` - Utility functions
 
 ### Styling
+
 - NativeWind (Tailwind for React Native)
 - Components use `className` prop with Tailwind utility classes
 
 ### State Management
+
 - Zustand stores for auth, meals, app settings
 - SQLite for local offline storage
 - Cloud sync via backend API
 
 ### Authentication Flow
+
 1. User signs in via Mana Middleware
 2. Tokens stored securely in expo-secure-store
 3. JWT sent with all API requests
@@ -177,16 +191,19 @@ PUBLIC_BACKEND_URL=http://localhost:3002
 ## Backend Architecture
 
 ### Authentication Guard
+
 - `JwtAuthGuard` validates tokens against Mana Core Auth
 - `CurrentUser` decorator extracts user data from JWT
 - All protected endpoints use `@UseGuards(JwtAuthGuard)`
 
 ### Database
+
 - PostgreSQL via Drizzle ORM (`@manacore/nutriphi-database` package)
 - Schema: `meals`, `nutrition_goals` tables
 - User isolation via `userId` field in all queries
 
 ### Sync Strategy
+
 - **Push**: Local changes uploaded with version tracking
 - **Pull**: Server changes downloaded since last sync
 - **Conflict Resolution**: Last-write-wins with client priority

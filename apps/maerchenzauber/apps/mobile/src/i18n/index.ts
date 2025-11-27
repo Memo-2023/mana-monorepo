@@ -13,40 +13,38 @@ const locales = getLocales();
 const deviceLanguage = locales[0]?.languageCode || 'en'; // e.g., 'en'
 
 // Initialize i18n
-i18n
-  .use(initReactI18next)
-  .init({
-    compatibilityJSON: 'v4', // Required for React Native
-    resources: {
-      en: { translation: en },
-      de: { translation: de },
-    },
-    lng: deviceLanguage, // Default to device language
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false, // React already escapes values
-    },
-    react: {
-      useSuspense: false, // Disable suspense for React Native
-    },
-  });
+i18n.use(initReactI18next).init({
+	compatibilityJSON: 'v4', // Required for React Native
+	resources: {
+		en: { translation: en },
+		de: { translation: de },
+	},
+	lng: deviceLanguage, // Default to device language
+	fallbackLng: 'en',
+	interpolation: {
+		escapeValue: false, // React already escapes values
+	},
+	react: {
+		useSuspense: false, // Disable suspense for React Native
+	},
+});
 
 // Load saved language preference
 AsyncStorage.getItem(LANGUAGE_STORAGE_KEY).then((savedLanguage) => {
-  if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'de')) {
-    i18n.changeLanguage(savedLanguage);
-  }
+	if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'de')) {
+		i18n.changeLanguage(savedLanguage);
+	}
 });
 
 // Helper function to change and save language
 export const changeLanguage = async (language: 'en' | 'de') => {
-  await i18n.changeLanguage(language);
-  await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+	await i18n.changeLanguage(language);
+	await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, language);
 };
 
 // Helper function to get current language
 export const getCurrentLanguage = (): 'en' | 'de' => {
-  return (i18n.language || 'en') as 'en' | 'de';
+	return (i18n.language || 'en') as 'en' | 'de';
 };
 
 export default i18n;

@@ -12,12 +12,12 @@ import Button from '../../components/ui/Button.astro';
 import { Icon } from 'astro-icon/components';
 
 export async function getStaticPaths() {
-  const missionEntries = await getCollection('mission');
-  const germanMissionEntries = missionEntries.filter(entry => entry.slug.startsWith('de/'));
-  return germanMissionEntries.map(entry => ({
-    params: { slug: entry.slug.replace('de/', '') },
-    props: { entry },
-  }));
+	const missionEntries = await getCollection('mission');
+	const germanMissionEntries = missionEntries.filter((entry) => entry.slug.startsWith('de/'));
+	return germanMissionEntries.map((entry) => ({
+		params: { slug: entry.slug.replace('de/', '') },
+		props: { entry },
+	}));
 }
 
 const { entry } = Astro.props;
@@ -25,133 +25,164 @@ const { Content } = await entry.render();
 
 // Get other mission articles
 const allMissionArticles = await getCollection('mission');
-const germanMissionArticles = allMissionArticles.filter(article => article.slug.startsWith('de/'));
+const germanMissionArticles = allMissionArticles.filter((article) =>
+	article.slug.startsWith('de/')
+);
 const otherArticles = germanMissionArticles
-  .filter(article => article.slug !== entry.slug)
-  .sort((a, b) => a.data.order - b.data.order);
+	.filter((article) => article.slug !== entry.slug)
+	.sort((a, b) => a.data.order - b.data.order);
 
 const categoryIcons = {
-  vision: 'mdi:eye-outline',
-  values: 'mdi:heart-outline',
-  approach: 'mdi:lightbulb-outline',
-  team: 'mdi:account-group-outline',
-  future: 'mdi:rocket-launch-outline',
+	vision: 'mdi:eye-outline',
+	values: 'mdi:heart-outline',
+	approach: 'mdi:lightbulb-outline',
+	team: 'mdi:account-group-outline',
+	future: 'mdi:rocket-launch-outline',
 };
 ---
 
 <Layout title={`${entry.data.title} | Mana`}>
-  <Navbar />
-  
-  <Section spacing="large" class="pt-32">
-    <Container>
-      <div class="max-w-4xl mx-auto">
-        <!-- Back Link -->
-        <a href="/mission" class="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-mana-blue transition-colors mb-8">
-          <Icon name="mdi:arrow-left" class="w-5 h-5" />
-          <span>Zurück zur Übersicht</span>
-        </a>
-        
-        <!-- Header -->
-        <div class="mb-12 text-center">
-          <div class="w-20 h-20 bg-mana-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Icon name={categoryIcons[entry.data.category]} class="w-10 h-10 text-mana-blue" />
-          </div>
-          
-          <Heading as="h1" size="1" class="mb-4">
-            {entry.data.title}
-          </Heading>
-          
-          <Text size="xl" color="muted" class="max-w-2xl mx-auto">
-            {entry.data.description}
-          </Text>
-        </div>
-        
-        <!-- Content -->
-        <div class="prose prose-lg dark:prose-invert max-w-none mb-16">
-          <Content />
-        </div>
-        
-        <!-- Other Articles -->
-        {otherArticles.length > 0 && (
-          <div class="border-t border-gray-200 dark:border-gray-700 pt-12">
-            <Heading as="h3" size="4" class="mb-6">
-              Weitere Artikel
-            </Heading>
-            
-            <div class="space-y-4">
-              {otherArticles.map(article => (
-                <a href={`/mission/${article.slug.replace('de/', '')}`} class="block group">
-                  <Card variant="bordered" padding="large" class="hover:border-mana-blue transition-all">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center group-hover:bg-mana-blue/10 transition-colors">
-                          <Icon name={categoryIcons[article.data.category]} class="w-6 h-6 text-mana-blue" />
-                        </div>
-                        <div>
-                          <Text weight="semibold" class="group-hover:text-mana-blue transition-colors">
-                            {article.data.title}
-                          </Text>
-                          <Text size="sm" color="muted">
-                            {article.data.description}
-                          </Text>
-                        </div>
-                      </div>
-                      <Icon name="mdi:arrow-right" class="w-5 h-5 text-gray-400 group-hover:text-mana-blue transition-colors" />
-                    </div>
-                  </Card>
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        <!-- CTA -->
-        <Card variant="elevated" padding="xlarge" class="mt-12 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
-          <div class="text-center">
-            <Heading as="h3" size="4" class="mb-4">
-              Bereit, Teil unserer Mission zu werden?
-            </Heading>
-            <Text color="muted" class="mb-6 max-w-xl mx-auto">
-              Starten Sie noch heute mit Mana und erleben Sie die Zukunft der KI-Nutzung.
-            </Text>
-            <Button href="/start" variant="primary" size="large" class="bg-mana-orange hover:bg-orange-600">
-              Kostenlos testen
-            </Button>
-          </div>
-        </Card>
-      </div>
-    </Container>
-  </Section>
-  
-  <Footer />
+	<Navbar />
+
+	<Section spacing="large" class="pt-32">
+		<Container>
+			<div class="max-w-4xl mx-auto">
+				<!-- Back Link -->
+				<a
+					href="/mission"
+					class="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-mana-blue transition-colors mb-8"
+				>
+					<Icon name="mdi:arrow-left" class="w-5 h-5" />
+					<span>Zurück zur Übersicht</span>
+				</a>
+
+				<!-- Header -->
+				<div class="mb-12 text-center">
+					<div
+						class="w-20 h-20 bg-mana-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-6"
+					>
+						<Icon name={categoryIcons[entry.data.category]} class="w-10 h-10 text-mana-blue" />
+					</div>
+
+					<Heading as="h1" size="1" class="mb-4">
+						{entry.data.title}
+					</Heading>
+
+					<Text size="xl" color="muted" class="max-w-2xl mx-auto">
+						{entry.data.description}
+					</Text>
+				</div>
+
+				<!-- Content -->
+				<div class="prose prose-lg dark:prose-invert max-w-none mb-16">
+					<Content />
+				</div>
+
+				<!-- Other Articles -->
+				{
+					otherArticles.length > 0 && (
+						<div class="border-t border-gray-200 dark:border-gray-700 pt-12">
+							<Heading as="h3" size="4" class="mb-6">
+								Weitere Artikel
+							</Heading>
+
+							<div class="space-y-4">
+								{otherArticles.map((article) => (
+									<a href={`/mission/${article.slug.replace('de/', '')}`} class="block group">
+										<Card
+											variant="bordered"
+											padding="large"
+											class="hover:border-mana-blue transition-all"
+										>
+											<div class="flex items-center justify-between">
+												<div class="flex items-center gap-4">
+													<div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center group-hover:bg-mana-blue/10 transition-colors">
+														<Icon
+															name={categoryIcons[article.data.category]}
+															class="w-6 h-6 text-mana-blue"
+														/>
+													</div>
+													<div>
+														<Text
+															weight="semibold"
+															class="group-hover:text-mana-blue transition-colors"
+														>
+															{article.data.title}
+														</Text>
+														<Text size="sm" color="muted">
+															{article.data.description}
+														</Text>
+													</div>
+												</div>
+												<Icon
+													name="mdi:arrow-right"
+													class="w-5 h-5 text-gray-400 group-hover:text-mana-blue transition-colors"
+												/>
+											</div>
+										</Card>
+									</a>
+								))}
+							</div>
+						</div>
+					)
+				}
+
+				<!-- CTA -->
+				<Card
+					variant="elevated"
+					padding="xlarge"
+					class="mt-12 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20"
+				>
+					<div class="text-center">
+						<Heading as="h3" size="4" class="mb-4">
+							Bereit, Teil unserer Mission zu werden?
+						</Heading>
+						<Text color="muted" class="mb-6 max-w-xl mx-auto">
+							Starten Sie noch heute mit Mana und erleben Sie die Zukunft der KI-Nutzung.
+						</Text>
+						<Button
+							href="/start"
+							variant="primary"
+							size="large"
+							class="bg-mana-orange hover:bg-orange-600"
+						>
+							Kostenlos testen
+						</Button>
+					</div>
+				</Card>
+			</div>
+		</Container>
+	</Section>
+
+	<Footer />
 </Layout>
 
 <style>
-  .prose h2 {
-    @apply text-2xl font-bold mt-8 mb-4;
-  }
-  
-  .prose h3 {
-    @apply text-xl font-semibold mt-6 mb-3;
-  }
-  
-  .prose p {
-    @apply mb-4 leading-relaxed;
-  }
-  
-  .prose ul {
-    @apply space-y-2 mb-4;
-  }
-  
-  .prose li {
-    @apply ml-6 list-disc;
-  }
-  
-  .prose strong {
-    @apply font-semibold text-gray-900 dark:text-gray-100;
-  }
-  
-  .prose blockquote {
-    @apply border-l-4 border-mana-blue pl-4 italic my-6;
-  }
+	.prose h2 {
+		@apply text-2xl font-bold mt-8 mb-4;
+	}
+
+	.prose h3 {
+		@apply text-xl font-semibold mt-6 mb-3;
+	}
+
+	.prose p {
+		@apply mb-4 leading-relaxed;
+	}
+
+	.prose ul {
+		@apply space-y-2 mb-4;
+	}
+
+	.prose li {
+		@apply ml-6 list-disc;
+	}
+
+	.prose strong {
+		@apply font-semibold text-gray-900 dark:text-gray-100;
+	}
+
+	.prose blockquote {
+		@apply border-l-4 border-mana-blue pl-4 italic my-6;
+	}
 </style>

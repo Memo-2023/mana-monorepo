@@ -17,7 +17,10 @@ class ThemeStore {
 	public transitioning = { subscribe: this.transitioningStore.subscribe };
 
 	// Derived stores
-	public currentPreset = derived(this.presetStore, ($preset) => themes[$preset] || themes[defaultTheme]);
+	public currentPreset = derived(
+		this.presetStore,
+		($preset) => themes[$preset] || themes[defaultTheme]
+	);
 
 	public isDark = derived(
 		[this.modeStore, this.systemPrefersDarkStore],

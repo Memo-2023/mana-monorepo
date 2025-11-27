@@ -12,8 +12,7 @@ In dieser Episode sprechen Garrelt und Jan mit Till und Tobias, den Köpfen hint
 
 Wir unterhalten uns über die Erfahrungen, die sie auf ihrer Reise gemacht haben: Von der Auswahl der richtigen Tools über den Einstieg und die Lernkurve bis hin zur Kollaboration zwischen Entwickler:innen und Designer:innen erforschen wir alle Facetten des Projektes.
 
-Aber wir beleuchten auch, wann und wie ein solcher Ansatz an seine Grenzen stoßen kann. Wir fragen uns, ob das unausweichlich ist und wie am besten damit umgegangen werden sollte. Außerdem stellen wir die alles entscheidende Frage: Können Till und Tobias den Ansatz wirklich empfehlen und würden sie es nochmal genauso machen? 
-
+Aber wir beleuchten auch, wann und wie ein solcher Ansatz an seine Grenzen stoßen kann. Wir fragen uns, ob das unausweichlich ist und wie am besten damit umgegangen werden sollte. Außerdem stellen wir die alles entscheidende Frage: Können Till und Tobias den Ansatz wirklich empfehlen und würden sie es nochmal genauso machen?
 
 Transkript:
 

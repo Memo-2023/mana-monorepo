@@ -1,13 +1,13 @@
 ---
-name: "Marcus Rodriguez"
-role: "Senior Product Designer"
-company: "Tech Startup Inc."
-avatar: "/testimonials/marcus-rodriguez.jpg"
+name: 'Marcus Rodriguez'
+role: 'Senior Product Designer'
+company: 'Tech Startup Inc.'
+avatar: '/testimonials/marcus-rodriguez.jpg'
 rating: 5
 featured: true
-category: "designer"
-useCase: "Product mockups and marketing materials"
-language: "en"
+category: 'designer'
+useCase: 'Product mockups and marketing materials'
+language: 'en'
 date: 2024-10-01
 verified: true
 ---

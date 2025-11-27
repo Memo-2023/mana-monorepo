@@ -16,9 +16,14 @@
 	// Image Model Settings
 	let selectedImageModel = $state('flux-schnell');
 	const imageModels = [
-		{ id: 'flux-schnell', name: 'Flux Schnell', description: 'Schnell & gut (Standard)', speed: 'Schnell' },
+		{
+			id: 'flux-schnell',
+			name: 'Flux Schnell',
+			description: 'Schnell & gut (Standard)',
+			speed: 'Schnell',
+		},
 		{ id: 'flux-dev', name: 'Flux Dev', description: 'Beste Qualität, langsamer', speed: 'Mittel' },
-		{ id: 'sdxl', name: 'SDXL', description: 'Klassischer Stil', speed: 'Mittel' }
+		{ id: 'sdxl', name: 'SDXL', description: 'Klassischer Stil', speed: 'Mittel' },
 	];
 
 	onMount(async () => {
@@ -87,14 +92,21 @@
 	</div>
 
 	<!-- Stats Section -->
-	<section class="rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 p-6 text-white shadow-lg">
+	<section
+		class="rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 p-6 text-white shadow-lg"
+	>
 		<h2 class="mb-4 text-lg font-semibold">Deine Statistiken</h2>
 		<div class="grid grid-cols-2 gap-4">
 			<div class="rounded-xl bg-white/20 p-4 backdrop-blur">
 				<div class="flex items-center gap-3">
 					<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
 						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+							/>
 						</svg>
 					</div>
 					<div>
@@ -107,7 +119,12 @@
 				<div class="flex items-center gap-3">
 					<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
 						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+							/>
 						</svg>
 					</div>
 					<div>
@@ -127,28 +144,46 @@
 			<!-- Dark Mode Toggle -->
 			<div class="flex items-center justify-between rounded-xl bg-gray-50 p-4 dark:bg-gray-700/50">
 				<div class="flex items-center gap-3">
-					<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300">
+					<div
+						class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300"
+					>
 						{#if isDarkMode}
 							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+								/>
 							</svg>
 						{:else}
 							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+								/>
 							</svg>
 						{/if}
 					</div>
 					<div>
 						<p class="font-medium text-gray-800 dark:text-gray-200">Dunkelmodus</p>
-						<p class="text-sm text-gray-500 dark:text-gray-400">{isDarkMode ? 'Aktiviert' : 'Deaktiviert'}</p>
+						<p class="text-sm text-gray-500 dark:text-gray-400">
+							{isDarkMode ? 'Aktiviert' : 'Deaktiviert'}
+						</p>
 					</div>
 				</div>
 				<button
 					onclick={toggleTheme}
-					class="relative h-7 w-12 rounded-full transition-colors {isDarkMode ? 'bg-pink-500' : 'bg-gray-300'}"
+					class="relative h-7 w-12 rounded-full transition-colors {isDarkMode
+						? 'bg-pink-500'
+						: 'bg-gray-300'}"
 				>
 					<span
-						class="absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all {isDarkMode ? 'left-5.5' : 'left-0.5'}"
+						class="absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all {isDarkMode
+							? 'left-5.5'
+							: 'left-0.5'}"
 						style="left: {isDarkMode ? '1.375rem' : '0.125rem'}"
 					></span>
 				</button>
@@ -167,23 +202,48 @@
 			{#each imageModels as model}
 				<button
 					onclick={() => saveImageModel(model.id)}
-					class="flex w-full items-center gap-3 rounded-xl p-4 text-left transition-all {selectedImageModel === model.id ? 'bg-pink-50 ring-2 ring-pink-500 dark:bg-pink-900/20' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700/50 dark:hover:bg-gray-700'}"
+					class="flex w-full items-center gap-3 rounded-xl p-4 text-left transition-all {selectedImageModel ===
+					model.id
+						? 'bg-pink-50 ring-2 ring-pink-500 dark:bg-pink-900/20'
+						: 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700/50 dark:hover:bg-gray-700'}"
 				>
-					<div class="flex h-10 w-10 items-center justify-center rounded-xl {selectedImageModel === model.id ? 'bg-pink-500 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'}">
+					<div
+						class="flex h-10 w-10 items-center justify-center rounded-xl {selectedImageModel ===
+						model.id
+							? 'bg-pink-500 text-white'
+							: 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'}"
+					>
 						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+							/>
 						</svg>
 					</div>
 					<div class="flex-1">
 						<p class="font-medium text-gray-800 dark:text-gray-200">{model.name}</p>
 						<p class="text-sm text-gray-500 dark:text-gray-400">{model.description}</p>
 					</div>
-					<span class="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-600 dark:text-gray-300">
+					<span
+						class="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-600 dark:text-gray-300"
+					>
 						{model.speed}
 					</span>
 					{#if selectedImageModel === model.id}
-						<svg class="h-5 w-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+						<svg
+							class="h-5 w-5 text-pink-500"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M5 13l4 4L19 7"
+							/>
 						</svg>
 					{/if}
 				</button>
@@ -201,9 +261,16 @@
 				href="/creators"
 				class="flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
 			>
-				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-500 dark:bg-purple-900/30 dark:text-purple-400">
+				<div
+					class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-500 dark:bg-purple-900/30 dark:text-purple-400"
+				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+						/>
 					</svg>
 				</div>
 				<div class="flex-1">
@@ -220,9 +287,16 @@
 				href="/templates"
 				class="flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
 			>
-				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-400">
+				<div
+					class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-400"
+				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+						/>
 					</svg>
 				</div>
 				<div class="flex-1">
@@ -239,9 +313,16 @@
 				href="/collections"
 				class="flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
 			>
-				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 text-green-500 dark:bg-green-900/30 dark:text-green-400">
+				<div
+					class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 text-green-500 dark:bg-green-900/30 dark:text-green-400"
+				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+						/>
 					</svg>
 				</div>
 				<div class="flex-1">
@@ -265,9 +346,16 @@
 				href="/characters/share"
 				class="flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
 			>
-				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100 text-pink-500 dark:bg-pink-900/30 dark:text-pink-400">
+				<div
+					class="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100 text-pink-500 dark:bg-pink-900/30 dark:text-pink-400"
+				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+						/>
 					</svg>
 				</div>
 				<div class="flex-1">
@@ -298,7 +386,9 @@
 			<div class="flex items-center justify-between rounded-xl bg-gray-50 p-4 dark:bg-gray-700/50">
 				<div>
 					<p class="text-sm font-medium text-gray-500 dark:text-gray-400">Benutzer-ID</p>
-					<p class="font-mono text-xs text-gray-600 dark:text-gray-400">{authStore.user?.id || '-'}</p>
+					<p class="font-mono text-xs text-gray-600 dark:text-gray-400">
+						{authStore.user?.id || '-'}
+					</p>
 				</div>
 			</div>
 		</div>
@@ -315,7 +405,9 @@
 			<div class="flex items-center gap-3">
 				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white">
 					<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-						<path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+						<path
+							d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
+						/>
 					</svg>
 				</div>
 				<div>
@@ -339,9 +431,16 @@
 				href="/feedback"
 				class="flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
 			>
-				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-100 text-rose-500 dark:bg-rose-900/30 dark:text-rose-400">
+				<div
+					class="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-100 text-rose-500 dark:bg-rose-900/30 dark:text-rose-400"
+				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+						/>
 					</svg>
 				</div>
 				<div class="flex-1">
@@ -358,14 +457,23 @@
 				href="/archive"
 				class="flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
 			>
-				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+				<div
+					class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+						/>
 					</svg>
 				</div>
 				<div class="flex-1">
 					<p class="font-medium text-gray-800 dark:text-gray-200">Archiv</p>
-					<p class="text-sm text-gray-500 dark:text-gray-400">Archivierte Geschichten und Charaktere</p>
+					<p class="text-sm text-gray-500 dark:text-gray-400">
+						Archivierte Geschichten und Charaktere
+					</p>
 				</div>
 				<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -377,9 +485,16 @@
 				href="/help"
 				class="flex items-center gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
 			>
-				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-500 dark:bg-blue-900/30 dark:text-blue-400">
+				<div
+					class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-500 dark:bg-blue-900/30 dark:text-blue-400"
+				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
 					</svg>
 				</div>
 				<div class="flex-1">
@@ -399,9 +514,16 @@
 				}}
 				class="flex w-full items-center gap-3 rounded-xl p-3 text-left transition-all hover:bg-red-50 dark:hover:bg-red-900/20"
 			>
-				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 text-red-500 dark:bg-red-900/30 dark:text-red-400">
+				<div
+					class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 text-red-500 dark:bg-red-900/30 dark:text-red-400"
+				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+						/>
 					</svg>
 				</div>
 				<div class="flex-1">

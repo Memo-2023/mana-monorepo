@@ -8,10 +8,7 @@
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import { authService } from '$lib/services/authService';
 	import { onMount } from 'svelte';
-	import {
-		PUBLIC_GOOGLE_CLIENT_ID,
-		PUBLIC_APPLE_CLIENT_ID
-	} from '$env/static/public';
+	import { PUBLIC_GOOGLE_CLIENT_ID, PUBLIC_APPLE_CLIENT_ID } from '$env/static/public';
 
 	// Get translations based on current locale
 	const translations = $derived(getLoginTranslations($locale || 'de'));

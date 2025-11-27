@@ -5,7 +5,7 @@ import type {
 	CardMetadata,
 	RenderMode,
 	CardEvent,
-	ValidationResult
+	ValidationResult,
 } from '$lib/components/cards/types';
 import { pb } from '$lib/pocketbase';
 import { cardConverter } from '$lib/services/cardConverter';
@@ -35,7 +35,7 @@ const initialState: CardsState = {
 	isLoading: false,
 	error: null,
 	editMode: false,
-	selectedCards: new Set()
+	selectedCards: new Set(),
 };
 
 // Create the main store
@@ -90,7 +90,7 @@ function createCardsStore() {
 
 				const records = await pb.collection('cards').getList(1, 100, {
 					filter,
-					sort: 'metadata.position,created'
+					sort: 'metadata.position,created',
 				});
 
 				const cards = new Map<string, Card>();
@@ -100,7 +100,7 @@ function createCardsStore() {
 						config: JSON.parse(record.config),
 						metadata: JSON.parse(record.metadata),
 						constraints: JSON.parse(record.constraints),
-						variant: record.variant
+						variant: record.variant,
 					};
 					cards.set(record.id, card);
 				}
@@ -108,7 +108,7 @@ function createCardsStore() {
 				update((state) => ({
 					...state,
 					cards,
-					isLoading: false
+					isLoading: false,
 				}));
 
 				return cards;
@@ -116,7 +116,7 @@ function createCardsStore() {
 				update((state) => ({
 					...state,
 					isLoading: false,
-					error: error instanceof Error ? error.message : 'Failed to load cards'
+					error: error instanceof Error ? error.message : 'Failed to load cards',
 				}));
 				throw error;
 			}
@@ -134,14 +134,14 @@ function createCardsStore() {
 					created: now,
 					updated: now,
 					isActive: true,
-					isPublic: false
+					isPublic: false,
 				},
 				constraints: {
 					aspectRatio: '16/9',
 					maxModules: 20,
 					maxHTMLSize: 100000,
-					maxCSSSize: 50000
-				}
+					maxCSSSize: 50000,
+				},
 			};
 
 			// Validate card
@@ -160,7 +160,7 @@ function createCardsStore() {
 					config: JSON.stringify(card.config),
 					metadata: JSON.stringify(card.metadata),
 					constraints: JSON.stringify(card.constraints),
-					variant: card.variant
+					variant: card.variant,
 				});
 
 				card.id = record.id;
@@ -174,14 +174,14 @@ function createCardsStore() {
 					return {
 						...state,
 						cards: newCards,
-						activeCardId: card.id || null
+						activeCardId: card.id || null,
 					};
 				});
 
 				emitEvent({
 					type: 'created',
 					cardId: card.id,
-					timestamp: Date.now()
+					timestamp: Date.now(),
 				});
 
 				return card;
@@ -201,8 +201,8 @@ function createCardsStore() {
 				metadata: {
 					...card.metadata,
 					...updates.metadata,
-					updated: new Date().toISOString()
-				}
+					updated: new Date().toISOString(),
+				},
 			};
 
 			// Validate card
@@ -217,7 +217,7 @@ function createCardsStore() {
 					config: JSON.stringify(updatedCard.config),
 					metadata: JSON.stringify(updatedCard.metadata),
 					constraints: JSON.stringify(updatedCard.constraints),
-					variant: updatedCard.variant
+					variant: updatedCard.variant,
 				});
 
 				// Update store
@@ -226,7 +226,7 @@ function createCardsStore() {
 					newCards.set(id, updatedCard);
 					return {
 						...state,
-						cards: newCards
+						cards: newCards,
 					};
 				});
 
@@ -234,7 +234,7 @@ function createCardsStore() {
 					type: 'updated',
 					cardId: id,
 					timestamp: Date.now(),
-					data: updates
+					data: updates,
 				});
 
 				return updatedCard;
@@ -257,14 +257,14 @@ function createCardsStore() {
 						...state,
 						cards: newCards,
 						selectedCards: newSelectedCards,
-						activeCardId: state.activeCardId === id ? null : state.activeCardId
+						activeCardId: state.activeCardId === id ? null : state.activeCardId,
 					};
 				});
 
 				emitEvent({
 					type: 'deleted',
 					cardId: id,
-					timestamp: Date.now()
+					timestamp: Date.now(),
 				});
 
 				return true;
@@ -301,7 +301,7 @@ function createCardsStore() {
 					type: 'converted',
 					cardId: id,
 					timestamp: Date.now(),
-					data: { from: card.config.mode, to: targetMode }
+					data: { from: card.config.mode, to: targetMode },
 				});
 
 				return updatedCard;
@@ -319,7 +319,7 @@ function createCardsStore() {
 				...card.metadata,
 				name: `${card.metadata?.name || 'Card'} (Copy)`,
 				created: new Date().toISOString(),
-				updated: new Date().toISOString()
+				updated: new Date().toISOString(),
 			};
 
 			return this.createCard(card.config, newMetadata);
@@ -370,7 +370,7 @@ function createCardsStore() {
 		selectAll() {
 			update((state) => ({
 				...state,
-				selectedCards: new Set(state.cards.keys())
+				selectedCards: new Set(state.cards.keys()),
 			}));
 		},
 
@@ -383,7 +383,7 @@ function createCardsStore() {
 		// Reset store
 		reset() {
 			set(initialState);
-		}
+		},
 	};
 }
 

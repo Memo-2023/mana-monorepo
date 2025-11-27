@@ -4,7 +4,10 @@
 	import { onMount } from 'svelte';
 	import { authStore } from '$lib/stores/authStore.svelte';
 	import { theme } from '$lib/stores/theme';
-	import { isSidebarMode as sidebarModeStore, isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
+	import {
+		isSidebarMode as sidebarModeStore,
+		isNavCollapsed as collapsedStore,
+	} from '$lib/stores/navigation';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem } from '@manacore/shared-ui';
 
@@ -22,19 +25,15 @@
 		{ href: '/explore', label: 'Explore', icon: 'search' },
 		{ href: '/progress', label: 'Progress', icon: 'chart' },
 		{ href: '/subscription', label: 'Mana', icon: 'mana' },
-		{ href: '/profile', label: 'Profile', icon: 'user' }
+		{ href: '/profile', label: 'Profile', icon: 'user' },
 	];
 
 	// Navigation shortcuts (Ctrl+1-5)
-	const navRoutes = navItems.map(item => item.href);
+	const navRoutes = navItems.map((item) => item.href);
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
-		if (
-			target.tagName === 'INPUT' ||
-			target.tagName === 'TEXTAREA' ||
-			target.isContentEditable
-		) {
+		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
 			return;
 		}
 
@@ -104,7 +103,9 @@
 {#if authStore.loading}
 	<div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
 		<div class="text-center">
-			<div class="inline-block animate-spin h-8 w-8 border-4 border-primary-500 border-t-transparent rounded-full"></div>
+			<div
+				class="inline-block animate-spin h-8 w-8 border-4 border-primary-500 border-t-transparent rounded-full"
+			></div>
 			<p class="mt-4 text-gray-500 dark:text-gray-400">Loading...</p>
 		</div>
 	</div>
@@ -119,9 +120,9 @@
 			onLogout={handleSignOut}
 			onToggleTheme={handleToggleTheme}
 			isDark={effectiveMode === 'dark'}
-			isSidebarMode={isSidebarMode}
+			{isSidebarMode}
 			onModeChange={handleModeChange}
-			isCollapsed={isCollapsed}
+			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
 			showThemeToggle={true}
 			showLanguageSwitcher={false}
@@ -130,7 +131,11 @@
 
 		<!-- Main content with dynamic padding -->
 		<main
-			class="transition-all duration-300 {isCollapsed ? '' : (isSidebarMode ? 'pl-[180px]' : 'pt-20')}"
+			class="transition-all duration-300 {isCollapsed
+				? ''
+				: isSidebarMode
+					? 'pl-[180px]'
+					: 'pt-20'}"
 		>
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				{@render children()}

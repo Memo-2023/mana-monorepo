@@ -5,27 +5,27 @@ industry: Bildung & Forschung
 size: enterprise
 location: Ravensburg-Weingarten, Deutschland
 testimonial:
-  quote: "Mana hat unsere digitale Transformation im Bereich KI maßgeblich vorangetrieben. Die einfache Verwaltung und die DSGVO-Konformität waren für uns als deutsche Hochschule entscheidend."
+  quote: 'Mana hat unsere digitale Transformation im Bereich KI maßgeblich vorangetrieben. Die einfache Verwaltung und die DSGVO-Konformität waren für uns als deutsche Hochschule entscheidend.'
   author: Prof. Dr. Anna Schmidt
   role: Vizepräsidentin Digitalisierung
   image: /images/clients/prof-schmidt.jpg
 stats:
-  - value: "850"
-    label: "Nutzer"
-  - value: "100%"
-    label: "DSGVO-konform"
-  - value: "4"
-    label: "Fakultäten"
-challenge: "Die RWU suchte eine datenschutzkonforme KI-Lösung, die sowohl für die Lehre als auch für die angewandte Forschung in Kooperation mit regionalen Unternehmen geeignet ist."
-solution: "Mana Enterprise mit speziellen Sicherheitsfeatures für sensible Forschungsprojekte und flexiblen Zugriffsrechten für externe Projektpartner."
+  - value: '850'
+    label: 'Nutzer'
+  - value: '100%'
+    label: 'DSGVO-konform'
+  - value: '4'
+    label: 'Fakultäten'
+challenge: 'Die RWU suchte eine datenschutzkonforme KI-Lösung, die sowohl für die Lehre als auch für die angewandte Forschung in Kooperation mit regionalen Unternehmen geeignet ist.'
+solution: 'Mana Enterprise mit speziellen Sicherheitsfeatures für sensible Forschungsprojekte und flexiblen Zugriffsrechten für externe Projektpartner.'
 results:
-  - "Sichere KI-Nutzung in Industriekooperationen"
-  - "Integration in alle Studiengänge"
-  - "Steigerung der Drittmitteleinnahmen durch KI-Projekte"
-  - "Aufbau eines KI-Kompetenzzentrums"
+  - 'Sichere KI-Nutzung in Industriekooperationen'
+  - 'Integration in alle Studiengänge'
+  - 'Steigerung der Drittmitteleinnahmen durch KI-Projekte'
+  - 'Aufbau eines KI-Kompetenzzentrums'
 manaUsage:
   monthlyCredits: 150000
-  mainTools: ["ChatGPT", "Claude", "Perplexity", "GitHub Copilot", "Wolfram Alpha"]
+  mainTools: ['ChatGPT', 'Claude', 'Perplexity', 'GitHub Copilot', 'Wolfram Alpha']
   teamSize: 850
 featured: true
 order: 3

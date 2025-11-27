@@ -27,22 +27,26 @@ const isRecent = isRecentRelease(data.releaseDate);
 
 <article class="changelog-entry">
 	<div class="entry-header">
-		<div class="flex items-start justify-between gap-4 flex-wrap">
+		<div class="flex flex-wrap items-start justify-between gap-4">
 			<div>
-				<div class="flex items-center gap-3 mb-3 flex-wrap">
+				<div class="mb-3 flex flex-wrap items-center gap-3">
 					<VersionBadge version={data.version} type={data.type} showLabel={false} />
 
-					{data.highlighted && (
-						<span class="px-2 py-1 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded text-xs font-medium">
-							⭐ Highlighted
-						</span>
-					)}
+					{
+						data.highlighted && (
+							<span class="rounded border border-yellow-500/20 bg-yellow-500/10 px-2 py-1 text-xs font-medium text-yellow-400">
+								⭐ Highlighted
+							</span>
+						)
+					}
 
-					{isRecent && (
-						<span class="px-2 py-1 bg-green-500/10 text-green-400 border border-green-500/20 rounded text-xs font-medium">
-							🆕 New
-						</span>
-					)}
+					{
+						isRecent && (
+							<span class="rounded border border-green-500/20 bg-green-500/10 px-2 py-1 text-xs font-medium text-green-400">
+								🆕 New
+							</span>
+						)
+					}
 				</div>
 
 				<a href={`/changelog/${entry.id}`} class="entry-title-link">
@@ -53,31 +57,44 @@ const isRecent = isRecentRelease(data.releaseDate);
 
 				<div class="entry-meta">
 					<span class="meta-item">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+							></path>
 						</svg>
 						{formattedDate} · {timeAgo}
 					</span>
 					<span class="meta-item">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+							></path>
 						</svg>
 						{totalChanges} changes
 					</span>
 					<span class="meta-item platforms">
-						{data.platforms.map((platform) => (
-							<span class="platform-badge" title={getPlatformDisplayName(platform)}>
-								{getPlatformIcon(platform)}
-							</span>
-						))}
+						{
+							data.platforms.map((platform) => (
+								<span class="platform-badge" title={getPlatformDisplayName(platform)}>
+									{getPlatformIcon(platform)}
+								</span>
+							))
+						}
 					</span>
 				</div>
 			</div>
 
 			<a href={`/changelog/${entry.id}`} class="read-more-btn">
 				Read More
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+					></path>
 				</svg>
 			</a>
 		</div>
@@ -86,119 +103,123 @@ const isRecent = isRecentRelease(data.releaseDate);
 	<!-- Changes Preview -->
 	<div class="entry-changes">
 		<!-- Features -->
-		{data.changes.features.length > 0 && (
-			<div class="change-section">
-				<h4 class="change-section-title">
-					<span class="change-icon">✨</span>
-					<span>New Features ({data.changes.features.length})</span>
-				</h4>
-				<ul class="change-list">
-					{data.changes.features.slice(0, detailed ? undefined : 3).map((feature) => (
-						<li class="change-item">
-							<span class="change-bullet">•</span>
-							<div>
-								<span class="change-title">{feature.title}</span>
-								{detailed && <p class="change-description">{feature.description}</p>}
-							</div>
-						</li>
-					))}
-					{!detailed && data.changes.features.length > 3 && (
-						<li class="change-item-more">
-							+ {data.changes.features.length - 3} more features
-						</li>
-					)}
-				</ul>
-			</div>
-		)}
+		{
+			data.changes.features.length > 0 && (
+				<div class="change-section">
+					<h4 class="change-section-title">
+						<span class="change-icon">✨</span>
+						<span>New Features ({data.changes.features.length})</span>
+					</h4>
+					<ul class="change-list">
+						{data.changes.features.slice(0, detailed ? undefined : 3).map((feature) => (
+							<li class="change-item">
+								<span class="change-bullet">•</span>
+								<div>
+									<span class="change-title">{feature.title}</span>
+									{detailed && <p class="change-description">{feature.description}</p>}
+								</div>
+							</li>
+						))}
+						{!detailed && data.changes.features.length > 3 && (
+							<li class="change-item-more">+ {data.changes.features.length - 3} more features</li>
+						)}
+					</ul>
+				</div>
+			)
+		}
 
 		<!-- Improvements -->
-		{data.changes.improvements.length > 0 && (
-			<div class="change-section">
-				<h4 class="change-section-title">
-					<span class="change-icon">🔧</span>
-					<span>Improvements ({data.changes.improvements.length})</span>
-				</h4>
-				<ul class="change-list">
-					{data.changes.improvements.slice(0, detailed ? undefined : 3).map((improvement) => (
-						<li class="change-item">
-							<span class="change-bullet">•</span>
-							<div>
-								<span class="change-title">{improvement.title}</span>
-								{detailed && <p class="change-description">{improvement.description}</p>}
-							</div>
-						</li>
-					))}
-					{!detailed && data.changes.improvements.length > 3 && (
-						<li class="change-item-more">
-							+ {data.changes.improvements.length - 3} more improvements
-						</li>
-					)}
-				</ul>
-			</div>
-		)}
+		{
+			data.changes.improvements.length > 0 && (
+				<div class="change-section">
+					<h4 class="change-section-title">
+						<span class="change-icon">🔧</span>
+						<span>Improvements ({data.changes.improvements.length})</span>
+					</h4>
+					<ul class="change-list">
+						{data.changes.improvements.slice(0, detailed ? undefined : 3).map((improvement) => (
+							<li class="change-item">
+								<span class="change-bullet">•</span>
+								<div>
+									<span class="change-title">{improvement.title}</span>
+									{detailed && <p class="change-description">{improvement.description}</p>}
+								</div>
+							</li>
+						))}
+						{!detailed && data.changes.improvements.length > 3 && (
+							<li class="change-item-more">
+								+ {data.changes.improvements.length - 3} more improvements
+							</li>
+						)}
+					</ul>
+				</div>
+			)
+		}
 
 		<!-- Bug Fixes -->
-		{data.changes.bugfixes.length > 0 && (
-			<div class="change-section">
-				<h4 class="change-section-title">
-					<span class="change-icon">🐛</span>
-					<span>Bug Fixes ({data.changes.bugfixes.length})</span>
-				</h4>
-				<ul class="change-list">
-					{data.changes.bugfixes.slice(0, detailed ? undefined : 3).map((bugfix) => (
-						<li class="change-item">
-							<span class="change-bullet">•</span>
-							<div>
-								{bugfix.severity && (
-									<span class={`severity-badge ${getSeverityColor(bugfix.severity)}`}>
-										{getSeverityIcon(bugfix.severity)}
-									</span>
-								)}
-								<span class="change-title">{bugfix.title}</span>
-								{detailed && <p class="change-description">{bugfix.description}</p>}
-							</div>
-						</li>
-					))}
-					{!detailed && data.changes.bugfixes.length > 3 && (
-						<li class="change-item-more">
-							+ {data.changes.bugfixes.length - 3} more bug fixes
-						</li>
-					)}
-				</ul>
-			</div>
-		)}
+		{
+			data.changes.bugfixes.length > 0 && (
+				<div class="change-section">
+					<h4 class="change-section-title">
+						<span class="change-icon">🐛</span>
+						<span>Bug Fixes ({data.changes.bugfixes.length})</span>
+					</h4>
+					<ul class="change-list">
+						{data.changes.bugfixes.slice(0, detailed ? undefined : 3).map((bugfix) => (
+							<li class="change-item">
+								<span class="change-bullet">•</span>
+								<div>
+									{bugfix.severity && (
+										<span class={`severity-badge ${getSeverityColor(bugfix.severity)}`}>
+											{getSeverityIcon(bugfix.severity)}
+										</span>
+									)}
+									<span class="change-title">{bugfix.title}</span>
+									{detailed && <p class="change-description">{bugfix.description}</p>}
+								</div>
+							</li>
+						))}
+						{!detailed && data.changes.bugfixes.length > 3 && (
+							<li class="change-item-more">+ {data.changes.bugfixes.length - 3} more bug fixes</li>
+						)}
+					</ul>
+				</div>
+			)
+		}
 
 		<!-- Breaking Changes -->
-		{data.changes.breaking.length > 0 && (
-			<div class="change-section breaking">
-				<h4 class="change-section-title">
-					<span class="change-icon">⚠️</span>
-					<span>Breaking Changes ({data.changes.breaking.length})</span>
-				</h4>
-				<ul class="change-list">
-					{data.changes.breaking.map((breaking) => (
-						<li class="change-item">
-							<span class="change-bullet">•</span>
-							<div>
-								<span class="change-title">{breaking.title}</span>
-								<p class="change-description">{breaking.description}</p>
-								{breaking.migration && (
-									<p class="migration-guide">
-										<strong>Migration:</strong> {breaking.migration}
-									</p>
-								)}
-							</div>
-						</li>
-					))}
-				</ul>
-			</div>
-		)}
+		{
+			data.changes.breaking.length > 0 && (
+				<div class="change-section breaking">
+					<h4 class="change-section-title">
+						<span class="change-icon">⚠️</span>
+						<span>Breaking Changes ({data.changes.breaking.length})</span>
+					</h4>
+					<ul class="change-list">
+						{data.changes.breaking.map((breaking) => (
+							<li class="change-item">
+								<span class="change-bullet">•</span>
+								<div>
+									<span class="change-title">{breaking.title}</span>
+									<p class="change-description">{breaking.description}</p>
+									{breaking.migration && (
+										<p class="migration-guide">
+											<strong>Migration:</strong> {breaking.migration}
+										</p>
+									)}
+								</div>
+							</li>
+						))}
+					</ul>
+				</div>
+			)
+		}
 	</div>
 </article>
 
 <style>
 	.changelog-entry {
-		@apply bg-dark-elevated border border-dark-border rounded-2xl p-6 hover:border-primary/30 transition;
+		@apply rounded-2xl border border-dark-border bg-dark-elevated p-6 transition hover:border-primary/30;
 	}
 
 	.entry-header {
@@ -210,15 +231,15 @@ const isRecent = isRecentRelease(data.releaseDate);
 	}
 
 	.entry-title {
-		@apply text-2xl font-bold text-white mb-3 hover:text-primary transition;
+		@apply mb-3 text-2xl font-bold text-white transition hover:text-primary;
 	}
 
 	.entry-summary {
-		@apply text-gray-300 mb-4 leading-relaxed;
+		@apply mb-4 leading-relaxed text-gray-300;
 	}
 
 	.entry-meta {
-		@apply flex items-center gap-4 text-sm text-gray-500 flex-wrap;
+		@apply flex flex-wrap items-center gap-4 text-sm text-gray-500;
 	}
 
 	.meta-item {
@@ -234,7 +255,7 @@ const isRecent = isRecentRelease(data.releaseDate);
 	}
 
 	.read-more-btn {
-		@apply px-4 py-2 bg-primary/10 border border-primary/20 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition flex items-center gap-2 whitespace-nowrap;
+		@apply flex items-center gap-2 whitespace-nowrap rounded-lg border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary/20;
 	}
 
 	.entry-changes {
@@ -242,15 +263,15 @@ const isRecent = isRecentRelease(data.releaseDate);
 	}
 
 	.change-section {
-		@apply bg-dark-bg rounded-xl p-4;
+		@apply rounded-xl bg-dark-bg p-4;
 	}
 
 	.change-section.breaking {
-		@apply bg-red-500/5 border border-red-500/20;
+		@apply border border-red-500/20 bg-red-500/5;
 	}
 
 	.change-section-title {
-		@apply flex items-center gap-2 text-sm font-semibold text-white mb-3;
+		@apply mb-3 flex items-center gap-2 text-sm font-semibold text-white;
 	}
 
 	.change-icon {
@@ -262,11 +283,11 @@ const isRecent = isRecentRelease(data.releaseDate);
 	}
 
 	.change-item {
-		@apply flex items-start gap-2 text-gray-300 text-sm;
+		@apply flex items-start gap-2 text-sm text-gray-300;
 	}
 
 	.change-bullet {
-		@apply text-primary flex-shrink-0 mt-0.5;
+		@apply mt-0.5 flex-shrink-0 text-primary;
 	}
 
 	.change-title {
@@ -274,18 +295,18 @@ const isRecent = isRecentRelease(data.releaseDate);
 	}
 
 	.change-description {
-		@apply text-gray-400 text-sm mt-1;
+		@apply mt-1 text-sm text-gray-400;
 	}
 
 	.change-item-more {
-		@apply text-gray-500 text-sm italic pl-4;
+		@apply pl-4 text-sm italic text-gray-500;
 	}
 
 	.severity-badge {
-		@apply text-xs mr-1;
+		@apply mr-1 text-xs;
 	}
 
 	.migration-guide {
-		@apply text-yellow-400 text-sm mt-2 p-2 bg-yellow-500/5 rounded;
+		@apply mt-2 rounded bg-yellow-500/5 p-2 text-sm text-yellow-400;
 	}
 </style>

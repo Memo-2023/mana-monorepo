@@ -3,9 +3,11 @@
 Da das pb_schema.json veraltet ist, erstelle die Collections manuell:
 
 ## 1. Users Collection
+
 **Bereits vorhanden** (PocketBase Standard Auth Collection)
 
 Füge diese zusätzlichen Felder hinzu:
+
 - `username` (text, unique, required)
 - `bio` (text, optional)
 - `website` (url, optional)
@@ -29,6 +31,7 @@ Füge diese zusätzlichen Felder hinzu:
 Name: `links`
 
 Fields:
+
 - `short_code` (text, unique, required, min: 3, max: 50)
 - `custom_code` (text, optional)
 - `original_url` (url, required)
@@ -48,6 +51,7 @@ Fields:
 - `account_owner` (relation → accounts, optional)
 
 API Rules:
+
 - List/View: @request.auth.id != "" && (@request.auth.id = user_id || is_active = true)
 - Create: @request.auth.id != ""
 - Update: @request.auth.id = user_id
@@ -60,6 +64,7 @@ API Rules:
 Name: `clicks`
 
 Fields:
+
 - `link_id` (relation → links, required)
 - `ip_hash` (text, optional)
 - `user_agent` (text, optional)
@@ -75,6 +80,7 @@ Fields:
 - `utm_campaign` (text, optional)
 
 API Rules:
+
 - List/View: @request.auth.id != "" && @request.auth.id = link_id.user_id
 - Create: "" (public)
 - Update: none
@@ -87,6 +93,7 @@ API Rules:
 Name: `accounts`
 
 Fields:
+
 - `name` (text, required)
 - `owner` (relation → users, required)
 - `members` (relation → users, multiple)
@@ -95,6 +102,7 @@ Fields:
 - `settings` (json, optional)
 
 API Rules:
+
 - List/View: @request.auth.id = owner || @request.auth.id in members
 - Create: @request.auth.id != ""
 - Update: @request.auth.id = owner
@@ -107,6 +115,7 @@ API Rules:
 Name: `payments`
 
 Fields:
+
 - `user_id` (relation → users, required)
 - `stripe_payment_intent_id` (text, unique)
 - `amount` (number, required)

@@ -1,5 +1,11 @@
 <script lang="ts">
-	import type { SubscriptionPlan, ManaPackage, UsageData, CostItem, BillingCycle } from '@manacore/shared-subscription-types';
+	import type {
+		SubscriptionPlan,
+		ManaPackage,
+		UsageData,
+		CostItem,
+		BillingCycle,
+	} from '@manacore/shared-subscription-types';
 	import BillingToggle from '../BillingToggle.svelte';
 	import SubscriptionCard from '../SubscriptionCard.svelte';
 	import PackageCard from '../PackageCard.svelte';
@@ -50,7 +56,7 @@
 		pageTitle = 'Mana kaufen',
 		subscriptionsTitle = 'Abonnements',
 		packagesTitle = 'Einmalkäufe',
-		yearlyDiscount = '33%'
+		yearlyDiscount = '33%',
 	}: Props = $props();
 
 	// State
@@ -58,15 +64,13 @@
 
 	// Get current plan name for display
 	const currentPlanName = $derived(() => {
-		const plan = subscriptions.find(p => p.id === currentPlanId);
+		const plan = subscriptions.find((p) => p.id === currentPlanId);
 		return plan?.name || 'Free';
 	});
 
 	// Get all subscription plans for current billing cycle
 	function getSubscriptionPlans() {
-		return subscriptions.filter(
-			(plan) => plan.id !== 'free' && plan.billingCycle === billingCycle
-		);
+		return subscriptions.filter((plan) => plan.id !== 'free' && plan.billingCycle === billingCycle);
 	}
 
 	// Check if a plan is the current plan
@@ -98,7 +102,11 @@
 			</section>
 
 			<!-- Billing Toggle -->
-			<BillingToggle {billingCycle} onChange={(cycle: BillingCycle) => (billingCycle = cycle)} {yearlyDiscount} />
+			<BillingToggle
+				{billingCycle}
+				onChange={(cycle: BillingCycle) => (billingCycle = cycle)}
+				{yearlyDiscount}
+			/>
 
 			<!-- Subscriptions Section -->
 			<section class="mb-12 pt-2">

@@ -74,7 +74,7 @@ class ModuleEventBus {
 		const event: ModuleEvent = {
 			type: eventType,
 			...data,
-			timestamp: Date.now()
+			timestamp: Date.now(),
 		};
 
 		// Add to history
@@ -209,7 +209,7 @@ class ModuleEventBus {
 			listeners: stats,
 			totalListeners: Array.from(this.listeners.values()).reduce((sum, set) => sum + set.size, 0),
 			eventTypes: this.listeners.size,
-			historySize: this.eventHistory.length
+			historySize: this.eventHistory.length,
 		};
 	}
 }
@@ -249,7 +249,7 @@ export const MODULE_EVENTS = {
 	// Card-level events
 	CARD_SAVED: 'card:saved',
 	CARD_DELETED: 'card:deleted',
-	CARD_CONVERTED: 'card:converted'
+	CARD_CONVERTED: 'card:converted',
 } as const;
 
 // Type for module event types

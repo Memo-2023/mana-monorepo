@@ -11,6 +11,7 @@ Link-Tracking ist der Schlüssel zu datengetriebenem Marketing. In diesem umfass
 ## Was ist Link-Tracking?
 
 Link-Tracking ermöglicht es Ihnen, das Verhalten Ihrer Nutzer zu verstehen:
+
 - Woher kommen Ihre Besucher?
 - Welche Kampagnen funktionieren?
 - Wie hoch ist Ihre Conversion-Rate?
@@ -19,15 +20,19 @@ Link-Tracking ermöglicht es Ihnen, das Verhalten Ihrer Nutzer zu verstehen:
 ## Die wichtigsten Metriken
 
 ### 1. Click-Through-Rate (CTR)
+
 Die CTR zeigt, wie viele Personen Ihren Link gesehen und geklickt haben. Eine gute CTR liegt je nach Kanal zwischen 2-5%.
 
 ### 2. Conversion Rate
+
 Der Prozentsatz der Klicks, die zu einer gewünschten Aktion führen.
 
 ### 3. Bounce Rate
+
 Wie viele Nutzer verlassen Ihre Seite sofort wieder?
 
 ### 4. Geographic Distribution
+
 Verstehen Sie, aus welchen Ländern und Regionen Ihre Besucher kommen.
 
 ## UTM-Parameter richtig einsetzen
@@ -54,6 +59,7 @@ https://ulo.ad/angebot
 ### Was ist erlaubt?
 
 ✅ **Anonymisierte Daten**
+
 - Gerätetyp
 - Browser
 - Ungefährer Standort
@@ -62,6 +68,7 @@ https://ulo.ad/angebot
 ### Was braucht Zustimmung?
 
 ❌ **Personenbezogene Daten**
+
 - Vollständige IP-Adressen
 - Device Fingerprinting
 - Cross-Site Tracking

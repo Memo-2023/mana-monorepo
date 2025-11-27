@@ -1,7 +1,9 @@
 # 🐛 process-jobs Function - Bug Fix Plan
 
 ## Problem
+
 Die `process-jobs` Edge Function wirft einen Runtime Error:
+
 ```
 {"success":false,"error":"Cannot read properties of undefined (reading 'substring')"}
 ```
@@ -20,30 +22,39 @@ Der Fehler tritt auf, bevor unser Code überhaupt läuft. Mögliche Ursachen:
 ## Solution Options
 
 ### Option A: Inline process-generation Code (EMPFOHLEN)
+
 **Pros:**
+
 - Keine Import-Probleme
 - Alle Funktionalität in einer Datei
 - Einfacher zu debuggen
 
 **Cons:**
+
 - Code-Duplizierung
 - Größere Datei (~1000 Zeilen)
 
 ### Option B: Fix Import Path
+
 **Pros:**
+
 - Saubere Code-Organisation
 - Wiederverwendbarkeit
 
 **Cons:**
+
 - Schwierig zu debuggen
 - Deno Import-Semantik kann tricky sein
 
 ### Option C: Separate Functions (No Imports)
+
 **Pros:**
+
 - Klare Trennung
 - Einfachere Edge Function
 
 **Cons:**
+
 - Mehr HTTP Overhead
 - Komplexere Orchestrierung
 
@@ -60,20 +71,24 @@ Da wir `processGeneration` nur in `process-jobs` verwenden, macht es Sinn, den C
 ### Alternative Quick Fix
 
 Falls das nicht funktioniert, können wir auch:
+
 1. Nur download-image Jobs verarbeiten
 2. generate-image Jobs über eine HTTP POST an process-generation delegieren
 
 ## Testing Plan
 
 1. **Minimal Test:**
+
    ```bash
    curl -X POST \
      https://mjuvnnjxwfwlmxjsgkqu.supabase.co/functions/v1/process-jobs \
      -H 'Authorization: Bearer SERVICE_ROLE_KEY'
    ```
+
    Should return: `{"success": true, "processed": 0, "errors": 0}`
 
 2. **With Job Test:**
+
    ```sql
    -- Create test job
    SELECT enqueue_job(
@@ -91,6 +106,7 @@ Falls das nicht funktioniert, können wir auch:
 ## Implementation
 
 Ich würde vorschlagen:
+
 1. Erstelle eine `process-jobs-v2.ts` mit inline Code
 2. Deploye als neue Function
 3. Teste

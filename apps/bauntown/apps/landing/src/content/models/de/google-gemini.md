@@ -1,17 +1,17 @@
 ---
-title: "Google Gemini 2.5 Pro: Ein Durchbruch in der KI-Technologie"
-description: "Google hat kürzlich das Gemini 2.5 Pro-Modell vorgestellt, das als das fortschrittlichste KI-Modell des Unternehmens gilt und mit seiner enormen Kontextfenstergröße neue Maßstäbe setzt."
+title: 'Google Gemini 2.5 Pro: Ein Durchbruch in der KI-Technologie'
+description: 'Google hat kürzlich das Gemini 2.5 Pro-Modell vorgestellt, das als das fortschrittlichste KI-Modell des Unternehmens gilt und mit seiner enormen Kontextfenstergröße neue Maßstäbe setzt.'
 pubDate: 2025-03-25
-category: "Text"
+category: 'Text'
 featured: true
-author: "BaunTown"
-tags: ["Google", "Gemini", "KI", "Multimodal", "Kontextfenster"]
-image: "/images/models/google-gemini-2.5pro-bauntown.png"
+author: 'BaunTown'
+tags: ['Google', 'Gemini', 'KI', 'Multimodal', 'Kontextfenster']
+image: '/images/models/google-gemini-2.5pro-bauntown.png'
 externalLinks:
-  - title: "Offizielle Google Ankündigung"
-    url: "https://blog.google/technology/google-deepmind/gemini-model-thinking-updates-march-2025/#gemini-2-5-thinking"
-  - title: "Gemini - Ausprobieren"
-    url: "https://gemini.google.com"
+  - title: 'Offizielle Google Ankündigung'
+    url: 'https://blog.google/technology/google-deepmind/gemini-model-thinking-updates-march-2025/#gemini-2-5-thinking'
+  - title: 'Gemini - Ausprobieren'
+    url: 'https://gemini.google.com'
 ---
 
 Google hat kürzlich das Gemini 2.5 Pro-Modell vorgestellt, das als das fortschrittlichste KI-Modell des Unternehmens gilt. Mit bahnbrechenden Funktionen wie multimodaler Verarbeitung, verbesserter Problemlösungsfähigkeit und einer enormen Kontextfenstergröße von bis zu 2 Millionen Tokens setzt dieses Modell neue Maßstäbe in der KI-Entwicklung. Die Reaktionen auf diese Innovation sind weltweit vielfältig und spiegeln sowohl Begeisterung als auch kritische Reflexion wider.

@@ -5,10 +5,7 @@
 	import PictureLogo from '$lib/components/branding/PictureLogo.svelte';
 	import { authService } from '$lib/services/authService';
 	import { onMount } from 'svelte';
-	import {
-		PUBLIC_GOOGLE_CLIENT_ID,
-		PUBLIC_APPLE_CLIENT_ID
-	} from '$env/static/public';
+	import { PUBLIC_GOOGLE_CLIENT_ID, PUBLIC_APPLE_CLIENT_ID } from '$env/static/public';
 
 	// Default to German
 	const translations = getRegisterTranslations('de');

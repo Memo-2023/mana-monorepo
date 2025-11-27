@@ -6,16 +6,20 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) {
 		redirect(303, '/login');
 	}
-	
+
 	// Count existing team workspaces for this user
 	const teamWorkspaces = await locals.pb.collection('workspaces').getList(1, 100, {
-		filter: `owner="${locals.user.id}" && type="team"`
+		filter: `owner="${locals.user.id}" && type="team"`,
 	});
-	
+
 	return {
 		workspaceCount: teamWorkspaces.totalItems,
-		workspaceLimit: locals.user?.subscription_tier === 'pro' ? 10 : 
-		                locals.user?.subscription_tier === 'business' ? 999 : 1
+		workspaceLimit:
+			locals.user?.subscription_tier === 'pro'
+				? 10
+				: locals.user?.subscription_tier === 'business'
+					? 999
+					: 1,
 	};
 };
 
@@ -34,19 +38,23 @@ export const actions = {
 		if (!name) {
 			return fail(400, { error: 'Workspace name is required' });
 		}
-		
+
 		// Check workspace limits for team workspaces
 		if (type === 'team') {
 			const teamWorkspaces = await locals.pb.collection('workspaces').getList(1, 100, {
-				filter: `owner="${locals.user.id}" && type="team"`
+				filter: `owner="${locals.user.id}" && type="team"`,
 			});
-			
-			const limit = locals.user?.subscription_tier === 'pro' ? 10 : 
-			              locals.user?.subscription_tier === 'business' ? 999 : 1;
-			
+
+			const limit =
+				locals.user?.subscription_tier === 'pro'
+					? 10
+					: locals.user?.subscription_tier === 'business'
+						? 999
+						: 1;
+
 			if (teamWorkspaces.totalItems >= limit) {
-				return fail(403, { 
-					error: `Workspace limit reached. You can have maximum ${limit} team workspace(s) with your current plan.` 
+				return fail(403, {
+					error: `Workspace limit reached. You can have maximum ${limit} team workspace(s) with your current plan.`,
 				});
 			}
 		}
@@ -64,9 +72,13 @@ export const actions = {
 			if (slug) {
 				// Check if username exists with this slug (but allow if it's the current user)
 				try {
-					const existingUser = await locals.pb.collection('users').getFirstListItem(`username="${slug}"`);
+					const existingUser = await locals.pb
+						.collection('users')
+						.getFirstListItem(`username="${slug}"`);
 					if (existingUser && existingUser.id !== locals.user.id) {
-						return fail(400, { error: 'This workspace URL conflicts with an existing user profile' });
+						return fail(400, {
+							error: 'This workspace URL conflicts with an existing user profile',
+						});
 					}
 				} catch (e) {
 					// No user found, which is good
@@ -74,7 +86,9 @@ export const actions = {
 
 				// Check if workspace slug already exists
 				try {
-					const existingWorkspace = await locals.pb.collection('workspaces').getFirstListItem(`slug="${slug}"`);
+					const existingWorkspace = await locals.pb
+						.collection('workspaces')
+						.getFirstListItem(`slug="${slug}"`);
 					if (existingWorkspace) {
 						return fail(400, { error: 'This workspace URL is already taken' });
 					}
@@ -89,7 +103,7 @@ export const actions = {
 				type: type || 'team',
 				description: description?.trim() || '',
 				slug: slug?.trim() || null,
-				subscription_status: locals.user.subscription_status || 'free'
+				subscription_status: locals.user.subscription_status || 'free',
 			});
 
 			// Add the owner as a member with owner role
@@ -98,19 +112,19 @@ export const actions = {
 				user: locals.user.id,
 				role: 'owner',
 				invitation_status: 'accepted',
-				accepted_at: new Date().toISOString()
+				accepted_at: new Date().toISOString(),
 			});
 
 			// Redirect to the new workspace
 			redirect(303, `/settings/workspaces/${workspace.id}`);
 		} catch (error: any) {
 			console.error('Error creating workspace:', error);
-			
+
 			if (error?.data?.data?.slug?.code === 'validation_not_unique') {
 				return fail(400, { error: 'This workspace URL is already taken' });
 			}
-			
+
 			return fail(400, { error: 'Failed to create workspace' });
 		}
-	}
+	},
 } satisfies Actions;

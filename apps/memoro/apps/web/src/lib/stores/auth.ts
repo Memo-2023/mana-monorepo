@@ -13,7 +13,7 @@ import { clearAuthClient } from '$lib/supabaseClient';
 const STORAGE_KEYS = {
 	APP_TOKEN: 'memoro_app_token',
 	REFRESH_TOKEN: 'memoro_refresh_token',
-	USER_EMAIL: 'memoro_user_email'
+	USER_EMAIL: 'memoro_user_email',
 };
 
 // Auth state
@@ -30,7 +30,7 @@ function createAuthStore() {
 		user: null,
 		isAuthenticated: false,
 		isLoading: true,
-		error: null
+		error: null,
 	});
 
 	// Initialize auth state from localStorage
@@ -83,20 +83,27 @@ function createAuthStore() {
 				user: null,
 				isAuthenticated: false,
 				isLoading: false,
-				error: 'Failed to initialize authentication'
+				error: 'Failed to initialize authentication',
 			});
 		}
 	}
 
 	// Sign in with email and password
-	async function signIn(email: string, password: string): Promise<{ success: boolean; error?: string }> {
+	async function signIn(
+		email: string,
+		password: string
+	): Promise<{ success: boolean; error?: string }> {
 		update((state) => ({ ...state, isLoading: true, error: null }));
 
 		try {
 			const result = await authService.signIn(email, password);
 
 			if (!result.success) {
-				update((state) => ({ ...state, isLoading: false, error: result.error || 'Sign in failed' }));
+				update((state) => ({
+					...state,
+					isLoading: false,
+					error: result.error || 'Sign in failed',
+				}));
 				return { success: false, error: result.error };
 			}
 
@@ -134,7 +141,11 @@ function createAuthStore() {
 			const result = await authService.signUp(email, password);
 
 			if (!result.success) {
-				update((state) => ({ ...state, isLoading: false, error: result.error || 'Sign up failed' }));
+				update((state) => ({
+					...state,
+					isLoading: false,
+					error: result.error || 'Sign up failed',
+				}));
 				return { success: false, error: result.error };
 			}
 
@@ -178,7 +189,7 @@ function createAuthStore() {
 				update((state) => ({
 					...state,
 					isLoading: false,
-					error: result.error || 'Google Sign-In failed'
+					error: result.error || 'Google Sign-In failed',
 				}));
 				return { success: false, error: result.error };
 			}
@@ -210,7 +221,9 @@ function createAuthStore() {
 	// Sign in with Apple
 	// Note: On web, Apple returns an authorization code (not identity token like mobile)
 	// The middleware needs to exchange the code for an identity token
-	async function signInWithApple(authorizationCode: string): Promise<{ success: boolean; error?: string }> {
+	async function signInWithApple(
+		authorizationCode: string
+	): Promise<{ success: boolean; error?: string }> {
 		update((state) => ({ ...state, isLoading: true, error: null }));
 
 		try {
@@ -223,7 +236,7 @@ function createAuthStore() {
 				update((state) => ({
 					...state,
 					isLoading: false,
-					error: result.error || 'Apple Sign-In failed'
+					error: result.error || 'Apple Sign-In failed',
 				}));
 				return { success: false, error: result.error };
 			}
@@ -298,7 +311,7 @@ function createAuthStore() {
 		signInWithApple,
 		signOut,
 		forgotPassword,
-		initialize
+		initialize,
 	};
 }
 

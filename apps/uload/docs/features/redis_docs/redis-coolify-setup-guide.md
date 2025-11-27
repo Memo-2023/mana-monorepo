@@ -9,11 +9,13 @@ Nach einigen Herausforderungen haben wir Redis erfolgreich auf Coolify zum Laufe
 ### Redis Service in Coolify
 
 #### 1. Redis als Database Service hinzufügen
+
 - **Type:** Redis Database
 - **Image:** redis:7.2
 - **Name:** redis-database-[generated-id]
 
 #### 2. General Settings
+
 ```
 Username: default
 Password: [Sicheres Passwort generieren]
@@ -23,6 +25,7 @@ Custom Docker Options: --protected-mode no --bind 0.0.0.0
 **Wichtig:** Die Custom Docker Options sind KRITISCH! Ohne diese wird Redis Verbindungen ablehnen.
 
 #### 3. Network Configuration
+
 ```
 Ports Mappings: 6379:6379
 Redis URL (internal): [wird automatisch generiert]
@@ -33,6 +36,7 @@ Redis URL (internal): [wird automatisch generiert]
 ### Hauptanwendung Environment Variables
 
 #### Funktionierende Konfiguration:
+
 ```bash
 REDIS_HOST=ycsoowwsc84s0s8gc8oooosk  # Der Container-Name (NICHT der Service-Name!)
 REDIS_PORT=6379
@@ -47,6 +51,7 @@ REDIS_PASSWORD=[Das gleiche Passwort wie im Redis Service]
 **Problem:** Der Coolify Service Name funktioniert nicht für die interne Kommunikation.
 
 **Lösung:** Verwende den tatsächlichen Container-Namen:
+
 - ❌ FALSCH: `redis-database-ycsoowwsc84s0s8gc8oooosk`
 - ❌ FALSCH: `redis-database-ycsoowwsc84s0s8gc8oooosk.coolify`
 - ✅ RICHTIG: `ycsoowwsc84s0s8gc8oooosk`
@@ -58,6 +63,7 @@ Der Container-Name findest du in den Redis Logs oder beim Container Start.
 **Problem:** "Connection is closed" Fehler trotz korrekter Credentials.
 
 **Lösung:** Redis Protected Mode deaktivieren:
+
 ```bash
 --protected-mode no --bind 0.0.0.0
 ```
@@ -68,7 +74,8 @@ Diese Optionen MÜSSEN in "Custom Docker Options" gesetzt werden!
 
 **Problem:** REDIS_HOST wurde mit kompletter URL statt nur Hostname gesetzt.
 
-**Lösung:** 
+**Lösung:**
+
 - ❌ FALSCH: `REDIS_HOST=redis://default:password@host:6379`
 - ✅ RICHTIG: `REDIS_HOST=ycsoowwsc84s0s8gc8oooosk`
 
@@ -79,6 +86,7 @@ REDIS_HOST darf NUR der Hostname sein, keine URL!
 **Problem:** Falscher Port (5432 statt 6379) wurde gemappt.
 
 **Lösung:**
+
 - Port 6379 ist Redis
 - Port 5432 ist PostgreSQL
 - Immer 6379:6379 für Redis verwenden
@@ -104,6 +112,7 @@ REDIS_HOST darf NUR der Hostname sein, keine URL!
 ### Schritt 3: Hauptapp konfigurieren
 
 Environment Variables in deiner Hauptapp:
+
 ```bash
 REDIS_HOST=[Container-Name aus Schritt 2]
 REDIS_PORT=6379
@@ -114,36 +123,40 @@ REDIS_PASSWORD=[Passwort aus Redis Service]
 ### Schritt 4: Testen
 
 Erstelle einen Test-Endpoint in deiner App:
+
 ```typescript
 // src/routes/test-redis/+server.ts
 import { json } from '@sveltejs/kit';
 import Redis from 'ioredis';
 
 export async function GET() {
-  const redis = new Redis({
-    host: process.env.REDIS_HOST,
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    username: process.env.REDIS_USERNAME,
-    password: process.env.REDIS_PASSWORD
-  });
+	const redis = new Redis({
+		host: process.env.REDIS_HOST,
+		port: parseInt(process.env.REDIS_PORT || '6379'),
+		username: process.env.REDIS_USERNAME,
+		password: process.env.REDIS_PASSWORD,
+	});
 
-  try {
-    await redis.ping();
-    await redis.set('test', 'Hello Redis!');
-    const value = await redis.get('test');
-    redis.disconnect();
-    
-    return json({ 
-      success: true, 
-      value,
-      host: process.env.REDIS_HOST 
-    });
-  } catch (error) {
-    return json({ 
-      success: false, 
-      error: error.message 
-    }, { status: 500 });
-  }
+	try {
+		await redis.ping();
+		await redis.set('test', 'Hello Redis!');
+		const value = await redis.get('test');
+		redis.disconnect();
+
+		return json({
+			success: true,
+			value,
+			host: process.env.REDIS_HOST,
+		});
+	} catch (error) {
+		return json(
+			{
+				success: false,
+				error: error.message,
+			},
+			{ status: 500 }
+		);
+	}
 }
 ```
 
@@ -152,16 +165,19 @@ export async function GET() {
 Nach erfolgreicher Redis-Integration:
 
 ### Link Redirects
+
 - **Vorher:** 50-100ms (PocketBase Query)
 - **Nachher:** 2-5ms (Redis Cache)
 - **Verbesserung:** 20-50x schneller!
 
 ### Dashboard Loading
+
 - **Vorher:** 200-400ms
 - **Nachher:** 10-20ms
 - **Verbesserung:** 10-20x schneller!
 
 ### Analytics
+
 - **Vorher:** 500-1500ms
 - **Nachher:** 20-50ms
 - **Verbesserung:** 10-30x schneller!
@@ -169,16 +185,19 @@ Nach erfolgreicher Redis-Integration:
 ## 🐛 Troubleshooting
 
 ### "Connection is closed" Error
+
 1. Check Custom Docker Options: `--protected-mode no --bind 0.0.0.0`
 2. Verify Container Name (nicht Service Name!)
 3. Check Password ist korrekt
 
 ### "ECONNREFUSED" Error
+
 1. Redis Service läuft nicht
 2. Falscher Host/Port
 3. Network Isolation Problem
 
 ### "NOAUTH Authentication required"
+
 1. Password nicht gesetzt in Environment Variables
 2. Falsches Password
 3. Username fehlt (sollte "default" sein)
@@ -186,6 +205,7 @@ Nach erfolgreicher Redis-Integration:
 ### Debug Commands
 
 Im Redis Container (via Coolify Terminal):
+
 ```bash
 # Test Redis läuft
 redis-cli ping
@@ -201,23 +221,27 @@ redis-cli -a [password] CONFIG GET protected-mode
 ## 💡 Best Practices
 
 ### 1. Resource Limits
+
 ```bash
 --maxmemory 512mb
 --maxmemory-policy allkeys-lru
 ```
 
 ### 2. Persistence
+
 ```bash
 --appendonly yes
 --save 900 1  # Save every 15 min if at least 1 key changed
 ```
 
 ### 3. Security
+
 - Niemals Redis Port öffentlich exponieren
 - Starkes Passwort verwenden
 - Protected Mode nur intern deaktivieren
 
 ### 4. Monitoring
+
 - Memory Usage im Auge behalten
 - Hit Rate tracken
 - Slow Queries monitoren
@@ -225,6 +249,7 @@ redis-cli -a [password] CONFIG GET protected-mode
 ## 📊 Resource-Bedarf
 
 Für uLoad auf Hetzner CX21:
+
 - **RAM:** 50-200MB (von 8GB verfügbar)
 - **CPU:** <1% (von 2 vCPUs)
 - **Disk:** <1GB (von 40GB)
@@ -251,4 +276,4 @@ Mit dieser Konfiguration läuft Redis stabil und performant auf dem gleichen Het
 
 ---
 
-*Dokumentiert nach erfolgreicher Redis-Integration für uLoad auf Coolify, August 2025*
+_Dokumentiert nach erfolgreicher Redis-Integration für uLoad auf Coolify, August 2025_

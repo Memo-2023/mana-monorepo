@@ -87,7 +87,7 @@
 
 		// Increment view count (fire-and-forget, don't block UI)
 		if (memo?.id) {
-			memoService.incrementViewCount(memo.id).catch(err => {
+			memoService.incrementViewCount(memo.id).catch((err) => {
 				console.error('Error incrementing view count:', err);
 			});
 		}
@@ -126,14 +126,14 @@
 			onCopy: handleCopyTranscript,
 			onPin: handlePinToggle,
 			onCreateMemory: () => (showCreateMemory = true),
-			onAskQuestion: () => (showPromptBar = true)
+			onAskQuestion: () => (showPromptBar = true),
 		});
 
 		const allShortcuts = shortcuts.flatMap((group) => group.shortcuts);
 		allShortcuts.push({
 			key: '?',
 			description: 'Show keyboard shortcuts',
-			action: () => (showShortcuts = !showShortcuts)
+			action: () => (showShortcuts = !showShortcuts),
 		});
 
 		const handler = createShortcutHandler(allShortcuts);
@@ -178,7 +178,7 @@
 			await memoService.updateMemo(memo.id, {
 				title: editedTitle,
 				intro: editedIntro,
-				transcript: editedTranscript
+				transcript: editedTranscript,
 			});
 
 			// Update local memo
@@ -187,7 +187,7 @@
 					...memo,
 					title: editedTitle,
 					intro: editedIntro,
-					transcript: editedTranscript
+					transcript: editedTranscript,
 				});
 			}
 
@@ -238,7 +238,7 @@
 			if (onMemoUpdated) {
 				onMemoUpdated({
 					...memo,
-					is_pinned: newPinStatus
+					is_pinned: newPinStatus,
 				});
 			}
 		} catch (err) {
@@ -290,7 +290,7 @@
 					id: `transcript-${index}`,
 					text: query,
 					context: (start > 0 ? '...' : '') + context + (end < memo.transcript.length ? '...' : ''),
-					type: 'transcript'
+					type: 'transcript',
 				});
 
 				index = transcriptLower.indexOf(lowerQuery, index + 1);
@@ -305,7 +305,7 @@
 						id: `memory-title-${idx}`,
 						text: query,
 						context: memory.title,
-						type: 'memory'
+						type: 'memory',
 					});
 				}
 				if (memory.content?.toLowerCase().includes(lowerQuery)) {
@@ -318,8 +318,9 @@
 					results.push({
 						id: `memory-content-${idx}`,
 						text: query,
-						context: (start > 0 ? '...' : '') + context + (end < memory.content.length ? '...' : ''),
-						type: 'memory'
+						context:
+							(start > 0 ? '...' : '') + context + (end < memory.content.length ? '...' : ''),
+						type: 'memory',
 					});
 				}
 			});
@@ -358,7 +359,7 @@
 				const updatedTags = availableTags.filter((t) => selectedTagIds.includes(t.id));
 				onMemoUpdated({
 					...memo,
-					tags: updatedTags
+					tags: updatedTags,
 				});
 			}
 		} catch (err) {
@@ -466,7 +467,7 @@
 			if (onMemoUpdated) {
 				onMemoUpdated({
 					...memo,
-					transcript: newTranscript
+					transcript: newTranscript,
 				});
 			}
 
@@ -491,7 +492,7 @@
 				const memories = await questionService.loadMemories(memo.id);
 				const updatedMemo = {
 					...memo,
-					memories
+					memories,
 				};
 
 				// Update the tabs store to reflect changes immediately
@@ -579,11 +580,7 @@
 	{/if}
 
 	{#if showShareModal}
-		<ShareModal
-			visible={showShareModal}
-			{memo}
-			onClose={() => (showShareModal = false)}
-		/>
+		<ShareModal visible={showShareModal} {memo} onClose={() => (showShareModal = false)} />
 	{/if}
 
 	{#if showSearchOverlay}
@@ -619,7 +616,7 @@
 				{ code: 'en', name: 'English' },
 				{ code: 'de', name: 'German' },
 				{ code: 'es', name: 'Spanish' },
-				{ code: 'fr', name: 'French' }
+				{ code: 'fr', name: 'French' },
 			]}
 			onClose={() => (showReprocess = false)}
 			onReprocess={handleReprocess}
@@ -644,7 +641,7 @@
 				{ code: 'de', name: 'German' },
 				{ code: 'es', name: 'Spanish' },
 				{ code: 'fr', name: 'French' },
-				{ code: 'it', name: 'Italian' }
+				{ code: 'it', name: 'Italian' },
 			]}
 			onClose={() => (showTranslate = false)}
 			onTranslate={handleTranslate}
@@ -695,7 +692,7 @@
 				onCopy: handleCopyTranscript,
 				onPin: handlePinToggle,
 				onCreateMemory: () => (showCreateMemory = true),
-				onAskQuestion: () => (showPromptBar = true)
+				onAskQuestion: () => (showPromptBar = true),
 			})}
 			onClose={() => (showShortcuts = false)}
 		/>

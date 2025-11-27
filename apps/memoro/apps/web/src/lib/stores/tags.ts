@@ -7,11 +7,12 @@ function createTagStore() {
 	return {
 		subscribe,
 		setTags: (tags: Tag[]) => set(tags),
-		addTag: (tag: Tag) => update((tags) => [...tags, tag].sort((a, b) => a.name.localeCompare(b.name))),
+		addTag: (tag: Tag) =>
+			update((tags) => [...tags, tag].sort((a, b) => a.name.localeCompare(b.name))),
 		updateTag: (id: string, updates: Partial<Tag>) =>
 			update((tags) => tags.map((t) => (t.id === id ? { ...t, ...updates } : t))),
 		deleteTag: (id: string) => update((tags) => tags.filter((t) => t.id !== id)),
-		reset: () => set([])
+		reset: () => set([]),
 	};
 }
 

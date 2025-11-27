@@ -113,7 +113,7 @@ function addSecurityHeaders(response: Response) {
 			"base-uri 'self'",
 			"form-action 'self'",
 			"frame-ancestors 'none'",
-			dev ? '' : 'upgrade-insecure-requests' // Only in production
+			dev ? '' : 'upgrade-insecure-requests', // Only in production
 		]
 			.filter(Boolean)
 			.join('; ');

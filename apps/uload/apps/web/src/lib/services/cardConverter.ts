@@ -84,9 +84,9 @@ class CardConverter {
 				type: 'header',
 				props: {
 					title: header.textContent || '',
-					subtitle: subtitle || ''
+					subtitle: subtitle || '',
 				},
-				order
+				order,
 			});
 		}
 
@@ -99,9 +99,9 @@ class CardConverter {
 				props: {
 					type: 'image',
 					src: img.getAttribute('src') || '',
-					alt: img.getAttribute('alt') || ''
+					alt: img.getAttribute('alt') || '',
 				},
-				order
+				order,
 			});
 		});
 
@@ -111,7 +111,7 @@ class CardConverter {
 			const linkItems = Array.from(links).map((link) => ({
 				label: link.textContent || '',
 				href: link.getAttribute('href') || '#',
-				icon: ''
+				icon: '',
 			}));
 
 			modules.push({
@@ -119,9 +119,9 @@ class CardConverter {
 				type: 'links',
 				props: {
 					links: linkItems,
-					style: 'button'
+					style: 'button',
 				},
-				order
+				order,
 			});
 		}
 
@@ -138,9 +138,9 @@ class CardConverter {
 					id: `content_${order++}`,
 					type: 'content',
 					props: {
-						text: content
+						text: content,
 					},
-					order
+					order,
 				});
 			}
 		}
@@ -152,8 +152,8 @@ class CardConverter {
 			layout: {
 				columns: 1,
 				gap: '1rem',
-				padding: '1.5rem'
-			}
+				padding: '1.5rem',
+			},
 		};
 	}
 
@@ -169,7 +169,7 @@ class CardConverter {
 			template: config.html,
 			css: config.css,
 			variables: [],
-			values: {}
+			values: {},
 		};
 
 		return this.templateToModular(templateConfig);
@@ -195,7 +195,7 @@ class CardConverter {
 							name: 'title',
 							type: 'text',
 							label: 'Title',
-							default: module.props.title
+							default: module.props.title,
 						});
 						values.title = module.props.title;
 					}
@@ -205,7 +205,7 @@ class CardConverter {
 							name: 'subtitle',
 							type: 'text',
 							label: 'Subtitle',
-							default: module.props.subtitle
+							default: module.props.subtitle,
 						});
 						values.subtitle = module.props.subtitle;
 					}
@@ -217,7 +217,7 @@ class CardConverter {
 						name: 'content',
 						type: 'text',
 						label: 'Content',
-						default: module.props.text || module.props.html
+						default: module.props.text || module.props.html,
 					});
 					values.content = module.props.text || module.props.html;
 					break;
@@ -230,13 +230,13 @@ class CardConverter {
 								name: 'image_url',
 								type: 'image',
 								label: 'Image URL',
-								default: module.props.src
+								default: module.props.src,
 							},
 							{
 								name: 'image_alt',
 								type: 'text',
 								label: 'Image Alt Text',
-								default: module.props.alt
+								default: module.props.alt,
 							}
 						);
 						values.image_url = module.props.src;
@@ -253,13 +253,13 @@ class CardConverter {
 								name: `link${index}_url`,
 								type: 'link',
 								label: `Link ${index + 1} URL`,
-								default: link.href
+								default: link.href,
 							},
 							{
 								name: `link${index}_text`,
 								type: 'text',
 								label: `Link ${index + 1} Text`,
-								default: link.label
+								default: link.label,
 							}
 						);
 						values[`link${index}_url`] = link.href;
@@ -280,13 +280,13 @@ class CardConverter {
 								name: `stat${index}_value`,
 								type: 'number',
 								label: `Stat ${index + 1} Value`,
-								default: stat.value
+								default: stat.value,
 							},
 							{
 								name: `stat${index}_label`,
 								type: 'text',
 								label: `Stat ${index + 1} Label`,
-								default: stat.label
+								default: stat.label,
 							}
 						);
 						values[`stat${index}_value`] = stat.value;
@@ -307,7 +307,7 @@ class CardConverter {
 			template,
 			css,
 			variables,
-			values
+			values,
 		};
 	}
 
@@ -331,7 +331,7 @@ class CardConverter {
 			template: config.html,
 			css: config.css,
 			variables,
-			values
+			values,
 		};
 	}
 
@@ -350,7 +350,7 @@ class CardConverter {
 		return {
 			mode: 'expert',
 			html,
-			css: templateConfig.css || ''
+			css: templateConfig.css || '',
 		};
 	}
 
@@ -366,7 +366,7 @@ class CardConverter {
 		return {
 			mode: 'expert',
 			html,
-			css: config.css || ''
+			css: config.css || '',
 		};
 	}
 
@@ -377,7 +377,7 @@ class CardConverter {
 		if (!css) return undefined;
 
 		const theme: any = {
-			colors: {}
+			colors: {},
 		};
 
 		// Extract color variables

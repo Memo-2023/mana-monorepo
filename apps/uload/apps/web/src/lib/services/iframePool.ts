@@ -155,7 +155,7 @@ class IFramePool {
 			poolSize: this.pool.length,
 			inUse: this.inUse.size,
 			total: this.pool.length + this.inUse.size,
-			maxSize: this.maxSize
+			maxSize: this.maxSize,
 		};
 	}
 

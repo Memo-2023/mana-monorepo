@@ -22,9 +22,7 @@
 			<Text variant="large" weight="bold" class="mb-5 text-2xl">Engagement</Text>
 
 			<!-- View Statistics -->
-			<Text variant="muted" weight="semibold" class="mb-2 uppercase tracking-wide">
-				Aufrufe
-			</Text>
+			<Text variant="muted" weight="semibold" class="mb-2 uppercase tracking-wide">Aufrufe</Text>
 			<div class="mb-4 -space-y-px">
 				{#if mostViewedMemo}
 					<StatRow
@@ -45,9 +43,7 @@
 			</div>
 
 			<!-- Reading Statistics -->
-			<Text variant="muted" weight="semibold" class="mb-2 uppercase tracking-wide">
-				Lesestatus
-			</Text>
+			<Text variant="muted" weight="semibold" class="mb-2 uppercase tracking-wide">Lesestatus</Text>
 			<div class="-space-y-px">
 				<StatRow
 					title="Ungelesene Memos"

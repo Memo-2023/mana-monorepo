@@ -22,8 +22,8 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 		headers: {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${appToken}`,
-			...options.headers
-		}
+			...options.headers,
+		},
 	});
 
 	if (!response.ok) {
@@ -50,7 +50,7 @@ function mapCardFromApi(apiCard: any): Card {
 		version: apiCard.version || 1,
 		is_favorite: apiCard.isFavorite || false,
 		created_at: apiCard.createdAt,
-		updated_at: apiCard.updatedAt
+		updated_at: apiCard.updatedAt,
 	};
 }
 
@@ -121,8 +121,8 @@ export const cardStore = {
 					title: input.title,
 					content: input.content,
 					cardType: input.card_type,
-					position: input.position
-				})
+					position: input.position,
+				}),
 			});
 
 			if (response.card) {
@@ -155,8 +155,8 @@ export const cardStore = {
 					content: updates.content,
 					cardType: updates.card_type,
 					position: updates.position,
-					isFavorite: updates.is_favorite
-				})
+					isFavorite: updates.is_favorite,
+				}),
 			});
 
 			if (response.card) {
@@ -186,7 +186,7 @@ export const cardStore = {
 
 		try {
 			await apiRequest<{ success: boolean }>(`/v1/api/cards/${id}`, {
-				method: 'DELETE'
+				method: 'DELETE',
 			});
 
 			// Remove from list
@@ -214,14 +214,16 @@ export const cardStore = {
 		try {
 			await apiRequest<{ success: boolean }>('/v1/api/cards/reorder', {
 				method: 'POST',
-				body: JSON.stringify({ deckId, cardIds })
+				body: JSON.stringify({ deckId, cardIds }),
 			});
 
 			// Update local positions
-			cards = cardIds.map((id, index) => {
-				const card = cards.find((c) => c.id === id);
-				return card ? { ...card, position: index } : card!;
-			}).filter(Boolean);
+			cards = cardIds
+				.map((id, index) => {
+					const card = cards.find((c) => c.id === id);
+					return card ? { ...card, position: index } : card!;
+				})
+				.filter(Boolean);
 		} catch (err: any) {
 			error = err.message || 'Failed to reorder cards';
 			console.error('Reorder cards error:', err);
@@ -244,5 +246,5 @@ export const cardStore = {
 	 */
 	clearError() {
 		error = null;
-	}
+	},
 };

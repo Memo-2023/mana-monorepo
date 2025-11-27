@@ -30,21 +30,27 @@ Märchenzauber revolutioniert das Geschichtenerzählen für Kinder. Mit unserer 
 ## Hauptfunktionen
 
 ### 📚 Personalisierte Geschichten
+
 Geben Sie einfach den Namen, das Aussehen und die Interessen Ihres Kindes ein. Unsere KI webt diese Details nahtlos in spannende Abenteuer ein:
+
 - Name und Eigenschaften des Kindes in der Geschichte
 - Freunde und Familienmitglieder als Charaktere
 - Lieblingstiere und Hobbys integriert
 - Individuelle Lernziele berücksichtigt
 
 ### 🎨 KI-generierte Illustrationen
+
 Jede Seite wird mit wunderschönen, kindgerechten Illustrationen zum Leben erweckt:
+
 - Verschiedene Kunststile wählbar (Aquarell, Comic, klassisch)
 - Konsistente Charakterdarstellung durch die ganze Geschichte
 - Sichere, altersgerechte Bilder
 - Hochauflösend für Druck und Digital
 
 ### 🌟 Vielfältige Genres
+
 Von klassischen Märchen bis zu modernen Abenteuern:
+
 - Märchen und Fantasie
 - Tiergeschichten
 - Weltraumabenteuer
@@ -65,18 +71,21 @@ Der Mana-Verbrauch richtet sich nach Umfang und Komplexität:
 ## Anwendungsfälle
 
 ### Für Familien
+
 - Einzigartige Gute-Nacht-Geschichten
 - Personalisierte Geburtstagsgeschenke
 - Geschwister gemeinsam in Abenteuern
 - Familientraditionen in Geschichten verewigen
 
 ### Für Kindergärten
+
 - Gruppengeschichten mit allen Kindern
 - Thematische Geschichten zu Projekten
 - Sprachförderung durch personalisierte Inhalte
 - Inklusion durch diverse Charaktere
 
 ### Für Therapeuten
+
 - Geschichten zur Angstbewältigung
 - Soziale Situationen üben
 - Selbstvertrauen stärken
@@ -85,6 +94,7 @@ Der Mana-Verbrauch richtet sich nach Umfang und Komplexität:
 ## Sicherheit & Datenschutz
 
 Märchenzauber nimmt den Schutz von Kindern ernst:
+
 - Alle Inhalte werden auf Alterseignung geprüft
 - Keine Weitergabe persönlicher Daten
 - DSGVO-konforme Datenspeicherung
@@ -97,6 +107,7 @@ Mit Mana-Credits zahlen Sie nur für die Bücher, die Sie tatsächlich erstellen
 ## Verfügbarkeit
 
 Märchenzauber ist verfügbar als:
+
 - Web-App (alle Browser)
 - iOS App (iPhone & iPad)
 - Android App

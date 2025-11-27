@@ -113,14 +113,17 @@
 			class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
 		>
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M10 19l-7-7m0 0l7-7m-7 7h18"
+				/>
 			</svg>
 		</a>
 		<div>
 			<h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Archiv</h1>
-			<p class="text-sm text-gray-500 dark:text-gray-400">
-				Archivierte Geschichten und Charaktere
-			</p>
+			<p class="text-sm text-gray-500 dark:text-gray-400">Archivierte Geschichten und Charaktere</p>
 		</div>
 	</div>
 
@@ -128,19 +131,35 @@
 	<div class="flex gap-2">
 		<button
 			onclick={() => (activeTab = 'stories')}
-			class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {activeTab === 'stories' ? 'bg-gray-800 text-white dark:bg-white dark:text-gray-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}"
+			class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {activeTab ===
+			'stories'
+				? 'bg-gray-800 text-white dark:bg-white dark:text-gray-800'
+				: 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}"
 		>
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+				/>
 			</svg>
 			Geschichten ({archivedStories.length})
 		</button>
 		<button
 			onclick={() => (activeTab = 'characters')}
-			class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {activeTab === 'characters' ? 'bg-gray-800 text-white dark:bg-white dark:text-gray-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}"
+			class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {activeTab ===
+			'characters'
+				? 'bg-gray-800 text-white dark:bg-white dark:text-gray-800'
+				: 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}"
 		>
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+				/>
 			</svg>
 			Charaktere ({archivedCharacters.length})
 		</button>
@@ -167,10 +186,22 @@
 		<!-- Archived Stories -->
 		{#if archivedStories.length === 0}
 			<div class="rounded-2xl bg-gray-50 p-8 text-center dark:bg-gray-800/50">
-				<svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+				<svg
+					class="mx-auto h-16 w-16 text-gray-400"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="1.5"
+						d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+					/>
 				</svg>
-				<h3 class="mt-4 font-medium text-gray-700 dark:text-gray-300">Keine archivierten Geschichten</h3>
+				<h3 class="mt-4 font-medium text-gray-700 dark:text-gray-300">
+					Keine archivierten Geschichten
+				</h3>
 				<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
 					Archivierte Geschichten erscheinen hier
 				</p>
@@ -178,7 +209,9 @@
 		{:else}
 			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{#each archivedStories as story (story.id)}
-					<div class="group relative overflow-hidden rounded-2xl bg-white shadow-md dark:bg-gray-800">
+					<div
+						class="group relative overflow-hidden rounded-2xl bg-white shadow-md dark:bg-gray-800"
+					>
 						<!-- Image -->
 						<div class="aspect-video overflow-hidden">
 							<img
@@ -222,10 +255,22 @@
 		<!-- Archived Characters -->
 		{#if archivedCharacters.length === 0}
 			<div class="rounded-2xl bg-gray-50 p-8 text-center dark:bg-gray-800/50">
-				<svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+				<svg
+					class="mx-auto h-16 w-16 text-gray-400"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="1.5"
+						d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+					/>
 				</svg>
-				<h3 class="mt-4 font-medium text-gray-700 dark:text-gray-300">Keine archivierten Charaktere</h3>
+				<h3 class="mt-4 font-medium text-gray-700 dark:text-gray-300">
+					Keine archivierten Charaktere
+				</h3>
 				<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
 					Archivierte Charaktere erscheinen hier
 				</p>
@@ -249,9 +294,7 @@
 							<h3 class="font-semibold text-gray-800 dark:text-gray-200 truncate">
 								{character.name}
 							</h3>
-							<p class="text-xs text-gray-500 dark:text-gray-400">
-								Archiviert
-							</p>
+							<p class="text-xs text-gray-500 dark:text-gray-400">Archiviert</p>
 
 							<!-- Actions -->
 							<div class="mt-2 flex gap-2">

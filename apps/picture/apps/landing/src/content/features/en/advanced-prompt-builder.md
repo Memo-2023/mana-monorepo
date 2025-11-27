@@ -1,25 +1,25 @@
 ---
-title: "Advanced Prompt Builder"
-description: "Craft perfect prompts with our intelligent prompt builder. Get suggestions, templates, and real-time previews to create exactly what you imagine."
-icon: "✨"
-coverImage: "/features/prompt-builder.jpg"
-category: "generation"
+title: 'Advanced Prompt Builder'
+description: 'Craft perfect prompts with our intelligent prompt builder. Get suggestions, templates, and real-time previews to create exactly what you imagine.'
+icon: '✨'
+coverImage: '/features/prompt-builder.jpg'
+category: 'generation'
 featured: true
 order: 2
 available: true
 comingSoon: false
-language: "en"
+language: 'en'
 benefits:
-  - "AI-powered prompt suggestions"
-  - "100+ pre-made prompt templates"
-  - "Real-time prompt preview"
-  - "Prompt history and favorites"
-  - "Prompt enhancement tools"
+  - 'AI-powered prompt suggestions'
+  - '100+ pre-made prompt templates'
+  - 'Real-time prompt preview'
+  - 'Prompt history and favorites'
+  - 'Prompt enhancement tools'
 useCases:
-  - "Learning prompt engineering"
-  - "Faster image creation"
-  - "Consistent results"
-  - "Professional workflows"
+  - 'Learning prompt engineering'
+  - 'Faster image creation'
+  - 'Consistent results'
+  - 'Professional workflows'
 ---
 
 ## Master the Art of Prompting
@@ -40,6 +40,7 @@ As you type, our AI analyzes your prompt and suggests improvements:
 Start with professionally crafted templates for common use cases:
 
 ### Photography Templates
+
 - Product Photography
 - Portrait Photography
 - Landscape Photography
@@ -47,6 +48,7 @@ Start with professionally crafted templates for common use cases:
 - Fashion Photography
 
 ### Art Templates
+
 - Digital Art
 - Oil Painting
 - Watercolor
@@ -54,6 +56,7 @@ Start with professionally crafted templates for common use cases:
 - Concept Art
 
 ### Marketing Templates
+
 - Social Media Posts
 - Ad Banners
 - Product Mockups
@@ -64,11 +67,13 @@ Start with professionally crafted templates for common use cases:
 Turn simple prompts into detailed, optimized ones with one click:
 
 **Before:**
+
 ```
 a cat on a windowsill
 ```
 
 **After Enhancement:**
+
 ```
 a fluffy orange tabby cat sitting elegantly on a Victorian windowsill,
 soft golden hour sunlight streaming through lace curtains,

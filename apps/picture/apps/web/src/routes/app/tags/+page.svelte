@@ -23,7 +23,7 @@
 		'#8B5CF6', // violet
 		'#EC4899', // pink
 		'#6366F1', // indigo
-		'#14B8A6'  // teal
+		'#14B8A6', // teal
 	];
 
 	onMount(async () => {
@@ -49,7 +49,7 @@
 		try {
 			await createTag({
 				name: newTagName.trim(),
-				color: newTagColor
+				color: newTagColor,
 			});
 			await loadTags();
 			showToast('Tag erfolgreich erstellt', 'success');
@@ -75,7 +75,7 @@
 		try {
 			await updateTag(editingTag.id, {
 				name: editTagName.trim(),
-				color: editTagColor
+				color: editTagColor,
 			});
 			await loadTags();
 			showToast('Tag erfolgreich aktualisiert', 'success');
@@ -120,7 +120,12 @@
 				class="flex items-center gap-2 rounded-2xl bg-blue-600/90 px-6 py-3 text-sm font-medium text-white backdrop-blur-xl transition-all hover:bg-blue-700/90 dark:bg-blue-500/90 dark:hover:bg-blue-600/90"
 			>
 				<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 4v16m8-8H4"
+					/>
 				</svg>
 				Neuer Tag
 			</button>
@@ -134,7 +139,9 @@
 				></div>
 			</div>
 		{:else if $tags.length === 0}
-			<div class="rounded-3xl border border-gray-200/50 bg-white/80 p-12 text-center backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/80">
+			<div
+				class="rounded-3xl border border-gray-200/50 bg-white/80 p-12 text-center backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/80"
+			>
 				<svg
 					class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500"
 					fill="none"
@@ -148,7 +155,9 @@
 						d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
 					/>
 				</svg>
-				<h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Keine Tags vorhanden</h3>
+				<h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
+					Keine Tags vorhanden
+				</h3>
 				<p class="mt-2 text-gray-600 dark:text-gray-400">
 					Erstelle deinen ersten Tag, um deine Bilder zu organisieren
 				</p>
@@ -162,10 +171,7 @@
 						<div class="flex items-start justify-between">
 							<div class="flex items-center gap-3">
 								{#if tag.color}
-									<div
-										class="h-8 w-8 rounded-full"
-										style="background-color: {tag.color};"
-									></div>
+									<div class="h-8 w-8 rounded-full" style="background-color: {tag.color};"></div>
 								{/if}
 								<div>
 									<h3 class="font-medium text-gray-900 dark:text-gray-100">{tag.name}</h3>
@@ -229,7 +235,10 @@
 
 			<div class="space-y-4">
 				<div>
-					<label for="tag-name" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+					<label
+						for="tag-name"
+						class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+					>
 						Name
 					</label>
 					<input
@@ -252,7 +261,9 @@
 								class="h-10 w-10 rounded-full transition-all {newTagColor === color
 									? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-gray-900'
 									: ''}"
-								style="background-color: {color}; {newTagColor === color ? `--tw-ring-color: ${color}` : ''}"
+								style="background-color: {color}; {newTagColor === color
+									? `--tw-ring-color: ${color}`
+									: ''}"
 								aria-label="Farbe auswählen"
 							></button>
 						{/each}
@@ -295,7 +306,10 @@
 
 			<div class="space-y-4">
 				<div>
-					<label for="edit-tag-name" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+					<label
+						for="edit-tag-name"
+						class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+					>
 						Name
 					</label>
 					<input
@@ -317,7 +331,9 @@
 								class="h-10 w-10 rounded-full transition-all {editTagColor === color
 									? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-gray-900'
 									: ''}"
-								style="background-color: {color}; {editTagColor === color ? `--tw-ring-color: ${color}` : ''}"
+								style="background-color: {color}; {editTagColor === color
+									? `--tw-ring-color: ${color}`
+									: ''}"
 								aria-label="Farbe auswählen"
 							></button>
 						{/each}

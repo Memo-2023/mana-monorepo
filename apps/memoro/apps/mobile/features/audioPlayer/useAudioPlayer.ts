@@ -12,407 +12,401 @@ import { useAudioPlaybackStore } from './store/audioPlaybackStore';
  * Formatiert eine Zeitangabe in Sekunden als MM:SS
  */
 export const formatDuration = (seconds: number): string => {
-  return formatDurationWithUnits(seconds);
+	return formatDurationWithUnits(seconds);
 };
 
 /**
  * Hook zur Verwaltung eines Audio-Players
  */
 export const useAudioPlayer = () => {
-  const [player, setPlayer] = useState<AudioPlayer | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [loadError, setLoadError] = useState(false);
-  const [status, setStatus] = useState<AudioPlayerStatus>(AudioPlayerStatus.IDLE);
-  const [error, setError] = useState<string | null>(null);
-  const [isBuffering, setIsBuffering] = useState(false);
-  const audioIdRef = useRef<string | null>(null);
-  const { registerAudio, unregisterAudio, pauseAllExcept } = useAudioPlaybackStore();
+	const [player, setPlayer] = useState<AudioPlayer | null>(null);
+	const [isPlaying, setIsPlaying] = useState(false);
+	const [loadError, setLoadError] = useState(false);
+	const [status, setStatus] = useState<AudioPlayerStatus>(AudioPlayerStatus.IDLE);
+	const [error, setError] = useState<string | null>(null);
+	const [isBuffering, setIsBuffering] = useState(false);
+	const audioIdRef = useRef<string | null>(null);
+	const { registerAudio, unregisterAudio, pauseAllExcept } = useAudioPlaybackStore();
 
-  // Verwende die zentralen Timer-Hooks mit externen Zeitaktualisierungen
-  const positionTimer = useTimer(0, { useExternalTimeUpdates: true });
-  const durationTimer = useTimer(0, { useExternalTimeUpdates: true });
+	// Verwende die zentralen Timer-Hooks mit externen Zeitaktualisierungen
+	const positionTimer = useTimer(0, { useExternalTimeUpdates: true });
+	const durationTimer = useTimer(0, { useExternalTimeUpdates: true });
 
-  const isWebEnvironment = Platform.OS === 'web';
+	const isWebEnvironment = Platform.OS === 'web';
 
-  const loadSound = useCallback(
-    async (uri: string | undefined) => {
-      try {
-        setStatus(AudioPlayerStatus.LOADING);
+	const loadSound = useCallback(
+		async (uri: string | undefined) => {
+			try {
+				setStatus(AudioPlayerStatus.LOADING);
 
-        if (player) {
-          // Clear any existing intervals
-          if ((player as any)._intervalId) {
-            clearInterval((player as any)._intervalId);
-          }
-          if ((player as any)._checkDurationId) {
-            clearInterval((player as any)._checkDurationId);
-          }
-          await player.pause();
-          player.release();
-        }
+				if (player) {
+					// Clear any existing intervals
+					if ((player as any)._intervalId) {
+						clearInterval((player as any)._intervalId);
+					}
+					if ((player as any)._checkDurationId) {
+						clearInterval((player as any)._checkDurationId);
+					}
+					await player.pause();
+					player.release();
+				}
 
-        if (!uri) {
-          setLoadError(true);
-          setStatus(AudioPlayerStatus.ERROR);
-          setError('Keine URI angegeben');
-          return;
-        }
+				if (!uri) {
+					setLoadError(true);
+					setStatus(AudioPlayerStatus.ERROR);
+					setError('Keine URI angegeben');
+					return;
+				}
 
-        setLoadError(false);
-        await setAudioModeAsync({
-          shouldPlayInBackground: true,
-          playsInSilentMode: true,
-          interruptionMode: 'duckOthers',
-          allowsRecording: false,
-        });
+				setLoadError(false);
+				await setAudioModeAsync({
+					shouldPlayInBackground: true,
+					playsInSilentMode: true,
+					interruptionMode: 'duckOthers',
+					allowsRecording: false,
+				});
 
-        const newPlayer = createAudioPlayer(uri);
+				const newPlayer = createAudioPlayer(uri);
 
-        // Wait a moment for the player to load
-        await new Promise(resolve => setTimeout(resolve, 100));
+				// Wait a moment for the player to load
+				await new Promise((resolve) => setTimeout(resolve, 100));
 
-        // Check if player loaded successfully
-        if (newPlayer.duration === 0 && !newPlayer.playing) {
-          // Try waiting a bit more
-          await new Promise(resolve => setTimeout(resolve, 200));
-        }
+				// Check if player loaded successfully
+				if (newPlayer.duration === 0 && !newPlayer.playing) {
+					// Try waiting a bit more
+					await new Promise((resolve) => setTimeout(resolve, 200));
+				}
 
-        setPlayer(newPlayer);
-        if (newPlayer.duration !== undefined && newPlayer.duration > 0) {
-          durationTimer.setTime(newPlayer.duration);
-        }
+				setPlayer(newPlayer);
+				if (newPlayer.duration !== undefined && newPlayer.duration > 0) {
+					durationTimer.setTime(newPlayer.duration);
+				}
 
-        // Wiederholte Überprüfung der Dauer, falls sie nicht sofort verfügbar ist
-        let attempts = 0;
-        const maxAttempts = 100;
-        const checkDuration = setInterval(() => {
-          if (
-            newPlayer.duration &&
-            newPlayer.duration > 0 &&
-            newPlayer.duration !== Infinity
-          ) {
-            durationTimer.setTime(newPlayer.duration);
-            clearInterval(checkDuration);
-          } else if (attempts >= maxAttempts) {
-            clearInterval(checkDuration);
-          }
-          attempts += 1;
-        }, 100);
+				// Wiederholte Überprüfung der Dauer, falls sie nicht sofort verfügbar ist
+				let attempts = 0;
+				const maxAttempts = 100;
+				const checkDuration = setInterval(() => {
+					if (newPlayer.duration && newPlayer.duration > 0 && newPlayer.duration !== Infinity) {
+						durationTimer.setTime(newPlayer.duration);
+						clearInterval(checkDuration);
+					} else if (attempts >= maxAttempts) {
+						clearInterval(checkDuration);
+					}
+					attempts += 1;
+				}, 100);
 
-        // Monitor playback state changes
-        const intervalId = setInterval(() => {
-          if (newPlayer) {
-            positionTimer.updateTime(newPlayer.currentTime);
-            setIsPlaying(newPlayer.playing);
-            setIsBuffering(false); // expo-audio doesn't expose buffering state
+				// Monitor playback state changes
+				const intervalId = setInterval(() => {
+					if (newPlayer) {
+						positionTimer.updateTime(newPlayer.currentTime);
+						setIsPlaying(newPlayer.playing);
+						setIsBuffering(false); // expo-audio doesn't expose buffering state
 
-            if (newPlayer.duration !== undefined && newPlayer.duration > 0) {
-              durationTimer.setTime(newPlayer.duration);
-            }
+						if (newPlayer.duration !== undefined && newPlayer.duration > 0) {
+							durationTimer.setTime(newPlayer.duration);
+						}
 
-            // Status aktualisieren
-            if (newPlayer.playing) {
-              setStatus(AudioPlayerStatus.PLAYING);
-            } else if (newPlayer.currentTime === 0 && !newPlayer.playing) {
-              setStatus(AudioPlayerStatus.STOPPED);
-            } else if (positionTimer.timer > 0) {
-              setStatus(AudioPlayerStatus.PAUSED);
-            }
-          }
-        }, 100);
+						// Status aktualisieren
+						if (newPlayer.playing) {
+							setStatus(AudioPlayerStatus.PLAYING);
+						} else if (newPlayer.currentTime === 0 && !newPlayer.playing) {
+							setStatus(AudioPlayerStatus.STOPPED);
+						} else if (positionTimer.timer > 0) {
+							setStatus(AudioPlayerStatus.PAUSED);
+						}
+					}
+				}, 100);
 
-        // Store interval IDs for cleanup
-        (newPlayer as any)._intervalId = intervalId;
-        (newPlayer as any)._checkDurationId = checkDuration;
+				// Store interval IDs for cleanup
+				(newPlayer as any)._intervalId = intervalId;
+				(newPlayer as any)._checkDurationId = checkDuration;
 
-        setStatus(AudioPlayerStatus.PAUSED);
-      } catch (error) {
-        console.error('Fehler beim Laden der Audio-Datei:', error);
-        setLoadError(true);
-        setPlayer(null);
-        setStatus(AudioPlayerStatus.ERROR);
-        setError(error instanceof Error ? error.message : 'Unbekannter Fehler');
-      }
-    },
-    [player]
-  );
+				setStatus(AudioPlayerStatus.PAUSED);
+			} catch (error) {
+				console.error('Fehler beim Laden der Audio-Datei:', error);
+				setLoadError(true);
+				setPlayer(null);
+				setStatus(AudioPlayerStatus.ERROR);
+				setError(error instanceof Error ? error.message : 'Unbekannter Fehler');
+			}
+		},
+		[player]
+	);
 
-  const pause = useCallback(async () => {
-    try {
-      if (!player) return;
+	const pause = useCallback(async () => {
+		try {
+			if (!player) return;
 
-      if (player.playing) {
-        await player.pause();
-        setStatus(AudioPlayerStatus.PAUSED);
+			if (player.playing) {
+				await player.pause();
+				setStatus(AudioPlayerStatus.PAUSED);
 
-        if (audioIdRef.current) {
-          unregisterAudio(audioIdRef.current);
-          audioIdRef.current = null;
-        }
-      }
-    } catch (error) {
-      console.error('Fehler beim Pausieren:', error);
-    }
-  }, [player, unregisterAudio]);
+				if (audioIdRef.current) {
+					unregisterAudio(audioIdRef.current);
+					audioIdRef.current = null;
+				}
+			}
+		} catch (error) {
+			console.error('Fehler beim Pausieren:', error);
+		}
+	}, [player, unregisterAudio]);
 
-  const playPause = useCallback(async () => {
-    try {
-      if (!player) return;
+	const playPause = useCallback(async () => {
+		try {
+			if (!player) return;
 
-      if (player.playing) {
-        // Pausieren
-        await pause();
+			if (player.playing) {
+				// Pausieren
+				await pause();
 
-        // Benachrichtigung aktualisieren (nur für native Plattformen)
-        if (!isWebEnvironment) {
-          await NotificationService.showNotification(
-            'Audio-Wiedergabe pausiert',
-            'Tippe, um zur Wiedergabe zurückzukehren',
-            NotificationChannel.AUDIO_PLAYBACK,
-            true
-          );
-        }
-      } else {
-        // Wenn Audio zu Ende ist (Position am Ende), von vorne starten
-        if (
-          player.currentTime >= player.duration && player.duration > 0
-        ) {
-          player.seekTo(0);
-          positionTimer.updateTime(0);
-        }
+				// Benachrichtigung aktualisieren (nur für native Plattformen)
+				if (!isWebEnvironment) {
+					await NotificationService.showNotification(
+						'Audio-Wiedergabe pausiert',
+						'Tippe, um zur Wiedergabe zurückzukehren',
+						NotificationChannel.AUDIO_PLAYBACK,
+						true
+					);
+				}
+			} else {
+				// Wenn Audio zu Ende ist (Position am Ende), von vorne starten
+				if (player.currentTime >= player.duration && player.duration > 0) {
+					player.seekTo(0);
+					positionTimer.updateTime(0);
+				}
 
-        // Generate audio ID if not exists
-        if (!audioIdRef.current) {
-          audioIdRef.current = `audio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        }
+				// Generate audio ID if not exists
+				if (!audioIdRef.current) {
+					audioIdRef.current = `audio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+				}
 
-        // Pause all other audio before playing this one
-        await pauseAllExcept(audioIdRef.current);
+				// Pause all other audio before playing this one
+				await pauseAllExcept(audioIdRef.current);
 
-        // Abspielen
-        await player.play();
-        setStatus(AudioPlayerStatus.PLAYING);
+				// Abspielen
+				await player.play();
+				setStatus(AudioPlayerStatus.PLAYING);
 
-        // Register in global store
-        registerAudio(audioIdRef.current, player, pause);
+				// Register in global store
+				registerAudio(audioIdRef.current, player, pause);
 
-        // Benachrichtigung anzeigen (nur für native Plattformen)
-        if (!isWebEnvironment) {
-          await NotificationService.showNotification(
-            'Audio-Wiedergabe läuft',
-            'Tippe, um zur Wiedergabe zurückzukehren',
-            NotificationChannel.AUDIO_PLAYBACK,
-            true
-          );
-        }
-      }
-    } catch (error) {
-      console.error('Fehler beim Play/Pause:', error);
-      setLoadError(true);
-      setStatus(AudioPlayerStatus.ERROR);
-      setError(error instanceof Error ? error.message : 'Unbekannter Fehler beim Abspielen');
-    }
-  }, [player, isWebEnvironment, positionTimer, pause, registerAudio, pauseAllExcept]);
+				// Benachrichtigung anzeigen (nur für native Plattformen)
+				if (!isWebEnvironment) {
+					await NotificationService.showNotification(
+						'Audio-Wiedergabe läuft',
+						'Tippe, um zur Wiedergabe zurückzukehren',
+						NotificationChannel.AUDIO_PLAYBACK,
+						true
+					);
+				}
+			}
+		} catch (error) {
+			console.error('Fehler beim Play/Pause:', error);
+			setLoadError(true);
+			setStatus(AudioPlayerStatus.ERROR);
+			setError(error instanceof Error ? error.message : 'Unbekannter Fehler beim Abspielen');
+		}
+	}, [player, isWebEnvironment, positionTimer, pause, registerAudio, pauseAllExcept]);
 
-  const stop = useCallback(async () => {
-    try {
-      if (!player) return;
+	const stop = useCallback(async () => {
+		try {
+			if (!player) return;
 
-      await player.pause();
-      player.seekTo(0);
-      setStatus(AudioPlayerStatus.STOPPED);
-      positionTimer.updateTime(0);
+			await player.pause();
+			player.seekTo(0);
+			setStatus(AudioPlayerStatus.STOPPED);
+			positionTimer.updateTime(0);
 
-      // Unregister from global store
-      if (audioIdRef.current) {
-        unregisterAudio(audioIdRef.current);
-        audioIdRef.current = null;
-      }
+			// Unregister from global store
+			if (audioIdRef.current) {
+				unregisterAudio(audioIdRef.current);
+				audioIdRef.current = null;
+			}
 
-      // Benachrichtigung entfernen (nur für native Plattformen)
-      if (!isWebEnvironment) {
-        await NotificationService.stopForegroundService();
-      }
-    } catch (error) {
-      console.error('Fehler beim Stop:', error);
-      setLoadError(true);
-      setStatus(AudioPlayerStatus.ERROR);
-      setError(error instanceof Error ? error.message : 'Unbekannter Fehler beim Stoppen');
-    }
-  }, [player, isWebEnvironment, unregisterAudio]);
+			// Benachrichtigung entfernen (nur für native Plattformen)
+			if (!isWebEnvironment) {
+				await NotificationService.stopForegroundService();
+			}
+		} catch (error) {
+			console.error('Fehler beim Stop:', error);
+			setLoadError(true);
+			setStatus(AudioPlayerStatus.ERROR);
+			setError(error instanceof Error ? error.message : 'Unbekannter Fehler beim Stoppen');
+		}
+	}, [player, isWebEnvironment, unregisterAudio]);
 
-  const seekAndPlay = useCallback(
-    async (positionMillis: number) => {
-      try {
-        if (!player) {
-          console.error('Kein Player geladen');
-          return;
-        }
+	const seekAndPlay = useCallback(
+		async (positionMillis: number) => {
+			try {
+				if (!player) {
+					console.error('Kein Player geladen');
+					return;
+				}
 
-        const maxPosition = (player.duration || 0) * 1000;
-        const clampedPosition = Math.min(Math.max(0, positionMillis), maxPosition);
-        player.seekTo(clampedPosition / 1000);
+				const maxPosition = (player.duration || 0) * 1000;
+				const clampedPosition = Math.min(Math.max(0, positionMillis), maxPosition);
+				player.seekTo(clampedPosition / 1000);
 
-        // Generate audio ID if not exists
-        if (!audioIdRef.current) {
-          audioIdRef.current = `audio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        }
+				// Generate audio ID if not exists
+				if (!audioIdRef.current) {
+					audioIdRef.current = `audio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+				}
 
-        // Pause all other audio before playing this one
-        await pauseAllExcept(audioIdRef.current);
+				// Pause all other audio before playing this one
+				await pauseAllExcept(audioIdRef.current);
 
-        await player.play();
-        setIsPlaying(true);
-        positionTimer.updateTime(positionMillis / 1000);
-        setStatus(AudioPlayerStatus.PLAYING);
+				await player.play();
+				setIsPlaying(true);
+				positionTimer.updateTime(positionMillis / 1000);
+				setStatus(AudioPlayerStatus.PLAYING);
 
-        // Register in global store
-        registerAudio(audioIdRef.current, player, pause);
+				// Register in global store
+				registerAudio(audioIdRef.current, player, pause);
 
-        // Benachrichtigung aktualisieren (nur für native Plattformen)
-        if (!isWebEnvironment) {
-          await NotificationService.showNotification(
-            'Audio-Wiedergabe läuft',
-            'Tippe, um zur Wiedergabe zurückzukehren',
-            NotificationChannel.AUDIO_PLAYBACK,
-            true
-          );
-        }
-      } catch (error) {
-        console.error('Fehler beim Scrubben und Abspielen:', error);
-        setLoadError(true);
-        setStatus(AudioPlayerStatus.ERROR);
-        setError(error instanceof Error ? error.message : 'Unbekannter Fehler bei der Navigation');
-      }
-    },
-    [player, isWebEnvironment, pause, registerAudio, pauseAllExcept]
-  );
+				// Benachrichtigung aktualisieren (nur für native Plattformen)
+				if (!isWebEnvironment) {
+					await NotificationService.showNotification(
+						'Audio-Wiedergabe läuft',
+						'Tippe, um zur Wiedergabe zurückzukehren',
+						NotificationChannel.AUDIO_PLAYBACK,
+						true
+					);
+				}
+			} catch (error) {
+				console.error('Fehler beim Scrubben und Abspielen:', error);
+				setLoadError(true);
+				setStatus(AudioPlayerStatus.ERROR);
+				setError(error instanceof Error ? error.message : 'Unbekannter Fehler bei der Navigation');
+			}
+		},
+		[player, isWebEnvironment, pause, registerAudio, pauseAllExcept]
+	);
 
-  const seek = useCallback(
-    async (positionMillis: number) => {
-      try {
-        if (!player) return;
+	const seek = useCallback(
+		async (positionMillis: number) => {
+			try {
+				if (!player) return;
 
-        const maxPosition = (player.duration || 0) * 1000;
-        const clampedPosition = Math.min(Math.max(0, positionMillis), maxPosition);
-        player.seekTo(clampedPosition / 1000);
-        positionTimer.updateTime(clampedPosition / 1000);
-      } catch (error) {
-        console.error('Fehler beim Scrubben:', error);
-        setLoadError(true);
-      }
-    },
-    [player]
-  );
+				const maxPosition = (player.duration || 0) * 1000;
+				const clampedPosition = Math.min(Math.max(0, positionMillis), maxPosition);
+				player.seekTo(clampedPosition / 1000);
+				positionTimer.updateTime(clampedPosition / 1000);
+			} catch (error) {
+				console.error('Fehler beim Scrubben:', error);
+				setLoadError(true);
+			}
+		},
+		[player]
+	);
 
-  const unload = useCallback(async () => {
-    try {
-      if (!player) return;
+	const unload = useCallback(async () => {
+		try {
+			if (!player) return;
 
-      // Clear update intervals if they exist
-      if ((player as any)._intervalId) {
-        clearInterval((player as any)._intervalId);
-      }
-      if ((player as any)._checkDurationId) {
-        clearInterval((player as any)._checkDurationId);
-      }
+			// Clear update intervals if they exist
+			if ((player as any)._intervalId) {
+				clearInterval((player as any)._intervalId);
+			}
+			if ((player as any)._checkDurationId) {
+				clearInterval((player as any)._checkDurationId);
+			}
 
-      await player.pause();
-      player.release();
+			await player.pause();
+			player.release();
 
-      // Benachrichtigung entfernen (nur für native Plattformen)
-      if (!isWebEnvironment) {
-        await NotificationService.stopForegroundService();
-      }
+			// Benachrichtigung entfernen (nur für native Plattformen)
+			if (!isWebEnvironment) {
+				await NotificationService.stopForegroundService();
+			}
 
-      setPlayer(null);
-      positionTimer.reset();
-      durationTimer.reset();
-      setIsPlaying(false);
-      setLoadError(false);
-      setStatus(AudioPlayerStatus.IDLE);
-      setError(null);
-      setIsBuffering(false);
+			setPlayer(null);
+			positionTimer.reset();
+			durationTimer.reset();
+			setIsPlaying(false);
+			setLoadError(false);
+			setStatus(AudioPlayerStatus.IDLE);
+			setError(null);
+			setIsBuffering(false);
 
-      // Unregister from global store
-      if (audioIdRef.current) {
-        unregisterAudio(audioIdRef.current);
-        audioIdRef.current = null;
-      }
-    } catch (error) {
-      console.error('Fehler beim Unload:', error);
+			// Unregister from global store
+			if (audioIdRef.current) {
+				unregisterAudio(audioIdRef.current);
+				audioIdRef.current = null;
+			}
+		} catch (error) {
+			console.error('Fehler beim Unload:', error);
 
-      // Trotzdem Status zurücksetzen, um dem Nutzer zu ermöglichen, neu zu laden
-      setPlayer(null);
-      setStatus(AudioPlayerStatus.IDLE);
+			// Trotzdem Status zurücksetzen, um dem Nutzer zu ermöglichen, neu zu laden
+			setPlayer(null);
+			setStatus(AudioPlayerStatus.IDLE);
 
-      // Ensure unregistration even on error
-      if (audioIdRef.current) {
-        unregisterAudio(audioIdRef.current);
-        audioIdRef.current = null;
-      }
-    }
-  }, [player, isWebEnvironment, unregisterAudio]);
+			// Ensure unregistration even on error
+			if (audioIdRef.current) {
+				unregisterAudio(audioIdRef.current);
+				audioIdRef.current = null;
+			}
+		}
+	}, [player, isWebEnvironment, unregisterAudio]);
 
-  // Ressourcen freigeben, wenn die Komponente unmounted wird
-  useEffect(() => {
-    return () => {
-      if (player) {
-        // Clear update intervals if they exist
-        if ((player as any)._intervalId) {
-          clearInterval((player as any)._intervalId);
-        }
-        if ((player as any)._checkDurationId) {
-          clearInterval((player as any)._checkDurationId);
-        }
-        // Check if pause method exists before calling it (Expo Audio API change)
-        if (typeof player.pause === 'function') {
-          try {
-            player.pause();
-          } catch (error) {
-            console.error('Error pausing player:', error);
-          }
-        }
-        player.release();
-      }
+	// Ressourcen freigeben, wenn die Komponente unmounted wird
+	useEffect(() => {
+		return () => {
+			if (player) {
+				// Clear update intervals if they exist
+				if ((player as any)._intervalId) {
+					clearInterval((player as any)._intervalId);
+				}
+				if ((player as any)._checkDurationId) {
+					clearInterval((player as any)._checkDurationId);
+				}
+				// Check if pause method exists before calling it (Expo Audio API change)
+				if (typeof player.pause === 'function') {
+					try {
+						player.pause();
+					} catch (error) {
+						console.error('Error pausing player:', error);
+					}
+				}
+				player.release();
+			}
 
-      // Benachrichtigung entfernen (nur für native Plattformen)
-      if (!isWebEnvironment) {
-        NotificationService.stopForegroundService().catch(console.error);
-      }
+			// Benachrichtigung entfernen (nur für native Plattformen)
+			if (!isWebEnvironment) {
+				NotificationService.stopForegroundService().catch(console.error);
+			}
 
-      // Unregister from global store
-      if (audioIdRef.current) {
-        unregisterAudio(audioIdRef.current);
-        audioIdRef.current = null;
-      }
-    };
-  }, [player, isWebEnvironment, unregisterAudio]);
+			// Unregister from global store
+			if (audioIdRef.current) {
+				unregisterAudio(audioIdRef.current);
+				audioIdRef.current = null;
+			}
+		};
+	}, [player, isWebEnvironment, unregisterAudio]);
 
-  return {
-    isPlaying,
-    duration: durationTimer.timer,
-    currentTime: positionTimer.timer,
-    status,
-    error,
-    isBuffering,
-    loadError,
-    loadSound,
-    playPause,
-    stop,
-    seekAndPlay,
-    seek,
-    unload,
-    formattedPosition: positionTimer.formattedTime,
-    formattedDuration: durationTimer.formattedTime,
-    percentComplete:
-      durationTimer.timer > 0 ? (positionTimer.timer / durationTimer.timer) * 100 : 0,
-  };
+	return {
+		isPlaying,
+		duration: durationTimer.timer,
+		currentTime: positionTimer.timer,
+		status,
+		error,
+		isBuffering,
+		loadError,
+		loadSound,
+		playPause,
+		stop,
+		seekAndPlay,
+		seek,
+		unload,
+		formattedPosition: positionTimer.formattedTime,
+		formattedDuration: durationTimer.formattedTime,
+		percentComplete:
+			durationTimer.timer > 0 ? (positionTimer.timer / durationTimer.timer) * 100 : 0,
+	};
 };
 
 export default useAudioPlayer;
 
 // Hilfsfunktion zur Formatierung der Zeit
 export const formatTime = (milliseconds: number): string => {
-  return formatDurationFromMs(milliseconds);
+	return formatDurationFromMs(milliseconds);
 };

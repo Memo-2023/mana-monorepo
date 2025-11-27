@@ -68,8 +68,8 @@ export class ABTestingService {
 			variants: [
 				{ id: 'control', name: 'Original', weight: 34 },
 				{ id: 'value-focused', name: 'Value Proposition', weight: 33 },
-				{ id: 'social-proof', name: 'Social Proof First', weight: 33 }
-			]
+				{ id: 'social-proof', name: 'Social Proof First', weight: 33 },
+			],
 		});
 
 		this.tests.set('homepage-cta', {
@@ -80,8 +80,8 @@ export class ABTestingService {
 				{ id: 'start-free', name: 'Start Free', weight: 25 },
 				{ id: 'try-now', name: 'Try Now', weight: 25 },
 				{ id: 'get-started', name: 'Get Started', weight: 25 },
-				{ id: 'create-link', name: 'Create Your First Link', weight: 25 }
-			]
+				{ id: 'create-link', name: 'Create Your First Link', weight: 25 },
+			],
 		});
 	}
 
@@ -107,7 +107,7 @@ export class ABTestingService {
 			maxAge: 60 * 60 * 24 * 30,
 			httpOnly: true,
 			secure: true,
-			sameSite: 'lax'
+			sameSite: 'lax',
 		});
 
 		return variant;
@@ -151,8 +151,8 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
 		// Existing data...
 		abTests: {
 			hero: heroVariant,
-			cta: ctaVariant
-		}
+			cta: ctaVariant,
+		},
 	};
 };
 ```
@@ -173,7 +173,7 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
 	const heroComponents = {
 		control: HeroOriginal,
 		'value-focused': HeroValue,
-		'social-proof': HeroSocial
+		'social-proof': HeroSocial,
 	};
 
 	const HeroComponent = heroComponents[data.abTests?.hero?.id || 'control'];
@@ -183,7 +183,7 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
 		'start-free': 'Start Free - No Credit Card',
 		'try-now': 'Try Now',
 		'get-started': 'Get Started Free',
-		'create-link': 'Create Your First Link'
+		'create-link': 'Create Your First Link',
 	};
 
 	const ctaText = ctaTexts[data.abTests?.cta?.id || 'start-free'];
@@ -204,7 +204,7 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
 export const featureFlags = {
 	newHero: import.meta.env.PUBLIC_FEATURE_NEW_HERO === 'true',
 	interactiveDemo: import.meta.env.PUBLIC_FEATURE_DEMO === 'true',
-	pricingCalculator: import.meta.env.PUBLIC_FEATURE_CALCULATOR === 'true'
+	pricingCalculator: import.meta.env.PUBLIC_FEATURE_CALCULATOR === 'true',
 };
 
 // .env.local
@@ -225,7 +225,7 @@ export const load: PageServerLoad = async ({ url, cookies }) => {
 		// Override cookie for testing
 		cookies.set('ab_homepage-hero', variant, {
 			path: '/',
-			maxAge: 60 * 60 * 24
+			maxAge: 60 * 60 * 24,
 		});
 	}
 
@@ -259,16 +259,16 @@ export function getTimeBasedVariant(): string {
 export const heroHeadlines = {
 	control: {
 		headline: 'Short Links That Work Harder',
-		subheadline: 'Professional URL management with real-time analytics'
+		subheadline: 'Professional URL management with real-time analytics',
 	},
 	benefit: {
 		headline: 'Save 3 Hours Per Week on Link Management',
-		subheadline: 'Automate your URL workflow with smart analytics'
+		subheadline: 'Automate your URL workflow with smart analytics',
 	},
 	social: {
 		headline: 'Join 10,000+ Marketers Using uLoad',
-		subheadline: 'The trusted URL shortener for growing brands'
-	}
+		subheadline: 'The trusted URL shortener for growing brands',
+	},
 };
 ```
 
@@ -288,23 +288,23 @@ export const heroHeadlines = {
 		'start-free': {
 			text: 'Start Free - No Credit Card',
 			color: 'bg-purple-600 hover:bg-purple-700',
-			size: 'px-8 py-4 text-lg'
+			size: 'px-8 py-4 text-lg',
 		},
 		'try-now': {
 			text: 'Try Now →',
 			color: 'bg-blue-600 hover:bg-blue-700',
-			size: 'px-6 py-3 text-base'
+			size: 'px-6 py-3 text-base',
 		},
 		'get-started': {
 			text: 'Get Started Free',
 			color: 'bg-gradient-to-r from-purple-600 to-blue-600',
-			size: 'px-8 py-4 text-lg'
+			size: 'px-8 py-4 text-lg',
 		},
 		'create-link': {
 			text: '🔗 Create Your First Link',
 			color: 'bg-black hover:bg-gray-800',
-			size: 'px-6 py-4 text-lg'
-		}
+			size: 'px-6 py-4 text-lg',
+		},
 	};
 
 	const config = configs[variant];
@@ -363,7 +363,7 @@ export function trackABEvent(
 		window.gtag('event', 'ab_test', {
 			test_id: testId,
 			variant_id: variantId,
-			action: action
+			action: action,
 		});
 	}
 
@@ -375,8 +375,8 @@ export function trackABEvent(
 			testId,
 			variantId,
 			action,
-			timestamp: new Date().toISOString()
-		})
+			timestamp: new Date().toISOString(),
+		}),
 	});
 }
 ```
@@ -520,7 +520,7 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
 		heroVariant = Math.random() > 0.5 ? 'a' : 'b';
 		cookies.set('ab_hero', heroVariant, {
 			path: '/',
-			maxAge: 60 * 60 * 24 * 30
+			maxAge: 60 * 60 * 24 * 30,
 		});
 	}
 
@@ -528,7 +528,7 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
 
 	return {
 		// Existing data...
-		heroVariant
+		heroVariant,
 	};
 };
 ```

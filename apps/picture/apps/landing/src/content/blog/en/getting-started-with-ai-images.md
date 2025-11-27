@@ -1,12 +1,12 @@
 ---
 title: "Getting Started with AI Image Generation: A Beginner's Guide"
 description: "Learn the fundamentals of AI image generation and create your first stunning images with our comprehensive beginner's guide."
-author: "Picture Team"
+author: 'Picture Team'
 publishedAt: 2025-01-15
-coverImage: "/blog/getting-started.jpg"
-category: "tutorial"
-tags: ["beginner", "tutorial", "ai-basics", "getting-started"]
-language: "en"
+coverImage: '/blog/getting-started.jpg'
+category: 'tutorial'
+tags: ['beginner', 'tutorial', 'ai-basics', 'getting-started']
+language: 'en'
 ---
 
 ## Welcome to AI Image Generation
@@ -43,6 +43,7 @@ Instead of "a cat", try "a fluffy orange tabby cat sitting on a windowsill, soft
 ### Use Style Keywords
 
 Add style modifiers like:
+
 - "photorealistic"
 - "oil painting"
 - "digital art"
@@ -52,6 +53,7 @@ Add style modifiers like:
 ### Experiment with Composition
 
 Specify camera angles and framing:
+
 - "wide angle shot"
 - "close-up portrait"
 - "bird's eye view"

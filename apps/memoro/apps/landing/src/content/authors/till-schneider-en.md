@@ -1,15 +1,15 @@
 ---
-name: "Till Schneider"
-displayName: "Till Schneider"
-bio: "Founder and CEO of Memoro. Passionate advocate for AI-powered productivity and personal knowledge management."
-role: "Founder & CEO"
-avatar: "/images/team/Memoro-Team-Portrait-TillSchneider.jpg"
+name: 'Till Schneider'
+displayName: 'Till Schneider'
+bio: 'Founder and CEO of Memoro. Passionate advocate for AI-powered productivity and personal knowledge management.'
+role: 'Founder & CEO'
+avatar: '/images/team/Memoro-Team-Portrait-TillSchneider.jpg'
 social:
-  linkedin: "tillschneider"
-  twitter: "tillschneider"
-  website: "https://tillschneider.com"
-expertise: ["AI", "Productivity", "Entrepreneurship", "Personal Knowledge Management"]
-topics: ["Artificial Intelligence", "Startup Life", "Product Development", "Work-Life Balance"]
+  linkedin: 'tillschneider'
+  twitter: 'tillschneider'
+  website: 'https://tillschneider.com'
+expertise: ['AI', 'Productivity', 'Entrepreneurship', 'Personal Knowledge Management']
+topics: ['Artificial Intelligence', 'Startup Life', 'Product Development', 'Work-Life Balance']
 isActive: true
 isFeatured: true
 showInDirectory: true
@@ -17,9 +17,9 @@ permissions:
   canPublish: true
   canEditOthers: true
   isAdmin: true
-lang: "en"
-preferredLanguages: ["de", "en"]
-slug: "till-schneider"
+lang: 'en'
+preferredLanguages: ['de', 'en']
+slug: 'till-schneider'
 createdAt: 2024-01-01
 ---
 

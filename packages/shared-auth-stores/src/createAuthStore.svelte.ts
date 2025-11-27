@@ -181,6 +181,6 @@ export function createAuthStore<TUser extends BaseUser>(authService: AuthService
 		 */
 		clearError() {
 			error = null;
-		}
+		},
 	};
 }

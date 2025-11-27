@@ -6,69 +6,79 @@ import Container from '../atoms/Container.astro';
 import Button from '../atoms/Button.astro';
 
 interface CTA {
-  text: string;
-  href: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+	text: string;
+	href: string;
+	variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
 }
 
 interface Props {
-  title: string;
-  subtitle?: string;
-  primaryCta?: CTA;
-  secondaryCta?: CTA;
-  variant?: 'default' | 'highlighted' | 'minimal';
-  class?: string;
-  id?: string;
+	title: string;
+	subtitle?: string;
+	primaryCta?: CTA;
+	secondaryCta?: CTA;
+	variant?: 'default' | 'highlighted' | 'minimal';
+	class?: string;
+	id?: string;
 }
 
 const {
-  title,
-  subtitle,
-  primaryCta,
-  secondaryCta,
-  variant = 'default',
-  class: className = '',
-  id
+	title,
+	subtitle,
+	primaryCta,
+	secondaryCta,
+	variant = 'default',
+	class: className = '',
+	id,
 } = Astro.props;
 
 const variantStyles = {
-  default: 'bg-[var(--color-background-page)]',
-  highlighted: 'bg-[var(--color-primary)]/10 border-y border-[var(--color-primary)]/20',
-  minimal: ''
+	default: 'bg-[var(--color-background-page)]',
+	highlighted: 'bg-[var(--color-primary)]/10 border-y border-[var(--color-primary)]/20',
+	minimal: '',
 };
 ---
 
-<section id={id} class:list={["py-16 md:py-24", variantStyles[variant], className]}>
-  <Container size="md">
-    <div class="text-center space-y-6">
-      <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] leading-tight">
-        <slot name="title">{title}</slot>
-      </h2>
+<section id={id} class:list={['py-16 md:py-24', variantStyles[variant], className]}>
+	<Container size="md">
+		<div class="text-center space-y-6">
+			<h2
+				class="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] leading-tight"
+			>
+				<slot name="title">{title}</slot>
+			</h2>
 
-      {subtitle && (
-        <p class="text-base sm:text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto leading-relaxed">
-          {subtitle}
-        </p>
-      )}
+			{
+				subtitle && (
+					<p class="text-base sm:text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto leading-relaxed">
+						{subtitle}
+					</p>
+				)
+			}
 
-      {(primaryCta || secondaryCta) && (
-        <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-          {primaryCta && (
-            <Button href={primaryCta.href} variant={primaryCta.variant ?? 'primary'} size="lg">
-              <slot name="primaryCtaIcon" />
-              {primaryCta.text}
-            </Button>
-          )}
-          {secondaryCta && (
-            <Button href={secondaryCta.href} variant={secondaryCta.variant ?? 'secondary'} size="lg">
-              <slot name="secondaryCtaIcon" />
-              {secondaryCta.text}
-            </Button>
-          )}
-        </div>
-      )}
+			{
+				(primaryCta || secondaryCta) && (
+					<div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+						{primaryCta && (
+							<Button href={primaryCta.href} variant={primaryCta.variant ?? 'primary'} size="lg">
+								<slot name="primaryCtaIcon" />
+								{primaryCta.text}
+							</Button>
+						)}
+						{secondaryCta && (
+							<Button
+								href={secondaryCta.href}
+								variant={secondaryCta.variant ?? 'secondary'}
+								size="lg"
+							>
+								<slot name="secondaryCtaIcon" />
+								{secondaryCta.text}
+							</Button>
+						)}
+					</div>
+				)
+			}
 
-      <slot />
-    </div>
-  </Container>
+			<slot />
+		</div>
+	</Container>
 </section>

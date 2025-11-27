@@ -60,10 +60,7 @@ export function cacheKey(...parts: (string | number)[]): string {
 }
 
 // Cache-Decorator für async Funktionen
-export function cached<T>(
-	keyGenerator: (...args: any[]) => string,
-	ttlMs: number = 5 * 60 * 1000
-) {
+export function cached<T>(keyGenerator: (...args: any[]) => string, ttlMs: number = 5 * 60 * 1000) {
 	return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 		const originalMethod = descriptor.value;
 
@@ -92,5 +89,5 @@ export const CacheKeys = {
 	linkRedirect: (shortCode: string) => cacheKey('redirect', shortCode),
 	analyticsDaily: (linkId: string, date: string) => cacheKey('analytics', linkId, date),
 	userCards: (userId: string) => cacheKey('user', userId, 'cards'),
-	publicCard: (username: string, cardId: string) => cacheKey('public', username, cardId)
+	publicCard: (username: string, cardId: string) => cacheKey('public', username, cardId),
 } as const;

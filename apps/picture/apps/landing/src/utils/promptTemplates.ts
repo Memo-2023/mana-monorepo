@@ -37,9 +37,7 @@ export async function getTrendingTemplates(limit = 8): Promise<PromptTemplateEnt
 /**
  * Get prompt templates by category
  */
-export async function getTemplatesByCategory(
-	category: string
-): Promise<PromptTemplateEntry[]> {
+export async function getTemplatesByCategory(category: string): Promise<PromptTemplateEntry[]> {
 	const templates = await getAllPromptTemplates();
 	return templates.filter((t) => t.data.category === category);
 }
@@ -214,18 +212,14 @@ export async function getMostSavedTemplates(limit = 10): Promise<PromptTemplateE
 export async function getTemplatesByModel(model: string): Promise<PromptTemplateEntry[]> {
 	const templates = await getAllPromptTemplates();
 	return templates.filter(
-		(t) =>
-			t.data.recommendedModel === model || t.data.alternativeModels.includes(model)
+		(t) => t.data.recommendedModel === model || t.data.alternativeModels.includes(model)
 	);
 }
 
 /**
  * Fill template with variables
  */
-export function fillTemplate(
-	template: string,
-	variables: Record<string, string>
-): string {
+export function fillTemplate(template: string, variables: Record<string, string>): string {
 	let filled = template;
 
 	Object.entries(variables).forEach(([key, value]) => {
@@ -264,9 +258,7 @@ export function validateTemplateVariables(
 	const providedKeys = Object.keys(providedVariables);
 
 	const missing = requiredVars.filter((v) => !providedKeys.includes(v));
-	const extra = providedKeys.filter(
-		(k) => !template.data.variables.some((v) => v.name === k)
-	);
+	const extra = providedKeys.filter((k) => !template.data.variables.some((v) => v.name === k));
 
 	return {
 		valid: missing.length === 0,
@@ -282,15 +274,15 @@ function getCategoryIcon(category: string): string {
 	const icons: Record<string, string> = {
 		'social-media': '📱',
 		'product-photography': '📸',
-		'marketing': '📊',
+		marketing: '📊',
 		'logo-design': '🎨',
 		'character-design': '⚔️',
-		'illustration': '✏️',
-		'photography': '📷',
-		'architecture': '🏛️',
-		'abstract': '🌈',
-		'portrait': '👤',
-		'landscape': '🏔️',
+		illustration: '✏️',
+		photography: '📷',
+		architecture: '🏛️',
+		abstract: '🌈',
+		portrait: '👤',
+		landscape: '🏔️',
 		other: '📁',
 	};
 

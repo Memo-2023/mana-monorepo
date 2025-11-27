@@ -26,6 +26,7 @@
 Märchenzauber ist eine gut strukturierte, moderne App mit starkem technologischen Fundament (NestJS, React Native, Expo, Supabase). Die Analyse hat **62 konkrete Verbesserungsmöglichkeiten** identifiziert, die in folgende Kategorien fallen:
 
 ### Stärken der aktuellen Implementierung
+
 - ✅ Saubere Modulstruktur (Backend + Frontend)
 - ✅ Moderne Tech-Stack mit TypeScript
 - ✅ Gute Komponenten-Architektur (Atomic Design)
@@ -33,6 +34,7 @@ Märchenzauber ist eine gut strukturierte, moderne App mit starkem technologisch
 - ✅ Responsive Design für verschiedene Bildschirmgrößen
 
 ### Hauptverbesserungspotenziale
+
 - 🔴 **Kritisch:** Fehlende Fehlerbehandlung in mobilen Komponenten
 - 🟡 **Wichtig:** Performance-Optimierungen (Caching, Lazy Loading)
 - 🟢 **Nice-to-Have:** UX-Verbesserungen (Animationen, Feedback)
@@ -46,6 +48,7 @@ Märchenzauber ist eine gut strukturierte, moderne App mit starkem technologisch
 **Problem:** Die App verwendet nur Context API + lokale useState. Bei wachsender Komplexität wird dies zu Prop-Drilling und Re-Render-Problemen führen.
 
 **Lösung:**
+
 ```typescript
 // Empfehlung: Zustand für globalen State
 import { create } from 'zustand';
@@ -76,6 +79,7 @@ export const useStoryStore = create<StoryStore>()(
 ```
 
 **Vorteile:**
+
 - 🚀 Weniger Re-Renders durch selektive Subscriptions
 - 💾 Automatisches Persistence
 - 🧪 Bessere Testbarkeit
@@ -90,6 +94,7 @@ export const useStoryStore = create<StoryStore>()(
 **Problem:** Turborepo ist konfiguriert, aber `package.json` Scripts nutzen es nicht optimal.
 
 **Lösung:**
+
 ```json
 // Root package.json
 {
@@ -120,6 +125,7 @@ export const useStoryStore = create<StoryStore>()(
 ```
 
 **Vorteile:**
+
 - ⚡ Parallele Task-Ausführung
 - 💾 Build-Caching zwischen Runs
 - 🔄 Automatische Dependency-Resolution
@@ -133,6 +139,7 @@ export const useStoryStore = create<StoryStore>()(
 **Problem:** Types werden zwischen Mobile und Backend dupliziert.
 
 **Aktuelle Situation:**
+
 ```typescript
 // mobile/types/character.ts
 export interface Character {
@@ -152,6 +159,7 @@ export interface Character {
 ```
 
 **Lösung:**
+
 ```typescript
 // packages/shared-types/src/character.ts
 export interface Character {
@@ -179,6 +187,7 @@ export class CharacterDto {
 ```
 
 **Vorteile:**
+
 - ✅ Single Source of Truth
 - 🔒 Type-Safety zwischen Services
 - 🔄 Automatische API-Validierung
@@ -194,6 +203,7 @@ export class CharacterDto {
 **Problem:** `expo-image` wird verwendet, aber keine explizite Cache-Policy definiert.
 
 **Lösung:**
+
 ```typescript
 // components/atoms/OptimizedImage.tsx
 import { Image, ImageContentFit } from 'expo-image';
@@ -228,12 +238,13 @@ export function OptimizedImage({ uri, blurHash, size, aspectRatio = 16/9 }: Prop
 ```
 
 **Zusätzlich: Preloading für Story Pages**
+
 ```typescript
 // In StoryViewer beim Page Change
 useEffect(() => {
   // Preload next 2 pages
   const nextPages = [currentPage + 1, currentPage + 2];
-  nextPages.forEach(pageNum => {
+  nextPages.forEach((pageNum) => {
     const page = pages[pageNum];
     if (page?.image_url) {
       Image.prefetch(page.image_url);
@@ -243,6 +254,7 @@ useEffect(() => {
 ```
 
 **Vorteile:**
+
 - 🚀 Schnelleres Laden (50-70% Reduktion)
 - 💾 Reduzierter Daten-Traffic
 - 🎨 Smooth BlurHash Transitions
@@ -256,6 +268,7 @@ useEffect(() => {
 **Problem:** `FlatList` rendert alle Stories, auch wenn sie nicht sichtbar sind.
 
 **Lösung:**
+
 ```typescript
 // app/stories.tsx
 import { FlashList } from '@shopify/flash-list';
@@ -296,6 +309,7 @@ export default function StoriesScreen() {
 **Problem:** Identische Prompts führen zu redundanten AI-Calls (teuer & langsam).
 
 **Lösung:**
+
 ```typescript
 // backend/src/core/services/caching.service.ts
 import { Injectable } from '@nestjs/common';
@@ -326,15 +340,14 @@ export class CachingService {
   }
 
   private generateKey(prompt: string, model: string): string {
-    const hash = createHash('sha256')
-      .update(`${model}:${prompt}`)
-      .digest('hex');
+    const hash = createHash('sha256').update(`${model}:${prompt}`).digest('hex');
     return `ai-prompt:${hash}`;
   }
 }
 ```
 
 **Integration in PromptingService:**
+
 ```typescript
 async createConsistentCharacterDescriptionPrompts(
   story: string,
@@ -369,6 +382,7 @@ async createConsistentCharacterDescriptionPrompts(
 ```
 
 **Kostenersparnis (bei 1000 Stories/Monat):**
+
 - Cache Hit Rate: ~30% (konservativ)
 - AI Calls vermieden: 300/Monat
 - Kosteneinsparung: **~$45-60/Monat**
@@ -383,6 +397,7 @@ async createConsistentCharacterDescriptionPrompts(
 **Problem:** User sieht nur "Lädt..." ohne Fortschrittsanzeige.
 
 **Lösung:**
+
 ```typescript
 // Backend: WebSocket oder SSE für Progress Updates
 // Alternative: Polling-basiertes System mit story_logbooks
@@ -431,6 +446,7 @@ export default function CreateStory() {
 ```
 
 **Progress Steps:**
+
 1. ✅ Charakter wird geladen (10%)
 2. 📝 Geschichte wird geschrieben (30%)
 3. 🎨 Illustrationen werden erstellt (70%)
@@ -448,6 +464,7 @@ export default function CreateStory() {
 **Problem:** Keine klare Guided Tour für neue User.
 
 **Lösung:**
+
 ```typescript
 // components/organisms/OnboardingTour.tsx
 import { useEffect, useState } from 'react';
@@ -459,22 +476,22 @@ const ONBOARDING_STEPS = [
     title: 'Willkommen bei Märchenzauber!',
     description: 'Erstelle magische Geschichten mit deinen eigenen Charakteren',
     target: null,
-    cta: 'Los gehts!'
+    cta: 'Los gehts!',
   },
   {
     id: 'create-character',
     title: 'Erstelle deinen ersten Charakter',
     description: 'Lade ein Foto hoch oder beschreibe deinen Charakter',
     target: 'create-character-button',
-    cta: 'Charakter erstellen'
+    cta: 'Charakter erstellen',
   },
   {
     id: 'create-story',
     title: 'Schreibe deine erste Geschichte',
     description: 'Beschreibe was passieren soll - die KI macht den Rest!',
     target: 'create-story-button',
-    cta: 'Geschichte schreiben'
-  }
+    cta: 'Geschichte schreiben',
+  },
 ];
 
 export function OnboardingTour({ onComplete }: { onComplete: () => void }) {
@@ -485,7 +502,7 @@ export function OnboardingTour({ onComplete }: { onComplete: () => void }) {
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 300,
-      useNativeDriver: true
+      useNativeDriver: true,
     }).start();
   }, [currentStep]);
 
@@ -494,11 +511,12 @@ export function OnboardingTour({ onComplete }: { onComplete: () => void }) {
 ```
 
 **Tracking:**
+
 ```typescript
 posthog?.capture('onboarding_step_viewed', {
   step: currentStep,
   step_name: ONBOARDING_STEPS[currentStep].id,
-  time_spent: Date.now() - stepStartTime
+  time_spent: Date.now() - stepStartTime,
 });
 ```
 
@@ -511,6 +529,7 @@ posthog?.capture('onboarding_step_viewed', {
 **Problem:** Share-Funktion vorhanden, aber kein Share-Sheet mit Preview.
 
 **Lösung:**
+
 ```typescript
 // components/molecules/ShareButton.tsx
 import * as Sharing from 'expo-sharing';
@@ -572,6 +591,7 @@ export function ShareButton({ story }: { story: Story }) {
 ```
 
 **Zusätzlich: Deep Links für Shares**
+
 ```typescript
 // app.json
 {
@@ -603,6 +623,7 @@ export function ShareButton({ story }: { story: Story }) {
 **Problem:** App funktioniert nicht ohne Internet, auch für bereits geladene Stories.
 
 **Lösung:**
+
 ```typescript
 // src/services/offlineStorageService.ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -612,16 +633,13 @@ export class OfflineStorageService {
   private static KEYS = {
     STORIES: 'offline_stories',
     CHARACTERS: 'offline_characters',
-    IMAGES: 'offline_images'
+    IMAGES: 'offline_images',
   };
 
   static async saveStoryForOffline(story: Story): Promise<void> {
     const stories = await this.getOfflineStories();
-    const updated = [...stories.filter(s => s.id !== story.id), story];
-    await AsyncStorage.setItem(
-      this.KEYS.STORIES,
-      JSON.stringify(updated)
-    );
+    const updated = [...stories.filter((s) => s.id !== story.id), story];
+    await AsyncStorage.setItem(this.KEYS.STORIES, JSON.stringify(updated));
   }
 
   static async getOfflineStories(): Promise<Story[]> {
@@ -649,20 +667,19 @@ export const dataService = {
       const stories = await fetchWithAuth('/story');
 
       // Cache for offline use
-      await Promise.all(
-        stories.map(story => OfflineStorageService.saveStoryForOffline(story))
-      );
+      await Promise.all(stories.map((story) => OfflineStorageService.saveStoryForOffline(story)));
 
       return stories;
     } catch (error) {
       console.warn('Network error - falling back to offline cache');
       return await OfflineStorageService.getOfflineStories();
     }
-  }
+  },
 };
 ```
 
 **Offline Banner:**
+
 ```typescript
 // components/molecules/OfflineBanner.tsx
 export function OfflineBanner() {
@@ -699,6 +716,7 @@ export function OfflineBanner() {
 **Vorschläge:**
 
 **A) Text-to-Speech für Geschichten**
+
 ```typescript
 import * as Speech from 'expo-speech';
 
@@ -733,6 +751,7 @@ function StoryPage({ page }: { page: StoryPage }) {
 ```
 
 **B) Immersive Reading Mode**
+
 ```typescript
 // Automatisches Durchblättern mit Timer
 function StoryViewer({ pages }: { pages: StoryPage[] }) {
@@ -769,6 +788,7 @@ function StoryViewer({ pages }: { pages: StoryPage[] }) {
 ```
 
 **C) Bookmarking & Reading Progress**
+
 ```typescript
 interface ReadingProgress {
   storyId: string;
@@ -785,7 +805,7 @@ useEffect(() => {
       JSON.stringify({
         currentPage,
         lastReadAt: new Date().toISOString(),
-        completed: currentPage >= pages.length - 1
+        completed: currentPage >= pages.length - 1,
       })
     );
   };
@@ -816,6 +836,7 @@ useEffect(() => {
 **Problem:** Character-Liste ist einfach, aber bietet keine Sortierung/Filterung.
 
 **Lösung:**
+
 ```typescript
 // app/characters.tsx
 export default function CharactersScreen() {
@@ -866,6 +887,7 @@ export default function CharactersScreen() {
 ```
 
 **Zusätzlich: Character Stats**
+
 ```typescript
 // backend: Add story_count to character response
 async getUserCharacters(userId: string) {
@@ -895,6 +917,7 @@ async getUserCharacters(userId: string) {
 **Problem:** Responses haben unterschiedliche Formate (`Result<T>` vs. direkte Returns).
 
 **Lösung:**
+
 ```typescript
 // Standardisiertes API Response Format
 export interface ApiResponse<T = any> {
@@ -919,28 +942,28 @@ export class ResponseTransformInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
 
     return next.handle().pipe(
-      map(data => ({
+      map((data) => ({
         success: true,
         data,
         meta: {
           timestamp: new Date().toISOString(),
           requestId: request.id,
-          version: '1.0'
-        }
+          version: '1.0',
+        },
       })),
-      catchError(error => {
+      catchError((error) => {
         return of({
           success: false,
           error: {
             code: error.code || 'INTERNAL_ERROR',
             message: error.message,
-            details: error.details
+            details: error.details,
           },
           meta: {
             timestamp: new Date().toISOString(),
             requestId: request.id,
-            version: '1.0'
-          }
+            version: '1.0',
+          },
         });
       })
     );
@@ -949,6 +972,7 @@ export class ResponseTransformInterceptor implements NestInterceptor {
 ```
 
 **Vorteile:**
+
 - ✅ Konsistente Responses
 - 🔍 Besseres Error-Tracking mit Request-IDs
 - 📊 Vereinfachte Client-Side Parsing
@@ -962,6 +986,7 @@ export class ResponseTransformInterceptor implements NestInterceptor {
 **Problem:** Keine Rate Limits auf teure AI-Endpoints.
 
 **Lösung:**
+
 ```typescript
 // backend/src/common/guards/rate-limit.guard.ts
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
@@ -976,11 +1001,14 @@ export class CustomRateLimitGuard extends ThrottlerGuard {
   }
 
   protected async throwThrottlingException(context: ExecutionContext): Promise<void> {
-    throw new HttpException({
-      statusCode: 429,
-      message: 'Zu viele Anfragen. Bitte versuche es in ein paar Minuten erneut.',
-      retryAfter: 60
-    }, 429);
+    throw new HttpException(
+      {
+        statusCode: 429,
+        message: 'Zu viele Anfragen. Bitte versuche es in ein paar Minuten erneut.',
+        retryAfter: 60,
+      },
+      429
+    );
   }
 }
 
@@ -1029,6 +1057,7 @@ export class StoryController {
 **Problem:** Health Checks existieren, aber prüfen nur Basis-Status.
 
 **Lösung:**
+
 ```typescript
 // backend/src/health/health.controller.ts
 import { HealthCheck, HealthCheckService, TypeOrmHealthIndicator } from '@nestjs/terminus';
@@ -1040,7 +1069,7 @@ export class HealthController {
     private db: TypeOrmHealthIndicator,
     private supabase: SupabaseHealthIndicator,
     private replicate: ReplicateHealthIndicator,
-    private manaCore: ManaCoreHealthIndicator,
+    private manaCore: ManaCoreHealthIndicator
   ) {}
 
   @Get()
@@ -1091,6 +1120,7 @@ export class HealthController {
 ```
 
 **Monitoring Dashboard Integration:**
+
 ```typescript
 // Prometheus Metrics
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
@@ -1116,9 +1146,7 @@ export class MetricsService {
   });
 
   recordStoryCreation(duration: number, success: boolean) {
-    this.storyCreationDuration
-      .labels(success ? 'success' : 'error')
-      .observe(duration);
+    this.storyCreationDuration.labels(success ? 'success' : 'error').observe(duration);
   }
 }
 ```
@@ -1132,6 +1160,7 @@ export class MetricsService {
 **Problem:** Mobile App muss pollen, um zu wissen, wann Story fertig ist.
 
 **Lösung:**
+
 ```typescript
 // backend/src/webhooks/webhook.service.ts
 @Injectable()
@@ -1182,6 +1211,7 @@ async createStory(params: StoryCreationParams): Promise<StoryCreationResult> {
 ```
 
 **Mobile: Push Notification Handling**
+
 ```typescript
 // mobile/src/services/pushNotificationService.ts
 import * as Notifications from 'expo-notifications';
@@ -1221,7 +1251,7 @@ export class PushNotificationService {
     });
 
     // Handle notification tap
-    Notifications.addNotificationResponseReceivedListener(response => {
+    Notifications.addNotificationResponseReceivedListener((response) => {
       const { storyId, type } = response.notification.request.content.data;
 
       if (type === 'story_completed') {
@@ -1247,6 +1277,7 @@ export class PushNotificationService {
 **Problem:** `updateCharacterImagesJsonb()` und ähnliche Methoden werden manuell aufgerufen.
 
 **Lösung:**
+
 ```sql
 -- backend/migrations/auto_sync_jsonb_fields.sql
 
@@ -1312,6 +1343,7 @@ CREATE TRIGGER story_pages_sync
 ```
 
 **Vorteile:**
+
 - ✅ Automatische Konsistenz
 - 🚀 Schnellere Abfragen (JSONB für Reads)
 - 🔍 Relationale Integrität (für komplexe Queries)
@@ -1325,6 +1357,7 @@ CREATE TRIGGER story_pages_sync
 **Problem:** Search-Bar in `stories.tsx` nutzt nur `includes()` auf Titel/Prompt.
 
 **Lösung:**
+
 ```sql
 -- Add Full-Text Search columns
 ALTER TABLE stories
@@ -1358,6 +1391,7 @@ UPDATE stories SET search_vector =
 ```
 
 **Backend API:**
+
 ```typescript
 // story.controller.ts
 @Get('search')
@@ -1385,6 +1419,7 @@ async searchStories(query: string, userId: string): Promise<Story[]> {
 ```
 
 **Mobile Integration:**
+
 ```typescript
 // app/stories.tsx
 const [searchQuery, setSearchQuery] = useState('');
@@ -1420,6 +1455,7 @@ return (
 **Problem:** Keine explizite Backup-Strategie dokumentiert.
 
 **Empfehlung (Supabase-spezifisch):**
+
 ```bash
 # Tägliche Backups via Supabase CLI
 # .github/workflows/database-backup.yml
@@ -1455,6 +1491,7 @@ jobs:
 ```
 
 **Point-in-Time Recovery:**
+
 ```sql
 -- Supabase bietet 7-Tage PITR (Pro Plan)
 -- Restore zu spezifischem Zeitpunkt:
@@ -1472,6 +1509,7 @@ jobs:
 **Problem:** Keine End-to-End Tests.
 
 **Lösung:**
+
 ```typescript
 // mobile/e2e/createStory.test.ts (mit Detox)
 describe('Story Creation Flow', () => {
@@ -1530,6 +1568,7 @@ describe('Story Creation Flow', () => {
 ```
 
 **Backend Integration Tests:**
+
 ```typescript
 // backend/test/e2e/story.e2e-spec.ts
 describe('Story API (e2e)', () => {
@@ -1580,6 +1619,7 @@ describe('Story API (e2e)', () => {
 **Problem:** Manual `.env` setup notwendig.
 
 **Lösung:**
+
 ```bash
 #!/bin/bash
 # scripts/setup-dev.sh
@@ -1629,6 +1669,7 @@ echo "   Mobile: Expo Dev Client wird gestartet..."
 ```
 
 **VS Code Workspace Settings:**
+
 ```json
 // .vscode/settings.json
 {
@@ -1684,6 +1725,7 @@ echo "   Mobile: Expo Dev Client wird gestartet..."
 **Problem:** Keine strukturierte Logging-Strategie.
 
 **Lösung:**
+
 ```typescript
 // backend/src/common/logger/logger.service.ts
 import { Injectable, LoggerService as NestLoggerService } from '@nestjs/common';
@@ -1752,6 +1794,7 @@ export class LoggerService implements NestLoggerService {
 ```
 
 **Structured Logging in Services:**
+
 ```typescript
 // story-creation.service.ts
 this.logger.log('Creating story', 'StoryCreationService', {
@@ -1765,6 +1808,7 @@ this.logger.log('Creating story', 'StoryCreationService', {
 ```
 
 **Log Aggregation (Optional):**
+
 ```typescript
 // Integration mit Datadog/Sentry
 import * as Sentry from '@sentry/node';
@@ -1791,6 +1835,7 @@ Sentry.init({
 **Problem:** Manche DTOs haben nur partielle Validierung.
 
 **Lösung:**
+
 ```typescript
 // story/dto/create-story.dto.ts (aktuell nur Zod)
 import { IsString, IsArray, IsUUID, IsOptional, MaxLength, MinLength } from 'class-validator';
@@ -1801,7 +1846,7 @@ export class CreateAnimalStoryDto {
     description: 'Story description prompt',
     example: 'A magical adventure in the forest',
     minLength: 10,
-    maxLength: 2000
+    maxLength: 2000,
   })
   @IsString()
   @MinLength(10, { message: 'Story description must be at least 10 characters' })
@@ -1810,14 +1855,14 @@ export class CreateAnimalStoryDto {
 
   @ApiProperty({
     description: 'Character ID',
-    example: 'uuid-here'
+    example: 'uuid-here',
   })
   @IsUUID('4', { message: 'Invalid character ID format' })
   characterId: string;
 
   @ApiProperty({
     description: 'Optional author ID',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsUUID('4')
@@ -1825,7 +1870,7 @@ export class CreateAnimalStoryDto {
 
   @ApiProperty({
     description: 'Optional illustrator ID',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsUUID('4')
@@ -1833,27 +1878,30 @@ export class CreateAnimalStoryDto {
 }
 
 // Global Validation Pipe
-app.useGlobalPipes(new ValidationPipe({
-  whitelist: true, // Strip properties not in DTO
-  forbidNonWhitelisted: true, // Throw error on unknown properties
-  transform: true, // Auto-transform to DTO types
-  transformOptions: {
-    enableImplicitConversion: true
-  },
-  exceptionFactory: (errors) => {
-    const messages = errors.map(error => ({
-      field: error.property,
-      errors: Object.values(error.constraints || {}),
-    }));
-    return new BadRequestException({
-      message: 'Validation failed',
-      errors: messages,
-    });
-  },
-}));
+app.useGlobalPipes(
+  new ValidationPipe({
+    whitelist: true, // Strip properties not in DTO
+    forbidNonWhitelisted: true, // Throw error on unknown properties
+    transform: true, // Auto-transform to DTO types
+    transformOptions: {
+      enableImplicitConversion: true,
+    },
+    exceptionFactory: (errors) => {
+      const messages = errors.map((error) => ({
+        field: error.property,
+        errors: Object.values(error.constraints || {}),
+      }));
+      return new BadRequestException({
+        message: 'Validation failed',
+        errors: messages,
+      });
+    },
+  })
+);
 ```
 
 **Vorteile:**
+
 - 🛡️ Schutz vor Injection-Attacks
 - ✅ Bessere Fehler-Messages
 - 📚 Automatische API-Dokumentation (Swagger)
@@ -1867,6 +1915,7 @@ app.useGlobalPipes(new ValidationPipe({
 **Problem:** Keine Filterung von unangemessenen Story-Prompts.
 
 **Lösung:**
+
 ```typescript
 // backend/src/moderation/moderation.service.ts
 import { Injectable } from '@nestjs/common';
@@ -1931,6 +1980,7 @@ async createStory(@Body() dto: CreateStoryDto) {
 ```
 
 **Client-Side Handling:**
+
 ```typescript
 // mobile/app/createStory.tsx
 try {
@@ -1960,6 +2010,7 @@ try {
 **Problem:** API Keys sind statisch in `.env`.
 
 **Empfehlung:**
+
 ```typescript
 // Verwendung von Secret Manager (z.B. Google Secret Manager)
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
@@ -1994,6 +2045,7 @@ export default async (): Promise<AppConfig> => {
 ```
 
 **Alternative: Vault/Doppler**
+
 ```bash
 # Doppler CLI für lokale Entwicklung
 npx doppler run -- npm run dev
@@ -2015,6 +2067,7 @@ doppler secrets download --no-file --format env > .env.production
 **Ziel:** 80%+ Coverage für kritische Services
 
 **Beispiel: Story Creation Service Tests**
+
 ```typescript
 // backend/src/story/services/story-creation.service.spec.ts
 describe('StoryCreationService', () => {
@@ -2080,10 +2133,12 @@ describe('StoryCreationService', () => {
 
       supabaseService.getCharacterById.mockResolvedValue(mockCharacter);
       promptingService.createConsistentCharacterDescriptionPrompts.mockResolvedValue({
-        data: [{
-          characterDescription: 'A friendly brown bear',
-          pages: [1, 2],
-        }],
+        data: [
+          {
+            characterDescription: 'A friendly brown bear',
+            pages: [1, 2],
+          },
+        ],
         error: null,
       });
       imageService.generateIllustrationForPage.mockResolvedValue({
@@ -2149,14 +2204,16 @@ describe('StoryCreationService', () => {
       });
 
       // Should fall back to original character description
-      expect(result.storyData.characters_data[0].character_description)
-        .toBe('Fallback description');
+      expect(result.storyData.characters_data[0].character_description).toBe(
+        'Fallback description'
+      );
     });
   });
 });
 ```
 
 **Coverage Script:**
+
 ```json
 // package.json
 {
@@ -2194,6 +2251,7 @@ describe('StoryCreationService', () => {
 **Problem:** Keine Tests für komplette User Journeys.
 
 **Lösung:**
+
 ```typescript
 // backend/test/integration/story-flow.integration.spec.ts
 describe('Complete Story Creation Flow (Integration)', () => {
@@ -2276,7 +2334,7 @@ describe('Complete Story Creation Flow (Integration)', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .expect(200);
 
-    const createdStory = getStoriesRes.body.find(s => s.id === storyId);
+    const createdStory = getStoriesRes.body.find((s) => s.id === storyId);
     expect(createdStory).toBeDefined();
     expect(createdStory.character_id).toBe(characterId);
 
@@ -2309,6 +2367,7 @@ describe('Complete Story Creation Flow (Integration)', () => {
 **Verbesserung:** Dynamisches Pricing basierend auf Komplexität
 
 **Lösung:**
+
 ```typescript
 // backend/src/credits/pricing.service.ts
 @Injectable()
@@ -2400,6 +2459,7 @@ async createStory(params: StoryCreationParams) {
 ```
 
 **Mobile: Show Price Before Creation**
+
 ```typescript
 // app/createStory.tsx
 const [estimatedPrice, setEstimatedPrice] = useState<number>(0);
@@ -2441,14 +2501,15 @@ return (
 
 **Vorschlag:**
 
-| Tier | Preis/Monat | Credits | Features |
-|------|-------------|---------|----------|
-| **Free** | €0 | 5 | - 1 Charakter<br>- Basis-Modell (flux-schnell)<br>- Wasserzeichen |
-| **Basic** | €9.99 | 50 | - 5 Charaktere<br>- Standard-Modelle<br>- Kein Wasserzeichen |
-| **Pro** | €19.99 | 150 | - Unlimitierte Charaktere<br>- Premium-Modelle (Flux Pro, Imagen)<br>- Early Access Features<br>- Priority Support |
-| **Family** | €29.99 | 300 | - Alle Pro Features<br>- Multi-User Accounts (bis zu 5)<br>- Shared Character Library |
+| Tier       | Preis/Monat | Credits | Features                                                                                                           |
+| ---------- | ----------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Free**   | €0          | 5       | - 1 Charakter<br>- Basis-Modell (flux-schnell)<br>- Wasserzeichen                                                  |
+| **Basic**  | €9.99       | 50      | - 5 Charaktere<br>- Standard-Modelle<br>- Kein Wasserzeichen                                                       |
+| **Pro**    | €19.99      | 150     | - Unlimitierte Charaktere<br>- Premium-Modelle (Flux Pro, Imagen)<br>- Early Access Features<br>- Priority Support |
+| **Family** | €29.99      | 300     | - Alle Pro Features<br>- Multi-User Accounts (bis zu 5)<br>- Shared Character Library                              |
 
 **Implementation:**
+
 ```typescript
 // backend/src/subscriptions/subscription.service.ts
 @Injectable()
@@ -2468,20 +2529,20 @@ export class SubscriptionService {
 
   private getCreditsForTier(tier: string): number {
     const tiers = {
-      'free': 5,
-      'basic': 50,
-      'pro': 150,
-      'family': 300,
+      free: 5,
+      basic: 50,
+      pro: 150,
+      family: 300,
     };
     return tiers[tier] || 0;
   }
 
   private getFeaturesForTier(tier: string): string[] {
     const features = {
-      'free': ['1_character', 'basic_model', 'watermark'],
-      'basic': ['5_characters', 'standard_models', 'no_watermark'],
-      'pro': ['unlimited_characters', 'premium_models', 'early_access', 'priority_support'],
-      'family': ['all_pro', 'multi_user', 'shared_library'],
+      free: ['1_character', 'basic_model', 'watermark'],
+      basic: ['5_characters', 'standard_models', 'no_watermark'],
+      pro: ['unlimited_characters', 'premium_models', 'early_access', 'priority_support'],
+      family: ['all_pro', 'multi_user', 'shared_library'],
     };
     return features[tier] || [];
   }
@@ -2497,19 +2558,18 @@ export class SubscriptionService {
 **Idee:** Credits für Shares/Referrals
 
 **Lösung:**
+
 ```typescript
 // backend/src/referrals/referral.service.ts
 @Injectable()
 export class ReferralService {
   async trackShare(userId: string, storyId: string, platform: string): Promise<void> {
-    await this.supabase
-      .from('story_shares')
-      .insert({
-        user_id: userId,
-        story_id: storyId,
-        platform,
-        shared_at: new Date().toISOString(),
-      });
+    await this.supabase.from('story_shares').insert({
+      user_id: userId,
+      story_id: storyId,
+      platform,
+      shared_at: new Date().toISOString(),
+    });
 
     // Award share credits (1 credit per share, max 5/day)
     const sharesToday = await this.getSharesCountToday(userId);
@@ -2539,6 +2599,7 @@ export class ReferralService {
 ```
 
 **Mobile: Referral Code System**
+
 ```typescript
 // app/settings.tsx
 export default function Settings() {
@@ -2578,14 +2639,14 @@ export default function Settings() {
 
 ### 🔴 Kritisch (Sofort angehen)
 
-| # | Verbesserung | Aufwand | Impact | Grund |
-|---|--------------|---------|--------|-------|
-| 1 | Rate Limiting (4.2) | 0.5T | Hoch | Kostenkontrolle, Abuse Prevention |
-| 2 | Input Validation (7.1) | 1T | Hoch | Security, SQL Injection Prevention |
-| 3 | Content Moderation (7.2) | 1T | Hoch | Legal Compliance, Brand Safety |
-| 4 | Image Caching (2.1) | 1T | Hoch | User Experience, Kosten |
-| 5 | DB Backup Strategy (5.3) | 0.5T | Hoch | Datensicherheit |
-| 6 | Subscription System (9.2) | 5-7T | Sehr Hoch | Revenue-kritisch |
+| #   | Verbesserung              | Aufwand | Impact    | Grund                              |
+| --- | ------------------------- | ------- | --------- | ---------------------------------- |
+| 1   | Rate Limiting (4.2)       | 0.5T    | Hoch      | Kostenkontrolle, Abuse Prevention  |
+| 2   | Input Validation (7.1)    | 1T      | Hoch      | Security, SQL Injection Prevention |
+| 3   | Content Moderation (7.2)  | 1T      | Hoch      | Legal Compliance, Brand Safety     |
+| 4   | Image Caching (2.1)       | 1T      | Hoch      | User Experience, Kosten            |
+| 5   | DB Backup Strategy (5.3)  | 0.5T    | Hoch      | Datensicherheit                    |
+| 6   | Subscription System (9.2) | 5-7T    | Sehr Hoch | Revenue-kritisch                   |
 
 **Gesamt: ~10 Tage**
 
@@ -2593,22 +2654,22 @@ export default function Settings() {
 
 ### 🟡 Wichtig (Nächste 1-2 Monate)
 
-| # | Verbesserung | Aufwand | Impact | Grund |
-|---|--------------|---------|--------|-------|
-| 7 | State Management (1.1) | 2-3T | Hoch | Skalierbarkeit |
-| 8 | Shared Types (1.3) | 2-3T | Hoch | Type Safety, DX |
-| 9 | AI Caching (2.3) | 2T | Hoch | Kosteneinsparung |
-| 10 | Progress Tracking (2.4) | 3T | Hoch | UX |
-| 11 | Onboarding (3.1) | 2T | Hoch | User Retention |
-| 12 | Story Sharing (3.2) | 2T | Hoch | Growth |
-| 13 | Immersive Reading (3.4) | 3-4T | Hoch | UX |
-| 14 | API Standardisierung (4.1) | 1T | Mittel | DX, Maintainability |
-| 15 | Webhooks (4.4) | 2-3T | Hoch | UX |
-| 16 | JSONB Auto-Sync (5.1) | 1T | Mittel | Data Consistency |
-| 17 | Logging System (6.3) | 1T | Mittel | Debugging, Monitoring |
-| 18 | Unit Tests (8.1) | 5-7T | Hoch | Code Quality |
-| 19 | Dynamic Pricing (9.1) | 2T | Hoch | Revenue Optimization |
-| 20 | Referral System (9.3) | 3T | Hoch | Growth |
+| #   | Verbesserung               | Aufwand | Impact | Grund                 |
+| --- | -------------------------- | ------- | ------ | --------------------- |
+| 7   | State Management (1.1)     | 2-3T    | Hoch   | Skalierbarkeit        |
+| 8   | Shared Types (1.3)         | 2-3T    | Hoch   | Type Safety, DX       |
+| 9   | AI Caching (2.3)           | 2T      | Hoch   | Kosteneinsparung      |
+| 10  | Progress Tracking (2.4)    | 3T      | Hoch   | UX                    |
+| 11  | Onboarding (3.1)           | 2T      | Hoch   | User Retention        |
+| 12  | Story Sharing (3.2)        | 2T      | Hoch   | Growth                |
+| 13  | Immersive Reading (3.4)    | 3-4T    | Hoch   | UX                    |
+| 14  | API Standardisierung (4.1) | 1T      | Mittel | DX, Maintainability   |
+| 15  | Webhooks (4.4)             | 2-3T    | Hoch   | UX                    |
+| 16  | JSONB Auto-Sync (5.1)      | 1T      | Mittel | Data Consistency      |
+| 17  | Logging System (6.3)       | 1T      | Mittel | Debugging, Monitoring |
+| 18  | Unit Tests (8.1)           | 5-7T    | Hoch   | Code Quality          |
+| 19  | Dynamic Pricing (9.1)      | 2T      | Hoch   | Revenue Optimization  |
+| 20  | Referral System (9.3)      | 3T      | Hoch   | Growth                |
 
 **Gesamt: ~35-40 Tage**
 
@@ -2616,16 +2677,16 @@ export default function Settings() {
 
 ### 🟢 Nice-to-Have (Backlog)
 
-| # | Verbesserung | Aufwand | Impact | Anmerkung |
-|---|--------------|---------|--------|-----------|
-| 21 | Monorepo Optimization (1.2) | 1T | Mittel | DX |
-| 22 | FlashList (2.2) | 0.5T | Mittel | Performance |
-| 23 | Offline Mode (3.3) | 2T | Mittel | Edge Case |
-| 24 | Character Filters (3.5) | 1-2T | Mittel | UX |
-| 25 | Health Checks (4.3) | 1T | Mittel | Ops |
-| 26 | Full-Text Search (5.2) | 1T | Mittel | UX |
-| 27 | Dev Setup Script (6.2) | 0.5T | Mittel | DX |
-| 28 | API Key Rotation (7.3) | 1T | Hoch | Security (long-term) |
+| #   | Verbesserung                | Aufwand | Impact | Anmerkung            |
+| --- | --------------------------- | ------- | ------ | -------------------- |
+| 21  | Monorepo Optimization (1.2) | 1T      | Mittel | DX                   |
+| 22  | FlashList (2.2)             | 0.5T    | Mittel | Performance          |
+| 23  | Offline Mode (3.3)          | 2T      | Mittel | Edge Case            |
+| 24  | Character Filters (3.5)     | 1-2T    | Mittel | UX                   |
+| 25  | Health Checks (4.3)         | 1T      | Mittel | Ops                  |
+| 26  | Full-Text Search (5.2)      | 1T      | Mittel | UX                   |
+| 27  | Dev Setup Script (6.2)      | 0.5T    | Mittel | DX                   |
+| 28  | API Key Rotation (7.3)      | 1T      | Hoch   | Security (long-term) |
 
 **Gesamt: ~10 Tage**
 
@@ -2634,6 +2695,7 @@ export default function Settings() {
 ## Zusammenfassung
 
 ### Quick Wins (< 1 Tag, Hoher Impact)
+
 1. ✅ Rate Limiting (0.5T)
 2. ✅ Input Validation (1T)
 3. ✅ Content Moderation (1T)
@@ -2645,6 +2707,7 @@ export default function Settings() {
 ---
 
 ### MVP Next Steps (1-2 Wochen)
+
 1. Subscription System implementieren (5-7T)
 2. State Management modernisieren (2-3T)
 3. AI Caching aufsetzen (2T)
@@ -2655,6 +2718,7 @@ export default function Settings() {
 ---
 
 ### Long-Term Roadmap (3-6 Monate)
+
 1. **Q1:** Kritische Verbesserungen + Subscription
 2. **Q2:** UX Verbesserungen + Testing
 3. **Q3:** Growth Features (Referrals, Sharing)
@@ -2687,4 +2751,4 @@ Dieses Dokument sollte als lebendes Dokument behandelt werden. Nach Implementier
 
 **Ende des Dokuments**
 
-*Erstellt mit ❤️ für Märchenzauber*
+_Erstellt mit ❤️ für Märchenzauber_

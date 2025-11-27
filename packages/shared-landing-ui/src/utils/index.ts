@@ -7,17 +7,17 @@
  * for the shared components to work correctly.
  */
 export const requiredCssVariables = [
-  '--color-primary',
-  '--color-primary-hover',
-  '--color-primary-glow',
-  '--color-text-primary',
-  '--color-text-secondary',
-  '--color-text-muted',
-  '--color-background-page',
-  '--color-background-card',
-  '--color-background-card-hover',
-  '--color-border',
-  '--color-border-hover',
+	'--color-primary',
+	'--color-primary-hover',
+	'--color-primary-glow',
+	'--color-text-primary',
+	'--color-text-secondary',
+	'--color-text-muted',
+	'--color-background-page',
+	'--color-background-card',
+	'--color-background-card-hover',
+	'--color-border',
+	'--color-border-hover',
 ] as const;
 
 /**
@@ -62,45 +62,45 @@ export const exampleDarkTheme = `
  * Type definitions for component props (for TypeScript users)
  */
 export interface ButtonProps {
-  href?: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  fullWidth?: boolean;
+	href?: string;
+	variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+	size?: 'sm' | 'md' | 'lg';
+	fullWidth?: boolean;
 }
 
 export interface CardProps {
-  variant?: 'default' | 'hover' | 'glow' | 'bordered';
-  padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+	variant?: 'default' | 'hover' | 'glow' | 'bordered';
+	padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
 }
 
 export interface Feature {
-  icon: string;
-  title: string;
-  description: string;
-  href?: string;
+	icon: string;
+	title: string;
+	description: string;
+	href?: string;
 }
 
 export interface Testimonial {
-  name: string;
-  role?: string;
-  company?: string;
-  text: string;
-  image?: string;
-  rating?: number;
+	name: string;
+	role?: string;
+	company?: string;
+	text: string;
+	image?: string;
+	rating?: number;
 }
 
 export interface FAQItem {
-  question: string;
-  answer: string;
+	question: string;
+	answer: string;
 }
 
 export interface PricingPlan {
-  name: string;
-  description?: string;
-  price: string;
-  period?: string;
-  features: Array<{ text: string; included: boolean } | string>;
-  cta: { text: string; href: string };
-  highlighted?: boolean;
-  badge?: string;
+	name: string;
+	description?: string;
+	price: string;
+	period?: string;
+	features: Array<{ text: string; included: boolean } | string>;
+	cta: { text: string; href: string };
+	highlighted?: boolean;
+	badge?: string;
 }

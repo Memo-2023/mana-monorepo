@@ -8,6 +8,7 @@
 ## ✅ Successfully Deployed
 
 ### 1. Database Migration
+
 - **Status:** ✅ Complete
 - **Migration:** `20251009_job_queue_system.sql`
 - **Components:**
@@ -20,6 +21,7 @@
   - ✅ Proper indexes for performance
 
 ### 2. Edge Functions
+
 - **start-generation:** ✅ Deployed successfully
   - Returns immediately (~100ms)
   - Creates generation record and enqueues job
@@ -37,6 +39,7 @@
   - **Likely Cause:** Import issue with process-generation or Supabase client initialization
 
 ### 3. Environment Secrets
+
 - **Status:** ✅ All configured
 - **Secrets Set:**
   - ✅ `REPLICATE_API_KEY` (already existed)
@@ -46,6 +49,7 @@
   - ✅ `SUPABASE_DB_URL` (auto-set)
 
 ### 4. pg_cron Worker
+
 - **Status:** ✅ Configured and running
 - **Schedule:** Every minute (`* * * * *`)
 - **Job Name:** `process-job-queue`
@@ -60,6 +64,7 @@
 ### Issue 1: process-jobs Function Runtime Error
 
 **Symptom:**
+
 ```bash
 curl -X POST https://mjuvnnjxwfwlmxjsgkqu.supabase.co/functions/v1/process-jobs
 # Returns: {"success":false,"error":"Cannot read properties of undefined (reading 'substring')"}
@@ -67,21 +72,25 @@ curl -X POST https://mjuvnnjxwfwlmxjsgkqu.supabase.co/functions/v1/process-jobs
 
 **Root Cause:**
 The error occurs when calling `supabaseAdmin.rpc('claim_next_job')`. This is likely due to:
+
 1. Import of `process-generation/index.ts` causing initialization issues
 2. Supabase client not being properly initialized
 3. Environment variables not being available
 
 **Impact:**
+
 - The cron job will fail every minute
 - Jobs in the queue won't be processed automatically
 - Manual triggering via start-generation still works (but jobs stay pending)
 
 **Workaround:**
 Until fixed, you can:
+
 1. Use the old `generate-image` function (still deployed)
 2. Manually process jobs via SQL: `SELECT * FROM claim_next_job();`
 
 **Next Steps to Fix:**
+
 1. Remove the import of `process-generation` and inline the code
 2. Add better error handling and logging
 3. Test with a minimal version first
@@ -128,17 +137,20 @@ Until fixed, you can:
 ## 🧪 Testing Status
 
 ### Database Functions
+
 - ✅ `enqueue_job()` - Works perfectly
 - ✅ `claim_next_job()` - Returns SETOF correctly
 - ✅ `complete_job()` - Updates jobs correctly
 - ✅ Views (queue_health, failed_jobs_recent, stuck_jobs) - All working
 
 ### Edge Functions
+
 - ✅ `start-generation` - Not tested with auth, but deployed
 - ✅ `process-generation` - Deployed, used internally
 - ⚠️ `process-jobs` - Has runtime error
 
 ### pg_cron
+
 - ✅ Extension enabled
 - ✅ Cron job scheduled
 - ⚠️ Will fail due to process-jobs bug
@@ -148,6 +160,7 @@ Until fixed, you can:
 ## 📝 Quick Commands
 
 ### Check Queue Status
+
 ```sql
 -- Queue health
 SELECT * FROM queue_health;
@@ -160,6 +173,7 @@ SELECT * FROM failed_jobs_recent;
 ```
 
 ### Manual Job Processing (Workaround)
+
 ```sql
 -- Claim a job manually
 SELECT * FROM claim_next_job();
@@ -169,6 +183,7 @@ SELECT complete_job('job-id-here', NULL, NULL);
 ```
 
 ### Check Cron Job Status
+
 ```sql
 -- Check if cron is running
 SELECT * FROM cron.job WHERE jobname = 'process-job-queue';
@@ -181,6 +196,7 @@ LIMIT 10;
 ```
 
 ### Edge Function Logs
+
 Dashboard: https://supabase.com/dashboard/project/mjuvnnjxwfwlmxjsgkqu/logs/edge-functions
 
 ---
@@ -188,6 +204,7 @@ Dashboard: https://supabase.com/dashboard/project/mjuvnnjxwfwlmxjsgkqu/logs/edge
 ## 🎯 Next Steps
 
 ### Immediate (Fix Bug)
+
 1. **Debug process-jobs function**
    - Simplify to minimal version
    - Remove process-generation import
@@ -199,6 +216,7 @@ Dashboard: https://supabase.com/dashboard/project/mjuvnnjxwfwlmxjsgkqu/logs/edge
    - Check image is downloaded and stored
 
 ### Short-term
+
 1. **Add monitoring dashboard**
    - Queue depth alerts
    - Failed job notifications
@@ -210,6 +228,7 @@ Dashboard: https://supabase.com/dashboard/project/mjuvnnjxwfwlmxjsgkqu/logs/edge
    - Implement rate limiting
 
 ### Long-term
+
 1. **Add more job types**
    - Batch generation
    - Image variations

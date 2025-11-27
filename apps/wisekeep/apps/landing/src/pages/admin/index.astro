@@ -7,173 +7,183 @@ import '../../styles/themes.css';
 const currentPath = Astro.url.pathname;
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de" data-theme="ocean">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard - YouTube Transcriber</title>
-    <style>
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-      }
-      .stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin: 30px 0;
-      }
-      .stat-card {
-        background: rgb(var(--theme-card));
-        padding: 20px;
-        border-radius: 8px;
-        border: 1px solid rgba(var(--theme-border), 0.2);
-      }
-      .stat-value {
-        font-size: 2em;
-        font-weight: bold;
-        color: rgb(var(--theme-primary));
-      }
-      .stat-label {
-        color: rgb(var(--theme-text-muted));
-        margin-top: 5px;
-      }
-      .quick-actions {
-        background: rgb(var(--theme-card));
-        padding: 20px;
-        border-radius: 8px;
-        border: 1px solid rgba(var(--theme-border), 0.2);
-      }
-      .input-field {
-        width: 70%;
-        padding: 10px;
-        background: rgb(var(--theme-background));
-        color: rgb(var(--theme-text));
-        border: 1px solid rgba(var(--theme-border), 0.3);
-        border-radius: 4px;
-      }
-      .btn-primary {
-        padding: 10px 20px;
-        background: rgb(var(--theme-primary));
-        color: white;
-        border: none;
-        border-radius: 4px;
-        margin-left: 10px;
-        cursor: pointer;
-        transition: opacity 0.2s;
-      }
-      .btn-primary:hover {
-        opacity: 0.9;
-      }
-    </style>
-  </head>
-  <body class="bg-theme-background text-theme-text min-h-screen">
-    <ThemeSwitcher />
-    <Navigation currentPath={currentPath} />
-    
-    <div class="container">
-      <!-- Admin sub-navigation -->
-      <div class="bg-theme-card border border-theme-border/20 rounded-lg p-4 mb-8">
-        <div class="flex flex-wrap gap-4">
-          <a href="/admin" class="text-theme-primary font-semibold">Dashboard</a>
-          <a href="/admin/playlists" class="text-theme-text-muted hover:text-theme-primary transition-colors">Playlists</a>
-          <a href="/admin/transcripts" class="text-theme-text-muted hover:text-theme-primary transition-colors">Transkripte</a>
-          <a href="/admin/settings" class="text-theme-text-muted hover:text-theme-primary transition-colors">Einstellungen</a>
-        </div>
-      </div>
-      
-      <h1 class="text-4xl font-bold text-theme-primary mb-8">🎥 Admin Dashboard</h1>
-      
-      <div class="stats">
-        <div class="stat-card">
-          <div class="stat-value" id="transcripts">-</div>
-          <div class="stat-label">Transkripte</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="active">-</div>
-          <div class="stat-label">Aktive Jobs</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="playlists">-</div>
-          <div class="stat-label">Playlists</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="size">-</div>
-          <div class="stat-label">Speicher</div>
-        </div>
-      </div>
-      
-      <h2 class="text-2xl font-semibold text-theme-text mb-4">Quick Actions</h2>
-      <div class="quick-actions">
-        <input type="text" id="url" placeholder="YouTube URL eingeben..." class="input-field">
-        <button onclick="startTranscription()" class="btn-primary">Transkribieren</button>
-      </div>
-    </div>
-    
-    <Footer />
-    
-    <script>
-      // Load stats from API
-      async function loadStats() {
-        try {
-          const response = await fetch('http://localhost:8000/api/stats');
-          const data = await response.json();
-          document.getElementById('transcripts').textContent = data.total_transcripts;
-          document.getElementById('active').textContent = data.active_jobs;
-          document.getElementById('size').textContent = data.total_size_mb + ' MB';
-        } catch (error) {
-          console.error('Error loading stats:', error);
-        }
-      }
-      
-      // Load playlists count
-      async function loadPlaylists() {
-        try {
-          const response = await fetch('http://localhost:8000/api/playlists');
-          const data = await response.json();
-          document.getElementById('playlists').textContent = data.length;
-        } catch (error) {
-          console.error('Error loading playlists:', error);
-        }
-      }
-      
-      // Start transcription
-      async function startTranscription() {
-        const url = document.getElementById('url').value;
-        if (!url) return;
-        
-        try {
-          const response = await fetch('http://localhost:8000/api/transcribe', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              url: url,
-              model: 'base',
-              language: 'de'
-            })
-          });
-          
-          if (response.ok) {
-            alert('Transkription gestartet!');
-            document.getElementById('url').value = '';
-            loadStats();
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          alert('Fehler beim Starten der Transkription');
-        }
-      }
-      
-      // Load data on page load
-      loadStats();
-      loadPlaylists();
-      
-      // Refresh every 5 seconds
-      setInterval(loadStats, 5000);
-    </script>
-  </body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Admin Dashboard - YouTube Transcriber</title>
+		<style>
+			.container {
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 2rem;
+			}
+			.stats {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+				gap: 20px;
+				margin: 30px 0;
+			}
+			.stat-card {
+				background: rgb(var(--theme-card));
+				padding: 20px;
+				border-radius: 8px;
+				border: 1px solid rgba(var(--theme-border), 0.2);
+			}
+			.stat-value {
+				font-size: 2em;
+				font-weight: bold;
+				color: rgb(var(--theme-primary));
+			}
+			.stat-label {
+				color: rgb(var(--theme-text-muted));
+				margin-top: 5px;
+			}
+			.quick-actions {
+				background: rgb(var(--theme-card));
+				padding: 20px;
+				border-radius: 8px;
+				border: 1px solid rgba(var(--theme-border), 0.2);
+			}
+			.input-field {
+				width: 70%;
+				padding: 10px;
+				background: rgb(var(--theme-background));
+				color: rgb(var(--theme-text));
+				border: 1px solid rgba(var(--theme-border), 0.3);
+				border-radius: 4px;
+			}
+			.btn-primary {
+				padding: 10px 20px;
+				background: rgb(var(--theme-primary));
+				color: white;
+				border: none;
+				border-radius: 4px;
+				margin-left: 10px;
+				cursor: pointer;
+				transition: opacity 0.2s;
+			}
+			.btn-primary:hover {
+				opacity: 0.9;
+			}
+		</style>
+	</head>
+	<body class="bg-theme-background text-theme-text min-h-screen">
+		<ThemeSwitcher />
+		<Navigation currentPath={currentPath} />
+
+		<div class="container">
+			<!-- Admin sub-navigation -->
+			<div class="bg-theme-card border border-theme-border/20 rounded-lg p-4 mb-8">
+				<div class="flex flex-wrap gap-4">
+					<a href="/admin" class="text-theme-primary font-semibold">Dashboard</a>
+					<a
+						href="/admin/playlists"
+						class="text-theme-text-muted hover:text-theme-primary transition-colors">Playlists</a
+					>
+					<a
+						href="/admin/transcripts"
+						class="text-theme-text-muted hover:text-theme-primary transition-colors">Transkripte</a
+					>
+					<a
+						href="/admin/settings"
+						class="text-theme-text-muted hover:text-theme-primary transition-colors"
+						>Einstellungen</a
+					>
+				</div>
+			</div>
+
+			<h1 class="text-4xl font-bold text-theme-primary mb-8">🎥 Admin Dashboard</h1>
+
+			<div class="stats">
+				<div class="stat-card">
+					<div class="stat-value" id="transcripts">-</div>
+					<div class="stat-label">Transkripte</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-value" id="active">-</div>
+					<div class="stat-label">Aktive Jobs</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-value" id="playlists">-</div>
+					<div class="stat-label">Playlists</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-value" id="size">-</div>
+					<div class="stat-label">Speicher</div>
+				</div>
+			</div>
+
+			<h2 class="text-2xl font-semibold text-theme-text mb-4">Quick Actions</h2>
+			<div class="quick-actions">
+				<input type="text" id="url" placeholder="YouTube URL eingeben..." class="input-field" />
+				<button onclick="startTranscription()" class="btn-primary">Transkribieren</button>
+			</div>
+		</div>
+
+		<Footer />
+
+		<script>
+			// Load stats from API
+			async function loadStats() {
+				try {
+					const response = await fetch('http://localhost:8000/api/stats');
+					const data = await response.json();
+					document.getElementById('transcripts').textContent = data.total_transcripts;
+					document.getElementById('active').textContent = data.active_jobs;
+					document.getElementById('size').textContent = data.total_size_mb + ' MB';
+				} catch (error) {
+					console.error('Error loading stats:', error);
+				}
+			}
+
+			// Load playlists count
+			async function loadPlaylists() {
+				try {
+					const response = await fetch('http://localhost:8000/api/playlists');
+					const data = await response.json();
+					document.getElementById('playlists').textContent = data.length;
+				} catch (error) {
+					console.error('Error loading playlists:', error);
+				}
+			}
+
+			// Start transcription
+			async function startTranscription() {
+				const url = document.getElementById('url').value;
+				if (!url) return;
+
+				try {
+					const response = await fetch('http://localhost:8000/api/transcribe', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							url: url,
+							model: 'base',
+							language: 'de',
+						}),
+					});
+
+					if (response.ok) {
+						alert('Transkription gestartet!');
+						document.getElementById('url').value = '';
+						loadStats();
+					}
+				} catch (error) {
+					console.error('Error:', error);
+					alert('Fehler beim Starten der Transkription');
+				}
+			}
+
+			// Load data on page load
+			loadStats();
+			loadPlaylists();
+
+			// Refresh every 5 seconds
+			setInterval(loadStats, 5000);
+		</script>
+	</body>
 </html>

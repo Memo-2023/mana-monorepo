@@ -1,11 +1,11 @@
 ---
 title: "Vibecoding: L'Arte della Programmazione Intuitiva"
-description: "Scopri come elevare le tue competenze di programmazione a un nuovo livello con il Vibecoding e sviluppare soluzioni di codice più intuitive e creative."
+description: 'Scopri come elevare le tue competenze di programmazione a un nuovo livello con il Vibecoding e sviluppare soluzioni di codice più intuitive e creative.'
 pubDate: 2025-03-25
-category: "Vibecoding"
+category: 'Vibecoding'
 featured: true
-image: "/images/tutorials/nobackground/vibecode-bauntown-tutorial.png"
-author: "Max Müller"
+image: '/images/tutorials/nobackground/vibecode-bauntown-tutorial.png'
+author: 'Max Müller'
 ---
 
 # Vibecoding: L'Arte della Programmazione Intuitiva
@@ -43,20 +43,18 @@ Il primo passo nel Vibecoding è raggiungere uno stato mentale in cui sei comple
 ```javascript
 // Codifica tradizionale
 function processData(data) {
-  const results = [];
-  for (let i = 0; i < data.length; i++) {
-    if (data[i].status === 'active') {
-      results.push(data[i].value * 2);
-    }
-  }
-  return results;
+	const results = [];
+	for (let i = 0; i < data.length; i++) {
+		if (data[i].status === 'active') {
+			results.push(data[i].value * 2);
+		}
+	}
+	return results;
 }
 
 // Approccio Vibecoding
 function enhanceActiveValues(data) {
-  return data
-    .filter(item => item.isActive())
-    .map(item => item.amplify());
+	return data.filter((item) => item.isActive()).map((item) => item.amplify());
 }
 ```
 
@@ -82,7 +80,7 @@ def feels_like_valid_username(name):
     is_substantial = len(name) >= 3
     starts_properly = name[0].isalpha()
     has_acceptable_chars = all(c.isalnum() or c == '_' for c in name)
-    
+
     return is_substantial and starts_properly and has_acceptable_chars
 ```
 
@@ -94,16 +92,16 @@ Il Vibecoding non riguarda solo COSA fa il tuo codice, ma COME lo fa. Presta att
 
 ```javascript
 // Approccio funzionale ma ritmico
-const processTransactions = transactions => 
-  transactions
-    .filter(tx => tx.isComplete)
-    .sort((a, b) => b.date - a.date)
-    .map(tx => ({
-      id: tx.id,
-      amount: formatCurrency(tx.amount),
-      date: formatDate(tx.date)
-    }))
-    .slice(0, 10);
+const processTransactions = (transactions) =>
+	transactions
+		.filter((tx) => tx.isComplete)
+		.sort((a, b) => b.date - a.date)
+		.map((tx) => ({
+			id: tx.id,
+			amount: formatCurrency(tx.amount),
+			date: formatDate(tx.date),
+		}))
+		.slice(0, 10);
 ```
 
 Questo codice ha un flusso naturale—filtra, ordina, trasforma, limita—che si sente bene ed è facile da capire.
@@ -125,28 +123,28 @@ Nel Vibecoding avanzato, ci sforziamo di raggiungere l'armonia nel codice—uno 
 ```typescript
 // Un design di interfaccia armonioso
 interface Resonance<T> {
-  source: T;
-  amplify(factor: number): Resonance<T>;
-  combine(other: Resonance<T>): Resonance<T>;
-  release(): T;
+	source: T;
+	amplify(factor: number): Resonance<T>;
+	combine(other: Resonance<T>): Resonance<T>;
+	release(): T;
 }
 
 class SoundResonance implements Resonance<AudioBuffer> {
-  constructor(private buffer: AudioBuffer) {}
-  
-  amplify(factor: number): Resonance<AudioBuffer> {
-    // Implementation...
-    return this;
-  }
-  
-  combine(other: Resonance<AudioBuffer>): Resonance<AudioBuffer> {
-    // Implementation...
-    return this;
-  }
-  
-  release(): AudioBuffer {
-    return this.buffer;
-  }
+	constructor(private buffer: AudioBuffer) {}
+
+	amplify(factor: number): Resonance<AudioBuffer> {
+		// Implementation...
+		return this;
+	}
+
+	combine(other: Resonance<AudioBuffer>): Resonance<AudioBuffer> {
+		// Implementation...
+		return this;
+	}
+
+	release(): AudioBuffer {
+		return this.buffer;
+	}
 }
 ```
 

@@ -3,28 +3,24 @@
  * Shared Container component for consistent max-width and padding
  */
 interface Props {
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
-  class?: string;
-  as?: 'div' | 'section' | 'article' | 'main';
+	size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+	class?: string;
+	as?: 'div' | 'section' | 'article' | 'main';
 }
 
-const {
-  size = 'lg',
-  class: className = '',
-  as: Element = 'div'
-} = Astro.props;
+const { size = 'lg', class: className = '', as: Element = 'div' } = Astro.props;
 
 const sizes = {
-  sm: 'max-w-3xl',
-  md: 'max-w-5xl',
-  lg: 'max-w-7xl',
-  xl: 'max-w-[1400px]',
-  full: 'max-w-full'
+	sm: 'max-w-3xl',
+	md: 'max-w-5xl',
+	lg: 'max-w-7xl',
+	xl: 'max-w-[1400px]',
+	full: 'max-w-full',
 };
 
 const styles = `mx-auto px-4 sm:px-6 lg:px-8 ${sizes[size]} ${className}`;
 ---
 
 <Element class={styles}>
-  <slot />
+	<slot />
 </Element>

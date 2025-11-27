@@ -21,21 +21,23 @@
 	logo={UloadLogo}
 	primaryColor="#3b82f6"
 	onForgotPassword={handleForgotPassword}
-	goto={goto}
+	{goto}
 	loginPath="/login"
 	lightBackground="#f8fafc"
 	darkBackground="#0f172a"
 	translations={{
 		titleForm: 'Passwort zurücksetzen',
 		titleSuccess: 'E-Mail gesendet',
-		description: 'Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.',
+		description:
+			'Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.',
 		emailPlaceholder: 'E-Mail',
 		sendResetLinkButton: 'Link senden',
 		sending: 'Wird gesendet...',
 		backToLogin: 'Zurück zum Login',
 		resendEmail: 'E-Mail erneut senden',
-		successMessage: 'Wir haben einen Link zum Zurücksetzen deines Passworts an {email} gesendet. Bitte überprüfe deinen Posteingang.',
+		successMessage:
+			'Wir haben einen Link zum Zurücksetzen deines Passworts an {email} gesendet. Bitte überprüfe deinen Posteingang.',
 		emailRequired: 'E-Mail ist erforderlich',
-		sendFailed: 'Senden der E-Mail fehlgeschlagen'
+		sendFailed: 'Senden der E-Mail fehlgeschlagen',
 	}}
 />

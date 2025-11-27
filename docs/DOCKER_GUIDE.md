@@ -15,6 +15,7 @@ Comprehensive guide for working with Docker in the manacore-monorepo.
 ## Overview
 
 The monorepo uses Docker for:
+
 - **Development**: Local service orchestration
 - **CI/CD**: Automated builds and tests
 - **Production**: Deployment and scaling
@@ -22,6 +23,7 @@ The monorepo uses Docker for:
 ### Image Strategy
 
 All images use:
+
 - **Multi-stage builds**: Smaller production images
 - **Alpine Linux**: Minimal base images
 - **Non-root users**: Enhanced security
@@ -37,6 +39,7 @@ Templates are located in `docker/templates/`. Use these as starting points for n
 **File**: `docker/templates/Dockerfile.nestjs`
 
 **Usage**:
+
 ```dockerfile
 # Copy template
 cp docker/templates/Dockerfile.nestjs apps/myproject/apps/backend/Dockerfile
@@ -45,11 +48,13 @@ cp docker/templates/Dockerfile.nestjs apps/myproject/apps/backend/Dockerfile
 ```
 
 **Build Arguments**:
+
 - `SERVICE_PATH`: Path to service (e.g., `apps/chat/apps/backend`)
 - `PORT`: Service port (default: 3000)
 - `HEALTH_PATH`: Health check endpoint (default: `/health`)
 
 **Example**:
+
 ```bash
 docker build \
   --build-arg SERVICE_PATH=apps/chat/apps/backend \
@@ -65,12 +70,14 @@ docker build \
 **File**: `docker/templates/Dockerfile.sveltekit`
 
 **Features**:
+
 - SSR support
 - Environment variable injection
 - Static asset optimization
 - Health endpoint
 
 **Usage**:
+
 ```bash
 docker build \
   --build-arg SERVICE_PATH=apps/chat/apps/web \
@@ -85,6 +92,7 @@ docker build \
 **File**: `docker/templates/Dockerfile.astro`
 
 **Features**:
+
 - Static site serving with Nginx
 - Gzip compression
 - Security headers
@@ -93,6 +101,7 @@ docker build \
 **Nginx Configuration**: `docker/nginx/astro.conf`
 
 **Usage**:
+
 ```bash
 docker build \
   --build-arg SERVICE_PATH=apps/chat/apps/landing \
@@ -377,10 +386,10 @@ Configure logging drivers:
 services:
   backend:
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
 ```
 
 ### 8. Environment Variables
@@ -408,6 +417,7 @@ services:
 **Issue**: Container exits immediately
 
 **Debug**:
+
 ```bash
 # View container logs
 docker logs container-name
@@ -424,6 +434,7 @@ docker run -it --rm image-name sh
 **Issue**: Docker runs out of disk space
 
 **Solution**:
+
 ```bash
 # Check disk usage
 docker system df
@@ -447,6 +458,7 @@ docker rmi $(docker images -q)
 **Issue**: Docker build fails
 
 **Debug**:
+
 ```bash
 # Build with verbose output
 docker build --progress=plain --no-cache -t image-name .
@@ -463,6 +475,7 @@ docker build --target builder -t image-name .
 **Issue**: Containers can't communicate
 
 **Debug**:
+
 ```bash
 # List networks
 docker network ls
@@ -482,6 +495,7 @@ docker exec container1 nslookup container2
 **Issue**: Container runs slowly
 
 **Debug**:
+
 ```bash
 # Check resource usage
 docker stats
@@ -498,6 +512,7 @@ docker history image-name
 **Issue**: Permission denied errors
 
 **Solution**:
+
 ```bash
 # Check file ownership
 docker exec container-name ls -la /app
@@ -512,6 +527,7 @@ USER nodejs
 **Issue**: Env vars not available in container
 
 **Debug**:
+
 ```bash
 # Check environment
 docker exec container-name env

@@ -27,7 +27,7 @@
 		onEdit = () => {},
 		onDelete = () => {},
 		showMetadata = false,
-		userCardCustomization
+		userCardCustomization,
 	}: Props = $props();
 
 	// Determine variant classes and user customization styles
@@ -38,7 +38,7 @@
 			hero: 'bg-gradient-to-br from-blue-500 to-purple-600 text-white',
 			minimal: 'bg-transparent border-0',
 			glass: 'bg-white/10 backdrop-blur-lg border border-white/20',
-			gradient: 'bg-gradient-to-br from-blue-50 to-purple-50 border border-purple-200'
+			gradient: 'bg-gradient-to-br from-blue-50 to-purple-50 border border-purple-200',
 		};
 		return classes[card.variant || 'default'] || classes.default;
 	});
@@ -46,7 +46,7 @@
 	// Generate CSS custom properties for user card customization
 	let cardCustomStyles = $derived(() => {
 		if (!userCardCustomization) return '';
-		
+
 		const styles = [];
 		if (userCardCustomization.cardBackgroundColor) {
 			styles.push(`--card-bg: ${userCardCustomization.cardBackgroundColor}`);
@@ -60,7 +60,7 @@
 		if (userCardCustomization.cardTextColor) {
 			styles.push(`--card-text: ${userCardCustomization.cardTextColor}`);
 		}
-		
+
 		return styles.join('; ');
 	});
 
@@ -97,7 +97,7 @@
 
 <div
 	class="card-renderer rounded-xl shadow-sm transition-all {variantClasses()} {className}"
-	style="{cardCustomStyles()}"
+	style={cardCustomStyles()}
 	data-card-id={card.id}
 	data-card-mode={card.config.mode}
 >

@@ -12,6 +12,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ## Tech Stack Unabhängigkeit
 
 ### **SvelteKit** ✅ Unabhängiger
+
 - **Compiler-basiert** - kompiliert zu Vanilla JS
 - Keine Runtime Framework (React, Vue, etc.)
 - Kleinere Abhängigkeiten
@@ -19,6 +20,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 - Zukunftssicherer durch Web Standards
 
 ### **Next.js** ⚠️ React-Ökosystem
+
 - Fest an React gebunden
 - Braucht React Ökosystem (React Query, etc.)
 - Größere Bundle Sizes
@@ -29,6 +31,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ## Performance
 
 ### **SvelteKit** 🚀
+
 - **Extrem schnell** - kein Virtual DOM
 - Kleinere Bundles (20-30% weniger)
 - Schnelleres First Paint
@@ -36,6 +39,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 - Beispiel: 50KB vs 150KB initial
 
 ### **Next.js** 👍
+
 - Gut, aber schwerer
 - Virtual DOM Overhead
 - Hydration kann langsam sein
@@ -48,6 +52,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ### **SvelteKit**
 
 **Vorteile:**
+
 - **Weniger Boilerplate** - 30-40% weniger Code
 - Intuitivere Syntax
 - Eingebaute Animationen/Transitions
@@ -55,17 +60,19 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 - Server Load Functions elegant
 
 **Beispiel:**
+
 ```svelte
 <script>
-  let count = 0; // Kein useState!
+	let count = 0; // Kein useState!
 </script>
 
 <button on:click={() => count++}>
-  {count}
+	{count}
 </button>
 ```
 
 **Nachteile:**
+
 - Kleinere Community
 - Weniger StackOverflow Antworten
 - Weniger UI Libraries
@@ -73,6 +80,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ### **Next.js**
 
 **Vorteile:**
+
 - **Riesige Community** - jedes Problem schon gelöst
 - Tonnen von Libraries
 - Mehr Devs verfügbar (Hiring)
@@ -80,6 +88,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 - Besserer Support
 
 **Nachteile:**
+
 - Mehr Boilerplate
 - Komplexer (App Router vs Pages Router)
 - Hooks-Lernkurve
@@ -90,6 +99,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ## Supabase Integration
 
 ### **Beide gleich gut** ✅
+
 - Supabase JS Client funktioniert überall
 - SSR Auth beide gut
 - Beide haben offizielle Guides
@@ -97,10 +107,12 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ### **Unterschiede:**
 
 **SvelteKit:**
+
 - Hooks in `+page.server.ts` natürlicher
 - Load Functions cleaner
 
 **Next.js:**
+
 - Mehr Beispiele online
 - Mehr Tutorials verfügbar
 
@@ -109,6 +121,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ## Routing & SSR
 
 ### **SvelteKit** 💚
+
 - **File-based Routing** - `+page.svelte`
 - Einfacher als Next.js
 - Layouts intuitiver
@@ -116,6 +129,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 - Weniger Magic
 
 ### **Next.js** 💛
+
 - File-based Routing - aber komplizierter
 - App Router vs Pages Router Verwirrung
 - Mehr Konzepte (RSC, Server Actions)
@@ -128,6 +142,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ### **Next.js** ✅ Größer
 
 **UI Libraries:**
+
 - Shadcn/ui (top!)
 - Material UI
 - Chakra UI
@@ -136,6 +151,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 - Tausende mehr
 
 **Sonstiges:**
+
 - Jede Library hat React Support
 - Auth: NextAuth perfekt integriert
 - Payments: Stripe Beispiele überall
@@ -143,6 +159,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ### **SvelteKit** ⚠️ Kleiner, wachsend
 
 **UI Libraries:**
+
 - Skeleton UI
 - DaisyUI (Tailwind-based)
 - Carbon Components
@@ -150,6 +167,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 - Weniger Auswahl
 
 **Aber:**
+
 - Kann CSS Frameworks nutzen (Tailwind, UnoCSS)
 - Viele Web Components nutzbar
 
@@ -158,6 +176,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ## Image Handling (kritisch für Picture App!)
 
 ### **Next.js** ✅ Exzellent
+
 - `next/image` Component eingebaut
 - Automatische Optimierung
 - WebP/AVIF Konvertierung
@@ -166,6 +185,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 - **Produktionsreif out of the box**
 
 ### **SvelteKit** ⚠️ Braucht Setup
+
 - Kein eingebautes Image Optimization
 - Manuell mit Vite Plugins (vite-imagetools)
 - Oder externe Services (Cloudinary, imgix)
@@ -185,10 +205,12 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ### **Unterschiede:**
 
 **Next.js:**
+
 - Optimiert für Vercel
 - Einige Features nur auf Vercel
 
 **SvelteKit:**
+
 - Adapter-System flexibler
 - Läuft überall gleich gut
 
@@ -197,12 +219,14 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ## Code Sharing mit React Native
 
 ### **Next.js** ✅ Einfacher
+
 - Beide nutzen React
 - Components **teilweise** portierbar
 - Gleiche Patterns (Hooks)
 - Logic besser teilbar
 
 ### **SvelteKit** ⚠️ Schwieriger
+
 - Komplett andere Syntax
 - Nur Business Logic teilbar
 - UI muss komplett neu
@@ -212,11 +236,13 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ## Hiring & Team
 
 ### **Next.js** ✅
+
 - Jeder React Dev kann Next.js
 - Größerer Talent Pool
 - Einfacher zu ersetzen
 
 ### **SvelteKit** ⚠️
+
 - Kleinere Developer Base
 - Schwieriger zu finden
 - Aber: React Devs lernen es schnell
@@ -226,12 +252,14 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ## Long-term Maintenance
 
 ### **SvelteKit** ✅ Stabiler
+
 - Weniger Breaking Changes
 - Klare Roadmap
 - Web Standards fokussiert
 - Weniger Refactoring nötig
 
 ### **Next.js** ⚠️ Schnelle Evolution
+
 - App Router große Änderung (2023)
 - React Server Components komplex
 - Viel Churn
@@ -241,24 +269,25 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 
 ## Feature-Matrix für Picture App
 
-| Feature | Next.js | SvelteKit | Gewinner |
-|---------|---------|-----------|----------|
-| Image Optimization | ✅ Exzellent | ⚠️ Manuell | Next.js |
-| Performance | 👍 Gut | 🚀 Besser | SvelteKit |
-| Supabase Integration | ✅ Gut | ✅ Gut | Unentschieden |
-| Auth | ✅ NextAuth | ✅ Hooks | Unentschieden |
-| Animations | 👍 Libraries | ✅ Native | SvelteKit |
-| SEO | ✅ Gut | ✅ Gut | Unentschieden |
-| Community Support | ✅ Riesig | ⚠️ Klein | Next.js |
-| Bundle Size | ⚠️ Größer | ✅ Kleiner | SvelteKit |
-| Code Sharing RN | ✅ React | ❌ Neu | Next.js |
-| Developer Experience | 👍 Gut | ✅ Besser | SvelteKit |
+| Feature              | Next.js      | SvelteKit  | Gewinner      |
+| -------------------- | ------------ | ---------- | ------------- |
+| Image Optimization   | ✅ Exzellent | ⚠️ Manuell | Next.js       |
+| Performance          | 👍 Gut       | 🚀 Besser  | SvelteKit     |
+| Supabase Integration | ✅ Gut       | ✅ Gut     | Unentschieden |
+| Auth                 | ✅ NextAuth  | ✅ Hooks   | Unentschieden |
+| Animations           | 👍 Libraries | ✅ Native  | SvelteKit     |
+| SEO                  | ✅ Gut       | ✅ Gut     | Unentschieden |
+| Community Support    | ✅ Riesig    | ⚠️ Klein   | Next.js       |
+| Bundle Size          | ⚠️ Größer    | ✅ Kleiner | SvelteKit     |
+| Code Sharing RN      | ✅ React     | ❌ Neu     | Next.js       |
+| Developer Experience | 👍 Gut       | ✅ Besser  | SvelteKit     |
 
 ---
 
 ## Entscheidungsmatrix
 
 ### **Wähle SvelteKit wenn:**
+
 - ✅ Maximale Unabhängigkeit wichtig
 - ✅ Performance kritisch
 - ✅ Bereit für Image Optimization Setup
@@ -266,6 +295,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 - ✅ Kleine, fokussierte Community okay
 
 ### **Wähle Next.js wenn:**
+
 - ✅ Schnelle Time-to-Market wichtig
 - ✅ Image Optimization out-of-the-box benötigt
 - ✅ React-Synergien mit Mobile gewünscht
@@ -302,6 +332,7 @@ Für eine Bilder-App mit gleichwertigen Mobile (React Native) und Web Anforderun
 ```
 
 **Regeln:**
+
 1. ❌ **Keine Next.js spezifischen Features** außer Image und Routing
 2. ✅ **Business Logic in `/shared`** auslagern
 3. ✅ **Vercel-unabhängig deployen** (z.B. Cloudflare, Netlify)
@@ -329,6 +360,7 @@ Phase 3: Optional - Migration zu SvelteKit wenn Next.js nervt
 **Warum NICHT Expo Web?**
 
 Die App nutzt viele native-only Features:
+
 - `react-native-worklets` (JSI/Native)
 - `react-native-reanimated` (Native Animations)
 - `react-native-pager-view` (Native Views)
@@ -336,6 +368,7 @@ Die App nutzt viele native-only Features:
 - Gesten, Zoom, Blur...
 
 **Probleme:**
+
 - 2-5 Tage Debugging für Mocks
 - Ständige Workarounds
 - Limitierte Features
@@ -359,15 +392,18 @@ Die App nutzt viele native-only Features:
 ## Ressourcen
 
 ### Next.js
+
 - [Next.js Docs](https://nextjs.org/docs)
 - [Next.js + Supabase](https://supabase.com/docs/guides/getting-started/tutorials/with-nextjs)
 - [Next.js Image Optimization](https://nextjs.org/docs/app/building-your-application/optimizing/images)
 
 ### SvelteKit (für Zukunft)
+
 - [SvelteKit Docs](https://kit.svelte.dev/docs)
 - [SvelteKit + Supabase](https://supabase.com/docs/guides/getting-started/tutorials/with-sveltekit)
 
 ### Monorepo Setup
+
 - [Turborepo](https://turbo.build/repo/docs)
 - [pnpm Workspaces](https://pnpm.io/workspaces)
 

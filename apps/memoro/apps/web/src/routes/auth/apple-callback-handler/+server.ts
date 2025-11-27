@@ -11,8 +11,8 @@ import type { RequestHandler } from './$types';
 // Disable CSRF protection for this endpoint since Apple is POSTing from their domain
 export const config = {
 	csrf: {
-		checkOrigin: false
-	}
+		checkOrigin: false,
+	},
 };
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -25,7 +25,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		hasIdToken: formData.has('id_token'),
 		hasState: formData.has('state'),
 		hasUser: formData.has('user'),
-		hasError: formData.has('error')
+		hasError: formData.has('error'),
 	});
 
 	// Check for errors from Apple

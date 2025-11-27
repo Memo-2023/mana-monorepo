@@ -26,7 +26,7 @@ export const showPropertiesPanel = writable(false);
 
 // Text editing state
 export const editingTextId = writable<string | null>(null);
-export const isEditingText = derived(editingTextId, $id => $id !== null);
+export const isEditingText = derived(editingTextId, ($id) => $id !== null);
 
 // Loading state
 export const isLoadingCanvasItems = writable(false);
@@ -44,16 +44,16 @@ export const canvasHistoryIndex = writable(-1);
 export const selectedItems = derived(
 	[canvasItems, selectedItemIds],
 	([$canvasItems, $selectedItemIds]) =>
-		$canvasItems.filter(item => $selectedItemIds.includes(item.id))
+		$canvasItems.filter((item) => $selectedItemIds.includes(item.id))
 );
 
 // Derived: Selected text items only
-export const selectedTextItems = derived(selectedItems, $selectedItems =>
+export const selectedTextItems = derived(selectedItems, ($selectedItems) =>
 	$selectedItems.filter(isTextItem)
 );
 
 // Derived: Selected image items only
-export const selectedImageItems = derived(selectedItems, $selectedItems =>
+export const selectedImageItems = derived(selectedItems, ($selectedItems) =>
 	$selectedItems.filter(isImageItem)
 );
 
@@ -65,29 +65,28 @@ export const hasMixedSelection = derived(
 
 export const hasSelection = derived(
 	selectedItemIds,
-	$selectedItemIds => $selectedItemIds.length > 0
+	($selectedItemIds) => $selectedItemIds.length > 0
 );
 
 export const canUndo = derived(
 	canvasHistoryIndex,
-	$canvasHistoryIndex => $canvasHistoryIndex > 0
+	($canvasHistoryIndex) => $canvasHistoryIndex > 0
 );
 
 export const canRedo = derived(
 	[canvasHistory, canvasHistoryIndex],
-	([$canvasHistory, $canvasHistoryIndex]) =>
-		$canvasHistoryIndex < $canvasHistory.length - 1
+	([$canvasHistory, $canvasHistoryIndex]) => $canvasHistoryIndex < $canvasHistory.length - 1
 );
 
 // Helper functions
 export function addCanvasItem(item: BoardItem) {
-	canvasItems.update(items => [...items, item]);
+	canvasItems.update((items) => [...items, item]);
 	saveToHistory();
 }
 
 export function updateCanvasItem(id: string, updates: Partial<BoardItem>) {
-	canvasItems.update(items =>
-		items.map(item => (item.id === id ? { ...item, ...updates } : item))
+	canvasItems.update((items) =>
+		items.map((item) => (item.id === id ? { ...item, ...updates } : item))
 	);
 	saveToHistory();
 }
@@ -102,14 +101,14 @@ export function stopEditingText() {
 }
 
 export function removeCanvasItem(id: string) {
-	canvasItems.update(items => items.filter(item => item.id !== id));
-	selectedItemIds.update(ids => ids.filter(itemId => itemId !== id));
+	canvasItems.update((items) => items.filter((item) => item.id !== id));
+	selectedItemIds.update((ids) => ids.filter((itemId) => itemId !== id));
 	saveToHistory();
 }
 
 export function removeSelectedItems() {
 	const ids = get(selectedItemIds);
-	canvasItems.update(items => items.filter(item => !ids.includes(item.id)));
+	canvasItems.update((items) => items.filter((item) => !ids.includes(item.id)));
 	selectedItemIds.set([]);
 	saveToHistory();
 }
@@ -117,10 +116,8 @@ export function removeSelectedItems() {
 export function selectItem(id: string, multi = false) {
 	console.log('[Store] selectItem called:', id, 'multi:', multi);
 	if (multi) {
-		selectedItemIds.update(ids => {
-			const newIds = ids.includes(id)
-				? ids.filter(itemId => itemId !== id)
-				: [...ids, id];
+		selectedItemIds.update((ids) => {
+			const newIds = ids.includes(id) ? ids.filter((itemId) => itemId !== id) : [...ids, id];
 			console.log('[Store] Updated selection (multi):', newIds);
 			return newIds;
 		});
@@ -131,7 +128,7 @@ export function selectItem(id: string, multi = false) {
 }
 
 export function selectAll() {
-	selectedItemIds.set(get(canvasItems).map(item => item.id));
+	selectedItemIds.set(get(canvasItems).map((item) => item.id));
 }
 
 export function deselectAll() {
@@ -140,50 +137,55 @@ export function deselectAll() {
 
 export function bringToFront(id: string) {
 	const items = get(canvasItems);
-	const maxZIndex = Math.max(...items.map(item => item.z_index));
+	const maxZIndex = Math.max(...items.map((item) => item.z_index));
 	updateCanvasItem(id, { z_index: maxZIndex + 1 });
 }
 
 export function sendToBack(id: string) {
 	const items = get(canvasItems);
-	const minZIndex = Math.min(...items.map(item => item.z_index));
+	const minZIndex = Math.min(...items.map((item) => item.z_index));
 	updateCanvasItem(id, { z_index: minZIndex - 1 });
 }
 
 export function moveForward(id: string) {
 	const items = get(canvasItems);
-	const item = items.find(i => i.id === id);
+	const item = items.find((i) => i.id === id);
 	if (!item) return;
 
-	const itemsAbove = items.filter(i => i.z_index > item.z_index);
+	const itemsAbove = items.filter((i) => i.z_index > item.z_index);
 	if (itemsAbove.length === 0) return;
 
-	const nextZIndex = Math.min(...itemsAbove.map(i => i.z_index));
+	const nextZIndex = Math.min(...itemsAbove.map((i) => i.z_index));
 	updateCanvasItem(id, { z_index: nextZIndex + 0.5 });
 }
 
 export function moveBackward(id: string) {
 	const items = get(canvasItems);
-	const item = items.find(i => i.id === id);
+	const item = items.find((i) => i.id === id);
 	if (!item) return;
 
-	const itemsBelow = items.filter(i => i.z_index < item.z_index);
+	const itemsBelow = items.filter((i) => i.z_index < item.z_index);
 	if (itemsBelow.length === 0) return;
 
-	const prevZIndex = Math.max(...itemsBelow.map(i => i.z_index));
+	const prevZIndex = Math.max(...itemsBelow.map((i) => i.z_index));
 	updateCanvasItem(id, { z_index: prevZIndex - 0.5 });
 }
 
 // Zoom functions
 export function zoomIn() {
-	canvasZoom.update(z => Math.min(z * 1.2, 5));
+	canvasZoom.update((z) => Math.min(z * 1.2, 5));
 }
 
 export function zoomOut() {
-	canvasZoom.update(z => Math.max(z / 1.2, 0.1));
+	canvasZoom.update((z) => Math.max(z / 1.2, 0.1));
 }
 
-export function zoomToFit(containerWidth: number, containerHeight: number, boardWidth: number, boardHeight: number) {
+export function zoomToFit(
+	containerWidth: number,
+	containerHeight: number,
+	boardWidth: number,
+	boardHeight: number
+) {
 	const scaleX = containerWidth / boardWidth;
 	const scaleY = containerHeight / boardHeight;
 	const scale = Math.min(scaleX, scaleY) * 0.9; // 90% to add padding
@@ -208,7 +210,7 @@ export function saveToHistory() {
 	// Add current state
 	newHistory.push({
 		items: JSON.parse(JSON.stringify(items)), // Deep clone
-		timestamp: Date.now()
+		timestamp: Date.now(),
 	});
 
 	// Limit history to 50 states
@@ -269,6 +271,6 @@ export function snapPositionToGrid(x: number, y: number): { x: number; y: number
 
 	return {
 		x: snapToGridPoint(x, size),
-		y: snapToGridPoint(y, size)
+		y: snapToGridPoint(y, size),
 	};
 }

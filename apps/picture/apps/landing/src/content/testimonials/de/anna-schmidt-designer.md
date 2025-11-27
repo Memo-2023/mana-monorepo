@@ -1,13 +1,13 @@
 ---
-name: "Anna Schmidt"
-role: "Grafikdesignerin"
-company: "Kreativ Studio Berlin"
-avatar: "/testimonials/anna-schmidt.jpg"
+name: 'Anna Schmidt'
+role: 'Grafikdesignerin'
+company: 'Kreativ Studio Berlin'
+avatar: '/testimonials/anna-schmidt.jpg'
 rating: 5
 featured: true
-category: "designer"
-useCase: "Kundenprojekte und Social Media Content"
-language: "de"
+category: 'designer'
+useCase: 'Kundenprojekte und Social Media Content'
+language: 'de'
 date: 2024-09-22
 verified: true
 ---

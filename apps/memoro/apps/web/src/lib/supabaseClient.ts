@@ -28,8 +28,8 @@ export const supabase = (() => {
 		anonClient = createClient<Database>(env.supabase.url, env.supabase.anonKey, {
 			auth: {
 				persistSession: false,
-				autoRefreshToken: false
-			}
+				autoRefreshToken: false,
+			},
 		});
 	}
 	return anonClient;
@@ -66,13 +66,13 @@ export const createAuthClient = async (): Promise<SupabaseClient<Database>> => {
 	authClient = createClient<Database>(env.supabase.url, env.supabase.anonKey, {
 		auth: {
 			persistSession: false,
-			autoRefreshToken: false
+			autoRefreshToken: false,
 		},
 		global: {
 			headers: {
-				Authorization: `Bearer ${token}` // Use the Mana JWT token
-			}
-		}
+				Authorization: `Bearer ${token}`, // Use the Mana JWT token
+			},
+		},
 	});
 
 	return authClient;

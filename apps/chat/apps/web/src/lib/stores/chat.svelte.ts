@@ -17,109 +17,109 @@ let error = $state<string | null>(null);
 let messageCounter = 0;
 
 export const chatStore = {
-  // Getters
-  get messages() {
-    return messages;
-  },
-  get models() {
-    return models;
-  },
-  get selectedModelId() {
-    return selectedModelId;
-  },
-  get selectedModel() {
-    return models.find((m) => m.id === selectedModelId) || null;
-  },
-  get isLoading() {
-    return isLoading;
-  },
-  get isSending() {
-    return isSending;
-  },
-  get error() {
-    return error;
-  },
+	// Getters
+	get messages() {
+		return messages;
+	},
+	get models() {
+		return models;
+	},
+	get selectedModelId() {
+		return selectedModelId;
+	},
+	get selectedModel() {
+		return models.find((m) => m.id === selectedModelId) || null;
+	},
+	get isLoading() {
+		return isLoading;
+	},
+	get isSending() {
+		return isSending;
+	},
+	get error() {
+		return error;
+	},
 
-  // Actions
-  async loadModels() {
-    isLoading = true;
-    error = null;
-    try {
-      models = await chatService.getModels();
-      if (models.length > 0 && !selectedModelId) {
-        selectedModelId = models[0].id;
-      }
-    } catch (e) {
-      error = e instanceof Error ? e.message : 'Failed to load models';
-    } finally {
-      isLoading = false;
-    }
-  },
+	// Actions
+	async loadModels() {
+		isLoading = true;
+		error = null;
+		try {
+			models = await chatService.getModels();
+			if (models.length > 0 && !selectedModelId) {
+				selectedModelId = models[0].id;
+			}
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to load models';
+		} finally {
+			isLoading = false;
+		}
+	},
 
-  setSelectedModel(modelId: string) {
-    selectedModelId = modelId;
-  },
+	setSelectedModel(modelId: string) {
+		selectedModelId = modelId;
+	},
 
-  async sendMessage(text: string) {
-    if (!text.trim() || !selectedModelId) return;
+	async sendMessage(text: string) {
+		if (!text.trim() || !selectedModelId) return;
 
-    isSending = true;
-    error = null;
+		isSending = true;
+		error = null;
 
-    // Add user message
-    const userMessage: Message = {
-      id: `temp-${++messageCounter}`,
-      conversation_id: '',
-      sender: 'user',
-      message_text: text,
-      created_at: new Date().toISOString(),
-    };
-    messages = [...messages, userMessage];
+		// Add user message
+		const userMessage: Message = {
+			id: `temp-${++messageCounter}`,
+			conversation_id: '',
+			sender: 'user',
+			message_text: text,
+			created_at: new Date().toISOString(),
+		};
+		messages = [...messages, userMessage];
 
-    try {
-      // Build chat messages for API
-      const chatMessages: ChatMessage[] = messages.map((m) => ({
-        role: m.sender === 'user' ? 'user' : 'assistant',
-        content: m.message_text,
-      }));
+		try {
+			// Build chat messages for API
+			const chatMessages: ChatMessage[] = messages.map((m) => ({
+				role: m.sender === 'user' ? 'user' : 'assistant',
+				content: m.message_text,
+			}));
 
-      const request: ChatCompletionRequest = {
-        messages: chatMessages,
-        modelId: selectedModelId,
-      };
+			const request: ChatCompletionRequest = {
+				messages: chatMessages,
+				modelId: selectedModelId,
+			};
 
-      const response = await chatService.createCompletion(request);
+			const response = await chatService.createCompletion(request);
 
-      if (response) {
-        // Add assistant message
-        const assistantMessage: Message = {
-          id: `temp-${++messageCounter}`,
-          conversation_id: '',
-          sender: 'assistant',
-          message_text: response.content,
-          created_at: new Date().toISOString(),
-        };
-        messages = [...messages, assistantMessage];
-      } else {
-        error = 'Failed to get response';
-      }
-    } catch (e) {
-      error = e instanceof Error ? e.message : 'Failed to send message';
-    } finally {
-      isSending = false;
-    }
-  },
+			if (response) {
+				// Add assistant message
+				const assistantMessage: Message = {
+					id: `temp-${++messageCounter}`,
+					conversation_id: '',
+					sender: 'assistant',
+					message_text: response.content,
+					created_at: new Date().toISOString(),
+				};
+				messages = [...messages, assistantMessage];
+			} else {
+				error = 'Failed to get response';
+			}
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to send message';
+		} finally {
+			isSending = false;
+		}
+	},
 
-  clearMessages() {
-    messages = [];
-    messageCounter = 0;
-    error = null;
-  },
+	clearMessages() {
+		messages = [];
+		messageCounter = 0;
+		error = null;
+	},
 
-  reset() {
-    messages = [];
-    messageCounter = 0;
-    error = null;
-    isSending = false;
-  },
+	reset() {
+		messages = [];
+		messageCounter = 0;
+		error = null;
+		isSending = false;
+	},
 };

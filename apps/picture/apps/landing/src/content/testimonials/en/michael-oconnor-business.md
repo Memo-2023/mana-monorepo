@@ -1,13 +1,13 @@
 ---
 name: "Michael O'Connor"
-role: "Real Estate Agent"
-company: "Luxury Homes Realty"
-avatar: "/testimonials/michael-oconnor.jpg"
+role: 'Real Estate Agent'
+company: 'Luxury Homes Realty'
+avatar: '/testimonials/michael-oconnor.jpg'
 rating: 5
 featured: false
-category: "business"
-useCase: "Property marketing and lifestyle imagery"
-language: "en"
+category: 'business'
+useCase: 'Property marketing and lifestyle imagery'
+language: 'en'
 date: 2024-10-02
 verified: true
 ---

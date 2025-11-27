@@ -3,7 +3,7 @@ import PocketBase from 'pocketbase';
 // Test verschiedene URL-Varianten
 const urls = [
 	'http://pocketbase-xs0ccokk8s0goko4w40gwc0w.91.99.221.179.sslip.io', // ohne trailing slash
-	'http://pocketbase-xs0ccokk8s0goko4w40gwc0w.91.99.221.179.sslip.io/' // mit trailing slash
+	'http://pocketbase-xs0ccokk8s0goko4w40gwc0w.91.99.221.179.sslip.io/', // mit trailing slash
 ];
 
 console.log('Testing different URL configurations...\n');
@@ -30,7 +30,7 @@ async function testUrl(url) {
 			passwordConfirm: 'TestPass123!',
 			username: testUsername,
 			name: 'Test User',
-			emailVisibility: true
+			emailVisibility: true,
 		};
 
 		console.log(`  Attempting registration with: ${testEmail}`);

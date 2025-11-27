@@ -1,11 +1,11 @@
 import { IsBoolean, IsOptional, IsNumber } from 'class-validator';
 
 export class RecordPlayDto {
-  @IsOptional()
-  @IsBoolean()
-  completed?: boolean;
+	@IsOptional()
+	@IsBoolean()
+	completed?: boolean;
 
-  @IsOptional()
-  @IsNumber()
-  completionTime?: number;
+	@IsOptional()
+	@IsNumber()
+	completionTime?: number;
 }

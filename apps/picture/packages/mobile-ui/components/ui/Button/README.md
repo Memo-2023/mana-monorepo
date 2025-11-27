@@ -3,11 +3,13 @@
 Pressable button with variants, sizes, and icon support.
 
 ## Installation
+
 \`\`\`bash
 npx @memoro/ui add button
 \`\`\`
 
 ## Usage
+
 \`\`\`tsx
 import { Button } from '@/components/ui/Button';
 
@@ -17,6 +19,7 @@ import { Button } from '@/components/ui/Button';
 \`\`\`
 
 ## Variants
+
 - \`primary\` (default) - Blue background
 - \`secondary\` - Gray background
 - \`danger\` - Red background
@@ -24,6 +27,7 @@ import { Button } from '@/components/ui/Button';
 - \`outline\` - Transparent with border
 
 ## Sizes
+
 - \`sm\` - Small
 - \`md\` (default) - Medium
 - \`lg\` - Large

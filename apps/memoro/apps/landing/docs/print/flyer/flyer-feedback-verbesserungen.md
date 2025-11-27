@@ -3,6 +3,7 @@
 ## Analyse des vorliegenden Designs
 
 ### Stärken ✅
+
 - **Klare Struktur** mit Vorder- und Rückseite
 - **Auffälliges Memoro-Logo** mit gelbem Kreis
 - **QR-Code** prominent platziert für einfachen Zugang
@@ -41,12 +42,15 @@
 ## Drei Verbesserungsvorschläge
 
 ### 📚 VARIANTE 1: "Der Studentenfokus"
-*Direkter, jugendlicher Ansatz mit klarem Nutzen*
+
+_Direkter, jugendlicher Ansatz mit klarem Nutzen_
 
 #### Vorderseite
+
 **Neue Headline:**
+
 ```
-"Nie wieder in Vorlesungen 
+"Nie wieder in Vorlesungen
 mitschreiben müssen!"
 ```
 
@@ -54,6 +58,7 @@ mitschreiben müssen!"
 "Memoro macht's für dich - automatisch & intelligent"
 
 **Emotionales Visual:**
+
 - Gestresster Student VORHER → Entspannter Student NACHHER
 - Oder: Überquellender Notizblock → Smartphone mit Memoro
 
@@ -64,18 +69,21 @@ mitschreiben müssen!"
 🎓 Von 50.000+ Studierenden genutzt
 
 **Starker CTA:**
-"JETZT 6 MONATE GRATIS*
-*Exklusiv für Studierende"
+"JETZT 6 MONATE GRATIS\*
+\*Exklusiv für Studierende"
 
 #### Rückseite
+
 **Testimonial prominent:**
-"Memoro hat mir im Staatsexamen das Leben gerettet! 
+"Memoro hat mir im Staatsexamen das Leben gerettet!
 Alle Vorlesungen perfekt dokumentiert."
+
 - Max, Jura, Uni München
 
 **Einfache 3-Schritte-Anleitung:**
+
 1. 📱 App downloaden
-2. 🎙️ Vorlesung aufnehmen  
+2. 🎙️ Vorlesung aufnehmen
 3. 📝 Perfekte Notizen erhalten
 
 **Trust-Signale:**
@@ -86,10 +94,13 @@ Alle Vorlesungen perfekt dokumentiert."
 ---
 
 ### 🚀 VARIANTE 2: "Der Problem-Solver"
-*Fokus auf konkrete Probleme und Lösungen*
+
+_Fokus auf konkrete Probleme und Lösungen_
 
 #### Vorderseite
+
 **Problem-orientierte Headline:**
+
 ```
 "Vorlesung verpasst?
 Mitschrift unleserlich?
@@ -100,6 +111,7 @@ Prüfung in 2 Wochen?"
 "Eine App löst alle drei Probleme!"
 
 **Visual:**
+
 - Split-Screen: Links Chaos (Notizzettel) → Rechts Ordnung (Memoro App)
 
 **Konkrete Features:**
@@ -109,10 +121,11 @@ Prüfung in 2 Wochen?"
 □ Export als PDF, Word oder Notion
 
 **Dringlichkeits-CTA:**
-"Semesterstart-Special: 
+"Semesterstart-Special:
 70% Rabatt - nur noch diese Woche!"
 
 #### Rückseite
+
 **Use-Case-Beispiele:**
 📚 **Große Vorlesung:** 500 Leute, schlechte Akustik? Kein Problem!
 🏃 **Pendler:** Notizen in der Bahn durchgehen
@@ -120,6 +133,7 @@ Prüfung in 2 Wochen?"
 ☕ **Lerngruppe:** Teile Notizen mit einem Klick
 
 **Vergleichstabelle:**
+
 ```
 Ohne Memoro        Mit Memoro
 ❌ 2h mitschreiben → ✅ 0 Min
@@ -130,12 +144,15 @@ Ohne Memoro        Mit Memoro
 ---
 
 ### 💡 VARIANTE 3: "Der Social Proof Hero"
-*Maximaler Fokus auf Vertrauen und Beliebtheit*
+
+_Maximaler Fokus auf Vertrauen und Beliebtheit_
 
 #### Vorderseite
+
 **Social-Proof-Headline:**
+
 ```
-"Die App, die an der TUM 
+"Die App, die an der TUM
 alle nutzen"
 ```
 
@@ -145,12 +162,13 @@ alle nutzen"
 ⭐ 4.9/5 Bewertung
 
 **Visual:**
+
 - Collage von Uni-Logos (mit Erlaubnis)
 - Oder: Heatmap von Deutschland mit Nutzerzahlen
 
 **Influencer/Ambassador Quote:**
 "@StudyTina (50k Follower):
-'Beste Entscheidung meines Studiums! 
+'Beste Entscheidung meines Studiums!
 Memoro ist ein Game-Changer!'"
 
 **FOMO-CTA:**
@@ -158,9 +176,11 @@ Memoro ist ein Game-Changer!'"
 Erste 3 Monate GRATIS"
 
 #### Rückseite
+
 **Testimonial-Wand (verschiedene Studienrichtungen):**
+
 - "Perfekt für Medizin!" - Lisa, Charité
-- "Rettet mein BWL-Studium" - Tom, WHU  
+- "Rettet mein BWL-Studium" - Tom, WHU
 - "Endlich verstehe ich Mathe" - Sara, RWTH
 - "Jura ohne Memoro? Unmöglich!" - Felix, LMU
 
@@ -183,6 +203,7 @@ Erste 3 Monate GRATIS"
 ## Allgemeine Empfehlungen für alle Varianten
 
 ### Design-Verbesserungen
+
 1. **Größere, mutigere Headlines** (min. 24pt)
 2. **Mehr Kontrast** - Schwarz auf Weiß statt Grau
 3. **Weniger Text, mehr Icons/Visuals**
@@ -190,6 +211,7 @@ Erste 3 Monate GRATIS"
 5. **QR-Code mit Kontext** ("Scan für 6 Monate gratis")
 
 ### Content-Optimierungen
+
 1. **Studentensprache** verwenden ("Vorlesung", "Klausur", "Semester")
 2. **Konkrete Zeitersparnis** nennen (Stunden pro Woche)
 3. **Preistransparenz** (Normalpreis durchgestrichen, Studentenrabatt)
@@ -197,6 +219,7 @@ Erste 3 Monate GRATIS"
 5. **Social Media Handles** prominent platzieren
 
 ### Call-to-Action Alternativen
+
 - "Hol dir dein Semester-Upgrade"
 - "Starte schlauer ins neue Semester"
 - "Aktiviere deinen Uni-Vorteil"
@@ -204,6 +227,7 @@ Erste 3 Monate GRATIS"
 - "Werde zum Vorlesungs-Profi"
 
 ### Tracking-Verbesserungen
+
 - **Eindeutiger QR-Code** pro Uni/Campus
 - **Promo-Code** auf Flyer (z.B. "UNI2025")
 - **Spezielle Landing Page** nur für Flyer-Traffic

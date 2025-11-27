@@ -67,14 +67,14 @@
 		metadata,
 		actions,
 		badge,
-		class: className = ''
+		class: className = '',
 	}: Props = $props();
 
 	const variantClasses: Record<CardVariant, string> = {
 		default: 'bg-menu border border-theme',
 		elevated: 'bg-menu border border-theme shadow-md',
 		outlined: 'bg-transparent border-2 border-theme',
-		ghost: 'bg-transparent border-transparent hover:bg-menu-hover'
+		ghost: 'bg-transparent border-transparent hover:bg-menu-hover',
 	};
 
 	const isClickable = $derived(interactive || !!onclick);
@@ -84,7 +84,7 @@
 	class="data-card rounded-xl p-4 transition-colors {variantClasses[variant]} {isClickable
 		? 'cursor-pointer hover:bg-menu-hover'
 		: ''} {className}"
-	onclick={onclick}
+	{onclick}
 	onkeydown={(e) => {
 		if (isClickable && onclick && (e.key === 'Enter' || e.key === ' ')) {
 			e.preventDefault();
@@ -139,7 +139,10 @@
 		{#if actions}
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
-			<div class="data-card__actions flex-shrink-0 flex items-center gap-1" onclick={(e) => e.stopPropagation()}>
+			<div
+				class="data-card__actions flex-shrink-0 flex items-center gap-1"
+				onclick={(e) => e.stopPropagation()}
+			>
 				{@render actions()}
 			</div>
 		{/if}

@@ -12,70 +12,64 @@ import 'react-native-reanimated';
 
 // Configure Reanimated logger to reduce noise (if available)
 try {
-  const Reanimated = require('react-native-reanimated');
-  if (Reanimated.configureReanimatedLogger) {
-    Reanimated.configureReanimatedLogger({
-      level: Reanimated.ReanimatedLogLevel?.warn,
-      strict: false,
-    });
-  }
+	const Reanimated = require('react-native-reanimated');
+	if (Reanimated.configureReanimatedLogger) {
+		Reanimated.configureReanimatedLogger({
+			level: Reanimated.ReanimatedLogLevel?.warn,
+			strict: false,
+		});
+	}
 } catch (e) {
-  console.warn('Reanimated logger configuration not available');
+	console.warn('Reanimated logger configuration not available');
 }
 
 // Ignore known warnings from third-party libraries
-LogBox.ignoreLogs([
-  'SafeAreaView has been deprecated',
-  'A UIRefreshControl received offscreen',
-]);
+LogBox.ignoreLogs(['SafeAreaView has been deprecated', 'A UIRefreshControl received offscreen']);
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
+	// Ensure that reloading on `/modal` keeps a back button present.
+	initialRouteName: '(tabs)',
 };
 
 export default function RootLayout() {
-  const { initialize, isInitialized, isLoading, user } = useAuthStore();
+	const { initialize, isInitialized, isLoading, user } = useAuthStore();
 
-  useEffect(() => {
-    initialize();
-  }, []);
+	useEffect(() => {
+		initialize();
+	}, []);
 
-  if (!isInitialized || isLoading) {
-    return (
-      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <ThemeProvider>
-          <ThemeWrapper>
-            <View className="flex-1 items-center justify-center bg-surface">
-              <ActivityIndicator size="large" color="#3B82F6" />
-            </View>
-          </ThemeWrapper>
-        </ThemeProvider>
-      </SafeAreaProvider>
-    );
-  }
+	if (!isInitialized || isLoading) {
+		return (
+			<SafeAreaProvider initialMetrics={initialWindowMetrics}>
+				<ThemeProvider>
+					<ThemeWrapper>
+						<View className="flex-1 items-center justify-center bg-surface">
+							<ActivityIndicator size="large" color="#3B82F6" />
+						</View>
+					</ThemeWrapper>
+				</ThemeProvider>
+			</SafeAreaProvider>
+		);
+	}
 
-  return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <ThemeProvider>
-        <ThemeWrapper>
-          <ErrorBoundary>
-            {!user ? (
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(auth)" />
-              </Stack>
-            ) : (
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(tabs)" />
-                <Stack.Screen
-                  name="modal"
-                  options={{ presentation: 'modal', headerShown: true }}
-                />
-              </Stack>
-            )}
-          </ErrorBoundary>
-        </ThemeWrapper>
-      </ThemeProvider>
-    </SafeAreaProvider>
-  );
+	return (
+		<SafeAreaProvider initialMetrics={initialWindowMetrics}>
+			<ThemeProvider>
+				<ThemeWrapper>
+					<ErrorBoundary>
+						{!user ? (
+							<Stack screenOptions={{ headerShown: false }}>
+								<Stack.Screen name="(auth)" />
+							</Stack>
+						) : (
+							<Stack screenOptions={{ headerShown: false }}>
+								<Stack.Screen name="(tabs)" />
+								<Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: true }} />
+							</Stack>
+						)}
+					</ErrorBoundary>
+				</ThemeWrapper>
+			</ThemeProvider>
+		</SafeAreaProvider>
+	);
 }

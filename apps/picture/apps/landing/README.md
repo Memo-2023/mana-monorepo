@@ -86,7 +86,7 @@ Das Projekt verwendet **Tailwind CSS** für Styling:
 ```html
 <!-- Beispiel -->
 <div class="container mx-auto px-4 py-8">
-  <h1 class="text-4xl font-bold">Welcome to Picture</h1>
+	<h1 class="text-4xl font-bold">Welcome to Picture</h1>
 </div>
 ```
 
@@ -155,10 +155,10 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="About - Picture">
-  <main>
-    <h1>About Us</h1>
-    <p>Welcome to Picture</p>
-  </main>
+	<main>
+		<h1>About Us</h1>
+		<p>Welcome to Picture</p>
+	</main>
 </Layout>
 ```
 
@@ -170,23 +170,23 @@ Die Seite ist dann verfügbar unter: `/about`
 ---
 // src/components/Hero.astro
 interface Props {
-  title: string;
-  subtitle?: string;
+	title: string;
+	subtitle?: string;
 }
 
 const { title, subtitle } = Astro.props;
 ---
 
 <section class="hero">
-  <h1>{title}</h1>
-  {subtitle && <p>{subtitle}</p>}
+	<h1>{title}</h1>
+	{subtitle && <p>{subtitle}</p>}
 </section>
 
 <style>
-  .hero {
-    text-align: center;
-    padding: 4rem 2rem;
-  }
+	.hero {
+		text-align: center;
+		padding: 4rem 2rem;
+	}
 </style>
 ```
 
@@ -199,8 +199,8 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
-  integrations: [tailwind()],
-  output: 'static',
+	integrations: [tailwind()],
+	output: 'static',
 });
 ```
 
@@ -208,11 +208,11 @@ export default defineConfig({
 
 ```javascript
 export default {
-  content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
+	content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+	theme: {
+		extend: {},
+	},
+	plugins: [],
 };
 ```
 
@@ -231,8 +231,8 @@ Astro ist von Haus aus SEO-optimiert:
 ---
 // src/layouts/Layout.astro
 interface Props {
-  title: string;
-  description?: string;
+	title: string;
+	description?: string;
 }
 
 const { title, description } = Astro.props;
@@ -240,16 +240,16 @@ const { title, description } = Astro.props;
 
 <!doctype html>
 <html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>{title}</title>
-    {description && <meta name="description" content={description} />}
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  </head>
-  <body>
-    <slot />
-  </body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>{title}</title>
+		{description && <meta name="description" content={description} />}
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	</head>
+	<body>
+		<slot />
+	</body>
 </html>
 ```
 

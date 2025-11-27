@@ -5,7 +5,7 @@
 		downloadQRCode,
 		type QRCodeColor,
 		type QRCodeFormat,
-		type QRCodeRotation
+		type QRCodeRotation,
 	} from '$lib/qrcode';
 	import TagBadge from '$lib/components/TagBadge.svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -57,7 +57,7 @@
 	let qrColor: QRCodeColor = $state('black');
 	let qrFormat: QRCodeFormat = $state('png');
 	let qrRotation: QRCodeRotation = $state(0);
-	
+
 	const isExpired = link.expires_at ? new Date(link.expires_at) < new Date() : false;
 	const isNearLimit = link.max_clicks ? link.clicks >= link.max_clicks * 0.8 : false;
 
@@ -93,7 +93,7 @@
 			short_code: link.short_code,
 			format: qrFormat,
 			color: qrColor,
-			rotation: qrRotation
+			rotation: qrRotation,
 		});
 	}
 
@@ -102,21 +102,23 @@
 	}
 </script>
 
-<div class="group relative p-6 transition-all duration-200 hover:bg-gradient-to-br hover:from-theme-surface/50 hover:to-transparent">
+<div
+	class="hover:from-theme-surface/50 group relative p-6 transition-all duration-200 hover:bg-gradient-to-br hover:to-transparent"
+>
 	<div class="flex flex-col gap-4">
 		<!-- Header with Title and Actions -->
 		<div class="flex items-start justify-between gap-3">
 			<div class="min-w-0 flex-1">
-				<h3 class="text-lg font-semibold text-theme-text truncate">
+				<h3 class="truncate text-lg font-semibold text-theme-text">
 					{link.title || link.short_code}
 				</h3>
 				{#if link.description}
-					<p class="mt-1 text-sm text-theme-text-muted line-clamp-2">{link.description}</p>
+					<p class="mt-1 line-clamp-2 text-sm text-theme-text-muted">{link.description}</p>
 				{/if}
 			</div>
-			
+
 			<!-- Action Buttons -->
-			<div class="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+			<div class="flex items-center gap-1 opacity-60 transition-opacity group-hover:opacity-100">
 				<Dropdown
 					items={[
 						{
@@ -125,19 +127,19 @@
 							color: '#6366f1',
 							action: () => {
 								copyToClipboard(formatUrl(link.short_code), link.id, link.short_code);
-							}
+							},
 						},
 						{
 							label: 'QR Code',
 							icon: '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h8m-4 0v8m-4-8h.01M8 8h8M4 20h2m0-4v4m12-4v4" /></svg>',
 							color: '#10b981',
-							action: toggleQRCode
+							action: toggleQRCode,
 						},
 						{
 							label: 'Analytics',
 							href: `/my/analytics/${link.short_code}`,
 							icon: '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>',
-							color: '#2563eb'
+							color: '#2563eb',
 						},
 						{
 							label: 'Edit',
@@ -145,20 +147,20 @@
 							color: '#9333ea',
 							action: () => {
 								window.dispatchEvent(new CustomEvent('edit-link', { detail: link }));
-							}
+							},
 						},
 						{
 							label: link.is_active ? 'Deactivate' : 'Activate',
 							type: 'form',
 							formAction: '?/toggle',
 							formData: { id: link.id, is_active: String(link.is_active) },
-							icon: link.is_active 
+							icon: link.is_active
 								? '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
 								: '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
-							color: link.is_active ? '#ea580c' : '#16a34a'
+							color: link.is_active ? '#ea580c' : '#16a34a',
 						},
 						{
-							divider: true
+							divider: true,
 						},
 						{
 							label: 'Delete',
@@ -176,13 +178,13 @@
 									await update();
 									if (result.type === 'success') {
 										trackEvent(EVENTS.LINK_DELETED, {
-											short_code: link.short_code
+											short_code: link.short_code,
 										});
 										toastMessages.linkDeleted();
 									}
 								};
-							}
-						}
+							},
+						},
 					]}
 					buttonClass="!p-2"
 				/>
@@ -190,21 +192,25 @@
 		</div>
 
 		<!-- URL Display Box -->
-		<div class="rounded-lg bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-950/20 dark:to-purple-950/20 p-3 border border-theme-border/50">
+		<div
+			class="border-theme-border/50 rounded-lg border bg-gradient-to-r from-blue-50/50 to-purple-50/50 p-3 dark:from-blue-950/20 dark:to-purple-950/20"
+		>
 			<div class="flex items-center justify-between gap-2">
 				<div class="min-w-0 flex-1">
-					<p class="text-[10px] uppercase tracking-wider text-theme-text-muted mb-1 font-medium">Short URL</p>
+					<p class="mb-1 text-[10px] font-medium uppercase tracking-wider text-theme-text-muted">
+						Short URL
+					</p>
 					{#if link.short_code.includes('/')}
 						<a
 							href="/{link.short_code}"
 							target="_blank"
-							class="text-sm font-mono font-medium text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 truncate block"
+							class="block truncate font-mono text-sm font-medium text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
 							onclick={() =>
 								trackLinkClick({
 									shortCode: link.short_code,
 									username: link.short_code.split('/')[0],
 									hasPassword: !!link.password,
-									isExpiring: !!link.expires_at
+									isExpiring: !!link.expires_at,
 								})}
 						>
 							ulo.ad/{link.short_code}
@@ -213,13 +219,13 @@
 						<a
 							href="/{link.short_code}"
 							target="_blank"
-							class="text-sm font-mono font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 truncate block"
+							class="block truncate font-mono text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
 							onclick={() =>
 								trackLinkClick({
 									shortCode: link.short_code,
 									username: 'direct',
 									hasPassword: !!link.password,
-									isExpiring: !!link.expires_at
+									isExpiring: !!link.expires_at,
 								})}
 						>
 							ulo.ad/{link.short_code}
@@ -231,14 +237,31 @@
 						const url = formatUrl(link.short_code);
 						copyToClipboard(url, `${link.id}-url`, link.short_code);
 					}}
-					class="p-1.5 rounded-md hover:bg-white/50 dark:hover:bg-black/20 transition-colors"
+					class="rounded-md p-1.5 transition-colors hover:bg-white/50 dark:hover:bg-black/20"
 					title="Copy URL"
 				>
-					<svg class="h-4 w-4 {copiedStates[`${link.id}-url`] ? 'text-green-600' : 'text-theme-text-muted'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg
+						class="h-4 w-4 {copiedStates[`${link.id}-url`]
+							? 'text-green-600'
+							: 'text-theme-text-muted'}"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
 						{#if copiedStates[`${link.id}-url`]}
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M5 13l4 4L19 7"
+							/>
 						{:else}
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+							/>
 						{/if}
 					</svg>
 				</button>
@@ -246,13 +269,13 @@
 		</div>
 
 		<!-- Original URL -->
-		<div class="text-xs text-theme-text-muted truncate">
-			<span class="font-medium">Destination:</span> 
-			<a 
-				href={link.original_url} 
-				target="_blank" 
+		<div class="truncate text-xs text-theme-text-muted">
+			<span class="font-medium">Destination:</span>
+			<a
+				href={link.original_url}
+				target="_blank"
 				rel="noopener noreferrer"
-				class="hover:text-blue-600 ml-1"
+				class="ml-1 hover:text-blue-600"
 			>
 				{link.original_url}
 			</a>
@@ -263,7 +286,8 @@
 			{#if link.expand?.folder}
 				<span
 					class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium shadow-sm"
-					style="background-color: {link.expand.folder.color}15; color: {link.expand.folder.color}; border: 1px solid {link.expand.folder.color}30"
+					style="background-color: {link.expand.folder.color}15; color: {link.expand.folder
+						.color}; border: 1px solid {link.expand.folder.color}30"
 				>
 					<span class="text-sm">{link.expand.folder.icon}</span>
 					{link.expand.folder.display_name}
@@ -277,23 +301,41 @@
 				{/each}
 			{/if}
 			{#if !link.is_active}
-				<span class="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10 dark:bg-red-900/20 dark:text-red-400 dark:ring-red-500/20">
-					<svg class="h-3 w-3" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+				<span
+					class="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10 dark:bg-red-900/20 dark:text-red-400 dark:ring-red-500/20"
+				>
+					<svg class="h-3 w-3" fill="currentColor" viewBox="0 0 8 8"
+						><circle cx="4" cy="4" r="3" /></svg
+					>
 					Inactive
 				</span>
 			{/if}
 			{#if isExpired}
-				<span class="inline-flex items-center gap-1 rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-600/10 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-500/20">
+				<span
+					class="inline-flex items-center gap-1 rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-600/10 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-500/20"
+				>
 					<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="3"
+							d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
 					</svg>
 					Expired
 				</span>
 			{/if}
 			{#if link.password}
-				<span class="inline-flex items-center gap-1 rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/10 dark:bg-yellow-900/20 dark:text-yellow-400 dark:ring-yellow-500/20">
+				<span
+					class="inline-flex items-center gap-1 rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/10 dark:bg-yellow-900/20 dark:text-yellow-400 dark:ring-yellow-500/20"
+				>
 					<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="3"
+							d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+						/>
 					</svg>
 					Protected
 				</span>
@@ -301,22 +343,47 @@
 		</div>
 
 		<!-- Stats Bar -->
-		<div class="flex flex-wrap items-center gap-4 pt-3 border-t border-theme-border/30">
+		<div class="border-theme-border/30 flex flex-wrap items-center gap-4 border-t pt-3">
 			<div class="flex items-center gap-1.5">
-				<svg class="h-3.5 w-3.5 text-theme-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+				<svg
+					class="h-3.5 w-3.5 text-theme-text-muted"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+					/>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+					/>
 				</svg>
 				<span class="text-xs font-medium {isNearLimit ? 'text-orange-600' : 'text-theme-text'}">
 					{link.clicks || 0}
 				</span>
 				<span class="text-xs text-theme-text-muted">clicks</span>
 			</div>
-			
+
 			{#if link.max_clicks}
 				<div class="flex items-center gap-1.5">
-					<svg class="h-3.5 w-3.5 text-theme-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+					<svg
+						class="h-3.5 w-3.5 text-theme-text-muted"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
 					</svg>
 					<span class="text-xs font-medium {isNearLimit ? 'text-orange-600' : 'text-purple-600'}">
 						{link.max_clicks}
@@ -324,31 +391,59 @@
 					<span class="text-xs text-theme-text-muted">max</span>
 				</div>
 			{/if}
-			
+
 			{#if link.expires_at}
 				<div class="flex items-center gap-1.5">
-					<svg class="h-3.5 w-3.5 text-theme-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+					<svg
+						class="h-3.5 w-3.5 text-theme-text-muted"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
 					</svg>
 					<span class="text-xs font-medium {isExpired ? 'text-red-600' : 'text-orange-600'}">
-						{new Date(link.expires_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+						{new Date(link.expires_at).toLocaleDateString('de-DE', {
+							day: '2-digit',
+							month: '2-digit',
+							year: '2-digit',
+						})}
 					</span>
 				</div>
 			{/if}
-			
-			<div class="flex items-center gap-1.5 ml-auto">
-				<svg class="h-3.5 w-3.5 text-theme-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+
+			<div class="ml-auto flex items-center gap-1.5">
+				<svg
+					class="h-3.5 w-3.5 text-theme-text-muted"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+					/>
 				</svg>
 				<span class="text-xs text-theme-text-muted">
-					{new Date(link.created).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+					{new Date(link.created).toLocaleDateString('de-DE', {
+						day: '2-digit',
+						month: '2-digit',
+						year: 'numeric',
+					})}
 				</span>
 			</div>
 		</div>
 	</div>
 
 	{#if showQRCode}
-		<div class="mt-4 rounded-lg bg-theme-surface p-4 border border-theme-border/50">
+		<div class="border-theme-border/50 mt-4 rounded-lg border bg-theme-surface p-4">
 			<div class="flex flex-col items-center gap-4">
 				<div
 					class="relative rounded border-2 border-theme-border p-4"
@@ -420,12 +515,8 @@
 					</div>
 				</div>
 
-				<div class="flex gap-2 flex-wrap justify-center">
-					<Button
-						onclick={downloadQR}
-						variant="primary"
-						size="lg"
-					>
+				<div class="flex flex-wrap justify-center gap-2">
+					<Button onclick={downloadQR} variant="primary" size="lg">
 						Download{qrRotation !== 0 ? ` (${qrRotation}°)` : ''} as {qrFormat.toUpperCase()}
 					</Button>
 					<Button

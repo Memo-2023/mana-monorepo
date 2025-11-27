@@ -26,7 +26,7 @@ npx @memoro/ui add header
 ```tsx
 import { Header } from '@/components/navigation/Header';
 
-<Header title="My Screen" />
+<Header title="My Screen" />;
 ```
 
 ### With Back Button
@@ -35,15 +35,9 @@ import { Header } from '@/components/navigation/Header';
 import { useRouter } from 'expo-router';
 
 function MyScreen() {
-  const router = useRouter();
+	const router = useRouter();
 
-  return (
-    <Header
-      title="Details"
-      showBackButton
-      onBackPress={() => router.back()}
-    />
-  );
+	return <Header title="Details" showBackButton onBackPress={() => router.back()} />;
 }
 ```
 
@@ -51,13 +45,13 @@ function MyScreen() {
 
 ```tsx
 <Header
-  title="Settings"
-  rightContent={
-    <>
-      <HeaderButton icon="search" onPress={() => {}} />
-      <HeaderButton icon="ellipsis-horizontal" onPress={() => {}} />
-    </>
-  }
+	title="Settings"
+	rightContent={
+		<>
+			<HeaderButton icon="search" onPress={() => {}} />
+			<HeaderButton icon="ellipsis-horizontal" onPress={() => {}} />
+		</>
+	}
 />
 ```
 
@@ -65,65 +59,54 @@ function MyScreen() {
 
 ```tsx
 <Header
-  title="Messages"
-  leftContent={
-    <Image
-      source={{ uri: user.avatar }}
-      style={{ width: 32, height: 32, borderRadius: 16 }}
-    />
-  }
-  rightContent={
-    <HeaderButton icon="add" onPress={() => {}} />
-  }
+	title="Messages"
+	leftContent={
+		<Image source={{ uri: user.avatar }} style={{ width: 32, height: 32, borderRadius: 16 }} />
+	}
+	rightContent={<HeaderButton icon="add" onPress={() => {}} />}
 />
 ```
 
 ### Without Border
 
 ```tsx
-<Header
-  title="My Screen"
-  showBorder={false}
-/>
+<Header title="My Screen" showBorder={false} />
 ```
 
 ### Without Safe Area
 
 ```tsx
-<Header
-  title="My Screen"
-  useSafeArea={false}
-/>
+<Header title="My Screen" useSafeArea={false} />
 ```
 
 ### Custom Colors
 
 ```tsx
 <Header
-  title="Dark Header"
-  backgroundColor="#1F2937"
-  borderColor="#374151"
-  titleColor="#FFFFFF"
-  backIconColor="#60A5FA"
+	title="Dark Header"
+	backgroundColor="#1F2937"
+	borderColor="#374151"
+	titleColor="#FFFFFF"
+	backIconColor="#60A5FA"
 />
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `title` | `string` | - | Header title |
-| `showBackButton` | `boolean` | `false` | Show back button on the left |
-| `onBackPress` | `() => void` | - | Back button press handler (required if showBackButton) |
-| `leftContent` | `ReactNode` | - | Custom left content (overrides back button) |
-| `rightContent` | `ReactNode` | - | Custom right content |
-| `backgroundColor` | `string` | `'#FFFFFF'` | Background color |
-| `borderColor` | `string` | `'#E5E7EB'` | Border color |
-| `titleColor` | `string` | `'#111827'` | Title text color |
-| `backIconColor` | `string` | `'#3B82F6'` | Back button icon color |
-| `showBorder` | `boolean` | `true` | Show border at bottom |
-| `useSafeArea` | `boolean` | `true` | Use safe area insets for top padding |
-| `style` | `ViewStyle` | - | Additional styles |
+| Prop              | Type         | Default     | Description                                            |
+| ----------------- | ------------ | ----------- | ------------------------------------------------------ |
+| `title`           | `string`     | -           | Header title                                           |
+| `showBackButton`  | `boolean`    | `false`     | Show back button on the left                           |
+| `onBackPress`     | `() => void` | -           | Back button press handler (required if showBackButton) |
+| `leftContent`     | `ReactNode`  | -           | Custom left content (overrides back button)            |
+| `rightContent`    | `ReactNode`  | -           | Custom right content                                   |
+| `backgroundColor` | `string`     | `'#FFFFFF'` | Background color                                       |
+| `borderColor`     | `string`     | `'#E5E7EB'` | Border color                                           |
+| `titleColor`      | `string`     | `'#111827'` | Title text color                                       |
+| `backIconColor`   | `string`     | `'#3B82F6'` | Back button icon color                                 |
+| `showBorder`      | `boolean`    | `true`      | Show border at bottom                                  |
+| `useSafeArea`     | `boolean`    | `true`      | Use safe area insets for top padding                   |
+| `style`           | `ViewStyle`  | -           | Additional styles                                      |
 
 ## Default Styling
 
@@ -140,17 +123,19 @@ function MyScreen() {
 
 ```tsx
 <Header
-  title="Profile"
-  leftContent={
-    <Pressable onPress={() => router.back()}>
-      <Icon name="close" size={24} color="#111827" />
-    </Pressable>
-  }
-  rightContent={
-    <Pressable onPress={handleSave}>
-      <Text variant="body" color="#3B82F6" weight="semibold">Save</Text>
-    </Pressable>
-  }
+	title="Profile"
+	leftContent={
+		<Pressable onPress={() => router.back()}>
+			<Icon name="close" size={24} color="#111827" />
+		</Pressable>
+	}
+	rightContent={
+		<Pressable onPress={handleSave}>
+			<Text variant="body" color="#3B82F6" weight="semibold">
+				Save
+			</Text>
+		</Pressable>
+	}
 />
 ```
 
@@ -158,24 +143,26 @@ function MyScreen() {
 
 ```tsx
 <Header
-  leftContent={
-    <View style={{ flex: 1, marginRight: 12 }}>
-      <TextInput
-        placeholder="Search..."
-        style={{
-          backgroundColor: '#F3F4F6',
-          paddingHorizontal: 12,
-          paddingVertical: 8,
-          borderRadius: 8,
-        }}
-      />
-    </View>
-  }
-  rightContent={
-    <Pressable onPress={handleCancel}>
-      <Text variant="body" color="#6B7280">Cancel</Text>
-    </Pressable>
-  }
+	leftContent={
+		<View style={{ flex: 1, marginRight: 12 }}>
+			<TextInput
+				placeholder="Search..."
+				style={{
+					backgroundColor: '#F3F4F6',
+					paddingHorizontal: 12,
+					paddingVertical: 8,
+					borderRadius: 8,
+				}}
+			/>
+		</View>
+	}
+	rightContent={
+		<Pressable onPress={handleCancel}>
+			<Text variant="body" color="#6B7280">
+				Cancel
+			</Text>
+		</Pressable>
+	}
 />
 ```
 
@@ -183,23 +170,23 @@ function MyScreen() {
 
 ```tsx
 <Header
-  showBackButton
-  onBackPress={() => router.back()}
-  leftContent={
-    <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 12 }}>
-      <Image
-        source={{ uri: chat.avatar }}
-        style={{ width: 32, height: 32, borderRadius: 16, marginRight: 8 }}
-      />
-      <Text variant="h4">{chat.name}</Text>
-    </View>
-  }
-  rightContent={
-    <>
-      <HeaderButton icon="videocam" onPress={handleVideoCall} />
-      <HeaderButton icon="call" onPress={handleCall} />
-    </>
-  }
+	showBackButton
+	onBackPress={() => router.back()}
+	leftContent={
+		<View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 12 }}>
+			<Image
+				source={{ uri: chat.avatar }}
+				style={{ width: 32, height: 32, borderRadius: 16, marginRight: 8 }}
+			/>
+			<Text variant="h4">{chat.name}</Text>
+		</View>
+	}
+	rightContent={
+		<>
+			<HeaderButton icon="videocam" onPress={handleVideoCall} />
+			<HeaderButton icon="call" onPress={handleCall} />
+		</>
+	}
 />
 ```
 
@@ -207,27 +194,17 @@ function MyScreen() {
 
 ```tsx
 <Header
-  showBackButton
-  onBackPress={() => router.back()}
-  title="Settings"
-  rightContent={
-    <HeaderButton
-      icon="checkmark"
-      onPress={handleSave}
-      iconColor="#10B981"
-    />
-  }
+	showBackButton
+	onBackPress={() => router.back()}
+	title="Settings"
+	rightContent={<HeaderButton icon="checkmark" onPress={handleSave} iconColor="#10B981" />}
 />
 ```
 
 ### Minimal Header
 
 ```tsx
-<Header
-  title="Welcome"
-  showBorder={false}
-  backgroundColor="transparent"
-/>
+<Header title="Welcome" showBorder={false} backgroundColor="transparent" />
 ```
 
 ## Integration with Navigation
@@ -239,19 +216,19 @@ import { Stack } from 'expo-router';
 import { Header } from '@/components/navigation/Header';
 
 export default function Layout() {
-  return (
-    <Stack
-      screenOptions={{
-        header: ({ navigation, route, options }) => (
-          <Header
-            title={options.title || route.name}
-            showBackButton={navigation.canGoBack()}
-            onBackPress={() => navigation.goBack()}
-          />
-        ),
-      }}
-    />
-  );
+	return (
+		<Stack
+			screenOptions={{
+				header: ({ navigation, route, options }) => (
+					<Header
+						title={options.title || route.name}
+						showBackButton={navigation.canGoBack()}
+						onBackPress={() => navigation.goBack()}
+					/>
+				),
+			}}
+		/>
+	);
 }
 ```
 
@@ -261,18 +238,18 @@ export default function Layout() {
 import { Header } from '@/components/navigation/Header';
 
 <Stack.Navigator
-  screenOptions={{
-    header: ({ navigation, route, options }) => (
-      <Header
-        title={options.title}
-        showBackButton={navigation.canGoBack()}
-        onBackPress={() => navigation.goBack()}
-      />
-    ),
-  }}
+	screenOptions={{
+		header: ({ navigation, route, options }) => (
+			<Header
+				title={options.title}
+				showBackButton={navigation.canGoBack()}
+				onBackPress={() => navigation.goBack()}
+			/>
+		),
+	}}
 >
-  <Stack.Screen name="Home" component={HomeScreen} />
-</Stack.Navigator>
+	<Stack.Screen name="Home" component={HomeScreen} />
+</Stack.Navigator>;
 ```
 
 ## Common Patterns
@@ -281,14 +258,14 @@ import { Header } from '@/components/navigation/Header';
 
 ```tsx
 <Header
-  title="Photos"
-  rightContent={
-    <View style={{ flexDirection: 'row', gap: 8 }}>
-      <HeaderButton icon="search" onPress={handleSearch} />
-      <HeaderButton icon="share" onPress={handleShare} />
-      <HeaderButton icon="ellipsis-horizontal" onPress={handleMore} />
-    </View>
-  }
+	title="Photos"
+	rightContent={
+		<View style={{ flexDirection: 'row', gap: 8 }}>
+			<HeaderButton icon="search" onPress={handleSearch} />
+			<HeaderButton icon="share" onPress={handleShare} />
+			<HeaderButton icon="ellipsis-horizontal" onPress={handleMore} />
+		</View>
+	}
 />
 ```
 
@@ -296,18 +273,15 @@ import { Header } from '@/components/navigation/Header';
 
 ```tsx
 <Header
-  title="Notifications"
-  rightContent={
-    <View>
-      <HeaderButton icon="settings" onPress={handleSettings} />
-      {unreadCount > 0 && (
-        <Badge
-          count={unreadCount}
-          style={{ position: 'absolute', top: -4, right: -4 }}
-        />
-      )}
-    </View>
-  }
+	title="Notifications"
+	rightContent={
+		<View>
+			<HeaderButton icon="settings" onPress={handleSettings} />
+			{unreadCount > 0 && (
+				<Badge count={unreadCount} style={{ position: 'absolute', top: -4, right: -4 }} />
+			)}
+		</View>
+	}
 />
 ```
 
@@ -315,16 +289,16 @@ import { Header } from '@/components/navigation/Header';
 
 ```tsx
 <View style={{ flex: 1 }}>
-  <Image source={headerImage} style={{ position: 'absolute', width: '100%', height: 200 }} />
-  <Header
-    title="Detail"
-    showBackButton
-    onBackPress={() => router.back()}
-    backgroundColor="transparent"
-    titleColor="#FFFFFF"
-    backIconColor="#FFFFFF"
-    showBorder={false}
-  />
+	<Image source={headerImage} style={{ position: 'absolute', width: '100%', height: 200 }} />
+	<Header
+		title="Detail"
+		showBackButton
+		onBackPress={() => router.back()}
+		backgroundColor="transparent"
+		titleColor="#FFFFFF"
+		backIconColor="#FFFFFF"
+		showBorder={false}
+	/>
 </View>
 ```
 

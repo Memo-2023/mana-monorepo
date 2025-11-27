@@ -20,17 +20,17 @@ Pass rehypeExternalLinks to the rehypePlugins array, along with an options objec
 import rehypeExternalLinks from 'rehype-external-links';
 
 export default defineConfig({
-  // ...
-  markdown: {
-    rehypePlugins: [
-      [
-        rehypeExternalLinks,
-        {
-          content: { type: 'text', value: ' 🔗' }
-        }
-      ],
-    ]
-  },
+// ...
+markdown: {
+rehypePlugins: [
+[
+rehypeExternalLinks,
+{
+content: { type: 'text', value: ' 🔗' }
+}
+],
+]
+},
 });
 
 Note

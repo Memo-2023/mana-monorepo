@@ -1,40 +1,36 @@
 ---
-import Layout from "../../../layouts/Layout.astro";
-import { getLangFromUrl, useTranslations } from "../../../utils/i18n";
-import Newsletter from "../../../components/Newsletter.astro";
-import ContentSubmission from "../../../components/ContentSubmission.astro";
-import Card from "../../../components/Card.astro";
-import HeroSection from "../../../components/HeroSection.astro";
-import { languages } from "../../../i18n/ui";
-import { getCollection } from "astro:content";
+import Layout from '../../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '../../../utils/i18n';
+import Newsletter from '../../../components/Newsletter.astro';
+import ContentSubmission from '../../../components/ContentSubmission.astro';
+import Card from '../../../components/Card.astro';
+import HeroSection from '../../../components/HeroSection.astro';
+import { languages } from '../../../i18n/ui';
+import { getCollection } from 'astro:content';
 
 // Define static paths for ALL supported languages
 export async function getStaticPaths() {
-  const joinEntries = await Promise.all(
-    Object.keys(languages).map(async (lang) => {
-      const langEntries = await getCollection("join", ({ id }) => {
-        return id.startsWith(`${lang}/`);
-      });
+	const joinEntries = await Promise.all(
+		Object.keys(languages).map(async (lang) => {
+			const langEntries = await getCollection('join', ({ id }) => {
+				return id.startsWith(`${lang}/`);
+			});
 
-      // Get the main entry (index.md) and other entries
-      const mainEntry = langEntries.find((entry) =>
-        entry.id.endsWith("/index.md")
-      );
-      const otherEntries = langEntries.filter(
-        (entry) => !entry.id.endsWith("/index.md")
-      );
+			// Get the main entry (index.md) and other entries
+			const mainEntry = langEntries.find((entry) => entry.id.endsWith('/index.md'));
+			const otherEntries = langEntries.filter((entry) => !entry.id.endsWith('/index.md'));
 
-      return {
-        params: { lang },
-        props: {
-          entry: mainEntry,
-          otherEntries: otherEntries,
-        },
-      };
-    })
-  );
+			return {
+				params: { lang },
+				props: {
+					entry: mainEntry,
+					otherEntries: otherEntries,
+				},
+			};
+		})
+	);
 
-  return joinEntries;
+	return joinEntries;
 }
 
 // Get current language from URL
@@ -43,278 +39,275 @@ const { entry, otherEntries = [] } = Astro.props;
 const t = useTranslations(lang as keyof typeof languages);
 
 // Debugging information
-console.log("Current language:", lang);
-console.log("Entry loaded:", entry?.id);
-console.log("Entry data:", entry?.data);
+console.log('Current language:', lang);
+console.log('Entry loaded:', entry?.id);
+console.log('Entry data:', entry?.data);
 
 // Set hero title based on language
-const heroTitle = lang === "de"
-  ? "Gemeinsam gestalten wir die digitale Zukunft"
-  : lang === "it"
-    ? "Insieme costruiamo il futuro" 
-    : "Together we shape the digital future";
+const heroTitle =
+	lang === 'de'
+		? 'Gemeinsam gestalten wir die digitale Zukunft'
+		: lang === 'it'
+			? 'Insieme costruiamo il futuro'
+			: 'Together we shape the digital future';
 ---
 
-<Layout title={`${t("nav.join")} - BaunTown`}>
-  <HeroSection 
-    title={heroTitle}
-    image="/images/bauntown-buildtogether.png" 
-    imageAlt="Join BaunTown"
-  />
-  
-  <div class="join-container">
+<Layout title={`${t('nav.join')} - BaunTown`}>
+	<HeroSection
+		title={heroTitle}
+		image="/images/bauntown-buildtogether.png"
+		imageAlt="Join BaunTown"
+	/>
 
-    <section id="submission" class="join-sections">
-      <div id="submit" class="join-section submission-section">
-        <div class="section-content">
-          <ContentSubmission
-            customTitle={entry?.data?.submissionTitle}
-            customDescription={entry?.data?.submissionDescription}
-          />
-        </div>
-        <div class="section-image">
-          <img
-            src="/images/bauntown-codespillingorange.png"
-            alt="Content Submission"
-          />
-        </div>
-      </div>
+	<div class="join-container">
+		<section id="submission" class="join-sections">
+			<div id="submit" class="join-section submission-section">
+				<div class="section-content">
+					<ContentSubmission
+						customTitle={entry?.data?.submissionTitle}
+						customDescription={entry?.data?.submissionDescription}
+					/>
+				</div>
+				<div class="section-image">
+					<img src="/images/bauntown-codespillingorange.png" alt="Content Submission" />
+				</div>
+			</div>
 
-      <div id="newsletter" class="join-section newsletter-section">
-        <div class="section-content">
-          <Newsletter
-            customTitle={entry?.data?.newsletterTitle}
-            customDescription={entry?.data?.newsletterDescription}
-          />
-        </div>
-        <div class="section-image">
-          <img src="/images/bauntown-women-coder.png" alt="Newsletter" />
-        </div>
-      </div>
-    </section>
-  </div>
+			<div id="newsletter" class="join-section newsletter-section">
+				<div class="section-content">
+					<Newsletter
+						customTitle={entry?.data?.newsletterTitle}
+						customDescription={entry?.data?.newsletterDescription}
+					/>
+				</div>
+				<div class="section-image">
+					<img src="/images/bauntown-women-coder.png" alt="Newsletter" />
+				</div>
+			</div>
+		</section>
+	</div>
 </Layout>
 
 <style>
-  .join-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem 2rem;
-  }
+	.join-container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 1rem 2rem;
+	}
 
-  .cta-button {
-    display: inline-block;
-    background: linear-gradient(90deg, var(--accent-color), #fb923c);
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 2rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition:
-      transform 0.2s,
-      box-shadow 0.2s;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
+	.cta-button {
+		display: inline-block;
+		background: linear-gradient(90deg, var(--accent-color), #fb923c);
+		color: white;
+		padding: 0.75rem 1.5rem;
+		border-radius: 2rem;
+		font-weight: 600;
+		text-decoration: none;
+		transition:
+			transform 0.2s,
+			box-shadow 0.2s;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	}
 
-  .cta-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-  }
+	.cta-button:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+	}
 
-  .content-container {
-    max-width: 800px;
-    margin: 0 auto 5rem;
-    line-height: 1.8;
-    font-size: 1.1rem;
-  }
+	.content-container {
+		max-width: 800px;
+		margin: 0 auto 5rem;
+		line-height: 1.8;
+		font-size: 1.1rem;
+	}
 
-  .content-container :global(h2) {
-    font-size: 2rem;
-    margin-top: 3rem;
-    margin-bottom: 1.25rem;
-    color: var(--text-color);
-  }
+	.content-container :global(h2) {
+		font-size: 2rem;
+		margin-top: 3rem;
+		margin-bottom: 1.25rem;
+		color: var(--text-color);
+	}
 
-  .content-container :global(h3) {
-    font-size: 1.5rem;
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
-    color: var(--text-color);
-  }
+	.content-container :global(h3) {
+		font-size: 1.5rem;
+		margin-top: 2.5rem;
+		margin-bottom: 1rem;
+		color: var(--text-color);
+	}
 
-  .content-container :global(p) {
-    margin-bottom: 1.75rem;
-    color: var(--text-muted);
-  }
+	.content-container :global(p) {
+		margin-bottom: 1.75rem;
+		color: var(--text-muted);
+	}
 
-  .section-title {
-    font-size: 2.25rem;
-    margin-bottom: 2.5rem;
-    text-align: center;
-    position: relative;
-    padding-bottom: 1rem;
-  }
+	.section-title {
+		font-size: 2.25rem;
+		margin-bottom: 2.5rem;
+		text-align: center;
+		position: relative;
+		padding-bottom: 1rem;
+	}
 
-  .section-title::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 4px;
-    background: linear-gradient(90deg, var(--accent-color), #fb923c);
-    border-radius: 2px;
-  }
+	.section-title::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 80px;
+		height: 4px;
+		background: linear-gradient(90deg, var(--accent-color), #fb923c);
+		border-radius: 2px;
+	}
 
-  .join-sections {
-    display: flex;
-    flex-direction: column;
-    gap: 3rem;
-    margin-top: 3rem;
-    padding-top: 1rem;
-    scroll-margin-top: 5rem;
-  }
+	.join-sections {
+		display: flex;
+		flex-direction: column;
+		gap: 3rem;
+		margin-top: 3rem;
+		padding-top: 1rem;
+		scroll-margin-top: 5rem;
+	}
 
-  .join-section {
-    display: flex;
-    align-items: stretch;
-    gap: 0;
-    padding: 0;
-    border-radius: 1.5rem;
-    background-color: #000000;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    transition:
-      transform 0.3s ease,
-      box-shadow 0.3s ease;
-    overflow: hidden;
-    height: 100%;
-    min-height: 350px;
-  }
+	.join-section {
+		display: flex;
+		align-items: stretch;
+		gap: 0;
+		padding: 0;
+		border-radius: 1.5rem;
+		background-color: #000000;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+		transition:
+			transform 0.3s ease,
+			box-shadow 0.3s ease;
+		overflow: hidden;
+		height: 100%;
+		min-height: 350px;
+	}
 
-  .section-content {
-    flex: 1;
-    padding: 3rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background-color: #000000;
-  }
+	.section-content {
+		flex: 1;
+		padding: 3rem;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		background-color: #000000;
+	}
 
-  /* Farbmodus-abhängige Stile */
-  :root:not(.dark) .join-section,
-  :root:not(.dark) .section-content {
-    background-color: #ffffff;
-  }
+	/* Farbmodus-abhängige Stile */
+	:root:not(.dark) .join-section,
+	:root:not(.dark) .section-content {
+		background-color: #ffffff;
+	}
 
-  .section-image {
-    flex: 0 0 350px;
-    overflow: hidden;
-    position: relative;
-  }
+	.section-image {
+		flex: 0 0 350px;
+		overflow: hidden;
+		position: relative;
+	}
 
-  .section-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
+	.section-image img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
 
-  .join-section:hover {
-    transform: translateY(-5px);
-    box-shadow:
-      0 15px 25px -5px rgba(0, 0, 0, 0.1),
-      0 10px 10px -5px rgba(0, 0, 0, 0.05);
-  }
+	.join-section:hover {
+		transform: translateY(-5px);
+		box-shadow:
+			0 15px 25px -5px rgba(0, 0, 0, 0.1),
+			0 10px 10px -5px rgba(0, 0, 0, 0.05);
+	}
 
-  /* Alternierende Bildpositionen */
-  .newsletter-section .section-image {
-    order: 2;
-  }
+	/* Alternierende Bildpositionen */
+	.newsletter-section .section-image {
+		order: 2;
+	}
 
-  .submission-section .section-image {
-    order: -1;
-  }
+	.submission-section .section-image {
+		order: -1;
+	}
 
-  @media (min-width: 1024px) {
-    .join-sections {
-      grid-template-columns: 1fr;
-    }
-  }
+	@media (min-width: 1024px) {
+		.join-sections {
+			grid-template-columns: 1fr;
+		}
+	}
 
-  @media (max-width: 1024px) {
-    /* Desktop responsive styles for other elements */
-  }
+	@media (max-width: 1024px) {
+		/* Desktop responsive styles for other elements */
+	}
 
-  @media (max-width: 768px) {
-    /* Mobile responsive styles for other elements */
+	@media (max-width: 768px) {
+		/* Mobile responsive styles for other elements */
 
-    .section-title {
-      font-size: 1.75rem;
-    }
+		.section-title {
+			font-size: 1.75rem;
+		}
 
-    .cards-grid {
-      grid-template-columns: 1fr;
-    }
+		.cards-grid {
+			grid-template-columns: 1fr;
+		}
 
-    .content-container {
-      font-size: 1rem;
-    }
+		.content-container {
+			font-size: 1rem;
+		}
 
-    .content-container :global(h2) {
-      font-size: 1.75rem;
-    }
+		.content-container :global(h2) {
+			font-size: 1.75rem;
+		}
 
-    .content-container :global(h3) {
-      font-size: 1.35rem;
-    }
+		.content-container :global(h3) {
+			font-size: 1.35rem;
+		}
 
-    .join-section {
-      flex-direction: column;
-      padding: 0;
-      overflow: hidden;
-      min-height: auto;
-    }
+		.join-section {
+			flex-direction: column;
+			padding: 0;
+			overflow: hidden;
+			min-height: auto;
+		}
 
-    .section-content {
-      padding: 2rem 1.5rem;
-    }
+		.section-content {
+			padding: 2rem 1.5rem;
+		}
 
-    .section-image {
-      width: 100%;
-      flex: 0 0 220px;
-      order: -1 !important; /* Bild immer oben bei mobilen Geräten */
-      position: relative;
-    }
-  }
+		.section-image {
+			width: 100%;
+			flex: 0 0 220px;
+			order: -1 !important; /* Bild immer oben bei mobilen Geräten */
+			position: relative;
+		}
+	}
 </style>
 
 <script>
-  // Handle smooth scrolling for hero CTA button
-  document.addEventListener("DOMContentLoaded", () => {
-    const ctaButton = document.querySelector(".cta-button");
+	// Handle smooth scrolling for hero CTA button
+	document.addEventListener('DOMContentLoaded', () => {
+		const ctaButton = document.querySelector('.cta-button');
 
-    if (ctaButton) {
-      ctaButton.addEventListener("click", (e) => {
-        e.preventDefault();
-        const href = ctaButton.getAttribute("href");
-        if (!href) return;
+		if (ctaButton) {
+			ctaButton.addEventListener('click', (e) => {
+				e.preventDefault();
+				const href = ctaButton.getAttribute('href');
+				if (!href) return;
 
-        const targetId = href.substring(1);
-        const targetElement = document.getElementById(targetId);
+				const targetId = href.substring(1);
+				const targetElement = document.getElementById(targetId);
 
-        if (targetElement) {
-          window.scrollTo({
-            top: targetElement.offsetTop - 90,
-            behavior: "smooth",
-          });
+				if (targetElement) {
+					window.scrollTo({
+						top: targetElement.offsetTop - 90,
+						behavior: 'smooth',
+					});
 
-          // Update URL without page jump
-          history.pushState({}, document.title, `#${targetId}`);
-        }
-      });
-    }
-  });
+					// Update URL without page jump
+					history.pushState({}, document.title, `#${targetId}`);
+				}
+			});
+		}
+	});
 </script>

@@ -11,7 +11,7 @@ export class HashManager {
 		control: 40, // Baseline
 		a1: 20, // Value-focused variant
 		b1: 20, // Social proof variant
-		c1: 20 // Feature-focused variant
+		c1: 20, // Feature-focused variant
 	};
 
 	// Storage key for backup

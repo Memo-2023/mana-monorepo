@@ -28,7 +28,7 @@ import type {
 	CreditCheckResponse,
 	PricingResponse,
 	CreditUpdateCallback,
-	StandardOperationType
+	StandardOperationType,
 } from './types';
 import { DEFAULT_OPERATION_PRICING } from './types';
 
@@ -42,7 +42,7 @@ export function createCreditService(config: CreditServiceConfig) {
 		pricingEndpoint = '/credits/pricing',
 		cacheDuration = 30 * 60 * 1000, // 30 minutes default
 		fallbackPricing = {},
-		getAuthToken
+		getAuthToken,
 	} = config;
 
 	// Normalize API URL (remove trailing slash)
@@ -56,7 +56,7 @@ export function createCreditService(config: CreditServiceConfig) {
 	// Merge fallback pricing with defaults
 	const mergedFallbackPricing = {
 		...DEFAULT_OPERATION_PRICING,
-		...fallbackPricing
+		...fallbackPricing,
 	};
 
 	/**
@@ -121,8 +121,8 @@ export function createCreditService(config: CreditServiceConfig) {
 			const response = await fetch(`${baseUrl}${pricingEndpoint}`, {
 				method: 'GET',
 				headers: {
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+				},
 			});
 
 			if (!response.ok) {
@@ -145,7 +145,7 @@ export function createCreditService(config: CreditServiceConfig) {
 			// Return fallback pricing
 			return {
 				operationCosts: mergedFallbackPricing,
-				lastUpdated: new Date().toISOString()
+				lastUpdated: new Date().toISOString(),
 			};
 		}
 	}
@@ -166,8 +166,8 @@ export function createCreditService(config: CreditServiceConfig) {
 				method: 'GET',
 				headers: {
 					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+				},
 			});
 
 			if (!response.ok) {
@@ -183,7 +183,7 @@ export function createCreditService(config: CreditServiceConfig) {
 					credits: data.data.credits,
 					maxCreditLimit: data.data.maxCreditLimit ?? data.data.credits,
 					userId: data.data.userId ?? '',
-					lastUpdated: new Date().toISOString()
+					lastUpdated: new Date().toISOString(),
 				};
 			}
 
@@ -193,7 +193,7 @@ export function createCreditService(config: CreditServiceConfig) {
 					credits: data.credits,
 					maxCreditLimit: data.maxCreditLimit ?? data.credits,
 					userId: data.userId ?? '',
-					lastUpdated: new Date().toISOString()
+					lastUpdated: new Date().toISOString(),
 				};
 			}
 
@@ -230,7 +230,10 @@ export function createCreditService(config: CreditServiceConfig) {
 	/**
 	 * Calculate cost for multiple units of an operation
 	 */
-	async function calculateCost(operation: StandardOperationType, quantity: number = 1): Promise<number> {
+	async function calculateCost(
+		operation: StandardOperationType,
+		quantity: number = 1
+	): Promise<number> {
 		const unitCost = await getOperationCost(operation);
 		return unitCost * quantity;
 	}
@@ -257,7 +260,7 @@ export function createCreditService(config: CreditServiceConfig) {
 				hasEnoughCredits: false,
 				currentCredits: 0,
 				requiredCredits,
-				deficit: requiredCredits
+				deficit: requiredCredits,
 			};
 		}
 
@@ -268,14 +271,16 @@ export function createCreditService(config: CreditServiceConfig) {
 			currentCredits: balance.credits,
 			requiredCredits,
 			deficit: hasEnough ? undefined : requiredCredits - balance.credits,
-			context: operation ? { operation } : undefined
+			context: operation ? { operation } : undefined,
 		};
 	}
 
 	/**
 	 * Check if user has enough credits for a specific operation
 	 */
-	async function checkOperationBalance(operation: StandardOperationType): Promise<CreditCheckResponse> {
+	async function checkOperationBalance(
+		operation: StandardOperationType
+	): Promise<CreditCheckResponse> {
 		const cost = await getOperationCost(operation);
 		return checkBalance(cost, operation);
 	}
@@ -317,7 +322,7 @@ export function createCreditService(config: CreditServiceConfig) {
 
 		// Utilities
 		formatCredits,
-		clearCache
+		clearCache,
 	};
 }
 

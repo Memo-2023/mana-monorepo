@@ -36,12 +36,14 @@ ManaCore Apps is a monorepo containing web and mobile applications that provide 
 ### Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd mana-core-apps
    ```
 
 2. **Web App Setup**
+
    ```bash
    cd apps/web
    pnpm install
@@ -96,28 +98,28 @@ mana-core-apps/
 
 ### Web App (apps/web)
 
-| Category | Technology |
-|----------|------------|
-| Framework | SvelteKit 2 with Svelte 5 (Runes) |
-| Language | TypeScript |
-| Styling | TailwindCSS 3 with PostCSS |
-| Database | Supabase (PostgreSQL) |
-| Auth | Supabase Auth with SSR |
-| Testing | Vitest (unit) + Playwright (E2E) |
-| Build Tool | Vite |
+| Category   | Technology                        |
+| ---------- | --------------------------------- |
+| Framework  | SvelteKit 2 with Svelte 5 (Runes) |
+| Language   | TypeScript                        |
+| Styling    | TailwindCSS 3 with PostCSS        |
+| Database   | Supabase (PostgreSQL)             |
+| Auth       | Supabase Auth with SSR            |
+| Testing    | Vitest (unit) + Playwright (E2E)  |
+| Build Tool | Vite                              |
 
 ### Mobile App (apps/mobile)
 
-| Category | Technology |
-|----------|------------|
-| Framework | Expo 52 with React Native 0.76 |
-| Language | TypeScript |
-| Routing | Expo Router 4 (file-based) |
-| Styling | NativeWind (TailwindCSS for RN) |
+| Category   | Technology                      |
+| ---------- | ------------------------------- |
+| Framework  | Expo 52 with React Native 0.76  |
+| Language   | TypeScript                      |
+| Routing    | Expo Router 4 (file-based)      |
+| Styling    | NativeWind (TailwindCSS for RN) |
 | Navigation | React Navigation (drawer, tabs) |
-| Database | Supabase |
-| Build | EAS Build |
-| Platforms | iOS, Android, Web |
+| Database   | Supabase                        |
+| Build      | EAS Build                       |
+| Platforms  | iOS, Android, Web               |
 
 ## Development
 
@@ -204,12 +206,14 @@ App configurations are centralized in `apps/web/src/lib/config/apps.ts`, definin
 ### Authentication Flow
 
 **Web (SvelteKit)**:
+
 1. Server-side authentication using `@supabase/ssr`
 2. Middleware in `hooks.server.ts` handles session validation
 3. Protected routes in `(app)` group require authentication
 4. JWT validation via `safeGetSession()` before allowing access
 
 **Mobile (Expo)**:
+
 1. Client-side authentication using `@supabase/supabase-js`
 2. Custom memory storage for session persistence
 3. `AuthProvider` in `app/_layout.tsx` manages auth state
@@ -218,6 +222,7 @@ App configurations are centralized in `apps/web/src/lib/config/apps.ts`, definin
 ### Database Schema
 
 Key tables:
+
 - `users` - User profiles (linked via `auth_id` to Supabase Auth)
 - `organizations` - Organization entities
 - `user_roles` - User-organization relationships with roles
@@ -258,12 +263,14 @@ npm start              # Start dev server
 ### Web App
 
 **Vercel** (Recommended):
+
 ```bash
 cd apps/web
 vercel
 ```
 
 **Netlify**:
+
 ```bash
 cd apps/web
 netlify deploy
@@ -272,6 +279,7 @@ netlify deploy
 ### Mobile App
 
 **iOS and Android** (via EAS):
+
 ```bash
 cd apps/mobile
 

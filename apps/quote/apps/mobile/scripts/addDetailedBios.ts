@@ -9,30 +9,30 @@ import * as path from 'path';
 import { Author } from '../services/contentLoader';
 
 function loadAuthors(lang: 'de' | 'en'): Author[] {
-  const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const match = content.match(/export const authors[A-Z]{2}: Author\[\] = (\[[\s\S]*\]);/);
-  return eval(match[1]) as Author[];
+	const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
+	const content = fs.readFileSync(filePath, 'utf-8');
+	const match = content.match(/export const authors[A-Z]{2}: Author\[\] = (\[[\s\S]*\]);/);
+	return eval(match[1]) as Author[];
 }
 
 function writeAuthors(authors: Author[], lang: 'de' | 'en'): void {
-  const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
-  const backupPath = filePath.replace('.ts', `.backup-${Date.now()}.ts`);
-  fs.copyFileSync(filePath, backupPath);
+	const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
+	const backupPath = filePath.replace('.ts', `.backup-${Date.now()}.ts`);
+	fs.copyFileSync(filePath, backupPath);
 
-  const authorsJson = JSON.stringify(authors, null, 2);
-  const tsContent = `import { Author } from '../../contentLoader';
+	const authorsJson = JSON.stringify(authors, null, 2);
+	const tsContent = `import { Author } from '../../contentLoader';
 
 export const authors${lang.toUpperCase()}: Author[] = ${authorsJson};
 `;
 
-  fs.writeFileSync(filePath, tsContent, 'utf-8');
-  console.log(`✅ ${lang}.ts aktualisiert`);
+	fs.writeFileSync(filePath, tsContent, 'utf-8');
+	console.log(`✅ ${lang}.ts aktualisiert`);
 }
 
 // Ausführliche Biografien (hochwertig, nicht template-basiert)
 const detailedBios: Record<string, string> = {
-  'augustinus': `# Aurelius Augustinus
+	augustinus: `# Aurelius Augustinus
 *13. November 354 - 28. August 430*
 
 ## Kurzbiografie
@@ -241,7 +241,7 @@ Augustinus bleibt der einflussreichste Kirchenvater des Westens:
 
 Seine Größe liegt in der radikalen Ehrlichkeit, mit der er sein zerrissenes Ich offenbart, und in der Tiefe, mit der er die Paradoxien menschlicher Existenz durchdenkt. Augustinus lehrte die Gotteserkenntnis durch Selbsterkenntnis und die Selbsterkenntnis durch Gotteserkenntnis.`,
 
-  'kennedy-john-f': `# John Fitzgerald Kennedy
+	'kennedy-john-f': `# John Fitzgerald Kennedy
 *29. Mai 1917 - 22. November 1963*
 
 ## Kurzbiografie
@@ -428,48 +428,48 @@ Kennedy verkörperte den Optimismus und die Zuversicht einer Ära, die mit ihm z
 };
 
 async function main() {
-  console.log('📝 Füge ausführliche Biografien hinzu\n');
+	console.log('📝 Füge ausführliche Biografien hinzu\n');
 
-  const authorsDE = loadAuthors('de');
-  const authorsEN = loadAuthors('en');
+	const authorsDE = loadAuthors('de');
+	const authorsEN = loadAuthors('en');
 
-  let updated = 0;
+	let updated = 0;
 
-  const updatedDE = authorsDE.map(author => {
-    if (detailedBios[author.id]) {
-      console.log(`✅ ${author.name} (${author.id})`);
-      updated++;
-      return {
-        ...author,
-        biography: {
-          ...author.biography,
-          long: detailedBios[author.id]
-        }
-      };
-    }
-    return author;
-  });
+	const updatedDE = authorsDE.map((author) => {
+		if (detailedBios[author.id]) {
+			console.log(`✅ ${author.name} (${author.id})`);
+			updated++;
+			return {
+				...author,
+				biography: {
+					...author.biography,
+					long: detailedBios[author.id],
+				},
+			};
+		}
+		return author;
+	});
 
-  const updatedEN = authorsEN.map(author => {
-    const deAuthor = updatedDE.find(a => a.id === author.id);
-    if (deAuthor?.biography?.long && detailedBios[author.id]) {
-      return {
-        ...author,
-        biography: {
-          ...author.biography,
-          long: deAuthor.biography.long
-        }
-      };
-    }
-    return author;
-  });
+	const updatedEN = authorsEN.map((author) => {
+		const deAuthor = updatedDE.find((a) => a.id === author.id);
+		if (deAuthor?.biography?.long && detailedBios[author.id]) {
+			return {
+				...author,
+				biography: {
+					...author.biography,
+					long: deAuthor.biography.long,
+				},
+			};
+		}
+		return author;
+	});
 
-  console.log(`\n📊 ${updated} Biografien hinzugefügt\n`);
+	console.log(`\n📊 ${updated} Biografien hinzugefügt\n`);
 
-  writeAuthors(updatedDE, 'de');
-  writeAuthors(updatedEN, 'en');
+	writeAuthors(updatedDE, 'de');
+	writeAuthors(updatedEN, 'en');
 
-  console.log('\n✨ Fertig!\n');
+	console.log('\n✨ Fertig!\n');
 }
 
 main();

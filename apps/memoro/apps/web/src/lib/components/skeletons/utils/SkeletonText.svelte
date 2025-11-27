@@ -14,17 +14,12 @@
 		className?: string;
 	}
 
-	let {
-		lines = 2,
-		width = ['100%', '80%'],
-		variant = 'body',
-		className = ''
-	}: Props = $props();
+	let { lines = 2, width = ['100%', '80%'], variant = 'body', className = '' }: Props = $props();
 
 	const heights = {
 		heading: '24px',
 		body: '16px',
-		caption: '12px'
+		caption: '12px',
 	};
 
 	const height = heights[variant];

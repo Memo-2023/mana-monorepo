@@ -15,7 +15,8 @@ Drei unterschiedliche Ansätze für verschiedene Studierenden-Personas und Motiv
 ---
 
 ## VARIANTE A: "Der Lerngruppen-Champion"
-*Fokus: Gemeinsames Lernen & Prüfungsvorbereitung*
+
+_Fokus: Gemeinsames Lernen & Prüfungsvorbereitung_
 
 ### Vorderseite
 
@@ -52,7 +53,7 @@ Icon-Cluster: Gruppe von Studenten-Silhouetten mit Sprechblasen
 💡 **Nachhilfe geben:** Sessions aufzeichnen für spätere Wiederholung
 
 **Social Proof:**
-"Unsere 5er-Lerngruppe hat dank Memoro 
+"Unsere 5er-Lerngruppe hat dank Memoro
 alle die Klausur bestanden!"
 – Tom, BWL, Uni Mannheim
 
@@ -65,7 +66,8 @@ Fragen? uni@memoro.ai | WhatsApp: +49...
 ---
 
 ## VARIANTE B: "Der Kreativ-Chaot"
-*Fokus: Kreative Studiengänge & Ideensammlung*
+
+_Fokus: Kreative Studiengänge & Ideensammlung_
 
 ### Vorderseite
 
@@ -116,7 +118,8 @@ creative@memoro.ai | Insta: @memoro.creative
 ---
 
 ## VARIANTE C: "Der Selbst-Optimierer"
-*Fokus: Persönliche Produktivität & Selbstmanagement*
+
+_Fokus: Persönliche Produktivität & Selbstmanagement_
 
 ### Vorderseite
 
@@ -159,17 +162,19 @@ Beste Therapie ever - und kostet nichts!"
 – Chris, Sport & Ernährung, DSHS Köln
 
 **Pro-Tipp:**
-🚀 **Voice Journaling:** Studien zeigen - 
+🚀 **Voice Journaling:** Studien zeigen -
 wer seine Gedanken ausspricht, lernt 40% effektiver!
 
 **Footer:**
 lifestyle@memoro.ai | TikTok: @memoro.life
-ß 
+ß
 .
+
 ---
 
 ## VARIANTE D: "Der Campus-Botschafter"
-*Spezieller Flyer für Botschafter-Rekrutierung*
+
+_Spezieller Flyer für Botschafter-Rekrutierung_
 
 ### Vorderseite
 
@@ -232,7 +237,8 @@ botschafter@memoro.ai
 ---
 
 ## VARIANTE E: "Der Tech-Builder"
-*Fokus: Entwickler & Tech-Studierende für App-Entwicklung*
+
+_Fokus: Entwickler & Tech-Studierende für App-Entwicklung_
 
 ### Vorderseite
 
@@ -272,6 +278,7 @@ für die beste App!"
 💼 **Productivity:** Custom Workflows für Teams
 
 **Tech-Stack:**
+
 ```
 • REST API mit allen Memoro-Features
 • Python, JS, Swift SDKs
@@ -298,7 +305,8 @@ Discord: discord.gg/memoro-devs
 ---
 
 ## VARIANTE F: "Der Impact-Maker"
-*Fokus: Ideengeber & Visionäre für gesellschaftlichen Impact*
+
+_Fokus: Ideengeber & Visionäre für gesellschaftlichen Impact_
 
 ### Vorderseite
 
@@ -368,6 +376,7 @@ Wir suchen Visionäre, keine Programmierer."
 ## Design-Richtlinien
 
 ### Farbschema
+
 - **Variante A:** Memoro Blau + Akzent Orange (energetisch)
 - **Variante B:** Memoro Grün + Soft Purple (kreativ)
 - **Variante C:** Memoro Türkis + Koralle (lifestyle)
@@ -376,11 +385,13 @@ Wir suchen Visionäre, keine Programmierer."
 - **Variante F:** Memoro Regenbogen-Gradient (impact)
 
 ### Typografie
+
 - **Headlines:** Sans-Serif, bold (z.B. Inter, Helvetica)
 - **Body:** Sans-Serif, regular, gut lesbar bei kleiner Größe
 - **Größen:** Headline min. 18pt, Body min. 9pt
 
 ### Layout-Prinzipien
+
 - **Weißraum:** Mindestens 30% der Fläche
 - **Hierarchie:** Klare visuelle Führung
 - **Kontrast:** Hoher Kontrast für Lesbarkeit
@@ -391,12 +402,15 @@ Wir suchen Visionäre, keine Programmierer."
 ## Tracking & Messbarkeit
 
 ### QR-Code Tracking
+
 Jede Variante erhält eigenen Tracking-Link:
+
 - memoro.ai/uni-zeitsparer?utm_source=flyer&utm_campaign=uni-q1-2025&utm_content=variante-a
 - memoro.ai/uni-team?utm_source=flyer&utm_campaign=uni-q1-2025&utm_content=variante-b
 - memoro.ai/uni-research?utm_source=flyer&utm_campaign=uni-q1-2025&utm_content=variante-c
 
 ### Erfolgsmetriken
+
 1. **Scan-Rate:** QR-Code-Scans pro verteiltem Flyer
 2. **Conversion-Rate:** Registrierungen pro Scan
 3. **Aktivierungsrate:** Aktive Nutzer nach 7 Tagen
@@ -404,6 +418,7 @@ Jede Variante erhält eigenen Tracking-Link:
 5. **Viral Coefficient:** Einladungen pro Nutzer
 
 ### A/B/C Test-Zeitraum
+
 - **Woche 1-2:** Verteilung an 3 verschiedenen Unis
 - **Woche 3-4:** Verteilung am gleichen Campus, verschiedene Fakultäten
 - **Woche 5-6:** Auswertung & Entscheidung für Gewinner-Variante
@@ -413,6 +428,7 @@ Jede Variante erhält eigenen Tracking-Link:
 ## Verteilungsstrategie
 
 ### Prioritäre Orte
+
 1. **Mensen & Cafeterien** (Tische)
 2. **Bibliotheken** (Schwarze Bretter)
 3. **Hörsaal-Eingänge** (vor großen Vorlesungen)
@@ -420,11 +436,13 @@ Jede Variante erhält eigenen Tracking-Link:
 5. **Copy-Shops** (Kooperation)
 
 ### Timing
+
 - **Semesterstart:** Höchste Priorität
 - **Prüfungsphase:** Fokus auf Zeitersparnis
 - **Projekt-Wochen:** Fokus auf Kollaboration
 
 ### Campus-Botschafter
+
 - Rekrutierung von 2-3 Studierenden pro Uni
 - Vergütung: Pro-Account + kleine Aufwandsentschädigung
 - Aufgabe: Verteilung & Feedback sammeln
@@ -434,17 +452,20 @@ Jede Variante erhält eigenen Tracking-Link:
 ## Budget-Kalkulation
 
 ### Druckkosten (3.000 Stück)
+
 - Design & Satz: €300
 - Druck 4/4 auf 160g: €180
 - Schneiden: €50
 - **Gesamt:** €530
 
 ### Verteilung
+
 - Campus-Botschafter (3 Unis × 2 Personen × €50): €300
 - Reisekosten Team: €200
 - **Gesamt:** €500
 
 ### Tracking & Analyse
+
 - QR-Code-Generator Pro: €20/Monat
 - Analytics-Setup: €100
 - **Gesamt:** €120
@@ -465,16 +486,19 @@ Jede Variante erhält eigenen Tracking-Link:
 ## Erwartete Ergebnisse
 
 **Konservativ (Bottom):**
+
 - 5% Scan-Rate = 150 Scans
 - 20% Conversion = 30 Registrierungen
 - 50% Aktivierung = 15 aktive Nutzer
 
 **Realistisch (Middle):**
+
 - 10% Scan-Rate = 300 Scans
 - 30% Conversion = 90 Registrierungen
 - 60% Aktivierung = 54 aktive Nutzer
 
 **Optimistisch (Top):**
+
 - 20% Scan-Rate = 600 Scans
 - 40% Conversion = 240 Registrierungen
 - 70% Aktivierung = 168 aktive Nutzer
@@ -482,16 +506,19 @@ Jede Variante erhält eigenen Tracking-Link:
 ## Anhang: Copywriting-Alternativen
 
 ### Alternative Headlines Variante A:
+
 - "Schluss mit Mitschreib-Marathons"
 - "Deine Vorlesung. Automatisch notiert."
 - "Mehr zuhören. Weniger tippen."
 
 ### Alternative Headlines Variante B:
+
 - "Gemeinsam besser lernen"
 - "Ein Team. Eine Mitschrift."
 - "Sharing is Caring - auch bei Notizen"
 
 ### Alternative Headlines Variante C:
+
 - "Präzision trifft Innovation"
 - "Dokumentation auf Forschungsniveau"
 - "Die Zukunft akademischer Notizen"

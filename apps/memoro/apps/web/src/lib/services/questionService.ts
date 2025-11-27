@@ -26,7 +26,7 @@ class QuestionService {
 		if (!memoId || !question.trim()) {
 			return {
 				success: false,
-				error: 'Invalid memo ID or question'
+				error: 'Invalid memo ID or question',
 			};
 		}
 
@@ -36,7 +36,7 @@ class QuestionService {
 			if (!token) {
 				return {
 					success: false,
-					error: 'Nicht authentifiziert. Bitte melden Sie sich erneut an.'
+					error: 'Nicht authentifiziert. Bitte melden Sie sich erneut an.',
 				};
 			}
 
@@ -45,7 +45,7 @@ class QuestionService {
 			if (!memoroServiceUrl) {
 				return {
 					success: false,
-					error: 'Memoro service URL nicht konfiguriert'
+					error: 'Memoro service URL nicht konfiguriert',
 				};
 			}
 
@@ -54,12 +54,12 @@ class QuestionService {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`
+					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
 					memo_id: memoId,
-					question: question.trim()
-				})
+					question: question.trim(),
+				}),
 			});
 
 			if (!response.ok) {
@@ -69,20 +69,20 @@ class QuestionService {
 				if (response.status === 402) {
 					return {
 						success: false,
-						error: 'Nicht genügend Mana. Bitte laden Sie Ihr Konto auf.'
+						error: 'Nicht genügend Mana. Bitte laden Sie Ihr Konto auf.',
 					};
 				}
 
 				if (response.status === 401) {
 					return {
 						success: false,
-						error: 'Sitzung abgelaufen. Bitte melden Sie sich erneut an.'
+						error: 'Sitzung abgelaufen. Bitte melden Sie sich erneut an.',
 					};
 				}
 
 				return {
 					success: false,
-					error: errorData.message || `Fehler: ${response.status} ${response.statusText}`
+					error: errorData.message || `Fehler: ${response.status} ${response.statusText}`,
 				};
 			}
 
@@ -92,13 +92,13 @@ class QuestionService {
 				return {
 					success: true,
 					memoryId: data.memory_id,
-					creditsConsumed: data.creditsConsumed
+					creditsConsumed: data.creditsConsumed,
 				};
 			}
 
 			return {
 				success: false,
-				error: data?.error || 'Unbekannter Fehler bei der Verarbeitung'
+				error: data?.error || 'Unbekannter Fehler bei der Verarbeitung',
 			};
 		} catch (error) {
 			console.error('Error asking question:', error);
@@ -107,13 +107,13 @@ class QuestionService {
 			if (error instanceof TypeError && error.message.includes('fetch')) {
 				return {
 					success: false,
-					error: 'Netzwerkfehler. Bitte überprüfen Sie Ihre Internetverbindung.'
+					error: 'Netzwerkfehler. Bitte überprüfen Sie Ihre Internetverbindung.',
 				};
 			}
 
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unbekannter Fehler'
+				error: error instanceof Error ? error.message : 'Unbekannter Fehler',
 			};
 		}
 	}
@@ -138,7 +138,7 @@ class QuestionService {
 			}
 
 			// Transform data to match Memory interface
-			return (data || []).map(item => ({
+			return (data || []).map((item) => ({
 				id: item.id,
 				memo_id: item.memo_id,
 				title: item.title,
@@ -147,7 +147,7 @@ class QuestionService {
 				style: item.style as Record<string, any> | null | undefined,
 				media: item.media as Record<string, any> | null | undefined,
 				created_at: item.created_at,
-				updated_at: item.updated_at
+				updated_at: item.updated_at,
 			}));
 		} catch (error) {
 			console.error('Error loading memories:', error);

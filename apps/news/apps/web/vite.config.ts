@@ -10,8 +10,8 @@ export default defineConfig({
 			'@manacore/shared-auth-ui',
 			'@manacore/shared-branding',
 			'@manacore/shared-ui',
-			'@manacore/shared-theme-ui'
-		]
+			'@manacore/shared-theme-ui',
+		],
 	},
 	optimizeDeps: {
 		exclude: [
@@ -19,7 +19,7 @@ export default defineConfig({
 			'@manacore/shared-auth-ui',
 			'@manacore/shared-branding',
 			'@manacore/shared-ui',
-			'@manacore/shared-theme-ui'
-		]
-	}
+			'@manacore/shared-theme-ui',
+		],
+	},
 });

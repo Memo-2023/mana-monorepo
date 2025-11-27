@@ -1,6 +1,11 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { env } from '$env/dynamic/private'
+import {
+	S3Client,
+	PutObjectCommand,
+	DeleteObjectCommand,
+	GetObjectCommand,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { env } from '$env/dynamic/private';
 
 // Initialize R2 Client (S3-compatible)
 const r2Client = new S3Client({
@@ -8,11 +13,11 @@ const r2Client = new S3Client({
 	endpoint: `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
 	credentials: {
 		accessKeyId: env.R2_ACCESS_KEY_ID || '',
-		secretAccessKey: env.R2_SECRET_ACCESS_KEY || ''
-	}
-})
+		secretAccessKey: env.R2_SECRET_ACCESS_KEY || '',
+	},
+});
 
-export type Bucket = 'avatars' | 'qr-codes'
+export type Bucket = 'avatars' | 'qr-codes';
 
 /**
  * Upload a file to Cloudflare R2
@@ -22,9 +27,9 @@ export type Bucket = 'avatars' | 'qr-codes'
  * @returns Public URL of uploaded file
  */
 export async function uploadFile(file: File, bucket: Bucket, userId: string): Promise<string> {
-	const ext = file.name.split('.').pop()
-	const fileName = `${userId}-${Date.now()}.${ext}`
-	const bucketName = bucket === 'avatars' ? env.R2_BUCKET_AVATARS : env.R2_BUCKET_QR
+	const ext = file.name.split('.').pop();
+	const fileName = `${userId}-${Date.now()}.${ext}`;
+	const bucketName = bucket === 'avatars' ? env.R2_BUCKET_AVATARS : env.R2_BUCKET_QR;
 
 	try {
 		const command = new PutObjectCommand({
@@ -32,17 +37,17 @@ export async function uploadFile(file: File, bucket: Bucket, userId: string): Pr
 			Key: fileName,
 			Body: Buffer.from(await file.arrayBuffer()),
 			ContentType: file.type,
-			CacheControl: 'public, max-age=31536000' // 1 year cache
-		})
+			CacheControl: 'public, max-age=31536000', // 1 year cache
+		});
 
-		await r2Client.send(command)
+		await r2Client.send(command);
 
 		// Return public URL
-		const publicUrl = `${env.R2_PUBLIC_URL}/${bucket}/${fileName}`
-		return publicUrl
+		const publicUrl = `${env.R2_PUBLIC_URL}/${bucket}/${fileName}`;
+		return publicUrl;
 	} catch (error) {
-		console.error('File upload error:', error)
-		throw new Error('Failed to upload file')
+		console.error('File upload error:', error);
+		throw new Error('Failed to upload file');
 	}
 }
 
@@ -52,18 +57,18 @@ export async function uploadFile(file: File, bucket: Bucket, userId: string): Pr
  * @param fileName - File name to delete
  */
 export async function deleteFile(bucket: Bucket, fileName: string): Promise<void> {
-	const bucketName = bucket === 'avatars' ? env.R2_BUCKET_AVATARS : env.R2_BUCKET_QR
+	const bucketName = bucket === 'avatars' ? env.R2_BUCKET_AVATARS : env.R2_BUCKET_QR;
 
 	try {
 		const command = new DeleteObjectCommand({
 			Bucket: bucketName,
-			Key: fileName
-		})
+			Key: fileName,
+		});
 
-		await r2Client.send(command)
+		await r2Client.send(command);
 	} catch (error) {
-		console.error('File deletion error:', error)
-		throw new Error('Failed to delete file')
+		console.error('File deletion error:', error);
+		throw new Error('Failed to delete file');
 	}
 }
 
@@ -79,14 +84,14 @@ export async function getPresignedUrl(
 	fileName: string,
 	expiresIn: number = 3600
 ): Promise<string> {
-	const bucketName = bucket === 'avatars' ? env.R2_BUCKET_AVATARS : env.R2_BUCKET_QR
+	const bucketName = bucket === 'avatars' ? env.R2_BUCKET_AVATARS : env.R2_BUCKET_QR;
 
 	const command = new GetObjectCommand({
 		Bucket: bucketName,
-		Key: fileName
-	})
+		Key: fileName,
+	});
 
-	return await getSignedUrl(r2Client, command, { expiresIn })
+	return await getSignedUrl(r2Client, command, { expiresIn });
 }
 
 /**
@@ -96,11 +101,11 @@ export async function getPresignedUrl(
  */
 export function extractFileNameFromUrl(url: string): string | null {
 	try {
-		const urlObj = new URL(url)
-		const parts = urlObj.pathname.split('/')
-		return parts[parts.length - 1]
+		const urlObj = new URL(url);
+		const parts = urlObj.pathname.split('/');
+		return parts[parts.length - 1];
 	} catch {
-		return null
+		return null;
 	}
 }
 
@@ -116,21 +121,21 @@ export function validateFile(
 	allowedTypes: string[] = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 ): { valid: boolean; error?: string } {
 	// Check size
-	const maxSizeBytes = maxSizeMB * 1024 * 1024
+	const maxSizeBytes = maxSizeMB * 1024 * 1024;
 	if (file.size > maxSizeBytes) {
 		return {
 			valid: false,
-			error: `File size exceeds ${maxSizeMB}MB limit`
-		}
+			error: `File size exceeds ${maxSizeMB}MB limit`,
+		};
 	}
 
 	// Check type
 	if (!allowedTypes.includes(file.type)) {
 		return {
 			valid: false,
-			error: `File type not allowed. Accepted types: ${allowedTypes.join(', ')}`
-		}
+			error: `File type not allowed. Accepted types: ${allowedTypes.join(', ')}`,
+		};
 	}
 
-	return { valid: true }
+	return { valid: true };
 }

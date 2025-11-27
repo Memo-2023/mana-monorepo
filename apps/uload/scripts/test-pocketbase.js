@@ -27,8 +27,8 @@ async function testConnection() {
 			fields: usersCollection.schema.map((f) => ({
 				name: f.name,
 				type: f.type,
-				required: f.required
-			}))
+				required: f.required,
+			})),
 		});
 
 		// Test 4: Try to list users (might fail due to permissions)
@@ -47,7 +47,7 @@ async function testConnection() {
 				email: testEmail,
 				password: 'Test123456!',
 				passwordConfirm: 'Test123456!',
-				username: `testuser${Date.now()}`
+				username: `testuser${Date.now()}`,
 			});
 			console.log('✓ Registration test successful, user created:', result.id);
 			// Clean up test user

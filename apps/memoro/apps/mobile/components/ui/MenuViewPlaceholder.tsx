@@ -8,11 +8,11 @@ import { View } from 'react-native';
  * TODO: Migrate all usages to @expo/ui ContextMenu
  */
 export const MenuView: React.FC<{
-  children: React.ReactNode;
-  actions?: any[];
-  onPressAction?: (event: any) => void;
-  shouldOpenOnLongPress?: boolean;
-  [key: string]: any;
+	children: React.ReactNode;
+	actions?: any[];
+	onPressAction?: (event: any) => void;
+	shouldOpenOnLongPress?: boolean;
+	[key: string]: any;
 }> = ({ children }) => {
-  return <View>{children}</View>;
+	return <View>{children}</View>;
 };

@@ -12,7 +12,7 @@ const APP_ID = env.middleware.appId;
 const STORAGE_KEYS = {
 	APP_TOKEN: 'memoro_app_token',
 	REFRESH_TOKEN: 'memoro_refresh_token',
-	USER_EMAIL: 'memoro_user_email'
+	USER_EMAIL: 'memoro_user_email',
 };
 
 /**
@@ -23,7 +23,7 @@ function getDeviceInfo() {
 		deviceId: getBrowserFingerprint(),
 		deviceName: getBrowserName(),
 		deviceType: 'web',
-		platform: 'web'
+		platform: 'web',
 	};
 }
 
@@ -79,7 +79,7 @@ function isTokenExpired(token: string): boolean {
 
 		// Add 10 second buffer
 		const bufferTime = 10 * 1000;
-		return Date.now() >= (payload.exp * 1000) - bufferTime;
+		return Date.now() >= payload.exp * 1000 - bufferTime;
 	} catch (error) {
 		return true;
 	}
@@ -114,9 +114,9 @@ export const authService = {
 			const response = await fetch(`${MIDDLEWARE_URL}/auth/signin?appId=${APP_ID}`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ email, password, deviceInfo })
+				body: JSON.stringify({ email, password, deviceInfo }),
 			});
 
 			if (!response.ok) {
@@ -124,31 +124,35 @@ export const authService = {
 
 				// Handle specific error cases
 				if (response.status === 401) {
-					if (errorData.message?.includes('Firebase user detected') ||
-						errorData.message?.includes('password reset required')) {
+					if (
+						errorData.message?.includes('Firebase user detected') ||
+						errorData.message?.includes('password reset required')
+					) {
 						return {
 							success: false,
-							error: 'FIREBASE_USER_PASSWORD_RESET_REQUIRED'
+							error: 'FIREBASE_USER_PASSWORD_RESET_REQUIRED',
 						};
 					}
 
-					if (errorData.message?.includes('Email not confirmed') ||
-						errorData.message?.includes('Email not verified')) {
+					if (
+						errorData.message?.includes('Email not confirmed') ||
+						errorData.message?.includes('Email not verified')
+					) {
 						return {
 							success: false,
-							error: 'EMAIL_NOT_VERIFIED'
+							error: 'EMAIL_NOT_VERIFIED',
 						};
 					}
 
 					return {
 						success: false,
-						error: 'INVALID_CREDENTIALS'
+						error: 'INVALID_CREDENTIALS',
 					};
 				}
 
 				return {
 					success: false,
-					error: errorData.message || 'Sign in failed'
+					error: errorData.message || 'Sign in failed',
 				};
 			}
 
@@ -158,13 +162,13 @@ export const authService = {
 				success: true,
 				appToken,
 				refreshToken,
-				email
+				email,
 			};
 		} catch (error) {
 			console.error('Error signing in:', error);
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error during sign in'
+				error: error instanceof Error ? error.message : 'Unknown error during sign in',
 			};
 		}
 	},
@@ -179,9 +183,9 @@ export const authService = {
 			const response = await fetch(`${MIDDLEWARE_URL}/auth/signup?appId=${APP_ID}`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ email, password, deviceInfo })
+				body: JSON.stringify({ email, password, deviceInfo }),
 			});
 
 			if (!response.ok) {
@@ -190,13 +194,13 @@ export const authService = {
 				if (response.status === 409) {
 					return {
 						success: false,
-						error: 'This email is already in use'
+						error: 'This email is already in use',
 					};
 				}
 
 				return {
 					success: false,
-					error: errorData.message || 'Registration failed'
+					error: errorData.message || 'Registration failed',
 				};
 			}
 
@@ -206,7 +210,7 @@ export const authService = {
 			if (responseData.confirmationRequired) {
 				return {
 					success: true,
-					needsVerification: true
+					needsVerification: true,
 				};
 			}
 
@@ -216,13 +220,13 @@ export const authService = {
 				success: true,
 				appToken,
 				refreshToken,
-				email
+				email,
 			};
 		} catch (error) {
 			console.error('Error signing up:', error);
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error during registration'
+				error: error instanceof Error ? error.message : 'Unknown error during registration',
 			};
 		}
 	},
@@ -237,16 +241,16 @@ export const authService = {
 			const response = await fetch(`${MIDDLEWARE_URL}/auth/google-signin?appId=${APP_ID}`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ token: idToken, deviceInfo })
+				body: JSON.stringify({ token: idToken, deviceInfo }),
 			});
 
 			if (!response.ok) {
 				const errorData = await response.json();
 				return {
 					success: false,
-					error: errorData.message || 'Google Sign-In failed'
+					error: errorData.message || 'Google Sign-In failed',
 				};
 			}
 
@@ -264,13 +268,13 @@ export const authService = {
 				success: true,
 				appToken,
 				refreshToken,
-				email
+				email,
 			};
 		} catch (error) {
 			console.error('Error signing in with Google:', error);
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error during Google Sign-In'
+				error: error instanceof Error ? error.message : 'Unknown error during Google Sign-In',
 			};
 		}
 	},
@@ -285,16 +289,16 @@ export const authService = {
 			const response = await fetch(`${MIDDLEWARE_URL}/auth/apple-signin?appId=${APP_ID}`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ token: identityToken, deviceInfo })
+				body: JSON.stringify({ token: identityToken, deviceInfo }),
 			});
 
 			if (!response.ok) {
 				const errorData = await response.json();
 				return {
 					success: false,
-					error: errorData.message || 'Apple Sign-In failed'
+					error: errorData.message || 'Apple Sign-In failed',
 				};
 			}
 
@@ -312,13 +316,13 @@ export const authService = {
 				success: true,
 				appToken,
 				refreshToken,
-				email
+				email,
 			};
 		} catch (error) {
 			console.error('Error signing in with Apple:', error);
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error during Apple Sign-In'
+				error: error instanceof Error ? error.message : 'Unknown error during Apple Sign-In',
 			};
 		}
 	},
@@ -337,9 +341,9 @@ export const authService = {
 			const response = await fetch(`${MIDDLEWARE_URL}/auth/refresh?appId=${APP_ID}`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ refreshToken: currentRefreshToken, deviceInfo })
+				body: JSON.stringify({ refreshToken: currentRefreshToken, deviceInfo }),
 			});
 
 			if (!response.ok) {
@@ -362,7 +366,7 @@ export const authService = {
 					userData = {
 						id: payload.sub,
 						email: payload.email || '',
-						role: payload.role || 'user'
+						role: payload.role || 'user',
 					};
 				}
 			} catch (error) {
@@ -390,9 +394,9 @@ export const authService = {
 			const response = await fetch(`${MIDDLEWARE_URL}/auth/validate`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ appToken, appId: APP_ID })
+				body: JSON.stringify({ appToken, appId: APP_ID }),
 			});
 
 			return response.ok;
@@ -410,10 +414,10 @@ export const authService = {
 			await fetch(`${MIDDLEWARE_URL}/auth/logout`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ refreshToken })
-			}).catch(err => console.error('Error logging out on server:', err));
+				body: JSON.stringify({ refreshToken }),
+			}).catch((err) => console.error('Error logging out on server:', err));
 		} catch (error) {
 			console.error('Error signing out:', error);
 		}
@@ -427,9 +431,9 @@ export const authService = {
 			const response = await fetch(`${MIDDLEWARE_URL}/auth/forgot-password`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ email })
+				body: JSON.stringify({ email }),
 			});
 
 			if (!response.ok) {
@@ -438,13 +442,14 @@ export const authService = {
 				if (errorData.message?.includes('rate limit')) {
 					return {
 						success: false,
-						error: 'Too many password reset attempts. Please wait a few minutes before trying again.'
+						error:
+							'Too many password reset attempts. Please wait a few minutes before trying again.',
 					};
 				}
 
 				return {
 					success: false,
-					error: errorData.message || 'Password reset failed'
+					error: errorData.message || 'Password reset failed',
 				};
 			}
 
@@ -453,7 +458,7 @@ export const authService = {
 			console.error('Error sending password reset email:', error);
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error during password reset'
+				error: error instanceof Error ? error.message : 'Unknown error during password reset',
 			};
 		}
 	},
@@ -469,7 +474,7 @@ export const authService = {
 			return {
 				id: payload.sub,
 				email: payload.email || '',
-				role: payload.role || 'user'
+				role: payload.role || 'user',
 			};
 		} catch (error) {
 			console.error('Error getting user from token:', error);
@@ -482,5 +487,5 @@ export const authService = {
 	 */
 	isTokenValidLocally(token: string): boolean {
 		return !isTokenExpired(token);
-	}
+	},
 };

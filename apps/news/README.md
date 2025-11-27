@@ -18,15 +18,15 @@ news/
 
 ## Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| **Database** | PostgreSQL 16 (Docker) |
-| **ORM** | Drizzle |
-| **Backend** | NestJS + Fastify |
-| **Auth** | Custom JWT Auth |
-| **Mobile** | React Native / Expo |
-| **State** | Zustand |
-| **Styling** | NativeWind (Tailwind) |
+| Component    | Technology                  |
+| ------------ | --------------------------- |
+| **Database** | PostgreSQL 16 (Docker)      |
+| **ORM**      | Drizzle                     |
+| **Backend**  | NestJS + Fastify            |
+| **Auth**     | Custom JWT Auth             |
+| **Mobile**   | React Native / Expo         |
+| **State**    | Zustand                     |
+| **Styling**  | NativeWind (Tailwind)       |
 | **Monorepo** | pnpm workspaces + Turborepo |
 
 ## Getting Started
@@ -101,11 +101,13 @@ EXPO_PUBLIC_API_URL=http://localhost:3000
 ## Features
 
 ### News Feed (AI-Generated)
+
 - **Feed**: Quick news updates with infinite scroll
 - **Summaries**: 4 daily summaries (morning, noon, evening, night)
 - **In-Depth**: Detailed analysis articles
 
 ### Personal Library (Read Later)
+
 - Save articles from any URL
 - Browser extension for one-click saving
 - Content extraction with Readability
@@ -114,12 +116,14 @@ EXPO_PUBLIC_API_URL=http://localhost:3000
 ## API Endpoints
 
 ### Auth
+
 - `POST /auth/signup` - Create account
 - `POST /auth/signin` - Sign in
 - `POST /auth/signout` - Sign out
 - `GET /auth/session` - Get current session
 
 ### Articles
+
 - `GET /articles` - Get AI articles (public)
 - `GET /articles/:id` - Get single article
 - `GET /articles/saved/list` - Get saved articles (auth required)
@@ -127,13 +131,16 @@ EXPO_PUBLIC_API_URL=http://localhost:3000
 - `DELETE /articles/:id` - Delete article
 
 ### Content Extraction
+
 - `POST /extract/save` - Save article from URL (auth required)
 - `POST /extract/preview` - Preview URL extraction (public)
 
 ### Categories
+
 - `GET /categories` - Get all categories
 
 ### Users
+
 - `GET /users/me` - Get current user
 - `PATCH /users/me` - Update profile
 - `PATCH /users/me/onboarding` - Complete onboarding
@@ -143,6 +150,7 @@ EXPO_PUBLIC_API_URL=http://localhost:3000
 The browser extension is located in `packages/browser-extension/`.
 
 ### Installation (Development)
+
 1. Go to `chrome://extensions/`
 2. Enable "Developer mode"
 3. Click "Load unpacked"
@@ -151,6 +159,7 @@ The browser extension is located in `packages/browser-extension/`.
 ## Database Schema
 
 ### Tables
+
 - `users` - User accounts and preferences
 - `articles` - All articles (AI-generated and user-saved)
 - `categories` - Article categories

@@ -1,10 +1,10 @@
 ---
-title: "Speaker Recognition"
-description: "Automatic identification of up to 12 different speakers in your meeting."
-icon: "🎙️"
-color: "purple"
-category: "recording"
-lang: "en"
+title: 'Speaker Recognition'
+description: 'Automatic identification of up to 12 different speakers in your meeting.'
+icon: '🎙️'
+color: 'purple'
+category: 'recording'
+lang: 'en'
 order: 2
 ---
 

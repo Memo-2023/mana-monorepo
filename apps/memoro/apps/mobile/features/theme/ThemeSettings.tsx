@@ -8,10 +8,10 @@ import { useTranslation } from 'react-i18next';
 
 // Vorschaufarben für jedes Theme
 const THEME_PREVIEW_COLORS: Record<ThemeVariant, { primary: string; secondary: string }> = {
-  lume: { primary: '#f8d62b', secondary: '#383838' },
-  nature: { primary: '#81C784', secondary: '#2E7D32' },
-  stone: { primary: '#90A4AE', secondary: '#455A64' },
-  ocean: { primary: '#4FC3F7', secondary: '#0277BD' },
+	lume: { primary: '#f8d62b', secondary: '#383838' },
+	nature: { primary: '#81C784', secondary: '#2E7D32' },
+	stone: { primary: '#90A4AE', secondary: '#455A64' },
+	ocean: { primary: '#4FC3F7', secondary: '#0277BD' },
 };
 
 /**
@@ -19,90 +19,103 @@ const THEME_PREVIEW_COLORS: Record<ThemeVariant, { primary: string; secondary: s
  * Ermöglicht die Auswahl von Farbmodus und Theme-Variante
  */
 export const ThemeSettings = () => {
-  const { t } = useTranslation();
-  const { 
-    isDark,
-    colorMode,
-    setColorMode,
-    themeVariant,
-    setThemeVariant,
-    tw,
-    themeVersion
-  } = useTheme();
+	const { t } = useTranslation();
+	const { isDark, colorMode, setColorMode, themeVariant, setThemeVariant, tw, themeVersion } =
+		useTheme();
 
-  // Farbmodus-Optionen mit Übersetzungen
-  const COLOR_MODES: { label: string; value: ColorMode; icon: string }[] = [
-    { label: t('settings.system', 'System'), value: 'system', icon: 'sync' },
-    { label: t('settings.light', 'Hell'), value: 'light', icon: 'sunny' },
-    { label: t('settings.dark', 'Dunkel'), value: 'dark', icon: 'moon' },
-  ];
+	// Farbmodus-Optionen mit Übersetzungen
+	const COLOR_MODES: { label: string; value: ColorMode; icon: string }[] = [
+		{ label: t('settings.system', 'System'), value: 'system', icon: 'sync' },
+		{ label: t('settings.light', 'Hell'), value: 'light', icon: 'sunny' },
+		{ label: t('settings.dark', 'Dunkel'), value: 'dark', icon: 'moon' },
+	];
 
-  // Verwende die gleichen Farben wie MemoPreview und SettingsToggle
-  const themeColors = (colors as any).theme?.extend?.colors;
-  const cardBackgroundColor = isDark
-    ? themeColors?.dark?.[themeVariant]?.contentBackground || '#1E1E1E'
-    : themeColors?.[themeVariant]?.contentBackground || '#FFFFFF';
-  const borderColor = isDark
-    ? themeColors?.dark?.[themeVariant]?.border || '#424242'
-    : themeColors?.[themeVariant]?.border || '#e6e6e6';
+	// Verwende die gleichen Farben wie MemoPreview und SettingsToggle
+	const themeColors = (colors as any).theme?.extend?.colors;
+	const cardBackgroundColor = isDark
+		? themeColors?.dark?.[themeVariant]?.contentBackground || '#1E1E1E'
+		: themeColors?.[themeVariant]?.contentBackground || '#FFFFFF';
+	const borderColor = isDark
+		? themeColors?.dark?.[themeVariant]?.border || '#424242'
+		: themeColors?.[themeVariant]?.border || '#e6e6e6';
 
-  // Primary-Farbe für aktive Tabs
-  const primaryColor = isDark
-    ? themeColors?.dark?.[themeVariant]?.primary || '#f8d62b'
-    : themeColors?.[themeVariant]?.primary || '#f8d62b';
+	// Primary-Farbe für aktive Tabs
+	const primaryColor = isDark
+		? themeColors?.dark?.[themeVariant]?.primary || '#f8d62b'
+		: themeColors?.[themeVariant]?.primary || '#f8d62b';
 
-  return (
-    <View className="w-full space-y-2">
-      {/* Farbmodus-Einstellungen */}
-      <View style={{ backgroundColor: cardBackgroundColor, borderColor, borderWidth: 1, padding: 16, borderRadius: 16 }}>
-        <Text variant="h2" style={{ marginBottom: 16 }}>
-          {t('settings.appearance', 'Erscheinungsbild')}
-        </Text>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
-          {COLOR_MODES.map(mode => {
-            const isSelected = mode.value === colorMode;
-            return (
-              <TouchableOpacity
-                key={mode.value}
-                style={{
-                  flex: 1,
-                  paddingVertical: 16,
-                  paddingHorizontal: 8,
-                  borderRadius: 12,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
-                  borderWidth: isSelected ? 2 : 1,
-                  borderColor: isSelected
-                    ? primaryColor
-                    : isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.06)',
-                }}
-                onPress={() => setColorMode(mode.value)}
-              >
-                <Ionicons
-                  name={mode.icon as any}
-                  size={24}
-                  color={isSelected ? primaryColor : (isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)')}
-                />
-                <Text
-                  variant='body'
-                  style={{
-                    color: isSelected ? primaryColor : (isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'),
-                    fontWeight: isSelected ? '600' : '500',
-                    marginTop: 8,
-                    fontSize: 12,
-                  }}
-                >
-                  {mode.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
+	return (
+		<View className="w-full space-y-2">
+			{/* Farbmodus-Einstellungen */}
+			<View
+				style={{
+					backgroundColor: cardBackgroundColor,
+					borderColor,
+					borderWidth: 1,
+					padding: 16,
+					borderRadius: 16,
+				}}
+			>
+				<Text variant="h2" style={{ marginBottom: 16 }}>
+					{t('settings.appearance', 'Erscheinungsbild')}
+				</Text>
+				<View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+					{COLOR_MODES.map((mode) => {
+						const isSelected = mode.value === colorMode;
+						return (
+							<TouchableOpacity
+								key={mode.value}
+								style={{
+									flex: 1,
+									paddingVertical: 16,
+									paddingHorizontal: 8,
+									borderRadius: 12,
+									alignItems: 'center',
+									justifyContent: 'center',
+									backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+									borderWidth: isSelected ? 2 : 1,
+									borderColor: isSelected
+										? primaryColor
+										: isDark
+											? 'rgba(255, 255, 255, 0.1)'
+											: 'rgba(0, 0, 0, 0.06)',
+								}}
+								onPress={() => setColorMode(mode.value)}
+							>
+								<Ionicons
+									name={mode.icon as any}
+									size={24}
+									color={
+										isSelected
+											? primaryColor
+											: isDark
+												? 'rgba(255, 255, 255, 0.6)'
+												: 'rgba(0, 0, 0, 0.6)'
+									}
+								/>
+								<Text
+									variant="body"
+									style={{
+										color: isSelected
+											? primaryColor
+											: isDark
+												? 'rgba(255, 255, 255, 0.6)'
+												: 'rgba(0, 0, 0, 0.6)',
+										fontWeight: isSelected ? '600' : '500',
+										marginTop: 8,
+										fontSize: 12,
+									}}
+								>
+									{mode.label}
+								</Text>
+							</TouchableOpacity>
+						);
+					})}
+				</View>
+			</View>
 
-      {/* Theme-Varianten */}
-      {/* <View style={{ backgroundColor: cardBackgroundColor, borderColor, borderWidth: 1, marginTop: 16, padding: 16, borderRadius: 12 }}>
+			{/* Theme-Varianten */}
+			{/* <View style={{ backgroundColor: cardBackgroundColor, borderColor, borderWidth: 1, marginTop: 16, padding: 16, borderRadius: 12 }}>
         <Text variant="h2" style={{ marginBottom: 16 }}>
           {t('settings.theme', 'Theme')}
         </Text>
@@ -234,6 +247,6 @@ export const ThemeSettings = () => {
           </View>
         </View>
       </View> */}
-    </View>
-  );
+		</View>
+	);
 };

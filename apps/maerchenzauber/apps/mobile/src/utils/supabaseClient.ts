@@ -9,10 +9,9 @@ import { debug, info, warn, error } from './logger';
 
 // Supabase configuration from environment variables
 export const supabaseUrl =
-  process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://npgifbrwhftlbrbaglmi.supabase.co';
+	process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://npgifbrwhftlbrbaglmi.supabase.co';
 export const supabaseAnonKey =
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
-  'sb_publishable_HlAZpB4BxXaMcfOCNx6VJA_-64NTxu4';
+	process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_HlAZpB4BxXaMcfOCNx6VJA_-64NTxu4';
 
 // Store for the JWT token
 let jwtToken: string | null = null;
@@ -27,32 +26,32 @@ let tokenStateUnsubscribe: (() => void) | null = null;
  * Create the base Supabase client with anonymous credentials
  */
 const supabase = createClient(
-  supabaseUrl, 
-  supabaseAnonKey, // Publishable keys work the same as anon keys
-  {
-    auth: {
-      ...(Platform.OS !== 'web' ? { storage: AsyncStorage } : {}),
-      autoRefreshToken: false, // Handle token refresh manually
-      persistSession: false, // Handle session persistence manually
-      detectSessionInUrl: false,
-    },
-    global: {
-      headers: {
-        'x-application-name': 'memoro-app',
-        'User-Agent': `Memoro/${Constants.expoConfig?.version || '2.0.5'} (${Platform.OS}; ${Platform.Version})`,
-        'x-client-info': 'supabase-js/2.45.0',
-      },
-    },
-    realtime: {
-      headers: {
-        'x-application-name': 'memoro-app',
-        'User-Agent': `Memoro/${Constants.expoConfig?.version || '2.0.5'} (${Platform.OS}; ${Platform.Version})`,
-      },
-      params: {
-        apikey: supabaseAnonKey,
-      },
-    },
-  }
+	supabaseUrl,
+	supabaseAnonKey, // Publishable keys work the same as anon keys
+	{
+		auth: {
+			...(Platform.OS !== 'web' ? { storage: AsyncStorage } : {}),
+			autoRefreshToken: false, // Handle token refresh manually
+			persistSession: false, // Handle session persistence manually
+			detectSessionInUrl: false,
+		},
+		global: {
+			headers: {
+				'x-application-name': 'memoro-app',
+				'User-Agent': `Memoro/${Constants.expoConfig?.version || '2.0.5'} (${Platform.OS}; ${Platform.Version})`,
+				'x-client-info': 'supabase-js/2.45.0',
+			},
+		},
+		realtime: {
+			headers: {
+				'x-application-name': 'memoro-app',
+				'User-Agent': `Memoro/${Constants.expoConfig?.version || '2.0.5'} (${Platform.OS}; ${Platform.Version})`,
+			},
+			params: {
+				apikey: supabaseAnonKey,
+			},
+		},
+	}
 );
 
 /**
@@ -61,84 +60,84 @@ const supabase = createClient(
  * @returns Supabase client with authentication
  */
 export const createAuthClient = (token: string) => {
-  return createClient(
-    supabaseUrl, 
-    supabaseAnonKey, // Publishable keys work the same as anon keys
-    {
-      auth: {
-        ...(Platform.OS !== 'web' ? { storage: AsyncStorage } : {}),
-        autoRefreshToken: false,
-        persistSession: false,
-        detectSessionInUrl: false,
-      },
-      global: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'x-application-name': 'memoro-app',
-          'User-Agent': `Memoro/${Constants.expoConfig?.version || '2.0.5'} (${Platform.OS}; ${Platform.Version})`,
-          'x-client-info': 'supabase-js/2.45.0',
-        },
-      },
-      realtime: {
-        headers: {
-          'x-application-name': 'memoro-app',
-          'User-Agent': `Memoro/${Constants.expoConfig?.version || '2.0.5'} (${Platform.OS}; ${Platform.Version})`,
-        },
-        params: {
-          apikey: supabaseAnonKey,
-        },
-      },
-    }
-  );
+	return createClient(
+		supabaseUrl,
+		supabaseAnonKey, // Publishable keys work the same as anon keys
+		{
+			auth: {
+				...(Platform.OS !== 'web' ? { storage: AsyncStorage } : {}),
+				autoRefreshToken: false,
+				persistSession: false,
+				detectSessionInUrl: false,
+			},
+			global: {
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'x-application-name': 'memoro-app',
+					'User-Agent': `Memoro/${Constants.expoConfig?.version || '2.0.5'} (${Platform.OS}; ${Platform.Version})`,
+					'x-client-info': 'supabase-js/2.45.0',
+				},
+			},
+			realtime: {
+				headers: {
+					'x-application-name': 'memoro-app',
+					'User-Agent': `Memoro/${Constants.expoConfig?.version || '2.0.5'} (${Platform.OS}; ${Platform.Version})`,
+				},
+				params: {
+					apikey: supabaseAnonKey,
+				},
+			},
+		}
+	);
 };
 
 /**
  * Update the stored JWT token and create a new authenticated client
  */
 export const updateStoredToken = async (): Promise<void> => {
-  try {
-    // Get the JWT token from the token manager
-    const token = await tokenManager.getValidToken();
-    jwtToken = token;
+	try {
+		// Get the JWT token from the token manager
+		const token = await tokenManager.getValidToken();
+		jwtToken = token;
 
-    if (token) {
-      debug('JWT token updated:', `${token.substring(0, 20)}...`);
+		if (token) {
+			debug('JWT token updated:', `${token.substring(0, 20)}...`);
 
-      // Update Supabase headers with the new token
-      setupSupabaseHeaders(token);
+			// Update Supabase headers with the new token
+			setupSupabaseHeaders(token);
 
-      // Update realtime auth with the token
-      supabase.realtime.setAuth(token);
+			// Update realtime auth with the token
+			supabase.realtime.setAuth(token);
 
-      // Debug: Try to decode the token to verify it has a sub claim
-      try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        
-        let payload;
-        if (typeof window !== 'undefined' && window.atob) {
-          payload = JSON.parse(window.atob(base64));
-        } else {
-          const base64js = require('base64-js');
-          const uint8Array = base64js.toByteArray(base64);
-          const decoded = String.fromCharCode.apply(null, uint8Array);
-          payload = JSON.parse(decoded);
-        }
-        
-        debug('JWT payload:', {
-          sub: payload.sub,
-          role: payload.role,
-          issuer: payload.iss,
-        });
-      } catch (error) {
-        debug('Error decoding JWT token:', error);
-      }
-    } else {
-      debug('No JWT token available');
-    }
-  } catch (error) {
-    debug('Error updating stored token:', error);
-  }
+			// Debug: Try to decode the token to verify it has a sub claim
+			try {
+				const base64Url = token.split('.')[1];
+				const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+
+				let payload;
+				if (typeof window !== 'undefined' && window.atob) {
+					payload = JSON.parse(window.atob(base64));
+				} else {
+					const base64js = require('base64-js');
+					const uint8Array = base64js.toByteArray(base64);
+					const decoded = String.fromCharCode.apply(null, uint8Array);
+					payload = JSON.parse(decoded);
+				}
+
+				debug('JWT payload:', {
+					sub: payload.sub,
+					role: payload.role,
+					issuer: payload.iss,
+				});
+			} catch (error) {
+				debug('Error decoding JWT token:', error);
+			}
+		} else {
+			debug('No JWT token available');
+		}
+	} catch (error) {
+		debug('Error updating stored token:', error);
+	}
 };
 
 /**
@@ -146,10 +145,10 @@ export const updateStoredToken = async (): Promise<void> => {
  * Note: Token refresh is now handled by the global fetch interceptor
  */
 const setupSupabaseHeaders = (token: string) => {
-  // Set auth token for Supabase realtime
-  if (token) {
-    supabase.realtime.setAuth(token);
-  }
+	// Set auth token for Supabase realtime
+	if (token) {
+		supabase.realtime.setAuth(token);
+	}
 };
 
 // Note: Token will be initialized when explicitly needed to avoid infinite refresh loops
@@ -158,23 +157,23 @@ const setupSupabaseHeaders = (token: string) => {
  * Initialize automatic Supabase auth updates when token state changes
  */
 export const initializeSupabaseAuth = (): void => {
-  // Clean up existing listener
-  if (tokenStateUnsubscribe) {
-    tokenStateUnsubscribe();
-  }
+	// Clean up existing listener
+	if (tokenStateUnsubscribe) {
+		tokenStateUnsubscribe();
+	}
 
-  // Subscribe to token state changes
-  tokenStateUnsubscribe = tokenManager.subscribe((state, token) => {
-    debug('Supabase: Token state changed to', state);
-    
-    if (state === TokenState.VALID && token) {
-      // Update Supabase with new token
-      updateStoredTokenFromData(token);
-    } else if (state === TokenState.FAILED || state === TokenState.EXPIRED) {
-      // Clear Supabase auth
-      clearSupabaseAuth();
-    }
-  });
+	// Subscribe to token state changes
+	tokenStateUnsubscribe = tokenManager.subscribe((state, token) => {
+		debug('Supabase: Token state changed to', state);
+
+		if (state === TokenState.VALID && token) {
+			// Update Supabase with new token
+			updateStoredTokenFromData(token);
+		} else if (state === TokenState.FAILED || state === TokenState.EXPIRED) {
+			// Clear Supabase auth
+			clearSupabaseAuth();
+		}
+	});
 };
 
 /**
@@ -182,59 +181,59 @@ export const initializeSupabaseAuth = (): void => {
  * Only updates if we actually have a valid token to avoid triggering refresh loops
  */
 export const updateSupabaseAuth = async (): Promise<void> => {
-  try {
-    // Get current token state from TokenManager
-    const currentState = tokenManager.getState();
+	try {
+		// Get current token state from TokenManager
+		const currentState = tokenManager.getState();
 
-    if (currentState === TokenState.VALID) {
-      // Try to get a valid token (which will handle refresh if needed)
-      const token = await tokenManager.getValidToken();
-      if (token) {
-        updateStoredTokenFromData(token);
-      } else {
-        debug('Skipping Supabase auth update - no valid token available');
-      }
-    } else {
-      debug('Skipping Supabase auth update - token state is not valid:', currentState);
-    }
-  } catch (error) {
-    debug('Error in updateSupabaseAuth:', error);
-    // Don't throw - this is a non-critical operation
-  }
+		if (currentState === TokenState.VALID) {
+			// Try to get a valid token (which will handle refresh if needed)
+			const token = await tokenManager.getValidToken();
+			if (token) {
+				updateStoredTokenFromData(token);
+			} else {
+				debug('Skipping Supabase auth update - no valid token available');
+			}
+		} else {
+			debug('Skipping Supabase auth update - token state is not valid:', currentState);
+		}
+	} catch (error) {
+		debug('Error in updateSupabaseAuth:', error);
+		// Don't throw - this is a non-critical operation
+	}
 };
 
 /**
  * Update Supabase with a specific token
  */
 const updateStoredTokenFromData = (token: string): void => {
-  try {
-    jwtToken = token;
-    debug('Supabase: JWT token updated from TokenManager');
+	try {
+		jwtToken = token;
+		debug('Supabase: JWT token updated from TokenManager');
 
-    // Update Supabase headers with the new token
-    setupSupabaseHeaders(token);
+		// Update Supabase headers with the new token
+		setupSupabaseHeaders(token);
 
-    // Update realtime auth with the token
-    supabase.realtime.setAuth(token);
-  } catch (error) {
-    debug('Error updating Supabase with token:', error);
-  }
+		// Update realtime auth with the token
+		supabase.realtime.setAuth(token);
+	} catch (error) {
+		debug('Error updating Supabase with token:', error);
+	}
 };
 
 /**
  * Clear Supabase authentication
  */
 const clearSupabaseAuth = (): void => {
-  try {
-    jwtToken = null;
-    authClient = null;
-    debug('Supabase: Auth cleared');
-    
-    // Note: We don't clear supabase.realtime.setAuth(null) as this might cause issues
-    // The realtime connection will naturally fail with an invalid token
-  } catch (error) {
-    debug('Error clearing Supabase auth:', error);
-  }
+	try {
+		jwtToken = null;
+		authClient = null;
+		debug('Supabase: Auth cleared');
+
+		// Note: We don't clear supabase.realtime.setAuth(null) as this might cause issues
+		// The realtime connection will naturally fail with an invalid token
+	} catch (error) {
+		debug('Error clearing Supabase auth:', error);
+	}
 };
 
 /**
@@ -243,13 +242,13 @@ const clearSupabaseAuth = (): void => {
  * @returns true if token was set, false otherwise
  */
 export const setSupabaseToken = async (token: string | null): Promise<boolean> => {
-  if (token) {
-    jwtToken = token;
-    supabase.realtime.setAuth(token);
-    setupSupabaseHeaders(token);
-    return true;
-  }
-  return false;
+	if (token) {
+		jwtToken = token;
+		supabase.realtime.setAuth(token);
+		setupSupabaseHeaders(token);
+		return true;
+	}
+	return false;
 };
 
 /**
@@ -258,19 +257,19 @@ export const setSupabaseToken = async (token: string | null): Promise<boolean> =
  * Uses a singleton pattern to avoid creating multiple client instances
  */
 export const getAuthenticatedClient = async () => {
-  const token = await tokenManager.getValidToken();
+	const token = await tokenManager.getValidToken();
 
-  if (!token) {
-    return supabase; // Return the base client if no token is available
-  }
+	if (!token) {
+		return supabase; // Return the base client if no token is available
+	}
 
-  // Check if we need to create a new client (token changed or no client exists)
-  if (!authClient || token !== jwtToken) {
-    authClient = createAuthClient(token);
-    jwtToken = token;
-  }
+	// Check if we need to create a new client (token changed or no client exists)
+	if (!authClient || token !== jwtToken) {
+		authClient = createAuthClient(token);
+		jwtToken = token;
+	}
 
-  return authClient;
+	return authClient;
 };
 
 export default supabase;

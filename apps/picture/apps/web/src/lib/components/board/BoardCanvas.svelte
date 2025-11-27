@@ -19,7 +19,7 @@
 		undo,
 		redo,
 		canUndo,
-		canRedo
+		canRedo,
 	} from '$lib/stores/canvas';
 	import { updateBoardItem, updateBoardItems, isImageItem, isTextItem } from '$lib/api/boardItems';
 	import { editingTextId, startEditingText, stopEditingText } from '$lib/stores/canvas';
@@ -74,7 +74,7 @@
 			container: container,
 			width: width,
 			height: height,
-			draggable: false
+			draggable: false,
 		});
 
 		// Background layer for grid
@@ -95,9 +95,14 @@
 			nodes: [],
 			// All 8 anchors for maximum control
 			enabledAnchors: [
-				'top-left', 'top-center', 'top-right',
-				'middle-left', 'middle-right',
-				'bottom-left', 'bottom-center', 'bottom-right'
+				'top-left',
+				'top-center',
+				'top-right',
+				'middle-left',
+				'middle-right',
+				'bottom-left',
+				'bottom-center',
+				'bottom-right',
 			],
 			rotateEnabled: true,
 			rotateAnchorOffset: 60, // Distance of rotation handle from image
@@ -134,7 +139,7 @@
 					return oldBox;
 				}
 				return newBox;
-			}
+			},
 		});
 		layer.add(transformer);
 
@@ -174,7 +179,7 @@
 				points: [x, 0, x, height],
 				stroke: '#e5e7eb',
 				strokeWidth: 1,
-				listening: false
+				listening: false,
 			});
 			gridLayer.add(line);
 		}
@@ -185,7 +190,7 @@
 				points: [0, y, width, y],
 				stroke: '#e5e7eb',
 				strokeWidth: 1,
-				listening: false
+				listening: false,
 			});
 			gridLayer.add(line);
 		}
@@ -199,13 +204,13 @@
 		console.log('[Canvas] Rendering items:', $canvasItems.length);
 
 		// Remove existing nodes, keep transformer
-		imageNodes.forEach(node => node.destroy());
-		textNodes.forEach(node => node.destroy());
+		imageNodes.forEach((node) => node.destroy());
+		textNodes.forEach((node) => node.destroy());
 		imageNodes.clear();
 		textNodes.clear();
 
 		// Render each item based on type
-		$canvasItems.forEach(item => {
+		$canvasItems.forEach((item) => {
 			if (isImageItem(item)) {
 				renderImageItem(item);
 			} else if (isTextItem(item)) {
@@ -230,7 +235,7 @@
 				scaleY: item.scale_y,
 				rotation: item.rotation,
 				draggable: true,
-				opacity: item.opacity
+				opacity: item.opacity,
 			});
 
 			// Click to select
@@ -282,7 +287,7 @@
 			scaleY: item.scale_y,
 			opacity: item.opacity,
 			draggable: true,
-			lineHeight: item.properties?.lineHeight || 1.2
+			lineHeight: item.properties?.lineHeight || 1.2,
 		});
 
 		// Click to select
@@ -323,7 +328,7 @@
 		// Collect all selected nodes (images + texts)
 		const selectedNodes: (Konva.Image | Konva.Text)[] = [];
 
-		$selectedItemIds.forEach(id => {
+		$selectedItemIds.forEach((id) => {
 			const imageNode = imageNodes.get(id);
 			const textNode = textNodes.get(id);
 
@@ -360,7 +365,7 @@
 		// Update store
 		updateCanvasItem(itemId, {
 			position_x: x,
-			position_y: y
+			position_y: y,
 		});
 
 		// Save to database
@@ -376,14 +381,14 @@
 		updateCanvasItem(itemId, {
 			scale_x: scaleX,
 			scale_y: scaleY,
-			rotation: rotation
+			rotation: rotation,
 		});
 
 		// Save to database
 		await saveBoardItem(itemId, {
 			scale_x: scaleX,
 			scale_y: scaleY,
-			rotation: rotation
+			rotation: rotation,
 		});
 	}
 
@@ -402,7 +407,7 @@
 			width: Math.round(width),
 			scale_x: 1,
 			scale_y: scaleY,
-			rotation: rotation
+			rotation: rotation,
 		});
 
 		// Save to database
@@ -410,7 +415,7 @@
 			width: Math.round(width),
 			scale_x: 1,
 			scale_y: scaleY,
-			rotation: rotation
+			rotation: rotation,
 		});
 	}
 
@@ -516,12 +521,12 @@
 		// Zoom to pointer position
 		const mousePointTo = {
 			x: (pointer.x - stage.x()) / oldScale,
-			y: (pointer.y - stage.y()) / oldScale
+			y: (pointer.y - stage.y()) / oldScale,
 		};
 
 		const newPos = {
 			x: pointer.x - mousePointTo.x * clampedScale,
-			y: pointer.y - mousePointTo.y * clampedScale
+			y: pointer.y - mousePointTo.y * clampedScale,
 		};
 
 		stage.scale({ x: clampedScale, y: clampedScale });
@@ -562,7 +567,7 @@
 					if (e.metaKey || e.ctrlKey) {
 						e.preventDefault();
 						// Select all
-						selectedItemIds.set($canvasItems.map(item => item.id));
+						selectedItemIds.set($canvasItems.map((item) => item.id));
 						updateTransformer();
 					}
 					break;

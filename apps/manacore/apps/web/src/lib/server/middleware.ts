@@ -18,9 +18,9 @@ export async function callMiddleware(
 		method: options.method || 'GET',
 		headers: {
 			'Content-Type': 'application/json',
-			...options.headers
+			...options.headers,
 		},
-		body: options.body ? JSON.stringify(options.body) : undefined
+		body: options.body ? JSON.stringify(options.body) : undefined,
 	});
 
 	if (!response.ok) {

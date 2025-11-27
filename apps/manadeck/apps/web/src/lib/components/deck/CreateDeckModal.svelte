@@ -29,7 +29,7 @@
 			title: title.trim(),
 			description: description.trim() || undefined,
 			is_public: isPublic,
-			tags: tagArray.length > 0 ? tagArray : undefined
+			tags: tagArray.length > 0 ? tagArray : undefined,
 		});
 
 		submitting = false;
@@ -49,13 +49,14 @@
 </script>
 
 <Modal bind:open title="Create New Deck" {onClose}>
-	<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="space-y-4">
-		<Input
-			label="Deck Title"
-			bind:value={title}
-			placeholder="e.g., Spanish Vocabulary"
-			required
-		/>
+	<form
+		onsubmit={(e) => {
+			e.preventDefault();
+			handleSubmit();
+		}}
+		class="space-y-4"
+	>
+		<Input label="Deck Title" bind:value={title} placeholder="e.g., Spanish Vocabulary" required />
 
 		<div class="space-y-2">
 			<label class="text-sm font-medium">Description</label>
@@ -91,12 +92,17 @@
 		{/if}
 
 		<div class="flex justify-end space-x-3">
-			<Button type="button" variant="ghost" onclick={() => { open = false; onClose?.(); }}>
+			<Button
+				type="button"
+				variant="ghost"
+				onclick={() => {
+					open = false;
+					onClose?.();
+				}}
+			>
 				Cancel
 			</Button>
-			<Button type="submit" loading={submitting}>
-				Create Deck
-			</Button>
+			<Button type="submit" loading={submitting}>Create Deck</Button>
 		</div>
 	</form>
 </Modal>

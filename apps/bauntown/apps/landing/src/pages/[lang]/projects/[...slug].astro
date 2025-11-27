@@ -6,43 +6,42 @@ import { languages } from '../../../i18n/ui';
 export const prerender = true;
 
 export async function getStaticPaths() {
-  const projectsEntries = await Promise.all(
-    Object.keys(languages)
-      .map(async (lang) => {
-        const langProjects = await getCollection('projects', ({ id }) => {
-          return id.startsWith(`${lang}/`);
-        });
-        
-        return langProjects.map(project => {
-          // Get just the filename part from the slug
-          const slugParts = project.slug.split('/');
-          const fileName = slugParts[slugParts.length - 1];
-          
-          return {
-            params: { 
-              lang, 
-              slug: fileName 
-            },
-            props: { project },
-          };
-        });
-      })
-  );
-  
-  // Flatten array of arrays
-  return projectsEntries.flat();
+	const projectsEntries = await Promise.all(
+		Object.keys(languages).map(async (lang) => {
+			const langProjects = await getCollection('projects', ({ id }) => {
+				return id.startsWith(`${lang}/`);
+			});
+
+			return langProjects.map((project) => {
+				// Get just the filename part from the slug
+				const slugParts = project.slug.split('/');
+				const fileName = slugParts[slugParts.length - 1];
+
+				return {
+					params: {
+						lang,
+						slug: fileName,
+					},
+					props: { project },
+				};
+			});
+		})
+	);
+
+	// Flatten array of arrays
+	return projectsEntries.flat();
 }
 
 const { project } = Astro.props;
 
 // Sicherheitsabfrage für Project
 if (!project) {
-  return Astro.redirect('/404');
+	return Astro.redirect('/404');
 }
 
 const { Content } = await project.render();
 ---
 
 <ProjectLayout project={project}>
-  <Content />
+	<Content />
 </ProjectLayout>

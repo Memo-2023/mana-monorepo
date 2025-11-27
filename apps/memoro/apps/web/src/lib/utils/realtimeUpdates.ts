@@ -32,7 +32,7 @@ export function subscribeMemoUpdates(
 				event: '*',
 				schema: 'public',
 				table: 'memos',
-				filter: `id=eq.${memoId}`
+				filter: `id=eq.${memoId}`,
 			},
 			(payload: RealtimePostgresChangesPayload<Memo>) => {
 				handleMemoChange(payload, callback);
@@ -46,10 +46,7 @@ export function subscribeMemoUpdates(
 /**
  * Subscribe to real-time updates for all user memos
  */
-export function subscribeUserMemos(
-	userId: string,
-	callback: MemoChangeCallback
-): RealtimeChannel {
+export function subscribeUserMemos(userId: string, callback: MemoChangeCallback): RealtimeChannel {
 	const channel = supabase
 		.channel(`user-memos:${userId}`)
 		.on(
@@ -58,7 +55,7 @@ export function subscribeUserMemos(
 				event: '*',
 				schema: 'public',
 				table: 'memos',
-				filter: `user_id=eq.${userId}`
+				filter: `user_id=eq.${userId}`,
 			},
 			(payload: RealtimePostgresChangesPayload<Memo>) => {
 				handleMemoChange(payload, callback);
@@ -84,7 +81,7 @@ export function subscribeSpaceMemos(
 				event: '*',
 				schema: 'public',
 				table: 'space_memos',
-				filter: `space_id=eq.${spaceId}`
+				filter: `space_id=eq.${spaceId}`,
 			},
 			async (payload) => {
 				// When a memo is added/removed from a space, fetch the full memo
@@ -95,14 +92,14 @@ export function subscribeSpaceMemos(
 					if (memo) {
 						callback({
 							type: payload.eventType,
-							memo: memo as Memo
+							memo: memo as Memo,
 						});
 					}
 				} else if (payload.eventType === 'DELETE') {
 					const memoId = (payload.old as any).memo_id;
 					callback({
 						type: 'DELETE',
-						memo: { id: memoId } as Memo
+						memo: { id: memoId } as Memo,
 					});
 				}
 			}
@@ -129,7 +126,7 @@ function handleMemoChange(
 	const event: MemoChangeEvent = {
 		type: payload.eventType as MemoChangeType,
 		memo: payload.new as Memo,
-		old: payload.old as Memo | undefined
+		old: payload.old as Memo | undefined,
 	};
 
 	callback(event);
@@ -139,10 +136,7 @@ function handleMemoChange(
  * Svelte 5 effect for real-time memo updates
  * Usage: $effect(() => { const cleanup = useMemoRealtime(memoId, callback); return cleanup; })
  */
-export function useMemoRealtime(
-	memoId: string | null,
-	callback: MemoChangeCallback
-): () => void {
+export function useMemoRealtime(memoId: string | null, callback: MemoChangeCallback): () => void {
 	if (!memoId) {
 		return () => {};
 	}

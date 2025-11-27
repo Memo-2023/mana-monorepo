@@ -13,26 +13,26 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const teamMembers = await locals.pb.collection('shared_access').getList<SharedAccess>(1, 50, {
 		filter: `owner="${locals.user.id}" && invitation_status="accepted"`,
 		expand: 'user',
-		sort: '-created'
+		sort: '-created',
 	});
 
 	// Get pending invitations for existing users
 	const pendingInvites = await locals.pb.collection('shared_access').getList<SharedAccess>(1, 50, {
 		filter: `owner="${locals.user.id}" && invitation_status="pending"`,
 		expand: 'user',
-		sort: '-created'
+		sort: '-created',
 	});
 
 	// Get pending invitations for new users
 	const pendingNewUserInvites = await locals.pb.collection('pending_invitations').getList(1, 50, {
 		filter: `owner="${locals.user.id}" && accepted_at = null && expires_at > "${new Date().toISOString()}"`,
-		sort: '-created'
+		sort: '-created',
 	});
 
 	return {
 		teamMembers: teamMembers.items,
 		pendingInvites: pendingInvites.items,
-		pendingNewUserInvites: pendingNewUserInvites.items
+		pendingNewUserInvites: pendingNewUserInvites.items,
 	};
 };
 
@@ -54,12 +54,12 @@ export const actions = {
 		// Check team member limit based on subscription
 		const teamLimit = getTeamMemberLimit(locals.user.subscription_status);
 		const currentMembers = await locals.pb.collection('shared_access').getList(1, 1, {
-			filter: `owner="${locals.user.id}" && (invitation_status="accepted" || invitation_status="pending")`
+			filter: `owner="${locals.user.id}" && (invitation_status="accepted" || invitation_status="pending")`,
 		});
 
 		if (teamLimit !== Infinity && currentMembers.totalItems >= teamLimit) {
-			return fail(403, { 
-				error: `Team member limit reached. Your ${locals.user.subscription_status || 'free'} plan allows ${teamLimit} team member${teamLimit === 1 ? '' : 's'}.` 
+			return fail(403, {
+				error: `Team member limit reached. Your ${locals.user.subscription_status || 'free'} plan allows ${teamLimit} team member${teamLimit === 1 ? '' : 's'}.`,
 			});
 		}
 
@@ -67,7 +67,7 @@ export const actions = {
 			// Check if user exists
 			let invitedUser;
 			let isNewUser = false;
-			
+
 			try {
 				invitedUser = await locals.pb.collection('users').getFirstListItem(`email="${email}"`);
 			} catch {
@@ -78,7 +78,7 @@ export const actions = {
 			if (!isNewUser) {
 				// Check if already invited
 				const existing = await locals.pb.collection('shared_access').getList(1, 1, {
-					filter: `owner="${locals.user.id}" && user="${invitedUser.id}"`
+					filter: `owner="${locals.user.id}" && user="${invitedUser.id}"`,
 				});
 
 				if (existing.items.length > 0) {
@@ -92,7 +92,7 @@ export const actions = {
 					permissions: DEFAULT_PERMISSIONS,
 					invitation_token: generateInviteToken(),
 					invitation_status: 'pending',
-					invited_at: new Date().toISOString()
+					invited_at: new Date().toISOString(),
 				});
 
 				// Email will be sent automatically by PocketBase hook
@@ -108,20 +108,22 @@ export const actions = {
 					email,
 					owner: locals.user.id,
 					token,
-					expires_at: expiresAt.toISOString()
+					expires_at: expiresAt.toISOString(),
 				});
 
 				// Send invitation email
 				const inviterName = locals.user.name || locals.user.username || locals.user.email;
 				const emailSent = await sendTeamInvitationEmail(email, inviterName, token);
-				
+
 				if (!emailSent) {
 					console.error('[TEAM] Failed to send invitation email to:', email);
 				}
 
-				return { success: true, message: 'Invitation sent! The user will need to create an account to join your team.' };
+				return {
+					success: true,
+					message: 'Invitation sent! The user will need to create an account to join your team.',
+				};
 			}
-
 		} catch (err: any) {
 			console.error('Error inviting team member:', err);
 			return fail(500, { error: 'Failed to send invitation' });
@@ -151,7 +153,6 @@ export const actions = {
 			await locals.pb.collection('shared_access').delete(memberId);
 
 			return { success: true, message: 'Team member removed' };
-
 		} catch (err: any) {
 			console.error('Error removing team member:', err);
 			return fail(500, { error: 'Failed to remove team member' });
@@ -181,7 +182,6 @@ export const actions = {
 			await locals.pb.collection('shared_access').delete(inviteId);
 
 			return { success: true, message: 'Invitation cancelled' };
-
 		} catch (err: any) {
 			console.error('Error cancelling invitation:', err);
 			return fail(500, { error: 'Failed to cancel invitation' });
@@ -211,24 +211,23 @@ export const actions = {
 			const newToken = generateInviteToken();
 			await locals.pb.collection('shared_access').update(inviteId, {
 				invitation_token: newToken,
-				invited_at: new Date().toISOString()
+				invited_at: new Date().toISOString(),
 			});
 
 			// Resend invitation email
 			const inviterName = locals.user.name || locals.user.username || locals.user.email;
 			const emailSent = await sendTeamInvitationEmail(invite.user.email, inviterName, newToken);
-			
+
 			if (!emailSent) {
 				console.error('[TEAM] Failed to resend invitation email to:', invite.user.email);
 			}
 
 			return { success: true, message: 'Invitation resent' };
-
 		} catch (err: any) {
 			console.error('Error resending invitation:', err);
 			return fail(500, { error: 'Failed to resend invitation' });
 		}
-	}
+	},
 } satisfies Actions;
 
 function generateInviteToken(): string {

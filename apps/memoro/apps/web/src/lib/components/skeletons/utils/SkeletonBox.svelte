@@ -13,12 +13,7 @@
 		className?: string;
 	}
 
-	let {
-		width = '100%',
-		height = '20px',
-		borderRadius = '4px',
-		className = ''
-	}: Props = $props();
+	let { width = '100%', height = '20px', borderRadius = '4px', className = '' }: Props = $props();
 </script>
 
 <div

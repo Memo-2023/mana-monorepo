@@ -14,7 +14,7 @@ export {
 	createShortcuts,
 	shortcuts,
 	isMac,
-	getPlatformShortcut
+	getPlatformShortcut,
 } from '@manacore/shared-utils';
 
 import type { ShortcutAction, ShortcutGroup } from '@manacore/shared-utils';
@@ -44,7 +44,7 @@ export function getMemoPanelShortcuts(actions: {
 			key: 'f',
 			ctrl: true,
 			description: 'Search in memo',
-			action: actions.onSearch
+			action: actions.onSearch,
 		});
 	}
 
@@ -53,7 +53,7 @@ export function getMemoPanelShortcuts(actions: {
 			key: 'e',
 			ctrl: true,
 			description: 'Edit memo',
-			action: actions.onEdit
+			action: actions.onEdit,
 		});
 	}
 
@@ -62,7 +62,7 @@ export function getMemoPanelShortcuts(actions: {
 			key: 's',
 			ctrl: true,
 			description: 'Save changes',
-			action: actions.onSave
+			action: actions.onSave,
 		});
 	}
 
@@ -70,14 +70,14 @@ export function getMemoPanelShortcuts(actions: {
 		generalShortcuts.push({
 			key: 'Escape',
 			description: 'Cancel edit',
-			action: actions.onCancel
+			action: actions.onCancel,
 		});
 	}
 
 	if (generalShortcuts.length > 0) {
 		shortcuts.push({
 			name: 'General',
-			shortcuts: generalShortcuts
+			shortcuts: generalShortcuts,
 		});
 	}
 
@@ -89,7 +89,7 @@ export function getMemoPanelShortcuts(actions: {
 			key: 'p',
 			ctrl: true,
 			description: 'Toggle pin',
-			action: actions.onPin
+			action: actions.onPin,
 		});
 	}
 
@@ -99,7 +99,7 @@ export function getMemoPanelShortcuts(actions: {
 			ctrl: true,
 			shift: true,
 			description: 'Copy transcript',
-			action: actions.onCopy
+			action: actions.onCopy,
 		});
 	}
 
@@ -109,7 +109,7 @@ export function getMemoPanelShortcuts(actions: {
 			ctrl: true,
 			shift: true,
 			description: 'Share memo',
-			action: actions.onShare
+			action: actions.onShare,
 		});
 	}
 
@@ -118,14 +118,14 @@ export function getMemoPanelShortcuts(actions: {
 			key: 'Delete',
 			ctrl: true,
 			description: 'Delete memo',
-			action: actions.onDelete
+			action: actions.onDelete,
 		});
 	}
 
 	if (memoShortcuts.length > 0) {
 		shortcuts.push({
 			name: 'Memo Actions',
-			shortcuts: memoShortcuts
+			shortcuts: memoShortcuts,
 		});
 	}
 
@@ -137,7 +137,7 @@ export function getMemoPanelShortcuts(actions: {
 			key: 'm',
 			ctrl: true,
 			description: 'Create memory',
-			action: actions.onCreateMemory
+			action: actions.onCreateMemory,
 		});
 	}
 
@@ -146,14 +146,14 @@ export function getMemoPanelShortcuts(actions: {
 			key: 'q',
 			ctrl: true,
 			description: 'Ask question',
-			action: actions.onAskQuestion
+			action: actions.onAskQuestion,
 		});
 	}
 
 	if (aiShortcuts.length > 0) {
 		shortcuts.push({
 			name: 'AI Features',
-			shortcuts: aiShortcuts
+			shortcuts: aiShortcuts,
 		});
 	}
 

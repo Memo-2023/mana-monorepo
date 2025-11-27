@@ -22,7 +22,8 @@ export const getIsOffline = () => get(isOfflineStore);
 
 if (browser) {
 	// Check if app is already installed (standalone mode)
-	const standalone = window.matchMedia('(display-mode: standalone)').matches ||
+	const standalone =
+		window.matchMedia('(display-mode: standalone)').matches ||
 		(window.navigator as any).standalone ||
 		document.referrer.includes('android-app://');
 	isStandaloneStore.set(standalone);
@@ -56,7 +57,7 @@ if (browser) {
 // Install PWA function
 export async function installPWA(): Promise<boolean> {
 	const deferredPrompt = get(deferredPromptStore);
-	
+
 	if (!deferredPrompt) {
 		console.log('PWA: No install prompt available');
 		return false;
@@ -91,7 +92,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 
 	try {
 		const registration = await navigator.serviceWorker.register('/sw.js', {
-			scope: '/'
+			scope: '/',
 		});
 
 		console.log('PWA: Service Worker registered', registration);
@@ -139,7 +140,7 @@ export function initializePWA() {
 // Check if update is available
 export async function checkForUpdates(): Promise<boolean> {
 	const registration = get(serviceWorkerRegistrationStore);
-	
+
 	if (!registration) {
 		return false;
 	}
@@ -156,7 +157,7 @@ export async function checkForUpdates(): Promise<boolean> {
 // Skip waiting and activate new service worker
 export async function activateUpdate(): Promise<void> {
 	const registration = get(serviceWorkerRegistrationStore);
-	
+
 	if (!registration || !registration.waiting) {
 		return;
 	}

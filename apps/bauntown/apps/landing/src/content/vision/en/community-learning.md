@@ -1,23 +1,24 @@
 ---
-title: "Community-Based Learning: The Future of Developer Education"
-description: "Our vision for a collaborative, practice-oriented learning model based on community interaction and real-world projects."
+title: 'Community-Based Learning: The Future of Developer Education'
+description: 'Our vision for a collaborative, practice-oriented learning model based on community interaction and real-world projects.'
 pubDate: 2025-03-15
-category: "community"
-timeline: "2025-2028"
-status: "planned"
+category: 'community'
+timeline: '2025-2028'
+status: 'planned'
 featured: true
-image: "/images/vision/community-learning.png"
-contributors: ["David Wagner", "Sophie Klein", "Marcus Hoffman"]
-relatedLinks: [
-  {
-    title: "Community of Practice Framework",
-    url: "https://www.communityofpractice.ca/background/what-is-a-community-of-practice/"
-  },
-  {
-    title: "The Future of Learning Communities",
-    url: "https://www.mckinsey.com/industries/education/our-insights/how-to-create-learning-communities-in-times-of-crisis-five-design-principles"
-  }
-]
+image: '/images/vision/community-learning.png'
+contributors: ['David Wagner', 'Sophie Klein', 'Marcus Hoffman']
+relatedLinks:
+  [
+    {
+      title: 'Community of Practice Framework',
+      url: 'https://www.communityofpractice.ca/background/what-is-a-community-of-practice/',
+    },
+    {
+      title: 'The Future of Learning Communities',
+      url: 'https://www.mckinsey.com/industries/education/our-insights/how-to-create-learning-communities-in-times-of-crisis-five-design-principles',
+    },
+  ]
 ---
 
 # Community-Based Learning: The Future of Developer Education

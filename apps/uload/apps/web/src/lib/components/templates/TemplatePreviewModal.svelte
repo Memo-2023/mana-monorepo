@@ -125,7 +125,7 @@
 										id: template.id,
 										config: template.config,
 										metadata: template.metadata || {},
-										constraints: template.constraints || {}
+										constraints: template.constraints || {},
 									}}
 									editable={false}
 								/>
@@ -142,7 +142,7 @@
 						<div class="space-y-2 rounded-lg bg-theme-background p-4">
 							<div class="flex justify-between">
 								<span class="text-sm text-theme-text-muted">Mode:</span>
-								<span class="text-sm text-theme-text capitalize"
+								<span class="text-sm capitalize text-theme-text"
 									>{template.config?.mode || 'Unknown'}</span
 								>
 							</div>
@@ -155,7 +155,7 @@
 							{#if template.variant}
 								<div class="flex justify-between">
 									<span class="text-sm text-theme-text-muted">Variant:</span>
-									<span class="text-sm text-theme-text capitalize">{template.variant}</span>
+									<span class="text-sm capitalize text-theme-text">{template.variant}</span>
 								</div>
 							{/if}
 							{#if template.created}
@@ -200,7 +200,7 @@
 										{index + 1}
 									</span>
 									<div class="flex-1">
-										<p class="font-medium text-theme-text capitalize">{module.type} Module</p>
+										<p class="font-medium capitalize text-theme-text">{module.type} Module</p>
 										{#if module.props?.title}
 											<p class="text-xs text-theme-text-muted">{module.props.title}</p>
 										{/if}
@@ -256,7 +256,7 @@
 							onUse(template);
 							onClose();
 						}}
-						class="flex-1 rounded-lg bg-theme-primary px-4 py-2 font-medium text-white transition-colors hover:bg-theme-primary/90"
+						class="hover:bg-theme-primary/90 flex-1 rounded-lg bg-theme-primary px-4 py-2 font-medium text-white transition-colors"
 					>
 						Use This Template
 					</button>

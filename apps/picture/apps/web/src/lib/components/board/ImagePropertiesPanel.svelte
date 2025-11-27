@@ -31,9 +31,7 @@
 	async function handlePositionChange(axis: 'x' | 'y', value: number) {
 		if (!selectedItem) return;
 
-		const updates = axis === 'x'
-			? { position_x: value }
-			: { position_y: value };
+		const updates = axis === 'x' ? { position_x: value } : { position_y: value };
 
 		updateCanvasItem(selectedItem.id, updates);
 
@@ -135,7 +133,9 @@
 
 {#if hasMultipleSelected}
 	<!-- Multiple Selection Info -->
-	<div class="h-full overflow-y-auto border-l border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+	<div
+		class="h-full overflow-y-auto border-l border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900"
+	>
 		<div class="text-center">
 			<svg
 				class="mx-auto h-12 w-12 text-gray-400"
@@ -156,14 +156,14 @@
 			<p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
 				Multi-Bearbeitung wird bald unterstützt
 			</p>
-			<Button variant="danger" class="mt-6" onclick={handleDelete}>
-				Alle löschen
-			</Button>
+			<Button variant="danger" class="mt-6" onclick={handleDelete}>Alle löschen</Button>
 		</div>
 	</div>
 {:else if selectedItem}
 	<!-- Single Item Properties -->
-	<div class="h-full overflow-y-auto border-l border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+	<div
+		class="h-full overflow-y-auto border-l border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
+	>
 		<div class="p-6">
 			<h3 class="mb-6 text-lg font-semibold text-gray-900 dark:text-gray-100">
 				Bild-Eigenschaften
@@ -171,11 +171,7 @@
 
 			<!-- Image Preview -->
 			<div class="mb-6 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-				<img
-					src={selectedItem.image.public_url}
-					alt="Preview"
-					class="w-full"
-				/>
+				<img src={selectedItem.image.public_url} alt="Preview" class="w-full" />
 			</div>
 
 			<!-- Prompt Info -->
@@ -184,7 +180,9 @@
 					<label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Prompt
 					</label>
-					<p class="rounded-lg bg-gray-50 p-3 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+					<p
+						class="rounded-lg bg-gray-50 p-3 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+					>
 						{selectedItem.image.prompt}
 					</p>
 				</div>
@@ -220,9 +218,7 @@
 			<!-- Scale -->
 			<div class="mb-6">
 				<div class="mb-2 flex items-center justify-between">
-					<label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-						Skalierung
-					</label>
+					<label class="text-sm font-medium text-gray-700 dark:text-gray-300"> Skalierung </label>
 					<button
 						onclick={() => (lockAspectRatio = !lockAspectRatio)}
 						class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
@@ -280,25 +276,37 @@
 				/>
 				<div class="mt-2 grid grid-cols-4 gap-2">
 					<button
-						onclick={() => { rotation = 0; handleRotationChange(0); }}
+						onclick={() => {
+							rotation = 0;
+							handleRotationChange(0);
+						}}
 						class="rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
 					>
 						0°
 					</button>
 					<button
-						onclick={() => { rotation = 90; handleRotationChange(90); }}
+						onclick={() => {
+							rotation = 90;
+							handleRotationChange(90);
+						}}
 						class="rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
 					>
 						90°
 					</button>
 					<button
-						onclick={() => { rotation = 180; handleRotationChange(180); }}
+						onclick={() => {
+							rotation = 180;
+							handleRotationChange(180);
+						}}
 						class="rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
 					>
 						180°
 					</button>
 					<button
-						onclick={() => { rotation = 270; handleRotationChange(270); }}
+						onclick={() => {
+							rotation = 270;
+							handleRotationChange(270);
+						}}
 						class="rounded bg-gray-100 px-2 py-1 text-xs hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
 					>
 						270°
@@ -332,7 +340,12 @@
 						class="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
 					>
 						<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M5 15l7-7 7 7"
+							/>
 						</svg>
 						Nach vorne
 					</button>
@@ -341,7 +354,12 @@
 						class="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
 					>
 						<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 9l-7 7-7-7"
+							/>
 						</svg>
 						Nach hinten
 					</button>
@@ -350,7 +368,12 @@
 						class="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
 					>
 						<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M5 10l7-7m0 0l7 7m-7-7v18"
+							/>
 						</svg>
 						Eine Ebene
 					</button>
@@ -359,7 +382,12 @@
 						class="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
 					>
 						<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 14l-7 7m0 0l-7-7m7 7V3"
+							/>
 						</svg>
 						Eine Ebene
 					</button>
@@ -371,7 +399,9 @@
 				<div class="text-xs text-gray-500 dark:text-gray-400">
 					<div class="flex justify-between py-1">
 						<span>Original:</span>
-						<span class="font-medium">{selectedItem.image.width} × {selectedItem.image.height}px</span>
+						<span class="font-medium"
+							>{selectedItem.image.width} × {selectedItem.image.height}px</span
+						>
 					</div>
 					<div class="flex justify-between py-1">
 						<span>Aktuell:</span>
@@ -408,7 +438,9 @@
 	</div>
 {:else}
 	<!-- No Selection -->
-	<div class="flex h-full items-center justify-center border-l border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+	<div
+		class="flex h-full items-center justify-center border-l border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900"
+	>
 		<div class="text-center">
 			<svg
 				class="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600"

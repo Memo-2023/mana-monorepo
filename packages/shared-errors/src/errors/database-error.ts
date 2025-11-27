@@ -17,38 +17,28 @@ type DatabaseErrorCode = ErrorCode.DATABASE_ERROR | ErrorCode.CONSTRAINT_VIOLATI
  * ```
  */
 export class DatabaseError extends AppError {
-  constructor(
-    code: DatabaseErrorCode,
-    message: string,
-    cause?: Error,
-    context?: ErrorContext
-  ) {
-    super({ code, message, cause, context });
-    this.name = 'DatabaseError';
-  }
+	constructor(code: DatabaseErrorCode, message: string, cause?: Error, context?: ErrorContext) {
+		super({ code, message, cause, context });
+		this.name = 'DatabaseError';
+	}
 
-  /**
-   * Create a constraint violation error (e.g., unique constraint).
-   *
-   * @param field - The field that violated the constraint
-   * @param message - Description of the violation
-   */
-  static constraintViolation(field: string, message: string): DatabaseError {
-    return new DatabaseError(
-      ErrorCode.CONSTRAINT_VIOLATION,
-      message,
-      undefined,
-      { field }
-    );
-  }
+	/**
+	 * Create a constraint violation error (e.g., unique constraint).
+	 *
+	 * @param field - The field that violated the constraint
+	 * @param message - Description of the violation
+	 */
+	static constraintViolation(field: string, message: string): DatabaseError {
+		return new DatabaseError(ErrorCode.CONSTRAINT_VIOLATION, message, undefined, { field });
+	}
 
-  /**
-   * Create a generic database query error.
-   *
-   * @param message - Description of what went wrong
-   * @param cause - Original error if available
-   */
-  static queryFailed(message: string, cause?: Error): DatabaseError {
-    return new DatabaseError(ErrorCode.DATABASE_ERROR, message, cause);
-  }
+	/**
+	 * Create a generic database query error.
+	 *
+	 * @param message - Description of what went wrong
+	 * @param cause - Original error if available
+	 */
+	static queryFailed(message: string, cause?: Error): DatabaseError {
+		return new DatabaseError(ErrorCode.DATABASE_ERROR, message, cause);
+	}
 }

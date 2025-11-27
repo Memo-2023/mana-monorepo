@@ -33,7 +33,7 @@
 		monthlyEquivalentLabel = '/Monat',
 		buyLabel = 'Kaufen',
 		yourPlanLabel = 'Dein Plan',
-		yourLegacyPlanLabel = 'Dein Legacy-Plan'
+		yourLegacyPlanLabel = 'Dein Legacy-Plan',
 	}: Props = $props();
 
 	function formatPrice(plan: SubscriptionPlan) {
@@ -85,7 +85,10 @@
 	<!-- Three column layout -->
 	<div class="mb-5 flex justify-between gap-2">
 		<!-- Mana Icon with background -->
-		<div class="flex aspect-square flex-1 items-center justify-center rounded-xl bg-menu" style="min-height: 80px;">
+		<div
+			class="flex aspect-square flex-1 items-center justify-center rounded-xl bg-menu"
+			style="min-height: 80px;"
+		>
 			<div
 				class="flex items-center justify-center rounded-lg"
 				style="width: {tierStyles.bgSize}; height: {tierStyles.bgSize}; background-color: {tierStyles.bg};"
@@ -95,7 +98,10 @@
 		</div>
 
 		<!-- Mana Amount -->
-		<div class="flex aspect-square flex-1 flex-col items-center justify-center rounded-xl bg-menu" style="min-height: 80px;">
+		<div
+			class="flex aspect-square flex-1 flex-col items-center justify-center rounded-xl bg-menu"
+			style="min-height: 80px;"
+		>
 			<p class="mb-0.5 text-2xl font-bold text-theme">
 				{plan.monthlyMana}
 			</p>
@@ -103,7 +109,10 @@
 		</div>
 
 		<!-- Price -->
-		<div class="flex aspect-square flex-1 flex-col items-center justify-center rounded-xl bg-menu" style="min-height: 80px;">
+		<div
+			class="flex aspect-square flex-1 flex-col items-center justify-center rounded-xl bg-menu"
+			style="min-height: 80px;"
+		>
 			<p class="text-xl font-bold text-theme">
 				{formatPrice(plan)}
 			</p>
@@ -121,11 +130,7 @@
 	<!-- Button only show if NOT free plan -->
 	{#if !plan.id.toLowerCase().includes('free')}
 		<SubscriptionButton
-			label={isCurrentPlan
-				? isLegacy
-					? yourLegacyPlanLabel
-					: yourPlanLabel
-				: buyLabel}
+			label={isCurrentPlan ? (isLegacy ? yourLegacyPlanLabel : yourPlanLabel) : buyLabel}
 			onclick={() => onSelect(plan.id)}
 			iconName={isCurrentPlan ? 'checkmark-circle-outline' : 'arrow-forward-outline'}
 			variant={isCurrentPlan ? 'secondary' : plan.popular ? 'accent' : 'primary'}

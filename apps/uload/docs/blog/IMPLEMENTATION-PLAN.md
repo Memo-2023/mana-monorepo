@@ -7,7 +7,7 @@ Basierend auf der Analyse empfehle ich die **PocketBase-Integration (Option 1)**
 ## Projektziele
 
 - ✅ Content Marketing Platform für SEO & Thought Leadership
-- ✅ Nahtlose Integration in bestehendes uload-System  
+- ✅ Nahtlose Integration in bestehendes uload-System
 - ✅ Skalierbar für 100+ Artikel
 - ✅ DSGVO-konform
 - ✅ Mobile-optimiert
@@ -16,75 +16,90 @@ Basierend auf der Analyse empfehle ich die **PocketBase-Integration (Option 1)**
 ## Timeline & Milestones
 
 ### Tag 1: Database & Backend Setup
+
 **Ziel**: Komplette Datenbank-Struktur und API-Endpoints
 
 #### Vormittag (4h)
+
 - [ ] PocketBase Collections erstellen
 - [ ] Relationen definieren
 - [ ] Validation Rules setzen
 - [ ] Test-Daten einfügen
 
 #### Nachmittag (4h)
+
 - [ ] Server-Routes implementieren
 - [ ] API-Endpoints testen
 - [ ] Error Handling
 - [ ] Pagination Logic
 
 ### Tag 2: Frontend Basis-Komponenten
+
 **Ziel**: Blog-Übersicht und Artikel-Ansicht funktionsfähig
 
 #### Vormittag (4h)
+
 - [ ] Blog-Übersichtsseite
 - [ ] BlogCard Komponente
 - [ ] Kategorie-Filter
 - [ ] Tag-Cloud
 
 #### Nachmittag (4h)
+
 - [ ] Artikel-Detailseite
 - [ ] Reading Progress Bar
 - [ ] Table of Contents
 - [ ] Share Buttons
 
 ### Tag 3: Admin-Interface
+
 **Ziel**: Vollständiges CMS für Blog-Verwaltung
 
 #### Vormittag (4h)
+
 - [ ] Admin-Dashboard
 - [ ] Artikel-Liste mit Status
 - [ ] Bulk-Actions
 - [ ] Suchfunktion
 
 #### Nachmittag (4h)
+
 - [ ] Rich-Text Editor (Tiptap)
 - [ ] Media Upload
 - [ ] Preview-Funktion
 - [ ] Auto-Save
 
 ### Tag 4: SEO & Performance
+
 **Ziel**: Optimale Sichtbarkeit und Geschwindigkeit
 
 #### Vormittag (4h)
+
 - [ ] Meta-Tags Management
 - [ ] Schema.org Markup
 - [ ] XML Sitemap
 - [ ] RSS/Atom Feed
 
 #### Nachmittag (4h)
+
 - [ ] Image Optimization
 - [ ] Lazy Loading
 - [ ] Cache-Strategy
 - [ ] CDN-Integration
 
 ### Tag 5: Features & Polish
+
 **Ziel**: Premium-Features und finale Optimierungen
 
 #### Vormittag (4h)
+
 - [ ] Verwandte Artikel
 - [ ] Lesezeit-Berechnung
 - [ ] Newsletter-Integration
 - [ ] Social Media Auto-Post
 
 #### Nachmittag (4h)
+
 - [ ] Analytics Dashboard
 - [ ] A/B Testing Setup
 - [ ] Mobile Optimierung
@@ -146,21 +161,21 @@ CREATE TABLE blog_post_tags (
 
 ```typescript
 // Blog API Routes
-GET    /api/blog/posts          // Liste mit Pagination
-GET    /api/blog/posts/[slug]   // Einzelner Artikel
-POST   /api/blog/posts/[slug]/view  // View Counter
-GET    /api/blog/categories     // Alle Kategorien
-GET    /api/blog/tags           // Alle Tags
-GET    /api/blog/search         // Volltextsuche
-GET    /api/blog/feed.xml       // RSS Feed
-GET    /api/blog/sitemap.xml    // Sitemap
+GET / api / blog / posts; // Liste mit Pagination
+GET / api / blog / posts / [slug]; // Einzelner Artikel
+POST / api / blog / posts / [slug] / view; // View Counter
+GET / api / blog / categories; // Alle Kategorien
+GET / api / blog / tags; // Alle Tags
+GET / api / blog / search; // Volltextsuche
+GET / api / blog / feed.xml; // RSS Feed
+GET / api / blog / sitemap.xml; // Sitemap
 
 // Admin API Routes (auth required)
-POST   /api/admin/blog/posts    // Neuer Artikel
-PUT    /api/admin/blog/posts/[id]  // Update
-DELETE /api/admin/blog/posts/[id]  // Löschen
-POST   /api/admin/blog/posts/[id]/publish  // Veröffentlichen
-POST   /api/admin/blog/upload   // Bild-Upload
+POST / api / admin / blog / posts; // Neuer Artikel
+PUT / api / admin / blog / posts / [id]; // Update
+DELETE / api / admin / blog / posts / [id]; // Löschen
+POST / api / admin / blog / posts / [id] / publish; // Veröffentlichen
+POST / api / admin / blog / upload; // Bild-Upload
 ```
 
 ### Komponenten-Architektur
@@ -212,18 +227,21 @@ src/lib/components/blog/
 ### Content-Kalender (erste 3 Monate)
 
 **Monat 1**: Foundations (4 Artikel/Monat)
+
 - Woche 1: Psychology & UX
 - Woche 2: Technical Tutorial
 - Woche 3: Case Study
 - Woche 4: Industry Trends
 
 **Monat 2**: Deep Dives (6 Artikel/Monat)
+
 - Analytics Deep Dives
 - Integration Guides
 - Performance Optimization
 - Security Best Practices
 
 **Monat 3**: Growth (8 Artikel/Monat)
+
 - Guest Posts
 - User Success Stories
 - Feature Announcements
@@ -234,11 +252,13 @@ src/lib/components/blog/
 ### Target Keywords
 
 **Primary Keywords** (Schwierigkeit: Mittel)
+
 - "url kürzen" (9.900 Suchen/Monat)
 - "link verkürzen" (6.600 Suchen/Monat)
 - "kurze urls" (2.400 Suchen/Monat)
 
 **Long-Tail Keywords** (Schwierigkeit: Leicht)
+
 - "kostenlos url kürzen ohne anmeldung"
 - "eigene domain für kurze links"
 - "qr code mit logo erstellen"
@@ -260,12 +280,14 @@ src/lib/components/blog/
 ## Performance KPIs
 
 ### Technical Metrics
+
 - **Page Load**: < 2s (Mobile 3G)
 - **Time to Interactive**: < 3.5s
 - **Core Web Vitals**: Alle grün
 - **Lighthouse Score**: > 90
 
 ### Business Metrics
+
 - **Organic Traffic**: +50% in 3 Monaten
 - **Conversion Rate**: Blog → Sign-up > 3%
 - **Engagement Rate**: > 2 Min Average Time
@@ -275,26 +297,29 @@ src/lib/components/blog/
 
 ### Potenzielle Risiken & Mitigationen
 
-| Risiko | Wahrscheinlichkeit | Impact | Mitigation |
-|--------|-------------------|---------|------------|
-| Editor-Komplexität | Mittel | Hoch | Start mit SimpleMDE, später Upgrade |
-| Performance-Probleme | Niedrig | Mittel | Caching-Strategy von Anfang an |
-| Content-Erstellung | Hoch | Mittel | Freelancer-Pool aufbauen |
-| SEO-Konkurrenz | Mittel | Niedrig | Nischen-Keywords fokussieren |
+| Risiko               | Wahrscheinlichkeit | Impact  | Mitigation                          |
+| -------------------- | ------------------ | ------- | ----------------------------------- |
+| Editor-Komplexität   | Mittel             | Hoch    | Start mit SimpleMDE, später Upgrade |
+| Performance-Probleme | Niedrig            | Mittel  | Caching-Strategy von Anfang an      |
+| Content-Erstellung   | Hoch               | Mittel  | Freelancer-Pool aufbauen            |
+| SEO-Konkurrenz       | Mittel             | Niedrig | Nischen-Keywords fokussieren        |
 
 ## Budget & Ressourcen
 
 ### Entwicklung (5 Tage)
+
 - **Developer**: 5 Tage × 8h = 40h
 - **Design Assets**: Vorhandene UI-Komponenten nutzen
 - **Testing**: 1 Tag zusätzlich
 
 ### Content (Ongoing)
+
 - **Launch Content**: 5 Artikel (intern)
 - **Monthly Content**: 4-8 Artikel
 - **Freelancer Budget**: €500-1000/Monat
 
 ### Tools & Services
+
 - **Grammarly**: Rechtschreibprüfung
 - **Canva Pro**: Grafiken
 - **Unsplash+**: Stock-Fotos
@@ -305,6 +330,7 @@ src/lib/components/blog/
 ### Pre-Launch Checklist
 
 #### Funktionalität
+
 - [ ] Alle CRUD-Operationen funktionieren
 - [ ] Pagination arbeitet korrekt
 - [ ] Suche liefert relevante Ergebnisse
@@ -312,24 +338,28 @@ src/lib/components/blog/
 - [ ] RSS Feed validiert
 
 #### Performance
+
 - [ ] Lighthouse Audit > 90
 - [ ] Mobile-Responsive
 - [ ] Bilder optimiert
 - [ ] Caching aktiviert
 
 #### SEO
+
 - [ ] Meta-Tags vollständig
 - [ ] Sitemap generiert
 - [ ] Schema.org implementiert
 - [ ] Social Cards funktionieren
 
 #### Security
+
 - [ ] Input-Validation
 - [ ] XSS-Protection
 - [ ] CSRF-Token
 - [ ] Rate Limiting
 
 #### Accessibility
+
 - [ ] WCAG 2.1 AA konform
 - [ ] Keyboard-Navigation
 - [ ] Screen-Reader kompatibel
@@ -338,18 +368,21 @@ src/lib/components/blog/
 ## Post-Launch Plan
 
 ### Woche 1
+
 - Monitoring Setup
 - Bug Fixes
 - Performance Tuning
 - Erste Analytics
 
 ### Monat 1
+
 - Content-Pipeline etablieren
 - SEO-Optimierungen
 - User-Feedback sammeln
 - A/B Tests starten
 
 ### Quartal 1
+
 - Feature-Erweiterungen
 - Newsletter-Integration
 - Kommentar-System
@@ -358,16 +391,19 @@ src/lib/components/blog/
 ## Success Metrics
 
 ### Launch (Tag 1)
+
 - ✅ Blog live und funktional
 - ✅ 5 Launch-Artikel online
 - ✅ Keine kritischen Bugs
 
 ### Monat 1
+
 - ✅ 20+ Blog-Artikel
 - ✅ 1000+ Unique Visitors
 - ✅ 5+ Backlinks
 
 ### Quartal 1
+
 - ✅ 50+ Blog-Artikel
 - ✅ 10.000+ Monthly Visitors
 - ✅ Top 10 Rankings für Target Keywords

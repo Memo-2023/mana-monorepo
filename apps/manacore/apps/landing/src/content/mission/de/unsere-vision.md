@@ -1,6 +1,6 @@
 ---
-title: "Unsere Vision: KI für alle zugänglich machen"
-description: "Wir glauben an eine Welt, in der jeder Zugang zu den besten KI-Tools hat - unabhängig von Unternehmensgröße oder Budget."
+title: 'Unsere Vision: KI für alle zugänglich machen'
+description: 'Wir glauben an eine Welt, in der jeder Zugang zu den besten KI-Tools hat - unabhängig von Unternehmensgröße oder Budget.'
 category: vision
 order: 1
 featured: true

@@ -31,7 +31,7 @@
 		signInFailed: 'Anmeldung fehlgeschlagen',
 		googleSignInFailed: 'Google-Anmeldung fehlgeschlagen',
 		signInSuccess: 'Erfolgreich angemeldet. Weiterleitung...',
-		googleSignInSuccess: 'Erfolgreich mit Google angemeldet. Weiterleitung...'
+		googleSignInSuccess: 'Erfolgreich mit Google angemeldet. Weiterleitung...',
 	};
 
 	async function handleSignIn(email: string, password: string) {
@@ -48,7 +48,7 @@
 	logo={ChatLogo}
 	primaryColor="#0ea5e9"
 	onSignIn={handleSignIn}
-	goto={goto}
+	{goto}
 	enableGoogle={false}
 	enableApple={false}
 	successRedirect={redirectTo}

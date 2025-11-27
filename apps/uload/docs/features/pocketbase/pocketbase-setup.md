@@ -57,7 +57,6 @@ npm run dev:all
 ```bash
 /app/pocketbase superuser create till.schneider@memoro.ai p0ck3t-RA1N
 ```
- 
 
 ### Über Web-Interface
 

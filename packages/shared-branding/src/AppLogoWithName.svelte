@@ -27,7 +27,7 @@
 		showName = true,
 		nameFontSize = '1.25rem',
 		gap = '0.5rem',
-		class: className = ''
+		class: className = '',
 	}: Props = $props();
 
 	const branding = $derived(APP_BRANDING[app]);

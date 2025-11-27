@@ -33,11 +33,11 @@
 		defaultOpen = true,
 		editingLink,
 		onSuccess,
-		refreshOnSuccess = true
+		refreshOnSuccess = true,
 	}: Props = $props();
 
 	let isOpen = $state(defaultOpen);
-	
+
 	// Update isOpen when defaultOpen changes
 	$effect(() => {
 		isOpen = defaultOpen;
@@ -47,7 +47,7 @@
 	let bulkUrls = $state('');
 	let bulkFolder = $state('');
 	let bulkUseUsername = $state(false);
-	let createdLinks = $state<Array<{url: string, shortCode: string}>>([]);
+	let createdLinks = $state<Array<{ url: string; shortCode: string }>>([]);
 	let copiedStates = $state<Record<string, boolean>>({});
 
 	function handleSingleSuccess(link: any, shortUrl: string) {
@@ -55,11 +55,11 @@
 		console.log('Link:', link);
 		console.log('Short URL:', shortUrl);
 		toastMessages.linkCreated();
-		
+
 		if (onSuccess) {
 			onSuccess(link, shortUrl);
 		}
-		
+
 		if (refreshOnSuccess) {
 			// Immediately invalidate to refresh the data
 			goto(window.location.pathname, { invalidateAll: true });
@@ -84,24 +84,24 @@
 			console.log('Result type:', result.type);
 			console.log('Result data:', result.data);
 			if (result.type === 'success') {
-				const urls = bulkUrls.split('\n').filter(line => line.trim());
+				const urls = bulkUrls.split('\n').filter((line) => line.trim());
 				console.log('✅ LinkCreationCard: Bulk creation successful');
 				console.log('Created links:', result.data?.links);
 				notify.success(`${urls.length} Links erfolgreich erstellt!`);
-				
+
 				// Store created links for display
 				if (result.data?.links) {
 					createdLinks = result.data.links.map((link: any) => ({
 						url: link.shortUrl,
-						shortCode: link.short_code
+						shortCode: link.short_code,
 					}));
 				}
-				
+
 				// Clear form
 				bulkUrls = '';
 				bulkFolder = '';
 				bulkUseUsername = false;
-				
+
 				if (refreshOnSuccess) {
 					setTimeout(() => {
 						goto(window.location.pathname, { invalidateAll: true });
@@ -122,37 +122,56 @@
 	}
 </script>
 
-<div class="mb-8 transition-all duration-500 ease-in-out {isOpen ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}">
-	<div class="rounded-xl border-2 border-theme-accent/30 bg-gradient-to-br from-theme-surface via-theme-surface to-theme-accent/5 p-6 shadow-2xl sm:p-8">
+<div
+	class="mb-8 transition-all duration-500 ease-in-out {isOpen
+		? 'max-h-[3000px] opacity-100'
+		: 'max-h-0 overflow-hidden opacity-0'}"
+>
+	<div
+		class="border-theme-accent/30 to-theme-accent/5 rounded-xl border-2 bg-gradient-to-br from-theme-surface via-theme-surface p-6 shadow-2xl sm:p-8"
+	>
 		<!-- Header -->
-		<div class="flex items-center justify-between mb-6">
+		<div class="mb-6 flex items-center justify-between">
 			<div class="flex items-center gap-3">
-				<div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl">
+				<div
+					class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xl font-bold text-white"
+				>
 					+
 				</div>
 				<h2 class="text-2xl font-bold text-theme-text">
-					{showBulkCreate ? 'Mehrere Links erstellen' : editingLink ? 'Link bearbeiten' : 'Neuen Link erstellen'}
+					{showBulkCreate
+						? 'Mehrere Links erstellen'
+						: editingLink
+							? 'Link bearbeiten'
+							: 'Neuen Link erstellen'}
 				</h2>
 			</div>
-			
+
 			<div class="flex items-center gap-2">
 				<!-- Toggle Single/Bulk -->
 				<button
 					type="button"
 					onclick={() => (showBulkCreate = !showBulkCreate)}
-					class="px-3 py-1.5 text-sm font-medium rounded-lg transition-all {showBulkCreate ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}"
+					class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all {showBulkCreate
+						? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+						: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}"
 				>
 					{showBulkCreate ? '← Einzelner Link' : 'Mehrere Links →'}
 				</button>
-				
+
 				<!-- Close Button -->
 				<button
 					onclick={() => (isOpen = false)}
-					class="text-theme-text-muted hover:text-theme-text transition-colors p-1 hover:bg-theme-surface-hover rounded-lg"
+					class="rounded-lg p-1 text-theme-text-muted transition-colors hover:bg-theme-surface-hover hover:text-theme-text"
 					title="Formular ausblenden"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						></path>
 					</svg>
 				</button>
 			</div>
@@ -161,18 +180,10 @@
 		<!-- Content -->
 		{#if showBulkCreate}
 			<!-- Bulk Create Form -->
-			<form
-				method="POST"
-				action="?/bulk_create"
-				use:enhance={handleBulkSubmit}
-				class="space-y-6"
-			>
+			<form method="POST" action="?/bulk_create" use:enhance={handleBulkSubmit} class="space-y-6">
 				<div>
-					<label
-						for="bulk_urls"
-						class="mb-2 block text-lg font-medium text-theme-text"
-					>
-						<span class="text-theme-accent mr-2">1.</span>
+					<label for="bulk_urls" class="mb-2 block text-lg font-medium text-theme-text">
+						<span class="mr-2 text-theme-accent">1.</span>
 						URLs eingeben (eine pro Zeile)
 					</label>
 					<textarea
@@ -182,55 +193,63 @@
 						required
 						placeholder="https://beispiel.de&#10;https://google.com&#10;https://github.com"
 						bind:value={bulkUrls}
-						class="w-full rounded-lg border-2 border-theme-border bg-theme-surface px-4 py-3 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none font-mono text-sm"
+						class="w-full rounded-lg border-2 border-theme-border bg-theme-surface px-4 py-3 font-mono text-sm text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 					></textarea>
-					<p class="mt-2 text-sm text-theme-text-muted flex items-center gap-2">
-						<svg class="h-4 w-4 text-theme-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+					<p class="mt-2 flex items-center gap-2 text-sm text-theme-text-muted">
+						<svg
+							class="h-4 w-4 text-theme-accent"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							></path>
 						</svg>
-						{bulkUrls.split('\n').filter(line => line.trim()).length} URLs erkannt
+						{bulkUrls.split('\n').filter((line) => line.trim()).length} URLs erkannt
 					</p>
 				</div>
 
 				{#if user}
 					<div class="space-y-4">
 						<label class="block text-lg font-medium text-theme-text">
-							<span class="text-theme-accent mr-2">2.</span>
+							<span class="mr-2 text-theme-accent">2.</span>
 							Optionen für alle Links
 						</label>
-						
+
 						<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<!-- Folder Selection -->
 							{#if folders.length > 0}
 								<div>
-									<label
-										for="bulk_folder"
-										class="mb-1 block text-sm font-medium text-theme-text"
-									>
+									<label for="bulk_folder" class="mb-1 block text-sm font-medium text-theme-text">
 										Ordner zuweisen
 									</label>
 									<select
 										id="bulk_folder"
 										name="bulk_folder"
 										bind:value={bulkFolder}
-										class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text focus:ring-2 focus:ring-theme-accent focus:outline-none"
+										class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text focus:outline-none focus:ring-2 focus:ring-theme-accent"
 									>
 										<option value="">Kein Ordner</option>
 										{#each folders as folder}
 											<option value={folder.id}>
-												{folder.icon} {folder.display_name}
+												{folder.icon}
+												{folder.display_name}
 											</option>
 										{/each}
 									</select>
 								</div>
 							{/if}
-							
+
 							<!-- Username Prefix -->
 							<div>
-								<div class="mb-1 block text-sm font-medium text-theme-text">
-									URL-Format
-								</div>
-								<label class="flex cursor-pointer items-center space-x-2 p-3 rounded-lg bg-theme-surface-hover">
+								<div class="mb-1 block text-sm font-medium text-theme-text">URL-Format</div>
+								<label
+									class="flex cursor-pointer items-center space-x-2 rounded-lg bg-theme-surface-hover p-3"
+								>
 									<input
 										type="checkbox"
 										name="bulk_use_username"
@@ -250,7 +269,7 @@
 				<button
 					type="submit"
 					disabled={isSubmitting || !bulkUrls.trim()}
-					class="flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 px-6 py-4 font-semibold text-white transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+					class="flex w-full transform items-center justify-center rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					{#if isSubmitting}
 						<svg class="mr-2 h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -276,20 +295,26 @@
 
 				<!-- Created Links Display -->
 				{#if createdLinks.length > 0}
-					<div class="mt-6 p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-800">
-						<h3 class="font-semibold text-green-800 dark:text-green-300 mb-3">
+					<div
+						class="mt-6 rounded-lg border border-green-300 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20"
+					>
+						<h3 class="mb-3 font-semibold text-green-800 dark:text-green-300">
 							✅ {createdLinks.length} Links erfolgreich erstellt:
 						</h3>
-						<div class="space-y-2 max-h-60 overflow-y-auto">
+						<div class="max-h-60 space-y-2 overflow-y-auto">
 							{#each createdLinks as link, i}
-								<div class="flex items-center gap-2 p-2 rounded bg-white dark:bg-theme-surface">
-									<code class="flex-1 text-sm font-mono text-green-700 dark:text-green-400">
+								<div class="flex items-center gap-2 rounded bg-white p-2 dark:bg-theme-surface">
+									<code class="flex-1 font-mono text-sm text-green-700 dark:text-green-400">
 										{link.url}
 									</code>
 									<button
 										type="button"
 										onclick={() => copyToClipboard(link.url, `bulk-${i}`)}
-										class="px-2 py-1 text-xs font-medium rounded transition-colors {copiedStates[`bulk-${i}`] ? 'bg-green-600 text-white' : 'bg-green-700 text-white hover:bg-green-800'}"
+										class="rounded px-2 py-1 text-xs font-medium transition-colors {copiedStates[
+											`bulk-${i}`
+										]
+											? 'bg-green-600 text-white'
+											: 'bg-green-700 text-white hover:bg-green-800'}"
 									>
 										{copiedStates[`bulk-${i}`] ? '✓' : '📋'}
 									</button>
@@ -313,4 +338,3 @@
 		{/if}
 	</div>
 </div>
-

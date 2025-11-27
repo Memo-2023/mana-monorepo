@@ -5,7 +5,7 @@ export type QRCodeRotation = 0 | 45 | 90 | 135 | 180 | 225 | 270 | 315;
 export const QR_COLORS = {
 	black: { color: '000000', bg: 'ffffff' },
 	white: { color: 'ffffff', bg: '000000' },
-	gold: { color: 'f8d62b', bg: '000000' }
+	gold: { color: 'f8d62b', bg: '000000' },
 };
 
 export function generateQRCodeURL(
@@ -65,43 +65,46 @@ export async function downloadQRCode(
 			.then((response) => response.text())
 			.then((svgText) => {
 				let finalSvg = svgText;
-				
+
 				if (rotation !== 0) {
 					// Apply rotation transform to SVG
 					const parser = new DOMParser();
 					const doc = parser.parseFromString(svgText, 'image/svg+xml');
 					const svgElement = doc.documentElement;
-					
+
 					// Get original dimensions
 					const width = parseInt(svgElement.getAttribute('width') || `${size}`);
 					const height = parseInt(svgElement.getAttribute('height') || `${size}`);
-					
+
 					// Calculate new dimensions for rotated SVG
 					const radians = (rotation * Math.PI) / 180;
 					const sin = Math.abs(Math.sin(radians));
 					const cos = Math.abs(Math.cos(radians));
 					const newWidth = Math.round(width * cos + height * sin);
 					const newHeight = Math.round(width * sin + height * cos);
-					
+
 					// Update SVG dimensions
 					svgElement.setAttribute('width', `${newWidth}`);
 					svgElement.setAttribute('height', `${newHeight}`);
-					
+
 					// Add a group with rotation transform
 					const g = doc.createElementNS('http://www.w3.org/2000/svg', 'g');
-					g.setAttribute('transform', `translate(${newWidth/2},${newHeight/2}) rotate(${rotation}) translate(${-width/2},${-height/2})`);
-					
+					g.setAttribute(
+						'transform',
+						`translate(${newWidth / 2},${newHeight / 2}) rotate(${rotation}) translate(${-width / 2},${-height / 2})`
+					);
+
 					// Move all existing children into the group
 					while (svgElement.firstChild) {
 						g.appendChild(svgElement.firstChild);
 					}
 					svgElement.appendChild(g);
-					
+
 					// Serialize back to string
 					const serializer = new XMLSerializer();
 					finalSvg = serializer.serializeToString(doc);
 				}
-				
+
 				const blob = new Blob([finalSvg], { type: 'image/svg+xml' });
 				const objectUrl = URL.createObjectURL(blob);
 				const a = document.createElement('a');

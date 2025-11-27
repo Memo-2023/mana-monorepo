@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { GDPRManager, acceptAllCookies, acceptNecessaryOnly, type GDPRConsent } from '$lib/gdpr/compliance';
+	import {
+		GDPRManager,
+		acceptAllCookies,
+		acceptNecessaryOnly,
+		type GDPRConsent,
+	} from '$lib/gdpr/compliance';
 	import { slide } from 'svelte/transition';
 
 	// State
@@ -11,22 +16,22 @@
 		necessary: true,
 		analytics: false,
 		marketing: false,
-		preferences: false
+		preferences: false,
 	});
 
 	onMount(() => {
 		// Prüfe ob Banner gezeigt werden muss
 		showBanner = GDPRManager.needsConsent();
 		consent = GDPRManager.getConsent();
-		
+
 		// Event Listener für Consent-Updates
 		const handleConsentUpdate = (event: CustomEvent) => {
 			consent = event.detail;
 			showBanner = false;
 		};
-		
+
 		window.addEventListener('gdpr:consent-updated', handleConsentUpdate as EventListener);
-		
+
 		return () => {
 			window.removeEventListener('gdpr:consent-updated', handleConsentUpdate as EventListener);
 		};
@@ -57,45 +62,58 @@
 </script>
 
 {#if showBanner}
-	<div 
-		class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-xl"
+	<div
+		class="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900"
 		transition:slide={{ duration: 300 }}
 	>
-		<div class="max-w-7xl mx-auto p-4 md:p-6">
+		<div class="mx-auto max-w-7xl p-4 md:p-6">
 			{#if !showDetails}
 				<!-- Basis Cookie Banner -->
-				<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+				<div class="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
 					<!-- Content -->
 					<div class="flex-1">
 						<div class="flex items-start space-x-3">
 							<!-- Cookie Icon -->
-							<div class="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-								<svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+							<div
+								class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900"
+							>
+								<svg
+									class="h-5 w-5 text-blue-600 dark:text-blue-400"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
 								</svg>
 							</div>
-							
+
 							<!-- Text -->
 							<div class="flex-1">
-								<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+								<h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
 									Cookies & Datenschutz
 								</h3>
-								<p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-									Wir verwenden Cookies und ähnliche Technologien, um Ihnen die bestmögliche Erfahrung zu bieten. 
-									Einige sind technisch notwendig, andere helfen uns die Website zu verbessern und zu analysieren.
+								<p class="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+									Wir verwenden Cookies und ähnliche Technologien, um Ihnen die bestmögliche
+									Erfahrung zu bieten. Einige sind technisch notwendig, andere helfen uns die
+									Website zu verbessern und zu analysieren.
 								</p>
-								
+
 								<!-- Links -->
 								<div class="mt-2 flex items-center space-x-4 text-xs">
-									<a href="/datenschutz" class="text-blue-600 dark:text-blue-400 hover:underline">
+									<a href="/datenschutz" class="text-blue-600 hover:underline dark:text-blue-400">
 										Datenschutzerklärung
 									</a>
-									<a href="/impressum" class="text-blue-600 dark:text-blue-400 hover:underline">
+									<a href="/impressum" class="text-blue-600 hover:underline dark:text-blue-400">
 										Impressum
 									</a>
-									<button 
+									<button
 										onclick={toggleDetails}
-										class="text-blue-600 dark:text-blue-400 hover:underline"
+										class="text-blue-600 hover:underline dark:text-blue-400"
 									>
 										Details anzeigen
 									</button>
@@ -105,28 +123,27 @@
 					</div>
 
 					<!-- Buttons -->
-					<div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-						<button 
+					<div class="flex w-full flex-col gap-3 sm:flex-row md:w-auto">
+						<button
 							onclick={handleAcceptNecessary}
-							class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+							class="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
 						>
 							Nur notwendige
 						</button>
-						<button 
+						<button
 							onclick={toggleDetails}
-							class="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 border border-blue-600 dark:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+							class="rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900/20"
 						>
 							Anpassen
 						</button>
-						<button 
+						<button
 							onclick={handleAcceptAll}
-							class="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+							class="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
 						>
 							Alle akzeptieren
 						</button>
 					</div>
 				</div>
-
 			{:else}
 				<!-- Detaillierte Cookie-Einstellungen -->
 				<div class="space-y-6">
@@ -135,13 +152,18 @@
 						<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
 							Cookie-Einstellungen
 						</h3>
-						<button 
+						<button
 							onclick={toggleDetails}
-							class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+							class="p-2 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200"
 							aria-label="Schließen"
 						>
-							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
 							</svg>
 						</button>
 					</div>
@@ -149,20 +171,18 @@
 					<!-- Cookie Categories -->
 					<div class="grid gap-4">
 						<!-- Notwendige Cookies -->
-						<div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-							<div class="flex items-center justify-between mb-3">
+						<div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+							<div class="mb-3 flex items-center justify-between">
 								<div>
-									<h4 class="font-medium text-gray-900 dark:text-white">
-										Notwendige Cookies
-									</h4>
+									<h4 class="font-medium text-gray-900 dark:text-white">Notwendige Cookies</h4>
 									<p class="text-sm text-gray-600 dark:text-gray-300">
 										Technisch erforderlich für die Grundfunktionen der Website
 									</p>
 								</div>
 								<div class="flex items-center">
-									<span class="text-sm text-gray-500 mr-2">Immer aktiv</span>
-									<div class="w-10 h-6 bg-green-600 rounded-full relative">
-										<div class="w-4 h-4 bg-white rounded-full absolute top-1 right-1"></div>
+									<span class="mr-2 text-sm text-gray-500">Immer aktiv</span>
+									<div class="relative h-6 w-10 rounded-full bg-green-600">
+										<div class="absolute right-1 top-1 h-4 w-4 rounded-full bg-white"></div>
 									</div>
 								</div>
 							</div>
@@ -172,22 +192,28 @@
 						</div>
 
 						<!-- Analytics Cookies -->
-						<div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-							<div class="flex items-center justify-between mb-3">
+						<div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+							<div class="mb-3 flex items-center justify-between">
 								<div>
-									<h4 class="font-medium text-gray-900 dark:text-white">
-										Analytics Cookies
-									</h4>
+									<h4 class="font-medium text-gray-900 dark:text-white">Analytics Cookies</h4>
 									<p class="text-sm text-gray-600 dark:text-gray-300">
 										Helfen uns die Website zu verbessern
 									</p>
 								</div>
-								<button 
+								<button
 									onclick={() => handleCustomChange('analytics', !customConsent.analytics)}
 									class="relative"
 								>
-									<div class="w-10 h-6 rounded-full transition-colors {customConsent.analytics ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}">
-										<div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-transform {customConsent.analytics ? 'translate-x-4' : 'translate-x-1'}"></div>
+									<div
+										class="h-6 w-10 rounded-full transition-colors {customConsent.analytics
+											? 'bg-blue-600'
+											: 'bg-gray-300 dark:bg-gray-600'}"
+									>
+										<div
+											class="absolute top-1 h-4 w-4 rounded-full bg-white transition-transform {customConsent.analytics
+												? 'translate-x-4'
+												: 'translate-x-1'}"
+										></div>
 									</div>
 								</button>
 							</div>
@@ -197,22 +223,28 @@
 						</div>
 
 						<!-- Marketing Cookies -->
-						<div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-							<div class="flex items-center justify-between mb-3">
+						<div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+							<div class="mb-3 flex items-center justify-between">
 								<div>
-									<h4 class="font-medium text-gray-900 dark:text-white">
-										Marketing Cookies
-									</h4>
+									<h4 class="font-medium text-gray-900 dark:text-white">Marketing Cookies</h4>
 									<p class="text-sm text-gray-600 dark:text-gray-300">
 										Für personalisierte Inhalte und Werbung
 									</p>
 								</div>
-								<button 
+								<button
 									onclick={() => handleCustomChange('marketing', !customConsent.marketing)}
 									class="relative"
 								>
-									<div class="w-10 h-6 rounded-full transition-colors {customConsent.marketing ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}">
-										<div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-transform {customConsent.marketing ? 'translate-x-4' : 'translate-x-1'}"></div>
+									<div
+										class="h-6 w-10 rounded-full transition-colors {customConsent.marketing
+											? 'bg-blue-600'
+											: 'bg-gray-300 dark:bg-gray-600'}"
+									>
+										<div
+											class="absolute top-1 h-4 w-4 rounded-full bg-white transition-transform {customConsent.marketing
+												? 'translate-x-4'
+												: 'translate-x-1'}"
+										></div>
 									</div>
 								</button>
 							</div>
@@ -222,22 +254,28 @@
 						</div>
 
 						<!-- Preferences Cookies -->
-						<div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-							<div class="flex items-center justify-between mb-3">
+						<div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+							<div class="mb-3 flex items-center justify-between">
 								<div>
-									<h4 class="font-medium text-gray-900 dark:text-white">
-										Präferenz Cookies
-									</h4>
+									<h4 class="font-medium text-gray-900 dark:text-white">Präferenz Cookies</h4>
 									<p class="text-sm text-gray-600 dark:text-gray-300">
 										Speichern Ihre persönlichen Einstellungen
 									</p>
 								</div>
-								<button 
+								<button
 									onclick={() => handleCustomChange('preferences', !customConsent.preferences)}
 									class="relative"
 								>
-									<div class="w-10 h-6 rounded-full transition-colors {customConsent.preferences ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}">
-										<div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-transform {customConsent.preferences ? 'translate-x-4' : 'translate-x-1'}"></div>
+									<div
+										class="h-6 w-10 rounded-full transition-colors {customConsent.preferences
+											? 'bg-blue-600'
+											: 'bg-gray-300 dark:bg-gray-600'}"
+									>
+										<div
+											class="absolute top-1 h-4 w-4 rounded-full bg-white transition-transform {customConsent.preferences
+												? 'translate-x-4'
+												: 'translate-x-1'}"
+										></div>
 									</div>
 								</button>
 							</div>
@@ -248,22 +286,24 @@
 					</div>
 
 					<!-- Action Buttons -->
-					<div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-						<button 
+					<div
+						class="flex flex-col gap-3 border-t border-gray-200 pt-4 dark:border-gray-700 sm:flex-row"
+					>
+						<button
 							onclick={handleAcceptNecessary}
-							class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+							class="flex-1 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
 						>
 							Nur notwendige Cookies
 						</button>
-						<button 
+						<button
 							onclick={handleSaveCustom}
-							class="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+							class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
 						>
 							Auswahl speichern
 						</button>
-						<button 
+						<button
 							onclick={handleAcceptAll}
-							class="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+							class="flex-1 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
 						>
 							Alle akzeptieren
 						</button>
@@ -279,7 +319,7 @@
 	.toggle-switch {
 		transition: all 0.2s ease-in-out;
 	}
-	
+
 	/* Focus styles for accessibility */
 	button:focus {
 		outline: 2px solid #3b82f6;

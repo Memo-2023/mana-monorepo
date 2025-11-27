@@ -9,59 +9,51 @@ import { TranscriptSkeleton } from './sections/TranscriptSkeleton';
 import { QuestionButtonSkeleton } from './sections/QuestionButtonSkeleton';
 
 interface MemoDetailSkeletonProps {
-  showMemories?: boolean;
-  showAudioPlayer?: boolean;
-  showTranscript?: boolean;
-  showQuestionButton?: boolean;
+	showMemories?: boolean;
+	showAudioPlayer?: boolean;
+	showTranscript?: boolean;
+	showQuestionButton?: boolean;
 }
 
 export const MemoDetailSkeleton: React.FC<MemoDetailSkeletonProps> = ({
-  showMemories = true,
-  showAudioPlayer = true,
-  showTranscript = true,
-  showQuestionButton = true,
+	showMemories = true,
+	showAudioPlayer = true,
+	showTranscript = true,
+	showQuestionButton = true,
 }) => {
-  const { colors } = useTheme();
+	const { colors } = useTheme();
 
-  return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={false}
-    >
-      <MemoTitleSkeleton />
-      <MemoMetadataSkeleton />
-      
-      {showMemories && (
-        <MemoryCardSkeleton showMultiple />
-      )}
-      
-      {showAudioPlayer && (
-        <AudioPlayerSkeleton />
-      )}
-      
-      {showTranscript && (
-        <TranscriptSkeleton />
-      )}
-      
-      {showQuestionButton && (
-        <QuestionButtonSkeleton />
-      )}
-      
-      <View style={styles.bottomPadding} />
-    </ScrollView>
-  );
+	return (
+		<ScrollView
+			style={[styles.container, { backgroundColor: colors.background }]}
+			contentContainerStyle={styles.contentContainer}
+			showsVerticalScrollIndicator={false}
+		>
+			<MemoTitleSkeleton />
+			<MemoMetadataSkeleton />
+
+			{showMemories && <MemoryCardSkeleton showMultiple />}
+
+			{showAudioPlayer && <AudioPlayerSkeleton />}
+
+			{showTranscript && <TranscriptSkeleton />}
+
+			{showQuestionButton && <QuestionButtonSkeleton />}
+
+			<View style={styles.bottomPadding} />
+		</ScrollView>
+	);
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingTop: 8,        // Same as content paddingTop in memo page
-    paddingBottom: 32,    // Same as scrollContentContainer paddingBottom
-  },
-  bottomPadding: {
-    height: 120,  // Account for bottom bar
-  },
+	container: {
+		flex: 1,
+	},
+	contentContainer: {
+		paddingTop: 8, // Same as content paddingTop in memo page
+		paddingBottom: 32, // Same as scrollContentContainer paddingBottom
+	},
+	bottomPadding: {
+		height: 120, // Account for bottom bar
+	},
 });

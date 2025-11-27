@@ -8,37 +8,35 @@ import { ConfigService } from '@nestjs/config';
  */
 @Injectable()
 export class SupabaseClientService {
-  private readonly url: string;
-  private readonly anonKey: string;
+	private readonly url: string;
+	private readonly anonKey: string;
 
-  constructor(private configService: ConfigService) {
-    this.url = this.configService.get<string>('MAERCHENZAUBER_SUPABASE_URL')!;
-    this.anonKey = this.configService.get<string>(
-      'MAERCHENZAUBER_SUPABASE_ANON_KEY',
-    )!;
-  }
+	constructor(private configService: ConfigService) {
+		this.url = this.configService.get<string>('MAERCHENZAUBER_SUPABASE_URL')!;
+		this.anonKey = this.configService.get<string>('MAERCHENZAUBER_SUPABASE_ANON_KEY')!;
+	}
 
-  /**
-   * Create an authenticated Supabase client with the given token
-   */
-  createAuthenticatedClient(token: string): SupabaseClient {
-    return createClient(this.url, this.anonKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-      global: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    });
-  }
+	/**
+	 * Create an authenticated Supabase client with the given token
+	 */
+	createAuthenticatedClient(token: string): SupabaseClient {
+		return createClient(this.url, this.anonKey, {
+			auth: {
+				autoRefreshToken: false,
+				persistSession: false,
+			},
+			global: {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			},
+		});
+	}
 
-  /**
-   * Create an unauthenticated Supabase client
-   */
-  createUnauthenticatedClient(): SupabaseClient {
-    return createClient(this.url, this.anonKey);
-  }
+	/**
+	 * Create an unauthenticated Supabase client
+	 */
+	createUnauthenticatedClient(): SupabaseClient {
+		return createClient(this.url, this.anonKey);
+	}
 }

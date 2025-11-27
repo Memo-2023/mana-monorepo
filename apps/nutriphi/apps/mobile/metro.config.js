@@ -10,8 +10,8 @@ const config = getDefaultConfig(__dirname);
 
 // Add path mapping for @ alias
 config.resolver.alias = {
-  '@': path.resolve(__dirname, './'),
-  ...config.resolver.alias,
+	'@': path.resolve(__dirname, './'),
+	...config.resolver.alias,
 };
 
 module.exports = withNativeWind(config, { input: './global.css' });

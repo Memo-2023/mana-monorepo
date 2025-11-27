@@ -23,7 +23,9 @@ The following terms are brand names or technical terms that should remain unchan
 ## Language-Specific Guidelines
 
 ### Important: Informal Address
+
 **All languages should use informal address forms** to maintain a friendly, modern app experience:
+
 - German: "du/dein" (not "Sie")
 - French: "tu/ton" (not "vous")
 - Italian: "tu/tuo" (not "Lei")
@@ -31,29 +33,34 @@ The following terms are brand names or technical terms that should remain unchan
 - Dutch: "je/jij" (already informal)
 
 ### German (de)
+
 - Use informal "du" for user-facing text
 - Technical terms: Keep English terms that are commonly used in German IT contexts
 - Date format: DD.MM.YYYY
 - Time format: 24-hour (HH:mm)
 
 ### French (fr)
+
 - Use informal "tu" for user-facing text
 - Keep articles with brand terms where natural (e.g., "une Memory")
 - Date format: DD/MM/YYYY
 - Time format: 24-hour (HH:mm)
 
 ### Italian (it)
+
 - Use informal "tu" forms (second person singular)
 - Keep articles with brand terms where natural (e.g., "una Memory")
 - Date format: DD/MM/YYYY
 - Time format: 24-hour (HH:mm)
 
 ### Spanish (es)
+
 - Use informal "tú" forms for instructions and UI text
 - Date format: DD/MM/YYYY
 - Time format: 24-hour (HH:mm)
 
 ### Dutch (nl)
+
 - Use informal "je/jij" forms (modern app convention)
 - Date format: DD-MM-YYYY
 - Time format: 24-hour (HH:mm)
@@ -61,26 +68,29 @@ The following terms are brand names or technical terms that should remain unchan
 ## Common Translations
 
 ### Core Features
-| English | German | French | Italian | Spanish | Dutch |
-|---------|---------|---------|----------|----------|--------|
-| Memo/Memos | Memo/Memos | Mémo/Mémos | Memo/Memo | Memo/Memos | Memo/Memo's |
-| Recording | Aufnahme | Enregistrement | Registrazione | Grabación | Opname |
-| Transcript | Transkript | Transcription | Trascrizione | Transcripción | Transcriptie |
-| Speaker | Sprecher | Intervenant | Relatore | Orador | Spreker |
-| Space/Spaces | Bereich/Bereiche | Espace/Espaces | Spazio/Spazi | Espacio/Espacios | Ruimte/Ruimtes |
+
+| English      | German           | French         | Italian       | Spanish          | Dutch          |
+| ------------ | ---------------- | -------------- | ------------- | ---------------- | -------------- |
+| Memo/Memos   | Memo/Memos       | Mémo/Mémos     | Memo/Memo     | Memo/Memos       | Memo/Memo's    |
+| Recording    | Aufnahme         | Enregistrement | Registrazione | Grabación        | Opname         |
+| Transcript   | Transkript       | Transcription  | Trascrizione  | Transcripción    | Transcriptie   |
+| Speaker      | Sprecher         | Intervenant    | Relatore      | Orador           | Spreker        |
+| Space/Spaces | Bereich/Bereiche | Espace/Espaces | Spazio/Spazi  | Espacio/Espacios | Ruimte/Ruimtes |
 
 ### Actions
-| English | German | French | Italian | Spanish | Dutch |
-|---------|---------|---------|----------|----------|--------|
-| Share | Teilen | Partager | Condividi | Compartir | Delen |
-| Copy | Kopieren | Copier | Copia | Copiar | Kopiëren |
-| Delete | Löschen | Supprimer | Elimina | Eliminar | Verwijderen |
+
+| English   | German            | French               | Italian       | Spanish        | Dutch               |
+| --------- | ----------------- | -------------------- | ------------- | -------------- | ------------------- |
+| Share     | Teilen            | Partager             | Condividi     | Compartir      | Delen               |
+| Copy      | Kopieren          | Copier               | Copia         | Copiar         | Kopiëren            |
+| Delete    | Löschen           | Supprimer            | Elimina       | Eliminar       | Verwijderen         |
 | Pin/Unpin | Anpinnen/Loslösen | Épingler/Désépingler | Fissa/Sblocca | Fijar/Desfijar | Vastpinnen/Losmaken |
 
 ## Technical Terms
 
 ### Audio & Processing
-- **Diarization**: 
+
+- **Diarization**:
   - DE: Sprechererkennung
   - FR: Diarisation
   - IT: Diarizzazione
@@ -88,6 +98,7 @@ The following terms are brand names or technical terms that should remain unchan
   - NL: Sprekerherkenning
 
 ### Features to Keep in English
+
 - API
 - Webhook
 - Token
@@ -133,12 +144,10 @@ When adding a new language:
    - Variable names in curly braces: `{{variable}}`
    - Brand names: Memoro, Mana, Memory, Blueprint
    - Technical terms when commonly used in English
-   
 2. **Always translate**:
    - UI action words (Save, Cancel, Delete, etc.)
    - Descriptive text and messages
    - Error messages and confirmations
-   
 3. **Header Menu Issue**: The app uses action IDs for navigation, not translated strings. Ensure menu items have proper `id` fields.
 
 ## Notes for Developers

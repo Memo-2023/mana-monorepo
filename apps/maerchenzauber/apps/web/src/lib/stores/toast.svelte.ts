@@ -76,5 +76,5 @@ export const toastStore = {
 	},
 
 	remove: removeToast,
-	clear: clearToasts
+	clear: clearToasts,
 };

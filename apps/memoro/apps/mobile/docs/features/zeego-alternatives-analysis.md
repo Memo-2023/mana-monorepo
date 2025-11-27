@@ -1,6 +1,7 @@
 # Zeego Kompatibilitätsprobleme und Alternativen-Analyse
 
 ## Zusammenfassung
+
 Datum: 30. September 2025
 
 Unser Projekt nutzt aktuell Zeego v3.0.6 für Context Menus und Dropdown Menus. Mit dem Upgrade auf Expo SDK 54 (React Native 0.81) und iOS 26 treten kritische Kompatibilitätsprobleme auf, die die App am Starten hindern.
@@ -18,12 +19,14 @@ react-native-ios-context-menu could not be found within the project
 ### Zeego Kompatibilitätsstatus
 
 **Zeego Version 3.x Kompatibilität:**
+
 - ✅ React Native: 0.76 oder 0.77
 - ✅ Expo SDK: 52+
 - ❌ React Native 0.81 (SDK 54): **Nicht offiziell unterstützt**
 - ❌ iOS 26: **Keine offizielle Kompatibilität**
 
 **Abhängigkeiten:**
+
 - `react-native-menu`: 1.2.2
 - `react-native-ios-context-menu`: 3.1.0
 - `react-native-ios-utilities`: 5.1.2
@@ -53,11 +56,13 @@ Laut GitHub Issue #173 auf dem Zeego Repository:
 Zeego wird an **15 Stellen** im Projekt verwendet:
 
 ### Context Menus (4 Verwendungen)
+
 - `components/organisms/Memory.tsx`
 - `components/molecules/PromptPreview.tsx`
 - `components/molecules/MemoPreview.tsx`
 
 ### Dropdown Menus (11 Verwendungen)
+
 - `components/molecules/TableOfContentsMenu.tsx`
 - `components/atoms/Pill.tsx`
 - `features/subscription/SubscriptionMenu.tsx`
@@ -74,11 +79,13 @@ Zeego wird an **15 Stellen** im Projekt verwendet:
 Warten, bis Zeego offiziell Expo SDK 54 und React Native 0.81 unterstützt.
 
 **Vorteile:**
+
 - ✅ Keine Code-Änderungen nötig
 - ✅ Behält bestehende API und Funktionalität
 - ✅ Native Performance bleibt erhalten
 
 **Nachteile:**
+
 - ❌ Unbekannter Zeitrahmen
 - ❌ `react-native-ios-context-menu` ist im Maintenance Mode (Autor macht kein OSS mehr)
 - ❌ Blockiert SDK 54 Upgrade
@@ -97,6 +104,7 @@ Warten, bis Zeego offiziell Expo SDK 54 und React Native 0.81 unterstützt.
 Ersetze Dropdown- und Context-Menus durch `@expo/react-native-action-sheet` (bereits im Projekt als Dependency).
 
 **Vorteile:**
+
 - ✅ **Bereits im Projekt vorhanden** (`@expo/react-native-action-sheet@^4.1.1`)
 - ✅ Offiziell von Expo maintained
 - ✅ 100% Expo SDK 54 kompatibel
@@ -106,6 +114,7 @@ Ersetze Dropdown- und Context-Menus durch `@expo/react-native-action-sheet` (ber
 - ✅ Keine zusätzlichen Dependencies
 
 **Nachteile:**
+
 - ❌ **Limitierte Funktionalität** - keine verschachtelten Menüs, keine Icons, keine Checkboxen
 - ❌ Andere UX - Modal von unten statt Context Menu
 - ❌ Funktioniert nicht auf Web (nur mobil)
@@ -118,31 +127,36 @@ Ersetze Dropdown- und Context-Menus durch `@expo/react-native-action-sheet` (ber
 import * as DropdownMenu from 'zeego/dropdown-menu';
 
 <DropdownMenu.Root>
-  <DropdownMenu.Trigger>
-    <Button />
-  </DropdownMenu.Trigger>
-  <DropdownMenu.Content>
-    <DropdownMenu.Item key="delete" onSelect={handleDelete}>
-      <DropdownMenu.ItemTitle>Löschen</DropdownMenu.ItemTitle>
-      <DropdownMenu.ItemIcon ios={{ name: 'trash' }} />
-    </DropdownMenu.Item>
-  </DropdownMenu.Content>
-</DropdownMenu.Root>
+	<DropdownMenu.Trigger>
+		<Button />
+	</DropdownMenu.Trigger>
+	<DropdownMenu.Content>
+		<DropdownMenu.Item key="delete" onSelect={handleDelete}>
+			<DropdownMenu.ItemTitle>Löschen</DropdownMenu.ItemTitle>
+			<DropdownMenu.ItemIcon ios={{ name: 'trash' }} />
+		</DropdownMenu.Item>
+	</DropdownMenu.Content>
+</DropdownMenu.Root>;
 
 // Nachher (Action Sheet)
 import { useActionSheet } from '@expo/react-native-action-sheet';
 
 const { showActionSheetWithOptions } = useActionSheet();
 
-<Button onPress={() => {
-  showActionSheetWithOptions({
-    options: ['Löschen', 'Abbrechen'],
-    destructiveButtonIndex: 0,
-    cancelButtonIndex: 1,
-  }, (buttonIndex) => {
-    if (buttonIndex === 0) handleDelete();
-  });
-}} />
+<Button
+	onPress={() => {
+		showActionSheetWithOptions(
+			{
+				options: ['Löschen', 'Abbrechen'],
+				destructiveButtonIndex: 0,
+				cancelButtonIndex: 1,
+			},
+			(buttonIndex) => {
+				if (buttonIndex === 0) handleDelete();
+			}
+		);
+	}}
+/>;
 ```
 
 **Zeitaufwand:** 6-8 Stunden (alle 15 Verwendungen anpassen)
@@ -159,12 +173,14 @@ const { showActionSheetWithOptions } = useActionSheet();
 Cross-platform Context Menu Library (iOS + Android).
 
 **Vorteile:**
+
 - ✅ Context Menus auf iOS und Android
 - ✅ Einfachere API als Zeego
 - ✅ Native UI auf beiden Plattformen
 - ✅ Unterstützt Icons und Submenus
 
 **Nachteile:**
+
 - ❌ **Wartungsprobleme** - viele offene Issues
 - ❌ **Keine bestätigte New Architecture Unterstützung**
 - ❌ **Unklare SDK 54 Kompatibilität**
@@ -172,6 +188,7 @@ Cross-platform Context Menu Library (iOS + Android).
 - ❌ Nur Context Menus, keine Dropdown Menus
 
 **Status der Library:**
+
 - Latest Version: 1.19.0 (vor 5 Monaten)
 - Maintenance: "Not nearly as good" laut Community-Feedback
 - Signifikante offene Issues
@@ -190,15 +207,19 @@ Cross-platform Context Menu Library (iOS + Android).
 Direkte Verwendung von Platform-spezifischen APIs ohne Wrapper Library.
 
 **iOS:**
+
 - `@react-native-menu/menu@2.0.0` für iOS Context Menus (UIMenu)
 
 **Android:**
+
 - `@react-native-menu/menu@2.0.0` für Android PopupMenu
 
 **Web:**
+
 - Radix UI Dropdown Menu / Context Menu
 
 **Vorteile:**
+
 - ✅ Maximale Kontrolle
 - ✅ Native Features und Performance
 - ✅ Keine Wrapper-Dependencies
@@ -206,6 +227,7 @@ Direkte Verwendung von Platform-spezifischen APIs ohne Wrapper Library.
 - ✅ Expo config plugin vorhanden
 
 **Nachteile:**
+
 - ❌ **3 verschiedene Implementierungen** (iOS, Android, Web)
 - ❌ Viel Boilerplate Code
 - ❌ Höherer Wartungsaufwand
@@ -219,9 +241,9 @@ import { ContextMenuView } from '@react-native-menu/menu'; // iOS/Android
 import * as RadixDropdown from '@radix-ui/react-dropdown-menu'; // Web
 
 const Menu = Platform.select({
-  ios: IOSContextMenu,
-  android: AndroidContextMenu,
-  web: RadixWebMenu,
+	ios: IOSContextMenu,
+	android: AndroidContextMenu,
+	web: RadixWebMenu,
 });
 ```
 
@@ -239,18 +261,21 @@ const Menu = Platform.select({
 Kombiniere mehrere Libraries basierend auf Use Case.
 
 **Strategie:**
+
 - **Einfache Dropdown Menus:** Action Sheet
 - **iOS Context Menus (kritisch):** `@react-native-menu/menu@2.0.0`
 - **Android:** Action Sheet oder `@react-native-menu/menu`
 - **Web:** Radix UI oder Action Sheet-ähnliche Modals
 
 **Vorteile:**
+
 - ✅ Best-of-both-worlds Ansatz
 - ✅ Sofort funktionsfähig
 - ✅ Optimiert für jeden Use Case
 - ✅ Schrittweise Migration möglich
 
 **Nachteile:**
+
 - ❌ Höhere Code-Komplexität
 - ❌ Mehr Dependencies
 - ❌ Inkonsistente UX möglich
@@ -267,6 +292,7 @@ Kombiniere mehrere Libraries basierend auf Use Case.
 Baue eigene Menu-Komponenten mit React Native Modals, Pressables und Animations.
 
 **Vorteile:**
+
 - ✅ Volle Kontrolle über UX
 - ✅ Cross-platform konsistent
 - ✅ Keine nativen Dependencies
@@ -274,6 +300,7 @@ Baue eigene Menu-Komponenten mit React Native Modals, Pressables und Animations.
 - ✅ Keine Kompatibilitätsprobleme
 
 **Nachteile:**
+
 - ❌ **Sehr hoher Zeitaufwand** (20-30 Stunden)
 - ❌ Kein natives Look-and-Feel
 - ❌ Performance-Optimierung nötig
@@ -290,16 +317,16 @@ Baue eigene Menu-Komponenten mit React Native Modals, Pressables und Animations.
 
 ## Vergleichsmatrix
 
-| Kriterium | Option 1: Warten | Option 2: Action Sheet | Option 3: context-menu-view | Option 4: Native APIs | Option 5: Hybrid | Option 6: Custom |
-|-----------|------------------|------------------------|------------------------------|----------------------|------------------|------------------|
-| **Zeitaufwand** | 0h (Wartezeit) | 6-8h | 8-10h | 12-16h | 10-14h | 20-30h |
-| **SDK 54 Ready** | ❌ Nein | ✅ Ja | ⚠️ Unklar | ✅ Ja | ✅ Ja | ✅ Ja |
-| **New Arch Support** | ⚠️ Teils | ✅ Ja | ❌ Unklar | ✅ Ja | ✅ Ja | ✅ Ja |
-| **Native Look** | ✅ Ja | ✅ Ja | ✅ Ja | ✅ Ja | ✅ Ja | ❌ Nein |
-| **Web Support** | ✅ Ja | ❌ Nein | ❌ Nein | ✅ Ja | ⚠️ Teils | ✅ Ja |
-| **Maintenance** | ⚠️ Extern | ✅ Niedrig | ❌ Hoch | ⚠️ Mittel | ⚠️ Mittel | ❌ Sehr Hoch |
-| **Feature-Vollständigkeit** | ✅✅✅ | ⚠️ | ✅✅ | ✅✅✅ | ✅✅✅ | ✅✅✅ |
-| **Risiko** | 🔴 Hoch | 🟢 Niedrig | 🟡 Mittel-Hoch | 🟡 Mittel | 🟡 Mittel | 🔴 Hoch |
+| Kriterium                   | Option 1: Warten | Option 2: Action Sheet | Option 3: context-menu-view | Option 4: Native APIs | Option 5: Hybrid | Option 6: Custom |
+| --------------------------- | ---------------- | ---------------------- | --------------------------- | --------------------- | ---------------- | ---------------- |
+| **Zeitaufwand**             | 0h (Wartezeit)   | 6-8h                   | 8-10h                       | 12-16h                | 10-14h           | 20-30h           |
+| **SDK 54 Ready**            | ❌ Nein          | ✅ Ja                  | ⚠️ Unklar                   | ✅ Ja                 | ✅ Ja            | ✅ Ja            |
+| **New Arch Support**        | ⚠️ Teils         | ✅ Ja                  | ❌ Unklar                   | ✅ Ja                 | ✅ Ja            | ✅ Ja            |
+| **Native Look**             | ✅ Ja            | ✅ Ja                  | ✅ Ja                       | ✅ Ja                 | ✅ Ja            | ❌ Nein          |
+| **Web Support**             | ✅ Ja            | ❌ Nein                | ❌ Nein                     | ✅ Ja                 | ⚠️ Teils         | ✅ Ja            |
+| **Maintenance**             | ⚠️ Extern        | ✅ Niedrig             | ❌ Hoch                     | ⚠️ Mittel             | ⚠️ Mittel        | ❌ Sehr Hoch     |
+| **Feature-Vollständigkeit** | ✅✅✅           | ⚠️                     | ✅✅                        | ✅✅✅                | ✅✅✅           | ✅✅✅           |
+| **Risiko**                  | 🔴 Hoch          | 🟢 Niedrig             | 🟡 Mittel-Hoch              | 🟡 Mittel             | 🟡 Mittel        | 🔴 Hoch          |
 
 ---
 
@@ -347,30 +374,36 @@ Baue eigene Menu-Komponenten mit React Native Modals, Pressables und Animations.
 **Ziel:** SDK 54 kompatible App mit Action Sheets
 
 #### Tag 1: Vorbereitung
+
 1. **Backup erstellen**
+
    ```bash
    git checkout -b migration/zeego-to-actionsheet
    ```
 
 2. **Action Sheet Hook vorbereiten**
+
    ```tsx
    // hooks/useMenu.ts
    import { useActionSheet } from '@expo/react-native-action-sheet';
 
    export const useMenu = () => {
-     const { showActionSheetWithOptions } = useActionSheet();
+   	const { showActionSheetWithOptions } = useActionSheet();
 
-     return {
-       showMenu: (options: MenuOption[]) => {
-         showActionSheetWithOptions({
-           options: options.map(o => o.title),
-           destructiveButtonIndex: options.findIndex(o => o.destructive),
-           cancelButtonIndex: options.length - 1,
-         }, (index) => {
-           options[index]?.onSelect?.();
-         });
-       }
-     };
+   	return {
+   		showMenu: (options: MenuOption[]) => {
+   			showActionSheetWithOptions(
+   				{
+   					options: options.map((o) => o.title),
+   					destructiveButtonIndex: options.findIndex((o) => o.destructive),
+   					cancelButtonIndex: options.length - 1,
+   				},
+   				(index) => {
+   					options[index]?.onSelect?.();
+   				}
+   			);
+   		},
+   	};
    };
    ```
 
@@ -378,14 +411,15 @@ Baue eigene Menu-Komponenten mit React Native Modals, Pressables und Animations.
    ```tsx
    // types/menu.ts
    export interface MenuOption {
-     title: string;
-     onSelect?: () => void;
-     destructive?: boolean;
-     disabled?: boolean;
+   	title: string;
+   	onSelect?: () => void;
+   	destructive?: boolean;
+   	disabled?: boolean;
    }
    ```
 
 #### Tag 2: Migration Dropdown Menus (11 Komponenten)
+
 1. `features/menus/HeaderMenu.tsx`
 2. `features/menus/MemoMenu.tsx`
 3. `features/menus/MemoHeaderMenu.tsx`
@@ -395,12 +429,14 @@ Baue eigene Menu-Komponenten mit React Native Modals, Pressables und Animations.
 7. Weitere Dropdown-Komponenten
 
 **Pro Komponente:**
+
 - Zeego Imports entfernen
 - Action Sheet Hook einbinden
 - Trigger Button anpassen
 - Menu Options Array erstellen
 
 #### Tag 3: Migration Context Menus (4 Komponenten)
+
 1. `components/organisms/Memory.tsx`
 2. `components/molecules/PromptPreview.tsx`
 3. `components/molecules/MemoPreview.tsx`
@@ -408,6 +444,7 @@ Baue eigene Menu-Komponenten mit React Native Modals, Pressables und Animations.
 **Temporär:** Action Sheet mit Long Press Trigger
 
 #### Tag 3 Nachmittag: Testing
+
 - iOS Testing (Simulator + Device)
 - Android Testing (Emulator + Device)
 - Funktionale Tests aller Menu-Interaktionen
@@ -422,20 +459,21 @@ Baue eigene Menu-Komponenten mit React Native Modals, Pressables und Animations.
 #### Woche 1: Setup + iOS Implementation
 
 **Dependency Installation:**
+
 ```bash
 npm install @react-native-menu/menu@2.0.0
 ```
 
 **app.json Plugin:**
+
 ```json
 {
-  "plugins": [
-    "@react-native-menu/menu"
-  ]
+	"plugins": ["@react-native-menu/menu"]
 }
 ```
 
 **Rebuild:**
+
 ```bash
 npx expo prebuild --clean
 npx expo run:ios
@@ -450,40 +488,43 @@ import { ContextMenuView } from '@react-native-menu/menu';
 import { useMenu } from '~/hooks/useMenu'; // Action Sheet fallback
 
 export const Memory = ({ memory }) => {
-  const { showMenu } = useMenu();
+	const { showMenu } = useMenu();
 
-  if (Platform.OS === 'ios') {
-    return (
-      <ContextMenuView
-        actions={[
-          { id: 'share', title: 'Teilen', image: 'square.and.arrow.up' },
-          { id: 'delete', title: 'Löschen', destructive: true },
-        ]}
-        onPressAction={({ nativeEvent }) => {
-          if (nativeEvent.actionKey === 'delete') handleDelete();
-          if (nativeEvent.actionKey === 'share') handleShare();
-        }}
-      >
-        <MemoryContent memory={memory} />
-      </ContextMenuView>
-    );
-  }
+	if (Platform.OS === 'ios') {
+		return (
+			<ContextMenuView
+				actions={[
+					{ id: 'share', title: 'Teilen', image: 'square.and.arrow.up' },
+					{ id: 'delete', title: 'Löschen', destructive: true },
+				]}
+				onPressAction={({ nativeEvent }) => {
+					if (nativeEvent.actionKey === 'delete') handleDelete();
+					if (nativeEvent.actionKey === 'share') handleShare();
+				}}
+			>
+				<MemoryContent memory={memory} />
+			</ContextMenuView>
+		);
+	}
 
-  // Android/Web Fallback: Long Press -> Action Sheet
-  return (
-    <Pressable
-      onLongPress={() => showMenu([
-        { title: 'Teilen', onSelect: handleShare },
-        { title: 'Löschen', onSelect: handleDelete, destructive: true },
-      ])}
-    >
-      <MemoryContent memory={memory} />
-    </Pressable>
-  );
+	// Android/Web Fallback: Long Press -> Action Sheet
+	return (
+		<Pressable
+			onLongPress={() =>
+				showMenu([
+					{ title: 'Teilen', onSelect: handleShare },
+					{ title: 'Löschen', onSelect: handleDelete, destructive: true },
+				])
+			}
+		>
+			<MemoryContent memory={memory} />
+		</Pressable>
+	);
 };
 ```
 
 #### Woche 2: Testing + Optimierung
+
 - iOS Context Menu Testing
 - Android Fallback Testing
 - Performance Testing
@@ -494,11 +535,13 @@ export const Memory = ({ memory }) => {
 ### Phase 3: Monitoring & Evaluation (Ongoing)
 
 **Zeego Tracking:**
+
 - GitHub Issue #173 monitoren
 - Release Notes von Zeego beobachten
 - Bei SDK 54 Support: Evaluation ob Rückmigration lohnt
 
 **Kriterien für Rückmigration zu Zeego:**
+
 - ✅ Offizieller Expo SDK 54 Support
 - ✅ React Native 0.81+ Support
 - ✅ Stabile Version (keine Beta)
@@ -524,11 +567,7 @@ npm uninstall @react-native-menu/menu # Falls installiert als Zeego Dependency
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 
 export default function RootLayout() {
-  return (
-    <ActionSheetProvider>
-      {/* Rest der App */}
-    </ActionSheetProvider>
-  );
+	return <ActionSheetProvider>{/* Rest der App */}</ActionSheetProvider>;
 }
 ```
 
@@ -540,44 +579,47 @@ import { useActionSheet } from '@expo/react-native-action-sheet';
 import { useCallback } from 'react';
 
 export interface MenuOption {
-  title: string;
-  onSelect?: () => void;
-  destructive?: boolean;
-  disabled?: boolean;
-  icon?: string; // Für zukünftige native menu implementation
+	title: string;
+	onSelect?: () => void;
+	destructive?: boolean;
+	disabled?: boolean;
+	icon?: string; // Für zukünftige native menu implementation
 }
 
 export const useMenu = () => {
-  const { showActionSheetWithOptions } = useActionSheet();
+	const { showActionSheetWithOptions } = useActionSheet();
 
-  const showMenu = useCallback((
-    options: MenuOption[],
-    config?: {
-      title?: string;
-      message?: string;
-    }
-  ) => {
-    const actionOptions = options.map(o => o.title);
-    const cancelButtonIndex = actionOptions.length - 1;
-    const destructiveButtonIndex = options.findIndex(o => o.destructive);
+	const showMenu = useCallback(
+		(
+			options: MenuOption[],
+			config?: {
+				title?: string;
+				message?: string;
+			}
+		) => {
+			const actionOptions = options.map((o) => o.title);
+			const cancelButtonIndex = actionOptions.length - 1;
+			const destructiveButtonIndex = options.findIndex((o) => o.destructive);
 
-    showActionSheetWithOptions(
-      {
-        options: actionOptions,
-        cancelButtonIndex,
-        destructiveButtonIndex: destructiveButtonIndex >= 0 ? destructiveButtonIndex : undefined,
-        title: config?.title,
-        message: config?.message,
-      },
-      (buttonIndex) => {
-        if (buttonIndex !== undefined && buttonIndex !== cancelButtonIndex) {
-          options[buttonIndex]?.onSelect?.();
-        }
-      }
-    );
-  }, [showActionSheetWithOptions]);
+			showActionSheetWithOptions(
+				{
+					options: actionOptions,
+					cancelButtonIndex,
+					destructiveButtonIndex: destructiveButtonIndex >= 0 ? destructiveButtonIndex : undefined,
+					title: config?.title,
+					message: config?.message,
+				},
+				(buttonIndex) => {
+					if (buttonIndex !== undefined && buttonIndex !== cancelButtonIndex) {
+						options[buttonIndex]?.onSelect?.();
+					}
+				}
+			);
+		},
+		[showActionSheetWithOptions]
+	);
 
-  return { showMenu };
+	return { showMenu };
 };
 ```
 
@@ -586,32 +628,40 @@ export const useMenu = () => {
 ## Risiken & Mitigationen
 
 ### Risiko 1: UX Verschlechterung
+
 **Problem:** Action Sheets haben andere UX als Context/Dropdown Menus
 
 **Mitigation:**
+
 - User Testing durchführen
 - Feedback sammeln
 - Bei kritischen Features: Native Context Menus (Phase 2)
 
 ### Risiko 2: Web Support
+
 **Problem:** Action Sheets funktionieren nicht auf Web
 
 **Mitigation:**
+
 - Falls Web wichtig: Phase 2 mit Radix UI für Web
 - Oder: Web-spezifische Dropdown Implementierung mit React Native Web Modals
 
 ### Risiko 3: Feature Loss
+
 **Problem:** Icons, Checkboxes, verschachtelte Menus gehen verloren
 
 **Mitigation:**
+
 - Dokumentiere fehlende Features
 - Priorisiere nach Business Impact
 - Alternative UI Patterns für kritische Features (z.B. separate Settings Screens statt Inline Checkboxes)
 
 ### Risiko 4: Zukünftige Zeego-Updates
+
 **Problem:** Wenn Zeego später SDK 54 Support erhält, haben wir doppelten Aufwand
 
 **Mitigation:**
+
 - Code modular halten (useMenu Hook als Abstraction)
 - Zeego Monitoring als Teil des Prozesses
 - Rückmigration nur wenn klarer Mehrwert
@@ -621,21 +671,25 @@ export const useMenu = () => {
 ## Entscheidungshilfe
 
 ### Wähle **Option 1 (Warten)** wenn:
+
 - ❌ Nicht empfohlen - zu hohes Risiko
 
 ### Wähle **Option 2 (Action Sheet)** wenn:
+
 - ✅ Schnelle Lösung benötigt (2-3 Tage)
 - ✅ SDK 54 Upgrade blockiert
 - ✅ Basic Menu-Funktionalität ausreichend
 - ✅ Team-Kapazität limitiert
 
 ### Wähle **Option 4 (Native APIs)** wenn:
+
 - ✅ Context Menu UX kritisch
 - ✅ Platform-spezifische Features benötigt
 - ✅ Team hat 2-3 Wochen Zeit
 - ✅ Web Support wichtig
 
 ### Wähle **Option 2 + 4 Hybrid (Empfohlen)** wenn:
+
 - ✅ Best-of-both-worlds gewünscht
 - ✅ Schrittweise Migration möglich
 - ✅ Risiko-Minimierung wichtig
@@ -657,18 +711,22 @@ export const useMenu = () => {
 ## Ressourcen & Links
 
 ### Zeego
+
 - [Zeego GitHub Issue #173 (Expo 54 Build fails)](https://github.com/nandorojo/zeego/issues/173)
 - [Zeego Docs - Compatibility Table](https://zeego.dev/start)
 
 ### Action Sheet
+
 - [@expo/react-native-action-sheet Docs](https://docs.expo.dev/versions/latest/sdk/action-sheet/)
 - [GitHub Repository](https://github.com/expo/react-native-action-sheet)
 
 ### Native Menu
+
 - [@react-native-menu/menu v2.0.0](https://www.npmjs.com/package/@react-native-menu/menu)
 - [GitHub Repository](https://github.com/react-native-menu/menu)
 
 ### Expo SDK 54
+
 - [Expo SDK 54 Changelog](https://expo.dev/changelog/sdk-54)
 - [Expo SDK 54 Upgrade Guide](https://expo.dev/blog/expo-sdk-upgrade-guide)
 
@@ -677,6 +735,7 @@ export const useMenu = () => {
 ## Appendix: Zeego Usage in Project
 
 ### Context Menu Verwendungen
+
 1. **components/organisms/Memory.tsx** (Zeile 17)
    - Use Case: Long-press auf Memory für Actions (Share, Delete, etc.)
    - Kritikalität: Hoch - Kern-Feature
@@ -690,6 +749,7 @@ export const useMenu = () => {
    - Kritikalität: Hoch
 
 ### Dropdown Menu Verwendungen
+
 4. **features/menus/HeaderMenu.tsx** (Zeile 8)
    - Use Case: App Header Menu
    - Kritikalität: Mittel

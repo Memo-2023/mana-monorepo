@@ -11,18 +11,18 @@ export type TimeOfDay = 'morning' | 'day' | 'evening' | 'night';
  * @returns The current time period
  */
 export function getTimeOfDay(mockHour?: number): TimeOfDay {
-  const now = new Date();
-  const hour = mockHour !== undefined ? mockHour : now.getHours();
+	const now = new Date();
+	const hour = mockHour !== undefined ? mockHour : now.getHours();
 
-  if (hour >= 6 && hour < 11) {
-    return 'morning';
-  } else if (hour >= 11 && hour < 17) {
-    return 'day';
-  } else if (hour >= 17 && hour < 21) {
-    return 'evening';
-  } else {
-    return 'night';
-  }
+	if (hour >= 6 && hour < 11) {
+		return 'morning';
+	} else if (hour >= 11 && hour < 17) {
+		return 'day';
+	} else if (hour >= 17 && hour < 21) {
+		return 'evening';
+	} else {
+		return 'night';
+	}
 }
 
 /**
@@ -31,13 +31,13 @@ export function getTimeOfDay(mockHour?: number): TimeOfDay {
  * @returns A greeting string
  */
 export function getGreeting(timeOfDay: TimeOfDay): string {
-  const greetings = {
-    morning: 'Guten Morgen',
-    day: 'Hallo',
-    evening: 'Guten Abend',
-    night: 'Gute Nacht',
-  };
-  return greetings[timeOfDay];
+	const greetings = {
+		morning: 'Guten Morgen',
+		day: 'Hallo',
+		evening: 'Guten Abend',
+		night: 'Gute Nacht',
+	};
+	return greetings[timeOfDay];
 }
 
 /**
@@ -46,11 +46,11 @@ export function getGreeting(timeOfDay: TimeOfDay): string {
  * @returns An emoji string
  */
 export function getTimeEmoji(timeOfDay: TimeOfDay): string {
-  const emojis = {
-    morning: '🌅',
-    day: '☁️',
-    evening: '🌆',
-    night: '🌙',
-  };
-  return emojis[timeOfDay];
+	const emojis = {
+		morning: '🌅',
+		day: '☁️',
+		evening: '🌆',
+		night: '🌙',
+	};
+	return emojis[timeOfDay];
 }

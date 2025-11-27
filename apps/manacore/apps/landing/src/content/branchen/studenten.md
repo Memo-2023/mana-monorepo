@@ -15,14 +15,14 @@ useCases:
   - Lernzusammenfassungen generieren
   - Übersetzungen für Fremdsprachenkurse
 testimonial:
-  quote: "Statt 5 verschiedene Tool-Abos zu jonglieren, nutze ich jetzt nur noch Mana. Besonders in der Prüfungsphase spare ich mir viel Geld und Stress."
-  author: "Lisa Müller"
-  role: "Masterstudentin"
-  company: "Uni Heidelberg"
+  quote: 'Statt 5 verschiedene Tool-Abos zu jonglieren, nutze ich jetzt nur noch Mana. Besonders in der Prüfungsphase spare ich mir viel Geld und Stress.'
+  author: 'Lisa Müller'
+  role: 'Masterstudentin'
+  company: 'Uni Heidelberg'
 pricing:
   special: true
-  discount: "Studenten-Tarif verfügbar"
-  details: "Vergünstigte Mana-Pakete für Studierende mit gültigem Nachweis"
+  discount: 'Studenten-Tarif verfügbar'
+  details: 'Vergünstigte Mana-Pakete für Studierende mit gültigem Nachweis'
 order: 3
 ---
 
@@ -47,24 +47,28 @@ Schluss mit teuren Abos, die du nur in der Prüfungsphase brauchst! Mit Mana nut
 ## Deine KI-Helfer im Studium
 
 ### 📝 Für Hausarbeiten & Essays
+
 - **Recherche**: Lass dir Literatur zusammenfassen und Quellen finden
 - **Gliederung**: Strukturiere deine Arbeit mit KI-Unterstützung
 - **Schreibhilfe**: Überwinde Schreibblockaden und formuliere wissenschaftlich
 - **Zitiercheck**: Prüfe deine Zitate und Formatierung
 
 ### 🎙️ Für Vorlesungen mit Memoro
+
 - **Aufzeichnen**: Nimm Vorlesungen auf und lass sie transkribieren
 - **Zusammenfassen**: Erhalte die wichtigsten Punkte auf einen Blick
 - **Durchsuchen**: Finde schnell bestimmte Themen in deinen Aufnahmen
 - **Teilen**: Erstelle Lerngruppen und teile Zusammenfassungen
 
 ### 📊 Für Präsentationen
+
 - **Foliendesign**: Erstelle professionelle Slides mit KI
 - **Visualisierungen**: Generiere Grafiken und Diagramme
 - **Sprechernotizen**: Lass dir Moderationstexte erstellen
 - **Übersetzungen**: Präsentiere mehrsprachig
 
 ### 🧠 Für die Prüfungsvorbereitung
+
 - **Lernkarten**: Erstelle Karteikarten aus deinen Unterlagen
 - **Übungsfragen**: Generiere Testfragen zum Üben
 - **Zusammenfassungen**: Komprimiere Skripte auf das Wesentliche
@@ -73,12 +77,14 @@ Schluss mit teuren Abos, die du nur in der Prüfungsphase brauchst! Mit Mana nut
 ## Kostenbeispiel für ein Semester
 
 **Traditionell (3 Tool-Abos)**:
+
 - ChatGPT Plus: 20€ × 6 Monate = 120€
 - Grammarly: 12€ × 6 Monate = 72€
 - DeepL Pro: 8€ × 6 Monate = 48€
 - **Gesamt: 240€**
 
 **Mit Mana**:
+
 - Einmalkauf: 50€ für 5.000 Mana
 - Reicht für: ~100 Stunden Memoro ODER ~500 ChatGPT-Sessions
 - **Ersparnis: 190€ pro Semester!**
@@ -86,16 +92,19 @@ Schluss mit teuren Abos, die du nur in der Prüfungsphase brauchst! Mit Mana nut
 ## Beliebte Mana-Pakete für Studis
 
 ### 🎯 Starter-Paket
+
 - **1.000 Mana** für 9,99€
 - Perfekt zum Ausprobieren
 - Reicht für: 1-2 Hausarbeiten
 
 ### 📚 Semester-Paket
+
 - **5.000 Mana** für 45€ (statt 50€)
 - Ideal für ein ganzes Semester
 - Reicht für: Alle Vorlesungen + Hausarbeiten
 
 ### 🚀 Master-Paket
+
 - **10.000 Mana** für 85€ (statt 100€)
 - Für Thesis und große Projekte
 - Reicht für: Komplette Abschlussarbeit

@@ -55,7 +55,9 @@
 			class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-black border border-gray-800 px-4 font-medium text-white transition-all hover:bg-gray-900 disabled:opacity-50"
 		>
 			{#if isLoading}
-				<div class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+				<div
+					class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
+				></div>
 			{:else}
 				<svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
 					<path

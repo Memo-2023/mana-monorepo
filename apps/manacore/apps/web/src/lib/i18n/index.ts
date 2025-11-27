@@ -37,14 +37,14 @@ function getInitialLocale(): SupportedLocale {
 // Initialize i18n at module scope (required for SSR)
 init({
 	fallbackLocale: defaultLocale,
-	initialLocale: getInitialLocale()
+	initialLocale: getInitialLocale(),
 });
 
 // Also export initI18n for backwards compatibility
 export function initI18n() {
 	init({
 		fallbackLocale: defaultLocale,
-		initialLocale: getInitialLocale()
+		initialLocale: getInitialLocale(),
 	});
 }
 

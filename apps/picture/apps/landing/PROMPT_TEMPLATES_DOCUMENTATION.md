@@ -11,6 +11,7 @@ Located in: `/apps/landing/src/content/config.ts`
 ### Core Fields
 
 #### Required Fields
+
 - **title** (string) - The name of the template
 - **description** (string) - Brief description of what the template creates
 - **icon** (string) - Emoji icon for visual identification
@@ -20,6 +21,7 @@ Located in: `/apps/landing/src/content/config.ts`
 - **recommendedModel** (string) - Best AI model for this template
 
 #### Template Variables
+
 - **variables** (array) - List of variable definitions:
   - `name` - Variable identifier in the template
   - `description` - User-friendly label
@@ -27,12 +29,14 @@ Located in: `/apps/landing/src/content/config.ts`
   - `required` - Whether the variable must be filled
 
 #### Organization
+
 - **category** - Main category (social-media, product-photography, character-design, etc.)
 - **tags** - Array of searchable tags
 - **difficulty** - Skill level required
 - **subcategory** - Optional subcategory for finer organization
 
 #### Recommendations
+
 - **recommendedModel** - Primary AI model
 - **alternativeModels** - Array of alternative models
 - **recommendedSettings** - Object with:
@@ -42,6 +46,7 @@ Located in: `/apps/landing/src/content/config.ts`
   - `negativePrompt` - What to avoid
 
 #### Examples & Variations
+
 - **exampleImages** - Array of example outputs:
   - `url` - Image path
   - `prompt` - Exact prompt used
@@ -52,6 +57,7 @@ Located in: `/apps/landing/src/content/config.ts`
   - `description` - What makes it different
 
 #### Engagement Metrics
+
 - **uses** (number) - Total usage count
 - **likes** (number) - User likes
 - **saves** (number) - Times saved
@@ -59,17 +65,20 @@ Located in: `/apps/landing/src/content/config.ts`
 - **successRate** (number, 0-100) - Success percentage
 
 #### Status Flags
+
 - **featured** (boolean) - Show in featured section
 - **popular** (boolean) - Mark as popular
 - **trending** (boolean) - Currently trending
 - **premium** (boolean) - Requires premium access
 
 #### Metadata
+
 - **publishDate** (date) - First published
 - **lastUpdated** (date) - Last modification
 - **language** (string) - Content language (en, de, fr, etc.)
 
 #### Content & Guidance
+
 - **useCases** - Array of use case strings
 - **idealFor** - Array of target audience strings
 - **tips** - Array of helpful tips
@@ -99,35 +108,35 @@ apps/landing/src/content/promptTemplates/
 
 ```markdown
 ---
-title: "Product Photography for Instagram"
-description: "Create stunning product shots optimized for Instagram"
-icon: "📸"
+title: 'Product Photography for Instagram'
+description: 'Create stunning product shots optimized for Instagram'
+icon: '📸'
 
-promptTemplate: "Professional product photography of {product}, {style} style, {lighting} lighting, on {background}, {angle} angle, high detail, commercial quality"
+promptTemplate: 'Professional product photography of {product}, {style} style, {lighting} lighting, on {background}, {angle} angle, high detail, commercial quality'
 
 variables:
-  - name: "product"
-    description: "The product to photograph"
-    placeholder: "sneakers / watch / coffee mug"
+  - name: 'product'
+    description: 'The product to photograph'
+    placeholder: 'sneakers / watch / coffee mug'
     required: true
-  - name: "style"
-    description: "Photography style"
-    placeholder: "minimalist / editorial / lifestyle"
+  - name: 'style'
+    description: 'Photography style'
+    placeholder: 'minimalist / editorial / lifestyle'
     required: true
 
-category: "product-photography"
+category: 'product-photography'
 tags:
-  - "product"
-  - "instagram"
-  - "commercial"
+  - 'product'
+  - 'instagram'
+  - 'commercial'
 
-difficulty: "beginner"
-recommendedModel: "flux-1-1-pro"
+difficulty: 'beginner'
+recommendedModel: 'flux-1-1-pro'
 alternativeModels:
-  - "flux-dev"
+  - 'flux-dev'
 
 recommendedSettings:
-  aspectRatio: "1:1"
+  aspectRatio: '1:1'
   steps: 2
   guidanceScale: 3.5
 
@@ -157,6 +166,7 @@ Your content here...
 Located in: `/apps/landing/src/utils/promptTemplates.ts`
 
 ### Template Retrieval
+
 - `getAllPromptTemplates()` - Get all templates, sorted by uses
 - `getFeaturedTemplates(limit)` - Get featured templates
 - `getPopularTemplates(limit)` - Get popular templates
@@ -164,12 +174,14 @@ Located in: `/apps/landing/src/utils/promptTemplates.ts`
 - `getTemplateBySlug(slug)` - Get single template
 
 ### Filtering
+
 - `getTemplatesByCategory(category)` - Filter by category
 - `getTemplatesByDifficulty(difficulty)` - Filter by difficulty
 - `getTemplatesByTag(tag)` - Filter by tag
 - `getTemplatesByModel(model)` - Filter by AI model
 
 ### Search & Sort
+
 - `searchTemplates(query)` - Full-text search
 - `sortTemplates(templates, sortBy)` - Sort by various criteria
 - `getMostUsedTemplates(limit)` - Top used templates
@@ -177,19 +189,23 @@ Located in: `/apps/landing/src/utils/promptTemplates.ts`
 - `getMostSavedTemplates(limit)` - Most saved templates
 
 ### Analytics
+
 - `getAllCategories()` - Get categories with counts and icons
 - `getAllTags()` - Get tags with usage counts
 - `getTemplateStats()` - Comprehensive statistics
 
 ### Template Manipulation
+
 - `fillTemplate(template, variables)` - Replace {variables} with values
 - `extractVariables(template)` - Get all {variables} from template
 - `validateTemplateVariables(template, providedVariables)` - Validate inputs
 
 ### Related Content
+
 - `getRelatedTemplates(currentTemplate, limit)` - Get related templates
 
 ### UI Helpers
+
 - `formatCategoryName(category)` - Format for display
 - `getDifficultyColor(difficulty)` - Get badge color
 
@@ -198,14 +214,17 @@ Located in: `/apps/landing/src/utils/promptTemplates.ts`
 Located in: `/apps/landing/src/components/promptTemplates/`
 
 ### TemplateCard.astro
+
 Reusable card component for displaying template summaries.
 
 **Props:**
+
 - `template` - PromptTemplateEntry
 - `featured` - boolean (optional)
 - `compact` - boolean (optional)
 
 **Features:**
+
 - Icon and title
 - Difficulty badge
 - Status badges (featured, popular, trending)
@@ -215,12 +234,15 @@ Reusable card component for displaying template summaries.
 - Recommended model
 
 ### PromptBuilder.astro
+
 Interactive form for building prompts from templates.
 
 **Props:**
+
 - `template` - PromptTemplateEntry
 
 **Features:**
+
 - Dynamic form fields based on template variables
 - Real-time prompt generation
 - Copy to clipboard functionality
@@ -228,28 +250,34 @@ Interactive form for building prompts from templates.
 - Required field validation
 
 ### CategoryGrid.astro
+
 Grid display of all categories.
 
 **Props:**
+
 - `categories` - Array of category objects
 - `interactive` - boolean (enables click-to-filter)
 
 **Features:**
+
 - Icon and category name
 - Template count
 - Hover effects
 - Interactive filtering (when enabled)
 
 ### TemplateFilters.astro
+
 Filter and sort controls.
 
 **Props:**
+
 - `categories` - Array of categories
 - `difficulties` - Array of difficulty levels
 - `models` - Array of AI models
 - `stats` - Statistics object
 
 **Features:**
+
 - Category filter dropdown
 - Difficulty filter dropdown
 - Model filter dropdown
@@ -258,14 +286,17 @@ Filter and sort controls.
 - Custom events for filter changes
 
 ### FeaturedSection.astro
+
 Section component for displaying featured templates.
 
 **Props:**
+
 - `templates` - Array of PromptTemplateEntry
 - `title` - string (optional)
 - `description` - string (optional)
 
 **Features:**
+
 - Responsive grid layout
 - Uses TemplateCard components
 - Customizable heading
@@ -273,9 +304,11 @@ Section component for displaying featured templates.
 ## Pages
 
 ### Index Page
+
 **Path:** `/apps/landing/src/pages/prompt-templates/index.astro`
 
 **Sections:**
+
 1. Hero with search and stats
 2. Filter bar (sticky)
 3. Featured templates section
@@ -284,6 +317,7 @@ Section component for displaying featured templates.
 6. CTA section
 
 **Features:**
+
 - Real-time client-side filtering
 - Search functionality
 - Sort options
@@ -292,9 +326,11 @@ Section component for displaying featured templates.
 - Responsive grid layouts
 
 ### Detail Page
+
 **Path:** `/apps/landing/src/pages/prompt-templates/[slug].astro`
 
 **Sections:**
+
 1. Hero with template info and stats
 2. Two-column layout:
    - **Main Content:**
@@ -316,6 +352,7 @@ Section component for displaying featured templates.
 4. CTA section
 
 **Features:**
+
 - Interactive prompt builder with live preview
 - Copy to clipboard
 - Breadcrumb navigation
@@ -326,18 +363,22 @@ Section component for displaying featured templates.
 ## SEO & Best Practices
 
 ### Title Format
+
 `{Template Title} - AI Prompt Template | Picture`
 
 ### Description Format
+
 Keep under 160 characters, focus on benefits and use cases.
 
 ### URL Structure
+
 `/prompt-templates` - Index page
 `/prompt-templates/{slug}` - Detail page
 `/prompt-templates?category={category}` - Category filter
 `/prompt-templates?tag={tag}` - Tag filter
 
 ### Content Guidelines
+
 1. **Title** - Clear, descriptive, 3-7 words
 2. **Description** - One sentence benefit statement
 3. **Icon** - Relevant emoji
@@ -347,6 +388,7 @@ Keep under 160 characters, focus on benefits and use cases.
 7. **Use Cases** - 3-6 specific scenarios
 
 ### Engagement Tips
+
 - Set realistic success rates
 - Use clear, specific placeholders
 - Include example images when possible
@@ -356,19 +398,25 @@ Keep under 160 characters, focus on benefits and use cases.
 ## Naming Conventions
 
 ### File Names
+
 Use kebab-case with descriptive names:
+
 - `instagram-product-showcase.md`
 - `character-design-rpg.md`
 - `cinematic-portrait.md`
 
 ### Category Slugs
+
 Use kebab-case:
+
 - `product-photography`
 - `character-design`
 - `social-media`
 
 ### Variable Names
+
 Use snake_case:
+
 - `product_type`
 - `lighting_style`
 - `color_scheme`
@@ -406,6 +454,7 @@ Future enhancement: URL parameters to pass prompt directly to app.
 ## Localization
 
 Templates support multiple languages:
+
 - Each language has its own folder
 - Translations should maintain same slug structure
 - Variables can be localized
@@ -414,6 +463,7 @@ Templates support multiple languages:
 ## Analytics Tracking
 
 Consider tracking:
+
 - Template views
 - Template uses (prompt generation)
 - Copy to clipboard events
@@ -425,6 +475,7 @@ Consider tracking:
 ## Future Enhancements
 
 Potential improvements:
+
 - User-submitted templates
 - Template ratings/reviews
 - Save to favorites

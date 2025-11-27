@@ -25,7 +25,7 @@
 
 	onMount(() => {
 		initLocale();
-		
+
 		// Initialize PocketBase auth from cookie on client-side
 		if (typeof document !== 'undefined') {
 			const cookie = document.cookie;
@@ -33,10 +33,10 @@
 			console.log('[ROOT LAYOUT] PocketBase auth initialized:', {
 				isValid: pb.authStore.isValid,
 				userId: pb.authStore.model?.id,
-				email: pb.authStore.model?.email
+				email: pb.authStore.model?.email,
 			});
 		}
-		
+
 		// Initialize PWA
 		initializePWA();
 	});
@@ -58,7 +58,7 @@
 	visibleToasts={3}
 	toastOptions={{
 		className: 'sonner-toast',
-		descriptionClassName: 'sonner-description'
+		descriptionClassName: 'sonner-description',
 	}}
 />
 

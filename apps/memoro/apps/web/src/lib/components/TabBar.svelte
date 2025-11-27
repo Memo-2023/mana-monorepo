@@ -55,7 +55,9 @@
 							handleCloseTab(tab.id);
 						}
 					}}
-					class="rounded p-0.5 opacity-0 transition-opacity hover:bg-white/20 group-hover:opacity-100 {tab.isActive ? 'opacity-100' : ''} cursor-pointer"
+					class="rounded p-0.5 opacity-0 transition-opacity hover:bg-white/20 group-hover:opacity-100 {tab.isActive
+						? 'opacity-100'
+						: ''} cursor-pointer"
 					title="Close tab"
 				>
 					<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

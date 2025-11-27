@@ -1,13 +1,13 @@
 ---
-name: "Lisa Müller"
-role: "Small Business Owner"
-company: "Café Bohème"
-avatar: "/testimonials/lisa-mueller.jpg"
+name: 'Lisa Müller'
+role: 'Small Business Owner'
+company: 'Café Bohème'
+avatar: '/testimonials/lisa-mueller.jpg'
 rating: 5
 featured: true
-category: "business"
-useCase: "Restaurant marketing and menu design"
-language: "en"
+category: 'business'
+useCase: 'Restaurant marketing and menu design'
+language: 'en'
 date: 2024-10-05
 verified: true
 ---

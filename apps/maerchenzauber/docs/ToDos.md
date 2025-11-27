@@ -1,29 +1,29 @@
-# Märchenzauber - ToDos & Dokumentation
+# Mï¿½rchenzauber - ToDos & Dokumentation
 
-## <¨ Bildmodell-Auswahl Feature (10.09.2025)
+## <ï¿½ Bildmodell-Auswahl Feature (10.09.2025)
 
 ###  Was wurde implementiert
 
-#### Backend-Änderungen
+#### Backend-ï¿½nderungen
 
 1. **Datenbank-Schema**
    - Neue Tabelle `user_settings` mit Spalte `image_model` erstellt
-   - RLS-Policies für sichere User-spezifische Einstellungen implementiert
+   - RLS-Policies fï¿½r sichere User-spezifische Einstellungen implementiert
    - Migration-Script: `apps/backend/migrations/001_create_user_settings_table.sql`
 
 2. **Model-Konfiguration** (`apps/backend/src/core/models/image-models.ts`)
    - Drei Bildgenerierungsmodelle definiert:
      - **FLUX Schnell**: Schnelle Generierung (1-2 Sek, 1 Credit)
-     - **FLUX Pro 1.1**: Premium-Qualität (10-15 Sek, 3 Credits)  
-     - **Stable Diffusion XL**: Standard-Qualität (5-10 Sek, 2 Credits)
-   - Vollständige Replicate Model-IDs mit Versionen integriert
+     - **FLUX Pro 1.1**: Premium-Qualitï¿½t (10-15 Sek, 3 Credits)
+     - **Stable Diffusion XL**: Standard-Qualitï¿½t (5-10 Sek, 2 Credits)
+   - Vollstï¿½ndige Replicate Model-IDs mit Versionen integriert
 
 3. **Settings Service** (`apps/backend/src/core/services/settings.service.ts`)
    - `getUserImageModel(userId)`: Abrufen des User-spezifischen Modells
    - `setUserImageModel(userId, modelId)`: Setzen eines neuen Modells
-   - `getAvailableImageModels()`: Liste aller verfügbaren Modelle
+   - `getAvailableImageModels()`: Liste aller verfï¿½gbaren Modelle
    - `getImageModelInfo(modelId)`: Detailinformationen zu einem Modell
-   - Caching der User-Einstellungen für Performance
+   - Caching der User-Einstellungen fï¿½r Performance
 
 4. **Image Service Updates** (`apps/backend/src/core/services/image-supabase.service.ts`)
    - `generateImageWithReplicate()` nutzt jetzt User-spezifisches Modell
@@ -35,22 +35,22 @@
    - Drei Varianten aktualisiert: createCharacter, createCharacterFromImage, createCharacterSpecial
 
 6. **Story Service Updates** (`apps/backend/src/story/services/story-creation.service.ts`)
-   - `generateIllustrationForPage()` nutzt User-ID für Modellauswahl
-   - Konsistente Modellnutzung für alle Illustrationen einer Story
+   - `generateIllustrationForPage()` nutzt User-ID fï¿½r Modellauswahl
+   - Konsistente Modellnutzung fï¿½r alle Illustrationen einer Story
 
 7. **API Endpoints** (`apps/backend/src/settings/settings.controller.ts`)
-   - `GET /settings/image-models`: Verfügbare Modelle mit Metadaten
+   - `GET /settings/image-models`: Verfï¿½gbare Modelle mit Metadaten
    - `GET /settings/user/image-model`: Aktuelles User-Modell abrufen
-   - `PUT /settings/user/image-model`: User-Modell ändern
-   - DTO für Modell-Updates: `apps/backend/src/settings/dto/image-model.dto.ts`
+   - `PUT /settings/user/image-model`: User-Modell ï¿½ndern
+   - DTO fï¿½r Modell-Updates: `apps/backend/src/settings/dto/image-model.dto.ts`
 
-#### Frontend-Änderungen
+#### Frontend-ï¿½nderungen
 
 1. **Neue Settings-Seite** (`apps/mobile/app/(tabs)/(settings)/image-model.tsx`)
-   - Übersichtliche Card-basierte Modellauswahl
-   - Visual Feedback für ausgewähltes Modell
-   - Badges für Geschwindigkeit und Credit-Kosten
-   - Informative Beschreibungen für jedes Modell
+   - ï¿½bersichtliche Card-basierte Modellauswahl
+   - Visual Feedback fï¿½r ausgewï¿½hltes Modell
+   - Badges fï¿½r Geschwindigkeit und Credit-Kosten
+   - Informative Beschreibungen fï¿½r jedes Modell
    - Loading- und Saving-States
    - Error Handling mit User-Feedback
 
@@ -59,16 +59,17 @@
    - Navigation zur Modellauswahl-Seite
 
 3. **UI Features**
-   - Responsive Design für verschiedene Bildschirmgrößen
+   - Responsive Design fï¿½r verschiedene Bildschirmgrï¿½ï¿½en
    - Farbcodierte Badges (Schnell/Premium/Standard)
-   - Checkmark-Icon für ausgewähltes Modell
-   - Info-Box mit Erklärung zur Modellauswahl
+   - Checkmark-Icon fï¿½r ausgewï¿½hltes Modell
+   - Info-Box mit Erklï¿½rung zur Modellauswahl
 
 ### =' Was muss noch gemacht werden
 
 #### Sofort erforderlich (vor Go-Live)
 
-1. **Datenbank-Migration ausführen**   KRITISCH
+1. **Datenbank-Migration ausfï¿½hren** ï¿½ KRITISCH
+
    ```bash
    # In Supabase Dashboard oder via psql:
    psql "postgresql://postgres.[project-id]:[password]@db.dyywxrmonxoiojsjmymc.supabase.co:5432/postgres"
@@ -76,49 +77,50 @@
    ```
 
 2. **Backend neu starten**
+
    ```bash
    cd apps/backend
-   npm run dev  # oder npm run start:prod für Produktion
+   npm run dev  # oder npm run start:prod fï¿½r Produktion
    ```
 
 3. **Testing**
    - [ ] Modellauswahl in der App testen
    - [ ] Story-Generierung mit verschiedenen Modellen testen
    - [ ] Character-Erstellung mit verschiedenen Modellen testen
-   - [ ] Persistenz der Einstellungen prüfen
+   - [ ] Persistenz der Einstellungen prï¿½fen
 
-#### Nächste Schritte (Nice-to-have)
+#### Nï¿½chste Schritte (Nice-to-have)
 
 1. **Performance & Monitoring**
-   - [ ] Logging für Modell-Performance (Generierungszeiten)
+   - [ ] Logging fï¿½r Modell-Performance (Generierungszeiten)
    - [ ] Erfolgs-/Fehlerquoten pro Modell tracken
-   - [ ] Analytics für Modell-Präferenzen der User
+   - [ ] Analytics fï¿½r Modell-Prï¿½ferenzen der User
 
 2. **User Experience**
    - [ ] Modell-Empfehlungen basierend auf Use-Case
-   - [ ] Vorschau-Bilder für jedes Modell
-   - [ ] A/B Testing für optimale Default-Einstellung
+   - [ ] Vorschau-Bilder fï¿½r jedes Modell
+   - [ ] A/B Testing fï¿½r optimale Default-Einstellung
 
 3. **Admin Features**
-   - [ ] Admin-Dashboard für Modell-Statistiken
+   - [ ] Admin-Dashboard fï¿½r Modell-Statistiken
    - [ ] Modelle dynamisch aktivieren/deaktivieren
    - [ ] Credit-Preise anpassen per Admin-Interface
 
 4. **Erweiterte Features**
-   - [ ] Verschiedene Modelle für Characters vs. Stories
-   - [ ] User-Feedback zur Bildqualität erfassen
+   - [ ] Verschiedene Modelle fï¿½r Characters vs. Stories
+   - [ ] User-Feedback zur Bildqualitï¿½t erfassen
    - [ ] Automatisches Fallback bei Modell-Ausfall
-   - [ ] Batch-Generierung mit mehreren Modellen (für Vergleich)
+   - [ ] Batch-Generierung mit mehreren Modellen (fï¿½r Vergleich)
 
-### =Ê Technische Details
+### =ï¿½ Technische Details
 
 #### Modell-Spezifikationen
 
-| Modell | Replicate ID | Geschwindigkeit | Credits | Use-Case |
-|--------|-------------|-----------------|---------|----------|
-| FLUX Schnell | `black-forest-labs/flux-schnell:5599ed30...` | 1-2s | 1 | Tests, Prototypen |
-| FLUX Pro 1.1 | `black-forest-labs/flux-1.1-pro:8f06b9d3...` | 10-15s | 3 | Finale Stories |
-| SDXL | `stability-ai/sdxl:39ed52f2...` | 5-10s | 2 | Standard |
+| Modell       | Replicate ID                                 | Geschwindigkeit | Credits | Use-Case          |
+| ------------ | -------------------------------------------- | --------------- | ------- | ----------------- |
+| FLUX Schnell | `black-forest-labs/flux-schnell:5599ed30...` | 1-2s            | 1       | Tests, Prototypen |
+| FLUX Pro 1.1 | `black-forest-labs/flux-1.1-pro:8f06b9d3...` | 10-15s          | 3       | Finale Stories    |
+| SDXL         | `stability-ai/sdxl:39ed52f2...`              | 5-10s           | 2       | Standard          |
 
 #### Datenbank-Schema
 
@@ -134,22 +136,23 @@ CREATE TABLE user_settings (
 
 ### = Bekannte Issues & Fixes
 
-1. **Import-Pfad-Fehler (GELÖST)**
+1. **Import-Pfad-Fehler (GELï¿½ST)**
    - Problem: `Colors` Import-Pfad war falsch
-   - Lösung: Pfad von `../../../src/constants/Colors` zu `../../../constants/Colors` korrigiert
+   - Lï¿½sung: Pfad von `../../../src/constants/Colors` zu `../../../constants/Colors` korrigiert
 
 2. **TypeScript Strict Mode**
-   - Linter hat `!` zu required properties hinzugefügt
+   - Linter hat `!` zu required properties hinzugefï¿½gt
    - DTOs nutzen jetzt strict mode compliance
 
-### =Ý Testing Checklist
+### =ï¿½ Testing Checklist
 
 - [ ] **Backend API Tests**
+
   ```bash
   # Modelle abrufen
   curl http://localhost:3002/settings/image-models -H "Authorization: Bearer TOKEN"
-  
-  # User-Modell ändern
+
+  # User-Modell ï¿½ndern
   curl -X PUT http://localhost:3002/settings/user/image-model \
     -H "Authorization: Bearer TOKEN" \
     -H "Content-Type: application/json" \
@@ -157,55 +160,59 @@ CREATE TABLE user_settings (
   ```
 
 - [ ] **Frontend Tests**
-  - Settings öffnen ’ Bildgenerierung
-  - Modell auswählen und speichern
-  - App neu starten und prüfen ob Auswahl persistiert
+  - Settings ï¿½ffnen ï¿½ Bildgenerierung
+  - Modell auswï¿½hlen und speichern
+  - App neu starten und prï¿½fen ob Auswahl persistiert
   - Neue Story/Character erstellen
 
 - [ ] **Datenbank Tests**
+
   ```sql
-  -- User-Settings prüfen
+  -- User-Settings prï¿½fen
   SELECT * FROM user_settings;
-  
+
   -- Modell-Verteilung
   SELECT image_model, COUNT(*) FROM user_settings GROUP BY image_model;
   ```
 
-### =Ú Dokumentation
+### =ï¿½ Dokumentation
 
-- Vollständige Implementation-Dokumentation: `/IMAGE_MODEL_SELECTION_README.md`
+- Vollstï¿½ndige Implementation-Dokumentation: `/IMAGE_MODEL_SELECTION_README.md`
 - API-Dokumentation in den jeweiligen Controller-Dateien
 - Frontend-Komponenten sind self-documenting mit TypeScript-Interfaces
 
-### =€ Deployment Checklist
+### =ï¿½ Deployment Checklist
 
-1. [ ] Datenbank-Migration ausführen
-2. [ ] Environment-Variable `MAERCHENZAUBER_REPLICATE_API_KEY` prüfen
+1. [ ] Datenbank-Migration ausfï¿½hren
+2. [ ] Environment-Variable `MAERCHENZAUBER_REPLICATE_API_KEY` prï¿½fen
 3. [ ] Backend deployen
 4. [ ] Mobile App builden und deployen
 5. [ ] Feature-Flag aktivieren (falls vorhanden)
 6. [ ] Monitoring aktivieren
-7. [ ] User-Kommunikation über neues Feature
+7. [ ] User-Kommunikation ï¿½ber neues Feature
 
 ---
 
-## =Å Weitere TODOs (nicht related zu Bildmodell-Feature)
+## =ï¿½ Weitere TODOs (nicht related zu Bildmodell-Feature)
 
 ### High Priority
-- [ ] Story-Logbook vollständig implementieren
+
+- [ ] Story-Logbook vollstï¿½ndig implementieren
 - [ ] Character-Konsistenz in Stories verbessern
 - [ ] 10 Bilder pro Story generieren (aktuell nur 3)
 
 ### Medium Priority
-- [ ] Mana Core Credit-System Integration vervollständigen
+
+- [ ] Mana Core Credit-System Integration vervollstï¿½ndigen
 - [ ] Mehrsprachigkeit (DE/EN) konsistent umsetzen
-- [ ] Performance-Optimierungen für große Story-Collections
+- [ ] Performance-Optimierungen fï¿½r groï¿½e Story-Collections
 
 ### Low Priority
-- [ ] Onboarding-Flow überarbeiten
+
+- [ ] Onboarding-Flow ï¿½berarbeiten
 - [ ] Push-Notifications implementieren
 - [ ] Social-Sharing Features
 
 ---
 
-*Letzte Aktualisierung: 10.09.2025 - Till Schneider*
+_Letzte Aktualisierung: 10.09.2025 - Till Schneider_

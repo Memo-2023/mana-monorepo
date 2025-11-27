@@ -101,8 +101,8 @@ class SpaceService {
 				method: 'GET',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+				},
 			});
 
 			if (!response.ok) {
@@ -127,7 +127,7 @@ class SpaceService {
 				app_id: space.app_id,
 				credits: space.credits || 0,
 				roles: space.roles,
-				isOwner: space.isOwner || false
+				isOwner: space.isOwner || false,
 			}));
 		} catch (error) {
 			console.error('Failed to fetch spaces:', error);
@@ -148,8 +148,8 @@ class SpaceService {
 				method: 'GET',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+				},
 			});
 
 			if (!response.ok) {
@@ -174,7 +174,7 @@ class SpaceService {
 				credits: data.space.credits || 0,
 				roles: data.space.roles,
 				apps: data.space.apps,
-				isOwner: data.space.isOwner || false
+				isOwner: data.space.isOwner || false,
 			};
 		} catch (error) {
 			console.error(`Failed to fetch space ${spaceId}:`, error);
@@ -198,16 +198,16 @@ class SpaceService {
 
 			// Prepare request data according to API docs
 			const requestData = {
-				name: spaceData.name
+				name: spaceData.name,
 			};
 
 			const response = await fetch(`${this.apiUrl}/memoro/spaces`, {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify(requestData)
+				body: JSON.stringify(requestData),
 			});
 
 			if (!response.ok) {
@@ -245,7 +245,7 @@ class SpaceService {
 					isDefault: false,
 					color: spaceData.color || '#4CAF50',
 					created_at: new Date().toISOString(),
-					updated_at: new Date().toISOString()
+					updated_at: new Date().toISOString(),
 				};
 			}
 		} catch (error) {
@@ -257,7 +257,11 @@ class SpaceService {
 	/**
 	 * Update an existing space
 	 */
-	async updateSpace(spaceId: string, spaceData: UpdateSpaceRequest, appToken: string): Promise<Space> {
+	async updateSpace(
+		spaceId: string,
+		spaceData: UpdateSpaceRequest,
+		appToken: string
+	): Promise<Space> {
 		try {
 			if (!appToken) {
 				throw new Error('Not authenticated');
@@ -267,9 +271,9 @@ class SpaceService {
 				method: 'PUT',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify(spaceData)
+				body: JSON.stringify(spaceData),
 			});
 
 			if (!response.ok) {
@@ -306,8 +310,8 @@ class SpaceService {
 				method: 'DELETE',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+				},
 			});
 
 			if (!response.ok) {
@@ -350,8 +354,8 @@ class SpaceService {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+				},
 			});
 
 			if (!response.ok) {
@@ -388,14 +392,16 @@ class SpaceService {
 				throw new Error('Not authenticated');
 			}
 
-			console.debug(`Fetching memos for space ${spaceId} from ${this.apiUrl}/memoro/spaces/${spaceId}/memos`);
+			console.debug(
+				`Fetching memos for space ${spaceId} from ${this.apiUrl}/memoro/spaces/${spaceId}/memos`
+			);
 
 			const response = await fetch(`${this.apiUrl}/memoro/spaces/${spaceId}/memos`, {
 				method: 'GET',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+				},
 			});
 
 			if (!response.ok) {
@@ -432,9 +438,9 @@ class SpaceService {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ memoId, spaceId })
+				body: JSON.stringify({ memoId, spaceId }),
 			});
 
 			if (!response.ok) {
@@ -472,9 +478,9 @@ class SpaceService {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ memoId, spaceId })
+				body: JSON.stringify({ memoId, spaceId }),
 			});
 
 			if (!response.ok) {
@@ -512,8 +518,8 @@ class SpaceService {
 				method: 'GET',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+				},
 			});
 
 			if (!response.ok) {
@@ -538,7 +544,12 @@ class SpaceService {
 	/**
 	 * Invite a user to a space by email
 	 */
-	async inviteUserToSpace(spaceId: string, email: string, role: string, appToken: string): Promise<string> {
+	async inviteUserToSpace(
+		spaceId: string,
+		email: string,
+		role: string,
+		appToken: string
+	): Promise<string> {
 		try {
 			if (!appToken) {
 				throw new Error('Not authenticated');
@@ -550,9 +561,9 @@ class SpaceService {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ email, role })
+				body: JSON.stringify({ email, role }),
 			});
 
 			if (!response.ok) {
@@ -589,8 +600,8 @@ class SpaceService {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+				},
 			});
 
 			if (!response.ok) {
@@ -626,9 +637,9 @@ class SpaceService {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ inviteId })
+				body: JSON.stringify({ inviteId }),
 			});
 
 			if (!response.ok) {
@@ -664,9 +675,9 @@ class SpaceService {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ inviteId })
+				body: JSON.stringify({ inviteId }),
 			});
 
 			if (!response.ok) {
@@ -702,9 +713,9 @@ class SpaceService {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ inviteId })
+				body: JSON.stringify({ inviteId }),
 			});
 
 			if (!response.ok) {
@@ -740,8 +751,8 @@ class SpaceService {
 				method: 'GET',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+				},
 			});
 
 			if (!response.ok) {

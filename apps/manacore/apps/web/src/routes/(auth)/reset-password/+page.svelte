@@ -31,8 +31,8 @@
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
 						access_token: accessToken,
-						refresh_token: refreshToken
-					})
+						refresh_token: refreshToken,
+					}),
 				});
 
 				const result = await response.json();
@@ -56,7 +56,7 @@
 				const response = await fetch('/api/auth/verify-token', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ token: queryToken, type: queryType })
+					body: JSON.stringify({ token: queryToken, type: queryType }),
 				});
 
 				const result = await response.json();
@@ -98,10 +98,10 @@
 	{#if verifying}
 		<Card class="mt-8">
 			<div class="text-center">
-				<div class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-				<p class="text-gray-600 dark:text-gray-400">
-					Verifying your password reset link...
-				</p>
+				<div
+					class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
+				></div>
+				<p class="text-gray-600 dark:text-gray-400">Verifying your password reset link...</p>
 			</div>
 		</Card>
 	{:else if verificationError}
@@ -111,7 +111,10 @@
 				<p class="mb-4 text-gray-600 dark:text-gray-400">
 					{verificationError}
 				</p>
-				<a href="/forgot-password" class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400">
+				<a
+					href="/forgot-password"
+					class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
+				>
 					Request a new reset link
 				</a>
 			</div>
@@ -129,14 +132,19 @@
 				}}
 			>
 				{#if form?.error}
-					<div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+					<div
+						class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400"
+					>
 						{form.error}
 					</div>
 				{/if}
 
 				<div class="space-y-4">
 					<div>
-						<label for="password" class="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+						<label
+							for="password"
+							class="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100"
+						>
 							New Password
 						</label>
 						<Input
@@ -154,7 +162,10 @@
 					</div>
 
 					<div>
-						<label for="confirmPassword" class="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+						<label
+							for="confirmPassword"
+							class="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100"
+						>
 							Confirm Password
 						</label>
 						<Input
@@ -183,7 +194,10 @@
 				<p class="mb-4 text-gray-600 dark:text-gray-400">
 					This password reset link is invalid or has expired.
 				</p>
-				<a href="/login" class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400">
+				<a
+					href="/login"
+					class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
+				>
 					Back to login
 				</a>
 			</div>

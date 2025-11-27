@@ -20,17 +20,17 @@ const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
 // Ensure directory exists
 const iconsDir = path.join(__dirname, '..', 'static', 'icons');
 if (!fs.existsSync(iconsDir)) {
-  fs.mkdirSync(iconsDir, { recursive: true });
+	fs.mkdirSync(iconsDir, { recursive: true });
 }
 
 // Generate SVG icons
-sizes.forEach(size => {
-  const filename = `icon-${size}x${size}.svg`;
-  const filepath = path.join(iconsDir, filename);
-  const content = createSvgIcon(size);
-  
-  fs.writeFileSync(filepath, content.trim());
-  console.log(`Generated ${filename}`);
+sizes.forEach((size) => {
+	const filename = `icon-${size}x${size}.svg`;
+	const filepath = path.join(iconsDir, filename);
+	const content = createSvgIcon(size);
+
+	fs.writeFileSync(filepath, content.trim());
+	console.log(`Generated ${filename}`);
 });
 
 // Also create apple-touch-icon
@@ -40,10 +40,10 @@ console.log('Generated apple-touch-icon.svg');
 
 // Create maskable icon (with safe area padding)
 const createMaskableIcon = (size) => {
-  const safeArea = size * 0.8; // 80% safe area
-  const padding = (size - safeArea) / 2;
-  
-  return `
+	const safeArea = size * 0.8; // 80% safe area
+	const padding = (size - safeArea) / 2;
+
+	return `
 <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
   <rect width="${size}" height="${size}" fill="#3B82F6"/>
   <rect x="${padding}" y="${padding}" width="${safeArea}" height="${safeArea}" fill="#3B82F6" rx="${safeArea * 0.15}"/>
@@ -53,13 +53,13 @@ const createMaskableIcon = (size) => {
 };
 
 // Generate maskable icons
-[192, 512].forEach(size => {
-  const filename = `icon-maskable-${size}x${size}.svg`;
-  const filepath = path.join(iconsDir, filename);
-  const content = createMaskableIcon(size);
-  
-  fs.writeFileSync(filepath, content.trim());
-  console.log(`Generated ${filename}`);
+[192, 512].forEach((size) => {
+	const filename = `icon-maskable-${size}x${size}.svg`;
+	const filepath = path.join(iconsDir, filename);
+	const content = createMaskableIcon(size);
+
+	fs.writeFileSync(filepath, content.trim());
+	console.log(`Generated ${filename}`);
 });
 
 console.log('\n✅ All PWA icons generated successfully!');

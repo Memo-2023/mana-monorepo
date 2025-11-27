@@ -5,8 +5,8 @@ import { CoreModule } from '../../core/core.module';
 import { CharacterModule } from '../../character/character.module';
 
 @Module({
-  imports: [CoreModule, CharacterModule],
-  providers: [CharacterPipelineService, CharacterPipelineSteps],
-  exports: [CharacterPipelineService, CharacterPipelineSteps],
+	imports: [CoreModule, CharacterModule],
+	providers: [CharacterPipelineService, CharacterPipelineSteps],
+	exports: [CharacterPipelineService, CharacterPipelineSteps],
 })
 export class CharacterPipelineModule {}

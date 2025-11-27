@@ -3,12 +3,14 @@
 ## Overview
 
 This guide covers deploying the Manadeck backend service to Google Cloud Run. The service can be deployed either:
+
 - **Automatically** via GitHub Actions (recommended)
 - **Manually** via Cloud Build and gcloud CLI
 
 ## Prerequisites
 
 1. **Google Cloud SDK** installed and authenticated:
+
    ```bash
    gcloud auth login
    gcloud config set project memo-2c4c4
@@ -97,7 +99,9 @@ done
 Go to your repository → Settings → Secrets and variables → Actions
 
 Add these secrets:
+
 - **GCP_SA_KEY_PROD**: Create and download a service account key:
+
   ```bash
   gcloud iam service-accounts keys create key.json \
     --iam-account=manadeck-backend-sa@memo-2c4c4.iam.gserviceaccount.com \
@@ -114,11 +118,13 @@ Add these secrets:
 ### Trigger Deployment
 
 The GitHub Actions workflow automatically deploys when:
+
 - Code is pushed to `main` branch
 - Changes are made to `manadeck/backend/**` directory
 - Workflow file is modified
 
 **Manual trigger:**
+
 1. Go to GitHub → Actions tab
 2. Select "Deploy Manadeck Backend to Cloud Run"
 3. Click "Run workflow"
@@ -237,12 +243,14 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 To deploy a new version:
 
 1. **Edit `cloudbuild.yaml`**:
+
    ```yaml
    # Change v1.0.0 to v1.1.0
    - 'europe-west3-docker.pkg.dev/memo-2c4c4/manadeck-backend/manadeck-backend:v1.1.0'
    ```
 
 2. **Build and deploy**:
+
    ```bash
    gcloud builds submit --project=memo-2c4c4 --config=cloudbuild.yaml .
 
@@ -284,18 +292,21 @@ gcloud run services update-traffic manadeck-backend \
 ### Build Fails
 
 **Authentication errors:**
+
 ```bash
 gcloud auth login
 gcloud auth configure-docker europe-west3-docker.pkg.dev
 ```
 
 **Permission denied:**
+
 - Verify you have Cloud Build Editor role
 - Check service account has Artifact Registry Writer role
 
 ### Deployment Fails
 
 **Secret not found:**
+
 ```bash
 # List secrets
 gcloud secrets list --project=memo-2c4c4
@@ -305,6 +316,7 @@ echo "value" | gcloud secrets create SECRET_NAME --data-file=- --project=memo-2c
 ```
 
 **Service account permissions:**
+
 ```bash
 # Check service account IAM policy
 gcloud projects get-iam-policy memo-2c4c4 \
@@ -315,6 +327,7 @@ gcloud projects get-iam-policy memo-2c4c4 \
 ### Health Check Fails
 
 **Check logs:**
+
 ```bash
 gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=manadeck-backend" \
   --project=memo-2c4c4 \
@@ -323,12 +336,14 @@ gcloud logging read "resource.type=cloud_run_revision AND resource.labels.servic
 ```
 
 **Common issues:**
+
 - Port mismatch (must be 8080)
 - Missing environment variables
 - Database connection issues
 - Mana Core service unreachable
 
 **Test locally:**
+
 ```bash
 cd manadeck/backend
 
@@ -399,15 +414,15 @@ gcloud logging read "resource.type=cloud_run_revision AND resource.labels.servic
 
 ### Environment Variables (via Secrets)
 
-| Secret Name | Description | Example | Note |
-|------------|-------------|---------|------|
-| MANA_SERVICE_URL | Mana Core service URL | https://mana-core.example.com | Global secret |
-| MANADECK_APP_ID | Application ID from Mana | app-12345 | |
-| MANADECK_SERVICE_KEY | Service authentication key | sk_live_... | |
-| MANADECK_SUPABASE_URL | Supabase project URL | https://abc.supabase.co | |
-| MANADECK_SUPABASE_ANON_KEY | Supabase anonymous key | eyJhb... | |
-| MANADECK_SUPABASE_SERVICE_KEY | Supabase service role key | eyJhb... | |
-| MANADECK_SIGNUP_REDIRECT_URL | Post-signup redirect URL | https://app.example.com/welcome | |
+| Secret Name                   | Description                | Example                         | Note          |
+| ----------------------------- | -------------------------- | ------------------------------- | ------------- |
+| MANA_SERVICE_URL              | Mana Core service URL      | https://mana-core.example.com   | Global secret |
+| MANADECK_APP_ID               | Application ID from Mana   | app-12345                       |               |
+| MANADECK_SERVICE_KEY          | Service authentication key | sk*live*...                     |               |
+| MANADECK_SUPABASE_URL         | Supabase project URL       | https://abc.supabase.co         |               |
+| MANADECK_SUPABASE_ANON_KEY    | Supabase anonymous key     | eyJhb...                        |               |
+| MANADECK_SUPABASE_SERVICE_KEY | Supabase service role key  | eyJhb...                        |               |
+| MANADECK_SIGNUP_REDIRECT_URL  | Post-signup redirect URL   | https://app.example.com/welcome |               |
 
 ### Cloud Run Configuration
 
@@ -473,6 +488,7 @@ echo "new-value" | gcloud secrets versions add MANA_SERVICE_URL \
 ## Support
 
 For issues or questions:
+
 1. Check Cloud Run logs for error messages
 2. Verify all secrets are configured correctly
 3. Test health endpoints

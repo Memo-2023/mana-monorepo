@@ -17,9 +17,9 @@ import { oceanTheme } from './ocean';
  * All available themes
  */
 export const themes = {
-  default: defaultTheme,
-  sunset: sunsetTheme,
-  ocean: oceanTheme,
+	default: defaultTheme,
+	sunset: sunsetTheme,
+	ocean: oceanTheme,
 } as const;
 
 /**

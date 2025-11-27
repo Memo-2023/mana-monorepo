@@ -7,7 +7,7 @@ Redis is used in uload to dramatically improve link redirect performance by cach
 ## Prerequisites
 
 - macOS with Homebrew installed
-- Node.js 18+ 
+- Node.js 18+
 - Running uload development environment
 
 ## Installation
@@ -51,6 +51,7 @@ REDIS_HOST=localhost REDIS_PORT=6379 npm run dev
 ```
 
 Check the console output for:
+
 ```
 ✅ Redis: Connected successfully
 ```
@@ -64,14 +65,15 @@ curl http://localhost:5173/api/redis-status | jq
 ```
 
 Expected response:
+
 ```json
 {
-  "connected": true,
-  "host": "localhost",
-  "enabled": true,
-  "available": true,
-  "cachedLinks": 0,
-  "error": null
+	"connected": true,
+	"host": "localhost",
+	"enabled": true,
+	"available": true,
+	"cachedLinks": 0,
+	"error": null
 }
 ```
 
@@ -80,16 +82,20 @@ Expected response:
 ### Cache Flow
 
 1. **First Visit (Cache MISS)**
+
    ```
    User → Short Link → Check Redis (miss) → Query Database → Redirect → Cache Result
    ```
+
    - Takes ~100-200ms
    - Stores result in Redis for future requests
 
 2. **Subsequent Visits (Cache HIT)**
+
    ```
    User → Short Link → Check Redis (hit) → Redirect
    ```
+
    - Takes ~10-20ms
    - Skips database query entirely
 
@@ -139,6 +145,7 @@ redis-cli del "redirect:abc123"
 ### 4. Debug Cache Hits/Misses
 
 Enable verbose logging in your browser console:
+
 1. Visit a short link
 2. Check browser console for:
    - "Cache MISS - fetching from PocketBase"
@@ -170,13 +177,14 @@ node test-redis-cache.mjs
 Edit `src/lib/server/linkCache.ts`:
 
 ```typescript
-const CACHE_TTL = 86400;  // 24 hours for popular links
-const SHORT_TTL = 300;    // 5 minutes for normal links
+const CACHE_TTL = 86400; // 24 hours for popular links
+const SHORT_TTL = 300; // 5 minutes for normal links
 ```
 
 ### Fallback Behavior
 
 The app automatically handles Redis unavailability:
+
 - If Redis is down, the app continues working without cache
 - No errors shown to users
 - Graceful degradation to database-only mode
@@ -202,11 +210,13 @@ tail -f /opt/homebrew/var/log/redis.log
 ### Connection Refused
 
 1. Verify Redis is running:
+
    ```bash
    redis-cli ping
    ```
 
 2. Check port availability:
+
    ```bash
    lsof -i :6379
    ```
@@ -220,11 +230,13 @@ tail -f /opt/homebrew/var/log/redis.log
 ### Cache Not Working
 
 1. Check Redis connection in app:
+
    ```bash
    curl http://localhost:5173/api/redis-status
    ```
 
 2. Verify Redis has memory available:
+
    ```bash
    redis-cli info memory
    ```
@@ -234,11 +246,13 @@ tail -f /opt/homebrew/var/log/redis.log
 ### Performance Issues
 
 1. Monitor Redis latency:
+
    ```bash
    redis-cli --latency
    ```
 
 2. Check Redis memory usage:
+
    ```bash
    redis-cli info memory | grep used_memory_human
    ```

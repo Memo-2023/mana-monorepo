@@ -1,30 +1,30 @@
 import { useEffect } from 'react';
 import { View, ViewStyle } from 'react-native';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  interpolate,
+	useSharedValue,
+	useAnimatedStyle,
+	withRepeat,
+	withTiming,
+	interpolate,
 } from 'react-native-reanimated';
 
 export type SkeletonProps = {
-  /** Width of skeleton */
-  width?: number | string;
-  /** Height of skeleton */
-  height?: number | string;
-  /** Border radius */
-  borderRadius?: number;
-  /** Background color */
-  backgroundColor?: string;
-  /** Shimmer color */
-  shimmerColor?: string;
-  /** Animation duration in ms */
-  duration?: number;
-  /** Additional styles */
-  style?: ViewStyle;
-  /** Variant for common shapes */
-  variant?: 'rect' | 'circle' | 'text';
+	/** Width of skeleton */
+	width?: number | string;
+	/** Height of skeleton */
+	height?: number | string;
+	/** Border radius */
+	borderRadius?: number;
+	/** Background color */
+	backgroundColor?: string;
+	/** Shimmer color */
+	shimmerColor?: string;
+	/** Animation duration in ms */
+	duration?: number;
+	/** Additional styles */
+	style?: ViewStyle;
+	/** Variant for common shapes */
+	variant?: 'rect' | 'circle' | 'text';
 };
 
 /**
@@ -43,85 +43,78 @@ export type SkeletonProps = {
  * ```
  */
 export function Skeleton({
-  width = '100%',
-  height = 20,
-  borderRadius,
-  backgroundColor = '#E5E7EB',
-  shimmerColor = '#F3F4F6',
-  duration = 1500,
-  style,
-  variant = 'rect',
+	width = '100%',
+	height = 20,
+	borderRadius,
+	backgroundColor = '#E5E7EB',
+	shimmerColor = '#F3F4F6',
+	duration = 1500,
+	style,
+	variant = 'rect',
 }: SkeletonProps) {
-  const shimmerValue = useSharedValue(0);
+	const shimmerValue = useSharedValue(0);
 
-  useEffect(() => {
-    shimmerValue.value = withRepeat(
-      withTiming(1, { duration }),
-      -1,
-      false
-    );
-  }, [duration]);
+	useEffect(() => {
+		shimmerValue.value = withRepeat(withTiming(1, { duration }), -1, false);
+	}, [duration]);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      shimmerValue.value,
-      [0, 0.5, 1],
-      [0.3, 0.6, 0.3]
-    );
-    return { opacity };
-  });
+	const animatedStyle = useAnimatedStyle(() => {
+		const opacity = interpolate(shimmerValue.value, [0, 0.5, 1], [0.3, 0.6, 0.3]);
+		return { opacity };
+	});
 
-  // Variant-specific styles
-  const getVariantStyles = (): ViewStyle => {
-    switch (variant) {
-      case 'circle':
-        return {
-          borderRadius: typeof width === 'number' ? width / 2 : 9999,
-        };
-      case 'text':
-        return {
-          borderRadius: 4,
-          height: 16,
-        };
-      default:
-        return {};
-    }
-  };
+	// Variant-specific styles
+	const getVariantStyles = (): ViewStyle => {
+		switch (variant) {
+			case 'circle':
+				return {
+					borderRadius: typeof width === 'number' ? width / 2 : 9999,
+				};
+			case 'text':
+				return {
+					borderRadius: 4,
+					height: 16,
+				};
+			default:
+				return {};
+		}
+	};
 
-  const finalBorderRadius = borderRadius !== undefined
-    ? borderRadius
-    : variant === 'text'
-    ? 4
-    : variant === 'circle'
-    ? 9999
-    : 8;
+	const finalBorderRadius =
+		borderRadius !== undefined
+			? borderRadius
+			: variant === 'text'
+				? 4
+				: variant === 'circle'
+					? 9999
+					: 8;
 
-  return (
-    <View
-      style={[
-        {
-          width,
-          height,
-          backgroundColor,
-          borderRadius: finalBorderRadius,
-          overflow: 'hidden',
-        },
-        getVariantStyles(),
-        style,
-      ]}
-    >
-      <Animated.View
-        style={[
-          {
-            width: '100%',
-            height: '100%',
-            backgroundColor: shimmerColor,
-          },
-          animatedStyle,
-        ]}
-      />
-    </View>
-  );
+	return (
+		<View
+			style={[
+				{
+					width,
+					height,
+					backgroundColor,
+					borderRadius: finalBorderRadius,
+					overflow: 'hidden',
+				},
+				getVariantStyles(),
+				style,
+			]}
+		>
+			<Animated.View
+				style={[
+					{
+						width: '100%',
+						height: '100%',
+						backgroundColor: shimmerColor,
+					},
+					animatedStyle,
+				]}
+			/>
+		</View>
+	);
 }
 
 /**
@@ -138,17 +131,13 @@ export function Skeleton({
  * ```
  */
 export function SkeletonGroup({
-  children,
-  spacing = 12,
-  style,
+	children,
+	spacing = 12,
+	style,
 }: {
-  children: React.ReactNode;
-  spacing?: number;
-  style?: ViewStyle;
+	children: React.ReactNode;
+	spacing?: number;
+	style?: ViewStyle;
 }) {
-  return (
-    <View style={[{ gap: spacing }, style]}>
-      {children}
-    </View>
-  );
+	return <View style={[{ gap: spacing }, style]}>{children}</View>;
 }

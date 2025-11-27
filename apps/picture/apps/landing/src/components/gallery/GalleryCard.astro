@@ -118,11 +118,7 @@ const { data } = image;
 				data.creator && (
 					<div class="mt-3 flex items-center gap-2 border-t border-gray-100 pt-3 dark:border-gray-700">
 						{data.creator.avatar && (
-							<img
-								src={data.creator.avatar}
-								alt={data.creator.name}
-								class="h-6 w-6 rounded-full"
-							/>
+							<img src={data.creator.avatar} alt={data.creator.name} class="h-6 w-6 rounded-full" />
 						)}
 						<span class="text-xs text-gray-600 dark:text-gray-400">{data.creator.name}</span>
 					</div>

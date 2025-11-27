@@ -9,68 +9,76 @@ Die Manadeck-Anwendung verwendet **Supabase** (PostgreSQL) als Backend-Datenbank
 ### Tabellen
 
 #### 1. **profiles**
+
 Speichert Benutzerprofile und Einstellungen.
 
-| Spalte | Typ | Beschreibung | Constraints |
-|--------|-----|--------------|-------------|
-| `id` | uuid | Benutzer-ID (Referenz zu auth.users) | PRIMARY KEY, NOT NULL |
-| `username` | varchar | Eindeutiger Benutzername | NOT NULL, UNIQUE |
-| `display_name` | varchar | Anzeigename des Benutzers | NULL |
-| `avatar_url` | text | URL zum Profilbild | NULL |
-| `bio` | text | Biografie/Beschreibung | NULL |
-| `preferences` | jsonb | Benutzereinstellungen als JSON | DEFAULT '{}' |
-| `created_at` | timestamptz | Erstellungszeitpunkt | DEFAULT now() |
-| `updated_at` | timestamptz | Letzte Aktualisierung | DEFAULT now() |
+| Spalte         | Typ         | Beschreibung                         | Constraints           |
+| -------------- | ----------- | ------------------------------------ | --------------------- |
+| `id`           | uuid        | Benutzer-ID (Referenz zu auth.users) | PRIMARY KEY, NOT NULL |
+| `username`     | varchar     | Eindeutiger Benutzername             | NOT NULL, UNIQUE      |
+| `display_name` | varchar     | Anzeigename des Benutzers            | NULL                  |
+| `avatar_url`   | text        | URL zum Profilbild                   | NULL                  |
+| `bio`          | text        | Biografie/Beschreibung               | NULL                  |
+| `preferences`  | jsonb       | Benutzereinstellungen als JSON       | DEFAULT '{}'          |
+| `created_at`   | timestamptz | Erstellungszeitpunkt                 | DEFAULT now()         |
+| `updated_at`   | timestamptz | Letzte Aktualisierung                | DEFAULT now()         |
 
 **Beziehungen:**
+
 - Foreign Key zu `auth.users(id)` über `id`
 
 #### 2. **decks**
+
 Verwaltet Kartenstapel/Sammlungen von Lernkarten.
 
-| Spalte | Typ | Beschreibung | Constraints |
-|--------|-----|--------------|-------------|
-| `id` | uuid | Eindeutige Deck-ID | PRIMARY KEY, DEFAULT gen_random_uuid() |
-| `user_id` | uuid | Besitzer des Decks | NOT NULL, FK zu auth.users |
-| `title` | varchar | Titel des Decks | NOT NULL |
-| `description` | text | Beschreibung des Decks | NULL |
-| `cover_image_url` | text | URL zum Cover-Bild | NULL |
-| `is_public` | boolean | Öffentlich sichtbar? | DEFAULT false |
-| `settings` | jsonb | Deck-spezifische Einstellungen | DEFAULT '{}' |
-| `tags` | text[] | Array von Tags | DEFAULT '{}' |
-| `metadata` | jsonb | Zusätzliche Metadaten | DEFAULT '{}' |
-| `created_at` | timestamptz | Erstellungszeitpunkt | DEFAULT now() |
-| `updated_at` | timestamptz | Letzte Aktualisierung | DEFAULT now() |
+| Spalte            | Typ         | Beschreibung                   | Constraints                            |
+| ----------------- | ----------- | ------------------------------ | -------------------------------------- |
+| `id`              | uuid        | Eindeutige Deck-ID             | PRIMARY KEY, DEFAULT gen_random_uuid() |
+| `user_id`         | uuid        | Besitzer des Decks             | NOT NULL, FK zu auth.users             |
+| `title`           | varchar     | Titel des Decks                | NOT NULL                               |
+| `description`     | text        | Beschreibung des Decks         | NULL                                   |
+| `cover_image_url` | text        | URL zum Cover-Bild             | NULL                                   |
+| `is_public`       | boolean     | Öffentlich sichtbar?           | DEFAULT false                          |
+| `settings`        | jsonb       | Deck-spezifische Einstellungen | DEFAULT '{}'                           |
+| `tags`            | text[]      | Array von Tags                 | DEFAULT '{}'                           |
+| `metadata`        | jsonb       | Zusätzliche Metadaten          | DEFAULT '{}'                           |
+| `created_at`      | timestamptz | Erstellungszeitpunkt           | DEFAULT now()                          |
+| `updated_at`      | timestamptz | Letzte Aktualisierung          | DEFAULT now()                          |
 
 **Beziehungen:**
+
 - Foreign Key zu `auth.users(id)` über `user_id`
 - One-to-Many Beziehung zu `cards`
 
 #### 3. **cards**
+
 Einzelne Lernkarten innerhalb der Decks.
 
-| Spalte | Typ | Beschreibung | Constraints |
-|--------|-----|--------------|-------------|
-| `id` | uuid | Eindeutige Karten-ID | PRIMARY KEY, DEFAULT gen_random_uuid() |
-| `deck_id` | uuid | Zugehöriges Deck | NOT NULL, FK zu decks |
-| `position` | integer | Position innerhalb des Decks | NOT NULL |
-| `title` | varchar | Titel/Überschrift der Karte | NULL |
-| `content` | jsonb | Karteninhalt (strukturiert) | DEFAULT '{}' |
-| `card_type` | card_type (enum) | Typ der Karte | NOT NULL, DEFAULT 'text' |
-| `ai_model` | varchar | Verwendetes AI-Modell | NULL |
-| `ai_prompt` | text | AI-Prompt für Generierung | NULL |
-| `version` | integer | Versionsnummer | DEFAULT 1 |
-| `is_favorite` | boolean | Als Favorit markiert? | DEFAULT false |
-| `created_at` | timestamptz | Erstellungszeitpunkt | DEFAULT now() |
-| `updated_at` | timestamptz | Letzte Aktualisierung | DEFAULT now() |
+| Spalte        | Typ              | Beschreibung                 | Constraints                            |
+| ------------- | ---------------- | ---------------------------- | -------------------------------------- |
+| `id`          | uuid             | Eindeutige Karten-ID         | PRIMARY KEY, DEFAULT gen_random_uuid() |
+| `deck_id`     | uuid             | Zugehöriges Deck             | NOT NULL, FK zu decks                  |
+| `position`    | integer          | Position innerhalb des Decks | NOT NULL                               |
+| `title`       | varchar          | Titel/Überschrift der Karte  | NULL                                   |
+| `content`     | jsonb            | Karteninhalt (strukturiert)  | DEFAULT '{}'                           |
+| `card_type`   | card_type (enum) | Typ der Karte                | NOT NULL, DEFAULT 'text'               |
+| `ai_model`    | varchar          | Verwendetes AI-Modell        | NULL                                   |
+| `ai_prompt`   | text             | AI-Prompt für Generierung    | NULL                                   |
+| `version`     | integer          | Versionsnummer               | DEFAULT 1                              |
+| `is_favorite` | boolean          | Als Favorit markiert?        | DEFAULT false                          |
+| `created_at`  | timestamptz      | Erstellungszeitpunkt         | DEFAULT now()                          |
+| `updated_at`  | timestamptz      | Letzte Aktualisierung        | DEFAULT now()                          |
 
 **Beziehungen:**
+
 - Foreign Key zu `decks(id)` über `deck_id`
 
 ### Custom Types
 
 #### card_type (Enum)
+
 Definiert die verschiedenen Kartentypen:
+
 - `text` - Reine Textkarte
 - `mixed` - Gemischter Inhalt
 - `quiz` - Quiz-Karte
@@ -82,29 +90,29 @@ Alle Tabellen haben RLS aktiviert mit folgenden Policies:
 
 ### profiles Policies
 
-| Policy | Operation | Beschreibung |
-|--------|-----------|--------------|
-| "Profiles are viewable by everyone" | SELECT | Alle können Profile einsehen |
-| "Users can insert own profile" | INSERT | Authentifizierte Benutzer können eigenes Profil anlegen |
-| "Users can update own profile" | UPDATE | Benutzer können nur eigenes Profil bearbeiten |
+| Policy                              | Operation | Beschreibung                                            |
+| ----------------------------------- | --------- | ------------------------------------------------------- |
+| "Profiles are viewable by everyone" | SELECT    | Alle können Profile einsehen                            |
+| "Users can insert own profile"      | INSERT    | Authentifizierte Benutzer können eigenes Profil anlegen |
+| "Users can update own profile"      | UPDATE    | Benutzer können nur eigenes Profil bearbeiten           |
 
 ### decks Policies
 
-| Policy | Operation | Beschreibung |
-|--------|-----------|--------------|
-| "View public decks and own decks" | SELECT | Öffentliche Decks und eigene Decks sind sichtbar |
-| "Users can create own decks" | INSERT | Authentifizierte Benutzer können Decks erstellen |
-| "Users can update own decks" | UPDATE | Nur eigene Decks können bearbeitet werden |
-| "Users can delete own decks" | DELETE | Nur eigene Decks können gelöscht werden |
+| Policy                            | Operation | Beschreibung                                     |
+| --------------------------------- | --------- | ------------------------------------------------ |
+| "View public decks and own decks" | SELECT    | Öffentliche Decks und eigene Decks sind sichtbar |
+| "Users can create own decks"      | INSERT    | Authentifizierte Benutzer können Decks erstellen |
+| "Users can update own decks"      | UPDATE    | Nur eigene Decks können bearbeitet werden        |
+| "Users can delete own decks"      | DELETE    | Nur eigene Decks können gelöscht werden          |
 
 ### cards Policies
 
-| Policy | Operation | Beschreibung |
-|--------|-----------|--------------|
-| "View cards from accessible decks" | SELECT | Karten aus öffentlichen oder eigenen Decks sind sichtbar |
-| "Users can create cards in own decks" | INSERT | Karten können nur in eigenen Decks erstellt werden |
-| "Users can update cards in own decks" | UPDATE | Karten in eigenen Decks können bearbeitet werden |
-| "Users can delete cards in own decks" | DELETE | Karten in eigenen Decks können gelöscht werden |
+| Policy                                | Operation | Beschreibung                                             |
+| ------------------------------------- | --------- | -------------------------------------------------------- |
+| "View cards from accessible decks"    | SELECT    | Karten aus öffentlichen oder eigenen Decks sind sichtbar |
+| "Users can create cards in own decks" | INSERT    | Karten können nur in eigenen Decks erstellt werden       |
+| "Users can update cards in own decks" | UPDATE    | Karten in eigenen Decks können bearbeitet werden         |
+| "Users can delete cards in own decks" | DELETE    | Karten in eigenen Decks können gelöscht werden           |
 
 ## Aktivierte Extensions
 
@@ -143,7 +151,9 @@ cards
 ## Verwendung in der Anwendung
 
 ### Supabase Client-Konfiguration
+
 Die Anwendung verwendet den Supabase JavaScript Client (`utils/supabase.ts`) mit:
+
 - **AsyncStorage** für Session-Persistenz
 - Umgebungsvariablen für Konfiguration:
   - `EXPO_PUBLIC_SUPABASE_URL`

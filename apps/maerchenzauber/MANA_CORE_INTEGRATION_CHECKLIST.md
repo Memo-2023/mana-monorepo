@@ -19,6 +19,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 ### 1. Installation
 
 - [ ] Install the package:
+
   ```bash
   npm install git+https://github.com/Memo-2023/mana-core-nestjs-package.git
   ```
@@ -31,6 +32,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 ### 2. Environment Configuration
 
 - [ ] Create/update `.env` file:
+
   ```env
   MANA_SERVICE_URL=https://your-mana-instance.com
   APP_ID=your-app-id
@@ -47,6 +49,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 - [ ] Import `ManaCoreModule` in `app.module.ts`
 
 - [ ] Configure with `forRootAsync()`:
+
   ```typescript
   ManaCoreModule.forRootAsync({
     imports: [ConfigModule],
@@ -57,7 +60,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
       debug: configService.get('NODE_ENV') === 'development',
     }),
     inject: [ConfigService],
-  })
+  });
   ```
 
 - [ ] Test backend starts without errors
@@ -65,11 +68,13 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 ### 4. Protect Routes with AuthGuard
 
 - [ ] Import `AuthGuard` in controller:
+
   ```typescript
   import { AuthGuard } from '@mana-core/nestjs-integration';
   ```
 
 - [ ] Apply to controller or route:
+
   ```typescript
   @Controller('protected')
   @UseGuards(AuthGuard)
@@ -81,11 +86,13 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 ### 5. Extract User Information
 
 - [ ] Import `@CurrentUser()` decorator:
+
   ```typescript
   import { CurrentUser } from '@mana-core/nestjs-integration';
   ```
 
 - [ ] Use in route handlers:
+
   ```typescript
   @Get('profile')
   async getProfile(@CurrentUser() user: JwtPayload) {
@@ -98,31 +105,31 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 ### 6. Integrate Credit System
 
 - [ ] Inject `CreditClientService`:
+
   ```typescript
   constructor(private creditClient: CreditClientService) {}
   ```
 
 - [ ] Add pre-flight credit validation:
+
   ```typescript
-  const validation = await this.creditClient.validateCredits(
-    userId,
-    'operation_type',
-    creditCost,
-  );
+  const validation = await this.creditClient.validateCredits(userId, 'operation_type', creditCost);
   ```
 
 - [ ] Add credit consumption after success:
+
   ```typescript
   await this.creditClient.consumeCredits(
     userId,
     'operation_type',
     creditCost,
     'Description',
-    metadata,
+    metadata
   );
   ```
 
 - [ ] Handle `InsufficientCreditsException`:
+
   ```typescript
   import { InsufficientCreditsException } from '@mana-core/nestjs-integration';
   ```
@@ -132,18 +139,17 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 ### 7. (Optional) Custom Token Decorator
 
 - [ ] Create `@UserToken()` decorator for RLS:
+
   ```typescript
   // decorators/user.decorator.ts
-  export const UserToken = createParamDecorator(
-    (_data: unknown, ctx: ExecutionContext): string => {
-      const request = ctx.switchToHttp().getRequest();
-      const authHeader = request.headers.authorization;
-      if (authHeader?.startsWith('Bearer ')) {
-        return authHeader.substring(7);
-      }
-      return request.token;
-    },
-  );
+  export const UserToken = createParamDecorator((_data: unknown, ctx: ExecutionContext): string => {
+    const request = ctx.switchToHttp().getRequest();
+    const authHeader = request.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      return authHeader.substring(7);
+    }
+    return request.token;
+  });
   ```
 
 - [ ] Use for database RLS:
@@ -164,6 +170,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 ### 1. Configure API Base URL
 
 - [ ] Create `.env` file:
+
   ```env
   EXPO_PUBLIC_STORYTELLER_BACKEND_URL=http://localhost:3002
   ```
@@ -178,6 +185,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 - [ ] Create `services/authService.ts`
 
 - [ ] Implement sign-in:
+
   ```typescript
   signIn: async (email: string, password: string) => {
     const deviceInfo = await getDeviceInfo();
@@ -188,7 +196,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
     });
     const data = await response.json();
     await storeTokens(data.appToken, data.refreshToken);
-  }
+  };
   ```
 
 - [ ] Implement sign-up
@@ -202,6 +210,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 - [ ] Create `services/tokenManager.ts`
 
 - [ ] Implement `getValidToken()`:
+
   ```typescript
   getValidToken: async () => {
     let token = await storage.getItem('appToken');
@@ -210,10 +219,11 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
       token = await storage.getItem('appToken');
     }
     return token;
-  }
+  };
   ```
 
 - [ ] Implement `refreshToken()`:
+
   ```typescript
   refreshToken: async () => {
     const refreshToken = await storage.getItem('refreshToken');
@@ -224,7 +234,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
     });
     const data = await response.json();
     await storeTokens(data.appToken, data.refreshToken);
-  }
+  };
   ```
 
 - [ ] Test: Verify automatic refresh works
@@ -232,6 +242,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 ### 4. Create Authenticated API Client
 
 - [ ] Create `fetchWithAuth()` function:
+
   ```typescript
   export async function fetchWithAuth(endpoint: string, options = {}) {
     const token = await tokenManager.getValidToken();
@@ -239,7 +250,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
       ...options,
       headers: {
         ...options.headers,
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -257,6 +268,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 ### 5. Handle Credit Errors
 
 - [ ] Create error handling utility:
+
   ```typescript
   export function isInsufficientCreditsError(error: any) {
     return error?.error === 'insufficient_credits';
@@ -264,6 +276,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
   ```
 
 - [ ] Handle in UI:
+
   ```typescript
   if (data.error === 'insufficient_credits') {
     showPurchaseCreditsModal({
@@ -278,6 +291,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 ### 6. Device Management
 
 - [ ] Create `utils/deviceManager.ts`:
+
   ```typescript
   export class DeviceManager {
     static async getDeviceInfo() {
@@ -302,6 +316,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 ### Backend Tests
 
 - [ ] Create unit tests with mocked services:
+
   ```typescript
   {
     provide: CreditClientService,
@@ -341,6 +356,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 ### Backend
 
 - [ ] Set production environment variables:
+
   ```env
   MANA_SERVICE_URL=https://production-mana.com
   APP_ID=production-app-id
@@ -357,6 +373,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 ### Frontend
 
 - [ ] Update `.env` for production:
+
   ```env
   EXPO_PUBLIC_BACKEND_URL=https://your-api.com
   ```
@@ -439,6 +456,7 @@ Once all items are checked, your application is fully integrated with Mana Core.
 **Estimated Time**: 2-4 hours for basic integration, 1-2 days for complete implementation with testing.
 
 **Next Steps**:
+
 1. Define your operation types and credit costs
 2. Implement purchase flow for credits
 3. Add analytics and monitoring

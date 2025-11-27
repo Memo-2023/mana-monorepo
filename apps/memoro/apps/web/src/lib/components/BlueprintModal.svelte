@@ -155,7 +155,7 @@
 </script>
 
 {#if blueprint}
-	<Modal visible={visible} onClose={onClose} title="Vorlage: {displayName}">
+	<Modal {visible} {onClose} title="Vorlage: {displayName}">
 		{#snippet children()}
 			<!-- Description -->
 			{#if displayDescription}

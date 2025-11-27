@@ -17,9 +17,9 @@
 			props: {
 				title: 'Meine erste Karte',
 				subtitle: 'Ein einfaches Beispiel',
-				icon: '🎉'
-			}
-		}
+				icon: '🎉',
+			},
+		},
 	]}
 />
 ```
@@ -35,15 +35,15 @@
 			order: 0,
 			props: {
 				title: 'Komplexere Karte',
-				subtitle: 'Mit mehreren Modulen'
-			}
+				subtitle: 'Mit mehreren Modulen',
+			},
 		},
 		{
 			type: 'content',
 			order: 1,
 			props: {
-				text: 'Dies ist der Hauptinhalt der Karte. Hier kann beliebiger Text stehen.'
-			}
+				text: 'Dies ist der Hauptinhalt der Karte. Hier kann beliebiger Text stehen.',
+			},
 		},
 		{
 			type: 'actions',
@@ -51,10 +51,10 @@
 			props: {
 				actions: [
 					{ label: 'Mehr erfahren', variant: 'primary' },
-					{ label: 'Schließen', variant: 'ghost' }
-				]
-			}
-		}
+					{ label: 'Schließen', variant: 'ghost' },
+				],
+			},
+		},
 	]}
 />
 ```
@@ -71,7 +71,7 @@
 		name: 'Max Mustermann',
 		role: 'Software Developer',
 		avatar: '/avatars/max.jpg',
-		bio: 'Passionate about creating amazing web experiences.'
+		bio: 'Passionate about creating amazing web experiences.',
 	};
 </script>
 
@@ -83,15 +83,15 @@
 			props: {
 				title: userData.name,
 				subtitle: userData.role,
-				avatar: userData.avatar
-			}
+				avatar: userData.avatar,
+			},
 		},
 		{
 			type: 'content',
 			props: {
-				text: userData.bio
-			}
-		}
+				text: userData.bio,
+			},
+		},
 	]}
 />
 ```
@@ -109,14 +109,14 @@
 					title: 'Jane Doe',
 					subtitle: 'UX Designer',
 					avatar: '/avatars/jane.jpg',
-					badge: 'PRO'
-				}
+					badge: 'PRO',
+				},
 			},
 			{
 				type: 'content',
 				props: {
-					text: 'Creating beautiful and functional user experiences since 2015.'
-				}
+					text: 'Creating beautiful and functional user experiences since 2015.',
+				},
 			},
 			{
 				type: 'stats',
@@ -124,10 +124,10 @@
 					stats: [
 						{ label: 'Projects', value: 127, icon: '📁' },
 						{ label: 'Clients', value: 45, icon: '👥' },
-						{ label: 'Awards', value: 8, icon: '🏆' }
+						{ label: 'Awards', value: 8, icon: '🏆' },
 					],
-					layout: 'grid'
-				}
+					layout: 'grid',
+				},
 			},
 			{
 				type: 'links',
@@ -135,13 +135,13 @@
 					links: [
 						{ label: 'Portfolio', href: 'https://portfolio.com', icon: '🎨' },
 						{ label: 'LinkedIn', href: 'https://linkedin.com', icon: '💼' },
-						{ label: 'GitHub', href: 'https://github.com', icon: '💻' }
+						{ label: 'GitHub', href: 'https://github.com', icon: '💻' },
 					],
 					style: 'button',
-					showIcon: true
-				}
-			}
-		]
+					showIcon: true,
+				},
+			},
+		],
 	};
 </script>
 
@@ -160,8 +160,8 @@
 			type: 'header',
 			props: {
 				title: 'Verkaufsstatistik',
-				subtitle: 'Letzten 30 Tage'
-			}
+				subtitle: 'Letzten 30 Tage',
+			},
 		},
 		{
 			type: 'stats',
@@ -169,11 +169,11 @@
 				stats: [
 					{ label: 'Umsatz', value: '€12.4k', change: 12, color: 'green' },
 					{ label: 'Bestellungen', value: 234, change: -5, color: 'red' },
-					{ label: 'Conversion', value: '3.2%', change: 8, color: 'blue' }
+					{ label: 'Conversion', value: '3.2%', change: 8, color: 'blue' },
 				],
-				layout: 'list'
-			}
-		}
+				layout: 'list',
+			},
+		},
 	]}
 />
 ```
@@ -188,8 +188,8 @@
 			type: 'header',
 			props: {
 				title: 'Letzte Aktivitäten',
-				icon: '📋'
-			}
+				icon: '📋',
+			},
 		},
 		{
 			type: 'content',
@@ -198,10 +198,10 @@
 					{ label: 'Neuer Benutzer', value: 'vor 5 Min.', icon: '👤' },
 					{ label: 'Bestellung #1234', value: 'vor 15 Min.', icon: '🛒' },
 					{ label: 'Kommentar erhalten', value: 'vor 1 Std.', icon: '💬' },
-					{ label: 'System-Update', value: 'vor 2 Std.', icon: '🔄' }
-				]
-			}
-		}
+					{ label: 'System-Update', value: 'vor 2 Std.', icon: '🔄' },
+				],
+			},
+		},
 	]}
 />
 ```
@@ -218,8 +218,8 @@
 			type: 'header',
 			props: {
 				title: 'Folge mir',
-				subtitle: 'auf Social Media'
-			}
+				subtitle: 'auf Social Media',
+			},
 		},
 		{
 			type: 'links',
@@ -228,14 +228,14 @@
 					{ label: 'Instagram', href: 'https://instagram.com/user', icon: '📷' },
 					{ label: 'Twitter', href: 'https://twitter.com/user', icon: '🐦' },
 					{ label: 'YouTube', href: 'https://youtube.com/user', icon: '📺' },
-					{ label: 'TikTok', href: 'https://tiktok.com/@user', icon: '🎵' }
+					{ label: 'TikTok', href: 'https://tiktok.com/@user', icon: '🎵' },
 				],
 				style: 'button',
 				columns: 2,
 				buttonVariant: 'secondary',
-				showIcon: true
-			}
-		}
+				showIcon: true,
+			},
+		},
 	]}
 />
 ```
@@ -249,8 +249,8 @@
 		{
 			type: 'header',
 			props: {
-				title: 'Nützliche Ressourcen'
-			}
+				title: 'Nützliche Ressourcen',
+			},
 		},
 		{
 			type: 'links',
@@ -260,26 +260,26 @@
 						label: 'Dokumentation',
 						href: '/docs',
 						icon: '📚',
-						description: 'Vollständige API-Dokumentation'
+						description: 'Vollständige API-Dokumentation',
 					},
 					{
 						label: 'Tutorials',
 						href: '/tutorials',
 						icon: '🎓',
-						description: 'Schritt-für-Schritt Anleitungen'
+						description: 'Schritt-für-Schritt Anleitungen',
 					},
 					{
 						label: 'Community Forum',
 						href: '/forum',
 						icon: '💬',
-						description: 'Hilfe von der Community'
-					}
+						description: 'Hilfe von der Community',
+					},
 				],
 				style: 'card',
 				showDescription: true,
-				showIcon: true
-			}
-		}
+				showIcon: true,
+			},
+		},
 	]}
 />
 ```
@@ -295,8 +295,8 @@
 		{
 			type: 'header',
 			props: {
-				title: 'Projekt Screenshots'
-			}
+				title: 'Projekt Screenshots',
+			},
 		},
 		{
 			type: 'media',
@@ -304,15 +304,15 @@
 				type: 'image',
 				src: '/screenshots/dashboard.png',
 				alt: 'Dashboard Screenshot',
-				aspectRatio: '16/9'
-			}
+				aspectRatio: '16/9',
+			},
 		},
 		{
 			type: 'content',
 			props: {
-				text: 'Das neue Dashboard-Design mit verbesserter Benutzerführung.'
-			}
-		}
+				text: 'Das neue Dashboard-Design mit verbesserter Benutzerführung.',
+			},
+		},
 	]}
 />
 ```
@@ -327,8 +327,8 @@
 			type: 'header',
 			props: {
 				title: 'Mein QR-Code',
-				subtitle: 'Scanne für Kontaktdaten'
-			}
+				subtitle: 'Scanne für Kontaktdaten',
+			},
 		},
 		{
 			type: 'media',
@@ -336,9 +336,9 @@
 				type: 'qr',
 				qrData: 'https://example.com/contact',
 				qrSize: 200,
-				qrColor: '#000000'
-			}
-		}
+				qrColor: '#000000',
+			},
+		},
 	]}
 />
 ```
@@ -361,8 +361,8 @@
 			text: '#f9fafb',
 			textMuted: '#9ca3af',
 			border: '#374151',
-			hover: '#374151'
-		}
+			hover: '#374151',
+		},
 	};
 </script>
 
@@ -374,9 +374,9 @@
 				type: 'header',
 				props: {
 					title: 'Dark Mode Karte',
-					subtitle: 'Mit custom Theme'
-				}
-			}
+					subtitle: 'Mit custom Theme',
+				},
+			},
 		]}
 	/>
 </ThemeProvider>
@@ -392,8 +392,8 @@
 			secondary: '#4ecdc4',
 			accent: '#45b7d1',
 			background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-			text: '#ffffff'
-		}
+			text: '#ffffff',
+		},
 	};
 </script>
 
@@ -405,9 +405,9 @@
 			type: 'header',
 			props: {
 				title: 'Gradient Card',
-				subtitle: 'Mit Farbverlauf'
-			}
-		}
+				subtitle: 'Mit Farbverlauf',
+			},
+		},
 	]}
 />
 ```
@@ -495,28 +495,28 @@
 		breakpoints: {
 			sm: '640px',
 			md: '768px',
-			lg: '1024px'
+			lg: '1024px',
 		},
-		mobileLayout: 'stack'
+		mobileLayout: 'stack',
 	}}
 	modules={[
 		{
 			type: 'header',
 			visibility: 'always',
-			props: { title: 'Responsive Karte' }
+			props: { title: 'Responsive Karte' },
 		},
 		{
 			type: 'content',
 			visibility: 'desktop', // Nur auf Desktop
-			props: { text: 'Dieser Text ist nur auf Desktop sichtbar.' }
+			props: { text: 'Dieser Text ist nur auf Desktop sichtbar.' },
 		},
 		{
 			type: 'actions',
 			visibility: 'mobile', // Nur auf Mobile
 			props: {
-				actions: [{ label: 'Mobile Action', variant: 'primary' }]
-			}
-		}
+				actions: [{ label: 'Mobile Action', variant: 'primary' }],
+			},
+		},
 	]}
 />
 ```
@@ -532,16 +532,16 @@
 		hover: true,
 		entrance: 'slide',
 		duration: 300,
-		delay: 100
+		delay: 100,
 	}}
 	modules={[
 		{
 			type: 'header',
 			props: {
 				title: 'Animierte Karte',
-				subtitle: 'Mit Slide-In Effekt'
-			}
-		}
+				subtitle: 'Mit Slide-In Effekt',
+			},
+		},
 	]}
 />
 ```

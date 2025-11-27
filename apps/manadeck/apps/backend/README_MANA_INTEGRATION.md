@@ -99,6 +99,7 @@ FRONTEND_URL=http://localhost:8081
 ## Available Endpoints
 
 ### Authentication (Proxied by ManaCoreModule)
+
 - `POST /auth/signin` - Email/password sign-in
 - `POST /auth/signup` - User registration
 - `POST /auth/google-signin` - Google OAuth
@@ -111,6 +112,7 @@ FRONTEND_URL=http://localhost:8081
 - `GET /auth/devices` - Get user devices
 
 ### Protected API Endpoints (Requires Authentication)
+
 - `GET /v1/api/profile` - Get user profile
 - `GET /v1/api/decks` - Get user's decks
 - `POST /v1/api/decks` - Create a new deck
@@ -121,6 +123,7 @@ FRONTEND_URL=http://localhost:8081
 - `GET /v1/api/stats` - Get user statistics
 
 ### Public Endpoints
+
 - `GET /v1/public/featured-decks` - Get featured decks (personalized if authenticated)
 - `GET /v1/public/leaderboard` - Get leaderboard
 - `GET /v1/public/deck-templates` - Get deck templates
@@ -129,6 +132,7 @@ FRONTEND_URL=http://localhost:8081
 - `GET /v1/public/version` - API version info
 
 ### Health Checks
+
 - `GET /health` - Comprehensive health check
 - `GET /health/ready` - Readiness probe
 - `GET /health/live` - Liveness probe
@@ -155,27 +159,32 @@ npm run build
 ## Testing the Integration
 
 1. **Start Mana Core Middleware** (if running locally):
+
 ```bash
 cd ../mana-core-middleware
 npm run start:dev
 ```
 
 2. **Start the Backend**:
+
 ```bash
 npm run start:dev
 ```
 
 3. **Test Health Check**:
+
 ```bash
 curl http://localhost:8080/health
 ```
 
 4. **Test Public Endpoint**:
+
 ```bash
 curl http://localhost:8080/v1/public/version
 ```
 
 5. **Test Authentication**:
+
 ```bash
 # Sign up
 curl -X POST http://localhost:8080/auth/signup \
@@ -189,6 +198,7 @@ curl -X POST http://localhost:8080/auth/signin \
 ```
 
 6. **Test Protected Endpoint**:
+
 ```bash
 # Use the token from signin response
 curl http://localhost:8080/v1/api/profile \
@@ -198,11 +208,13 @@ curl http://localhost:8080/v1/api/profile \
 ## Docker
 
 ### Build Docker Image
+
 ```bash
 docker build -t manadeck-backend .
 ```
 
 ### Run Docker Container
+
 ```bash
 docker run -p 8080:8080 --env-file .env manadeck-backend
 ```
@@ -212,11 +224,13 @@ docker run -p 8080:8080 --env-file .env manadeck-backend
 ### Google Cloud Run
 
 1. **Build and push to Container Registry**:
+
 ```bash
 gcloud builds submit --config cloudbuild.yaml
 ```
 
 2. **Or deploy directly**:
+
 ```bash
 gcloud run deploy manadeck-backend \
   --source . \
@@ -229,28 +243,31 @@ gcloud run deploy manadeck-backend \
 Update your React Native app to use the backend:
 
 1. **Update API configuration**:
+
 ```javascript
 // utils/api.js
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080';
 ```
 
 2. **Use auth endpoints**:
+
 ```javascript
 // Sign in
 const response = await fetch(`${API_URL}/auth/signin`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email, password }),
+	method: 'POST',
+	headers: { 'Content-Type': 'application/json' },
+	body: JSON.stringify({ email, password }),
 });
 ```
 
 3. **Use protected endpoints**:
+
 ```javascript
 // Get profile
 const response = await fetch(`${API_URL}/v1/api/profile`, {
-  headers: {
-    'Authorization': `Bearer ${token}`
-  },
+	headers: {
+		Authorization: `Bearer ${token}`,
+	},
 });
 ```
 
@@ -267,18 +284,22 @@ const response = await fetch(`${API_URL}/v1/api/profile`, {
 ## Troubleshooting
 
 ### "App verification failed"
+
 - Verify APP_ID matches the one registered with Mana Core
 - Check MANA_SERVICE_URL is correct and accessible
 
 ### "Token expired" errors
+
 - Ensure token refresh is implemented in the mobile app
 - Check token expiration settings in Mana Core
 
 ### "CORS errors" in mobile app
+
 - Update FRONTEND_URL in .env
 - Verify CORS configuration in main.ts
 
 ### "Cannot connect to Mana Core"
+
 - Ensure Mana Core Middleware is running
 - Check network connectivity
 - Verify MANA_SERVICE_URL is correct
@@ -295,6 +316,7 @@ const response = await fetch(`${API_URL}/v1/api/profile`, {
 ## Support
 
 For issues or questions:
+
 - Check the Mana Core documentation
 - Review the integration guides
 - Contact the development team

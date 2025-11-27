@@ -1,7 +1,9 @@
 # Skalierbare Minimallösung für Zentrale Stories
+
 ## Foundation für späteres Community-System
 
 ### Kernprinzip
+
 Start mit minimalem Setup, das bereits die richtige Struktur für spätere Features hat.
 
 ---
@@ -9,13 +11,14 @@ Start mit minimalem Setup, das bereits die richtige Struktur für spätere Featu
 ## Phase 1: Minimale Basis (JETZT - 2 Tage)
 
 ### 1.1 Stories Tabelle erweitern
+
 ```sql
 -- Diese Felder bleiben für immer und werden später genutzt
-ALTER TABLE stories 
+ALTER TABLE stories
 ADD COLUMN is_published BOOLEAN DEFAULT FALSE,
 ADD COLUMN published_at TIMESTAMPTZ,
 ADD COLUMN published_by TEXT, -- 'system', 'user', 'curator'
-ADD COLUMN visibility VARCHAR(20) DEFAULT 'private' 
+ADD COLUMN visibility VARCHAR(20) DEFAULT 'private'
     CHECK (visibility IN ('private', 'public', 'central', 'featured')),
 ADD COLUMN featured_score DECIMAL DEFAULT 0, -- Für späteres Ranking
 ADD COLUMN metadata JSONB DEFAULT '{}'::jsonb; -- Flexibel für Zukunft
@@ -26,6 +29,7 @@ CREATE INDEX idx_story_metadata ON stories USING gin (metadata);
 ```
 
 ### 1.2 Story Collections (Basis-Struktur)
+
 ```sql
 -- Diese Tabelle JETZT anlegen, auch wenn minimal genutzt
 CREATE TABLE story_collections (
@@ -52,11 +56,12 @@ CREATE TABLE collection_stories (
 );
 
 -- Erste Collection erstellen
-INSERT INTO story_collections (slug, name, description, type) 
+INSERT INTO story_collections (slug, name, description, type)
 VALUES ('central-stories', 'Märchenzauber Geschichten', 'Offizielle Geschichten von Märchenzauber', 'manual');
 ```
 
 ### 1.3 RLS Policies (zukunftssicher)
+
 ```sql
 -- Stories Policy
 CREATE POLICY "story_visibility_policy" ON stories
@@ -76,16 +81,20 @@ CREATE POLICY "collection_stories_public_read" ON collection_stories
 ```
 
 ### 1.4 Backend Service (erweiterbar)
+
 ```typescript
 // story.service.ts - Struktur für Wachstum
 export class StoryService {
   // Basis-Methode die später erweitert wird
-  async getStories(userId: string, options?: {
-    includePublic?: boolean;
-    collectionSlug?: string;
-  }) {
+  async getStories(
+    userId: string,
+    options?: {
+      includePublic?: boolean;
+      collectionSlug?: string;
+    }
+  ) {
     let query = this.supabase.from('stories').select('*');
-    
+
     if (options?.collectionSlug) {
       // Via Collection
       const { data: collection } = await this.supabase
@@ -93,7 +102,7 @@ export class StoryService {
         .select('id')
         .eq('slug', options.collectionSlug)
         .single();
-        
+
       query = this.supabase
         .from('collection_stories')
         .select('stories(*)')
@@ -101,11 +110,9 @@ export class StoryService {
         .order('position');
     } else {
       // Direkt
-      query = query.or(
-        `user_id.eq.${userId},visibility.in.(public,central,featured)`
-      );
+      query = query.or(`user_id.eq.${userId},visibility.in.(public,central,featured)`);
     }
-    
+
     return query;
   }
 
@@ -118,6 +125,7 @@ export class StoryService {
 ```
 
 ### 1.5 Mobile App (mit Zukunfts-Hooks)
+
 ```typescript
 // types/story.ts
 export interface Story {
@@ -133,7 +141,7 @@ export interface Story {
 // components/StoryList.tsx
 export const StoryList = () => {
   const [filter, setFilter] = useState<'all' | 'mine' | 'central'>('all');
-  
+
   // Struktur die später erweitert wird
   const sections = [
     {
@@ -146,12 +154,12 @@ export const StoryList = () => {
       data: stories.filter(s => s.user_id === currentUser.id),
     }
   ];
-  
+
   return (
     <SectionList
       sections={sections}
       renderItem={({ item }) => (
-        <StoryCard 
+        <StoryCard
           story={item}
           onVote={() => {/* TODO Phase 2 */}}
           showVoteButton={false} // Wird später true
@@ -179,12 +187,13 @@ CREATE TABLE story_votes (
 ALTER TABLE stories ADD COLUMN vote_count INTEGER DEFAULT 0;
 
 -- Automatisches Update via Trigger
-CREATE TRIGGER update_vote_count 
+CREATE TRIGGER update_vote_count
 AFTER INSERT OR DELETE ON story_votes
 FOR EACH ROW EXECUTE FUNCTION update_story_vote_count();
 ```
 
 Backend:
+
 ```typescript
 // Nur neue Methode hinzufügen
 async voteStory(storyId: string, userId: string) {
@@ -240,7 +249,7 @@ VALUES ('community', 'Community Geschichten', 'automatic');
 -- migrations/001_initial_central_stories.sql
 -- Phase 1 Changes
 
--- migrations/002_add_voting.sql  
+-- migrations/002_add_voting.sql
 -- Phase 2 Changes
 
 -- migrations/003_character_sharing.sql
@@ -273,35 +282,40 @@ npm run deploy
 ```
 
 ## Seed Script für erste Stories
+
 ```javascript
 // scripts/seed-central-stories.js
 const createCentralStory = async (title, text, pages) => {
-  const { data: story } = await supabase.from('stories').insert({
-    user_id: 'SYSTEM',
-    title,
-    story_text: text,
-    visibility: 'central',
-    published_at: new Date(),
-    published_by: 'system',
-    pages_data: pages,
-    metadata: { 
-      version: 1,
-      language: 'de',
-      age_group: '4-8'
-    }
-  }).select().single();
-  
+  const { data: story } = await supabase
+    .from('stories')
+    .insert({
+      user_id: 'SYSTEM',
+      title,
+      story_text: text,
+      visibility: 'central',
+      published_at: new Date(),
+      published_by: 'system',
+      pages_data: pages,
+      metadata: {
+        version: 1,
+        language: 'de',
+        age_group: '4-8',
+      },
+    })
+    .select()
+    .single();
+
   // In Collection einfügen
   const { data: collection } = await supabase
     .from('story_collections')
     .select('id')
     .eq('slug', 'central-stories')
     .single();
-    
+
   await supabase.from('collection_stories').insert({
     collection_id: collection.id,
     story_id: story.id,
-    position: 1
+    position: 1,
   });
 };
 ```

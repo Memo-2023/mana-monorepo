@@ -1,7 +1,7 @@
 ---
 interface Props {
-  title: string;
-  description?: string;
+	title: string;
+	description?: string;
 }
 
 const { title, description = 'Discover inspiring quotes from great minds' } = Astro.props;
@@ -9,64 +9,67 @@ const { title, description = 'Discover inspiring quotes from great minds' } = As
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="description" content={description} />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
-  </head>
-  <body>
-    <nav class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
-      <div class="container mx-auto px-6 py-4">
-        <div class="flex items-center justify-between">
-          <a href="/" class="text-2xl font-bold">📖 Quotes</a>
-          <div class="flex gap-6">
-            <a href="/#features" class="hover:opacity-80">Features</a>
-            <a href="/#about" class="hover:opacity-80">About</a>
-            <a href="/app" class="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:opacity-90">
-              Open App
-            </a>
-          </div>
-        </div>
-      </div>
-    </nav>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content={description} />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<nav class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+			<div class="container mx-auto px-6 py-4">
+				<div class="flex items-center justify-between">
+					<a href="/" class="text-2xl font-bold">📖 Quotes</a>
+					<div class="flex gap-6">
+						<a href="/#features" class="hover:opacity-80">Features</a>
+						<a href="/#about" class="hover:opacity-80">About</a>
+						<a
+							href="/app"
+							class="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:opacity-90"
+						>
+							Open App
+						</a>
+					</div>
+				</div>
+			</div>
+		</nav>
 
-    <slot />
+		<slot />
 
-    <footer class="bg-gray-900 text-white py-12">
-      <div class="container mx-auto px-6 text-center">
-        <p>&copy; 2025 Quotes App. All rights reserved.</p>
-        <div class="mt-4 flex justify-center gap-6">
-          <a href="/privacy" class="hover:opacity-80">Privacy</a>
-          <a href="/terms" class="hover:opacity-80">Terms</a>
-          <a href="/contact" class="hover:opacity-80">Contact</a>
-        </div>
-      </div>
-    </footer>
-  </body>
+		<footer class="bg-gray-900 text-white py-12">
+			<div class="container mx-auto px-6 text-center">
+				<p>&copy; 2025 Quotes App. All rights reserved.</p>
+				<div class="mt-4 flex justify-center gap-6">
+					<a href="/privacy" class="hover:opacity-80">Privacy</a>
+					<a href="/terms" class="hover:opacity-80">Terms</a>
+					<a href="/contact" class="hover:opacity-80">Contact</a>
+				</div>
+			</div>
+		</footer>
+	</body>
 </html>
 
 <style is:global>
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+	* {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+	}
 
-  html {
-    font-family: system-ui, sans-serif;
-    background: #ffffff;
-  }
+	html {
+		font-family: system-ui, sans-serif;
+		background: #ffffff;
+	}
 
-  body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+	body {
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+	}
 
-  main {
-    flex: 1;
-  }
+	main {
+		flex: 1;
+	}
 </style>

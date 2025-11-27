@@ -3,12 +3,15 @@
 ## Was wurde gemacht:
 
 ### 1. Redis lokal installiert
+
 - Redis via Homebrew installiert: `brew install redis`
 - Redis-Service gestartet: `brew services start redis`
 - Läuft jetzt permanent im Hintergrund
 
 ### 2. Umgebungsvariablen konfiguriert
+
 **Lokal (.env.development):**
+
 ```env
 REDIS_HOST=localhost
 REDIS_PORT=6379
@@ -16,6 +19,7 @@ REDIS_PASSWORD=
 ```
 
 **Produktion (.env):**
+
 ```env
 # Füge deine Coolify Redis-Daten hier ein:
 REDIS_HOST=your-redis-host
@@ -25,6 +29,7 @@ REDIS_PASSWORD=your-redis-password
 ```
 
 ### 3. Robuster Fallback-Mechanismus
+
 - App funktioniert auch OHNE Redis
 - Automatische Erkennung ob Redis verfügbar ist
 - Graceful degradation wenn Redis offline ist
@@ -32,6 +37,7 @@ REDIS_PASSWORD=your-redis-password
 ## So prüfst du ob Redis funktioniert:
 
 ### 1. Status-Endpoint
+
 ```bash
 # Lokal
 curl http://localhost:5173/api/redis-status
@@ -41,15 +47,19 @@ curl https://ulo.ad/api/redis-status
 ```
 
 ### 2. Console Logs
+
 Beim App-Start siehst du:
+
 - ✅ Redis: Connected successfully (wenn verbunden)
 - ⚠️ Redis: Disabled (wenn nicht konfiguriert)
 
 ### 3. Performance Test
+
 1. Besuche einen Link zum ersten Mal → "Cache MISS"
 2. Besuche denselben Link nochmal → "Cache HIT!" (viel schneller!)
 
 ### 4. Redis CLI
+
 ```bash
 # Zeige alle gecachten Links
 redis-cli keys "redirect:*"
@@ -96,7 +106,7 @@ redis-cli flushall
 ## Cache-Strategie:
 
 - **Normale Links**: 5 Minuten Cache
-- **Populäre Links**: 24 Stunden Cache  
+- **Populäre Links**: 24 Stunden Cache
 - **Passwort-geschützte Links**: Kein Cache
 - **Abgelaufene Links**: Kein Cache
 

@@ -3,7 +3,7 @@ import {
 	generateShortCode,
 	generateTagSlug,
 	parseUserAgent,
-	DEFAULT_TAG_COLORS
+	DEFAULT_TAG_COLORS,
 } from './pocketbase';
 
 describe('PocketBase Utilities', () => {

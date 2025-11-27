@@ -32,6 +32,7 @@ cp .env.example .env
 ```
 
 **Minimum required changes in .env:**
+
 ```env
 POSTGRES_PASSWORD=your-secure-password-here
 REDIS_PASSWORD=your-redis-password-here
@@ -57,6 +58,7 @@ pnpm migration:run
 ```
 
 Expected output:
+
 ```
 Running migrations...
 Migrations completed successfully
@@ -69,6 +71,7 @@ pnpm start:dev
 ```
 
 You should see:
+
 ```
 🚀 Mana Core Auth running on: http://localhost:3001
 📚 Environment: development
@@ -89,12 +92,13 @@ curl -X POST http://localhost:3001/api/v1/auth/register \
 ```
 
 Expected response:
+
 ```json
 {
-  "id": "uuid-here",
-  "email": "test@example.com",
-  "name": "Test User",
-  "createdAt": "2025-11-25T..."
+	"id": "uuid-here",
+	"email": "test@example.com",
+	"name": "Test User",
+	"createdAt": "2025-11-25T..."
 }
 ```
 
@@ -110,18 +114,19 @@ curl -X POST http://localhost:3001/api/v1/auth/login \
 ```
 
 Expected response:
+
 ```json
 {
-  "user": {
-    "id": "uuid-here",
-    "email": "test@example.com",
-    "name": "Test User",
-    "role": "user"
-  },
-  "accessToken": "eyJhbGciOiJSUzI1NiIs...",
-  "refreshToken": "long-random-string",
-  "expiresIn": 900,
-  "tokenType": "Bearer"
+	"user": {
+		"id": "uuid-here",
+		"email": "test@example.com",
+		"name": "Test User",
+		"role": "user"
+	},
+	"accessToken": "eyJhbGciOiJSUzI1NiIs...",
+	"refreshToken": "long-random-string",
+	"expiresIn": 900,
+	"tokenType": "Bearer"
 }
 ```
 
@@ -134,13 +139,14 @@ curl -X GET http://localhost:3001/api/v1/credits/balance \
 ```
 
 Expected response:
+
 ```json
 {
-  "balance": 0,
-  "freeCreditsRemaining": 150,
-  "totalEarned": 0,
-  "totalSpent": 0,
-  "dailyFreeCredits": 5
+	"balance": 0,
+	"freeCreditsRemaining": 150,
+	"totalEarned": 0,
+	"totalSpent": 0,
+	"dailyFreeCredits": 5
 }
 ```
 
@@ -159,25 +165,26 @@ curl -X POST http://localhost:3001/api/v1/credits/use \
 ```
 
 Expected response:
+
 ```json
 {
-  "success": true,
-  "transaction": {
-    "id": "uuid-here",
-    "userId": "uuid-here",
-    "type": "usage",
-    "status": "completed",
-    "amount": -10,
-    "balanceBefore": 150,
-    "balanceAfter": 140,
-    "appId": "test",
-    "description": "Test credit usage"
-  },
-  "newBalance": {
-    "balance": 0,
-    "freeCreditsRemaining": 140,
-    "totalSpent": 10
-  }
+	"success": true,
+	"transaction": {
+		"id": "uuid-here",
+		"userId": "uuid-here",
+		"type": "usage",
+		"status": "completed",
+		"amount": -10,
+		"balanceBefore": 150,
+		"balanceAfter": 140,
+		"appId": "test",
+		"description": "Test credit usage"
+	},
+	"newBalance": {
+		"balance": 0,
+		"freeCreditsRemaining": 140,
+		"totalSpent": 10
+	}
 }
 ```
 
@@ -211,6 +218,7 @@ The authentication system is now running and ready to use.
 **Problem:** Database not ready yet
 
 **Solution:**
+
 ```bash
 docker-compose ps  # Check if postgres is healthy
 docker-compose logs postgres  # Check logs
@@ -221,6 +229,7 @@ docker-compose logs postgres  # Check logs
 **Problem:** JWT keys not set in .env
 
 **Solution:**
+
 ```bash
 # Run the key generator again
 ./scripts/generate-keys.sh
@@ -234,6 +243,7 @@ docker-compose logs postgres  # Check logs
 **Problem:** Database schema issues
 
 **Solution:**
+
 ```bash
 # Drop and recreate database
 docker-compose down -v
@@ -247,6 +257,7 @@ pnpm migration:run
 **Problem:** Another service is using the port
 
 **Solution:**
+
 ```bash
 # Change PORT in .env
 echo "PORT=3002" >> .env
@@ -315,11 +326,13 @@ pnpm db:studio
 ## Environment Variables Reference
 
 ### Required
+
 - `DATABASE_URL` - PostgreSQL connection string
 - `JWT_PRIVATE_KEY` - RS256 private key (PEM format)
 - `JWT_PUBLIC_KEY` - RS256 public key (PEM format)
 
 ### Optional (have defaults)
+
 - `PORT` - Server port (default: 3001)
 - `NODE_ENV` - Environment (default: development)
 - `REDIS_HOST` - Redis host (default: localhost)
@@ -328,6 +341,7 @@ pnpm db:studio
 - `CREDITS_DAILY_FREE` - Daily free credits (default: 5)
 
 ### For Production
+
 - `STRIPE_SECRET_KEY` - Stripe secret key
 - `STRIPE_WEBHOOK_SECRET` - Stripe webhook signing secret
 - `ACME_EMAIL` - Email for Let's Encrypt SSL
@@ -343,6 +357,7 @@ pnpm db:studio
 ## Support
 
 If you encounter issues:
+
 1. Check this guide first
 2. Review the logs
 3. Consult the master plan

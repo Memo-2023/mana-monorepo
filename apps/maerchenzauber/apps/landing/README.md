@@ -39,6 +39,7 @@ All commands are run from the `landingpage` directory:
 ## 🚀 Deployment to Netlify
 
 ### Prerequisites
+
 - Netlify CLI installed: `npm install -g netlify-cli`
 - Netlify account and site created
 

@@ -1,19 +1,19 @@
 ---
 title: "AI Image Generation Revolution: OpenAI's GPT-4o Sets New Standards"
-description: "OpenAI recently unveiled its latest model, GPT-4o, which directly integrates image generation, marking a significant advancement in AI technology."
+description: 'OpenAI recently unveiled its latest model, GPT-4o, which directly integrates image generation, marking a significant advancement in AI technology.'
 pubDate: 2025-03-25
-category: "Bild"
+category: 'Bild'
 featured: true
-author: "BaunTown"
-tags: ["GPT-4o", "OpenAI", "AI", "Multimodal", "Image Generation"]
-image: "/images/models/openai-gpt4o-imagemode-bauntown.png"
+author: 'BaunTown'
+tags: ['GPT-4o', 'OpenAI', 'AI', 'Multimodal', 'Image Generation']
+image: '/images/models/openai-gpt4o-imagemode-bauntown.png'
 externalLinks:
-  - title: "Official OpenAI Announcement"
-    url: "https://openai.com/index/introducing-4o-image-generation/"
-  - title: "ChatGPT - Create Images"
-    url: "https://chat.openai.com"
+  - title: 'Official OpenAI Announcement'
+    url: 'https://openai.com/index/introducing-4o-image-generation/'
+  - title: 'ChatGPT - Create Images'
+    url: 'https://chat.openai.com'
   - title: "Sora - OpenAI's Video & Image Platform"
-    url: "https://sora.com"
+    url: 'https://sora.com'
 ---
 
 OpenAI recently unveiled its latest model, GPT-4o, which directly integrates image generation, marking a significant advancement in AI technology. This model can create images based on text prompts, edit uploaded images, and even accurately represent multiple objects. It stands out for its improved text rendering in images, an area where previous models like DALL-E often struggled.

@@ -33,7 +33,7 @@ function getInitialSettings(): SettingsState {
 			showRecordingInstruction: true,
 			showBlueprints: true,
 			showManaBadge: true,
-			enableDiarization: false
+			enableDiarization: false,
 		};
 	}
 
@@ -55,7 +55,7 @@ function getInitialSettings(): SettingsState {
 		showRecordingInstruction: true,
 		showBlueprints: true,
 		showManaBadge: true,
-		enableDiarization: false
+		enableDiarization: false,
 	};
 }
 
@@ -143,11 +143,11 @@ function createSettingsStore() {
 				showRecordingInstruction: true,
 				showBlueprints: true,
 				showManaBadge: true,
-				enableDiarization: false
+				enableDiarization: false,
 			};
 			set(defaultState);
 			saveToStorage(defaultState);
-		}
+		},
 	};
 }
 

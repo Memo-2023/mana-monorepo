@@ -4,15 +4,15 @@ import { PipelineRegistry } from './core/pipeline.registry';
 
 @Controller('pipeline-testing')
 export class PipelineTestingController {
-  constructor(
-    private readonly pipelineExecutor: PipelineExecutor,
-    private readonly pipelineRegistry: PipelineRegistry,
-  ) {}
+	constructor(
+		private readonly pipelineExecutor: PipelineExecutor,
+		private readonly pipelineRegistry: PipelineRegistry
+	) {}
 
-  @Get('/')
-  getTestingUI() {
-    // Return HTML UI for testing
-    return `
+	@Get('/')
+	getTestingUI() {
+		// Return HTML UI for testing
+		return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -421,61 +421,49 @@ export class PipelineTestingController {
 </body>
 </html>
     `;
-  }
+	}
 
-  @Get('steps')
-  getAllSteps() {
-    const steps = Array.from(this.pipelineRegistry.getAllSteps().values());
-    return steps.map((step) => ({
-      name: step.name,
-      category: step.category,
-      description: step.description,
-    }));
-  }
+	@Get('steps')
+	getAllSteps() {
+		const steps = Array.from(this.pipelineRegistry.getAllSteps().values());
+		return steps.map((step) => ({
+			name: step.name,
+			category: step.category,
+			description: step.description,
+		}));
+	}
 
-  @Get('pipelines')
-  getAllPipelines() {
-    const pipelines = Array.from(
-      this.pipelineRegistry.getAllPipelines().entries(),
-    );
-    return pipelines.map(([name, steps]) => ({
-      name,
-      steps: steps.map((s) => ({
-        name: s.name,
-        category: s.category,
-      })),
-    }));
-  }
+	@Get('pipelines')
+	getAllPipelines() {
+		const pipelines = Array.from(this.pipelineRegistry.getAllPipelines().entries());
+		return pipelines.map(([name, steps]) => ({
+			name,
+			steps: steps.map((s) => ({
+				name: s.name,
+				category: s.category,
+			})),
+		}));
+	}
 
-  @Post('execute-step')
-  async executeStep(
-    @Body() body: { category: string; name: string; input: any },
-  ) {
-    const step = this.pipelineRegistry.getStep(body.category, body.name);
+	@Post('execute-step')
+	async executeStep(@Body() body: { category: string; name: string; input: any }) {
+		const step = this.pipelineRegistry.getStep(body.category, body.name);
 
-    if (!step) {
-      throw new Error(`Step ${body.category}:${body.name} not found`);
-    }
+		if (!step) {
+			throw new Error(`Step ${body.category}:${body.name} not found`);
+		}
 
-    return await this.pipelineExecutor.execute(
-      [step],
-      body.input,
-      body.input.userId,
-    );
-  }
+		return await this.pipelineExecutor.execute([step], body.input, body.input.userId);
+	}
 
-  @Post('execute-pipeline')
-  async executePipeline(@Body() body: { name: string; input: any }) {
-    const pipeline = this.pipelineRegistry.getPipeline(body.name);
+	@Post('execute-pipeline')
+	async executePipeline(@Body() body: { name: string; input: any }) {
+		const pipeline = this.pipelineRegistry.getPipeline(body.name);
 
-    if (!pipeline) {
-      throw new Error(`Pipeline ${body.name} not found`);
-    }
+		if (!pipeline) {
+			throw new Error(`Pipeline ${body.name} not found`);
+		}
 
-    return await this.pipelineExecutor.execute(
-      pipeline,
-      body.input,
-      body.input.userId,
-    );
-  }
+		return await this.pipelineExecutor.execute(pipeline, body.input, body.input.userId);
+	}
 }

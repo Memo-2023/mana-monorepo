@@ -18,7 +18,7 @@
 		onLoadMore,
 		loadMoreThreshold = 200,
 		class: className = '',
-		children
+		children,
 	}: Props = $props();
 
 	// State
@@ -31,16 +31,18 @@
 
 	let startIndex = $derived(Math.max(0, Math.floor(scrollTop / itemHeight) - bufferSize));
 
-	let endIndex = $derived(Math.min(
-		items.length,
-		Math.floor(scrollTop / itemHeight) + Math.ceil(containerHeight / itemHeight) + bufferSize
-	));
+	let endIndex = $derived(
+		Math.min(
+			items.length,
+			Math.floor(scrollTop / itemHeight) + Math.ceil(containerHeight / itemHeight) + bufferSize
+		)
+	);
 
 	let visibleItems = $derived(
 		items.slice(startIndex, endIndex).map((item, i) => ({
 			item,
 			index: startIndex + i,
-			style: `position: absolute; top: ${(startIndex + i) * itemHeight}px; left: 0; right: 0; height: ${itemHeight}px;`
+			style: `position: absolute; top: ${(startIndex + i) * itemHeight}px; left: 0; right: 0; height: ${itemHeight}px;`,
 		}))
 	);
 
@@ -60,7 +62,9 @@
 				isLoadMorePending = true;
 				onLoadMore();
 				// Reset after a short delay to prevent multiple calls
-				setTimeout(() => { isLoadMorePending = false; }, 500);
+				setTimeout(() => {
+					isLoadMorePending = false;
+				}, 500);
 			}
 		}
 

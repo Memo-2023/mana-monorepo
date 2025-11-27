@@ -28,7 +28,7 @@
 		onPress,
 		showCategory = false,
 		isActive = false,
-		onToggleActive
+		onToggleActive,
 	}: Props = $props();
 
 	// Get current language (simplified, you can use i18n store later)
@@ -125,8 +125,9 @@
 				disabled={isLoading}
 			>
 				{#if isLoading}
-					<div class="h-5 w-5 animate-spin rounded-full border-2 border-gray-400 border-t-transparent">
-					</div>
+					<div
+						class="h-5 w-5 animate-spin rounded-full border-2 border-gray-400 border-t-transparent"
+					></div>
 				{:else}
 					<svg
 						class="h-5 w-5"

@@ -59,14 +59,17 @@ supabase secrets set REPLICATE_API_KEY=dein_replicate_token --project-ref mjuvnn
 ## Fehlerbehebung
 
 ### "Replicate API key not configured"
+
 - Stelle sicher, dass der API Key korrekt in Supabase Secrets gespeichert ist
 - Der Key muss genau `REPLICATE_API_KEY` heißen
 
 ### "Unauthorized" oder "Invalid token"
+
 - Überprüfe, ob der Token korrekt kopiert wurde
 - Stelle sicher, dass der Token noch gültig ist (nicht gelöscht wurde)
 
 ### Bilder werden nicht angezeigt
+
 - Überprüfe, ob der Storage Bucket `generated-images` öffentlich ist
 - Gehe zu Supabase Dashboard → Storage → generated-images → Policies
 - Der Bucket sollte auf "Public" gesetzt sein

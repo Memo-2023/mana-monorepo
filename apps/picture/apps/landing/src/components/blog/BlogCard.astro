@@ -13,19 +13,26 @@ const { title, description, publishedAt, coverImage, category, tags } = post.dat
 const readingTime = calculateReadingTime(post.body);
 ---
 
-<article class="group bg-dark-elevated border border-dark-border rounded-2xl overflow-hidden hover:border-primary/50 transition-all duration-300 hover:scale-[1.02]">
+<article
+	class="group overflow-hidden rounded-2xl border border-dark-border bg-dark-elevated transition-all duration-300 hover:scale-[1.02] hover:border-primary/50"
+>
 	<!-- Cover Image -->
-	<a href={localizePath(`/blog/${post.slug}`)} class="block relative aspect-video overflow-hidden">
-		<div class="absolute inset-0 bg-gradient-to-t from-dark-bg/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
+	<a href={localizePath(`/blog/${post.slug}`)} class="relative block aspect-video overflow-hidden">
+		<div
+			class="absolute inset-0 z-10 bg-gradient-to-t from-dark-bg/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+		>
+		</div>
 		<img
 			src={coverImage}
 			alt={title}
-			class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+			class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
 			loading="lazy"
 		/>
 		<!-- Category Badge -->
-		<div class="absolute top-4 left-4 z-20">
-			<span class="px-3 py-1 bg-primary/90 backdrop-blur-sm text-white text-sm font-medium rounded-full capitalize">
+		<div class="absolute left-4 top-4 z-20">
+			<span
+				class="rounded-full bg-primary/90 px-3 py-1 text-sm font-medium capitalize text-white backdrop-blur-sm"
+			>
 				{t(`blog.categories.${category}`)}
 			</span>
 		</div>
@@ -34,7 +41,7 @@ const readingTime = calculateReadingTime(post.body);
 	<!-- Content -->
 	<div class="p-6">
 		<!-- Meta Info -->
-		<div class="flex items-center gap-4 text-sm text-gray-400 mb-3">
+		<div class="mb-3 flex items-center gap-4 text-sm text-gray-400">
 			<time datetime={publishedAt.toISOString()}>
 				{formatDate(publishedAt, post.data.language)}
 			</time>
@@ -43,24 +50,28 @@ const readingTime = calculateReadingTime(post.body);
 		</div>
 
 		<!-- Title -->
-		<a href={localizePath(`/blog/${post.slug}`)} class="block mb-3">
-			<h3 class="text-xl font-bold text-white group-hover:text-primary transition-colors line-clamp-2">
+		<a href={localizePath(`/blog/${post.slug}`)} class="mb-3 block">
+			<h3
+				class="line-clamp-2 text-xl font-bold text-white transition-colors group-hover:text-primary"
+			>
 				{title}
 			</h3>
 		</a>
 
 		<!-- Description -->
-		<p class="text-gray-300 mb-4 line-clamp-2">
+		<p class="mb-4 line-clamp-2 text-gray-300">
 			{description}
 		</p>
 
 		<!-- Tags -->
 		<div class="flex flex-wrap gap-2">
-			{tags.slice(0, 3).map(tag => (
-				<span class="px-2 py-1 bg-dark-surface text-gray-400 text-xs rounded">
-					#{tag}
-				</span>
-			))}
+			{
+				tags
+					.slice(0, 3)
+					.map((tag) => (
+						<span class="rounded bg-dark-surface px-2 py-1 text-xs text-gray-400">#{tag}</span>
+					))
+			}
 		</div>
 	</div>
 </article>

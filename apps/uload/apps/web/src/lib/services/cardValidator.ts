@@ -26,7 +26,7 @@ class CardValidator {
 
 		return {
 			valid: errors.length === 0,
-			errors: errors.length > 0 ? errors : undefined
+			errors: errors.length > 0 ? errors : undefined,
 		};
 	}
 
@@ -91,7 +91,7 @@ class CardValidator {
 			if (config.layout.columns && (config.layout.columns < 1 || config.layout.columns > 4)) {
 				errors.push({
 					field: 'config.layout.columns',
-					message: 'Columns must be between 1 and 4'
+					message: 'Columns must be between 1 and 4',
 				});
 			}
 		}
@@ -121,7 +121,7 @@ class CardValidator {
 				'stats',
 				'actions',
 				'links',
-				'custom'
+				'custom',
 			];
 			if (!validTypes.includes(module.type)) {
 				errors.push({ field: `${prefix}.type`, message: `Invalid module type: ${module.type}` });
@@ -167,7 +167,7 @@ class CardValidator {
 			if (config.template.length > 100000) {
 				errors.push({
 					field: 'config.template',
-					message: 'Template exceeds maximum size of 100KB'
+					message: 'Template exceeds maximum size of 100KB',
 				});
 			}
 
@@ -175,7 +175,7 @@ class CardValidator {
 			if (this.containsDangerousPatterns(config.template)) {
 				errors.push({
 					field: 'config.template',
-					message: 'Template contains potentially dangerous patterns'
+					message: 'Template contains potentially dangerous patterns',
 				});
 			}
 		}
@@ -185,14 +185,14 @@ class CardValidator {
 			if (config.css.length > 50000) {
 				errors.push({
 					field: 'config.css',
-					message: 'CSS exceeds maximum size of 50KB'
+					message: 'CSS exceeds maximum size of 50KB',
 				});
 			}
 
 			if (this.containsDangerousCSS(config.css)) {
 				errors.push({
 					field: 'config.css',
-					message: 'CSS contains potentially dangerous patterns'
+					message: 'CSS contains potentially dangerous patterns',
 				});
 			}
 		}
@@ -205,13 +205,13 @@ class CardValidator {
 				if (!variable.name) {
 					errors.push({
 						field: `config.variables[${index}].name`,
-						message: 'Variable name is required'
+						message: 'Variable name is required',
 					});
 				}
 				if (!variable.type) {
 					errors.push({
 						field: `config.variables[${index}].type`,
-						message: 'Variable type is required'
+						message: 'Variable type is required',
 					});
 				}
 			});
@@ -224,7 +224,7 @@ class CardValidator {
 				if (!(variable.name in config.values)) {
 					errors.push({
 						field: `config.values.${variable.name}`,
-						message: `Required variable '${variable.name}' is missing`
+						message: `Required variable '${variable.name}' is missing`,
 					});
 				}
 			});
@@ -248,14 +248,14 @@ class CardValidator {
 			if (config.html.length > 100000) {
 				errors.push({
 					field: 'config.html',
-					message: 'HTML exceeds maximum size of 100KB'
+					message: 'HTML exceeds maximum size of 100KB',
 				});
 			}
 
 			if (this.containsDangerousPatterns(config.html)) {
 				errors.push({
 					field: 'config.html',
-					message: 'HTML contains potentially dangerous patterns'
+					message: 'HTML contains potentially dangerous patterns',
 				});
 			}
 		}
@@ -267,14 +267,14 @@ class CardValidator {
 			if (config.css.length > 50000) {
 				errors.push({
 					field: 'config.css',
-					message: 'CSS exceeds maximum size of 50KB'
+					message: 'CSS exceeds maximum size of 50KB',
 				});
 			}
 
 			if (this.containsDangerousCSS(config.css)) {
 				errors.push({
 					field: 'config.css',
-					message: 'CSS contains potentially dangerous patterns'
+					message: 'CSS contains potentially dangerous patterns',
 				});
 			}
 		}
@@ -283,7 +283,7 @@ class CardValidator {
 		if (config.javascript) {
 			errors.push({
 				field: 'config.javascript',
-				message: 'JavaScript is not allowed for security reasons'
+				message: 'JavaScript is not allowed for security reasons',
 			});
 		}
 
@@ -309,7 +309,7 @@ class CardValidator {
 				if (!ratioPattern.test(card.constraints.aspectRatio)) {
 					errors.push({
 						field: 'constraints.aspectRatio',
-						message: 'Invalid aspect ratio format'
+						message: 'Invalid aspect ratio format',
 					});
 				}
 			}
@@ -319,21 +319,21 @@ class CardValidator {
 		if (card.constraints.maxModules && card.constraints.maxModules < 1) {
 			errors.push({
 				field: 'constraints.maxModules',
-				message: 'Maximum modules must be at least 1'
+				message: 'Maximum modules must be at least 1',
 			});
 		}
 
 		if (card.constraints.maxHTMLSize && card.constraints.maxHTMLSize < 1000) {
 			errors.push({
 				field: 'constraints.maxHTMLSize',
-				message: 'Maximum HTML size must be at least 1KB'
+				message: 'Maximum HTML size must be at least 1KB',
 			});
 		}
 
 		if (card.constraints.maxCSSSize && card.constraints.maxCSSSize < 1000) {
 			errors.push({
 				field: 'constraints.maxCSSSize',
-				message: 'Maximum CSS size must be at least 1KB'
+				message: 'Maximum CSS size must be at least 1KB',
 			});
 		}
 
@@ -354,7 +354,7 @@ class CardValidator {
 		if (card.metadata.name && card.metadata.name.length > 100) {
 			errors.push({
 				field: 'metadata.name',
-				message: 'Name must be 100 characters or less'
+				message: 'Name must be 100 characters or less',
 			});
 		}
 
@@ -362,7 +362,7 @@ class CardValidator {
 		if (card.metadata.description && card.metadata.description.length > 500) {
 			errors.push({
 				field: 'metadata.description',
-				message: 'Description must be 500 characters or less'
+				message: 'Description must be 500 characters or less',
 			});
 		}
 
@@ -371,12 +371,12 @@ class CardValidator {
 			if (!Array.isArray(card.metadata.tags)) {
 				errors.push({
 					field: 'metadata.tags',
-					message: 'Tags must be an array'
+					message: 'Tags must be an array',
 				});
 			} else if (card.metadata.tags.length > 10) {
 				errors.push({
 					field: 'metadata.tags',
-					message: 'Maximum 10 tags allowed'
+					message: 'Maximum 10 tags allowed',
 				});
 			}
 		}
@@ -400,7 +400,7 @@ class CardValidator {
 			/javascript:/i,
 			/on\w+\s*=/i, // Event handlers
 			/<link[^>]*href/i, // External stylesheets
-			/<meta[^>]*http-equiv/i // Meta refresh
+			/<meta[^>]*http-equiv/i, // Meta refresh
 		];
 
 		return dangerousPatterns.some((pattern) => pattern.test(html));
@@ -417,7 +417,7 @@ class CardValidator {
 			/behavior\s*:/i,
 			/-moz-binding/i,
 			/filter\s*:/i, // IE filters can execute code
-			/content\s*:\s*url\s*\(/i // Can load external resources
+			/content\s*:\s*url\s*\(/i, // Can load external resources
 		];
 
 		return dangerousPatterns.some((pattern) => pattern.test(css));
@@ -445,7 +445,7 @@ class CardValidator {
 
 		return {
 			valid: errors.length === 0,
-			errors: errors.length > 0 ? errors : undefined
+			errors: errors.length > 0 ? errors : undefined,
 		};
 	}
 }

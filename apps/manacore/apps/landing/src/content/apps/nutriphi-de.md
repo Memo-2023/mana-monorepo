@@ -30,15 +30,19 @@ Nutriphi ist dein persönlicher Ernährungs-Coach mit KI-Power. Statt mühsam je
 ## Hauptfunktionen
 
 ### 📸 Foto-Tracking
+
 Fotografiere deine Mahlzeit und Nutriphi erkennt automatisch alle Lebensmittel und berechnet die Nährwerte. Kein manuelles Eingeben mehr!
 
 ### 🎯 Personalisierte Ziele
+
 Ob Gewichtsverlust, Muskelaufbau oder gesunde Ernährung - Nutriphi erstellt dir einen maßgeschneiderten Plan basierend auf deinen Zielen.
 
 ### 🧪 Detaillierte Analysen
+
 Verfolge nicht nur Kalorien, sondern alle wichtigen Makro- und Mikronährstoffe. Identifiziere Defizite und optimiere deine Ernährung.
 
 ### 🍳 Intelligente Rezepte
+
 Erhalte Rezeptvorschläge, die zu deinen Zielen passen und die Lebensmittel nutzen, die du bereits hast.
 
 ## Für wen ist Nutriphi?

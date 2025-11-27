@@ -9,13 +9,14 @@ Dieses Dokument fasst die durchgeführten Refactorings zusammen (Datum: 2025-10-
 **Problem**: Die Funktion `createBatch` wurde in `app/(tabs)/generate.tsx` verwendet, war aber nicht aus dem Store importiert.
 
 **Lösung**: Import aus `useBatchStore()` hinzugefügt:
+
 ```typescript
 const {
-  isBatchModalOpen,
-  openBatchModal,
-  closeBatchModal,
-  activeBatches,
-  createBatch  // ✅ Hinzugefügt
+	isBatchModalOpen,
+	openBatchModal,
+	closeBatchModal,
+	activeBatches,
+	createBatch, // ✅ Hinzugefügt
 } = useBatchStore();
 ```
 
@@ -38,6 +39,7 @@ const {
 **Problem**: Keine React Error Boundaries im Projekt vorhanden. Bei Fehlern würde die gesamte App abstürzen ohne Feedback an den User.
 
 **Lösung**:
+
 - Neue `ErrorBoundary` Komponente erstellt mit:
   - Schönem Fehler-UI
   - "Erneut versuchen" Button
@@ -52,6 +54,7 @@ const {
 **Geänderte Datei**: `app/_layout.tsx`
 
 **Features**:
+
 - ✅ Catch React-Fehler auf höchster Ebene
 - ✅ Zeigt benutzerfreundliche Fehleranzeige
 - ✅ Reset-Funktion zum erneuten Versuchen
@@ -63,6 +66,7 @@ const {
 ### 4. Constants zentralisieren
 
 **Problem**: Magic Numbers und Konstanten waren über verschiedene Dateien verstreut:
+
 - `PAGE_SIZE = 20` in `index.tsx`
 - `PAGE_SIZE = 30` in `explore.tsx`
 - `TAB_BAR_HEIGHT = 49` in `explore.tsx`
@@ -71,38 +75,45 @@ const {
 **Lösung**: Drei neue Konstanten-Dateien erstellt:
 
 #### `constants/pagination.ts`
+
 ```typescript
 export const PAGINATION = {
-  GALLERY_PAGE_SIZE: 20,
-  EXPLORE_PAGE_SIZE: 30,
-  INITIAL_LOAD: 20,
-  LOAD_MORE_THRESHOLD: 0.5,
+	GALLERY_PAGE_SIZE: 20,
+	EXPLORE_PAGE_SIZE: 30,
+	INITIAL_LOAD: 20,
+	LOAD_MORE_THRESHOLD: 0.5,
 } as const;
 ```
 
 #### `constants/layout.ts`
+
 ```typescript
 export const LAYOUT = {
-  TAB_BAR_HEIGHT: 49,
-  QUICK_GENERATE_BAR_HEIGHT: 60,
-  FILTER_BAR_HEIGHT: 50,
-  PADDING: {
-    xs: 4, sm: 8, md: 16, lg: 24, xl: 32,
-  },
-  GRID: {
-    COLUMN_SPACING: 48,
-    COLUMNS: 2,
-  },
+	TAB_BAR_HEIGHT: 49,
+	QUICK_GENERATE_BAR_HEIGHT: 60,
+	FILTER_BAR_HEIGHT: 50,
+	PADDING: {
+		xs: 4,
+		sm: 8,
+		md: 16,
+		lg: 24,
+		xl: 32,
+	},
+	GRID: {
+		COLUMN_SPACING: 48,
+		COLUMNS: 2,
+	},
 } as const;
 
 export const ANIMATION = {
-  SHORT: 150,
-  MEDIUM: 250,
-  LONG: 350,
+	SHORT: 150,
+	MEDIUM: 250,
+	LONG: 350,
 } as const;
 ```
 
 #### `constants/index.ts`
+
 ```typescript
 export * from './colors';
 export * from './layout';
@@ -110,10 +121,12 @@ export * from './pagination';
 ```
 
 **Geänderte Dateien**:
+
 - `app/(tabs)/index.tsx` - Verwendet jetzt `PAGINATION` und `LAYOUT`
 - `app/(tabs)/explore.tsx` - Verwendet jetzt `PAGINATION`, `LAYOUT` und `ANIMATION`
 
 **Vorteile**:
+
 - ✅ Single source of truth für alle Konstanten
 - ✅ Einfachere Wartung
 - ✅ Type-safe mit `as const`
@@ -127,6 +140,7 @@ export * from './pagination';
 ### ESLint Warnings behoben
 
 **Behobene Warnings**:
+
 1. ✅ Doppelte Imports von `react-native-safe-area-context` in `explore.tsx`
 2. ✅ Ungenutzte Variable `Ionicons` in `index.tsx`
 3. ✅ Ungenutzte Variablen in `generate.tsx`:

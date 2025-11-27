@@ -22,16 +22,16 @@ class UnifiedCardService {
 
 			// Try with double quotes instead of single quotes
 			let filterString = `user_id="${userId}" && type="user"`;
-			
+
 			if (page) {
 				filterString += ` && page="${page}"`;
 			}
-			
+
 			console.log('🔍 Query filter:', filterString);
 
 			const records = await pb.collection(this.COLLECTION).getList(1, 100, {
 				filter: filterString,
-				sort: 'position,created'
+				sort: 'position,created',
 			});
 
 			console.log('📊 Found records:', records.totalItems);
@@ -64,7 +64,7 @@ class UnifiedCardService {
 					id: 'temp', // Temporary ID for validation
 					config: card.config,
 					metadata: card.metadata || {},
-					constraints: card.constraints || {}
+					constraints: card.constraints || {},
 				});
 				if (!validation.valid) {
 					console.error('Card config validation failed:', validation.errors);
@@ -95,7 +95,7 @@ class UnifiedCardService {
 				position: card.position || 0,
 				usage_count: 0,
 				likes_count: 0,
-				...card
+				...card,
 			};
 
 			console.log('Creating card with data:', data);
@@ -108,7 +108,7 @@ class UnifiedCardService {
 				errorMessage: error instanceof Error ? error.message : 'Unknown error',
 				errorResponse: (error as any)?.response,
 				errorData: (error as any)?.data,
-				errorStatus: (error as any)?.status
+				errorStatus: (error as any)?.status,
 			});
 
 			// Check for specific error types
@@ -138,7 +138,7 @@ class UnifiedCardService {
 					id: 'temp',
 					config: updates.config,
 					metadata: {},
-					constraints: {}
+					constraints: {},
 				});
 				if (!validation.valid) {
 					console.error('❌ Update validation failed:', validation.errors);
@@ -165,7 +165,7 @@ class UnifiedCardService {
 		} catch (error) {
 			console.error('❌ Failed to update card:', {
 				error,
-				errorMessage: error instanceof Error ? error.message : 'Unknown error'
+				errorMessage: error instanceof Error ? error.message : 'Unknown error',
 			});
 			return null;
 		}
@@ -190,7 +190,7 @@ class UnifiedCardService {
 
 			const records = await pb.collection(this.COLLECTION).getList(1, 100, {
 				filter: filters.join(' && '),
-				sort: '-likes_count,-usage_count,created'
+				sort: '-likes_count,-usage_count,created',
 			});
 
 			return records.items as unknown as Card[];
@@ -205,7 +205,7 @@ class UnifiedCardService {
 		try {
 			const records = await pb.collection(this.COLLECTION).getList(1, 20, {
 				filter: `type = 'template' && visibility = 'public' && is_featured = true`,
-				sort: '-likes_count,-usage_count,created'
+				sort: '-likes_count,-usage_count,created',
 			});
 
 			return records.items as unknown as Card[];
@@ -229,17 +229,17 @@ class UnifiedCardService {
 				config: template.config,
 				metadata: {
 					...template.metadata,
-					name: `${template.metadata?.name || 'Card'} (Copy)`
+					name: `${template.metadata?.name || 'Card'} (Copy)`,
 				},
 				constraints: template.constraints,
 				page: page || 'home',
 				visibility: 'private',
-				variant: template.variant
+				variant: template.variant,
 			};
 
 			// Increment usage count
 			await this.updateCard(templateId, {
-				usage_count: (template.usage_count || 0) + 1
+				usage_count: (template.usage_count || 0) + 1,
 			});
 
 			return this.createCard(newCard);
@@ -262,10 +262,10 @@ class UnifiedCardService {
 				source: 'duplicated',
 				metadata: {
 					...original.metadata,
-					name: `${original.metadata?.name || 'Card'} (Copy)`
+					name: `${original.metadata?.name || 'Card'} (Copy)`,
 				},
 				created: undefined,
-				updated: undefined
+				updated: undefined,
 			};
 
 			return this.createCard(duplicate);
@@ -283,7 +283,7 @@ class UnifiedCardService {
 
 			return this.updateCard(id, {
 				page,
-				position
+				position,
 			});
 		} catch (error) {
 			console.error('Failed to move card:', error);
@@ -299,7 +299,7 @@ class UnifiedCardService {
 
 			const records = await pb.collection(this.COLLECTION).getList(1, 50, {
 				filter: `(user_id = '${userId}' || visibility = 'public') && (metadata.name ~ '${query}' || metadata.description ~ '${query}' || tags ~ '${query}')`,
-				sort: '-updated'
+				sort: '-updated',
 			});
 
 			return records.items as unknown as Card[];
@@ -318,7 +318,7 @@ class UnifiedCardService {
 			// In a real app, you'd track likes per user
 			// For now, just increment/decrement the count
 			await this.updateCard(id, {
-				likes_count: (card.likes_count || 0) + 1
+				likes_count: (card.likes_count || 0) + 1,
 			});
 
 			return true;
@@ -327,7 +327,6 @@ class UnifiedCardService {
 			return false;
 		}
 	}
-
 
 	// Batch operations
 	async batchUpdatePositions(updates: Array<{ id: string; position: number }>): Promise<boolean> {
@@ -348,7 +347,7 @@ class UnifiedCardService {
 		try {
 			const records = await pb.collection(this.COLLECTION).getList(1, 100, {
 				filter: `type = 'system'`,
-				sort: 'position,created'
+				sort: 'position,created',
 			});
 
 			return records.items as unknown as Card[];
@@ -372,7 +371,7 @@ class UnifiedCardService {
 				metadata: cardData.metadata,
 				constraints: cardData.constraints,
 				visibility: 'private',
-				page: cardData.page || 'home'
+				page: cardData.page || 'home',
 			};
 
 			return this.createCard(newCard);
@@ -414,7 +413,7 @@ class UnifiedCardService {
 				metadata: {
 					...card.metadata,
 					name: templateData.name,
-					description: templateData.description
+					description: templateData.description,
 				},
 				constraints: card.constraints,
 				visibility: templateData.visibility || 'public',
@@ -424,7 +423,7 @@ class UnifiedCardService {
 				usage_count: 0,
 				likes_count: 0,
 				is_featured: false,
-				allow_duplication: templateData.allow_duplication !== false
+				allow_duplication: templateData.allow_duplication !== false,
 			};
 
 			return this.createCard(template);
@@ -462,15 +461,15 @@ class UnifiedCardService {
 				metadata: {
 					...template.metadata,
 					...(updates.name && { name: updates.name }),
-					...(updates.description && { description: updates.description })
+					...(updates.description && { description: updates.description }),
 				},
 				...(updates.category && { category: updates.category }),
 				...(updates.tags && { tags: updates.tags }),
 				...(updates.visibility && { visibility: updates.visibility }),
 				...(updates.is_featured !== undefined && { is_featured: updates.is_featured }),
 				...(updates.allow_duplication !== undefined && {
-					allow_duplication: updates.allow_duplication
-				})
+					allow_duplication: updates.allow_duplication,
+				}),
 			};
 
 			return this.updateCard(templateId, templateUpdates);
@@ -508,7 +507,7 @@ class UnifiedCardService {
 
 			const records = await pb.collection(this.COLLECTION).getList(1, 100, {
 				filter: `user_id = '${userId}' && type = 'template'`,
-				sort: '-created'
+				sort: '-created',
 			});
 
 			return records.items as unknown as Card[];
@@ -566,7 +565,7 @@ class UnifiedCardService {
 
 			const records = await pb.collection(this.COLLECTION).getList(1, options.limit || 50, {
 				filter: filters.join(' && '),
-				sort
+				sort,
 			});
 
 			return records.items as unknown as Card[];
@@ -589,7 +588,7 @@ class UnifiedCardService {
 			}
 
 			await this.updateCard(templateId, {
-				is_featured: !template.is_featured
+				is_featured: !template.is_featured,
 			});
 
 			return true;

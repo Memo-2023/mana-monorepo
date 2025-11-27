@@ -5,7 +5,7 @@
 	import { activeWorkspace } from '$lib/stores/activeWorkspace';
 
 	let { data }: { data: PageData } = $props();
-	
+
 	function openWorkspace(workspace: any) {
 		// Set the active workspace in the store
 		activeWorkspace.set(workspace);
@@ -24,7 +24,11 @@
 			</p>
 			<!-- Workspace count display -->
 			<p class="mt-1 text-sm text-theme-text-muted">
-				{data.teamWorkspaces.length} von {data.user?.subscription_tier === 'pro' ? '10' : data.user?.subscription_tier === 'business' ? 'unbegrenzt' : '1'} Team-Workspaces erstellt
+				{data.teamWorkspaces.length} von {data.user?.subscription_tier === 'pro'
+					? '10'
+					: data.user?.subscription_tier === 'business'
+						? 'unbegrenzt'
+						: '1'} Team-Workspaces erstellt
 			</p>
 		</div>
 		<button
@@ -40,10 +44,12 @@
 	<div class="grid gap-4 md:grid-cols-2">
 		<!-- Personal Workspace -->
 		{#if data.personalWorkspace}
-			<div class="rounded-lg border border-theme-border bg-white p-6 shadow-sm transition-all hover:shadow-md dark:bg-gray-800">
+			<div
+				class="rounded-lg border border-theme-border bg-white p-6 shadow-sm transition-all hover:shadow-md dark:bg-gray-800"
+			>
 				<div class="mb-4 flex items-start justify-between">
 					<div class="flex items-center gap-3">
-						<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-theme-primary/10">
+						<div class="bg-theme-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
 							<User class="h-5 w-5 text-theme-primary" />
 						</div>
 						<div>
@@ -53,7 +59,9 @@
 							<p class="text-sm text-theme-text-muted">Personal Workspace</p>
 						</div>
 					</div>
-					<span class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/20 dark:text-green-400">
+					<span
+						class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/20 dark:text-green-400"
+					>
 						Active
 					</span>
 				</div>
@@ -91,10 +99,14 @@
 
 		<!-- Team Workspaces -->
 		{#each data.teamWorkspaces as workspace}
-			<div class="rounded-lg border border-theme-border bg-white p-6 shadow-sm transition-all hover:shadow-md dark:bg-gray-800">
+			<div
+				class="rounded-lg border border-theme-border bg-white p-6 shadow-sm transition-all hover:shadow-md dark:bg-gray-800"
+			>
 				<div class="mb-4 flex items-start justify-between">
 					<div class="flex items-center gap-3">
-						<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
+						<div
+							class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20"
+						>
 							<Users class="h-5 w-5 text-purple-600 dark:text-purple-400" />
 						</div>
 						<div>
@@ -105,11 +117,15 @@
 						</div>
 					</div>
 					{#if workspace.owner === data.user?.id}
-						<span class="rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-700 dark:bg-purple-900/20 dark:text-purple-400">
+						<span
+							class="rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-700 dark:bg-purple-900/20 dark:text-purple-400"
+						>
 							Owner
 						</span>
 					{:else}
-						<span class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
+						<span
+							class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
+						>
 							Member
 						</span>
 					{/if}
@@ -147,10 +163,12 @@
 
 		<!-- Workspace Invitations -->
 		{#each data.invitations as invitation}
-			<div class="rounded-lg border-2 border-dashed border-theme-border bg-theme-surface/50 p-6">
+			<div class="bg-theme-surface/50 rounded-lg border-2 border-dashed border-theme-border p-6">
 				<div class="mb-4 flex items-start justify-between">
 					<div class="flex items-center gap-3">
-						<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-100 dark:bg-yellow-900/20">
+						<div
+							class="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-100 dark:bg-yellow-900/20"
+						>
 							<Users class="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
 						</div>
 						<div>
@@ -160,14 +178,14 @@
 							<p class="text-sm text-theme-text-muted">Pending Invitation</p>
 						</div>
 					</div>
-					<span class="rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">
+					<span
+						class="rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+					>
 						Pending
 					</span>
 				</div>
 
-				<p class="mb-4 text-sm text-theme-text-muted">
-					You've been invited to join this workspace
-				</p>
+				<p class="mb-4 text-sm text-theme-text-muted">You've been invited to join this workspace</p>
 
 				<div class="flex gap-2">
 					<button

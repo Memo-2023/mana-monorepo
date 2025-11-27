@@ -6,7 +6,7 @@
 		html = '',
 		items = [],
 		truncate = false,
-		maxLines = 3
+		maxLines = 3,
 	}: ContentModuleProps = $props();
 
 	let truncateClass = $derived(truncate ? `line-clamp-${maxLines}` : '');

@@ -19,26 +19,26 @@
 	let collapsed = $state(false);
 	let mounted = $state(false);
 	let showThemeDropdown = $state(false);
-	
+
 	// Subscribe to workspace stores for reactive URL updates
 	let currentWorkspaceId = $state(activeWorkspace.getId());
 	let currentWorkspaceData = $state(activeWorkspace.getData());
-	
+
 	// Subscribe to changes
 	$effect(() => {
-		const unsubId = activeWorkspace.id.subscribe(id => {
+		const unsubId = activeWorkspace.id.subscribe((id) => {
 			currentWorkspaceId = id;
 		});
-		const unsubData = activeWorkspace.data.subscribe(data => {
+		const unsubData = activeWorkspace.data.subscribe((data) => {
 			currentWorkspaceData = data;
 		});
-		
+
 		return () => {
 			unsubId();
 			unsubData();
 		};
 	});
-	
+
 	// Reactive URL builder
 	function buildUrl(path: string): string {
 		if (currentWorkspaceId && !path.includes('workspace=')) {
@@ -47,7 +47,7 @@
 		}
 		return path;
 	}
-	
+
 	let themeDropdownElement: HTMLDivElement;
 
 	function isActive(path: string): boolean {
@@ -114,7 +114,7 @@
 
 {#if user && mounted}
 	<aside
-		class="sidebar-transition animate-slide-in fixed top-4 bottom-4 left-4 z-40 hidden flex-col lg:flex"
+		class="sidebar-transition animate-slide-in fixed bottom-4 left-4 top-4 z-40 hidden flex-col lg:flex"
 		class:w-64={!collapsed}
 		class:w-20={collapsed}
 	>
@@ -128,7 +128,13 @@
 		<!-- Content Container -->
 		<div class="relative flex h-full flex-col p-4">
 			<!-- Logo Section -->
-			<div class="mb-8" class:flex={!collapsed} class:flex-col={collapsed} class:items-center={collapsed} class:justify-between={!collapsed}>
+			<div
+				class="mb-8"
+				class:flex={!collapsed}
+				class:flex-col={collapsed}
+				class:items-center={collapsed}
+				class:justify-between={!collapsed}
+			>
 				<a
 					href="/"
 					class="flex items-center gap-3 transition-opacity hover:opacity-80"
@@ -182,7 +188,9 @@
 			{#if !collapsed}
 				<div class="mb-6 space-y-3">
 					<div class="flex items-center justify-between">
-						<span class="text-xs font-medium text-theme-text-muted uppercase tracking-wider">Benachrichtigungen</span>
+						<span class="text-xs font-medium uppercase tracking-wider text-theme-text-muted"
+							>Benachrichtigungen</span
+						>
 						<NotificationBell position="left-outside" />
 					</div>
 					<WorkspaceSwitcher position="left-outside" />
@@ -306,11 +314,10 @@
 						<span class="text-transition font-medium text-theme-text">Templates</span>
 					{/if}
 				</a>
-
 			</nav>
 
 			<!-- Bottom Section -->
-			<div class="mt-auto space-y-2 border-t border-theme-border/30 pt-4">
+			<div class="border-theme-border/30 mt-auto space-y-2 border-t pt-4">
 				<!-- Theme Toggle -->
 				<div class="relative" bind:this={themeDropdownElement}>
 					<button

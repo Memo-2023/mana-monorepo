@@ -21,7 +21,7 @@
 		languages,
 		onClose,
 		onTranslate,
-		isTranslating = false
+		isTranslating = false,
 	}: Props = $props();
 
 	let selectedLanguage = $state('');
@@ -100,7 +100,11 @@
 				<h4 class="text-sm font-medium text-theme-secondary">What will be translated:</h4>
 				<ul class="space-y-1.5 text-sm text-theme-secondary">
 					<li class="flex items-start gap-2">
-						<svg class="h-5 w-5 flex-shrink-0 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+						<svg
+							class="h-5 w-5 flex-shrink-0 text-green-500"
+							fill="currentColor"
+							viewBox="0 0 20 20"
+						>
 							<path
 								fill-rule="evenodd"
 								d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -110,7 +114,11 @@
 						<span>Full transcript text</span>
 					</li>
 					<li class="flex items-start gap-2">
-						<svg class="h-5 w-5 flex-shrink-0 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+						<svg
+							class="h-5 w-5 flex-shrink-0 text-green-500"
+							fill="currentColor"
+							viewBox="0 0 20 20"
+						>
 							<path
 								fill-rule="evenodd"
 								d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -120,7 +128,11 @@
 						<span>Memo title and introduction</span>
 					</li>
 					<li class="flex items-start gap-2">
-						<svg class="h-5 w-5 flex-shrink-0 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+						<svg
+							class="h-5 w-5 flex-shrink-0 text-green-500"
+							fill="currentColor"
+							viewBox="0 0 20 20"
+						>
 							<path
 								fill-rule="evenodd"
 								d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"

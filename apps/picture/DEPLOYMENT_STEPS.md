@@ -10,6 +10,7 @@
 ### Option A: Via Supabase Dashboard (EMPFOHLEN für Production)
 
 1. **Öffne Supabase Dashboard:**
+
    ```
    https://supabase.com/dashboard/project/mjuvnnjxwfwlmxjsgkqu
    ```
@@ -25,6 +26,7 @@
    - Warte auf Success Message
 
 5. **Verifiziere:**
+
    ```sql
    -- Check tables
    SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename = 'job_queue';
@@ -61,6 +63,7 @@ npx supabase functions deploy start-generation --project-ref mjuvnnjxwfwlmxjsgkq
 ```
 
 **Expected Output:**
+
 ```
 ✓ Deployed Function start-generation
 ```
@@ -90,6 +93,7 @@ npx supabase secrets list --project-ref mjuvnnjxwfwlmxjsgkqu
 ```
 
 **Secrets needed:**
+
 - `REPLICATE_API_TOKEN` - Your Replicate API key
 - `SUPABASE_URL` - Auto-set
 - `SUPABASE_ANON_KEY` - Auto-set
@@ -102,6 +106,7 @@ npx supabase secrets list --project-ref mjuvnnjxwfwlmxjsgkqu
 ### 4.1 Enable pg_cron Extension
 
 **Via SQL Editor:**
+
 ```sql
 -- Enable extension
 CREATE EXTENSION IF NOT EXISTS pg_cron;
@@ -180,6 +185,7 @@ SELECT complete_job('job-id-here', NULL, NULL);
 ### 5.2 Test Edge Functions
 
 #### Test start-generation:
+
 ```bash
 curl -X POST \
   https://mjuvnnjxwfwlmxjsgkqu.supabase.co/functions/v1/start-generation \
@@ -192,16 +198,18 @@ curl -X POST \
 ```
 
 **Expected Response:**
+
 ```json
 {
-  "success": true,
-  "generation_id": "uuid-here",
-  "job_id": "uuid-here",
-  "status": "queued"
+	"success": true,
+	"generation_id": "uuid-here",
+	"job_id": "uuid-here",
+	"status": "queued"
 }
 ```
 
 #### Test process-jobs (manual trigger):
+
 ```bash
 curl -X POST \
   https://mjuvnnjxwfwlmxjsgkqu.supabase.co/functions/v1/process-jobs \
@@ -281,6 +289,7 @@ SELECT * FROM stuck_jobs;
 ### Issue: Jobs stuck in pending
 
 **Check:**
+
 ```sql
 -- Is cron running?
 SELECT * FROM cron.job_run_details ORDER BY start_time DESC LIMIT 5;
@@ -290,6 +299,7 @@ SELECT * FROM job_queue WHERE status = 'processing';
 ```
 
 **Fix:**
+
 - Manually trigger: `curl ... /process-jobs`
 - Check service role key is correct
 - Check Edge Function logs
@@ -297,11 +307,13 @@ SELECT * FROM job_queue WHERE status = 'processing';
 ### Issue: Jobs failing
 
 **Check:**
+
 ```sql
 SELECT error_message FROM failed_jobs_recent;
 ```
 
 **Common Causes:**
+
 - Missing REPLICATE_API_TOKEN
 - Invalid model_id
 - Replicate API down
@@ -311,11 +323,13 @@ SELECT error_message FROM failed_jobs_recent;
 ## 📝 Notes
 
 **Project:**
+
 - ID: mjuvnnjxwfwlmxjsgkqu
 - URL: https://mjuvnnjxwfwlmxjsgkqu.supabase.co
 - Region: EU Central
 
 **Important URLs:**
+
 - Dashboard: https://supabase.com/dashboard/project/mjuvnnjxwfwlmxjsgkqu
 - SQL Editor: https://supabase.com/dashboard/project/mjuvnnjxwfwlmxjsgkqu/sql
 - Functions: https://supabase.com/dashboard/project/mjuvnnjxwfwlmxjsgkqu/functions

@@ -1,13 +1,13 @@
 ---
-name: "David Armstrong"
-role: "UX/UI Designer"
-company: "DesignStudio"
-avatar: "/testimonials/david-armstrong.jpg"
+name: 'David Armstrong'
+role: 'UX/UI Designer'
+company: 'DesignStudio'
+avatar: '/testimonials/david-armstrong.jpg'
 rating: 4
 featured: false
-category: "designer"
-useCase: "UI inspiration and design exploration"
-language: "en"
+category: 'designer'
+useCase: 'UI inspiration and design exploration'
+language: 'en'
 date: 2024-10-03
 verified: true
 ---

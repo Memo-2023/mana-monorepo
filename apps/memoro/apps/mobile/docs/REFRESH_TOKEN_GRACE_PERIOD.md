@@ -19,17 +19,18 @@ The `tokenManager.ts` already handles most scenarios correctly:
 ```typescript
 // Handles both refresh_in_progress and rotation_in_progress errors
 if (result.error === 'refresh_in_progress' || result.error === 'rotation_in_progress') {
-  console.debug('TokenManager: Token rotation in progress, waiting...');
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  // Retry after waiting
+	console.debug('TokenManager: Token rotation in progress, waiting...');
+	await new Promise((resolve) => setTimeout(resolve, 1000));
+	// Retry after waiting
 }
 ```
 
 ### Non-Retryable Errors
 
 The following errors indicate permanent failures and should not be retried:
+
 - `invalid_token` - Token doesn't exist
-- `token_expired` - Token or grace period expired  
+- `token_expired` - Token or grace period expired
 - `invalid_token_state` - Token in unexpected state
 - `token_collision` - Very rare UUID collision
 
@@ -63,6 +64,7 @@ To test the grace period implementation:
 ## No Additional Changes Required
 
 The current frontend implementation is already compatible with the grace period feature because:
+
 - It properly retries on temporary errors
 - It saves whatever token is returned
 - It handles the new `rotation_in_progress` error

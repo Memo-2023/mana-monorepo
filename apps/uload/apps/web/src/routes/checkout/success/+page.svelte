@@ -30,7 +30,7 @@
 	<div class="max-w-md text-center">
 		{#if verifying}
 			<div
-				class="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-theme-primary/20 border-t-theme-primary"
+				class="border-theme-primary/20 mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-t-theme-primary"
 			></div>
 			<p class="text-lg text-theme-text">Verifiziere deine Zahlung...</p>
 		{:else}

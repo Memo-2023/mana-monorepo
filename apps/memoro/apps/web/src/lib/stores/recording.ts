@@ -16,7 +16,7 @@ function createRecordingStore() {
 		duration: 0,
 		audioBlob: null,
 		audioUrl: null,
-		error: null
+		error: null,
 	});
 
 	return {
@@ -27,7 +27,7 @@ function createRecordingStore() {
 			update((state) => ({
 				...state,
 				audioBlob: blob,
-				audioUrl: URL.createObjectURL(blob)
+				audioUrl: URL.createObjectURL(blob),
 			})),
 		setError: (error: string | null) => update((state) => ({ ...state, error })),
 		reset: () =>
@@ -36,8 +36,8 @@ function createRecordingStore() {
 				duration: 0,
 				audioBlob: null,
 				audioUrl: null,
-				error: null
-			})
+				error: null,
+			}),
 	};
 }
 

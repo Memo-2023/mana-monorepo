@@ -20,7 +20,7 @@ async function testRegistration() {
 			password: testPassword,
 			passwordConfirm: testPassword,
 			username: `user${timestamp}`,
-			emailVisibility: true
+			emailVisibility: true,
 		});
 
 		console.log('✅ User created successfully');

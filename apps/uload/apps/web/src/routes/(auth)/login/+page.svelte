@@ -16,7 +16,7 @@
 		} catch (err: any) {
 			return {
 				success: false,
-				error: err?.message || 'Ungültige E-Mail oder Passwort'
+				error: err?.message || 'Ungültige E-Mail oder Passwort',
 			};
 		}
 	}
@@ -27,7 +27,7 @@
 	logo={UloadLogo}
 	primaryColor="#3b82f6"
 	onSignIn={handleSignIn}
-	goto={goto}
+	{goto}
 	enableGoogle={false}
 	enableApple={false}
 	successRedirect="/my"
@@ -57,6 +57,6 @@
 		signInFailed: 'Anmeldung fehlgeschlagen',
 		googleSignInFailed: 'Google-Anmeldung fehlgeschlagen',
 		signInSuccess: 'Erfolgreich angemeldet. Weiterleitung...',
-		googleSignInSuccess: 'Erfolgreich mit Google angemeldet. Weiterleitung...'
+		googleSignInSuccess: 'Erfolgreich mit Google angemeldet. Weiterleitung...',
 	}}
 />

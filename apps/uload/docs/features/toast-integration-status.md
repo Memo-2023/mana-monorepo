@@ -190,7 +190,7 @@ Dieses Dokument zeigt den aktuellen Status der Toast-Integration in uLoad.
    notify.promise(saveOperation(), {
    	loading: 'Wird gespeichert...',
    	success: 'Erfolgreich gespeichert!',
-   	error: (err) => `Fehler: ${err.message}`
+   	error: (err) => `Fehler: ${err.message}`,
    });
    ```
 

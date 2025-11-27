@@ -7,9 +7,11 @@ PostHog analytics has been **completely removed** from the Memoro mobile app. An
 ## What Was Removed
 
 ### Dependencies
+
 - ❌ `posthog-react-native` package (from package.json)
 
 ### Files Deleted
+
 - ❌ `features/analytics/services/analyticsService.ts` - PostHog service
 - ❌ `features/analytics/services/postHogManager.ts` - PostHog manager
 - ❌ `B2B_ANALYTICS_DISABLE.md` - Documentation (obsolete)
@@ -18,6 +20,7 @@ PostHog analytics has been **completely removed** from the Memoro mobile app. An
 ### Code Changes
 
 **1. AuthContext** (`features/auth/contexts/AuthContext.tsx`)
+
 - Removed PostHog imports
 - Removed PostHog initialization on app startup
 - Removed PostHog initialization on sign in
@@ -27,29 +30,35 @@ PostHog analytics has been **completely removed** from the Memoro mobile app. An
 - Removed `useAnalytics()` hook usage
 
 **2. MultiPlatformAnalytics** (`features/analytics/services/multiPlatformAnalytics.ts`)
+
 - Removed PostHog manager import
 - Mobile analytics calls are now no-ops
 - Web continues to use Umami
 
 **3. Analytics Index** (`features/analytics/index.ts`)
+
 - Removed PostHog manager exports
 - Removed analyticsService export
 
 **4. Feature Flags** (`features/analytics/hooks/useFeatureFlag.ts`)
+
 - `useFeatureFlag()` now always returns `false`
 - `useFeatureFlags()` now always returns `{}`
 - Kept for backward compatibility
 
 **5. Config** (`config.ts`)
+
 - Removed `POSTHOG_KEY` configuration
 - Removed `POSTHOG_HOST` configuration
 
 **6. Layout** (`app/_layout.tsx`)
+
 - Updated comment to reflect PostHog removal
 
 ## Current State
 
 ### Mobile (iOS/Android)
+
 - ✅ **No analytics tracking**
 - ✅ All `useAnalytics()` calls are no-ops
 - ✅ All feature flag checks return false
@@ -57,6 +66,7 @@ PostHog analytics has been **completely removed** from the Memoro mobile app. An
 - ✅ RevenueCat still works (B2B disable logic intact)
 
 ### Web
+
 - ✅ **Umami analytics only**
 - ✅ All analytics tracking functional
 - ✅ No changes to web analytics behavior
@@ -64,6 +74,7 @@ PostHog analytics has been **completely removed** from the Memoro mobile app. An
 ## Backward Compatibility
 
 All analytics hooks remain functional:
+
 ```typescript
 // These still work but do nothing on mobile
 const { track, identify, screen, reset } = useAnalytics();
@@ -100,6 +111,7 @@ const flags = useFeatureFlags(); // Always {}
 To clean up your environment:
 
 1. **Remove node_modules and reinstall:**
+
    ```bash
    rm -rf node_modules package-lock.json
    npm install
@@ -111,6 +123,7 @@ To clean up your environment:
    - `.env.example`
 
    Remove these lines:
+
    ```bash
    EXPO_PUBLIC_POSTHOG_KEY=...
    EXPO_PUBLIC_POSTHOG_HOST=...
@@ -139,15 +152,17 @@ git grep -i posthog
 **Commit:** `fd18430` - 🔥 refactor: remove PostHog analytics completely from the app
 
 **Stats:**
+
 - 11 files changed
 - 29 insertions
 - 925 deletions
 - Net reduction: ~900 lines of code
 
 **Files affected:**
+
 - B2B_ANALYTICS_DISABLE.md (deleted)
 - REMOVE_TEST_ALERTS.md (deleted)
-- app/_layout.tsx
+- app/\_layout.tsx
 - config.ts
 - features/analytics/hooks/useFeatureFlag.ts
 - features/analytics/index.ts

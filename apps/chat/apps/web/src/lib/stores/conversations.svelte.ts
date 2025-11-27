@@ -12,124 +12,122 @@ let isLoading = $state(false);
 let error = $state<string | null>(null);
 
 export const conversationsStore = {
-  // Getters
-  get conversations() {
-    return conversations;
-  },
-  get archivedConversations() {
-    return archivedConversations;
-  },
-  get isLoading() {
-    return isLoading;
-  },
-  get error() {
-    return error;
-  },
+	// Getters
+	get conversations() {
+		return conversations;
+	},
+	get archivedConversations() {
+		return archivedConversations;
+	},
+	get isLoading() {
+		return isLoading;
+	},
+	get error() {
+		return error;
+	},
 
-  /**
-   * Load conversations for a user
-   */
-  async loadConversations(userId: string, spaceId?: string) {
-    isLoading = true;
-    error = null;
+	/**
+	 * Load conversations for a user
+	 */
+	async loadConversations(userId: string, spaceId?: string) {
+		isLoading = true;
+		error = null;
 
-    try {
-      conversations = await conversationService.getConversations(userId, spaceId);
-    } catch (e) {
-      error = e instanceof Error ? e.message : 'Failed to load conversations';
-      conversations = [];
-    } finally {
-      isLoading = false;
-    }
-  },
+		try {
+			conversations = await conversationService.getConversations(userId, spaceId);
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to load conversations';
+			conversations = [];
+		} finally {
+			isLoading = false;
+		}
+	},
 
-  /**
-   * Load archived conversations
-   */
-  async loadArchivedConversations(userId: string) {
-    isLoading = true;
-    error = null;
+	/**
+	 * Load archived conversations
+	 */
+	async loadArchivedConversations(userId: string) {
+		isLoading = true;
+		error = null;
 
-    try {
-      archivedConversations = await conversationService.getArchivedConversations(userId);
-    } catch (e) {
-      error = e instanceof Error ? e.message : 'Failed to load archived conversations';
-      archivedConversations = [];
-    } finally {
-      isLoading = false;
-    }
-  },
+		try {
+			archivedConversations = await conversationService.getArchivedConversations(userId);
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to load archived conversations';
+			archivedConversations = [];
+		} finally {
+			isLoading = false;
+		}
+	},
 
-  /**
-   * Add a new conversation to the list
-   */
-  addConversation(conversation: Conversation) {
-    conversations = [conversation, ...conversations];
-  },
+	/**
+	 * Add a new conversation to the list
+	 */
+	addConversation(conversation: Conversation) {
+		conversations = [conversation, ...conversations];
+	},
 
-  /**
-   * Update a conversation in the list
-   */
-  updateConversation(conversationId: string, updates: Partial<Conversation>) {
-    conversations = conversations.map((c) =>
-      c.id === conversationId ? { ...c, ...updates } : c
-    );
-  },
+	/**
+	 * Update a conversation in the list
+	 */
+	updateConversation(conversationId: string, updates: Partial<Conversation>) {
+		conversations = conversations.map((c) => (c.id === conversationId ? { ...c, ...updates } : c));
+	},
 
-  /**
-   * Archive a conversation
-   */
-  async archiveConversation(conversationId: string) {
-    const success = await conversationService.archiveConversation(conversationId);
+	/**
+	 * Archive a conversation
+	 */
+	async archiveConversation(conversationId: string) {
+		const success = await conversationService.archiveConversation(conversationId);
 
-    if (success) {
-      const conversation = conversations.find((c) => c.id === conversationId);
-      if (conversation) {
-        conversations = conversations.filter((c) => c.id !== conversationId);
-        archivedConversations = [{ ...conversation, is_archived: true }, ...archivedConversations];
-      }
-    }
+		if (success) {
+			const conversation = conversations.find((c) => c.id === conversationId);
+			if (conversation) {
+				conversations = conversations.filter((c) => c.id !== conversationId);
+				archivedConversations = [{ ...conversation, is_archived: true }, ...archivedConversations];
+			}
+		}
 
-    return success;
-  },
+		return success;
+	},
 
-  /**
-   * Unarchive a conversation
-   */
-  async unarchiveConversation(conversationId: string) {
-    const success = await conversationService.unarchiveConversation(conversationId);
+	/**
+	 * Unarchive a conversation
+	 */
+	async unarchiveConversation(conversationId: string) {
+		const success = await conversationService.unarchiveConversation(conversationId);
 
-    if (success) {
-      const conversation = archivedConversations.find((c) => c.id === conversationId);
-      if (conversation) {
-        archivedConversations = archivedConversations.filter((c) => c.id !== conversationId);
-        conversations = [{ ...conversation, is_archived: false }, ...conversations];
-      }
-    }
+		if (success) {
+			const conversation = archivedConversations.find((c) => c.id === conversationId);
+			if (conversation) {
+				archivedConversations = archivedConversations.filter((c) => c.id !== conversationId);
+				conversations = [{ ...conversation, is_archived: false }, ...conversations];
+			}
+		}
 
-    return success;
-  },
+		return success;
+	},
 
-  /**
-   * Delete a conversation
-   */
-  async deleteConversation(conversationId: string) {
-    const success = await conversationService.deleteConversation(conversationId);
+	/**
+	 * Delete a conversation
+	 */
+	async deleteConversation(conversationId: string) {
+		const success = await conversationService.deleteConversation(conversationId);
 
-    if (success) {
-      conversations = conversations.filter((c) => c.id !== conversationId);
-      archivedConversations = archivedConversations.filter((c) => c.id !== conversationId);
-    }
+		if (success) {
+			conversations = conversations.filter((c) => c.id !== conversationId);
+			archivedConversations = archivedConversations.filter((c) => c.id !== conversationId);
+		}
 
-    return success;
-  },
+		return success;
+	},
 
-  /**
-   * Clear all data
-   */
-  reset() {
-    conversations = [];
-    archivedConversations = [];
-    error = null;
-  },
+	/**
+	 * Clear all data
+	 */
+	reset() {
+		conversations = [];
+		archivedConversations = [];
+		error = null;
+	},
 };

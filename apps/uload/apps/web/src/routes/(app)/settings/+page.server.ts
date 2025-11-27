@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	return {
 		user: locals.user,
-		avatarUrl: locals.user?.avatar ? locals.pb.getFileUrl(locals.user, locals.user.avatar) : null
+		avatarUrl: locals.user?.avatar ? locals.pb.getFileUrl(locals.user, locals.user.avatar) : null,
 	};
 };
 
@@ -43,7 +43,7 @@ export const actions = {
 				cardBackgroundColor: cardBackground || '#ffffff',
 				cardBorderColor: cardBorder || '#e2e8f0',
 				cardLinkColor: cardLinks || '#0ea5e9',
-				cardTextColor: cardText || '#0f172a'
+				cardTextColor: cardText || '#0f172a',
 			};
 
 			// Prepare update data
@@ -58,7 +58,7 @@ export const actions = {
 				linkedin: linkedin || '',
 				instagram: instagram || '',
 				profileBackground: profileBackground || '',
-				cardCustomization: JSON.stringify(cardCustomization)
+				cardCustomization: JSON.stringify(cardCustomization),
 			};
 
 			// Add avatar if a new file was uploaded
@@ -73,7 +73,7 @@ export const actions = {
 
 			return {
 				success: true,
-				message: 'Profile updated successfully'
+				message: 'Profile updated successfully',
 			};
 		} catch (err) {
 			console.error('Profile update error:', err);
@@ -112,12 +112,12 @@ export const actions = {
 			// Update the password
 			await locals.pb.collection('users').update(locals.user.id, {
 				password: newPassword,
-				passwordConfirm: confirmPassword
+				passwordConfirm: confirmPassword,
 			});
 
 			return {
 				passwordSuccess: true,
-				passwordMessage: 'Password updated successfully'
+				passwordMessage: 'Password updated successfully',
 			};
 		} catch (err) {
 			return fail(400, { passwordError: 'Current password is incorrect' });
@@ -140,12 +140,12 @@ export const actions = {
 				emailNotifications,
 				publicProfile,
 				showClickStats,
-				defaultExpiry: defaultExpiry ? parseInt(defaultExpiry) : null
+				defaultExpiry: defaultExpiry ? parseInt(defaultExpiry) : null,
 			});
 
 			return {
 				preferencesSuccess: true,
-				preferencesMessage: 'Preferences updated successfully'
+				preferencesMessage: 'Preferences updated successfully',
 			};
 		} catch (err) {
 			return fail(400, { preferencesError: 'Failed to update preferences' });
@@ -160,7 +160,7 @@ export const actions = {
 		try {
 			// Delete all user's links first
 			const links = await locals.pb.collection('links').getFullList({
-				filter: `user_id="${locals.user.id}"`
+				filter: `user_id="${locals.user.id}"`,
 			});
 
 			for (const link of links) {
@@ -178,5 +178,5 @@ export const actions = {
 		} catch (err) {
 			return fail(400, { deleteError: 'Failed to delete account' });
 		}
-	}
+	},
 } satisfies Actions;

@@ -19,7 +19,7 @@
 		{ key: '1', description: 'Listen-Ansicht', category: 'Ansicht' },
 		{ key: '2', description: 'Grid 3x3 Ansicht', category: 'Ansicht' },
 		{ key: '3', description: 'Grid 5x5 Ansicht', category: 'Ansicht' },
-		{ key: 'S', description: 'Sidebar öffnen/schließen', category: 'UI' }
+		{ key: 'S', description: 'Sidebar öffnen/schließen', category: 'UI' },
 	];
 
 	const categories = [...new Set(shortcuts.map((s) => s.category))];
@@ -71,13 +71,19 @@
 			<div class="space-y-6">
 				{#each categories as category}
 					<div>
-						<h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+						<h3
+							class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+						>
 							{category}
 						</h3>
 						<div class="space-y-2">
 							{#each shortcuts.filter((s) => s.category === category) as shortcut}
-								<div class="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800/50">
-									<span class="text-sm text-gray-700 dark:text-gray-300">{shortcut.description}</span>
+								<div
+									class="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800/50"
+								>
+									<span class="text-sm text-gray-700 dark:text-gray-300"
+										>{shortcut.description}</span
+									>
 									<kbd
 										class="rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:ring-gray-600"
 									>

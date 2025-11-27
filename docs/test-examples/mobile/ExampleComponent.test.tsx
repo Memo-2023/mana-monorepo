@@ -36,7 +36,9 @@ describe('ExampleComponent', () => {
 		});
 
 		it('should render with testID for automation', () => {
-			const { getByTestId } = render(<ExampleComponent {...defaultProps} testID="example-component" />);
+			const { getByTestId } = render(
+				<ExampleComponent {...defaultProps} testID="example-component" />
+			);
 
 			expect(getByTestId('example-component')).toBeTruthy();
 		});
@@ -78,7 +80,9 @@ describe('ExampleComponent', () => {
 		});
 
 		it('should call onLongPress when long pressed', () => {
-			const { getByText } = render(<ExampleComponent {...defaultProps} onLongPress={mockOnLongPress} />);
+			const { getByText } = render(
+				<ExampleComponent {...defaultProps} onLongPress={mockOnLongPress} />
+			);
 
 			fireEvent(getByText('Test Title'), 'onLongPress');
 
@@ -242,7 +246,9 @@ describe('ExampleComponent', () => {
 		});
 
 		it('should handle undefined props gracefully', () => {
-			const { getByText } = render(<ExampleComponent title="Test" onPress={mockOnPress} description={undefined} />);
+			const { getByText } = render(
+				<ExampleComponent title="Test" onPress={mockOnPress} description={undefined} />
+			);
 
 			expect(getByText('Test')).toBeTruthy();
 		});

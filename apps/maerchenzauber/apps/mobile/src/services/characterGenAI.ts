@@ -98,9 +98,9 @@
 //     const result = await model.generateContent(finalPrompt);
 //     const response = result.response;
 //     const text = response.text();
-    
+
 //     console.log('AI Response:', text);
-    
+
 //     // Create character object with default values
 //     const character: GeneratedCharacter = {
 //       name: suggestedName || '',
@@ -113,7 +113,7 @@
 //       development: '',
 //       imagePrompt: ''
 //     };
-    
+
 //     // Split response into sections by number prefixes and clean up
 //     const sections = text
 //       .split(/\d+\.\s+/)
@@ -124,13 +124,13 @@
 //         .replace(/^\s*•\s*/gm, '')
 //         .trim()
 //       );
-    
+
 //     console.log('Cleaned sections:', sections.map((s, i) => `${i}: ${s.substring(0, 50)}...`));
-    
+
 //     // Map sections to character fields
 //     sections.forEach((content, index) => {
 //       if (!content) return;
-      
+
 //       // Entferne den Abschnittsnummer und Doppelpunkt am Anfang
 //       const cleanContent = content
 //         .replace(/^\d+:\s*/, '')  // Entfernt "1:" am Anfang
@@ -140,7 +140,7 @@
 
 //       // Überspringe den ersten leeren Abschnitt
 //       const adjustedIndex = index - 1;
-      
+
 //       switch (adjustedIndex) {
 //         case 0: // Name
 //           if (!suggestedName) character.name = cleanContent;

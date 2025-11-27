@@ -8,7 +8,7 @@ PocketBase ist bereits gestartet auf: http://localhost:8090
 
 ### 1. Admin Account erstellen
 
-Öffne im Browser: http://localhost:8090/_/
+Öffne im Browser: http://localhost:8090/\_/
 
 - Beim ersten Besuch wirst du aufgefordert einen Admin-Account zu erstellen
 - Verwende sichere Credentials (nur für lokale Entwicklung)
@@ -27,10 +27,12 @@ Nach dem Login als Admin:
 Erstelle ein paar Test-Einträge:
 
 **Test User:**
+
 - Email: test@localhost
 - Password: test123456
 
 **Test Links:**
+
 - Kurz-Code: test1
 - Original URL: https://example.com
 - Aktiv: Ja

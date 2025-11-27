@@ -26,7 +26,7 @@
 		return new Intl.DateTimeFormat('de-DE', {
 			day: '2-digit',
 			month: 'short',
-			year: 'numeric'
+			year: 'numeric',
 		}).format(date);
 	}
 </script>
@@ -40,7 +40,9 @@
 	<img
 		src={image.public_url}
 		alt={image.prompt}
-		class="h-full w-full object-cover transition-opacity duration-300 {imageLoaded ? 'opacity-100' : 'opacity-15'}"
+		class="h-full w-full object-cover transition-opacity duration-300 {imageLoaded
+			? 'opacity-100'
+			: 'opacity-15'}"
 		loading="lazy"
 		onload={handleImageLoad}
 	/>
@@ -49,7 +51,7 @@
 	<div
 		class="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100"
 	>
-		<p class="text-base text-white font-medium">{image.prompt}</p>
+		<p class="text-base font-medium text-white">{image.prompt}</p>
 		<p class="mt-1 text-sm text-gray-300">{formatDate(image.created_at)}</p>
 	</div>
 

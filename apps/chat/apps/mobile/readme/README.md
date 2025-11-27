@@ -5,6 +5,7 @@ Eine moderne Chat-Anwendung mit LLM-Integration, entwickelt mit Expo React Nativ
 ## Projektübersicht
 
 Diese Anwendung ermöglicht Benutzern, mit verschiedenen LLM-Modellen zu interagieren. Sie unterstützt verschiedene Konversationsmodi:
+
 - **Freier Modus**: Offene Gespräche mit dem KI-Modell
 - **Geführter Modus**: Strukturierte Konversationen mit vordefinierten Schritten
 - **Vorlagen-Modus**: Vordefinierte Gesprächsabläufe für spezifische Anwendungsfälle
@@ -14,53 +15,58 @@ Diese Anwendung ermöglicht Benutzern, mit verschiedenen LLM-Modellen zu interag
 Die Anwendung verwendet Supabase mit folgender Datenbankstruktur:
 
 ### Users
-| Feld | Typ | Beschreibung |
-|------|-----|-------------|
-| id | UUID (PK) | Eindeutige Benutzer-ID |
-| email | String | E-Mail-Adresse des Benutzers |
-| name | String | Name des Benutzers |
-| created_at | Timestamp | Erstellungszeitpunkt |
+
+| Feld       | Typ       | Beschreibung                     |
+| ---------- | --------- | -------------------------------- |
+| id         | UUID (PK) | Eindeutige Benutzer-ID           |
+| email      | String    | E-Mail-Adresse des Benutzers     |
+| name       | String    | Name des Benutzers               |
+| created_at | Timestamp | Erstellungszeitpunkt             |
 | updated_at | Timestamp | Letzter Aktualisierungszeitpunkt |
 
 ### Conversations
-| Feld | Typ | Beschreibung |
-|------|-----|-------------|
-| id | UUID (PK) | Eindeutige Konversations-ID |
-| user_id | UUID (FK) | Referenz zum Benutzer |
-| model_id | UUID (FK) | Referenz zum verwendeten LLM-Modell |
-| template_id | UUID (FK, Nullable) | Optionale Referenz zur verwendeten Vorlage |
-| conversation_mode | String | Modus der Konversation (frei, geführt, vorlage) |
-| created_at | Timestamp | Erstellungszeitpunkt |
-| updated_at | Timestamp | Letzter Aktualisierungszeitpunkt |
+
+| Feld              | Typ                 | Beschreibung                                    |
+| ----------------- | ------------------- | ----------------------------------------------- |
+| id                | UUID (PK)           | Eindeutige Konversations-ID                     |
+| user_id           | UUID (FK)           | Referenz zum Benutzer                           |
+| model_id          | UUID (FK)           | Referenz zum verwendeten LLM-Modell             |
+| template_id       | UUID (FK, Nullable) | Optionale Referenz zur verwendeten Vorlage      |
+| conversation_mode | String              | Modus der Konversation (frei, geführt, vorlage) |
+| created_at        | Timestamp           | Erstellungszeitpunkt                            |
+| updated_at        | Timestamp           | Letzter Aktualisierungszeitpunkt                |
 
 ### Messages
-| Feld | Typ | Beschreibung |
-|------|-----|-------------|
-| id | UUID (PK) | Eindeutige Nachrichten-ID |
-| conversation_id | UUID (FK) | Referenz zur Konversation |
-| sender | Enum | Absender der Nachricht (user, ai) |
-| message_text | Text | Inhalt der Nachricht |
-| created_at | Timestamp | Erstellungszeitpunkt |
-| updated_at | Timestamp | Letzter Aktualisierungszeitpunkt |
+
+| Feld            | Typ       | Beschreibung                      |
+| --------------- | --------- | --------------------------------- |
+| id              | UUID (PK) | Eindeutige Nachrichten-ID         |
+| conversation_id | UUID (FK) | Referenz zur Konversation         |
+| sender          | Enum      | Absender der Nachricht (user, ai) |
+| message_text    | Text      | Inhalt der Nachricht              |
+| created_at      | Timestamp | Erstellungszeitpunkt              |
+| updated_at      | Timestamp | Letzter Aktualisierungszeitpunkt  |
 
 ### Models
-| Feld | Typ | Beschreibung |
-|------|-----|-------------|
-| id | UUID (PK) | Eindeutige Modell-ID |
-| name | String | Name des Modells (z.B. GPT-4, GPT-3) |
-| description | Text | Beschreibung des Modells |
-| parameters | JSON | Optionale Einstellungen für das Modell |
+
+| Feld        | Typ       | Beschreibung                           |
+| ----------- | --------- | -------------------------------------- |
+| id          | UUID (PK) | Eindeutige Modell-ID                   |
+| name        | String    | Name des Modells (z.B. GPT-4, GPT-3)   |
+| description | Text      | Beschreibung des Modells               |
+| parameters  | JSON      | Optionale Einstellungen für das Modell |
 
 ### Templates
-| Feld | Typ | Beschreibung |
-|------|-----|-------------|
-| id | UUID (PK) | Eindeutige Vorlagen-ID |
-| name | String | Name der Vorlage (z.B. "Vertrag erstellen") |
-| description | Text | Beschreibung der Vorlage |
-| mode_type | Text | Detaillierte Beschreibung des Modus/Guided Flow |
-| initial_questions | JSON/Text | Startfragen oder Anweisungen |
-| created_at | Timestamp | Erstellungszeitpunkt |
-| updated_at | Timestamp | Letzter Aktualisierungszeitpunkt |
+
+| Feld              | Typ       | Beschreibung                                    |
+| ----------------- | --------- | ----------------------------------------------- |
+| id                | UUID (PK) | Eindeutige Vorlagen-ID                          |
+| name              | String    | Name der Vorlage (z.B. "Vertrag erstellen")     |
+| description       | Text      | Beschreibung der Vorlage                        |
+| mode_type         | Text      | Detaillierte Beschreibung des Modus/Guided Flow |
+| initial_questions | JSON/Text | Startfragen oder Anweisungen                    |
+| created_at        | Timestamp | Erstellungszeitpunkt                            |
+| updated_at        | Timestamp | Letzter Aktualisierungszeitpunkt                |
 
 ## Beziehungen
 

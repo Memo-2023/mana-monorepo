@@ -9,6 +9,6 @@
 	{/if}
 </svelte:head>
 
-<div class="container mx-auto px-4 py-8 prose prose-lg max-w-none">
+<div class="prose prose-lg container mx-auto max-w-none px-4 py-8">
 	<slot />
 </div>

@@ -11,7 +11,7 @@ describe('User Registration', () => {
 		const result = await registerUser({
 			email,
 			password,
-			passwordConfirm: password
+			passwordConfirm: password,
 		});
 
 		// May fail in test environment without PocketBase
@@ -27,7 +27,7 @@ describe('User Registration', () => {
 		const result = await registerUser({
 			email: 'invalid-email',
 			password: 'TestPassword123!',
-			passwordConfirm: 'TestPassword123!'
+			passwordConfirm: 'TestPassword123!',
 		});
 
 		expect(result.success).toBe(false);
@@ -38,7 +38,7 @@ describe('User Registration', () => {
 		const result = await registerUser({
 			email: testEmail(),
 			password: 'Password123!',
-			passwordConfirm: 'DifferentPassword123!'
+			passwordConfirm: 'DifferentPassword123!',
 		});
 
 		expect(result.success).toBe(false);
@@ -52,7 +52,7 @@ describe('User Registration', () => {
 		const result = await registerUser({
 			email,
 			password,
-			passwordConfirm: password
+			passwordConfirm: password,
 		});
 
 		if (process.env.PUBLIC_POCKETBASE_URL && result.success) {
@@ -69,14 +69,14 @@ describe('User Registration', () => {
 		await registerUser({
 			email,
 			password,
-			passwordConfirm: password
+			passwordConfirm: password,
 		});
 
 		// Second registration with same email
 		const result = await registerUser({
 			email,
 			password,
-			passwordConfirm: password
+			passwordConfirm: password,
 		});
 
 		if (process.env.PUBLIC_POCKETBASE_URL) {

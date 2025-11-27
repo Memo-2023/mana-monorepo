@@ -30,16 +30,19 @@ EXPO_PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
 ## Cloudflare Pages Build Settings
 
 **Build command:**
+
 ```bash
 npm run web:build
 ```
 
 **Build output directory:**
+
 ```
 web-build
 ```
 
 **Node version:**
+
 ```
 18
 ```

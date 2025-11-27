@@ -78,7 +78,7 @@
 				fetchAllData('memos', 'id, created_at, source, metadata, title, intro'),
 				fetchAllData('memories', 'id, created_at, content'),
 				fetchAllData('tags', 'id, name, style'),
-				fetchAllData('memo_tags', 'memo_id, tag_id', 2000)
+				fetchAllData('memo_tags', 'memo_id, tag_id', 2000),
 			]);
 
 			// Calculate statistics
@@ -135,7 +135,7 @@
 					mostViewedMemo = {
 						id: memo.id,
 						title: memo.title || memo.intro || 'Unbenanntes Memo',
-						viewCount
+						viewCount,
 					};
 				}
 
@@ -146,7 +146,7 @@
 					lastViewedMemo = {
 						id: memo.id,
 						title: memo.title || memo.intro || 'Unbenanntes Memo',
-						lastViewed
+						lastViewed,
 					};
 				}
 			});
@@ -167,8 +167,9 @@
 				.slice(0, 5)
 				.map(([city, count]) => ({ city, count }));
 
-			const memosWithAudio = memos.filter((memo) => (memo.metadata?.stats?.audioDuration || 0) > 0)
-				.length;
+			const memosWithAudio = memos.filter(
+				(memo) => (memo.metadata?.stats?.audioDuration || 0) > 0
+			).length;
 
 			statistics = {
 				memoCount: memos.length,
@@ -189,7 +190,7 @@
 					totalRecordingDuration > 0
 						? Math.round((totalWordsInRecordings / (totalRecordingDuration / 60)) * 10) / 10
 						: 0,
-				topLocations
+				topLocations,
 			};
 		} catch (err) {
 			console.error('Error loading statistics:', err);
@@ -236,13 +237,13 @@
 				memos: periodMemos.length,
 				memories: periodMemories.length,
 				duration,
-				words
+				words,
 			};
 		};
 
 		return {
 			todayStats: calculateStatsForPeriod(todayStart),
-			last30DaysStats: calculateStatsForPeriod(last30DaysStart)
+			last30DaysStats: calculateStatsForPeriod(last30DaysStart),
 		};
 	}
 
@@ -252,7 +253,7 @@
 				currentStreak: 0,
 				longestStreak: 0,
 				activestWeek: { week: 'Keine Daten', count: 0 },
-				activestMonth: { month: 'Keine Daten', count: 0 }
+				activestMonth: { month: 'Keine Daten', count: 0 },
 			};
 		}
 
@@ -328,7 +329,7 @@
 		const dayNum = d.getUTCDay() || 7;
 		d.setUTCDate(d.getUTCDate() + 4 - dayNum);
 		const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-		return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+		return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
 	}
 
 	function calculateTagAnalytics(memos: any[], memoTags: any[], tags: any[]) {
@@ -345,7 +346,7 @@
 				return {
 					name: tag?.name || 'Unknown',
 					count,
-					color: tag?.style?.color || '#808080'
+					color: tag?.style?.color || '#808080',
 				};
 			})
 			.sort((a, b) => b.count - a.count)
@@ -363,7 +364,7 @@
 			mostUsedTags,
 			assignedTags: totalTagAssignments,
 			memosWithoutTags,
-			averageTagsPerMemo
+			averageTagsPerMemo,
 		};
 	}
 </script>

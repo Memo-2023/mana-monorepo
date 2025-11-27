@@ -51,7 +51,7 @@
 			return {
 				file,
 				url,
-				error: validation.valid ? undefined : validation.error
+				error: validation.valid ? undefined : validation.error,
 			};
 		});
 
@@ -144,7 +144,8 @@
 		<div class="space-y-4">
 			<div class="flex items-center justify-between">
 				<h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-					{previews.length} {previews.length === 1 ? 'Bild' : 'Bilder'} ausgewählt
+					{previews.length}
+					{previews.length === 1 ? 'Bild' : 'Bilder'} ausgewählt
 				</h3>
 				{#if !uploading}
 					<button
@@ -164,11 +165,7 @@
 					>
 						<!-- Image Preview -->
 						<div class="aspect-square w-full">
-							<img
-								src={preview.url}
-								alt={preview.file.name}
-								class="h-full w-full object-cover"
-							/>
+							<img src={preview.url} alt={preview.file.name} class="h-full w-full object-cover" />
 						</div>
 
 						<!-- Overlay -->
@@ -231,7 +228,10 @@
 										{#if progress.status === 'uploading' || progress.status === 'success'}
 											<div class="h-1 w-full overflow-hidden rounded-full bg-white/20">
 												<div
-													class="h-full bg-white transition-all duration-300 {progress.status === 'success' ? 'bg-green-500' : ''}"
+													class="h-full bg-white transition-all duration-300 {progress.status ===
+													'success'
+														? 'bg-green-500'
+														: ''}"
 													style="width: {progress.progress}%"
 												></div>
 											</div>
@@ -263,7 +263,8 @@
 								d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
 							/>
 						</svg>
-						{selectedFiles.length} {selectedFiles.length === 1 ? 'Bild' : 'Bilder'} hochladen
+						{selectedFiles.length}
+						{selectedFiles.length === 1 ? 'Bild' : 'Bilder'} hochladen
 					</button>
 				</div>
 			{/if}

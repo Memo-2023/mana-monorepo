@@ -5,18 +5,18 @@ import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/publi
  * Create a Supabase client with authentication token
  */
 export async function getAuthenticatedSupabase(appToken: string): Promise<SupabaseClient> {
-  return createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
-    global: {
-      headers: {
-        Authorization: `Bearer ${appToken}`,
-      },
-    },
-  });
+	return createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+		global: {
+			headers: {
+				Authorization: `Bearer ${appToken}`,
+			},
+		},
+	});
 }
 
 /**
  * Create an anonymous Supabase client
  */
 export function getSupabaseClient(): SupabaseClient {
-  return createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+	return createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 }

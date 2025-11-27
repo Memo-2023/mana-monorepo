@@ -29,10 +29,10 @@ export const showShareBoardModal = writable(false);
 export const shareBoardId = writable<string | null>(null);
 
 // Board settings (for canvas)
-export const boardSettings = derived(currentBoard, $currentBoard => ({
+export const boardSettings = derived(currentBoard, ($currentBoard) => ({
 	width: $currentBoard?.canvas_width || 2000,
 	height: $currentBoard?.canvas_height || 1500,
-	backgroundColor: $currentBoard?.background_color || '#ffffff'
+	backgroundColor: $currentBoard?.background_color || '#ffffff',
 }));
 
 // Helper functions for board management
@@ -43,37 +43,31 @@ export function resetBoardsState() {
 }
 
 export function addBoard(board: BoardWithCount) {
-	boards.update(current => [board, ...current]);
+	boards.update((current) => [board, ...current]);
 }
 
 export function updateBoardInList(boardId: string, updates: Partial<Board>) {
-	boards.update(current =>
-		current.map(board =>
-			board.id === boardId ? { ...board, ...updates } : board
-		)
+	boards.update((current) =>
+		current.map((board) => (board.id === boardId ? { ...board, ...updates } : board))
 	);
 }
 
 export function removeBoardFromList(boardId: string) {
-	boards.update(current => current.filter(board => board.id !== boardId));
+	boards.update((current) => current.filter((board) => board.id !== boardId));
 }
 
 export function incrementBoardItemCount(boardId: string) {
-	boards.update(current =>
-		current.map(board =>
-			board.id === boardId
-				? { ...board, item_count: board.item_count + 1 }
-				: board
+	boards.update((current) =>
+		current.map((board) =>
+			board.id === boardId ? { ...board, item_count: board.item_count + 1 } : board
 		)
 	);
 }
 
 export function decrementBoardItemCount(boardId: string) {
-	boards.update(current =>
-		current.map(board =>
-			board.id === boardId
-				? { ...board, item_count: Math.max(0, board.item_count - 1) }
-				: board
+	boards.update((current) =>
+		current.map((board) =>
+			board.id === boardId ? { ...board, item_count: Math.max(0, board.item_count - 1) } : board
 		)
 	);
 }

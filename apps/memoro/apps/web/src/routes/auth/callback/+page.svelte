@@ -56,20 +56,18 @@
 <div class="flex min-h-screen items-center justify-center">
 	<div class="card w-full max-w-md text-center">
 		{#if processing}
-			<div class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+			<div
+				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
+			></div>
 			<h2 class="text-2xl font-bold mb-2">Authenticating...</h2>
-			<p class="text-gray-600 dark:text-gray-400">
-				Please wait while we complete your sign-in.
-			</p>
+			<p class="text-gray-600 dark:text-gray-400">Please wait while we complete your sign-in.</p>
 		{:else if error}
 			<div class="text-6xl mb-4">⚠️</div>
 			<h2 class="text-2xl font-bold mb-2 text-red-600 dark:text-red-400">Authentication Error</h2>
 			<p class="text-gray-600 dark:text-gray-400 mb-4">
 				{error}
 			</p>
-			<p class="text-sm text-gray-500 dark:text-gray-400">
-				Redirecting you back to login...
-			</p>
+			<p class="text-sm text-gray-500 dark:text-gray-400">Redirecting you back to login...</p>
 		{/if}
 	</div>
 </div>

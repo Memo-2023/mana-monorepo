@@ -1,9 +1,11 @@
 # ROI-Rechner Komponente
 
 ## Übersicht
+
 Interaktiver ROI (Return on Investment) Rechner zur Visualisierung der Zeit- und Geldersparnis mit Memoro.
 
 ## Features
+
 - 🎚️ **Interaktive Slider** für alle Parameter
 - 📊 **Echtzeit-Berechnung** bei jeder Änderung
 - 💰 **Zeit- und Geldersparnis** für Woche/Monat/Jahr
@@ -15,6 +17,7 @@ Interaktiver ROI (Return on Investment) Rechner zur Visualisierung der Zeit- und
 ## Verwendung
 
 ### Basic Usage
+
 ```astro
 import ROICalculator from "../components/ROICalculator.astro";
 
@@ -22,44 +25,49 @@ import ROICalculator from "../components/ROICalculator.astro";
 ```
 
 ### Mit Custom Props
+
 ```astro
-<ROICalculator 
-  lang="de"
-  title="Berechnen Sie Ihre Zeitersparnis"
-  subtitle="Finden Sie heraus, wie viel Sie sparen können"
-  accentColor="primary"
+<ROICalculator
+	lang="de"
+	title="Berechnen Sie Ihre Zeitersparnis"
+	subtitle="Finden Sie heraus, wie viel Sie sparen können"
+	accentColor="primary"
 />
 ```
 
 ## Props
 
-| Prop | Type | Default | Beschreibung |
-|------|------|---------|--------------|
-| `lang` | `'de' \| 'en'` | `'de'` | Sprache der Komponente |
-| `title` | `string` | Auto | Überschrift des Rechners |
-| `subtitle` | `string` | Auto | Untertitel/Beschreibung |
-| `accentColor` | `string` | `'primary'` | Farbschema für Akzente |
+| Prop          | Type           | Default     | Beschreibung             |
+| ------------- | -------------- | ----------- | ------------------------ |
+| `lang`        | `'de' \| 'en'` | `'de'`      | Sprache der Komponente   |
+| `title`       | `string`       | Auto        | Überschrift des Rechners |
+| `subtitle`    | `string`       | Auto        | Untertitel/Beschreibung  |
+| `accentColor` | `string`       | `'primary'` | Farbschema für Akzente   |
 
 ## Einstellbare Parameter
 
 ### Meetings pro Woche
+
 - **Range:** 1-30 Meetings
 - **Default:** 10 Meetings
 - **Einfluss:** Direkte Multiplikation der Zeitersparnis
 
 ### Minuten pro Meeting
+
 - **Range:** 15-120 Minuten
 - **Default:** 45 Minuten
 - **Schritte:** 15 Minuten
 - **Einfluss:** Basis für Protokoll-Zeit
 
 ### Minuten für Protokoll
+
 - **Range:** 10-90 Minuten
 - **Default:** 30 Minuten
 - **Schritte:** 5 Minuten
 - **Einfluss:** Hauptfaktor für Zeitersparnis (80% mit Memoro gespart)
 
 ### Stundensatz
+
 - **Range:** 20-200 €/Stunde
 - **Default:** 50 €/Stunde
 - **Schritte:** 10 €
@@ -68,27 +76,30 @@ import ROICalculator from "../components/ROICalculator.astro";
 ## Berechnungslogik
 
 ### Zeitersparnis
+
 ```javascript
 // 80% Zeitersparnis bei der Protokollerstellung
-minutesSavedPerMeeting = protocolTime * 0.8
-minutesSavedPerWeek = minutesSavedPerMeeting * meetings
-hoursSavedPerWeek = minutesSavedPerWeek / 60
-hoursSavedPerMonth = hoursSavedPerWeek * 4.33
-hoursSavedPerYear = hoursSavedPerWeek * 52
-daysSavedPerYear = hoursSavedPerYear / 8
+minutesSavedPerMeeting = protocolTime * 0.8;
+minutesSavedPerWeek = minutesSavedPerMeeting * meetings;
+hoursSavedPerWeek = minutesSavedPerWeek / 60;
+hoursSavedPerMonth = hoursSavedPerWeek * 4.33;
+hoursSavedPerYear = hoursSavedPerWeek * 52;
+daysSavedPerYear = hoursSavedPerYear / 8;
 ```
 
 ### Geldersparnis
+
 ```javascript
-moneySavedPerWeek = hoursSavedPerWeek * hourlyRate
-moneySavedPerMonth = hoursSavedPerMonth * hourlyRate
-moneySavedPerYear = hoursSavedPerYear * hourlyRate
+moneySavedPerWeek = hoursSavedPerWeek * hourlyRate;
+moneySavedPerMonth = hoursSavedPerMonth * hourlyRate;
+moneySavedPerYear = hoursSavedPerYear * hourlyRate;
 ```
 
 ### ROI (Return on Investment)
+
 ```javascript
-memoroCostPerMonth = 15 // Durchschnittlicher Memoro-Preis
-daysToROI = Math.ceil(memoroCostPerMonth / (moneySavedPerMonth / 30))
+memoroCostPerMonth = 15; // Durchschnittlicher Memoro-Preis
+daysToROI = Math.ceil(memoroCostPerMonth / (moneySavedPerMonth / 30));
 ```
 
 ## Annahmen
@@ -102,46 +113,47 @@ daysToROI = Math.ceil(memoroCostPerMonth / (moneySavedPerMonth / 30))
 ## Styling
 
 Die Komponente verwendet:
+
 - Tailwind CSS für Layout und Styling
 - Custom CSS für Slider-Styling
 - Gradient-Backgrounds für visuelle Attraktivität
 - Smooth Transitions für bessere UX
 
 ### Slider-Styling
+
 ```css
 .slider {
-  background: linear-gradient(to right, 
-    #ef4444 0%, 
-    #ef4444 var(--value, 50%), 
-    #e5e7eb var(--value, 50%), 
-    #e5e7eb 100%
-  );
+	background: linear-gradient(
+		to right,
+		#ef4444 0%,
+		#ef4444 var(--value, 50%),
+		#e5e7eb var(--value, 50%),
+		#e5e7eb 100%
+	);
 }
 ```
 
 ## Integration
 
 ### Auf Landing Pages
-```astro
-// In meeting-protokoll-software.mdx
-import ROICalculator from "../components/ROICalculator.astro";
 
-<ROICalculator 
-  lang="de"
-  title="ROI-Rechner: Ihre Zeitersparnis mit automatischen Protokollen"
-  subtitle="Berechnen Sie konkret Ihre Einsparungen"
+```astro
+// In meeting-protokoll-software.mdx import ROICalculator from "../components/ROICalculator.astro";
+
+<ROICalculator
+	lang="de"
+	title="ROI-Rechner: Ihre Zeitersparnis mit automatischen Protokollen"
+	subtitle="Berechnen Sie konkret Ihre Einsparungen"
 />
 ```
 
 ### Auf der Homepage
+
 ```astro
 // Nach NumbersSection für maximale Wirkung
 <NumbersSection />
 
-<ROICalculator 
-  lang={lang}
-  title="Berechnen Sie Ihre Zeitersparnis"
-/>
+<ROICalculator lang={lang} title="Berechnen Sie Ihre Zeitersparnis" />
 
 <TestimonialSection />
 ```
@@ -171,4 +183,4 @@ import ROICalculator from "../components/ROICalculator.astro";
 
 ---
 
-*Komponente erstellt: 28. Dezember 2024*
+_Komponente erstellt: 28. Dezember 2024_

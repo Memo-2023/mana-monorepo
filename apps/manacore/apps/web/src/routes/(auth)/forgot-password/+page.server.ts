@@ -9,7 +9,7 @@ export const actions: Actions = {
 		if (!email) {
 			return fail(400, {
 				error: 'Email is required',
-				email
+				email,
 			});
 		}
 
@@ -19,21 +19,21 @@ export const actions: Actions = {
 
 		// Send password reset email
 		const { error } = await supabase.auth.resetPasswordForEmail(email, {
-			redirectTo
+			redirectTo,
 		});
 
 		if (error) {
 			console.error('Password reset error:', error);
 			return fail(400, {
 				error: error.message,
-				email
+				email,
 			});
 		}
 
 		// Return success (we don't reveal if the email exists for security)
 		return {
 			success: true,
-			email
+			email,
 		};
-	}
+	},
 };

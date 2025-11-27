@@ -1,9 +1,11 @@
 # Bildmodell-Auswahl Feature
 
 ## Übersicht
+
 Dieses Feature ermöglicht es Nutzern, zwischen verschiedenen Bildgenerierungsmodellen zu wählen:
+
 - **FLUX Schnell**: Schnelle Generierung (1-2 Sekunden)
-- **FLUX Pro 1.1**: Höchste Qualität (10-15 Sekunden)  
+- **FLUX Pro 1.1**: Höchste Qualität (10-15 Sekunden)
 - **Stable Diffusion XL**: Bewährte, stabile Qualität (5-10 Sekunden)
 
 ## Implementierte Änderungen
@@ -11,16 +13,19 @@ Dieses Feature ermöglicht es Nutzern, zwischen verschiedenen Bildgenerierungsmo
 ### Backend
 
 #### 1. Datenbank-Migration
+
 - **Datei**: `apps/backend/migrations/001_create_user_settings_table.sql`
 - Neue Tabelle `user_settings` mit Spalte `image_model`
 - RLS-Policies für User-spezifische Settings
 
 #### 2. Model-Konfiguration
+
 - **Datei**: `apps/backend/src/core/models/image-models.ts`
 - Definition der verfügbaren Modelle mit Metadaten
 - Export von `IMAGE_MODELS` Konstante
 
 #### 3. Settings Service
+
 - **Datei**: `apps/backend/src/core/services/settings.service.ts`
 - Neue Methoden:
   - `getUserImageModel(userId)`: Abrufen des User-Modells
@@ -29,11 +34,13 @@ Dieses Feature ermöglicht es Nutzern, zwischen verschiedenen Bildgenerierungsmo
   - `getImageModelInfo(modelId)`: Details eines Modells
 
 #### 4. Image Service
+
 - **Datei**: `apps/backend/src/core/services/image-supabase.service.ts`
 - `generateImageWithReplicate()` nutzt jetzt User-spezifisches Modell
 - User-ID wird durch alle Generierungsfunktionen durchgereicht
 
 #### 5. API Endpoints
+
 - **Datei**: `apps/backend/src/settings/settings.controller.ts`
 - `GET /settings/image-models`: Verfügbare Modelle
 - `GET /settings/user/image-model`: Aktuelles User-Modell
@@ -42,18 +49,21 @@ Dieses Feature ermöglicht es Nutzern, zwischen verschiedenen Bildgenerierungsmo
 ### Frontend
 
 #### 1. Settings UI
+
 - **Datei**: `apps/mobile/app/(tabs)/(settings)/image-model.tsx`
 - Neue Seite für Modellauswahl mit Card-Layout
 - Visual Feedback für ausgewähltes Modell
 - Credits und Zeitangaben
 
 #### 2. Navigation
+
 - **Datei**: `apps/mobile/app/settings.tsx`
 - Neuer Button "Bildgenerierung" in Settings
 
 ## Deployment-Schritte
 
 ### 1. Datenbank-Migration ausführen
+
 ```bash
 # Verbindung zur Supabase-Datenbank herstellen
 psql "postgresql://postgres.[project-id]:[password]@db.[project-id].supabase.co:5432/postgres"
@@ -63,6 +73,7 @@ psql "postgresql://postgres.[project-id]:[password]@db.[project-id].supabase.co:
 ```
 
 ### 2. Backend deployen
+
 ```bash
 cd apps/backend
 npm run build
@@ -70,12 +81,13 @@ npm run start:prod
 ```
 
 ### 3. Mobile App aktualisieren
+
 ```bash
 cd apps/mobile
 npm run build
 # Für iOS
 eas build --platform ios
-# Für Android  
+# Für Android
 eas build --platform android
 ```
 
@@ -84,6 +96,7 @@ eas build --platform android
 ### Backend Tests
 
 #### 1. API Endpoints testen
+
 ```bash
 # Verfügbare Modelle abrufen
 curl http://localhost:3002/settings/image-models \
@@ -101,6 +114,7 @@ curl -X PUT http://localhost:3002/settings/user/image-model \
 ```
 
 #### 2. Bildgenerierung testen
+
 ```bash
 # Story mit neuem Modell erstellen
 curl -X POST http://localhost:3002/story \
@@ -137,11 +151,13 @@ Die Model-IDs in `image-models.ts` müssen mit den tatsächlichen Replicate-Mode
 ```
 
 ### Umgebungsvariablen
+
 Sicherstellen, dass `MAERCHENZAUBER_REPLICATE_API_KEY` gesetzt ist.
 
 ## Monitoring
 
 ### Logs prüfen
+
 ```bash
 # Backend Logs für Model-Auswahl
 grep "Using Replicate model:" backend.log
@@ -151,15 +167,16 @@ grep "getUserImageModel" backend.log
 ```
 
 ### Datenbank-Queries
+
 ```sql
 -- Anzahl User pro Modell
-SELECT image_model, COUNT(*) 
-FROM user_settings 
+SELECT image_model, COUNT(*)
+FROM user_settings
 GROUP BY image_model;
 
 -- User mit speziellem Modell
-SELECT user_id, image_model, updated_at 
-FROM user_settings 
+SELECT user_id, image_model, updated_at
+FROM user_settings
 WHERE image_model != 'sdxl'
 ORDER BY updated_at DESC;
 ```
@@ -167,16 +184,19 @@ ORDER BY updated_at DESC;
 ## Troubleshooting
 
 ### Problem: Modell wird nicht gespeichert
+
 - Prüfen ob `user_settings` Tabelle existiert
 - RLS-Policies überprüfen
 - JWT Token validieren
 
 ### Problem: Falsches Modell wird verwendet
+
 - Settings Service Cache prüfen
 - User-ID in Logs verifizieren
 - Default-Fallback prüfen
 
 ### Problem: Replicate Fehler
+
 - API Key prüfen
 - Model-IDs validieren
 - Rate Limits checken

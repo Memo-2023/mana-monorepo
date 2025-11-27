@@ -1,25 +1,25 @@
 ---
-title: "Mehrere KI-Modelle"
-description: "Zugriff auf über 10 modernste KI-Modelle einschließlich FLUX, Stable Diffusion und mehr. Wähle das perfekte Modell für jedes kreative Projekt."
-icon: "🎨"
-coverImage: "/features/ai-models.jpg"
-category: "models"
+title: 'Mehrere KI-Modelle'
+description: 'Zugriff auf über 10 modernste KI-Modelle einschließlich FLUX, Stable Diffusion und mehr. Wähle das perfekte Modell für jedes kreative Projekt.'
+icon: '🎨'
+coverImage: '/features/ai-models.jpg'
+category: 'models'
 featured: true
 order: 1
 available: true
 comingSoon: false
-language: "de"
+language: 'de'
 benefits:
-  - "Zugriff auf über 10 Premium-KI-Modelle"
-  - "FLUX für fotorealistische Bilder"
-  - "Stable Diffusion für künstlerische Stile"
-  - "Spezialisierte Modelle für verschiedene Anwendungsfälle"
-  - "Regelmäßige Updates mit neuen Modellen"
+  - 'Zugriff auf über 10 Premium-KI-Modelle'
+  - 'FLUX für fotorealistische Bilder'
+  - 'Stable Diffusion für künstlerische Stile'
+  - 'Spezialisierte Modelle für verschiedene Anwendungsfälle'
+  - 'Regelmäßige Updates mit neuen Modellen'
 useCases:
-  - "Produktfotografie"
-  - "Concept Art und Illustrationen"
-  - "Marketingmaterialien"
-  - "Social Media Inhalte"
+  - 'Produktfotografie'
+  - 'Concept Art und Illustrationen'
+  - 'Marketingmaterialien'
+  - 'Social Media Inhalte'
 ---
 
 ## Wähle das richtige Modell für jedes Projekt
@@ -31,6 +31,7 @@ Picture gibt dir Zugriff auf die fortschrittlichsten verfügbaren KI-Bildgenerie
 FLUX ist unser Flaggschiff-Modell zur Erstellung hyperrealistischer Bilder, die praktisch nicht von Fotos zu unterscheiden sind.
 
 **Perfekt für:**
+
 - Produktfotografie
 - Architekturvisualisierung
 - Professionelle Headshots
@@ -38,6 +39,7 @@ FLUX ist unser Flaggschiff-Modell zur Erstellung hyperrealistischer Bilder, die 
 - Marketing und Werbung
 
 **Hauptmerkmale:**
+
 - Außergewöhnlicher Fotorealismus
 - Überlegene Textwiedergabe
 - Konsistente Ergebnisse
@@ -48,6 +50,7 @@ FLUX ist unser Flaggschiff-Modell zur Erstellung hyperrealistischer Bilder, die 
 Stable Diffusion glänzt bei der Erstellung künstlerischer, stilisierter Bilder in einer breiten Palette von Ästhetiken.
 
 **Perfekt für:**
+
 - Digitale Kunst und Illustrationen
 - Concept Art
 - Anime und Manga

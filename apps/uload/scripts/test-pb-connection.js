@@ -17,7 +17,7 @@ try {
 		passwordConfirm: 'testpassword123',
 		username: `testuser${Date.now()}`,
 		name: 'Test User',
-		emailVisibility: true
+		emailVisibility: true,
 	});
 
 	console.log('✅ User created successfully:', testUser.id);

@@ -64,11 +64,11 @@ Windsurf offre una generosa versione gratuita con funzionalità avanzate come l'
 
 Windsurf si distingue per la sua capacità di agire sia come copilot che come agente autonomo, distinguendosi da altri IDE come Cursor.
 
-| Funzionalità | Windsurf Editor | Cursor | VS Code (con plugin) |
-|---------------------------|---|---|---|
-| Supporto agenti AI | ✅ Sì | ❌ No | ❌ No |
-| Modifica multi-file | ✅ Sì | ✅ Sì | ❌ No |
-| Consapevolezza contestuale completa | ✅ Sì | ❌ No | ❌ No |
+| Funzionalità                        | Windsurf Editor | Cursor | VS Code (con plugin) |
+| ----------------------------------- | --------------- | ------ | -------------------- |
+| Supporto agenti AI                  | ✅ Sì           | ❌ No  | ❌ No                |
+| Modifica multi-file                 | ✅ Sì           | ✅ Sì  | ❌ No                |
+| Consapevolezza contestuale completa | ✅ Sì           | ❌ No  | ❌ No                |
 
 ## Casi d'uso
 

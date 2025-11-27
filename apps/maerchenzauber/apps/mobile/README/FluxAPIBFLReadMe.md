@@ -50,7 +50,7 @@ Selected HTTP client:Shell Curl
 Curl
 Copy content
 curl 'https://api.bfl.ml/v1/get_result?id=' \
-  --header 'X-Key: YOUR_SECRET_TOKEN'
+ --header 'X-Key: YOUR_SECRET_TOKEN'
 
 Test Request
 (GET /v1/get_result)
@@ -58,9 +58,9 @@ Test Request
 422
 Copy content
 {
-  "id": "…",
-  "status": "Task not found",
-  "result": {}
+"id": "…",
+"status": "Task not found",
+"result": {}
 }
 Successful Response
 
@@ -103,27 +103,27 @@ Show Child Attributes
 Show Child Attributes
 width
 integer
-min: 
+min:
 256
-max: 
+max:
 1440
-default: 
+default:
 1024
 Width of the generated image in pixels. Must be a multiple of 32.
 
 height
 integer
-min: 
+min:
 256
-max: 
+max:
 1440
-default: 
+default:
 768
 Height of the generated image in pixels. Must be a multiple of 32.
 
 prompt_upsampling
 boolean
-default: 
+default:
 false
 Whether to perform upsampling on the prompt. If active, automatically modifies the prompt for more creative generation.
 
@@ -137,11 +137,11 @@ Show Child Attributes
 Show Child Attributes
 safety_tolerance
 integer
-min: 
+min:
 0
-max: 
+max:
 6
-default: 
+default:
 2
 Tolerance level for input and output moderation. Between 0 and 6, 0 being most strict, 6 being least strict.
 
@@ -169,18 +169,18 @@ Selected HTTP client:Shell Curl
 Curl
 Copy content
 curl https://api.bfl.ml/v1/flux-pro-1.1 \
-  --request POST \
-  --header 'Content-Type: application/json' \
-  --header 'X-Key: YOUR_SECRET_TOKEN' \
-  --data '{
-  "prompt": "ein fantastisches bild",
-  "image_prompt": "",
-  "width": 1024,
-  "height": 768,
-  "prompt_upsampling": false,
-  "seed": 42,
-  "safety_tolerance": 2,
-  "output_format": "jpeg"
+ --request POST \
+ --header 'Content-Type: application/json' \
+ --header 'X-Key: YOUR_SECRET_TOKEN' \
+ --data '{
+"prompt": "ein fantastisches bild",
+"image_prompt": "",
+"width": 1024,
+"height": 768,
+"prompt_upsampling": false,
+"seed": 42,
+"safety_tolerance": 2,
+"output_format": "jpeg"
 }'
 
 Test Request
@@ -189,7 +189,7 @@ Test Request
 422
 Copy content
 {
-  "id": "…"
+"id": "…"
 }
 Successful Response
 
@@ -214,21 +214,21 @@ Show Child Attributes
 Show Child Attributes
 width
 integer
-min: 
+min:
 256
-max: 
+max:
 1440
-default: 
+default:
 1024
 Width of the generated image in pixels. Must be a multiple of 32.
 
 height
 integer
-min: 
+min:
 256
-max: 
+max:
 1440
-default: 
+default:
 768
 Height of the generated image in pixels. Must be a multiple of 32.
 
@@ -242,7 +242,7 @@ Show Child Attributes
 Show Child Attributes
 prompt_upsampling
 boolean
-default: 
+default:
 false
 Whether to perform upsampling on the prompt. If active, automatically modifies the prompt for more creative generation.
 
@@ -264,11 +264,11 @@ Show Child Attributes
 Show Child Attributes
 safety_tolerance
 integer
-min: 
+min:
 0
-max: 
+max:
 6
-default: 
+default:
 2
 Tolerance level for input and output moderation. Between 0 and 6, 0 being most strict, 6 being least strict.
 
@@ -304,21 +304,21 @@ Selected HTTP client:Shell Curl
 Curl
 Copy content
 curl https://api.bfl.ml/v1/flux-pro \
-  --request POST \
-  --header 'Content-Type: application/json' \
-  --header 'X-Key: YOUR_SECRET_TOKEN' \
-  --data '{
-  "prompt": "ein fantastisches bild",
-  "image_prompt": "",
-  "width": 1024,
-  "height": 768,
-  "steps": 40,
-  "prompt_upsampling": false,
-  "seed": 42,
-  "guidance": 2.5,
-  "safety_tolerance": 2,
-  "interval": 2,
-  "output_format": "jpeg"
+ --request POST \
+ --header 'Content-Type: application/json' \
+ --header 'X-Key: YOUR_SECRET_TOKEN' \
+ --data '{
+"prompt": "ein fantastisches bild",
+"image_prompt": "",
+"width": 1024,
+"height": 768,
+"steps": 40,
+"prompt_upsampling": false,
+"seed": 42,
+"guidance": 2.5,
+"safety_tolerance": 2,
+"interval": 2,
+"output_format": "jpeg"
 }'
 
 Test Request
@@ -327,7 +327,7 @@ Test Request
 422
 Copy content
 {
-  "id": "…"
+"id": "…"
 }
 Successful Response
 
@@ -338,7 +338,7 @@ Body
 application/json
 prompt
 string
-default: 
+default:
 Text prompt for image generation.
 
 Example
@@ -351,21 +351,21 @@ Show Child Attributes
 Show Child Attributes
 width
 integer
-min: 
+min:
 256
-max: 
+max:
 1440
-default: 
+default:
 1024
 Width of the generated image in pixels. Must be a multiple of 32.
 
 height
 integer
-min: 
+min:
 256
-max: 
+max:
 1440
-default: 
+default:
 768
 Height of the generated image in pixels. Must be a multiple of 32.
 
@@ -379,7 +379,7 @@ Show Child Attributes
 Show Child Attributes
 prompt_upsampling
 boolean
-default: 
+default:
 false
 Whether to perform upsampling on the prompt. If active, automatically modifies the prompt for more creative generation.
 
@@ -401,11 +401,11 @@ Show Child Attributes
 Show Child Attributes
 safety_tolerance
 integer
-min: 
+min:
 0
-max: 
+max:
 6
-default: 
+default:
 2
 Tolerance level for input and output moderation. Between 0 and 6, 0 being most strict, 6 being least strict.
 
@@ -433,20 +433,20 @@ Selected HTTP client:Shell Curl
 Curl
 Copy content
 curl https://api.bfl.ml/v1/flux-dev \
-  --request POST \
-  --header 'Content-Type: application/json' \
-  --header 'X-Key: YOUR_SECRET_TOKEN' \
-  --data '{
-  "prompt": "ein fantastisches bild",
-  "image_prompt": "",
-  "width": 1024,
-  "height": 768,
-  "steps": 28,
-  "prompt_upsampling": false,
-  "seed": 42,
-  "guidance": 3,
-  "safety_tolerance": 2,
-  "output_format": "jpeg"
+ --request POST \
+ --header 'Content-Type: application/json' \
+ --header 'X-Key: YOUR_SECRET_TOKEN' \
+ --data '{
+"prompt": "ein fantastisches bild",
+"image_prompt": "",
+"width": 1024,
+"height": 768,
+"steps": 28,
+"prompt_upsampling": false,
+"seed": 42,
+"guidance": 3,
+"safety_tolerance": 2,
+"output_format": "jpeg"
 }'
 
 Test Request
@@ -455,7 +455,7 @@ Test Request
 422
 Copy content
 {
-  "id": "…"
+"id": "…"
 }
 Successful Response
 
@@ -482,17 +482,17 @@ Show Child Attributes
 Show Child Attributes
 aspect_ratio
 string
-default: 
+default:
 16:9
 Aspect ratio of the image between 21:9 and 9:21
 
 safety_tolerance
 integer
-min: 
+min:
 0
-max: 
+max:
 6
-default: 
+default:
 2
 Tolerance level for input and output moderation. Between 0 and 6, 0 being most strict, 6 being least strict.
 
@@ -506,7 +506,7 @@ Show OutputFormat
 Show Child Attributes
 raw
 boolean
-default: 
+default:
 false
 Generate less processed, more natural-looking images
 
@@ -518,11 +518,11 @@ Show Child Attributes
 Show Child Attributes
 image_prompt_strength
 number
-min: 
+min:
 0
-max: 
+max:
 1
-default: 
+default:
 0.1
 Blend between the prompt and the image prompt
 
@@ -542,18 +542,18 @@ Selected HTTP client:Shell Curl
 Curl
 Copy content
 curl https://api.bfl.ml/v1/flux-pro-1.1-ultra \
-  --request POST \
-  --header 'Content-Type: application/json' \
-  --header 'X-Key: YOUR_SECRET_TOKEN' \
-  --data '{
-  "prompt": "A beautiful landscape with mountains and a lake",
-  "seed": 42,
-  "aspect_ratio": "16:9",
-  "safety_tolerance": 2,
-  "output_format": "jpeg",
-  "raw": false,
-  "image_prompt": "",
-  "image_prompt_strength": 0.1
+ --request POST \
+ --header 'Content-Type: application/json' \
+ --header 'X-Key: YOUR_SECRET_TOKEN' \
+ --data '{
+"prompt": "A beautiful landscape with mountains and a lake",
+"seed": 42,
+"aspect_ratio": "16:9",
+"safety_tolerance": 2,
+"output_format": "jpeg",
+"raw": false,
+"image_prompt": "",
+"image_prompt_strength": 0.1
 }'
 
 Test Request
@@ -621,11 +621,11 @@ Show OutputFormat
 Show Child Attributes
 safety_tolerance
 integer
-min: 
+min:
 0
-max: 
+max:
 6
-default: 
+default:
 2
 Tolerance level for input and output moderation. Between 0 and 6, 0 being most strict, 6 being least strict.
 
@@ -647,19 +647,19 @@ Selected HTTP client:Shell Curl
 Curl
 Copy content
 curl https://api.bfl.ml/v1/flux-pro-1.0-fill \
-  --request POST \
-  --header 'Content-Type: application/json' \
-  --header 'X-Key: YOUR_SECRET_TOKEN' \
-  --data '{
-  "image": "",
-  "mask": "",
-  "prompt": "ein fantastisches bild",
-  "steps": 50,
-  "prompt_upsampling": false,
-  "seed": 1,
-  "guidance": 60,
-  "output_format": "jpeg",
-  "safety_tolerance": 2
+ --request POST \
+ --header 'Content-Type: application/json' \
+ --header 'X-Key: YOUR_SECRET_TOKEN' \
+ --data '{
+"image": "",
+"mask": "",
+"prompt": "ein fantastisches bild",
+"steps": 50,
+"prompt_upsampling": false,
+"seed": 1,
+"guidance": 60,
+"output_format": "jpeg",
+"safety_tolerance": 2
 }'
 
 Test Request
@@ -668,7 +668,7 @@ Test Request
 422
 Copy content
 {
-  "id": "…"
+"id": "…"
 }
 Successful Response
 
@@ -723,11 +723,11 @@ Show Child Attributes
 Show Child Attributes
 safety_tolerance
 integer
-min: 
+min:
 0
-max: 
+max:
 6
-default: 
+default:
 2
 Tolerance level for input and output moderation. Between 0 and 6, 0 being most strict, 6 being least strict.
 
@@ -747,18 +747,18 @@ Selected HTTP client:Shell Curl
 Curl
 Copy content
 curl https://api.bfl.ml/v1/flux-pro-1.0-canny \
-  --request POST \
-  --header 'Content-Type: application/json' \
-  --header 'X-Key: YOUR_SECRET_TOKEN' \
-  --data '{
-  "prompt": "ein fantastisches bild",
-  "control_image": "",
-  "prompt_upsampling": false,
-  "seed": 42,
-  "steps": 50,
-  "output_format": "jpeg",
-  "guidance": 30,
-  "safety_tolerance": 2
+ --request POST \
+ --header 'Content-Type: application/json' \
+ --header 'X-Key: YOUR_SECRET_TOKEN' \
+ --data '{
+"prompt": "ein fantastisches bild",
+"control_image": "",
+"prompt_upsampling": false,
+"seed": 42,
+"steps": 50,
+"output_format": "jpeg",
+"guidance": 30,
+"safety_tolerance": 2
 }'
 
 Test Request
@@ -819,11 +819,11 @@ Show Child Attributes
 Show Child Attributes
 safety_tolerance
 integer
-min: 
+min:
 0
-max: 
+max:
 6
-default: 
+default:
 2
 Tolerance level for input and output moderation. Between 0 and 6, 0 being most strict, 6 being least strict.
 

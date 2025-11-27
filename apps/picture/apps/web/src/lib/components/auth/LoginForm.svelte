@@ -21,7 +21,7 @@
 
 		const { data, error: authError } = await supabase.auth.signInWithPassword({
 			email,
-			password
+			password,
 		});
 
 		loading = false;
@@ -41,8 +41,8 @@
 		const { error: authError } = await supabase.auth.signInWithOAuth({
 			provider: 'google',
 			options: {
-				redirectTo: `${window.location.origin}/app/gallery`
-			}
+				redirectTo: `${window.location.origin}/app/gallery`,
+			},
 		});
 
 		if (authError) {
@@ -64,7 +64,13 @@
 		</div>
 	{/if}
 
-	<form onsubmit={(e) => { e.preventDefault(); handleLogin(); }} class="space-y-4">
+	<form
+		onsubmit={(e) => {
+			e.preventDefault();
+			handleLogin();
+		}}
+		class="space-y-4"
+	>
 		<div>
 			<Input
 				type="email"
@@ -93,9 +99,7 @@
 			</a>
 		</div>
 
-		<Button type="submit" variant="primary" class="w-full" {loading}>
-			Sign in
-		</Button>
+		<Button type="submit" variant="primary" class="w-full" {loading}>Sign in</Button>
 	</form>
 
 	<div class="relative my-6">

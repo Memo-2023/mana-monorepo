@@ -19,7 +19,7 @@
 		yourManaLabel = 'Dein Mana',
 		availableLabel = 'verfügbar',
 		consumedLabel = 'verbraucht',
-		currentPlanLabel = 'Aktueller Plan'
+		currentPlanLabel = 'Aktueller Plan',
 	}: Props = $props();
 
 	// Use real credits (this would normally come from a store/API)
@@ -65,7 +65,8 @@
 				{availablePercentage}% {availableLabel}
 			</p>
 			<p class="text-sm font-medium text-theme-secondary">
-				{formattedUsedMana} {consumedLabel}
+				{formattedUsedMana}
+				{consumedLabel}
 			</p>
 		</div>
 

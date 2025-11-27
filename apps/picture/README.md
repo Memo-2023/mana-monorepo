@@ -55,12 +55,14 @@ pnpm dev:landing
 ### Mobile App (`apps/mobile`)
 
 **Tech Stack:**
+
 - React Native 0.81 + Expo SDK 54
 - Expo Router (File-based Routing)
 - NativeWind (Tailwind für React Native)
 - Zustand (State Management)
 
 **Features:**
+
 - ✅ Native iOS & Android Experience
 - ✅ Bildgenerierung mit AI Models
 - ✅ Gallery mit Infinite Scroll
@@ -69,6 +71,7 @@ pnpm dev:landing
 - ✅ Offline-fähig
 
 **Starten:**
+
 ```bash
 pnpm dev:mobile
 ```
@@ -76,11 +79,13 @@ pnpm dev:mobile
 ### Web App (`apps/web`)
 
 **Tech Stack:**
+
 - SvelteKit 2.x + Svelte 5
 - Tailwind CSS
 - Server-Side Rendering (SSR)
 
 **Features:**
+
 - ✅ Volle Web-Anwendung
 - ✅ Responsive Design
 - ✅ SEO-optimiert durch SSR
@@ -88,6 +93,7 @@ pnpm dev:mobile
 - ✅ Masonry Gallery Layout
 
 **Starten:**
+
 ```bash
 pnpm dev:web
 ```
@@ -95,17 +101,20 @@ pnpm dev:web
 ### Landing Page (`apps/landing`)
 
 **Tech Stack:**
+
 - Astro 5.x
 - Tailwind CSS
 - Static Site Generation
 
 **Features:**
+
 - ✅ Ultraschnell (0 JS by default)
 - ✅ SEO-optimiert
 - ✅ Marketing-optimiert
 - ✅ Statically Generated
 
 **Starten:**
+
 ```bash
 pnpm dev:landing
 ```
@@ -115,6 +124,7 @@ pnpm dev:landing
 ### `@picture/shared`
 
 Geteilte Business Logic zwischen allen Apps:
+
 - Supabase Types & API Clients
 - Image Utilities
 - Validation Logic
@@ -124,6 +134,7 @@ Geteilte Business Logic zwischen allen Apps:
 ### `@picture/memoro-ui`
 
 Shared UI Component Library mit CLI Tool:
+
 - Wiederverwendbare UI Components
 - Cross-platform (React Native & Web)
 - CLI für Component Management
@@ -166,6 +177,7 @@ pnpm clean            # Alle Build-Artefakte & node_modules löschen
 ## 🗄️ Datenbank
 
 Das Projekt verwendet **Supabase** für:
+
 - PostgreSQL Database
 - Authentication
 - Storage (für Bilder)
@@ -256,6 +268,7 @@ Landing:
 Dieses Problem tritt auf, wenn React Native Dependencies dupliziert sind (typisch bei PNPM Workspaces).
 
 **Fix:**
+
 ```bash
 # Alle node_modules und Lock-File löschen
 rm -rf node_modules apps/*/node_modules packages/*/node_modules pnpm-lock.yaml

@@ -16,6 +16,7 @@ The landing page has been successfully built with universal links support!
 ### Option 1: Netlify (Recommended for ease)
 
 1. **Deploy to Netlify:**
+
    ```bash
    # Install Netlify CLI if you haven't
    npm install -g netlify-cli
@@ -41,6 +42,7 @@ The `_redirects` file will automatically handle URL rewrites!
 ### Option 2: Vercel
 
 1. **Deploy to Vercel:**
+
    ```bash
    # Install Vercel CLI if you haven't
    npm install -g vercel
@@ -66,6 +68,7 @@ The `vercel.json` file will automatically handle URL rewrites!
    - Should serve the character.html page
 
 3. **For Nginx**, add this to your config:
+
    ```nginx
    location ~ ^/character/([^/]+)/([^/]+)/?$ {
        rewrite ^/character/([^/]+)/([^/]+)/?$ /character.html last;
@@ -134,12 +137,14 @@ After deployment, these URLs MUST work:
 ### Universal links not working?
 
 **iOS:**
+
 - Clear Safari cache
 - Reinstall the app
 - Wait a few minutes after deployment (Apple caches the association file)
 - Test with: `https://branch.io/resources/aasa-validator/`
 
 **Android:**
+
 - Check the SHA-256 fingerprint matches in `assetlinks.json`
 - Clear app data: Settings → Apps → Märchenzauber → Storage → Clear Data
 - May take 24-48 hours for Google to verify
@@ -169,6 +174,7 @@ After deployment, these URLs MUST work:
 ## Support
 
 If you encounter issues:
+
 1. Check the browser console for errors
 2. Verify network requests in DevTools
 3. Test the backend endpoint directly:

@@ -17,13 +17,13 @@ async function test() {
 
 		// Test 3: Get folders for user
 		const folders = await pb.collection('folders').getList(1, 50, {
-			filter: `user_id="${user.id}" && is_public=true`
+			filter: `user_id="${user.id}" && is_public=true`,
 		});
 		console.log('Public folders:', folders.items.length);
 
 		// Test 4: Get links for user
 		const links = await pb.collection('links').getList(1, 100, {
-			filter: `user_id="${user.id}" && is_active=true`
+			filter: `user_id="${user.id}" && is_active=true`,
 		});
 		console.log('Active links:', links.items.length);
 	} catch (err) {

@@ -14,6 +14,7 @@ Link-Tracking ist der Schlüssel zu datengetriebenem Marketing. In diesem umfass
 ## Was ist Link-Tracking?
 
 Link-Tracking ermöglicht es Ihnen, das Verhalten Ihrer Nutzer zu verstehen:
+
 - Woher kommen Ihre Besucher?
 - Welche Kampagnen funktionieren?
 - Wie hoch ist Ihre Conversion-Rate?
@@ -22,15 +23,19 @@ Link-Tracking ermöglicht es Ihnen, das Verhalten Ihrer Nutzer zu verstehen:
 ## Die wichtigsten Metriken
 
 ### 1. Click-Through-Rate (CTR)
+
 Die CTR zeigt, wie viele Personen Ihren Link gesehen und geklickt haben. Eine gute CTR liegt je nach Kanal zwischen 2-5%.
 
 ### 2. Conversion Rate
+
 Der Prozentsatz der Klicks, die zu einer gewünschten Aktion führen (Kauf, Anmeldung, Download).
 
 ### 3. Bounce Rate
+
 Wie viele Nutzer verlassen Ihre Seite sofort wieder? Eine hohe Bounce Rate deutet auf Probleme hin.
 
 ### 4. Geographic Distribution
+
 Verstehen Sie, aus welchen Ländern und Regionen Ihre Besucher kommen.
 
 ## UTM-Parameter richtig einsetzen
@@ -58,12 +63,14 @@ https://ulo.ad/angebot
 ### Was ist erlaubt?
 
 ✅ **Anonymisierte Daten**
+
 - Gerätetyp
 - Browser
 - Ungefährer Standort (Land/Stadt)
 - Referrer
 
 ✅ **Aggregierte Metriken**
+
 - Gesamtklicks
 - Durchschnittliche Verweildauer
 - Conversion-Raten
@@ -71,6 +78,7 @@ https://ulo.ad/angebot
 ### Was braucht Zustimmung?
 
 ❌ **Personenbezogene Daten**
+
 - Vollständige IP-Adressen
 - Device Fingerprinting
 - Cross-Site Tracking
@@ -81,6 +89,7 @@ https://ulo.ad/angebot
 ### 1. Konsistente Namenskonvention
 
 Entwickeln Sie ein einheitliches Schema:
+
 ```
 utm_source: [channel]
 utm_medium: [type]
@@ -101,6 +110,7 @@ Löschen Sie alte, inaktive Links und konsolidieren Sie ähnliche Kampagnen.
 ## A/B-Testing mit Links
 
 Testen Sie verschiedene Varianten:
+
 - Verschiedene Call-to-Actions
 - Unterschiedliche Landing Pages
 - Alternative Platzierungen
@@ -109,16 +119,19 @@ Testen Sie verschiedene Varianten:
 ## Tools und Integration
 
 ### Google Analytics 4
+
 - Automatisches UTM-Tracking
 - Conversion-Tracking
 - Audience-Segmentierung
 
 ### Marketing-Automation
+
 - HubSpot
 - Mailchimp
 - ActiveCampaign
 
 ### Social Media Tools
+
 - Buffer
 - Hootsuite
 - Sprout Social

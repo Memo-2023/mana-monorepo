@@ -6,7 +6,11 @@
 	import type { Memo } from '$lib/types/memo.types';
 
 	interface Props {
-		onOpenInSplit?: (memo: Memo, direction: 'vertical' | 'horizontal', audioUrl: string | null) => void;
+		onOpenInSplit?: (
+			memo: Memo,
+			direction: 'vertical' | 'horizontal',
+			audioUrl: string | null
+		) => void;
 	}
 
 	let { onOpenInSplit }: Props = $props();
@@ -37,7 +41,7 @@
 		{#if split.tabs.length > 1}
 			<div class="absolute top-6 left-8 right-8 z-10">
 				<TabBar
-					split={split}
+					{split}
 					onSplitVertical={() => {
 						if (activeTab?.memo && onOpenInSplit) {
 							onOpenInSplit(activeTab.memo, 'vertical', activeTab.audioUrl);
@@ -52,7 +56,12 @@
 			</div>
 		{/if}
 		<!-- Content -->
-		<div class="h-full w-full overflow-hidden rounded-t-xl border border-theme border-b-0 bg-content {split.tabs.length > 1 ? 'pt-10' : ''}">
+		<div
+			class="h-full w-full overflow-hidden rounded-t-xl border border-theme border-b-0 bg-content {split
+				.tabs.length > 1
+				? 'pt-10'
+				: ''}"
+		>
 			<MemoPanel memo={activeTab?.memo || null} audioUrl={activeTab?.audioUrl || null} />
 		</div>
 	</div>
@@ -68,7 +77,11 @@
 
 	<div class="flex h-full {isVertical ? 'flex-row' : 'flex-col'} gap-4 p-4">
 		<!-- Split 1 -->
-		<div class="flex {isVertical ? 'w-1/2' : 'h-1/2'} flex-col rounded-xl border border-theme bg-content overflow-hidden">
+		<div
+			class="flex {isVertical
+				? 'w-1/2'
+				: 'h-1/2'} flex-col rounded-xl border border-theme bg-content overflow-hidden"
+		>
 			<TabBar split={split1} onCloseSplit={() => handleCloseSplit(split1.id)} />
 			<div class="flex-1 overflow-hidden">
 				<MemoPanel memo={activeTab1?.memo || null} audioUrl={activeTab1?.audioUrl || null} />
@@ -76,7 +89,11 @@
 		</div>
 
 		<!-- Split 2 -->
-		<div class="flex {isVertical ? 'w-1/2' : 'h-1/2'} flex-col rounded-xl border border-theme bg-content overflow-hidden">
+		<div
+			class="flex {isVertical
+				? 'w-1/2'
+				: 'h-1/2'} flex-col rounded-xl border border-theme bg-content overflow-hidden"
+		>
 			<TabBar split={split2} onCloseSplit={() => handleCloseSplit(split2.id)} />
 			<div class="flex-1 overflow-hidden">
 				<MemoPanel memo={activeTab2?.memo || null} audioUrl={activeTab2?.audioUrl || null} />
@@ -91,7 +108,7 @@
 			{#each $tabs.splits.slice(0, 2) as split}
 				{@const activeTab = split.tabs.find((t) => t.id === split.activeTabId)}
 				<div class="flex flex-1 flex-col rounded-xl border border-theme bg-content overflow-hidden">
-					<TabBar split={split} onCloseSplit={() => handleCloseSplit(split.id)} />
+					<TabBar {split} onCloseSplit={() => handleCloseSplit(split.id)} />
 					<div class="flex-1 overflow-hidden">
 						<MemoPanel memo={activeTab?.memo || null} audioUrl={activeTab?.audioUrl || null} />
 					</div>
@@ -117,7 +134,7 @@
 		{#each $tabs.splits.slice(0, 4) as split}
 			{@const activeTab = split.tabs.find((t) => t.id === split.activeTabId)}
 			<div class="flex flex-col rounded-xl border border-theme bg-content overflow-hidden">
-				<TabBar split={split} onCloseSplit={() => handleCloseSplit(split.id)} />
+				<TabBar {split} onCloseSplit={() => handleCloseSplit(split.id)} />
 				<div class="flex-1 overflow-hidden">
 					<MemoPanel memo={activeTab?.memo || null} audioUrl={activeTab?.audioUrl || null} />
 				</div>

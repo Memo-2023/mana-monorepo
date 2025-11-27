@@ -13,7 +13,14 @@
 		averageWordCount: number;
 	}
 
-	let { memoCount, memoryCount, totalDuration, totalWords, currentStreak, averageWordCount }: Props = $props();
+	let {
+		memoCount,
+		memoryCount,
+		totalDuration,
+		totalWords,
+		currentStreak,
+		averageWordCount,
+	}: Props = $props();
 </script>
 
 <GlassCard>
@@ -35,11 +42,7 @@
 				<StatRow title="Wörter" value={totalWords.toLocaleString()} icon="text-outline" />
 			</div>
 			<div class="-space-y-px">
-				<StatRow
-					title="Aktuelle Serie"
-					value={`${currentStreak} Tage`}
-					icon="flame-outline"
-				/>
+				<StatRow title="Aktuelle Serie" value={`${currentStreak} Tage`} icon="flame-outline" />
 				<StatRow
 					title="Ø Wörter/Memo"
 					value={averageWordCount.toString()}

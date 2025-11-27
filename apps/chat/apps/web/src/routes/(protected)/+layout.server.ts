@@ -6,8 +6,8 @@
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ url }) => {
-  // Return the current path for client-side redirect logic
-  return {
-    pathname: url.pathname,
-  };
+	// Return the current path for client-side redirect logic
+	return {
+		pathname: url.pathname,
+	};
 };

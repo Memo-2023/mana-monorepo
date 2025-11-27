@@ -22,7 +22,7 @@ export const notify = {
 	error: (message: string, details?: string) => {
 		if (details) {
 			toast.error(message, {
-				description: details
+				description: details,
 			});
 		} else {
 			toast.error(message);
@@ -100,8 +100,8 @@ export const notify = {
 		toast(message, {
 			action: {
 				label: actionLabel,
-				onClick: onAction
-			}
+				onClick: onAction,
+			},
 		});
 	},
 
@@ -114,7 +114,7 @@ export const notify = {
 		} else {
 			toast.dismiss();
 		}
-	}
+	},
 };
 
 // Convenience exports for common messages
@@ -169,5 +169,5 @@ export const toastMessages = {
 	saving: () => notify.loading('Wird gespeichert...'),
 	loading: () => notify.loading('Wird geladen...'),
 	uploading: () => notify.loading('Wird hochgeladen...'),
-	processing: () => notify.loading('Wird verarbeitet...')
+	processing: () => notify.loading('Wird verarbeitet...'),
 };

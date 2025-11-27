@@ -1,23 +1,21 @@
 ---
-title: "Costruzione Collaborativa: Sviluppo Tecnologico Collettivo"
-description: "La nostra visione per una nuova era di sviluppo comunitario di tecnologie e soluzioni digitali."
+title: 'Costruzione Collaborativa: Sviluppo Tecnologico Collettivo'
+description: 'La nostra visione per una nuova era di sviluppo comunitario di tecnologie e soluzioni digitali.'
 pubDate: 2025-04-02
-category: "technology"
-timeline: "2025-2027"
-status: "current"
+category: 'technology'
+timeline: '2025-2027'
+status: 'current'
 featured: true
-image: "/images/vision/gemeinsam-bauen.png"
-contributors: ["Marcus Hoffman", "Judith Berg", "Till Schneider"]
-relatedLinks: [
-  {
-    title: "Modello di Sviluppo Open Source",
-    url: "https://opensource.org/osd"
-  },
-  {
-    title: "Reti di Innovazione Collaborativa",
-    url: "https://en.wikipedia.org/wiki/Collaborative_innovation_network"
-  }
-]
+image: '/images/vision/gemeinsam-bauen.png'
+contributors: ['Marcus Hoffman', 'Judith Berg', 'Till Schneider']
+relatedLinks:
+  [
+    { title: 'Modello di Sviluppo Open Source', url: 'https://opensource.org/osd' },
+    {
+      title: 'Reti di Innovazione Collaborativa',
+      url: 'https://en.wikipedia.org/wiki/Collaborative_innovation_network',
+    },
+  ]
 ---
 
 # Costruzione Collaborativa: Sviluppo Tecnologico Collettivo

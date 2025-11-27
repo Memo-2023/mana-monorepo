@@ -6,43 +6,42 @@ import { languages } from '../../../i18n/ui';
 export const prerender = true;
 
 export async function getStaticPaths() {
-  const missionsEntries = await Promise.all(
-    Object.keys(languages)
-      .map(async (lang) => {
-        const langMissions = await getCollection('missions', ({ id }) => {
-          return id.startsWith(`${lang}/`);
-        });
-        
-        return langMissions.map(mission => {
-          // Get just the filename part from the slug
-          const slugParts = mission.slug.split('/');
-          const fileName = slugParts[slugParts.length - 1];
-          
-          return {
-            params: { 
-              lang, 
-              slug: fileName 
-            },
-            props: { mission },
-          };
-        });
-      })
-  );
-  
-  // Flatten array of arrays
-  return missionsEntries.flat();
+	const missionsEntries = await Promise.all(
+		Object.keys(languages).map(async (lang) => {
+			const langMissions = await getCollection('missions', ({ id }) => {
+				return id.startsWith(`${lang}/`);
+			});
+
+			return langMissions.map((mission) => {
+				// Get just the filename part from the slug
+				const slugParts = mission.slug.split('/');
+				const fileName = slugParts[slugParts.length - 1];
+
+				return {
+					params: {
+						lang,
+						slug: fileName,
+					},
+					props: { mission },
+				};
+			});
+		})
+	);
+
+	// Flatten array of arrays
+	return missionsEntries.flat();
 }
 
 const { mission } = Astro.props;
 
 // Sicherheitsabfrage für Mission
 if (!mission) {
-  return Astro.redirect('/404');
+	return Astro.redirect('/404');
 }
 
 const { Content } = await mission.render();
 ---
 
 <MissionLayout mission={mission}>
-  <Content />
+	<Content />
 </MissionLayout>

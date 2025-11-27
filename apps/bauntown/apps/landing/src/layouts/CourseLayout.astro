@@ -5,8 +5,8 @@ import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
 
 interface Props {
-  tutorial: CollectionEntry<'tutorials'>;
-  courseName: string;
+	tutorial: CollectionEntry<'tutorials'>;
+	courseName: string;
 }
 
 const { tutorial, courseName } = Astro.props;
@@ -15,9 +15,9 @@ const lang = getLangFromUrl(Astro.url);
 
 // Format date based on language
 const formattedDate = new Intl.DateTimeFormat(lang === 'de' ? 'de-DE' : 'en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric'
+	year: 'numeric',
+	month: 'long',
+	day: 'numeric',
 }).format(data.pubDate);
 
 // Category translation
@@ -26,645 +26,664 @@ const categoryKey = `tutorials.categories.${data.category}` as const;
 
 // Get all tutorials that belong to this course
 const allTutorials = await getCollection('tutorials', ({ id, data }) => {
-  return id.startsWith(lang + '/') && data.course === courseName;
+	return id.startsWith(lang + '/') && data.course === courseName;
 });
 
 // Sort by lesson number
 const sortedCourseLessons = allTutorials.sort(
-  (a, b) => (a.data.lessonNumber || 0) - (b.data.lessonNumber || 0)
+	(a, b) => (a.data.lessonNumber || 0) - (b.data.lessonNumber || 0)
 );
 
 // Find current lesson index
-const currentLessonIndex = sortedCourseLessons.findIndex(lesson => 
-  lesson.slug === tutorial.slug
-);
+const currentLessonIndex = sortedCourseLessons.findIndex((lesson) => lesson.slug === tutorial.slug);
 
 // Get next and previous lessons
 const previousLesson = currentLessonIndex > 0 ? sortedCourseLessons[currentLessonIndex - 1] : null;
-const nextLesson = currentLessonIndex < sortedCourseLessons.length - 1 ? sortedCourseLessons[currentLessonIndex + 1] : null;
+const nextLesson =
+	currentLessonIndex < sortedCourseLessons.length - 1
+		? sortedCourseLessons[currentLessonIndex + 1]
+		: null;
 
 // Generate lesson URLs
 function getLessonUrl(lesson: CollectionEntry<'tutorials'>) {
-  const slugParts = lesson.slug.split('/');
-  const fileName = slugParts[slugParts.length - 1];
-  
-  return lang === 'de' 
-    ? `/tutorials/${fileName}`
-    : `/${lang}/tutorials/${fileName}`;
+	const slugParts = lesson.slug.split('/');
+	const fileName = slugParts[slugParts.length - 1];
+
+	return lang === 'de' ? `/tutorials/${fileName}` : `/${lang}/tutorials/${fileName}`;
 }
 ---
 
 <Layout title={data.title} description={data.description}>
-  <div class="tutorial-container">
-    <button id="sidebar-toggle" aria-label="Kursinhalt anzeigen">
-      <span class="toggle-icon"></span>
-    </button>
-    
-    <aside class="course-sidebar">
-      <div class="sidebar-header">
-        <h3>Kursinhalt</h3>
-        <button id="sidebar-close" aria-label="Kursinhalt ausblenden">
-          <span class="close-icon">×</span>
-        </button>
-      </div>
-      <nav class="course-nav">
-        <ol>
-          {sortedCourseLessons.map(lesson => (
-            <li class={lesson.slug === tutorial.slug ? 'active' : ''}>
-              <a href={getLessonUrl(lesson)}>
-                <span class="lesson-number">{lesson.data.lessonNumber}</span>
-                <span class="lesson-title">{lesson.data.title}</span>
-              </a>
-            </li>
-          ))}
-        </ol>
-      </nav>
-    </aside>
-    
-    <div class="main-content">
-      <div class="tutorial-header">
-        <div class="course-info">
-          <div class="course-name">{data.courseName || courseName}</div>
-          <div class="lesson-number">Lektion {data.lessonNumber} von {sortedCourseLessons.length}</div>
-        </div>
-        
-        <h1>{data.title}</h1>
-        <p class="description">{data.description}</p>
-        
-        {data.image && <img src={data.image} alt={data.title} class="featured-image" />}
-      </div>
-      
-      <article class="tutorial-content">
-        <slot />
-        
-        <div class="lesson-navigation">
-          {previousLesson && (
-            <a href={getLessonUrl(previousLesson)} class="prev-link">
-              <span class="nav-label">← Vorherige Lektion</span>
-              <span class="nav-title">{previousLesson.data.title}</span>
-            </a>
-          )}
-          
-          {nextLesson && (
-            <a href={getLessonUrl(nextLesson)} class="next-link">
-              <span class="nav-label">Nächste Lektion →</span>
-              <span class="nav-title">{nextLesson.data.title}</span>
-            </a>
-          )}
-        </div>
-        
-        <div class="tutorial-meta">
-          <span class="category">{t(categoryKey)}</span>
-          <span class="author">{data.author}</span>
-          <time datetime={data.pubDate.toISOString()}>{formattedDate}</time>
-        </div>
-      </article>
-    </div>
-  </div>
+	<div class="tutorial-container">
+		<button id="sidebar-toggle" aria-label="Kursinhalt anzeigen">
+			<span class="toggle-icon"></span>
+		</button>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const toggleButton = document.getElementById('sidebar-toggle');
-      const closeButton = document.getElementById('sidebar-close');
-      const container = document.querySelector('.tutorial-container');
-      const sidebar = document.querySelector('.course-sidebar');
-      const body = document.body;
-      
-      // Check for stored preference
-      const sidebarHidden = localStorage.getItem('sidebarHidden') === 'true';
-      if (sidebarHidden) {
-        container.classList.add('sidebar-hidden');
-      } else {
-        container.classList.remove('sidebar-hidden');
-      }
-      
-      // Function to show sidebar
-      function showSidebar() {
-        container.classList.remove('sidebar-hidden');
-        localStorage.setItem('sidebarHidden', 'false');
-        // Ensure sidebar is above everything when open
-        sidebar.style.zIndex = "100";
-      }
-      
-      // Function to hide sidebar
-      function hideSidebar() {
-        container.classList.add('sidebar-hidden');
-        localStorage.setItem('sidebarHidden', 'true');
-      }
-      
-      // Function to ensure content stays centered when sidebar opens/closes
-      function ensureCentering() {
-        document.querySelectorAll('.tutorial-content, .tutorial-header, .lesson-navigation').forEach(el => {
-          el.style.transition = 'none';
-        });
-      }
-      
-      // Initial check to make sure layout is correct
-      ensureCentering();
-      
-      // Toggle button event (show sidebar)
-      toggleButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        showSidebar();
-      });
-      
-      // Close button event (hide sidebar)
-      closeButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        hideSidebar();
-      });
-      
-      // Close sidebar when clicking outside of it (for mobile)
-      document.addEventListener('click', function(e) {
-        // Only do this on mobile
-        if (window.innerWidth <= 1024) {
-          if (!sidebar.contains(e.target) && 
-              !toggleButton.contains(e.target) && 
-              !container.classList.contains('sidebar-hidden')) {
-            hideSidebar();
-          }
-        }
-      });
-    });
-  </script>
+		<aside class="course-sidebar">
+			<div class="sidebar-header">
+				<h3>Kursinhalt</h3>
+				<button id="sidebar-close" aria-label="Kursinhalt ausblenden">
+					<span class="close-icon">×</span>
+				</button>
+			</div>
+			<nav class="course-nav">
+				<ol>
+					{
+						sortedCourseLessons.map((lesson) => (
+							<li class={lesson.slug === tutorial.slug ? 'active' : ''}>
+								<a href={getLessonUrl(lesson)}>
+									<span class="lesson-number">{lesson.data.lessonNumber}</span>
+									<span class="lesson-title">{lesson.data.title}</span>
+								</a>
+							</li>
+						))
+					}
+				</ol>
+			</nav>
+		</aside>
+
+		<div class="main-content">
+			<div class="tutorial-header">
+				<div class="course-info">
+					<div class="course-name">{data.courseName || courseName}</div>
+					<div class="lesson-number">
+						Lektion {data.lessonNumber} von {sortedCourseLessons.length}
+					</div>
+				</div>
+
+				<h1>{data.title}</h1>
+				<p class="description">{data.description}</p>
+
+				{data.image && <img src={data.image} alt={data.title} class="featured-image" />}
+			</div>
+
+			<article class="tutorial-content">
+				<slot />
+
+				<div class="lesson-navigation">
+					{
+						previousLesson && (
+							<a href={getLessonUrl(previousLesson)} class="prev-link">
+								<span class="nav-label">← Vorherige Lektion</span>
+								<span class="nav-title">{previousLesson.data.title}</span>
+							</a>
+						)
+					}
+
+					{
+						nextLesson && (
+							<a href={getLessonUrl(nextLesson)} class="next-link">
+								<span class="nav-label">Nächste Lektion →</span>
+								<span class="nav-title">{nextLesson.data.title}</span>
+							</a>
+						)
+					}
+				</div>
+
+				<div class="tutorial-meta">
+					<span class="category">{t(categoryKey)}</span>
+					<span class="author">{data.author}</span>
+					<time datetime={data.pubDate.toISOString()}>{formattedDate}</time>
+				</div>
+			</article>
+		</div>
+	</div>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const toggleButton = document.getElementById('sidebar-toggle');
+			const closeButton = document.getElementById('sidebar-close');
+			const container = document.querySelector('.tutorial-container');
+			const sidebar = document.querySelector('.course-sidebar');
+			const body = document.body;
+
+			// Check for stored preference
+			const sidebarHidden = localStorage.getItem('sidebarHidden') === 'true';
+			if (sidebarHidden) {
+				container.classList.add('sidebar-hidden');
+			} else {
+				container.classList.remove('sidebar-hidden');
+			}
+
+			// Function to show sidebar
+			function showSidebar() {
+				container.classList.remove('sidebar-hidden');
+				localStorage.setItem('sidebarHidden', 'false');
+				// Ensure sidebar is above everything when open
+				sidebar.style.zIndex = '100';
+			}
+
+			// Function to hide sidebar
+			function hideSidebar() {
+				container.classList.add('sidebar-hidden');
+				localStorage.setItem('sidebarHidden', 'true');
+			}
+
+			// Function to ensure content stays centered when sidebar opens/closes
+			function ensureCentering() {
+				document
+					.querySelectorAll('.tutorial-content, .tutorial-header, .lesson-navigation')
+					.forEach((el) => {
+						el.style.transition = 'none';
+					});
+			}
+
+			// Initial check to make sure layout is correct
+			ensureCentering();
+
+			// Toggle button event (show sidebar)
+			toggleButton.addEventListener('click', (e) => {
+				e.preventDefault();
+				showSidebar();
+			});
+
+			// Close button event (hide sidebar)
+			closeButton.addEventListener('click', (e) => {
+				e.preventDefault();
+				hideSidebar();
+			});
+
+			// Close sidebar when clicking outside of it (for mobile)
+			document.addEventListener('click', function (e) {
+				// Only do this on mobile
+				if (window.innerWidth <= 1024) {
+					if (
+						!sidebar.contains(e.target) &&
+						!toggleButton.contains(e.target) &&
+						!container.classList.contains('sidebar-hidden')
+					) {
+						hideSidebar();
+					}
+				}
+			});
+		});
+	</script>
 </Layout>
 
 <style>
-  .tutorial-header {
-    margin-top: 80px; /* Abstand zur Navigation */
-    margin-bottom: 3rem;
-    padding-bottom: 1rem;
-    text-align: left;
-    max-width: 680px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .meta-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2.5rem;
-    width: 100%;
-  }
-  
-  .course-info {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-  }
-  
-  .course-name {
-    font-weight: 600;
-    font-size: 0.875rem;
-    color: var(--text-muted);
-  }
-  
-  .lesson-number {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-  }
-  
-  .tutorial-meta {
-    display: flex;
-    gap: 1.5rem;
-    font-size: 0.875rem;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    text-align: left;
-    margin-top: 4rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-  }
-  
-  .category {
-    color: var(--text-muted);
-    font-weight: 600;
-  }
-  
-  time {
-    color: var(--text-muted);
-    margin-left: auto;
-  }
-  
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
-    margin-top: 1.5rem;
-    text-align: left;
-  }
-  
-  .description {
-    font-size: 1.25rem;
-    color: var(--text-muted);
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-  }
-  
-  .author {
-    color: var(--text-muted);
-  }
-  
-  .featured-image {
-    width: 100%;
-    max-height: 500px;
-    object-fit: cover;
-    border-radius: 0.75rem;
-    margin-bottom: 3rem;
-  }
-  
-  .tutorial-container {
-    display: block;
-    position: relative;
-    transition: all 0.3s ease;
-  }
-  
-  .sidebar-hidden {
-    grid-template-columns: 0 1fr;
-  }
-  
-  .main-content {
-    width: 100%;
-    transition: width 0.3s ease;
-    position: relative;
-    margin-left: 0;
-  }
-  
-  .sidebar-hidden .course-sidebar {
-    transform: translateX(-280px);
-    width: 0;
-    overflow: hidden;
-    padding: 0;
-    margin: 0;
-    opacity: 0;
-  }
-  
-  .sidebar-hidden #sidebar-toggle {
-    left: 0;
-  }
-  
-  .course-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    align-self: start;
-    background-color: var(--card-bg);
-    padding: 1.5rem;
-    border-right: 1px solid var(--border-color);
-    height: 100vh;
-    width: 280px;
-    overflow-y: auto;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    z-index: 100;
-    margin-top: 60px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
-  }
-  
-  .sidebar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-  }
-  
-  #sidebar-close {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-    transition: color 0.2s;
-  }
-  
-  #sidebar-close:hover {
-    color: var(--accent-color);
-  }
-  
-  .close-icon {
-    display: block;
-    font-weight: bold;
-  }
-  
-  #sidebar-toggle {
-    position: fixed;
-    left: 20px;
-    top: 80px;
-    z-index: 50;
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    opacity: 1;
-    transform: translateX(0);
-  }
-  
-  .tutorial-container:not(.sidebar-hidden) #sidebar-toggle {
-    opacity: 0;
-    transform: translateX(-60px);
-    pointer-events: none;
-  }
-  
-  .toggle-icon {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 18px;
-    margin: 0 auto;
-  }
-  
-  .toggle-icon::before,
-  .toggle-icon::after {
-    content: '';
-    display: block;
-    width: 20px;
-    height: 2px;
-    background-color: white;
-  }
-  
-  .toggle-icon::before {
-    margin-bottom: 7px;
-  }
-  
-  .toggle-icon::after {
-    margin-top: 7px;
-  }
-  
-  .toggle-icon span {
-    display: block;
-    width: 20px;
-    height: 2px;
-    background-color: white;
-  }
-  
-  .toggle-icon::before span,
-  .toggle-icon::after span {
-    content: '';
-    display: inline-block;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background-color: white;
-    margin: 0 2px;
-  }
-  
-  .main-content {
-    padding: 0 20px;
-    margin-top: 0;
-    display: block;
-  }
-  
-  .course-sidebar h3 {
-    margin-top: 0;
-    margin-bottom: 1rem;
-    font-size: 1.25rem;
-  }
-  
-  .course-nav ol {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    position: relative;
-  }
-  
-  .course-nav li {
-    margin-bottom: 0.5rem;
-  }
-  
-  .course-nav li a {
-    display: flex;
-    padding: 0.75rem;
-    text-decoration: none;
-    color: var(--text-color);
-    border-radius: 0.5rem;
-    transition: background-color 0.2s;
-  }
-  
-  .course-nav li a:hover {
-    background-color: var(--hover-bg);
-  }
-  
-  .course-nav li.active a {
-    background-color: var(--accent-color);
-    color: white;
-  }
-  
-  .lesson-number {
-    display: inline-block;
-    margin-right: 0.5rem;
-    font-weight: bold;
-    min-width: 24px;
-  }
-  
-  .lesson-title {
-    font-size: 0.95rem;
-  }
-  
-  .tutorial-content {
-    line-height: 1.8;
-    font-size: 1.125rem;
-    max-width: 680px;
-    margin: 0 auto;
-    text-align: left;
-  }
-  
-  .tutorial-content :global(h2) {
-    font-size: 1.75rem;
-    margin: 2.5rem 0 1rem 0;
-  }
-  
-  .tutorial-content :global(h3) {
-    font-size: 1.5rem;
-    margin: 2rem 0 1rem 0;
-  }
-  
-  .tutorial-content :global(p) {
-    margin: 1.5rem 0;
-  }
-  
-  .tutorial-content :global(ul), 
-  .tutorial-content :global(ol) {
-    padding-left: 1.5rem;
-    margin: 1.5rem 0;
-  }
-  
-  .tutorial-content :global(li) {
-    margin-bottom: 0.5rem;
-  }
-  
-  .tutorial-content :global(blockquote) {
-    border-left: 4px solid var(--accent-color);
-    padding-left: 1rem;
-    margin-left: 0;
-    font-style: italic;
-    color: var(--text-muted);
-  }
-  
-  .tutorial-content :global(pre),
-  .tutorial-content :global(code) {
-    display: block;
-  }
-  
-  .lesson-navigation {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border-color);
-    text-align: left;
-    max-width: 680px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .prev-link, .next-link {
-    display: flex;
-    flex-direction: column;
-    text-decoration: none;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    transition: transform 0.2s, border-color 0.2s;
-    max-width: 45%;
-  }
-  
-  .prev-link:hover, .next-link:hover {
-    transform: translateY(-2px);
-    border-color: var(--accent-color);
-  }
-  
-  .next-link {
-    text-align: right;
-    margin-left: auto;
-  }
-  
-  .nav-label {
-    color: var(--accent-color);
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-  }
-  
-  .nav-title {
-    color: var(--text-color);
-    font-weight: 500;
-  }
-  
-  @media (max-width: 1024px) {
-  .tutorial-header {
-    margin-top: 56px;
-  }
-    .tutorial-meta {
-      flex-direction: column;
-      gap: 0.5rem;
-      align-items: flex-start;
-    }
-    
-    time {
-      margin-left: 0;
-    }
-    
-    .course-sidebar {
-      transform: translateX(-280px);
-      z-index: 100;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    }
-    
-    .tutorial-container:not(.sidebar-hidden) .course-sidebar {
-      transform: translateX(0);
-    }
-    
-    #sidebar-toggle {
-      left: 20px;
-      top: 70px;
-      border-radius: 4px;
-      width: 40px;
-      height: 40px;
-    }
-    
-    .tutorial-container:not(.sidebar-hidden) #sidebar-toggle {
-      opacity: 0;
-      transform: translateX(-60px);
-    }
-    
-    .author {
-      margin-bottom: 2rem;
-    }
-    
-    .featured-image {
-      margin-bottom: 2rem;
-    }
-    
-    .tutorial-header {
-      margin-bottom: 2rem;
-      padding-bottom: 0;
-    }
-    
-    .tutorial-content,
-    .tutorial-header,
-    .lesson-navigation {
-      max-width: 100%;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    
-    .main-content {
-      padding: 0 15px;
-    }
-  }
-  
-  @media (min-width: 1025px) {
-    .tutorial-header {
-      padding-left: 2rem;
-      padding-right: 2rem;
-    }
-    
-    h1 {
-      font-size: 2.8rem;
-    }
-    
-    .main-content {
-      padding: 0 30px;
-    }
-    
-    .tutorial-content,
-    .tutorial-header,
-    .lesson-navigation {
-      max-width: 680px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    
-    /* Keep content with consistent alignment */
-    .tutorial-content:not(.sidebar-hidden) {
-      text-align: left;
-    }
-  }
-  
-  @media (min-width: 1400px) {
-    .tutorial-content,
-    .tutorial-header,
-    .lesson-navigation {
-      max-width: 680px;
-    }
-  }
-  
-  /* Add specific alignment control classes */
-  .desktop-center {
-    text-align: center;
-  }
-  
-  .text-left {
-    text-align: left !important;
-  }
+	.tutorial-header {
+		margin-top: 80px; /* Abstand zur Navigation */
+		margin-bottom: 3rem;
+		padding-bottom: 1rem;
+		text-align: left;
+		max-width: 680px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.meta-wrapper {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 2.5rem;
+		width: 100%;
+	}
+
+	.course-info {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
+	}
+
+	.course-name {
+		font-weight: 600;
+		font-size: 0.875rem;
+		color: var(--text-muted);
+	}
+
+	.lesson-number {
+		font-size: 0.875rem;
+		color: var(--text-muted);
+	}
+
+	.tutorial-meta {
+		display: flex;
+		gap: 1.5rem;
+		font-size: 0.875rem;
+		flex-wrap: nowrap;
+		justify-content: flex-end;
+		text-align: left;
+		margin-top: 4rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--border-color);
+	}
+
+	.category {
+		color: var(--text-muted);
+		font-weight: 600;
+	}
+
+	time {
+		color: var(--text-muted);
+		margin-left: auto;
+	}
+
+	h1 {
+		font-size: 2.5rem;
+		margin-bottom: 1.5rem;
+		margin-top: 1.5rem;
+		text-align: left;
+	}
+
+	.description {
+		font-size: 1.25rem;
+		color: var(--text-muted);
+		margin-bottom: 1.5rem;
+		line-height: 1.6;
+	}
+
+	.author {
+		color: var(--text-muted);
+	}
+
+	.featured-image {
+		width: 100%;
+		max-height: 500px;
+		object-fit: cover;
+		border-radius: 0.75rem;
+		margin-bottom: 3rem;
+	}
+
+	.tutorial-container {
+		display: block;
+		position: relative;
+		transition: all 0.3s ease;
+	}
+
+	.sidebar-hidden {
+		grid-template-columns: 0 1fr;
+	}
+
+	.main-content {
+		width: 100%;
+		transition: width 0.3s ease;
+		position: relative;
+		margin-left: 0;
+	}
+
+	.sidebar-hidden .course-sidebar {
+		transform: translateX(-280px);
+		width: 0;
+		overflow: hidden;
+		padding: 0;
+		margin: 0;
+		opacity: 0;
+	}
+
+	.sidebar-hidden #sidebar-toggle {
+		left: 0;
+	}
+
+	.course-sidebar {
+		position: fixed;
+		top: 0;
+		left: 0;
+		align-self: start;
+		background-color: var(--card-bg);
+		padding: 1.5rem;
+		border-right: 1px solid var(--border-color);
+		height: 100vh;
+		width: 280px;
+		overflow-y: auto;
+		transition:
+			transform 0.3s ease,
+			opacity 0.3s ease;
+		z-index: 100;
+		margin-top: 60px;
+		box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+	}
+
+	.sidebar-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1.5rem;
+	}
+
+	#sidebar-close {
+		background: none;
+		border: none;
+		color: var(--text-muted);
+		font-size: 1.5rem;
+		cursor: pointer;
+		padding: 0;
+		line-height: 1;
+		transition: color 0.2s;
+	}
+
+	#sidebar-close:hover {
+		color: var(--accent-color);
+	}
+
+	.close-icon {
+		display: block;
+		font-weight: bold;
+	}
+
+	#sidebar-toggle {
+		position: fixed;
+		left: 20px;
+		top: 80px;
+		z-index: 50;
+		background-color: var(--accent-color);
+		color: white;
+		border: none;
+		border-radius: 4px;
+		width: 40px;
+		height: 40px;
+		cursor: pointer;
+		transition:
+			opacity 0.3s ease,
+			transform 0.3s ease;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	.tutorial-container:not(.sidebar-hidden) #sidebar-toggle {
+		opacity: 0;
+		transform: translateX(-60px);
+		pointer-events: none;
+	}
+
+	.toggle-icon {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 20px;
+		height: 18px;
+		margin: 0 auto;
+	}
+
+	.toggle-icon::before,
+	.toggle-icon::after {
+		content: '';
+		display: block;
+		width: 20px;
+		height: 2px;
+		background-color: white;
+	}
+
+	.toggle-icon::before {
+		margin-bottom: 7px;
+	}
+
+	.toggle-icon::after {
+		margin-top: 7px;
+	}
+
+	.toggle-icon span {
+		display: block;
+		width: 20px;
+		height: 2px;
+		background-color: white;
+	}
+
+	.toggle-icon::before span,
+	.toggle-icon::after span {
+		content: '';
+		display: inline-block;
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background-color: white;
+		margin: 0 2px;
+	}
+
+	.main-content {
+		padding: 0 20px;
+		margin-top: 0;
+		display: block;
+	}
+
+	.course-sidebar h3 {
+		margin-top: 0;
+		margin-bottom: 1rem;
+		font-size: 1.25rem;
+	}
+
+	.course-nav ol {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		position: relative;
+	}
+
+	.course-nav li {
+		margin-bottom: 0.5rem;
+	}
+
+	.course-nav li a {
+		display: flex;
+		padding: 0.75rem;
+		text-decoration: none;
+		color: var(--text-color);
+		border-radius: 0.5rem;
+		transition: background-color 0.2s;
+	}
+
+	.course-nav li a:hover {
+		background-color: var(--hover-bg);
+	}
+
+	.course-nav li.active a {
+		background-color: var(--accent-color);
+		color: white;
+	}
+
+	.lesson-number {
+		display: inline-block;
+		margin-right: 0.5rem;
+		font-weight: bold;
+		min-width: 24px;
+	}
+
+	.lesson-title {
+		font-size: 0.95rem;
+	}
+
+	.tutorial-content {
+		line-height: 1.8;
+		font-size: 1.125rem;
+		max-width: 680px;
+		margin: 0 auto;
+		text-align: left;
+	}
+
+	.tutorial-content :global(h2) {
+		font-size: 1.75rem;
+		margin: 2.5rem 0 1rem 0;
+	}
+
+	.tutorial-content :global(h3) {
+		font-size: 1.5rem;
+		margin: 2rem 0 1rem 0;
+	}
+
+	.tutorial-content :global(p) {
+		margin: 1.5rem 0;
+	}
+
+	.tutorial-content :global(ul),
+	.tutorial-content :global(ol) {
+		padding-left: 1.5rem;
+		margin: 1.5rem 0;
+	}
+
+	.tutorial-content :global(li) {
+		margin-bottom: 0.5rem;
+	}
+
+	.tutorial-content :global(blockquote) {
+		border-left: 4px solid var(--accent-color);
+		padding-left: 1rem;
+		margin-left: 0;
+		font-style: italic;
+		color: var(--text-muted);
+	}
+
+	.tutorial-content :global(pre),
+	.tutorial-content :global(code) {
+		display: block;
+	}
+
+	.lesson-navigation {
+		display: flex;
+		justify-content: space-between;
+		margin-top: 3rem;
+		padding-top: 2rem;
+		border-top: 1px solid var(--border-color);
+		text-align: left;
+		max-width: 680px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.prev-link,
+	.next-link {
+		display: flex;
+		flex-direction: column;
+		text-decoration: none;
+		padding: 1rem;
+		border-radius: 0.5rem;
+		background-color: var(--card-bg);
+		border: 1px solid var(--border-color);
+		transition:
+			transform 0.2s,
+			border-color 0.2s;
+		max-width: 45%;
+	}
+
+	.prev-link:hover,
+	.next-link:hover {
+		transform: translateY(-2px);
+		border-color: var(--accent-color);
+	}
+
+	.next-link {
+		text-align: right;
+		margin-left: auto;
+	}
+
+	.nav-label {
+		color: var(--accent-color);
+		font-size: 0.875rem;
+		font-weight: 600;
+		margin-bottom: 0.25rem;
+	}
+
+	.nav-title {
+		color: var(--text-color);
+		font-weight: 500;
+	}
+
+	@media (max-width: 1024px) {
+		.tutorial-header {
+			margin-top: 56px;
+		}
+		.tutorial-meta {
+			flex-direction: column;
+			gap: 0.5rem;
+			align-items: flex-start;
+		}
+
+		time {
+			margin-left: 0;
+		}
+
+		.course-sidebar {
+			transform: translateX(-280px);
+			z-index: 100;
+			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+		}
+
+		.tutorial-container:not(.sidebar-hidden) .course-sidebar {
+			transform: translateX(0);
+		}
+
+		#sidebar-toggle {
+			left: 20px;
+			top: 70px;
+			border-radius: 4px;
+			width: 40px;
+			height: 40px;
+		}
+
+		.tutorial-container:not(.sidebar-hidden) #sidebar-toggle {
+			opacity: 0;
+			transform: translateX(-60px);
+		}
+
+		.author {
+			margin-bottom: 2rem;
+		}
+
+		.featured-image {
+			margin-bottom: 2rem;
+		}
+
+		.tutorial-header {
+			margin-bottom: 2rem;
+			padding-bottom: 0;
+		}
+
+		.tutorial-content,
+		.tutorial-header,
+		.lesson-navigation {
+			max-width: 100%;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		.main-content {
+			padding: 0 15px;
+		}
+	}
+
+	@media (min-width: 1025px) {
+		.tutorial-header {
+			padding-left: 2rem;
+			padding-right: 2rem;
+		}
+
+		h1 {
+			font-size: 2.8rem;
+		}
+
+		.main-content {
+			padding: 0 30px;
+		}
+
+		.tutorial-content,
+		.tutorial-header,
+		.lesson-navigation {
+			max-width: 680px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		/* Keep content with consistent alignment */
+		.tutorial-content:not(.sidebar-hidden) {
+			text-align: left;
+		}
+	}
+
+	@media (min-width: 1400px) {
+		.tutorial-content,
+		.tutorial-header,
+		.lesson-navigation {
+			max-width: 680px;
+		}
+	}
+
+	/* Add specific alignment control classes */
+	.desktop-center {
+		text-align: center;
+	}
+
+	.text-left {
+		text-align: left !important;
+	}
 </style>

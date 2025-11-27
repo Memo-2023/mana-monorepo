@@ -83,27 +83,27 @@ npm run test:auth network-errors --watch
 
 ### Available Test Suites
 
-| Suite | Command | Description |
-|-------|---------|-------------|
-| `sign-in` | `npm run test:auth sign-in` | Authentication sign-in process |
-| `token-refresh` | `npm run test:auth token-refresh` | Token refresh system |
-| `network-errors` | `npm run test:auth network-errors` | Network error handling |
-| `state-management` | `npm run test:auth state-management` | State transitions and management |
-| `supabase-integration` | `npm run test:auth supabase-integration` | Supabase integration |
-| `all` | `npm run test:auth` | All authentication tests |
+| Suite                  | Command                                  | Description                      |
+| ---------------------- | ---------------------------------------- | -------------------------------- |
+| `sign-in`              | `npm run test:auth sign-in`              | Authentication sign-in process   |
+| `token-refresh`        | `npm run test:auth token-refresh`        | Token refresh system             |
+| `network-errors`       | `npm run test:auth network-errors`       | Network error handling           |
+| `state-management`     | `npm run test:auth state-management`     | State transitions and management |
+| `supabase-integration` | `npm run test:auth supabase-integration` | Supabase integration             |
+| `all`                  | `npm run test:auth`                      | All authentication tests         |
 
 ### Command Line Options
 
-| Option | Description | Example |
-|--------|-------------|---------|
-| `-h, --help` | Show help information | `npm run test:auth --help` |
-| `-w, --watch` | Watch mode for development | `npm run test:auth sign-in --watch` |
-| `-v, --verbose` | Verbose output | `npm run test:auth --verbose` |
-| `-c, --coverage` | Generate coverage report | `npm run test:auth --coverage` |
-| `-d, --debug` | Enable debug mode | `npm run test:auth --debug` |
-| `-s, --silent` | Suppress console output | `npm run test:auth --silent` |
-| `--max-workers N` | Set worker processes | `npm run test:auth --max-workers 4` |
-| `--timeout N` | Set test timeout (ms) | `npm run test:auth --timeout 10000` |
+| Option            | Description                | Example                             |
+| ----------------- | -------------------------- | ----------------------------------- |
+| `-h, --help`      | Show help information      | `npm run test:auth --help`          |
+| `-w, --watch`     | Watch mode for development | `npm run test:auth sign-in --watch` |
+| `-v, --verbose`   | Verbose output             | `npm run test:auth --verbose`       |
+| `-c, --coverage`  | Generate coverage report   | `npm run test:auth --coverage`      |
+| `-d, --debug`     | Enable debug mode          | `npm run test:auth --debug`         |
+| `-s, --silent`    | Suppress console output    | `npm run test:auth --silent`        |
+| `--max-workers N` | Set worker processes       | `npm run test:auth --max-workers 4` |
+| `--timeout N`     | Set test timeout (ms)      | `npm run test:auth --timeout 10000` |
 
 ### Examples
 
@@ -128,6 +128,7 @@ npm run test:auth sign-in --max-workers 1 --timeout 5000
 **Location**: `src/__tests__/auth/signInFlow.test.ts`
 
 Tests cover:
+
 - ✅ Successful sign-in with valid credentials
 - ❌ Failed sign-in with invalid credentials
 - 📧 Email verification required scenarios
@@ -138,19 +139,20 @@ Tests cover:
 - ⚡ Concurrent sign-in attempts
 
 **Key Test Cases**:
+
 ```javascript
 // Successful authentication
-it('should sign in successfully with valid credentials')
+it('should sign in successfully with valid credentials');
 
 // Error handling
-it('should handle invalid credentials')
-it('should handle email not verified error')
+it('should handle invalid credentials');
+it('should handle email not verified error');
 
 // Network conditions
-it('should handle network errors during sign in')
+it('should handle network errors during sign in');
 
 // Edge cases
-it('should handle concurrent sign in attempts')
+it('should handle concurrent sign in attempts');
 ```
 
 ### Token Refresh Flow Tests
@@ -158,6 +160,7 @@ it('should handle concurrent sign in attempts')
 **Location**: `src/__tests__/auth/tokenRefreshFlow.test.ts`
 
 Tests cover:
+
 - 🔄 Automatic token refresh on 401 responses
 - 🚦 Request queuing during refresh
 - ⏱️ Refresh token expiration handling
@@ -167,19 +170,20 @@ Tests cover:
 - 📊 Queue management and timeouts
 
 **Key Test Cases**:
+
 ```javascript
 // Automatic refresh
-it('should refresh token automatically on 401 response')
+it('should refresh token automatically on 401 response');
 
 // Concurrent handling
-it('should queue concurrent requests during token refresh')
+it('should queue concurrent requests during token refresh');
 
 // Error scenarios
-it('should handle refresh token expiration')
-it('should detect device ID changes')
+it('should handle refresh token expiration');
+it('should detect device ID changes');
 
 // Performance
-it('should prevent multiple simultaneous refresh attempts')
+it('should prevent multiple simultaneous refresh attempts');
 ```
 
 ### Network Error Handling Tests
@@ -187,6 +191,7 @@ it('should prevent multiple simultaneous refresh attempts')
 **Location**: `src/__tests__/auth/networkErrorHandling.test.ts`
 
 Tests cover:
+
 - 🌐 Offline state detection and handling
 - 📡 Network recovery with retry logic
 - ⏰ Timeout scenarios
@@ -195,17 +200,18 @@ Tests cover:
 - 🎯 Fetch interceptor integration
 
 **Key Test Cases**:
+
 ```javascript
 // Offline handling
-it('should handle offline state during sign in')
-it('should detect network recovery and resume operations')
+it('should handle offline state during sign in');
+it('should detect network recovery and resume operations');
 
 // Error recovery
-it('should retry failed requests after network recovery')
-it('should handle progressive backoff during retries')
+it('should retry failed requests after network recovery');
+it('should handle progressive backoff during retries');
 
 // Connection quality
-it('should handle intermittent connectivity issues')
+it('should handle intermittent connectivity issues');
 ```
 
 ### State Management Tests
@@ -213,6 +219,7 @@ it('should handle intermittent connectivity issues')
 **Location**: `src/__tests__/auth/stateManagement.test.ts`
 
 Tests cover:
+
 - ⚡ TokenManager state transitions
 - 🔄 AuthContext state updates
 - 👁️ Observer pattern implementation
@@ -221,17 +228,18 @@ Tests cover:
 - 📊 State consistency during errors
 
 **Key Test Cases**:
+
 ```javascript
 // State transitions
-it('should transition from IDLE to VALID on successful token retrieval')
-it('should transition to REFRESHING during token refresh')
+it('should transition from IDLE to VALID on successful token retrieval');
+it('should transition to REFRESHING during token refresh');
 
 // Observer pattern
-it('should properly unsubscribe observers')
-it('should handle observer errors gracefully')
+it('should properly unsubscribe observers');
+it('should handle observer errors gracefully');
 
 // Race conditions
-it('should prevent race conditions in concurrent token requests')
+it('should prevent race conditions in concurrent token requests');
 ```
 
 ### Supabase Integration Tests
@@ -239,6 +247,7 @@ it('should prevent race conditions in concurrent token requests')
 **Location**: `src/__tests__/auth/supabaseIntegration.test.ts`
 
 Tests cover:
+
 - 🔄 Token sync with Supabase client
 - 🛡️ RLS policy validation
 - 📁 Storage operations with auth
@@ -246,17 +255,18 @@ Tests cover:
 - ❌ Integration error scenarios
 
 **Key Test Cases**:
+
 ```javascript
 // Token sync
-it('should update Supabase auth when token becomes valid')
-it('should handle Supabase auth update after token refresh')
+it('should update Supabase auth when token becomes valid');
+it('should handle Supabase auth update after token refresh');
 
 // RLS validation
-it('should validate RLS policies work with refreshed tokens')
-it('should retry queries after token refresh on RLS failures')
+it('should validate RLS policies work with refreshed tokens');
+it('should retry queries after token refresh on RLS failures');
 
 // Storage operations
-it('should perform storage operations with valid tokens')
+it('should perform storage operations with valid tokens');
 ```
 
 ## 🛠️ Debugging Tools
@@ -268,6 +278,7 @@ The test suite includes comprehensive debugging utilities:
 **Purpose**: Monitor token state transitions and collect metrics
 **Usage**: Automatically enabled in debug mode
 **Features**:
+
 - Real-time state transition logging
 - Token payload inspection
 - Performance metrics collection
@@ -291,6 +302,7 @@ tokenStateInspector.printReport();
 **Purpose**: Track request queuing during token refresh
 **Usage**: Monitor concurrent request handling
 **Features**:
+
 - Request lifecycle tracking
 - Queue performance metrics
 - Long-running request detection
@@ -314,6 +326,7 @@ await requestQueueMonitor.waitForEmptyQueue();
 **Purpose**: Log and analyze network conditions
 **Usage**: Debug network-related authentication issues
 **Features**:
+
 - Network quality assessment
 - Latency and bandwidth monitoring
 - Error pattern analysis
@@ -337,6 +350,7 @@ const analysis = networkConditionLogger.analyzePerformance();
 **Purpose**: Visualize complete authentication flows
 **Usage**: Understand complex auth sequences
 **Features**:
+
 - Flow step tracking
 - Visual flow representation
 - Pattern analysis
@@ -426,7 +440,7 @@ open coverage/auth/lcov-report/index.html
 ```javascript
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { tokenManager, TokenState } from '../../services/tokenManager';
-import { 
+import {
   mockStorage,
   TestScenarioBuilder,
   TokenStateObserver,
@@ -469,7 +483,7 @@ describe('My Custom Auth Test', () => {
 ### Using Test Utilities
 
 ```javascript
-import { 
+import {
   MOCK_TOKENS,
   MOCK_USER_DATA,
   mockFetchResponses,
@@ -537,6 +551,7 @@ open coverage/auth/lcov-report/index.html
 ### Coverage Exclusions
 
 The following are excluded from coverage requirements:
+
 - Debug utilities
 - Mock implementations
 - Type definitions
@@ -547,6 +562,7 @@ The following are excluded from coverage requirements:
 ### Test Execution Metrics
 
 Tests automatically collect:
+
 - Execution duration per suite
 - Success/failure rates
 - Performance bottlenecks
@@ -555,6 +571,7 @@ Tests automatically collect:
 ### Debug Output
 
 When running with `--debug` flag, tests provide:
+
 - Detailed step-by-step execution logs
 - Token state transition history
 - Network condition changes
@@ -563,6 +580,7 @@ When running with `--debug` flag, tests provide:
 ### Test Reports
 
 Generated reports include:
+
 - Test results summary
 - Coverage metrics
 - Performance analysis
@@ -580,6 +598,7 @@ Reports are saved to `test-reports/auth-tests-[timestamp].json`
 ---
 
 For questions or issues with the test suite, please:
+
 1. Check this guide first
 2. Run tests with `--debug` flag for detailed output
 3. Review existing test cases for patterns

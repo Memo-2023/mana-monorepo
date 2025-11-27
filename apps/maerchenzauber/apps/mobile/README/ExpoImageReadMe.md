@@ -1,8 +1,6 @@
 Expo Image
 A cross-platform and performant React component that loads and renders images.
 
-
-
 expo-image is a cross-platform React component that loads and renders images.
 
 Main features:
@@ -15,16 +13,16 @@ Transitioning between images when the source changes (no more flickering!)
 Implements the CSS object-fit and object-position properties (see contentFit and contentPosition props)
 Uses performant SDWebImage and Glide under the hood
 Supported image formats
-Format	Android	iOS	Web
-WebP			
-PNG / APNG			
-AVIF			
-HEIC			 not adopted yet
-JPEG			
-GIF			
-SVG			
-ICO			
-ICNS			
+Format Android iOS Web
+WebP
+PNG / APNG
+AVIF
+HEIC not adopted yet
+JPEG
+GIF
+SVG
+ICO
+ICNS
 Installation
 Terminal
 
@@ -38,34 +36,34 @@ import { Image } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 
 const blurhash =
-  '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
+'|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Image
-        style={styles.image}
-        source="https://picsum.photos/seed/696/3000/2000"
-        placeholder={{ blurhash }}
-        contentFit="cover"
-        transition={1000}
-      />
-    </View>
-  );
+return (
+<View style={styles.container}>
+<Image
+style={styles.image}
+source="https://picsum.photos/seed/696/3000/2000"
+placeholder={{ blurhash }}
+contentFit="cover"
+transition={1000}
+/>
+</View>
+);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  image: {
-    flex: 1,
-    width: '100%',
-    backgroundColor: '#0553',
-  },
+container: {
+flex: 1,
+backgroundColor: '#fff',
+alignItems: 'center',
+justifyContent: 'center',
+},
+image: {
+flex: 1,
+width: '100%',
+backgroundColor: '#0553',
+},
 });
 
 Show More
@@ -265,17 +263,16 @@ Promise<boolean>
 A promise resolving to true when the operation succeeds. It may resolve to false on Android when the activity is no longer available. Resolves to false on Web.
 
 generateBlurhashAsync(url, numberOfComponents)
-Parameter	Type	Description
-url	string	
+Parameter Type Description
+url string
 The URL of the image to generate a blurhash from.
 
-numberOfComponents	
+numberOfComponents
 [number, number] | {
-  height: number, 
-  width: number
+height: number,
+width: number
 }
 The number of components to encode the blurhash with. Must be between 1 and 9. Defaults to [4, 3].
-
 
 Asynchronously generates a Blurhash from an image.
 
@@ -284,10 +281,9 @@ Promise<null | string>
 A promise resolving to the blurhash string.
 
 getCachePathAsync(cacheKey)
-Parameter	Type	Description
-cacheKey	string	
+Parameter Type Description
+cacheKey string
 The cache key for the requested image. Unless you have set a custom cache key, this will be the source URL of the image.
-
 
 Asynchronously checks if an image exists in the disk cache and resolves to the path of the cached image if it does.
 
@@ -296,8 +292,8 @@ Promise<null | string>
 A promise resolving to the path of the cached image. It will resolve to null if the image does not exist in the cache.
 
 loadAsync(source, options)
-Parameter	Type
-source	string | ImageSource
+Parameter Type
+source string | ImageSource
 options
 (optional)
 ImageLoadOptions
@@ -307,15 +303,14 @@ Loads an image from the given source to memory and resolves to an object that re
 Returns:
 Promise<ImageRef>
 prefetch(urls, cachePolicy)
-Parameter	Type	Description
-urls	string | string[]	
+Parameter Type Description
+urls string | string[]
 A URL string or an array of URLs of images to prefetch.
 
 cachePolicy
 (optional)
-'disk' | 'memory' | 'memory-disk'	
+'disk' | 'memory' | 'memory-disk'
 The cache policy for prefetched images.
-
 
 Preloads images at the given URLs that can be later used in the image view. Preloaded images are cached to the memory and disk by default, so make sure to use disk (default) or memory-disk cache policy.
 
@@ -324,15 +319,14 @@ Promise<boolean>
 A promise resolving to true as soon as all images have been successfully prefetched. If an image fails to be prefetched, the promise will immediately resolve to false regardless of whether other images have finished prefetching.
 
 prefetch(urls, options)
-Parameter	Type	Description
-urls	string | string[]	
+Parameter Type Description
+urls string | string[]
 A URL string or an array of URLs of images to prefetch.
 
 options
 (optional)
-ImagePrefetchOptions	
+ImagePrefetchOptions
 Options for prefetching images.
-
 
 Preloads images at the given URLs that can be later used in the image view. Preloaded images are cached to the memory and disk by default, so make sure to use disk (default) or memory-disk cache policy.
 
@@ -358,8 +352,8 @@ Returns:
 Promise<void>
 Hooks
 useImage(source, options, dependencies)
-Parameter	Type
-source	string | ImageSource
+Parameter Type
+source string | ImageSource
 options
 (optional)
 ImageLoadOptions
@@ -379,18 +373,18 @@ import { useImage, Image } from 'expo-image';
 import { Text } from 'react-native';
 
 export default function MyImage() {
-  const image = useImage('https://picsum.photos/1000/800', {
-    maxWidth: 800,
-    onError(error, retry) {
-      console.error('Loading failed:', error.message);
-    }
-  });
+const image = useImage('https://picsum.photos/1000/800', {
+maxWidth: 800,
+onError(error, retry) {
+console.error('Loading failed:', error.message);
+}
+});
 
-  if (!image) {
-    return <Text>Image is loading...</Text>;
-  }
+if (!image) {
+return <Text>Image is loading...</Text>;
+}
 
-  return <Image source={image} style={{ width: image.width / 2, height: image.height / 2 }} />;
+return <Image source={image} style={{ width: image.width / 2, height: image.height / 2 }} />;
 }
 Classes
 ImageRef
@@ -437,40 +431,40 @@ As an example, 'top right' is the same as { top: 0, right: 0 } and 'bottom' is t
 
 Type: ImageContentPositionString or object shaped as below:
 
-Property	Type	Description
+Property Type Description
 right
 (optional)
-ImageContentPositionValue	-
+ImageContentPositionValue -
 top
 (optional)
-ImageContentPositionValue	-
+ImageContentPositionValue -
 Or object shaped as below:
 
-Property	Type	Description
+Property Type Description
 left
 (optional)
-ImageContentPositionValue	-
+ImageContentPositionValue -
 top
 (optional)
-ImageContentPositionValue	-
+ImageContentPositionValue -
 Or object shaped as below:
 
-Property	Type	Description
+Property Type Description
 bottom
 (optional)
-ImageContentPositionValue	-
+ImageContentPositionValue -
 right
 (optional)
-ImageContentPositionValue	-
+ImageContentPositionValue -
 Or object shaped as below:
 
-Property	Type	Description
+Property Type Description
 bottom
 (optional)
-ImageContentPositionValue	-
+ImageContentPositionValue -
 left
 (optional)
-ImageContentPositionValue	-
+ImageContentPositionValue -
 ImageContentPositionValue
 Literal Type: multiple types
 
@@ -482,137 +476,137 @@ If string, it must be a percentage value where '100%' is the difference in size 
 Acceptable values are: number | string | {number}% | {number} | 'center'
 
 ImageErrorEventData
-Property	Type	Description
-error	string	-
+Property Type Description
+error string -
 ImageLoadEventData
-Property	Type	Description
-cacheType	'none' | 'disk' | 'memory'	-
-source	
+Property Type Description
+cacheType 'none' | 'disk' | 'memory' -
+source
 {
-  height: number, 
-  isAnimated: boolean, 
-  mediaType: string | null, 
-  url: string, 
-  width: number
+height: number,
+isAnimated: boolean,
+mediaType: string | null,
+url: string,
+width: number
 }
--
-ImageLoadOptions
-An object with options for the useImage hook.
 
-Property	Type	Description
+- ImageLoadOptions
+  An object with options for the useImage hook.
+
+Property Type Description
 maxHeight
 (optional)
-number	
+number
 Only for: 
 
 If provided, the image will be automatically resized to not exceed this height in pixels, preserving its aspect ratio.
 
 maxWidth
 (optional)
-number	
+number
 Only for: 
 
 If provided, the image will be automatically resized to not exceed this width in pixels, preserving its aspect ratio.
 
 onError
 (optional)
-(error: Error, retry: () => void) => void	
+(error: Error, retry: () => void) => void
 Function to call when the image has failed to load. In addition to the error, it also provides a function that retries loading the image.
 
 ImagePrefetchOptions
-Property	Type	Description
+Property Type Description
 cachePolicy
 (optional)
-'disk' | 'memory-disk' | 'memory'	
+'disk' | 'memory-disk' | 'memory'
 The cache policy for prefetched images.
 
 Default:
 'memory-disk'
 headers
 (optional)
-Record<string, string>	
+Record<string, string>
 A map of headers to use when prefetching the images.
 
 ImageProgressEventData
-Property	Type	Description
-loaded	number	-
-total	number	-
+Property Type Description
+loaded number -
+total number -
 ImageSource
-Property	Type	Description
+Property Type Description
 blurhash
 (optional)
-string	
+string
 A string used to generate the image placeholder. For example, placeholder={blurhash}. If uri is provided as the value of the source prop, this is ignored since the source can only have blurhash or uri.
 
 When using the blurhash, you should also provide width and height (higher values reduce performance), otherwise their default value is 16. For more information, see woltapp/blurhash repository.
 
 cacheKey
 (optional)
-string	
+string
 The cache key used to query and store this specific image. If not provided, the uri is used also as the cache key.
 
 headers
 (optional)
-Record<string, string>	
+Record<string, string>
 An object representing the HTTP headers to send along with the request for a remote image. On web requires the Access-Control-Allow-Origin header returned by the server to include the current domain.
 
 height
 (optional)
-number	
+number
 Can be specified if known at build time, in which case the value will be used to set the default <Image/> component dimension.
 
 isAnimated
 (optional)
-boolean	
+boolean
 Only for: 
 
 Whether the image is animated (an animated GIF or WebP for example).
 
 thumbhash
 (optional)
-string	
+string
 A string used to generate the image placeholder. For example, placeholder={thumbhash}. If uri is provided as the value of the source prop, this is ignored since the source can only have thumbhash or uri.
 
 For more information, see thumbhash website.
 
 uri
 (optional)
-string	
+string
 A string representing the resource identifier for the image, which could be an HTTPS address, a local file path, or the name of a static image resource.
 
 webMaxViewportWidth
 (optional)
-number	
+number
 Only for: 
 
 The max width of the viewport for which this source should be selected. Has no effect if source prop is not an array or has only 1 element. Has no effect if responsivePolicy is not set to static. Ignored if blurhash or thumbhash is provided (image hashes are never selected if passed in an array).
 
 width
 (optional)
-number	
+number
 Can be specified if known at build time, in which case the value will be used to set the default <Image/> component dimension.
 
 ImageTransition
 An object that describes the smooth transition when switching the image source.
 
-Property	Type	Description
+Property Type Description
 duration
 (optional)
-number	
+number
 The duration of the transition in milliseconds.
 
 Default:
 0
 effect
 (optional)
-'cross-dissolve' | 'flip-from-top' | 'flip-from-right' | 'flip-from-bottom' | 'flip-from-left' | 'curl-up' | 'curl-down' | null	
+'cross-dissolve' | 'flip-from-top' | 'flip-from-right' | 'flip-from-bottom' | 'flip-from-left' | 'curl-up' | 'curl-down' | null
 An animation effect used for transition.
 
 Default:
 'cross-dissolve' On Android, only `'cross-dissolve'` is supported. On Web, `'curl-up'` and `'curl-down'` effects are not supported.
 timing
 (optional)
-'ease-in-out' | 'ease-in' | 'ease-out' | 'linear'	
+'ease-in-out' | 'ease-in' | 'ease-out' | 'linear'
 Specifies the speed curve of the transition effect and how intermediate values are calculated.
 
 Default:
@@ -643,31 +637,31 @@ const upload = multer();
 Assuming the app is a variable that holds a reference to the Express server, an endpoint can be created that accepts an image and returns a JSON response containing the generated blurhash.
 
 app.post('/blurhash', upload.single('image'), async (req, res) => {
-  const { file } = req;
-  // If the file is not available we're returning with error.
-  if (file === null) {
-    res.status(400).json({ message: 'Image is missing' });
-    return;
-  }
+const { file } = req;
+// If the file is not available we're returning with error.
+if (file === null) {
+res.status(400).json({ message: 'Image is missing' });
+return;
+}
 
-  // Users can specify number of components in each axes.
-  const componentX = req.body.componentX ?? 4;
-  const componentY = req.body.componentY ?? 3;
+// Users can specify number of components in each axes.
+const componentX = req.body.componentX ?? 4;
+const componentY = req.body.componentY ?? 3;
 
-  // We're converting provided image to a byte buffer.
-  // Sharp currently supports multiple common formats like JPEG, PNG, WebP, GIF, and AVIF.
-  const { data, info } = await sharp(file.buffer).ensureAlpha().raw().toBuffer({
-    resolveWithObject: true,
-  });
+// We're converting provided image to a byte buffer.
+// Sharp currently supports multiple common formats like JPEG, PNG, WebP, GIF, and AVIF.
+const { data, info } = await sharp(file.buffer).ensureAlpha().raw().toBuffer({
+resolveWithObject: true,
+});
 
-  const blurhash = encode(
-    new Uint8ClampedArray(data),
-    info.width,
-    info.height,
-    componentX,
-    componentY
-  );
-  res.json({ blurhash });
+const blurhash = encode(
+new Uint8ClampedArray(data),
+info.width,
+info.height,
+componentX,
+componentY
+);
+res.json({ blurhash });
 });
 
 Show More

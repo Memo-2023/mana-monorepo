@@ -20,7 +20,12 @@ module.exports = {
 	testMatch: ['**/__tests__/**/*.test.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
 
 	// Paths to ignore
-	testPathIgnorePatterns: ['/node_modules/', '/__tests__/utils/', '/__tests__/fixtures/', '/__tests__/mocks/'],
+	testPathIgnorePatterns: [
+		'/node_modules/',
+		'/__tests__/utils/',
+		'/__tests__/fixtures/',
+		'/__tests__/mocks/',
+	],
 
 	// Transform ignore patterns for React Native modules
 	transformIgnorePatterns: [

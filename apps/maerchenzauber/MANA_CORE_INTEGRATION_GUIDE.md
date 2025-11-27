@@ -19,6 +19,7 @@ This document provides a comprehensive guide on how the `@mana-core/nestjs-integ
 ## Overview
 
 The Mana Core NestJS integration package provides:
+
 - **Complete Authentication System**: Email/password, Google OAuth, Apple Sign-in
 - **JWT Token Management**: Automatic validation, refresh, and storage
 - **Credit Management**: Pre-flight validation and consumption with app-level tracking
@@ -87,7 +88,7 @@ Check your `package.json`:
   "dependencies": {
     "@mana-core/nestjs-integration": "git+https://github.com/Memo-2023/mana-core-nestjs-package.git",
     "@nestjs/common": "^10.0.0",
-    "@nestjs/config": "^4.0.0",
+    "@nestjs/config": "^4.0.0"
     // ... other dependencies
   }
 }
@@ -116,6 +117,7 @@ SIGNUP_REDIRECT_URL=https://yourapp.com/welcome
 ```
 
 **Important Notes**:
+
 - `MANA_SERVICE_URL`: Your Mana Core instance URL
 - `APP_ID`: Obtained from Mana Core admin panel
 - `MANA_SUPABASE_SECRET_KEY`: Required for credit operations and service-level auth
@@ -172,6 +174,7 @@ export class AppModule {}
 ```
 
 **Configuration Options**:
+
 - `manaServiceUrl` (required): URL of your Mana Core service
 - `appId` (required): Your application ID
 - `serviceKey` (recommended): Service role key for backend operations
@@ -183,13 +186,7 @@ export class AppModule {}
 Use the `AuthGuard` to protect routes that require authentication:
 
 ```typescript
-import {
-  Controller,
-  Get,
-  Post,
-  UseGuards,
-  Body,
-} from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Body } from '@nestjs/common';
 import {
   AuthGuard,
   CurrentUser,
@@ -201,9 +198,7 @@ import { JwtPayload } from '../types/jwt-payload.interface';
 @Controller('story')
 @UseGuards(AuthGuard) // Protect all routes in this controller
 export class StoryController {
-  constructor(
-    private readonly creditClient: CreditClientService,
-  ) {}
+  constructor(private readonly creditClient: CreditClientService) {}
 
   @Get()
   async getStories(@CurrentUser() user: JwtPayload) {
@@ -245,13 +240,14 @@ async getId(@CurrentUser('sub') userId: string) {
 ```
 
 **JwtPayload Interface**:
+
 ```typescript
 export interface JwtPayload {
-  sub: string;        // User ID
-  email: string;      // User email
-  role: string;       // User role (e.g., 'user', 'admin')
-  iat?: number;       // Issued at timestamp
-  exp?: number;       // Expiration timestamp
+  sub: string; // User ID
+  email: string; // User email
+  role: string; // User role (e.g., 'user', 'admin')
+  iat?: number; // Issued at timestamp
+  exp?: number; // Expiration timestamp
 }
 ```
 
@@ -264,20 +260,19 @@ Create `backend/src/decorators/user.decorator.ts`:
 ```typescript
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
-export const UserToken = createParamDecorator(
-  (_data: unknown, ctx: ExecutionContext): string => {
-    const request = ctx.switchToHttp().getRequest();
-    // Extract token from Authorization header
-    const authHeader = request.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      return authHeader.substring(7);
-    }
-    return request.token;
-  },
-);
+export const UserToken = createParamDecorator((_data: unknown, ctx: ExecutionContext): string => {
+  const request = ctx.switchToHttp().getRequest();
+  // Extract token from Authorization header
+  const authHeader = request.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.substring(7);
+  }
+  return request.token;
+});
 ```
 
 **Usage with RLS**:
+
 ```typescript
 @Get()
 async getCharacters(
@@ -342,16 +337,13 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
     ...options,
     headers: {
       ...options.headers,
-      'Authorization': `Bearer ${appToken}`,
+      Authorization: `Bearer ${appToken}`,
       'Content-Type': 'application/json',
     },
   };
 
   // Make request
-  const response = await fetch(
-    `${API_BASE_URL}${endpoint}`,
-    authenticatedOptions,
-  );
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, authenticatedOptions);
 
   // Handle 401 (token expired)
   if (response.status === 401) {
@@ -362,7 +354,7 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
       appToken = await tokenManager.getValidToken();
       authenticatedOptions.headers = {
         ...authenticatedOptions.headers,
-        'Authorization': `Bearer ${appToken}`,
+        Authorization: `Bearer ${appToken}`,
       };
       return fetch(`${API_BASE_URL}${endpoint}`, authenticatedOptions);
     }
@@ -456,7 +448,7 @@ export const authService = {
         await fetch(`${BACKEND_URL}/auth/logout`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${appToken}`,
+            Authorization: `Bearer ${appToken}`,
             'Content-Type': 'application/json',
           },
         });
@@ -603,17 +595,12 @@ The Mana Core package includes a complete credit consumption system for tracking
 Inject the `CreditClientService` into your controller or service:
 
 ```typescript
-import {
-  CreditClientService,
-  InsufficientCreditsException,
-} from '@mana-core/nestjs-integration';
+import { CreditClientService, InsufficientCreditsException } from '@mana-core/nestjs-integration';
 
 @Controller('character')
 @UseGuards(AuthGuard)
 export class CharacterController {
-  constructor(
-    private readonly creditClient: CreditClientService,
-  ) {}
+  constructor(private readonly creditClient: CreditClientService) {}
 }
 ```
 
@@ -683,13 +670,10 @@ async generateCharacterImages(
 ### Step 3: Credit Operations in Storyteller
 
 **Character Creation** (20 credits):
+
 ```typescript
 // Validate
-const validation = await this.creditClient.validateCredits(
-  user.sub,
-  'character_creation',
-  20,
-);
+const validation = await this.creditClient.validateCredits(user.sub, 'character_creation', 20);
 
 // ... create character ...
 
@@ -699,18 +683,15 @@ await this.creditClient.consumeCredits(
   'character_creation',
   20,
   `Created character: ${name}`,
-  { characterId, characterName: name, description },
+  { characterId, characterName: name, description }
 );
 ```
 
 **Story Creation** (100 credits):
+
 ```typescript
 // Validate
-const validation = await this.creditClient.validateCredits(
-  user.sub,
-  'story_creation',
-  100,
-);
+const validation = await this.creditClient.validateCredits(user.sub, 'story_creation', 100);
 
 // ... create story ...
 
@@ -720,7 +701,7 @@ await this.creditClient.consumeCredits(
   'story_creation',
   100,
   `Created story: ${storyTitle}`,
-  { storyId, characterId, storyDescription },
+  { storyId, characterId, storyDescription }
 );
 ```
 
@@ -744,21 +725,18 @@ Define your own operation types based on your application:
 
 ```typescript
 type MyAppOperations =
-  | 'character_creation'    // 20 credits
-  | 'story_creation'        // 100 credits
-  | 'image_generation'      // 10 credits
-  | 'api_call'              // 5 credits
-  | 'transcription'         // Variable
-  | 'analysis';             // Variable
+  | 'character_creation' // 20 credits
+  | 'story_creation' // 100 credits
+  | 'image_generation' // 10 credits
+  | 'api_call' // 5 credits
+  | 'transcription' // Variable
+  | 'analysis'; // Variable
 
 // Use in credit operations
-await this.creditClient.consumeCredits(
-  userId,
-  'image_generation',
-  10,
-  'Generated AI image',
-  { imageSize: '1024x1024', model: 'dalle-3' },
-);
+await this.creditClient.consumeCredits(userId, 'image_generation', 10, 'Generated AI image', {
+  imageSize: '1024x1024',
+  model: 'dalle-3',
+});
 ```
 
 ---
@@ -806,11 +784,7 @@ import { BadRequestException } from '@nestjs/common';
 
 try {
   // Validate credits
-  const validation = await this.creditClient.validateCredits(
-    userId,
-    'operation',
-    100,
-  );
+  const validation = await this.creditClient.validateCredits(userId, 'operation', 100);
 
   if (!validation.hasCredits) {
     throw new BadRequestException({
@@ -887,7 +861,7 @@ describe('CharacterController', () => {
     expect(creditClient.validateCredits).toHaveBeenCalledWith(
       mockUser.sub,
       'character_creation',
-      20,
+      20
     );
   });
 });
@@ -929,9 +903,7 @@ describe('CharacterController (e2e)', () => {
   });
 
   it('/character (GET) should require authentication', () => {
-    return request(app.getHttpServer())
-      .get('/character')
-      .expect(401);
+    return request(app.getHttpServer()).get('/character').expect(401);
   });
 
   it('/character (GET) should return characters with valid token', () => {
@@ -964,11 +936,13 @@ npm install git+https://github.com/Memo-2023/mana-core-nestjs-package.git
 #### 2. "401 Unauthorized" on Protected Routes
 
 **Causes**:
+
 - Invalid or expired token
 - Token not included in request headers
 - Service key not configured
 
 **Solution**:
+
 ```typescript
 // Check token in request
 console.log('Authorization header:', request.headers.authorization);
@@ -984,11 +958,13 @@ const refreshed = await tokenManager.refreshToken();
 #### 3. Credit Validation Fails
 
 **Causes**:
+
 - User has insufficient credits
 - Service key not configured
 - App ID not matching
 
 **Solution**:
+
 ```typescript
 // Check user's balance
 const balance = await this.creditClient.getCreditBalance(userId);
@@ -1004,11 +980,13 @@ console.log('App ID:', process.env.APP_ID);
 #### 4. Token Refresh Not Working
 
 **Causes**:
+
 - Refresh token expired
 - Device info not sent
 - Backend URL misconfigured
 
 **Solution**:
+
 ```typescript
 // Log refresh attempt
 console.log('Refreshing token with:', {
@@ -1091,15 +1069,15 @@ After following this guide, your application now has:
 
 ### Key Files Reference
 
-| File | Purpose |
-|------|---------|
-| `backend/src/app.module.ts` | Mana Core module configuration |
+| File                                            | Purpose                                            |
+| ----------------------------------------------- | -------------------------------------------------- |
+| `backend/src/app.module.ts`                     | Mana Core module configuration                     |
 | `backend/src/character/character.controller.ts` | Example of AuthGuard and CreditClientService usage |
-| `backend/src/story/story.controller.ts` | Example of credit validation and consumption |
-| `backend/src/decorators/user.decorator.ts` | Custom @UserToken() decorator |
-| `mobile/src/utils/api.ts` | Frontend API client with authentication |
-| `mobile/src/services/authService.ts` | Frontend authentication service |
-| `mobile/src/services/tokenManager.ts` | Token management with auto-refresh |
+| `backend/src/story/story.controller.ts`         | Example of credit validation and consumption       |
+| `backend/src/decorators/user.decorator.ts`      | Custom @UserToken() decorator                      |
+| `mobile/src/utils/api.ts`                       | Frontend API client with authentication            |
+| `mobile/src/services/authService.ts`            | Frontend authentication service                    |
+| `mobile/src/services/tokenManager.ts`           | Token management with auto-refresh                 |
 
 ---
 

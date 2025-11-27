@@ -80,16 +80,16 @@ export const themes = {
 		colors: {
 			light: {
 				primary: '#000000',
-				primaryHover: '#333333'
+				primaryHover: '#333333',
 				// ... weitere Farben
 			},
 			dark: {
 				primary: '#ffffff',
-				primaryHover: '#cccccc'
+				primaryHover: '#cccccc',
 				// ... weitere Farben
-			}
-		}
-	}
+			},
+		},
+	},
 };
 ```
 

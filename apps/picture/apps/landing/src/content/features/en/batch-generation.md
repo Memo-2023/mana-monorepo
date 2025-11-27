@@ -1,20 +1,20 @@
 ---
-title: "Batch Generation"
-description: "Generate multiple variations simultaneously. Perfect for exploring ideas, A/B testing, and creating diverse content at scale."
-icon: "🚀"
-coverImage: "/features/batch-generation.jpg"
-category: "generation"
+title: 'Batch Generation'
+description: 'Generate multiple variations simultaneously. Perfect for exploring ideas, A/B testing, and creating diverse content at scale.'
+icon: '🚀'
+coverImage: '/features/batch-generation.jpg'
+category: 'generation'
 featured: false
 order: 4
 available: true
 comingSoon: false
-language: "en"
+language: 'en'
 benefits:
-  - "Generate up to 100 images at once"
-  - "Explore multiple variations"
-  - "Save time with parallel processing"
-  - "Perfect for A/B testing"
-  - "Bulk operations support"
+  - 'Generate up to 100 images at once'
+  - 'Explore multiple variations'
+  - 'Save time with parallel processing'
+  - 'Perfect for A/B testing'
+  - 'Bulk operations support'
 ---
 
 ## Scale Your Creative Process
@@ -26,6 +26,7 @@ Generate dozens or hundreds of images with a single click. Perfect for when you 
 ### Single Prompt, Multiple Variations
 
 Generate variations of the same prompt:
+
 - Different seeds for variety
 - Slight parameter variations
 - Multiple aspect ratios
@@ -34,6 +35,7 @@ Generate variations of the same prompt:
 ### Multiple Prompts, Batch Processing
 
 Queue up multiple prompts:
+
 - Process them all at once
 - Set different parameters per prompt
 - Organize outputs automatically
@@ -43,6 +45,7 @@ Queue up multiple prompts:
 ### Creative Exploration
 
 Generate 10-20 variations to:
+
 - Explore different compositions
 - Test various styles
 - Find the perfect result
@@ -51,6 +54,7 @@ Generate 10-20 variations to:
 ### A/B Testing
 
 For marketing teams:
+
 - Test multiple ad variations
 - Compare different messages
 - Find the best performing creative
@@ -59,6 +63,7 @@ For marketing teams:
 ### Content Production
 
 Scale your output:
+
 - Social media content calendars
 - Multiple product variations
 - Diverse stock imagery
@@ -67,6 +72,7 @@ Scale your output:
 ### Client Presentations
 
 Impress clients with options:
+
 - Show multiple concepts
 - Different style directions
 - Various compositions
@@ -84,6 +90,7 @@ Impress clients with options:
 ### Progress Tracking
 
 Real-time visibility:
+
 - Live progress bars
 - Estimated completion time
 - Success/failure counts
@@ -92,6 +99,7 @@ Real-time visibility:
 ### Smart Organization
 
 Automatically organize outputs:
+
 - Group by prompt
 - Separate folders
 - Custom naming schemes
@@ -100,6 +108,7 @@ Automatically organize outputs:
 ### Bulk Actions
 
 Manage results efficiently:
+
 - Select multiple images
 - Bulk download
 - Bulk tag
@@ -111,6 +120,7 @@ Manage results efficiently:
 ### Parameter Variations
 
 Automatically vary parameters:
+
 - Random seeds
 - Guidance scale range
 - Step counts
@@ -119,6 +129,7 @@ Automatically vary parameters:
 ### Grid Comparison
 
 Visual comparison tools:
+
 - Side-by-side view
 - Grid layouts
 - Zoomed comparisons
@@ -127,6 +138,7 @@ Visual comparison tools:
 ### Export Options
 
 Bulk export features:
+
 - ZIP downloads
 - Organized folders
 - CSV metadata
@@ -150,6 +162,7 @@ Bulk export features:
 ## Pricing
 
 Batch generation is included:
+
 - ✅ No extra cost
 - ✅ Same credit usage as individual
 - ✅ All plans supported

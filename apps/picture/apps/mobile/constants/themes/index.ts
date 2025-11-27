@@ -15,21 +15,21 @@ export { oceanTheme } from './ocean';
  * All available theme definitions
  */
 export const themes: Record<ThemeVariant, ThemeDefinition> = {
-  default: defaultTheme,
-  sunset: sunsetTheme,
-  ocean: oceanTheme,
+	default: defaultTheme,
+	sunset: sunsetTheme,
+	ocean: oceanTheme,
 };
 
 /**
  * Get a theme by variant and mode
  */
 export function getTheme(variant: ThemeVariant, mode: 'light' | 'dark'): Theme {
-  const themeDefinition = themes[variant];
-  const themeData = mode === 'light' ? themeDefinition.light : themeDefinition.dark;
+	const themeDefinition = themes[variant];
+	const themeData = mode === 'light' ? themeDefinition.light : themeDefinition.dark;
 
-  return {
-    name: themeDefinition.name,
-    displayName: themeDefinition.displayName,
-    ...themeData,
-  };
+	return {
+		name: themeDefinition.name,
+		displayName: themeDefinition.displayName,
+		...themeData,
+	};
 }

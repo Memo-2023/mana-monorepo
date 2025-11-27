@@ -56,7 +56,7 @@
 		signInFailed: 'Sign in failed',
 		googleSignInFailed: 'Google sign in failed',
 		signInSuccess: 'Successfully signed in. Redirecting...',
-		googleSignInSuccess: 'Successfully signed in with Google. Redirecting...'
+		googleSignInSuccess: 'Successfully signed in with Google. Redirecting...',
 	};
 
 	interface Props {
@@ -113,7 +113,7 @@
 		darkBackground = '#121212',
 		appSlider,
 		headerControls,
-		translations = {}
+		translations = {},
 	}: Props = $props();
 
 	// Merge provided translations with defaults
@@ -259,11 +259,311 @@
 	<title>Login - {appName}</title>
 </svelte:head>
 
+<!-- Skip Link for keyboard users -->
+<button class="skip-link" onclick={skipToForm} type="button">
+	{t.skipToForm}
+</button>
+
+<!-- Screen reader announcements -->
+<div aria-live="polite" aria-atomic="true" class="sr-only">
+	{successAnnouncement}
+</div>
+
+<div
+	class="flex min-h-screen flex-col justify-between"
+	style="background-color: {getPageBackground()};"
+>
+	<!-- Header Controls (Theme Toggle, Language Selector, etc.) -->
+	{#if headerControls}
+		<div class="absolute right-4 top-4 z-50 flex items-center gap-3 opacity-60">
+			{@render headerControls()}
+		</div>
+	{/if}
+
+	<main>
+		<!-- Top Section - Logo -->
+		<div class="flex flex-col items-center justify-center pt-16 pb-8">
+			<div
+				class="flex items-center justify-center rounded-full transition-all mb-4"
+				class:success-pulse={showSuccess}
+				style="width: 120px; height: 120px; border: 3px solid {showSuccess
+					? '#22c55e'
+					: primaryColor}; background-color: {isDark ? '#000' : '#fff'}; box-shadow: {isDark
+					? '0 6px 12px rgba(0, 0, 0, 0.4)'
+					: '0 6px 12px rgba(0, 0, 0, 0.15)'};"
+				role="img"
+				aria-label="{appName} logo"
+			>
+				{#if showSuccess}
+					<Icon name="check" size={55} color="#22c55e" />
+				{:else}
+					<Logo size={55} color={primaryColor} />
+				{/if}
+			</div>
+			<h1 class="text-2xl font-semibold" style="color: {isDark ? '#ffffff' : '#000000'};">
+				{appName}
+			</h1>
+		</div>
+
+		<!-- Middle Section - Auth Form -->
+		<div class="flex-1 flex items-start justify-center px-5 pt-8 pb-8">
+			<div
+				class="w-full max-w-md rounded-xl p-6"
+				class:shake={shakeError}
+				style="background-color: {isDark
+					? 'rgba(255, 255, 255, 0.08)'
+					: 'rgba(255, 255, 255, 0.7)'}; backdrop-filter: blur(10px); border: 1px solid {isDark
+					? 'rgba(255, 255, 255, 0.1)'
+					: 'rgba(0, 0, 0, 0.1)'};"
+			>
+				<!-- Title -->
+				<div class="mb-6">
+					<h2
+						class="text-center text-xl font-semibold"
+						style="color: {isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)'};"
+					>
+						{t.title}
+					</h2>
+					<p
+						class="mt-2 text-sm text-center"
+						style="color: {isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};"
+					>
+						{t.subtitle}
+					</p>
+				</div>
+
+				<!-- Error Messages -->
+				{#if error}
+					<div
+						id="form-error"
+						role="alert"
+						aria-live="assertive"
+						class="mb-4 rounded-xl bg-red-500/20 border border-red-500/30 p-3 flex items-center gap-2"
+					>
+						<Icon name="warning" size={18} color="#ef4444" />
+						<p class="text-sm text-red-500">{error}</p>
+					</div>
+				{/if}
+
+				<!-- Login Form -->
+				<form
+					onsubmit={(e) => {
+						e.preventDefault();
+						handleLogin();
+					}}
+					class="pb-4"
+					aria-busy={loading}
+					aria-describedby={error ? 'form-error' : undefined}
+				>
+					<!-- Email Field -->
+					<div class="mb-3">
+						<label for="email" class="sr-only">{t.emailPlaceholder}</label>
+						<input
+							id="email"
+							type="email"
+							bind:this={emailInput}
+							bind:value={email}
+							placeholder={t.emailPlaceholder}
+							required
+							autocomplete="email"
+							aria-invalid={errorField === 'email'}
+							aria-describedby={errorField === 'email' ? 'form-error' : undefined}
+							class="h-14 w-full rounded-xl border px-4 text-lg transition-colors focus:outline-none focus:ring-2"
+							style="background-color: {isDark
+								? 'rgba(0, 0, 0, 0.2)'
+								: 'rgba(255, 255, 255, 0.8)'}; border-color: {errorField === 'email'
+								? '#ef4444'
+								: isDark
+									? 'rgba(255, 255, 255, 0.2)'
+									: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
+								? '#ffffff'
+								: '#000000'}; --tw-ring-color: {errorField === 'email' ? '#ef4444' : primaryColor};"
+						/>
+					</div>
+
+					<!-- Password Field -->
+					<div class="mb-3 relative">
+						<label for="password" class="sr-only">{t.passwordPlaceholder}</label>
+						<input
+							id="password"
+							type={showPassword ? 'text' : 'password'}
+							bind:this={passwordInput}
+							bind:value={password}
+							placeholder={t.passwordPlaceholder}
+							required
+							autocomplete="current-password"
+							aria-invalid={errorField === 'password'}
+							aria-describedby={errorField === 'password' ? 'form-error' : undefined}
+							class="h-14 w-full rounded-xl border px-4 pr-12 text-lg transition-colors focus:outline-none focus:ring-2"
+							style="background-color: {isDark
+								? 'rgba(0, 0, 0, 0.2)'
+								: 'rgba(255, 255, 255, 0.8)'}; border-color: {errorField === 'password'
+								? '#ef4444'
+								: isDark
+									? 'rgba(255, 255, 255, 0.2)'
+									: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
+								? '#ffffff'
+								: '#000000'}; --tw-ring-color: {errorField === 'password'
+								? '#ef4444'
+								: primaryColor};"
+						/>
+						<button
+							type="button"
+							onclick={() => (showPassword = !showPassword)}
+							class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors touch-target flex items-center justify-center"
+							aria-label={showPassword ? t.hidePassword : t.showPassword}
+							aria-pressed={showPassword}
+							title={showPassword ? t.hidePassword : t.showPassword}
+						>
+							<Icon
+								name={showPassword ? 'eye-off' : 'eye'}
+								size={20}
+								color={isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'}
+							/>
+						</button>
+					</div>
+
+					<!-- Remember Me & Forgot Password Row -->
+					<div class="mb-4 flex items-center justify-between">
+						<label class="flex items-center gap-2 cursor-pointer touch-target">
+							<input
+								type="checkbox"
+								bind:checked={rememberMe}
+								class="w-5 h-5 rounded border-2 transition-colors cursor-pointer"
+								style="accent-color: {primaryColor};"
+							/>
+							<span
+								class="text-sm"
+								style="color: {isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'};"
+							>
+								{t.rememberMe}
+							</span>
+						</label>
+
+						<button
+							type="button"
+							onclick={() => goto(forgotPasswordPath)}
+							class="text-sm font-medium transition-opacity hover:opacity-70 touch-target flex items-center justify-center px-2"
+							style="color: {primaryColor};"
+						>
+							{t.forgotPassword}
+						</button>
+					</div>
+
+					<!-- Submit Button -->
+					<button
+						type="submit"
+						disabled={loading || showSuccess}
+						aria-disabled={loading || showSuccess}
+						class="flex h-14 w-full items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 disabled:opacity-50 border-2 touch-target"
+						style="background-color: {showSuccess
+							? '#22c55e'
+							: primaryColor + '60'}; border-color: {showSuccess
+							? '#22c55e'
+							: primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
+					>
+						{#if loading}
+							<svg
+								class="spinner w-5 h-5"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								aria-hidden="true"
+							>
+								<circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
+								<path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
+							</svg>
+							<span>{t.signingIn}</span>
+						{:else if showSuccess}
+							<Icon name="check" size={20} />
+							<span>{t.success}</span>
+						{:else}
+							<Icon name="sign-in" size={20} />
+							<span>{t.signInButton}</span>
+						{/if}
+					</button>
+				</form>
+
+				<!-- Social Login -->
+				{#if enableGoogle || enableApple}
+					<div class="my-4 flex items-center gap-3" role="separator" aria-orientation="horizontal">
+						<div
+							class="flex-1 border-t"
+							style="border-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"
+						></div>
+						<span
+							class="text-xs"
+							style="color: {isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'};"
+							>{t.orDivider}</span
+						>
+						<div
+							class="flex-1 border-t"
+							style="border-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"
+						></div>
+					</div>
+
+					<div class="mb-4 flex flex-col gap-2" role="group" aria-label="Social login options">
+						{#if enableGoogle && onSignInWithGoogle}
+							<GoogleSignInButton onSuccess={handleGoogleSuccess} />
+						{/if}
+						{#if enableApple}
+							<AppleSignInButton />
+						{/if}
+					</div>
+				{/if}
+
+				<!-- Register Link -->
+				<div class="mt-4 text-center">
+					<p
+						class="text-sm"
+						style="color: {isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};"
+					>
+						{t.noAccount}
+						<button
+							type="button"
+							onclick={() => goto(registerPath)}
+							class="font-medium transition-opacity hover:opacity-70 touch-target inline-flex items-center justify-center px-1"
+							style="color: {primaryColor};"
+						>
+							{t.createAccount}
+						</button>
+					</p>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<!-- App Slider -->
+	{#if appSlider}
+		<div class="w-full pb-8 px-2 pt-4">
+			{@render appSlider()}
+		</div>
+	{:else}
+		<!-- Bottom padding -->
+		<div class="pb-8"></div>
+	{/if}
+</div>
+
 <style>
 	@keyframes shake {
-		0%, 100% { transform: translateX(0); }
-		10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-		20%, 40%, 60%, 80% { transform: translateX(4px); }
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		10%,
+		30%,
+		50%,
+		70%,
+		90% {
+			transform: translateX(-4px);
+		}
+		20%,
+		40%,
+		60%,
+		80% {
+			transform: translateX(4px);
+		}
 	}
 
 	.shake {
@@ -271,8 +571,12 @@
 	}
 
 	@keyframes spin {
-		from { transform: rotate(0deg); }
-		to { transform: rotate(360deg); }
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	.spinner {
@@ -280,9 +584,18 @@
 	}
 
 	@keyframes success-pulse {
-		0% { transform: scale(1); opacity: 1; }
-		50% { transform: scale(1.05); opacity: 0.9; }
-		100% { transform: scale(1); opacity: 1; }
+		0% {
+			transform: scale(1);
+			opacity: 1;
+		}
+		50% {
+			transform: scale(1.05);
+			opacity: 0.9;
+		}
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
 	}
 
 	.success-pulse {
@@ -338,255 +651,3 @@
 		min-height: 44px;
 	}
 </style>
-
-<!-- Skip Link for keyboard users -->
-<button
-	class="skip-link"
-	onclick={skipToForm}
-	type="button"
->
-	{t.skipToForm}
-</button>
-
-<!-- Screen reader announcements -->
-<div aria-live="polite" aria-atomic="true" class="sr-only">
-	{successAnnouncement}
-</div>
-
-<div
-	class="flex min-h-screen flex-col justify-between"
-	style="background-color: {getPageBackground()};"
->
-	<!-- Header Controls (Theme Toggle, Language Selector, etc.) -->
-	{#if headerControls}
-		<div class="absolute right-4 top-4 z-50 flex items-center gap-3 opacity-60">
-			{@render headerControls()}
-		</div>
-	{/if}
-
-	<main>
-		<!-- Top Section - Logo -->
-		<div class="flex flex-col items-center justify-center pt-16 pb-8">
-			<div
-				class="flex items-center justify-center rounded-full transition-all mb-4"
-				class:success-pulse={showSuccess}
-				style="width: 120px; height: 120px; border: 3px solid {showSuccess ? '#22c55e' : primaryColor}; background-color: {isDark ? '#000' : '#fff'}; box-shadow: {isDark
-					? '0 6px 12px rgba(0, 0, 0, 0.4)'
-					: '0 6px 12px rgba(0, 0, 0, 0.15)'};"
-				role="img"
-				aria-label="{appName} logo"
-			>
-				{#if showSuccess}
-					<Icon name="check" size={55} color="#22c55e" />
-				{:else}
-					<Logo size={55} color={primaryColor} />
-				{/if}
-			</div>
-			<h1 class="text-2xl font-semibold" style="color: {isDark ? '#ffffff' : '#000000'};">
-				{appName}
-			</h1>
-		</div>
-
-		<!-- Middle Section - Auth Form -->
-		<div class="flex-1 flex items-start justify-center px-5 pt-8 pb-8">
-			<div
-				class="w-full max-w-md rounded-xl p-6"
-				class:shake={shakeError}
-				style="background-color: {isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.7)'}; backdrop-filter: blur(10px); border: 1px solid {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"
-			>
-				<!-- Title -->
-				<div class="mb-6">
-					<h2
-						class="text-center text-xl font-semibold"
-						style="color: {isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)'};"
-					>
-						{t.title}
-					</h2>
-					<p
-						class="mt-2 text-sm text-center"
-						style="color: {isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};"
-					>
-						{t.subtitle}
-					</p>
-				</div>
-
-				<!-- Error Messages -->
-				{#if error}
-					<div
-						id="form-error"
-						role="alert"
-						aria-live="assertive"
-						class="mb-4 rounded-xl bg-red-500/20 border border-red-500/30 p-3 flex items-center gap-2"
-					>
-						<Icon name="warning" size={18} color="#ef4444" />
-						<p class="text-sm text-red-500">{error}</p>
-					</div>
-				{/if}
-
-				<!-- Login Form -->
-				<form
-					onsubmit={(e) => {
-						e.preventDefault();
-						handleLogin();
-					}}
-					class="pb-4"
-					aria-busy={loading}
-					aria-describedby={error ? 'form-error' : undefined}
-				>
-					<!-- Email Field -->
-					<div class="mb-3">
-						<label for="email" class="sr-only">{t.emailPlaceholder}</label>
-						<input
-							id="email"
-							type="email"
-							bind:this={emailInput}
-							bind:value={email}
-							placeholder={t.emailPlaceholder}
-							required
-							autocomplete="email"
-							aria-invalid={errorField === 'email'}
-							aria-describedby={errorField === 'email' ? 'form-error' : undefined}
-							class="h-14 w-full rounded-xl border px-4 text-lg transition-colors focus:outline-none focus:ring-2"
-							style="background-color: {isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {errorField === 'email' ? '#ef4444' : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)')}; color: {isDark ? '#ffffff' : '#000000'}; --tw-ring-color: {errorField === 'email' ? '#ef4444' : primaryColor};"
-						/>
-					</div>
-
-					<!-- Password Field -->
-					<div class="mb-3 relative">
-						<label for="password" class="sr-only">{t.passwordPlaceholder}</label>
-						<input
-							id="password"
-							type={showPassword ? 'text' : 'password'}
-							bind:this={passwordInput}
-							bind:value={password}
-							placeholder={t.passwordPlaceholder}
-							required
-							autocomplete="current-password"
-							aria-invalid={errorField === 'password'}
-							aria-describedby={errorField === 'password' ? 'form-error' : undefined}
-							class="h-14 w-full rounded-xl border px-4 pr-12 text-lg transition-colors focus:outline-none focus:ring-2"
-							style="background-color: {isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {errorField === 'password' ? '#ef4444' : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)')}; color: {isDark ? '#ffffff' : '#000000'}; --tw-ring-color: {errorField === 'password' ? '#ef4444' : primaryColor};"
-						/>
-						<button
-							type="button"
-							onclick={() => (showPassword = !showPassword)}
-							class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors touch-target flex items-center justify-center"
-							aria-label={showPassword ? t.hidePassword : t.showPassword}
-							aria-pressed={showPassword}
-							title={showPassword ? t.hidePassword : t.showPassword}
-						>
-							<Icon
-								name={showPassword ? 'eye-off' : 'eye'}
-								size={20}
-								color={isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'}
-							/>
-						</button>
-					</div>
-
-					<!-- Remember Me & Forgot Password Row -->
-					<div class="mb-4 flex items-center justify-between">
-						<label class="flex items-center gap-2 cursor-pointer touch-target">
-							<input
-								type="checkbox"
-								bind:checked={rememberMe}
-								class="w-5 h-5 rounded border-2 transition-colors cursor-pointer"
-								style="accent-color: {primaryColor};"
-							/>
-							<span
-								class="text-sm"
-								style="color: {isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'};"
-							>
-								{t.rememberMe}
-							</span>
-						</label>
-
-						<button
-							type="button"
-							onclick={() => goto(forgotPasswordPath)}
-							class="text-sm font-medium transition-opacity hover:opacity-70 touch-target flex items-center justify-center px-2"
-							style="color: {primaryColor};"
-						>
-							{t.forgotPassword}
-						</button>
-					</div>
-
-					<!-- Submit Button -->
-					<button
-						type="submit"
-						disabled={loading || showSuccess}
-						aria-disabled={loading || showSuccess}
-						class="flex h-14 w-full items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 disabled:opacity-50 border-2 touch-target"
-						style="background-color: {showSuccess ? '#22c55e' : primaryColor + '60'}; border-color: {showSuccess ? '#22c55e' : primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
-					>
-						{#if loading}
-							<svg
-								class="spinner w-5 h-5"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								aria-hidden="true"
-							>
-								<circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
-								<path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
-							</svg>
-							<span>{t.signingIn}</span>
-						{:else if showSuccess}
-							<Icon name="check" size={20} />
-							<span>{t.success}</span>
-						{:else}
-							<Icon name="sign-in" size={20} />
-							<span>{t.signInButton}</span>
-						{/if}
-					</button>
-				</form>
-
-				<!-- Social Login -->
-				{#if enableGoogle || enableApple}
-					<div class="my-4 flex items-center gap-3" role="separator" aria-orientation="horizontal">
-						<div class="flex-1 border-t" style="border-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"></div>
-						<span class="text-xs" style="color: {isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'};">{t.orDivider}</span>
-						<div class="flex-1 border-t" style="border-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"></div>
-					</div>
-
-					<div class="mb-4 flex flex-col gap-2" role="group" aria-label="Social login options">
-						{#if enableGoogle && onSignInWithGoogle}
-							<GoogleSignInButton onSuccess={handleGoogleSuccess} />
-						{/if}
-						{#if enableApple}
-							<AppleSignInButton />
-						{/if}
-					</div>
-				{/if}
-
-				<!-- Register Link -->
-				<div class="mt-4 text-center">
-					<p
-						class="text-sm"
-						style="color: {isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};"
-					>
-						{t.noAccount}
-						<button
-							type="button"
-							onclick={() => goto(registerPath)}
-							class="font-medium transition-opacity hover:opacity-70 touch-target inline-flex items-center justify-center px-1"
-							style="color: {primaryColor};"
-						>
-							{t.createAccount}
-						</button>
-					</p>
-				</div>
-			</div>
-		</div>
-	</main>
-
-	<!-- App Slider -->
-	{#if appSlider}
-		<div class="w-full pb-8 px-2 pt-4">
-			{@render appSlider()}
-		</div>
-	{:else}
-		<!-- Bottom padding -->
-		<div class="pb-8"></div>
-	{/if}
-</div>

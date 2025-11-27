@@ -1,108 +1,122 @@
 ---
 // Component for tracking content interactions
 interface Props {
-  contentType: 'tutorial' | 'project' | 'tool' | 'model' | 'mission' | 'vision';
-  contentId?: string;
-  contentTitle?: string;
+	contentType: 'tutorial' | 'project' | 'tool' | 'model' | 'mission' | 'vision';
+	contentId?: string;
+	contentTitle?: string;
 }
 
 const { contentType, contentId, contentTitle } = Astro.props;
 ---
 
 <script define:vars={{ contentType, contentId, contentTitle }}>
-  import { trackEvent, EVENTS } from '../scripts/analytics';
-  
-  // Track page view for content
-  document.addEventListener('DOMContentLoaded', () => {
-    const eventMap = {
-      'tutorial': EVENTS.TUTORIAL_VIEW,
-      'project': EVENTS.PROJECT_VIEW,
-      'tool': EVENTS.TOOL_VIEW,
-      'model': EVENTS.MODEL_VIEW,
-      'mission': EVENTS.MISSION_VIEW,
-      'vision': 'vision-view'
-    };
-    
-    const eventName = eventMap[contentType];
-    if (eventName) {
-      trackEvent(eventName, {
-        id: contentId || 'unknown',
-        title: contentTitle || document.title,
-        language: document.documentElement.lang
-      });
-    }
-    
-    // Track video plays
-    document.querySelectorAll('iframe[src*="youtube"], iframe[src*="vimeo"]').forEach(video => {
-      // Create intersection observer to track when video comes into view
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const src = (entry.target as HTMLIFrameElement).src;
-            trackEvent(EVENTS.VIDEO_PLAY, {
-              source: src.includes('youtube') ? 'youtube' : 'vimeo',
-              url: src,
-              contentType,
-              contentId
-            });
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.5 });
-      
-      observer.observe(video);
-    });
-    
-    // Track Figma embeds
-    document.querySelectorAll('iframe[src*="figma.com"]').forEach(embed => {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            trackEvent(EVENTS.FIGMA_EMBED_VIEW, {
-              url: (entry.target as HTMLIFrameElement).src,
-              contentType,
-              contentId
-            });
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.5 });
-      
-      observer.observe(embed);
-    });
-    
-    // Track code copy (if there are code blocks with copy buttons)
-    document.querySelectorAll('.copy-code-button, [data-copy]').forEach(button => {
-      button.addEventListener('click', () => {
-        trackEvent(EVENTS.CODE_COPY, {
-          contentType,
-          contentId,
-          location: window.location.pathname
-        });
-      });
-    });
-    
-    // Track card clicks on listing pages
-    document.querySelectorAll('.tutorial-card, .project-card, .tool-card, .model-card, .mission-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        const target = e.currentTarget as HTMLElement;
-        const link = target.querySelector('a');
-        const title = target.querySelector('h3, h4')?.textContent?.trim() || '';
-        
-        if (link) {
-          const cardType = target.className.includes('tutorial') ? 'tutorial' :
-                          target.className.includes('project') ? 'project' :
-                          target.className.includes('tool') ? 'tool' :
-                          target.className.includes('model') ? 'model' :
-                          target.className.includes('mission') ? 'mission' : 'unknown';
-          
-          trackEvent(`${cardType}-card-click`, {
-            title,
-            destination: link.href,
-            fromPage: window.location.pathname
-          });
-        }
-      });
-    });
-  });
+	import { trackEvent, EVENTS } from '../scripts/analytics';
+
+	// Track page view for content
+	document.addEventListener('DOMContentLoaded', () => {
+		const eventMap = {
+			tutorial: EVENTS.TUTORIAL_VIEW,
+			project: EVENTS.PROJECT_VIEW,
+			tool: EVENTS.TOOL_VIEW,
+			model: EVENTS.MODEL_VIEW,
+			mission: EVENTS.MISSION_VIEW,
+			vision: 'vision-view',
+		};
+
+		const eventName = eventMap[contentType];
+		if (eventName) {
+			trackEvent(eventName, {
+				id: contentId || 'unknown',
+				title: contentTitle || document.title,
+				language: document.documentElement.lang,
+			});
+		}
+
+		// Track video plays
+		document.querySelectorAll('iframe[src*="youtube"], iframe[src*="vimeo"]').forEach((video) => {
+			// Create intersection observer to track when video comes into view
+			const observer = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						if (entry.isIntersecting) {
+							const src = (entry.target as HTMLIFrameElement).src;
+							trackEvent(EVENTS.VIDEO_PLAY, {
+								source: src.includes('youtube') ? 'youtube' : 'vimeo',
+								url: src,
+								contentType,
+								contentId,
+							});
+							observer.unobserve(entry.target);
+						}
+					});
+				},
+				{ threshold: 0.5 }
+			);
+
+			observer.observe(video);
+		});
+
+		// Track Figma embeds
+		document.querySelectorAll('iframe[src*="figma.com"]').forEach((embed) => {
+			const observer = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						if (entry.isIntersecting) {
+							trackEvent(EVENTS.FIGMA_EMBED_VIEW, {
+								url: (entry.target as HTMLIFrameElement).src,
+								contentType,
+								contentId,
+							});
+							observer.unobserve(entry.target);
+						}
+					});
+				},
+				{ threshold: 0.5 }
+			);
+
+			observer.observe(embed);
+		});
+
+		// Track code copy (if there are code blocks with copy buttons)
+		document.querySelectorAll('.copy-code-button, [data-copy]').forEach((button) => {
+			button.addEventListener('click', () => {
+				trackEvent(EVENTS.CODE_COPY, {
+					contentType,
+					contentId,
+					location: window.location.pathname,
+				});
+			});
+		});
+
+		// Track card clicks on listing pages
+		document
+			.querySelectorAll('.tutorial-card, .project-card, .tool-card, .model-card, .mission-card')
+			.forEach((card) => {
+				card.addEventListener('click', (e) => {
+					const target = e.currentTarget as HTMLElement;
+					const link = target.querySelector('a');
+					const title = target.querySelector('h3, h4')?.textContent?.trim() || '';
+
+					if (link) {
+						const cardType = target.className.includes('tutorial')
+							? 'tutorial'
+							: target.className.includes('project')
+								? 'project'
+								: target.className.includes('tool')
+									? 'tool'
+									: target.className.includes('model')
+										? 'model'
+										: target.className.includes('mission')
+											? 'mission'
+											: 'unknown';
+
+						trackEvent(`${cardType}-card-click`, {
+							title,
+							destination: link.href,
+							fromPage: window.location.pathname,
+						});
+					}
+				});
+			});
+	});
 </script>

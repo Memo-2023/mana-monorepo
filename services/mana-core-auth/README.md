@@ -37,34 +37,40 @@ Central authentication and credit management system for the Mana Universe ecosys
 ### Development Setup
 
 1. **Install dependencies**
+
    ```bash
    pnpm install
    ```
 
 2. **Generate JWT keys**
+
    ```bash
    cd mana-core-auth
    ./scripts/generate-keys.sh
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env and add your JWT keys and other configuration
    ```
 
 4. **Start PostgreSQL and Redis** (using Docker)
+
    ```bash
    docker-compose up postgres redis -d
    ```
 
 5. **Run migrations**
+
    ```bash
    pnpm migration:generate
    pnpm migration:run
    ```
 
 6. **Start development server**
+
    ```bash
    pnpm start:dev
    ```
@@ -74,18 +80,21 @@ Central authentication and credit management system for the Mana Universe ecosys
 ### Production Deployment (Docker)
 
 1. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env with production values
    ```
 
 2. **Generate JWT keys**
+
    ```bash
    ./mana-core-auth/scripts/generate-keys.sh
    # Add the generated keys to .env
    ```
 
 3. **Start all services**
+
    ```bash
    docker-compose up -d
    ```
@@ -101,26 +110,31 @@ Central authentication and credit management system for the Mana Universe ecosys
 ### Authentication
 
 **POST** `/api/v1/auth/register`
+
 - Register a new user
 - Body: `{ email, password, name? }`
 - Returns: User object
 
 **POST** `/api/v1/auth/login`
+
 - Login with email and password
 - Body: `{ email, password, deviceId?, deviceName? }`
 - Returns: `{ user, accessToken, refreshToken, expiresIn, tokenType }`
 
 **POST** `/api/v1/auth/refresh`
+
 - Refresh access token
 - Body: `{ refreshToken }`
 - Returns: New token pair
 
 **POST** `/api/v1/auth/logout`
+
 - Logout and revoke session
 - Requires: Bearer token
 - Returns: Success message
 
 **POST** `/api/v1/auth/validate`
+
 - Validate a JWT token
 - Body: `{ token }`
 - Returns: `{ valid, payload }`
@@ -128,27 +142,32 @@ Central authentication and credit management system for the Mana Universe ecosys
 ### Credits
 
 **GET** `/api/v1/credits/balance`
+
 - Get current credit balance
 - Requires: Bearer token
 - Returns: `{ balance, freeCreditsRemaining, totalEarned, totalSpent }`
 
 **POST** `/api/v1/credits/use`
+
 - Deduct credits from balance
 - Requires: Bearer token
 - Body: `{ amount, appId, description, idempotencyKey?, metadata? }`
 - Returns: Transaction details
 
 **GET** `/api/v1/credits/transactions?limit=50&offset=0`
+
 - Get transaction history
 - Requires: Bearer token
 - Returns: Array of transactions
 
 **GET** `/api/v1/credits/purchases`
+
 - Get purchase history
 - Requires: Bearer token
 - Returns: Array of purchases
 
 **GET** `/api/v1/credits/packages`
+
 - Get available credit packages
 - Requires: Bearer token
 - Returns: Array of packages
@@ -156,6 +175,7 @@ Central authentication and credit management system for the Mana Universe ecosys
 ## Database Schema
 
 ### Auth Schema
+
 - `auth.users` - User accounts
 - `auth.sessions` - Active sessions
 - `auth.passwords` - Hashed passwords
@@ -165,6 +185,7 @@ Central authentication and credit management system for the Mana Universe ecosys
 - `auth.security_events` - Security audit log
 
 ### Credits Schema
+
 - `credits.balances` - User credit balances
 - `credits.transactions` - Transaction ledger
 - `credits.packages` - Available credit packages
@@ -176,6 +197,7 @@ Central authentication and credit management system for the Mana Universe ecosys
 See `.env.example` for all available configuration options.
 
 Key variables:
+
 - `DATABASE_URL` - PostgreSQL connection string
 - `JWT_PUBLIC_KEY` - RS256 public key (PEM format)
 - `JWT_PRIVATE_KEY` - RS256 private key (PEM format)

@@ -1,386 +1,360 @@
 ---
-import { getLangFromUrl, useTranslations } from "../utils/i18n";
+import { getLangFromUrl, useTranslations } from '../utils/i18n';
 
 interface Props {
-  defaultType?: "mission" | "tutorial" | "vision";
-  showTitle?: boolean;
-  customTitle?: string;
-  customDescription?: string;
+	defaultType?: 'mission' | 'tutorial' | 'vision';
+	showTitle?: boolean;
+	customTitle?: string;
+	customDescription?: string;
 }
 
-const {
-  defaultType = "mission",
-  showTitle = true,
-  customTitle,
-  customDescription,
-} = Astro.props;
+const { defaultType = 'mission', showTitle = true, customTitle, customDescription } = Astro.props;
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 ---
 
 <div class="content-submission">
-  {showTitle && <h2>{customTitle || t("join.submissionTitle")}</h2>}
-  <p class="submission-description">
-    {customDescription || t("join.submissionDesc")}
-  </p>
+	{showTitle && <h2>{customTitle || t('join.submissionTitle')}</h2>}
+	<p class="submission-description">
+		{customDescription || t('join.submissionDesc')}
+	</p>
 
-  <form class="submission-form" id="contentSubmissionForm">
-    <div class="form-group">
-      <label for="contentType">{t("join.submissionType")}</label>
-      <select id="contentType" name="contentType" required>
-        <option value="mission" selected={defaultType === "mission"}
-          >{t("join.submissionMission")}</option
-        >
-        <option value="tutorial" selected={defaultType === "tutorial"}
-          >{t("join.submissionTutorial")}</option
-        >
-        <option value="vision" selected={defaultType === "vision"}
-          >{t("join.submissionVision")}</option
-        >
-      </select>
-    </div>
+	<form class="submission-form" id="contentSubmissionForm">
+		<div class="form-group">
+			<label for="contentType">{t('join.submissionType')}</label>
+			<select id="contentType" name="contentType" required>
+				<option value="mission" selected={defaultType === 'mission'}
+					>{t('join.submissionMission')}</option
+				>
+				<option value="tutorial" selected={defaultType === 'tutorial'}
+					>{t('join.submissionTutorial')}</option
+				>
+				<option value="vision" selected={defaultType === 'vision'}
+					>{t('join.submissionVision')}</option
+				>
+			</select>
+		</div>
 
-    <div class="form-group">
-      <label for="title">{t("join.submissionTitle")}</label>
-      <input
-        type="text"
-        id="title"
-        name="title"
-        placeholder={t("join.submissionTitlePlaceholder")}
-        required
-      />
-    </div>
+		<div class="form-group">
+			<label for="title">{t('join.submissionTitle')}</label>
+			<input
+				type="text"
+				id="title"
+				name="title"
+				placeholder={t('join.submissionTitlePlaceholder')}
+				required
+			/>
+		</div>
 
-    <div class="form-group">
-      <label for="description">{t("join.submissionDesc")}</label>
-      <textarea
-        id="description"
-        name="description"
-        placeholder={t("join.submissionDescPlaceholder")}
-        rows="4"
-        required></textarea>
-    </div>
+		<div class="form-group">
+			<label for="description">{t('join.submissionDesc')}</label>
+			<textarea
+				id="description"
+				name="description"
+				placeholder={t('join.submissionDescPlaceholder')}
+				rows="4"
+				required></textarea>
+		</div>
 
-    <div class="form-group">
-      <label for="email">{t("join.submissionEmail")}</label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        placeholder={t("join.submissionEmailPlaceholder")}
-        required
-      />
-    </div>
+		<div class="form-group">
+			<label for="email">{t('join.submissionEmail')}</label>
+			<input
+				type="email"
+				id="email"
+				name="email"
+				placeholder={t('join.submissionEmailPlaceholder')}
+				required
+			/>
+		</div>
 
-    <button type="submit" class="submit-button"
-      >{t("join.submissionSubmit")}</button
-    >
-  </form>
+		<button type="submit" class="submit-button">{t('join.submissionSubmit')}</button>
+	</form>
 
-  <div id="submissionSuccess" class="submission-success" style="display: none;">
-    <p class="success-title">{t("join.submissionSuccessTitle")}</p>
-    <p class="success-message">{t("join.submissionSuccessMessage")}</p>
-  </div>
+	<div id="submissionSuccess" class="submission-success" style="display: none;">
+		<p class="success-title">{t('join.submissionSuccessTitle')}</p>
+		<p class="success-message">{t('join.submissionSuccessMessage')}</p>
+	</div>
 </div>
 
 <style>
-  .content-submission {
-    background-color: var(--card-bg);
-    border-radius: 1rem;
-    padding: 2.5rem;
-    border: 1px solid var(--border-color);
-    margin-bottom: 2rem;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-    transition: box-shadow 0.3s ease;
-  }
+	.content-submission {
+		background-color: var(--card-bg);
+		border-radius: 1rem;
+		padding: 2.5rem;
+		border: 1px solid var(--border-color);
+		margin-bottom: 2rem;
+		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+		transition: box-shadow 0.3s ease;
+	}
 
-  /* Heller Modus */
-  :root:not(.dark) .content-submission {
-    background-color: var(--card-bg);
-  }
+	/* Heller Modus */
+	:root:not(.dark) .content-submission {
+		background-color: var(--card-bg);
+	}
 
-  .content-submission:hover {
-    box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.08);
-  }
+	.content-submission:hover {
+		box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.08);
+	}
 
-  h2 {
-    margin-top: 0;
-    margin-bottom: 1rem;
-    font-size: 1.75rem;
-    background: linear-gradient(90deg, var(--accent-color), #fb923c);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    display: inline-block;
-    position: relative;
-  }
+	h2 {
+		margin-top: 0;
+		margin-bottom: 1rem;
+		font-size: 1.75rem;
+		background: linear-gradient(90deg, var(--accent-color), #fb923c);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		display: inline-block;
+		position: relative;
+	}
 
-  h2::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -0.25rem;
-    width: 100%;
-    height: 3px;
-    background: linear-gradient(90deg, var(--accent-color), #fb923c);
-    border-radius: 1.5px;
-  }
+	h2::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		bottom: -0.25rem;
+		width: 100%;
+		height: 3px;
+		background: linear-gradient(90deg, var(--accent-color), #fb923c);
+		border-radius: 1.5px;
+	}
 
-  .submission-description {
-    margin-bottom: 2rem;
-    color: var(--text-muted);
-    font-size: 1.1rem;
-    line-height: 1.6;
-    max-width: 600px;
-  }
+	.submission-description {
+		margin-bottom: 2rem;
+		color: var(--text-muted);
+		font-size: 1.1rem;
+		line-height: 1.6;
+		max-width: 600px;
+	}
 
-  .submission-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
+	.submission-form {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
 
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
 
-  label {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: var(--text-color);
-  }
+	label {
+		font-weight: 600;
+		font-size: 0.95rem;
+		color: var(--text-color);
+	}
 
-  input,
-  select,
-  textarea {
-    padding: 0.9rem 1rem;
-    border-radius: 0.5rem;
-    border: 1.5px solid var(--border-color);
-    background-color: var(--background-color);
-    color: var(--text-color);
-    font-size: 1rem;
-    font-family: inherit;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-  }
+	input,
+	select,
+	textarea {
+		padding: 0.9rem 1rem;
+		border-radius: 0.5rem;
+		border: 1.5px solid var(--border-color);
+		background-color: var(--background-color);
+		color: var(--text-color);
+		font-size: 1rem;
+		font-family: inherit;
+		transition: all 0.2s ease;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+	}
 
-  /* Heller Modus für Eingabefelder */
-  :root:not(.dark) input,
-  :root:not(.dark) select,
-  :root:not(.dark) textarea {
-    background-color: var(--background-color);
-  }
+	/* Heller Modus für Eingabefelder */
+	:root:not(.dark) input,
+	:root:not(.dark) select,
+	:root:not(.dark) textarea {
+		background-color: var(--background-color);
+	}
 
-  input:hover,
-  select:hover,
-  textarea:hover {
-    border-color: var(--accent-color);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.04);
-  }
+	input:hover,
+	select:hover,
+	textarea:hover {
+		border-color: var(--accent-color);
+		box-shadow: 0 3px 6px rgba(0, 0, 0, 0.04);
+	}
 
-  input:focus,
-  select:focus,
-  textarea:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.15);
-  }
+	input:focus,
+	select:focus,
+	textarea:focus {
+		outline: none;
+		border-color: var(--accent-color);
+		box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.15);
+	}
 
-  textarea {
-    min-height: 120px;
-    resize: vertical;
-  }
+	textarea {
+		min-height: 120px;
+		resize: vertical;
+	}
 
-  .submit-button {
-    background: linear-gradient(90deg, var(--accent-color), #fb923c);
-    color: white;
-    border: none;
-    border-radius: 0.5rem;
-    padding: 0.9rem 2rem;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 1rem;
-    align-self: flex-start;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
+	.submit-button {
+		background: linear-gradient(90deg, var(--accent-color), #fb923c);
+		color: white;
+		border: none;
+		border-radius: 0.5rem;
+		padding: 0.9rem 2rem;
+		font-size: 1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		margin-top: 1rem;
+		align-self: flex-start;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	}
 
-  .submit-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-  }
+	.submit-button:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+	}
 
-  .submit-button:active {
-    transform: translateY(1px);
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
-  }
+	.submit-button:active {
+		transform: translateY(1px);
+		box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+	}
 
-  .submission-success {
-    background-color: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    border-radius: 0.75rem;
-    padding: 2rem;
-    margin-top: 2rem;
-    text-align: center;
-    animation: fadeIn 0.5s ease-in-out;
-    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.1);
-  }
+	.submission-success {
+		background-color: rgba(16, 185, 129, 0.1);
+		border: 1px solid rgba(16, 185, 129, 0.3);
+		border-radius: 0.75rem;
+		padding: 2rem;
+		margin-top: 2rem;
+		text-align: center;
+		animation: fadeIn 0.5s ease-in-out;
+		box-shadow: 0 4px 10px rgba(16, 185, 129, 0.1);
+	}
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
 
-  .submission-success .success-title {
-    color: #10b981;
-    margin: 0 0 1rem 0;
-    font-weight: 700;
-    font-size: 1.5rem;
-  }
+	.submission-success .success-title {
+		color: #10b981;
+		margin: 0 0 1rem 0;
+		font-weight: 700;
+		font-size: 1.5rem;
+	}
 
-  .submission-success .success-message {
-    color: var(--text-color);
-    margin: 0;
-    font-size: 1.05rem;
-    line-height: 1.7;
-  }
+	.submission-success .success-message {
+		color: var(--text-color);
+		margin: 0;
+		font-size: 1.05rem;
+		line-height: 1.7;
+	}
 
-  @media (max-width: 768px) {
-    .content-submission {
-      padding: 1.5rem;
-    }
+	@media (max-width: 768px) {
+		.content-submission {
+			padding: 1.5rem;
+		}
 
-    h2 {
-      font-size: 1.5rem;
-    }
+		h2 {
+			font-size: 1.5rem;
+		}
 
-    .submission-description {
-      font-size: 1rem;
-    }
+		.submission-description {
+			font-size: 1rem;
+		}
 
-    .submit-button {
-      width: 100%;
-      justify-content: center;
-      text-align: center;
-      display: flex;
-    }
-  }
+		.submit-button {
+			width: 100%;
+			justify-content: center;
+			text-align: center;
+			display: flex;
+		}
+	}
 </style>
 
 <script>
-  declare global {
-    interface Window {
-      plausible: (
-        eventName: string,
-        options?: { props?: Record<string, string> }
-      ) => void;
-    }
-  }
+	declare global {
+		interface Window {
+			plausible: (eventName: string, options?: { props?: Record<string, string> }) => void;
+		}
+	}
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById(
-      "contentSubmissionForm"
-    ) as HTMLFormElement;
-    const successMessage = document.getElementById("submissionSuccess");
-    const contentType = document.getElementById(
-      "contentType"
-    ) as HTMLSelectElement;
-    const title = document.getElementById("title") as HTMLInputElement;
-    const description = document.getElementById(
-      "description"
-    ) as HTMLTextAreaElement;
-    const email = document.getElementById("email") as HTMLInputElement;
+	document.addEventListener('DOMContentLoaded', () => {
+		const form = document.getElementById('contentSubmissionForm') as HTMLFormElement;
+		const successMessage = document.getElementById('submissionSuccess');
+		const contentType = document.getElementById('contentType') as HTMLSelectElement;
+		const title = document.getElementById('title') as HTMLInputElement;
+		const description = document.getElementById('description') as HTMLTextAreaElement;
+		const email = document.getElementById('email') as HTMLInputElement;
 
-    if (
-      !form ||
-      !successMessage ||
-      !contentType ||
-      !title ||
-      !description ||
-      !email
-    )
-      return;
+		if (!form || !successMessage || !contentType || !title || !description || !email) return;
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
 
-      // Sammle Formulardaten
-      const formData = {
-        contentType: contentType.value,
-        title: title.value,
-        description: description.value,
-        email: email.value,
-      };
+			// Sammle Formulardaten
+			const formData = {
+				contentType: contentType.value,
+				title: title.value,
+				description: description.value,
+				email: email.value,
+			};
 
-      // Track content submission attempt
-      if (typeof window.plausible === "function") {
-        window.plausible("content-submit", {
-          props: {
-            type: contentType.value,
-            title: title.value,
-            email: email.value,
-          },
-        });
-      }
+			// Track content submission attempt
+			if (typeof window.plausible === 'function') {
+				window.plausible('content-submit', {
+					props: {
+						type: contentType.value,
+						title: title.value,
+						email: email.value,
+					},
+				});
+			}
 
-      try {
-        // Sende die Daten an die Netlify-Funktion
-        const response = await fetch("/.netlify/functions/content-submission", {
-          method: "POST",
-          body: JSON.stringify(formData),
-        });
+			try {
+				// Sende die Daten an die Netlify-Funktion
+				const response = await fetch('/.netlify/functions/content-submission', {
+					method: 'POST',
+					body: JSON.stringify(formData),
+				});
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || "Submission failed");
-        }
+				if (!response.ok) {
+					const error = await response.json();
+					throw new Error(error.error || 'Submission failed');
+				}
 
-        // Bei erfolgreicher Übermittlung
-        form.reset();
-        successMessage.style.display = "block";
+				// Bei erfolgreicher Übermittlung
+				form.reset();
+				successMessage.style.display = 'block';
 
-        // Track successful submission
-        if (typeof window.plausible === "function") {
-          window.plausible("content-success", {
-            props: {
-              type: contentType.value,
-              title: title.value,
-              email: email.value,
-            },
-          });
-        }
+				// Track successful submission
+				if (typeof window.plausible === 'function') {
+					window.plausible('content-success', {
+						props: {
+							type: contentType.value,
+							title: title.value,
+							email: email.value,
+						},
+					});
+				}
 
-        // Erfolgs-Nachricht nach 8 Sekunden ausblenden
-        setTimeout(() => {
-          successMessage.style.display = "none";
-        }, 8000);
-      } catch (error: unknown) {
-        // Track error
-        if (typeof window.plausible === "function") {
-          window.plausible("content-error", {
-            props: {
-              type: contentType.value,
-              title: title.value,
-              email: email.value,
-              error: error instanceof Error ? error.message : String(error),
-            },
-          });
-        }
+				// Erfolgs-Nachricht nach 8 Sekunden ausblenden
+				setTimeout(() => {
+					successMessage.style.display = 'none';
+				}, 8000);
+			} catch (error: unknown) {
+				// Track error
+				if (typeof window.plausible === 'function') {
+					window.plausible('content-error', {
+						props: {
+							type: contentType.value,
+							title: title.value,
+							email: email.value,
+							error: error instanceof Error ? error.message : String(error),
+						},
+					});
+				}
 
-        // Fehlermeldung anzeigen
-        alert(
-          "Es gab einen Fehler bei der Übermittlung. Bitte versuche es später erneut."
-        );
-      }
-    });
-  });
+				// Fehlermeldung anzeigen
+				alert('Es gab einen Fehler bei der Übermittlung. Bitte versuche es später erneut.');
+			}
+		});
+	});
 </script>

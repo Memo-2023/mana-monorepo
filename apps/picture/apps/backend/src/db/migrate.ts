@@ -5,22 +5,22 @@ import { getDb, closeConnection } from './connection';
 dotenv.config();
 
 async function runMigrations() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error('DATABASE_URL is not set');
-  }
+	const databaseUrl = process.env.DATABASE_URL;
+	if (!databaseUrl) {
+		throw new Error('DATABASE_URL is not set');
+	}
 
-  const db = getDb(databaseUrl);
+	const db = getDb(databaseUrl);
 
-  console.log('Running migrations...');
+	console.log('Running migrations...');
 
-  await migrate(db, { migrationsFolder: './src/db/migrations' });
+	await migrate(db, { migrationsFolder: './src/db/migrations' });
 
-  console.log('Migrations complete!');
-  await closeConnection();
+	console.log('Migrations complete!');
+	await closeConnection();
 }
 
 runMigrations().catch((error) => {
-  console.error('Migration failed:', error);
-  process.exit(1);
+	console.error('Migration failed:', error);
+	process.exit(1);
 });

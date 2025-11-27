@@ -26,8 +26,7 @@ const { Content } = await faq.render();
 				stroke="currentColor"
 				stroke-width="2"
 				stroke-linecap="round"
-				stroke-linejoin="round"
-			></path>
+				stroke-linejoin="round"></path>
 		</svg>
 	</summary>
 	<div class="faq-answer">
@@ -37,7 +36,7 @@ const { Content } = await faq.render();
 
 <style>
 	.faq-item {
-		@apply bg-dark-elevated border border-dark-border rounded-xl overflow-hidden transition-all duration-200;
+		@apply overflow-hidden rounded-xl border border-dark-border bg-dark-elevated transition-all duration-200;
 	}
 
 	.faq-item:hover {
@@ -45,8 +44,8 @@ const { Content } = await faq.render();
 	}
 
 	.faq-question {
-		@apply flex items-center justify-between w-full p-6 cursor-pointer select-none text-left;
-		@apply font-medium text-lg text-gray-100;
+		@apply flex w-full cursor-pointer select-none items-center justify-between p-6 text-left;
+		@apply text-lg font-medium text-gray-100;
 	}
 
 	.faq-question:hover {
@@ -54,7 +53,7 @@ const { Content } = await faq.render();
 	}
 
 	.chevron {
-		@apply flex-shrink-0 ml-4 text-gray-400 transition-transform duration-200;
+		@apply ml-4 flex-shrink-0 text-gray-400 transition-transform duration-200;
 	}
 
 	.group[open] .chevron {
@@ -62,16 +61,16 @@ const { Content } = await faq.render();
 	}
 
 	.faq-answer {
-		@apply px-6 pb-6 text-gray-300 prose prose-invert max-w-none;
+		@apply prose prose-invert max-w-none px-6 pb-6 text-gray-300;
 	}
 
 	/* Markdown content styling */
 	.faq-answer :global(h2) {
-		@apply text-xl font-semibold text-gray-100 mt-6 mb-3;
+		@apply mb-3 mt-6 text-xl font-semibold text-gray-100;
 	}
 
 	.faq-answer :global(h3) {
-		@apply text-lg font-semibold text-gray-200 mt-4 mb-2;
+		@apply mb-2 mt-4 text-lg font-semibold text-gray-200;
 	}
 
 	.faq-answer :global(p) {
@@ -80,7 +79,7 @@ const { Content } = await faq.render();
 
 	.faq-answer :global(ul),
 	.faq-answer :global(ol) {
-		@apply mb-4 pl-6 space-y-2;
+		@apply mb-4 space-y-2 pl-6;
 	}
 
 	.faq-answer :global(li) {
@@ -88,7 +87,7 @@ const { Content } = await faq.render();
 	}
 
 	.faq-answer :global(strong) {
-		@apply text-gray-100 font-semibold;
+		@apply font-semibold text-gray-100;
 	}
 
 	.faq-answer :global(a) {
@@ -96,26 +95,26 @@ const { Content } = await faq.render();
 	}
 
 	.faq-answer :global(code) {
-		@apply bg-dark-bg px-1.5 py-0.5 rounded text-sm font-mono text-primary;
+		@apply rounded bg-dark-bg px-1.5 py-0.5 font-mono text-sm text-primary;
 	}
 
 	.faq-answer :global(pre) {
-		@apply bg-dark-bg p-4 rounded-lg overflow-x-auto my-4;
+		@apply my-4 overflow-x-auto rounded-lg bg-dark-bg p-4;
 	}
 
 	.faq-answer :global(table) {
-		@apply w-full border-collapse my-4;
+		@apply my-4 w-full border-collapse;
 	}
 
 	.faq-answer :global(th) {
-		@apply bg-dark-bg text-left p-3 font-semibold text-gray-100 border border-dark-border;
+		@apply border border-dark-border bg-dark-bg p-3 text-left font-semibold text-gray-100;
 	}
 
 	.faq-answer :global(td) {
-		@apply p-3 border border-dark-border;
+		@apply border border-dark-border p-3;
 	}
 
 	.faq-answer :global(blockquote) {
-		@apply border-l-4 border-primary pl-4 italic text-gray-400 my-4;
+		@apply my-4 border-l-4 border-primary pl-4 italic text-gray-400;
 	}
 </style>

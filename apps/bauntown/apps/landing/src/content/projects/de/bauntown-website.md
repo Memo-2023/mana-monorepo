@@ -1,15 +1,15 @@
 ---
-title: "BaunTown"
-description: "Eine Community-Plattform zum Teilen von Wissen, Tools und Ressourcen, um Entwicklern zu helfen, gemeinsam bessere digitale Produkte zu erstellen."
+title: 'BaunTown'
+description: 'Eine Community-Plattform zum Teilen von Wissen, Tools und Ressourcen, um Entwicklern zu helfen, gemeinsam bessere digitale Produkte zu erstellen.'
 pubDate: 2024-04-04
-category: "Web"
+category: 'Web'
 featured: true
-status: "active"
-technologies: ["Astro", "TypeScript", "CSS", "Markdown", "Netlify", "Stripe"]
-image: "/images/projects/bauntown-project-bauntown-platform.png"
-author: "Till Schneider"
-githubUrl: "https://github.com/bauntown/website"
-demoUrl: "https://baun.town"
+status: 'active'
+technologies: ['Astro', 'TypeScript', 'CSS', 'Markdown', 'Netlify', 'Stripe']
+image: '/images/projects/bauntown-project-bauntown-platform.png'
+author: 'Till Schneider'
+githubUrl: 'https://github.com/bauntown/website'
+demoUrl: 'https://baun.town'
 ---
 
 # BaunTown Plattform
@@ -19,6 +19,7 @@ BaunTown ist unsere zentrale Wissensaustausch-Plattform, die geschaffen wurde, u
 ## Die Herausforderung
 
 Nach Workshops und Schulungen standen wir immer wieder vor denselben Problemen:
+
 - Teilnehmer fragten nach Assets, Dateien und Dokumentation
 - Kein zentraler Ort zur Speicherung und gemeinsamen Nutzung von Materialien
 - Schwierigkeiten bei der Nachverfolgung, wer Zugang zu welchen Ressourcen hat
@@ -39,6 +40,7 @@ BaunTown bietet:
 ## Technische Umsetzung
 
 Die Plattform nutzt einen modernen Tech-Stack:
+
 - **Astro** für statische Site-Generierung mit minimalem JavaScript
 - **Content Collections** für strukturierte, typsichere Inhalte
 - **Markdown/MDX** für einfache Inhaltserstellung
@@ -50,6 +52,7 @@ Die Plattform nutzt einen modernen Tech-Stack:
 ## Zukunftsvision
 
 BaunTown wird sich weiterentwickeln mit:
+
 - Erweiterter Tutorial-Bibliothek zu Entwicklungs- und Design-Themen
 - Detailliertere Projektvorstellungen und Fallstudien
 - Mitgliederprofile für Mitwirkende

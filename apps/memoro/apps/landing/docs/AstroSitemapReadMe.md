@@ -37,14 +37,14 @@ Yarn
 Terminal window
 npm install @astrojs/sitemap
 
-Then, apply the integration to your astro.config.* file using the integrations property:
+Then, apply the integration to your astro.config.\* file using the integrations property:
 
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  // ...
-  integrations: [sitemap()],
+// ...
+integrations: [sitemap()],
 });
 
 Usage
@@ -57,9 +57,9 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://stargazers.club',
-  integrations: [sitemap()],
-  // ...
+site: 'https://stargazers.club',
+integrations: [sitemap()],
+// ...
 });
 
 With the sitemap integration configured, sitemap-index.xml and sitemap-0.xml files will be added to your output directory when building your site.
@@ -74,6 +74,7 @@ Sitemap link in <head>
 Add a <link rel="sitemap"> element to your site’s <head> pointing to the sitemap index file:
 
 src/layouts/Layout.astro
+
 <head>
   <link rel="sitemap" href="/sitemap-index.xml" />
 </head>
@@ -82,7 +83,7 @@ Sitemap link in robots.txt
 If you have a robots.txt for your website, you can add the URL for the sitemap index to help crawlers:
 
 public/robots.txt
-User-agent: *
+User-agent: \*
 Allow: /
 
 Sitemap: https://<YOUR SITE>/sitemap-index.xml
@@ -93,15 +94,15 @@ src/pages/robots.txt.ts
 import type { APIRoute } from 'astro';
 
 const getRobotsTxt = (sitemapURL: URL) => `
-User-agent: *
+User-agent: \*
 Allow: /
 
 Sitemap: ${sitemapURL.href}
 `;
 
 export const GET: APIRoute = ({ site }) => {
-  const sitemapURL = new URL('sitemap-index.xml', site);
-  return new Response(getRobotsTxt(sitemapURL));
+const sitemapURL = new URL('sitemap-index.xml', site);
+return new Response(getRobotsTxt(sitemapURL));
 };
 
 Configuration
@@ -112,11 +113,11 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  integrations: [
-    sitemap({
-      // configuration options
-    }),
-  ],
+integrations: [
+sitemap({
+// configuration options
+}),
+],
 });
 
 filter
@@ -127,12 +128,12 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://stargazers.club',
-  integrations: [
-    sitemap({
-      filter: (page) => page !== 'https://stargazers.club/secret-vip-lounge/',
-    }),
-  ],
+site: 'https://stargazers.club',
+integrations: [
+sitemap({
+filter: (page) => page !== 'https://stargazers.club/secret-vip-lounge/',
+}),
+],
 });
 
 The function will be called for every page on your site. The page function parameter is the full URL of the page currently under consideration, including your site domain. Return true to include the page in your sitemap, and false to leave it out.
@@ -144,16 +145,16 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://stargazers.club',
-  integrations: [
-    sitemap({
-      filter: (page) =>
-        page !== 'https://stargazers.club/secret-vip-lounge-1/' &&
-        page !== 'https://stargazers.club/secret-vip-lounge-2/' &&
-        page !== 'https://stargazers.club/secret-vip-lounge-3/' &&
-        page !== 'https://stargazers.club/secret-vip-lounge-4/',
-    }),
-  ],
+site: 'https://stargazers.club',
+integrations: [
+sitemap({
+filter: (page) =>
+page !== 'https://stargazers.club/secret-vip-lounge-1/' &&
+page !== 'https://stargazers.club/secret-vip-lounge-2/' &&
+page !== 'https://stargazers.club/secret-vip-lounge-3/' &&
+page !== 'https://stargazers.club/secret-vip-lounge-4/',
+}),
+],
 });
 
 customPages
@@ -164,12 +165,12 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://stargazers.club',
-  integrations: [
-    sitemap({
-      customPages: ['https://stargazers.club/external-page', 'https://stargazers.club/external-page2'],
-    }),
-  ],
+site: 'https://stargazers.club',
+integrations: [
+sitemap({
+customPages: ['https://stargazers.club/external-page', 'https://stargazers.club/external-page2'],
+}),
+],
 });
 
 entryLimit
@@ -180,12 +181,12 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://stargazers.club',
-  integrations: [
-    sitemap({
-      entryLimit: 10000,
-    }),
-  ],
+site: 'https://stargazers.club',
+integrations: [
+sitemap({
+entryLimit: 10000,
+}),
+],
 });
 
 changefreq, lastmod, and priority
@@ -202,14 +203,14 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://stargazers.club',
-  integrations: [
-    sitemap({
-      changefreq: 'weekly',
-      priority: 0.7,
-      lastmod: new Date('2022-02-24'),
-    }),
-  ],
+site: 'https://stargazers.club',
+integrations: [
+sitemap({
+changefreq: 'weekly',
+priority: 0.7,
+lastmod: new Date('2022-02-24'),
+}),
+],
 });
 
 serialize
@@ -235,22 +236,22 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://stargazers.club',
-  integrations: [
-    sitemap({
-      serialize(item) {
-        if (/exclude-from-sitemap/.test(item.url)) {
-          return undefined;
-        }
-        if (/your-special-page/.test(item.url)) {
-          item.changefreq = 'daily';
-          item.lastmod = new Date();
-          item.priority = 0.9;
-        }
-        return item;
-      },
-    }),
-  ],
+site: 'https://stargazers.club',
+integrations: [
+sitemap({
+serialize(item) {
+if (/exclude-from-sitemap/.test(item.url)) {
+return undefined;
+}
+if (/your-special-page/.test(item.url)) {
+item.changefreq = 'daily';
+item.lastmod = new Date();
+item.priority = 0.9;
+}
+return item;
+},
+}),
+],
 });
 
 i18n
@@ -269,49 +270,49 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://stargazers.club',
-  integrations: [
-    sitemap({
-      i18n: {
-        defaultLocale: 'en', // All urls that don't contain `es` or `fr` after `https://stargazers.club/` will be treated as default locale, i.e. `en`
-        locales: {
-          en: 'en-US', // The `defaultLocale` value must present in `locales` keys
-          es: 'es-ES',
-          fr: 'fr-CA',
-        },
-      },
-    }),
-  ],
+site: 'https://stargazers.club',
+integrations: [
+sitemap({
+i18n: {
+defaultLocale: 'en', // All urls that don't contain `es` or `fr` after `https://stargazers.club/` will be treated as default locale, i.e. `en`
+locales: {
+en: 'en-US', // The `defaultLocale` value must present in `locales` keys
+es: 'es-ES',
+fr: 'fr-CA',
+},
+},
+}),
+],
 });
 
 The resulting sitemap looks like this:
 
 sitemap-0.xml
 ...
-  <url>
-    <loc>https://stargazers.club/</loc>
-    <xhtml:link rel="alternate" hreflang="en-US" href="https://stargazers.club/"/>
-    <xhtml:link rel="alternate" hreflang="es-ES" href="https://stargazers.club/es/"/>
-    <xhtml:link rel="alternate" hreflang="fr-CA" href="https://stargazers.club/fr/"/>
-  </url>
-  <url>
-    <loc>https://stargazers.club/es/</loc>
-    <xhtml:link rel="alternate" hreflang="en-US" href="https://stargazers.club/"/>
-    <xhtml:link rel="alternate" hreflang="es-ES" href="https://stargazers.club/es/"/>
-    <xhtml:link rel="alternate" hreflang="fr-CA" href="https://stargazers.club/fr/"/>
-  </url>
-  <url>
-    <loc>https://stargazers.club/fr/</loc>
-    <xhtml:link rel="alternate" hreflang="en-US" href="https://stargazers.club/"/>
-    <xhtml:link rel="alternate" hreflang="es-ES" href="https://stargazers.club/es/"/>
-    <xhtml:link rel="alternate" hreflang="fr-CA" href="https://stargazers.club/fr/"/>
-  </url>
-  <url>
-    <loc>https://stargazers.club/es/second-page/</loc>
-    <xhtml:link rel="alternate" hreflang="es-ES" href="https://stargazers.club/es/second-page/"/>
-    <xhtml:link rel="alternate" hreflang="fr-CA" href="https://stargazers.club/fr/second-page/"/>
-    <xhtml:link rel="alternate" hreflang="en-US" href="https://stargazers.club/second-page/"/>
-  </url>
+<url>
+<loc>https://stargazers.club/</loc>
+<xhtml:link rel="alternate" hreflang="en-US" href="https://stargazers.club/"/>
+<xhtml:link rel="alternate" hreflang="es-ES" href="https://stargazers.club/es/"/>
+<xhtml:link rel="alternate" hreflang="fr-CA" href="https://stargazers.club/fr/"/>
+</url>
+<url>
+<loc>https://stargazers.club/es/</loc>
+<xhtml:link rel="alternate" hreflang="en-US" href="https://stargazers.club/"/>
+<xhtml:link rel="alternate" hreflang="es-ES" href="https://stargazers.club/es/"/>
+<xhtml:link rel="alternate" hreflang="fr-CA" href="https://stargazers.club/fr/"/>
+</url>
+<url>
+<loc>https://stargazers.club/fr/</loc>
+<xhtml:link rel="alternate" hreflang="en-US" href="https://stargazers.club/"/>
+<xhtml:link rel="alternate" hreflang="es-ES" href="https://stargazers.club/es/"/>
+<xhtml:link rel="alternate" hreflang="fr-CA" href="https://stargazers.club/fr/"/>
+</url>
+<url>
+<loc>https://stargazers.club/es/second-page/</loc>
+<xhtml:link rel="alternate" hreflang="es-ES" href="https://stargazers.club/es/second-page/"/>
+<xhtml:link rel="alternate" hreflang="fr-CA" href="https://stargazers.club/fr/second-page/"/>
+<xhtml:link rel="alternate" hreflang="en-US" href="https://stargazers.club/second-page/"/>
+</url>
 ...
 
 xslURL
@@ -324,10 +325,10 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://example.com',
-  integrations: [
-    sitemap({
-      xslURL: '/sitemap.xsl'
-    }),
-  ],
+site: 'https://example.com',
+integrations: [
+sitemap({
+xslURL: '/sitemap.xsl'
+}),
+],
 });

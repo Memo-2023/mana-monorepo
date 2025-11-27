@@ -12,8 +12,13 @@
 		canEdit?: boolean;
 	}
 
-	let { recordings, onRecordingAdd, onRecordingDelete, onRecordingRename, canEdit = false }: Props =
-		$props();
+	let {
+		recordings,
+		onRecordingAdd,
+		onRecordingDelete,
+		onRecordingRename,
+		canEdit = false,
+	}: Props = $props();
 
 	let editingId = $state<string | null>(null);
 	let editLabel = $state('');
@@ -24,7 +29,7 @@
 			month: 'short',
 			year: 'numeric',
 			hour: '2-digit',
-			minute: '2-digit'
+			minute: '2-digit',
 		});
 	}
 
@@ -140,7 +145,9 @@
 												d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
 											/>
 										</svg>
-										{recording.duration_millis ? formatDurationFromMs(recording.duration_millis) : '--:--'}
+										{recording.duration_millis
+											? formatDurationFromMs(recording.duration_millis)
+											: '--:--'}
 									</Text>
 									<Text variant="muted" class="flex items-center gap-1">
 										<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

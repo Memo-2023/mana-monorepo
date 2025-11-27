@@ -1,8 +1,8 @@
 ---
-title: "Häufige Fragen zu Mana"
-description: "Detaillierte Antworten auf alle wichtigen Fragen rund um Mana, Credits und die Nutzung der KI-Tools"
+title: 'Häufige Fragen zu Mana'
+description: 'Detaillierte Antworten auf alle wichtigen Fragen rund um Mana, Credits und die Nutzung der KI-Tools'
 order: 2
-icon: "mdi:help-circle"
+icon: 'mdi:help-circle'
 publishedAt: 2024-01-01
 updatedAt: 2024-01-15
 ---
@@ -18,12 +18,14 @@ Mana ist eine Plattform, die Ihnen Zugang zu über 20 führenden KI-Tools mit ei
 ### Wie unterscheidet sich Mana von direkten Abonnements?
 
 **Direkte Abos:**
+
 - Fixe monatliche Kosten pro Tool
 - Ungenutzte Kapazitäten verfallen
 - Mehrere Accounts und Logins
 - Verschiedene Rechnungen
 
 **Mana:**
+
 - Ein Account für alle Tools
 - Credits nur bei Nutzung verbraucht
 - Keine monatlichen Fixkosten
@@ -32,6 +34,7 @@ Mana ist eine Plattform, die Ihnen Zugang zu über 20 führenden KI-Tools mit ei
 ### Welche KI-Tools sind verfügbar?
 
 Aktuelle Tool-Kategorien:
+
 - **Text-KI**: ChatGPT-4, Claude 3, Gemini Pro, Llama 3
 - **Bild-KI**: Midjourney, DALL-E 3, Stable Diffusion XL
 - **Code**: GitHub Copilot, Cursor, Codeium
@@ -45,7 +48,8 @@ Die vollständige Liste finden Sie unter [/apps](/apps).
 ### Wie funktionieren Mana-Credits?
 
 Mana-Credits sind die universelle Währung auf unserer Plattform:
-- 1 Credit = 0,01€ 
+
+- 1 Credit = 0,01€
 - Credits werden bei jeder Nutzung abgezogen
 - Der Verbrauch hängt vom Tool und der Aktion ab
 - Credits verfallen nicht
@@ -53,8 +57,9 @@ Mana-Credits sind die universelle Währung auf unserer Plattform:
 ### Wie viele Credits brauche ich?
 
 Beispielhafte Verbräuche:
+
 - **ChatGPT-4 Anfrage**: 10-20 Credits
-- **Claude 3 Anfrage**: 15-25 Credits  
+- **Claude 3 Anfrage**: 15-25 Credits
 - **Midjourney Bild**: 40-60 Credits
 - **DALL-E 3 Bild**: 30-50 Credits
 - **1 Stunde Coding**: 150-250 Credits
@@ -64,6 +69,7 @@ Ein durchschnittlicher Nutzer verbraucht 2.000-5.000 Credits/Monat.
 ### Gibt es Mengenrabatte?
 
 Ja! Je mehr Credits Sie kaufen, desto günstiger wird der Einzelpreis:
+
 - 1.000 Credits: 10€ (1 Cent/Credit)
 - 5.000 Credits: 45€ (0,9 Cent/Credit)
 - 10.000 Credits: 80€ (0,8 Cent/Credit)
@@ -99,6 +105,7 @@ Ja, beliebig oft! Nutzen Sie ChatGPT für eine Aufgabe, wechseln Sie zu Claude f
 ### Gibt es Team-Accounts?
 
 Ja! Team-Features umfassen:
+
 - Geteilte Credit-Pools
 - Nutzer-Verwaltung
 - Verbrauchsstatistiken pro Mitglied
@@ -114,6 +121,7 @@ Ja! Team-Features umfassen:
 ### Gibt es Enterprise-Lösungen?
 
 Für Unternehmen ab 50 Mitarbeitern bieten wir:
+
 - Individuelle Preisgestaltung
 - SLA-Garantien
 - Dedizierter Support
@@ -124,7 +132,8 @@ Für Unternehmen ab 50 Mitarbeitern bieten wir:
 
 ### Sind meine Daten sicher?
 
-Absolut! 
+Absolut!
+
 - Ende-zu-Ende Verschlüsselung
 - Server in Deutschland
 - DSGVO-konform
@@ -138,6 +147,7 @@ Nein. Wir leiten Ihre Anfragen nur weiter und speichern keine Inhalte. Lediglich
 ### Kann ich Mana für sensible Daten nutzen?
 
 Ja, aber beachten Sie:
+
 - Wir verschlüsseln die Übertragung
 - Die Verarbeitung erfolgt bei den jeweiligen KI-Anbietern
 - Für hochsensible Daten empfehlen wir unsere Enterprise-Lösung
@@ -147,6 +157,7 @@ Ja, aber beachten Sie:
 ### Welche Browser werden unterstützt?
 
 Mana funktioniert mit allen modernen Browsern:
+
 - Chrome/Edge (letzte 2 Versionen)
 - Firefox (letzte 2 Versionen)
 - Safari (letzte 2 Versionen)
@@ -207,6 +218,7 @@ Für Erstnutzer bieten wir eine 14-tägige Zufriedenheitsgarantie auf den ersten
 ### Gibt es Schulungen?
 
 Ja! Wir bieten:
+
 - Video-Tutorials für alle Tools
 - Wöchentliche Webinare
 - 1:1 Onboarding für Teams

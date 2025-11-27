@@ -6,15 +6,15 @@ import { GetPublicImagesDto, SearchPublicImagesDto } from './dto/explore.dto';
 @Controller('explore')
 @UseGuards(JwtAuthGuard)
 export class ExploreController {
-  constructor(private readonly exploreService: ExploreService) {}
+	constructor(private readonly exploreService: ExploreService) {}
 
-  @Get()
-  async getPublicImages(@Query() query: GetPublicImagesDto) {
-    return this.exploreService.getPublicImages(query);
-  }
+	@Get()
+	async getPublicImages(@Query() query: GetPublicImagesDto) {
+		return this.exploreService.getPublicImages(query);
+	}
 
-  @Get('search')
-  async searchPublicImages(@Query() query: SearchPublicImagesDto) {
-    return this.exploreService.searchPublicImages(query);
-  }
+	@Get('search')
+	async searchPublicImages(@Query() query: SearchPublicImagesDto) {
+		return this.exploreService.searchPublicImages(query);
+	}
 }

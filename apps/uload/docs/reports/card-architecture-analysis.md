@@ -108,7 +108,7 @@ import { writable, derived } from 'svelte/store';
 export const cardStore = createCardStore({
 	cards: new Map(),
 	activeCard: null,
-	editMode: false
+	editMode: false,
 });
 ```
 
@@ -174,8 +174,8 @@ const CardSchema = z.object({
 	constraints: z.object({
 		maxModules: z.number().max(20),
 		maxHTMLSize: z.number().max(100000),
-		maxCSSSize: z.number().max(50000)
-	})
+		maxCSSSize: z.number().max(50000),
+	}),
 });
 ```
 
@@ -194,7 +194,7 @@ const CardSchema = z.object({
 const cardEventBus = {
 	emit: (event: string, data: any) => {},
 	on: (event: string, handler: Function) => {},
-	off: (event: string, handler: Function) => {}
+	off: (event: string, handler: Function) => {},
 };
 ```
 
@@ -222,7 +222,7 @@ export const cardsStore = {
 	createCard: async (config: CardConfig) => {},
 	updateCard: async (id: string, updates: Partial<Card>) => {},
 	deleteCard: async (id: string) => {},
-	convertCard: async (id: string, targetMode: RenderMode) => {}
+	convertCard: async (id: string, targetMode: RenderMode) => {},
 };
 ```
 
@@ -272,7 +272,7 @@ if (import.meta.env.DEV) {
 		inspect: (cardId: string) => {},
 		export: (cardId: string) => {},
 		import: (config: any) => {},
-		benchmark: () => {}
+		benchmark: () => {},
 	};
 }
 ```

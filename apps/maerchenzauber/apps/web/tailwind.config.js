@@ -6,7 +6,7 @@ export default {
 	content: [
 		'./src/**/*.{html,js,svelte,ts}',
 		'../../../packages/shared-ui/src/**/*.{html,js,svelte,ts}',
-		'../../../packages/shared-auth-ui/src/**/*.{html,js,svelte,ts}'
+		'../../../packages/shared-auth-ui/src/**/*.{html,js,svelte,ts}',
 	],
-	plugins: [require('@tailwindcss/typography')]
+	plugins: [require('@tailwindcss/typography')],
 };

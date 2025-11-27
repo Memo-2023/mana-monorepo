@@ -59,7 +59,7 @@
 		expanded = $bindable(false),
 		collapsible = true,
 		compact = false,
-		class: className = ''
+		class: className = '',
 	}: Props = $props();
 
 	// Group shortcuts by category
@@ -116,7 +116,12 @@
 					stroke="currentColor"
 					viewBox="0 0 24 24"
 				>
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M19 9l-7 7-7-7"
+					/>
 				</svg>
 			{/if}
 		</button>
@@ -162,14 +167,9 @@
 	<button
 		type="button"
 		class="w-full flex items-center justify-center p-2 hover:bg-menu-hover rounded-lg transition-colors group relative"
-		title={title}
+		{title}
 	>
-		<svg
-			class="w-5 h-5 text-theme-secondary"
-			fill="none"
-			stroke="currentColor"
-			viewBox="0 0 24 24"
-		>
+		<svg class="w-5 h-5 text-theme-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
 				stroke-linecap="round"
 				stroke-linejoin="round"

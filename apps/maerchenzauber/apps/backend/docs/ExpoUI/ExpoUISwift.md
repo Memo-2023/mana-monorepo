@@ -1,8 +1,5 @@
 SwiftUI
 
-
-
-
 Ask AI
 
 SwiftUI components for building native iOS interfaces with @expo/ui.
@@ -35,7 +32,6 @@ BottomSheet
 
 iOS
 
-
 Code
 
 import { BottomSheet, Host, Text } from '@expo/ui/swift-ui';
@@ -44,9 +40,9 @@ import { useWindowDimensions } from 'react-native';
 const { width } = useWindowDimensions();
 
 <Host style={{ position: 'absolute', width }}>
-  <BottomSheet isOpened={isOpened} onIsOpenedChange={e => setIsOpened(e)}>
-    <Text>Hello, world!</Text>
-  </BottomSheet>
+<BottomSheet isOpened={isOpened} onIsOpenedChange={e => setIsOpened(e)}>
+<Text>Hello, world!</Text>
+</BottomSheet>
 </Host>
 See also: official SwiftUI documentation
 
@@ -55,19 +51,18 @@ The borderless variant is not available on Apple TV.
 
 iOS
 
-
 Code
 
 import { Button, Host } from '@expo/ui/swift-ui';
 
 <Host style={{ flex: 1 }}>
-  <Button
-    variant="default"
-    onPress={() => {
-      setEditingProfile(true);
-    }}>
-    Edit profile
-  </Button>
+<Button
+variant="default"
+onPress={() => {
+setEditingProfile(true);
+}}>
+Edit profile
+</Button>
 </Host>
 See also: official SwiftUI documentation
 
@@ -75,13 +70,12 @@ CircularProgress
 
 iOS
 
-
 Code
 
 import { CircularProgress, Host } from '@expo/ui/swift-ui';
 
 <Host style={{ width: 300 }}>
-  <CircularProgress progress={0.5} color="blue" />
+<CircularProgress progress={0.5} color="blue" />
 </Host>
 See also: official SwiftUI documentation
 
@@ -90,13 +84,12 @@ This component is not available on Apple TV.
 
 iOS
 
-
 Code
 
 import { ColorPicker, Host } from '@expo/ui/swift-ui';
 
 <Host style={{ width: 400, height: 200 }}>
-  <ColorPicker
+<ColorPicker
     label="Select a color"
     selection={color}
     onValueChanged={setColor}
@@ -107,42 +100,40 @@ See also: official SwiftUI documentation
 ContextMenu
 Note: Also known as DropdownMenu.
 
-
 iOS
-
 
 Code
 
 import { ContextMenu, Host } from '@expo/ui/swift-ui';
 
 <Host style={{ width: 150, height: 50 }}>
-  <ContextMenu>
-    <ContextMenu.Items>
-      <Button
-        systemImage="person.crop.circle.badge.xmark"
-        onPress={() => console.log('Pressed1')}>
-        Hello
-      </Button>
-      <Button
-        variant="bordered"
-        systemImage="heart"
-        onPress={() => console.log('Pressed2')}>
-        Love it
-      </Button>
-      <Picker
-        label="Doggos"
-        options={['very', 'veery', 'veeery', 'much']}
-        variant="menu"
-        selectedIndex={selectedIndex}
-        onOptionSelected={({ nativeEvent: { index } }) => setSelectedIndex(index)}
-      />
-    </ContextMenu.Items>
-    <ContextMenu.Trigger>
-      <Button variant="bordered">
-        Show Menu
-      </Button>
-    </ContextMenu.Trigger>
-  </ContextMenu>
+<ContextMenu>
+<ContextMenu.Items>
+<Button
+systemImage="person.crop.circle.badge.xmark"
+onPress={() => console.log('Pressed1')}>
+Hello
+</Button>
+<Button
+variant="bordered"
+systemImage="heart"
+onPress={() => console.log('Pressed2')}>
+Love it
+</Button>
+<Picker
+label="Doggos"
+options={['very', 'veery', 'veeery', 'much']}
+variant="menu"
+selectedIndex={selectedIndex}
+onOptionSelected={({ nativeEvent: { index } }) => setSelectedIndex(index)}
+/>
+</ContextMenu.Items>
+<ContextMenu.Trigger>
+<Button variant="bordered">
+Show Menu
+</Button>
+</ContextMenu.Trigger>
+</ContextMenu>
 </Host>
 See also: official SwiftUI documentation
 
@@ -150,7 +141,6 @@ DateTimePicker (date)
 This component is not available on Apple TV.
 
 iOS
-
 
 Code
 
@@ -173,7 +163,6 @@ This component is not available on Apple TV.
 
 iOS
 
-
 Code
 
 import { DateTimePicker, Host } from '@expo/ui/swift-ui';
@@ -194,7 +183,6 @@ Gauge
 This component is not available on Apple TV.
 
 iOS
-
 
 Code
 
@@ -225,54 +213,51 @@ Wrapping Button in Host
 
 Copy
 
-
 import { Button, Host } from '@expo/ui/swift-ui';
 
 function Example() {
-  return (
-    <Host matchContents>
-      <Button
-        onPress={() => {
-          console.log('Pressed');
-        }}>
-        Click
-      </Button>
-    </Host>
-  );
+return (
+<Host matchContents>
+<Button
+onPress={() => {
+console.log('Pressed');
+}}>
+Click
+</Button>
+</Host>
+);
 }
 Host with flexbox and VStack
 
 Copy
 
-
 import { Button, Host, VStack, Text } from '@expo/ui/swift-ui';
 
 function Example() {
-  return (
-    <Host style={{ flex: 1 }}>
-      <VStack spacing={8}>
-        <Text>Hello, world!</Text>
-        <Button
-          onPress={() => {
-            console.log('Pressed');
-          }}>
-          Click
-        </Button>
-      </VStack>
-    </Host>
-  );
+return (
+<Host style={{ flex: 1 }}>
+<VStack spacing={8}>
+<Text>Hello, world!</Text>
+<Button
+onPress={() => {
+console.log('Pressed');
+}}>
+Click
+</Button>
+</VStack>
+</Host>
+);
 }
 LinearProgress
 
 iOS
-
 
 Code
 
 import { LinearProgress, Host } from '@expo/ui/swift-ui';
 
 <Host style={{ width: 300 }}>
-  <LinearProgress progress={0.5} color="red" />
+<LinearProgress progress={0.5} color="red" />
 </Host>
 See also: official SwiftUI documentation
 
@@ -280,33 +265,31 @@ List
 
 iOS
 
-
 Code
 
 import { Host, List } from '@expo/ui/swift-ui';
 
 <Host style={{ flex: 1 }}>
-  <List
-    scrollEnabled={false}
-    editModeEnabled={editModeEnabled}
-    onSelectionChange={(items) => alert(`indexes of selected items: ${items.join(', ')}`)}
-    moveEnabled={moveEnabled}
-    onMoveItem={(from, to) => alert(`moved item at index ${from} to index ${to}`)}
-    onDeleteItem={(item) => alert(`deleted item at index: ${item}`)}
-    listStyle='automatic'
-    deleteEnabled={deleteEnabled}
-    selectEnabled={selectEnabled}>
-    {data.map((item, index) => (
-      <LabelPrimitive key={index} title={item.text} systemImage={item.systemImage} color={color} />
-    ))}
-  </List>
+<List
+scrollEnabled={false}
+editModeEnabled={editModeEnabled}
+onSelectionChange={(items) => alert(`indexes of selected items: ${items.join(', ')}`)}
+moveEnabled={moveEnabled}
+onMoveItem={(from, to) => alert(`moved item at index ${from} to index ${to}`)}
+onDeleteItem={(item) => alert(`deleted item at index: ${item}`)}
+listStyle='automatic'
+deleteEnabled={deleteEnabled}
+selectEnabled={selectEnabled}>
+{data.map((item, index) => (
+<LabelPrimitive key={index} title={item.text} systemImage={item.systemImage} color={color} />
+))}
+</List>
 </Host>
 See also: official SwiftUI documentation
 
 Picker (segmented)
 
 iOS
-
 
 Code
 
@@ -329,20 +312,19 @@ The wheel variant is not available on Apple TV.
 
 iOS
 
-
 Code
 
 import { Host, Picker } from '@expo/ui/swift-ui';
 
 <Host style={{ height: 100 }}>
-  <Picker
-    options={['$', '$$', '$$$', '$$$$']}
-    selectedIndex={selectedIndex}
-    onOptionSelected={({ nativeEvent: { index } }) => {
-      setSelectedIndex(index);
-    }}
-    variant="wheel"
-  />
+<Picker
+options={['$', '$$', '$$$', '$$$$']}
+selectedIndex={selectedIndex}
+onOptionSelected={({ nativeEvent: { index } }) => {
+setSelectedIndex(index);
+}}
+variant="wheel"
+/>
 </Host>
 See also: official SwiftUI documentation
 
@@ -351,27 +333,24 @@ This component is not available on Apple TV.
 
 iOS
 
-
 Code
 
 import { Host, Slider } from '@expo/ui/swift-ui';
 
 <Host style={{ minHeight: 60 }}>
-  <Slider
-    value={value}
-    onValueChange={(value) => {
-      setValue(value);
-    }}
-  />
+<Slider
+value={value}
+onValueChange={(value) => {
+setValue(value);
+}}
+/>
 </Host>
 See also: official SwiftUI documentation
 
 Switch (toggle)
 Note: Also known as Toggle.
 
-
 iOS
-
 
 Code
 
@@ -394,7 +373,6 @@ Switch (checkbox)
 
 iOS
 
-
 Code
 
 import { Host, Switch } from '@expo/ui/swift-ui';
@@ -414,7 +392,6 @@ See also: official SwiftUI documentation
 TextField
 
 iOS
-
 
 Code
 

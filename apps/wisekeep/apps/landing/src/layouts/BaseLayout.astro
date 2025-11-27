@@ -3,11 +3,14 @@ import { getCollection } from 'astro:content';
 import '../styles/themes.css';
 
 export interface Props {
-    title?: string;
-    description?: string;
+	title?: string;
+	description?: string;
 }
 
-const { title = 'YouTube Wisdom Library', description = 'A curated collection of insights from the best talks' } = Astro.props;
+const {
+	title = 'YouTube Wisdom Library',
+	description = 'A curated collection of insights from the best talks',
+} = Astro.props;
 
 // Get all talks for the sidebar
 const talks = await getCollection('talks');
@@ -15,775 +18,806 @@ const currentPath = Astro.url.pathname;
 
 // Sort talks by date (newest first)
 const sortedTalks = talks.sort((a, b) => {
-    return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+	return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
 });
 
 // Group talks by speaker
-const talksBySpeaker = sortedTalks.reduce((acc, talk) => {
-    const speaker = talk.data.speaker;
-    if (!acc[speaker]) {
-        acc[speaker] = [];
-    }
-    acc[speaker].push(talk);
-    return acc;
-}, {} as Record<string, typeof talks>);
+const talksBySpeaker = sortedTalks.reduce(
+	(acc, talk) => {
+		const speaker = talk.data.speaker;
+		if (!acc[speaker]) {
+			acc[speaker] = [];
+		}
+		acc[speaker].push(talk);
+		return acc;
+	},
+	{} as Record<string, typeof talks>
+);
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de" data-theme="ocean">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title}</title>
-    <meta name="description" content={description}>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            font-family: system-ui, -apple-system, sans-serif;
-        }
-
-        .app-layout {
-            display: flex;
-            height: 100vh;
-            background: rgb(var(--theme-background));
-        }
-
-        /* Desktop Sidebar */
-        .nav-sidebar {
-            width: 320px;
-            height: 100vh;
-            background: rgb(var(--theme-card));
-            border-right: 1px solid rgba(var(--theme-primary), 0.1);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            left: 0;
-            top: 0;
-            overflow: hidden;
-            z-index: 100;
-        }
-
-        .nav-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(var(--theme-primary), 0.1);
-        }
-
-        .logo {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: rgb(var(--theme-primary));
-            margin: 0 0 1.5rem 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.6rem 0.75rem;
-            border-radius: 0.5rem;
-            color: rgb(var(--theme-text-muted));
-            text-decoration: none;
-            transition: all 0.2s ease;
-            font-size: 0.95rem;
-        }
-
-        .nav-link:hover {
-            background: rgba(var(--theme-primary), 0.08);
-            color: rgb(var(--theme-primary));
-        }
-
-        .nav-link.active {
-            background: rgba(var(--theme-primary), 0.1);
-            color: rgb(var(--theme-primary));
-        }
-
-        .nav-icon {
-            font-size: 1.1rem;
-            width: 24px;
-            text-align: center;
-        }
-
-        .talks-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .section-header {
-            padding: 1rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(var(--theme-primary), 0.1);
-        }
-
-        .section-header h2 {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: rgb(var(--theme-text-muted));
-            letter-spacing: 0.05em;
-            margin: 0;
-        }
-
-        .talks-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0.5rem;
-        }
-
-        .talks-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .talks-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .talks-list::-webkit-scrollbar-thumb {
-            background: rgba(var(--theme-primary), 0.2);
-            border-radius: 3px;
-        }
-
-        .speaker-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .speaker-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem 0.75rem;
-            margin-bottom: 0.5rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: rgb(var(--theme-text-muted));
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .talk-count {
-            background: rgba(var(--theme-primary), 0.1);
-            color: rgb(var(--theme-primary));
-            padding: 0.1rem 0.4rem;
-            border-radius: 10px;
-            font-size: 0.7rem;
-        }
-
-        .talk-card {
-            display: block;
-            padding: 0.75rem;
-            margin: 0.25rem 0.5rem;
-            background: rgba(var(--theme-background), 0.5);
-            border: 1px solid rgba(var(--theme-primary), 0.08);
-            border-radius: 0.75rem;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .talk-card:hover {
-            background: rgba(var(--theme-primary), 0.05);
-            border-color: rgba(var(--theme-primary), 0.15);
-            transform: translateX(2px);
-        }
-
-        .talk-card.active {
-            background: rgba(var(--theme-primary), 0.1);
-            border-color: rgb(var(--theme-primary));
-            border-left-width: 3px;
-        }
-
-        .talk-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: rgb(var(--theme-text));
-            margin-bottom: 0.25rem;
-            line-height: 1.3;
-        }
-
-        .talk-meta {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            margin-bottom: 0.25rem;
-        }
-
-        .talk-tag {
-            font-size: 0.7rem;
-            padding: 0.15rem 0.4rem;
-            background: rgba(var(--theme-secondary), 0.1);
-            color: rgb(var(--theme-secondary));
-            border-radius: 4px;
-            text-transform: capitalize;
-        }
-
-        .talk-date {
-            font-size: 0.7rem;
-            color: rgb(var(--theme-text-muted));
-        }
-
-        /* Sidebar Theme Section */
-        .sidebar-theme-section {
-            border-top: 1px solid rgba(var(--theme-primary), 0.1);
-            padding: 1rem 1.5rem 1.5rem;
-        }
-
-        .theme-header {
-            margin-bottom: 1rem;
-        }
-
-        .theme-header h3 {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: rgb(var(--theme-text-muted));
-            letter-spacing: 0.05em;
-            margin: 0;
-        }
-
-        .theme-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .theme-selector {
-            position: relative;
-        }
-
-        .theme-button {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            background: rgba(var(--theme-background), 0.5);
-            border: 1px solid rgba(var(--theme-primary), 0.1);
-            border-radius: 0.5rem;
-            color: rgb(var(--theme-text));
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-        }
-
-        .theme-button:hover {
-            background: rgba(var(--theme-primary), 0.05);
-            border-color: rgba(var(--theme-primary), 0.2);
-        }
-
-        .theme-icon {
-            font-size: 1.1rem;
-        }
-
-        .theme-name {
-            flex: 1;
-            text-align: left;
-            margin-left: 0.75rem;
-        }
-
-        .theme-arrow {
-            width: 16px;
-            height: 16px;
-            transition: transform 0.2s ease;
-        }
-
-        .theme-menu {
-            position: absolute;
-            bottom: 100%;
-            left: 0;
-            right: 0;
-            margin-bottom: 0.5rem;
-            background: rgb(var(--theme-card));
-            border: 1px solid rgba(var(--theme-primary), 0.1);
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            transform: scale(0.95) translateY(10px);
-            transition: all 0.2s ease;
-            z-index: 50;
-        }
-
-        .theme-menu:not(.hidden) {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-
-        .theme-option {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            background: none;
-            border: none;
-            text-align: left;
-            color: rgb(var(--theme-text));
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-            border-radius: 0.25rem;
-            margin: 0.25rem;
-        }
-
-        .theme-option:hover {
-            background: rgba(var(--theme-primary), 0.08);
-        }
-
-        .theme-option.active {
-            background: rgba(var(--theme-primary), 0.1);
-            color: rgb(var(--theme-primary));
-        }
-
-        .dark-toggle {
-            padding: 0.75rem;
-            background: rgba(var(--theme-background), 0.5);
-            border: 1px solid rgba(var(--theme-primary), 0.1);
-            border-radius: 0.5rem;
-            color: rgb(var(--theme-text));
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-
-        .dark-toggle:hover {
-            background: rgba(var(--theme-primary), 0.05);
-            border-color: rgba(var(--theme-primary), 0.2);
-        }
-
-        .theme-toggle-icon {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Main Content Area */
-        .main-content {
-            flex: 1;
-            margin-left: 320px;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        /* Mobile Navigation */
-        .mobile-nav {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: rgb(var(--theme-card));
-            border-bottom: 1px solid rgba(var(--theme-primary), 0.1);
-            z-index: 99;
-            padding: 0 1rem;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .mobile-menu-toggle {
-            background: none;
-            border: none;
-            color: rgb(var(--theme-text));
-            cursor: pointer;
-            padding: 0.5rem;
-        }
-
-        .mobile-logo {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: rgb(var(--theme-primary));
-            text-decoration: none;
-        }
-
-        .mobile-nav-links {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .mobile-nav-link {
-            color: rgb(var(--theme-text-muted));
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .nav-sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-            }
-
-            .nav-sidebar.open {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding-top: 60px;
-            }
-
-            .mobile-nav {
-                display: flex;
-            }
-
-            /* Overlay for mobile sidebar */
-            .sidebar-overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 98;
-            }
-
-            .sidebar-overlay.active {
-                display: block;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .nav-sidebar {
-                width: 280px;
-            }
-
-            .mobile-nav-links {
-                display: none;
-            }
-        }
-    </style>
-</head>
-<body class="bg-theme-background text-theme-text">
-    
-    <div class="app-layout">
-        <!-- Desktop Sidebar / Mobile Drawer -->
-        <nav class="nav-sidebar" id="sidebar">
-            <div class="nav-header">
-                <a href="/" class="logo">
-                    📚 Wisdom Library
-                </a>
-                <div class="nav-links">
-                    <a href="/" class={`nav-link ${currentPath === '/' ? 'active' : ''}`}>
-                        <span class="nav-icon">🏠</span>
-                        <span>Home</span>
-                    </a>
-                    <a href="/speakers" class={`nav-link ${currentPath.includes('/speakers') ? 'active' : ''}`}>
-                        <span class="nav-icon">🎤</span>
-                        <span>Speakers</span>
-                    </a>
-                    <a href="/admin" class={`nav-link ${currentPath.includes('/admin') ? 'active' : ''}`}>
-                        <span class="nav-icon">⚙️</span>
-                        <span>Admin</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="talks-section">
-                <div class="section-header">
-                    <h2>RECENT TALKS</h2>
-                </div>
-
-                <div class="talks-list">
-                    {Object.entries(talksBySpeaker).map(([speaker, speakerTalks]) => (
-                        <div class="speaker-group">
-                            <div class="speaker-header">
-                                <span>{speaker}</span>
-                                <span class="talk-count">{speakerTalks.length}</span>
-                            </div>
-                            {speakerTalks.map(talk => {
-                                const isActive = currentPath.includes(talk.slug);
-                                return (
-                                    <a 
-                                        href={`/talks/${talk.slug}`} 
-                                        class={`talk-card ${isActive ? 'active' : ''}`}
-                                    >
-                                        <div class="talk-title">{talk.data.title}</div>
-                                        <div class="talk-meta">
-                                            <span class="talk-tag">{talk.data.category.replace('-', ' ')}</span>
-                                            <span class="talk-date">
-                                                {new Date(talk.data.date).toLocaleDateString('de-DE', { 
-                                                    day: 'numeric',
-                                                    month: 'short'
-                                                })}
-                                            </span>
-                                        </div>
-                                    </a>
-                                );
-                            })}
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <!-- Theme Settings in Sidebar -->
-            <div class="sidebar-theme-section">
-                <div class="theme-header">
-                    <h3>APPEARANCE</h3>
-                </div>
-                <div class="theme-controls">
-                    <!-- Theme Selector -->
-                    <div class="theme-selector">
-                        <button id="theme-menu-button" class="theme-button">
-                            <span id="theme-icon" class="theme-icon">🌊</span>
-                            <span id="theme-name" class="theme-name">Ocean</span>
-                            <svg class="theme-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        
-                        <div id="theme-menu" class="theme-menu hidden">
-                            <button data-theme="ocean" class="theme-option">
-                                <span>🌊</span> Ocean
-                            </button>
-                            <button data-theme="forest" class="theme-option">
-                                <span>🌲</span> Forest
-                            </button>
-                            <button data-theme="sunset" class="theme-option">
-                                <span>🌅</span> Sunset
-                            </button>
-                            <button data-theme="monochrome" class="theme-option">
-                                <span>⚫</span> Monochrome
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Dark Mode Toggle -->
-                    <button id="dark-toggle" class="dark-toggle">
-                        <svg id="sun-icon" class="theme-toggle-icon hidden" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
-                        </svg>
-                        <svg id="moon-icon" class="theme-toggle-icon" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Mobile Navigation Bar -->
-        <nav class="mobile-nav">
-            <button class="mobile-menu-toggle" id="mobileMenuToggle">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </button>
-            <a href="/" class="mobile-logo">📚 Wisdom Library</a>
-            <div class="mobile-nav-links">
-                <a href="/" class="mobile-nav-link">Home</a>
-                <a href="/speakers" class="mobile-nav-link">Speakers</a>
-            </div>
-        </nav>
-
-        <!-- Overlay for mobile -->
-        <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <slot />
-        </main>
-    </div>
-
-    <script>
-        // Theme Management
-        const themes = {
-            ocean: { icon: '🌊', name: 'Ocean' },
-            forest: { icon: '🌲', name: 'Forest' },
-            sunset: { icon: '🌅', name: 'Sunset' },
-            monochrome: { icon: '⚫', name: 'Monochrome' }
-        };
-
-        class ThemeManager {
-            constructor() {
-                this.currentTheme = 'ocean';
-                this.isDark = false;
-                this.init();
-            }
-
-            init() {
-                this.loadPreferences();
-                this.applyTheme();
-                this.setupEventListeners();
-                this.watchSystemPreference();
-            }
-
-            loadPreferences() {
-                const savedTheme = localStorage.getItem('theme');
-                const savedMode = localStorage.getItem('darkMode');
-                
-                if (savedTheme && themes[savedTheme]) {
-                    this.currentTheme = savedTheme;
-                }
-                
-                if (savedMode !== null) {
-                    this.isDark = savedMode === 'true';
-                } else {
-                    this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                }
-            }
-
-            savePreferences() {
-                localStorage.setItem('theme', this.currentTheme);
-                localStorage.setItem('darkMode', this.isDark.toString());
-            }
-
-            applyTheme() {
-                const html = document.documentElement;
-                html.setAttribute('data-theme', this.currentTheme);
-                
-                if (this.isDark) {
-                    html.classList.add('dark');
-                } else {
-                    html.classList.remove('dark');
-                }
-                
-                this.updateUI();
-            }
-
-            updateUI() {
-                const themeIcon = document.getElementById('theme-icon');
-                const themeName = document.getElementById('theme-name');
-                if (themeIcon && themeName) {
-                    themeIcon.textContent = themes[this.currentTheme].icon;
-                    themeName.textContent = themes[this.currentTheme].name;
-                }
-                
-                const sunIcon = document.getElementById('sun-icon');
-                const moonIcon = document.getElementById('moon-icon');
-                if (sunIcon && moonIcon) {
-                    if (this.isDark) {
-                        sunIcon.classList.remove('hidden');
-                        moonIcon.classList.add('hidden');
-                    } else {
-                        sunIcon.classList.add('hidden');
-                        moonIcon.classList.remove('hidden');
-                    }
-                }
-                
-                document.querySelectorAll('.theme-option').forEach(btn => {
-                    const theme = btn.getAttribute('data-theme');
-                    if (theme === this.currentTheme) {
-                        btn.classList.add('active');
-                    } else {
-                        btn.classList.remove('active');
-                    }
-                });
-            }
-
-            setupEventListeners() {
-                const menuButton = document.getElementById('theme-menu-button');
-                const menu = document.getElementById('theme-menu');
-                
-                if (menuButton && menu) {
-                    menuButton.addEventListener('click', () => {
-                        const isHidden = menu.classList.contains('hidden');
-                        if (isHidden) {
-                            menu.classList.remove('hidden');
-                        } else {
-                            menu.classList.add('hidden');
-                        }
-                    });
-                    
-                    document.addEventListener('click', (e) => {
-                        if (!menuButton.contains(e.target) && !menu.contains(e.target)) {
-                            menu.classList.add('hidden');
-                        }
-                    });
-                }
-                
-                document.querySelectorAll('.theme-option').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const theme = btn.getAttribute('data-theme');
-                        if (theme && themes[theme]) {
-                            this.currentTheme = theme;
-                            this.applyTheme();
-                            this.savePreferences();
-                            
-                            const menu = document.getElementById('theme-menu');
-                            if (menu) {
-                                menu.classList.add('hidden');
-                            }
-                        }
-                    });
-                });
-                
-                const darkToggle = document.getElementById('dark-toggle');
-                if (darkToggle) {
-                    darkToggle.addEventListener('click', () => {
-                        this.isDark = !this.isDark;
-                        this.applyTheme();
-                        this.savePreferences();
-                    });
-                }
-            }
-
-            watchSystemPreference() {
-                const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                mediaQuery.addEventListener('change', (e) => {
-                    if (localStorage.getItem('darkMode') === null) {
-                        this.isDark = e.matches;
-                        this.applyTheme();
-                    }
-                });
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize Theme Manager
-            new ThemeManager();
-
-            // Sidebar functionality
-            const sidebar = document.getElementById('sidebar');
-            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-            const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-            // Mobile menu toggle
-            if (mobileMenuToggle) {
-                mobileMenuToggle.addEventListener('click', () => {
-                    sidebar?.classList.toggle('open');
-                    sidebarOverlay?.classList.toggle('active');
-                });
-            }
-
-            // Close sidebar when clicking overlay
-            if (sidebarOverlay) {
-                sidebarOverlay.addEventListener('click', () => {
-                    sidebar?.classList.remove('open');
-                    sidebarOverlay.classList.remove('active');
-                });
-            }
-
-            // Close sidebar on mobile when clicking a link
-            const talkCards = sidebar?.querySelectorAll('.talk-card');
-            talkCards?.forEach(card => {
-                card.addEventListener('click', () => {
-                    if (window.innerWidth <= 1024) {
-                        sidebar?.classList.remove('open');
-                        sidebarOverlay?.classList.remove('active');
-                    }
-                });
-            });
-        });
-    </script>
-</body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				font-family:
+					system-ui,
+					-apple-system,
+					sans-serif;
+			}
+
+			.app-layout {
+				display: flex;
+				height: 100vh;
+				background: rgb(var(--theme-background));
+			}
+
+			/* Desktop Sidebar */
+			.nav-sidebar {
+				width: 320px;
+				height: 100vh;
+				background: rgb(var(--theme-card));
+				border-right: 1px solid rgba(var(--theme-primary), 0.1);
+				display: flex;
+				flex-direction: column;
+				position: fixed;
+				left: 0;
+				top: 0;
+				overflow: hidden;
+				z-index: 100;
+			}
+
+			.nav-header {
+				padding: 1.5rem;
+				border-bottom: 1px solid rgba(var(--theme-primary), 0.1);
+			}
+
+			.logo {
+				font-size: 1.3rem;
+				font-weight: 700;
+				color: rgb(var(--theme-primary));
+				margin: 0 0 1.5rem 0;
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				text-decoration: none;
+			}
+
+			.nav-links {
+				display: flex;
+				flex-direction: column;
+				gap: 0.25rem;
+			}
+
+			.nav-link {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				padding: 0.6rem 0.75rem;
+				border-radius: 0.5rem;
+				color: rgb(var(--theme-text-muted));
+				text-decoration: none;
+				transition: all 0.2s ease;
+				font-size: 0.95rem;
+			}
+
+			.nav-link:hover {
+				background: rgba(var(--theme-primary), 0.08);
+				color: rgb(var(--theme-primary));
+			}
+
+			.nav-link.active {
+				background: rgba(var(--theme-primary), 0.1);
+				color: rgb(var(--theme-primary));
+			}
+
+			.nav-icon {
+				font-size: 1.1rem;
+				width: 24px;
+				text-align: center;
+			}
+
+			.talks-section {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				overflow: hidden;
+			}
+
+			.section-header {
+				padding: 1rem 1.5rem;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				border-bottom: 1px solid rgba(var(--theme-primary), 0.1);
+			}
+
+			.section-header h2 {
+				font-size: 0.75rem;
+				font-weight: 600;
+				color: rgb(var(--theme-text-muted));
+				letter-spacing: 0.05em;
+				margin: 0;
+			}
+
+			.talks-list {
+				flex: 1;
+				overflow-y: auto;
+				padding: 0.5rem;
+			}
+
+			.talks-list::-webkit-scrollbar {
+				width: 6px;
+			}
+
+			.talks-list::-webkit-scrollbar-track {
+				background: transparent;
+			}
+
+			.talks-list::-webkit-scrollbar-thumb {
+				background: rgba(var(--theme-primary), 0.2);
+				border-radius: 3px;
+			}
+
+			.speaker-group {
+				margin-bottom: 1.5rem;
+			}
+
+			.speaker-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 0.5rem 0.75rem;
+				margin-bottom: 0.5rem;
+				font-size: 0.8rem;
+				font-weight: 600;
+				color: rgb(var(--theme-text-muted));
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+			}
+
+			.talk-count {
+				background: rgba(var(--theme-primary), 0.1);
+				color: rgb(var(--theme-primary));
+				padding: 0.1rem 0.4rem;
+				border-radius: 10px;
+				font-size: 0.7rem;
+			}
+
+			.talk-card {
+				display: block;
+				padding: 0.75rem;
+				margin: 0.25rem 0.5rem;
+				background: rgba(var(--theme-background), 0.5);
+				border: 1px solid rgba(var(--theme-primary), 0.08);
+				border-radius: 0.75rem;
+				text-decoration: none;
+				color: inherit;
+				transition: all 0.2s ease;
+				cursor: pointer;
+			}
+
+			.talk-card:hover {
+				background: rgba(var(--theme-primary), 0.05);
+				border-color: rgba(var(--theme-primary), 0.15);
+				transform: translateX(2px);
+			}
+
+			.talk-card.active {
+				background: rgba(var(--theme-primary), 0.1);
+				border-color: rgb(var(--theme-primary));
+				border-left-width: 3px;
+			}
+
+			.talk-title {
+				font-size: 0.9rem;
+				font-weight: 600;
+				color: rgb(var(--theme-text));
+				margin-bottom: 0.25rem;
+				line-height: 1.3;
+			}
+
+			.talk-meta {
+				display: flex;
+				gap: 0.5rem;
+				align-items: center;
+				margin-bottom: 0.25rem;
+			}
+
+			.talk-tag {
+				font-size: 0.7rem;
+				padding: 0.15rem 0.4rem;
+				background: rgba(var(--theme-secondary), 0.1);
+				color: rgb(var(--theme-secondary));
+				border-radius: 4px;
+				text-transform: capitalize;
+			}
+
+			.talk-date {
+				font-size: 0.7rem;
+				color: rgb(var(--theme-text-muted));
+			}
+
+			/* Sidebar Theme Section */
+			.sidebar-theme-section {
+				border-top: 1px solid rgba(var(--theme-primary), 0.1);
+				padding: 1rem 1.5rem 1.5rem;
+			}
+
+			.theme-header {
+				margin-bottom: 1rem;
+			}
+
+			.theme-header h3 {
+				font-size: 0.75rem;
+				font-weight: 600;
+				color: rgb(var(--theme-text-muted));
+				letter-spacing: 0.05em;
+				margin: 0;
+			}
+
+			.theme-controls {
+				display: flex;
+				flex-direction: column;
+				gap: 0.75rem;
+			}
+
+			.theme-selector {
+				position: relative;
+			}
+
+			.theme-button {
+				width: 100%;
+				padding: 0.75rem 1rem;
+				background: rgba(var(--theme-background), 0.5);
+				border: 1px solid rgba(var(--theme-primary), 0.1);
+				border-radius: 0.5rem;
+				color: rgb(var(--theme-text));
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				font-size: 0.9rem;
+				transition: all 0.2s ease;
+			}
+
+			.theme-button:hover {
+				background: rgba(var(--theme-primary), 0.05);
+				border-color: rgba(var(--theme-primary), 0.2);
+			}
+
+			.theme-icon {
+				font-size: 1.1rem;
+			}
+
+			.theme-name {
+				flex: 1;
+				text-align: left;
+				margin-left: 0.75rem;
+			}
+
+			.theme-arrow {
+				width: 16px;
+				height: 16px;
+				transition: transform 0.2s ease;
+			}
+
+			.theme-menu {
+				position: absolute;
+				bottom: 100%;
+				left: 0;
+				right: 0;
+				margin-bottom: 0.5rem;
+				background: rgb(var(--theme-card));
+				border: 1px solid rgba(var(--theme-primary), 0.1);
+				border-radius: 0.5rem;
+				box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+				opacity: 0;
+				transform: scale(0.95) translateY(10px);
+				transition: all 0.2s ease;
+				z-index: 50;
+			}
+
+			.theme-menu:not(.hidden) {
+				opacity: 1;
+				transform: scale(1) translateY(0);
+			}
+
+			.theme-option {
+				width: 100%;
+				padding: 0.75rem 1rem;
+				background: none;
+				border: none;
+				text-align: left;
+				color: rgb(var(--theme-text));
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				font-size: 0.9rem;
+				transition: all 0.2s ease;
+				border-radius: 0.25rem;
+				margin: 0.25rem;
+			}
+
+			.theme-option:hover {
+				background: rgba(var(--theme-primary), 0.08);
+			}
+
+			.theme-option.active {
+				background: rgba(var(--theme-primary), 0.1);
+				color: rgb(var(--theme-primary));
+			}
+
+			.dark-toggle {
+				padding: 0.75rem;
+				background: rgba(var(--theme-background), 0.5);
+				border: 1px solid rgba(var(--theme-primary), 0.1);
+				border-radius: 0.5rem;
+				color: rgb(var(--theme-text));
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: all 0.2s ease;
+			}
+
+			.dark-toggle:hover {
+				background: rgba(var(--theme-primary), 0.05);
+				border-color: rgba(var(--theme-primary), 0.2);
+			}
+
+			.theme-toggle-icon {
+				width: 20px;
+				height: 20px;
+			}
+
+			/* Main Content Area */
+			.main-content {
+				flex: 1;
+				margin-left: 320px;
+				overflow-y: auto;
+				position: relative;
+			}
+
+			/* Mobile Navigation */
+			.mobile-nav {
+				display: none;
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: 60px;
+				background: rgb(var(--theme-card));
+				border-bottom: 1px solid rgba(var(--theme-primary), 0.1);
+				z-index: 99;
+				padding: 0 1rem;
+				align-items: center;
+				justify-content: space-between;
+			}
+
+			.mobile-menu-toggle {
+				background: none;
+				border: none;
+				color: rgb(var(--theme-text));
+				cursor: pointer;
+				padding: 0.5rem;
+			}
+
+			.mobile-logo {
+				font-size: 1.1rem;
+				font-weight: 700;
+				color: rgb(var(--theme-primary));
+				text-decoration: none;
+			}
+
+			.mobile-nav-links {
+				display: flex;
+				gap: 1rem;
+			}
+
+			.mobile-nav-link {
+				color: rgb(var(--theme-text-muted));
+				text-decoration: none;
+				font-size: 0.9rem;
+			}
+
+			/* Responsive Design */
+			@media (max-width: 1024px) {
+				.nav-sidebar {
+					transform: translateX(-100%);
+					transition: transform 0.3s ease;
+				}
+
+				.nav-sidebar.open {
+					transform: translateX(0);
+				}
+
+				.main-content {
+					margin-left: 0;
+					padding-top: 60px;
+				}
+
+				.mobile-nav {
+					display: flex;
+				}
+
+				/* Overlay for mobile sidebar */
+				.sidebar-overlay {
+					display: none;
+					position: fixed;
+					top: 0;
+					left: 0;
+					right: 0;
+					bottom: 0;
+					background: rgba(0, 0, 0, 0.5);
+					z-index: 98;
+				}
+
+				.sidebar-overlay.active {
+					display: block;
+				}
+			}
+
+			@media (max-width: 768px) {
+				.nav-sidebar {
+					width: 280px;
+				}
+
+				.mobile-nav-links {
+					display: none;
+				}
+			}
+		</style>
+	</head>
+	<body class="bg-theme-background text-theme-text">
+		<div class="app-layout">
+			<!-- Desktop Sidebar / Mobile Drawer -->
+			<nav class="nav-sidebar" id="sidebar">
+				<div class="nav-header">
+					<a href="/" class="logo"> 📚 Wisdom Library </a>
+					<div class="nav-links">
+						<a href="/" class={`nav-link ${currentPath === '/' ? 'active' : ''}`}>
+							<span class="nav-icon">🏠</span>
+							<span>Home</span>
+						</a>
+						<a
+							href="/speakers"
+							class={`nav-link ${currentPath.includes('/speakers') ? 'active' : ''}`}
+						>
+							<span class="nav-icon">🎤</span>
+							<span>Speakers</span>
+						</a>
+						<a href="/admin" class={`nav-link ${currentPath.includes('/admin') ? 'active' : ''}`}>
+							<span class="nav-icon">⚙️</span>
+							<span>Admin</span>
+						</a>
+					</div>
+				</div>
+
+				<div class="talks-section">
+					<div class="section-header">
+						<h2>RECENT TALKS</h2>
+					</div>
+
+					<div class="talks-list">
+						{
+							Object.entries(talksBySpeaker).map(([speaker, speakerTalks]) => (
+								<div class="speaker-group">
+									<div class="speaker-header">
+										<span>{speaker}</span>
+										<span class="talk-count">{speakerTalks.length}</span>
+									</div>
+									{speakerTalks.map((talk) => {
+										const isActive = currentPath.includes(talk.slug);
+										return (
+											<a
+												href={`/talks/${talk.slug}`}
+												class={`talk-card ${isActive ? 'active' : ''}`}
+											>
+												<div class="talk-title">{talk.data.title}</div>
+												<div class="talk-meta">
+													<span class="talk-tag">{talk.data.category.replace('-', ' ')}</span>
+													<span class="talk-date">
+														{new Date(talk.data.date).toLocaleDateString('de-DE', {
+															day: 'numeric',
+															month: 'short',
+														})}
+													</span>
+												</div>
+											</a>
+										);
+									})}
+								</div>
+							))
+						}
+					</div>
+				</div>
+
+				<!-- Theme Settings in Sidebar -->
+				<div class="sidebar-theme-section">
+					<div class="theme-header">
+						<h3>APPEARANCE</h3>
+					</div>
+					<div class="theme-controls">
+						<!-- Theme Selector -->
+						<div class="theme-selector">
+							<button id="theme-menu-button" class="theme-button">
+								<span id="theme-icon" class="theme-icon">🌊</span>
+								<span id="theme-name" class="theme-name">Ocean</span>
+								<svg class="theme-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M19 9l-7 7-7-7"></path>
+								</svg>
+							</button>
+
+							<div id="theme-menu" class="theme-menu hidden">
+								<button data-theme="ocean" class="theme-option">
+									<span>🌊</span> Ocean
+								</button>
+								<button data-theme="forest" class="theme-option">
+									<span>🌲</span> Forest
+								</button>
+								<button data-theme="sunset" class="theme-option">
+									<span>🌅</span> Sunset
+								</button>
+								<button data-theme="monochrome" class="theme-option">
+									<span>⚫</span> Monochrome
+								</button>
+							</div>
+						</div>
+
+						<!-- Dark Mode Toggle -->
+						<button id="dark-toggle" class="dark-toggle">
+							<svg
+								id="sun-icon"
+								class="theme-toggle-icon hidden"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+									clip-rule="evenodd"></path>
+							</svg>
+							<svg id="moon-icon" class="theme-toggle-icon" fill="currentColor" viewBox="0 0 20 20">
+								<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+							</svg>
+						</button>
+					</div>
+				</div>
+			</nav>
+
+			<!-- Mobile Navigation Bar -->
+			<nav class="mobile-nav">
+				<button class="mobile-menu-toggle" id="mobileMenuToggle">
+					<svg
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							d="M3 12H21M3 6H21M3 18H21"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"></path>
+					</svg>
+				</button>
+				<a href="/" class="mobile-logo">📚 Wisdom Library</a>
+				<div class="mobile-nav-links">
+					<a href="/" class="mobile-nav-link">Home</a>
+					<a href="/speakers" class="mobile-nav-link">Speakers</a>
+				</div>
+			</nav>
+
+			<!-- Overlay for mobile -->
+			<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+			<!-- Main Content -->
+			<main class="main-content">
+				<slot />
+			</main>
+		</div>
+
+		<script>
+			// Theme Management
+			const themes = {
+				ocean: { icon: '🌊', name: 'Ocean' },
+				forest: { icon: '🌲', name: 'Forest' },
+				sunset: { icon: '🌅', name: 'Sunset' },
+				monochrome: { icon: '⚫', name: 'Monochrome' },
+			};
+
+			class ThemeManager {
+				constructor() {
+					this.currentTheme = 'ocean';
+					this.isDark = false;
+					this.init();
+				}
+
+				init() {
+					this.loadPreferences();
+					this.applyTheme();
+					this.setupEventListeners();
+					this.watchSystemPreference();
+				}
+
+				loadPreferences() {
+					const savedTheme = localStorage.getItem('theme');
+					const savedMode = localStorage.getItem('darkMode');
+
+					if (savedTheme && themes[savedTheme]) {
+						this.currentTheme = savedTheme;
+					}
+
+					if (savedMode !== null) {
+						this.isDark = savedMode === 'true';
+					} else {
+						this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+					}
+				}
+
+				savePreferences() {
+					localStorage.setItem('theme', this.currentTheme);
+					localStorage.setItem('darkMode', this.isDark.toString());
+				}
+
+				applyTheme() {
+					const html = document.documentElement;
+					html.setAttribute('data-theme', this.currentTheme);
+
+					if (this.isDark) {
+						html.classList.add('dark');
+					} else {
+						html.classList.remove('dark');
+					}
+
+					this.updateUI();
+				}
+
+				updateUI() {
+					const themeIcon = document.getElementById('theme-icon');
+					const themeName = document.getElementById('theme-name');
+					if (themeIcon && themeName) {
+						themeIcon.textContent = themes[this.currentTheme].icon;
+						themeName.textContent = themes[this.currentTheme].name;
+					}
+
+					const sunIcon = document.getElementById('sun-icon');
+					const moonIcon = document.getElementById('moon-icon');
+					if (sunIcon && moonIcon) {
+						if (this.isDark) {
+							sunIcon.classList.remove('hidden');
+							moonIcon.classList.add('hidden');
+						} else {
+							sunIcon.classList.add('hidden');
+							moonIcon.classList.remove('hidden');
+						}
+					}
+
+					document.querySelectorAll('.theme-option').forEach((btn) => {
+						const theme = btn.getAttribute('data-theme');
+						if (theme === this.currentTheme) {
+							btn.classList.add('active');
+						} else {
+							btn.classList.remove('active');
+						}
+					});
+				}
+
+				setupEventListeners() {
+					const menuButton = document.getElementById('theme-menu-button');
+					const menu = document.getElementById('theme-menu');
+
+					if (menuButton && menu) {
+						menuButton.addEventListener('click', () => {
+							const isHidden = menu.classList.contains('hidden');
+							if (isHidden) {
+								menu.classList.remove('hidden');
+							} else {
+								menu.classList.add('hidden');
+							}
+						});
+
+						document.addEventListener('click', (e) => {
+							if (!menuButton.contains(e.target) && !menu.contains(e.target)) {
+								menu.classList.add('hidden');
+							}
+						});
+					}
+
+					document.querySelectorAll('.theme-option').forEach((btn) => {
+						btn.addEventListener('click', () => {
+							const theme = btn.getAttribute('data-theme');
+							if (theme && themes[theme]) {
+								this.currentTheme = theme;
+								this.applyTheme();
+								this.savePreferences();
+
+								const menu = document.getElementById('theme-menu');
+								if (menu) {
+									menu.classList.add('hidden');
+								}
+							}
+						});
+					});
+
+					const darkToggle = document.getElementById('dark-toggle');
+					if (darkToggle) {
+						darkToggle.addEventListener('click', () => {
+							this.isDark = !this.isDark;
+							this.applyTheme();
+							this.savePreferences();
+						});
+					}
+				}
+
+				watchSystemPreference() {
+					const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+					mediaQuery.addEventListener('change', (e) => {
+						if (localStorage.getItem('darkMode') === null) {
+							this.isDark = e.matches;
+							this.applyTheme();
+						}
+					});
+				}
+			}
+
+			document.addEventListener('DOMContentLoaded', () => {
+				// Initialize Theme Manager
+				new ThemeManager();
+
+				// Sidebar functionality
+				const sidebar = document.getElementById('sidebar');
+				const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+				const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+				// Mobile menu toggle
+				if (mobileMenuToggle) {
+					mobileMenuToggle.addEventListener('click', () => {
+						sidebar?.classList.toggle('open');
+						sidebarOverlay?.classList.toggle('active');
+					});
+				}
+
+				// Close sidebar when clicking overlay
+				if (sidebarOverlay) {
+					sidebarOverlay.addEventListener('click', () => {
+						sidebar?.classList.remove('open');
+						sidebarOverlay.classList.remove('active');
+					});
+				}
+
+				// Close sidebar on mobile when clicking a link
+				const talkCards = sidebar?.querySelectorAll('.talk-card');
+				talkCards?.forEach((card) => {
+					card.addEventListener('click', () => {
+						if (window.innerWidth <= 1024) {
+							sidebar?.classList.remove('open');
+							sidebarOverlay?.classList.remove('active');
+						}
+					});
+				});
+			});
+		</script>
+	</body>
 </html>

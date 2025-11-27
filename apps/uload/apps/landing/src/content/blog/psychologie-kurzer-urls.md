@@ -19,11 +19,13 @@ Aktuelle Studien zeigen eindeutig: URLs, die länger als 100 Zeichen sind, löse
 Vergleichen Sie diese beiden URLs:
 
 **Lange URL (schlecht):**
+
 ```
 https://example.com/product?id=12345&utm_source=newsletter&utm_medium=email&utm_campaign=summer2024
 ```
 
 **Kurze URL (gut):**
+
 ```
 https://ulo.ad/summer-sale
 ```
@@ -53,6 +55,7 @@ Die Cognitive Load Theory erklärt, warum kurze URLs so effektiv sind. Unser Geh
 ### 2. Die 50-Zeichen-Regel
 
 Halten Sie Ihre URLs unter 50 Zeichen. Das ist:
+
 - Kurz genug für Twitter/X
 - Lesbar auf Mobilgeräten
 - Merkbar für Nutzer

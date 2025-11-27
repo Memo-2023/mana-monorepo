@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 		const tags = await locals.pb.collection('tags').getList<Tag>(1, 100, {
 			filter,
-			sort: '-usage_count,name'
+			sort: '-usage_count,name',
 		});
 
 		console.log('[TAGS] Response:');
@@ -30,16 +30,16 @@ export const load: PageServerLoad = async ({ locals }) => {
 			tags.items.map(async (tag) => {
 				const linkTags = await locals.pb.collection('linktags').getList(1, 100, {
 					filter: `tag_id="${tag.id}"`,
-					expand: 'link_id'
+					expand: 'link_id',
 				});
-				
+
 				// Calculate total clicks for all links with this tag
 				let totalClicks = 0;
 				for (const linkTag of linkTags.items) {
 					if (linkTag.expand?.link_id) {
 						try {
 							const clicks = await locals.pb.collection('clicks').getList(1, 1, {
-								filter: `link_id="${linkTag.link_id}"`
+								filter: `link_id="${linkTag.link_id}"`,
 							});
 							totalClicks += clicks.totalItems;
 						} catch (err) {
@@ -47,11 +47,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 						}
 					}
 				}
-				
+
 				return {
 					...tag,
 					linkCount: linkTags.totalItems,
-					totalClicks
+					totalClicks,
 				};
 			})
 		);
@@ -60,13 +60,13 @@ export const load: PageServerLoad = async ({ locals }) => {
 		console.log('=== END TAGS PAGE LOAD ===\n');
 
 		return {
-			tags: tagsWithStats
+			tags: tagsWithStats,
 		};
 	} catch (err) {
 		console.error('[TAGS] ERROR in load function:', err);
 		console.error('[TAGS] Error details:', JSON.stringify(err, null, 2));
 		return {
-			tags: []
+			tags: [],
 		};
 	}
 };
@@ -91,7 +91,7 @@ export const actions = {
 				icon: icon || '',
 				user_id: locals.user?.id,
 				is_public: isPublic,
-				usage_count: 0
+				usage_count: 0,
 			});
 
 			return { success: true, tag };
@@ -118,7 +118,7 @@ export const actions = {
 				slug: generateTagSlug(name.trim()),
 				color: color || DEFAULT_TAG_COLORS[0],
 				icon: icon || '',
-				is_public: isPublic
+				is_public: isPublic,
 			});
 
 			return { updated: true };
@@ -138,7 +138,7 @@ export const actions = {
 		try {
 			// Delete all link_tags relationships first
 			const linkTags = await locals.pb.collection('linktags').getList(1, 100, {
-				filter: `tag_id="${id}"`
+				filter: `tag_id="${id}"`,
 			});
 
 			for (const linkTag of linkTags.items) {
@@ -153,32 +153,32 @@ export const actions = {
 			return fail(400, { error: 'Failed to delete tag' });
 		}
 	},
-	
+
 	bulkAction: async ({ request, locals }) => {
 		// Ensure user is authenticated
 		if (!locals.user?.id) {
 			return fail(401, { error: 'Sie müssen eingeloggt sein' });
 		}
-		
+
 		const data = await request.formData();
 		const action = data.get('action') as string;
 		const tagIdsJson = data.get('tagIds') as string;
-		
+
 		if (!tagIdsJson) {
 			return fail(400, { error: 'No tags selected' });
 		}
-		
+
 		let tagIds: string[];
 		try {
 			tagIds = JSON.parse(tagIdsJson);
 		} catch {
 			return fail(400, { error: 'Invalid tag IDs' });
 		}
-		
+
 		if (tagIds.length === 0) {
 			return fail(400, { error: 'No tags selected' });
 		}
-		
+
 		// Verify all tags belong to the current user
 		for (const tagId of tagIds) {
 			try {
@@ -190,20 +190,20 @@ export const actions = {
 				return fail(404, { error: `Tag ${tagId} not found` });
 			}
 		}
-		
+
 		switch (action) {
 			case 'bulk-delete': {
 				try {
 					for (const tagId of tagIds) {
 						// Delete all link_tags relationships first
 						const linkTags = await locals.pb.collection('linktags').getList(1, 100, {
-							filter: `tag_id="${tagId}"`
+							filter: `tag_id="${tagId}"`,
 						});
-						
+
 						for (const linkTag of linkTags.items) {
 							await locals.pb.collection('linktags').delete(linkTag.id);
 						}
-						
+
 						// Delete the tag
 						await locals.pb.collection('tags').delete(tagId);
 					}
@@ -213,68 +213,68 @@ export const actions = {
 					return fail(400, { error: 'Failed to delete tags' });
 				}
 			}
-			
+
 			case 'bulk-merge': {
 				const targetTagId = data.get('targetTagId') as string;
 				if (!targetTagId) {
 					return fail(400, { error: 'No target tag selected' });
 				}
-				
+
 				if (!tagIds.includes(targetTagId)) {
 					return fail(400, { error: 'Target tag must be one of the selected tags' });
 				}
-				
+
 				try {
 					// Get the target tag
 					const targetTag = await locals.pb.collection('tags').getOne(targetTagId);
-					
+
 					// Merge all other tags into the target tag
 					for (const tagId of tagIds) {
 						if (tagId === targetTagId) continue;
-						
+
 						// Get all link_tags for this tag
 						const linkTags = await locals.pb.collection('linktags').getList(1, 100, {
-							filter: `tag_id="${tagId}"`
+							filter: `tag_id="${tagId}"`,
 						});
-						
+
 						// For each link_tag, check if target tag already has this link
 						for (const linkTag of linkTags.items) {
 							// Check if this link already has the target tag
 							const existingLinkTag = await locals.pb.collection('linktags').getList(1, 1, {
-								filter: `link_id="${linkTag.link_id}" && tag_id="${targetTagId}"`
+								filter: `link_id="${linkTag.link_id}" && tag_id="${targetTagId}"`,
 							});
-							
+
 							if (existingLinkTag.totalItems === 0) {
 								// Create new link_tag with target tag
 								await locals.pb.collection('linktags').create({
 									link_id: linkTag.link_id,
-									tag_id: targetTagId
+									tag_id: targetTagId,
 								});
 							}
-							
+
 							// Delete the old link_tag
 							await locals.pb.collection('linktags').delete(linkTag.id);
 						}
-						
+
 						// Update target tag usage count
 						const tag = await locals.pb.collection('tags').getOne(tagId);
 						await locals.pb.collection('tags').update(targetTagId, {
-							usage_count: (targetTag.usage_count || 0) + (tag.usage_count || 0)
+							usage_count: (targetTag.usage_count || 0) + (tag.usage_count || 0),
 						});
-						
+
 						// Delete the merged tag
 						await locals.pb.collection('tags').delete(tagId);
 					}
-					
+
 					return { success: true, merged: tagIds.length - 1, targetTag: targetTag.name };
 				} catch (err) {
 					console.error('Failed to merge tags:', err);
 					return fail(400, { error: 'Failed to merge tags' });
 				}
 			}
-			
+
 			default:
 				return fail(400, { error: 'Invalid action' });
 		}
-	}
+	},
 } satisfies Actions;

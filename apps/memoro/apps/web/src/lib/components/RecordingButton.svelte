@@ -63,7 +63,11 @@
 		}
 	}
 
-	function animatePressRotation(targetDegrees: number, duration: number, useEaseOut: boolean = false) {
+	function animatePressRotation(
+		targetDegrees: number,
+		duration: number,
+		useEaseOut: boolean = false
+	) {
 		// Cancel any existing press animation
 		if (pressAnimationId) {
 			cancelAnimationFrame(pressAnimationId);
@@ -254,8 +258,8 @@
 			audio: {
 				echoCancellation: true,
 				noiseSuppression: true,
-				autoGainControl: true
-			}
+				autoGainControl: true,
+			},
 		});
 
 		try {
@@ -279,9 +283,7 @@
 			}
 
 			// Create media recorder
-			const mimeType = MediaRecorder.isTypeSupported('audio/webm')
-				? 'audio/webm'
-				: 'audio/mp4';
+			const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
 			mediaRecorder = new MediaRecorder(stream, { mimeType });
 
 			mediaRecorder.ondataavailable = (event) => {
@@ -313,7 +315,9 @@
 		} catch (error: any) {
 			console.error('Error starting recording:', error);
 			if (error.name === 'NotAllowedError') {
-				recording.setError('Microphone permission denied. Please enable it in your browser settings.');
+				recording.setError(
+					'Microphone permission denied. Please enable it in your browser settings.'
+				);
 			} else {
 				recording.setError('Failed to start recording: ' + error.message);
 			}
@@ -504,7 +508,10 @@
 
 	<!-- Control Buttons (Pause/Resume, Cancel) - positioned to the right like mobile app -->
 	{#if isRecording || isPaused}
-		<div class="absolute right-0 flex flex-col gap-5 animate-fade-in" style="top: 50%; transform: translate(calc(100% + 40px), -50%);">
+		<div
+			class="absolute right-0 flex flex-col gap-5 animate-fade-in"
+			style="top: 50%; transform: translate(calc(100% + 40px), -50%);"
+		>
 			<!-- Pause/Resume Button -->
 			<button
 				on:click={isPaused ? resumeRecording : pauseRecording}
@@ -531,13 +538,18 @@
 				title={$t('record.cancel')}
 			>
 				<!-- X Icon -->
-				<svg class="h-6 w-6 text-theme" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+				<svg
+					class="h-6 w-6 text-theme"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+					stroke-width="2.5"
+				>
 					<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
 				</svg>
 			</button>
 		</div>
 	{/if}
-
 </div>
 
 <!-- Cancel Recording Modal -->

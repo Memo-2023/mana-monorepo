@@ -23,6 +23,7 @@ This is a multi-tenant system where a single authentication backend supports mul
 Both web and mobile apps use Supabase for authentication with different approaches:
 
 **Web App (SvelteKit)**:
+
 - Server-side authentication using `@supabase/ssr`
 - Two-hook middleware system in `apps/web/src/hooks.server.ts`:
   - `supabase` hook: Creates Supabase client per request with cookie management
@@ -31,6 +32,7 @@ Both web and mobile apps use Supabase for authentication with different approach
 - Route groups: `(auth)` for login/register, `(app)` for protected dashboard pages
 
 **Mobile App (Expo)**:
+
 - Client-side authentication using `@supabase/supabase-js`
 - Custom memory storage implementation (`apps/mobile/utils/memoryStorage.ts`) for session persistence
 - `AuthProvider` component in `apps/mobile/app/_layout.tsx` handles auth state and navigation
@@ -39,6 +41,7 @@ Both web and mobile apps use Supabase for authentication with different approach
 ### Database Schema
 
 Key tables (inferred from queries):
+
 - `users`: User profiles linked via `auth_id` to Supabase Auth users
 - `user_roles`: Junction table linking users to organizations (with role information)
 - `organizations`: Organization entities
@@ -48,6 +51,7 @@ Key tables (inferred from queries):
 ### Routing Structure
 
 **Web App** (SvelteKit file-based routing):
+
 ```
 routes/
 ├── (auth)/          # Public authentication pages
@@ -62,6 +66,7 @@ routes/
 ```
 
 **Mobile App** (Expo Router):
+
 ```
 app/
 ├── (drawer)/        # Main drawer navigation
@@ -77,6 +82,7 @@ app/
 ### Path Aliases (Web App)
 
 Defined in `apps/web/svelte.config.js`:
+
 - `$lib` → `src/lib`
 - `$components` → `src/lib/components`
 - `$stores` → `src/lib/stores`
@@ -139,6 +145,7 @@ npm run prebuild        # Generate native projects
 Both apps require Supabase credentials. Copy the `.env.example` files and configure:
 
 **Web App** (`apps/web/.env`):
+
 ```
 PUBLIC_SUPABASE_URL=your_supabase_url
 PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -146,6 +153,7 @@ MIDDLEWARE_URL=https://mana-core-middleware-111768794939.europe-west3.run.app
 ```
 
 **Mobile App** (`apps/mobile/.env`):
+
 ```
 EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -154,6 +162,7 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ## Technology Stack
 
 ### Web App
+
 - **Framework**: SvelteKit 2 with Svelte 5
 - **Styling**: TailwindCSS with PostCSS
 - **Database**: Supabase (PostgreSQL)
@@ -162,6 +171,7 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 - **Build**: Vite
 
 ### Mobile App
+
 - **Framework**: Expo 52 with React Native 0.76
 - **Routing**: Expo Router 4 (file-based)
 - **Styling**: NativeWind (TailwindCSS for React Native)
@@ -178,22 +188,20 @@ Use `+page.server.ts` files for server-side data fetching with automatic auth co
 
 ```typescript
 export const load: PageServerLoad = async ({ locals: { supabase, session } }) => {
-  if (!session) {
-    throw redirect(307, '/login');
-  }
+	if (!session) {
+		throw redirect(307, '/login');
+	}
 
-  const { data } = await supabase
-    .from('table_name')
-    .select('*')
-    .eq('user_id', session.user.id);
+	const { data } = await supabase.from('table_name').select('*').eq('user_id', session.user.id);
 
-  return { data };
+	return { data };
 };
 ```
 
 ### Supabase Client Access
 
 **Web**: Access via `event.locals.supabase` in server code, or use helper functions in `$server/supabase.ts`:
+
 - `getUser(event)`: Get current user
 - `getSession(event)`: Get current session
 - `requireAuth(event)`: Require auth or throw error
@@ -210,6 +218,7 @@ export const load: PageServerLoad = async ({ locals: { supabase, session } }) =>
 ## Multi-App Branding
 
 When adding new apps to the ecosystem, update `apps/web/src/lib/config/apps.ts` with:
+
 - App name and display name
 - Tagline and description
 - Logo emoji and colors

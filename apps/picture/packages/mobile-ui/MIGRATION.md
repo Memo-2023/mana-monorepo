@@ -6,19 +6,23 @@
 ## What Changed
 
 ### Package Rename
+
 - **Old:** `@memoro/ui`
 - **New:** `@memoro/mobile-ui`
 - **Directory:** `packages/memoro-ui/` → `packages/mobile-ui/`
 
 ### Framework Scope
+
 The package is now explicitly **React Native only**.
 
 **Compatible:**
+
 - ✅ React Native (Expo)
 - ✅ Expo Router
 - ✅ React Native apps
 
 **Not Compatible:**
+
 - ❌ SvelteKit (Web app)
 - ❌ Astro (Landing page)
 - ❌ Next.js / React DOM
@@ -27,6 +31,7 @@ The package is now explicitly **React Native only**.
 ## Why This Change?
 
 ### Monorepo Structure
+
 The picture project uses a monorepo with multiple apps:
 
 ```
@@ -40,7 +45,9 @@ picture/
 ```
 
 ### Technical Reason
+
 All 17 components use React Native primitives:
+
 - `View`, `Pressable`, `Text` (not DOM elements)
 - `react-native-reanimated`
 - `react-native-safe-area-context`
@@ -51,6 +58,7 @@ These dependencies are **not compatible** with web frameworks.
 ## What Was Updated
 
 ### Files Changed
+
 1. **Package name:**
    - `package.json` → `name: "@memoro/mobile-ui"`
    - `registry.json` → `name: "@memoro/mobile-ui"`
@@ -65,6 +73,7 @@ These dependencies are **not compatible** with web frameworks.
    - `packages/memoro-ui/` → `packages/mobile-ui/`
 
 ### No Breaking Changes
+
 - Component code unchanged
 - CLI tool works the same
 - Import paths unchanged (still `@/components/ui/Button`)
@@ -73,6 +82,7 @@ These dependencies are **not compatible** with web frameworks.
 ## For Developers
 
 ### If Using Mobile App (`@picture/mobile`)
+
 **No action needed.** Everything works as before.
 
 ```bash
@@ -82,14 +92,17 @@ node packages/mobile-ui/cli/bin/cli.js add button
 ```
 
 ### If Using Web App (`@picture/web`) or Landing
+
 **Cannot use this library.** Build Svelte/Astro components instead.
 
 Consider:
+
 - Create `apps/web/src/lib/components/ui/` for Svelte components
 - Create `apps/landing/src/components/` for Astro components
 - Share design tokens (colors, spacing) via separate package
 
 ### Future: Shared Design Tokens
+
 If UI consistency becomes important across all apps:
 
 ```
@@ -103,6 +116,7 @@ packages/
 ```
 
 Then:
+
 - Mobile app uses `@memoro/mobile-ui` + design tokens
 - Web app builds Svelte components using same design tokens
 - Landing builds Astro components using same design tokens
@@ -116,6 +130,7 @@ Then:
 ## Questions?
 
 See:
+
 - [README.md](./README.md) - Main documentation
 - [STATUS.md](./STATUS.md) - Current status and next steps
 - [CLI.md](./CLI.md) - CLI usage guide

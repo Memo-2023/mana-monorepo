@@ -15,7 +15,7 @@
 	logo={ManaCoreLogo}
 	primaryColor="#6366f1"
 	onSignUp={handleSignUp}
-	goto={goto}
+	{goto}
 	successRedirect="/dashboard"
 	loginPath="/login"
 	lightBackground="#f3f4f6"

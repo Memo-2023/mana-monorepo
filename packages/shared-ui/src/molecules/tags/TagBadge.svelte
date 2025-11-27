@@ -28,13 +28,7 @@
 		onClick?: () => void;
 	}
 
-	let {
-		tag,
-		removable = false,
-		clickable = false,
-		onRemove,
-		onClick
-	}: Props = $props();
+	let { tag, removable = false, clickable = false, onRemove, onClick }: Props = $props();
 
 	// Get tag color from either style.color (new format) or color (old format)
 	const tagColor = $derived(tag.style?.color || tag.color || '#3b82f6');
@@ -84,7 +78,12 @@
 			aria-label="Remove tag"
 		>
 			<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M6 18L18 6M6 6l12 12"
+				/>
 			</svg>
 		</button>
 	{/if}

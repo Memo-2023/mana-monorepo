@@ -11,6 +11,7 @@ Nach eingehender Analyse des aktuellen Projekts und dem erhaltenen Feedback bewe
 ## Aktuelle Situation
 
 ### Technologie-Stack
+
 - **Frontend:** SvelteKit v2.22 mit Svelte 5.0
 - **Styling:** Tailwind CSS v4.0
 - **Backend:** PocketBase (aktuell)
@@ -18,6 +19,7 @@ Nach eingehender Analyse des aktuellen Projekts und dem erhaltenen Feedback bewe
 - **Hosting:** Separate Instanzen für Dev (localhost:8090) und Prod (pb.ulo.ad)
 
 ### Implementierte Features
+
 - URL-Shortening mit custom Short-Codes
 - User Authentication & Profile Management
 - Link-Management mit Tags
@@ -89,6 +91,7 @@ Nach eingehender Analyse des aktuellen Projekts und dem erhaltenen Feedback bewe
 ## Migrations-Strategie (falls notwendig)
 
 ### Wann der Wechsel sinnvoll wäre:
+
 - ✅ Mehr als 10.000 aktive User
 - ✅ Mehr als 1 Million Clicks/Tag
 - ✅ Komplexe Business Intelligence Anforderungen
@@ -96,6 +99,7 @@ Nach eingehender Analyse des aktuellen Projekts und dem erhaltenen Feedback bewe
 - ✅ Geografisch verteilte Deployments
 
 ### Empfohlener Migrations-Pfad:
+
 1. **Phase 1:** Weiter mit PocketBase (JETZT)
 2. **Phase 2:** Redis-Cache für Hot-Links hinzufügen
 3. **Phase 3:** Analytics in separaten Service auslagern
@@ -104,6 +108,7 @@ Nach eingehender Analyse des aktuellen Projekts und dem erhaltenen Feedback bewe
 ## Konkrete Empfehlungen
 
 ### Kurzfristig (0-3 Monate)
+
 1. **Bei PocketBase bleiben**
    - Fokus auf Feature-Entwicklung
    - User-Feedback sammeln
@@ -115,6 +120,7 @@ Nach eingehender Analyse des aktuellen Projekts und dem erhaltenen Feedback bewe
    - Lazy-Loading für Analytics
 
 ### Mittelfristig (3-6 Monate)
+
 1. **Hybrid-Ansatz evaluieren**
    - PocketBase für Auth & Core-Data
    - Redis für Link-Resolution Cache
@@ -126,6 +132,7 @@ Nach eingehender Analyse des aktuellen Projekts und dem erhaltenen Feedback bewe
    - Datenbasierte Entscheidungen treffen
 
 ### Langfristig (6+ Monate)
+
 1. **Bei nachgewiesenem Bedarf**
    - Migration zu PostgreSQL planen
    - Schrittweise Migration
@@ -143,17 +150,17 @@ Die Kritik an PocketBase ist **teilweise berechtigt**, aber für die aktuelle Pr
 
 ## Anhang: Feature-Vergleich
 
-| Feature | PocketBase | PostgreSQL + Stack | Bewertung |
-|---------|------------|-------------------|-----------|
-| Setup-Zeit | 5 Minuten | 2-3 Stunden | PocketBase ✅ |
-| Auth System | Eingebaut | Lucia/Auth.js nötig | PocketBase ✅ |
-| REST API | Automatisch | Prisma + tRPC/REST | PocketBase ✅ |
-| Realtime | WebSockets eingebaut | Separate Lösung | PocketBase ✅ |
-| File Storage | Eingebaut | S3/Cloudinary | PocketBase ✅ |
-| Admin UI | Eingebaut | Eigenbau/Forest Admin | PocketBase ✅ |
-| Complex Queries | Limitiert | Vollständig | PostgreSQL ✅ |
-| Skalierung | Vertikal | Horizontal | PostgreSQL ✅ |
-| Performance | Gut bis 100k Users | Exzellent | PostgreSQL ✅ |
-| Kosten | Niedrig | Mittel-Hoch | PocketBase ✅ |
+| Feature         | PocketBase           | PostgreSQL + Stack    | Bewertung     |
+| --------------- | -------------------- | --------------------- | ------------- |
+| Setup-Zeit      | 5 Minuten            | 2-3 Stunden           | PocketBase ✅ |
+| Auth System     | Eingebaut            | Lucia/Auth.js nötig   | PocketBase ✅ |
+| REST API        | Automatisch          | Prisma + tRPC/REST    | PocketBase ✅ |
+| Realtime        | WebSockets eingebaut | Separate Lösung       | PocketBase ✅ |
+| File Storage    | Eingebaut            | S3/Cloudinary         | PocketBase ✅ |
+| Admin UI        | Eingebaut            | Eigenbau/Forest Admin | PocketBase ✅ |
+| Complex Queries | Limitiert            | Vollständig           | PostgreSQL ✅ |
+| Skalierung      | Vertikal             | Horizontal            | PostgreSQL ✅ |
+| Performance     | Gut bis 100k Users   | Exzellent             | PostgreSQL ✅ |
+| Kosten          | Niedrig              | Mittel-Hoch           | PocketBase ✅ |
 
 **Gesamtbewertung für aktuelles Projekt:** PocketBase 7:3 PostgreSQL

@@ -14,23 +14,23 @@ import { ProfileModule } from './profile/profile.module';
 import { BatchModule } from './batch/batch.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
-    DatabaseModule,
-    HealthModule,
-    ModelModule,
-    TagModule,
-    ImageModule,
-    BoardModule,
-    BoardItemModule,
-    UploadModule,
-    GenerateModule,
-    ExploreModule,
-    ProfileModule,
-    BatchModule,
-  ],
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			envFilePath: '.env',
+		}),
+		DatabaseModule,
+		HealthModule,
+		ModelModule,
+		TagModule,
+		ImageModule,
+		BoardModule,
+		BoardItemModule,
+		UploadModule,
+		GenerateModule,
+		ExploreModule,
+		ProfileModule,
+		BatchModule,
+	],
 })
 export class AppModule {}

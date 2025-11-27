@@ -3,11 +3,13 @@
 Typography component with predefined text variants.
 
 ## Installation
+
 \`\`\`bash
 npx @memoro/ui add text
 \`\`\`
 
 ## Usage
+
 \`\`\`tsx
 import { Text } from '@/components/ui/Text';
 
@@ -17,6 +19,7 @@ import { Text } from '@/components/ui/Text';
 \`\`\`
 
 ## Variants
+
 - \`title\` - 44px, extra bold
 - \`h1\` - 32px, bold
 - \`h2\` - 28px, bold
@@ -30,6 +33,7 @@ import { Text } from '@/components/ui/Text';
 - \`button\` - 16px, semibold
 
 ## Weights
+
 - \`regular\` - 400
 - \`medium\` - 500
 - \`semibold\` - 600

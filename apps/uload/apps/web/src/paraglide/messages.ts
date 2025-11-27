@@ -14,7 +14,7 @@ const messageProxy = new Proxy(
 				const translate = get(_);
 				return translate(prop);
 			};
-		}
+		},
 	}
 ) as Record<string, () => string>;
 
@@ -165,7 +165,7 @@ export const {
 	error_link_creation,
 	error_link_creation_single,
 	error_password_change,
-	error_save
+	error_save,
 } = messageProxy;
 
 // Re-export locale utilities

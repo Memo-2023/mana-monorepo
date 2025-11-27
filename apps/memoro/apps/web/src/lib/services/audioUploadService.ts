@@ -36,7 +36,7 @@ export async function uploadAndProcessAudio({
 	recordingLanguages = [],
 	enableDiarization = false,
 	recordingDate,
-	recordingTime
+	recordingTime,
 }: AudioUploadOptions): Promise<AudioUploadResult> {
 	try {
 		// 1. Generate memoId (UUID v4)
@@ -50,7 +50,7 @@ export async function uploadAndProcessAudio({
 			return {
 				success: false,
 				error: 'Authentication failed - no valid token found',
-				isNetworkError: false
+				isNetworkError: false,
 			};
 		}
 
@@ -69,9 +69,9 @@ export async function uploadAndProcessAudio({
 			headers: {
 				apikey: env.supabase.anonKey,
 				Authorization: `Bearer ${appToken}`,
-				'x-upsert': 'true'
+				'x-upsert': 'true',
 			},
-			body: formData
+			body: formData,
 		});
 
 		if (!uploadResponse.ok) {
@@ -81,7 +81,7 @@ export async function uploadAndProcessAudio({
 			return {
 				success: false,
 				error: `Upload failed: ${uploadResponse.status} - ${errorText}`,
-				isNetworkError: uploadResponse.status >= 500 || uploadResponse.status === 0
+				isNetworkError: uploadResponse.status >= 500 || uploadResponse.status === 0,
 			};
 		}
 
@@ -100,7 +100,7 @@ export async function uploadAndProcessAudio({
 			title,
 			blueprintId: blueprintId ?? undefined,
 			recordingLanguages,
-			appToken
+			appToken,
 		});
 
 		if (!transcriptionResult.success) {
@@ -109,7 +109,7 @@ export async function uploadAndProcessAudio({
 			return {
 				success: false,
 				error: transcriptionResult.error || 'Transcription failed to start',
-				isNetworkError: false
+				isNetworkError: false,
 			};
 		}
 
@@ -117,19 +117,18 @@ export async function uploadAndProcessAudio({
 
 		return {
 			success: true,
-			memoId
+			memoId,
 		};
 	} catch (error) {
 		console.error('Error in uploadAndProcessAudio:', error);
 
 		// Check if network error
-		const isNetworkError =
-			error instanceof TypeError && error.message.includes('fetch');
+		const isNetworkError = error instanceof TypeError && error.message.includes('fetch');
 
 		return {
 			success: false,
 			error: error instanceof Error ? error.message : 'Unknown error occurred',
-			isNetworkError
+			isNetworkError,
 		};
 	}
 }

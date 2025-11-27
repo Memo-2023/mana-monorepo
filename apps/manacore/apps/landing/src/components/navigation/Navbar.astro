@@ -8,8 +8,8 @@ import { getLangFromUrl, useTranslations } from '../../lib/i18n/config';
 import { getLocalizedRoute } from '../../lib/i18n/utils';
 
 export interface Props {
-  transparent?: boolean;
-  sticky?: boolean;
+	transparent?: boolean;
+	sticky?: boolean;
 }
 
 const { transparent = false, sticky = true } = Astro.props;
@@ -18,116 +18,122 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
 const navLinks = [
-  { href: getLocalizedRoute('/apps', lang), label: t('nav.apps') },
-  { href: getLocalizedRoute('/pricing', lang), label: t('nav.pricing') },
-  { href: getLocalizedRoute('/clients', lang), label: t('nav.references') },
-  { href: getLocalizedRoute('/privacy', lang), label: t('nav.privacy') },
+	{ href: getLocalizedRoute('/apps', lang), label: t('nav.apps') },
+	{ href: getLocalizedRoute('/pricing', lang), label: t('nav.pricing') },
+	{ href: getLocalizedRoute('/clients', lang), label: t('nav.references') },
+	{ href: getLocalizedRoute('/privacy', lang), label: t('nav.privacy') },
 ];
 
-const baseStyles = "w-full transition-all duration-300";
-const bgStyles = transparent ? "bg-transparent" : "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50";
-const positionStyles = sticky ? "sticky top-0 z-50" : "";
+const baseStyles = 'w-full transition-all duration-300';
+const bgStyles = transparent
+	? 'bg-transparent'
+	: 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50';
+const positionStyles = sticky ? 'sticky top-0 z-50' : '';
 
 const classes = `${baseStyles} ${bgStyles} ${positionStyles}`;
 ---
 
 <nav class={classes}>
-  <Container>
-    <div class="flex items-center justify-between h-16">
-      <!-- Logo -->
-      <a href={getLocalizedRoute('/', lang)} class="flex items-center gap-2">
-        <img 
-          src="/icons/mana-icon.svg" 
-          alt="Mana Logo" 
-          class="w-8 h-8"
-        />
-        <span class="text-2xl font-bold text-mana-blue">
-          Manacore
-        </span>
-      </a>
-      
-      <!-- Desktop Navigation -->
-      <div class="hidden md:flex items-center space-x-8">
-        {navLinks.map(link => (
-          <a 
-            href={link.href} 
-            class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
-          >
-            {link.label}
-          </a>
-        ))}
-      </div>
-      
-      <!-- CTA Buttons and Theme Toggle -->
-      <div class="hidden md:flex items-center space-x-3">
-        <LanguageSwitcher currentLang={lang} />
-        <ThemeToggle />
-        <Button href={getLocalizedRoute('/start', lang)} size="small" class="bg-mana-orange hover:bg-orange-600">
-          {t('button.startFree')}
-        </Button>
-      </div>
-      
-      <!-- Mobile Menu Button -->
-      <div class="md:hidden flex items-center gap-2">
-        <ThemeToggle />
-        <button 
-          id="mobile-menu-open"
-          class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors" 
-          aria-label="Menü öffnen"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-  </Container>
-  
-  <!-- Mobile Menu Component -->
-  <MobileMenu navLinks={navLinks} />
+	<Container>
+		<div class="flex items-center justify-between h-16">
+			<!-- Logo -->
+			<a href={getLocalizedRoute('/', lang)} class="flex items-center gap-2">
+				<img src="/icons/mana-icon.svg" alt="Mana Logo" class="w-8 h-8" />
+				<span class="text-2xl font-bold text-mana-blue"> Manacore </span>
+			</a>
+
+			<!-- Desktop Navigation -->
+			<div class="hidden md:flex items-center space-x-8">
+				{
+					navLinks.map((link) => (
+						<a
+							href={link.href}
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+						>
+							{link.label}
+						</a>
+					))
+				}
+			</div>
+
+			<!-- CTA Buttons and Theme Toggle -->
+			<div class="hidden md:flex items-center space-x-3">
+				<LanguageSwitcher currentLang={lang} />
+				<ThemeToggle />
+				<Button
+					href={getLocalizedRoute('/start', lang)}
+					size="small"
+					class="bg-mana-orange hover:bg-orange-600"
+				>
+					{t('button.startFree')}
+				</Button>
+			</div>
+
+			<!-- Mobile Menu Button -->
+			<div class="md:hidden flex items-center gap-2">
+				<ThemeToggle />
+				<button
+					id="mobile-menu-open"
+					class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors"
+					aria-label="Menü öffnen"
+				>
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 6h16M4 12h16M4 18h16"></path>
+					</svg>
+				</button>
+			</div>
+		</div>
+	</Container>
+
+	<!-- Mobile Menu Component -->
+	<MobileMenu navLinks={navLinks} />
 </nav>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const mobileMenu = document.getElementById('mobile-menu');
-    const mobileMenuPanel = mobileMenu?.querySelector('.transform');
-    const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
-    const mobileMenuClose = document.getElementById('mobile-menu-close');
-    const mobileMenuOpen = document.getElementById('mobile-menu-open');
+	document.addEventListener('DOMContentLoaded', () => {
+		const mobileMenu = document.getElementById('mobile-menu');
+		const mobileMenuPanel = mobileMenu?.querySelector('.transform');
+		const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+		const mobileMenuClose = document.getElementById('mobile-menu-close');
+		const mobileMenuOpen = document.getElementById('mobile-menu-open');
 
-    function openMobileMenu() {
-      if (!mobileMenu || !mobileMenuPanel) return;
+		function openMobileMenu() {
+			if (!mobileMenu || !mobileMenuPanel) return;
 
-      mobileMenu.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
+			mobileMenu.classList.remove('hidden');
+			document.body.style.overflow = 'hidden';
 
-      // Trigger animation after display change
-      requestAnimationFrame(() => {
-        mobileMenuPanel.classList.remove('translate-x-full');
-      });
-    }
+			// Trigger animation after display change
+			requestAnimationFrame(() => {
+				mobileMenuPanel.classList.remove('translate-x-full');
+			});
+		}
 
-    function closeMobileMenu() {
-      if (!mobileMenu || !mobileMenuPanel) return;
+		function closeMobileMenu() {
+			if (!mobileMenu || !mobileMenuPanel) return;
 
-      mobileMenuPanel.classList.add('translate-x-full');
-      document.body.style.overflow = '';
+			mobileMenuPanel.classList.add('translate-x-full');
+			document.body.style.overflow = '';
 
-      // Hide after animation completes
-      setTimeout(() => {
-        mobileMenu.classList.add('hidden');
-      }, 300);
-    }
+			// Hide after animation completes
+			setTimeout(() => {
+				mobileMenu.classList.add('hidden');
+			}, 300);
+		}
 
-    mobileMenuOpen?.addEventListener('click', openMobileMenu);
-    mobileMenuClose?.addEventListener('click', closeMobileMenu);
-    mobileMenuOverlay?.addEventListener('click', closeMobileMenu);
+		mobileMenuOpen?.addEventListener('click', openMobileMenu);
+		mobileMenuClose?.addEventListener('click', closeMobileMenu);
+		mobileMenuOverlay?.addEventListener('click', closeMobileMenu);
 
-    // Close menu on escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !mobileMenu?.classList.contains('hidden')) {
-        closeMobileMenu();
-      }
-    });
-  });
+		// Close menu on escape key
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && !mobileMenu?.classList.contains('hidden')) {
+				closeMobileMenu();
+			}
+		});
+	});
 </script>

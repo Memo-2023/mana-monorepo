@@ -27,10 +27,12 @@ This guide explains how to set up and use Google Sign-In with Supabase in the Me
    - Android
 
 #### For iOS:
+
 - Provide your app's Bundle ID
 - Add App Store ID and Team ID if the app is already published
 
 #### For Android:
+
 - Provide the package name
 - Generate the SHA-1 certificate fingerprint using:
   ```
@@ -114,5 +116,6 @@ The Google Sign-In button is now available on the login and registration screens
 5. **"Error in authentication flow"**: Check the Supabase dashboard logs for more details on the error.
 
 For more information, refer to:
+
 - [Supabase Auth Documentation](https://supabase.com/docs/guides/auth/social-login/auth-google)
 - [React Native Google Sign-In Documentation](https://github.com/react-native-google-signin/google-signin)

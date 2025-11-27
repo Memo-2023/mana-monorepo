@@ -1,254 +1,274 @@
 Basierend auf der
-  Memoro-Website und
-  Best Practices für
-  SaaS-Landingpages,
-  hier sind sinnvolle
-  A/B-Tests:
+Memoro-Website und
+Best Practices für
+SaaS-Landingpages,
+hier sind sinnvolle
+A/B-Tests:
 
-  🎯 Empfohlene 
-  A/B-Tests für Memoro
+🎯 Empfohlene
+A/B-Tests für Memoro
 
-  1. Navigation 
-  Download-Button 🔝
+1. Navigation
+   Download-Button 🔝
 
-  Hypothese: Ein
-  prominenterer
-  Download-Button
-  erhöht Conversions
+Hypothese: Ein
+prominenterer
+Download-Button
+erhöht Conversions
 
-  Varianten:
-  - A: "App
+Varianten:
+
+- A: "App
   herunterladen"
   (rechts, normal)
-  - B: "Kostenlos
+- B: "Kostenlos
   testen" (mit Badge
   "Neu!")
-  - C: Pulsierender
+- C: Pulsierender
   Button mit Icon
 
-  Metriken:
-  Download-Klicks,
-  Scroll-Verhalten
+Metriken:
+Download-Klicks,
+Scroll-Verhalten
 
-  ---
-  2. 
-  Pricing-Darstellung 
-  💰
+---
 
-  Hypothese:
-  Verschiedene
-  Pricing-Layouts
-  beeinflussen
-  Kaufentscheidung
+2.  Pricing-Darstellung
+    💰
 
-  Varianten:
-  - A: Grid-Layout
+Hypothese:
+Verschiedene
+Pricing-Layouts
+beeinflussen
+Kaufentscheidung
+
+Varianten:
+
+- A: Grid-Layout
   (aktuell)
-  - B:
+- B:
   Vergleichstabelle
-  - C: Slider
+- C: Slider
   (Monatlich/Jährlich
   Toggle)
 
-  Metriken:
-  Time-on-Page,
-  Plan-Auswahl,
-  Conversions
+Metriken:
+Time-on-Page,
+Plan-Auswahl,
+Conversions
 
-  ---
-  3. Social Proof 
-  Position ⭐
+---
 
-  Hypothese:
-  Testimonials direkt
-  nach Hero erhöhen
-  Vertrauen
+3. Social Proof
+   Position ⭐
 
-  Varianten:
-  - A: Testimonials
+Hypothese:
+Testimonials direkt
+nach Hero erhöhen
+Vertrauen
+
+Varianten:
+
+- A: Testimonials
   unten (aktuell)
-  - B:
+- B:
   Mini-Testimonials
   direkt nach Hero
-  - C: Floating
+- C: Floating
   Testimonial-Ticker
 
-  Metriken:
-  Scroll-Tiefe,
-  Verweildauer,
-  Conversions
+Metriken:
+Scroll-Tiefe,
+Verweildauer,
+Conversions
 
-  ---
-  4. Video vs. Demo 🎥
+---
 
-  Hypothese: Live-Demo
-  ist überzeugender als
-   Video
+4. Video vs. Demo 🎥
 
-  Varianten:
-  - A: "Video ansehen"
+Hypothese: Live-Demo
+ist überzeugender als
+Video
+
+Varianten:
+
+- A: "Video ansehen"
   (aktuell)
-  - B: "Interaktive
+- B: "Interaktive
   Demo"
-  - C: "30-Sek
+- C: "30-Sek
   Kurzvideo" (autoplay)
 
-  Metriken:
-  Engagement-Rate,
-  Demo-Completions
+Metriken:
+Engagement-Rate,
+Demo-Completions
 
-  ---
-  5. Urgency/Scarcity 
-  Test ⏰ -> Wichtig: SOWAS WOLLEN WIR NICHT MACHEN - KEINERLEI DARK PATTERNS ETC
+---
 
-  Hypothese: Zeitliche
-  Begrenzung erhöht
-  Conversions
+5. Urgency/Scarcity
+   Test ⏰ -> Wichtig: SOWAS WOLLEN WIR NICHT MACHEN - KEINERLEI DARK PATTERNS ETC
 
-  Varianten:
-  - A: Keine Urgency
-  - B: "Nur noch heute:
-   50% Rabatt"
-  - C: "Begrenzt: Erste
-   100 Nutzer
+Hypothese: Zeitliche
+Begrenzung erhöht
+Conversions
+
+Varianten:
+
+- A: Keine Urgency
+- B: "Nur noch heute:
+  50% Rabatt"
+- C: "Begrenzt: Erste
+  100 Nutzer
   kostenlos"
 
-  Metriken:
-  Conversion-Rate,
-  Absprungrate
+Metriken:
+Conversion-Rate,
+Absprungrate
 
-  ---
-  6. 
-  Feature-Priorisierung
-   📋
+---
 
-  Hypothese:
-  KI-Features sind
-  wichtiger als
-  Datenschutz
+6.  Feature-Priorisierung
+    📋
 
-  Varianten:
-  - A: Datenschutz
+Hypothese:
+KI-Features sind
+wichtiger als
+Datenschutz
+
+Varianten:
+
+- A: Datenschutz
   zuerst
-  - B: KI-Features
+- B: KI-Features
   zuerst
-  - C: Use-Cases zuerst
+- C: Use-Cases zuerst
 
-  Metriken: Engagement,
-   Feature-Klicks
+Metriken: Engagement,
+Feature-Klicks
 
-  ---
-  7. Mobile-First Hero 
-  📱
+---
 
-  Hypothese:
-  App-Screenshots
-  performen besser als
-  Illustrations
+7. Mobile-First Hero
+   📱
 
-  Varianten:
-  - A: Aktuelle
+Hypothese:
+App-Screenshots
+performen besser als
+Illustrations
+
+Varianten:
+
+- A: Aktuelle
   Illustration
-  - B: iPhone-Mockup
+- B: iPhone-Mockup
   mit App
-  - C: Animiertes
+- C: Animiertes
   App-Demo
 
-  Metriken: Mobile
-  Conversions, Bounce
-  Rate
+Metriken: Mobile
+Conversions, Bounce
+Rate
 
-  ---
-  8. Sprache & Tone 💬
+---
 
-  Hypothese:
-  Persönlichere
-  Ansprache erhöht
-  Engagement
+8. Sprache & Tone 💬
 
-  Varianten:
-  - A: "Ihre Gedanken"
+Hypothese:
+Persönlichere
+Ansprache erhöht
+Engagement
+
+Varianten:
+
+- A: "Ihre Gedanken"
   (formell)
-  - B: "Deine Ideen"
+- B: "Deine Ideen"
   (informell)
-  - C: "Sprechen Sie
+- C: "Sprechen Sie
   einfach drauflos"
   (aktiv)
 
-  Metriken:
-  Verweildauer,
-  Engagement
+Metriken:
+Verweildauer,
+Engagement
 
-  ---
-  9. Trust-Badges 🛡️
+---
 
-  Hypothese:
-  Sicherheits-Badges
-  erhöhen Vertrauen
+9. Trust-Badges 🛡️
 
-  Varianten:
-  - A: Keine Badges
-  - B: "DSGVO-konform"
-  + "SSL-verschlüsselt"
-  - C: "TÜV-geprüft" +
+Hypothese:
+Sicherheits-Badges
+erhöhen Vertrauen
+
+Varianten:
+
+- A: Keine Badges
+- B: "DSGVO-konform"
+
+* "SSL-verschlüsselt"
+
+- C: "TÜV-geprüft" +
   Kundenzahlen
 
-  Metriken:
-  Conversion-Rate,
-  Trust-Umfragen
+Metriken:
+Conversion-Rate,
+Trust-Umfragen
 
-  ---
-  10. Onboarding-Flow 
-  🚀
+---
 
-  Hypothese: Geführtes
-  Onboarding erhöht
-  Aktivierung
+10. Onboarding-Flow
+    🚀
 
-  Varianten:
-  - A: Direkt zur App
-  - B: 3-Schritt
+Hypothese: Geführtes
+Onboarding erhöht
+Aktivierung
+
+Varianten:
+
+- A: Direkt zur App
+- B: 3-Schritt
   Tutorial
-  - C: Persönliche Demo
-   buchen
+- C: Persönliche Demo
+  buchen
 
-  Metriken:
-  Aktivierungsrate,
-  7-Tage Retention
+Metriken:
+Aktivierungsrate,
+7-Tage Retention
 
-  ---
-  📊 
-  Priorisierungs-Matrix
+---
 
-  | Test              |
-   Aufwand | Impact |
-  Empfehlung |
-  |-------------------|
-  ---------|--------|--
-  ----------|
-  | Navigation Button |
-   Niedrig | Hoch   |
-  ⭐⭐⭐        |
-  | Pricing Layout    |
-   Mittel  | Hoch   |
-  ⭐⭐⭐        |
-  | Video vs Demo     |
-   Hoch    | Mittel |
-  ⭐⭐         |
-  | Trust Badges      |
-   Niedrig | Mittel |
-  ⭐⭐         |
-  | Mobile Hero       |
-   Mittel  | Hoch   |
-  ⭐⭐⭐        |
+📊
+Priorisierungs-Matrix
 
-  🚀 Nächste Schritte
+| Test |
+Aufwand | Impact |
+Empfehlung |
+|-------------------|
+---------|--------|--
+----------|
+| Navigation Button |
+Niedrig | Hoch |
+⭐⭐⭐ |
+| Pricing Layout |
+Mittel | Hoch |
+⭐⭐⭐ |
+| Video vs Demo |
+Hoch | Mittel |
+⭐⭐ |
+| Trust Badges |
+Niedrig | Mittel |
+⭐⭐ |
+| Mobile Hero |
+Mittel | Hoch |
+⭐⭐⭐ |
 
-  1. Navigation-Button 
-  Test (einfach &
-  high-impact)
-  2. Pricing-Layout
-  (wichtig für
-  Conversion)
-  3. Mobile-Hero (50%+
-  Traffic ist mobil)
+🚀 Nächste Schritte
+
+1. Navigation-Button
+   Test (einfach &
+   high-impact)
+2. Pricing-Layout
+   (wichtig für
+   Conversion)
+3. Mobile-Hero (50%+
+   Traffic ist mobil)

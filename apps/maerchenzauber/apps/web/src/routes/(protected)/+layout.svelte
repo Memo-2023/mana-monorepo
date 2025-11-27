@@ -15,17 +15,17 @@
 
 	// Keyboard shortcuts configuration
 	const navRoutes: Record<string, string> = {
-		'1': '/dashboard',  // Dashboard
-		'2': '/stories',    // Stories
+		'1': '/dashboard', // Dashboard
+		'2': '/stories', // Stories
 		'3': '/characters', // Characters
-		'4': '/discover',   // Discover
-		'5': '/settings',   // Settings
+		'4': '/discover', // Discover
+		'5': '/settings', // Settings
 	};
 
 	const actionRoutes: Record<string, string> = {
-		'n': '/stories/create',    // New Story
-		's': '/stories/create',    // New Story (alternative)
-		'c': '/characters/create', // New Character
+		n: '/stories/create', // New Story
+		s: '/stories/create', // New Story (alternative)
+		c: '/characters/create', // New Character
 	};
 
 	// Shortcut descriptions for help modal
@@ -38,7 +38,7 @@
 				{ keys: ['Cmd/Ctrl', '3'], description: 'Charaktere' },
 				{ keys: ['Cmd/Ctrl', '4'], description: 'Entdecken' },
 				{ keys: ['Cmd/Ctrl', '5'], description: 'Einstellungen' },
-			]
+			],
 		},
 		{
 			title: 'Aktionen',
@@ -46,25 +46,21 @@
 				{ keys: ['Cmd/Ctrl', 'N'], description: 'Neue Geschichte' },
 				{ keys: ['Cmd/Ctrl', 'Shift', 'C'], description: 'Neuer Charakter' },
 				{ keys: ['?'], description: 'Tastaturkürzel anzeigen' },
-			]
+			],
 		},
 		{
 			title: 'Allgemein',
 			shortcuts: [
 				{ keys: ['Esc'], description: 'Menü/Modal schließen' },
 				{ keys: ['B'], description: 'Seitenleiste ein-/ausblenden' },
-			]
-		}
+			],
+		},
 	];
 
 	function handleKeydown(event: KeyboardEvent) {
 		// Don't handle if user is typing in an input
 		const target = event.target as HTMLElement;
-		if (
-			target.tagName === 'INPUT' ||
-			target.tagName === 'TEXTAREA' ||
-			target.isContentEditable
-		) {
+		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
 			return;
 		}
 
@@ -161,15 +157,21 @@
 
 {#if loading}
 	<!-- Loading State -->
-	<div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
+	<div
+		class="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800"
+	>
 		<div class="text-center">
-			<div class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-pink-500 border-r-transparent"></div>
+			<div
+				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-pink-500 border-r-transparent"
+			></div>
 			<p class="text-gray-600 dark:text-gray-400">Laden...</p>
 		</div>
 	</div>
 {:else}
 	<!-- Main Layout -->
-	<div class="flex min-h-screen bg-gradient-to-br from-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:to-gray-800">
+	<div
+		class="flex min-h-screen bg-gradient-to-br from-pink-50/50 to-purple-50/50 dark:from-gray-900 dark:to-gray-800"
+	>
 		<!-- Sidebar (Desktop) -->
 		<Sidebar
 			isCollapsed={isSidebarCollapsed}
@@ -205,10 +207,7 @@
 			class:lg:ml-20={isSidebarCollapsed}
 		>
 			<!-- Header -->
-			<Header
-				onMenuClick={handleMobileMenuToggle}
-				onLogout={handleLogout}
-			/>
+			<Header onMenuClick={handleMobileMenuToggle} onLogout={handleLogout} />
 
 			<!-- Page Content -->
 			<main class="flex-1 overflow-auto p-4 lg:p-6">
@@ -243,7 +242,12 @@
 						aria-label="Schließen"
 					>
 						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
 						</svg>
 					</button>
 				</div>
@@ -251,16 +255,24 @@
 				<div class="space-y-6">
 					{#each shortcutGroups as group}
 						<div>
-							<h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+							<h3
+								class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+							>
 								{group.title}
 							</h3>
 							<div class="space-y-2">
 								{#each group.shortcuts as shortcut}
-									<div class="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-700/50">
-										<span class="text-sm text-gray-700 dark:text-gray-300">{shortcut.description}</span>
+									<div
+										class="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-700/50"
+									>
+										<span class="text-sm text-gray-700 dark:text-gray-300"
+											>{shortcut.description}</span
+										>
 										<div class="flex gap-1">
 											{#each shortcut.keys as key}
-												<kbd class="rounded bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-600 dark:text-gray-300">
+												<kbd
+													class="rounded bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-600 dark:text-gray-300"
+												>
 													{key}
 												</kbd>
 											{/each}
@@ -273,7 +285,8 @@
 				</div>
 
 				<p class="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
-					Drücke <kbd class="rounded bg-gray-200 px-1.5 py-0.5 text-xs dark:bg-gray-600">?</kbd> um dieses Menü zu öffnen
+					Drücke <kbd class="rounded bg-gray-200 px-1.5 py-0.5 text-xs dark:bg-gray-600">?</kbd> um dieses
+					Menü zu öffnen
 				</p>
 			</div>
 		</div>

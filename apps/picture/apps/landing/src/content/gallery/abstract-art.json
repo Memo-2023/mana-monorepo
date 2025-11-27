@@ -1,42 +1,42 @@
 {
-  "title": "Vibrant Abstract Fluid Art",
-  "slug": "vibrant-abstract-fluid",
-  "imageUrl": "/gallery/abstract-fluid.jpg",
-  "prompt": "Abstract fluid art with vibrant colors flowing together, purple pink orange gradient, organic shapes, high contrast, digital art, smooth textures",
-  "model": "flux-schnell",
-  "settings": {
-    "seed": 999,
-    "guidanceScale": 3.0,
-    "width": 1024,
-    "height": 1024,
-    "aspectRatio": "1:1"
-  },
-  "category": "abstract",
-  "style": ["abstract", "colorful", "fluid", "modern"],
-  "tags": ["abstract-art", "fluid", "colorful", "digital-art", "gradient"],
-  "creator": {
-    "name": "Picture Gallery"
-  },
-  "featured": false,
-  "trending": true,
-  "staffPick": false,
-  "published": true,
-  "likes": 445,
-  "downloads": 123,
-  "views": 1876,
-  "qualityScore": 4,
-  "nsfw": false,
-  "moderationStatus": "approved",
-  "relatedImages": ["geometric-abstract", "watercolor-abstract"],
-  "relatedTutorials": ["getting-started-first-image"],
-  "relatedModels": ["flux-schnell"],
-  "description": "Quick and beautiful abstract art generated with FLUX Schnell in just 2 seconds. Perfect for backgrounds, social media, and creative projects.",
-  "seoKeywords": ["abstract art AI", "fluid art", "colorful backgrounds", "digital art"],
-  "createdAt": "2025-01-12T11:45:00Z",
-  "language": "en",
-  "fileSize": 1567890,
-  "dimensions": {
-    "width": 1024,
-    "height": 1024
-  }
+	"title": "Vibrant Abstract Fluid Art",
+	"slug": "vibrant-abstract-fluid",
+	"imageUrl": "/gallery/abstract-fluid.jpg",
+	"prompt": "Abstract fluid art with vibrant colors flowing together, purple pink orange gradient, organic shapes, high contrast, digital art, smooth textures",
+	"model": "flux-schnell",
+	"settings": {
+		"seed": 999,
+		"guidanceScale": 3.0,
+		"width": 1024,
+		"height": 1024,
+		"aspectRatio": "1:1"
+	},
+	"category": "abstract",
+	"style": ["abstract", "colorful", "fluid", "modern"],
+	"tags": ["abstract-art", "fluid", "colorful", "digital-art", "gradient"],
+	"creator": {
+		"name": "Picture Gallery"
+	},
+	"featured": false,
+	"trending": true,
+	"staffPick": false,
+	"published": true,
+	"likes": 445,
+	"downloads": 123,
+	"views": 1876,
+	"qualityScore": 4,
+	"nsfw": false,
+	"moderationStatus": "approved",
+	"relatedImages": ["geometric-abstract", "watercolor-abstract"],
+	"relatedTutorials": ["getting-started-first-image"],
+	"relatedModels": ["flux-schnell"],
+	"description": "Quick and beautiful abstract art generated with FLUX Schnell in just 2 seconds. Perfect for backgrounds, social media, and creative projects.",
+	"seoKeywords": ["abstract art AI", "fluid art", "colorful backgrounds", "digital art"],
+	"createdAt": "2025-01-12T11:45:00Z",
+	"language": "en",
+	"fileSize": 1567890,
+	"dimensions": {
+		"width": 1024,
+		"height": 1024
+	}
 }

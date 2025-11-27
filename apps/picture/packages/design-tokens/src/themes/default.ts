@@ -9,16 +9,16 @@ import { semanticColors } from '../colors';
 import { shadows, opacity } from '../shadows';
 
 export const defaultTheme = {
-  name: 'default' as const,
-  displayName: 'Indigo',
+	name: 'default' as const,
+	displayName: 'Indigo',
 
-  colors: {
-    light: semanticColors.light,
-    dark: semanticColors.dark,
-  },
+	colors: {
+		light: semanticColors.light,
+		dark: semanticColors.dark,
+	},
 
-  shadows,
-  opacity,
+	shadows,
+	opacity,
 } as const;
 
 export type DefaultTheme = typeof defaultTheme;

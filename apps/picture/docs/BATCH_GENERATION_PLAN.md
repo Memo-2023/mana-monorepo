@@ -1,6 +1,7 @@
 # 🚀 Batch Generation Implementation Plan
 
 ## 📋 Übersicht
+
 Implementierung eines Batch Generation Systems, das es Nutzern ermöglicht, mehrere Bilder gleichzeitig mit verschiedenen Prompts oder Variationen zu generieren.
 
 ---
@@ -8,6 +9,7 @@ Implementierung eines Batch Generation Systems, das es Nutzern ermöglicht, mehr
 ## 🎯 Ziele & Requirements
 
 ### Funktionale Anforderungen
+
 - **Batch-Größe**: 2-10 Bilder pro Batch
 - **Parallel Processing**: Bis zu 3 gleichzeitige Generierungen
 - **Queue Management**: FIFO-Queue für wartende Generierungen
@@ -16,6 +18,7 @@ Implementierung eines Batch Generation Systems, das es Nutzern ermöglicht, mehr
 - **Fehlerbehandlung**: Einzelne Fehler stoppen nicht den ganzen Batch
 
 ### Nicht-Funktionale Anforderungen
+
 - **Performance**: Max. 100ms UI Response Time
 - **Skalierbarkeit**: Support für 100+ User gleichzeitig
 - **UX**: Intuitive, nicht-blockierende UI
@@ -39,7 +42,7 @@ CREATE TABLE batch_generations (
   status TEXT CHECK (status IN ('pending', 'processing', 'completed', 'partial', 'failed')),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   completed_at TIMESTAMPTZ,
-  
+
   -- Shared settings for the batch
   model_id TEXT,
   model_version TEXT,
@@ -47,10 +50,10 @@ CREATE TABLE batch_generations (
   height INTEGER,
   steps INTEGER,
   guidance_scale FLOAT,
-  
+
   CONSTRAINT valid_counts CHECK (
-    completed_count >= 0 AND 
-    failed_count >= 0 AND 
+    completed_count >= 0 AND
+    failed_count >= 0 AND
     completed_count + failed_count <= total_count
   )
 );
@@ -67,7 +70,7 @@ CREATE INDEX idx_image_generations_batch ON image_generations(batch_id, batch_in
 
 -- Real-time Subscriptions View
 CREATE VIEW batch_progress AS
-SELECT 
+SELECT
   bg.id,
   bg.user_id,
   bg.total_count,
@@ -81,8 +84,8 @@ SELECT
       'index', ig.batch_index,
       'prompt', ig.prompt,
       'status', ig.status,
-      'progress', 
-        CASE 
+      'progress',
+        CASE
           WHEN ig.status = 'completed' THEN 100
           WHEN ig.status = 'processing' THEN 50
           WHEN ig.status = 'failed' THEN -1
@@ -98,23 +101,24 @@ GROUP BY bg.id;
 ### 2. Backend Architecture
 
 #### Edge Function: `batch-generate-images`
+
 ```typescript
 // Neue Edge Function für Batch Processing
 interface BatchRequest {
-  prompts: Array<{
-    text: string;
-    negative_prompt?: string;
-    seed?: number;
-  }>;
-  shared_settings: {
-    model_id: string;
-    model_version: string;
-    width: number;
-    height: number;
-    steps: number;
-    guidance_scale: number;
-  };
-  batch_name?: string;
+	prompts: Array<{
+		text: string;
+		negative_prompt?: string;
+		seed?: number;
+	}>;
+	shared_settings: {
+		model_id: string;
+		model_version: string;
+		width: number;
+		height: number;
+		steps: number;
+		guidance_scale: number;
+	};
+	batch_name?: string;
 }
 
 // Workflow:
@@ -126,21 +130,22 @@ interface BatchRequest {
 ```
 
 #### Queue Worker System
+
 ```typescript
 // Background worker (kann als Cron Job oder separate Edge Function laufen)
 interface QueueWorker {
-  // Polls für neue Jobs alle 5 Sekunden
-  pollInterval: 5000;
-  
-  // Max parallel Generierungen pro User
-  maxParallelPerUser: 3;
-  
-  // Global max parallel
-  maxParallelGlobal: 20;
-  
-  // Retry Logic
-  maxRetries: 3;
-  retryDelay: [5000, 10000, 30000]; // Exponential backoff
+	// Polls für neue Jobs alle 5 Sekunden
+	pollInterval: 5000;
+
+	// Max parallel Generierungen pro User
+	maxParallelPerUser: 3;
+
+	// Global max parallel
+	maxParallelGlobal: 20;
+
+	// Retry Logic
+	maxRetries: 3;
+	retryDelay: [5000, 10000, 30000]; // Exponential backoff
 }
 ```
 
@@ -151,55 +156,56 @@ interface QueueWorker {
 ```typescript
 // components/batch/BatchGenerationModal.tsx
 interface BatchGenerationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (batch: BatchRequest) => void;
+	isOpen: boolean;
+	onClose: () => void;
+	onSubmit: (batch: BatchRequest) => void;
 }
 
 // components/batch/BatchPromptInput.tsx
 interface BatchPromptInputProps {
-  prompts: PromptItem[];
-  onChange: (prompts: PromptItem[]) => void;
-  maxPrompts: number;
+	prompts: PromptItem[];
+	onChange: (prompts: PromptItem[]) => void;
+	maxPrompts: number;
 }
 
 // components/batch/BatchProgressTracker.tsx
 interface BatchProgressTrackerProps {
-  batchId: string;
-  onComplete?: () => void;
-  onItemClick?: (itemId: string) => void;
+	batchId: string;
+	onComplete?: () => void;
+	onItemClick?: (itemId: string) => void;
 }
 
 // components/batch/BatchResultsGrid.tsx
 interface BatchResultsGridProps {
-  batchId: string;
-  results: BatchResult[];
-  onSaveAll: () => void;
-  onDeleteAll: () => void;
+	batchId: string;
+	results: BatchResult[];
+	onSaveAll: () => void;
+	onDeleteAll: () => void;
 }
 ```
 
 #### Neuer Store: `batchStore.ts`
+
 ```typescript
 interface BatchStore {
-  // State
-  activeBatches: Map<string, BatchGeneration>;
-  currentBatch: BatchGeneration | null;
-  
-  // Actions
-  createBatch: (request: BatchRequest) => Promise<string>;
-  subscribeToBatch: (batchId: string) => void;
-  unsubscribeFromBatch: (batchId: string) => void;
-  
-  // Batch Actions
-  saveAllImages: (batchId: string) => Promise<void>;
-  deleteAllImages: (batchId: string) => Promise<void>;
-  retryFailed: (batchId: string) => Promise<void>;
-  
-  // UI State
-  isBatchModalOpen: boolean;
-  openBatchModal: () => void;
-  closeBatchModal: () => void;
+	// State
+	activeBatches: Map<string, BatchGeneration>;
+	currentBatch: BatchGeneration | null;
+
+	// Actions
+	createBatch: (request: BatchRequest) => Promise<string>;
+	subscribeToBatch: (batchId: string) => void;
+	unsubscribeFromBatch: (batchId: string) => void;
+
+	// Batch Actions
+	saveAllImages: (batchId: string) => Promise<void>;
+	deleteAllImages: (batchId: string) => Promise<void>;
+	retryFailed: (batchId: string) => Promise<void>;
+
+	// UI State
+	isBatchModalOpen: boolean;
+	openBatchModal: () => void;
+	closeBatchModal: () => void;
 }
 ```
 
@@ -214,6 +220,7 @@ interface BatchStore {
    - Öffnet Modal/Neue Seite
 
 2. **Prompt-Eingabe**
+
    ```
    ┌─────────────────────────────────────┐
    │ Batch Generation (3/10)             │
@@ -236,6 +243,7 @@ interface BatchStore {
    ```
 
 3. **Progress Tracking**
+
    ```
    ┌─────────────────────────────────────┐
    │ Generating Batch "My Batch"         │
@@ -266,6 +274,7 @@ interface BatchStore {
    ```
 
 ### Mobile Responsiveness
+
 - Swipeable prompt cards auf Mobile
 - Bottom Sheet für Batch Modal
 - Compact Progress View als Notification Bar
@@ -275,24 +284,28 @@ interface BatchStore {
 ## 📝 Implementierungsschritte
 
 ### Phase 1: Backend Foundation (3 Tage)
+
 - [ ] Datenbank-Schema erstellen und migrieren
 - [ ] Batch Edge Function implementieren
 - [ ] Queue Worker Logik entwickeln
 - [ ] Error Handling & Retry Logic
 
 ### Phase 2: Core Frontend (3 Tage)
+
 - [ ] BatchStore mit Zustand implementieren
 - [ ] Batch Generation Modal UI
 - [ ] Prompt Input Komponenten
 - [ ] Real-time Subscriptions Setup
 
 ### Phase 3: Progress & Results (2 Tage)
+
 - [ ] Progress Tracker Komponente
 - [ ] Real-time Updates via Supabase
 - [ ] Results Grid mit Actions
 - [ ] Batch Management (Save/Delete All)
 
 ### Phase 4: Polish & Edge Cases (2 Tage)
+
 - [ ] Error States & Recovery
 - [ ] Loading States & Skeletons
 - [ ] Mobile Optimierung
@@ -304,68 +317,73 @@ interface BatchStore {
 ## 🔧 Technische Details
 
 ### Parallel Processing Logic
+
 ```typescript
 // Pseudo-Code für Queue Worker
 async function processQueue() {
-  // Get active generations per user
-  const activeByUser = await getActiveGenerationsGroupedByUser();
-  
-  // Find users with capacity
-  const usersWithCapacity = activeByUser.filter(u => 
-    u.activeCount < MAX_PARALLEL_PER_USER
-  );
-  
-  // Get next pending generations
-  const pending = await getNextPendingGenerations({
-    limit: MAX_PARALLEL_GLOBAL - currentActiveTotal,
-    excludeUsers: usersAtCapacity
-  });
-  
-  // Start generations
-  for (const gen of pending) {
-    startGeneration(gen);
-  }
+	// Get active generations per user
+	const activeByUser = await getActiveGenerationsGroupedByUser();
+
+	// Find users with capacity
+	const usersWithCapacity = activeByUser.filter((u) => u.activeCount < MAX_PARALLEL_PER_USER);
+
+	// Get next pending generations
+	const pending = await getNextPendingGenerations({
+		limit: MAX_PARALLEL_GLOBAL - currentActiveTotal,
+		excludeUsers: usersAtCapacity,
+	});
+
+	// Start generations
+	for (const gen of pending) {
+		startGeneration(gen);
+	}
 }
 ```
 
 ### Real-time Updates
+
 ```typescript
 // Frontend Subscription
 useEffect(() => {
-  const subscription = supabase
-    .channel(`batch_${batchId}`)
-    .on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'image_generations',
-      filter: `batch_id=eq.${batchId}`
-    }, (payload) => {
-      updateBatchProgress(payload.new);
-    })
-    .subscribe();
-    
-  return () => subscription.unsubscribe();
+	const subscription = supabase
+		.channel(`batch_${batchId}`)
+		.on(
+			'postgres_changes',
+			{
+				event: 'UPDATE',
+				schema: 'public',
+				table: 'image_generations',
+				filter: `batch_id=eq.${batchId}`,
+			},
+			(payload) => {
+				updateBatchProgress(payload.new);
+			}
+		)
+		.subscribe();
+
+	return () => subscription.unsubscribe();
 }, [batchId]);
 ```
 
 ### Error Recovery
+
 ```typescript
 // Automatic Retry mit Exponential Backoff
 async function retryGeneration(genId: string, attempt: number) {
-  const delays = [5000, 15000, 30000];
-  const delay = delays[Math.min(attempt, delays.length - 1)];
-  
-  await wait(delay);
-  
-  try {
-    await generateImage(genId);
-  } catch (error) {
-    if (attempt < MAX_RETRIES - 1) {
-      await retryGeneration(genId, attempt + 1);
-    } else {
-      await markAsFailed(genId, error);
-    }
-  }
+	const delays = [5000, 15000, 30000];
+	const delay = delays[Math.min(attempt, delays.length - 1)];
+
+	await wait(delay);
+
+	try {
+		await generateImage(genId);
+	} catch (error) {
+		if (attempt < MAX_RETRIES - 1) {
+			await retryGeneration(genId, attempt + 1);
+		} else {
+			await markAsFailed(genId, error);
+		}
+	}
 }
 ```
 
@@ -374,12 +392,14 @@ async function retryGeneration(genId: string, attempt: number) {
 ## 📊 Success Metrics
 
 ### Performance KPIs
+
 - **Queue Processing Time**: < 10s für Start der ersten Generierung
 - **Parallel Efficiency**: 80%+ GPU Utilization
 - **Error Rate**: < 5% Failed Generations
 - **User Wait Time**: < 2min für 5-Bilder Batch
 
 ### User Experience KPIs
+
 - **Adoption Rate**: 30% der aktiven User nutzen Batch
 - **Completion Rate**: 90% der gestarteten Batches werden komplett
 - **Satisfaction**: 4.5+ Stars für Feature
@@ -389,19 +409,25 @@ async function retryGeneration(genId: string, attempt: number) {
 ## 🚨 Risiken & Mitigationen
 
 ### Risiko 1: API Rate Limits
-**Mitigation**: 
+
+**Mitigation**:
+
 - Intelligentes Queue Management
 - User-basierte Rate Limits
 - Fallback auf sequentielle Verarbeitung
 
 ### Risiko 2: Kosten-Explosion
+
 **Mitigation**:
+
 - Credits-System parallel implementieren
 - Batch-Limits pro User/Tag
 - Cost Alerts & Monitoring
 
 ### Risiko 3: UI Complexity
+
 **Mitigation**:
+
 - Progressive Disclosure (Simple/Advanced Mode)
 - Gute Defaults
 - In-App Tutorial
@@ -411,12 +437,14 @@ async function retryGeneration(genId: string, attempt: number) {
 ## 🎯 MVP Scope (für erste Version)
 
 ### Included ✅
+
 - Basis Batch Generation (bis 5 Bilder)
 - Einfache Progress Anzeige
 - Save All / Delete All Actions
 - Desktop & Mobile UI
 
 ### Excluded ❌ (für später)
+
 - Variations Mode
 - Custom Seeds pro Prompt
 - Batch Templates
@@ -428,10 +456,12 @@ async function retryGeneration(genId: string, attempt: number) {
 ## 📅 Timeline
 
 **Woche 1**:
+
 - Mo-Mi: Backend Implementation
 - Do-Fr: Core Frontend
 
 **Woche 2**:
+
 - Mo-Di: Progress & Results UI
 - Mi-Do: Testing & Bug Fixes
 - Fr: Documentation & Release
@@ -440,4 +470,4 @@ async function retryGeneration(genId: string, attempt: number) {
 
 ---
 
-*Erstellt: Januar 2025*
+_Erstellt: Januar 2025_

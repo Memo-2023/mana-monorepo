@@ -26,7 +26,7 @@
 	primaryColor="#FF6B9D"
 	onSignIn={handleSignIn}
 	onSignInWithGoogle={handleSignInWithGoogle}
-	goto={goto}
+	{goto}
 	enableGoogle={true}
 	enableApple={true}
 	successRedirect="/dashboard"

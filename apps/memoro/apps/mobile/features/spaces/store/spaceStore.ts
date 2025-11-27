@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 
 interface SpaceState {
-  // Current selected space ID
-  currentSpaceId: string | null;
-  // Actions
-  setCurrentSpaceId: (spaceId: string | null) => void;
-  clearCurrentSpaceId: () => void;
+	// Current selected space ID
+	currentSpaceId: string | null;
+	// Actions
+	setCurrentSpaceId: (spaceId: string | null) => void;
+	clearCurrentSpaceId: () => void;
 }
 
 /**
@@ -13,10 +13,10 @@ interface SpaceState {
  * Uses Zustand for state management
  */
 export const useSpaceStore = create<SpaceState>((set) => ({
-  // Initial state
-  currentSpaceId: null,
-  
-  // Actions
-  setCurrentSpaceId: (spaceId) => set({ currentSpaceId: spaceId }),
-  clearCurrentSpaceId: () => set({ currentSpaceId: null }),
+	// Initial state
+	currentSpaceId: null,
+
+	// Actions
+	setCurrentSpaceId: (spaceId) => set({ currentSpaceId: spaceId }),
+	clearCurrentSpaceId: () => set({ currentSpaceId: null }),
 }));

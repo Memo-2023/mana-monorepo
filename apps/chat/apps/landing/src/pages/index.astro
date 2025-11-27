@@ -13,247 +13,264 @@ import PricingSection from '@manacore/shared-landing-ui/sections/PricingSection.
 
 // Feature data
 const features = [
-  {
-    icon: '🤖',
-    title: 'Mehrere KI-Modelle',
-    description: 'Wähle zwischen GPT-4o, GPT-4o-Mini und weiteren leistungsstarken Modellen für deine Gespräche.'
-  },
-  {
-    icon: '💬',
-    title: 'Konversationen speichern',
-    description: 'Alle deine Chats werden sicher in der Cloud gespeichert und sind jederzeit abrufbar.'
-  },
-  {
-    icon: '📱',
-    title: 'Plattformübergreifend',
-    description: 'Nutze ManaChat auf iOS, Android und im Web - deine Daten sind überall synchronisiert.'
-  },
-  {
-    icon: '📝',
-    title: 'Dokument-Modus',
-    description: 'Arbeite mit der KI an längeren Texten im speziellen Dokument-Modus mit Versionierung.'
-  },
-  {
-    icon: '🎨',
-    title: 'Vorlagen',
-    description: 'Nutze vorgefertigte Vorlagen für häufige Aufgaben wie Texte schreiben, Code erklären oder Übersetzungen.'
-  },
-  {
-    icon: '🔒',
-    title: 'Privatsphäre',
-    description: 'Deine Daten sind sicher. Wir verkaufen keine Nutzerdaten und sind DSGVO-konform.'
-  }
+	{
+		icon: '🤖',
+		title: 'Mehrere KI-Modelle',
+		description:
+			'Wähle zwischen GPT-4o, GPT-4o-Mini und weiteren leistungsstarken Modellen für deine Gespräche.',
+	},
+	{
+		icon: '💬',
+		title: 'Konversationen speichern',
+		description:
+			'Alle deine Chats werden sicher in der Cloud gespeichert und sind jederzeit abrufbar.',
+	},
+	{
+		icon: '📱',
+		title: 'Plattformübergreifend',
+		description:
+			'Nutze ManaChat auf iOS, Android und im Web - deine Daten sind überall synchronisiert.',
+	},
+	{
+		icon: '📝',
+		title: 'Dokument-Modus',
+		description:
+			'Arbeite mit der KI an längeren Texten im speziellen Dokument-Modus mit Versionierung.',
+	},
+	{
+		icon: '🎨',
+		title: 'Vorlagen',
+		description:
+			'Nutze vorgefertigte Vorlagen für häufige Aufgaben wie Texte schreiben, Code erklären oder Übersetzungen.',
+	},
+	{
+		icon: '🔒',
+		title: 'Privatsphäre',
+		description: 'Deine Daten sind sicher. Wir verkaufen keine Nutzerdaten und sind DSGVO-konform.',
+	},
 ];
 
 // Steps data
 const steps = [
-  {
-    number: '1',
-    title: 'App herunterladen',
-    description: 'Lade ManaChat kostenlos im App Store oder Google Play Store herunter.',
-    image: '/screenshots/download.png'
-  },
-  {
-    number: '2',
-    title: 'Konto erstellen',
-    description: 'Registriere dich in wenigen Sekunden mit E-Mail oder Google-Account.',
-    image: '/screenshots/register.png'
-  },
-  {
-    number: '3',
-    title: 'Loslegen',
-    description: 'Starte dein erstes Gespräch mit der KI - einfach und intuitiv.',
-    image: '/screenshots/chat.png'
-  }
+	{
+		number: '1',
+		title: 'App herunterladen',
+		description: 'Lade ManaChat kostenlos im App Store oder Google Play Store herunter.',
+		image: '/screenshots/download.png',
+	},
+	{
+		number: '2',
+		title: 'Konto erstellen',
+		description: 'Registriere dich in wenigen Sekunden mit E-Mail oder Google-Account.',
+		image: '/screenshots/register.png',
+	},
+	{
+		number: '3',
+		title: 'Loslegen',
+		description: 'Starte dein erstes Gespräch mit der KI - einfach und intuitiv.',
+		image: '/screenshots/chat.png',
+	},
 ];
 
 // Pricing data
 const pricingPlans = [
-  {
-    name: 'Free',
-    price: '0',
-    period: '/Monat',
-    description: 'Perfekt zum Ausprobieren',
-    features: [
-      { text: '50 Nachrichten/Tag', included: true },
-      { text: 'GPT-4o-Mini Zugang', included: true },
-      { text: 'Chat-Verlauf speichern', included: true },
-      { text: 'Basis-Vorlagen', included: true },
-      { text: 'GPT-4o Zugang', included: false },
-      { text: 'Dokument-Modus', included: false }
-    ],
-    cta: {
-      text: 'Kostenlos starten',
-      href: '#download'
-    }
-  },
-  {
-    name: 'Pro',
-    price: '9,99',
-    period: '/Monat',
-    description: 'Für Power-User',
-    features: [
-      { text: 'Unbegrenzte Nachrichten', included: true },
-      { text: 'Alle KI-Modelle', included: true },
-      { text: 'Dokument-Modus', included: true },
-      { text: 'Alle Vorlagen', included: true },
-      { text: 'Prioritäts-Antworten', included: true },
-      { text: 'Premium-Support', included: true }
-    ],
-    cta: {
-      text: 'Pro werden',
-      href: '#download'
-    },
-    highlighted: true,
-    badge: 'Beliebt'
-  },
-  {
-    name: 'Team',
-    price: '24,99',
-    period: '/Monat',
-    description: 'Für Teams und Unternehmen',
-    features: [
-      { text: 'Alles aus Pro', included: true },
-      { text: 'Team-Verwaltung', included: true },
-      { text: 'Geteilte Chats', included: true },
-      { text: 'Admin-Dashboard', included: true },
-      { text: 'API-Zugang', included: true },
-      { text: 'Dedizierter Support', included: true }
-    ],
-    cta: {
-      text: 'Team starten',
-      href: '#download'
-    }
-  }
+	{
+		name: 'Free',
+		price: '0',
+		period: '/Monat',
+		description: 'Perfekt zum Ausprobieren',
+		features: [
+			{ text: '50 Nachrichten/Tag', included: true },
+			{ text: 'GPT-4o-Mini Zugang', included: true },
+			{ text: 'Chat-Verlauf speichern', included: true },
+			{ text: 'Basis-Vorlagen', included: true },
+			{ text: 'GPT-4o Zugang', included: false },
+			{ text: 'Dokument-Modus', included: false },
+		],
+		cta: {
+			text: 'Kostenlos starten',
+			href: '#download',
+		},
+	},
+	{
+		name: 'Pro',
+		price: '9,99',
+		period: '/Monat',
+		description: 'Für Power-User',
+		features: [
+			{ text: 'Unbegrenzte Nachrichten', included: true },
+			{ text: 'Alle KI-Modelle', included: true },
+			{ text: 'Dokument-Modus', included: true },
+			{ text: 'Alle Vorlagen', included: true },
+			{ text: 'Prioritäts-Antworten', included: true },
+			{ text: 'Premium-Support', included: true },
+		],
+		cta: {
+			text: 'Pro werden',
+			href: '#download',
+		},
+		highlighted: true,
+		badge: 'Beliebt',
+	},
+	{
+		name: 'Team',
+		price: '24,99',
+		period: '/Monat',
+		description: 'Für Teams und Unternehmen',
+		features: [
+			{ text: 'Alles aus Pro', included: true },
+			{ text: 'Team-Verwaltung', included: true },
+			{ text: 'Geteilte Chats', included: true },
+			{ text: 'Admin-Dashboard', included: true },
+			{ text: 'API-Zugang', included: true },
+			{ text: 'Dedizierter Support', included: true },
+		],
+		cta: {
+			text: 'Team starten',
+			href: '#download',
+		},
+	},
 ];
 
 // FAQ data
 const faqs = [
-  {
-    question: 'Welche KI-Modelle sind verfügbar?',
-    answer: 'ManaChat bietet Zugang zu GPT-4o, GPT-4o-Mini und weiteren Modellen. Du kannst das Modell für jedes Gespräch individuell auswählen, je nach Komplexität deiner Anfrage.'
-  },
-  {
-    question: 'Wie sicher sind meine Daten?',
-    answer: 'Deine Daten werden verschlüsselt übertragen und gespeichert. Wir verkaufen keine Nutzerdaten an Dritte und sind vollständig DSGVO-konform. Du kannst deine Daten jederzeit exportieren oder löschen.'
-  },
-  {
-    question: 'Was ist der Dokument-Modus?',
-    answer: 'Im Dokument-Modus kannst du mit der KI an längeren Texten arbeiten. Die KI hilft dir beim Schreiben, Überarbeiten und Verbessern. Alle Änderungen werden versioniert, sodass du jederzeit frühere Versionen wiederherstellen kannst.'
-  },
-  {
-    question: 'Kann ich ManaChat offline nutzen?',
-    answer: 'Da ManaChat auf Cloud-KI-Modellen basiert, ist eine Internetverbindung erforderlich. Dein Chat-Verlauf wird jedoch lokal zwischengespeichert und synchronisiert, sobald du wieder online bist.'
-  },
-  {
-    question: 'Wie funktioniert die Synchronisierung?',
-    answer: 'Alle deine Chats werden automatisch in der Cloud gespeichert und sind auf allen deinen Geräten verfügbar. Melde dich einfach mit dem gleichen Account an und du hast sofort Zugriff auf alle Gespräche.'
-  },
-  {
-    question: 'Kann ich mein Abo jederzeit kündigen?',
-    answer: 'Ja, du kannst dein Pro- oder Team-Abo jederzeit kündigen. Nach der Kündigung hast du noch bis zum Ende des Abrechnungszeitraums Zugang zu allen Premium-Features.'
-  }
+	{
+		question: 'Welche KI-Modelle sind verfügbar?',
+		answer:
+			'ManaChat bietet Zugang zu GPT-4o, GPT-4o-Mini und weiteren Modellen. Du kannst das Modell für jedes Gespräch individuell auswählen, je nach Komplexität deiner Anfrage.',
+	},
+	{
+		question: 'Wie sicher sind meine Daten?',
+		answer:
+			'Deine Daten werden verschlüsselt übertragen und gespeichert. Wir verkaufen keine Nutzerdaten an Dritte und sind vollständig DSGVO-konform. Du kannst deine Daten jederzeit exportieren oder löschen.',
+	},
+	{
+		question: 'Was ist der Dokument-Modus?',
+		answer:
+			'Im Dokument-Modus kannst du mit der KI an längeren Texten arbeiten. Die KI hilft dir beim Schreiben, Überarbeiten und Verbessern. Alle Änderungen werden versioniert, sodass du jederzeit frühere Versionen wiederherstellen kannst.',
+	},
+	{
+		question: 'Kann ich ManaChat offline nutzen?',
+		answer:
+			'Da ManaChat auf Cloud-KI-Modellen basiert, ist eine Internetverbindung erforderlich. Dein Chat-Verlauf wird jedoch lokal zwischengespeichert und synchronisiert, sobald du wieder online bist.',
+	},
+	{
+		question: 'Wie funktioniert die Synchronisierung?',
+		answer:
+			'Alle deine Chats werden automatisch in der Cloud gespeichert und sind auf allen deinen Geräten verfügbar. Melde dich einfach mit dem gleichen Account an und du hast sofort Zugriff auf alle Gespräche.',
+	},
+	{
+		question: 'Kann ich mein Abo jederzeit kündigen?',
+		answer:
+			'Ja, du kannst dein Pro- oder Team-Abo jederzeit kündigen. Nach der Kündigung hast du noch bis zum Ende des Abrechnungszeitraums Zugang zu allen Premium-Features.',
+	},
 ];
 ---
 
 <Layout title="ManaChat - Dein intelligenter KI-Chat-Assistent">
-  <Navigation />
+	<Navigation />
 
-  <main class="pt-16">
-    <HeroSection
-      title="Chatte mit den besten KI-Modellen"
-      subtitle="ManaChat gibt dir Zugang zu GPT-4o, GPT-4o-Mini und mehr. Eine elegante App für intelligente Gespräche - auf allen deinen Geräten."
-      variant="default"
-      primaryCta={{
-        text: 'Jetzt kostenlos starten',
-        href: '#download'
-      }}
-      secondaryCta={{
-        text: 'Features entdecken',
-        href: '#features',
-        variant: 'secondary'
-      }}
-      trustBadges={[
-        { icon: '✓', text: 'Kostenlos testen' },
-        { icon: '🔒', text: 'DSGVO-konform' },
-        { icon: '📱', text: 'iOS, Android & Web' }
-      ]}
-    />
+	<main class="pt-16">
+		<HeroSection
+			title="Chatte mit den besten KI-Modellen"
+			subtitle="ManaChat gibt dir Zugang zu GPT-4o, GPT-4o-Mini und mehr. Eine elegante App für intelligente Gespräche - auf allen deinen Geräten."
+			variant="default"
+			primaryCta={{
+				text: 'Jetzt kostenlos starten',
+				href: '#download',
+			}}
+			secondaryCta={{
+				text: 'Features entdecken',
+				href: '#features',
+				variant: 'secondary',
+			}}
+			trustBadges={[
+				{ icon: '✓', text: 'Kostenlos testen' },
+				{ icon: '🔒', text: 'DSGVO-konform' },
+				{ icon: '📱', text: 'iOS, Android & Web' },
+			]}
+		/>
 
-    <FeatureSection
-      id="features"
-      title="Alles was du für KI-Chats brauchst"
-      subtitle="ManaChat kombiniert die besten KI-Modelle mit einer intuitiven Oberfläche für maximale Produktivität."
-      features={features}
-      columns={3}
-      variant="cards"
-      class="bg-[var(--color-background-card)]"
-    />
+		<FeatureSection
+			id="features"
+			title="Alles was du für KI-Chats brauchst"
+			subtitle="ManaChat kombiniert die besten KI-Modelle mit einer intuitiven Oberfläche für maximale Produktivität."
+			features={features}
+			columns={3}
+			variant="cards"
+			class="bg-[var(--color-background-card)]"
+		/>
 
-    <StepsSection
-      id="how-it-works"
-      title="In 3 Schritten loslegen"
-      subtitle="So einfach startest du mit ManaChat"
-      steps={steps}
-      showImages={false}
-      alternateLayout={true}
-    />
+		<StepsSection
+			id="how-it-works"
+			title="In 3 Schritten loslegen"
+			subtitle="So einfach startest du mit ManaChat"
+			steps={steps}
+			showImages={false}
+			alternateLayout={true}
+		/>
 
-    <PricingSection
-      id="pricing"
-      title="Wähle deinen Plan"
-      subtitle="Starte kostenlos und upgrade, wenn du bereit bist"
-      plans={pricingPlans}
-      class="bg-[var(--color-background-card)]"
-    />
+		<PricingSection
+			id="pricing"
+			title="Wähle deinen Plan"
+			subtitle="Starte kostenlos und upgrade, wenn du bereit bist"
+			plans={pricingPlans}
+			class="bg-[var(--color-background-card)]"
+		/>
 
-    <FAQSection
-      id="faq"
-      title="Häufig gestellte Fragen"
-      subtitle="Alles was du über ManaChat wissen musst"
-      faqs={faqs}
-    />
+		<FAQSection
+			id="faq"
+			title="Häufig gestellte Fragen"
+			subtitle="Alles was du über ManaChat wissen musst"
+			faqs={faqs}
+		/>
 
-    <CTASection
-      id="download"
-      title="Bereit für intelligente Gespräche?"
-      subtitle="Lade ManaChat jetzt herunter und starte dein erstes Gespräch mit GPT-4o. Kostenlos und ohne Kreditkarte."
-      primaryCta={{ text: 'App herunterladen', href: '#' }}
-      variant="highlighted"
-    >
-      <!-- App Store Buttons -->
-      <div class="flex flex-wrap items-center justify-center gap-4 mt-8">
-        <a href="#" class="inline-block hover:opacity-80 transition-opacity">
-          <img src="/app-store-badge.svg" alt="Download im App Store" class="h-12" />
-        </a>
-        <a href="#" class="inline-block hover:opacity-80 transition-opacity">
-          <img src="/google-play-badge.svg" alt="Jetzt bei Google Play" class="h-12" />
-        </a>
-      </div>
+		<CTASection
+			id="download"
+			title="Bereit für intelligente Gespräche?"
+			subtitle="Lade ManaChat jetzt herunter und starte dein erstes Gespräch mit GPT-4o. Kostenlos und ohne Kreditkarte."
+			primaryCta={{ text: 'App herunterladen', href: '#' }}
+			variant="highlighted"
+		>
+			<!-- App Store Buttons -->
+			<div class="flex flex-wrap items-center justify-center gap-4 mt-8">
+				<a href="#" class="inline-block hover:opacity-80 transition-opacity">
+					<img src="/app-store-badge.svg" alt="Download im App Store" class="h-12" />
+				</a>
+				<a href="#" class="inline-block hover:opacity-80 transition-opacity">
+					<img src="/google-play-badge.svg" alt="Jetzt bei Google Play" class="h-12" />
+				</a>
+			</div>
 
-      <!-- Trust Indicators -->
-      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8">
-        <div class="flex items-center gap-2">
-          <svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-          </svg>
-          <span class="text-[var(--color-text-secondary)] text-sm">100% Kostenlos starten</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
-          </svg>
-          <span class="text-[var(--color-text-secondary)] text-sm">DSGVO-konform</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"></path>
-          </svg>
-          <span class="text-[var(--color-text-secondary)] text-sm">Keine Kreditkarte nötig</span>
-        </div>
-      </div>
-    </CTASection>
-  </main>
+			<!-- Trust Indicators -->
+			<div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8">
+				<div class="flex items-center gap-2">
+					<svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
+						<path
+							fill-rule="evenodd"
+							d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+							clip-rule="evenodd"></path>
+					</svg>
+					<span class="text-[var(--color-text-secondary)] text-sm">100% Kostenlos starten</span>
+				</div>
+				<div class="flex items-center gap-2">
+					<svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
+						<path
+							fill-rule="evenodd"
+							d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+							clip-rule="evenodd"></path>
+					</svg>
+					<span class="text-[var(--color-text-secondary)] text-sm">DSGVO-konform</span>
+				</div>
+				<div class="flex items-center gap-2">
+					<svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
+						<path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"></path>
+					</svg>
+					<span class="text-[var(--color-text-secondary)] text-sm">Keine Kreditkarte nötig</span>
+				</div>
+			</div>
+		</CTASection>
+	</main>
 
-  <Footer />
+	<Footer />
 </Layout>

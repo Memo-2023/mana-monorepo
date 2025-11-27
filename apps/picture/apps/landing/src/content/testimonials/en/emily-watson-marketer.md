@@ -1,13 +1,13 @@
 ---
-name: "Emily Watson"
-role: "Marketing Director"
-company: "GrowthCo"
-avatar: "/testimonials/emily-watson.jpg"
+name: 'Emily Watson'
+role: 'Marketing Director'
+company: 'GrowthCo'
+avatar: '/testimonials/emily-watson.jpg'
 rating: 5
 featured: true
-category: "marketer"
-useCase: "Marketing campaigns and social media ads"
-language: "en"
+category: 'marketer'
+useCase: 'Marketing campaigns and social media ads'
+language: 'en'
 date: 2024-09-28
 verified: true
 ---

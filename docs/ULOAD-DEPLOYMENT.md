@@ -169,15 +169,16 @@ redis://uload-redis:6379
 
 Da uload Teil eines Monorepos ist, muss die Build-Konfiguration genau so sein:
 
-| Einstellung | Wert |
-|-------------|------|
-| **Base Directory** | `/` (leer lassen oder `/`) |
-| **Build Pack** | Dockerfile |
-| **Dockerfile Location** | `uload/Dockerfile` |
-| **Port Exposes** | `3000` |
+| Einstellung             | Wert                       |
+| ----------------------- | -------------------------- |
+| **Base Directory**      | `/` (leer lassen oder `/`) |
+| **Build Pack**          | Dockerfile                 |
+| **Dockerfile Location** | `uload/Dockerfile`         |
+| **Port Exposes**        | `3000`                     |
 
 **Warum `/` als Base Directory?**
 Das Dockerfile benötigt Zugriff auf:
+
 - `uload/apps/web/` (die App)
 - `packages/shared-*` (gemeinsame Packages)
 - `pnpm-workspace.yaml` und `pnpm-lock.yaml` (Workspace-Config)
@@ -243,10 +244,10 @@ Kopiere das Ergebnis als `AUTH_SECRET`.
 
 Bei deinem DNS-Provider (z.B. Cloudflare, Namecheap):
 
-| Type | Name | Value | TTL |
-|------|------|-------|-----|
-| A | @ | DEINE-SERVER-IP | 3600 |
-| A | www | DEINE-SERVER-IP | 3600 |
+| Type | Name | Value           | TTL  |
+| ---- | ---- | --------------- | ---- |
+| A    | @    | DEINE-SERVER-IP | 3600 |
+| A    | www  | DEINE-SERVER-IP | 3600 |
 
 ### 8.2 Domain in Coolify hinzufügen
 
@@ -275,6 +276,7 @@ DNS-Änderungen können 5-30 Minuten dauern. SSL-Zertifikate werden automatisch 
 Klicke auf das laufende Deployment um die Logs zu sehen.
 
 **Erfolgreicher Build zeigt:**
+
 ```
 ✔ done
 Listening on http://0.0.0.0:3000
@@ -321,8 +323,9 @@ curl https://ulo.ad/api/health
 ```
 
 Erwartete Antwort:
+
 ```json
-{"status":"ok","timestamp":"2025-11-25T12:00:00.000Z","uptime":123.45}
+{ "status": "ok", "timestamp": "2025-11-25T12:00:00.000Z", "uptime": 123.45 }
 ```
 
 ### 11.2 Website öffnen
@@ -351,6 +354,7 @@ In Coolify: Application → **Redeploy**
 Application → **Logs**
 
 **Via SSH:**
+
 ```bash
 docker logs -f $(docker ps -qf "name=uload")
 ```
@@ -375,19 +379,19 @@ cat backup_20251125.sql | docker exec -i uload-postgres psql -U uload uload
 
 ### Build schlägt fehl
 
-| Problem | Lösung |
-|---------|--------|
-| "Cannot find package" | Prüfe Base Directory (muss `/` sein) |
-| "pnpm-lock.yaml not found" | Prüfe dass pnpm-lock.yaml im Repo ist |
-| Timeout beim Build | Erhöhe Build-Timeout in Coolify Settings |
+| Problem                    | Lösung                                   |
+| -------------------------- | ---------------------------------------- |
+| "Cannot find package"      | Prüfe Base Directory (muss `/` sein)     |
+| "pnpm-lock.yaml not found" | Prüfe dass pnpm-lock.yaml im Repo ist    |
+| Timeout beim Build         | Erhöhe Build-Timeout in Coolify Settings |
 
 ### Container startet nicht
 
-| Problem | Lösung |
-|---------|--------|
-| "Missing API key" | Prüfe RESEND_API_KEY Environment Variable |
-| "Cannot connect to database" | Prüfe DATABASE_URL (Internal URL!) |
-| Port already in use | Prüfe ob alter Container noch läuft |
+| Problem                      | Lösung                                    |
+| ---------------------------- | ----------------------------------------- |
+| "Missing API key"            | Prüfe RESEND_API_KEY Environment Variable |
+| "Cannot connect to database" | Prüfe DATABASE_URL (Internal URL!)        |
+| Port already in use          | Prüfe ob alter Container noch läuft       |
 
 ### SSL-Zertifikat Fehler
 
@@ -429,18 +433,19 @@ cat backup_20251125.sql | docker exec -i uload-postgres psql -U uload uload
 
 ## Dateien im Repository
 
-| Datei | Beschreibung |
-|-------|--------------|
-| `uload/Dockerfile` | Multi-Stage Docker Build |
-| `uload/docker-compose.yml` | Lokale Entwicklung |
-| `uload/docker-compose.coolify.yml` | Coolify Deployment |
-| `uload/docker-compose.prod.yml` | Standalone Production |
+| Datei                              | Beschreibung             |
+| ---------------------------------- | ------------------------ |
+| `uload/Dockerfile`                 | Multi-Stage Docker Build |
+| `uload/docker-compose.yml`         | Lokale Entwicklung       |
+| `uload/docker-compose.coolify.yml` | Coolify Deployment       |
+| `uload/docker-compose.prod.yml`    | Standalone Production    |
 
 ---
 
 ## Support
 
 Bei Problemen:
+
 1. Coolify Logs prüfen
 2. Container Logs prüfen (`docker logs`)
 3. GitHub Issues: https://github.com/anthropics/claude-code/issues

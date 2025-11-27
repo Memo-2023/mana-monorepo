@@ -4,7 +4,7 @@
 		archivedImages,
 		isLoadingArchive,
 		hasMoreArchive,
-		currentArchivePage
+		currentArchivePage,
 	} from '$lib/stores/archive';
 	import { getImages } from '$lib/api/images';
 	import ArchivedImageCard from '$lib/components/archive/ArchivedImageCard.svelte';
@@ -27,18 +27,13 @@
 		// Setup Intersection Observer for infinite scroll
 		observer = new IntersectionObserver(
 			(entries) => {
-				if (
-					entries[0].isIntersecting &&
-					$hasMoreArchive &&
-					!$isLoadingArchive &&
-					!loadingMore
-				) {
+				if (entries[0].isIntersecting && $hasMoreArchive && !$isLoadingArchive && !loadingMore) {
 					loadMoreImages();
 				}
 			},
 			{
 				threshold: 0.1,
-				rootMargin: '100px' // Load before reaching the trigger
+				rootMargin: '100px', // Load before reaching the trigger
 			}
 		);
 

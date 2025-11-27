@@ -31,14 +31,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		if (action === 'add') {
 			// Check if vote already exists
 			const existingVotes = await pb.collection('featurevotes').getList(1, 1, {
-				filter: `user_id = "${locals.user.id}" && feature_request_id = "${featureRequestId}"`
+				filter: `user_id = "${locals.user.id}" && feature_request_id = "${featureRequestId}"`,
 			});
 
 			if (existingVotes.items.length === 0) {
 				// Create vote
 				await pb.collection('featurevotes').create({
 					user_id: locals.user.id,
-					feature_request_id: featureRequestId
+					feature_request_id: featureRequestId,
 				});
 
 				// Get current vote count and increment
@@ -48,7 +48,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				// Update using admin client if available, otherwise try regular
 				const client = adminPb.authStore.isValid ? adminPb : pb;
 				await client.collection('featurerequests').update(featureRequestId, {
-					vote_count: newCount
+					vote_count: newCount,
 				});
 
 				return json({ success: true, voteCount: newCount });
@@ -58,7 +58,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		} else if (action === 'remove') {
 			// Find and delete vote
 			const existingVotes = await pb.collection('featurevotes').getList(1, 1, {
-				filter: `user_id = "${locals.user.id}" && feature_request_id = "${featureRequestId}"`
+				filter: `user_id = "${locals.user.id}" && feature_request_id = "${featureRequestId}"`,
 			});
 
 			if (existingVotes.items.length > 0) {
@@ -71,7 +71,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				// Update using admin client if available, otherwise try regular
 				const client = adminPb.authStore.isValid ? adminPb : pb;
 				await client.collection('featurerequests').update(featureRequestId, {
-					vote_count: newCount
+					vote_count: newCount,
 				});
 
 				return json({ success: true, voteCount: newCount });

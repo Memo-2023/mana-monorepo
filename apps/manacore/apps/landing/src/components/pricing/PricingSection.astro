@@ -9,197 +9,225 @@ import { pricingPlans } from '../../data/pricing.js';
 import { Icon } from 'astro-icon/components';
 
 export interface Props {
-  showOneTime?: boolean;
+	showOneTime?: boolean;
 }
 
 const { showOneTime = false } = Astro.props;
 ---
 
 <Section spacing="xlarge" class="relative z-10">
-  <Container>
-    <!-- Header -->
-    <div class="text-center mb-16">
-      <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-mana-blue/10 to-blue-500/10 rounded-2xl mb-4">
-        <Icon name="mdi:currency-eur" class="w-8 h-8 text-mana-blue" />
-      </div>
-      <Heading as="h2" size="2" class="mb-4 text-center">
-        Transparente Preise für jeden Bedarf
-      </Heading>
-      <Text size="xl" class="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto text-center">
-        Wählen Sie zwischen monatlichen Abos mit täglicher Regeneration oder einmaligen Mana-Käufen. 
-        Keine versteckten Kosten, keine Mindestlaufzeiten.
-      </Text>
-    </div>
-    
-    <!-- Billing Toggle -->
-    <div class="flex justify-center mb-16">
-      <div class="relative">
-        <div class="absolute inset-0 bg-gradient-to-r from-mana-blue/20 to-blue-500/20 rounded-2xl blur-xl"></div>
-        <div class="relative bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-2xl p-1.5 inline-flex shadow-lg border border-gray-200 dark:border-gray-700">
-          <button 
-            id="monthly-tab" 
-            class="px-8 py-3 rounded-xl font-medium transition-all billing-tab active text-base"
-            data-billing="monthly"
-          >
-            <Icon name="mdi:calendar-month" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
-            Monatlich
-          </button>
-          <button 
-            id="yearly-tab" 
-            class="px-8 py-3 rounded-xl font-medium transition-all billing-tab text-base"
-            data-billing="yearly"
-          >
-            <Icon name="mdi:calendar-check" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
-            Jährlich
-            <span class="ml-2 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2.5 py-1 rounded-full font-semibold shadow-sm">2 Monate gratis</span>
-          </button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Subscription Plans -->
-    <div id="monthly-plans" class="pricing-content">
-      <Grid cols={3} gap="large" class="max-w-5xl mx-auto mb-8">
-        {pricingPlans.monthly.slice(0, 3).map(plan => (
-          <PricingCard plan={plan} type="subscription" billingPeriod="monthly" />
-        ))}
-      </Grid>
-      
-      <!-- Additional Plans -->
-      {pricingPlans.monthly.length > 3 && (
-        <Grid cols={2} gap="large" class="max-w-3xl mx-auto mb-16">
-          {pricingPlans.monthly.slice(3).map(plan => (
-            <PricingCard plan={plan} type="subscription" billingPeriod="monthly" />
-          ))}
-        </Grid>
-      )}
-    </div>
-    
-    <div id="yearly-plans" class="pricing-content hidden">
-      <Grid cols={3} gap="large" class="max-w-5xl mx-auto mb-8">
-        {pricingPlans.yearly.slice(0, 3).map(plan => (
-          <PricingCard plan={plan} type="subscription" billingPeriod="yearly" />
-        ))}
-      </Grid>
-      
-      <!-- Additional Plans -->
-      {pricingPlans.yearly.length > 3 && (
-        <Grid cols={2} gap="large" class="max-w-3xl mx-auto mb-16">
-          {pricingPlans.yearly.slice(3).map(plan => (
-            <PricingCard plan={plan} type="subscription" billingPeriod="yearly" />
-          ))}
-        </Grid>
-      )}
-    </div>
-    
-    <!-- One-time Purchases -->
-    {showOneTime && (
-      <div class="mt-24 pt-20 border-t border-gray-200 dark:border-gray-700">
-        <div class="text-center mb-12">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl mb-4">
-            <Icon name="mdi:flask" class="w-8 h-8 text-purple-600 dark:text-purple-500" />
-          </div>
-          <Heading as="h3" size="3" class="mb-4 text-center">
-            Einmalige Mana-Käufe
-          </Heading>
-          <Text size="lg" class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-center">
-            Brauchen Sie sofort mehr Mana? Kaufen Sie Mana-Tränke ohne Abo – 
-            perfekt für Projekte oder als Geschenk für Ihr Team.
-          </Text>
-        </div>
-        <Grid cols={4} gap="medium" class="max-w-5xl mx-auto">
-          {pricingPlans.oneTime.map(plan => (
-            <PricingCard plan={plan} type="onetime" />
-          ))}
-        </Grid>
-      </div>
-    )}
-    
-    <!-- Trust Indicators -->
-    <div class="mt-20 pt-20 border-t border-gray-200 dark:border-gray-700">
-      <div class="text-center mb-12">
-        <Heading as="h3" size="4" class="mb-4 text-center">
-          Warum Mana das bessere Preismodell ist
-        </Heading>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
-        <div class="text-center group">
-          <div class="w-16 h-16 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-            <Icon name="mdi:piggy-bank" class="w-8 h-8 text-green-600 dark:text-green-500" />
-          </div>
-          <Text weight="semibold" class="mb-2">Bis zu 90% sparen</Text>
-          <Text size="sm" class="text-gray-600 dark:text-gray-400">
-            Gegenüber einzelnen Tool-Abos
-          </Text>
-        </div>
-        <div class="text-center group">
-          <div class="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-            <Icon name="mdi:account-group" class="w-8 h-8 text-blue-600 dark:text-blue-500" />
-          </div>
-          <Text weight="semibold" class="mb-2">Team-freundlich</Text>
-          <Text size="sm" class="text-gray-600 dark:text-gray-400">
-            Mana teilen im Team möglich
-          </Text>
-        </div>
-        <div class="text-center group">
-          <div class="w-16 h-16 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-            <Icon name="mdi:chart-line" class="w-8 h-8 text-purple-600 dark:text-purple-500" />
-          </div>
-          <Text weight="semibold" class="mb-2">Volle Kostenkontrolle</Text>
-          <Text size="sm" class="text-gray-600 dark:text-gray-400">
-            Detaillierte Nutzungsstatistiken
-          </Text>
-        </div>
-        <div class="text-center group">
-          <div class="w-16 h-16 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-            <Icon name="mdi:flash" class="w-8 h-8 text-orange-600 dark:text-orange-500" />
-          </div>
-          <Text weight="semibold" class="mb-2">Sofort alle Tools</Text>
-          <Text size="sm" class="text-gray-600 dark:text-gray-400">
-            Keine Wartezeiten oder Verhandlungen
-          </Text>
-        </div>
-      </div>
-    </div>
-  </Container>
+	<Container>
+		<!-- Header -->
+		<div class="text-center mb-16">
+			<div
+				class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-mana-blue/10 to-blue-500/10 rounded-2xl mb-4"
+			>
+				<Icon name="mdi:currency-eur" class="w-8 h-8 text-mana-blue" />
+			</div>
+			<Heading as="h2" size="2" class="mb-4 text-center">
+				Transparente Preise für jeden Bedarf
+			</Heading>
+			<Text size="xl" class="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto text-center">
+				Wählen Sie zwischen monatlichen Abos mit täglicher Regeneration oder einmaligen Mana-Käufen.
+				Keine versteckten Kosten, keine Mindestlaufzeiten.
+			</Text>
+		</div>
+
+		<!-- Billing Toggle -->
+		<div class="flex justify-center mb-16">
+			<div class="relative">
+				<div
+					class="absolute inset-0 bg-gradient-to-r from-mana-blue/20 to-blue-500/20 rounded-2xl blur-xl"
+				>
+				</div>
+				<div
+					class="relative bg-white/90 backdrop-blur-sm dark:bg-gray-800 rounded-2xl p-1.5 inline-flex shadow-lg border border-gray-200 dark:border-gray-700"
+				>
+					<button
+						id="monthly-tab"
+						class="px-8 py-3 rounded-xl font-medium transition-all billing-tab active text-base"
+						data-billing="monthly"
+					>
+						<Icon name="mdi:calendar-month" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
+						Monatlich
+					</button>
+					<button
+						id="yearly-tab"
+						class="px-8 py-3 rounded-xl font-medium transition-all billing-tab text-base"
+						data-billing="yearly"
+					>
+						<Icon name="mdi:calendar-check" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
+						Jährlich
+						<span
+							class="ml-2 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2.5 py-1 rounded-full font-semibold shadow-sm"
+							>2 Monate gratis</span
+						>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Subscription Plans -->
+		<div id="monthly-plans" class="pricing-content">
+			<Grid cols={3} gap="large" class="max-w-5xl mx-auto mb-8">
+				{
+					pricingPlans.monthly
+						.slice(0, 3)
+						.map((plan) => <PricingCard plan={plan} type="subscription" billingPeriod="monthly" />)
+				}
+			</Grid>
+
+			<!-- Additional Plans -->
+			{
+				pricingPlans.monthly.length > 3 && (
+					<Grid cols={2} gap="large" class="max-w-3xl mx-auto mb-16">
+						{pricingPlans.monthly.slice(3).map((plan) => (
+							<PricingCard plan={plan} type="subscription" billingPeriod="monthly" />
+						))}
+					</Grid>
+				)
+			}
+		</div>
+
+		<div id="yearly-plans" class="pricing-content hidden">
+			<Grid cols={3} gap="large" class="max-w-5xl mx-auto mb-8">
+				{
+					pricingPlans.yearly
+						.slice(0, 3)
+						.map((plan) => <PricingCard plan={plan} type="subscription" billingPeriod="yearly" />)
+				}
+			</Grid>
+
+			<!-- Additional Plans -->
+			{
+				pricingPlans.yearly.length > 3 && (
+					<Grid cols={2} gap="large" class="max-w-3xl mx-auto mb-16">
+						{pricingPlans.yearly.slice(3).map((plan) => (
+							<PricingCard plan={plan} type="subscription" billingPeriod="yearly" />
+						))}
+					</Grid>
+				)
+			}
+		</div>
+
+		<!-- One-time Purchases -->
+		{
+			showOneTime && (
+				<div class="mt-24 pt-20 border-t border-gray-200 dark:border-gray-700">
+					<div class="text-center mb-12">
+						<div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl mb-4">
+							<Icon name="mdi:flask" class="w-8 h-8 text-purple-600 dark:text-purple-500" />
+						</div>
+						<Heading as="h3" size="3" class="mb-4 text-center">
+							Einmalige Mana-Käufe
+						</Heading>
+						<Text size="lg" class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-center">
+							Brauchen Sie sofort mehr Mana? Kaufen Sie Mana-Tränke ohne Abo – perfekt für Projekte
+							oder als Geschenk für Ihr Team.
+						</Text>
+					</div>
+					<Grid cols={4} gap="medium" class="max-w-5xl mx-auto">
+						{pricingPlans.oneTime.map((plan) => (
+							<PricingCard plan={plan} type="onetime" />
+						))}
+					</Grid>
+				</div>
+			)
+		}
+
+		<!-- Trust Indicators -->
+		<div class="mt-20 pt-20 border-t border-gray-200 dark:border-gray-700">
+			<div class="text-center mb-12">
+				<Heading as="h3" size="4" class="mb-4 text-center">
+					Warum Mana das bessere Preismodell ist
+				</Heading>
+			</div>
+			<div class="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
+				<div class="text-center group">
+					<div
+						class="w-16 h-16 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"
+					>
+						<Icon name="mdi:piggy-bank" class="w-8 h-8 text-green-600 dark:text-green-500" />
+					</div>
+					<Text weight="semibold" class="mb-2">Bis zu 90% sparen</Text>
+					<Text size="sm" class="text-gray-600 dark:text-gray-400">
+						Gegenüber einzelnen Tool-Abos
+					</Text>
+				</div>
+				<div class="text-center group">
+					<div
+						class="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"
+					>
+						<Icon name="mdi:account-group" class="w-8 h-8 text-blue-600 dark:text-blue-500" />
+					</div>
+					<Text weight="semibold" class="mb-2">Team-freundlich</Text>
+					<Text size="sm" class="text-gray-600 dark:text-gray-400">
+						Mana teilen im Team möglich
+					</Text>
+				</div>
+				<div class="text-center group">
+					<div
+						class="w-16 h-16 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"
+					>
+						<Icon name="mdi:chart-line" class="w-8 h-8 text-purple-600 dark:text-purple-500" />
+					</div>
+					<Text weight="semibold" class="mb-2">Volle Kostenkontrolle</Text>
+					<Text size="sm" class="text-gray-600 dark:text-gray-400">
+						Detaillierte Nutzungsstatistiken
+					</Text>
+				</div>
+				<div class="text-center group">
+					<div
+						class="w-16 h-16 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"
+					>
+						<Icon name="mdi:flash" class="w-8 h-8 text-orange-600 dark:text-orange-500" />
+					</div>
+					<Text weight="semibold" class="mb-2">Sofort alle Tools</Text>
+					<Text size="sm" class="text-gray-600 dark:text-gray-400">
+						Keine Wartezeiten oder Verhandlungen
+					</Text>
+				</div>
+			</div>
+		</div>
+	</Container>
 </Section>
 
 <style>
-  .billing-tab {
-    @apply text-gray-600 dark:text-gray-400;
-  }
-  
-  .billing-tab.active {
-    @apply bg-gradient-to-r from-mana-blue to-blue-600 text-white shadow-lg;
-  }
-  
-  .billing-tab.active .icon {
-    @apply text-white;
-  }
+	.billing-tab {
+		@apply text-gray-600 dark:text-gray-400;
+	}
+
+	.billing-tab.active {
+		@apply bg-gradient-to-r from-mana-blue to-blue-600 text-white shadow-lg;
+	}
+
+	.billing-tab.active .icon {
+		@apply text-white;
+	}
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const monthlyTab = document.getElementById('monthly-tab');
-    const yearlyTab = document.getElementById('yearly-tab');
-    const monthlyPlans = document.getElementById('monthly-plans');
-    const yearlyPlans = document.getElementById('yearly-plans');
-    
-    function switchBilling(billing: 'monthly' | 'yearly') {
-      if (billing === 'monthly') {
-        monthlyTab?.classList.add('active');
-        yearlyTab?.classList.remove('active');
-        monthlyPlans?.classList.remove('hidden');
-        yearlyPlans?.classList.add('hidden');
-      } else {
-        yearlyTab?.classList.add('active');
-        monthlyTab?.classList.remove('active');
-        yearlyPlans?.classList.remove('hidden');
-        monthlyPlans?.classList.add('hidden');
-      }
-    }
-    
-    monthlyTab?.addEventListener('click', () => switchBilling('monthly'));
-    yearlyTab?.addEventListener('click', () => switchBilling('yearly'));
-  });
+	document.addEventListener('DOMContentLoaded', () => {
+		const monthlyTab = document.getElementById('monthly-tab');
+		const yearlyTab = document.getElementById('yearly-tab');
+		const monthlyPlans = document.getElementById('monthly-plans');
+		const yearlyPlans = document.getElementById('yearly-plans');
+
+		function switchBilling(billing: 'monthly' | 'yearly') {
+			if (billing === 'monthly') {
+				monthlyTab?.classList.add('active');
+				yearlyTab?.classList.remove('active');
+				monthlyPlans?.classList.remove('hidden');
+				yearlyPlans?.classList.add('hidden');
+			} else {
+				yearlyTab?.classList.add('active');
+				monthlyTab?.classList.remove('active');
+				yearlyPlans?.classList.remove('hidden');
+				monthlyPlans?.classList.add('hidden');
+			}
+		}
+
+		monthlyTab?.addEventListener('click', () => switchBilling('monthly'));
+		yearlyTab?.addEventListener('click', () => switchBilling('yearly'));
+	});
 </script>

@@ -38,7 +38,9 @@
 </svelte:head>
 
 {#if appConfig}
-	<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+	<div
+		class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+	>
 		<div class="container mx-auto px-4 py-12">
 			<!-- Header -->
 			<div class="mb-12 text-center">
@@ -108,36 +110,48 @@
 							<div class="mt-1 text-xl">🎤</div>
 							<div>
 								<h4 class="font-semibold text-gray-800 dark:text-gray-200">Start Recording</h4>
-								<p class="text-gray-600 dark:text-gray-400">Click the record button to capture your first voice memo</p>
+								<p class="text-gray-600 dark:text-gray-400">
+									Click the record button to capture your first voice memo
+								</p>
 							</div>
 						</div>
 						<div class="flex items-start gap-3">
 							<div class="mt-1 text-xl">✨</div>
 							<div>
 								<h4 class="font-semibold text-gray-800 dark:text-gray-200">AI Processing</h4>
-								<p class="text-gray-600 dark:text-gray-400">Watch as AI transcribes and summarizes your recording</p>
+								<p class="text-gray-600 dark:text-gray-400">
+									Watch as AI transcribes and summarizes your recording
+								</p>
 							</div>
 						</div>
 						<div class="flex items-start gap-3">
 							<div class="mt-1 text-xl">🏷️</div>
 							<div>
 								<h4 class="font-semibold text-gray-800 dark:text-gray-200">Organize</h4>
-								<p class="text-gray-600 dark:text-gray-400">Add tags and organize your memos for easy retrieval</p>
+								<p class="text-gray-600 dark:text-gray-400">
+									Add tags and organize your memos for easy retrieval
+								</p>
 							</div>
 						</div>
 					{:else if appConfig.name === 'manadeck'}
 						<div class="flex items-start gap-3">
 							<div class="mt-1 text-xl">➕</div>
 							<div>
-								<h4 class="font-semibold text-gray-800 dark:text-gray-200">Create Your First Deck</h4>
-								<p class="text-gray-600 dark:text-gray-400">Start with a new deck or import existing flashcards</p>
+								<h4 class="font-semibold text-gray-800 dark:text-gray-200">
+									Create Your First Deck
+								</h4>
+								<p class="text-gray-600 dark:text-gray-400">
+									Start with a new deck or import existing flashcards
+								</p>
 							</div>
 						</div>
 						<div class="flex items-start gap-3">
 							<div class="mt-1 text-xl">🧠</div>
 							<div>
 								<h4 class="font-semibold text-gray-800 dark:text-gray-200">Study Smart</h4>
-								<p class="text-gray-600 dark:text-gray-400">Let AI optimize your review schedule for maximum retention</p>
+								<p class="text-gray-600 dark:text-gray-400">
+									Let AI optimize your review schedule for maximum retention
+								</p>
 							</div>
 						</div>
 					{:else if appConfig.name === 'storyteller'}
@@ -145,29 +159,39 @@
 							<div class="mt-1 text-xl">✍️</div>
 							<div>
 								<h4 class="font-semibold text-gray-800 dark:text-gray-200">Start Writing</h4>
-								<p class="text-gray-600 dark:text-gray-400">Create your first story with AI assistance</p>
+								<p class="text-gray-600 dark:text-gray-400">
+									Create your first story with AI assistance
+								</p>
 							</div>
 						</div>
 						<div class="flex items-start gap-3">
 							<div class="mt-1 text-xl">🎨</div>
 							<div>
 								<h4 class="font-semibold text-gray-800 dark:text-gray-200">Format & Style</h4>
-								<p class="text-gray-600 dark:text-gray-400">Use professional formatting tools to make your story shine</p>
+								<p class="text-gray-600 dark:text-gray-400">
+									Use professional formatting tools to make your story shine
+								</p>
 							</div>
 						</div>
 					{:else}
 						<div class="flex items-start gap-3">
 							<div class="mt-1 text-xl">🚀</div>
 							<div>
-								<h4 class="font-semibold text-gray-800 dark:text-gray-200">Explore Your Dashboard</h4>
-								<p class="text-gray-600 dark:text-gray-400">Discover all the features available to you</p>
+								<h4 class="font-semibold text-gray-800 dark:text-gray-200">
+									Explore Your Dashboard
+								</h4>
+								<p class="text-gray-600 dark:text-gray-400">
+									Discover all the features available to you
+								</p>
 							</div>
 						</div>
 						<div class="flex items-start gap-3">
 							<div class="mt-1 text-xl">⚙️</div>
 							<div>
 								<h4 class="font-semibold text-gray-800 dark:text-gray-200">Customize Settings</h4>
-								<p class="text-gray-600 dark:text-gray-400">Personalize your experience in settings</p>
+								<p class="text-gray-600 dark:text-gray-400">
+									Personalize your experience in settings
+								</p>
 							</div>
 						</div>
 					{/if}
@@ -194,7 +218,13 @@
 			<div class="mt-8 text-center">
 				<p class="text-gray-600 dark:text-gray-400">
 					{#if appConfig.website}
-						Need help? Visit <a href={appConfig.website} target="_blank" rel="noopener noreferrer" class="font-medium hover:underline" style="color: {appConfig.primaryColor}">{appConfig.website}</a>
+						Need help? Visit <a
+							href={appConfig.website}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="font-medium hover:underline"
+							style="color: {appConfig.primaryColor}">{appConfig.website}</a
+						>
 					{:else}
 						Need help? Check out the documentation or contact support
 					{/if}
@@ -206,7 +236,9 @@
 	<!-- Loading state -->
 	<div class="flex min-h-screen items-center justify-center">
 		<div class="text-center">
-			<div class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+			<div
+				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
+			></div>
 			<p class="text-gray-600 dark:text-gray-400">Loading...</p>
 		</div>
 	</div>

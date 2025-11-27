@@ -39,7 +39,7 @@
 					theme: 'outline',
 					size: 'large',
 					text: 'signin_with',
-					shape: 'pill'
+					shape: 'pill',
 				});
 			}
 		} catch (err) {
@@ -55,10 +55,18 @@
 	</div>
 {/if}
 
-<div bind:this={buttonContainer} class="relative w-full google-btn-wrapper" style="min-height: 56px;">
+<div
+	bind:this={buttonContainer}
+	class="relative w-full google-btn-wrapper"
+	style="min-height: 56px;"
+>
 	{#if isLoading}
-		<div class="absolute inset-0 flex items-center justify-center rounded-xl bg-white/80 dark:bg-black/80 backdrop-blur-sm z-10">
-			<div class="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent"></div>
+		<div
+			class="absolute inset-0 flex items-center justify-center rounded-xl bg-white/80 dark:bg-black/80 backdrop-blur-sm z-10"
+		>
+			<div
+				class="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent"
+			></div>
 		</div>
 	{/if}
 </div>

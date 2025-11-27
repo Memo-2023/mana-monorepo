@@ -57,18 +57,19 @@ pnpm build:prod       # Production build
 
 ## Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| Framework | React Native 0.79.5 + Expo SDK 53 |
-| Navigation | Expo Router v5 (file-based) |
-| Styling | NativeWind (Tailwind CSS for RN) |
-| State | Zustand |
-| Backend | Supabase (PostgreSQL + Auth) |
-| Language | TypeScript |
+| Component  | Technology                        |
+| ---------- | --------------------------------- |
+| Framework  | React Native 0.79.5 + Expo SDK 53 |
+| Navigation | Expo Router v5 (file-based)       |
+| Styling    | NativeWind (Tailwind CSS for RN)  |
+| State      | Zustand                           |
+| Backend    | Supabase (PostgreSQL + Auth)      |
+| Language   | TypeScript                        |
 
 ## Database Design
 
 Single `texts` table with JSONB field for flexibility:
+
 - Stores texts, metadata, tags, and reading progress
 - Audio files stored locally, paths tracked in DB
 - Designed for future expansion without migrations
@@ -78,6 +79,7 @@ See `apps/mobile/ReadMe/MinimalDatabase.md` for details.
 ## Key Implementation Patterns
 
 ### Navigation (Expo Router)
+
 ```tsx
 // File-based routing in apps/mobile/app/
 // (tabs)/ - Tab navigation screens
@@ -85,26 +87,31 @@ See `apps/mobile/ReadMe/MinimalDatabase.md` for details.
 ```
 
 ### Styling (NativeWind)
+
 ```tsx
 <View className="flex-1 items-center justify-center">
-  <Text className="text-lg font-bold">Hello</Text>
+	<Text className="text-lg font-bold">Hello</Text>
 </View>
 ```
 
 ### State Management (Zustand)
+
 ```tsx
 import { useStore } from '~/store/store';
 const { state, actions } = useStore();
 ```
 
 ### Supabase Client
+
 ```tsx
 // Client configured in apps/mobile/utils/supabase.ts
 import { supabase } from '~/utils/supabase';
 ```
 
 ### Path Alias
+
 Use `~/*` for absolute imports from mobile root:
+
 ```tsx
 import { Button } from '~/components/Button';
 ```
@@ -112,6 +119,7 @@ import { Button } from '~/components/Button';
 ## Environment Variables
 
 Create `apps/reader/apps/mobile/.env`:
+
 ```bash
 EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key

@@ -1,6 +1,5 @@
 Expo ImagePicker
 
-
 A library that provides access to the system's UI for selecting images and videos from the phone's library or taking a photo with the camera.
 
 Bundled version:
@@ -26,32 +25,31 @@ app.json
 
 Copy
 
-
 {
-  "expo": {
-    "plugins": [
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
-        }
-      ]
-    ]
-  }
+"expo": {
+"plugins": [
+[
+"expo-image-picker",
+{
+"photosPermission": "The app accesses your photos to let you share them with your friends."
+}
+]
+]
+}
 }
 Configurable properties
-Name	Default	Description
-photosPermission	"Allow $(PRODUCT_NAME) to access your photos"	
+Name Default Description
+photosPermission "Allow $(PRODUCT_NAME) to access your photos"
 Only for: 
 
 A string to set the NSPhotoLibraryUsageDescription permission message.
 
-cameraPermission	"Allow $(PRODUCT_NAME) to access your camera"	
+cameraPermission "Allow $(PRODUCT_NAME) to access your camera"
 Only for: 
 
 A string to set the NSCameraUsageDescription permission message.
 
-microphonePermission	"Allow $(PRODUCT_NAME) to access your microphone"	
+microphonePermission "Allow $(PRODUCT_NAME) to access your microphone"
 Only for: 
 
 A string to set the NSMicrophoneUsageDescription permission message.
@@ -62,72 +60,71 @@ Image Picker
 
 Copy
 
-
 Open in Snack
-
 
 import { useState } from 'react';
 import { Button, Image, View, StyleSheet } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import \* as ImagePicker from 'expo-image-picker';
 
 export default function ImagePickerExample() {
-  const [image, setImage] = useState<string | null>(null);
+const [image, setImage] = useState<string | null>(null);
 
-  const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images', 'videos'],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+const pickImage = async () => {
+// No permissions request is necessary for launching the image library
+let result = await ImagePicker.launchImageLibraryAsync({
+mediaTypes: ['images', 'videos'],
+allowsEditing: true,
+aspect: [4, 3],
+quality: 1,
+});
 
     console.log(result);
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
-  };
 
-  return (
-    <View style={styles.container}>
-      <Button title="Pick an image from camera roll" onPress={pickImage} />
-      {image && <Image source={{ uri: image }} style={styles.image} />}
-    </View>
-  );
+};
+
+return (
+<View style={styles.container}>
+<Button title="Pick an image from camera roll" onPress={pickImage} />
+{image && <Image source={{ uri: image }} style={styles.image} />}
+</View>
+);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  image: {
-    width: 200,
-    height: 200,
-  },
+container: {
+flex: 1,
+alignItems: 'center',
+justifyContent: 'center',
+},
+image: {
+width: 200,
+height: 200,
+},
 });
 
 Show More
 When you run this example and pick an image, you will see the image that you picked show up in your app, and a similar log will be shown in the console:
 
 {
-  "assets": [
-    {
-      "assetId": "C166F9F5-B5FE-4501-9531",
-      "base64": null,
-      "duration": null,
-      "exif": null,
-      "fileName": "IMG.HEIC",
-      "fileSize": 6018901,
-      "height": 3025,
-      "type": "image",
-      "uri": "file:///data/user/0/host.exp.exponent/cache/cropped1814158652.jpg"
-      "width": 3024
-    }
-  ],
-  "canceled": false
+"assets": [
+{
+"assetId": "C166F9F5-B5FE-4501-9531",
+"base64": null,
+"duration": null,
+"exif": null,
+"fileName": "IMG.HEIC",
+"fileSize": 6018901,
+"height": 3025,
+"type": "image",
+"uri": "file:///data/user/0/host.exp.exponent/cache/cropped1814158652.jpg"
+"width": 3024
+}
+],
+"canceled": false
 }
 With AWS S3
 AWS storage example
@@ -142,10 +139,10 @@ An example of how to use Firebase storage can be found in with-firebase-storage-
 See Using Firebase guide to set up your project correctly.
 
 API
-import * as ImagePicker from 'expo-image-picker';
+import \* as ImagePicker from 'expo-image-picker';
 Hooks
 useCameraPermissions(options)
-Parameter	Type
+Parameter Type
 options
 (optional)
 PermissionHookOptions<object>
@@ -158,11 +155,11 @@ Example
 
 const [status, requestPermission] = ImagePicker.useCameraPermissions();
 useMediaLibraryPermissions(options)
-Parameter	Type
+Parameter Type
 options
 (optional)
 PermissionHookOptions<{
-  writeOnly: boolean
+writeOnly: boolean
 }>
 
 Check or request permissions to access the media library. This uses both requestMediaLibraryPermissionsAsync and getMediaLibraryPermissionsAsync to interact with the permissions.
@@ -181,10 +178,10 @@ Promise<CameraPermissionResponse>
 A promise that fulfills with an object of type CameraPermissionResponse.
 
 ImagePicker.getMediaLibraryPermissionsAsync(writeOnly)
-Parameter	Type	Description
+Parameter Type Description
 writeOnly
 (optional)
-boolean	
+boolean
 Whether to request write or read and write permissions. Defaults to false
 
 Default:
@@ -204,10 +201,10 @@ Promise<ImagePickerResult | ImagePickerErrorResult | null>
 On Android: a promise that resolves to an object of exactly same type as in ImagePicker.launchImageLibraryAsync or ImagePicker.launchCameraAsync if the ImagePicker finished successfully. Otherwise, an object of type ImagePickerErrorResult.
 On other platforms: null
 ImagePicker.launchCameraAsync(options)
-Parameter	Type	Description
+Parameter Type Description
 options
 (optional)
-ImagePickerOptions	
+ImagePickerOptions
 An ImagePickerOptions object.
 
 Default:
@@ -222,10 +219,10 @@ Promise<ImagePickerResult>
 A promise that resolves to an object with canceled and assets fields. When the user canceled the action the assets is always null, otherwise it's an array of the selected media assets which have a form of ImagePickerAsset.
 
 ImagePicker.launchImageLibraryAsync(options)
-Parameter	Type	Description
+Parameter Type Description
 options
 (optional)
-ImagePickerOptions	
+ImagePickerOptions
 An object extended by ImagePickerOptions.
 
 Default:
@@ -249,10 +246,10 @@ Promise<CameraPermissionResponse>
 A promise that fulfills with an object of type CameraPermissionResponse.
 
 ImagePicker.requestMediaLibraryPermissionsAsync(writeOnly)
-Parameter	Type	Description
+Parameter Type Description
 writeOnly
 (optional)
-boolean	
+boolean
 Whether to request write or read and write permissions. Defaults to false
 
 Default:
@@ -282,10 +279,10 @@ Acceptable values are: 'photos' | 'albums'
 ImagePickerAsset
 Represents an asset (image or video) returned by the image picker or camera.
 
-Property	Type	Description
+Property Type Description
 assetId
 (optional)
-string | null	
+string | null
 Only for: 
 
 The unique ID that represents the picked image or video, if picked from the library. It can be used by expo-media-library to manage the picked asset.
@@ -294,100 +291,100 @@ This might be null when the ID is unavailable or the user gave limited permissio
 
 base64
 (optional)
-string | null	
+string | null
 When the base64 option is truthy, it is a Base64-encoded string of the selected image's JPEG data, otherwise null. If you prepend this with 'data:image/jpeg;base64,' to create a data URI, you can use it as the source of an Image element; for example:
 
 <Image
-  source={{ uri: 'data:image/jpeg;base64,' + asset.base64 }}
-  style={{ width: 200, height: 200 }}
+source={{ uri: 'data:image/jpeg;base64,' + asset.base64 }}
+style={{ width: 200, height: 200 }}
 />
 duration
 (optional)
-number | null	
+number | null
 Length of the video in milliseconds or null if the asset is not a video.
 
 exif
 (optional)
-Record<string, any> | null	
+Record<string, any> | null
 Only for: 
 
 The exif field is included if the exif option is truthy, and is an object containing the image's EXIF data. The names of this object's properties are EXIF tags and the values are the respective EXIF values for those tags.
 
 file
 (optional)
-File	
+File
 Only for: 
 
 The web File object containing the selected media. This property is web-only and can be used to upload to a server with FormData.
 
 fileName
 (optional)
-string | null	
+string | null
 Preferred filename to use when saving this item. This might be null when the name is unavailable or user gave limited permission to access the media library.
 
 fileSize
 (optional)
-number	
+number
 File size of the picked image or video, in bytes.
 
-height	number	
+height number
 Height of the image or video.
 
 mimeType
 (optional)
-string	
+string
 The MIME type of the selected asset or null if could not be determined.
 
 pairedVideoAsset
 (optional)
-ImagePickerAsset | null	
+ImagePickerAsset | null
 Only for: 
 
 Contains information about the video paired with the image file. This property is only set when livePhotos media type was present in the mediaTypes array when launching the picker and a live photo was selected.
 
 type
 (optional)
-'image' | 'video' | 'livePhoto' | 'pairedVideo'	
+'image' | 'video' | 'livePhoto' | 'pairedVideo'
 The type of the asset.
 
 'image' - for images.
 'video' - for videos.
 'livePhoto' - for live photos. (iOS only)
 'pairedVideo' - for videos paired with photos, which can be combined to create a live photo. (iOS only)
-uri	string	
+uri string
 URI to the local image or video file (usable as the source of an Image element, in the case of an image) and width and height specify the dimensions of the media.
 
-width	number	
+width number
 Width of the image or video.
 
 ImagePickerCanceledResult
 Type representing canceled pick result.
 
-Property	Type	Description
-assets	null	
+Property Type Description
+assets null
 null signifying that the request was canceled.
 
-canceled	true	
+canceled true
 Boolean flag set to true showing that the request was canceled.
 
 ImagePickerErrorResult
-Property	Type	Description
-code	string	
+Property Type Description
+code string
 The error code.
 
 exception
 (optional)
-string	
+string
 The exception which caused the error.
 
-message	string	
+message string
 The error message.
 
 ImagePickerOptions
-Property	Type	Description
+Property Type Description
 allowsEditing
 (optional)
-boolean	
+boolean
 Only for: 
 
 Whether to show a UI to edit the image after it is picked. On Android the user can crop and rotate the image and on iOS simply crop it.
@@ -399,7 +396,7 @@ Default:
 false
 allowsMultipleSelection
 (optional)
-boolean	
+boolean
 Only for: 
 
 Whether or not to allow selecting multiple media files at once.
@@ -410,17 +407,17 @@ Default:
 false
 aspect
 (optional)
-[number, number]	
+[number, number]
 An array with two entries [x, y] specifying the aspect ratio to maintain if the user is allowed to edit the image (by passing allowsEditing: true). This is only applicable on Android, since on iOS the crop rectangle is always a square.
 
 base64
 (optional)
-boolean	
+boolean
 Whether to also include the image data in Base64 format.
 
 cameraType
 (optional)
-CameraType	
+CameraType
 Selects the camera-facing type. The CameraType enum provides two options: front for the front-facing camera and back for the back-facing camera.
 
 On Android, the behavior of this option may vary based on the camera app installed on the device.
@@ -429,7 +426,7 @@ Default:
 CameraType.back
 defaultTab
 (optional)
-DefaultTab	
+DefaultTab
 Only for: 
 
 Choose the default tab with which the image picker will be opened.
@@ -438,14 +435,14 @@ Default:
 'photos'
 exif
 (optional)
-boolean	
+boolean
 Only for: 
 
 Whether to also include the EXIF data for the image. On iOS the EXIF data does not include GPS tags in the camera case.
 
 legacy
 (optional)
-boolean	
+boolean
 Only for: 
 
 Uses the legacy image picker on Android. This will allow media to be selected from outside the users photo library.
@@ -454,14 +451,14 @@ Default:
 false
 mediaTypes
 (optional)
-MediaType | MediaType[] | MediaTypeOptions	
+MediaType | MediaType[] | MediaTypeOptions
 Choose what type of media to pick.
 
 Default:
 'images'
 orderedSelection
 (optional)
-boolean	
+boolean
 Only for: 
 
 Whether to display number badges when assets are selected. The badges are numbered in selection order. Assets are then returned in the exact same order they were selected.
@@ -472,7 +469,7 @@ Default:
 false
 preferredAssetRepresentationMode
 (optional)
-UIImagePickerPreferredAssetRepresentationMode	
+UIImagePickerPreferredAssetRepresentationMode
 Only for: 
 
 Choose preferred asset representation mode to use when loading assets.
@@ -481,7 +478,7 @@ Default:
 ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Automatic
 presentationStyle
 (optional)
-UIImagePickerPresentationStyle	
+UIImagePickerPresentationStyle
 Only for: 
 
 Choose presentation style to customize view during taking photo/video.
@@ -490,7 +487,7 @@ Default:
 ImagePicker.UIImagePickerPresentationStyle.Automatic
 quality
 (optional)
-number	
+number
 Only for: 
 
 Specify the quality of compression, from 0 to 1. 0 means compress for small size, 1 means compress for maximum quality.
@@ -503,7 +500,7 @@ Default:
 1.0
 selectionLimit
 (optional)
-number	
+number
 Only for: 
 
 The maximum number of items that user can select. Applicable when allowsMultipleSelection is enabled. Setting the value to 0 sets the selection limit to the maximum that the system supports.
@@ -512,7 +509,7 @@ Default:
 0
 videoExportPreset
 (optional)
-VideoExportPreset	
+VideoExportPreset
 Deprecated See videoExportPreset in Apple documentation.
 
 Specify preset which will be used to compress selected video.
@@ -521,7 +518,7 @@ Default:
 ImagePicker.VideoExportPreset.Passthrough
 videoMaxDuration
 (optional)
-number	
+number
 Maximum duration, in seconds, for video recording. Setting this to 0 disables the limit. Defaults to 0 (no limit).
 
 On iOS, when allowsEditing is set to true, maximum duration is limited to 10 minutes. This limit is applied automatically, if 0 or no value is specified.
@@ -529,7 +526,7 @@ On Android, effect of this option depends on support of installed camera app.
 On Web this option has no effect - the limit is browser-dependant.
 videoQuality
 (optional)
-UIImagePickerControllerQualityType	
+UIImagePickerControllerQualityType
 Only for: 
 
 Specify the quality of recorded videos. Defaults to the highest quality available for the device.
@@ -546,11 +543,11 @@ Acceptable values are: ImagePickerSuccessResult | ImagePickerCanceledResult
 ImagePickerSuccessResult
 Type representing successful pick result.
 
-Property	Type	Description
-assets	ImagePickerAsset[]	
+Property Type Description
+assets ImagePickerAsset[]
 An array of picked assets.
 
-canceled	false	
+canceled false
 Boolean flag set to false showing that the request was successful.
 
 MediaLibraryPermissionResponse
@@ -558,10 +555,10 @@ Extends PermissionResponse type exported by expo-modules-core, containing additi
 
 Type: PermissionResponse extended by:
 
-Property	Type	Description
+Property Type Description
 accessPrivileges
 (optional)
-'all' | 'limited' | 'none'	
+'all' | 'limited' | 'none'
 Indicates if your app has access to the whole or only part of the photo library. Possible values are:
 
 'all' if the user granted your app access to the whole photo library
@@ -596,17 +593,17 @@ Acceptable values are: PermissionHookBehavior | Options
 PermissionResponse
 An object obtained by permissions get and request functions.
 
-Property	Type	Description
-canAskAgain	boolean	
+Property Type Description
+canAskAgain boolean
 Indicates if user can be asked again for specific permission. If not, one should be directed to the Settings app in order to enable/disable the permission.
 
-expires	PermissionExpiration	
+expires PermissionExpiration
 Determines time when the permission expires.
 
-granted	boolean	
+granted boolean
 A convenience boolean that indicates if the permission is granted.
 
-status	PermissionStatus	
+status PermissionStatus
 Determines the status of the permission.
 
 Enums
@@ -771,7 +768,7 @@ Permissions
 Android
 The following permissions are added automatically through the library's AndroidManifest.xml.
 
-Android Permission	Description
+Android Permission Description
 CAMERA
 
 Required to be able to access the camera device.
@@ -787,7 +784,7 @@ Allows an application to write to external storage.
 iOS
 The following usage description keys are used by the APIs in this library.
 
-Info.plist Key	Description
+Info.plist Key Description
 NSMicrophoneUsageDescription
 
 A message that tells the user why the app is requesting access to the device’s microphone.

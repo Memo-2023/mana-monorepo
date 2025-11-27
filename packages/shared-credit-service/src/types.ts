@@ -150,5 +150,5 @@ export const DEFAULT_OPERATION_PRICING: Record<string, number> = {
 	// Generic
 	AI_PROCESSING: 10,
 	EXPORT: 1,
-	IMPORT: 1
+	IMPORT: 1,
 };

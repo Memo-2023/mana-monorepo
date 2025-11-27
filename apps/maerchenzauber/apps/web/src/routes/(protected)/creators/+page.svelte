@@ -32,7 +32,8 @@
 				illustrators = data.illustrators || [];
 				// Set defaults
 				selectedAuthor = authors.find((a) => a.isDefault)?.id || authors[0]?.id || null;
-				selectedIllustrator = illustrators.find((i) => i.isDefault)?.id || illustrators[0]?.id || null;
+				selectedIllustrator =
+					illustrators.find((i) => i.isDefault)?.id || illustrators[0]?.id || null;
 			}
 		} catch (err) {
 			console.error('[Creators] Failed to fetch:', err);
@@ -44,29 +45,29 @@
 					type: 'author',
 					description: 'Zeitlose Geschichten voller Abenteuer und kindlicher Fantasie',
 					style: 'Warmherzig, fantasievoll, mit starken Kindfiguren',
-					isDefault: true
+					isDefault: true,
 				},
 				{
 					id: 'grimm',
 					name: 'Gebrüder Grimm',
 					type: 'author',
 					description: 'Klassische Märchen mit moralischen Lehren',
-					style: 'Traditionell, märchenhaft, mit klaren Botschaften'
+					style: 'Traditionell, märchenhaft, mit klaren Botschaften',
 				},
 				{
 					id: 'ende',
 					name: 'Michael Ende',
 					type: 'author',
 					description: 'Fantastische Welten und tiefgründige Geschichten',
-					style: 'Magisch, philosophisch, reich an Symbolik'
+					style: 'Magisch, philosophisch, reich an Symbolik',
 				},
 				{
 					id: 'preussler',
 					name: 'Otfried Preußler',
 					type: 'author',
 					description: 'Spannende Abenteuer mit liebenswerten Figuren',
-					style: 'Humorvoll, spannend, kindgerecht'
-				}
+					style: 'Humorvoll, spannend, kindgerecht',
+				},
 			];
 			illustrators = [
 				{
@@ -75,29 +76,29 @@
 					type: 'illustrator',
 					description: 'Lebendige, farbenfrohe Illustrationen',
 					style: 'Bunt, expressiv, animationsartig',
-					isDefault: true
+					isDefault: true,
 				},
 				{
 					id: 'watercolor',
 					name: 'Aquarell',
 					type: 'illustrator',
 					description: 'Sanfte, verträumte Wasserfarben-Optik',
-					style: 'Weich, malerisch, romantisch'
+					style: 'Weich, malerisch, romantisch',
 				},
 				{
 					id: 'cartoon',
 					name: 'Comic Style',
 					type: 'illustrator',
 					description: 'Lustige, übertriebene Charaktere',
-					style: 'Dynamisch, humorvoll, ausdrucksstark'
+					style: 'Dynamisch, humorvoll, ausdrucksstark',
 				},
 				{
 					id: 'storybook',
 					name: 'Klassisch',
 					type: 'illustrator',
 					description: 'Traditionelle Kinderbuch-Illustrationen',
-					style: 'Detailliert, nostalgisch, handgezeichnet'
-				}
+					style: 'Detailliert, nostalgisch, handgezeichnet',
+				},
 			];
 			selectedAuthor = 'astrid';
 			selectedIllustrator = 'disney';
@@ -115,7 +116,7 @@
 		try {
 			await dataService.updateSettings({
 				defaultAuthor: selectedAuthor,
-				defaultIllustrator: selectedIllustrator
+				defaultIllustrator: selectedIllustrator,
 			});
 			toastStore.success('Auswahl gespeichert!');
 		} catch (err) {
@@ -150,14 +151,17 @@
 			class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
 		>
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M10 19l-7-7m0 0l7-7m-7 7h18"
+				/>
 			</svg>
 		</a>
 		<div>
 			<h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Kreative wählen</h1>
-			<p class="text-sm text-gray-500 dark:text-gray-400">
-				Wähle den Stil für deine Geschichten
-			</p>
+			<p class="text-sm text-gray-500 dark:text-gray-400">Wähle den Stil für deine Geschichten</p>
 		</div>
 	</div>
 
@@ -165,30 +169,58 @@
 	<div class="flex gap-2">
 		<button
 			onclick={() => (activeTab = 'authors')}
-			class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {activeTab === 'authors' ? 'bg-gray-800 text-white dark:bg-white dark:text-gray-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}"
+			class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {activeTab ===
+			'authors'
+				? 'bg-gray-800 text-white dark:bg-white dark:text-gray-800'
+				: 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}"
 		>
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+				/>
 			</svg>
 			Autoren
 		</button>
 		<button
 			onclick={() => (activeTab = 'illustrators')}
-			class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {activeTab === 'illustrators' ? 'bg-gray-800 text-white dark:bg-white dark:text-gray-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}"
+			class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {activeTab ===
+			'illustrators'
+				? 'bg-gray-800 text-white dark:bg-white dark:text-gray-800'
+				: 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}"
 		>
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+				/>
 			</svg>
 			Illustratoren
 		</button>
 	</div>
 
 	<!-- Info Box -->
-	<div class="rounded-2xl bg-gradient-to-r from-pink-50 to-purple-50 p-4 dark:from-pink-900/20 dark:to-purple-900/20">
+	<div
+		class="rounded-2xl bg-gradient-to-r from-pink-50 to-purple-50 p-4 dark:from-pink-900/20 dark:to-purple-900/20"
+	>
 		<div class="flex items-start gap-3">
 			<div class="rounded-full bg-pink-100 p-2 dark:bg-pink-900/30">
-				<svg class="h-5 w-5 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+				<svg
+					class="h-5 w-5 text-pink-600 dark:text-pink-400"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+					/>
 				</svg>
 			</div>
 			<div>
@@ -222,14 +254,27 @@
 							selectedIllustrator = creator.id;
 						}
 					}}
-					class="group relative overflow-hidden rounded-2xl border-2 p-4 text-left transition-all {activeSelection === creator.id ? 'border-pink-500 bg-pink-50 dark:border-pink-400 dark:bg-pink-900/20' : 'border-transparent bg-white shadow-md hover:shadow-lg dark:bg-gray-800'}"
+					class="group relative overflow-hidden rounded-2xl border-2 p-4 text-left transition-all {activeSelection ===
+					creator.id
+						? 'border-pink-500 bg-pink-50 dark:border-pink-400 dark:bg-pink-900/20'
+						: 'border-transparent bg-white shadow-md hover:shadow-lg dark:bg-gray-800'}"
 				>
 					<!-- Selection indicator -->
 					{#if activeSelection === creator.id}
 						<div class="absolute right-3 top-3">
 							<div class="flex h-6 w-6 items-center justify-center rounded-full bg-pink-500">
-								<svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+								<svg
+									class="h-4 w-4 text-white"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M5 13l4 4L19 7"
+									/>
 								</svg>
 							</div>
 						</div>
@@ -237,7 +282,9 @@
 
 					<div class="flex items-start gap-4">
 						<!-- Avatar -->
-						<div class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-400 to-purple-500 text-lg font-bold text-white">
+						<div
+							class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-400 to-purple-500 text-lg font-bold text-white"
+						>
 							{getCreatorInitials(creator.name)}
 						</div>
 
@@ -250,7 +297,8 @@
 								{creator.description}
 							</p>
 							<p class="mt-2 text-xs text-gray-500 dark:text-gray-500">
-								<span class="font-medium">Stil:</span> {creator.style}
+								<span class="font-medium">Stil:</span>
+								{creator.style}
 							</p>
 						</div>
 					</div>

@@ -1,25 +1,25 @@
 ---
-title: "How Bright Social Scaled Content Creation by 500%"
-slug: "bright-social-agency"
-description: "Learn how Bright Social, a digital marketing agency, used Picture AI to scale from 200 to 1,000+ social media posts per month while reducing costs."
+title: 'How Bright Social Scaled Content Creation by 500%'
+slug: 'bright-social-agency'
+description: 'Learn how Bright Social, a digital marketing agency, used Picture AI to scale from 200 to 1,000+ social media posts per month while reducing costs.'
 company:
-  name: "Bright Social"
-  logo: "/case-studies/bright-social-logo.png"
-  website: "https://brightsocial.example.com"
-  industry: "Marketing Agency"
-  size: "small"
-  location: "London, UK"
+  name: 'Bright Social'
+  logo: '/case-studies/bright-social-logo.png'
+  website: 'https://brightsocial.example.com'
+  industry: 'Marketing Agency'
+  size: 'small'
+  location: 'London, UK'
 contact:
-  name: "James Chen"
-  role: "Founder & CEO"
-  avatar: "/case-studies/james-chen.jpg"
+  name: 'James Chen'
+  role: 'Founder & CEO'
+  avatar: '/case-studies/james-chen.jpg'
   quote: "Picture AI lets us compete with agencies 10x our size. We're delivering enterprise-level content at startup speed."
-coverImage: "/case-studies/bright-social-hero.jpg"
-category: "marketing"
-tags: ["social-media", "content-creation", "marketing-agency", "scale"]
+coverImage: '/case-studies/bright-social-hero.jpg'
+category: 'marketing'
+tags: ['social-media', 'content-creation', 'marketing-agency', 'scale']
 featured: true
 trending: false
-language: "en"
+language: 'en'
 challenge: |
   Bright Social manages social media for 25 clients across various industries. Each client needed 30-40 unique posts per month, requiring 750-1,000 total posts. With only 4 designers on staff, creating original imagery was impossible. Stock photos looked generic and hurt engagement rates. Hiring more designers would make services unprofitable.
 solution: |
@@ -29,58 +29,58 @@ implementation: |
 results: |
   In 6 months, Bright Social scaled from 200 to 1,000+ posts per month without hiring additional designers. Client engagement rates increased by 67% compared to stock photos. The agency took on 10 new clients with the same team size and increased revenue by 85% while maintaining 70% profit margins.
 metrics:
-  - label: "Content Volume"
-    value: "5x"
-    description: "From 200 to 1,000+ posts per month"
-    icon: "📊"
-  - label: "Engagement Rate"
-    value: "+67%"
-    description: "Custom AI visuals vs stock photos"
-    icon: "❤️"
-  - label: "Revenue Growth"
-    value: "+85%"
-    description: "10 new clients, same team size"
-    icon: "💰"
-  - label: "Designer Time Saved"
-    value: "120 hours/month"
-    description: "Redirected to strategy and planning"
-    icon: "⏱️"
+  - label: 'Content Volume'
+    value: '5x'
+    description: 'From 200 to 1,000+ posts per month'
+    icon: '📊'
+  - label: 'Engagement Rate'
+    value: '+67%'
+    description: 'Custom AI visuals vs stock photos'
+    icon: '❤️'
+  - label: 'Revenue Growth'
+    value: '+85%'
+    description: '10 new clients, same team size'
+    icon: '💰'
+  - label: 'Designer Time Saved'
+    value: '120 hours/month'
+    description: 'Redirected to strategy and planning'
+    icon: '⏱️'
 featuresUsed: []
-modelsUsed: ["flux-schnell", "ideogram-v3-turbo", "imagen-4-fast"]
+modelsUsed: ['flux-schnell', 'ideogram-v3-turbo', 'imagen-4-fast']
 useCases: []
 exampleImages:
-  - url: "/case-studies/bright-social-1.jpg"
-    caption: "Instagram post for tech client"
-    prompt: "Modern minimalist tech illustration, smartphone with abstract data visualization, blue and purple gradient"
-  - url: "/case-studies/bright-social-2.jpg"
-    caption: "LinkedIn post with text"
+  - url: '/case-studies/bright-social-1.jpg'
+    caption: 'Instagram post for tech client'
+    prompt: 'Modern minimalist tech illustration, smartphone with abstract data visualization, blue and purple gradient'
+  - url: '/case-studies/bright-social-2.jpg'
+    caption: 'LinkedIn post with text'
     prompt: "Professional business graphic with text 'Top 5 Marketing Trends 2025', modern corporate style, clean typography"
-  - url: "/case-studies/bright-social-3.jpg"
-    caption: "Facebook ad for restaurant"
+  - url: '/case-studies/bright-social-3.jpg'
+    caption: 'Facebook ad for restaurant'
 keyTakeaways:
-  - "AI democratizes content creation - account managers can now do what only designers could before"
-  - "Prompt libraries are essential for consistency at scale"
-  - "Custom AI visuals outperform stock photos in engagement"
-  - "Free up senior talent for strategy by automating production"
-  - "ROI improves when AI handles volume, humans handle strategy"
+  - 'AI democratizes content creation - account managers can now do what only designers could before'
+  - 'Prompt libraries are essential for consistency at scale'
+  - 'Custom AI visuals outperform stock photos in engagement'
+  - 'Free up senior talent for strategy by automating production'
+  - 'ROI improves when AI handles volume, humans handle strategy'
 testimonial:
   quote: "Before Picture AI, we were turning down clients because we couldn't scale production. Now we're taking on bigger clients and delivering better results with the same team. It's completely changed our business model."
-  author: "James Chen"
-  role: "Founder & CEO, Bright Social"
+  author: 'James Chen'
+  role: 'Founder & CEO, Bright Social'
 technicalDetails:
-  integrations: ["Canva", "Buffer", "Monday.com"]
-  workflow: "Account managers generate images in Picture, add branding in Canva, schedule via Buffer. Monday.com tracks all content status."
+  integrations: ['Canva', 'Buffer', 'Monday.com']
+  workflow: 'Account managers generate images in Picture, add branding in Canva, schedule via Buffer. Monday.com tracks all content status.'
   team:
     size: 8
-    roles: ["4 Account Managers", "2 Designers", "1 Strategist", "1 CEO"]
-relatedCaseStudies: ["luxe-fashion-ecommerce"]
+    roles: ['4 Account Managers', '2 Designers', '1 Strategist', '1 CEO']
+relatedCaseStudies: ['luxe-fashion-ecommerce']
 relatedTutorials: []
 relatedFeatures: []
 seoKeywords:
-  - "agency case study"
-  - "social media content creation"
-  - "scale marketing agency"
-  - "AI for agencies"
+  - 'agency case study'
+  - 'social media content creation'
+  - 'scale marketing agency'
+  - 'AI for agencies'
 publishDate: 2025-01-12T00:00:00.000Z
 lastUpdated: 2025-01-12T00:00:00.000Z
 views: 1523
@@ -96,11 +96,13 @@ Founded in 2022, the boutique marketing agency had built a reputation for creati
 ### The Math Didn't Add Up
 
 Each client contract included:
+
 - 30-40 social media posts per month
 - All with unique, on-brand imagery
 - Total: **750-1,000 posts per month**
 
 With 4 designers on staff, that meant:
+
 - **~60 posts per designer per month**
 - **~3 posts per designer per day**
 - Plus strategy meetings, revisions, and other work
@@ -128,6 +130,7 @@ In March 2024, James discovered Picture AI and ran a 2-week experiment with one 
 **Models Used**: FLUX Schnell (speed) + Ideogram V3 Turbo (text)
 
 **Results after 2 weeks**:
+
 - ✅ 40 posts created (100% target met)
 - ✅ 3 hours of designer time (vs 20 hours previously)
 - ✅ 23% higher engagement than previous month
@@ -140,22 +143,26 @@ In March 2024, James discovered Picture AI and ran a 2-week experiment with one 
 After the successful pilot, Bright Social rolled out Picture AI agency-wide:
 
 **1. Content Generation Playbook Created**
+
 - 50+ prompt templates by industry (tech, hospitality, retail, etc.)
 - 30+ templates by content type (tips, quotes, promotions, etc.)
 - Brand guideline prompts for each client
 
 **2. Account Managers Trained**
+
 - 4-hour workshop on AI image generation
 - Practice generating 50 images each
 - Certification on brand consistency
 
 **3. Designer Role Evolved**
+
 - From production → strategy & quality control
 - Create prompt templates
 - Review & approve AI-generated images
 - Handle complex, high-visibility projects
 
 **4. Production Pipeline Optimized**
+
 ```
 Account Manager generates 3-5 options →
 Self-select best option →
@@ -172,12 +179,14 @@ Schedule in Buffer
 **Goal**: Prove the concept across different client sizes
 
 Results:
+
 - Generated 350 posts (target: 300)
 - Designer hours: 12 (vs 60 previously)
 - Client satisfaction: 9.3/10
 - Engagement rates: +34% average
 
 Key learnings:
+
 - FLUX Schnell perfect for most social posts
 - Ideogram V3 Turbo essential for text-heavy graphics
 - Prompt templates crucial for consistency
@@ -189,17 +198,20 @@ Key learnings:
 **Focus**: Template refinement and team training
 
 Results:
+
 - Generated 580 posts
 - Designer hours: 15
 - Zero client complaints about AI usage
 - Team confidence growing
 
 Challenges:
+
 - Some prompts needed 3-4 iterations
 - Brand consistency required better templates
 - Image quality varied by model choice
 
 Solutions:
+
 - Created industry-specific prompt libraries
 - Documented "if this, use that model" guide
 - Weekly team reviews of best/worst examples
@@ -209,6 +221,7 @@ Solutions:
 **All 25 clients** on the new workflow
 
 Results:
+
 - Generated 1,050 posts (goal: 1,000)
 - Designer hours: 25 total (vs 240 previously)
 - Client NPS score: +45
@@ -218,12 +231,12 @@ Results:
 
 ### Content Production Metrics
 
-| Metric | Before Picture AI | After Picture AI | Change |
-|--------|------------------|------------------|--------|
-| Posts per Month | 200 | 1,050 | **+425%** |
-| Designer Hours | 240 | 25 | **-90%** |
-| Cost per Post | £45 | £3 | **-93%** |
-| Turnaround Time | 2-3 days | 30 minutes | **-99%** |
+| Metric          | Before Picture AI | After Picture AI | Change    |
+| --------------- | ----------------- | ---------------- | --------- |
+| Posts per Month | 200               | 1,050            | **+425%** |
+| Designer Hours  | 240               | 25               | **-90%**  |
+| Cost per Post   | £45               | £3               | **-93%**  |
+| Turnaround Time | 2-3 days          | 30 minutes       | **-99%**  |
 
 ### Quality & Engagement
 
@@ -247,11 +260,13 @@ The efficiency gains translated directly to business growth:
 ### Cost Analysis
 
 **Monthly costs before Picture AI**:
+
 - 4 designers: £15,000/month
 - Stock photo licenses: £500/month
 - **Total: £15,500/month**
 
 **Monthly costs after Picture AI**:
+
 - 2 designers: £7,500/month (2 moved to strategy roles)
 - Picture AI Pro: £199/month
 - Canva Business: £100/month
@@ -266,16 +281,19 @@ One of the keys to their success was systematic prompt library development. Here
 ### Industry-Specific Templates
 
 **Tech Companies**:
+
 - "Modern tech illustration, [topic], minimalist style, blue/purple gradients"
 - "Abstract data visualization representing [concept], clean, professional"
 - "Isometric tech workspace showing [feature], colorful, engaging"
 
 **Hospitality**:
+
 - "Appetizing food photography, [dish], natural lighting, rustic presentation"
 - "Cozy restaurant interior, warm atmosphere, inviting, [style] decor"
 - "Happy diners enjoying [experience], candid, lifestyle photography"
 
 **Retail**:
+
 - "Product flat lay, [items], clean white background, professional"
 - "Shopping lifestyle, [demographic] holding bags, happy, urban setting"
 - "Product in use, natural lifestyle shot, [setting], aspirational"
@@ -283,14 +301,17 @@ One of the keys to their success was systematic prompt library development. Here
 ### Content Type Templates
 
 **Tips & How-To**:
+
 - "Infographic-style illustration for '[tip]', clear, educational, [brand colors]"
 - "Step-by-step visual guide, simple icons, clean layout, [topic]"
 
 **Quotes**:
+
 - "Inspirational background for text overlay, [mood], [brand style]"
 - "Abstract gradient background, [colors], smooth, professional"
 
 **Promotions**:
+
 - "Eye-catching sale graphic, vibrant, energetic, [theme]"
 - "Limited time offer visual, urgent, attention-grabbing, [style]"
 
@@ -407,6 +428,7 @@ Agencies that adapt will thrive. Those that don't will struggle to compete.
 Ready to scale your agency like Bright Social?
 
 **Picture AI Agency Benefits**:
+
 - ✅ **Unlimited generations** on Pro plan
 - ✅ **Team collaboration** features
 - ✅ **Brand consistency** tools
@@ -417,4 +439,4 @@ Ready to scale your agency like Bright Social?
 
 ---
 
-*Questions about Picture AI for your agency? [Contact our team](/contact) for a personalized consultation.*
+_Questions about Picture AI for your agency? [Contact our team](/contact) for a personalized consultation._

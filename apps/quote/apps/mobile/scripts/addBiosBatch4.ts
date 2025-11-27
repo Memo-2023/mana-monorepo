@@ -8,27 +8,27 @@ import * as path from 'path';
 import { Author } from '../services/contentLoader';
 
 function loadAuthors(lang: 'de' | 'en'): Author[] {
-  const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const match = content.match(/export const authors[A-Z]{2}: Author\[\] = (\[[\s\S]*\]);/);
-  return eval(match[1]) as Author[];
+	const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
+	const content = fs.readFileSync(filePath, 'utf-8');
+	const match = content.match(/export const authors[A-Z]{2}: Author\[\] = (\[[\s\S]*\]);/);
+	return eval(match[1]) as Author[];
 }
 
 function writeAuthors(authors: Author[], lang: 'de' | 'en'): void {
-  const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
-  const backupPath = filePath.replace('.ts', `.backup-${Date.now()}.ts`);
-  fs.copyFileSync(filePath, backupPath);
-  const authorsJson = JSON.stringify(authors, null, 2);
-  const tsContent = `import { Author } from '../../contentLoader';
+	const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
+	const backupPath = filePath.replace('.ts', `.backup-${Date.now()}.ts`);
+	fs.copyFileSync(filePath, backupPath);
+	const authorsJson = JSON.stringify(authors, null, 2);
+	const tsContent = `import { Author } from '../../contentLoader';
 
 export const authors${lang.toUpperCase()}: Author[] = ${authorsJson};
 `;
-  fs.writeFileSync(filePath, tsContent, 'utf-8');
-  console.log(`✅ ${lang}.ts aktualisiert`);
+	fs.writeFileSync(filePath, tsContent, 'utf-8');
+	console.log(`✅ ${lang}.ts aktualisiert`);
 }
 
 const batch4Bios: Record<string, string> = {
-  'johannes-paul-ii': `# Johannes Paul II.
+	'johannes-paul-ii': `# Johannes Paul II.
 *18. Mai 1920 - 2. April 2005*
 
 ## Kurzbiografie
@@ -266,7 +266,7 @@ Die Figur Johannes Paul II. zeigt: Auch Heilige sind Menschen. Größe und Versa
 
 Er prägte das Papsttum neu: Reisend, medial, charismatisch. Franziskus ist anders, aber ohne Johannes Paul undenkbar.`,
 
-  'rowling-jk': `# J.K. Rowling
+	'rowling-jk': `# J.K. Rowling
 *31. Juli 1965 - heute*
 
 ## Kurzbiografie
@@ -471,7 +471,7 @@ Ihre Geschichte ist shakespearean: Armut, Erfolg, Kontroverse. Ihr Werk wird ble
 
 Rowlings größte Leistung: Sie brachte eine Generation zum Lesen. Hogwarts wurde zur zweiten Heimat für Millionen. Diese Magie ist unsterblich - egal, was auf Twitter passiert.`,
 
-  'adler-alfred': `# Alfred Adler
+	'adler-alfred': `# Alfred Adler
 *7. Februar 1870 - 28. Mai 1937*
 
 ## Kurzbiografie
@@ -678,7 +678,7 @@ Aber: Sein Einfluss ist riesig - oft unerkannt. Kognitive Therapie, humanistisch
 
 Adlers Vision: Psychologie im Dienst der Menschlichkeit. Heilung durch Gemeinschaft. Erziehung zur Demokratie. In zerrissener Zeit aktueller denn je.`,
 
-  'kästner-erich': `# Erich Kästner
+	'kästner-erich': `# Erich Kästner
 *23. Februar 1899 - 29. Juli 1974*
 
 ## Kurzbiografie
@@ -850,48 +850,48 @@ Kästners Werke leben. "Emil" wird gelesen. "Doppelte Lottchen" verfilmt. Seine 
 };
 
 async function main() {
-  console.log('📝 Batch 4: Johannes Paul II, Rowling, Adler, Kästner\n');
+	console.log('📝 Batch 4: Johannes Paul II, Rowling, Adler, Kästner\n');
 
-  const authorsDE = loadAuthors('de');
-  const authorsEN = loadAuthors('en');
+	const authorsDE = loadAuthors('de');
+	const authorsEN = loadAuthors('en');
 
-  let updated = 0;
+	let updated = 0;
 
-  const updatedDE = authorsDE.map(author => {
-    if (batch4Bios[author.id]) {
-      console.log(`✅ ${author.name} (${author.id})`);
-      updated++;
-      return {
-        ...author,
-        biography: {
-          ...author.biography,
-          long: batch4Bios[author.id]
-        }
-      };
-    }
-    return author;
-  });
+	const updatedDE = authorsDE.map((author) => {
+		if (batch4Bios[author.id]) {
+			console.log(`✅ ${author.name} (${author.id})`);
+			updated++;
+			return {
+				...author,
+				biography: {
+					...author.biography,
+					long: batch4Bios[author.id],
+				},
+			};
+		}
+		return author;
+	});
 
-  const updatedEN = authorsEN.map(author => {
-    const deAuthor = updatedDE.find(a => a.id === author.id);
-    if (deAuthor?.biography?.long && batch4Bios[author.id]) {
-      return {
-        ...author,
-        biography: {
-          ...author.biography,
-          long: deAuthor.biography.long
-        }
-      };
-    }
-    return author;
-  });
+	const updatedEN = authorsEN.map((author) => {
+		const deAuthor = updatedDE.find((a) => a.id === author.id);
+		if (deAuthor?.biography?.long && batch4Bios[author.id]) {
+			return {
+				...author,
+				biography: {
+					...author.biography,
+					long: deAuthor.biography.long,
+				},
+			};
+		}
+		return author;
+	});
 
-  console.log(`\n📊 ${updated} Biografien hinzugefügt\n`);
+	console.log(`\n📊 ${updated} Biografien hinzugefügt\n`);
 
-  writeAuthors(updatedDE, 'de');
-  writeAuthors(updatedEN, 'en');
+	writeAuthors(updatedDE, 'de');
+	writeAuthors(updatedEN, 'en');
 
-  console.log('\n✨ Batch 4 fertig!\n');
+	console.log('\n✨ Batch 4 fertig!\n');
 }
 
 main();

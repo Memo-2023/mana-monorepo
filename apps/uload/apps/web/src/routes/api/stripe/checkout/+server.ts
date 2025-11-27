@@ -10,7 +10,7 @@ function mapLocaleToStripe(locale: string): any {
 		de: 'de',
 		it: 'it',
 		fr: 'fr',
-		es: 'es'
+		es: 'es',
 	};
 	return stripeLocales[locale] || 'auto';
 }
@@ -64,15 +64,15 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
 				name: user.name || undefined,
 				metadata: {
 					pocketbase_id: user.id,
-					username: user.username || ''
-				}
+					username: user.username || '',
+				},
 			});
 
 			stripeCustomerId = customer.id;
 
 			// Save customer ID to PocketBase
 			await locals.pb.collection('users').update(user.id, {
-				stripe_customer_id: stripeCustomerId
+				stripe_customer_id: stripeCustomerId,
 			});
 		}
 
@@ -84,8 +84,8 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
 			line_items: [
 				{
 					price: priceId,
-					quantity: 1
-				}
+					quantity: 1,
+				},
 			],
 			mode,
 			allow_promotion_codes: true,
@@ -95,26 +95,27 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
 			metadata: {
 				user_id: user.id,
 				user_email: user.email,
-				price_type: priceType
+				price_type: priceType,
 			},
 			...(mode === 'subscription' && {
 				subscription_data: {
 					metadata: {
-						pocketbase_user_id: user.id
-					}
-				}
-			})
+						pocketbase_user_id: user.id,
+					},
+				},
+			}),
 		});
 
 		return json({
 			sessionId: session.id,
-			url: session.url
+			url: session.url,
 		});
 	} catch (error) {
 		console.error('Stripe checkout error:', error);
 		return json(
 			{
-				error: error instanceof Error ? error.message : 'Fehler beim Erstellen der Checkout-Session'
+				error:
+					error instanceof Error ? error.message : 'Fehler beim Erstellen der Checkout-Session',
 			},
 			{ status: 500 }
 		);

@@ -107,7 +107,7 @@
 
 <!-- Desktop Navigation -->
 <nav
-	class="sticky top-0 z-50 hidden border-b border-theme-border bg-theme-surface/80 shadow-sm backdrop-blur-xl md:block"
+	class="bg-theme-surface/80 sticky top-0 z-50 hidden border-b border-theme-border shadow-sm backdrop-blur-xl md:block"
 >
 	<div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 		<div class="flex h-16 items-center justify-between">
@@ -132,7 +132,7 @@
 			</div>
 
 			<!-- Desktop Navigation - Absolutely Centered -->
-			<div class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 xl:flex">
+			<div class="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 xl:flex">
 				<div class="flex items-center gap-6">
 					{#if user}
 						<a
@@ -289,12 +289,12 @@
 
 	<!-- Main navigation content -->
 	<div
-		class="relative z-20 flex overflow-hidden rounded-full border-2 border-theme-border/20 bg-theme-surface/95 shadow-2xl backdrop-blur-xl transition-all duration-300 before:pointer-events-none before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-t before:from-black/20 before:to-transparent"
+		class="border-theme-border/20 bg-theme-surface/95 relative z-20 flex overflow-hidden rounded-full border-2 shadow-2xl backdrop-blur-xl transition-all duration-300 before:pointer-events-none before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-t before:from-black/20 before:to-transparent"
 	>
 		<!-- Left Half: Logo -->
 		<a
 			href="/"
-			class="relative z-10 flex flex-1 items-center justify-center gap-2 px-6 py-4 transition-colors hover:bg-theme-surface-hover/50"
+			class="hover:bg-theme-surface-hover/50 relative z-10 flex flex-1 items-center justify-center gap-2 px-6 py-4 transition-colors"
 		>
 			<svg class="h-6 w-6 text-theme-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -308,12 +308,12 @@
 		</a>
 
 		<!-- Divider -->
-		<div class="relative z-10 w-px bg-theme-border/30"></div>
+		<div class="bg-theme-border/30 relative z-10 w-px"></div>
 
 		<!-- Right Half: Menu -->
 		<button
 			onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
-			class="relative z-10 flex flex-1 items-center justify-center gap-2 px-6 py-4 transition-colors hover:bg-theme-surface-hover/50"
+			class="hover:bg-theme-surface-hover/50 relative z-10 flex flex-1 items-center justify-center gap-2 px-6 py-4 transition-colors"
 			aria-label="Menu"
 			aria-expanded={mobileMenuOpen}
 		>
@@ -342,7 +342,7 @@
 <!-- Mobile Menu Backdrop -->
 {#if mobileMenuOpen}
 	<button
-		class="fixed inset-0 z-35 bg-black/40 md:hidden"
+		class="z-35 fixed inset-0 bg-black/40 md:hidden"
 		onclick={() => (mobileMenuOpen = false)}
 		onkeydown={(e) => e.key === 'Escape' && (mobileMenuOpen = false)}
 		aria-label="Close mobile menu"
@@ -353,16 +353,16 @@
 <!-- Mobile Menu - Dropdown from bottom on mobile, from top on tablet/desktop -->
 {#if mobileMenuOpen}
 	<div
-		class="animate-slide-up md:animate-slide-down fixed bottom-[80px] left-1/2 z-40 w-full max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 md:top-[65px] md:bottom-auto md:max-w-md"
+		class="animate-slide-up md:animate-slide-down fixed bottom-[80px] left-1/2 z-40 w-full max-w-[calc(100%-2rem)] -translate-x-1/2 px-4 md:bottom-auto md:top-[65px] md:max-w-md"
 	>
 		<div
-			class="flex max-h-[60vh] w-full flex-col overflow-hidden rounded-2xl border border-theme-border/30 bg-theme-surface/95 shadow-2xl backdrop-blur-xl"
+			class="border-theme-border/30 bg-theme-surface/95 flex max-h-[60vh] w-full flex-col overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl"
 		>
 			<div class="flex-1 overflow-y-auto p-3">
 				{#if user}
 					<!-- Main Navigation -->
 					<div class="pb-1">
-						<h3 class="px-3 pt-1 pb-1 text-xs font-normal text-theme-text-muted/50">Navigation</h3>
+						<h3 class="text-theme-text-muted/50 px-3 pb-1 pt-1 text-xs font-normal">Navigation</h3>
 						<a
 							href="/my/links"
 							onclick={() => (mobileMenuOpen = false)}
@@ -533,8 +533,8 @@
 					</div>
 
 					<!-- Account Section -->
-					<div class="pt-2 pb-1">
-						<h3 class="px-3 pt-1 pb-1 text-xs font-normal text-theme-text-muted/50">Account</h3>
+					<div class="pb-1 pt-2">
+						<h3 class="text-theme-text-muted/50 px-3 pb-1 pt-1 text-xs font-normal">Account</h3>
 						<a
 							href="/settings"
 							onclick={() => (mobileMenuOpen = false)}
@@ -569,7 +569,7 @@
 								Settings
 							</span>
 						</a>
-						
+
 						<a
 							href="/settings/team"
 							onclick={() => (mobileMenuOpen = false)}
@@ -601,8 +601,8 @@
 					</div>
 
 					<!-- Settings Section -->
-					<div class="border-t border-theme-border/30 pt-2 pb-1">
-						<h3 class="px-3 pt-1 pb-1 text-xs font-normal text-theme-text-muted/50">Preferences</h3>
+					<div class="border-theme-border/30 border-t pb-1 pt-2">
+						<h3 class="text-theme-text-muted/50 px-3 pb-1 pt-1 text-xs font-normal">Preferences</h3>
 						<div
 							class="group flex items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-theme-surface-hover"
 						>
@@ -645,7 +645,7 @@
 				{:else}
 					<!-- Guest Navigation -->
 					<div class="pb-1">
-						<h3 class="px-3 pt-1 pb-1 text-xs font-normal text-theme-text-muted/50">Navigation</h3>
+						<h3 class="text-theme-text-muted/50 px-3 pb-1 pt-1 text-xs font-normal">Navigation</h3>
 						<a
 							href="/features"
 							onclick={() => (mobileMenuOpen = false)}
@@ -733,8 +733,8 @@
 					</div>
 
 					<!-- Settings Section -->
-					<div class="border-t border-theme-border/30 pt-2 pb-1">
-						<h3 class="px-3 pt-1 pb-1 text-xs font-normal text-theme-text-muted/50">Preferences</h3>
+					<div class="border-theme-border/30 border-t pb-1 pt-2">
+						<h3 class="text-theme-text-muted/50 px-3 pb-1 pt-1 text-xs font-normal">Preferences</h3>
 						<div
 							class="group flex items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-theme-surface-hover"
 						>
@@ -778,7 +778,7 @@
 			</div>
 
 			<!-- Sticky Buttons at bottom -->
-			<div class="space-y-2 border-t border-theme-border/30 p-3">
+			<div class="border-theme-border/30 space-y-2 border-t p-3">
 				{#if !user}
 					<a
 						href="/login"

@@ -75,7 +75,7 @@ function base32Encode(buffer: Buffer): string {
 // Secret generieren
 export function generateSecret(length: number = 32): string {
 	const buffer = Buffer.alloc(length);
-	
+
 	// Sichere Zufallsbytes generieren
 	if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
 		// Browser
@@ -95,9 +95,14 @@ function getCurrentTimeSlot(period: number = 30): number {
 }
 
 // HMAC-basierte OTP generieren
-function generateHOTP(secret: string, counter: number, digits: number = 6, algorithm: string = 'sha1'): string {
+function generateHOTP(
+	secret: string,
+	counter: number,
+	digits: number = 6,
+	algorithm: string = 'sha1'
+): string {
 	const key = base32Decode(secret);
-	
+
 	// Counter als 8-Byte Big-Endian Buffer
 	const counterBuffer = Buffer.alloc(8);
 	counterBuffer.writeUInt32BE(Math.floor(counter / 0x100000000), 0);
@@ -110,7 +115,7 @@ function generateHOTP(secret: string, counter: number, digits: number = 6, algor
 
 	// Dynamic truncation (RFC 4226)
 	const offset = hash[hash.length - 1] & 0x0f;
-	const code = 
+	const code =
 		((hash[offset] & 0x7f) << 24) |
 		((hash[offset + 1] & 0xff) << 16) |
 		((hash[offset + 2] & 0xff) << 8) |
@@ -123,35 +128,24 @@ function generateHOTP(secret: string, counter: number, digits: number = 6, algor
 
 // TOTP Token generieren
 export function generateTOTP(config: TOTPConfig): TOTPResult {
-	const {
-		secret,
-		digits = 6,
-		period = 30,
-		algorithm = 'sha1'
-	} = config;
+	const { secret, digits = 6, period = 30, algorithm = 'sha1' } = config;
 
 	const timeSlot = getCurrentTimeSlot(period);
 	const token = generateHOTP(secret, timeSlot, digits, algorithm);
-	
+
 	// Verbleibende Zeit bis zum nächsten Token
 	const timeRemaining = period - (Math.floor(Date.now() / 1000) % period);
 
 	return {
 		token,
 		timeRemaining,
-		window: timeSlot
+		window: timeSlot,
 	};
 }
 
 // TOTP Token verifizieren
 export function verifyTOTP(token: string, config: TOTPConfig): boolean {
-	const {
-		secret,
-		window = 1,
-		digits = 6,
-		period = 30,
-		algorithm = 'sha1'
-	} = config;
+	const { secret, window = 1, digits = 6, period = 30, algorithm = 'sha1' } = config;
 
 	const currentTimeSlot = getCurrentTimeSlot(period);
 
@@ -159,7 +153,7 @@ export function verifyTOTP(token: string, config: TOTPConfig): boolean {
 	for (let i = -window; i <= window; i++) {
 		const timeSlot = currentTimeSlot + i;
 		const expectedToken = generateHOTP(secret, timeSlot, digits, algorithm);
-		
+
 		if (constantTimeEquals(token, expectedToken)) {
 			return true;
 		}
@@ -196,7 +190,7 @@ export function generateQRCodeURL(
 		issuer,
 		algorithm,
 		digits: digits.toString(),
-		period: period.toString()
+		period: period.toString(),
 	});
 
 	return `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(accountName)}?${params}`;
@@ -205,7 +199,7 @@ export function generateQRCodeURL(
 // Backup Codes generieren
 export function generateBackupCodes(count: number = 10): string[] {
 	const codes: string[] = [];
-	
+
 	for (let i = 0; i < count; i++) {
 		// 8-stellige Backup-Codes generieren
 		let code = '';
@@ -220,10 +214,13 @@ export function generateBackupCodes(count: number = 10): string[] {
 }
 
 // Backup Code validieren und als verbraucht markieren
-export function validateBackupCode(code: string, availableCodes: string[]): { isValid: boolean; remainingCodes: string[] } {
+export function validateBackupCode(
+	code: string,
+	availableCodes: string[]
+): { isValid: boolean; remainingCodes: string[] } {
 	const normalizedCode = code.replace(/[-\s]/g, '');
-	const codeIndex = availableCodes.findIndex(availableCode => 
-		availableCode.replace(/[-\s]/g, '') === normalizedCode
+	const codeIndex = availableCodes.findIndex(
+		(availableCode) => availableCode.replace(/[-\s]/g, '') === normalizedCode
 	);
 
 	if (codeIndex === -1) {
@@ -262,13 +259,13 @@ export function encryptSecret(secret: string, password: string): string {
 	const encoder = new TextEncoder();
 	const data = encoder.encode(secret);
 	const key = encoder.encode(password.padEnd(32, '0').slice(0, 32));
-	
+
 	// XOR-basierte "Verschlüsselung" (NUR FÜR DEMO!)
 	const encrypted = new Uint8Array(data.length);
 	for (let i = 0; i < data.length; i++) {
 		encrypted[i] = data[i] ^ key[i % key.length];
 	}
-	
+
 	return Buffer.from(encrypted).toString('base64');
 }
 
@@ -277,11 +274,11 @@ export function decryptSecret(encryptedSecret: string, password: string): string
 	const encoder = new TextEncoder();
 	const data = Buffer.from(encryptedSecret, 'base64');
 	const key = encoder.encode(password.padEnd(32, '0').slice(0, 32));
-	
+
 	const decrypted = new Uint8Array(data.length);
 	for (let i = 0; i < data.length; i++) {
 		decrypted[i] = data[i] ^ key[i % key.length];
 	}
-	
+
 	return new TextDecoder().decode(decrypted);
 }

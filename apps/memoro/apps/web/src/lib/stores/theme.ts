@@ -16,10 +16,10 @@ export type { ThemeMode, ThemeVariant, EffectiveMode } from '@manacore/shared-th
  * - All 4 theme variants available
  */
 export const theme = createThemeStore({
-  appId: 'memoro',
-  defaultVariant: 'lume',
-  primaryColor: {
-    light: '47 95% 58%', // Gold #f8d62b
-    dark: '47 95% 58%',
-  },
+	appId: 'memoro',
+	defaultVariant: 'lume',
+	primaryColor: {
+		light: '47 95% 58%', // Gold #f8d62b
+		dark: '47 95% 58%',
+	},
 });

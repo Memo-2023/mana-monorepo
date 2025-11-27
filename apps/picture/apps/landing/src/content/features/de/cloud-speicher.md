@@ -1,25 +1,25 @@
 ---
-title: "Unbegrenzter Cloud-Speicher"
-description: "Alle deine KI-generierten Bilder werden automatisch gespeichert und über alle Geräte synchronisiert. Greife überall und jederzeit auf deine Kreationen zu."
-icon: "☁️"
-coverImage: "/features/cloud-storage.jpg"
-category: "organization"
+title: 'Unbegrenzter Cloud-Speicher'
+description: 'Alle deine KI-generierten Bilder werden automatisch gespeichert und über alle Geräte synchronisiert. Greife überall und jederzeit auf deine Kreationen zu.'
+icon: '☁️'
+coverImage: '/features/cloud-storage.jpg'
+category: 'organization'
 featured: true
 order: 3
 available: true
 comingSoon: false
-language: "de"
+language: 'de'
 benefits:
-  - "Unbegrenzter Speicher für alle Bilder"
-  - "Automatische Synchronisation über Geräte"
-  - "Schnelle CDN-Bereitstellung weltweit"
-  - "Sichere Verschlüsselung im Ruhezustand"
-  - "Organisierte Galerien und Sammlungen"
+  - 'Unbegrenzter Speicher für alle Bilder'
+  - 'Automatische Synchronisation über Geräte'
+  - 'Schnelle CDN-Bereitstellung weltweit'
+  - 'Sichere Verschlüsselung im Ruhezustand'
+  - 'Organisierte Galerien und Sammlungen'
 useCases:
-  - "Zugriff von jedem Gerät"
-  - "Team-Zusammenarbeit"
-  - "Portfolio-Verwaltung"
-  - "Backup und Archivierung"
+  - 'Zugriff von jedem Gerät'
+  - 'Team-Zusammenarbeit'
+  - 'Portfolio-Verwaltung'
+  - 'Backup und Archivierung'
 ---
 
 ## Keine Sorgen mehr um Speicherplatz
@@ -40,6 +40,7 @@ Deine Bilder sind sofort verfügbar auf:
 ### Automatische Sammlungen
 
 Bilder werden automatisch organisiert nach:
+
 - Generierungsdatum
 - Verwendetem Modell
 - Prompt-Schlüsselwörtern

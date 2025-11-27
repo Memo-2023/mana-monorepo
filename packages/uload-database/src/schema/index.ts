@@ -8,11 +8,11 @@ export { tags, linkTags, type Tag, type NewTag, type LinkTag, type NewLinkTag } 
 
 // Relations
 export {
-  usersRelations,
-  linksRelations,
-  clicksRelations,
-  tagsRelations,
-  linkTagsRelations,
-  accountsRelations,
-  workspacesRelations,
+	usersRelations,
+	linksRelations,
+	clicksRelations,
+	tagsRelations,
+	linkTagsRelations,
+	accountsRelations,
+	workspacesRelations,
 } from './relations.js';

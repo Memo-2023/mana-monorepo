@@ -1,11 +1,11 @@
 export interface AuthUser {
-  id: string;
-  email: string;
-  name?: string;
+	id: string;
+	email: string;
+	name?: string;
 }
 
 export interface AuthTokens {
-  accessToken: string;
-  refreshToken?: string;
-  expiresIn?: number;
+	accessToken: string;
+	refreshToken?: string;
+	expiresIn?: number;
 }

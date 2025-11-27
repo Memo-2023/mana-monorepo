@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { themeVariant, themeMode, setThemeVariant, setThemeMode, currentTheme } from '$lib/stores/theme';
+	import {
+		themeVariant,
+		themeMode,
+		setThemeVariant,
+		setThemeMode,
+		currentTheme,
+	} from '$lib/stores/theme';
 	import { themes, type ThemeVariant } from '@picture/design-tokens';
 	import type { ThemeMode } from '$lib/stores/theme';
 
@@ -18,13 +24,13 @@
 	const themeOptions: ThemeOption[] = [
 		{ value: 'default', label: 'Indigo', icon: '🔵' },
 		{ value: 'sunset', label: 'Sunset', icon: '🌅' },
-		{ value: 'ocean', label: 'Ocean', icon: '🌊' }
+		{ value: 'ocean', label: 'Ocean', icon: '🌊' },
 	];
 
 	const modeOptions: ModeOption[] = [
 		{ value: 'system', label: 'System', icon: '💻' },
 		{ value: 'light', label: 'Hell', icon: '☀️' },
-		{ value: 'dark', label: 'Dunkel', icon: '🌙' }
+		{ value: 'dark', label: 'Dunkel', icon: '🌙' },
 	];
 </script>
 

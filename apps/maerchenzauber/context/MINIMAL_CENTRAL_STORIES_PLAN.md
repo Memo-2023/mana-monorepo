@@ -1,6 +1,7 @@
 # Minimale Umsetzung: Zentrale Stories für Alle
 
 ## Übersicht
+
 Schnellste Lösung um zentral erstellte Stories allen Nutzern zur Verfügung zu stellen.
 
 ---
@@ -8,6 +9,7 @@ Schnellste Lösung um zentral erstellte Stories allen Nutzern zur Verfügung zu 
 ## Option A: Super Minimal (1-2 Tage)
 
 ### Datenbank-Änderung (NUR 2 Spalten!)
+
 ```sql
 -- Stories Tabelle erweitern
 ALTER TABLE stories ADD COLUMN is_central BOOLEAN DEFAULT FALSE;
@@ -15,6 +17,7 @@ ALTER TABLE stories ADD COLUMN central_order INTEGER DEFAULT 0;
 ```
 
 ### RLS Policy Update
+
 ```sql
 -- Bestehende Policy ersetzen
 DROP POLICY IF EXISTS "Users can view their own stories" ON stories;
@@ -22,12 +25,13 @@ DROP POLICY IF EXISTS "Users can view their own stories" ON stories;
 -- Neue Policy: Eigene Stories + Zentrale Stories
 CREATE POLICY "Users can view own and central stories" ON stories
     FOR SELECT USING (
-        user_id = auth.uid()::text 
+        user_id = auth.uid()::text
         OR is_central = true
     );
 ```
 
 ### Backend: Character Controller anpassen
+
 ```typescript
 // apps/backend/src/story/story.service.ts
 async getStories(userId: string) {
@@ -41,6 +45,7 @@ async getStories(userId: string) {
 ```
 
 ### Mobile App: Story List
+
 ```typescript
 // apps/mobile/app/stories.tsx
 // Zentrale Stories mit Badge markieren
@@ -50,12 +55,13 @@ async getStories(userId: string) {
 ```
 
 ### Admin-Tool (Quick & Dirty)
+
 ```sql
 -- Stories zentral machen (manuell via Supabase Dashboard)
-UPDATE stories 
-SET is_central = true, 
+UPDATE stories
+SET is_central = true,
     central_order = 1,
-    user_id = 'SYSTEM' 
+    user_id = 'SYSTEM'
 WHERE id = 'story-uuid-hier';
 ```
 
@@ -64,6 +70,7 @@ WHERE id = 'story-uuid-hier';
 ## Option B: Etwas sauberer (3-4 Tage)
 
 ### Datenbank
+
 ```sql
 -- Neue Tabelle NUR für zentrale Stories
 CREATE TABLE central_stories (
@@ -87,6 +94,7 @@ CREATE POLICY "Everyone can read central stories" ON central_stories
 ```
 
 ### Backend Service
+
 ```typescript
 // Neuer Endpoint
 @Get('central')
@@ -100,6 +108,7 @@ async getCentralStories() {
 ```
 
 ### Mobile: Separate Sektion
+
 ```typescript
 // Zwei Tabs: "Meine Stories" | "Märchenzauber Stories"
 <Tab.Navigator>
@@ -113,10 +122,11 @@ async getCentralStories() {
 ## Option C: Hybrid - Empfohlen! (2 Tage)
 
 ### Minimale Änderung mit besserem Design
+
 ```sql
 -- Stories Tabelle
-ALTER TABLE stories 
-ADD COLUMN story_type VARCHAR(20) DEFAULT 'user' 
+ALTER TABLE stories
+ADD COLUMN story_type VARCHAR(20) DEFAULT 'user'
     CHECK (story_type IN ('user', 'central', 'seasonal'));
 ADD COLUMN is_public BOOLEAN DEFAULT FALSE;
 
@@ -126,12 +136,13 @@ CREATE INDEX idx_public_stories ON stories(is_public, story_type);
 -- RLS anpassen
 CREATE POLICY "View public and own stories" ON stories
     FOR SELECT USING (
-        user_id = auth.uid()::text 
+        user_id = auth.uid()::text
         OR is_public = true
     );
 ```
 
 ### Stories erstellen (Admin Script)
+
 ```javascript
 // Admin-Script zum Story erstellen
 const createCentralStory = async () => {
@@ -150,6 +161,7 @@ const createCentralStory = async () => {
 ```
 
 ### Mobile App
+
 ```typescript
 // stories.tsx - Gruppiert anzeigen
 const groupedStories = {
@@ -166,7 +178,7 @@ const groupedStories = {
       ))}
     </Section>
   )}
-  
+
   <Section title="Meine Stories">
     {groupedStories.mine.map(story => (
       <StoryCard key={story.id} story={story} />
@@ -180,12 +192,14 @@ const groupedStories = {
 ## Deployment Steps (für alle Optionen)
 
 ### 1. Datenbank Migration
+
 ```bash
 # SQL ausführen in Supabase Dashboard
 # Oder via Migration File
 ```
 
 ### 2. Backend Update
+
 ```bash
 # Nur bei Option B/C
 npm run build
@@ -193,6 +207,7 @@ npm run deploy
 ```
 
 ### 3. Mobile App
+
 ```bash
 # Nur UI Updates
 npm run build:ios
@@ -201,6 +216,7 @@ npm run build:android
 ```
 
 ### 4. Erste zentrale Stories erstellen
+
 - Supabase Dashboard öffnen
 - Stories Tabelle
 - Insert Row
@@ -220,7 +236,7 @@ npm run build:android
 
 - ❌ Voting System
 - ❌ Collections
-- ❌ Character Sharing  
+- ❌ Character Sharing
 - ❌ Admin Dashboard
 - ❌ Automatische Kuratierung
 
@@ -236,7 +252,8 @@ npm run build:android
 6. **Test**: Mit 2-3 Test-Usern prüfen
 7. **Release**: App Update veröffentlichen
 
-**Geschätzter Aufwand**: 
+**Geschätzter Aufwand**:
+
 - Option A: 4-8 Stunden
 - Option B: 2-3 Tage
 - Option C: 1-2 Tage (Empfehlung!)

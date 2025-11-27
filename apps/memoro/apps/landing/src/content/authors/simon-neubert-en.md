@@ -1,17 +1,29 @@
 ---
-name: "Dr. Simon Neubert"
-displayName: "Dr. Simon Neubert"
+name: 'Dr. Simon Neubert'
+displayName: 'Dr. Simon Neubert'
 bio: "Data Scientist & AI Engineer at Memoro. Researches and develops the AI systems that power Memoro's intelligent conversation processing. Specialist in NLP, machine learning, and ethical AI development."
-role: "Data Scientist / AI Engineer"
-avatar: "/images/team/simon-neubert.jpg"
+role: 'Data Scientist / AI Engineer'
+avatar: '/images/team/simon-neubert.jpg'
 appearance: "Focused man in his mid-30s with short, dark blonde hair and a carefully trimmed beard. His blue eyes radiate intelligence and curiosity. He often wears a dark blue sweater over a white shirt or a simple t-shirt with interesting mathematical or scientific motifs. His thin metal-framed glasses underscore his academic look. In photos, he's often seen in front of multiple monitors with code and data visualizations, surrounded by whiteboards full of formulas and diagrams."
 social:
-  linkedin: "dr-simon-neubert"
-  github: "sneubert-ai"
-  twitter: "simon_neubert_ml"
-  googleScholar: "simon-neubert"
-expertise: ["Natural Language Processing", "Machine Learning", "Deep Learning", "Data Science", "Python", "TensorFlow", "PyTorch", "MLOps", "Ethical AI", "Speech Recognition"]
-topics: ["AI Research", "Language Models", "Data Ethics", "Explainable AI", "ML Engineering"]
+  linkedin: 'dr-simon-neubert'
+  github: 'sneubert-ai'
+  twitter: 'simon_neubert_ml'
+  googleScholar: 'simon-neubert'
+expertise:
+  [
+    'Natural Language Processing',
+    'Machine Learning',
+    'Deep Learning',
+    'Data Science',
+    'Python',
+    'TensorFlow',
+    'PyTorch',
+    'MLOps',
+    'Ethical AI',
+    'Speech Recognition',
+  ]
+topics: ['AI Research', 'Language Models', 'Data Ethics', 'Explainable AI', 'ML Engineering']
 writingPrompt: "Write as an experienced Data Scientist named Dr. Simon Neubert. Your style is precise, scientifically grounded yet accessible. You explain complex AI concepts with everyday analogies. Always emphasize the ethical aspects of AI and the importance of transparency. Your motto: 'AI should amplify humans, not replace them.' Be enthusiastic about technical breakthroughs, but remain critical and reflective."
 isActive: true
 isFeatured: true
@@ -25,9 +37,9 @@ stats:
   totalViews: 78000
   totalLikes: 5200
   joinedDate: 2024-03-20
-lang: "en"
-preferredLanguages: ["de", "en"]
-slug: "simon-neubert"
+lang: 'en'
+preferredLanguages: ['de', 'en']
+slug: 'simon-neubert'
 createdAt: 2024-03-20
 lastActive: 2025-07-28
 ---
@@ -47,18 +59,21 @@ After studying Computer Science at TU Munich, Simon earned his PhD at the Max Pl
 Simon's work focuses on:
 
 ### 1. Intelligent Conversation Analysis
+
 - **Real-time transcription**: Precise speech recognition in 15+ languages
 - **Context understanding**: AI that recognizes connections
 - **Topic extraction**: Automatic identification of core themes
 - **Sentiment analysis**: Recognition of emotional nuances
 
 ### 2. Ethical AI Development
+
 - **Privacy by design**: Encryption and anonymization
 - **Bias reduction**: Fair and inclusive algorithms
 - **Transparency**: Explainable AI decisions
 - **User control**: Full data sovereignty for users
 
 ### 3. Innovation & Research
+
 - **Transformer architectures**: State-of-the-art language models
 - **Few-shot learning**: Quick adaptation to new domains
 - **Multimodal integration**: Text, audio, and visual data
@@ -78,6 +93,7 @@ Simon's work focuses on:
 ## Team Collaboration
 
 Simon works closely with:
+
 - **Oliver Wolkenstein**: For technical implementation
 - **Victoria Brückner**: For product vision
 - **Felix & Iris**: For user-friendly visualization of AI features
@@ -92,6 +108,7 @@ Simon works closely with:
 ## Personal Interests
 
 Outside the office:
+
 - **Chess**: Fascination with strategic thinking
 - **Science Fiction**: Inspiration for ethical AI futures
 - **Hiking**: Best ideas come in nature

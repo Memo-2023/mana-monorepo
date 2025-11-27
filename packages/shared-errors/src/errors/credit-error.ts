@@ -12,24 +12,20 @@ import { AppError } from './app-error';
  * ```
  */
 export class CreditError extends AppError {
-  /** Credits required for the operation */
-  readonly requiredCredits: number;
+	/** Credits required for the operation */
+	readonly requiredCredits: number;
 
-  /** Credits currently available */
-  readonly availableCredits: number;
+	/** Credits currently available */
+	readonly availableCredits: number;
 
-  constructor(
-    requiredCredits: number,
-    availableCredits: number,
-    operation?: string
-  ) {
-    super({
-      code: ErrorCode.INSUFFICIENT_CREDITS,
-      message: `Insufficient credits. Required: ${requiredCredits}, Available: ${availableCredits}`,
-      context: { requiredCredits, availableCredits, operation },
-    });
-    this.name = 'CreditError';
-    this.requiredCredits = requiredCredits;
-    this.availableCredits = availableCredits;
-  }
+	constructor(requiredCredits: number, availableCredits: number, operation?: string) {
+		super({
+			code: ErrorCode.INSUFFICIENT_CREDITS,
+			message: `Insufficient credits. Required: ${requiredCredits}, Available: ${availableCredits}`,
+			context: { requiredCredits, availableCredits, operation },
+		});
+		this.name = 'CreditError';
+		this.requiredCredits = requiredCredits;
+		this.availableCredits = availableCredits;
+	}
 }

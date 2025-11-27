@@ -16,10 +16,10 @@ Both a list of all supported languages (locales) and a default language (default
 astro.config.mjs
 import { defineConfig } from "astro/config"
 export default defineConfig({
-  i18n: {
-    locales: ["es", "en", "pt-br"],
-    defaultLocale: "en",
-  }
+i18n: {
+locales: ["es", "en", "pt-br"],
+defaultLocale: "en",
+}
 })
 
 Create localized folders
@@ -46,12 +46,13 @@ With i18n routing configured, you can now compute links to pages within your sit
 
 You can also still write the links manually.
 
-src/pages/es/index.astro
----
+## src/pages/es/index.astro
+
 import { getRelativeLocaleUrl } from 'astro:i18n';
 
 // defaultLocale is "es"
 const aboutURL = getRelativeLocaleUrl("es", "about");
+
 ---
 
 <a href="/get-started/">Â¡Vamos!</a>
@@ -82,13 +83,13 @@ prefixDefaultLocale: false
 astro.config.mjs
 import { defineConfig } from "astro/config"
 export default defineConfig({
-  i18n: {
-    locales: ["es", "en", "fr"],
-    defaultLocale: "en",
-    routing: {
-        prefixDefaultLocale: false
-    }
-  }
+i18n: {
+locales: ["es", "en", "fr"],
+defaultLocale: "en",
+routing: {
+prefixDefaultLocale: false
+}
+}
 })
 
 This is the default value. Set this option when URLs in your default language will not have a /[locale]/ prefix and files in your default language exist at the root of src/pages/:
@@ -109,13 +110,13 @@ prefixDefaultLocale: true
 astro.config.mjs
 import { defineConfig } from "astro/config"
 export default defineConfig({
-  i18n: {
-    locales: ["es", "en", "fr"],
-    defaultLocale: "en",
-    routing: {
-        prefixDefaultLocale: true
-    }
-  }
+i18n: {
+locales: ["es", "en", "fr"],
+defaultLocale: "en",
+routing: {
+prefixDefaultLocale: true
+}
+}
 })
 
 Set this option when all routes will have their /locale/ prefix in their URL and when all page content files, including those for your defaultLocale, exist in a localized folder:
@@ -153,11 +154,11 @@ You will be responsible for writing your own routing logic, or executing Astroâ€
 astro.config.mjs
 import { defineConfig } from "astro/config"
 export default defineConfig({
-  i18n: {
-    locales: ["es", "en", "fr"],
-    defaultLocale: "en",
-    routing: "manual"
-  }
+i18n: {
+locales: ["es", "en", "fr"],
+defaultLocale: "en",
+routing: "manual"
+}
 })
 
 Astro provides helper functions for your middleware so you can control your own default routing, exceptions, fallback behavior, error catching, etc: redirectToDefaultLocale(), notFound(), and redirectToFallback():
@@ -166,11 +167,11 @@ src/middleware.js
 import { defineMiddleware } from "astro:middleware";
 import { redirectToDefaultLocale } from "astro:i18n"; // function available with `manual` routing
 export const onRequest = defineMiddleware(async (ctx, next) => {
-  if (ctx.url.startsWith("/about")) {
-    return next();
-  } else {
-    return redirectToDefaultLocale(302);
-  }
+if (ctx.url.startsWith("/about")) {
+return next();
+} else {
+return redirectToDefaultLocale(302);
+}
 })
 
 middleware function
@@ -183,25 +184,24 @@ import {defineMiddleware, sequence} from "astro:middleware";
 import { middleware } from "astro:i18n"; // Astro's own i18n routing config
 
 export const userMiddleware = defineMiddleware(async (ctx, next) => {
-  // this response might come from Astro's i18n middleware, and it might return a 404
-  const response = await next();
-  // the /about page is an exception and we want to render it
-  if (ctx.url.startsWith("/about")) {
-    return new Response("About page", {
-      status: 200
-    });
-  } else {
-    return response;
-  }
+// this response might come from Astro's i18n middleware, and it might return a 404
+const response = await next();
+// the /about page is an exception and we want to render it
+if (ctx.url.startsWith("/about")) {
+return new Response("About page", {
+status: 200
+});
+} else {
+return response;
+}
 });
 
-
 export const onRequest = sequence(
-  userMiddleware,
-  middleware({
-    redirectToDefaultLocale: false,
-    prefixDefaultLocale: true
-  })
+userMiddleware,
+middleware({
+redirectToDefaultLocale: false,
+prefixDefaultLocale: true
+})
 )
 
 domains
@@ -214,22 +214,22 @@ Add i18n.domains to map any of your supported locales to custom URLs:
 astro.config.mjs
 import { defineConfig } from "astro/config"
 export default defineConfig({
-  site: "https://example.com",
-  output: "server", // required, with no prerendered pages
-  adapter: node({
-    mode: 'standalone',
-  }),
-  i18n: {
-    locales: ["es", "en", "fr", "ja"],
-    defaultLocale: "en",
-    routing: {
-      prefixDefaultLocale: false
-    },
-    domains: {
-      fr: "https://fr.example.com",
-      es: "https://example.es"
-    }
-  }
+site: "https://example.com",
+output: "server", // required, with no prerendered pages
+adapter: node({
+mode: 'standalone',
+}),
+i18n: {
+locales: ["es", "en", "fr", "ja"],
+defaultLocale: "en",
+routing: {
+prefixDefaultLocale: false
+},
+domains: {
+fr: "https://fr.example.com",
+es: "https://example.es"
+}
+}
 })
 
 All non-mapped locales will follow your prefixDefaultLocales configuration. However, even if this value is false, page files for your defaultLocale must also exist within a localized folder. For the configuration above, an /en/ folder is required.
@@ -258,16 +258,16 @@ For example, the configuration below sets es as the fallback locale for any miss
 astro.config.mjs
 import { defineConfig } from "astro/config"
 export default defineConfig({
-  i18n: {
-    locales: ["es", "en", "fr"],
-    defaultLocale: "en",
-    fallback: {
-      fr: "es"
-    },
-    routing: {
-      fallbackType: "rewrite"
-    }
-  }
+i18n: {
+locales: ["es", "en", "fr"],
+defaultLocale: "en",
+fallback: {
+fr: "es"
+},
+routing: {
+fallbackType: "rewrite"
+}
+}
 })
 
 Custom locale paths
@@ -280,17 +280,17 @@ This is useful if you support multiple variations of a language (e.g. "fr", "fr-
 astro.config.mjs
 import { defineConfig } from "astro/config"
 export default defineConfig({
-  i18n: {
-    locales: ["es", "en", "fr"],
-    locales: ["es", "en", {
-      path: "french", // no slashes included
-      codes: ["fr", "fr-BR", "fr-CA"]
-    }],
-    defaultLocale: "en",
-    routing: {
-        prefixDefaultLocale: true
-    }
-  }
+i18n: {
+locales: ["es", "en", "fr"],
+locales: ["es", "en", {
+path: "french", // no slashes included
+codes: ["fr", "fr-BR", "fr-CA"]
+}],
+defaultLocale: "en",
+routing: {
+prefixDefaultLocale: true
+}
+}
 })
 
 When using functions from the astro:i18n virtual module to compute valid URL paths based on your configuration (e.g. getRelativeLocaleUrl()), use the path as the value for locale.

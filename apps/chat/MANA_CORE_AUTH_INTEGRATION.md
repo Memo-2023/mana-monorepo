@@ -33,6 +33,7 @@ PostgreSQL (Users, Sessions, Credits)
 The `@manacore/shared-auth` package has been updated to work with Mana Core Auth endpoints:
 
 **Updated endpoints:**
+
 - `POST /api/v1/auth/register` - User registration
 - `POST /api/v1/auth/login` - Email/password login
 - `POST /api/v1/auth/refresh` - Token refresh
@@ -40,6 +41,7 @@ The `@manacore/shared-auth` package has been updated to work with Mana Core Auth
 - `GET /api/v1/credits/balance` - Get credit balance
 
 **Response format changes:**
+
 - Login returns: `{ accessToken, refreshToken, user, expiresIn, tokenType }`
 - Credits balance returns: `{ balance, freeCreditsRemaining, totalEarned, totalSpent }`
 
@@ -101,52 +103,52 @@ import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private configService: ConfigService) {}
+	constructor(private configService: ConfigService) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
+	async canActivate(context: ExecutionContext): Promise<boolean> {
+		const request = context.switchToHttp().getRequest();
+		const token = this.extractTokenFromHeader(request);
 
-    if (!token) {
-      throw new UnauthorizedException('No token provided');
-    }
+		if (!token) {
+			throw new UnauthorizedException('No token provided');
+		}
 
-    try {
-      // Get public key from Mana Core Auth
-      const authUrl = this.configService.get<string>('MANA_CORE_AUTH_URL');
-      const response = await fetch(`${authUrl}/api/v1/auth/validate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
+		try {
+			// Get public key from Mana Core Auth
+			const authUrl = this.configService.get<string>('MANA_CORE_AUTH_URL');
+			const response = await fetch(`${authUrl}/api/v1/auth/validate`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ token }),
+			});
 
-      if (!response.ok) {
-        throw new UnauthorizedException('Invalid token');
-      }
+			if (!response.ok) {
+				throw new UnauthorizedException('Invalid token');
+			}
 
-      const { valid, payload } = await response.json();
+			const { valid, payload } = await response.json();
 
-      if (!valid) {
-        throw new UnauthorizedException('Invalid token');
-      }
+			if (!valid) {
+				throw new UnauthorizedException('Invalid token');
+			}
 
-      // Attach user to request
-      request.user = {
-        userId: payload.sub,
-        email: payload.email,
-        role: payload.role,
-      };
+			// Attach user to request
+			request.user = {
+				userId: payload.sub,
+				email: payload.email,
+				role: payload.role,
+			};
 
-      return true;
-    } catch (error) {
-      throw new UnauthorizedException('Invalid token');
-    }
-  }
+			return true;
+		} catch (error) {
+			throw new UnauthorizedException('Invalid token');
+		}
+	}
 
-  private extractTokenFromHeader(request: any): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
-  }
+	private extractTokenFromHeader(request: any): string | undefined {
+		const [type, token] = request.headers.authorization?.split(' ') ?? [];
+		return type === 'Bearer' ? token : undefined;
+	}
 }
 ```
 
@@ -181,52 +183,52 @@ const MANA_AUTH_URL = import.meta.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://local
 
 // Initialize Mana Core Auth
 const { authService, tokenManager } = initializeWebAuth({
-  baseUrl: MANA_AUTH_URL,
+	baseUrl: MANA_AUTH_URL,
 });
 
 class AuthStore {
-  user = $state<UserData | null>(null);
-  isLoading = $state(true);
+	user = $state<UserData | null>(null);
+	isLoading = $state(true);
 
-  async initialize() {
-    this.isLoading = true;
-    try {
-      const authenticated = await authService.isAuthenticated();
-      if (authenticated) {
-        const userData = await authService.getUserFromToken();
-        this.user = userData;
-      }
-    } finally {
-      this.isLoading = false;
-    }
-  }
+	async initialize() {
+		this.isLoading = true;
+		try {
+			const authenticated = await authService.isAuthenticated();
+			if (authenticated) {
+				const userData = await authService.getUserFromToken();
+				this.user = userData;
+			}
+		} finally {
+			this.isLoading = false;
+		}
+	}
 
-  async signIn(email: string, password: string) {
-    const result = await authService.signIn(email, password);
-    if (result.success) {
-      const userData = await authService.getUserFromToken();
-      this.user = userData;
-    }
-    return result;
-  }
+	async signIn(email: string, password: string) {
+		const result = await authService.signIn(email, password);
+		if (result.success) {
+			const userData = await authService.getUserFromToken();
+			this.user = userData;
+		}
+		return result;
+	}
 
-  async signUp(email: string, password: string) {
-    const result = await authService.signUp(email, password);
-    // After signup, automatically sign in
-    if (result.success) {
-      return this.signIn(email, password);
-    }
-    return result;
-  }
+	async signUp(email: string, password: string) {
+		const result = await authService.signUp(email, password);
+		// After signup, automatically sign in
+		if (result.success) {
+			return this.signIn(email, password);
+		}
+		return result;
+	}
 
-  async signOut() {
-    await authService.signOut();
-    this.user = null;
-  }
+	async signOut() {
+		await authService.signOut();
+		this.user = null;
+	}
 
-  async resetPassword(email: string) {
-    return authService.forgotPassword(email);
-  }
+	async resetPassword(email: string) {
+		return authService.forgotPassword(email);
+	}
 }
 
 export const authStore = new AuthStore();
@@ -240,35 +242,35 @@ Edit `chat/apps/web/src/hooks.server.ts`:
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-  // Get token from cookies
-  const token = event.cookies.get('auth_token');
+	// Get token from cookies
+	const token = event.cookies.get('auth_token');
 
-  if (token) {
-    try {
-      // Validate token with Mana Core Auth
-      const authUrl = process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
-      const response = await fetch(`${authUrl}/api/v1/auth/validate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
+	if (token) {
+		try {
+			// Validate token with Mana Core Auth
+			const authUrl = process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+			const response = await fetch(`${authUrl}/api/v1/auth/validate`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ token }),
+			});
 
-      if (response.ok) {
-        const { valid, payload } = await response.json();
-        if (valid) {
-          event.locals.user = {
-            id: payload.sub,
-            email: payload.email,
-            role: payload.role,
-          };
-        }
-      }
-    } catch (error) {
-      console.error('Error validating token:', error);
-    }
-  }
+			if (response.ok) {
+				const { valid, payload } = await response.json();
+				if (valid) {
+					event.locals.user = {
+						id: payload.sub,
+						email: payload.email,
+						role: payload.role,
+					};
+				}
+			}
+		} catch (error) {
+			console.error('Error validating token:', error);
+		}
+	}
 
-  return resolve(event);
+	return resolve(event);
 };
 ```
 
@@ -390,6 +392,7 @@ pnpm remove @supabase/ssr @supabase/supabase-js
 ```
 
 Delete or update these files:
+
 - `src/lib/services/supabase.ts` (no longer needed)
 
 #### 5.2 Mobile App
@@ -400,6 +403,7 @@ pnpm remove @supabase/supabase-js
 ```
 
 Delete or update these files:
+
 - `utils/supabase.ts` (no longer needed)
 
 #### 5.3 Backend
@@ -463,16 +467,16 @@ pnpm dev
 
 ### Mana Core Auth vs Supabase
 
-| Feature | Supabase Auth | Mana Core Auth | Status |
-|---------|---------------|----------------|--------|
-| Email/Password | ✅ | ✅ | Migrated |
-| OAuth (Google) | ✅ | 🚧 | TODO |
-| OAuth (Apple) | ✅ | 🚧 | TODO |
-| Password Reset | ✅ | 🚧 | TODO |
-| Email Verification | ✅ | 🚧 | TODO |
-| Credits | ❌ | ✅ | New! |
-| Session Management | ✅ | ✅ | Migrated |
-| JWT Tokens | ✅ | ✅ | Migrated |
+| Feature            | Supabase Auth | Mana Core Auth | Status   |
+| ------------------ | ------------- | -------------- | -------- |
+| Email/Password     | ✅            | ✅             | Migrated |
+| OAuth (Google)     | ✅            | 🚧             | TODO     |
+| OAuth (Apple)      | ✅            | 🚧             | TODO     |
+| Password Reset     | ✅            | 🚧             | TODO     |
+| Email Verification | ✅            | 🚧             | TODO     |
+| Credits            | ❌            | ✅             | New!     |
+| Session Management | ✅            | ✅             | Migrated |
+| JWT Tokens         | ✅            | ✅             | Migrated |
 
 ## Credits System
 
@@ -500,6 +504,7 @@ console.log(credits);
 ### "Connection refused" to Mana Core Auth
 
 **Solution:** Make sure Mana Core Auth is running:
+
 ```bash
 cd mana-core-auth
 pnpm start:dev
@@ -508,6 +513,7 @@ pnpm start:dev
 ### "Invalid token" errors
 
 **Solution:** Clear stored tokens and login again:
+
 ```typescript
 await authService.clearAuthStorage();
 ```
@@ -515,6 +521,7 @@ await authService.clearAuthStorage();
 ### CORS errors
 
 **Solution:** Add Chat app URLs to Mana Core Auth `.env`:
+
 ```env
 CORS_ORIGINS=http://localhost:3000,http://localhost:8081
 ```

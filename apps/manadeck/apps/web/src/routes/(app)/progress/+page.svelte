@@ -113,7 +113,7 @@
 									{new Date(session.started_at).toLocaleDateString('de-DE', {
 										weekday: 'short',
 										day: 'numeric',
-										month: 'short'
+										month: 'short',
 									})}
 								</div>
 								<div class="text-sm text-muted-foreground">

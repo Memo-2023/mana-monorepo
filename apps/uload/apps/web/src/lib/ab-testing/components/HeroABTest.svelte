@@ -5,7 +5,7 @@
 		getVariantContent,
 		getTrustBadges,
 		getFreeText,
-		type VariantContent
+		type VariantContent,
 	} from '../config/variants';
 	import { locale } from 'svelte-i18n';
 	import { get } from 'svelte/store';
@@ -78,7 +78,7 @@
 </script>
 
 {#if showDebug}
-	<div class="fixed top-20 right-4 z-50 rounded-lg bg-black/80 p-4 text-white shadow-lg">
+	<div class="fixed right-4 top-20 z-50 rounded-lg bg-black/80 p-4 text-white shadow-lg">
 		<div class="font-mono text-xs">
 			<div class="font-bold text-green-400">A/B Test Debug</div>
 			<div>Variant: <span class="text-yellow-400">{variant}</span></div>
@@ -104,7 +104,7 @@
 >
 	<!-- Background decoration -->
 	<div
-		class="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-purple-300 opacity-20 blur-3xl"
+		class="absolute -right-40 -top-40 h-80 w-80 rounded-full bg-purple-300 opacity-20 blur-3xl"
 	></div>
 	<div
 		class="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-300 opacity-20 blur-3xl"
@@ -115,7 +115,7 @@
 			<div class="text-center">
 				<!-- Headline -->
 				<h1
-					class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl dark:text-white"
+					class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl"
 				>
 					{#if variant === 'b2' && content.headline.includes(',')}
 						<!-- Special formatting for logos variant -->
@@ -129,7 +129,7 @@
 				</h1>
 
 				<!-- Subheadline -->
-				<p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600 sm:text-xl dark:text-gray-300">
+				<p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-300 sm:text-xl">
 					{content.subheadline}
 				</p>
 
@@ -216,7 +216,7 @@
 					<a
 						href="#url-form"
 						onclick={handleCtaClick}
-						class="inline-block rounded-lg px-8 py-4 font-semibold whitespace-nowrap text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl {content.ctaStyle ||
+						class="inline-block whitespace-nowrap rounded-lg px-8 py-4 font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl {content.ctaStyle ||
 							'bg-theme-primary hover:bg-theme-primary-hover'}"
 					>
 						{content.ctaText}

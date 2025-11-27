@@ -3,6 +3,7 @@
 **React Native UI component library for memoro mobile apps.**
 
 ⚠️ **Framework Compatibility:**
+
 - ✅ **React Native (Expo)** - Full support
 - ❌ **Web (SvelteKit)** - Not compatible (use Svelte components instead)
 - ❌ **Landing (Astro)** - Not compatible (use Astro components instead)
@@ -12,6 +13,7 @@ This library is specifically built for React Native applications using Expo. All
 ## 🎉 17 Components Ready
 
 ### UI Components (14)
+
 - ✅ **Button** - Pressable button with 5 variants, 3 sizes, icon support
 - ✅ **Text** - Typography with 11 predefined variants
 - ✅ **Icon** - Cross-platform icons (SF Symbols on iOS, Ionicons elsewhere)
@@ -28,6 +30,7 @@ This library is specifically built for React Native applications using Expo. All
 - ✅ **ToggleGroup** - Segmented control for mutually exclusive options
 
 ### Navigation Components (3)
+
 - ✅ **Header** - Navigation header with title, back button, custom actions
 - ✅ **HeaderButton** - Icon button for header actions
 - ✅ **TabBarIcon** - Icon component optimized for tab bars
@@ -64,17 +67,14 @@ import { Text } from '@/components/ui/Text';
 import { Card } from '@/components/ui/Card';
 
 function MyScreen() {
-  return (
-    <Card>
-      <Text variant="h1" weight="bold">Welcome</Text>
-      <Button
-        title="Get Started"
-        variant="primary"
-        icon="arrow-forward"
-        onPress={() => {}}
-      />
-    </Card>
-  );
+	return (
+		<Card>
+			<Text variant="h1" weight="bold">
+				Welcome
+			</Text>
+			<Button title="Get Started" variant="primary" icon="arrow-forward" onPress={() => {}} />
+		</Card>
+	);
 }
 ```
 
@@ -100,11 +100,13 @@ Each component has detailed documentation:
 ## Project Status
 
 📍 **Current State:**
+
 - ✅ 17 Components ready (14 UI + 3 Navigation)
 - ✅ CLI tool working (add + list commands)
 - ✅ Embedded in `picture` app for development
 
 🎯 **Next Steps:**
+
 - Test components in mobile app
 - Extract to `github.com/memoro/mobile-ui` when stable
 - Publish CLI to GitHub Packages
@@ -135,6 +137,7 @@ mobile-ui/
 ## Development
 
 Currently developed within the `picture` app. Will be extracted to its own repository once we have:
+
 - ✅ 5+ working components
 - ⏳ CLI tool prototype
 - ⏳ Tested in 2+ apps

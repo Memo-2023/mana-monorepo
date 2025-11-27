@@ -1,16 +1,14 @@
 API Routes
 Learn how to create server endpoints with Expo Router.
 
-
 Expo Router enables you to write secure server code for all platforms, right in your app directory.
 
 app/hello+api.ts
 
 Copy
 
-
 export function GET(request: Request) {
-  return Response.json({ hello: 'world' });
+return Response.json({ hello: 'world' });
 }
 Server features require a custom server, which can be deployed to EAS or most other hosting providers.
 
@@ -22,8 +20,10 @@ API Routes are functions that are executed on a server when a route is matched. 
 In Expo, API Routes are defined by creating files in the app directory with the +api.ts extension. For example, the following API route is executed when the route /hello is matched.
 
 app
+
  
 index.tsx
+
  
 hello+api.ts
 API Route
@@ -36,11 +36,10 @@ app.json
 
 Copy
 
-
 {
-  "web": {
-    "output": "server"
-  }
+"web": {
+"output": "server"
+}
 }
 2
 
@@ -50,9 +49,8 @@ app/hello+api.ts
 
 Copy
 
-
 export function GET(request: Request) {
-  return Response.json({ hello: 'world' });
+return Response.json({ hello: 'world' });
 }
 You can export any of the following functions GET, POST, PUT, PATCH, DELETE, HEAD, and OPTIONS from a server route. The function executes when the corresponding HTTP method is matched. Unsupported methods will automatically return 405: Method not allowed.
 
@@ -80,17 +78,16 @@ app/index.tsx
 
 Copy
 
-
 import { Button } from 'react-native';
 
 async function fetchHello() {
-  const response = await fetch('/hello');
-  const data = await response.json();
-  alert('Hello ' + data.hello);
+const response = await fetch('/hello');
+const data = await response.json();
+alert('Hello ' + data.hello);
 }
 
 export default function App() {
-  return <Button onPress={() => fetchHello()} title="Fetch hello" />;
+return <Button onPress={() => fetchHello()} title="Fetch hello" />;
 }
 Relative fetch requests automatically fetch relative to the dev server origin in development, and can be configured in production using the origin field in the app.json:
 
@@ -98,16 +95,15 @@ app.json
 
 Copy
 
-
 {
-  "plugins": [
-    [
-      "expo-router",
-      {
-        "origin": "https://evanbacon.dev/"
-      }
-    ]
-  ]
+"plugins": [
+[
+"expo-router",
+{
+"origin": "https://evanbacon.dev/"
+}
+]
+]
 }
 This URL can be automatically configured during EAS Builds by setting the EXPO_UNSTABLE_DEPLOY_SERVER=1 environment variable. This will trigger a versioned server deployment which sets the origin to a preview deploy URL automatically.
 
@@ -123,11 +119,10 @@ app/blog/[post]+api.ts
 
 Copy
 
-
 export async function GET(request: Request, { post }: Record<string, string>) {
-  // const postId = new URL(request.url).searchParams.get('post')
-  // fetch data for 'post'
-  return Response.json({ ... });
+// const postId = new URL(request.url).searchParams.get('post')
+// fetch data for 'post'
+return Response.json({ ... });
 }
 Request body
 Use the request.json() function to access the request body. It automatically parses the body and returns the result.
@@ -136,11 +131,10 @@ app/validate+api.ts
 
 Copy
 
-
 export async function POST(request: Request) {
-  const body = await request.json();
+const body = await request.json();
 
-  return Response.json({ ... });
+return Response.json({ ... });
 }
 Request query parameters
 Query parameters can be accessed by parsing the request URL:
@@ -149,13 +143,12 @@ app/endpoint+api.ts
 
 Copy
 
-
 export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const post = url.searchParams.get('post');
+const url = new URL(request.url);
+const post = url.searchParams.get('post');
 
-  // fetch data for 'post'
-  return Response.json({ ... });
+// fetch data for 'post'
+return Response.json({ ... });
 }
 Response
 Responses use the global, standard Response object.
@@ -164,9 +157,8 @@ app/demo+api.ts
 
 Copy
 
-
 export function GET() {
-  return Response.json({ hello: 'universe' });
+return Response.json({ hello: 'universe' });
 }
 Errors
 You can respond to server errors by using the Response object.
@@ -175,20 +167,19 @@ app/blog/[post].ts
 
 Copy
 
-
 import { Request, Response } from 'expo-router/server';
 
 export async function GET(request: Request, { post }: Record<string, string>) {
-  if (!post) {
-    return new Response('No post found', {
-      status: 404,
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-    });
-  }
-  // fetch data for `post`
-  return Response.json({ ... });
+if (!post) {
+return new Response('No post found', {
+status: 404,
+headers: {
+'Content-Type': 'text/plain',
+},
+});
+}
+// fetch data for `post`
+return Response.json({ ... });
 }
 Making requests with an undefined method will automatically return 405: Method not allowed. If an error is thrown during the request, it will automatically return 500: Internal server error.
 
@@ -196,7 +187,7 @@ Bundling
 API Routes are bundled with Expo CLI and Metro bundler. They have access to all of the language features as your client code:
 
 TypeScript — types and tsconfig.json paths.
-Environment variables — server routes have access to all environment variables, not just the ones prefixed with EXPO_PUBLIC_.
+Environment variables — server routes have access to all environment variables, not just the ones prefixed with EXPO*PUBLIC*.
 Node.js standard library — ensure that you are using the correct version of Node.js locally for your server environment.
 babel.config.js and metro.config.js support — settings work across both client and server code.
 Security
@@ -239,7 +230,6 @@ Set the EXPO_UNSTABLE_DEPLOY_SERVER environment variable in your .env file. This
 .env
 
 Copy
-
 
 EXPO_UNSTABLE_DEPLOY_SERVER=1
 4
@@ -293,18 +283,17 @@ app.json
 
 Copy
 
-
 {
-  "expo": {
-    "plugins": [
-      [
-        "expo-router",
-        {
-          "origin": "http://localhost:8081"
-        }
-      ]
-    ]
-  }
+"expo": {
+"plugins": [
+[
+"expo-router",
+{
+"origin": "http://localhost:8081"
+}
+]
+]
+}
 }
 Remember to remove this origin value when deploying to production.
 
@@ -363,7 +352,6 @@ server.ts
 
 Copy
 
-
 #!/usr/bin/env node
 
 const path = require('path');
@@ -386,24 +374,24 @@ app.disable('x-powered-by');
 process.env.NODE_ENV = 'production';
 
 app.use(
-  express.static(CLIENT_BUILD_DIR, {
-    maxAge: '1h',
-    extensions: ['html'],
-  })
+express.static(CLIENT_BUILD_DIR, {
+maxAge: '1h',
+extensions: ['html'],
+})
 );
 
 app.use(morgan('tiny'));
 
 app.all(
-  '*',
-  createRequestHandler({
-    build: SERVER_BUILD_DIR,
-  })
+'\*',
+createRequestHandler({
+build: SERVER_BUILD_DIR,
+})
 );
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
-  console.log(`Express server listening on port ${port}`);
+console.log(`Express server listening on port ${port}`);
 });
 
 Show More
@@ -426,11 +414,10 @@ netlify/functions/server.ts
 
 Copy
 
-
 const { createRequestHandler } = require('@expo/server/adapter/netlify');
 
 const handler = createRequestHandler({
-  build: require('path').join(__dirname, '../../dist/server'),
+build: require('path').join(\_\_dirname, '../../dist/server'),
 });
 
 module.exports = { handler };
@@ -442,26 +429,26 @@ netlify.toml
 
 Copy
 
-
 [build]
-  command = "expo export -p web"
-  functions = "netlify/functions"
-  publish = "dist/client"
+command = "expo export -p web"
+functions = "netlify/functions"
+publish = "dist/client"
 
 [[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/server"
-  status = 404
+from = "/\*"
+to = "/.netlify/functions/server"
+status = 404
 
 [functions]
-  # Include everything to ensure dynamic routes can be used.
-  included_files = ["dist/server/**/*"]
+
+# Include everything to ensure dynamic routes can be used.
+
+included_files = ["dist/server/**/*"]
 
 [[headers]]
-  for = "/dist/server/_expo/functions/*"
-  [headers.values]
-    # Set to 60 seconds as an example.
-    "Cache-Control" = "public, max-age=60, s-maxage=60"
+for = "/dist/server/\_expo/functions/\*"
+[headers.values] # Set to 60 seconds as an example.
+"Cache-Control" = "public, max-age=60, s-maxage=60"
 
 Show More
 3
@@ -496,19 +483,16 @@ api/index.ts
 
 Copy
 
-
 const { createRequestHandler } = require('@expo/server/adapter/vercel');
 
 module.exports = createRequestHandler({
-  build: require('path').join(__dirname, '../dist/server'),
+build: require('path').join(\_\_dirname, '../dist/server'),
 });
 2
 
 Create a Vercel configuration file (vercel.json) at the root of your project to redirect all requests to the server function.
 
-
 vercel.json v3
-
 
 vercel.json v2
 
@@ -516,22 +500,21 @@ vercel.json
 
 Copy
 
-
 {
-  "buildCommand": "expo export -p web",
-  "outputDirectory": "dist/client",
-  "functions": {
-    "api/index.ts": {
-      "runtime": "@vercel/node@5.1.8",
-      "includeFiles": "dist/server/**"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api/index"
-    }
-  ]
+"buildCommand": "expo export -p web",
+"outputDirectory": "dist/client",
+"functions": {
+"api/index.ts": {
+"runtime": "@vercel/node@5.1.8",
+"includeFiles": "dist/server/\*_"
+}
+},
+"rewrites": [
+{
+"source": "/(._)",
+"destination": "/api/index"
+}
+]
 }
 The newer version of the vercel.json does not use routes and builds configuration options anymore, and serves your public assets from the dist/client output directory automatically.
 

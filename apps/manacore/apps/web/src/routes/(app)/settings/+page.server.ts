@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ locals: { supabase, session } }) =>
 		.single();
 
 	return {
-		profile
+		profile,
 	};
 };
 
@@ -32,19 +32,19 @@ export const actions: Actions = {
 			.update({
 				first_name: firstName,
 				last_name: lastName,
-				updated_at: new Date().toISOString()
+				updated_at: new Date().toISOString(),
 			})
 			.eq('auth_id', session.user.id);
 
 		if (error) {
 			console.error('Profile update error:', error);
 			return fail(500, {
-				error: 'Failed to update profile'
+				error: 'Failed to update profile',
 			});
 		}
 
 		return {
-			success: true
+			success: true,
 		};
-	}
+	},
 };

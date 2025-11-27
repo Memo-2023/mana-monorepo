@@ -35,7 +35,8 @@
 		emailPlaceholder: 'Email',
 		passwordPlaceholder: 'Password',
 		confirmPasswordPlaceholder: 'Confirm Password',
-		passwordRequirements: 'Password must be at least 8 characters with lowercase, uppercase, number, and special character.',
+		passwordRequirements:
+			'Password must be at least 8 characters with lowercase, uppercase, number, and special character.',
 		createAccountButton: 'Create Account',
 		creatingAccount: 'Creating Account...',
 		backToLogin: 'Back to Login',
@@ -46,9 +47,10 @@
 		confirmPasswordRequired: 'Please confirm your password',
 		passwordsDoNotMatch: 'Passwords do not match',
 		passwordTooShort: 'Password must be at least 8 characters',
-		passwordStrengthError: 'Password must include lowercase, uppercase, number, and special character',
+		passwordStrengthError:
+			'Password must include lowercase, uppercase, number, and special character',
 		registrationFailed: 'Registration failed',
-		accountCreated: 'Account created! Please check your email to verify your account.'
+		accountCreated: 'Account created! Please check your email to verify your account.',
 	};
 
 	interface Props {
@@ -87,7 +89,7 @@
 		lightBackground = '#f5f5f5',
 		darkBackground = '#121212',
 		appSlider,
-		translations = {}
+		translations = {},
 	}: Props = $props();
 
 	// Merge provided translations with defaults
@@ -126,7 +128,7 @@
 				lowercase: false,
 				uppercase: false,
 				digit: false,
-				special: false
+				special: false,
 			};
 		}
 
@@ -135,7 +137,7 @@
 			lowercase: /[a-z]/.test(password),
 			uppercase: /[A-Z]/.test(password),
 			digit: /[0-9]/.test(password),
-			special: /[^a-zA-Z0-9]/.test(password)
+			special: /[^a-zA-Z0-9]/.test(password),
 		};
 	});
 
@@ -222,7 +224,9 @@
 	<div class="flex flex-col items-center justify-center pt-16 pb-8">
 		<div
 			class="flex items-center justify-center rounded-full transition-all mb-4"
-			style="width: 120px; height: 120px; border: 3px solid {primaryColor}; background-color: {isDark ? '#000' : '#fff'}; box-shadow: {isDark
+			style="width: 120px; height: 120px; border: 3px solid {primaryColor}; background-color: {isDark
+				? '#000'
+				: '#fff'}; box-shadow: {isDark
 				? '0 6px 12px rgba(0, 0, 0, 0.4)'
 				: '0 6px 12px rgba(0, 0, 0, 0.15)'};"
 		>
@@ -237,7 +241,11 @@
 	<div class="flex-1 flex items-start justify-center px-5 pt-8 pb-8">
 		<div
 			class="w-full max-w-md rounded-xl p-6"
-			style="background-color: {isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.7)'}; backdrop-filter: blur(10px); border: 1px solid {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"
+			style="background-color: {isDark
+				? 'rgba(255, 255, 255, 0.08)'
+				: 'rgba(255, 255, 255, 0.7)'}; backdrop-filter: blur(10px); border: 1px solid {isDark
+				? 'rgba(255, 255, 255, 0.1)'
+				: 'rgba(0, 0, 0, 0.1)'};"
 		>
 			<!-- Title -->
 			<h2
@@ -278,7 +286,13 @@
 						placeholder={t.emailPlaceholder}
 						required
 						class="h-14 w-full rounded-xl border px-4 text-lg transition-colors focus:outline-none focus:ring-2"
-						style="background-color: {isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'}; --tw-ring-color: {primaryColor};"
+						style="background-color: {isDark
+							? 'rgba(0, 0, 0, 0.2)'
+							: 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark
+							? 'rgba(255, 255, 255, 0.2)'
+							: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
+							? '#ffffff'
+							: '#000000'}; --tw-ring-color: {primaryColor};"
 					/>
 				</div>
 
@@ -290,7 +304,13 @@
 						required
 						minlength={8}
 						class="h-14 w-full rounded-xl border px-4 pr-12 text-lg transition-colors focus:outline-none focus:ring-2"
-						style="background-color: {isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'}; --tw-ring-color: {primaryColor};"
+						style="background-color: {isDark
+							? 'rgba(0, 0, 0, 0.2)'
+							: 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark
+							? 'rgba(255, 255, 255, 0.2)'
+							: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
+							? '#ffffff'
+							: '#000000'}; --tw-ring-color: {primaryColor};"
 					/>
 					<button
 						type="button"
@@ -314,7 +334,13 @@
 						required
 						minlength={8}
 						class="h-14 w-full rounded-xl border px-4 pr-12 text-lg transition-colors focus:outline-none focus:ring-2"
-						style="background-color: {isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'}; --tw-ring-color: {primaryColor};"
+						style="background-color: {isDark
+							? 'rgba(0, 0, 0, 0.2)'
+							: 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark
+							? 'rgba(255, 255, 255, 0.2)'
+							: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
+							? '#ffffff'
+							: '#000000'}; --tw-ring-color: {primaryColor};"
 					/>
 					<button
 						type="button"
@@ -342,7 +368,9 @@
 					type="submit"
 					disabled={loading}
 					class="flex h-14 w-full items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 disabled:opacity-50 border-2"
-					style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
+					style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark
+						? '#ffffff'
+						: '#000000'};"
 				>
 					<Icon name="user-plus" size={20} />
 					{loading ? t.creatingAccount : t.createAccountButton}

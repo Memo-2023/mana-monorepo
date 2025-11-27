@@ -64,7 +64,7 @@ export class CardSanitizer {
 				'circle',
 				'rect',
 				'line',
-				'polygon'
+				'polygon',
 			],
 			allowedAttributes: {
 				'*': ['class', 'id', 'style'],
@@ -72,10 +72,10 @@ export class CardSanitizer {
 				img: ['src', 'alt', 'width', 'height'],
 				svg: ['viewBox', 'width', 'height', 'fill', 'stroke'],
 				path: ['d', 'fill', 'stroke', 'stroke-width'],
-				button: ['type', 'disabled']
+				button: ['type', 'disabled'],
 			},
 			removeScripts: true,
-			removeEventHandlers: true
+			removeEventHandlers: true,
 		};
 
 		const mergedOptions = { ...defaultOptions, ...options };
@@ -85,7 +85,7 @@ export class CardSanitizer {
 			ALLOWED_TAGS: mergedOptions.allowedTags,
 			ALLOWED_ATTR: [],
 			FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'textarea', 'select'],
-			FORBID_ATTR: ['onclick', 'onload', 'onerror', 'onmouseover', 'onfocus', 'onblur']
+			FORBID_ATTR: ['onclick', 'onload', 'onerror', 'onmouseover', 'onfocus', 'onblur'],
 		};
 
 		// Build allowed attributes list
@@ -156,9 +156,9 @@ export class CardSanitizer {
 				'animation',
 				'box-shadow',
 				'cursor',
-				'pointer-events'
+				'pointer-events',
 			],
-			maxNesting: 3
+			maxNesting: 3,
 		};
 
 		const mergedOptions = { ...defaultOptions, ...options };
@@ -260,7 +260,7 @@ export class CardSanitizer {
 					name,
 					type: type as any,
 					required: true,
-					label: name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' ')
+					label: name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' '),
 				});
 			}
 		}
@@ -298,7 +298,7 @@ export class CardSanitizer {
 			'>': '&gt;',
 			'"': '&quot;',
 			"'": '&#x27;',
-			'/': '&#x2F;'
+			'/': '&#x2F;',
 		};
 		return text.replace(/[&<>"'/]/g, (char) => map[char]);
 	}
@@ -383,7 +383,7 @@ export class CardSanitizer {
 			height: /^(\d+(%|px|em|rem|vw|vh)|auto|inherit)$/i,
 			'font-size': /^(\d+(%|px|em|rem)|inherit)$/i,
 			margin: /^(\d+(%|px|em|rem)|auto|inherit)$/i,
-			padding: /^(\d+(%|px|em|rem)|inherit)$/i
+			padding: /^(\d+(%|px|em|rem)|inherit)$/i,
 		};
 
 		const pattern = validPatterns[property];

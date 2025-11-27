@@ -1,6 +1,6 @@
 /**
  * Reserved slugs that cannot be used for workspace URLs
- * to prevent conflicts with system routes, common usernames, 
+ * to prevent conflicts with system routes, common usernames,
  * and potential brand confusion
  */
 export const RESERVED_SLUGS = [
@@ -36,7 +36,7 @@ export const RESERVED_SLUGS = [
 	'members',
 	'owner',
 	'owners',
-	
+
 	// System/Admin routes
 	'admin',
 	'api',
@@ -98,7 +98,7 @@ export const RESERVED_SLUGS = [
 	'admin-panel',
 	'control-panel',
 	'cpanel',
-	
+
 	// Common service names
 	'cdn',
 	'assets',
@@ -118,7 +118,7 @@ export const RESERVED_SLUGS = [
 	'export',
 	'import',
 	'sync',
-	
+
 	// Common usernames/brands
 	'admin',
 	'administrator',
@@ -143,7 +143,7 @@ export const RESERVED_SLUGS = [
 	'sa',
 	'ltd',
 	'limited',
-	
+
 	// Potential phishing/confusion - Tech Giants
 	'google',
 	'facebook',
@@ -229,7 +229,7 @@ export const RESERVED_SLUGS = [
 	'midjourney',
 	'stability',
 	'huggingface',
-	
+
 	// German companies/brands
 	'telekom',
 	'vodafone',
@@ -303,7 +303,7 @@ export const RESERVED_SLUGS = [
 	'bauhaus',
 	'toom',
 	'hagebau',
-	
+
 	// Banks & Financial
 	'visa',
 	'mastercard',
@@ -328,7 +328,7 @@ export const RESERVED_SLUGS = [
 	'klarna',
 	'wise',
 	'transferwise',
-	
+
 	// Social Media & Dating
 	'youtube',
 	'tiktok',
@@ -350,7 +350,7 @@ export const RESERVED_SLUGS = [
 	'lovoo',
 	'parship',
 	'elitepartner',
-	
+
 	// E-commerce & Marketplaces
 	'ebay',
 	'etsy',
@@ -373,7 +373,7 @@ export const RESERVED_SLUGS = [
 	'gorillas',
 	'getir',
 	'flink',
-	
+
 	// News & Media
 	'nytimes',
 	'bbc',
@@ -398,7 +398,7 @@ export const RESERVED_SLUGS = [
 	'rtl',
 	'sat1',
 	'prosieben',
-	
+
 	// Gaming & Entertainment
 	'steam',
 	'epic',
@@ -426,7 +426,7 @@ export const RESERVED_SLUGS = [
 	'valorant',
 	'overwatch',
 	'warcraft',
-	
+
 	// Automotive & Transportation
 	'uber',
 	'lyft',
@@ -451,7 +451,7 @@ export const RESERVED_SLUGS = [
 	'hertz',
 	'avis',
 	'enterprise',
-	
+
 	// Food & Beverage Brands
 	'mcdonalds',
 	'burgerking',
@@ -479,7 +479,7 @@ export const RESERVED_SLUGS = [
 	'rittersport',
 	'milka',
 	'lindt',
-	
+
 	// Telecom & ISPs
 	'att',
 	'verizon',
@@ -498,7 +498,7 @@ export const RESERVED_SLUGS = [
 	'pyur',
 	'netcologne',
 	'mnet',
-	
+
 	// Universities & Education
 	'harvard',
 	'stanford',
@@ -517,7 +517,7 @@ export const RESERVED_SLUGS = [
 	'babbel',
 	'rosetta',
 	'rosettastone',
-	
+
 	// Healthcare & Pharma
 	'pfizer',
 	'moderna',
@@ -536,7 +536,7 @@ export const RESERVED_SLUGS = [
 	'docmorris',
 	'shop-apotheke',
 	'shopapotheke',
-	
+
 	// Short/valuable names
 	'a',
 	'b',
@@ -632,7 +632,7 @@ export const RESERVED_SLUGS = [
 	'txt',
 	'spf',
 	'dkim',
-	'dmarc'
+	'dmarc',
 ] as const;
 
 /**
@@ -650,35 +650,35 @@ export function validateWorkspaceSlug(slug: string): string | null {
 	if (!slug) {
 		return null; // Empty slug is allowed (auto-generated)
 	}
-	
+
 	// Check format
 	if (!/^[a-z0-9\-]+$/.test(slug)) {
 		return 'Workspace URL can only contain lowercase letters, numbers, and hyphens';
 	}
-	
+
 	// Check length
 	if (slug.length < 2) {
 		return 'Workspace URL must be at least 2 characters long';
 	}
-	
+
 	if (slug.length > 50) {
 		return 'Workspace URL cannot be longer than 50 characters';
 	}
-	
+
 	// Check reserved
 	if (isSlugReserved(slug)) {
 		return 'This workspace URL is reserved and cannot be used';
 	}
-	
+
 	// Check start/end with hyphen
 	if (slug.startsWith('-') || slug.endsWith('-')) {
 		return 'Workspace URL cannot start or end with a hyphen';
 	}
-	
+
 	// Check consecutive hyphens
 	if (slug.includes('--')) {
 		return 'Workspace URL cannot contain consecutive hyphens';
 	}
-	
+
 	return null; // Valid
 }

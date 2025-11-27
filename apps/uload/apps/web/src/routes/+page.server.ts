@@ -1,11 +1,5 @@
 import { fail } from '@sveltejs/kit';
-import {
-	pb,
-	generateShortCode,
-	type Link,
-	type Click,
-	type User
-} from '$lib/pocketbase';
+import { pb, generateShortCode, type Link, type Click, type User } from '$lib/pocketbase';
 import { getCollection } from '$lib/content';
 import type { BlogPostWithMeta } from '../content/config';
 import type { Actions, PageServerLoad } from './$types';
@@ -16,17 +10,17 @@ export const load: PageServerLoad = async ({ locals }) => {
 		const links = await locals.pb.collection('links').getList<Link>(1, locals.user ? 50 : 10, {
 			filter,
 			sort: '-created',
-			expand: 'user'
+			expand: 'user',
 		});
 
 		const linksWithClicks = await Promise.all(
 			links.items.map(async (link) => {
 				const clicks = await locals.pb.collection('clicks').getList(1, 1, {
-					filter: `link_id="${link.id}"`
+					filter: `link_id="${link.id}"`,
 				});
 				return {
 					...link,
-					clicks: clicks.totalItems
+					clicks: clicks.totalItems,
 				};
 			})
 		);
@@ -36,9 +30,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 			locals.pb.collection('users').getList<User>(1, 1),
 			locals.pb.collection('links').getList<Link>(1, 1),
 			locals.pb.collection('folders').getList(1, 1),
-			locals.pb.collection('clicks').getList<Click>(1, 1)
+			locals.pb.collection('clicks').getList<Click>(1, 1),
 		]).catch(() => [{ totalItems: 0 }, { totalItems: 0 }, { totalItems: 0 }, { totalItems: 0 }]);
-		
+
 		// Fetch latest blog posts
 		const blogPosts = await getCollection<BlogPostWithMeta>('blog').catch(() => []);
 
@@ -48,9 +42,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 				totalUsers: usersStats.totalItems || 0,
 				totalLinks: linksStats.totalItems || 0,
 				totalFolders: foldersStats.totalItems || 0,
-				totalClicks: clicksStats.totalItems || 0
+				totalClicks: clicksStats.totalItems || 0,
 			},
-			blogPosts: blogPosts.slice(0, 3)
+			blogPosts: blogPosts.slice(0, 3),
 		};
 	} catch (err) {
 		return {
@@ -59,8 +53,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 				totalUsers: 0,
 				totalLinks: 0,
 				totalFolders: 0,
-				totalClicks: 0
-			}
+				totalClicks: 0,
+			},
 		};
 	}
 };
@@ -69,7 +63,7 @@ export const actions = {
 	create: async ({ request, url, locals }) => {
 		console.log('🎯 Home page: Create action called');
 		console.log('User:', locals.user?.id || 'Anonymous');
-		
+
 		const data = await request.formData();
 		const urlToShorten = data.get('url') as string;
 		const title = data.get('title') as string;
@@ -83,7 +77,7 @@ export const actions = {
 			title,
 			expiresIn,
 			maxClicks,
-			hasPassword: !!password
+			hasPassword: !!password,
 		});
 
 		if (!urlToShorten) {
@@ -96,7 +90,7 @@ export const actions = {
 		if (locals.user?.id) {
 			try {
 				const workspaces = await locals.pb.collection('workspaces').getList(1, 1, {
-					filter: `owner="${locals.user.id}" && type="personal"`
+					filter: `owner="${locals.user.id}" && type="personal"`,
 				});
 				if (workspaces.items.length > 0) {
 					workspaceId = workspaces.items[0].id;
@@ -133,23 +127,23 @@ export const actions = {
 					is_active: true,
 					expires_at: expiresAt,
 					max_clicks: maxClicks ? parseInt(maxClicks) : null,
-					password: password || null
+					password: password || null,
 				});
 
 				console.log('✅ Link created successfully:', link);
 				return {
 					success: true,
 					shortUrl: `${url.origin}/${link.short_code}`,
-					link
+					link,
 				};
 			} catch (err: any) {
 				console.error('❌ Error creating link:', err);
 				console.error('Error details:', {
 					message: err?.message,
 					data: err?.data,
-					response: err?.response
+					response: err?.response,
 				});
-				
+
 				if (err?.data?.data?.short_code?.code === 'validation_not_unique') {
 					shortCode = generateShortCode();
 					attempts++;
@@ -174,5 +168,5 @@ export const actions = {
 		} catch (err) {
 			return fail(400, { error: 'Failed to delete link' });
 		}
-	}
+	},
 } satisfies Actions;

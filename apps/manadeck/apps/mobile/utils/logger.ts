@@ -6,28 +6,28 @@
 const isDevelopment = process.env.NODE_ENV === 'development' || __DEV__;
 
 export const debug = (...args: any[]): void => {
-  if (isDevelopment) {
-    console.debug('[DEBUG]', ...args);
-  }
+	if (isDevelopment) {
+		console.debug('[DEBUG]', ...args);
+	}
 };
 
 export const info = (...args: any[]): void => {
-  if (isDevelopment) {
-    console.info('[INFO]', ...args);
-  }
+	if (isDevelopment) {
+		console.info('[INFO]', ...args);
+	}
 };
 
 export const warn = (...args: any[]): void => {
-  console.warn('[WARN]', ...args);
+	console.warn('[WARN]', ...args);
 };
 
 export const error = (...args: any[]): void => {
-  console.error('[ERROR]', ...args);
-  // TODO: Send to crash reporting service in production
+	console.error('[ERROR]', ...args);
+	// TODO: Send to crash reporting service in production
 };
 
 export const log = (...args: any[]): void => {
-  if (isDevelopment) {
-    console.log('[LOG]', ...args);
-  }
+	if (isDevelopment) {
+		console.log('[LOG]', ...args);
+	}
 };

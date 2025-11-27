@@ -11,6 +11,7 @@ This application uses Supabase for authentication, following a multi-Supabase ar
 ### Setup Requirements
 
 You need to set up two Supabase instances:
+
 1. **mana** - Central authentication service
 2. **maerchenzauber** - Application-specific database
 
@@ -19,6 +20,7 @@ See `auth.md` for detailed setup instructions and database schema.
 ### Environment Variables
 
 Configure the following environment variables (see `.env.example`):
+
 - `MANA_SUPABASE_URL` - URL of the central auth Supabase instance
 - `MANA_SUPABASE_ANON_KEY` - Anon key for the central auth Supabase
 - `MANA_JWT_SECRET` - JWT secret for verifying tokens from the central auth
@@ -39,27 +41,23 @@ after sucesfull build it shows something like this
 
 gcr.io/storyteller-a1fde/storyteller-api:v1.5.7
 
-
 then run
 
 gcloud run deploy storyteller-api \
-  --image gcr.io/storyteller-a1fde/storyteller-api:v1.5.7 \
-  --region=us-central1 \
-  --platform=managed \
-  --allow-unauthenticated
-
+ --image gcr.io/storyteller-a1fde/storyteller-api:v1.5.7 \
+ --region=us-central1 \
+ --platform=managed \
+ --allow-unauthenticated
 
 currently deployed: gcr.io/storyteller-a1fde/storyteller-api:v1.5.7
-
 
 ## Testing Request
 
 curl -X POST http://localhost:3000/story \
 -H "Content-Type: application/json" \
 -d '{
-  "characters": ["7d800d18-dcb4-4a48-addf-c6a6a88dd7ed"],
-  "storyDescription": "A fun adventure story about friendship and courage",
-  "illustratorId": "QsqH9Cyds24rRbAYf6zT",
-  "authorId": "fKMNQsgKojozOHTnjAbs"
+"characters": ["7d800d18-dcb4-4a48-addf-c6a6a88dd7ed"],
+"storyDescription": "A fun adventure story about friendship and courage",
+"illustratorId": "QsqH9Cyds24rRbAYf6zT",
+"authorId": "fKMNQsgKojozOHTnjAbs"
 }'
-

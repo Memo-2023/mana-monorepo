@@ -20,7 +20,12 @@
 	class="flex items-center gap-3 border border-theme bg-black/[0.03] dark:bg-white/[0.06] px-3 py-2.5 transition-colors hover:bg-black/[0.06] dark:hover:bg-white/[0.12] first:rounded-t-xl last:rounded-b-xl"
 >
 	<!-- Icon -->
-	<svg class="h-5 w-5 flex-shrink-0 text-theme-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+	<svg
+		class="h-5 w-5 flex-shrink-0 text-theme-secondary"
+		fill="none"
+		stroke="currentColor"
+		viewBox="0 0 24 24"
+	>
 		{#if icon === 'document-text-outline'}
 			<path
 				stroke-linecap="round"
@@ -159,12 +164,7 @@
 				d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
 			/>
 		{:else if icon === 'checkmark-done-outline'}
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M5 13l4 4L19 7"
-			/>
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
 		{:else if icon === 'stats-chart-outline'}
 			<path
 				stroke-linecap="round"

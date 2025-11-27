@@ -26,31 +26,23 @@ npx @memoro/ui add header-button
 ```tsx
 import { HeaderButton } from '@/components/navigation/HeaderButton';
 
-<HeaderButton
-  icon="search"
-  onPress={() => console.log('Search')}
-/>
+<HeaderButton icon="search" onPress={() => console.log('Search')} />;
 ```
 
 ### Custom Size and Color
 
 ```tsx
-<HeaderButton
-  icon="settings"
-  onPress={handleSettings}
-  size={28}
-  iconColor="#3B82F6"
-/>
+<HeaderButton icon="settings" onPress={handleSettings} size={28} iconColor="#3B82F6" />
 ```
 
 ### Disabled State
 
 ```tsx
 <HeaderButton
-  icon="save"
-  onPress={handleSave}
-  disabled={!hasChanges}
-  iconColor={hasChanges ? '#10B981' : '#9CA3AF'}
+	icon="save"
+	onPress={handleSave}
+	disabled={!hasChanges}
+	iconColor={hasChanges ? '#10B981' : '#9CA3AF'}
 />
 ```
 
@@ -58,23 +50,23 @@ import { HeaderButton } from '@/components/navigation/HeaderButton';
 
 ```tsx
 <View style={{ flexDirection: 'row', gap: 4 }}>
-  <HeaderButton icon="search" onPress={handleSearch} />
-  <HeaderButton icon="filter" onPress={handleFilter} />
-  <HeaderButton icon="ellipsis-horizontal" onPress={handleMore} />
+	<HeaderButton icon="search" onPress={handleSearch} />
+	<HeaderButton icon="filter" onPress={handleFilter} />
+	<HeaderButton icon="ellipsis-horizontal" onPress={handleMore} />
 </View>
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `icon` | `string` | - | **Required** - Icon name |
-| `onPress` | `() => void` | - | **Required** - Press handler |
-| `size` | `number` | `24` | Icon size in pixels |
-| `iconColor` | `string` | `'#6B7280'` | Icon color |
-| `disabled` | `boolean` | `false` | Button is disabled |
-| `style` | `ViewStyle` | - | Additional styles |
-| `hitSlop` | `object` | `{top:10,bottom:10,left:10,right:10}` | Touch target expansion |
+| Prop        | Type         | Default                               | Description                  |
+| ----------- | ------------ | ------------------------------------- | ---------------------------- |
+| `icon`      | `string`     | -                                     | **Required** - Icon name     |
+| `onPress`   | `() => void` | -                                     | **Required** - Press handler |
+| `size`      | `number`     | `24`                                  | Icon size in pixels          |
+| `iconColor` | `string`     | `'#6B7280'`                           | Icon color                   |
+| `disabled`  | `boolean`    | `false`                               | Button is disabled           |
+| `style`     | `ViewStyle`  | -                                     | Additional styles            |
+| `hitSlop`   | `object`     | `{top:10,bottom:10,left:10,right:10}` | Touch target expansion       |
 
 ## Default Styling
 
@@ -90,60 +82,41 @@ import { HeaderButton } from '@/components/navigation/HeaderButton';
 ### Save Button
 
 ```tsx
-<HeaderButton
-  icon="checkmark"
-  onPress={handleSave}
-  iconColor="#10B981"
-/>
+<HeaderButton icon="checkmark" onPress={handleSave} iconColor="#10B981" />
 ```
 
 ### Close Button
 
 ```tsx
-<HeaderButton
-  icon="close"
-  onPress={handleClose}
-  iconColor="#EF4444"
-/>
+<HeaderButton icon="close" onPress={handleClose} iconColor="#EF4444" />
 ```
 
 ### Add Button
 
 ```tsx
-<HeaderButton
-  icon="add"
-  onPress={handleAdd}
-  iconColor="#3B82F6"
-  size={28}
-/>
+<HeaderButton icon="add" onPress={handleAdd} iconColor="#3B82F6" size={28} />
 ```
 
 ### Share Button
 
 ```tsx
-<HeaderButton
-  icon="share-outline"
-  onPress={handleShare}
-/>
+<HeaderButton icon="share-outline" onPress={handleShare} />
 ```
 
 ### More Menu
 
 ```tsx
-<HeaderButton
-  icon="ellipsis-horizontal"
-  onPress={handleOpenMenu}
-/>
+<HeaderButton icon="ellipsis-horizontal" onPress={handleOpenMenu} />
 ```
 
 ### Edit Button
 
 ```tsx
 <HeaderButton
-  icon="pencil"
-  onPress={handleEdit}
-  disabled={!canEdit}
-  iconColor={canEdit ? '#3B82F6' : '#9CA3AF'}
+	icon="pencil"
+	onPress={handleEdit}
+	disabled={!canEdit}
+	iconColor={canEdit ? '#3B82F6' : '#9CA3AF'}
 />
 ```
 
@@ -153,12 +126,10 @@ import { HeaderButton } from '@/components/navigation/HeaderButton';
 
 ```tsx
 <Header
-  title="Details"
-  showBackButton
-  onBackPress={() => router.back()}
-  rightContent={
-    <HeaderButton icon="ellipsis-horizontal" onPress={handleMore} />
-  }
+	title="Details"
+	showBackButton
+	onBackPress={() => router.back()}
+	rightContent={<HeaderButton icon="ellipsis-horizontal" onPress={handleMore} />}
 />
 ```
 
@@ -166,14 +137,14 @@ import { HeaderButton } from '@/components/navigation/HeaderButton';
 
 ```tsx
 <Header
-  title="Photos"
-  rightContent={
-    <View style={{ flexDirection: 'row', gap: 4 }}>
-      <HeaderButton icon="search" onPress={handleSearch} />
-      <HeaderButton icon="filter" onPress={handleFilter} />
-      <HeaderButton icon="ellipsis-horizontal" onPress={handleMore} />
-    </View>
-  }
+	title="Photos"
+	rightContent={
+		<View style={{ flexDirection: 'row', gap: 4 }}>
+			<HeaderButton icon="search" onPress={handleSearch} />
+			<HeaderButton icon="filter" onPress={handleFilter} />
+			<HeaderButton icon="ellipsis-horizontal" onPress={handleMore} />
+		</View>
+	}
 />
 ```
 
@@ -181,21 +152,21 @@ import { HeaderButton } from '@/components/navigation/HeaderButton';
 
 ```tsx
 <Header
-  title="Edit"
-  showBackButton
-  onBackPress={() => router.back()}
-  rightContent={
-    <>
-      {isEditing && (
-        <HeaderButton
-          icon="checkmark"
-          onPress={handleSave}
-          iconColor="#10B981"
-          disabled={!hasChanges}
-        />
-      )}
-    </>
-  }
+	title="Edit"
+	showBackButton
+	onBackPress={() => router.back()}
+	rightContent={
+		<>
+			{isEditing && (
+				<HeaderButton
+					icon="checkmark"
+					onPress={handleSave}
+					iconColor="#10B981"
+					disabled={!hasChanges}
+				/>
+			)}
+		</>
+	}
 />
 ```
 
@@ -229,48 +200,42 @@ import { HeaderButton } from '@/components/navigation/HeaderButton';
 
 ```tsx
 <View>
-  <HeaderButton icon="notifications-outline" onPress={handleNotifications} />
-  {hasUnread && (
-    <View style={{
-      position: 'absolute',
-      top: 6,
-      right: 6,
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: '#EF4444',
-    }} />
-  )}
+	<HeaderButton icon="notifications-outline" onPress={handleNotifications} />
+	{hasUnread && (
+		<View
+			style={{
+				position: 'absolute',
+				top: 6,
+				right: 6,
+				width: 8,
+				height: 8,
+				borderRadius: 4,
+				backgroundColor: '#EF4444',
+			}}
+		/>
+	)}
 </View>
 ```
 
 ### Download
 
 ```tsx
-<HeaderButton
-  icon="download-outline"
-  onPress={handleDownload}
-  disabled={isDownloading}
-/>
+<HeaderButton icon="download-outline" onPress={handleDownload} disabled={isDownloading} />
 ```
 
 ### Delete
 
 ```tsx
-<HeaderButton
-  icon="trash-outline"
-  onPress={handleDelete}
-  iconColor="#EF4444"
-/>
+<HeaderButton icon="trash-outline" onPress={handleDelete} iconColor="#EF4444" />
 ```
 
 ### Favorite
 
 ```tsx
 <HeaderButton
-  icon={isFavorite ? 'heart' : 'heart-outline'}
-  onPress={toggleFavorite}
-  iconColor={isFavorite ? '#EF4444' : '#6B7280'}
+	icon={isFavorite ? 'heart' : 'heart-outline'}
+	onPress={toggleFavorite}
+	iconColor={isFavorite ? '#EF4444' : '#6B7280'}
 />
 ```
 
@@ -279,31 +244,23 @@ import { HeaderButton } from '@/components/navigation/HeaderButton';
 ### With Margin
 
 ```tsx
-<HeaderButton
-  icon="search"
-  onPress={handleSearch}
-  style={{ marginRight: 8 }}
-/>
+<HeaderButton icon="search" onPress={handleSearch} style={{ marginRight: 8 }} />
 ```
 
 ### Larger Touch Target
 
 ```tsx
 <HeaderButton
-  icon="close"
-  onPress={handleClose}
-  hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+	icon="close"
+	onPress={handleClose}
+	hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
 />
 ```
 
 ### Custom Padding
 
 ```tsx
-<HeaderButton
-  icon="settings"
-  onPress={handleSettings}
-  style={{ padding: 12 }}
-/>
+<HeaderButton icon="settings" onPress={handleSettings} style={{ padding: 12 }} />
 ```
 
 ## Notes

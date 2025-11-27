@@ -32,7 +32,7 @@
 		blue: 'from-blue-400 to-blue-600',
 		green: 'from-green-400 to-green-600',
 		amber: 'from-amber-400 to-amber-600',
-		red: 'from-red-400 to-red-600'
+		red: 'from-red-400 to-red-600',
 	};
 
 	// Fetch data
@@ -41,7 +41,7 @@
 		try {
 			const [collectionData, allStoriesData] = await Promise.all([
 				dataService.getCollection?.(collectionId),
-				dataService.getStories()
+				dataService.getStories(),
 			]);
 
 			if (collectionData) {
@@ -55,7 +55,7 @@
 					name: 'Gutenachtgeschichten',
 					description: 'Beruhigende Geschichten zum Einschlafen',
 					color: 'purple',
-					storyIds: []
+					storyIds: [],
 				};
 				allStories = [];
 				stories = [];
@@ -66,7 +66,7 @@
 				id: collectionId,
 				name: 'Sammlung',
 				color: 'pink',
-				storyIds: []
+				storyIds: [],
 			};
 			stories = [];
 			allStories = [];
@@ -113,9 +113,7 @@
 	}
 
 	// Get stories not in collection
-	let availableStories = $derived(
-		allStories.filter((s) => !collection?.storyIds?.includes(s.id))
-	);
+	let availableStories = $derived(allStories.filter((s) => !collection?.storyIds?.includes(s.id)));
 
 	// Get story image
 	function getStoryImage(story: Story): string {
@@ -137,7 +135,10 @@
 		</div>
 	{:else if collection}
 		<!-- Header -->
-		<div class="overflow-hidden rounded-2xl bg-gradient-to-br {colorGradients[collection.color] || colorGradients.pink}">
+		<div
+			class="overflow-hidden rounded-2xl bg-gradient-to-br {colorGradients[collection.color] ||
+				colorGradients.pink}"
+		>
 			<div class="p-6">
 				<div class="flex items-start gap-4">
 					<a
@@ -145,7 +146,12 @@
 						class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 text-white hover:bg-white/30"
 					>
 						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M10 19l-7-7m0 0l7-7m-7 7h18"
+							/>
 						</svg>
 					</a>
 					<div class="flex-1">
@@ -154,7 +160,8 @@
 							<p class="mt-1 text-white/80">{collection.description}</p>
 						{/if}
 						<p class="mt-2 text-sm text-white/70">
-							{stories.length} {stories.length === 1 ? 'Geschichte' : 'Geschichten'}
+							{stories.length}
+							{stories.length === 1 ? 'Geschichte' : 'Geschichten'}
 						</p>
 					</div>
 					<button
@@ -162,7 +169,12 @@
 						class="flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 text-sm font-medium text-white hover:bg-white/30"
 					>
 						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 4v16m8-8H4"
+							/>
 						</svg>
 						Hinzufügen
 					</button>
@@ -173,8 +185,18 @@
 		<!-- Stories Grid -->
 		{#if stories.length === 0}
 			<div class="rounded-2xl bg-gray-50 p-8 text-center dark:bg-gray-800/50">
-				<svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+				<svg
+					class="mx-auto h-16 w-16 text-gray-400"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="1.5"
+						d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+					/>
 				</svg>
 				<h3 class="mt-4 font-medium text-gray-700 dark:text-gray-300">Keine Geschichten</h3>
 				<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -190,7 +212,9 @@
 		{:else}
 			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{#each stories as story (story.id)}
-					<div class="group relative overflow-hidden rounded-2xl bg-white shadow-md dark:bg-gray-800">
+					<div
+						class="group relative overflow-hidden rounded-2xl bg-white shadow-md dark:bg-gray-800"
+					>
 						<!-- Image -->
 						<div class="aspect-video overflow-hidden">
 							<img
@@ -218,7 +242,12 @@
 							aria-label="Aus Sammlung entfernen"
 						>
 							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
 							</svg>
 						</button>
 
@@ -249,14 +278,21 @@
 				onkeydown={(e) => e.stopPropagation()}
 				role="dialog"
 			>
-				<div class="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
+				<div
+					class="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700"
+				>
 					<h2 class="text-lg font-bold text-gray-800 dark:text-gray-200">Geschichten hinzufügen</h2>
 					<button
 						onclick={() => (showAddModal = false)}
 						class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
 					>
 						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
 						</svg>
 					</button>
 				</div>
@@ -264,8 +300,18 @@
 				<div class="max-h-96 overflow-y-auto p-4">
 					{#if availableStories.length === 0}
 						<div class="py-8 text-center">
-							<svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+							<svg
+								class="mx-auto h-12 w-12 text-gray-400"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="1.5"
+									d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+								/>
 							</svg>
 							<p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
 								Alle Geschichten sind bereits in dieser Sammlung
@@ -275,7 +321,10 @@
 						<div class="space-y-2">
 							{#each availableStories as story (story.id)}
 								<button
-									onclick={() => { addStory(story.id); showAddModal = false; }}
+									onclick={() => {
+										addStory(story.id);
+										showAddModal = false;
+									}}
 									class="flex w-full items-center gap-3 rounded-xl p-3 text-left transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
 								>
 									<div class="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg">
@@ -293,8 +342,18 @@
 											{story.description || 'Keine Beschreibung'}
 										</p>
 									</div>
-									<svg class="h-5 w-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+									<svg
+										class="h-5 w-5 flex-shrink-0 text-gray-400"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M12 4v16m8-8H4"
+										/>
 									</svg>
 								</button>
 							{/each}

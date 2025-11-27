@@ -5,14 +5,14 @@ import { LevelModule } from './level/level.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
-    DatabaseModule,
-    LevelModule,
-    HealthModule,
-  ],
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			envFilePath: '.env',
+		}),
+		DatabaseModule,
+		LevelModule,
+		HealthModule,
+	],
 })
 export class AppModule {}

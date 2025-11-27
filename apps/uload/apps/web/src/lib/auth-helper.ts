@@ -54,7 +54,7 @@ export async function registerUser(data: RegisterData): Promise<RegisterResult> 
 			password: data.password,
 			passwordConfirm: data.passwordConfirm,
 			username,
-			emailVisibility: true
+			emailVisibility: true,
 		};
 
 		console.log('Creating user with minimal data:', { email, username });
@@ -72,7 +72,7 @@ export async function registerUser(data: RegisterData): Promise<RegisterResult> 
 
 		return {
 			success: true,
-			user: newUser
+			user: newUser,
 		};
 	} catch (error: any) {
 		console.error('Registration error:', error);
@@ -111,7 +111,7 @@ export async function registerUser(data: RegisterData): Promise<RegisterResult> 
 			}
 			return {
 				success: false,
-				error: 'Registration system error. Please try again later or contact support.'
+				error: 'Registration system error. Please try again later or contact support.',
 			};
 		}
 
@@ -125,7 +125,7 @@ export async function registerUser(data: RegisterData): Promise<RegisterResult> 
 		// Generic error
 		return {
 			success: false,
-			error: error?.message || 'Registration failed. Please try again.'
+			error: error?.message || 'Registration failed. Please try again.',
 		};
 	}
 }
@@ -140,7 +140,7 @@ export async function loginUser(email: string, password: string) {
 		console.error('Login error:', error);
 		return {
 			success: false,
-			error: 'Invalid email or password'
+			error: 'Invalid email or password',
 		};
 	}
 }

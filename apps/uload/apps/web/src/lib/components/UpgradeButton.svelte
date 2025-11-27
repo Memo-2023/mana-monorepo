@@ -11,13 +11,13 @@
 	const priceDisplay = {
 		monthly: '4,99€/Monat',
 		yearly: '39,99€/Jahr',
-		lifetime: '129,99€ einmalig'
+		lifetime: '129,99€ einmalig',
 	};
 
 	const sizeClasses = {
 		sm: 'btn-sm',
 		md: '',
-		lg: 'btn-lg'
+		lg: 'btn-lg',
 	};
 
 	async function handleUpgrade() {
@@ -28,9 +28,9 @@
 			const response = await fetch('/api/stripe/checkout', {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ priceType })
+				body: JSON.stringify({ priceType }),
 			});
 
 			if (!response.ok) {

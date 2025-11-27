@@ -1,6 +1,6 @@
 ---
-title: "Unser Team: Die Menschen hinter Mana"
-description: "Lernen Sie das leidenschaftliche Team kennen, das Tag für Tag daran arbeitet, KI für alle zugänglich zu machen."
+title: 'Unser Team: Die Menschen hinter Mana'
+description: 'Lernen Sie das leidenschaftliche Team kennen, das Tag für Tag daran arbeitet, KI für alle zugänglich zu machen.'
 category: team
 order: 3
 featured: false
@@ -23,16 +23,19 @@ Unser Gründer, Till Schneider, erlebte diese Frustration hautnah:
 ### Führungsteam
 
 **Till Schneider** - CEO & Gründer
+
 - Serienunternehmer mit 10+ Jahren Erfahrung im SaaS-Bereich
 - Leidenschaft für Demokratisierung von Technologie
 - Vision: "KI sollte so einfach zugänglich sein wie Strom aus der Steckdose"
 
 **Dr. Sarah Chen** - CTO
+
 - KI-Forscherin mit Doktortitel von Stanford
 - Früher: Lead Engineer bei OpenAI
 - Fokus: Nahtlose Integration verschiedener KI-Modelle
 
 **Michael Okonkwo** - Head of Product
+
 - Product Designer mit Hintergrund in User Psychology
 - Mission: "Komplexe Technologie einfach nutzbar machen"
 - Verantwortlich für das intuitive Mana-Interface

@@ -6,7 +6,15 @@
 	import { user } from '$lib/stores/auth';
 	import { memoService } from '$lib/services/memoService';
 	import { tagService } from '$lib/services/tagService';
-	import { memos, selectedTagId, filteredMemos, searchQuery, hasMoreMemos, isLoadingMore, currentOffset } from '$lib/stores/memos';
+	import {
+		memos,
+		selectedTagId,
+		filteredMemos,
+		searchQuery,
+		hasMoreMemos,
+		isLoadingMore,
+		currentOffset,
+	} from '$lib/stores/memos';
 	import { tags } from '$lib/stores/tags';
 	import { tabs } from '$lib/stores/tabs';
 	import { isSidebarMode, isNavCollapsed } from '$lib/stores/navigation';
@@ -77,7 +85,7 @@
 			if (modKey && e.key === 'w') {
 				e.preventDefault();
 				if ($tabs.activeSplitId) {
-					const activeSplit = $tabs.splits.find(s => s.id === $tabs.activeSplitId);
+					const activeSplit = $tabs.splits.find((s) => s.id === $tabs.activeSplitId);
 					if (activeSplit?.activeTabId) {
 						tabs.closeTab(activeSplit.id, activeSplit.activeTabId);
 					}
@@ -89,9 +97,11 @@
 			if (modKey && e.key === '[') {
 				e.preventDefault();
 				if ($tabs.activeSplitId) {
-					const activeSplit = $tabs.splits.find(s => s.id === $tabs.activeSplitId);
+					const activeSplit = $tabs.splits.find((s) => s.id === $tabs.activeSplitId);
 					if (activeSplit && activeSplit.tabs.length > 1) {
-						const currentIndex = activeSplit.tabs.findIndex(t => t.id === activeSplit.activeTabId);
+						const currentIndex = activeSplit.tabs.findIndex(
+							(t) => t.id === activeSplit.activeTabId
+						);
 						const prevIndex = currentIndex > 0 ? currentIndex - 1 : activeSplit.tabs.length - 1;
 						tabs.activateTab(activeSplit.id, activeSplit.tabs[prevIndex].id);
 					}
@@ -103,9 +113,11 @@
 			if (modKey && e.key === ']') {
 				e.preventDefault();
 				if ($tabs.activeSplitId) {
-					const activeSplit = $tabs.splits.find(s => s.id === $tabs.activeSplitId);
+					const activeSplit = $tabs.splits.find((s) => s.id === $tabs.activeSplitId);
 					if (activeSplit && activeSplit.tabs.length > 1) {
-						const currentIndex = activeSplit.tabs.findIndex(t => t.id === activeSplit.activeTabId);
+						const currentIndex = activeSplit.tabs.findIndex(
+							(t) => t.id === activeSplit.activeTabId
+						);
 						const nextIndex = currentIndex < activeSplit.tabs.length - 1 ? currentIndex + 1 : 0;
 						tabs.activateTab(activeSplit.id, activeSplit.tabs[nextIndex].id);
 					}
@@ -139,7 +151,11 @@
 		isLoadingMore.set(true);
 		try {
 			const newOffset = $currentOffset + MEMOS_PER_PAGE;
-			const { memos: newMemos, hasMore } = await memoService.getMemosForList($user.id, MEMOS_PER_PAGE, newOffset);
+			const { memos: newMemos, hasMore } = await memoService.getMemosForList(
+				$user.id,
+				MEMOS_PER_PAGE,
+				newOffset
+			);
 
 			memos.appendMemos(newMemos);
 			currentOffset.set(newOffset);
@@ -167,7 +183,7 @@
 			// Load memos and tags in parallel using optimized list query
 			const [memosResult, tagsData] = await Promise.all([
 				memoService.getMemosForList($user.id, MEMOS_PER_PAGE, 0),
-				tagService.getTags($user.id)
+				tagService.getTags($user.id),
 			]);
 
 			memos.setMemos(memosResult.memos);
@@ -177,7 +193,7 @@
 			// Check if there's a memo ID in the URL query
 			const memoId = $page.url.searchParams.get('id');
 			if (memoId) {
-				const memo = memosResult.memos.find(m => m.id === memoId);
+				const memo = memosResult.memos.find((m) => m.id === memoId);
 				if (memo) {
 					await selectMemo(memo, false);
 				}
@@ -276,7 +292,7 @@
 		contextMenu = {
 			memo,
 			x: e.clientX,
-			y: e.clientY
+			y: e.clientY,
 		};
 	}
 
@@ -331,7 +347,7 @@
 				await navigator.share({
 					title: memo.title || $t('memo.no_title'),
 					text: memo.transcript ? memo.transcript.substring(0, 100) + '...' : '',
-					url: shareUrl
+					url: shareUrl,
 				});
 			} catch (err) {
 				if ((err as Error).name !== 'AbortError') {
@@ -358,7 +374,7 @@ Dauer: ${formatDuration(getMemooDuration(memo))}
 Transkript:
 ${memo.transcript || 'Kein Transkript verfügbar'}
 
-${memo.memories && memo.memories.length > 0 ? '\nKI-Analyse:\n' + memo.memories.map(m => `${m.title}\n${m.content}`).join('\n\n') : ''}
+${memo.memories && memo.memories.length > 0 ? '\nKI-Analyse:\n' + memo.memories.map((m) => `${m.title}\n${m.content}`).join('\n\n') : ''}
 `.trim();
 
 		const blob = new Blob([content], { type: 'text/plain' });
@@ -393,7 +409,7 @@ ${memo.memories && memo.memories.length > 0 ? '\nKI-Analyse:\n' + memo.memories.
 </svelte:head>
 
 {#if loading}
-	<DashboardSkeleton leftColumnWidth={leftColumnWidth} />
+	<DashboardSkeleton {leftColumnWidth} />
 {:else if error}
 	<div class="flex h-full items-center justify-center">
 		<div class="text-center">
@@ -406,14 +422,19 @@ ${memo.memories && memo.memories.length > 0 ? '\nKI-Analyse:\n' + memo.memories.
 	</div>
 {:else}
 	<!-- Two-column layout -->
-	<div class="flex w-full gap-0 overflow-hidden {$isNavCollapsed || $isSidebarMode ? 'h-screen' : 'h-[calc(100vh-5rem)]'}">
+	<div
+		class="flex w-full gap-0 overflow-hidden {$isNavCollapsed || $isSidebarMode
+			? 'h-screen'
+			: 'h-[calc(100vh-5rem)]'}"
+	>
 		<!-- Left Column: Memo List -->
-		<div
-			class="relative flex flex-shrink-0 flex-col bg-menu"
-			style="width: {leftColumnWidth}px;"
-		>
+		<div class="relative flex flex-shrink-0 flex-col bg-menu" style="width: {leftColumnWidth}px;">
 			<!-- Floating Search Bar -->
-			<div class="absolute top-0 left-0 right-0 z-20 py-3 pr-2 transition-all duration-300 {$isNavCollapsed ? 'pl-16' : 'pl-4'}">
+			<div
+				class="absolute top-0 left-0 right-0 z-20 py-3 pr-2 transition-all duration-300 {$isNavCollapsed
+					? 'pl-16'
+					: 'pl-4'}"
+			>
 				<div class="relative">
 					<input
 						type="text"
@@ -462,121 +483,136 @@ ${memo.memories && memo.memories.length > 0 ? '\nKI-Analyse:\n' + memo.memories.
 
 			<!-- Memo List (Scrollable via VirtualList) -->
 			<div class="flex-1 overflow-hidden flex flex-col">
-
 				<!-- Content area (takes remaining space) -->
 				<div class="flex-1 overflow-hidden">
 					{#if $filteredMemos.length === 0}
 						<div class="flex flex-col items-center justify-center p-8 pt-[80px] text-center h-full">
-						{#if $searchQuery}
-							<div class="text-6xl mb-4">🔍</div>
-							<h3 class="text-lg font-semibold mb-2">{$t('memo.no_search_results')}</h3>
-							<p class="text-sm text-theme-secondary mb-4">
-								{$t('memo.no_memos_with_search', { values: { query: $searchQuery } })}
-							</p>
-							<button
-								onclick={() => searchQuery.set('')}
-								class="rounded-lg border border-mana bg-mana px-4 py-2 text-sm font-medium text-white hover:bg-mana/90"
-							>
-								{$t('memo.clear_search')}
-							</button>
-						{:else if $selectedTagId}
-							<div class="text-6xl mb-4">🏷️</div>
-							<h3 class="text-lg font-semibold mb-2">{$t('memo.no_memos_with_tag')}</h3>
-							<p class="text-sm text-theme-secondary mb-4">
-								{$t('memo.no_memos_with_tag_hint')}
-							</p>
-							<button
-								onclick={() => selectedTagId.set(null)}
-								class="rounded-lg border border-mana bg-mana px-4 py-2 text-sm font-medium text-white hover:bg-mana/90"
-							>
-								{$t('memo.show_all_memos')}
-							</button>
-						{:else}
-							<div class="text-6xl mb-4">🎤</div>
-							<h3 class="text-lg font-semibold mb-2">{$t('memo.no_memos_yet')}</h3>
-							<p class="text-sm text-theme-secondary">
-								{$t('memo.no_memos_hint')}
-							</p>
-						{/if}
-					</div>
-				{:else}
-					<!-- Virtual Scrolling List -->
-					<VirtualList
-						items={$filteredMemos}
-						itemHeight={156}
-						onLoadMore={$hasMoreMemos ? loadMoreMemos : undefined}
-						loadMoreThreshold={300}
-						class="pl-4 pr-2 pt-[72px]"
-					>
-						{#snippet children({ item: memo, index })}
-							<button
-								onclick={(e) => handleMemoClick(memo, e)}
-								oncontextmenu={(e) => handleContextMenu(e, memo)}
-								class="w-full rounded-xl border border-theme bg-content p-4 text-left transition-colors hover:bg-menu-hover"
-								style="height: 144px; margin-bottom: 12px;"
-							>
-								<!-- Title with Pin Indicator -->
-								<div class="mb-1 flex items-center gap-2">
-									{#if memo.is_pinned}
-										<svg
-											class="h-4 w-4 flex-shrink-0 text-primary"
-											fill="currentColor"
-											viewBox="0 0 24 24"
-											xmlns="http://www.w3.org/2000/svg"
-										>
-											<path
-												d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-											/>
-										</svg>
-									{/if}
-									<h3 class="text-sm font-semibold line-clamp-2">
-										{memo.title || $t('memo.no_title')}
-									</h3>
-								</div>
-
-								<!-- Intro/Transcript Preview -->
-								{#if memo.intro}
-									<p class="mb-2 text-sm text-theme-secondary line-clamp-2">
-										{memo.intro}
-									</p>
-								{:else if memo.transcript}
-									<p class="mb-2 text-sm text-theme-secondary line-clamp-2">
-										{memo.transcript}
-									</p>
-								{:else}
-									<p class="mb-2 text-sm italic text-theme-muted">
-										{$t('memo.processing_transcript')}
-									</p>
-								{/if}
-
-								<!-- Footer -->
-								<div class="flex items-center justify-between">
-									<span class="text-xs text-theme-muted">
-										{formatTimestamp(memo.created_at)}
-									</span>
-									<span class="text-xs text-theme-muted">
-										{formatDuration(getMemooDuration(memo))}
-									</span>
-								</div>
-							</button>
-						{/snippet}
-					</VirtualList>
-
-					<!-- Loading indicator at bottom -->
-					{#if $isLoadingMore}
-						<div class="px-4 pb-3">
-							<div class="w-full rounded-xl border border-theme bg-content/50 p-4 text-center text-sm text-theme-secondary">
-								<span class="flex items-center justify-center gap-2">
-									<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-									</svg>
-									{$t('common.loading')}
-								</span>
-							</div>
+							{#if $searchQuery}
+								<div class="text-6xl mb-4">🔍</div>
+								<h3 class="text-lg font-semibold mb-2">{$t('memo.no_search_results')}</h3>
+								<p class="text-sm text-theme-secondary mb-4">
+									{$t('memo.no_memos_with_search', { values: { query: $searchQuery } })}
+								</p>
+								<button
+									onclick={() => searchQuery.set('')}
+									class="rounded-lg border border-mana bg-mana px-4 py-2 text-sm font-medium text-white hover:bg-mana/90"
+								>
+									{$t('memo.clear_search')}
+								</button>
+							{:else if $selectedTagId}
+								<div class="text-6xl mb-4">🏷️</div>
+								<h3 class="text-lg font-semibold mb-2">{$t('memo.no_memos_with_tag')}</h3>
+								<p class="text-sm text-theme-secondary mb-4">
+									{$t('memo.no_memos_with_tag_hint')}
+								</p>
+								<button
+									onclick={() => selectedTagId.set(null)}
+									class="rounded-lg border border-mana bg-mana px-4 py-2 text-sm font-medium text-white hover:bg-mana/90"
+								>
+									{$t('memo.show_all_memos')}
+								</button>
+							{:else}
+								<div class="text-6xl mb-4">🎤</div>
+								<h3 class="text-lg font-semibold mb-2">{$t('memo.no_memos_yet')}</h3>
+								<p class="text-sm text-theme-secondary">
+									{$t('memo.no_memos_hint')}
+								</p>
+							{/if}
 						</div>
+					{:else}
+						<!-- Virtual Scrolling List -->
+						<VirtualList
+							items={$filteredMemos}
+							itemHeight={156}
+							onLoadMore={$hasMoreMemos ? loadMoreMemos : undefined}
+							loadMoreThreshold={300}
+							class="pl-4 pr-2 pt-[72px]"
+						>
+							{#snippet children({ item: memo, index })}
+								<button
+									onclick={(e) => handleMemoClick(memo, e)}
+									oncontextmenu={(e) => handleContextMenu(e, memo)}
+									class="w-full rounded-xl border border-theme bg-content p-4 text-left transition-colors hover:bg-menu-hover"
+									style="height: 144px; margin-bottom: 12px;"
+								>
+									<!-- Title with Pin Indicator -->
+									<div class="mb-1 flex items-center gap-2">
+										{#if memo.is_pinned}
+											<svg
+												class="h-4 w-4 flex-shrink-0 text-primary"
+												fill="currentColor"
+												viewBox="0 0 24 24"
+												xmlns="http://www.w3.org/2000/svg"
+											>
+												<path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+											</svg>
+										{/if}
+										<h3 class="text-sm font-semibold line-clamp-2">
+											{memo.title || $t('memo.no_title')}
+										</h3>
+									</div>
+
+									<!-- Intro/Transcript Preview -->
+									{#if memo.intro}
+										<p class="mb-2 text-sm text-theme-secondary line-clamp-2">
+											{memo.intro}
+										</p>
+									{:else if memo.transcript}
+										<p class="mb-2 text-sm text-theme-secondary line-clamp-2">
+											{memo.transcript}
+										</p>
+									{:else}
+										<p class="mb-2 text-sm italic text-theme-muted">
+											{$t('memo.processing_transcript')}
+										</p>
+									{/if}
+
+									<!-- Footer -->
+									<div class="flex items-center justify-between">
+										<span class="text-xs text-theme-muted">
+											{formatTimestamp(memo.created_at)}
+										</span>
+										<span class="text-xs text-theme-muted">
+											{formatDuration(getMemooDuration(memo))}
+										</span>
+									</div>
+								</button>
+							{/snippet}
+						</VirtualList>
+
+						<!-- Loading indicator at bottom -->
+						{#if $isLoadingMore}
+							<div class="px-4 pb-3">
+								<div
+									class="w-full rounded-xl border border-theme bg-content/50 p-4 text-center text-sm text-theme-secondary"
+								>
+									<span class="flex items-center justify-center gap-2">
+										<svg
+											class="animate-spin h-4 w-4"
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+										>
+											<circle
+												class="opacity-25"
+												cx="12"
+												cy="12"
+												r="10"
+												stroke="currentColor"
+												stroke-width="4"
+											></circle>
+											<path
+												class="opacity-75"
+												fill="currentColor"
+												d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+											></path>
+										</svg>
+										{$t('common.loading')}
+									</span>
+								</div>
+							</div>
+						{/if}
 					{/if}
-				{/if}
 				</div>
 			</div>
 		</div>
@@ -605,44 +641,44 @@ ${memo.memories && memo.memories.length > 0 ? '\nKI-Analyse:\n' + memo.memories.
 			{
 				label: $t('memo.open_in_new_tab'),
 				icon: 'open',
-				action: () => handleOpenInNewTab(menuMemo)
+				action: () => handleOpenInNewTab(menuMemo),
 			},
 			{
 				label: menuMemo.is_pinned ? $t('memo.unpin') : $t('memo.pin'),
 				icon: 'pin',
-				action: () => handlePinMemo(menuMemo)
+				action: () => handlePinMemo(menuMemo),
 			},
 			{
 				separator: true,
 				label: '',
-				action: () => {}
+				action: () => {},
 			},
 			{
 				label: $t('memo.edit_title'),
 				icon: 'edit',
-				action: () => handleEditTitle(menuMemo)
+				action: () => handleEditTitle(menuMemo),
 			},
 			{
 				label: $t('memo.share'),
 				icon: 'share',
-				action: () => handleShareMemo(menuMemo)
+				action: () => handleShareMemo(menuMemo),
 			},
 			{
 				label: $t('memo.export_text'),
 				icon: 'download',
-				action: () => handleExportMemo(menuMemo)
+				action: () => handleExportMemo(menuMemo),
 			},
 			{
 				separator: true,
 				label: '',
-				action: () => {}
+				action: () => {},
 			},
 			{
 				label: $t('common.delete'),
 				icon: 'delete',
 				danger: true,
-				action: () => handleDeleteMemo(menuMemo)
-			}
+				action: () => handleDeleteMemo(menuMemo),
+			},
 		]}
 		x={contextMenu.x}
 		y={contextMenu.y}
@@ -660,7 +696,9 @@ ${memo.memories && memo.memories.length > 0 ? '\nKI-Analyse:\n' + memo.memories.
 	{#snippet children()}
 		<div class="space-y-4">
 			<p class="text-theme">
-				{$t('memo.delete_memo_confirm', { values: { title: memoToDelete?.title || $t('memo.no_title') } })}
+				{$t('memo.delete_memo_confirm', {
+					values: { title: memoToDelete?.title || $t('memo.no_title') },
+				})}
 			</p>
 			<p class="text-theme-secondary text-sm">
 				{$t('memo.delete_memo_warning')}

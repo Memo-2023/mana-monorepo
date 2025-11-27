@@ -14,15 +14,15 @@ import { useAnalytics } from './useAnalytics';
  * useScreenTracking('home_screen', { tab: 'home' });
  */
 export const useScreenTracking = (screenName: string, properties?: Record<string, any>) => {
-  const { screen } = useAnalytics();
+	const { screen } = useAnalytics();
 
-  useFocusEffect(
-    useCallback(() => {
-      // Track screen view when screen comes into focus
-      screen(screenName, {
-        ...properties,
-        focused_at: new Date().toISOString(),
-      });
-    }, [screenName, screen]) // Remove properties from dependencies to avoid loops
-  );
+	useFocusEffect(
+		useCallback(() => {
+			// Track screen view when screen comes into focus
+			screen(screenName, {
+				...properties,
+				focused_at: new Date().toISOString(),
+			});
+		}, [screenName, screen]) // Remove properties from dependencies to avoid loops
+	);
 };

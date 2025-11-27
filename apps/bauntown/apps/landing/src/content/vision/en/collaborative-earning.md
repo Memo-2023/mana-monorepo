@@ -1,23 +1,18 @@
 ---
-title: "Collaborative Earning: New Models for Collective Value Creation"
-description: "Our vision for fair, transparent, and community-oriented models of economic participation in the digital age."
+title: 'Collaborative Earning: New Models for Collective Value Creation'
+description: 'Our vision for fair, transparent, and community-oriented models of economic participation in the digital age.'
 pubDate: 2025-04-03
-category: "future"
-timeline: "2025-2028"
-status: "exploring"
+category: 'future'
+timeline: '2025-2028'
+status: 'exploring'
 featured: true
-image: "/images/vision/gemeinsam-verdienen.png"
-contributors: ["Lena Fischer", "Till Schneider", "Michael Werner"]
-relatedLinks: [
-  {
-    title: "Platform Cooperativism",
-    url: "https://platform.coop/about/vision-and-advantages/"
-  },
-  {
-    title: "Web3 and Decentralized Value Creation",
-    url: "https://ethereum.org/en/dao/"
-  }
-]
+image: '/images/vision/gemeinsam-verdienen.png'
+contributors: ['Lena Fischer', 'Till Schneider', 'Michael Werner']
+relatedLinks:
+  [
+    { title: 'Platform Cooperativism', url: 'https://platform.coop/about/vision-and-advantages/' },
+    { title: 'Web3 and Decentralized Value Creation', url: 'https://ethereum.org/en/dao/' },
+  ]
 ---
 
 # Collaborative Earning: New Models for Collective Value Creation

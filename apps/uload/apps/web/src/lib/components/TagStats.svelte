@@ -12,29 +12,29 @@
 	let totalClicks = $derived(tags.reduce((sum, tag) => sum + (tag.totalClicks || 0), 0));
 	let totalLinks = $derived(tags.reduce((sum, tag) => sum + (tag.linkCount || 0), 0));
 	let averageLinksPerTag = $derived(totalTags > 0 ? (totalLinks / totalTags).toFixed(1) : '0');
-	let mostUsedTag = $derived(tags.reduce((max, tag) => 
-		(tag.usage_count || 0) > (max?.usage_count || 0) ? tag : max, 
-		tags[0]
-	));
-	let mostClickedTag = $derived(tags.reduce((max, tag) => 
-		(tag.totalClicks || 0) > (max?.totalClicks || 0) ? tag : max, 
-		tags[0]
-	));
+	let mostUsedTag = $derived(
+		tags.reduce(
+			(max, tag) => ((tag.usage_count || 0) > (max?.usage_count || 0) ? tag : max),
+			tags[0]
+		)
+	);
+	let mostClickedTag = $derived(
+		tags.reduce(
+			(max, tag) => ((tag.totalClicks || 0) > (max?.totalClicks || 0) ? tag : max),
+			tags[0]
+		)
+	);
 
 	let topTagsByClicks = $derived(
-		[...tags]
-			.sort((a, b) => (b.totalClicks || 0) - (a.totalClicks || 0))
-			.slice(0, 10)
+		[...tags].sort((a, b) => (b.totalClicks || 0) - (a.totalClicks || 0)).slice(0, 10)
 	);
 
 	let topTagsByLinks = $derived(
-		[...tags]
-			.sort((a, b) => (b.linkCount || 0) - (a.linkCount || 0))
-			.slice(0, 10)
+		[...tags].sort((a, b) => (b.linkCount || 0) - (a.linkCount || 0)).slice(0, 10)
 	);
 
-	let maxClicks = $derived(Math.max(...topTagsByClicks.map(t => t.totalClicks || 0), 1));
-	let maxLinks = $derived(Math.max(...topTagsByLinks.map(t => t.linkCount || 0), 1));
+	let maxClicks = $derived(Math.max(...topTagsByClicks.map((t) => t.totalClicks || 0), 1));
+	let maxLinks = $derived(Math.max(...topTagsByLinks.map((t) => t.linkCount || 0), 1));
 
 	function formatNumber(num: number): string {
 		if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -93,8 +93,10 @@
 				<div>
 					<p class="text-sm font-medium text-theme-text-muted">Top Tag</p>
 					{#if mostClickedTag}
-						<p class="mt-2 text-lg font-bold text-theme-text truncate">{mostClickedTag.name}</p>
-						<p class="text-xs text-theme-text-muted">{formatNumber(mostClickedTag.totalClicks || 0)} Klicks</p>
+						<p class="mt-2 truncate text-lg font-bold text-theme-text">{mostClickedTag.name}</p>
+						<p class="text-xs text-theme-text-muted">
+							{formatNumber(mostClickedTag.totalClicks || 0)} Klicks
+						</p>
 					{:else}
 						<p class="mt-2 text-lg text-theme-text-muted">-</p>
 					{/if}
@@ -117,12 +119,14 @@
 			<div class="space-y-3">
 				{#each topTagsByClicks as tag, index}
 					<div class="flex items-center gap-3">
-						<div class="flex h-8 w-8 items-center justify-center rounded-full bg-theme-surface-hover text-sm font-medium text-theme-text">
+						<div
+							class="flex h-8 w-8 items-center justify-center rounded-full bg-theme-surface-hover text-sm font-medium text-theme-text"
+						>
 							{index + 1}
 						</div>
 						<div class="flex-1">
-							<div class="flex items-center justify-between mb-1">
-								<span class="text-sm font-medium text-theme-text truncate max-w-[200px]">
+							<div class="mb-1 flex items-center justify-between">
+								<span class="max-w-[200px] truncate text-sm font-medium text-theme-text">
 									{tag.name}
 								</span>
 								<span class="text-sm text-theme-text-muted">
@@ -130,7 +134,7 @@
 								</span>
 							</div>
 							<div class="h-2 overflow-hidden rounded-full bg-theme-surface-hover">
-								<div 
+								<div
 									class="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500"
 									style="width: {((tag.totalClicks || 0) / maxClicks) * 100}%"
 								></div>
@@ -153,12 +157,14 @@
 			<div class="space-y-3">
 				{#each topTagsByLinks as tag, index}
 					<div class="flex items-center gap-3">
-						<div class="flex h-8 w-8 items-center justify-center rounded-full bg-theme-surface-hover text-sm font-medium text-theme-text">
+						<div
+							class="flex h-8 w-8 items-center justify-center rounded-full bg-theme-surface-hover text-sm font-medium text-theme-text"
+						>
 							{index + 1}
 						</div>
 						<div class="flex-1">
-							<div class="flex items-center justify-between mb-1">
-								<span class="text-sm font-medium text-theme-text truncate max-w-[200px]">
+							<div class="mb-1 flex items-center justify-between">
+								<span class="max-w-[200px] truncate text-sm font-medium text-theme-text">
 									{tag.name}
 								</span>
 								<span class="text-sm text-theme-text-muted">
@@ -166,7 +172,7 @@
 								</span>
 							</div>
 							<div class="h-2 overflow-hidden rounded-full bg-theme-surface-hover">
-								<div 
+								<div
 									class="h-full rounded-full bg-gradient-to-r from-green-500 to-green-600 transition-all duration-500"
 									style="width: {((tag.linkCount || 0) / maxLinks) * 100}%"
 								></div>
@@ -182,7 +188,7 @@
 	</div>
 
 	<!-- Detaillierte Tabelle -->
-	<div class="rounded-xl border border-theme-border bg-theme-surface shadow-md overflow-hidden">
+	<div class="overflow-hidden rounded-xl border border-theme-border bg-theme-surface shadow-md">
 		<div class="border-b border-theme-border bg-theme-surface-hover px-6 py-4">
 			<h3 class="text-lg font-semibold text-theme-text">Detaillierte Tag-Statistiken</h3>
 		</div>
@@ -190,38 +196,49 @@
 			<table class="w-full">
 				<thead class="border-b border-theme-border bg-theme-surface-hover">
 					<tr>
-						<th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text">
+						<th
+							class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text"
+						>
 							Tag
 						</th>
-						<th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text">
+						<th
+							class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text"
+						>
 							Links
 						</th>
-						<th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text">
+						<th
+							class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text"
+						>
 							Klicks
 						</th>
-						<th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text">
+						<th
+							class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text"
+						>
 							CTR
 						</th>
-						<th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text">
+						<th
+							class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text"
+						>
 							Verwendungen
 						</th>
-						<th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text">
+						<th
+							class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text"
+						>
 							Status
 						</th>
-						<th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text">
+						<th
+							class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-theme-text"
+						>
 							Erstellt
 						</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-theme-border">
 					{#each tags as tag}
-						<tr class="hover:bg-theme-surface-hover transition-colors">
+						<tr class="transition-colors hover:bg-theme-surface-hover">
 							<td class="px-6 py-4">
 								<div class="flex items-center gap-2">
-									<div 
-										class="h-3 w-3 rounded-full" 
-										style="background-color: {tag.color}"
-									></div>
+									<div class="h-3 w-3 rounded-full" style="background-color: {tag.color}"></div>
 									<span class="font-medium text-theme-text">{tag.name}</span>
 								</div>
 							</td>
@@ -232,7 +249,9 @@
 								{formatNumber(tag.totalClicks || 0)}
 							</td>
 							<td class="px-6 py-4">
-								<span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
+								<span
+									class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+								>
 									{calculateCTR(tag)}
 								</span>
 							</td>
@@ -241,11 +260,15 @@
 							</td>
 							<td class="px-6 py-4">
 								{#if tag.is_public}
-									<span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400">
+									<span
+										class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400"
+									>
 										Öffentlich
 									</span>
 								{:else}
-									<span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-900/20 dark:text-gray-400">
+									<span
+										class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
+									>
 										Privat
 									</span>
 								{/if}

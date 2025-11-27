@@ -21,6 +21,7 @@ PocketBase Container (Port 8090) - Separat in Coolify
 ## 📦 Was wurde geändert?
 
 ### Entfernte Komponenten:
+
 - ❌ Embedded PocketBase im Container
 - ❌ Supervisor Process Manager
 - ❌ Docker Entrypoint Script
@@ -29,6 +30,7 @@ PocketBase Container (Port 8090) - Separat in Coolify
 - ❌ Volume für pb_data
 
 ### Neue Struktur:
+
 - ✅ Schlanker Container nur mit SvelteKit
 - ✅ Externe PocketBase Verbindung via `PUBLIC_POCKETBASE_URL`
 - ✅ Direkte Node.js Ausführung (kein Supervisor)
@@ -37,6 +39,7 @@ PocketBase Container (Port 8090) - Separat in Coolify
 ## 🔧 Deployment in Coolify
 
 ### 1. PocketBase Service (falls noch nicht vorhanden)
+
 ```yaml
 # Als separater Service in Coolify
 Service: PocketBase
@@ -45,13 +48,14 @@ Persistent Volume: /pb_data
 ```
 
 ### 2. uLoad App Service
+
 ```yaml
 # docker-compose.coolify.yml verwenden
 Service: uLoad
 Port: 3000
 Build: Dockerfile
 Environment:
-  - PUBLIC_POCKETBASE_URL=http://pocketbase:8090  # Interner Service Name
+  - PUBLIC_POCKETBASE_URL=http://pocketbase:8090 # Interner Service Name
   - ORIGIN=https://ulo.ad
   - PUBLIC_UMAMI_URL=...
   - PUBLIC_UMAMI_WEBSITE_ID=...
@@ -62,6 +66,7 @@ Environment:
 ### Für bestehende Deployments:
 
 1. **PocketBase Daten sichern** (falls noch embedded):
+
    ```bash
    docker cp container_name:/app/pb_data ./pb_data_backup
    ```
@@ -71,6 +76,7 @@ Environment:
 3. **Daten importieren** in neue PocketBase Instanz
 
 4. **Environment Variables anpassen**:
+
    ```env
    PUBLIC_POCKETBASE_URL=http://pocketbase:8090
    ```
@@ -93,6 +99,7 @@ PUBLIC_UMAMI_WEBSITE_ID=xxx-xxx-xxx
 ## 🏗️ Build & Deploy
 
 ### Lokal testen:
+
 ```bash
 # Build
 docker build -t uload:latest .
@@ -105,6 +112,7 @@ docker run -p 3000:3000 \
 ```
 
 ### Production Deploy:
+
 ```bash
 # Via Coolify mit docker-compose.coolify.yml
 # Oder direkt:

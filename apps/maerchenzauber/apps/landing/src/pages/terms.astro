@@ -6,366 +6,400 @@ import Card from '../components/ui/Card.astro';
 ---
 
 <BaseLayout>
-  <Navigation />
+	<Navigation />
 
-  <main class="pt-24 pb-16">
-    <div class="container-custom max-w-4xl">
-      <!-- Header -->
-      <div class="text-center mb-12">
-        <h1 class="font-grandstander font-bold text-4xl md:text-5xl text-text-primary mb-4">
-          Allgemeine Geschäftsbedingungen (AGB)
-        </h1>
-        <p class="text-text-secondary">
-          Stand: {new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
-      </div>
+	<main class="pt-24 pb-16">
+		<div class="container-custom max-w-4xl">
+			<!-- Header -->
+			<div class="text-center mb-12">
+				<h1 class="font-grandstander font-bold text-4xl md:text-5xl text-text-primary mb-4">
+					Allgemeine Geschäftsbedingungen (AGB)
+				</h1>
+				<p class="text-text-secondary">
+					Stand: {
+						new Date().toLocaleDateString('de-DE', {
+							year: 'numeric',
+							month: 'long',
+							day: 'numeric',
+						})
+					}
+				</p>
+			</div>
 
-      <!-- Content -->
-      <Card variant="default" padding="lg">
-        <div class="prose prose-invert max-w-none">
+			<!-- Content -->
+			<Card variant="default" padding="lg">
+				<div class="prose prose-invert max-w-none">
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">1. Geltungsbereich</h2>
+						<p class="text-text-secondary mb-4">
+							Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der
+							Märchenzauber-App und aller damit verbundenen Dienste.
+						</p>
+						<p class="text-text-secondary mb-4">
+							Betreiber: Memoro GmbH, Reichenaustraße 11a, 78464 Konstanz
+						</p>
+						<p class="text-text-secondary mb-4">
+							Mit der Nutzung unserer Dienste erklären Sie sich mit diesen AGB einverstanden.
+						</p>
+					</section>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">1. Geltungsbereich</h2>
-            <p class="text-text-secondary mb-4">
-              Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der Märchenzauber-App und aller damit verbundenen Dienste.
-            </p>
-            <p class="text-text-secondary mb-4">
-              Betreiber: Memoro GmbH, Reichenaustraße 11a, 78464 Konstanz
-            </p>
-            <p class="text-text-secondary mb-4">
-              Mit der Nutzung unserer Dienste erklären Sie sich mit diesen AGB einverstanden.
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">2. Leistungsbeschreibung</h2>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">2. Leistungsbeschreibung</h2>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">2.1 Märchenzauber-App</h3>
+						<p class="text-text-secondary mb-4">Märchenzauber bietet folgende Hauptfunktionen:</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Erstellung personalisierter Charaktere durch KI</li>
+							<li>Generierung individueller Kindergeschichten</li>
+							<li>KI-generierte Illustrationen im 3D-Pixar-Stil</li>
+							<li>Speicherung und Verwaltung von Geschichten und Charakteren</li>
+							<li>Mehrsprachige Unterstützung (Deutsch/Englisch)</li>
+						</ul>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">2.1 Märchenzauber-App</h3>
-            <p class="text-text-secondary mb-4">
-              Märchenzauber bietet folgende Hauptfunktionen:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Erstellung personalisierter Charaktere durch KI</li>
-              <li>Generierung individueller Kindergeschichten</li>
-              <li>KI-generierte Illustrationen im 3D-Pixar-Stil</li>
-              <li>Speicherung und Verwaltung von Geschichten und Charakteren</li>
-              <li>Mehrsprachige Unterstützung (Deutsch/Englisch)</li>
-            </ul>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">2.2 Verfügbarkeit</h3>
+						<p class="text-text-secondary mb-4">
+							Wir bemühen uns um eine möglichst hohe Verfügbarkeit. Eine Garantie für
+							ununterbrochene Verfügbarkeit können wir jedoch nicht geben. Wartungsarbeiten werden
+							nach Möglichkeit angekündigt.
+						</p>
+					</section>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">2.2 Verfügbarkeit</h3>
-            <p class="text-text-secondary mb-4">
-              Wir bemühen uns um eine möglichst hohe Verfügbarkeit. Eine Garantie für ununterbrochene Verfügbarkeit
-              können wir jedoch nicht geben. Wartungsarbeiten werden nach Möglichkeit angekündigt.
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">
+							3. Vertragsschluss und Nutzerkonto
+						</h2>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">3. Vertragsschluss und Nutzerkonto</h2>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">3.1 Registrierung</h3>
+						<p class="text-text-secondary mb-4">
+							Die Nutzung von Märchenzauber erfordert eine Registrierung. Sie können sich
+							registrieren über:
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>E-Mail und Passwort</li>
+							<li>Google-Login</li>
+							<li>Apple Sign In</li>
+						</ul>
+						<p class="text-text-secondary mb-4">
+							Sie müssen mindestens 16 Jahre alt sein oder die Zustimmung eines
+							Erziehungsberechtigten haben.
+						</p>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">3.1 Registrierung</h3>
-            <p class="text-text-secondary mb-4">
-              Die Nutzung von Märchenzauber erfordert eine Registrierung. Sie können sich registrieren über:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>E-Mail und Passwort</li>
-              <li>Google-Login</li>
-              <li>Apple Sign In</li>
-            </ul>
-            <p class="text-text-secondary mb-4">
-              Sie müssen mindestens 16 Jahre alt sein oder die Zustimmung eines Erziehungsberechtigten haben.
-            </p>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">3.2 Kontosicherheit</h3>
+						<p class="text-text-secondary mb-4">Sie sind verantwortlich für:</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Die Geheimhaltung Ihrer Zugangsdaten</li>
+							<li>Alle Aktivitäten unter Ihrem Konto</li>
+							<li>Die sofortige Meldung bei Missbrauch</li>
+						</ul>
+					</section>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">3.2 Kontosicherheit</h3>
-            <p class="text-text-secondary mb-4">
-              Sie sind verantwortlich für:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Die Geheimhaltung Ihrer Zugangsdaten</li>
-              <li>Alle Aktivitäten unter Ihrem Konto</li>
-              <li>Die sofortige Meldung bei Missbrauch</li>
-            </ul>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">4. Mana-Token System</h2>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">4. Mana-Token System</h2>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							4.1 Was sind Mana-Token?
+						</h3>
+						<p class="text-text-secondary mb-4">
+							Mana-Token (kurz: Mana) sind Credits zur Nutzung der KI-Dienste:
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>1 Geschichte erstellen: ca. 30-40 Mana</li>
+							<li>1 Charakter erstellen: ca. 30-40 Mana</li>
+							<li>Genaue Kosten werden vor Generierung angezeigt</li>
+						</ul>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">4.1 Was sind Mana-Token?</h3>
-            <p class="text-text-secondary mb-4">
-              Mana-Token (kurz: Mana) sind Credits zur Nutzung der KI-Dienste:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>1 Geschichte erstellen: ca. 30-40 Mana</li>
-              <li>1 Charakter erstellen: ca. 30-40 Mana</li>
-              <li>Genaue Kosten werden vor Generierung angezeigt</li>
-            </ul>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">4.2 Mana erwerben</h3>
+						<p class="text-text-secondary mb-4">Mana können erworben werden über:</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Einmalige Mana-Pakete</li>
+							<li>Monatliche Abonnements</li>
+							<li>Kostenlose Starter-Mana (100 bei Registrierung)</li>
+						</ul>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">4.2 Mana erwerben</h3>
-            <p class="text-text-secondary mb-4">
-              Mana können erworben werden über:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Einmalige Mana-Pakete</li>
-              <li>Monatliche Abonnements</li>
-              <li>Kostenlose Starter-Mana (100 bei Registrierung)</li>
-            </ul>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							4.3 Gültigkeit und Verfall
+						</h3>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Einmalig gekaufte Mana verfallen nicht</li>
+							<li>Abo-Mana verfallen am Monatsende</li>
+							<li>Kostenlose Starter-Mana verfallen nicht</li>
+							<li>Keine Auszahlung oder Rückerstattung in Geld möglich</li>
+						</ul>
+					</section>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">4.3 Gültigkeit und Verfall</h3>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Einmalig gekaufte Mana verfallen nicht</li>
-              <li>Abo-Mana verfallen am Monatsende</li>
-              <li>Kostenlose Starter-Mana verfallen nicht</li>
-              <li>Keine Auszahlung oder Rückerstattung in Geld möglich</li>
-            </ul>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">5. Preise und Zahlung</h2>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">5. Preise und Zahlung</h2>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">5.1 Preise</h3>
+						<p class="text-text-secondary mb-4">
+							Alle Preise verstehen sich inklusive der gesetzlichen Mehrwertsteuer. Aktuelle Preise
+							finden Sie auf unserer <a href="/pricing" class="text-yellow-light hover:underline"
+								>Pricing-Seite</a
+							>.
+						</p>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">5.1 Preise</h3>
-            <p class="text-text-secondary mb-4">
-              Alle Preise verstehen sich inklusive der gesetzlichen Mehrwertsteuer.
-              Aktuelle Preise finden Sie auf unserer <a href="/pricing" class="text-yellow-light hover:underline">Pricing-Seite</a>.
-            </p>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">5.2 Zahlungsmethoden</h3>
+						<p class="text-text-secondary mb-4">Zahlung erfolgt über:</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Apple In-App Purchase (iOS)</li>
+							<li>Google Play Billing (Android)</li>
+							<li>Weitere Zahlungsmethoden je nach Plattform</li>
+						</ul>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">5.2 Zahlungsmethoden</h3>
-            <p class="text-text-secondary mb-4">
-              Zahlung erfolgt über:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Apple In-App Purchase (iOS)</li>
-              <li>Google Play Billing (Android)</li>
-              <li>Weitere Zahlungsmethoden je nach Plattform</li>
-            </ul>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">5.3 Abonnements</h3>
+						<p class="text-text-secondary mb-4">
+							Abonnements verlängern sich automatisch, sofern nicht gekündigt:
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Kündigung jederzeit möglich</li>
+							<li>Wirksam zum Ende der aktuellen Laufzeit</li>
+							<li>Keine Rückerstattung für laufenden Zeitraum</li>
+							<li>Verwaltung über App Store / Google Play</li>
+						</ul>
+					</section>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">5.3 Abonnements</h3>
-            <p class="text-text-secondary mb-4">
-              Abonnements verlängern sich automatisch, sofern nicht gekündigt:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Kündigung jederzeit möglich</li>
-              <li>Wirksam zum Ende der aktuellen Laufzeit</li>
-              <li>Keine Rückerstattung für laufenden Zeitraum</li>
-              <li>Verwaltung über App Store / Google Play</li>
-            </ul>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">6. Widerrufsrecht</h2>
+						<p class="text-text-secondary mb-4">
+							Verbraucher haben ein 14-tägiges Widerrufsrecht gemäß § 355 BGB.
+						</p>
+						<p class="text-text-secondary mb-4">
+							<strong>Wichtig:</strong> Das Widerrufsrecht erlischt bei digitalen Inhalten, wenn:
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>
+								Sie ausdrücklich zugestimmt haben, dass wir vor Ablauf der Widerrufsfrist mit der
+								Ausführung beginnen
+							</li>
+							<li>
+								Sie bestätigt haben, dass Sie Ihr Widerrufsrecht durch den Beginn der Ausführung
+								verlieren
+							</li>
+							<li>Bei Mana-Käufen gilt dies ab dem Zeitpunkt der Nutzung der erworbenen Mana</li>
+						</ul>
+					</section>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">6. Widerrufsrecht</h2>
-            <p class="text-text-secondary mb-4">
-              Verbraucher haben ein 14-tägiges Widerrufsrecht gemäß § 355 BGB.
-            </p>
-            <p class="text-text-secondary mb-4">
-              <strong>Wichtig:</strong> Das Widerrufsrecht erlischt bei digitalen Inhalten, wenn:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Sie ausdrücklich zugestimmt haben, dass wir vor Ablauf der Widerrufsfrist mit der Ausführung beginnen</li>
-              <li>Sie bestätigt haben, dass Sie Ihr Widerrufsrecht durch den Beginn der Ausführung verlieren</li>
-              <li>Bei Mana-Käufen gilt dies ab dem Zeitpunkt der Nutzung der erworbenen Mana</li>
-            </ul>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">
+							7. Nutzungsrechte und Urheberrecht
+						</h2>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">7. Nutzungsrechte und Urheberrecht</h2>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							7.1 Ihre Rechte an erstellten Inhalten
+						</h3>
+						<p class="text-text-secondary mb-4">
+							Sie erhalten folgende Rechte an den von Ihnen generierten Inhalten:
+						</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Privates Nutzungsrecht für Geschichten und Bilder</li>
+							<li>Recht zum Teilen mit Familie und Freunden</li>
+							<li>Recht zum Ausdrucken für private Zwecke</li>
+							<li>Keine kommerzielle Nutzung ohne schriftliche Genehmigung</li>
+						</ul>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">7.1 Ihre Rechte an erstellten Inhalten</h3>
-            <p class="text-text-secondary mb-4">
-              Sie erhalten folgende Rechte an den von Ihnen generierten Inhalten:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Privates Nutzungsrecht für Geschichten und Bilder</li>
-              <li>Recht zum Teilen mit Familie und Freunden</li>
-              <li>Recht zum Ausdrucken für private Zwecke</li>
-              <li>Keine kommerzielle Nutzung ohne schriftliche Genehmigung</li>
-            </ul>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							7.2 KI-generierte Inhalte
+						</h3>
+						<p class="text-text-secondary mb-4">
+							Alle durch KI generierten Inhalte werden speziell für Sie erstellt. Wir garantieren
+							jedoch nicht, dass identische Eingaben nicht ähnliche Ergebnisse bei anderen Nutzern
+							erzeugen können.
+						</p>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">7.2 KI-generierte Inhalte</h3>
-            <p class="text-text-secondary mb-4">
-              Alle durch KI generierten Inhalte werden speziell für Sie erstellt. Wir garantieren jedoch nicht,
-              dass identische Eingaben nicht ähnliche Ergebnisse bei anderen Nutzern erzeugen können.
-            </p>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">7.3 Unsere Rechte</h3>
+						<p class="text-text-secondary mb-4">Wir behalten uns das Recht vor:</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>
+								Anonymisierte Beispiele zu Marketing-Zwecken zu nutzen (nur mit Ihrer Zustimmung)
+							</li>
+							<li>Inhalte zu moderieren und bei Verstoß zu entfernen</li>
+							<li>Den Dienst weiterzuentwickeln</li>
+						</ul>
+					</section>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">7.3 Unsere Rechte</h3>
-            <p class="text-text-secondary mb-4">
-              Wir behalten uns das Recht vor:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Anonymisierte Beispiele zu Marketing-Zwecken zu nutzen (nur mit Ihrer Zustimmung)</li>
-              <li>Inhalte zu moderieren und bei Verstoß zu entfernen</li>
-              <li>Den Dienst weiterzuentwickeln</li>
-            </ul>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">8. Verhaltensregeln</h2>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">8. Verhaltensregeln</h2>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">8.1 Verbotene Inhalte</h3>
+						<p class="text-text-secondary mb-4">Es ist untersagt, Inhalte zu erstellen, die:</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Gewalt, Hass oder Diskriminierung fördern</li>
+							<li>Pornografisch oder sexuell explizit sind</li>
+							<li>Rechte Dritter verletzen</li>
+							<li>Gegen geltendes Recht verstoßen</li>
+							<li>Für Kinder ungeeignet sind</li>
+						</ul>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">8.1 Verbotene Inhalte</h3>
-            <p class="text-text-secondary mb-4">
-              Es ist untersagt, Inhalte zu erstellen, die:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Gewalt, Hass oder Diskriminierung fördern</li>
-              <li>Pornografisch oder sexuell explizit sind</li>
-              <li>Rechte Dritter verletzen</li>
-              <li>Gegen geltendes Recht verstoßen</li>
-              <li>Für Kinder ungeeignet sind</li>
-            </ul>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							8.2 Konsequenzen bei Verstößen
+						</h3>
+						<p class="text-text-secondary mb-4">Bei Verstößen können wir:</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Inhalte entfernen</li>
+							<li>Ihr Konto sperren</li>
+							<li>Rechtliche Schritte einleiten</li>
+							<li>Keine Rückerstattung gewähren</li>
+						</ul>
+					</section>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">8.2 Konsequenzen bei Verstößen</h3>
-            <p class="text-text-secondary mb-4">
-              Bei Verstößen können wir:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Inhalte entfernen</li>
-              <li>Ihr Konto sperren</li>
-              <li>Rechtliche Schritte einleiten</li>
-              <li>Keine Rückerstattung gewähren</li>
-            </ul>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">9. Haftung</h2>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">9. Haftung</h2>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							9.1 Haftungsbeschränkung
+						</h3>
+						<p class="text-text-secondary mb-4">
+							Wir haften nur für Vorsatz und grobe Fahrlässigkeit. Bei leichter Fahrlässigkeit
+							haften wir nur für die Verletzung wesentlicher Vertragspflichten (Kardinalpflichten).
+						</p>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">9.1 Haftungsbeschränkung</h3>
-            <p class="text-text-secondary mb-4">
-              Wir haften nur für Vorsatz und grobe Fahrlässigkeit. Bei leichter Fahrlässigkeit haften wir nur
-              für die Verletzung wesentlicher Vertragspflichten (Kardinalpflichten).
-            </p>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">9.2 KI-Inhalte</h3>
+						<p class="text-text-secondary mb-4">Wir übernehmen keine Haftung für:</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Inhaltliche Richtigkeit der generierten Geschichten</li>
+							<li>Ähnlichkeiten zu existierenden Werken (die KI erstellt eigenständige Inhalte)</li>
+							<li>Die pädagogische Eignung für Ihr Kind (Eltern entscheiden)</li>
+						</ul>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">9.2 KI-Inhalte</h3>
-            <p class="text-text-secondary mb-4">
-              Wir übernehmen keine Haftung für:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Inhaltliche Richtigkeit der generierten Geschichten</li>
-              <li>Ähnlichkeiten zu existierenden Werken (die KI erstellt eigenständige Inhalte)</li>
-              <li>Die pädagogische Eignung für Ihr Kind (Eltern entscheiden)</li>
-            </ul>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">9.3 Ausnahmen</h3>
+						<p class="text-text-secondary mb-4">
+							Unsere Haftung für Schäden aus der Verletzung des Lebens, des Körpers oder der
+							Gesundheit sowie nach dem Produkthaftungsgesetz bleibt unberührt.
+						</p>
+					</section>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">9.3 Ausnahmen</h3>
-            <p class="text-text-secondary mb-4">
-              Unsere Haftung für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit
-              sowie nach dem Produkthaftungsgesetz bleibt unberührt.
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">10. Kündigung</h2>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">10. Kündigung</h2>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">10.1 Durch Sie</h3>
+						<p class="text-text-secondary mb-4">
+							Sie können Ihr Konto jederzeit in den App-Einstellungen löschen. Abonnements müssen
+							über den jeweiligen Store gekündigt werden.
+						</p>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">10.1 Durch Sie</h3>
-            <p class="text-text-secondary mb-4">
-              Sie können Ihr Konto jederzeit in den App-Einstellungen löschen.
-              Abonnements müssen über den jeweiligen Store gekündigt werden.
-            </p>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">10.2 Durch uns</h3>
+						<p class="text-text-secondary mb-4">Wir können Ihr Konto kündigen bei:</p>
+						<ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
+							<li>Verstoß gegen diese AGB</li>
+							<li>Missbrauch des Dienstes</li>
+							<li>Zahlungsverzug</li>
+							<li>Mit 30 Tagen Kündigungsfrist ohne Angabe von Gründen</li>
+						</ul>
+					</section>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">10.2 Durch uns</h3>
-            <p class="text-text-secondary mb-4">
-              Wir können Ihr Konto kündigen bei:
-            </p>
-            <ul class="list-disc list-inside text-text-secondary mb-4 space-y-2">
-              <li>Verstoß gegen diese AGB</li>
-              <li>Missbrauch des Dienstes</li>
-              <li>Zahlungsverzug</li>
-              <li>Mit 30 Tagen Kündigungsfrist ohne Angabe von Gründen</li>
-            </ul>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">11. Datenschutz</h2>
+						<p class="text-text-secondary mb-4">
+							Details zur Datenverarbeitung finden Sie in unserer
+							<a href="/privacy" class="text-yellow-light hover:underline">Datenschutzerklärung</a>.
+						</p>
+					</section>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">11. Datenschutz</h2>
-            <p class="text-text-secondary mb-4">
-              Details zur Datenverarbeitung finden Sie in unserer
-              <a href="/privacy" class="text-yellow-light hover:underline">Datenschutzerklärung</a>.
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">12. Änderungen der AGB</h2>
+						<p class="text-text-secondary mb-4">
+							Wir behalten uns vor, diese AGB zu ändern. Bei wesentlichen Änderungen informieren wir
+							Sie mindestens 30 Tage im Voraus per E-Mail. Widersprechen Sie nicht innerhalb von 30
+							Tagen, gelten die Änderungen als akzeptiert.
+						</p>
+					</section>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">12. Änderungen der AGB</h2>
-            <p class="text-text-secondary mb-4">
-              Wir behalten uns vor, diese AGB zu ändern. Bei wesentlichen Änderungen informieren wir Sie
-              mindestens 30 Tage im Voraus per E-Mail. Widersprechen Sie nicht innerhalb von 30 Tagen,
-              gelten die Änderungen als akzeptiert.
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">13. Streitbeilegung</h2>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">13. Streitbeilegung</h2>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							13.1 Online-Streitbeilegung
+						</h3>
+						<p class="text-text-secondary mb-4">
+							Die EU-Kommission stellt eine Plattform zur Online-Streitbeilegung bereit:
+							<a href="https://ec.europa.eu/consumers/odr" class="text-yellow-light hover:underline"
+								>https://ec.europa.eu/consumers/odr</a
+							>
+						</p>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">13.1 Online-Streitbeilegung</h3>
-            <p class="text-text-secondary mb-4">
-              Die EU-Kommission stellt eine Plattform zur Online-Streitbeilegung bereit:
-              <a href="https://ec.europa.eu/consumers/odr" class="text-yellow-light hover:underline">https://ec.europa.eu/consumers/odr</a>
-            </p>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							13.2 Verbraucherschlichtung
+						</h3>
+						<p class="text-text-secondary mb-4">
+							Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer
+							Verbraucherschlichtungsstelle teilzunehmen.
+						</p>
+					</section>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">13.2 Verbraucherschlichtung</h3>
-            <p class="text-text-secondary mb-4">
-              Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer
-              Verbraucherschlichtungsstelle teilzunehmen.
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">14. Schlussbestimmungen</h2>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">14. Schlussbestimmungen</h2>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							14.1 Anwendbares Recht
+						</h3>
+						<p class="text-text-secondary mb-4">
+							Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts.
+						</p>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">14.1 Anwendbares Recht</h3>
-            <p class="text-text-secondary mb-4">
-              Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts.
-            </p>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">14.2 Gerichtsstand</h3>
+						<p class="text-text-secondary mb-4">
+							Gerichtsstand für alle Streitigkeiten ist Konstanz, sofern Sie Kaufmann, juristische
+							Person des öffentlichen Rechts oder öffentlich-rechtliches Sondervermögen sind.
+						</p>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">14.2 Gerichtsstand</h3>
-            <p class="text-text-secondary mb-4">
-              Gerichtsstand für alle Streitigkeiten ist Konstanz, sofern Sie Kaufmann,
-              juristische Person des öffentlichen Rechts oder öffentlich-rechtliches Sondervermögen sind.
-            </p>
+						<h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">
+							14.3 Salvatorische Klausel
+						</h3>
+						<p class="text-text-secondary mb-4">
+							Sollten einzelne Bestimmungen dieser AGB unwirksam sein oder werden, berührt dies die
+							Wirksamkeit der übrigen Bestimmungen nicht.
+						</p>
+					</section>
 
-            <h3 class="text-xl font-semibold text-text-primary mb-3 mt-6">14.3 Salvatorische Klausel</h3>
-            <p class="text-text-secondary mb-4">
-              Sollten einzelne Bestimmungen dieser AGB unwirksam sein oder werden, berührt dies die
-              Wirksamkeit der übrigen Bestimmungen nicht.
-            </p>
-          </section>
+					<section class="mb-8">
+						<h2 class="text-2xl font-bold text-text-primary mb-4">15. Kontakt</h2>
+						<p class="text-text-secondary mb-4">Bei Fragen zu diesen AGB kontaktieren Sie uns:</p>
+						<p class="text-text-secondary">
+							E-Mail: <a href="mailto:kontakt@memoro.ai" class="text-yellow-light hover:underline"
+								>kontakt@memoro.ai</a
+							><br />
+							Telefon: +49 176 444 343 85
+						</p>
+					</section>
+				</div>
+			</Card>
 
-          <section class="mb-8">
-            <h2 class="text-2xl font-bold text-text-primary mb-4">15. Kontakt</h2>
-            <p class="text-text-secondary mb-4">
-              Bei Fragen zu diesen AGB kontaktieren Sie uns:
-            </p>
-            <p class="text-text-secondary">
-              E-Mail: <a href="mailto:kontakt@memoro.ai" class="text-yellow-light hover:underline">kontakt@memoro.ai</a><br />
-              Telefon: +49 176 444 343 85
-            </p>
-          </section>
+			<!-- Back to Home -->
+			<div class="text-center mt-8">
+				<a
+					href="/"
+					class="text-text-secondary hover:text-yellow-light transition-colors inline-flex items-center gap-2"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+					</svg>
+					Zurück zur Startseite
+				</a>
+			</div>
+		</div>
+	</main>
 
-        </div>
-      </Card>
-
-      <!-- Back to Home -->
-      <div class="text-center mt-8">
-        <a href="/" class="text-text-secondary hover:text-yellow-light transition-colors inline-flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-          </svg>
-          Zurück zur Startseite
-        </a>
-      </div>
-    </div>
-  </main>
-
-  <Footer />
+	<Footer />
 </BaseLayout>
 
 <style>
-  .prose h2 {
-    margin-top: 2rem;
-  }
+	.prose h2 {
+		margin-top: 2rem;
+	}
 
-  .prose h3 {
-    margin-top: 1.5rem;
-  }
+	.prose h3 {
+		margin-top: 1.5rem;
+	}
 
-  .prose p {
-    margin-bottom: 1rem;
-  }
+	.prose p {
+		margin-bottom: 1rem;
+	}
 
-  .prose ul {
-    margin-bottom: 1rem;
-  }
+	.prose ul {
+		margin-bottom: 1rem;
+	}
 </style>

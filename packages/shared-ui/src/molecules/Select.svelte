@@ -34,7 +34,7 @@
 		disabled = false,
 		required = false,
 		class: className = '',
-		id = `select-${Math.random().toString(36).slice(2, 9)}`
+		id = `select-${Math.random().toString(36).slice(2, 9)}`,
 	}: Props = $props();
 
 	function handleChange(e: Event) {

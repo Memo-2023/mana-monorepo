@@ -14,12 +14,12 @@
 		return date.toLocaleDateString('en-US', {
 			month: 'short',
 			day: 'numeric',
-			year: 'numeric'
+			year: 'numeric',
 		});
 	}
 </script>
 
-<Card variant="elevated" class="cursor-pointer hover:shadow-lg transition-shadow" onclick={onclick}>
+<Card variant="elevated" class="cursor-pointer hover:shadow-lg transition-shadow" {onclick}>
 	<div class="space-y-3">
 		<!-- Title -->
 		<h3 class="text-lg font-semibold line-clamp-2">{deck.title}</h3>
@@ -44,7 +44,9 @@
 		{/if}
 
 		<!-- Footer -->
-		<div class="flex items-center justify-between text-sm text-muted-foreground pt-2 border-t border-border">
+		<div
+			class="flex items-center justify-between text-sm text-muted-foreground pt-2 border-t border-border"
+		>
 			<div class="flex items-center space-x-2">
 				<span>📇 {deck.card_count || 0} cards</span>
 				{#if deck.is_public}

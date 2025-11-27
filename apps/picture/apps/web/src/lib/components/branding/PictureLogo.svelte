@@ -20,11 +20,7 @@
 	<rect x="4" y="8" width="40" height="32" rx="4" stroke="currentColor" stroke-width="2" />
 
 	<!-- Mountain/Landscape -->
-	<path
-		d="M8 36L18 22L24 30L32 18L40 36H8Z"
-		fill="currentColor"
-		opacity="0.2"
-	/>
+	<path d="M8 36L18 22L24 30L32 18L40 36H8Z" fill="currentColor" opacity="0.2" />
 	<path
 		d="M8 36L18 22L24 30L32 18L40 36"
 		stroke="currentColor"

@@ -14,6 +14,6 @@ export type Database = PostgresJsDatabase<typeof schema>;
 
 // Helper to create a new database connection
 export function createDb(url: string): Database {
-  const client = postgres(url);
-  return drizzle(client, { schema });
+	const client = postgres(url);
+	return drizzle(client, { schema });
 }

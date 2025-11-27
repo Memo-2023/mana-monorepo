@@ -26,6 +26,7 @@ This comprehensive guide provides migration patterns for transitioning from Reac
 ## Framework Philosophy
 
 ### React (Runtime Framework)
+
 - Uses Virtual DOM for reconciliation
 - Runtime reactivity through hooks (useState, useEffect, useMemo)
 - Component-based architecture with JSX
@@ -33,6 +34,7 @@ This comprehensive guide provides migration patterns for transitioning from Reac
 - Requires additional libraries for routing, forms, etc.
 
 ### SvelteKit (Compiler Framework)
+
 - Compiles components to optimized JavaScript at build time
 - No Virtual DOM - direct DOM manipulation
 - Reactivity through runes (compile-time primitives)
@@ -48,6 +50,7 @@ This comprehensive guide provides migration patterns for transitioning from Reac
 ### Basic Component Structure
 
 #### React (Functional Component)
+
 ```jsx
 // UserProfile.jsx
 import React, { useState } from 'react';
@@ -74,6 +77,7 @@ export default UserProfile;
 ```
 
 #### SvelteKit (Svelte 5 with Runes)
+
 ```svelte
 <!-- UserProfile.svelte -->
 <script>
@@ -106,15 +110,15 @@ export default UserProfile;
 
 ### Key Differences
 
-| Aspect | React | Svelte/SvelteKit |
-|--------|-------|------------------|
-| **File Extension** | `.jsx` or `.tsx` | `.svelte` |
+| Aspect              | React                        | Svelte/SvelteKit                    |
+| ------------------- | ---------------------------- | ----------------------------------- |
+| **File Extension**  | `.jsx` or `.tsx`             | `.svelte`                           |
 | **Template Syntax** | JSX (JavaScript expressions) | HTML-like with `{}` for expressions |
-| **Props** | Function parameters | `$props()` rune with destructuring |
-| **State** | `useState` hook | `$state()` rune |
-| **Styles** | CSS-in-JS or external | Scoped `<style>` block |
-| **Class Names** | `className` | `class` |
-| **Imports** | Explicit React import | No framework import needed |
+| **Props**           | Function parameters          | `$props()` rune with destructuring  |
+| **State**           | `useState` hook              | `$state()` rune                     |
+| **Styles**          | CSS-in-JS or external        | Scoped `<style>` block              |
+| **Class Names**     | `className`                  | `class`                             |
+| **Imports**         | Explicit React import        | No framework import needed          |
 
 ---
 
@@ -125,6 +129,7 @@ export default UserProfile;
 #### 1. State Management
 
 **React:**
+
 ```jsx
 const [count, setCount] = useState(0);
 const [user, setUser] = useState({ name: 'John', age: 30 });
@@ -135,6 +140,7 @@ setUser({ ...user, age: 31 }); // Immutable update
 ```
 
 **Svelte:**
+
 ```svelte
 <script>
   let count = $state(0);
@@ -149,6 +155,7 @@ setUser({ ...user, age: 31 }); // Immutable update
 #### 2. Computed/Derived Values
 
 **React:**
+
 ```jsx
 // useMemo for expensive computations
 const total = useMemo(() => {
@@ -160,6 +167,7 @@ const doubled = count * 2;
 ```
 
 **Svelte:**
+
 ```svelte
 <script>
   let items = $state([...]);
@@ -177,6 +185,7 @@ const doubled = count * 2;
 #### 3. Side Effects
 
 **React:**
+
 ```jsx
 useEffect(() => {
   console.log(`Count changed to ${count}`);
@@ -189,6 +198,7 @@ useEffect(() => {
 ```
 
 **Svelte:**
+
 ```svelte
 <script>
   $effect(() => {
@@ -204,17 +214,17 @@ useEffect(() => {
 
 ### Reactivity Comparison Table
 
-| Feature | React | Svelte 5 |
-|---------|-------|----------|
-| **State** | `useState(0)` | `$state(0)` |
-| **Computed** | `useMemo()` | `$derived()` |
-| **Effects** | `useEffect()` | `$effect()` |
-| **Refs** | `useRef()` | `$state()` (or direct variable) |
-| **Callback** | `useCallback()` | Not needed (functions are stable) |
-| **Context** | `useContext()` | Svelte context API or stores |
-| **Dependency Tracking** | Manual (dependency array) | Automatic (runtime tracking) |
-| **Mutation** | Immutable updates only | Direct mutation works |
-| **Deep Reactivity** | No (requires immutable patterns) | Yes (automatic) |
+| Feature                 | React                            | Svelte 5                          |
+| ----------------------- | -------------------------------- | --------------------------------- |
+| **State**               | `useState(0)`                    | `$state(0)`                       |
+| **Computed**            | `useMemo()`                      | `$derived()`                      |
+| **Effects**             | `useEffect()`                    | `$effect()`                       |
+| **Refs**                | `useRef()`                       | `$state()` (or direct variable)   |
+| **Callback**            | `useCallback()`                  | Not needed (functions are stable) |
+| **Context**             | `useContext()`                   | Svelte context API or stores      |
+| **Dependency Tracking** | Manual (dependency array)        | Automatic (runtime tracking)      |
+| **Mutation**            | Immutable updates only           | Direct mutation works             |
+| **Deep Reactivity**     | No (requires immutable patterns) | Yes (automatic)                   |
 
 ---
 
@@ -223,6 +233,7 @@ useEffect(() => {
 ### React Router → SvelteKit File-Based Routing
 
 #### React Router Setup
+
 ```jsx
 // App.jsx
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
@@ -253,6 +264,7 @@ function App() {
 #### SvelteKit File-Based Routing
 
 **Directory Structure:**
+
 ```
 src/routes/
 ├── +page.svelte              # Home page (/)
@@ -273,6 +285,7 @@ src/routes/
 ```
 
 **Root Layout:**
+
 ```svelte
 <!-- src/routes/+layout.svelte -->
 <nav>
@@ -286,6 +299,7 @@ src/routes/
 ```
 
 **Dynamic Route:**
+
 ```svelte
 <!-- src/routes/blog/[slug]/+page.svelte -->
 <script>
@@ -301,16 +315,16 @@ src/routes/
 
 ### Routing Comparison Table
 
-| Feature | React Router | SvelteKit |
-|---------|--------------|-----------|
-| **Route Definition** | JSX `<Route>` components | File system structure |
-| **Dynamic Routes** | `:param` syntax | `[param]` folder name |
-| **Navigation** | `<Link>` component | Native `<a>` tags |
-| **Nested Routes** | `<Outlet>` component | Nested `<slot>` in layouts |
-| **Layout Wrapping** | Manual wrapper components | `+layout.svelte` files |
-| **Programmatic Nav** | `useNavigate()` hook | `goto()` from `$app/navigation` |
-| **Route Guards** | Custom components/HOCs | Load functions with redirects |
-| **Not Found** | `<Route path="*">` | `+error.svelte` file |
+| Feature              | React Router              | SvelteKit                       |
+| -------------------- | ------------------------- | ------------------------------- |
+| **Route Definition** | JSX `<Route>` components  | File system structure           |
+| **Dynamic Routes**   | `:param` syntax           | `[param]` folder name           |
+| **Navigation**       | `<Link>` component        | Native `<a>` tags               |
+| **Nested Routes**    | `<Outlet>` component      | Nested `<slot>` in layouts      |
+| **Layout Wrapping**  | Manual wrapper components | `+layout.svelte` files          |
+| **Programmatic Nav** | `useNavigate()` hook      | `goto()` from `$app/navigation` |
+| **Route Guards**     | Custom components/HOCs    | Load functions with redirects   |
+| **Not Found**        | `<Route path="*">`        | `+error.svelte` file            |
 
 ### Migration Strategy
 
@@ -328,6 +342,7 @@ src/routes/
 ### Redux/Context API → Svelte Stores
 
 #### React with Redux
+
 ```jsx
 // store.js
 import { createStore } from 'redux';
@@ -351,18 +366,15 @@ export const store = createStore(reducer);
 import { useSelector, useDispatch } from 'react-redux';
 
 function Counter() {
-  const count = useSelector(state => state.count);
+  const count = useSelector((state) => state.count);
   const dispatch = useDispatch();
 
-  return (
-    <button onClick={() => dispatch({ type: 'INCREMENT' })}>
-      Count: {count}
-    </button>
-  );
+  return <button onClick={() => dispatch({ type: 'INCREMENT' })}>Count: {count}</button>;
 }
 ```
 
 #### React Context API
+
 ```jsx
 // UserContext.jsx
 import { createContext, useContext, useState } from 'react';
@@ -372,11 +384,7 @@ const UserContext = createContext();
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  return (
-    <UserContext.Provider value={{ user, setUser }}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
 }
 
 export const useUser = () => useContext(UserContext);
@@ -391,6 +399,7 @@ function Profile() {
 #### Svelte Stores
 
 **Writable Store:**
+
 ```javascript
 // stores.js
 import { writable } from 'svelte/store';
@@ -400,6 +409,7 @@ export const user = writable(null);
 ```
 
 **Component Usage:**
+
 ```svelte
 <script>
   import { count, user } from './stores.js';
@@ -420,6 +430,7 @@ export const user = writable(null);
 ```
 
 **Custom Store (Redux-like):**
+
 ```javascript
 // counterStore.js
 import { writable } from 'svelte/store';
@@ -429,9 +440,9 @@ function createCounter() {
 
   return {
     subscribe,
-    increment: () => update(n => n + 1),
-    decrement: () => update(n => n - 1),
-    reset: () => set(0)
+    increment: () => update((n) => n + 1),
+    decrement: () => update((n) => n - 1),
+    reset: () => set(0),
   };
 }
 
@@ -439,6 +450,7 @@ export const counter = createCounter();
 ```
 
 **Usage:**
+
 ```svelte
 <script>
   import { counter } from './counterStore.js';
@@ -451,27 +463,27 @@ export const counter = createCounter();
 ```
 
 **Derived Store:**
+
 ```javascript
 // stores.js
 import { writable, derived } from 'svelte/store';
 
 export const items = writable([
   { id: 1, name: 'Item 1', price: 10 },
-  { id: 2, name: 'Item 2', price: 20 }
+  { id: 2, name: 'Item 2', price: 20 },
 ]);
 
 // Computed value from store(s)
-export const total = derived(items, $items =>
-  $items.reduce((sum, item) => sum + item.price, 0)
-);
+export const total = derived(items, ($items) => $items.reduce((sum, item) => sum + item.price, 0));
 ```
 
 **Readable Store (for external subscriptions):**
+
 ```javascript
 // timeStore.js
 import { readable } from 'svelte/store';
 
-export const time = readable(new Date(), set => {
+export const time = readable(new Date(), (set) => {
   const interval = setInterval(() => {
     set(new Date());
   }, 1000);
@@ -483,16 +495,16 @@ export const time = readable(new Date(), set => {
 
 ### State Management Comparison
 
-| Feature | Redux | Context API | Svelte Stores |
-|---------|-------|-------------|---------------|
-| **Setup Complexity** | High | Medium | Low |
-| **Boilerplate** | High | Medium | Low |
-| **Provider Required** | Yes | Yes | No |
-| **Auto-subscription** | No | No | Yes (with `$`) |
-| **Derived State** | Selectors | Manual | `derived()` |
-| **DevTools** | Yes | Limited | Extension available |
-| **Server-Side** | Complex | Complex | Simple (`.server.js` suffix) |
-| **Performance** | Good (with optimization) | Can cause re-renders | Excellent (fine-grained) |
+| Feature               | Redux                    | Context API          | Svelte Stores                |
+| --------------------- | ------------------------ | -------------------- | ---------------------------- |
+| **Setup Complexity**  | High                     | Medium               | Low                          |
+| **Boilerplate**       | High                     | Medium               | Low                          |
+| **Provider Required** | Yes                      | Yes                  | No                           |
+| **Auto-subscription** | No                       | No                   | Yes (with `$`)               |
+| **Derived State**     | Selectors                | Manual               | `derived()`                  |
+| **DevTools**          | Yes                      | Limited              | Extension available          |
+| **Server-Side**       | Complex                  | Complex              | Simple (`.server.js` suffix) |
+| **Performance**       | Good (with optimization) | Can cause re-renders | Excellent (fine-grained)     |
 
 ---
 
@@ -501,6 +513,7 @@ export const time = readable(new Date(), set => {
 ### useEffect + fetch → Load Functions
 
 #### React Data Fetching
+
 ```jsx
 import { useState, useEffect } from 'react';
 
@@ -542,6 +555,7 @@ function BlogPost({ slug }) {
 #### SvelteKit Load Functions
 
 **Server-side Load Function:**
+
 ```javascript
 // src/routes/blog/[slug]/+page.server.js
 import { error } from '@sveltejs/kit';
@@ -559,7 +573,7 @@ export async function load({ params, fetch }) {
     const post = await response.json();
 
     return {
-      post
+      post,
     };
   } catch (err) {
     throw error(500, 'Failed to load post');
@@ -568,6 +582,7 @@ export async function load({ params, fetch }) {
 ```
 
 **Component:**
+
 ```svelte
 <!-- src/routes/blog/[slug]/+page.svelte -->
 <script>
@@ -583,6 +598,7 @@ export async function load({ params, fetch }) {
 ```
 
 **Universal Load Function (runs on both server and client):**
+
 ```javascript
 // src/routes/blog/[slug]/+page.js
 export async function load({ params, fetch }) {
@@ -601,6 +617,7 @@ export async function load({ params, fetch }) {
 ```
 
 **Load Function with Dependencies:**
+
 ```javascript
 // src/routes/blog/[slug]/+page.server.js
 export async function load({ params, fetch, depends }) {
@@ -608,8 +625,8 @@ export async function load({ params, fetch, depends }) {
   depends('app:blog-post');
 
   const [post, comments] = await Promise.all([
-    fetch(`/api/posts/${params.slug}`).then(r => r.json()),
-    fetch(`/api/posts/${params.slug}/comments`).then(r => r.json())
+    fetch(`/api/posts/${params.slug}`).then((r) => r.json()),
+    fetch(`/api/posts/${params.slug}/comments`).then((r) => r.json()),
   ]);
 
   return { post, comments };
@@ -617,6 +634,7 @@ export async function load({ params, fetch, depends }) {
 ```
 
 **Invalidating Data from Component:**
+
 ```svelte
 <script>
   import { invalidate } from '$app/navigation';
@@ -634,20 +652,21 @@ export async function load({ params, fetch, depends }) {
 
 ### Data Fetching Comparison
 
-| Feature | React (useEffect) | SvelteKit Load Functions |
-|---------|-------------------|--------------------------|
-| **When Runs** | After component mounts | Before page renders |
-| **SSR Support** | Manual setup | Built-in |
-| **Loading State** | Manual management | Automatic |
-| **Error Handling** | Try/catch + state | `error()` helper |
-| **Waterfalls** | Common problem | Parallel by default |
-| **Caching** | Manual/React Query | Automatic |
-| **Revalidation** | Manual/dependencies | `invalidate()` API |
-| **Type Safety** | Manual typing | Automatic inference |
+| Feature            | React (useEffect)      | SvelteKit Load Functions |
+| ------------------ | ---------------------- | ------------------------ |
+| **When Runs**      | After component mounts | Before page renders      |
+| **SSR Support**    | Manual setup           | Built-in                 |
+| **Loading State**  | Manual management      | Automatic                |
+| **Error Handling** | Try/catch + state      | `error()` helper         |
+| **Waterfalls**     | Common problem         | Parallel by default      |
+| **Caching**        | Manual/React Query     | Automatic                |
+| **Revalidation**   | Manual/dependencies    | `invalidate()` API       |
+| **Type Safety**    | Manual typing          | Automatic inference      |
 
 ### API Routes Comparison
 
 #### Next.js API Route
+
 ```javascript
 // pages/api/posts/[slug].js
 export default async function handler(req, res) {
@@ -663,6 +682,7 @@ export default async function handler(req, res) {
 ```
 
 #### SvelteKit Server Route
+
 ```javascript
 // src/routes/api/posts/[slug]/+server.js
 import { json } from '@sveltejs/kit';
@@ -691,6 +711,7 @@ export async function DELETE({ params }) {
 ### React vs Svelte Event Syntax
 
 #### React Event Handling
+
 ```jsx
 function EventsExample() {
   const [value, setValue] = useState('');
@@ -714,23 +735,19 @@ function EventsExample() {
   return (
     <div>
       <button onClick={handleClick}>Click</button>
-      <button onClick={() => handleClickWithParam(123)}>
-        Click with param
-      </button>
+      <button onClick={() => handleClickWithParam(123)}>Click with param</button>
 
       <form onSubmit={handleSubmit}>
-        <input
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
+        <input value={value} onChange={(e) => setValue(e.target.value)} />
       </form>
 
       {/* Stop propagation */}
       <div onClick={() => console.log('Parent')}>
-        <button onClick={(e) => {
-          e.stopPropagation();
-          console.log('Child');
-        }}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            console.log('Child');
+          }}>
           Click me
         </button>
       </div>
@@ -740,6 +757,7 @@ function EventsExample() {
 ```
 
 #### Svelte 5 Event Handling
+
 ```svelte
 <script>
   let value = $state('');
@@ -789,14 +807,11 @@ function EventsExample() {
 ### Component Events
 
 #### React (Callback Props)
+
 ```jsx
 // Child.jsx
 function Child({ onCustomEvent }) {
-  return (
-    <button onClick={() => onCustomEvent({ detail: 'data' })}>
-      Trigger Event
-    </button>
-  );
+  return <button onClick={() => onCustomEvent({ detail: 'data' })}>Trigger Event</button>;
 }
 
 // Parent.jsx
@@ -810,6 +825,7 @@ function Parent() {
 ```
 
 #### Svelte 5 (Callback Props - Recommended)
+
 ```svelte
 <!-- Child.svelte -->
 <script>
@@ -834,15 +850,15 @@ function Parent() {
 
 ### Event Handling Comparison
 
-| Feature | React | Svelte 5 |
-|---------|-------|----------|
-| **Event Names** | camelCase (`onClick`) | lowercase (`onclick`) |
-| **Prevent Default** | `e.preventDefault()` | Manual or form action |
-| **Stop Propagation** | `e.stopPropagation()` | Manual in handler |
-| **Event Modifiers** | Manual in handler | Manual (legacy modifiers removed) |
-| **Component Events** | Callback props | Callback props (recommended) |
-| **Performance** | New function per render | Function created once |
-| **Two-way Binding** | Controlled components | `bind:value` directive |
+| Feature              | React                   | Svelte 5                          |
+| -------------------- | ----------------------- | --------------------------------- |
+| **Event Names**      | camelCase (`onClick`)   | lowercase (`onclick`)             |
+| **Prevent Default**  | `e.preventDefault()`    | Manual or form action             |
+| **Stop Propagation** | `e.stopPropagation()`   | Manual in handler                 |
+| **Event Modifiers**  | Manual in handler       | Manual (legacy modifiers removed) |
+| **Component Events** | Callback props          | Callback props (recommended)      |
+| **Performance**      | New function per render | Function created once             |
+| **Two-way Binding**  | Controlled components   | `bind:value` directive            |
 
 ---
 
@@ -851,6 +867,7 @@ function Parent() {
 ### React Lifecycle Hooks → Svelte Lifecycle
 
 #### React Lifecycle
+
 ```jsx
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 
@@ -895,6 +912,7 @@ function LifecycleExample() {
 ```
 
 #### Svelte Lifecycle
+
 ```svelte
 <script>
   import { onMount, onDestroy, beforeUpdate, afterUpdate, tick } from 'svelte';
@@ -949,14 +967,14 @@ function LifecycleExample() {
 
 ### Lifecycle Comparison Table
 
-| React Hook | Svelte Function | When It Runs |
-|------------|-----------------|--------------|
-| `useEffect(() => {}, [])` | `onMount()` | After component mounts |
-| `useEffect(() => { return cleanup })` | `onDestroy()` | Before unmount |
-| `useEffect(() => {}, [deps])` | `$effect()` | When dependencies change |
-| `useLayoutEffect()` | `beforeUpdate()` | Before DOM updates |
-| N/A | `afterUpdate()` | After DOM updates |
-| N/A | `tick()` | Wait for pending updates |
+| React Hook                            | Svelte Function  | When It Runs             |
+| ------------------------------------- | ---------------- | ------------------------ |
+| `useEffect(() => {}, [])`             | `onMount()`      | After component mounts   |
+| `useEffect(() => { return cleanup })` | `onDestroy()`    | Before unmount           |
+| `useEffect(() => {}, [deps])`         | `$effect()`      | When dependencies change |
+| `useLayoutEffect()`                   | `beforeUpdate()` | Before DOM updates       |
+| N/A                                   | `afterUpdate()`  | After DOM updates        |
+| N/A                                   | `tick()`         | Wait for pending updates |
 
 ### Key Differences
 
@@ -972,6 +990,7 @@ function LifecycleExample() {
 ### React Forms vs SvelteKit Form Actions
 
 #### React Form Handling
+
 ```jsx
 import { useState } from 'react';
 
@@ -979,7 +998,7 @@ function ContactForm() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: ''
+    message: '',
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -987,7 +1006,7 @@ function ContactForm() {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -1000,7 +1019,7 @@ function ContactForm() {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
@@ -1021,12 +1040,7 @@ function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input
-        name="name"
-        value={formData.name}
-        onChange={handleChange}
-        disabled={submitting}
-      />
+      <input name="name" value={formData.name} onChange={handleChange} disabled={submitting} />
       {errors.name && <span>{errors.name}</span>}
 
       <input
@@ -1057,6 +1071,7 @@ function ContactForm() {
 #### SvelteKit Form Actions
 
 **Server Action:**
+
 ```javascript
 // src/routes/contact/+page.server.js
 import { fail } from '@sveltejs/kit';
@@ -1082,11 +1097,12 @@ export const actions = {
     await db.contacts.create({ name, email, message });
 
     return { success: true };
-  }
+  },
 };
 ```
 
 **Component (works without JavaScript!):**
+
 ```svelte
 <!-- src/routes/contact/+page.svelte -->
 <script>
@@ -1130,6 +1146,7 @@ export const actions = {
 ```
 
 **Named Actions:**
+
 ```javascript
 // src/routes/auth/+page.server.js
 import { fail } from '@sveltejs/kit';
@@ -1145,7 +1162,7 @@ export const actions = {
     const data = await request.formData();
     // Handle registration
     return { success: true };
-  }
+  },
 };
 ```
 
@@ -1161,6 +1178,7 @@ export const actions = {
 ```
 
 **Progressive Enhancement:**
+
 ```svelte
 <script>
   import { enhance } from '$app/forms';
@@ -1202,16 +1220,16 @@ export const actions = {
 
 ### Form Handling Comparison
 
-| Feature | React | SvelteKit |
-|---------|-------|-----------|
-| **JavaScript Required** | Yes | No (progressive enhancement) |
-| **Form State** | Manual with useState | Automatic via `form` prop |
-| **Validation** | Client-side or manual | Server-side with `fail()` |
-| **Submission** | Fetch API | Native form submission |
-| **Loading State** | Manual | Built-in with `use:enhance` |
-| **Error Handling** | Try/catch + state | Return from action |
-| **File Uploads** | FormData + fetch | Native FormData |
-| **Multiple Actions** | Different endpoints | Named actions on same page |
+| Feature                 | React                 | SvelteKit                    |
+| ----------------------- | --------------------- | ---------------------------- |
+| **JavaScript Required** | Yes                   | No (progressive enhancement) |
+| **Form State**          | Manual with useState  | Automatic via `form` prop    |
+| **Validation**          | Client-side or manual | Server-side with `fail()`    |
+| **Submission**          | Fetch API             | Native form submission       |
+| **Loading State**       | Manual                | Built-in with `use:enhance`  |
+| **Error Handling**      | Try/catch + state     | Return from action           |
+| **File Uploads**        | FormData + fetch      | Native FormData              |
+| **Multiple Actions**    | Different endpoints   | Named actions on same page   |
 
 ---
 
@@ -1220,6 +1238,7 @@ export const actions = {
 ### React (Create React App / Next.js) vs SvelteKit
 
 #### React Project Structure
+
 ```
 my-react-app/
 ├── public/
@@ -1252,6 +1271,7 @@ my-react-app/
 ```
 
 #### SvelteKit Project Structure
+
 ```
 my-sveltekit-app/
 ├── src/
@@ -1296,16 +1316,19 @@ my-sveltekit-app/
 ### Key Directories
 
 #### `src/lib/` ($lib alias)
+
 - Reusable components, utilities, stores
 - Imported via `$lib` alias: `import Button from '$lib/components/Button.svelte'`
 - Shareable across the entire application
 
 #### `src/lib/server/` ($lib/server alias)
+
 - Server-only code (database, auth, secrets)
 - Imported via `$lib/server` alias
 - SvelteKit ensures this code never reaches the client
 
 #### `src/routes/`
+
 - File-based routing structure
 - `+page.svelte` - Page components
 - `+page.js` - Universal load functions
@@ -1315,23 +1338,25 @@ my-sveltekit-app/
 - `+error.svelte` - Error pages
 
 #### `static/`
+
 - Static assets served at root (robots.txt, favicon, etc.)
 - Files accessible at `/filename`
 
 ### Naming Conventions
 
-| React | SvelteKit |
-|-------|-----------|
-| `Component.jsx` | `Component.svelte` |
-| `pages/about.jsx` | `routes/about/+page.svelte` |
-| `api/posts.js` (Next.js) | `routes/api/posts/+server.js` |
-| `_app.jsx` (Next.js) | `routes/+layout.svelte` |
-| `_document.jsx` (Next.js) | `app.html` |
-| `middleware.js` | `hooks.server.js` |
+| React                     | SvelteKit                     |
+| ------------------------- | ----------------------------- |
+| `Component.jsx`           | `Component.svelte`            |
+| `pages/about.jsx`         | `routes/about/+page.svelte`   |
+| `api/posts.js` (Next.js)  | `routes/api/posts/+server.js` |
+| `_app.jsx` (Next.js)      | `routes/+layout.svelte`       |
+| `_document.jsx` (Next.js) | `app.html`                    |
+| `middleware.js`           | `hooks.server.js`             |
 
 ### Code Organization Patterns
 
 **React Pattern (feature-based):**
+
 ```
 src/
 ├── features/
@@ -1347,6 +1372,7 @@ src/
 ```
 
 **SvelteKit Pattern (route-based):**
+
 ```
 src/
 ├── routes/
@@ -1385,12 +1411,14 @@ src/
 ### Bundle Size
 
 **React:**
+
 - React runtime: ~42KB (minified + gzipped)
 - React DOM: ~130KB (minified + gzipped)
 - Total base: ~172KB
 - Additional libraries (Router, Redux, etc.) add more
 
 **Svelte:**
+
 - No runtime (compiler-based)
 - Component code: ~3-5KB per component (compiled)
 - Total base: ~5-10KB
@@ -1398,16 +1426,17 @@ src/
 
 ### Runtime Performance
 
-| Metric | React | Svelte |
-|--------|-------|--------|
-| **Initial render** | Virtual DOM diffing | Direct DOM manipulation |
-| **Updates** | Re-render tree + diff | Surgical updates |
-| **Reactivity** | Runtime hooks | Compile-time analysis |
-| **Memory** | Higher (VDOM + fiber) | Lower (no abstraction layer) |
+| Metric             | React                 | Svelte                       |
+| ------------------ | --------------------- | ---------------------------- |
+| **Initial render** | Virtual DOM diffing   | Direct DOM manipulation      |
+| **Updates**        | Re-render tree + diff | Surgical updates             |
+| **Reactivity**     | Runtime hooks         | Compile-time analysis        |
+| **Memory**         | Higher (VDOM + fiber) | Lower (no abstraction layer) |
 
 ### Optimization Techniques
 
 #### React Optimizations
+
 ```jsx
 // Memoization
 const MemoizedComponent = React.memo(Component);
@@ -1423,6 +1452,7 @@ const LazyComponent = lazy(() => import('./Component'));
 ```
 
 #### Svelte Optimizations
+
 ```svelte
 <!-- Most optimizations built-in -->
 <script>
@@ -1479,6 +1509,7 @@ const LazyComponent = lazy(() => import('./Component'));
 ### Phase 4: Component Conversion
 
 For each component:
+
 - [ ] Remove React imports
 - [ ] Convert JSX to Svelte template syntax
 - [ ] Change `className` to `class`
@@ -1528,42 +1559,45 @@ For each component:
 
 ### React → Svelte Translation Table
 
-| React Code | Svelte 5 Code |
-|------------|---------------|
-| `import React from 'react'` | No import needed |
-| `const [x, setX] = useState(0)` | `let x = $state(0)` |
-| `const y = useMemo(() => x * 2, [x])` | `const y = $derived(x * 2)` |
-| `useEffect(() => {...}, [x])` | `$effect(() => {...})` |
-| `const ref = useRef()` | `let ref` |
-| `<div className="foo">` | `<div class="foo">` |
-| `<button onClick={fn}>` | `<button onclick={fn}>` |
-| `<input value={x} onChange={...} />` | `<input bind:value={x} />` |
-| `{condition && <Component />}` | `{#if condition}<Component />{/if}` |
-| `{items.map(i => <Item {...i} />)}` | `{#each items as i}<Item {...i} />{/each}` |
-| `<Component {...props} />` | `<Component {...props} />` (same) |
-| `const { prop } = props` | `let { prop } = $props()` |
-| `props.children` | `<slot />` |
-| `<Link to="/about">` | `<a href="/about">` |
-| `useNavigate()` | `goto()` from `$app/navigation` |
-| `useParams()` | `params` from load function |
-| `useSearchParams()` | `url.searchParams` from load |
+| React Code                            | Svelte 5 Code                              |
+| ------------------------------------- | ------------------------------------------ |
+| `import React from 'react'`           | No import needed                           |
+| `const [x, setX] = useState(0)`       | `let x = $state(0)`                        |
+| `const y = useMemo(() => x * 2, [x])` | `const y = $derived(x * 2)`                |
+| `useEffect(() => {...}, [x])`         | `$effect(() => {...})`                     |
+| `const ref = useRef()`                | `let ref`                                  |
+| `<div className="foo">`               | `<div class="foo">`                        |
+| `<button onClick={fn}>`               | `<button onclick={fn}>`                    |
+| `<input value={x} onChange={...} />`  | `<input bind:value={x} />`                 |
+| `{condition && <Component />}`        | `{#if condition}<Component />{/if}`        |
+| `{items.map(i => <Item {...i} />)}`   | `{#each items as i}<Item {...i} />{/each}` |
+| `<Component {...props} />`            | `<Component {...props} />` (same)          |
+| `const { prop } = props`              | `let { prop } = $props()`                  |
+| `props.children`                      | `<slot />`                                 |
+| `<Link to="/about">`                  | `<a href="/about">`                        |
+| `useNavigate()`                       | `goto()` from `$app/navigation`            |
+| `useParams()`                         | `params` from load function                |
+| `useSearchParams()`                   | `url.searchParams` from load               |
 
 ---
 
 ## Additional Resources
 
 ### Official Documentation
+
 - **SvelteKit Docs**: https://svelte.dev/docs/kit/introduction
 - **Svelte 5 Docs**: https://svelte.dev/docs/svelte/overview
 - **Svelte Tutorial**: https://svelte.dev/tutorial
 - **SvelteKit Examples**: https://svelte.dev/examples
 
 ### Community Resources
+
 - **Svelte Discord**: https://svelte.dev/chat
 - **Svelte Reddit**: https://reddit.com/r/sveltejs
 - **SvelteKit GitHub**: https://github.com/sveltejs/kit
 
 ### Learning Paths
+
 1. Complete Svelte tutorial (1-2 hours)
 2. Build a simple SvelteKit app (3-5 hours)
 3. Migrate one React component to Svelte (1 hour)
@@ -1577,6 +1611,7 @@ For each component:
 Migrating from React to SvelteKit involves learning a new paradigm, but many concepts translate directly:
 
 **Easier in Svelte:**
+
 - Less boilerplate (no imports, smaller files)
 - Automatic reactivity (no dependency arrays)
 - Built-in routing (no React Router)
@@ -1585,6 +1620,7 @@ Migrating from React to SvelteKit involves learning a new paradigm, but many con
 - Scoped styles by default
 
 **Requires Adjustment:**
+
 - File-based routing structure
 - Load functions instead of useEffect
 - Different reactivity model (runes vs hooks)

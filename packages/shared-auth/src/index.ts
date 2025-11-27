@@ -11,62 +11,62 @@ export { createTokenManager } from './core/tokenManager';
 export type { TokenManager, TokenManagerConfig } from './core/tokenManager';
 
 export {
-  decodeToken,
-  isTokenValidLocally,
-  isTokenExpired,
-  getUserFromToken,
-  getTokenExpirationTime,
-  getTimeUntilExpiration,
-  isB2BUser,
-  getB2BInfo,
-  shouldDisableRevenueCat,
-  getAppSettings,
+	decodeToken,
+	isTokenValidLocally,
+	isTokenExpired,
+	getUserFromToken,
+	getTokenExpirationTime,
+	getTimeUntilExpiration,
+	isB2BUser,
+	getB2BInfo,
+	shouldDisableRevenueCat,
+	getAppSettings,
 } from './core/jwtUtils';
 
 // Storage adapter
 import {
-  setStorageAdapter as _setStorageAdapter,
-  createLocalStorageAdapter as _createLocalStorageAdapter,
+	setStorageAdapter as _setStorageAdapter,
+	createLocalStorageAdapter as _createLocalStorageAdapter,
 } from './adapters/storage';
 export {
-  setStorageAdapter,
-  getStorageAdapter,
-  isStorageInitialized,
-  createLocalStorageAdapter,
-  createMemoryStorageAdapter,
+	setStorageAdapter,
+	getStorageAdapter,
+	isStorageInitialized,
+	createLocalStorageAdapter,
+	createMemoryStorageAdapter,
 } from './adapters/storage';
 
 // Device adapter
 import {
-  setDeviceAdapter as _setDeviceAdapter,
-  createWebDeviceAdapter as _createWebDeviceAdapter,
+	setDeviceAdapter as _setDeviceAdapter,
+	createWebDeviceAdapter as _createWebDeviceAdapter,
 } from './adapters/device';
 export {
-  setDeviceAdapter,
-  getDeviceAdapter,
-  isDeviceInitialized,
-  createWebDeviceAdapter,
+	setDeviceAdapter,
+	getDeviceAdapter,
+	isDeviceInitialized,
+	createWebDeviceAdapter,
 } from './adapters/device';
 
 // Network adapter
 import {
-  setNetworkAdapter as _setNetworkAdapter,
-  createWebNetworkAdapter as _createWebNetworkAdapter,
+	setNetworkAdapter as _setNetworkAdapter,
+	createWebNetworkAdapter as _createWebNetworkAdapter,
 } from './adapters/network';
 export {
-  setNetworkAdapter,
-  getNetworkAdapter,
-  isDeviceConnected,
-  hasStableConnection,
-  createWebNetworkAdapter,
+	setNetworkAdapter,
+	getNetworkAdapter,
+	isDeviceConnected,
+	hasStableConnection,
+	createWebNetworkAdapter,
 } from './adapters/network';
 
 // Fetch interceptor
 import { setupFetchInterceptor as _setupFetchInterceptor } from './interceptors/fetchInterceptor';
 export {
-  setupFetchInterceptor,
-  setupTokenObservers,
-  getInterceptorStatus,
+	setupFetchInterceptor,
+	setupTokenObservers,
+	getInterceptorStatus,
 } from './interceptors/fetchInterceptor';
 export type { FetchInterceptorConfig } from './interceptors/fetchInterceptor';
 
@@ -82,18 +82,21 @@ export type { FetchInterceptorConfig } from './interceptors/fetchInterceptor';
  * });
  * ```
  */
-export function initializeWebAuth(config: { baseUrl: string; storageKeys?: Partial<import('./types').StorageKeys> }) {
-  // Set up adapters
-  _setStorageAdapter(_createLocalStorageAdapter());
-  _setDeviceAdapter(_createWebDeviceAdapter());
-  _setNetworkAdapter(_createWebNetworkAdapter());
+export function initializeWebAuth(config: {
+	baseUrl: string;
+	storageKeys?: Partial<import('./types').StorageKeys>;
+}) {
+	// Set up adapters
+	_setStorageAdapter(_createLocalStorageAdapter());
+	_setDeviceAdapter(_createWebDeviceAdapter());
+	_setNetworkAdapter(_createWebNetworkAdapter());
 
-  // Create services
-  const authService = _createAuthService(config);
-  const tokenManager = _createTokenManager(authService);
+	// Create services
+	const authService = _createAuthService(config);
+	const tokenManager = _createTokenManager(authService);
 
-  // Set up interceptor
-  _setupFetchInterceptor(authService, tokenManager);
+	// Set up interceptor
+	_setupFetchInterceptor(authService, tokenManager);
 
-  return { authService, tokenManager };
+	return { authService, tokenManager };
 }

@@ -30,7 +30,7 @@
 		height = '20px',
 		borderRadius = '4px',
 		circle = false,
-		class: className = ''
+		class: className = '',
 	}: Props = $props();
 
 	const computedRadius = $derived(circle ? '50%' : borderRadius);

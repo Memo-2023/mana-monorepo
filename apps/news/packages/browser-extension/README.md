@@ -13,12 +13,14 @@ Eine Chrome/Firefox Browser-Erweiterung für die Kokon Read-Later App.
 ## Installation (Development)
 
 ### Chrome/Edge
+
 1. Öffne `chrome://extensions/`
 2. Aktiviere "Entwicklermodus" (Developer mode)
 3. Klicke "Ungepackte Erweiterung laden" (Load unpacked)
 4. Wähle den `browser-extension` Ordner aus
 
 ### Firefox
+
 1. Öffne `about:debugging`
 2. Klicke "Dieses Firefox" (This Firefox)
 3. Klicke "Temporäres Add-on laden" (Load Temporary Add-on)
@@ -39,18 +41,21 @@ Eine Chrome/Firefox Browser-Erweiterung für die Kokon Read-Later App.
 ## Technische Details
 
 ### Architektur
+
 - **Manifest V3**: Moderne Chrome Extension API
 - **Service Worker**: Background-Verarbeitung für Session-Management
 - **Popup Interface**: Elegant gestaltetes Popup mit Echtzeit-Feedback
 - **Chrome Storage API**: Synchronisation mit Web-App-Sessions
 
 ### Sicherheit
+
 - **Minimale Berechtigungen**: Nur `activeTab` und `storage`
 - **HTTPS Only**: Sichere Kommunikation mit Supabase
 - **Token-basierte Auth**: Nutzt bestehende Supabase-Session
 - **Domain-Validierung**: Verhindert Speichern von Browser-internen Seiten
 
 ### Integration
+
 - Nutzt die gleiche `save-article` Edge Function wie die App
 - Teilt sich die Session mit der Web-App über Chrome Storage
 - Automatische Token-Erneuerung und Logout-Erkennung
@@ -74,6 +79,7 @@ browser-extension/
 ## TODO: Icons
 
 Die Extension benötigt noch Icons in verschiedenen Größen:
+
 - 16x16px (Toolbar)
 - 32x32px (Extension-Management)
 - 48x48px (Extension-Management)
@@ -103,12 +109,14 @@ Für Mozilla Add-ons:
 ## Entwicklung
 
 ### Testing
+
 1. Lade die Extension im Entwicklermodus
 2. Öffne eine beliebige Webseite
 3. Teste das Popup und die Save-Funktionalität
 4. Überprüfe die Browser-Konsole für Fehler
 
 ### Debugging
+
 - **Popup debuggen**: Rechtsklick auf Extension-Icon → "Inspect popup"
 - **Background Script**: In `chrome://extensions/` → "Inspect views: background page"
 - **Storage prüfen**: Chrome DevTools → Application → Storage → Extension

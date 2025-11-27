@@ -9,6 +9,7 @@
 A shadcn-style CLI tool that copies React Native UI components into your mobile app. Components become part of your codebase, giving you full control without NPM dependencies.
 
 **Compatible with:**
+
 - ✅ React Native (Expo) applications
 - ❌ Web applications (SvelteKit, Next.js, etc.)
 - ❌ Astro sites
@@ -32,6 +33,7 @@ node packages/mobile-ui/cli/bin/cli.js list
 ```
 
 **Output:**
+
 ```
 📦 Available Components
 
@@ -45,10 +47,12 @@ UI:
 ```
 
 Legend:
+
 - ✓ = Already installed in this project
 - ○ = Not installed
 
 **Options:**
+
 - `-c, --category <category>` - Filter by category (ui, navigation)
 
 ### `add <component>`
@@ -60,6 +64,7 @@ node packages/mobile-ui/cli/bin/cli.js add button
 ```
 
 **What it does:**
+
 1. Checks if component exists in registry
 2. Resolves dependencies automatically
 3. Checks for existing components
@@ -69,6 +74,7 @@ node packages/mobile-ui/cli/bin/cli.js add button
 7. Shows import instructions
 
 **Options:**
+
 - `-y, --yes` - Skip confirmation prompts
 
 **Example with dependencies:**
@@ -78,6 +84,7 @@ node packages/mobile-ui/cli/bin/cli.js add button
 ```
 
 Output:
+
 ```
 ✔ Found component: Button
 ✔ Dependencies: icon, text
@@ -142,19 +149,19 @@ packages/mobile-ui/
 
 ```json
 {
-  "name": "@memoro/ui",
-  "version": "0.1.0",
-  "components": {
-    "ui": {
-      "button": {
-        "name": "Button",
-        "files": ["Button.tsx"],
-        "category": "ui",
-        "dependencies": ["icon", "text"],
-        "description": "Pressable button with variants, sizes, and icon support"
-      }
-    }
-  }
+	"name": "@memoro/ui",
+	"version": "0.1.0",
+	"components": {
+		"ui": {
+			"button": {
+				"name": "Button",
+				"files": ["Button.tsx"],
+				"category": "ui",
+				"dependencies": ["icon", "text"],
+				"description": "Pressable button with variants, sizes, and icon support"
+			}
+		}
+	}
 }
 ```
 
@@ -171,6 +178,7 @@ Already installed components are skipped.
 ### File Operations
 
 Components are copied to:
+
 ```
 your-project/
 └── components/
@@ -243,6 +251,7 @@ cd /tmp/test-cli
 ### TypeScript
 
 Fully typed with TypeScript:
+
 - `ComponentRegistry` - Registry structure
 - `ComponentInfo` - Component metadata
 - `Config` - CLI configuration
@@ -257,50 +266,62 @@ Fully typed with TypeScript:
 ## Future Enhancements (Phase 4+)
 
 ### `update` Command
+
 ```bash
 memoro-ui update button
 ```
+
 - Shows diff between local and remote
 - Asks for confirmation
 - Updates component
 
 ### `diff` Command
+
 ```bash
 memoro-ui diff button
 ```
+
 - Shows differences without updating
 - Helpful for seeing local modifications
 
 ### `init` Command
+
 ```bash
 memoro-ui init
 ```
+
 - Creates `components/` directory structure
 - Sets up path aliases in tsconfig.json
 
 ### `remove` Command
+
 ```bash
 memoro-ui remove button
 ```
+
 - Removes component from project
 - Warns about dependents
 
 ### `sync` Command
+
 ```bash
 memoro-ui sync
 ```
+
 - Updates all installed components
 - Shows summary of changes
 
 ## Comparison to Other Tools
 
 ### vs shadcn/ui
+
 - ✅ Same copy-paste philosophy
 - ✅ Same registry approach
 - ⚠️ React Native instead of React web
 - ⚠️ No theme system yet (coming in Phase 2)
 
 ### vs NPM Packages
+
 - ✅ No version conflicts
 - ✅ Full control over code
 - ✅ Better for AI context
@@ -318,27 +339,31 @@ memoro-ui sync
 ## Troubleshooting
 
 ### "Component not found"
+
 - Run `memoro-ui list` to see available components
 - Check spelling (use kebab-case: `empty-state` not `EmptyState`)
 
 ### "Registry not found"
+
 - Ensure you're using the correct path to CLI
 - Check that `registry.json` exists in `packages/mobile-ui/`
 
 ### "Components copied to wrong location"
+
 - Create `components/` directory first
 - CLI will auto-detect it
 
 ### Import errors after adding component
+
 - Check import path: `@/components/ui/Button`
 - Ensure path alias is configured in tsconfig.json:
   ```json
   {
-    "compilerOptions": {
-      "paths": {
-        "@/*": ["./*"]
-      }
-    }
+  	"compilerOptions": {
+  		"paths": {
+  			"@/*": ["./*"]
+  		}
+  	}
   }
   ```
 
@@ -371,6 +396,7 @@ node packages/mobile-ui/cli/bin/cli.js add container -y
 ```
 
 Then use them:
+
 ```tsx
 import { Container } from '@/components/ui/Container';
 import { Card } from '@/components/ui/Card';
@@ -378,15 +404,15 @@ import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/ui/Button';
 
 function LoginForm() {
-  return (
-    <Container>
-      <Card>
-        <Text variant="h2">Login</Text>
-        {/* Form fields */}
-        <Button title="Sign In" variant="primary" onPress={handleLogin} />
-      </Card>
-    </Container>
-  );
+	return (
+		<Container>
+			<Card>
+				<Text variant="h2">Login</Text>
+				{/* Form fields */}
+				<Button title="Sign In" variant="primary" onPress={handleLogin} />
+			</Card>
+		</Container>
+	);
 }
 ```
 
@@ -395,6 +421,7 @@ function LoginForm() {
 Phase 3 is complete! The CLI tool is fully functional and ready to use. 🎉
 
 **What's working:**
+
 - ✅ List all components with install status
 - ✅ Add components with automatic dependency resolution
 - ✅ Conflict detection and confirmation prompts
@@ -402,6 +429,7 @@ Phase 3 is complete! The CLI tool is fully functional and ready to use. 🎉
 - ✅ Type-safe TypeScript implementation
 
 **Next steps:**
+
 - Test in picture app (Phase 4)
 - Extract to separate repo
 - Publish to GitHub Packages

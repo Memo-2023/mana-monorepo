@@ -3,6 +3,7 @@
 ## ✅ Verfügbare Page Skeletons
 
 ### 1. **DashboardSkeleton** ✅ Integriert
+
 - **Datei**: `pages/DashboardSkeleton.svelte`
 - **Verwendet in**: `/dashboard/+page.svelte`
 - **Struktur**: Zwei-Spalten Layout mit Memo-Liste und Detail-View
@@ -11,6 +12,7 @@
   - `leftColumnWidth?: number` (Default: 400)
 
 **Features**:
+
 - Memo-Liste mit Titel, Transcript-Vorschau, Footer
 - Recording Button Platzhalter (kreisrund)
 - Opacity Staggering für visuelle Tiefe
@@ -18,6 +20,7 @@
 ---
 
 ### 2. **TagsPageSkeleton** ✅ Integriert
+
 - **Datei**: `pages/TagsPageSkeleton.svelte`
 - **Verwendet in**: `/tags/+page.svelte`
 - **Struktur**: Header + Grid von Tag-Karten
@@ -25,6 +28,7 @@
   - `tagCount?: number` (Default: 12)
 
 **Features**:
+
 - Tag-Karten mit Farb-Dot, Name, Description
 - Usage Count & Action Buttons
 - Responsive Grid (1/2/3 Spalten)
@@ -32,6 +36,7 @@
 ---
 
 ### 3. **BlueprintsPageSkeleton** ✅ Integriert
+
 - **Datei**: `pages/BlueprintsPageSkeleton.svelte`
 - **Verwendet in**: `/blueprints/+page.svelte`
 - **Struktur**: Filter Pills + Blueprint Cards Grid
@@ -40,6 +45,7 @@
   - `showFilters?: boolean` (Default: true)
 
 **Features**:
+
 - Category Filter Pills (horizontal scroll)
 - Blueprint Cards mit Category Badge, Title, Description
 - Prompts Count Indikator
@@ -48,6 +54,7 @@
 ---
 
 ### 4. **StatisticsPageSkeleton** ✅ Integriert
+
 - **Datei**: `pages/StatisticsPageSkeleton.svelte`
 - **Verwendet in**: `/statistics/+page.svelte`
 - **Struktur**: Quick Stats Cards + Large Analysis Cards
@@ -55,6 +62,7 @@
   - `showCards?: boolean` (Default: true)
 
 **Features**:
+
 - 4 Quick Stats Cards (horizontal scroll)
 - Overview, Productivity, Insights, Engagement Cards
 - Chart Platzhalter (Balken, Kreise)
@@ -63,6 +71,7 @@
 ---
 
 ### 5. **SettingsPageSkeleton** ✅ Erstellt (Optional)
+
 - **Datei**: `pages/SettingsPageSkeleton.svelte`
 - **Verwendet in**: _Optional - Settings lädt synchron_
 - **Struktur**: User Info + Theme + Toggles + Sections
@@ -70,6 +79,7 @@
   - `showAllSections?: boolean` (Default: true)
 
 **Features**:
+
 - User Info Card mit Avatar
 - Theme Mode Buttons (3er Grid)
 - Theme Variant Buttons (4er Grid)
@@ -83,6 +93,7 @@
 ---
 
 ### 6. **SubscriptionPageSkeleton** ✅ Erstellt (Optional)
+
 - **Datei**: `pages/SubscriptionPageSkeleton.svelte`
 - **Verwendet in**: _Optional - Daten aus JSON_
 - **Struktur**: Usage + Cost + Subscriptions + Packages
@@ -92,6 +103,7 @@
   - `packageCount?: number` (Default: 3)
 
 **Features**:
+
 - Usage Card mit Progress Bars
 - Cost Card mit Cost Items
 - Billing Toggle
@@ -103,6 +115,7 @@
 ---
 
 ### 7. **SpacesPageSkeleton** ✅ Erstellt (Optional)
+
 - **Datei**: `pages/SpacesPageSkeleton.svelte`
 - **Verwendet in**: _Optional - "Coming Soon" Page_
 - **Struktur**: Header + Spaces Grid
@@ -111,6 +124,7 @@
   - `showCreateButton?: boolean` (Default: true)
 
 **Features**:
+
 - Space Cards mit Icon, Name, Description
 - Members & Stats Indikatoren
 - Action Buttons
@@ -121,6 +135,7 @@
 ---
 
 ### 8. **UploadPageSkeleton** ✅ Integriert
+
 - **Datei**: `pages/UploadPageSkeleton.svelte`
 - **Verwendet in**: `/upload/+page.svelte`
 - **Struktur**: File Upload Card + Options Form
@@ -128,6 +143,7 @@
   - `showOptionsForm?: boolean` (Default: true)
 
 **Features**:
+
 - File Upload Card mit Drag & Drop Area
 - Options Form (Title, Blueprint, Date/Time, Languages, Diarization)
 - Upload Buttons (Cancel, Upload & Verarbeiten)
@@ -142,24 +158,17 @@
 ## 🛠️ Utility Komponenten
 
 ### SkeletonBox
+
 ```svelte
-<SkeletonBox
-  width="200px"
-  height="24px"
-  borderRadius="8px"
-  className="mb-2"
-/>
+<SkeletonBox width="200px" height="24px" borderRadius="8px" className="mb-2" />
 ```
 
 **Verwendung**: Einzelne animierte Platzhalter-Boxen
 
 ### SkeletonText
+
 ```svelte
-<SkeletonText
-  lines={3}
-  width={['100%', '90%', '70%']}
-  variant="body"
-/>
+<SkeletonText lines={3} width={['100%', '90%', '70%']} variant="body" />
 ```
 
 **Verwendung**: Mehrere Text-Linien mit verschiedenen Breiten
@@ -168,44 +177,48 @@
 
 ## 📊 Integrationsstatus
 
-| Page | Skeleton | Status | Loading State |
-|------|----------|--------|---------------|
-| Dashboard | ✅ | Integriert | Async (Memos/Tags laden) |
-| Tags | ✅ | Integriert | Async (Tags laden) |
-| Blueprints | ✅ | Integriert | Async (Blueprints laden) |
-| Statistics | ✅ | Integriert | Async (Stats berechnen) |
-| Upload | ✅ | Integriert | Async (Blueprints/Spaces laden) |
-| Settings | ✅ | Verfügbar | Synchron (kein Loading) |
-| Subscription | ✅ | Verfügbar | Synchron (JSON Files) |
-| Spaces | ✅ | Verfügbar | "Coming Soon" Page |
+| Page         | Skeleton | Status     | Loading State                   |
+| ------------ | -------- | ---------- | ------------------------------- |
+| Dashboard    | ✅       | Integriert | Async (Memos/Tags laden)        |
+| Tags         | ✅       | Integriert | Async (Tags laden)              |
+| Blueprints   | ✅       | Integriert | Async (Blueprints laden)        |
+| Statistics   | ✅       | Integriert | Async (Stats berechnen)         |
+| Upload       | ✅       | Integriert | Async (Blueprints/Spaces laden) |
+| Settings     | ✅       | Verfügbar  | Synchron (kein Loading)         |
+| Subscription | ✅       | Verfügbar  | Synchron (JSON Files)           |
+| Spaces       | ✅       | Verfügbar  | "Coming Soon" Page              |
 
 ---
 
 ## 🎨 Design Patterns
 
 ### Opacity Staggering
+
 ```svelte
 {#each items as item, i}
-  <div style="opacity: {Math.max(0.4, 1 - i * 0.08)};">
-    <!-- Skeleton -->
-  </div>
+	<div style="opacity: {Math.max(0.4, 1 - i * 0.08)};">
+		<!-- Skeleton -->
+	</div>
 {/each}
 ```
 
 **Effekt**: Items werden nach unten hin transparenter (40% min)
 
 ### Shimmer Animation
+
 - **Dauer**: 1.5s
 - **Easing**: ease-in-out
 - **Loop**: infinite
 - **Farben**: CSS Variables `--skeleton-base` & `--skeleton-highlight`
 
 ### Responsive Grids
+
 ```svelte
 grid-cols-1 md:grid-cols-2 lg:grid-cols-3
 ```
 
 **Breakpoints**:
+
 - Mobile: 1 Spalte
 - Tablet (md): 2 Spalten
 - Desktop (lg): 3 Spalten
@@ -215,12 +228,14 @@ grid-cols-1 md:grid-cols-2 lg:grid-cols-3
 ## 🚀 Zukünftige Erweiterungen
 
 ### Potenzielle neue Skeletons:
+
 - **MemoDetailSkeleton**: Für einzelne Memo-Ansicht
 - **SearchResultsSkeleton**: Für Such-Ergebnisse
 - **NotificationsSkeleton**: Für Benachrichtigungs-Liste
 - **ProfileSkeleton**: Für User-Profile Ansicht
 
 ### Verbesserungen:
+
 - **Staggered Delays**: Zeitversetztes Erscheinen von Elementen
 - **Shimmer Direction**: Verschiedene Richtungen (top-to-bottom, diagonal)
 - **Color Variations**: Theme-spezifische Skeleton Farben

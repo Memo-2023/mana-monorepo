@@ -3,11 +3,12 @@
 ## Post 1: Die Psychologie kurzer URLs (Carousel)
 
 ### Slide 1 - Cover
+
 **Die Psychologie kurzer URLs**
 Warum wir eher auf kurze Links klicken
 
-
 ### Slide 2 - Das Problem
+
 **42% weniger Klicks bei langen URLs**
 
 Studien zeigen:
@@ -15,9 +16,10 @@ Studien zeigen:
 • Unleserliche Parameter = Spam-Verdacht
 • Mobile User scrollen nicht horizontal
 
-*Quelle: Marketing Sherpa Study 2023*
+_Quelle: Marketing Sherpa Study 2023_
 
 ### Slide 3 - Die Wissenschaft
+
 **Cognitive Load Theory**
 
 Unser Gehirn:
@@ -29,6 +31,7 @@ Lang: website.com/category/2024/01/article-title-here-very-long?utm_source=socia
 Kurz: website.com/artikel
 
 ### Slide 4 - Vertrauensfaktoren
+
 **Was macht Links vertrauenswürdig?**
 
 1. **Erkennbare Domain** (60% Wichtigkeit)
@@ -37,6 +40,7 @@ Kurz: website.com/artikel
 4. **HTTPS-Verschlüsselung** (5%)
 
 ### Slide 5 - Best Practices
+
 **So optimierst du deine Links:**
 
 ✅ Nutze sprechende URLs (/sommer-sale)
@@ -46,6 +50,7 @@ Kurz: website.com/artikel
 ✅ Tracke die Performance
 
 ### Slide 6 - Call to Action
+
 **Key Takeaway:**
 Kurze URLs = Mehr Vertrauen = Mehr Klicks
 
@@ -58,24 +63,30 @@ Speicher diesen Post für später! 📌
 ## Post 2: Der perfekte Instagram Bio-Link (Reel Script)
 
 ### Hook (0-3 Sek)
+
 [Text Overlay: "Nur 3% nutzen ihren Bio-Link richtig!"]
 "Stop! Dein Instagram Bio-Link könnte viel mehr leisten!"
 
 ### Problem (3-8 Sek)
+
 [Zeige schlechtes Beispiel]
 "Die meisten verlinken nur ihre Homepage. Fehler! Warum? Weil Instagram-User spezifische Inhalte suchen!"
 
 ### Lösung Teil 1 (8-15 Sek)
+
 [Screen Recording]
 "Trick 1: Erstelle eine Link-Sammlung! Alle wichtigen Links an einem Ort. Shop, Blog, YouTube, alles!"
 
 ### Lösung Teil 2 (15-22 Sek)
+
 "Trick 2: Update den Link bei jedem Post! Neuer Post über Smoothies? Link zum Rezept! Story über Workout? Link zum Plan!"
 
 ### Lösung Teil 3 (22-28 Sek)
+
 "Trick 3: Nutze Analytics! Check welche Links geklickt werden. Mehr davon = mehr Engagement!"
 
 ### Call to Action (28-30 Sek)
+
 [Text Overlay: "Speichern & ausprobieren!"]
 "Follow für mehr Instagram-Hacks! Welchen Trick probierst du zuerst?"
 
@@ -84,6 +95,7 @@ Speicher diesen Post für später! 📌
 ## Post 3: QR-Codes richtig einsetzen (Infografik)
 
 ### Haupttitel
+
 **QR-Codes: Do's and Don'ts für 2024**
 
 ### Do's ✅
@@ -121,6 +133,7 @@ QR-Code braucht klaren Kontrast
 Immer auch kurze URL dazu angeben
 
 ### Fun Facts
+
 • QR steht für "Quick Response"
 • Erfunden 1994 in Japan für Toyota
 • Kann bis zu 4.296 Zeichen speichern
@@ -139,6 +152,7 @@ Kleine Unternehmen haben oft begrenzte Marketing-Ressourcen. Umso wichtiger ist 
 ## 1. Der Hub-Ansatz
 
 Statt überall verschiedene Links zu streuen, erstellen Sie einen zentralen Hub. Dies kann eine einfache Landing Page sein mit:
+
 - Kontaktinformationen
 - Wichtigste Produkte/Services
 - Social Media Profile
@@ -149,6 +163,7 @@ Statt überall verschiedene Links zu streuen, erstellen Sie einen zentralen Hub.
 ## 2. Campaign-spezifische Links
 
 Für jede Marketing-Kampagne ein eigener Kurz-Link:
+
 - Black Friday: ihrefirma.de/blackfriday
 - Newsletter: ihrefirma.de/news-mai
 - Instagram: ihrefirma.de/insta
@@ -158,6 +173,7 @@ Für jede Marketing-Kampagne ein eigener Kurz-Link:
 ## 3. QR-Codes im Ladengeschäft
 
 Physisch zu Digital:
+
 - Auf Visitenkarten → digitale Kontaktkarte
 - An der Kasse → Google Bewertungen
 - Auf Produkten → Anleitungsvideos
@@ -166,6 +182,7 @@ Physisch zu Digital:
 ## 4. Team-Koordination
 
 Wenn mehrere Personen Links teilen:
+
 - Einheitliche Naming-Convention
 - Zentrale Link-Verwaltung
 - Regelmäßige Aufräum-Sessions
@@ -174,6 +191,7 @@ Wenn mehrere Personen Links teilen:
 ## 5. Analyse & Optimierung
 
 Monatlich prüfen:
+
 - Welche Links werden geklickt?
 - Zu welchen Uhrzeiten?
 - Von welchen Geräten?
@@ -186,13 +204,14 @@ Monatlich prüfen:
 □ Team schulen
 □ Monatliche Reviews planen
 
-*Tools wie youload können bei der Umsetzung helfen, aber die Strategie ist tool-unabhängig anwendbar.*
+_Tools wie youload können bei der Umsetzung helfen, aber die Strategie ist tool-unabhängig anwendbar._
 
 ---
 
 ## Post 5: UTM-Parameter einfach erklärt (Story-Serie)
 
 ### Story 1
+
 **UTM-Parameter in 60 Sekunden erklärt**
 [Grafik: URL mit markierten Parametern]
 
@@ -205,6 +224,7 @@ Sie helfen dir zu verstehen:
 Swipe für Examples →
 
 ### Story 2
+
 **Die 5 wichtigsten Parameter**
 
 1. utm_source = Woher? (instagram, newsletter)
@@ -214,6 +234,7 @@ Swipe für Examples →
 5. utm_term = Welches Keyword? (bei Ads)
 
 ### Story 3
+
 **Real-Life Beispiel**
 
 Normaler Link:
@@ -225,6 +246,7 @@ meinshop.de/produkt?utm_source=instagram&utm_medium=social&utm_campaign=black-fr
 Jetzt weißt du: Dieser Kunde kam von Instagram während der Black Friday Kampagne!
 
 ### Story 4
+
 **Pro-Tipps**
 
 ✅ Kleinschreibung verwenden
@@ -234,6 +256,7 @@ Jetzt weißt du: Dieser Kunde kam von Instagram während der Black Friday Kampag
 ✅ In Analytics prüfen
 
 ### Story 5
+
 **Quick Quiz!**
 
 Was trackt "utm_medium"?
@@ -249,20 +272,25 @@ Antwort: B! Medium zeigt dir ob es Social, Email, Paid oder Organic Traffic war!
 ## Post 6: Mobile-First Link-Strategie (Video-Script)
 
 ### Szene 1 (0-5 Sek)
+
 [Zeige Smartphone-Statistik]
 "80% deiner Kunden sind mobil. Aber sind deine Links dafür ready?"
 
 ### Szene 2 (5-10 Sek)
+
 [Screen-Recording: Schlechtes Beispiel]
 "Problem 1: Desktop-Links auf Mobile. Horizontal scrollen? Nobody got time for that!"
 
 ### Szene 3 (10-15 Sek)
+
 [Zeige Daumen-Reichweite]
 "Problem 2: Links außerhalb der Thumb-Zone. Der Daumen erreicht nur 30% des Screens!"
 
 ### Szene 4 (15-25 Sek)
+
 [Lösungen zeigen]
 "Die Fixes:
+
 - Kurze URLs (max 30 Zeichen sichtbar)
 - Buttons statt Text-Links
 - Unten platzieren (Daumen-Zone)
@@ -270,6 +298,7 @@ Antwort: B! Medium zeigt dir ob es Social, Email, Paid oder Organic Traffic war!
 - Test auf verschiedenen Geräten!"
 
 ### Szene 5 (25-30 Sek)
+
 "Mobile-First ist kein Trend, es ist die Realität. Optimiere jetzt oder verliere Kunden. Check meine Bio für den kompletten Mobile-Guide!"
 
 ---
@@ -277,10 +306,12 @@ Antwort: B! Medium zeigt dir ob es Social, Email, Paid oder Organic Traffic war!
 ## Post 7: Hashtag-Strategie Deep Dive (Carousel)
 
 ### Slide 1
+
 **Die 30-10-10 Hashtag-Formel**
 So findest du die perfekten Hashtags
 
 ### Slide 2
+
 **Die Formel erklärt**
 • 30% Große Hashtags (500k+ Posts)
 • 10% Mittlere (100k-500k Posts)  
@@ -290,7 +321,9 @@ So findest du die perfekten Hashtags
 Warum? Balance zwischen Reichweite und Sichtbarkeit!
 
 ### Slide 3
+
 **Research-Methode**
+
 1. Starte mit einem Haupt-Hashtag
 2. Check "Ähnliche Hashtags"
 3. Analysiere Top-Posts
@@ -299,6 +332,7 @@ Warum? Balance zwischen Reichweite und Sichtbarkeit!
 6. Erstelle deine Liste
 
 ### Slide 4
+
 **Rotation System**
 Montag: Set A (30 Hashtags)
 Mittwoch: Set B (30 andere)
@@ -307,6 +341,7 @@ Freitag: Set C (30 neue)
 Instagram mag keine Wiederholung!
 
 ### Slide 5
+
 **Tracking Performance**
 Welche Hashtags bringen Traffic?
 → Instagram Insights
@@ -316,6 +351,7 @@ Welche Hashtags bringen Traffic?
 Optimiere basierend auf Daten!
 
 ### Slide 6
+
 **Tools & Tricks**
 • Later's Hashtag Suggestions
 • Hashtagify.me
@@ -344,6 +380,7 @@ LinkedIn | Website
 
 **Zeile 5: Call-to-Action**
 Rotierend je nach Quartal:
+
 - Q1: "Jahresplanung? → Kostenloses Beratungsgespräch"
 - Q2: "Neu: Unser Sommer-Katalog →"
 - Q3: "Folgen Sie uns auf LinkedIn →"
@@ -351,6 +388,7 @@ Rotierend je nach Quartal:
 
 **Der Link-Trick:**
 Nutze Kurz-URLs mit Tracking:
+
 - firma.de/sig-jan (Januar Signatur)
 - firma.de/sig-meetings (Meeting-Anfragen)
 - firma.de/sig-katalog (Katalog-Download)
@@ -413,13 +451,15 @@ Dort findest man alle Formate an einem Ort.
 
 [8-15 Sek - Was kannst du testen?]
 "Teste diese Dinge:
+
 - Button-Farben
-- Link-Texte ('Mehr erfahren' vs 'Jetzt entdecken')  
+- Link-Texte ('Mehr erfahren' vs 'Jetzt entdecken')
 - Platzierung (oben vs unten)
 - Mit oder ohne Emoji"
 
 [15-22 Sek - Wie geht's?]
 "So geht's:
+
 1. Teile deine Audience 50/50
 2. Version A an Gruppe 1
 3. Version B an Gruppe 2

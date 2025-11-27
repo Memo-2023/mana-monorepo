@@ -5,21 +5,25 @@ A modern, production-ready audio recording solution for React Native using Expo 
 ## Features
 
 ✅ **Correct Expo SDK 54 API Usage**
+
 - Uses `AudioModule.AudioRecorder` from internal API
 - Proper synchronous/asynchronous method handling
 - Status polling for real-time updates
 
 ✅ **Platform-Specific Optimizations**
+
 - Android: Foreground service, wake locks, Android 16 support
 - iOS: Audio session management, background recording
 - Web: Fallback support (basic implementation)
 
 ✅ **Robust Error Handling**
+
 - Comprehensive error classification
 - Automatic retry strategies
 - User-friendly error messages
 
 ✅ **State Management**
+
 - Zustand store integration
 - Separate timer management
 - Real-time status updates
@@ -32,30 +36,27 @@ A modern, production-ready audio recording solution for React Native using Expo 
 import { useAudioRecordingV2 } from '@/features/audioRecordingV2';
 
 function RecordingComponent() {
-  const recording = useAudioRecordingV2();
+	const recording = useAudioRecordingV2();
 
-  const handleRecord = async () => {
-    if (!recording.permissions.microphone.granted) {
-      await recording.requestPermissions();
-    }
+	const handleRecord = async () => {
+		if (!recording.permissions.microphone.granted) {
+			await recording.requestPermissions();
+		}
 
-    if (recording.status === 'idle') {
-      await recording.startRecording();
-    } else if (recording.status === 'recording') {
-      await recording.stopRecording();
-    }
-  };
+		if (recording.status === 'idle') {
+			await recording.startRecording();
+		} else if (recording.status === 'recording') {
+			await recording.stopRecording();
+		}
+	};
 
-  return (
-    <View>
-      <Text>Status: {recording.status}</Text>
-      <Text>Duration: {recording.session?.duration || 0}s</Text>
-      <Button
-        title={recording.status === 'recording' ? 'Stop' : 'Record'}
-        onPress={handleRecord}
-      />
-    </View>
-  );
+	return (
+		<View>
+			<Text>Status: {recording.status}</Text>
+			<Text>Duration: {recording.session?.duration || 0}s</Text>
+			<Button title={recording.status === 'recording' ? 'Stop' : 'Record'} onPress={handleRecord} />
+		</View>
+	);
 }
 ```
 
@@ -63,29 +64,29 @@ function RecordingComponent() {
 
 ```tsx
 import {
-  useAudioRecordingV2,
-  handleRecordingError,
-  RecordingPreset
+	useAudioRecordingV2,
+	handleRecordingError,
+	RecordingPreset,
 } from '@/features/audioRecordingV2';
 
 function AdvancedRecording() {
-  const recording = useAudioRecordingV2();
+	const recording = useAudioRecordingV2();
 
-  const startRecording = async () => {
-    try {
-      await recording.startRecording({
-        preset: RecordingPreset.HIGH_QUALITY,
-        maxDuration: 300, // 5 minutes
-      });
-    } catch (error) {
-      handleRecordingError(error, {
-        showAlert: true,
-        onRetry: startRecording,
-      });
-    }
-  };
+	const startRecording = async () => {
+		try {
+			await recording.startRecording({
+				preset: RecordingPreset.HIGH_QUALITY,
+				maxDuration: 300, // 5 minutes
+			});
+		} catch (error) {
+			handleRecordingError(error, {
+				showAlert: true,
+				onRetry: startRecording,
+			});
+		}
+	};
 
-  // Rest of component...
+	// Rest of component...
 }
 ```
 
@@ -116,23 +117,23 @@ recordingService.cleanup();
 
 ```typescript
 interface RecordingStoreState {
-  // State
-  status: RecordingStatus;
-  session: RecordingSession | null;
-  error: RecordingError | null;
-  permissions: PermissionState;
-  isInitialized: boolean;
+	// State
+	status: RecordingStatus;
+	session: RecordingSession | null;
+	error: RecordingError | null;
+	permissions: PermissionState;
+	isInitialized: boolean;
 
-  // Actions
-  initialize(): Promise<void>;
-  startRecording(options?: RecordingOptions): Promise<void>;
-  stopRecording(): Promise<void>;
-  pauseRecording(): void;
-  resumeRecording(): void;
-  requestPermissions(): Promise<PermissionState>;
-  checkPermissions(): Promise<PermissionState>;
-  reset(): void;
-  setError(error: RecordingError | null): void;
+	// Actions
+	initialize(): Promise<void>;
+	startRecording(options?: RecordingOptions): Promise<void>;
+	stopRecording(): Promise<void>;
+	pauseRecording(): void;
+	resumeRecording(): void;
+	requestPermissions(): Promise<PermissionState>;
+	checkPermissions(): Promise<PermissionState>;
+	reset(): void;
+	setError(error: RecordingError | null): void;
 }
 ```
 
@@ -140,17 +141,17 @@ interface RecordingStoreState {
 
 ```typescript
 interface RecordingOptions {
-  preset?: RecordingPreset;
-  format?: Partial<AudioFormat>;
-  maxDuration?: number; // seconds
-  sizeLimit?: number;   // bytes
+	preset?: RecordingPreset;
+	format?: Partial<AudioFormat>;
+	maxDuration?: number; // seconds
+	sizeLimit?: number; // bytes
 }
 
 enum RecordingPreset {
-  HIGH_QUALITY = 'high_quality',
-  MEDIUM_QUALITY = 'medium_quality',
-  LOW_QUALITY = 'low_quality',
-  VOICE_MEMO = 'voice_memo'
+	HIGH_QUALITY = 'high_quality',
+	MEDIUM_QUALITY = 'medium_quality',
+	LOW_QUALITY = 'low_quality',
+	VOICE_MEMO = 'voice_memo',
 }
 ```
 
@@ -158,13 +159,13 @@ enum RecordingPreset {
 
 ```typescript
 enum RecordingStatus {
-  IDLE = 'idle',
-  PREPARING = 'preparing',
-  RECORDING = 'recording',
-  PAUSED = 'paused',
-  STOPPING = 'stopping',
-  STOPPED = 'stopped',
-  ERROR = 'error'
+	IDLE = 'idle',
+	PREPARING = 'preparing',
+	RECORDING = 'recording',
+	PAUSED = 'paused',
+	STOPPING = 'stopping',
+	STOPPED = 'stopped',
+	ERROR = 'error',
 }
 ```
 
@@ -196,18 +197,19 @@ The system includes comprehensive error handling:
 
 ```typescript
 enum RecordingErrorType {
-  PERMISSION_DENIED,
-  HARDWARE_UNAVAILABLE,
-  PLATFORM_RESTRICTION,
-  STORAGE_ERROR,
-  NETWORK_ERROR,
-  AUDIO_ENGINE_ERROR,
-  INITIALIZATION_ERROR,
-  UNKNOWN_ERROR
+	PERMISSION_DENIED,
+	HARDWARE_UNAVAILABLE,
+	PLATFORM_RESTRICTION,
+	STORAGE_ERROR,
+	NETWORK_ERROR,
+	AUDIO_ENGINE_ERROR,
+	INITIALIZATION_ERROR,
+	UNKNOWN_ERROR,
 }
 ```
 
 Each error includes:
+
 - Type classification
 - Error code
 - User-friendly message
@@ -229,14 +231,17 @@ Each error includes:
 **Fixed in latest version!** Background recording now works correctly.
 
 **Root Cause:** Two bugs prevented background recording:
+
 1. `interruptionMode: 'doNotMix'` - iOS revoked exclusive audio access when backgrounded
 2. App state handler manually paused recording on `inactive` state transition
 
 **Solution:**
+
 1. Changed to `interruptionMode: 'mixWithOthers'` - allows background recording
 2. Removed manual pause logic - let iOS handle audio naturally
 
 **Verification:**
+
 - Recording continues when pressing home button
 - Recording continues when switching to other apps
 - Recording continues when device is locked
@@ -247,6 +252,7 @@ See `TROUBLESHOOTING.md` for detailed technical explanation.
 ### Zero-byte recordings
 
 This is a known issue with Expo SDK 54 on some Android devices. The implementation includes:
+
 - File validation after recording
 - Automatic retry mechanism
 - Error reporting for debugging
@@ -284,6 +290,7 @@ npx expo run:ios
 ### Debugging
 
 Enable debug logs:
+
 ```typescript
 // In AudioEngineService.ts
 console.log('Debug:', status);
@@ -292,6 +299,7 @@ console.log('Debug:', status);
 ## Contributing
 
 When making changes:
+
 1. Test on both Android and iOS
 2. Verify Android 16 compatibility
 3. Check memory leaks with profiler

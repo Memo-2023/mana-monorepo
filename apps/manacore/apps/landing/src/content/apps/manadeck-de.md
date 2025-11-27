@@ -30,7 +30,9 @@ Manadeck revolutioniert das Lernen mit Karteikarten durch KI-Unterstützung. Lad
 ## Hauptfunktionen
 
 ### 🎯 KI-generierte Lernkarten
+
 Manadeck verwandelt Ihre Materialien intelligent in Lernkarten:
+
 - Automatische Extraktion von Schlüsselkonzepten
 - Generierung von Frage-Antwort-Paaren
 - Erstellung von Multiple-Choice-Fragen
@@ -38,7 +40,9 @@ Manadeck verwandelt Ihre Materialien intelligent in Lernkarten:
 - Bildbasierte Karten für visuelle Lerner
 
 ### 🧠 Intelligentes Lernsystem
+
 Adaptives Lernen basierend auf Ihrer Performance:
+
 - Spaced Repetition für optimale Gedächtnisleistung
 - Schwierigkeitsanpassung in Echtzeit
 - Personalisierte Wiederholungsintervalle
@@ -46,7 +50,9 @@ Adaptives Lernen basierend auf Ihrer Performance:
 - Lernstatistiken und Fortschrittstracking
 
 ### 📚 Vielseitige Kartentypen
+
 Verschiedene Formate für jeden Lernstil:
+
 - Klassische Vorder-/Rückseite-Karten
 - Multiple-Choice mit Erklärungen
 - Lückentexte
@@ -67,6 +73,7 @@ Der Verbrauch richtet sich nach der Komplexität:
 ## Anwendungsfälle
 
 ### Für Studierende
+
 - Prüfungsvorbereitung optimieren
 - Vorlesungsnotizen in Lernkarten verwandeln
 - Gemeinsame Lerndecks mit Kommilitonen
@@ -74,6 +81,7 @@ Der Verbrauch richtet sich nach der Komplexität:
 - Vokabeln und Fachbegriffe lernen
 
 ### Für Schüler
+
 - Hausaufgaben effektiver bewältigen
 - Für Klassenarbeiten lernen
 - Sprachen spielerisch lernen
@@ -81,6 +89,7 @@ Der Verbrauch richtet sich nach der Komplexität:
 - Abitur-Vorbereitung
 
 ### Für Berufstätige
+
 - Zertifizierungen vorbereiten
 - Fachkenntnisse auffrischen
 - Neue Skills erlernen
@@ -88,6 +97,7 @@ Der Verbrauch richtet sich nach der Komplexität:
 - Produktschulungen
 
 ### Für Lehrkräfte
+
 - Unterrichtsmaterial aufbereiten
 - Lerndecks für Klassen erstellen
 - Lernfortschritt verfolgen
@@ -97,6 +107,7 @@ Der Verbrauch richtet sich nach der Komplexität:
 ## KI-Features im Detail
 
 ### 📝 Automatische Kartenerstellung
+
 - Upload von PDF, Word, PowerPoint
 - Texterkennung aus Bildern (OCR)
 - Strukturierte Extraktion von Informationen
@@ -104,6 +115,7 @@ Der Verbrauch richtet sich nach der Komplexität:
 - Qualitätskontrolle der generierten Karten
 
 ### 💡 Intelligente Erklärungen
+
 - KI-generierte Zusatzerklärungen
 - Beispiele und Analogien
 - Verwandte Konzepte verlinken
@@ -111,6 +123,7 @@ Der Verbrauch richtet sich nach der Komplexität:
 - Eselsbrücken und Merkhilfen
 
 ### 📊 Lernanalyse
+
 - Detaillierte Lernstatistiken
 - Stärken und Schwächen identifizieren
 - Optimale Lernzeiten ermitteln
@@ -120,6 +133,7 @@ Der Verbrauch richtet sich nach der Komplexität:
 ## Kollaboration & Sharing
 
 ### 👥 Team-Features
+
 - Gemeinsame Lerndecks erstellen
 - Karten kommentieren und verbessern
 - Lerngruppen bilden
@@ -127,6 +141,7 @@ Der Verbrauch richtet sich nach der Komplexität:
 - Peer-Learning fördern
 
 ### 🌐 Community-Bibliothek
+
 - Öffentliche Decks durchsuchen
 - Bewertungen und Reviews
 - Von Experten erstellte Decks
@@ -136,6 +151,7 @@ Der Verbrauch richtet sich nach der Komplexität:
 ## Integration & Kompatibilität
 
 Manadeck arbeitet nahtlos mit:
+
 - Anki (Import/Export)
 - Quizlet (Import/Export)
 - Google Drive & Dropbox
@@ -146,6 +162,7 @@ Manadeck arbeitet nahtlos mit:
 ## Gamification & Motivation
 
 ### 🏆 Erfolge & Belohnungen
+
 - Lernsträhnen aufbauen
 - Abzeichen sammeln
 - Level-System
@@ -153,6 +170,7 @@ Manadeck arbeitet nahtlos mit:
 - Ranglisten (optional)
 
 ### 🎯 Lernziele
+
 - Persönliche Ziele setzen
 - Meilensteine definieren
 - Erinnerungen und Motivation
@@ -174,6 +192,7 @@ Nutzen Sie Manadeck genau nach Ihrem Bedarf. Erstellen Sie einmalig Karten für 
 ## Verfügbarkeit
 
 Manadeck wird verfügbar sein als:
+
 - Progressive Web App (alle Browser)
 - iOS App (iPhone & iPad)
 - Android App

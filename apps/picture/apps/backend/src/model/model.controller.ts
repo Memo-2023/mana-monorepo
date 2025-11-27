@@ -5,15 +5,15 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 @Controller('models')
 @UseGuards(JwtAuthGuard)
 export class ModelController {
-  constructor(private readonly modelService: ModelService) {}
+	constructor(private readonly modelService: ModelService) {}
 
-  @Get()
-  async getActiveModels() {
-    return this.modelService.getActiveModels();
-  }
+	@Get()
+	async getActiveModels() {
+		return this.modelService.getActiveModels();
+	}
 
-  @Get(':id')
-  async getModelById(@Param('id') id: string) {
-    return this.modelService.getModelById(id);
-  }
+	@Get(':id')
+	async getModelById(@Param('id') id: string) {
+		return this.modelService.getModelById(id);
+	}
 }

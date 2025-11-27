@@ -4,12 +4,12 @@ Monorepo containing all Manacore projects with shared packages and unified tooli
 
 ## Projects
 
-| Project | Description | Tech Stack |
-|---------|-------------|------------|
+| Project            | Description                     | Tech Stack                     |
+| ------------------ | ------------------------------- | ------------------------------ |
 | **maerchenzauber** | AI-powered story generation app | NestJS, Expo, SvelteKit, Astro |
-| **manacore** | Multi-app ecosystem platform | Expo, SvelteKit, Astro |
-| **manadeck** | Card/deck management app | NestJS, Expo, SvelteKit |
-| **memoro** | Voice memo & AI analysis app | Expo, SvelteKit, Astro |
+| **manacore**       | Multi-app ecosystem platform    | Expo, SvelteKit, Astro         |
+| **manadeck**       | Card/deck management app        | NestJS, Expo, SvelteKit        |
+| **memoro**         | Voice memo & AI analysis app    | Expo, SvelteKit, Astro         |
 
 ## Getting Started
 
@@ -57,12 +57,12 @@ pnpm run format
 
 Located in `packages/`:
 
-| Package | Description |
-|---------|-------------|
-| `@manacore/shared-types` | Common TypeScript types |
-| `@manacore/shared-supabase` | Unified Supabase client |
-| `@manacore/shared-utils` | Utility functions (date, string, async) |
-| `@manacore/shared-ui` | React Native UI components |
+| Package                     | Description                             |
+| --------------------------- | --------------------------------------- |
+| `@manacore/shared-types`    | Common TypeScript types                 |
+| `@manacore/shared-supabase` | Unified Supabase client                 |
+| `@manacore/shared-utils`    | Utility functions (date, string, async) |
+| `@manacore/shared-ui`       | React Native UI components              |
 
 ### Using Shared Packages
 

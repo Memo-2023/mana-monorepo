@@ -11,18 +11,19 @@ const notifeeAndroidWorkaroundCode = `
 `;
 
 /** @type {import('expo/config-plugins').ConfigPlugin} */
-module.exports = (expoConfig) => withProjectBuildGradle(expoConfig, async (config) => {
-  const { contents } = generateCode.mergeContents({
-    newSrc: notifeeAndroidWorkaroundCode,
-    tag: 'notifieeAndroidWorkaround',
-    src: config.modResults.contents,
-    anchor: /maven\s*\{\s*url\s*'https:\/\/www\.jitpack\.io'\s*\}/,
-    comment: '//',
-    offset: 1,
-  });
+module.exports = (expoConfig) =>
+	withProjectBuildGradle(expoConfig, async (config) => {
+		const { contents } = generateCode.mergeContents({
+			newSrc: notifeeAndroidWorkaroundCode,
+			tag: 'notifieeAndroidWorkaround',
+			src: config.modResults.contents,
+			anchor: /maven\s*\{\s*url\s*'https:\/\/www\.jitpack\.io'\s*\}/,
+			comment: '//',
+			offset: 1,
+		});
 
-  // eslint-disable-next-line no-param-reassign
-  config.modResults.contents = contents;
+		// eslint-disable-next-line no-param-reassign
+		config.modResults.contents = contents;
 
-  return config;
-});
+		return config;
+	});

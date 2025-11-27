@@ -33,7 +33,7 @@
 
 			<!-- Quick Links -->
 			<div>
-				<h3 class="mb-4 text-sm font-semibold tracking-wider text-theme-text uppercase">
+				<h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-theme-text">
 					Navigation
 				</h3>
 				<ul class="space-y-3">
@@ -113,7 +113,7 @@
 
 			<!-- Legal -->
 			<div>
-				<h3 class="mb-4 text-sm font-semibold tracking-wider text-theme-text uppercase">
+				<h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-theme-text">
 					Rechtliches
 				</h3>
 				<ul class="space-y-3">

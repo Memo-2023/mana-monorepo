@@ -51,17 +51,15 @@
 				audio: {
 					echoCancellation: true,
 					noiseSuppression: true,
-					autoGainControl: true
-				}
+					autoGainControl: true,
+				},
 			});
 
 			hasPermission = true;
 			permissionDenied = false;
 
 			// Create media recorder
-			const mimeType = MediaRecorder.isTypeSupported('audio/webm')
-				? 'audio/webm'
-				: 'audio/mp4';
+			const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
 			mediaRecorder = new MediaRecorder(stream, { mimeType });
 
 			mediaRecorder.ondataavailable = (event) => {
@@ -91,7 +89,9 @@
 			console.error('Error starting recording:', error);
 			if (error.name === 'NotAllowedError') {
 				permissionDenied = true;
-				recording.setError('Microphone permission denied. Please enable it in your browser settings.');
+				recording.setError(
+					'Microphone permission denied. Please enable it in your browser settings.'
+				);
 			} else {
 				recording.setError('Failed to start recording: ' + error.message);
 			}
@@ -148,7 +148,12 @@
 	{#if permissionDenied}
 		<div class="card bg-red-50 dark:bg-red-900/20">
 			<div class="flex items-start gap-3">
-				<svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg
+					class="h-6 w-6 text-red-600 dark:text-red-400"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -157,7 +162,9 @@
 					/>
 				</svg>
 				<div>
-					<Text variant="body" weight="semibold" class="text-red-800 dark:text-red-300">Microphone Permission Required</Text>
+					<Text variant="body" weight="semibold" class="text-red-800 dark:text-red-300"
+						>Microphone Permission Required</Text
+					>
 					<Text variant="small" class="mt-1 text-red-700 dark:text-red-400">
 						Please enable microphone access in your browser settings to record audio.
 					</Text>
@@ -185,7 +192,9 @@
 								<path
 									d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"
 								/>
-								<path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+								<path
+									d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"
+								/>
 							</svg>
 						</div>
 					</div>
@@ -202,12 +211,16 @@
 						</svg>
 					</div>
 				{:else}
-					<div class="h-32 w-32 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center">
+					<div
+						class="h-32 w-32 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center"
+					>
 						<svg class="h-16 w-16 text-theme-secondary" fill="currentColor" viewBox="0 0 24 24">
 							<path
 								d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"
 							/>
-							<path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+							<path
+								d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"
+							/>
 						</svg>
 					</div>
 				{/if}
@@ -236,27 +249,23 @@
 			<!-- Controls -->
 			<div class="flex justify-center gap-4">
 				{#if $recording.status === 'idle'}
-					<button onclick={startRecording} disabled={permissionDenied} class="btn-primary px-8 py-3 text-lg">
+					<button
+						onclick={startRecording}
+						disabled={permissionDenied}
+						class="btn-primary px-8 py-3 text-lg"
+					>
 						🎤 Start Recording
 					</button>
 				{:else if $recording.status === 'recording'}
-					<button onclick={pauseRecording} class="btn-secondary px-6 py-3">
-						⏸️ Pause
-					</button>
+					<button onclick={pauseRecording} class="btn-secondary px-6 py-3"> ⏸️ Pause </button>
 					<button onclick={stopRecording} class="btn-primary px-6 py-3 bg-red-600 hover:bg-red-700">
 						⏹️ Stop
 					</button>
 				{:else if $recording.status === 'paused'}
-					<button onclick={resumeRecording} class="btn-primary px-6 py-3">
-						▶️ Resume
-					</button>
-					<button onclick={stopRecording} class="btn-secondary px-6 py-3">
-						⏹️ Stop
-					</button>
+					<button onclick={resumeRecording} class="btn-primary px-6 py-3"> ▶️ Resume </button>
+					<button onclick={stopRecording} class="btn-secondary px-6 py-3"> ⏹️ Stop </button>
 				{:else if $recording.status === 'stopped'}
-					<button onclick={reset} class="btn-secondary px-6 py-3">
-						🔄 Record Again
-					</button>
+					<button onclick={reset} class="btn-secondary px-6 py-3"> 🔄 Record Again </button>
 				{/if}
 			</div>
 		</div>

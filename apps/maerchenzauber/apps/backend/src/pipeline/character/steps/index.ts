@@ -9,20 +9,20 @@ import { finalizeCharacterStep } from './finalize-character.step';
 
 @Injectable()
 export class CharacterPipelineSteps {
-  constructor() {} // Inject services here as needed
+	constructor() {} // Inject services here as needed
 
-  getAllSteps(): PipelineStep[] {
-    return [
-      validateCharacterStep,
-      generatePromptStep,
-      generateImageStep,
-      saveToDatabase,
-      deductCreditsStep,
-      finalizeCharacterStep,
-    ];
-  }
+	getAllSteps(): PipelineStep[] {
+		return [
+			validateCharacterStep,
+			generatePromptStep,
+			generateImageStep,
+			saveToDatabase,
+			deductCreditsStep,
+			finalizeCharacterStep,
+		];
+	}
 
-  getStep(name: string): PipelineStep | undefined {
-    return this.getAllSteps().find((step) => step.name === name);
-  }
+	getStep(name: string): PipelineStep | undefined {
+		return this.getAllSteps().find((step) => step.name === name);
+	}
 }

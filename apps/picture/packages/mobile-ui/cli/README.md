@@ -27,9 +27,11 @@ memoro-ui add card
 ```
 
 Options:
+
 - `-y, --yes` - Skip confirmation prompts
 
 The CLI will:
+
 1. Check if the component exists in the registry
 2. Resolve and install dependencies automatically
 3. Copy component files to your `components/` directory
@@ -44,9 +46,11 @@ memoro-ui list
 ```
 
 Options:
+
 - `-c, --category <category>` - Filter by category (ui, navigation)
 
 Shows:
+
 - All available components
 - Which components are already installed (✓)
 - Component descriptions
@@ -64,6 +68,7 @@ This CLI follows the **shadcn** approach:
 ## Component Structure
 
 Components are copied to:
+
 ```
 your-project/
 └── components/
@@ -85,9 +90,7 @@ import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 
 function MyScreen() {
-  return (
-    <Button title="Click me" onPress={() => {}} />
-  );
+	return <Button title="Click me" onPress={() => {}} />;
 }
 ```
 
@@ -117,6 +120,7 @@ memoro-ui list
 Run `memoro-ui list` to see all available components.
 
 Current components:
+
 - **UI** (14): Button, Text, Icon, Container, EmptyState, ErrorBanner, Slider, Skeleton, FAB, Tag, Badge, Card, Select, ToggleGroup
 - **Navigation** (coming soon): Header, TabBar, HeaderButton
 

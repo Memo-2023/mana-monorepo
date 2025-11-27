@@ -24,7 +24,7 @@ export function createTestUser(overrides: Partial<User> = {}): User {
 		showClickStats: true,
 		created: new Date().toISOString(),
 		updated: new Date().toISOString(),
-		...overrides
+		...overrides,
 	};
 }
 
@@ -40,7 +40,7 @@ export function createTestTag(overrides: Partial<Tag> = {}): Tag {
 		usage_count: 0,
 		created: new Date().toISOString(),
 		updated: new Date().toISOString(),
-		...overrides
+		...overrides,
 	};
 }
 
@@ -57,7 +57,7 @@ export function createTestFolder(overrides: Partial<Folder> = {}): Folder {
 		order: 0,
 		created: new Date().toISOString(),
 		updated: new Date().toISOString(),
-		...overrides
+		...overrides,
 	};
 }
 
@@ -77,7 +77,7 @@ export function createTestLink(overrides: Partial<Link> = {}): Link {
 		folder_id: undefined,
 		created: new Date().toISOString(),
 		updated: new Date().toISOString(),
-		...overrides
+		...overrides,
 	};
 }
 
@@ -93,7 +93,7 @@ export function createTestClick(overrides: Partial<Click> = {}): Click {
 		browser: 'Chrome',
 		clicked_at: new Date().toISOString(),
 		created: new Date().toISOString(),
-		...overrides
+		...overrides,
 	};
 }
 
@@ -110,7 +110,7 @@ export function createBatchTestTags(count: number, userId: string): Tag[] {
 				user_id: userId,
 				color: colors[i % colors.length],
 				icon: icons[i % icons.length],
-				usage_count: Math.floor(Math.random() * 10)
+				usage_count: Math.floor(Math.random() * 10),
 			})
 		);
 	}
@@ -131,7 +131,7 @@ export function createBatchTestFolders(count: number, userId: string): Folder[] 
 				user_id: userId,
 				color: colors[i % colors.length],
 				icon: icons[i % icons.length],
-				order: i
+				order: i,
 			})
 		);
 	}
@@ -144,9 +144,9 @@ export function createAuthError(message: string = 'Invalid credentials') {
 		response: {
 			data: {
 				message,
-				code: 401
-			}
-		}
+				code: 401,
+			},
+		},
 	};
 }
 
@@ -156,10 +156,10 @@ export function createValidationError(field: string, message: string) {
 			data: {
 				data: {
 					[field]: {
-						message
-					}
-				}
-			}
-		}
+						message,
+					},
+				},
+			},
+		},
 	};
 }

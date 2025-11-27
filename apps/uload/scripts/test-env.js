@@ -10,18 +10,18 @@ const path = require('path');
 
 const envFiles = ['.env', '.env.development', '.env.production'];
 
-envFiles.forEach(file => {
-  const filePath = path.join(__dirname, file);
-  if (fs.existsSync(filePath)) {
-    console.log(`\n${file} exists`);
-    const content = fs.readFileSync(filePath, 'utf8');
-    const lines = content.split('\n');
-    lines.forEach(line => {
-      if (line.includes('POCKETBASE_URL')) {
-        console.log(`  -> ${line}`);
-      }
-    });
-  }
+envFiles.forEach((file) => {
+	const filePath = path.join(__dirname, file);
+	if (fs.existsSync(filePath)) {
+		console.log(`\n${file} exists`);
+		const content = fs.readFileSync(filePath, 'utf8');
+		const lines = content.split('\n');
+		lines.forEach((line) => {
+			if (line.includes('POCKETBASE_URL')) {
+				console.log(`  -> ${line}`);
+			}
+		});
+	}
 });
 
 console.log('\nNOTE: SvelteKit/Vite loads environment variables differently.');

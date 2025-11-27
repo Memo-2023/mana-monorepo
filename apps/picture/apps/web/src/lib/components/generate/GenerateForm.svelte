@@ -56,7 +56,7 @@
 			const { generationId } = await generateImageAsync({
 				prompt: prompt.trim(),
 				model_id: selectedModelId,
-				negative_prompt: negativePrompt.trim() || undefined
+				negative_prompt: negativePrompt.trim() || undefined,
 			});
 
 			// Wait for completion using realtime subscription
@@ -92,9 +92,7 @@
 			}, 1000);
 		} catch (error) {
 			console.error('Generation error:', error);
-			generationError.set(
-				error instanceof Error ? error.message : 'Failed to generate image'
-			);
+			generationError.set(error instanceof Error ? error.message : 'Failed to generate image');
 		} finally {
 			isGenerating.set(false);
 		}
@@ -103,10 +101,7 @@
 	const promptLength = $derived(prompt.length);
 	const negativePromptLength = $derived(negativePrompt.length);
 	const canGenerate = $derived(
-		!$isGenerating &&
-		!$isLoadingModels &&
-		prompt.trim().length > 0 &&
-		selectedModelId.length > 0
+		!$isGenerating && !$isLoadingModels && prompt.trim().length > 0 && selectedModelId.length > 0
 	);
 </script>
 

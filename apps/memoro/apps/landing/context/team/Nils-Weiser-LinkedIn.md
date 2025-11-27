@@ -1,15 +1,14 @@
 Nils Weiser
 test
 Nils Weiser
-  Direkter Kontakt1.
+Direkter Kontakt1.
 Co-Founder Codify AG, Software Developer
 
 Codify
 
 HTWG Hochschule Konstanz – Technik, Wirtschaft und Gestaltung
-Kreuzlingen, Thurgau, Schweiz  Kontaktinfo
+Kreuzlingen, Thurgau, Schweiz Kontaktinfo
 313 Kontakte
-
 
 Tobias Müller, Jan Kaiser und 20 weitere gemeinsame KontakteTobias Müller, Jan Kaiser und 20 weitere gemeinsame Kontakte
 
@@ -32,18 +31,17 @@ Sales Navigator für 0 CHF erneut testen
 AktivitätenAktivitäten
 319 Follower:innen319 Follower:innen
 
-
 Beiträge
 
 Kommentare
 
 Bilder
 9 „Beiträge“-Beiträge wurden geladen
-Link zur Grafik von Nils Weiser  anzeigen
+Link zur Grafik von Nils Weiser anzeigen
 Nils WeiserNils Weiser
- • 1.1.
+• 1.1.
 Co-Founder Codify AG, Software DeveloperCo-Founder Codify AG, Software Developer
-3 Monate • Bearbeitet •  vor 3 Monaten • Bearbeitet • Alle Mitglieder und Nicht-Mitglieder von LinkedIn
+3 Monate • Bearbeitet • vor 3 Monaten • Bearbeitet • Alle Mitglieder und Nicht-Mitglieder von LinkedIn
 
 Just watched an insightful video from Y Combinator with Tom on "vibe coding" with AI tools. Here are the game-changing tips I found most valuable:
 
@@ -57,7 +55,7 @@ Just watched an insightful video from Y Combinator with Tom on "vibe coding" wit
 Personal experience:
 when running into error loops of llm calls, stop it, and tell explicitly to use the browser tool to get more context.
 We also use a tech stack which is well established (Frontend: react, backend: express).
-Writing tests is crucial, especially when Windsurf come with a huge wave of changes to your code base 😃 
+Writing tests is crucial, especially when Windsurf come with a huge wave of changes to your code base 😃
 
 Bonus: for security you can prompt it to act in a red/blue team manner and should audit your code, this should prevent the api key leaks im reading recently on linkedIn with vibe coded products
 … mehr
@@ -69,13 +67,11 @@ likeinsightful
 
 like
 
-
-
-Link zur Grafik von Nils Weiser  anzeigen
+Link zur Grafik von Nils Weiser anzeigen
 Nils WeiserNils Weiser
- • 1.1.
+• 1.1.
 Co-Founder Codify AG, Software DeveloperCo-Founder Codify AG, Software Developer
-5 Monate • Bearbeitet •  vor 5 Monaten • Bearbeitet • Alle Mitglieder und Nicht-Mitglieder von LinkedIn
+5 Monate • Bearbeitet • vor 5 Monaten • Bearbeitet • Alle Mitglieder und Nicht-Mitglieder von LinkedIn
 
 MCP Tools für IDE's!
 
@@ -98,9 +94,6 @@ likeinsightful
 2 Kommentare
 
 like
-
-
-
 
 Alle Beiträge anzeigen
 BerufserfahrungBerufserfahrung

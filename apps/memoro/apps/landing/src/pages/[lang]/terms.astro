@@ -1,9 +1,9 @@
 ---
 export async function getStaticPaths() {
-  return ['de', 'en'].map(lang => ({
-    params: { lang },
-    props: { lang }
-  }));
+	return ['de', 'en'].map((lang) => ({
+		params: { lang },
+		props: { lang },
+	}));
 }
 
 const { lang } = Astro.props;

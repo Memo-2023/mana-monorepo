@@ -31,6 +31,7 @@ await identifyRevenueCatUser(userData.id);
 ```
 
 This happens in the following authentication flows:
+
 - Email/password sign-in
 - Email/password sign-up
 - Google sign-in
@@ -44,7 +45,7 @@ When the authentication token is refreshed (which happens automatically when a t
 // Re-identify user with RevenueCat after token refresh
 const userData = await authService.getUserFromToken();
 if (userData) {
-  await identifyRevenueCatUser(userData.id);
+	await identifyRevenueCatUser(userData.id);
 }
 ```
 
@@ -67,13 +68,13 @@ The `identifyUser` function in `subscriptionService.ts` is used to identify the 
 
 ```typescript
 export const identifyUser = async (userId: string): Promise<void> => {
-  try {
-    await Purchases.logIn(userId);
-    console.debug('User identified with RevenueCat:', userId);
-  } catch (error) {
-    console.debug('Error identifying user with RevenueCat:', error);
-    throw error;
-  }
+	try {
+		await Purchases.logIn(userId);
+		console.debug('User identified with RevenueCat:', userId);
+	} catch (error) {
+		console.debug('Error identifying user with RevenueCat:', error);
+		throw error;
+	}
 };
 ```
 
@@ -83,13 +84,13 @@ The `resetUser` function in `subscriptionService.ts` is used to reset the Revenu
 
 ```typescript
 export const resetUser = async (): Promise<void> => {
-  try {
-    await Purchases.logOut();
-    console.debug('User reset with RevenueCat');
-  } catch (error) {
-    console.debug('Error resetting user with RevenueCat:', error);
-    throw error;
-  }
+	try {
+		await Purchases.logOut();
+		console.debug('User reset with RevenueCat');
+	} catch (error) {
+		console.debug('Error resetting user with RevenueCat:', error);
+		throw error;
+	}
 };
 ```
 

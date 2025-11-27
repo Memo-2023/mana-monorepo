@@ -13,11 +13,13 @@ This directory is for storing logo variations of the Mana brand.
 7. **mana-logo-mark.svg** - Logo mark only (icon without text)
 
 ## Naming Convention:
+
 - Use lowercase with hyphens
 - Include variant descriptors (dark, light, horizontal, etc.)
 - Always include format extension (.svg, .png, .jpg)
 
 ## Size Guidelines:
+
 - SVG files are preferred for scalability
 - For PNG exports, provide multiple sizes:
   - Small: 200px width

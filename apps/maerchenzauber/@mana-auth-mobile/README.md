@@ -73,7 +73,7 @@ function LoginScreen() {
 
 function ProtectedScreen() {
   const { user, signOut } = useManaAuth();
-  
+
   return (
     <View>
       <Text>Welcome {user?.name}!</Text>
@@ -91,18 +91,18 @@ function ProtectedScreen() {
 {
   // Required
   backendUrl: string;
-  
+
   // Optional OAuth
   googleClientId?: string;
   googleWebClientId?: string;
   appleClientId?: string;
-  
+
   // Feature flags
   enableGoogleSignIn?: boolean;  // default: true
   enableAppleSignIn?: boolean;   // default: true
   enableEmailSignIn?: boolean;   // default: true
   enablePasswordReset?: boolean; // default: true
-  
+
   // Dev mode
   devMode?: boolean;
   devCredentials?: { email: string; password: string };
@@ -142,7 +142,7 @@ function ProtectedScreen() {
 {
   appName: string;
   appIcon?: ImageSource;
-  
+
   // All text strings are customizable
   loginTitle?: string;
   loginButton?: string;
@@ -150,12 +150,12 @@ function ProtectedScreen() {
   emailPlaceholder?: string;
   passwordPlaceholder?: string;
   forgotPassword?: string;
-  
+
   // Error messages
   emailInvalid?: string;
   passwordTooShort?: string;
   loginError?: string;
-  
+
   // ... and many more
 }
 ```
@@ -166,14 +166,14 @@ function ProtectedScreen() {
 
 ```typescript
 const {
-  isAuthenticated,
-  user,
-  loading,
-  signIn,
-  signUp,
-  signInWithGoogle,
-  signInWithApple,
-  signOut,
+	isAuthenticated,
+	user,
+	loading,
+	signIn,
+	signUp,
+	signInWithGoogle,
+	signInWithApple,
+	signOut,
 } = useManaAuth();
 ```
 

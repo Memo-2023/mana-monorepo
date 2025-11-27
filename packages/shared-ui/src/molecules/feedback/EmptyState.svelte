@@ -63,18 +63,20 @@
 		onSecondaryAction,
 		variant = 'default',
 		icon,
-		class: className = ''
+		class: className = '',
 	}: Props = $props();
 
 	const variantClasses: Record<EmptyStateVariant, string> = {
 		default: 'py-12 px-6',
 		compact: 'py-6 px-4',
-		centered: 'py-16 px-8'
+		centered: 'py-16 px-8',
 	};
 </script>
 
 <div
-	class="empty-state flex flex-col items-center justify-center text-center {variantClasses[variant]} {className}"
+	class="empty-state flex flex-col items-center justify-center text-center {variantClasses[
+		variant
+	]} {className}"
 >
 	<!-- Icon -->
 	{#if icon}

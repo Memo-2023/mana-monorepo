@@ -76,7 +76,7 @@ Links kürzen, Profile erstellen, Teams managen. Die smarteste Lösung für dein
 
 ## Ausführliche Bio
 
-**Uload - Die All-in-One Plattform für deine digitale Präsenz** 
+**Uload - Die All-in-One Plattform für deine digitale Präsenz**
 
 ✨ **Was wir machen:**
 Wir vereinen professionelles Link-Management mit kreativer Selbstdarstellung. Egal ob Creator, Freelancer oder Team - Uload gibt dir die Tools für deinen digitalen Erfolg.

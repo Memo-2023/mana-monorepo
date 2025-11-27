@@ -12,7 +12,7 @@
 
 		// Setup auth state change listener
 		const {
-			data: { subscription }
+			data: { subscription },
 		} = data.supabase.auth.onAuthStateChange(async (event, session) => {
 			if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
 				invalidate('supabase:auth');

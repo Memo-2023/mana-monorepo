@@ -50,7 +50,11 @@
 									</p>
 								{/if}
 								{#if team.user_role}
-									<span class="mt-1 inline-block rounded-full px-2 py-1 text-xs font-medium {getRoleBadgeColor(team.user_role)}">
+									<span
+										class="mt-1 inline-block rounded-full px-2 py-1 text-xs font-medium {getRoleBadgeColor(
+											team.user_role
+										)}"
+									>
 										{team.user_role.replace('_', ' ')}
 									</span>
 								{/if}
@@ -93,9 +97,7 @@
 		<Card>
 			<div class="py-12 text-center">
 				<span class="mb-4 block text-6xl">👥</span>
-				<h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-					No teams yet
-				</h3>
+				<h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">No teams yet</h3>
 				<p class="mb-6 text-sm text-gray-500 dark:text-gray-400">
 					Create or join a team to start collaborating
 				</p>

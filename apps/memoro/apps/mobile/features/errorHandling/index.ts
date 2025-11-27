@@ -1,9 +1,9 @@
 // Network error detection utilities
 export {
-  analyzeNetworkError,
-  analyzeNetworkErrorSync,
-  isDeviceConnected,
-  type NetworkErrorInfo
+	analyzeNetworkError,
+	analyzeNetworkErrorSync,
+	isDeviceConnected,
+	type NetworkErrorInfo,
 } from './utils/networkErrorUtils';
 
 // Network status hook

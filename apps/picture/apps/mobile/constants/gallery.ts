@@ -15,9 +15,9 @@ export const PREFETCH_DEBOUNCE_MS = 500;
 
 // FlatList performance props
 export const FLATLIST_PERFORMANCE_PROPS = {
-  removeClippedSubviews: Platform.OS === 'android',
-  maxToRenderPerBatch: 10,
-  windowSize: 5,
-  initialNumToRender: 6,
-  updateCellsBatchingPeriod: 50,
+	removeClippedSubviews: Platform.OS === 'android',
+	maxToRenderPerBatch: 10,
+	windowSize: 5,
+	initialNumToRender: 6,
+	updateCellsBatchingPeriod: 50,
 } as const;

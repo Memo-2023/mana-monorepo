@@ -2,15 +2,15 @@
 	import { themeStore } from '$lib/themes/theme-store';
 	import { themes } from '$lib/themes/presets';
 	import { get } from 'svelte/store';
-	
+
 	// Subscribe to stores for reactive values
 	let isDark = $state(false);
 	let preset = $state('');
-	
+
 	$effect(() => {
-		const unsubscribeDark = themeStore.isDark.subscribe(value => isDark = value);
-		const unsubscribePreset = themeStore.preset.subscribe(value => preset = value);
-		
+		const unsubscribeDark = themeStore.isDark.subscribe((value) => (isDark = value));
+		const unsubscribePreset = themeStore.preset.subscribe((value) => (preset = value));
+
 		return () => {
 			unsubscribeDark();
 			unsubscribePreset();

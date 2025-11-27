@@ -34,7 +34,7 @@
 		onclick,
 		header,
 		footer,
-		children
+		children,
 	}: Props = $props();
 
 	// Determine if card should be interactive
@@ -43,7 +43,9 @@
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
-	class="card card--{variant} card--padding-{padding} {isInteractive ? 'card--interactive' : ''} {fullWidth ? 'card--full-width' : ''} {className}"
+	class="card card--{variant} card--padding-{padding} {isInteractive
+		? 'card--interactive'
+		: ''} {fullWidth ? 'card--full-width' : ''} {className}"
 	{onclick}
 	role={isInteractive ? 'button' : undefined}
 	tabindex={isInteractive ? 0 : undefined}
@@ -82,7 +84,9 @@
 	.card--elevated {
 		background-color: hsl(var(--color-surface-elevated));
 		border: 1px solid hsl(var(--color-border));
-		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+		box-shadow:
+			0 1px 3px 0 rgba(0, 0, 0, 0.1),
+			0 1px 2px -1px rgba(0, 0, 0, 0.1);
 	}
 
 	.card--outlined {
@@ -130,7 +134,9 @@
 	}
 
 	.card--elevated.card--interactive:hover {
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -2px rgba(0, 0, 0, 0.1);
 		transform: translateY(-1px);
 	}
 

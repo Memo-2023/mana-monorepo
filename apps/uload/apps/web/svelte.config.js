@@ -13,17 +13,20 @@ const mdsvexOptions = {
 	extensions: ['.md', '.mdx'],
 	layout: {
 		blog: path.join(__dirname, './src/lib/layouts/BlogLayout.svelte'),
-		_: path.join(__dirname, './src/lib/layouts/DefaultLayout.svelte')
+		_: path.join(__dirname, './src/lib/layouts/DefaultLayout.svelte'),
 	},
 	rehypePlugins: [
 		rehypeSlug,
-		[rehypeAutolinkHeadings, { 
-			behavior: 'wrap',
-			properties: {
-				className: 'anchor-link'
-			}
-		}]
-	]
+		[
+			rehypeAutolinkHeadings,
+			{
+				behavior: 'wrap',
+				properties: {
+					className: 'anchor-link',
+				},
+			},
+		],
+	],
 };
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -36,9 +39,9 @@ const config = {
 		adapter: adapter(),
 		alias: {
 			$paraglide: './src/paraglide',
-			'$paraglide/*': './src/paraglide/*'
-		}
-	}
+			'$paraglide/*': './src/paraglide/*',
+		},
+	},
 };
 
 export default config;

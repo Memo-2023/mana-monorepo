@@ -7,11 +7,13 @@ The application now supports automatic switching between development and product
 ## Configuration
 
 ### Development Mode
+
 - **Database URL**: `http://localhost:8090`
 - **Config File**: `.env` (for local development)
 - **MCP Config**: `.mcp.development.json`
 
 ### Production Mode
+
 - **Database URL**: `https://pb.ulo.ad`
 - **Config File**: `.env.production`
 - **MCP Config**: `.mcp.json`
@@ -21,6 +23,7 @@ The application now supports automatic switching between development and product
 ### Local Development
 
 1. **Start the local PocketBase server**:
+
 ```bash
 npm run backend
 # or
@@ -28,11 +31,13 @@ cd backend && ./pocketbase serve
 ```
 
 2. **Start the development server**:
+
 ```bash
 npm run dev
 ```
 
 3. **Or start both together**:
+
 ```bash
 npm run dev:all
 ```
@@ -51,11 +56,13 @@ npm run preview
 ## Switching Between Environments
 
 ### To use local database:
+
 1. Ensure `.env` contains: `PUBLIC_POCKETBASE_URL=http://localhost:8090`
 2. Start local PocketBase: `npm run backend`
 3. Run development server: `npm run dev`
 
 ### To use production database (NOT RECOMMENDED for development):
+
 1. Change `.env` to: `PUBLIC_POCKETBASE_URL=https://pb.ulo.ad`
 2. Restart development server: `npm run dev`
 
@@ -82,16 +89,19 @@ Is Production: false
 ## Troubleshooting
 
 ### Local PocketBase not starting
+
 - Check if port 8090 is already in use
 - Ensure PocketBase binary is executable: `chmod +x backend/pocketbase`
 - Check logs: `cat pocketbase-dev.log`
 
 ### Still connecting to production
+
 - Clear browser cache and restart dev server
 - Verify `.env` file contains correct URL
 - Check console output for which URL is being used
 
 ### MCP Server issues
+
 - For local development, use `.mcp.development.json`
 - For production, use `.mcp.json`
 - Restart Claude Code after changing MCP configuration

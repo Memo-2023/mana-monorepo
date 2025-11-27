@@ -7,22 +7,24 @@ function createMemoStore() {
 	return {
 		subscribe,
 		setMemos: (memos: Memo[]) => set(memos),
-		appendMemos: (newMemos: Memo[]) => update((memos) => {
-			// Avoid duplicates
-			const existingIds = new Set(memos.map(m => m.id));
-			const uniqueNewMemos = newMemos.filter(m => !existingIds.has(m.id));
-			return [...memos, ...uniqueNewMemos];
-		}),
-		addMemo: (memo: Memo) => update((memos) => {
-			// Avoid duplicates when adding single memo
-			if (memos.some(m => m.id === memo.id)) return memos;
-			return [memo, ...memos];
-		}),
+		appendMemos: (newMemos: Memo[]) =>
+			update((memos) => {
+				// Avoid duplicates
+				const existingIds = new Set(memos.map((m) => m.id));
+				const uniqueNewMemos = newMemos.filter((m) => !existingIds.has(m.id));
+				return [...memos, ...uniqueNewMemos];
+			}),
+		addMemo: (memo: Memo) =>
+			update((memos) => {
+				// Avoid duplicates when adding single memo
+				if (memos.some((m) => m.id === memo.id)) return memos;
+				return [memo, ...memos];
+			}),
 		updateMemo: (id: string, updates: Partial<Memo>) =>
 			update((memos) => memos.map((m) => (m.id === id ? { ...m, ...updates } : m))),
 		deleteMemo: (id: string) => update((memos) => memos.filter((m) => m.id !== id)),
 		reset: () => set([]),
-		getCount: () => get({ subscribe }).length
+		getCount: () => get({ subscribe }).length,
 	};
 }
 
@@ -42,7 +44,7 @@ export const debouncedSearchQuery = writable('');
 let debounceTimer: ReturnType<typeof setTimeout>;
 
 // Set up debounce for search
-searchQuery.subscribe(value => {
+searchQuery.subscribe((value) => {
 	clearTimeout(debounceTimer);
 	debounceTimer = setTimeout(() => {
 		debouncedSearchQuery.set(value);
@@ -54,11 +56,13 @@ let memoSearchCache = new Map<string, { title: string; transcript: string }>();
 let lastMemoIds: string[] = [];
 
 function updateSearchCache(memos: Memo[]) {
-	const currentIds = memos.map(m => m.id);
+	const currentIds = memos.map((m) => m.id);
 
 	// Only rebuild if memos changed
-	if (lastMemoIds.length === currentIds.length &&
-		lastMemoIds.every((id, i) => id === currentIds[i])) {
+	if (
+		lastMemoIds.length === currentIds.length &&
+		lastMemoIds.every((id, i) => id === currentIds[i])
+	) {
 		return;
 	}
 
@@ -68,7 +72,7 @@ function updateSearchCache(memos: Memo[]) {
 	for (const memo of memos) {
 		memoSearchCache.set(memo.id, {
 			title: (memo.title || '').toLowerCase(),
-			transcript: (memo.transcript || '').toLowerCase()
+			transcript: (memo.transcript || '').toLowerCase(),
 		});
 	}
 }
@@ -105,9 +109,7 @@ export const filteredMemos = derived(
 
 		// Filter by tag
 		if ($selectedTagId) {
-			filtered = filtered.filter((memo) =>
-				memo.tags?.some((tag) => tag.id === $selectedTagId)
-			);
+			filtered = filtered.filter((memo) => memo.tags?.some((tag) => tag.id === $selectedTagId));
 		}
 
 		// Sort: pinned memos first, then by created_at

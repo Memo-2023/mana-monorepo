@@ -52,14 +52,14 @@
 		onToggleSelect?: (linkId: string) => void;
 	}
 
-	let { 
-		links, 
-		username, 
-		viewMode, 
+	let {
+		links,
+		username,
+		viewMode,
 		onPageChange = () => {},
 		isSelectMode = false,
 		selectedLinks = new Set<string>(),
-		onToggleSelect = () => {}
+		onToggleSelect = () => {},
 	}: Props = $props();
 
 	let copiedStates = $state<Record<string, boolean>>({});
@@ -81,14 +81,19 @@
 		<div class="space-y-6">
 			<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
 				{#each links.items as link}
-					<div class="rounded-xl border border-theme-border bg-theme-surface shadow-sm hover:shadow-lg transition-shadow duration-200 overflow-hidden relative {isSelectMode && selectedLinks.has(link.id) ? 'ring-2 ring-theme-primary' : ''}">
+					<div
+						class="relative overflow-hidden rounded-xl border border-theme-border bg-theme-surface shadow-sm transition-shadow duration-200 hover:shadow-lg {isSelectMode &&
+						selectedLinks.has(link.id)
+							? 'ring-2 ring-theme-primary'
+							: ''}"
+					>
 						{#if isSelectMode}
-							<div class="absolute top-3 left-3 z-10">
+							<div class="absolute left-3 top-3 z-10">
 								<input
 									type="checkbox"
 									checked={selectedLinks.has(link.id)}
 									onchange={() => onToggleSelect(link.id)}
-									class="h-5 w-5 rounded border-theme-border text-theme-primary focus:ring-theme-primary cursor-pointer"
+									class="h-5 w-5 cursor-pointer rounded border-theme-border text-theme-primary focus:ring-theme-primary"
 								/>
 							</div>
 						{/if}
@@ -98,9 +103,13 @@
 			</div>
 		</div>
 	{:else}
-		<div class="rounded-xl border border-theme-border bg-theme-surface shadow-xl overflow-hidden">
+		<div class="overflow-hidden rounded-xl border border-theme-border bg-theme-surface shadow-xl">
 			<!-- Desktop Table Header -->
-			<div class="hidden lg:grid {isSelectMode ? 'grid-cols-[40px_200px_200px_1fr_100px_120px_180px]' : 'grid-cols-[200px_200px_1fr_100px_120px_180px]'} items-center gap-4 border-b border-theme-border bg-theme-surface-hover px-6 py-3 text-sm font-medium text-theme-text">
+			<div
+				class="hidden lg:grid {isSelectMode
+					? 'grid-cols-[40px_200px_200px_1fr_100px_120px_180px]'
+					: 'grid-cols-[200px_200px_1fr_100px_120px_180px]'} items-center gap-4 border-b border-theme-border bg-theme-surface-hover px-6 py-3 text-sm font-medium text-theme-text"
+			>
 				{#if isSelectMode}<div></div>{/if}
 				<div>Title</div>
 				<div>Short URL</div>
@@ -110,7 +119,11 @@
 				<div class="text-right">Actions</div>
 			</div>
 			<!-- Tablet Table Header -->
-			<div class="hidden md:grid lg:hidden {isSelectMode ? 'grid-cols-[40px_minmax(200px,1fr)_200px_100px_140px]' : 'grid-cols-[minmax(200px,1fr)_200px_100px_140px]'} items-center gap-4 border-b border-theme-border bg-theme-surface-hover px-4 py-3 text-sm font-medium text-theme-text">
+			<div
+				class="hidden md:grid lg:hidden {isSelectMode
+					? 'grid-cols-[40px_minmax(200px,1fr)_200px_100px_140px]'
+					: 'grid-cols-[minmax(200px,1fr)_200px_100px_140px]'} items-center gap-4 border-b border-theme-border bg-theme-surface-hover px-4 py-3 text-sm font-medium text-theme-text"
+			>
 				{#if isSelectMode}<div></div>{/if}
 				<div>Title</div>
 				<div>Short URL</div>
@@ -120,10 +133,10 @@
 			<!-- Table Body -->
 			<div>
 				{#each links.items as link}
-					<LinkListItem 
-						{link} 
-						{username} 
-						onCopy={handleCopy} 
+					<LinkListItem
+						{link}
+						{username}
+						onCopy={handleCopy}
 						{copiedStates}
 						{isSelectMode}
 						isSelected={selectedLinks.has(link.id)}

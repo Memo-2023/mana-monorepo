@@ -41,7 +41,7 @@
 
 			matches.push({
 				context: (start > 0 ? '...' : '') + context + (end < transcript.length ? '...' : ''),
-				index
+				index,
 			});
 
 			index = text.indexOf(term, index + 1);

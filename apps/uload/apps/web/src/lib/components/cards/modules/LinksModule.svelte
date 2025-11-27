@@ -9,19 +9,19 @@
 		showIcon = true,
 		target = '_blank',
 		buttonVariant = 'secondary',
-		gap = 'md'
+		gap = 'md',
 	}: LinksModuleProps = $props();
 
 	let containerClass = $derived(() => {
 		const columnClasses = {
 			1: 'grid-cols-1',
-			2: 'grid-cols-2'
+			2: 'grid-cols-2',
 		};
 
 		const gapClasses = {
 			sm: 'gap-2',
 			md: 'gap-3',
-			lg: 'gap-4'
+			lg: 'gap-4',
 		};
 
 		return `grid ${columnClasses[columns] || 'grid-cols-1'} ${gapClasses[gap] || 'gap-3'}`;
@@ -34,7 +34,7 @@
 				'bg-theme-surface hover:bg-theme-surface-hover text-theme-text border border-theme-border',
 			ghost: 'text-theme-text hover:bg-theme-surface-hover',
 			outline:
-				'border-2 border-theme-primary text-theme-primary hover:bg-theme-primary hover:text-theme-background'
+				'border-2 border-theme-primary text-theme-primary hover:bg-theme-primary hover:text-theme-background',
 		};
 		return classes[variant] || classes.secondary;
 	}

@@ -67,12 +67,13 @@ npm install stripe @stripe/stripe-js @paypal/paypal-js
 ### 3. Erstellung der Frontend-Komponenten
 
 #### PaymentForm.astro
+
 ```astro
 ---
 import { useTranslations } from '../utils/i18n';
 
 interface Props {
-  lang: string;
+	lang: string;
 }
 
 const { lang } = Astro.props;
@@ -80,69 +81,74 @@ const t = useTranslations(lang);
 ---
 
 <div class="payment-container">
-  <!-- Zahlungstyp-Auswahl -->
-  <div class="payment-type-selector">
-    <button id="one-time" class="payment-type-btn active">{t('support.onetime')}</button>
-    <button id="recurring" class="payment-type-btn">{t('support.recurring')}</button>
-  </div>
-  
-  <!-- Kaffee-Größen -->
-  <div class="coffee-options">
-    <!-- ... -->
-  </div>
-  
-  <!-- Zahlungsmethoden -->
-  <div class="payment-buttons">
-    <button id="stripe-button" class="payment-method-btn">
-      <!-- ... -->
-      <span>{t('support.payWithStripe')}</span>
-    </button>
-    <button id="paypal-button" class="payment-method-btn">
-      <!-- ... -->
-      <span>{t('support.payWithPayPal')}</span>
-    </button>
-  </div>
+	<!-- Zahlungstyp-Auswahl -->
+	<div class="payment-type-selector">
+		<button id="one-time" class="payment-type-btn active">{t('support.onetime')}</button>
+		<button id="recurring" class="payment-type-btn">{t('support.recurring')}</button>
+	</div>
+
+	<!-- Kaffee-Größen -->
+	<div class="coffee-options">
+		<!-- ... -->
+	</div>
+
+	<!-- Zahlungsmethoden -->
+	<div class="payment-buttons">
+		<button id="stripe-button" class="payment-method-btn">
+			<!-- ... -->
+			<span>{t('support.payWithStripe')}</span>
+		</button>
+		<button id="paypal-button" class="payment-method-btn">
+			<!-- ... -->
+			<span>{t('support.payWithPayPal')}</span>
+		</button>
+	</div>
 </div>
 
 <script>
-  import { loadStripe } from '@stripe/stripe-js';
-  
-  document.addEventListener('DOMContentLoaded', async () => {
-    // Stripe-Instanz initialisieren
-    const stripePromise = loadStripe(import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
-    
-    // Event-Listener für Stripe-Button
-    stripeBtn?.addEventListener('click', async () => {
-      try {
-        // Checkout-Session erstellen
-        const response = await fetch('/.netlify/functions/create-payment-intent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            amount, isRecurring, priceId, coffeeSize
-          }),
-        });
-        
-        const data = await response.json();
-        
-        // Zur Checkout-Seite weiterleiten
-        if (data.url) {
-          window.location.href = data.url;
-          return;
-        }
-        
-        // Alternativ: redirectToCheckout verwenden
-        if (data.sessionId || data.id) {
-          const stripe = await stripePromise;
-          await stripe.redirectToCheckout({
-            sessionId: data.sessionId || data.id,
-          });
-        }
-      } catch (error) {
-        console.error('Payment error:', error);
-      }
-    });
-  });
+	import { loadStripe } from '@stripe/stripe-js';
+
+	document.addEventListener('DOMContentLoaded', async () => {
+		// Stripe-Instanz initialisieren
+		const stripePromise = loadStripe(
+			import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder'
+		);
+
+		// Event-Listener für Stripe-Button
+		stripeBtn?.addEventListener('click', async () => {
+			try {
+				// Checkout-Session erstellen
+				const response = await fetch('/.netlify/functions/create-payment-intent', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						amount,
+						isRecurring,
+						priceId,
+						coffeeSize,
+					}),
+				});
+
+				const data = await response.json();
+
+				// Zur Checkout-Seite weiterleiten
+				if (data.url) {
+					window.location.href = data.url;
+					return;
+				}
+
+				// Alternativ: redirectToCheckout verwenden
+				if (data.sessionId || data.id) {
+					const stripe = await stripePromise;
+					await stripe.redirectToCheckout({
+						sessionId: data.sessionId || data.id,
+					});
+				}
+			} catch (error) {
+				console.error('Payment error:', error);
+			}
+		});
+	});
 </script>
 ```
 
@@ -154,50 +160,52 @@ const t = useTranslations(lang);
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 exports.handler = async (event, context) => {
-  const headers = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS"
-  };
-  
-  try {
-    const { amount, isRecurring, coffeeSize } = JSON.parse(event.body || '{}');
-    const amountInCents = Math.round(amount * 100);
-    
-    // Stripe Checkout Session erstellen
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: `BaunTown Kaffee - ${coffeeSize || 'Mittlerer Kaffee'}`,
-            description: isRecurring ? 'Monatliche Unterstützung' : 'Einmalige Unterstützung',
-          },
-          unit_amount: amountInCents,
-          recurring: isRecurring ? { interval: 'month' } : undefined,
-        },
-        quantity: 1,
-      }],
-      mode: isRecurring ? 'subscription' : 'payment',
-      success_url: `${process.env.URL || 'https://bauntown.com'}/support-success`,
-      cancel_url: `${process.env.URL || 'https://bauntown.com'}/support-cancel`,
-    });
-    
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
-        url: session.url
-      })
-    };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: error.message })
-    };
-  }
+	const headers = {
+		'Access-Control-Allow-Origin': '*',
+		'Access-Control-Allow-Headers': 'Content-Type',
+		'Access-Control-Allow-Methods': 'POST, OPTIONS',
+	};
+
+	try {
+		const { amount, isRecurring, coffeeSize } = JSON.parse(event.body || '{}');
+		const amountInCents = Math.round(amount * 100);
+
+		// Stripe Checkout Session erstellen
+		const session = await stripe.checkout.sessions.create({
+			payment_method_types: ['card'],
+			line_items: [
+				{
+					price_data: {
+						currency: 'eur',
+						product_data: {
+							name: `BaunTown Kaffee - ${coffeeSize || 'Mittlerer Kaffee'}`,
+							description: isRecurring ? 'Monatliche Unterstützung' : 'Einmalige Unterstützung',
+						},
+						unit_amount: amountInCents,
+						recurring: isRecurring ? { interval: 'month' } : undefined,
+					},
+					quantity: 1,
+				},
+			],
+			mode: isRecurring ? 'subscription' : 'payment',
+			success_url: `${process.env.URL || 'https://bauntown.com'}/support-success`,
+			cancel_url: `${process.env.URL || 'https://bauntown.com'}/support-cancel`,
+		});
+
+		return {
+			statusCode: 200,
+			headers,
+			body: JSON.stringify({
+				url: session.url,
+			}),
+		};
+	} catch (error) {
+		return {
+			statusCode: 500,
+			headers,
+			body: JSON.stringify({ error: error.message }),
+		};
+	}
 };
 ```
 
@@ -265,7 +273,7 @@ export function useTranslations(lang: keyof typeof ui) {
    - Navigieren Sie zu Ihrem Netlify-Dashboard
    - Gehen Sie zu "Site settings" > "Environment variables"
    - Fügen Sie die folgenden Umgebungsvariablen hinzu:
-     - `PUBLIC_STRIPE_PUBLISHABLE_KEY` (muss mit PUBLIC_ beginnen für Frontend-Verwendung)
+     - `PUBLIC_STRIPE_PUBLISHABLE_KEY` (muss mit PUBLIC\_ beginnen für Frontend-Verwendung)
      - `STRIPE_SECRET_KEY`
      - `STRIPE_WEBHOOK_SECRET` (optional für Webhook-Verarbeitung)
 
@@ -315,9 +323,9 @@ Die Netlify-Function enthält CORS-Header für die Anfrageverarbeitung:
 
 ```javascript
 const headers = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS"
+	'Access-Control-Allow-Origin': '*',
+	'Access-Control-Allow-Headers': 'Content-Type',
+	'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 ```
 
@@ -327,15 +335,15 @@ Die Implementation enthält einen Fallback-Mechanismus für Entwicklungs- und Te
 
 ```javascript
 if (!process.env.STRIPE_SECRET_KEY) {
-  console.log("WARNUNG: STRIPE_SECRET_KEY fehlt - liefere Test-Antwort");
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify({
-      url: `${process.env.URL || 'https://bauntown.com'}/support-success?test=true`,
-      message: "Test mode - no Stripe key available"
-    })
-  };
+	console.log('WARNUNG: STRIPE_SECRET_KEY fehlt - liefere Test-Antwort');
+	return {
+		statusCode: 200,
+		headers,
+		body: JSON.stringify({
+			url: `${process.env.URL || 'https://bauntown.com'}/support-success?test=true`,
+			message: 'Test mode - no Stripe key available',
+		}),
+	};
 }
 ```
 
@@ -346,6 +354,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 Die Stripe-Integration für das "Buy Me a Coffee"-Feature wurde erfolgreich implementiert und ermöglicht sowohl einmalige als auch wiederkehrende Spenden. Durch die Verwendung von Netlify Functions wird die Sicherheit erhöht, da sensible Daten wie der Stripe Secret Key nicht im Frontend verfügbar sind.
 
 Die wichtigsten Punkte für eine fehlerfreie Implementierung:
+
 1. Verwenden Sie `PUBLIC_`-Präfix für Frontend-Umgebungsvariablen in Astro
 2. Verwenden Sie den Stripe Checkout-Flow für eine einfache und sichere Zahlungsabwicklung
 3. Implementieren Sie robuste Fehlerbehandlung für Übersetzungen und API-Aufrufe

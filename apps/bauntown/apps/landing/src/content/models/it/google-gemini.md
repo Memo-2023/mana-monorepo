@@ -1,17 +1,17 @@
 ---
-title: "Google Gemini 2.5 Pro: Una svolta nella tecnologia AI"
+title: 'Google Gemini 2.5 Pro: Una svolta nella tecnologia AI'
 description: "Google ha recentemente presentato il modello Gemini 2.5 Pro, considerato il modello AI più avanzato dell'azienda, stabilendo nuovi standard con la sua enorme finestra di contesto."
 pubDate: 2025-03-25
-category: "Text"
+category: 'Text'
 featured: true
-author: "BaunTown"
-tags: ["Google", "Gemini", "IA", "Multimodale", "Finestra di contesto"]
-image: "/images/models/google-gemini-2.5pro-bauntown.png"
+author: 'BaunTown'
+tags: ['Google', 'Gemini', 'IA', 'Multimodale', 'Finestra di contesto']
+image: '/images/models/google-gemini-2.5pro-bauntown.png'
 externalLinks:
-  - title: "Annuncio ufficiale di Google"
-    url: "https://blog.google/technology/google-deepmind/gemini-model-thinking-updates-march-2025/#gemini-2-5-thinking"
-  - title: "Prova Gemini"
-    url: "https://gemini.google.com"
+  - title: 'Annuncio ufficiale di Google'
+    url: 'https://blog.google/technology/google-deepmind/gemini-model-thinking-updates-march-2025/#gemini-2-5-thinking'
+  - title: 'Prova Gemini'
+    url: 'https://gemini.google.com'
 ---
 
 Google ha recentemente presentato il modello Gemini 2.5 Pro, considerato il modello di intelligenza artificiale più avanzato dell'azienda. Con caratteristiche rivoluzionarie come l'elaborazione multimodale, migliori capacità di risoluzione dei problemi e un'enorme finestra di contesto fino a 2 milioni di token, questo modello stabilisce nuovi standard nello sviluppo dell'IA. Le reazioni a questa innovazione sono diverse in tutto il mondo, riflettendo sia entusiasmo che riflessione critica.

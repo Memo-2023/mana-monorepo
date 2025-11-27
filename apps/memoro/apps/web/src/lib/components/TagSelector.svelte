@@ -9,7 +9,7 @@
 	let {
 		userId,
 		selectedTags = [],
-		onTagsChange
+		onTagsChange,
 	}: {
 		userId: string;
 		selectedTags: Tag[];
@@ -94,7 +94,9 @@
 
 	<!-- Dropdown -->
 	{#if isOpen}
-		<div class="absolute top-full left-0 z-50 mt-2 w-72 rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+		<div
+			class="absolute top-full left-0 z-50 mt-2 w-72 rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800"
+		>
 			<!-- Search -->
 			<input
 				type="search"
@@ -152,7 +154,12 @@
 				class="absolute top-2 right-2 rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
 			>
 				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
 				</svg>
 			</button>
 		</div>

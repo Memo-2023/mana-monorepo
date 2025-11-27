@@ -147,6 +147,7 @@ curl -X POST http://localhost:3001/api/auth/register \
 ### Step 7: Configure SSL (Coolify Auto)
 
 In Coolify UI:
+
 1. Navigate to: Settings → Domains
 2. Add domain: `auth.manacore.app`
 3. Enable "Auto SSL" (Let's Encrypt)
@@ -676,12 +677,12 @@ curl -f https://api-chat.manacore.app/api/health
 
 ### Severity Levels
 
-| Severity | Description | Response Time | Escalation |
-|----------|-------------|---------------|------------|
-| **P1 - Critical** | Total service outage, data loss | Immediate | CTO + All hands |
-| **P2 - High** | Major functionality broken | < 30 min | DevOps lead + Backend team |
-| **P3 - Medium** | Partial degradation, workaround exists | < 2 hours | On-call engineer |
-| **P4 - Low** | Minor issues, no user impact | < 24 hours | Backlog |
+| Severity          | Description                            | Response Time | Escalation                 |
+| ----------------- | -------------------------------------- | ------------- | -------------------------- |
+| **P1 - Critical** | Total service outage, data loss        | Immediate     | CTO + All hands            |
+| **P2 - High**     | Major functionality broken             | < 30 min      | DevOps lead + Backend team |
+| **P3 - Medium**   | Partial degradation, workaround exists | < 2 hours     | On-call engineer           |
+| **P4 - Low**      | Minor issues, no user impact           | < 24 hours    | Backlog                    |
 
 ### Incident Response Workflow
 

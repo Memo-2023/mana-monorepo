@@ -31,7 +31,7 @@
 		{ value: 'minimal', label: 'Minimal' },
 		{ value: 'social', label: 'Social' },
 		{ value: 'portfolio', label: 'Portfolio' },
-		{ value: 'other', label: 'Other' }
+		{ value: 'other', label: 'Other' },
 	];
 
 	// Reset form when card changes
@@ -77,7 +77,7 @@
 				category: templateCategory,
 				tags: tags.length > 0 ? tags : undefined,
 				visibility: templateVisibility,
-				allow_duplication: allowDuplication
+				allow_duplication: allowDuplication,
 			});
 
 			if (template) {
@@ -160,7 +160,7 @@
 								type="text"
 								bind:value={templateName}
 								placeholder="Enter a descriptive name"
-								class="w-full rounded-lg border border-theme-border bg-theme-background px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+								class="w-full rounded-lg border border-theme-border bg-theme-background px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 								required
 							/>
 						</div>
@@ -178,7 +178,7 @@
 								bind:value={templateDescription}
 								placeholder="Describe what makes this template special"
 								rows="3"
-								class="w-full resize-none rounded-lg border border-theme-border bg-theme-background px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+								class="w-full resize-none rounded-lg border border-theme-border bg-theme-background px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 							></textarea>
 						</div>
 
@@ -190,7 +190,7 @@
 							<select
 								id="template-category"
 								bind:value={templateCategory}
-								class="w-full rounded-lg border border-theme-border bg-theme-background px-3 py-2 text-theme-text focus:ring-2 focus:ring-theme-accent focus:outline-none"
+								class="w-full rounded-lg border border-theme-border bg-theme-background px-3 py-2 text-theme-text focus:outline-none focus:ring-2 focus:ring-theme-accent"
 								required
 							>
 								{#each categories as category}
@@ -209,7 +209,7 @@
 								type="text"
 								bind:value={templateTags}
 								placeholder="minimal, professional, clean (comma separated)"
-								class="w-full rounded-lg border border-theme-border bg-theme-background px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+								class="w-full rounded-lg border border-theme-border bg-theme-background px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 							/>
 							<p class="mt-1 text-xs text-theme-text-muted">
 								Separate tags with commas. Help others find your template!
@@ -263,7 +263,7 @@
 									id: card.id,
 									config: card.config,
 									metadata: card.metadata || {},
-									constraints: card.constraints || {}
+									constraints: card.constraints || {},
 								}}
 								readonly={true}
 								compact={true}
@@ -274,7 +274,7 @@
 						<div class="mt-4 space-y-2 text-sm">
 							<div class="flex justify-between">
 								<span class="text-theme-text-muted">Mode:</span>
-								<span class="text-theme-text capitalize">{card.config?.mode || 'Unknown'}</span>
+								<span class="capitalize text-theme-text">{card.config?.mode || 'Unknown'}</span>
 							</div>
 							{#if isBeginnerCard(card.config)}
 								<div class="flex justify-between">
@@ -285,7 +285,7 @@
 							{#if card.variant}
 								<div class="flex justify-between">
 									<span class="text-theme-text-muted">Variant:</span>
-									<span class="text-theme-text capitalize">{card.variant}</span>
+									<span class="capitalize text-theme-text">{card.variant}</span>
 								</div>
 							{/if}
 						</div>
@@ -305,7 +305,7 @@
 					</button>
 					<button
 						onclick={handleSubmit}
-						class="flex items-center gap-2 rounded-lg bg-theme-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-theme-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+						class="hover:bg-theme-primary/90 flex items-center gap-2 rounded-lg bg-theme-primary px-4 py-2 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
 						disabled={loading || !templateName.trim() || !templateCategory}
 					>
 						{#if loading}

@@ -1,18 +1,18 @@
 ---
-name: "Dr. Simon Neubert"
-title: "Dr. Simon Neubert"
-description: "Entwickelt die KI-Systeme, die Memoros intelligente Gesprächsverarbeitung ermöglichen."
-role: "Data Scientist / AI Engineer"
-avatar: "/images/team/simon-neubert.jpg"
-bio: "Entwickelt die KI-Systeme, die Memoros intelligente Gesprächsverarbeitung ermöglichen."
-category: "kernteam"
+name: 'Dr. Simon Neubert'
+title: 'Dr. Simon Neubert'
+description: 'Entwickelt die KI-Systeme, die Memoros intelligente Gesprächsverarbeitung ermöglichen.'
+role: 'Data Scientist / AI Engineer'
+avatar: '/images/team/simon-neubert.jpg'
+bio: 'Entwickelt die KI-Systeme, die Memoros intelligente Gesprächsverarbeitung ermöglichen.'
+category: 'kernteam'
 order: 7
 social:
-  linkedin: "dr-simon-neubert"
-  github: "sneubert-ai"
-  twitter: "simon_neubert_ml"
-lang: "de"
-slug: "simon-neubert"
+  linkedin: 'dr-simon-neubert'
+  github: 'sneubert-ai'
+  twitter: 'simon_neubert_ml'
+lang: 'de'
+slug: 'simon-neubert'
 ---
 
 ## Die KI hinter Memoro

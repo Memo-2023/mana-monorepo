@@ -209,7 +209,7 @@ export function getVariant(testId: string, cookies: Cookies) {
 		variant = Math.random() > 0.5 ? 'A' : 'B';
 		cookies.set(cookieName, variant, {
 			path: '/',
-			maxAge: 60 * 60 * 24 * 30 // 30 Tage
+			maxAge: 60 * 60 * 24 * 30, // 30 Tage
 		});
 	}
 
@@ -219,7 +219,7 @@ export function getVariant(testId: string, cookies: Cookies) {
 // Usage in +layout.server.ts
 export async function load({ cookies }) {
 	return {
-		heroVariant: getVariant('homepage-hero', cookies)
+		heroVariant: getVariant('homepage-hero', cookies),
 	};
 }
 ```

@@ -1,49 +1,60 @@
 ---
 export interface Props {
-  src?: string;
-  alt: string;
-  width?: number | string;
-  height?: number | string;
-  loading?: 'lazy' | 'eager';
-  class?: string;
-  objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
-  placeholder?: 'team' | 'dashboard' | 'chart' | 'abstract' | 'office' | 'tech' | 'nature';
-  rounded?: boolean;
+	src?: string;
+	alt: string;
+	width?: number | string;
+	height?: number | string;
+	loading?: 'lazy' | 'eager';
+	class?: string;
+	objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
+	placeholder?: 'team' | 'dashboard' | 'chart' | 'abstract' | 'office' | 'tech' | 'nature';
+	rounded?: boolean;
 }
 
 // Placeholder image services
 const placeholderServices = {
-  team: (w: number, h: number) => `https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=${w}&h=${h}&fit=crop&auto=format`,
-  dashboard: (w: number, h: number) => `https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=${w}&h=${h}&fit=crop&auto=format`,
-  chart: (w: number, h: number) => `https://images.unsplash.com/photo-1666875753105-c63a6f3bdc86?w=${w}&h=${h}&fit=crop&auto=format`,
-  abstract: (w: number, h: number) => `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=${w}&h=${h}&fit=crop&auto=format`,
-  office: (w: number, h: number) => `https://images.unsplash.com/photo-1497366216548-37526070297c?w=${w}&h=${h}&fit=crop&auto=format`,
-  tech: (w: number, h: number) => `https://images.unsplash.com/photo-1518770660439-4636190af475?w=${w}&h=${h}&fit=crop&auto=format`,
-  nature: (w: number, h: number) => `https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=${w}&h=${h}&fit=crop&auto=format`,
+	team: (w: number, h: number) =>
+		`https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=${w}&h=${h}&fit=crop&auto=format`,
+	dashboard: (w: number, h: number) =>
+		`https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=${w}&h=${h}&fit=crop&auto=format`,
+	chart: (w: number, h: number) =>
+		`https://images.unsplash.com/photo-1666875753105-c63a6f3bdc86?w=${w}&h=${h}&fit=crop&auto=format`,
+	abstract: (w: number, h: number) =>
+		`https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=${w}&h=${h}&fit=crop&auto=format`,
+	office: (w: number, h: number) =>
+		`https://images.unsplash.com/photo-1497366216548-37526070297c?w=${w}&h=${h}&fit=crop&auto=format`,
+	tech: (w: number, h: number) =>
+		`https://images.unsplash.com/photo-1518770660439-4636190af475?w=${w}&h=${h}&fit=crop&auto=format`,
+	nature: (w: number, h: number) =>
+		`https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=${w}&h=${h}&fit=crop&auto=format`,
 };
 
 const {
-  src,
-  alt,
-  width = 600,
-  height = 400,
-  loading = 'lazy',
-  class: className = '',
-  objectFit = 'cover',
-  placeholder,
-  rounded = false,
-  ...rest
+	src,
+	alt,
+	width = 600,
+	height = 400,
+	loading = 'lazy',
+	class: className = '',
+	objectFit = 'cover',
+	placeholder,
+	rounded = false,
+	...rest
 } = Astro.props;
 
 // Use placeholder if no src provided
-const imageSrc = src || (placeholder && placeholderServices[placeholder] ? placeholderServices[placeholder](Number(width), Number(height)) : `https://via.placeholder.com/${width}x${height}/3b82f6/ffffff?text=${encodeURIComponent(alt)}`);
+const imageSrc =
+	src ||
+	(placeholder && placeholderServices[placeholder]
+		? placeholderServices[placeholder](Number(width), Number(height))
+		: `https://via.placeholder.com/${width}x${height}/3b82f6/ffffff?text=${encodeURIComponent(alt)}`);
 
 const objectFitClasses = {
-  contain: 'object-contain',
-  cover: 'object-cover',
-  fill: 'object-fill',
-  none: 'object-none',
-  'scale-down': 'object-scale-down'
+	contain: 'object-contain',
+	cover: 'object-cover',
+	fill: 'object-fill',
+	none: 'object-none',
+	'scale-down': 'object-scale-down',
 };
 
 const roundedClass = rounded ? 'rounded-lg' : '';
@@ -51,12 +62,12 @@ const classes = `${objectFitClasses[objectFit]} ${roundedClass} ${className}`;
 ---
 
 <img
-  src={imageSrc}
-  alt={alt}
-  width={width}
-  height={height}
-  loading={loading}
-  class={classes}
-  decoding="async"
-  {...rest}
+	src={imageSrc}
+	alt={alt}
+	width={width}
+	height={height}
+	loading={loading}
+	class={classes}
+	decoding="async"
+	{...rest}
 />

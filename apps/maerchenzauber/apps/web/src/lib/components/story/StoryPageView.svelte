@@ -22,14 +22,18 @@
 		/>
 
 		<!-- Text Overlay -->
-		<div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-4 sm:p-6">
+		<div
+			class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-4 sm:p-6"
+		>
 			<p class="text-base leading-relaxed text-white sm:text-lg lg:text-xl">
 				{page.story}
 			</p>
 		</div>
 
 		<!-- Page Number Badge -->
-		<div class="absolute right-3 top-3 rounded-full bg-black/50 px-3 py-1 text-sm font-medium text-white backdrop-blur">
+		<div
+			class="absolute right-3 top-3 rounded-full bg-black/50 px-3 py-1 text-sm font-medium text-white backdrop-blur"
+		>
 			{pageNumber} / {totalPages}
 		</div>
 	</div>

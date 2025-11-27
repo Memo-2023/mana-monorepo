@@ -23,9 +23,9 @@ export class EmailSender {
 			const textContent = html.replace(/<[^>]*>/g, '').substring(0, 200);
 			console.log(textContent + '...');
 			console.log('═══════════════════════════════════════════════════════');
-			
+
 			// In production, you would configure one of these options:
-			
+
 			// Option 1: Use PocketBase SMTP (configure in PocketBase admin)
 			// The settings are at: https://pb.ulo.ad/_/#/settings/mail
 			// You need to set:
@@ -33,7 +33,7 @@ export class EmailSender {
 			// - Port (usually 587 for TLS)
 			// - Username/Password
 			// - Use TLS
-			
+
 			// Option 2: Use a third-party email service
 			// For example, using Brevo (formerly SendinBlue):
 			/*
@@ -56,7 +56,7 @@ export class EmailSender {
 				throw new Error(`Email API error: ${response.status}`);
 			}
 			*/
-			
+
 			// Option 3: Use Resend.com (very simple API)
 			/*
 			const response = await fetch('https://api.resend.com/emails', {
@@ -77,17 +77,17 @@ export class EmailSender {
 				throw new Error(`Email API error: ${response.status}`);
 			}
 			*/
-			
+
 			return true;
 		} catch (error) {
 			console.error('Failed to send email:', error);
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Instructions for setting up email:
-	 * 
+	 *
 	 * OPTION 1: PocketBase SMTP (Recommended)
 	 * 1. Go to https://pb.ulo.ad/_/#/settings/mail
 	 * 2. Enable "Use SMTP mail server"
@@ -96,13 +96,13 @@ export class EmailSender {
 	 *    - For Outlook: smtp-mail.outlook.com, port 587
 	 *    - For Custom: Your SMTP server details
 	 * 4. Save settings
-	 * 
+	 *
 	 * OPTION 2: Brevo (Free tier: 300 emails/day)
 	 * 1. Sign up at https://www.brevo.com
 	 * 2. Get API key from https://app.brevo.com/settings/keys/api
 	 * 3. Add to .env: BREVO_API_KEY=your-api-key
 	 * 4. Uncomment the Brevo code above
-	 * 
+	 *
 	 * OPTION 3: Resend (Free tier: 100 emails/day)
 	 * 1. Sign up at https://resend.com
 	 * 2. Verify your domain

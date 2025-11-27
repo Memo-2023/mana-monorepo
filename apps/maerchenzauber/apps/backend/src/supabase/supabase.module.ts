@@ -5,8 +5,8 @@ import { SupabaseStorageProvider } from './supabase-storage.provider';
 import { CommonModule } from '../common/common.module';
 
 @Module({
-  imports: [ConfigModule, CommonModule],
-  providers: [SupabaseProvider, SupabaseStorageProvider],
-  exports: [SupabaseProvider, SupabaseStorageProvider],
+	imports: [ConfigModule, CommonModule],
+	providers: [SupabaseProvider, SupabaseStorageProvider],
+	exports: [SupabaseProvider, SupabaseStorageProvider],
 })
 export class SupabaseModule {}

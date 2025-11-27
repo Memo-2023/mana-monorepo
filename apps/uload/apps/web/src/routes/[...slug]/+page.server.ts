@@ -3,14 +3,20 @@ import { parseUserAgent, type Link } from '$lib/pocketbase';
 import { linkCache } from '$lib/server/linkCache';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ params, request, getClientAddress, cookies, locals }) => {
+export const load: PageServerLoad = async ({
+	params,
+	request,
+	getClientAddress,
+	cookies,
+	locals,
+}) => {
 	const { slug } = params;
-	
+
 	// Parse slug - could be either:
 	// 1. Random code: "abc123"
 	// 2. Username/custom code: "u/username/project" -> stored as "username/project"
 	let shortCode: string;
-	
+
 	if (typeof slug === 'string') {
 		shortCode = slug;
 	} else if (Array.isArray(slug)) {
@@ -19,7 +25,7 @@ export const load: PageServerLoad = async ({ params, request, getClientAddress, 
 	} else {
 		error(404, 'Invalid URL format');
 	}
-	
+
 	// Handle /u/username/code format - strip the 'u/' prefix
 	// Links are stored as "username/code" in the database
 	if (shortCode.startsWith('u/')) {
@@ -46,16 +52,20 @@ export const load: PageServerLoad = async ({ params, request, getClientAddress, 
 	try {
 		link = await locals.pb.collection('links').getFirstListItem<Link>(`short_code="${shortCode}"`);
 		console.log('Found link:', link);
-		
+
 		// Cache the link for future requests (if it's valid)
-		if (link.is_active && !link.password && (!link.expires_at || new Date(link.expires_at) > new Date())) {
+		if (
+			link.is_active &&
+			!link.password &&
+			(!link.expires_at || new Date(link.expires_at) > new Date())
+		) {
 			await linkCache.cacheRedirect(shortCode, link.original_url);
 			console.log('Cached redirect for future use');
 		}
 	} catch (fetchErr: any) {
 		console.error('Failed to fetch link:', fetchErr);
 		console.error('Error details:', fetchErr.response || fetchErr.message);
-		
+
 		// Try to see if any links exist for debugging
 		try {
 			const testList = await locals.pb.collection('links').getList(1, 5);
@@ -85,7 +95,7 @@ export const load: PageServerLoad = async ({ params, request, getClientAddress, 
 	try {
 		const clicks = await locals.pb.collection('clicks').getList(1, 1, {
 			filter: `link_id="${link.id}"`,
-			sort: '-created'
+			sort: '-created',
 		});
 		const totalClicks = clicks.totalItems;
 
@@ -109,7 +119,7 @@ export const load: PageServerLoad = async ({ params, request, getClientAddress, 
 		if (!isAuthenticated) {
 			return {
 				requiresPassword: true,
-				linkId: link.id
+				linkId: link.id,
 			};
 		}
 	}
@@ -141,7 +151,7 @@ export const load: PageServerLoad = async ({ params, request, getClientAddress, 
 			os: os,
 			country: country,
 			city: city,
-			clicked_at: new Date().toISOString()
+			clicked_at: new Date().toISOString(),
 		});
 		console.log('Click recorded successfully');
 	} catch (clickErr) {
@@ -176,10 +186,10 @@ export const actions = {
 			path: '/',
 			maxAge: 60 * 60 * 24,
 			httpOnly: true,
-			sameSite: 'lax'
+			sameSite: 'lax',
 		});
 
 		// Redirect back to the same URL to trigger the load function again
 		throw redirect(303, `/${code}`);
-	}
+	},
 } satisfies Actions;

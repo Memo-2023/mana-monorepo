@@ -87,7 +87,9 @@
 
 					{#if blueprints.length === 0}
 						<div class="rounded-lg bg-content p-8 text-center">
-							<p class="text-theme-secondary">No blueprints available. Use a custom prompt instead.</p>
+							<p class="text-theme-secondary">
+								No blueprints available. Use a custom prompt instead.
+							</p>
 						</div>
 					{/if}
 				{:else}

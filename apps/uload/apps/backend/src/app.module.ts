@@ -20,61 +20,56 @@ import { RedirectService } from './services/redirect.service';
 import { AnalyticsService } from './services/analytics.service';
 
 @Module({
-  imports: [
-    // Context-Local Storage for request-scoped data
-    ClsModule.forRoot({
-      global: true,
-      middleware: { mount: true, generateId: true },
-    }),
+	imports: [
+		// Context-Local Storage for request-scoped data
+		ClsModule.forRoot({
+			global: true,
+			middleware: { mount: true, generateId: true },
+		}),
 
-    // Configuration
-    ConfigModule.forRoot({
-      isGlobal: true,
-      validationSchema,
-      validationOptions: {
-        allowUnknown: true,
-        abortEarly: false,
-      },
-      ignoreEnvFile: process.env.NODE_ENV === 'production',
-    }),
+		// Configuration
+		ConfigModule.forRoot({
+			isGlobal: true,
+			validationSchema,
+			validationOptions: {
+				allowUnknown: true,
+				abortEarly: false,
+			},
+			ignoreEnvFile: process.env.NODE_ENV === 'production',
+		}),
 
-    // Mana Core Authentication
-    ManaCoreModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        manaServiceUrl: configService.get<string>('MANA_SERVICE_URL')!,
-        appId: configService.get<string>('APP_ID')!,
-        serviceKey: configService.get<string>('MANA_SERVICE_KEY', ''),
-        debug: configService.get('NODE_ENV') === 'development',
-      }),
-      inject: [ConfigService],
-    }) as any,
+		// Mana Core Authentication
+		ManaCoreModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (configService: ConfigService) => ({
+				manaServiceUrl: configService.get<string>('MANA_SERVICE_URL')!,
+				appId: configService.get<string>('APP_ID')!,
+				serviceKey: configService.get<string>('MANA_SERVICE_KEY', ''),
+				debug: configService.get('NODE_ENV') === 'development',
+			}),
+			inject: [ConfigService],
+		}) as any,
 
-    // Health checks
-    TerminusModule,
-    HttpModule,
+		// Health checks
+		TerminusModule,
+		HttpModule,
 
-    // Database
-    DatabaseModule,
-  ],
-  controllers: [
-    HealthController,
-    RedirectController,
-    LinksController,
-    AnalyticsController,
-  ],
-  providers: [
-    // Repositories
-    LinkRepository,
-    ClickRepository,
-    // Services
-    LinksService,
-    RedirectService,
-    AnalyticsService,
-  ],
+		// Database
+		DatabaseModule,
+	],
+	controllers: [HealthController, RedirectController, LinksController, AnalyticsController],
+	providers: [
+		// Repositories
+		LinkRepository,
+		ClickRepository,
+		// Services
+		LinksService,
+		RedirectService,
+		AnalyticsService,
+	],
 })
 export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    // Add custom middleware here if needed
-  }
+	configure(consumer: MiddlewareConsumer) {
+		// Add custom middleware here if needed
+	}
 }

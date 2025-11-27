@@ -5,19 +5,19 @@
 const PREFIX = '[ManaAuth]';
 
 export const debug = (...args: any[]) => {
-  if (__DEV__) {
-    console.debug(PREFIX, ...args);
-  }
+	if (__DEV__) {
+		console.debug(PREFIX, ...args);
+	}
 };
 
 export const info = (...args: any[]) => {
-  console.log(PREFIX, ...args);
+	console.log(PREFIX, ...args);
 };
 
 export const warn = (...args: any[]) => {
-  console.warn(PREFIX, ...args);
+	console.warn(PREFIX, ...args);
 };
 
 export const error = (...args: any[]) => {
-  console.error(PREFIX, ...args);
+	console.error(PREFIX, ...args);
 };

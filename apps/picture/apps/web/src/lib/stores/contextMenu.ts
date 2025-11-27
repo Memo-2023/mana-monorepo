@@ -20,7 +20,7 @@ const initialState: ContextMenuState = {
 	image: null,
 	showTagSubmenu: false,
 	submenuX: 0,
-	submenuY: 0
+	submenuY: 0,
 };
 
 export const contextMenu = writable<ContextMenuState>(initialState);
@@ -33,7 +33,7 @@ export function showContextMenu(x: number, y: number, image: Image) {
 		image,
 		showTagSubmenu: false,
 		submenuX: 0,
-		submenuY: 0
+		submenuY: 0,
 	});
 }
 
@@ -46,13 +46,13 @@ export function showTagSubmenu(x: number, y: number) {
 		...state,
 		showTagSubmenu: true,
 		submenuX: x,
-		submenuY: y
+		submenuY: y,
 	}));
 }
 
 export function hideTagSubmenu() {
 	contextMenu.update((state) => ({
 		...state,
-		showTagSubmenu: false
+		showTagSubmenu: false,
 	}));
 }

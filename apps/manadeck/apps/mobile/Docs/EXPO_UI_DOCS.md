@@ -1,6 +1,5 @@
 Building SwiftUI apps with Expo UI
 
-
 Copy
 
 Learn how to use Expo UI to integrate SwiftUI into your Expo apps.
@@ -29,33 +28,29 @@ Basic usage with Host
 
 Code
 
-
 Preview
 
 SwiftUI loading view
 
 Copy
 
-
 import { CircularProgress, Host } from '@expo/ui/swift-ui';
 import { View, Text } from 'react-native';
 
 export default function LoadingView() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Host matchContents>
-        <CircularProgress />
-      </Host>
-      <Text>Loading...</Text>
-    </View>
-  );
+return (
+<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+<Host matchContents>
+<CircularProgress />
+</Host>
+<Text>Loading...</Text>
+</View>
+);
 }
 Using HStack and VStack
 You can also use the HStack and VStack components to build the entire layout in SwiftUI.
 
-
 Code
-
 
 Preview
 
@@ -63,29 +58,26 @@ SwiftUI loading with HStack and VStack
 
 Copy
 
-
 import { CircularProgress, Host, HStack, LinearProgress, VStack } from '@expo/ui/swift-ui';
 
 export default function LoadingView() {
-  return (
-    <Host style={{ flex: 1, margin: 32 }}>
-      <VStack spacing={32}>
-        <HStack spacing={32}>
-          <CircularProgress />
-          <CircularProgress color="orange" />
-        </HStack>
-        <LinearProgress progress={0.5} />
-        <LinearProgress color="orange" progress={0.7} />
-      </VStack>
-    </Host>
-  );
+return (
+<Host style={{ flex: 1, margin: 32 }}>
+<VStack spacing={32}>
+<HStack spacing={32}>
+<CircularProgress />
+<CircularProgress color="orange" />
+</HStack>
+<LinearProgress progress={0.5} />
+<LinearProgress color="orange" progress={0.7} />
+</VStack>
+</Host>
+);
 }
 Modifiers
 SwiftUI modifier is a powerful way to customize the appearance and behavior of SwiftUI components. Expo UI also provides modifiers for SwiftUI components. You can import modifiers from @expo/ui/swift-ui/modifiers and pass them as an array to the modifiers prop. In the following example, the expo-mesh-gradient and glassEffect modifier are combined to create Liquid Glass text.
 
-
 Code
-
 
 Preview
 
@@ -95,59 +87,56 @@ SwiftUI modifiers
 
 Copy
 
-
 import { Host, Text } from '@expo/ui/swift-ui';
 import { glassEffect, padding } from '@expo/ui/swift-ui/modifiers';
 import { MeshGradientView } from 'expo-mesh-gradient';
 import { View } from 'react-native';
 
 export default function Page() {
-  return (
-    <View style={{ flex: 1 }}>
-      <MeshGradientView
-        style={{ flex: 1 }}
-        columns={3}
-        rows={3}
-        colors={['red', 'purple', 'indigo', 'orange', 'white', 'blue', 'yellow', 'green', 'cyan']}
-        points={[
-          [0.0, 0.0],
-          [0.5, 0.0],
-          [1.0, 0.0],
-          [0.0, 0.5],
-          [0.5, 0.5],
-          [1.0, 0.5],
-          [0.0, 1.0],
-          [0.5, 1.0],
-          [1.0, 1.0],
-        ]}
-      />
-      <Host style={{ position: 'absolute', top: 0, right: 0, left: 0, bottom: 0 }}>
-        <Text
-          size={32}
-          modifiers={[
-            padding({
-              all: 16,
-            }),
-            glassEffect({
-              glass: {
-                variant: 'clear',
-              },
-            }),
-          ]}>
-          Glass effect text
-        </Text>
-      </Host>
-    </View>
-  );
+return (
+<View style={{ flex: 1 }}>
+<MeshGradientView
+style={{ flex: 1 }}
+columns={3}
+rows={3}
+colors={['red', 'purple', 'indigo', 'orange', 'white', 'blue', 'yellow', 'green', 'cyan']}
+points={[
+[0.0, 0.0],
+[0.5, 0.0],
+[1.0, 0.0],
+[0.0, 0.5],
+[0.5, 0.5],
+[1.0, 0.5],
+[0.0, 1.0],
+[0.5, 1.0],
+[1.0, 1.0],
+]}
+/>
+<Host style={{ position: 'absolute', top: 0, right: 0, left: 0, bottom: 0 }}>
+<Text
+size={32}
+modifiers={[
+padding({
+all: 16,
+}),
+glassEffect({
+glass: {
+variant: 'clear',
+},
+}),
+]}>
+Glass effect text
+</Text>
+</Host>
+</View>
+);
 }
 
 Show More
 iOS Settings app example
 Combining the Expo UI components and modifiers, you can build a UI like iOS Settings app.
 
-
 Code
-
 
 Preview
 
@@ -155,44 +144,44 @@ SwiftUI Form example to build iOS Settings app
 
 Copy
 
-
 import {
-  Button,
-  Form,
-  Host,
-  HStack,
-  Image,
-  Section,
-  Spacer,
-  Switch,
-  Text,
+Button,
+Form,
+Host,
+HStack,
+Image,
+Section,
+Spacer,
+Switch,
+Text,
 } from '@expo/ui/swift-ui';
 import { background, clipShape, frame } from '@expo/ui/swift-ui/modifiers';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 
 export default function SettingsView() {
-  const [isAirplaneMode, setIsAirplaneMode] = useState(true);
+const [isAirplaneMode, setIsAirplaneMode] = useState(true);
 
-  return (
-    <Host style={{ flex: 1 }}>
-      <Form>
-        <Section>
-          <HStack spacing={8}>
-            <Image
-              systemName="airplane"
-              color="white"
-              size={18}
-              modifiers={[
-                frame({ width: 28, height: 28 }),
-                background('#ffa500'),
-                clipShape('roundedRectangle'),
-              ]}
-            />
-            <Text>Airplane Mode</Text>
-            <Spacer />
-            <Switch value={isAirplaneMode} onValueChange={setIsAirplaneMode} />
-          </HStack>
+return (
+<Host style={{ flex: 1 }}>
+
+<Form>
+<Section>
+<HStack spacing={8}>
+<Image
+systemName="airplane"
+color="white"
+size={18}
+modifiers={[
+frame({ width: 28, height: 28 }),
+background('#ffa500'),
+clipShape('roundedRectangle'),
+]}
+/>
+<Text>Airplane Mode</Text>
+<Spacer />
+<Switch value={isAirplaneMode} onValueChange={setIsAirplaneMode} />
+</HStack>
 
           <Link href="/wifi" asChild>
             <Button>
@@ -216,7 +205,8 @@ export default function SettingsView() {
         </Section>
       </Form>
     </Host>
-  );
+
+);
 }
 
 Show More
@@ -244,10 +234,7 @@ We recommend keeping SwiftUI layouts self-contained. Interop is possible, but it
 I'm a SwiftUI developer. Why should I learn Expo UI?
 Because React's promise of "learn once, write anywhere", it now extends to SwiftUI and Jetpack Compose. With Expo UI, you can apply your SwiftUI knowledge to build apps that run in the React Native ecosystem, extend to the Web through DOM components, and even integrate 2D and 3D rendering. The system is flexible enough that different parts of your app can use different approaches — giving you seamless integration at the component level.
 
-
 SwiftUI
-
-
 
 SwiftUI components for building native iOS interfaces with @expo/ui.
 
@@ -275,7 +262,6 @@ BottomSheet
 
 iOS
 
-
 Code
 
 import { BottomSheet, Host, Text } from '@expo/ui/swift-ui';
@@ -284,9 +270,9 @@ import { useWindowDimensions } from 'react-native';
 const { width } = useWindowDimensions();
 
 <Host style={{ position: 'absolute', width }}>
-  <BottomSheet isOpened={isOpened} onIsOpenedChange={e => setIsOpened(e)}>
-    <Text>Hello, world!</Text>
-  </BottomSheet>
+<BottomSheet isOpened={isOpened} onIsOpenedChange={e => setIsOpened(e)}>
+<Text>Hello, world!</Text>
+</BottomSheet>
 </Host>
 See also: official SwiftUI documentation
 
@@ -295,19 +281,18 @@ The borderless variant is not available on Apple TV.
 
 iOS
 
-
 Code
 
 import { Button, Host } from '@expo/ui/swift-ui';
 
 <Host style={{ flex: 1 }}>
-  <Button
-    variant="default"
-    onPress={() => {
-      setEditingProfile(true);
-    }}>
-    Edit profile
-  </Button>
+<Button
+variant="default"
+onPress={() => {
+setEditingProfile(true);
+}}>
+Edit profile
+</Button>
 </Host>
 See also: official SwiftUI documentation
 
@@ -315,13 +300,12 @@ CircularProgress
 
 iOS
 
-
 Code
 
 import { CircularProgress, Host } from '@expo/ui/swift-ui';
 
 <Host style={{ width: 300 }}>
-  <CircularProgress progress={0.5} color="blue" />
+<CircularProgress progress={0.5} color="blue" />
 </Host>
 See also: official SwiftUI documentation
 
@@ -330,13 +314,12 @@ This component is not available on Apple TV.
 
 iOS
 
-
 Code
 
 import { ColorPicker, Host } from '@expo/ui/swift-ui';
 
 <Host style={{ width: 400, height: 200 }}>
-  <ColorPicker
+<ColorPicker
     label="Select a color"
     selection={color}
     onValueChanged={setColor}
@@ -347,42 +330,40 @@ See also: official SwiftUI documentation
 ContextMenu
 Note: Also known as DropdownMenu.
 
-
 iOS
-
 
 Code
 
 import { ContextMenu, Host } from '@expo/ui/swift-ui';
 
 <Host style={{ width: 150, height: 50 }}>
-  <ContextMenu>
-    <ContextMenu.Items>
-      <Button
-        systemImage="person.crop.circle.badge.xmark"
-        onPress={() => console.log('Pressed1')}>
-        Hello
-      </Button>
-      <Button
-        variant="bordered"
-        systemImage="heart"
-        onPress={() => console.log('Pressed2')}>
-        Love it
-      </Button>
-      <Picker
-        label="Doggos"
-        options={['very', 'veery', 'veeery', 'much']}
-        variant="menu"
-        selectedIndex={selectedIndex}
-        onOptionSelected={({ nativeEvent: { index } }) => setSelectedIndex(index)}
-      />
-    </ContextMenu.Items>
-    <ContextMenu.Trigger>
-      <Button variant="bordered">
-        Show Menu
-      </Button>
-    </ContextMenu.Trigger>
-  </ContextMenu>
+<ContextMenu>
+<ContextMenu.Items>
+<Button
+systemImage="person.crop.circle.badge.xmark"
+onPress={() => console.log('Pressed1')}>
+Hello
+</Button>
+<Button
+variant="bordered"
+systemImage="heart"
+onPress={() => console.log('Pressed2')}>
+Love it
+</Button>
+<Picker
+label="Doggos"
+options={['very', 'veery', 'veeery', 'much']}
+variant="menu"
+selectedIndex={selectedIndex}
+onOptionSelected={({ nativeEvent: { index } }) => setSelectedIndex(index)}
+/>
+</ContextMenu.Items>
+<ContextMenu.Trigger>
+<Button variant="bordered">
+Show Menu
+</Button>
+</ContextMenu.Trigger>
+</ContextMenu>
 </Host>
 
 Show More
@@ -392,7 +373,6 @@ DateTimePicker (date)
 This component is not available on Apple TV.
 
 iOS
-
 
 Code
 
@@ -415,7 +395,6 @@ This component is not available on Apple TV.
 
 iOS
 
-
 Code
 
 import { DateTimePicker, Host } from '@expo/ui/swift-ui';
@@ -436,7 +415,6 @@ Gauge
 This component is not available on Apple TV.
 
 iOS
-
 
 Code
 
@@ -467,54 +445,51 @@ Wrapping Button in Host
 
 Copy
 
-
 import { Button, Host } from '@expo/ui/swift-ui';
 
 function Example() {
-  return (
-    <Host matchContents>
-      <Button
-        onPress={() => {
-          console.log('Pressed');
-        }}>
-        Click
-      </Button>
-    </Host>
-  );
+return (
+<Host matchContents>
+<Button
+onPress={() => {
+console.log('Pressed');
+}}>
+Click
+</Button>
+</Host>
+);
 }
 Host with flexbox and VStack
 
 Copy
 
-
 import { Button, Host, VStack, Text } from '@expo/ui/swift-ui';
 
 function Example() {
-  return (
-    <Host style={{ flex: 1 }}>
-      <VStack spacing={8}>
-        <Text>Hello, world!</Text>
-        <Button
-          onPress={() => {
-            console.log('Pressed');
-          }}>
-          Click
-        </Button>
-      </VStack>
-    </Host>
-  );
+return (
+<Host style={{ flex: 1 }}>
+<VStack spacing={8}>
+<Text>Hello, world!</Text>
+<Button
+onPress={() => {
+console.log('Pressed');
+}}>
+Click
+</Button>
+</VStack>
+</Host>
+);
 }
 LinearProgress
 
 iOS
-
 
 Code
 
 import { LinearProgress, Host } from '@expo/ui/swift-ui';
 
 <Host style={{ width: 300 }}>
-  <LinearProgress progress={0.5} color="red" />
+<LinearProgress progress={0.5} color="red" />
 </Host>
 See also: official SwiftUI documentation
 
@@ -522,26 +497,25 @@ List
 
 iOS
 
-
 Code
 
 import { Host, List } from '@expo/ui/swift-ui';
 
 <Host style={{ flex: 1 }}>
-  <List
-    scrollEnabled={false}
-    editModeEnabled={editModeEnabled}
-    onSelectionChange={(items) => alert(`indexes of selected items: ${items.join(', ')}`)}
-    moveEnabled={moveEnabled}
-    onMoveItem={(from, to) => alert(`moved item at index ${from} to index ${to}`)}
-    onDeleteItem={(item) => alert(`deleted item at index: ${item}`)}
-    listStyle='automatic'
-    deleteEnabled={deleteEnabled}
-    selectEnabled={selectEnabled}>
-    {data.map((item, index) => (
-      <LabelPrimitive key={index} title={item.text} systemImage={item.systemImage} color={color} />
-    ))}
-  </List>
+<List
+scrollEnabled={false}
+editModeEnabled={editModeEnabled}
+onSelectionChange={(items) => alert(`indexes of selected items: ${items.join(', ')}`)}
+moveEnabled={moveEnabled}
+onMoveItem={(from, to) => alert(`moved item at index ${from} to index ${to}`)}
+onDeleteItem={(item) => alert(`deleted item at index: ${item}`)}
+listStyle='automatic'
+deleteEnabled={deleteEnabled}
+selectEnabled={selectEnabled}>
+{data.map((item, index) => (
+<LabelPrimitive key={index} title={item.text} systemImage={item.systemImage} color={color} />
+))}
+</List>
 </Host>
 
 Show More
@@ -550,7 +524,6 @@ See also: official SwiftUI documentation
 Picker (segmented)
 
 iOS
-
 
 Code
 
@@ -573,20 +546,19 @@ The wheel variant is not available on Apple TV.
 
 iOS
 
-
 Code
 
 import { Host, Picker } from '@expo/ui/swift-ui';
 
 <Host style={{ height: 100 }}>
-  <Picker
-    options={['$', '$$', '$$$', '$$$$']}
-    selectedIndex={selectedIndex}
-    onOptionSelected={({ nativeEvent: { index } }) => {
-      setSelectedIndex(index);
-    }}
-    variant="wheel"
-  />
+<Picker
+options={['$', '$$', '$$$', '$$$$']}
+selectedIndex={selectedIndex}
+onOptionSelected={({ nativeEvent: { index } }) => {
+setSelectedIndex(index);
+}}
+variant="wheel"
+/>
 </Host>
 See also: official SwiftUI documentation
 
@@ -595,27 +567,24 @@ This component is not available on Apple TV.
 
 iOS
 
-
 Code
 
 import { Host, Slider } from '@expo/ui/swift-ui';
 
 <Host style={{ minHeight: 60 }}>
-  <Slider
-    value={value}
-    onValueChange={(value) => {
-      setValue(value);
-    }}
-  />
+<Slider
+value={value}
+onValueChange={(value) => {
+setValue(value);
+}}
+/>
 </Host>
 See also: official SwiftUI documentation
 
 Switch (toggle)
 Note: Also known as Toggle.
 
-
 iOS
-
 
 Code
 
@@ -638,7 +607,6 @@ Switch (checkbox)
 
 iOS
 
-
 Code
 
 import { Host, Switch } from '@expo/ui/swift-ui';
@@ -659,7 +627,6 @@ TextField
 
 iOS
 
-
 Code
 
 import { Host, TextField } from '@expo/ui/swift-ui';
@@ -679,8 +646,6 @@ Full documentation is not yet available. Use TypeScript types to explore the API
 import { BottomSheet } from '@expo/ui/swift-ui';
 
 Jetpack Compose
-
-
 
 Jetpack Compose components for building native Android interfaces with @expo/ui.
 
@@ -705,25 +670,23 @@ Button
 
 Android
 
-
 Code
 
 import { Button } from '@expo/ui/jetpack-compose';
 
 <Button
-  style={{ flex: 1 }}
-  variant="default"
-  onPress={() => {
-    setEditingProfile(true);
-  }}>
-  Edit profile
+style={{ flex: 1 }}
+variant="default"
+onPress={() => {
+setEditingProfile(true);
+}}>
+Edit profile
 </Button>
 See also: official Jetpack Compose documentation
 
 CircularProgress
 
 Android
-
 
 Code
 
@@ -735,40 +698,38 @@ See also: official Jetpack Compose documentation
 ContextMenu
 Note: Also known as DropdownMenu.
 
-
 Android
-
 
 Code
 
 import { ContextMenu } from '@expo/ui/jetpack-compose';
 
 <ContextMenu style={{ width: 150, height: 50 }}>
-  <ContextMenu.Items>
-    <Button
-      elementColors={{ containerColor: '#0000ff', contentColor: '#00ff00' }}
-      onPress={() => console.log('Pressed1')}>
-      Hello
-    </Button>
-    <Button
-      variant="bordered"
-      color="#ff0000"
-      onPress={() => console.log('Pressed2')}>
-      Love it
-    </Button>
-    <Picker
-      label="Doggos"
-      options={['very', 'veery', 'veeery', 'much']}
-      variant="menu"
-      selectedIndex={selectedIndex}
-      onOptionSelected={({ nativeEvent: { index } }) => setSelectedIndex(index)}
-    />
-  </ContextMenu.Items>
-  <ContextMenu.Trigger>
-    <Button variant="bordered" style={{ width: 150, height: 50 }}>
-      Show Menu
-    </Button>
-  </ContextMenu.Trigger>
+<ContextMenu.Items>
+<Button
+elementColors={{ containerColor: '#0000ff', contentColor: '#00ff00' }}
+onPress={() => console.log('Pressed1')}>
+Hello
+</Button>
+<Button
+variant="bordered"
+color="#ff0000"
+onPress={() => console.log('Pressed2')}>
+Love it
+</Button>
+<Picker
+label="Doggos"
+options={['very', 'veery', 'veeery', 'much']}
+variant="menu"
+selectedIndex={selectedIndex}
+onOptionSelected={({ nativeEvent: { index } }) => setSelectedIndex(index)}
+/>
+</ContextMenu.Items>
+<ContextMenu.Trigger>
+<Button variant="bordered" style={{ width: 150, height: 50 }}>
+Show Menu
+</Button>
+</ContextMenu.Trigger>
 </ContextMenu>
 
 Show More
@@ -778,42 +739,41 @@ Chip
 
 Android
 
-
 Code
 
 import { Chip } from '@expo/ui/jetpack-compose';
 
 // Assist chip with icon
 <Chip
-  variant="assist"
-  label="Book"
-  leadingIcon="filled.Add"
-  onPress={() => console.log('Opening flight booking...')}
+variant="assist"
+label="Book"
+leadingIcon="filled.Add"
+onPress={() => console.log('Opening flight booking...')}
 />
 
 // Filter chip with selection
 <Chip
-  variant="filter"
-  label="Images"
-  leadingIcon="filled.Star"
-  selected={selectedFilters.includes('Images')}
-  onPress={() => handleFilterToggle('Images')}
+variant="filter"
+label="Images"
+leadingIcon="filled.Star"
+selected={selectedFilters.includes('Images')}
+onPress={() => handleFilterToggle('Images')}
 />
 
 // Input chip with dismiss
 <Chip
-  variant="input"
-  label="Work"
-  leadingIcon="filled.Create"
-  onDismiss={() => handleInputDismiss('Work')}
+variant="input"
+label="Work"
+leadingIcon="filled.Create"
+onDismiss={() => handleInputDismiss('Work')}
 />
 
 // Suggestion chip
 <Chip
-  variant="suggestion"
-  label="Nearby"
-  leadingIcon="filled.LocationOn"
-  onPress={() => console.log('Searching nearby...')}
+variant="suggestion"
+label="Nearby"
+leadingIcon="filled.LocationOn"
+onPress={() => console.log('Searching nearby...')}
 />
 
 Show More
@@ -823,18 +783,17 @@ DateTimePicker (date)
 
 Android
 
-
 Code
 
 import { DateTimePicker } from '@expo/ui/jetpack-compose';
 
 <DateTimePicker
-  onDateSelected={date => {
-    setSelectedDate(date);
-  }}
-  displayedComponents='date'
-  initialDate={selectedDate.toISOString()}
-  variant='picker'
+onDateSelected={date => {
+setSelectedDate(date);
+}}
+displayedComponents='date'
+initialDate={selectedDate.toISOString()}
+variant='picker'
 />
 See also: official Jetpack Compose documentation
 
@@ -842,25 +801,23 @@ DateTimePicker (time)
 
 Android
 
-
 Code
 
 import { DateTimePicker } from '@expo/ui/jetpack-compose';
 
 <DateTimePicker
-  onDateSelected={date => {
-    setSelectedDate(date);
-  }}
-  displayedComponents='hourAndMinute'
-  initialDate={selectedDate.toISOString()}
-  variant='picker'
+onDateSelected={date => {
+setSelectedDate(date);
+}}
+displayedComponents='hourAndMinute'
+initialDate={selectedDate.toISOString()}
+variant='picker'
 />
 See also: official Jetpack Compose documentation
 
 LinearProgress
 
 Android
-
 
 Code
 
@@ -873,18 +830,17 @@ Picker (radio)
 
 Android
 
-
 Code
 
 import { Picker } from '@expo/ui/jetpack-compose';
 
 <Picker
-  options={['$', '$$', '$$$', '$$$$']}
-  selectedIndex={selectedIndex}
-  onOptionSelected={({ nativeEvent: { index } }) => {
-    setSelectedIndex(index);
-  }}
-  variant="radio"
+options={['$', '$$', '$$$', '$$$$']}
+selectedIndex={selectedIndex}
+onOptionSelected={({ nativeEvent: { index } }) => {
+setSelectedIndex(index);
+}}
+variant="radio"
 />
 See also: official Jetpack Compose documentation
 
@@ -892,18 +848,17 @@ Picker (segmented)
 
 Android
 
-
 Code
 
 import { Picker } from '@expo/ui/jetpack-compose';
 
 <Picker
-  options={['$', '$$', '$$$', '$$$$']}
-  selectedIndex={selectedIndex}
-  onOptionSelected={({ nativeEvent: { index } }) => {
-    setSelectedIndex(index);
-  }}
-  variant="segmented"
+options={['$', '$$', '$$$', '$$$$']}
+selectedIndex={selectedIndex}
+onOptionSelected={({ nativeEvent: { index } }) => {
+setSelectedIndex(index);
+}}
+variant="segmented"
 />
 See also: official Jetpack Compose documentation
 
@@ -911,39 +866,36 @@ Slider
 
 Android
 
-
 Code
 
 import { Slider } from '@expo/ui/jetpack-compose';
 
 <Slider
-  style={{ minHeight: 60 }}
-  value={value}
-  onValueChange={(value) => {
-    setValue(value);
-  }}
+style={{ minHeight: 60 }}
+value={value}
+onValueChange={(value) => {
+setValue(value);
+}}
 />
 See also: official Jetpack Compose documentation
 
 Switch (toggle)
 Note: also known as Toggle.
 
-
 Android
-
 
 Code
 
 import { Switch } from '@expo/ui/jetpack-compose';
 
 <Switch
-  value={checked}
-  onValueChange={checked => {
-    setChecked(checked);
-  }}
-  color="#ff0000"
-  label="Play music"
-  variant="switch"
+value={checked}
+onValueChange={checked => {
+setChecked(checked);
+}}
+color="#ff0000"
+label="Play music"
+variant="switch"
 />
 See also: official Jetpack Compose documentation
 
@@ -951,26 +903,24 @@ Switch (checkbox)
 
 Android
 
-
 Code
 
 import { Switch } from '@expo/ui/jetpack-compose';
 
 <Switch
-  value={checked}
-  onValueChange={checked => {
-    setChecked(checked);
-  }}
-  label="Play music"
-  color="#ff0000"
-  variant="checkbox"
+value={checked}
+onValueChange={checked => {
+setChecked(checked);
+}}
+label="Play music"
+color="#ff0000"
+variant="checkbox"
 />
 See also: official Jetpack Compose documentation
 
 TextInput
 
 Android
-
 
 Code
 

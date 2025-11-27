@@ -26,9 +26,7 @@
 	<div class="flex items-center justify-between">
 		<div>
 			<h1 class="text-3xl font-bold">My Decks</h1>
-			<p class="text-muted-foreground mt-1">
-				Organize your learning materials into decks
-			</p>
+			<p class="text-muted-foreground mt-1">Organize your learning materials into decks</p>
 		</div>
 		<Button onclick={() => (showCreateModal = true)}>
 			<span class="mr-2">+</span>
@@ -40,7 +38,9 @@
 	{#if deckStore.loading && deckStore.decks.length === 0}
 		<div class="flex justify-center py-12">
 			<div class="text-center">
-				<div class="inline-block animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+				<div
+					class="inline-block animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"
+				></div>
 				<p class="mt-4 text-muted-foreground">Loading decks...</p>
 			</div>
 		</div>
@@ -61,9 +61,7 @@
 			<p class="text-muted-foreground mb-6">
 				Create your first deck to start organizing your learning materials
 			</p>
-			<Button onclick={() => (showCreateModal = true)}>
-				Create Your First Deck
-			</Button>
+			<Button onclick={() => (showCreateModal = true)}>Create Your First Deck</Button>
 		</div>
 	{:else}
 		<!-- Decks Grid -->

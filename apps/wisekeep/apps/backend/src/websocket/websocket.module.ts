@@ -3,7 +3,7 @@ import { ProgressGateway } from './progress.gateway';
 
 @Global()
 @Module({
-  providers: [ProgressGateway],
-  exports: [ProgressGateway],
+	providers: [ProgressGateway],
+	exports: [ProgressGateway],
 })
 export class WebsocketModule {}

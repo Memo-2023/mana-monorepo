@@ -13,7 +13,7 @@
 		exploreImages,
 		currentExplorePage,
 		hasMoreExplore,
-		showExploreFavoritesOnly
+		showExploreFavoritesOnly,
 	} from '$lib/stores/explore';
 	import { tags, selectedTags } from '$lib/stores/tags';
 	import { showFavoritesOnly } from '$lib/stores/images';
@@ -71,7 +71,7 @@
 					const data = await getPublicImages({
 						page: 1,
 						sortBy: $exploreSortBy,
-						favoritesOnly: $showExploreFavoritesOnly
+						favoritesOnly: $showExploreFavoritesOnly,
 					});
 					exploreImages.set(data);
 					currentExplorePage.set(1);
@@ -91,7 +91,7 @@
 			const data = await getPublicImages({
 				page: 1,
 				sortBy: target.value as any,
-				favoritesOnly: $showExploreFavoritesOnly
+				favoritesOnly: $showExploreFavoritesOnly,
 			});
 			exploreImages.set(data);
 			currentExplorePage.set(1);
@@ -111,68 +111,73 @@
 		{
 			path: '/app/gallery',
 			label: 'Galerie',
-			icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
+			icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
 		},
 		{
 			path: '/app/board',
 			label: 'Moodboards',
-			icon: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z'
+			icon: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z',
 		},
 		{
 			path: '/app/explore',
 			label: 'Entdecken',
-			icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
+			icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
 		},
 		{
 			path: '/app/generate',
 			label: 'Generieren',
-			icon: 'M13 10V3L4 14h7v7l9-11h-7z'
+			icon: 'M13 10V3L4 14h7v7l9-11h-7z',
 		},
 		{
 			path: '/app/upload',
 			label: 'Upload',
-			icon: 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12'
+			icon: 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12',
 		},
 		{
 			path: '/app/tags',
 			label: 'Tags',
-			icon: 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'
+			icon: 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z',
 		},
 		{
 			path: '/app/archive',
 			label: 'Archiv',
-			icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'
+			icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4',
 		},
 		{
 			path: '/app/subscription',
 			label: 'Abonnement',
-			icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-		}
+			icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+		},
 	];
 </script>
 
 <!-- Sidebar Toggle Button (collapsed) -->
 <button
 	onclick={() => setSidebarCollapsed(false)}
-	class="fixed bottom-8 left-4 z-50 hidden h-14 w-14 items-center justify-center rounded-full bg-blue-600/90 text-white shadow-2xl backdrop-blur-xl transition-all duration-300 hover:bg-blue-700/90 dark:bg-blue-500/90 dark:hover:bg-blue-600/90 lg:flex"
+	class="fixed bottom-8 left-4 z-50 hidden h-14 w-14 items-center justify-center rounded-full bg-blue-600/90 text-white shadow-2xl backdrop-blur-xl transition-all duration-300 hover:bg-blue-700/90 lg:flex dark:bg-blue-500/90 dark:hover:bg-blue-600/90"
 	class:-translate-x-[calc(100%+2rem)]={!$isSidebarCollapsed}
 	aria-label="Sidebar öffnen"
 >
 	<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-		<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+		<path
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			stroke-width="2"
+			d="M4 6h16M4 12h16M4 18h16"
+		/>
 	</svg>
 </button>
 
 <!-- Sidebar for Desktop -->
 <aside
-	class="fixed left-4 top-4 z-40 hidden h-[calc(100vh-2rem)] w-64 flex-col overflow-hidden rounded-3xl border border-gray-200/50 bg-white/80 shadow-2xl backdrop-blur-xl transition-transform duration-300 dark:border-gray-700/50 dark:bg-gray-900/80 lg:flex"
+	class="fixed left-4 top-4 z-40 hidden h-[calc(100vh-2rem)] w-64 flex-col overflow-hidden rounded-3xl border border-gray-200/50 bg-white/80 shadow-2xl backdrop-blur-xl transition-transform duration-300 lg:flex dark:border-gray-700/50 dark:bg-gray-900/80"
 	class:-translate-x-[calc(100%+2rem)]={$isSidebarCollapsed}
 >
 	<!-- Logo & Collapse Button -->
-	<div class="flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-200/50 px-6 dark:border-gray-700/50">
-		<a href="/app/gallery" class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-			Picture
-		</a>
+	<div
+		class="flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-200/50 px-6 dark:border-gray-700/50"
+	>
+		<a href="/app/gallery" class="text-2xl font-bold text-gray-900 dark:text-gray-100"> Picture </a>
 		<button
 			onclick={() => setSidebarCollapsed(true)}
 			class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 backdrop-blur-xl transition-colors hover:bg-gray-100/80 hover:text-gray-600 dark:hover:bg-gray-800/80 dark:hover:text-gray-300"
@@ -195,7 +200,9 @@
 					: 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}"
 			>
 				<svg
-					class="h-5 w-5 {active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'}"
+					class="h-5 w-5 {active
+						? 'text-blue-600 dark:text-blue-400'
+						: 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'}"
 					fill="none"
 					viewBox="0 0 24 24"
 					stroke="currentColor"
@@ -235,13 +242,16 @@
 
 		<!-- View Mode Switcher -->
 		<div class="px-3 py-2">
-			<p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+			<p
+				class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+			>
 				Ansicht
 			</p>
 			<div class="grid grid-cols-3 gap-2">
 				<button
 					onclick={() => viewMode.set('single')}
-					class="flex items-center justify-center rounded-lg p-2 backdrop-blur-xl transition-colors {$viewMode === 'single'
+					class="flex items-center justify-center rounded-lg p-2 backdrop-blur-xl transition-colors {$viewMode ===
+					'single'
 						? 'bg-blue-100/80 text-blue-600 dark:bg-blue-950/80 dark:text-blue-400'
 						: 'text-gray-400 hover:bg-gray-100/80 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800/80 dark:hover:text-gray-300'}"
 					title="Liste"
@@ -252,24 +262,30 @@
 				</button>
 				<button
 					onclick={() => viewMode.set('grid3')}
-					class="flex items-center justify-center rounded-lg p-2 backdrop-blur-xl transition-colors {$viewMode === 'grid3'
+					class="flex items-center justify-center rounded-lg p-2 backdrop-blur-xl transition-colors {$viewMode ===
+					'grid3'
 						? 'bg-blue-100/80 text-blue-600 dark:bg-blue-950/80 dark:text-blue-400'
 						: 'text-gray-400 hover:bg-gray-100/80 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800/80 dark:hover:text-gray-300'}"
 					title="Mittel"
 				>
 					<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-						<path d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+						<path
+							d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
+						/>
 					</svg>
 				</button>
 				<button
 					onclick={() => viewMode.set('grid5')}
-					class="flex items-center justify-center rounded-lg p-2 backdrop-blur-xl transition-colors {$viewMode === 'grid5'
+					class="flex items-center justify-center rounded-lg p-2 backdrop-blur-xl transition-colors {$viewMode ===
+					'grid5'
 						? 'bg-blue-100/80 text-blue-600 dark:bg-blue-950/80 dark:text-blue-400'
 						: 'text-gray-400 hover:bg-gray-100/80 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800/80 dark:hover:text-gray-300'}"
 					title="Klein"
 				>
 					<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-						<path d="M4 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM10 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5zM16 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5zM4 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zM10 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2zM16 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2z" />
+						<path
+							d="M4 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM10 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5zM16 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5zM4 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zM10 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2zM16 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2z"
+						/>
 					</svg>
 				</button>
 			</div>
@@ -282,7 +298,9 @@
 
 				<div>
 					<div class="mb-2 flex items-center justify-between">
-						<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+						<p
+							class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+						>
 							Filter
 						</p>
 						{#if $showExploreFavoritesOnly}
@@ -297,7 +315,7 @@
 
 					<!-- Favorites Toggle -->
 					<button
-						onclick={() => showExploreFavoritesOnly.update(v => !v)}
+						onclick={() => showExploreFavoritesOnly.update((v) => !v)}
 						class="mb-3 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors {$showExploreFavoritesOnly
 							? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
 							: 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'}"
@@ -308,14 +326,21 @@
 							viewBox="0 0 24 24"
 							stroke="currentColor"
 						>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+							/>
 						</svg>
 						<span>Favoriten</span>
 					</button>
 				</div>
 
 				<div>
-					<p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+					<p
+						class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+					>
 						Suchen
 					</p>
 					<div class="relative">
@@ -343,7 +368,9 @@
 				</div>
 
 				<div>
-					<p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+					<p
+						class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+					>
 						Sortieren
 					</p>
 					<select
@@ -366,7 +393,9 @@
 
 				<div>
 					<div class="mb-2 flex items-center justify-between">
-						<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+						<p
+							class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+						>
 							Filter
 						</p>
 						{#if $selectedTags.length > 0 || $showFavoritesOnly}
@@ -384,7 +413,7 @@
 
 					<!-- Favorites Toggle -->
 					<button
-						onclick={() => showFavoritesOnly.update(v => !v)}
+						onclick={() => showFavoritesOnly.update((v) => !v)}
 						class="mb-3 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors {$showFavoritesOnly
 							? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
 							: 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'}"
@@ -395,7 +424,12 @@
 							viewBox="0 0 24 24"
 							stroke="currentColor"
 						>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+							/>
 						</svg>
 						<span>Favoriten</span>
 					</button>
@@ -403,9 +437,7 @@
 					{#if $tags.length > 0}
 						<TagPills />
 					{:else}
-						<p class="text-xs text-gray-500 dark:text-gray-400">
-							Keine Tags vorhanden
-						</p>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Keine Tags vorhanden</p>
 					{/if}
 				</div>
 
@@ -424,7 +456,6 @@
 				{/if}
 			</div>
 		{/if}
-
 	</nav>
 
 	<!-- User Section -->
@@ -452,7 +483,12 @@
 					viewBox="0 0 24 24"
 					stroke="currentColor"
 				>
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M19 9l-7 7-7-7"
+					/>
 				</svg>
 			</button>
 
@@ -496,12 +532,12 @@
 </aside>
 
 <!-- Mobile Header -->
-<header class="fixed left-0 right-0 top-0 z-30 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 lg:hidden">
+<header
+	class="fixed left-0 right-0 top-0 z-30 border-b border-gray-200 bg-white lg:hidden dark:border-gray-700 dark:bg-gray-900"
+>
 	<div class="flex h-16 items-center justify-between px-4">
 		<!-- Logo -->
-		<a href="/app/gallery" class="text-xl font-bold text-gray-900 dark:text-gray-100">
-			Picture
-		</a>
+		<a href="/app/gallery" class="text-xl font-bold text-gray-900 dark:text-gray-100"> Picture </a>
 
 		<!-- User Avatar -->
 		<button
@@ -573,7 +609,7 @@
 
 <!-- Mobile Bottom Navigation -->
 <nav
-	class="fixed bottom-0 left-0 right-0 z-30 border-t border-gray-200 bg-white pb-safe dark:border-gray-700 dark:bg-gray-900 lg:hidden"
+	class="pb-safe fixed bottom-0 left-0 right-0 z-30 border-t border-gray-200 bg-white lg:hidden dark:border-gray-700 dark:bg-gray-900"
 >
 	<div class="grid grid-cols-4 gap-1 px-2 py-2">
 		{#each navItems as item}

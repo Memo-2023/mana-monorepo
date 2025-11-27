@@ -68,9 +68,9 @@ import { useManaAuth } from '@mana/auth-mobile';
 
 function MyScreen() {
   const { user, signOut, isAuthenticated } = useManaAuth();
-  
+
   if (!isAuthenticated) return <LoginScreen />;
-  
+
   return (
     <View>
       <Text>Welcome {user?.name}!</Text>
@@ -222,6 +222,7 @@ const buttonColor = theme.colors.buttonPrimary;
 ```
 
 Legend:
+
 - ✅ = Created and ready
 - ⏳ = Needs to be copied from storyteller
 
@@ -236,6 +237,7 @@ Legend:
 ## 🤝 Support
 
 If you have questions:
+
 1. Check IMPLEMENTATION_GUIDE.md
 2. Look at the storyteller implementation as reference
 3. All types are documented with JSDoc comments

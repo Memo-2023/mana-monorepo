@@ -1,13 +1,13 @@
 ---
-name: "Stefan Müller"
-role: "Gastronom"
-company: "Restaurant Alpenblick"
-avatar: "/testimonials/stefan-mueller.jpg"
+name: 'Stefan Müller'
+role: 'Gastronom'
+company: 'Restaurant Alpenblick'
+avatar: '/testimonials/stefan-mueller.jpg'
 rating: 5
 featured: false
-category: "business"
-useCase: "Restaurant-Marketing und Menü-Design"
-language: "de"
+category: 'business'
+useCase: 'Restaurant-Marketing und Menü-Design'
+language: 'de'
 date: 2024-09-30
 verified: true
 ---

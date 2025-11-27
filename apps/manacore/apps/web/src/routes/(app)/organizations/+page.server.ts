@@ -20,10 +20,7 @@ export const load: PageServerLoad = async ({ locals: { supabase, session } }) =>
 	const orgIds = userRoles.map((ur) => ur.organization_id);
 
 	// Get organization details
-	const { data: organizations } = await supabase
-		.from('organizations')
-		.select('*')
-		.in('id', orgIds);
+	const { data: organizations } = await supabase.from('organizations').select('*').in('id', orgIds);
 
 	if (!organizations) {
 		return { organizations: [] };
@@ -43,12 +40,12 @@ export const load: PageServerLoad = async ({ locals: { supabase, session } }) =>
 			return {
 				...org,
 				team_count: teamCount || 0,
-				user_role: roleName?.name || 'member'
+				user_role: roleName?.name || 'member',
 			};
 		})
 	);
 
 	return {
-		organizations: orgsWithStats
+		organizations: orgsWithStats,
 	};
 };

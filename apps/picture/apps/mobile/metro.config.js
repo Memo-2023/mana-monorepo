@@ -15,53 +15,53 @@ config.watchFolders = [workspaceRoot];
 
 // Let Metro know where to resolve packages and in what order
 config.resolver.nodeModulesPaths = [
-  path.resolve(projectRoot, 'node_modules'),
-  path.resolve(workspaceRoot, 'node_modules'),
+	path.resolve(projectRoot, 'node_modules'),
+	path.resolve(workspaceRoot, 'node_modules'),
 ];
 
 // Fix for Supabase web compatibility
 config.resolver = {
-  ...config.resolver,
-  nodeModulesPaths: [
-    path.resolve(projectRoot, 'node_modules'),
-    path.resolve(workspaceRoot, 'node_modules'),
-  ],
-  unstable_enablePackageExports: true,
-  unstable_conditionNames: ['browser', 'require', 'import'],
-  sourceExts: [...config.resolver.sourceExts, 'cjs', 'mjs'],
-  resolveRequest: (context, moduleName, platform) => {
-    // Handle @supabase/node-fetch for web platform
-    if (platform === 'web' && moduleName === '@supabase/node-fetch') {
-      // Return an empty module for web
-      return {
-        filePath: __dirname + '/utils/polyfills.web.js',
-        type: 'sourceFile',
-      };
-    }
-    
-    // Default resolution
-    return context.resolveRequest(context, moduleName, platform);
-  },
+	...config.resolver,
+	nodeModulesPaths: [
+		path.resolve(projectRoot, 'node_modules'),
+		path.resolve(workspaceRoot, 'node_modules'),
+	],
+	unstable_enablePackageExports: true,
+	unstable_conditionNames: ['browser', 'require', 'import'],
+	sourceExts: [...config.resolver.sourceExts, 'cjs', 'mjs'],
+	resolveRequest: (context, moduleName, platform) => {
+		// Handle @supabase/node-fetch for web platform
+		if (platform === 'web' && moduleName === '@supabase/node-fetch') {
+			// Return an empty module for web
+			return {
+				filePath: __dirname + '/utils/polyfills.web.js',
+				type: 'sourceFile',
+			};
+		}
+
+		// Default resolution
+		return context.resolveRequest(context, moduleName, platform);
+	},
 };
 
 // Web-specific transformer options
 config.transformer = {
-  ...config.transformer,
-  minifierPath: require.resolve('metro-minify-terser'),
-  minifierConfig: {
-    keep_fnames: true,
-    mangle: {
-      keep_fnames: true,
-    },
-  },
-  getTransformOptions: async () => ({
-    transform: {
-      experimentalImportSupport: false,
-      inlineRequires: true,
-    },
-  }),
-  // Ensure we transform files from the shared package
-  unstable_allowRequireContext: true,
+	...config.transformer,
+	minifierPath: require.resolve('metro-minify-terser'),
+	minifierConfig: {
+		keep_fnames: true,
+		mangle: {
+			keep_fnames: true,
+		},
+	},
+	getTransformOptions: async () => ({
+		transform: {
+			experimentalImportSupport: false,
+			inlineRequires: true,
+		},
+	}),
+	// Ensure we transform files from the shared package
+	unstable_allowRequireContext: true,
 };
 
 module.exports = withNativeWind(config, { input: './global.css' });

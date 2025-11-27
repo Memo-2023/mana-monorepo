@@ -1,33 +1,25 @@
 ---
 export interface Props {
-  variant?: 'text' | 'title' | 'card' | 'avatar' | 'button';
-  className?: string;
-  width?: string;
-  height?: string;
+	variant?: 'text' | 'title' | 'card' | 'avatar' | 'button';
+	className?: string;
+	width?: string;
+	height?: string;
 }
 
-const { 
-  variant = 'text',
-  className = '',
-  width,
-  height
-} = Astro.props;
+const { variant = 'text', className = '', width, height } = Astro.props;
 
 const variantStyles = {
-  text: 'h-4 rounded',
-  title: 'h-8 rounded',
-  card: 'h-48 rounded-lg',
-  avatar: 'w-12 h-12 rounded-full',
-  button: 'h-12 w-32 rounded-md'
+	text: 'h-4 rounded',
+	title: 'h-8 rounded',
+	card: 'h-48 rounded-lg',
+	avatar: 'w-12 h-12 rounded-full',
+	button: 'h-12 w-32 rounded-md',
 };
 
 const style = {
-  width: width || (variant === 'text' ? '100%' : undefined),
-  height: height || undefined
+	width: width || (variant === 'text' ? '100%' : undefined),
+	height: height || undefined,
 };
 ---
 
-<div 
-  class={`bg-bg-card animate-pulse ${variantStyles[variant]} ${className}`}
-  style={style}
-></div>
+<div class={`bg-bg-card animate-pulse ${variantStyles[variant]} ${className}`} style={style}></div>

@@ -12,5 +12,5 @@ export type {
 	KeyboardShortcut,
 	PillNavItem,
 	PillDropdownItem,
-	PillNavigationProps
+	PillNavigationProps,
 } from './types';

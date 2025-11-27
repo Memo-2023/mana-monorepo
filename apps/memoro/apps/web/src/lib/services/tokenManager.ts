@@ -12,7 +12,7 @@ export enum TokenState {
 	IDLE = 'idle',
 	REFRESHING = 'refreshing',
 	EXPIRED = 'expired',
-	VALID = 'valid'
+	VALID = 'valid',
 }
 
 // Request queue item
@@ -57,7 +57,7 @@ class TokenManager {
 	private readonly STORAGE_KEYS = {
 		APP_TOKEN: 'memoro_app_token',
 		REFRESH_TOKEN: 'memoro_refresh_token',
-		USER_EMAIL: 'memoro_user_email'
+		USER_EMAIL: 'memoro_user_email',
 	};
 
 	private static instance: TokenManager;
@@ -248,7 +248,7 @@ class TokenManager {
 				init,
 				resolve,
 				reject,
-				timestamp: Date.now()
+				timestamp: Date.now(),
 			};
 
 			this.requestQueue.push(queueItem);
@@ -392,7 +392,7 @@ class TokenManager {
 		console.debug('TokenManager: All retry attempts failed');
 		return {
 			success: false,
-			error: lastError instanceof Error ? lastError.message : 'All retry attempts failed'
+			error: lastError instanceof Error ? lastError.message : 'All retry attempts failed',
 		};
 	}
 
@@ -432,7 +432,7 @@ class TokenManager {
 
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown refresh error'
+				error: error instanceof Error ? error.message : 'Unknown refresh error',
 			};
 		}
 	}
@@ -452,7 +452,7 @@ class TokenManager {
 			'Failed to fetch',
 			'NetworkError',
 			'TypeError',
-			'ERR_NETWORK'
+			'ERR_NETWORK',
 		];
 
 		const authErrors = [
@@ -463,7 +463,7 @@ class TokenManager {
 			'Invalid token',
 			'Token expired',
 			'jwt expired',
-			'jwt malformed'
+			'jwt malformed',
 		];
 
 		const errorString = `${error.message} ${error.name}`.toLowerCase();
@@ -472,9 +472,7 @@ class TokenManager {
 			errorString.includes(keyword.toLowerCase())
 		);
 
-		const isAuthError = authErrors.some((keyword) =>
-			errorString.includes(keyword.toLowerCase())
-		);
+		const isAuthError = authErrors.some((keyword) => errorString.includes(keyword.toLowerCase()));
 
 		// Network errors are recoverable unless they also contain auth errors
 		return isNetworkError && !isAuthError;
@@ -553,7 +551,7 @@ class TokenManager {
 
 		return fetch(input, {
 			...init,
-			headers
+			headers,
 		});
 	}
 
@@ -597,7 +595,7 @@ class TokenManager {
 		return {
 			size: this.requestQueue.length,
 			state: this.state,
-			refreshAttempts: this.refreshAttempts
+			refreshAttempts: this.refreshAttempts,
 		};
 	}
 }

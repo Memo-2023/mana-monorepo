@@ -24,11 +24,11 @@ remark-modified-time.mjs
 import { execSync } from "child_process";
 
 export function remarkModifiedTime() {
-  return function (tree, file) {
-    const filepath = file.history[0];
-    const result = execSync(`git log -1 --pretty="format:%cI" "${filepath}"`);
-    file.data.astro.frontmatter.lastModified = result.toString();
-  };
+return function (tree, file) {
+const filepath = file.history[0];
+const result = execSync(`git log -1 --pretty="format:%cI" "${filepath}"`);
+file.data.astro.frontmatter.lastModified = result.toString();
+};
 }
 
 Using the file system instead of Git
@@ -39,9 +39,9 @@ import { defineConfig } from 'astro/config';
 import { remarkModifiedTime } from './remark-modified-time.mjs';
 
 export default defineConfig({
-  markdown: {
-    remarkPlugins: [remarkModifiedTime],
-  },
+markdown: {
+remarkPlugins: [remarkModifiedTime],
+},
 });
 
 Now all Markdown documents will have a lastModified property in their frontmatter.
@@ -50,8 +50,8 @@ Display Last Modified Time
 
 If your content is stored in a content collection, access the remarkPluginFrontmatter from the render(entry) function. Then render lastModified in your template wherever you would like it to appear.
 
-src/pages/posts/[slug].astro
----
+## src/pages/posts/[slug].astro
+
 import { getCollection, render } from 'astro:content';
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -59,19 +59,20 @@ import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
 export async function getStaticPaths() {
-  const blog = await getCollection('blog');
-  return blog.map(entry => ({
-    params: { slug: entry.id },
-    props: { entry },
-  }));
+const blog = await getCollection('blog');
+return blog.map(entry => ({
+params: { slug: entry.id },
+props: { entry },
+}));
 }
 
 const { entry } = Astro.props;
 const { Content, remarkPluginFrontmatter } = await render(entry);
 
 const lastModified = dayjs(remarkPluginFrontmatter.lastModified)
-  .utc()
-  .format("HH:mm:ss DD MMMM YYYY UTC");
+.utc()
+.format("HH:mm:ss DD MMMM YYYY UTC");
+
 ---
 
 <html>
@@ -85,16 +86,17 @@ const lastModified = dayjs(remarkPluginFrontmatter.lastModified)
 
 If you’re using a Markdown layout, use the lastModified frontmatter property from Astro.props in your layout template.
 
-src/layouts/BlogLayout.astro
----
+## src/layouts/BlogLayout.astro
+
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
 
 const lastModified = dayjs()
-  .utc(Astro.props.frontmatter.lastModified)
-  .format("HH:mm:ss DD MMMM YYYY UTC");
+.utc(Astro.props.frontmatter.lastModified)
+.format("HH:mm:ss DD MMMM YYYY UTC");
+
 ---
 
 <html>

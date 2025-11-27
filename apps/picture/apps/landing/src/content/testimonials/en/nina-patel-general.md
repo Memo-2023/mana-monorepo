@@ -1,13 +1,13 @@
 ---
-name: "Nina Patel"
-role: "Hobbyist & Art Enthusiast"
-company: ""
-avatar: "/testimonials/nina-patel.jpg"
+name: 'Nina Patel'
+role: 'Hobbyist & Art Enthusiast'
+company: ''
+avatar: '/testimonials/nina-patel.jpg'
 rating: 5
 featured: false
-category: "general"
-useCase: "Personal creative exploration and digital art"
-language: "en"
+category: 'general'
+useCase: 'Personal creative exploration and digital art'
+language: 'en'
 date: 2024-09-18
 verified: true
 ---

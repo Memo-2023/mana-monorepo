@@ -3,19 +3,15 @@ const CACHE_NAME = 'uload-v1';
 const OFFLINE_URL = '/offline';
 
 // Assets die gecacht werden sollen
-const CACHE_ASSETS = [
-	'/',
-	'/my',
-	'/offline',
-	'/manifest.json'
-];
+const CACHE_ASSETS = ['/', '/my', '/offline', '/manifest.json'];
 
 // Install Event - Cache initialisieren
 self.addEventListener('install', (event) => {
 	console.log('Service Worker: Installing');
-	
+
 	event.waitUntil(
-		caches.open(CACHE_NAME)
+		caches
+			.open(CACHE_NAME)
 			.then((cache) => {
 				console.log('Service Worker: Caching assets');
 				return cache.addAll(CACHE_ASSETS);
@@ -27,18 +23,21 @@ self.addEventListener('install', (event) => {
 // Activate Event - Alte Caches löschen
 self.addEventListener('activate', (event) => {
 	console.log('Service Worker: Activating');
-	
+
 	event.waitUntil(
-		caches.keys().then((cacheNames) => {
-			return Promise.all(
-				cacheNames.map((cacheName) => {
-					if (cacheName !== CACHE_NAME) {
-						console.log('Service Worker: Deleting old cache', cacheName);
-						return caches.delete(cacheName);
-					}
-				})
-			);
-		}).then(() => self.clients.claim())
+		caches
+			.keys()
+			.then((cacheNames) => {
+				return Promise.all(
+					cacheNames.map((cacheName) => {
+						if (cacheName !== CACHE_NAME) {
+							console.log('Service Worker: Deleting old cache', cacheName);
+							return caches.delete(cacheName);
+						}
+					})
+				);
+			})
+			.then(() => self.clients.claim())
 	);
 });
 
@@ -74,13 +73,13 @@ async function handleNavigate(request) {
 	try {
 		// Versuche Network Request
 		const response = await fetch(request);
-		
+
 		// Bei Erfolg: Response cachen und zurückgeben
 		if (response.status === 200) {
 			const cache = await caches.open(CACHE_NAME);
 			cache.put(request, response.clone());
 		}
-		
+
 		return response;
 	} catch (error) {
 		// Bei Netzwerk-Fehler: Cache prüfen
@@ -88,7 +87,7 @@ async function handleNavigate(request) {
 		if (cachedResponse) {
 			return cachedResponse;
 		}
-		
+
 		// Offline-Seite anzeigen
 		return caches.match(OFFLINE_URL);
 	}
@@ -99,14 +98,14 @@ async function handleApiRequest(request) {
 	try {
 		// API Requests immer vom Netzwerk
 		const response = await fetch(request);
-		
+
 		// Bei Erfolg: kurzzeitig cachen (für Read-only Endpoints)
 		if (response.status === 200 && request.method === 'GET') {
 			const cache = await caches.open(CACHE_NAME);
 			// Clone erstellen da Response nur einmal gelesen werden kann
 			cache.put(request, response.clone());
 		}
-		
+
 		return response;
 	} catch (error) {
 		// Bei Offline: gecachte Response zurückgeben (falls vorhanden)
@@ -114,16 +113,13 @@ async function handleApiRequest(request) {
 		if (cachedResponse) {
 			return cachedResponse;
 		}
-		
+
 		// Offline-Antwort für API
-		return new Response(
-			JSON.stringify({ error: 'Offline - Please try again when online' }),
-			{
-				status: 503,
-				statusText: 'Service Unavailable',
-				headers: { 'Content-Type': 'application/json' }
-			}
-		);
+		return new Response(JSON.stringify({ error: 'Offline - Please try again when online' }), {
+			status: 503,
+			statusText: 'Service Unavailable',
+			headers: { 'Content-Type': 'application/json' },
+		});
 	}
 }
 
@@ -134,16 +130,16 @@ async function handleStaticAsset(request) {
 	if (cachedResponse) {
 		return cachedResponse;
 	}
-	
+
 	try {
 		const response = await fetch(request);
-		
+
 		// Bei Erfolg: Cache aktualisieren
 		if (response.status === 200) {
 			const cache = await caches.open(CACHE_NAME);
 			cache.put(request, response.clone());
 		}
-		
+
 		return response;
 	} catch (error) {
 		// Bei Offline und nicht im Cache: Default-Response
@@ -164,8 +160,18 @@ async function handleDefault(request) {
 
 // Prüfen ob URL ein statisches Asset ist
 function isStaticAsset(url) {
-	const staticExtensions = ['.css', '.js', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.woff', '.woff2'];
-	return staticExtensions.some(ext => url.includes(ext));
+	const staticExtensions = [
+		'.css',
+		'.js',
+		'.png',
+		'.jpg',
+		'.jpeg',
+		'.svg',
+		'.ico',
+		'.woff',
+		'.woff2',
+	];
+	return staticExtensions.some((ext) => url.includes(ext));
 }
 
 // Background Sync für Offline-Aktionen
@@ -178,7 +184,7 @@ self.addEventListener('sync', (event) => {
 async function handleBackgroundSync() {
 	// Hier können Offline-Aktionen synchronisiert werden
 	console.log('Service Worker: Background sync triggered');
-	
+
 	// Beispiel: Gespeicherte Links hochladen
 	try {
 		const pendingLinks = await getPendingLinks();
@@ -194,7 +200,7 @@ async function handleBackgroundSync() {
 self.addEventListener('push', (event) => {
 	if (event.data) {
 		const data = event.data.json();
-		
+
 		const options = {
 			body: data.body,
 			icon: '/icons/icon-192x192.png',
@@ -204,29 +210,25 @@ self.addEventListener('push', (event) => {
 			actions: [
 				{
 					action: 'view',
-					title: 'View'
+					title: 'View',
 				},
 				{
 					action: 'dismiss',
-					title: 'Dismiss'
-				}
-			]
+					title: 'Dismiss',
+				},
+			],
 		};
-		
-		event.waitUntil(
-			self.registration.showNotification(data.title || 'uLoad', options)
-		);
+
+		event.waitUntil(self.registration.showNotification(data.title || 'uLoad', options));
 	}
 });
 
 // Notification Click Event
 self.addEventListener('notificationclick', (event) => {
 	event.notification.close();
-	
+
 	if (event.action === 'view') {
-		event.waitUntil(
-			clients.openWindow('/')
-		);
+		event.waitUntil(clients.openWindow('/'));
 	}
 });
 

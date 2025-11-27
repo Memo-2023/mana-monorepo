@@ -8,20 +8,20 @@
 			name: 'Available Mana',
 			value: data.profile?.credits || 0,
 			icon: '💰',
-			showProgress: false
+			showProgress: false,
 		},
 		{
 			name: 'Organizations',
 			value: data.organizationCount || 0,
 			icon: '🏢',
-			showProgress: false
+			showProgress: false,
 		},
 		{
 			name: 'Teams',
 			value: data.teamCount || 0,
 			icon: '👥',
-			showProgress: false
-		}
+			showProgress: false,
+		},
 	]);
 </script>
 
@@ -65,10 +65,7 @@
 						</div>
 					</div>
 				</a>
-				<a
-					href="/teams"
-					class="block rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-700"
-				>
+				<a href="/teams" class="block rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-700">
 					<div class="flex items-center">
 						<span class="text-2xl">👥</span>
 						<div class="ml-3">

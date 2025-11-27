@@ -14,11 +14,7 @@
 		speakerLabels?: Record<string, string>;
 	}
 
-	let {
-		segments,
-		showTimestamps = true,
-		speakerLabels = {}
-	}: Props = $props();
+	let { segments, showTimestamps = true, speakerLabels = {} }: Props = $props();
 
 	function formatTime(ms?: number): string {
 		if (ms === undefined) return '';
@@ -37,7 +33,7 @@
 			'text-orange-400',
 			'text-red-400',
 			'text-purple-400',
-			'text-teal-400'
+			'text-teal-400',
 		];
 
 		// Generate consistent color based on speaker label
@@ -93,7 +89,8 @@
 			</svg>
 			<p class="text-theme-secondary">Kein strukturiertes Transkript verfügbar</p>
 			<p class="text-theme-muted mt-1 text-sm">
-				Dieses Transkript muss möglicherweise mit aktivierter Sprechererkennung neu verarbeitet werden.
+				Dieses Transkript muss möglicherweise mit aktivierter Sprechererkennung neu verarbeitet
+				werden.
 			</p>
 		</div>
 	{/if}

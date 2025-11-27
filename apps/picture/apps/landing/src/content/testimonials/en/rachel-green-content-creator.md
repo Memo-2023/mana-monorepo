@@ -1,13 +1,13 @@
 ---
-name: "Rachel Green"
-role: "YouTube Creator"
-company: "Tech Reviews by Rachel"
-avatar: "/testimonials/rachel-green.jpg"
+name: 'Rachel Green'
+role: 'YouTube Creator'
+company: 'Tech Reviews by Rachel'
+avatar: '/testimonials/rachel-green.jpg'
 rating: 5
 featured: true
-category: "content-creator"
-useCase: "YouTube thumbnails and social media graphics"
-language: "en"
+category: 'content-creator'
+useCase: 'YouTube thumbnails and social media graphics'
+language: 'en'
 date: 2024-09-25
 verified: true
 ---

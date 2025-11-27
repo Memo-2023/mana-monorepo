@@ -25,8 +25,8 @@ import { ErrorCode } from './error-codes';
  * ```
  */
 export type Result<T, E extends AppError = AppError> =
-  | { readonly ok: true; readonly value: T; readonly error?: never }
-  | { readonly ok: false; readonly error: E; readonly value?: never };
+	| { readonly ok: true; readonly value: T; readonly error?: never }
+	| { readonly ok: false; readonly error: E; readonly value?: never };
 
 /**
  * Async version of Result - use this as return type for async functions.
@@ -42,7 +42,7 @@ export type AsyncResult<T, E extends AppError = AppError> = Promise<Result<T, E>
  * ```
  */
 export function ok<T>(value: T): Result<T, never> {
-  return { ok: true, value };
+	return { ok: true, value };
 }
 
 /**
@@ -55,7 +55,7 @@ export function ok<T>(value: T): Result<T, never> {
  * ```
  */
 export function err<E extends AppError>(error: E): Result<never, E> {
-  return { ok: false, error };
+	return { ok: false, error };
 }
 
 /**
@@ -71,9 +71,9 @@ export function err<E extends AppError>(error: E): Result<never, E> {
  * ```
  */
 export function isOk<T, E extends AppError>(
-  result: Result<T, E>
+	result: Result<T, E>
 ): result is { ok: true; value: T } {
-  return result.ok === true;
+	return result.ok === true;
 }
 
 /**
@@ -89,9 +89,9 @@ export function isOk<T, E extends AppError>(
  * ```
  */
 export function isErr<T, E extends AppError>(
-  result: Result<T, E>
+	result: Result<T, E>
 ): result is { ok: false; error: E } {
-  return result.ok === false;
+	return result.ok === false;
 }
 
 /**
@@ -107,10 +107,10 @@ export function isErr<T, E extends AppError>(
  * ```
  */
 export function unwrap<T, E extends AppError>(result: Result<T, E>): T {
-  if (isOk(result)) {
-    return result.value;
-  }
-  throw result.error;
+	if (isOk(result)) {
+		return result.value;
+	}
+	throw result.error;
 }
 
 /**
@@ -121,11 +121,8 @@ export function unwrap<T, E extends AppError>(result: Result<T, E>): T {
  * const users = unwrapOr(result, []); // Returns [] if error
  * ```
  */
-export function unwrapOr<T, E extends AppError>(
-  result: Result<T, E>,
-  defaultValue: T
-): T {
-  return isOk(result) ? result.value : defaultValue;
+export function unwrapOr<T, E extends AppError>(result: Result<T, E>, defaultValue: T): T {
+	return isOk(result) ? result.value : defaultValue;
 }
 
 /**
@@ -139,11 +136,8 @@ export function unwrapOr<T, E extends AppError>(
  * });
  * ```
  */
-export function unwrapOrElse<T, E extends AppError>(
-  result: Result<T, E>,
-  fn: (error: E) => T
-): T {
-  return isOk(result) ? result.value : fn(result.error);
+export function unwrapOrElse<T, E extends AppError>(result: Result<T, E>, fn: (error: E) => T): T {
+	return isOk(result) ? result.value : fn(result.error);
 }
 
 /**
@@ -156,10 +150,10 @@ export function unwrapOrElse<T, E extends AppError>(
  * ```
  */
 export function map<T, U, E extends AppError>(
-  result: Result<T, E>,
-  fn: (value: T) => U
+	result: Result<T, E>,
+	fn: (value: T) => U
 ): Result<U, E> {
-  return isOk(result) ? ok(fn(result.value)) : result;
+	return isOk(result) ? ok(fn(result.value)) : result;
 }
 
 /**
@@ -173,10 +167,10 @@ export function map<T, U, E extends AppError>(
  * ```
  */
 export function mapErr<T, E extends AppError, F extends AppError>(
-  result: Result<T, E>,
-  fn: (error: E) => F
+	result: Result<T, E>,
+	fn: (error: E) => F
 ): Result<T, F> {
-  return isErr(result) ? err(fn(result.error)) : result;
+	return isErr(result) ? err(fn(result.error)) : result;
 }
 
 /**
@@ -190,10 +184,10 @@ export function mapErr<T, E extends AppError, F extends AppError>(
  * ```
  */
 export function andThen<T, U, E extends AppError>(
-  result: Result<T, E>,
-  fn: (value: T) => Result<U, E>
+	result: Result<T, E>,
+	fn: (value: T) => Result<U, E>
 ): Result<U, E> {
-  return isOk(result) ? fn(result.value) : result;
+	return isOk(result) ? fn(result.value) : result;
 }
 
 /**
@@ -208,13 +202,13 @@ export function andThen<T, U, E extends AppError>(
  * ```
  */
 export function match<T, E extends AppError, U>(
-  result: Result<T, E>,
-  handlers: {
-    ok: (value: T) => U;
-    err: (error: E) => U;
-  }
+	result: Result<T, E>,
+	handlers: {
+		ok: (value: T) => U;
+		err: (error: E) => U;
+	}
 ): U {
-  return isOk(result) ? handlers.ok(result.value) : handlers.err(result.error);
+	return isOk(result) ? handlers.ok(result.value) : handlers.err(result.error);
 }
 
 /**
@@ -226,20 +220,20 @@ export function match<T, E extends AppError, U>(
  * ```
  */
 export function tryCatch<T>(fn: () => T): Result<T, AppError> {
-  try {
-    return ok(fn());
-  } catch (error) {
-    if (error instanceof AppError) {
-      return err(error);
-    }
-    return err(
-      new AppError({
-        code: ErrorCode.UNKNOWN_ERROR,
-        message: error instanceof Error ? error.message : String(error),
-        cause: error instanceof Error ? error : undefined,
-      })
-    );
-  }
+	try {
+		return ok(fn());
+	} catch (error) {
+		if (error instanceof AppError) {
+			return err(error);
+		}
+		return err(
+			new AppError({
+				code: ErrorCode.UNKNOWN_ERROR,
+				message: error instanceof Error ? error.message : String(error),
+				cause: error instanceof Error ? error : undefined,
+			})
+		);
+	}
 }
 
 /**
@@ -250,23 +244,21 @@ export function tryCatch<T>(fn: () => T): Result<T, AppError> {
  * const result = await tryCatchAsync(() => fetch(url).then(r => r.json()));
  * ```
  */
-export async function tryCatchAsync<T>(
-  fn: () => Promise<T>
-): AsyncResult<T, AppError> {
-  try {
-    return ok(await fn());
-  } catch (error) {
-    if (error instanceof AppError) {
-      return err(error);
-    }
-    return err(
-      new AppError({
-        code: ErrorCode.UNKNOWN_ERROR,
-        message: error instanceof Error ? error.message : String(error),
-        cause: error instanceof Error ? error : undefined,
-      })
-    );
-  }
+export async function tryCatchAsync<T>(fn: () => Promise<T>): AsyncResult<T, AppError> {
+	try {
+		return ok(await fn());
+	} catch (error) {
+		if (error instanceof AppError) {
+			return err(error);
+		}
+		return err(
+			new AppError({
+				code: ErrorCode.UNKNOWN_ERROR,
+				message: error instanceof Error ? error.message : String(error),
+				cause: error instanceof Error ? error : undefined,
+			})
+		);
+	}
 }
 
 /**
@@ -285,17 +277,15 @@ export async function tryCatchAsync<T>(
  * }
  * ```
  */
-export function combine<T, E extends AppError>(
-  results: Result<T, E>[]
-): Result<T[], E> {
-  const values: T[] = [];
-  for (const result of results) {
-    if (isErr(result)) {
-      return result;
-    }
-    values.push(result.value);
-  }
-  return ok(values);
+export function combine<T, E extends AppError>(results: Result<T, E>[]): Result<T[], E> {
+	const values: T[] = [];
+	for (const result of results) {
+		if (isErr(result)) {
+			return result;
+		}
+		values.push(result.value);
+	}
+	return ok(values);
 }
 
 /**
@@ -310,10 +300,10 @@ export function combine<T, E extends AppError>(
  * ```
  */
 export function fromNullable<T, E extends AppError>(
-  value: T | null | undefined,
-  errorFn: () => E
+	value: T | null | undefined,
+	errorFn: () => E
 ): Result<T, E> {
-  return value != null ? ok(value) : err(errorFn());
+	return value != null ? ok(value) : err(errorFn());
 }
 
 /**
@@ -324,8 +314,6 @@ export function fromNullable<T, E extends AppError>(
  * const user = toNullable(result); // User | null
  * ```
  */
-export function toNullable<T, E extends AppError>(
-  result: Result<T, E>
-): T | null {
-  return isOk(result) ? result.value : null;
+export function toNullable<T, E extends AppError>(result: Result<T, E>): T | null {
+	return isOk(result) ? result.value : null;
 }

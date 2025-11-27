@@ -1,45 +1,50 @@
 {
-  "title": "Cinematic Portrait in Golden Hour",
-  "slug": "cinematic-portrait-golden-hour",
-  "imageUrl": "/gallery/cinematic-portrait.jpg",
-  "prompt": "Cinematic portrait of a woman in golden hour light, shallow depth of field, professional photography, film grain, warm tones, bokeh background",
-  "negativePrompt": "cartoon, illustration, oversaturated, artificial lighting",
-  "model": "flux-1-1-pro",
-  "settings": {
-    "seed": 42,
-    "steps": 1,
-    "guidanceScale": 3.5,
-    "width": 1024,
-    "height": 1440,
-    "aspectRatio": "5:7"
-  },
-  "category": "portrait",
-  "style": ["cinematic", "moody", "warm", "professional"],
-  "tags": ["portrait", "golden-hour", "photography", "cinematic", "woman"],
-  "creator": {
-    "name": "Picture Gallery",
-    "avatar": "/avatars/picture.jpg"
-  },
-  "featured": true,
-  "trending": true,
-  "staffPick": true,
-  "published": true,
-  "likes": 1247,
-  "downloads": 389,
-  "views": 5623,
-  "qualityScore": 5,
-  "nsfw": false,
-  "moderationStatus": "approved",
-  "relatedImages": ["professional-headshot", "sunset-portrait"],
-  "relatedTutorials": ["advanced-prompt-engineering"],
-  "relatedModels": ["flux-1-1-pro"],
-  "description": "A stunning cinematic portrait showcasing the power of FLUX 1.1 Pro for professional photography. Generated with simple prompt, perfect golden hour lighting.",
-  "seoKeywords": ["cinematic portrait", "AI portrait photography", "golden hour", "professional headshot"],
-  "createdAt": "2025-01-15T10:00:00Z",
-  "language": "en",
-  "fileSize": 2456789,
-  "dimensions": {
-    "width": 1024,
-    "height": 1440
-  }
+	"title": "Cinematic Portrait in Golden Hour",
+	"slug": "cinematic-portrait-golden-hour",
+	"imageUrl": "/gallery/cinematic-portrait.jpg",
+	"prompt": "Cinematic portrait of a woman in golden hour light, shallow depth of field, professional photography, film grain, warm tones, bokeh background",
+	"negativePrompt": "cartoon, illustration, oversaturated, artificial lighting",
+	"model": "flux-1-1-pro",
+	"settings": {
+		"seed": 42,
+		"steps": 1,
+		"guidanceScale": 3.5,
+		"width": 1024,
+		"height": 1440,
+		"aspectRatio": "5:7"
+	},
+	"category": "portrait",
+	"style": ["cinematic", "moody", "warm", "professional"],
+	"tags": ["portrait", "golden-hour", "photography", "cinematic", "woman"],
+	"creator": {
+		"name": "Picture Gallery",
+		"avatar": "/avatars/picture.jpg"
+	},
+	"featured": true,
+	"trending": true,
+	"staffPick": true,
+	"published": true,
+	"likes": 1247,
+	"downloads": 389,
+	"views": 5623,
+	"qualityScore": 5,
+	"nsfw": false,
+	"moderationStatus": "approved",
+	"relatedImages": ["professional-headshot", "sunset-portrait"],
+	"relatedTutorials": ["advanced-prompt-engineering"],
+	"relatedModels": ["flux-1-1-pro"],
+	"description": "A stunning cinematic portrait showcasing the power of FLUX 1.1 Pro for professional photography. Generated with simple prompt, perfect golden hour lighting.",
+	"seoKeywords": [
+		"cinematic portrait",
+		"AI portrait photography",
+		"golden hour",
+		"professional headshot"
+	],
+	"createdAt": "2025-01-15T10:00:00Z",
+	"language": "en",
+	"fileSize": 2456789,
+	"dimensions": {
+		"width": 1024,
+		"height": 1440
+	}
 }

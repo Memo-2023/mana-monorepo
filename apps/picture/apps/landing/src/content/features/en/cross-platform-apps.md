@@ -1,25 +1,25 @@
 ---
-title: "Cross-Platform Apps"
-description: "Native apps for iOS, Android, and Web. Start on your phone, finish on desktop. Your images everywhere, always in sync."
-icon: "📱"
-category: "platform"
+title: 'Cross-Platform Apps'
+description: 'Native apps for iOS, Android, and Web. Start on your phone, finish on desktop. Your images everywhere, always in sync.'
+icon: '📱'
+category: 'platform'
 featured: true
 available: true
 comingSoon: false
 benefits:
-  - "Native iOS app optimized for iPhone and iPad"
-  - "Native Android app for all devices"
-  - "Progressive Web App for desktop browsers"
-  - "Seamless sync across all platforms"
-  - "Unified experience with platform-specific optimizations"
-  - "One account, unlimited devices"
+  - 'Native iOS app optimized for iPhone and iPad'
+  - 'Native Android app for all devices'
+  - 'Progressive Web App for desktop browsers'
+  - 'Seamless sync across all platforms'
+  - 'Unified experience with platform-specific optimizations'
+  - 'One account, unlimited devices'
 useCases:
-  - "Mobile generation on-the-go, review on desktop"
-  - "Start project on iPad, finalize on phone"
-  - "Present from web, organize on mobile"
-  - "Team collaboration across different devices"
-  - "Backup workflow - access from any device if one fails"
-language: "en"
+  - 'Mobile generation on-the-go, review on desktop'
+  - 'Start project on iPad, finalize on phone'
+  - 'Present from web, organize on mobile'
+  - 'Team collaboration across different devices'
+  - 'Backup workflow - access from any device if one fails'
+language: 'en'
 ---
 
 # Create Anywhere, Access Everywhere
@@ -29,6 +29,7 @@ Picture is built for the multi-device world. Generate on your phone during commu
 ## Native iOS App
 
 ### Optimized for Apple
+
 - **iPhone** - Perfectly sized for one-handed use
 - **iPad** - Larger canvas for detailed work
 - **iOS gestures** - Native swipes, long-press menus
@@ -36,6 +37,7 @@ Picture is built for the multi-device world. Generate on your phone during commu
 - **Face ID / Touch ID** - Secure, passwordless login
 
 ### iOS-Native Features
+
 - Context menus with SF Symbols icons
 - Share sheet integration
 - Photo library access for downloads
@@ -44,6 +46,7 @@ Picture is built for the multi-device world. Generate on your phone during commu
 - Push notifications (coming soon)
 
 ### Performance
+
 - 60 FPS scrolling
 - Instant app launches
 - Optimized battery usage
@@ -52,12 +55,14 @@ Picture is built for the multi-device world. Generate on your phone during commu
 ## Native Android App
 
 ### Material Design 3
+
 - Modern Material You theming
 - Dynamic color system
 - Smooth animations
 - Gesture navigation
 
 ### Android Features
+
 - Share intent support
 - Gallery integration
 - File system access
@@ -65,6 +70,7 @@ Picture is built for the multi-device world. Generate on your phone during commu
 - Notification support
 
 ### Compatibility
+
 - Android 8.0+ supported
 - Works on phones and tablets
 - Foldable device optimized
@@ -73,6 +79,7 @@ Picture is built for the multi-device world. Generate on your phone during commu
 ## Progressive Web App
 
 ### Desktop Experience
+
 - Full-featured web application
 - No installation required
 - Works in any modern browser
@@ -80,6 +87,7 @@ Picture is built for the multi-device world. Generate on your phone during commu
 - Multiple window support
 
 ### Desktop Advantages
+
 - Larger screen real estate
 - Mouse precision for editing
 - Keyboard-first workflows
@@ -87,6 +95,7 @@ Picture is built for the multi-device world. Generate on your phone during commu
 - Drag and drop (coming soon)
 
 ### Browser Support
+
 - Chrome / Edge (recommended)
 - Safari
 - Firefox
@@ -95,7 +104,9 @@ Picture is built for the multi-device world. Generate on your phone during commu
 ## Seamless Synchronization
 
 ### Real-Time Sync
+
 Everything syncs instantly:
+
 - **Images** - All generations across devices
 - **Tags** - Organization system synced
 - **Favorites** - Starred images everywhere
@@ -103,6 +114,7 @@ Everything syncs instantly:
 - **Archive** - Hidden images consistent
 
 ### Conflict Resolution
+
 - Smart merge for simultaneous edits
 - Latest change wins by default
 - No data loss scenarios
@@ -111,14 +123,18 @@ Everything syncs instantly:
 ## Unified Experience
 
 ### Consistent Design
+
 Same beautiful interface on all platforms:
+
 - Liquid glass design system
 - Consistent navigation patterns
 - Familiar interactions
 - Platform-appropriate adaptations
 
 ### Feature Parity
+
 Almost all features available everywhere:
+
 - Image generation ✅
 - Gallery browsing ✅
 - Tag management ✅
@@ -127,7 +143,9 @@ Almost all features available everywhere:
 - Batch generation ✅
 
 ### Platform-Specific Optimizations
+
 Each platform gets unique advantages:
+
 - **iOS**: Haptics, context menus, shortcuts
 - **Android**: Material You, dynamic theming
 - **Web**: Keyboard shortcuts, multi-window
@@ -135,16 +153,19 @@ Each platform gets unique advantages:
 ## Workflow Examples
 
 ### The Commuter
+
 1. Generate ideas on iPhone during morning train
 2. Review and tag on iPad at lunch
 3. Share finalized images from laptop at office
 
 ### The Content Creator
+
 1. Batch generate on desktop for efficiency
 2. Quick edits and tagging on phone
 3. Post directly from mobile to social media
 
 ### The Designer
+
 1. Client meeting on iPad - live generation demos
 2. Back to office - organize on desktop
 3. Final touches on phone before deadline
@@ -152,12 +173,14 @@ Each platform gets unique advantages:
 ## Device Management
 
 ### Multiple Devices
+
 - Use Picture on unlimited devices
 - No device limits or restrictions
 - Sign in/out seamlessly
 - Manage active sessions
 
 ### Security
+
 - One account, secure on all devices
 - Biometric login options
 - Automatic logout on untrusted devices
@@ -166,6 +189,7 @@ Each platform gets unique advantages:
 ## Offline Support
 
 ### Smart Caching (Coming Soon)
+
 - Recently viewed images cached locally
 - Offline browsing of cache
 - Queue generations for when online
@@ -174,12 +198,14 @@ Each platform gets unique advantages:
 ## Performance Across Platforms
 
 ### Mobile Apps
+
 - Native code for maximum performance
 - Optimized image loading
 - Battery-efficient background sync
 - Minimal storage footprint
 
 ### Web App
+
 - Progressive Web App (PWA)
 - Service worker caching
 - Installable to home screen/desktop
@@ -188,6 +214,7 @@ Each platform gets unique advantages:
 ## Future Platform Support
 
 ### Roadmap
+
 - **macOS native app** - Desktop-class experience
 - **Windows native app** - Microsoft Store
 - **Linux support** - Via web app and AppImage

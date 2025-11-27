@@ -10,11 +10,7 @@
 
 <div class="sticky bottom-0 left-0 right-0 border-t border-theme bg-menu p-4 z-10">
 	<div class="flex items-center justify-end gap-3">
-		<button
-			onclick={onCancel}
-			disabled={isSaving}
-			class="btn-secondary"
-		>
+		<button onclick={onCancel} disabled={isSaving} class="btn-secondary">
 			<svg
 				class="h-4 w-4"
 				fill="none"
@@ -32,11 +28,7 @@
 			<span>Cancel</span>
 		</button>
 
-		<button
-			onclick={onSave}
-			disabled={isSaving}
-			class="btn-primary"
-		>
+		<button onclick={onSave} disabled={isSaving} class="btn-primary">
 			{#if isSaving}
 				<svg
 					class="h-4 w-4 animate-spin"

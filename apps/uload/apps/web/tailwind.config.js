@@ -15,10 +15,10 @@ export default {
 					'text-muted': 'var(--theme-text-muted)',
 					border: 'var(--theme-border)',
 					accent: 'var(--theme-accent)',
-					'accent-hover': 'var(--theme-accent-hover)'
-				}
-			}
-		}
+					'accent-hover': 'var(--theme-accent-hover)',
+				},
+			},
+		},
 	},
-	plugins: []
+	plugins: [],
 };

@@ -3,6 +3,7 @@
 ## Problem
 
 The middleware URL was previously exposed to the browser via `PUBLIC_MIDDLEWARE_URL`, which:
+
 - ❌ Exposes internal API endpoints to anyone viewing the source
 - ❌ Allows direct calls to middleware from client browsers
 - ❌ Makes it harder to control access and rate limiting
@@ -15,11 +16,13 @@ The middleware URL is now **private** and only accessible from the server:
 ### 1. Environment Variable Changed
 
 **Before:**
+
 ```bash
 PUBLIC_MIDDLEWARE_URL=https://...  # Exposed to browser
 ```
 
 **After:**
+
 ```bash
 MIDDLEWARE_URL=https://...  # Server-side only
 ```
@@ -34,6 +37,7 @@ Browser → SvelteKit API Route → Middleware
 ```
 
 **Client makes request:**
+
 ```typescript
 // Browser code
 const response = await fetch('/api/example');
@@ -41,17 +45,18 @@ const data = await response.json();
 ```
 
 **Server proxies to middleware:**
+
 ```typescript
 // src/routes/api/example/+server.ts
 import { callMiddleware } from '$lib/server/middleware';
 
 export const GET: RequestHandler = async ({ locals: { session } }) => {
-  // Middleware URL is hidden, server-side only
-  const data = await callMiddleware('/api/endpoint', {
-    headers: { Authorization: `Bearer ${session.access_token}` }
-  });
+	// Middleware URL is hidden, server-side only
+	const data = await callMiddleware('/api/endpoint', {
+		headers: { Authorization: `Bearer ${session.access_token}` },
+	});
 
-  return json(data);
+	return json(data);
 };
 ```
 
@@ -67,9 +72,9 @@ const data = await callMiddleware('/api/endpoint');
 
 // POST request
 const result = await callMiddleware('/api/endpoint', {
-  method: 'POST',
-  body: { key: 'value' },
-  headers: { Authorization: 'Bearer token' }
+	method: 'POST',
+	body: { key: 'value' },
+	headers: { Authorization: 'Bearer token' },
 });
 ```
 
@@ -85,7 +90,7 @@ const result = await callMiddleware('/api/endpoint', {
 
 If you were using `PUBLIC_MIDDLEWARE_URL` anywhere:
 
-1. ✅ Update `.env` to use `MIDDLEWARE_URL` (no PUBLIC_ prefix)
+1. ✅ Update `.env` to use `MIDDLEWARE_URL` (no PUBLIC\_ prefix)
 2. ✅ Create server-side API routes for each middleware endpoint
 3. ✅ Use `callMiddleware()` helper instead of direct fetch
 4. ✅ Update client code to call your API routes instead of middleware directly
@@ -94,33 +99,35 @@ If you were using `PUBLIC_MIDDLEWARE_URL` anywhere:
 ## Example: Password Reset
 
 **Before (exposed):**
+
 ```typescript
 // Client code - BAD!
 const response = await fetch(`${PUBLIC_MIDDLEWARE_URL}/auth/reset-password`, {
-  method: 'POST',
-  body: JSON.stringify({ email })
+	method: 'POST',
+	body: JSON.stringify({ email }),
 });
 ```
 
 **After (hidden):**
+
 ```typescript
 // Client code - calls your API
 const response = await fetch('/api/auth/reset-password', {
-  method: 'POST',
-  body: JSON.stringify({ email })
+	method: 'POST',
+	body: JSON.stringify({ email }),
 });
 
 // Server code - proxies to middleware
 // src/routes/api/auth/reset-password/+server.ts
 export const POST: RequestHandler = async ({ request }) => {
-  const { email } = await request.json();
+	const { email } = await request.json();
 
-  const result = await callMiddleware('/auth/reset-password', {
-    method: 'POST',
-    body: { email }
-  });
+	const result = await callMiddleware('/auth/reset-password', {
+		method: 'POST',
+		body: { email },
+	});
 
-  return json(result);
+	return json(result);
 };
 ```
 
@@ -134,5 +141,6 @@ export const POST: RequestHandler = async ({ request }) => {
 ## Verification
 
 After rebuilding, check browser DevTools sources:
+
 - ❌ Should NOT see middleware URL in any bundle
 - ✅ Should only see your public API routes (`/api/*`)

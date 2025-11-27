@@ -7,6 +7,7 @@ A brand new SvelteKit application has been created in the `manacore-web` folder,
 ## ✅ What's Been Implemented
 
 ### Core Infrastructure
+
 - ✅ SvelteKit 2.x with Svelte 5 (Runes)
 - ✅ TypeScript configuration
 - ✅ Tailwind CSS styling
@@ -15,6 +16,7 @@ A brand new SvelteKit application has been created in the `manacore-web` folder,
 - ✅ Environment configuration
 
 ### Authentication System
+
 - ✅ Login page (`/login`)
 - ✅ Registration page (`/register`)
 - ✅ Protected routes with automatic redirects
@@ -22,6 +24,7 @@ A brand new SvelteKit application has been created in the `manacore-web` folder,
 - ✅ SSR-safe Supabase client setup
 
 ### Dashboard
+
 - ✅ Main dashboard with stats display
 - ✅ Available mana/credits tracking
 - ✅ Organization and team counts
@@ -29,6 +32,7 @@ A brand new SvelteKit application has been created in the `manacore-web` folder,
 - ✅ Responsive design
 
 ### UI Components
+
 - ✅ Button component (primary, secondary, danger, ghost variants)
 - ✅ Card component
 - ✅ Input component with validation
@@ -113,11 +117,13 @@ The app expects the same Supabase database schema as the React Native app. Ensur
 ## 📝 Next Steps
 
 ### Immediate (Must Do)
+
 1. **Update .env file** with real Supabase credentials
 2. **Test login/registration** flow
 3. **Verify database schema** matches expected structure
 
 ### Short-Term Features to Add
+
 1. **Organizations Management**
    - List organizations page
    - Organization detail page
@@ -140,6 +146,7 @@ The app expects the same Supabase database schema as the React Native app. Ensur
    - Account settings
 
 ### Medium-Term Enhancements
+
 1. **Real-time Updates**
    - Supabase realtime subscriptions
    - Live credit balance updates
@@ -189,6 +196,7 @@ pnpm test:e2e         # Run E2E tests
 ## 🎨 Design System
 
 ### Colors
+
 - Primary: `#0055FF` (blue-600)
 - Background Light: `#FFFFFF`
 - Background Dark: `#121212`
@@ -196,13 +204,16 @@ pnpm test:e2e         # Run E2E tests
 - Text Dark: `#F9FAFB`
 
 ### Components
+
 All components support:
+
 - Dark mode (automatic via system preference)
 - TypeScript props
 - Tailwind CSS classes
 - Accessibility features
 
 ### Responsive Breakpoints
+
 - `sm`: 640px
 - `md`: 768px
 - `lg`: 1024px
@@ -231,58 +242,66 @@ All components support:
 
 ## 📚 Key Technologies
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| SvelteKit | 2.48.4 | Web framework |
-| Svelte | 5.43.3 | UI components |
-| TypeScript | 5.9.3 | Type safety |
-| Tailwind CSS | 3.4.18 | Styling |
-| Supabase | 2.79.0 | Backend/Auth |
-| Vite | 6.4.1 | Build tool |
-| Playwright | 1.56.1 | E2E testing |
-| Vitest | 3.2.4 | Unit testing |
+| Technology   | Version | Purpose       |
+| ------------ | ------- | ------------- |
+| SvelteKit    | 2.48.4  | Web framework |
+| Svelte       | 5.43.3  | UI components |
+| TypeScript   | 5.9.3   | Type safety   |
+| Tailwind CSS | 3.4.18  | Styling       |
+| Supabase     | 2.79.0  | Backend/Auth  |
+| Vite         | 6.4.1   | Build tool    |
+| Playwright   | 1.56.1  | E2E testing   |
+| Vitest       | 3.2.4   | Unit testing  |
 
 ## 🆚 Comparison: React Native vs SvelteKit
 
-| Feature | React Native (manacore_app) | SvelteKit (manacore-web) |
-|---------|----------------------------|--------------------------|
-| Platform | Mobile (iOS/Android) | Web (Browser) |
-| Routing | Expo Router | File-based routing |
-| State | useState/Context | Svelte Runes/$state |
-| Styling | NativeWind | Tailwind CSS |
-| Auth | Supabase | Supabase (same) |
-| Database | Supabase | Supabase (same) |
-| Build | Expo | Vite |
-| Deployment | App Stores | Vercel/Netlify |
+| Feature    | React Native (manacore_app) | SvelteKit (manacore-web) |
+| ---------- | --------------------------- | ------------------------ |
+| Platform   | Mobile (iOS/Android)        | Web (Browser)            |
+| Routing    | Expo Router                 | File-based routing       |
+| State      | useState/Context            | Svelte Runes/$state      |
+| Styling    | NativeWind                  | Tailwind CSS             |
+| Auth       | Supabase                    | Supabase (same)          |
+| Database   | Supabase                    | Supabase (same)          |
+| Build      | Expo                        | Vite                     |
+| Deployment | App Stores                  | Vercel/Netlify           |
 
 ## 🚨 Common Issues & Solutions
 
 ### Issue: Type errors on first run
+
 **Solution**: Run `pnpm run check` to sync types
 
 ### Issue: Port already in use
+
 **Solution**: Change port in `vite.config.ts` or kill process on port 5173
 
 ### Issue: Supabase auth not working
+
 **Solution**:
+
 1. Check `.env` variables are correct
 2. Verify Supabase project is active
 3. Check browser console for errors
 
 ### Issue: Dark mode not switching
+
 **Solution**: Check system dark mode preference, or implement manual toggle
 
 ## 📖 Documentation & Resources
 
 ### SvelteKit
+
 - [SvelteKit Docs](https://svelte.dev/docs/kit)
 - [Svelte 5 Tutorial](https://svelte.dev/tutorial/svelte/welcome)
 
 ### Supabase
+
 - [Supabase Docs](https://supabase.com/docs)
 - [Supabase Auth](https://supabase.com/docs/guides/auth)
 
 ### Tailwind CSS
+
 - [Tailwind Docs](https://tailwindcss.com/docs)
 - [Tailwind UI](https://tailwindui.com)
 
@@ -297,6 +316,7 @@ All components support:
 ## ✨ What Makes This Different
 
 Unlike a migration, this is a **clean, modern implementation** that:
+
 - ✅ Follows 2025 SvelteKit best practices
 - ✅ Uses latest Svelte 5 features (Runes)
 - ✅ Implements SSR-safe authentication
@@ -307,6 +327,7 @@ Unlike a migration, this is a **clean, modern implementation** that:
 ## 🎯 Success Criteria
 
 The project is ready for development when:
+
 - [x] Project structure created
 - [x] Dependencies installed
 - [x] TypeScript configured
@@ -320,6 +341,7 @@ The project is ready for development when:
 ## 🤝 Contributing
 
 When adding new features:
+
 1. Create components in `src/lib/components/`
 2. Add pages in appropriate route groups
 3. Use server-side data loading for security
@@ -330,6 +352,7 @@ When adding new features:
 ## 📞 Support
 
 For issues or questions:
+
 - Check SvelteKit docs
 - Review Supabase documentation
 - Check browser console for errors

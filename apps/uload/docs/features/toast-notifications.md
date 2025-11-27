@@ -94,7 +94,7 @@ export const notify = {
 	error: (message: string, details?: string) => {
 		if (details) {
 			toast.error(message, {
-				description: details
+				description: details,
 			});
 		} else {
 			toast.error(message);
@@ -121,10 +121,10 @@ export const notify = {
 		toast(message, {
 			action: {
 				label: actionLabel,
-				onClick: onAction
-			}
+				onClick: onAction,
+			},
 		});
-	}
+	},
 };
 ```
 
@@ -150,7 +150,7 @@ notify.error('Username bereits vergeben');
 notify.promise(createLink(data), {
 	loading: 'Link wird erstellt...',
 	success: 'Link erfolgreich erstellt!',
-	error: (err) => `Fehler: ${err.message}`
+	error: (err) => `Fehler: ${err.message}`,
 });
 
 // Link kopieren
@@ -186,14 +186,14 @@ notify.success('Passwort-Reset-Link wurde gesendet');
 notify.promise(updateProfile(data), {
 	loading: 'Profil wird aktualisiert...',
 	success: 'Profil erfolgreich gespeichert',
-	error: 'Fehler beim Speichern des Profils'
+	error: 'Fehler beim Speichern des Profils',
 });
 
 // Avatar hochladen
 notify.promise(uploadAvatar(file), {
 	loading: 'Bild wird hochgeladen...',
 	success: 'Profilbild aktualisiert',
-	error: 'Fehler beim Upload'
+	error: 'Fehler beim Upload',
 });
 ```
 

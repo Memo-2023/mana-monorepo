@@ -49,7 +49,11 @@
 									{org.name}
 								</h3>
 								{#if org.user_role}
-									<span class="mt-1 inline-block rounded-full px-2 py-1 text-xs font-medium {getRoleBadgeColor(org.user_role)}">
+									<span
+										class="mt-1 inline-block rounded-full px-2 py-1 text-xs font-medium {getRoleBadgeColor(
+											org.user_role
+										)}"
+									>
 										{org.user_role.replace('_', ' ')}
 									</span>
 								{/if}
@@ -68,7 +72,8 @@
 								<div class="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
 									<div
 										class="h-full rounded-full bg-primary-600 transition-all"
-										style="width: {((org.total_credits - org.used_credits) / org.total_credits) * 100}%"
+										style="width: {((org.total_credits - org.used_credits) / org.total_credits) *
+											100}%"
 									></div>
 								</div>
 							</div>

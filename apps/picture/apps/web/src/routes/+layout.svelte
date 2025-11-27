@@ -24,7 +24,7 @@
 		// Identify user in PostHog if logged in
 		if (authStore.user) {
 			analytics.identify(authStore.user.id, {
-				email: authStore.user.email
+				email: authStore.user.email,
 			});
 		}
 	});

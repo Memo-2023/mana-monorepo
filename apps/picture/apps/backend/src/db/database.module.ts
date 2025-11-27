@@ -6,23 +6,23 @@ export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
 
 @Global()
 @Module({
-  providers: [
-    {
-      provide: DATABASE_CONNECTION,
-      useFactory: (configService: ConfigService): Database => {
-        const databaseUrl = configService.get<string>('DATABASE_URL');
-        if (!databaseUrl) {
-          throw new Error('DATABASE_URL environment variable is not set');
-        }
-        return getDb(databaseUrl);
-      },
-      inject: [ConfigService],
-    },
-  ],
-  exports: [DATABASE_CONNECTION],
+	providers: [
+		{
+			provide: DATABASE_CONNECTION,
+			useFactory: (configService: ConfigService): Database => {
+				const databaseUrl = configService.get<string>('DATABASE_URL');
+				if (!databaseUrl) {
+					throw new Error('DATABASE_URL environment variable is not set');
+				}
+				return getDb(databaseUrl);
+			},
+			inject: [ConfigService],
+		},
+	],
+	exports: [DATABASE_CONNECTION],
 })
 export class DatabaseModule implements OnModuleDestroy {
-  async onModuleDestroy() {
-    await closeConnection();
-  }
+	async onModuleDestroy() {
+		await closeConnection();
+	}
 }

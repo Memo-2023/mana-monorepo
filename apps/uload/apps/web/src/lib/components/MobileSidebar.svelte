@@ -32,7 +32,7 @@
 
 	<!-- Sidebar -->
 	<aside
-		class="slide-in fixed top-0 bottom-0 left-0 z-50 w-72 bg-theme-surface shadow-2xl lg:hidden"
+		class="slide-in fixed bottom-0 left-0 top-0 z-50 w-72 bg-theme-surface shadow-2xl lg:hidden"
 	>
 		<div class="flex h-full flex-col p-4">
 			<!-- Header -->
@@ -175,7 +175,7 @@
 					<span class="font-medium">Templates</span>
 				</a>
 
-				<div class="my-2 border-t border-theme-border/30"></div>
+				<div class="border-theme-border/30 my-2 border-t"></div>
 
 				<a
 					href="/pricing"
@@ -218,7 +218,7 @@
 			</nav>
 
 			<!-- Bottom Section -->
-			<div class="mt-auto space-y-2 border-t border-theme-border/30 pt-4">
+			<div class="border-theme-border/30 mt-auto space-y-2 border-t pt-4">
 				<a
 					href="/settings"
 					onclick={handleLinkClick}

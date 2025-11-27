@@ -29,21 +29,18 @@ import { ErrorBanner } from '@/components/ui/ErrorBanner/ErrorBanner';
 
 const [error, setError] = useState<string | null>(null);
 
-{error && (
-  <ErrorBanner
-    message={error}
-    onDismiss={() => setError(null)}
-  />
-)}
+{
+	error && <ErrorBanner message={error} onDismiss={() => setError(null)} />;
+}
 ```
 
 ### Success Banner
 
 ```tsx
 <ErrorBanner
-  message="Changes saved successfully"
-  variant="success"
-  onDismiss={() => setSuccess(null)}
+	message="Changes saved successfully"
+	variant="success"
+	onDismiss={() => setSuccess(null)}
 />
 ```
 
@@ -51,77 +48,68 @@ const [error, setError] = useState<string | null>(null);
 
 ```tsx
 <ErrorBanner
-  message="Your session will expire soon"
-  variant="warning"
-  onDismiss={() => setWarning(null)}
+	message="Your session will expire soon"
+	variant="warning"
+	onDismiss={() => setWarning(null)}
 />
 ```
 
 ### Info Banner
 
 ```tsx
-<ErrorBanner
-  message="New features available"
-  variant="info"
-  onDismiss={() => setInfo(null)}
-/>
+<ErrorBanner message="New features available" variant="info" onDismiss={() => setInfo(null)} />
 ```
 
 ### Custom Colors
 
 ```tsx
 <ErrorBanner
-  message="Custom message"
-  backgroundColor="#8B5CF6" // purple
-  textColor="#FFFFFF"
-  onDismiss={() => {}}
+	message="Custom message"
+	backgroundColor="#8B5CF6" // purple
+	textColor="#FFFFFF"
+	onDismiss={() => {}}
 />
 ```
 
 ### Custom Icon
 
 ```tsx
-<ErrorBanner
-  message="Network error"
-  icon="cloud-offline"
-  variant="error"
-  onDismiss={() => {}}
-/>
+<ErrorBanner message="Network error" icon="cloud-offline" variant="error" onDismiss={() => {}} />
 ```
 
 ### Custom Position
 
 ```tsx
 <ErrorBanner
-  message="Bottom banner"
-  top={undefined}
-  style={{ bottom: 20, top: undefined }}
-  onDismiss={() => {}}
+	message="Bottom banner"
+	top={undefined}
+	style={{ bottom: 20, top: undefined }}
+	onDismiss={() => {}}
 />
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `message` | `string` | - | **Required** - Message text |
-| `onDismiss` | `() => void` | - | **Required** - Dismiss callback |
-| `variant` | `'error' \| 'warning' \| 'info' \| 'success'` | `'error'` | Banner style variant |
-| `top` | `number` | `60` | Distance from top of screen |
-| `horizontalMargin` | `number` | `16` | Left/right margins |
-| `backgroundColor` | `string` | - | Custom background (overrides variant) |
-| `textColor` | `string` | `'#FFFFFF'` | Text and icon color |
-| `icon` | `string` | - | Custom icon (overrides variant) |
-| `style` | `ViewStyle` | - | Additional styles |
+| Prop               | Type                                          | Default     | Description                           |
+| ------------------ | --------------------------------------------- | ----------- | ------------------------------------- |
+| `message`          | `string`                                      | -           | **Required** - Message text           |
+| `onDismiss`        | `() => void`                                  | -           | **Required** - Dismiss callback       |
+| `variant`          | `'error' \| 'warning' \| 'info' \| 'success'` | `'error'`   | Banner style variant                  |
+| `top`              | `number`                                      | `60`        | Distance from top of screen           |
+| `horizontalMargin` | `number`                                      | `16`        | Left/right margins                    |
+| `backgroundColor`  | `string`                                      | -           | Custom background (overrides variant) |
+| `textColor`        | `string`                                      | `'#FFFFFF'` | Text and icon color                   |
+| `icon`             | `string`                                      | -           | Custom icon (overrides variant)       |
+| `style`            | `ViewStyle`                                   | -           | Additional styles                     |
 
 ## Variants
 
-| Variant | Color | Default Icon |
-|---------|-------|-------------|
-| `error` | Red (#EF4444) | `alert-circle` |
-| `warning` | Amber (#F59E0B) | `warning` |
-| `info` | Blue (#3B82F6) | `information-circle` |
-| `success` | Green (#10B981) | `checkmark-circle` |
+| Variant   | Color           | Default Icon         |
+| --------- | --------------- | -------------------- |
+| `error`   | Red (#EF4444)   | `alert-circle`       |
+| `warning` | Amber (#F59E0B) | `warning`            |
+| `info`    | Blue (#3B82F6)  | `information-circle` |
+| `success` | Green (#10B981) | `checkmark-circle`   |
 
 ## Examples
 
@@ -129,10 +117,10 @@ const [error, setError] = useState<string | null>(null);
 
 ```tsx
 <ErrorBanner
-  message="No internet connection"
-  icon="cloud-offline"
-  variant="error"
-  onDismiss={handleDismiss}
+	message="No internet connection"
+	icon="cloud-offline"
+	variant="error"
+	onDismiss={handleDismiss}
 />
 ```
 
@@ -140,9 +128,9 @@ const [error, setError] = useState<string | null>(null);
 
 ```tsx
 <ErrorBanner
-  message="Please fill in all required fields"
-  variant="error"
-  onDismiss={() => setError(null)}
+	message="Please fill in all required fields"
+	variant="error"
+	onDismiss={() => setError(null)}
 />
 ```
 
@@ -150,9 +138,9 @@ const [error, setError] = useState<string | null>(null);
 
 ```tsx
 <ErrorBanner
-  message="Your changes have been saved"
-  variant="success"
-  onDismiss={() => setSuccess(null)}
+	message="Your changes have been saved"
+	variant="success"
+	onDismiss={() => setSuccess(null)}
 />
 ```
 
@@ -160,10 +148,10 @@ const [error, setError] = useState<string | null>(null);
 
 ```tsx
 <ErrorBanner
-  message="Storage space running low"
-  variant="warning"
-  icon="warning"
-  onDismiss={() => {}}
+	message="Storage space running low"
+	variant="warning"
+	icon="warning"
+	onDismiss={() => {}}
 />
 ```
 
@@ -173,43 +161,33 @@ const [error, setError] = useState<string | null>(null);
 const [error, setError] = useState<string | null>(null);
 
 useEffect(() => {
-  if (error) {
-    const timer = setTimeout(() => setError(null), 5000);
-    return () => clearTimeout(timer);
-  }
+	if (error) {
+		const timer = setTimeout(() => setError(null), 5000);
+		return () => clearTimeout(timer);
+	}
 }, [error]);
 
-return (
-  <>
-    {error && (
-      <ErrorBanner
-        message={error}
-        onDismiss={() => setError(null)}
-      />
-    )}
-  </>
-);
+return <>{error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}</>;
 ```
 
 ### Multiple Banners (Stacked)
 
 ```tsx
-{error && (
-  <ErrorBanner
-    message={error}
-    variant="error"
-    top={60}
-    onDismiss={() => setError(null)}
-  />
-)}
-{warning && (
-  <ErrorBanner
-    message={warning}
-    variant="warning"
-    top={140} // Below error banner
-    onDismiss={() => setWarning(null)}
-  />
-)}
+{
+	error && (
+		<ErrorBanner message={error} variant="error" top={60} onDismiss={() => setError(null)} />
+	);
+}
+{
+	warning && (
+		<ErrorBanner
+			message={warning}
+			variant="warning"
+			top={140} // Below error banner
+			onDismiss={() => setWarning(null)}
+		/>
+	);
+}
 ```
 
 ## Positioning
@@ -220,12 +198,9 @@ return (
 - **Width:** Automatically fills available width
 
 To position at bottom:
+
 ```tsx
-<ErrorBanner
-  message="Bottom banner"
-  style={{ top: undefined, bottom: 20 }}
-  onDismiss={() => {}}
-/>
+<ErrorBanner message="Bottom banner" style={{ top: undefined, bottom: 20 }} onDismiss={() => {}} />
 ```
 
 ## Animation Tip
@@ -235,17 +210,13 @@ For smooth enter/exit animations, use a library like `react-native-reanimated`:
 ```tsx
 import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 
-{error && (
-  <Animated.View
-    entering={FadeInDown}
-    exiting={FadeOutUp}
-  >
-    <ErrorBanner
-      message={error}
-      onDismiss={() => setError(null)}
-    />
-  </Animated.View>
-)}
+{
+	error && (
+		<Animated.View entering={FadeInDown} exiting={FadeOutUp}>
+			<ErrorBanner message={error} onDismiss={() => setError(null)} />
+		</Animated.View>
+	);
+}
 ```
 
 ## Common Patterns
@@ -254,13 +225,13 @@ import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 
 ```tsx
 const handleApiError = (error: Error) => {
-  setError(error.message || 'Something went wrong');
+	setError(error.message || 'Something went wrong');
 };
 
 try {
-  await api.call();
+	await api.call();
 } catch (error) {
-  handleApiError(error);
+	handleApiError(error);
 }
 ```
 
@@ -268,12 +239,12 @@ try {
 
 ```tsx
 const handleSubmit = async () => {
-  try {
-    await submitForm();
-    setSuccess('Form submitted successfully');
-  } catch (error) {
-    setError('Failed to submit form');
-  }
+	try {
+		await submitForm();
+		setSuccess('Form submitted successfully');
+	} catch (error) {
+		setError('Failed to submit form');
+	}
 };
 ```
 

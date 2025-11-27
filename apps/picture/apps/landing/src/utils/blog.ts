@@ -7,18 +7,18 @@ export async function getBlogPosts(language?: string) {
 	const allPosts = await getCollection('blog');
 
 	return allPosts
-		.filter(post => post.data.language === lang && !post.data.draft)
+		.filter((post) => post.data.language === lang && !post.data.draft)
 		.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 }
 
 export async function getPostsByCategory(category: string, language?: string) {
 	const posts = await getBlogPosts(language);
-	return posts.filter(post => post.data.category === category);
+	return posts.filter((post) => post.data.category === category);
 }
 
 export async function getPostsByTag(tag: string, language?: string) {
 	const posts = await getBlogPosts(language);
-	return posts.filter(post => post.data.tags.includes(tag));
+	return posts.filter((post) => post.data.tags.includes(tag));
 }
 
 export function calculateReadingTime(content: string): number {
@@ -42,13 +42,13 @@ export async function getRelatedPosts(
 	const allPosts = await getBlogPosts(post.data.language);
 
 	// Filter out current post
-	const otherPosts = allPosts.filter(p => p.id !== post.id);
+	const otherPosts = allPosts.filter((p) => p.id !== post.id);
 
 	// Score posts by relevance (same category, shared tags)
-	const scoredPosts = otherPosts.map(p => {
+	const scoredPosts = otherPosts.map((p) => {
 		let score = 0;
 		if (p.data.category === post.data.category) score += 3;
-		const sharedTags = p.data.tags.filter(tag => post.data.tags.includes(tag));
+		const sharedTags = p.data.tags.filter((tag) => post.data.tags.includes(tag));
 		score += sharedTags.length;
 		return { post: p, score };
 	});
@@ -57,13 +57,13 @@ export async function getRelatedPosts(
 	return scoredPosts
 		.sort((a, b) => b.score - a.score)
 		.slice(0, limit)
-		.map(item => item.post);
+		.map((item) => item.post);
 }
 
 export function getAllTags(posts: CollectionEntry<'blog'>[]): string[] {
 	const tags = new Set<string>();
-	posts.forEach(post => {
-		post.data.tags.forEach(tag => tags.add(tag));
+	posts.forEach((post) => {
+		post.data.tags.forEach((tag) => tags.add(tag));
 	});
 	return Array.from(tags).sort();
 }

@@ -42,9 +42,7 @@ Prozess:
    (pocketbase_id, username)
 4. Erstellt Checkout
    Session mit:
-
-
-    - Lokalisation
+   - Lokalisation
 
 (DE/EN/IT/FR/ES) - Zahlungsmethoden
 (Karte + SEPA) - Promotion Codes

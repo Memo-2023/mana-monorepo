@@ -151,7 +151,9 @@
 			const blueprintsWithPrompts: Blueprint[] = [];
 			for (const blueprint of blueprintsData || []) {
 				const promptIds = promptLinksByBlueprintId[blueprint.id] || [];
-				const promptsForBlueprint = promptIds.map((id) => promptsById[id]).filter(Boolean) as Prompt[];
+				const promptsForBlueprint = promptIds
+					.map((id) => promptsById[id])
+					.filter(Boolean) as Prompt[];
 
 				blueprintsWithPrompts.push({
 					id: blueprint.id,
@@ -162,7 +164,7 @@
 					created_at: blueprint.created_at,
 					updated_at: blueprint.updated_at,
 					user_id: blueprint.user_id || '',
-					prompts: promptsForBlueprint
+					prompts: promptsForBlueprint,
 				});
 			}
 
@@ -170,12 +172,21 @@
 			filteredBlueprints = blueprintsWithPrompts;
 
 			console.log('📊 Blueprints loaded:', blueprints.length);
-			console.log('📋 Blueprint IDs:', blueprints.map(b => b.id));
-			console.log('🏷️ Blueprints by category:', blueprints.reduce((acc, b) => {
-				const catName = b.category?.name?.de || b.category?.name?.en || 'No Category';
-				acc[catName] = (acc[catName] || 0) + 1;
-				return acc;
-			}, {} as Record<string, number>));
+			console.log(
+				'📋 Blueprint IDs:',
+				blueprints.map((b) => b.id)
+			);
+			console.log(
+				'🏷️ Blueprints by category:',
+				blueprints.reduce(
+					(acc, b) => {
+						const catName = b.category?.name?.de || b.category?.name?.en || 'No Category';
+						acc[catName] = (acc[catName] || 0) + 1;
+						return acc;
+					},
+					{} as Record<string, number>
+				)
+			);
 
 			// Extract unique categories
 			const uniqueCategories = new Map<string, Category>();
@@ -265,8 +276,16 @@
 			});
 		}
 
-		console.log('🔍 Filter applied - Total:', blueprints.length, 'Filtered:', filtered.length,
-			'Categories selected:', selectedCategoryIds.length, 'Search:', searchQuery || '(none)');
+		console.log(
+			'🔍 Filter applied - Total:',
+			blueprints.length,
+			'Filtered:',
+			filtered.length,
+			'Categories selected:',
+			selectedCategoryIds.length,
+			'Search:',
+			searchQuery || '(none)'
+		);
 
 		filteredBlueprints = filtered;
 	});
@@ -305,7 +324,7 @@
 			return {
 				id: category.id,
 				label,
-				color
+				color,
 			};
 		})
 	);
@@ -323,26 +342,26 @@
 
 			<!-- Search Bar -->
 			<div class="relative mb-4">
-		<svg
-			class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-theme-secondary"
-			fill="none"
-			stroke="currentColor"
-			viewBox="0 0 24 24"
-		>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-			/>
-		</svg>
-		<input
-			type="text"
-			placeholder="Blueprints durchsuchen..."
-			bind:value={searchQuery}
-			class="w-full rounded-2xl border border-theme bg-content py-3 pl-11 pr-4 text-theme placeholder-theme-secondary focus:outline-none focus:ring-2 focus:ring-primary"
-		/>
-	</div>
+				<svg
+					class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-theme-secondary"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+					/>
+				</svg>
+				<input
+					type="text"
+					placeholder="Blueprints durchsuchen..."
+					bind:value={searchQuery}
+					class="w-full rounded-2xl border border-theme bg-content py-3 pl-11 pr-4 text-theme placeholder-theme-secondary focus:outline-none focus:ring-2 focus:ring-primary"
+				/>
+			</div>
 
 			<!-- Category Filter -->
 			<div class="mb-4">
@@ -358,50 +377,50 @@
 			</div>
 
 			<!-- Blueprints Content -->
-		{#if loading}
-			<BlueprintsPageSkeleton blueprintCount={9} showFilters={false} />
-		{:else if error}
-			<!-- Error State -->
-			<div class="flex flex-col items-center justify-center py-20">
-				<p class="text-center text-theme-secondary">{error}</p>
-			</div>
-		{:else if filteredBlueprints.length === 0}
-			<!-- Empty State -->
-			<div class="flex flex-col items-center justify-center py-20">
-				<svg
-					class="mb-4 h-16 w-16 text-theme-secondary"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-					/>
-				</svg>
-				<p class="text-center text-theme-secondary">Keine Blueprints gefunden</p>
-			</div>
-		{:else}
-			<!-- Blueprints List -->
-			<div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-				{#each filteredBlueprints as blueprint (blueprint.id)}
-					<BlueprintCard
-						id={blueprint.id}
-						name={blueprint.name}
-						description={blueprint.description}
-						category={blueprint.category}
-						isPublic={blueprint.is_public}
-						createdAt={blueprint.created_at}
-						onPress={handleOpenModal}
-						showCategory={selectedCategoryIds.length === 0}
-						isActive={activeBlueprints.includes(blueprint.id)}
-						onToggleActive={handleToggleActive}
-					/>
-				{/each}
-			</div>
-		{/if}
+			{#if loading}
+				<BlueprintsPageSkeleton blueprintCount={9} showFilters={false} />
+			{:else if error}
+				<!-- Error State -->
+				<div class="flex flex-col items-center justify-center py-20">
+					<p class="text-center text-theme-secondary">{error}</p>
+				</div>
+			{:else if filteredBlueprints.length === 0}
+				<!-- Empty State -->
+				<div class="flex flex-col items-center justify-center py-20">
+					<svg
+						class="mb-4 h-16 w-16 text-theme-secondary"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+						/>
+					</svg>
+					<p class="text-center text-theme-secondary">Keine Blueprints gefunden</p>
+				</div>
+			{:else}
+				<!-- Blueprints List -->
+				<div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+					{#each filteredBlueprints as blueprint (blueprint.id)}
+						<BlueprintCard
+							id={blueprint.id}
+							name={blueprint.name}
+							description={blueprint.description}
+							category={blueprint.category}
+							isPublic={blueprint.is_public}
+							createdAt={blueprint.created_at}
+							onPress={handleOpenModal}
+							showCategory={selectedCategoryIds.length === 0}
+							isActive={activeBlueprints.includes(blueprint.id)}
+							onToggleActive={handleToggleActive}
+						/>
+					{/each}
+				</div>
+			{/if}
 		</div>
 	</div>
 </div>

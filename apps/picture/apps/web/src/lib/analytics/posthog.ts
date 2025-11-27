@@ -23,7 +23,7 @@ export function initPostHog() {
 				if (import.meta.env.DEV) {
 					console.log('PostHog loaded');
 				}
-			}
+			},
 		});
 	}
 }
@@ -79,7 +79,7 @@ export const analytics = {
 			return posthog.getFeatureFlag(featureKey);
 		}
 		return undefined;
-	}
+	},
 };
 
 export default posthog;

@@ -9,12 +9,15 @@
 ## 1. Google Cloud Setup
 
 ### API Key erstellen
+
 1. Google Cloud Console → "APIs & Services" → "Credentials"
 2. "Create Credentials" → "API Key"
 3. API Key auf Text-to-Speech API beschränken
 
 ### Stimmen konfigurieren
+
 Die App verwendet Google Neural2 Stimmen:
+
 - `de-DE-Neural2-A` (Deutsch, weiblich)
 - `en-US-Neural2-A` (Englisch US, männlich)
 - `en-GB-Neural2-A` (Englisch UK, weiblich)
@@ -22,6 +25,7 @@ Die App verwendet Google Neural2 Stimmen:
 ## 2. Supabase Setup
 
 ### Datenbank Migrationen
+
 ```bash
 # Migrations ausführen
 supabase migration up
@@ -32,12 +36,15 @@ supabase migration up
 ```
 
 ### Environment Variables
+
 In Supabase Dashboard → Settings → Edge Functions:
+
 ```
 GOOGLE_TTS_API_KEY=your_google_api_key_here
 ```
 
 ### Edge Functions deployen
+
 ```bash
 # Supabase CLI installieren
 npm install -g supabase
@@ -48,6 +55,7 @@ supabase functions deploy get-audio-url
 ```
 
 ### Storage Setup
+
 - Bucket "audio" wird automatisch erstellt
 - RLS Policies sind konfiguriert
 - Benutzer können nur ihre eigenen Audio-Dateien zugreifen
@@ -55,50 +63,56 @@ supabase functions deploy get-audio-url
 ## 3. React Native App Setup
 
 ### Environment Variables
+
 Erstelle `.env.local`:
+
 ```
 EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 ```
 
 ### Dependencies installieren
+
 ```bash
 npm install
 ```
 
 ### App konfigurieren
+
 In `app.json`:
+
 ```json
 {
-  "expo": {
-    "name": "Reader",
-    "slug": "reader",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.tilljs.reader"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
-    }
-  }
+	"expo": {
+		"name": "Reader",
+		"slug": "reader",
+		"version": "1.0.0",
+		"orientation": "portrait",
+		"icon": "./assets/icon.png",
+		"userInterfaceStyle": "light",
+		"splash": {
+			"image": "./assets/splash.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#ffffff"
+		},
+		"ios": {
+			"supportsTablet": true,
+			"bundleIdentifier": "com.tilljs.reader"
+		},
+		"android": {
+			"adaptiveIcon": {
+				"foregroundImage": "./assets/adaptive-icon.png",
+				"backgroundColor": "#ffffff"
+			}
+		}
+	}
 }
 ```
 
 ## 4. Development Testing
 
 ### Lokal testen
+
 ```bash
 # Development Server starten
 npm start
@@ -111,6 +125,7 @@ npm run android
 ```
 
 ### Edge Functions testen
+
 ```bash
 # Lokal
 supabase functions serve
@@ -130,6 +145,7 @@ curl -X POST 'http://localhost:54321/functions/v1/generate-audio' \
 ## 5. Production Deployment
 
 ### EAS Build Setup
+
 ```bash
 # EAS CLI installieren
 npm install -g @expo/eas-cli
@@ -142,28 +158,30 @@ eas build:configure
 ```
 
 ### Build Profile (`eas.json`)
+
 ```json
 {
-  "cli": {
-    "version": ">= 0.52.0"
-  },
-  "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
-    "preview": {
-      "distribution": "internal"
-    },
-    "production": {}
-  },
-  "submit": {
-    "production": {}
-  }
+	"cli": {
+		"version": ">= 0.52.0"
+	},
+	"build": {
+		"development": {
+			"developmentClient": true,
+			"distribution": "internal"
+		},
+		"preview": {
+			"distribution": "internal"
+		},
+		"production": {}
+	},
+	"submit": {
+		"production": {}
+	}
 }
 ```
 
 ### Builds erstellen
+
 ```bash
 # Development Build
 eas build --profile development
@@ -173,6 +191,7 @@ eas build --profile production
 ```
 
 ### App Store Submission
+
 ```bash
 # iOS App Store
 eas submit --platform ios
@@ -184,17 +203,20 @@ eas submit --platform android
 ## 6. Monitoring & Maintenance
 
 ### Supabase Dashboard
+
 - Database Performance
 - Storage Usage
 - Edge Function Logs
 - User Activity
 
 ### Google Cloud Monitoring
+
 - API Usage
 - Kosten überwachen
 - Rate Limits prüfen
 
 ### App Analytics
+
 - Expo Analytics
 - Crashlytics Integration
 - Performance Monitoring
@@ -202,11 +224,13 @@ eas submit --platform android
 ## 7. Kosten-Optimierung
 
 ### Google Cloud TTS
+
 - Erste 1M Zeichen/Monat kostenlos
 - Neural2 Stimmen: $16/1M Zeichen
 - Caching implementiert zur Kostenreduzierung
 
 ### Supabase
+
 - Free Tier: 500MB DB, 1GB Storage
 - Pro Tier: $25/Monat für erweiterte Features
 - Storage: $0.021/GB/Monat
@@ -214,12 +238,14 @@ eas submit --platform android
 ## 8. Sicherheit
 
 ### Best Practices
+
 - API Keys niemals in Client-Code
 - Row Level Security (RLS) aktiviert
 - Signed URLs für Audio-Dateien
 - JWT Token Validation
 
 ### Regelmäßige Updates
+
 - Dependencies aktualisieren
 - Sicherheitspatches einspielen
 - API Key Rotation
@@ -227,6 +253,7 @@ eas submit --platform android
 ## 9. Troubleshooting
 
 ### Häufige Probleme
+
 1. **Audio-Generierung fehlschlägt**
    - Google Cloud API Key prüfen
    - Quota-Limits prüfen
@@ -243,6 +270,7 @@ eas submit --platform android
    - Audio Format Kompatibilität
 
 ### Logs & Debugging
+
 ```bash
 # Supabase Logs
 supabase logs
@@ -257,6 +285,7 @@ expo logs
 ## 10. Nächste Schritte
 
 ### Feature Roadmap
+
 - Push Notifications
 - Offline-First Synchronisation
 - Cloud Backup
@@ -264,6 +293,7 @@ expo logs
 - Advanced Audio Controls
 
 ### Performance Optimierung
+
 - Image Optimization
 - Bundle Size Reduction
 - Lazy Loading

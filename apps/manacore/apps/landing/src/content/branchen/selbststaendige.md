@@ -15,14 +15,14 @@ useCases:
   - Übersetzungen für internationale Kunden
   - Projektdokumentation automatisieren
 testimonial:
-  quote: "Als Freelancer schwankt meine Auslastung stark. Mit Mana zahle ich in ruhigen Monaten fast nichts und kann bei Großprojekten voll durchstarten."
-  author: "Thomas Bauer"
-  role: "Freelance Designer"
-  company: ""
+  quote: 'Als Freelancer schwankt meine Auslastung stark. Mit Mana zahle ich in ruhigen Monaten fast nichts und kann bei Großprojekten voll durchstarten.'
+  author: 'Thomas Bauer'
+  role: 'Freelance Designer'
+  company: ''
 pricing:
   special: false
-  discount: ""
-  details: "Flexible Mana-Pakete perfekt für variable Projektgrößen"
+  discount: ''
+  details: 'Flexible Mana-Pakete perfekt für variable Projektgrößen'
 order: 4
 ---
 
@@ -47,24 +47,28 @@ Als Selbstständiger kennen Sie das: Mal läuft's, mal nicht. Warum sollten Sie 
 ## Ihre KI-Assistenten im Business
 
 ### 📋 Kundenmanagement mit Memoro
+
 - **Meeting-Protokolle**: Kundengespräche automatisch dokumentieren
 - **Briefings erfassen**: Nie wieder wichtige Details vergessen
 - **Follow-ups**: Automatische Zusammenfassungen für Kunden
 - **Projekt-Historie**: Durchsuchbare Aufzeichnungen aller Gespräche
 
 ### 💰 Angebote & Rechnungen
+
 - **Angebotstexte**: Professionelle Formulierungen mit KI
 - **Leistungsbeschreibungen**: Detaillierte Projektbeschreibungen generieren
 - **Mehrsprachig**: Angebote für internationale Kunden übersetzen
 - **AGB-Check**: Vertragstexte prüfen und optimieren
 
 ### 📱 Marketing & Akquise
+
 - **Social Media**: Content für LinkedIn, Instagram & Co.
 - **Blog-Artikel**: SEO-optimierte Texte für Ihre Website
 - **Newsletter**: Regelmäßige Kundenkommunikation
 - **Portfolio**: Projektbeschreibungen professionell aufbereiten
 
 ### 🎨 Kreative Arbeit
+
 - **Konzepte**: Brainstorming und Ideengenerierung
 - **Visualisierungen**: Mockups und Grafiken erstellen
 - **Präsentationen**: Pitch-Decks für Kunden
@@ -73,18 +77,21 @@ Als Selbstständiger kennen Sie das: Mal läuft's, mal nicht. Warum sollten Sie 
 ## Praxisbeispiele
 
 ### Webdesigner
+
 - Kundenbrief mit Memoro aufnehmen (50 Mana)
 - Designkonzept mit ChatGPT entwickeln (30 Mana)
 - Mockups mit DALL-E erstellen (100 Mana)
 - **Projektkosten Mana: 1,80€** ➜ An Kunde weiterberechnen
 
 ### Berater
+
 - Workshop mit Memoro dokumentieren (200 Mana)
 - Analyse mit Claude erstellen (100 Mana)
 - Präsentation aufbereiten (50 Mana)
 - **Projektkosten Mana: 3,50€** ➜ In Tagessatz einkalkuliert
 
 ### Content Creator
+
 - Interview transkribieren (150 Mana)
 - Blog-Artikel generieren (80 Mana)
 - Social Media Posts erstellen (40 Mana)
@@ -93,6 +100,7 @@ Als Selbstständiger kennen Sie das: Mal läuft's, mal nicht. Warum sollten Sie 
 ## Kostenvergleich
 
 **Traditionelle Tool-Abos (monatlich)**:
+
 - ChatGPT Plus: 20€
 - Jasper AI: 39€
 - DeepL Pro: 8€
@@ -100,6 +108,7 @@ Als Selbstständiger kennen Sie das: Mal läuft's, mal nicht. Warum sollten Sie 
 - **Gesamt: 84€/Monat = 1.008€/Jahr**
 
 **Mit Mana (beispielhaft)**:
+
 - Ruhige Monate: 0-20€
 - Normale Monate: 30-50€
 - Projekt-Monate: 80-150€
@@ -109,17 +118,21 @@ Als Selbstständiger kennen Sie das: Mal läuft's, mal nicht. Warum sollten Sie 
 ## Smarte Mana-Strategien
 
 ### 🎯 Projekt-Pakete
+
 Kalkulieren Sie Mana direkt in Ihre Angebote ein:
+
 - Kleines Projekt: +10€ Mana-Budget
 - Mittleres Projekt: +25€ Mana-Budget
 - Großprojekt: +50€ Mana-Budget
 
 ### 💡 Steuer-Tipp
+
 - Mana-Käufe sind Betriebsausgaben
 - Sammeln Sie Rechnungen für die Buchhaltung
 - Weisen Sie Kosten Projekten zu
 
 ### 🔄 Workflow-Optimierung
+
 1. **Morgens**: Mails mit KI beantworten (10 Mana)
 2. **Vormittags**: Projektarbeit mit Tools (30-50 Mana)
 3. **Nachmittags**: Content erstellen (20-30 Mana)
@@ -128,16 +141,19 @@ Kalkulieren Sie Mana direkt in Ihre Angebote ein:
 ## Beliebte Pakete für Selbstständige
 
 ### Starter-Paket
+
 - **2.500 Mana** für 24,99€
 - Perfekt für Einzelprojekte
 - Reicht für: ~2 Wochen normale Nutzung
 
 ### Profi-Paket
+
 - **10.000 Mana** für 95€ (5% Rabatt)
 - Ideal für regelmäßige Nutzung
 - Reicht für: 1-2 Monate Vollauslastung
 
 ### Business-Paket
+
 - **25.000 Mana** für 225€ (10% Rabatt)
 - Für intensive Projektphasen
 - Reicht für: 3-4 Monate oder Großprojekte

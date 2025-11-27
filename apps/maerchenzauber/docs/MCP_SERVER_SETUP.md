@@ -85,11 +85,13 @@ claude mcp remove supabase-maerchenzauber
 Erstelle oder bearbeite die MCP-Konfigurationsdatei:
 
 **Für lokales Scope** (nur für dich in diesem Projekt):
+
 ```bash
 # .mcp.json im Projekt-Root erstellen
 ```
 
 **Für User Scope** (global für alle deine Projekte):
+
 ```bash
 # ~/.config/claude/mcp.json
 ```
@@ -98,12 +100,12 @@ Erstelle oder bearbeite die MCP-Konfigurationsdatei:
 
 ```json
 {
-  "mcpServers": {
-    "supabase-maerchenzauber": {
-      "type": "http",
-      "url": "https://mcp.supabase.com/mcp?read_only=true&project_ref=dyywxrmonxoiojsjmymc"
-    }
-  }
+	"mcpServers": {
+		"supabase-maerchenzauber": {
+			"type": "http",
+			"url": "https://mcp.supabase.com/mcp?read_only=true&project_ref=dyywxrmonxoiojsjmymc"
+		}
+	}
 }
 ```
 
@@ -179,12 +181,12 @@ Du kannst auf Datenbank-Ressourcen mit `@` verweisen:
 
 ```json
 {
-  "mcpServers": {
-    "supabase-dev": {
-      "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=dyywxrmonxoiojsjmymc&features=database,development"
-    }
-  }
+	"mcpServers": {
+		"supabase-dev": {
+			"type": "http",
+			"url": "https://mcp.supabase.com/mcp?project_ref=dyywxrmonxoiojsjmymc&features=database,development"
+		}
+	}
 }
 ```
 
@@ -192,12 +194,12 @@ Du kannst auf Datenbank-Ressourcen mit `@` verweisen:
 
 ```json
 {
-  "mcpServers": {
-    "supabase-prod": {
-      "type": "http",
-      "url": "https://mcp.supabase.com/mcp?read_only=true&project_ref=dyywxrmonxoiojsjmymc&features=database"
-    }
-  }
+	"mcpServers": {
+		"supabase-prod": {
+			"type": "http",
+			"url": "https://mcp.supabase.com/mcp?read_only=true&project_ref=dyywxrmonxoiojsjmymc&features=database"
+		}
+	}
 }
 ```
 
@@ -205,12 +207,12 @@ Du kannst auf Datenbank-Ressourcen mit `@` verweisen:
 
 ```json
 {
-  "mcpServers": {
-    "supabase-debug": {
-      "type": "http",
-      "url": "https://mcp.supabase.com/mcp?read_only=true&project_ref=dyywxrmonxoiojsjmymc&features=database,debugging"
-    }
-  }
+	"mcpServers": {
+		"supabase-debug": {
+			"type": "http",
+			"url": "https://mcp.supabase.com/mcp?read_only=true&project_ref=dyywxrmonxoiojsjmymc&features=database,debugging"
+		}
+	}
 }
 ```
 
@@ -276,12 +278,12 @@ Du kannst Umgebungsvariablen in der MCP-Konfiguration nutzen:
 
 ```json
 {
-  "mcpServers": {
-    "supabase": {
-      "type": "http",
-      "url": "https://mcp.supabase.com/mcp?read_only=true&project_ref=${SUPABASE_PROJECT_REF}"
-    }
-  }
+	"mcpServers": {
+		"supabase": {
+			"type": "http",
+			"url": "https://mcp.supabase.com/mcp?read_only=true&project_ref=${SUPABASE_PROJECT_REF}"
+		}
+	}
 }
 ```
 
@@ -291,16 +293,16 @@ Du kannst mehrere Supabase-Projekte gleichzeitig konfigurieren:
 
 ```json
 {
-  "mcpServers": {
-    "supabase-maerchenzauber-prod": {
-      "type": "http",
-      "url": "https://mcp.supabase.com/mcp?read_only=true&project_ref=dyywxrmonxoiojsjmymc"
-    },
-    "supabase-maerchenzauber-dev": {
-      "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=<dev-ref>"
-    }
-  }
+	"mcpServers": {
+		"supabase-maerchenzauber-prod": {
+			"type": "http",
+			"url": "https://mcp.supabase.com/mcp?read_only=true&project_ref=dyywxrmonxoiojsjmymc"
+		},
+		"supabase-maerchenzauber-dev": {
+			"type": "http",
+			"url": "https://mcp.supabase.com/mcp?project_ref=<dev-ref>"
+		}
+	}
 }
 ```
 
@@ -310,17 +312,18 @@ Für Team-weite Konfiguration, erstelle `.mcp.json` im Projekt-Root:
 
 ```json
 {
-  "mcpServers": {
-    "supabase-maerchenzauber": {
-      "type": "http",
-      "url": "https://mcp.supabase.com/mcp?read_only=true&project_ref=dyywxrmonxoiojsjmymc&features=database",
-      "description": "Märchenzauber Production DB (Read-Only)"
-    }
-  }
+	"mcpServers": {
+		"supabase-maerchenzauber": {
+			"type": "http",
+			"url": "https://mcp.supabase.com/mcp?read_only=true&project_ref=dyywxrmonxoiojsjmymc&features=database",
+			"description": "Märchenzauber Production DB (Read-Only)"
+		}
+	}
 }
 ```
 
 **Vorteile:**
+
 - Alle Teammitglieder nutzen die gleiche Konfiguration
 - Versionskontrolle über Git
 - Einheitliche Development-Experience

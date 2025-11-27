@@ -68,22 +68,24 @@ Each case study follows a four-part narrative:
 ### Key Metrics
 
 **metrics** (array of objects, optional):
+
 - **label** (string) - e.g., "Time Saved", "Cost Reduction"
 - **value** (string) - e.g., "80%", "€2,000/month"
 - **description** (string, optional) - Additional context
 - **icon** (string, optional) - Emoji or icon
 
 Example:
+
 ```yaml
 metrics:
-  - label: "Cost Reduction"
-    value: "90%"
-    description: "Saved €54,000 per year on photography"
-    icon: "💰"
-  - label: "Images Generated"
-    value: "10,000+"
-    description: "Professional product photos in first 6 months"
-    icon: "📸"
+  - label: 'Cost Reduction'
+    value: '90%'
+    description: 'Saved €54,000 per year on photography'
+    icon: '💰'
+  - label: 'Images Generated'
+    value: '10,000+'
+    description: 'Professional product photos in first 6 months'
+    icon: '📸'
 ```
 
 ### Features & Models Used
@@ -97,22 +99,23 @@ metrics:
 ```yaml
 beforeAfter:
   before:
-    description: "Hiring photographers for every product"
-    image: "/images/before.jpg"
+    description: 'Hiring photographers for every product'
+    image: '/images/before.jpg'
     metrics:
-      - "€5,000/month on photography"
-      - "2 weeks per photo shoot"
+      - '€5,000/month on photography'
+      - '2 weeks per photo shoot'
   after:
-    description: "Generate unlimited product photos on-demand"
-    image: "/images/after.jpg"
+    description: 'Generate unlimited product photos on-demand'
+    image: '/images/after.jpg'
     metrics:
-      - "€500/month for Picture Pro"
-      - "Minutes per image"
+      - '€500/month for Picture Pro'
+      - 'Minutes per image'
 ```
 
 ### Example Images
 
 **exampleImages** (array of objects):
+
 - **url** (string)
 - **caption** (string, optional)
 - **prompt** (string, optional)
@@ -121,29 +124,30 @@ beforeAfter:
 
 ```yaml
 timeline:
-  - date: "January 2025"
-    milestone: "Started using Picture"
-  - date: "March 2025"
-    milestone: "Scaled to 10,000 images"
+  - date: 'January 2025'
+    milestone: 'Started using Picture'
+  - date: 'March 2025'
+    milestone: 'Scaled to 10,000 images'
 ```
 
 ### Key Takeaways
 
 **keyTakeaways** (array of strings, required):
+
 ```yaml
 keyTakeaways:
-  - "AI image generation reduced costs by 90%"
-  - "Team productivity increased 5x"
-  - "Able to test more product variations"
+  - 'AI image generation reduced costs by 90%'
+  - 'Team productivity increased 5x'
+  - 'Able to test more product variations'
 ```
 
 ### Testimonial (Optional)
 
 ```yaml
 testimonial:
-  quote: "Picture transformed how we create product photos"
-  author: "Sarah Chen"
-  role: "Creative Director"
+  quote: 'Picture transformed how we create product photos'
+  author: 'Sarah Chen'
+  role: 'Creative Director'
 ```
 
 ### Technical Details (Optional)
@@ -151,14 +155,14 @@ testimonial:
 ```yaml
 technicalDetails:
   integrations:
-    - "Shopify"
-    - "WordPress"
-  workflow: "Automated workflow description"
+    - 'Shopify'
+    - 'WordPress'
+  workflow: 'Automated workflow description'
   team:
     size: 5
     roles:
-      - "Designer"
-      - "Marketer"
+      - 'Designer'
+      - 'Marketer'
 ```
 
 ### Related Content
@@ -184,77 +188,77 @@ technicalDetails:
 
 ```yaml
 cta:
-  text: "Start Your Free Trial"
-  url: "/signup"
+  text: 'Start Your Free Trial'
+  url: '/signup'
 ```
 
 ## Example Case Study
 
 ```markdown
 ---
-title: "How Luxe Fashion Reduced Photography Costs by 90%"
-description: "Luxe Fashion e-commerce store saves €54,000/year on product photography using Picture AI"
-coverImage: "/images/case-studies/luxe-fashion-hero.jpg"
+title: 'How Luxe Fashion Reduced Photography Costs by 90%'
+description: 'Luxe Fashion e-commerce store saves €54,000/year on product photography using Picture AI'
+coverImage: '/images/case-studies/luxe-fashion-hero.jpg'
 
 company:
-  name: "Luxe Fashion"
-  logo: "/images/logos/luxe-fashion.svg"
-  website: "https://luxefashion.example"
-  industry: "E-commerce Fashion"
-  size: "small"
-  location: "Berlin, Germany"
+  name: 'Luxe Fashion'
+  logo: '/images/logos/luxe-fashion.svg'
+  website: 'https://luxefashion.example'
+  industry: 'E-commerce Fashion'
+  size: 'small'
+  location: 'Berlin, Germany'
 
 contact:
-  name: "Sarah Chen"
-  role: "Creative Director"
-  avatar: "/images/people/sarah-chen.jpg"
-  quote: "Picture transformed our entire content creation workflow"
+  name: 'Sarah Chen'
+  role: 'Creative Director'
+  avatar: '/images/people/sarah-chen.jpg'
+  quote: 'Picture transformed our entire content creation workflow'
 
-category: "ecommerce"
+category: 'ecommerce'
 tags:
-  - "product-photography"
-  - "e-commerce"
-  - "fashion"
+  - 'product-photography'
+  - 'e-commerce'
+  - 'fashion'
 featured: true
 trending: false
-language: "en"
+language: 'en'
 
-challenge: "We were spending €5,000/month on professional photographers..."
-solution: "Picture AI enabled us to generate unlimited product photos..."
-implementation: "We integrated Picture into our Shopify workflow..."
-results: "In 6 months, we generated over 10,000 product images..."
+challenge: 'We were spending €5,000/month on professional photographers...'
+solution: 'Picture AI enabled us to generate unlimited product photos...'
+implementation: 'We integrated Picture into our Shopify workflow...'
+results: 'In 6 months, we generated over 10,000 product images...'
 
 metrics:
-  - label: "Cost Reduction"
-    value: "90%"
-    description: "Saved €54,000 per year"
-    icon: "💰"
-  - label: "Images Generated"
-    value: "10,000+"
-    description: "Professional product photos"
-    icon: "📸"
-  - label: "Time Saved"
-    value: "20 hours/week"
-    description: "Team productivity boost"
-    icon: "⏱️"
+  - label: 'Cost Reduction'
+    value: '90%'
+    description: 'Saved €54,000 per year'
+    icon: '💰'
+  - label: 'Images Generated'
+    value: '10,000+'
+    description: 'Professional product photos'
+    icon: '📸'
+  - label: 'Time Saved'
+    value: '20 hours/week'
+    description: 'Team productivity boost'
+    icon: '⏱️'
 
 featuresUsed:
-  - "flux-pro"
-  - "batch-generation"
-  - "api-integration"
+  - 'flux-pro'
+  - 'batch-generation'
+  - 'api-integration'
 modelsUsed:
-  - "flux-1-1-pro"
-  - "flux-dev"
+  - 'flux-1-1-pro'
+  - 'flux-dev'
 
 keyTakeaways:
-  - "AI image generation reduced costs by 90%"
-  - "Team can test more product variations"
-  - "Faster time-to-market for new products"
+  - 'AI image generation reduced costs by 90%'
+  - 'Team can test more product variations'
+  - 'Faster time-to-market for new products'
 
 testimonial:
-  quote: "Picture transformed how we create product photos. What used to take weeks now takes minutes."
-  author: "Sarah Chen"
-  role: "Creative Director"
+  quote: 'Picture transformed how we create product photos. What used to take weeks now takes minutes.'
+  author: 'Sarah Chen'
+  role: 'Creative Director'
 
 publishDate: 2025-01-20T00:00:00Z
 lastUpdated: 2025-01-20T00:00:00Z
@@ -374,6 +378,7 @@ Located in `/src/utils/caseStudies.ts`:
 ## File Naming Convention
 
 Use kebab-case for file names:
+
 - `company-name-brief-description.md`
 - Example: `luxe-fashion-ecommerce.md`
 

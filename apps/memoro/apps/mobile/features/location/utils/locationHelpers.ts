@@ -8,23 +8,23 @@
  * @returns Object with latitude and longitude or null if invalid
  */
 export function parsePostGISPoint(
-  pointString: string | null | undefined
+	pointString: string | null | undefined
 ): { latitude: number; longitude: number } | null {
-  if (!pointString) return null;
+	if (!pointString) return null;
 
-  // Match POINT(longitude latitude) format
-  const match = pointString.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
-  if (!match) return null;
+	// Match POINT(longitude latitude) format
+	const match = pointString.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
+	if (!match) return null;
 
-  const longitude = parseFloat(match[1]);
-  const latitude = parseFloat(match[2]);
+	const longitude = parseFloat(match[1]);
+	const latitude = parseFloat(match[2]);
 
-  // Validate coordinates
-  if (isNaN(longitude) || isNaN(latitude)) return null;
-  if (latitude < -90 || latitude > 90) return null;
-  if (longitude < -180 || longitude > 180) return null;
+	// Validate coordinates
+	if (isNaN(longitude) || isNaN(latitude)) return null;
+	if (latitude < -90 || latitude > 90) return null;
+	if (longitude < -180 || longitude > 180) return null;
 
-  return { latitude, longitude };
+	return { latitude, longitude };
 }
 
 /**
@@ -34,7 +34,7 @@ export function parsePostGISPoint(
  * @returns PostGIS POINT string
  */
 export function toPostGISPoint(latitude: number, longitude: number): string {
-  return `POINT(${longitude} ${latitude})`;
+	return `POINT(${longitude} ${latitude})`;
 }
 
 /**
@@ -43,31 +43,30 @@ export function toPostGISPoint(latitude: number, longitude: number): string {
  * @returns Location data with latitude, longitude, and address or null
  */
 export function getMemoLocation(
-  memo: any
+	memo: any
 ): { latitude?: number; longitude?: number; address?: any } | null {
-  // Check if we have address data in metadata
-  const hasAddress = memo?.metadata?.address;
+	// Check if we have address data in metadata
+	const hasAddress = memo?.metadata?.address;
 
-  // Parse location coordinates if available
-  const parsed = memo?.location ? parsePostGISPoint(memo.location) : null;
+	// Parse location coordinates if available
+	const parsed = memo?.location ? parsePostGISPoint(memo.location) : null;
 
-  // If we have neither coordinates nor address, return null
-  if (!parsed && !hasAddress) {
-    return null;
-  }
+	// If we have neither coordinates nor address, return null
+	if (!parsed && !hasAddress) {
+		return null;
+	}
 
-  // Build result with available data
-  const result: { latitude?: number; longitude?: number; address?: any } = {};
+	// Build result with available data
+	const result: { latitude?: number; longitude?: number; address?: any } = {};
 
-  if (parsed) {
-    result.latitude = parsed.latitude;
-    result.longitude = parsed.longitude;
-  }
+	if (parsed) {
+		result.latitude = parsed.latitude;
+		result.longitude = parsed.longitude;
+	}
 
-  if (hasAddress) {
-    result.address = memo.metadata.address;
-  }
+	if (hasAddress) {
+		result.address = memo.metadata.address;
+	}
 
-  return result;
+	return result;
 }
-

@@ -1,8 +1,8 @@
 ---
-title: "Content Collections in Astro"
-description: "How to use Content Collections for structured content in Astro."
+title: 'Content Collections in Astro'
+description: 'How to use Content Collections for structured content in Astro.'
 pubDate: 2025-03-18
-category: "Marketing"
+category: 'Marketing'
 ---
 
 # Content Collections in Astro
@@ -32,19 +32,19 @@ Here's an example configuration file:
 import { defineCollection, z } from 'astro:content';
 
 const blogCollection = defineCollection({
-  type: 'content', // 'content' or 'data'
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    pubDate: z.date(),
-    updatedDate: z.date().optional(),
-    tags: z.array(z.string()).default(['general']),
-    image: z.string().optional(),
-  }),
+	type: 'content', // 'content' or 'data'
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		pubDate: z.date(),
+		updatedDate: z.date().optional(),
+		tags: z.array(z.string()).default(['general']),
+		image: z.string().optional(),
+	}),
 });
 
 export const collections = {
-  'blog': blogCollection,
+	blog: blogCollection,
 };
 ```
 
@@ -54,10 +54,10 @@ After setup, you can add Markdown or MDX files to your collections:
 
 ```markdown
 ---
-title: "My First Post"
-description: "This is my first blog post using Astro Content Collections."
+title: 'My First Post'
+description: 'This is my first blog post using Astro Content Collections.'
 pubDate: 2025-03-10
-tags: ["astro", "markdown"]
+tags: ['astro', 'markdown']
 ---
 
 # My First Post
@@ -78,7 +78,7 @@ const allBlogPosts = await getCollection('blog');
 
 // Filter by specific criteria
 const featuredPosts = await getCollection('blog', ({ data }) => {
-  return data.tags.includes('featured');
+	return data.tags.includes('featured');
 });
 
 // Get a specific entry
@@ -86,11 +86,13 @@ const specificPost = await getEntry('blog', 'post-slug');
 ---
 
 <ul>
-  {allBlogPosts.map(post => (
-    <li>
-      <a href={`/blog/${post.slug}`}>{post.data.title}</a>
-    </li>
-  ))}
+	{
+		allBlogPosts.map((post) => (
+			<li>
+				<a href={`/blog/${post.slug}`}>{post.data.title}</a>
+			</li>
+		))
+	}
 </ul>
 ```
 
@@ -112,7 +114,7 @@ const { Content } = await entry.render();
 ---
 
 <BlogLayout frontmatter={entry.data}>
-  <Content />
+	<Content />
 </BlogLayout>
 ```
 
@@ -128,7 +130,7 @@ type BlogPost = CollectionEntry<'blog'>;
 
 // Component prop type
 interface Props {
-  post: BlogPost;
+	post: BlogPost;
 }
 ```
 

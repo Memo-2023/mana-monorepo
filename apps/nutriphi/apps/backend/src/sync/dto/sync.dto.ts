@@ -1,146 +1,153 @@
-import { IsString, IsOptional, IsArray, ValidateNested, IsNumber, IsBoolean } from 'class-validator';
+import {
+	IsString,
+	IsOptional,
+	IsArray,
+	ValidateNested,
+	IsNumber,
+	IsBoolean,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
  * Local meal data from mobile app
  */
 export class LocalMealDto {
-  @IsNumber()
-  localId: number;
+	@IsNumber()
+	localId: number;
 
-  @IsOptional()
-  @IsString()
-  cloudId?: string;
+	@IsOptional()
+	@IsString()
+	cloudId?: string;
 
-  @IsString()
-  foodName: string;
+	@IsString()
+	foodName: string;
 
-  @IsOptional()
-  @IsString()
-  imageUrl?: string;
+	@IsOptional()
+	@IsString()
+	imageUrl?: string;
 
-  @IsOptional()
-  calories?: number;
+	@IsOptional()
+	calories?: number;
 
-  @IsOptional()
-  protein?: number;
+	@IsOptional()
+	protein?: number;
 
-  @IsOptional()
-  carbohydrates?: number;
+	@IsOptional()
+	carbohydrates?: number;
 
-  @IsOptional()
-  fat?: number;
+	@IsOptional()
+	fat?: number;
 
-  @IsOptional()
-  fiber?: number;
+	@IsOptional()
+	fiber?: number;
 
-  @IsOptional()
-  sugar?: number;
+	@IsOptional()
+	sugar?: number;
 
-  @IsOptional()
-  sodium?: number;
+	@IsOptional()
+	sodium?: number;
 
-  @IsOptional()
-  @IsString()
-  servingSize?: string;
+	@IsOptional()
+	@IsString()
+	servingSize?: string;
 
-  @IsOptional()
-  @IsString()
-  mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+	@IsOptional()
+	@IsString()
+	mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
-  @IsOptional()
-  @IsString()
-  analysisStatus?: string;
+	@IsOptional()
+	@IsString()
+	analysisStatus?: string;
 
-  @IsOptional()
-  healthScore?: number;
+	@IsOptional()
+	healthScore?: number;
 
-  @IsOptional()
-  @IsString()
-  healthCategory?: string;
+	@IsOptional()
+	@IsString()
+	healthCategory?: string;
 
-  @IsOptional()
-  @IsString()
-  notes?: string;
+	@IsOptional()
+	@IsString()
+	notes?: string;
 
-  @IsOptional()
-  userRating?: number;
+	@IsOptional()
+	userRating?: number;
 
-  @IsOptional()
-  foodItems?: any[];
+	@IsOptional()
+	foodItems?: any[];
 
-  @IsNumber()
-  version: number;
+	@IsNumber()
+	version: number;
 
-  @IsString()
-  createdAt: string;
+	@IsString()
+	createdAt: string;
 
-  @IsString()
-  updatedAt: string;
+	@IsString()
+	updatedAt: string;
 }
 
 /**
  * Push request - local changes to server
  */
 export class SyncPushDto {
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => LocalMealDto)
-  meals: LocalMealDto[];
+	@IsArray()
+	@ValidateNested({ each: true })
+	@Type(() => LocalMealDto)
+	meals: LocalMealDto[];
 
-  @IsArray()
-  @IsString({ each: true })
-  deletedIds: string[];
+	@IsArray()
+	@IsString({ each: true })
+	deletedIds: string[];
 
-  @IsOptional()
-  @IsString()
-  lastSyncAt?: string;
+	@IsOptional()
+	@IsString()
+	lastSyncAt?: string;
 }
 
 /**
  * Push response
  */
 export interface SyncPushResponse {
-  created: { localId: number; cloudId: string }[];
-  updated: string[];
-  conflicts: ConflictInfo[];
-  serverTime: string;
+	created: { localId: number; cloudId: string }[];
+	updated: string[];
+	conflicts: ConflictInfo[];
+	serverTime: string;
 }
 
 /**
  * Conflict information
  */
 export interface ConflictInfo {
-  cloudId: string;
-  localVersion: number;
-  serverVersion: number;
-  serverData: any;
-  message: string;
+	cloudId: string;
+	localVersion: number;
+	serverVersion: number;
+	serverData: any;
+	message: string;
 }
 
 /**
  * Pull query parameters
  */
 export class SyncPullQueryDto {
-  @IsOptional()
-  @IsString()
-  since?: string;
+	@IsOptional()
+	@IsString()
+	since?: string;
 }
 
 /**
  * Pull response
  */
 export interface SyncPullResponse {
-  meals: any[];
-  deletedIds: string[];
-  serverTime: string;
+	meals: any[];
+	deletedIds: string[];
+	serverTime: string;
 }
 
 /**
  * Sync status response
  */
 export interface SyncStatusResponse {
-  lastSyncAt: string | null;
-  pendingChanges: number;
-  serverTime: string;
+	lastSyncAt: string | null;
+	pendingChanges: number;
+	serverTime: string;
 }

@@ -15,14 +15,14 @@ useCases:
   - Datenanalyse und Reporting optimieren
   - Interne Schulungen und Dokumentation
 testimonial:
-  quote: "Früher hatten wir 50 ChatGPT-Lizenzen, von denen nur 20 aktiv genutzt wurden. Mit Mana zahlen wir 60% weniger und jeder im Team kann bei Bedarf auf KI zugreifen."
-  author: "Michael Schmidt"
-  role: "IT-Leiter"
-  company: "TechCorp GmbH"
+  quote: 'Früher hatten wir 50 ChatGPT-Lizenzen, von denen nur 20 aktiv genutzt wurden. Mit Mana zahlen wir 60% weniger und jeder im Team kann bei Bedarf auf KI zugreifen.'
+  author: 'Michael Schmidt'
+  role: 'IT-Leiter'
+  company: 'TechCorp GmbH'
 pricing:
   special: true
-  discount: "Mengenrabatte ab 10 Nutzern"
-  details: "Individuelle Enterprise-Tarife und dedizierte Betreuung für größere Teams"
+  discount: 'Mengenrabatte ab 10 Nutzern'
+  details: 'Individuelle Enterprise-Tarife und dedizierte Betreuung für größere Teams'
 order: 1
 ---
 
@@ -49,21 +49,25 @@ Mit unserem Credit-System lösen sich diese Probleme in Luft auf:
 ## Perfekt für verschiedene Abteilungen
 
 ### 💼 Vertrieb & Kundenservice
+
 - Kundengespräche mit Memoro aufzeichnen und analysieren
 - Automatische Gesprächszusammenfassungen erstellen
 - Follow-up E-Mails mit KI verfassen
 
 ### 📊 Marketing & Content
+
 - Social Media Posts mit KI generieren
 - Bilder und Grafiken mit DALL-E erstellen
 - SEO-optimierte Texte schreiben
 
 ### 🔧 IT & Entwicklung
+
 - Code-Reviews mit KI-Unterstützung
 - Dokumentation automatisch generieren
 - Debugging und Optimierung
 
 ### 📈 Management & Strategie
+
 - Marktanalysen mit KI-Tools durchführen
 - Berichte und Präsentationen erstellen
 - Datenvisualisierungen generieren

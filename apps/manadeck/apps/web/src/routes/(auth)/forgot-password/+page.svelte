@@ -15,7 +15,7 @@
 	logo={ManaDeckLogo}
 	primaryColor="#8b5cf6"
 	onForgotPassword={handleForgotPassword}
-	goto={goto}
+	{goto}
 	loginPath="/login"
 	lightBackground="#faf5ff"
 	darkBackground="#1a1625"

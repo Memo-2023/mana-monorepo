@@ -38,8 +38,8 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 		headers: {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${appToken}`,
-			...options.headers
-		}
+			...options.headers,
+		},
 	});
 
 	if (!response.ok) {
@@ -64,7 +64,7 @@ function mapSessionFromApi(apiSession: any): StudySession {
 		correct_cards: apiSession.correctCards || 0,
 		started_at: apiSession.startedAt,
 		completed_at: apiSession.endedAt,
-		time_spent_seconds: apiSession.timeSpentSeconds || 0
+		time_spent_seconds: apiSession.timeSpentSeconds || 0,
 	};
 }
 
@@ -83,7 +83,7 @@ function mapProgressFromApi(apiProgress: any): CardProgress {
 		next_review: apiProgress.nextReview,
 		status: apiProgress.status || 'new',
 		created_at: apiProgress.createdAt,
-		updated_at: apiProgress.updatedAt
+		updated_at: apiProgress.updatedAt,
 	};
 }
 
@@ -96,7 +96,7 @@ function calculateStreak(sessions: StudySession[]): StreakInfo {
 			currentStreak: 0,
 			longestStreak: 0,
 			lastStudyDate: '',
-			totalStudyDays: 0
+			totalStudyDays: 0,
 		};
 	}
 
@@ -149,7 +149,7 @@ function calculateStreak(sessions: StudySession[]): StreakInfo {
 		currentStreak,
 		longestStreak,
 		lastStudyDate,
-		totalStudyDays: studyDates.size
+		totalStudyDays: studyDates.size,
 	};
 }
 
@@ -206,7 +206,7 @@ export const progressStore = {
 		try {
 			const [sessionsResponse, progressStatsResponse] = await Promise.all([
 				apiRequest<{ stats: any }>('/v1/api/study-sessions/stats'),
-				apiRequest<{ stats: any }>('/v1/api/progress/stats')
+				apiRequest<{ stats: any }>('/v1/api/progress/stats'),
 			]);
 
 			const sessionStats = sessionsResponse.stats || {};
@@ -221,7 +221,7 @@ export const progressStore = {
 								((sessionStats.totalCorrectCards || 0) / sessionStats.totalCardsStudied) * 100
 							)
 						: 0,
-				totalSessions: sessionStats.totalSessions || 0
+				totalSessions: sessionStats.totalSessions || 0,
 			};
 		} catch (err: any) {
 			error = err.message || 'Failed to fetch statistics';
@@ -259,9 +259,7 @@ export const progressStore = {
 		error = null;
 
 		try {
-			const endpoint = deckId
-				? `/v1/api/progress/deck/${deckId}/due`
-				: '/v1/api/progress/due';
+			const endpoint = deckId ? `/v1/api/progress/deck/${deckId}/due` : '/v1/api/progress/due';
 			const response = await apiRequest<{ progress: any[]; count: number }>(endpoint);
 			return (response.progress || []).map(mapProgressFromApi);
 		} catch (err: any) {
@@ -283,12 +281,8 @@ export const progressStore = {
 		});
 
 		const total = deckProgress.length;
-		const mastered = deckProgress.filter(
-			(p) => p.ease_factor >= 2.5 && p.interval >= 21
-		).length;
-		const learning = deckProgress.filter(
-			(p) => p.status === 'learning'
-		).length;
+		const mastered = deckProgress.filter((p) => p.ease_factor >= 2.5 && p.interval >= 21).length;
+		const learning = deckProgress.filter((p) => p.status === 'learning').length;
 		const newCards = deckProgress.filter((p) => p.status === 'new').length;
 		const dueNow = deckProgress.filter((p) => {
 			if (!p.next_review) return false;
@@ -300,7 +294,7 @@ export const progressStore = {
 			mastered,
 			learning,
 			newCards,
-			dueNow
+			dueNow,
 		};
 	},
 
@@ -309,5 +303,5 @@ export const progressStore = {
 	 */
 	clearError() {
 		error = null;
-	}
+	},
 };

@@ -136,8 +136,8 @@ class CreditService {
 			const response = await fetch(`${this.memoroServiceUrl}/memoro/credits/pricing`, {
 				method: 'GET',
 				headers: {
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+				},
 			});
 
 			if (!response.ok) {
@@ -168,10 +168,10 @@ class CreditService {
 					NEW_MEMORY: 5,
 					MEMO_COMBINE: 5,
 					MEMO_SHARING: 1,
-					SPACE_OPERATION: 2
+					SPACE_OPERATION: 2,
 				},
 				transcriptionPerHour: 120,
-				lastUpdated: new Date().toISOString()
+				lastUpdated: new Date().toISOString(),
 			};
 		}
 	}
@@ -181,7 +181,10 @@ class CreditService {
 	 */
 	async getUserCredits(appToken: string): Promise<{ credits: number } | null> {
 		try {
-			console.log('[CreditService] Fetching user credits from:', `${this.manaServiceUrl}/auth/credits`);
+			console.log(
+				'[CreditService] Fetching user credits from:',
+				`${this.manaServiceUrl}/auth/credits`
+			);
 
 			if (!appToken) {
 				console.error('[CreditService] No authentication token available for credits fetch');
@@ -192,8 +195,8 @@ class CreditService {
 				method: 'GET',
 				headers: {
 					Authorization: `Bearer ${appToken}`,
-					'Content-Type': 'application/json'
-				}
+					'Content-Type': 'application/json',
+				},
 			});
 
 			console.log('[CreditService] Credits response status:', response.status);
@@ -238,7 +241,7 @@ class CreditService {
 				SPACE_OPERATION: 2,
 				QUESTION_MEMO: 5,
 				NEW_MEMORY: 5,
-				MEMO_COMBINE: 5
+				MEMO_COMBINE: 5,
 			};
 			return fallbackCosts[operation];
 		}
@@ -269,7 +272,7 @@ class CreditService {
 			SPACE_OPERATION: 2,
 			QUESTION_MEMO: 5,
 			NEW_MEMORY: 5,
-			MEMO_COMBINE: 5
+			MEMO_COMBINE: 5,
 		};
 		return fallbackCosts[operation];
 	}
@@ -281,7 +284,10 @@ class CreditService {
 	/**
 	 * Retry transcription for a failed memo using the reprocess-memo endpoint
 	 */
-	async retryTranscription(memoId: string, appToken: string): Promise<{ success: boolean; message: string }> {
+	async retryTranscription(
+		memoId: string,
+		appToken: string
+	): Promise<{ success: boolean; message: string }> {
 		try {
 			if (!appToken) {
 				throw new Error('No authentication token available');
@@ -291,9 +297,9 @@ class CreditService {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					Authorization: `Bearer ${appToken}`
+					Authorization: `Bearer ${appToken}`,
 				},
-				body: JSON.stringify({ memoId })
+				body: JSON.stringify({ memoId }),
 			});
 
 			if (!response.ok) {
@@ -305,7 +311,7 @@ class CreditService {
 
 			return {
 				success: true,
-				message: result.message || 'Memo reprocessing started successfully'
+				message: result.message || 'Memo reprocessing started successfully',
 			};
 		} catch (error) {
 			console.error('Error reprocessing memo:', error);
@@ -316,7 +322,10 @@ class CreditService {
 	/**
 	 * Retry headline generation for a failed memo
 	 */
-	async retryHeadline(memoId: string, appToken: string): Promise<{ success: boolean; message: string }> {
+	async retryHeadline(
+		memoId: string,
+		appToken: string
+	): Promise<{ success: boolean; message: string }> {
 		try {
 			if (!appToken) {
 				throw new Error('No authentication token available');
@@ -326,9 +335,9 @@ class CreditService {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					Authorization: `Bearer ${appToken}`
+					Authorization: `Bearer ${appToken}`,
 				},
-				body: JSON.stringify({ memoId })
+				body: JSON.stringify({ memoId }),
 			});
 
 			if (!response.ok) {
@@ -340,7 +349,7 @@ class CreditService {
 
 			return {
 				success: true,
-				message: result.message || 'Headline generation retry initiated successfully'
+				message: result.message || 'Headline generation retry initiated successfully',
 			};
 		} catch (error) {
 			console.error('Error retrying headline generation:', error);

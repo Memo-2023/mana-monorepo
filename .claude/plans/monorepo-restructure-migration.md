@@ -106,6 +106,7 @@ manacore-monorepo/
 ## Phase 1: Preparation (Pre-Migration)
 
 ### 1.1 Create backup branch
+
 ```bash
 git checkout -b backup/pre-restructure
 git push origin backup/pre-restructure
@@ -114,6 +115,7 @@ git checkout -b feat/monorepo-restructure
 ```
 
 ### 1.2 Create target directories
+
 ```bash
 mkdir -p apps
 mkdir -p services
@@ -125,17 +127,17 @@ mkdir -p services
 
 ### 2.1 Move projects to apps/ folder
 
-| Source | Destination |
-|--------|-------------|
-| `chat/` | `apps/chat/` |
+| Source            | Destination            |
+| ----------------- | ---------------------- |
+| `chat/`           | `apps/chat/`           |
 | `maerchenzauber/` | `apps/maerchenzauber/` |
-| `manadeck/` | `apps/manadeck/` |
-| `memoro/` | `apps/memoro/` |
-| `picture/` | `apps/picture/` |
-| `nutriphi/` | `apps/nutriphi/` |
-| `uload/` | `apps/uload/` |
-| `news/` | `apps/news/` |
-| `manacore/` | `apps/manacore/` |
+| `manadeck/`       | `apps/manadeck/`       |
+| `memoro/`         | `apps/memoro/`         |
+| `picture/`        | `apps/picture/`        |
+| `nutriphi/`       | `apps/nutriphi/`       |
+| `uload/`          | `apps/uload/`          |
+| `news/`           | `apps/news/`           |
+| `manacore/`       | `apps/manacore/`       |
 
 ```bash
 # Move all products to apps/
@@ -154,9 +156,9 @@ git mv manacore apps/manacore
 
 Projects with backends at root level need restructuring:
 
-| Source | Destination |
-|--------|-------------|
-| `apps/chat/backend/` | `apps/chat/apps/backend/` |
+| Source                   | Destination                   |
+| ------------------------ | ----------------------------- |
+| `apps/chat/backend/`     | `apps/chat/apps/backend/`     |
 | `apps/manadeck/backend/` | `apps/manadeck/apps/backend/` |
 | `apps/nutriphi/backend/` | `apps/nutriphi/apps/backend/` |
 
@@ -175,6 +177,7 @@ git mv apps/nutriphi/backend apps/nutriphi/apps/backend
 ```
 
 ### 2.3 Move mana-core-auth to services/
+
 ```bash
 git mv mana-core-auth services/mana-core-auth
 ```
@@ -186,6 +189,7 @@ git mv mana-core-auth services/mana-core-auth
 ### 3.1 Update pnpm-workspace.yaml
 
 **New content:**
+
 ```yaml
 packages:
   # Product applications
@@ -207,85 +211,86 @@ No changes needed - turbo.json uses task definitions, not paths.
 ### 3.3 Update root package.json scripts
 
 **Replace scripts section:**
+
 ```json
 {
-  "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
-    "type-check": "turbo run type-check",
-    "clean": "turbo run clean",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
+	"scripts": {
+		"dev": "turbo run dev",
+		"build": "turbo run build",
+		"test": "turbo run test",
+		"lint": "turbo run lint",
+		"type-check": "turbo run type-check",
+		"clean": "turbo run clean",
+		"format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
+		"format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
 
-    "maerchenzauber:dev": "turbo run dev --filter=@maerchenzauber/*...",
-    "manacore:dev": "turbo run dev --filter=@manacore/*...",
-    "manadeck:dev": "turbo run dev --filter=@manadeck/*...",
-    "memoro:dev": "turbo run dev --filter=@memoro/*...",
-    "picture:dev": "turbo run dev --filter=@picture/*...",
-    "uload:dev": "turbo run dev --filter=@uload/*...",
-    "chat:dev": "turbo run dev --filter=@chat/*...",
-    "nutriphi:dev": "turbo run dev --filter=@nutriphi/*...",
-    "news:dev": "turbo run dev --filter=@news/*...",
+		"maerchenzauber:dev": "turbo run dev --filter=@maerchenzauber/*...",
+		"manacore:dev": "turbo run dev --filter=@manacore/*...",
+		"manadeck:dev": "turbo run dev --filter=@manadeck/*...",
+		"memoro:dev": "turbo run dev --filter=@memoro/*...",
+		"picture:dev": "turbo run dev --filter=@picture/*...",
+		"uload:dev": "turbo run dev --filter=@uload/*...",
+		"chat:dev": "turbo run dev --filter=@chat/*...",
+		"nutriphi:dev": "turbo run dev --filter=@nutriphi/*...",
+		"news:dev": "turbo run dev --filter=@news/*...",
 
-    "dev:maerchenzauber:web": "pnpm --filter @maerchenzauber/web dev",
-    "dev:maerchenzauber:landing": "pnpm --filter @maerchenzauber/landing dev",
-    "dev:maerchenzauber:backend": "pnpm --filter @maerchenzauber/backend dev",
-    "dev:maerchenzauber:mobile": "pnpm --filter @maerchenzauber/mobile dev",
-    "dev:maerchenzauber:app": "turbo run dev --filter=@maerchenzauber/web --filter=@maerchenzauber/backend",
+		"dev:maerchenzauber:web": "pnpm --filter @maerchenzauber/web dev",
+		"dev:maerchenzauber:landing": "pnpm --filter @maerchenzauber/landing dev",
+		"dev:maerchenzauber:backend": "pnpm --filter @maerchenzauber/backend dev",
+		"dev:maerchenzauber:mobile": "pnpm --filter @maerchenzauber/mobile dev",
+		"dev:maerchenzauber:app": "turbo run dev --filter=@maerchenzauber/web --filter=@maerchenzauber/backend",
 
-    "dev:manacore:web": "pnpm --filter @manacore/web dev",
-    "dev:manacore:landing": "pnpm --filter @manacore/landing dev",
-    "dev:manacore:mobile": "pnpm --filter @manacore/mobile dev",
+		"dev:manacore:web": "pnpm --filter @manacore/web dev",
+		"dev:manacore:landing": "pnpm --filter @manacore/landing dev",
+		"dev:manacore:mobile": "pnpm --filter @manacore/mobile dev",
 
-    "dev:manadeck:web": "pnpm --filter @manadeck/web dev",
-    "dev:manadeck:landing": "pnpm --filter @manadeck/landing dev",
-    "dev:manadeck:backend": "pnpm --filter @manadeck/backend dev",
-    "dev:manadeck:mobile": "pnpm --filter @manadeck/mobile dev",
-    "dev:manadeck:app": "turbo run dev --filter=@manadeck/web --filter=@manadeck/backend",
+		"dev:manadeck:web": "pnpm --filter @manadeck/web dev",
+		"dev:manadeck:landing": "pnpm --filter @manadeck/landing dev",
+		"dev:manadeck:backend": "pnpm --filter @manadeck/backend dev",
+		"dev:manadeck:mobile": "pnpm --filter @manadeck/mobile dev",
+		"dev:manadeck:app": "turbo run dev --filter=@manadeck/web --filter=@manadeck/backend",
 
-    "dev:memoro:web": "pnpm --filter @memoro/web dev",
-    "dev:memoro:landing": "pnpm --filter @memoro/landing dev",
-    "dev:memoro:mobile": "pnpm --filter @memoro/mobile dev",
+		"dev:memoro:web": "pnpm --filter @memoro/web dev",
+		"dev:memoro:landing": "pnpm --filter @memoro/landing dev",
+		"dev:memoro:mobile": "pnpm --filter @memoro/mobile dev",
 
-    "dev:picture:web": "pnpm --filter @picture/web dev",
-    "dev:picture:landing": "pnpm --filter @picture/landing dev",
-    "dev:picture:mobile": "pnpm --filter @picture/mobile dev",
+		"dev:picture:web": "pnpm --filter @picture/web dev",
+		"dev:picture:landing": "pnpm --filter @picture/landing dev",
+		"dev:picture:mobile": "pnpm --filter @picture/mobile dev",
 
-    "dev:uload:web": "pnpm --filter @uload/web dev",
+		"dev:uload:web": "pnpm --filter @uload/web dev",
 
-    "dev:chat:mobile": "pnpm --filter @chat/mobile dev",
-    "dev:chat:web": "pnpm --filter @chat/web dev",
-    "dev:chat:landing": "pnpm --filter @chat/landing dev",
-    "dev:chat:backend": "pnpm --filter @chat/backend start:dev",
-    "dev:chat:app": "turbo run dev --filter=@chat/web --filter=@chat/backend",
+		"dev:chat:mobile": "pnpm --filter @chat/mobile dev",
+		"dev:chat:web": "pnpm --filter @chat/web dev",
+		"dev:chat:landing": "pnpm --filter @chat/landing dev",
+		"dev:chat:backend": "pnpm --filter @chat/backend start:dev",
+		"dev:chat:app": "turbo run dev --filter=@chat/web --filter=@chat/backend",
 
-    "dev:nutriphi:mobile": "pnpm --filter @nutriphi/mobile dev",
-    "dev:nutriphi:web": "pnpm --filter @nutriphi/web dev",
-    "dev:nutriphi:landing": "pnpm --filter @nutriphi/landing dev",
-    "dev:nutriphi:backend": "pnpm --filter @nutriphi/backend start:dev",
-    "dev:nutriphi:app": "turbo run dev --filter=@nutriphi/web --filter=@nutriphi/backend",
+		"dev:nutriphi:mobile": "pnpm --filter @nutriphi/mobile dev",
+		"dev:nutriphi:web": "pnpm --filter @nutriphi/web dev",
+		"dev:nutriphi:landing": "pnpm --filter @nutriphi/landing dev",
+		"dev:nutriphi:backend": "pnpm --filter @nutriphi/backend start:dev",
+		"dev:nutriphi:app": "turbo run dev --filter=@nutriphi/web --filter=@nutriphi/backend",
 
-    "dev:news:mobile": "pnpm --filter @news/mobile dev",
-    "dev:news:web": "pnpm --filter @news/web dev",
-    "dev:news:landing": "pnpm --filter @news/landing dev",
-    "dev:news:api": "pnpm --filter @news/api start:dev",
-    "dev:news:app": "turbo run dev --filter=@news/web --filter=@news/api",
-    "news:db:push": "pnpm --filter @manacore/news-database db:push",
-    "news:db:studio": "pnpm --filter @manacore/news-database db:studio",
+		"dev:news:mobile": "pnpm --filter @news/mobile dev",
+		"dev:news:web": "pnpm --filter @news/web dev",
+		"dev:news:landing": "pnpm --filter @news/landing dev",
+		"dev:news:api": "pnpm --filter @news/api start:dev",
+		"dev:news:app": "turbo run dev --filter=@news/web --filter=@news/api",
+		"news:db:push": "pnpm --filter @manacore/news-database db:push",
+		"news:db:studio": "pnpm --filter @manacore/news-database db:studio",
 
-    "docker:up": "docker compose -f docker-compose.dev.yml up -d postgres redis",
-    "docker:up:auth": "docker compose -f docker-compose.dev.yml --profile auth up -d",
-    "docker:up:chat": "docker compose -f docker-compose.dev.yml --profile chat up -d",
-    "docker:up:all": "docker compose -f docker-compose.dev.yml --profile all up -d",
-    "docker:down": "docker compose -f docker-compose.dev.yml --profile all down",
-    "docker:logs": "docker compose -f docker-compose.dev.yml logs -f",
-    "docker:logs:auth": "docker compose -f docker-compose.dev.yml logs -f mana-core-auth",
-    "docker:logs:chat": "docker compose -f docker-compose.dev.yml logs -f chat-backend",
-    "docker:ps": "docker compose -f docker-compose.dev.yml ps -a",
-    "docker:clean": "docker compose -f docker-compose.dev.yml --profile all down -v"
-  }
+		"docker:up": "docker compose -f docker-compose.dev.yml up -d postgres redis",
+		"docker:up:auth": "docker compose -f docker-compose.dev.yml --profile auth up -d",
+		"docker:up:chat": "docker compose -f docker-compose.dev.yml --profile chat up -d",
+		"docker:up:all": "docker compose -f docker-compose.dev.yml --profile all up -d",
+		"docker:down": "docker compose -f docker-compose.dev.yml --profile all down",
+		"docker:logs": "docker compose -f docker-compose.dev.yml logs -f",
+		"docker:logs:auth": "docker compose -f docker-compose.dev.yml logs -f mana-core-auth",
+		"docker:logs:chat": "docker compose -f docker-compose.dev.yml logs -f chat-backend",
+		"docker:ps": "docker compose -f docker-compose.dev.yml ps -a",
+		"docker:clean": "docker compose -f docker-compose.dev.yml --profile all down -v"
+	}
 }
 ```
 
@@ -296,6 +301,7 @@ No changes needed - turbo.json uses task definitions, not paths.
 ### 4.1 Update docker-compose.dev.yml
 
 **Key changes:**
+
 - mana-core-auth Dockerfile path: `./services/mana-core-auth/Dockerfile`
 - chat-backend Dockerfile path: `./apps/chat/apps/backend/Dockerfile`
 
@@ -304,14 +310,14 @@ services:
   # ... postgres and redis unchanged ...
 
   mana-core-auth:
-    profiles: ["auth", "all"]
+    profiles: ['auth', 'all']
     build:
       context: .
       dockerfile: ./services/mana-core-auth/Dockerfile
     # ... rest unchanged ...
 
   chat-backend:
-    profiles: ["chat", "all"]
+    profiles: ['chat', 'all']
     build:
       context: .
       dockerfile: ./apps/chat/apps/backend/Dockerfile
@@ -323,6 +329,7 @@ services:
 Each Dockerfile needs path updates for COPY commands.
 
 **services/mana-core-auth/Dockerfile:**
+
 ```dockerfile
 # Update COPY paths
 COPY services/mana-core-auth/package.json ./services/mana-core-auth/
@@ -331,6 +338,7 @@ COPY packages/ ./packages/
 ```
 
 **apps/chat/apps/backend/Dockerfile:**
+
 ```dockerfile
 # Update COPY paths
 COPY apps/chat/apps/backend/package.json ./apps/chat/apps/backend/
@@ -350,6 +358,7 @@ Each project's CLAUDE.md needs path updates in documentation.
 ### 5.2 Update relative imports in code
 
 Check for any hardcoded relative paths like:
+
 - `../../packages/`
 - `../../../shared/`
 
@@ -358,6 +367,7 @@ These may need adjustment.
 ### 5.3 Update .env files
 
 Environment files should still work but verify paths for:
+
 - File-based configs
 - Volume mounts
 - Any path references
@@ -367,6 +377,7 @@ Environment files should still work but verify paths for:
 ## Phase 6: Validation & Testing
 
 ### 6.1 Reinstall dependencies
+
 ```bash
 rm -rf node_modules
 rm pnpm-lock.yaml
@@ -374,11 +385,13 @@ pnpm install
 ```
 
 ### 6.2 Verify workspace packages
+
 ```bash
 pnpm ls -r --depth 0
 ```
 
 ### 6.3 Test turbo commands
+
 ```bash
 pnpm chat:dev        # Should start all chat apps
 pnpm dev:chat:web    # Should start just web
@@ -386,6 +399,7 @@ pnpm type-check      # Should check all projects
 ```
 
 ### 6.4 Test Docker
+
 ```bash
 pnpm docker:up:all
 pnpm docker:ps
@@ -393,6 +407,7 @@ pnpm docker:logs
 ```
 
 ### 6.5 Build all projects
+
 ```bash
 pnpm build
 ```
@@ -402,6 +417,7 @@ pnpm build
 ## Phase 7: Commit & Merge
 
 ### 7.1 Commit changes
+
 ```bash
 git add .
 git commit -m "refactor: restructure monorepo with apps/ and services/ directories
@@ -415,6 +431,7 @@ git commit -m "refactor: restructure monorepo with apps/ and services/ directori
 ```
 
 ### 7.2 Create PR
+
 ```bash
 gh pr create --title "refactor: monorepo restructure" --body "..."
 ```
@@ -424,6 +441,7 @@ gh pr create --title "refactor: monorepo restructure" --body "..."
 ## Rollback Plan
 
 If issues arise:
+
 ```bash
 git checkout main
 git branch -D feat/monorepo-restructure
@@ -455,13 +473,13 @@ git branch -D feat/monorepo-restructure
 
 ## Estimated Impact
 
-| Item | Count |
-|------|-------|
-| Directories to move | 10 |
-| Config files to update | 5-6 |
-| Dockerfiles to update | ~6 |
-| package.json scripts | ~40 (most unchanged) |
-| CLAUDE.md files | ~10 |
+| Item                   | Count                |
+| ---------------------- | -------------------- |
+| Directories to move    | 10                   |
+| Config files to update | 5-6                  |
+| Dockerfiles to update  | ~6                   |
+| package.json scripts   | ~40 (most unchanged) |
+| CLAUDE.md files        | ~10                  |
 
 **Risk Level:** Medium - Many file moves but package names unchanged
 **Estimated Time:** 2-4 hours with testing

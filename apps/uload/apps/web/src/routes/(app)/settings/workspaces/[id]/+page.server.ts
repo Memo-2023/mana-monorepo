@@ -10,28 +10,32 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	try {
 		// Get workspace details
 		const workspace = await locals.pb.collection('workspaces').getOne<Workspace>(params.id);
-		
+
 		// Check if user has access
-		const currentMember = await locals.pb.collection('workspace_members').getList<WorkspaceMember>(1, 1, {
-			filter: `workspace="${params.id}" && user="${locals.user.id}"`
-		});
-		
+		const currentMember = await locals.pb
+			.collection('workspace_members')
+			.getList<WorkspaceMember>(1, 1, {
+				filter: `workspace="${params.id}" && user="${locals.user.id}"`,
+			});
+
 		if (workspace.owner !== locals.user.id && currentMember.items.length === 0) {
 			redirect(303, '/settings');
 		}
 
 		// Get all members
-		const members = await locals.pb.collection('workspace_members').getList<WorkspaceMember>(1, 100, {
-			filter: `workspace="${params.id}"`,
-			expand: 'user',
-			sort: 'role,created'
-		});
+		const members = await locals.pb
+			.collection('workspace_members')
+			.getList<WorkspaceMember>(1, 100, {
+				filter: `workspace="${params.id}"`,
+				expand: 'user',
+				sort: 'role,created',
+			});
 
 		return {
 			workspace,
 			members: members.items,
 			currentMember: currentMember.items[0] || null,
-			user: locals.user
+			user: locals.user,
 		};
 	} catch (error) {
 		console.error('Error loading workspace:', error);
@@ -54,12 +58,12 @@ export const actions = {
 			// Check permissions
 			const workspace = await locals.pb.collection('workspaces').getOne(params.id);
 			const member = await locals.pb.collection('workspace_members').getList(1, 1, {
-				filter: `workspace="${params.id}" && user="${locals.user.id}"`
+				filter: `workspace="${params.id}" && user="${locals.user.id}"`,
 			});
-			
+
 			const isOwner = workspace.owner === locals.user.id;
 			const isAdmin = member.items[0]?.role === 'admin';
-			
+
 			if (!isOwner && !isAdmin) {
 				return fail(403, { error: 'You do not have permission to edit this workspace' });
 			}
@@ -68,14 +72,16 @@ export const actions = {
 			if (slug) {
 				const slugPattern = /^[a-z0-9-]+$/;
 				if (!slugPattern.test(slug)) {
-					return fail(400, { error: 'Slug can only contain lowercase letters, numbers, and hyphens' });
+					return fail(400, {
+						error: 'Slug can only contain lowercase letters, numbers, and hyphens',
+					});
 				}
-				
+
 				// Check if slug is unique (excluding current workspace)
 				try {
-					const existing = await locals.pb.collection('workspaces').getFirstListItem(
-						`slug="${slug}" && id!="${params.id}"`
-					);
+					const existing = await locals.pb
+						.collection('workspaces')
+						.getFirstListItem(`slug="${slug}" && id!="${params.id}"`);
 					if (existing) {
 						return fail(400, { error: 'This slug is already taken' });
 					}
@@ -88,7 +94,7 @@ export const actions = {
 			await locals.pb.collection('workspaces').update(params.id, {
 				name: name.trim(),
 				description: description?.trim() || '',
-				slug: slug?.trim() || null
+				slug: slug?.trim() || null,
 			});
 
 			return { success: true, message: 'Workspace settings updated' };
@@ -111,18 +117,18 @@ export const actions = {
 			// Check permissions
 			const workspace = await locals.pb.collection('workspaces').getOne(params.id);
 			const member = await locals.pb.collection('workspace_members').getList(1, 1, {
-				filter: `workspace="${params.id}" && user="${locals.user.id}"`
+				filter: `workspace="${params.id}" && user="${locals.user.id}"`,
 			});
-			
+
 			const canInvite = workspace.owner === locals.user.id || member.items[0]?.role === 'admin';
-			
+
 			if (!canInvite) {
 				return fail(403, { error: 'You do not have permission to invite members' });
 			}
 
 			// Find user by email
 			const users = await locals.pb.collection('users').getList(1, 1, {
-				filter: `email="${email}"`
+				filter: `email="${email}"`,
 			});
 
 			if (users.items.length === 0) {
@@ -133,7 +139,7 @@ export const actions = {
 
 			// Check if already a member
 			const existingMember = await locals.pb.collection('workspace_members').getList(1, 1, {
-				filter: `workspace="${params.id}" && user="${invitedUser.id}"`
+				filter: `workspace="${params.id}" && user="${invitedUser.id}"`,
 			});
 
 			if (existingMember.items.length > 0) {
@@ -148,7 +154,7 @@ export const actions = {
 				role: role || 'member',
 				invitation_status: 'pending',
 				invitation_token: invitationToken,
-				invited_at: new Date().toISOString()
+				invited_at: new Date().toISOString(),
 			});
 
 			// TODO: Send invitation email
@@ -172,7 +178,7 @@ export const actions = {
 			// Check permissions
 			const workspace = await locals.pb.collection('workspaces').getOne(params.id);
 			const isOwner = workspace.owner === locals.user.id;
-			
+
 			if (!isOwner) {
 				return fail(403, { error: 'Only workspace owner can remove members' });
 			}
@@ -195,11 +201,11 @@ export const actions = {
 		try {
 			// Check if owner
 			const workspace = await locals.pb.collection('workspaces').getOne(params.id);
-			
+
 			if (workspace.owner !== locals.user.id) {
 				return fail(403, { error: 'Only workspace owner can delete the workspace' });
 			}
-			
+
 			// Don't allow deleting personal workspaces
 			if (workspace.type === 'personal') {
 				return fail(403, { error: 'Personal workspaces cannot be deleted' });
@@ -207,18 +213,18 @@ export const actions = {
 
 			// Delete all workspace members first
 			const members = await locals.pb.collection('workspace_members').getList(1, 100, {
-				filter: `workspace="${params.id}"`
+				filter: `workspace="${params.id}"`,
 			});
 
 			for (const member of members.items) {
 				await locals.pb.collection('workspace_members').delete(member.id);
 			}
-			
+
 			// Delete all links in this workspace
 			const links = await locals.pb.collection('links').getList(1, 100, {
-				filter: `workspace_id="${params.id}"`
+				filter: `workspace_id="${params.id}"`,
 			});
-			
+
 			for (const link of links.items) {
 				await locals.pb.collection('links').delete(link.id);
 			}
@@ -232,5 +238,5 @@ export const actions = {
 			console.error('Error deleting workspace:', error);
 			return fail(400, { error: 'Failed to delete workspace: ' + (error as any)?.message });
 		}
-	}
+	},
 } satisfies Actions;

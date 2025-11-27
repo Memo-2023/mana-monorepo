@@ -2,21 +2,28 @@
 import { t } from '../i18n';
 ---
 
-<section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+<section class="relative flex min-h-screen items-center justify-center overflow-hidden">
 	<!-- Background Gradient -->
-	<div class="absolute inset-0 bg-gradient-to-br from-primary-900/20 via-dark-surface to-secondary-900/20"></div>
+	<div
+		class="to-secondary-900/20 absolute inset-0 bg-gradient-to-br from-primary-900/20 via-dark-surface"
+	>
+	</div>
 
 	<!-- Content -->
-	<div class="relative z-10 container mx-auto px-4 py-24">
-		<div class="max-w-4xl mx-auto text-center">
+	<div class="container relative z-10 mx-auto px-4 py-24">
+		<div class="mx-auto max-w-4xl text-center">
 			<!-- Badge -->
-			<div class="inline-flex items-center px-4 py-2 mb-8 bg-primary/10 border border-primary/20 rounded-full">
+			<div
+				class="mb-8 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-2"
+			>
 				<span class="text-sm text-primary-300">{t('hero.badge')}</span>
 			</div>
 
 			<!-- Main Heading -->
-			<h1 class="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
-				<span class="bg-gradient-to-r from-primary-400 via-secondary-400 to-primary-400 bg-clip-text text-transparent animate-gradient">
+			<h1 class="mb-6 text-6xl font-bold leading-tight md:text-7xl lg:text-8xl">
+				<span
+					class="animate-gradient bg-gradient-to-r from-primary-400 via-secondary-400 to-primary-400 bg-clip-text text-transparent"
+				>
 					{t('hero.title')}
 				</span>
 				<br />
@@ -24,39 +31,39 @@ import { t } from '../i18n';
 			</h1>
 
 			<!-- Subtitle -->
-			<p class="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl mx-auto">
+			<p class="mx-auto mb-12 max-w-2xl text-xl text-gray-300 md:text-2xl">
 				{t('hero.description')}
 			</p>
 
 			<!-- CTA Buttons -->
-			<div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+			<div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
 				<a
 					href="#"
-					class="group px-8 py-4 bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white rounded-lg font-semibold text-lg transition-all duration-300 shadow-lg shadow-primary/50 hover:shadow-primary/70 hover:scale-105"
+					class="hover:to-secondary-700 group rounded-lg bg-gradient-to-r from-primary-600 to-secondary-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-primary/50 transition-all duration-300 hover:scale-105 hover:from-primary-700 hover:shadow-primary/70"
 				>
 					{t('hero.cta_primary')}
-					<span class="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
+					<span class="ml-2 inline-block transition-transform group-hover:translate-x-1">→</span>
 				</a>
 				<a
 					href="#features"
-					class="px-8 py-4 bg-dark-elevated/50 hover:bg-dark-elevated text-white rounded-lg font-semibold text-lg transition-all duration-300 border border-dark-border hover:border-primary/50"
+					class="rounded-lg border border-dark-border bg-dark-elevated/50 px-8 py-4 text-lg font-semibold text-white transition-all duration-300 hover:border-primary/50 hover:bg-dark-elevated"
 				>
 					{t('hero.cta_secondary')}
 				</a>
 			</div>
 
 			<!-- Stats -->
-			<div class="grid grid-cols-3 gap-8 mt-16 max-w-2xl mx-auto">
+			<div class="mx-auto mt-16 grid max-w-2xl grid-cols-3 gap-8">
 				<div class="text-center">
-					<div class="text-3xl md:text-4xl font-bold text-white mb-2">50K+</div>
+					<div class="mb-2 text-3xl font-bold text-white md:text-4xl">50K+</div>
 					<div class="text-sm text-gray-400">{t('hero.stats.images')}</div>
 				</div>
 				<div class="text-center">
-					<div class="text-3xl md:text-4xl font-bold text-white mb-2">10+</div>
+					<div class="mb-2 text-3xl font-bold text-white md:text-4xl">10+</div>
 					<div class="text-sm text-gray-400">{t('hero.stats.models')}</div>
 				</div>
 				<div class="text-center">
-					<div class="text-3xl md:text-4xl font-bold text-white mb-2">99%</div>
+					<div class="mb-2 text-3xl font-bold text-white md:text-4xl">99%</div>
 					<div class="text-sm text-gray-400">{t('hero.stats.satisfaction')}</div>
 				</div>
 			</div>
@@ -64,13 +71,20 @@ import { t } from '../i18n';
 	</div>
 
 	<!-- Decorative Elements -->
-	<div class="absolute top-1/4 left-10 w-72 h-72 bg-primary/30 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
-	<div class="absolute bottom-1/4 right-10 w-96 h-96 bg-secondary/30 rounded-full filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
+	<div
+		class="absolute left-10 top-1/4 h-72 w-72 animate-pulse rounded-full bg-primary/30 opacity-20 blur-3xl filter"
+	>
+	</div>
+	<div
+		class="absolute bottom-1/4 right-10 h-96 w-96 animate-pulse rounded-full bg-secondary/30 opacity-20 blur-3xl filter delay-1000"
+	>
+	</div>
 </section>
 
 <style>
 	@keyframes gradient {
-		0%, 100% {
+		0%,
+		100% {
 			background-position: 0% 50%;
 		}
 		50% {

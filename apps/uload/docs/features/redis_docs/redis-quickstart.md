@@ -59,10 +59,11 @@ redis-cli ping
 Visit: http://localhost:5173/api/redis-status
 
 Should see:
+
 ```json
 {
-  "connected": true,
-  "available": true
+	"connected": true,
+	"available": true
 }
 ```
 
@@ -105,17 +106,20 @@ brew services stop redis
 ## 🆘 Help
 
 **Redis won't start?**
+
 ```bash
 brew services restart redis
 ```
 
 **Connection refused?**
+
 ```bash
 # Check if running
 ps aux | grep redis
 ```
 
 **Cache not working?**
+
 - Check console for Redis connection message
 - Verify environment variables are loaded
 - Try explicit env vars: `REDIS_HOST=localhost npm run dev`

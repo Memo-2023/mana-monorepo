@@ -5,6 +5,7 @@ This guide explains how RevenueCat has been integrated into the Storyteller mobi
 ## Overview
 
 RevenueCat is now integrated to handle:
+
 - Monthly and yearly subscription plans
 - One-time mana package purchases (consumables)
 - Purchase restoration across devices
@@ -69,6 +70,7 @@ EXPO_PUBLIC_REVENUECAT_ANDROID_KEY=goog_YOUR_ANDROID_KEY_HERE
 ```
 
 Get your API keys from:
+
 1. Go to https://app.revenuecat.com
 2. Navigate to your project
 3. Go to "API Keys" section
@@ -80,12 +82,12 @@ Add the environment variables to Expo configuration in `mobile/app.json`:
 
 ```json
 {
-  "expo": {
-    "extra": {
-      "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "${EXPO_PUBLIC_REVENUECAT_IOS_KEY}",
-      "EXPO_PUBLIC_REVENUECAT_ANDROID_KEY": "${EXPO_PUBLIC_REVENUECAT_ANDROID_KEY}"
-    }
-  }
+	"expo": {
+		"extra": {
+			"EXPO_PUBLIC_REVENUECAT_IOS_KEY": "${EXPO_PUBLIC_REVENUECAT_IOS_KEY}",
+			"EXPO_PUBLIC_REVENUECAT_ANDROID_KEY": "${EXPO_PUBLIC_REVENUECAT_ANDROID_KEY}"
+		}
+	}
 }
 ```
 
@@ -97,40 +99,40 @@ Update your root layout file (e.g., `app/_layout.tsx`) to initialize RevenueCat:
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  initializeRevenueCat,
-  identifyRevenueCatUser,
-  resetRevenueCatUser
+	initializeRevenueCat,
+	identifyRevenueCatUser,
+	resetRevenueCatUser,
 } from '@/features/subscription/revenueCatManager';
 
 export default function RootLayout() {
-  const { user } = useAuth();
+	const { user } = useAuth();
 
-  useEffect(() => {
-    // Initialize RevenueCat on app start
-    async function init() {
-      await initializeRevenueCat();
+	useEffect(() => {
+		// Initialize RevenueCat on app start
+		async function init() {
+			await initializeRevenueCat();
 
-      // Identify user if logged in
-      if (user?.id) {
-        await identifyRevenueCatUser(user.id);
-      }
-    }
-    init();
-  }, []);
+			// Identify user if logged in
+			if (user?.id) {
+				await identifyRevenueCatUser(user.id);
+			}
+		}
+		init();
+	}, []);
 
-  // Handle user login/logout
-  useEffect(() => {
-    async function handleAuthChange() {
-      if (user?.id) {
-        await identifyRevenueCatUser(user.id);
-      } else {
-        await resetRevenueCatUser();
-      }
-    }
-    handleAuthChange();
-  }, [user]);
+	// Handle user login/logout
+	useEffect(() => {
+		async function handleAuthChange() {
+			if (user?.id) {
+				await identifyRevenueCatUser(user.id);
+			} else {
+				await resetRevenueCatUser();
+			}
+		}
+		handleAuthChange();
+	}, [user]);
 
-  // ... rest of your layout
+	// ... rest of your layout
 }
 ```
 
@@ -167,12 +169,14 @@ export default function RootLayout() {
 Your products are already created! Make sure they have:
 
 **Subscriptions:**
+
 - ✅ Kleiner Mana Stream (Monthly/Yearly)
 - ✅ Mittlerer Mana Stream (Monthly/Yearly)
 - ✅ Großer Mana Stream (Monthly/Yearly)
 - ✅ Riesiger Mana Stream (Monthly/Yearly)
 
 **Consumables:**
+
 - ✅ Kleiner Mana Trank
 - ✅ Mittlerer Mana Trank
 - ✅ Großer Mana Trank
@@ -234,18 +238,21 @@ If you want to sync purchases with your backend:
 ## Product ID Reference
 
 ### Subscriptions (Monthly)
+
 - Small: `mana_stream_small_maerchenzauber_monthly_v1`
 - Medium: `mana_stream_medium_maerchenzauber_monthly_v1`
 - Large: `mana_stream_large_maerchenzauber_monthly_v1`
 - Giant: `mana_stream_giant_maerchenzauber_monthly_v1`
 
 ### Subscriptions (Yearly)
+
 - Small: `mana_stream_small_maerchenzauber_yearly_v1`
 - Medium: `mana_stream_medium_maerchenzauber_yearly_v1`
 - Large: `mana_stream_large_maerchenzauber_yearly_v1`
 - Giant: `mana_stream_giant_maerchenzauber_yearly_v1`
 
 ### Consumables (Mana Potions)
+
 - Small: `mana_potion_small_maerchenzauber_v1`
 - Medium: `mana_potion_medium_maerchenzauber_v1`
 - Large: `mana_potion_large_maerchenzauber_v1`
@@ -258,6 +265,7 @@ If you want to sync purchases with your backend:
 **Problem:** Subscription screen shows "Lade Abonnements..." indefinitely
 
 **Solutions:**
+
 1. Check RevenueCat API keys in `.env.local`
 2. Verify offerings are configured in RevenueCat dashboard
 3. Check console logs for `[RevenueCat]` error messages
@@ -268,6 +276,7 @@ If you want to sync purchases with your backend:
 **Problem:** "Der Kauf konnte nicht abgeschlossen werden"
 
 **Solutions:**
+
 1. Verify sandbox tester is signed in (for development)
 2. Check RevenueCat dashboard for error events
 3. Ensure products are approved in App Store Connect
@@ -278,6 +287,7 @@ If you want to sync purchases with your backend:
 **Problem:** Purchases not associated with user account
 
 **Solutions:**
+
 1. Verify `identifyRevenueCatUser()` is called after login
 2. Check that user ID is being passed correctly
 3. Look for "User identified" log messages
@@ -315,6 +325,7 @@ npm run dev
 ## Questions?
 
 If you encounter any issues:
+
 1. Check console logs for `[RevenueCat]` messages
 2. Review RevenueCat dashboard for error events
 3. Verify all configuration steps are completed

@@ -29,7 +29,10 @@
 // Factory functions
 export { createAuthStore } from './createAuthStore.svelte';
 export { createSupabaseAuthStore } from './createSupabaseAuthStore.svelte';
-export type { CreateSupabaseAuthStoreOptions, SupabaseUser } from './createSupabaseAuthStore.svelte';
+export type {
+	CreateSupabaseAuthStoreOptions,
+	SupabaseUser,
+} from './createSupabaseAuthStore.svelte';
 
 // Types
 export type {
@@ -38,5 +41,5 @@ export type {
 	AuthServiceAdapter,
 	AuthStoreState,
 	AuthStoreActions,
-	AuthStore
+	AuthStore,
 } from './types';

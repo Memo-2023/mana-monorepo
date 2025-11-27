@@ -11,10 +11,7 @@ let error = $state<string | null>(null);
 /**
  * Helper to make authenticated API requests
  */
-async function apiRequest<T>(
-	endpoint: string,
-	options: RequestInit = {}
-): Promise<T> {
+async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 	const appToken = await authService.getAppToken();
 	if (!appToken) {
 		throw new Error('Not authenticated');
@@ -25,8 +22,8 @@ async function apiRequest<T>(
 		headers: {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${appToken}`,
-			...options.headers
-		}
+			...options.headers,
+		},
 	});
 
 	if (!response.ok) {
@@ -105,8 +102,8 @@ export const deckStore = {
 					description: input.description || '',
 					isPublic: input.is_public ?? false,
 					tags: input.tags || [],
-					settings: input.settings || {}
-				})
+					settings: input.settings || {},
+				}),
 			});
 
 			if (response.deck) {
@@ -132,13 +129,10 @@ export const deckStore = {
 		error = null;
 
 		try {
-			const response = await apiRequest<{ success: boolean; deck: Deck }>(
-				`/v1/api/decks/${id}`,
-				{
-					method: 'PUT',
-					body: JSON.stringify(updates)
-				}
-			);
+			const response = await apiRequest<{ success: boolean; deck: Deck }>(`/v1/api/decks/${id}`, {
+				method: 'PUT',
+				body: JSON.stringify(updates),
+			});
 
 			if (response.deck) {
 				// Update in list
@@ -166,7 +160,7 @@ export const deckStore = {
 
 		try {
 			await apiRequest<{ success: boolean }>(`/v1/api/decks/${id}`, {
-				method: 'DELETE'
+				method: 'DELETE',
 			});
 
 			// Remove from list
@@ -189,5 +183,5 @@ export const deckStore = {
 	 */
 	clearError() {
 		error = null;
-	}
+	},
 };

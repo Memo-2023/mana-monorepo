@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { id } = params;
-	
+
 	console.log('[Analytics] Loading analytics for ID/short_code:', id);
 	console.log('[Analytics] User:', locals.user?.id, locals.user?.email);
 
@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			console.log('[Analytics] Not found by ID, trying by short_code:', id);
 			// If not found by ID, try by short_code
 			const linkList = await locals.pb.collection('links').getList(1, 1, {
-				filter: `short_code="${id}"`
+				filter: `short_code="${id}"`,
 			});
 			console.log('[Analytics] Search by short_code result:', linkList.items.length, 'items');
 			if (linkList.items.length === 0) {
@@ -37,7 +37,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		}
 
 		// Check if user owns the link (check both user_id and created_by)
-		console.log('[Analytics] Checking ownership - Link user_id:', link.user_id, 'created_by:', link.created_by);
+		console.log(
+			'[Analytics] Checking ownership - Link user_id:',
+			link.user_id,
+			'created_by:',
+			link.created_by
+		);
 		console.log('[Analytics] Current user ID:', locals.user.id);
 		if (link.user_id !== locals.user.id && link.created_by !== locals.user.id) {
 			console.log('[Analytics] Access denied - user does not own this link');
@@ -47,7 +52,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		const clicks = await locals.pb.collection('analytics').getList(1, 500, {
 			filter: `link="${link.id}"`,
-			sort: '-created'
+			sort: '-created',
 		});
 
 		// Helper function to extract browser from user agent
@@ -127,7 +132,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			clicksByDay: Object.entries(clicksByDay).sort(
 				(a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()
 			),
-			clicksByHour: Array.from({ length: 24 }, (_, i) => [i.toString(), clicksByHour[i] || 0])
+			clicksByHour: Array.from({ length: 24 }, (_, i) => [i.toString(), clicksByHour[i] || 0]),
 		};
 	} catch (err) {
 		console.log('[Analytics] Error occurred:', err);

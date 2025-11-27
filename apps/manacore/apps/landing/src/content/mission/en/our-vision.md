@@ -1,6 +1,6 @@
 ---
-title: "Our Vision: Making AI Accessible to Everyone"
-description: "We believe in a world where everyone has access to the best AI tools - regardless of company size or budget."
+title: 'Our Vision: Making AI Accessible to Everyone'
+description: 'We believe in a world where everyone has access to the best AI tools - regardless of company size or budget.'
 category: vision
 order: 1
 featured: true

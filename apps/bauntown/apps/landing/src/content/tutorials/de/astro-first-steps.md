@@ -1,11 +1,11 @@
 ---
-title: "Erste Schritte mit Astro"
-description: "Eine Einführung in Astro und wie du dein erstes Projekt startest."
+title: 'Erste Schritte mit Astro'
+description: 'Eine Einführung in Astro und wie du dein erstes Projekt startest.'
 pubDate: 2025-03-15
-category: "Business"
+category: 'Business'
 featured: true
-image: "/images/tutorials/nobackground/website-with-astro-bauntown-tutorial.png"
-author: "Till Schneider"
+image: '/images/tutorials/nobackground/website-with-astro-bauntown-tutorial.png'
+author: 'Till Schneider'
 ---
 
 # Erste Schritte mit Astro
@@ -68,21 +68,21 @@ Astro-Komponenten sind die Grundbausteine einer Astro-Website. Sie verwenden ein
 ```astro
 ---
 // Der Component Script (JS/TS)
-const greeting = "Hallo";
-const name = "Astro";
+const greeting = 'Hallo';
+const name = 'Astro';
 ---
 
 <!-- Komponenten-Template (HTML + JS Expressions) -->
 <div>
-  <h1>{greeting}, {name}!</h1>
-  <p>Willkommen zu Astro!</p>
+	<h1>{greeting}, {name}!</h1>
+	<p>Willkommen zu Astro!</p>
 </div>
 
 <style>
-  /* Komponenten-Styles (skopiert) */
-  h1 {
-    color: navy;
-  }
+	/* Komponenten-Styles (skopiert) */
+	h1 {
+		color: navy;
+	}
 </style>
 ```
 
@@ -95,15 +95,15 @@ Astro v2.0+ führte Content Collections ein, die einen strukturierten Weg bieten
 import { defineCollection, z } from 'astro:content';
 
 const blogCollection = defineCollection({
-  schema: z.object({
-    title: z.string(),
-    pubDate: z.date(),
-    tags: z.array(z.string()),
-  }),
+	schema: z.object({
+		title: z.string(),
+		pubDate: z.date(),
+		tags: z.array(z.string()),
+	}),
 });
 
 export const collections = {
-  'blog': blogCollection,
+	blog: blogCollection,
 };
 ```
 

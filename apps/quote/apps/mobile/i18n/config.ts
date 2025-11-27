@@ -16,47 +16,43 @@ const deviceLanguage = Localization.getLocales()[0]?.languageCode || 'de';
 
 // Initialize i18n synchronously but handle errors
 try {
-  i18n
-    .use(initReactI18next)
-    .init({
-      compatibilityJSON: 'v3',
-      resources: {
-        de: { translation: de },
-        en: { translation: en }
-      },
-      lng: deviceLanguage,
-      fallbackLng: 'de',
-      interpolation: {
-        escapeValue: false
-      },
-      react: {
-        useSuspense: false
-      }
-    });
+	i18n.use(initReactI18next).init({
+		compatibilityJSON: 'v3',
+		resources: {
+			de: { translation: de },
+			en: { translation: en },
+		},
+		lng: deviceLanguage,
+		fallbackLng: 'de',
+		interpolation: {
+			escapeValue: false,
+		},
+		react: {
+			useSuspense: false,
+		},
+	});
 } catch (error) {
-  console.error('Failed to initialize i18n:', error);
-  // Fallback to German if initialization fails
-  i18n
-    .use(initReactI18next)
-    .init({
-      compatibilityJSON: 'v3',
-      resources: {
-        de: { translation: de }
-      },
-      lng: 'de',
-      fallbackLng: 'de',
-      interpolation: {
-        escapeValue: false
-      },
-      react: {
-        useSuspense: false
-      }
-    });
+	console.error('Failed to initialize i18n:', error);
+	// Fallback to German if initialization fails
+	i18n.use(initReactI18next).init({
+		compatibilityJSON: 'v3',
+		resources: {
+			de: { translation: de },
+		},
+		lng: 'de',
+		fallbackLng: 'de',
+		interpolation: {
+			escapeValue: false,
+		},
+		react: {
+			useSuspense: false,
+		},
+	});
 }
 
 export default i18n;
 
 // Helper function to change language
 export const changeLanguage = (lng: string) => {
-  i18n.changeLanguage(lng);
+	i18n.changeLanguage(lng);
 };

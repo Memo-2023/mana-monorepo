@@ -2,154 +2,150 @@ import React from 'react';
 import { Text as RNText, TextProps as RNTextProps, TextStyle } from 'react-native';
 import { useIsDarkMode, useFontSize } from '~/store/settingsStore';
 
-type TextVariant = 
-  | 'h1' 
-  | 'h2' 
-  | 'h3' 
-  | 'h4'
-  | 'body' 
-  | 'bodyLarge'
-  | 'bodySmall'
-  | 'caption'
-  | 'label'
-  | 'button'
-  | 'quote';
+type TextVariant =
+	| 'h1'
+	| 'h2'
+	| 'h3'
+	| 'h4'
+	| 'body'
+	| 'bodyLarge'
+	| 'bodySmall'
+	| 'caption'
+	| 'label'
+	| 'button'
+	| 'quote';
 
-type TextColor = 
-  | 'primary'
-  | 'secondary'
-  | 'tertiary'
-  | 'accent'
-  | 'danger'
-  | 'success'
-  | 'warning'
-  | 'inherit';
+type TextColor =
+	| 'primary'
+	| 'secondary'
+	| 'tertiary'
+	| 'accent'
+	| 'danger'
+	| 'success'
+	| 'warning'
+	| 'inherit';
 
 interface TextProps extends Omit<RNTextProps, 'style'> {
-  variant?: TextVariant;
-  color?: TextColor;
-  weight?: 'normal' | 'medium' | 'semibold' | 'bold';
-  align?: 'left' | 'center' | 'right' | 'justify';
-  className?: string;
-  style?: TextStyle;
-  children?: React.ReactNode;
+	variant?: TextVariant;
+	color?: TextColor;
+	weight?: 'normal' | 'medium' | 'semibold' | 'bold';
+	align?: 'left' | 'center' | 'right' | 'justify';
+	className?: string;
+	style?: TextStyle;
+	children?: React.ReactNode;
 }
 
 export default function Text({
-  variant = 'body',
-  color = 'primary',
-  weight,
-  align,
-  className = '',
-  style,
-  children,
-  ...props
+	variant = 'body',
+	color = 'primary',
+	weight,
+	align,
+	className = '',
+	style,
+	children,
+	...props
 }: TextProps) {
-  const isDarkMode = useIsDarkMode();
-  const fontSize = useFontSize();
+	const isDarkMode = useIsDarkMode();
+	const fontSize = useFontSize();
 
-  // Font size multiplier based on user preference
-  const sizeMultiplier = fontSize === 'small' ? 0.9 : fontSize === 'large' ? 1.1 : 1;
+	// Font size multiplier based on user preference
+	const sizeMultiplier = fontSize === 'small' ? 0.9 : fontSize === 'large' ? 1.1 : 1;
 
-  // Base styles for each variant
-  const variantStyles: Record<TextVariant, string> = {
-    h1: 'text-4xl font-bold',
-    h2: 'text-3xl font-bold',
-    h3: 'text-2xl font-semibold',
-    h4: 'text-xl font-semibold',
-    body: 'text-base',
-    bodyLarge: 'text-lg',
-    bodySmall: 'text-sm',
-    caption: 'text-xs',
-    label: 'text-sm font-medium uppercase tracking-wider',
-    button: 'text-base font-semibold',
-    quote: 'text-lg italic',
-  };
+	// Base styles for each variant
+	const variantStyles: Record<TextVariant, string> = {
+		h1: 'text-4xl font-bold',
+		h2: 'text-3xl font-bold',
+		h3: 'text-2xl font-semibold',
+		h4: 'text-xl font-semibold',
+		body: 'text-base',
+		bodyLarge: 'text-lg',
+		bodySmall: 'text-sm',
+		caption: 'text-xs',
+		label: 'text-sm font-medium uppercase tracking-wider',
+		button: 'text-base font-semibold',
+		quote: 'text-lg italic',
+	};
 
-  // Color styles based on theme
-  const getColorClass = (color: TextColor): string => {
-    if (color === 'inherit') return '';
-    
-    const colors: Record<TextColor, { dark: string; light: string }> = {
-      primary: {
-        dark: 'text-white',
-        light: 'text-black',
-      },
-      secondary: {
-        dark: 'text-white/60',
-        light: 'text-black/60',
-      },
-      tertiary: {
-        dark: 'text-white/40',
-        light: 'text-black/40',
-      },
-      accent: {
-        dark: 'text-purple-400',
-        light: 'text-purple-600',
-      },
-      danger: {
-        dark: 'text-red-400',
-        light: 'text-red-600',
-      },
-      success: {
-        dark: 'text-green-400',
-        light: 'text-green-600',
-      },
-      warning: {
-        dark: 'text-yellow-400',
-        light: 'text-yellow-600',
-      },
-      inherit: {
-        dark: '',
-        light: '',
-      },
-    };
+	// Color styles based on theme
+	const getColorClass = (color: TextColor): string => {
+		if (color === 'inherit') return '';
 
-    return isDarkMode ? colors[color].dark : colors[color].light;
-  };
+		const colors: Record<TextColor, { dark: string; light: string }> = {
+			primary: {
+				dark: 'text-white',
+				light: 'text-black',
+			},
+			secondary: {
+				dark: 'text-white/60',
+				light: 'text-black/60',
+			},
+			tertiary: {
+				dark: 'text-white/40',
+				light: 'text-black/40',
+			},
+			accent: {
+				dark: 'text-purple-400',
+				light: 'text-purple-600',
+			},
+			danger: {
+				dark: 'text-red-400',
+				light: 'text-red-600',
+			},
+			success: {
+				dark: 'text-green-400',
+				light: 'text-green-600',
+			},
+			warning: {
+				dark: 'text-yellow-400',
+				light: 'text-yellow-600',
+			},
+			inherit: {
+				dark: '',
+				light: '',
+			},
+		};
 
-  // Weight styles
-  const weightStyles: Record<string, string> = {
-    normal: 'font-normal',
-    medium: 'font-medium',
-    semibold: 'font-semibold',
-    bold: 'font-bold',
-  };
+		return isDarkMode ? colors[color].dark : colors[color].light;
+	};
 
-  // Alignment styles
-  const alignStyles: Record<string, string> = {
-    left: 'text-left',
-    center: 'text-center',
-    right: 'text-right',
-    justify: 'text-justify',
-  };
+	// Weight styles
+	const weightStyles: Record<string, string> = {
+		normal: 'font-normal',
+		medium: 'font-medium',
+		semibold: 'font-semibold',
+		bold: 'font-bold',
+	};
 
-  // Combine all classes
-  const combinedClassName = [
-    variantStyles[variant],
-    getColorClass(color),
-    weight ? weightStyles[weight] : '',
-    align ? alignStyles[align] : '',
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+	// Alignment styles
+	const alignStyles: Record<string, string> = {
+		left: 'text-left',
+		center: 'text-center',
+		right: 'text-right',
+		justify: 'text-justify',
+	};
 
-  // Apply size multiplier to style
-  const combinedStyle: TextStyle = {
-    ...(style || {}),
-    ...(sizeMultiplier !== 1 ? { fontSize: (style?.fontSize || 16) * sizeMultiplier } : {}),
-  };
+	// Combine all classes
+	const combinedClassName = [
+		variantStyles[variant],
+		getColorClass(color),
+		weight ? weightStyles[weight] : '',
+		align ? alignStyles[align] : '',
+		className,
+	]
+		.filter(Boolean)
+		.join(' ');
 
-  return (
-    <RNText
-      className={combinedClassName}
-      style={combinedStyle}
-      {...props}
-    >
-      {children}
-    </RNText>
-  );
+	// Apply size multiplier to style
+	const combinedStyle: TextStyle = {
+		...(style || {}),
+		...(sizeMultiplier !== 1 ? { fontSize: (style?.fontSize || 16) * sizeMultiplier } : {}),
+	};
+
+	return (
+		<RNText className={combinedClassName} style={combinedStyle} {...props}>
+			{children}
+		</RNText>
+	);
 }
 
 // Export convenience components for common use cases

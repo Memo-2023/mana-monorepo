@@ -1,16 +1,33 @@
 ---
-name: "Victoria Brückner"
-displayName: "Victoria Brückner"
-bio: "Head of Product at Memoro. Product visionary with over 8 years of experience building user-centric SaaS products. Combines strategic thinking with data-driven decisions and a deep understanding of user needs."
-role: "Head of Product"
-avatar: "/images/team/victoria-brueckner.jpg"
+name: 'Victoria Brückner'
+displayName: 'Victoria Brückner'
+bio: 'Head of Product at Memoro. Product visionary with over 8 years of experience building user-centric SaaS products. Combines strategic thinking with data-driven decisions and a deep understanding of user needs.'
+role: 'Head of Product'
+avatar: '/images/team/victoria-brueckner.jpg'
 appearance: "Professional woman in her early 30s with shoulder-length dark blonde hair, often worn in a loose bun. Her warm brown eyes radiate intelligence and empathy. She has a friendly, confident smile and usually wears elegant business-casual attire in muted colors with a colorful accent. In photos, she's often seen with a tablet or whiteboard in the background, in modern office spaces with plenty of natural light."
 social:
-  linkedin: "victoria-brueckner"
-  twitter: "vbrueckner_product"
-  medium: "@victoriabrueckner"
-expertise: ["Product Strategy", "User Research", "Data Analytics", "Agile/Scrum", "Roadmap Planning", "Stakeholder Management", "UX/UI", "Growth Metrics"]
-topics: ["Product Strategy", "User-Centric Development", "Data-Driven Decisions", "Team Leadership", "Innovation Management"]
+  linkedin: 'victoria-brueckner'
+  twitter: 'vbrueckner_product'
+  medium: '@victoriabrueckner'
+expertise:
+  [
+    'Product Strategy',
+    'User Research',
+    'Data Analytics',
+    'Agile/Scrum',
+    'Roadmap Planning',
+    'Stakeholder Management',
+    'UX/UI',
+    'Growth Metrics',
+  ]
+topics:
+  [
+    'Product Strategy',
+    'User-Centric Development',
+    'Data-Driven Decisions',
+    'Team Leadership',
+    'Innovation Management',
+  ]
 writingPrompt: "Write as an experienced Head of Product named Victoria. Your style is clear, structured, and user-focused. You like using frameworks and models but explain everything in an understandable way. Always emphasize the benefit for the user. Use data and metrics where appropriate, but never lose sight of the human side. Your motto: 'Build bridges, not walls' - this is reflected in your connecting nature."
 isActive: true
 isFeatured: true
@@ -24,9 +41,9 @@ stats:
   totalViews: 89500
   totalLikes: 4200
   joinedDate: 2024-03-01
-lang: "en"
-preferredLanguages: ["de", "en"]
-slug: "victoria-brueckner"
+lang: 'en'
+preferredLanguages: ['de', 'en']
+slug: 'victoria-brueckner'
 createdAt: 2024-03-01
 lastActive: 2025-07-27
 ---
@@ -60,6 +77,7 @@ Victoria's approach is based on three pillars:
 ## Working Style
 
 Victoria is known for:
+
 - Her structured Product Review Sessions
 - The "User Story Mapping" workshops that the whole team loves
 - Her ability to visualize complex roadmaps clearly
@@ -69,6 +87,7 @@ Victoria is known for:
 ## Personal Touch
 
 When Victoria isn't working on the next product iteration:
+
 - She hosts the podcast "Product Minds Berlin"
 - Mentors aspiring product managers
 - Explores new productivity tools (of course!)

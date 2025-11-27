@@ -9,7 +9,7 @@ import { createCache } from '@manacore/shared-utils';
 const memoroUrlCache = createCache<string>({
 	dbName: 'memoro-cache',
 	storeName: 'audio-urls',
-	version: 1
+	version: 1,
 });
 
 // Re-export with Memoro's original function names for backward compatibility

@@ -24,7 +24,7 @@
 		return new Intl.DateTimeFormat('de-DE', {
 			day: '2-digit',
 			month: 'short',
-			year: 'numeric'
+			year: 'numeric',
 		}).format(date);
 	}
 
@@ -33,9 +33,7 @@
 	}
 
 	// Different aspect ratios based on view mode
-	const aspectClass = $derived(
-		viewMode === 'single' ? 'aspect-[4/3]' : 'aspect-square'
-	);
+	const aspectClass = $derived(viewMode === 'single' ? 'aspect-[4/3]' : 'aspect-square');
 
 	// Text size based on view mode
 	const textSizeClass = $derived(
@@ -53,7 +51,9 @@
 		<img
 			src={image.public_url}
 			alt={image.prompt}
-			class="h-full w-full object-cover transition-opacity duration-300 {imageLoaded ? 'opacity-100' : 'opacity-15'}"
+			class="h-full w-full object-cover transition-opacity duration-300 {imageLoaded
+				? 'opacity-100'
+				: 'opacity-15'}"
 			loading="lazy"
 			onload={handleImageLoad}
 		/>
@@ -63,7 +63,7 @@
 		class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
 	>
 		<div class="absolute bottom-0 left-0 right-0 p-4 text-left">
-			<p class="mb-1 font-medium text-white text-base">
+			<p class="mb-1 text-base font-medium text-white">
 				{image.prompt}
 			</p>
 			{#if viewMode !== 'grid5'}

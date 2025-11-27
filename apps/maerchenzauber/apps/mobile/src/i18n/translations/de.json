@@ -1,25 +1,25 @@
 {
-  "errors": {
-    "title": "Fehler",
-    "unknown": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut. Falls das Problem weiterhin besteht, kontaktieren Sie uns bitte.",
-    "rateLimit": "Unsere Server sind gerade ausgelastet. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
-    "networkError": "Es gab ein Problem mit der Netzwerkverbindung. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
-    "generationFailed": "Die Generierung ist leider fehlgeschlagen. Bitte versuchen Sie es erneut. Falls das Problem weiterhin besteht, kontaktieren Sie uns bitte.",
-    "invalidInput": "Die eingegebenen Daten sind ungültig. Bitte überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
-    "serviceUnavailable": "Der Dienst ist vorübergehend nicht verfügbar. Bitte versuchen Sie es in wenigen Minuten erneut.",
-    "insufficientCredits": "Sie haben nicht genügend Credits für diese Aktion. Bitte laden Sie Ihr Guthaben auf.",
-    "authenticationError": "Authentifizierung fehlgeschlagen. Bitte melden Sie sich erneut an.",
-    "notFound": "Die angeforderte Ressource wurde nicht gefunden. Bitte versuchen Sie es erneut.",
-    "tryAgain": "Erneut versuchen",
-    "cancel": "Abbrechen",
-    "ok": "OK"
-  },
-  "story": {
-    "creationError": "Beim Erstellen der Geschichte ist ein Fehler aufgetreten",
-    "creationSuccess": "Geschichte erfolgreich erstellt!"
-  },
-  "character": {
-    "generationError": "Fehler beim Generieren des Charakters",
-    "generationSuccess": "Charakter erfolgreich generiert!"
-  }
+	"errors": {
+		"title": "Fehler",
+		"unknown": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut. Falls das Problem weiterhin besteht, kontaktieren Sie uns bitte.",
+		"rateLimit": "Unsere Server sind gerade ausgelastet. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
+		"networkError": "Es gab ein Problem mit der Netzwerkverbindung. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
+		"generationFailed": "Die Generierung ist leider fehlgeschlagen. Bitte versuchen Sie es erneut. Falls das Problem weiterhin besteht, kontaktieren Sie uns bitte.",
+		"invalidInput": "Die eingegebenen Daten sind ungültig. Bitte überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
+		"serviceUnavailable": "Der Dienst ist vorübergehend nicht verfügbar. Bitte versuchen Sie es in wenigen Minuten erneut.",
+		"insufficientCredits": "Sie haben nicht genügend Credits für diese Aktion. Bitte laden Sie Ihr Guthaben auf.",
+		"authenticationError": "Authentifizierung fehlgeschlagen. Bitte melden Sie sich erneut an.",
+		"notFound": "Die angeforderte Ressource wurde nicht gefunden. Bitte versuchen Sie es erneut.",
+		"tryAgain": "Erneut versuchen",
+		"cancel": "Abbrechen",
+		"ok": "OK"
+	},
+	"story": {
+		"creationError": "Beim Erstellen der Geschichte ist ein Fehler aufgetreten",
+		"creationSuccess": "Geschichte erfolgreich erstellt!"
+	},
+	"character": {
+		"generationError": "Fehler beim Generieren des Charakters",
+		"generationSuccess": "Charakter erfolgreich generiert!"
+	}
 }

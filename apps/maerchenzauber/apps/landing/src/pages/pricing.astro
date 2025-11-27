@@ -6,517 +6,559 @@ import Card from '../components/ui/Card.astro';
 
 // Monatliche Pläne
 const monthlyPlans = [
-  {
-    name: 'Kostenlos',
-    price: '0€',
-    period: '/Monat',
-    mana: '150',
-    features: [
-      '150 Mana monatlich',
-      '~5 Geschichten',
-      'Alle Features verfügbar',
-      'Charaktererstellung',
-      'KI-Illustrationen'
-    ],
-    cta: 'Kostenlos starten',
-    popular: false
-  },
-  {
-    name: 'Kleiner Mana Stream',
-    price: '5,99€',
-    period: '/Monat',
-    mana: '600',
-    features: [
-      '600 Mana monatlich',
-      '~20 Geschichten',
-      'Alle Features',
-      'Prioritäts-Support',
-      'Werbefreie Nutzung'
-    ],
-    cta: 'Jetzt upgraden',
-    popular: false
-  },
-  {
-    name: 'Mittlerer Mana Stream',
-    price: '14,99€',
-    period: '/Monat',
-    mana: '1500',
-    features: [
-      '1500 Mana monatlich',
-      '~50 Geschichten',
-      'Premium-Support',
-      'Exklusive Charaktere',
-      'Early Access Features'
-    ],
-    cta: 'Jetzt upgraden',
-    popular: true
-  },
-  {
-    name: 'Großer Mana Stream',
-    price: '29,99€',
-    period: '/Monat',
-    mana: '3000',
-    features: [
-      '3000 Mana monatlich',
-      '~100 Geschichten',
-      'VIP-Support',
-      'Export-Funktionen',
-      'Familien-Sharing'
-    ],
-    cta: 'Jetzt upgraden',
-    popular: false
-  },
-  {
-    name: 'Riesiger Mana Stream',
-    price: '49,99€',
-    period: '/Monat',
-    mana: '5000',
-    features: [
-      '5000 Mana monatlich',
-      '~165 Geschichten',
-      'Persönlicher Support',
-      'Alle Premium-Features',
-      'Unbegrenzte Exporte'
-    ],
-    cta: 'Jetzt upgraden',
-    popular: false
-  }
+	{
+		name: 'Kostenlos',
+		price: '0€',
+		period: '/Monat',
+		mana: '150',
+		features: [
+			'150 Mana monatlich',
+			'~5 Geschichten',
+			'Alle Features verfügbar',
+			'Charaktererstellung',
+			'KI-Illustrationen',
+		],
+		cta: 'Kostenlos starten',
+		popular: false,
+	},
+	{
+		name: 'Kleiner Mana Stream',
+		price: '5,99€',
+		period: '/Monat',
+		mana: '600',
+		features: [
+			'600 Mana monatlich',
+			'~20 Geschichten',
+			'Alle Features',
+			'Prioritäts-Support',
+			'Werbefreie Nutzung',
+		],
+		cta: 'Jetzt upgraden',
+		popular: false,
+	},
+	{
+		name: 'Mittlerer Mana Stream',
+		price: '14,99€',
+		period: '/Monat',
+		mana: '1500',
+		features: [
+			'1500 Mana monatlich',
+			'~50 Geschichten',
+			'Premium-Support',
+			'Exklusive Charaktere',
+			'Early Access Features',
+		],
+		cta: 'Jetzt upgraden',
+		popular: true,
+	},
+	{
+		name: 'Großer Mana Stream',
+		price: '29,99€',
+		period: '/Monat',
+		mana: '3000',
+		features: [
+			'3000 Mana monatlich',
+			'~100 Geschichten',
+			'VIP-Support',
+			'Export-Funktionen',
+			'Familien-Sharing',
+		],
+		cta: 'Jetzt upgraden',
+		popular: false,
+	},
+	{
+		name: 'Riesiger Mana Stream',
+		price: '49,99€',
+		period: '/Monat',
+		mana: '5000',
+		features: [
+			'5000 Mana monatlich',
+			'~165 Geschichten',
+			'Persönlicher Support',
+			'Alle Premium-Features',
+			'Unbegrenzte Exporte',
+		],
+		cta: 'Jetzt upgraden',
+		popular: false,
+	},
 ];
 
 // Jährliche Pläne
 const yearlyPlans = [
-  {
-    name: 'Kostenlos',
-    price: '0€',
-    period: '/Jahr',
-    mana: '150',
-    savings: null,
-    features: [
-      '150 Mana monatlich',
-      '~5 Geschichten/Monat',
-      'Alle Features verfügbar',
-      'Charaktererstellung',
-      'KI-Illustrationen'
-    ],
-    cta: 'Kostenlos starten',
-    popular: false
-  },
-  {
-    name: 'Kleiner Mana Stream',
-    price: '47,99€',
-    period: '/Jahr',
-    mana: '600',
-    savings: 'Spare 23,89€ (33%)',
-    features: [
-      '600 Mana monatlich',
-      '~20 Geschichten/Monat',
-      'Alle Features',
-      'Prioritäts-Support',
-      'Werbefreie Nutzung'
-    ],
-    cta: 'Jetzt upgraden',
-    popular: false
-  },
-  {
-    name: 'Mittlerer Mana Stream',
-    price: '119,99€',
-    period: '/Jahr',
-    mana: '1500',
-    savings: 'Spare 59,89€ (33%)',
-    features: [
-      '1500 Mana monatlich',
-      '~50 Geschichten/Monat',
-      'Premium-Support',
-      'Exklusive Charaktere',
-      'Early Access Features'
-    ],
-    cta: 'Jetzt upgraden',
-    popular: true
-  },
-  {
-    name: 'Großer Mana Stream',
-    price: '239,99€',
-    period: '/Jahr',
-    mana: '3000',
-    savings: 'Spare 119,89€ (33%)',
-    features: [
-      '3000 Mana monatlich',
-      '~100 Geschichten/Monat',
-      'VIP-Support',
-      'Export-Funktionen',
-      'Familien-Sharing'
-    ],
-    cta: 'Jetzt upgraden',
-    popular: false
-  },
-  {
-    name: 'Riesiger Mana Stream',
-    price: '399,99€',
-    period: '/Jahr',
-    mana: '5000',
-    savings: 'Spare 199,89€ (33%)',
-    features: [
-      '5000 Mana monatlich',
-      '~165 Geschichten/Monat',
-      'Persönlicher Support',
-      'Alle Premium-Features',
-      'Unbegrenzte Exporte'
-    ],
-    cta: 'Jetzt upgraden',
-    popular: false
-  }
+	{
+		name: 'Kostenlos',
+		price: '0€',
+		period: '/Jahr',
+		mana: '150',
+		savings: null,
+		features: [
+			'150 Mana monatlich',
+			'~5 Geschichten/Monat',
+			'Alle Features verfügbar',
+			'Charaktererstellung',
+			'KI-Illustrationen',
+		],
+		cta: 'Kostenlos starten',
+		popular: false,
+	},
+	{
+		name: 'Kleiner Mana Stream',
+		price: '47,99€',
+		period: '/Jahr',
+		mana: '600',
+		savings: 'Spare 23,89€ (33%)',
+		features: [
+			'600 Mana monatlich',
+			'~20 Geschichten/Monat',
+			'Alle Features',
+			'Prioritäts-Support',
+			'Werbefreie Nutzung',
+		],
+		cta: 'Jetzt upgraden',
+		popular: false,
+	},
+	{
+		name: 'Mittlerer Mana Stream',
+		price: '119,99€',
+		period: '/Jahr',
+		mana: '1500',
+		savings: 'Spare 59,89€ (33%)',
+		features: [
+			'1500 Mana monatlich',
+			'~50 Geschichten/Monat',
+			'Premium-Support',
+			'Exklusive Charaktere',
+			'Early Access Features',
+		],
+		cta: 'Jetzt upgraden',
+		popular: true,
+	},
+	{
+		name: 'Großer Mana Stream',
+		price: '239,99€',
+		period: '/Jahr',
+		mana: '3000',
+		savings: 'Spare 119,89€ (33%)',
+		features: [
+			'3000 Mana monatlich',
+			'~100 Geschichten/Monat',
+			'VIP-Support',
+			'Export-Funktionen',
+			'Familien-Sharing',
+		],
+		cta: 'Jetzt upgraden',
+		popular: false,
+	},
+	{
+		name: 'Riesiger Mana Stream',
+		price: '399,99€',
+		period: '/Jahr',
+		mana: '5000',
+		savings: 'Spare 199,89€ (33%)',
+		features: [
+			'5000 Mana monatlich',
+			'~165 Geschichten/Monat',
+			'Persönlicher Support',
+			'Alle Premium-Features',
+			'Unbegrenzte Exporte',
+		],
+		cta: 'Jetzt upgraden',
+		popular: false,
+	},
 ];
 
 // Mana Tränke (Einmalkäufe)
 const manaPotions = [
-  {
-    name: 'Kleiner Mana Trank',
-    price: '4,99€',
-    mana: '350',
-    stories: '~12 Geschichten',
-    cta: 'Kaufen'
-  },
-  {
-    name: 'Mittlerer Mana Trank',
-    price: '9,99€',
-    mana: '700',
-    stories: '~23 Geschichten',
-    cta: 'Kaufen',
-    popular: true
-  },
-  {
-    name: 'Großer Mana Trank',
-    price: '19,99€',
-    mana: '1400',
-    stories: '~47 Geschichten',
-    cta: 'Kaufen'
-  },
-  {
-    name: 'Riesiger Mana Trank',
-    price: '39,99€',
-    mana: '2800',
-    stories: '~93 Geschichten',
-    cta: 'Kaufen'
-  }
+	{
+		name: 'Kleiner Mana Trank',
+		price: '4,99€',
+		mana: '350',
+		stories: '~12 Geschichten',
+		cta: 'Kaufen',
+	},
+	{
+		name: 'Mittlerer Mana Trank',
+		price: '9,99€',
+		mana: '700',
+		stories: '~23 Geschichten',
+		cta: 'Kaufen',
+		popular: true,
+	},
+	{
+		name: 'Großer Mana Trank',
+		price: '19,99€',
+		mana: '1400',
+		stories: '~47 Geschichten',
+		cta: 'Kaufen',
+	},
+	{
+		name: 'Riesiger Mana Trank',
+		price: '39,99€',
+		mana: '2800',
+		stories: '~93 Geschichten',
+		cta: 'Kaufen',
+	},
 ];
 ---
 
-<BaseLayout title="Preise - Märchenzauber" description="Einfache, transparente Preise für personalisierte Kindergeschichten">
-  <Navigation />
+<BaseLayout
+	title="Preise - Märchenzauber"
+	description="Einfache, transparente Preise für personalisierte Kindergeschichten"
+>
+	<Navigation />
 
-  <main class="pt-24 pb-20 md:pt-28 md:pb-28">
-    <!-- Hero Section -->
-    <section class="section">
-      <div class="container-custom">
-        <div class="text-center mb-12">
-          <h1 class="font-grandstander font-bold text-4xl md:text-5xl lg:text-6xl text-text-primary mb-4">
-            Einfache, transparente Preise
-          </h1>
-          <p class="text-text-secondary text-lg md:text-xl max-w-3xl mx-auto">
-            Wähle das passende Paket für deine Familie. Alle Funktionen sind in jedem Plan verfügbar.
-          </p>
-        </div>
+	<main class="pt-24 pb-20 md:pt-28 md:pb-28">
+		<!-- Hero Section -->
+		<section class="section">
+			<div class="container-custom">
+				<div class="text-center mb-12">
+					<h1
+						class="font-grandstander font-bold text-4xl md:text-5xl lg:text-6xl text-text-primary mb-4"
+					>
+						Einfache, transparente Preise
+					</h1>
+					<p class="text-text-secondary text-lg md:text-xl max-w-3xl mx-auto">
+						Wähle das passende Paket für deine Familie. Alle Funktionen sind in jedem Plan
+						verfügbar.
+					</p>
+				</div>
 
-        <!-- Mana Explanation -->
-        <div class="text-center mb-12">
-          <Card variant="default" className="inline-block max-w-2xl" padding="md">
-            <div class="flex items-start gap-4">
-              <div class="w-12 h-12 bg-yellow-dark rounded-full flex items-center justify-center glow-yellow flex-shrink-0">
-                <span class="text-white font-bold text-xl">M</span>
-              </div>
-              <div class="text-left">
-                <div class="text-text-primary font-semibold text-lg mb-1">Was sind Mana-Token?</div>
-                <div class="text-text-secondary">
-                  Mana sind Credits für die Generierung von Geschichten und Charakteren.
-                  1 Geschichte kostet ca. 30 Mana, 1 Charakter ca. 10 Mana.
-                  <span class="text-yellow-light font-semibold">1 Mana = 1 Cent</span>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
+				<!-- Mana Explanation -->
+				<div class="text-center mb-12">
+					<Card variant="default" className="inline-block max-w-2xl" padding="md">
+						<div class="flex items-start gap-4">
+							<div
+								class="w-12 h-12 bg-yellow-dark rounded-full flex items-center justify-center glow-yellow flex-shrink-0"
+							>
+								<span class="text-white font-bold text-xl">M</span>
+							</div>
+							<div class="text-left">
+								<div class="text-text-primary font-semibold text-lg mb-1">Was sind Mana-Token?</div>
+								<div class="text-text-secondary">
+									Mana sind Credits für die Generierung von Geschichten und Charakteren. 1
+									Geschichte kostet ca. 30 Mana, 1 Charakter ca. 10 Mana.
+									<span class="text-yellow-light font-semibold">1 Mana = 1 Cent</span>
+								</div>
+							</div>
+						</div>
+					</Card>
+				</div>
 
-        <!-- Tab Navigation -->
-        <div class="flex justify-center mb-12">
-          <div class="inline-flex bg-bg-darker rounded-lg p-1 border border-border/20">
-            <button
-              class="tab-btn active px-6 py-3 rounded-md font-semibold transition-all"
-              data-tab="monthly"
-            >
-              Monatlich
-            </button>
-            <button
-              class="tab-btn px-6 py-3 rounded-md font-semibold transition-all"
-              data-tab="yearly"
-            >
-              Jährlich
-              <span class="ml-2 text-xs bg-yellow-dark/20 text-yellow-light px-2 py-1 rounded-full">-33%</span>
-            </button>
-            <button
-              class="tab-btn px-6 py-3 rounded-md font-semibold transition-all"
-              data-tab="potions"
-            >
-              Mana Tränke
-            </button>
-          </div>
-        </div>
+				<!-- Tab Navigation -->
+				<div class="flex justify-center mb-12">
+					<div class="inline-flex bg-bg-darker rounded-lg p-1 border border-border/20">
+						<button
+							class="tab-btn active px-6 py-3 rounded-md font-semibold transition-all"
+							data-tab="monthly"
+						>
+							Monatlich
+						</button>
+						<button
+							class="tab-btn px-6 py-3 rounded-md font-semibold transition-all"
+							data-tab="yearly"
+						>
+							Jährlich
+							<span class="ml-2 text-xs bg-yellow-dark/20 text-yellow-light px-2 py-1 rounded-full"
+								>-33%</span
+							>
+						</button>
+						<button
+							class="tab-btn px-6 py-3 rounded-md font-semibold transition-all"
+							data-tab="potions"
+						>
+							Mana Tränke
+						</button>
+					</div>
+				</div>
 
-        <!-- Monthly Plans -->
-        <div id="monthly-plans" class="tab-content">
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-            {monthlyPlans.map((plan) => (
-              <Card
-                variant="hover"
-                className={plan.popular ? 'border-2 border-yellow-dark relative' : ''}
-                padding="lg"
-              >
-                {plan.popular && (
-                  <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span class="bg-yellow-dark text-white px-3 py-1 rounded-full text-xs font-semibold">
-                      Beliebt
-                    </span>
-                  </div>
-                )}
+				<!-- Monthly Plans -->
+				<div id="monthly-plans" class="tab-content">
+					<div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+						{
+							monthlyPlans.map((plan) => (
+								<Card
+									variant="hover"
+									className={plan.popular ? 'border-2 border-yellow-dark relative' : ''}
+									padding="lg"
+								>
+									{plan.popular && (
+										<div class="absolute -top-3 left-1/2 -translate-x-1/2">
+											<span class="bg-yellow-dark text-white px-3 py-1 rounded-full text-xs font-semibold">
+												Beliebt
+											</span>
+										</div>
+									)}
 
-                <div class="text-center">
-                  <h3 class="font-grandstander font-bold text-xl text-text-primary mb-4">
-                    {plan.name}
-                  </h3>
+									<div class="text-center">
+										<h3 class="font-grandstander font-bold text-xl text-text-primary mb-4">
+											{plan.name}
+										</h3>
 
-                  <div class="mb-6">
-                    <span class="text-3xl font-bold text-text-primary">{plan.price}</span>
-                    <span class="text-text-secondary text-sm">{plan.period}</span>
-                  </div>
+										<div class="mb-6">
+											<span class="text-3xl font-bold text-text-primary">{plan.price}</span>
+											<span class="text-text-secondary text-sm">{plan.period}</span>
+										</div>
 
-                  <div class="flex items-center justify-center gap-2 mb-6 pb-6 border-b border-border/20">
-                    <div class="w-8 h-8 bg-yellow-dark/20 rounded-full flex items-center justify-center">
-                      <span class="text-yellow-light font-bold text-sm">M</span>
-                    </div>
-                    <span class="text-yellow-light font-semibold">{plan.mana} Mana</span>
-                  </div>
+										<div class="flex items-center justify-center gap-2 mb-6 pb-6 border-b border-border/20">
+											<div class="w-8 h-8 bg-yellow-dark/20 rounded-full flex items-center justify-center">
+												<span class="text-yellow-light font-bold text-sm">M</span>
+											</div>
+											<span class="text-yellow-light font-semibold">{plan.mana} Mana</span>
+										</div>
 
-                  <ul class="space-y-3 mb-8 text-left">
-                    {plan.features.map((feature) => (
-                      <li class="flex items-start gap-2 text-sm">
-                        <svg class="w-5 h-5 text-yellow-light mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        <span class="text-text-secondary">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+										<ul class="space-y-3 mb-8 text-left">
+											{plan.features.map((feature) => (
+												<li class="flex items-start gap-2 text-sm">
+													<svg
+														class="w-5 h-5 text-yellow-light mt-0.5 flex-shrink-0"
+														fill="none"
+														stroke="currentColor"
+														viewBox="0 0 24 24"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M5 13l4 4L19 7"
+														/>
+													</svg>
+													<span class="text-text-secondary">{feature}</span>
+												</li>
+											))}
+										</ul>
 
-                  <a
-                    href="/download"
-                    class={`w-full inline-block text-center text-sm ${plan.popular ? 'btn-primary' : 'btn-secondary'}`}
-                  >
-                    {plan.cta}
-                  </a>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
+										<a
+											href="/download"
+											class={`w-full inline-block text-center text-sm ${plan.popular ? 'btn-primary' : 'btn-secondary'}`}
+										>
+											{plan.cta}
+										</a>
+									</div>
+								</Card>
+							))
+						}
+					</div>
+				</div>
 
-        <!-- Yearly Plans -->
-        <div id="yearly-plans" class="tab-content hidden">
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-            {yearlyPlans.map((plan) => (
-              <Card
-                variant="hover"
-                className={plan.popular ? 'border-2 border-yellow-dark relative' : ''}
-                padding="lg"
-              >
-                {plan.popular && (
-                  <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span class="bg-yellow-dark text-white px-3 py-1 rounded-full text-xs font-semibold">
-                      Beliebt
-                    </span>
-                  </div>
-                )}
+				<!-- Yearly Plans -->
+				<div id="yearly-plans" class="tab-content hidden">
+					<div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+						{
+							yearlyPlans.map((plan) => (
+								<Card
+									variant="hover"
+									className={plan.popular ? 'border-2 border-yellow-dark relative' : ''}
+									padding="lg"
+								>
+									{plan.popular && (
+										<div class="absolute -top-3 left-1/2 -translate-x-1/2">
+											<span class="bg-yellow-dark text-white px-3 py-1 rounded-full text-xs font-semibold">
+												Beliebt
+											</span>
+										</div>
+									)}
 
-                <div class="text-center">
-                  <h3 class="font-grandstander font-bold text-xl text-text-primary mb-4">
-                    {plan.name}
-                  </h3>
+									<div class="text-center">
+										<h3 class="font-grandstander font-bold text-xl text-text-primary mb-4">
+											{plan.name}
+										</h3>
 
-                  <div class="mb-2">
-                    <span class="text-3xl font-bold text-text-primary">{plan.price}</span>
-                    <span class="text-text-secondary text-sm">{plan.period}</span>
-                  </div>
+										<div class="mb-2">
+											<span class="text-3xl font-bold text-text-primary">{plan.price}</span>
+											<span class="text-text-secondary text-sm">{plan.period}</span>
+										</div>
 
-                  {plan.savings && (
-                    <div class="mb-6">
-                      <span class="text-green-400 text-sm font-semibold">{plan.savings}</span>
-                    </div>
-                  )}
-                  {!plan.savings && <div class="mb-6"></div>}
+										{plan.savings && (
+											<div class="mb-6">
+												<span class="text-green-400 text-sm font-semibold">{plan.savings}</span>
+											</div>
+										)}
+										{!plan.savings && <div class="mb-6" />}
 
-                  <div class="flex items-center justify-center gap-2 mb-6 pb-6 border-b border-border/20">
-                    <div class="w-8 h-8 bg-yellow-dark/20 rounded-full flex items-center justify-center">
-                      <span class="text-yellow-light font-bold text-sm">M</span>
-                    </div>
-                    <span class="text-yellow-light font-semibold">{plan.mana} Mana</span>
-                  </div>
+										<div class="flex items-center justify-center gap-2 mb-6 pb-6 border-b border-border/20">
+											<div class="w-8 h-8 bg-yellow-dark/20 rounded-full flex items-center justify-center">
+												<span class="text-yellow-light font-bold text-sm">M</span>
+											</div>
+											<span class="text-yellow-light font-semibold">{plan.mana} Mana</span>
+										</div>
 
-                  <ul class="space-y-3 mb-8 text-left">
-                    {plan.features.map((feature) => (
-                      <li class="flex items-start gap-2 text-sm">
-                        <svg class="w-5 h-5 text-yellow-light mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        <span class="text-text-secondary">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+										<ul class="space-y-3 mb-8 text-left">
+											{plan.features.map((feature) => (
+												<li class="flex items-start gap-2 text-sm">
+													<svg
+														class="w-5 h-5 text-yellow-light mt-0.5 flex-shrink-0"
+														fill="none"
+														stroke="currentColor"
+														viewBox="0 0 24 24"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M5 13l4 4L19 7"
+														/>
+													</svg>
+													<span class="text-text-secondary">{feature}</span>
+												</li>
+											))}
+										</ul>
 
-                  <a
-                    href="/download"
-                    class={`w-full inline-block text-center text-sm ${plan.popular ? 'btn-primary' : 'btn-secondary'}`}
-                  >
-                    {plan.cta}
-                  </a>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
+										<a
+											href="/download"
+											class={`w-full inline-block text-center text-sm ${plan.popular ? 'btn-primary' : 'btn-secondary'}`}
+										>
+											{plan.cta}
+										</a>
+									</div>
+								</Card>
+							))
+						}
+					</div>
+				</div>
 
-        <!-- Mana Potions -->
-        <div id="potion-plans" class="tab-content hidden">
-          <div class="max-w-5xl mx-auto">
-            <div class="text-center mb-8">
-              <h3 class="font-grandstander font-bold text-2xl text-text-primary mb-2">
-                Mana Tränke
-              </h3>
-              <p class="text-text-secondary">
-                Einmalige Mana-Pakete für zusätzliche Power - kein Abo nötig
-              </p>
-            </div>
+				<!-- Mana Potions -->
+				<div id="potion-plans" class="tab-content hidden">
+					<div class="max-w-5xl mx-auto">
+						<div class="text-center mb-8">
+							<h3 class="font-grandstander font-bold text-2xl text-text-primary mb-2">
+								Mana Tränke
+							</h3>
+							<p class="text-text-secondary">
+								Einmalige Mana-Pakete für zusätzliche Power - kein Abo nötig
+							</p>
+						</div>
 
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {manaPotions.map((potion) => (
-                <Card
-                  variant="hover"
-                  className={potion.popular ? 'border-2 border-yellow-dark relative' : ''}
-                  padding="lg"
-                >
-                  {potion.popular && (
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span class="bg-yellow-dark text-white px-3 py-1 rounded-full text-xs font-semibold">
-                        Bester Deal
-                      </span>
-                    </div>
-                  )}
+						<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+							{
+								manaPotions.map((potion) => (
+									<Card
+										variant="hover"
+										className={potion.popular ? 'border-2 border-yellow-dark relative' : ''}
+										padding="lg"
+									>
+										{potion.popular && (
+											<div class="absolute -top-3 left-1/2 -translate-x-1/2">
+												<span class="bg-yellow-dark text-white px-3 py-1 rounded-full text-xs font-semibold">
+													Bester Deal
+												</span>
+											</div>
+										)}
 
-                  <div class="text-center">
-                    <div class="mb-4 flex justify-center">
-                      <div class="w-16 h-16 bg-gradient-to-br from-yellow-dark to-yellow-light rounded-full flex items-center justify-center glow-yellow">
-                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2L4 7v10c0 5.5 3.5 10.5 8 12 4.5-1.5 8-6.5 8-12V7l-8-5z"/>
-                        </svg>
-                      </div>
-                    </div>
+										<div class="text-center">
+											<div class="mb-4 flex justify-center">
+												<div class="w-16 h-16 bg-gradient-to-br from-yellow-dark to-yellow-light rounded-full flex items-center justify-center glow-yellow">
+													<svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+														<path d="M12 2L4 7v10c0 5.5 3.5 10.5 8 12 4.5-1.5 8-6.5 8-12V7l-8-5z" />
+													</svg>
+												</div>
+											</div>
 
-                    <h4 class="font-grandstander font-bold text-lg text-text-primary mb-3">
-                      {potion.name}
-                    </h4>
+											<h4 class="font-grandstander font-bold text-lg text-text-primary mb-3">
+												{potion.name}
+											</h4>
 
-                    <div class="mb-4">
-                      <span class="text-3xl font-bold text-text-primary">{potion.price}</span>
-                    </div>
+											<div class="mb-4">
+												<span class="text-3xl font-bold text-text-primary">{potion.price}</span>
+											</div>
 
-                    <div class="mb-4 pb-4 border-b border-border/20">
-                      <div class="text-yellow-light font-bold text-2xl mb-1">{potion.mana} Mana</div>
-                      <div class="text-text-secondary text-sm">{potion.stories}</div>
-                    </div>
+											<div class="mb-4 pb-4 border-b border-border/20">
+												<div class="text-yellow-light font-bold text-2xl mb-1">
+													{potion.mana} Mana
+												</div>
+												<div class="text-text-secondary text-sm">{potion.stories}</div>
+											</div>
 
-                    <a
-                      href="/download"
-                      class={`w-full inline-block text-center ${potion.popular ? 'btn-primary' : 'btn-secondary'}`}
-                    >
-                      {potion.cta}
-                    </a>
-                  </div>
-                </Card>
-              ))}
-            </div>
+											<a
+												href="/download"
+												class={`w-full inline-block text-center ${potion.popular ? 'btn-primary' : 'btn-secondary'}`}
+											>
+												{potion.cta}
+											</a>
+										</div>
+									</Card>
+								))
+							}
+						</div>
 
-            <div class="mt-8 text-center">
-              <Card variant="default" className="inline-block" padding="md">
-                <p class="text-text-secondary text-sm">
-                  💡 <span class="text-yellow-light font-semibold">Tipp:</span> Mana Tränke verfallen nicht und können jederzeit verwendet werden
-                </p>
-              </Card>
-            </div>
-          </div>
-        </div>
+						<div class="mt-8 text-center">
+							<Card variant="default" className="inline-block" padding="md">
+								<p class="text-text-secondary text-sm">
+									💡 <span class="text-yellow-light font-semibold">Tipp:</span> Mana Tränke verfallen
+									nicht und können jederzeit verwendet werden
+								</p>
+							</Card>
+						</div>
+					</div>
+				</div>
 
-        <!-- Additional Info -->
-        <div class="text-center mt-12">
-          <p class="text-text-secondary mb-6">
-            Alle Preise inkl. MwSt. • Jederzeit kündbar • Keine versteckten Kosten
-          </p>
+				<!-- Additional Info -->
+				<div class="text-center mt-12">
+					<p class="text-text-secondary mb-6">
+						Alle Preise inkl. MwSt. • Jederzeit kündbar • Keine versteckten Kosten
+					</p>
 
-          <!-- FAQ Link -->
-          <a href="/#faq" class="text-yellow-light hover:text-yellow-dark transition-colors font-semibold">
-            Häufig gestellte Fragen →
-          </a>
-        </div>
-      </div>
-    </section>
-  </main>
+					<!-- FAQ Link -->
+					<a
+						href="/#faq"
+						class="text-yellow-light hover:text-yellow-dark transition-colors font-semibold"
+					>
+						Häufig gestellte Fragen →
+					</a>
+				</div>
+			</div>
+		</section>
+	</main>
 
-  <Footer />
+	<Footer />
 </BaseLayout>
 
 <script>
-  // Tab switching logic
-  const tabs = document.querySelectorAll('.tab-btn');
-  const contents = document.querySelectorAll('.tab-content');
+	// Tab switching logic
+	const tabs = document.querySelectorAll('.tab-btn');
+	const contents = document.querySelectorAll('.tab-content');
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const targetTab = tab.getAttribute('data-tab');
+	tabs.forEach((tab) => {
+		tab.addEventListener('click', () => {
+			const targetTab = tab.getAttribute('data-tab');
 
-      // Remove active class from all tabs
-      tabs.forEach(t => t.classList.remove('active'));
+			// Remove active class from all tabs
+			tabs.forEach((t) => t.classList.remove('active'));
 
-      // Add active class to clicked tab
-      tab.classList.add('active');
+			// Add active class to clicked tab
+			tab.classList.add('active');
 
-      // Hide all content
-      contents.forEach(content => {
-        content.classList.add('hidden');
-      });
+			// Hide all content
+			contents.forEach((content) => {
+				content.classList.add('hidden');
+			});
 
-      // Show target content
-      if (targetTab === 'monthly') {
-        document.getElementById('monthly-plans')?.classList.remove('hidden');
-      } else if (targetTab === 'yearly') {
-        document.getElementById('yearly-plans')?.classList.remove('hidden');
-      } else if (targetTab === 'potions') {
-        document.getElementById('potion-plans')?.classList.remove('hidden');
-      }
-    });
-  });
+			// Show target content
+			if (targetTab === 'monthly') {
+				document.getElementById('monthly-plans')?.classList.remove('hidden');
+			} else if (targetTab === 'yearly') {
+				document.getElementById('yearly-plans')?.classList.remove('hidden');
+			} else if (targetTab === 'potions') {
+				document.getElementById('potion-plans')?.classList.remove('hidden');
+			}
+		});
+	});
 </script>
 
 <style>
-  .tab-btn {
-    color: var(--color-text-secondary);
-  }
+	.tab-btn {
+		color: var(--color-text-secondary);
+	}
 
-  .tab-btn:hover {
-    color: var(--color-text-primary);
-  }
+	.tab-btn:hover {
+		color: var(--color-text-primary);
+	}
 
-  .tab-btn.active {
-    background: var(--color-yellow-dark);
-    color: white;
-  }
+	.tab-btn.active {
+		background: var(--color-yellow-dark);
+		color: white;
+	}
 
-  .glow-yellow {
-    box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
-  }
+	.glow-yellow {
+		box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+	}
 </style>

@@ -35,8 +35,8 @@
 			email,
 			password,
 			options: {
-				emailRedirectTo: `${window.location.origin}/app/gallery`
-			}
+				emailRedirectTo: `${window.location.origin}/app/gallery`,
+			},
 		});
 
 		loading = false;
@@ -75,7 +75,13 @@
 			</div>
 		{/if}
 
-		<form onsubmit={(e) => { e.preventDefault(); handleSignup(); }} class="space-y-4">
+		<form
+			onsubmit={(e) => {
+				e.preventDefault();
+				handleSignup();
+			}}
+			class="space-y-4"
+		>
 			<div>
 				<Input
 					type="email"
@@ -109,9 +115,7 @@
 				/>
 			</div>
 
-			<Button type="submit" variant="primary" class="w-full" {loading}>
-				Create account
-			</Button>
+			<Button type="submit" variant="primary" class="w-full" {loading}>Create account</Button>
 		</form>
 
 		<p class="mt-6 text-center text-sm text-gray-600">

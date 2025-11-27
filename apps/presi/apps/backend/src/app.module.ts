@@ -8,17 +8,17 @@ import { ShareModule } from './share/share.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
-    DatabaseModule,
-    DeckModule,
-    SlideModule,
-    ThemeModule,
-    ShareModule,
-    HealthModule,
-  ],
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			envFilePath: '.env',
+		}),
+		DatabaseModule,
+		DeckModule,
+		SlideModule,
+		ThemeModule,
+		ShareModule,
+		HealthModule,
+	],
 })
 export class AppModule {}

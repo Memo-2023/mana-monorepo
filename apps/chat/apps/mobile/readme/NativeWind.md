@@ -44,8 +44,8 @@ As all React components are transformed with JSX, it works with 3rd party module
 import { CustomText } from "third-party-text-component";
 
 export function BoldText(props) {
-  // You just need to write `className="<your styles>"`
-  return <CustomText className="text-bold" {...props} />;
+// You just need to write `className="<your styles>"`
+return <CustomText className="text-bold" {...props} />;
 }
 
 Styling can by dynamic and you can perform conditional logic and build up complex style objects.
@@ -53,34 +53,34 @@ Styling can by dynamic and you can perform conditional logic and build up comple
 import { Text } from "react-native";
 
 export function MyText({ bold, italic, lineThrough, ...props }) {
-  const classNames = [];
+const classNames = [];
 
-  if (bold) classNames.push("font-bold");
-  if (italic) classNames.push("italic");
-  if (lineThrough) classNames.push("line-through");
+if (bold) classNames.push("font-bold");
+if (italic) classNames.push("italic");
+if (lineThrough) classNames.push("line-through");
 
-  return <Text className={classNames.join(" ")} {...props} />;
+return <Text className={classNames.join(" ")} {...props} />;
 }
 
 Manually styling components via cssInterop() and remapProps()
 By default NativeWind maps className->style, but it can handle the mapping of complex components. If you'd like to manually wrap a component, you can use cssInterop() docs. If you run into any performance issues, we suggest trying out remapProps(). While less robust in its coverage, it should lead to improved performance.
 
 remapProps(FlatList, {
-  className: "style",
-  ListFooterComponentClassName: "ListFooterComponentStyle",
-  ListHeaderComponentClassName: "ListHeaderComponentStyle",
-  columnWrapperClassName: "columnWrapperStyle",
-  contentContainerClassName: "contentContainerStyle",
+className: "style",
+ListFooterComponentClassName: "ListFooterComponentStyle",
+ListHeaderComponentClassName: "ListHeaderComponentStyle",
+columnWrapperClassName: "columnWrapperStyle",
+contentContainerClassName: "contentContainerStyle",
 });
 
 <FlatList
-  {...}
-  className="bg-black"
-  ListHeaderComponentClassName="bg-black text-white"
-  ListFooterComponentClassName="bg-black text-white"
-  columnWrapperClassName="bg-black"
-  contentContainerClassName="bg-black"
-  indicatorClassName="bg-black"
+{...}
+className="bg-black"
+ListHeaderComponentClassName="bg-black text-white"
+ListFooterComponentClassName="bg-black text-white"
+columnWrapperClassName="bg-black"
+contentContainerClassName="bg-black"
+indicatorClassName="bg-black"
 />
 
 And can even work with components that expect style attributes as props
@@ -89,41 +89,42 @@ import { Text } from "react-native";
 import { cssInterop } from "nativewind";
 import { Svg, Circle } from "react-native-svg";
 
-/**
- * Circle uses `height`/`width` props on native and className on web
- */
-const StyledSVG = cssInterop(Svg, {
+/\*\*
+
+- Circle uses `height`/`width` props on native and className on web
+  \*/
+  const StyledSVG = cssInterop(Svg, {
   className: {
-	target: "style",
-	nativeStyleToProp: {
-	  height: true,
-	  width: true,
-	},
+  target: "style",
+  nativeStyleToProp: {
+  height: true,
+  width: true,
   },
-});
-/**
- * Circle uses `fill`/`stroke`/`strokeWidth` props on native and className on web
- */
-const StyledCircle = cssInterop(Circle, {
+  },
+  });
+  /\*\*
+- Circle uses `fill`/`stroke`/`strokeWidth` props on native and className on web
+  \*/
+  const StyledCircle = cssInterop(Circle, {
   className: {
-	target: "style",
-	nativeStyleToProp: {
-	  fill: true,
-	  stroke: true,
-	  strokeWidth: true,
-	},
+  target: "style",
+  nativeStyleToProp: {
+  fill: true,
+  stroke: true,
+  strokeWidth: true,
   },
-});
+  },
+  });
 
 export function BoldText(props) {
-  return (
-	<Svg className="w-1/2 h-1/2" viewBox="0 0 100 100">
-	  <StyledCircle
+return (
+<Svg className="w-1/2 h-1/2" viewBox="0 0 100 100">
+<StyledCircle
 		className="fill-green-500 stroke-blue-500 stroke-2"
 		cx="50"
 		cy="50"
 		r="45"
 	  />
-	</Svg>
-  );
+</Svg>
+);
 }

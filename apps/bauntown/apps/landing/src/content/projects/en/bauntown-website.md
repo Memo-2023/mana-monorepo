@@ -1,15 +1,15 @@
 ---
-title: "BaunTown"
-description: "A community platform for sharing knowledge, tools, and resources to help builders create better digital products together."
+title: 'BaunTown'
+description: 'A community platform for sharing knowledge, tools, and resources to help builders create better digital products together.'
 pubDate: 2024-04-04
-category: "Web"
+category: 'Web'
 featured: true
-status: "active"
-technologies: ["Astro", "TypeScript", "CSS", "Markdown", "Netlify", "Stripe"]
-image: "/images/projects/bauntown-project-bauntown-platform.png"
-author: "Till Schneider"
-githubUrl: "https://github.com/bauntown/website"
-demoUrl: "https://baun.town"
+status: 'active'
+technologies: ['Astro', 'TypeScript', 'CSS', 'Markdown', 'Netlify', 'Stripe']
+image: '/images/projects/bauntown-project-bauntown-platform.png'
+author: 'Till Schneider'
+githubUrl: 'https://github.com/bauntown/website'
+demoUrl: 'https://baun.town'
 ---
 
 # BaunTown Platform
@@ -19,6 +19,7 @@ BaunTown is our central knowledge-sharing platform, created to solve the recurri
 ## The Challenge
 
 After hosting workshops and training sessions, we consistently faced the same problems:
+
 - Participants asking for assets, files, and documentation
 - No centralized place to store and share materials
 - Difficulty tracking who has access to what resources
@@ -39,6 +40,7 @@ BaunTown provides:
 ## Technical Implementation
 
 The platform uses a modern tech stack:
+
 - **Astro** for static site generation with minimal JavaScript
 - **Content Collections** for structured, type-safe content
 - **Markdown/MDX** for easy content creation
@@ -50,6 +52,7 @@ The platform uses a modern tech stack:
 ## Future Vision
 
 BaunTown will continue to evolve with:
+
 - Expanded tutorial library covering development and design topics
 - More detailed project showcases and case studies
 - Member profiles for contributors

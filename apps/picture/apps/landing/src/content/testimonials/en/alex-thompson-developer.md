@@ -1,13 +1,13 @@
 ---
-name: "Alex Thompson"
-role: "Full-Stack Developer"
-company: "TechFlow Solutions"
-avatar: "/testimonials/alex-thompson.jpg"
+name: 'Alex Thompson'
+role: 'Full-Stack Developer'
+company: 'TechFlow Solutions'
+avatar: '/testimonials/alex-thompson.jpg'
 rating: 5
 featured: false
-category: "developer"
-useCase: "App mockups and placeholder images"
-language: "en"
+category: 'developer'
+useCase: 'App mockups and placeholder images'
+language: 'en'
 date: 2024-09-12
 verified: true
 ---

@@ -1,10 +1,7 @@
 import { ErrorCode } from '../types/error-codes';
 import { AppError, type ErrorContext } from './app-error';
 
-type NetworkErrorCode =
-  | ErrorCode.NETWORK_ERROR
-  | ErrorCode.TIMEOUT
-  | ErrorCode.CONNECTION_REFUSED;
+type NetworkErrorCode = ErrorCode.NETWORK_ERROR | ErrorCode.TIMEOUT | ErrorCode.CONNECTION_REFUSED;
 
 /**
  * Error for network-level failures (timeouts, connection issues, etc.).
@@ -23,41 +20,33 @@ type NetworkErrorCode =
  * ```
  */
 export class NetworkError extends AppError {
-  constructor(
-    code: NetworkErrorCode,
-    message: string,
-    cause?: Error,
-    context?: ErrorContext
-  ) {
-    super({ code, message, cause, context });
-    this.name = 'NetworkError';
-  }
+	constructor(code: NetworkErrorCode, message: string, cause?: Error, context?: ErrorContext) {
+		super({ code, message, cause, context });
+		this.name = 'NetworkError';
+	}
 
-  /**
-   * Create a timeout error.
-   *
-   * @param operation - Description of the operation that timed out
-   */
-  static timeout(operation: string): NetworkError {
-    return new NetworkError(
-      ErrorCode.TIMEOUT,
-      `Operation timed out: ${operation}`,
-      undefined,
-      { operation }
-    );
-  }
+	/**
+	 * Create a timeout error.
+	 *
+	 * @param operation - Description of the operation that timed out
+	 */
+	static timeout(operation: string): NetworkError {
+		return new NetworkError(ErrorCode.TIMEOUT, `Operation timed out: ${operation}`, undefined, {
+			operation,
+		});
+	}
 
-  /**
-   * Create a connection refused error.
-   *
-   * @param service - Name of the service that refused connection
-   */
-  static connectionRefused(service: string): NetworkError {
-    return new NetworkError(
-      ErrorCode.CONNECTION_REFUSED,
-      `Connection refused: ${service}`,
-      undefined,
-      { service }
-    );
-  }
+	/**
+	 * Create a connection refused error.
+	 *
+	 * @param service - Name of the service that refused connection
+	 */
+	static connectionRefused(service: string): NetworkError {
+		return new NetworkError(
+			ErrorCode.CONNECTION_REFUSED,
+			`Connection refused: ${service}`,
+			undefined,
+			{ service }
+		);
+	}
 }

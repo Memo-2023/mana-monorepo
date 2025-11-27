@@ -16,26 +16,26 @@ import * as Linking from 'expo-linking';
  * Add future deeplink handling here only if they don't match file routes.
  */
 export default function NativeIntent() {
-  const url = Linking.useURL();
+	const url = Linking.useURL();
 
-  if (!url) {
-    return <Redirect href="/(tabs)/(story)" />;
-  }
+	if (!url) {
+		return <Redirect href="/(tabs)/(story)" />;
+	}
 
-  const { hostname, path, queryParams } = Linking.parse(url);
+	const { hostname, path, queryParams } = Linking.parse(url);
 
-  console.log('[DeepLink Fallback] Received unmatched URL:', url);
-  console.log('[DeepLink Fallback] Hostname:', hostname);
-  console.log('[DeepLink Fallback] Path:', path);
-  console.log('[DeepLink Fallback] Query Params:', queryParams);
+	console.log('[DeepLink Fallback] Received unmatched URL:', url);
+	console.log('[DeepLink Fallback] Hostname:', hostname);
+	console.log('[DeepLink Fallback] Path:', path);
+	console.log('[DeepLink Fallback] Query Params:', queryParams);
 
-  // Add custom deeplink handling here for patterns that don't match file routes
-  // Example:
-  // if (hostname === 'special-action') {
-  //   return <Redirect href="/some-screen" />;
-  // }
+	// Add custom deeplink handling here for patterns that don't match file routes
+	// Example:
+	// if (hostname === 'special-action') {
+	//   return <Redirect href="/some-screen" />;
+	// }
 
-  // Default fallback - redirect to home
-  console.log('[DeepLink Fallback] No custom handler, redirecting to home');
-  return <Redirect href="/(tabs)/(story)" />;
+	// Default fallback - redirect to home
+	console.log('[DeepLink Fallback] No custom handler, redirecting to home');
+	return <Redirect href="/(tabs)/(story)" />;
 }

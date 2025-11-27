@@ -7,6 +7,7 @@ The QuickGenerateBar now includes advanced settings that allow users to customiz
 ## Features
 
 ### 1. Image Count (Batch Generation)
+
 - Generate 1-5 images at once with a single prompt
 - Each image uses a different random seed for variety
 - Progress indicator shows "Generiere Bild X/Y..." during batch generation
@@ -15,7 +16,9 @@ The QuickGenerateBar now includes advanced settings that allow users to customiz
 **Default**: 1 image
 
 ### 2. Aspect Ratio Selector
+
 Choose from three preset aspect ratios:
+
 - **Quadratisch** (Square): 1024×1024px
 - **Hochformat** (Portrait): 832×1216px
 - **Querformat** (Landscape): 1216×832px
@@ -25,7 +28,9 @@ Visual preview boxes show the relative dimensions.
 **Default**: Square (1024×1024)
 
 ### 3. Steps Slider
+
 Control the number of diffusion steps (quality vs. speed):
+
 - **Range**: 20-150 steps (increments of 5)
 - Lower values = faster generation, potentially lower quality
 - Higher values = slower generation, higher quality/detail
@@ -34,7 +39,9 @@ Control the number of diffusion steps (quality vs. speed):
 **Default**: 50 steps
 
 ### 4. Guidance Scale Slider
+
 Control how closely the AI follows the prompt:
+
 - **Range**: 1-20 (increments of 0.5)
 - Lower values = more creative/artistic interpretation
 - Higher values = stricter adherence to prompt
@@ -46,19 +53,23 @@ Control how closely the AI follows the prompt:
 ## UI/UX Details
 
 ### Settings Button
+
 - **Location**: Between prompt input and Generate button
 - **Icon**: Gear/settings icon (⚙️)
 - **Badge**: Blue pulsing dot appears when any setting differs from defaults
 - **State**: Disabled during generation
 
 ### Modal Layout
+
 - **Style**: Glass-blur modal (white/95 with backdrop-blur-xl)
 - **Size**: max-w-2xl centered
 - **Close**: ESC key or close button (×)
 - **Actions**: Cancel (gray) or Übernehmen (blue)
 
 ### Visual Feedback
+
 The settings button shows a blue pulsing badge when:
+
 - Image count > 1
 - Aspect ratio ≠ Square
 - Steps ≠ 50
@@ -88,13 +99,13 @@ The settings button shows a blue pulsing badge when:
    - Extended `GenerateImageParams` interface:
      ```typescript
      export interface GenerateImageParams {
-       prompt: string;
-       model_id: string;
-       negative_prompt?: string;
-       width?: number;           // NEW
-       height?: number;          // NEW
-       steps?: number;           // NEW
-       guidance_scale?: number;  // NEW
+     	prompt: string;
+     	model_id: string;
+     	negative_prompt?: string;
+     	width?: number; // NEW
+     	height?: number; // NEW
+     	steps?: number; // NEW
+     	guidance_scale?: number; // NEW
      }
      ```
 
@@ -104,12 +115,12 @@ The advanced settings are passed directly to the edge function:
 
 ```typescript
 const result = await generateImage({
-  prompt: prompt.trim(),
-  model_id: selectedModelId,
-  width: advancedSettings.aspectRatio.width,
-  height: advancedSettings.aspectRatio.height,
-  steps: advancedSettings.steps,
-  guidance_scale: advancedSettings.guidanceScale
+	prompt: prompt.trim(),
+	model_id: selectedModelId,
+	width: advancedSettings.aspectRatio.width,
+	height: advancedSettings.aspectRatio.height,
+	steps: advancedSettings.steps,
+	guidance_scale: advancedSettings.guidanceScale,
 });
 ```
 
@@ -118,6 +129,7 @@ const result = await generateImage({
 ### Batch Generation Flow
 
 When `imageCount > 1`:
+
 1. Loop from 0 to imageCount
 2. For each iteration:
    - Update progress: `Generiere Bild ${i + 1}/${totalImages}...`
@@ -130,6 +142,7 @@ When `imageCount > 1`:
 ## Future Enhancements
 
 Potential additions inspired by mobile app:
+
 - [ ] Tag input for organizing generated images
 - [ ] Negative prompt field
 - [ ] Seed input for reproducible generations
@@ -188,6 +201,7 @@ Potential additions inspired by mobile app:
 ## Design Inspiration
 
 Based on mobile app's `QuickGenerateBar.tsx` which includes:
+
 - ImageCountSelector with pill/counter/compact styles
 - AspectRatioSelector with visual previews
 - Slider controls for steps and guidance
@@ -196,6 +210,7 @@ Based on mobile app's `QuickGenerateBar.tsx` which includes:
 - Batch progress tracking
 
 The web implementation follows similar patterns while adapting to:
+
 - Desktop-first layout with responsive mobile view
 - Glass-blur aesthetic matching existing UI
 - Svelte 5 runes instead of React hooks

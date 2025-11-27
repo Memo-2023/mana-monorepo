@@ -7,6 +7,6 @@
  * @returns {boolean} - True wenn eine Kollision erkannt wurde
  */
 export function checkCollision(player, voxels) {
-  // ...
-  return false; // Standardmäßig keine Kollision zurückgeben
+	// ...
+	return false; // Standardmäßig keine Kollision zurückgeben
 }

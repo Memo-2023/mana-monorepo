@@ -3,18 +3,18 @@ import { ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export type ContainerProps = {
-  /** Content to render inside the container */
-  children: ReactNode;
-  /** Background color */
-  backgroundColor?: string;
-  /** Apply padding to the container */
-  padding?: boolean;
-  /** Custom padding value (overrides default) */
-  paddingValue?: number;
-  /** Additional styles */
-  style?: ViewStyle;
-  /** CSS class names (NativeWind/Tailwind) */
-  className?: string;
+	/** Content to render inside the container */
+	children: ReactNode;
+	/** Background color */
+	backgroundColor?: string;
+	/** Apply padding to the container */
+	padding?: boolean;
+	/** Custom padding value (overrides default) */
+	paddingValue?: number;
+	/** Additional styles */
+	style?: ViewStyle;
+	/** CSS class names (NativeWind/Tailwind) */
+	className?: string;
 };
 
 /**
@@ -32,23 +32,23 @@ export type ContainerProps = {
  * ```
  */
 export const Container = ({
-  children,
-  backgroundColor = '#FFFFFF',
-  padding = true,
-  paddingValue = 24,
-  style,
-  className = '',
+	children,
+	backgroundColor = '#FFFFFF',
+	padding = true,
+	paddingValue = 24,
+	style,
+	className = '',
 }: ContainerProps) => {
-  return (
-    <SafeAreaView
-      className={`flex flex-1 ${padding ? `p-6` : ''} ${className}`}
-      style={{
-        backgroundColor,
-        ...(padding && paddingValue !== 24 && { padding: paddingValue }),
-        ...style,
-      }}
-    >
-      {children}
-    </SafeAreaView>
-  );
+	return (
+		<SafeAreaView
+			className={`flex flex-1 ${padding ? `p-6` : ''} ${className}`}
+			style={{
+				backgroundColor,
+				...(padding && paddingValue !== 24 && { padding: paddingValue }),
+				...style,
+			}}
+		>
+			{children}
+		</SafeAreaView>
+	);
 };

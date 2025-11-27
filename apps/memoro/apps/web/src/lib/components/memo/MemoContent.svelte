@@ -31,20 +31,14 @@
 		onTitleChange,
 		onIntroChange,
 		onTranscriptChange,
-		onAddTagPress
+		onAddTagPress,
 	}: Props = $props();
 </script>
 
 <div class="flex-1 overflow-y-auto px-8 py-6">
 	<div class="mx-auto max-w-3xl">
 		<!-- Header with all metadata -->
-		<MemoHeader
-			{memo}
-			{isEditMode}
-			onTitleChange={onTitleChange}
-			onIntroChange={onIntroChange}
-			onAddTagPress={onAddTagPress}
-		/>
+		<MemoHeader {memo} {isEditMode} {onTitleChange} {onIntroChange} {onAddTagPress} />
 
 		<!-- Memories (AI Analysis) -->
 		{#if memo.memories && memo.memories.length > 0}
@@ -92,7 +86,7 @@
 							id: `utterance-${i}`,
 							speaker: u.speakerId || 'speaker1',
 							text: u.text,
-							startTime: u.offset
+							startTime: u.offset,
 						}))}
 						speakerLabels={memo.metadata?.speakerLabels || memo.source?.speakers || {}}
 					/>

@@ -1,11 +1,11 @@
 ---
-title: "Fondamenti di Figma per Sviluppatori"
-description: "Impara i fondamenti di Figma per collaborare meglio con i designer e comprendere i progetti UI."
+title: 'Fondamenti di Figma per Sviluppatori'
+description: 'Impara i fondamenti di Figma per collaborare meglio con i designer e comprendere i progetti UI.'
 pubDate: 2025-03-20
-category: "UI & UX"
+category: 'UI & UX'
 featured: true
-image: "/images/tutorials/bauntown-figma-basics.png"
-author: "Anna Schmidt"
+image: '/images/tutorials/bauntown-figma-basics.png'
+author: 'Anna Schmidt'
 ---
 
 # Fondamenti di Figma per Sviluppatori

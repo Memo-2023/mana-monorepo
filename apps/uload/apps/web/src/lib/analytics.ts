@@ -47,7 +47,7 @@ export const EVENTS = {
 
 	// Error events
 	ERROR_OCCURRED: 'error-occurred',
-	RATE_LIMITED: 'rate-limited'
+	RATE_LIMITED: 'rate-limited',
 } as const;
 
 export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
@@ -95,7 +95,7 @@ export function trackLinkClick(linkData: {
 		short_code: linkData.shortCode,
 		username: linkData.username,
 		has_password: linkData.hasPassword || false,
-		is_expiring: linkData.isExpiring || false
+		is_expiring: linkData.isExpiring || false,
 	});
 }
 
@@ -112,7 +112,7 @@ export function trackLinkCreated(linkData: {
 		short_code: linkData.shortCode,
 		has_password: linkData.hasPassword || false,
 		has_expiry: linkData.hasExpiry || false,
-		has_click_limit: linkData.hasClickLimit || false
+		has_click_limit: linkData.hasClickLimit || false,
 	});
 }
 
@@ -123,7 +123,7 @@ export function trackAuth(type: 'signup' | 'login' | 'logout', method?: string):
 	const eventMap = {
 		signup: EVENTS.USER_SIGNUP,
 		login: EVENTS.USER_LOGIN,
-		logout: EVENTS.USER_LOGOUT
+		logout: EVENTS.USER_LOGOUT,
 	};
 
 	trackEvent(eventMap[type], method ? { method } : undefined);
@@ -140,6 +140,6 @@ export function trackError(error: {
 	trackEvent(EVENTS.ERROR_OCCURRED, {
 		error_type: error.type,
 		error_message: error.message || 'Unknown error',
-		error_code: error.code || 'unknown'
+		error_code: error.code || 'unknown',
 	});
 }

@@ -5,11 +5,13 @@ This guide outlines the steps to test the spaces functionality in the Memoro app
 ## Test Environment Setup
 
 Before testing, ensure you have:
+
 - A development build of the Memoro app running
 - At least one test user account
 - A few test memos created
 
 You can enable mock data for testing without a backend by setting the environment variable:
+
 ```
 EXPO_PUBLIC_USE_MOCK_DATA=true
 ```
@@ -19,6 +21,7 @@ EXPO_PUBLIC_USE_MOCK_DATA=true
 ### 1. Spaces List View
 
 #### Create a New Space
+
 - Navigate to the Spaces tab
 - Tap "Create New Space" button
 - Enter a space name (e.g., "Test Space")
@@ -26,6 +29,7 @@ EXPO_PUBLIC_USE_MOCK_DATA=true
 - **Expected**: A new space should appear in the list
 
 #### Space List Display
+
 - Check that the spaces list shows:
   - Space name
   - Description (if any)
@@ -34,10 +38,11 @@ EXPO_PUBLIC_USE_MOCK_DATA=true
 - **Expected**: All spaces should be listed with correct information
 
 #### Delete a Space
+
 - Long press or tap on a space to open the action menu
 - Select "Delete" from the menu
 - Confirm deletion in the alert dialog
-- **Expected**: 
+- **Expected**:
   - A confirmation dialog should show the space name
   - After confirmation, the space should be removed from the list
   - Success message should appear
@@ -45,11 +50,13 @@ EXPO_PUBLIC_USE_MOCK_DATA=true
 ### 2. Space Detail View
 
 #### Navigate to Space Detail
+
 - Tap on a space in the spaces list
 - Select "View Details" from the menu
 - **Expected**: Space detail screen should open showing space information
 
 #### Space Information Display
+
 - Check that the space detail view shows:
   - Space name
   - Description
@@ -58,11 +65,13 @@ EXPO_PUBLIC_USE_MOCK_DATA=true
 - **Expected**: All information should be displayed correctly
 
 #### View Memos in a Space
+
 - Scroll down to see the "Memos in this Space" section
 - **Expected**: All memos associated with the space should be listed
 - **Expected**: If no memos are associated, an appropriate message should be shown
 
 #### Add New Memo to Space
+
 - Tap "Create New Memo" button
 - **Expected**: Navigation to memo creation screen
 - **Note**: This may not be fully implemented yet
@@ -70,17 +79,19 @@ EXPO_PUBLIC_USE_MOCK_DATA=true
 ### 3. Memo-Space Management
 
 #### Link a Memo to Spaces
+
 - Navigate to a memo detail view
 - Tap the menu (three dots) icon
 - Select "Manage Spaces" from the menu
 - Check/uncheck spaces to link/unlink the memo
 - Tap "Save"
-- **Expected**: 
+- **Expected**:
   - Space selector modal should open showing all available spaces
   - Spaces should be checkable/uncheckable
   - After saving, changes should persist
 
 #### Unlink a Memo from Spaces
+
 - Navigate to a memo detail view
 - Tap the menu icon
 - Select "Manage Spaces"
@@ -89,6 +100,7 @@ EXPO_PUBLIC_USE_MOCK_DATA=true
 - **Expected**: The memo should no longer be associated with the unchecked space
 
 #### Verify Space-Memo Relationships
+
 - Link a memo to a space
 - Navigate to that space's detail view
 - **Expected**: The linked memo should appear in the space's memo list
@@ -98,16 +110,19 @@ EXPO_PUBLIC_USE_MOCK_DATA=true
 ### 4. Error Handling
 
 #### Network Errors
+
 - Turn off internet connection
 - Attempt to create a space or link a memo to a space
 - **Expected**: Appropriate error message should be displayed
 - **Expected**: The app should not crash
 
 #### Invalid Operations
+
 - Try to delete a space that has memos (if that's restricted)
 - **Expected**: Appropriate warning or confirmation message
 
 #### Recovery from Errors
+
 - Cause an error (e.g., by network disconnect)
 - Restore connectivity
 - Retry the operation
@@ -116,18 +131,21 @@ EXPO_PUBLIC_USE_MOCK_DATA=true
 ## Edge Cases
 
 ### Space with Many Memos
+
 - Create a space
 - Link 10+ memos to it
 - View the space detail
 - **Expected**: All memos should load and display correctly
 
 ### Long Names and Descriptions
+
 - Create a space with a very long name (>50 characters)
 - Add a long description (>200 characters)
 - View in both list and detail views
 - **Expected**: Text should be properly truncated or wrapped
 
 ### Empty States
+
 - Delete all spaces
 - Check spaces list
 - **Expected**: An appropriate "no spaces" message should be displayed
@@ -144,6 +162,7 @@ EXPO_PUBLIC_USE_MOCK_DATA=true
 ## Reporting Issues
 
 If you encounter any issues during testing, please document:
+
 1. The steps to reproduce the issue
 2. What you expected to happen
 3. What actually happened

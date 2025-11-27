@@ -10,19 +10,19 @@ import { ModelModule } from './model/model.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
-    DatabaseModule,
-    ChatModule,
-    ConversationModule,
-    TemplateModule,
-    SpaceModule,
-    DocumentModule,
-    ModelModule,
-    HealthModule,
-  ],
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			envFilePath: '.env',
+		}),
+		DatabaseModule,
+		ChatModule,
+		ConversationModule,
+		TemplateModule,
+		SpaceModule,
+		DocumentModule,
+		ModelModule,
+		HealthModule,
+	],
 })
 export class AppModule {}

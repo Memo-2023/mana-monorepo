@@ -48,14 +48,19 @@ function createWorkspacesStore() {
 		teamWorkspaces: [],
 		currentWorkspace: null,
 		workspaceMembers: [],
-		isLoadingWorkspaces: false
+		isLoadingWorkspaces: false,
 	});
 
 	return {
 		subscribe,
-		
+
 		// Initialize workspaces on auth
-		init(user: User | null, personalWorkspace: Workspace | null, teamWorkspaces: Workspace[] = [], currentWorkspaceId?: string) {
+		init(
+			user: User | null,
+			personalWorkspace: Workspace | null,
+			teamWorkspaces: Workspace[] = [],
+			currentWorkspaceId?: string
+		) {
 			if (!user) {
 				set({
 					currentUser: null,
@@ -63,7 +68,7 @@ function createWorkspacesStore() {
 					teamWorkspaces: [],
 					currentWorkspace: null,
 					workspaceMembers: [],
-					isLoadingWorkspaces: false
+					isLoadingWorkspaces: false,
 				});
 				return;
 			}
@@ -72,7 +77,7 @@ function createWorkspacesStore() {
 			let currentWorkspace = personalWorkspace;
 			if (currentWorkspaceId) {
 				// Try to find in team workspaces
-				const teamWs = teamWorkspaces.find(w => w.id === currentWorkspaceId);
+				const teamWs = teamWorkspaces.find((w) => w.id === currentWorkspaceId);
 				if (teamWs) {
 					currentWorkspace = teamWs;
 				}
@@ -84,17 +89,17 @@ function createWorkspacesStore() {
 				teamWorkspaces,
 				currentWorkspace,
 				workspaceMembers: [],
-				isLoadingWorkspaces: false
+				isLoadingWorkspaces: false,
 			});
 		},
 
 		// Switch workspace context
 		async switchWorkspace(workspaceId: string) {
 			const state = get(this);
-			
+
 			// Check if switching to personal workspace
 			if (state.personalWorkspace?.id === workspaceId) {
-				update(s => ({ ...s, currentWorkspace: state.personalWorkspace }));
+				update((s) => ({ ...s, currentWorkspace: state.personalWorkspace }));
 				// Remove workspace param from URL
 				const url = new URL(window.location.href);
 				url.searchParams.delete('workspace');
@@ -103,9 +108,9 @@ function createWorkspacesStore() {
 			}
 
 			// Check if switching to a team workspace
-			const teamWorkspace = state.teamWorkspaces.find(w => w.id === workspaceId);
+			const teamWorkspace = state.teamWorkspaces.find((w) => w.id === workspaceId);
 			if (teamWorkspace) {
-				update(s => ({ ...s, currentWorkspace: teamWorkspace }));
+				update((s) => ({ ...s, currentWorkspace: teamWorkspace }));
 				// Add workspace param to URL
 				const url = new URL(window.location.href);
 				url.searchParams.set('workspace', workspaceId);
@@ -116,7 +121,7 @@ function createWorkspacesStore() {
 		// Get permissions for current workspace
 		getPermissions() {
 			const state = get(this);
-			
+
 			// Personal workspace or owner has full permissions
 			if (state.currentWorkspace?.owner === state.currentUser?.id) {
 				return {
@@ -126,13 +131,13 @@ function createWorkspacesStore() {
 					delete_own: true,
 					edit_all: true,
 					delete_all: true,
-					manage_team: true
+					manage_team: true,
 				};
 			}
 
 			// Find member role for current workspace
 			const member = state.workspaceMembers.find(
-				m => m.workspace === state.currentWorkspace?.id && m.user === state.currentUser?.id
+				(m) => m.workspace === state.currentWorkspace?.id && m.user === state.currentUser?.id
 			);
 
 			if (member?.role === 'admin') {
@@ -143,7 +148,7 @@ function createWorkspacesStore() {
 					delete_own: true,
 					edit_all: true,
 					delete_all: true,
-					manage_team: true
+					manage_team: true,
 				};
 			} else if (member?.role === 'member') {
 				return {
@@ -153,7 +158,7 @@ function createWorkspacesStore() {
 					delete_own: true,
 					edit_all: false,
 					delete_all: false,
-					manage_team: false
+					manage_team: false,
 				};
 			}
 
@@ -165,7 +170,7 @@ function createWorkspacesStore() {
 				delete_own: false,
 				edit_all: false,
 				delete_all: false,
-				manage_team: false
+				manage_team: false,
 			};
 		},
 
@@ -177,7 +182,7 @@ function createWorkspacesStore() {
 
 		// Update workspace members
 		setWorkspaceMembers(members: WorkspaceMember[]) {
-			update(s => ({ ...s, workspaceMembers: members }));
+			update((s) => ({ ...s, workspaceMembers: members }));
 		},
 
 		// Create a new workspace
@@ -194,9 +199,9 @@ function createWorkspacesStore() {
 				teamWorkspaces: [],
 				currentWorkspace: null,
 				workspaceMembers: [],
-				isLoadingWorkspaces: false
+				isLoadingWorkspaces: false,
 			});
-		}
+		},
 	};
 }
 
@@ -205,30 +210,27 @@ export const workspacesStore = createWorkspacesStore();
 // Derived store for whether viewing personal workspace
 export const isViewingPersonalWorkspace = derived(
 	workspacesStore,
-	$workspaces => $workspaces.currentWorkspace?.id === $workspaces.personalWorkspace?.id
+	($workspaces) => $workspaces.currentWorkspace?.id === $workspaces.personalWorkspace?.id
 );
 
 // Derived store for whether user can switch workspaces
 export const canSwitchWorkspaces = derived(
 	workspacesStore,
-	$workspaces => $workspaces.teamWorkspaces.length > 0
+	($workspaces) => $workspaces.teamWorkspaces.length > 0
 );
 
 // Derived store for current workspace
 export const currentWorkspace = derived(
 	workspacesStore,
-	$workspaces => $workspaces.currentWorkspace
+	($workspaces) => $workspaces.currentWorkspace
 );
 
 // Derived store for all available workspaces
-export const allWorkspaces = derived(
-	workspacesStore,
-	$workspaces => {
-		const all: Workspace[] = [];
-		if ($workspaces.personalWorkspace) {
-			all.push($workspaces.personalWorkspace);
-		}
-		all.push(...$workspaces.teamWorkspaces);
-		return all;
+export const allWorkspaces = derived(workspacesStore, ($workspaces) => {
+	const all: Workspace[] = [];
+	if ($workspaces.personalWorkspace) {
+		all.push($workspaces.personalWorkspace);
 	}
-);
+	all.push(...$workspaces.teamWorkspaces);
+	return all;
+});

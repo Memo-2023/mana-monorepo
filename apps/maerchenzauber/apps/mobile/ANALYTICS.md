@@ -3,6 +3,7 @@
 This document explains the comprehensive PostHog analytics implementation in the Storyteller mobile app.
 
 ## Table of Contents
+
 - [Setup](#setup)
 - [Architecture](#architecture)
 - [Event Types](#event-types)
@@ -27,6 +28,7 @@ EXPO_PUBLIC_POSTHOG_HOST=https://app.posthog.com
 ### 2. Installation
 
 The required dependencies are already installed:
+
 - `posthog-react-native` - Core PostHog SDK for React Native
 - `posthog-js` - PostHog JavaScript SDK
 - `expo-file-system`, `expo-application`, `expo-localization` - Required peer dependencies
@@ -54,6 +56,7 @@ mobile/
 ### Analytics Service
 
 The `analytics.ts` service provides:
+
 - **Type-safe event tracking** - All events are strongly typed using TypeScript
 - **Automatic enrichment** - Events automatically include device info, session data, etc.
 - **Error handling** - Graceful degradation if PostHog is not configured
@@ -85,12 +88,12 @@ analytics.track('auth_signout', { userId: string });
 // Story creation
 analytics.track('story_creation_started', {
   characterId: string,
-  characterName: string
+  characterName: string,
 });
 
 analytics.track('story_prompt_entered', {
   promptLength: number,
-  language: string
+  language: string,
 });
 
 analytics.track('story_generation_completed', {
@@ -98,13 +101,13 @@ analytics.track('story_generation_completed', {
   characterId: string,
   duration: number,
   pageCount: number,
-  language: string
+  language: string,
 });
 
 analytics.track('story_generation_failed', {
   characterId: string,
   error: string,
-  duration: number
+  duration: number,
 });
 
 // Story interaction
@@ -112,7 +115,7 @@ analytics.track('story_viewed', { storyId: string, title: string });
 analytics.track('story_page_changed', {
   storyId: string,
   pageNumber: number,
-  totalPages: number
+  totalPages: number,
 });
 
 analytics.track('story_shared', { storyId: string, method: string });
@@ -128,15 +131,15 @@ These events track how users interact with and consume stories, providing deep i
 analytics.track('story_session_started', {
   storyId: string,
   title: string,
-  pageCount: number
+  pageCount: number,
 });
 
 analytics.track('story_session_ended', {
   storyId: string,
-  duration: number,          // Total time in milliseconds
-  pagesViewed: number,       // Number of unique pages viewed
-  completed: boolean,        // Whether user reached the end
-  furthestPage: number       // Highest page number reached
+  duration: number, // Total time in milliseconds
+  pagesViewed: number, // Number of unique pages viewed
+  completed: boolean, // Whether user reached the end
+  furthestPage: number, // Highest page number reached
 });
 
 // Page-level engagement
@@ -144,60 +147,60 @@ analytics.track('story_page_viewed', {
   storyId: string,
   pageNumber: number,
   totalPages: number,
-  isStartScreen: boolean,    // Start screen (page 0)
-  isEndScreen: boolean       // End screen (last page)
+  isStartScreen: boolean, // Start screen (page 0)
+  isEndScreen: boolean, // End screen (last page)
 });
 
 analytics.track('story_page_duration', {
   storyId: string,
   pageNumber: number,
-  duration: number,          // Time spent on this page in milliseconds
+  duration: number, // Time spent on this page in milliseconds
   isStartScreen: boolean,
-  isEndScreen: boolean
+  isEndScreen: boolean,
 });
 
 // Story completion
 analytics.track('story_completed', {
   storyId: string,
-  totalDuration: number,           // Total time to complete story
-  pageCount: number,               // Number of story pages (excluding start/end)
-  averagePageDuration: number      // Average time per page
+  totalDuration: number, // Total time to complete story
+  pageCount: number, // Number of story pages (excluding start/end)
+  averagePageDuration: number, // Average time per page
 });
 
 // Abandonment tracking
 analytics.track('story_abandoned', {
   storyId: string,
-  lastPage: number,                // Last page viewed before leaving
+  lastPage: number, // Last page viewed before leaving
   totalPages: number,
-  duration: number,                // Time before abandonment
-  completionPercentage: number     // How far through the story (0-100)
+  duration: number, // Time before abandonment
+  completionPercentage: number, // How far through the story (0-100)
 });
 
 // Story restart
 analytics.track('story_restarted', {
   storyId: string,
-  fromPage: number                 // Page number when restart was triggered
+  fromPage: number, // Page number when restart was triggered
 });
 
 // Button interactions
 analytics.track('story_end_button_clicked', {
   storyId: string,
-  title: string
+  title: string,
 });
 
 analytics.track('story_restart_button_clicked', {
   storyId: string,
-  fromPage: number                 // Page when restart was clicked
+  fromPage: number, // Page when restart was clicked
 });
 
 analytics.track('story_archive_button_clicked', {
   storyId: string,
-  title: string
+  title: string,
 });
 
 analytics.track('story_archived', {
   storyId: string,
-  title: string
+  title: string,
 });
 ```
 
@@ -206,34 +209,34 @@ analytics.track('story_archived', {
 ```typescript
 // Character creation
 analytics.track('character_creation_started', {
-  method: 'description' | 'photo'
+  method: 'description' | 'photo',
 });
 
 analytics.track('character_description_entered', {
-  descriptionLength: number
+  descriptionLength: number,
 });
 
 analytics.track('character_photo_selected', {
-  source: 'camera' | 'gallery'
+  source: 'camera' | 'gallery',
 });
 
 analytics.track('character_generation_completed', {
   characterId: string,
   name: string,
   method: 'description' | 'photo',
-  duration: number
+  duration: number,
 });
 
 analytics.track('character_generation_failed', {
   method: 'description' | 'photo',
   error: string,
-  duration: number
+  duration: number,
 });
 
 // Character interaction
 analytics.track('character_viewed', {
   characterId: string,
-  characterName: string
+  characterName: string,
 });
 
 analytics.track('character_shared', { characterId: string, method: string });
@@ -248,30 +251,30 @@ analytics.track('credits_checked', { balance: number });
 analytics.track('credits_insufficient', {
   required: number,
   available: number,
-  action: string
+  action: string,
 });
 
 analytics.track('credits_consumed', {
   amount: number,
   action: string,
-  balance: number
+  balance: number,
 });
 
 analytics.track('credits_purchase_initiated', { amount: number });
 analytics.track('credits_purchase_completed', {
   amount: number,
-  paymentMethod: string
+  paymentMethod: string,
 });
 
 // Credits screen tracking
 analytics.track('credits_screen_viewed', {
-  source: string,           // Where user came from (e.g., 'insufficient_modal', 'settings')
-  balance: number          // Current credit balance
+  source: string, // Where user came from (e.g., 'insufficient_modal', 'settings')
+  balance: number, // Current credit balance
 });
 
 analytics.track('credits_screen_duration', {
-  duration: number,        // Time spent on credits screen
-  purchaseMade: boolean    // Whether a purchase was completed
+  duration: number, // Time spent on credits screen
+  purchaseMade: boolean, // Whether a purchase was completed
 });
 ```
 
@@ -315,7 +318,7 @@ import { analytics } from '../src/services/analytics';
 // Track a simple event
 analytics.track('feature_discovered', {
   feature: 'story_sharing',
-  source: 'button_click'
+  source: 'button_click',
 });
 ```
 
@@ -433,13 +436,13 @@ await analytics.identify(user.id, {
   email: user.email,
   name: user.name,
   plan: user.plan,
-  signupDate: user.createdAt
+  signupDate: user.createdAt,
 });
 
 // Update user properties
 await analytics.setUserProperties({
   preferredLanguage: 'de',
-  storiesCreated: 5
+  storiesCreated: 5,
 });
 
 // Reset on logout
@@ -482,8 +485,8 @@ try {
     action: 'submit_story',
     metadata: {
       characterId: selectedCharacter.id,
-      promptLength: prompt.length
-    }
+      promptLength: prompt.length,
+    },
   });
 }
 ```
@@ -498,7 +501,7 @@ Always use the strongly-typed events defined in the `AnalyticsEvent` type:
 // ✅ Good - Type-safe
 analytics.track('story_created', {
   storyId: '123',
-  characterId: 'abc'
+  characterId: 'abc',
 });
 
 // ❌ Bad - No type safety
@@ -520,14 +523,14 @@ analytics.track('story_prompt_entered', { promptLength: 50 });
 analytics.track('story_generation_completed', {
   storyId: '456',
   characterId: '123',
-  duration: 5000
+  duration: 5000,
 });
 
 // Or end of flow (failure)
 analytics.track('story_generation_failed', {
   characterId: '123',
   error: 'API timeout',
-  duration: 30000
+  duration: 30000,
 });
 ```
 
@@ -542,12 +545,12 @@ analytics.track('story_generation_completed', {
   characterId: character.id,
   duration: elapsed,
   pageCount: 10,
-  language: 'de'
+  language: 'de',
 });
 
 // ❌ Bad - Minimal context
 analytics.track('story_generation_completed', {
-  storyId: story.id
+  storyId: story.id,
 });
 ```
 
@@ -564,12 +567,12 @@ try {
   analytics.track('operation_completed', {
     duration,
     success: true,
-    resultCount: result.length
+    resultCount: result.length,
   });
 } catch (error) {
   analytics.track('operation_failed', {
     duration: Date.now() - startTime,
-    error: error.message
+    error: error.message,
   });
 }
 ```
@@ -582,13 +585,13 @@ Never track Personally Identifiable Information (PII) in event properties:
 // ✅ Good - No PII
 analytics.track('profile_updated', {
   fields: ['name', 'avatar'],
-  fieldCount: 2
+  fieldCount: 2,
 });
 
 // ❌ Bad - Contains PII
 analytics.track('profile_updated', {
   email: 'user@example.com',
-  name: 'John Doe'
+  name: 'John Doe',
 });
 ```
 
@@ -645,16 +648,19 @@ await analytics.flush();
 ### Common Issues
 
 **Analytics not tracking:**
+
 1. Check that `EXPO_PUBLIC_POSTHOG_API_KEY` is set in `.env`
 2. Restart Expo with cache clear: `npx expo start -c`
 3. Check console for initialization errors
 
 **Events not appearing in PostHog:**
+
 1. Events are batched - wait a few seconds or call `flush()`
 2. Check that your PostHog project is active
 3. Verify the API key is correct
 
 **TypeScript errors:**
+
 1. Make sure event names match exactly (case-sensitive)
 2. Ensure properties match the type definition
 3. Update the `AnalyticsEvent` type if adding new events
@@ -670,7 +676,7 @@ export type AnalyticsEvent = {
   // ... existing events ...
 
   // Your new event
-  'feature_used': {
+  feature_used: {
     featureName: string;
     context: string;
   };
@@ -682,7 +688,7 @@ export type AnalyticsEvent = {
 ```typescript
 analytics.track('feature_used', {
   featureName: 'dark_mode',
-  context: 'settings'
+  context: 'settings',
 });
 ```
 
@@ -708,7 +714,7 @@ Access your analytics dashboard at [app.posthog.com](https://app.posthog.com)
    - `story_creation_started` → `story_prompt_entered` → `story_generation_completed`
 
 2. **Character Creation Success Rate**:
-   - `character_generation_completed` / `character_creation_started` * 100
+   - `character_generation_completed` / `character_creation_started` \* 100
 
 3. **Average Story Generation Time**:
    - Average of `duration` property on `story_generation_completed` events
@@ -716,7 +722,7 @@ Access your analytics dashboard at [app.posthog.com](https://app.posthog.com)
 #### Story Engagement
 
 5. **Story Completion Rate**:
-   - `story_completed` / `story_session_started` * 100
+   - `story_completed` / `story_session_started` \* 100
    - Shows what percentage of users finish stories they start
 
 6. **Average Time Per Story Page**:
@@ -742,7 +748,7 @@ Access your analytics dashboard at [app.posthog.com](https://app.posthog.com)
 #### User Actions & Behavior
 
 11. **Archive Rate**:
-    - `story_archived` / `story_archive_button_clicked` * 100
+    - `story_archived` / `story_archive_button_clicked` \* 100
     - Shows if users follow through with archiving
 
 12. **Restart vs. End Behavior**:
@@ -759,7 +765,7 @@ Access your analytics dashboard at [app.posthog.com](https://app.posthog.com)
     - Sum of `amount` property on `credits_consumed` events grouped by `action`
 
 15. **Credits Screen Conversion**:
-    - `credits_purchase_completed` / `credits_screen_viewed` * 100
+    - `credits_purchase_completed` / `credits_screen_viewed` \* 100
     - Shows effectiveness of purchase flow
 
 16. **Time to Purchase Decision**:
@@ -769,6 +775,7 @@ Access your analytics dashboard at [app.posthog.com](https://app.posthog.com)
 ## Support
 
 For issues or questions about analytics:
+
 1. Check the console logs for error messages
 2. Verify environment configuration
 3. Review PostHog documentation: [posthog.com/docs](https://posthog.com/docs)

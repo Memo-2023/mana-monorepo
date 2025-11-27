@@ -16,16 +16,16 @@ import { AppError } from './app-error';
  * ```
  */
 export class RateLimitError extends AppError {
-  /** Seconds to wait before retrying (if known) */
-  readonly retryAfter?: number;
+	/** Seconds to wait before retrying (if known) */
+	readonly retryAfter?: number;
 
-  constructor(message = 'Rate limit exceeded', retryAfter?: number) {
-    super({
-      code: ErrorCode.RATE_LIMIT_EXCEEDED,
-      message,
-      context: retryAfter ? { retryAfter } : {},
-    });
-    this.name = 'RateLimitError';
-    this.retryAfter = retryAfter;
-  }
+	constructor(message = 'Rate limit exceeded', retryAfter?: number) {
+		super({
+			code: ErrorCode.RATE_LIMIT_EXCEEDED,
+			message,
+			context: retryAfter ? { retryAfter } : {},
+		});
+		this.name = 'RateLimitError';
+		this.retryAfter = retryAfter;
+	}
 }

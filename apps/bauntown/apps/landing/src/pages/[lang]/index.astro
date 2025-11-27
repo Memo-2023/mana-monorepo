@@ -1,19 +1,19 @@
 ---
-import { languages } from "../../i18n/ui";
-import { getLangFromUrl, useTranslations } from "../../utils/i18n";
-import Layout from "../../layouts/Layout.astro";
-import TutorialCard from "../../components/TutorialCard.astro";
-import Card from "../../components/Card.astro";
-import MissionCard from "../../components/MissionCard.astro";
-import NewsCard from "../../components/NewsCard.astro";
-import ProjectCard from "../../components/ProjectCard.astro";
-import ToolCard from "../../components/ToolCard.astro";
-import MatrixHero from "../../components/MatrixHero.astro";
-import { getCollection } from "astro:content";
+import { languages } from '../../i18n/ui';
+import { getLangFromUrl, useTranslations } from '../../utils/i18n';
+import Layout from '../../layouts/Layout.astro';
+import TutorialCard from '../../components/TutorialCard.astro';
+import Card from '../../components/Card.astro';
+import MissionCard from '../../components/MissionCard.astro';
+import NewsCard from '../../components/NewsCard.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import ToolCard from '../../components/ToolCard.astro';
+import MatrixHero from '../../components/MatrixHero.astro';
+import { getCollection } from 'astro:content';
 
 // Define static paths for ALL supported languages
 export function getStaticPaths() {
-  return Object.keys(languages).map((lang) => ({ params: { lang } }));
+	return Object.keys(languages).map((lang) => ({ params: { lang } }));
 }
 
 export const prerender = true;
@@ -23,464 +23,447 @@ const { lang } = Astro.params;
 const t = useTranslations(lang as keyof typeof languages);
 
 // Get tutorials in current language
-const allTutorials = await getCollection("tutorials", ({ id }) => {
-  return id.startsWith(lang + "/");
+const allTutorials = await getCollection('tutorials', ({ id }) => {
+	return id.startsWith(lang + '/');
 });
 
 // Sort by date with newest first
 const sortedTutorials = allTutorials.sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 
 // Group by category
-const categories = ["basics", "advanced", "integrations"] as const;
+const categories = ['basics', 'advanced', 'integrations'] as const;
 const tutorialsByCategory = categories.reduce(
-  (acc, category) => {
-    acc[category] = sortedTutorials.filter(
-      (tutorial) => tutorial.data.category === category
-    );
-    return acc;
-  },
-  {} as Record<(typeof categories)[number], typeof sortedTutorials>
+	(acc, category) => {
+		acc[category] = sortedTutorials.filter((tutorial) => tutorial.data.category === category);
+		return acc;
+	},
+	{} as Record<(typeof categories)[number], typeof sortedTutorials>
 );
 
 // Get featured tutorials
 const featuredTutorials = sortedTutorials.filter((tutorial) => {
-  const title = (tutorial.data.title || "").toLowerCase();
-  const courseName = (tutorial.data.courseName || "").toLowerCase();
-  // Only include the main figma course card (lessonNumber 0 or undefined)
-  if (courseName.includes("figma grundlagen") || title.includes("figma grundlagen")) {
-    return tutorial.data.lessonNumber === 0 || tutorial.data.lessonNumber === undefined;
-  }
-  // Vibecoding and Astro Website as before
-  return (
-    title.includes("vibecoding") ||
-    courseName.includes("vibecoding") ||
-    title.includes("astro website") ||
-    courseName.includes("astro website") ||
-    title.includes("erste schritte mit astro") ||
-    courseName.includes("erste schritte mit astro")
-  );
+	const title = (tutorial.data.title || '').toLowerCase();
+	const courseName = (tutorial.data.courseName || '').toLowerCase();
+	// Only include the main figma course card (lessonNumber 0 or undefined)
+	if (courseName.includes('figma grundlagen') || title.includes('figma grundlagen')) {
+		return tutorial.data.lessonNumber === 0 || tutorial.data.lessonNumber === undefined;
+	}
+	// Vibecoding and Astro Website as before
+	return (
+		title.includes('vibecoding') ||
+		courseName.includes('vibecoding') ||
+		title.includes('astro website') ||
+		courseName.includes('astro website') ||
+		title.includes('erste schritte mit astro') ||
+		courseName.includes('erste schritte mit astro')
+	);
 });
 
 // Get missions for home page
-const allMissions = await getCollection("missions", ({ id }) => {
-  return id.startsWith(lang + "/");
+const allMissions = await getCollection('missions', ({ id }) => {
+	return id.startsWith(lang + '/');
 });
 
 // Sort missions by date with newest first
 const sortedMissions = allMissions.sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 
 // Get news for home page
-const allNews = await getCollection("news", ({ id }) => {
-  return id.startsWith(lang + "/");
+const allNews = await getCollection('news', ({ id }) => {
+	return id.startsWith(lang + '/');
 });
 
 // Sort news by date with newest first
-const sortedNews = allNews.sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-);
+const sortedNews = allNews.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 // Get models for home page
-const allModels = await getCollection("models", ({ id }) => {
-  return id.startsWith(lang + "/");
+const allModels = await getCollection('models', ({ id }) => {
+	return id.startsWith(lang + '/');
 });
 
 // Sort models by date with newest first
-const sortedModels = allModels.sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-);
+const sortedModels = allModels.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 // Get tools for home page
-const allTools = await getCollection("tools", ({ id }) => {
-  return id.startsWith(lang + "/");
+const allTools = await getCollection('tools', ({ id }) => {
+	return id.startsWith(lang + '/');
 });
 
 // Sort tools by date with newest first
-const sortedTools = allTools.sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-);
+const sortedTools = allTools.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 // Get featured tools
-const featuredTools = sortedTools.filter(
-  (tool) => tool.data.featured
-);
+const featuredTools = sortedTools.filter((tool) => tool.data.featured);
 
 // Get projects for home page
-const allProjects = await getCollection("projects", ({ id }) => {
-  return id.startsWith(lang + "/");
+const allProjects = await getCollection('projects', ({ id }) => {
+	return id.startsWith(lang + '/');
 });
 
 // Sort projects by date with newest first
 const sortedProjects = allProjects.sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 ---
 
 <Layout title="BaunTown - A Community of Builders">
-  <MatrixHero height="85vh" />
+	<MatrixHero height="85vh" />
 
-  <section class="section feature-section">
-    <div class="section-header">
-      <h2>{t("home.featured")}</h2>
-    </div>
-    <div class="grid">
-      <Card
-        variant="primary"
-        title={t("home.section1.title")}
-        description={t("home.section1.description")}
-        image="/images/bauntown-buildtogether.png"
-        imageAlt="Build Together"
-        href={`/${lang}/vision/gemeinsam-lernen`}
-        buttonText={t("home.hero.cta")}
-      />
+	<section class="section feature-section">
+		<div class="section-header">
+			<h2>{t('home.featured')}</h2>
+		</div>
+		<div class="grid">
+			<Card
+				variant="primary"
+				title={t('home.section1.title')}
+				description={t('home.section1.description')}
+				image="/images/bauntown-buildtogether.png"
+				imageAlt="Build Together"
+				href={`/${lang}/vision/gemeinsam-lernen`}
+				buttonText={t('home.hero.cta')}
+			/>
 
-      <Card
-        variant="secondary"
-        title={t("home.section2.title")}
-        description={t("home.section2.description")}
-        image="/images/bauntown-codewave.png"
-        imageAlt="Shape the Future"
-        href={`/${lang}/vision/gemeinsam-bauen`}
-        buttonText={t("home.hero.cta")}
-      />
+			<Card
+				variant="secondary"
+				title={t('home.section2.title')}
+				description={t('home.section2.description')}
+				image="/images/bauntown-codewave.png"
+				imageAlt="Shape the Future"
+				href={`/${lang}/vision/gemeinsam-bauen`}
+				buttonText={t('home.hero.cta')}
+			/>
 
-      <Card
-        variant="tertiary"
-        title={t("home.section3.title")}
-        description={t("home.section3.description")}
-        image="/images/bauntown-laptop.png"
-        imageAlt="Grow Together"
-        href={`/${lang}/vision/gemeinsam-verdienen`}
-        buttonText={t("home.hero.cta")}
-      />
-    </div>
-  </section>
+			<Card
+				variant="tertiary"
+				title={t('home.section3.title')}
+				description={t('home.section3.description')}
+				image="/images/bauntown-laptop.png"
+				imageAlt="Grow Together"
+				href={`/${lang}/vision/gemeinsam-verdienen`}
+				buttonText={t('home.hero.cta')}
+			/>
+		</div>
+	</section>
 
-  {
-    featuredTutorials.length > 0 && (
-      <section class="section featured-section">
-        <div class="section-header">
-          <h2>{t("tutorials.featured")}</h2>
-        </div>
-        <div class="grid">
-          {featuredTutorials.slice(0, 3).map((tutorial) => (
-            <TutorialCard tutorial={tutorial} />
-          ))}
-        </div>
-        <div class="view-all-container">
-          <a href={`/${lang}/tutorials`} class="btn-secondary">
-            {t("tutorials.allTutorials")} <span class="arrow">→</span>
-          </a>
-        </div>
-      </section>
-    )
-  }
+	{
+		featuredTutorials.length > 0 && (
+			<section class="section featured-section">
+				<div class="section-header">
+					<h2>{t('tutorials.featured')}</h2>
+				</div>
+				<div class="grid">
+					{featuredTutorials.slice(0, 3).map((tutorial) => (
+						<TutorialCard tutorial={tutorial} />
+					))}
+				</div>
+				<div class="view-all-container">
+					<a href={`/${lang}/tutorials`} class="btn-secondary">
+						{t('tutorials.allTutorials')} <span class="arrow">→</span>
+					</a>
+				</div>
+			</section>
+		)
+	}
 
-  {
-    sortedTools.length > 0 ? (
-      <section class="section tools-section">
-        <div class="section-header">
-          <h2>{t("tools.featured")}</h2>
-        </div>
-        <div class="grid">
-          {sortedTools.slice(0, 3).map((tool) => (
-            <ToolCard tool={tool} />
-          ))}
-        </div>
-        <div class="view-all-container">
-          <a href={`/${lang}/tools`} class="btn-secondary">
-            {t("tools.allTools")} <span class="arrow">→</span>
-          </a>
-        </div>
-      </section>
-    ) : (
-      <section class="section tools-section">
-        <div class="section-header">
-          <h2>{t("tools.featured")}</h2>
-        </div>
-        <div class="coming-soon-teaser">
-          <div class="coming-soon-text">
-            <h3>Tools kommen bald!</h3>
-            <p>
-              Wir stellen eine Sammlung hilfreicher Tools zusammen,
-              die in Kürze verfügbar sein werden.
-            </p>
-            <a href={`/${lang}/tools`} class="btn-secondary">
-              Zu allen Tools <span class="arrow">→</span>
-            </a>
-          </div>
-          <div class="coming-soon-image">
-            <img src="/images/bauntown-laptop.png" alt="Coming Soon" />
-          </div>
-        </div>
-      </section>
-    )
-  }
+	{
+		sortedTools.length > 0 ? (
+			<section class="section tools-section">
+				<div class="section-header">
+					<h2>{t('tools.featured')}</h2>
+				</div>
+				<div class="grid">
+					{sortedTools.slice(0, 3).map((tool) => (
+						<ToolCard tool={tool} />
+					))}
+				</div>
+				<div class="view-all-container">
+					<a href={`/${lang}/tools`} class="btn-secondary">
+						{t('tools.allTools')} <span class="arrow">→</span>
+					</a>
+				</div>
+			</section>
+		) : (
+			<section class="section tools-section">
+				<div class="section-header">
+					<h2>{t('tools.featured')}</h2>
+				</div>
+				<div class="coming-soon-teaser">
+					<div class="coming-soon-text">
+						<h3>Tools kommen bald!</h3>
+						<p>
+							Wir stellen eine Sammlung hilfreicher Tools zusammen, die in Kürze verfügbar sein
+							werden.
+						</p>
+						<a href={`/${lang}/tools`} class="btn-secondary">
+							Zu allen Tools <span class="arrow">→</span>
+						</a>
+					</div>
+					<div class="coming-soon-image">
+						<img src="/images/bauntown-laptop.png" alt="Coming Soon" />
+					</div>
+				</div>
+			</section>
+		)
+	}
 
-  <section class="section news-section">
-    <div class="section-header">
-      <h2>{t("models.featured")}</h2>
-    </div>
-    <div class="grid">
-      {
-        sortedModels.length > 0 ? (
-          sortedModels.slice(0, 3).map((model) => <NewsCard news={model} />)
-        ) : (
-          <div class="coming-soon-teaser">
-            <div class="coming-soon-text">
-              <h3>Modelle kommen bald!</h3>
-              <p>
-                Wir arbeiten an spannenden KI-Modellen, die in Kürze verfügbar
-                sein werden.
-              </p>
-            </div>
-          </div>
-        )
-      }
-    </div>
-    <div class="view-all-container">
-      <a href={`/${lang}/models`} class="btn-secondary">
-        {t("models.allModels")}
-        <span class="arrow">→</span>
-      </a>
-    </div>
-  </section>
+	<section class="section news-section">
+		<div class="section-header">
+			<h2>{t('models.featured')}</h2>
+		</div>
+		<div class="grid">
+			{
+				sortedModels.length > 0 ? (
+					sortedModels.slice(0, 3).map((model) => <NewsCard news={model} />)
+				) : (
+					<div class="coming-soon-teaser">
+						<div class="coming-soon-text">
+							<h3>Modelle kommen bald!</h3>
+							<p>Wir arbeiten an spannenden KI-Modellen, die in Kürze verfügbar sein werden.</p>
+						</div>
+					</div>
+				)
+			}
+		</div>
+		<div class="view-all-container">
+			<a href={`/${lang}/models`} class="btn-secondary">
+				{t('models.allModels')}
+				<span class="arrow">→</span>
+			</a>
+		</div>
+	</section>
 
-  <section class="section projects-section">
-    <div class="section-header">
-      <h2>{t("projects.featured")}</h2>
-    </div>
-    <div class="grid">
-      {
-        sortedProjects
-          .slice(0, 3)
-          .map((project) => <ProjectCard project={project} />)
-      }
-    </div>
-    <div class="view-all-container">
-      <a href={`/${lang}/projects`} class="btn-secondary">
-        {t("projects.allProjects")}
-        <span class="arrow">→</span>
-      </a>
-    </div>
-  </section>
+	<section class="section projects-section">
+		<div class="section-header">
+			<h2>{t('projects.featured')}</h2>
+		</div>
+		<div class="grid">
+			{sortedProjects.slice(0, 3).map((project) => <ProjectCard project={project} />)}
+		</div>
+		<div class="view-all-container">
+			<a href={`/${lang}/projects`} class="btn-secondary">
+				{t('projects.allProjects')}
+				<span class="arrow">→</span>
+			</a>
+		</div>
+	</section>
 </Layout>
 
 <style>
-  .feature-section {
-    margin: 4rem 0;
-  }
+	.feature-section {
+		margin: 4rem 0;
+	}
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
-    position: relative;
-    z-index: 2;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem;
-  }
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: 2rem;
+		position: relative;
+		z-index: 2;
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 1rem;
+	}
 
-  .community-section {
-    margin: 4rem 0;
-  }
+	.community-section {
+		margin: 4rem 0;
+	}
 
-  .community-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-    gap: 2rem;
-  }
+	.community-cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+		gap: 2rem;
+	}
 
-  .community-card {
-    height: 100%;
-  }
+	.community-card {
+		height: 100%;
+	}
 
-  .section {
-    margin: 4rem 0;
-  }
+	.section {
+		margin: 4rem 0;
+	}
 
-  .section-header {
-    /* Überschreibt alle anderen Border und Styles, damit nur der untere Rand sichtbar ist */
-    margin-bottom: 1.5rem;
-    text-align: left;
-    position: relative;
-    z-index: 2;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0 1rem;
-    border: none !important;
-    border-bottom: 1px solid var(--border-color) !important;
-    background: none !important;
-    box-shadow: none !important;
-  }
+	.section-header {
+		/* Überschreibt alle anderen Border und Styles, damit nur der untere Rand sichtbar ist */
+		margin-bottom: 1.5rem;
+		text-align: left;
+		position: relative;
+		z-index: 2;
+		max-width: 1200px;
+		margin-left: auto;
+		margin-right: auto;
+		padding: 0 1rem;
+		border: none !important;
+		border-bottom: 1px solid var(--border-color) !important;
+		background: none !important;
+		box-shadow: none !important;
+	}
 
-  .section-header h2 {
-    font-size: 2rem;
-    color: var(--text-color) !important;
-    display: inline-block;
-    margin-bottom: 0.5rem;
-  }
+	.section-header h2 {
+		font-size: 2rem;
+		color: var(--text-color) !important;
+		display: inline-block;
+		margin-bottom: 0.5rem;
+	}
 
-  .featured-section .section-header h2 {
-    color: white;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-  }
+	.featured-section .section-header h2 {
+		color: white;
+		text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+	}
 
-  .featured-section {
-    padding: 3rem 0;
-    position: relative;
-    overflow: visible;
-    background: none;
-    margin: 0;
-    width: auto;
-    left: unset;
-    right: unset;
-  }
+	.featured-section {
+		padding: 3rem 0;
+		position: relative;
+		overflow: visible;
+		background: none;
+		margin: 0;
+		width: auto;
+		left: unset;
+		right: unset;
+	}
 
-  .featured-section::before {
-    content: "";
-    display: none;
-  }
+	.featured-section::before {
+		content: '';
+		display: none;
+	}
 
-  .featured-section::after {
-    content: "";
-    display: none;
-  }
+	.featured-section::after {
+		content: '';
+		display: none;
+	}
 
-  .btn-primary {
-    display: inline-block;
-    background-color: var(--accent-color);
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition:
-      transform 0.2s,
-      background-color 0.2s;
-  }
+	.btn-primary {
+		display: inline-block;
+		background-color: var(--accent-color);
+		color: white;
+		padding: 0.75rem 1.5rem;
+		border-radius: 0.5rem;
+		font-weight: 600;
+		text-decoration: none;
+		transition:
+			transform 0.2s,
+			background-color 0.2s;
+	}
 
-  .btn-primary:hover {
-    background-color: var(--accent-hover, #2563eb);
-    transform: translateY(-2px);
-  }
+	.btn-primary:hover {
+		background-color: var(--accent-hover, #2563eb);
+		transform: translateY(-2px);
+	}
 
-  /* Tools section styles */
-  .tools-section {
-    margin: 6rem 0;
-  }
+	/* Tools section styles */
+	.tools-section {
+		margin: 6rem 0;
+	}
 
-  .view-all-container {
-    display: flex;
-    justify-content: flex-start;
-    margin-top: 2rem;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0 1rem;
-  }
+	.view-all-container {
+		display: flex;
+		justify-content: flex-start;
+		margin-top: 2rem;
+		max-width: 1200px;
+		margin-left: auto;
+		margin-right: auto;
+		padding: 0 1rem;
+	}
 
-  .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    background-color: transparent;
-    color: var(--accent-color);
-    border: 1px solid var(--accent-color);
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition:
-      background-color 0.2s,
-      color 0.2s,
-      transform 0.2s;
-  }
+	.btn-secondary {
+		display: inline-flex;
+		align-items: center;
+		background-color: transparent;
+		color: var(--accent-color);
+		border: 1px solid var(--accent-color);
+		padding: 0.75rem 1.5rem;
+		border-radius: 0.5rem;
+		font-weight: 600;
+		text-decoration: none;
+		transition:
+			background-color 0.2s,
+			color 0.2s,
+			transform 0.2s;
+	}
 
-  .btn-secondary:hover {
-    background-color: var(--accent-color);
-    color: white;
-    transform: translateY(-2px);
-  }
+	.btn-secondary:hover {
+		background-color: var(--accent-color);
+		color: white;
+		transform: translateY(-2px);
+	}
 
-  .arrow {
-    display: inline-block;
-    margin-left: 0.5rem;
-    transition: transform 0.2s;
-  }
+	.arrow {
+		display: inline-block;
+		margin-left: 0.5rem;
+		transition: transform 0.2s;
+	}
 
-  .btn-secondary:hover .arrow {
-    transform: translateX(4px);
-  }
+	.btn-secondary:hover .arrow {
+		transform: translateX(4px);
+	}
 
-  /* Coming Soon Teaser */
-  .coming-soon-teaser {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    background-color: var(--card-bg);
-    border-radius: 1rem;
-    padding: 2rem;
-    margin: 1rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--border-color);
-  }
+	/* Coming Soon Teaser */
+	.coming-soon-teaser {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 2rem;
+		background-color: var(--card-bg);
+		border-radius: 1rem;
+		padding: 2rem;
+		margin: 1rem;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+		border: 1px solid var(--border-color);
+	}
 
-  .coming-soon-text {
-    flex: 1;
-  }
+	.coming-soon-text {
+		flex: 1;
+	}
 
-  .coming-soon-text h3 {
-    font-size: 1.75rem;
-    margin-bottom: 1rem;
-    color: var(--accent-color);
-  }
+	.coming-soon-text h3 {
+		font-size: 1.75rem;
+		margin-bottom: 1rem;
+		color: var(--accent-color);
+	}
 
-  .coming-soon-text p {
-    margin-bottom: 1.5rem;
-    color: var(--text-muted);
-  }
+	.coming-soon-text p {
+		margin-bottom: 1.5rem;
+		color: var(--text-muted);
+	}
 
-  .coming-soon-image {
-    flex: 0 0 250px;
-  }
+	.coming-soon-image {
+		flex: 0 0 250px;
+	}
 
-  .coming-soon-image img {
-    width: 100%;
-    height: auto;
-    border-radius: 0.5rem;
-  }
+	.coming-soon-image img {
+		width: 100%;
+		height: auto;
+		border-radius: 0.5rem;
+	}
 
-  @media (max-width: 768px) {
-    .coming-soon-teaser {
-      flex-direction: column-reverse;
-      padding: 1.5rem;
-    }
+	@media (max-width: 768px) {
+		.coming-soon-teaser {
+			flex-direction: column-reverse;
+			padding: 1.5rem;
+		}
 
-    .coming-soon-image {
-      flex: 0 0 auto;
-      width: 100%;
-      max-width: 300px;
-      margin: 0 auto;
-    }
-  }
+		.coming-soon-image {
+			flex: 0 0 auto;
+			width: 100%;
+			max-width: 300px;
+			margin: 0 auto;
+		}
+	}
 
-  @media (max-width: 768px) {
-    .community-image {
-      margin-bottom: 2rem;
-    }
+	@media (max-width: 768px) {
+		.community-image {
+			margin-bottom: 2rem;
+		}
 
-    .community-content {
-      text-align: center;
-    }
+		.community-content {
+			text-align: center;
+		}
 
-    .missions-container {
-      grid-template-columns: 1fr;
-    }
-  }
+		.missions-container {
+			grid-template-columns: 1fr;
+		}
+	}
 </style>

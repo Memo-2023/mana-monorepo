@@ -3,11 +3,13 @@
 Cross-platform icon component (SF Symbols on iOS, Ionicons elsewhere).
 
 ## Installation
+
 \`\`\`bash
 npx @memoro/ui add icon
 \`\`\`
 
 ## Usage
+
 \`\`\`tsx
 import { Icon } from '@/components/ui/Icon';
 
@@ -16,6 +18,7 @@ import { Icon } from '@/components/ui/Icon';
 \`\`\`
 
 ## Common Icons
+
 - Navigation: \`chevron-back\`, \`chevron-forward\`, \`arrow-back\`, \`close\`, \`menu\`
 - Actions: \`add\`, \`remove\`, \`checkmark\`, \`search\`, \`filter\`, \`settings\`, \`trash\`, \`share\`
 - Media: \`image\`, \`images\`, \`camera\`, \`heart\`, \`star\`, \`bookmark\`
@@ -25,6 +28,7 @@ import { Icon } from '@/components/ui/Icon';
 See Icon.tsx for full icon list (100+ icons mapped).
 
 ## Platform
+
 - **iOS:** Uses SF Symbols (native, better performance)
 - **Android/Web:** Uses Ionicons
 

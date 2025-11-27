@@ -1,15 +1,15 @@
 ---
-title: "BaunTown"
-description: "Una piattaforma comunitaria per condividere conoscenze, strumenti e risorse per aiutare i costruttori a creare insieme prodotti digitali migliori."
+title: 'BaunTown'
+description: 'Una piattaforma comunitaria per condividere conoscenze, strumenti e risorse per aiutare i costruttori a creare insieme prodotti digitali migliori.'
 pubDate: 2024-04-04
-category: "Web"
+category: 'Web'
 featured: true
-status: "active"
-technologies: ["Astro", "TypeScript", "CSS", "Markdown", "Netlify", "Stripe"]
-image: "/images/projects/bauntown-project-bauntown-platform.png"
-author: "Till Schneider"
-githubUrl: "https://github.com/bauntown/website"
-demoUrl: "https://baun.town"
+status: 'active'
+technologies: ['Astro', 'TypeScript', 'CSS', 'Markdown', 'Netlify', 'Stripe']
+image: '/images/projects/bauntown-project-bauntown-platform.png'
+author: 'Till Schneider'
+githubUrl: 'https://github.com/bauntown/website'
+demoUrl: 'https://baun.town'
 ---
 
 # Piattaforma BaunTown
@@ -19,6 +19,7 @@ BaunTown è la nostra piattaforma centrale per la condivisione delle conoscenze,
 ## La Sfida
 
 Dopo aver ospitato workshop e sessioni di formazione, abbiamo costantemente affrontato gli stessi problemi:
+
 - Partecipanti che chiedevano assets, file e documentazione
 - Nessun luogo centralizzato per archiviare e condividere materiali
 - Difficoltà nel tracciare chi ha accesso a quali risorse
@@ -39,6 +40,7 @@ BaunTown offre:
 ## Implementazione Tecnica
 
 La piattaforma utilizza uno stack tecnologico moderno:
+
 - **Astro** per la generazione di siti statici con JavaScript minimo
 - **Content Collections** per contenuti strutturati e type-safe
 - **Markdown/MDX** per una facile creazione di contenuti
@@ -50,6 +52,7 @@ La piattaforma utilizza uno stack tecnologico moderno:
 ## Visione Futura
 
 BaunTown continuerà a evolversi con:
+
 - Libreria di tutorial ampliata che copre argomenti di sviluppo e design
 - Vetrine di progetti più dettagliate e casi di studio
 - Profili dei membri per i contributori

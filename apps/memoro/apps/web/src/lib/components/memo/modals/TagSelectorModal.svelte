@@ -19,7 +19,7 @@
 		onClose,
 		onTagSelect,
 		onCreate,
-		isLoading = false
+		isLoading = false,
 	}: Props = $props();
 
 	let searchQuery = $state('');
@@ -39,7 +39,7 @@
 		{ name: 'Purple', value: '#8B5CF6' },
 		{ name: 'Pink', value: '#EC4899' },
 		{ name: 'Indigo', value: '#6366F1' },
-		{ name: 'Gray', value: '#6B7280' }
+		{ name: 'Gray', value: '#6B7280' },
 	];
 
 	function handleCreateTag() {
@@ -158,7 +158,10 @@
 								: ''}"
 						>
 							<div class="flex items-center gap-3">
-								<div class="h-4 w-4 rounded-full" style="background-color: {tag.color || '#gray'}" />
+								<div
+									class="h-4 w-4 rounded-full"
+									style="background-color: {tag.color || '#gray'}"
+								/>
 								<span class="font-medium text-theme">{tag.name}</span>
 							</div>
 

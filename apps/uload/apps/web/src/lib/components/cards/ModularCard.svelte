@@ -36,7 +36,7 @@
 		layout = { columns: 1, gap: '1rem', padding: '1.5rem' },
 		animations = {},
 		className = '',
-		userCardCustomization
+		userCardCustomization,
 	}: Props = $props();
 
 	// Module component map
@@ -47,7 +47,7 @@
 		stats: StatsModule,
 		actions: ActionsModule,
 		footer: FooterModule,
-		links: LinksModule
+		links: LinksModule,
 	};
 
 	// Sort modules by order - create a copy to avoid mutation
@@ -60,11 +60,10 @@
 	// Generate CSS variables from theme and user customization
 	let themeStyles = $derived(() => {
 		const styles = [];
-		
+
 		// Add theme colors
 		if (theme?.colors) {
-			styles.push(...Object.entries(theme.colors)
-				.map(([key, value]) => `--${key}: ${value}`));
+			styles.push(...Object.entries(theme.colors).map(([key, value]) => `--${key}: ${value}`));
 		}
 
 		// Add user card customization (takes priority)
@@ -93,7 +92,7 @@
 		const classes = {
 			fade: 'animate-fade-in',
 			slide: 'animate-slide-up',
-			scale: 'animate-scale-in'
+			scale: 'animate-scale-in',
 		};
 
 		return classes[animations.entrance] || '';
@@ -135,7 +134,7 @@
 	function handleModuleEvent(moduleId: string, event: string, data: any) {
 		moduleEventBus.emit(`module:${event}`, {
 			moduleId,
-			data
+			data,
 		});
 	}
 </script>

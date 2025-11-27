@@ -15,7 +15,7 @@
 	logo={ManaCoreLogo}
 	primaryColor="#6366f1"
 	onForgotPassword={handleForgotPassword}
-	goto={goto}
+	{goto}
 	loginPath="/login"
 	lightBackground="#f3f4f6"
 	darkBackground="#121212"

@@ -17,8 +17,8 @@ export const GET: RequestHandler = async ({ locals: { session } }) => {
 		const data = await callMiddleware('/api/some-endpoint', {
 			method: 'GET',
 			headers: {
-				Authorization: `Bearer ${session.access_token}`
-			}
+				Authorization: `Bearer ${session.access_token}`,
+			},
 		});
 
 		return json(data);

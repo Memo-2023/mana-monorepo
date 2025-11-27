@@ -20,7 +20,12 @@
 	{#if showFilters}
 		<div class="mb-8 flex gap-2 overflow-x-auto pb-2">
 			{#each [90, 110, 80, 100, 95, 85] as width}
-				<SkeletonBox width="{width}px" height="36px" borderRadius="18px" className="flex-shrink-0" />
+				<SkeletonBox
+					width="{width}px"
+					height="36px"
+					borderRadius="18px"
+					className="flex-shrink-0"
+				/>
 			{/each}
 		</div>
 	{/if}

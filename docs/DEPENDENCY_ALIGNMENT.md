@@ -6,18 +6,19 @@ This document tracks critical dependencies across all projects and their target 
 
 ### High Priority - Version Mismatches
 
-| Package | Target Version | Current Versions | Notes |
-|---------|---------------|------------------|-------|
-| `@supabase/supabase-js` | **2.81.1** | 2.38.4 - 2.81.1 | Significant spread, alignment critical |
-| `typescript` | **5.9.2** | 5.3.3 - 5.9.2 | Update all to latest |
-| `react` | **19.1.0** | 18.3.1 - 19.1.0 | Mixed versions |
-| `expo` | **54.x** | 52.0.39 - 54.0.21 | Manacore needs update |
-| `expo-router` | **6.x** | 4.0.19 - 6.0.14 | Manacore needs update |
-| `astro` | **5.16.0** | 5.3.0 - 5.16.0 | Memoro landing needs update |
+| Package                 | Target Version | Current Versions  | Notes                                  |
+| ----------------------- | -------------- | ----------------- | -------------------------------------- |
+| `@supabase/supabase-js` | **2.81.1**     | 2.38.4 - 2.81.1   | Significant spread, alignment critical |
+| `typescript`            | **5.9.2**      | 5.3.3 - 5.9.2     | Update all to latest                   |
+| `react`                 | **19.1.0**     | 18.3.1 - 19.1.0   | Mixed versions                         |
+| `expo`                  | **54.x**       | 52.0.39 - 54.0.21 | Manacore needs update                  |
+| `expo-router`           | **6.x**        | 4.0.19 - 6.0.14   | Manacore needs update                  |
+| `astro`                 | **5.16.0**     | 5.3.0 - 5.16.0    | Memoro landing needs update            |
 
 ### Current Status by Project
 
 #### Supabase Versions
+
 ```
 maerchenzauber:
   - backend: 2.50.3
@@ -38,6 +39,7 @@ memoro:
 ```
 
 #### Expo/React Native Versions
+
 ```
 maerchenzauber:
   - expo: 54.0.21 ✅
@@ -61,6 +63,7 @@ memoro:
 ```
 
 #### NestJS Versions (Backends)
+
 ```
 maerchenzauber: NestJS 10.0.0
 manadeck: NestJS 11.0.1
@@ -141,17 +144,20 @@ After updating dependencies, verify:
 ## Breaking Changes to Watch
 
 ### Supabase 2.38 → 2.81
+
 - Auth session handling may have changed
 - Check `onAuthStateChange` listeners
 - Verify RLS policies still work
 
 ### Expo SDK 52 → 54
+
 - Check expo-router migration guide
 - New navigation patterns in 6.x
 - Screen options changes
 - Layout changes
 
 ### NestJS 10 → 11
+
 - Decorator changes
 - Module resolution changes
 - Check middleware compatibility

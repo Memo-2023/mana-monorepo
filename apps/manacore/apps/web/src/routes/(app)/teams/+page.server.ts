@@ -48,12 +48,12 @@ export const load: PageServerLoad = async ({ locals: { supabase, session } }) =>
 			return {
 				...team,
 				member_count: memberCount || 0,
-				user_role: roleName?.name || 'member'
+				user_role: roleName?.name || 'member',
 			};
 		})
 	);
 
 	return {
-		teams: teamsWithStats
+		teams: teamsWithStats,
 	};
 };

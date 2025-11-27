@@ -33,7 +33,7 @@ export const actions = {
 			console.log('Password reset successful');
 
 			return {
-				success: true
+				success: true,
 			};
 		} catch (err: any) {
 			console.error('Password reset error:', err);
@@ -53,5 +53,5 @@ export const actions = {
 			const message = err?.message || 'Failed to reset password. Please try again.';
 			return fail(400, { error: message });
 		}
-	}
+	},
 } satisfies Actions;

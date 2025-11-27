@@ -77,12 +77,12 @@ export function createSupabaseAuthStore(
 	async function getUserFromSession(): Promise<SupabaseUser | null> {
 		const supabase = getSupabaseClient();
 		const {
-			data: { session }
+			data: { session },
 		} = await supabase.auth.getSession();
 		if (!session?.user) return null;
 		return {
 			id: session.user.id,
-			email: session.user.email || ''
+			email: session.user.email || '',
 		};
 	}
 
@@ -136,7 +136,7 @@ export function createSupabaseAuthStore(
 				const supabase = getSupabaseClient();
 				const { error: authError } = await supabase.auth.signInWithPassword({
 					email,
-					password
+					password,
 				});
 
 				if (authError) {
@@ -165,7 +165,7 @@ export function createSupabaseAuthStore(
 				const supabase = getSupabaseClient();
 				const { data, error: authError } = await supabase.auth.signUp({
 					email,
-					password
+					password,
 				});
 
 				if (authError) {
@@ -183,7 +183,7 @@ export function createSupabaseAuthStore(
 				return {
 					success: true,
 					needsVerification,
-					user: user || undefined
+					user: user || undefined,
 				};
 			} catch (e) {
 				const errorMessage = e instanceof Error ? e.message : 'Sign up failed';
@@ -206,7 +206,7 @@ export function createSupabaseAuthStore(
 					options.passwordResetRedirectUrl || `${window.location.origin}/reset-password`;
 
 				const { error: authError } = await supabase.auth.resetPasswordForEmail(email, {
-					redirectTo
+					redirectTo,
 				});
 
 				if (authError) {
@@ -266,6 +266,6 @@ export function createSupabaseAuthStore(
 		 */
 		clearError() {
 			error = null;
-		}
+		},
 	};
 }

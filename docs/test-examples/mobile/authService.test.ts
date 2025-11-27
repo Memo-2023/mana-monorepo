@@ -72,7 +72,10 @@ describe('authService', () => {
 
 			// Verify tokens were stored
 			expect(SecureStore.setItemAsync).toHaveBeenCalledWith('@auth/appToken', mockTokens.appToken);
-			expect(SecureStore.setItemAsync).toHaveBeenCalledWith('@auth/refreshToken', mockTokens.refreshToken);
+			expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
+				'@auth/refreshToken',
+				mockTokens.refreshToken
+			);
 		});
 
 		it('should handle invalid credentials error', async () => {

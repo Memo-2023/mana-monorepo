@@ -20,52 +20,52 @@ import { StoryLogbookService } from './services/story-logbook.service';
 import { ErrorLoggingService } from './services/error-logging.service';
 
 @Module({
-  imports: [
-    SupabaseModule,
-    ConfigModule,
-    // Configure ClsModule for request context management
-    ClsModule.forRoot({
-      global: true,
-      middleware: {
-        // Don't mount middleware automatically - we'll use interceptor instead
-        mount: false,
-      },
-    }),
-  ],
-  controllers: [ImageController],
-  providers: [
-    ImageSupabaseService,
-    ImageOptimizationService,
-    SettingsService,
-    // CustomFirestoreService,
-    PromptingService,
-    CoreService,
-    SupabaseService,
-    SupabaseDataService,
-    SupabaseJsonbAuthService,
-    AuthenticatedSupabaseService,
-    SupabaseClientService,
-    RequestContextInterceptor,
-    RequestContextService,
-    StoryLogbookService,
-    ErrorLoggingService,
-  ],
-  exports: [
-    ImageSupabaseService,
-    ImageOptimizationService,
-    SettingsService,
-    // CustomFirestoreService,
-    PromptingService,
-    CoreService,
-    SupabaseService,
-    SupabaseDataService,
-    SupabaseJsonbAuthService,
-    AuthenticatedSupabaseService,
-    SupabaseClientService,
-    RequestContextInterceptor,
-    RequestContextService,
-    StoryLogbookService,
-    ErrorLoggingService,
-  ],
+	imports: [
+		SupabaseModule,
+		ConfigModule,
+		// Configure ClsModule for request context management
+		ClsModule.forRoot({
+			global: true,
+			middleware: {
+				// Don't mount middleware automatically - we'll use interceptor instead
+				mount: false,
+			},
+		}),
+	],
+	controllers: [ImageController],
+	providers: [
+		ImageSupabaseService,
+		ImageOptimizationService,
+		SettingsService,
+		// CustomFirestoreService,
+		PromptingService,
+		CoreService,
+		SupabaseService,
+		SupabaseDataService,
+		SupabaseJsonbAuthService,
+		AuthenticatedSupabaseService,
+		SupabaseClientService,
+		RequestContextInterceptor,
+		RequestContextService,
+		StoryLogbookService,
+		ErrorLoggingService,
+	],
+	exports: [
+		ImageSupabaseService,
+		ImageOptimizationService,
+		SettingsService,
+		// CustomFirestoreService,
+		PromptingService,
+		CoreService,
+		SupabaseService,
+		SupabaseDataService,
+		SupabaseJsonbAuthService,
+		AuthenticatedSupabaseService,
+		SupabaseClientService,
+		RequestContextInterceptor,
+		RequestContextService,
+		StoryLogbookService,
+		ErrorLoggingService,
+	],
 })
 export class CoreModule {}

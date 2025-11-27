@@ -97,7 +97,7 @@ export function getVariantContent(variantId: string): VariantContent {
 				name: 'Control',
 				headline: m.hero_control_headline(),
 				subheadline: m.hero_control_subheadline(),
-				ctaText: m.hero_control_cta()
+				ctaText: m.hero_control_cta(),
 				// ...
 			};
 		case 'a1':
@@ -107,7 +107,7 @@ export function getVariantContent(variantId: string): VariantContent {
 				headline: m.hero_a1_headline(),
 				subheadline: m.hero_a1_subheadline(),
 				ctaText: m.hero_a1_cta(),
-				features: [m.hero_a1_feature_1(), m.hero_a1_feature_2(), m.hero_a1_feature_3()]
+				features: [m.hero_a1_feature_1(), m.hero_a1_feature_2(), m.hero_a1_feature_3()],
 				// ...
 			};
 		// ...

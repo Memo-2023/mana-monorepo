@@ -25,7 +25,9 @@ test-examples/
 ### Backend Tests (NestJS)
 
 #### `example.controller.spec.ts`
+
 Demonstrates:
+
 - Controller unit testing with mocked services
 - Request/response handling
 - Authentication/authorization testing
@@ -34,13 +36,16 @@ Demonstrates:
 - CRUD operations
 
 **Key Patterns**:
+
 - Use `@nestjs/testing` TestingModule
 - Mock all service dependencies
 - Test both success and error paths
 - Verify service method calls
 
 #### `example.service.spec.ts`
+
 Demonstrates:
+
 - Service business logic testing
 - Database operation mocking
 - External API mocking
@@ -49,6 +54,7 @@ Demonstrates:
 - Authorization checks
 
 **Key Patterns**:
+
 - Mock database and external services
 - Test error handling thoroughly
 - Verify data transformations
@@ -57,7 +63,9 @@ Demonstrates:
 ### Mobile Tests (React Native)
 
 #### `ExampleComponent.test.tsx`
+
 Demonstrates:
+
 - Component rendering
 - User interactions (press, long press)
 - State management
@@ -67,13 +75,16 @@ Demonstrates:
 - Snapshot testing
 
 **Key Patterns**:
+
 - Use `@testing-library/react-native`
 - Test user behavior, not implementation
 - Verify accessibility props
 - Test loading and error states
 
 #### `authService.test.ts`
+
 Demonstrates:
+
 - Async service testing
 - API call mocking with fetch
 - Storage operations (SecureStore)
@@ -82,6 +93,7 @@ Demonstrates:
 - Integration with other services
 
 **Key Patterns**:
+
 - Mock global fetch
 - Mock Expo modules (SecureStore)
 - Test timeout scenarios
@@ -90,7 +102,9 @@ Demonstrates:
 ### Web Tests (SvelteKit)
 
 #### `Button.test.ts`
+
 Demonstrates:
+
 - Svelte 5 component testing
 - Reactive state with runes ($state, $derived)
 - User events
@@ -100,13 +114,16 @@ Demonstrates:
 - Debouncing
 
 **Key Patterns**:
+
 - Use `@testing-library/svelte`
 - Test Svelte 5 reactivity
 - Verify accessibility attributes
 - Test custom event dispatch
 
 #### `page.server.test.ts`
+
 Demonstrates:
+
 - Server load function testing
 - Form action testing
 - Database mocking (PocketBase)
@@ -116,6 +133,7 @@ Demonstrates:
 - File upload handling
 
 **Key Patterns**:
+
 - Mock `locals` object
 - Mock database client
 - Test redirect behavior
@@ -125,7 +143,9 @@ Demonstrates:
 ### Shared Package Tests
 
 #### `format.test.ts`
+
 Demonstrates:
+
 - Pure function testing
 - Parameterized tests (it.each)
 - Edge case testing
@@ -135,6 +155,7 @@ Demonstrates:
 - Unicode and emoji handling
 
 **Key Patterns**:
+
 - Test with multiple inputs using `it.each`
 - Cover edge cases thoroughly
 - Test security vulnerabilities
@@ -180,6 +201,7 @@ jest.mock('@your-project/custom-service', () => ({
 ### 4. Reference Best Practices
 
 Each file includes comments explaining:
+
 - Why specific patterns are used
 - What to test and what not to test
 - Common pitfalls to avoid

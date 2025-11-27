@@ -44,7 +44,7 @@
 					hasVoted: false,
 					status: 'planned',
 					category: 'feature',
-					createdAt: '2024-01-15'
+					createdAt: '2024-01-15',
 				},
 				{
 					id: '2',
@@ -54,7 +54,7 @@
 					hasVoted: true,
 					status: 'in_progress',
 					category: 'feature',
-					createdAt: '2024-01-10'
+					createdAt: '2024-01-10',
 				},
 				{
 					id: '3',
@@ -64,7 +64,7 @@
 					hasVoted: false,
 					status: 'open',
 					category: 'feature',
-					createdAt: '2024-01-20'
+					createdAt: '2024-01-20',
 				},
 				{
 					id: '4',
@@ -74,7 +74,7 @@
 					hasVoted: false,
 					status: 'completed',
 					category: 'feature',
-					createdAt: '2024-01-05'
+					createdAt: '2024-01-05',
 				},
 				{
 					id: '5',
@@ -84,8 +84,8 @@
 					hasVoted: false,
 					status: 'open',
 					category: 'improvement',
-					createdAt: '2024-01-18'
-				}
+					createdAt: '2024-01-18',
+				},
 			];
 		} finally {
 			loading = false;
@@ -132,7 +132,7 @@
 			hasVoted: true,
 			status: 'open',
 			category: newCategory,
-			createdAt: new Date().toISOString()
+			createdAt: new Date().toISOString(),
 		};
 		feedbackItems = [newItem, ...feedbackItems];
 		toastStore.success('Feedback eingereicht!');
@@ -157,21 +157,27 @@
 	const statusColors: Record<string, { bg: string; text: string }> = {
 		open: { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-600 dark:text-gray-300' },
 		planned: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600 dark:text-blue-400' },
-		in_progress: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-600 dark:text-amber-400' },
-		completed: { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-600 dark:text-green-400' }
+		in_progress: {
+			bg: 'bg-amber-100 dark:bg-amber-900/30',
+			text: 'text-amber-600 dark:text-amber-400',
+		},
+		completed: {
+			bg: 'bg-green-100 dark:bg-green-900/30',
+			text: 'text-green-600 dark:text-green-400',
+		},
 	};
 
 	const statusLabels: Record<string, string> = {
 		open: 'Offen',
 		planned: 'Geplant',
 		in_progress: 'In Arbeit',
-		completed: 'Fertig'
+		completed: 'Fertig',
 	};
 
 	const categoryLabels: Record<string, string> = {
 		feature: 'Feature',
 		bug: 'Bug',
-		improvement: 'Verbesserung'
+		improvement: 'Verbesserung',
 	};
 </script>
 
@@ -206,7 +212,10 @@
 			{#each ['all', 'feature', 'bug', 'improvement'] as filter}
 				<button
 					onclick={() => (activeFilter = filter as typeof activeFilter)}
-					class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors {activeFilter === filter ? 'bg-white text-gray-800 shadow dark:bg-gray-600 dark:text-white' : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white'}"
+					class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors {activeFilter ===
+					filter
+						? 'bg-white text-gray-800 shadow dark:bg-gray-600 dark:text-white'
+						: 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white'}"
 				>
 					{filter === 'all' ? 'Alle' : categoryLabels[filter]}
 				</button>
@@ -232,8 +241,18 @@
 		</div>
 	{:else if filteredItems.length === 0}
 		<div class="rounded-2xl bg-gray-50 p-8 text-center dark:bg-gray-800/50">
-			<svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+			<svg
+				class="mx-auto h-16 w-16 text-gray-400"
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="1.5"
+					d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+				/>
 			</svg>
 			<h3 class="mt-4 font-medium text-gray-700 dark:text-gray-300">Noch kein Feedback</h3>
 			<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -247,10 +266,22 @@
 					<!-- Vote button -->
 					<button
 						onclick={() => handleVote(item.id)}
-						class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 transition-colors {item.hasVoted ? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600'}"
+						class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 transition-colors {item.hasVoted
+							? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400'
+							: 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600'}"
 					>
-						<svg class="h-5 w-5" fill={item.hasVoted ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+						<svg
+							class="h-5 w-5"
+							fill={item.hasVoted ? 'currentColor' : 'none'}
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M5 15l7-7 7 7"
+							/>
 						</svg>
 						<span class="text-sm font-semibold">{item.votes}</span>
 					</button>
@@ -261,7 +292,10 @@
 							<h3 class="font-semibold text-gray-800 dark:text-gray-200">
 								{item.title}
 							</h3>
-							<span class="rounded-full px-2 py-0.5 text-xs font-medium {statusColors[item.status].bg} {statusColors[item.status].text}">
+							<span
+								class="rounded-full px-2 py-0.5 text-xs font-medium {statusColors[item.status]
+									.bg} {statusColors[item.status].text}"
+							>
 								{statusLabels[item.status]}
 							</span>
 						</div>
@@ -304,12 +338,23 @@
 						class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
 					>
 						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
 						</svg>
 					</button>
 				</div>
 
-				<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="space-y-4">
+				<form
+					onsubmit={(e) => {
+						e.preventDefault();
+						handleSubmit();
+					}}
+					class="space-y-4"
+				>
 					<!-- Category -->
 					<div>
 						<label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -320,7 +365,10 @@
 								<button
 									type="button"
 									onclick={() => (newCategory = cat as typeof newCategory)}
-									class="flex-1 rounded-xl px-3 py-2 text-sm font-medium transition-colors {newCategory === cat ? 'bg-pink-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'}"
+									class="flex-1 rounded-xl px-3 py-2 text-sm font-medium transition-colors {newCategory ===
+									cat
+										? 'bg-pink-500 text-white'
+										: 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'}"
 								>
 									{categoryLabels[cat]}
 								</button>
@@ -330,7 +378,10 @@
 
 					<!-- Title -->
 					<div>
-						<label for="title" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+						<label
+							for="title"
+							class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+						>
 							Titel
 						</label>
 						<input
@@ -344,7 +395,10 @@
 
 					<!-- Description -->
 					<div>
-						<label for="description" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+						<label
+							for="description"
+							class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+						>
 							Beschreibung
 						</label>
 						<textarea

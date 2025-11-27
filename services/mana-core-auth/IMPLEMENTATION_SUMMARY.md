@@ -65,6 +65,7 @@ mana-core-auth/
 ### 2. Database Schema ✅
 
 **Auth Schema:**
+
 - `auth.users` - User accounts with soft delete support
 - `auth.sessions` - Active sessions with device tracking
 - `auth.passwords` - Separate password storage (bcrypt hashed)
@@ -74,6 +75,7 @@ mana-core-auth/
 - `auth.security_events` - Security audit log
 
 **Credits Schema:**
+
 - `credits.balances` - User credit balances with optimistic locking
 - `credits.transactions` - Double-entry transaction ledger
 - `credits.packages` - Credit pricing packages
@@ -81,6 +83,7 @@ mana-core-auth/
 - `credits.usage_stats` - Usage analytics per app
 
 **Key Features:**
+
 - Row-Level Security (RLS) policies on all tables
 - Optimistic locking for balance updates (prevents race conditions)
 - Idempotency keys for transactions
@@ -89,6 +92,7 @@ mana-core-auth/
 ### 3. Authentication System ✅
 
 **Endpoints Implemented:**
+
 - `POST /api/v1/auth/register` - User registration
 - `POST /api/v1/auth/login` - Login with credentials
 - `POST /api/v1/auth/refresh` - Refresh access token
@@ -96,6 +100,7 @@ mana-core-auth/
 - `POST /api/v1/auth/validate` - Validate JWT token
 
 **Security Features:**
+
 - RS256 JWT algorithm (asymmetric keys)
 - Access tokens: 15 minutes expiry
 - Refresh tokens: 7 days expiry with rotation
@@ -107,6 +112,7 @@ mana-core-auth/
 ### 4. Credit System ✅
 
 **Endpoints Implemented:**
+
 - `GET /api/v1/credits/balance` - Get current balance
 - `POST /api/v1/credits/use` - Deduct credits
 - `GET /api/v1/credits/transactions` - Transaction history
@@ -114,6 +120,7 @@ mana-core-auth/
 - `GET /api/v1/credits/packages` - Available packages
 
 **Features:**
+
 - Signup bonus: 150 free credits
 - Daily free credits: 5 credits every 24 hours
 - Automatic daily reset with transaction logging
@@ -123,12 +130,14 @@ mana-core-auth/
 - Complete audit trail via double-entry ledger
 
 **Credit Pricing:**
+
 - 100 mana = €1.00 (configurable)
 - Stored as integer (euro cents) for precision
 
 ### 5. Docker Infrastructure ✅
 
 **Services Configured:**
+
 - **Traefik** - Reverse proxy with automatic SSL (Let's Encrypt)
 - **PostgreSQL 16** - Database with SCRAM-SHA-256 auth
 - **PgBouncer** - Connection pooling (transaction mode)
@@ -138,6 +147,7 @@ mana-core-auth/
 - **Grafana** - Monitoring dashboards
 
 **Docker Features:**
+
 - Multi-stage Dockerfile (optimized build)
 - Health checks for all services
 - Volume persistence for data
@@ -148,6 +158,7 @@ mana-core-auth/
 ### 6. Configuration & Environment ✅
 
 **Environment Variables:**
+
 - Database connection (PostgreSQL)
 - Redis configuration
 - JWT keys (RS256 public/private)
@@ -157,6 +168,7 @@ mana-core-auth/
 - Rate limiting configuration
 
 **Configuration Files:**
+
 - `.env.example` - Template with all variables
 - `configuration.ts` - Type-safe config loading
 - `docker-compose.yml` - Full stack orchestration
@@ -164,6 +176,7 @@ mana-core-auth/
 ### 7. Security Features ✅
 
 **Application Level:**
+
 - Helmet.js security headers
 - CORS protection
 - Rate limiting (100 req/min per IP)
@@ -172,6 +185,7 @@ mana-core-auth/
 - Refresh token rotation
 
 **Database Level:**
+
 - Row-Level Security (RLS) policies
 - Helper functions: `auth.uid()`, `auth.role()`
 - Separate password table
@@ -179,6 +193,7 @@ mana-core-auth/
 - Security events logging
 
 **Infrastructure Level:**
+
 - Traefik rate limiting
 - PostgreSQL SCRAM-SHA-256
 - Redis password protection
@@ -188,11 +203,13 @@ mana-core-auth/
 ### 8. Additional Features ✅
 
 **Scripts:**
+
 - `generate-keys.sh` - Generate RS256 key pair
 - Migration management via Drizzle Kit
 - Docker health checks
 
 **Documentation:**
+
 - README.md - Complete setup guide
 - API endpoint documentation
 - Architecture overview
@@ -286,6 +303,7 @@ curl -X GET http://localhost:3001/api/v1/credits/balance \
 ### 5. Future Implementation Tasks
 
 **Phase 1: Stripe Integration**
+
 - [ ] Implement Stripe payment intent creation
 - [ ] Add webhook handler for payment events
 - [ ] Create credit packages in database
@@ -293,12 +311,14 @@ curl -X GET http://localhost:3001/api/v1/credits/balance \
 - [ ] Test payment flow end-to-end
 
 **Phase 2: OAuth Providers**
+
 - [ ] Configure OAuth providers (Google, GitHub, Apple)
 - [ ] Add OAuth login endpoints
 - [ ] Handle account linking
 - [ ] Test social login flow
 
 **Phase 3: Advanced Features**
+
 - [ ] Implement 2FA setup and verification
 - [ ] Add email verification system
 - [ ] Create password reset flow
@@ -306,6 +326,7 @@ curl -X GET http://localhost:3001/api/v1/credits/balance \
 - [ ] Admin dashboard
 
 **Phase 4: Shared Package**
+
 - [ ] Create `@manacore/shared-auth` package
 - [ ] Platform-agnostic auth service
 - [ ] Auto-refresh logic
@@ -313,6 +334,7 @@ curl -X GET http://localhost:3001/api/v1/credits/balance \
 - [ ] App-token generation
 
 **Phase 5: Production Deployment**
+
 - [ ] Set up VPS (Hetzner CPX31)
 - [ ] Configure DNS records
 - [ ] Deploy with docker-compose
@@ -324,38 +346,38 @@ curl -X GET http://localhost:3001/api/v1/credits/balance \
 
 ### Authentication
 
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/api/v1/auth/register` | POST | None | Register new user |
-| `/api/v1/auth/login` | POST | None | Login with credentials |
-| `/api/v1/auth/refresh` | POST | None | Refresh access token |
-| `/api/v1/auth/logout` | POST | Bearer | Logout and revoke session |
-| `/api/v1/auth/validate` | POST | None | Validate JWT token |
+| Endpoint                | Method | Auth   | Description               |
+| ----------------------- | ------ | ------ | ------------------------- |
+| `/api/v1/auth/register` | POST   | None   | Register new user         |
+| `/api/v1/auth/login`    | POST   | None   | Login with credentials    |
+| `/api/v1/auth/refresh`  | POST   | None   | Refresh access token      |
+| `/api/v1/auth/logout`   | POST   | Bearer | Logout and revoke session |
+| `/api/v1/auth/validate` | POST   | None   | Validate JWT token        |
 
 ### Credits
 
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/api/v1/credits/balance` | GET | Bearer | Get current balance |
-| `/api/v1/credits/use` | POST | Bearer | Deduct credits |
-| `/api/v1/credits/transactions` | GET | Bearer | Transaction history |
-| `/api/v1/credits/purchases` | GET | Bearer | Purchase history |
-| `/api/v1/credits/packages` | GET | Bearer | Available packages |
+| Endpoint                       | Method | Auth   | Description         |
+| ------------------------------ | ------ | ------ | ------------------- |
+| `/api/v1/credits/balance`      | GET    | Bearer | Get current balance |
+| `/api/v1/credits/use`          | POST   | Bearer | Deduct credits      |
+| `/api/v1/credits/transactions` | GET    | Bearer | Transaction history |
+| `/api/v1/credits/purchases`    | GET    | Bearer | Purchase history    |
+| `/api/v1/credits/packages`     | GET    | Bearer | Available packages  |
 
 ## Technical Stack Summary
 
-| Component | Technology | Version |
-|-----------|-----------|---------|
-| Framework | NestJS | 10.4.x |
-| Runtime | Node.js | 20+ |
-| Package Manager | pnpm | 9.15.0 |
-| Database | PostgreSQL | 16 |
-| ORM | Drizzle | 0.38.x |
-| Cache | Redis | 7 |
-| Payment | Stripe | 17.x |
-| Reverse Proxy | Traefik | 3.0 |
-| Connection Pool | PgBouncer | Latest |
-| Monitoring | Prometheus + Grafana | Latest |
+| Component       | Technology           | Version |
+| --------------- | -------------------- | ------- |
+| Framework       | NestJS               | 10.4.x  |
+| Runtime         | Node.js              | 20+     |
+| Package Manager | pnpm                 | 9.15.0  |
+| Database        | PostgreSQL           | 16      |
+| ORM             | Drizzle              | 0.38.x  |
+| Cache           | Redis                | 7       |
+| Payment         | Stripe               | 17.x    |
+| Reverse Proxy   | Traefik              | 3.0     |
+| Connection Pool | PgBouncer            | Latest  |
+| Monitoring      | Prometheus + Grafana | Latest  |
 
 ## File Locations
 
@@ -370,6 +392,7 @@ curl -X GET http://localhost:3001/api/v1/credits/balance \
 ## Success Metrics
 
 ✅ **Core Implementation Complete**
+
 - 12 database tables with RLS policies
 - 10 API endpoints (5 auth + 5 credits)
 - Docker deployment infrastructure
@@ -380,6 +403,7 @@ curl -X GET http://localhost:3001/api/v1/credits/balance \
 ## Estimated Time to Production
 
 Based on remaining tasks:
+
 - JWT key generation: 5 minutes
 - Environment configuration: 15 minutes
 - Local testing: 30 minutes
@@ -392,6 +416,7 @@ Based on remaining tasks:
 ## Support
 
 For questions or issues:
+
 1. Check README.md in the package
 2. Review master plan in .hive-mind/
 3. Contact the development team

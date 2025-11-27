@@ -41,9 +41,9 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 	description={template.data.description}
 >
 	<!-- Hero Section -->
-	<section class="bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white py-12">
+	<section class="bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 py-12 text-white">
 		<div class="container mx-auto px-4">
-			<div class="max-w-5xl mx-auto">
+			<div class="mx-auto max-w-5xl">
 				<!-- Breadcrumb -->
 				<nav class="mb-6">
 					<ol class="flex items-center gap-2 text-sm text-purple-200">
@@ -62,7 +62,7 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 							</a>
 						</li>
 						<li>/</li>
-						<li class="text-white font-medium">{template.data.title}</li>
+						<li class="font-medium text-white">{template.data.title}</li>
 					</ol>
 				</nav>
 
@@ -70,18 +70,18 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 				<div class="flex items-start gap-6">
 					<div class="text-6xl">{template.data.icon}</div>
 					<div class="flex-1">
-						<div class="flex items-center gap-3 mb-3">
-							<h1 class="text-4xl md:text-5xl font-bold">{template.data.title}</h1>
+						<div class="mb-3 flex items-center gap-3">
+							<h1 class="text-4xl font-bold md:text-5xl">{template.data.title}</h1>
 							{
 								template.data.featured && (
-									<span class="px-3 py-1 bg-yellow-400 text-yellow-900 text-sm font-bold rounded-full">
+									<span class="rounded-full bg-yellow-400 px-3 py-1 text-sm font-bold text-yellow-900">
 										⭐ Featured
 									</span>
 								)
 							}
 						</div>
 
-						<p class="text-xl text-purple-100 mb-6">
+						<p class="mb-6 text-xl text-purple-100">
 							{template.data.description}
 						</p>
 
@@ -96,12 +96,14 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 											: 'bg-red-500 text-white'
 								}`}
 							>
-								{template.data.difficulty.charAt(0).toUpperCase() +
-									template.data.difficulty.slice(1)}
+								{
+									template.data.difficulty.charAt(0).toUpperCase() +
+										template.data.difficulty.slice(1)
+								}
 							</span>
 
 							<!-- Category -->
-							<span class="px-4 py-2 bg-white/20 rounded-full font-medium">
+							<span class="rounded-full bg-white/20 px-4 py-2 font-medium">
 								{formatCategoryName(template.data.category)}
 							</span>
 
@@ -124,15 +126,13 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 
 	<!-- Main Content -->
 	<div class="container mx-auto px-4 py-12">
-		<div class="max-w-7xl mx-auto">
-			<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+		<div class="mx-auto max-w-7xl">
+			<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
 				<!-- Main Content Column -->
-				<div class="lg:col-span-2 space-y-8">
+				<div class="space-y-8 lg:col-span-2">
 					<!-- Interactive Prompt Builder -->
-					<div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
-						<h2 class="text-2xl font-bold text-gray-900 mb-6">
-							🛠️ Build Your Prompt
-						</h2>
+					<div class="rounded-xl border border-gray-200 bg-white p-8 shadow-lg">
+						<h2 class="mb-6 text-2xl font-bold text-gray-900">🛠️ Build Your Prompt</h2>
 
 						<form id="prompt-form" class="space-y-6">
 							{
@@ -140,13 +140,13 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 									<div>
 										<label
 											for={`var-${variable.name}`}
-											class="block text-sm font-semibold text-gray-900 mb-2"
+											class="mb-2 block text-sm font-semibold text-gray-900"
 										>
 											{variable.description}
 											{variable.required ? (
 												<span class="text-red-500">*</span>
 											) : (
-												<span class="text-gray-500 font-normal">(optional)</span>
+												<span class="font-normal text-gray-500">(optional)</span>
 											)}
 										</label>
 										<input
@@ -155,7 +155,7 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 											name={variable.name}
 											placeholder={variable.placeholder}
 											required={variable.required}
-											class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+											class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-purple-500"
 										/>
 									</div>
 								))
@@ -164,7 +164,7 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 							<button
 								type="button"
 								id="generate-prompt-btn"
-								class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 rounded-lg transition-colors"
+								class="w-full rounded-lg bg-purple-600 py-4 font-semibold text-white transition-colors hover:bg-purple-700"
 							>
 								Generate Prompt
 							</button>
@@ -172,18 +172,13 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 
 						<!-- Generated Prompt Display -->
 						<div id="generated-prompt-container" class="mt-6 hidden">
-							<div class="flex items-center justify-between mb-3">
+							<div class="mb-3 flex items-center justify-between">
 								<h3 class="text-lg font-bold text-gray-900">Your Generated Prompt</h3>
 								<button
 									id="copy-prompt-btn"
-									class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors flex items-center gap-2"
+									class="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-200"
 								>
-									<svg
-										class="w-4 h-4"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
+									<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path
 											stroke-linecap="round"
 											stroke-linejoin="round"
@@ -196,18 +191,18 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 							</div>
 							<div
 								id="generated-prompt"
-								class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-gray-800 font-mono text-sm"
+								class="rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-800"
 							>
 							</div>
 
 							<!-- CTA to app -->
-							<div class="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-								<p class="text-sm text-gray-700 mb-3">
+							<div class="mt-4 rounded-lg border border-purple-200 bg-purple-50 p-4">
+								<p class="mb-3 text-sm text-gray-700">
 									Ready to generate your image? Use this prompt in Picture!
 								</p>
 								<a
 									href="/app"
-									class="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
+									class="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-purple-700"
 								>
 									Open Picture App →
 								</a>
@@ -216,9 +211,13 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 					</div>
 
 					<!-- Example Prompt -->
-					<div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 border border-blue-200">
-						<h3 class="text-xl font-bold text-gray-900 mb-4">💡 Example Prompt</h3>
-						<div class="bg-white rounded-lg p-4 text-gray-800 font-mono text-sm border border-blue-200 mb-4">
+					<div
+						class="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-8"
+					>
+						<h3 class="mb-4 text-xl font-bold text-gray-900">💡 Example Prompt</h3>
+						<div
+							class="mb-4 rounded-lg border border-blue-200 bg-white p-4 font-mono text-sm text-gray-800"
+						>
 							{examplePrompt}
 						</div>
 						<p class="text-sm text-gray-600">
@@ -227,22 +226,22 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 					</div>
 
 					<!-- Template Details (from markdown content) -->
-					<div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200 prose prose-lg max-w-none">
+					<div
+						class="prose prose-lg max-w-none rounded-xl border border-gray-200 bg-white p-8 shadow-lg"
+					>
 						<Content />
 					</div>
 
 					<!-- Use Cases -->
 					{
 						template.data.useCases.length > 0 && (
-							<div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
-								<h2 class="text-2xl font-bold text-gray-900 mb-4">
-									🎯 Perfect For
-								</h2>
-								<ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
+							<div class="rounded-xl border border-gray-200 bg-white p-8 shadow-lg">
+								<h2 class="mb-4 text-2xl font-bold text-gray-900">🎯 Perfect For</h2>
+								<ul class="grid grid-cols-1 gap-3 md:grid-cols-2">
 									{template.data.useCases.map((useCase) => (
 										<li class="flex items-center gap-3">
 											<svg
-												class="w-5 h-5 text-green-500 flex-shrink-0"
+												class="h-5 w-5 flex-shrink-0 text-green-500"
 												fill="none"
 												stroke="currentColor"
 												viewBox="0 0 24 24"
@@ -265,14 +264,12 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 					<!-- Tips & Best Practices -->
 					{
 						template.data.tips.length > 0 && (
-							<div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
-								<h2 class="text-2xl font-bold text-gray-900 mb-4">
-									💡 Tips & Best Practices
-								</h2>
+							<div class="rounded-xl border border-gray-200 bg-white p-8 shadow-lg">
+								<h2 class="mb-4 text-2xl font-bold text-gray-900">💡 Tips & Best Practices</h2>
 								<ul class="space-y-3">
 									{template.data.tips.map((tip) => (
 										<li class="flex items-start gap-3">
-											<span class="text-purple-600 font-bold flex-shrink-0">•</span>
+											<span class="flex-shrink-0 font-bold text-purple-600">•</span>
 											<span class="text-gray-700">{tip}</span>
 										</li>
 									))}
@@ -284,14 +281,12 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 					<!-- Common Mistakes -->
 					{
 						template.data.commonMistakes && template.data.commonMistakes.length > 0 && (
-							<div class="bg-red-50 rounded-xl p-8 border border-red-200">
-								<h2 class="text-2xl font-bold text-gray-900 mb-4">
-									⚠️ Common Mistakes to Avoid
-								</h2>
+							<div class="rounded-xl border border-red-200 bg-red-50 p-8">
+								<h2 class="mb-4 text-2xl font-bold text-gray-900">⚠️ Common Mistakes to Avoid</h2>
 								<ul class="space-y-3">
 									{template.data.commonMistakes.map((mistake) => (
 										<li class="flex items-start gap-3">
-											<span class="text-red-600 font-bold flex-shrink-0">×</span>
+											<span class="flex-shrink-0 font-bold text-red-600">×</span>
 											<span class="text-gray-700">{mistake}</span>
 										</li>
 									))}
@@ -303,22 +298,16 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 					<!-- Variations -->
 					{
 						template.data.variations.length > 0 && (
-							<div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
-								<h2 class="text-2xl font-bold text-gray-900 mb-6">
-									🔄 Template Variations
-								</h2>
+							<div class="rounded-xl border border-gray-200 bg-white p-8 shadow-lg">
+								<h2 class="mb-6 text-2xl font-bold text-gray-900">🔄 Template Variations</h2>
 								<div class="space-y-4">
 									{template.data.variations.map((variation) => (
-										<div class="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors">
-											<h3 class="font-bold text-gray-900 mb-2">
-												{variation.title}
-											</h3>
+										<div class="rounded-lg border border-gray-200 p-4 transition-colors hover:border-purple-300">
+											<h3 class="mb-2 font-bold text-gray-900">{variation.title}</h3>
 											{variation.description && (
-												<p class="text-sm text-gray-600 mb-3">
-													{variation.description}
-												</p>
+												<p class="mb-3 text-sm text-gray-600">{variation.description}</p>
 											)}
-											<div class="bg-gray-50 rounded p-3 text-sm font-mono text-gray-700">
+											<div class="rounded bg-gray-50 p-3 font-mono text-sm text-gray-700">
 												{variation.prompt}
 											</div>
 										</div>
@@ -332,15 +321,13 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 				<!-- Sidebar -->
 				<div class="space-y-6">
 					<!-- Recommended Settings -->
-					<div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 sticky top-6">
-						<h3 class="text-xl font-bold text-gray-900 mb-4">⚙️ Settings</h3>
+					<div class="sticky top-6 rounded-xl border border-gray-200 bg-white p-6 shadow-lg">
+						<h3 class="mb-4 text-xl font-bold text-gray-900">⚙️ Settings</h3>
 
 						<div class="space-y-4">
 							<!-- Recommended Model -->
 							<div>
-								<div class="text-sm font-semibold text-gray-600 mb-1">
-									Recommended Model
-								</div>
+								<div class="mb-1 text-sm font-semibold text-gray-600">Recommended Model</div>
 								<div class="text-lg font-bold text-purple-600">
 									{template.data.recommendedModel}
 								</div>
@@ -350,12 +337,10 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 							{
 								template.data.alternativeModels.length > 0 && (
 									<div>
-										<div class="text-sm font-semibold text-gray-600 mb-2">
-											Alternative Models
-										</div>
+										<div class="mb-2 text-sm font-semibold text-gray-600">Alternative Models</div>
 										<div class="flex flex-wrap gap-2">
 											{template.data.alternativeModels.map((model) => (
-												<span class="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
+												<span class="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
 													{model}
 												</span>
 											))}
@@ -367,10 +352,8 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 							<!-- Recommended Settings -->
 							{
 								template.data.recommendedSettings && (
-									<div class="pt-4 border-t border-gray-200">
-										<div class="text-sm font-semibold text-gray-600 mb-3">
-											Recommended Settings
-										</div>
+									<div class="border-t border-gray-200 pt-4">
+										<div class="mb-3 text-sm font-semibold text-gray-600">Recommended Settings</div>
 										<div class="space-y-2 text-sm">
 											{template.data.recommendedSettings.aspectRatio && (
 												<div class="flex justify-between">
@@ -404,14 +387,12 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 							<!-- Success Rate -->
 							{
 								template.data.successRate && (
-									<div class="pt-4 border-t border-gray-200">
-										<div class="text-sm font-semibold text-gray-600 mb-2">
-											Success Rate
-										</div>
+									<div class="border-t border-gray-200 pt-4">
+										<div class="mb-2 text-sm font-semibold text-gray-600">Success Rate</div>
 										<div class="flex items-center gap-3">
-											<div class="flex-1 bg-gray-200 rounded-full h-2">
+											<div class="h-2 flex-1 rounded-full bg-gray-200">
 												<div
-													class="bg-green-500 h-2 rounded-full"
+													class="h-2 rounded-full bg-green-500"
 													style={`width: ${template.data.successRate}%`}
 												/>
 											</div>
@@ -427,7 +408,7 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 						<!-- CTA Button -->
 						<a
 							href="/app"
-							class="block mt-6 w-full text-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
+							class="mt-6 block w-full rounded-lg bg-purple-600 px-6 py-3 text-center font-semibold text-white transition-colors hover:bg-purple-700"
 						>
 							Try This Template
 						</a>
@@ -436,18 +417,12 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 					<!-- Ideal For -->
 					{
 						template.data.idealFor.length > 0 && (
-							<div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-								<h3 class="text-xl font-bold text-gray-900 mb-4">
-									👥 Ideal For
-								</h3>
+							<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-lg">
+								<h3 class="mb-4 text-xl font-bold text-gray-900">👥 Ideal For</h3>
 								<ul class="space-y-2">
 									{template.data.idealFor.map((audience) => (
 										<li class="flex items-center gap-2 text-gray-700">
-											<svg
-												class="w-4 h-4 text-purple-600"
-												fill="currentColor"
-												viewBox="0 0 20 20"
-											>
+											<svg class="h-4 w-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
 												<path
 													fill-rule="evenodd"
 													d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
@@ -463,14 +438,14 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 					}
 
 					<!-- Tags -->
-					<div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-						<h3 class="text-xl font-bold text-gray-900 mb-4">🏷️ Tags</h3>
+					<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-lg">
+						<h3 class="mb-4 text-xl font-bold text-gray-900">🏷️ Tags</h3>
 						<div class="flex flex-wrap gap-2">
 							{
 								template.data.tags.map((tag) => (
 									<a
 										href={`/prompt-templates?tag=${tag}`}
-										class="px-3 py-1 bg-gray-100 hover:bg-purple-100 text-gray-700 hover:text-purple-700 text-sm rounded-full transition-colors"
+										class="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-purple-100 hover:text-purple-700"
 									>
 										#{tag}
 									</a>
@@ -480,17 +455,17 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 					</div>
 
 					<!-- Share -->
-					<div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-						<h3 class="text-xl font-bold text-gray-900 mb-4">📤 Share</h3>
+					<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-lg">
+						<h3 class="mb-4 text-xl font-bold text-gray-900">📤 Share</h3>
 						<div class="flex gap-2">
 							<button
-								class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+								class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
 								onclick="window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(document.title) + '&url=' + encodeURIComponent(window.location.href), '_blank')"
 							>
 								Twitter
 							</button>
 							<button
-								class="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+								class="flex-1 rounded-lg bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
 								onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href), '_blank')"
 							>
 								Facebook
@@ -505,25 +480,23 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 	<!-- Related Templates -->
 	{
 		relatedTemplates.length > 0 && (
-			<section class="py-16 bg-gray-50">
+			<section class="bg-gray-50 py-16">
 				<div class="container mx-auto px-4">
-					<h2 class="text-3xl font-bold text-gray-900 mb-8">Related Templates</h2>
-					<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+					<h2 class="mb-8 text-3xl font-bold text-gray-900">Related Templates</h2>
+					<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
 						{relatedTemplates.map((related) => (
 							<a
 								href={`/prompt-templates/${related.slug}`}
-								class="group bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+								class="group overflow-hidden rounded-lg border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
 							>
 								<div class="p-6">
-									<div class="flex items-center gap-3 mb-3">
+									<div class="mb-3 flex items-center gap-3">
 										<span class="text-3xl">{related.data.icon}</span>
-										<h3 class="text-lg font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
+										<h3 class="text-lg font-bold text-gray-900 transition-colors group-hover:text-purple-600">
 											{related.data.title}
 										</h3>
 									</div>
-									<p class="text-gray-600 text-sm mb-4 line-clamp-2">
-										{related.data.description}
-									</p>
+									<p class="mb-4 line-clamp-2 text-sm text-gray-600">{related.data.description}</p>
 									<div class="flex items-center justify-between text-sm text-gray-500">
 										<span>⭐ {related.data.rating}</span>
 										<span>{related.data.uses} uses</span>
@@ -538,15 +511,15 @@ const difficultyColor = getDifficultyColor(template.data.difficulty);
 	}
 
 	<!-- CTA Section -->
-	<section class="py-20 bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white">
+	<section class="bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 py-20 text-white">
 		<div class="container mx-auto px-4 text-center">
-			<h2 class="text-4xl font-bold mb-6">Start Creating with This Template</h2>
-			<p class="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
+			<h2 class="mb-6 text-4xl font-bold">Start Creating with This Template</h2>
+			<p class="mx-auto mb-8 max-w-2xl text-xl text-purple-100">
 				Generate professional-quality AI images in seconds using this prompt template.
 			</p>
 			<a
 				href="/app"
-				class="inline-block px-8 py-4 bg-white text-purple-600 font-semibold rounded-full hover:bg-purple-50 transition-colors"
+				class="inline-block rounded-full bg-white px-8 py-4 font-semibold text-purple-600 transition-colors hover:bg-purple-50"
 			>
 				Try It Now - Free
 			</a>

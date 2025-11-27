@@ -14,49 +14,46 @@ import { fontSize, fontWeight } from '../src/typography';
  * Get theme colors for a specific variant and mode
  */
 export function getThemeColors(
-  variant: ThemeVariant = 'default',
-  mode: ColorMode = 'dark'
+	variant: ThemeVariant = 'default',
+	mode: ColorMode = 'dark'
 ): SemanticColors {
-  const theme = themes[variant];
-  return theme.colors[mode] as SemanticColors;
+	const theme = themes[variant];
+	return theme.colors[mode] as SemanticColors;
 }
 
 /**
  * Create a complete React Native theme object
  */
-export function createNativeTheme(
-  variant: ThemeVariant = 'default',
-  mode: ColorMode = 'dark'
-) {
-  const theme = themes[variant];
-  const colors = theme.colors[mode];
-  const shadows = theme.shadows[mode];
+export function createNativeTheme(variant: ThemeVariant = 'default', mode: ColorMode = 'dark') {
+	const theme = themes[variant];
+	const colors = theme.colors[mode];
+	const shadows = theme.shadows[mode];
 
-  return {
-    variant,
-    mode,
-    colors,
-    spacing,
-    borderRadius,
-    fontSize,
-    fontWeight,
-    shadows,
-    opacity: theme.opacity,
-  } as const;
+	return {
+		variant,
+		mode,
+		colors,
+		spacing,
+		borderRadius,
+		fontSize,
+		fontWeight,
+		shadows,
+		opacity: theme.opacity,
+	} as const;
 }
 
 /**
  * Get all available theme variants
  */
 export function getThemeVariants(): ThemeVariant[] {
-  return Object.keys(themes) as ThemeVariant[];
+	return Object.keys(themes) as ThemeVariant[];
 }
 
 /**
  * Check if a theme variant exists
  */
 export function isValidThemeVariant(variant: string): variant is ThemeVariant {
-  return variant in themes;
+	return variant in themes;
 }
 
 /**

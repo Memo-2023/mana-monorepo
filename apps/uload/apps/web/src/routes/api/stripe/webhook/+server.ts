@@ -42,26 +42,25 @@ async function handleWebhookEvent(event: any, locals?: any) {
 	// Admin auth for updating users
 	try {
 		if (!env.POCKETBASE_ADMIN_EMAIL || !env.POCKETBASE_ADMIN_PASSWORD) {
-			throw new Error('Admin credentials not configured. Please set POCKETBASE_ADMIN_EMAIL and POCKETBASE_ADMIN_PASSWORD environment variables.');
+			throw new Error(
+				'Admin credentials not configured. Please set POCKETBASE_ADMIN_EMAIL and POCKETBASE_ADMIN_PASSWORD environment variables.'
+			);
 		}
-		
-		await pb.admins.authWithPassword(
-			env.POCKETBASE_ADMIN_EMAIL,
-			env.POCKETBASE_ADMIN_PASSWORD
-		);
+
+		await pb.admins.authWithPassword(env.POCKETBASE_ADMIN_EMAIL, env.POCKETBASE_ADMIN_PASSWORD);
 		// Admin authenticated successfully
 	} catch (error) {
 		// Admin authentication failed
-		
+
 		// Return error response for missing credentials
 		return new Response(
-			JSON.stringify({ 
+			JSON.stringify({
 				error: 'Webhook processing failed due to configuration error',
-				details: 'Admin authentication failed. Please check server configuration.'
+				details: 'Admin authentication failed. Please check server configuration.',
 			}),
-			{ 
+			{
 				status: 500,
-				headers: { 'Content-Type': 'application/json' }
+				headers: { 'Content-Type': 'application/json' },
 			}
 		);
 	}
@@ -89,7 +88,7 @@ async function handleWebhookEvent(event: any, locals?: any) {
 						stripe_customer_id: session.customer,
 						stripe_subscription_id: 'lifetime_' + session.id,
 						current_period_end: new Date('2099-12-31').toISOString(), // Far future date
-						links_created_this_month: 0
+						links_created_this_month: 0,
 					});
 					// User purchased lifetime access
 				} else {
@@ -105,7 +104,7 @@ async function handleWebhookEvent(event: any, locals?: any) {
 							stripe_customer_id: session.customer,
 							stripe_subscription_id: subscription.id,
 							current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-							links_created_this_month: 0
+							links_created_this_month: 0,
 						});
 						// User upgraded to Pro
 					}
@@ -120,7 +119,7 @@ async function handleWebhookEvent(event: any, locals?: any) {
 				// Get user by stripe_subscription_id
 				try {
 					const users = await pb.collection('users').getList(1, 1, {
-						filter: `stripe_subscription_id = "${subscription.id}"`
+						filter: `stripe_subscription_id = "${subscription.id}"`,
 					});
 
 					if (users.items.length > 0) {
@@ -143,7 +142,7 @@ async function handleWebhookEvent(event: any, locals?: any) {
 
 						await pb.collection('users').update(user.id, {
 							subscription_status: status,
-							current_period_end: new Date(subscription.current_period_end * 1000).toISOString()
+							current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
 						});
 						// User subscription status updated
 					}
@@ -159,7 +158,7 @@ async function handleWebhookEvent(event: any, locals?: any) {
 
 				try {
 					const users = await pb.collection('users').getList(1, 1, {
-						filter: `stripe_subscription_id = "${subscription.id}"`
+						filter: `stripe_subscription_id = "${subscription.id}"`,
 					});
 
 					if (users.items.length > 0) {
@@ -168,7 +167,7 @@ async function handleWebhookEvent(event: any, locals?: any) {
 						await pb.collection('users').update(user.id, {
 							subscription_status: 'free',
 							stripe_subscription_id: null,
-							current_period_end: null
+							current_period_end: null,
 						});
 						// User downgraded to Free
 					}
@@ -185,14 +184,14 @@ async function handleWebhookEvent(event: any, locals?: any) {
 				if (invoice.subscription) {
 					try {
 						const users = await pb.collection('users').getList(1, 1, {
-							filter: `stripe_subscription_id = "${invoice.subscription}"`
+							filter: `stripe_subscription_id = "${invoice.subscription}"`,
 						});
 
 						if (users.items.length > 0) {
 							const user = users.items[0];
 
 							await pb.collection('users').update(user.id, {
-								subscription_status: 'past_due'
+								subscription_status: 'past_due',
 							});
 							// User payment failed - marked as past_due
 						}
@@ -210,7 +209,7 @@ async function handleWebhookEvent(event: any, locals?: any) {
 				if (invoice.subscription) {
 					try {
 						const users = await pb.collection('users').getList(1, 1, {
-							filter: `stripe_subscription_id = "${invoice.subscription}"`
+							filter: `stripe_subscription_id = "${invoice.subscription}"`,
 						});
 
 						if (users.items.length > 0) {
@@ -219,7 +218,7 @@ async function handleWebhookEvent(event: any, locals?: any) {
 							// Reactivate if was past_due
 							if (user.subscription_status === 'past_due') {
 								await pb.collection('users').update(user.id, {
-									subscription_status: 'pro'
+									subscription_status: 'pro',
 								});
 								// User reactivated after payment
 							}
@@ -232,7 +231,7 @@ async function handleWebhookEvent(event: any, locals?: any) {
 			}
 
 			default:
-				// Unhandled event type
+			// Unhandled event type
 		}
 
 		return new Response('Webhook processed', { status: 200 });

@@ -2,113 +2,133 @@
 // Navigation component inspired by mobile app's CommonHeader
 ---
 
-<nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-bg-primary/80 border-b border-border/20">
-  <div class="container-custom">
-    <div class="flex items-center justify-between h-16 md:h-20">
-      <!-- Logo -->
-      <a href="/" class="flex items-center space-x-2">
-        <img 
-          src="/logo.png" 
-          alt="Märchenzauber" 
-          class="h-8 md:h-10 w-auto"
-        />
-        <span class="font-grandstander font-bold text-xl md:text-2xl text-text-primary hidden sm:block">
-          Märchenzauber
-        </span>
-      </a>
+<nav
+	class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-bg-primary/80 border-b border-border/20"
+>
+	<div class="container-custom">
+		<div class="flex items-center justify-between h-16 md:h-20">
+			<!-- Logo -->
+			<a href="/" class="flex items-center space-x-2">
+				<img src="/logo.png" alt="Märchenzauber" class="h-8 md:h-10 w-auto" />
+				<span
+					class="font-grandstander font-bold text-xl md:text-2xl text-text-primary hidden sm:block"
+				>
+					Märchenzauber
+				</span>
+			</a>
 
-      <!-- Desktop Navigation -->
-      <div class="hidden md:flex items-center space-x-8">
-        <a href="#features" class="text-text-secondary hover:text-yellow-light transition-colors">
-          Features
-        </a>
-        <a href="#how-it-works" class="text-text-secondary hover:text-yellow-light transition-colors">
-          So funktioniert's
-        </a>
-        <a href="#stories" class="text-text-secondary hover:text-yellow-light transition-colors">
-          Geschichten
-        </a>
-        <a href="#pricing" class="text-text-secondary hover:text-yellow-light transition-colors">
-          Preise
-        </a>
-        <a href="#faq" class="text-text-secondary hover:text-yellow-light transition-colors">
-          FAQ
-        </a>
-      </div>
+			<!-- Desktop Navigation -->
+			<div class="hidden md:flex items-center space-x-8">
+				<a href="#features" class="text-text-secondary hover:text-yellow-light transition-colors">
+					Features
+				</a>
+				<a
+					href="#how-it-works"
+					class="text-text-secondary hover:text-yellow-light transition-colors"
+				>
+					So funktioniert's
+				</a>
+				<a href="#stories" class="text-text-secondary hover:text-yellow-light transition-colors">
+					Geschichten
+				</a>
+				<a href="#pricing" class="text-text-secondary hover:text-yellow-light transition-colors">
+					Preise
+				</a>
+				<a href="#faq" class="text-text-secondary hover:text-yellow-light transition-colors">
+					FAQ
+				</a>
+			</div>
 
-      <!-- CTA Buttons -->
-      <div class="flex items-center space-x-4">
-        <!-- Mobile Menu Button -->
-        <button 
-          id="mobile-menu-btn"
-          class="md:hidden p-2 text-text-secondary hover:text-yellow-light"
-          aria-label="Menu"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
+			<!-- CTA Buttons -->
+			<div class="flex items-center space-x-4">
+				<!-- Mobile Menu Button -->
+				<button
+					id="mobile-menu-btn"
+					class="md:hidden p-2 text-text-secondary hover:text-yellow-light"
+					aria-label="Menu"
+				>
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 6h16M4 12h16M4 18h16"></path>
+					</svg>
+				</button>
 
-        <!-- Download Button -->
-        <a href="/download" class="btn-primary text-sm md:text-base">
-          App laden
-        </a>
-      </div>
-    </div>
-  </div>
+				<!-- Download Button -->
+				<a href="/download" class="btn-primary text-sm md:text-base"> App laden </a>
+			</div>
+		</div>
+	</div>
 
-  <!-- Mobile Menu -->
-  <div id="mobile-menu" class="hidden md:hidden bg-bg-darker border-t border-border/20">
-    <div class="container-custom py-4 space-y-4">
-      <a href="#features" class="block text-text-secondary hover:text-yellow-light transition-colors py-2">
-        Features
-      </a>
-      <a href="#how-it-works" class="block text-text-secondary hover:text-yellow-light transition-colors py-2">
-        So funktioniert's
-      </a>
-      <a href="#stories" class="block text-text-secondary hover:text-yellow-light transition-colors py-2">
-        Geschichten
-      </a>
-      <a href="#pricing" class="block text-text-secondary hover:text-yellow-light transition-colors py-2">
-        Preise
-      </a>
-      <a href="#faq" class="block text-text-secondary hover:text-yellow-light transition-colors py-2">
-        FAQ
-      </a>
-    </div>
-  </div>
+	<!-- Mobile Menu -->
+	<div id="mobile-menu" class="hidden md:hidden bg-bg-darker border-t border-border/20">
+		<div class="container-custom py-4 space-y-4">
+			<a
+				href="#features"
+				class="block text-text-secondary hover:text-yellow-light transition-colors py-2"
+			>
+				Features
+			</a>
+			<a
+				href="#how-it-works"
+				class="block text-text-secondary hover:text-yellow-light transition-colors py-2"
+			>
+				So funktioniert's
+			</a>
+			<a
+				href="#stories"
+				class="block text-text-secondary hover:text-yellow-light transition-colors py-2"
+			>
+				Geschichten
+			</a>
+			<a
+				href="#pricing"
+				class="block text-text-secondary hover:text-yellow-light transition-colors py-2"
+			>
+				Preise
+			</a>
+			<a
+				href="#faq"
+				class="block text-text-secondary hover:text-yellow-light transition-colors py-2"
+			>
+				FAQ
+			</a>
+		</div>
+	</div>
 </nav>
 
 <script>
-  // Mobile menu toggle
-  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-  const mobileMenu = document.getElementById('mobile-menu');
+	// Mobile menu toggle
+	const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+	const mobileMenu = document.getElementById('mobile-menu');
 
-  mobileMenuBtn?.addEventListener('click', () => {
-    mobileMenu?.classList.toggle('hidden');
-  });
+	mobileMenuBtn?.addEventListener('click', () => {
+		mobileMenu?.classList.toggle('hidden');
+	});
 
-  // Close mobile menu when clicking a link
-  const mobileLinks = mobileMenu?.querySelectorAll('a');
-  mobileLinks?.forEach(link => {
-    link.addEventListener('click', () => {
-      mobileMenu?.classList.add('hidden');
-    });
-  });
+	// Close mobile menu when clicking a link
+	const mobileLinks = mobileMenu?.querySelectorAll('a');
+	mobileLinks?.forEach((link) => {
+		link.addEventListener('click', () => {
+			mobileMenu?.classList.add('hidden');
+		});
+	});
 
-  // Add scroll effect to navigation
-  let lastScroll = 0;
-  const nav = document.querySelector('nav');
+	// Add scroll effect to navigation
+	let lastScroll = 0;
+	const nav = document.querySelector('nav');
 
-  window.addEventListener('scroll', () => {
-    const currentScroll = window.pageYOffset;
-    
-    if (currentScroll > 100) {
-      nav?.classList.add('shadow-lg');
-    } else {
-      nav?.classList.remove('shadow-lg');
-    }
+	window.addEventListener('scroll', () => {
+		const currentScroll = window.pageYOffset;
 
-    lastScroll = currentScroll;
-  });
+		if (currentScroll > 100) {
+			nav?.classList.add('shadow-lg');
+		} else {
+			nav?.classList.remove('shadow-lg');
+		}
+
+		lastScroll = currentScroll;
+	});
 </script>

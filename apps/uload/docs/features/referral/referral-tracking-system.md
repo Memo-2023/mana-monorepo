@@ -52,16 +52,19 @@ Die DSGVO und moderne Browser-Technologien schaffen zusätzliche Hürden:
 Branch.io nutzt eine Kombination aus verschiedenen Matching-Technologien:
 
 **Deterministic Matching** (100% Genauigkeit):
+
 - Verwendet eindeutige Identifikatoren wie IDFA (iOS) oder GAID (Android)
 - Click-IDs in URL-Parametern
 - Login-basiertes Matching über User-Accounts
 
 **Probabilistic Matching** (70-90% Genauigkeit):
+
 - Kombiniert IP-Adresse, User-Agent, Zeitstempel und Geräteinformationen
 - Erstellt einen "Fingerprint" für wahrscheinliche Zuordnung
 - Nutzt ein Zeitfenster von typischerweise 24-72 Stunden
 
 **Deferred Deep Linking**:
+
 - Speichert die Ziel-Information vor der App-Installation
 - Nach Installation fragt die App den Branch-Server nach pending Deep Links
 - Nutzer wird automatisch zum richtigen Inhalt in der App geleitet
@@ -71,16 +74,19 @@ Branch.io nutzt eine Kombination aus verschiedenen Matching-Technologien:
 Diese Plattformen setzen auf:
 
 **Server-to-Server Integration**:
+
 - Direkte API-Kommunikation zwischen App-Backend und Attribution-Plattform
 - Umgeht Browser-Restriktionen komplett
 - Höhere Datenqualität durch serverseitige Validierung
 
 **SKAdNetwork Integration** (iOS):
+
 - Apples Privacy-freundliche Attribution-API
 - Aggregierte Daten ohne Nutzer-Identifikation
 - 24-48 Stunden Verzögerung in Reporting
 
 **Multi-Touch Attribution Models**:
+
 - First-Touch: Kredite gehen an ersten Touchpoint
 - Last-Touch: Kredite gehen an letzten Touchpoint vor Conversion
 - Linear: Gleichmäßige Verteilung auf alle Touchpoints
@@ -101,18 +107,21 @@ Diese Plattformen setzen auf:
 **Konzept**: Jeder Link-Ersteller erhält einen eindeutigen Referral-Code, der in der URL mitgegeben wird. Dieser Code wird durch die gesamte Journey hindurch weitergereicht.
 
 **Funktionsweise**:
+
 - Link-Ersteller teilt: `https://ulo.ad/download?ref=USER123`
 - Code wird auf Download-Seite im LocalStorage gespeichert
 - App liest Code beim ersten Start aus und meldet ihn zurück
 - Keine personenbezogenen Daten des Endnutzers werden getrackt
 
 **Vorteile**:
+
 - 100% DSGVO-konform, da nur der Referrer getrackt wird
 - 100% genaue Attribution möglich
 - Keine Cookies oder Fingerprinting erforderlich
 - Funktioniert plattformübergreifend
 
 **Nachteile**:
+
 - Erfordert aktive Weitergabe des Codes durch die App
 - Kann bei App-Store-Downloads verloren gehen
 - Keine Multi-Touch-Attribution möglich
@@ -122,6 +131,7 @@ Diese Plattformen setzen auf:
 **Konzept**: Temporäre Sessions mit kurzer Lebensdauer und anonymisierten Daten.
 
 **Funktionsweise**:
+
 - Bei Klick wird Session-ID generiert (30 Minuten Gültigkeit)
 - Nur aggregierte Daten ohne Personenbezug werden gespeichert
 - Täglicher Salt für Hashing verhindert langfristige Nachverfolgung
@@ -145,11 +155,13 @@ Diese Plattformen setzen auf:
    - Langzeit-Analyse
 
 **Vorteile**:
+
 - Flexibles Privacy-Modell
 - Bessere Insights bei vorhandenem Consent
 - Basis-Funktionalität ohne Einwilligung
 
 **Nachteile**:
+
 - Komplexere Implementierung
 - Reduzierte Genauigkeit ohne Consent
 - Consent-Banner kann Conversion beeinträchtigen
@@ -159,18 +171,21 @@ Diese Plattformen setzen auf:
 **Konzept**: Nutzer gibt E-Mail-Adresse ein und erhält personalisierten Download-Link.
 
 **Funktionsweise**:
+
 - Nutzer gibt E-Mail auf Landing Page ein
 - System sendet Magic Link mit verschlüsseltem Token
 - Token enthält Attribution-Informationen
 - Nach Download kann Nutzer direkt zugeordnet werden
 
 **Vorteile**:
+
 - Explizite Einwilligung durch E-Mail-Eingabe
 - 100% genaue Attribution
 - Möglichkeit für Follow-up-Kommunikation
 - DSGVO-konform mit Double-Opt-In
 
 **Nachteile**:
+
 - Zusätzlicher Schritt im Conversion-Funnel
 - Nicht alle Nutzer wollen E-Mail angeben
 - Verzögerung durch E-Mail-Versand
@@ -180,18 +195,21 @@ Diese Plattformen setzen auf:
 **Konzept**: Gamification-Ansatz mit manueller Code-Eingabe.
 
 **Funktionsweise**:
+
 - Jeder Link enthält prominenten Promo-Code
 - Nutzer wird incentiviert, Code in App einzugeben
 - Code aktiviert Vorteile (Rabatte, Features)
 - Attribution erfolgt bei Code-Einlösung
 
 **Vorteile**:
+
 - Kein technisches Tracking erforderlich
 - Nutzer hat volle Kontrolle
 - Zusätzlicher Conversion-Anreiz
 - 100% DSGVO-konform
 
 **Nachteile**:
+
 - Erfordert manuelle Aktion des Nutzers
 - Nicht alle werden Code eingeben
 - Zusätzliche Incentive-Kosten
@@ -203,12 +221,14 @@ Diese Plattformen setzen auf:
 **Ziel**: Schnelle Basis-Implementation ohne komplexe Infrastruktur
 
 **Umsetzung**:
+
 - Integration von Referral-Codes in bestehende Link-Struktur
 - Weitergabe der Codes über URL-Parameter
 - Einfaches Dashboard für Link-Ersteller
 - Server-to-Server Webhook für App-Events
 
 **Metriken**:
+
 - Anzahl Klicks pro Referral-Code
 - Conversions (Download, Registrierung, Kauf)
 - Conversion-Rate pro Link-Ersteller
@@ -218,12 +238,14 @@ Diese Plattformen setzen auf:
 **Ziel**: Verbessertes Tracking mit Privacy-First-Ansatz
 
 **Umsetzung**:
+
 - Session-basiertes Tracking mit täglichem Salt
 - Aggregierte Analytics ohne Personenbezug
 - A/B-Testing verschiedener Attribution-Methoden
 - Implementierung eines Consent-Banners für erweiterte Features
 
 **Neue Features**:
+
 - Conversion-Funnels
 - Zeitbasierte Analysen
 - Geografische Verteilung
@@ -234,12 +256,14 @@ Diese Plattformen setzen auf:
 **Ziel**: Vollständige Customer Journey Analyse
 
 **Umsetzung**:
+
 - Kombination mehrerer Tracking-Methoden
 - Machine Learning für Probabilistic Matching
 - Integration mit externen Analytics-Tools
 - Advanced Reporting und Insights
 
 **Erweiterte Funktionen**:
+
 - Attribution-Modelle (First-Touch, Last-Touch, Linear)
 - Kohorten-Analyse
 - Lifetime-Value-Berechnung
@@ -250,6 +274,7 @@ Diese Plattformen setzen auf:
 **Ziel**: Professionelle Attribution-Plattform
 
 **Umsetzung**:
+
 - Fraud-Detection-System
 - Real-Time Dashboards
 - API für Drittanbieter-Integration
@@ -260,16 +285,19 @@ Diese Plattformen setzen auf:
 ### Datenmodell
 
 **tracking_sessions**:
+
 - Temporäre Sessions mit kurzer Lebensdauer
 - Anonymisierte Nutzer-Identifikatoren
 - Verknüpfung zu Links und Referrern
 
 **conversion_events**:
+
 - Event-Stream aller Conversions
 - Attribution zu Sessions und Referral-Codes
 - Zeitstempel und Event-Typen
 
 **attribution_analytics**:
+
 - Aggregierte Metriken
 - Keine personenbezogenen Daten
 - Optimiert für schnelle Abfragen
@@ -277,11 +305,13 @@ Diese Plattformen setzen auf:
 ### API-Design
 
 **Tracking-Endpoints**:
+
 - POST /api/track/click - Initiale Klick-Erfassung
 - POST /api/track/event - Event-Tracking (Download, Register, Purchase)
 - GET /api/analytics/attribution - Attribution-Reports
 
 **Webhook-System**:
+
 - Empfang von App-Events
 - Validierung und Zuordnung
 - Asynchrone Verarbeitung
@@ -289,12 +319,14 @@ Diese Plattformen setzen auf:
 ### Sicherheit und Datenschutz
 
 **Datenschutz-Maßnahmen**:
+
 - Verschlüsselung aller Daten in Transit und at Rest
 - Automatische Datenlöschung nach definierten Zeiträumen
 - Pseudonymisierung von Nutzer-Daten
 - Audit-Logs für alle Datenzugriffe
 
 **Compliance**:
+
 - DSGVO-konforme Datenverarbeitung
 - Privacy-by-Design-Prinzipien
 - Transparente Datenschutzerklärung
@@ -328,28 +360,35 @@ Diese Plattformen setzen auf:
 ### Technische Risiken
 
 **Datenverlust bei Platform-Wechsel**:
+
 - Mitigation: Redundante Tracking-Methoden, Fallback-Mechanismen
 
 **Ungenauigkeit bei Probabilistic Matching**:
+
 - Mitigation: Konservative Zuordnung, manuelle Validierung bei hochwertigen Conversions
 
 **Skalierungsprobleme**:
+
 - Mitigation: Event-Streaming-Architektur, horizontale Skalierung
 
 ### Rechtliche Risiken
 
 **DSGVO-Verstöße**:
+
 - Mitigation: Privacy-by-Design, regelmäßige Audits, Datenschutzbeauftragter
 
 **Internationale Datenschutzgesetze**:
+
 - Mitigation: Geo-basierte Compliance-Rules, lokale Datenspeicherung
 
 ### Geschäftliche Risiken
 
 **Nutzer-Akzeptanz**:
+
 - Mitigation: Transparente Kommunikation, Opt-in-Incentives
 
 **Kosten-Nutzen-Verhältnis**:
+
 - Mitigation: Phasenweise Einführung, kontinuierliche ROI-Messung
 
 ## Zusammenfassung und Ausblick

@@ -5,6 +5,7 @@ This guide will walk you through setting up Google Sign-In and Apple Sign-In for
 ## App Information Summary
 
 **Collected Information:**
+
 - **App Name**: Märchen Zauber (Märchenzauber)
 - **iOS Bundle ID**: `com.memoro.maerchenzauber`
 - **Android Package Name**: `com.memoro.maerchenzauber`
@@ -58,7 +59,8 @@ This guide will walk you through setting up Google Sign-In and Apple Sign-In for
    - **SHA-1 certificate fingerprint**: `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`
 5. Click **Create**
 6. **Note**: You don't need to download anything for Android
-111768794939-91fgpc7bf0bu1ss50nonscmmp4k1dvbb.apps.googleusercontent.com
+   111768794939-91fgpc7bf0bu1ss50nonscmmp4k1dvbb.apps.googleusercontent.com
+
 ### Step 5: Create iOS OAuth Client
 
 1. Go to **APIs & Services → Credentials**
@@ -97,6 +99,7 @@ The `google-services.json` and `GoogleService-Info.plist` files are only needed 
 <summary>Only if you want Firebase services (click to expand)</summary>
 
 **For Android:**
+
 1. Go to [Firebase Console](https://console.firebase.google.com)
 2. Create a new Firebase project or link existing Google Cloud project
 3. Add Android app:
@@ -107,6 +110,7 @@ The `google-services.json` and `GoogleService-Info.plist` files are only needed 
 5. Place in `android/app/google-services.json`
 
 **For iOS:**
+
 1. In Firebase Console, add iOS app:
    - Bundle ID: `com.memoro.maerchenzauber`
    - App nickname: Märchenzauber
@@ -236,6 +240,7 @@ npm install @react-native-async-storage/async-storage
 You need to copy the following files from the memoro_app to your storyteller app:
 
 **Core Services:**
+
 ```bash
 # Create directories
 mkdir -p src/features/auth/services
@@ -286,6 +291,7 @@ export function AuthScreen() {
 ### Test on iOS
 
 1. Build and run:
+
    ```bash
    cd /Users/wuesteon/memoro_new/mana-2025/storyteller-project/mobile
    npm run ios
@@ -306,6 +312,7 @@ export function AuthScreen() {
 ### Test on Android
 
 1. Build and run:
+
    ```bash
    npm run android
    ```
@@ -349,6 +356,7 @@ The same iOS Client ID works for both development and production.
 Use this checklist to track your progress:
 
 ### Google Cloud Console
+
 - [ ] Created/selected Google Cloud project
 - [ ] Enabled Google Sign-In API
 - [ ] Created OAuth consent screen
@@ -358,10 +366,12 @@ Use this checklist to track your progress:
 - [ ] ~~Downloaded google-services files~~ (Not needed for Google Sign-In only!)
 
 ### Apple Developer Portal
+
 - [ ] Enabled Sign in with Apple capability for app ID
 - [ ] Configured in Xcode (optional)
 
 ### Project Configuration
+
 - [ ] Updated `app.json` with Google Sign-In config (iOS client ID)
 - [ ] Updated `app.json` with Apple Sign-In config
 - [ ] Added plugins to `app.json`
@@ -369,6 +379,7 @@ Use this checklist to track your progress:
 - [ ] Installed npm dependencies
 
 ### Code Implementation
+
 - [ ] Copied/created auth service files
 - [ ] Added GoogleSignInButton component
 - [ ] Added AppleSignInButton component
@@ -377,6 +388,7 @@ Use this checklist to track your progress:
 - [ ] Set up fetch interceptor
 
 ### Testing
+
 - [ ] Tested Google Sign-In on iOS
 - [ ] Tested Google Sign-In on Android
 - [ ] Tested Apple Sign-In on iOS
@@ -392,6 +404,7 @@ Use this checklist to track your progress:
 **Problem**: Google Sign-In fails with DEVELOPER_ERROR
 
 **Solutions**:
+
 1. Verify SHA-1 fingerprint is correct in Google Cloud Console
 2. Make sure you're using the **Web Client ID** in `EXPO_PUBLIC_GOOGLE_CLIENT_ID`
 3. Ensure `google-services.json` is in `android/app/`
@@ -405,6 +418,7 @@ Use this checklist to track your progress:
 ### Google Sign-In button not showing
 
 **Solutions**:
+
 1. Check that `@react-native-google-signin/google-signin` is installed
 2. Verify plugin is in `app.json`
 3. Run `npx expo prebuild --clean` to regenerate native code
@@ -412,6 +426,7 @@ Use this checklist to track your progress:
 ### Apple Sign-In button not showing on iOS
 
 **Solutions**:
+
 1. Verify `expo-apple-authentication` is installed
 2. Check that `usesAppleSignIn: true` is in `app.json` under `ios`
 3. Ensure plugin is listed: `"expo-apple-authentication"`
@@ -420,6 +435,7 @@ Use this checklist to track your progress:
 ### Network errors / 401 errors
 
 **Solutions**:
+
 1. Verify middleware URL is correct in `.env.local`
 2. Check app ID from middleware
 3. Test middleware health: `curl https://your-middleware-url/health`
@@ -461,6 +477,7 @@ After completing this setup:
 5. Submit to App Store and Google Play
 
 For detailed code implementation, see:
+
 - `/Users/wuesteon/memoro_new/mana-2025/SOCIAL_AUTH_INTEGRATION_GUIDE.md`
 - `/Users/wuesteon/memoro_new/mana-2025/memoro_app/features/auth/` for reference implementation
 
@@ -469,6 +486,7 @@ For detailed code implementation, see:
 ## Support
 
 If you encounter issues:
+
 1. Check this troubleshooting section
 2. Review the main integration guide
 3. Check memoro_app implementation for reference

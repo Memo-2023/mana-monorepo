@@ -6,9 +6,9 @@ import { CoreModule } from '../core/core.module';
 import { SupabaseModule } from '../supabase/supabase.module';
 
 @Module({
-  imports: [ConfigModule, CoreModule, SupabaseModule],
-  controllers: [HealthController],
-  providers: [HealthService],
-  exports: [HealthService],
+	imports: [ConfigModule, CoreModule, SupabaseModule],
+	controllers: [HealthController],
+	providers: [HealthService],
+	exports: [HealthService],
 })
 export class HealthModule {}

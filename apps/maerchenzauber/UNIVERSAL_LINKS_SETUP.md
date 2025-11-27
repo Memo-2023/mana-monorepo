@@ -5,6 +5,7 @@
 We've implemented universal links for character sharing, replacing the custom scheme `maerchenzauber://` with clickable HTTPS URLs that work in WhatsApp, SMS, and all messaging apps.
 
 **New sharing URL format:**
+
 ```
 https://märchen-zauber.de/character/{characterId}/{shareCode}
 ```
@@ -12,6 +13,7 @@ https://märchen-zauber.de/character/{characterId}/{shareCode}
 ## What Was Implemented
 
 ### 1. **Landing Page Route** ✅
+
 - **File:** `landingpage/public/character.html`
 - **Type:** Static HTML with client-side JavaScript
 - **Purpose:** Web page that displays character preview and deep links into the app
@@ -24,22 +26,26 @@ https://märchen-zauber.de/character/{characterId}/{shareCode}
   - Works with any static hosting (Netlify, Vercel, Apache, etc.)
 
 ### 2. **Backend Public Endpoint** ✅
+
 - **Endpoint:** `GET /characters/public/{id}/{shareCode}`
 - **File:** `backend/src/character/public-character.controller.ts`
 - **Purpose:** Fetch character data without authentication using share code
 - **Security:** Share code must match to access character data
 
 ### 3. **iOS Universal Links Configuration** ✅
+
 - **File:** `landingpage/public/.well-known/apple-app-site-association`
 - **App Configuration:** `mobile/app.json` - added `associatedDomains`
 - **Domain:** `applinks:märchen-zauber.de` and punycode version
 
 ### 4. **Android App Links Configuration** ✅
+
 - **File:** `landingpage/public/.well-known/assetlinks.json`
 - **App Configuration:** `mobile/app.json` - added `intentFilters` with `autoVerify: true`
 - **Note:** ⚠️ Requires SHA-256 fingerprint update (see below)
 
 ### 5. **Mobile Share Button** ✅
+
 - **File:** `mobile/components/character/ShareCharacterButton.tsx`
 - **Features:**
   - Generates share code if none exists
@@ -48,6 +54,7 @@ https://märchen-zauber.de/character/{characterId}/{shareCode}
   - Loading state while generating code
 
 ### 6. **Deep Link Handlers** ✅
+
 - **Universal Links:** `mobile/app/character/[id]/[shareCode].tsx`
 - **Custom Scheme:** `mobile/app/share/character/[id].tsx` (updated to support share code)
 - **Preview Screen:** `mobile/app/character/preview/[characterId].tsx` (updated to use public endpoint with share code)
@@ -57,6 +64,7 @@ https://märchen-zauber.de/character/{characterId}/{shareCode}
 ### Landing Page Deployment
 
 1. **Build the landing page:**
+
    ```bash
    cd landingpage
    npm run build
@@ -66,15 +74,19 @@ https://märchen-zauber.de/character/{characterId}/{shareCode}
 2. **Deploy to hosting provider** (choose one):
 
    **Netlify (Recommended):**
+
    ```bash
    netlify deploy --prod --dir=dist
    ```
+
    - URL rewrites handled automatically by `_redirects` file
 
    **Vercel:**
+
    ```bash
    vercel --prod
    ```
+
    - URL rewrites handled automatically by `vercel.json` file
 
    **Traditional Hosting (Apache/Nginx):**
@@ -83,6 +95,7 @@ https://märchen-zauber.de/character/{characterId}/{shareCode}
    - Nginx: Add rewrite rules to config (see DEPLOYMENT.md)
 
 3. **Verify `.well-known` files are accessible:**
+
    ```bash
    # iOS
    curl https://märchen-zauber.de/.well-known/apple-app-site-association
@@ -114,11 +127,10 @@ https://märchen-zauber.de/character/{characterId}/{shareCode}
    ```
 
    Update `landingpage/public/.well-known/assetlinks.json`:
+
    ```json
    {
-     "sha256_cert_fingerprints": [
-       "YOUR_ACTUAL_SHA256_FINGERPRINT_HERE"
-     ]
+   	"sha256_cert_fingerprints": ["YOUR_ACTUAL_SHA256_FINGERPRINT_HERE"]
    }
    ```
 
@@ -145,6 +157,7 @@ https://märchen-zauber.de/character/{characterId}/{shareCode}
    The backend already has the public endpoint. No additional deployment needed if already running.
 
    Verify the endpoint works:
+
    ```bash
    curl https://storyteller-backend-111768794939.europe-west3.run.app/characters/public/{id}/{shareCode}
    ```
@@ -154,6 +167,7 @@ https://märchen-zauber.de/character/{characterId}/{shareCode}
 ### Test Universal Links (iOS)
 
 1. **Send yourself a message** with a character link:
+
    ```
    https://märchen-zauber.de/character/abc123/xyz789
    ```
@@ -245,6 +259,7 @@ https://märchen-zauber.de/character/{characterId}/{shareCode}
 ## Files Modified/Created
 
 ### Landing Page
+
 - ✅ `public/character.html` (new - static character sharing page)
 - ✅ `public/.well-known/apple-app-site-association` (new - iOS universal links)
 - ✅ `public/.well-known/assetlinks.json` (new - Android app links, SHA-256 updated)
@@ -253,9 +268,11 @@ https://märchen-zauber.de/character/{characterId}/{shareCode}
 - ✅ `vercel.json` (new - Vercel URL rewrites)
 
 ### Backend
+
 - ✅ `src/character/public-character.controller.ts` (updated)
 
 ### Mobile App
+
 - ✅ `app.json` (updated iOS/Android configs)
 - ✅ `components/character/ShareCharacterButton.tsx` (updated)
 - ✅ `app/character/[id]/[shareCode].tsx` (new)

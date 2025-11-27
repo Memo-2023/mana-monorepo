@@ -157,9 +157,7 @@ export async function getRelatedGalleryImages(
 		}
 
 		// Shared style tags = +2 points each
-		const sharedStyles = img.data.style.filter((style) =>
-			currentImage.data.style.includes(style)
-		);
+		const sharedStyles = img.data.style.filter((style) => currentImage.data.style.includes(style));
 		score += sharedStyles.length * 2;
 
 		// Shared tags = +1 point each

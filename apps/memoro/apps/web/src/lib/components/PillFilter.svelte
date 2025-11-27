@@ -22,7 +22,7 @@
 		isLoading = false,
 		error = null,
 		showAllOption = true,
-		allOptionLabel = 'All'
+		allOptionLabel = 'All',
 	}: Props = $props();
 
 	const allSelected = $derived(selectedIds.length === 0);

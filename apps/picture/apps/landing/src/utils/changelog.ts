@@ -257,7 +257,9 @@ export function formatVersion(version: string): string {
 /**
  * Parse semantic version
  */
-export function parseVersion(version: string): { major: number; minor: number; patch: number; suffix?: string } | null {
+export function parseVersion(
+	version: string
+): { major: number; minor: number; patch: number; suffix?: string } | null {
 	const match = version.match(/^v?(\d+)\.(\d+)\.(\d+)(-(.+))?$/);
 	if (!match) return null;
 

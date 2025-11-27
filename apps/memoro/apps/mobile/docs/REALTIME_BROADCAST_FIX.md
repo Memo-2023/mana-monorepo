@@ -11,12 +11,14 @@ The memo list and memo preview components were not updating in real-time when st
 ## Solution Implemented
 
 Implemented a **hybrid subscription model** combining:
+
 1. **postgres_changes subscriptions** - For user-initiated direct updates
 2. **Broadcast channel subscriptions** - For service_role edge function updates
 
 ### Edge Functions (Backend)
 
 Edge functions already send broadcasts to `memo-updates-{memoId}` channels when they complete processing:
+
 - `batch-transcribe-callback/index.ts` - Sends broadcasts after transcription
 - `headline/index.ts` - Sends broadcasts after headline generation
 - `translate/index.ts` - Sends broadcasts after translation
@@ -25,123 +27,126 @@ Edge functions already send broadcasts to `memo-updates-{memoId}` channels when 
 ### Client Components (Frontend)
 
 **Files Modified:**
+
 1. `/memoro_app/components/molecules/MemoList.tsx`
 2. `/memoro_app/components/molecules/MemoPreview.tsx`
 
 #### MemoList.tsx Changes
 
 **Import Added:**
+
 ```typescript
 import { memoRealtimeService } from '~/features/memos/services/memoRealtimeService';
 ```
 
 **New useEffect Hook (lines 387-437):**
+
 ```typescript
 useEffect(() => {
-  const unsubscribeFunctions: (() => void)[] = [];
+	const unsubscribeFunctions: (() => void)[] = [];
 
-  // Subscribe to broadcasts for all visible memos
-  memos.forEach((memo) => {
-    const unsubscribe = memoRealtimeService.subscribeToBroadcastChannel(
-      `memo-updates-${memo.id}`,
-      async (payload) => {
-        console.log('MemoList: Received broadcast for memo', memo.id, payload);
+	// Subscribe to broadcasts for all visible memos
+	memos.forEach((memo) => {
+		const unsubscribe = memoRealtimeService.subscribeToBroadcastChannel(
+			`memo-updates-${memo.id}`,
+			async (payload) => {
+				console.log('MemoList: Received broadcast for memo', memo.id, payload);
 
-        try {
-          // Fetch fresh memo data from Supabase
-          const supabase = await getAuthenticatedClient();
-          const { data: updatedMemo, error } = await supabase
-            .from('memos')
-            .select('*')
-            .eq('id', memo.id)
-            .single();
+				try {
+					// Fetch fresh memo data from Supabase
+					const supabase = await getAuthenticatedClient();
+					const { data: updatedMemo, error } = await supabase
+						.from('memos')
+						.select('*')
+						.eq('id', memo.id)
+						.single();
 
-          if (error) {
-            console.error('MemoList: Error fetching updated memo after broadcast:', error);
-            return;
-          }
+					if (error) {
+						console.error('MemoList: Error fetching updated memo after broadcast:', error);
+						return;
+					}
 
-          if (updatedMemo) {
-            // Update the memo in the list immediately
-            setMemos(prevMemos =>
-              prevMemos.map(m => m.id === memo.id ? updatedMemo : m)
-            );
+					if (updatedMemo) {
+						// Update the memo in the list immediately
+						setMemos((prevMemos) => prevMemos.map((m) => (m.id === memo.id ? updatedMemo : m)));
 
-            console.log('MemoList: Updated memo from broadcast', {
-              id: updatedMemo.id,
-              title: updatedMemo.title,
-              headlineStatus: updatedMemo.metadata?.processing?.headline_and_intro?.status
-            });
-          }
-        } catch (error) {
-          console.error('MemoList: Error processing broadcast update:', error);
-        }
-      }
-    );
+						console.log('MemoList: Updated memo from broadcast', {
+							id: updatedMemo.id,
+							title: updatedMemo.title,
+							headlineStatus: updatedMemo.metadata?.processing?.headline_and_intro?.status,
+						});
+					}
+				} catch (error) {
+					console.error('MemoList: Error processing broadcast update:', error);
+				}
+			}
+		);
 
-    unsubscribeFunctions.push(unsubscribe);
-  });
+		unsubscribeFunctions.push(unsubscribe);
+	});
 
-  // Cleanup on unmount or memo list change
-  return () => {
-    unsubscribeFunctions.forEach(unsub => unsub());
-  };
-}, [memos.map(m => m.id).join(',')]); // Re-subscribe when memo IDs change
+	// Cleanup on unmount or memo list change
+	return () => {
+		unsubscribeFunctions.forEach((unsub) => unsub());
+	};
+}, [memos.map((m) => m.id).join(',')]); // Re-subscribe when memo IDs change
 ```
 
 #### MemoPreview.tsx Changes
 
 **Import Added:**
+
 ```typescript
 import { memoRealtimeService } from '~/features/memos/services/memoRealtimeService';
 ```
 
 **New useEffect Hook (lines 242-287):**
+
 ```typescript
 useEffect(() => {
-  if (!memo?.id) return;
+	if (!memo?.id) return;
 
-  const unsubscribe = memoRealtimeService.subscribeToBroadcastChannel(
-    `memo-updates-${memo.id}`,
-    async (payload) => {
-      console.log('MemoPreview: Received broadcast for memo', memo.id, payload);
+	const unsubscribe = memoRealtimeService.subscribeToBroadcastChannel(
+		`memo-updates-${memo.id}`,
+		async (payload) => {
+			console.log('MemoPreview: Received broadcast for memo', memo.id, payload);
 
-      try {
-        // Fetch fresh memo data from Supabase
-        const supabase = await getAuthenticatedClient();
-        const { data: updatedMemo, error } = await supabase
-          .from('memos')
-          .select('*')
-          .eq('id', memo.id)
-          .single();
+			try {
+				// Fetch fresh memo data from Supabase
+				const supabase = await getAuthenticatedClient();
+				const { data: updatedMemo, error } = await supabase
+					.from('memos')
+					.select('*')
+					.eq('id', memo.id)
+					.single();
 
-        if (error) {
-          console.error('MemoPreview: Error fetching updated memo after broadcast:', error);
-          return;
-        }
+				if (error) {
+					console.error('MemoPreview: Error fetching updated memo after broadcast:', error);
+					return;
+				}
 
-        if (updatedMemo) {
-          // If this is the latest memo on recording page, update it in the store
-          if (reactToGlobalRecordingStatus) {
-            setLatestMemo(updatedMemo);
-          }
+				if (updatedMemo) {
+					// If this is the latest memo on recording page, update it in the store
+					if (reactToGlobalRecordingStatus) {
+						setLatestMemo(updatedMemo);
+					}
 
-          console.log('MemoPreview: Updated memo from broadcast', {
-            id: updatedMemo.id,
-            title: updatedMemo.title,
-            headlineStatus: updatedMemo.metadata?.processing?.headline_and_intro?.status
-          });
+					console.log('MemoPreview: Updated memo from broadcast', {
+						id: updatedMemo.id,
+						title: updatedMemo.title,
+						headlineStatus: updatedMemo.metadata?.processing?.headline_and_intro?.status,
+					});
 
-          // The useMemoProcessing hook will automatically recalculate displayTitle
-          // based on the updated memo state
-        }
-      } catch (error) {
-        console.error('MemoPreview: Error processing broadcast update:', error);
-      }
-    }
-  );
+					// The useMemoProcessing hook will automatically recalculate displayTitle
+					// based on the updated memo state
+				}
+			} catch (error) {
+				console.error('MemoPreview: Error processing broadcast update:', error);
+			}
+		}
+	);
 
-  return () => unsubscribe();
+	return () => unsubscribe();
 }, [memo?.id, reactToGlobalRecordingStatus, setLatestMemo]);
 ```
 
@@ -212,6 +217,7 @@ UI re-renders with new title/status
 ### Expected Console Output
 
 When broadcast received:
+
 ```
 MemoList: Received broadcast for memo {memoId} {payload}
 MemoList: Updated memo from broadcast {id, title, headlineStatus}

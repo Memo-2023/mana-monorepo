@@ -1,7 +1,10 @@
 import Redis from 'ioredis';
 
 // Check if Redis is configured
-const REDIS_ENABLED = !!(process.env.REDIS_HOST && (process.env.REDIS_PASSWORD || process.env.NODE_ENV === 'development'));
+const REDIS_ENABLED = !!(
+	process.env.REDIS_HOST &&
+	(process.env.REDIS_PASSWORD || process.env.NODE_ENV === 'development')
+);
 
 let redis: Redis | null = null;
 let redisAvailable = false;
@@ -16,7 +19,7 @@ if (REDIS_ENABLED) {
 		retryDelayOnFailover: 100,
 		maxRetriesPerRequest: 3,
 		lazyConnect: true,
-		enableOfflineQueue: false
+		enableOfflineQueue: false,
 	};
 
 	// Create Redis client
@@ -108,7 +111,7 @@ export const cache = {
 		} catch (error) {
 			console.error('Cache setWithExpiry error:', error);
 		}
-	}
+	},
 };
 
 // Ensure connection is established
@@ -118,7 +121,7 @@ export async function ensureRedisConnection() {
 		redisAvailable = true;
 		return true;
 	}
-	
+
 	try {
 		await redis.connect();
 		redisAvailable = true;

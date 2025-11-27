@@ -30,15 +30,19 @@ Pictus ist dein persönlicher KI-Bildgenerator und kreativer Playground. Ob du e
 ## Hauptfunktionen
 
 ### 🎨 Unbegrenzte Kreativität
+
 Erstelle Bilder in jedem erdenklichen Stil - von Ölgemälden über Manga bis zu hyperrealistischen Fotos. Unsere KI versteht deine Vision und setzt sie um.
 
 ### ⚡ Blitzschnelle Generation
+
 Von der Idee zum fertigen Bild in Sekunden. Keine stundenlanges Warten mehr - deine Kreativität wird nicht ausgebremst.
 
 ### 🎯 Präzise Kontrolle
+
 Mit erweiterten Parametern, Inpainting und Style-Transfer hast du volle Kontrolle über jedes Detail deiner Kreationen.
 
 ### 💼 Kommerziell Nutzbar
+
 Alle generierten Bilder gehören dir und können frei für kommerzielle Projekte verwendet werden.
 
 ## Für wen ist Pictus?

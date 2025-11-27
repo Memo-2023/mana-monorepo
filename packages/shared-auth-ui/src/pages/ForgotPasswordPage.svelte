@@ -34,7 +34,7 @@
 		resendEmail: 'Resend Email',
 		successMessage: "We've sent a password reset link to {email}. Please check your inbox.",
 		emailRequired: 'Email is required',
-		sendFailed: 'Failed to send reset email'
+		sendFailed: 'Failed to send reset email',
 	};
 
 	interface Props {
@@ -70,7 +70,7 @@
 		lightBackground = '#f5f5f5',
 		darkBackground = '#121212',
 		appSlider,
-		translations = {}
+		translations = {},
 	}: Props = $props();
 
 	// Merge provided translations with defaults
@@ -142,7 +142,9 @@
 	<div class="flex flex-col items-center justify-center pt-16 pb-8">
 		<div
 			class="flex items-center justify-center rounded-full transition-all mb-4"
-			style="width: 120px; height: 120px; border: 3px solid {primaryColor}; background-color: {isDark ? '#000' : '#fff'}; box-shadow: {isDark
+			style="width: 120px; height: 120px; border: 3px solid {primaryColor}; background-color: {isDark
+				? '#000'
+				: '#fff'}; box-shadow: {isDark
 				? '0 6px 12px rgba(0, 0, 0, 0.4)'
 				: '0 6px 12px rgba(0, 0, 0, 0.15)'};"
 		>
@@ -157,7 +159,11 @@
 	<div class="flex-1 flex items-start justify-center px-5 pt-8 pb-8">
 		<div
 			class="w-full max-w-md rounded-xl p-6"
-			style="background-color: {isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.7)'}; backdrop-filter: blur(10px); border: 1px solid {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"
+			style="background-color: {isDark
+				? 'rgba(255, 255, 255, 0.08)'
+				: 'rgba(255, 255, 255, 0.7)'}; backdrop-filter: blur(10px); border: 1px solid {isDark
+				? 'rgba(255, 255, 255, 0.1)'
+				: 'rgba(0, 0, 0, 0.1)'};"
 		>
 			<!-- Title -->
 			<h2
@@ -197,7 +203,13 @@
 							placeholder={t.emailPlaceholder}
 							required
 							class="h-14 w-full rounded-xl border px-4 text-lg transition-colors focus:outline-none focus:ring-2"
-							style="background-color: {isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'}; --tw-ring-color: {primaryColor};"
+							style="background-color: {isDark
+								? 'rgba(0, 0, 0, 0.2)'
+								: 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark
+								? 'rgba(255, 255, 255, 0.2)'
+								: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
+								? '#ffffff'
+								: '#000000'}; --tw-ring-color: {primaryColor};"
 						/>
 					</div>
 
@@ -205,7 +217,9 @@
 						type="submit"
 						disabled={loading}
 						class="flex h-14 w-full items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 disabled:opacity-50 border-2"
-						style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
+						style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark
+							? '#ffffff'
+							: '#000000'};"
 					>
 						<Icon name="key" size={20} />
 						{loading ? t.sending : t.sendResetLinkButton}
@@ -224,7 +238,7 @@
 					</button>
 				</div>
 
-			<!-- Success Mode -->
+				<!-- Success Mode -->
 			{:else}
 				<div class="pb-4">
 					<div class="flex flex-col items-center mb-6">
@@ -239,7 +253,10 @@
 							class="text-sm text-center px-2"
 							style="color: {isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'};"
 						>
-							{@html getSuccessMessage(resetEmail).replace(resetEmail, `<strong>${resetEmail}</strong>`)}
+							{@html getSuccessMessage(resetEmail).replace(
+								resetEmail,
+								`<strong>${resetEmail}</strong>`
+							)}
 						</p>
 					</div>
 
@@ -247,7 +264,9 @@
 						<button
 							onclick={() => goto(loginPath)}
 							class="flex h-14 items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 border-2"
-							style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
+							style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark
+								? '#ffffff'
+								: '#000000'};"
 						>
 							<Icon name="sign-in" size={20} />
 							{t.backToLogin}
@@ -259,7 +278,11 @@
 								error = null;
 							}}
 							class="flex h-10 items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 border"
-							style="background-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'};"
+							style="background-color: {isDark
+								? 'rgba(255, 255, 255, 0.1)'
+								: 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark
+								? 'rgba(255, 255, 255, 0.2)'
+								: 'rgba(0, 0, 0, 0.1)'}; color: {isDark ? '#ffffff' : '#000000'};"
 						>
 							{t.resendEmail}
 						</button>

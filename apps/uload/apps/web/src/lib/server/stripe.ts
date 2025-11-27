@@ -9,7 +9,7 @@ export const getStripe = () => {
 	}
 	return new Stripe(secretKey, {
 		apiVersion: '2025-07-30.basil',
-		typescript: true
+		typescript: true,
 	});
 };
 
@@ -18,6 +18,6 @@ export const STRIPE_CONFIG = {
 	prices: {
 		monthly: env.STRIPE_PRICE_MONTHLY,
 		yearly: env.STRIPE_PRICE_YEARLY,
-		lifetime: env.STRIPE_PRICE_LIFETIME
-	}
+		lifetime: env.STRIPE_PRICE_LIFETIME,
+	},
 };

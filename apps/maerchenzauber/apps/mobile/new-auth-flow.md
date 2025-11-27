@@ -22,36 +22,28 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Custom storage adapter for React Native
 const AsyncStorageAdapter = {
-  getItem: async (key) => await AsyncStorage.getItem(key),
-  setItem: async (key, value) => await AsyncStorage.setItem(key, value),
-  removeItem: async (key) => await AsyncStorage.removeItem(key),
+	getItem: async (key) => await AsyncStorage.getItem(key),
+	setItem: async (key, value) => await AsyncStorage.setItem(key, value),
+	removeItem: async (key) => await AsyncStorage.removeItem(key),
 };
 
 // Initialize Supabase client
-export const supabase = createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY,
-  {
-    auth: {
-      storage: AsyncStorageAdapter, // For React Native
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: false,
-    },
-  }
-);
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+	auth: {
+		storage: AsyncStorageAdapter, // For React Native
+		autoRefreshToken: true,
+		persistSession: true,
+		detectSessionInUrl: false,
+	},
+});
 
 // For Web applications, you can use built-in storage
-export const supabase = createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY,
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-    },
-  }
-);
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+	auth: {
+		autoRefreshToken: true,
+		persistSession: true,
+	},
+});
 ```
 
 ### 2. Implement Authentication with Middleware
@@ -59,37 +51,37 @@ export const supabase = createClient(
 ```javascript
 // Sign in with middleware service
 export const signInWithMiddleware = async (email, password) => {
-  try {
-    // 1. Authenticate with middleware
-    const response = await fetch('https://your-middleware-api.com/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Authentication failed');
-    }
-    
-    // 2. Get Supabase-compatible JWT
-    const { token, refreshToken } = await response.json();
-    
-    // 3. Set the Supabase session
-    const { data, error } = await supabase.auth.setSession({
-      access_token: token,
-      refresh_token: refreshToken || '',
-    });
-    
-    if (error) throw error;
-    
-    return { user: data.user, session: data.session };
-  } catch (error) {
-    console.error('Error signing in:', error.message);
-    throw error;
-  }
+	try {
+		// 1. Authenticate with middleware
+		const response = await fetch('https://your-middleware-api.com/auth/login', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ email, password }),
+		});
+
+		if (!response.ok) {
+			const errorData = await response.json();
+			throw new Error(errorData.message || 'Authentication failed');
+		}
+
+		// 2. Get Supabase-compatible JWT
+		const { token, refreshToken } = await response.json();
+
+		// 3. Set the Supabase session
+		const { data, error } = await supabase.auth.setSession({
+			access_token: token,
+			refresh_token: refreshToken || '',
+		});
+
+		if (error) throw error;
+
+		return { user: data.user, session: data.session };
+	} catch (error) {
+		console.error('Error signing in:', error.message);
+		throw error;
+	}
 };
 ```
 
@@ -98,37 +90,37 @@ export const signInWithMiddleware = async (email, password) => {
 ```javascript
 // Sign out
 export const signOut = async () => {
-  try {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  } catch (error) {
-    console.error('Error signing out:', error.message);
-    throw error;
-  }
+	try {
+		const { error } = await supabase.auth.signOut();
+		if (error) throw error;
+	} catch (error) {
+		console.error('Error signing out:', error.message);
+		throw error;
+	}
 };
 
 // Get current session
 export const getSession = async () => {
-  try {
-    const { data, error } = await supabase.auth.getSession();
-    if (error) throw error;
-    return data.session;
-  } catch (error) {
-    console.error('Error getting session:', error.message);
-    return null;
-  }
+	try {
+		const { data, error } = await supabase.auth.getSession();
+		if (error) throw error;
+		return data.session;
+	} catch (error) {
+		console.error('Error getting session:', error.message);
+		return null;
+	}
 };
 
 // Refresh token when needed
 export const refreshSession = async () => {
-  try {
-    const { data, error } = await supabase.auth.refreshSession();
-    if (error) throw error;
-    return data.session;
-  } catch (error) {
-    console.error('Error refreshing session:', error.message);
-    return null;
-  }
+	try {
+		const { data, error } = await supabase.auth.refreshSession();
+		if (error) throw error;
+		return data.session;
+	} catch (error) {
+		console.error('Error refreshing session:', error.message);
+		return null;
+	}
 };
 ```
 
@@ -139,37 +131,35 @@ export const refreshSession = async () => {
 import { useState, useEffect } from 'react';
 
 export const useAuth = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+	const [user, setUser] = useState(null);
+	const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Get initial session
-    const initializeAuth = async () => {
-      try {
-        const session = await getSession();
-        setUser(session?.user || null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    initializeAuth();
-    
-    // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user || null);
-      }
-    );
-    
-    return () => {
-      if (authListener?.subscription) {
-        authListener.subscription.unsubscribe();
-      }
-    };
-  }, []);
+	useEffect(() => {
+		// Get initial session
+		const initializeAuth = async () => {
+			try {
+				const session = await getSession();
+				setUser(session?.user || null);
+			} finally {
+				setLoading(false);
+			}
+		};
 
-  return { user, loading, signIn: signInWithMiddleware, signOut };
+		initializeAuth();
+
+		// Listen for auth state changes
+		const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+			setUser(session?.user || null);
+		});
+
+		return () => {
+			if (authListener?.subscription) {
+				authListener.subscription.unsubscribe();
+			}
+		};
+	}, []);
+
+	return { user, loading, signIn: signInWithMiddleware, signOut };
 };
 ```
 
@@ -181,54 +171,54 @@ import { View, TextInput, Button, Text } from 'react-native';
 import { useAuth } from './auth';
 
 export default function AuthScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
-  const { user, loading, signIn, signOut } = useAuth();
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const [error, setError] = useState(null);
+	const { user, loading, signIn, signOut } = useAuth();
 
-  const handleLogin = async () => {
-    try {
-      setError(null);
-      await signIn(email, password);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+	const handleLogin = async () => {
+		try {
+			setError(null);
+			await signIn(email, password);
+		} catch (err) {
+			setError(err.message);
+		}
+	};
 
-  if (loading) {
-    return <Text>Loading...</Text>;
-  }
+	if (loading) {
+		return <Text>Loading...</Text>;
+	}
 
-  return (
-    <View style={{ padding: 20 }}>
-      {user ? (
-        <View>
-          <Text>Logged in as: {user.email}</Text>
-          <Button title="Sign Out" onPress={signOut} />
-        </View>
-      ) : (
-        <View>
-          <TextInput
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            style={{ marginBottom: 10, padding: 10, borderWidth: 1 }}
-          />
-          <TextInput
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            style={{ marginBottom: 10, padding: 10, borderWidth: 1 }}
-          />
-          <Button title="Sign In" onPress={handleLogin} />
-        </View>
-      )}
-      
-      {error && <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text>}
-    </View>
-  );
+	return (
+		<View style={{ padding: 20 }}>
+			{user ? (
+				<View>
+					<Text>Logged in as: {user.email}</Text>
+					<Button title="Sign Out" onPress={signOut} />
+				</View>
+			) : (
+				<View>
+					<TextInput
+						placeholder="Email"
+						value={email}
+						onChangeText={setEmail}
+						autoCapitalize="none"
+						style={{ marginBottom: 10, padding: 10, borderWidth: 1 }}
+					/>
+					<TextInput
+						placeholder="Password"
+						value={password}
+						onChangeText={setPassword}
+						secureTextEntry
+						style={{ marginBottom: 10, padding: 10, borderWidth: 1 }}
+					/>
+					<Button title="Sign In" onPress={handleLogin} />
+				</View>
+			)}
+
+			{error && <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text>}
+		</View>
+	);
 }
 ```
 

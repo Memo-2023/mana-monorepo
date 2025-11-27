@@ -131,27 +131,27 @@ The spaces table uses RLS to ensure users can only access their own spaces:
 
 ```sql
 -- For retrieving spaces
-CREATE POLICY "Users can view their own spaces" 
-  ON public.spaces 
-  FOR SELECT 
+CREATE POLICY "Users can view their own spaces"
+  ON public.spaces
+  FOR SELECT
   USING ((auth.jwt() ->> 'sub')::uuid = user_id);
 
 -- For creating spaces
-CREATE POLICY "Users can create their own spaces" 
-  ON public.spaces 
-  FOR INSERT 
+CREATE POLICY "Users can create their own spaces"
+  ON public.spaces
+  FOR INSERT
   WITH CHECK ((auth.jwt() ->> 'sub')::uuid = user_id);
 
 -- For updating spaces
-CREATE POLICY "Users can update their own spaces" 
-  ON public.spaces 
-  FOR UPDATE 
+CREATE POLICY "Users can update their own spaces"
+  ON public.spaces
+  FOR UPDATE
   USING ((auth.jwt() ->> 'sub')::uuid = user_id);
 
 -- For deleting spaces
-CREATE POLICY "Users can delete their own spaces" 
-  ON public.spaces 
-  FOR DELETE 
+CREATE POLICY "Users can delete their own spaces"
+  ON public.spaces
+  FOR DELETE
   USING ((auth.jwt() ->> 'sub')::uuid = user_id);
 
 -- For edge function operations
@@ -165,17 +165,17 @@ CREATE POLICY "Service role can access all spaces"
 ```typescript
 // Create a space
 const newSpace = await spaceService.createSpace({
-  name: "Work Notes",
-  description: "All my work-related memos",
-  color: "#2196F3",
-  appId: "550e8400-e29b-41d4-a716-446655440000"
+	name: 'Work Notes',
+	description: 'All my work-related memos',
+	color: '#2196F3',
+	appId: '550e8400-e29b-41d4-a716-446655440000',
 });
 
 // Update a space
 await spaceService.updateSpace(spaceId, {
-  name: "Updated Work Notes",
-  description: "New description",
-  color: "#FF9800"
+	name: 'Updated Work Notes',
+	description: 'New description',
+	color: '#FF9800',
 });
 
 // Delete a space

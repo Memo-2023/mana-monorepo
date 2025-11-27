@@ -20,21 +20,24 @@ interface RateLimitEntry {
 const store = new Map<string, RateLimitEntry>();
 
 // Cleanup alte Einträge alle 5 Minuten
-setInterval(() => {
-	const now = Date.now();
-	for (const [key, entry] of store.entries()) {
-		if (now > entry.resetTime) {
-			store.delete(key);
+setInterval(
+	() => {
+		const now = Date.now();
+		for (const [key, entry] of store.entries()) {
+			if (now > entry.resetTime) {
+				store.delete(key);
+			}
 		}
-	}
-}, 5 * 60 * 1000);
+	},
+	5 * 60 * 1000
+);
 
 // Standard Key Generator
 function defaultKeyGenerator(event: RequestEvent): string {
 	const ip = getClientIP(event);
 	const userAgent = event.request.headers.get('user-agent') || 'unknown';
 	const route = event.route.id || event.url.pathname;
-	
+
 	// Kombiniere IP, User-Agent Hash und Route für eindeutigen Key
 	const uaHash = hashString(userAgent);
 	return `${ip}:${uaHash}:${route}`;
@@ -44,21 +47,21 @@ function defaultKeyGenerator(event: RequestEvent): string {
 function getClientIP(event: RequestEvent): string {
 	// Prüfe verschiedene Headers für echte Client-IP
 	const headers = event.request.headers;
-	
+
 	// Cloudflare
 	const cfConnectingIP = headers.get('cf-connecting-ip');
 	if (cfConnectingIP) return cfConnectingIP;
-	
+
 	// Standard Proxy Headers
 	const xForwardedFor = headers.get('x-forwarded-for');
 	if (xForwardedFor) {
 		// Erste IP aus der Liste nehmen
 		return xForwardedFor.split(',')[0].trim();
 	}
-	
+
 	const xRealIP = headers.get('x-real-ip');
 	if (xRealIP) return xRealIP;
-	
+
 	// Fallback auf connection info
 	return event.getClientAddress();
 }
@@ -68,7 +71,7 @@ function hashString(str: string): string {
 	let hash = 0;
 	for (let i = 0; i < str.length; i++) {
 		const char = str.charCodeAt(i);
-		hash = ((hash << 5) - hash) + char;
+		hash = (hash << 5) - hash + char;
 		hash = hash & hash; // 32-bit integer
 	}
 	return Math.abs(hash).toString(36);
@@ -82,7 +85,7 @@ export function rateLimit(config: RateLimitConfig) {
 		message = 'Too many requests',
 		keyGenerator = defaultKeyGenerator,
 		skipIf,
-		onLimitReached
+		onLimitReached,
 	} = config;
 
 	return async (event: RequestEvent): Promise<Response | null> => {
@@ -100,7 +103,7 @@ export function rateLimit(config: RateLimitConfig) {
 			store.set(key, {
 				count: 1,
 				resetTime: now + windowMs,
-				firstRequest: now
+				firstRequest: now,
 			});
 			return null;
 		}
@@ -111,7 +114,7 @@ export function rateLimit(config: RateLimitConfig) {
 			store.set(key, {
 				count: 1,
 				resetTime: now + windowMs,
-				firstRequest: now
+				firstRequest: now,
 			});
 			return null;
 		}
@@ -123,15 +126,15 @@ export function rateLimit(config: RateLimitConfig) {
 		// Prüfe Limit
 		if (entry.count > maxRequests) {
 			onLimitReached?.(event, key);
-			
+
 			const retryAfter = Math.ceil((entry.resetTime - now) / 1000);
-			
+
 			return new Response(
 				JSON.stringify({
 					error: message,
 					retryAfter,
 					limit: maxRequests,
-					window: Math.ceil(windowMs / 1000)
+					window: Math.ceil(windowMs / 1000),
 				}),
 				{
 					status: 429,
@@ -141,8 +144,8 @@ export function rateLimit(config: RateLimitConfig) {
 						'X-RateLimit-Limit': maxRequests.toString(),
 						'X-RateLimit-Remaining': '0',
 						'X-RateLimit-Reset': Math.ceil(entry.resetTime / 1000).toString(),
-						'X-RateLimit-Window': Math.ceil(windowMs / 1000).toString()
-					}
+						'X-RateLimit-Window': Math.ceil(windowMs / 1000).toString(),
+					},
 				}
 			);
 		}
@@ -150,13 +153,13 @@ export function rateLimit(config: RateLimitConfig) {
 		// Request ist OK, füge Rate Limit Headers hinzu
 		const remaining = Math.max(0, maxRequests - entry.count);
 		const reset = Math.ceil(entry.resetTime / 1000);
-		
+
 		// Headers werden später in der Response gesetzt
 		event.locals.rateLimitHeaders = {
 			'X-RateLimit-Limit': maxRequests.toString(),
 			'X-RateLimit-Remaining': remaining.toString(),
 			'X-RateLimit-Reset': reset.toString(),
-			'X-RateLimit-Window': Math.ceil(windowMs / 1000).toString()
+			'X-RateLimit-Window': Math.ceil(windowMs / 1000).toString(),
 		};
 
 		return null; // Request durchlassen
@@ -169,7 +172,7 @@ export const RateLimits = {
 	api: rateLimit({
 		windowMs: 15 * 60 * 1000, // 15 Minuten
 		maxRequests: 100,
-		message: 'Too many API requests'
+		message: 'Too many API requests',
 	}),
 
 	// Authentication
@@ -180,7 +183,7 @@ export const RateLimits = {
 		keyGenerator: (event) => {
 			// Nur IP für Auth, nicht User-Agent
 			return `auth:${getClientIP(event)}`;
-		}
+		},
 	}),
 
 	// Link Creation
@@ -196,7 +199,7 @@ export const RateLimits = {
 			}
 			// Sonst IP-basiert
 			return `links:ip:${getClientIP(event)}`;
-		}
+		},
 	}),
 
 	// Password Reset
@@ -206,7 +209,7 @@ export const RateLimits = {
 		message: 'Too many password reset attempts',
 		keyGenerator: (event) => {
 			return `reset:${getClientIP(event)}`;
-		}
+		},
 	}),
 
 	// Registration
@@ -216,7 +219,7 @@ export const RateLimits = {
 		message: 'Too many registration attempts',
 		keyGenerator: (event) => {
 			return `register:${getClientIP(event)}`;
-		}
+		},
 	}),
 
 	// Link Clicks (sehr großzügig, nur gegen DDoS)
@@ -226,15 +229,15 @@ export const RateLimits = {
 		message: 'Too many requests',
 		keyGenerator: (event) => {
 			return `clicks:${getClientIP(event)}`;
-		}
+		},
 	}),
 
 	// Strikte Limits für kritische Operationen
 	strict: rateLimit({
 		windowMs: 60 * 60 * 1000, // 1 Stunde
 		maxRequests: 1, // Nur 1 Request pro Stunde
-		message: 'Operation rate limited'
-	})
+		message: 'Operation rate limited',
+	}),
 };
 
 // Helper für Custom Rate Limits
@@ -243,7 +246,7 @@ export function createUserRateLimit(userId: string, config: Partial<RateLimitCon
 		windowMs: 15 * 60 * 1000,
 		maxRequests: 100,
 		...config,
-		keyGenerator: () => `user:${userId}:${config.keyGenerator ? 'custom' : 'default'}`
+		keyGenerator: () => `user:${userId}:${config.keyGenerator ? 'custom' : 'default'}`,
 	});
 }
 
@@ -256,7 +259,7 @@ const whitelist = new Set([
 
 export function createWhitelistSkip(additionalIPs: string[] = []) {
 	const fullWhitelist = new Set([...whitelist, ...additionalIPs]);
-	
+
 	return (event: RequestEvent): boolean => {
 		const ip = getClientIP(event);
 		return fullWhitelist.has(ip);
@@ -266,13 +269,13 @@ export function createWhitelistSkip(additionalIPs: string[] = []) {
 // Sliding Window Rate Limiter (genauer aber ressourcenintensiver)
 export function slidingWindowRateLimit(config: RateLimitConfig & { precision?: number }) {
 	const { precision = 10 } = config; // Anzahl Sub-Windows
-	
+
 	return async (event: RequestEvent): Promise<Response | null> => {
 		const now = Date.now();
 		const key = (config.keyGenerator || defaultKeyGenerator)(event);
 		const windowSize = config.windowMs / precision;
 		const currentWindow = Math.floor(now / windowSize);
-		
+
 		// Lösche alte Windows
 		for (const [storeKey] of store.entries()) {
 			if (storeKey.startsWith(key + ':')) {
@@ -282,7 +285,7 @@ export function slidingWindowRateLimit(config: RateLimitConfig & { precision?: n
 				}
 			}
 		}
-		
+
 		// Zähle Requests in allen aktiven Windows
 		let totalRequests = 0;
 		for (let i = 0; i < precision; i++) {
@@ -292,37 +295,43 @@ export function slidingWindowRateLimit(config: RateLimitConfig & { precision?: n
 				totalRequests += windowEntry.count;
 			}
 		}
-		
+
 		// Increment current window
 		const currentWindowKey = `${key}:${currentWindow}`;
-		const currentEntry = store.get(currentWindowKey) || { count: 0, resetTime: now + windowSize, firstRequest: now };
+		const currentEntry = store.get(currentWindowKey) || {
+			count: 0,
+			resetTime: now + windowSize,
+			firstRequest: now,
+		};
 		currentEntry.count++;
 		store.set(currentWindowKey, currentEntry);
 		totalRequests++;
-		
+
 		// Check limit
 		if (totalRequests > config.maxRequests) {
 			const oldestWindow = currentWindow - precision + 1;
 			const oldestEntry = store.get(`${key}:${oldestWindow}`);
-			const retryAfter = oldestEntry ? Math.ceil((oldestEntry.resetTime - now) / 1000) : Math.ceil(windowSize / 1000);
-			
+			const retryAfter = oldestEntry
+				? Math.ceil((oldestEntry.resetTime - now) / 1000)
+				: Math.ceil(windowSize / 1000);
+
 			return new Response(
 				JSON.stringify({
 					error: config.message || 'Too many requests',
 					retryAfter,
 					limit: config.maxRequests,
-					current: totalRequests
+					current: totalRequests,
 				}),
 				{
 					status: 429,
 					headers: {
 						'Content-Type': 'application/json',
-						'Retry-After': retryAfter.toString()
-					}
+						'Retry-After': retryAfter.toString(),
+					},
 				}
 			);
 		}
-		
+
 		return null;
 	};
 }
@@ -338,11 +347,11 @@ export function getRateLimitStatus(key: string): {
 	if (!entry) {
 		return null;
 	}
-	
+
 	return {
 		requests: entry.count,
 		limit: 0, // Müsste aus der ursprünglichen Config kommen
 		remaining: 0, // Berechnet
-		resetTime: entry.resetTime
+		resetTime: entry.resetTime,
 	};
 }

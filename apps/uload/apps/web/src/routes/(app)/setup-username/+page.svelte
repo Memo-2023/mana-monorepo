@@ -116,10 +116,10 @@
 								maxlength="30"
 								pattern="[a-zA-Z0-9_\-]+"
 								placeholder="dein-username"
-								class="w-full rounded-lg border border-theme-border bg-theme-surface px-4 py-3 text-lg text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+								class="w-full rounded-lg border border-theme-border bg-theme-surface px-4 py-3 text-lg text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 							/>
 							{#if isChecking}
-								<div class="absolute top-1/2 right-3 -translate-y-1/2">
+								<div class="absolute right-3 top-1/2 -translate-y-1/2">
 									<svg
 										class="h-5 w-5 animate-spin text-theme-primary"
 										fill="none"

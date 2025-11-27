@@ -4,7 +4,14 @@
 	import { goto } from '$app/navigation';
 	import { user } from '$lib/stores/auth';
 	import { currentBoard } from '$lib/stores/boards';
-	import { canvasItems, resetCanvasState, isLoadingCanvasItems, showPropertiesPanel, selectedItemIds, addCanvasItem } from '$lib/stores/canvas';
+	import {
+		canvasItems,
+		resetCanvasState,
+		isLoadingCanvasItems,
+		showPropertiesPanel,
+		selectedItemIds,
+		addCanvasItem,
+	} from '$lib/stores/canvas';
 	import { getBoardById } from '$lib/api/boards';
 	import { getBoardItems, addTextToBoard } from '$lib/api/boardItems';
 	import { showToast } from '$lib/stores/toast';
@@ -75,7 +82,7 @@
 			const text = await addTextToBoard({
 				boardId,
 				content: 'Doppelklick zum Bearbeiten',
-				position: { x: 200, y: 200 }
+				position: { x: 200, y: 200 },
 			});
 
 			// Add to canvas
@@ -123,13 +130,15 @@
 		/>
 
 		<!-- Canvas -->
-		<div class="flex-1 h-full pt-16">
+		<div class="h-full flex-1 pt-16">
 			<BoardCanvas />
 		</div>
 
 		<!-- Properties Panel (Right Side) with slide animation -->
 		<div
-			class="h-full pt-16 transition-all duration-300 ease-in-out {$showPropertiesPanel ? 'w-80' : 'w-0'}"
+			class="h-full pt-16 transition-all duration-300 ease-in-out {$showPropertiesPanel
+				? 'w-80'
+				: 'w-0'}"
 		>
 			{#if $showPropertiesPanel}
 				<ImagePropertiesPanel />
@@ -140,12 +149,17 @@
 		<button
 			onclick={() => showPropertiesPanel.set(!$showPropertiesPanel)}
 			class="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-all duration-200 hover:scale-110 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-			title="{$showPropertiesPanel ? 'Eigenschaften ausblenden' : 'Eigenschaften anzeigen'}"
+			title={$showPropertiesPanel ? 'Eigenschaften ausblenden' : 'Eigenschaften anzeigen'}
 		>
 			{#if $showPropertiesPanel}
 				<!-- Close Icon -->
 				<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
 				</svg>
 			{:else}
 				<!-- Settings/Sliders Icon -->

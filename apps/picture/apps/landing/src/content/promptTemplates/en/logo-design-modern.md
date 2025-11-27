@@ -1,102 +1,102 @@
 ---
-title: "Modern Logo Design"
-description: "Create clean, professional logos with perfect text rendering using Ideogram"
-icon: "🎨"
+title: 'Modern Logo Design'
+description: 'Create clean, professional logos with perfect text rendering using Ideogram'
+icon: '🎨'
 
 promptTemplate: "Modern minimalist logo design for '{brand_name}', {industry} business, {icon_concept}, {color_scheme} color palette, clean typography, professional branding, vector style, white background"
 
 variables:
-  - name: "brand_name"
-    description: "Your brand or company name"
-    placeholder: "Apex Digital"
+  - name: 'brand_name'
+    description: 'Your brand or company name'
+    placeholder: 'Apex Digital'
     required: true
-  - name: "industry"
-    description: "Business industry or niche"
-    placeholder: "tech startup / coffee shop / fitness / consulting"
+  - name: 'industry'
+    description: 'Business industry or niche'
+    placeholder: 'tech startup / coffee shop / fitness / consulting'
     required: true
-  - name: "icon_concept"
-    description: "Icon or symbol concept"
-    placeholder: "mountain peak icon / coffee cup / dumbbell / abstract A letter"
+  - name: 'icon_concept'
+    description: 'Icon or symbol concept'
+    placeholder: 'mountain peak icon / coffee cup / dumbbell / abstract A letter'
     required: true
-  - name: "color_scheme"
-    description: "Brand colors"
-    placeholder: "blue and white / warm brown tones / vibrant gradient"
+  - name: 'color_scheme'
+    description: 'Brand colors'
+    placeholder: 'blue and white / warm brown tones / vibrant gradient'
     required: true
 
-category: "logo-design"
+category: 'logo-design'
 tags:
-  - "logo"
-  - "branding"
-  - "design"
-  - "business"
-  - "typography"
+  - 'logo'
+  - 'branding'
+  - 'design'
+  - 'business'
+  - 'typography'
 
-difficulty: "beginner"
-recommendedModel: "ideogram-v3-turbo"
+difficulty: 'beginner'
+recommendedModel: 'ideogram-v3-turbo'
 alternativeModels:
-  - "flux-1-1-pro"
+  - 'flux-1-1-pro'
 
 recommendedSettings:
-  aspectRatio: "1:1"
+  aspectRatio: '1:1'
   guidanceScale: 4.0
-  negativePrompt: "blurry, pixelated, complex, cluttered, gradient background"
+  negativePrompt: 'blurry, pixelated, complex, cluttered, gradient background'
 
 exampleImages:
-  - url: "/examples/logo-tech-startup.jpg"
+  - url: '/examples/logo-tech-startup.jpg'
     prompt: "Modern minimalist logo design for 'Apex Digital', tech startup business, mountain peak icon, blue and white color palette, clean typography, professional branding, vector style, white background"
-  - url: "/examples/logo-coffee.jpg"
+  - url: '/examples/logo-coffee.jpg'
     prompt: "Modern minimalist logo design for 'Brew & Co.', coffee shop business, coffee cup with steam icon, warm brown tones color palette, clean typography, professional branding, vector style, white background"
 
 variations:
-  - title: "Badge Style"
+  - title: 'Badge Style'
     prompt: "Badge-style logo design for '{brand_name}', {industry}, circular badge with {icon_concept}, {color_scheme}, vintage-modern hybrid, clean typography"
-  - title: "Lettermark"
+  - title: 'Lettermark'
     prompt: "Lettermark logo for '{brand_name}', {industry}, stylized {initial} letter, {color_scheme}, geometric modern design, minimal"
-  - title: "Wordmark"
+  - title: 'Wordmark'
     prompt: "Wordmark logo '{brand_name}', {industry}, custom typography, {color_scheme}, modern sans-serif, professional branding"
 
 useCases:
-  - "Startup branding"
-  - "Business rebranding"
-  - "Logo concepts and mockups"
-  - "Social media profile pictures"
-  - "Business cards and stationery"
+  - 'Startup branding'
+  - 'Business rebranding'
+  - 'Logo concepts and mockups'
+  - 'Social media profile pictures'
+  - 'Business cards and stationery'
 
 idealFor:
-  - "Entrepreneurs"
-  - "Small business owners"
-  - "Designers seeking inspiration"
-  - "Marketing agencies"
+  - 'Entrepreneurs'
+  - 'Small business owners'
+  - 'Designers seeking inspiration'
+  - 'Marketing agencies'
 
 tips:
-  - "Ideogram V3 excels at text rendering - use actual brand names"
-  - "Keep it simple - best logos are recognizable at small sizes"
-  - "Test in monochrome first, then add color"
-  - "Use 1:1 ratio for versatility across platforms"
+  - 'Ideogram V3 excels at text rendering - use actual brand names'
+  - 'Keep it simple - best logos are recognizable at small sizes'
+  - 'Test in monochrome first, then add color'
+  - 'Use 1:1 ratio for versatility across platforms'
 
 commonMistakes:
-  - "Too many design elements creating clutter"
-  - "Overly complex color gradients"
+  - 'Too many design elements creating clutter'
+  - 'Overly complex color gradients'
   - "Text that's too small or hard to read"
   - "Trendy styles that won't age well"
 
 doAndDont:
   do:
-    - "Use Ideogram for text-heavy logos"
-    - "Keep design elements balanced"
-    - "Think about scalability"
-    - "Test on different backgrounds"
+    - 'Use Ideogram for text-heavy logos'
+    - 'Keep design elements balanced'
+    - 'Think about scalability'
+    - 'Test on different backgrounds'
   dont:
-    - "Use more than 3 colors"
-    - "Make text too ornate"
-    - "Copy existing brand styles"
-    - "Forget negative space"
+    - 'Use more than 3 colors'
+    - 'Make text too ornate'
+    - 'Copy existing brand styles'
+    - 'Forget negative space'
 
 featured: true
 popular: true
 trending: false
 premium: false
-language: "en"
+language: 'en'
 
 uses: 8934
 likes: 1823
@@ -104,14 +104,14 @@ saves: 1456
 rating: 4.7
 
 relatedTemplates:
-  - "badge-logo-vintage"
-  - "tech-startup-logo"
+  - 'badge-logo-vintage'
+  - 'tech-startup-logo'
 
 seoKeywords:
-  - "ai logo design"
-  - "logo generator"
-  - "business logo"
-  - "brand identity"
+  - 'ai logo design'
+  - 'logo generator'
+  - 'business logo'
+  - 'brand identity'
 
 publishDate: 2025-01-16T00:00:00Z
 lastUpdated: 2025-01-20T00:00:00Z

@@ -17,6 +17,7 @@ apps/presi/
 ## Commands
 
 ### Root Level (from monorepo root)
+
 ```bash
 pnpm presi:dev                   # Run all presi apps
 pnpm dev:presi:mobile            # Start mobile app
@@ -29,6 +30,7 @@ pnpm presi:db:seed               # Seed database with sample data
 ```
 
 ### Mobile App (apps/presi/apps/mobile)
+
 ```bash
 pnpm dev                         # Start Expo dev server
 pnpm ios                         # Run on iOS simulator
@@ -36,6 +38,7 @@ pnpm android                     # Run on Android emulator
 ```
 
 ### Web App (apps/presi/apps/web)
+
 ```bash
 pnpm dev                         # Start dev server (port 5178)
 pnpm build                       # Build for production
@@ -44,6 +47,7 @@ pnpm check                       # Run svelte-check
 ```
 
 ### Backend (apps/presi/apps/backend)
+
 ```bash
 pnpm dev                         # Start with hot reload
 pnpm build                       # Build for production
@@ -63,6 +67,7 @@ pnpm db:seed                     # Seed database
 ## Architecture
 
 ### Core Features
+
 - Create and manage presentation decks
 - Add and edit slides with various content types
 - Apply themes to presentations
@@ -71,27 +76,28 @@ pnpm db:seed                     # Seed database
 
 ### Backend API Endpoints
 
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/api/health` | GET | No | Health check |
-| `/api/decks` | GET | Yes | Get user's decks |
-| `/api/decks` | POST | Yes | Create new deck |
-| `/api/decks/:id` | GET | Yes | Get deck details |
-| `/api/decks/:id` | PUT | Yes | Update deck |
-| `/api/decks/:id` | DELETE | Yes | Delete deck |
-| `/api/decks/:id/slides` | GET | Yes | Get slides for deck |
-| `/api/decks/:id/slides` | POST | Yes | Add slide to deck |
-| `/api/slides/:id` | PUT | Yes | Update slide |
-| `/api/slides/:id` | DELETE | Yes | Delete slide |
-| `/api/slides/reorder` | PUT | Yes | Reorder slides |
-| `/api/share/:code` | GET | No | Get shared deck (public) |
-| `/api/share/deck/:id` | POST | Yes | Create share link |
-| `/api/share/deck/:id/links` | GET | Yes | Get share links for deck |
-| `/api/share/:shareId` | DELETE | Yes | Delete share link |
+| Endpoint                    | Method | Auth | Description              |
+| --------------------------- | ------ | ---- | ------------------------ |
+| `/api/health`               | GET    | No   | Health check             |
+| `/api/decks`                | GET    | Yes  | Get user's decks         |
+| `/api/decks`                | POST   | Yes  | Create new deck          |
+| `/api/decks/:id`            | GET    | Yes  | Get deck details         |
+| `/api/decks/:id`            | PUT    | Yes  | Update deck              |
+| `/api/decks/:id`            | DELETE | Yes  | Delete deck              |
+| `/api/decks/:id/slides`     | GET    | Yes  | Get slides for deck      |
+| `/api/decks/:id/slides`     | POST   | Yes  | Add slide to deck        |
+| `/api/slides/:id`           | PUT    | Yes  | Update slide             |
+| `/api/slides/:id`           | DELETE | Yes  | Delete slide             |
+| `/api/slides/reorder`       | PUT    | Yes  | Reorder slides           |
+| `/api/share/:code`          | GET    | No   | Get shared deck (public) |
+| `/api/share/deck/:id`       | POST   | Yes  | Create share link        |
+| `/api/share/deck/:id/links` | GET    | Yes  | Get share links for deck |
+| `/api/share/:shareId`       | DELETE | Yes  | Delete share link        |
 
 ### Data Models
 
 **Deck** - Presentation deck
+
 - `id` (string) - Unique identifier
 - `userId` (string) - Owner user ID
 - `title` (string) - Deck title
@@ -101,6 +107,7 @@ pnpm db:seed                     # Seed database
 - `createdAt` / `updatedAt` (timestamps)
 
 **Slide** - Individual slide in a deck
+
 - `id` (string) - Unique identifier
 - `deckId` (string) - Parent deck reference
 - `order` (number) - Position in deck
@@ -108,13 +115,16 @@ pnpm db:seed                     # Seed database
 - `createdAt` (timestamp)
 
 **SlideContent** - Content structure
+
 - `type`: 'title' | 'content' | 'image' | 'split'
 - `title`, `subtitle`, `body`, `imageUrl`, `bulletPoints`
 
 **Theme** - Visual theme
+
 - `id`, `name`, `colors`, `fonts`, `isDefault`
 
 **SharedDeck** - Share link for deck
+
 - `id` (string) - Unique identifier
 - `deckId` (string) - Reference to deck
 - `shareCode` (string) - Unique share code (12 chars)
@@ -124,6 +134,7 @@ pnpm db:seed                     # Seed database
 ### Environment Variables
 
 #### Backend (.env)
+
 ```
 NODE_ENV=development
 PORT=3008
@@ -133,12 +144,14 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:8081
 ```
 
 #### Mobile (.env)
+
 ```
 EXPO_PUBLIC_BACKEND_URL=http://localhost:3008
 EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
 ```
 
 #### Web (.env)
+
 ```
 PUBLIC_BACKEND_URL=http://localhost:3008
 PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
@@ -147,14 +160,17 @@ PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
 ## Shared Package
 
 ### @presi/shared
+
 Located at `packages/shared/`
 
 **Types:**
+
 - `Deck`, `Slide`, `SlideContent`
 - `Theme`, `ThemeColors`, `ThemeFonts`
 - `SharedDeck` (for sharing feature)
 
 **DTOs:**
+
 - `CreateDeckDto`, `UpdateDeckDto`
 - `CreateSlideDto`, `UpdateSlideDto`
 - `ReorderSlidesDto`
@@ -186,6 +202,7 @@ The SvelteKit web app provides feature parity with the mobile app:
 - **Settings**: Theme switching (light/dark/system), account info
 
 ### Web App Structure
+
 ```
 src/
 ├── lib/

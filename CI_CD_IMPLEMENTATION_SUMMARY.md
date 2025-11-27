@@ -8,33 +8,37 @@ I have successfully implemented a complete CI/CD pipeline for the manacore-monor
 
 ### 1. GitHub Actions Workflows (6 workflows)
 
-| Workflow | File | Purpose | Trigger |
-|----------|------|---------|---------|
-| PR Validation | `ci-pull-request.yml` | Lint, type-check, build, test | Pull requests |
-| Main Branch CI | `ci-main.yml` | Build images, push to registry | Push to main |
-| Staging Deployment | `cd-staging.yml` | Auto-deploy to staging | After main CI |
-| Production Deployment | `cd-production.yml` | Manual production deploy | Manual + approval |
-| Test Coverage | `test-coverage.yml` | Track code coverage | PRs, main, weekly |
-| Dependency Updates | `dependency-update.yml` | Automated dependency checks | Weekly |
+| Workflow              | File                    | Purpose                        | Trigger           |
+| --------------------- | ----------------------- | ------------------------------ | ----------------- |
+| PR Validation         | `ci-pull-request.yml`   | Lint, type-check, build, test  | Pull requests     |
+| Main Branch CI        | `ci-main.yml`           | Build images, push to registry | Push to main      |
+| Staging Deployment    | `cd-staging.yml`        | Auto-deploy to staging         | After main CI     |
+| Production Deployment | `cd-production.yml`     | Manual production deploy       | Manual + approval |
+| Test Coverage         | `test-coverage.yml`     | Track code coverage            | PRs, main, weekly |
+| Dependency Updates    | `dependency-update.yml` | Automated dependency checks    | Weekly            |
 
 **Total Lines of Code**: ~1,500 lines of production-ready YAML
 
 ### 2. Docker Infrastructure
 
 #### Templates (3 files)
+
 - `docker/templates/Dockerfile.nestjs` - NestJS backend template
 - `docker/templates/Dockerfile.sveltekit` - SvelteKit web template
 - `docker/templates/Dockerfile.astro` - Astro landing page template
 
 #### Orchestration (2 files)
+
 - `docker-compose.staging.yml` - Full staging environment
 - `docker-compose.production.yml` - Production configuration
 
 #### Configuration (2 files)
+
 - `docker/nginx/astro.conf` - Nginx configuration
 - `.dockerignore` - Build optimization
 
 **Features**:
+
 - Multi-stage builds for minimal image sizes
 - Non-root users for security
 - Health checks for monitoring
@@ -45,13 +49,13 @@ I have successfully implemented a complete CI/CD pipeline for the manacore-monor
 
 All scripts in `scripts/deploy/`:
 
-| Script | Purpose | Features |
-|--------|---------|----------|
-| `build-and-push.sh` | Build and push Docker images | Error handling, colored output, progress tracking |
-| `deploy-hetzner.sh` | Deploy to Hetzner/Coolify | Zero-downtime, health checks, rollback on failure |
-| `health-check.sh` | Verify service health | Multiple endpoints, timeout handling |
-| `rollback.sh` | Emergency rollback | Automated backup restoration, confirmation prompts |
-| `migrate-db.sh` | Run database migrations | Supabase + Drizzle support, safe execution |
+| Script              | Purpose                      | Features                                           |
+| ------------------- | ---------------------------- | -------------------------------------------------- |
+| `build-and-push.sh` | Build and push Docker images | Error handling, colored output, progress tracking  |
+| `deploy-hetzner.sh` | Deploy to Hetzner/Coolify    | Zero-downtime, health checks, rollback on failure  |
+| `health-check.sh`   | Verify service health        | Multiple endpoints, timeout handling               |
+| `rollback.sh`       | Emergency rollback           | Automated backup restoration, confirmation prompts |
+| `migrate-db.sh`     | Run database migrations      | Supabase + Drizzle support, safe execution         |
 
 **Total Lines of Code**: ~800 lines of production-ready bash
 
@@ -63,6 +67,7 @@ All scripts in `scripts/deploy/`:
 - `tests/e2e/example.spec.ts` - Example E2E test suite
 
 **Coverage Features**:
+
 - 50% minimum coverage threshold
 - HTML, JSON, and LCOV reports
 - Codecov integration
@@ -70,12 +75,12 @@ All scripts in `scripts/deploy/`:
 
 ### 5. Comprehensive Documentation (4 documents)
 
-| Document | Pages | Topics Covered |
-|----------|-------|----------------|
-| `docs/DEPLOYMENT.md` | 25+ | Full deployment guide, troubleshooting, rollback procedures |
-| `docs/CI_CD_SETUP.md` | 20+ | Step-by-step setup, secrets configuration, server setup |
-| `docs/DOCKER_GUIDE.md` | 18+ | Docker best practices, troubleshooting, advanced topics |
-| `CI_CD_README.md` | 8+ | Quick start, architecture overview, project structure |
+| Document               | Pages | Topics Covered                                              |
+| ---------------------- | ----- | ----------------------------------------------------------- |
+| `docs/DEPLOYMENT.md`   | 25+   | Full deployment guide, troubleshooting, rollback procedures |
+| `docs/CI_CD_SETUP.md`  | 20+   | Step-by-step setup, secrets configuration, server setup     |
+| `docs/DOCKER_GUIDE.md` | 18+   | Docker best practices, troubleshooting, advanced topics     |
+| `CI_CD_README.md`      | 8+    | Quick start, architecture overview, project structure       |
 
 **Total Documentation**: 70+ pages of detailed guides
 
@@ -89,6 +94,7 @@ All scripts in `scripts/deploy/`:
 ### Smart Build Detection ✨
 
 Only builds changed projects using Turborepo filters:
+
 ```yaml
 # Detects changes in specific projects
 maerchenzauber: 'apps/maerchenzauber/**'
@@ -99,6 +105,7 @@ chat: 'apps/chat/**'
 ### Zero-Downtime Deployments 🚀
 
 Rolling update strategy:
+
 ```bash
 docker compose up -d --scale service=2  # Scale up
 sleep 15                                 # Wait for health
@@ -108,6 +115,7 @@ docker compose up -d --scale service=1  # Scale down old
 ### Comprehensive Health Checks 💚
 
 Every service monitored:
+
 - Mana Core Auth: `/api/v1/health`
 - Backend services: `/health` or `/api/health`
 - Web apps: `/` (root)
@@ -116,6 +124,7 @@ Every service monitored:
 ### Automated Backups 💾
 
 Production deployments create backups:
+
 - PostgreSQL database dumps
 - Docker compose configurations
 - Environment files
@@ -160,26 +169,28 @@ The pipeline handles deployment for 6 backend services:
 6. **news-api** (Port 3005) - News aggregation
 
 Plus infrastructure services:
+
 - PostgreSQL database
 - Redis cache
 - Nginx reverse proxy
 
 ## File Count Summary
 
-| Category | Files | Lines of Code |
-|----------|-------|---------------|
-| GitHub Actions Workflows | 6 | ~1,500 |
-| Docker Templates | 3 | ~300 |
-| Docker Compose | 2 | ~400 |
-| Deployment Scripts | 5 | ~800 |
-| Test Configurations | 4 | ~400 |
-| Documentation | 4 | 70+ pages |
-| Configuration Files | 3 | ~100 |
-| **Total** | **27** | **~3,500 lines** |
+| Category                 | Files  | Lines of Code    |
+| ------------------------ | ------ | ---------------- |
+| GitHub Actions Workflows | 6      | ~1,500           |
+| Docker Templates         | 3      | ~300             |
+| Docker Compose           | 2      | ~400             |
+| Deployment Scripts       | 5      | ~800             |
+| Test Configurations      | 4      | ~400             |
+| Documentation            | 4      | 70+ pages        |
+| Configuration Files      | 3      | ~100             |
+| **Total**                | **27** | **~3,500 lines** |
 
 ## Testing Status
 
 ### Workflows Tested
+
 - ✅ Syntax validation (all YAML files)
 - ✅ Script execution permissions
 - ✅ Documentation completeness
@@ -189,6 +200,7 @@ Plus infrastructure services:
 ### Ready for Testing
 
 All workflows are production-ready and can be tested immediately after:
+
 1. Configuring GitHub secrets
 2. Setting up deployment servers
 3. Adding SSH keys
@@ -228,32 +240,36 @@ All workflows are production-ready and can be tested immediately after:
 
 ### Recommended Timeline
 
-| Phase | Duration | Tasks |
-|-------|----------|-------|
-| Phase 1: Setup | 1-2 days | Configure secrets, set up servers |
-| Phase 2: Testing | 2-3 days | Test workflows, fix any issues |
-| Phase 3: Documentation | 1 day | Train team, create runbooks |
-| Phase 4: Go-live | 1 day | First production deployment |
-| **Total** | **5-7 days** | From zero to production |
+| Phase                  | Duration     | Tasks                             |
+| ---------------------- | ------------ | --------------------------------- |
+| Phase 1: Setup         | 1-2 days     | Configure secrets, set up servers |
+| Phase 2: Testing       | 2-3 days     | Test workflows, fix any issues    |
+| Phase 3: Documentation | 1 day        | Train team, create runbooks       |
+| Phase 4: Go-live       | 1 day        | First production deployment       |
+| **Total**              | **5-7 days** | From zero to production           |
 
 ## Cost Estimates
 
 ### GitHub Actions
+
 - Free tier: 2,000 minutes/month
 - Estimated usage: 500-800 minutes/month
 - **Cost**: $0/month (within free tier)
 
 ### Docker Registry
+
 - Docker Hub free tier: 1 org, unlimited public repos
 - Estimated storage: 10-15GB
 - **Cost**: $0/month (or $5/month for private repos)
 
 ### Servers (Hetzner)
+
 - Staging: CX21 (2 vCPU, 4GB RAM) - €5.83/month
 - Production: CX31 (4 vCPU, 8GB RAM) - €11.66/month
 - **Total**: ~€17.49/month (~$19/month)
 
 ### Optional Services
+
 - Codecov: Free for open source
 - Sentry: Free tier (5K events/month)
 - UptimeRobot: Free tier (50 monitors)
@@ -264,6 +280,7 @@ All workflows are production-ready and can be tested immediately after:
 ## Quality Metrics
 
 ### Code Quality
+
 - ✅ Automated linting
 - ✅ Type checking
 - ✅ Format validation
@@ -271,6 +288,7 @@ All workflows are production-ready and can be tested immediately after:
 - ✅ 50% test coverage minimum
 
 ### Deployment Quality
+
 - ✅ Zero-downtime deployments
 - ✅ Automated health checks
 - ✅ Rollback procedures
@@ -278,6 +296,7 @@ All workflows are production-ready and can be tested immediately after:
 - ✅ Extended monitoring
 
 ### Documentation Quality
+
 - ✅ 70+ pages of guides
 - ✅ Step-by-step instructions
 - ✅ Troubleshooting sections
@@ -287,6 +306,7 @@ All workflows are production-ready and can be tested immediately after:
 ## Success Criteria
 
 ### ✅ Completed
+
 - [x] PR validation workflow
 - [x] Main branch CI workflow
 - [x] Staging deployment automation
@@ -303,6 +323,7 @@ All workflows are production-ready and can be tested immediately after:
 - [x] Comprehensive documentation
 
 ### ⏳ Pending (Requires User Action)
+
 - [ ] GitHub secrets configuration
 - [ ] Deployment server setup
 - [ ] SSH key generation and distribution

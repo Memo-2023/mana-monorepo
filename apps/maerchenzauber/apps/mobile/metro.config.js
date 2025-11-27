@@ -12,13 +12,11 @@ const config = getDefaultConfig(projectRoot);
 config.resolver.sourceExts.push('cjs');
 
 // Ensure Metro can resolve packages from node_modules
-config.resolver.nodeModulesPaths = [
-  path.resolve(projectRoot, 'node_modules'),
-];
+config.resolver.nodeModulesPaths = [path.resolve(projectRoot, 'node_modules')];
 
 // Add support for shared types
 config.resolver.extraNodeModules = {
-  '@storyteller/shared-types': path.resolve(projectRoot, 'src/shared-types'),
+	'@storyteller/shared-types': path.resolve(projectRoot, 'src/shared-types'),
 };
 
 module.exports = config;

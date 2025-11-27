@@ -13,247 +13,266 @@ import PricingSection from '@manacore/shared-landing-ui/sections/PricingSection.
 
 // Feature data
 const features = [
-  {
-    icon: '📰',
-    title: 'Feed',
-    description: 'Schnelle News-Updates im Infinite-Scroll Format. Bleib auf dem Laufenden mit kurzen, prägnanten Nachrichten.'
-  },
-  {
-    icon: '📝',
-    title: 'Zusammenfassungen',
-    description: '4 tägliche Zusammenfassungen (Morgen, Mittag, Abend, Nacht) - perfekt für einen schnellen Überblick.'
-  },
-  {
-    icon: '📖',
-    title: 'In-Depth Artikel',
-    description: 'Ausführliche Analysen (5-15 Min. Lesezeit) für tiefes Verständnis komplexer Themen.'
-  },
-  {
-    icon: '🔖',
-    title: 'Artikel speichern',
-    description: 'Speichere interessante Artikel mit der Browser-Extension und lese sie später in der App.'
-  },
-  {
-    icon: '🎯',
-    title: 'Personalisierte Kategorien',
-    description: 'Wähle deine Interessengebiete und erhalte maßgeschneiderte Nachrichten-Empfehlungen.'
-  },
-  {
-    icon: '🔄',
-    title: 'Cross-Platform Sync',
-    description: 'Deine Artikel, Lesefortschritt und Einstellungen werden auf allen Geräten synchronisiert.'
-  }
+	{
+		icon: '📰',
+		title: 'Feed',
+		description:
+			'Schnelle News-Updates im Infinite-Scroll Format. Bleib auf dem Laufenden mit kurzen, prägnanten Nachrichten.',
+	},
+	{
+		icon: '📝',
+		title: 'Zusammenfassungen',
+		description:
+			'4 tägliche Zusammenfassungen (Morgen, Mittag, Abend, Nacht) - perfekt für einen schnellen Überblick.',
+	},
+	{
+		icon: '📖',
+		title: 'In-Depth Artikel',
+		description:
+			'Ausführliche Analysen (5-15 Min. Lesezeit) für tiefes Verständnis komplexer Themen.',
+	},
+	{
+		icon: '🔖',
+		title: 'Artikel speichern',
+		description:
+			'Speichere interessante Artikel mit der Browser-Extension und lese sie später in der App.',
+	},
+	{
+		icon: '🎯',
+		title: 'Personalisierte Kategorien',
+		description:
+			'Wähle deine Interessengebiete und erhalte maßgeschneiderte Nachrichten-Empfehlungen.',
+	},
+	{
+		icon: '🔄',
+		title: 'Cross-Platform Sync',
+		description:
+			'Deine Artikel, Lesefortschritt und Einstellungen werden auf allen Geräten synchronisiert.',
+	},
 ];
 
 // Steps data
 const steps = [
-  {
-    number: '1',
-    title: 'App herunterladen',
-    description: 'Lade News Hub kostenlos im App Store oder Google Play Store herunter.',
-    image: '/screenshots/download.png'
-  },
-  {
-    number: '2',
-    title: 'Kategorien wählen',
-    description: 'Wähle deine Interessengebiete für personalisierte Nachrichten.',
-    image: '/screenshots/categories.png'
-  },
-  {
-    number: '3',
-    title: 'Informiert bleiben',
-    description: 'Erhalte täglich kuratierte News im Feed, Zusammenfassungen oder In-Depth Artikeln.',
-    image: '/screenshots/feed.png'
-  }
+	{
+		number: '1',
+		title: 'App herunterladen',
+		description: 'Lade News Hub kostenlos im App Store oder Google Play Store herunter.',
+		image: '/screenshots/download.png',
+	},
+	{
+		number: '2',
+		title: 'Kategorien wählen',
+		description: 'Wähle deine Interessengebiete für personalisierte Nachrichten.',
+		image: '/screenshots/categories.png',
+	},
+	{
+		number: '3',
+		title: 'Informiert bleiben',
+		description:
+			'Erhalte täglich kuratierte News im Feed, Zusammenfassungen oder In-Depth Artikeln.',
+		image: '/screenshots/feed.png',
+	},
 ];
 
 // Pricing data
 const pricingPlans = [
-  {
-    name: 'Free',
-    price: '0',
-    period: '/Monat',
-    description: 'Perfekt zum Ausprobieren',
-    features: [
-      { text: 'Feed mit allen News', included: true },
-      { text: '2 Zusammenfassungen/Tag', included: true },
-      { text: '5 Artikel speichern', included: true },
-      { text: 'Basis-Kategorien', included: true },
-      { text: 'In-Depth Artikel', included: false },
-      { text: 'Browser Extension', included: false }
-    ],
-    cta: {
-      text: 'Kostenlos starten',
-      href: '#download'
-    }
-  },
-  {
-    name: 'Pro',
-    price: '4,99',
-    period: '/Monat',
-    description: 'Für Nachrichten-Enthusiasten',
-    features: [
-      { text: 'Unbegrenzter Feed', included: true },
-      { text: 'Alle 4 Zusammenfassungen', included: true },
-      { text: 'In-Depth Artikel', included: true },
-      { text: 'Unbegrenzt speichern', included: true },
-      { text: 'Browser Extension', included: true },
-      { text: 'Alle Kategorien', included: true }
-    ],
-    cta: {
-      text: 'Pro werden',
-      href: '#download'
-    },
-    highlighted: true,
-    badge: 'Beliebt'
-  },
-  {
-    name: 'Team',
-    price: '12,99',
-    period: '/Monat',
-    description: 'Für Teams und Unternehmen',
-    features: [
-      { text: 'Alles aus Pro', included: true },
-      { text: 'Team-Verwaltung', included: true },
-      { text: 'Geteilte Sammlungen', included: true },
-      { text: 'Custom Kategorien', included: true },
-      { text: 'API-Zugang', included: true },
-      { text: 'Prioritäts-Support', included: true }
-    ],
-    cta: {
-      text: 'Team starten',
-      href: '#download'
-    }
-  }
+	{
+		name: 'Free',
+		price: '0',
+		period: '/Monat',
+		description: 'Perfekt zum Ausprobieren',
+		features: [
+			{ text: 'Feed mit allen News', included: true },
+			{ text: '2 Zusammenfassungen/Tag', included: true },
+			{ text: '5 Artikel speichern', included: true },
+			{ text: 'Basis-Kategorien', included: true },
+			{ text: 'In-Depth Artikel', included: false },
+			{ text: 'Browser Extension', included: false },
+		],
+		cta: {
+			text: 'Kostenlos starten',
+			href: '#download',
+		},
+	},
+	{
+		name: 'Pro',
+		price: '4,99',
+		period: '/Monat',
+		description: 'Für Nachrichten-Enthusiasten',
+		features: [
+			{ text: 'Unbegrenzter Feed', included: true },
+			{ text: 'Alle 4 Zusammenfassungen', included: true },
+			{ text: 'In-Depth Artikel', included: true },
+			{ text: 'Unbegrenzt speichern', included: true },
+			{ text: 'Browser Extension', included: true },
+			{ text: 'Alle Kategorien', included: true },
+		],
+		cta: {
+			text: 'Pro werden',
+			href: '#download',
+		},
+		highlighted: true,
+		badge: 'Beliebt',
+	},
+	{
+		name: 'Team',
+		price: '12,99',
+		period: '/Monat',
+		description: 'Für Teams und Unternehmen',
+		features: [
+			{ text: 'Alles aus Pro', included: true },
+			{ text: 'Team-Verwaltung', included: true },
+			{ text: 'Geteilte Sammlungen', included: true },
+			{ text: 'Custom Kategorien', included: true },
+			{ text: 'API-Zugang', included: true },
+			{ text: 'Prioritäts-Support', included: true },
+		],
+		cta: {
+			text: 'Team starten',
+			href: '#download',
+		},
+	},
 ];
 
 // FAQ data
 const faqs = [
-  {
-    question: 'Was macht News Hub anders als andere News-Apps?',
-    answer: 'News Hub nutzt KI um Nachrichten zu kuratieren und in drei Formaten anzubieten: schnelle Feed-Updates, tägliche Zusammenfassungen und ausführliche Analysen. Du entscheidest, wie tief du in ein Thema eintauchen möchtest.'
-  },
-  {
-    question: 'Wie funktionieren die täglichen Zusammenfassungen?',
-    answer: 'Du erhältst 4 Zusammenfassungen pro Tag: Morgen (6 Uhr), Mittag (12 Uhr), Abend (18 Uhr) und Nacht (22 Uhr). Jede Zusammenfassung fasst die wichtigsten Ereignisse der letzten Stunden zusammen.'
-  },
-  {
-    question: 'Kann ich Artikel von anderen Webseiten speichern?',
-    answer: 'Ja! Mit der Browser Extension (Pro) kannst du jeden Artikel von jeder Webseite mit einem Klick speichern. Der Artikel wird automatisch für die App optimiert und ist offline verfügbar.'
-  },
-  {
-    question: 'Sind meine Daten sicher?',
-    answer: 'Absolut. Wir speichern nur das Nötigste und verkaufen keine Nutzerdaten. Die App ist vollständig DSGVO-konform und du kannst deine Daten jederzeit exportieren oder löschen.'
-  },
-  {
-    question: 'Funktioniert News Hub offline?',
-    answer: 'Ja! Bereits geladene Artikel und Zusammenfassungen sind offline verfügbar. Neue Inhalte werden synchronisiert, sobald du wieder online bist.'
-  },
-  {
-    question: 'Kann ich mein Abo jederzeit kündigen?',
-    answer: 'Ja, du kannst dein Pro- oder Team-Abo jederzeit kündigen. Nach der Kündigung hast du noch bis zum Ende des Abrechnungszeitraums Zugang zu allen Premium-Features.'
-  }
+	{
+		question: 'Was macht News Hub anders als andere News-Apps?',
+		answer:
+			'News Hub nutzt KI um Nachrichten zu kuratieren und in drei Formaten anzubieten: schnelle Feed-Updates, tägliche Zusammenfassungen und ausführliche Analysen. Du entscheidest, wie tief du in ein Thema eintauchen möchtest.',
+	},
+	{
+		question: 'Wie funktionieren die täglichen Zusammenfassungen?',
+		answer:
+			'Du erhältst 4 Zusammenfassungen pro Tag: Morgen (6 Uhr), Mittag (12 Uhr), Abend (18 Uhr) und Nacht (22 Uhr). Jede Zusammenfassung fasst die wichtigsten Ereignisse der letzten Stunden zusammen.',
+	},
+	{
+		question: 'Kann ich Artikel von anderen Webseiten speichern?',
+		answer:
+			'Ja! Mit der Browser Extension (Pro) kannst du jeden Artikel von jeder Webseite mit einem Klick speichern. Der Artikel wird automatisch für die App optimiert und ist offline verfügbar.',
+	},
+	{
+		question: 'Sind meine Daten sicher?',
+		answer:
+			'Absolut. Wir speichern nur das Nötigste und verkaufen keine Nutzerdaten. Die App ist vollständig DSGVO-konform und du kannst deine Daten jederzeit exportieren oder löschen.',
+	},
+	{
+		question: 'Funktioniert News Hub offline?',
+		answer:
+			'Ja! Bereits geladene Artikel und Zusammenfassungen sind offline verfügbar. Neue Inhalte werden synchronisiert, sobald du wieder online bist.',
+	},
+	{
+		question: 'Kann ich mein Abo jederzeit kündigen?',
+		answer:
+			'Ja, du kannst dein Pro- oder Team-Abo jederzeit kündigen. Nach der Kündigung hast du noch bis zum Ende des Abrechnungszeitraums Zugang zu allen Premium-Features.',
+	},
 ];
 ---
 
 <Layout title="News Hub - KI-kuratierte Nachrichten">
-  <Navigation />
+	<Navigation />
 
-  <main class="pt-16">
-    <HeroSection
-      title="Nachrichten, die zu dir passen"
-      subtitle="News Hub kuratiert Nachrichten mit KI und liefert sie in drei Formaten: schnelle Updates, tägliche Zusammenfassungen und tiefgehende Analysen. Du entscheidest, wie informiert du sein willst."
-      variant="default"
-      primaryCta={{
-        text: 'Jetzt kostenlos starten',
-        href: '#download'
-      }}
-      secondaryCta={{
-        text: 'Features entdecken',
-        href: '#features',
-        variant: 'secondary'
-      }}
-      trustBadges={[
-        { icon: '✓', text: 'Kostenlos testen' },
-        { icon: '🔒', text: 'DSGVO-konform' },
-        { icon: '📱', text: 'iOS, Android & Web' }
-      ]}
-    />
+	<main class="pt-16">
+		<HeroSection
+			title="Nachrichten, die zu dir passen"
+			subtitle="News Hub kuratiert Nachrichten mit KI und liefert sie in drei Formaten: schnelle Updates, tägliche Zusammenfassungen und tiefgehende Analysen. Du entscheidest, wie informiert du sein willst."
+			variant="default"
+			primaryCta={{
+				text: 'Jetzt kostenlos starten',
+				href: '#download',
+			}}
+			secondaryCta={{
+				text: 'Features entdecken',
+				href: '#features',
+				variant: 'secondary',
+			}}
+			trustBadges={[
+				{ icon: '✓', text: 'Kostenlos testen' },
+				{ icon: '🔒', text: 'DSGVO-konform' },
+				{ icon: '📱', text: 'iOS, Android & Web' },
+			]}
+		/>
 
-    <FeatureSection
-      id="features"
-      title="Drei Wege, informiert zu bleiben"
-      subtitle="Wähle das Format, das zu deinem Alltag passt - von schnellen Updates bis zu ausführlichen Analysen."
-      features={features}
-      columns={3}
-      variant="cards"
-      class="bg-[var(--color-background-card)]"
-    />
+		<FeatureSection
+			id="features"
+			title="Drei Wege, informiert zu bleiben"
+			subtitle="Wähle das Format, das zu deinem Alltag passt - von schnellen Updates bis zu ausführlichen Analysen."
+			features={features}
+			columns={3}
+			variant="cards"
+			class="bg-[var(--color-background-card)]"
+		/>
 
-    <StepsSection
-      id="how-it-works"
-      title="In 3 Schritten loslegen"
-      subtitle="So einfach startest du mit News Hub"
-      steps={steps}
-      showImages={false}
-      alternateLayout={true}
-    />
+		<StepsSection
+			id="how-it-works"
+			title="In 3 Schritten loslegen"
+			subtitle="So einfach startest du mit News Hub"
+			steps={steps}
+			showImages={false}
+			alternateLayout={true}
+		/>
 
-    <PricingSection
-      id="pricing"
-      title="Wähle deinen Plan"
-      subtitle="Starte kostenlos und upgrade, wenn du bereit bist"
-      plans={pricingPlans}
-      class="bg-[var(--color-background-card)]"
-    />
+		<PricingSection
+			id="pricing"
+			title="Wähle deinen Plan"
+			subtitle="Starte kostenlos und upgrade, wenn du bereit bist"
+			plans={pricingPlans}
+			class="bg-[var(--color-background-card)]"
+		/>
 
-    <FAQSection
-      id="faq"
-      title="Häufig gestellte Fragen"
-      subtitle="Alles was du über News Hub wissen musst"
-      faqs={faqs}
-    />
+		<FAQSection
+			id="faq"
+			title="Häufig gestellte Fragen"
+			subtitle="Alles was du über News Hub wissen musst"
+			faqs={faqs}
+		/>
 
-    <CTASection
-      id="download"
-      title="Bereit für bessere Nachrichten?"
-      subtitle="Lade News Hub jetzt herunter und erlebe Nachrichten, die wirklich zu dir passen. Kostenlos und ohne Kreditkarte."
-      primaryCta={{ text: 'App herunterladen', href: '#' }}
-      variant="highlighted"
-    >
-      <!-- App Store Buttons -->
-      <div class="flex flex-wrap items-center justify-center gap-4 mt-8">
-        <a href="#" class="inline-block hover:opacity-80 transition-opacity">
-          <img src="/app-store-badge.svg" alt="Download im App Store" class="h-12" />
-        </a>
-        <a href="#" class="inline-block hover:opacity-80 transition-opacity">
-          <img src="/google-play-badge.svg" alt="Jetzt bei Google Play" class="h-12" />
-        </a>
-      </div>
+		<CTASection
+			id="download"
+			title="Bereit für bessere Nachrichten?"
+			subtitle="Lade News Hub jetzt herunter und erlebe Nachrichten, die wirklich zu dir passen. Kostenlos und ohne Kreditkarte."
+			primaryCta={{ text: 'App herunterladen', href: '#' }}
+			variant="highlighted"
+		>
+			<!-- App Store Buttons -->
+			<div class="flex flex-wrap items-center justify-center gap-4 mt-8">
+				<a href="#" class="inline-block hover:opacity-80 transition-opacity">
+					<img src="/app-store-badge.svg" alt="Download im App Store" class="h-12" />
+				</a>
+				<a href="#" class="inline-block hover:opacity-80 transition-opacity">
+					<img src="/google-play-badge.svg" alt="Jetzt bei Google Play" class="h-12" />
+				</a>
+			</div>
 
-      <!-- Trust Indicators -->
-      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8">
-        <div class="flex items-center gap-2">
-          <svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-          </svg>
-          <span class="text-[var(--color-text-secondary)] text-sm">100% Kostenlos starten</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
-          </svg>
-          <span class="text-[var(--color-text-secondary)] text-sm">DSGVO-konform</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"></path>
-          </svg>
-          <span class="text-[var(--color-text-secondary)] text-sm">Keine Kreditkarte nötig</span>
-        </div>
-      </div>
-    </CTASection>
-  </main>
+			<!-- Trust Indicators -->
+			<div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8">
+				<div class="flex items-center gap-2">
+					<svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
+						<path
+							fill-rule="evenodd"
+							d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+							clip-rule="evenodd"></path>
+					</svg>
+					<span class="text-[var(--color-text-secondary)] text-sm">100% Kostenlos starten</span>
+				</div>
+				<div class="flex items-center gap-2">
+					<svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
+						<path
+							fill-rule="evenodd"
+							d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+							clip-rule="evenodd"></path>
+					</svg>
+					<span class="text-[var(--color-text-secondary)] text-sm">DSGVO-konform</span>
+				</div>
+				<div class="flex items-center gap-2">
+					<svg class="w-5 h-5 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
+						<path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"></path>
+					</svg>
+					<span class="text-[var(--color-text-secondary)] text-sm">Keine Kreditkarte nötig</span>
+				</div>
+			</div>
+		</CTASection>
+	</main>
 
-  <Footer />
+	<Footer />
 </Layout>

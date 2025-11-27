@@ -48,29 +48,32 @@ I've created a complete npm package structure for a reusable Mana Core authentic
 ## What's Configurable
 
 ### 1. **Theme Configuration** (ManaAuthTheme)
-   - Colors (primary, secondary, buttons, inputs, etc.)
-   - Fonts (regular, bold, header)
-   - Spacing (xs, sm, md, lg, xl)
-   - Border radius (sm, md, lg, xl)
-   - Background image
-   - Blur intensity
+
+- Colors (primary, secondary, buttons, inputs, etc.)
+- Fonts (regular, bold, header)
+- Spacing (xs, sm, md, lg, xl)
+- Border radius (sm, md, lg, xl)
+- Background image
+- Blur intensity
 
 ### 2. **Text/Wording Configuration** (ManaAuthText)
-   - App branding (name, icon)
-   - All button labels
-   - All placeholder text
-   - All validation messages
-   - All error messages
-   - Legal text
-   - Cross-app promotion content
+
+- App branding (name, icon)
+- All button labels
+- All placeholder text
+- All validation messages
+- All error messages
+- Legal text
+- Cross-app promotion content
 
 ### 3. **Environment Configuration** (ManaAuthEnvironment)
-   - Backend URL (required)
-   - OAuth credentials (Google, Apple)
-   - Feature flags (enable/disable auth methods)
-   - Analytics settings
-   - Storage keys
-   - Dev mode settings
+
+- Backend URL (required)
+- OAuth credentials (Google, Apple)
+- Feature flags (enable/disable auth methods)
+- Analytics settings
+- Storage keys
+- Dev mode settings
 
 ## How to Complete the Package
 
@@ -128,12 +131,14 @@ npm link @mana/auth-mobile
 ## Usage Example (Storyteller)
 
 ### Install
+
 ```bash
 cd mobile
 npm install ../../../@mana-auth-mobile
 ```
 
-### Configure (app/_layout.tsx)
+### Configure (app/\_layout.tsx)
+
 ```typescript
 import { ManaAuthConfigProvider, ManaAuthProvider } from '@mana/auth-mobile';
 
@@ -160,6 +165,7 @@ import { ManaAuthConfigProvider, ManaAuthProvider } from '@mana/auth-mobile';
 ```
 
 ### Use (app/login.tsx)
+
 ```typescript
 import { ManaLoginScreen } from '@mana/auth-mobile';
 
@@ -169,6 +175,7 @@ export default function LoginScreen() {
 ```
 
 ### Use (any protected screen)
+
 ```typescript
 import { useManaAuth } from '@mana/auth-mobile';
 
@@ -201,6 +208,7 @@ function MyScreen() {
 ## Files Created vs. Files to Copy
 
 ### ✅ Created (Infrastructure)
+
 - Package configuration (package.json, tsconfig.json)
 - Type definitions (types/index.ts, config/types.ts)
 - Configuration system (defaults.ts, ManaAuthConfigProvider.tsx)
@@ -208,6 +216,7 @@ function MyScreen() {
 - Documentation (README.md, IMPLEMENTATION_GUIDE.md)
 
 ### ⏳ To Copy (Business Logic)
+
 - authService.ts (from mobile/src/services/)
 - tokenManager.ts (from mobile/src/services/)
 - ManaLoginScreen.tsx (from mobile/app/login.tsx)

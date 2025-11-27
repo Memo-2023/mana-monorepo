@@ -36,9 +36,7 @@ const categoryIcons: Record<string, string> = {
 
 	<!-- Category Filters -->
 	<div class="mb-6">
-		<div class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-			📂 Categories
-		</div>
+		<div class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">📂 Categories</div>
 		<div class="flex flex-wrap gap-2">
 			<button
 				data-filter="all"
@@ -67,7 +65,7 @@ const categoryIcons: Record<string, string> = {
 			</label>
 			<select
 				id="sort"
-				class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:w-auto"
+				class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 sm:w-auto dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 			>
 				<option value="likes">Most Liked</option>
 				<option value="views">Most Viewed</option>
@@ -200,13 +198,25 @@ const categoryIcons: Record<string, string> = {
 			viewToggles.forEach((toggle) => toggle?.classList.remove('active'));
 			gridView.classList.add('active');
 			galleryGrid?.classList.remove('list-view');
-			galleryGrid?.classList.add('grid', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3', 'xl:grid-cols-4');
+			galleryGrid?.classList.add(
+				'grid',
+				'grid-cols-1',
+				'sm:grid-cols-2',
+				'lg:grid-cols-3',
+				'xl:grid-cols-4'
+			);
 		});
 
 		listView?.addEventListener('click', () => {
 			viewToggles.forEach((toggle) => toggle?.classList.remove('active'));
 			listView.classList.add('active');
-			galleryGrid?.classList.remove('grid', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3', 'xl:grid-cols-4');
+			galleryGrid?.classList.remove(
+				'grid',
+				'grid-cols-1',
+				'sm:grid-cols-2',
+				'lg:grid-cols-3',
+				'xl:grid-cols-4'
+			);
 			galleryGrid?.classList.add('list-view');
 		});
 	});

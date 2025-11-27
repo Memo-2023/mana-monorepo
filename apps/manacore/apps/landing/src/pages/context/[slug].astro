@@ -12,11 +12,11 @@ import { getCollection, getEntry } from 'astro:content';
 import { Icon } from 'astro-icon/components';
 
 export async function getStaticPaths() {
-  const contextPages = await getCollection('context');
-  return contextPages.map((page) => ({
-    params: { slug: page.slug },
-    props: { page },
-  }));
+	const contextPages = await getCollection('context');
+	return contextPages.map((page) => ({
+		params: { slug: page.slug },
+		props: { page },
+	}));
 }
 
 const { page } = Astro.props;
@@ -25,47 +25,58 @@ const { Content } = await page.render();
 // Get other context pages for navigation
 const allPages = await getCollection('context');
 const otherPages = allPages
-  .filter(p => p.slug !== page.slug)
-  .sort((a, b) => a.data.order - b.data.order);
+	.filter((p) => p.slug !== page.slug)
+	.sort((a, b) => a.data.order - b.data.order);
 ---
 
 <Layout title={`${page.data.title} - Mana Kontext`}>
-  <Navbar />
-  
-  <Section spacing="large" class="pt-24 pb-8">
-    <Container>
-      <div class="max-w-4xl mx-auto">
-        <Button href="/context" variant="ghost" size="small" class="mb-6">
-          <Icon name="mdi:arrow-left" class="w-4 h-4 mr-2" />
-          Zurück zur Übersicht
-        </Button>
-        
-        <div class="mb-8">
-          {page.data.icon && (
-            <div class="w-16 h-16 bg-mana-blue/10 rounded-xl flex items-center justify-center mb-6">
-              <Icon name={page.data.icon} class="w-8 h-8 text-mana-blue" />
-            </div>
-          )}
-          <Heading as="h1" size="1" class="mb-4">{page.data.title}</Heading>
-          <Text size="xl" color="muted" class="mb-6">{page.data.description}</Text>
-          
-          <div class="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
-            {page.data.publishedAt && (
-              <div class="flex items-center gap-2">
-                <Icon name="mdi:calendar" class="w-4 h-4" />
-                <span>Veröffentlicht: {new Date(page.data.publishedAt).toLocaleDateString('de-DE')}</span>
-              </div>
-            )}
-            {page.data.updatedAt && (
-              <div class="flex items-center gap-2">
-                <Icon name="mdi:update" class="w-4 h-4" />
-                <span>Aktualisiert: {new Date(page.data.updatedAt).toLocaleDateString('de-DE')}</span>
-              </div>
-            )}
-          </div>
-        </div>
+	<Navbar />
 
-        <div class="prose prose-lg dark:prose-invert max-w-none
+	<Section spacing="large" class="pt-24 pb-8">
+		<Container>
+			<div class="max-w-4xl mx-auto">
+				<Button href="/context" variant="ghost" size="small" class="mb-6">
+					<Icon name="mdi:arrow-left" class="w-4 h-4 mr-2" />
+					Zurück zur Übersicht
+				</Button>
+
+				<div class="mb-8">
+					{
+						page.data.icon && (
+							<div class="w-16 h-16 bg-mana-blue/10 rounded-xl flex items-center justify-center mb-6">
+								<Icon name={page.data.icon} class="w-8 h-8 text-mana-blue" />
+							</div>
+						)
+					}
+					<Heading as="h1" size="1" class="mb-4">{page.data.title}</Heading>
+					<Text size="xl" color="muted" class="mb-6">{page.data.description}</Text>
+
+					<div class="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+						{
+							page.data.publishedAt && (
+								<div class="flex items-center gap-2">
+									<Icon name="mdi:calendar" class="w-4 h-4" />
+									<span>
+										Veröffentlicht: {new Date(page.data.publishedAt).toLocaleDateString('de-DE')}
+									</span>
+								</div>
+							)
+						}
+						{
+							page.data.updatedAt && (
+								<div class="flex items-center gap-2">
+									<Icon name="mdi:update" class="w-4 h-4" />
+									<span>
+										Aktualisiert: {new Date(page.data.updatedAt).toLocaleDateString('de-DE')}
+									</span>
+								</div>
+							)
+						}
+					</div>
+				</div>
+
+				<div
+					class="prose prose-lg dark:prose-invert max-w-none
           prose-headings:text-gray-900 dark:prose-headings:text-gray-100
           prose-h1:text-4xl prose-h1:font-bold prose-h1:mb-6
           prose-h2:text-3xl prose-h2:font-semibold prose-h2:mt-8 prose-h2:mb-4
@@ -78,53 +89,69 @@ const otherPages = allPages
           prose-li:text-gray-600 dark:prose-li:text-gray-300 prose-li:mb-2
           prose-blockquote:border-l-4 prose-blockquote:border-mana-blue prose-blockquote:pl-4 prose-blockquote:italic
           prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
-          prose-pre:bg-gray-900 prose-pre:text-gray-100">
-          <Content />
-        </div>
+          prose-pre:bg-gray-900 prose-pre:text-gray-100"
+				>
+					<Content />
+				</div>
 
-        {otherPages.length > 0 && (
-          <div class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
-            <Heading as="h3" size="4" class="mb-6">Weitere Artikel</Heading>
-            <div class="grid gap-4">
-              {otherPages.map((otherPage) => (
-                <Card variant="bordered" padding="medium" class="hover:border-mana-blue transition-colors">
-                  <a href={`/context/${otherPage.slug}`} class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      {otherPage.data.icon && (
-                        <Icon name={otherPage.data.icon} class="w-5 h-5 text-mana-blue" />
-                      )}
-                      <div>
-                        <Text weight="semibold">{otherPage.data.title}</Text>
-                        <Text size="sm" color="muted">{otherPage.data.description}</Text>
-                      </div>
-                    </div>
-                    <Icon name="mdi:arrow-right" class="w-5 h-5 text-gray-400" />
-                  </a>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
+				{
+					otherPages.length > 0 && (
+						<div class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
+							<Heading as="h3" size="4" class="mb-6">
+								Weitere Artikel
+							</Heading>
+							<div class="grid gap-4">
+								{otherPages.map((otherPage) => (
+									<Card
+										variant="bordered"
+										padding="medium"
+										class="hover:border-mana-blue transition-colors"
+									>
+										<a
+											href={`/context/${otherPage.slug}`}
+											class="flex items-center justify-between"
+										>
+											<div class="flex items-center gap-3">
+												{otherPage.data.icon && (
+													<Icon name={otherPage.data.icon} class="w-5 h-5 text-mana-blue" />
+												)}
+												<div>
+													<Text weight="semibold">{otherPage.data.title}</Text>
+													<Text size="sm" color="muted">
+														{otherPage.data.description}
+													</Text>
+												</div>
+											</div>
+											<Icon name="mdi:arrow-right" class="w-5 h-5 text-gray-400" />
+										</a>
+									</Card>
+								))}
+							</div>
+						</div>
+					)
+				}
 
-        <div class="mt-12">
-          <Card variant="elevated" padding="large" class="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
-            <div class="flex items-start gap-4">
-              <Icon name="mdi:lightbulb" class="w-8 h-8 text-mana-blue flex-shrink-0" />
-              <div>
-                <Heading as="h4" size="5" class="mb-2">Bereit durchzustarten?</Heading>
-                <Text color="muted" class="mb-4">
-                  Testen Sie Mana kostenlos mit 500 Credits Startguthaben
-                </Text>
-                <Button href="/start" variant="primary">
-                  Jetzt kostenlos starten
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-    </Container>
-  </Section>
+				<div class="mt-12">
+					<Card
+						variant="elevated"
+						padding="large"
+						class="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20"
+					>
+						<div class="flex items-start gap-4">
+							<Icon name="mdi:lightbulb" class="w-8 h-8 text-mana-blue flex-shrink-0" />
+							<div>
+								<Heading as="h4" size="5" class="mb-2">Bereit durchzustarten?</Heading>
+								<Text color="muted" class="mb-4">
+									Testen Sie Mana kostenlos mit 500 Credits Startguthaben
+								</Text>
+								<Button href="/start" variant="primary"> Jetzt kostenlos starten </Button>
+							</div>
+						</div>
+					</Card>
+				</div>
+			</div>
+		</Container>
+	</Section>
 
-  <Footer />
+	<Footer />
 </Layout>

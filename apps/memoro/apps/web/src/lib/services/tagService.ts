@@ -21,11 +21,7 @@ export class TagService {
 
 	async getTagById(tagId: string) {
 		const supabase = await createAuthClient();
-		const { data, error } = await supabase
-			.from('tags')
-			.select('*')
-			.eq('id', tagId)
-			.single();
+		const { data, error } = await supabase.from('tags').select('*').eq('id', tagId).single();
 
 		if (error) throw error;
 		return data as Tag;
@@ -39,7 +35,7 @@ export class TagService {
 			.insert({
 				user_id: userId,
 				name: name.trim(),
-				style: { color: tagColor }
+				style: { color: tagColor },
 			})
 			.select()
 			.single();
@@ -114,7 +110,7 @@ export class TagService {
 			'#06b6d4', // cyan
 			'#84cc16', // lime
 			'#f97316', // orange
-			'#6366f1' // indigo
+			'#6366f1', // indigo
 		];
 		return colors[Math.floor(Math.random() * colors.length)];
 	}

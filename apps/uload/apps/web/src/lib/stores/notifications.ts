@@ -25,120 +25,116 @@ function createNotificationStore() {
 	const { subscribe, set, update } = writable<NotificationStore>({
 		notifications: [],
 		loading: false,
-		error: null
+		error: null,
 	});
 
 	return {
 		subscribe,
-		
+
 		// Load notifications from server
 		async load(pb: any) {
-			update(s => ({ ...s, loading: true, error: null }));
-			
+			update((s) => ({ ...s, loading: true, error: null }));
+
 			try {
 				const result = await pb.collection('notifications').getList(1, 50, {
 					sort: '-created',
-					filter: 'expires_at = null || expires_at > @now'
+					filter: 'expires_at = null || expires_at > @now',
 				});
-				
-				update(s => ({
+
+				update((s) => ({
 					...s,
 					notifications: result.items,
-					loading: false
+					loading: false,
 				}));
-				
+
 				return result.items;
 			} catch (error: any) {
-				update(s => ({
+				update((s) => ({
 					...s,
 					error: error.message,
-					loading: false
+					loading: false,
 				}));
 				return [];
 			}
 		},
-		
+
 		// Mark notification as read
 		async markAsRead(pb: any, notificationId: string) {
 			try {
 				await pb.collection('notifications').update(notificationId, {
-					read: true
+					read: true,
 				});
-				
-				update(s => ({
+
+				update((s) => ({
 					...s,
-					notifications: s.notifications.map(n => 
+					notifications: s.notifications.map((n) =>
 						n.id === notificationId ? { ...n, read: true } : n
-					)
+					),
 				}));
-				
+
 				return true;
 			} catch (error: any) {
 				console.error('Failed to mark notification as read:', error);
 				return false;
 			}
 		},
-		
+
 		// Mark all notifications as read
 		async markAllAsRead(pb: any) {
 			const store = get(notifications);
-			const unreadIds = store.notifications
-				.filter(n => !n.read)
-				.map(n => n.id);
-			
+			const unreadIds = store.notifications.filter((n) => !n.read).map((n) => n.id);
+
 			try {
 				// Update all unread notifications
 				await Promise.all(
-					unreadIds.map(id => 
-						pb.collection('notifications').update(id, { read: true })
-					)
+					unreadIds.map((id) => pb.collection('notifications').update(id, { read: true }))
 				);
-				
-				update(s => ({
+
+				update((s) => ({
 					...s,
-					notifications: s.notifications.map(n => ({ ...n, read: true }))
+					notifications: s.notifications.map((n) => ({ ...n, read: true })),
 				}));
-				
+
 				return true;
 			} catch (error: any) {
 				console.error('Failed to mark all as read:', error);
 				return false;
 			}
 		},
-		
+
 		// Delete notification
 		async delete(pb: any, notificationId: string) {
 			try {
 				await pb.collection('notifications').delete(notificationId);
-				
-				update(s => ({
+
+				update((s) => ({
 					...s,
-					notifications: s.notifications.filter(n => n.id !== notificationId)
+					notifications: s.notifications.filter((n) => n.id !== notificationId),
 				}));
-				
+
 				return true;
 			} catch (error: any) {
 				console.error('Failed to delete notification:', error);
 				return false;
 			}
 		},
-		
+
 		// Add new notification (for real-time updates)
 		add(notification: Notification) {
-			update(s => ({
+			update((s) => ({
 				...s,
-				notifications: [notification, ...s.notifications]
+				notifications: [notification, ...s.notifications],
 			}));
 		},
-		
+
 		// Clear all notifications
 		clear() {
 			set({
 				notifications: [],
 				loading: false,
-				error: null
+				error: null,
 			});
-		}
+		},
 	};
 }
 
@@ -147,11 +143,10 @@ export const notifications = createNotificationStore();
 // Derived store for unread count
 export const unreadCount = derived(
 	notifications,
-	$notifications => $notifications.notifications.filter(n => !n.read).length
+	($notifications) => $notifications.notifications.filter((n) => !n.read).length
 );
 
 // Derived store for pending invitations
-export const pendingInvitations = derived(
-	notifications,
-	$notifications => $notifications.notifications.filter(n => n.type === 'team_invite' && !n.read)
+export const pendingInvitations = derived(notifications, ($notifications) =>
+	$notifications.notifications.filter((n) => n.type === 'team_invite' && !n.read)
 );

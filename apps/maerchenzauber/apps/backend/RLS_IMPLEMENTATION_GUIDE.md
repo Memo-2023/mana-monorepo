@@ -11,21 +11,25 @@ This document describes the Row Level Security (RLS) implementation for the Maer
 We've created four essential authentication helper functions:
 
 #### `current_user_id()`
+
 - **Purpose**: Extracts user identity from JWT claims
 - **Returns**: User ID as text
 - **Usage**: Primary function for identifying the current user in RLS policies
 
 #### `auth_is_admin()`
+
 - **Purpose**: Checks if the current user has admin privileges
 - **Returns**: Boolean (true if admin, false otherwise)
 - **Usage**: Used in policies that require admin access (creators, errors tables)
 
 #### `current_user_uuid()`
+
 - **Purpose**: Returns the current user's ID as UUID
 - **Returns**: UUID
 - **Usage**: Compatibility function when UUID type is needed
 
 #### `user_owns_resource(resource_user_id text)`
+
 - **Purpose**: Helper function to check resource ownership
 - **Returns**: Boolean
 - **Usage**: Simplifies ownership checks in policies
@@ -33,6 +37,7 @@ We've created four essential authentication helper functions:
 ### 2. Table RLS Policies
 
 #### Characters Table
+
 - **View**: Users can only see their own characters
 - **Insert**: Users can only create characters with their user_id
 - **Update**: Users can only update their own characters
@@ -40,6 +45,7 @@ We've created four essential authentication helper functions:
 - **Service Role**: Full access for backend operations
 
 #### Stories Table
+
 - **View**: Users can only see their own stories
 - **Insert**: Users can only create stories with their user_id
 - **Update**: Users can only update their own stories
@@ -47,11 +53,13 @@ We've created four essential authentication helper functions:
 - **Service Role**: Full access for backend operations
 
 #### Creators Table
+
 - **View**: All authenticated users can view creators
 - **Insert/Update/Delete**: Only admins can modify creators
 - **Service Role**: Full access for backend operations
 
 #### Errors Table
+
 - **View**: Only admins can view errors
 - **Insert**: Authenticated users can insert their own errors (for logging)
 - **Update/Delete**: Only admins can modify errors
@@ -60,12 +68,14 @@ We've created four essential authentication helper functions:
 ### 3. Storage RLS Policies
 
 #### storyteller-images bucket (public)
+
 - **Structure**: `{user_id}/stories/{story_id}/` or `{user_id}/characters/{character_id}/`
 - **View**: Anyone can view images (public bucket)
 - **Upload/Update/Delete**: Users can only manage files in their own folder (first folder must match their user_id)
 - **Admin Access**: Admins can view and delete any file
 
 #### user-uploads bucket (private)
+
 - **Structure**: `{user_id}/{filename}`
 - **View/Upload/Update/Delete**: Users can only access their own folder
 - **Admin Access**: Admins can view and delete any file
@@ -85,24 +95,20 @@ We've created four essential authentication helper functions:
 ```typescript
 // File upload with proper path structure
 const uploadFile = async (file: File, userId: string, storyId: string) => {
-  const filePath = `${userId}/stories/${storyId}/${Date.now()}_${file.name}`;
-  
-  const { data, error } = await supabase.storage
-    .from('storyteller-images')
-    .upload(filePath, file);
-    
-  if (error) throw error;
-  return data;
+	const filePath = `${userId}/stories/${storyId}/${Date.now()}_${file.name}`;
+
+	const { data, error } = await supabase.storage.from('storyteller-images').upload(filePath, file);
+
+	if (error) throw error;
+	return data;
 };
 
 // Fetching user's own data (RLS automatically filters)
 const getUserCharacters = async () => {
-  const { data, error } = await supabase
-    .from('characters')
-    .select('*');
-    
-  // Only returns characters where user_id matches current user
-  return data;
+	const { data, error } = await supabase.from('characters').select('*');
+
+	// Only returns characters where user_id matches current user
+	return data;
 };
 ```
 
@@ -111,20 +117,17 @@ const getUserCharacters = async () => {
 ```typescript
 // Check if user is admin
 const checkAdminStatus = async () => {
-  const { data, error } = await supabase
-    .rpc('auth_is_admin');
-    
-  return data; // true or false
+	const { data, error } = await supabase.rpc('auth_is_admin');
+
+	return data; // true or false
 };
 
 // Admin creating a creator (requires admin role)
 const createCreator = async (creatorData: CreatorInput) => {
-  const { data, error } = await supabase
-    .from('creators')
-    .insert(creatorData);
-    
-  // Will fail if user is not admin
-  return data;
+	const { data, error } = await supabase.from('creators').insert(creatorData);
+
+	// Will fail if user is not admin
+	return data;
 };
 ```
 

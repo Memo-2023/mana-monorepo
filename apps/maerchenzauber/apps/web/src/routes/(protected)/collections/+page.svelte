@@ -36,7 +36,7 @@
 		{ id: 'blue', bg: 'bg-blue-500', gradient: 'from-blue-400 to-blue-600' },
 		{ id: 'green', bg: 'bg-green-500', gradient: 'from-green-400 to-green-600' },
 		{ id: 'amber', bg: 'bg-amber-500', gradient: 'from-amber-400 to-amber-600' },
-		{ id: 'red', bg: 'bg-red-500', gradient: 'from-red-400 to-red-600' }
+		{ id: 'red', bg: 'bg-red-500', gradient: 'from-red-400 to-red-600' },
 	];
 
 	// Fetch data (collections API not implemented yet - using mock data)
@@ -60,7 +60,7 @@
 						color: 'purple',
 						storyIds: [],
 						createdAt: '2024-01-15',
-						updatedAt: '2024-01-20'
+						updatedAt: '2024-01-20',
 					},
 					{
 						id: '2',
@@ -69,8 +69,8 @@
 						color: 'pink',
 						storyIds: [],
 						createdAt: '2024-01-10',
-						updatedAt: '2024-01-18'
-					}
+						updatedAt: '2024-01-18',
+					},
 				];
 			}
 		} catch (err) {
@@ -119,7 +119,13 @@
 		if (editingCollection) {
 			collections = collections.map((c) =>
 				c.id === editingCollection!.id
-					? { ...c, name: formName, description: formDescription, color: formColor, updatedAt: new Date().toISOString() }
+					? {
+							...c,
+							name: formName,
+							description: formDescription,
+							color: formColor,
+							updatedAt: new Date().toISOString(),
+						}
 					: c
 			);
 			toastStore.success('Sammlung aktualisiert');
@@ -133,8 +139,8 @@
 					color: formColor,
 					storyIds: [],
 					createdAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString()
-				}
+					updatedAt: new Date().toISOString(),
+				},
 			];
 			toastStore.success('Sammlung erstellt');
 		}
@@ -203,8 +209,18 @@
 		</div>
 	{:else if collections.length === 0}
 		<div class="rounded-2xl bg-gray-50 p-8 text-center dark:bg-gray-800/50">
-			<svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+			<svg
+				class="mx-auto h-16 w-16 text-gray-400"
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="1.5"
+					d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+				/>
 			</svg>
 			<h3 class="mt-4 font-medium text-gray-700 dark:text-gray-300">Keine Sammlungen</h3>
 			<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -220,20 +236,37 @@
 	{:else}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each collections as collection (collection.id)}
-				<div class="group relative overflow-hidden rounded-2xl bg-white shadow-md transition-all hover:shadow-xl dark:bg-gray-800">
+				<div
+					class="group relative overflow-hidden rounded-2xl bg-white shadow-md transition-all hover:shadow-xl dark:bg-gray-800"
+				>
 					<!-- Gradient header -->
 					<div class="h-24 bg-gradient-to-br {getColorGradient(collection.color)} p-4">
 						<!-- Preview images -->
 						<div class="flex -space-x-3">
 							{#each getPreviewImages(collection) as image, i}
-								<div class="h-12 w-12 overflow-hidden rounded-lg border-2 border-white shadow-md" style="z-index: {3 - i}">
+								<div
+									class="h-12 w-12 overflow-hidden rounded-lg border-2 border-white shadow-md"
+									style="z-index: {3 - i}"
+								>
 									<img src={image} alt="" class="h-full w-full object-cover" />
 								</div>
 							{/each}
 							{#if getStoryCount(collection) === 0}
-								<div class="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-white/50 bg-white/20">
-									<svg class="h-6 w-6 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+								<div
+									class="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-white/50 bg-white/20"
+								>
+									<svg
+										class="h-6 w-6 text-white/70"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+										/>
 									</svg>
 								</div>
 							{/if}
@@ -251,18 +284,26 @@
 							</p>
 						{/if}
 						<p class="mt-2 text-xs text-gray-500 dark:text-gray-500">
-							{getStoryCount(collection)} {getStoryCount(collection) === 1 ? 'Geschichte' : 'Geschichten'}
+							{getStoryCount(collection)}
+							{getStoryCount(collection) === 1 ? 'Geschichte' : 'Geschichten'}
 						</p>
 					</div>
 
 					<!-- Actions (shown on hover) -->
-					<div class="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+					<div
+						class="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100"
+					>
 						<button
 							onclick={() => openEditModal(collection)}
 							class="rounded-lg bg-white/90 p-2 text-gray-600 hover:bg-white hover:text-gray-800 dark:bg-gray-700/90 dark:text-gray-300 dark:hover:bg-gray-700"
 						>
 							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+								/>
 							</svg>
 						</button>
 						<button
@@ -270,7 +311,12 @@
 							class="rounded-lg bg-white/90 p-2 text-red-500 hover:bg-white hover:text-red-600 dark:bg-gray-700/90 dark:hover:bg-gray-700"
 						>
 							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+								/>
 							</svg>
 						</button>
 					</div>
@@ -310,15 +356,29 @@
 						class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
 					>
 						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
 						</svg>
 					</button>
 				</div>
 
-				<form onsubmit={(e) => { e.preventDefault(); saveCollection(); }} class="space-y-4">
+				<form
+					onsubmit={(e) => {
+						e.preventDefault();
+						saveCollection();
+					}}
+					class="space-y-4"
+				>
 					<!-- Name -->
 					<div>
-						<label for="name" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+						<label
+							for="name"
+							class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+						>
 							Name
 						</label>
 						<input
@@ -332,7 +392,10 @@
 
 					<!-- Description -->
 					<div>
-						<label for="description" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+						<label
+							for="description"
+							class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+						>
 							Beschreibung (optional)
 						</label>
 						<textarea
@@ -354,7 +417,10 @@
 								<button
 									type="button"
 									onclick={() => (formColor = color.id)}
-									class="h-10 w-10 rounded-xl {color.bg} transition-transform {formColor === color.id ? 'scale-110 ring-2 ring-gray-800 ring-offset-2 dark:ring-white' : 'hover:scale-105'}"
+									class="h-10 w-10 rounded-xl {color.bg} transition-transform {formColor ===
+									color.id
+										? 'scale-110 ring-2 ring-gray-800 ring-offset-2 dark:ring-white'
+										: 'hover:scale-105'}"
 									aria-label={color.id}
 								></button>
 							{/each}

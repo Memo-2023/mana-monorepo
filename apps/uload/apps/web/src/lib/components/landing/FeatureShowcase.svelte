@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	
-	let selectedFeature = $state<'links' | 'cards' | 'analytics' | 'qr' | 'team' | 'templates'>('links');
+
+	let selectedFeature = $state<'links' | 'cards' | 'analytics' | 'qr' | 'team' | 'templates'>(
+		'links'
+	);
 	let animationKey = $state(0);
-	
+
 	$effect(() => {
 		// Trigger re-animation when feature changes
 		animationKey++;
@@ -25,126 +27,258 @@
 			<!-- Feature Navigation -->
 			<div class="space-y-2">
 				<button
-					onclick={() => selectedFeature = 'links'}
-					class="group flex w-full items-center gap-4 rounded-lg px-6 py-4 text-left transition {selectedFeature === 'links' 
-						? 'bg-theme-primary text-white shadow-lg' 
-						: 'bg-theme-surface text-theme-text hover:bg-theme-surface/80'}"
+					onclick={() => (selectedFeature = 'links')}
+					class="group flex w-full items-center gap-4 rounded-lg px-6 py-4 text-left transition {selectedFeature ===
+					'links'
+						? 'bg-theme-primary text-white shadow-lg'
+						: 'hover:bg-theme-surface/80 bg-theme-surface text-theme-text'}"
 				>
-					<div class="flex h-12 w-12 items-center justify-center rounded-lg {selectedFeature === 'links' ? 'bg-white/20' : 'bg-theme-primary/10'}">
-						<svg class="h-6 w-6 {selectedFeature === 'links' ? 'text-white' : 'text-theme-primary'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+					<div
+						class="flex h-12 w-12 items-center justify-center rounded-lg {selectedFeature ===
+						'links'
+							? 'bg-white/20'
+							: 'bg-theme-primary/10'}"
+					>
+						<svg
+							class="h-6 w-6 {selectedFeature === 'links' ? 'text-white' : 'text-theme-primary'}"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+							/>
 						</svg>
 					</div>
 					<div class="flex-1">
-						<h3 class="font-semibold {selectedFeature === 'links' ? 'text-white' : 'text-theme-text'}">
+						<h3
+							class="font-semibold {selectedFeature === 'links' ? 'text-white' : 'text-theme-text'}"
+						>
 							Smart Link Management
 						</h3>
-						<p class="mt-1 text-sm {selectedFeature === 'links' ? 'text-white/80' : 'text-theme-text-muted'}">
+						<p
+							class="mt-1 text-sm {selectedFeature === 'links'
+								? 'text-white/80'
+								: 'text-theme-text-muted'}"
+						>
 							Kurze URLs mit erweiterten Features
 						</p>
 					</div>
 				</button>
 
 				<button
-					onclick={() => selectedFeature = 'cards'}
-					class="group flex w-full items-center gap-4 rounded-lg px-6 py-4 text-left transition {selectedFeature === 'cards' 
-						? 'bg-theme-primary text-white shadow-lg' 
-						: 'bg-theme-surface text-theme-text hover:bg-theme-surface/80'}"
+					onclick={() => (selectedFeature = 'cards')}
+					class="group flex w-full items-center gap-4 rounded-lg px-6 py-4 text-left transition {selectedFeature ===
+					'cards'
+						? 'bg-theme-primary text-white shadow-lg'
+						: 'hover:bg-theme-surface/80 bg-theme-surface text-theme-text'}"
 				>
-					<div class="flex h-12 w-12 items-center justify-center rounded-lg {selectedFeature === 'cards' ? 'bg-white/20' : 'bg-purple-600/10'}">
-						<svg class="h-6 w-6 {selectedFeature === 'cards' ? 'text-white' : 'text-purple-600'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+					<div
+						class="flex h-12 w-12 items-center justify-center rounded-lg {selectedFeature ===
+						'cards'
+							? 'bg-white/20'
+							: 'bg-purple-600/10'}"
+					>
+						<svg
+							class="h-6 w-6 {selectedFeature === 'cards' ? 'text-white' : 'text-purple-600'}"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
+							/>
 						</svg>
 					</div>
 					<div class="flex-1">
-						<h3 class="font-semibold {selectedFeature === 'cards' ? 'text-white' : 'text-theme-text'}">
+						<h3
+							class="font-semibold {selectedFeature === 'cards' ? 'text-white' : 'text-theme-text'}"
+						>
 							Profilkarten Builder
 						</h3>
-						<p class="mt-1 text-sm {selectedFeature === 'cards' ? 'text-white/80' : 'text-theme-text-muted'}">
+						<p
+							class="mt-1 text-sm {selectedFeature === 'cards'
+								? 'text-white/80'
+								: 'text-theme-text-muted'}"
+						>
 							3-Stufen Builder mit Live-Preview
 						</p>
 					</div>
 				</button>
 
 				<button
-					onclick={() => selectedFeature = 'analytics'}
-					class="group flex w-full items-center gap-4 rounded-lg px-6 py-4 text-left transition {selectedFeature === 'analytics' 
-						? 'bg-theme-primary text-white shadow-lg' 
-						: 'bg-theme-surface text-theme-text hover:bg-theme-surface/80'}"
+					onclick={() => (selectedFeature = 'analytics')}
+					class="group flex w-full items-center gap-4 rounded-lg px-6 py-4 text-left transition {selectedFeature ===
+					'analytics'
+						? 'bg-theme-primary text-white shadow-lg'
+						: 'hover:bg-theme-surface/80 bg-theme-surface text-theme-text'}"
 				>
-					<div class="flex h-12 w-12 items-center justify-center rounded-lg {selectedFeature === 'analytics' ? 'bg-white/20' : 'bg-blue-600/10'}">
-						<svg class="h-6 w-6 {selectedFeature === 'analytics' ? 'text-white' : 'text-blue-600'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+					<div
+						class="flex h-12 w-12 items-center justify-center rounded-lg {selectedFeature ===
+						'analytics'
+							? 'bg-white/20'
+							: 'bg-blue-600/10'}"
+					>
+						<svg
+							class="h-6 w-6 {selectedFeature === 'analytics' ? 'text-white' : 'text-blue-600'}"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+							/>
 						</svg>
 					</div>
 					<div class="flex-1">
-						<h3 class="font-semibold {selectedFeature === 'analytics' ? 'text-white' : 'text-theme-text'}">
+						<h3
+							class="font-semibold {selectedFeature === 'analytics'
+								? 'text-white'
+								: 'text-theme-text'}"
+						>
 							Professionelle Analytics
 						</h3>
-						<p class="mt-1 text-sm {selectedFeature === 'analytics' ? 'text-white/80' : 'text-theme-text-muted'}">
+						<p
+							class="mt-1 text-sm {selectedFeature === 'analytics'
+								? 'text-white/80'
+								: 'text-theme-text-muted'}"
+						>
 							Echtzeit-Tracking und Insights
 						</p>
 					</div>
 				</button>
 
 				<button
-					onclick={() => selectedFeature = 'qr'}
-					class="group flex w-full items-center gap-4 rounded-lg px-6 py-4 text-left transition {selectedFeature === 'qr' 
-						? 'bg-theme-primary text-white shadow-lg' 
-						: 'bg-theme-surface text-theme-text hover:bg-theme-surface/80'}"
+					onclick={() => (selectedFeature = 'qr')}
+					class="group flex w-full items-center gap-4 rounded-lg px-6 py-4 text-left transition {selectedFeature ===
+					'qr'
+						? 'bg-theme-primary text-white shadow-lg'
+						: 'hover:bg-theme-surface/80 bg-theme-surface text-theme-text'}"
 				>
-					<div class="flex h-12 w-12 items-center justify-center rounded-lg {selectedFeature === 'qr' ? 'bg-white/20' : 'bg-green-600/10'}">
-						<svg class="h-6 w-6 {selectedFeature === 'qr' ? 'text-white' : 'text-green-600'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+					<div
+						class="flex h-12 w-12 items-center justify-center rounded-lg {selectedFeature === 'qr'
+							? 'bg-white/20'
+							: 'bg-green-600/10'}"
+					>
+						<svg
+							class="h-6 w-6 {selectedFeature === 'qr' ? 'text-white' : 'text-green-600'}"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+							/>
 						</svg>
 					</div>
 					<div class="flex-1">
 						<h3 class="font-semibold {selectedFeature === 'qr' ? 'text-white' : 'text-theme-text'}">
 							QR-Code Generator
 						</h3>
-						<p class="mt-1 text-sm {selectedFeature === 'qr' ? 'text-white/80' : 'text-theme-text-muted'}">
+						<p
+							class="mt-1 text-sm {selectedFeature === 'qr'
+								? 'text-white/80'
+								: 'text-theme-text-muted'}"
+						>
 							Anpassbare Designs und Farben
 						</p>
 					</div>
 				</button>
 
 				<button
-					onclick={() => selectedFeature = 'team'}
-					class="group flex w-full items-center gap-4 rounded-lg px-6 py-4 text-left transition {selectedFeature === 'team' 
-						? 'bg-theme-primary text-white shadow-lg' 
-						: 'bg-theme-surface text-theme-text hover:bg-theme-surface/80'}"
+					onclick={() => (selectedFeature = 'team')}
+					class="group flex w-full items-center gap-4 rounded-lg px-6 py-4 text-left transition {selectedFeature ===
+					'team'
+						? 'bg-theme-primary text-white shadow-lg'
+						: 'hover:bg-theme-surface/80 bg-theme-surface text-theme-text'}"
 				>
-					<div class="flex h-12 w-12 items-center justify-center rounded-lg {selectedFeature === 'team' ? 'bg-white/20' : 'bg-indigo-600/10'}">
-						<svg class="h-6 w-6 {selectedFeature === 'team' ? 'text-white' : 'text-indigo-600'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+					<div
+						class="flex h-12 w-12 items-center justify-center rounded-lg {selectedFeature === 'team'
+							? 'bg-white/20'
+							: 'bg-indigo-600/10'}"
+					>
+						<svg
+							class="h-6 w-6 {selectedFeature === 'team' ? 'text-white' : 'text-indigo-600'}"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+							/>
 						</svg>
 					</div>
 					<div class="flex-1">
-						<h3 class="font-semibold {selectedFeature === 'team' ? 'text-white' : 'text-theme-text'}">
+						<h3
+							class="font-semibold {selectedFeature === 'team' ? 'text-white' : 'text-theme-text'}"
+						>
 							Team Kollaboration
 						</h3>
-						<p class="mt-1 text-sm {selectedFeature === 'team' ? 'text-white/80' : 'text-theme-text-muted'}">
+						<p
+							class="mt-1 text-sm {selectedFeature === 'team'
+								? 'text-white/80'
+								: 'text-theme-text-muted'}"
+						>
 							Workspaces und Berechtigungen
 						</p>
 					</div>
 				</button>
 
 				<button
-					onclick={() => selectedFeature = 'templates'}
-					class="group flex w-full items-center gap-4 rounded-lg px-6 py-4 text-left transition {selectedFeature === 'templates' 
-						? 'bg-theme-primary text-white shadow-lg' 
-						: 'bg-theme-surface text-theme-text hover:bg-theme-surface/80'}"
+					onclick={() => (selectedFeature = 'templates')}
+					class="group flex w-full items-center gap-4 rounded-lg px-6 py-4 text-left transition {selectedFeature ===
+					'templates'
+						? 'bg-theme-primary text-white shadow-lg'
+						: 'hover:bg-theme-surface/80 bg-theme-surface text-theme-text'}"
 				>
-					<div class="flex h-12 w-12 items-center justify-center rounded-lg {selectedFeature === 'templates' ? 'bg-white/20' : 'bg-pink-600/10'}">
-						<svg class="h-6 w-6 {selectedFeature === 'templates' ? 'text-white' : 'text-pink-600'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+					<div
+						class="flex h-12 w-12 items-center justify-center rounded-lg {selectedFeature ===
+						'templates'
+							? 'bg-white/20'
+							: 'bg-pink-600/10'}"
+					>
+						<svg
+							class="h-6 w-6 {selectedFeature === 'templates' ? 'text-white' : 'text-pink-600'}"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+							/>
 						</svg>
 					</div>
 					<div class="flex-1">
-						<h3 class="font-semibold {selectedFeature === 'templates' ? 'text-white' : 'text-theme-text'}">
+						<h3
+							class="font-semibold {selectedFeature === 'templates'
+								? 'text-white'
+								: 'text-theme-text'}"
+						>
 							Template Store
 						</h3>
-						<p class="mt-1 text-sm {selectedFeature === 'templates' ? 'text-white/80' : 'text-theme-text-muted'}">
+						<p
+							class="mt-1 text-sm {selectedFeature === 'templates'
+								? 'text-white/80'
+								: 'text-theme-text-muted'}"
+						>
 							Vorgefertigte Designs und Layouts
 						</p>
 					</div>
@@ -183,7 +317,7 @@
 									<span class="text-sm text-theme-text">Bulk-Operationen</span>
 								</div>
 							</div>
-							<div class="mt-6 rounded-lg bg-theme-primary/10 p-3">
+							<div class="bg-theme-primary/10 mt-6 rounded-lg p-3">
 								<p class="text-xs text-theme-primary">
 									Beispiel: ulo.ad/produkt-launch → 500 Clicks, läuft in 7 Tagen ab
 								</p>
@@ -195,17 +329,27 @@
 						<div class="rounded-xl border border-theme-border bg-theme-surface p-6 shadow-xl">
 							<h4 class="mb-4 text-lg font-semibold text-theme-text">3-Stufen Builder</h4>
 							<div class="space-y-4">
-								<div class="rounded-lg border border-green-500 bg-green-50 p-3 dark:bg-green-900/20">
+								<div
+									class="rounded-lg border border-green-500 bg-green-50 p-3 dark:bg-green-900/20"
+								>
 									<p class="font-medium text-green-700 dark:text-green-400">👶 Anfänger</p>
-									<p class="mt-1 text-sm text-green-600 dark:text-green-300">Einfache Vorlagen, schnell anpassbar</p>
+									<p class="mt-1 text-sm text-green-600 dark:text-green-300">
+										Einfache Vorlagen, schnell anpassbar
+									</p>
 								</div>
 								<div class="rounded-lg border border-blue-500 bg-blue-50 p-3 dark:bg-blue-900/20">
 									<p class="font-medium text-blue-700 dark:text-blue-400">💪 Fortgeschritten</p>
-									<p class="mt-1 text-sm text-blue-600 dark:text-blue-300">Drag & Drop Module, mehr Kontrolle</p>
+									<p class="mt-1 text-sm text-blue-600 dark:text-blue-300">
+										Drag & Drop Module, mehr Kontrolle
+									</p>
 								</div>
-								<div class="rounded-lg border border-purple-500 bg-purple-50 p-3 dark:bg-purple-900/20">
+								<div
+									class="rounded-lg border border-purple-500 bg-purple-50 p-3 dark:bg-purple-900/20"
+								>
 									<p class="font-medium text-purple-700 dark:text-purple-400">🚀 Experte</p>
-									<p class="mt-1 text-sm text-purple-600 dark:text-purple-300">Volle Freiheit, eigener Code möglich</p>
+									<p class="mt-1 text-sm text-purple-600 dark:text-purple-300">
+										Volle Freiheit, eigener Code möglich
+									</p>
 								</div>
 							</div>
 						</div>
@@ -217,13 +361,13 @@
 							<div class="space-y-4">
 								<!-- Mini chart visualization -->
 								<div class="flex items-end gap-2">
-									<div class="h-16 w-8 rounded bg-theme-primary/20"></div>
-									<div class="h-24 w-8 rounded bg-theme-primary/40"></div>
-									<div class="h-32 w-8 rounded bg-theme-primary/60"></div>
-									<div class="h-28 w-8 rounded bg-theme-primary/80"></div>
+									<div class="bg-theme-primary/20 h-16 w-8 rounded"></div>
+									<div class="bg-theme-primary/40 h-24 w-8 rounded"></div>
+									<div class="bg-theme-primary/60 h-32 w-8 rounded"></div>
+									<div class="bg-theme-primary/80 h-28 w-8 rounded"></div>
 									<div class="h-36 w-8 rounded bg-theme-primary"></div>
-									<div class="h-30 w-8 rounded bg-theme-primary/90"></div>
-									<div class="h-26 w-8 rounded bg-theme-primary/70"></div>
+									<div class="h-30 bg-theme-primary/90 w-8 rounded"></div>
+									<div class="h-26 bg-theme-primary/70 w-8 rounded"></div>
 								</div>
 								<div class="grid grid-cols-2 gap-4">
 									<div class="rounded-lg bg-theme-surface p-3">
@@ -260,19 +404,25 @@
 							<div class="flex justify-center">
 								<div class="grid grid-cols-3 gap-4">
 									<div class="text-center">
-										<div class="mb-2 flex h-24 w-24 items-center justify-center rounded-lg bg-white p-2">
+										<div
+											class="mb-2 flex h-24 w-24 items-center justify-center rounded-lg bg-white p-2"
+										>
 											<div class="h-full w-full rounded bg-black"></div>
 										</div>
 										<p class="text-xs text-theme-text">Schwarz</p>
 									</div>
 									<div class="text-center">
-										<div class="mb-2 flex h-24 w-24 items-center justify-center rounded-lg bg-black p-2">
+										<div
+											class="mb-2 flex h-24 w-24 items-center justify-center rounded-lg bg-black p-2"
+										>
 											<div class="h-full w-full rounded bg-white"></div>
 										</div>
 										<p class="text-xs text-theme-text">Weiß</p>
 									</div>
 									<div class="text-center">
-										<div class="mb-2 flex h-24 w-24 items-center justify-center rounded-lg bg-white p-2">
+										<div
+											class="mb-2 flex h-24 w-24 items-center justify-center rounded-lg bg-white p-2"
+										>
 											<div class="h-full w-full rounded bg-yellow-500"></div>
 										</div>
 										<p class="text-xs text-theme-text">Gold</p>
@@ -282,9 +432,15 @@
 							<div class="mt-4 space-y-2">
 								<p class="text-sm font-medium text-theme-text">Formate:</p>
 								<div class="flex gap-2">
-									<span class="rounded bg-theme-primary/10 px-2 py-1 text-xs text-theme-primary">PNG</span>
-									<span class="rounded bg-theme-primary/10 px-2 py-1 text-xs text-theme-primary">SVG</span>
-									<span class="rounded bg-theme-primary/10 px-2 py-1 text-xs text-theme-primary">JPG</span>
+									<span class="bg-theme-primary/10 rounded px-2 py-1 text-xs text-theme-primary"
+										>PNG</span
+									>
+									<span class="bg-theme-primary/10 rounded px-2 py-1 text-xs text-theme-primary"
+										>SVG</span
+									>
+									<span class="bg-theme-primary/10 rounded px-2 py-1 text-xs text-theme-primary"
+										>JPG</span
+									>
 								</div>
 							</div>
 						</div>
@@ -296,13 +452,16 @@
 							<div class="space-y-3">
 								<div class="flex items-center justify-between rounded-lg bg-theme-surface p-3">
 									<div class="flex items-center gap-3">
-										<div class="h-8 w-8 rounded-full bg-theme-primary/20"></div>
+										<div class="bg-theme-primary/20 h-8 w-8 rounded-full"></div>
 										<div>
 											<p class="text-sm font-medium text-theme-text">Max Mustermann</p>
 											<p class="text-xs text-theme-text-muted">Admin</p>
 										</div>
 									</div>
-									<span class="rounded bg-green-100 px-2 py-1 text-xs text-green-700 dark:bg-green-900/20 dark:text-green-400">Full Access</span>
+									<span
+										class="rounded bg-green-100 px-2 py-1 text-xs text-green-700 dark:bg-green-900/20 dark:text-green-400"
+										>Full Access</span
+									>
 								</div>
 								<div class="flex items-center justify-between rounded-lg bg-theme-surface p-3">
 									<div class="flex items-center gap-3">
@@ -312,7 +471,10 @@
 											<p class="text-xs text-theme-text-muted">Editor</p>
 										</div>
 									</div>
-									<span class="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">Edit Links</span>
+									<span
+										class="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
+										>Edit Links</span
+									>
 								</div>
 								<div class="flex items-center justify-between rounded-lg bg-theme-surface p-3">
 									<div class="flex items-center gap-3">
@@ -322,7 +484,10 @@
 											<p class="text-xs text-theme-text-muted">Viewer</p>
 										</div>
 									</div>
-									<span class="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700 dark:bg-gray-900/20 dark:text-gray-400">View Only</span>
+									<span
+										class="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700 dark:bg-gray-900/20 dark:text-gray-400"
+										>View Only</span
+									>
 								</div>
 							</div>
 						</div>
@@ -332,24 +497,34 @@
 						<div class="rounded-xl border border-theme-border bg-theme-surface p-6 shadow-xl">
 							<h4 class="mb-4 text-lg font-semibold text-theme-text">Template Gallery</h4>
 							<div class="grid grid-cols-2 gap-3">
-								<div class="rounded-lg border border-theme-border bg-gradient-to-br from-pink-500/10 to-purple-500/10 p-4">
+								<div
+									class="rounded-lg border border-theme-border bg-gradient-to-br from-pink-500/10 to-purple-500/10 p-4"
+								>
 									<p class="mb-2 text-xs font-medium text-theme-text">Creator Pro</p>
 									<div class="h-20 rounded bg-white/50"></div>
 								</div>
-								<div class="rounded-lg border border-theme-border bg-gradient-to-br from-blue-500/10 to-cyan-500/10 p-4">
+								<div
+									class="rounded-lg border border-theme-border bg-gradient-to-br from-blue-500/10 to-cyan-500/10 p-4"
+								>
 									<p class="mb-2 text-xs font-medium text-theme-text">Business</p>
 									<div class="h-20 rounded bg-white/50"></div>
 								</div>
-								<div class="rounded-lg border border-theme-border bg-gradient-to-br from-green-500/10 to-emerald-500/10 p-4">
+								<div
+									class="rounded-lg border border-theme-border bg-gradient-to-br from-green-500/10 to-emerald-500/10 p-4"
+								>
 									<p class="mb-2 text-xs font-medium text-theme-text">Restaurant</p>
 									<div class="h-20 rounded bg-white/50"></div>
 								</div>
-								<div class="rounded-lg border border-theme-border bg-gradient-to-br from-indigo-500/10 to-purple-500/10 p-4">
+								<div
+									class="rounded-lg border border-theme-border bg-gradient-to-br from-indigo-500/10 to-purple-500/10 p-4"
+								>
 									<p class="mb-2 text-xs font-medium text-theme-text">Portfolio</p>
 									<div class="h-20 rounded bg-white/50"></div>
 								</div>
 							</div>
-							<button class="mt-4 w-full rounded-lg bg-theme-primary/10 py-2 text-sm font-medium text-theme-primary hover:bg-theme-primary/20">
+							<button
+								class="bg-theme-primary/10 hover:bg-theme-primary/20 mt-4 w-full rounded-lg py-2 text-sm font-medium text-theme-primary"
+							>
 								Alle Templates ansehen →
 							</button>
 						</div>

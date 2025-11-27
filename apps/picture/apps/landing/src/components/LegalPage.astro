@@ -10,27 +10,28 @@ const { title } = Astro.props;
 ---
 
 <div class="min-h-screen bg-dark-bg py-24">
-	<div class="container mx-auto px-4 max-w-4xl">
+	<div class="container mx-auto max-w-4xl px-4">
 		<!-- Back Button -->
 		<a
 			href={localizePath('/')}
-			class="inline-flex items-center gap-2 text-primary hover:text-primary-400 transition-colors mb-8"
+			class="mb-8 inline-flex items-center gap-2 text-primary transition-colors hover:text-primary-400"
 		>
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"
+				></path>
 			</svg>
 			<span>{t('legal.back_home')}</span>
 		</a>
 
 		<!-- Page Header -->
 		<div class="mb-12">
-			<h1 class="text-4xl md:text-5xl font-bold text-white mb-4">{title}</h1>
+			<h1 class="mb-4 text-4xl font-bold text-white md:text-5xl">{title}</h1>
 			<p class="text-gray-400">{t('legal.last_updated')}: {new Date().toLocaleDateString()}</p>
 		</div>
 
 		<!-- Content -->
-		<div class="prose prose-invert prose-primary max-w-none">
-			<div class="bg-dark-surface border border-dark-border rounded-2xl p-8 md:p-12">
+		<div class="prose-primary prose prose-invert max-w-none">
+			<div class="rounded-2xl border border-dark-border bg-dark-surface p-8 md:p-12">
 				<slot />
 			</div>
 		</div>
@@ -43,23 +44,23 @@ const { title } = Astro.props;
 	}
 
 	:global(.prose h2) {
-		@apply text-2xl font-bold text-white mt-8 mb-4;
+		@apply mb-4 mt-8 text-2xl font-bold text-white;
 	}
 
 	:global(.prose h3) {
-		@apply text-xl font-semibold text-white mt-6 mb-3;
+		@apply mb-3 mt-6 text-xl font-semibold text-white;
 	}
 
 	:global(.prose p) {
-		@apply text-gray-300 mb-4 leading-relaxed;
+		@apply mb-4 leading-relaxed text-gray-300;
 	}
 
 	:global(.prose ul) {
-		@apply list-disc pl-6 mb-4 space-y-2;
+		@apply mb-4 list-disc space-y-2 pl-6;
 	}
 
 	:global(.prose ol) {
-		@apply list-decimal pl-6 mb-4 space-y-2;
+		@apply mb-4 list-decimal space-y-2 pl-6;
 	}
 
 	:global(.prose li) {
@@ -67,10 +68,10 @@ const { title } = Astro.props;
 	}
 
 	:global(.prose a) {
-		@apply text-primary hover:text-primary-400 transition-colors;
+		@apply text-primary transition-colors hover:text-primary-400;
 	}
 
 	:global(.prose strong) {
-		@apply text-white font-semibold;
+		@apply font-semibold text-white;
 	}
 </style>

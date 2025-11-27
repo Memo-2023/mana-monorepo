@@ -14,7 +14,7 @@
 			icon: '/images/app-icons/memoro-logo-gradient.png',
 			color: '#f8d62b',
 			comingSoon: false,
-			status: 'published'
+			status: 'published',
 		},
 		{
 			name: 'Märchenzauber',
@@ -23,7 +23,7 @@
 			icon: '/images/app-icons/maerchenzauber-logo-gradient.png',
 			color: '#FF6B9D',
 			comingSoon: true,
-			status: 'beta'
+			status: 'beta',
 		},
 		{
 			name: 'ManaDeck',
@@ -32,7 +32,7 @@
 			icon: '/images/app-icons/manadeck-logo-gradient.png',
 			color: '#8b5cf6',
 			comingSoon: true,
-			status: 'development'
+			status: 'development',
 		},
 		{
 			name: 'Moodlit',
@@ -41,7 +41,7 @@
 			icon: '/images/app-icons/moodlit-logo-gradient.png',
 			color: '#9C27B0',
 			comingSoon: true,
-			status: 'planning'
+			status: 'planning',
 		},
 		{
 			name: 'Manacore',
@@ -50,15 +50,15 @@
 			icon: '/images/app-icons/manacore-logo-gradient.png',
 			color: '#00BCD4',
 			comingSoon: true,
-			status: 'development'
-		}
+			status: 'development',
+		},
 	]);
 
 	let statusLabels = $derived({
 		published: $t('app_slider.status_published'),
 		beta: $t('app_slider.status_beta'),
 		development: $t('app_slider.status_development'),
-		planning: $t('app_slider.status_planning')
+		planning: $t('app_slider.status_planning'),
 	});
 
 	function handleAppClick(app: AppItem, index: number) {

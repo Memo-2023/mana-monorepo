@@ -8,6 +8,6 @@
  * @returns {Object} - Steuerungsobjekt mit Methoden zum Aktualisieren und Entfernen der Steuerung
  */
 export function setupPlayerControls(canvas, player) {
-  // ...
-  return {}; // Steuerungsobjekt zurückgeben
+	// ...
+	return {}; // Steuerungsobjekt zurückgeben
 }

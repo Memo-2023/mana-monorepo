@@ -17,8 +17,8 @@
 			...module,
 			props: {
 				...module.props,
-				[key]: value
-			}
+				[key]: value,
+			},
 		});
 	}
 
@@ -32,7 +32,7 @@
 			stats: '📊',
 			actions: '⚡',
 			footer: '📌',
-			custom: '🎨'
+			custom: '🎨',
 		};
 		return icons[type] || '📦';
 	}

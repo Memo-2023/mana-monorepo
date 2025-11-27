@@ -8,17 +8,17 @@ import { WebsocketModule } from './websocket/websocket.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
-    TranscriptionModule,
-    PlaylistModule,
-    YoutubeModule,
-    WhisperModule,
-    WebsocketModule,
-    HealthModule,
-  ],
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			envFilePath: '.env',
+		}),
+		TranscriptionModule,
+		PlaylistModule,
+		YoutubeModule,
+		WhisperModule,
+		WebsocketModule,
+		HealthModule,
+	],
 })
 export class AppModule {}

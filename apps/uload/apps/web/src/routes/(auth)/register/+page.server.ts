@@ -7,7 +7,7 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ locals, url }) => {
 	// Allow creating additional accounts - check if this is an explicit additional account creation
 	const createAdditional = url.searchParams.get('additional') === 'true';
-	
+
 	// Only redirect if user is logged in AND not explicitly creating an additional account
 	if (locals.user && !createAdditional) {
 		redirect(303, '/my');
@@ -18,29 +18,32 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	if (inviteToken) {
 		try {
 			// Verify the invitation exists and is valid
-			const invitation = await locals.pb.collection('pending_invitations').getFirstListItem(
-				`token="${inviteToken}" && expires_at > "${new Date().toISOString()}" && accepted_at = null`,
-				{ expand: 'owner' }
-			);
-			
+			const invitation = await locals.pb
+				.collection('pending_invitations')
+				.getFirstListItem(
+					`token="${inviteToken}" && expires_at > "${new Date().toISOString()}" && accepted_at = null`,
+					{ expand: 'owner' }
+				);
+
 			return {
 				invitation: {
 					token: inviteToken,
 					email: invitation.email,
-					inviterName: invitation.expand?.owner?.name || invitation.expand?.owner?.email || 'Someone'
-				}
+					inviterName:
+						invitation.expand?.owner?.name || invitation.expand?.owner?.email || 'Someone',
+				},
 			};
 		} catch (err) {
 			// Invalid or expired invitation
 			console.error('Invalid invitation:', err);
 			return {
-				invitation: null
+				invitation: null,
 			};
 		}
 	}
 
 	return {
-		invitation: null
+		invitation: null,
 	};
 };
 
@@ -49,15 +52,19 @@ export const actions = {
 		console.log('[REGISTER] Registration attempt started');
 		console.log('[REGISTER] PocketBase instance exists:', !!locals.pb);
 		console.log('[REGISTER] PocketBase URL:', locals.pb?.baseUrl);
-		
+
 		const formData = await request.formData();
 		const email = (formData.get('email') as string)?.toLowerCase().trim();
 		const password = formData.get('password') as string;
 		const passwordConfirm = formData.get('passwordConfirm') as string;
 		const inviteToken = formData.get('inviteToken') as string;
 		const isAdditionalAccount = url.searchParams.get('additional') === 'true';
-		
-		console.log('[REGISTER] Form data received:', { email, hasPassword: !!password, isAdditionalAccount });
+
+		console.log('[REGISTER] Form data received:', {
+			email,
+			hasPassword: !!password,
+			isAdditionalAccount,
+		});
 
 		// Basic validation
 		if (!email || !password || !passwordConfirm) {
@@ -91,7 +98,7 @@ export const actions = {
 				email,
 				password,
 				passwordConfirm,
-				emailVisibility: true
+				emailVisibility: true,
 			};
 
 			console.log('[REGISTER] Creating user with data:', { email, emailVisibility: true });
@@ -125,8 +132,8 @@ export const actions = {
 			// Check if it's the nested data.id error (shouldn't happen anymore)
 			if (errorData?.data?.id) {
 				console.error('[REGISTER] ID validation error detected:', errorData.data.id);
-				return fail(400, { 
-					error: 'Registration configuration error. Please contact support.' 
+				return fail(400, {
+					error: 'Registration configuration error. Please contact support.',
 				});
 			}
 
@@ -155,9 +162,9 @@ export const actions = {
 
 				// In development, show the actual error
 				if (dev) {
-					return fail(400, { 
+					return fail(400, {
 						error: `Debug: ${message}`,
-						details: err?.response?.data || err?.data
+						details: err?.response?.data || err?.data,
 					});
 				}
 
@@ -167,7 +174,7 @@ export const actions = {
 					console.error('[REGISTER] Actual PocketBase error:', message);
 					console.error('[REGISTER] Full error object:', JSON.stringify(err, null, 2));
 					return fail(400, {
-						error: 'Registration failed. Please check your information and try again.'
+						error: 'Registration failed. Please check your information and try again.',
 					});
 				}
 
@@ -186,10 +193,12 @@ export const actions = {
 		if (inviteToken && newUser) {
 			try {
 				// Find the pending invitation
-				const invitation = await locals.pb.collection('pending_invitations').getFirstListItem(
-					`token="${inviteToken}" && email="${email}" && expires_at > "${new Date().toISOString()}" && accepted_at = null`,
-					{ expand: 'owner' }
-				);
+				const invitation = await locals.pb
+					.collection('pending_invitations')
+					.getFirstListItem(
+						`token="${inviteToken}" && email="${email}" && expires_at > "${new Date().toISOString()}" && accepted_at = null`,
+						{ expand: 'owner' }
+					);
 
 				// Create shared_access record
 				await locals.pb.collection('shared_access').create({
@@ -201,16 +210,16 @@ export const actions = {
 						can_delete_own_links: true,
 						can_view_analytics: false,
 						can_manage_tags: false,
-						can_export_data: false
+						can_export_data: false,
 					},
 					invitation_status: 'accepted',
-					accepted_at: new Date().toISOString()
+					accepted_at: new Date().toISOString(),
 				});
 
 				// Mark invitation as accepted
 				await locals.pb.collection('pending_invitations').update(invitation.id, {
 					accepted_at: new Date().toISOString(),
-					accepted_by: newUser.id
+					accepted_by: newUser.id,
 				});
 
 				// Notification email will be sent automatically by PocketBase hook
@@ -236,16 +245,16 @@ export const actions = {
 		// Handle redirect based on registration type
 		if (isAdditionalAccount) {
 			// For additional accounts, redirect back to /my with message
-			const message = verificationSent 
+			const message = verificationSent
 				? 'Account created! Please check your email to verify your new account.'
 				: 'Account created! You can request a verification email from the settings page.';
 			redirect(303, `/my?message=${encodeURIComponent(message)}&type=success`);
 		} else {
 			// For normal registration, redirect to login
-			const redirectUrl = inviteToken 
+			const redirectUrl = inviteToken
 				? '/login?registered=true&invited=true&email=' + encodeURIComponent(email)
 				: '/login?registered=true&email=' + encodeURIComponent(email);
 			redirect(303, redirectUrl);
 		}
-	}
+	},
 } satisfies Actions;

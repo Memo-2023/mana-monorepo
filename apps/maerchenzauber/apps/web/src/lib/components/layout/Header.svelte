@@ -11,10 +11,13 @@
 
 	// Icon paths
 	const menuIcon = 'M4 6h16M4 12h16M4 18h16';
-	const userIcon = 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z';
+	const userIcon =
+		'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z';
 </script>
 
-<header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-pink-200/50 bg-white/80 px-4 backdrop-blur-xl lg:px-6 dark:border-gray-700/50 dark:bg-gray-900/80">
+<header
+	class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-pink-200/50 bg-white/80 px-4 backdrop-blur-xl lg:px-6 dark:border-gray-700/50 dark:bg-gray-900/80"
+>
 	<!-- Left: Mobile Menu Button -->
 	<div class="flex items-center gap-4">
 		<button
@@ -43,7 +46,9 @@
 			<button
 				class="flex items-center gap-2 rounded-xl bg-gradient-to-r from-pink-100 to-purple-100 px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:from-pink-200 hover:to-purple-200 dark:from-gray-800 dark:to-gray-700 dark:text-gray-200 dark:hover:from-gray-700 dark:hover:to-gray-600"
 			>
-				<div class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white">
+				<div
+					class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white"
+				>
 					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={userIcon} />
 					</svg>

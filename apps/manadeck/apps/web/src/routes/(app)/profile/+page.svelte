@@ -26,21 +26,23 @@
 <div class="space-y-6">
 	<div>
 		<h1 class="text-3xl font-bold">Profile</h1>
-		<p class="text-muted-foreground mt-1">
-			Manage your account and settings
-		</p>
+		<p class="text-muted-foreground mt-1">Manage your account and settings</p>
 	</div>
 
 	<!-- User Info -->
 	<Card>
 		<div class="space-y-4">
 			<div class="flex items-center space-x-4">
-				<div class="h-16 w-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold">
+				<div
+					class="h-16 w-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold"
+				>
 					{authStore.user?.email?.[0].toUpperCase() || 'U'}
 				</div>
 				<div>
 					<h2 class="text-xl font-semibold">{authStore.user?.email || 'User'}</h2>
-					<p class="text-sm text-muted-foreground">Member since {new Date().toLocaleDateString()}</p>
+					<p class="text-sm text-muted-foreground">
+						Member since {new Date().toLocaleDateString()}
+					</p>
 				</div>
 			</div>
 		</div>
@@ -51,9 +53,7 @@
 		<div class="flex items-center justify-between">
 			<div>
 				<h3 class="text-lg font-semibold mb-1">Mana Credits</h3>
-				<p class="text-sm text-muted-foreground">
-					Use credits for AI features
-				</p>
+				<p class="text-sm text-muted-foreground">Use credits for AI features</p>
 			</div>
 			<div class="text-right">
 				{#if loadingCredits}

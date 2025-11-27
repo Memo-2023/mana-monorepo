@@ -1,6 +1,7 @@
 # Uload - Talking Head Video Scripts
 
 ## Video Script 1: "Der Link-Shortener, der mehr kann"
+
 **Dauer: 30-45 Sekunden**
 
 ---
@@ -23,6 +24,7 @@
 ---
 
 ## Video Script 2: "Warum ich von Linktree zu Uload gewechselt bin"
+
 **Dauer: 40-50 Sekunden**
 
 ---
@@ -48,6 +50,7 @@
 ---
 
 ## Video Script 3: "Das perfekte Tool für Creator und Teams"
+
 **Dauer: 35-45 Sekunden**
 
 ---
@@ -73,6 +76,7 @@
 ---
 
 ## Video Script 4: "QR-Codes, die richtig was können"
+
 **Dauer: 30-40 Sekunden**
 
 ---
@@ -84,7 +88,7 @@
 "Uload macht aus jedem Link einen QR-Code - in Gold, mit Passwortschutz, und Ablaufdatum!"
 
 **[Use Cases - 12 Sek]**
-"Event nur für VIPs? Passwortgeschützter QR-Code. 
+"Event nur für VIPs? Passwortgeschützter QR-Code.
 Flash-Sale? QR-Code der nach 24 Stunden abläuft.
 Limitierte Aktion? QR-Code für nur 100 Klicks!"
 
@@ -100,6 +104,7 @@ Limitierte Aktion? QR-Code für nur 100 Klicks!"
 ---
 
 ## Video Script 5: "Von 0 auf Profi-Profil in 5 Minuten"
+
 **Dauer: 35-45 Sekunden**
 
 ---
@@ -131,24 +136,28 @@ QR-Code generieren - AUTOMATISCH!"
 ## Produktions-Tipps:
 
 ### Visuelle Elemente:
+
 - **Screen-Recordings** der Features während du sprichst
 - **Grafische Overlays** für Preisvergleiche
 - **Animierte Zahlen** für Statistiken
 - **Split-Screens** für Vorher-Nachher
 
 ### Ton & Musik:
+
 - **Upbeat Background Music** (leise)
 - **Sound Effects** bei Übergängen
 - **Klare, enthusiastische Stimme**
 
 ### Call-to-Actions:
+
 - **URL einblenden**: ulo.ad
 - **QR-Code** zum Scannen
 - **"Link in Bio"** Reference
 
 ### Hashtag-Strategie:
+
 - #LinkInBio
-- #DigitalMarketing  
+- #DigitalMarketing
 - #CreatorTools
 - #TeamWork
 - #QRCode

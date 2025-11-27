@@ -34,20 +34,20 @@ export function createMockPocketBase(): MockPocketBase {
 					totalItems: 0,
 					totalPages: 0,
 					page: 1,
-					perPage: 20
+					perPage: 20,
 				})
 			),
 			getOne: vi.fn(),
 			getFirstListItem: vi.fn(() => Promise.reject(new Error('No items found'))),
-			authWithPassword: vi.fn()
+			authWithPassword: vi.fn(),
 		})),
 		authStore: {
 			isValid: false,
 			token: '',
 			model: null,
-			clear: vi.fn()
+			clear: vi.fn(),
 		},
-		baseUrl: 'http://localhost:8090'
+		baseUrl: 'http://localhost:8090',
 	};
 }
 
@@ -55,7 +55,7 @@ export function mockSuccessfulAuth(pb: MockPocketBase, user: any) {
 	const collection = pb.collection('users') as MockCollection;
 	collection.authWithPassword.mockResolvedValue({
 		token: 'mock-token',
-		record: user
+		record: user,
 	});
 	pb.authStore.isValid = true;
 	pb.authStore.token = 'mock-token';
@@ -73,7 +73,7 @@ export function mockCreateSuccess(pb: MockPocketBase, collectionName: string, da
 		...data,
 		id: 'mock-id-' + Date.now(),
 		created: new Date().toISOString(),
-		updated: new Date().toISOString()
+		updated: new Date().toISOString(),
 	});
 }
 
@@ -89,7 +89,7 @@ export function mockGetListSuccess(pb: MockPocketBase, collectionName: string, i
 		totalItems: items.length,
 		totalPages: 1,
 		page: 1,
-		perPage: 20
+		perPage: 20,
 	});
 }
 
@@ -97,7 +97,7 @@ export function mockUpdateSuccess(pb: MockPocketBase, collectionName: string, up
 	const collection = pb.collection(collectionName) as MockCollection;
 	collection.update.mockResolvedValue({
 		...updatedData,
-		updated: new Date().toISOString()
+		updated: new Date().toISOString(),
 	});
 }
 

@@ -13,7 +13,7 @@
 		template = $bindable(),
 		css = $bindable(),
 		variables = $bindable(),
-		values = $bindable()
+		values = $bindable(),
 	}: Props = $props();
 
 	// Extract variables when template changes

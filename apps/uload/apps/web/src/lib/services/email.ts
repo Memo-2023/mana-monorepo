@@ -28,10 +28,10 @@ export class EmailService {
 	static async sendTeamInvitation(data: InvitationEmailData): Promise<boolean> {
 		const appUrl = this.getBaseUrl();
 		const subject = `${data.inviterName || data.inviterEmail} hat dich zu seinem Team eingeladen / invited you to their team - ulo.ad 👥`;
-		
-		const html = data.isNewUser 
-			? this.getNewUserInvitationTemplate({...data, appUrl})
-			: this.getExistingUserInvitationTemplate({...data, appUrl});
+
+		const html = data.isNewUser
+			? this.getNewUserInvitationTemplate({ ...data, appUrl })
+			: this.getExistingUserInvitationTemplate({ ...data, appUrl });
 
 		try {
 			// Use the EmailSender to actually send the email
@@ -204,10 +204,13 @@ export class EmailService {
 </div>`;
 	}
 
-	static async sendAcceptanceNotification(inviterEmail: string, acceptedByEmail: string): Promise<boolean> {
+	static async sendAcceptanceNotification(
+		inviterEmail: string,
+		acceptedByEmail: string
+	): Promise<boolean> {
 		const subject = `${acceptedByEmail} hat deine Einladung angenommen / accepted your invitation - ulo.ad ✅`;
 		const html = this.getInvitationAcceptedTemplate(inviterEmail, acceptedByEmail);
-		
+
 		try {
 			return await EmailSender.sendEmail(inviterEmail, subject, html);
 		} catch (error) {

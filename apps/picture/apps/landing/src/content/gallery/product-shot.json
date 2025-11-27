@@ -1,44 +1,44 @@
 {
-  "title": "Premium Headphones Product Photography",
-  "slug": "premium-headphones-product",
-  "imageUrl": "/gallery/headphones-product.jpg",
-  "prompt": "Premium wireless headphones product photography, sleek black design, studio lighting, white background, professional e-commerce style, sharp focus, reflections on surface",
-  "negativePrompt": "cluttered background, poor lighting, blurry",
-  "model": "flux-1-1-pro",
-  "settings": {
-    "seed": 2024,
-    "steps": 2,
-    "guidanceScale": 3.8,
-    "width": 1024,
-    "height": 1024,
-    "aspectRatio": "1:1"
-  },
-  "category": "product",
-  "style": ["professional", "clean", "modern", "studio"],
-  "tags": ["product-photography", "headphones", "ecommerce", "studio-lighting"],
-  "creator": {
-    "name": "Picture Gallery"
-  },
-  "featured": true,
-  "trending": false,
-  "staffPick": true,
-  "published": true,
-  "likes": 678,
-  "downloads": 198,
-  "views": 2341,
-  "qualityScore": 5,
-  "nsfw": false,
-  "moderationStatus": "approved",
-  "relatedImages": ["watch-product", "perfume-bottle"],
-  "relatedTutorials": [],
-  "relatedModels": ["flux-1-1-pro"],
-  "description": "Studio-quality product photography generated with FLUX 1.1 Pro. Perfect for e-commerce listings, marketing materials, and product catalogs.",
-  "seoKeywords": ["product photography AI", "ecommerce images", "studio photography", "headphones"],
-  "createdAt": "2025-01-13T14:20:00Z",
-  "language": "en",
-  "fileSize": 1876543,
-  "dimensions": {
-    "width": 1024,
-    "height": 1024
-  }
+	"title": "Premium Headphones Product Photography",
+	"slug": "premium-headphones-product",
+	"imageUrl": "/gallery/headphones-product.jpg",
+	"prompt": "Premium wireless headphones product photography, sleek black design, studio lighting, white background, professional e-commerce style, sharp focus, reflections on surface",
+	"negativePrompt": "cluttered background, poor lighting, blurry",
+	"model": "flux-1-1-pro",
+	"settings": {
+		"seed": 2024,
+		"steps": 2,
+		"guidanceScale": 3.8,
+		"width": 1024,
+		"height": 1024,
+		"aspectRatio": "1:1"
+	},
+	"category": "product",
+	"style": ["professional", "clean", "modern", "studio"],
+	"tags": ["product-photography", "headphones", "ecommerce", "studio-lighting"],
+	"creator": {
+		"name": "Picture Gallery"
+	},
+	"featured": true,
+	"trending": false,
+	"staffPick": true,
+	"published": true,
+	"likes": 678,
+	"downloads": 198,
+	"views": 2341,
+	"qualityScore": 5,
+	"nsfw": false,
+	"moderationStatus": "approved",
+	"relatedImages": ["watch-product", "perfume-bottle"],
+	"relatedTutorials": [],
+	"relatedModels": ["flux-1-1-pro"],
+	"description": "Studio-quality product photography generated with FLUX 1.1 Pro. Perfect for e-commerce listings, marketing materials, and product catalogs.",
+	"seoKeywords": ["product photography AI", "ecommerce images", "studio photography", "headphones"],
+	"createdAt": "2025-01-13T14:20:00Z",
+	"language": "en",
+	"fileSize": 1876543,
+	"dimensions": {
+		"width": 1024,
+		"height": 1024
+	}
 }

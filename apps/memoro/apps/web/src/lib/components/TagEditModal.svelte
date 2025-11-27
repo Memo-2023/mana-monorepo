@@ -56,17 +56,15 @@
 		'#06b6d4', // cyan
 		'#f97316', // orange
 		'#14b8a6', // teal
-		'#6366f1' // indigo
+		'#6366f1', // indigo
 	];
 </script>
 
-<Modal visible={isOpen} onClose={onClose} title="Tag bearbeiten" maxWidth="md">
+<Modal visible={isOpen} {onClose} title="Tag bearbeiten" maxWidth="md">
 	{#snippet children()}
 		<!-- Tag Name -->
 		<div class="mb-6">
-			<label for="tag-name" class="mb-2 block text-sm font-medium text-theme">
-				Tag-Name
-			</label>
+			<label for="tag-name" class="mb-2 block text-sm font-medium text-theme"> Tag-Name </label>
 			<input
 				id="tag-name"
 				type="text"

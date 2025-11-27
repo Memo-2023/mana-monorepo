@@ -12,13 +12,7 @@
 		onAddTagPress?: () => void;
 	}
 
-	let {
-		memo,
-		isEditMode = false,
-		onTitleChange,
-		onIntroChange,
-		onAddTagPress
-	}: Props = $props();
+	let { memo, isEditMode = false, onTitleChange, onIntroChange, onAddTagPress }: Props = $props();
 
 	let editTitle = $state(memo.title || '');
 	let editIntro = $state(memo.intro || '');
@@ -112,7 +106,9 @@
 									<span>Dauer</span>
 								</div>
 							</td>
-							<td class="px-3 py-2 text-theme text-right">{formatDuration(getMemooDuration(memo))}</td>
+							<td class="px-3 py-2 text-theme text-right"
+								>{formatDuration(getMemooDuration(memo))}</td
+							>
 						</tr>
 
 						<!-- View Count -->
@@ -282,7 +278,9 @@
 								</div>
 							</td>
 							<td class="px-3 py-2 text-right">
-								<span class="rounded-full px-2 py-0.5 text-xs {getStatusColor(memo.processing_status)}">
+								<span
+									class="rounded-full px-2 py-0.5 text-xs {getStatusColor(memo.processing_status)}"
+								>
 									{memo.processing_status}
 								</span>
 							</td>
@@ -340,7 +338,12 @@
 					title="Tag hinzufügen"
 				>
 					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 4v16m8-8H4"
+						/>
 					</svg>
 					<span>Tag hinzufügen</span>
 				</button>

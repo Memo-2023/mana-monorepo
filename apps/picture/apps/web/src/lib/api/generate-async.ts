@@ -12,30 +12,30 @@ import type { Image } from './images';
 // ============================================================================
 
 export interface GenerationProgress {
-  generationId: string;
-  status: 'queued' | 'pending' | 'processing' | 'completed' | 'failed';
-  progress?: number; // 0-100
-  imageUrl?: string;
-  error?: string;
+	generationId: string;
+	status: 'queued' | 'pending' | 'processing' | 'completed' | 'failed';
+	progress?: number; // 0-100
+	imageUrl?: string;
+	error?: string;
 }
 
 export type GenerationCallback = (progress: GenerationProgress) => void;
 
 export interface GenerateImageJobParams {
-  prompt: string;
-  modelId: string;
-  negativePrompt?: string;
-  width?: number;
-  height?: number;
-  numInferenceSteps?: number;
-  guidanceScale?: number;
+	prompt: string;
+	modelId: string;
+	negativePrompt?: string;
+	width?: number;
+	height?: number;
+	numInferenceSteps?: number;
+	guidanceScale?: number;
 }
 
 interface GenerationStatusResponse {
-  id: string;
-  status: 'queued' | 'pending' | 'processing' | 'completed' | 'failed';
-  errorMessage?: string;
-  image?: Image;
+	id: string;
+	status: 'queued' | 'pending' | 'processing' | 'completed' | 'failed';
+	errorMessage?: string;
+	image?: Image;
 }
 
 // ============================================================================
@@ -49,23 +49,23 @@ interface GenerationStatusResponse {
  * Use pollGenerationUpdates() to monitor progress.
  */
 export async function generateImageAsync(
-  params: GenerateImageJobParams,
+	params: GenerateImageJobParams
 ): Promise<{ generationId: string }> {
-  const { data, error } = await fetchApi<{ generationId: string; status: string }>('/generate', {
-    method: 'POST',
-    body: params,
-  });
+	const { data, error } = await fetchApi<{ generationId: string; status: string }>('/generate', {
+		method: 'POST',
+		body: params,
+	});
 
-  if (error) {
-    console.error('Failed to start image generation:', error);
-    throw new Error(error.message || 'Failed to start image generation');
-  }
+	if (error) {
+		console.error('Failed to start image generation:', error);
+		throw new Error(error.message || 'Failed to start image generation');
+	}
 
-  if (!data) {
-    throw new Error('No data returned from generation endpoint');
-  }
+	if (!data) {
+		throw new Error('No data returned from generation endpoint');
+	}
 
-  return { generationId: data.generationId };
+	return { generationId: data.generationId };
 }
 
 /**
@@ -84,61 +84,61 @@ export async function generateImageAsync(
  * ```
  */
 export function pollGenerationUpdates(
-  generationId: string,
-  callback: GenerationCallback,
-  pollInterval = 2000,
+	generationId: string,
+	callback: GenerationCallback,
+	pollInterval = 2000
 ): () => void {
-  let isPolling = true;
+	let isPolling = true;
 
-  const poll = async () => {
-    while (isPolling) {
-      try {
-        const { data, error } = await fetchApi<GenerationStatusResponse>(
-          `/generate/${generationId}/status`,
-        );
+	const poll = async () => {
+		while (isPolling) {
+			try {
+				const { data, error } = await fetchApi<GenerationStatusResponse>(
+					`/generate/${generationId}/status`
+				);
 
-        if (error) {
-          callback({
-            generationId,
-            status: 'failed',
-            error: error.message,
-          });
-          break;
-        }
+				if (error) {
+					callback({
+						generationId,
+						status: 'failed',
+						error: error.message,
+					});
+					break;
+				}
 
-        if (data) {
-          const progress: GenerationProgress = {
-            generationId: data.id,
-            status: data.status,
-            progress: getProgressPercentage(data.status),
-            error: data.errorMessage,
-            imageUrl: data.image?.publicUrl,
-          };
+				if (data) {
+					const progress: GenerationProgress = {
+						generationId: data.id,
+						status: data.status,
+						progress: getProgressPercentage(data.status),
+						error: data.errorMessage,
+						imageUrl: data.image?.publicUrl,
+					};
 
-          callback(progress);
+					callback(progress);
 
-          if (data.status === 'completed' || data.status === 'failed') {
-            break;
-          }
-        }
-      } catch (err) {
-        callback({
-          generationId,
-          status: 'failed',
-          error: err instanceof Error ? err.message : 'Unknown error',
-        });
-        break;
-      }
+					if (data.status === 'completed' || data.status === 'failed') {
+						break;
+					}
+				}
+			} catch (err) {
+				callback({
+					generationId,
+					status: 'failed',
+					error: err instanceof Error ? err.message : 'Unknown error',
+				});
+				break;
+			}
 
-      await new Promise((resolve) => setTimeout(resolve, pollInterval));
-    }
-  };
+			await new Promise((resolve) => setTimeout(resolve, pollInterval));
+		}
+	};
 
-  poll();
+	poll();
 
-  return () => {
-    isPolling = false;
-  };
+	return () => {
+		isPolling = false;
+	};
 }
 
 /**
@@ -146,24 +146,24 @@ export function pollGenerationUpdates(
  * Kept for backwards compatibility
  */
 export function subscribeToGenerationUpdates(
-  generationId: string,
-  callback: GenerationCallback,
+	generationId: string,
+	callback: GenerationCallback
 ): () => void {
-  return pollGenerationUpdates(generationId, callback);
+	return pollGenerationUpdates(generationId, callback);
 }
 
 /**
  * All-in-one: Generate image and poll for updates
  */
 export async function generateWithRealtime(
-  params: GenerateImageJobParams,
-  onUpdate: GenerationCallback,
+	params: GenerateImageJobParams,
+	onUpdate: GenerationCallback
 ): Promise<{ generationId: string; unsubscribe: () => void }> {
-  const { generationId } = await generateImageAsync(params);
+	const { generationId } = await generateImageAsync(params);
 
-  const unsubscribe = pollGenerationUpdates(generationId, onUpdate);
+	const unsubscribe = pollGenerationUpdates(generationId, onUpdate);
 
-  return { generationId, unsubscribe };
+	return { generationId, unsubscribe };
 }
 
 // ============================================================================
@@ -174,58 +174,60 @@ export async function generateWithRealtime(
  * Convert status to progress percentage (for UI)
  */
 function getProgressPercentage(status: string): number {
-  switch (status) {
-    case 'queued':
-      return 10;
-    case 'pending':
-      return 20;
-    case 'processing':
-      return 50;
-    case 'completed':
-      return 100;
-    case 'failed':
-      return 0;
-    default:
-      return 0;
-  }
+	switch (status) {
+		case 'queued':
+			return 10;
+		case 'pending':
+			return 20;
+		case 'processing':
+			return 50;
+		case 'completed':
+			return 100;
+		case 'failed':
+			return 0;
+		default:
+			return 0;
+	}
 }
 
 /**
  * Get generation status (one-time check, no polling)
  */
-export async function getGenerationStatus(generationId: string): Promise<GenerationProgress | null> {
-  const { data, error } = await fetchApi<GenerationStatusResponse>(
-    `/generate/${generationId}/status`,
-  );
+export async function getGenerationStatus(
+	generationId: string
+): Promise<GenerationProgress | null> {
+	const { data, error } = await fetchApi<GenerationStatusResponse>(
+		`/generate/${generationId}/status`
+	);
 
-  if (error) {
-    console.error('Failed to get generation status:', error);
-    return null;
-  }
+	if (error) {
+		console.error('Failed to get generation status:', error);
+		return null;
+	}
 
-  if (!data) {
-    return null;
-  }
+	if (!data) {
+		return null;
+	}
 
-  return {
-    generationId: data.id,
-    status: data.status,
-    progress: getProgressPercentage(data.status),
-    error: data.errorMessage,
-    imageUrl: data.image?.publicUrl,
-  };
+	return {
+		generationId: data.id,
+		status: data.status,
+		progress: getProgressPercentage(data.status),
+		error: data.errorMessage,
+		imageUrl: data.image?.publicUrl,
+	};
 }
 
 /**
  * Cancel a pending generation
  */
 export async function cancelGeneration(generationId: string): Promise<void> {
-  const { error } = await fetchApi(`/generate/${generationId}/cancel`, {
-    method: 'POST',
-  });
+	const { error } = await fetchApi(`/generate/${generationId}/cancel`, {
+		method: 'POST',
+	});
 
-  if (error) {
-    console.error('Failed to cancel generation:', error);
-    throw new Error('Failed to cancel generation');
-  }
+	if (error) {
+		console.error('Failed to cancel generation:', error);
+		throw new Error('Failed to cancel generation');
+	}
 }

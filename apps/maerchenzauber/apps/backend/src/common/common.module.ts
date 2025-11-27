@@ -4,8 +4,8 @@ import { RequestContextService } from './services/request-context.service';
 
 @Global()
 @Module({
-  imports: [ClsModule],
-  providers: [RequestContextService],
-  exports: [RequestContextService],
+	imports: [ClsModule],
+	providers: [RequestContextService],
+	exports: [RequestContextService],
 })
 export class CommonModule {}

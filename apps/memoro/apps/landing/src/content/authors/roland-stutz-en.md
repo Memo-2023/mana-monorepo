@@ -1,16 +1,35 @@
 ---
-name: "Roland Stutz"
-displayName: "Roland Stutz"
-bio: "CFO at Memoro. Combines visionary growth strategy with solid financial planning. Startup veteran with expertise in SaaS metrics, fundraising, and sustainable corporate finance."
-role: "Chief Financial Officer"
-avatar: "/images/team/roland-stutz.jpg"
+name: 'Roland Stutz'
+displayName: 'Roland Stutz'
+bio: 'CFO at Memoro. Combines visionary growth strategy with solid financial planning. Startup veteran with expertise in SaaS metrics, fundraising, and sustainable corporate finance.'
+role: 'Chief Financial Officer'
+avatar: '/images/team/roland-stutz.jpg'
 appearance: "Dynamic man in his early 30s with short, perfectly styled black hair. His alert brown eyes radiate intelligence and determination. He usually wears modern business casual clothing - often a white shirt with rolled-up sleeves, paired with an Apple Watch and designer sneakers. His friendly smile and open body language make him approachable despite his affinity for numbers. In photos, he's often seen with his MacBook in front of multiple screens full of dashboards and metrics."
 social:
-  linkedin: "roland-stutz-cfo"
-  twitter: "rolandstutz"
-  medium: "@rolandstutz"
-expertise: ["Financial Planning", "SaaS Metrics", "Fundraising", "Venture Capital", "Growth Strategy", "Unit Economics", "Financial Modeling", "Investor Relations", "Cap Table Management", "ESG Investing"]
-topics: ["Startup Finance", "Sustainable Growth", "SaaS Economics", "Venture Funding", "Financial Transparency"]
+  linkedin: 'roland-stutz-cfo'
+  twitter: 'rolandstutz'
+  medium: '@rolandstutz'
+expertise:
+  [
+    'Financial Planning',
+    'SaaS Metrics',
+    'Fundraising',
+    'Venture Capital',
+    'Growth Strategy',
+    'Unit Economics',
+    'Financial Modeling',
+    'Investor Relations',
+    'Cap Table Management',
+    'ESG Investing',
+  ]
+topics:
+  [
+    'Startup Finance',
+    'Sustainable Growth',
+    'SaaS Economics',
+    'Venture Funding',
+    'Financial Transparency',
+  ]
 writingPrompt: "Write as visionary CFO named Roland Stutz. Your style is clear, data-driven yet accessible. You explain complex financial concepts with practical examples and metaphors. Always emphasize sustainable growth over short-term profits. Your motto: 'Numbers tell stories - you just have to know how to read them.' Be enthusiastic about metrics, but never lose sight of the people behind the numbers."
 isActive: true
 isFeatured: true
@@ -24,9 +43,9 @@ stats:
   totalViews: 42000
   totalLikes: 2800
   joinedDate: 2024-02-01
-lang: "en"
-preferredLanguages: ["de", "en"]
-slug: "roland-stutz"
+lang: 'en'
+preferredLanguages: ['de', 'en']
+slug: 'roland-stutz'
 createdAt: 2024-02-01
 lastActive: 2025-07-28
 ---
@@ -46,6 +65,7 @@ With a background in Business Informatics (ETH Zurich) and an MBA from INSEAD, R
 Roland's approach is revolutionary and traditional at once:
 
 ### Core Principles
+
 1. **Radical Transparency**: Open books for all employees
 2. **Metrics that Matter**: Focus on sustainable KPIs, not vanity metrics
 3. **Growth with Purpose**: Growth must serve the product, not vice versa
@@ -54,21 +74,25 @@ Roland's approach is revolutionary and traditional at once:
 ### His Innovations at Memoro
 
 **1. The "Open Dashboard"**
+
 - Real-time metrics for all team members
 - Weekly Finance Standups
 - Quarterly "State of the Finances" All-Hands
 
 **2. Sustainable Unit Economics**
+
 - LTV:CAC ratio of 4:1 as minimum target
 - Negative churn through product excellence
 - Reinvestment in R&D and team
 
 **3. Innovative Financing Models**
+
 - Revenue-based financing options
 - Employee participation program (everyone becomes a stakeholder)
 - ESG-focused investors
 
 **4. Financial Education Program**
+
 - "Finance for Non-Finance" workshops
 - Mentoring for team members
 - Transparent decision processes
@@ -76,6 +100,7 @@ Roland's approach is revolutionary and traditional at once:
 ## Collaboration in the Leadership Team
 
 Roland works closely with:
+
 - **Till & Nils**: Aligning product vision and financial strategy
 - **Victoria**: Product roadmap vs. budget allocation
 - **Dr. Simon**: ROI of AI investments
@@ -98,6 +123,7 @@ Roland works closely with:
 ## The Person Behind the Numbers
 
 Outside of spreadsheets:
+
 - **Mountain biking**: Best ideas come on the trail
 - **Angel Investing**: Supporting other founders
 - **Culinary arts**: Loves experimenting (like with financial models)

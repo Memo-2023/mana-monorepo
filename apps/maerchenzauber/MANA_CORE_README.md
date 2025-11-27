@@ -7,10 +7,13 @@ Complete documentation for integrating the `@mana-core/nestjs-integration` packa
 This documentation suite includes four comprehensive guides:
 
 ### 1. **This File** - Quick Start & Overview
+
 Start here for a high-level understanding and quick reference.
 
 ### 2. **[Integration Guide](./MANA_CORE_INTEGRATION_GUIDE.md)** - Complete Implementation Guide
+
 📖 **70+ pages** of detailed step-by-step instructions covering:
+
 - Installation and setup
 - Backend integration with code examples
 - Frontend integration (React Native/Expo)
@@ -22,7 +25,9 @@ Start here for a high-level understanding and quick reference.
 **Use this when**: You're implementing Mana Core for the first time or need detailed explanations.
 
 ### 3. **[Integration Checklist](./MANA_CORE_INTEGRATION_CHECKLIST.md)** - Step-by-Step Checklist
+
 ✅ **Actionable checklist** with checkboxes covering:
+
 - Prerequisites verification
 - Backend integration steps
 - Frontend integration steps
@@ -33,7 +38,9 @@ Start here for a high-level understanding and quick reference.
 **Use this when**: You want a quick reference while implementing or to verify nothing was missed.
 
 ### 4. **[Architecture Guide](./MANA_CORE_ARCHITECTURE.md)** - Visual Architecture & Data Flow
+
 🎨 **Visual diagrams and architecture** explaining:
+
 - System architecture
 - Authentication flows
 - Credit management flows
@@ -50,6 +57,7 @@ Start here for a high-level understanding and quick reference.
 ### What is Mana Core?
 
 Mana Core is a centralized authentication and credit management system that provides:
+
 - **Authentication**: Email/password, Google OAuth, Apple Sign-in
 - **JWT Token Management**: Automatic validation, refresh, and multi-device support
 - **Credit System**: Pre-flight validation, consumption tracking, and billing
@@ -57,12 +65,12 @@ Mana Core is a centralized authentication and credit management system that prov
 
 ### How Storyteller Uses It
 
-| Feature | Implementation | Credits |
-|---------|---------------|---------|
-| **User Authentication** | Email/password + OAuth | Free |
-| **Character Creation** | AI image generation (3 variants) | 20 credits |
-| **Story Creation** | 10-page illustrated story + translation | 100 credits |
-| **Protected Routes** | All character/story endpoints | Via AuthGuard |
+| Feature                 | Implementation                          | Credits       |
+| ----------------------- | --------------------------------------- | ------------- |
+| **User Authentication** | Email/password + OAuth                  | Free          |
+| **Character Creation**  | AI image generation (3 variants)        | 20 credits    |
+| **Story Creation**      | 10-page illustrated story + translation | 100 credits   |
+| **Protected Routes**    | All character/story endpoints           | Via AuthGuard |
 
 ### Integration Time
 
@@ -87,6 +95,7 @@ npm install git+https://github.com/Memo-2023/mana-core-nestjs-package.git
 ### 1. Environment Variables
 
 **Backend `.env`**:
+
 ```env
 MANA_SERVICE_URL=https://mana-core-middleware-111768794939.europe-west3.run.app
 APP_ID=your-app-id
@@ -96,6 +105,7 @@ PORT=3002
 ```
 
 **Frontend `.env`**:
+
 ```env
 EXPO_PUBLIC_STORYTELLER_BACKEND_URL=http://localhost:3002
 ```
@@ -103,6 +113,7 @@ EXPO_PUBLIC_STORYTELLER_BACKEND_URL=http://localhost:3002
 ### 2. Module Setup
 
 **`backend/src/app.module.ts`**:
+
 ```typescript
 import { ManaCoreModule } from '@mana-core/nestjs-integration';
 
@@ -130,18 +141,12 @@ export class AppModule {}
 ### Backend Controller
 
 ```typescript
-import {
-  AuthGuard,
-  CurrentUser,
-  CreditClientService,
-} from '@mana-core/nestjs-integration';
+import { AuthGuard, CurrentUser, CreditClientService } from '@mana-core/nestjs-integration';
 
 @Controller('character')
-@UseGuards(AuthGuard)  // Protect all routes
+@UseGuards(AuthGuard) // Protect all routes
 export class CharacterController {
-  constructor(
-    private readonly creditClient: CreditClientService,
-  ) {}
+  constructor(private readonly creditClient: CreditClientService) {}
 
   @Get()
   async getCharacters(@CurrentUser() user: JwtPayload) {
@@ -164,7 +169,7 @@ export async function fetchWithAuth(endpoint: string, options = {}) {
     ...options,
     headers: {
       ...options.headers,
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -257,7 +262,7 @@ Protects routes automatically:
 
 ```typescript
 @Controller('protected')
-@UseGuards(AuthGuard)  // All routes require authentication
+@UseGuards(AuthGuard) // All routes require authentication
 export class ProtectedController {}
 ```
 
@@ -285,20 +290,10 @@ Manages credits:
 
 ```typescript
 // Validate before operation
-const validation = await this.creditClient.validateCredits(
-  userId,
-  'operation_type',
-  amount,
-);
+const validation = await this.creditClient.validateCredits(userId, 'operation_type', amount);
 
 // Consume after success
-await this.creditClient.consumeCredits(
-  userId,
-  'operation_type',
-  amount,
-  'Description',
-  metadata,
-);
+await this.creditClient.consumeCredits(userId, 'operation_type', amount, 'Description', metadata);
 
 // Check balance
 const balance = await this.creditClient.getCreditBalance(userId);
@@ -308,10 +303,10 @@ const balance = await this.creditClient.getCreditBalance(userId);
 
 ## 📊 Storyteller Credit Costs
 
-| Operation | Cost | What's Included |
-|-----------|------|-----------------|
-| **Character Creation** | 20 credits | 3 AI-generated image variants |
-| **Story Creation** | 100 credits | 10-page illustrated story + German translation |
+| Operation              | Cost        | What's Included                                |
+| ---------------------- | ----------- | ---------------------------------------------- |
+| **Character Creation** | 20 credits  | 3 AI-generated image variants                  |
+| **Story Creation**     | 100 credits | 10-page illustrated story + German translation |
 
 ---
 
@@ -359,6 +354,7 @@ Mobile App
 ### Sign In
 
 **Backend** (Auto-provided by Mana Core):
+
 ```
 POST /auth/signin
 {
@@ -369,6 +365,7 @@ POST /auth/signin
 ```
 
 **Frontend**:
+
 ```typescript
 const result = await authService.signIn(email, password);
 if (result.success) {
@@ -391,11 +388,7 @@ async getStories(@CurrentUser() user: JwtPayload) {
 ### Credit Validation
 
 ```typescript
-const validation = await this.creditClient.validateCredits(
-  user.sub,
-  'story_creation',
-  100,
-);
+const validation = await this.creditClient.validateCredits(user.sub, 'story_creation', 100);
 
 if (!validation.hasCredits) {
   throw new BadRequestException({
@@ -431,9 +424,7 @@ if (!validation.hasCredits) {
 
 ```typescript
 it('should require authentication', () => {
-  return request(app.getHttpServer())
-    .get('/character')
-    .expect(401);
+  return request(app.getHttpServer()).get('/character').expect(401);
 });
 
 it('should return data with valid token', () => {
@@ -448,12 +439,12 @@ it('should return data with valid token', () => {
 
 ## 🚨 Common Issues
 
-| Issue | Solution |
-|-------|----------|
-| **401 Unauthorized** | Check token expiration, verify service key |
-| **Credit validation fails** | Verify service key, check user balance |
+| Issue                         | Solution                                      |
+| ----------------------------- | --------------------------------------------- |
+| **401 Unauthorized**          | Check token expiration, verify service key    |
+| **Credit validation fails**   | Verify service key, check user balance        |
 | **Token refresh not working** | Verify device info is sent, check backend URL |
-| **Module not found** | Re-install package from GitHub |
+| **Module not found**          | Re-install package from GitHub                |
 
 See [Integration Guide](./MANA_CORE_INTEGRATION_GUIDE.md#troubleshooting) for detailed troubleshooting.
 
@@ -514,20 +505,20 @@ MANA_CORE_README.md                    ← You are here (Quick start)
 
 ### Backend
 
-| File | Purpose |
-|------|---------|
-| `backend/src/app.module.ts` | Mana Core module configuration |
+| File                                            | Purpose                          |
+| ----------------------------------------------- | -------------------------------- |
+| `backend/src/app.module.ts`                     | Mana Core module configuration   |
 | `backend/src/character/character.controller.ts` | AuthGuard + Credit usage example |
-| `backend/src/story/story.controller.ts` | Credit validation + consumption |
-| `backend/src/decorators/user.decorator.ts` | Custom @UserToken() for RLS |
+| `backend/src/story/story.controller.ts`         | Credit validation + consumption  |
+| `backend/src/decorators/user.decorator.ts`      | Custom @UserToken() for RLS      |
 
 ### Frontend
 
-| File | Purpose |
-|------|---------|
-| `mobile/src/utils/api.ts` | API client with auto-refresh |
-| `mobile/src/services/authService.ts` | Sign-in, sign-up, sign-out |
-| `mobile/src/services/tokenManager.ts` | Token management |
+| File                                  | Purpose                      |
+| ------------------------------------- | ---------------------------- |
+| `mobile/src/utils/api.ts`             | API client with auto-refresh |
+| `mobile/src/services/authService.ts`  | Sign-in, sign-up, sign-out   |
+| `mobile/src/services/tokenManager.ts` | Token management             |
 
 ---
 
@@ -565,6 +556,7 @@ MANA_CORE_README.md                    ← You are here (Quick start)
 ### Contributing
 
 If you find issues or improvements in this documentation:
+
 1. Create a pull request
 2. Open an issue
 3. Contact the team

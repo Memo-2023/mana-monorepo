@@ -7,6 +7,7 @@ Diese Anleitung beschreibt den Upgrade-Prozess von Expo SDK 53 auf SDK 54 für d
 ## Wichtige Änderungen in SDK 54
 
 ### Hauptversionen
+
 - **React Native**: 0.79.5 → 0.81.x
 - **React**: 19.0.0 → 19.1.x
 - **Reanimated**: v3 → v4 (optional)
@@ -37,6 +38,7 @@ Diese Anleitung beschreibt den Upgrade-Prozess von Expo SDK 53 auf SDK 54 für d
 ### 1. Vorbereitung
 
 Erstelle ein Backup deines Projekts:
+
 ```bash
 git add .
 git commit -m "Backup vor SDK 54 Upgrade"
@@ -59,6 +61,7 @@ npx expo-doctor@latest
 ### 3. React und React Native aktualisieren
 
 Da SDK 54 React Native 0.81 und React 19.1 benötigt:
+
 ```bash
 npm install react@19.1.0 react-native@0.81.x
 ```
@@ -110,6 +113,7 @@ npx expo install \
 Falls das Projekt `expo-file-system` nutzt:
 
 **Quick Migration (Legacy API behalten):**
+
 ```typescript
 // Alt:
 import * as FileSystem from 'expo-file-system';
@@ -119,6 +123,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 ```
 
 **Oder zur neuen API migrieren:**
+
 ```typescript
 // Neue API verwenden
 import * as FileSystem from 'expo-file-system';
@@ -127,6 +132,7 @@ import * as FileSystem from 'expo-file-system';
 ### 6. Native Projekte aktualisieren
 
 **Wenn Continuous Native Generation verwendet wird:**
+
 ```bash
 # Alte native Verzeichnisse löschen
 rm -rf android ios
@@ -136,6 +142,7 @@ npx expo prebuild --clean
 ```
 
 **Wenn eigene native Projekte vorhanden sind:**
+
 ```bash
 # iOS Pods aktualisieren
 cd ios && pod install && cd ..
@@ -147,19 +154,20 @@ cd ios && pod install && cd ..
 ### 7. EAS Build Configuration
 
 Update `eas.json` falls nötig:
+
 ```json
 {
-  "build": {
-    "development": {
-      "node": "20.19.1"
-    },
-    "preview": {
-      "node": "20.19.1"
-    },
-    "production": {
-      "node": "20.19.1"
-    }
-  }
+	"build": {
+		"development": {
+			"node": "20.19.1"
+		},
+		"preview": {
+			"node": "20.19.1"
+		},
+		"production": {
+			"node": "20.19.1"
+		}
+	}
 }
 ```
 
@@ -199,6 +207,7 @@ npm run build:dev
 ## Troubleshooting
 
 ### Problem: Metro Bundler Fehler
+
 ```bash
 # Metro Cache löschen
 npx expo start --clear
@@ -206,14 +215,17 @@ rm -rf node_modules/.cache/metro
 ```
 
 ### Problem: iOS Build schlägt fehl
+
 - Xcode 16.1 oder höher erforderlich
 - iOS Deployment Target prüfen
 
 ### Problem: Reanimated Fehler
+
 - Bei Problemen mit v4: Bei v3 bleiben
 - Babel Config prüfen (babel-preset-expo handled das automatisch)
 
 ### Problem: TypeScript Fehler
+
 ```bash
 # TypeScript neu konfigurieren
 npx expo customize tsconfig.json
@@ -222,6 +234,7 @@ npx expo customize tsconfig.json
 ## Rollback bei Problemen
 
 Falls das Upgrade fehlschlägt:
+
 ```bash
 git checkout backup-sdk-53
 npm install
@@ -237,6 +250,7 @@ npm install
 ## Nächste Schritte nach dem Upgrade
 
 1. **New Architecture aktivieren** (empfohlen für SDK 54):
+
    ```bash
    npx expo prebuild --clean
    ```
@@ -250,6 +264,7 @@ npm install
 ## Support
 
 Bei Problemen:
+
 - [Expo Discord](https://chat.expo.dev)
 - [GitHub Issues](https://github.com/expo/expo/issues)
 - [Stack Overflow](https://stackoverflow.com/questions/tagged/expo)

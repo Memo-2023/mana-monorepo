@@ -111,7 +111,7 @@ export function createCache<T = string>(config: CacheConfig) {
 					id,
 					data,
 					expires: Date.now() + expiresInMs,
-					createdAt: Date.now()
+					createdAt: Date.now(),
 				};
 
 				store.put(entry);
@@ -180,7 +180,7 @@ export function createCache<T = string>(config: CacheConfig) {
 		async has(id: string): Promise<boolean> {
 			const data = await this.get(id);
 			return data !== null;
-		}
+		},
 	};
 }
 
@@ -188,7 +188,7 @@ export function createCache<T = string>(config: CacheConfig) {
 const DEFAULT_URL_CACHE_CONFIG: CacheConfig = {
 	dbName: 'manacore-cache',
 	storeName: 'urls',
-	version: 1
+	version: 1,
 };
 
 /**

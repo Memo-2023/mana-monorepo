@@ -8,27 +8,27 @@ import * as path from 'path';
 import { Author } from '../services/contentLoader';
 
 function loadAuthors(lang: 'de' | 'en'): Author[] {
-  const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const match = content.match(/export const authors[A-Z]{2}: Author\[\] = (\[[\s\S]*\]);/);
-  return eval(match[1]) as Author[];
+	const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
+	const content = fs.readFileSync(filePath, 'utf-8');
+	const match = content.match(/export const authors[A-Z]{2}: Author\[\] = (\[[\s\S]*\]);/);
+	return eval(match[1]) as Author[];
 }
 
 function writeAuthors(authors: Author[], lang: 'de' | 'en'): void {
-  const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
-  const backupPath = filePath.replace('.ts', `.backup-${Date.now()}.ts`);
-  fs.copyFileSync(filePath, backupPath);
-  const authorsJson = JSON.stringify(authors, null, 2);
-  const tsContent = `import { Author } from '../../contentLoader';
+	const filePath = path.join(__dirname, `../services/data/authors/${lang}.ts`);
+	const backupPath = filePath.replace('.ts', `.backup-${Date.now()}.ts`);
+	fs.copyFileSync(filePath, backupPath);
+	const authorsJson = JSON.stringify(authors, null, 2);
+	const tsContent = `import { Author } from '../../contentLoader';
 
 export const authors${lang.toUpperCase()}: Author[] = ${authorsJson};
 `;
-  fs.writeFileSync(filePath, tsContent, 'utf-8');
-  console.log(`✅ ${lang}.ts aktualisiert`);
+	fs.writeFileSync(filePath, tsContent, 'utf-8');
+	console.log(`✅ ${lang}.ts aktualisiert`);
 }
 
 const batch3Bios: Record<string, string> = {
-  'lee-bruce': `# Bruce Lee
+	'lee-bruce': `# Bruce Lee
 *27. November 1940 - 20. Juli 1973*
 
 ## Kurzbiografie
@@ -259,7 +259,7 @@ Seine Größe lag in der Verbindung scheinbar unvereinbarer Welten: Tradition un
 
 Der frühe Tod verwandelte eine aufsteigende Karriere in einen Mythos. Aber auch ohne Tod wäre sein Einfluss revolutionär gewesen. Bruce Lee lehrte, dass Grenzen - kulturelle, physische, philosophische - nur im Kopf existieren. Seine Botschaft bleibt zeitlos: Sei du selbst, aber die beste Version davon.`,
 
-  'chaplin-charlie': `# Charlie Chaplin
+	'chaplin-charlie': `# Charlie Chaplin
 *16. April 1889 - 25. Dezember 1977*
 
 ## Kurzbiografie
@@ -445,7 +445,7 @@ Von den Londoner Slums zum Weltstar, von Hollywood-Liebling zum politischen Flü
 
 Der Tramp watschelt durch die Geschichte - Symbol für alle, die trotz allem weitermachen, lächeln und hoffen. Das ist Charlie Chaplins unsterbliches Geschenk.`,
 
-  'ben-gurion-david': `# David Ben-Gurion
+	'ben-gurion-david': `# David Ben-Gurion
 *16. Oktober 1886 - 1. Dezember 1973*
 
 ## Kurzbiografie
@@ -666,7 +666,7 @@ Ohne Ben-Gurion kein Israel in 1948. Seine Willenskraft, strategische Intelligen
 
 Israel heute - demokratisch, wirtschaftlich erfolgreich, militärisch stark, aber auch im Konflikt - trägt Ben-Gurions Stempel: Seine Stärken UND seine Ambivalenzen. Das Urteil über ihn bleibt komplex, wie der Staat, den er schuf.`,
 
-  'rousseau-jean': `# Jean-Jacques Rousseau
+	'rousseau-jean': `# Jean-Jacques Rousseau
 *28. Juni 1712 - 2. Juli 1778*
 
 ## Kurzbiografie
@@ -921,48 +921,48 @@ Seine zentrale Einsicht bleibt: Moderne Gesellschaft entfremdet. Freiheit erford
 };
 
 async function main() {
-  console.log('📝 Batch 3: Bruce Lee, Charlie Chaplin, Ben-Gurion, Rousseau\n');
+	console.log('📝 Batch 3: Bruce Lee, Charlie Chaplin, Ben-Gurion, Rousseau\n');
 
-  const authorsDE = loadAuthors('de');
-  const authorsEN = loadAuthors('en');
+	const authorsDE = loadAuthors('de');
+	const authorsEN = loadAuthors('en');
 
-  let updated = 0;
+	let updated = 0;
 
-  const updatedDE = authorsDE.map(author => {
-    if (batch3Bios[author.id]) {
-      console.log(`✅ ${author.name} (${author.id})`);
-      updated++;
-      return {
-        ...author,
-        biography: {
-          ...author.biography,
-          long: batch3Bios[author.id]
-        }
-      };
-    }
-    return author;
-  });
+	const updatedDE = authorsDE.map((author) => {
+		if (batch3Bios[author.id]) {
+			console.log(`✅ ${author.name} (${author.id})`);
+			updated++;
+			return {
+				...author,
+				biography: {
+					...author.biography,
+					long: batch3Bios[author.id],
+				},
+			};
+		}
+		return author;
+	});
 
-  const updatedEN = authorsEN.map(author => {
-    const deAuthor = updatedDE.find(a => a.id === author.id);
-    if (deAuthor?.biography?.long && batch3Bios[author.id]) {
-      return {
-        ...author,
-        biography: {
-          ...author.biography,
-          long: deAuthor.biography.long
-        }
-      };
-    }
-    return author;
-  });
+	const updatedEN = authorsEN.map((author) => {
+		const deAuthor = updatedDE.find((a) => a.id === author.id);
+		if (deAuthor?.biography?.long && batch3Bios[author.id]) {
+			return {
+				...author,
+				biography: {
+					...author.biography,
+					long: deAuthor.biography.long,
+				},
+			};
+		}
+		return author;
+	});
 
-  console.log(`\n📊 ${updated} Biografien hinzugefügt\n`);
+	console.log(`\n📊 ${updated} Biografien hinzugefügt\n`);
 
-  writeAuthors(updatedDE, 'de');
-  writeAuthors(updatedEN, 'en');
+	writeAuthors(updatedDE, 'de');
+	writeAuthors(updatedEN, 'en');
 
-  console.log('\n✨ Batch 3 fertig!\n');
+	console.log('\n✨ Batch 3 fertig!\n');
 }
 
 main();

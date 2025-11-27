@@ -1,13 +1,10 @@
 {
-  "expo": {
-    "name": "storyteller-monorepo",
-    "slug": "storyteller-monorepo",
-    "version": "1.0.0",
-    "description": "Storyteller project containing frontend and backend",
-    "sdkVersion": "51.0.0",
-    "platforms": [
-      "ios",
-      "android"
-    ]
-  }
+	"expo": {
+		"name": "storyteller-monorepo",
+		"slug": "storyteller-monorepo",
+		"version": "1.0.0",
+		"description": "Storyteller project containing frontend and backend",
+		"sdkVersion": "51.0.0",
+		"platforms": ["ios", "android"]
+	}
 }

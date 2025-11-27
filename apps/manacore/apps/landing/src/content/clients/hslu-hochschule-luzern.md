@@ -5,27 +5,27 @@ industry: Bildung & Forschung
 size: enterprise
 location: Luzern, Schweiz
 testimonial:
-  quote: "Mit Mana haben wir eine kosteneffiziente Lösung gefunden, die unseren Studierenden und Forschenden Zugang zu modernsten KI-Tools ermöglicht. Die Flexibilität des Credit-Systems ist perfekt für unsere vielfältigen Anforderungen."
+  quote: 'Mit Mana haben wir eine kosteneffiziente Lösung gefunden, die unseren Studierenden und Forschenden Zugang zu modernsten KI-Tools ermöglicht. Die Flexibilität des Credit-Systems ist perfekt für unsere vielfältigen Anforderungen.'
   author: Prof. Dr. Michael Steiner
   role: Prorektor Forschung
   image: /images/clients/prof-steiner.jpg
 stats:
-  - value: "1.800"
-    label: "Aktive Nutzer"
-  - value: "40%"
-    label: "Kosteneinsparung"
-  - value: "6"
-    label: "Departemente"
-challenge: "Die Hochschule Luzern benötigte eine einheitliche KI-Plattform für verschiedene Departemente mit unterschiedlichen Anforderungen - von Design bis Informatik."
-solution: "Implementierung von Mana mit departementspezifischen Kontingenten und zentraler Verwaltung durch die IT-Abteilung."
+  - value: '1.800'
+    label: 'Aktive Nutzer'
+  - value: '40%'
+    label: 'Kosteneinsparung'
+  - value: '6'
+    label: 'Departemente'
+challenge: 'Die Hochschule Luzern benötigte eine einheitliche KI-Plattform für verschiedene Departemente mit unterschiedlichen Anforderungen - von Design bis Informatik.'
+solution: 'Implementierung von Mana mit departementspezifischen Kontingenten und zentraler Verwaltung durch die IT-Abteilung.'
 results:
-  - "Standardisierter KI-Zugang über alle Departemente"
-  - "Erhöhte Forschungsproduktivität"
-  - "Verbesserte Lehrmethoden mit KI-Integration"
-  - "Transparente Kostenübersicht pro Departement"
+  - 'Standardisierter KI-Zugang über alle Departemente'
+  - 'Erhöhte Forschungsproduktivität'
+  - 'Verbesserte Lehrmethoden mit KI-Integration'
+  - 'Transparente Kostenübersicht pro Departement'
 manaUsage:
   monthlyCredits: 350000
-  mainTools: ["ChatGPT", "Claude", "Midjourney", "DALL-E", "GitHub Copilot"]
+  mainTools: ['ChatGPT', 'Claude', 'Midjourney', 'DALL-E', 'GitHub Copilot']
   teamSize: 1800
 featured: true
 order: 2

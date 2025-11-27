@@ -30,7 +30,7 @@
 		autocomplete,
 		class: className = '',
 		id = `input-${Math.random().toString(36).slice(2, 9)}`,
-		name
+		name,
 	}: Props = $props();
 
 	function handleInput(e: Event) {
@@ -70,7 +70,7 @@
 			? 'border-red-500 focus:ring-red-500/50'
 			: 'border-theme'}"
 	/>
-	
+
 	{#if error}
 		<p class="text-sm text-red-500">{error}</p>
 	{/if}

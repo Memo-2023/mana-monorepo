@@ -20,7 +20,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 
 	return {
-		user: locals.user
+		user: locals.user,
 	};
 };
 
@@ -88,7 +88,7 @@ export const actions = {
 			console.log('[SETUP-USERNAME] PB auth valid before update:', locals.pb?.authStore?.isValid);
 
 			const updatedUser = await locals.pb.collection('users').update(locals.user.id, {
-				username: username
+				username: username,
 			});
 
 			console.log('[SETUP-USERNAME] Update successful:', updatedUser.id, updatedUser.username);
@@ -126,7 +126,7 @@ export const actions = {
 					response: (err as any).response,
 					data: (err as any).data,
 					status: (err as any).status,
-					originalError: (err as any).originalError
+					originalError: (err as any).originalError,
 				});
 
 				// Return more specific error message if available
@@ -141,5 +141,5 @@ export const actions = {
 			}
 			return fail(500, { error: 'Fehler beim Setzen des Usernamens' });
 		}
-	}
+	},
 } satisfies Actions;

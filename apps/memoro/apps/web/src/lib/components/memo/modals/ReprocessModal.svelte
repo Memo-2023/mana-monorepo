@@ -37,7 +37,7 @@
 		languages,
 		onClose,
 		onReprocess,
-		isProcessing = false
+		isProcessing = false,
 	}: Props = $props();
 
 	let selectedLanguage = $state(currentLanguage);
@@ -129,9 +129,7 @@
 						<option value={language.code}>{language.name}</option>
 					{/each}
 				</select>
-				<p class="text-xs text-theme-muted">
-					Change the language for transcription and analysis
-				</p>
+				<p class="text-xs text-theme-muted">Change the language for transcription and analysis</p>
 			</div>
 
 			<!-- Blueprint Selection -->
@@ -203,9 +201,7 @@
 							/>
 						</svg>
 						<div class="flex-1">
-							<p class="text-sm font-medium text-blue-800 dark:text-blue-200">
-								Changes detected
-							</p>
+							<p class="text-sm font-medium text-blue-800 dark:text-blue-200">Changes detected</p>
 							<ul class="text-xs text-blue-700 dark:text-blue-300 mt-1 space-y-0.5">
 								{#if selectedLanguage !== currentLanguage}
 									<li>• Language will be changed</li>

@@ -1,13 +1,13 @@
 ---
-name: "Julia Hoffmann"
-role: "Content Creatorin"
-company: "Instagram @juliacreates"
-avatar: "/testimonials/julia-hoffmann.jpg"
+name: 'Julia Hoffmann'
+role: 'Content Creatorin'
+company: 'Instagram @juliacreates'
+avatar: '/testimonials/julia-hoffmann.jpg'
 rating: 5
 featured: true
-category: "content-creator"
-useCase: "Täglicher Instagram und TikTok Content"
-language: "de"
+category: 'content-creator'
+useCase: 'Täglicher Instagram und TikTok Content'
+language: 'de'
 date: 2024-09-18
 verified: true
 ---

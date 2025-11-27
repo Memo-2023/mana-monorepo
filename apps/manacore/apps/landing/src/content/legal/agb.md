@@ -45,6 +45,7 @@ Verträge für Privatpersonen und Unternehmen unterliegen diesen AGB. Für Bildu
 ### 3.2 Erwerb von Credits
 
 Credits können erworben werden durch:
+
 - Einmalkauf
 - Abonnements mit automatischer Regeneration
 - Sonderaktionen und Promotions
@@ -58,6 +59,7 @@ Alle Preise verstehen sich inklusive der gesetzlichen Mehrwertsteuer. Preisände
 ### 4.1 Bestimmungsgemäße Nutzung
 
 Die Services dürfen nur für legale Zwecke genutzt werden. Insbesondere untersagt ist:
+
 - Erstellung illegaler oder schädlicher Inhalte
 - Verstoß gegen Urheberrechte oder andere Schutzrechte
 - Spam oder Belästigung
@@ -92,6 +94,7 @@ Bei Abonnements regenerieren sich Credits täglich bis zum vereinbarten Speicher
 ### 6.1 Verwaltung
 
 Der Account-Inhaber ist verantwortlich für:
+
 - Verwaltung der Nutzer
 - Verteilung der Credits
 - Einhaltung der AGB durch alle Nutzer
@@ -125,6 +128,7 @@ Alle Rechte an der Mana-Plattform, dem Design und der Marke verbleiben bei uns.
 ### 9.1 Haftungsbeschränkung
 
 Wir haften unbeschränkt bei:
+
 - Vorsatz und grober Fahrlässigkeit
 - Verletzung von Leben, Körper oder Gesundheit
 - Übernahme einer Garantie
@@ -201,4 +205,4 @@ Telefon: [Telefonnummer]
 
 ---
 
-*Stand: Januar 2024*
+_Stand: Januar 2024_

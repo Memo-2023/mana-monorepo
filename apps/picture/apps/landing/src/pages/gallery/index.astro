@@ -20,15 +20,17 @@ const stats = await getGalleryStats();
 
 const pageTitle = 'AI Image Gallery - Stunning Examples | Picture';
 const pageDescription =
-	'Explore our gallery of AI-generated images. Get inspired by stunning examples, see what\'s possible, and discover prompts used to create them.';
+	"Explore our gallery of AI-generated images. Get inspired by stunning examples, see what's possible, and discover prompts used to create them.";
 ---
 
 <Layout title={pageTitle} description={pageDescription}>
-	<main class="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+	<main
+		class="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800"
+	>
 		<!-- Hero Section -->
 		<section class="px-6 py-16 text-center">
 			<div class="mx-auto max-w-4xl">
-				<h1 class="mb-4 text-5xl font-bold text-gray-900 dark:text-white md:text-6xl">
+				<h1 class="mb-4 text-5xl font-bold text-gray-900 md:text-6xl dark:text-white">
 					AI Image Gallery
 				</h1>
 				<p class="mb-8 text-xl text-gray-600 dark:text-gray-300">
@@ -38,7 +40,7 @@ const pageDescription =
 
 				<!-- Stats -->
 				<div
-					class="mx-auto grid max-w-3xl grid-cols-2 gap-4 rounded-2xl bg-white p-6 shadow-lg dark:bg-gray-800 md:grid-cols-4"
+					class="mx-auto grid max-w-3xl grid-cols-2 gap-4 rounded-2xl bg-white p-6 shadow-lg md:grid-cols-4 dark:bg-gray-800"
 				>
 					<div>
 						<div class="text-3xl font-bold text-blue-600">{stats.totalImages}</div>

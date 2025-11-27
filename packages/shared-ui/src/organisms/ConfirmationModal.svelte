@@ -67,7 +67,7 @@
 		message,
 		confirmLabel = 'Confirm',
 		cancelLabel = 'Cancel',
-		loading = false
+		loading = false,
 	}: Props = $props();
 
 	const variantConfig: Record<
@@ -77,18 +77,18 @@
 		danger: {
 			iconName: 'alert-triangle',
 			iconColor: 'text-red-500',
-			buttonVariant: 'danger'
+			buttonVariant: 'danger',
 		},
 		warning: {
 			iconName: 'alert-circle',
 			iconColor: 'text-yellow-500',
-			buttonVariant: 'primary'
+			buttonVariant: 'primary',
 		},
 		info: {
 			iconName: 'info',
 			iconColor: 'text-blue-500',
-			buttonVariant: 'primary'
-		}
+			buttonVariant: 'primary',
+		},
 	};
 
 	const config = $derived(variantConfig[variant]);

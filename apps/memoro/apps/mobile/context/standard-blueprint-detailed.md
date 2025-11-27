@@ -9,6 +9,7 @@ Der **Standard-Analyse Blueprint** ist die zentrale Analysevorlage in der Memoro
 ## Warum Standard-Analyse?
 
 Dieser Blueprint ist die Standardauswahl, weil er die wichtigsten Aspekte eines jeden Gesprächs oder einer Aufnahme abdeckt:
+
 - **Verstehen**: Was wurde besprochen?
 - **Merken**: Was sind die wichtigsten Punkte?
 - **Handeln**: Was muss getan werden?
@@ -18,23 +19,27 @@ Dieser Blueprint ist die Standardauswahl, weil er die wichtigsten Aspekte eines 
 ## Die 5 Prompts im Detail
 
 ### 1. Kurzzusammenfassung (Executive Summary)
+
 **Prompt-ID**: `c4009bef-4504-4af7-86f5-f896a2412a0a`
 
 **Zweck**: Gibt einen schnellen Überblick über das gesamte Memo in 3-5 prägnanten Sätzen.
 
 **Was wird extrahiert**:
+
 - Die Hauptthemen des Gesprächs
 - Die wichtigsten Schlussfolgerungen
 - Die absoluten Kernbotschaften
 
 **Beispiel-Output**:
+
 ```
-"Das Meeting behandelte die Q4-Marketingstrategie mit Fokus auf digitale Kanäle. 
-Es wurde entschieden, das Budget um 20% zu erhöhen und zwei neue Kampagnen zu starten. 
+"Das Meeting behandelte die Q4-Marketingstrategie mit Fokus auf digitale Kanäle.
+Es wurde entschieden, das Budget um 20% zu erhöhen und zwei neue Kampagnen zu starten.
 Die Hauptherausforderung liegt in der knappen Timeline bis zum Jahresende."
 ```
 
-**Wann besonders wertvoll**: 
+**Wann besonders wertvoll**:
+
 - Wenn Sie schnell verstehen müssen, worum es ging
 - Für die Weitergabe an Kollegen
 - Als Erinnerungsstütze Wochen später
@@ -42,17 +47,20 @@ Die Hauptherausforderung liegt in der knappen Timeline bis zum Jahresende."
 ---
 
 ### 2. Schlüsselpunkte (Key Takeaways)
+
 **Prompt-ID**: `9b411221-6f52-4534-9ea9-dd1904259e8c`
 
 **Zweck**: Identifiziert und listet die zentralen Erkenntnisse als klare Aufzählungspunkte.
 
 **Was wird extrahiert**:
+
 - Die wichtigsten Informationen
 - Zentrale Argumente
 - Bedeutende Erkenntnisse
 - Kritische Datenpunkte
 
 **Beispiel-Output**:
+
 ```
 • Umsatzsteigerung von 15% im letzten Quartal
 • Kundenzufriedenheit bei 87% (Ziel: 90%)
@@ -62,6 +70,7 @@ Die Hauptherausforderung liegt in der knappen Timeline bis zum Jahresende."
 ```
 
 **Wann besonders wertvoll**:
+
 - Für Präsentationen und Reports
 - Als Diskussionsgrundlage
 - Für die Nachbereitung von Meetings
@@ -69,11 +78,13 @@ Die Hauptherausforderung liegt in der knappen Timeline bis zum Jahresende."
 ---
 
 ### 3. Dynamische Aufgaben- und Maßnahmenplanung
+
 **Prompt-ID**: `7a6cac9a-5a34-4fe5-a8f6-23f8165b0e48`
 
 **Zweck**: Extrahiert ALLE erwähnten Aufgaben, Aktionspunkte und nächsten Schritte mit maximalen Details.
 
 **Was wird extrahiert**:
+
 - Konkrete Aufgaben und To-Dos
 - Verantwortliche Personen (wenn genannt)
 - Zeitrahmen und Deadlines (wenn erwähnt)
@@ -81,6 +92,7 @@ Die Hauptherausforderung liegt in der knappen Timeline bis zum Jahresende."
 - Abhängigkeiten zwischen Aufgaben
 
 **Beispiel-Output**:
+
 ```
 1. Marktanalyse erstellen
    - Verantwortlich: Sarah
@@ -92,7 +104,7 @@ Die Hauptherausforderung liegt in der knappen Timeline bis zum Jahresende."
    - Verantwortlich: noch zu klären
    - Zeitrahmen: Vor dem nächsten Board-Meeting
    - Abhängigkeit: Benötigt Input aus Marktanalyse
-   
+
 3. Kundeninterviews durchführen
    - Verantwortlich: Marketing-Team
    - Anzahl: Mindestens 20 Interviews
@@ -102,6 +114,7 @@ Die Hauptherausforderung liegt in der knappen Timeline bis zum Jahresende."
 **Besonderheit**: Dieser Prompt passt sich dynamisch an - er extrahiert nur die Informationen, die tatsächlich im Transkript vorhanden sind. Keine künstliche Vervollständigung.
 
 **Wann besonders wertvoll**:
+
 - Projektmanagement
 - Follow-up nach Meetings
 - Aufgabenverteilung im Team
@@ -110,17 +123,20 @@ Die Hauptherausforderung liegt in der knappen Timeline bis zum Jahresende."
 ---
 
 ### 4. Getroffene Entscheidungen (Decisions Made)
+
 **Prompt-ID**: `13abbdb0-c6ba-4852-be12-411a2925eb57`
 
 **Zweck**: Dokumentiert alle expliziten und impliziten Entscheidungen für Verbindlichkeit und Klarheit.
 
 **Was wird extrahiert**:
+
 - Explizite Beschlüsse ("Wir haben entschieden...")
 - Implizite Entscheidungen (aus dem Kontext erkennbar)
 - Festlegungen und Commitments
 - Strategische Richtungsentscheidungen
 
 **Beispiel-Output**:
+
 ```
 ✓ Die Produkteinführung wird auf Q2 verschoben
 ✓ Das Team wird um 2 Personen erweitert
@@ -130,6 +146,7 @@ Die Hauptherausforderung liegt in der knappen Timeline bis zum Jahresende."
 ```
 
 **Wann besonders wertvoll**:
+
 - Für die Dokumentation
 - Bei Vertragsverhandlungen
 - Für die Kommunikation an Stakeholder
@@ -138,17 +155,20 @@ Die Hauptherausforderung liegt in der knappen Timeline bis zum Jahresende."
 ---
 
 ### 5. Offene Fragen (Open Questions)
+
 **Prompt-ID**: `c576e875-5a52-4f6a-abb7-0c62c945af78`
 
 **Zweck**: Identifiziert alle unbeantworteten Fragen und Punkte, die weiterer Klärung bedürfen.
 
 **Was wird extrahiert**:
+
 - Direkt gestellte, unbeantwortete Fragen
 - Implizite Unsicherheiten
 - Punkte, die zur Diskussion gestellt wurden
 - Themen für Follow-up Gespräche
 
 **Beispiel-Output**:
+
 ```
 ? Wie hoch ist das genaue Budget für Q2?
 ? Wer übernimmt die Projektleitung während Sarahs Urlaub?
@@ -158,6 +178,7 @@ Die Hauptherausforderung liegt in der knappen Timeline bis zum Jahresende."
 ```
 
 **Wann besonders wertvoll**:
+
 - Vorbereitung von Follow-up Meetings
 - Identifikation von Wissenslücken
 - Risikomanagement
@@ -194,6 +215,7 @@ Offene Fragen
 ## Praktische Anwendungsszenarien
 
 ### Scenario 1: Wöchentliches Team-Meeting
+
 - **Kurzzusammenfassung**: Schneller Überblick für Abwesende
 - **Schlüsselpunkte**: Für das Meeting-Protokoll
 - **Aufgaben**: Verteilung an Teammitglieder
@@ -201,6 +223,7 @@ Offene Fragen
 - **Offene Fragen**: Agenda für nächstes Meeting
 
 ### Scenario 2: Kundengespräch
+
 - **Kurzzusammenfassung**: Für CRM-Eintrag
 - **Schlüsselpunkte**: Kundenbedürfnisse verstehen
 - **Aufgaben**: Follow-up Aktionen
@@ -208,6 +231,7 @@ Offene Fragen
 - **Offene Fragen**: Für Angebotserstellung
 
 ### Scenario 3: Brainstorming-Session
+
 - **Kurzzusammenfassung**: Für Projektdokumentation
 - **Schlüsselpunkte**: Die besten Ideen
 - **Aufgaben**: Nächste Schritte zur Umsetzung
@@ -215,6 +239,7 @@ Offene Fragen
 - **Offene Fragen**: Was noch recherchiert werden muss
 
 ### Scenario 4: Persönliche Notizen
+
 - **Kurzzusammenfassung**: Für spätere Erinnerung
 - **Schlüsselpunkte**: Wichtige Gedanken
 - **Aufgaben**: Persönliche To-Dos
@@ -224,6 +249,7 @@ Offene Fragen
 ## Tipps für optimale Ergebnisse
 
 ### Beim Sprechen beachten:
+
 1. **Strukturiert sprechen**: Nutzen Sie Signalwörter wie "Erstens", "Zweitens", "Zusammenfassend"
 2. **Explizit sein**: Sagen Sie "Wir entscheiden..." oder "Die Aufgabe ist..."
 3. **Namen nennen**: Erwähnen Sie Verantwortliche bei Aufgaben
@@ -231,6 +257,7 @@ Offene Fragen
 5. **Fragen markieren**: "Die offene Frage ist..." oder "Zu klären wäre noch..."
 
 ### Nach der Aufnahme:
+
 - Überprüfen Sie die generierten Memories
 - Ergänzen Sie fehlende Details manuell
 - Teilen Sie relevante Punkte mit Beteiligten
@@ -241,21 +268,22 @@ Offene Fragen
 ```javascript
 // Pseudocode der Blueprint-Ausführung
 async function executeStandardAnalyse(transcript) {
-  const results = await Promise.all([
-    executePrompt('c4009bef-...', transcript), // Kurzzusammenfassung
-    executePrompt('9b411221-...', transcript), // Schlüsselpunkte
-    executePrompt('7a6cac9a-...', transcript), // Aufgaben
-    executePrompt('13abbdb0-...', transcript), // Entscheidungen
-    executePrompt('c576e875-...', transcript)  // Offene Fragen
-  ]);
-  
-  return createMemories(results);
+	const results = await Promise.all([
+		executePrompt('c4009bef-...', transcript), // Kurzzusammenfassung
+		executePrompt('9b411221-...', transcript), // Schlüsselpunkte
+		executePrompt('7a6cac9a-...', transcript), // Aufgaben
+		executePrompt('13abbdb0-...', transcript), // Entscheidungen
+		executePrompt('c576e875-...', transcript), // Offene Fragen
+	]);
+
+	return createMemories(results);
 }
 ```
 
 ## Kosten
 
 Der Standard-Analyse Blueprint verwendet 5 Prompts, was bedeutet:
+
 - **Mana-Kosten**: 5 Credits pro Blueprint-Anwendung
 - **Verarbeitung**: Alle 5 Prompts werden parallel ausgeführt
 - **Ergebnis**: 5 separate Memory-Einträge werden erstellt

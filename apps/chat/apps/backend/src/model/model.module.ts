@@ -3,8 +3,8 @@ import { ModelController } from './model.controller';
 import { ModelService } from './model.service';
 
 @Module({
-  controllers: [ModelController],
-  providers: [ModelService],
-  exports: [ModelService],
+	controllers: [ModelController],
+	providers: [ModelService],
+	exports: [ModelService],
 })
 export class ModelModule {}

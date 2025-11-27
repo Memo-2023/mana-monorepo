@@ -22,15 +22,14 @@ HomeScreen.tsx
 
 Copy
 
-
 import { KeyboardAvoidingView, TextInput } from 'react-native';
 
 export default function HomeScreen() {
-  return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-      <TextInput placeholder="Type here..." />
-    </KeyboardAvoidingView>;
-  );
+return (
+<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+<TextInput placeholder="Type here..." />
+</KeyboardAvoidingView>;
+);
 }
 In the above example, the height of the KeyboardAvoidingView automatically adjusts based on the device's keyboard height, which ensures that the input is always visible.
 
@@ -40,32 +39,30 @@ app.json
 
 Copy
 
-
 "expo" {
-  "android": {
-    "softwareKeyboardLayoutMode": "pan"
-  }
+"android": {
+"softwareKeyboardLayoutMode": "pan"
+}
 }
 After adding this property, restart the development server and reload your app to apply the changes.
 
 It's also possible to hide the bottom tab when the keyboard opens using tabBarHideOnKeyboard. It is an option with the Bottom Tab Navigator. If set to true, it will hide the bar when the keyboard opens.
 
-app/_layout.tsx
+app/\_layout.tsx
 
 Copy
-
 
 import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
-  return (
-    <Tabs
-      screenOptions={{
+return (
+<Tabs
+screenOptions={{
         tabBarHideOnKeyboard: true,
       }}>
-      <Tabs.Screen name="index" />
-    </Tabs>
-  );
+<Tabs.Screen name="index" />
+</Tabs>
+);
 }
 Keyboard events
 The Keyboard module from React Native allows you to listen for native events, react to them, and make changes to the keyboard, such as dismissing it.
@@ -78,36 +75,36 @@ HomeScreen.tsx
 
 Copy
 
-
 import { useEffect, useState } from 'react';
 import { Keyboard, View, Button, TextInput } from 'react-native';
 
 export default function HomeScreen() {
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
-  useEffect(() => {
-    const showSubscription = Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
-    const hideSubscription = Keyboard.addListener('keyboardDidHide', handleKeyboardHide);
+useEffect(() => {
+const showSubscription = Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
+const hideSubscription = Keyboard.addListener('keyboardDidHide', handleKeyboardHide);
 
     return () => {
       showSubscription.remove();
     };
-  }, []);
 
-  const handleKeyboardShow = event => {
-    setIsKeyboardVisible(true);
-  };
+}, []);
 
-  const handleKeyboardHide = event => {
-    setIsKeyboardVisible(false);
-  };
+const handleKeyboardShow = event => {
+setIsKeyboardVisible(true);
+};
 
-  return (
-    <View>
-      {isKeyboardVisible && <Button title="Dismiss keyboard" onPress={Keyboard.dismiss} />}
-      <TextInput placeholder="Type here..." />
-    </View>
-  );
+const handleKeyboardHide = event => {
+setIsKeyboardVisible(false);
+};
+
+return (
+<View>
+{isKeyboardVisible && <Button title="Dismiss keyboard" onPress={Keyboard.dismiss} />}
+<TextInput placeholder="Type here..." />
+</View>
+);
 }
 Advanced keyboard handling with Keyboard Controller
 For complex forms with multiple input fields, the recommended solution is the KeyboardAwareScrollView component. This component provides the best keyboard handling experience, especially when dealing with multiple text inputs.
@@ -115,6 +112,7 @@ For complex forms with multiple input fields, the recommended solution is the Ke
 ### KeyboardAwareScrollView Implementation
 
 First, install the package:
+
 ```bash
 npm install react-native-keyboard-aware-scroll-view --save
 ```
@@ -125,36 +123,37 @@ Here's a complete example with best practices:
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function Form() {
-  return (
-    <KeyboardAwareScrollView
-      enableOnAndroid={true}           // Enable functionality for Android
-      enableAutomaticScroll={true}     // Automatically scroll to focused input
-      keyboardShouldPersistTaps="handled" // Allow interaction with inputs while keyboard is visible
-      extraScrollHeight={Platform.OS === 'ios' ? 120 : 40} // Extra space above keyboard
-      keyboardOpeningTime={0}          // No delay when keyboard opens
-      contentContainerStyle={styles.contentContainer}
-    >
-      <View style={styles.container}>
-        <TextInput />
-        {/* More form fields */}
-      </View>
-    </KeyboardAwareScrollView>
-  );
+	return (
+		<KeyboardAwareScrollView
+			enableOnAndroid={true} // Enable functionality for Android
+			enableAutomaticScroll={true} // Automatically scroll to focused input
+			keyboardShouldPersistTaps="handled" // Allow interaction with inputs while keyboard is visible
+			extraScrollHeight={Platform.OS === 'ios' ? 120 : 40} // Extra space above keyboard
+			keyboardOpeningTime={0} // No delay when keyboard opens
+			contentContainerStyle={styles.contentContainer}
+		>
+			<View style={styles.container}>
+				<TextInput />
+				{/* More form fields */}
+			</View>
+		</KeyboardAwareScrollView>
+	);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  contentContainer: {
-    flexGrow: 1,
-    paddingBottom: 120, // Additional space at bottom for better scrolling
-  }
+	container: {
+		flex: 1,
+		padding: 16,
+	},
+	contentContainer: {
+		flexGrow: 1,
+		paddingBottom: 120, // Additional space at bottom for better scrolling
+	},
 });
 ```
 
 Key configuration options:
+
 1. `enableOnAndroid`: Ensures consistent behavior across platforms
 2. `extraScrollHeight`: Provides extra space above keyboard (iOS typically needs more)
 3. `keyboardShouldPersistTaps="handled"`: Allows better interaction with inputs
@@ -162,25 +161,27 @@ Key configuration options:
 5. `keyboardOpeningTime={0}`: Immediate scrolling response
 
 Real-world example from the Storyteller app:
+
 ```tsx
 <KeyboardAwareScrollView
-  contentContainerStyle={styles.contentContainer}
-  enableOnAndroid={true}
-  enableAutomaticScroll={true}
-  keyboardShouldPersistTaps="handled"
-  extraScrollHeight={Platform.OS === 'ios' ? 120 : 40}
-  keyboardOpeningTime={0}
+	contentContainerStyle={styles.contentContainer}
+	enableOnAndroid={true}
+	enableAutomaticScroll={true}
+	keyboardShouldPersistTaps="handled"
+	extraScrollHeight={Platform.OS === 'ios' ? 120 : 40}
+	keyboardOpeningTime={0}
 >
-  <View style={styles.container}>
-    <TextField
-      placeholder="Input field"
-      // ... other props
-    />
-  </View>
+	<View style={styles.container}>
+		<TextField
+			placeholder="Input field"
+			// ... other props
+		/>
+	</View>
 </KeyboardAwareScrollView>
 ```
 
 This implementation ensures that:
+
 - Input fields automatically scroll into view when focused
 - The keyboard doesn't cover any input fields
 - Scrolling behavior is smooth and consistent across platforms
@@ -204,23 +205,22 @@ npx expo install react-native-keyboard-controller
 Set up provider
 To finalize the setup, add the KeyboardProvider to your app.
 
-app/_layout.tsx
+app/\_layout.tsx
 
 Copy
-
 
 import { Stack } from 'expo-router';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 export default function RootLayout() {
-  return (
-    <KeyboardProvider>
-      <Stack>
-        <Stack.Screen name="home" />
-        <Stack.Screen name="chat" />
-      </Stack>
-    </KeyboardProvider>
-  );
+return (
+<KeyboardProvider>
+<Stack>
+<Stack.Screen name="home" />
+<Stack.Screen name="chat" />
+</Stack>
+</KeyboardProvider>
+);
 }
 Handling multiple inputs
 The KeyboardAvoidingView component is excellent for prototyping but requires platform-specific configuration and is not very customizable. To achieve the same functionality, you can use KeyboardAwareScrollView, which automatically scrolls to focused TextInput and provides a native-like performance, we recommend using KeyboardAwareScrollView for simple screens with not many elements.
@@ -231,52 +231,51 @@ FormScreen.tsx
 
 Copy
 
-
 import { TextInput, View, StyleSheet } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 
 export default function FormScreen() {
-  return (
-    <>
-      <KeyboardAwareScrollView bottomOffset={62} contentContainerStyle={styles.container}>
-        <View>
-          <TextInput placeholder="Type a message..." style={styles.textInput} />
-          <TextInput placeholder="Type a message..." style={styles.textInput} />
-        </View>
-        <TextInput placeholder="Type a message..." style={styles.textInput} />
-        <View>
-          <TextInput placeholder="Type a message..." style={styles.textInput} />
-          <TextInput placeholder="Type a message..." style={styles.textInput} />
-          <TextInput placeholder="Type a message..." style={styles.textInput} />
-        </View>
-        <TextInput placeholder="Type a message..." style={styles.textInput} />
-      </KeyboardAwareScrollView>
-      <KeyboardToolbar />
-    </>
-  );
+return (
+<>
+<KeyboardAwareScrollView bottomOffset={62} contentContainerStyle={styles.container}>
+<View>
+<TextInput placeholder="Type a message..." style={styles.textInput} />
+<TextInput placeholder="Type a message..." style={styles.textInput} />
+</View>
+<TextInput placeholder="Type a message..." style={styles.textInput} />
+<View>
+<TextInput placeholder="Type a message..." style={styles.textInput} />
+<TextInput placeholder="Type a message..." style={styles.textInput} />
+<TextInput placeholder="Type a message..." style={styles.textInput} />
+</View>
+<TextInput placeholder="Type a message..." style={styles.textInput} />
+</KeyboardAwareScrollView>
+<KeyboardToolbar />
+</>
+);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    gap: 16,
-    padding: 16,
-  },
-  listStyle: {
-    padding: 16,
-    gap: 16,
-  },
-  textInput: {
-    width: 'auto',
-    flexGrow: 1,
-    flexShrink: 1,
-    height: 45,
-    borderWidth: 1,
-    borderRadius: 8,
-    borderColor: '#d8d8d8',
-    backgroundColor: '#fff',
-    padding: 8,
-    marginBottom: 8,
-  },
+container: {
+gap: 16,
+padding: 16,
+},
+listStyle: {
+padding: 16,
+gap: 16,
+},
+textInput: {
+width: 'auto',
+flexGrow: 1,
+flexShrink: 1,
+height: 45,
+borderWidth: 1,
+borderRadius: 8,
+borderColor: '#d8d8d8',
+backgroundColor: '#fff',
+padding: 8,
+marginBottom: 8,
+},
 });
 The above example wraps the inputs with KeyboardAwareScrollView to prevent the keyboard from covering them. The KeyboardToolbar component displays navigation controls and a dismiss button. While it works without configuration, you can customize the toolbar content if needed.
 
@@ -289,23 +288,22 @@ ChatScreen.tsx
 
 Copy
 
-
 import { useKeyboardHandler } from 'react-native-keyboard-controller';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 const useGradualAnimation = () => {
-  const height = useSharedValue(0);
+const height = useSharedValue(0);
 
-  useKeyboardHandler(
-    {
-      onMove: event => {
-        'worklet';
-        height.value = Math.max(event.height, 0);
-      },
-    },
-    []
-  );
-  return { height };
+useKeyboardHandler(
+{
+onMove: event => {
+'worklet';
+height.value = Math.max(event.height, 0);
+},
+},
+[]
+);
+return { height };
 };
 You can use the useGradualAnimation hook to animate a view and give it a smooth animation when the keyboard is active or dismissed, for example, in a chat screen component (shown in the example below). This component gets the keyboard height from the hook. It then creates an animated style called fakeView using the useAnimatedStyle hook from reanimated. This style only contains one property: height, which is set to the keyboard's height.
 
@@ -315,7 +313,6 @@ ChatScreen.tsx
 
 Copy
 
-
 import { StyleSheet, Platform, FlatList, View, StatusBar, TextInput } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { useKeyboardHandler } from 'react-native-keyboard-controller';
@@ -324,50 +321,50 @@ import MessageItem from '@/components/MessageItem';
 import { messages } from '@/messages';
 
 const useGradualAnimation = () => {
-  // Code remains same from previous example 
+// Code remains same from previous example
 };
 
 export default function ChatScreen() {
-  const { height } = useGradualAnimation();
+const { height } = useGradualAnimation();
 
-  const fakeView = useAnimatedStyle(() => {
-    return {
-      height: Math.abs(height.value),
-    };
-  }, []);
+const fakeView = useAnimatedStyle(() => {
+return {
+height: Math.abs(height.value),
+};
+}, []);
 
-  return (
-    <View style={styles.container}>
-      <FlatList
-        data={messages}
-        renderItem={({ item }) => <MessageItem message={item} />}
-        keyExtractor={item => item.createdAt.toString()}
-        contentContainerStyle={styles.listStyle}
-      />
-      <TextInput placeholder="Type a message..." style={styles.textInput} />
-      <Animated.View style={fakeView} />
-    </View>
-  );
+return (
+<View style={styles.container}>
+<FlatList
+data={messages}
+renderItem={({ item }) => <MessageItem message={item} />}
+keyExtractor={item => item.createdAt.toString()}
+contentContainerStyle={styles.listStyle}
+/>
+<TextInput placeholder="Type a message..." style={styles.textInput} />
+<Animated.View style={fakeView} />
+</View>
+);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-  },
-  listStyle: {
-    padding: 16,
-    gap: 16,
-  },
-  textInput: {
-    width: '95%',
-    height: 45,
-    borderWidth: 1,
-    borderRadius: 8,
-    borderColor: '#d8d8d8',
-    backgroundColor: '#fff',
-    padding: 8,
-    alignSelf: 'center',
-    marginBottom: 8,
-  },
+container: {
+flex: 1,
+paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+},
+listStyle: {
+padding: 16,
+gap: 16,
+},
+textInput: {
+width: '95%',
+height: 45,
+borderWidth: 1,
+borderRadius: 8,
+borderColor: '#d8d8d8',
+backgroundColor: '#fff',
+padding: 8,
+alignSelf: 'center',
+marginBottom: 8,
+},
 });

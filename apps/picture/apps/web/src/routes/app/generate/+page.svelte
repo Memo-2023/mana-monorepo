@@ -37,7 +37,8 @@
 							d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
 						/>
 					</svg>
-					<span><strong>Be specific:</strong> Include details about style, mood, colors, and composition</span
+					<span
+						><strong>Be specific:</strong> Include details about style, mood, colors, and composition</span
 					>
 				</li>
 				<li class="flex items-start">
@@ -55,8 +56,7 @@
 						/>
 					</svg>
 					<span
-						><strong>Use descriptive words:</strong> "Vibrant sunset over mountains" is better than
-						"sunset"</span
+						><strong>Use descriptive words:</strong> "Vibrant sunset over mountains" is better than "sunset"</span
 					>
 				</li>
 				<li class="flex items-start">

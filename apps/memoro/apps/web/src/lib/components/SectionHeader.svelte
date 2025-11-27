@@ -7,7 +7,13 @@
 		onPress?: () => void;
 	}
 
-	let { title, isFirst = false, collapsible = false, isCollapsed = false, onPress }: Props = $props();
+	let {
+		title,
+		isFirst = false,
+		collapsible = false,
+		isCollapsed = false,
+		onPress,
+	}: Props = $props();
 
 	function handleClick() {
 		if (collapsible && onPress) {

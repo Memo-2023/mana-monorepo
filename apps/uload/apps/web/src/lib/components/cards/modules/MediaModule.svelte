@@ -12,7 +12,7 @@
 		qrSize = 200,
 		qrColor = 'black',
 		icon = '',
-		iconSize = '3rem'
+		iconSize = '3rem',
 	}: MediaModuleProps = $props();
 </script>
 

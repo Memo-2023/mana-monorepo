@@ -15,7 +15,7 @@
 	logo={StorytellerLogo}
 	primaryColor="#FF6B9D"
 	onForgotPassword={handleForgotPassword}
-	goto={goto}
+	{goto}
 	loginPath="/login"
 	lightBackground="#fff5f8"
 	darkBackground="#1a1218"

@@ -29,7 +29,7 @@
 		currentStreak,
 		longestStreak,
 		activestWeek,
-		activestMonth
+		activestMonth,
 	}: Props = $props();
 </script>
 
@@ -39,16 +39,10 @@
 			<Text variant="large" weight="bold" class="mb-5 text-2xl">Produktivität</Text>
 
 			<!-- Today Section -->
-			<Text variant="muted" weight="semibold" class="mb-2 uppercase tracking-wide">
-				Heute
-			</Text>
+			<Text variant="muted" weight="semibold" class="mb-2 uppercase tracking-wide">Heute</Text>
 			<div class="mb-4 -space-y-px">
 				<StatRow title="Memos" value={todayStats.memos.toString()} icon="document-text-outline" />
-				<StatRow
-					title="Memories"
-					value={todayStats.memories.toString()}
-					icon="sparkles-outline"
-				/>
+				<StatRow title="Memories" value={todayStats.memories.toString()} icon="sparkles-outline" />
 				<StatRow
 					title="Aufnahmedauer"
 					value={formatDurationWithUnits(todayStats.duration, 'de')}
@@ -85,20 +79,10 @@
 			</div>
 
 			<!-- Activity Section -->
-			<Text variant="muted" weight="semibold" class="mb-2 uppercase tracking-wide">
-				Aktivität
-			</Text>
+			<Text variant="muted" weight="semibold" class="mb-2 uppercase tracking-wide">Aktivität</Text>
 			<div class="-space-y-px">
-				<StatRow
-					title="Aktuelle Serie"
-					value={`${currentStreak} Tage`}
-					icon="flame-outline"
-				/>
-				<StatRow
-					title="Längste Serie"
-					value={`${longestStreak} Tage`}
-					icon="trophy-outline"
-				/>
+				<StatRow title="Aktuelle Serie" value={`${currentStreak} Tage`} icon="flame-outline" />
+				<StatRow title="Längste Serie" value={`${longestStreak} Tage`} icon="trophy-outline" />
 				<StatRow
 					title="Aktivste Woche"
 					value={`${activestWeek.count}x`}

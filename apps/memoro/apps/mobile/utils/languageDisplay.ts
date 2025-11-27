@@ -8,18 +8,18 @@ import { TFunction } from 'react-i18next';
  * @returns Formatted language string (e.g., "German (Deutsch)" when interface is English)
  */
 export function formatLanguageDisplay(
-  languageCode: string,
-  nativeName: string,
-  t: TFunction
+	languageCode: string,
+	nativeName: string,
+	t: TFunction
 ): string {
-  // Get the translated language name in the current frontend language
-  const translatedName = t(`language.languages.${languageCode}`, nativeName);
-  
-  // If the translated name is the same as native name, just return the native name
-  if (translatedName === nativeName) {
-    return nativeName;
-  }
-  
-  // Return format: "TranslatedName (NativeName)"
-  return `${translatedName} (${nativeName})`;
+	// Get the translated language name in the current frontend language
+	const translatedName = t(`language.languages.${languageCode}`, nativeName);
+
+	// If the translated name is the same as native name, just return the native name
+	if (translatedName === nativeName) {
+		return nativeName;
+	}
+
+	// Return format: "TranslatedName (NativeName)"
+	return `${translatedName} (${nativeName})`;
 }

@@ -10,7 +10,7 @@ describe('Username Utilities', () => {
 				'test-user',
 				'JohnDoe',
 				'a1b2c3',
-				'user_name-123'
+				'user_name-123',
 			];
 
 			validUsernames.forEach((username) => {
@@ -40,7 +40,7 @@ describe('Username Utilities', () => {
 				'user name',
 				'user!name',
 				'user#name',
-				'user$name'
+				'user$name',
 			];
 
 			invalidUsernames.forEach((username) => {
@@ -128,7 +128,7 @@ describe('Username Utilities', () => {
 				{ email: 'first.last@example.com', expected: 'firstlast' },
 				{ email: 'user+tag@example.com', expected: 'usertag' },
 				{ email: '123user@example.com', expected: '123user' },
-				{ email: 'test.test.test@example.com', expected: 'testtesttest' }
+				{ email: 'test.test.test@example.com', expected: 'testtesttest' },
 			];
 
 			testCases.forEach(({ email, expected }) => {
@@ -149,7 +149,7 @@ describe('Username Utilities', () => {
 				'settings',
 				'dashboard',
 				'user',
-				'users'
+				'users',
 			];
 
 			essentialReserved.forEach((name) => {

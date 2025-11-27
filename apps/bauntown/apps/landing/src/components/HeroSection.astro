@@ -1,149 +1,176 @@
 ---
 interface Props {
-  title: string;
-  description?: string;
-  image?: string;
-  imageAlt?: string;
+	title: string;
+	description?: string;
+	image?: string;
+	imageAlt?: string;
 }
 
-const { 
-  title, 
-  description, 
-  image, 
-  imageAlt = "Hero image"
-} = Astro.props;
+const { title, description, image, imageAlt = 'Hero image' } = Astro.props;
 ---
 
 <div class="hero-section">
-  <div class="hero-text">
-    <svg width="60" height="60" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" class="hero-logo-svg" style="display:block;margin:0 auto 2rem auto;"><rect x="0.666667" y="7.33334" width="10.6667" height="2.66667" stroke="currentColor" stroke-width="0.8" fill="none"/><rect x="2" y="4.66666" width="8" height="2.66667" stroke="currentColor" stroke-width="0.8" fill="none"/><rect x="3.33333" y="2" width="5.33333" height="2.66667" stroke="currentColor" stroke-width="0.8" fill="none"/></svg>
-    <h1>{title}</h1>
-    {description && <p class="hero-description">{description}</p>}
-    <slot name="content" />
-  </div>
-  
-  {image && (
-    <div class="hero-image">
-      <img src={image} alt={imageAlt} />
-    </div>
-  )}
+	<div class="hero-text">
+		<svg
+			width="60"
+			height="60"
+			viewBox="0 0 12 12"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+			class="hero-logo-svg"
+			style="display:block;margin:0 auto 2rem auto;"
+			><rect
+				x="0.666667"
+				y="7.33334"
+				width="10.6667"
+				height="2.66667"
+				stroke="currentColor"
+				stroke-width="0.8"
+				fill="none"></rect><rect
+				x="2"
+				y="4.66666"
+				width="8"
+				height="2.66667"
+				stroke="currentColor"
+				stroke-width="0.8"
+				fill="none"></rect><rect
+				x="3.33333"
+				y="2"
+				width="5.33333"
+				height="2.66667"
+				stroke="currentColor"
+				stroke-width="0.8"
+				fill="none"></rect></svg
+		>
+		<h1>{title}</h1>
+		{description && <p class="hero-description">{description}</p>}
+		<slot name="content" />
+	</div>
+
+	{
+		image && (
+			<div class="hero-image">
+				<img src={image} alt={imageAlt} />
+			</div>
+		)
+	}
 </div>
 
 <style is:global>
-  /* Hero Section Styles */
-  .hero-section {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 120px 0 4rem;
-    padding: 0.5rem 0 0;
-    gap: 4rem;
-  }
+	/* Hero Section Styles */
+	.hero-section {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin: 120px 0 4rem;
+		padding: 0.5rem 0 0;
+		gap: 4rem;
+	}
 
-  .hero-section .hero-text {
-    flex: 1;
-    text-align: center;
-  }
-  .hero-logo {
-    margin-bottom: 2rem;
-    margin-top: 0;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 60px;
-    height: 60px;
-    transition: filter 0.2s;
-  }
-  @media (prefers-color-scheme: dark) {
-    .hero-logo {
-      filter: invert(1) brightness(2);
-    }
-  }
+	.hero-section .hero-text {
+		flex: 1;
+		text-align: center;
+	}
+	.hero-logo {
+		margin-bottom: 2rem;
+		margin-top: 0;
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+		width: 60px;
+		height: 60px;
+		transition: filter 0.2s;
+	}
+	@media (prefers-color-scheme: dark) {
+		.hero-logo {
+			filter: invert(1) brightness(2);
+		}
+	}
 
-  .hero-section h1 {
-    font-size: 2.5rem;
-    line-height: 1.2;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    background: linear-gradient(90deg, var(--accent-color), #fb923c);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-fill-color: transparent;
-  }
+	.hero-section h1 {
+		font-size: 2.5rem;
+		line-height: 1.2;
+		font-weight: 700;
+		margin-bottom: 1rem;
+		background: linear-gradient(90deg, var(--accent-color), #fb923c);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		text-fill-color: transparent;
+	}
 
-  .hero-section .hero-description {
-    font-size: 1.25rem;
-    color: var(--text-muted);
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-  }
+	.hero-section .hero-description {
+		font-size: 1.25rem;
+		color: var(--text-muted);
+		margin-bottom: 1.5rem;
+		line-height: 1.6;
+	}
 
-  .hero-section .hero-image {
-    flex: 0 0 400px;
-    height: 400px;
-    border-radius: 1.5rem;
-    overflow: hidden;
-    box-shadow:
-      0 20px 25px -5px rgba(0, 0, 0, 0.1),
-      0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
+	.hero-section .hero-image {
+		flex: 0 0 400px;
+		height: 400px;
+		border-radius: 1.5rem;
+		overflow: hidden;
+		box-shadow:
+			0 20px 25px -5px rgba(0, 0, 0, 0.1),
+			0 10px 10px -5px rgba(0, 0, 0, 0.04);
+	}
 
-  .hero-section .hero-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
+	.hero-section .hero-image img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.5s ease;
+	}
 
-  .hero-section .hero-image img:hover {
-    transform: scale(1.05);
-  }
-  
-  @media (max-width: 1024px) {
-    .hero-section {
-      gap: 2rem;
-    }
+	.hero-section .hero-image img:hover {
+		transform: scale(1.05);
+	}
 
-    .hero-section .hero-image {
-      flex: 0 0 250px;
-      height: auto;
-      aspect-ratio: 1/1;
-    }
+	@media (max-width: 1024px) {
+		.hero-section {
+			gap: 2rem;
+		}
 
-    .hero-section h1 {
-      font-size: 2.25rem;
-    }
+		.hero-section .hero-image {
+			flex: 0 0 250px;
+			height: auto;
+			aspect-ratio: 1/1;
+		}
 
-    .hero-section .hero-description {
-      font-size: 1.15rem;
-    }
-  }
+		.hero-section h1 {
+			font-size: 2.25rem;
+		}
 
-  @media (max-width: 768px) {
-    .hero-section {
-      flex-direction: column-reverse;
-      margin: 100px 0 3.5rem;
-      gap: 2rem;
-    }
+		.hero-section .hero-description {
+			font-size: 1.15rem;
+		}
+	}
 
-    .hero-section .hero-text {
-      width: 100%;
-    }
+	@media (max-width: 768px) {
+		.hero-section {
+			flex-direction: column-reverse;
+			margin: 100px 0 3.5rem;
+			gap: 2rem;
+		}
 
-    .hero-section .hero-text h1 {
-      font-size: 2rem;
-    }
+		.hero-section .hero-text {
+			width: 100%;
+		}
 
-    .hero-section .hero-description {
-      font-size: 1.1rem;
-    }
+		.hero-section .hero-text h1 {
+			font-size: 2rem;
+		}
 
-    .hero-section .hero-image {
-      width: 100%;
-      flex: 0 0 auto;
-      aspect-ratio: 3/2;
-      height: auto;
-    }
-  }
+		.hero-section .hero-description {
+			font-size: 1.1rem;
+		}
+
+		.hero-section .hero-image {
+			width: 100%;
+			flex: 0 0 auto;
+			aspect-ratio: 3/2;
+			height: auto;
+		}
+	}
 </style>

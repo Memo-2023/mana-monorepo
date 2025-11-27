@@ -1,64 +1,64 @@
 ---
-title: "Generate Your First AI Image"
-description: "Learn how to create your first stunning AI-generated image with Picture in under 5 minutes."
-slug: "getting-started-first-image"
-icon: "🎨"
-coverImage: "/images/tutorials/first-image-cover.jpg"
-category: "getting-started"
-difficulty: "beginner"
+title: 'Generate Your First AI Image'
+description: 'Learn how to create your first stunning AI-generated image with Picture in under 5 minutes.'
+slug: 'getting-started-first-image'
+icon: '🎨'
+coverImage: '/images/tutorials/first-image-cover.jpg'
+category: 'getting-started'
+difficulty: 'beginner'
 featured: true
 popular: true
-language: "en"
+language: 'en'
 steps:
-  - title: "Sign up and access the dashboard"
-    duration: "1 minute"
-  - title: "Choose your AI model"
-    duration: "1 minute"
-  - title: "Write your first prompt"
-    duration: "2 minutes"
-  - title: "Generate and refine"
-    duration: "1 minute"
+  - title: 'Sign up and access the dashboard'
+    duration: '1 minute'
+  - title: 'Choose your AI model'
+    duration: '1 minute'
+  - title: 'Write your first prompt'
+    duration: '2 minutes'
+  - title: 'Generate and refine'
+    duration: '1 minute'
 prerequisites: []
 requiredFeatures: []
-requiredModels: ["flux-schnell", "flux-dev"]
-videoUrl: ""
+requiredModels: ['flux-schnell', 'flux-dev']
+videoUrl: ''
 hasVideo: false
-estimatedTime: "5 minutes"
+estimatedTime: '5 minutes'
 whatYouWillLearn:
-  - "How to access the Picture image generator"
-  - "The basics of writing effective prompts"
-  - "How to choose the right AI model"
-  - "How to refine and iterate on your images"
-finalResult: "Your first AI-generated image ready to download and share"
+  - 'How to access the Picture image generator'
+  - 'The basics of writing effective prompts'
+  - 'How to choose the right AI model'
+  - 'How to refine and iterate on your images'
+finalResult: 'Your first AI-generated image ready to download and share'
 examplePrompts:
-  - "A serene mountain landscape at sunset, digital art"
-  - "Portrait of a futuristic astronaut, cinematic lighting"
-  - "Cozy coffee shop interior, warm colors, isometric view"
+  - 'A serene mountain landscape at sunset, digital art'
+  - 'Portrait of a futuristic astronaut, cinematic lighting'
+  - 'Cozy coffee shop interior, warm colors, isometric view'
 tips:
-  - "Start simple - clear, descriptive prompts work best"
-  - "Use FLUX Schnell for quick experiments, FLUX Dev for higher quality"
+  - 'Start simple - clear, descriptive prompts work best'
+  - 'Use FLUX Schnell for quick experiments, FLUX Dev for higher quality'
   - "Add style keywords like 'cinematic', 'watercolor', or 'minimalist'"
-  - "Experiment with different aspect ratios for different use cases"
+  - 'Experiment with different aspect ratios for different use cases'
 commonMistakes:
-  - "Writing overly complex prompts with too many details"
-  - "Not specifying a style or mood"
-  - "Expecting perfection on the first try"
+  - 'Writing overly complex prompts with too many details'
+  - 'Not specifying a style or mood'
+  - 'Expecting perfection on the first try'
 troubleshooting:
   - problem: "Image doesn't match my expectations"
-    solution: "Try being more specific about style, colors, and composition. Add descriptive adjectives."
-  - problem: "Generation takes too long"
-    solution: "Use FLUX Schnell for faster results, especially when experimenting."
-  - problem: "Results are inconsistent"
-    solution: "Lock your seed value once you find a result you like, then iterate on the prompt."
+    solution: 'Try being more specific about style, colors, and composition. Add descriptive adjectives.'
+  - problem: 'Generation takes too long'
+    solution: 'Use FLUX Schnell for faster results, especially when experimenting.'
+  - problem: 'Results are inconsistent'
+    solution: 'Lock your seed value once you find a result you like, then iterate on the prompt.'
 relatedTutorials: []
-relatedFeatures: ["flux-models", "prompt-builder"]
-relatedUseCases: ["social-media-content"]
+relatedFeatures: ['flux-models', 'prompt-builder']
+relatedUseCases: ['social-media-content']
 seoKeywords:
-  - "how to generate AI images"
-  - "AI image generator tutorial"
-  - "first AI image"
-  - "picture tutorial"
-targetAudience: "Complete beginners new to AI image generation"
+  - 'how to generate AI images'
+  - 'AI image generator tutorial'
+  - 'first AI image'
+  - 'picture tutorial'
+targetAudience: 'Complete beginners new to AI image generation'
 publishDate: 2025-01-15T00:00:00Z
 lastUpdated: 2025-01-15T00:00:00Z
 downloadableResources: []
@@ -84,11 +84,13 @@ First things first - let's get you set up.
 Picture gives you access to multiple state-of-the-art AI models. For your first image, we recommend:
 
 ### FLUX Schnell (Fast)
+
 - ⚡ **Best for:** Quick experiments and iterations
 - ⏱️ **Speed:** ~5 seconds
 - 💡 **Use when:** You're exploring ideas
 
 ### FLUX Dev (High Quality)
+
 - 🎨 **Best for:** Final, high-quality images
 - ⏱️ **Speed:** ~15 seconds
 - 💡 **Use when:** You know what you want
@@ -108,16 +110,19 @@ This is where the magic happens! A good prompt tells the AI exactly what you wan
 ### Example Prompts to Try
 
 **Simple and Effective:**
+
 ```
 A serene mountain landscape at sunset, digital art, vibrant colors, peaceful atmosphere
 ```
 
 **More Specific:**
+
 ```
 Portrait of a futuristic astronaut, cinematic lighting, detailed spacesuit, galaxy reflection in helmet visor, sci-fi art
 ```
 
 **Creative and Stylized:**
+
 ```
 Cozy coffee shop interior, warm colors, isometric view, soft lighting, plants and books, minimalist illustration
 ```
@@ -145,16 +150,19 @@ Hit that generate button and watch the magic unfold!
 Not quite what you expected? No problem! Here's how to improve:
 
 #### Option 1: Adjust the Prompt
+
 - **Too vague?** Add more descriptive details
 - **Wrong style?** Add style keywords like "photorealistic", "oil painting", "anime"
 - **Wrong mood?** Specify lighting like "golden hour", "dramatic lighting", "soft natural light"
 
 #### Option 2: Change Parameters
+
 - Try a different **aspect ratio**
 - Switch to **FLUX Dev** for higher quality
 - Adjust **guidance scale** (how closely AI follows your prompt)
 
 #### Option 3: Iterate with Seeds
+
 - Found a result you like? Click the **"seed"** icon to lock the composition
 - Now modify the prompt slightly to refine that specific image
 
@@ -172,6 +180,7 @@ Not quite what you expected? No problem! Here's how to improve:
 ## What You've Learned
 
 Congratulations! You've just:
+
 - ✅ Created your Picture account
 - ✅ Generated your first AI image
 - ✅ Learned the basics of prompt writing

@@ -1,6 +1,7 @@
 # Story Text Editing - Test Plan
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [Backend Unit Tests](#backend-unit-tests)
 3. [Integration Test Plan](#integration-test-plan)
@@ -13,7 +14,9 @@
 ## Overview
 
 ### Feature Description
+
 The story text editing feature allows users to edit the text content of their own stories. Users can:
+
 - Enter edit mode by clicking the "Bearbeiten" button
 - Edit text for each story page in place
 - Save changes which persist to the database
@@ -21,6 +24,7 @@ The story text editing feature allows users to edit the text content of their ow
 - Only edit stories they own (authorization enforced)
 
 ### Architecture
+
 - **Backend**: NestJS controller (`PUT /story/:id`) with authorization checks
 - **Frontend**: React Native with edit mode state management
 - **Database**: Supabase with RLS policies for data security
@@ -36,22 +40,26 @@ The story text editing feature allows users to edit the text content of their ow
 ## Backend Unit Tests
 
 ### Test File Location
+
 `/Users/wuesteon/memoro_new/mana-2025/storyteller-project/backend/src/story/test/story-text-editing.spec.ts`
 
 ### Test Coverage
 
 #### 1. Successful Update Tests
+
 - ✅ Should successfully update story text when user owns the story
 - ✅ Should update the updated_at timestamp
 - ✅ Should preserve other story fields when updating text
 - ✅ Should handle partial page updates
 
 #### 2. Authorization Tests
+
 - ✅ Should reject update when user does not own the story
 - ✅ Should reject update from unauthenticated user
 - ✅ Should verify JWT token is passed correctly
 
 #### 3. Validation Tests
+
 - ✅ Should handle empty text update
 - ✅ Should handle very long text update (10,000 characters)
 - ✅ Should handle special characters (äöü ß € emojis quotes HTML JSON)
@@ -59,11 +67,13 @@ The story text editing feature allows users to edit the text content of their ow
 - ✅ Should handle malformed page data structure
 
 #### 4. Error Handling Tests
+
 - ✅ Should handle database errors gracefully
 - ✅ Should handle story not found
 - ✅ Should return proper error messages
 
 #### 5. Concurrency Tests
+
 - ✅ Should handle simultaneous update attempts
 
 ### Running Backend Tests
@@ -80,6 +90,7 @@ Expected output: All tests should pass
 ## Integration Test Plan
 
 ### Test Environment Setup
+
 1. Backend running locally on `http://localhost:3002`
 2. Mobile app connected to local backend
 3. Test user account with existing stories
@@ -88,9 +99,11 @@ Expected output: All tests should pass
 ### Integration Test Scenarios
 
 #### Scenario 1: Happy Path - Edit and Save
+
 **Objective**: Verify complete edit flow works end-to-end
 
 **Steps**:
+
 1. Open a story that belongs to the test user
 2. Click "Bearbeiten" button in header
 3. Edit mode activates (button changes to green "Speichern")
@@ -101,6 +114,7 @@ Expected output: All tests should pass
 8. Wait for save to complete
 
 **Expected Results**:
+
 - ✅ Edit mode activates immediately
 - ✅ Text input appears with current story text
 - ✅ Text changes reflect in real-time
@@ -112,6 +126,7 @@ Expected output: All tests should pass
 - ✅ Database contains updated text
 
 **API Verification**:
+
 ```bash
 # Check story in database
 curl -H "Authorization: Bearer $TOKEN" http://localhost:3002/story/STORY_ID | jq '.data.pages_data'
@@ -120,9 +135,11 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:3002/story/STORY_ID | jq
 ---
 
 #### Scenario 2: Cancel Without Saving
+
 **Objective**: Verify unsaved changes are discarded properly
 
 **Steps**:
+
 1. Open a story and enter edit mode
 2. Edit text on one or more pages
 3. Click "Bearbeiten" button again (without saving)
@@ -130,6 +147,7 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:3002/story/STORY_ID | jq
 5. Click "Verwerfen" button
 
 **Expected Results**:
+
 - ✅ Modal asks: "Änderungen verwerfen?"
 - ✅ Modal shows number of edited pages
 - ✅ "Verwerfen" button discards changes
@@ -140,15 +158,18 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:3002/story/STORY_ID | jq
 ---
 
 #### Scenario 3: Network Error During Save
+
 **Objective**: Verify proper error handling when network fails
 
 **Steps**:
+
 1. Enter edit mode and modify text
 2. Simulate network error (turn off backend or use network throttling)
 3. Click "Speichern"
 4. Wait for error
 
 **Expected Results**:
+
 - ✅ Loading state shows "Speichert..."
 - ✅ Error toast appears after timeout
 - ✅ Error message: "Fehler beim Speichern"
@@ -157,6 +178,7 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:3002/story/STORY_ID | jq
 - ✅ Backend logs show failed request
 
 **Network Simulation**:
+
 ```bash
 # Kill backend to simulate network error
 pkill -f "nest start"
@@ -168,9 +190,11 @@ pkill -f "nest start"
 ---
 
 #### Scenario 4: Edit Unauthorized Story (Security)
+
 **Objective**: Verify users cannot edit others' stories
 
 **Steps**:
+
 1. User A creates a story
 2. Get story ID
 3. User B logs in
@@ -179,12 +203,14 @@ pkill -f "nest start"
 6. If User B somehow accesses edit mode, save should fail
 
 **Expected Results**:
+
 - ✅ User B cannot see "Bearbeiten" button (isOwnStory = false)
 - ✅ If API called directly, backend returns 403 or "access denied"
 - ✅ No changes persisted to database
 - ✅ Backend logs show authorization failure
 
 **API Test**:
+
 ```bash
 # Try to update another user's story
 curl -X PUT \
@@ -199,14 +225,17 @@ curl -X PUT \
 ---
 
 #### Scenario 5: Very Long Text
+
 **Objective**: Verify system handles edge cases
 
 **Steps**:
+
 1. Enter edit mode
 2. Paste very long text (5000+ characters)
 3. Save changes
 
 **Expected Results**:
+
 - ✅ Text input accepts long text
 - ✅ Scrolling works properly
 - ✅ Save completes successfully
@@ -214,6 +243,7 @@ curl -X PUT \
 - ✅ Performance remains acceptable
 
 **Test Data**:
+
 ```
 Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 ```
@@ -221,9 +251,11 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 ---
 
 #### Scenario 6: Special Characters and Formatting
+
 **Objective**: Verify text encoding/decoding works correctly
 
 **Steps**:
+
 1. Enter edit mode
 2. Enter text with special characters:
    - German umlauts: äöüÄÖÜß
@@ -235,6 +267,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 3. Save and verify
 
 **Expected Results**:
+
 - ✅ All characters preserved exactly
 - ✅ No HTML/script execution
 - ✅ No JSON parsing errors
@@ -243,9 +276,11 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 ---
 
 #### Scenario 7: Multiple Page Edits
+
 **Objective**: Verify editing multiple pages in one session
 
 **Steps**:
+
 1. Enter edit mode
 2. Navigate to page 1, edit text
 3. Swipe to page 2, edit text
@@ -253,6 +288,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 5. Save all changes
 
 **Expected Results**:
+
 - ✅ Edit state persists across page swipes
 - ✅ All edited pages tracked in Map
 - ✅ Single API call updates all pages
@@ -261,15 +297,18 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 ---
 
 #### Scenario 8: Edit During Poor Network Conditions
+
 **Objective**: Verify behavior under slow network
 
 **Steps**:
+
 1. Simulate slow network (3G throttling)
 2. Enter edit mode and modify text
 3. Click save
 4. Observe behavior during slow save
 
 **Expected Results**:
+
 - ✅ Loading indicator shows continuously
 - ✅ Save eventually completes (may take 5-10 seconds)
 - ✅ No timeout error before 30 seconds
@@ -283,6 +322,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 ### UI/UX Testing
 
 #### Edit Mode Activation
+
 - [ ] "Bearbeiten" button visible only on own stories
 - [ ] Button changes to "Speichern" in edit mode
 - [ ] Button color changes to green in edit mode
@@ -291,6 +331,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 - [ ] "Speichert..." text shows during save
 
 #### Text Input Behavior
+
 - [ ] Text input appears when in edit mode
 - [ ] Text input hidden when not in edit mode
 - [ ] Input focuses automatically when tapped
@@ -303,6 +344,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 - [ ] Input has slight background tint
 
 #### Edit State Management
+
 - [ ] Edited pages tracked correctly
 - [ ] Unsaved indicator shows when changes exist
 - [ ] Original text preserved until save
@@ -312,6 +354,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 - [ ] State cleared after cancel
 
 #### Save Operation
+
 - [ ] Save button clickable only in edit mode
 - [ ] Loading state activates on save click
 - [ ] Cannot edit during save
@@ -321,6 +364,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 - [ ] Edit mode exits after save
 
 #### Cancel Operation
+
 - [ ] Cancel modal appears when clicking edit button with unsaved changes
 - [ ] Modal shows clear warning message
 - [ ] "Weiter bearbeiten" button closes modal, stays in edit mode
@@ -329,6 +373,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 - [ ] Edit mode exits after discard
 
 #### Error Handling
+
 - [ ] Error toast appears on network failure
 - [ ] Error message is user-friendly in German
 - [ ] Error toast stays visible for 3 seconds
@@ -337,6 +382,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 - [ ] Backend errors displayed appropriately
 
 #### Accessibility
+
 - [ ] Text input accessible to screen readers
 - [ ] Buttons have proper accessibility labels
 - [ ] Input supports text selection/copy/paste
@@ -344,6 +390,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 - [ ] Focus management works correctly
 
 #### Performance
+
 - [ ] Edit mode activates instantly (<100ms)
 - [ ] Text input responds immediately to typing
 - [ ] No lag when typing long text
@@ -354,6 +401,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 ### Cross-Platform Testing
 
 #### iOS Testing
+
 - [ ] Edit button renders correctly
 - [ ] Keyboard appears properly
 - [ ] Keyboard type is appropriate
@@ -364,6 +412,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 - [ ] Native haptic feedback on save
 
 #### Android Testing
+
 - [ ] Edit button renders correctly
 - [ ] Keyboard appears properly
 - [ ] Back button behavior correct
@@ -371,12 +420,14 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 - [ ] Performance acceptable on mid-range devices
 
 #### Tablet/iPad Testing
+
 - [ ] Larger text input on tablets
 - [ ] Proper spacing and layout
 - [ ] Keyboard doesn't obscure content
 - [ ] Landscape orientation works
 
 ### Security Testing
+
 - [ ] Edit button hidden for other users' stories
 - [ ] API rejects edits from non-owners
 - [ ] Token validation works correctly
@@ -391,12 +442,14 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 ### Backend Coverage
 
 #### Files Tested
+
 - `backend/src/story/story.controller.ts` - PUT /story/:id endpoint
 - `backend/src/core/services/supabase-jsonb-auth.service.ts` - updateStory method
 - Authorization via AuthGuard
 - JWT token validation
 
 #### Coverage Metrics
+
 - **Unit Tests**: 13 test cases created
 - **Edge Cases**: Empty text, long text, special chars, null data
 - **Security**: Authorization, authentication, ownership verification
@@ -406,12 +459,14 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 ### Frontend Coverage
 
 #### Files Tested
+
 - `mobile/app/story/[id].tsx` - Main story screen with edit mode
 - `mobile/components/story/StoryViewer.tsx` - Story viewer with edit props
 - `mobile/components/story/StoryPage.tsx` - Individual page with TextInput
 - `mobile/src/utils/dataService.ts` - API client updateStory method
 
 #### Coverage Metrics
+
 - **State Management**: Edit mode flag, edited pages Map, saving state
 - **UI Components**: Edit button, text input, cancel modal, toast notifications
 - **User Interactions**: Enter edit, change text, save, cancel, discard
@@ -420,6 +475,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 ### Integration Coverage
 
 #### End-to-End Flows
+
 1. ✅ Edit → Save → Verify (Happy Path)
 2. ✅ Edit → Cancel → Verify Discard
 3. ✅ Edit → Network Error → Retry
@@ -427,6 +483,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 5. ✅ Edge Case Data → Handled
 
 ### Areas Not Covered (Future Work)
+
 - [ ] Undo/Redo functionality
 - [ ] Auto-save drafts
 - [ ] Collaborative editing (multiple users)
@@ -440,6 +497,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
 ## Known Issues
 
 ### Current Limitations
+
 1. **No Auto-Save**: Changes only saved when user clicks save button
    - Risk: User may lose work if app crashes
    - Mitigation: Add auto-save to drafts every 30 seconds
@@ -457,14 +515,17 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit... [repeat 5000 times]
    - Mitigation: Add soft limits with warnings
 
 ### Bugs Found During Testing
+
 None currently - feature working as expected
 
 ### Performance Considerations
+
 - **Large Text**: Text >5000 chars may cause slight lag on older devices
 - **Multiple Pages**: Editing 10+ pages in one session works but uses more memory
 - **Network**: Slow 3G networks may take 10+ seconds to save
 
 ### Security Considerations
+
 - **Authorization**: ✅ Properly enforced at backend
 - **XSS Protection**: ✅ React Native automatically escapes text
 - **SQL Injection**: ✅ Supabase client uses parameterized queries
@@ -475,6 +536,7 @@ None currently - feature working as expected
 ## Test Execution Summary
 
 ### Backend Unit Tests
+
 ```bash
 cd backend
 npm test -- story-text-editing.spec.ts
@@ -506,9 +568,11 @@ npm test -- story-text-editing.spec.ts
 ```
 
 ### Integration Tests
+
 Manual execution required - follow scenarios in Integration Test Plan section
 
 ### Manual UI Tests
+
 Use checklist above - estimated time: 2-3 hours for complete coverage
 
 ---
@@ -516,45 +580,47 @@ Use checklist above - estimated time: 2-3 hours for complete coverage
 ## Appendix: Test Data
 
 ### Sample Story for Testing
+
 ```json
 {
-  "id": "test-story-123",
-  "user_id": "test-user-456",
-  "title": "Test Story",
-  "pages_data": [
-    {
-      "page_number": 1,
-      "story_text": "Once upon a time in a magical forest...",
-      "image_url": "https://example.com/image1.jpg",
-      "blur_hash": "L6PZfSi_.AyE_3t7t7R**0o#DgR4"
-    },
-    {
-      "page_number": 2,
-      "story_text": "There lived a brave little fox...",
-      "image_url": "https://example.com/image2.jpg",
-      "blur_hash": "L6PZfSi_.AyE_3t7t7R**0o#DgR5"
-    }
-  ]
+	"id": "test-story-123",
+	"user_id": "test-user-456",
+	"title": "Test Story",
+	"pages_data": [
+		{
+			"page_number": 1,
+			"story_text": "Once upon a time in a magical forest...",
+			"image_url": "https://example.com/image1.jpg",
+			"blur_hash": "L6PZfSi_.AyE_3t7t7R**0o#DgR4"
+		},
+		{
+			"page_number": 2,
+			"story_text": "There lived a brave little fox...",
+			"image_url": "https://example.com/image2.jpg",
+			"blur_hash": "L6PZfSi_.AyE_3t7t7R**0o#DgR5"
+		}
+	]
 }
 ```
 
 ### Sample Update Request
+
 ```json
 {
-  "pages_data": [
-    {
-      "page_number": 1,
-      "story_text": "EDITED: Once upon a time in a magical forest...",
-      "image_url": "https://example.com/image1.jpg",
-      "blur_hash": "L6PZfSi_.AyE_3t7t7R**0o#DgR4"
-    },
-    {
-      "page_number": 2,
-      "story_text": "EDITED: There lived a brave little fox...",
-      "image_url": "https://example.com/image2.jpg",
-      "blur_hash": "L6PZfSi_.AyE_3t7t7R**0o#DgR5"
-    }
-  ]
+	"pages_data": [
+		{
+			"page_number": 1,
+			"story_text": "EDITED: Once upon a time in a magical forest...",
+			"image_url": "https://example.com/image1.jpg",
+			"blur_hash": "L6PZfSi_.AyE_3t7t7R**0o#DgR4"
+		},
+		{
+			"page_number": 2,
+			"story_text": "EDITED: There lived a brave little fox...",
+			"image_url": "https://example.com/image2.jpg",
+			"blur_hash": "L6PZfSi_.AyE_3t7t7R**0o#DgR5"
+		}
+	]
 }
 ```
 
@@ -563,6 +629,7 @@ Use checklist above - estimated time: 2-3 hours for complete coverage
 ## Conclusion
 
 The story text editing feature has been thoroughly tested with:
+
 - ✅ 13 backend unit tests covering all major scenarios
 - ✅ 8 integration test scenarios documented
 - ✅ Comprehensive manual testing checklist

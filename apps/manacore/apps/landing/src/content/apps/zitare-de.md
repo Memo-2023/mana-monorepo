@@ -30,7 +30,9 @@ Zitare ist dein intelligenter Assistent für wissenschaftliches Arbeiten. Von de
 ## Hauptfunktionen
 
 ### 🔍 KI-gestützte Literaturrecherche
+
 Finde relevante Quellen in Sekundenschnelle:
+
 - Durchsuche Millionen akademischer Artikel und Bücher
 - KI-basierte Relevanz-Bewertung
 - Zugriff auf Google Scholar, PubMed, arXiv und mehr
@@ -39,7 +41,9 @@ Finde relevante Quellen in Sekundenschnelle:
 - Volltextzugriff wo verfügbar
 
 ### 📑 Intelligente Zitatverwaltung
+
 Organisiere deine Quellen mühelos:
+
 - Automatische Metadaten-Extraktion aus PDFs
 - Drag & Drop Import von Dokumenten
 - Tagging und Kategorisierung
@@ -48,7 +52,9 @@ Organisiere deine Quellen mühelos:
 - Duplikat-Erkennung
 
 ### ✍️ Perfekte Formatierung
+
 Zitiere korrekt in jedem Stil:
+
 - Über 10.000 Zitierstile unterstützt
 - Automatische In-Text-Zitate
 - Ein-Klick Bibliografie-Erstellung
@@ -57,7 +63,9 @@ Zitiere korrekt in jedem Stil:
 - LaTeX/BibTeX Export
 
 ### 🤖 KI-Features
+
 Verstehe Forschung schneller:
+
 - Automatische Zusammenfassungen langer Artikel
 - Extraktion von Kernaussagen und Methoden
 - Vergleich mehrerer Studien
@@ -80,24 +88,28 @@ Der Mana-Verbrauch richtet sich nach der genutzten Funktion:
 ## Anwendungsfälle
 
 ### Für Studierende
+
 - Bachelor- und Masterarbeiten schreiben
 - Seminararbeiten professionell formatieren
 - Literaturrecherche für Essays
 - Gruppenprojekte koordinieren
 
 ### Für Forschende
+
 - Systematische Literature Reviews
 - Paper-Submission vorbereiten
 - Forschungsprojekte dokumentieren
 - Kollaboration in Forschungsgruppen
 
 ### Für Doktoranden
+
 - Dissertation organisieren
 - Hunderte Quellen verwalten
 - Publikationen vorbereiten
 - Forschungsstand analysieren
 
 ### Für Journalisten & Autoren
+
 - Fakten verifizieren
 - Quellen dokumentieren
 - Recherchen organisieren
@@ -106,6 +118,7 @@ Der Mana-Verbrauch richtet sich nach der genutzten Funktion:
 ## Unterstützte Zitierstile
 
 Zitare unterstützt alle gängigen Zitierstile:
+
 - **APA** (American Psychological Association)
 - **MLA** (Modern Language Association)
 - **Chicago** (Notes & Bibliography, Author-Date)
@@ -119,6 +132,7 @@ Zitare unterstützt alle gängigen Zitierstile:
 ## Integration & Export
 
 Nahtlose Integration in deinen Workflow:
+
 - **Microsoft Word** Plugin (Windows & Mac)
 - **Google Docs** Add-on
 - **LibreOffice** Extension
@@ -130,6 +144,7 @@ Nahtlose Integration in deinen Workflow:
 ## Team-Features
 
 Gemeinsam effizienter forschen:
+
 - Geteilte Bibliotheken für Teams
 - Kommentare und Diskussionen
 - Aufgaben-Zuweisung
@@ -140,6 +155,7 @@ Gemeinsam effizienter forschen:
 ## Datensicherheit
 
 Deine Forschung ist wertvoll und geschützt:
+
 - **Verschlüsselte Speicherung** aller Dokumente
 - **Automatische Backups** täglich
 - **DSGVO-konform** - Server in Europa
@@ -154,6 +170,7 @@ Mit Mana-Credits zahlst du nur für die KI-Features, die du tatsächlich nutzt. 
 ## Verfügbarkeit
 
 Zitare ist verfügbar als:
+
 - **Web-App** (alle Browser)
 - **Desktop-App** (Windows, Mac, Linux)
 - **Browser-Extension** (Chrome, Firefox, Safari, Edge)
@@ -162,18 +179,19 @@ Zitare ist verfügbar als:
 
 ## Vergleich zu Konkurrenz
 
-| Feature | Zitare | Zotero | Mendeley | EndNote |
-|---------|--------|--------|----------|---------|
-| KI-Zusammenfassungen | ✅ | ❌ | ❌ | ❌ |
-| Flexible Abrechnung | ✅ | ✅ | ❌ | ❌ |
-| Moderne UI | ✅ | ⚠️ | ✅ | ⚠️ |
-| Open Source | ✅ | ✅ | ❌ | ❌ |
-| PDF-Annotation | ✅ | ✅ | ✅ | ✅ |
-| Team-Features | ✅ | ⚠️ | ✅ | ✅ |
+| Feature              | Zitare | Zotero | Mendeley | EndNote |
+| -------------------- | ------ | ------ | -------- | ------- |
+| KI-Zusammenfassungen | ✅     | ❌     | ❌       | ❌      |
+| Flexible Abrechnung  | ✅     | ✅     | ❌       | ❌      |
+| Moderne UI           | ✅     | ⚠️     | ✅       | ⚠️      |
+| Open Source          | ✅     | ✅     | ❌       | ❌      |
+| PDF-Annotation       | ✅     | ✅     | ✅       | ✅      |
+| Team-Features        | ✅     | ⚠️     | ✅       | ✅      |
 
 ## Kostenlos starten
 
 Die Basis-Funktionen von Zitare sind komplett kostenlos:
+
 - Unbegrenzte Quellen speichern
 - Alle Zitierstile nutzen
 - Bibliografien erstellen

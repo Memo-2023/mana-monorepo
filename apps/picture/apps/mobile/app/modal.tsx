@@ -6,12 +6,12 @@ import { useTheme } from '~/contexts/ThemeContext';
 import { ScreenContent } from '~/components/ScreenContent';
 
 export default function Modal() {
-  const { theme } = useTheme();
+	const { theme } = useTheme();
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <ScreenContent path="app/modal.tsx" title="Modal"></ScreenContent>
-      <StatusBar style="light" />
-    </SafeAreaView>
-  );
+	return (
+		<SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+			<ScreenContent path="app/modal.tsx" title="Modal"></ScreenContent>
+			<StatusBar style="light" />
+		</SafeAreaView>
+	);
 }

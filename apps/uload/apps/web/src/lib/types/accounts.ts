@@ -59,7 +59,7 @@ export const DEFAULT_PERMISSIONS: TeamPermissions = {
 	create_links: true,
 	edit_own: true,
 	delete_own: true,
-	manage_team: false
+	manage_team: false,
 };
 
 // Subscription plans with updated limits
@@ -75,8 +75,8 @@ export const SUBSCRIPTION_PLANS = {
 			'1 team member',
 			'Basic Analytics',
 			'QR Codes',
-			'Link Customization'
-		]
+			'Link Customization',
+		],
 	},
 	pro: {
 		name: 'Pro Monthly',
@@ -89,22 +89,22 @@ export const SUBSCRIPTION_PLANS = {
 			'Up to 3 team members',
 			'Advanced Analytics',
 			'Custom QR Codes',
-			'Priority Support'
-		]
+			'Priority Support',
+		],
 	},
 	team: {
 		name: 'Pro Yearly',
 		price: 39.99,
 		currency: 'EUR',
-		team_members: 5, // Can invite up to 5 team members  
+		team_members: 5, // Can invite up to 5 team members
 		links_per_month: 600, // Updated to match pricing page (yearly = 600/month)
 		features: [
 			'600 links per month',
 			'Up to 5 team members',
 			'Advanced Analytics',
 			'Custom QR Codes',
-			'Priority Support'
-		]
+			'Priority Support',
+		],
 	},
 	team_plus: {
 		name: 'Pro Lifetime',
@@ -117,9 +117,9 @@ export const SUBSCRIPTION_PLANS = {
 			'Unlimited team members',
 			'All Pro Features',
 			'API Access',
-			'Early Access to new Features'
-		]
-	}
+			'Early Access to new Features',
+		],
+	},
 };
 
 // Helper to check if user can add team members (now everyone can)
@@ -132,7 +132,8 @@ export function getTeamMemberLimit(subscription_status?: string): number {
 	if (!subscription_status || !(subscription_status in SUBSCRIPTION_PLANS)) {
 		return SUBSCRIPTION_PLANS.free.team_members; // Default to free plan limit
 	}
-	const limit = SUBSCRIPTION_PLANS[subscription_status as keyof typeof SUBSCRIPTION_PLANS].team_members;
+	const limit =
+		SUBSCRIPTION_PLANS[subscription_status as keyof typeof SUBSCRIPTION_PLANS].team_members;
 	return limit === -1 ? Infinity : limit; // -1 means unlimited
 }
 

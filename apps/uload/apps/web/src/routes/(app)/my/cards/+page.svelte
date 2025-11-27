@@ -5,7 +5,7 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import SafeCardRenderer from '$lib/components/cards/SafeCardRenderer.svelte';
-	
+
 	let { data }: { data: PageData } = $props();
 
 	// State
@@ -21,29 +21,31 @@
 	// Load user's cards
 	async function loadUserCards() {
 		if (!browser) return;
-		
+
 		console.log('🔍 Loading all user cards...');
-		
+
 		// Wait for PocketBase auth to be initialized
 		const { pb } = await import('$lib/pocketbase');
 		let authCheckAttempts = 0;
 		const maxAuthChecks = 10;
-		
+
 		while (!pb.authStore.isValid && authCheckAttempts < maxAuthChecks) {
-			console.log(`⏳ Waiting for auth initialization (attempt ${authCheckAttempts + 1}/${maxAuthChecks})`);
-			await new Promise(resolve => setTimeout(resolve, 100));
+			console.log(
+				`⏳ Waiting for auth initialization (attempt ${authCheckAttempts + 1}/${maxAuthChecks})`
+			);
+			await new Promise((resolve) => setTimeout(resolve, 100));
 			authCheckAttempts++;
 		}
-		
+
 		if (!pb.authStore.isValid) {
 			console.error('❌ Auth not valid after waiting - aborting card load');
 			loading = false;
 			return;
 		}
-		
+
 		console.log('✅ Auth is valid, proceeding with card load');
 		loading = true;
-		
+
 		try {
 			const { unifiedCardService } = await import('$lib/services/unifiedCardService');
 			const cards = await unifiedCardService.getUserCards();
@@ -109,8 +111,8 @@
 				...card,
 				metadata: {
 					...card.metadata,
-					is_active: !card.metadata?.is_active
-				}
+					is_active: !card.metadata?.is_active,
+				},
 			};
 			await unifiedCardService.updateCard(card.id, updatedCard);
 			await loadUserCards();
@@ -128,7 +130,7 @@
 			const updatedCard = {
 				...card,
 				page: newPage,
-				visibility: newPage === 'profile' ? 'public' : card.visibility
+				visibility: newPage === 'profile' ? 'public' : card.visibility,
 			};
 			await unifiedCardService.updateCard(card.id, updatedCard);
 			await loadUserCards();
@@ -197,7 +199,7 @@
 			console.error('Error updating positions:', error);
 		}
 	}
-	
+
 	onMount(() => {
 		loadUserCards();
 	});
@@ -209,7 +211,7 @@
 			<h1 class="text-3xl font-bold text-theme-text">Profile Cards</h1>
 			<div class="flex gap-2">
 				<button
-					onclick={() => showStats = !showStats}
+					onclick={() => (showStats = !showStats)}
 					class="rounded-lg border border-theme-border bg-theme-surface px-3 py-2 text-sm font-medium text-theme-text transition-all hover:bg-theme-surface-hover"
 					title="Toggle Stats"
 				>
@@ -230,18 +232,18 @@
 				<div class="rounded-lg border border-theme-border bg-theme-surface p-4 shadow-sm">
 					<p class="text-2xl font-bold text-theme-text">{userCards?.length || 0}</p>
 					<p class="text-sm text-theme-text-muted">Total Cards</p>
-					<p class="text-xs text-theme-accent">{userCards?.filter(c => c.page === 'profile').length || 0} on profile</p>
+					<p class="text-xs text-theme-accent">
+						{userCards?.filter((c) => c.page === 'profile').length || 0} on profile
+					</p>
 				</div>
 				<div class="rounded-lg border border-theme-border bg-theme-surface p-4 shadow-sm">
-					<p class="text-2xl font-bold text-theme-text">{userCards?.filter(c => c.metadata?.is_active !== false).length || 0}</p>
+					<p class="text-2xl font-bold text-theme-text">
+						{userCards?.filter((c) => c.metadata?.is_active !== false).length || 0}
+					</p>
 					<p class="text-sm text-theme-text-muted">Active Cards</p>
 				</div>
 				<div class="rounded-lg border border-theme-border bg-theme-surface p-4 shadow-sm">
-					<a
-						href="/p/{data.user?.username || data.user?.id}"
-						target="_blank"
-						class="group"
-					>
+					<a href="/p/{data.user?.username || data.user?.id}" target="_blank" class="group">
 						<p class="text-lg font-semibold text-theme-text group-hover:underline">View Profile</p>
 						<p class="text-sm text-theme-text-muted">See how it looks</p>
 					</a>
@@ -262,10 +264,11 @@
 
 				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 					{#each userCards as card, index}
-						<div 
-							class="relative rounded-lg border-2 bg-theme-surface p-4 transition-all {
-								dropTargetIndex === index ? 'border-theme-primary' : 'border-theme-border'
-							} {isDragging && draggedIndex === index ? 'opacity-50' : ''}"
+						<div
+							class="relative rounded-lg border-2 bg-theme-surface p-4 transition-all {dropTargetIndex ===
+							index
+								? 'border-theme-primary'
+								: 'border-theme-border'} {isDragging && draggedIndex === index ? 'opacity-50' : ''}"
 							draggable="true"
 							ondragstart={(e) => handleDragStart(e, index)}
 							ondragover={(e) => handleDragOver(e, index)}
@@ -276,28 +279,39 @@
 							<!-- Drag handle -->
 							<div class="absolute left-2 top-2 cursor-move text-theme-text-muted">
 								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M4 8h16M4 16h16"
+									/>
 								</svg>
 							</div>
 
 							<!-- Card Preview -->
 							<div class="ml-8">
 								<SafeCardRenderer {card} compact={true} className="mb-4" />
-								
+
 								<!-- Status badges -->
 								<div class="mb-3 flex flex-wrap gap-2">
 									{#if card.page === 'profile'}
-										<span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+										<span
+											class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800"
+										>
 											On Profile
 										</span>
 									{:else}
-										<span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
+										<span
+											class="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800"
+										>
 											Not on Profile
 										</span>
 									{/if}
-									
+
 									{#if card.metadata?.is_active === false}
-										<span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">
+										<span
+											class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800"
+										>
 											Hidden
 										</span>
 									{/if}
@@ -347,9 +361,7 @@
 		{:else}
 			<div class="rounded-lg border border-theme-border bg-theme-surface p-8 text-center shadow-md">
 				<h3 class="mb-2 text-lg font-medium text-theme-text">No cards yet</h3>
-				<p class="mb-6 text-theme-text-muted">
-					Create your first card to get started
-				</p>
+				<p class="mb-6 text-theme-text-muted">Create your first card to get started</p>
 				<button
 					onclick={() => createNewCard()}
 					class="inline-flex items-center rounded-lg bg-theme-primary px-4 py-2 font-medium text-white shadow-lg transition-colors hover:bg-theme-primary-hover"
@@ -364,7 +376,7 @@
 <!-- Delete Confirmation Modal -->
 {#if showDeleteConfirm && cardToDelete}
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-		<div class="max-w-md rounded-lg bg-theme-surface border border-theme-border p-6">
+		<div class="max-w-md rounded-lg border border-theme-border bg-theme-surface p-6">
 			<h3 class="mb-4 text-lg font-semibold text-theme-text">Delete Card</h3>
 			<p class="mb-6 text-sm text-theme-text-muted">
 				Are you sure you want to delete this card? This action cannot be undone.

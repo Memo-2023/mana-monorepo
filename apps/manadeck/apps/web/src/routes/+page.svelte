@@ -16,7 +16,9 @@
 
 <div class="min-h-screen flex items-center justify-center">
 	<div class="text-center">
-		<div class="inline-block animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+		<div
+			class="inline-block animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"
+		></div>
 		<p class="mt-4 text-muted-foreground">Loading...</p>
 	</div>
 </div>

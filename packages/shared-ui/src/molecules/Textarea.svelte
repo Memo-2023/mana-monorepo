@@ -44,7 +44,7 @@
 		required = false,
 		autoResize = false,
 		class: className = '',
-		id = `textarea-${Math.random().toString(36).slice(2, 9)}`
+		id = `textarea-${Math.random().toString(36).slice(2, 9)}`,
 	}: Props = $props();
 
 	let textareaElement: HTMLTextAreaElement | null = $state(null);
@@ -90,7 +90,9 @@
 		{required}
 		oninput={handleInput}
 		onchange={handleChange}
-		class="textarea-input {error || isOverLimit ? 'textarea-input--error' : ''} {autoResize ? 'textarea-input--auto-resize' : ''}"
+		class="textarea-input {error || isOverLimit ? 'textarea-input--error' : ''} {autoResize
+			? 'textarea-input--auto-resize'
+			: ''}"
 	></textarea>
 
 	<div class="textarea-footer">

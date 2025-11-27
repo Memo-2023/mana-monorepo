@@ -1,42 +1,36 @@
-import {
-  IsString,
-  IsOptional,
-  IsBoolean,
-  IsObject,
-  IsArray,
-} from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsObject, IsArray } from 'class-validator';
 
 export class CreateLevelDto {
-  @IsString()
-  name: string;
+	@IsString()
+	name: string;
 
-  @IsOptional()
-  @IsString()
-  description?: string;
+	@IsOptional()
+	@IsString()
+	description?: string;
 
-  @IsObject()
-  voxelData: Record<string, any>;
+	@IsObject()
+	voxelData: Record<string, any>;
 
-  @IsObject()
-  spawnPoint: { x: number; y: number; z: number };
+	@IsObject()
+	spawnPoint: { x: number; y: number; z: number };
 
-  @IsObject()
-  worldSize: { width: number; height: number; depth: number };
+	@IsObject()
+	worldSize: { width: number; height: number; depth: number };
 
-  @IsOptional()
-  @IsBoolean()
-  isPublic?: boolean;
+	@IsOptional()
+	@IsBoolean()
+	isPublic?: boolean;
 
-  @IsOptional()
-  @IsString()
-  difficulty?: string;
+	@IsOptional()
+	@IsString()
+	difficulty?: string;
 
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
+	@IsOptional()
+	@IsArray()
+	@IsString({ each: true })
+	tags?: string[];
 
-  @IsOptional()
-  @IsString()
-  thumbnailUrl?: string;
+	@IsOptional()
+	@IsString()
+	thumbnailUrl?: string;
 }

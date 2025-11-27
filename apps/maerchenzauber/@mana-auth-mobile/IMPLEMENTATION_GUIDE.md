@@ -256,14 +256,14 @@ export default function HomeScreen() {
 ```typescript
 // Hardcoded in login.tsx
 const handleLogin = async () => {
-  await authService.signIn(email, password);
+	await authService.signIn(email, password);
 };
 
 // Hardcoded colors
 const styles = StyleSheet.create({
-  button: {
-    backgroundColor: '#FFCB00', // Hardcoded
-  },
+	button: {
+		backgroundColor: '#FFCB00', // Hardcoded
+	},
 });
 ```
 

@@ -20,13 +20,14 @@ Die PostHog-Integration ist GDPR-konform implementiert:
 - **Event-basiertes Tracking**: Keine automatische Erfassung sensibler Daten
 
 **Wichtige Konfiguration:**
+
 ```javascript
 posthog.init(PROJECT_KEY, {
-  api_host: 'https://eu.posthog.com',
-  person_profiles: 'identified_only',
-  capture_pageview: true,
-  capture_pageleave: true,
-  autocapture: false // Volle Kontrolle über Events
+	api_host: 'https://eu.posthog.com',
+	person_profiles: 'identified_only',
+	capture_pageview: true,
+	capture_pageleave: true,
+	autocapture: false, // Volle Kontrolle über Events
 });
 ```
 
@@ -52,15 +53,16 @@ Zentrale Funktionen für A/B-Tests:
 **Ziel:** Optimierung der Haupt-Call-to-Action auf der Homepage
 
 **Varianten:**
-- **Control (50%)**: 
+
+- **Control (50%)**:
   - Primary: "So funktioniert's" → `#how-it-works`
   - Secondary: "Live-Demo (2 Min)" → `/de/demo`
-  
 - **Variant B (50%)**:
   - Primary: "Kostenlos testen" → `/de/download`
   - Secondary: "So funktioniert's" → `#how-it-works`
 
 **Implementation:**
+
 - Script in `HeroABTestScript.astro`
 - Dynamische CTA-Änderung via JavaScript
 - Tracking von Impressions und Klicks
@@ -69,29 +71,30 @@ Zentrale Funktionen für A/B-Tests:
 
 ### Basis-Events
 
-| Event Name | Beschreibung | Properties |
-|------------|--------------|------------|
-| `$pageview` | Automatisch bei Seitenaufruf | `locale` |
-| `$pageleave` | Beim Verlassen der Seite | - |
+| Event Name   | Beschreibung                 | Properties |
+| ------------ | ---------------------------- | ---------- |
+| `$pageview`  | Automatisch bei Seitenaufruf | `locale`   |
+| `$pageleave` | Beim Verlassen der Seite     | -          |
 
 ### Experiment-Events
 
-| Event Name | Beschreibung | Properties |
-|------------|--------------|------------|
-| `experiment_variant_shown` | Nutzer sieht eine Variante | `experiment`, `variant` |
-| `hero_cta_clicked` | Klick auf Hero-CTA | `experiment`, `variant`, `button_type`, `destination` |
-| `experiment_conversion` | Conversion erfolgt | `experiment`, `variant`, `conversion_type`, `platform` |
+| Event Name                 | Beschreibung               | Properties                                             |
+| -------------------------- | -------------------------- | ------------------------------------------------------ |
+| `experiment_variant_shown` | Nutzer sieht eine Variante | `experiment`, `variant`                                |
+| `hero_cta_clicked`         | Klick auf Hero-CTA         | `experiment`, `variant`, `button_type`, `destination`  |
+| `experiment_conversion`    | Conversion erfolgt         | `experiment`, `variant`, `conversion_type`, `platform` |
 
 ### Download-Events
 
-| Event Name | Beschreibung | Properties |
-|------------|--------------|------------|
-| `download_page_viewed` | Download-Seite aufgerufen | `lang` |
-| `download_button_clicked` | App-Download geklickt | `platform`, `source`, `lang`, `hero_experiment_variant` |
+| Event Name                | Beschreibung              | Properties                                              |
+| ------------------------- | ------------------------- | ------------------------------------------------------- |
+| `download_page_viewed`    | Download-Seite aufgerufen | `lang`                                                  |
+| `download_button_clicked` | App-Download geklickt     | `platform`, `source`, `lang`, `hero_experiment_variant` |
 
 ## PostHog Dashboard-Konfiguration
 
 ### Aktivierte Produkte
+
 - ✅ **Product Analytics**: User-Journeys und Funnels
 - ✅ **Web Analytics**: Basis-Metriken (parallel zu Plausible)
 - ✅ **Feature Flags**: A/B-Test-Infrastruktur
@@ -101,12 +104,14 @@ Zentrale Funktionen für A/B-Tests:
 ### Empfohlene Dashboards
 
 #### 1. "Hero CTA A/B Test Results"
+
 - **Conversion Funnel**: Impression → Click → Download Page → App Download
 - **CTR by Variant**: Click-Through-Rate Vergleich
 - **Download Conversions**: Finale Conversions nach Variante
 - **Platform Distribution**: iOS vs. Android
 
 #### 2. "User Journey Analysis"
+
 - **Path Analysis**: Häufigste Wege zur Download-Seite
 - **Drop-off Points**: Wo verlieren wir Nutzer?
 - **Session Duration**: Verweildauer nach Variante
@@ -121,19 +126,20 @@ Zentrale Funktionen für A/B-Tests:
 const variant = await getExperiment('my-new-test');
 
 if (variant === 'variant-b') {
-  // Variante B anwenden
+	// Variante B anwenden
 }
 
 // 3. Events tracken
 trackEvent('my_test_interaction', {
-  experiment: 'my-new-test',
-  variant: variant || 'control'
+	experiment: 'my-new-test',
+	variant: variant || 'control',
 });
 ```
 
 ### 2. Conversion-Tracking
 
 Immer die komplette Journey tracken:
+
 1. Impression (Variante gezeigt)
 2. Interaction (Nutzer-Aktion)
 3. Conversion (Ziel erreicht)
@@ -147,16 +153,19 @@ Immer die komplette Journey tracken:
 ## Wartung & Monitoring
 
 ### Tägliche Checks
+
 - [ ] Events kommen in PostHog an
 - [ ] Feature Flags funktionieren
 - [ ] Keine JavaScript-Fehler in Console
 
 ### Wöchentliche Reviews
+
 - [ ] A/B-Test Performance prüfen
 - [ ] Signifikanz-Level checken
 - [ ] Anomalien untersuchen
 
 ### Monatliche Aufgaben
+
 - [ ] Abgeschlossene Tests dokumentieren
 - [ ] Neue Test-Ideen priorisieren
 - [ ] PostHog-Kosten überprüfen
@@ -164,16 +173,19 @@ Immer die komplette Journey tracken:
 ## Troubleshooting
 
 ### Problem: PostHog lädt nicht
+
 1. Cookie-Consent prüfen: `localStorage.getItem('memoro_cookie_consent')`
 2. API-Key in `.env` verifizieren
 3. Browser-Console auf Fehler checken
 
 ### Problem: Feature Flag gibt null zurück
+
 1. Flag-Name exakt prüfen (case-sensitive!)
 2. Rollout-Percentage in PostHog checken
 3. Cache leeren und neu laden
 
 ### Problem: Events werden nicht getrackt
+
 1. Network-Tab öffnen, nach `eu.posthog.com/e/` suchen
 2. `window.posthog` in Console prüfen
 3. Event-Namen auf Tippfehler checken
@@ -181,16 +193,19 @@ Immer die komplette Journey tracken:
 ## Zukünftige Optimierungen
 
 ### Phase 1 (Abgeschlossen ✅)
+
 - PostHog-Integration
 - Erster A/B-Test (Hero CTA)
 - Conversion-Tracking
 
 ### Phase 2 (Geplant)
+
 - Pricing-Layout A/B-Test
 - Navigation-Varianten
 - Form-Optimierung
 
 ### Phase 3 (Zukunft)
+
 - Personalisierung basierend auf Quelle
 - Multi-Variate Tests
 - KI-gestützte Optimierung
@@ -202,6 +217,7 @@ Immer die komplette Journey tracken:
 **Support:** support@posthog.com
 
 **Internes Team:**
+
 - A/B-Tests: Development Team
 - Analytics: Marketing Team
 - Datenschutz: Legal Team

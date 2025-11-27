@@ -21,26 +21,31 @@
 ## 🛠 Technology Stack
 
 ### Core Framework
+
 - **React Native**: 0.79.2
 - **Expo SDK**: 53.0.6
 - **React**: 19.0.0
 - **TypeScript**: Latest
 
 ### Navigation & UI
+
 - **Expo Router**: 5.0.4 (file-based routing)
 - **NativeWind**: 4.1.23 (Tailwind CSS for React Native)
 - **React Native Reanimated**: 3.17.4
 
 ### State Management
+
 - **Zustand**: 5.0.4 (global state)
 - **React Context**: Feature-specific state management
 
 ### Backend Integration
+
 - **Supabase**: 2.49.4 (database, storage, real-time)
 - **Custom JWT Middleware**: Authentication bridge
 - **Azure Speech Services**: Audio transcription
 
 ### Platform Features
+
 - **Audio**: expo-audio 1.0.13 (migrated from expo-av)
 - **Maps**: react-native-maps 1.20.1
 - **Subscriptions**: react-native-purchases 8.10.1 (RevenueCat)
@@ -88,6 +93,7 @@ memoro_app/
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
 - Expo CLI
 - iOS Simulator / Android Emulator
@@ -120,7 +126,7 @@ npm start
 # iOS development
 npm run ios
 
-# Android development  
+# Android development
 npm run android
 
 # Web development
@@ -149,11 +155,13 @@ eas build --profile production
 ```
 
 ### Build Profiles
+
 - **Development**: Development client with debugging enabled
 - **Preview**: Internal distribution with app bundle (Android)
 - **Production**: Auto-increment version, store-ready builds
 
 ### Platform Support
+
 - **iOS**: App Store deployment with proper entitlements
 - **Android**: Google Play with adaptive icons
 - **Web**: Netlify deployment with static export
@@ -161,18 +169,21 @@ eas build --profile production
 ## 🎨 Design System
 
 ### Atomic Design Architecture
+
 - **Atoms**: Button, Text, Icon, Input, Toggle (16 components)
-- **Molecules**: MemoPreview, RecordingBar, TagSelector (21 components)  
+- **Molecules**: MemoPreview, RecordingBar, TagSelector (21 components)
 - **Organisms**: AudioRecorder, Memory, TranscriptDisplay (9 components)
 - **Statistics**: Specialized analytics components (14 components)
 
 ### Theme System
+
 - **Multiple Variants**: Light, dark, and custom themes
 - **Dynamic Switching**: Real-time theme changes
 - **System Detection**: Automatic dark/light mode
 - **Color System**: Comprehensive Tailwind-based palette
 
 ### Markdown Support
+
 - **Rich Text Display**: Full Markdown rendering in memos
 - **Hybrid Rendering**: Automatic detection of Markdown syntax
 - **Theme Integration**: Markdown styles adapt to dark/light mode
@@ -182,9 +193,11 @@ eas build --profile production
 ## 🌍 Internationalization
 
 ### Supported Languages (32)
+
 Arabic, Bengali, Bulgarian, Chinese, Czech, Danish, Dutch, English, Estonian, Finnish, French, Gaelic, German, Greek, Hindi, Croatian, Hungarian, Indonesian, Italian, Japanese, Korean, Lithuanian, Latvian, Maltese, Norwegian, Persian, Polish, Portuguese, Romanian, Russian, Serbian, Slovak, Slovenian, Spanish, Swedish, Turkish, Ukrainian, Urdu, Vietnamese
 
 ### Features
+
 - **Automatic Detection**: Device language detection with fallback
 - **Persistent Preferences**: User language choice storage
 - **RTL Support**: Right-to-left languages (Arabic, Hebrew)
@@ -193,6 +206,7 @@ Arabic, Bengali, Bulgarian, Chinese, Czech, Danish, Dutch, English, Estonian, Fi
 ## 🎙 Audio Features
 
 ### Recording Capabilities
+
 - **High-Quality Recording**: M4A format with AAC encoding
 - **Background Recording**: Proper iOS/Android permissions
 - **Pause/Resume**: Seamless recording control
@@ -200,6 +214,7 @@ Arabic, Bengali, Bulgarian, Chinese, Czech, Danish, Dutch, English, Estonian, Fi
 - **Crash Recovery**: Automatic segmentation prevents data loss
 
 ### Processing Pipeline
+
 - **Cloud Storage**: Supabase Storage integration
 - **Azure Transcription**: Speaker labeling and timestamps
 - **AI Analysis**: Custom backend processing
@@ -209,37 +224,45 @@ Arabic, Bengali, Bulgarian, Chinese, Czech, Danish, Dutch, English, Estonian, Fi
 ## 🤖 AI Processing System
 
 ### Blueprints
+
 Reusable AI analysis patterns for different use cases:
+
 - **Text Analysis**: Content structure and insights
 - **Creative Writing**: Literary analysis and suggestions
 - **Meeting Notes**: Action items and summaries
 - **Research**: Citation and reference extraction
 
-### Prompts  
+### Prompts
+
 Specific AI tasks for content transformation:
+
 - **Summary**: Concise content overview
 - **To-Do**: Action item extraction
 - **Translation**: Multi-language support
 - **Question Answering**: Interactive content exploration
 
 ### Categories (8)
+
 - Coaching, Crafts, Healthcare, Journal, Journalism, Office, Sales, University
 
 ## 💰 Subscription & Credits
 
 ### Mana Credit System
+
 - **Transparent Pricing**: Backend-driven cost calculation
 - **Real-Time Validation**: Pre-operation credit checks
 - **Usage Tracking**: Comprehensive consumption analytics
 - **Credit Sharing**: Team-based credit pools
 
 ### Subscription Tiers
+
 - **Free**: 150 Mana, 5 daily Mana
 - **Individual Plans**: Stream (€5.99), River (€14.99), Lake (€29.99), Ocean (€49.99)
 - **Team Plans**: Collaborative features with shared credits
 - **Enterprise**: Advanced features and support
 
 ### RevenueCat Integration
+
 - **Cross-Platform**: iOS, Android, Web support
 - **Purchase Management**: Subscription lifecycle handling
 - **User Identification**: Authentication system integration
@@ -248,6 +271,7 @@ Specific AI tasks for content transformation:
 ## 🏢 Collaborative Spaces
 
 ### Team Features
+
 - **Space Creation**: Unlimited collaborative workspaces
 - **Member Management**: Role-based permissions
 - **Memo Sharing**: Seamless content collaboration
@@ -255,6 +279,7 @@ Specific AI tasks for content transformation:
 - **Access Control**: Row-level security policies
 
 ### Integration
+
 - **Backend API**: RESTful space management
 - **Real-Time Sync**: Live collaboration updates
 - **Credit Pools**: Shared team resources
@@ -263,12 +288,14 @@ Specific AI tasks for content transformation:
 ## 🔐 Security & Authentication
 
 ### Multi-Provider Authentication
+
 - **Email/Password**: Traditional authentication
 - **Google Sign-In**: OAuth integration
 - **Apple Sign-In**: iOS native authentication
 - **JWT Tokens**: Custom middleware integration
 
 ### Data Security
+
 - **Row Level Security**: Database-level access control
 - **Token Rotation**: Automatic refresh mechanisms
 - **Secure Storage**: Platform-specific secure storage
@@ -277,12 +304,14 @@ Specific AI tasks for content transformation:
 ## 📊 Analytics & Monitoring
 
 ### User Analytics
+
 - **PostHog Integration**: Comprehensive event tracking
 - **User Identification**: Authentication-linked analytics
 - **Feature Usage**: Detailed interaction metrics
 - **Performance Monitoring**: App performance insights
 
 ### Error Handling
+
 - **Graceful Degradation**: Offline functionality
 - **Retry Mechanisms**: Network failure recovery
 - **User Feedback**: Comprehensive error messaging
@@ -291,12 +320,14 @@ Specific AI tasks for content transformation:
 ## 🔧 Development & Testing
 
 ### Code Quality
+
 - **TypeScript Strict**: Type safety enforcement
 - **ESLint & Prettier**: Code quality standards
 - **Atomic Design**: Consistent component architecture
 - **Documentation**: Comprehensive README files
 
 ### Development Tools
+
 - **Expo Development Build**: Native debugging
 - **Metro Bundler**: Asset optimization
 - **Hot Reload**: Fast development iteration
@@ -305,15 +336,16 @@ Specific AI tasks for content transformation:
 ## 📚 Additional Documentation
 
 For more detailed information, see:
+
 - **CLAUDE.md**: Development notes and context
 - **docs/**: Feature-specific documentation
 - **ReadMe/**: Legacy documentation archive
-- **features/*/README.md**: Feature-specific guides
+- **features/\*/README.md**: Feature-specific guides
 
 ## 🌟 Key Features Summary
 
 1. **Enterprise-Ready**: Production-scale architecture with comprehensive error handling
-2. **International**: 32-language support with RTL compatibility  
+2. **International**: 32-language support with RTL compatibility
 3. **Modern Stack**: Latest React Native patterns with Expo Router
 4. **AI-Powered**: Sophisticated content processing and analysis
 5. **Collaborative**: Team-based workspaces with real-time sync

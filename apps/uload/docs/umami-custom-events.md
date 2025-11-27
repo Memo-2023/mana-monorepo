@@ -295,7 +295,7 @@ trackLinkClick({
 	shortCode: 'abc123',
 	username: 'john',
 	hasPassword: false,
-	isExpiring: true
+	isExpiring: true,
 });
 
 // Track link creation
@@ -304,7 +304,7 @@ trackLinkCreated({
 	hasPassword: true,
 	hasExpiry: false,
 	hasClickLimit: true,
-	isCustomCode: false
+	isCustomCode: false,
 });
 
 // Track authentication
@@ -316,7 +316,7 @@ trackAuth('logout');
 trackError({
 	type: 'validation',
 	message: 'Invalid URL format',
-	code: 'INVALID_URL'
+	code: 'INVALID_URL',
 });
 ```
 
@@ -351,7 +351,7 @@ Example:
 // In analytics.ts
 export const EVENTS = {
 	// ... existing events
-	NEW_EVENT_NAME: 'new-event-name'
+	NEW_EVENT_NAME: 'new-event-name',
 };
 
 // In your component
@@ -359,6 +359,6 @@ import { trackEvent, EVENTS } from '$lib/analytics';
 
 trackEvent(EVENTS.NEW_EVENT_NAME, {
 	property1: 'value1',
-	property2: 'value2'
+	property2: 'value2',
 });
 ```

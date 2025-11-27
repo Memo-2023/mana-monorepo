@@ -1,23 +1,21 @@
 ---
-title: "Gemeinsam Bauen: Kollaborative Technologieentwicklung"
-description: "Unsere Vision für eine neue Ära des gemeinschaftlichen Bauens von Technologien und digitalen Lösungen."
+title: 'Gemeinsam Bauen: Kollaborative Technologieentwicklung'
+description: 'Unsere Vision für eine neue Ära des gemeinschaftlichen Bauens von Technologien und digitalen Lösungen.'
 pubDate: 2025-04-02
-category: "technology"
-timeline: "2025-2027"
-status: "current"
+category: 'technology'
+timeline: '2025-2027'
+status: 'current'
 featured: true
-image: "/images/vision/gemeinsam-bauen.png"
-contributors: ["Marcus Hoffmann", "Judith Berg", "Till Schneider"]
-relatedLinks: [
-  {
-    title: "Open Source Development Model",
-    url: "https://opensource.org/osd"
-  },
-  {
-    title: "Collaborative Innovation Networks",
-    url: "https://en.wikipedia.org/wiki/Collaborative_innovation_network"
-  }
-]
+image: '/images/vision/gemeinsam-bauen.png'
+contributors: ['Marcus Hoffmann', 'Judith Berg', 'Till Schneider']
+relatedLinks:
+  [
+    { title: 'Open Source Development Model', url: 'https://opensource.org/osd' },
+    {
+      title: 'Collaborative Innovation Networks',
+      url: 'https://en.wikipedia.org/wiki/Collaborative_innovation_network',
+    },
+  ]
 ---
 
 # Gemeinsam Bauen: Kollaborative Technologieentwicklung

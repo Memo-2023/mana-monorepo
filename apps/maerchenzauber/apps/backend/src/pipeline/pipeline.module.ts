@@ -6,9 +6,9 @@ import { CharacterPipelineModule } from './character/character-pipeline.module';
 
 @Global()
 @Module({
-  imports: [CharacterPipelineModule],
-  controllers: [PipelineTestingController],
-  providers: [PipelineExecutor, PipelineRegistry],
-  exports: [PipelineExecutor, PipelineRegistry],
+	imports: [CharacterPipelineModule],
+	controllers: [PipelineTestingController],
+	providers: [PipelineExecutor, PipelineRegistry],
+	exports: [PipelineExecutor, PipelineRegistry],
 })
 export class PipelineModule {}

@@ -30,7 +30,6 @@
 	async function handleSignInWithGoogle(idToken: string) {
 		return auth.signInWithGoogle(idToken);
 	}
-
 </script>
 
 <LoginPage
@@ -39,7 +38,7 @@
 	primaryColor="#f8d62b"
 	onSignIn={handleSignIn}
 	onSignInWithGoogle={handleSignInWithGoogle}
-	goto={goto}
+	{goto}
 	enableGoogle={!!env.oauth.googleClientId}
 	enableApple={!!env.oauth.appleClientId}
 	successRedirect="/dashboard"

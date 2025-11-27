@@ -3,7 +3,7 @@ import type { RequestEvent } from '@sveltejs/kit';
 export async function getUser(event: RequestEvent) {
 	const {
 		data: { user },
-		error
+		error,
 	} = await event.locals.supabase.auth.getUser();
 
 	if (error) {
@@ -17,7 +17,7 @@ export async function getUser(event: RequestEvent) {
 export async function getSession(event: RequestEvent) {
 	const {
 		data: { session },
-		error
+		error,
 	} = await event.locals.supabase.auth.getSession();
 
 	if (error) {

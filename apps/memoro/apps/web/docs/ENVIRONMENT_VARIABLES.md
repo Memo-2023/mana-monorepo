@@ -5,6 +5,7 @@ This document describes all environment variables used in the Memoro web applica
 ## Overview
 
 The web app uses SvelteKit's environment variable system:
+
 - **`PUBLIC_*`** prefix: Client-side accessible (exposed to browser)
 - **No prefix**: Server-side only (secure, not exposed to browser)
 
@@ -23,6 +24,7 @@ PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
 - **`PUBLIC_SUPABASE_ANON_KEY`**: Supabase anonymous/public key for client-side auth
 
 **Where to find:**
+
 1. Go to [Supabase Dashboard](https://app.supabase.com/)
 2. Select your Memoro project
 3. Go to Settings → API
@@ -43,6 +45,7 @@ PUBLIC_MIDDLEWARE_APP_ID=973da0c1-b479-4dac-a1b0-ed09c72caca8
 - **`PUBLIC_MIDDLEWARE_APP_ID`**: Application identifier for middleware authentication
 
 **Usage:**
+
 - Audio transcription requests
 - Memo processing pipeline
 - AI-powered insights generation
@@ -58,6 +61,7 @@ PUBLIC_STORAGE_BUCKET=user-uploads
 - **`PUBLIC_STORAGE_BUCKET`**: Supabase Storage bucket name for audio files
 
 **Setup:**
+
 1. Go to Supabase Dashboard → Storage
 2. Create bucket named `user-uploads` (or your preferred name)
 3. Set appropriate access policies (RLS)
@@ -90,12 +94,14 @@ PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
 - **`PUBLIC_POSTHOG_HOST`**: PostHog instance URL (EU or US)
 
 **Setup:**
+
 1. Create account at [PostHog](https://posthog.com/)
 2. Create new project
 3. Copy project API key
 4. Choose region: `https://eu.i.posthog.com` (EU) or `https://app.posthog.com` (US)
 
 **Features when enabled:**
+
 - User behavior tracking
 - Feature usage analytics
 - A/B testing support
@@ -115,12 +121,14 @@ PUBLIC_SENTRY_DSN=https://YOUR_DSN@sentry.io/PROJECT_ID
 - **`PUBLIC_SENTRY_DSN`**: Sentry DSN for client-side error reporting
 
 **Setup:**
+
 1. Create account at [Sentry](https://sentry.io/)
 2. Create new project (select SvelteKit)
 3. Copy DSN from project settings
 4. Generate auth token: Settings → Developer Settings → Auth Tokens
 
 **Features when enabled:**
+
 - Real-time error tracking
 - Stack traces with source maps
 - Performance monitoring
@@ -156,11 +164,13 @@ Template file with placeholder values. This file **is committed** to Git and ser
 Production environment variables. Configure these in your hosting platform:
 
 **Vercel:**
+
 1. Go to Project Settings → Environment Variables
 2. Add each `PUBLIC_*` variable
 3. Add server-only variables (like `SENTRY_AUTH_TOKEN`)
 
 **Netlify:**
+
 1. Go to Site Settings → Build & Deploy → Environment
 2. Add each variable
 3. Choose deploy contexts (Production/Preview/Branch)
@@ -191,12 +201,12 @@ const googleClientId = env.oauth.googleClientId;
 
 // Analytics (optional)
 if (env.analytics.posthog.key) {
-  // Initialize PostHog
+	// Initialize PostHog
 }
 
 // Error tracking (optional)
 if (env.sentry.dsn) {
-  // Initialize Sentry
+	// Initialize Sentry
 }
 ```
 
@@ -208,11 +218,11 @@ Check if optional features are enabled:
 import { features } from '$lib/config/env';
 
 if (features.hasPosthog) {
-  console.log('PostHog analytics enabled');
+	console.log('PostHog analytics enabled');
 }
 
 if (features.hasSentry) {
-  console.log('Sentry error tracking enabled');
+	console.log('Sentry error tracking enabled');
 }
 ```
 
@@ -247,6 +257,7 @@ The web app shares these services with the React Native mobile app:
 - ✅ **Error tracking** - Same Sentry organization (optional)
 
 **Not shared:**
+
 - ❌ **RevenueCat** - Mobile only (in-app purchases)
 - ❌ **Native features** - Camera, biometrics, notifications
 
@@ -257,16 +268,18 @@ The web app shares these services with the React Native mobile app:
 **Cause:** Environment variable not defined or has typo.
 
 **Solution:**
+
 1. Check `.env` file exists
 2. Verify variable name matches (case-sensitive)
 3. Restart dev server after changes
 4. Check for typos in variable names
 
-### Error: "PUBLIC_* is not defined"
+### Error: "PUBLIC\_\* is not defined"
 
 **Cause:** Trying to access client-side variable that doesn't exist.
 
 **Solution:**
+
 1. Ensure variable has `PUBLIC_` prefix
 2. Add to `.env` file
 3. Restart dev server
@@ -283,6 +296,7 @@ The web app shares these services with the React Native mobile app:
 **Cause:** Required environment variables missing in build environment.
 
 **Solution:**
+
 1. Add variables to hosting platform
 2. Verify variable names exactly match
 3. Ensure `PUBLIC_` prefix for client-side variables

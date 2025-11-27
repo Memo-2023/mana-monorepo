@@ -58,81 +58,91 @@ curl -X PATCH \
 
 ```json
 {
-  "data": {
-    "id": "abc-123-def-456",
-    "title": "Der kleine Hase",
-    "pages_data": [
-      {
-        "page_number": 1,
-        "story_text": "Once upon a time...",
-        "illustration_description": "A forest scene",
-        "image_url": "https://...",
-        "blur_hash": "..."
-      },
-      {
-        "page_number": 2,
-        "story_text": "Es war einmal ein kleiner Hase, der durch den Wald hüpfte.",
-        "illustration_description": "A bunny hopping",
-        "image_url": "https://...",
-        "blur_hash": "..."
-      }
-      // ... more pages
-    ],
-    "updated_at": "2025-01-15T10:30:00.000Z"
-  },
-  "message": "Page 2 updated successfully"
+	"data": {
+		"id": "abc-123-def-456",
+		"title": "Der kleine Hase",
+		"pages_data": [
+			{
+				"page_number": 1,
+				"story_text": "Once upon a time...",
+				"illustration_description": "A forest scene",
+				"image_url": "https://...",
+				"blur_hash": "..."
+			},
+			{
+				"page_number": 2,
+				"story_text": "Es war einmal ein kleiner Hase, der durch den Wald hüpfte.",
+				"illustration_description": "A bunny hopping",
+				"image_url": "https://...",
+				"blur_hash": "..."
+			}
+			// ... more pages
+		],
+		"updated_at": "2025-01-15T10:30:00.000Z"
+	},
+	"message": "Page 2 updated successfully"
 }
 ```
 
 ## Error Responses
 
 ### Story Not Found
+
 **Code:** `404 NOT FOUND`
+
 ```json
 {
-  "statusCode": 404,
-  "message": "Story not found",
-  "error": "Not Found"
+	"statusCode": 404,
+	"message": "Story not found",
+	"error": "Not Found"
 }
 ```
 
 ### Permission Denied
+
 **Code:** `403 FORBIDDEN`
+
 ```json
 {
-  "statusCode": 403,
-  "message": "You do not have permission to edit this story",
-  "error": "Forbidden"
+	"statusCode": 403,
+	"message": "You do not have permission to edit this story",
+	"error": "Forbidden"
 }
 ```
 
 ### Page Not Found
+
 **Code:** `400 BAD REQUEST`
+
 ```json
 {
-  "statusCode": 400,
-  "message": "Page 99 not found",
-  "error": "Bad Request"
+	"statusCode": 400,
+	"message": "Page 99 not found",
+	"error": "Bad Request"
 }
 ```
 
 ### Page Number Mismatch
+
 **Code:** `400 BAD REQUEST`
+
 ```json
 {
-  "statusCode": 400,
-  "message": "Page number in URL does not match page number in request body",
-  "error": "Bad Request"
+	"statusCode": 400,
+	"message": "Page number in URL does not match page number in request body",
+	"error": "Bad Request"
 }
 ```
 
 ### Invalid Story Data
+
 **Code:** `400 BAD REQUEST`
+
 ```json
 {
-  "statusCode": 400,
-  "message": "Story has no pages to update",
-  "error": "Bad Request"
+	"statusCode": 400,
+	"message": "Story has no pages to update",
+	"error": "Bad Request"
 }
 ```
 

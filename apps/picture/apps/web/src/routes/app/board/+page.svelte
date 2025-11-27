@@ -11,7 +11,7 @@
 		selectedBoard,
 		resetBoardsState,
 		addBoard,
-		removeBoardFromList
+		removeBoardFromList,
 	} from '$lib/stores/boards';
 	import { getBoards, deleteBoard, duplicateBoard } from '$lib/api/boards';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -44,7 +44,7 @@
 			},
 			{
 				threshold: 0.1,
-				rootMargin: '100px'
+				rootMargin: '100px',
 			}
 		);
 
@@ -105,7 +105,7 @@
 			const newBoard = await createBoard({
 				user_id: $user.id,
 				name: boardName,
-				description: boardDescription || null
+				description: boardDescription || null,
 			});
 			addBoard({ ...newBoard, item_count: 0 });
 			showCreateBoardModal.set(false);
@@ -261,13 +261,15 @@
 								{board.name}
 							</h3>
 							{#if board.description}
-								<p class="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+								<p class="mt-1 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
 									{board.description}
 								</p>
 							{/if}
 						</button>
 
-						<div class="mt-3 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+						<div
+							class="mt-3 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400"
+						>
 							<span>{board.item_count} {board.item_count === 1 ? 'Bild' : 'Bilder'}</span>
 							<span>{new Date(board.updated_at).toLocaleDateString('de-DE')}</span>
 						</div>
@@ -282,11 +284,7 @@
 							>
 								Duplizieren
 							</Button>
-							<Button
-								size="sm"
-								variant="danger"
-								onclick={() => confirmDelete(board.id)}
-							>
+							<Button size="sm" variant="danger" onclick={() => confirmDelete(board.id)}>
 								<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 									<path
 										stroke-linecap="round"
@@ -344,7 +342,10 @@
 			</div>
 
 			<div>
-				<label for="board-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+				<label
+					for="board-description"
+					class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+				>
 					Beschreibung (optional)
 				</label>
 				<textarea
@@ -357,7 +358,12 @@
 			</div>
 
 			<div class="flex gap-3 pt-4">
-				<Button type="button" variant="outline" class="flex-1" onclick={() => showCreateBoardModal.set(false)}>
+				<Button
+					type="button"
+					variant="outline"
+					class="flex-1"
+					onclick={() => showCreateBoardModal.set(false)}
+				>
 					Abbrechen
 				</Button>
 				<Button type="submit" class="flex-1" loading={isCreating} disabled={!boardName.trim()}>
@@ -373,16 +379,15 @@
 	<div class="p-6">
 		<h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Board löschen?</h2>
 		<p class="mt-4 text-gray-600 dark:text-gray-400">
-			Möchtest du dieses Board wirklich löschen? Alle Bilder auf dem Board bleiben in deiner Galerie erhalten.
+			Möchtest du dieses Board wirklich löschen? Alle Bilder auf dem Board bleiben in deiner Galerie
+			erhalten.
 		</p>
 
 		<div class="mt-6 flex gap-3">
 			<Button variant="outline" class="flex-1" onclick={() => (showDeleteModal = false)}>
 				Abbrechen
 			</Button>
-			<Button variant="danger" class="flex-1" onclick={handleDeleteBoard}>
-				Löschen
-			</Button>
+			<Button variant="danger" class="flex-1" onclick={handleDeleteBoard}>Löschen</Button>
 		</div>
 	</div>
 </Modal>

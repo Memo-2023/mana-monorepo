@@ -1,16 +1,35 @@
 ---
-name: "David Buchner"
-displayName: "David Buchner"
-bio: "Business Development Manager bei Memoro. Baut strategische Partnerschaften auf und erschließt neue Märkte. Experte für B2B-Sales, Enterprise-Kunden und internationale Expansion."
-role: "Business Development Manager"
-avatar: "/images/team/david-buchner.jpg"
-appearance: "Charismatischer Mann Mitte 30 mit gepflegtem Drei-Tage-Bart und dunkelbraunen, leicht gewellten Haaren. Seine warmen braunen Augen strahlen Vertrauen und Aufgeschlossenheit aus. Er trägt meist Business Casual - oft ein helles Hemd ohne Krawatte, dazu eine hochwertige Jeans und elegante Lederschuhe. Seine Körpersprache ist offen und einladend, sein Händedruck fest und herzlich. Auf Fotos sieht man ihn oft im Gespräch mit Partnern, auf Konferenzen oder in Video-Calls mit internationalen Kunden."
+name: 'David Buchner'
+displayName: 'David Buchner'
+bio: 'Business Development Manager bei Memoro. Baut strategische Partnerschaften auf und erschließt neue Märkte. Experte für B2B-Sales, Enterprise-Kunden und internationale Expansion.'
+role: 'Business Development Manager'
+avatar: '/images/team/david-buchner.jpg'
+appearance: 'Charismatischer Mann Mitte 30 mit gepflegtem Drei-Tage-Bart und dunkelbraunen, leicht gewellten Haaren. Seine warmen braunen Augen strahlen Vertrauen und Aufgeschlossenheit aus. Er trägt meist Business Casual - oft ein helles Hemd ohne Krawatte, dazu eine hochwertige Jeans und elegante Lederschuhe. Seine Körpersprache ist offen und einladend, sein Händedruck fest und herzlich. Auf Fotos sieht man ihn oft im Gespräch mit Partnern, auf Konferenzen oder in Video-Calls mit internationalen Kunden.'
 social:
-  linkedin: "david-buchner"
-  twitter: "davidbuchner_biz"
-  xing: "David_Buchner"
-expertise: ["Business Development", "B2B Sales", "Strategic Partnerships", "Enterprise Sales", "SaaS", "Account Management", "Negotiation", "Market Expansion", "Channel Sales", "Revenue Growth"]
-topics: ["Strategische Partnerschaften", "Internationalisierung", "Enterprise Solutions", "Sales Excellence", "Customer Success"]
+  linkedin: 'david-buchner'
+  twitter: 'davidbuchner_biz'
+  xing: 'David_Buchner'
+expertise:
+  [
+    'Business Development',
+    'B2B Sales',
+    'Strategic Partnerships',
+    'Enterprise Sales',
+    'SaaS',
+    'Account Management',
+    'Negotiation',
+    'Market Expansion',
+    'Channel Sales',
+    'Revenue Growth',
+  ]
+topics:
+  [
+    'Strategische Partnerschaften',
+    'Internationalisierung',
+    'Enterprise Solutions',
+    'Sales Excellence',
+    'Customer Success',
+  ]
 writingPrompt: "Schreibe als erfahrener Business Development Manager namens David Buchner. Dein Stil ist professionell aber nahbar, strategisch aber praxisorientiert. Du erklärst Geschäftskonzepte mit realen Beispielen und betonst immer den gegenseitigen Nutzen. Dein Motto: 'Erfolgreiche Partnerschaften entstehen, wenn alle gewinnen.' Sei enthusiastisch über Wachstumschancen, aber bleibe authentisch und bodenständig."
 isActive: true
 isFeatured: false
@@ -24,9 +43,9 @@ stats:
   totalViews: 18000
   totalLikes: 1400
   joinedDate: 2024-03-01
-lang: "de"
-preferredLanguages: ["de", "en"]
-slug: "david-buchner"
+lang: 'de'
+preferredLanguages: ['de', 'en']
+slug: 'david-buchner'
 createdAt: 2024-03-01
 lastActive: 2025-07-28
 ---
@@ -46,21 +65,25 @@ Mit einem BWL-Studium (Schwerpunkt International Business) und über 10 Jahren E
 Davids Ansatz basiert auf vier Säulen:
 
 ### 1. Beziehungen vor Transaktionen
+
 - Langfristige Partnerschaften statt Quick Wins
 - Vertrauen als Fundament jeder Geschäftsbeziehung
 - Persönlicher Kontakt in digitalen Zeiten
 
 ### 2. Mutual Value Creation
+
 - Win-Win-Situationen identifizieren
 - Gemeinsame Erfolgskriterien definieren
 - Partnerschaften, die mitwachsen
 
 ### 3. Strategisches Denken
+
 - Markttrends frühzeitig erkennen
 - Neue Vertriebskanäle erschließen
 - Internationale Expansion vorantreiben
 
 ### 4. Customer Success Integration
+
 - Enge Zusammenarbeit mit Emma (Customer Success)
 - Feedback-Loops zwischen Sales und Product
 - Kundenerfolg als oberste Priorität
@@ -68,18 +91,21 @@ Davids Ansatz basiert auf vier Säulen:
 ## Erfolge bei Memoro
 
 **Strategische Partnerschaften:**
+
 - Integration mit Microsoft Teams & Zoom
 - Partnerschaft mit führenden Beratungsunternehmen
 - Channel-Partner-Programm aufgebaut
 - Reseller-Netzwerk in 8 Ländern
 
 **Enterprise Expansion:**
+
 - 15 DAX-Unternehmen als Kunden gewonnen
 - Enterprise-Umsatz um 300% gesteigert
 - Durchschnittliche Deal-Größe verdreifacht
 - Net Revenue Retention von 125%
 
 **Neue Märkte:**
+
 - DACH-Region vollständig erschlossen
 - Expansion nach Frankreich und BeNeLux
 - Pilotprojekte in UK und Skandinavien
@@ -88,6 +114,7 @@ Davids Ansatz basiert auf vier Säulen:
 ## Arbeitsweise
 
 David ist bekannt für:
+
 - Seine "Partnership Playbooks" für verschiedene Segmente
 - Quartalsweise Partner-Events
 - Persönliche Beziehungspflege trotz Digitalisierung
@@ -105,6 +132,7 @@ David ist bekannt für:
 ## Zusammenarbeit im Team
 
 David arbeitet eng mit:
+
 - **Roland (CFO)**: Pricing-Strategien und Deal-Strukturen
 - **Emma**: Nahtlose Übergabe von Sales zu Success
 - **Victoria**: Produkt-Roadmap basierend auf Markt-Feedback
@@ -113,6 +141,7 @@ David arbeitet eng mit:
 ## Persönliche Seite
 
 Außerhalb des Büros:
+
 - **Marathonläufer**: "Ausdauer ist im Business wie im Sport essentiell"
 - **Weinkenner**: Sammelt Weine aus Partnerländern
 - **Familienmensch**: Verheiratet, zwei Kinder

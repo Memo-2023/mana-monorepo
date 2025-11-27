@@ -139,7 +139,7 @@ migrate(
 			{ name: 'folders', oldField: 'user', newField: 'user_id' },
 			{ name: 'folders', oldField: 'public', newField: 'is_public' },
 			{ name: 'tags', oldField: 'user', newField: 'user_id' },
-			{ name: 'tags', oldField: 'public', newField: 'is_public' }
+			{ name: 'tags', oldField: 'public', newField: 'is_public' },
 		];
 
 		collections.forEach(({ name, oldField, newField }) => {
@@ -169,7 +169,7 @@ migrate(
 			{ name: 'links', fields: ['user_id', 'is_active', 'folder_id'] },
 			{ name: 'analytics', fields: ['link_id', 'ip_address'] },
 			{ name: 'folders', fields: ['user_id', 'is_public'] },
-			{ name: 'tags', fields: ['user_id', 'is_public'] }
+			{ name: 'tags', fields: ['user_id', 'is_public'] },
 		];
 
 		collections.forEach(({ name, fields }) => {
@@ -206,7 +206,7 @@ export class DBCompatibility {
 			folder: 'folder_id',
 			active: 'is_active',
 			public: 'is_public',
-			ip: 'ip_address'
+			ip: 'ip_address',
 		};
 
 		return mapping[oldName] || oldName;
@@ -236,7 +236,7 @@ export class DBCompatibility {
 			folder_id: 'folder',
 			is_active: 'active',
 			is_public: 'public',
-			ip_address: 'ip'
+			ip_address: 'ip',
 		};
 
 		const transformed = { ...data };
@@ -346,7 +346,7 @@ migrate((db) => {
 	const updates = [
 		'UPDATE links SET user = user_id WHERE user_id IS NOT NULL',
 		'UPDATE links SET active = is_active WHERE is_active IS NOT NULL',
-		'UPDATE analytics SET link = link_id WHERE link_id IS NOT NULL'
+		'UPDATE analytics SET link = link_id WHERE link_id IS NOT NULL',
 		// ... weitere Updates
 	];
 
@@ -390,7 +390,7 @@ export async function validateMigration() {
 		linksIntegrity: await checkLinksIntegrity(),
 		analyticsConsistency: await checkAnalyticsConsistency(),
 		relationsValid: await checkRelationsValid(),
-		performanceMetrics: await checkPerformance()
+		performanceMetrics: await checkPerformance(),
 	};
 
 	return checks;

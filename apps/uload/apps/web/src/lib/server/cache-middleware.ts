@@ -6,7 +6,7 @@ import type { Handle } from '@sveltejs/kit';
 export function withResponseCache(ttlMs: number = 5 * 60 * 1000): Handle {
 	return async ({ event, resolve }) => {
 		const { url, request } = event;
-		
+
 		// Nur GET Requests cachen
 		if (request.method !== 'GET') {
 			return resolve(event);
@@ -21,25 +21,25 @@ export function withResponseCache(ttlMs: number = 5 * 60 * 1000): Handle {
 				headers: {
 					'Content-Type': 'text/html',
 					'Cache-Control': `public, max-age=${Math.floor(ttlMs / 1000)}`,
-					'X-Cache': 'HIT'
-				}
+					'X-Cache': 'HIT',
+				},
 			});
 		}
 
 		const response = await resolve(event);
-		
+
 		// Nur erfolgreiche HTML-Responses cachen
 		if (response.status === 200 && response.headers.get('content-type')?.includes('text/html')) {
 			const html = await response.text();
 			cache.set(cacheKeyStr, html, ttlMs);
-			
+
 			return new Response(html, {
 				...response,
 				headers: {
 					...response.headers,
 					'Cache-Control': `public, max-age=${Math.floor(ttlMs / 1000)}`,
-					'X-Cache': 'MISS'
-				}
+					'X-Cache': 'MISS',
+				},
 			});
 		}
 
@@ -57,7 +57,11 @@ export function getCachedApiResponse<T>(key: string): T | null {
 }
 
 // Link redirect caching (sehr wichtig für Performance)
-export function cacheRedirect(shortCode: string, url: string, ttlMs: number = 10 * 60 * 1000): void {
+export function cacheRedirect(
+	shortCode: string,
+	url: string,
+	ttlMs: number = 10 * 60 * 1000
+): void {
 	cache.set(CacheKeys.linkRedirect(shortCode), url, ttlMs);
 }
 

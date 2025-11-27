@@ -16,10 +16,10 @@ export type { ThemeMode, ThemeVariant, EffectiveMode } from '@manacore/shared-th
  * - All 4 theme variants available
  */
 export const theme = createThemeStore({
-  appId: 'manadeck',
-  defaultVariant: 'ocean',
-  primaryColor: {
-    light: '239 84% 67%', // Indigo #6366f1
-    dark: '239 84% 67%',
-  },
+	appId: 'manadeck',
+	defaultVariant: 'ocean',
+	primaryColor: {
+		light: '239 84% 67%', // Indigo #6366f1
+		dark: '239 84% 67%',
+	},
 });

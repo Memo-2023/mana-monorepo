@@ -1,14 +1,14 @@
 ---
-name: "Nils Weiser"
-displayName: "Nils Weiser"
-bio: "Co-Founder and CTO of Memoro. Technology enthusiast focused on innovative AI solutions and user-friendly software architecture."
-role: "Co-Founder & CTO"
-avatar: "/images/team/Memoro-Team-Portrait-NilsWeiser.jpg"
+name: 'Nils Weiser'
+displayName: 'Nils Weiser'
+bio: 'Co-Founder and CTO of Memoro. Technology enthusiast focused on innovative AI solutions and user-friendly software architecture.'
+role: 'Co-Founder & CTO'
+avatar: '/images/team/Memoro-Team-Portrait-NilsWeiser.jpg'
 social:
-  linkedin: "nilsweiser"
-  github: "nilsweiser"
-expertise: ["Software Architecture", "AI Integration", "Cloud Computing", "Mobile Development"]
-topics: ["Technical Innovation", "System Design", "Performance Optimization", "Scalability"]
+  linkedin: 'nilsweiser'
+  github: 'nilsweiser'
+expertise: ['Software Architecture', 'AI Integration', 'Cloud Computing', 'Mobile Development']
+topics: ['Technical Innovation', 'System Design', 'Performance Optimization', 'Scalability']
 isActive: true
 isFeatured: true
 showInDirectory: true
@@ -16,9 +16,9 @@ permissions:
   canPublish: true
   canEditOthers: true
   isAdmin: true
-lang: "en"
-preferredLanguages: ["de", "en"]
-slug: "nils-weiser"
+lang: 'en'
+preferredLanguages: ['de', 'en']
+slug: 'nils-weiser'
 createdAt: 2024-01-01
 ---
 

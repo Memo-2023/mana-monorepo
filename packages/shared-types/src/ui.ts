@@ -41,66 +41,66 @@ export type ToastType = 'info' | 'success' | 'warning' | 'error';
  * Toast notification
  */
 export interface Toast {
-  id: string;
-  type: ToastType;
-  message: string;
-  title?: string;
-  duration?: number;
-  dismissible?: boolean;
+	id: string;
+	type: ToastType;
+	message: string;
+	title?: string;
+	duration?: number;
+	dismissible?: boolean;
 }
 
 /**
  * Modal configuration
  */
 export interface ModalConfig {
-  title?: string;
-  description?: string;
-  confirmText?: string;
-  cancelText?: string;
-  dangerous?: boolean;
+	title?: string;
+	description?: string;
+	confirmText?: string;
+	cancelText?: string;
+	dangerous?: boolean;
 }
 
 /**
  * Dropdown/Select option
  */
 export interface SelectOption<T = string> {
-  value: T;
-  label: string;
-  disabled?: boolean;
-  icon?: string;
+	value: T;
+	label: string;
+	disabled?: boolean;
+	icon?: string;
 }
 
 /**
  * Tab item
  */
 export interface TabItem {
-  id: string;
-  label: string;
-  icon?: string;
-  disabled?: boolean;
-  badge?: string | number;
+	id: string;
+	label: string;
+	icon?: string;
+	disabled?: boolean;
+	badge?: string | number;
 }
 
 /**
  * Menu item
  */
 export interface MenuItem {
-  id: string;
-  label: string;
-  icon?: string;
-  href?: string;
-  onClick?: () => void;
-  disabled?: boolean;
-  danger?: boolean;
-  divider?: boolean;
+	id: string;
+	label: string;
+	icon?: string;
+	href?: string;
+	onClick?: () => void;
+	disabled?: boolean;
+	danger?: boolean;
+	divider?: boolean;
 }
 
 /**
  * Breadcrumb item
  */
 export interface BreadcrumbItem {
-  label: string;
-  href?: string;
+	label: string;
+	href?: string;
 }
 
 /**

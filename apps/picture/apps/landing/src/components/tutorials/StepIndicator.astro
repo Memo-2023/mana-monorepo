@@ -11,31 +11,40 @@ const { steps } = Astro.props;
 		<div class="step-header">
 			<h3 class="step-title">Tutorial Steps</h3>
 			<button id="toggle-steps" class="toggle-btn">
-				<svg id="chevron-icon" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+				<svg
+					id="chevron-icon"
+					class="h-5 w-5 transition-transform"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"
+					></path>
 				</svg>
 			</button>
 		</div>
 		<div id="steps-list" class="steps-list">
 			<ol class="steps">
-				{steps.map((step, index) => (
-					<li class="step-item" data-step={index}>
-						<div class="step-number">{index + 1}</div>
-						<div class="step-content">
-							<span class="step-name">{step.title}</span>
-							{step.duration && <span class="step-duration">{step.duration}</span>}
-						</div>
-						<div class="step-check hidden">
-							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-								<path
-									fill-rule="evenodd"
-									d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-									clip-rule="evenodd"
-								/>
-							</svg>
-						</div>
-					</li>
-				))}
+				{
+					steps.map((step, index) => (
+						<li class="step-item" data-step={index}>
+							<div class="step-number">{index + 1}</div>
+							<div class="step-content">
+								<span class="step-name">{step.title}</span>
+								{step.duration && <span class="step-duration">{step.duration}</span>}
+							</div>
+							<div class="step-check hidden">
+								<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+									<path
+										fill-rule="evenodd"
+										d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							</div>
+						</li>
+					))
+				}
 			</ol>
 		</div>
 	</div>
@@ -73,7 +82,7 @@ const { steps } = Astro.props;
 
 			if (scrollPos >= headingPos && scrollPos < nextHeadingPos) {
 				// Remove active from all steps
-				stepItems.forEach(item => item.classList.remove('active'));
+				stepItems.forEach((item) => item.classList.remove('active'));
 
 				// Add active to current step
 				const currentStep = document.querySelector(`[data-step="${index}"]`);
@@ -88,11 +97,11 @@ const { steps } = Astro.props;
 	const observerOptions = {
 		root: null,
 		rootMargin: '0px',
-		threshold: 0.5
+		threshold: 0.5,
 	};
 
 	const observer = new IntersectionObserver((entries) => {
-		entries.forEach(entry => {
+		entries.forEach((entry) => {
 			if (entry.isIntersecting) {
 				const heading = entry.target;
 				const index = Array.from(headings).indexOf(heading as Element);
@@ -110,7 +119,7 @@ const { steps } = Astro.props;
 	}, observerOptions);
 
 	// Observe all h2 headings
-	headings.forEach(heading => observer.observe(heading));
+	headings.forEach((heading) => observer.observe(heading));
 
 	// Update on scroll
 	window.addEventListener('scroll', updateActiveStep);
@@ -133,11 +142,11 @@ const { steps } = Astro.props;
 	}
 
 	.step-indicator-content {
-		@apply bg-dark-elevated border border-dark-border rounded-xl overflow-hidden shadow-lg;
+		@apply overflow-hidden rounded-xl border border-dark-border bg-dark-elevated shadow-lg;
 	}
 
 	.step-header {
-		@apply flex items-center justify-between p-4 border-b border-dark-border;
+		@apply flex items-center justify-between border-b border-dark-border p-4;
 	}
 
 	.step-title {
@@ -145,7 +154,7 @@ const { steps } = Astro.props;
 	}
 
 	.toggle-btn {
-		@apply p-2 hover:bg-dark-bg rounded-lg transition text-gray-400 hover:text-white;
+		@apply rounded-lg p-2 text-gray-400 transition hover:bg-dark-bg hover:text-white;
 	}
 
 	.steps-list {
@@ -157,16 +166,16 @@ const { steps } = Astro.props;
 	}
 
 	.steps {
-		@apply p-4 space-y-2;
+		@apply space-y-2 p-4;
 	}
 
 	.step-item {
-		@apply flex items-center gap-3 p-3 rounded-lg cursor-pointer
+		@apply flex cursor-pointer items-center gap-3 rounded-lg p-3
 		       transition-all hover:bg-dark-bg;
 	}
 
 	.step-item.active {
-		@apply bg-primary/10 border border-primary/20;
+		@apply border border-primary/20 bg-primary/10;
 	}
 
 	.step-item.completed .step-number {
@@ -174,8 +183,8 @@ const { steps } = Astro.props;
 	}
 
 	.step-number {
-		@apply w-8 h-8 flex items-center justify-center rounded-full
-		       bg-dark-bg text-gray-400 text-sm font-medium flex-shrink-0;
+		@apply flex h-8 w-8 flex-shrink-0 items-center justify-center
+		       rounded-full bg-dark-bg text-sm font-medium text-gray-400;
 	}
 
 	.step-item.active .step-number {
@@ -187,7 +196,7 @@ const { steps } = Astro.props;
 	}
 
 	.step-name {
-		@apply block text-sm text-gray-300 font-medium;
+		@apply block text-sm font-medium text-gray-300;
 	}
 
 	.step-item.active .step-name {
@@ -195,11 +204,11 @@ const { steps } = Astro.props;
 	}
 
 	.step-duration {
-		@apply block text-xs text-gray-500 mt-0.5;
+		@apply mt-0.5 block text-xs text-gray-500;
 	}
 
 	.step-check {
-		@apply text-green-500 flex-shrink-0;
+		@apply flex-shrink-0 text-green-500;
 	}
 
 	/* Custom scrollbar */
@@ -212,7 +221,7 @@ const { steps } = Astro.props;
 	}
 
 	.steps-list::-webkit-scrollbar-thumb {
-		@apply bg-dark-border rounded-full;
+		@apply rounded-full bg-dark-border;
 	}
 
 	.steps-list::-webkit-scrollbar-thumb:hover {

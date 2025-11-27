@@ -1,15 +1,16 @@
 ---
-title: "Memoro"
-description: "KI-gestützte mobile Anwendung zur Umwandlung von Gesprächen und Gedanken in strukturierte Dokumente."
+title: 'Memoro'
+description: 'KI-gestützte mobile Anwendung zur Umwandlung von Gesprächen und Gedanken in strukturierte Dokumente.'
 pubDate: 2024-04-08
-category: "Mobile"
+category: 'Mobile'
 featured: true
-status: "active"
-technologies: ["React Native", "Expo", "Supabase", "Azure OpenAI", "Azure Speech", "RevenueCat", "PostHog"]
-image: "/images/projects/memoro-project-bauntown-app.png"
-author: "Till Schneider"
-githubUrl: "https://github.com/bauntown/memoro"
-demoUrl: "https://www.memoro.ai"
+status: 'active'
+technologies:
+  ['React Native', 'Expo', 'Supabase', 'Azure OpenAI', 'Azure Speech', 'RevenueCat', 'PostHog']
+image: '/images/projects/memoro-project-bauntown-app.png'
+author: 'Till Schneider'
+githubUrl: 'https://github.com/bauntown/memoro'
+demoUrl: 'https://www.memoro.ai'
 ---
 
 # Memoro App

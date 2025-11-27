@@ -130,19 +130,20 @@ manacore-monorepo/
 
 ## Lines of Code by Category
 
-| Category | Files | Approx. Lines |
-|----------|-------|---------------|
-| GitHub Actions YAML | 6 | 1,500 |
-| Deployment Scripts (Bash) | 5 | 800 |
-| Docker Configurations | 5 | 400 |
-| Test Configurations | 4 | 400 |
-| Documentation (Markdown) | 5 | 70+ pages |
-| Configuration Files | 3 | 100 |
-| **Total** | **28** | **~3,500 lines** |
+| Category                  | Files  | Approx. Lines    |
+| ------------------------- | ------ | ---------------- |
+| GitHub Actions YAML       | 6      | 1,500            |
+| Deployment Scripts (Bash) | 5      | 800              |
+| Docker Configurations     | 5      | 400              |
+| Test Configurations       | 4      | 400              |
+| Documentation (Markdown)  | 5      | 70+ pages        |
+| Configuration Files       | 3      | 100              |
+| **Total**                 | **28** | **~3,500 lines** |
 
 ## Key Features Implemented
 
 ### GitHub Actions
+
 - Smart build detection (only affected projects)
 - Automated PR validation
 - Docker image building and pushing
@@ -152,6 +153,7 @@ manacore-monorepo/
 - Dependency scanning and updates
 
 ### Docker
+
 - Multi-stage builds for optimization
 - Non-root users for security
 - Health checks for monitoring
@@ -159,6 +161,7 @@ manacore-monorepo/
 - Environment-specific configurations
 
 ### Deployment
+
 - Zero-downtime rolling updates
 - Automated health checks
 - Pre-deployment backups
@@ -166,6 +169,7 @@ manacore-monorepo/
 - Emergency rollback procedures
 
 ### Testing
+
 - Unit tests (Vitest/Jest)
 - E2E tests (Playwright)
 - Coverage reporting (Codecov)
@@ -173,6 +177,7 @@ manacore-monorepo/
 - 50% minimum coverage threshold
 
 ### Documentation
+
 - Quick start guide (30 minutes)
 - Complete setup guide (step-by-step)
 - Deployment operations guide

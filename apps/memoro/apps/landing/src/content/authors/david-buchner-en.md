@@ -1,16 +1,35 @@
 ---
-name: "David Buchner"
-displayName: "David Buchner"
-bio: "Business Development Manager at Memoro. Builds strategic partnerships and opens new markets. Expert in B2B sales, enterprise customers, and international expansion."
-role: "Business Development Manager"
-avatar: "/images/team/david-buchner.jpg"
+name: 'David Buchner'
+displayName: 'David Buchner'
+bio: 'Business Development Manager at Memoro. Builds strategic partnerships and opens new markets. Expert in B2B sales, enterprise customers, and international expansion.'
+role: 'Business Development Manager'
+avatar: '/images/team/david-buchner.jpg'
 appearance: "Charismatic man in his mid-30s with a well-groomed three-day beard and dark brown, slightly wavy hair. His warm brown eyes radiate trust and openness. He usually wears business casual - often a light shirt without a tie, paired with quality jeans and elegant leather shoes. His body language is open and inviting, his handshake firm and warm. In photos, he's often seen in conversation with partners, at conferences, or in video calls with international clients."
 social:
-  linkedin: "david-buchner"
-  twitter: "davidbuchner_biz"
-  xing: "David_Buchner"
-expertise: ["Business Development", "B2B Sales", "Strategic Partnerships", "Enterprise Sales", "SaaS", "Account Management", "Negotiation", "Market Expansion", "Channel Sales", "Revenue Growth"]
-topics: ["Strategic Partnerships", "Internationalization", "Enterprise Solutions", "Sales Excellence", "Customer Success"]
+  linkedin: 'david-buchner'
+  twitter: 'davidbuchner_biz'
+  xing: 'David_Buchner'
+expertise:
+  [
+    'Business Development',
+    'B2B Sales',
+    'Strategic Partnerships',
+    'Enterprise Sales',
+    'SaaS',
+    'Account Management',
+    'Negotiation',
+    'Market Expansion',
+    'Channel Sales',
+    'Revenue Growth',
+  ]
+topics:
+  [
+    'Strategic Partnerships',
+    'Internationalization',
+    'Enterprise Solutions',
+    'Sales Excellence',
+    'Customer Success',
+  ]
 writingPrompt: "Write as an experienced Business Development Manager named David Buchner. Your style is professional yet approachable, strategic yet practical. You explain business concepts with real examples and always emphasize mutual benefit. Your motto: 'Successful partnerships emerge when everyone wins.' Be enthusiastic about growth opportunities, but remain authentic and down-to-earth."
 isActive: true
 isFeatured: false
@@ -24,9 +43,9 @@ stats:
   totalViews: 18000
   totalLikes: 1400
   joinedDate: 2024-03-01
-lang: "en"
-preferredLanguages: ["de", "en"]
-slug: "david-buchner"
+lang: 'en'
+preferredLanguages: ['de', 'en']
+slug: 'david-buchner'
 createdAt: 2024-03-01
 lastActive: 2025-07-28
 ---
@@ -46,21 +65,25 @@ With a degree in Business Administration (focus on International Business) and o
 David's approach is based on four pillars:
 
 ### 1. Relationships Before Transactions
+
 - Long-term partnerships instead of quick wins
 - Trust as the foundation of every business relationship
 - Personal contact in digital times
 
 ### 2. Mutual Value Creation
+
 - Identifying win-win situations
 - Defining shared success criteria
 - Partnerships that grow together
 
 ### 3. Strategic Thinking
+
 - Recognizing market trends early
 - Opening new sales channels
 - Driving international expansion
 
 ### 4. Customer Success Integration
+
 - Close collaboration with Emma (Customer Success)
 - Feedback loops between Sales and Product
 - Customer success as top priority
@@ -68,18 +91,21 @@ David's approach is based on four pillars:
 ## Achievements at Memoro
 
 **Strategic Partnerships:**
+
 - Integration with Microsoft Teams & Zoom
 - Partnerships with leading consulting firms
 - Built channel partner program
 - Reseller network in 8 countries
 
 **Enterprise Expansion:**
+
 - Won 15 DAX companies as customers
 - Increased enterprise revenue by 300%
 - Tripled average deal size
 - Net Revenue Retention of 125%
 
 **New Markets:**
+
 - Fully developed DACH region
 - Expansion to France and BeNeLux
 - Pilot projects in UK and Scandinavia
@@ -88,6 +114,7 @@ David's approach is based on four pillars:
 ## Working Style
 
 David is known for:
+
 - His "Partnership Playbooks" for different segments
 - Quarterly partner events
 - Personal relationship management despite digitalization
@@ -105,6 +132,7 @@ David is known for:
 ## Team Collaboration
 
 David works closely with:
+
 - **Roland (CFO)**: Pricing strategies and deal structures
 - **Emma**: Seamless handover from Sales to Success
 - **Victoria**: Product roadmap based on market feedback
@@ -113,6 +141,7 @@ David works closely with:
 ## Personal Side
 
 Outside the office:
+
 - **Marathon runner**: "Endurance is essential in business as in sports"
 - **Wine connoisseur**: Collects wines from partner countries
 - **Family man**: Married, two children

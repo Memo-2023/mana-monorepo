@@ -21,20 +21,24 @@ Eine moderne mobile Chat-Anwendung zur Interaktion mit verschiedenen KI-Sprachmo
 ## Einrichtung
 
 1. Repository klonen
+
    ```
    git clone <repository-url>
    cd chat
    ```
 
 2. Abhängigkeiten installieren
+
    ```
    npm install
    ```
 
 3. Umgebungsvariablen konfigurieren
+
    ```
    cp .env.example .env
    ```
+
    Dann `.env` mit deinen Supabase- und Azure OpenAI-Zugangsdaten bearbeiten.
 
 4. Entwicklungsserver starten
@@ -53,6 +57,7 @@ Eine moderne mobile Chat-Anwendung zur Interaktion mit verschiedenen KI-Sprachmo
 ## Nutzung
 
 Nach dem Start kannst du:
+
 - Dich registrieren oder anmelden
 - Ein KI-Modell auswählen
 - Eine neue Konversation starten

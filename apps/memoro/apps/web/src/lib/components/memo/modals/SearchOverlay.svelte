@@ -208,8 +208,9 @@
 		border-radius: 0.25rem;
 		border-width: 1px;
 		padding: 0.125rem 0.375rem;
-		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-			'Courier New', monospace;
+		font-family:
+			ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+			monospace;
 		font-size: 0.75rem;
 		line-height: 1rem;
 		border-color: var(--color-border);

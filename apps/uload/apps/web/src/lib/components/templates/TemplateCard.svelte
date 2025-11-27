@@ -19,7 +19,7 @@
 		onLike = () => {},
 		onDuplicate = () => {},
 		onShare = () => {},
-		compact = false
+		compact = false,
 	}: Props = $props();
 </script>
 
@@ -30,7 +30,7 @@
 	<div
 		class="relative {compact
 			? 'h-32'
-			: 'h-48'} overflow-hidden bg-gradient-to-br from-theme-primary/10 to-theme-accent/10"
+			: 'h-48'} from-theme-primary/10 to-theme-accent/10 overflow-hidden bg-gradient-to-br"
 	>
 		<div class="p-2 {compact ? 'scale-75' : ''}">
 			<CardRenderer
@@ -38,14 +38,14 @@
 					id: template.id,
 					config: template.config,
 					metadata: template.metadata || {},
-					constraints: template.constraints || {}
+					constraints: template.constraints || {},
 				}}
 				editable={false}
 			/>
 		</div>
 
 		<!-- Badges -->
-		<div class="absolute top-2 left-2 flex gap-1">
+		<div class="absolute left-2 top-2 flex gap-1">
 			{#if template.is_featured}
 				<span class="rounded-full bg-yellow-500 px-2 py-1 text-xs font-medium text-white">
 					Featured
@@ -53,10 +53,10 @@
 			{/if}
 		</div>
 
-		<div class="absolute top-2 right-2">
+		<div class="absolute right-2 top-2">
 			{#if template.category}
 				<span
-					class="rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-gray-700 capitalize backdrop-blur-sm"
+					class="rounded-full bg-white/90 px-2 py-1 text-xs font-medium capitalize text-gray-700 backdrop-blur-sm"
 				>
 					{template.category}
 				</span>
@@ -156,7 +156,7 @@
 				onclick={() => onUse(template)}
 				class="{compact
 					? 'flex-1'
-					: 'flex-1'} rounded-lg bg-theme-primary px-3 py-2 text-sm font-medium text-white hover:bg-theme-primary/90"
+					: 'flex-1'} hover:bg-theme-primary/90 rounded-lg bg-theme-primary px-3 py-2 text-sm font-medium text-white"
 			>
 				Use Template
 			</button>

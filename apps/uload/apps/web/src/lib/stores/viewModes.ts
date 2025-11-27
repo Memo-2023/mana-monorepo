@@ -12,11 +12,11 @@ interface ViewModes {
 const defaultViewModes: ViewModes = {
 	tags: 'cards',
 	links: 'list',
-	dashboard: 'list'
+	dashboard: 'list',
 };
 
 function createViewModes() {
-	const initialValue = browser 
+	const initialValue = browser
 		? JSON.parse(localStorage.getItem('viewModes') || JSON.stringify(defaultViewModes))
 		: defaultViewModes;
 
@@ -25,7 +25,7 @@ function createViewModes() {
 	return {
 		subscribe,
 		setTagsView: (view: ViewMode) => {
-			update(modes => {
+			update((modes) => {
 				const newModes = { ...modes, tags: view };
 				if (browser) {
 					localStorage.setItem('viewModes', JSON.stringify(newModes));
@@ -34,7 +34,7 @@ function createViewModes() {
 			});
 		},
 		setLinksView: (view: ViewMode) => {
-			update(modes => {
+			update((modes) => {
 				const newModes = { ...modes, links: view };
 				if (browser) {
 					localStorage.setItem('viewModes', JSON.stringify(newModes));
@@ -43,7 +43,7 @@ function createViewModes() {
 			});
 		},
 		setDashboardView: (view: ViewMode) => {
-			update(modes => {
+			update((modes) => {
 				const newModes = { ...modes, dashboard: view };
 				if (browser) {
 					localStorage.setItem('viewModes', JSON.stringify(newModes));
@@ -56,7 +56,7 @@ function createViewModes() {
 			if (browser) {
 				localStorage.setItem('viewModes', JSON.stringify(defaultViewModes));
 			}
-		}
+		},
 	};
 }
 

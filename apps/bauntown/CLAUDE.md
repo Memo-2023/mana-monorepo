@@ -5,6 +5,7 @@ This file provides guidance to Claude Code when working with the BaunTown projec
 ## Project Overview
 
 BaunTown is a community website for developers and creators with:
+
 - Multilingual support (DE, EN, IT)
 - Payment integration (Stripe, PayPal)
 - Content collections for news, projects, tutorials, etc.
@@ -56,6 +57,7 @@ pnpm --filter @bauntown/landing preview
 ## Environment Variables
 
 Create `apps/bauntown/apps/landing/.env`:
+
 ```bash
 STRIPE_SECRET_KEY=sk_...
 STRIPE_WEBHOOK_SECRET=whsec_...
@@ -65,31 +67,31 @@ PUBLIC_STRIPE_KEY=pk_...
 
 ## Technology Stack
 
-| Component | Technology |
-|-----------|------------|
-| Framework | Astro 5.x |
-| Styling | CSS/Tailwind |
-| i18n | astro-i18n-aut (DE, EN, IT) |
-| Payments | Stripe, PayPal |
-| Analytics | Plausible (via Partytown) |
-| APIs | Google Sheets/Docs |
-| Deployment | Netlify (SSR + Functions) |
+| Component  | Technology                  |
+| ---------- | --------------------------- |
+| Framework  | Astro 5.x                   |
+| Styling    | CSS/Tailwind                |
+| i18n       | astro-i18n-aut (DE, EN, IT) |
+| Payments   | Stripe, PayPal              |
+| Analytics  | Plausible (via Partytown)   |
+| APIs       | Google Sheets/Docs          |
+| Deployment | Netlify (SSR + Functions)   |
 
 ## Content Collections
 
 BaunTown uses Astro Content Collections:
 
-| Collection | Purpose |
-|------------|---------|
-| tools | Design, Development, Productivity tools |
-| news | AI, Web, Design, Community news |
-| models | AI models (Text, Image) |
-| projects | Web, Mobile, Desktop projects |
-| tutorials | Courses (UI/UX, Business, Marketing) |
-| missions | Community challenges |
-| vision | Long-term vision items |
-| join | Join page content |
-| members | Team members |
+| Collection | Purpose                                 |
+| ---------- | --------------------------------------- |
+| tools      | Design, Development, Productivity tools |
+| news       | AI, Web, Design, Community news         |
+| models     | AI models (Text, Image)                 |
+| projects   | Web, Mobile, Desktop projects           |
+| tutorials  | Courses (UI/UX, Business, Marketing)    |
+| missions   | Community challenges                    |
+| vision     | Long-term vision items                  |
+| join       | Join page content                       |
+| members    | Team members                            |
 
 ## Code Style Guidelines
 
@@ -110,6 +112,7 @@ BaunTown uses Astro Content Collections:
 ## Deployment
 
 Deployed via Netlify with `@astrojs/netlify` adapter:
+
 - Static pages pre-rendered
 - Dynamic routes use Netlify Functions
 - Configuration in `netlify.toml`

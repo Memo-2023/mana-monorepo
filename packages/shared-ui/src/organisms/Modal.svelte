@@ -14,7 +14,16 @@
 		showHeader?: boolean;
 	}
 
-	let { visible, onClose, title, icon, children, footer, maxWidth = 'lg', showHeader = true }: Props = $props();
+	let {
+		visible,
+		onClose,
+		title,
+		icon,
+		children,
+		footer,
+		maxWidth = 'lg',
+		showHeader = true,
+	}: Props = $props();
 
 	const maxWidthClasses = {
 		sm: 'max-w-sm',
@@ -22,7 +31,7 @@
 		lg: 'max-w-lg',
 		xl: 'max-w-xl',
 		'2xl': 'max-w-2xl',
-		'3xl': 'max-w-3xl'
+		'3xl': 'max-w-3xl',
 	};
 
 	function handleBackdropClick(e: MouseEvent) {
@@ -54,7 +63,9 @@
 		<!-- Modal Content -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
-			class="relative flex max-h-[90vh] w-full {maxWidthClasses[maxWidth]} flex-col rounded-xl border border-theme bg-menu shadow-xl"
+			class="relative flex max-h-[90vh] w-full {maxWidthClasses[
+				maxWidth
+			]} flex-col rounded-xl border border-theme bg-menu shadow-xl"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>

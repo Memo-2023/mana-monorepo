@@ -1,53 +1,64 @@
 # SEO & Performance Monitoring für Memoro
 
 ## Übersicht
+
 Dieses Dokument beschreibt kostenlose und kostenpflichtige Tools zur Überwachung und Optimierung der Website-Performance und SEO für memoro.ai.
 
 ## 1. Essential Tools (Kostenlos)
 
 ### Google Search Console ⭐
+
 **Setup:** Domain verifizieren → Sitemap einreichen (`/sitemap-index.xml`)
 
 **Hauptnutzen:**
+
 - Suchanfragen & Rankings überwachen
 - Indexierungsstatus prüfen
 - Core Web Vitals tracken
 - Crawling-Fehler identifizieren
 
 **Wichtige Metriken:**
+
 - CTR (Click-Through-Rate)
 - Durchschnittliche Position
 - Impressionen & Klicks
 - Mobile Usability Score
 
 ### Google PageSpeed Insights
+
 **URL:** https://pagespeed.web.dev
 
 **Metriken:**
+
 - Lighthouse Score (Performance, SEO, Accessibility)
 - Core Web Vitals (LCP, FID, CLS)
 - Konkrete Optimierungsvorschläge
 
 ### Analytics (bereits integriert)
+
 - **Plausible**: DSGVO-konform, leichtgewichtig
 - **Umami**: Self-hosted Alternative
 
 ## 2. Content & Keyword Research
 
 ### Answer The Public
+
 **Kostenlos:** 1 Suche/Tag
 **Use Case:** Content-Ideen & FAQ-Erstellung
 
 **Suchbegriffe für Memoro:**
+
 - "AI Notizen"
 - "Meeting Dokumentation"
 - "Gesprächsprotokoll Software"
 
 ### Google Keyword Planner
+
 **Zugang:** Google Ads Account (kostenlos)
 **Daten:** Suchvolumen-Ranges ohne aktive Kampagne
 
 **Workflow:**
+
 1. Answer The Public → Themen sammeln
 2. Keyword Planner → Volumen validieren
 3. Content erstellen
@@ -56,12 +67,15 @@ Dieses Dokument beschreibt kostenlose und kostenpflichtige Tools zur Überwachun
 ## 3. Erweiterte Tools
 
 ### Ahrefs Webmaster Tools (Kostenlos)
+
 **Features nach Domain-Verifizierung:**
+
 - Site Audit (bis 5.000 Seiten)
 - Backlink-Übersicht
 - 10 Keywords tracken
 
 ### Kostenpflichtige Alternativen
+
 - **Ahrefs** (ab $99/Monat): Umfassende Backlink- & Keyword-Analyse
 - **SEMrush** (ab $119/Monat): All-in-One SEO Suite
 - **Screaming Frog** (£149/Jahr): Technisches SEO-Audit
@@ -69,6 +83,7 @@ Dieses Dokument beschreibt kostenlose und kostenpflichtige Tools zur Überwachun
 ## 4. Astro-spezifische Optimierungen
 
 ### Build-Optimierung
+
 ```bash
 npm run astro check  # Type-checking
 npm run build       # Production build
@@ -76,6 +91,7 @@ npx astro-bundle-visualizer  # Bundle-Analyse
 ```
 
 ### Performance-Checklist
+
 - [ ] Lazy Loading für Bilder aktiviert
 - [ ] Component Islands für interaktive Teile
 - [ ] Prefetching für interne Links
@@ -84,16 +100,19 @@ npx astro-bundle-visualizer  # Bundle-Analyse
 ## 5. Monitoring-Setup Empfehlung
 
 ### Phase 1: Basis (Sofort)
+
 1. Google Search Console einrichten
 2. PageSpeed Insights monatlich prüfen
 3. Plausible/Umami Dashboards nutzen
 
 ### Phase 2: Erweitert (Nach 3 Monaten)
+
 1. Ahrefs Webmaster Tools aktivieren
 2. Strukturierte Daten implementieren
 3. Core Web Vitals optimieren
 
 ### Phase 3: Professionell (Bei Wachstum)
+
 1. Paid SEO-Tool wählen (Ahrefs/SEMrush)
 2. Automatisierte Tests (GitHub Actions)
 3. A/B Testing für CTR-Optimierung
@@ -101,12 +120,14 @@ npx astro-bundle-visualizer  # Bundle-Analyse
 ## 6. KPIs & Ziele
 
 ### Monatlich tracken
+
 - Organischer Traffic (Wachstumsrate)
 - Durchschnittliche Position Top 10 Keywords
 - Anzahl indexierter Seiten
 - Core Web Vitals Score >90
 
 ### Quarterly Review
+
 - Backlink-Profil
 - Content-Performance
 - Technische SEO-Issues
@@ -129,4 +150,4 @@ npx astro-bundle-visualizer  # Bundle-Analyse
 
 ---
 
-*Letzte Aktualisierung: Dezember 2024*
+_Letzte Aktualisierung: Dezember 2024_

@@ -37,7 +37,7 @@
 			await navigator.share({
 				title: memo.title || 'Untitled Memo',
 				text: memo.intro || memo.transcript?.substring(0, 100) || '',
-				url: shareUrl
+				url: shareUrl,
 			});
 		} catch (err) {
 			if ((err as Error).name !== 'AbortError') {
@@ -172,7 +172,8 @@ ${memo.memories && memo.memories.length > 0 ? `\nKI-Analyse:\n${memo.memories.ma
 				<div class="grid grid-cols-2 gap-3">
 					<button
 						onclick={() => (exportFormat = 'txt')}
-						class="flex flex-col items-center gap-2 rounded-lg border-2 py-3 transition-all {exportFormat === 'txt'
+						class="flex flex-col items-center gap-2 rounded-lg border-2 py-3 transition-all {exportFormat ===
+						'txt'
 							? 'border-primary bg-primary/10 text-primary'
 							: 'border-theme text-theme hover:bg-menu-hover'}"
 					>
@@ -188,7 +189,8 @@ ${memo.memories && memo.memories.length > 0 ? `\nKI-Analyse:\n${memo.memories.ma
 					</button>
 					<button
 						onclick={() => (exportFormat = 'md')}
-						class="flex flex-col items-center gap-2 rounded-lg border-2 py-3 transition-all {exportFormat === 'md'
+						class="flex flex-col items-center gap-2 rounded-lg border-2 py-3 transition-all {exportFormat ===
+						'md'
 							? 'border-primary bg-primary/10 text-primary'
 							: 'border-theme text-theme hover:bg-menu-hover'}"
 					>
@@ -204,7 +206,10 @@ ${memo.memories && memo.memories.length > 0 ? `\nKI-Analyse:\n${memo.memories.ma
 					</button>
 				</div>
 
-				<button onclick={copyContent} class="btn-secondary w-full flex items-center justify-center gap-2">
+				<button
+					onclick={copyContent}
+					class="btn-secondary w-full flex items-center justify-center gap-2"
+				>
 					{#if copiedContent}
 						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
@@ -228,7 +233,10 @@ ${memo.memories && memo.memories.length > 0 ? `\nKI-Analyse:\n${memo.memories.ma
 					{/if}
 				</button>
 
-				<button onclick={exportMemo} class="btn-primary w-full flex items-center justify-center gap-2">
+				<button
+					onclick={exportMemo}
+					class="btn-primary w-full flex items-center justify-center gap-2"
+				>
 					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"

@@ -19,7 +19,7 @@
 		layout = {},
 		animations = {},
 		className = '',
-		children
+		children,
 	}: Props = $props();
 
 	// Generate CSS classes based on variant
@@ -30,7 +30,7 @@
 			hero: 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg',
 			minimal: 'bg-transparent border-none',
 			glass: 'bg-white/20 backdrop-blur-md border border-white/30',
-			gradient: 'bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200'
+			gradient: 'bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200',
 		};
 		return classes[variant] || classes.default;
 	});

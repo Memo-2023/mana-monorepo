@@ -6,7 +6,7 @@
 		currentExplorePage,
 		exploreSortBy,
 		exploreSearchQuery,
-		showExploreFavoritesOnly
+		showExploreFavoritesOnly,
 	} from '$lib/stores/explore';
 	import { selectedImage } from '$lib/stores/images';
 	import { viewMode } from '$lib/stores/view';
@@ -41,18 +41,13 @@
 		// Setup Intersection Observer for infinite scroll
 		observer = new IntersectionObserver(
 			(entries) => {
-				if (
-					entries[0].isIntersecting &&
-					$hasMoreExplore &&
-					!$isLoadingExplore &&
-					!loadingMore
-				) {
+				if (entries[0].isIntersecting && $hasMoreExplore && !$isLoadingExplore && !loadingMore) {
 					loadMoreImages();
 				}
 			},
 			{
 				threshold: 0.1,
-				rootMargin: '100px' // Load before reaching the trigger
+				rootMargin: '100px', // Load before reaching the trigger
 			}
 		);
 
@@ -72,7 +67,7 @@
 			const data = await getPublicImages({
 				page: 1,
 				sortBy: $exploreSortBy,
-				favoritesOnly: $showExploreFavoritesOnly
+				favoritesOnly: $showExploreFavoritesOnly,
 			});
 			exploreImages.set(data);
 			currentExplorePage.set(1);
@@ -94,10 +89,10 @@
 			const newImages = $exploreSearchQuery
 				? await searchPublicImages($exploreSearchQuery, nextPage, 20, $showExploreFavoritesOnly)
 				: await getPublicImages({
-					page: nextPage,
-					sortBy: $exploreSortBy,
-					favoritesOnly: $showExploreFavoritesOnly
-				});
+						page: nextPage,
+						sortBy: $exploreSortBy,
+						favoritesOnly: $showExploreFavoritesOnly,
+					});
 
 			if (newImages.length > 0) {
 				exploreImages.update((current) => [...current, ...newImages]);
@@ -147,7 +142,12 @@
 			if (searchInput.trim()) {
 				isLoadingExplore.set(true);
 				try {
-					const results = await searchPublicImages(searchInput.trim(), 1, 20, $showExploreFavoritesOnly);
+					const results = await searchPublicImages(
+						searchInput.trim(),
+						1,
+						20,
+						$showExploreFavoritesOnly
+					);
 					exploreImages.set(results);
 					currentExplorePage.set(1);
 					hasMoreExplore.set(results.length === 20);
@@ -187,7 +187,9 @@
 					d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
 				/>
 			</svg>
-			<h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Keine Bilder gefunden</h3>
+			<h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
+				Keine Bilder gefunden
+			</h3>
 			<p class="mt-2 text-gray-600 dark:text-gray-400">
 				{#if $exploreSearchQuery}
 					Keine Ergebnisse für "{$exploreSearchQuery}"

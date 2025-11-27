@@ -9,65 +9,65 @@ let generationError = $state('');
 let currentGenerationId = $state<string | null>(null);
 
 export const generateStore = {
-  get isGenerating() {
-    return isGenerating;
-  },
-  get generationProgress() {
-    return generationProgress;
-  },
-  get generationError() {
-    return generationError;
-  },
-  get currentGenerationId() {
-    return currentGenerationId;
-  },
+	get isGenerating() {
+		return isGenerating;
+	},
+	get generationProgress() {
+		return generationProgress;
+	},
+	get generationError() {
+		return generationError;
+	},
+	get currentGenerationId() {
+		return currentGenerationId;
+	},
 
-  startGeneration(generationId?: string) {
-    isGenerating = true;
-    generationProgress = 'Starting...';
-    generationError = '';
-    currentGenerationId = generationId || null;
-  },
+	startGeneration(generationId?: string) {
+		isGenerating = true;
+		generationProgress = 'Starting...';
+		generationError = '';
+		currentGenerationId = generationId || null;
+	},
 
-  updateProgress(progress: string) {
-    generationProgress = progress;
-  },
+	updateProgress(progress: string) {
+		generationProgress = progress;
+	},
 
-  setError(error: string) {
-    generationError = error;
-    isGenerating = false;
-  },
+	setError(error: string) {
+		generationError = error;
+		isGenerating = false;
+	},
 
-  completeGeneration() {
-    isGenerating = false;
-    generationProgress = 'Complete!';
-    currentGenerationId = null;
-  },
+	completeGeneration() {
+		isGenerating = false;
+		generationProgress = 'Complete!';
+		currentGenerationId = null;
+	},
 
-  cancelGeneration() {
-    isGenerating = false;
-    generationProgress = '';
-    generationError = '';
-    currentGenerationId = null;
-  },
+	cancelGeneration() {
+		isGenerating = false;
+		generationProgress = '';
+		generationError = '';
+		currentGenerationId = null;
+	},
 
-  reset() {
-    isGenerating = false;
-    generationProgress = '';
-    generationError = '';
-    currentGenerationId = null;
-  },
+	reset() {
+		isGenerating = false;
+		generationProgress = '';
+		generationError = '';
+		currentGenerationId = null;
+	},
 };
 
 // Export individual getters for backwards compatibility
 export function getIsGenerating() {
-  return isGenerating;
+	return isGenerating;
 }
 
 export function getGenerationProgress() {
-  return generationProgress;
+	return generationProgress;
 }
 
 export function getGenerationError() {
-  return generationError;
+	return generationError;
 }

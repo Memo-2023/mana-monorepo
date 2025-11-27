@@ -11,14 +11,14 @@ const config = {
 		// Netlify adapter for SSR with server-side POST handling (required for Apple Sign-In)
 		adapter: adapter({
 			edge: false, // Use Node-based Netlify Functions (better for OAuth)
-			split: false // Single function for all routes (simpler deployment)
+			split: false, // Single function for all routes (simpler deployment)
 		}),
 		// Disable built-in CSRF check - we handle it in hooks.server.ts
 		// Using empty array allows all origins (equivalent to checkOrigin: false)
 		csrf: {
-			trustedOrigins: []
-		}
-	}
+			trustedOrigins: [],
+		},
+	},
 };
 
 export default config;

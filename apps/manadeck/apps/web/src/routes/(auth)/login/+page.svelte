@@ -21,7 +21,7 @@
 	logo={ManaDeckLogo}
 	primaryColor="#8b5cf6"
 	onSignIn={handleSignIn}
-	goto={goto}
+	{goto}
 	enableGoogle={false}
 	enableApple={false}
 	successRedirect="/decks"

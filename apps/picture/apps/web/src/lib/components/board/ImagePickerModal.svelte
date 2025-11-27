@@ -44,7 +44,7 @@
 				userId: $user.id,
 				page: 1,
 				limit: 50,
-				archived: false
+				archived: false,
 			});
 			images.set(data);
 			currentPage = 1;
@@ -72,7 +72,7 @@
 	}
 
 	function isImageAlreadyOnBoard(imageId: string): boolean {
-		return $canvasItems.some(item => item.image_id === imageId);
+		return $canvasItems.some((item) => item.image_id === imageId);
 	}
 
 	async function handleAddImages() {
@@ -89,22 +89,22 @@
 				}
 
 				// Get image details
-				const image = $images.find(img => img.id === imageId);
+				const image = $images.find((img) => img.id === imageId);
 				if (!image) continue;
 
 				// Add to board
 				const boardItem = await addBoardItem({
 					board_id: boardId,
 					image_id: imageId,
-					position_x: 100 + (addedCount * 20), // Offset each image slightly
-					position_y: 100 + (addedCount * 20),
+					position_x: 100 + addedCount * 20, // Offset each image slightly
+					position_y: 100 + addedCount * 20,
 					scale_x: 1,
 					scale_y: 1,
 					rotation: 0,
 					z_index: addedCount,
 					opacity: 1,
 					width: image.width || 400,
-					height: image.height || 300
+					height: image.height || 300,
 				});
 
 				// Add to canvas
@@ -125,8 +125,8 @@
 	}
 
 	function handleSelectAll() {
-		const availableImages = $images.filter(img => !isImageAlreadyOnBoard(img.id));
-		selectedImages = new Set(availableImages.map(img => img.id));
+		const availableImages = $images.filter((img) => !isImageAlreadyOnBoard(img.id));
+		selectedImages = new Set(availableImages.map((img) => img.id));
 	}
 
 	function handleDeselectAll() {
@@ -136,14 +136,12 @@
 
 	const filteredImages = $derived(
 		searchQuery.trim()
-			? $images.filter(img =>
-					img.prompt?.toLowerCase().includes(searchQuery.toLowerCase())
-				)
+			? $images.filter((img) => img.prompt?.toLowerCase().includes(searchQuery.toLowerCase()))
 			: $images
 	);
 </script>
 
-<Modal {open} onClose={onClose} size="large">
+<Modal {open} {onClose} size="large">
 	<div class="flex h-[80vh] flex-col p-6">
 		<!-- Header -->
 		<div class="mb-6">
@@ -190,7 +188,8 @@
 		{#if selectedImages.size > 0}
 			<div class="mb-4 rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
 				<p class="text-sm font-medium text-blue-900 dark:text-blue-100">
-					{selectedImages.size} {selectedImages.size === 1 ? 'Bild' : 'Bilder'} ausgewählt
+					{selectedImages.size}
+					{selectedImages.size === 1 ? 'Bild' : 'Bilder'} ausgewählt
 				</p>
 			</div>
 		{/if}
@@ -232,7 +231,9 @@
 							disabled={alreadyOnBoard}
 							class="group relative aspect-square overflow-hidden rounded-lg transition-all {selected
 								? 'ring-4 ring-blue-500 ring-offset-2 dark:ring-offset-gray-800'
-								: ''} {alreadyOnBoard ? 'opacity-40 cursor-not-allowed' : 'hover:ring-2 hover:ring-gray-300'}"
+								: ''} {alreadyOnBoard
+								? 'cursor-not-allowed opacity-40'
+								: 'hover:ring-2 hover:ring-gray-300'}"
 						>
 							<img
 								src={image.public_url}
@@ -272,9 +273,7 @@
 
 		<!-- Footer Actions -->
 		<div class="mt-6 flex gap-3">
-			<Button variant="outline" class="flex-1" onclick={onClose}>
-				Abbrechen
-			</Button>
+			<Button variant="outline" class="flex-1" onclick={onClose}>Abbrechen</Button>
 			<Button
 				class="flex-1"
 				onclick={handleAddImages}

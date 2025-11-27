@@ -10,7 +10,7 @@ export {
 	formatRelativeTime,
 	isToday,
 	isYesterday,
-	type LocaleKey
+	type LocaleKey,
 } from '@manacore/shared-utils';
 
 // Re-export format utilities from shared package (with explicit names for clarity)
@@ -18,7 +18,7 @@ export {
 	formatDuration as formatDurationCompact,
 	parseDuration,
 	formatDurationWithUnits,
-	formatDurationHumanReadable
+	formatDurationHumanReadable,
 } from '@manacore/shared-utils';
 
 /**

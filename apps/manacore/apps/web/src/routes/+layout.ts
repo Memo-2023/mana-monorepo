@@ -14,7 +14,7 @@ export const load: LayoutLoad = async ({ data, depends }) => {
 
 	const supabase = createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
 		global: {
-			fetch
+			fetch,
 		},
 		cookies: {
 			getAll() {
@@ -23,8 +23,8 @@ export const load: LayoutLoad = async ({ data, depends }) => {
 			setAll(cookiesToSet) {
 				// Browser client handles cookies automatically through the browser
 				// This is a no-op as cookies are managed via document.cookie in the browser
-			}
-		}
+			},
+		},
 	});
 
 	/**
@@ -33,7 +33,7 @@ export const load: LayoutLoad = async ({ data, depends }) => {
 	 * safely checked the session using `safeGetSession`.
 	 */
 	const {
-		data: { session }
+		data: { session },
 	} = await supabase.auth.getSession();
 
 	return { session, supabase };

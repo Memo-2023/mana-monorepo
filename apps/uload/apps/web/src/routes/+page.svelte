@@ -16,7 +16,7 @@
 		generateQRCodeURL,
 		downloadQRCode,
 		type QRCodeColor,
-		type QRCodeFormat
+		type QRCodeFormat,
 	} from '$lib/qrcode';
 	import * as m from '$paraglide/messages';
 
@@ -172,7 +172,7 @@
 							required
 							bind:value={inputUrl}
 							placeholder="https://example.com"
-							class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:ring-2 focus:ring-theme-accent focus:outline-none"
+							class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-accent"
 						/>
 					</div>
 
@@ -196,7 +196,7 @@
 								onclick={handleLockedFieldClick}
 								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted {!data.user
 									? 'cursor-not-allowed bg-gray-100 opacity-50 dark:bg-gray-800'
-									: 'focus:ring-2 focus:ring-theme-accent focus:outline-none'}"
+									: 'focus:outline-none focus:ring-2 focus:ring-theme-accent'}"
 							/>
 							{#if !data.user}
 								<button
@@ -229,7 +229,7 @@
 								onclick={handleLockedFieldClick}
 								class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted {!data.user
 									? 'cursor-not-allowed bg-gray-100 opacity-50 dark:bg-gray-800'
-									: 'focus:ring-2 focus:ring-theme-accent focus:outline-none'}"
+									: 'focus:outline-none focus:ring-2 focus:ring-theme-accent'}"
 							></textarea>
 							{#if !data.user}
 								<button
@@ -264,7 +264,7 @@
 									onclick={handleLockedFieldClick}
 									class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted {!data.user
 										? 'cursor-not-allowed bg-gray-100 opacity-50 dark:bg-gray-800'
-										: 'focus:ring-2 focus:ring-theme-accent focus:outline-none'}"
+										: 'focus:outline-none focus:ring-2 focus:ring-theme-accent'}"
 								/>
 								{#if !data.user}
 									<button
@@ -297,7 +297,7 @@
 									onclick={handleLockedFieldClick}
 									class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted {!data.user
 										? 'cursor-not-allowed bg-gray-100 opacity-50 dark:bg-gray-800'
-										: 'focus:ring-2 focus:ring-theme-accent focus:outline-none'}"
+										: 'focus:outline-none focus:ring-2 focus:ring-theme-accent'}"
 								/>
 								{#if !data.user}
 									<button
@@ -329,7 +329,7 @@
 									onclick={handleLockedFieldClick}
 									class="w-full rounded-md border border-theme-border bg-theme-surface px-3 py-2 text-theme-text placeholder-theme-text-muted {!data.user
 										? 'cursor-not-allowed bg-gray-100 opacity-50 dark:bg-gray-800'
-										: 'focus:ring-2 focus:ring-theme-accent focus:outline-none'}"
+										: 'focus:outline-none focus:ring-2 focus:ring-theme-accent'}"
 								/>
 								{#if !data.user}
 									<button
@@ -503,7 +503,7 @@
 						/>
 						<button
 							onclick={() => copyToClipboard(form.shortUrl)}
-							class="rounded-lg bg-neutral-900 px-6 py-2 whitespace-nowrap text-white transition duration-200 hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
+							class="whitespace-nowrap rounded-lg bg-neutral-900 px-6 py-2 text-white transition duration-200 hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
 						>
 							{copiedStates['main'] ? '✓ Copied!' : '📋 Copy'}
 						</button>
@@ -514,7 +514,7 @@
 									toggleQRCode(shortCode);
 								}
 							}}
-							class="rounded-lg bg-purple-600 px-6 py-2 whitespace-nowrap text-white transition duration-200 hover:bg-purple-700"
+							class="whitespace-nowrap rounded-lg bg-purple-600 px-6 py-2 text-white transition duration-200 hover:bg-purple-700"
 						>
 							{showQRCode === form.shortUrl.split('/').pop() ? '✕ Close QR' : '◳ QR Code'}
 						</button>
@@ -601,7 +601,7 @@
 
 	<!-- Testimonials -->
 	<Testimonials />
-	
+
 	<!-- Blog Section -->
 	<BlogSection posts={data.blogPosts || []} />
 

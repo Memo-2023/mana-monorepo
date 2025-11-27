@@ -15,10 +15,10 @@
 //   try {
 //     const systemPrompt = await getStorySystemPrompt();
 //     const imagePromptTemplate = await getImageSystemPrompt();
-    
+
 //     const finalPrompt = `
 //       System: ${systemPrompt}
-      
+
 //       Prompt: ${prompt}
 //     `;
 
@@ -42,10 +42,10 @@
 //   try {
 //     const systemPrompt = await getStorySystemPrompt();
 //     const imagePromptTemplate = await getImageSystemPrompt();
-    
+
 //     const finalPrompt = `
 //       System: ${systemPrompt}
-      
+
 //       Prompt: ${prompt}
 //     `;
 
@@ -59,7 +59,7 @@
 //     const imageResult = await model.generateContent(imagePrompt);
 //     const imageResponse = imageResult.response;
 //     const imageText = imageResponse.text();
-    
+
 //     // Parse numbered list into array
 //     const imageDescriptions = imageText
 //       .split('\n')

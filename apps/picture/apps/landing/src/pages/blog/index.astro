@@ -19,11 +19,13 @@ const paginatedPosts = posts.slice(0, postsPerPage);
 	<div class="min-h-screen bg-dark-bg py-24">
 		<div class="container mx-auto px-4">
 			<!-- Header -->
-			<div class="max-w-3xl mx-auto text-center mb-16">
-				<div class="inline-flex items-center px-4 py-2 mb-6 bg-primary/10 border border-primary/20 rounded-full">
+			<div class="mx-auto mb-16 max-w-3xl text-center">
+				<div
+					class="mb-6 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-2"
+				>
 					<span class="text-sm text-primary-300">{t('blog.badge')}</span>
 				</div>
-				<h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+				<h1 class="mb-4 text-4xl font-bold text-white md:text-5xl">
 					{t('blog.title')}
 				</h1>
 				<p class="text-xl text-gray-400">
@@ -32,54 +34,58 @@ const paginatedPosts = posts.slice(0, postsPerPage);
 			</div>
 
 			<!-- Category Filter -->
-			<div class="flex flex-wrap justify-center gap-3 mb-12">
+			<div class="mb-12 flex flex-wrap justify-center gap-3">
 				<a
 					href={localizePath('/blog')}
-					class="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-600 transition-colors"
+					class="rounded-lg bg-primary px-4 py-2 font-medium text-white transition-colors hover:bg-primary-600"
 				>
 					{t('blog.all_posts')}
 				</a>
-				{categories.map(category => (
-					<a
-						href={localizePath(`/blog/category/${category}`)}
-						class="px-4 py-2 bg-dark-elevated text-gray-300 rounded-lg font-medium hover:bg-dark-surface hover:text-white transition-colors border border-dark-border"
-					>
-						{t(`blog.categories.${category}`)}
-					</a>
-				))}
+				{
+					categories.map((category) => (
+						<a
+							href={localizePath(`/blog/category/${category}`)}
+							class="rounded-lg border border-dark-border bg-dark-elevated px-4 py-2 font-medium text-gray-300 transition-colors hover:bg-dark-surface hover:text-white"
+						>
+							{t(`blog.categories.${category}`)}
+						</a>
+					))
+				}
 			</div>
 
 			<!-- Blog Grid -->
-			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-				{paginatedPosts.map(post => (
-					<BlogCard post={post} />
-				))}
+			<div class="mb-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+				{paginatedPosts.map((post) => <BlogCard post={post} />)}
 			</div>
 
 			<!-- Pagination -->
-			{totalPages > 1 && (
-				<div class="flex justify-center gap-2">
-					{Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-						<a
-							href={localizePath(`/blog${page === 1 ? '' : `/page/${page}`}`)}
-							class={`px-4 py-2 rounded-lg font-medium transition-colors ${
-								page === currentPage
-									? 'bg-primary text-white'
-									: 'bg-dark-elevated text-gray-300 hover:bg-dark-surface'
-							}`}
-						>
-							{page}
-						</a>
-					))}
-				</div>
-			)}
+			{
+				totalPages > 1 && (
+					<div class="flex justify-center gap-2">
+						{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+							<a
+								href={localizePath(`/blog${page === 1 ? '' : `/page/${page}`}`)}
+								class={`rounded-lg px-4 py-2 font-medium transition-colors ${
+									page === currentPage
+										? 'bg-primary text-white'
+										: 'bg-dark-elevated text-gray-300 hover:bg-dark-surface'
+								}`}
+							>
+								{page}
+							</a>
+						))}
+					</div>
+				)
+			}
 
 			<!-- No Posts -->
-			{posts.length === 0 && (
-				<div class="text-center py-16">
-					<p class="text-xl text-gray-400">{t('blog.no_posts')}</p>
-				</div>
-			)}
+			{
+				posts.length === 0 && (
+					<div class="py-16 text-center">
+						<p class="text-xl text-gray-400">{t('blog.no_posts')}</p>
+					</div>
+				)
+			}
 		</div>
 	</div>
 </Layout>

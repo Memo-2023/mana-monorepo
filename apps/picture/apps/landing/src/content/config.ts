@@ -282,12 +282,14 @@ const tutorialsCollection = defineCollection({
 		examplePrompts: z.array(z.string()).default([]), // Sample prompts
 		tips: z.array(z.string()).default([]), // Pro tips
 		commonMistakes: z.array(z.string()).default([]), // What to avoid
-		troubleshooting: z.array(
-			z.object({
-				problem: z.string(),
-				solution: z.string(),
-			})
-		).default([]),
+		troubleshooting: z
+			.array(
+				z.object({
+					problem: z.string(),
+					solution: z.string(),
+				})
+			)
+			.default([]),
 
 		// Outcomes
 		whatYouWillLearn: z.array(z.string()), // Learning objectives
@@ -307,13 +309,15 @@ const tutorialsCollection = defineCollection({
 		lastUpdated: z.date(),
 
 		// Engagement
-		downloadableResources: z.array(
-			z.object({
-				title: z.string(),
-				url: z.string(),
-				type: z.enum(['template', 'preset', 'example', 'cheatsheet']),
-			})
-		).default([]),
+		downloadableResources: z
+			.array(
+				z.object({
+					title: z.string(),
+					url: z.string(),
+					type: z.enum(['template', 'preset', 'example', 'cheatsheet']),
+				})
+			)
+			.default([]),
 	}),
 });
 
@@ -344,63 +348,68 @@ const changelogCollection = defineCollection({
 
 		// Changes (categorized)
 		changes: z.object({
-			features: z.array(
-				z.object({
-					title: z.string(),
-					description: z.string(),
-					category: z.enum([
-						'generation',
-						'editing',
-						'organization',
-						'api',
-						'mobile',
-						'web',
-						'performance',
-						'ui',
-						'other',
-					]).optional(),
-					image: z.string().optional(), // Screenshot or demo image
-					videoUrl: z.string().optional(), // Demo video
-					link: z.string().optional(), // Link to feature page or docs
-				})
-			).default([]),
+			features: z
+				.array(
+					z.object({
+						title: z.string(),
+						description: z.string(),
+						category: z
+							.enum([
+								'generation',
+								'editing',
+								'organization',
+								'api',
+								'mobile',
+								'web',
+								'performance',
+								'ui',
+								'other',
+							])
+							.optional(),
+						image: z.string().optional(), // Screenshot or demo image
+						videoUrl: z.string().optional(), // Demo video
+						link: z.string().optional(), // Link to feature page or docs
+					})
+				)
+				.default([]),
 
-			improvements: z.array(
-				z.object({
-					title: z.string(),
-					description: z.string(),
-					category: z.enum([
-						'performance',
-						'ui',
-						'ux',
-						'accessibility',
-						'security',
-						'other',
-					]).optional(),
-				})
-			).default([]),
+			improvements: z
+				.array(
+					z.object({
+						title: z.string(),
+						description: z.string(),
+						category: z
+							.enum(['performance', 'ui', 'ux', 'accessibility', 'security', 'other'])
+							.optional(),
+					})
+				)
+				.default([]),
 
-			bugfixes: z.array(
-				z.object({
-					title: z.string(),
-					description: z.string(),
-					severity: z.enum(['critical', 'major', 'minor']).optional(),
-				})
-			).default([]),
+			bugfixes: z
+				.array(
+					z.object({
+						title: z.string(),
+						description: z.string(),
+						severity: z.enum(['critical', 'major', 'minor']).optional(),
+					})
+				)
+				.default([]),
 
-			breaking: z.array(
-				z.object({
-					title: z.string(),
-					description: z.string(),
-					migration: z.string().optional(), // Migration guide
-				})
-			).default([]),
+			breaking: z
+				.array(
+					z.object({
+						title: z.string(),
+						description: z.string(),
+						migration: z.string().optional(), // Migration guide
+					})
+				)
+				.default([]),
 		}),
 
 		// Platform availability
-		platforms: z.array(
-			z.enum(['web', 'mobile-ios', 'mobile-android', 'api', 'all'])
-		).default(['all']),
+		platforms: z
+			.array(z.enum(['web', 'mobile-ios', 'mobile-android', 'api', 'all']))
+			.default(['all']),
 
 		// Related content
 		relatedFeatures: z.array(z.string()).default([]), // Feature slugs
@@ -412,11 +421,13 @@ const changelogCollection = defineCollection({
 		discussionUrl: z.string().optional(), // Link to discussion (GitHub, Discord)
 
 		// Stats (optional, for major releases)
-		stats: z.object({
-			totalChanges: z.number().optional(),
-			contributors: z.number().optional(),
-			daysInDevelopment: z.number().optional(),
-		}).optional(),
+		stats: z
+			.object({
+				totalChanges: z.number().optional(),
+				contributors: z.number().optional(),
+				daysInDevelopment: z.number().optional(),
+			})
+			.optional(),
 
 		// SEO
 		seoKeywords: z.array(z.string()).default([]),
@@ -493,19 +504,25 @@ const aiModelsCollection = defineCollection({
 		technical: z.object({
 			maxResolution: z.string().optional(), // e.g., "1024x1024", "2048x2048"
 			aspectRatios: z.array(z.string()).default([]), // e.g., ["1:1", "16:9", "9:16"]
-			parameters: z.object({
-				steps: z.object({
-					min: z.number(),
-					max: z.number(),
-					default: z.number(),
-				}).optional(),
-				guidanceScale: z.object({
-					min: z.number(),
-					max: z.number(),
-					default: z.number(),
-				}).optional(),
-				seed: z.boolean().default(true), // Supports seed control
-			}).optional(),
+			parameters: z
+				.object({
+					steps: z
+						.object({
+							min: z.number(),
+							max: z.number(),
+							default: z.number(),
+						})
+						.optional(),
+					guidanceScale: z
+						.object({
+							min: z.number(),
+							max: z.number(),
+							default: z.number(),
+						})
+						.optional(),
+					seed: z.boolean().default(true), // Supports seed control
+				})
+				.optional(),
 			modelSize: z.string().optional(), // e.g., "2.8B parameters"
 			architecture: z.string().optional(), // e.g., "Diffusion Transformer"
 		}),
@@ -531,26 +548,32 @@ const aiModelsCollection = defineCollection({
 		notRecommendedFor: z.array(z.string()).default([]), // When not to use
 
 		// Example outputs
-		exampleImages: z.array(
-			z.object({
-				url: z.string(),
-				prompt: z.string(),
-				settings: z.object({
-					steps: z.number().optional(),
-					guidance: z.number().optional(),
-					seed: z.number().optional(),
-				}).optional(),
-			})
-		).default([]),
+		exampleImages: z
+			.array(
+				z.object({
+					url: z.string(),
+					prompt: z.string(),
+					settings: z
+						.object({
+							steps: z.number().optional(),
+							guidance: z.number().optional(),
+							seed: z.number().optional(),
+						})
+						.optional(),
+				})
+			)
+			.default([]),
 
 		// Comparison data
-		comparisonMetrics: z.object({
-			promptAdherence: z.number().min(1).max(5), // How well it follows prompts
-			detailLevel: z.number().min(1).max(5), // Level of detail
-			colorAccuracy: z.number().min(1).max(5), // Color reproduction
-			textRendering: z.number().min(1).max(5).optional(), // Text in images
-			consistency: z.number().min(1).max(5), // Result consistency
-		}).optional(),
+		comparisonMetrics: z
+			.object({
+				promptAdherence: z.number().min(1).max(5), // How well it follows prompts
+				detailLevel: z.number().min(1).max(5), // Level of detail
+				colorAccuracy: z.number().min(1).max(5), // Color reproduction
+				textRendering: z.number().min(1).max(5).optional(), // Text in images
+				consistency: z.number().min(1).max(5), // Result consistency
+			})
+			.optional(),
 
 		// Related content
 		relatedModels: z.array(z.string()).default([]), // Similar model slugs
@@ -586,14 +609,16 @@ const galleryCollection = defineCollection({
 		model: z.string(), // Model slug (e.g., "flux-dev")
 
 		// Generation settings
-		settings: z.object({
-			seed: z.number().optional(),
-			steps: z.number().optional(),
-			guidanceScale: z.number().optional(),
-			width: z.number().optional(),
-			height: z.number().optional(),
-			aspectRatio: z.string().optional(),
-		}).optional(),
+		settings: z
+			.object({
+				seed: z.number().optional(),
+				steps: z.number().optional(),
+				guidanceScale: z.number().optional(),
+				width: z.number().optional(),
+				height: z.number().optional(),
+				aspectRatio: z.string().optional(),
+			})
+			.optional(),
 
 		// Categorization
 		category: z.enum([
@@ -612,11 +637,13 @@ const galleryCollection = defineCollection({
 		tags: z.array(z.string()).default([]), // General tags
 
 		// Creator info
-		creator: z.object({
-			name: z.string(),
-			avatar: z.string().optional(),
-			profileUrl: z.string().optional(),
-		}).optional(),
+		creator: z
+			.object({
+				name: z.string(),
+				avatar: z.string().optional(),
+				profileUrl: z.string().optional(),
+			})
+			.optional(),
 
 		// Visibility & Status
 		featured: z.boolean().default(false), // Featured on homepage
@@ -645,15 +672,20 @@ const galleryCollection = defineCollection({
 
 		// Metadata
 		createdAt: z.string().transform((str) => new Date(str)),
-		updatedAt: z.string().transform((str) => new Date(str)).optional(),
+		updatedAt: z
+			.string()
+			.transform((str) => new Date(str))
+			.optional(),
 		language: z.enum(['en', 'de', 'fr', 'it', 'es']).default('en'),
 
 		// Technical metadata
 		fileSize: z.number().optional(), // File size in bytes
-		dimensions: z.object({
-			width: z.number(),
-			height: z.number(),
-		}).optional(),
+		dimensions: z
+			.object({
+				width: z.number(),
+				height: z.number(),
+			})
+			.optional(),
 	}),
 });
 
@@ -666,14 +698,16 @@ const promptTemplatesCollection = defineCollection({
 
 		// Template content
 		promptTemplate: z.string(), // The actual prompt template with {variables}
-		variables: z.array(
-			z.object({
-				name: z.string(), // Variable name (e.g., "product", "style")
-				description: z.string(), // What this variable is for
-				placeholder: z.string(), // Example value
-				required: z.boolean().default(true),
-			})
-		).default([]), // Variables in the template
+		variables: z
+			.array(
+				z.object({
+					name: z.string(), // Variable name (e.g., "product", "style")
+					description: z.string(), // What this variable is for
+					placeholder: z.string(), // Example value
+					required: z.boolean().default(true),
+				})
+			)
+			.default([]), // Variables in the template
 
 		// Classification
 		category: z.enum([
@@ -699,30 +733,36 @@ const promptTemplatesCollection = defineCollection({
 		alternativeModels: z.array(z.string()).default([]),
 
 		// Settings Recommendations
-		recommendedSettings: z.object({
-			aspectRatio: z.string().optional(), // e.g., "1:1", "16:9"
-			steps: z.number().optional(),
-			guidanceScale: z.number().optional(),
-			negativePrompt: z.string().optional(),
-		}).optional(),
+		recommendedSettings: z
+			.object({
+				aspectRatio: z.string().optional(), // e.g., "1:1", "16:9"
+				steps: z.number().optional(),
+				guidanceScale: z.number().optional(),
+				negativePrompt: z.string().optional(),
+			})
+			.optional(),
 
 		// Example Outputs
-		exampleImages: z.array(
-			z.object({
-				url: z.string(),
-				prompt: z.string(), // Filled-in version of the template
-				variables: z.record(z.string()).optional(), // Variable values used
-			})
-		).default([]),
+		exampleImages: z
+			.array(
+				z.object({
+					url: z.string(),
+					prompt: z.string(), // Filled-in version of the template
+					variables: z.record(z.string()).optional(), // Variable values used
+				})
+			)
+			.default([]),
 
 		// Variations
-		variations: z.array(
-			z.object({
-				title: z.string(),
-				prompt: z.string(), // Slightly different version
-				description: z.string().optional(),
-			})
-		).default([]),
+		variations: z
+			.array(
+				z.object({
+					title: z.string(),
+					prompt: z.string(), // Slightly different version
+					description: z.string().optional(),
+				})
+			)
+			.default([]),
 
 		// Use Cases
 		useCases: z.array(z.string()).default([]), // When to use this template
@@ -731,10 +771,12 @@ const promptTemplatesCollection = defineCollection({
 		// Tips & Best Practices
 		tips: z.array(z.string()).default([]),
 		commonMistakes: z.array(z.string()).default([]),
-		doAndDont: z.object({
-			do: z.array(z.string()).default([]),
-			dont: z.array(z.string()).default([]),
-		}).optional(),
+		doAndDont: z
+			.object({
+				do: z.array(z.string()).default([]),
+				dont: z.array(z.string()).default([]),
+			})
+			.optional(),
 
 		// Visibility
 		featured: z.boolean().default(false), // Featured on homepage
@@ -784,12 +826,14 @@ const caseStudiesCollection = defineCollection({
 		}),
 
 		// Contact person (optional)
-		contact: z.object({
-			name: z.string(),
-			role: z.string(), // Job title
-			avatar: z.string().optional(),
-			quote: z.string().optional(), // Pull quote from interview
-		}).optional(),
+		contact: z
+			.object({
+				name: z.string(),
+				role: z.string(), // Job title
+				avatar: z.string().optional(),
+				quote: z.string().optional(), // Pull quote from interview
+			})
+			.optional(),
 
 		// Hero image
 		coverImage: z.string(), // Main case study image
@@ -821,14 +865,16 @@ const caseStudiesCollection = defineCollection({
 		results: z.string(), // What results did they achieve?
 
 		// Key Metrics (Results)
-		metrics: z.array(
-			z.object({
-				label: z.string(), // e.g., "Time Saved", "Cost Reduction", "Images Generated"
-				value: z.string(), // e.g., "80%", "€2,000/month", "10,000+"
-				description: z.string().optional(), // Additional context
-				icon: z.string().optional(), // Emoji or icon
-			})
-		).default([]),
+		metrics: z
+			.array(
+				z.object({
+					label: z.string(), // e.g., "Time Saved", "Cost Reduction", "Images Generated"
+					value: z.string(), // e.g., "80%", "€2,000/month", "10,000+"
+					description: z.string().optional(), // Additional context
+					icon: z.string().optional(), // Emoji or icon
+				})
+			)
+			.default([]),
 
 		// Features Used
 		featuresUsed: z.array(z.string()).default([]), // Feature slugs they used
@@ -836,55 +882,67 @@ const caseStudiesCollection = defineCollection({
 		useCases: z.array(z.string()).default([]), // Use case slugs
 
 		// Before & After (optional)
-		beforeAfter: z.object({
-			before: z.object({
-				description: z.string(),
-				image: z.string().optional(),
-				metrics: z.array(z.string()).default([]),
-			}),
-			after: z.object({
-				description: z.string(),
-				image: z.string().optional(),
-				metrics: z.array(z.string()).default([]),
-			}),
-		}).optional(),
+		beforeAfter: z
+			.object({
+				before: z.object({
+					description: z.string(),
+					image: z.string().optional(),
+					metrics: z.array(z.string()).default([]),
+				}),
+				after: z.object({
+					description: z.string(),
+					image: z.string().optional(),
+					metrics: z.array(z.string()).default([]),
+				}),
+			})
+			.optional(),
 
 		// Example images (work samples)
-		exampleImages: z.array(
-			z.object({
-				url: z.string(),
-				caption: z.string().optional(),
-				prompt: z.string().optional(), // If showing AI-generated examples
-			})
-		).default([]),
+		exampleImages: z
+			.array(
+				z.object({
+					url: z.string(),
+					caption: z.string().optional(),
+					prompt: z.string().optional(), // If showing AI-generated examples
+				})
+			)
+			.default([]),
 
 		// Timeline (optional)
-		timeline: z.array(
-			z.object({
-				date: z.string(), // e.g., "January 2025"
-				milestone: z.string(), // What happened
-			})
-		).default([]),
+		timeline: z
+			.array(
+				z.object({
+					date: z.string(), // e.g., "January 2025"
+					milestone: z.string(), // What happened
+				})
+			)
+			.default([]),
 
 		// Key Takeaways
 		keyTakeaways: z.array(z.string()), // Bullet points of lessons learned
 
 		// Testimonial quote (main quote for the case study)
-		testimonial: z.object({
-			quote: z.string(),
-			author: z.string(),
-			role: z.string(),
-		}).optional(),
+		testimonial: z
+			.object({
+				quote: z.string(),
+				author: z.string(),
+				role: z.string(),
+			})
+			.optional(),
 
 		// Technical Details (optional)
-		technicalDetails: z.object({
-			integrations: z.array(z.string()).default([]), // e.g., ["Shopify", "WordPress"]
-			workflow: z.string().optional(), // Description of their workflow
-			team: z.object({
-				size: z.number().optional(), // Team size
-				roles: z.array(z.string()).default([]), // e.g., ["Designer", "Marketer"]
-			}).optional(),
-		}).optional(),
+		technicalDetails: z
+			.object({
+				integrations: z.array(z.string()).default([]), // e.g., ["Shopify", "WordPress"]
+				workflow: z.string().optional(), // Description of their workflow
+				team: z
+					.object({
+						size: z.number().optional(), // Team size
+						roles: z.array(z.string()).default([]), // e.g., ["Designer", "Marketer"]
+					})
+					.optional(),
+			})
+			.optional(),
 
 		// Related content
 		relatedCaseStudies: z.array(z.string()).default([]), // Other case study slugs
@@ -905,10 +963,12 @@ const caseStudiesCollection = defineCollection({
 		likes: z.number().default(0),
 
 		// Call to Action (optional custom CTA)
-		cta: z.object({
-			text: z.string(),
-			url: z.string(),
-		}).optional(),
+		cta: z
+			.object({
+				text: z.string(),
+				url: z.string(),
+			})
+			.optional(),
 	}),
 });
 

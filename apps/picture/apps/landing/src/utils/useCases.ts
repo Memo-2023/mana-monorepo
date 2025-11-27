@@ -14,17 +14,13 @@ export async function getUseCases(language?: string): Promise<UseCaseEntry[]> {
 			.sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime());
 	}
 
-	return allUseCases.sort(
-		(a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime()
-	);
+	return allUseCases.sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime());
 }
 
 /**
  * Get featured use cases for homepage
  */
-export async function getFeaturedUseCases(
-	language?: string
-): Promise<UseCaseEntry[]> {
+export async function getFeaturedUseCases(language?: string): Promise<UseCaseEntry[]> {
 	const allUseCases = await getUseCases(language);
 	return allUseCases.filter((uc) => uc.data.featured);
 }
@@ -32,9 +28,7 @@ export async function getFeaturedUseCases(
 /**
  * Get popular use cases
  */
-export async function getPopularUseCases(
-	language?: string
-): Promise<UseCaseEntry[]> {
+export async function getPopularUseCases(language?: string): Promise<UseCaseEntry[]> {
 	const allUseCases = await getUseCases(language);
 	return allUseCases.filter((uc) => uc.data.popular);
 }
@@ -142,10 +136,7 @@ export function getDifficultyColor(difficulty: string): string {
 /**
  * Search use cases by query string
  */
-export async function searchUseCases(
-	query: string,
-	language?: string
-): Promise<UseCaseEntry[]> {
+export async function searchUseCases(query: string, language?: string): Promise<UseCaseEntry[]> {
 	const allUseCases = await getUseCases(language);
 	const lowerQuery = query.toLowerCase();
 
@@ -154,9 +145,7 @@ export async function searchUseCases(
 			uc.data.title.toLowerCase().includes(lowerQuery) ||
 			uc.data.description.toLowerCase().includes(lowerQuery) ||
 			uc.body.toLowerCase().includes(lowerQuery) ||
-			uc.data.seoKeywords.some((keyword) =>
-				keyword.toLowerCase().includes(lowerQuery)
-			) ||
+			uc.data.seoKeywords.some((keyword) => keyword.toLowerCase().includes(lowerQuery)) ||
 			(uc.data.industry && uc.data.industry.toLowerCase().includes(lowerQuery))
 	);
 }
@@ -179,13 +168,9 @@ export async function getUseCaseStats(language?: string) {
 			count: allUseCases.filter((uc) => uc.data.category === category).length,
 		})),
 		difficultyCounts: {
-			beginner: allUseCases.filter((uc) => uc.data.difficulty === 'beginner')
-				.length,
-			intermediate: allUseCases.filter(
-				(uc) => uc.data.difficulty === 'intermediate'
-			).length,
-			advanced: allUseCases.filter((uc) => uc.data.difficulty === 'advanced')
-				.length,
+			beginner: allUseCases.filter((uc) => uc.data.difficulty === 'beginner').length,
+			intermediate: allUseCases.filter((uc) => uc.data.difficulty === 'intermediate').length,
+			advanced: allUseCases.filter((uc) => uc.data.difficulty === 'advanced').length,
 		},
 	};
 }

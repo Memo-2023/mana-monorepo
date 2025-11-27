@@ -2,9 +2,9 @@
 
 /**
  * Seed Script for Local PocketBase Development
- * 
+ *
  * This script creates test data for local development.
- * 
+ *
  * Usage:
  *   1. Make sure PocketBase is running locally (http://localhost:8090)
  *   2. Run: node scripts/seed-local-db.js
@@ -33,7 +33,7 @@ const testUsers = [
 		passwordConfirm: 'test123456',
 		username: 'testuser',
 		name: 'Test User',
-		emailVisibility: true
+		emailVisibility: true,
 	},
 	{
 		email: 'demo@localhost',
@@ -41,8 +41,8 @@ const testUsers = [
 		passwordConfirm: 'demo123456',
 		username: 'demouser',
 		name: 'Demo User',
-		emailVisibility: true
-	}
+		emailVisibility: true,
+	},
 ];
 
 const testLinks = [
@@ -54,7 +54,7 @@ const testLinks = [
 		is_active: true,
 		click_limit: null,
 		expires_at: null,
-		password: null
+		password: null,
 	},
 	{
 		short_code: 'test2',
@@ -64,7 +64,7 @@ const testLinks = [
 		is_active: true,
 		click_limit: 100,
 		expires_at: null,
-		password: null
+		password: null,
 	},
 	{
 		short_code: 'protected',
@@ -74,7 +74,7 @@ const testLinks = [
 		is_active: true,
 		click_limit: null,
 		expires_at: null,
-		password: 'secret123'
+		password: 'secret123',
 	},
 	{
 		short_code: 'expired',
@@ -84,8 +84,8 @@ const testLinks = [
 		is_active: true,
 		click_limit: null,
 		expires_at: new Date(Date.now() - 86400000).toISOString(), // Yesterday
-		password: null
-	}
+		password: null,
+	},
 ];
 
 async function seedDatabase() {
@@ -99,14 +99,14 @@ async function seedDatabase() {
 			console.log('⚠️  Admin auth failed. You may need to:');
 			console.log('   1. Create admin account at http://localhost:8090/_/');
 			console.log('   2. Update POCKETBASE_ADMIN_EMAIL and POCKETBASE_ADMIN_PASSWORD\n');
-			
+
 			// Try to continue without admin auth (some operations might fail)
 		}
 
 		// Step 2: Create test users
 		console.log('👥 Creating test users...');
 		const createdUsers = [];
-		
+
 		for (const userData of testUsers) {
 			try {
 				const user = await pb.collection('users').create(userData);
@@ -118,7 +118,7 @@ async function seedDatabase() {
 					// Try to get existing user
 					try {
 						const users = await pb.collection('users').getList(1, 1, {
-							filter: `email = "${userData.email}"`
+							filter: `email = "${userData.email}"`,
 						});
 						if (users.items.length > 0) {
 							createdUsers.push(users.items[0]);
@@ -135,22 +135,22 @@ async function seedDatabase() {
 
 		// Step 3: Create test links
 		console.log('🔗 Creating test links...');
-		
+
 		// Use the first created user as the owner
 		const ownerId = createdUsers[0]?.id;
-		
+
 		for (const linkData of testLinks) {
 			try {
 				// Add owner if we have one
 				if (ownerId) {
 					linkData.user_id = ownerId;
 				}
-				
+
 				// Generate a random custom code if needed
 				if (!linkData.custom_code) {
 					linkData.custom_code = linkData.short_code;
 				}
-				
+
 				const link = await pb.collection('links').create(linkData);
 				console.log(`   ✅ Created link: ${linkData.short_code} -> ${linkData.original_url}`);
 			} catch (error) {
@@ -165,16 +165,16 @@ async function seedDatabase() {
 
 		// Step 4: Create some test clicks
 		console.log('📊 Creating test click data...');
-		
+
 		try {
 			// Get one of the links we created
 			const links = await pb.collection('links').getList(1, 1, {
-				filter: 'short_code = "test1"'
+				filter: 'short_code = "test1"',
 			});
-			
+
 			if (links.items.length > 0) {
 				const link = links.items[0];
-				
+
 				// Create some fake clicks
 				const clickData = [
 					{
@@ -186,7 +186,7 @@ async function seedDatabase() {
 						os: 'macOS',
 						country: 'Germany',
 						city: 'Munich',
-						clicked_at: new Date().toISOString()
+						clicked_at: new Date().toISOString(),
 					},
 					{
 						link_id: link.id,
@@ -197,10 +197,10 @@ async function seedDatabase() {
 						os: 'iOS',
 						country: 'USA',
 						city: 'New York',
-						clicked_at: new Date(Date.now() - 3600000).toISOString() // 1 hour ago
-					}
+						clicked_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+					},
 				];
-				
+
 				for (const click of clickData) {
 					try {
 						await pb.collection('clicks').create(click);
@@ -227,7 +227,6 @@ async function seedDatabase() {
 		console.log('   http://localhost:5173/protected - Password: secret123');
 		console.log('   http://localhost:5173/expired - Expired link\n');
 		console.log('👉 Next: Open http://localhost:5173 and test the app!');
-
 	} catch (error) {
 		console.error('❌ Seeding failed:', error);
 		process.exit(1);
@@ -235,9 +234,11 @@ async function seedDatabase() {
 }
 
 // Run the seeding
-seedDatabase().then(() => {
-	process.exit(0);
-}).catch(error => {
-	console.error('Fatal error:', error);
-	process.exit(1);
-});
+seedDatabase()
+	.then(() => {
+		process.exit(0);
+	})
+	.catch((error) => {
+		console.error('Fatal error:', error);
+		process.exit(1);
+	});

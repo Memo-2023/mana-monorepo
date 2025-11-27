@@ -1,74 +1,67 @@
-import {
-  IsString,
-  IsOptional,
-  IsNumber,
-  IsArray,
-  ValidateNested,
-  IsUUID,
-} from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsArray, ValidateNested, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class BatchPromptDto {
-  @IsString()
-  text: string;
+	@IsString()
+	text: string;
 
-  @IsString()
-  @IsOptional()
-  negativePrompt?: string;
+	@IsString()
+	@IsOptional()
+	negativePrompt?: string;
 
-  @IsNumber()
-  @IsOptional()
-  seed?: number;
+	@IsNumber()
+	@IsOptional()
+	seed?: number;
 
-  @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
-  tags?: string[];
+	@IsArray()
+	@IsString({ each: true })
+	@IsOptional()
+	tags?: string[];
 }
 
 export class SharedSettingsDto {
-  @IsUUID()
-  modelId: string;
+	@IsUUID()
+	modelId: string;
 
-  @IsString()
-  modelVersion: string;
+	@IsString()
+	modelVersion: string;
 
-  @IsNumber()
-  width: number;
+	@IsNumber()
+	width: number;
 
-  @IsNumber()
-  height: number;
+	@IsNumber()
+	height: number;
 
-  @IsNumber()
-  steps: number;
+	@IsNumber()
+	steps: number;
 
-  @IsNumber()
-  guidanceScale: number;
+	@IsNumber()
+	guidanceScale: number;
 }
 
 export class CreateBatchDto {
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => BatchPromptDto)
-  prompts: BatchPromptDto[];
+	@IsArray()
+	@ValidateNested({ each: true })
+	@Type(() => BatchPromptDto)
+	prompts: BatchPromptDto[];
 
-  @ValidateNested()
-  @Type(() => SharedSettingsDto)
-  sharedSettings: SharedSettingsDto;
+	@ValidateNested()
+	@Type(() => SharedSettingsDto)
+	sharedSettings: SharedSettingsDto;
 
-  @IsString()
-  @IsOptional()
-  batchName?: string;
+	@IsString()
+	@IsOptional()
+	batchName?: string;
 }
 
 export class GetBatchQueryDto {
-  @IsNumber()
-  @IsOptional()
-  @Type(() => Number)
-  page?: number = 1;
+	@IsNumber()
+	@IsOptional()
+	@Type(() => Number)
+	page?: number = 1;
 
-  @IsNumber()
-  @IsOptional()
-  @Type(() => Number)
-  limit?: number = 20;
+	@IsNumber()
+	@IsOptional()
+	@Type(() => Number)
+	limit?: number = 20;
 }

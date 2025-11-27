@@ -7,28 +7,28 @@ export async function getFeatures(language?: string) {
 	const allFeatures = await getCollection('features');
 
 	return allFeatures
-		.filter(feature => feature.data.language === lang)
+		.filter((feature) => feature.data.language === lang)
 		.sort((a, b) => a.data.order - b.data.order);
 }
 
 export async function getFeaturedFeatures(language?: string) {
 	const features = await getFeatures(language);
-	return features.filter(feature => feature.data.featured);
+	return features.filter((feature) => feature.data.featured);
 }
 
 export async function getFeaturesByCategory(category: string, language?: string) {
 	const features = await getFeatures(language);
-	return features.filter(feature => feature.data.category === category);
+	return features.filter((feature) => feature.data.category === category);
 }
 
 export async function getAvailableFeatures(language?: string) {
 	const features = await getFeatures(language);
-	return features.filter(feature => feature.data.available);
+	return features.filter((feature) => feature.data.available);
 }
 
 export async function getComingSoonFeatures(language?: string) {
 	const features = await getFeatures(language);
-	return features.filter(feature => feature.data.comingSoon);
+	return features.filter((feature) => feature.data.comingSoon);
 }
 
 export function getAllFeatureCategories(): string[] {
@@ -43,13 +43,13 @@ export async function getRelatedFeatures(
 
 	// Filter out current feature and same category
 	const relatedFeatures = allFeatures
-		.filter(f => f.id !== feature.id && f.data.category === feature.data.category)
+		.filter((f) => f.id !== feature.id && f.data.category === feature.data.category)
 		.slice(0, limit);
 
 	// If not enough, add from other categories
 	if (relatedFeatures.length < limit) {
 		const remaining = allFeatures
-			.filter(f => f.id !== feature.id && !relatedFeatures.includes(f))
+			.filter((f) => f.id !== feature.id && !relatedFeatures.includes(f))
 			.slice(0, limit - relatedFeatures.length);
 		relatedFeatures.push(...remaining);
 	}

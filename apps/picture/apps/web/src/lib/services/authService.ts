@@ -28,7 +28,7 @@ export const authService = {
 		try {
 			const { data, error } = await supabase.auth.signInWithPassword({
 				email,
-				password
+				password,
 			});
 
 			if (error) {
@@ -36,20 +36,20 @@ export const authService = {
 				if (error.message?.includes('Invalid login credentials')) {
 					return {
 						success: false,
-						error: 'INVALID_CREDENTIALS'
+						error: 'INVALID_CREDENTIALS',
 					};
 				}
 
 				if (error.message?.includes('Email not confirmed')) {
 					return {
 						success: false,
-						error: 'EMAIL_NOT_VERIFIED'
+						error: 'EMAIL_NOT_VERIFIED',
 					};
 				}
 
 				return {
 					success: false,
-					error: error.message || 'Sign in failed'
+					error: error.message || 'Sign in failed',
 				};
 			}
 
@@ -59,13 +59,13 @@ export const authService = {
 
 			return {
 				success: false,
-				error: 'No session returned'
+				error: 'No session returned',
 			};
 		} catch (error) {
 			console.error('Error signing in:', error);
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error during sign in'
+				error: error instanceof Error ? error.message : 'Unknown error during sign in',
 			};
 		}
 	},
@@ -79,21 +79,21 @@ export const authService = {
 				email,
 				password,
 				options: {
-					emailRedirectTo: `${window.location.origin}/auth/callback`
-				}
+					emailRedirectTo: `${window.location.origin}/auth/callback`,
+				},
 			});
 
 			if (error) {
 				if (error.message?.includes('already registered')) {
 					return {
 						success: false,
-						error: 'This email is already in use'
+						error: 'This email is already in use',
 					};
 				}
 
 				return {
 					success: false,
-					error: error.message || 'Registration failed'
+					error: error.message || 'Registration failed',
 				};
 			}
 
@@ -101,7 +101,7 @@ export const authService = {
 			if (data.user && !data.session) {
 				return {
 					success: true,
-					needsVerification: true
+					needsVerification: true,
 				};
 			}
 
@@ -110,7 +110,7 @@ export const authService = {
 			console.error('Error signing up:', error);
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error during registration'
+				error: error instanceof Error ? error.message : 'Unknown error during registration',
 			};
 		}
 	},
@@ -123,14 +123,14 @@ export const authService = {
 			const { error } = await supabase.auth.signInWithOAuth({
 				provider: 'google',
 				options: {
-					redirectTo: `${window.location.origin}/app/gallery`
-				}
+					redirectTo: `${window.location.origin}/app/gallery`,
+				},
 			});
 
 			if (error) {
 				return {
 					success: false,
-					error: error.message || 'Google Sign-In failed'
+					error: error.message || 'Google Sign-In failed',
 				};
 			}
 
@@ -140,7 +140,7 @@ export const authService = {
 			console.error('Error signing in with Google:', error);
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error during Google Sign-In'
+				error: error instanceof Error ? error.message : 'Unknown error during Google Sign-In',
 			};
 		}
 	},
@@ -153,14 +153,14 @@ export const authService = {
 			const { error } = await supabase.auth.signInWithOAuth({
 				provider: 'apple',
 				options: {
-					redirectTo: `${window.location.origin}/app/gallery`
-				}
+					redirectTo: `${window.location.origin}/app/gallery`,
+				},
 			});
 
 			if (error) {
 				return {
 					success: false,
-					error: error.message || 'Apple Sign-In failed'
+					error: error.message || 'Apple Sign-In failed',
 				};
 			}
 
@@ -169,7 +169,7 @@ export const authService = {
 			console.error('Error signing in with Apple:', error);
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error during Apple Sign-In'
+				error: error instanceof Error ? error.message : 'Unknown error during Apple Sign-In',
 			};
 		}
 	},
@@ -191,20 +191,21 @@ export const authService = {
 	async forgotPassword(email: string): Promise<AuthResult> {
 		try {
 			const { error } = await supabase.auth.resetPasswordForEmail(email, {
-				redirectTo: `${window.location.origin}/auth/reset-password`
+				redirectTo: `${window.location.origin}/auth/reset-password`,
 			});
 
 			if (error) {
 				if (error.message?.includes('rate limit')) {
 					return {
 						success: false,
-						error: 'Too many password reset attempts. Please wait a few minutes before trying again.'
+						error:
+							'Too many password reset attempts. Please wait a few minutes before trying again.',
 					};
 				}
 
 				return {
 					success: false,
-					error: error.message || 'Password reset failed'
+					error: error.message || 'Password reset failed',
 				};
 			}
 
@@ -213,8 +214,8 @@ export const authService = {
 			console.error('Error sending password reset email:', error);
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error during password reset'
+				error: error instanceof Error ? error.message : 'Unknown error during password reset',
 			};
 		}
-	}
+	},
 };

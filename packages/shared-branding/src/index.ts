@@ -20,16 +20,11 @@ export {
 	ManaDeckLogo,
 	StorytellerLogo,
 	UloadLogo,
-	ChatLogo
+	ChatLogo,
 } from './logos';
 
 // Configuration
 export { APP_BRANDING, getAppBranding, getAllAppBrandings } from './config';
 
 // Types
-export type {
-	AppId,
-	AppBranding,
-	LogoProps,
-	AppLogoWithNameProps,
-} from './types';
+export type { AppId, AppBranding, LogoProps, AppLogoWithNameProps } from './types';

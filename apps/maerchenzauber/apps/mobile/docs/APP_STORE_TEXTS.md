@@ -7,21 +7,25 @@ Diese Datei enthält alle notwendigen Texte und Metadaten für die Einreichung v
 ## 📱 Basis-Informationen
 
 ### App Name
+
 ```
 Märchenzauber
 ```
 
 **Alternative Namen (falls nicht verfügbar):**
+
 - Märchenzauber - Kuscheltier Geschichten
 - Märchenzauber Stories
 - Märchenzauber App
 
 ### Bundle Identifier
+
 ```
 com.memoro.maerchenzauber
 ```
 
 ### Version
+
 ```
 1.2.0
 ```
@@ -31,21 +35,25 @@ com.memoro.maerchenzauber
 ## 🎯 Apple App Store Texte
 
 ### Subtitle (30 Zeichen)
+
 ```
 Kuscheltiere erwachen
 ```
 
 **Alternativen:**
+
 - `Magische Kindergeschichten` (26 Zeichen)
 - `Kuscheltiere erleben` (20 Zeichen)
 - `Dein Teddy als Held` (18 Zeichen)
 
 ### Promotional Text (170 Zeichen)
+
 Dieser Text kann jederzeit aktualisiert werden, ohne eine neue App-Version einzureichen.
 
 ```
 Erwecke das Kuscheltier deines Kindes zum Leben! Magische Geschichten mit wunderschönen Illustrationen - dein Teddy wird zum Helden seines eigenen Abenteuers.
 ```
+
 (167 Zeichen)
 
 ### Beschreibung (4000 Zeichen max)
@@ -134,15 +142,19 @@ Datenschutz: https://märchen-zauber.de/privacy
 Nutzungsbedingungen: https://märchen-zauber.de/terms
 
 ```
+
 (3.207 Zeichen)
 
 ### Keywords (100 Zeichen, komma-separiert)
+
 ```
 kuscheltier,teddy,kindergeschichten,märchen,vorlesen,geschichten,kinder,bilderbuch,personalisiert,magie
 ```
+
 (100 Zeichen genau)
 
 **Zusätzliche Keyword-Ideen (falls Platz ist):**
+
 - gute nacht geschichten
 - kinderbücher
 - stofftier
@@ -153,6 +165,7 @@ kuscheltier,teddy,kindergeschichten,märchen,vorlesen,geschichten,kinder,bilderb
 - einschlafen
 
 ### What's New (Version 1.2.0)
+
 ```
 🎉 NEU IN DIESER VERSION
 
@@ -179,9 +192,11 @@ Danke für euer Feedback! Wir arbeiten ständig daran, Märchenzauber noch magis
 ## 🤖 Google Play Store Texte
 
 ### Kurzbeschreibung (80 Zeichen)
+
 ```
 Erwecke das Kuscheltier deines Kindes zum Leben - magische Geschichten warten!
 ```
+
 (79 Zeichen)
 
 ### Vollständige Beschreibung (4000 Zeichen max)
@@ -260,34 +275,42 @@ Datenschutz: https://märchen-zauber.de/privacy
 Für optimale Konversion sollten die Screenshots mit überzeugenden Texten versehen werden:
 
 ### Screenshot 1: Kuscheltier-Foto
+
 **Titel:** Fotografiere dein Kuscheltier
 **Text:** Teddy, Hase oder Dino - jedes wird zum Helden
 
 ### Screenshot 2: Charakter-Auswahl
+
 **Titel:** Erwecke es zum Leben
 **Text:** Wähle aus 3 magischen Varianten deinen Favoriten
 
 ### Screenshot 3: Generierte Story
+
 **Titel:** Dein Kuscheltier als Held
 **Text:** 10 wunderschön illustrierte Seiten voller Abenteuer
 
 ### Screenshot 4: Story-Eingabe
+
 **Titel:** Wähle das Abenteuer
 **Text:** Weltraum, Zauberwald oder Unterwasser?
 
 ### Screenshot 5: Story-Reader
+
 **Titel:** Magische Geschichten
 **Text:** Jede Illustration zeigt dein Kuscheltier im Pixar-Stil
 
 ### Screenshot 6: Kuscheltier-Bibliothek
+
 **Titel:** Alle deine Kuscheltiere
 **Text:** Erwecke so viele zum Leben wie du möchtest
 
 ### Screenshot 7: Story-Bibliothek
+
 **Titel:** Deine Märchenbibliothek
 **Text:** Alle Abenteuer sicher gespeichert und offline verfügbar
 
 ### Screenshot 8: Family-Moment
+
 **Titel:** Perfekt fürs Vorlesen
 **Text:** "Heute erlebt dein Teddy ein Abenteuer!"
 
@@ -324,16 +347,19 @@ Visual: Download-Button mit App-Icon
 ## 📋 Kategorien
 
 ### Primäre Kategorie
+
 ```
 Bildung
 ```
 
 ### Sekundäre Kategorie
+
 ```
 Unterhaltung
 ```
 
 **Alternative Kategorien:**
+
 - Bücher & Nachschlagewerke
 - Familie
 
@@ -342,10 +368,12 @@ Unterhaltung
 ## 👶 Altersfreigabe
 
 ### Apple App Store
+
 **Altersfreigabe:** 4+
 **Grund:** App ist speziell für Kinder konzipiert, enthält keine unangemessenen Inhalte
 
 **Inhalte:**
+
 - Keine: Häufige/intensive Cartoongewalt oder Fantasy-Gewalt
 - Keine: Häufige/intensive realistische Gewalt
 - Keine: Ärgernis oder Grusel-Themen
@@ -357,10 +385,12 @@ Unterhaltung
 - Keine: Glücksspiel
 
 ### Google Play Store
+
 **Altersfreigabe:** PEGI 3 / USK 0
 **Inhaltshinweise:** Keine
 
 **Zielgruppe:**
+
 - Primär: Kinder (3-8 Jahre)
 - Sekundär: Kinder (9-12 Jahre)
 - Erwachsene (Eltern/Erziehungsberechtigte)
@@ -374,20 +404,24 @@ Unterhaltung
 **Datentypen, die gesammelt werden:**
 
 **Mit Benutzer verknüpfte Daten:**
+
 - Kontaktdaten (E-Mail-Adresse)
 - Benutzerinhalte (Fotos von Kuscheltieren, Geschichten)
 - Kennungen (Benutzer-ID)
 
 **Nicht mit Benutzer verknüpfte Daten:**
+
 - Diagnose (Crash-Daten, Performance-Daten)
 
 **Wichtiger Hinweis zu Fotos:**
+
 - Fotos werden nur zur Charaktererstellung verwendet
 - Keine Gesichtserkennung von echten Personen
 - Fotos von Kuscheltieren/Stofftieren werden verarbeitet
 - Bilder werden nicht für andere Zwecke verwendet
 
 **Datenschutz-URL:**
+
 ```
 https://märchen-zauber.de/privacy
 ```
@@ -395,6 +429,7 @@ https://märchen-zauber.de/privacy
 ### Google Play Store Data Safety
 
 **Erfasste Daten:**
+
 - Persönliche Informationen: E-Mail-Adresse
 - Fotos und Videos: Fotos (für Kuscheltier-Charaktererstellung)
 - App-Aktivität: App-Interaktionen
@@ -409,30 +444,37 @@ https://märchen-zauber.de/privacy
 ## 🌐 URLs
 
 ### Website
+
 ```
 https://märchen-zauber.de
 ```
 
 ### Support-URL
+
 ```
 https://märchen-zauber.de/#faq
 ```
+
 oder
+
 ```
 mailto:support@märchen-zauber.de
 ```
 
 ### Marketing-URL
+
 ```
 https://märchen-zauber.de
 ```
 
 ### Datenschutz-URL
+
 ```
 https://märchen-zauber.de/privacy
 ```
 
 ### Nutzungsbedingungen-URL
+
 ```
 https://märchen-zauber.de/terms
 ```
@@ -516,28 +558,35 @@ Bei Fragen erreichen Sie uns unter: support@märchen-zauber.de
 Stelle sicher, dass folgende Assets vorbereitet sind:
 
 ### App-Icons
+
 - [ ] 1024x1024px (App Store Icon)
 - [ ] Adaptive Icon für Android (foreground + background)
 - [ ] Verschiedene Größen für iOS (20pt bis 1024pt)
 
 ### Screenshots
+
 **iPhone (erforderlich):**
+
 - [ ] iPhone 15 Pro Max (6.7" Display) - 1290 x 2796 px
 - [ ] iPhone 15 (6.1" Display) - 1179 x 2556 px
 
 **iPad (optional aber empfohlen):**
+
 - [ ] iPad Pro (12.9" 3rd Gen) - 2048 x 2732 px
 - [ ] iPad Pro (11" 2nd Gen) - 1668 x 2388 px
 
 **Android:**
+
 - [ ] Phone Screenshot - 1080 x 1920 px (mindestens 2 Screenshots)
 - [ ] 7" Tablet - 1920 x 1200 px (optional)
 - [ ] 10" Tablet - 2560 x 1600 px (optional)
 
 ### Feature Graphic (Google Play)
+
 - [ ] 1024 x 500 px Feature Graphic
 
 ### Promo Material (optional)
+
 - [ ] App Preview Video (max. 30s)
 - [ ] Promotional Screenshots mit Text-Overlays
 - [ ] Kuscheltier-Fotos für Marketing
@@ -547,6 +596,7 @@ Stelle sicher, dass folgende Assets vorbereitet sind:
 ## ✅ Pre-Submission Checkliste
 
 ### Technische Prüfung
+
 - [ ] App läuft stabil auf allen unterstützten Geräten
 - [ ] Keine Crashes beim Start
 - [ ] Alle Features funktionieren wie beschrieben
@@ -558,6 +608,7 @@ Stelle sicher, dass folgende Assets vorbereitet sind:
 - [ ] Zahlungssystem ist korrekt implementiert
 
 ### Content-Prüfung
+
 - [ ] Alle Texte betonen Kuscheltier-Feature
 - [ ] Screenshots zeigen Kuscheltiere als Charaktere
 - [ ] Keine "KI"-Erwähnungen mehr
@@ -567,6 +618,7 @@ Stelle sicher, dass folgende Assets vorbereitet sind:
 - [ ] Website ist online und funktional
 
 ### Compliance
+
 - [ ] DSGVO-konform (EU)
 - [ ] COPPA-konform (USA - Kinder-App)
 - [ ] Keine Gesichtserkennung von Personen
@@ -576,6 +628,7 @@ Stelle sicher, dass folgende Assets vorbereitet sind:
 - [ ] Keine Copyright-Verletzungen
 
 ### Test-Account
+
 - [ ] Test-Account erstellt für Review-Team
 - [ ] Account hat ausreichend Mana für Tests
 - [ ] Test-Kuscheltier-Fotos vorbereitet
@@ -586,11 +639,13 @@ Stelle sicher, dass folgende Assets vorbereitet sind:
 ## 📞 Support & Kontakt
 
 ### Support-E-Mail
+
 ```
 support@märchen-zauber.de
 ```
 
 ### Entwickler-Kontakt
+
 ```
 Memoro
 Deutschland
@@ -601,11 +656,13 @@ Deutschland
 ## 🚀 Launch-Strategie
 
 ### Soft Launch (Empfohlen)
+
 1. **Woche 1-2:** Deutschland, Österreich, Schweiz
 2. **Woche 3-4:** Weitere europäische Länder
 3. **Woche 5+:** Global rollout
 
 ### Marketing-Vorbereitung
+
 - [ ] Social Media Posts mit echten Kuscheltier-Beispielen
 - [ ] Press Kit mit Kuscheltier-Stories
 - [ ] Mom-Influencer kontaktiert
@@ -613,6 +670,7 @@ Deutschland
 - [ ] Newsletter vorbereitet
 
 ### Launch Day Checkliste
+
 - [ ] App ist im Store verfügbar
 - [ ] Backend ist skaliert und bereit
 - [ ] Support-Team ist informiert
@@ -624,15 +682,18 @@ Deutschland
 ## 📊 Lokalisierung
 
 ### Aktuell unterstützte Sprachen
+
 - **Deutsch** (Primär)
 - **Englisch** (Sekundär)
 
 ### Übersetzungs-Hinweise
+
 - "Kuscheltier" = "stuffed animal" / "plush toy" / "teddy"
 - "Erwecken" = "bring to life" / "awaken"
 - Behalte emotionalen Ton bei
 
 ### Zukünftige Sprachen (Optional)
+
 - Französisch
 - Spanisch
 - Italienisch
@@ -667,14 +728,17 @@ Danke für euer Feedback! Wir arbeiten ständig daran, die Magie noch stärker z
 ## 📎 Anhang: Marketing-Botschaften
 
 ### Kern-Botschaft
+
 "Erwecke das Kuscheltier deines Kindes zum Leben"
 
 ### Sekundäre Botschaften
+
 - "Dein Teddy wird zum Helden"
 - "Magische Geschichten mit dem Lieblings-Kuscheltier"
 - "Jedes Kuscheltier verdient sein eigenes Abenteuer"
 
 ### Emotionale Trigger
+
 - Bindung zum Kuscheltier verstärken
 - Stolz des Kindes ("MEIN Teddy ist der Held!")
 - Nostalgie der Eltern (eigene Kuscheltier-Erinnerungen)
@@ -685,6 +749,7 @@ Danke für euer Feedback! Wir arbeiten ständig daran, die Magie noch stärker z
 ## 📎 Anhang: Häufige Ablehnungsgründe vermeiden
 
 ### Apple App Store
+
 1. **Crash beim Start:** Gründlich testen
 2. **Foto-Permissions:** Klar erklären (nur Kuscheltiere)
 3. **Kinder-Apps:** COPPA-Compliance beachten
@@ -693,6 +758,7 @@ Danke für euer Feedback! Wir arbeiten ständig daran, die Magie noch stärker z
 6. **In-App-Käufe:** Korrekt implementiert und beschrieben
 
 ### Google Play Store
+
 1. **Fehlende Datenschutzerklärung:** URL muss gültig sein
 2. **Foto-Permissions:** Erklären warum benötigt (Kuscheltier-Feature)
 3. **Falsche Altersfreigabe:** Ehrlich bewerten

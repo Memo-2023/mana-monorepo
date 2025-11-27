@@ -37,7 +37,7 @@ async function getLocationFromIP(ipAddress) {
 		const data = await response.json();
 		return {
 			country: data.country_name || 'Unknown',
-			city: data.city || 'Unknown'
+			city: data.city || 'Unknown',
 		};
 	} catch (error) {
 		return { country: 'Unknown', city: 'Unknown' };

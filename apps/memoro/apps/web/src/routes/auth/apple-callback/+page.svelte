@@ -6,7 +6,7 @@
 	import {
 		parseAppleAuthorizationResponse,
 		getStoredReturnUrl,
-		clearAppleSignInSession
+		clearAppleSignInSession,
 	} from '@manacore/shared-auth-ui';
 
 	let error = $state<string | null>(null);
@@ -98,7 +98,9 @@
 <div class="flex min-h-screen items-center justify-center">
 	<div class="card w-full max-w-md text-center">
 		{#if processing}
-			<div class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-black border-r-transparent dark:border-white dark:border-r-transparent"></div>
+			<div
+				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-black border-r-transparent dark:border-white dark:border-r-transparent"
+			></div>
 			<h2 class="text-2xl font-bold mb-2">Signing in with Apple...</h2>
 			<p class="text-gray-600 dark:text-gray-400">
 				Please wait while we complete your authentication.
@@ -109,9 +111,7 @@
 			<p class="text-gray-600 dark:text-gray-400 mb-4">
 				{error}
 			</p>
-			<p class="text-sm text-gray-500 dark:text-gray-400">
-				Redirecting you back to login...
-			</p>
+			<p class="text-sm text-gray-500 dark:text-gray-400">Redirecting you back to login...</p>
 		{/if}
 	</div>
 </div>

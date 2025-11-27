@@ -7,7 +7,7 @@
 		const classes = {
 			grid: 'grid grid-cols-2 gap-4',
 			list: 'space-y-3',
-			compact: 'flex flex-wrap gap-4'
+			compact: 'flex flex-wrap gap-4',
 		};
 		return classes[layout] || classes.grid;
 	});

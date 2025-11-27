@@ -8,7 +8,7 @@
 		avatarAlt = '',
 		badge = '',
 		icon = '',
-		actions = []
+		actions = [],
 	}: HeaderModuleProps = $props();
 </script>
 
@@ -17,7 +17,7 @@
 		{#if avatar}
 			<img src={avatar} alt={avatarAlt || title} class="h-12 w-12 rounded-full object-cover" />
 		{:else if icon}
-			<div class="flex h-12 w-12 items-center justify-center rounded-full bg-theme-primary/10">
+			<div class="bg-theme-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
 				<span class="text-2xl">{icon}</span>
 			</div>
 		{/if}

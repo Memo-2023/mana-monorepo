@@ -10,7 +10,7 @@ import type { Handle } from '@sveltejs/kit';
 const ALLOWED_PATHS = [
 	'/auth/apple-callback-handler', // Apple Sign-In OAuth callback (server endpoint)
 	'/auth/apple-callback', // Apple Sign-In OAuth callback (legacy/fallback)
-	'/auth/google-callback' // Google Sign-In OAuth callback (if needed)
+	'/auth/google-callback', // Google Sign-In OAuth callback (if needed)
 ];
 
 /**
@@ -34,11 +34,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 				method: request.method,
 				path: url.pathname,
 				origin: origin,
-				expectedOrigin: url.origin
+				expectedOrigin: url.origin,
 			});
 
 			return new Response('Cross-site POST form submissions are forbidden', {
-				status: 403
+				status: 403,
 			});
 		}
 	}

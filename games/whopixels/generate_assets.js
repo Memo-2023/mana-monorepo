@@ -11,10 +11,10 @@ bgCtx.fillRect(0, 0, 800, 600);
 // Add some pattern to background
 bgCtx.fillStyle = '#1a1a2a';
 for (let i = 0; i < 100; i++) {
-    const x = Math.random() * 800;
-    const y = Math.random() * 600;
-    const size = Math.random() * 5 + 2;
-    bgCtx.fillRect(x, y, size, size);
+	const x = Math.random() * 800;
+	const y = Math.random() * 600;
+	const size = Math.random() * 5 + 2;
+	bgCtx.fillRect(x, y, size, size);
 }
 
 // Create player image (32x32)

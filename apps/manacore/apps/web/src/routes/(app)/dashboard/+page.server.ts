@@ -41,6 +41,6 @@ export const load: PageServerLoad = async ({ locals: { supabase, session } }) =>
 	return {
 		profile,
 		organizationCount: organizationCount || 0,
-		teamCount: teamCount || 0
+		teamCount: teamCount || 0,
 	};
 };

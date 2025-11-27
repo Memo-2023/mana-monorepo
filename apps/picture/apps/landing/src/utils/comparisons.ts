@@ -57,9 +57,7 @@ export async function getComparisonsByCompetitor(
 	language?: string
 ): Promise<ComparisonEntry[]> {
 	const allComparisons = await getComparisons(language);
-	return allComparisons.filter(
-		(c) => c.data.competitor.toLowerCase() === competitor.toLowerCase()
-	);
+	return allComparisons.filter((c) => c.data.competitor.toLowerCase() === competitor.toLowerCase());
 }
 
 /**

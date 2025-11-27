@@ -1,17 +1,34 @@
 ---
-name: "Felix Wolkenstein"
-displayName: "Felix Wolkenstein"
+name: 'Felix Wolkenstein'
+displayName: 'Felix Wolkenstein'
 bio: "Lead UX/UI Designer at Memoro. Creates intuitive and aesthetic interfaces that users love. As Oliver's younger brother, he brings the perfect balance between technical understanding and creative design."
-role: "Lead UX/UI Designer"
-avatar: "/images/team/felix-wolkenstein.jpg"
+role: 'Lead UX/UI Designer'
+avatar: '/images/team/felix-wolkenstein.jpg'
 appearance: "Creative man in his late 20s with longer, wavy dark brown hair often tied in a small bun. His green eyes sparkle with creativity. He has a well-groomed full beard and a warm, mischievous smile. Usually wears black clothing with colorful sneakers or striking accessories. In photos, he's often seen in front of large screens with design software or sketching on his iPad, surrounded by design books and color palettes."
 social:
-  linkedin: "felix-wolkenstein"
-  dribbble: "fwolkenstein"
-  behance: "felixwolkenstein"
-  instagram: "felix.creates"
-expertise: ["UX Design", "UI Design", "Design Systems", "Prototyping", "User Research", "Figma", "Motion Design", "Accessibility"]
-topics: ["Design Thinking", "User-Centered Design", "Visual Storytelling", "Design Trends", "Creative Process"]
+  linkedin: 'felix-wolkenstein'
+  dribbble: 'fwolkenstein'
+  behance: 'felixwolkenstein'
+  instagram: 'felix.creates'
+expertise:
+  [
+    'UX Design',
+    'UI Design',
+    'Design Systems',
+    'Prototyping',
+    'User Research',
+    'Figma',
+    'Motion Design',
+    'Accessibility',
+  ]
+topics:
+  [
+    'Design Thinking',
+    'User-Centered Design',
+    'Visual Storytelling',
+    'Design Trends',
+    'Creative Process',
+  ]
 writingPrompt: "Write as a creative UX/UI designer named Felix. Your style is inspiring, visual, and metaphorical. You like explaining design concepts with analogies from nature or art. Use descriptive language and paint word pictures. Always emphasize the emotional connection between user and product. Your motto: 'Design is not how it looks, but how it feels.' Be enthusiastic but not over the top."
 isActive: false
 isFeatured: false
@@ -25,9 +42,9 @@ stats:
   totalViews: 45000
   totalLikes: 3100
   joinedDate: 2024-06-01
-lang: "en"
-preferredLanguages: ["de", "en"]
-slug: "felix-wolkenstein"
+lang: 'en'
+preferredLanguages: ['de', 'en']
+slug: 'felix-wolkenstein'
 createdAt: 2024-06-01
 lastActive: 2025-07-27
 ---
@@ -68,6 +85,7 @@ Felix's approach to design:
 ## Working Style
 
 Felix is known for:
+
 - His "Design Critique Thursdays" (with donuts!)
 - Endless iterations until perfection
 - User testing sessions where he watches himself
@@ -85,6 +103,7 @@ Felix is known for:
 ## Personal Life
 
 Outside of Memoro:
+
 - Visits art exhibitions for inspiration
 - Photographs urban architecture
 - Plays bass in an indie band

@@ -70,26 +70,29 @@ npm install react-native-shared-group-preferences
 **Beschreibung:** Zeigt das zuletzt erstellte Memo mit Titel, Datum und Quick Actions.
 
 **Größen:**
+
 - **Small (2x2):** Nur Titel + Datum
 - **Medium (4x2):** Titel + Intro + Datum + Space Badge
 - **Large (4x4):** Titel + Vollständiger Intro + Transcript Preview + Metadata
 
 **Daten:**
+
 ```typescript
 interface LatestMemoWidget {
-  memoId: string;
-  title: string;
-  intro?: string;
-  transcriptPreview?: string; // First 200 chars
-  createdAt: Date;
-  spaceName?: string;
-  spaceColor?: string;
-  audioLength?: number;
-  hasTranscript: boolean;
+	memoId: string;
+	title: string;
+	intro?: string;
+	transcriptPreview?: string; // First 200 chars
+	createdAt: Date;
+	spaceName?: string;
+	spaceColor?: string;
+	audioLength?: number;
+	hasTranscript: boolean;
 }
 ```
 
 **Deep Links:**
+
 - Widget Tap → Öffnet Memo Detail (`memoro://memo/{id}`)
 - Space Badge → Öffnet Space (`memoro://space/{id}`)
 
@@ -100,26 +103,29 @@ interface LatestMemoWidget {
 **Beschreibung:** Grid-Layout mit gepinnten Memos für schnellen Zugriff.
 
 **Größen:**
+
 - **Small (2x2):** 1 Memo (Featured)
 - **Medium (4x2):** 2-3 Memos (Horizontal Stack)
 - **Large (4x4):** 4-6 Memos (Grid Layout)
 
 **Daten:**
+
 ```typescript
 interface PinnedMemosWidget {
-  memos: Array<{
-    id: string;
-    title: string;
-    snippet: string; // First 50 chars
-    isPinned: boolean;
-    spaceColor?: string;
-    createdAt: Date;
-  }>;
-  totalCount: number;
+	memos: Array<{
+		id: string;
+		title: string;
+		snippet: string; // First 50 chars
+		isPinned: boolean;
+		spaceColor?: string;
+		createdAt: Date;
+	}>;
+	totalCount: number;
 }
 ```
 
 **Features:**
+
 - Tappable Cards → Öffnet jeweiliges Memo
 - Empty State → "No pinned memos" mit Link zu App
 - Sortierung nach Pin-Datum (neueste zuerst)
@@ -131,23 +137,27 @@ interface PinnedMemosWidget {
 **Beschreibung:** One-Tap Recording Start mit minimalistischem Design.
 
 **Größen:**
+
 - **Small (2x2):** Großer Aufnahme-Button + Mikrofon Icon
 - ~~Medium~~ (nicht sinnvoll für diesen Type)
 - ~~Large~~ (nicht sinnvoll für diesen Type)
 
 **Daten:**
+
 ```typescript
 interface QuickRecordWidget {
-  selectedSpaceId?: string;
-  selectedBlueprintId?: string;
-  recordingLanguages?: string[];
+	selectedSpaceId?: string;
+	selectedBlueprintId?: string;
+	recordingLanguages?: string[];
 }
 ```
 
 **Deep Links:**
+
 - Widget Tap → Öffnet Recording Screen mit vorausgewählten Settings
 
 **Visual Design:**
+
 - Großes Mikrofon-Icon (SF Symbol)
 - Gradient Background (Theme Colors)
 - Text: "Start Recording" oder "Aufnehmen"
@@ -160,31 +170,34 @@ interface QuickRecordWidget {
 **Beschreibung:** Übersicht über Nutzungsstatistiken und Achievements.
 
 **Größen:**
+
 - **Small (2x2):** Memo Count + Trend Icon
 - **Medium (4x2):** Count + Duration + Last Week Stats
 - **Large (4x4):** Detailed Stats + Chart + Breakdown by Space
 
 **Daten:**
+
 ```typescript
 interface StatisticsWidget {
-  totalMemos: number;
-  totalDuration: number; // seconds
-  thisWeekCount: number;
-  thisMonthCount: number;
-  favoriteCount: number;
-  spaceBreakdown?: Array<{
-    spaceName: string;
-    count: number;
-    color: string;
-  }>;
-  longestMemo?: {
-    title: string;
-    duration: number;
-  };
+	totalMemos: number;
+	totalDuration: number; // seconds
+	thisWeekCount: number;
+	thisMonthCount: number;
+	favoriteCount: number;
+	spaceBreakdown?: Array<{
+		spaceName: string;
+		count: number;
+		color: string;
+	}>;
+	longestMemo?: {
+		title: string;
+		duration: number;
+	};
 }
 ```
 
 **Features:**
+
 - Trend Indicators (↑↓)
 - Weekly Progress Bar
 - Tap → Öffnet Statistics Screen (neu zu bauen)
@@ -200,16 +213,17 @@ interface StatisticsWidget {
 **Update Frequency:** Täglich um Mitternacht
 
 **Daten:**
+
 ```typescript
 interface InspirationWidget {
-  randomMemo: {
-    id: string;
-    title: string;
-    snippet: string;
-    createdAt: Date;
-    tags?: string[];
-  };
-  refreshDate: Date;
+	randomMemo: {
+		id: string;
+		title: string;
+		snippet: string;
+		createdAt: Date;
+		tags?: string[];
+	};
+	refreshDate: Date;
 }
 ```
 
@@ -318,6 +332,7 @@ interface InspirationWidget {
 **Ziel:** Live Activities für aktive Aufnahmen
 
 **Features:**
+
 - Live recording duration
 - Pause/Resume controls
 - Waveform visualization
@@ -416,26 +431,24 @@ memoro/
 
 ```json
 {
-  "expo": {
-    "ios": {
-      "bundleIdentifier": "com.memo.beta",
-      "appleTeamId": "ZB76J8YWG6",
-      "entitlements": {
-        "com.apple.security.application-groups": [
-          "group.com.memo.beta.widget"
-        ]
-      }
-    },
-    "plugins": [
-      // ... existing plugins ...
-      [
-        "@bacons/apple-targets",
-        {
-          "appleTeamId": "ZB76J8YWG6"
-        }
-      ]
-    ]
-  }
+	"expo": {
+		"ios": {
+			"bundleIdentifier": "com.memo.beta",
+			"appleTeamId": "ZB76J8YWG6",
+			"entitlements": {
+				"com.apple.security.application-groups": ["group.com.memo.beta.widget"]
+			}
+		},
+		"plugins": [
+			// ... existing plugins ...
+			[
+				"@bacons/apple-targets",
+				{
+					"appleTeamId": "ZB76J8YWG6"
+				}
+			]
+		]
+	}
 }
 ```
 
@@ -444,30 +457,25 @@ memoro/
 ```javascript
 /** @type {import('@bacons/apple-targets/app.plugin').Config} */
 module.exports = {
-  type: "widget",
-  name: "MemoroWidget",
-  bundleIdentifier: "$(PRODUCT_BUNDLE_IDENTIFIER).widget",
-  deploymentTarget: "16.0",
-  icon: "../../assets/widgets/widget-icon.png",
-  colors: {
-    $accent: {
-      color: "#007AFF",      // iOS Blue
-      darkColor: "#0A84FF"   // iOS Blue Dark
-    },
-    $widgetBackground: {
-      color: "#FFFFFF",
-      darkColor: "#1C1C1E"
-    }
-  },
-  entitlements: {
-    "com.apple.security.application-groups": [
-      "group.com.memo.beta.widget"
-    ]
-  },
-  frameworks: [
-    "SwiftUI",
-    "WidgetKit"
-  ]
+	type: 'widget',
+	name: 'MemoroWidget',
+	bundleIdentifier: '$(PRODUCT_BUNDLE_IDENTIFIER).widget',
+	deploymentTarget: '16.0',
+	icon: '../../assets/widgets/widget-icon.png',
+	colors: {
+		$accent: {
+			color: '#007AFF', // iOS Blue
+			darkColor: '#0A84FF', // iOS Blue Dark
+		},
+		$widgetBackground: {
+			color: '#FFFFFF',
+			darkColor: '#1C1C1E',
+		},
+	},
+	entitlements: {
+		'com.apple.security.application-groups': ['group.com.memo.beta.widget'],
+	},
+	frameworks: ['SwiftUI', 'WidgetKit'],
 };
 ```
 
@@ -486,125 +494,125 @@ import { NativeModules, Platform } from 'react-native';
 const APP_GROUP = 'group.com.memo.beta.widget';
 
 export interface WidgetMemoData {
-  id: string;
-  title: string;
-  intro?: string;
-  transcriptPreview?: string;
-  createdAt: string; // ISO format
-  spaceName?: string;
-  spaceColor?: string;
-  audioLength?: number;
-  hasTranscript: boolean;
+	id: string;
+	title: string;
+	intro?: string;
+	transcriptPreview?: string;
+	createdAt: string; // ISO format
+	spaceName?: string;
+	spaceColor?: string;
+	audioLength?: number;
+	hasTranscript: boolean;
 }
 
 export interface WidgetPinnedMemo {
-  id: string;
-  title: string;
-  snippet: string;
-  isPinned: boolean;
-  spaceColor?: string;
-  createdAt: string;
+	id: string;
+	title: string;
+	snippet: string;
+	isPinned: boolean;
+	spaceColor?: string;
+	createdAt: string;
 }
 
 export interface WidgetStatistics {
-  totalMemos: number;
-  totalDuration: number;
-  thisWeekCount: number;
-  thisMonthCount: number;
-  favoriteCount: number;
-  spaceBreakdown?: Array<{
-    spaceName: string;
-    count: number;
-    color: string;
-  }>;
+	totalMemos: number;
+	totalDuration: number;
+	thisWeekCount: number;
+	thisMonthCount: number;
+	favoriteCount: number;
+	spaceBreakdown?: Array<{
+		spaceName: string;
+		count: number;
+		color: string;
+	}>;
 }
 
 export class WidgetDataManager {
-  /**
-   * Update latest memo data for widget
-   */
-  static async updateLatestMemo(memo: WidgetMemoData): Promise<void> {
-    try {
-      const data = JSON.stringify(memo);
-      await SharedGroupPreferences.setItem('latestMemo', data, APP_GROUP);
-      this.refreshWidget();
-    } catch (error) {
-      console.error('[WidgetDataManager] Failed to update latest memo:', error);
-    }
-  }
+	/**
+	 * Update latest memo data for widget
+	 */
+	static async updateLatestMemo(memo: WidgetMemoData): Promise<void> {
+		try {
+			const data = JSON.stringify(memo);
+			await SharedGroupPreferences.setItem('latestMemo', data, APP_GROUP);
+			this.refreshWidget();
+		} catch (error) {
+			console.error('[WidgetDataManager] Failed to update latest memo:', error);
+		}
+	}
 
-  /**
-   * Update pinned memos for widget
-   */
-  static async updatePinnedMemos(memos: WidgetPinnedMemo[]): Promise<void> {
-    try {
-      // Only send top 6 pinned memos (for large widget)
-      const limitedMemos = memos.slice(0, 6);
-      const data = JSON.stringify(limitedMemos);
-      await SharedGroupPreferences.setItem('pinnedMemos', data, APP_GROUP);
-      this.refreshWidget();
-    } catch (error) {
-      console.error('[WidgetDataManager] Failed to update pinned memos:', error);
-    }
-  }
+	/**
+	 * Update pinned memos for widget
+	 */
+	static async updatePinnedMemos(memos: WidgetPinnedMemo[]): Promise<void> {
+		try {
+			// Only send top 6 pinned memos (for large widget)
+			const limitedMemos = memos.slice(0, 6);
+			const data = JSON.stringify(limitedMemos);
+			await SharedGroupPreferences.setItem('pinnedMemos', data, APP_GROUP);
+			this.refreshWidget();
+		} catch (error) {
+			console.error('[WidgetDataManager] Failed to update pinned memos:', error);
+		}
+	}
 
-  /**
-   * Update statistics for widget
-   */
-  static async updateStatistics(stats: WidgetStatistics): Promise<void> {
-    try {
-      const data = JSON.stringify(stats);
-      await SharedGroupPreferences.setItem('statistics', data, APP_GROUP);
-      this.refreshWidget();
-    } catch (error) {
-      console.error('[WidgetDataManager] Failed to update statistics:', error);
-    }
-  }
+	/**
+	 * Update statistics for widget
+	 */
+	static async updateStatistics(stats: WidgetStatistics): Promise<void> {
+		try {
+			const data = JSON.stringify(stats);
+			await SharedGroupPreferences.setItem('statistics', data, APP_GROUP);
+			this.refreshWidget();
+		} catch (error) {
+			console.error('[WidgetDataManager] Failed to update statistics:', error);
+		}
+	}
 
-  /**
-   * Update recording preferences for Quick Record widget
-   */
-  static async updateRecordingPreferences(preferences: {
-    selectedSpaceId?: string;
-    selectedBlueprintId?: string;
-    recordingLanguages?: string[];
-  }): Promise<void> {
-    try {
-      const data = JSON.stringify(preferences);
-      await SharedGroupPreferences.setItem('recordingPreferences', data, APP_GROUP);
-      this.refreshWidget();
-    } catch (error) {
-      console.error('[WidgetDataManager] Failed to update recording preferences:', error);
-    }
-  }
+	/**
+	 * Update recording preferences for Quick Record widget
+	 */
+	static async updateRecordingPreferences(preferences: {
+		selectedSpaceId?: string;
+		selectedBlueprintId?: string;
+		recordingLanguages?: string[];
+	}): Promise<void> {
+		try {
+			const data = JSON.stringify(preferences);
+			await SharedGroupPreferences.setItem('recordingPreferences', data, APP_GROUP);
+			this.refreshWidget();
+		} catch (error) {
+			console.error('[WidgetDataManager] Failed to update recording preferences:', error);
+		}
+	}
 
-  /**
-   * Trigger widget refresh (iOS 14+)
-   */
-  static refreshWidget(): void {
-    if (Platform.OS === 'ios') {
-      try {
-        NativeModules.WidgetKit?.reloadAllTimelines();
-      } catch (error) {
-        console.warn('[WidgetDataManager] Could not reload widget timelines:', error);
-      }
-    }
-  }
+	/**
+	 * Trigger widget refresh (iOS 14+)
+	 */
+	static refreshWidget(): void {
+		if (Platform.OS === 'ios') {
+			try {
+				NativeModules.WidgetKit?.reloadAllTimelines();
+			} catch (error) {
+				console.warn('[WidgetDataManager] Could not reload widget timelines:', error);
+			}
+		}
+	}
 
-  /**
-   * Clear all widget data
-   */
-  static async clearWidgetData(): Promise<void> {
-    try {
-      await SharedGroupPreferences.setItem('latestMemo', '', APP_GROUP);
-      await SharedGroupPreferences.setItem('pinnedMemos', '', APP_GROUP);
-      await SharedGroupPreferences.setItem('statistics', '', APP_GROUP);
-      await SharedGroupPreferences.setItem('recordingPreferences', '', APP_GROUP);
-      this.refreshWidget();
-    } catch (error) {
-      console.error('[WidgetDataManager] Failed to clear widget data:', error);
-    }
-  }
+	/**
+	 * Clear all widget data
+	 */
+	static async clearWidgetData(): Promise<void> {
+		try {
+			await SharedGroupPreferences.setItem('latestMemo', '', APP_GROUP);
+			await SharedGroupPreferences.setItem('pinnedMemos', '', APP_GROUP);
+			await SharedGroupPreferences.setItem('statistics', '', APP_GROUP);
+			await SharedGroupPreferences.setItem('recordingPreferences', '', APP_GROUP);
+			this.refreshWidget();
+		} catch (error) {
+			console.error('[WidgetDataManager] Failed to clear widget data:', error);
+		}
+	}
 }
 ```
 
@@ -621,41 +629,41 @@ import { WidgetDataManager } from '~/features/widgets/services/widgetDataManager
 
 // In setLatestMemo action:
 setLatestMemo: (memo: Memo | null) => {
-  set({ latestMemo: memo });
+	set({ latestMemo: memo });
 
-  // Update widget data
-  if (memo) {
-    WidgetDataManager.updateLatestMemo({
-      id: memo.id,
-      title: memo.title,
-      intro: memo.metadata?.intro?.substring(0, 200),
-      transcriptPreview: memo.source?.transcript?.substring(0, 200),
-      createdAt: memo.created_at || new Date().toISOString(),
-      spaceName: memo.space?.name,
-      spaceColor: memo.space?.color,
-      audioLength: memo.source?.duration_seconds,
-      hasTranscript: !!memo.source?.transcript,
-    });
-  }
-}
+	// Update widget data
+	if (memo) {
+		WidgetDataManager.updateLatestMemo({
+			id: memo.id,
+			title: memo.title,
+			intro: memo.metadata?.intro?.substring(0, 200),
+			transcriptPreview: memo.source?.transcript?.substring(0, 200),
+			createdAt: memo.created_at || new Date().toISOString(),
+			spaceName: memo.space?.name,
+			spaceColor: memo.space?.color,
+			audioLength: memo.source?.duration_seconds,
+			hasTranscript: !!memo.source?.transcript,
+		});
+	}
+};
 
 // In togglePin action:
 togglePin: async (memoId: string) => {
-  // ... existing pin logic ...
+	// ... existing pin logic ...
 
-  // Update widget with pinned memos
-  const pinnedMemos = state.memos.filter(m => m.is_pinned);
-  WidgetDataManager.updatePinnedMemos(
-    pinnedMemos.map(m => ({
-      id: m.id,
-      title: m.title,
-      snippet: m.source?.transcript?.substring(0, 50) || '',
-      isPinned: true,
-      spaceColor: m.space?.color,
-      createdAt: m.created_at || new Date().toISOString(),
-    }))
-  );
-}
+	// Update widget with pinned memos
+	const pinnedMemos = state.memos.filter((m) => m.is_pinned);
+	WidgetDataManager.updatePinnedMemos(
+		pinnedMemos.map((m) => ({
+			id: m.id,
+			title: m.title,
+			snippet: m.source?.transcript?.substring(0, 50) || '',
+			isPinned: true,
+			spaceColor: m.space?.color,
+			createdAt: m.created_at || new Date().toISOString(),
+		}))
+	);
+};
 ```
 
 ---
@@ -973,6 +981,7 @@ extension Color {
 **Format:** `memoro://[screen]/[id]`
 
 **Examples:**
+
 - `memoro://memo/abc-123` → Opens memo detail
 - `memoro://space/xyz-789` → Opens space view
 - `memoro://record` → Opens recording screen
@@ -987,38 +996,38 @@ import { Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 
 export default function RootLayout() {
-  const router = useRouter();
+	const router = useRouter();
 
-  useEffect(() => {
-    // Handle deep links from widgets
-    const handleDeepLink = (url: string) => {
-      const route = url.replace('memoro://', '');
+	useEffect(() => {
+		// Handle deep links from widgets
+		const handleDeepLink = (url: string) => {
+			const route = url.replace('memoro://', '');
 
-      if (route.startsWith('memo/')) {
-        const memoId = route.replace('memo/', '');
-        router.push(`/(protected)/(memo)/${memoId}`);
-      } else if (route.startsWith('space/')) {
-        const spaceId = route.replace('space/', '');
-        router.push(`/(protected)/(space)/${spaceId}`);
-      } else if (route === 'record') {
-        router.push('/(protected)/(tabs)/');
-      }
-    };
+			if (route.startsWith('memo/')) {
+				const memoId = route.replace('memo/', '');
+				router.push(`/(protected)/(memo)/${memoId}`);
+			} else if (route.startsWith('space/')) {
+				const spaceId = route.replace('space/', '');
+				router.push(`/(protected)/(space)/${spaceId}`);
+			} else if (route === 'record') {
+				router.push('/(protected)/(tabs)/');
+			}
+		};
 
-    // Listen for deep links
-    const subscription = Linking.addEventListener('url', ({ url }) => {
-      handleDeepLink(url);
-    });
+		// Listen for deep links
+		const subscription = Linking.addEventListener('url', ({ url }) => {
+			handleDeepLink(url);
+		});
 
-    // Handle initial URL if app was closed
-    Linking.getInitialURL().then((url) => {
-      if (url) handleDeepLink(url);
-    });
+		// Handle initial URL if app was closed
+		Linking.getInitialURL().then((url) => {
+			if (url) handleDeepLink(url);
+		});
 
-    return () => subscription.remove();
-  }, [router]);
+		return () => subscription.remove();
+	}, [router]);
 
-  // ... rest of layout
+	// ... rest of layout
 }
 ```
 
@@ -1034,31 +1043,31 @@ export default function RootLayout() {
 import { WidgetDataManager } from '../widgetDataManager';
 
 describe('WidgetDataManager', () => {
-  it('should update latest memo data', async () => {
-    const mockMemo = {
-      id: 'test-123',
-      title: 'Test Memo',
-      intro: 'Test intro',
-      createdAt: new Date().toISOString(),
-      hasTranscript: true,
-    };
+	it('should update latest memo data', async () => {
+		const mockMemo = {
+			id: 'test-123',
+			title: 'Test Memo',
+			intro: 'Test intro',
+			createdAt: new Date().toISOString(),
+			hasTranscript: true,
+		};
 
-    await WidgetDataManager.updateLatestMemo(mockMemo);
-    // Assert SharedGroupPreferences was called
-  });
+		await WidgetDataManager.updateLatestMemo(mockMemo);
+		// Assert SharedGroupPreferences was called
+	});
 
-  it('should limit pinned memos to 6', async () => {
-    const manyMemos = Array.from({ length: 10 }, (_, i) => ({
-      id: `memo-${i}`,
-      title: `Memo ${i}`,
-      snippet: 'snippet',
-      isPinned: true,
-      createdAt: new Date().toISOString(),
-    }));
+	it('should limit pinned memos to 6', async () => {
+		const manyMemos = Array.from({ length: 10 }, (_, i) => ({
+			id: `memo-${i}`,
+			title: `Memo ${i}`,
+			snippet: 'snippet',
+			isPinned: true,
+			createdAt: new Date().toISOString(),
+		}));
 
-    await WidgetDataManager.updatePinnedMemos(manyMemos);
-    // Assert only 6 memos were saved
-  });
+		await WidgetDataManager.updatePinnedMemos(manyMemos);
+		// Assert only 6 memos were saved
+	});
 });
 ```
 
@@ -1118,18 +1127,21 @@ describe('WidgetDataManager', () => {
 ### Translation Keys
 
 **Widget Titles:**
+
 - `widget.latest_memo.title` = "Letztes Memo" / "Latest Memo"
 - `widget.pinned_memos.title` = "Gepinnte Memos" / "Pinned Memos"
 - `widget.quick_record.title` = "Aufnahme" / "Record"
 - `widget.statistics.title` = "Statistiken" / "Statistics"
 
 **Widget Descriptions:**
+
 - `widget.latest_memo.description` = "Zeigt dein zuletzt erstelltes Memo"
 - `widget.pinned_memos.description` = "Schnellzugriff auf gepinnte Memos"
 - `widget.quick_record.description` = "Starte eine Aufnahme mit einem Tap"
 - `widget.statistics.description` = "Übersicht deiner Nutzungsstatistiken"
 
 **UI Text:**
+
 - `widget.common.no_memos` = "Noch keine Memos" / "No memos yet"
 - `widget.common.today` = "Heute" / "Today"
 - `widget.common.yesterday` = "Gestern" / "Yesterday"
@@ -1141,6 +1153,7 @@ describe('WidgetDataManager', () => {
 ### Beta Testing (2 Wochen)
 
 **Phase 1:**
+
 - Internal team testing (5 developers)
 - TestFlight beta with 10 users
 - Collect feedback on:
@@ -1150,6 +1163,7 @@ describe('WidgetDataManager', () => {
   - Performance
 
 **Phase 2:**
+
 - Extended TestFlight beta (50 users)
 - Monitor analytics:
   - Widget add rate
@@ -1160,6 +1174,7 @@ describe('WidgetDataManager', () => {
 ### Production Release
 
 **Criteria for Launch:**
+
 - ✅ All widgets functional in 3 sizes
 - ✅ Deep links working 100%
 - ✅ No memory leaks
@@ -1168,6 +1183,7 @@ describe('WidgetDataManager', () => {
 - ✅ Documentation complete
 
 **Release Notes:**
+
 ```
 🎉 Neu: iOS Home Screen Widgets!
 
@@ -1212,22 +1228,22 @@ Tippe auf ein Widget, um direkt zur App zu springen!
 
 ### Technical Risks
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Widget doesn't update | High | Medium | Comprehensive testing, fallback to manual refresh |
-| Deep links fail | High | Low | URL validation, error handling, fallback to app home |
-| Memory issues | Medium | Medium | Profile early, set size limits, optimize data |
-| Data sync delays | Medium | Medium | Cache last known state, show loading states |
-| Build complexity | Low | Medium | Follow @bacons/apple-targets docs, seek help early |
+| Risk                  | Impact | Probability | Mitigation                                           |
+| --------------------- | ------ | ----------- | ---------------------------------------------------- |
+| Widget doesn't update | High   | Medium      | Comprehensive testing, fallback to manual refresh    |
+| Deep links fail       | High   | Low         | URL validation, error handling, fallback to app home |
+| Memory issues         | Medium | Medium      | Profile early, set size limits, optimize data        |
+| Data sync delays      | Medium | Medium      | Cache last known state, show loading states          |
+| Build complexity      | Low    | Medium      | Follow @bacons/apple-targets docs, seek help early   |
 
 ### User Experience Risks
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Widget confusion | Medium | Clear labels, contextual help, onboarding |
-| Data privacy concerns | High | Document data handling, no sensitive data in widgets |
-| Inconsistent UI | Low | Follow Apple HIG, use system fonts/colors |
-| Outdated widget data | Medium | Implement refresh logic, show last update time |
+| Risk                  | Impact | Mitigation                                           |
+| --------------------- | ------ | ---------------------------------------------------- |
+| Widget confusion      | Medium | Clear labels, contextual help, onboarding            |
+| Data privacy concerns | High   | Document data handling, no sensitive data in widgets |
+| Inconsistent UI       | Low    | Follow Apple HIG, use system fonts/colors            |
+| Outdated widget data  | Medium | Implement refresh logic, show last update time       |
 
 ---
 
@@ -1297,16 +1313,19 @@ Tippe auf ein Widget, um direkt zur App zu springen!
 ### A. Widget Size Guidelines
 
 **Small Widget (2x2 Grid)**
+
 - Dimensions: 158x158 pts (iPhone 14)
 - Safe Area: 16pt padding all sides
 - Max Content: ~3 lines of text
 
 **Medium Widget (4x2 Grid)**
+
 - Dimensions: 338x158 pts (iPhone 14)
 - Safe Area: 16pt padding all sides
 - Max Content: ~5 lines of text, 1 image
 
 **Large Widget (4x4 Grid)**
+
 - Dimensions: 338x354 pts (iPhone 14)
 - Safe Area: 16pt padding all sides
 - Max Content: Full memo preview, multiple elements
@@ -1314,12 +1333,14 @@ Tippe auf ein Widget, um direkt zur App zu springen!
 ### B. Color Palette
 
 **Primary Colors:**
+
 - Blue: `#007AFF` (Light), `#0A84FF` (Dark)
 - Green: `#34C759` (Success)
 - Red: `#FF3B30` (Error)
 - Gray: `#8E8E93` (Secondary Text)
 
 **Space Colors:** (from existing Memoro theme)
+
 - Use existing space color palette
 - Ensure WCAG AA contrast ratios
 

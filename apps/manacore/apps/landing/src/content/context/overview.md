@@ -16,6 +16,7 @@ Mana steht für ein langfristig nachhaltiges Software-Ökosystem mit KI im Kern.
 ### Das Mana-Ökosystem
 
 Im Manacore-Netzwerk arbeiten verschiedene Applikationen zusammen:
+
 - Jede App unterstützt Menschen bei spezifischen Aufgaben
 - Verbunden entfalten sie eine ganz neue Kraft
 - Memoro ist die erste Applikation, weitere folgen noch in diesem Jahr
@@ -23,6 +24,7 @@ Im Manacore-Netzwerk arbeiten verschiedene Applikationen zusammen:
 ### Ein neues Geschäftsmodell
 
 Die Idee hinter Mana ist revolutionär:
+
 - **Einheitliche Währung**: Ein Bezahlsystem für alle Apps im Ökosystem
 - **Leistungsbasierte Abrechnung**: Bezahlung nur bei tatsächlicher Nutzung - im Gegensatz zu monatlichen Abos, die auch ohne Nutzung abbuchen
 - **Nachhaltigkeit**: Ein Geschäftsmodell, bei dem Software allen gehört, die daran mitwirken und es mitgestalten
@@ -30,6 +32,7 @@ Die Idee hinter Mana ist revolutionär:
 ### Partizipation auf allen Ebenen
 
 Jeder kann auf seine Weise am Mana-Ökosystem teilhaben:
+
 - Als Nutzer der verschiedenen Tools
 - Durch Analytics-Opt-in für besseres Feedback und Optimierung
 - Durch aktives Feedback über verschiedene Kanäle
@@ -39,6 +42,7 @@ Jeder kann auf seine Weise am Mana-Ökosystem teilhaben:
 ### Mehrwert im Fokus
 
 Das gesamte System ist auf Wertschöpfung ausgelegt:
+
 - **Pay-per-Value**: Abrechnung nach tatsächlichem Mehrwert
 - **Faire Preise**: Nutzer zahlen nur für die tatsächlich erbrachte Leistung (Rechenleistung, Entwicklung)
 - **Transparenz**: Große generative Aktionen werden mit Mana abgerechnet
@@ -46,6 +50,7 @@ Das gesamte System ist auf Wertschöpfung ausgelegt:
 ### Ökologische Verantwortung
 
 Mana übernimmt aktiv Verantwortung für die Umwelt:
+
 - 10% jedes ausgegebenen Mana für ökologischen Ausgleich
 - Buchführung über CO2-Verbrauch und aktiver Ausgleich
 - Nutzung umweltschonender Infrastruktur-Provider
@@ -54,6 +59,7 @@ Mana übernimmt aktiv Verantwortung für die Umwelt:
 ### Europäische Unabhängigkeit
 
 Die Entwicklung von Mana fokussiert sich auf Europa:
+
 - Aufbau eines neuen Software-Ökosystems für Europa
 - Reduzierung der Abhängigkeit von US-amerikanischen Technologien
 - Langfristiges Ziel: Komplette technologische Unabhängigkeit
@@ -62,6 +68,7 @@ Die Entwicklung von Mana fokussiert sich auf Europa:
 ### Einheitliche Vorteile für Nutzer
 
 Kunden profitieren von:
+
 - Einheitlichem Datenschutz
 - Einheitlicher Abrechnung
 - Einem Ansprechpartner für alle Apps
@@ -75,26 +82,31 @@ Jeder ausgegebene Mana wird transparent und nachhaltig verwendet:
 ### Die Mana-Verteilung im Detail
 
 **40% Compute Costs (KI-Verarbeitung)**
+
 - Deckung der Kosten für KI-Modelle und Rechenleistung
 - Direkte Kosten für die Ausführung von Tasks
 - Skalierbare Infrastruktur für optimale Performance
 
 **25% Entwicklungskosten**
+
 - Kontinuierliche Wartung und Verbesserung der Software
 - Aktive Entwicklerteams für neue Features
 - Sicherstellung langfristiger Qualität und Innovation
 
 **15% App Store / Play Store Provision**
+
 - Notwendige Gebühren an Google und Apple
 - Gewährleistung breiter Verfügbarkeit
 - Einfacher Zugang über etablierte Plattformen
 
 **10% Ökologischer Ausgleich**
+
 - Direkter Ausgleich entstandener Umweltschäden
 - Investition in klimaneutrale Infrastruktur
 - Aktiver Beitrag zum Umweltschutz
 
 **10% Free User Kontingent**
+
 - Ermöglicht neuen Nutzern kostenloses Testen
 - Unterstützung von NGOs und Bildungseinrichtungen
 - Demokratisierung des Zugangs zu KI-Technologie
@@ -102,6 +114,7 @@ Jeder ausgegebene Mana wird transparent und nachhaltig verwendet:
 ### Nachhaltigkeit als Kernprinzip
 
 Die transparente Kostenstruktur zeigt: Bei Mana steht nicht der Profit im Vordergrund, sondern:
+
 - **Fairness**: Verhältnismäßig wenig bleibt bei den Entwicklern
 - **Zugänglichkeit**: Neue Nutzer können die Software kostenlos erleben
 - **Nachhaltigkeit**: Sowohl ökologisch als auch im Verhältnis zu allen Beteiligten
@@ -110,6 +123,7 @@ Die transparente Kostenstruktur zeigt: Bei Mana steht nicht der Profit im Vorder
 ### Zukunftsperspektiven
 
 Mit fortschreitender Technologie ergeben sich neue Möglichkeiten:
+
 - **On-Device-Modelle**: Geringere Mana-Kosten durch lokale Verarbeitung
 - **Qualitätsstufen**: Nutzer wählen zwischen Geschwindigkeit und Qualität
 - **Demokratisierung**: KI-Tools werden zur allgegenwärtigen Ressource

@@ -28,20 +28,20 @@
 		'body-secondary': 'text-base text-theme-secondary leading-relaxed',
 		small: 'text-sm text-theme',
 		large: 'text-lg text-theme leading-relaxed',
-		muted: 'text-sm text-theme-muted'
+		muted: 'text-sm text-theme-muted',
 	};
 
 	const alignClasses: Record<TextAlign, string> = {
 		left: 'text-left',
 		center: 'text-center',
-		right: 'text-right'
+		right: 'text-right',
 	};
 
 	const weightClasses: Record<TextWeight, string> = {
 		normal: 'font-normal',
 		medium: 'font-medium',
 		semibold: 'font-semibold',
-		bold: 'font-bold'
+		bold: 'font-bold',
 	};
 
 	const classes = $derived(

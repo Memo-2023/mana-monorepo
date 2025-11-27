@@ -10,6 +10,6 @@
  * @returns {Object} - Das platzierte Voxel-Objekt
  */
 export function placeVoxel(x, y, z, type) {
-  // ...
-  return { x, y, z, type }; // Voxel-Objekt zurückgeben
+	// ...
+	return { x, y, z, type }; // Voxel-Objekt zurückgeben
 }

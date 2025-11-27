@@ -1,5 +1,14 @@
-import { pgTable, uuid, text, boolean, integer, timestamp, jsonb, index } from 'drizzle-orm/pg-core'
-import { relations } from 'drizzle-orm'
+import {
+	pgTable,
+	uuid,
+	text,
+	boolean,
+	integer,
+	timestamp,
+	jsonb,
+	index,
+} from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
 // ============================================
 // Users Table
@@ -27,14 +36,14 @@ export const users = pgTable(
 		profileBackground: text('profile_background'),
 		verified: boolean('verified').default(false),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at').defaultNow().notNull()
+		updatedAt: timestamp('updated_at').defaultNow().notNull(),
 	},
 	(table) => ({
 		emailIdx: index('users_email_idx').on(table.email),
 		usernameIdx: index('users_username_idx').on(table.username),
-		externalAuthIdIdx: index('users_external_auth_id_idx').on(table.externalAuthId)
+		externalAuthIdIdx: index('users_external_auth_id_idx').on(table.externalAuthId),
 	})
-)
+);
 
 // ============================================
 // Accounts Table (Business/Team Accounts)
@@ -51,12 +60,12 @@ export const accounts = pgTable(
 		planType: text('plan_type', { enum: ['free', 'team', 'enterprise'] }).default('free'),
 		settings: jsonb('settings'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at').defaultNow().notNull()
+		updatedAt: timestamp('updated_at').defaultNow().notNull(),
 	},
 	(table) => ({
-		ownerIdx: index('accounts_owner_idx').on(table.owner)
+		ownerIdx: index('accounts_owner_idx').on(table.owner),
 	})
-)
+);
 
 // ============================================
 // Workspaces Table
@@ -72,13 +81,13 @@ export const workspaces = pgTable(
 			.references(() => users.id)
 			.notNull(),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at').defaultNow().notNull()
+		updatedAt: timestamp('updated_at').defaultNow().notNull(),
 	},
 	(table) => ({
 		slugIdx: index('workspaces_slug_idx').on(table.slug),
-		ownerIdx: index('workspaces_owner_idx').on(table.owner)
+		ownerIdx: index('workspaces_owner_idx').on(table.owner),
 	})
-)
+);
 
 // ============================================
 // Links Table
@@ -106,16 +115,16 @@ export const links = pgTable(
 		accountOwner: uuid('account_owner').references(() => accounts.id),
 		workspaceId: uuid('workspace_id').references(() => workspaces.id),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at').defaultNow().notNull()
+		updatedAt: timestamp('updated_at').defaultNow().notNull(),
 	},
 	(table) => ({
 		userIdIdx: index('links_user_id_idx').on(table.userId),
 		shortCodeIdx: index('links_short_code_idx').on(table.shortCode),
 		workspaceIdIdx: index('links_workspace_id_idx').on(table.workspaceId),
 		accountOwnerIdx: index('links_account_owner_idx').on(table.accountOwner),
-		isActiveIdx: index('links_is_active_idx').on(table.isActive)
+		isActiveIdx: index('links_is_active_idx').on(table.isActive),
 	})
-)
+);
 
 // ============================================
 // Clicks Table (Analytics)
@@ -139,14 +148,14 @@ export const clicks = pgTable(
 		utmSource: text('utm_source'),
 		utmMedium: text('utm_medium'),
 		utmCampaign: text('utm_campaign'),
-		createdAt: timestamp('created_at').defaultNow().notNull()
+		createdAt: timestamp('created_at').defaultNow().notNull(),
 	},
 	(table) => ({
 		linkIdIdx: index('clicks_link_id_idx').on(table.linkId),
 		clickedAtIdx: index('clicks_clicked_at_idx').on(table.clickedAt),
-		countryIdx: index('clicks_country_idx').on(table.country)
+		countryIdx: index('clicks_country_idx').on(table.country),
 	})
-)
+);
 
 // ============================================
 // Tags Table
@@ -163,13 +172,13 @@ export const tags = pgTable(
 		usageCount: integer('usage_count').default(0),
 		userId: uuid('user_id').references(() => users.id),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at').defaultNow().notNull()
+		updatedAt: timestamp('updated_at').defaultNow().notNull(),
 	},
 	(table) => ({
 		userIdIdx: index('tags_user_id_idx').on(table.userId),
-		slugIdx: index('tags_slug_idx').on(table.slug)
+		slugIdx: index('tags_slug_idx').on(table.slug),
 	})
-)
+);
 
 // ============================================
 // Link-Tags Junction Table
@@ -184,14 +193,14 @@ export const linkTags = pgTable(
 		tagId: uuid('tag_id')
 			.references(() => tags.id, { onDelete: 'cascade' })
 			.notNull(),
-		createdAt: timestamp('created_at').defaultNow().notNull()
+		createdAt: timestamp('created_at').defaultNow().notNull(),
 	},
 	(table) => ({
 		linkIdIdx: index('link_tags_link_id_idx').on(table.linkId),
 		tagIdIdx: index('link_tags_tag_id_idx').on(table.tagId),
-		uniqueLinkTag: index('link_tags_unique_idx').on(table.linkId, table.tagId)
+		uniqueLinkTag: index('link_tags_unique_idx').on(table.linkId, table.tagId),
 	})
-)
+);
 
 // ============================================
 // Notifications Table
@@ -210,13 +219,13 @@ export const notifications = pgTable(
 		read: boolean('read').default(false),
 		actionUrl: text('action_url'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at').defaultNow().notNull()
+		updatedAt: timestamp('updated_at').defaultNow().notNull(),
 	},
 	(table) => ({
 		userIdIdx: index('notifications_user_id_idx').on(table.userId),
-		readIdx: index('notifications_read_idx').on(table.read)
+		readIdx: index('notifications_read_idx').on(table.read),
 	})
-)
+);
 
 // ============================================
 // Shared Access Table (Team Invitations)
@@ -231,18 +240,18 @@ export const sharedAccess = pgTable(
 		userId: uuid('user_id').references(() => users.id),
 		permissions: jsonb('permissions'),
 		invitationStatus: text('invitation_status', {
-			enum: ['pending', 'accepted', 'declined']
+			enum: ['pending', 'accepted', 'declined'],
 		}).default('pending'),
 		acceptedAt: timestamp('accepted_at'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at').defaultNow().notNull()
+		updatedAt: timestamp('updated_at').defaultNow().notNull(),
 	},
 	(table) => ({
 		ownerIdx: index('shared_access_owner_idx').on(table.owner),
 		userIdIdx: index('shared_access_user_id_idx').on(table.userId),
-		statusIdx: index('shared_access_status_idx').on(table.invitationStatus)
+		statusIdx: index('shared_access_status_idx').on(table.invitationStatus),
 	})
-)
+);
 
 // ============================================
 // Pending Invitations Table
@@ -260,14 +269,14 @@ export const pendingInvitations = pgTable(
 		acceptedAt: timestamp('accepted_at'),
 		acceptedBy: uuid('accepted_by').references(() => users.id),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at').defaultNow().notNull()
+		updatedAt: timestamp('updated_at').defaultNow().notNull(),
 	},
 	(table) => ({
 		emailIdx: index('pending_invitations_email_idx').on(table.email),
 		tokenIdx: index('pending_invitations_token_idx').on(table.token),
-		ownerIdx: index('pending_invitations_owner_idx').on(table.owner)
+		ownerIdx: index('pending_invitations_owner_idx').on(table.owner),
 	})
-)
+);
 
 // ============================================
 // Feature Requests Table
@@ -282,18 +291,18 @@ export const featureRequests = pgTable(
 			.references(() => users.id)
 			.notNull(),
 		status: text('status', {
-			enum: ['pending', 'reviewing', 'planned', 'completed', 'rejected']
+			enum: ['pending', 'reviewing', 'planned', 'completed', 'rejected'],
 		}).default('pending'),
 		voteCount: integer('vote_count').default(0),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at').defaultNow().notNull()
+		updatedAt: timestamp('updated_at').defaultNow().notNull(),
 	},
 	(table) => ({
 		userIdIdx: index('feature_requests_user_id_idx').on(table.userId),
 		statusIdx: index('feature_requests_status_idx').on(table.status),
-		voteCountIdx: index('feature_requests_vote_count_idx').on(table.voteCount)
+		voteCountIdx: index('feature_requests_vote_count_idx').on(table.voteCount),
 	})
-)
+);
 
 // ============================================
 // Feature Votes Table
@@ -308,14 +317,14 @@ export const featureVotes = pgTable(
 		userId: uuid('user_id')
 			.references(() => users.id, { onDelete: 'cascade' })
 			.notNull(),
-		createdAt: timestamp('created_at').defaultNow().notNull()
+		createdAt: timestamp('created_at').defaultNow().notNull(),
 	},
 	(table) => ({
 		featureRequestIdIdx: index('feature_votes_feature_request_id_idx').on(table.featureRequestId),
 		userIdIdx: index('feature_votes_user_id_idx').on(table.userId),
-		uniqueVote: index('feature_votes_unique_idx').on(table.featureRequestId, table.userId)
+		uniqueVote: index('feature_votes_unique_idx').on(table.featureRequestId, table.userId),
 	})
-)
+);
 
 // ============================================
 // Folders Table (minimal usage, keep for future)
@@ -329,12 +338,12 @@ export const folders = pgTable(
 			.references(() => users.id, { onDelete: 'cascade' })
 			.notNull(),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at').defaultNow().notNull()
+		updatedAt: timestamp('updated_at').defaultNow().notNull(),
 	},
 	(table) => ({
-		userIdIdx: index('folders_user_id_idx').on(table.userId)
+		userIdIdx: index('folders_user_id_idx').on(table.userId),
 	})
-)
+);
 
 // ============================================
 // Relations (for Drizzle Relational Queries)
@@ -347,58 +356,58 @@ export const usersRelations = relations(users, ({ many }) => ({
 	ownedWorkspaces: many(workspaces),
 	featureRequests: many(featureRequests),
 	featureVotes: many(featureVotes),
-	folders: many(folders)
-}))
+	folders: many(folders),
+}));
 
 export const linksRelations = relations(links, ({ one, many }) => ({
 	user: one(users, { fields: [links.userId], references: [users.id] }),
 	account: one(accounts, { fields: [links.accountOwner], references: [accounts.id] }),
 	workspace: one(workspaces, { fields: [links.workspaceId], references: [workspaces.id] }),
 	clicks: many(clicks),
-	linkTags: many(linkTags)
-}))
+	linkTags: many(linkTags),
+}));
 
 export const clicksRelations = relations(clicks, ({ one }) => ({
-	link: one(links, { fields: [clicks.linkId], references: [links.id] })
-}))
+	link: one(links, { fields: [clicks.linkId], references: [links.id] }),
+}));
 
 export const tagsRelations = relations(tags, ({ one, many }) => ({
 	user: one(users, { fields: [tags.userId], references: [users.id] }),
-	linkTags: many(linkTags)
-}))
+	linkTags: many(linkTags),
+}));
 
 export const linkTagsRelations = relations(linkTags, ({ one }) => ({
 	link: one(links, { fields: [linkTags.linkId], references: [links.id] }),
-	tag: one(tags, { fields: [linkTags.tagId], references: [tags.id] })
-}))
+	tag: one(tags, { fields: [linkTags.tagId], references: [tags.id] }),
+}));
 
 export const accountsRelations = relations(accounts, ({ one, many }) => ({
 	owner: one(users, { fields: [accounts.owner], references: [users.id] }),
-	links: many(links)
-}))
+	links: many(links),
+}));
 
 export const workspacesRelations = relations(workspaces, ({ one, many }) => ({
 	owner: one(users, { fields: [workspaces.owner], references: [users.id] }),
-	links: many(links)
-}))
+	links: many(links),
+}));
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
-	user: one(users, { fields: [notifications.userId], references: [users.id] })
-}))
+	user: one(users, { fields: [notifications.userId], references: [users.id] }),
+}));
 
 export const featureRequestsRelations = relations(featureRequests, ({ one, many }) => ({
 	user: one(users, { fields: [featureRequests.userId], references: [users.id] }),
-	votes: many(featureVotes)
-}))
+	votes: many(featureVotes),
+}));
 
 export const featureVotesRelations = relations(featureVotes, ({ one }) => ({
 	featureRequest: one(featureRequests, {
 		fields: [featureVotes.featureRequestId],
-		references: [featureRequests.id]
+		references: [featureRequests.id],
 	}),
-	user: one(users, { fields: [featureVotes.userId], references: [users.id] })
-}))
+	user: one(users, { fields: [featureVotes.userId], references: [users.id] }),
+}));
 
 export const foldersRelations = relations(folders, ({ one }) => ({
-	user: one(users, { fields: [folders.userId], references: [users.id] })
-}))
+	user: one(users, { fields: [folders.userId], references: [users.id] }),
+}));

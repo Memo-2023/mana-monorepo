@@ -31,7 +31,7 @@
 			console.log('Uploading recording:', {
 				blobSize: audioBlob.size,
 				duration: audioDuration,
-				userId: $user.id
+				userId: $user.id,
 			});
 
 			const result = await uploadAndProcessAudio({
@@ -40,7 +40,7 @@
 				title: 'New Recording',
 				duration: audioDuration,
 				spaceId: null,
-				blueprintId: selectedBlueprintId
+				blueprintId: selectedBlueprintId,
 			});
 
 			if (result.success) {
@@ -91,13 +91,7 @@
 	{#if $recording.status === 'uploading'}
 		<div class="absolute bottom-20 flex items-center gap-2 text-sm text-theme-secondary">
 			<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-				<circle
-					class="opacity-25"
-					cx="12"
-					cy="12"
-					r="10"
-					stroke="currentColor"
-					stroke-width="4"
+				<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
 				></circle>
 				<path
 					class="opacity-75"
@@ -111,21 +105,17 @@
 
 	<!-- Error Message -->
 	{#if $recording.error}
-		<div class="absolute bottom-24 rounded-lg bg-red-100 px-4 py-2 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400">
+		<div
+			class="absolute bottom-24 rounded-lg bg-red-100 px-4 py-2 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400"
+		>
 			{$recording.error}
 		</div>
 	{/if}
 
 	<!-- Advice Carousel and Blueprint Selector (fixed at bottom) -->
 	<div class="absolute bottom-16 left-0 right-0">
-		<AdviceCarousel
-			blueprintId={selectedBlueprintId}
-			language="de"
-		/>
-		<BlueprintSelector
-			selectedBlueprintId={selectedBlueprintId}
-			onSelectBlueprint={handleSelectBlueprint}
-		/>
+		<AdviceCarousel blueprintId={selectedBlueprintId} language="de" />
+		<BlueprintSelector {selectedBlueprintId} onSelectBlueprint={handleSelectBlueprint} />
 	</div>
 </div>
 

@@ -22,12 +22,12 @@ Beispiel für eine Übersetzungsdatei:
 
 ```json
 {
-  "common": {
-    "save": "Speichern",
-    "cancel": "Abbrechen",
-    // weitere Übersetzungen...
-  },
-  // weitere Kategorien...
+	"common": {
+		"save": "Speichern",
+		"cancel": "Abbrechen"
+		// weitere Übersetzungen...
+	}
+	// weitere Kategorien...
 }
 ```
 
@@ -36,6 +36,7 @@ Beispiel für eine Übersetzungsdatei:
 Stelle sicher, dass die Struktur der neuen Übersetzungsdatei exakt der Struktur der vorhandenen Dateien entspricht. Alle Schlüssel müssen vorhanden sein, um Fehler zu vermeiden.
 
 Die Hauptkategorien sind:
+
 - `common`: Allgemeine Begriffe
 - `auth`: Authentifizierungsbezogene Texte
 - `home`: Texte für die Startseite
@@ -66,8 +67,8 @@ Füge die neue Sprache zur `LANGUAGES`-Konstante hinzu:
 
 ```typescript
 export const LANGUAGES = {
-  // bestehende Sprachen...
-  xx: { nativeName: 'Sprachname', emoji: '🇽🇽' }, // Sprachname in der Originalsprache und entsprechendes Flaggen-Emoji
+	// bestehende Sprachen...
+	xx: { nativeName: 'Sprachname', emoji: '🇽🇽' }, // Sprachname in der Originalsprache und entsprechendes Flaggen-Emoji
 };
 ```
 
@@ -78,15 +79,13 @@ Verwende für das Emoji die entsprechende Länderflagge im Unicode-Format (z.B. 
 Füge die neue Sprache zu den Ressourcen in der i18n-Initialisierung hinzu:
 
 ```typescript
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      // bestehende Sprachen...
-      xx: { translation: xx },
-    },
-    // weitere Konfigurationen...
-  });
+i18n.use(initReactI18next).init({
+	resources: {
+		// bestehende Sprachen...
+		xx: { translation: xx },
+	},
+	// weitere Konfigurationen...
+});
 ```
 
 ## 3. Testen der neuen Sprache
@@ -98,6 +97,7 @@ Starte die App und navigiere zu den Einstellungen. Die neue Sprache sollte in de
 ### Schritt 3.2: Testen der Übersetzungen
 
 Wähle die neue Sprache aus und überprüfe, ob alle Texte korrekt übersetzt werden. Achte besonders auf:
+
 - Formatierungen (z.B. bei Datumsangaben)
 - Pluralformen
 - Spezielle Zeichen
@@ -146,25 +146,23 @@ Stelle sicher, dass die Blueprint-Anzeige die Inhalte in der neuen Sprache korre
 import es from './translations/es.json';
 
 export const LANGUAGES = {
-  de: { nativeName: 'Deutsch', emoji: '🇩🇪' },
-  en: { nativeName: 'English', emoji: '🇬🇧' },
-  it: { nativeName: 'Italiano', emoji: '🇮🇹' },
-  fr: { nativeName: 'Français', emoji: '🇫🇷' },
-  es: { nativeName: 'Español', emoji: '🇪🇸' },
+	de: { nativeName: 'Deutsch', emoji: '🇩🇪' },
+	en: { nativeName: 'English', emoji: '🇬🇧' },
+	it: { nativeName: 'Italiano', emoji: '🇮🇹' },
+	fr: { nativeName: 'Français', emoji: '🇫🇷' },
+	es: { nativeName: 'Español', emoji: '🇪🇸' },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      de: { translation: de },
-      en: { translation: en },
-      it: { translation: it },
-      fr: { translation: fr },
-      es: { translation: es },
-    },
-    // weitere Konfigurationen...
-  });
+i18n.use(initReactI18next).init({
+	resources: {
+		de: { translation: de },
+		en: { translation: en },
+		it: { translation: it },
+		fr: { translation: fr },
+		es: { translation: es },
+	},
+	// weitere Konfigurationen...
+});
 ```
 
 ### 7.2 Beispiel: Hinzufügen von Griechisch
@@ -176,19 +174,17 @@ i18n
 import el from './translations/el.json';
 
 export const LANGUAGES = {
-  // bestehende Sprachen...
-  el: { nativeName: 'Ελληνικά', emoji: '🇬🇷' },
+	// bestehende Sprachen...
+	el: { nativeName: 'Ελληνικά', emoji: '🇬🇷' },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      // bestehende Sprachen...
-      el: { translation: el },
-    },
-    // weitere Konfigurationen...
-  });
+i18n.use(initReactI18next).init({
+	resources: {
+		// bestehende Sprachen...
+		el: { translation: el },
+	},
+	// weitere Konfigurationen...
+});
 ```
 
 ### 7.3 Beispiel: Hinzufügen von Lettisch
@@ -200,19 +196,17 @@ i18n
 import lv from './translations/lv.json';
 
 export const LANGUAGES = {
-  // bestehende Sprachen...
-  lv: { nativeName: 'Latviešu', emoji: '🇱🇻' },
+	// bestehende Sprachen...
+	lv: { nativeName: 'Latviešu', emoji: '🇱🇻' },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      // bestehende Sprachen...
-      lv: { translation: lv },
-    },
-    // weitere Konfigurationen...
-  });
+i18n.use(initReactI18next).init({
+	resources: {
+		// bestehende Sprachen...
+		lv: { translation: lv },
+	},
+	// weitere Konfigurationen...
+});
 ```
 
 ### 7.4 Beispiel: Hinzufügen von Litauisch
@@ -224,19 +218,17 @@ i18n
 import lt from './translations/lt.json';
 
 export const LANGUAGES = {
-  // bestehende Sprachen...
-  lt: { nativeName: 'Lietuvių', emoji: '🇱🇹' },
+	// bestehende Sprachen...
+	lt: { nativeName: 'Lietuvių', emoji: '🇱🇹' },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      // bestehende Sprachen...
-      lt: { translation: lt },
-    },
-    // weitere Konfigurationen...
-  });
+i18n.use(initReactI18next).init({
+	resources: {
+		// bestehende Sprachen...
+		lt: { translation: lt },
+	},
+	// weitere Konfigurationen...
+});
 ```
 
 ### 7.5 Beispiel: Hinzufügen von Slowakisch
@@ -248,19 +240,17 @@ i18n
 import sk from './translations/sk.json';
 
 export const LANGUAGES = {
-  // bestehende Sprachen...
-  sk: { nativeName: 'Slovenčina', emoji: '🇸🇰' },
+	// bestehende Sprachen...
+	sk: { nativeName: 'Slovenčina', emoji: '🇸🇰' },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      // bestehende Sprachen...
-      sk: { translation: sk },
-    },
-    // weitere Konfigurationen...
-  });
+i18n.use(initReactI18next).init({
+	resources: {
+		// bestehende Sprachen...
+		sk: { translation: sk },
+	},
+	// weitere Konfigurationen...
+});
 ```
 
 ### 7.6 Beispiel: Hinzufügen von Slowenisch
@@ -272,17 +262,15 @@ i18n
 import sl from './translations/sl.json';
 
 export const LANGUAGES = {
-  // bestehende Sprachen...
-  sl: { nativeName: 'Slovenščina', emoji: '🇸🇮' },
+	// bestehende Sprachen...
+	sl: { nativeName: 'Slovenščina', emoji: '🇸🇮' },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      // bestehende Sprachen...
-      sl: { translation: sl },
-    },
-    // weitere Konfigurationen...
-  });
+i18n.use(initReactI18next).init({
+	resources: {
+		// bestehende Sprachen...
+		sl: { translation: sl },
+	},
+	// weitere Konfigurationen...
+});
 ```

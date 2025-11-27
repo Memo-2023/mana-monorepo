@@ -23,7 +23,7 @@
 		description,
 		disabled = false,
 		indeterminate = false,
-		class: className = ''
+		class: className = '',
 	}: Props = $props();
 
 	let inputElement: HTMLInputElement | null = $state(null);
@@ -53,11 +53,23 @@
 		/>
 		<div class="checkbox-box">
 			{#if indeterminate}
-				<svg class="checkbox-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+				<svg
+					class="checkbox-icon"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="3"
+				>
 					<line x1="5" y1="12" x2="19" y2="12" />
 				</svg>
 			{:else if checked}
-				<svg class="checkbox-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+				<svg
+					class="checkbox-icon"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="3"
+				>
 					<polyline points="20 6 9 17 4 12" />
 				</svg>
 			{/if}

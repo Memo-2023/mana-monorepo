@@ -1,12 +1,12 @@
-import { Resend } from 'resend'
-import { env } from '$env/dynamic/private'
-import { env as publicEnv } from '$env/dynamic/public'
+import { Resend } from 'resend';
+import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 
 // Initialize Resend client
-const resend = new Resend(env.RESEND_API_KEY)
+const resend = new Resend(env.RESEND_API_KEY);
 
-const FROM_EMAIL = env.RESEND_FROM_EMAIL || 'noreply@ulo.ad'
-const APP_URL = publicEnv.PUBLIC_APP_URL || 'https://ulo.ad'
+const FROM_EMAIL = env.RESEND_FROM_EMAIL || 'noreply@ulo.ad';
+const APP_URL = publicEnv.PUBLIC_APP_URL || 'https://ulo.ad';
 
 /**
  * Send a team invitation email
@@ -17,7 +17,7 @@ export async function sendTeamInvitationEmail(
 	inviteToken: string
 ): Promise<boolean> {
 	try {
-		const inviteUrl = `${APP_URL}/register?invite=${inviteToken}`
+		const inviteUrl = `${APP_URL}/register?invite=${inviteToken}`;
 
 		await resend.emails.send({
 			from: `ulo.ad <${FROM_EMAIL}>`,
@@ -93,14 +93,14 @@ export async function sendTeamInvitationEmail(
       © ${new Date().getFullYear()} ulo.ad · <a href="https://ulo.ad" style="color: #0ea5e9; text-decoration: none;">ulo.ad</a>
     </p>
   </div>
-</div>`
-		})
+</div>`,
+		});
 
-		console.log('[EMAIL] Team invitation sent to:', recipientEmail)
-		return true
+		console.log('[EMAIL] Team invitation sent to:', recipientEmail);
+		return true;
 	} catch (error) {
-		console.error('[EMAIL] Failed to send invitation email:', error)
-		return false
+		console.error('[EMAIL] Failed to send invitation email:', error);
+		return false;
 	}
 }
 
@@ -160,14 +160,14 @@ export async function sendInvitationAcceptedEmail(
       © ${new Date().getFullYear()} ulo.ad · <a href="https://ulo.ad" style="color: #0ea5e9; text-decoration: none;">ulo.ad</a>
     </p>
   </div>
-</div>`
-		})
+</div>`,
+		});
 
-		console.log('[EMAIL] Acceptance notification sent to:', ownerEmail)
-		return true
+		console.log('[EMAIL] Acceptance notification sent to:', ownerEmail);
+		return true;
 	} catch (error) {
-		console.error('[EMAIL] Failed to send acceptance notification:', error)
-		return false
+		console.error('[EMAIL] Failed to send acceptance notification:', error);
+		return false;
 	}
 }
 
@@ -211,12 +211,12 @@ export async function sendWelcomeEmail(to: string, username: string): Promise<bo
       © ${new Date().getFullYear()} ulo.ad
     </p>
   </div>
-</div>`
-		})
+</div>`,
+		});
 
-		return true
+		return true;
 	} catch (error) {
-		console.error('[EMAIL] Failed to send welcome email:', error)
-		return false
+		console.error('[EMAIL] Failed to send welcome email:', error);
+		return false;
 	}
 }

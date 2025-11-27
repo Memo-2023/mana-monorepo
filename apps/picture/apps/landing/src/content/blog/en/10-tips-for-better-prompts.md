@@ -1,12 +1,12 @@
 ---
-title: "10 Tips for Writing Better AI Image Prompts"
-description: "Master the art of prompt engineering with these 10 proven tips to create stunning AI-generated images every time."
-author: "Picture Team"
+title: '10 Tips for Writing Better AI Image Prompts'
+description: 'Master the art of prompt engineering with these 10 proven tips to create stunning AI-generated images every time.'
+author: 'Picture Team'
 publishedAt: 2025-01-10
-coverImage: "/blog/prompt-tips.jpg"
-category: "tips"
-tags: ["prompts", "tips", "prompt-engineering", "advanced"]
-language: "en"
+coverImage: '/blog/prompt-tips.jpg'
+category: 'tips'
+tags: ['prompts', 'tips', 'prompt-engineering', 'advanced']
+language: 'en'
 ---
 
 ## The Art of Prompt Engineering
@@ -89,6 +89,7 @@ Tell the AI what to avoid:
 ## 8. Keep It Structured
 
 Organize your prompt logically:
+
 ```
 [Subject] + [Action] + [Environment] + [Lighting] + [Style] + [Quality]
 ```
@@ -96,6 +97,7 @@ Organize your prompt logically:
 ## 9. Experiment with Weights
 
 Some models support emphasis:
+
 - Use parentheses (subject:1.2) to increase importance
 - Use brackets [detail:0.8] to decrease importance
 
@@ -114,6 +116,7 @@ Your first prompt won't be perfect:
 **Before**: "cat in room"
 
 **After**:
+
 ```
 a fluffy white Persian cat sitting elegantly on a velvet cushion,
 luxurious Victorian-style room with ornate furniture,

@@ -18,14 +18,19 @@
 	let { memoCount = 6, leftColumnWidth = 400 }: Props = $props();
 </script>
 
-<div class="flex w-full gap-0 overflow-hidden {$isNavCollapsed || $isSidebarMode ? 'h-screen' : 'h-[calc(100vh-5rem)]'}">
+<div
+	class="flex w-full gap-0 overflow-hidden {$isNavCollapsed || $isSidebarMode
+		? 'h-screen'
+		: 'h-[calc(100vh-5rem)]'}"
+>
 	<!-- Left Column: Memo List -->
-	<div
-		class="relative flex flex-shrink-0 flex-col bg-menu"
-		style="width: {leftColumnWidth}px;"
-	>
+	<div class="relative flex flex-shrink-0 flex-col bg-menu" style="width: {leftColumnWidth}px;">
 		<!-- Floating Search Bar -->
-		<div class="absolute top-0 left-0 right-0 z-20 py-3 pr-2 transition-all duration-300 {$isNavCollapsed ? 'pl-16' : 'pl-4'}">
+		<div
+			class="absolute top-0 left-0 right-0 z-20 py-3 pr-2 transition-all duration-300 {$isNavCollapsed
+				? 'pl-16'
+				: 'pl-4'}"
+		>
 			<SkeletonBox
 				width="100%"
 				height="48px"
@@ -73,7 +78,9 @@
 		<!-- Panel Container matching SplitView single split design -->
 		<div class="relative h-full w-full overflow-hidden pt-3 pl-2 pr-4">
 			<!-- Content Container -->
-			<div class="h-full w-full overflow-hidden rounded-t-xl border border-theme border-b-0 bg-content">
+			<div
+				class="h-full w-full overflow-hidden rounded-t-xl border border-theme border-b-0 bg-content"
+			>
 				<!-- Empty State -->
 				<div class="flex h-full items-center justify-center p-4">
 					<div class="text-center rounded-xl border border-theme bg-content p-8">

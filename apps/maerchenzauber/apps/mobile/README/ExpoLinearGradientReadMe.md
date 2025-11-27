@@ -1,6 +1,5 @@
 Expo LinearGradient
 
-
 A universal React component that renders a gradient view.
 
 expo-linear-gradient provides a native React view that transitions between multiple colors in a linear direction.
@@ -18,55 +17,53 @@ Linear Gradient
 
 Copy
 
-
 Open in Snack
-
 
 import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <LinearGradient
-        // Background Linear Gradient
-        colors={['rgba(0,0,0,0.8)', 'transparent']}
-        style={styles.background}
-      />
-      <LinearGradient
-        // Button Linear Gradient
-        colors={['#4c669f', '#3b5998', '#192f6a']}
-        style={styles.button}>
-        <Text style={styles.text}>Sign in with Facebook</Text>
-      </LinearGradient>
-    </View>
-  );
+return (
+<View style={styles.container}>
+<LinearGradient
+// Background Linear Gradient
+colors={['rgba(0,0,0,0.8)', 'transparent']}
+style={styles.background}
+/>
+<LinearGradient
+// Button Linear Gradient
+colors={['#4c669f', '#3b5998', '#192f6a']}
+style={styles.button}>
+<Text style={styles.text}>Sign in with Facebook</Text>
+</LinearGradient>
+</View>
+);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'orange',
-  },
-  background: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    height: 300,
-  },
-  button: {
-    padding: 15,
-    alignItems: 'center',
-    borderRadius: 5,
-  },
-  text: {
-    backgroundColor: 'transparent',
-    fontSize: 15,
-    color: '#fff',
-  },
+container: {
+flex: 1,
+alignItems: 'center',
+justifyContent: 'center',
+backgroundColor: 'orange',
+},
+background: {
+position: 'absolute',
+left: 0,
+right: 0,
+top: 0,
+height: 300,
+},
+button: {
+padding: 15,
+alignItems: 'center',
+borderRadius: 5,
+},
+text: {
+backgroundColor: 'transparent',
+fontSize: 15,
+color: '#fff',
+},
 });
 
 Show More
@@ -121,11 +118,11 @@ An object { x: number; y: number } or array [x, y] that represents the point at 
 
 Type: NativeLinearGradientPoint or object shaped as below:
 
-Property	Type	Description
-x	number	
+Property Type Description
+x number
 A number ranging from 0 to 1, representing the position of gradient transformation.
 
-y	number	
+y number
 A number ranging from 0 to 1, representing the position of gradient transformation.
 
 NativeLinearGradientPoint

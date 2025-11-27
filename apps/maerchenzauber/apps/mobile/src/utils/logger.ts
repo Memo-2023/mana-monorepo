@@ -5,42 +5,42 @@
 const isDevelopment = __DEV__;
 
 export enum LogLevel {
-  DEBUG = 0,
-  INFO = 1,
-  WARN = 2,
-  ERROR = 3,
+	DEBUG = 0,
+	INFO = 1,
+	WARN = 2,
+	ERROR = 3,
 }
 
 class Logger {
-  private level: LogLevel = isDevelopment ? LogLevel.DEBUG : LogLevel.INFO;
+	private level: LogLevel = isDevelopment ? LogLevel.DEBUG : LogLevel.INFO;
 
-  debug(...args: any[]) {
-    if (this.level <= LogLevel.DEBUG) {
-      console.log('[DEBUG]', ...args);
-    }
-  }
+	debug(...args: any[]) {
+		if (this.level <= LogLevel.DEBUG) {
+			console.log('[DEBUG]', ...args);
+		}
+	}
 
-  info(...args: any[]) {
-    if (this.level <= LogLevel.INFO) {
-      console.log(...args);
-    }
-  }
+	info(...args: any[]) {
+		if (this.level <= LogLevel.INFO) {
+			console.log(...args);
+		}
+	}
 
-  warn(...args: any[]) {
-    if (this.level <= LogLevel.WARN) {
-      console.warn(...args);
-    }
-  }
+	warn(...args: any[]) {
+		if (this.level <= LogLevel.WARN) {
+			console.warn(...args);
+		}
+	}
 
-  error(...args: any[]) {
-    if (this.level <= LogLevel.ERROR) {
-      console.error(...args);
-    }
-  }
+	error(...args: any[]) {
+		if (this.level <= LogLevel.ERROR) {
+			console.error(...args);
+		}
+	}
 
-  setLevel(level: LogLevel) {
-    this.level = level;
-  }
+	setLevel(level: LogLevel) {
+		this.level = level;
+	}
 }
 
 export const logger = new Logger();

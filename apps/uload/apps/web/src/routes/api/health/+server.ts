@@ -5,6 +5,6 @@ export const GET: RequestHandler = async () => {
 	return json({
 		status: 'ok',
 		timestamp: new Date().toISOString(),
-		uptime: process.uptime()
+		uptime: process.uptime(),
 	});
 };

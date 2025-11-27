@@ -87,7 +87,7 @@ async function testConnection() {
 				email: testEmail,
 				password: 'Test123456!',
 				passwordConfirm: 'Test123456!',
-				username: testUsername
+				username: testUsername,
 			});
 			console.log('✓ Registration successful! User ID:', result.id);
 
@@ -115,8 +115,8 @@ async function testConnection() {
 			const response = await fetch(`${PROD_POCKETBASE_URL}/api/collections`, {
 				method: 'GET',
 				headers: {
-					Origin: 'https://your-frontend-domain.com'
-				}
+					Origin: 'https://your-frontend-domain.com',
+				},
 			});
 			console.log(
 				'✓ CORS headers present:',

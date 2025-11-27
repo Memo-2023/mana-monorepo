@@ -10,32 +10,27 @@ export { default as AppleSignInButton } from './components/AppleSignInButton.sve
 
 // Utilities
 export {
-  setGoogleClientId,
-  initializeGoogleAuth,
-  renderGoogleButton,
-  isGoogleAuthLoaded,
-  waitForGoogleAuth
+	setGoogleClientId,
+	initializeGoogleAuth,
+	renderGoogleButton,
+	isGoogleAuthLoaded,
+	waitForGoogleAuth,
 } from './utils/googleAuth';
 
 export {
-  setAppleConfig,
-  initializeAppleAuth,
-  signInWithApple,
-  parseAppleAuthorizationResponse,
-  getStoredReturnUrl,
-  clearAppleSignInSession,
-  isAppleAuthLoaded,
-  waitForAppleAuth,
-  type AppleAuthorizationResponse
+	setAppleConfig,
+	initializeAppleAuth,
+	signInWithApple,
+	parseAppleAuthorizationResponse,
+	getStoredReturnUrl,
+	clearAppleSignInSession,
+	isAppleAuthLoaded,
+	waitForAppleAuth,
+	type AppleAuthorizationResponse,
 } from './utils/appleAuth';
 
 // Types
-export type {
-  AuthUIConfig,
-  AuthServiceInterface,
-  AuthResult,
-  IconName
-} from './types';
+export type { AuthUIConfig, AuthServiceInterface, AuthResult, IconName } from './types';
 
 // Page Translation Types
 export type { LoginTranslations } from './pages/LoginPage.svelte';

@@ -19,6 +19,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 **Location:** `/packages/shared-auth/src/core/authService.ts`
 
 **Changes:**
+
 - Updated API endpoints to match Mana Core Auth (`/api/v1/auth/*`)
 - Fixed login response handling (`accessToken` instead of `appToken`)
 - Fixed signup flow (register then login separately)
@@ -32,6 +33,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 ### 2. **Chat Backend Integration** ✅
 
 **Files Modified:**
+
 - ✅ `chat/backend/src/common/guards/jwt-auth.guard.ts` (NEW)
 - ✅ `chat/backend/src/common/decorators/current-user.decorator.ts` (NEW)
 - ✅ `chat/backend/src/chat/chat.controller.ts`
@@ -40,6 +42,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 - ✅ `chat/backend/.env.example`
 
 **Changes:**
+
 - Created JWT Auth Guard that validates tokens with Mana Core Auth
 - Created CurrentUser decorator to inject user data into controllers
 - Updated all controllers to use JwtAuthGuard
@@ -48,6 +51,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 - Changed PORT from 3001 to 3002 (to avoid conflict with auth service)
 
 **Key Features:**
+
 - All endpoints now protected with JWT validation
 - User context automatically injected via @CurrentUser decorator
 - Token validation happens via Mana Core Auth API
@@ -58,10 +62,12 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 ### 3. **Chat Web App Integration** ✅
 
 **Files Modified:**
+
 - ✅ `chat/apps/web/src/lib/stores/auth.svelte.ts`
 - ✅ `chat/apps/web/.env.example`
 
 **Changes:**
+
 - Completely rewrote auth store to use `@manacore/shared-auth`
 - Removed Supabase auth dependencies
 - Added `initializeWebAuth()` initialization
@@ -70,6 +76,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 - Added MANA_CORE_AUTH_URL environment variable
 
 **API Compatibility:**
+
 - Same method signatures as before (signIn, signUp, signOut, resetPassword)
 - Minimal breaking changes for existing code
 - Additional methods: `getCredits()`, `getAccessToken()`
@@ -79,10 +86,12 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 ### 4. **Chat Mobile App Integration** ✅
 
 **Files Modified:**
+
 - ✅ `chat/apps/mobile/context/AuthProvider.tsx`
 - ✅ `chat/apps/mobile/.env.example`
 
 **Changes:**
+
 - Rewrote AuthProvider to use `@manacore/shared-auth`
 - Created SecureStore adapter for token storage
 - Created React Native device adapter
@@ -91,6 +100,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 - Added MANA_CORE_AUTH_URL environment variable
 
 **Key Features:**
+
 - Tokens stored securely in Expo SecureStore
 - Device ID generated and persisted
 - Same API as before (useAuth hook remains unchanged)
@@ -252,6 +262,7 @@ const credits = await authService.getUserCredits();
 ```
 
 **Default Credits:**
+
 - Signup bonus: 150 free credits
 - Daily free credits: 5 credits every 24 hours
 - Pricing: 100 mana = €1.00
@@ -260,24 +271,24 @@ const credits = await authService.getUserCredits();
 
 ## 🔄 What Changed for Users
 
-| Aspect | Before (Supabase) | After (Mana Core) | Impact |
-|--------|-------------------|-------------------|---------|
-| **Registration** | Immediate session | Register → Login | Minimal (auto-login in mobile) |
-| **Login** | Supabase JWT | Mana Core JWT | None (transparent) |
-| **Token Storage** | Supabase cookies | localStorage/SecureStore | None (same security) |
-| **Sessions** | Supabase sessions | JWT + refresh tokens | Better (token rotation) |
-| **Credits** | ❌ None | ✅ 150 initial + 5 daily | **NEW FEATURE!** |
+| Aspect            | Before (Supabase) | After (Mana Core)        | Impact                         |
+| ----------------- | ----------------- | ------------------------ | ------------------------------ |
+| **Registration**  | Immediate session | Register → Login         | Minimal (auto-login in mobile) |
+| **Login**         | Supabase JWT      | Mana Core JWT            | None (transparent)             |
+| **Token Storage** | Supabase cookies  | localStorage/SecureStore | None (same security)           |
+| **Sessions**      | Supabase sessions | JWT + refresh tokens     | Better (token rotation)        |
+| **Credits**       | ❌ None           | ✅ 150 initial + 5 daily | **NEW FEATURE!**               |
 
 ---
 
 ## 📊 Port Configuration
 
-| Service | Port | URL |
-|---------|------|-----|
+| Service            | Port | URL                   |
+| ------------------ | ---- | --------------------- |
 | **Mana Core Auth** | 3001 | http://localhost:3001 |
-| **Chat Backend** | 3002 | http://localhost:3002 |
-| **Web App** | 5173 | http://localhost:5173 |
-| **Mobile App** | 8081 | exp://localhost:8081 |
+| **Chat Backend**   | 3002 | http://localhost:3002 |
+| **Web App**        | 5173 | http://localhost:5173 |
+| **Mobile App**     | 8081 | exp://localhost:8081  |
 
 ---
 
@@ -286,6 +297,7 @@ const credits = await authService.getUserCredits();
 ### Issue: "Connection refused" to Mana Core Auth
 
 **Solution:** Make sure Mana Core Auth is running on port 3001
+
 ```bash
 cd mana-core-auth && pnpm start:dev
 ```
@@ -293,6 +305,7 @@ cd mana-core-auth && pnpm start:dev
 ### Issue: "Invalid token" errors
 
 **Solution:** Clear stored tokens and login again
+
 ```typescript
 // Web: Clear localStorage
 localStorage.clear();
@@ -305,6 +318,7 @@ await SecureStore.deleteItemAsync('@auth/refreshToken');
 ### Issue: CORS errors from web app
 
 **Solution:** Add web app URL to Mana Core Auth CORS config
+
 ```env
 # In mana-core-auth/.env
 CORS_ORIGINS=http://localhost:5173,http://localhost:8081
@@ -313,6 +327,7 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:8081
 ### Issue: Backend can't validate tokens
 
 **Solution:** Check MANA_CORE_AUTH_URL in backend .env
+
 ```env
 MANA_CORE_AUTH_URL=http://localhost:3001
 ```

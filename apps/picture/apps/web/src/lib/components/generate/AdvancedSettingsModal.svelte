@@ -28,7 +28,7 @@
 	const aspectRatios: AspectRatio[] = [
 		{ label: 'Quadratisch', value: 'square', width: 1024, height: 1024 },
 		{ label: 'Hochformat', value: 'portrait', width: 768, height: 1344 },
-		{ label: 'Querformat', value: 'landscape', width: 1344, height: 768 }
+		{ label: 'Querformat', value: 'landscape', width: 1344, height: 768 },
 	];
 
 	// Local state
@@ -74,16 +74,19 @@
 	>
 		<!-- Header -->
 		<div class="mb-6 flex items-center justify-between">
-			<h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-				Erweiterte Einstellungen
-			</h2>
+			<h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Erweiterte Einstellungen</h2>
 			<button
 				onclick={onClose}
 				class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
 				aria-label="Schließen"
 			>
 				<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
 				</svg>
 			</button>
 		</div>
@@ -97,7 +100,9 @@
 						Anzahl Bilder
 					</label>
 					{#if localSettings.imageCount > 1}
-						<span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+						<span
+							class="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+						>
 							{localSettings.imageCount} Bilder
 						</span>
 					{/if}
@@ -106,7 +111,8 @@
 					{#each [1, 2, 3, 4, 5] as count}
 						<button
 							onclick={() => (localSettings.imageCount = count)}
-							class="flex h-12 w-12 items-center justify-center rounded-xl border-2 font-medium transition-all {localSettings.imageCount === count
+							class="flex h-12 w-12 items-center justify-center rounded-xl border-2 font-medium transition-all {localSettings.imageCount ===
+							count
 								? 'border-blue-600 bg-blue-600 text-white dark:border-blue-500 dark:bg-blue-500'
 								: 'border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-blue-400'}"
 						>
@@ -130,12 +136,14 @@
 					{#each aspectRatios as ratio}
 						<button
 							onclick={() => (localSettings.aspectRatio = ratio)}
-							class="flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all {localSettings.aspectRatio.value === ratio.value
+							class="flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all {localSettings
+								.aspectRatio.value === ratio.value
 								? 'border-blue-600 bg-blue-50 dark:border-blue-500 dark:bg-blue-900/20'
 								: 'border-gray-300 bg-white hover:border-blue-400 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-blue-400'}"
 						>
 							<div
-								class="flex h-12 w-12 items-center justify-center rounded-lg {localSettings.aspectRatio.value === ratio.value
+								class="flex h-12 w-12 items-center justify-center rounded-lg {localSettings
+									.aspectRatio.value === ratio.value
 									? 'bg-blue-600 dark:bg-blue-500'
 									: 'bg-gray-200 dark:bg-gray-700'}"
 							>
@@ -181,7 +189,9 @@
 					<label class="text-sm font-semibold text-gray-900 dark:text-gray-100">
 						Schritte (Steps)
 					</label>
-					<span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-800 dark:text-gray-300">
+					<span
+						class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+					>
 						{localSettings.steps}
 					</span>
 				</div>
@@ -191,7 +201,7 @@
 					max="150"
 					step="5"
 					bind:value={localSettings.steps}
-					class="h-2 w-full appearance-none rounded-lg bg-gray-200 dark:bg-gray-700 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:dark:bg-blue-500 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:dark:bg-blue-500"
+					class="h-2 w-full appearance-none rounded-lg bg-gray-200 dark:bg-gray-700 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:dark:bg-blue-500 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:dark:bg-blue-500"
 				/>
 				<div class="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
 					<span>20 (Schnell)</span>
@@ -205,7 +215,9 @@
 					<label class="text-sm font-semibold text-gray-900 dark:text-gray-100">
 						Guidance Scale
 					</label>
-					<span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-800 dark:text-gray-300">
+					<span
+						class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+					>
 						{localSettings.guidanceScale}
 					</span>
 				</div>
@@ -215,7 +227,7 @@
 					max="20"
 					step="0.5"
 					bind:value={localSettings.guidanceScale}
-					class="h-2 w-full appearance-none rounded-lg bg-gray-200 dark:bg-gray-700 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:dark:bg-blue-500 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:dark:bg-blue-500"
+					class="h-2 w-full appearance-none rounded-lg bg-gray-200 dark:bg-gray-700 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:dark:bg-blue-500 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:dark:bg-blue-500"
 				/>
 				<div class="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
 					<span>1 (Kreativ)</span>

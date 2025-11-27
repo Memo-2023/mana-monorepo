@@ -15,7 +15,7 @@
 	logo={MemoroLogo}
 	primaryColor="#f8d62b"
 	onForgotPassword={handleForgotPassword}
-	goto={goto}
+	{goto}
 	loginPath="/login"
 	lightBackground="#dddddd"
 	darkBackground="#101010"

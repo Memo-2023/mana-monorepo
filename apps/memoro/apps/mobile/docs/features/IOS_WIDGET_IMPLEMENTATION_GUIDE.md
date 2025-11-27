@@ -7,6 +7,7 @@ Diese Anleitung erklärt, wie Sie iOS Home Screen Widgets und Live Activities f�
 ## Voraussetzungen
 
 ### System Requirements
+
 - **macOS 15 Sequoia** oder höher
 - **Xcode 16** oder höher
 - **CocoaPods 1.16.2** oder höher (Ruby 3.2.0+)
@@ -15,6 +16,7 @@ Diese Anleitung erklärt, wie Sie iOS Home Screen Widgets und Live Activities f�
 - Apple Developer Account (für Device Testing)
 
 ### Development Build
+
 Widgets funktionieren **nicht** mit Expo Go. Sie benötigen einen Development Build:
 
 ```bash
@@ -40,6 +42,7 @@ npx create-target widget
 ```
 
 Dies generiert automatisch:
+
 - `/targets/widget/` Verzeichnis mit Swift-Dateien
 - Basis Widget-Konfiguration
 - Integration in app.json
@@ -48,29 +51,27 @@ Dies generiert automatisch:
 
 ```json
 {
-  "expo": {
-    "name": "Quote App",
-    "slug": "quote-app",
-    "version": "1.0.0",
-    "platforms": ["ios"],
-    "ios": {
-      "bundleIdentifier": "com.yourcompany.quoteapp",
-      "supportsTablet": true,
-      "entitlements": {
-        "com.apple.security.application-groups": [
-          "group.com.yourcompany.quoteapp.widget"
-        ]
-      }
-    },
-    "plugins": [
-      [
-        "@bacons/apple-targets",
-        {
-          "appleTeamId": "YOUR_TEAM_ID"
-        }
-      ]
-    ]
-  }
+	"expo": {
+		"name": "Quote App",
+		"slug": "quote-app",
+		"version": "1.0.0",
+		"platforms": ["ios"],
+		"ios": {
+			"bundleIdentifier": "com.yourcompany.quoteapp",
+			"supportsTablet": true,
+			"entitlements": {
+				"com.apple.security.application-groups": ["group.com.yourcompany.quoteapp.widget"]
+			}
+		},
+		"plugins": [
+			[
+				"@bacons/apple-targets",
+				{
+					"appleTeamId": "YOUR_TEAM_ID"
+				}
+			]
+		]
+	}
 }
 ```
 
@@ -79,30 +80,25 @@ Dies generiert automatisch:
 ```javascript
 /** @type {import('@bacons/apple-targets/app.plugin').Config} */
 module.exports = {
-  type: "widget",
-  name: "QuotesWidget",
-  bundleIdentifier: "$(PRODUCT_BUNDLE_IDENTIFIER).widget",
-  deploymentTarget: "16.0",
-  icon: "../../assets/widget-icon.png",
-  colors: {
-    $accent: { 
-      color: "#007AFF", 
-      darkColor: "#0A84FF" 
-    },
-    $widgetBackground: {
-      color: "#FFFFFF",
-      darkColor: "#1C1C1E"
-    }
-  },
-  entitlements: {
-    "com.apple.security.application-groups": [
-      "group.com.yourcompany.quoteapp.widget"
-    ]
-  },
-  frameworks: [
-    "SwiftUI",
-    "WidgetKit"
-  ]
+	type: 'widget',
+	name: 'QuotesWidget',
+	bundleIdentifier: '$(PRODUCT_BUNDLE_IDENTIFIER).widget',
+	deploymentTarget: '16.0',
+	icon: '../../assets/widget-icon.png',
+	colors: {
+		$accent: {
+			color: '#007AFF',
+			darkColor: '#0A84FF',
+		},
+		$widgetBackground: {
+			color: '#FFFFFF',
+			darkColor: '#1C1C1E',
+		},
+	},
+	entitlements: {
+		'com.apple.security.application-groups': ['group.com.yourcompany.quoteapp.widget'],
+	},
+	frameworks: ['SwiftUI', 'WidgetKit'],
 };
 ```
 
@@ -114,35 +110,35 @@ Falls Sie mehr Kontrolle benötigen, können Sie einen eigenen Config Plugin ers
 
 ```javascript
 const {
-  withXcodeProject,
-  withDangerousMod,
-  withEntitlementsPlist,
-  withInfoPlist,
-  IOSConfig
+	withXcodeProject,
+	withDangerousMod,
+	withEntitlementsPlist,
+	withInfoPlist,
+	IOSConfig,
 } = require('@expo/config-plugins');
 const fs = require('fs');
 const path = require('path');
 
 function withIOSWidget(config) {
-  // App Group hinzufügen
-  config = withEntitlementsPlist(config, async (config) => {
-    config.modResults['com.apple.security.application-groups'] = [
-      `group.${config.ios.bundleIdentifier}.widget`
-    ];
-    return config;
-  });
+	// App Group hinzufügen
+	config = withEntitlementsPlist(config, async (config) => {
+		config.modResults['com.apple.security.application-groups'] = [
+			`group.${config.ios.bundleIdentifier}.widget`,
+		];
+		return config;
+	});
 
-  // Widget Target zum Xcode Project hinzufügen
-  config = withXcodeProject(config, async (config) => {
-    const project = config.modResults;
-    
-    // Widget Target Configuration
-    // (Detaillierte Implementation hier)
-    
-    return config;
-  });
+	// Widget Target zum Xcode Project hinzufügen
+	config = withXcodeProject(config, async (config) => {
+		const project = config.modResults;
 
-  return config;
+		// Widget Target Configuration
+		// (Detaillierte Implementation hier)
+
+		return config;
+	});
+
+	return config;
 }
 
 module.exports = withIOSWidget;
@@ -167,7 +163,7 @@ struct QuoteEntry: TimelineEntry {
 // Widget Datenprovider
 struct QuoteProvider: TimelineProvider {
     let userDefaults = UserDefaults(suiteName: "group.com.yourcompany.quoteapp.widget")
-    
+
     func placeholder(in context: Context) -> QuoteEntry {
         QuoteEntry(
             date: Date(),
@@ -176,18 +172,18 @@ struct QuoteProvider: TimelineProvider {
             category: "Innovation"
         )
     }
-    
+
     func getSnapshot(in context: Context, completion: @escaping (QuoteEntry) -> ()) {
         let entry = getQuoteFromStorage() ?? placeholder(in: context)
         completion(entry)
     }
-    
+
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
         var entries: [QuoteEntry] = []
-        
+
         // Quotes aus UserDefaults laden
         let quotes = loadQuotesFromUserDefaults()
-        
+
         // Timeline mit stündlichen Updates erstellen
         let currentDate = Date()
         for hourOffset in 0..<24 {
@@ -200,11 +196,11 @@ struct QuoteProvider: TimelineProvider {
                 category: quote.category
             ))
         }
-        
+
         let timeline = Timeline(entries: entries, policy: .atEnd)
         completion(timeline)
     }
-    
+
     private func loadQuotesFromUserDefaults() -> [QuoteModel] {
         guard let data = userDefaults?.data(forKey: "savedQuotes"),
               let quotes = try? JSONDecoder().decode([QuoteModel].self, from: data) else {
@@ -212,14 +208,14 @@ struct QuoteProvider: TimelineProvider {
         }
         return quotes
     }
-    
+
     private func defaultQuotes() -> [QuoteModel] {
         return [
-            QuoteModel(quote: "Innovation distinguishes between a leader and a follower.", 
-                      author: "Steve Jobs", 
+            QuoteModel(quote: "Innovation distinguishes between a leader and a follower.",
+                      author: "Steve Jobs",
                       category: "Leadership"),
-            QuoteModel(quote: "The only way to do great work is to love what you do.", 
-                      author: "Steve Jobs", 
+            QuoteModel(quote: "The only way to do great work is to love what you do.",
+                      author: "Steve Jobs",
                       category: "Motivation")
         ]
     }
@@ -229,7 +225,7 @@ struct QuoteProvider: TimelineProvider {
 struct QuotesWidgetView : View {
     var entry: QuoteProvider.Entry
     @Environment(\.widgetFamily) var family
-    
+
     var body: some View {
         switch family {
         case .systemSmall:
@@ -247,16 +243,16 @@ struct QuotesWidgetView : View {
 // Small Widget Layout
 struct SmallWidgetView: View {
     let entry: QuoteEntry
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(entry.quote)
                 .font(.system(size: 14, weight: .medium))
                 .lineLimit(3)
                 .foregroundColor(.primary)
-            
+
             Spacer()
-            
+
             Text("— \(entry.author)")
                 .font(.system(size: 12))
                 .foregroundColor(.secondary)
@@ -276,7 +272,7 @@ struct SmallWidgetView: View {
 // Medium Widget Layout
 struct MediumWidgetView: View {
     let entry: QuoteEntry
-    
+
     var body: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 8) {
@@ -285,19 +281,19 @@ struct MediumWidgetView: View {
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(.blue)
                 }
-                
+
                 Text(entry.quote)
                     .font(.system(size: 16, weight: .medium))
                     .lineLimit(3)
                     .foregroundColor(.primary)
-                
+
                 Text("— \(entry.author)")
                     .font(.system(size: 14))
                     .foregroundColor(.secondary)
             }
-            
+
             Spacer()
-            
+
             Image(systemName: "quote.bubble.fill")
                 .font(.system(size: 30))
                 .foregroundColor(.blue.opacity(0.3))
@@ -313,7 +309,7 @@ struct MediumWidgetView: View {
 @main
 struct QuotesWidget: Widget {
     let kind: String = "QuotesWidget"
-    
+
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: QuoteProvider()) { entry in
             QuotesWidgetView(entry: entry)
@@ -353,69 +349,61 @@ import SharedGroupPreferences from 'react-native-shared-group-preferences';
 const APP_GROUP = 'group.com.yourcompany.quoteapp.widget';
 
 export class WidgetDataManager {
-  static async saveQuotesToWidget(quotes: Quote[]): Promise<void> {
-    try {
-      const quotesData = JSON.stringify(quotes);
-      await SharedGroupPreferences.setItem(
-        'savedQuotes',
-        quotesData,
-        APP_GROUP
-      );
-      
-      // Widget Update triggern (iOS 14+)
-      if (Platform.OS === 'ios') {
-        const WidgetKit = NativeModules.WidgetKit;
-        WidgetKit?.reloadAllTimelines();
-      }
-    } catch (error) {
-      console.error('Failed to save quotes to widget:', error);
-    }
-  }
+	static async saveQuotesToWidget(quotes: Quote[]): Promise<void> {
+		try {
+			const quotesData = JSON.stringify(quotes);
+			await SharedGroupPreferences.setItem('savedQuotes', quotesData, APP_GROUP);
 
-  static async saveDailyQuote(quote: Quote): Promise<void> {
-    try {
-      const quoteData = JSON.stringify({
-        ...quote,
-        date: new Date().toISOString()
-      });
-      
-      await SharedGroupPreferences.setItem(
-        'dailyQuote',
-        quoteData,
-        APP_GROUP
-      );
-      
-      // Widget aktualisieren
-      this.refreshWidget();
-    } catch (error) {
-      console.error('Failed to save daily quote:', error);
-    }
-  }
+			// Widget Update triggern (iOS 14+)
+			if (Platform.OS === 'ios') {
+				const WidgetKit = NativeModules.WidgetKit;
+				WidgetKit?.reloadAllTimelines();
+			}
+		} catch (error) {
+			console.error('Failed to save quotes to widget:', error);
+		}
+	}
 
-  static async saveUserPreferences(preferences: WidgetPreferences): Promise<void> {
-    try {
-      await SharedGroupPreferences.setItem(
-        'widgetPreferences',
-        JSON.stringify(preferences),
-        APP_GROUP
-      );
-    } catch (error) {
-      console.error('Failed to save widget preferences:', error);
-    }
-  }
+	static async saveDailyQuote(quote: Quote): Promise<void> {
+		try {
+			const quoteData = JSON.stringify({
+				...quote,
+				date: new Date().toISOString(),
+			});
 
-  static refreshWidget(): void {
-    if (Platform.OS === 'ios') {
-      NativeModules.WidgetKit?.reloadAllTimelines();
-    }
-  }
+			await SharedGroupPreferences.setItem('dailyQuote', quoteData, APP_GROUP);
+
+			// Widget aktualisieren
+			this.refreshWidget();
+		} catch (error) {
+			console.error('Failed to save daily quote:', error);
+		}
+	}
+
+	static async saveUserPreferences(preferences: WidgetPreferences): Promise<void> {
+		try {
+			await SharedGroupPreferences.setItem(
+				'widgetPreferences',
+				JSON.stringify(preferences),
+				APP_GROUP
+			);
+		} catch (error) {
+			console.error('Failed to save widget preferences:', error);
+		}
+	}
+
+	static refreshWidget(): void {
+		if (Platform.OS === 'ios') {
+			NativeModules.WidgetKit?.reloadAllTimelines();
+		}
+	}
 }
 
 interface WidgetPreferences {
-  updateFrequency: 'hourly' | 'daily' | 'manual';
-  categories: string[];
-  theme: 'light' | 'dark' | 'auto';
-  fontSize: 'small' | 'medium' | 'large';
+	updateFrequency: 'hourly' | 'daily' | 'manual';
+	categories: string[];
+	theme: 'light' | 'dark' | 'auto';
+	fontSize: 'small' | 'medium' | 'large';
 }
 ```
 
@@ -426,34 +414,32 @@ import { WidgetDataManager } from './widgetDataManager';
 
 // In Ihrem bestehenden Store
 const useQuotesStore = create<QuotesState>()(
-  persist(
-    (set, get) => ({
-      // ... existing state ...
-      
-      toggleFavorite: async (quoteId: string) => {
-        set((state) => {
-          const newFavorites = state.favorites.includes(quoteId)
-            ? state.favorites.filter(id => id !== quoteId)
-            : [...state.favorites, quoteId];
-          
-          // Widget mit aktualisierten Favoriten updaten
-          const favoriteQuotes = state.quotes.filter(q => 
-            newFavorites.includes(q.id)
-          );
-          WidgetDataManager.saveQuotesToWidget(favoriteQuotes);
-          
-          return { favorites: newFavorites };
-        });
-      },
+	persist(
+		(set, get) => ({
+			// ... existing state ...
 
-      setDailyQuote: async (quote: Quote) => {
-        // Daily Quote im Widget speichern
-        await WidgetDataManager.saveDailyQuote(quote);
-        set({ dailyQuote: quote });
-      },
-    }),
-    // ... persist config ...
-  )
+			toggleFavorite: async (quoteId: string) => {
+				set((state) => {
+					const newFavorites = state.favorites.includes(quoteId)
+						? state.favorites.filter((id) => id !== quoteId)
+						: [...state.favorites, quoteId];
+
+					// Widget mit aktualisierten Favoriten updaten
+					const favoriteQuotes = state.quotes.filter((q) => newFavorites.includes(q.id));
+					WidgetDataManager.saveQuotesToWidget(favoriteQuotes);
+
+					return { favorites: newFavorites };
+				});
+			},
+
+			setDailyQuote: async (quote: Quote) => {
+				// Daily Quote im Widget speichern
+				await WidgetDataManager.saveDailyQuote(quote);
+				set({ dailyQuote: quote });
+			},
+		})
+		// ... persist config ...
+	)
 );
 ```
 
@@ -469,21 +455,21 @@ import WidgetKit
 
 @objc(WidgetKitModule)
 class WidgetKitModule: NSObject {
-  
+
   @objc
   func reloadAllTimelines() {
     if #available(iOS 14.0, *) {
       WidgetCenter.shared.reloadAllTimelines()
     }
   }
-  
+
   @objc
   func reloadTimelines(_ widgetKind: String) {
     if #available(iOS 14.0, *) {
       WidgetCenter.shared.reloadTimelines(ofKind: widgetKind)
     }
   }
-  
+
   @objc
   static func requiresMainQueueSetup() -> Bool {
     return false
@@ -509,6 +495,7 @@ RCT_EXTERN_METHOD(reloadTimelines:(NSString *)widgetKind)
 ### 1. Widget Sizes und Layouts
 
 iOS unterstützt verschiedene Widget-Größen:
+
 - **Small**: 2x2 Grid (minimaler Inhalt)
 - **Medium**: 4x2 Grid (mehr Details)
 - **Large**: 4x4 Grid (vollständiger Inhalt)
@@ -520,7 +507,7 @@ iOS unterstützt verschiedene Widget-Größen:
 // In QuoteProvider
 func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
     let updatePolicy: TimelineReloadPolicy
-    
+
     // Update-Frequenz basierend auf User Preferences
     if let updateFrequency = userDefaults?.string(forKey: "updateFrequency") {
         switch updateFrequency {
@@ -534,7 +521,7 @@ func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) ->
     } else {
         updatePolicy = .atEnd
     }
-    
+
     let timeline = Timeline(entries: entries, policy: updatePolicy)
     completion(timeline)
 }
@@ -548,7 +535,7 @@ Widget-Taps können die App mit spezifischen Inhalten öffnen:
 // Widget View mit Link
 struct QuoteWidgetView: View {
     var entry: QuoteEntry
-    
+
     var body: some View {
         VStack {
             // Widget Content
@@ -565,20 +552,20 @@ import { Linking } from 'react-native';
 
 // In App.tsx
 useEffect(() => {
-  const handleDeepLink = (url: string) => {
-    const route = url.replace('quoteapp://', '');
-    if (route.startsWith('quote/')) {
-      const quoteId = route.replace('quote/', '');
-      // Navigate to quote details
-      navigation.navigate('QuoteDetail', { quoteId });
-    }
-  };
+	const handleDeepLink = (url: string) => {
+		const route = url.replace('quoteapp://', '');
+		if (route.startsWith('quote/')) {
+			const quoteId = route.replace('quote/', '');
+			// Navigate to quote details
+			navigation.navigate('QuoteDetail', { quoteId });
+		}
+	};
 
-  const subscription = Linking.addEventListener('url', ({ url }) => {
-    handleDeepLink(url);
-  });
+	const subscription = Linking.addEventListener('url', ({ url }) => {
+		handleDeepLink(url);
+	});
 
-  return () => subscription.remove();
+	return () => subscription.remove();
 }, []);
 ```
 
@@ -594,7 +581,7 @@ struct QuoteLiveActivityAttributes: ActivityAttributes {
         var author: String
         var expiresAt: Date
     }
-    
+
     var category: String
 }
 
@@ -624,6 +611,7 @@ npx expo run:ios
 ### 2. Debug Console Logs
 
 In widget.swift:
+
 ```swift
 import os.log
 
@@ -648,7 +636,7 @@ struct QuotesWidget_Previews: PreviewProvider {
                 category: "Preview"
             ))
             .previewContext(WidgetPreviewContext(family: .systemSmall))
-            
+
             QuotesWidgetView(entry: QuoteEntry(
                 date: Date(),
                 quote: "Preview Quote",
@@ -666,6 +654,7 @@ struct QuotesWidget_Previews: PreviewProvider {
 ### Problem 1: Widget zeigt keine Daten
 
 **Lösung:**
+
 1. Überprüfen Sie App Group Configuration
 2. Stellen Sie sicher, dass beide Targets dieselbe App Group verwenden
 3. Prüfen Sie UserDefaults Suite Name
@@ -673,20 +662,22 @@ struct QuotesWidget_Previews: PreviewProvider {
 ### Problem 2: Widget Updates nicht
 
 **Lösung:**
+
 ```typescript
 // Force Widget Reload
 import { NativeModules } from 'react-native';
 
 const forceWidgetUpdate = () => {
-  if (Platform.OS === 'ios') {
-    NativeModules.WidgetKit?.reloadAllTimelines();
-  }
+	if (Platform.OS === 'ios') {
+		NativeModules.WidgetKit?.reloadAllTimelines();
+	}
 };
 ```
 
 ### Problem 3: Build Fehler nach Widget Addition
 
 **Lösung:**
+
 ```bash
 # Clean Build
 cd ios
@@ -699,6 +690,7 @@ npx expo run:ios --clear
 ### Problem 4: Widget erscheint nicht in Widget Gallery
 
 **Lösung:**
+
 - Minimum Deployment Target prüfen (iOS 14.0+)
 - Info.plist Einträge verifizieren
 - Bundle Identifier Format überprüfen
@@ -723,17 +715,17 @@ func prepareImageForWidget(_ image: UIImage, size: CGSize) -> UIImage? {
 ```typescript
 // Efficient Data Storage
 class WidgetCache {
-  static async cacheQuotes(quotes: Quote[]) {
-    // Nur die nötigen Felder speichern
-    const minimalQuotes = quotes.map(q => ({
-      id: q.id,
-      quote: q.quote.substring(0, 200), // Limit text length
-      author: q.author,
-      category: q.category
-    }));
-    
-    await WidgetDataManager.saveQuotesToWidget(minimalQuotes);
-  }
+	static async cacheQuotes(quotes: Quote[]) {
+		// Nur die nötigen Felder speichern
+		const minimalQuotes = quotes.map((q) => ({
+			id: q.id,
+			quote: q.quote.substring(0, 200), // Limit text length
+			author: q.author,
+			category: q.category,
+		}));
+
+		await WidgetDataManager.saveQuotesToWidget(minimalQuotes);
+	}
 }
 ```
 
@@ -743,7 +735,7 @@ class WidgetCache {
 // Intelligente Timeline Generation
 func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
     let entries: [QuoteEntry]
-    
+
     if context.isPreview {
         // Minimal entries for preview
         entries = [getPlaceholderEntry()]
@@ -754,7 +746,7 @@ func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) ->
         // Standard timeline
         entries = generateEntries(count: 24)
     }
-    
+
     let timeline = Timeline(entries: entries, policy: .atEnd)
     completion(timeline)
 }
@@ -789,16 +781,19 @@ func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) ->
 ## Ressourcen und Weiterführende Links
 
 ### Offizielle Dokumentation
+
 - [Apple WidgetKit Documentation](https://developer.apple.com/documentation/widgetkit)
 - [Expo Config Plugins](https://docs.expo.dev/config-plugins/introduction/)
 - [React Native Share Extension](https://github.com/alinz/react-native-share-extension)
 
 ### Community Resources
+
 - [Evan Bacon's Apple Targets Plugin](https://github.com/EvanBacon/expo-apple-targets)
 - [EAS Widget Example](https://github.com/gaishimo/eas-widget-example)
 - [React Native Widget Bridge](https://github.com/fasky-software/react-native-widget-bridge)
 
 ### Tutorials und Beispiele
+
 - [SwiftUI Widget Tutorial](https://www.hackingwithswift.com/books/ios-swiftui/introduction-to-widgetkit)
 - [Expo Managed Workflow Widgets](https://www.peterarontoth.com/posts/interactive-widgets-in-expo-managed-workflows)
 

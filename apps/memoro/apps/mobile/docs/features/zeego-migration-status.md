@@ -3,17 +3,20 @@
 ## Abgeschlossen ✅
 
 ### Dependencies
+
 - [x] Zeego deinstalliert
 - [x] react-native-ios-context-menu deinstalliert
 - [x] react-native-ios-utilities deinstalliert
 - [x] @react-native-menu/menu@2.0.0 bereits vorhanden
 
 ### Utility Components
+
 - [x] `config/menuActions.ts` - Zentralisierte Menu Actions
 - [x] `utils/menuBuilder.ts` - Menu Action Builder
 - [x] `components/ui/NativeMenu.tsx` - Wiederverwendbare Wrapper-Komponente
 
 ### Dropdown Menus (3/11 migriert)
+
 - [x] `features/menus/HeaderMenu.tsx`
 - [x] `features/menus/MemoMenu.tsx`
 - [x] `features/menus/MemoHeaderMenu.tsx`
@@ -24,6 +27,7 @@
 - [ ] Weitere 4 Komponenten (noch zu identifizieren)
 
 ### Context Menus (0/4 migriert)
+
 - [ ] `components/organisms/Memory.tsx`
 - [ ] `components/molecules/PromptPreview.tsx`
 - [ ] `components/molecules/MemoPreview.tsx`
@@ -40,6 +44,7 @@
 ## Migration Pattern
 
 ### Dropdown Menu (Tap)
+
 ```tsx
 // Vorher
 import * as DropdownMenu from 'zeego/dropdown-menu';
@@ -48,26 +53,28 @@ import * as DropdownMenu from 'zeego/dropdown-menu';
 import { MenuView } from '@react-native-menu/menu';
 
 <MenuView
-  actions={actions}
-  onPressAction={({ nativeEvent }) => handleAction(nativeEvent.event)}
-  shouldOpenOnLongPress={false}  // Dropdown = tap
+	actions={actions}
+	onPressAction={({ nativeEvent }) => handleAction(nativeEvent.event)}
+	shouldOpenOnLongPress={false} // Dropdown = tap
 >
-  {children}
-</MenuView>
+	{children}
+</MenuView>;
 ```
 
 ### Context Menu (Long Press)
+
 ```tsx
 <MenuView
-  actions={actions}
-  onPressAction={({ nativeEvent }) => handleAction(nativeEvent.event)}
-  shouldOpenOnLongPress={true}  // Context = long press (default)
+	actions={actions}
+	onPressAction={({ nativeEvent }) => handleAction(nativeEvent.event)}
+	shouldOpenOnLongPress={true} // Context = long press (default)
 >
-  {children}
+	{children}
 </MenuView>
 ```
 
 ## Web Fallbacks
+
 Alle migrierten Komponenten behalten ihre bestehenden Web-Implementierungen (Custom Modals).
 
 ---

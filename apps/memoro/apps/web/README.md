@@ -13,6 +13,7 @@ Web companion application for Memoro, built with SvelteKit. This is a hybrid arc
 ## Features
 
 ### Core Features
+
 - Authentication (Email/Password + OAuth)
 - Audio recording (Web Audio API)
 - Memo management (CRUD operations)
@@ -23,6 +24,7 @@ Web companion application for Memoro, built with SvelteKit. This is a hybrid arc
 - Responsive design
 
 ### Web-Specific Features
+
 - Progressive Web App (PWA) support
 - Server-Side Rendering (SSR)
 - SEO optimization
@@ -40,16 +42,19 @@ Web companion application for Memoro, built with SvelteKit. This is a hybrid arc
 
 1. Clone the repository
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Copy `.env.example` to `.env` and add your Supabase credentials:
+
    ```bash
    cp .env.example .env
    ```
 
 4. Start the development server:
+
    ```bash
    npm run dev
    ```

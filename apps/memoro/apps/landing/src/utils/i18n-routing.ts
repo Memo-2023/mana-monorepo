@@ -7,7 +7,7 @@
 import type { GetStaticPathsResult } from 'astro';
 
 export interface LangParam {
-  lang: 'de' | 'en';
+	lang: 'de' | 'en';
 }
 
 /**
@@ -17,10 +17,10 @@ export interface LangParam {
  * - English: /en/path
  */
 export function getI18nStaticPaths(): GetStaticPathsResult {
-  return [
-    { params: { lang: 'de' as const }, props: { lang: 'de' as const } },
-    { params: { lang: 'en' as const }, props: { lang: 'en' as const } }
-  ];
+	return [
+		{ params: { lang: 'de' as const }, props: { lang: 'de' as const } },
+		{ params: { lang: 'en' as const }, props: { lang: 'en' as const } },
+	];
 }
 
 /**
@@ -29,24 +29,24 @@ export function getI18nStaticPaths(): GetStaticPathsResult {
  * @param additionalProps Additional props to pass to each page
  */
 export function getI18nStaticPathsWithSlug<T extends { slug: string; lang: 'de' | 'en' }>(
-  items: T[],
-  additionalProps?: (item: T) => Record<string, any>
+	items: T[],
+	additionalProps?: (item: T) => Record<string, any>
 ): GetStaticPathsResult {
-  return items.map(item => ({
-    params: { 
-      lang: item.lang,
-      slug: item.slug 
-    },
-    props: {
-      lang: item.lang,
-      ...additionalProps?.(item)
-    }
-  }));
+	return items.map((item) => ({
+		params: {
+			lang: item.lang,
+			slug: item.slug,
+		},
+		props: {
+			lang: item.lang,
+			...additionalProps?.(item),
+		},
+	}));
 }
 
 /**
  * Check if we're in the build process
  */
 export function isBuild(): boolean {
-  return import.meta.env.PROD || process.env.NODE_ENV === 'production';
+	return import.meta.env.PROD || process.env.NODE_ENV === 'production';
 }

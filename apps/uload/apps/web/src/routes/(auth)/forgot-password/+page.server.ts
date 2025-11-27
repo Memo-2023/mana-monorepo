@@ -6,7 +6,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	// If user is already logged in, they don't need password reset
 	if (locals.user) {
 		return {
-			user: locals.user
+			user: locals.user,
 		};
 	}
 };
@@ -37,7 +37,7 @@ export const actions = {
 			// Always return success to prevent email enumeration
 			// Even if the email doesn't exist, we show success
 			return {
-				success: true
+				success: true,
 			};
 		} catch (err: any) {
 			console.error('Password reset request error:', err);
@@ -45,8 +45,8 @@ export const actions = {
 			// Don't expose specific errors to prevent email enumeration
 			// Always show generic success message
 			return {
-				success: true
+				success: true,
 			};
 		}
-	}
+	},
 } satisfies Actions;

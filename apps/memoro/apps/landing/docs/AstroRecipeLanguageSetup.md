@@ -28,6 +28,7 @@ Set up src/pages/index.astro to redirect to your default language.
 Static
 SSR
 src/pages/index.astro
+
 <meta http-equiv="refresh" content="0;url=/en/" />
 
 This approach uses a meta refresh and will work however you deploy your site. Some static hosts also let you configure server redirects with a custom configuration file. See your deploy platform’s documentation for more details.
@@ -52,15 +53,15 @@ src/content.config.ts
 import { defineCollection, z } from 'astro:content';
 
 const blogCollection = defineCollection({
-  schema: z.object({
-    title: z.string(),
-    author: z.string(),
-    date: z.date()
-  })
+schema: z.object({
+title: z.string(),
+author: z.string(),
+date: z.date()
+})
 });
 
 export const collections = {
-  'blog': blogCollection
+'blog': blogCollection
 };
 
 Read more about Content Collections.
@@ -70,27 +71,27 @@ Static
 SSR
 In static rendering mode, use getStaticPaths to map each content entry to a page:
 
-src/pages/[lang]/blog/[...slug].astro
----
+## src/pages/[lang]/blog/[...slug].astro
+
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
-  const pages = await getCollection('blog');
+const pages = await getCollection('blog');
 
-  const paths = pages.map(page => {
-    const [lang, ...slug] = page.slug.split('/');
-    return { params: { lang, slug: slug.join('/') || undefined }, props: page };
-  });
+const paths = pages.map(page => {
+const [lang, ...slug] = page.slug.split('/');
+return { params: { lang, slug: slug.join('/') || undefined }, props: page };
+});
 
-  return paths;
+return paths;
 }
 
 const { lang, slug } = Astro.params;
 const page = Astro.props;
 const formattedDate = page.data.date.toLocaleString(lang);
 
-const { Content } = await page.render();
----
+## const { Content } = await page.render();
+
 <h1>{page.data.title}</h1>
 <p>by {page.data.author} • {formattedDate}</p>
 <Content/>
@@ -107,22 +108,22 @@ Create a src/i18n/ui.ts file to store your translation strings:
 
 src/i18n/ui.ts
 export const languages = {
-  en: 'English',
-  fr: 'Français',
+en: 'English',
+fr: 'Français',
 };
 
 export const defaultLang = 'en';
 
 export const ui = {
-  en: {
-    'nav.home': 'Home',
-    'nav.about': 'About',
-    'nav.twitter': 'Twitter',
-  },
-  fr: {
-    'nav.home': 'Accueil',
-    'nav.about': 'À propos',
-  },
+en: {
+'nav.home': 'Home',
+'nav.about': 'About',
+'nav.twitter': 'Twitter',
+},
+fr: {
+'nav.home': 'Accueil',
+'nav.about': 'À propos',
+},
 } as const;
 
 Create two helper functions: one to detect the page language based on the current URL, and one to get translations strings for different parts of the UI in src/i18n/utils.ts:
@@ -131,15 +132,15 @@ src/i18n/utils.ts
 import { ui, defaultLang } from './ui';
 
 export function getLangFromUrl(url: URL) {
-  const [, lang] = url.pathname.split('/');
-  if (lang in ui) return lang as keyof typeof ui;
-  return defaultLang;
+const [, lang] = url.pathname.split('/');
+if (lang in ui) return lang as keyof typeof ui;
+return defaultLang;
 }
 
 export function useTranslations(lang: keyof typeof ui) {
-  return function t(key: keyof typeof ui[typeof defaultLang]) {
-    return ui[lang][key] || ui[defaultLang][key];
-  }
+return function t(key: keyof typeof ui[typeof defaultLang]) {
+return ui[lang][key] || ui[defaultLang][key];
+}
 }
 
 Did you notice?
@@ -148,13 +149,15 @@ In step 1, the nav.twitter string was not translated to French. You may not want
 
 Import the helpers where needed and use them to choose the UI string that corresponds to the current language. For example, a nav component might look like:
 
-src/components/Nav.astro
----
+## src/components/Nav.astro
+
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
+
 ---
+
 <ul>
     <li>
         <a href={`/${lang}/home/`}>
@@ -175,12 +178,12 @@ const t = useTranslations(lang);
 
 Each page must have a lang attribute on the <html> element that matches the language on the page. In this example, a reusable layout extracts the language from the current route:
 
-src/layouts/Base.astro
----
+## src/layouts/Base.astro
+
 import { getLangFromUrl } from '../i18n/utils';
 
-const lang = getLangFromUrl(Astro.url);
----
+## const lang = getLangFromUrl(Astro.url);
+
 <html lang={lang}>
     <head>
         <meta charset="utf-8" />
@@ -195,10 +198,10 @@ const lang = getLangFromUrl(Astro.url);
 
 You can then use this base layout to ensure that pages use the correct lang attribute automatically.
 
-src/pages/en/about.astro
----
-import Base from '../../layouts/Base.astro';
----
+## src/pages/en/about.astro
+
+## import Base from '../../layouts/Base.astro';
+
 <Base>
     <h1>About me</h1>
     ...
@@ -209,10 +212,10 @@ Create links to the different languages you support so users can choose the lang
 
 Create a component to show a link for each language:
 
-src/components/LanguagePicker.astro
----
-import { languages } from '../i18n/ui';
----
+## src/components/LanguagePicker.astro
+
+## import { languages } from '../i18n/ui';
+
 <ul>
   {Object.entries(languages).map(([lang, label]) => (
     <li>
@@ -223,13 +226,13 @@ import { languages } from '../i18n/ui';
 
 Add <LanguagePicker /> to your site so it is shown on every page. The example below adds it to the site footer in a base layout:
 
-src/layouts/Base.astro
----
+## src/layouts/Base.astro
+
 import LanguagePicker from '../components/LanguagePicker.astro';
 import { getLangFromUrl } from '../i18n/utils';
 
-const lang = getLangFromUrl(Astro.url);
----
+## const lang = getLangFromUrl(Astro.url);
+
 <html lang={lang}>
     <head>
         <meta charset="utf-8" />
@@ -266,21 +269,23 @@ src/i18n/utils.ts
 import { ui, defaultLang, showDefaultLang } from './ui';
 
 export function useTranslatedPath(lang: keyof typeof ui) {
-  return function translatePath(path: string, l: string = lang) {
-    return !showDefaultLang && l === defaultLang ? path : `/${l}${path}`
-  }
+return function translatePath(path: string, l: string = lang) {
+return !showDefaultLang && l === defaultLang ? path : `/${l}${path}`
+}
 }
 
 Import the helper where needed. For example, a nav component might look like:
 
-src/components/Nav.astro
----
+## src/components/Nav.astro
+
 import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
+
 ---
+
 <ul>
     <li>
         <a href={translatePath('/home/')}>
@@ -301,14 +306,16 @@ const translatePath = useTranslatedPath(lang);
 
 The helper function can also be used to translate paths for a specific language. For example, when users switch between languages:
 
-src/components/LanguagePicker.astro
----
+## src/components/LanguagePicker.astro
+
 import { languages } from '../i18n/ui';
 import { getLangFromUrl, useTranslatedPath } from '../i18n/utils';
 
 const lang = getLangFromUrl(Astro.url);
 const translatePath = useTranslatedPath(lang);
+
 ---
+
 <ul>
   {Object.entries(languages).map(([lang, label]) => (
     <li>
@@ -324,12 +331,12 @@ Add route mappings to src/i18n/ui.ts:
 
 src/i18n/ui.ts
 export const routes = {
-  de: {
-    'services': 'leistungen',
-  },
-  fr: {
-    'services': 'prestations-de-service',
-  },
+de: {
+'services': 'leistungen',
+},
+fr: {
+'services': 'prestations-de-service',
+},
 }
 
 Update the useTranslatedPath helper function in src/i18n/utils.ts to add router translation logic.
@@ -338,13 +345,14 @@ src/i18n/utils.ts
 import { ui, defaultLang, showDefaultLang, routes } from './ui';
 
 export function useTranslatedPath(lang: keyof typeof ui) {
-  return function translatePath(path: string, l: string = lang) {
-    const pathName = path.replaceAll('/', '')
-    const hasTranslation = defaultLang !== l && routes[l] !== undefined && routes[l][pathName] !== undefined
-    const translatedPath = hasTranslation ? '/' + routes[l][pathName] : path
+return function translatePath(path: string, l: string = lang) {
+const pathName = path.replaceAll('/', '')
+const hasTranslation = defaultLang !== l && routes[l] !== undefined && routes[l][pathName] !== undefined
+const translatedPath = hasTranslation ? '/' + routes[l][pathName] : path
 
     return !showDefaultLang && l === defaultLang ? translatedPath : `/${l}${translatedPath}`
-  }
+
+}
 }
 
 Create a helper function to get the route, if it exists based on the current URL, in src/i18n/utils.ts:
@@ -353,43 +361,43 @@ src/i18n/utils.ts
 import { ui, defaultLang, showDefaultLang, routes } from './ui';
 
 export function getRouteFromUrl(url: URL): string | undefined {
-  const pathname = new URL(url).pathname;
-  const parts = pathname?.split('/');
-  const path = parts.pop() || parts.pop();
+const pathname = new URL(url).pathname;
+const parts = pathname?.split('/');
+const path = parts.pop() || parts.pop();
 
-  if (path === undefined) {
-    return undefined;
-  }
+if (path === undefined) {
+return undefined;
+}
 
-  const currentLang = getLangFromUrl(url);
+const currentLang = getLangFromUrl(url);
 
-  if (defaultLang === currentLang) {
-    const route = Object.values(routes)[0];
-    return route[path] !== undefined ? route[path] : undefined;
-  }
+if (defaultLang === currentLang) {
+const route = Object.values(routes)[0];
+return route[path] !== undefined ? route[path] : undefined;
+}
 
-  const getKeyByValue = (obj: Record<string, string>, value: string): string | undefined  => {
-      return Object.keys(obj).find((key) => obj[key] === value);
-  }
+const getKeyByValue = (obj: Record<string, string>, value: string): string | undefined => {
+return Object.keys(obj).find((key) => obj[key] === value);
+}
 
-  const reversedKey = getKeyByValue(routes[currentLang], path);
+const reversedKey = getKeyByValue(routes[currentLang], path);
 
-  if (reversedKey !== undefined) {
-    return reversedKey;
-  }
+if (reversedKey !== undefined) {
+return reversedKey;
+}
 
-  return undefined;
+return undefined;
 }
 
 The helper function can be used to get a translated route. For example, when no translated route is defined, the user will be redirected to the home page:
 
-src/components/LanguagePicker.astro
----
+## src/components/LanguagePicker.astro
+
 import { languages } from '../i18n/ui';
 import { getRouteFromUrl } from '../i18n/utils';
 
-const route = getRouteFromUrl(Astro.url);
----
+## const route = getRouteFromUrl(Astro.url);
+
 <ul>
   {Object.entries(languages).map(([lang, label]) => (
     <li>

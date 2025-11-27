@@ -68,7 +68,7 @@ export type {
 	CreditConsumptionResponse,
 	PricingResponse,
 	CreditUpdateCallback,
-	StandardOperationType
+	StandardOperationType,
 } from './types';
 
 // Constants

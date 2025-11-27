@@ -1,132 +1,132 @@
 {
-  "$schema": "https://json-schema.org/draft-07/schema#",
-  "name": "@memoro/mobile-ui",
-  "version": "0.1.0",
-  "framework": "react-native",
-  "description": "React Native UI component library for memoro mobile apps",
-  "components": {
-    "ui": {
-      "button": {
-        "name": "Button",
-        "files": ["Button.tsx"],
-        "category": "ui",
-        "dependencies": ["icon", "text"],
-        "description": "Pressable button with variants, sizes, and icon support"
-      },
-      "text": {
-        "name": "Text",
-        "files": ["Text.tsx"],
-        "category": "ui",
-        "dependencies": [],
-        "description": "Typography component with predefined variants and weights"
-      },
-      "icon": {
-        "name": "Icon",
-        "files": ["Icon.tsx"],
-        "category": "ui",
-        "dependencies": [],
-        "description": "Cross-platform icon component (SF Symbols on iOS, Ionicons elsewhere)"
-      },
-      "container": {
-        "name": "Container",
-        "files": ["Container.tsx"],
-        "category": "ui",
-        "dependencies": [],
-        "description": "Safe area container with flexible padding and background"
-      },
-      "empty-state": {
-        "name": "EmptyState",
-        "files": ["EmptyState.tsx"],
-        "category": "ui",
-        "dependencies": ["text", "icon"],
-        "description": "Empty state component for when there's no content"
-      },
-      "error-banner": {
-        "name": "ErrorBanner",
-        "files": ["ErrorBanner.tsx"],
-        "category": "ui",
-        "dependencies": ["text", "icon"],
-        "description": "Floating banner for error/warning/info/success messages"
-      },
-      "slider": {
-        "name": "Slider",
-        "files": ["Slider.tsx"],
-        "category": "ui",
-        "dependencies": [],
-        "description": "Interactive slider with smooth animations"
-      },
-      "skeleton": {
-        "name": "Skeleton",
-        "files": ["Skeleton.tsx"],
-        "category": "ui",
-        "dependencies": [],
-        "description": "Loading skeleton with shimmer animation"
-      },
-      "fab": {
-        "name": "FAB",
-        "files": ["FAB.tsx"],
-        "category": "ui",
-        "dependencies": ["icon"],
-        "description": "Floating Action Button with spring animation"
-      },
-      "tag": {
-        "name": "Tag",
-        "files": ["Tag.tsx"],
-        "category": "ui",
-        "dependencies": ["text", "icon"],
-        "description": "Tag/Chip component for labels and categories"
-      },
-      "badge": {
-        "name": "Badge",
-        "files": ["Badge.tsx"],
-        "category": "ui",
-        "dependencies": ["text"],
-        "description": "Notification badge for counts and status"
-      },
-      "card": {
-        "name": "Card",
-        "files": ["Card.tsx"],
-        "category": "ui",
-        "dependencies": [],
-        "description": "Container card with shadow and press interaction"
-      },
-      "select": {
-        "name": "Select",
-        "files": ["Select.tsx"],
-        "category": "ui",
-        "dependencies": ["text", "icon"],
-        "description": "Horizontal scrollable selector for choosing between options"
-      },
-      "toggle-group": {
-        "name": "ToggleGroup",
-        "files": ["ToggleGroup.tsx"],
-        "category": "ui",
-        "dependencies": ["text", "icon"],
-        "description": "Segmented control for mutually exclusive options"
-      }
-    },
-    "navigation": {
-      "header": {
-        "name": "Header",
-        "files": ["Header.tsx"],
-        "category": "navigation",
-        "dependencies": ["text", "icon"],
-        "description": "Navigation header with title, back button, and custom actions"
-      },
-      "header-button": {
-        "name": "HeaderButton",
-        "files": ["HeaderButton.tsx"],
-        "category": "navigation",
-        "dependencies": ["icon"],
-        "description": "Icon button for header actions"
-      },
-      "tab-bar-icon": {
-        "name": "TabBarIcon",
-        "files": ["TabBarIcon.tsx"],
-        "category": "navigation",
-        "dependencies": ["icon"],
-        "description": "Icon component optimized for tab bars"
-      }
-    }
-  }
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"name": "@memoro/mobile-ui",
+	"version": "0.1.0",
+	"framework": "react-native",
+	"description": "React Native UI component library for memoro mobile apps",
+	"components": {
+		"ui": {
+			"button": {
+				"name": "Button",
+				"files": ["Button.tsx"],
+				"category": "ui",
+				"dependencies": ["icon", "text"],
+				"description": "Pressable button with variants, sizes, and icon support"
+			},
+			"text": {
+				"name": "Text",
+				"files": ["Text.tsx"],
+				"category": "ui",
+				"dependencies": [],
+				"description": "Typography component with predefined variants and weights"
+			},
+			"icon": {
+				"name": "Icon",
+				"files": ["Icon.tsx"],
+				"category": "ui",
+				"dependencies": [],
+				"description": "Cross-platform icon component (SF Symbols on iOS, Ionicons elsewhere)"
+			},
+			"container": {
+				"name": "Container",
+				"files": ["Container.tsx"],
+				"category": "ui",
+				"dependencies": [],
+				"description": "Safe area container with flexible padding and background"
+			},
+			"empty-state": {
+				"name": "EmptyState",
+				"files": ["EmptyState.tsx"],
+				"category": "ui",
+				"dependencies": ["text", "icon"],
+				"description": "Empty state component for when there's no content"
+			},
+			"error-banner": {
+				"name": "ErrorBanner",
+				"files": ["ErrorBanner.tsx"],
+				"category": "ui",
+				"dependencies": ["text", "icon"],
+				"description": "Floating banner for error/warning/info/success messages"
+			},
+			"slider": {
+				"name": "Slider",
+				"files": ["Slider.tsx"],
+				"category": "ui",
+				"dependencies": [],
+				"description": "Interactive slider with smooth animations"
+			},
+			"skeleton": {
+				"name": "Skeleton",
+				"files": ["Skeleton.tsx"],
+				"category": "ui",
+				"dependencies": [],
+				"description": "Loading skeleton with shimmer animation"
+			},
+			"fab": {
+				"name": "FAB",
+				"files": ["FAB.tsx"],
+				"category": "ui",
+				"dependencies": ["icon"],
+				"description": "Floating Action Button with spring animation"
+			},
+			"tag": {
+				"name": "Tag",
+				"files": ["Tag.tsx"],
+				"category": "ui",
+				"dependencies": ["text", "icon"],
+				"description": "Tag/Chip component for labels and categories"
+			},
+			"badge": {
+				"name": "Badge",
+				"files": ["Badge.tsx"],
+				"category": "ui",
+				"dependencies": ["text"],
+				"description": "Notification badge for counts and status"
+			},
+			"card": {
+				"name": "Card",
+				"files": ["Card.tsx"],
+				"category": "ui",
+				"dependencies": [],
+				"description": "Container card with shadow and press interaction"
+			},
+			"select": {
+				"name": "Select",
+				"files": ["Select.tsx"],
+				"category": "ui",
+				"dependencies": ["text", "icon"],
+				"description": "Horizontal scrollable selector for choosing between options"
+			},
+			"toggle-group": {
+				"name": "ToggleGroup",
+				"files": ["ToggleGroup.tsx"],
+				"category": "ui",
+				"dependencies": ["text", "icon"],
+				"description": "Segmented control for mutually exclusive options"
+			}
+		},
+		"navigation": {
+			"header": {
+				"name": "Header",
+				"files": ["Header.tsx"],
+				"category": "navigation",
+				"dependencies": ["text", "icon"],
+				"description": "Navigation header with title, back button, and custom actions"
+			},
+			"header-button": {
+				"name": "HeaderButton",
+				"files": ["HeaderButton.tsx"],
+				"category": "navigation",
+				"dependencies": ["icon"],
+				"description": "Icon button for header actions"
+			},
+			"tab-bar-icon": {
+				"name": "TabBarIcon",
+				"files": ["TabBarIcon.tsx"],
+				"category": "navigation",
+				"dependencies": ["icon"],
+				"description": "Icon component optimized for tab bars"
+			}
+		}
+	}
 }

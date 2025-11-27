@@ -21,7 +21,13 @@ export default defineConfig({
 		include: ['src/**/*.{test,spec}.{js,ts}'],
 
 		// Exclude patterns
-		exclude: ['node_modules/**', 'dist/**', '**/*.d.ts', '**/__tests__/fixtures/**', '**/__tests__/utils/**'],
+		exclude: [
+			'node_modules/**',
+			'dist/**',
+			'**/*.d.ts',
+			'**/__tests__/fixtures/**',
+			'**/__tests__/utils/**',
+		],
 
 		// Test environment
 		environment: 'node',

@@ -62,7 +62,7 @@ export function createAuthError(message: string, originalError?: unknown): AuthE
 	return {
 		code: mapSupabaseErrorToCode(message),
 		message,
-		originalError
+		originalError,
 	};
 }
 
@@ -70,43 +70,43 @@ export function createAuthError(message: string, originalError?: unknown): AuthE
  * User session
  */
 export interface Session {
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: number;
-  user: AuthUser;
+	accessToken: string;
+	refreshToken: string;
+	expiresAt: number;
+	user: AuthUser;
 }
 
 /**
  * Authenticated user
  */
 export interface AuthUser {
-  id: string;
-  email: string;
-  emailConfirmed?: boolean;
-  phone?: string;
-  phoneConfirmed?: boolean;
-  createdAt: string;
-  updatedAt: string;
-  lastSignInAt?: string;
-  appMetadata?: Record<string, unknown>;
-  userMetadata?: Record<string, unknown>;
+	id: string;
+	email: string;
+	emailConfirmed?: boolean;
+	phone?: string;
+	phoneConfirmed?: boolean;
+	createdAt: string;
+	updatedAt: string;
+	lastSignInAt?: string;
+	appMetadata?: Record<string, unknown>;
+	userMetadata?: Record<string, unknown>;
 }
 
 /**
  * Sign in credentials
  */
 export interface SignInCredentials {
-  email: string;
-  password: string;
+	email: string;
+	password: string;
 }
 
 /**
  * Sign up credentials
  */
 export interface SignUpCredentials {
-  email: string;
-  password: string;
-  metadata?: Record<string, unknown>;
+	email: string;
+	password: string;
+	metadata?: Record<string, unknown>;
 }
 
 /**
@@ -118,35 +118,35 @@ export type OAuthProvider = 'google' | 'apple' | 'github' | 'facebook';
  * Auth result for operations
  */
 export interface AuthResult {
-  success: boolean;
-  error?: string;
-  session?: Session;
-  user?: AuthUser;
+	success: boolean;
+	error?: string;
+	session?: Session;
+	user?: AuthUser;
 }
 
 /**
  * Password reset request
  */
 export interface PasswordResetRequest {
-  email: string;
+	email: string;
 }
 
 /**
  * Password update request
  */
 export interface PasswordUpdateRequest {
-  password: string;
+	password: string;
 }
 
 /**
  * Auth context value
  */
 export interface AuthContextValue {
-  state: AuthState;
-  user: AuthUser | null;
-  session: Session | null;
-  signIn: (credentials: SignInCredentials) => Promise<AuthResult>;
-  signUp: (credentials: SignUpCredentials) => Promise<AuthResult>;
-  signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<AuthResult>;
+	state: AuthState;
+	user: AuthUser | null;
+	session: Session | null;
+	signIn: (credentials: SignInCredentials) => Promise<AuthResult>;
+	signUp: (credentials: SignUpCredentials) => Promise<AuthResult>;
+	signOut: () => Promise<void>;
+	resetPassword: (email: string) => Promise<AuthResult>;
 }

@@ -19,7 +19,7 @@ export const ripple: Action<HTMLElement, { color?: string; duration?: number }> 
 		// Erstelle neuen Ripple
 		rippleElement = document.createElement('div');
 		const rect = node.getBoundingClientRect();
-		
+
 		// Berechne Position des Touches/Clicks
 		let clientX: number, clientY: number;
 		if (event instanceof TouchEvent && event.touches.length > 0) {
@@ -50,7 +50,7 @@ export const ripple: Action<HTMLElement, { color?: string; duration?: number }> 
 			pointerEvents: 'none',
 			transform: 'scale(0)',
 			transition: `transform ${duration}ms ease-out, opacity ${duration}ms ease-out`,
-			zIndex: '1000'
+			zIndex: '1000',
 		});
 
 		// Stelle sicher, dass das Parent-Element relative Position hat
@@ -95,7 +95,7 @@ export const ripple: Action<HTMLElement, { color?: string; duration?: number }> 
 			if (rippleElement) {
 				rippleElement.remove();
 			}
-		}
+		},
 	};
 };
 
@@ -116,7 +116,7 @@ export const swipe: Action<HTMLElement, SwipeOptions> = (node, options = {}) => 
 		onSwipeLeft,
 		onSwipeRight,
 		onSwipeUp,
-		onSwipeDown
+		onSwipeDown,
 	} = options;
 
 	let startX: number;
@@ -176,7 +176,7 @@ export const swipe: Action<HTMLElement, SwipeOptions> = (node, options = {}) => 
 		destroy() {
 			node.removeEventListener('touchstart', handleTouchStart);
 			node.removeEventListener('touchend', handleTouchEnd);
-		}
+		},
 	};
 };
 
@@ -226,7 +226,7 @@ export const longPress: Action<HTMLElement, LongPressOptions> = (node, options =
 			node.removeEventListener('pointerup', cancelLongPress);
 			node.removeEventListener('pointercancel', cancelLongPress);
 			node.removeEventListener('pointermove', cancelLongPress);
-		}
+		},
 	};
 };
 
@@ -326,7 +326,7 @@ export const touchDrag: Action<HTMLElement, TouchDragOptions> = (node, options =
 			node.removeEventListener('pointermove', handleMove);
 			node.removeEventListener('pointerup', handleEnd);
 			node.removeEventListener('pointercancel', handleEnd);
-		}
+		},
 	};
 };
 

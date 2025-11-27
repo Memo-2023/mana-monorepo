@@ -1,25 +1,25 @@
 ---
-title: "Multiple AI Models"
-description: "Access 10+ state-of-the-art AI models including FLUX, Stable Diffusion, and more. Choose the perfect model for every creative project."
-icon: "🎨"
-coverImage: "/features/ai-models.jpg"
-category: "models"
+title: 'Multiple AI Models'
+description: 'Access 10+ state-of-the-art AI models including FLUX, Stable Diffusion, and more. Choose the perfect model for every creative project.'
+icon: '🎨'
+coverImage: '/features/ai-models.jpg'
+category: 'models'
 featured: true
 order: 1
 available: true
 comingSoon: false
-language: "en"
+language: 'en'
 benefits:
-  - "Access to 10+ premium AI models"
-  - "FLUX for photorealistic images"
-  - "Stable Diffusion for artistic styles"
-  - "Specialized models for different use cases"
-  - "Regular updates with new models"
+  - 'Access to 10+ premium AI models'
+  - 'FLUX for photorealistic images'
+  - 'Stable Diffusion for artistic styles'
+  - 'Specialized models for different use cases'
+  - 'Regular updates with new models'
 useCases:
-  - "Product photography"
-  - "Concept art and illustrations"
-  - "Marketing materials"
-  - "Social media content"
+  - 'Product photography'
+  - 'Concept art and illustrations'
+  - 'Marketing materials'
+  - 'Social media content'
 ---
 
 ## Choose the Right Model for Every Project
@@ -31,6 +31,7 @@ Picture gives you access to the most advanced AI image generation models availab
 FLUX is our flagship model for creating hyper-realistic images that are virtually indistinguishable from photographs.
 
 **Perfect for:**
+
 - Product photography
 - Architectural visualization
 - Professional headshots
@@ -38,6 +39,7 @@ FLUX is our flagship model for creating hyper-realistic images that are virtuall
 - Marketing and advertising
 
 **Key Features:**
+
 - Exceptional photorealism
 - Superior text rendering
 - Consistent results
@@ -48,6 +50,7 @@ FLUX is our flagship model for creating hyper-realistic images that are virtuall
 Stable Diffusion excels at creating artistic, stylized images across a wide range of aesthetics.
 
 **Perfect for:**
+
 - Digital art and illustrations
 - Concept art
 - Anime and manga
@@ -55,6 +58,7 @@ Stable Diffusion excels at creating artistic, stylized images across a wide rang
 - Creative experimentation
 
 **Key Features:**
+
 - Wide range of artistic styles
 - Fast generation times
 - Highly customizable
@@ -79,13 +83,13 @@ We continuously add new models and update existing ones, ensuring you always hav
 
 ## Model Comparison
 
-| Feature | FLUX | Stable Diffusion |
-|---------|------|------------------|
-| Photorealism | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| Artistic Styles | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Speed | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Text Rendering | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Consistency | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| Feature         | FLUX       | Stable Diffusion |
+| --------------- | ---------- | ---------------- |
+| Photorealism    | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐         |
+| Artistic Styles | ⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐       |
+| Speed           | ⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐       |
+| Text Rendering  | ⭐⭐⭐⭐⭐ | ⭐⭐⭐           |
+| Consistency     | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐         |
 
 ## Pricing
 

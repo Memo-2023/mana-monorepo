@@ -15,12 +15,14 @@ A magical storytelling application that creates personalized children's stories 
 ### Local Development Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd storyteller-project
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    ```
@@ -30,6 +32,7 @@ A magical storytelling application that creates personalized children's stories 
    Create `.env` files in both backend and mobile apps:
 
    **Backend (`apps/backend/.env`)**:
+
    ```env
    # Server Configuration
    NODE_ENV=development
@@ -57,6 +60,7 @@ A magical storytelling application that creates personalized children's stories 
    ```
 
    **Mobile (`apps/mobile/.env`)**:
+
    ```env
    # For local development
    EXPO_PUBLIC_STORYTELLER_BACKEND_URL=http://localhost:3002
@@ -73,17 +77,21 @@ A magical storytelling application that creates personalized children's stories 
    You'll need two terminal windows:
 
    **Terminal 1 - Backend:**
+
    ```bash
    cd apps/backend
    npm run dev
    ```
+
    The backend will start on http://localhost:3002
 
    **Terminal 2 - Mobile:**
+
    ```bash
    cd apps/mobile
    npm run dev
    ```
+
    The Expo development server will start on http://localhost:8081
 
 5. **Access the application**
@@ -95,12 +103,15 @@ A magical storytelling application that creates personalized children's stories 
 ## 📱 Testing on Physical Devices
 
 ### iOS Physical Device
+
 1. Find your computer's IP address:
+
    ```bash
    ifconfig | grep "inet " | grep -v 127.0.0.1
    ```
 
 2. Update `apps/mobile/.env`:
+
    ```env
    EXPO_PUBLIC_STORYTELLER_BACKEND_URL=http://YOUR_IP_ADDRESS:3002
    ```
@@ -108,6 +119,7 @@ A magical storytelling application that creates personalized children's stories 
 3. Restart the mobile app and scan the QR code with Expo Go
 
 ### Android Physical Device
+
 1. Make sure your device and computer are on the same network
 2. Follow the same steps as iOS
 
@@ -145,6 +157,7 @@ storyteller-project/
 ## 🛠️ Available Scripts
 
 ### Root Level (Turborepo)
+
 - `pnpm run dev` - Start all services in development mode
 - `pnpm run build` - Build all applications
 - `pnpm run clean` - Clean all node_modules and build artifacts
@@ -153,6 +166,7 @@ storyteller-project/
 - `pnpm run format` - Format code with Prettier
 
 ### Backend (`apps/backend/`)
+
 - `pnpm run dev` - Start in watch mode (port 3002)
 - `pnpm run build` - Build for production
 - `pnpm run start:prod` - Start production build
@@ -162,6 +176,7 @@ storyteller-project/
 - `pnpm run lint` - Lint backend code
 
 ### Mobile (`apps/mobile/`)
+
 - `pnpm run dev` - Start Expo development server
 - `pnpm run ios` - Run on iOS simulator
 - `pnpm run android` - Run on Android emulator
@@ -170,11 +185,13 @@ storyteller-project/
 - `pnpm run preview` - Preview production build
 
 ### Landing Page (`apps/landing/`)
+
 - `pnpm run dev` - Start Astro dev server
 - `pnpm run build` - Build static site
 - `pnpm run preview` - Preview production build
 
 ### Web App (`apps/web/`)
+
 - `pnpm run dev` - Start SvelteKit dev server
 - `pnpm run build` - Build production bundle
 - `pnpm run preview` - Preview production build
@@ -184,29 +201,34 @@ storyteller-project/
 ### Backend Issues
 
 **Backend won't start:**
+
 - Check if port 3002 is available: `lsof -i :3002`
 - Kill existing process: `kill -9 $(lsof -t -i:3002)`
 - Verify all environment variables are set correctly
 - Check database connections (Supabase, Mana Core)
 
 **SupabaseProvider dependency error:**
+
 - Ensure CommonModule is imported in AppModule
 - Check that all modules are properly exported
 
 ### Mobile App Issues
 
 **Can't connect to backend:**
+
 - Ensure backend is running on port 3002
 - Check `EXPO_PUBLIC_STORYTELLER_BACKEND_URL` in `.env`
 - For physical devices, use computer's IP address instead of localhost
 - Check firewall settings allow connections on port 3002
 
 **Metro bundler issues:**
+
 - Clear cache: `npx expo start -c`
 - Reset Metro bundler: `npx expo start --clear`
 - Delete node_modules and reinstall: `rm -rf node_modules && npm install`
 
 **Expo development server issues:**
+
 - Kill existing Expo processes: `pkill -f "expo start"`
 - Check port 8081 availability: `lsof -i :8081`
 - Try different port: `npx expo start --port 8082`
@@ -214,6 +236,7 @@ storyteller-project/
 ### Landing Page Issues
 
 **Build errors with @rolldown/pluginutils:**
+
 ```bash
 cd apps/landing
 npm install @rolldown/pluginutils
@@ -222,11 +245,13 @@ npm install @rolldown/pluginutils
 ### General Issues
 
 **TypeScript errors:**
+
 - Build all packages: `pnpm run build` from root
 - Check types: `pnpm run type-check`
 - Ensure VSCode uses workspace TypeScript version
 
 **Dependency issues:**
+
 - Clear all caches: `pnpm run clean`
 - Reinstall: `rm -rf node_modules pnpm-lock.yaml && pnpm install`
 - Update dependencies: `pnpm update`
@@ -234,6 +259,7 @@ npm install @rolldown/pluginutils
 ## 📊 Health Monitoring
 
 ### Backend Health Check
+
 ```bash
 # Full health check
 curl http://localhost:3002/health | jq
@@ -246,34 +272,35 @@ curl http://localhost:3002/health/live | jq
 ```
 
 Expected healthy response:
+
 ```json
 {
-  "status": "healthy",
-  "timestamp": "2025-01-09T21:16:58.017Z",
-  "duration": 213,
-  "services": [
-    {
-      "name": "supabase",
-      "status": "healthy",
-      "responseTime": 146
-    },
-    {
-      "name": "mana-service",
-      "status": "healthy",
-      "responseTime": 67
-    },
-    {
-      "name": "ai-services",
-      "status": "healthy",
-      "responseTime": 0,
-      "metadata": {
-        "gemini": "configured",
-        "replicate": "configured"
-      }
-    }
-  ],
-  "version": "0.0.1",
-  "environment": "development"
+	"status": "healthy",
+	"timestamp": "2025-01-09T21:16:58.017Z",
+	"duration": 213,
+	"services": [
+		{
+			"name": "supabase",
+			"status": "healthy",
+			"responseTime": 146
+		},
+		{
+			"name": "mana-service",
+			"status": "healthy",
+			"responseTime": 67
+		},
+		{
+			"name": "ai-services",
+			"status": "healthy",
+			"responseTime": 0,
+			"metadata": {
+				"gemini": "configured",
+				"replicate": "configured"
+			}
+		}
+	],
+	"version": "0.0.1",
+	"environment": "development"
 }
 ```
 
@@ -282,12 +309,14 @@ Expected healthy response:
 ### Backend Deployment (Google Cloud Run)
 
 1. **Build Docker image:**
+
    ```bash
    cd apps/backend
    docker build -t storyteller-backend .
    ```
 
 2. **Test locally:**
+
    ```bash
    docker run -p 3002:3002 --env-file .env storyteller-backend
    ```
@@ -306,17 +335,20 @@ Expected healthy response:
 ### Mobile Deployment (EAS Build)
 
 1. **Configure EAS:**
+
    ```bash
    cd apps/mobile
    eas build:configure
    ```
 
 2. **Build for iOS:**
+
    ```bash
    eas build --platform ios --profile production
    ```
 
 3. **Build for Android:**
+
    ```bash
    eas build --platform android --profile production
    ```
@@ -341,6 +373,7 @@ Expected healthy response:
 The backend exposes the following main endpoints:
 
 ### Authentication
+
 - `POST /auth/signin` - Sign in with email/password
 - `POST /auth/signup` - Create new account
 - `POST /auth/google-signin` - Sign in with Google
@@ -349,6 +382,7 @@ The backend exposes the following main endpoints:
 - `POST /auth/logout` - Log out user
 
 ### Characters
+
 - `GET /character` - Get user's characters
 - `GET /character/:id` - Get specific character
 - `POST /character/generate-images` - Generate character images
@@ -357,6 +391,7 @@ The backend exposes the following main endpoints:
 - `DELETE /character/:id` - Delete character
 
 ### Stories
+
 - `GET /story` - Get user's stories
 - `GET /story/:id` - Get specific story
 - `POST /story` - Create new story
@@ -365,6 +400,7 @@ The backend exposes the following main endpoints:
 - `DELETE /story/:id` - Delete story
 
 ### Settings
+
 - `GET /settings/user` - Get user settings
 - `PUT /settings/user` - Update user settings
 - `GET /settings/app` - Get app configuration
@@ -374,6 +410,7 @@ The backend exposes the following main endpoints:
 - `GET /settings/themes` - Get available themes
 
 ### Credits
+
 - `GET /credits/balance` - Get credit balance
 - `GET /credits/history` - Get transaction history
 - `POST /credits/check` - Check credit availability

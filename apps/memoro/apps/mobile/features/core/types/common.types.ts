@@ -6,7 +6,7 @@
  * Make all properties of T optional recursively
  */
 export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+	[P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
 
 /**
@@ -28,46 +28,46 @@ export type ArrayElement<T> = T extends readonly (infer U)[] ? U : never;
  * Common async state
  */
 export interface AsyncState<T> {
-  data: T | null;
-  loading: boolean;
-  error: Error | null;
+	data: T | null;
+	loading: boolean;
+	error: Error | null;
 }
 
 /**
  * Common pagination params
  */
 export interface PaginationParams {
-  page?: number;
-  pageSize?: number;
-  cursor?: string;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
+	page?: number;
+	pageSize?: number;
+	cursor?: string;
+	orderBy?: string;
+	orderDirection?: 'asc' | 'desc';
 }
 
 /**
  * Common filter params
  */
 export interface FilterParams {
-  search?: string;
-  tags?: string[];
-  dateFrom?: string;
-  dateTo?: string;
-  [key: string]: unknown;
+	search?: string;
+	tags?: string[];
+	dateFrom?: string;
+	dateTo?: string;
+	[key: string]: unknown;
 }
 
 /**
  * Common timestamp fields
  */
 export interface Timestamps {
-  created_at: string;
-  updated_at: string;
+	created_at: string;
+	updated_at: string;
 }
 
 /**
  * Common ID field
  */
 export interface WithId {
-  id: string;
+	id: string;
 }
 
 /**
@@ -89,40 +89,40 @@ export type Optional<T> = T | undefined;
  * Type guard to check if value is defined
  */
 export function isDefined<T>(value: T | undefined | null): value is T {
-  return value !== undefined && value !== null;
+	return value !== undefined && value !== null;
 }
 
 /**
  * Type guard to check if value is string
  */
 export function isString(value: unknown): value is string {
-  return typeof value === 'string';
+	return typeof value === 'string';
 }
 
 /**
  * Type guard to check if value is number
  */
 export function isNumber(value: unknown): value is number {
-  return typeof value === 'number' && !isNaN(value);
+	return typeof value === 'number' && !isNaN(value);
 }
 
 /**
  * Type guard to check if value is boolean
  */
 export function isBoolean(value: unknown): value is boolean {
-  return typeof value === 'boolean';
+	return typeof value === 'boolean';
 }
 
 /**
  * Type guard to check if value is object
  */
 export function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /**
  * Type guard to check if value is array
  */
 export function isArray<T = unknown>(value: unknown): value is T[] {
-  return Array.isArray(value);
+	return Array.isArray(value);
 }

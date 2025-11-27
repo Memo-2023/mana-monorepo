@@ -14,8 +14,8 @@ const supabase: Handle = async ({ event, resolve }) => {
 				cookiesToSet.forEach(({ name, value, options }) => {
 					event.cookies.set(name, value, { ...options, path: '/' });
 				});
-			}
-		}
+			},
+		},
 	}) as any;
 
 	/**
@@ -25,7 +25,7 @@ const supabase: Handle = async ({ event, resolve }) => {
 	 */
 	event.locals.safeGetSession = async () => {
 		const {
-			data: { session }
+			data: { session },
 		} = await event.locals.supabase.auth.getSession();
 
 		if (!session) {
@@ -34,7 +34,7 @@ const supabase: Handle = async ({ event, resolve }) => {
 
 		const {
 			data: { user },
-			error
+			error,
 		} = await event.locals.supabase.auth.getUser();
 
 		if (error) {
@@ -48,7 +48,7 @@ const supabase: Handle = async ({ event, resolve }) => {
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {
 			return name === 'content-range' || name === 'x-supabase-api-version';
-		}
+		},
 	});
 };
 
@@ -74,7 +74,10 @@ const authGuard: Handle = async ({ event, resolve }) => {
 	}
 
 	// Redirect to dashboard if already logged in and trying to access auth pages
-	if (event.locals.session && (event.url.pathname === '/login' || event.url.pathname === '/register')) {
+	if (
+		event.locals.session &&
+		(event.url.pathname === '/login' || event.url.pathname === '/register')
+	) {
 		redirect(303, '/dashboard');
 	}
 

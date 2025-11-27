@@ -16,10 +16,10 @@ export type { ThemeMode, ThemeVariant, EffectiveMode } from '@manacore/shared-th
  * - All 4 theme variants available
  */
 export const theme = createThemeStore({
-  appId: 'maerchenzauber',
-  defaultVariant: 'nature',
-  primaryColor: {
-    light: '280 60% 55%', // Purple - magical/storytelling
-    dark: '280 60% 60%',
-  },
+	appId: 'maerchenzauber',
+	defaultVariant: 'nature',
+	primaryColor: {
+		light: '280 60% 55%', // Purple - magical/storytelling
+		dark: '280 60% 60%',
+	},
 });

@@ -17,7 +17,7 @@ Basierend auf der Codeanalyse schlage ich folgende Maßnahmen zur Vereinfachung 
 
 ## 3. Architektur-Optimierung
 
-- **State Management**: 
+- **State Management**:
   - Auth-Zustand über einen zentralen Store verwalten
   - Modell- und Konversationszustand aus UI-Komponenten in Services verlagern
 

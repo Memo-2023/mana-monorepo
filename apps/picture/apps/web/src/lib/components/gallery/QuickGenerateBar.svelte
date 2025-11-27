@@ -8,7 +8,10 @@
 	import { generateImageAsync, subscribeToGenerationUpdates } from '$lib/api/generate-async';
 	import { showToast } from '$lib/stores/toast';
 	import { onMount } from 'svelte';
-	import AdvancedSettingsModal, { type AdvancedSettings, type AspectRatio } from '$lib/components/generate/AdvancedSettingsModal.svelte';
+	import AdvancedSettingsModal, {
+		type AdvancedSettings,
+		type AspectRatio,
+	} from '$lib/components/generate/AdvancedSettingsModal.svelte';
 
 	interface Props {
 		onGenerated?: () => void;
@@ -26,7 +29,7 @@
 		imageCount: 1,
 		aspectRatio: { label: 'Quadratisch', value: 'square', width: 1024, height: 1024 },
 		steps: 50,
-		guidanceScale: 7.5
+		guidanceScale: 7.5,
 	});
 
 	// Update advanced settings when model changes
@@ -88,7 +91,7 @@
 					width: advancedSettings.aspectRatio.width,
 					height: advancedSettings.aspectRatio.height,
 					num_inference_steps: advancedSettings.steps,
-					guidance_scale: advancedSettings.guidanceScale
+					guidance_scale: advancedSettings.guidanceScale,
 				});
 
 				// Wait for completion using realtime subscription
@@ -162,9 +165,9 @@
 	// Check if advanced settings differ from defaults
 	const hasCustomSettings = $derived(
 		advancedSettings.imageCount !== 1 ||
-		advancedSettings.aspectRatio.value !== 'square' ||
-		advancedSettings.steps !== 50 ||
-		advancedSettings.guidanceScale !== 7.5
+			advancedSettings.aspectRatio.value !== 'square' ||
+			advancedSettings.steps !== 50 ||
+			advancedSettings.guidanceScale !== 7.5
 	);
 </script>
 
@@ -176,9 +179,11 @@
 		: 'bottom-8 right-8'}"
 >
 	{#if isExpanded}
-		<div class="lg:w-[900px] animate-in fade-in slide-in-from-bottom-4 duration-200">
+		<div class="animate-in fade-in slide-in-from-bottom-4 duration-200 lg:w-[900px]">
 			<!-- Main Bar (expanded) -->
-			<div class="rounded-t-3xl border-t border-gray-200/50 bg-white/80 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/80 lg:rounded-3xl lg:border">
+			<div
+				class="rounded-t-3xl border-t border-gray-200/50 bg-white/80 shadow-2xl backdrop-blur-xl lg:rounded-3xl lg:border dark:border-gray-700/50 dark:bg-gray-900/80"
+			>
 				<div class="p-4">
 					<!-- Error Display -->
 					{#if $generationError}
@@ -237,7 +242,9 @@
 
 							<!-- Character count hint -->
 							{#if prompt.length > 400}
-								<span class="absolute bottom-2 right-3 text-xs text-orange-600 dark:text-orange-400">
+								<span
+									class="absolute bottom-2 right-3 text-xs text-orange-600 dark:text-orange-400"
+								>
 									{prompt.length}/500
 								</span>
 							{/if}
@@ -260,12 +267,21 @@
 									stroke-width="2"
 									d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
 								/>
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+								/>
 							</svg>
 							{#if hasCustomSettings}
 								<span class="absolute right-0 top-0 flex h-3 w-3">
-									<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
-									<span class="relative inline-flex h-3 w-3 rounded-full bg-blue-600 dark:bg-blue-500"></span>
+									<span
+										class="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"
+									></span>
+									<span
+										class="relative inline-flex h-3 w-3 rounded-full bg-blue-600 dark:bg-blue-500"
+									></span>
 								</span>
 							{/if}
 						</button>
@@ -284,7 +300,12 @@
 									class="h-5 w-5 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"
 								></div>
 							{:else}
-								<svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<svg
+									class="h-5 w-5 text-white"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
 									<path
 										stroke-linecap="round"
 										stroke-linejoin="round"
@@ -318,7 +339,7 @@
 		</div>
 	{:else}
 		<!-- Collapsed Button (bottom right) -->
-		<div class="hidden animate-in fade-in slide-in-from-bottom-4 duration-200 lg:block">
+		<div class="animate-in fade-in slide-in-from-bottom-4 hidden duration-200 lg:block">
 			<button
 				onclick={() => (isExpanded = true)}
 				disabled={$isGenerating}
@@ -339,7 +360,9 @@
 
 		<!-- Mobile: Always show bar at bottom -->
 		<div class="lg:hidden">
-			<div class="rounded-t-3xl border-t border-gray-200/50 bg-white/80 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/80">
+			<div
+				class="rounded-t-3xl border-t border-gray-200/50 bg-white/80 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/80"
+			>
 				<div class="flex items-center gap-3 p-4">
 					<button
 						onclick={() => (isExpanded = true)}

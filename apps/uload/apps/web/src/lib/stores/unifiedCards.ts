@@ -32,7 +32,7 @@ const initialState: UnifiedCardsState = {
 	error: null,
 	editMode: false,
 	selectedCards: new Set(),
-	currentPage: 'home'
+	currentPage: 'home',
 };
 
 // Create the main store
@@ -86,7 +86,7 @@ function createUnifiedCardsStore() {
 					...state,
 					cards: cardsMap,
 					isLoading: false,
-					currentPage: page || state.currentPage
+					currentPage: page || state.currentPage,
 				}));
 
 				return cardsMap;
@@ -94,7 +94,7 @@ function createUnifiedCardsStore() {
 				update((state) => ({
 					...state,
 					isLoading: false,
-					error: error instanceof Error ? error.message : 'Failed to load cards'
+					error: error instanceof Error ? error.message : 'Failed to load cards',
 				}));
 				throw error;
 			}
@@ -114,7 +114,7 @@ function createUnifiedCardsStore() {
 				update((state) => ({
 					...state,
 					templates: templatesMap,
-					isLoading: false
+					isLoading: false,
 				}));
 
 				return templatesMap;
@@ -122,7 +122,7 @@ function createUnifiedCardsStore() {
 				update((state) => ({
 					...state,
 					isLoading: false,
-					error: error instanceof Error ? error.message : 'Failed to load templates'
+					error: error instanceof Error ? error.message : 'Failed to load templates',
 				}));
 				throw error;
 			}
@@ -139,7 +139,7 @@ function createUnifiedCardsStore() {
 
 				update((state) => ({
 					...state,
-					templates: new Map([...state.templates, ...templatesMap])
+					templates: new Map([...state.templates, ...templatesMap]),
 				}));
 
 				return templatesMap;
@@ -160,7 +160,7 @@ function createUnifiedCardsStore() {
 					config,
 					metadata,
 					page: page || get({ subscribe }).currentPage,
-					visibility: 'private'
+					visibility: 'private',
 				};
 
 				const card = await unifiedCardService.createCard(cardData);
@@ -173,14 +173,14 @@ function createUnifiedCardsStore() {
 					return {
 						...state,
 						cards: newCards,
-						activeCardId: card.id!
+						activeCardId: card.id!,
 					};
 				});
 
 				emitEvent({
 					type: 'created',
 					cardId: card.id,
-					timestamp: Date.now()
+					timestamp: Date.now(),
 				});
 
 				return card;
@@ -209,7 +209,7 @@ function createUnifiedCardsStore() {
 					return {
 						...state,
 						cards: newCards,
-						templates: newTemplates
+						templates: newTemplates,
 					};
 				});
 
@@ -217,7 +217,7 @@ function createUnifiedCardsStore() {
 					type: 'updated',
 					cardId: id,
 					timestamp: Date.now(),
-					data: updates
+					data: updates,
 				});
 
 				return updatedCard;
@@ -246,14 +246,14 @@ function createUnifiedCardsStore() {
 						cards: newCards,
 						templates: newTemplates,
 						selectedCards: newSelectedCards,
-						activeCardId: state.activeCardId === id ? null : state.activeCardId
+						activeCardId: state.activeCardId === id ? null : state.activeCardId,
 					};
 				});
 
 				emitEvent({
 					type: 'deleted',
 					cardId: id,
-					timestamp: Date.now()
+					timestamp: Date.now(),
 				});
 
 				return true;
@@ -262,7 +262,6 @@ function createUnifiedCardsStore() {
 				return false;
 			}
 		},
-
 
 		async duplicateCard(id: string): Promise<Card | null> {
 			try {
@@ -276,7 +275,7 @@ function createUnifiedCardsStore() {
 					return {
 						...state,
 						cards: newCards,
-						activeCardId: duplicated.id!
+						activeCardId: duplicated.id!,
 					};
 				});
 
@@ -284,7 +283,7 @@ function createUnifiedCardsStore() {
 					type: 'created',
 					cardId: duplicated.id,
 					timestamp: Date.now(),
-					data: { source: 'duplicated' }
+					data: { source: 'duplicated' },
 				});
 
 				return duplicated;
@@ -309,7 +308,7 @@ function createUnifiedCardsStore() {
 					return {
 						...state,
 						cards: newCards,
-						activeCardId: card.id!
+						activeCardId: card.id!,
 					};
 				});
 
@@ -317,7 +316,7 @@ function createUnifiedCardsStore() {
 					type: 'created',
 					cardId: card.id,
 					timestamp: Date.now(),
-					data: { templateId }
+					data: { templateId },
 				});
 
 				return card;
@@ -338,7 +337,7 @@ function createUnifiedCardsStore() {
 					newCards.set(id, updatedCard);
 					return {
 						...state,
-						cards: newCards
+						cards: newCards,
 					};
 				});
 
@@ -346,7 +345,7 @@ function createUnifiedCardsStore() {
 					type: 'updated',
 					cardId: id,
 					timestamp: Date.now(),
-					data: { page, position, action: 'moved' }
+					data: { page, position, action: 'moved' },
 				});
 
 				return updatedCard;
@@ -378,7 +377,7 @@ function createUnifiedCardsStore() {
 						newTemplates.set(id, card);
 						return {
 							...state,
-							templates: newTemplates
+							templates: newTemplates,
 						};
 					});
 				}
@@ -435,7 +434,7 @@ function createUnifiedCardsStore() {
 		selectAll() {
 			update((state) => ({
 				...state,
-				selectedCards: new Set(state.cards.keys())
+				selectedCards: new Set(state.cards.keys()),
 			}));
 		},
 
@@ -467,7 +466,7 @@ function createUnifiedCardsStore() {
 		// Reset store
 		reset() {
 			set(initialState);
-		}
+		},
 	};
 }
 

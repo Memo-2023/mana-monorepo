@@ -51,7 +51,9 @@ export async function getCaseStudiesByCategory(
 	const caseStudies = await getAllCaseStudies();
 	return caseStudies
 		.filter((cs) => cs.data.category === category)
-		.sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime());
+		.sort(
+			(a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+		);
 }
 
 /**
@@ -61,7 +63,9 @@ export async function getCaseStudiesByIndustry(industry: string): Promise<CaseSt
 	const caseStudies = await getAllCaseStudies();
 	return caseStudies
 		.filter((cs) => cs.data.company.industry.toLowerCase().includes(industry.toLowerCase()))
-		.sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime());
+		.sort(
+			(a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+		);
 }
 
 /**
@@ -73,7 +77,9 @@ export async function getCaseStudiesByCompanySize(
 	const caseStudies = await getAllCaseStudies();
 	return caseStudies
 		.filter((cs) => cs.data.company.size === size)
-		.sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime());
+		.sort(
+			(a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+		);
 }
 
 /**
@@ -83,7 +89,9 @@ export async function getCaseStudiesByTag(tag: string): Promise<CaseStudyEntry[]
 	const caseStudies = await getAllCaseStudies();
 	return caseStudies
 		.filter((cs) => cs.data.tags.includes(tag))
-		.sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime());
+		.sort(
+			(a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+		);
 }
 
 /**
@@ -307,9 +315,7 @@ export async function getCaseStudyStats() {
 /**
  * Group case studies by category
  */
-export async function groupCaseStudiesByCategory(): Promise<
-	Record<string, CaseStudyEntry[]>
-> {
+export async function groupCaseStudiesByCategory(): Promise<Record<string, CaseStudyEntry[]>> {
 	const caseStudies = await getAllCaseStudies();
 	const grouped: Record<string, CaseStudyEntry[]> = {};
 

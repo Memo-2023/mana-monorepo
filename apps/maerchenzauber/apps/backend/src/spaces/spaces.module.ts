@@ -4,8 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { SpacesClientService } from './spaces-client.service';
 
 @Module({
-  imports: [HttpModule, ConfigModule],
-  providers: [SpacesClientService],
-  exports: [SpacesClientService],
+	imports: [HttpModule, ConfigModule],
+	providers: [SpacesClientService],
+	exports: [SpacesClientService],
 })
 export class SpacesModule {}

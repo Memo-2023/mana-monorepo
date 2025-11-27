@@ -5,932 +5,955 @@ import { pricingPlans } from '../data/pricing.js';
 ---
 
 <Layout title="Mana Preise - Flexible KI-Nutzung ohne Abo-Chaos">
-  <div class="page-wrapper">
-    <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="hero-content">
-        <h1 class="hero-title">
-          Preise, die zu <span class="gradient-text">Ihnen passen</span>
-        </h1>
-        <p class="hero-subtitle">
-          1 Mana = 1 Cent. Keine versteckten Kosten. Keine ungenutzten Lizenzen.<br/>
-          Wählen Sie zwischen monatlichen Streams mit täglicher Regeneration oder einmaligen Mana-Tränken.
-        </p>
+	<div class="page-wrapper">
+		<!-- Hero Section -->
+		<section class="hero-section">
+			<div class="hero-content">
+				<h1 class="hero-title">
+					Preise, die zu <span class="gradient-text">Ihnen passen</span>
+				</h1>
+				<p class="hero-subtitle">
+					1 Mana = 1 Cent. Keine versteckten Kosten. Keine ungenutzten Lizenzen.<br />
+					Wählen Sie zwischen monatlichen Streams mit täglicher Regeneration oder einmaligen Mana-Tränken.
+				</p>
 
-        <!-- Value Props -->
-        <div class="value-props">
-          <div class="value-prop">
-            <div class="value-icon">💳</div>
-            <div class="value-text">Keine Kreditkarte<br/>zum Starten</div>
-          </div>
-          <div class="value-prop">
-            <div class="value-icon">∞</div>
-            <div class="value-text">Mana verfällt<br/>niemals</div>
-          </div>
-          <div class="value-prop">
-            <div class="value-icon">🚀</div>
-            <div class="value-text">150 Mana<br/>kostenlos</div>
-          </div>
-        </div>
-      </div>
-    </section>
+				<!-- Value Props -->
+				<div class="value-props">
+					<div class="value-prop">
+						<div class="value-icon">💳</div>
+						<div class="value-text">Keine Kreditkarte<br />zum Starten</div>
+					</div>
+					<div class="value-prop">
+						<div class="value-icon">∞</div>
+						<div class="value-text">Mana verfällt<br />niemals</div>
+					</div>
+					<div class="value-prop">
+						<div class="value-icon">🚀</div>
+						<div class="value-text">150 Mana<br />kostenlos</div>
+					</div>
+				</div>
+			</div>
+		</section>
 
-    <!-- Pricing Toggle -->
-    <section class="pricing-toggle-section">
-      <div class="pricing-toggle">
-        <button class="toggle-btn active" data-type="monthly">
-          Monatlich
-        </button>
-        <button class="toggle-btn" data-type="yearly">
-          Jährlich
-          <span class="badge">2 Monate gratis</span>
-        </button>
-      </div>
-    </section>
+		<!-- Pricing Toggle -->
+		<section class="pricing-toggle-section">
+			<div class="pricing-toggle">
+				<button class="toggle-btn active" data-type="monthly"> Monatlich </button>
+				<button class="toggle-btn" data-type="yearly">
+					Jährlich
+					<span class="badge">2 Monate gratis</span>
+				</button>
+			</div>
+		</section>
 
-    <!-- Monthly Pricing -->
-    <section class="pricing-section" id="monthly-pricing">
-      <div class="pricing-grid">
-        {pricingPlans.monthly.map((plan) => (
-          <div class={`pricing-card ${plan.popular ? 'popular' : ''}`}>
-            {plan.popular && <div class="popular-badge">Beliebtester Plan</div>}
+		<!-- Monthly Pricing -->
+		<section class="pricing-section" id="monthly-pricing">
+			<div class="pricing-grid">
+				{
+					pricingPlans.monthly.map((plan) => (
+						<div class={`pricing-card ${plan.popular ? 'popular' : ''}`}>
+							{plan.popular && <div class="popular-badge">Beliebtester Plan</div>}
 
-            <div class="card-icon">{plan.icon}</div>
-            <h3 class="card-title">{plan.name}</h3>
+							<div class="card-icon">{plan.icon}</div>
+							<h3 class="card-title">{plan.name}</h3>
 
-            <div class="card-price">
-              <span class="price">{plan.price === 0 ? 'Kostenlos' : plan.price.toFixed(2).replace('.', ',') + '€'}</span>
-              {plan.price > 0 && <span class="period">/Monat</span>}
-            </div>
+							<div class="card-price">
+								<span class="price">
+									{plan.price === 0 ? 'Kostenlos' : plan.price.toFixed(2).replace('.', ',') + '€'}
+								</span>
+								{plan.price > 0 && <span class="period">/Monat</span>}
+							</div>
 
-            <div class="card-stats">
-              <div class="stat">
-                <span class="stat-label">Start-Mana</span>
-                <span class="stat-value">{plan.startMana.toLocaleString('de-DE')}</span>
-              </div>
-              <div class="stat">
-                <span class="stat-label">Regeneration</span>
-                <span class="stat-value">{plan.regeneration} Mana/Tag</span>
-              </div>
-              <div class="stat">
-                <span class="stat-label">Max. Speicher</span>
-                <span class="stat-value">{plan.storage.toLocaleString('de-DE')}</span>
-              </div>
-            </div>
+							<div class="card-stats">
+								<div class="stat">
+									<span class="stat-label">Start-Mana</span>
+									<span class="stat-value">{plan.startMana.toLocaleString('de-DE')}</span>
+								</div>
+								<div class="stat">
+									<span class="stat-label">Regeneration</span>
+									<span class="stat-value">{plan.regeneration} Mana/Tag</span>
+								</div>
+								<div class="stat">
+									<span class="stat-label">Max. Speicher</span>
+									<span class="stat-value">{plan.storage.toLocaleString('de-DE')}</span>
+								</div>
+							</div>
 
-            {plan.features && (
-              <ul class="card-features">
-                {plan.features.map((feature) => (
-                  <li class="feature">
-                    <svg class="check-icon" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+							{plan.features && (
+								<ul class="card-features">
+									{plan.features.map((feature) => (
+										<li class="feature">
+											<svg class="check-icon" viewBox="0 0 20 20" fill="currentColor">
+												<path
+													fill-rule="evenodd"
+													d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+													clip-rule="evenodd"
+												/>
+											</svg>
+											<span>{feature}</span>
+										</li>
+									))}
+								</ul>
+							)}
 
-            <a href={plan.price === 0 ? '/register' : '/purchase'} class="cta-button">
-              {plan.price === 0 ? 'Jetzt starten' : 'Plan auswählen'}
-            </a>
-          </div>
-        ))}
-      </div>
-    </section>
+							<a href={plan.price === 0 ? '/register' : '/purchase'} class="cta-button">
+								{plan.price === 0 ? 'Jetzt starten' : 'Plan auswählen'}
+							</a>
+						</div>
+					))
+				}
+			</div>
+		</section>
 
-    <!-- Yearly Pricing -->
-    <section class="pricing-section hidden" id="yearly-pricing">
-      <div class="pricing-grid">
-        {pricingPlans.yearly.map((plan) => (
-          <div class={`pricing-card ${plan.popular ? 'popular' : ''}`}>
-            {plan.popular && <div class="popular-badge">Beliebtester Plan</div>}
+		<!-- Yearly Pricing -->
+		<section class="pricing-section hidden" id="yearly-pricing">
+			<div class="pricing-grid">
+				{
+					pricingPlans.yearly.map((plan) => (
+						<div class={`pricing-card ${plan.popular ? 'popular' : ''}`}>
+							{plan.popular && <div class="popular-badge">Beliebtester Plan</div>}
 
-            <div class="card-icon">{plan.icon}</div>
-            <h3 class="card-title">{plan.name}</h3>
+							<div class="card-icon">{plan.icon}</div>
+							<h3 class="card-title">{plan.name}</h3>
 
-            <div class="card-price">
-              <span class="price">{plan.price === 0 ? 'Kostenlos' : plan.price.toFixed(2).replace('.', ',') + '€'}</span>
-              {plan.price > 0 && <span class="period">/Jahr</span>}
-            </div>
-            {plan.monthlyEquivalent && plan.monthlyEquivalent > 0 && (
-              <div class="monthly-equivalent">{plan.monthlyEquivalent.toFixed(2).replace('.', ',')}€ pro Monat</div>
-            )}
+							<div class="card-price">
+								<span class="price">
+									{plan.price === 0 ? 'Kostenlos' : plan.price.toFixed(2).replace('.', ',') + '€'}
+								</span>
+								{plan.price > 0 && <span class="period">/Jahr</span>}
+							</div>
+							{plan.monthlyEquivalent && plan.monthlyEquivalent > 0 && (
+								<div class="monthly-equivalent">
+									{plan.monthlyEquivalent.toFixed(2).replace('.', ',')}€ pro Monat
+								</div>
+							)}
 
-            <div class="card-stats">
-              <div class="stat">
-                <span class="stat-label">Start-Mana</span>
-                <span class="stat-value">{plan.startMana.toLocaleString('de-DE')}</span>
-              </div>
-              <div class="stat">
-                <span class="stat-label">Regeneration</span>
-                <span class="stat-value">{plan.regeneration} Mana/Tag</span>
-              </div>
-              <div class="stat">
-                <span class="stat-label">Max. Speicher</span>
-                <span class="stat-value">{plan.storage.toLocaleString('de-DE')}</span>
-              </div>
-            </div>
+							<div class="card-stats">
+								<div class="stat">
+									<span class="stat-label">Start-Mana</span>
+									<span class="stat-value">{plan.startMana.toLocaleString('de-DE')}</span>
+								</div>
+								<div class="stat">
+									<span class="stat-label">Regeneration</span>
+									<span class="stat-value">{plan.regeneration} Mana/Tag</span>
+								</div>
+								<div class="stat">
+									<span class="stat-label">Max. Speicher</span>
+									<span class="stat-value">{plan.storage.toLocaleString('de-DE')}</span>
+								</div>
+							</div>
 
-            {plan.features && (
-              <ul class="card-features">
-                {plan.features.map((feature) => (
-                  <li class="feature">
-                    <svg class="check-icon" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+							{plan.features && (
+								<ul class="card-features">
+									{plan.features.map((feature) => (
+										<li class="feature">
+											<svg class="check-icon" viewBox="0 0 20 20" fill="currentColor">
+												<path
+													fill-rule="evenodd"
+													d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+													clip-rule="evenodd"
+												/>
+											</svg>
+											<span>{feature}</span>
+										</li>
+									))}
+								</ul>
+							)}
 
-            <a href={plan.price === 0 ? '/register' : '/purchase'} class="cta-button">
-              {plan.price === 0 ? 'Jetzt starten' : 'Plan auswählen'}
-            </a>
-          </div>
-        ))}
-      </div>
-    </section>
+							<a href={plan.price === 0 ? '/register' : '/purchase'} class="cta-button">
+								{plan.price === 0 ? 'Jetzt starten' : 'Plan auswählen'}
+							</a>
+						</div>
+					))
+				}
+			</div>
+		</section>
 
-    <!-- One-time Purchases -->
-    <section class="onetime-section">
-      <div class="section-header">
-        <h2 class="section-title">
-          Einmalige <span class="gradient-text">Mana-Tränke</span>
-        </h2>
-        <p class="section-subtitle">
-          Brauchen Sie sofort mehr Mana? Kaufen Sie Mana-Tränke ohne Abo – perfekt für Projekte oder als Geschenk.
-        </p>
-      </div>
+		<!-- One-time Purchases -->
+		<section class="onetime-section">
+			<div class="section-header">
+				<h2 class="section-title">
+					Einmalige <span class="gradient-text">Mana-Tränke</span>
+				</h2>
+				<p class="section-subtitle">
+					Brauchen Sie sofort mehr Mana? Kaufen Sie Mana-Tränke ohne Abo – perfekt für Projekte oder
+					als Geschenk.
+				</p>
+			</div>
 
-      <div class="onetime-grid">
-        {pricingPlans.oneTime.map((plan) => (
-          <div class="onetime-card">
-            <div class="onetime-icon">{plan.icon}</div>
-            <h3 class="onetime-title">{plan.name}</h3>
+			<div class="onetime-grid">
+				{
+					pricingPlans.oneTime.map((plan) => (
+						<div class="onetime-card">
+							<div class="onetime-icon">{plan.icon}</div>
+							<h3 class="onetime-title">{plan.name}</h3>
 
-            <div class="onetime-mana">{plan.mana.toLocaleString('de-DE')}</div>
-            <div class="onetime-label">Mana Credits</div>
+							<div class="onetime-mana">{plan.mana.toLocaleString('de-DE')}</div>
+							<div class="onetime-label">Mana Credits</div>
 
-            <div class="onetime-price">{plan.price.toFixed(2).replace('.', ',')}€</div>
+							<div class="onetime-price">{plan.price.toFixed(2).replace('.', ',')}€</div>
 
-            <a href="/purchase" class="onetime-button">Kaufen</a>
-          </div>
-        ))}
-      </div>
-    </section>
+							<a href="/purchase" class="onetime-button">
+								Kaufen
+							</a>
+						</div>
+					))
+				}
+			</div>
+		</section>
 
-    <!-- Why Mana Section -->
-    <section class="why-section">
-      <h2 class="section-title">
-        Warum Mana das <span class="gradient-text">bessere Preismodell</span> ist
-      </h2>
+		<!-- Why Mana Section -->
+		<section class="why-section">
+			<h2 class="section-title">
+				Warum Mana das <span class="gradient-text">bessere Preismodell</span> ist
+			</h2>
 
-      <div class="benefits-grid">
-        <div class="benefit-card">
-          <div class="benefit-icon">💰</div>
-          <h3 class="benefit-title">Bis zu 90% sparen</h3>
-          <p class="benefit-text">Gegenüber einzelnen Tool-Abos zahlen Sie nur für tatsächliche Nutzung</p>
-        </div>
+			<div class="benefits-grid">
+				<div class="benefit-card">
+					<div class="benefit-icon">💰</div>
+					<h3 class="benefit-title">Bis zu 90% sparen</h3>
+					<p class="benefit-text">
+						Gegenüber einzelnen Tool-Abos zahlen Sie nur für tatsächliche Nutzung
+					</p>
+				</div>
 
-        <div class="benefit-card">
-          <div class="benefit-icon">👥</div>
-          <h3 class="benefit-title">Team-freundlich</h3>
-          <p class="benefit-text">Mana im Team teilen und gemeinsam nutzen</p>
-        </div>
+				<div class="benefit-card">
+					<div class="benefit-icon">👥</div>
+					<h3 class="benefit-title">Team-freundlich</h3>
+					<p class="benefit-text">Mana im Team teilen und gemeinsam nutzen</p>
+				</div>
 
-        <div class="benefit-card">
-          <div class="benefit-icon">📊</div>
-          <h3 class="benefit-title">Volle Kostenkontrolle</h3>
-          <p class="benefit-text">Detaillierte Nutzungsstatistiken in Echtzeit</p>
-        </div>
+				<div class="benefit-card">
+					<div class="benefit-icon">📊</div>
+					<h3 class="benefit-title">Volle Kostenkontrolle</h3>
+					<p class="benefit-text">Detaillierte Nutzungsstatistiken in Echtzeit</p>
+				</div>
 
-        <div class="benefit-card">
-          <div class="benefit-icon">⚡</div>
-          <h3 class="benefit-title">Sofort alle Tools</h3>
-          <p class="benefit-text">Keine Wartezeiten oder Verhandlungen nötig</p>
-        </div>
-      </div>
-    </section>
+				<div class="benefit-card">
+					<div class="benefit-icon">⚡</div>
+					<h3 class="benefit-title">Sofort alle Tools</h3>
+					<p class="benefit-text">Keine Wartezeiten oder Verhandlungen nötig</p>
+				</div>
+			</div>
+		</section>
 
-    <!-- FAQ Section -->
-    <section class="faq-section">
-      <h2 class="section-title">
-        Häufige <span class="gradient-text">Fragen</span>
-      </h2>
+		<!-- FAQ Section -->
+		<section class="faq-section">
+			<h2 class="section-title">
+				Häufige <span class="gradient-text">Fragen</span>
+			</h2>
 
-      <div class="faq-grid">
-        <div class="faq-card">
-          <div class="faq-icon">🔄</div>
-          <h3 class="faq-question">Was ist der Unterschied zwischen Streams und Tränken?</h3>
-          <p class="faq-answer">
-            Bei Streams regeneriert sich Ihr Mana täglich automatisch bis zum Speicherlimit.
-            Tränke geben Ihnen sofort Mana ohne Regeneration – perfekt für kurzfristige Projekte.
-          </p>
-        </div>
+			<div class="faq-grid">
+				<div class="faq-card">
+					<div class="faq-icon">🔄</div>
+					<h3 class="faq-question">Was ist der Unterschied zwischen Streams und Tränken?</h3>
+					<p class="faq-answer">
+						Bei Streams regeneriert sich Ihr Mana täglich automatisch bis zum Speicherlimit. Tränke
+						geben Ihnen sofort Mana ohne Regeneration – perfekt für kurzfristige Projekte.
+					</p>
+				</div>
 
-        <div class="faq-card">
-          <div class="faq-icon">🔁</div>
-          <h3 class="faq-question">Kann ich meinen Plan jederzeit wechseln?</h3>
-          <p class="faq-answer">
-            Ja! Sie können jederzeit upgraden oder downgraden. Bei einem Upgrade erhalten
-            Sie sofort die Differenz an Start-Mana. Beim Downgrade behalten Sie Ihr aktuelles Mana.
-          </p>
-        </div>
+				<div class="faq-card">
+					<div class="faq-icon">🔁</div>
+					<h3 class="faq-question">Kann ich meinen Plan jederzeit wechseln?</h3>
+					<p class="faq-answer">
+						Ja! Sie können jederzeit upgraden oder downgraden. Bei einem Upgrade erhalten Sie sofort
+						die Differenz an Start-Mana. Beim Downgrade behalten Sie Ihr aktuelles Mana.
+					</p>
+				</div>
 
-        <div class="faq-card">
-          <div class="faq-icon">💾</div>
-          <h3 class="faq-question">Was passiert wenn mein Speicher voll ist?</h3>
-          <p class="faq-answer">
-            Ihr Mana regeneriert nur bis zum Speicherlimit. Überschüssiges Mana geht nicht verloren –
-            nutzen Sie einfach etwas Mana und die Regeneration läuft weiter.
-          </p>
-        </div>
+				<div class="faq-card">
+					<div class="faq-icon">💾</div>
+					<h3 class="faq-question">Was passiert wenn mein Speicher voll ist?</h3>
+					<p class="faq-answer">
+						Ihr Mana regeneriert nur bis zum Speicherlimit. Überschüssiges Mana geht nicht verloren
+						– nutzen Sie einfach etwas Mana und die Regeneration läuft weiter.
+					</p>
+				</div>
 
-        <div class="faq-card">
-          <div class="faq-icon">🏢</div>
-          <h3 class="faq-question">Gibt es Mengenrabatte für Unternehmen?</h3>
-          <p class="faq-answer">
-            Ja! Ab 10 Nutzern bieten wir individuelle Enterprise-Tarife.
-            Kontaktieren Sie uns für ein maßgeschneidertes Angebot.
-          </p>
-        </div>
-      </div>
-    </section>
+				<div class="faq-card">
+					<div class="faq-icon">🏢</div>
+					<h3 class="faq-question">Gibt es Mengenrabatte für Unternehmen?</h3>
+					<p class="faq-answer">
+						Ja! Ab 10 Nutzern bieten wir individuelle Enterprise-Tarife. Kontaktieren Sie uns für
+						ein maßgeschneidertes Angebot.
+					</p>
+				</div>
+			</div>
+		</section>
 
-    <!-- CTA Section -->
-    <section class="cta-section">
-      <div class="cta-content">
-        <h2 class="cta-title">Bereit für flexiblere KI-Nutzung?</h2>
-        <p class="cta-text">
-          Starten Sie jetzt mit 150 kostenlosen Mana Credits und erleben Sie,
-          wie einfach KI-Tools sein können.
-        </p>
-        <div class="cta-buttons">
-          <a href="/register" class="cta-primary">Kostenlos starten</a>
-          <a href="/apps" class="cta-secondary">Apps entdecken</a>
-        </div>
-      </div>
-    </section>
+		<!-- CTA Section -->
+		<section class="cta-section">
+			<div class="cta-content">
+				<h2 class="cta-title">Bereit für flexiblere KI-Nutzung?</h2>
+				<p class="cta-text">
+					Starten Sie jetzt mit 150 kostenlosen Mana Credits und erleben Sie, wie einfach KI-Tools
+					sein können.
+				</p>
+				<div class="cta-buttons">
+					<a href="/register" class="cta-primary">Kostenlos starten</a>
+					<a href="/apps" class="cta-secondary">Apps entdecken</a>
+				</div>
+			</div>
+		</section>
 
-    <!-- Footer -->
-    <Footer />
-  </div>
+		<!-- Footer -->
+		<Footer />
+	</div>
 </Layout>
 
 <style>
-  :root {
-    --grid-unit: 40px;
-  }
-
-  .page-wrapper {
-    min-height: 100vh;
-    background: linear-gradient(to bottom, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-    color: #e2e8f0;
-  }
-
-  /* Hero Section */
-  .hero-section {
-    padding: calc(var(--grid-unit) * 4) calc(var(--grid-unit) * 2) calc(var(--grid-unit) * 3);
-    text-align: center;
-  }
-
-  .hero-content {
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  .hero-title {
-    font-size: clamp(2.5rem, 5vw, 4rem);
-    font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: calc(var(--grid-unit) * 0.5);
-    color: #f1f5f9;
-  }
-
-  .gradient-text {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .hero-subtitle {
-    font-size: clamp(1rem, 2vw, 1.25rem);
-    color: #94a3b8;
-    margin-bottom: calc(var(--grid-unit) * 1.5);
-    line-height: 1.6;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .value-props {
-    display: flex;
-    gap: calc(var(--grid-unit) * 1);
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: calc(var(--grid-unit) * 1.5);
-  }
-
-  .value-prop {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: calc(var(--grid-unit) * 0.75);
-    display: flex;
-    align-items: center;
-    gap: calc(var(--grid-unit) * 0.5);
-    transition: all 0.3s ease;
-  }
-
-  .value-prop:hover {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(59, 130, 246, 0.3);
-    transform: translateY(-2px);
-  }
-
-  .value-icon {
-    font-size: 2rem;
-  }
-
-  .value-text {
-    font-size: 0.875rem;
-    color: #cbd5e1;
-    text-align: left;
-    line-height: 1.4;
-  }
-
-  /* Pricing Toggle */
-  .pricing-toggle-section {
-    padding: 0 calc(var(--grid-unit) * 2) calc(var(--grid-unit) * 2);
-    text-align: center;
-  }
-
-  .pricing-toggle {
-    display: inline-flex;
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 6px;
-    gap: 6px;
-  }
-
-  .toggle-btn {
-    padding: 12px 32px;
-    border: none;
-    background: transparent;
-    color: #94a3b8;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .toggle-btn.active {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-  }
-
-  .badge {
-    font-size: 0.75rem;
-    background: rgba(16, 185, 129, 0.2);
-    color: #10b981;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-weight: 700;
-  }
-
-  .toggle-btn.active .badge {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-  }
-
-  /* Pricing Section */
-  .pricing-section {
-    padding: calc(var(--grid-unit) * 2);
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  .pricing-section.hidden {
-    display: none;
-  }
-
-  .pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: calc(var(--grid-unit) * 1);
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  .pricing-card {
-    position: relative;
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: calc(var(--grid-unit) * 1);
-    transition: all 0.3s ease;
-  }
-
-  .pricing-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(59, 130, 246, 0.3);
-    transform: translateY(-4px);
-  }
-
-  .pricing-card.popular {
-    border-color: rgba(59, 130, 246, 0.5);
-    background: rgba(59, 130, 246, 0.05);
-  }
-
-  .popular-badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  .card-icon {
-    font-size: 3rem;
-    text-align: center;
-    margin-bottom: calc(var(--grid-unit) * 0.5);
-  }
-
-  .card-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: calc(var(--grid-unit) * 0.5);
-    color: #f1f5f9;
-  }
-
-  .card-price {
-    text-align: center;
-    margin-bottom: calc(var(--grid-unit) * 1);
-  }
-
-  .price {
-    font-size: 2.5rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .period {
-    font-size: 1rem;
-    color: #94a3b8;
-    margin-left: 4px;
-  }
-
-  .monthly-equivalent {
-    text-align: center;
-    font-size: 0.875rem;
-    color: #94a3b8;
-    margin-top: -12px;
-    margin-bottom: calc(var(--grid-unit) * 0.75);
-  }
-
-  .card-stats {
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--grid-unit) * 0.5);
-    margin-bottom: calc(var(--grid-unit) * 1);
-  }
-
-  .stat {
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 12px;
-    padding: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .stat-label {
-    font-size: 0.875rem;
-    color: #94a3b8;
-  }
-
-  .stat-value {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #3b82f6;
-  }
-
-  .card-features {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 calc(var(--grid-unit) * 1) 0;
-  }
-
-  .feature {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 8px 0;
-    font-size: 0.875rem;
-    color: #cbd5e1;
-  }
-
-  .check-icon {
-    width: 20px;
-    height: 20px;
-    color: #10b981;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  .cta-button {
-    display: block;
-    width: 100%;
-    padding: 14px 24px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    text-align: center;
-    text-decoration: none;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-  }
-
-  .cta-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
-  }
-
-  /* One-time Section */
-  .onetime-section {
-    padding: calc(var(--grid-unit) * 4) calc(var(--grid-unit) * 2);
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  .section-header {
-    text-align: center;
-    margin-bottom: calc(var(--grid-unit) * 2);
-  }
-
-  .section-title {
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 800;
-    margin-bottom: calc(var(--grid-unit) * 0.5);
-    color: #f1f5f9;
-  }
-
-  .section-subtitle {
-    font-size: 1.125rem;
-    color: #94a3b8;
-    max-width: 700px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-
-  .onetime-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: calc(var(--grid-unit) * 1);
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  .onetime-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: calc(var(--grid-unit) * 1);
-    text-align: center;
-    transition: all 0.3s ease;
-  }
-
-  .onetime-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(147, 51, 234, 0.3);
-    transform: translateY(-4px);
-  }
-
-  .onetime-icon {
-    font-size: 3rem;
-    margin-bottom: calc(var(--grid-unit) * 0.5);
-  }
-
-  .onetime-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: calc(var(--grid-unit) * 0.75);
-    color: #f1f5f9;
-  }
-
-  .onetime-mana {
-    font-size: 2.5rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 4px;
-  }
-
-  .onetime-label {
-    font-size: 0.875rem;
-    color: #94a3b8;
-    margin-bottom: calc(var(--grid-unit) * 0.75);
-  }
-
-  .onetime-price {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #f1f5f9;
-    margin-bottom: calc(var(--grid-unit) * 0.75);
-  }
-
-  .onetime-button {
-    display: block;
-    width: 100%;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
-    color: white;
-    text-decoration: none;
-    border-radius: 12px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
-
-  .onetime-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);
-  }
-
-  /* Why Section */
-  .why-section {
-    padding: calc(var(--grid-unit) * 4) calc(var(--grid-unit) * 2);
-    text-align: center;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  .benefits-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: calc(var(--grid-unit) * 1);
-    margin-top: calc(var(--grid-unit) * 2);
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .benefit-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: calc(var(--grid-unit) * 1);
-    transition: all 0.3s ease;
-  }
-
-  .benefit-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(59, 130, 246, 0.3);
-    transform: translateY(-4px);
-  }
-
-  .benefit-icon {
-    font-size: 3rem;
-    margin-bottom: calc(var(--grid-unit) * 0.5);
-  }
-
-  .benefit-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: calc(var(--grid-unit) * 0.5);
-    color: #f1f5f9;
-  }
-
-  .benefit-text {
-    font-size: 0.875rem;
-    color: #94a3b8;
-    line-height: 1.6;
-  }
-
-  /* FAQ Section */
-  .faq-section {
-    padding: calc(var(--grid-unit) * 4) calc(var(--grid-unit) * 2);
-    text-align: center;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  .faq-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: calc(var(--grid-unit) * 1);
-    margin-top: calc(var(--grid-unit) * 2);
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .faq-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: calc(var(--grid-unit) * 1);
-    text-align: left;
-    transition: all 0.3s ease;
-  }
-
-  .faq-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(59, 130, 246, 0.3);
-  }
-
-  .faq-icon {
-    font-size: 2.5rem;
-    margin-bottom: calc(var(--grid-unit) * 0.5);
-  }
-
-  .faq-question {
-    font-size: 1.125rem;
-    font-weight: 700;
-    margin-bottom: calc(var(--grid-unit) * 0.5);
-    color: #f1f5f9;
-  }
-
-  .faq-answer {
-    font-size: 0.875rem;
-    color: #94a3b8;
-    line-height: 1.6;
-  }
-
-  /* CTA Section */
-  .cta-section {
-    padding: calc(var(--grid-unit) * 4) calc(var(--grid-unit) * 2) calc(var(--grid-unit) * 6);
-    text-align: center;
-  }
-
-  .cta-content {
-    max-width: 800px;
-    margin: 0 auto;
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px;
-    padding: calc(var(--grid-unit) * 2);
-  }
-
-  .cta-title {
-    font-size: clamp(1.75rem, 3vw, 2.5rem);
-    font-weight: 800;
-    margin-bottom: calc(var(--grid-unit) * 0.5);
-    color: #f1f5f9;
-  }
-
-  .cta-text {
-    font-size: 1.125rem;
-    color: #94a3b8;
-    margin-bottom: calc(var(--grid-unit) * 1.5);
-    line-height: 1.6;
-  }
-
-  .cta-buttons {
-    display: flex;
-    gap: calc(var(--grid-unit) * 0.5);
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .cta-primary {
-    padding: 16px 32px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    text-decoration: none;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 1.125rem;
-    transition: all 0.3s ease;
-  }
-
-  .cta-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
-  }
-
-  .cta-secondary {
-    padding: 16px 32px;
-    background: transparent;
-    color: #3b82f6;
-    text-decoration: none;
-    border-radius: 12px;
-    border: 2px solid rgba(59, 130, 246, 0.3);
-    font-weight: 600;
-    font-size: 1.125rem;
-    transition: all 0.3s ease;
-  }
-
-  .cta-secondary:hover {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(59, 130, 246, 0.5);
-  }
-
-  /* Responsive */
-  @media (max-width: 1024px) {
-    .pricing-grid {
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    }
-  }
-
-  @media (max-width: 768px) {
-    .hero-section {
-      padding: calc(var(--grid-unit) * 3) calc(var(--grid-unit) * 1) calc(var(--grid-unit) * 2);
-    }
-
-    .value-props {
-      flex-direction: column;
-      gap: calc(var(--grid-unit) * 0.5);
-    }
-
-    .value-prop {
-      width: 100%;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-
-    .pricing-grid,
-    .onetime-grid,
-    .benefits-grid,
-    .faq-grid {
-      grid-template-columns: 1fr;
-      max-width: 500px;
-    }
-
-    .cta-buttons {
-      flex-direction: column;
-    }
-
-    .cta-primary,
-    .cta-secondary {
-      width: 100%;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .toggle-btn {
-      padding: 10px 20px;
-      font-size: 0.875rem;
-    }
-
-    .badge {
-      display: block;
-      margin-top: 4px;
-    }
-  }
+	:root {
+		--grid-unit: 40px;
+	}
+
+	.page-wrapper {
+		min-height: 100vh;
+		background: linear-gradient(to bottom, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+		color: #e2e8f0;
+	}
+
+	/* Hero Section */
+	.hero-section {
+		padding: calc(var(--grid-unit) * 4) calc(var(--grid-unit) * 2) calc(var(--grid-unit) * 3);
+		text-align: center;
+	}
+
+	.hero-content {
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.hero-title {
+		font-size: clamp(2.5rem, 5vw, 4rem);
+		font-weight: 800;
+		line-height: 1.1;
+		margin-bottom: calc(var(--grid-unit) * 0.5);
+		color: #f1f5f9;
+	}
+
+	.gradient-text {
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+
+	.hero-subtitle {
+		font-size: clamp(1rem, 2vw, 1.25rem);
+		color: #94a3b8;
+		margin-bottom: calc(var(--grid-unit) * 1.5);
+		line-height: 1.6;
+		max-width: 800px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.value-props {
+		display: flex;
+		gap: calc(var(--grid-unit) * 1);
+		justify-content: center;
+		flex-wrap: wrap;
+		margin-top: calc(var(--grid-unit) * 1.5);
+	}
+
+	.value-prop {
+		background: rgba(255, 255, 255, 0.03);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 16px;
+		padding: calc(var(--grid-unit) * 0.75);
+		display: flex;
+		align-items: center;
+		gap: calc(var(--grid-unit) * 0.5);
+		transition: all 0.3s ease;
+	}
+
+	.value-prop:hover {
+		background: rgba(59, 130, 246, 0.1);
+		border-color: rgba(59, 130, 246, 0.3);
+		transform: translateY(-2px);
+	}
+
+	.value-icon {
+		font-size: 2rem;
+	}
+
+	.value-text {
+		font-size: 0.875rem;
+		color: #cbd5e1;
+		text-align: left;
+		line-height: 1.4;
+	}
+
+	/* Pricing Toggle */
+	.pricing-toggle-section {
+		padding: 0 calc(var(--grid-unit) * 2) calc(var(--grid-unit) * 2);
+		text-align: center;
+	}
+
+	.pricing-toggle {
+		display: inline-flex;
+		background: rgba(255, 255, 255, 0.03);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 12px;
+		padding: 6px;
+		gap: 6px;
+	}
+
+	.toggle-btn {
+		padding: 12px 32px;
+		border: none;
+		background: transparent;
+		color: #94a3b8;
+		font-size: 1rem;
+		font-weight: 600;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.toggle-btn.active {
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		color: white;
+	}
+
+	.badge {
+		font-size: 0.75rem;
+		background: rgba(16, 185, 129, 0.2);
+		color: #10b981;
+		padding: 4px 8px;
+		border-radius: 6px;
+		font-weight: 700;
+	}
+
+	.toggle-btn.active .badge {
+		background: rgba(255, 255, 255, 0.2);
+		color: white;
+	}
+
+	/* Pricing Section */
+	.pricing-section {
+		padding: calc(var(--grid-unit) * 2);
+		max-width: 1400px;
+		margin: 0 auto;
+	}
+
+	.pricing-section.hidden {
+		display: none;
+	}
+
+	.pricing-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: calc(var(--grid-unit) * 1);
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.pricing-card {
+		position: relative;
+		background: rgba(255, 255, 255, 0.03);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 20px;
+		padding: calc(var(--grid-unit) * 1);
+		transition: all 0.3s ease;
+	}
+
+	.pricing-card:hover {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: rgba(59, 130, 246, 0.3);
+		transform: translateY(-4px);
+	}
+
+	.pricing-card.popular {
+		border-color: rgba(59, 130, 246, 0.5);
+		background: rgba(59, 130, 246, 0.05);
+	}
+
+	.popular-badge {
+		position: absolute;
+		top: -12px;
+		left: 50%;
+		transform: translateX(-50%);
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		color: white;
+		padding: 6px 16px;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 700;
+		white-space: nowrap;
+	}
+
+	.card-icon {
+		font-size: 3rem;
+		text-align: center;
+		margin-bottom: calc(var(--grid-unit) * 0.5);
+	}
+
+	.card-title {
+		font-size: 1.5rem;
+		font-weight: 700;
+		text-align: center;
+		margin-bottom: calc(var(--grid-unit) * 0.5);
+		color: #f1f5f9;
+	}
+
+	.card-price {
+		text-align: center;
+		margin-bottom: calc(var(--grid-unit) * 1);
+	}
+
+	.price {
+		font-size: 2.5rem;
+		font-weight: 800;
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+
+	.period {
+		font-size: 1rem;
+		color: #94a3b8;
+		margin-left: 4px;
+	}
+
+	.monthly-equivalent {
+		text-align: center;
+		font-size: 0.875rem;
+		color: #94a3b8;
+		margin-top: -12px;
+		margin-bottom: calc(var(--grid-unit) * 0.75);
+	}
+
+	.card-stats {
+		display: flex;
+		flex-direction: column;
+		gap: calc(var(--grid-unit) * 0.5);
+		margin-bottom: calc(var(--grid-unit) * 1);
+	}
+
+	.stat {
+		background: rgba(59, 130, 246, 0.1);
+		border: 1px solid rgba(59, 130, 246, 0.2);
+		border-radius: 12px;
+		padding: 12px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.stat-label {
+		font-size: 0.875rem;
+		color: #94a3b8;
+	}
+
+	.stat-value {
+		font-size: 1rem;
+		font-weight: 700;
+		color: #3b82f6;
+	}
+
+	.card-features {
+		list-style: none;
+		padding: 0;
+		margin: 0 0 calc(var(--grid-unit) * 1) 0;
+	}
+
+	.feature {
+		display: flex;
+		align-items: flex-start;
+		gap: 8px;
+		padding: 8px 0;
+		font-size: 0.875rem;
+		color: #cbd5e1;
+	}
+
+	.check-icon {
+		width: 20px;
+		height: 20px;
+		color: #10b981;
+		flex-shrink: 0;
+		margin-top: 2px;
+	}
+
+	.cta-button {
+		display: block;
+		width: 100%;
+		padding: 14px 24px;
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		color: white;
+		text-align: center;
+		text-decoration: none;
+		border-radius: 12px;
+		font-weight: 600;
+		font-size: 1rem;
+		transition: all 0.3s ease;
+	}
+
+	.cta-button:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+	}
+
+	/* One-time Section */
+	.onetime-section {
+		padding: calc(var(--grid-unit) * 4) calc(var(--grid-unit) * 2);
+		max-width: 1400px;
+		margin: 0 auto;
+	}
+
+	.section-header {
+		text-align: center;
+		margin-bottom: calc(var(--grid-unit) * 2);
+	}
+
+	.section-title {
+		font-size: clamp(2rem, 4vw, 3rem);
+		font-weight: 800;
+		margin-bottom: calc(var(--grid-unit) * 0.5);
+		color: #f1f5f9;
+	}
+
+	.section-subtitle {
+		font-size: 1.125rem;
+		color: #94a3b8;
+		max-width: 700px;
+		margin: 0 auto;
+		line-height: 1.6;
+	}
+
+	.onetime-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: calc(var(--grid-unit) * 1);
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.onetime-card {
+		background: rgba(255, 255, 255, 0.03);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 20px;
+		padding: calc(var(--grid-unit) * 1);
+		text-align: center;
+		transition: all 0.3s ease;
+	}
+
+	.onetime-card:hover {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: rgba(147, 51, 234, 0.3);
+		transform: translateY(-4px);
+	}
+
+	.onetime-icon {
+		font-size: 3rem;
+		margin-bottom: calc(var(--grid-unit) * 0.5);
+	}
+
+	.onetime-title {
+		font-size: 1.25rem;
+		font-weight: 700;
+		margin-bottom: calc(var(--grid-unit) * 0.75);
+		color: #f1f5f9;
+	}
+
+	.onetime-mana {
+		font-size: 2.5rem;
+		font-weight: 800;
+		background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+		margin-bottom: 4px;
+	}
+
+	.onetime-label {
+		font-size: 0.875rem;
+		color: #94a3b8;
+		margin-bottom: calc(var(--grid-unit) * 0.75);
+	}
+
+	.onetime-price {
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: #f1f5f9;
+		margin-bottom: calc(var(--grid-unit) * 0.75);
+	}
+
+	.onetime-button {
+		display: block;
+		width: 100%;
+		padding: 12px 24px;
+		background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+		color: white;
+		text-decoration: none;
+		border-radius: 12px;
+		font-weight: 600;
+		transition: all 0.3s ease;
+	}
+
+	.onetime-button:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);
+	}
+
+	/* Why Section */
+	.why-section {
+		padding: calc(var(--grid-unit) * 4) calc(var(--grid-unit) * 2);
+		text-align: center;
+		max-width: 1400px;
+		margin: 0 auto;
+	}
+
+	.benefits-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: calc(var(--grid-unit) * 1);
+		margin-top: calc(var(--grid-unit) * 2);
+		max-width: 1200px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.benefit-card {
+		background: rgba(255, 255, 255, 0.03);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 20px;
+		padding: calc(var(--grid-unit) * 1);
+		transition: all 0.3s ease;
+	}
+
+	.benefit-card:hover {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: rgba(59, 130, 246, 0.3);
+		transform: translateY(-4px);
+	}
+
+	.benefit-icon {
+		font-size: 3rem;
+		margin-bottom: calc(var(--grid-unit) * 0.5);
+	}
+
+	.benefit-title {
+		font-size: 1.25rem;
+		font-weight: 700;
+		margin-bottom: calc(var(--grid-unit) * 0.5);
+		color: #f1f5f9;
+	}
+
+	.benefit-text {
+		font-size: 0.875rem;
+		color: #94a3b8;
+		line-height: 1.6;
+	}
+
+	/* FAQ Section */
+	.faq-section {
+		padding: calc(var(--grid-unit) * 4) calc(var(--grid-unit) * 2);
+		text-align: center;
+		max-width: 1400px;
+		margin: 0 auto;
+	}
+
+	.faq-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: calc(var(--grid-unit) * 1);
+		margin-top: calc(var(--grid-unit) * 2);
+		max-width: 1200px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.faq-card {
+		background: rgba(255, 255, 255, 0.03);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 20px;
+		padding: calc(var(--grid-unit) * 1);
+		text-align: left;
+		transition: all 0.3s ease;
+	}
+
+	.faq-card:hover {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: rgba(59, 130, 246, 0.3);
+	}
+
+	.faq-icon {
+		font-size: 2.5rem;
+		margin-bottom: calc(var(--grid-unit) * 0.5);
+	}
+
+	.faq-question {
+		font-size: 1.125rem;
+		font-weight: 700;
+		margin-bottom: calc(var(--grid-unit) * 0.5);
+		color: #f1f5f9;
+	}
+
+	.faq-answer {
+		font-size: 0.875rem;
+		color: #94a3b8;
+		line-height: 1.6;
+	}
+
+	/* CTA Section */
+	.cta-section {
+		padding: calc(var(--grid-unit) * 4) calc(var(--grid-unit) * 2) calc(var(--grid-unit) * 6);
+		text-align: center;
+	}
+
+	.cta-content {
+		max-width: 800px;
+		margin: 0 auto;
+		background: rgba(255, 255, 255, 0.03);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 24px;
+		padding: calc(var(--grid-unit) * 2);
+	}
+
+	.cta-title {
+		font-size: clamp(1.75rem, 3vw, 2.5rem);
+		font-weight: 800;
+		margin-bottom: calc(var(--grid-unit) * 0.5);
+		color: #f1f5f9;
+	}
+
+	.cta-text {
+		font-size: 1.125rem;
+		color: #94a3b8;
+		margin-bottom: calc(var(--grid-unit) * 1.5);
+		line-height: 1.6;
+	}
+
+	.cta-buttons {
+		display: flex;
+		gap: calc(var(--grid-unit) * 0.5);
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+
+	.cta-primary {
+		padding: 16px 32px;
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		color: white;
+		text-decoration: none;
+		border-radius: 12px;
+		font-weight: 600;
+		font-size: 1.125rem;
+		transition: all 0.3s ease;
+	}
+
+	.cta-primary:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+	}
+
+	.cta-secondary {
+		padding: 16px 32px;
+		background: transparent;
+		color: #3b82f6;
+		text-decoration: none;
+		border-radius: 12px;
+		border: 2px solid rgba(59, 130, 246, 0.3);
+		font-weight: 600;
+		font-size: 1.125rem;
+		transition: all 0.3s ease;
+	}
+
+	.cta-secondary:hover {
+		background: rgba(59, 130, 246, 0.1);
+		border-color: rgba(59, 130, 246, 0.5);
+	}
+
+	/* Responsive */
+	@media (max-width: 1024px) {
+		.pricing-grid {
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		}
+	}
+
+	@media (max-width: 768px) {
+		.hero-section {
+			padding: calc(var(--grid-unit) * 3) calc(var(--grid-unit) * 1) calc(var(--grid-unit) * 2);
+		}
+
+		.value-props {
+			flex-direction: column;
+			gap: calc(var(--grid-unit) * 0.5);
+		}
+
+		.value-prop {
+			width: 100%;
+			max-width: 400px;
+			margin: 0 auto;
+		}
+
+		.pricing-grid,
+		.onetime-grid,
+		.benefits-grid,
+		.faq-grid {
+			grid-template-columns: 1fr;
+			max-width: 500px;
+		}
+
+		.cta-buttons {
+			flex-direction: column;
+		}
+
+		.cta-primary,
+		.cta-secondary {
+			width: 100%;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.toggle-btn {
+			padding: 10px 20px;
+			font-size: 0.875rem;
+		}
+
+		.badge {
+			display: block;
+			margin-top: 4px;
+		}
+	}
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const toggleBtns = document.querySelectorAll('.toggle-btn');
-    const monthlySection = document.getElementById('monthly-pricing');
-    const yearlySection = document.getElementById('yearly-pricing');
+	document.addEventListener('DOMContentLoaded', () => {
+		const toggleBtns = document.querySelectorAll('.toggle-btn');
+		const monthlySection = document.getElementById('monthly-pricing');
+		const yearlySection = document.getElementById('yearly-pricing');
 
-    toggleBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const type = btn.dataset.type;
+		toggleBtns.forEach((btn) => {
+			btn.addEventListener('click', () => {
+				const type = btn.dataset.type;
 
-        // Update active state
-        toggleBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+				// Update active state
+				toggleBtns.forEach((b) => b.classList.remove('active'));
+				btn.classList.add('active');
 
-        // Toggle sections
-        if (type === 'monthly') {
-          monthlySection?.classList.remove('hidden');
-          yearlySection?.classList.add('hidden');
-        } else {
-          monthlySection?.classList.add('hidden');
-          yearlySection?.classList.remove('hidden');
-        }
-      });
-    });
-  });
+				// Toggle sections
+				if (type === 'monthly') {
+					monthlySection?.classList.remove('hidden');
+					yearlySection?.classList.add('hidden');
+				} else {
+					monthlySection?.classList.add('hidden');
+					yearlySection?.classList.remove('hidden');
+				}
+			});
+		});
+	});
 </script>

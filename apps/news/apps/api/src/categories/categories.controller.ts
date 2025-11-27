@@ -3,10 +3,10 @@ import { CategoriesService } from './categories.service';
 
 @Controller('categories')
 export class CategoriesController {
-  constructor(private categoriesService: CategoriesService) {}
+	constructor(private categoriesService: CategoriesService) {}
 
-  @Get()
-  async getAllCategories() {
-    return this.categoriesService.getAllCategories();
-  }
+	@Get()
+	async getAllCategories() {
+		return this.categoriesService.getAllCategories();
+	}
 }

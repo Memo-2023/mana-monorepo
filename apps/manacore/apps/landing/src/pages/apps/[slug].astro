@@ -4,12 +4,12 @@ import Footer from '../../components/navigation/Footer.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
-  const apps = await getCollection('apps');
-  const germanApps = apps.filter(app => app.slug.endsWith('-de'));
-  return germanApps.map((app) => ({
-    params: { slug: app.slug.replace('-de', '') },
-    props: { app },
-  }));
+	const apps = await getCollection('apps');
+	const germanApps = apps.filter((app) => app.slug.endsWith('-de'));
+	return germanApps.map((app) => ({
+		params: { slug: app.slug.replace('-de', '') },
+		props: { app },
+	}));
 }
 
 const { app } = Astro.props;
@@ -17,1297 +17,1362 @@ const { Content } = await app.render();
 
 // Get all apps for "More Apps" section
 const allApps = await getCollection('apps');
-const germanApps = allApps.filter(a => a.slug.endsWith('-de') && a.slug !== app.slug);
+const germanApps = allApps.filter((a) => a.slug.endsWith('-de') && a.slug !== app.slug);
 const otherApps = germanApps.slice(0, 3);
 
 // Map category to German
 const categoryMap = {
-  'productivity': 'Produktivität',
-  'creative': 'Kreativ',
-  'ai-tools': 'KI-Tools',
-  'communication': 'Kommunikation',
-  'analytics': 'Analytik'
+	productivity: 'Produktivität',
+	creative: 'Kreativ',
+	'ai-tools': 'KI-Tools',
+	communication: 'Kommunikation',
+	analytics: 'Analytik',
 };
 
 const categoryLabel = categoryMap[app.data.category] || app.data.category;
 
 // Platform icons
 const platforms = [
-  { name: 'iOS', icon: '📱' },
-  { name: 'Android', icon: '🤖' },
-  { name: 'Windows', icon: '🪟' },
-  { name: 'macOS', icon: '🍎' },
-  { name: 'Linux', icon: '🐧' },
-  { name: 'Web', icon: '🌐' }
+	{ name: 'iOS', icon: '📱' },
+	{ name: 'Android', icon: '🤖' },
+	{ name: 'Windows', icon: '🪟' },
+	{ name: 'macOS', icon: '🍎' },
+	{ name: 'Linux', icon: '🐧' },
+	{ name: 'Web', icon: '🌐' },
 ];
 
 // Trust badges
 const trustBadges = [
-  { icon: '🔒', title: 'DSGVO-konform', description: 'EU-Datenschutz' },
-  { icon: '🇩🇪', title: 'Made in Germany', description: 'Deutsche Server' },
-  { icon: '🛡️', title: 'Verschlüsselt', description: 'Ende-zu-Ende' },
-  { icon: '⚡', title: 'Schnell', description: 'Optimiert für Performance' }
+	{ icon: '🔒', title: 'DSGVO-konform', description: 'EU-Datenschutz' },
+	{ icon: '🇩🇪', title: 'Made in Germany', description: 'Deutsche Server' },
+	{ icon: '🛡️', title: 'Verschlüsselt', description: 'Ende-zu-Ende' },
+	{ icon: '⚡', title: 'Schnell', description: 'Optimiert für Performance' },
 ];
 ---
 
 <Layout title={`${app.data.title} - Mana App`}>
-  <!-- Hero Section -->
-  <section class="app-hero">
-    <div class="app-hero-overlay"></div>
+	<!-- Hero Section -->
+	<section class="app-hero">
+		<div class="app-hero-overlay"></div>
 
-    <div class="app-hero-content">
-      <div class="app-hero-icon">
-        {app.data.icon.startsWith('/') ? (
-          <img src={app.data.icon} alt={app.data.title} class="icon-image" />
-        ) : (
-          <span class="icon-emoji">{app.data.icon}</span>
-        )}
-      </div>
+		<div class="app-hero-content">
+			<div class="app-hero-icon">
+				{
+					app.data.icon.startsWith('/') ? (
+						<img src={app.data.icon} alt={app.data.title} class="icon-image" />
+					) : (
+						<span class="icon-emoji">{app.data.icon}</span>
+					)
+				}
+			</div>
 
-      <h1 class="app-hero-title">{app.data.title}</h1>
-      <p class="app-hero-description">{app.data.description}</p>
+			<h1 class="app-hero-title">{app.data.title}</h1>
+			<p class="app-hero-description">{app.data.description}</p>
 
-      <div class="app-hero-meta">
-        {app.data.status === 'available' && (
-          <span class="status-badge status-available">Verfügbar</span>
-        )}
-        {app.data.status === 'beta' && (
-          <span class="status-badge status-beta">Beta</span>
-        )}
-        {app.data.status === 'coming-soon' && (
-          <span class="status-badge status-coming">Demnächst</span>
-        )}
-        <span class="category-badge">{categoryLabel}</span>
-      </div>
+			<div class="app-hero-meta">
+				{
+					app.data.status === 'available' && (
+						<span class="status-badge status-available">Verfügbar</span>
+					)
+				}
+				{app.data.status === 'beta' && <span class="status-badge status-beta">Beta</span>}
+				{
+					app.data.status === 'coming-soon' && (
+						<span class="status-badge status-coming">Demnächst</span>
+					)
+				}
+				<span class="category-badge">{categoryLabel}</span>
+			</div>
 
-      {app.data.status === 'available' && (
-        <div class="app-hero-cta">
-          <a href="/start" class="btn-start">
-            Mit Mana starten
-          </a>
-          {app.data.website && (
-            <a href={app.data.website} target="_blank" rel="noopener noreferrer" class="btn-website">
-              Website besuchen
-            </a>
-          )}
-        </div>
-      )}
-    </div>
-  </section>
+			{
+				app.data.status === 'available' && (
+					<div class="app-hero-cta">
+						<a href="/start" class="btn-start">
+							Mit Mana starten
+						</a>
+						{app.data.website && (
+							<a
+								href={app.data.website}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="btn-website"
+							>
+								Website besuchen
+							</a>
+						)}
+					</div>
+				)
+			}
+		</div>
+	</section>
 
-  <!-- Main Content with Sidebar -->
-  <section class="app-main">
-    <div class="app-container">
-      <div class="content-wrapper">
-        <!-- Main Content Column -->
-        <div class="main-content">
+	<!-- Main Content with Sidebar -->
+	<section class="app-main">
+		<div class="app-container">
+			<div class="content-wrapper">
+				<!-- Main Content Column -->
+				<div class="main-content">
+					<!-- Features Grid -->
+					<div class="section-block">
+						<h2 class="section-title">Hauptfunktionen</h2>
+						<div class="features-grid">
+							{
+								app.data.features.slice(0, 6).map((feature, index) => (
+									<div class="feature-card">
+										<div class="feature-icon">
+											<svg
+												class="feature-check"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M5 13l4 4L19 7"
+												/>
+											</svg>
+										</div>
+										<h3 class="feature-title">{feature}</h3>
+									</div>
+								))
+							}
+						</div>
+					</div>
 
-          <!-- Features Grid -->
-          <div class="section-block">
-            <h2 class="section-title">Hauptfunktionen</h2>
-            <div class="features-grid">
-              {app.data.features.slice(0, 6).map((feature, index) => (
-                <div class="feature-card">
-                  <div class="feature-icon">
-                    <svg class="feature-check" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                  </div>
-                  <h3 class="feature-title">{feature}</h3>
-                </div>
-              ))}
-            </div>
-          </div>
+					<!-- Detailed Content -->
+					<div class="section-block prose-section">
+						<article class="prose-content">
+							<Content />
+						</article>
+					</div>
 
-          <!-- Detailed Content -->
-          <div class="section-block prose-section">
-            <article class="prose-content">
-              <Content />
-            </article>
-          </div>
+					<!-- Use Cases Section -->
+					<div class="section-block use-cases-section">
+						<h2 class="section-title">Perfekt für</h2>
+						<div class="use-cases-grid">
+							<div class="use-case-card">
+								<div class="use-case-icon">💼</div>
+								<h3 class="use-case-title">Business & Teams</h3>
+								<p class="use-case-text">Meeting-Protokolle, Kundengespräche, Team-Collaboration</p>
+							</div>
+							<div class="use-case-card">
+								<div class="use-case-icon">🎓</div>
+								<h3 class="use-case-title">Bildung & Forschung</h3>
+								<p class="use-case-text">Vorlesungen, Interviews, Forschungsdokumentation</p>
+							</div>
+							<div class="use-case-card">
+								<div class="use-case-icon">🎨</div>
+								<h3 class="use-case-title">Kreative & Content</h3>
+								<p class="use-case-text">Podcasts, Videos, Journalismus, Content-Erstellung</p>
+							</div>
+							<div class="use-case-card">
+								<div class="use-case-icon">👤</div>
+								<h3 class="use-case-title">Persönlich</h3>
+								<p class="use-case-text">Notizen, Ideen festhalten, Tagebuch, Erinnerungen</p>
+							</div>
+						</div>
+					</div>
 
-          <!-- Use Cases Section -->
-          <div class="section-block use-cases-section">
-            <h2 class="section-title">Perfekt für</h2>
-            <div class="use-cases-grid">
-              <div class="use-case-card">
-                <div class="use-case-icon">💼</div>
-                <h3 class="use-case-title">Business & Teams</h3>
-                <p class="use-case-text">Meeting-Protokolle, Kundengespräche, Team-Collaboration</p>
-              </div>
-              <div class="use-case-card">
-                <div class="use-case-icon">🎓</div>
-                <h3 class="use-case-title">Bildung & Forschung</h3>
-                <p class="use-case-text">Vorlesungen, Interviews, Forschungsdokumentation</p>
-              </div>
-              <div class="use-case-card">
-                <div class="use-case-icon">🎨</div>
-                <h3 class="use-case-title">Kreative & Content</h3>
-                <p class="use-case-text">Podcasts, Videos, Journalismus, Content-Erstellung</p>
-              </div>
-              <div class="use-case-card">
-                <div class="use-case-icon">👤</div>
-                <h3 class="use-case-title">Persönlich</h3>
-                <p class="use-case-text">Notizen, Ideen festhalten, Tagebuch, Erinnerungen</p>
-              </div>
-            </div>
-          </div>
+					<!-- Mana Advantage Section -->
+					<div class="section-block mana-advantage">
+						<div class="advantage-content">
+							<div class="advantage-text">
+								<h2 class="advantage-title">Der Mana-Vorteil</h2>
+								<p class="advantage-description">
+									Nutze {app.data.title} flexibel mit Mana-Credits. Keine monatlichen Abos, keine ungenutzten
+									Minuten. Zahle nur für das, was du wirklich verwendest.
+								</p>
+								<ul class="advantage-list">
+									<li>
+										<svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M5 13l4 4L19 7"></path>
+										</svg>
+										<span>Keine monatlichen Verpflichtungen</span>
+									</li>
+									<li>
+										<svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M5 13l4 4L19 7"></path>
+										</svg>
+										<span>Transparente Abrechnung pro Nutzung</span>
+									</li>
+									<li>
+										<svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M5 13l4 4L19 7"></path>
+										</svg>
+										<span>Perfekt für schwankenden Bedarf</span>
+									</li>
+									<li>
+										<svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M5 13l4 4L19 7"></path>
+										</svg>
+										<span>Ein Account für alle Apps</span>
+									</li>
+								</ul>
+							</div>
+							<div class="advantage-visual">
+								<div class="cost-comparison">
+									<div class="comparison-card traditional">
+										<div class="comparison-label">Pay-per-Use</div>
+										<div class="comparison-price">6€<span>/Monat</span></div>
+										<div class="comparison-note">300 Min (600 Mana)</div>
+									</div>
+									<div class="comparison-arrow">→</div>
+									<div class="comparison-card mana">
+										<div class="comparison-label">Mana Stream</div>
+										<div class="comparison-price">14,99€<span>/Monat</span></div>
+										<div class="comparison-note">750 Min (1.500 Mana)</div>
+									</div>
+								</div>
+								<div class="comparison-note-text">
+									* 1 Mana = 1 Cent | Aufnahme = 2 Mana/Min | Kostenlos: 150 Mana/Monat (75 Min)
+								</div>
+							</div>
+						</div>
+					</div>
 
-          <!-- Mana Advantage Section -->
-          <div class="section-block mana-advantage">
-            <div class="advantage-content">
-              <div class="advantage-text">
-                <h2 class="advantage-title">Der Mana-Vorteil</h2>
-                <p class="advantage-description">
-                  Nutze {app.data.title} flexibel mit Mana-Credits. Keine monatlichen Abos, keine ungenutzten Minuten.
-                  Zahle nur für das, was du wirklich verwendest.
-                </p>
-                <ul class="advantage-list">
-                  <li>
-                    <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Keine monatlichen Verpflichtungen</span>
-                  </li>
-                  <li>
-                    <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Transparente Abrechnung pro Nutzung</span>
-                  </li>
-                  <li>
-                    <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Perfekt für schwankenden Bedarf</span>
-                  </li>
-                  <li>
-                    <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Ein Account für alle Apps</span>
-                  </li>
-                </ul>
-              </div>
-              <div class="advantage-visual">
-                <div class="cost-comparison">
-                  <div class="comparison-card traditional">
-                    <div class="comparison-label">Pay-per-Use</div>
-                    <div class="comparison-price">6€<span>/Monat</span></div>
-                    <div class="comparison-note">300 Min (600 Mana)</div>
-                  </div>
-                  <div class="comparison-arrow">→</div>
-                  <div class="comparison-card mana">
-                    <div class="comparison-label">Mana Stream</div>
-                    <div class="comparison-price">14,99€<span>/Monat</span></div>
-                    <div class="comparison-note">750 Min (1.500 Mana)</div>
-                  </div>
-                </div>
-                <div class="comparison-note-text">
-                  * 1 Mana = 1 Cent | Aufnahme = 2 Mana/Min | Kostenlos: 150 Mana/Monat (75 Min)
-                </div>
-              </div>
-            </div>
-          </div>
+					<!-- Trust & Security -->
+					<div class="section-block trust-section">
+						<h2 class="section-title">Sicherheit & Vertrauen</h2>
+						<div class="trust-grid">
+							{
+								trustBadges.map((badge) => (
+									<div class="trust-badge">
+										<div class="trust-icon">{badge.icon}</div>
+										<div class="trust-text">
+											<div class="trust-title">{badge.title}</div>
+											<div class="trust-desc">{badge.description}</div>
+										</div>
+									</div>
+								))
+							}
+						</div>
+					</div>
 
-          <!-- Trust & Security -->
-          <div class="section-block trust-section">
-            <h2 class="section-title">Sicherheit & Vertrauen</h2>
-            <div class="trust-grid">
-              {trustBadges.map((badge) => (
-                <div class="trust-badge">
-                  <div class="trust-icon">{badge.icon}</div>
-                  <div class="trust-text">
-                    <div class="trust-title">{badge.title}</div>
-                    <div class="trust-desc">{badge.description}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+					<!-- Platform Availability -->
+					<div class="section-block platform-section">
+						<h2 class="section-title">Überall verfügbar</h2>
+						<p class="platform-subtitle">Nutze {app.data.title} auf allen deinen Geräten</p>
+						<div class="platform-grid">
+							{
+								platforms.map((platform) => (
+									<div class="platform-card">
+										<div class="platform-icon">{platform.icon}</div>
+										<div class="platform-name">{platform.name}</div>
+									</div>
+								))
+							}
+						</div>
+					</div>
+				</div>
 
-          <!-- Platform Availability -->
-          <div class="section-block platform-section">
-            <h2 class="section-title">Überall verfügbar</h2>
-            <p class="platform-subtitle">Nutze {app.data.title} auf allen deinen Geräten</p>
-            <div class="platform-grid">
-              {platforms.map((platform) => (
-                <div class="platform-card">
-                  <div class="platform-icon">{platform.icon}</div>
-                  <div class="platform-name">{platform.name}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+				<!-- Sticky Sidebar -->
+				<aside class="sidebar">
+					<!-- Mana Usage Card -->
+					<div class="sidebar-card mana-card">
+						<h3 class="sidebar-title">Mana-Verbrauch</h3>
 
-        </div>
+						<div class="mana-display">
+							<div class="mana-main">
+								<div class="mana-value">{app.data.manaUsage.average}</div>
+								<div class="mana-label">Mana</div>
+							</div>
+							<div class="mana-sub">
+								pro {
+									app.data.manaUsage.unit === 'per-minute'
+										? 'Minute'
+										: app.data.manaUsage.unit === 'per-request'
+											? 'Anfrage'
+											: app.data.manaUsage.unit === 'per-image'
+												? 'Bild'
+												: app.data.manaUsage.unit === 'per-token'
+													? 'Token'
+													: 'Aktion'
+								}
+							</div>
+						</div>
 
-        <!-- Sticky Sidebar -->
-        <aside class="sidebar">
-          <!-- Mana Usage Card -->
-          <div class="sidebar-card mana-card">
-            <h3 class="sidebar-title">Mana-Verbrauch</h3>
+						<div class="mana-range">
+							<div class="mana-range-item">
+								<span class="range-label">Min</span>
+								<span class="range-value">{app.data.manaUsage.min}</span>
+							</div>
+							<div class="mana-range-divider"></div>
+							<div class="mana-range-item">
+								<span class="range-label">Max</span>
+								<span class="range-value">{app.data.manaUsage.max}</span>
+							</div>
+						</div>
+					</div>
 
-            <div class="mana-display">
-              <div class="mana-main">
-                <div class="mana-value">{app.data.manaUsage.average}</div>
-                <div class="mana-label">Mana</div>
-              </div>
-              <div class="mana-sub">pro {
-                app.data.manaUsage.unit === 'per-minute' ? 'Minute' :
-                app.data.manaUsage.unit === 'per-request' ? 'Anfrage' :
-                app.data.manaUsage.unit === 'per-image' ? 'Bild' :
-                app.data.manaUsage.unit === 'per-token' ? 'Token' : 'Aktion'
-              }</div>
-            </div>
+					<!-- Quick Features -->
+					<div class="sidebar-card features-card">
+						<h3 class="sidebar-title">Top Features</h3>
+						<ul class="quick-features">
+							{
+								app.data.features.slice(0, 5).map((feature) => (
+									<li class="quick-feature">
+										<svg class="quick-check" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M5 13l4 4L19 7"
+											/>
+										</svg>
+										<span>{feature}</span>
+									</li>
+								))
+							}
+						</ul>
+					</div>
 
-            <div class="mana-range">
-              <div class="mana-range-item">
-                <span class="range-label">Min</span>
-                <span class="range-value">{app.data.manaUsage.min}</span>
-              </div>
-              <div class="mana-range-divider"></div>
-              <div class="mana-range-item">
-                <span class="range-label">Max</span>
-                <span class="range-value">{app.data.manaUsage.max}</span>
-              </div>
-            </div>
-          </div>
+					<!-- CTA Card -->
+					{
+						app.data.status === 'available' && (
+							<div class="sidebar-card cta-card">
+								<h3 class="cta-title">Jetzt starten</h3>
+								<p class="cta-text">Nutze {app.data.title} mit deinen Mana-Credits</p>
+								<a href="/start" class="cta-button">
+									Mit Mana starten
+								</a>
+								{app.data.website && (
+									<a href={app.data.website} target="_blank" class="cta-link">
+										Website besuchen →
+									</a>
+								)}
+							</div>
+						)
+					}
+				</aside>
+			</div>
+		</div>
+	</section>
 
-          <!-- Quick Features -->
-          <div class="sidebar-card features-card">
-            <h3 class="sidebar-title">Top Features</h3>
-            <ul class="quick-features">
-              {app.data.features.slice(0, 5).map((feature) => (
-                <li class="quick-feature">
-                  <svg class="quick-check" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+	<!-- More Apps Section -->
+	{
+		otherApps.length > 0 && (
+			<section class="more-apps-section">
+				<div class="more-apps-container">
+					<h2 class="more-apps-title">Weitere Apps entdecken</h2>
+					<div class="more-apps-grid">
+						{otherApps.map((otherApp) => (
+							<a href={`/apps/${otherApp.slug.replace('-de', '')}`} class="more-app-card">
+								<div class="more-app-icon">
+									{otherApp.data.icon.startsWith('/') ? (
+										<img src={otherApp.data.icon} alt={otherApp.data.title} class="more-icon-img" />
+									) : (
+										<span class="more-icon-emoji">{otherApp.data.icon}</span>
+									)}
+								</div>
+								<h3 class="more-app-name">{otherApp.data.title}</h3>
+								<p class="more-app-desc">{otherApp.data.description}</p>
+							</a>
+						))}
+					</div>
+					<div class="more-apps-cta">
+						<a href="/apps" class="btn-all-apps">
+							Alle Apps ansehen
+						</a>
+					</div>
+				</div>
+			</section>
+		)
+	}
 
-          <!-- CTA Card -->
-          {app.data.status === 'available' && (
-            <div class="sidebar-card cta-card">
-              <h3 class="cta-title">Jetzt starten</h3>
-              <p class="cta-text">Nutze {app.data.title} mit deinen Mana-Credits</p>
-              <a href="/start" class="cta-button">
-                Mit Mana starten
-              </a>
-              {app.data.website && (
-                <a href={app.data.website} target="_blank" class="cta-link">
-                  Website besuchen →
-                </a>
-              )}
-            </div>
-          )}
-        </aside>
-      </div>
-    </div>
-  </section>
+	<!-- Back Link -->
+	<section class="back-section">
+		<div class="back-container">
+			<a href="/apps" class="back-link">
+				<svg class="back-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+				</svg>
+				Zurück zur App-Übersicht
+			</a>
+		</div>
+	</section>
 
-  <!-- More Apps Section -->
-  {otherApps.length > 0 && (
-    <section class="more-apps-section">
-      <div class="more-apps-container">
-        <h2 class="more-apps-title">Weitere Apps entdecken</h2>
-        <div class="more-apps-grid">
-          {otherApps.map((otherApp) => (
-            <a href={`/apps/${otherApp.slug.replace('-de', '')}`} class="more-app-card">
-              <div class="more-app-icon">
-                {otherApp.data.icon.startsWith('/') ? (
-                  <img src={otherApp.data.icon} alt={otherApp.data.title} class="more-icon-img" />
-                ) : (
-                  <span class="more-icon-emoji">{otherApp.data.icon}</span>
-                )}
-              </div>
-              <h3 class="more-app-name">{otherApp.data.title}</h3>
-              <p class="more-app-desc">{otherApp.data.description}</p>
-            </a>
-          ))}
-        </div>
-        <div class="more-apps-cta">
-          <a href="/apps" class="btn-all-apps">Alle Apps ansehen</a>
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- Back Link -->
-  <section class="back-section">
-    <div class="back-container">
-      <a href="/apps" class="back-link">
-        <svg class="back-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-        </svg>
-        Zurück zur App-Übersicht
-      </a>
-    </div>
-  </section>
-
-  <Footer />
+	<Footer />
 </Layout>
 
 <style>
-  /* Hero Section */
-  .app-hero {
-    position: relative;
-    min-height: 60vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-    padding: calc(var(--grid-unit) * 4) 0 calc(var(--grid-unit) * 3) 0;
-    overflow: hidden;
-  }
-
-  .app-hero-overlay {
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(circle at 30% 40%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 70% 60%, rgba(37, 99, 235, 0.1) 0%, transparent 50%);
-    pointer-events: none;
-  }
-
-  .app-hero-content {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    max-width: 900px;
-    padding: 0 calc(var(--grid-unit) * 2);
-    margin: 0 auto;
-  }
-
-  .app-hero-icon {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto calc(var(--grid-unit) * 1) auto;
-    border-radius: 24px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    backdrop-filter: blur(10px);
-  }
-
-  .icon-image {
-    width: 80px;
-    height: 80px;
-    object-fit: contain;
-  }
-
-  .icon-emoji {
-    font-size: 4rem;
-  }
-
-  .app-hero-title {
-    font-size: clamp(2.5rem, 5vw, 3.5rem);
-    font-weight: 800;
-    color: #f8fafc;
-    margin: 0 0 calc(var(--grid-unit) * 0.75) 0;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-  }
-
-  .app-hero-description {
-    font-size: clamp(1.125rem, 2vw, 1.375rem);
-    line-height: 1.6;
-    color: #cbd5e1;
-    margin: 0 0 calc(var(--grid-unit) * 1) 0;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .app-hero-meta {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: calc(var(--grid-unit) * 0.5);
-    margin-bottom: calc(var(--grid-unit) * 1.5);
-    flex-wrap: wrap;
-  }
-
-  .status-badge,
-  .category-badge {
-    padding: calc(var(--grid-unit) * 0.2) calc(var(--grid-unit) * 0.5);
-    border-radius: 20px;
-    font-size: 0.875rem;
-    font-weight: 600;
-  }
-
-  .status-available {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.3);
-  }
-
-  .status-beta {
-    background: rgba(234, 179, 8, 0.15);
-    color: #facc15;
-    border: 1px solid rgba(234, 179, 8, 0.3);
-  }
-
-  .status-coming {
-    background: rgba(148, 163, 184, 0.15);
-    color: #94a3b8;
-    border: 1px solid rgba(148, 163, 184, 0.3);
-  }
-
-  .category-badge {
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
-    border: 1px solid rgba(59, 130, 246, 0.3);
-  }
-
-  .app-hero-cta {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: calc(var(--grid-unit) * 0.5);
-    flex-wrap: wrap;
-  }
-
-  .btn-start,
-  .btn-website {
-    padding: 0 calc(var(--grid-unit) * 1);
-    height: calc(var(--grid-unit) * 1.25);
-    font-size: 1.125rem;
-    font-weight: 600;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-  }
-
-  .btn-start {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
-    border: none;
-  }
-
-  .btn-start:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
-  }
-
-  .btn-website {
-    background: rgba(248, 250, 252, 0.1);
-    color: #f8fafc;
-    border: 2px solid rgba(248, 250, 252, 0.2);
-    backdrop-filter: blur(10px);
-  }
-
-  .btn-website:hover {
-    background: rgba(248, 250, 252, 0.15);
-  }
-
-  /* Main Content Area */
-  .app-main {
-    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-    padding: calc(var(--grid-unit) * 3) 0;
-  }
-
-  .app-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 calc(var(--grid-unit) * 2);
-  }
-
-  .content-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: calc(var(--grid-unit) * 2);
-    align-items: start;
-  }
-
-  .main-content {
-    min-width: 0;
-  }
-
-  .section-block {
-    margin-bottom: calc(var(--grid-unit) * 3);
-  }
-
-  .section-title {
-    font-size: clamp(1.75rem, 3vw, 2.25rem);
-    font-weight: 800;
-    color: #f8fafc;
-    margin: 0 0 calc(var(--grid-unit) * 1.25) 0;
-    line-height: 1.2;
-  }
-
-  /* Features Grid */
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: calc(var(--grid-unit) * 0.75);
-  }
-
-  .feature-card {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.7) 100%);
-    border: 1px solid rgba(248, 250, 252, 0.1);
-    border-radius: 16px;
-    padding: calc(var(--grid-unit) * 0.75);
-    display: flex;
-    align-items: flex-start;
-    gap: calc(var(--grid-unit) * 0.5);
-    transition: all 0.3s ease;
-  }
-
-  .feature-card:hover {
-    border-color: rgba(59, 130, 246, 0.3);
-    transform: translateY(-2px);
-  }
-
-  .feature-icon {
-    width: 40px;
-    height: 40px;
-    background: rgba(59, 130, 246, 0.15);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .feature-check {
-    width: 24px;
-    height: 24px;
-    color: #60a5fa;
-  }
-
-  .feature-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #f8fafc;
-    margin: 0;
-    line-height: 1.4;
-    margin-top: 8px;
-  }
-
-  /* Prose Content */
-  .prose-section {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.5) 100%);
-    border: 1px solid rgba(248, 250, 252, 0.08);
-    border-radius: 20px;
-    padding: calc(var(--grid-unit) * 1.5);
-  }
-
-  .prose-content {
-    color: #e2e8f0;
-    line-height: 1.7;
-  }
-
-  .prose-content :global(h2) {
-    color: #f8fafc;
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-top: calc(var(--grid-unit) * 1.25);
-    margin-bottom: calc(var(--grid-unit) * 0.6);
-    line-height: 1.2;
-  }
-
-  .prose-content :global(h2:first-child) {
-    margin-top: 0;
-  }
-
-  .prose-content :global(h3) {
-    color: #f1f5f9;
-    font-size: 1.375rem;
-    font-weight: 600;
-    margin-top: var(--grid-unit);
-    margin-bottom: calc(var(--grid-unit) * 0.5);
-  }
-
-  .prose-content :global(p) {
-    margin-bottom: calc(var(--grid-unit) * 0.6);
-    color: #cbd5e1;
-  }
-
-  .prose-content :global(ul),
-  .prose-content :global(ol) {
-    margin-bottom: calc(var(--grid-unit) * 0.6);
-    padding-left: calc(var(--grid-unit) * 0.75);
-  }
-
-  .prose-content :global(li) {
-    margin-bottom: calc(var(--grid-unit) * 0.25);
-    color: #cbd5e1;
-  }
-
-  .prose-content :global(strong) {
-    color: #f8fafc;
-    font-weight: 600;
-  }
-
-  .prose-content :global(a) {
-    color: #60a5fa;
-    text-decoration: underline;
-  }
-
-  /* Use Cases */
-  .use-cases-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: calc(var(--grid-unit) * 0.75);
-  }
-
-  .use-case-card {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.7) 100%);
-    border: 1px solid rgba(248, 250, 252, 0.1);
-    border-radius: 16px;
-    padding: calc(var(--grid-unit) * 1);
-    text-align: center;
-    transition: all 0.3s ease;
-  }
-
-  .use-case-card:hover {
-    border-color: rgba(59, 130, 246, 0.3);
-    transform: translateY(-4px);
-  }
-
-  .use-case-icon {
-    font-size: 3rem;
-    margin-bottom: calc(var(--grid-unit) * 0.5);
-  }
-
-  .use-case-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #f8fafc;
-    margin: 0 0 calc(var(--grid-unit) * 0.3) 0;
-  }
-
-  .use-case-text {
-    font-size: 0.9375rem;
-    color: #94a3b8;
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  /* Mana Advantage */
-  .mana-advantage {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.05) 100%);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 20px;
-    padding: calc(var(--grid-unit) * 2);
-  }
-
-  .advantage-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: calc(var(--grid-unit) * 2);
-    align-items: center;
-  }
-
-  .advantage-title {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #f8fafc;
-    margin: 0 0 calc(var(--grid-unit) * 0.5) 0;
-  }
-
-  .advantage-description {
-    font-size: 1.125rem;
-    color: #cbd5e1;
-    margin: 0 0 calc(var(--grid-unit) * 1) 0;
-    line-height: 1.6;
-  }
-
-  .advantage-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .advantage-list li {
-    display: flex;
-    align-items: center;
-    gap: calc(var(--grid-unit) * 0.3);
-    margin-bottom: calc(var(--grid-unit) * 0.4);
-    color: #e2e8f0;
-    font-size: 1rem;
-  }
-
-  .check-icon {
-    width: 20px;
-    height: 20px;
-    color: #4ade80;
-    flex-shrink: 0;
-  }
-
-  .cost-comparison {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: calc(var(--grid-unit) * 0.75);
-  }
-
-  .comparison-card {
-    flex: 1;
-    background: rgba(15, 23, 42, 0.8);
-    border-radius: 16px;
-    padding: calc(var(--grid-unit) * 1);
-    text-align: center;
-    border: 2px solid rgba(248, 250, 252, 0.1);
-  }
-
-  .comparison-card.mana {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.15) 100%);
-    border-color: rgba(59, 130, 246, 0.4);
-  }
-
-  .comparison-label {
-    font-size: 0.875rem;
-    color: #94a3b8;
-    margin-bottom: calc(var(--grid-unit) * 0.3);
-  }
-
-  .comparison-card.mana .comparison-label {
-    color: #60a5fa;
-    font-weight: 600;
-  }
-
-  .comparison-price {
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: #f8fafc;
-    line-height: 1;
-  }
-
-  .comparison-card.mana .comparison-price {
-    color: #60a5fa;
-  }
-
-  .comparison-price span {
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: #94a3b8;
-  }
-
-  .comparison-note {
-    font-size: 0.8125rem;
-    color: #64748b;
-    margin-top: calc(var(--grid-unit) * 0.3);
-  }
-
-  .comparison-arrow {
-    font-size: 2rem;
-    color: #60a5fa;
-    flex-shrink: 0;
-  }
-
-  .comparison-note-text {
-    margin-top: calc(var(--grid-unit) * 0.75);
-    text-align: center;
-    font-size: 0.8125rem;
-    color: #64748b;
-    font-style: italic;
-  }
-
-  /* Trust Badges */
-  .trust-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: calc(var(--grid-unit) * 0.75);
-  }
-
-  .trust-badge {
-    display: flex;
-    align-items: center;
-    gap: calc(var(--grid-unit) * 0.5);
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.7) 100%);
-    border: 1px solid rgba(248, 250, 252, 0.1);
-    border-radius: 12px;
-    padding: calc(var(--grid-unit) * 0.75);
-  }
-
-  .trust-icon {
-    font-size: 2rem;
-    flex-shrink: 0;
-  }
-
-  .trust-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #f8fafc;
-    margin-bottom: 2px;
-  }
-
-  .trust-desc {
-    font-size: 0.8125rem;
-    color: #94a3b8;
-  }
-
-  /* Platform Grid */
-  .platform-subtitle {
-    font-size: 1.125rem;
-    color: #94a3b8;
-    margin: 0 0 calc(var(--grid-unit) * 1.25) 0;
-  }
-
-  .platform-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: calc(var(--grid-unit) * 0.75);
-  }
-
-  .platform-card {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.7) 100%);
-    border: 1px solid rgba(248, 250, 252, 0.1);
-    border-radius: 12px;
-    padding: calc(var(--grid-unit) * 0.75);
-    text-align: center;
-    transition: all 0.3s ease;
-  }
-
-  .platform-card:hover {
-    border-color: rgba(59, 130, 246, 0.3);
-    transform: translateY(-2px);
-  }
-
-  .platform-icon {
-    font-size: 2.5rem;
-    margin-bottom: calc(var(--grid-unit) * 0.3);
-  }
-
-  .platform-name {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: #cbd5e1;
-  }
-
-  /* Sidebar */
-  .sidebar {
-    position: sticky;
-    top: calc(var(--grid-unit) * 2);
-  }
-
-  .sidebar-card {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
-    border: 1px solid rgba(248, 250, 252, 0.1);
-    border-radius: 20px;
-    padding: calc(var(--grid-unit) * 1);
-    margin-bottom: calc(var(--grid-unit) * 1);
-    backdrop-filter: blur(10px);
-  }
-
-  .sidebar-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #f8fafc;
-    margin: 0 0 calc(var(--grid-unit) * 0.75) 0;
-  }
-
-  /* Mana Card */
-  .mana-card {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
-    border-color: rgba(59, 130, 246, 0.3);
-  }
-
-  .mana-display {
-    text-align: center;
-    padding: calc(var(--grid-unit) * 1) 0;
-    border-bottom: 1px solid rgba(248, 250, 252, 0.1);
-    margin-bottom: calc(var(--grid-unit) * 0.75);
-  }
-
-  .mana-value {
-    font-size: 3.5rem;
-    font-weight: 800;
-    color: #60a5fa;
-    line-height: 1;
-  }
-
-  .mana-label {
-    font-size: 1.25rem;
-    color: #93c5fd;
-    font-weight: 600;
-    margin-top: calc(var(--grid-unit) * 0.2);
-  }
-
-  .mana-sub {
-    font-size: 0.9375rem;
-    color: #94a3b8;
-    margin-top: calc(var(--grid-unit) * 0.3);
-  }
-
-  .mana-range {
-    display: flex;
-    align-items: center;
-    gap: calc(var(--grid-unit) * 0.5);
-  }
-
-  .mana-range-item {
-    flex: 1;
-    text-align: center;
-  }
-
-  .range-label {
-    display: block;
-    font-size: 0.75rem;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: calc(var(--grid-unit) * 0.1);
-  }
-
-  .range-value {
-    display: block;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #cbd5e1;
-  }
-
-  .mana-range-divider {
-    width: 1px;
-    height: 30px;
-    background: rgba(248, 250, 252, 0.1);
-  }
-
-  /* Quick Features */
-  .quick-features {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .quick-feature {
-    display: flex;
-    align-items: flex-start;
-    gap: calc(var(--grid-unit) * 0.3);
-    padding: calc(var(--grid-unit) * 0.3) 0;
-    color: #cbd5e1;
-    font-size: 0.9375rem;
-    line-height: 1.4;
-  }
-
-  .quick-check {
-    width: 18px;
-    height: 18px;
-    color: #4ade80;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  /* CTA Card */
-  .cta-card {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    border-color: rgba(59, 130, 246, 0.3);
-  }
-
-  .cta-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: white;
-    margin: 0 0 calc(var(--grid-unit) * 0.3) 0;
-  }
-
-  .cta-text {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.9375rem;
-    margin: 0 0 calc(var(--grid-unit) * 0.75) 0;
-    line-height: 1.5;
-  }
-
-  .cta-button {
-    display: block;
-    width: 100%;
-    padding: calc(var(--grid-unit) * 0.4);
-    background: white;
-    color: #2563eb;
-    font-weight: 600;
-    font-size: 1rem;
-    border-radius: 10px;
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.3s ease;
-  }
-
-  .cta-button:hover {
-    background: #f1f5f9;
-    transform: translateY(-2px);
-  }
-
-  .cta-link {
-    display: block;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.875rem;
-    margin-top: calc(var(--grid-unit) * 0.5);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .cta-link:hover {
-    color: white;
-  }
-
-  /* More Apps Section */
-  .more-apps-section {
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-    padding: calc(var(--grid-unit) * 3) 0;
-  }
-
-  .more-apps-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 calc(var(--grid-unit) * 2);
-  }
-
-  .more-apps-title {
-    font-size: clamp(1.75rem, 3vw, 2.25rem);
-    font-weight: 800;
-    color: #f8fafc;
-    text-align: center;
-    margin: 0 0 calc(var(--grid-unit) * 2) 0;
-  }
-
-  .more-apps-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: calc(var(--grid-unit) * 1);
-    margin-bottom: calc(var(--grid-unit) * 2);
-  }
-
-  .more-app-card {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.7) 100%);
-    border: 1px solid rgba(248, 250, 252, 0.1);
-    border-radius: 16px;
-    padding: calc(var(--grid-unit) * 1.25);
-    text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    transition: all 0.3s ease;
-  }
-
-  .more-app-card:hover {
-    border-color: rgba(59, 130, 246, 0.3);
-    transform: translateY(-4px);
-  }
-
-  .more-app-icon {
-    width: 80px;
-    height: 80px;
-    background: rgba(59, 130, 246, 0.1);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: calc(var(--grid-unit) * 0.75);
-  }
-
-  .more-icon-img {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-  }
-
-  .more-icon-emoji {
-    font-size: 2.5rem;
-  }
-
-  .more-app-name {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #f8fafc;
-    margin: 0 0 calc(var(--grid-unit) * 0.3) 0;
-  }
-
-  .more-app-desc {
-    font-size: 0.9375rem;
-    color: #94a3b8;
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  .more-apps-cta {
-    text-align: center;
-  }
-
-  .btn-all-apps {
-    display: inline-block;
-    padding: 0 calc(var(--grid-unit) * 1.5);
-    height: calc(var(--grid-unit) * 1.25);
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 1.0625rem;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-  }
-
-  .btn-all-apps:hover {
-    background: rgba(59, 130, 246, 0.25);
-    border-color: rgba(59, 130, 246, 0.5);
-  }
-
-  /* Back Section */
-  .back-section {
-    background: #0f172a;
-    padding: calc(var(--grid-unit) * 1.5) 0;
-  }
-
-  .back-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 calc(var(--grid-unit) * 2);
-  }
-
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: calc(var(--grid-unit) * 0.3);
-    color: #94a3b8;
-    text-decoration: none;
-    font-size: 0.9375rem;
-    transition: all 0.3s ease;
-  }
-
-  .back-link:hover {
-    color: #cbd5e1;
-  }
-
-  .back-arrow {
-    width: 20px;
-    height: 20px;
-    transition: transform 0.3s ease;
-  }
-
-  .back-link:hover .back-arrow {
-    transform: translateX(-4px);
-  }
-
-  /* Responsive */
-  @media (max-width: 1200px) {
-    .advantage-content {
-      grid-template-columns: 1fr;
-    }
-
-    .advantage-visual {
-      order: -1;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    .content-wrapper {
-      grid-template-columns: 1fr;
-    }
-
-    .sidebar {
-      position: static;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: calc(var(--grid-unit) * 1);
-    }
-  }
-
-  @media (max-width: 768px) {
-    .app-hero {
-      padding: calc(var(--grid-unit) * 3) 0 calc(var(--grid-unit) * 2) 0;
-    }
-
-    .app-hero-icon {
-      width: 100px;
-      height: 100px;
-    }
-
-    .icon-emoji {
-      font-size: 3rem;
-    }
-
-    .icon-image {
-      width: 60px;
-      height: 60px;
-    }
-
-    .app-hero-cta {
-      flex-direction: column;
-      width: 100%;
-    }
-
-    .btn-start,
-    .btn-website {
-      width: 100%;
-    }
-
-    .app-main {
-      padding: calc(var(--grid-unit) * 2) 0;
-    }
-
-    .app-container {
-      padding: 0 calc(var(--grid-unit) * 1);
-    }
-
-    .features-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .use-cases-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .cost-comparison {
-      flex-direction: column;
-    }
-
-    .comparison-arrow {
-      transform: rotate(90deg);
-    }
-
-    .platform-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    .sidebar {
-      grid-template-columns: 1fr;
-    }
-
-    .more-apps-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .app-hero-content {
-      padding: 0 calc(var(--grid-unit) * 1);
-    }
-
-    .app-container {
-      padding: 0 calc(var(--grid-unit) * 0.75);
-    }
-
-    .section-block {
-      margin-bottom: calc(var(--grid-unit) * 2);
-    }
-
-    .prose-section {
-      padding: var(--grid-unit);
-    }
-
-    .mana-advantage {
-      padding: calc(var(--grid-unit) * 1.25);
-    }
-
-    .trust-grid {
-      grid-template-columns: 1fr;
-    }
-  }
+	/* Hero Section */
+	.app-hero {
+		position: relative;
+		min-height: 60vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+		padding: calc(var(--grid-unit) * 4) 0 calc(var(--grid-unit) * 3) 0;
+		overflow: hidden;
+	}
+
+	.app-hero-overlay {
+		position: absolute;
+		inset: 0;
+		background:
+			radial-gradient(circle at 30% 40%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+			radial-gradient(circle at 70% 60%, rgba(37, 99, 235, 0.1) 0%, transparent 50%);
+		pointer-events: none;
+	}
+
+	.app-hero-content {
+		position: relative;
+		z-index: 10;
+		text-align: center;
+		max-width: 900px;
+		padding: 0 calc(var(--grid-unit) * 2);
+		margin: 0 auto;
+	}
+
+	.app-hero-icon {
+		width: 120px;
+		height: 120px;
+		margin: 0 auto calc(var(--grid-unit) * 1) auto;
+		border-radius: 24px;
+		background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid rgba(59, 130, 246, 0.2);
+		backdrop-filter: blur(10px);
+	}
+
+	.icon-image {
+		width: 80px;
+		height: 80px;
+		object-fit: contain;
+	}
+
+	.icon-emoji {
+		font-size: 4rem;
+	}
+
+	.app-hero-title {
+		font-size: clamp(2.5rem, 5vw, 3.5rem);
+		font-weight: 800;
+		color: #f8fafc;
+		margin: 0 0 calc(var(--grid-unit) * 0.75) 0;
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+	}
+
+	.app-hero-description {
+		font-size: clamp(1.125rem, 2vw, 1.375rem);
+		line-height: 1.6;
+		color: #cbd5e1;
+		margin: 0 0 calc(var(--grid-unit) * 1) 0;
+		max-width: 700px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.app-hero-meta {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: calc(var(--grid-unit) * 0.5);
+		margin-bottom: calc(var(--grid-unit) * 1.5);
+		flex-wrap: wrap;
+	}
+
+	.status-badge,
+	.category-badge {
+		padding: calc(var(--grid-unit) * 0.2) calc(var(--grid-unit) * 0.5);
+		border-radius: 20px;
+		font-size: 0.875rem;
+		font-weight: 600;
+	}
+
+	.status-available {
+		background: rgba(34, 197, 94, 0.15);
+		color: #4ade80;
+		border: 1px solid rgba(34, 197, 94, 0.3);
+	}
+
+	.status-beta {
+		background: rgba(234, 179, 8, 0.15);
+		color: #facc15;
+		border: 1px solid rgba(234, 179, 8, 0.3);
+	}
+
+	.status-coming {
+		background: rgba(148, 163, 184, 0.15);
+		color: #94a3b8;
+		border: 1px solid rgba(148, 163, 184, 0.3);
+	}
+
+	.category-badge {
+		background: rgba(59, 130, 246, 0.15);
+		color: #60a5fa;
+		border: 1px solid rgba(59, 130, 246, 0.3);
+	}
+
+	.app-hero-cta {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: calc(var(--grid-unit) * 0.5);
+		flex-wrap: wrap;
+	}
+
+	.btn-start,
+	.btn-website {
+		padding: 0 calc(var(--grid-unit) * 1);
+		height: calc(var(--grid-unit) * 1.25);
+		font-size: 1.125rem;
+		font-weight: 600;
+		border-radius: 12px;
+		cursor: pointer;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		text-decoration: none;
+	}
+
+	.btn-start {
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		color: white;
+		box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+		border: none;
+	}
+
+	.btn-start:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
+	}
+
+	.btn-website {
+		background: rgba(248, 250, 252, 0.1);
+		color: #f8fafc;
+		border: 2px solid rgba(248, 250, 252, 0.2);
+		backdrop-filter: blur(10px);
+	}
+
+	.btn-website:hover {
+		background: rgba(248, 250, 252, 0.15);
+	}
+
+	/* Main Content Area */
+	.app-main {
+		background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+		padding: calc(var(--grid-unit) * 3) 0;
+	}
+
+	.app-container {
+		max-width: 1400px;
+		margin: 0 auto;
+		padding: 0 calc(var(--grid-unit) * 2);
+	}
+
+	.content-wrapper {
+		display: grid;
+		grid-template-columns: 1fr 380px;
+		gap: calc(var(--grid-unit) * 2);
+		align-items: start;
+	}
+
+	.main-content {
+		min-width: 0;
+	}
+
+	.section-block {
+		margin-bottom: calc(var(--grid-unit) * 3);
+	}
+
+	.section-title {
+		font-size: clamp(1.75rem, 3vw, 2.25rem);
+		font-weight: 800;
+		color: #f8fafc;
+		margin: 0 0 calc(var(--grid-unit) * 1.25) 0;
+		line-height: 1.2;
+	}
+
+	/* Features Grid */
+	.features-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: calc(var(--grid-unit) * 0.75);
+	}
+
+	.feature-card {
+		background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.7) 100%);
+		border: 1px solid rgba(248, 250, 252, 0.1);
+		border-radius: 16px;
+		padding: calc(var(--grid-unit) * 0.75);
+		display: flex;
+		align-items: flex-start;
+		gap: calc(var(--grid-unit) * 0.5);
+		transition: all 0.3s ease;
+	}
+
+	.feature-card:hover {
+		border-color: rgba(59, 130, 246, 0.3);
+		transform: translateY(-2px);
+	}
+
+	.feature-icon {
+		width: 40px;
+		height: 40px;
+		background: rgba(59, 130, 246, 0.15);
+		border-radius: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.feature-check {
+		width: 24px;
+		height: 24px;
+		color: #60a5fa;
+	}
+
+	.feature-title {
+		font-size: 1rem;
+		font-weight: 600;
+		color: #f8fafc;
+		margin: 0;
+		line-height: 1.4;
+		margin-top: 8px;
+	}
+
+	/* Prose Content */
+	.prose-section {
+		background: linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.5) 100%);
+		border: 1px solid rgba(248, 250, 252, 0.08);
+		border-radius: 20px;
+		padding: calc(var(--grid-unit) * 1.5);
+	}
+
+	.prose-content {
+		color: #e2e8f0;
+		line-height: 1.7;
+	}
+
+	.prose-content :global(h2) {
+		color: #f8fafc;
+		font-size: 1.75rem;
+		font-weight: 700;
+		margin-top: calc(var(--grid-unit) * 1.25);
+		margin-bottom: calc(var(--grid-unit) * 0.6);
+		line-height: 1.2;
+	}
+
+	.prose-content :global(h2:first-child) {
+		margin-top: 0;
+	}
+
+	.prose-content :global(h3) {
+		color: #f1f5f9;
+		font-size: 1.375rem;
+		font-weight: 600;
+		margin-top: var(--grid-unit);
+		margin-bottom: calc(var(--grid-unit) * 0.5);
+	}
+
+	.prose-content :global(p) {
+		margin-bottom: calc(var(--grid-unit) * 0.6);
+		color: #cbd5e1;
+	}
+
+	.prose-content :global(ul),
+	.prose-content :global(ol) {
+		margin-bottom: calc(var(--grid-unit) * 0.6);
+		padding-left: calc(var(--grid-unit) * 0.75);
+	}
+
+	.prose-content :global(li) {
+		margin-bottom: calc(var(--grid-unit) * 0.25);
+		color: #cbd5e1;
+	}
+
+	.prose-content :global(strong) {
+		color: #f8fafc;
+		font-weight: 600;
+	}
+
+	.prose-content :global(a) {
+		color: #60a5fa;
+		text-decoration: underline;
+	}
+
+	/* Use Cases */
+	.use-cases-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: calc(var(--grid-unit) * 0.75);
+	}
+
+	.use-case-card {
+		background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.7) 100%);
+		border: 1px solid rgba(248, 250, 252, 0.1);
+		border-radius: 16px;
+		padding: calc(var(--grid-unit) * 1);
+		text-align: center;
+		transition: all 0.3s ease;
+	}
+
+	.use-case-card:hover {
+		border-color: rgba(59, 130, 246, 0.3);
+		transform: translateY(-4px);
+	}
+
+	.use-case-icon {
+		font-size: 3rem;
+		margin-bottom: calc(var(--grid-unit) * 0.5);
+	}
+
+	.use-case-title {
+		font-size: 1.125rem;
+		font-weight: 700;
+		color: #f8fafc;
+		margin: 0 0 calc(var(--grid-unit) * 0.3) 0;
+	}
+
+	.use-case-text {
+		font-size: 0.9375rem;
+		color: #94a3b8;
+		margin: 0;
+		line-height: 1.5;
+	}
+
+	/* Mana Advantage */
+	.mana-advantage {
+		background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.05) 100%);
+		border: 1px solid rgba(59, 130, 246, 0.2);
+		border-radius: 20px;
+		padding: calc(var(--grid-unit) * 2);
+	}
+
+	.advantage-content {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: calc(var(--grid-unit) * 2);
+		align-items: center;
+	}
+
+	.advantage-title {
+		font-size: 2rem;
+		font-weight: 800;
+		color: #f8fafc;
+		margin: 0 0 calc(var(--grid-unit) * 0.5) 0;
+	}
+
+	.advantage-description {
+		font-size: 1.125rem;
+		color: #cbd5e1;
+		margin: 0 0 calc(var(--grid-unit) * 1) 0;
+		line-height: 1.6;
+	}
+
+	.advantage-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.advantage-list li {
+		display: flex;
+		align-items: center;
+		gap: calc(var(--grid-unit) * 0.3);
+		margin-bottom: calc(var(--grid-unit) * 0.4);
+		color: #e2e8f0;
+		font-size: 1rem;
+	}
+
+	.check-icon {
+		width: 20px;
+		height: 20px;
+		color: #4ade80;
+		flex-shrink: 0;
+	}
+
+	.cost-comparison {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: calc(var(--grid-unit) * 0.75);
+	}
+
+	.comparison-card {
+		flex: 1;
+		background: rgba(15, 23, 42, 0.8);
+		border-radius: 16px;
+		padding: calc(var(--grid-unit) * 1);
+		text-align: center;
+		border: 2px solid rgba(248, 250, 252, 0.1);
+	}
+
+	.comparison-card.mana {
+		background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.15) 100%);
+		border-color: rgba(59, 130, 246, 0.4);
+	}
+
+	.comparison-label {
+		font-size: 0.875rem;
+		color: #94a3b8;
+		margin-bottom: calc(var(--grid-unit) * 0.3);
+	}
+
+	.comparison-card.mana .comparison-label {
+		color: #60a5fa;
+		font-weight: 600;
+	}
+
+	.comparison-price {
+		font-size: 2.5rem;
+		font-weight: 800;
+		color: #f8fafc;
+		line-height: 1;
+	}
+
+	.comparison-card.mana .comparison-price {
+		color: #60a5fa;
+	}
+
+	.comparison-price span {
+		font-size: 1.25rem;
+		font-weight: 500;
+		color: #94a3b8;
+	}
+
+	.comparison-note {
+		font-size: 0.8125rem;
+		color: #64748b;
+		margin-top: calc(var(--grid-unit) * 0.3);
+	}
+
+	.comparison-arrow {
+		font-size: 2rem;
+		color: #60a5fa;
+		flex-shrink: 0;
+	}
+
+	.comparison-note-text {
+		margin-top: calc(var(--grid-unit) * 0.75);
+		text-align: center;
+		font-size: 0.8125rem;
+		color: #64748b;
+		font-style: italic;
+	}
+
+	/* Trust Badges */
+	.trust-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: calc(var(--grid-unit) * 0.75);
+	}
+
+	.trust-badge {
+		display: flex;
+		align-items: center;
+		gap: calc(var(--grid-unit) * 0.5);
+		background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.7) 100%);
+		border: 1px solid rgba(248, 250, 252, 0.1);
+		border-radius: 12px;
+		padding: calc(var(--grid-unit) * 0.75);
+	}
+
+	.trust-icon {
+		font-size: 2rem;
+		flex-shrink: 0;
+	}
+
+	.trust-title {
+		font-size: 1rem;
+		font-weight: 600;
+		color: #f8fafc;
+		margin-bottom: 2px;
+	}
+
+	.trust-desc {
+		font-size: 0.8125rem;
+		color: #94a3b8;
+	}
+
+	/* Platform Grid */
+	.platform-subtitle {
+		font-size: 1.125rem;
+		color: #94a3b8;
+		margin: 0 0 calc(var(--grid-unit) * 1.25) 0;
+	}
+
+	.platform-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+		gap: calc(var(--grid-unit) * 0.75);
+	}
+
+	.platform-card {
+		background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.7) 100%);
+		border: 1px solid rgba(248, 250, 252, 0.1);
+		border-radius: 12px;
+		padding: calc(var(--grid-unit) * 0.75);
+		text-align: center;
+		transition: all 0.3s ease;
+	}
+
+	.platform-card:hover {
+		border-color: rgba(59, 130, 246, 0.3);
+		transform: translateY(-2px);
+	}
+
+	.platform-icon {
+		font-size: 2.5rem;
+		margin-bottom: calc(var(--grid-unit) * 0.3);
+	}
+
+	.platform-name {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: #cbd5e1;
+	}
+
+	/* Sidebar */
+	.sidebar {
+		position: sticky;
+		top: calc(var(--grid-unit) * 2);
+	}
+
+	.sidebar-card {
+		background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+		border: 1px solid rgba(248, 250, 252, 0.1);
+		border-radius: 20px;
+		padding: calc(var(--grid-unit) * 1);
+		margin-bottom: calc(var(--grid-unit) * 1);
+		backdrop-filter: blur(10px);
+	}
+
+	.sidebar-title {
+		font-size: 1.125rem;
+		font-weight: 700;
+		color: #f8fafc;
+		margin: 0 0 calc(var(--grid-unit) * 0.75) 0;
+	}
+
+	/* Mana Card */
+	.mana-card {
+		background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
+		border-color: rgba(59, 130, 246, 0.3);
+	}
+
+	.mana-display {
+		text-align: center;
+		padding: calc(var(--grid-unit) * 1) 0;
+		border-bottom: 1px solid rgba(248, 250, 252, 0.1);
+		margin-bottom: calc(var(--grid-unit) * 0.75);
+	}
+
+	.mana-value {
+		font-size: 3.5rem;
+		font-weight: 800;
+		color: #60a5fa;
+		line-height: 1;
+	}
+
+	.mana-label {
+		font-size: 1.25rem;
+		color: #93c5fd;
+		font-weight: 600;
+		margin-top: calc(var(--grid-unit) * 0.2);
+	}
+
+	.mana-sub {
+		font-size: 0.9375rem;
+		color: #94a3b8;
+		margin-top: calc(var(--grid-unit) * 0.3);
+	}
+
+	.mana-range {
+		display: flex;
+		align-items: center;
+		gap: calc(var(--grid-unit) * 0.5);
+	}
+
+	.mana-range-item {
+		flex: 1;
+		text-align: center;
+	}
+
+	.range-label {
+		display: block;
+		font-size: 0.75rem;
+		color: #64748b;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		margin-bottom: calc(var(--grid-unit) * 0.1);
+	}
+
+	.range-value {
+		display: block;
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: #cbd5e1;
+	}
+
+	.mana-range-divider {
+		width: 1px;
+		height: 30px;
+		background: rgba(248, 250, 252, 0.1);
+	}
+
+	/* Quick Features */
+	.quick-features {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.quick-feature {
+		display: flex;
+		align-items: flex-start;
+		gap: calc(var(--grid-unit) * 0.3);
+		padding: calc(var(--grid-unit) * 0.3) 0;
+		color: #cbd5e1;
+		font-size: 0.9375rem;
+		line-height: 1.4;
+	}
+
+	.quick-check {
+		width: 18px;
+		height: 18px;
+		color: #4ade80;
+		flex-shrink: 0;
+		margin-top: 2px;
+	}
+
+	/* CTA Card */
+	.cta-card {
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		border-color: rgba(59, 130, 246, 0.3);
+	}
+
+	.cta-title {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: white;
+		margin: 0 0 calc(var(--grid-unit) * 0.3) 0;
+	}
+
+	.cta-text {
+		color: rgba(255, 255, 255, 0.9);
+		font-size: 0.9375rem;
+		margin: 0 0 calc(var(--grid-unit) * 0.75) 0;
+		line-height: 1.5;
+	}
+
+	.cta-button {
+		display: block;
+		width: 100%;
+		padding: calc(var(--grid-unit) * 0.4);
+		background: white;
+		color: #2563eb;
+		font-weight: 600;
+		font-size: 1rem;
+		border-radius: 10px;
+		text-decoration: none;
+		text-align: center;
+		transition: all 0.3s ease;
+	}
+
+	.cta-button:hover {
+		background: #f1f5f9;
+		transform: translateY(-2px);
+	}
+
+	.cta-link {
+		display: block;
+		text-align: center;
+		color: rgba(255, 255, 255, 0.8);
+		font-size: 0.875rem;
+		margin-top: calc(var(--grid-unit) * 0.5);
+		text-decoration: none;
+		transition: color 0.2s;
+	}
+
+	.cta-link:hover {
+		color: white;
+	}
+
+	/* More Apps Section */
+	.more-apps-section {
+		background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+		padding: calc(var(--grid-unit) * 3) 0;
+	}
+
+	.more-apps-container {
+		max-width: 1400px;
+		margin: 0 auto;
+		padding: 0 calc(var(--grid-unit) * 2);
+	}
+
+	.more-apps-title {
+		font-size: clamp(1.75rem, 3vw, 2.25rem);
+		font-weight: 800;
+		color: #f8fafc;
+		text-align: center;
+		margin: 0 0 calc(var(--grid-unit) * 2) 0;
+	}
+
+	.more-apps-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: calc(var(--grid-unit) * 1);
+		margin-bottom: calc(var(--grid-unit) * 2);
+	}
+
+	.more-app-card {
+		background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.7) 100%);
+		border: 1px solid rgba(248, 250, 252, 0.1);
+		border-radius: 16px;
+		padding: calc(var(--grid-unit) * 1.25);
+		text-decoration: none;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		transition: all 0.3s ease;
+	}
+
+	.more-app-card:hover {
+		border-color: rgba(59, 130, 246, 0.3);
+		transform: translateY(-4px);
+	}
+
+	.more-app-icon {
+		width: 80px;
+		height: 80px;
+		background: rgba(59, 130, 246, 0.1);
+		border-radius: 16px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: calc(var(--grid-unit) * 0.75);
+	}
+
+	.more-icon-img {
+		width: 60px;
+		height: 60px;
+		object-fit: contain;
+	}
+
+	.more-icon-emoji {
+		font-size: 2.5rem;
+	}
+
+	.more-app-name {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: #f8fafc;
+		margin: 0 0 calc(var(--grid-unit) * 0.3) 0;
+	}
+
+	.more-app-desc {
+		font-size: 0.9375rem;
+		color: #94a3b8;
+		margin: 0;
+		line-height: 1.5;
+	}
+
+	.more-apps-cta {
+		text-align: center;
+	}
+
+	.btn-all-apps {
+		display: inline-block;
+		padding: 0 calc(var(--grid-unit) * 1.5);
+		height: calc(var(--grid-unit) * 1.25);
+		background: rgba(59, 130, 246, 0.15);
+		color: #60a5fa;
+		border: 1px solid rgba(59, 130, 246, 0.3);
+		border-radius: 12px;
+		font-weight: 600;
+		font-size: 1.0625rem;
+		text-decoration: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.3s ease;
+	}
+
+	.btn-all-apps:hover {
+		background: rgba(59, 130, 246, 0.25);
+		border-color: rgba(59, 130, 246, 0.5);
+	}
+
+	/* Back Section */
+	.back-section {
+		background: #0f172a;
+		padding: calc(var(--grid-unit) * 1.5) 0;
+	}
+
+	.back-container {
+		max-width: 1400px;
+		margin: 0 auto;
+		padding: 0 calc(var(--grid-unit) * 2);
+	}
+
+	.back-link {
+		display: inline-flex;
+		align-items: center;
+		gap: calc(var(--grid-unit) * 0.3);
+		color: #94a3b8;
+		text-decoration: none;
+		font-size: 0.9375rem;
+		transition: all 0.3s ease;
+	}
+
+	.back-link:hover {
+		color: #cbd5e1;
+	}
+
+	.back-arrow {
+		width: 20px;
+		height: 20px;
+		transition: transform 0.3s ease;
+	}
+
+	.back-link:hover .back-arrow {
+		transform: translateX(-4px);
+	}
+
+	/* Responsive */
+	@media (max-width: 1200px) {
+		.advantage-content {
+			grid-template-columns: 1fr;
+		}
+
+		.advantage-visual {
+			order: -1;
+		}
+	}
+
+	@media (max-width: 1024px) {
+		.content-wrapper {
+			grid-template-columns: 1fr;
+		}
+
+		.sidebar {
+			position: static;
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+			gap: calc(var(--grid-unit) * 1);
+		}
+	}
+
+	@media (max-width: 768px) {
+		.app-hero {
+			padding: calc(var(--grid-unit) * 3) 0 calc(var(--grid-unit) * 2) 0;
+		}
+
+		.app-hero-icon {
+			width: 100px;
+			height: 100px;
+		}
+
+		.icon-emoji {
+			font-size: 3rem;
+		}
+
+		.icon-image {
+			width: 60px;
+			height: 60px;
+		}
+
+		.app-hero-cta {
+			flex-direction: column;
+			width: 100%;
+		}
+
+		.btn-start,
+		.btn-website {
+			width: 100%;
+		}
+
+		.app-main {
+			padding: calc(var(--grid-unit) * 2) 0;
+		}
+
+		.app-container {
+			padding: 0 calc(var(--grid-unit) * 1);
+		}
+
+		.features-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.use-cases-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.cost-comparison {
+			flex-direction: column;
+		}
+
+		.comparison-arrow {
+			transform: rotate(90deg);
+		}
+
+		.platform-grid {
+			grid-template-columns: repeat(3, 1fr);
+		}
+
+		.sidebar {
+			grid-template-columns: 1fr;
+		}
+
+		.more-apps-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.app-hero-content {
+			padding: 0 calc(var(--grid-unit) * 1);
+		}
+
+		.app-container {
+			padding: 0 calc(var(--grid-unit) * 0.75);
+		}
+
+		.section-block {
+			margin-bottom: calc(var(--grid-unit) * 2);
+		}
+
+		.prose-section {
+			padding: var(--grid-unit);
+		}
+
+		.mana-advantage {
+			padding: calc(var(--grid-unit) * 1.25);
+		}
+
+		.trust-grid {
+			grid-template-columns: 1fr;
+		}
+	}
 </style>

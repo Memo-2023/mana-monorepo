@@ -11,118 +11,115 @@ import { CloudSyncData } from './cloudSyncService';
 // 4. Use @react-native-google-signin/google-signin
 
 export class GoogleDriveSyncService {
-  private static readonly BACKUP_FILENAME = 'zitare-backup.json';
+	private static readonly BACKUP_FILENAME = 'zitare-backup.json';
 
-  static async initialize() {
-    // In a full implementation, initialize Google Sign-In here
-    // For now, we'll use the share functionality similar to iOS
-    return true;
-  }
+	static async initialize() {
+		// In a full implementation, initialize Google Sign-In here
+		// For now, we'll use the share functionality similar to iOS
+		return true;
+	}
 
-  static async authenticate(): Promise<boolean> {
-    // Simplified version using share functionality
-    // In production, implement proper Google OAuth here
-    return true;
-  }
+	static async authenticate(): Promise<boolean> {
+		// Simplified version using share functionality
+		// In production, implement proper Google OAuth here
+		return true;
+	}
 
-  static async exportToGoogleDrive(data: CloudSyncData): Promise<boolean> {
-    if (Platform.OS !== 'android') return false;
+	static async exportToGoogleDrive(data: CloudSyncData): Promise<boolean> {
+		if (Platform.OS !== 'android') return false;
 
-    try {
-      // Create backup file in document directory
-      const fileUri = (FileSystem.documentDirectory || '') + this.BACKUP_FILENAME;
-      
-      await FileSystem.writeAsStringAsync(
-        fileUri,
-        JSON.stringify(data, null, 2)
-      );
+		try {
+			// Create backup file in document directory
+			const fileUri = (FileSystem.documentDirectory || '') + this.BACKUP_FILENAME;
 
-      // Share to Google Drive using system share sheet
-      // User can manually save to Google Drive
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri, {
-          mimeType: 'application/json',
-          dialogTitle: 'Backup in Google Drive speichern',
-        });
-        return true;
-      }
+			await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(data, null, 2));
 
-      return false;
-    } catch (error) {
-      console.error('Google Drive export error:', error);
-      return false;
-    }
-  }
+			// Share to Google Drive using system share sheet
+			// User can manually save to Google Drive
+			if (await Sharing.isAvailableAsync()) {
+				await Sharing.shareAsync(fileUri, {
+					mimeType: 'application/json',
+					dialogTitle: 'Backup in Google Drive speichern',
+				});
+				return true;
+			}
 
-  static async importFromGoogleDrive(): Promise<CloudSyncData | null> {
-    if (Platform.OS !== 'android') return null;
+			return false;
+		} catch (error) {
+			console.error('Google Drive export error:', error);
+			return false;
+		}
+	}
 
-    try {
-      // Use document picker to select backup file
-      // Note: Full implementation would require expo-document-picker
-      const { DocumentPicker } = await import('expo-document-picker');
-      
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'application/json',
-        copyToCacheDirectory: true,
-        multiple: false
-      });
+	static async importFromGoogleDrive(): Promise<CloudSyncData | null> {
+		if (Platform.OS !== 'android') return null;
 
-      if (result.canceled || !result.assets?.[0]) {
-        return null;
-      }
+		try {
+			// Use document picker to select backup file
+			// Note: Full implementation would require expo-document-picker
+			const { DocumentPicker } = await import('expo-document-picker');
 
-      const fileUri = result.assets[0].uri;
-      const fileContent = await FileSystem.readAsStringAsync(fileUri);
-      
-      const backupData: CloudSyncData = JSON.parse(fileContent);
+			const result = await DocumentPicker.getDocumentAsync({
+				type: 'application/json',
+				copyToCacheDirectory: true,
+				multiple: false,
+			});
 
-      // Validate backup structure
-      if (!this.validateBackupData(backupData)) {
-        throw new Error('Ungültiges Backup-Format');
-      }
+			if (result.canceled || !result.assets?.[0]) {
+				return null;
+			}
 
-      return backupData;
-    } catch (error) {
-      console.error('Google Drive import error:', error);
-      return null;
-    }
-  }
+			const fileUri = result.assets[0].uri;
+			const fileContent = await FileSystem.readAsStringAsync(fileUri);
 
-  private static validateBackupData(data: any): data is CloudSyncData {
-    return (
-      data &&
-      Array.isArray(data.favorites) &&
-      Array.isArray(data.favoriteAuthors) &&
-      Array.isArray(data.userQuotes) &&
-      data.settings &&
-      typeof data.settings === 'object' &&
-      Array.isArray(data.viewHistory) &&
-      typeof data.exportDate === 'string' &&
-      typeof data.version === 'string'
-    );
-  }
+			const backupData: CloudSyncData = JSON.parse(fileContent);
 
-  static async deleteBackup(fileUri: string): Promise<boolean> {
-    try {
-      const fileInfo = await FileSystem.getInfoAsync(fileUri);
-      if (fileInfo.exists) {
-        await FileSystem.deleteAsync(fileUri);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error deleting backup:', error);
-      return false;
-    }
-  }
+			// Validate backup structure
+			if (!this.validateBackupData(backupData)) {
+				throw new Error('Ungültiges Backup-Format');
+			}
 
-  // Full Google Drive API implementation would include these methods:
-  // - getOrCreateAppFolder()
-  // - findAppFolder()
-  // - createFolder()
-  // - uploadFileToGoogleDrive()
-  // - findBackupFile()
-  // - downloadFileContent()
-  // - listAvailableBackups()
+			return backupData;
+		} catch (error) {
+			console.error('Google Drive import error:', error);
+			return null;
+		}
+	}
+
+	private static validateBackupData(data: any): data is CloudSyncData {
+		return (
+			data &&
+			Array.isArray(data.favorites) &&
+			Array.isArray(data.favoriteAuthors) &&
+			Array.isArray(data.userQuotes) &&
+			data.settings &&
+			typeof data.settings === 'object' &&
+			Array.isArray(data.viewHistory) &&
+			typeof data.exportDate === 'string' &&
+			typeof data.version === 'string'
+		);
+	}
+
+	static async deleteBackup(fileUri: string): Promise<boolean> {
+		try {
+			const fileInfo = await FileSystem.getInfoAsync(fileUri);
+			if (fileInfo.exists) {
+				await FileSystem.deleteAsync(fileUri);
+				return true;
+			}
+			return false;
+		} catch (error) {
+			console.error('Error deleting backup:', error);
+			return false;
+		}
+	}
+
+	// Full Google Drive API implementation would include these methods:
+	// - getOrCreateAppFolder()
+	// - findAppFolder()
+	// - createFolder()
+	// - uploadFileToGoogleDrive()
+	// - findBackupFile()
+	// - downloadFileContent()
+	// - listAvailableBackups()
 }

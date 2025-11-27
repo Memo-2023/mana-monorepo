@@ -1,12 +1,12 @@
 ---
-title: "10 Tipps für bessere KI-Bild-Prompts"
-description: "Meistere die Kunst des Prompt-Engineerings mit diesen 10 bewährten Tipps, um jedes Mal atemberaubende KI-generierte Bilder zu erstellen."
-author: "Picture Team"
+title: '10 Tipps für bessere KI-Bild-Prompts'
+description: 'Meistere die Kunst des Prompt-Engineerings mit diesen 10 bewährten Tipps, um jedes Mal atemberaubende KI-generierte Bilder zu erstellen.'
+author: 'Picture Team'
 publishedAt: 2025-01-10
-coverImage: "/blog/prompt-tips.jpg"
-category: "tips"
-tags: ["prompts", "tipps", "prompt-engineering", "fortgeschritten"]
-language: "de"
+coverImage: '/blog/prompt-tips.jpg'
+category: 'tips'
+tags: ['prompts', 'tipps', 'prompt-engineering', 'fortgeschritten']
+language: 'de'
 ---
 
 ## Die Kunst des Prompt-Engineerings
@@ -89,6 +89,7 @@ Sage der KI, was sie vermeiden soll:
 ## 8. Halte es strukturiert
 
 Organisiere deinen Prompt logisch:
+
 ```
 [Motiv] + [Aktion] + [Umgebung] + [Beleuchtung] + [Stil] + [Qualität]
 ```
@@ -96,6 +97,7 @@ Organisiere deinen Prompt logisch:
 ## 9. Experimentiere mit Gewichtungen
 
 Einige Modelle unterstützen Betonung:
+
 - Verwende Klammern (Motiv:1.2) um Wichtigkeit zu erhöhen
 - Verwende eckige Klammern [Detail:0.8] um Wichtigkeit zu verringern
 

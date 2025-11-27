@@ -3,8 +3,8 @@ import { WhisperService } from './whisper.service';
 import { WhisperController } from './whisper.controller';
 
 @Module({
-  controllers: [WhisperController],
-  providers: [WhisperService],
-  exports: [WhisperService],
+	controllers: [WhisperController],
+	providers: [WhisperService],
+	exports: [WhisperService],
 })
 export class WhisperModule {}

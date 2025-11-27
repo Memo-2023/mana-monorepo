@@ -31,22 +31,15 @@ export async function getFAQs(language?: string): Promise<FAQEntry[]> {
 /**
  * Get featured FAQs for homepage
  */
-export async function getFeaturedFAQs(
-	language?: string
-): Promise<FAQEntry[]> {
+export async function getFeaturedFAQs(language?: string): Promise<FAQEntry[]> {
 	const allFAQs = await getFAQs(language);
-	return allFAQs
-		.filter((faq) => faq.data.featured)
-		.sort((a, b) => a.data.order - b.data.order);
+	return allFAQs.filter((faq) => faq.data.featured).sort((a, b) => a.data.order - b.data.order);
 }
 
 /**
  * Get FAQs by category
  */
-export async function getFAQsByCategory(
-	category: string,
-	language?: string
-): Promise<FAQEntry[]> {
+export async function getFAQsByCategory(category: string, language?: string): Promise<FAQEntry[]> {
 	const allFAQs = await getFAQs(language);
 	return allFAQs
 		.filter((faq) => faq.data.category === category)
@@ -108,10 +101,7 @@ export function getCategoryIcon(category: string): string {
 /**
  * Search FAQs by query string
  */
-export async function searchFAQs(
-	query: string,
-	language?: string
-): Promise<FAQEntry[]> {
+export async function searchFAQs(query: string, language?: string): Promise<FAQEntry[]> {
 	const allFAQs = await getFAQs(language);
 	const lowerQuery = query.toLowerCase();
 
@@ -119,9 +109,7 @@ export async function searchFAQs(
 		(faq) =>
 			faq.data.question.toLowerCase().includes(lowerQuery) ||
 			faq.body.toLowerCase().includes(lowerQuery) ||
-			faq.data.seoKeywords.some((keyword) =>
-				keyword.toLowerCase().includes(lowerQuery)
-			)
+			faq.data.seoKeywords.some((keyword) => keyword.toLowerCase().includes(lowerQuery))
 	);
 }
 

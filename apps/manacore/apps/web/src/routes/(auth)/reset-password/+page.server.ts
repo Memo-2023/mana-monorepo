@@ -10,35 +10,35 @@ export const actions: Actions = {
 		// Validate inputs
 		if (!password || !confirmPassword) {
 			return fail(400, {
-				error: 'Both password fields are required'
+				error: 'Both password fields are required',
 			});
 		}
 
 		if (password.length < 6) {
 			return fail(400, {
-				error: 'Password must be at least 6 characters long'
+				error: 'Password must be at least 6 characters long',
 			});
 		}
 
 		if (password !== confirmPassword) {
 			return fail(400, {
-				error: 'Passwords do not match'
+				error: 'Passwords do not match',
 			});
 		}
 
 		// Update the user's password
 		const { error } = await supabase.auth.updateUser({
-			password
+			password,
 		});
 
 		if (error) {
 			console.error('Password update error:', error);
 			return fail(400, {
-				error: error.message
+				error: error.message,
 			});
 		}
 
 		// Success - redirect to dashboard
 		throw redirect(303, '/dashboard');
-	}
+	},
 };

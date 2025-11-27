@@ -14,6 +14,7 @@ Diese Dokumentation beschreibt die Integration von Supabase in die Chat-Anwendun
 ## Übersicht
 
 Die Chat-Anwendung verwendet Supabase als Backend-Dienst für:
+
 - Benutzerauthentifizierung
 - Datenspeicherung (Konversationen, Nachrichten, Modelle)
 - Echtzeit-Updates
@@ -22,13 +23,13 @@ Die Chat-Anwendung verwendet Supabase als Backend-Dienst für:
 
 Die Anwendung verwendet folgende Tabellen in Supabase:
 
-| Tabelle | Beschreibung | Wichtige Felder |
-|---------|--------------|-----------------|
-| users | Benutzerinformationen | id, email, name, created_at, updated_at |
-| conversations | Gespeicherte Konversationen | id, user_id, model_id, template_id, conversation_mode, created_at, updated_at |
-| messages | Nachrichten innerhalb von Konversationen | id, conversation_id, sender, message_text, created_at, updated_at |
-| models | Verfügbare LLM-Modelle | id, name, description, parameters, created_at, updated_at |
-| templates | Konversationsvorlagen | id, name, description, mode_type, initial_questions, created_at, updated_at |
+| Tabelle       | Beschreibung                             | Wichtige Felder                                                               |
+| ------------- | ---------------------------------------- | ----------------------------------------------------------------------------- |
+| users         | Benutzerinformationen                    | id, email, name, created_at, updated_at                                       |
+| conversations | Gespeicherte Konversationen              | id, user_id, model_id, template_id, conversation_mode, created_at, updated_at |
+| messages      | Nachrichten innerhalb von Konversationen | id, conversation_id, sender, message_text, created_at, updated_at             |
+| models        | Verfügbare LLM-Modelle                   | id, name, description, parameters, created_at, updated_at                     |
+| templates     | Konversationsvorlagen                    | id, name, description, mode_type, initial_questions, created_at, updated_at   |
 
 ## Einrichtung
 
@@ -54,6 +55,7 @@ npm run supabase:setup
 ```
 
 Dieses Skript:
+
 - Erstellt die notwendigen Funktionen in der Datenbank
 - Richtet die Tabellen ein, falls sie noch nicht existieren
 - Fügt die Standard-Modelle mit korrekten UUIDs ein
@@ -87,6 +89,7 @@ npm run supabase:cli
 ```
 
 Mit diesem Tool kannst du:
+
 - SQL-Abfragen direkt ausführen
 - SQL-Dateien ausführen
 - Tabellenlisten anzeigen
@@ -95,17 +98,20 @@ Mit diesem Tool kannst du:
 #### Beispiel-Befehle in der CLI
 
 **Tabellenliste anzeigen:**
+
 ```
 3 [Tabellenliste anzeigen]
 ```
 
 **Tabellenstruktur anzeigen:**
+
 ```
 4 [Tabellenstruktur anzeigen]
 conversations
 ```
 
 **SQL-Abfrage ausführen:**
+
 ```
 1 [SQL-Abfrage ausführen]
 SELECT * FROM models LIMIT 5;
@@ -117,17 +123,22 @@ SELECT * FROM models LIMIT 5;
 
 **Symptom:** Fehler "invalid input syntax for type uuid" beim Erstellen einer Konversation.
 
-**Lösung:** 
+**Lösung:**
+
 1. Führe das Modell-Update-Skript aus, um die Modell-IDs zu korrigieren:
+
 ```bash
 npm run supabase:update-models
 ```
 
 2. Überprüfe, ob die Modell-IDs im Frontend mit denen in der Datenbank übereinstimmen:
+
 ```bash
 npm run supabase:cli
 ```
+
 Dann wähle Option 1 und führe aus:
+
 ```sql
 SELECT id, name FROM models;
 ```
@@ -137,11 +148,15 @@ SELECT id, name FROM models;
 **Symptom:** 400 Bad Request bei der Anmeldung.
 
 **Lösung:**
+
 1. Überprüfe, ob der Benutzer in der Auth-Tabelle existiert:
+
 ```bash
 npm run supabase:cli
 ```
+
 Dann wähle Option 1 und führe aus:
+
 ```sql
 SELECT * FROM auth.users WHERE email = 'deine-email@beispiel.de';
 ```
@@ -154,6 +169,7 @@ SELECT * FROM auth.users WHERE email = 'deine-email@beispiel.de';
 
 1. Füge das Modell zur `FALLBACK_MODELS`-Liste in `app/api/models+api.ts` hinzu
 2. Führe das Modell-Update-Skript aus:
+
 ```bash
 npm run supabase:update-models
 ```
@@ -162,23 +178,30 @@ npm run supabase:update-models
 
 1. Erstelle eine SQL-Datei mit den gewünschten Änderungen
 2. Führe die Datei mit der Supabase-CLI aus:
+
 ```bash
 npm run supabase:cli
 ```
+
 Dann wähle Option 2 und gib den Pfad zur SQL-Datei ein.
 
 ### Wie kann ich die Datenbank zurücksetzen?
 
 1. Verwende die Supabase-CLI:
+
 ```bash
 npm run supabase:cli
 ```
+
 2. Wähle Option 1 und führe folgende Befehle aus:
+
 ```sql
 DELETE FROM messages;
 DELETE FROM conversations;
 ```
+
 3. Führe das Modell-Update-Skript aus, um die Standard-Modelle wiederherzustellen:
+
 ```bash
 npm run supabase:update-models
 ```

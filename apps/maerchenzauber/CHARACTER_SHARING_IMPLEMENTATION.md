@@ -1,6 +1,7 @@
 # Character Sharing Feature - Implementation Complete
 
 ## Overview
+
 Users can now share **private characters** with friends via deep links. Characters remain private to the owner, but anyone with the link can import them to their library for 10 credits.
 
 **Key Concept:** This is **private sharing** - no publishing required. Your character stays private, only people with the link can see and import it.
@@ -98,6 +99,7 @@ The following fields should exist in the `characters` table:
 ### Migration Applied ✅
 
 The migration has been applied to your database. The following fields were added:
+
 - `imported_from_user_id` (text)
 - `imported_at` (timestamptz)
 - `times_shared` (integer, default 0)
@@ -107,6 +109,7 @@ And we're using the existing `cloned_from` field to track the original character
 ## Testing Guide
 
 ### Setup
+
 1. **Restart Backend**: `cd backend && npm run dev`
 2. **Restart Mobile App with Cache Clear**: `cd mobile && npx expo start -c`
    - Important: Use `-c` flag to clear cache after app.json scheme change
@@ -160,6 +163,7 @@ And we're using the existing `cloned_from` field to track the original character
 ### Test Scenario 4: Deep Link Testing
 
 **Test deep link manually:**
+
 ```bash
 # iOS
 xcrun simctl openurl booted "maerchenzauber://share/character/YOUR_CHARACTER_ID"
@@ -171,10 +175,13 @@ adb shell am start -W -a android.intent.action.VIEW -d "maerchenzauber://share/c
 ## API Endpoints
 
 ### Get Shared Character (Public)
+
 ```http
 GET /character/shared/:characterId
 ```
+
 **Response:**
+
 ```json
 {
   "data": {
@@ -191,11 +198,14 @@ GET /character/shared/:characterId
 ```
 
 ### Import Character
+
 ```http
 POST /character/import/:characterId
 Authorization: Bearer <token>
 ```
+
 **Response:**
+
 ```json
 {
   "data": {
@@ -215,6 +225,7 @@ maerchenzauber://share/character/{characterId}
 ```
 
 **Example:**
+
 ```
 maerchenzauber://share/character/a1b2c3d4-e5f6-7890-abcd-ef1234567890
 ```
@@ -222,6 +233,7 @@ maerchenzauber://share/character/a1b2c3d4-e5f6-7890-abcd-ef1234567890
 ## File Changes Summary
 
 ### New Files
+
 1. `backend/src/character/dto/import-character.dto.ts`
 2. `mobile/app/+native-intent.tsx`
 3. `mobile/app/character/preview/[characterId].tsx`
@@ -229,6 +241,7 @@ maerchenzauber://share/character/a1b2c3d4-e5f6-7890-abcd-ef1234567890
 5. `CHARACTER_SHARING_IMPLEMENTATION.md` (this file)
 
 ### Modified Files
+
 1. `backend/src/core/services/supabase-jsonb-auth.service.ts`
 2. `backend/src/character/character.controller.ts`
 3. `mobile/app.json`
@@ -253,18 +266,21 @@ maerchenzauber://share/character/a1b2c3d4-e5f6-7890-abcd-ef1234567890
 ## Troubleshooting
 
 ### Deep Link Not Working
+
 - Ensure you restarted Expo with `-c` flag after changing app.json
 - Check that URL scheme is `maerchenzauber` (not `myapp`)
 - On iOS, deep links might not work in simulator for some URLs - test on device
 - On Android, ensure app is in foreground or background (not force-closed)
 
 ### Import Failing
+
 - Check user has 10+ credits available
 - Verify character is published (is_published = true)
 - Check character sharing_preference is not 'private'
 - Ensure user is not trying to import their own character
 
 ### Backend Errors
+
 - Check Supabase RLS policies allow reading published characters
 - Verify all new database fields exist in characters table
 - Check backend logs for specific error messages

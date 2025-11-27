@@ -10,11 +10,11 @@ Go to `https://github.com/Memo-2023/manadeck` → Settings → Secrets and varia
 
 Add these secrets:
 
-| Secret Name | Description | How to Get |
-|------------|-------------|------------|
-| `GCP_SA_KEY_PROD` | Service account JSON key for Cloud Run deployment | See "Create Service Account" below |
-| `CLOUD_RUN_SERVICE_ACCOUNT` | Service account email | `manadeck-backend-sa@memo-2c4c4.iam.gserviceaccount.com` |
-| `GH_PERSONAL_TOKEN` | GitHub Personal Access Token for private packages | See "Create GitHub PAT" below |
+| Secret Name                 | Description                                       | How to Get                                               |
+| --------------------------- | ------------------------------------------------- | -------------------------------------------------------- |
+| `GCP_SA_KEY_PROD`           | Service account JSON key for Cloud Run deployment | See "Create Service Account" below                       |
+| `CLOUD_RUN_SERVICE_ACCOUNT` | Service account email                             | `manadeck-backend-sa@memo-2c4c4.iam.gserviceaccount.com` |
+| `GH_PERSONAL_TOKEN`         | GitHub Personal Access Token for private packages | See "Create GitHub PAT" below                            |
 
 #### Create Service Account
 
@@ -110,6 +110,7 @@ done
 ```
 
 **IMPORTANT**: Add the generated `SERVICE_KEY` to mana-core-middleware's `APP_SERVICE_KEYS`:
+
 ```
 APP_SERVICE_KEYS=existing-apps,YOUR_APP_ID:YOUR_SERVICE_KEY
 ```
@@ -119,6 +120,7 @@ APP_SERVICE_KEYS=existing-apps,YOUR_APP_ID:YOUR_SERVICE_KEY
 ### Automatic Deployment (GitHub Actions)
 
 1. Push to `main` branch:
+
    ```bash
    git add .
    git commit -m "feat: your changes"
@@ -199,6 +201,7 @@ gcloud logging read "resource.type=cloud_run_revision AND resource.labels.servic
 **Problem**: Service account can't access secrets in `mana-core-453821`
 
 **Solution**: Grant cross-project secret access:
+
 ```bash
 SA_EMAIL="manadeck-backend-sa@memo-2c4c4.iam.gserviceaccount.com"
 
@@ -213,11 +216,13 @@ gcloud secrets add-iam-policy-binding MANADECK_APP_ID \
 **Problem**: Service starts but health endpoint returns 500
 
 **Possible causes**:
+
 1. Missing environment variables/secrets
 2. Can't connect to Supabase
 3. Can't connect to Mana Core
 
 **Debug**:
+
 ```bash
 # Check service logs
 gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=manadeck-backend" \
@@ -233,6 +238,7 @@ gcloud secrets versions access latest --secret=MANADECK_APP_ID --project=mana-co
 **Problem**: `@mana-core/nestjs-integration` has peer dependency on `@nestjs/common@^10.0.0` but project uses `^11.0.0`
 
 **Solution**: Already handled with `--legacy-peer-deps` flag in workflow. If you see this locally:
+
 ```bash
 npm install --legacy-peer-deps
 ```
@@ -261,19 +267,20 @@ manadeck/
 
 ## 📝 Configuration Summary
 
-| Component | Location | Value |
-|-----------|----------|-------|
-| **Deployment Project** | GCP | `memo-2c4c4` |
-| **Secrets Project** | GCP | `mana-core-453821` |
-| **Region** | GCP | `europe-west3` |
-| **Service Name** | Cloud Run | `manadeck-backend` |
-| **Image Registry** | Artifact Registry | `europe-west3-docker.pkg.dev/memo-2c4c4/manadeck-backend` |
-| **Port** | Container | `8080` |
-| **Repository** | GitHub | `Memo-2023/manadeck` |
+| Component              | Location          | Value                                                     |
+| ---------------------- | ----------------- | --------------------------------------------------------- |
+| **Deployment Project** | GCP               | `memo-2c4c4`                                              |
+| **Secrets Project**    | GCP               | `mana-core-453821`                                        |
+| **Region**             | GCP               | `europe-west3`                                            |
+| **Service Name**       | Cloud Run         | `manadeck-backend`                                        |
+| **Image Registry**     | Artifact Registry | `europe-west3-docker.pkg.dev/memo-2c4c4/manadeck-backend` |
+| **Port**               | Container         | `8080`                                                    |
+| **Repository**         | GitHub            | `Memo-2023/manadeck`                                      |
 
 ## 🎯 Quick Start
 
 **First-time setup**:
+
 ```bash
 # 1. Create GCP resources
 ./backend/create-secrets.sh
@@ -285,6 +292,7 @@ git push origin main
 ```
 
 **After setup**:
+
 ```bash
 # Just push to deploy
 git add .

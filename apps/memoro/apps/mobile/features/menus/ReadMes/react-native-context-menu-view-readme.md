@@ -15,18 +15,17 @@ Usage
 import ContextMenu from "react-native-context-menu-view";
 
 const Example = () => {
-  return (
-    <ContextMenu
-      actions={[{ title: "Title 1" }, { title: "Title 2" }]}
-      onPress={(e) => {
-        console.warn(
-          `Pressed ${e.nativeEvent.name} at index ${e.nativeEvent.index}`
-        );
-      }}
-    >
-      <View style={styles.yourOwnStyles} />
-    </ContextMenu>
-  );
+return (
+<ContextMenu
+actions={[{ title: "Title 1" }, { title: "Title 2" }]}
+onPress={(e) => {
+console.warn(
+`Pressed ${e.nativeEvent.name} at index ${e.nativeEvent.index}`
+);
+}} >
+<View style={styles.yourOwnStyles} />
+</ContextMenu>
+);
 };
 See example/ for basic usage.
 

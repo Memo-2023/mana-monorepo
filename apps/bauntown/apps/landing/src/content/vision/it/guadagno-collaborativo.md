@@ -1,23 +1,18 @@
 ---
-title: "Guadagno Collaborativo: Nuovi Modelli per la Creazione di Valore Collettivo"
+title: 'Guadagno Collaborativo: Nuovi Modelli per la Creazione di Valore Collettivo'
 description: "La nostra visione per modelli di partecipazione economica equi, trasparenti e orientati alla comunità nell'era digitale."
 pubDate: 2025-04-03
-category: "future"
-timeline: "2025-2028"
-status: "exploring"
+category: 'future'
+timeline: '2025-2028'
+status: 'exploring'
 featured: true
-image: "/images/vision/gemeinsam-verdienen.png"
-contributors: ["Lena Fischer", "Till Schneider", "Michael Werner"]
-relatedLinks: [
-  {
-    title: "Platform Cooperativism",
-    url: "https://platform.coop/about/vision-and-advantages/"
-  },
-  {
-    title: "Web3 e Creazione di Valore Decentralizzata",
-    url: "https://ethereum.org/en/dao/"
-  }
-]
+image: '/images/vision/gemeinsam-verdienen.png'
+contributors: ['Lena Fischer', 'Till Schneider', 'Michael Werner']
+relatedLinks:
+  [
+    { title: 'Platform Cooperativism', url: 'https://platform.coop/about/vision-and-advantages/' },
+    { title: 'Web3 e Creazione di Valore Decentralizzata', url: 'https://ethereum.org/en/dao/' },
+  ]
 ---
 
 # Guadagno Collaborativo: Nuovi Modelli per la Creazione di Valore Collettivo

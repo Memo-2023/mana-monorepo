@@ -23,7 +23,7 @@ Display an app's logo:
 
 ```svelte
 <script lang="ts">
-  import { AppLogo } from '@manacore/shared-branding';
+	import { AppLogo } from '@manacore/shared-branding';
 </script>
 
 <AppLogo app="memoro" size={32} />
@@ -38,7 +38,7 @@ Display logo with app name (perfect for headers):
 
 ```svelte
 <script lang="ts">
-  import { AppLogoWithName } from '@manacore/shared-branding';
+	import { AppLogoWithName } from '@manacore/shared-branding';
 </script>
 
 <AppLogoWithName app="memoro" size={28} />
@@ -51,7 +51,7 @@ Universal Mana drop icon:
 
 ```svelte
 <script lang="ts">
-  import { ManaIcon } from '@manacore/shared-branding';
+	import { ManaIcon } from '@manacore/shared-branding';
 </script>
 
 <ManaIcon size={24} color="#4287f5" />
@@ -65,50 +65,50 @@ Access branding config programmatically:
 import { getAppBranding, APP_BRANDING } from '@manacore/shared-branding';
 
 const memoro = getAppBranding('memoro');
-console.log(memoro.name);         // "Memoro"
-console.log(memoro.tagline);      // "AI Voice Memos"
+console.log(memoro.name); // "Memoro"
+console.log(memoro.tagline); // "AI Voice Memos"
 console.log(memoro.primaryColor); // "#f8d62b"
 ```
 
 ## App Branding
 
-| App | Name | Primary Color | Tagline |
-|-----|------|---------------|---------|
-| `memoro` | Memoro | #f8d62b (Gold) | AI Voice Memos |
-| `manacore` | ManaCore | #6366f1 (Indigo) | Central Hub |
-| `manadeck` | ManaDeck | #8b5cf6 (Purple) | AI Flashcards |
-| `maerchenzauber` | Märchenzauber | #ec4899 (Pink) | AI Story Creator |
+| App              | Name          | Primary Color    | Tagline          |
+| ---------------- | ------------- | ---------------- | ---------------- |
+| `memoro`         | Memoro        | #f8d62b (Gold)   | AI Voice Memos   |
+| `manacore`       | ManaCore      | #6366f1 (Indigo) | Central Hub      |
+| `manadeck`       | ManaDeck      | #8b5cf6 (Purple) | AI Flashcards    |
+| `maerchenzauber` | Märchenzauber | #ec4899 (Pink)   | AI Story Creator |
 
 ## Props
 
 ### AppLogo
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `app` | `AppId` | required | App identifier |
-| `size` | `number` | `32` | Size in pixels |
-| `color` | `string` | App primary color | Override color |
-| `class` | `string` | `''` | Additional CSS classes |
+| Prop    | Type     | Default           | Description            |
+| ------- | -------- | ----------------- | ---------------------- |
+| `app`   | `AppId`  | required          | App identifier         |
+| `size`  | `number` | `32`              | Size in pixels         |
+| `color` | `string` | App primary color | Override color         |
+| `class` | `string` | `''`              | Additional CSS classes |
 
 ### AppLogoWithName
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `app` | `AppId` | required | App identifier |
-| `size` | `number` | `28` | Logo size in pixels |
-| `color` | `string` | App primary color | Override color |
-| `showName` | `boolean` | `true` | Show app name |
-| `nameFontSize` | `string` | `'1.25rem'` | Name font size |
-| `gap` | `string` | `'0.5rem'` | Gap between logo and name |
-| `class` | `string` | `''` | Additional CSS classes |
+| Prop           | Type      | Default           | Description               |
+| -------------- | --------- | ----------------- | ------------------------- |
+| `app`          | `AppId`   | required          | App identifier            |
+| `size`         | `number`  | `28`              | Logo size in pixels       |
+| `color`        | `string`  | App primary color | Override color            |
+| `showName`     | `boolean` | `true`            | Show app name             |
+| `nameFontSize` | `string`  | `'1.25rem'`       | Name font size            |
+| `gap`          | `string`  | `'0.5rem'`        | Gap between logo and name |
+| `class`        | `string`  | `''`              | Additional CSS classes    |
 
 ### ManaIcon
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `size` | `number` | `24` | Size in pixels |
-| `color` | `string` | `'#4287f5'` | Icon color |
-| `class` | `string` | `''` | Additional CSS classes |
+| Prop    | Type     | Default     | Description            |
+| ------- | -------- | ----------- | ---------------------- |
+| `size`  | `number` | `24`        | Size in pixels         |
+| `color` | `string` | `'#4287f5'` | Icon color             |
+| `class` | `string` | `''`        | Additional CSS classes |
 
 ## Types
 
@@ -116,14 +116,14 @@ console.log(memoro.primaryColor); // "#f8d62b"
 type AppId = 'memoro' | 'manacore' | 'manadeck' | 'maerchenzauber';
 
 interface AppBranding {
-  id: AppId;
-  name: string;
-  tagline: string;
-  primaryColor: string;
-  secondaryColor?: string;
-  logoPath: string;
-  logoViewBox?: string;
-  logoStroke?: boolean;
-  logoStrokeWidth?: number;
+	id: AppId;
+	name: string;
+	tagline: string;
+	primaryColor: string;
+	secondaryColor?: string;
+	logoPath: string;
+	logoViewBox?: string;
+	logoStroke?: boolean;
+	logoStrokeWidth?: number;
 }
 ```

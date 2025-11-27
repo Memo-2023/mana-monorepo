@@ -3,8 +3,8 @@ import { DeckController } from './deck.controller';
 import { DeckService } from './deck.service';
 
 @Module({
-  controllers: [DeckController],
-  providers: [DeckService],
-  exports: [DeckService],
+	controllers: [DeckController],
+	providers: [DeckService],
+	exports: [DeckService],
 })
 export class DeckModule {}

@@ -15,7 +15,7 @@
 	logo={MemoroLogo}
 	primaryColor="#f8d62b"
 	onSignUp={handleSignUp}
-	goto={goto}
+	{goto}
 	successRedirect="/dashboard"
 	loginPath="/login"
 	lightBackground="#dddddd"

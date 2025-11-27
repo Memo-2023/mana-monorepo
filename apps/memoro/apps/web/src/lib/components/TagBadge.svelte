@@ -11,7 +11,7 @@
 		removable = false,
 		clickable = false,
 		onRemove,
-		onClick
+		onClick,
 	}: {
 		tag: Tag;
 		removable?: boolean;

@@ -23,7 +23,7 @@ function loadInitialTheme(): ThemeState {
 
 	return {
 		variant: savedVariant || 'default',
-		mode: savedMode || 'system'
+		mode: savedMode || 'system',
 	};
 }
 
@@ -41,13 +41,10 @@ export const actualMode = derived(themeMode, ($mode) => {
 });
 
 // Derive the current theme object
-export const currentTheme = derived(
-	[themeVariant, actualMode],
-	([$variant, $actualMode]) => {
-		const theme = themes[$variant];
-		return theme.colors[$actualMode];
-	}
-);
+export const currentTheme = derived([themeVariant, actualMode], ([$variant, $actualMode]) => {
+	const theme = themes[$variant];
+	return theme.colors[$actualMode];
+});
 
 // Actions
 export function setThemeVariant(variant: ThemeVariant) {

@@ -9,132 +9,136 @@ import Badge from '../atoms/Badge.astro';
 import SectionHeader from '../atoms/SectionHeader.astro';
 
 interface PricingFeature {
-  text: string;
-  included: boolean;
+	text: string;
+	included: boolean;
 }
 
 interface PricingPlan {
-  name: string;
-  description?: string;
-  price: string;
-  period?: string;
-  features: PricingFeature[] | string[];
-  cta: {
-    text: string;
-    href: string;
-  };
-  highlighted?: boolean;
-  badge?: string;
+	name: string;
+	description?: string;
+	price: string;
+	period?: string;
+	features: PricingFeature[] | string[];
+	cta: {
+		text: string;
+		href: string;
+	};
+	highlighted?: boolean;
+	badge?: string;
 }
 
 interface Props {
-  title: string;
-  subtitle?: string;
-  plans: PricingPlan[];
-  class?: string;
-  id?: string;
+	title: string;
+	subtitle?: string;
+	plans: PricingPlan[];
+	class?: string;
+	id?: string;
 }
 
-const {
-  title,
-  subtitle,
-  plans,
-  class: className = '',
-  id = 'pricing'
-} = Astro.props;
+const { title, subtitle, plans, class: className = '', id = 'pricing' } = Astro.props;
 
 // Normalize features to always have { text, included } format
 function normalizeFeatures(features: PricingFeature[] | string[]): PricingFeature[] {
-  return features.map(f => typeof f === 'string' ? { text: f, included: true } : f);
+	return features.map((f) => (typeof f === 'string' ? { text: f, included: true } : f));
 }
 ---
 
-<section id={id} class:list={["py-16 md:py-24", className]}>
-  <Container>
-    <SectionHeader title={title} subtitle={subtitle} />
+<section id={id} class:list={['py-16 md:py-24', className]}>
+	<Container>
+		<SectionHeader title={title} subtitle={subtitle} />
 
-    <div class:list={[
-      "grid gap-6 md:gap-8",
-      plans.length === 2 && "md:grid-cols-2 max-w-4xl mx-auto",
-      plans.length === 3 && "md:grid-cols-3",
-      plans.length >= 4 && "md:grid-cols-2 lg:grid-cols-4"
-    ]}>
-      {plans.map((plan) => (
-        <Card
-          variant={plan.highlighted ? 'glow' : 'bordered'}
-          padding="lg"
-          class:list={[
-            "flex flex-col relative",
-            plan.highlighted && "ring-2 ring-[var(--color-primary)] scale-105"
-          ]}
-        >
-          {plan.badge && (
-            <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge variant="primary">{plan.badge}</Badge>
-            </div>
-          )}
+		<div
+			class:list={[
+				'grid gap-6 md:gap-8',
+				plans.length === 2 && 'md:grid-cols-2 max-w-4xl mx-auto',
+				plans.length === 3 && 'md:grid-cols-3',
+				plans.length >= 4 && 'md:grid-cols-2 lg:grid-cols-4',
+			]}
+		>
+			{
+				plans.map((plan) => (
+					<Card
+						variant={plan.highlighted ? 'glow' : 'bordered'}
+						padding="lg"
+						class:list={[
+							'flex flex-col relative',
+							plan.highlighted && 'ring-2 ring-[var(--color-primary)] scale-105',
+						]}
+					>
+						{plan.badge && (
+							<div class="absolute -top-3 left-1/2 -translate-x-1/2">
+								<Badge variant="primary">{plan.badge}</Badge>
+							</div>
+						)}
 
-          <div class="text-center mb-6">
-            <h3 class="text-xl font-bold text-[var(--color-text-primary)] mb-2">
-              {plan.name}
-            </h3>
-            {plan.description && (
-              <p class="text-sm text-[var(--color-text-secondary)]">
-                {plan.description}
-              </p>
-            )}
-          </div>
+						<div class="text-center mb-6">
+							<h3 class="text-xl font-bold text-[var(--color-text-primary)] mb-2">{plan.name}</h3>
+							{plan.description && (
+								<p class="text-sm text-[var(--color-text-secondary)]">{plan.description}</p>
+							)}
+						</div>
 
-          <div class="text-center mb-6">
-            <span class="text-4xl font-bold text-[var(--color-text-primary)]">
-              {plan.price}
-            </span>
-            {plan.period && (
-              <span class="text-[var(--color-text-secondary)]">
-                /{plan.period}
-              </span>
-            )}
-          </div>
+						<div class="text-center mb-6">
+							<span class="text-4xl font-bold text-[var(--color-text-primary)]">{plan.price}</span>
+							{plan.period && (
+								<span class="text-[var(--color-text-secondary)]">/{plan.period}</span>
+							)}
+						</div>
 
-          <ul class="space-y-3 mb-8 flex-1">
-            {normalizeFeatures(plan.features).map((feature) => (
-              <li class="flex items-start gap-3">
-                <svg
-                  class:list={[
-                    "w-5 h-5 flex-shrink-0 mt-0.5",
-                    feature.included ? "text-green-500" : "text-[var(--color-text-muted)]"
-                  ]}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  {feature.included ? (
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  ) : (
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  )}
-                </svg>
-                <span class:list={[
-                  "text-sm",
-                  feature.included ? "text-[var(--color-text-primary)]" : "text-[var(--color-text-muted)] line-through"
-                ]}>
-                  {feature.text}
-                </span>
-              </li>
-            ))}
-          </ul>
+						<ul class="space-y-3 mb-8 flex-1">
+							{normalizeFeatures(plan.features).map((feature) => (
+								<li class="flex items-start gap-3">
+									<svg
+										class:list={[
+											'w-5 h-5 flex-shrink-0 mt-0.5',
+											feature.included ? 'text-green-500' : 'text-[var(--color-text-muted)]',
+										]}
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										{feature.included ? (
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M5 13l4 4L19 7"
+											/>
+										) : (
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M6 18L18 6M6 6l12 12"
+											/>
+										)}
+									</svg>
+									<span
+										class:list={[
+											'text-sm',
+											feature.included
+												? 'text-[var(--color-text-primary)]'
+												: 'text-[var(--color-text-muted)] line-through',
+										]}
+									>
+										{feature.text}
+									</span>
+								</li>
+							))}
+						</ul>
 
-          <Button
-            href={plan.cta.href}
-            variant={plan.highlighted ? 'primary' : 'secondary'}
-            fullWidth
-          >
-            {plan.cta.text}
-          </Button>
-        </Card>
-      ))}
-    </div>
+						<Button
+							href={plan.cta.href}
+							variant={plan.highlighted ? 'primary' : 'secondary'}
+							fullWidth
+						>
+							{plan.cta.text}
+						</Button>
+					</Card>
+				))
+			}
+		</div>
 
-    <slot />
-  </Container>
+		<slot />
+	</Container>
 </section>

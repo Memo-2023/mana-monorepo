@@ -14,7 +14,7 @@
 				email: email.toLowerCase().trim(),
 				password,
 				passwordConfirm: password,
-				emailVisibility: true
+				emailVisibility: true,
 			});
 
 			// Request verification email
@@ -26,7 +26,7 @@
 
 			return {
 				success: true,
-				needsVerification: true
+				needsVerification: true,
 			};
 		} catch (err: any) {
 			const errorData = err?.response?.data || err?.data || {};
@@ -34,7 +34,7 @@
 			if (errorData.email?.message?.includes('unique')) {
 				return {
 					success: false,
-					error: 'Diese E-Mail ist bereits registriert. Bitte melde dich an.'
+					error: 'Diese E-Mail ist bereits registriert. Bitte melde dich an.',
 				};
 			}
 
@@ -48,7 +48,7 @@
 
 			return {
 				success: false,
-				error: err?.message || 'Registrierung fehlgeschlagen. Bitte versuche es erneut.'
+				error: err?.message || 'Registrierung fehlgeschlagen. Bitte versuche es erneut.',
 			};
 		}
 	}
@@ -59,7 +59,7 @@
 	logo={UloadLogo}
 	primaryColor="#3b82f6"
 	onSignUp={handleSignUp}
-	goto={goto}
+	{goto}
 	successRedirect="/login?registered=true"
 	loginPath="/login"
 	lightBackground="#f8fafc"
@@ -69,7 +69,8 @@
 		emailPlaceholder: 'E-Mail',
 		passwordPlaceholder: 'Passwort',
 		confirmPasswordPlaceholder: 'Passwort bestätigen',
-		passwordRequirements: 'Passwort muss mindestens 8 Zeichen mit Kleinbuchstaben, Großbuchstaben, Zahl und Sonderzeichen enthalten.',
+		passwordRequirements:
+			'Passwort muss mindestens 8 Zeichen mit Kleinbuchstaben, Großbuchstaben, Zahl und Sonderzeichen enthalten.',
 		createAccountButton: 'Account erstellen',
 		creatingAccount: 'Wird erstellt...',
 		backToLogin: 'Zurück zum Login',
@@ -80,8 +81,9 @@
 		confirmPasswordRequired: 'Bitte bestätige dein Passwort',
 		passwordsDoNotMatch: 'Passwörter stimmen nicht überein',
 		passwordTooShort: 'Passwort muss mindestens 8 Zeichen haben',
-		passwordStrengthError: 'Passwort muss Kleinbuchstaben, Großbuchstaben, Zahl und Sonderzeichen enthalten',
+		passwordStrengthError:
+			'Passwort muss Kleinbuchstaben, Großbuchstaben, Zahl und Sonderzeichen enthalten',
 		registrationFailed: 'Registrierung fehlgeschlagen',
-		accountCreated: 'Account erstellt! Bitte überprüfe deine E-Mail zur Verifizierung.'
+		accountCreated: 'Account erstellt! Bitte überprüfe deine E-Mail zur Verifizierung.',
 	}}
 />

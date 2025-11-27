@@ -11,19 +11,19 @@ vi.mock('$app/environment', () => ({
 	browser: false,
 	dev: true,
 	building: false,
-	version: '1.0.0'
+	version: '1.0.0',
 }));
 
 vi.mock('$app/stores', () => ({
 	page: {
-		subscribe: vi.fn(() => () => {})
+		subscribe: vi.fn(() => () => {}),
 	},
 	updated: {
-		subscribe: vi.fn(() => () => {})
+		subscribe: vi.fn(() => () => {}),
 	},
 	navigating: {
-		subscribe: vi.fn(() => () => {})
-	}
+		subscribe: vi.fn(() => () => {}),
+	},
 }));
 
 vi.mock('$app/navigation', () => ({
@@ -32,13 +32,13 @@ vi.mock('$app/navigation', () => ({
 	invalidateAll: vi.fn(),
 	preloadData: vi.fn(),
 	pushState: vi.fn(),
-	replaceState: vi.fn()
+	replaceState: vi.fn(),
 }));
 
 // Mock PocketBase für Tests
 vi.mock('$lib/pocketbase', async () => {
 	const actual = await vi.importActual('$lib/pocketbase');
-	
+
 	// Mock PocketBase-Instanz
 	const mockPb = {
 		authStore: {
@@ -47,7 +47,7 @@ vi.mock('$lib/pocketbase', async () => {
 			isValid: false,
 			save: vi.fn(),
 			clear: vi.fn(),
-			onChange: vi.fn(() => () => {})
+			onChange: vi.fn(() => () => {}),
 		},
 		collection: vi.fn(() => ({
 			create: vi.fn(),
@@ -60,14 +60,14 @@ vi.mock('$lib/pocketbase', async () => {
 			requestPasswordReset: vi.fn(),
 			confirmPasswordReset: vi.fn(),
 			requestVerification: vi.fn(),
-			confirmVerification: vi.fn()
+			confirmVerification: vi.fn(),
 		})),
-		send: vi.fn()
+		send: vi.fn(),
 	};
 
 	return {
 		...actual,
-		pb: mockPb
+		pb: mockPb,
 	};
 });
 
@@ -77,8 +77,8 @@ vi.mock('$lib/services/toast', () => ({
 		success: vi.fn(),
 		error: vi.fn(),
 		info: vi.fn(),
-		warning: vi.fn()
-	}
+		warning: vi.fn(),
+	},
 }));
 
 // Mock Theme Store
@@ -86,7 +86,7 @@ vi.mock('$lib/theme.svelte', () => ({
 	themeMode: { value: 'light' },
 	themePreset: { value: 'minimal' },
 	applyTheme: vi.fn(),
-	initializeTheme: vi.fn()
+	initializeTheme: vi.fn(),
 }));
 
 // Global test utilities
@@ -96,7 +96,7 @@ export const createMockEvent = (data: any = {}) => ({
 		url: new URL('http://localhost:5173'),
 		formData: async () => new FormData(),
 		json: async () => data,
-		...data.request
+		...data.request,
 	},
 	locals: {
 		pb: {
@@ -106,17 +106,17 @@ export const createMockEvent = (data: any = {}) => ({
 				getList: vi.fn(),
 				getOne: vi.fn(),
 				update: vi.fn(),
-				delete: vi.fn()
-			}))
+				delete: vi.fn(),
+			})),
 		},
-		...data.locals
+		...data.locals,
 	},
 	cookies: {
 		get: vi.fn(),
 		set: vi.fn(),
-		delete: vi.fn()
+		delete: vi.fn(),
 	},
-	...data
+	...data,
 });
 
 // Mock User für Tests
@@ -128,7 +128,7 @@ export const createMockUser = (overrides = {}) => ({
 	verified: true,
 	created: '2024-01-01T00:00:00Z',
 	updated: '2024-01-01T00:00:00Z',
-	...overrides
+	...overrides,
 });
 
 // Mock Link für Tests
@@ -142,7 +142,7 @@ export const createMockLink = (overrides = {}) => ({
 	click_count: 0,
 	created: '2024-01-01T00:00:00Z',
 	updated: '2024-01-01T00:00:00Z',
-	...overrides
+	...overrides,
 });
 
 // Mock Analytics für Tests
@@ -154,19 +154,19 @@ export const createMockAnalytics = (overrides = {}) => ({
 	country: 'Germany',
 	device: 'desktop',
 	created: '2024-01-01T00:00:00Z',
-	...overrides
+	...overrides,
 });
 
 // Test Environment Setup
 beforeEach(() => {
 	// Reset all mocks before each test
 	vi.clearAllMocks();
-	
+
 	// Reset DOM (only in browser)
 	if (isBrowser && typeof document !== 'undefined') {
 		document.body.innerHTML = '';
 	}
-	
+
 	// Reset localStorage/sessionStorage (only in browser)
 	if (isBrowser && typeof localStorage !== 'undefined') {
 		localStorage.clear();
@@ -188,41 +188,41 @@ expect.extend({
 	toBeValidEmail(received: string) {
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		const pass = emailRegex.test(received);
-		
+
 		return {
 			pass,
-			message: () => 
-				pass 
+			message: () =>
+				pass
 					? `Expected "${received}" not to be a valid email`
-					: `Expected "${received}" to be a valid email`
+					: `Expected "${received}" to be a valid email`,
 		};
 	},
-	
+
 	toBeValidUsername(received: string) {
 		const usernameRegex = /^[a-z0-9_-]+$/;
 		const pass = usernameRegex.test(received) && received.length >= 3;
-		
+
 		return {
 			pass,
 			message: () =>
 				pass
 					? `Expected "${received}" not to be a valid username`
-					: `Expected "${received}" to be a valid username (3+ chars, lowercase, numbers, - and _ only)`
+					: `Expected "${received}" to be a valid username (3+ chars, lowercase, numbers, - and _ only)`,
 		};
 	},
-	
+
 	toBeValidShortCode(received: string) {
 		const codeRegex = /^[a-zA-Z0-9_-]+$/;
 		const pass = codeRegex.test(received) && received.length >= 3;
-		
+
 		return {
 			pass,
 			message: () =>
 				pass
 					? `Expected "${received}" not to be a valid short code`
-					: `Expected "${received}" to be a valid short code`
+					: `Expected "${received}" to be a valid short code`,
 		};
-	}
+	},
 });
 
 // Type declarations für custom matchers

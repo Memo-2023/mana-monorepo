@@ -29,16 +29,20 @@ Memoro is your personal AI assistant for audio recordings. Whether you have an i
 ## Key Features
 
 ### 🎯 Intelligent Transcription
+
 Memoro uses cutting-edge AI technology to transcribe your recordings with over 95% accuracy. The app automatically recognizes different speakers and formats the transcript clearly.
 
 ### 📝 Automatic Summarization
+
 After each recording, Memoro creates a concise summary of the key points. You receive:
+
 - Core statements and decisions
 - Action items and to-dos
 - Important dates and appointments
 - Topic overview
 
 ### 🌍 Multilingual
+
 Memoro supports over 20 languages and can even transcribe multilingual conversations. The app automatically detects the spoken language and seamlessly switches between different languages.
 
 ## Mana Usage
@@ -53,18 +57,21 @@ Mana consumption with Memoro is transparent and fair:
 ## Use Cases
 
 ### For Business
+
 - Automatically create meeting minutes
 - Document customer conversations
 - Capture brainstorming sessions
 - Record training sessions and presentations
 
 ### For Education
+
 - Transcribe lectures
 - Document research interviews
 - Create study notes
 - Language recordings for studies
 
 ### For Creatives
+
 - Create podcast transcripts
 - Process interview material
 - Capture ideas and concepts
@@ -77,6 +84,7 @@ Memoro is fully integrated into the Mana ecosystem. You only pay for actual usag
 ## Availability
 
 Memoro is available for:
+
 - iOS (iPhone & iPad)
 - Android
 - Web app

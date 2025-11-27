@@ -22,6 +22,7 @@ Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese mitteilen. Hierb
 Andere Daten werden automatisch beim Besuch der Website durch unsere IT-Systeme erfasst. Das sind vor allem technische Daten (z.B. Internetbrowser, Betriebssystem oder Uhrzeit des Seitenaufrufs).
 
 **Wofür nutzen wir Ihre Daten?**
+
 - Zur Bereitstellung und Abrechnung unserer Mana-Services
 - Zur Verwaltung Ihrer Mana-Credits
 - Zur Kommunikation mit Ihnen
@@ -30,6 +31,7 @@ Andere Daten werden automatisch beim Besuch der Website durch unsere IT-Systeme 
 
 **Welche Rechte haben Sie?**
 Sie haben jederzeit das Recht auf:
+
 - Auskunft über Ihre gespeicherten Daten
 - Berichtigung oder Löschung Ihrer Daten
 - Einschränkung der Verarbeitung
@@ -76,6 +78,7 @@ Die Bereitstellung bestimmter personenbezogener Daten kann gesetzlich vorgeschri
 ### Registrierung und Account-Erstellung
 
 Bei der Registrierung für Mana erfassen wir:
+
 - E-Mail-Adresse
 - Passwort (verschlüsselt gespeichert)
 - Optional: Name, Unternehmen, Telefonnummer
@@ -85,6 +88,7 @@ Bei der Registrierung für Mana erfassen wir:
 ### Mana-Credit-System
 
 Für die Verwaltung Ihrer Mana-Credits speichern wir:
+
 - Transaktionshistorie
 - Credit-Stand
 - Nutzungsstatistiken
@@ -95,6 +99,7 @@ Diese Daten sind erforderlich für die ordnungsgemäße Abrechnung und Bereitste
 ### Nutzung von KI-Tools
 
 Bei der Nutzung von KI-Tools über Mana:
+
 - Wir leiten Ihre Anfragen verschlüsselt an die jeweiligen KI-Anbieter weiter
 - Ihre Eingaben werden NICHT für das Training von KI-Modellen verwendet
 - Temporäre Speicherung nur zur Servicebereitstellung
@@ -103,6 +108,7 @@ Bei der Nutzung von KI-Tools über Mana:
 ### Memoro App
 
 Bei Nutzung der Memoro-App:
+
 - Audio-Aufnahmen werden verschlüsselt übertragen
 - Transkripte werden in Ihrem Account gespeichert
 - Sie haben volle Kontrolle über Ihre Aufnahmen
@@ -113,6 +119,7 @@ Bei Nutzung der Memoro-App:
 ### Zahlungsabwicklung
 
 Die Zahlungsabwicklung erfolgt über zertifizierte Zahlungsdienstleister:
+
 - Stripe (für Kreditkarten)
 - PayPal
 - SEPA-Lastschrift
@@ -122,6 +129,7 @@ Wir speichern keine Kreditkartendaten. Diese werden direkt beim Zahlungsdienstle
 ### Rechnungsdaten
 
 Für die Rechnungsstellung speichern wir:
+
 - Name/Firmenname
 - Anschrift
 - Steuernummer (bei Unternehmen)
@@ -134,6 +142,7 @@ Für die Rechnungsstellung speichern wir:
 ### Newsletter-Versand
 
 Mit Ihrer Einwilligung senden wir Ihnen unseren Newsletter mit:
+
 - Produkt-Updates
 - Tipps zur Mana-Nutzung
 - Sonderangebote
@@ -145,6 +154,7 @@ Mit Ihrer Einwilligung senden wir Ihnen unseren Newsletter mit:
 ### Technisch notwendige Cookies
 
 Wir verwenden nur technisch notwendige Cookies für:
+
 - Session-Management
 - Spracheinstellungen
 - Sicherheitsfunktionen
@@ -152,6 +162,7 @@ Wir verwenden nur technisch notwendige Cookies für:
 ### Analytics
 
 Wir verwenden datenschutzfreundliche Analytics-Tools:
+
 - Anonymisierte IP-Adressen
 - Kein Cross-Site-Tracking
 - Opt-Out möglich
@@ -204,6 +215,7 @@ Sie haben das Recht, sich bei der zuständigen Aufsichtsbehörde zu beschweren.
 ### KI-Anbieter
 
 Für die Bereitstellung der KI-Services übermitteln wir Daten an:
+
 - OpenAI (ChatGPT)
 - Anthropic (Claude)
 - Weitere KI-Anbieter
@@ -219,6 +231,7 @@ Wir geben Ihre Daten niemals zu Werbezwecken an Dritte weiter.
 ### EU-Datenschutz
 
 Ihre Daten werden primär innerhalb der EU verarbeitet. Bei Übermittlungen außerhalb der EU (z.B. an KI-Anbieter in den USA) stellen wir sicher, dass:
+
 - Standardvertragsklauseln vereinbart sind
 - Angemessene Schutzmaßnahmen bestehen
 - Ihre Rechte gewahrt bleiben
@@ -245,4 +258,4 @@ Unser Datenschutzbeauftragter:
 
 ---
 
-*Stand: Januar 2024*
+_Stand: Januar 2024_

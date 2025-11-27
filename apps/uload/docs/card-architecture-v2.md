@@ -88,9 +88,9 @@ await cardsStore.createCard({
 			id: 'header-1',
 			type: 'header',
 			props: { title: 'My Card' },
-			order: 0
-		}
-	]
+			order: 0,
+		},
+	],
 });
 
 // Advanced mode card
@@ -98,7 +98,7 @@ await cardsStore.createCard({
 	mode: 'advanced',
 	template: '<h1>{{title}}</h1>',
 	variables: [{ name: 'title', type: 'text', label: 'Title' }],
-	values: { title: 'My Title' }
+	values: { title: 'My Title' },
 });
 ```
 

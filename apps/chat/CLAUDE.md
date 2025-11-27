@@ -17,6 +17,7 @@ apps/chat/
 ## Commands
 
 ### Root Level
+
 ```bash
 pnpm chat:dev                    # Run all chat apps
 pnpm dev:chat:mobile             # Start mobile app
@@ -26,6 +27,7 @@ pnpm dev:chat:backend            # Start backend server
 ```
 
 ### Mobile App (chat/apps/mobile)
+
 ```bash
 pnpm dev                         # Start Expo dev server
 pnpm ios                         # Run on iOS simulator
@@ -36,6 +38,7 @@ pnpm build:prod                  # Build production version
 ```
 
 ### Backend (apps/chat/apps/backend)
+
 ```bash
 pnpm start:dev                   # Start with hot reload
 pnpm build                       # Build for production
@@ -43,6 +46,7 @@ pnpm start:prod                  # Start production server
 ```
 
 ### Web App (chat/apps/web)
+
 ```bash
 pnpm dev                         # Start dev server
 pnpm build                       # Build for production
@@ -50,6 +54,7 @@ pnpm preview                     # Preview production build
 ```
 
 ### Landing Page (chat/apps/landing)
+
 ```bash
 pnpm dev                         # Start dev server
 pnpm build                       # Build for production
@@ -68,20 +73,21 @@ pnpm preview                     # Preview production build
 
 ### Backend API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/health` | GET | Health check |
-| `/api/chat/models` | GET | List available AI models |
-| `/api/chat/completions` | POST | Create chat completion |
-| `/api/conversations` | GET | List user conversations |
-| `/api/conversations/:id` | GET | Get conversation details |
-| `/api/conversations/:id/messages` | GET | Get conversation messages |
-| `/api/conversations` | POST | Create new conversation |
-| `/api/conversations/:id/messages` | POST | Add message to conversation |
+| Endpoint                          | Method | Description                 |
+| --------------------------------- | ------ | --------------------------- |
+| `/api/health`                     | GET    | Health check                |
+| `/api/chat/models`                | GET    | List available AI models    |
+| `/api/chat/completions`           | POST   | Create chat completion      |
+| `/api/conversations`              | GET    | List user conversations     |
+| `/api/conversations/:id`          | GET    | Get conversation details    |
+| `/api/conversations/:id/messages` | GET    | Get conversation messages   |
+| `/api/conversations`              | POST   | Create new conversation     |
+| `/api/conversations/:id/messages` | POST   | Add message to conversation |
 
 ### Environment Variables
 
 #### Backend (.env)
+
 ```
 AZURE_OPENAI_ENDPOINT=https://...
 AZURE_OPENAI_API_KEY=...
@@ -92,6 +98,7 @@ PORT=3001
 ```
 
 #### Mobile (.env)
+
 ```
 EXPO_PUBLIC_SUPABASE_URL=https://...
 EXPO_PUBLIC_SUPABASE_ANON_KEY=...
@@ -108,11 +115,11 @@ EXPO_PUBLIC_BACKEND_URL=http://localhost:3001
 
 ## AI Models Available
 
-| Model ID | Name | Description |
-|----------|------|-------------|
+| Model ID                             | Name        | Description               |
+| ------------------------------------ | ----------- | ------------------------- |
 | 550e8400-e29b-41d4-a716-446655440000 | GPT-O3-Mini | Fast, efficient responses |
-| 550e8400-e29b-41d4-a716-446655440004 | GPT-4o-Mini | Compact, powerful |
-| 550e8400-e29b-41d4-a716-446655440005 | GPT-4o | Most advanced |
+| 550e8400-e29b-41d4-a716-446655440004 | GPT-4o-Mini | Compact, powerful         |
+| 550e8400-e29b-41d4-a716-446655440005 | GPT-4o      | Most advanced             |
 
 ## Important Notes
 

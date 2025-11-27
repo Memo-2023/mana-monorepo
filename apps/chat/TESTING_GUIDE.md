@@ -7,6 +7,7 @@ This guide walks you through testing the Chat project with Mana Core Auth.
 ## Prerequisites
 
 Before testing, make sure you have:
+
 - ✅ Node.js 20+
 - ✅ pnpm installed
 - ✅ All dependencies installed (`pnpm install` from monorepo root)
@@ -25,6 +26,7 @@ chmod +x scripts/generate-keys.sh
 ```
 
 **You'll see output like:**
+
 ```
 Generating RS256 key pair...
 Keys generated successfully!
@@ -165,6 +167,7 @@ pnpm start:dev
 ```
 
 **Expected output:**
+
 ```
 🚀 Mana Core Auth running on: http://localhost:3001
 📚 Environment: development
@@ -180,6 +183,7 @@ pnpm start:dev
 ```
 
 **Expected output:**
+
 ```
 [Nest] LOG [NestApplication] Nest application successfully started
 [Nest] LOG Listening on port 3002
@@ -195,6 +199,7 @@ pnpm dev
 ```
 
 **Expected output:**
+
 ```
   VITE v5.x.x  ready in xxx ms
 
@@ -212,6 +217,7 @@ pnpm dev
 ```
 
 **Expected output:**
+
 ```
 › Metro waiting on exp://localhost:8081
 › Scan the QR code above with Expo Go (Android) or Camera (iOS)
@@ -234,6 +240,7 @@ Open browser: http://localhost:5173
 3. Click **"Register"**
 
 **Expected:**
+
 - Registration succeeds
 - Automatically redirects to login
 - Login happens automatically
@@ -261,6 +268,7 @@ const authStore = window.authStore; // If exported globally
 ```
 
 **Expected:**
+
 - 150 initial credits
 - API call to `/api/v1/credits/balance` succeeds
 
@@ -279,6 +287,7 @@ const authStore = window.authStore; // If exported globally
 First, login via web app, then get the token from localStorage:
 
 **In browser console:**
+
 ```javascript
 const token = localStorage.getItem('@auth/appToken');
 console.log(token);
@@ -301,6 +310,7 @@ curl http://localhost:3002/api/chat/models \
 ```
 
 **Expected Response:**
+
 ```json
 [
   {
@@ -378,6 +388,7 @@ curl -X POST http://localhost:3002/api/chat/completions \
 4. Tap **"Register"**
 
 **Expected:**
+
 - Registration succeeds
 - Auto-login
 - Redirected to chat interface
@@ -400,10 +411,11 @@ curl http://localhost:3002/api/chat/models \
 ```
 
 **Expected:**
+
 ```json
 {
-  "statusCode": 401,
-  "message": "Invalid token"
+	"statusCode": 401,
+	"message": "Invalid token"
 }
 ```
 
@@ -439,13 +451,14 @@ curl http://localhost:3001/api/v1/credits/balance \
 ```
 
 **Expected:**
+
 ```json
 {
-  "balance": 0,
-  "freeCreditsRemaining": 150,
-  "totalEarned": 0,
-  "totalSpent": 0,
-  "dailyFreeCredits": 5
+	"balance": 0,
+	"freeCreditsRemaining": 150,
+	"totalEarned": 0,
+	"totalSpent": 0,
+	"dailyFreeCredits": 5
 }
 ```
 
@@ -464,6 +477,7 @@ curl -X POST http://localhost:3001/api/v1/credits/use \
 ```
 
 **Expected:**
+
 ```json
 {
   "success": true,
@@ -494,6 +508,7 @@ curl http://localhost:3001/api/v1/credits/transactions \
 **Problem:** Mana Core Auth not running
 
 **Solution:**
+
 ```bash
 cd mana-core-auth
 pnpm start:dev
@@ -504,6 +519,7 @@ pnpm start:dev
 **Problem:** JWT keys mismatch or token expired
 
 **Solution:**
+
 1. Clear tokens: `localStorage.clear()` in browser
 2. Login again
 3. Verify JWT keys are identical in Mana Core Auth .env
@@ -514,6 +530,7 @@ pnpm start:dev
 
 **Solution:**
 Edit `mana-core-auth/.env`:
+
 ```env
 CORS_ORIGINS=http://localhost:5173,http://localhost:8081
 ```
@@ -525,6 +542,7 @@ Restart Mana Core Auth
 **Problem:** PostgreSQL not running
 
 **Solution:**
+
 ```bash
 # If using Docker
 cd mana-core-auth
@@ -539,6 +557,7 @@ docker-compose ps
 **Problem:** Another service using port 3001
 
 **Solution:**
+
 ```bash
 # Find what's using the port
 lsof -ti:3001
@@ -553,6 +572,7 @@ kill -9 $(lsof -ti:3001)
 
 **Solution:**
 Edit `chat/apps/mobile/.env`:
+
 ```env
 # Replace localhost with your computer's IP
 EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://192.168.1.XXX:3001
@@ -560,6 +580,7 @@ EXPO_PUBLIC_BACKEND_URL=http://192.168.1.XXX:3002
 ```
 
 Get your IP:
+
 ```bash
 # macOS
 ipconfig getifaddr en0
@@ -627,6 +648,7 @@ echo "✅ All tests complete!"
 ```
 
 Make it executable and run:
+
 ```bash
 chmod +x test-auth.sh
 ./test-auth.sh
@@ -639,6 +661,7 @@ chmod +x test-auth.sh
 Use this checklist to verify everything works:
 
 ### Mana Core Auth ✅
+
 - [ ] Service starts on port 3001
 - [ ] Can register new user
 - [ ] Can login with credentials
@@ -648,6 +671,7 @@ Use this checklist to verify everything works:
 - [ ] Can use credits
 
 ### Chat Backend ✅
+
 - [ ] Service starts on port 3002
 - [ ] Protected endpoints return 401 without token
 - [ ] Protected endpoints work with valid token
@@ -657,6 +681,7 @@ Use this checklist to verify everything works:
 - [ ] Can send messages
 
 ### Web App ✅
+
 - [ ] App loads on port 5173
 - [ ] Can register new user
 - [ ] Can login
@@ -666,6 +691,7 @@ Use this checklist to verify everything works:
 - [ ] Can see conversations
 
 ### Mobile App ✅
+
 - [ ] App loads in Expo Go
 - [ ] Can register new user
 - [ ] Can login

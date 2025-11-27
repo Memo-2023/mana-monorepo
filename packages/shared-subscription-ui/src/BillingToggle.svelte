@@ -14,7 +14,7 @@
 		onChange,
 		yearlyDiscount = '33%',
 		monthlyLabel = 'Monatlich',
-		yearlyLabel = 'Jährlich'
+		yearlyLabel = 'Jährlich',
 	}: Props = $props();
 </script>
 
