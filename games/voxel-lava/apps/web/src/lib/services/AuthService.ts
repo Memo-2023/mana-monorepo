@@ -1,7 +1,14 @@
-import { pb } from '../pocketbase';
+import {
+  authApi,
+  getToken,
+  getStoredUser,
+  clearAuth,
+  type User,
+  type ApiError,
+} from '../api/client';
 
 /**
- * Service zur Verwaltung der Benutzerauthentifizierung mit PocketBase
+ * Service zur Verwaltung der Benutzerauthentifizierung mit Mana Core Auth
  */
 export class AuthService {
   /**
@@ -13,19 +20,7 @@ export class AuthService {
    */
   static async register(email: string, password: string, name?: string): Promise<boolean> {
     try {
-      const data = {
-        email,
-        password,
-        passwordConfirm: password,
-        name: name || email.split('@')[0],
-        emailVisibility: true
-      };
-
-      const record = await pb.collection('users').create(data);
-      
-      // Automatisch anmelden nach erfolgreicher Registrierung
-      await pb.collection('users').authWithPassword(email, password);
-      
+      await authApi.register(email, password, name || email.split('@')[0]);
       return true;
     } catch (error) {
       console.error('Fehler bei der Registrierung:', error);
@@ -41,8 +36,8 @@ export class AuthService {
    */
   static async login(email: string, password: string): Promise<boolean> {
     try {
-      const authData = await pb.collection('users').authWithPassword(email, password);
-      return !!authData.token;
+      await authApi.login(email, password);
+      return true;
     } catch (error) {
       console.error('Fehler bei der Anmeldung:', error);
       return false;
@@ -55,11 +50,12 @@ export class AuthService {
    */
   static async logout(): Promise<boolean> {
     try {
-      pb.authStore.clear();
+      await authApi.logout();
       return true;
     } catch (error) {
       console.error('Fehler bei der Abmeldung:', error);
-      return false;
+      clearAuth();
+      return true; // Always clear local auth even if API fails
     }
   }
 
@@ -67,12 +63,11 @@ export class AuthService {
    * Prüft, ob ein Benutzer angemeldet ist
    * @returns Der angemeldete Benutzer oder null, wenn kein Benutzer angemeldet ist
    */
-  static getCurrentUser() {
+  static getCurrentUser(): User | null {
     try {
-      if (pb.authStore.isValid) {
-        return pb.authStore.model;
-      }
-      return null;
+      const token = getToken();
+      if (!token) return null;
+      return getStoredUser();
     } catch (error) {
       console.error('Fehler beim Abrufen des aktuellen Benutzers:', error);
       return null;
@@ -86,34 +81,10 @@ export class AuthService {
    */
   static async resetPassword(email: string): Promise<boolean> {
     try {
-      await pb.collection('users').requestPasswordReset(email);
+      await authApi.resetPassword(email);
       return true;
     } catch (error) {
       console.error('Fehler beim Zurücksetzen des Passworts:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Aktualisiert das Passwort des aktuellen Benutzers
-   * @param newPassword Das neue Passwort
-   * @returns true, wenn das Passwort erfolgreich aktualisiert wurde, sonst false
-   */
-  static async updatePassword(newPassword: string): Promise<boolean> {
-    try {
-      const user = pb.authStore.model;
-      if (!user) {
-        throw new Error('Kein Benutzer angemeldet');
-      }
-
-      await pb.collection('users').update(user.id, {
-        password: newPassword,
-        passwordConfirm: newPassword
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren des Passworts:', error);
       return false;
     }
   }
@@ -124,11 +95,8 @@ export class AuthService {
    */
   static async refreshAuth(): Promise<boolean> {
     try {
-      if (pb.authStore.isValid) {
-        await pb.collection('users').authRefresh();
-        return true;
-      }
-      return false;
+      await authApi.refreshAuth();
+      return true;
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Auth-Tokens:', error);
       return false;
@@ -140,7 +108,7 @@ export class AuthService {
    * @returns true, wenn die Sitzung gültig ist, sonst false
    */
   static isAuthenticated(): boolean {
-    return pb.authStore.isValid;
+    return !!getToken();
   }
 
   /**
@@ -148,8 +116,8 @@ export class AuthService {
    * @returns Die User-ID oder null
    */
   static getUserId(): string | null {
-    const user = pb.authStore.model;
-    return user?.id || null;
+    const user = getStoredUser();
+    return user?.userId || null;
   }
 
   /**
@@ -157,7 +125,7 @@ export class AuthService {
    * @returns Die E-Mail oder null
    */
   static getUserEmail(): string | null {
-    const user = pb.authStore.model;
+    const user = getStoredUser();
     return user?.email || null;
   }
 }

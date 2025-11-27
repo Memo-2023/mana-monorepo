@@ -278,6 +278,36 @@ const APP_CONFIGS = [
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 		},
 	},
+
+	// Presi Backend (NestJS)
+	{
+		path: 'apps/presi/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.PRESI_BACKEND_PORT || '3008',
+			DATABASE_URL: (env) => env.PRESI_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Presi Mobile (Expo)
+	{
+		path: 'apps/presi/apps/mobile/.env',
+		vars: {
+			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.PRESI_BACKEND_PORT || '3008'}`,
+			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Presi Web (SvelteKit)
+	{
+		path: 'apps/presi/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.PRESI_BACKEND_PORT || '3008'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
 ];
 
 function main() {

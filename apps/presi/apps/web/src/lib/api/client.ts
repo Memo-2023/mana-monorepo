@@ -1,0 +1,209 @@
+import { browser } from '$app/environment';
+import { PUBLIC_BACKEND_URL, PUBLIC_MANA_CORE_AUTH_URL } from '$env/static/public';
+import type { Deck, Slide, CreateDeckDto, UpdateDeckDto, CreateSlideDto, UpdateSlideDto, ReorderSlidesDto } from '@presi/shared';
+
+const API_URL = PUBLIC_BACKEND_URL || 'http://localhost:3008';
+const AUTH_URL = PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+
+function getToken(): string | null {
+  if (!browser) return null;
+  return localStorage.getItem('accessToken');
+}
+
+async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
+  const token = getToken();
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  if (token) {
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, {
+    ...options,
+    headers
+  });
+
+  if (response.status === 401) {
+    // Token expired - try to refresh
+    const refreshed = await refreshToken();
+    if (refreshed) {
+      // Retry the request with new token
+      const newToken = getToken();
+      if (newToken) {
+        (headers as Record<string, string>)['Authorization'] = `Bearer ${newToken}`;
+      }
+      return fetch(url, { ...options, headers });
+    }
+    // Clear tokens and redirect to login
+    if (browser) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      window.location.href = '/login';
+    }
+  }
+
+  return response;
+}
+
+async function refreshToken(): Promise<boolean> {
+  if (!browser) return false;
+
+  const refreshToken = localStorage.getItem('refreshToken');
+  if (!refreshToken) return false;
+
+  try {
+    const response = await fetch(`${AUTH_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem('accessToken', data.accessToken);
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
+      return true;
+    }
+  } catch (e) {
+    console.error('Failed to refresh token:', e);
+  }
+
+  return false;
+}
+
+// Auth API
+export const authApi = {
+  async login(email: string, password: string) {
+    const response = await fetch(`${AUTH_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Login failed');
+    }
+
+    const data = await response.json();
+    if (browser) {
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+    }
+    return data;
+  },
+
+  async register(email: string, password: string) {
+    const response = await fetch(`${AUTH_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Registration failed');
+    }
+
+    const data = await response.json();
+    if (browser) {
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+    }
+    return data;
+  },
+
+  logout() {
+    if (browser) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+    }
+  },
+
+  isAuthenticated(): boolean {
+    if (!browser) return false;
+    return !!localStorage.getItem('accessToken');
+  }
+};
+
+// Decks API
+export const decksApi = {
+  async getAll(): Promise<Deck[]> {
+    const response = await fetchWithAuth(`${API_URL}/decks`);
+    if (!response.ok) throw new Error('Failed to fetch decks');
+    return response.json();
+  },
+
+  async getOne(id: string): Promise<{ deck: Deck; slides: Slide[] }> {
+    const response = await fetchWithAuth(`${API_URL}/decks/${id}`);
+    if (!response.ok) throw new Error('Failed to fetch deck');
+    return response.json();
+  },
+
+  async create(dto: CreateDeckDto): Promise<Deck> {
+    const response = await fetchWithAuth(`${API_URL}/decks`, {
+      method: 'POST',
+      body: JSON.stringify(dto)
+    });
+    if (!response.ok) throw new Error('Failed to create deck');
+    return response.json();
+  },
+
+  async update(id: string, dto: UpdateDeckDto): Promise<Deck> {
+    const response = await fetchWithAuth(`${API_URL}/decks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(dto)
+    });
+    if (!response.ok) throw new Error('Failed to update deck');
+    return response.json();
+  },
+
+  async delete(id: string): Promise<void> {
+    const response = await fetchWithAuth(`${API_URL}/decks/${id}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) throw new Error('Failed to delete deck');
+  }
+};
+
+// Slides API
+export const slidesApi = {
+  async create(deckId: string, dto: CreateSlideDto): Promise<Slide> {
+    const response = await fetchWithAuth(`${API_URL}/decks/${deckId}/slides`, {
+      method: 'POST',
+      body: JSON.stringify(dto)
+    });
+    if (!response.ok) throw new Error('Failed to create slide');
+    return response.json();
+  },
+
+  async update(id: string, dto: UpdateSlideDto): Promise<Slide> {
+    const response = await fetchWithAuth(`${API_URL}/slides/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(dto)
+    });
+    if (!response.ok) throw new Error('Failed to update slide');
+    return response.json();
+  },
+
+  async delete(id: string): Promise<void> {
+    const response = await fetchWithAuth(`${API_URL}/slides/${id}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) throw new Error('Failed to delete slide');
+  },
+
+  async reorder(dto: ReorderSlidesDto): Promise<void> {
+    const response = await fetchWithAuth(`${API_URL}/slides/reorder`, {
+      method: 'PUT',
+      body: JSON.stringify(dto)
+    });
+    if (!response.ok) throw new Error('Failed to reorder slides');
+  }
+};

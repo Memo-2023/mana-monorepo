@@ -102,6 +102,13 @@
     "reader:dev": "turbo run dev --filter=reader...",
     "dev:reader:mobile": "pnpm --filter @reader/mobile dev",
 
+    "voxel-lava:dev": "turbo run dev --filter=@voxel-lava/web --filter=@voxel-lava/backend",
+    "dev:voxel-lava:web": "pnpm --filter @voxel-lava/web dev",
+    "dev:voxel-lava:backend": "pnpm --filter @voxel-lava/backend start:dev",
+    "dev:voxel-lava:app": "turbo run dev --filter=@voxel-lava/web --filter=@voxel-lava/backend",
+    "voxel-lava:db:push": "pnpm --filter @voxel-lava/backend db:push",
+    "voxel-lava:db:studio": "pnpm --filter @voxel-lava/backend db:studio",
+
     "docker:up": "docker compose -f docker-compose.dev.yml --env-file .env.development up -d postgres redis",
     "docker:up:auth": "docker compose -f docker-compose.dev.yml --env-file .env.development --profile auth up -d",
     "docker:up:chat": "docker compose -f docker-compose.dev.yml --env-file .env.development --profile chat up -d",

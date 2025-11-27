@@ -1,0 +1,199 @@
+# Presi Project Guide
+
+## Project Structure
+
+```
+apps/presi/
+├── apps/
+│   ├── backend/      # NestJS API server (@presi/backend)
+│   ├── mobile/       # Expo/React Native mobile app (@presi/mobile)
+│   ├── web/          # SvelteKit web application (@presi/web)
+│   └── landing/      # Astro marketing landing page (@presi/landing) - TODO
+├── packages/
+│   └── shared/       # Shared types and utils (@presi/shared)
+└── package.json
+```
+
+## Commands
+
+### Root Level (from monorepo root)
+```bash
+pnpm presi:dev                   # Run all presi apps
+pnpm dev:presi:mobile            # Start mobile app
+pnpm dev:presi:web               # Start web app (port 5178)
+pnpm dev:presi:backend           # Start backend server
+pnpm dev:presi:app               # Start web + backend together
+pnpm presi:db:push               # Push schema to database
+pnpm presi:db:studio             # Open Drizzle Studio
+pnpm presi:db:seed               # Seed database with sample data
+```
+
+### Mobile App (apps/presi/apps/mobile)
+```bash
+pnpm dev                         # Start Expo dev server
+pnpm ios                         # Run on iOS simulator
+pnpm android                     # Run on Android emulator
+```
+
+### Web App (apps/presi/apps/web)
+```bash
+pnpm dev                         # Start dev server (port 5178)
+pnpm build                       # Build for production
+pnpm preview                     # Preview production build
+pnpm check                       # Run svelte-check
+```
+
+### Backend (apps/presi/apps/backend)
+```bash
+pnpm dev                         # Start with hot reload
+pnpm build                       # Build for production
+pnpm start:prod                  # Start production server
+pnpm db:push                     # Push schema to database
+pnpm db:studio                   # Open Drizzle Studio
+pnpm db:seed                     # Seed database
+```
+
+## Technology Stack
+
+- **Mobile**: React Native 0.76 + Expo SDK 52, Expo Router, Zustand
+- **Web**: SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS
+- **Backend**: NestJS 10, Drizzle ORM, PostgreSQL
+- **Types**: TypeScript 5.x
+
+## Architecture
+
+### Core Features
+- Create and manage presentation decks
+- Add and edit slides with various content types
+- Apply themes to presentations
+- Share decks via share codes
+- Present slides in full-screen mode
+
+### Backend API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/health` | GET | Health check |
+| `/api/decks` | GET | Get user's decks |
+| `/api/decks` | POST | Create new deck |
+| `/api/decks/:id` | GET | Get deck details |
+| `/api/decks/:id` | PUT | Update deck |
+| `/api/decks/:id` | DELETE | Delete deck |
+| `/api/decks/:id/slides` | GET | Get slides for deck |
+| `/api/decks/:id/slides` | POST | Add slide to deck |
+| `/api/slides/:id` | PUT | Update slide |
+| `/api/slides/:id` | DELETE | Delete slide |
+| `/api/slides/reorder` | POST | Reorder slides |
+
+### Data Models
+
+**Deck** - Presentation deck
+- `id` (string) - Unique identifier
+- `userId` (string) - Owner user ID
+- `title` (string) - Deck title
+- `description` (string?) - Optional description
+- `themeId` (string?) - Theme reference
+- `isPublic` (boolean) - Visibility flag
+- `createdAt` / `updatedAt` (timestamps)
+
+**Slide** - Individual slide in a deck
+- `id` (string) - Unique identifier
+- `deckId` (string) - Parent deck reference
+- `order` (number) - Position in deck
+- `content` (SlideContent) - Slide content
+- `createdAt` (timestamp)
+
+**SlideContent** - Content structure
+- `type`: 'title' | 'content' | 'image' | 'split'
+- `title`, `subtitle`, `body`, `imageUrl`, `bulletPoints`
+
+**Theme** - Visual theme
+- `id`, `name`, `colors`, `fonts`, `isDefault`
+
+### Environment Variables
+
+#### Backend (.env)
+```
+NODE_ENV=development
+PORT=3008
+DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/presi
+MANA_CORE_AUTH_URL=http://localhost:3001
+CORS_ORIGINS=http://localhost:5173,http://localhost:8081
+```
+
+#### Mobile (.env)
+```
+EXPO_PUBLIC_BACKEND_URL=http://localhost:3008
+EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+```
+
+#### Web (.env)
+```
+PUBLIC_BACKEND_URL=http://localhost:3008
+PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+```
+
+## Shared Package
+
+### @presi/shared
+Located at `packages/shared/`
+
+**Types:**
+- `Deck`, `Slide`, `SlideContent`
+- `Theme`, `ThemeColors`, `ThemeFonts`
+- `SharedDeck` (for sharing feature)
+
+**DTOs:**
+- `CreateDeckDto`, `UpdateDeckDto`
+- `CreateSlideDto`, `UpdateSlideDto`
+- `ReorderSlidesDto`
+
+## Code Style Guidelines
+
+- **TypeScript**: Strict typing with interfaces
+- **Mobile**: Functional components with hooks, Zustand for state
+- **Web**: Svelte 5 runes mode (`$state`, `$derived`, `$effect`)
+- **Backend**: NestJS modules with controllers and services
+- **Styling**: Tailwind CSS (Web), NativeWind (Mobile)
+- **Formatting**: Prettier with project config
+
+## Web App Features
+
+The SvelteKit web app provides feature parity with the mobile app:
+
+- **Authentication**: Login/Register with Mana Core Auth
+- **Deck Management**: Create, edit, delete presentation decks
+- **Slide Editor**: Create slides with title, body, bullet points, images
+- **Presentation Mode**: Fullscreen presentation with keyboard navigation
+  - Arrow keys / A/D for navigation
+  - F for fullscreen toggle
+  - ESC to exit
+  - Timer with start/pause
+  - Speaker notes toggle
+- **Settings**: Theme switching (light/dark/system), account info
+
+### Web App Structure
+```
+src/
+├── lib/
+│   ├── api/client.ts        # API client with auth
+│   └── stores/
+│       ├── auth.svelte.ts   # Auth state (Svelte 5 runes)
+│       └── decks.svelte.ts  # Decks/slides state
+├── routes/
+│   ├── +layout.svelte       # App layout with header
+│   ├── +page.svelte         # Deck list (home)
+│   ├── login/               # Login page
+│   ├── register/            # Register page
+│   ├── deck/[id]/           # Deck editor with slides
+│   ├── present/[id]/        # Presentation mode
+│   └── settings/            # Settings page
+└── app.css                  # Global styles
+```
+
+## Important Notes
+
+1. **Authentication**: Uses Mana Core Auth (JWT in Authorization header)
+2. **Database**: PostgreSQL with Drizzle ORM
+3. **Ports**: Backend=3008, Web=5178
+4. **Landing**: Not yet implemented (empty folder)
