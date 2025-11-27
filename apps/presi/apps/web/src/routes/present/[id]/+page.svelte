@@ -18,7 +18,7 @@
   let hideControlsTimeout: ReturnType<typeof setTimeout> | null = null;
   let timerInterval: ReturnType<typeof setInterval> | null = null;
 
-  const deckId = $page.params.id;
+  const deckId = $page.params.id as string;
 
   onMount(() => {
     decksStore.loadDeck(deckId);

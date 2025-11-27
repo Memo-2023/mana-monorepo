@@ -31,7 +31,7 @@
   let slideNotes = $state('');
   let isSaving = $state(false);
 
-  const deckId = $page.params.id;
+  const deckId = $page.params.id as string;
 
   onMount(() => {
     decksStore.loadDeck(deckId);

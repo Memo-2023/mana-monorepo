@@ -85,36 +85,21 @@
         <div class="grid grid-cols-3 gap-3">
           <button
             onclick={() => setTheme('light')}
-            class="flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors"
-            class:border-primary-500={themeMode === 'light'}
-            class:bg-primary-50={themeMode === 'light'}
-            class:dark:bg-primary-900/30={themeMode === 'light'}
-            class:border-slate-200={themeMode !== 'light'}
-            class:dark:border-slate-600={themeMode !== 'light'}
+            class="flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors {themeMode === 'light' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-slate-200 dark:border-slate-600'}"
           >
             <Sun class="w-6 h-6 text-amber-500" />
             <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Light</span>
           </button>
           <button
             onclick={() => setTheme('dark')}
-            class="flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors"
-            class:border-primary-500={themeMode === 'dark'}
-            class:bg-primary-50={themeMode === 'dark'}
-            class:dark:bg-primary-900/30={themeMode === 'dark'}
-            class:border-slate-200={themeMode !== 'dark'}
-            class:dark:border-slate-600={themeMode !== 'dark'}
+            class="flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors {themeMode === 'dark' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-slate-200 dark:border-slate-600'}"
           >
             <Moon class="w-6 h-6 text-indigo-500" />
             <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Dark</span>
           </button>
           <button
             onclick={() => setTheme('system')}
-            class="flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors"
-            class:border-primary-500={themeMode === 'system'}
-            class:bg-primary-50={themeMode === 'system'}
-            class:dark:bg-primary-900/30={themeMode === 'system'}
-            class:border-slate-200={themeMode !== 'system'}
-            class:dark:border-slate-600={themeMode !== 'system'}
+            class="flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors {themeMode === 'system' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-slate-200 dark:border-slate-600'}"
           >
             <Monitor class="w-6 h-6 text-slate-500" />
             <span class="text-sm font-medium text-slate-700 dark:text-slate-300">System</span>

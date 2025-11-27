@@ -20,9 +20,9 @@
   let hideControlsTimeout: ReturnType<typeof setTimeout> | null = null;
   let timerInterval: ReturnType<typeof setInterval> | null = null;
 
-  const shareCode = $page.params.code;
+  const shareCode = $page.params.code as string;
 
-  onMount(async () => {
+  async function loadSharedDeck() {
     try {
       const data = await shareApi.getByCode(shareCode);
       deck = data;
@@ -32,6 +32,10 @@
     } finally {
       isLoading = false;
     }
+  }
+
+  onMount(() => {
+    loadSharedDeck();
 
     // Keyboard navigation
     window.addEventListener('keydown', handleKeydown);
