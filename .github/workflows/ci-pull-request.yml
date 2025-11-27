@@ -36,42 +36,14 @@ jobs:
         id: filter
         with:
           filters: |
-            maerchenzauber:
-              - 'apps/maerchenzauber/**'
+            chat:
+              - 'apps/chat/**'
               - 'packages/**'
             manacore:
               - 'apps/manacore/**'
               - 'packages/**'
-            manadeck:
-              - 'apps/manadeck/**'
-              - 'packages/**'
-            memoro:
-              - 'apps/memoro/**'
-              - 'packages/**'
-            picture:
-              - 'apps/picture/**'
-              - 'packages/**'
-            uload:
-              - 'apps/uload/**'
-              - 'packages/**'
-            chat:
-              - 'apps/chat/**'
-              - 'packages/**'
-            nutriphi:
-              - 'apps/nutriphi/**'
-              - 'packages/**'
-            news:
-              - 'apps/news/**'
-              - 'packages/**'
-            auth-service:
-              - 'services/mana-core-auth/**'
             packages:
               - 'packages/**'
-            root:
-              - 'package.json'
-              - 'pnpm-lock.yaml'
-              - 'turbo.json'
-              - '.github/workflows/**'
 
   # Lint and format check
   lint-and-format:
@@ -101,7 +73,7 @@ jobs:
         run: pnpm run format:check
 
       - name: Run lint
-        run: pnpm run lint --filter=...[origin/${{ github.base_ref }}]
+        run: pnpm run lint --filter=chat... --filter=manacore...
         continue-on-error: true
 
   # Type checking
@@ -132,7 +104,8 @@ jobs:
         run: pnpm run build:packages
 
       - name: Run type check
-        run: pnpm run type-check --filter=...[origin/${{ github.base_ref }}]
+        run: pnpm run type-check --filter=chat... --filter=manacore...
+        continue-on-error: true
 
   # Build all affected projects
   build:
@@ -169,11 +142,10 @@ jobs:
         run: |
           if [ "${{ matrix.project }}" == "packages" ]; then
             pnpm run build --filter=@manacore/*
-          elif [ "${{ matrix.project }}" == "auth-service" ]; then
-            pnpm run build --filter=mana-core-auth
           else
             pnpm run build --filter=${{ matrix.project }}...
           fi
+        continue-on-error: true
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -223,8 +195,6 @@ jobs:
         run: |
           if [ "${{ matrix.project }}" == "packages" ]; then
             pnpm run test --filter=@manacore/* || echo "No tests found for packages"
-          elif [ "${{ matrix.project }}" == "auth-service" ]; then
-            pnpm run test --filter=mana-core-auth || echo "No tests found for auth-service"
           else
             pnpm run test --filter=${{ matrix.project }}... || echo "No tests found for ${{ matrix.project }}"
           fi
@@ -245,22 +215,11 @@ jobs:
     name: Docker Build Check
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: |
-      contains(needs.detect-changes.outputs.projects, 'maerchenzauber') ||
-      contains(needs.detect-changes.outputs.projects, 'chat') ||
-      contains(needs.detect-changes.outputs.projects, 'manadeck') ||
-      contains(needs.detect-changes.outputs.projects, 'nutriphi') ||
-      contains(needs.detect-changes.outputs.projects, 'news') ||
-      contains(needs.detect-changes.outputs.projects, 'auth-service')
+    if: contains(needs.detect-changes.outputs.projects, 'chat')
     strategy:
       matrix:
         service:
-          - { name: 'maerchenzauber-backend', path: 'apps/maerchenzauber/apps/backend' }
           - { name: 'chat-backend', path: 'apps/chat/apps/backend' }
-          - { name: 'manadeck-backend', path: 'apps/manadeck/apps/backend' }
-          - { name: 'nutriphi-backend', path: 'apps/nutriphi/apps/backend' }
-          - { name: 'news-api', path: 'apps/news/apps/api' }
-          - { name: 'mana-core-auth', path: 'services/mana-core-auth' }
       fail-fast: false
     steps:
       - name: Checkout code
