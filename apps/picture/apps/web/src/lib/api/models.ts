@@ -1,22 +1,40 @@
-import { supabase } from '$lib/supabase';
-import type { Database } from '@picture/shared/types';
+/**
+ * Models API - Now using Backend API instead of direct Supabase calls
+ */
 
-type Model = Database['public']['Tables']['models']['Row'];
+import { fetchApi } from './client';
 
-export async function getActiveModels() {
-	const { data, error } = await supabase
-		.from('models')
-		.select('*')
-		.eq('is_active', true)
-		.order('is_default', { ascending: false });
-
-	if (error) throw error;
-	return data as Model[];
+export interface Model {
+  id: string;
+  name: string;
+  displayName: string;
+  replicateId: string;
+  version?: string;
+  description?: string;
+  category?: string;
+  defaultWidth: number;
+  defaultHeight: number;
+  defaultSteps: number;
+  defaultGuidanceScale: number;
+  minWidth?: number;
+  maxWidth?: number;
+  minHeight?: number;
+  maxHeight?: number;
+  supportsNegativePrompt: boolean;
+  isDefault: boolean;
+  isActive: boolean;
+  createdAt: string;
 }
 
-export async function getModelById(id: string) {
-	const { data, error } = await supabase.from('models').select('*').eq('id', id).single();
+export async function getActiveModels(): Promise<Model[]> {
+  const { data, error } = await fetchApi<Model[]>('/models');
+  if (error) throw error;
+  return data || [];
+}
 
-	if (error) throw error;
-	return data as Model;
+export async function getModelById(id: string): Promise<Model> {
+  const { data, error } = await fetchApi<Model>(`/models/${id}`);
+  if (error) throw error;
+  if (!data) throw new Error('Model not found');
+  return data;
 }

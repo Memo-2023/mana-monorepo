@@ -4,6 +4,8 @@ import { SQLiteService } from './database/SQLiteService';
 import { PhotoService } from './storage/PhotoService';
 import { useMealStore } from '../store/MealStore';
 import { useAppStore } from '../store/AppStore';
+import { useAuthStore } from '../store/AuthStore';
+import { tokenManager } from './auth/tokenManager';
 
 export class DataClearingService {
   private static instance: DataClearingService;
@@ -46,13 +48,24 @@ export class DataClearingService {
       errors.push(`AsyncStorage clearing failed: ${error}`);
     }
 
-    // Note: Supabase integration will be added later
-    // For now, we skip Supabase sign out
+    try {
+      // 5. Sign out and clear auth tokens
+      await this.signOutAndClearAuth();
+    } catch (error) {
+      errors.push(`Auth clearing failed: ${error}`);
+    }
 
     return {
       success: errors.length === 0,
       errors,
     };
+  }
+
+  private async signOutAndClearAuth(): Promise<void> {
+    // Sign out from auth store
+    await useAuthStore.getState().signOut();
+    // Clear all tokens
+    await tokenManager.clearTokens();
   }
 
   private async clearDatabase(): Promise<void> {
@@ -119,14 +132,6 @@ export class DataClearingService {
       await AsyncStorage.multiRemove(keysToRemove);
     }
   }
-
-  // TODO: Implement when Supabase is configured
-  // private async signOutSupabase(): Promise<void> {
-  //   const { error } = await supabase.auth.signOut();
-  //   if (error) {
-  //     throw new Error(`Supabase sign out error: ${error.message}`);
-  //   }
-  // }
 
   // Optional: Clear everything including theme preference
   async clearAllDataIncludingTheme(): Promise<{ success: boolean; errors: string[] }> {

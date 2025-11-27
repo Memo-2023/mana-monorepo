@@ -6,7 +6,6 @@ import { useAppTheme } from '../theme/ThemeProvider';
 import ModelDropdown from './ModelDropdown';
 import { useRouter } from 'expo-router';
 import { createConversation, addMessage } from '../services/conversation';
-import { supabase } from '../utils/supabase';
 import { useAuth } from '../context/AuthProvider';
 import { Template, getTemplates } from '../services/template';
 

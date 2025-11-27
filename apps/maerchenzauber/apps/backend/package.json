@@ -23,6 +23,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@mana-core/nestjs-integration": "workspace:*",
     "@manacore/shared-errors": "workspace:*",
     "@google-cloud/aiplatform": "^3.34.0",
     "@google-cloud/storage": "^7.15.0",

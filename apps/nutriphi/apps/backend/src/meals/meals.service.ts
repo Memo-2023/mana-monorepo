@@ -87,8 +87,8 @@ export class MealsService {
   /**
    * Upload an image to storage, analyze it, and create a meal
    */
-  async uploadAndAnalyzeMeal(dto: UploadMealDto): Promise<Meal> {
-    this.logger.log(`Uploading and analyzing meal for user: ${dto.userId}`);
+  async uploadAndAnalyzeMeal(dto: UploadMealDto, userId: string): Promise<Meal> {
+    this.logger.log(`Uploading and analyzing meal for user: ${userId}`);
 
     // Step 1: Upload image to storage
     let imageUrl: string | undefined;
@@ -114,7 +114,7 @@ export class MealsService {
 
     // Step 3: Create the meal record
     const [result] = await this.db.insert(meals).values({
-      userId: dto.userId,
+      userId,
       foodName: analysis.foodName || 'Unbekanntes Gericht',
       imageUrl,
       storagePath,
@@ -134,11 +134,11 @@ export class MealsService {
     return this.mapDbMealToMeal(result);
   }
 
-  async createMeal(dto: CreateMealDto): Promise<Meal> {
-    this.logger.log(`Creating meal for user: ${dto.userId}`);
+  async createMeal(dto: CreateMealDto, userId: string): Promise<Meal> {
+    this.logger.log(`Creating meal for user: ${userId}`);
 
     const [result] = await this.db.insert(meals).values({
-      userId: dto.userId,
+      userId,
       foodName: dto.foodName,
       imageUrl: dto.imageUrl,
       calories: dto.calories,
@@ -193,11 +193,11 @@ export class MealsService {
     return results.map(this.mapDbMealToMeal);
   }
 
-  async getMealById(id: string): Promise<Meal> {
+  async getMealById(id: string, userId: string): Promise<Meal> {
     const [result] = await this.db
       .select()
       .from(meals)
-      .where(eq(meals.id, id));
+      .where(and(eq(meals.id, id), eq(meals.userId, userId)));
 
     if (!result) {
       throw new NotFoundException(`Meal with id ${id} not found`);
@@ -206,8 +206,8 @@ export class MealsService {
     return this.mapDbMealToMeal(result);
   }
 
-  async updateMeal(id: string, dto: UpdateMealDto): Promise<Meal> {
-    this.logger.log(`Updating meal: ${id}`);
+  async updateMeal(id: string, dto: UpdateMealDto, userId: string): Promise<Meal> {
+    this.logger.log(`Updating meal: ${id} for user: ${userId}`);
 
     const updateData: Partial<typeof meals.$inferInsert> = {
       updatedAt: new Date(),
@@ -228,7 +228,7 @@ export class MealsService {
     const [result] = await this.db
       .update(meals)
       .set(updateData)
-      .where(eq(meals.id, id))
+      .where(and(eq(meals.id, id), eq(meals.userId, userId)))
       .returning();
 
     if (!result) {
@@ -238,12 +238,12 @@ export class MealsService {
     return this.mapDbMealToMeal(result);
   }
 
-  async deleteMeal(id: string): Promise<void> {
-    this.logger.log(`Deleting meal: ${id}`);
+  async deleteMeal(id: string, userId: string): Promise<void> {
+    this.logger.log(`Deleting meal: ${id} for user: ${userId}`);
 
     const result = await this.db
       .delete(meals)
-      .where(eq(meals.id, id))
+      .where(and(eq(meals.id, id), eq(meals.userId, userId)))
       .returning();
 
     if (result.length === 0) {

@@ -1,8 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import { supabase } from '$lib/supabase';
-	import { user, session, loading } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import { onMount } from 'svelte';
 	import { initPostHog, analytics } from '$lib/analytics/posthog';
@@ -15,47 +14,19 @@
 
 	let { children, data } = $props();
 
-	onMount(() => {
+	onMount(async () => {
 		// Initialize PostHog
 		initPostHog();
 
-		// Get initial session
-		supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-			session.set(initialSession);
-			user.set(initialSession?.user ?? null);
-			loading.set(false);
+		// Initialize auth with Mana Core
+		await authStore.initialize();
 
-			// Identify user in PostHog if logged in
-			if (initialSession?.user) {
-				analytics.identify(initialSession.user.id, {
-					email: initialSession.user.email,
-					created_at: initialSession.user.created_at
-				});
-			}
-		});
-
-		// Listen for auth changes
-		const {
-			data: { subscription }
-		} = supabase.auth.onAuthStateChange((_event, newSession) => {
-			session.set(newSession);
-			user.set(newSession?.user ?? null);
-
-			// Update PostHog identity on auth changes
-			if (newSession?.user) {
-				analytics.identify(newSession.user.id, {
-					email: newSession.user.email,
-					created_at: newSession.user.created_at
-				});
-			} else {
-				// Reset PostHog on logout
-				analytics.reset();
-			}
-		});
-
-		return () => {
-			subscription.unsubscribe();
-		};
+		// Identify user in PostHog if logged in
+		if (authStore.user) {
+			analytics.identify(authStore.user.id, {
+				email: authStore.user.email
+			});
+		}
 	});
 </script>
 

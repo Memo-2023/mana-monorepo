@@ -70,47 +70,63 @@ pnpm type-check                # Run Astro checks
 - **Mobile**: React Native 0.79 + Expo SDK 53, NativeWind, Expo Router, Zustand
 - **Web**: SvelteKit 2.x, Svelte 5, Tailwind CSS 4
 - **Landing**: Astro 5.x, Tailwind CSS
-- **Backend**: NestJS 10, Google Gemini Vision API, Supabase
-- **Authentication**: Mana Core Auth (shared with ecosystem)
+- **Backend**: NestJS 10, Google Gemini Vision API, PostgreSQL + Drizzle ORM
+- **Authentication**: Mana Core Auth (JWT via middleware)
+- **Database**: PostgreSQL (via Drizzle ORM), SQLite (mobile offline)
 
 ## Architecture
 
 ### Backend API Endpoints
 
+All endpoints (except health) require JWT authentication via `Authorization: Bearer <token>` header.
+
+#### Meals API
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/health` | GET | Health check |
+| `/api/health` | GET | Health check (public) |
 | `/api/meals/analyze/image` | POST | Analyze food image with AI |
 | `/api/meals/analyze/text` | POST | Analyze food description |
+| `/api/meals` | GET | Get user's meals |
 | `/api/meals` | POST | Create new meal entry |
-| `/api/meals/user/:userId` | GET | Get user's meals |
-| `/api/meals/user/:userId/summary` | GET | Get daily nutrition summary |
+| `/api/meals/summary` | GET | Get daily nutrition summary |
 | `/api/meals/:id` | GET | Get meal by ID |
 | `/api/meals/:id` | PUT | Update meal |
 | `/api/meals/:id` | DELETE | Delete meal |
+
+#### Sync API
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/sync/push` | POST | Push local changes to server |
+| `/api/sync/pull` | GET | Pull changes from server |
+| `/api/sync/status` | GET | Get sync status |
 
 ### Environment Variables
 
 #### Backend (.env)
 ```
+DATABASE_URL=postgresql://nutriphi:password@localhost:5435/nutriphi
 GEMINI_API_KEY=your-gemini-api-key
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_KEY=your-service-key
-MANACORE_AUTH_URL=https://auth.manacore.de
+MANA_CORE_AUTH_URL=http://localhost:3001
+S3_ENDPOINT=https://...
+S3_ACCESS_KEY_ID=...
+S3_SECRET_ACCESS_KEY=...
+S3_BUCKET_NAME=nutriphi
+S3_REGION=eu-central-1
+S3_PUBLIC_URL=https://...
 PORT=3002
 ```
 
 #### Mobile (.env)
 ```
-EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+EXPO_PUBLIC_MANA_MIDDLEWARE_URL=https://api.manacore.de
+EXPO_PUBLIC_MIDDLEWARE_APP_ID=nutriphi
 EXPO_PUBLIC_BACKEND_URL=http://localhost:3002
 ```
 
 #### Web (.env)
 ```
-PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+PUBLIC_NUTRIPHI_MIDDLEWARE_URL=https://api.manacore.de
+PUBLIC_MIDDLEWARE_APP_ID=nutriphi
 PUBLIC_BACKEND_URL=http://localhost:3002
 ```
 
@@ -121,6 +137,8 @@ PUBLIC_BACKEND_URL=http://localhost:3002
 3. **Daily Tracking**: View daily summaries of calories, protein, carbs, fat, fiber
 4. **Meal History**: Browse and edit past meal entries
 5. **Health Tips**: Receive personalized nutrition recommendations
+6. **Offline-First**: SQLite local storage with cloud sync
+7. **Cross-Device Sync**: Meals sync across devices via backend API
 
 ## Mobile App Architecture
 
@@ -130,7 +148,14 @@ PUBLIC_BACKEND_URL=http://localhost:3002
   - `_layout.tsx` - Root layout with Stack navigation
 - `components/` - Reusable UI components
 - `store/` - Zustand state management
+  - `AuthStore.ts` - Authentication state
+  - `MealStore.ts` - Meal data state
+  - `AppStore.ts` - App-wide state
 - `services/` - API and database services
+  - `auth/` - Authentication (authService, tokenManager)
+  - `sync/` - Cloud synchronization (SyncService)
+  - `database/` - SQLite local storage
+  - `storage/` - Photo storage
 - `hooks/` - Custom React hooks
 - `utils/` - Utility functions
 
@@ -139,17 +164,40 @@ PUBLIC_BACKEND_URL=http://localhost:3002
 - Components use `className` prop with Tailwind utility classes
 
 ### State Management
-- Zustand stores for meals, user settings
+- Zustand stores for auth, meals, app settings
 - SQLite for local offline storage
-- Supabase for cloud sync
+- Cloud sync via backend API
+
+### Authentication Flow
+1. User signs in via Mana Middleware
+2. Tokens stored securely in expo-secure-store
+3. JWT sent with all API requests
+4. Auto-refresh on token expiry
+
+## Backend Architecture
+
+### Authentication Guard
+- `JwtAuthGuard` validates tokens against Mana Core Auth
+- `CurrentUser` decorator extracts user data from JWT
+- All protected endpoints use `@UseGuards(JwtAuthGuard)`
+
+### Database
+- PostgreSQL via Drizzle ORM (`@manacore/nutriphi-database` package)
+- Schema: `meals`, `nutrition_goals` tables
+- User isolation via `userId` field in all queries
+
+### Sync Strategy
+- **Push**: Local changes uploaded with version tracking
+- **Pull**: Server changes downloaded since last sync
+- **Conflict Resolution**: Last-write-wins with client priority
 
 ## Shared Packages Used
 
+- `@manacore/nutriphi-database` - Database schema and client
 - `@manacore/shared-auth-ui` - Authentication UI components
 - `@manacore/shared-branding` - Branding assets
 - `@manacore/shared-i18n` - Internationalization
 - `@manacore/shared-icons` - Icon library
-- `@manacore/shared-supabase` - Supabase client utilities
 - `@manacore/shared-tailwind` - Tailwind configuration
 - `@manacore/shared-theme` - Theme tokens
 - `@manacore/shared-theme-ui` - Theme UI components
@@ -167,6 +215,7 @@ PUBLIC_BACKEND_URL=http://localhost:3002
 ## Important Notes
 
 1. **Security**: API keys are stored in the backend only - never in client apps
-2. **Authentication**: Uses Mana Core Auth, shared with ecosystem
-3. **Database**: Supabase PostgreSQL with RLS policies
+2. **Authentication**: Uses Mana Core Auth via JWT middleware
+3. **Database**: PostgreSQL with Drizzle ORM (no Supabase dependency)
 4. **Deployment**: Backend runs on port 3002 by default
+5. **Offline-First**: Mobile app works offline, syncs when online

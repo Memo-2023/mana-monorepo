@@ -1,85 +1,65 @@
-import { supabase } from '$lib/supabase';
-import type { Database } from '@picture/shared/types';
+/**
+ * Tags API - Now using Backend API instead of direct Supabase calls
+ */
 
-type Tag = Database['public']['Tables']['tags']['Row'];
-type TagInsert = Database['public']['Tables']['tags']['Insert'];
+import { fetchApi } from './client';
+
+export interface Tag {
+  id: string;
+  name: string;
+  color?: string;
+  createdAt: string;
+}
 
 export async function getAllTags(): Promise<Tag[]> {
-	const { data, error } = await supabase
-		.from('tags')
-		.select('*')
-		.order('name', { ascending: true });
-
-	if (error) throw error;
-	return data || [];
+  const { data, error } = await fetchApi<Tag[]>('/tags');
+  if (error) throw error;
+  return data || [];
 }
 
-export async function createTag(tag: Omit<TagInsert, 'id' | 'created_at'>): Promise<Tag> {
-	const { data, error } = await supabase
-		.from('tags')
-		.insert(tag)
-		.select()
-		.single();
-
-	if (error) throw error;
-	return data;
+export async function createTag(tag: { name: string; color?: string }): Promise<Tag> {
+  const { data, error } = await fetchApi<Tag>('/tags', {
+    method: 'POST',
+    body: tag,
+  });
+  if (error) throw error;
+  if (!data) throw new Error('Failed to create tag');
+  return data;
 }
 
-export async function updateTag(id: string, updates: Partial<TagInsert>): Promise<Tag> {
-	const { data, error } = await supabase
-		.from('tags')
-		.update(updates)
-		.eq('id', id)
-		.select()
-		.single();
-
-	if (error) throw error;
-	return data;
+export async function updateTag(id: string, updates: { name?: string; color?: string }): Promise<Tag> {
+  const { data, error } = await fetchApi<Tag>(`/tags/${id}`, {
+    method: 'PATCH',
+    body: updates,
+  });
+  if (error) throw error;
+  if (!data) throw new Error('Failed to update tag');
+  return data;
 }
 
 export async function deleteTag(id: string): Promise<void> {
-	const { error } = await supabase
-		.from('tags')
-		.delete()
-		.eq('id', id);
-
-	if (error) throw error;
+  const { error } = await fetchApi(`/tags/${id}`, {
+    method: 'DELETE',
+  });
+  if (error) throw error;
 }
 
 export async function getImageTags(imageId: string): Promise<Tag[]> {
-	const { data, error } = await supabase
-		.from('image_tags')
-		.select('tag:tags(*)')
-		.eq('image_id', imageId);
-
-	if (error) throw error;
-	return data?.map((item: any) => item.tag).filter(Boolean) || [];
+  const { data, error } = await fetchApi<Tag[]>(`/tags/image/${imageId}`);
+  if (error) throw error;
+  return data || [];
 }
 
 export async function addTagToImage(imageId: string, tagId: string): Promise<void> {
-	const { error } = await supabase
-		.from('image_tags')
-		.insert({ image_id: imageId, tag_id: tagId });
-
-	if (error) throw error;
+  const { error } = await fetchApi(`/tags/image/${imageId}/${tagId}`, {
+    method: 'POST',
+  });
+  if (error) throw error;
 }
 
 export async function removeTagFromImage(imageId: string, tagId: string): Promise<void> {
-	const { error } = await supabase
-		.from('image_tags')
-		.delete()
-		.eq('image_id', imageId)
-		.eq('tag_id', tagId);
-
-	if (error) throw error;
-}
-
-export async function getImagesByTag(tagId: string) {
-	const { data, error } = await supabase
-		.from('image_tags')
-		.select('image:images(*)')
-		.eq('tag_id', tagId);
-
-	if (error) throw error;
-	return data?.map((item: any) => item.image).filter(Boolean) || [];
+  const { error } = await fetchApi(`/tags/image/${imageId}/${tagId}`, {
+    method: 'DELETE',
+  });
+  if (error) throw error;
 }

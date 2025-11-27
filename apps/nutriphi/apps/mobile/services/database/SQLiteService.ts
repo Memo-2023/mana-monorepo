@@ -400,4 +400,179 @@ export class SQLiteService {
     if (!this.db) throw new Error('Database not initialized');
     return await this.db.runAsync(sql, params);
   }
+
+  // ==================== Sync Methods ====================
+
+  /**
+   * Get all unsynced meals (sync_status = 'local' or 'pending')
+   */
+  public async getUnsyncedMeals(): Promise<Meal[]> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    return await this.db.getAllAsync<Meal>(
+      `SELECT * FROM meals WHERE sync_status IN ('local', 'pending') ORDER BY created_at DESC`
+    );
+  }
+
+  /**
+   * Get meal by cloud ID
+   */
+  public async getMealByCloudId(cloudId: string): Promise<Meal | null> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const result = await this.db.getFirstAsync<Meal>(
+      'SELECT * FROM meals WHERE cloud_id = ?',
+      [cloudId]
+    );
+
+    return result || null;
+  }
+
+  /**
+   * Update cloud_id for a local meal
+   */
+  public async updateCloudId(localId: number, cloudId: string): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    await this.db.runAsync(
+      `UPDATE meals SET cloud_id = ?, updated_at = datetime('now') WHERE id = ?`,
+      [cloudId, localId]
+    );
+  }
+
+  /**
+   * Mark a meal as synced
+   */
+  public async markSynced(localId: number): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    await this.db.runAsync(
+      `UPDATE meals SET sync_status = 'synced', last_sync_at = datetime('now'), updated_at = datetime('now') WHERE id = ?`,
+      [localId]
+    );
+  }
+
+  /**
+   * Delete a meal by cloud ID
+   */
+  public async deleteByCloudId(cloudId: string): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    await this.db.runAsync('DELETE FROM meals WHERE cloud_id = ?', [cloudId]);
+  }
+
+  /**
+   * Create a meal from server data
+   */
+  public async createMealFromServer(serverMeal: any): Promise<number> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const analysisResult = serverMeal.foodItems
+      ? JSON.stringify({
+          foodName: serverMeal.foodName,
+          foodItems: serverMeal.foodItems,
+        })
+      : null;
+
+    const result = await this.db.runAsync(
+      `INSERT INTO meals (
+        cloud_id, sync_status, version, last_sync_at,
+        photo_path, photo_url, timestamp, created_at, updated_at,
+        meal_type, analysis_result, analysis_status,
+        total_calories, total_protein, total_carbs, total_fat, total_fiber, total_sugar,
+        health_score, health_category, user_notes, user_rating
+      ) VALUES (?, ?, ?, datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        serverMeal.cloudId,
+        'synced',
+        1,
+        serverMeal.imageUrl || '',
+        serverMeal.imageUrl || null,
+        serverMeal.createdAt,
+        serverMeal.createdAt,
+        serverMeal.updatedAt,
+        serverMeal.mealType || null,
+        analysisResult,
+        serverMeal.analysisStatus || 'completed',
+        serverMeal.calories || null,
+        serverMeal.protein || null,
+        serverMeal.carbohydrates || null,
+        serverMeal.fat || null,
+        serverMeal.fiber || null,
+        serverMeal.sugar || null,
+        serverMeal.healthScore || null,
+        serverMeal.healthCategory || null,
+        serverMeal.notes || null,
+        serverMeal.userRating || null,
+      ]
+    );
+
+    return result.lastInsertRowId;
+  }
+
+  /**
+   * Update a local meal from server data
+   */
+  public async updateMealFromServer(localId: number, serverMeal: any): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const analysisResult = serverMeal.foodItems
+      ? JSON.stringify({
+          foodName: serverMeal.foodName,
+          foodItems: serverMeal.foodItems,
+        })
+      : null;
+
+    await this.db.runAsync(
+      `UPDATE meals SET
+        sync_status = 'synced',
+        last_sync_at = datetime('now'),
+        photo_url = ?,
+        meal_type = ?,
+        analysis_result = ?,
+        analysis_status = ?,
+        total_calories = ?,
+        total_protein = ?,
+        total_carbs = ?,
+        total_fat = ?,
+        total_fiber = ?,
+        total_sugar = ?,
+        health_score = ?,
+        health_category = ?,
+        user_notes = ?,
+        user_rating = ?,
+        updated_at = ?
+      WHERE id = ?`,
+      [
+        serverMeal.imageUrl || null,
+        serverMeal.mealType || null,
+        analysisResult,
+        serverMeal.analysisStatus || 'completed',
+        serverMeal.calories || null,
+        serverMeal.protein || null,
+        serverMeal.carbohydrates || null,
+        serverMeal.fat || null,
+        serverMeal.fiber || null,
+        serverMeal.sugar || null,
+        serverMeal.healthScore || null,
+        serverMeal.healthCategory || null,
+        serverMeal.notes || null,
+        serverMeal.userRating || null,
+        serverMeal.updatedAt,
+        localId,
+      ]
+    );
+  }
+
+  /**
+   * Get meals modified since a given timestamp
+   */
+  public async getMealsModifiedSince(since: string): Promise<Meal[]> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    return await this.db.getAllAsync<Meal>(
+      `SELECT * FROM meals WHERE updated_at > ? ORDER BY updated_at ASC`,
+      [since]
+    );
+  }
 }

@@ -5,6 +5,7 @@ import { StorageModule } from './storage/storage.module';
 import { HealthModule } from './health/health.module';
 import { GeminiModule } from './gemini/gemini.module';
 import { MealsModule } from './meals/meals.module';
+import { SyncModule } from './sync/sync.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { MealsModule } from './meals/meals.module';
     HealthModule,
     GeminiModule,
     MealsModule,
+    SyncModule,
   ],
 })
 export class AppModule {}

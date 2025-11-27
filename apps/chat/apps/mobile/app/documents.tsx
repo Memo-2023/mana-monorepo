@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
   ActivityIndicator,
   useWindowDimensions,
   Platform
@@ -12,8 +12,9 @@ import {
 import { useTheme } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Document } from '../services/document';
-import { supabase } from '../utils/supabase';
+import { Document, getLatestDocument } from '../services/document';
+import { conversationApi } from '../services/api';
+import { useAuth } from '../context/AuthProvider';
 import Markdown from 'react-native-markdown-display';
 
 type DocumentWithTitle = Document & {
@@ -23,11 +24,11 @@ type DocumentWithTitle = Document & {
 export default function DocumentsScreen() {
   const { colors } = useTheme();
   const router = useRouter();
+  const { user } = useAuth();
   const { width } = useWindowDimensions();
   const [documents, setDocuments] = useState<DocumentWithTitle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
-  
+
   // Berechne die Anzahl der Spalten basierend auf der Bildschirmbreite
   const columnsCount = useMemo(() => {
     // Mobile (schmaler Bildschirm)
@@ -41,7 +42,7 @@ export default function DocumentsScreen() {
     // Desktop oder großes Tablet
     return 3;
   }, [width]);
-  
+
   // Berechne die Breite jeder Karte basierend auf der Spaltenanzahl
   const cardWidth = useMemo(() => {
     const padding = 16;  // Container-Padding rechts und links
@@ -49,85 +50,55 @@ export default function DocumentsScreen() {
     const contentWidth = width - (padding * 2);
     const gapTotal = gap * (columnsCount - 1);
     const availableWidth = contentWidth - gapTotal;
-    
+
     // Verhältnis für schmalere Karten, je nach Spaltenanzahl anpassen
     const widthRatio = columnsCount === 1 ? 0.95 : // Fast volle Breite bei 1 Spalte
                        columnsCount === 2 ? 0.48 : // Etwas schmaler bei 2 Spalten
                        0.31;                       // Noch schmaler bei 3 Spalten
-    
+
     return (availableWidth * widthRatio);
   }, [width, columnsCount]);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data?.user) {
-        setUserId(data.user.id);
-      } else {
-        // In einer echten App würden wir hier zur Login-Seite weiterleiten
-        // Für jetzt verwenden wir eine Test-ID
-        setUserId('test-user-id');
-      }
-    };
-    checkUser();
-  }, []);
-
-  useEffect(() => {
-    if (userId) {
+    if (user?.id) {
       loadDocuments();
     }
-  }, [userId]);
+  }, [user]);
 
   const loadDocuments = async () => {
     try {
       setIsLoading(true);
-      
-      // Lade alle Konversationen des Benutzers, die im Dokumentmodus sind
-      const { data: conversations, error: convError } = await supabase
-        .from('conversations')
-        .select('id, title, document_mode')
-        .eq('user_id', userId)
-        .eq('document_mode', true);
-      
-      if (convError) {
-        console.error('Fehler beim Laden der Konversationen:', convError);
-        setIsLoading(false);
-        return;
-      }
-      
-      if (!conversations || conversations.length === 0) {
+
+      // Lade alle Konversationen des Benutzers über die Backend-API
+      const conversations = await conversationApi.getConversations();
+
+      // Filtere nur Konversationen im Dokumentmodus
+      const documentConversations = conversations.filter(conv => conv.documentMode);
+
+      if (documentConversations.length === 0) {
         setDocuments([]);
         setIsLoading(false);
         return;
       }
-      
+
       // Für jede Konversation den neuesten Dokumentstand laden
       const latestDocuments: DocumentWithTitle[] = [];
-      
-      for (const conv of conversations) {
-        const { data: docData, error: docError } = await supabase
-          .from('documents')
-          .select('*')
-          .eq('conversation_id', conv.id)
-          .order('version', { ascending: false })
-          .limit(1)
-          .single();
-          
-        if (docError) {
-          if (docError.code !== 'PGRST116') { // Ignore "No rows found" error
-            console.error(`Fehler beim Laden des Dokuments für Konversation ${conv.id}:`, docError);
+
+      for (const conv of documentConversations) {
+        try {
+          const docData = await getLatestDocument(conv.id);
+
+          if (docData) {
+            latestDocuments.push({
+              ...docData,
+              conversation_title: conv.title || 'Unbenannte Konversation'
+            });
           }
-          continue;
-        }
-        
-        if (docData) {
-          latestDocuments.push({
-            ...docData,
-            conversation_title: conv.title || 'Unbenannte Konversation'
-          });
+        } catch (docError) {
+          console.error(`Fehler beim Laden des Dokuments für Konversation ${conv.id}:`, docError);
         }
       }
-      
+
       setDocuments(latestDocuments);
     } catch (error) {
       console.error('Fehler beim Laden der Dokumente:', error);

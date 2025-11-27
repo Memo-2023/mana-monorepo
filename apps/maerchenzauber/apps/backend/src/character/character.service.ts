@@ -77,8 +77,7 @@ export class CharacterService {
       console.error('Error creating character:', error);
       return err(
         DatabaseError.queryFailed(
-          'create_character',
-          error instanceof Error ? error.message : 'Unknown error',
+          `Failed to create character: ${error instanceof Error ? error.message : 'Unknown error'}`,
           error instanceof Error ? error : undefined,
         ),
       );
@@ -107,8 +106,7 @@ export class CharacterService {
       console.error('Error getting character:', error);
       return err(
         DatabaseError.queryFailed(
-          'get_character',
-          error instanceof Error ? error.message : 'Unknown error',
+          `Failed to get character: ${error instanceof Error ? error.message : 'Unknown error'}`,
           error instanceof Error ? error : undefined,
         ),
       );
@@ -153,8 +151,7 @@ export class CharacterService {
       console.error('Error updating character:', error);
       return err(
         DatabaseError.queryFailed(
-          'update_character',
-          error instanceof Error ? error.message : 'Unknown error',
+          `Failed to update character: ${error instanceof Error ? error.message : 'Unknown error'}`,
           error instanceof Error ? error : undefined,
         ),
       );
@@ -183,8 +180,7 @@ export class CharacterService {
       console.error('Error deleting character:', error);
       return err(
         DatabaseError.queryFailed(
-          'delete_character',
-          error instanceof Error ? error.message : 'Unknown error',
+          `Failed to delete character: ${error instanceof Error ? error.message : 'Unknown error'}`,
           error instanceof Error ? error : undefined,
         ),
       );
@@ -206,8 +202,7 @@ export class CharacterService {
       console.error('Error listing characters:', error);
       return err(
         DatabaseError.queryFailed(
-          'list_characters',
-          error instanceof Error ? error.message : 'Unknown error',
+          `Failed to list characters: ${error instanceof Error ? error.message : 'Unknown error'}`,
           error instanceof Error ? error : undefined,
         ),
       );

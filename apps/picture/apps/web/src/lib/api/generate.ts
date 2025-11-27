@@ -1,113 +1,102 @@
-import { supabase } from '$lib/supabase';
+/**
+ * Generate API - Now using Backend API instead of Edge Functions
+ */
+
+import { fetchApi } from './client';
+import type { Image } from './images';
 
 export interface GenerateImageParams {
-	prompt: string;
-	model_id: string;
-	negative_prompt?: string;
-	width?: number;
-	height?: number;
-	num_inference_steps?: number;
-	guidance_scale?: number;
+  prompt: string;
+  modelId: string;
+  negativePrompt?: string;
+  width?: number;
+  height?: number;
+  numInferenceSteps?: number;
+  guidanceScale?: number;
 }
 
 export interface GenerateImageResponse {
-	image_id: string;
-	status: 'pending' | 'processing' | 'completed' | 'failed';
+  generationId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
 }
 
+export interface GenerationStatus {
+  id: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress?: number;
+  errorMessage?: string;
+  image?: Image;
+}
+
+/**
+ * Start image generation (async)
+ */
 export async function generateImage(params: GenerateImageParams): Promise<GenerateImageResponse> {
-	// Get current user
-	const {
-		data: { user },
-		error: userError
-	} = await supabase.auth.getUser();
+  const { data, error } = await fetchApi<GenerateImageResponse>('/generate', {
+    method: 'POST',
+    body: params,
+  });
 
-	if (userError || !user) {
-		throw new Error('User not authenticated');
-	}
+  if (error) {
+    console.error('Generate Image Error:', error);
+    throw error;
+  }
 
-	// Get model info
-	const { data: model, error: modelError } = await supabase
-		.from('models')
-		.select('*')
-		.eq('id', params.model_id)
-		.single();
+  if (!data) {
+    throw new Error('Failed to start image generation');
+  }
 
-	if (modelError || !model) {
-		throw new Error('Invalid model selected');
-	}
-
-	// Create generation record first
-	const { data: generation, error: generationError } = await supabase
-		.from('image_generations')
-		.insert({
-			user_id: user.id,
-			prompt: params.prompt,
-			negative_prompt: params.negative_prompt || null,
-			model: model.name,
-			width: params.width || model.default_width,
-			height: params.height || model.default_height,
-			steps: params.num_inference_steps || model.default_steps,
-			guidance_scale: params.guidance_scale || model.default_guidance_scale,
-			status: 'pending'
-		})
-		.select()
-		.single();
-
-	if (generationError) {
-		throw generationError;
-	}
-
-	// Call Edge Function with generation_id
-	const { data, error } = await supabase.functions.invoke('generate-image', {
-		body: {
-			prompt: params.prompt,
-			negative_prompt: params.negative_prompt,
-			model_id: model.replicate_id,
-			model_version: model.version,
-			width: params.width || model.default_width,
-			height: params.height || model.default_height,
-			num_inference_steps: params.num_inference_steps || model.default_steps,
-			guidance_scale: params.guidance_scale || model.default_guidance_scale,
-			generation_id: generation.id
-		}
-	});
-
-	if (error) {
-		// Log detailed error for debugging
-		console.error('Edge Function Error:', error);
-		console.error('Error details:', {
-			message: error.message,
-			context: error.context,
-			details: error
-		});
-
-		// Update generation status to failed
-		await supabase
-			.from('image_generations')
-			.update({
-				status: 'failed',
-				error_message: error.message || JSON.stringify(error),
-				completed_at: new Date().toISOString()
-			})
-			.eq('id', generation.id);
-
-		throw new Error(error.message || 'Edge Function failed');
-	}
-
-	return {
-		image_id: generation.id,
-		status: 'processing'
-	};
+  return data;
 }
 
-export async function checkGenerationStatus(imageId: string) {
-	const { data, error } = await supabase
-		.from('images')
-		.select('*')
-		.eq('id', imageId)
-		.single();
+/**
+ * Check generation status
+ */
+export async function checkGenerationStatus(generationId: string): Promise<GenerationStatus> {
+  const { data, error } = await fetchApi<GenerationStatus>(`/generate/${generationId}/status`);
 
-	if (error) throw error;
-	return data;
+  if (error) throw error;
+  if (!data) throw new Error('Generation not found');
+  return data;
+}
+
+/**
+ * Poll for generation completion
+ */
+export async function waitForGeneration(
+  generationId: string,
+  onProgress?: (status: GenerationStatus) => void,
+  pollInterval = 2000,
+  maxAttempts = 60,
+): Promise<GenerationStatus> {
+  let attempts = 0;
+
+  while (attempts < maxAttempts) {
+    const status = await checkGenerationStatus(generationId);
+
+    if (onProgress) {
+      onProgress(status);
+    }
+
+    if (status.status === 'completed' || status.status === 'failed') {
+      return status;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    attempts++;
+  }
+
+  throw new Error('Generation timed out');
+}
+
+/**
+ * Generate image and wait for completion
+ */
+export async function generateAndWait(
+  params: GenerateImageParams,
+  onProgress?: (status: GenerationStatus) => void,
+): Promise<GenerationStatus> {
+  const { generationId } = await generateImage(params);
+
+  return waitForGeneration(generationId, onProgress);
 }

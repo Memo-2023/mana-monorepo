@@ -1,4 +1,4 @@
-import { supabase } from '../../utils/supabase';
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:3001';
 
 // Definiere den Typ für ein Modell
 export type Model = {
@@ -10,7 +10,7 @@ export type Model = {
   updated_at?: string;
 };
 
-// Fallback-Modelle, falls keine aus der Datenbank geladen werden können
+// Fallback-Modelle, falls keine aus dem Backend geladen werden können
 const FALLBACK_MODELS: Model[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440000',
@@ -56,28 +56,25 @@ const FALLBACK_MODELS: Model[] = [
 // GET-Handler für Modelle
 export async function GET(request: Request) {
   try {
-    // Versuche, Modelle aus der Supabase-Datenbank zu laden
+    // Versuche, Modelle vom Backend zu laden
     let models: Model[] = FALLBACK_MODELS;
-    
-    // Wenn Supabase konfiguriert ist, versuche die Modelle von dort zu laden
+
     try {
-      if (supabase) {
-        const { data, error } = await supabase
-          .from('models')
-          .select('*');
-          // Entfernt: .order('created_at', { ascending: false })
-        
-        if (error) {
-          console.error('Fehler beim Laden der Modelle aus Supabase:', error);
-        } else if (data && data.length > 0) {
+      const response = await fetch(`${BACKEND_URL}/api/chat/models`);
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
           models = data as Model[];
         }
+      } else {
+        console.error('Fehler beim Laden der Modelle vom Backend:', response.status);
       }
     } catch (e) {
-      console.error('Fehler bei der Supabase-Verbindung:', e);
+      console.error('Fehler bei der Backend-Verbindung:', e);
       // Fallback zu den vordefinierten Modellen
     }
-    
+
     return Response.json(models);
   } catch (error) {
     console.error('Fehler beim Verarbeiten der Anfrage:', error);
@@ -90,59 +87,12 @@ export async function GET(request: Request) {
   }
 }
 
-// POST-Handler zum Erstellen eines neuen Modells
+// POST-Handler zum Erstellen eines neuen Modells (nicht unterstützt ohne Backend-Endpoint)
 export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    
-    // Validiere die Eingabedaten
-    if (!body.name || !body.description) {
-      return new Response(JSON.stringify({ error: 'Name und Beschreibung sind erforderlich' }), {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-    }
-    
-    // Erstelle ein neues Modell in der Datenbank
-    if (supabase) {
-      const { data, error } = await supabase
-        .from('models')
-        .insert([{
-          name: body.name,
-          description: body.description,
-          parameters: body.parameters || {},
-        }])
-        .select();
-      
-      if (error) {
-        console.error('Fehler beim Erstellen des Modells:', error);
-        return new Response(JSON.stringify({ error: 'Fehler beim Erstellen des Modells' }), {
-          status: 500,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-      }
-      
-      return Response.json(data[0]);
-    } else {
-      // Wenn Supabase nicht verfügbar ist, gib einen Fehler zurück
-      return new Response(JSON.stringify({ error: 'Datenbank nicht verfügbar' }), {
-        status: 503,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-    }
-  } catch (error) {
-    console.error('Fehler beim Verarbeiten der Anfrage:', error);
-    return new Response(JSON.stringify({ error: 'Interner Serverfehler' }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-  }
+  return new Response(JSON.stringify({ error: 'Modell-Erstellung wird über das Backend nicht unterstützt' }), {
+    status: 501,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 }

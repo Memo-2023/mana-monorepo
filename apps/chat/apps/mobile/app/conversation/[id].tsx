@@ -13,8 +13,9 @@ import DocumentVersions from '../../components/DocumentVersions';
 
 // Import der Konversations- und OpenAI-Services
 import { createConversation, addMessage, getMessages, sendMessageAndGetResponse, Message as DbMessage } from '../../services/conversation';
-import { supabase } from '../../utils/supabase';
+import { conversationApi } from '../../services/api';
 import { Document, createDocument, createDocumentVersion, getLatestDocument, getAllDocumentVersions, hasDocument, deleteDocumentVersion } from '../../services/document';
+import { useAuth } from '../../context/AuthProvider';
 
 // Typdefinition für die Nachrichten in der UI
 type UIMessage = {
@@ -38,10 +39,11 @@ function convertDbToUiMessages(dbMessages: DbMessage[]): UIMessage[] {
 export default function ConversationScreen() {
   const { colors } = useTheme();
   const router = useRouter();
+  const { user } = useAuth();
   // Hole Parameter aus URL und Query-String
   const params = useLocalSearchParams();
   const { id } = params;
-  
+
   // Drawer (Seitenmenü) Status
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
@@ -79,20 +81,15 @@ export default function ConversationScreen() {
   const [isDocumentLoading, setIsDocumentLoading] = useState<boolean>(false);
   const [isVersionsModalVisible, setIsVersionsModalVisible] = useState<boolean>(false);
 
-  // Überprüfe den aktuellen Benutzer
+  // Setze userId vom AuthProvider
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data?.user) {
-        setUserId(data.user.id);
-      } else {
-        // In einer echten App würden wir hier zur Login-Seite weiterleiten
-        // Für jetzt verwenden wir eine Test-ID
-        setUserId('test-user-id');
-      }
-    };
-    checkUser();
-  }, []);
+    if (user?.id) {
+      setUserId(user.id);
+    } else {
+      // Fallback für Test-Zwecke
+      setUserId('test-user-id');
+    }
+  }, [user]);
 
   // Lade das Modell
   useEffect(() => {
@@ -117,32 +114,28 @@ export default function ConversationScreen() {
           }
         }
         
-        // Wenn kein URL-Modell gefunden wurde oder keins angegeben war, 
+        // Wenn kein URL-Modell gefunden wurde oder keins angegeben war,
         // hole die Konversation, um die Model-ID zu bekommen
         if (!isNewConversation && conversationId) {
           console.log("Hole Modell-ID aus Konversation:", conversationId);
-          const { data: conversationData, error: conversationError } = await supabase
-            .from('conversations')
-            .select('model_id, title')
-            .eq('id', conversationId)
-            .single();
-            
-          if (conversationData && conversationData.model_id) {
-            console.log("✓ Model-ID aus der Konversation geladen:", conversationData.model_id);
+          const conversationData = await conversationApi.getConversation(conversationId);
+
+          if (conversationData && conversationData.modelId) {
+            console.log("✓ Model-ID aus der Konversation geladen:", conversationData.modelId);
             // Setze das modelId, wenn wir es aus der Konversation bekommen haben
-            const fetchedModelId = conversationData.model_id;
-            
+            const fetchedModelId = conversationData.modelId;
+
             // Setze den Titel aus der Konversation
             if (conversationData.title) {
               console.log("✓ Titel aus der Konversation geladen:", conversationData.title);
               setConversationTitle(conversationData.title);
             }
-            
+
             // Hole jetzt das Modell mit der ID
             const response = await fetch(`/api/models`);
             const models = await response.json();
             const model = models.find((m: any) => m.id === fetchedModelId);
-            
+
             if (model) {
               console.log("✓ Model-Daten aus Konversation geladen:", model.name);
               setModelName(model.name);
@@ -150,8 +143,8 @@ export default function ConversationScreen() {
             } else {
               console.warn("Modell mit ID aus Konversation nicht gefunden:", fetchedModelId);
             }
-          } else if (conversationError) {
-            console.error('Fehler beim Laden der Konversation:', conversationError);
+          } else {
+            console.error('Fehler beim Laden der Konversation oder keine Model-ID gefunden');
           }
         } 
       } catch (error) {
@@ -174,13 +167,9 @@ export default function ConversationScreen() {
           
           // Prüfe, ob es eine bestehende Konversation mit Dokumentmodus ist
           if (conversationId) {
-            const { data: convData, error: convError } = await supabase
-              .from('conversations')
-              .select('document_mode')
-              .eq('id', conversationId)
-              .single();
-              
-            if (convData && convData.document_mode) {
+            const convData = await conversationApi.getConversation(conversationId);
+
+            if (convData && convData.documentMode) {
               setIsDocumentMode(true);
               await loadDocumentData(conversationId);
             }
@@ -203,45 +192,21 @@ export default function ConversationScreen() {
     try {
       console.log(`[loadDocumentData] Lade Dokumentdaten für Konversation ${convId}`);
       setIsDocumentLoading(true);
-      
-      // Längere Verzögerung zur Sicherstellung, dass Datenbanktransaktionen Zeit haben
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Direkter Supabase-Aufruf mit Cache-Umgehung
-      console.log('Lade alle Dokumentversionen direkt...');
-      
-      // Generiere einen zufälligen String, um Caching zu verhindern
-      const timestamp = new Date().getTime();
-      const randomString = Math.random().toString(36).substring(2, 8);
-      const noCache = `${timestamp}-${randomString}`;
-      
-      const { data: freshVersions, error } = await supabase
-        .from('documents')
-        .select(`*,noCacheKey:conversation_id(id)`)
-        .eq('conversation_id', convId)
-        .order('version', { ascending: false })
-        .filter('noCacheKey.id', 'not.is', null)
-        .limit(100);
-        
-      if (error) {
-        console.error('Fehler beim direkten Laden der Dokumentversionen:', error);
-        setDocumentVersions([]);
-        return;
-      }
-      
-      // Entferne noCacheKey-Feld
-      const cleanVersions = freshVersions.map(v => {
-        const { noCacheKey, ...rest } = v;
-        return rest;
-      });
-      
-      console.log(`${cleanVersions.length} Dokumentversionen direkt geladen`);
-      setDocumentVersions(cleanVersions);
-      
+
+      // Kurze Verzögerung zur Sicherstellung, dass DB-Transaktionen abgeschlossen sind
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Lade alle Dokumentversionen über den Service
+      console.log('Lade alle Dokumentversionen über Backend API...');
+      const versions = await getAllDocumentVersions(convId);
+
+      console.log(`${versions.length} Dokumentversionen geladen`);
+      setDocumentVersions(versions);
+
       // Wenn Versionen existieren, nehme die neueste
-      if (cleanVersions.length > 0) {
-        console.log('Setze neuestes Dokument aus Liste', cleanVersions[0]);
-        setCurrentDocument(cleanVersions[0]);
+      if (versions.length > 0) {
+        console.log('Setze neuestes Dokument aus Liste', versions[0]);
+        setCurrentDocument(versions[0]);
       } else {
         // Wenn keine Versionen existieren, setze alles zurück
         console.log('Keine Dokumentversionen vorhanden, setze null');
@@ -322,53 +287,26 @@ export default function ConversationScreen() {
       console.error('Keine aktuelle Konversations-ID verfügbar');
       return;
     }
-    
+
     try {
       console.log(`[handleDeleteVersion] Versuche Dokumentversion ${document.version} (ID: ${document.id}) zu löschen`);
       setIsDocumentLoading(true);
-      
+
       // Debug-Informationen
       console.log('Aktuelle Konversation:', actualConversationId);
       console.log('Aktuelles Dokument:', currentDocument?.id);
       console.log('Zu löschendes Dokument:', document.id);
-      
+
       // Sicherstellen, dass die zu löschende Version nicht aktuell angezeigt wird
       const isCurrentlyDisplayed = currentDocument?.id === document.id;
-      
-      // Direkter Zugriff auf Supabase
-      console.log('Versuche direkte Löschung mit Supabase via delete');
-            
-      // Wir verwenden einen speziellen Trick, um sicherzustellen, dass die Löschung
-      // Zeit hat, vollständig durchgeführt zu werden, bevor wir weitermachen
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      try {
-        // Direktes Löschen über die normale DELETE-Methode
-        const { error } = await supabase
-          .from('documents')
-          .delete()
-          .eq('id', document.id);
-        
-        if (error) {
-          console.error('Fehler beim direkten Löschen:', error);
-          throw error;
-        }
-        
-        console.log('Dokument erfolgreich gelöscht');
-        
-        // Warten, damit die Datenbank Zeit hat, sich zu aktualisieren
-        await new Promise(resolve => setTimeout(resolve, 800));
-      } catch (deleteError) {
-        console.error('Fehler beim Löschen:', deleteError);
-        throw deleteError;
-      }
-      
-      const success = true; // Wenn wir bis hierher kommen, war es erfolgreich
-      console.log('Löschvorgang Ergebnis: Erfolgreich');
-      
+
+      // Löschen über den Service
+      console.log('Lösche Dokument über Backend API...');
+      const success = await deleteDocumentVersion(document.id);
+
       if (success) {
         console.log(`Dokumentversion ${document.version} erfolgreich gelöscht`);
-        
+
         // Systemische Nachricht hinzufügen
         const messageId = await addMessage(
           actualConversationId,
@@ -376,44 +314,33 @@ export default function ConversationScreen() {
           `Dokumentversion ${document.version} wurde gelöscht.`
         );
         console.log('System-Nachricht hinzugefügt:', messageId);
-        
+
         // Nachrichten neu laden
         const dbMessages = await getMessages(actualConversationId);
         setMessages(convertDbToUiMessages(dbMessages));
-        
-        // Dokumentversionen neu laden mit forcierter Aktualisierung
-      // Zuerst kurz warten, damit die DB-Änderungen sich vollständig auswirken können
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await loadDocumentData(actualConversationId);
-        
+
+        // Dokumentversionen neu laden
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await loadDocumentData(actualConversationId);
+
         // Wenn die gerade angezeigte Version gelöscht wurde, zur neuesten wechseln
         if (isCurrentlyDisplayed) {
           console.log('Aktuell angezeigte Version wurde gelöscht, wechsle zur neuesten');
-          
-          // Direkter Supabase-Aufruf für die aktuellste Version
-          const { data: latestData, error: latestError } = await supabase
-            .from('documents')
-            .select('*')
-            .eq('conversation_id', actualConversationId)
-            .order('version', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          
-          if (latestError) {
-            console.error('Fehler beim Laden des neuesten Dokuments:', latestError);
-          } else if (latestData) {
-            console.log('Setze neues aktuelles Dokument:', latestData.id);
-            setCurrentDocument(latestData);
+          const latestDoc = await getLatestDocument(actualConversationId);
+
+          if (latestDoc) {
+            console.log('Setze neues aktuelles Dokument:', latestDoc.id);
+            setCurrentDocument(latestDoc);
           } else {
             console.log('Kein neuestes Dokument gefunden, setze null');
             setCurrentDocument(null);
           }
         }
-        
+
         // Kurze Pause für bessere Benutzererfahrung
         setTimeout(() => {
           setIsVersionsModalVisible(false);
-          
+
           // Erfolgsmeldung anzeigen
           Alert.alert(
             "Version gelöscht",
@@ -611,27 +538,23 @@ export default function ConversationScreen() {
       if ((!modelId || modelId === 'undefined') && !modelData && actualConversationId) {
         try {
           console.log('Hole Modell aus der Konversation:', actualConversationId);
-          const { data, error } = await supabase
-            .from('conversations')
-            .select('model_id')
-            .eq('id', actualConversationId)
-            .single();
-            
-          if (error) {
-            console.error('Fehler beim Laden des Modells aus der Konversation:', error);
+          const convData = await conversationApi.getConversation(actualConversationId);
+
+          if (!convData) {
+            console.error('Fehler beim Laden der Konversation');
             Alert.alert('Fehler', 'Modell konnte nicht geladen werden.');
             return;
           }
-          
-          if (data && data.model_id) {
-            console.log('Modell-ID aus der Konversation geladen:', data.model_id);
-            const fetchedModelId = data.model_id;
-            
+
+          if (convData.modelId) {
+            console.log('Modell-ID aus der Konversation geladen:', convData.modelId);
+            const fetchedModelId = convData.modelId;
+
             // Setze das Modell für die nächsten API-Aufrufe
             const response = await fetch(`/api/models`);
             const models = await response.json();
             const model = models.find((m: any) => m.id === fetchedModelId);
-            
+
             if (model) {
               setModelName(model.name);
               setModelData(model);

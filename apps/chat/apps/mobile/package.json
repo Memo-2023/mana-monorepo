@@ -14,11 +14,7 @@
     "prebuild": "expo prebuild",
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\" && prettier -c \"**/*.{js,jsx,ts,tsx,json}\"",
     "format": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix && prettier \"**/*.{js,jsx,ts,tsx,json}\" --write",
-    "web": "expo start --web",
-    "supabase:cli": "node --experimental-json-modules scripts/supabase-cli.js",
-    "supabase:update-models": "node --experimental-json-modules scripts/update_models.js",
-    "supabase:setup": "node --experimental-json-modules scripts/setup_supabase.js",
-    "supabase:setup-spaces": "node --experimental-json-modules scripts/spaces/setup_spaces.js"
+    "web": "expo start --web"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
@@ -26,7 +22,6 @@
     "@react-navigation/bottom-tabs": "^7.0.5",
     "@react-navigation/drawer": "^7.0.0",
     "@react-navigation/native": "^7.0.3",
-    "@supabase/supabase-js": "^2.38.4",
     "expo": "^52.0.39",
     "expo-constants": "~17.0.8",
     "expo-dev-client": "~5.0.4",

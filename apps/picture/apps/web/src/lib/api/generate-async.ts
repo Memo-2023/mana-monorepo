@@ -1,17 +1,11 @@
 /**
- * Async Image Generation API (New Queue-Based System)
+ * Async Image Generation API (Using Backend API)
  *
- * This replaces the old synchronous generate.ts with an async, non-blocking approach.
- * Uses the job queue system for better scalability and user experience.
+ * Provides async generation with polling for status updates.
  */
 
-import { supabase } from '$lib/supabase';
-import {
-  startImageGeneration,
-  subscribeToGeneration,
-  generateImageWithUpdates,
-  type GenerateImageJobParams
-} from '@picture/shared';
+import { fetchApi } from './client';
+import type { Image } from './images';
 
 // ============================================================================
 // TYPES
@@ -27,6 +21,23 @@ export interface GenerationProgress {
 
 export type GenerationCallback = (progress: GenerationProgress) => void;
 
+export interface GenerateImageJobParams {
+  prompt: string;
+  modelId: string;
+  negativePrompt?: string;
+  width?: number;
+  height?: number;
+  numInferenceSteps?: number;
+  guidanceScale?: number;
+}
+
+interface GenerationStatusResponse {
+  id: string;
+  status: 'queued' | 'pending' | 'processing' | 'completed' | 'failed';
+  errorMessage?: string;
+  image?: Image;
+}
+
 // ============================================================================
 // MAIN API FUNCTIONS
 // ============================================================================
@@ -35,147 +46,129 @@ export type GenerationCallback = (progress: GenerationProgress) => void;
  * Generate an image (async, non-blocking)
  *
  * Returns immediately with a generation ID.
- * Use subscribeToGenerationUpdates() to monitor progress.
- *
- * @example
- * ```typescript
- * // Start generation
- * const { generationId } = await generateImageAsync({
- *   prompt: 'A beautiful sunset',
- *   model_id: 'black-forest-labs/flux-dev'
- * });
- *
- * // Subscribe to updates
- * const unsubscribe = subscribeToGenerationUpdates(generationId, (progress) => {
- *   console.log('Status:', progress.status);
- *   if (progress.status === 'completed') {
- *     console.log('Image URL:', progress.imageUrl);
- *     unsubscribe();
- *   }
- * });
- * ```
+ * Use pollGenerationUpdates() to monitor progress.
  */
 export async function generateImageAsync(
-  params: GenerateImageJobParams
-): Promise<{ generationId: string; jobId: string }> {
-  try {
-    const result = await startImageGeneration(supabase, params);
-    return result;
-  } catch (error: any) {
+  params: GenerateImageJobParams,
+): Promise<{ generationId: string }> {
+  const { data, error } = await fetchApi<{ generationId: string; status: string }>('/generate', {
+    method: 'POST',
+    body: params,
+  });
+
+  if (error) {
     console.error('Failed to start image generation:', error);
     throw new Error(error.message || 'Failed to start image generation');
   }
+
+  if (!data) {
+    throw new Error('No data returned from generation endpoint');
+  }
+
+  return { generationId: data.generationId };
 }
 
 /**
- * Subscribe to generation progress updates via Realtime
+ * Poll for generation status updates
  *
  * @example
  * ```typescript
- * const unsubscribe = subscribeToGenerationUpdates(generationId, (progress) => {
+ * const stopPolling = pollGenerationUpdates(generationId, (progress) => {
  *   console.log(`${progress.status}: ${progress.progress}%`);
  *
  *   if (progress.status === 'completed') {
  *     displayImage(progress.imageUrl);
- *     unsubscribe();
+ *     stopPolling();
  *   }
  * });
  * ```
  */
-export function subscribeToGenerationUpdates(
+export function pollGenerationUpdates(
   generationId: string,
-  callback: GenerationCallback
+  callback: GenerationCallback,
+  pollInterval = 2000,
 ): () => void {
-  return subscribeToGeneration(supabase, generationId, (generation) => {
-    // Map database status to progress object
-    const progress: GenerationProgress = {
-      generationId: generation.id,
-      status: generation.status,
-      progress: getProgressPercentage(generation.status),
-      error: generation.error_message
-    };
+  let isPolling = true;
 
-    // If completed, fetch the image record
-    if (generation.status === 'completed') {
-      fetchGeneratedImage(generationId).then(image => {
-        if (image) {
-          progress.imageUrl = image.public_url;
+  const poll = async () => {
+    while (isPolling) {
+      try {
+        const { data, error } = await fetchApi<GenerationStatusResponse>(
+          `/generate/${generationId}/status`,
+        );
+
+        if (error) {
+          callback({
+            generationId,
+            status: 'failed',
+            error: error.message,
+          });
+          break;
         }
-        callback(progress);
-      });
-    } else {
-      callback(progress);
+
+        if (data) {
+          const progress: GenerationProgress = {
+            generationId: data.id,
+            status: data.status,
+            progress: getProgressPercentage(data.status),
+            error: data.errorMessage,
+            imageUrl: data.image?.publicUrl,
+          };
+
+          callback(progress);
+
+          if (data.status === 'completed' || data.status === 'failed') {
+            break;
+          }
+        }
+      } catch (err) {
+        callback({
+          generationId,
+          status: 'failed',
+          error: err instanceof Error ? err.message : 'Unknown error',
+        });
+        break;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
     }
-  });
+  };
+
+  poll();
+
+  return () => {
+    isPolling = false;
+  };
 }
 
 /**
- * All-in-one: Generate image and subscribe to updates
- *
- * Convenience function that combines generateImageAsync + subscribeToGenerationUpdates.
- *
- * @example
- * ```typescript
- * const { generationId, unsubscribe } = await generateWithRealtime(
- *   { prompt: 'Sunset', model_id: 'flux-dev' },
- *   (progress) => {
- *     updateUI(progress);
- *     if (progress.status === 'completed') {
- *       showImage(progress.imageUrl);
- *       unsubscribe();
- *     }
- *   }
- * );
- * ```
+ * Subscribe to generation progress updates (alias for pollGenerationUpdates)
+ * Kept for backwards compatibility
+ */
+export function subscribeToGenerationUpdates(
+  generationId: string,
+  callback: GenerationCallback,
+): () => void {
+  return pollGenerationUpdates(generationId, callback);
+}
+
+/**
+ * All-in-one: Generate image and poll for updates
  */
 export async function generateWithRealtime(
   params: GenerateImageJobParams,
-  onUpdate: GenerationCallback
-): Promise<{ generationId: string; jobId: string; unsubscribe: () => void }> {
-  const result = await generateImageWithUpdates(supabase, params, (generation) => {
-    const progress: GenerationProgress = {
-      generationId: generation.id,
-      status: generation.status,
-      progress: getProgressPercentage(generation.status),
-      error: generation.error_message
-    };
+  onUpdate: GenerationCallback,
+): Promise<{ generationId: string; unsubscribe: () => void }> {
+  const { generationId } = await generateImageAsync(params);
 
-    if (generation.status === 'completed') {
-      fetchGeneratedImage(generation.id).then(image => {
-        if (image) {
-          progress.imageUrl = image.public_url;
-        }
-        onUpdate(progress);
-      });
-    } else {
-      onUpdate(progress);
-    }
-  });
+  const unsubscribe = pollGenerationUpdates(generationId, onUpdate);
 
-  return result;
+  return { generationId, unsubscribe };
 }
 
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
-
-/**
- * Fetch the generated image record
- */
-async function fetchGeneratedImage(generationId: string) {
-  const { data, error } = await supabase
-    .from('images')
-    .select('*')
-    .eq('generation_id', generationId)
-    .single();
-
-  if (error) {
-    console.error('Failed to fetch generated image:', error);
-    return null;
-  }
-
-  return data;
-}
 
 /**
  * Convert status to progress percentage (for UI)
@@ -198,53 +191,41 @@ function getProgressPercentage(status: string): number {
 }
 
 /**
- * Get generation status (one-time check, no subscription)
+ * Get generation status (one-time check, no polling)
  */
 export async function getGenerationStatus(generationId: string): Promise<GenerationProgress | null> {
-  const { data, error } = await supabase
-    .from('image_generations')
-    .select('*')
-    .eq('id', generationId)
-    .single();
+  const { data, error } = await fetchApi<GenerationStatusResponse>(
+    `/generate/${generationId}/status`,
+  );
 
   if (error) {
     console.error('Failed to get generation status:', error);
     return null;
   }
 
-  const progress: GenerationProgress = {
+  if (!data) {
+    return null;
+  }
+
+  return {
     generationId: data.id,
     status: data.status,
     progress: getProgressPercentage(data.status),
-    error: data.error_message
+    error: data.errorMessage,
+    imageUrl: data.image?.publicUrl,
   };
-
-  if (data.status === 'completed') {
-    const image = await fetchGeneratedImage(generationId);
-    if (image) {
-      progress.imageUrl = image.public_url;
-    }
-  }
-
-  return progress;
 }
 
 /**
  * Cancel a pending generation
  */
 export async function cancelGeneration(generationId: string): Promise<void> {
-  // Update generation status
-  const { error } = await supabase
-    .from('image_generations')
-    .update({ status: 'failed', error_message: 'Cancelled by user' })
-    .eq('id', generationId)
-    .eq('status', 'pending'); // Only cancel if still pending
+  const { error } = await fetchApi(`/generate/${generationId}/cancel`, {
+    method: 'POST',
+  });
 
   if (error) {
     console.error('Failed to cancel generation:', error);
     throw new Error('Failed to cancel generation');
   }
-
-  // Note: The job will still be in queue but will fail when processed
-  // Could also mark the job as cancelled in job_queue table
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { user, loading } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
@@ -13,14 +13,10 @@
 	let { children } = $props();
 
 	// Client-side auth check
-	onMount(() => {
-		const unsubscribe = user.subscribe((currentUser) => {
-			if (!$loading && !currentUser) {
-				goto('/auth/login');
-			}
-		});
-
-		return unsubscribe;
+	$effect(() => {
+		if (authStore.initialized && !authStore.loading && !authStore.user) {
+			goto('/auth/login');
+		}
 	});
 
 	// Global keyboard shortcuts
@@ -89,7 +85,7 @@
 
 <svelte:window on:keydown={handleKeyDown} />
 
-{#if $loading}
+{#if authStore.loading}
 	<div class="flex min-h-screen items-center justify-center">
 		<div class="text-center">
 			<div
@@ -98,7 +94,7 @@
 			<p class="text-gray-600">Loading...</p>
 		</div>
 	</div>
-{:else if $user}
+{:else if authStore.user}
 	<div class="min-h-screen" style="background-color: {$currentTheme.background};">
 		<!-- Sidebar (conditionally visible) -->
 		{#if $isUIVisible}

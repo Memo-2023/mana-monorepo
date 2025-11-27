@@ -149,7 +149,7 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_SUPABASE_URL: (env) => env.MAERCHENZAUBER_SUPABASE_URL,
 			PUBLIC_SUPABASE_ANON_KEY: (env) => env.MAERCHENZAUBER_SUPABASE_ANON_KEY,
-			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MAERCHENZAUBER_BACKEND_PORT || '3003'}`,
+			PUBLIC_API_URL: (env) => `http://localhost:${env.MAERCHENZAUBER_BACKEND_PORT || '3003'}`,
 		},
 	},
 

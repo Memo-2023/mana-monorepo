@@ -12,9 +12,6 @@ export class AnalyzeMealTextDto {
 
 export class CreateMealDto {
   @IsString()
-  userId: string;
-
-  @IsString()
   foodName: string;
 
   @IsOptional()
@@ -44,9 +41,6 @@ export class CreateMealDto {
 export class UploadMealDto {
   @IsString()
   imageBase64: string;
-
-  @IsString()
-  userId: string;
 
   @IsOptional()
   @IsString()

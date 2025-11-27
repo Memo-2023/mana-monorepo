@@ -15,13 +15,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthProvider';
 import { useAppTheme } from '../theme/ThemeProvider';
 import CustomDrawer from '../components/CustomDrawer';
-import { 
-  getArchivedConversations, 
-  getMessages, 
-  deleteConversation, 
+import {
+  getArchivedConversations,
+  getMessages,
+  deleteConversation,
   unarchiveConversation
 } from '../services/conversation';
-import { supabase } from '../utils/supabase';
+import { modelApi } from '../services/api';
 
 // Typendefinitionen für Konversationen
 type ConversationItem = {
@@ -69,18 +69,14 @@ export default function ArchiveScreen() {
         try {
           // Lade die Nachrichten der Konversation
           const messages = await getMessages(conv.id);
-          // Lade das Modell aus der Datenbank
-          const { data: modelData } = await supabase
-            .from('models')
-            .select('name')
-            .eq('id', conv.model_id)
-            .single();
-          
+          // Lade das Modell über die Backend API
+          const modelData = await modelApi.getModel(conv.model_id);
+
           // Finde die letzte Nachricht (die nicht vom System ist)
           const lastMessage = messages
             .filter(msg => msg.sender !== 'system')
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
-          
+
           if (lastMessage) {
             conversationItems.push({
               id: conv.id,
@@ -88,7 +84,7 @@ export default function ArchiveScreen() {
               title: conv.title || 'Unbenannte Konversation',
               lastMessage: lastMessage.message_text,
               timestamp: new Date(conv.updated_at),
-              mode: conv.conversation_mode === 'free' ? 'frei' : 
+              mode: conv.conversation_mode === 'free' ? 'frei' :
                     conv.conversation_mode === 'guided' ? 'geführt' : 'vorlage'
             });
           }

@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthProvider';
 import { useAppTheme } from '../theme/ThemeProvider';
-import { supabase } from '../utils/supabase';
 
 // Typendefinitionen für die Token-Nutzung
 type ModelUsage = {
@@ -44,46 +43,18 @@ export default function ProfileScreen() {
   const [selectedPeriod, setSelectedPeriod] = useState<'day' | 'month' | 'year'>('month');
 
   // Funktion zum Laden der Token-Nutzungsdaten
+  // TODO: Backend-Endpoints für Usage-Statistiken implementieren
   const loadUsageData = async () => {
     if (!user) return;
-    
+
     setIsLoading(true);
     try {
-      // Lade die Token-Nutzung nach Modell
-      const { data: modelData, error: modelError } = await supabase
-        .rpc('get_user_model_usage', { user_id: user.id });
-        
-      if (modelError) {
-        console.error('Fehler beim Laden der Modellnutzung:', modelError);
-      } else if (modelData) {
-        setModelUsage(modelData as ModelUsage[]);
-      }
-      
-      // Lade die Token-Nutzung nach Zeitraum
-      const { data: periodData, error: periodError } = await supabase
-        .rpc('get_user_usage_by_period', { 
-          user_id: user.id,
-          period: selectedPeriod
-        });
-        
-      if (periodError) {
-        console.error('Fehler beim Laden der Zeitraumnutzung:', periodError);
-      } else if (periodData) {
-        setPeriodUsage(periodData as UsageByPeriod[]);
-      }
-      
-      // Berechne die Zusammenfassung
-      if (modelData) {
-        const totalCost = (modelData as ModelUsage[]).reduce((sum, model) => sum + model.total_cost, 0);
-        const totalTokens = (modelData as ModelUsage[]).reduce((sum, model) => sum + model.total_tokens, 0);
-        
-        setSummary({
-          totalCost,
-          totalTokens,
-          modelCount: (modelData as ModelUsage[]).length,
-          periodCount: periodData ? (periodData as UsageByPeriod[]).length : 0
-        });
-      }
+      // Usage-Statistiken sind noch nicht über die Backend-API verfügbar
+      // Setze leere Daten und zeige Info-Text an
+      console.log('Usage-Statistiken: Backend-Endpoints noch nicht implementiert');
+      setModelUsage([]);
+      setPeriodUsage([]);
+      setSummary(null);
     } catch (error) {
       console.error('Fehler beim Laden der Nutzungsdaten:', error);
     } finally {

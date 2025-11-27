@@ -4,7 +4,6 @@ import { useTheme } from '@react-navigation/native';
 import { useRouter, Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthProvider';
-import { supabase } from '../../utils/supabase';
 import { useAppTheme } from '../../theme/ThemeProvider';
 
 export default function LoginScreen() {
@@ -24,24 +23,13 @@ export default function LoginScreen() {
       Alert.alert('Fehler', 'Bitte gib deine E-Mail-Adresse und dein Passwort ein.');
       return;
     }
-    
+
     try {
       setLoading(true);
       const { error } = await signIn(email, password);
-      
+
       if (error) {
-        console.log('Anmeldung mit Passwort fehlgeschlagen, versuche direkte Anmeldung...');
-        // Wenn die normale Anmeldung fehlschlägt, versuche eine direkte Anmeldung
-        const { error: directError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        
-        if (directError) {
-          Alert.alert('Anmeldung fehlgeschlagen', directError.message);
-        } else {
-          router.replace('/');
-        }
+        Alert.alert('Anmeldung fehlgeschlagen', error.message || 'Unbekannter Fehler');
       } else {
         // Erfolgreich angemeldet, navigiere zur Hauptseite
         router.replace('/');
@@ -54,37 +42,12 @@ export default function LoginScreen() {
     }
   };
   
+  // Magic Link ist derzeit nicht verfügbar (mana-core-auth unterstützt dies nicht)
   const handleMagicLink = async () => {
-    if (!email) {
-      Alert.alert('Fehler', 'Bitte gib deine E-Mail-Adresse ein.');
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: 'exp://localhost:8081/',
-        },
-      });
-      
-      if (error) {
-        Alert.alert('Fehler', error.message);
-      } else {
-        setIsMagicLinkSent(true);
-        Alert.alert(
-          'Magic Link gesendet', 
-          'Wir haben dir einen Magic Link an deine E-Mail-Adresse gesendet. Bitte öffne den Link, um dich anzumelden.'
-        );
-      }
-    } catch (error) {
-      console.error('Fehler beim Senden des Magic Links:', error);
-      Alert.alert('Fehler', 'Beim Senden des Magic Links ist ein Fehler aufgetreten. Bitte versuche es später erneut.');
-    } finally {
-      setLoading(false);
-    }
+    Alert.alert(
+      'Nicht verfügbar',
+      'Magic Link Anmeldung ist derzeit nicht verfügbar. Bitte nutze E-Mail und Passwort.'
+    );
   };
 
   return (

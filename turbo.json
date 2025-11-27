@@ -10,8 +10,7 @@
   "tasks": {
     "dev": {
       "cache": false,
-      "persistent": true,
-      "dotEnv": [".env", ".env.development", ".env.local"]
+      "persistent": true
     },
     "build": {
       "dependsOn": ["^build"],

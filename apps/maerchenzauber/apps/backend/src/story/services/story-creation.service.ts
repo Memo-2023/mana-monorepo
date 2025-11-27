@@ -10,7 +10,7 @@ import { ImageSupabaseService } from '../../core/services/image-supabase.service
 import { CoreService } from '../../core/services/core.service';
 import { StoryCharacter, StoryResponse } from '../../core/models/story';
 import { StoryError } from '../../core/consts/errors.const';
-import { Result } from '../../core/models/error';
+import { type Result, isOk } from '@manacore/shared-errors';
 import { StoryLogbookService } from '../../core/services/story-logbook.service';
 
 export interface StoryCreationParams {
@@ -115,7 +115,7 @@ export class StoryCreationService {
         isAnimalStory,
       );
 
-      if (story.error || !story.data) {
+      if (!isOk(story)) {
         this.logbookService.logError(
           storyId,
           'generate_story',
@@ -124,7 +124,7 @@ export class StoryCreationService {
         await this.logStoryError(
           userId,
           storyId,
-          story.data,
+          null,
           StoryError.CREATE_STORYLINE,
           isAnimalStory,
         );
@@ -134,12 +134,12 @@ export class StoryCreationService {
 
       // Update logbook with page count
       this.logbookService.updateMetadata(storyId, {
-        pageCount: story.data.pages.length,
+        pageCount: story.value.pages.length,
       });
 
       // 4. Create character descriptions
       const storyCharacters = await this.createCharacterDescriptions(
-        story.data.pages,
+        story.value.pages,
         character,
         userId,
         storyId,
@@ -148,7 +148,7 @@ export class StoryCreationService {
 
       // 5. Generate illustrations
       const { illustrationPrompts, images } = await this.generateIllustrations(
-        story.data.pages,
+        story.value.pages,
         storyCharacters,
         finalIllustratorId || '',
         userId,
@@ -160,7 +160,7 @@ export class StoryCreationService {
 
       // 6. Generate title
       const title = await this.generateTitle(
-        story.data.pages,
+        story.value.pages,
         userId,
         storyId,
         isAnimalStory,
@@ -168,7 +168,7 @@ export class StoryCreationService {
 
       // 7. Translate story
       const translatedPages = await this.translateStory(
-        story.data.pages,
+        story.value.pages,
         illustrationPrompts,
         images,
         userId,
@@ -575,7 +575,7 @@ export class StoryCreationService {
   ): Promise<string> {
     const titleResult = await this.storyService.generateStoryTitle(pages);
 
-    if (titleResult.error) {
+    if (!isOk(titleResult)) {
       this.logger.error('Error generating story title');
       await this.logStoryError(
         userId,
@@ -587,7 +587,7 @@ export class StoryCreationService {
       return '';
     }
 
-    return titleResult.data || '';
+    return titleResult.value;
   }
 
   private async translateStory(
