@@ -30,7 +30,7 @@ RUN --mount=type=secret,id=github_token \
     echo "Mana-core packaged as tarball at /app/mana-core.tgz"
 
 # Copy backend package.json
-COPY backend/package.json ./backend/package.json
+COPY apps/maerchenzauber/apps/backend/package.json ./backend/package.json
 
 # Replace GitHub URL with the tarball (../ because package.json is in backend/)
 RUN sed -i 's|"git+https://github.com/Memo-2023/mana-core-nestjs-package.git"|"file:../mana-core.tgz"|g' backend/package.json || \
@@ -59,7 +59,7 @@ RUN if [ -d "packages/shared-types" ]; then \
     fi
 
 # Copy backend source code
-COPY backend/ ./backend/
+COPY apps/maerchenzauber/apps/backend/ ./backend/
 
 # Build the backend application
 WORKDIR /app/backend

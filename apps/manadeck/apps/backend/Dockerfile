@@ -29,7 +29,7 @@ RUN --mount=type=secret,id=github_token \
     echo "Mana-core packaged as tarball at /app/mana-core.tgz"
 
 # Copy package.json
-COPY package.json ./
+COPY apps/manadeck/apps/backend/package.json ./
 
 # Replace GitHub URL with the tarball
 RUN sed -i 's|"git+https://github.com/Memo-2023/mana-core-nestjs-package.git"|"file:mana-core.tgz"|g' package.json || \
@@ -48,7 +48,7 @@ RUN npm install --legacy-peer-deps && \
     echo "Dependencies installed with mana-core from tarball"
 
 # Copy source code
-COPY . .
+COPY apps/manadeck/apps/backend/ ./
 
 # Build the application
 RUN npm run build

@@ -1,8 +1,4 @@
-# Dependencies
-node_modules/
-.pnpm-store/
-
-# Build outputs
+# Build outputs and generated files
 dist/
 build/
 .next/
@@ -11,22 +7,32 @@ build/
 .svelte-kit/
 .astro/
 .expo/
-android/
-ios/
-
-# Turbo
+.netlify/
+node_modules/
 .turbo/
 
-# Package manager
+# Lock files
 pnpm-lock.yaml
 package-lock.json
 yarn.lock
 
-# Generated files
-*.min.js
-*.min.css
-coverage/
+# Testing documentation with pseudo-code examples
+QA_TESTING_CHECKLIST.md
+TEST_CASES_SAMPLES.md
+TESTING_STRATEGY_AUTH_CREDITS.md
 
-# IDE
-.idea/
-.vscode/
+# Generated type files
+*.gen.ts
+*.generated.ts
+
+# Cache files
+.cache/
+.parcel-cache/
+.eslintcache
+.prettiercache
+
+# Files with pseudo-code or example syntax
+apps/maerchenzauber/apps/mobile/ANALYTICS.md
+apps/maerchenzauber/apps/landing/src/components/sections/CharacterGallery.astro
+apps/maerchenzauber/apps/landing/src/components/sections/StoryShowcase.astro
+apps/maerchenzauber/apps/landing/src/pages/privacy.astro

@@ -22,12 +22,14 @@
 ## Prerequisites
 
 ### Required Accounts
+
 - [ ] GitHub account (you have this)
 - [ ] Hetzner Cloud account (need to create)
 - [ ] Supabase account (you have this)
 - [ ] Azure OpenAI account (you have this)
 
 ### Required Tools (Local Machine)
+
 - [ ] Git
 - [ ] Docker Desktop
 - [ ] pnpm (v9.15.0)
@@ -36,6 +38,7 @@
 - [ ] Terminal/Command line
 
 ### Required Knowledge
+
 - Basic Docker understanding
 - Basic GitHub Actions understanding
 - SSH and server access
@@ -67,6 +70,7 @@
    - **Type**: CCX32 (8 vCPU, 32 GB RAM, $50/month)
    - **Networking**: Public IPv4
    - **SSH Key**: Add your public SSH key
+
      ```bash
      # On your machine, generate if you don't have one:
      ssh-keygen -t ed25519 -C "your_email@example.com"
@@ -75,6 +79,7 @@
      cat ~/.ssh/id_ed25519.pub
      # Paste into Hetzner
      ```
+
    - **Name**: `staging-01`
    - Click "Create & Buy now"
 
@@ -82,6 +87,7 @@
 4. Note the server IP address: `___________________`
 
 5. Test SSH connection:
+
    ```bash
    ssh root@YOUR_SERVER_IP
    # Type "yes" to accept fingerprint
@@ -96,6 +102,7 @@
 ### Step 3: Install Coolify (10 minutes)
 
 1. On your server (via SSH), run:
+
    ```bash
    curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
    ```
@@ -105,6 +112,7 @@
    - You'll see progress messages
 
 3. Once complete, access Coolify UI:
+
    ```
    https://YOUR_SERVER_IP:8000
    ```
@@ -154,12 +162,14 @@
 ### Step 5: Test CI/CD Pipeline (5 minutes)
 
 1. Create test branch:
+
    ```bash
    cd /Users/wuesteon/dev/mana_universe/manacore-monorepo
    git checkout -b test/cicd-setup
    ```
 
 2. Make small change (add comment to README):
+
    ```bash
    echo "\n<!-- Testing CI/CD -->" >> README.md
    git add README.md
@@ -206,6 +216,7 @@ STAGING_AZURE_OPENAI_API_KEY = your-azure-key
 **For mana-core-auth service**:
 
 1. Copy template:
+
    ```bash
    cp docker/templates/Dockerfile.nestjs services/mana-core-auth/Dockerfile
    ```
@@ -213,6 +224,7 @@ STAGING_AZURE_OPENAI_API_KEY = your-azure-key
 2. No changes needed! The template is already configured for NestJS services in the monorepo.
 
 3. Test build locally:
+
    ```bash
    docker build -t test-auth -f services/mana-core-auth/Dockerfile .
    ```
@@ -220,6 +232,7 @@ STAGING_AZURE_OPENAI_API_KEY = your-azure-key
    This will take 5-10 minutes the first time.
 
 4. Test run locally:
+
    ```bash
    docker run -p 3001:3001 \
      -e SUPABASE_URL=your-url \
@@ -228,12 +241,14 @@ STAGING_AZURE_OPENAI_API_KEY = your-azure-key
    ```
 
 5. Test health endpoint:
+
    ```bash
    curl http://localhost:3001/api/v1/health
    # Should return: {"status":"ok"}
    ```
 
 6. If it works, commit and push:
+
    ```bash
    git add services/mana-core-auth/Dockerfile
    git commit -m "feat: add Dockerfile for mana-core-auth"
@@ -247,17 +262,20 @@ STAGING_AZURE_OPENAI_API_KEY = your-azure-key
 **Option A: Manual Deployment (Recommended First Time)**
 
 1. SSH into your server:
+
    ```bash
    ssh root@YOUR_SERVER_IP
    ```
 
 2. Create deployment directory:
+
    ```bash
    mkdir -p ~/manacore-staging
    cd ~/manacore-staging
    ```
 
 3. Create `docker-compose.yml`:
+
    ```bash
    cat > docker-compose.yml << 'EOF'
    version: '3.8'
@@ -285,6 +303,7 @@ STAGING_AZURE_OPENAI_API_KEY = your-azure-key
    ```
 
 4. Create `.env` file:
+
    ```bash
    cat > .env << 'EOF'
    SUPABASE_URL=your-supabase-url
@@ -297,6 +316,7 @@ STAGING_AZURE_OPENAI_API_KEY = your-azure-key
    **Replace the placeholder values with your actual credentials!**
 
 5. Login to GitHub Container Registry:
+
    ```bash
    # Create a Personal Access Token (PAT) on GitHub:
    # GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
@@ -306,18 +326,21 @@ STAGING_AZURE_OPENAI_API_KEY = your-azure-key
    ```
 
 6. Pull and start:
+
    ```bash
    docker compose pull
    docker compose up -d
    ```
 
 7. Check status:
+
    ```bash
    docker compose ps
    docker compose logs mana-core-auth
    ```
 
 8. Test health endpoint:
+
    ```bash
    curl http://localhost:3001/api/v1/health
    ```
@@ -366,11 +389,13 @@ cp docker/templates/Dockerfile.nestjs apps/quote/apps/backend/Dockerfile
 ```
 
 **Test each build locally before committing**:
+
 ```bash
 docker build -t test-service -f apps/PROJECT/apps/backend/Dockerfile .
 ```
 
 **Commit all at once**:
+
 ```bash
 git add apps/*/apps/backend/Dockerfile
 git commit -m "feat: add Dockerfiles for all backend services"
@@ -382,6 +407,7 @@ git push
 On your server, update `~/manacore-staging/docker-compose.yml` to include all services.
 
 **Example with 3 backends**:
+
 ```yaml
 version: '3.8'
 
@@ -390,7 +416,7 @@ services:
     image: ghcr.io/wuesteon/mana-core-auth:latest
     container_name: mana-core-auth
     ports:
-      - "3001:3001"
+      - '3001:3001'
     environment:
       - NODE_ENV=staging
       - PORT=3001
@@ -401,7 +427,7 @@ services:
     image: ghcr.io/wuesteon/chat-backend:latest
     container_name: chat-backend
     ports:
-      - "3002:3002"
+      - '3002:3002'
     environment:
       - NODE_ENV=staging
       - PORT=3002
@@ -414,7 +440,7 @@ services:
     image: ghcr.io/wuesteon/maerchenzauber-backend:latest
     container_name: maerchenzauber-backend
     ports:
-      - "3003:3003"
+      - '3003:3003'
     environment:
       - NODE_ENV=staging
       - PORT=3003
@@ -425,6 +451,7 @@ services:
 ```
 
 **Deploy all services**:
+
 ```bash
 cd ~/manacore-staging
 docker compose pull
@@ -452,6 +479,7 @@ cp docker/templates/Dockerfile.sveltekit apps/manacore/apps/web/Dockerfile
 ```
 
 **Test one build**:
+
 ```bash
 docker build -t test-web -f apps/chat/apps/web/Dockerfile .
 docker run -p 3000:3000 -e PUBLIC_SUPABASE_URL=your-url test-web
@@ -474,6 +502,7 @@ cp docker/templates/Dockerfile.astro apps/bauntown/Dockerfile
 ### 3.3 Configure Domains and SSL
 
 **In Coolify UI**:
+
 1. Add a new "Resource" → "Service"
 2. For each web app/landing:
    - Set domain (e.g., `chat.manacore.app`)
@@ -491,6 +520,7 @@ cp docker/templates/Dockerfile.astro apps/bauntown/Dockerfile
 ### 4.1 Set Up Test Configuration
 
 1. Install test dependencies:
+
    ```bash
    pnpm install
    ```
@@ -500,15 +530,16 @@ cp docker/templates/Dockerfile.astro apps/bauntown/Dockerfile
 3. Configure each project to use shared configs.
 
 **For NestJS backends**, add to `apps/PROJECT/apps/backend/package.json`:
+
 ```json
 {
-  "scripts": {
-    "test": "jest",
-    "test:cov": "jest --coverage"
-  },
-  "jest": {
-    "preset": "@manacore/test-config/jest.config.backend.js"
-  }
+	"scripts": {
+		"test": "jest",
+		"test:cov": "jest --coverage"
+	},
+	"jest": {
+		"preset": "@manacore/test-config/jest.config.backend.js"
+	}
 }
 ```
 
@@ -558,6 +589,7 @@ GitHub Actions will automatically run tests and enforce coverage.
 ### 5.1 Provision Production Server
 
 Repeat the Hetzner setup, but:
+
 - Project name: `manacore-production`
 - Server type: CCX42 (16 vCPU, 64 GB RAM, $100/month)
   - Or CCX32 if resources sufficient
@@ -611,6 +643,7 @@ PRODUCTION_REDIS_PASSWORD
 ### Quick Health Check
 
 **Check all services**:
+
 ```bash
 # On server
 cd ~/manacore-staging  # or ~/manacore-production
@@ -626,12 +659,14 @@ curl http://YOUR_SERVER_IP:3002/api/health     # chat-backend
 ### Comprehensive Verification
 
 1. **All containers running**:
+
    ```bash
    docker compose ps
    # All should show "Up" status
    ```
 
 2. **Health checks passing**:
+
    ```bash
    for service in mana-core-auth chat-backend maerchenzauber-backend; do
      echo "Checking $service..."
@@ -640,12 +675,14 @@ curl http://YOUR_SERVER_IP:3002/api/health     # chat-backend
    ```
 
 3. **Resource usage acceptable**:
+
    ```bash
    docker stats --no-stream
    # CPU should be < 50%, Memory < 80%
    ```
 
 4. **Logs clean** (no critical errors):
+
    ```bash
    docker compose logs --tail=100 | grep -i error
    ```
@@ -663,6 +700,7 @@ curl http://YOUR_SERVER_IP:3002/api/health     # chat-backend
 **Symptom**: "ERROR: failed to solve"
 
 **Solutions**:
+
 1. Check Dockerfile syntax
 2. Ensure you're running from monorepo root
 3. Check for missing dependencies in package.json
@@ -677,6 +715,7 @@ curl http://YOUR_SERVER_IP:3002/api/health     # chat-backend
 **Symptom**: Red X on PR, workflow fails
 
 **Solutions**:
+
 1. Check workflow logs in GitHub Actions tab
 2. Verify all secrets are configured
 3. Check if build works locally first
@@ -691,6 +730,7 @@ curl http://YOUR_SERVER_IP:3002/api/health     # chat-backend
 **Symptom**: Can't connect to server via SSH in workflow
 
 **Solutions**:
+
 1. Verify `STAGING_SSH_KEY` secret contains **private** key
 2. Ensure key includes `-----BEGIN` and `-----END` lines
 3. Verify `STAGING_USER` is correct (usually `root`)
@@ -703,6 +743,7 @@ curl http://YOUR_SERVER_IP:3002/api/health     # chat-backend
 **Symptom**: Health check endpoint returns 500 or times out
 
 **Solutions**:
+
 1. Check logs: `docker compose logs service-name --tail=100`
 2. Verify environment variables are set correctly
 3. Check if database connection works
@@ -718,6 +759,7 @@ curl http://YOUR_SERVER_IP:3002/api/health     # chat-backend
 **Symptom**: "unauthorized: unauthenticated"
 
 **Solutions**:
+
 1. Login to ghcr.io on server:
    ```bash
    echo YOUR_PAT | docker login ghcr.io -u wuesteon --password-stdin

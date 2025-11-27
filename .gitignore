@@ -13,6 +13,7 @@ build/
 .expo/
 android/
 ios/
+.netlify/
 
 # Turbo
 .turbo/
@@ -88,3 +89,9 @@ yarn.lock
 
 # Debug
 .pnpm-debug.log
+
+# Hive mind sessions
+.hive-mind/
+
+# Claude Flow metrics
+.claude-flow/
