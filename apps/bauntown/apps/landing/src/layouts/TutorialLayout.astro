@@ -1,0 +1,174 @@
+---
+import Layout from './Layout.astro';
+import HeroSection from '../components/HeroSection.astro';
+import ContentTracking from '../components/ContentTracking.astro';
+import { getLangFromUrl, useTranslations } from '../utils/i18n';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  tutorial: CollectionEntry<'tutorials'>;
+}
+
+const { tutorial } = Astro.props;
+const { data } = tutorial;
+const lang = getLangFromUrl(Astro.url);
+
+// Format date based on language
+const formattedDate = new Intl.DateTimeFormat(lang === 'de' ? 'de-DE' : 'en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+}).format(data.pubDate);
+
+// Category translation
+const t = useTranslations(lang);
+const categoryKey = `tutorials.categories.${data.category}` as const;
+---
+
+<Layout title={data.title} description={data.description}>
+  <ContentTracking contentType="tutorial" contentId={tutorial.id} contentTitle={data.title} />
+  <HeroSection
+    title={data.title}
+    description={data.description}
+    image={data.image}
+    imageAlt={data.title}
+  />
+  
+  <article class="tutorial-content">
+    <slot />
+    
+    <div class="tutorial-meta">
+      <span class="category">{t(categoryKey)}</span>
+      <span class="author">{data.author}</span>
+      <time datetime={data.pubDate.toISOString()}>{formattedDate}</time>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .tutorial-header {
+    margin-top: 80px; /* More space for navigation */
+    margin-bottom: 3rem;
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+    padding-top: 1rem;
+  }
+  
+  .tutorial-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.875rem;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    text-align: left;
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .category {
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  
+  time {
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: left;
+  }
+  
+  .description {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    text-align: left;
+  }
+  
+  .author {
+    color: var(--text-muted);
+  }
+  
+  .featured-image {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    margin-bottom: 2rem;
+  }
+  
+  @media (max-width: 768px) {
+    .tutorial-header {
+      margin-top: 20px; /* Less space on mobile */
+      padding-top: 2rem;
+    }
+    .tutorial-content {
+      padding-top: 56px; /* Weniger Abstand auf Mobile */
+    }
+    
+    h1 {
+      font-size: 2rem;
+      margin-top: 1rem;
+    }
+    
+    .tutorial-meta {
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+    
+    time {
+      margin-left: 0;
+    }
+  }
+  
+  .tutorial-content {
+    line-height: 1.8;
+    font-size: 1.125rem;
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+    padding-top: 80px; /* Abstand für Navigation */
+  }
+  
+  .tutorial-content :global(h2) {
+    font-size: 1.75rem;
+    margin: 2.5rem 0 1rem 0;
+  }
+  
+  .tutorial-content :global(h3) {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem 0;
+  }
+  
+  .tutorial-content :global(p) {
+    margin: 1.5rem 0;
+  }
+  
+  .tutorial-content :global(ul), 
+  .tutorial-content :global(ol) {
+    padding-left: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  
+  .tutorial-content :global(li) {
+    margin-bottom: 0.5rem;
+  }
+  
+  .tutorial-content :global(blockquote) {
+    border-left: 4px solid var(--accent-color);
+    padding-left: 1rem;
+    margin-left: 0;
+    font-style: italic;
+    color: var(--text-muted);
+  }
+</style>

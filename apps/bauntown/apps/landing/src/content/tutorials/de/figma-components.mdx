@@ -1,0 +1,189 @@
+---
+title: "Komponenten und Varianten in Figma"
+description: "Lerne, wie du Designsysteme mit wiederverwendbaren Komponenten und ihren Varianten in Figma erstellst."
+pubDate: 2025-03-27
+category: "UI & UX"
+image: "/images/tutorials/nobackground/figma-basics-bauntown-tutorial.png"
+author: "Anna Schmidt"
+course: "figma-basics"
+courseName: "Figma Grundlagen"
+lessonNumber: 3
+---
+
+import YouTubeVideo from '../../../components/YouTubeVideo.astro';
+import FigmaEmbed from '../../../components/FigmaEmbed.astro';
+
+# Komponenten und Varianten in Figma
+
+Willkommen zur dritten Lektion unseres Figma-Grundlagenkurses! In dieser Lektion werden wir uns mit Komponenten und Varianten beschäftigen - den Baublöcken für skalierbare und konsistente Designsysteme.
+
+<FigmaEmbed figmaUrl="https://www.figma.com/file/LknZMjWUMRFpYGVuNY7gNp/Figma-Komponenten-Übung" title="Komponenten & Varianten Übungsdatei" />
+
+## Was sind Komponenten?
+
+Komponenten in Figma sind wiederverwendbare Design-Elemente, die an mehreren Stellen in deinem Design eingesetzt werden können. Sie funktionieren ähnlich wie Komponenten in React oder Vue.js, falls du mit diesen Frameworks vertraut bist.
+
+Die Schlüsselkonzepte bei Komponenten sind:
+
+- **Main Component**: Die Hauptkomponente, die als "Master" oder Quelle dient
+- **Instance**: Eine Kopie der Hauptkomponente, die in deinen Designs verwendet wird
+- **Overrides**: Anpassungen an einer Instanz, die nicht die Hauptkomponente beeinflussen
+- **Inheritance**: Änderungen an der Hauptkomponente werden auf alle Instanzen übertragen
+
+## Komponenten erstellen und verwenden
+
+### Eine Komponente erstellen
+
+1. Gestalte das Element, das du als Komponente erstellen möchtest (z.B. ein Button)
+2. Wähle das Element aus
+3. Klicke auf das "Create Component"-Symbol in der oberen Toolbar oder drücke `Ctrl+Alt+K` (Windows) oder `⌘+Option+K` (Mac)
+
+Die Komponente wird nun mit einer lila Umrandung markiert, was anzeigt, dass es sich um eine Hauptkomponente handelt.
+
+### Komponenten-Instanzen verwenden
+
+Um eine Instanz einer Komponente zu erstellen:
+
+1. Wähle die Hauptkomponente aus
+2. Kopiere sie (`Ctrl+C` / `⌘+C`) und füge sie ein (`Ctrl+V` / `⌘+V`) oder ziehe sie mit der Alt-Taste gedrückt
+3. Oder finde die Komponente in der Assets-Seitenleiste und ziehe sie in dein Design
+
+### Komponenten organisieren
+
+Für ein effizientes Designsystem solltest du deine Komponenten organisieren:
+
+1. Erstelle einen separaten Frame oder eine Seite für dein Komponentensystem
+2. Gruppiere ähnliche Komponenten zusammen (z.B. alle Button-Varianten)
+3. Benenne Komponenten klar und konsistent (z.B. "Button/Primary", "Button/Secondary")
+4. Verwende Beschreibungen für Komponenten, um ihre Verwendung zu dokumentieren
+
+<YouTubeVideo videoId="k74IrUNaJVk" title="Figma Components Tutorial" />
+
+## Komponenten-Eigenschaften bearbeiten
+
+### Instanz-Overrides
+
+Instanzen können angepasst werden, ohne die Hauptkomponente zu beeinflussen:
+
+1. Wähle eine Instanz aus
+2. Ändere Eigenschaften wie Farbe, Text, Größe usw.
+3. Diese Änderungen gelten nur für diese spezifische Instanz
+
+Wenn du eine Eigenschaft zurücksetzen möchtest, klicke auf den Reset-Button (kreisförmiger Pfeil) neben der Eigenschaft im Properties-Panel.
+
+### Hauptkomponente aktualisieren
+
+Wenn du die Hauptkomponente änderst, werden diese Änderungen auf alle Instanzen übertragen:
+
+1. Finde und wähle die Hauptkomponente aus
+2. Nimm Änderungen vor
+3. Alle Instanzen werden aktualisiert, wobei Overrides erhalten bleiben
+
+### Detached Instances
+
+Manchmal möchtest du eine Instanz komplett von ihrer Hauptkomponente trennen:
+
+1. Rechtsklick auf eine Instanz
+2. Wähle "Detach Instance"
+3. Die Instanz wird zu einer unabhängigen Form oder Gruppe
+
+Beachte, dass diese Aktion nicht rückgängig gemacht werden kann, außer durch manuelles Ersetzen mit einer neuen Instanz.
+
+## Varianten
+
+Varianten sind ein mächtiges Feature in Figma, das es dir ermöglicht, verschiedene Zustände oder Versionen einer Komponente innerhalb einer einzigen Hauptkomponente zu definieren.
+
+### Varianten erstellen
+
+1. Erstelle mehrere ähnliche Komponenten (z.B. Button-Zustände: Normal, Hover, Pressed, Disabled)
+2. Wähle alle diese Komponenten aus
+3. Klicke auf "Combine as variants" in der Properties-Leiste oder im Rechtsklick-Menü
+
+### Varianten-Eigenschaften definieren
+
+Nach dem Kombinieren von Komponenten als Varianten:
+
+1. Im Properties-Panel erscheint ein "Variant"-Abschnitt
+2. Definiere die Eigenschaften für deine Varianten (z.B. "State": "Normal", "Hover", "Pressed")
+3. Du kannst mehrere Eigenschaften hinzufügen (z.B. "Size": "Small", "Medium", "Large")
+
+### Varianten verwenden
+
+Wenn du Varianten in deinem Design verwendest:
+
+1. Ziehe eine Instanz der Variante in dein Design
+2. Im Properties-Panel kannst du zwischen den verfügbaren Varianten wechseln
+3. In Prototypen kannst du Interaktionen definieren, die zwischen Varianten wechseln
+
+## Praktische Übungen
+
+Lass uns das Gelernte mit einigen praktischen Übungen festigen:
+
+### Übung 1: Button-Komponente mit Varianten
+
+1. Erstelle einen Button mit Hintergrund, Text und Padding
+2. Mache ihn zu einer Komponente
+3. Dupliziere den Button und ändere seinen Stil für verschiedene Zustände:
+   - Normal: Standardfarbe
+   - Hover: Leicht hellere Farbe
+   - Pressed: Dunklere Farbe
+   - Disabled: Ausgegraute Farbe
+4. Kombiniere diese als Varianten mit der Eigenschaft "State"
+5. Erstelle eine weitere Dimension mit "Size" (Small, Medium, Large)
+
+### Übung 2: Input-Feld-Komponente
+
+1. Erstelle ein Text-Input-Feld mit Label und Placeholder
+2. Mache es zu einer Komponente
+3. Erstelle Varianten für verschiedene Zustände:
+   - Empty: Nur Placeholder-Text
+   - Filled: Mit eingegebenem Text
+   - Focus: Mit Fokus-Umrandung
+   - Error: Mit Fehlermeldung
+4. Verwende diese Input-Felder in einem Formular-Design
+
+### Übung 3: Card-Komponente mit verschachtelten Komponenten
+
+1. Erstelle eine Card-Komponente mit Bild, Titel, Text und Button
+2. Mache den Button innerhalb der Card zu einer eigenen Komponente
+3. Erstelle verschiedene Card-Varianten (z.B. mit/ohne Bild, mit verschiedenen Layouts)
+4. Experimentiere mit Overrides für einzelne Card-Instanzen
+
+## Komponenten-Bibliotheken und Teams
+
+In professionellen Arbeitsumgebungen werden Komponenten oft in Bibliotheken organisiert:
+
+### Komponenten-Bibliothek erstellen
+
+1. Erstelle eine neue Figma-Datei für deine Bibliothek
+2. Organisiere deine Komponenten nach Kategorien
+3. Gehe zu File > Publish Library, um sie zu veröffentlichen
+
+### Bibliotheken in Teams verwenden
+
+1. Team-Mitglieder können eine veröffentlichte Bibliothek aktivieren
+2. Komponenten erscheinen im Assets-Panel
+3. Änderungen an der Bibliothek können an alle Team-Mitglieder weitergegeben werden
+
+## Best Practices für Komponenten
+
+- **Sinnvolle Namensgebung**: Verwende ein klares Benennungsschema (z.B. "Kategorie/Unterkategorie/Variante")
+- **Beschreibungen hinzufügen**: Dokumentiere, wie und wann Komponenten verwendet werden sollten
+- **Varianten sinnvoll strukturieren**: Gruppiere ähnliche Komponenten als Varianten
+- **Auto Layout nutzen**: Verwende Auto Layout für flexible, responsive Komponenten
+- **Konsistente Eigenschaften**: Halte Abstände, Radien und andere Eigenschaften konsistent
+- **Versionierung**: Kommuniziere größere Änderungen an Komponenten mit deinem Team
+
+## Für die nächste Lektion
+
+In der nächsten Lektion werden wir uns mit **Auto Layout und Responsive Design** beschäftigen. Du wirst lernen, wie du flexible und anpassungsfähige Designs erstellst, die auf verschiedenen Bildschirmgrößen funktionieren.
+
+Bis dahin empfehle ich dir, mit Komponenten und Varianten zu experimentieren. Versuche, ein kleines Designsystem mit grundlegenden UI-Elementen zu erstellen.
+
+## Hilfreiche Ressourcen
+
+- [Figma Components Documentation](https://help.figma.com/hc/en-us/articles/360038662654-Guide-to-Components-in-Figma)
+- [Figma Variants Documentation](https://help.figma.com/hc/en-us/articles/360056440594-Create-and-use-variants)
+- [Material Design System für Figma](https://www.figma.com/community/file/778763161265841481)
+
+Hast du Fragen zu Komponenten und Varianten? Hinterlasse gerne einen Kommentar unten!

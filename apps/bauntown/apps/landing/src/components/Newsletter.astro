@@ -1,0 +1,156 @@
+---
+import { getLangFromUrl, useTranslations } from "../utils/i18n";
+
+interface Props {
+  customTitle?: string;
+  customDescription?: string;
+}
+
+const { customTitle, customDescription } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<div class="newsletter-container">
+  <h2>{customTitle || t("join.newsletterTitle")}</h2>
+  <p class="newsletter-description">
+    {customDescription || t("join.newsletterDesc")}
+  </p>
+
+  <form class="newsletter-form" id="newsletterForm">
+    <input
+      type="email"
+      id="newsletterEmail"
+      name="email"
+      placeholder={t("join.emailPlaceholder")}
+      required
+    />
+    <button type="submit">{t("join.subscribe")}</button>
+  </form>
+
+  <div id="subscribeSuccess" class="subscribe-success" style="display: none;">
+    <p>{t("join.success")}</p>
+  </div>
+</div>
+
+<style>
+  .newsletter-container {
+    background-color: var(--card-bg);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Heller Modus */
+  :root:not(.dark) .newsletter-container {
+    background-color: var(--card-bg);
+  }
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+  }
+
+  .newsletter-description {
+    margin-bottom: 1.5rem;
+    color: var(--text-muted);
+  }
+
+  .newsletter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  input {
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border-color);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+    width: 100%;
+  }
+
+  /* Heller Modus für Eingabefelder */
+  :root:not(.dark) input {
+    background-color: var(--background-color);
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+  }
+
+  button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    width: max-content;
+  }
+
+  button:hover {
+    background-color: var(--accent-hover);
+  }
+
+  .subscribe-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  .subscribe-success p {
+    color: #10b981;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  /* Responsive layout for larger screens */
+  @media (min-width: 640px) {
+    .newsletter-form {
+      flex-direction: row;
+    }
+
+    input {
+      flex: 1;
+    }
+
+    button {
+      flex-shrink: 0;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("newsletterForm");
+    const successMessage = document.getElementById("subscribeSuccess");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      // Simulate form submission (in a real app, this would send data to a server)
+      setTimeout(() => {
+        form.reset();
+        successMessage.style.display = "block";
+
+        // Hide success message after 5 seconds
+        setTimeout(() => {
+          successMessage.style.display = "none";
+        }, 5000);
+      }, 1000);
+    });
+  });
+</script>

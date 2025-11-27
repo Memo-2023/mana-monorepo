@@ -1,0 +1,463 @@
+---
+import { getLangFromUrl, useTranslations } from "../utils/i18n";
+import Navigation from "../components/Navigation.astro";
+import NavigationTracking from "../components/NavigationTracking.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "BaunTown - A Community of Builders" } =
+  Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <script
+      defer
+      src="https://umami.manacore.ai/script.js"
+      data-website-id="587fd41b-363c-4c31-848d-cb93029d6dd9"></script>
+  </head>
+  <body>
+    <Navigation />
+    <NavigationTracking />
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-top">
+            <div class="footer-logo-container">
+              <svg width="40" height="40" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" class="footer-logo">
+  <rect x="0.666667" y="7.33334" width="10.6667" height="2.66667" stroke="currentColor" stroke-width="0.8" fill="none"/>
+  <rect x="2" y="4.66666" width="8" height="2.66667" stroke="currentColor" stroke-width="0.8" fill="none"/>
+  <rect x="3.33333" y="2" width="5.33333" height="2.66667" stroke="currentColor" stroke-width="0.8" fill="none"/>
+</svg>
+              <div class="footer-tagline">
+                <h3>BaunTown</h3>
+                <p>Custom Build Future</p>
+              </div>
+            </div>
+
+            <div class="footer-links-container">
+              <div class="footer-links-column">
+                <h4>Entdecken</h4>
+                <a href={`/${lang}/news`}>News</a>
+                <a href={`/${lang}/tutorials`}>Tutorials</a>
+                <a href={`/${lang}/projects`}>Projekte</a>
+              </div>
+
+              <div class="footer-links-column">
+                <h4>Community</h4>
+                <a href={`/${lang}/vision`}>Vision</a>
+                <a href={`/${lang}/join`}>Mitmachen</a>
+                <a href={`/${lang}/support`} class="support-link">
+                  <span class="coffee-icon">☕</span> Kaffee spendieren
+                </a>
+              </div>
+
+              <div class="footer-links-column">
+                <h4>Sprachen</h4>
+                <a href="/de">Deutsch</a>
+                <a href="/en">English</a>
+                <a href="/it">Italiano</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-bottom">
+            <p>
+              &copy; {new Date().getFullYear()} BaunTown • {
+                t("footer.copyright")
+              }
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <script is:inline>
+      // Prevent theme flash - this script runs immediately, not after DOM loads
+      function setTheme() {
+        const theme =
+          localStorage.getItem("theme") ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+        document.documentElement.classList.toggle("dark", theme === "dark");
+        document.documentElement.style.visibility = "visible";
+      }
+      setTheme();
+    </script>
+
+    <!-- Global scroll utilities script -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add a global scrolling utility function that accounts for fixed navbar
+        // @ts-ignore - Extending Window
+        window.scrollToElement = function (element, offset = 0) {
+          // Get navbar height
+          const navbar = document.querySelector("nav");
+          const navbarHeight = navbar ? navbar.offsetHeight : 0;
+
+          // Calculate position to scroll to
+          const elementPosition =
+            element.getBoundingClientRect().top + window.pageYOffset;
+          const offsetPosition = elementPosition - navbarHeight - offset;
+
+          // Scroll
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth",
+          });
+        };
+
+        // Add scroll-margin-top to all sections to account for fixed navbar
+        document
+          .querySelectorAll("section[id], div[id]:not(#matrixCanvas)")
+          .forEach((section) => {
+            const navbar = document.querySelector("nav");
+            const navbarHeight = navbar ? navbar.offsetHeight : 0;
+            section.style.scrollMarginTop = navbarHeight + 20 + "px";
+          });
+      });
+    </script>
+    
+    <!-- Initialize Analytics -->
+    <script>
+      import { initAnalytics } from '../scripts/analytics';
+      initAnalytics();
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --background-gradient-overlay: rgba(229,231,235,1); /* Light Mode Overlay */
+    --accent-color: #f97316;
+    --accent-color-rgb: 249, 115, 22;
+    --accent-hover: #ea580c;
+    --text-color: #1f2937;
+    --text-muted: #4b5563;
+    --background-color: #e5e7eb; /* Dunkleres Grau für mehr Kontrast */
+    --background-color-rgb: 229, 231, 235;
+    --card-bg: #fff; /* Cards remain white */
+    --border-color: #e5e7eb;
+    --border-color-rgb: 229, 231, 235;
+    --hover-bg: #f9fafb;
+  }
+
+  :root.dark {
+    --background-gradient-overlay: rgba(31,41,55,1); /* Dark Mode Overlay */
+    --accent-color: #f97316;
+    --accent-color-rgb: 249, 115, 22;
+    --accent-hover: #fb923c;
+    --text-color: #f9fafb;
+    --text-muted: #9ca3af;
+    --background-color: #111827;
+    --background-color-rgb: 17, 24, 39;
+    --card-bg: #1f2937;
+    --border-color: #374151;
+    --border-color-rgb: 55, 65, 81;
+    --hover-bg: #374151;
+  }
+
+  /* Ensure text color is white in dark mode */
+  :root.dark .text-dark-color {
+    color: #f9fafb !important;
+  }
+
+  /* Footer logo style */
+  .footer-logo {
+    height: 40px;
+    width: auto;
+    color: #111;
+    stroke-width: 0.8;
+    transition: color 0.2s;
+  }
+  :root.dark .footer-logo {
+    color: #fff;
+  }
+
+  /* Prevent theme flash */
+  html {
+    visibility: hidden;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    transition:
+      color 0.2s ease-in-out,
+      background-color 0.2s ease-in-out;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+  }
+
+  /* body.menu-open style now deprecated with new mobile navigation */
+
+  /* Navigation wrapper styles have been removed */
+
+  main {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem 1rem 2rem;
+    flex: 1;
+    position: relative; /* Create stacking context for sticky elements */
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0 0 1rem 0;
+    line-height: 1.2;
+  }
+
+  a {
+    color: var(--accent-color);
+  }
+
+  footer {
+    border-top: 1px solid var(--border-color);
+    padding: 3rem 0 2rem;
+    color: var(--text-muted);
+    background-color: var(--background-color);
+  }
+
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .footer-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .footer-logo-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex: 0 0 auto;
+    max-width: 220px;
+  }
+
+  .footer-tagline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .footer-tagline h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  .footer-tagline p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .footer-links-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3rem;
+    flex: 1;
+    justify-content: flex-start;
+  }
+
+  .footer-links-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 140px;
+    align-items: flex-start;
+  }
+
+  .footer-links-column h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: var(--text-color);
+  }
+
+  .footer-links-column a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+  }
+
+  .footer-links-column a:hover {
+    color: var(--accent-color);
+    position: relative;
+  }
+
+  .footer-links-column a:not(.support-link)::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: var(--accent-color);
+    transition: width 0.3s ease;
+  }
+
+  .footer-links-column a:not(.support-link):hover::after {
+    width: 100%;
+  }
+
+  .support-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+    color: var(--accent-color) !important;
+    padding: 0.4rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid var(--accent-color);
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      transform 0.2s ease;
+    width: fit-content;
+  }
+
+  .support-link:hover {
+    background-color: var(--accent-color);
+    color: white !important;
+    transform: translateY(-2px);
+  }
+
+  .coffee-icon {
+    font-size: 1.1rem;
+  }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .footer-bottom p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 992px) {
+    .footer-top {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .footer-links-container {
+      width: 100%;
+    }
+
+    .footer-links-column {
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .footer-content {
+      gap: 1.5rem;
+    }
+
+    .footer-links-container {
+      gap: 2rem;
+    }
+  }
+
+  .container {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+
+  .section {
+    margin-bottom: 3rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+  }
+  .section-header h2 {
+    color: var(--text-color);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    transition: color 0.2s;
+  }
+
+  @media (max-width: 768px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Code block styling */
+  pre {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+  }
+
+  code {
+    font-family: Menlo, Monaco, "Courier New", monospace;
+  }
+</style>

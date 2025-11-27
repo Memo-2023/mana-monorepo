@@ -1,0 +1,320 @@
+---
+import Layout from './Layout.astro';
+import { getLangFromUrl, useTranslations } from '../utils/i18n';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { data } = project;
+const lang = getLangFromUrl(Astro.url);
+
+// Format date based on language
+const formattedDate = new Intl.DateTimeFormat(lang === 'de' ? 'de-DE' : lang === 'it' ? 'it-IT' : 'en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+}).format(data.pubDate);
+
+// Category translation
+const t = useTranslations(lang);
+const categoryKey = `projects.categories.${data.category}` as const;
+const statusKey = `projects.status.${data.status}` as const;
+---
+
+<Layout title={data.title} description={data.description}>
+  <div class="project-header">    
+    {data.image && <img src={data.image} alt={data.title} class="featured-image" />}
+    <h1>{data.title}</h1>
+    <p class="description">{data.description}</p>
+  </div>
+  
+  <article class="project-content">
+    <div class="project-sidebar">
+      <div class="sidebar-section">
+        <h3>{t('projects.technologies')}</h3>
+        {data.technologies && data.technologies.length > 0 ? (
+          <div class="tech-tags">
+            {data.technologies.map(tech => (
+              <span class="tech-tag">{tech}</span>
+            ))}
+          </div>
+        ) : <p>-</p>}
+      </div>
+      
+      <div class="sidebar-section">
+        <h3>{t(`projects.categories.${data.category}`)}</h3>
+        <span class="category-badge">{t(categoryKey)}</span>
+      </div>
+      
+      <div class="sidebar-section">
+        <h3>{t(`projects.status.${data.status}`)}</h3>
+        <span class="status-badge" class:list={[data.status]}>{t(statusKey)}</span>
+      </div>
+      
+      <div class="sidebar-section">
+        <h3>{t('projects.demo')}</h3>
+        {data.demoUrl ? (
+          <a href={data.demoUrl} target="_blank" rel="noopener" class="external-link">
+            {t('projects.demo')}
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </a>
+        ) : <p>-</p>}
+      </div>
+      
+      <div class="sidebar-section">
+        <h3>{t('projects.github')}</h3>
+        {data.githubUrl ? (
+          <a href={data.githubUrl} target="_blank" rel="noopener" class="external-link">
+            GitHub
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </a>
+        ) : <p>-</p>}
+      </div>
+    </div>
+    
+    <div class="project-main">
+      <slot />
+      
+      <div class="project-meta">
+        <span class="author">{data.author}</span>
+        <time datetime={data.pubDate.toISOString()}>{formattedDate}</time>
+      </div>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .project-header {
+    margin-top: 80px; /* Mehr Abstand zur Navigation */
+    margin-bottom: 3rem;
+    max-width: 1024px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+    padding-top: 1rem;
+  }
+  
+  .project-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.875rem;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    text-align: left;
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  time {
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: left;
+    line-height: 1.2;
+  }
+  
+  .description {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    text-align: left;
+  }
+  
+  .author {
+    color: var(--text-muted);
+  }
+  
+  .featured-image {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    margin-bottom: 2rem;
+  }
+  
+  .project-content {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: 2rem;
+    max-width: 1024px;
+    margin: 0 auto 4rem auto;
+  }
+  
+  .project-sidebar {
+    padding: 1.5rem;
+    background-color: var(--card-bg);
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+    height: fit-content;
+  }
+  
+  .sidebar-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .sidebar-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  
+  .sidebar-section h3 {
+    font-size: 1rem;
+    margin: 0 0 0.75rem 0;
+  }
+  
+  .tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .tech-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    background-color: rgba(var(--accent-color-rgb, 249, 115, 22), 0.1);
+    color: var(--accent-color);
+    border-radius: 0.25rem;
+  }
+  
+  .category-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background-color: rgba(var(--accent-color-rgb, 249, 115, 22), 0.1);
+    color: var(--accent-color);
+    border-radius: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .status-badge.active {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: rgb(16, 185, 129);
+  }
+  
+  .status-badge.completed {
+    background-color: rgba(79, 70, 229, 0.2);
+    color: rgb(79, 70, 229);
+  }
+  
+  .status-badge.archived {
+    background-color: rgba(107, 114, 128, 0.2);
+    color: rgb(107, 114, 128);
+  }
+  
+  .external-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.2s ease;
+  }
+  
+  .external-link:hover {
+    opacity: 0.8;
+  }
+  
+  .project-main {
+    max-width: 680px;
+  }
+  
+  .project-main :global(h2) {
+    font-size: 1.75rem;
+    margin: 2.5rem 0 1rem 0;
+    line-height: 1.3;
+  }
+  
+  .project-main :global(h3) {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem 0;
+    line-height: 1.3;
+  }
+  
+  .project-main :global(p) {
+    margin: 1.5rem 0;
+    line-height: 1.8;
+  }
+  
+  .project-main :global(ul), 
+  .project-main :global(ol) {
+    padding-left: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  
+  .project-main :global(li) {
+    margin-bottom: 0.5rem;
+  }
+  
+  .project-main :global(blockquote) {
+    border-left: 4px solid var(--accent-color);
+    padding-left: 1rem;
+    margin-left: 0;
+    font-style: italic;
+    color: var(--text-muted);
+  }
+  
+  @media (max-width: 1024px) {
+    .project-content {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    
+    .project-sidebar {
+      order: 2;
+    }
+    
+    .project-main {
+      order: 1;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .project-header {
+      margin-top: 20px; /* Weniger Abstand auf mobilen Geräten */
+      padding-top: 2rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      margin-top: 1rem;
+    }
+    
+    .project-meta {
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+    
+    time {
+      margin-left: 0;
+    }
+  }
+</style>

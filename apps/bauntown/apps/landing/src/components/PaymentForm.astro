@@ -1,0 +1,623 @@
+---
+import { useTranslations } from "../utils/i18n";
+
+interface Props {
+  lang: "de" | "en" | "it";
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<div class="payment-container">
+  <div class="payment-options">
+    <div class="payment-type-selector">
+      <button id="one-time" class="payment-type-btn active"
+        >{t("support.onetime")}</button
+      >
+      <button id="recurring" class="payment-type-btn"
+        >{t("support.recurring")}</button
+      >
+    </div>
+
+    <div class="coffee-options">
+      <h3>{t("support.buyMeACoffee")}</h3>
+      <div class="coffee-selector">
+        <div
+          class="coffee-option"
+          data-price="3"
+          data-price-id-onetime="price_1R8xkmAZjQCYS0ZJk6PZtJUm"
+          data-price-id-recurring="price_1R8xkmAZjQCYS0ZJSBkFXcE1"
+        >
+          <div class="coffee-icon small-coffee">☕</div>
+          <div class="coffee-details">
+            <h4>Kleiner Kaffee</h4>
+            <p>3€</p>
+          </div>
+        </div>
+        <div
+          class="coffee-option active"
+          data-price="5"
+          data-price-id-onetime="price_1R8xmlAZjQCYS0ZJ4QCSZFFN"
+          data-price-id-recurring="price_1R8xn3AZjQCYS0ZJIXddpl0O"
+        >
+          <div class="coffee-icon medium-coffee">☕</div>
+          <div class="coffee-details">
+            <h4>Mittlerer Kaffee</h4>
+            <p>5€</p>
+          </div>
+        </div>
+        <div
+          class="coffee-option"
+          data-price="8"
+          data-price-id-onetime="price_1R8xp4AZjQCYS0ZJCkTA6gCs"
+          data-price-id-recurring="price_1R8xpIAZjQCYS0ZJ93nqMjop"
+        >
+          <div class="coffee-icon large-coffee">☕</div>
+          <div class="coffee-details">
+            <h4>Großer Kaffee</h4>
+            <p>8€</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="payment-methods">
+      <p>{t("support.paymentMethod")}</p>
+      <div class="payment-buttons">
+        <button id="stripe-button" class="payment-method-btn">
+          <svg
+            viewBox="0 0 60 25"
+            xmlns="http://www.w3.org/2000/svg"
+            width="60"
+            height="25"
+            class="UserLogo variant--"
+          >
+            <title>Stripe logo</title>
+            <path
+              fill="var(--text-color)"
+              d="M59.64 14.28h-8.06c.19 1.93 1.6 2.55 3.2 2.55 1.64 0 2.96-.37 4.05-.95v3.32a8.33 8.33 0 0 1-4.56 1.1c-4.01 0-6.83-2.5-6.83-7.48 0-4.19 2.39-7.52 6.3-7.52 3.92 0 5.96 3.28 5.96 7.5 0 .4-.04 1.26-.06 1.48zm-5.92-5.62c-1.03 0-2.17.73-2.17 2.58h4.25c0-1.85-1.07-2.58-2.08-2.58zM40.95 20.3c-1.44 0-2.32-.6-2.9-1.04l-.02 4.63-4.12.87V5.57h3.76l.08 1.02a4.7 4.7 0 0 1 3.23-1.29c2.9 0 5.62 2.6 5.62 7.4 0 5.23-2.7 7.6-5.65 7.6zM40 8.95c-.95 0-1.54.34-1.97.81l.02 6.12c.4.44.98.78 1.95.78 1.52 0 2.54-1.65 2.54-3.87 0-2.15-1.04-3.84-2.54-3.84zM28.24 5.57h4.13v14.44h-4.13V5.57zm0-4.7L32.37 0v3.36l-4.13.88V.88zm-4.32 9.35v9.79H19.8V5.57h3.7l.12 1.22c1-1.77 3.07-1.41 3.62-1.22v3.79c-.52-.17-2.29-.43-3.32.86zm-8.55 4.72c0 2.43 2.6 1.68 3.12 1.46v3.36c-.55.3-1.54.54-2.89.54a4.15 4.15 0 0 1-4.27-4.24l.02-13.17 4.02-.86v3.54h3.14V9.1h-3.14v5.85zm-4.91.7c0 2.97-2.31 4.66-5.73 4.66a11.2 11.2 0 0 1-4.46-.93v-3.93c1.38.75 3.1 1.31 4.46 1.31.92 0 1.53-.24 1.53-1C6.26 13.77 0 14.51 0 9.95 0 7.04 2.28 5.3 5.62 5.3c1.36 0 2.72.2 4.09.75v3.88a9.23 9.23 0 0 0-4.1-1.06c-.86 0-1.44.25-1.44.9 0 1.85 6.29.97 6.29 5.88z"
+              fill-rule="evenodd"></path>
+          </svg>
+          <span>{t("support.payWithStripe")}</span>
+        </button>
+        {
+          /* PayPal Button wird später implementiert
+        <button id="paypal-button" class="payment-method-btn">
+          <svg
+            width="101"
+            height="32"
+            viewBox="0 0 101 32"
+            preserveAspectRatio="xMinYMin meet"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill="var(--text-color)"
+              d="M12.237 2.8h-4.307c-.323 0-.645.241-.698.549l-2.272 14.78c0 .307.247.524.57.524h2.272c.323 0 .644-.217.698-.549l.6-3.81c.054-.307.376-.549.699-.549h1.347c3.619 0 5.703-1.78 6.25-5.114.247-1.483.011-2.654-.701-3.466-.787-.856-2.166-1.365-3.94-1.365zm.645 4.979c-.298 1.975-1.807 1.975-3.265 1.975h-.834l.576-3.712c.032-.228.268-.417.5-.417h.377c.998 0 1.942 0 2.428.58.29.347.381.87.218 1.574zM29.667 7.723h-2.318c-.23 0-.422.19-.499.416l-.124.81-.199-.294c-.624-.929-2.02-1.243-3.413-1.243-3.178 0-5.899 2.464-6.43 5.91-.277 1.72.117 3.36 1.078 4.51.887 1.054 2.15 1.497 3.656 1.497 2.586 0 4.015-1.69 4.015-1.69l-.128.818c0 .305.222.545.545.545h2.089c.323 0 .645-.24.698-.548L29.99 8.27c.055-.306-.19-.547-.323-.547zm-3.31 5.087c-.277 1.676-1.586 2.804-3.265 2.804-.842 0-1.517-.277-1.952-.801-.427-.524-.588-1.268-.454-2.096.266-1.688 1.596-2.866 3.243-2.866.823 0 1.498.277 1.953.8.455.526.631 1.292.476 2.159zM43.148 7.723h-2.337c-.222 0-.429.153-.552.371l-3.192 4.797-1.35-4.599c-.091-.304-.366-.547-.698-.547h-2.293c-.306 0-.501.305-.41.589l2.553 7.76-2.399 3.466c-.19.282.007.67.343.67h2.293c.222 0 .428-.133.552-.35l7.735-11.446c.189-.305-.008-.67-.245-.67v-.011zM48.61 2.8h-4.308c-.323 0-.644.241-.698.549l-2.337 14.78c0 .307.247.524.57.524h2.272c.33 0 .645-.217.699-.549l.6-3.81c.053-.307.375-.549.698-.549h1.348c3.618 0 5.702-1.78 6.25-5.114.248-1.483.011-2.654-.701-3.466-.788-.856-2.165-1.365-3.94-1.365h-.453zm.645 4.979c-.298 1.975-1.807 1.975-3.265 1.975h-.835l.577-3.712c.031-.228.267-.417.5-.417h.377c.998 0 1.942 0 2.428.58.289.347.38.87.218 1.574zM66.04 7.723h-2.318c-.23 0-.422.19-.5.416l-.124.81-.199-.294c-.624-.929-2.02-1.243-3.412-1.243-3.179 0-5.9 2.464-6.431 5.91-.277 1.72.117 3.36 1.078 4.51.888 1.054 2.15 1.497 3.656 1.497 2.586 0 4.015-1.69 4.015-1.69l-.128.818c0 .305.222.545.545.545h2.089c.323 0 .645-.24.698-.548l1.354-8.763c.056-.306-.189-.545-.323-.547v-.001zm-3.31 5.087c-.277 1.676-1.586 2.804-3.265 2.804-.842 0-1.517-.277-1.952-.801-.428-.524-.588-1.268-.454-2.096.265-1.688 1.596-2.866 3.242-2.866.823 0 1.499.277 1.953.8.456.526.632 1.292.477 2.159zM71.044 2.8h-2.23c-.323 0-.6.24-.652.549L66 18.11c0 .306.244.54.552.54h2.229c.322 0 .7-.234.754-.549l2.161-14.752c.107-.305-.204-.549-.652-.549z"
+            ></path>
+          </svg>
+          <span>{t("support.payWithPayPal")}</span>
+        </button>
+        */
+        }
+      </div>
+    </div>
+
+    <div id="payment-message"></div>
+  </div>
+</div>
+
+<style>
+  .payment-container {
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 550px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(var(--border-color-rgb), 0.1);
+  }
+
+  .payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .payment-type-selector {
+    display: flex;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(var(--border-color-rgb), 0.2);
+  }
+
+  .payment-type-btn {
+    flex: 1;
+    padding: 1.2rem;
+    border: none;
+    background: var(--card-bg);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    color: var(--text-color);
+    font-size: 1.1rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .payment-type-btn:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: transparent;
+    transition: all 0.3s ease;
+  }
+
+  .payment-type-btn.active {
+    background-color: rgba(var(--accent-color-rgb), 0.1);
+    color: var(--accent-color);
+  }
+
+  .payment-type-btn.active:after {
+    background-color: var(--accent-color);
+  }
+
+  /* Coffee Options */
+  .coffee-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .coffee-options h3 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+    color: var(--text-color);
+  }
+
+  .coffee-selector {
+    display: flex;
+    gap: 1.2rem;
+    justify-content: space-between;
+  }
+
+  .coffee-option {
+    flex: 1;
+    border: 2px solid transparent;
+    background-color: rgba(var(--border-color-rgb), 0.05);
+    border-radius: 12px;
+    padding: 1.2rem 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .coffee-option:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  .coffee-option.active {
+    border-color: var(--accent-color);
+    background-color: rgba(var(--accent-color-rgb), 0.08);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .coffee-icon {
+    margin-bottom: 0.8rem;
+    transition: transform 0.3s ease;
+  }
+
+  .coffee-option:hover .coffee-icon {
+    transform: scale(1.1);
+  }
+
+  .small-coffee {
+    font-size: 1.5rem;
+  }
+
+  .medium-coffee {
+    font-size: 2rem;
+  }
+
+  .large-coffee {
+    font-size: 2.5rem;
+  }
+
+  .coffee-details h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  .coffee-details p {
+    margin: 0.25rem 0 0 0;
+    font-weight: 600;
+    color: var(--accent-color);
+    font-size: 1.2rem;
+  }
+
+  .payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .payment-methods p {
+    text-align: center;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .payment-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .payment-method-btn {
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--border-color-rgb), 0.15);
+    background-color: var(--background-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+    color: var(--text-color);
+    font-weight: 500;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .payment-method-btn:hover {
+    background-color: var(--hover-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .payment-method-btn span {
+    font-weight: 600;
+  }
+
+  #payment-message {
+    color: var(--accent-color);
+    text-align: center;
+    padding: 1.2rem;
+    margin-top: 1rem;
+    border-radius: 12px;
+    display: none;
+    font-weight: 500;
+  }
+
+  #payment-message.success {
+    background-color: rgba(var(--accent-color-rgb), 0.1);
+    border: 1px solid var(--accent-color);
+    display: block;
+  }
+
+  #payment-message.error {
+    background-color: rgba(255, 0, 0, 0.1);
+    border: 1px solid red;
+    color: red;
+    display: block;
+  }
+
+  @media (max-width: 480px) {
+    .payment-container {
+      padding: 1.5rem;
+    }
+
+    .coffee-selector {
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .coffee-option {
+      padding: 1rem;
+    }
+
+    .payment-type-btn {
+      padding: 1rem;
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<script>
+  // Import Stripe and PayPal libraries
+  import { loadStripe } from "@stripe/stripe-js";
+  // import { loadScript } from "@paypal/paypal-js"; // Wird später benötigt
+  import { trackEvent, EVENTS } from '../scripts/analytics';
+
+  // TypeScript-Definitionen für Plausible (legacy)
+  declare global {
+    interface Window {
+      plausible?: (
+        eventName: string,
+        options?: { props?: Record<string, any> }
+      ) => void;
+    }
+  }
+
+  // Interface für Coffee Option Element
+  interface CoffeeOptionElement extends Element {
+    dataset: {
+      price: string;
+      priceIdOnetime: string;
+      priceIdRecurring: string;
+    };
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const oneTimeBtn = document.getElementById("one-time");
+    const recurringBtn = document.getElementById("recurring");
+    const stripeBtn = document.getElementById("stripe-button");
+    // const paypalBtn = document.getElementById("paypal-button"); // Wird später benötigt
+    const coffeeOptions =
+      document.querySelectorAll<CoffeeOptionElement>(".coffee-option");
+    const paymentMessage = document.getElementById("payment-message");
+
+    if (!paymentMessage) {
+      console.error("Payment message element not found");
+      return;
+    }
+
+    // Kaffeegrößen-Auswahl
+    let selectedCoffeeOption = document.querySelector<CoffeeOptionElement>(
+      ".coffee-option.active"
+    );
+    let selectedAmount = Number(selectedCoffeeOption?.dataset.price || 5);
+    let selectedPriceId = selectedCoffeeOption?.dataset.priceIdOnetime;
+
+    // Event-Listener für Kaffee-Optionen
+    coffeeOptions.forEach((option) => {
+      option.addEventListener("click", () => {
+        // Vorherige Auswahl zurücksetzen
+        coffeeOptions.forEach((opt) => opt.classList.remove("active"));
+
+        // Neue Auswahl aktivieren
+        option.classList.add("active");
+        selectedCoffeeOption = option;
+        selectedAmount = Number(option.dataset.price);
+
+        // Preis-ID basierend auf dem Zahlungstyp setzen
+        if (recurringBtn?.classList.contains("active")) {
+          selectedPriceId = option.dataset.priceIdRecurring;
+        } else {
+          selectedPriceId = option.dataset.priceIdOnetime;
+        }
+
+        // Plausible Event für Kaffeegrößen-Auswahl
+        const coffeeTitle = option.querySelector("h4");
+        if (coffeeTitle) {
+          trackEvent(EVENTS.COFFEE_SELECT, {
+            size: coffeeTitle.textContent,
+            amount: selectedAmount,
+            type: recurringBtn?.classList.contains("active") ? "recurring" : "one-time"
+          });
+        }
+      });
+    });
+
+    // Toggle zwischen Zahlungstypen
+    oneTimeBtn?.addEventListener("click", () => {
+      oneTimeBtn.classList.add("active");
+      recurringBtn?.classList.remove("active");
+
+      // Preis-ID aktualisieren
+      if (selectedCoffeeOption) {
+        selectedPriceId = selectedCoffeeOption.dataset.priceIdOnetime;
+      }
+
+      // Plausible Event für Einmalzahlung
+      trackEvent(EVENTS.PAYMENT_TYPE_CHANGE, {
+        type: "one-time",
+        amount: selectedAmount
+      });
+    });
+
+    recurringBtn?.addEventListener("click", () => {
+      recurringBtn.classList.add("active");
+      oneTimeBtn?.classList.remove("active");
+
+      // Preis-ID aktualisieren
+      if (selectedCoffeeOption) {
+        selectedPriceId = selectedCoffeeOption.dataset.priceIdRecurring;
+      }
+
+      // Plausible Event für wiederkehrende Zahlung
+      trackEvent(EVENTS.PAYMENT_TYPE_CHANGE, {
+        type: "recurring",
+        amount: selectedAmount
+      });
+    });
+
+    // Dieser Stripe Key wird aus den Netlify Umgebungsvariablen geladen
+    const stripePromise = loadStripe(
+      import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_placeholder"
+    );
+
+    // Stripe payment processing
+    stripeBtn?.addEventListener("click", async () => {
+      const amount = selectedAmount;
+      const isRecurring = recurringBtn?.classList.contains("active");
+      const priceId = selectedPriceId;
+
+      paymentMessage.textContent = "Verarbeite Zahlung...";
+      paymentMessage.classList.remove("success", "error");
+      paymentMessage.style.display = "block";
+
+      // Plausible Event für Stripe-Zahlungsstart
+      const coffeeTitle = selectedCoffeeOption?.querySelector("h4");
+      trackEvent(EVENTS.CHECKOUT_START, {
+        provider: "stripe",
+        amount: amount,
+        type: isRecurring ? "recurring" : "one-time",
+        coffeeSize: coffeeTitle?.textContent || "Mittlerer Kaffee",
+        priceId: selectedPriceId
+      });
+
+      try {
+        // Create a payment intent on the server using Netlify Functions
+        const response = await fetch(
+          "/.netlify/functions/create-payment-intent",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              amount,
+              isRecurring,
+              priceId,
+              coffeeSize: coffeeTitle?.textContent || "Mittlerer Kaffee",
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Netzwerkantwort nicht ok");
+        }
+
+        const data = await response.json();
+
+        console.log("Payment response data:", data);
+
+        // Option 1: Direkt zur Stripe URL weiterleiten
+        if (data.url) {
+          console.log("Redirecting to checkout URL:", data.url);
+          // Kurze Verzögerung für UX
+          setTimeout(() => {
+            window.location.href = data.url;
+          }, 500);
+          return; // Wichtig: Return hier, damit der Rest nicht ausgeführt wird
+        }
+
+        // Wenn keine URL vorhanden ist, versuchen wir es mit redirectToCheckout
+        if (data.sessionId || data.id) {
+          console.log(
+            "Using redirectToCheckout with session ID:",
+            data.sessionId || data.id
+          );
+
+          // Initialisiere Stripe
+          const stripe = await stripePromise;
+          if (!stripe) {
+            throw new Error("Stripe konnte nicht initialisiert werden");
+          }
+
+          const { error } = await stripe.redirectToCheckout({
+            sessionId: data.sessionId || data.id,
+          });
+
+          if (error) {
+            console.error("Checkout redirect error:", error);
+            throw new Error(error.message);
+          }
+        } else {
+          throw new Error("Keine Checkout-URL oder Session-ID erhalten");
+        }
+
+        // Erfolgreiche Zahlung
+        paymentMessage.textContent = `Zahlung über ${amount}€ ${isRecurring ? "(regelmäßig)" : "(einmalig)"} erfolgreich!`;
+        paymentMessage.classList.add("success");
+        paymentMessage.classList.remove("error");
+      } catch (error: unknown) {
+        console.error("Zahlungsfehler:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unbekannter Fehler";
+        paymentMessage.textContent = `Fehler: ${errorMessage}`;
+        paymentMessage.classList.add("error");
+        paymentMessage.classList.remove("success");
+
+        // Plausible Event für Zahlungsfehler
+        trackEvent('payment-error', {
+          provider: "stripe",
+          error: errorMessage
+        });
+      }
+    });
+
+    // PayPal payment processing wird später implementiert
+    /*
+    paypalBtn?.addEventListener("click", async () => {
+      const amount = selectedAmount;
+      const isRecurring = recurringBtn?.classList.contains("active");
+      const priceId = selectedPriceId;
+
+      paymentMessage.textContent = "Processing payment...";
+      paymentMessage.classList.remove("success", "error");
+      paymentMessage.style.display = "block";
+
+      // Plausible Event für PayPal-Zahlungsstart
+      const coffeeTitle = selectedCoffeeOption?.querySelector("h4");
+      trackEvent(EVENTS.CHECKOUT_START, {
+        provider: "paypal",
+        amount: amount,
+        type: isRecurring ? "recurring" : "one-time",
+        coffeeSize: coffeeTitle?.textContent || "Mittlerer Kaffee"
+      });
+
+      try {
+        // Create a PayPal order on the server using Netlify Functions
+        const response = await fetch(
+          "/.netlify/functions/create-paypal-order",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              amount,
+              isRecurring,
+              priceId,
+              coffeeSize: coffeeTitle?.textContent || "Mittlerer Kaffee",
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        const data = await response.json();
+
+        // For demo purposes, we'll simulate a successful payment
+        setTimeout(() => {
+          paymentMessage.textContent = `Payment of €${amount} ${isRecurring ? "(recurring)" : "(one-time)"} successful!`;
+          paymentMessage.classList.add("success");
+          paymentMessage.classList.remove("error");
+        }, 1500);
+      } catch (error: unknown) {
+        console.error("PayPal-Fehler:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unbekannter Fehler";
+        paymentMessage.textContent = `Fehler: ${errorMessage}`;
+        paymentMessage.classList.add("error");
+        paymentMessage.classList.remove("success");
+
+        // Plausible Event für Zahlungsfehler
+        trackEvent('payment-error', {
+          provider: "paypal",
+          error: errorMessage
+        });
+      }
+    });
+    */
+  });
+</script>

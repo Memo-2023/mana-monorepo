@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "pocketbase-voxel": {
+      "command": "node",
+      "args": ["/Users/tillschneider/Documents/__00__Code/uload/mcp-servers/pocketbase-mcp/build/index.js"],
+      "env": {
+        "POCKETBASE_URL": "https://pb.voxelava.com",
+        "POCKETBASE_ADMIN_EMAIL": "till.schneider@memoro.ai",
+        "POCKETBASE_ADMIN_PASSWORD": "p0ck3t-RA1N"
+      }
+    }
+  }
+}

@@ -1,0 +1,324 @@
+---
+import Layout from './Layout.astro';
+import { getLangFromUrl, useTranslations } from '../utils/i18n';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  mission: CollectionEntry<'missions'>;
+}
+
+const { mission } = Astro.props;
+const { data } = mission;
+const lang = getLangFromUrl(Astro.url);
+
+// Format date based on language
+const formattedDate = new Intl.DateTimeFormat(lang === 'de' ? 'de-DE' : 'en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+}).format(data.pubDate);
+
+// Get translations
+const t = useTranslations(lang);
+const difficultyKey = `missions.difficulty.${data.difficulty}` as const;
+const statusKey = `missions.status.${data.status}` as const;
+---
+
+<Layout title={data.title} description={data.description}>
+  <div class="mission-header">
+    {data.image && <img src={data.image} alt={data.title} class="featured-image" />}
+    
+    <div class="status-badge" data-status={data.status}>
+      {t(statusKey)}
+    </div>
+    
+    <h1>{data.title}</h1>
+    <p class="description">{data.description}</p>
+    
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="meta-label">{t('missions.difficulty')}</div>
+        <div class="difficulty-badge" data-difficulty={data.difficulty}>
+          {t(difficultyKey)}
+        </div>
+      </div>
+      
+      <div class="meta-item">
+        <div class="meta-label">{t('missions.duration')}</div>
+        <div class="meta-value">{data.duration}</div>
+      </div>
+      
+      <div class="meta-item">
+        <div class="meta-label">Date</div>
+        <div class="meta-value">{formattedDate}</div>
+      </div>
+      
+      {data.githubRepo && (
+        <div class="meta-item">
+          <div class="meta-label">GitHub</div>
+          <div class="meta-value">
+            <a href={data.githubRepo} target="_blank" rel="noopener noreferrer" class="github-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+              </svg>
+              Repository
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+    
+    <div class="skills-section">
+      <div class="skills-label">{t('missions.skills')}</div>
+      <div class="skills-list">
+        {data.skills.map(skill => (
+          <span class="skill-tag">{skill}</span>
+        ))}
+      </div>
+    </div>
+  </div>
+  
+  <article class="mission-content">
+    <slot />
+  </article>
+  
+  {data.participants && data.participants.length > 0 && (
+    <div class="participants-section">
+      <h2>{t('missions.participants')}</h2>
+      <div class="participants-list">
+        {data.participants.map(participant => (
+          <div class="participant-item">
+            <div class="participant-avatar">
+              {participant.charAt(0).toUpperCase()}
+            </div>
+            <div class="participant-name">{participant}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+</Layout>
+
+<style>
+  .mission-header {
+    margin-top: 80px; /* More space for navigation */
+    margin-bottom: 3rem;
+    position: relative;
+    padding-top: 1rem;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: white;
+    margin-bottom: 1.5rem;
+  }
+  
+  .status-badge[data-status="active"] {
+    background-color: #10b981; /* Green */
+  }
+  
+  .status-badge[data-status="completed"] {
+    background-color: #6366f1; /* Purple */
+  }
+  
+  .status-badge[data-status="upcoming"] {
+    background-color: #f59e0b; /* Amber */
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .description {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+  
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .meta-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  
+  .meta-value {
+    font-size: 1.125rem;
+  }
+  
+  .difficulty-badge {
+    display: inline-block;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+  }
+  
+  .difficulty-badge[data-difficulty="beginner"] {
+    background-color: #dcfce7; /* Light green */
+    color: #16a34a;
+  }
+  
+  .difficulty-badge[data-difficulty="intermediate"] {
+    background-color: #e0f2fe; /* Light blue */
+    color: #0284c7;
+  }
+  
+  .difficulty-badge[data-difficulty="advanced"] {
+    background-color: #fee2e2; /* Light red */
+    color: #dc2626;
+  }
+  
+  .github-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1rem;
+  }
+  
+  .github-link:hover {
+    color: var(--accent-color);
+  }
+  
+  .skills-section {
+    margin-bottom: 2rem;
+  }
+  
+  .skills-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  
+  .skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .skill-tag {
+    font-size: 0.875rem;
+    background-color: rgba(var(--border-color-rgb), 0.3);
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.25rem;
+  }
+  
+  .featured-image {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    margin-bottom: 2rem;
+  }
+  
+  .mission-content {
+    line-height: 1.8;
+    font-size: 1.125rem;
+  }
+  
+  .mission-content :global(h2) {
+    font-size: 1.75rem;
+    margin: 2.5rem 0 1rem 0;
+  }
+  
+  .mission-content :global(h3) {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem 0;
+  }
+  
+  .mission-content :global(p) {
+    margin: 1.5rem 0;
+  }
+  
+  .mission-content :global(ul), 
+  .mission-content :global(ol) {
+    padding-left: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  
+  .mission-content :global(li) {
+    margin-bottom: 0.5rem;
+  }
+  
+  .mission-content :global(blockquote) {
+    border-left: 4px solid var(--accent-color);
+    padding-left: 1rem;
+    margin-left: 0;
+    font-style: italic;
+    color: var(--text-muted);
+  }
+  
+  .participants-section {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  @media (max-width: 768px) {
+    .mission-header {
+      margin-top: 20px; /* Less space on mobile */
+      padding-top: 2rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      margin-top: 1rem;
+    }
+  }
+  
+  .participants-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .participants-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .participant-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .participant-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+  }
+  
+  .participant-name {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+</style>
