@@ -21,6 +21,8 @@ This is a pnpm workspace monorepo containing multiple product applications with 
 | **picture** | AI image generation | Expo mobile, SvelteKit web, Astro landing |
 | **uload** | URL shortener | SvelteKit web, PocketBase/Drizzle |
 | **chat** | AI chat application | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
+| **wisekeep** | AI wisdom extraction from video | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
+| **quote** | Daily inspiration quotes | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
 
 ## Development Commands
 
@@ -33,6 +35,8 @@ pnpm run maerchenzauber:dev
 pnpm run memoro:dev
 pnpm run picture:dev
 pnpm run chat:dev
+pnpm run wisekeep:dev
+pnpm run quote:dev
 
 # Start specific app within project
 pnpm run dev:memoro:mobile      # Just mobile app

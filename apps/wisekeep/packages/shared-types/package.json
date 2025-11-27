@@ -1,5 +1,5 @@
 {
-  "name": "@transcriber/shared-types",
+  "name": "@wisekeep/shared-types",
   "version": "1.0.0",
   "private": true,
   "main": "./src/index.ts",

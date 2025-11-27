@@ -1,8 +1,8 @@
 {
-  "name": "@transcriber/backend",
+  "name": "@wisekeep/backend",
   "version": "1.0.0",
   "private": true,
-  "description": "YouTube Transcriber Backend - NestJS API",
+  "description": "Wisekeep Backend - NestJS API for wisdom extraction",
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",

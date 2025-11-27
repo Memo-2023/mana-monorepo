@@ -1,10 +1,10 @@
-# CLAUDE.md - Transcriber
+# CLAUDE.md - Wisekeep
 
-This file provides guidance to Claude Code when working with the Transcriber project.
+This file provides guidance to Claude Code when working with the Wisekeep project.
 
 ## Project Overview
 
-Transcriber is an AI-powered YouTube video transcription application with:
+Wisekeep is an AI-powered wisdom extraction application that captures insights from video content:
 - YouTube video download via yt-dlp
 - Ultra-fast audio transcription using Groq Whisper API (~300x realtime)
 - Fallback to local Whisper for offline use
@@ -15,7 +15,7 @@ Transcriber is an AI-powered YouTube video transcription application with:
 ## Architecture
 
 ```
-apps/transcriber/
+apps/wisekeep/
 ├── apps/
 │   ├── backend/       # NestJS API server (port 3006)
 │   ├── web/           # SvelteKit web application
@@ -43,22 +43,22 @@ apps/transcriber/
 # From monorepo root
 pnpm install
 
-# Start all transcriber apps
-pnpm transcriber:dev
+# Start all wisekeep apps
+pnpm wisekeep:dev
 
 # Start individual apps
-pnpm dev:transcriber:backend   # NestJS backend (port 3006)
-pnpm dev:transcriber:web       # SvelteKit web (port 5173)
-pnpm dev:transcriber:landing   # Astro landing (port 4321)
-pnpm dev:transcriber:mobile    # Expo mobile
+pnpm dev:wisekeep:backend   # NestJS backend (port 3006)
+pnpm dev:wisekeep:web       # SvelteKit web (port 5173)
+pnpm dev:wisekeep:landing   # Astro landing (port 4321)
+pnpm dev:wisekeep:mobile    # Expo mobile
 
 # Start web + backend together
-pnpm dev:transcriber:app
+pnpm dev:wisekeep:app
 ```
 
 ### Environment Variables
 
-Create `apps/transcriber/apps/backend/.env`:
+Create `apps/wisekeep/apps/backend/.env`:
 ```bash
 PORT=3006
 WHISPER_PROVIDER=groq         # groq or local
