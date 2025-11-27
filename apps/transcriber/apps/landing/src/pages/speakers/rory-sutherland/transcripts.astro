@@ -1,0 +1,488 @@
+---
+import Navigation from '../../../components/Navigation.astro';
+import Footer from '../../../components/Footer.astro';
+import ThemeSwitcher from '../../../components/ThemeSwitcher.astro';
+import '../../../styles/themes.css';
+
+const currentPath = Astro.url.pathname;
+
+// Get all talks for this speaker from content collection
+const allTalks = await Astro.glob('../../../content/talks/*.md');
+const speakerTalks = allTalks.filter(talk => 
+  talk.frontmatter.speakerId === 'rory-sutherland'
+);
+
+const speakerData = {
+  name: "Rory Sutherland",
+  title: "Vice Chairman",
+  company: "Ogilvy UK"
+};
+
+// Process talks data for filtering
+const talksData = speakerTalks.map(talk => ({
+  id: talk.frontmatter.speakerId + '-' + talk.frontmatter.title.toLowerCase().replace(/\s+/g, '-'),
+  title: talk.frontmatter.title,
+  date: talk.frontmatter.date,
+  category: talk.frontmatter.category,
+  tags: talk.frontmatter.tags || [],
+  venue: talk.frontmatter.venue,
+  duration: talk.frontmatter.duration,
+  transcript: talk.compiledContent(),
+  year: new Date(talk.frontmatter.date).getFullYear(),
+  readingTime: talk.frontmatter.readingTime || 0
+}));
+
+// Get unique filter options
+const categories = [...new Set(talksData.map(talk => talk.category))];
+const years = [...new Set(talksData.map(talk => talk.year))].sort((a, b) => b - a);
+const venues = [...new Set(talksData.map(talk => talk.venue))];
+const allTags = [...new Set(talksData.flatMap(talk => talk.tags))];
+---
+
+<!DOCTYPE html>
+<html lang="de" data-theme="ocean">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{speakerData.name} - Alle Transkripte | YouTube Wisdom Library</title>
+    <meta name="description" content="Alle Transkripte von {speakerData.name} auf einer Seite - durchsuchbar und komplett kopierbar.">
+</head>
+<body class="bg-theme-background text-theme-text min-h-screen">
+    <ThemeSwitcher />
+    <Navigation currentPath={currentPath} />
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-br from-theme-primary/10 to-theme-secondary/10 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-theme-text mb-4">
+                    Alle Transkripte von {speakerData.name}
+                </h1>
+                <p class="text-xl text-theme-text-muted mb-8">
+                    {talksData.length} Vorträge • Komplett durchsuchbar und kopierbar
+                </p>
+                
+                <!-- Bulk Actions -->
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button 
+                        id="copyAllTranscripts"
+                        class="bg-theme-primary text-white px-6 py-3 rounded-lg hover:bg-theme-primary-dark transition-colors font-semibold flex items-center gap-2"
+                    >
+                        <span>📋</span> Alle Transkripte kopieren
+                    </button>
+                    <button 
+                        id="copyFilteredTranscripts"
+                        class="bg-theme-secondary text-white px-6 py-3 rounded-lg hover:bg-theme-secondary-dark transition-colors font-semibold flex items-center gap-2"
+                        style="display: none;"
+                    >
+                        <span>🎯</span> Gefilterte Transkripte kopieren
+                    </button>
+                    <div class="text-sm text-theme-text-muted mt-2">
+                        Geschätzte Lesezeit: <span id="totalReadingTime">{talksData.reduce((sum, talk) => sum + talk.readingTime, 0)} Min</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="bg-theme-card/30 py-8 sticky top-0 z-40 backdrop-blur-sm border-b border-theme-border/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-theme-card rounded-xl p-6 border border-theme-border/20">
+                <h2 class="text-lg font-semibold text-theme-text mb-4 flex items-center gap-2">
+                    <span>🔍</span> Filter & Suche
+                </h2>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <!-- Search -->
+                    <div>
+                        <label class="block text-sm font-medium text-theme-text-muted mb-2">Volltext-Suche</label>
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            placeholder="Suche in allen Transkripten..."
+                            class="w-full px-3 py-2 bg-theme-background border border-theme-border/30 rounded-lg focus:ring-2 focus:ring-theme-primary/50 focus:border-transparent"
+                        >
+                    </div>
+                    
+                    <!-- Year Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-theme-text-muted mb-2">Jahr</label>
+                        <select id="yearFilter" class="w-full px-3 py-2 bg-theme-background border border-theme-border/30 rounded-lg focus:ring-2 focus:ring-theme-primary/50">
+                            <option value="">Alle Jahre</option>
+                            {years.map(year => (
+                                <option value={year}>{year}</option>
+                            ))}
+                        </select>
+                    </div>
+                    
+                    <!-- Category Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-theme-text-muted mb-2">Kategorie</label>
+                        <select id="categoryFilter" class="w-full px-3 py-2 bg-theme-background border border-theme-border/30 rounded-lg focus:ring-2 focus:ring-theme-primary/50">
+                            <option value="">Alle Kategorien</option>
+                            {categories.map(category => (
+                                <option value={category}>{category}</option>
+                            ))}
+                        </select>
+                    </div>
+                    
+                    <!-- Venue Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-theme-text-muted mb-2">Venue</label>
+                        <select id="venueFilter" class="w-full px-3 py-2 bg-theme-background border border-theme-border/30 rounded-lg focus:ring-2 focus:ring-theme-primary/50">
+                            <option value="">Alle Venues</option>
+                            {venues.map(venue => (
+                                <option value={venue}>{venue}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Tags Filter -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-theme-text-muted mb-2">Tags</label>
+                    <div class="flex flex-wrap gap-2" id="tagsContainer">
+                        {allTags.map(tag => (
+                            <button 
+                                class="tag-filter px-3 py-1 text-sm bg-theme-background border border-theme-border/30 rounded-full hover:bg-theme-primary/10 hover:border-theme-primary/50 transition-all"
+                                data-tag={tag}
+                            >
+                                {tag}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                
+                <!-- Quick Filters -->
+                <div class="flex flex-wrap gap-2">
+                    <button class="quick-filter px-4 py-2 text-sm bg-theme-primary/10 text-theme-primary rounded-lg hover:bg-theme-primary/20 transition-all" data-preset="recent">
+                        🕒 Letzte 2 Jahre
+                    </button>
+                    <button class="quick-filter px-4 py-2 text-sm bg-theme-secondary/10 text-theme-secondary rounded-lg hover:bg-theme-secondary/20 transition-all" data-preset="popular">
+                        🔥 Meist gelesen
+                    </button>
+                    <button class="quick-filter px-4 py-2 text-sm bg-theme-accent/10 text-theme-accent rounded-lg hover:bg-theme-accent/20 transition-all" data-preset="long">
+                        📖 Lange Vorträge
+                    </button>
+                    <button id="clearFilters" class="px-4 py-2 text-sm bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all">
+                        ❌ Filter zurücksetzen
+                    </button>
+                </div>
+                
+                <!-- Results Counter -->
+                <div class="mt-4 pt-4 border-t border-theme-border/20">
+                    <div class="text-sm text-theme-text-muted">
+                        <span id="resultsCount">{talksData.length}</span> von {talksData.length} Transkripten angezeigt
+                        • <span id="filteredReadingTime">{talksData.reduce((sum, talk) => sum + talk.readingTime, 0)} Min</span> Lesezeit
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transcripts Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div id="transcriptsContainer" class="space-y-8">
+            {talksData.map(talk => (
+                <article 
+                    class="transcript-item bg-theme-card rounded-xl p-8 border border-theme-border/20 shadow-sm"
+                    data-title={talk.title.toLowerCase()}
+                    data-year={talk.year}
+                    data-category={talk.category}
+                    data-venue={talk.venue}
+                    data-tags={JSON.stringify(talk.tags)}
+                    data-reading-time={talk.readingTime}
+                >
+                    <!-- Talk Header -->
+                    <div class="border-b border-theme-border/20 pb-6 mb-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <h2 class="text-2xl font-bold text-theme-text">
+                                {talk.title}
+                            </h2>
+                            <button 
+                                class="copy-single-transcript bg-theme-primary/10 text-theme-primary px-4 py-2 rounded-lg hover:bg-theme-primary/20 transition-all flex items-center gap-2 text-sm font-medium"
+                                data-transcript-id={talk.id}
+                            >
+                                <span>📋</span> Kopieren
+                            </button>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-4 text-sm text-theme-text-muted">
+                            <span class="flex items-center gap-1">
+                                <span>📅</span> {new Date(talk.date).toLocaleDateString('de-DE')}
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <span>🏛️</span> {talk.venue}
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <span>⏱️</span> {talk.duration}
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <span>📖</span> {talk.readingTime} Min Lesezeit
+                            </span>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            {talk.tags.map(tag => (
+                                <span class="px-2 py-1 text-xs bg-theme-primary/10 text-theme-primary rounded-full">
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    <!-- Transcript Content -->
+                    <div class="transcript-content prose prose-lg max-w-none" data-transcript-text={talk.transcript}>
+                        <div set:html={talk.transcript} />
+                    </div>
+                </article>
+            ))}
+        </div>
+        
+        <!-- No Results -->
+        <div id="noResults" class="text-center py-12" style="display: none;">
+            <div class="text-6xl mb-4">🔍</div>
+            <h3 class="text-xl font-semibold text-theme-text mb-2">Keine Ergebnisse gefunden</h3>
+            <p class="text-theme-text-muted">Versuche andere Filter oder Suchbegriffe</p>
+        </div>
+    </div>
+    
+    <Footer />
+
+    <script>
+        // Store all talks data for filtering
+        const talksData = {JSON.stringify(talksData)};
+        let filteredTalks = [...talksData];
+        let activeFilters = {
+            search: '',
+            year: '',
+            category: '',
+            venue: '',
+            tags: []
+        };
+
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const yearFilter = document.getElementById('yearFilter');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const venueFilter = document.getElementById('venueFilter');
+        const tagsContainer = document.getElementById('tagsContainer');
+        const transcriptsContainer = document.getElementById('transcriptsContainer');
+        const resultsCount = document.getElementById('resultsCount');
+        const filteredReadingTime = document.getElementById('filteredReadingTime');
+        const noResults = document.getElementById('noResults');
+        const copyAllBtn = document.getElementById('copyAllTranscripts');
+        const copyFilteredBtn = document.getElementById('copyFilteredTranscripts');
+        const clearFiltersBtn = document.getElementById('clearFilters');
+
+        // Filter Functions
+        function applyFilters() {
+            const transcriptItems = document.querySelectorAll('.transcript-item');
+            let visibleCount = 0;
+            let totalReadingTime = 0;
+            
+            filteredTalks = talksData.filter(talk => {
+                // Search filter
+                if (activeFilters.search) {
+                    const searchLower = activeFilters.search.toLowerCase();
+                    const matchesTitle = talk.title.toLowerCase().includes(searchLower);
+                    const matchesTranscript = talk.transcript.toLowerCase().includes(searchLower);
+                    if (!matchesTitle && !matchesTranscript) return false;
+                }
+                
+                // Year filter
+                if (activeFilters.year && talk.year != activeFilters.year) return false;
+                
+                // Category filter
+                if (activeFilters.category && talk.category !== activeFilters.category) return false;
+                
+                // Venue filter
+                if (activeFilters.venue && talk.venue !== activeFilters.venue) return false;
+                
+                // Tags filter
+                if (activeFilters.tags.length > 0) {
+                    const hasTag = activeFilters.tags.some(tag => talk.tags.includes(tag));
+                    if (!hasTag) return false;
+                }
+                
+                return true;
+            });
+
+            // Show/hide transcript items
+            transcriptItems.forEach(item => {
+                const talkId = item.querySelector('.copy-single-transcript').dataset.transcriptId;
+                const isVisible = filteredTalks.some(talk => talk.id === talkId);
+                
+                if (isVisible) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                    totalReadingTime += parseInt(item.dataset.readingTime) || 0;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Update counter
+            resultsCount.textContent = visibleCount;
+            filteredReadingTime.textContent = totalReadingTime;
+            
+            // Show/hide no results
+            if (visibleCount === 0) {
+                noResults.style.display = 'block';
+                transcriptsContainer.style.display = 'none';
+            } else {
+                noResults.style.display = 'none';
+                transcriptsContainer.style.display = 'block';
+            }
+            
+            // Show/hide filtered copy button
+            const hasActiveFilters = Object.values(activeFilters).some(filter => 
+                Array.isArray(filter) ? filter.length > 0 : filter !== ''
+            );
+            copyFilteredBtn.style.display = hasActiveFilters ? 'block' : 'none';
+        }
+
+        // Event Listeners
+        searchInput.addEventListener('input', (e) => {
+            activeFilters.search = e.target.value;
+            applyFilters();
+        });
+
+        yearFilter.addEventListener('change', (e) => {
+            activeFilters.year = e.target.value;
+            applyFilters();
+        });
+
+        categoryFilter.addEventListener('change', (e) => {
+            activeFilters.category = e.target.value;
+            applyFilters();
+        });
+
+        venueFilter.addEventListener('change', (e) => {
+            activeFilters.venue = e.target.value;
+            applyFilters();
+        });
+
+        // Tag filters
+        tagsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('tag-filter')) {
+                const tag = e.target.dataset.tag;
+                if (activeFilters.tags.includes(tag)) {
+                    activeFilters.tags = activeFilters.tags.filter(t => t !== tag);
+                    e.target.classList.remove('active');
+                } else {
+                    activeFilters.tags.push(tag);
+                    e.target.classList.add('active');
+                }
+                applyFilters();
+            }
+        });
+
+        // Quick filters
+        document.querySelectorAll('.quick-filter').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const preset = e.target.dataset.preset;
+                clearAllFilters();
+                
+                switch(preset) {
+                    case 'recent':
+                        activeFilters.year = new Date().getFullYear();
+                        yearFilter.value = activeFilters.year;
+                        break;
+                    case 'popular':
+                        // Sort by reading time and show top ones
+                        break;
+                    case 'long':
+                        // Filter talks longer than 15 minutes reading time
+                        break;
+                }
+                applyFilters();
+            });
+        });
+
+        // Clear filters
+        clearFiltersBtn.addEventListener('click', clearAllFilters);
+
+        function clearAllFilters() {
+            activeFilters = { search: '', year: '', category: '', venue: '', tags: [] };
+            searchInput.value = '';
+            yearFilter.value = '';
+            categoryFilter.value = '';
+            venueFilter.value = '';
+            document.querySelectorAll('.tag-filter.active').forEach(tag => {
+                tag.classList.remove('active');
+            });
+            applyFilters();
+        }
+
+        // Copy functions
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                return false;
+            }
+        }
+
+        function showCopyFeedback(button, success = true) {
+            const originalText = button.innerHTML;
+            button.innerHTML = success ? '<span>✅</span> Kopiert!' : '<span>❌</span> Fehler';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 2000);
+        }
+
+        // Copy all transcripts
+        copyAllBtn.addEventListener('click', async (e) => {
+            const allTranscripts = talksData.map(talk => 
+                `# ${talk.title}\nDatum: ${new Date(talk.date).toLocaleDateString('de-DE')}\nVenue: ${talk.venue}\nDauer: ${talk.duration}\n\n${talk.transcript}\n\n---\n\n`
+            ).join('');
+            
+            const success = await copyToClipboard(allTranscripts);
+            showCopyFeedback(e.target, success);
+        });
+
+        // Copy filtered transcripts
+        copyFilteredBtn.addEventListener('click', async (e) => {
+            const filteredTranscripts = filteredTalks.map(talk => 
+                `# ${talk.title}\nDatum: ${new Date(talk.date).toLocaleDateString('de-DE')}\nVenue: ${talk.venue}\nDauer: ${talk.duration}\n\n${talk.transcript}\n\n---\n\n`
+            ).join('');
+            
+            const success = await copyToClipboard(filteredTranscripts);
+            showCopyFeedback(e.target, success);
+        });
+
+        // Copy single transcript
+        document.addEventListener('click', async (e) => {
+            if (e.target.closest('.copy-single-transcript')) {
+                const button = e.target.closest('.copy-single-transcript');
+                const transcriptId = button.dataset.transcriptId;
+                const talk = talksData.find(t => t.id === transcriptId);
+                
+                if (talk) {
+                    const transcript = `# ${talk.title}\nDatum: ${new Date(talk.date).toLocaleDateString('de-DE')}\nVenue: ${talk.venue}\nDauer: ${talk.duration}\n\n${talk.transcript}`;
+                    const success = await copyToClipboard(transcript);
+                    showCopyFeedback(button, success);
+                }
+            }
+        });
+
+        // Add active styles for tag filters
+        const style = document.createElement('style');
+        style.textContent = `
+            .tag-filter.active {
+                background-color: var(--theme-primary) !important;
+                color: white !important;
+                border-color: var(--theme-primary) !important;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

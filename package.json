@@ -2,7 +2,7 @@
   "name": "manacore-monorepo",
   "version": "1.0.0",
   "private": true,
-  "description": "Manacore Monorepo containing maerchenzauber, manacore, manadeck, memoro, picture, uload, chat, nutriphi, and news",
+  "description": "Manacore Monorepo containing maerchenzauber, manacore, manadeck, memoro, picture, uload, chat, nutriphi, news, and transcriber",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -72,6 +72,13 @@
     "dev:news:app": "turbo run dev --filter=@news/web --filter=@news/api",
     "news:db:push": "pnpm --filter @manacore/news-database db:push",
     "news:db:studio": "pnpm --filter @manacore/news-database db:studio",
+
+    "transcriber:dev": "turbo run dev --filter=transcriber...",
+    "dev:transcriber:mobile": "pnpm --filter @transcriber/mobile dev",
+    "dev:transcriber:web": "pnpm --filter @transcriber/web dev",
+    "dev:transcriber:landing": "pnpm --filter @transcriber/landing dev",
+    "dev:transcriber:backend": "pnpm --filter @transcriber/backend dev",
+    "dev:transcriber:app": "turbo run dev --filter=@transcriber/web --filter=@transcriber/backend",
 
     "docker:up": "docker compose -f docker-compose.dev.yml --env-file .env.development up -d postgres redis",
     "docker:up:auth": "docker compose -f docker-compose.dev.yml --env-file .env.development --profile auth up -d",

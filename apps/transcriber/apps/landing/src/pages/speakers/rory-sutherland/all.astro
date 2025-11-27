@@ -1,0 +1,658 @@
+---
+import Navigation from '../../../components/Navigation.astro';
+import Footer from '../../../components/Footer.astro';
+import ThemeSwitcher from '../../../components/ThemeSwitcher.astro';
+import '../../../styles/themes.css';
+
+const currentPath = Astro.url.pathname;
+
+// Get all talks for this speaker from content collection
+const allTalks = await Astro.glob('../../../content/talks/*.md');
+const speakerTalks = allTalks.filter(talk => 
+  talk.frontmatter.speakerId === 'rory-sutherland'
+);
+
+const speakerData = {
+  name: "Rory Sutherland",
+  title: "Vice Chairman",  
+  company: "Ogilvy UK"
+};
+
+// Process talks data combining transcript and analysis
+const combinedData = speakerTalks.map(talk => {
+  const content = talk.compiledContent();
+  
+  // Split content at transcript marker
+  const transcriptMarker = '## 📜 Full Transcript';
+  const [analysisContent, transcriptContent] = content.split(transcriptMarker);
+  
+  return {
+    id: talk.frontmatter.speakerId + '-' + talk.frontmatter.title.toLowerCase().replace(/\s+/g, '-'),
+    title: talk.frontmatter.title,
+    date: talk.frontmatter.date,
+    category: talk.frontmatter.category,
+    tags: talk.frontmatter.tags || [],
+    venue: talk.frontmatter.venue,
+    duration: talk.frontmatter.duration,
+    summary: talk.frontmatter.summary,
+    year: new Date(talk.frontmatter.date).getFullYear(),
+    readingTime: talk.frontmatter.readingTime || 0,
+    analysisContent: analysisContent.trim(),
+    transcriptContent: transcriptContent ? transcriptContent.trim() : '',
+    fullContent: content
+  };
+});
+
+// Get unique filter options
+const categories = [...new Set(combinedData.map(talk => talk.category))];
+const years = [...new Set(combinedData.map(talk => talk.year))].sort((a, b) => b - a);
+const venues = [...new Set(combinedData.map(talk => talk.venue))];
+const allTags = [...new Set(combinedData.flatMap(talk => talk.tags))];
+---
+
+<!DOCTYPE html>
+<html lang="de" data-theme="ocean">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{speakerData.name} - Komplette Sammlung | YouTube Wisdom Library</title>
+    <meta name="description" content="Alle Inhalte von {speakerData.name} auf einer Seite - Transkripte, Analysen und Insights kombiniert.">
+</head>
+<body class="bg-theme-background text-theme-text min-h-screen">
+    <ThemeSwitcher />
+    <Navigation currentPath={currentPath} />
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-br from-theme-accent/10 to-theme-primary/10 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-theme-text mb-4">
+                    Komplette {speakerData.name} Sammlung
+                </h1>
+                <p class="text-xl text-theme-text-muted mb-8">
+                    {combinedData.length} Vorträge • Analysen + Transkripte kombiniert
+                </p>
+                
+                <!-- Content Type Toggle -->
+                <div class="flex flex-wrap justify-center gap-2 mb-8">
+                    <button class="content-toggle active bg-theme-accent text-white px-6 py-3 rounded-lg transition-all font-semibold" data-content="both">
+                        🔄 Analyse + Transkript
+                    </button>
+                    <button class="content-toggle bg-theme-card border border-theme-border/30 px-6 py-3 rounded-lg hover:bg-theme-primary/10 transition-all font-semibold" data-content="analysis">
+                        📊 Nur Analysen
+                    </button>
+                    <button class="content-toggle bg-theme-card border border-theme-border/30 px-6 py-3 rounded-lg hover:bg-theme-primary/10 transition-all font-semibold" data-content="transcript">
+                        📜 Nur Transkripte
+                    </button>
+                </div>
+                
+                <!-- Bulk Actions -->
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button 
+                        id="copyAllContent"
+                        class="bg-theme-accent text-white px-6 py-3 rounded-lg hover:bg-theme-accent-dark transition-colors font-semibold flex items-center gap-2"
+                    >
+                        <span>📋</span> Alles kopieren
+                    </button>
+                    <button 
+                        id="copyFilteredContent"
+                        class="bg-theme-primary text-white px-6 py-3 rounded-lg hover:bg-theme-primary-dark transition-colors font-semibold flex items-center gap-2"
+                        style="display: none;"
+                    >
+                        <span>🎯</span> Gefiltert kopieren
+                    </button>
+                    <div class="text-sm text-theme-text-muted">
+                        Aktuelle Auswahl: <span id="currentSelection">Analyse + Transkript</span>
+                        • <span id="totalWords">{combinedData.reduce((sum, talk) => sum + talk.readingTime * 250, 0).toLocaleString()}</span> Wörter geschätzt
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="bg-theme-card/30 py-8 sticky top-0 z-40 backdrop-blur-sm border-b border-theme-border/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-theme-card rounded-xl p-6 border border-theme-border/20">
+                <h2 class="text-lg font-semibold text-theme-text mb-4 flex items-center gap-2">
+                    <span>🔍</span> Filter & Suche
+                </h2>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <!-- Search -->
+                    <div>
+                        <label class="block text-sm font-medium text-theme-text-muted mb-2">Volltext-Suche</label>
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            placeholder="Suche in allen Inhalten..."
+                            class="w-full px-3 py-2 bg-theme-background border border-theme-border/30 rounded-lg focus:ring-2 focus:ring-theme-primary/50 focus:border-transparent"
+                        >
+                    </div>
+                    
+                    <!-- Year Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-theme-text-muted mb-2">Jahr</label>
+                        <select id="yearFilter" class="w-full px-3 py-2 bg-theme-background border border-theme-border/30 rounded-lg focus:ring-2 focus:ring-theme-primary/50">
+                            <option value="">Alle Jahre</option>
+                            {years.map(year => (
+                                <option value={year}>{year}</option>
+                            ))}
+                        </select>
+                    </div>
+                    
+                    <!-- Category Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-theme-text-muted mb-2">Kategorie</label>
+                        <select id="categoryFilter" class="w-full px-3 py-2 bg-theme-background border border-theme-border/30 rounded-lg focus:ring-2 focus:ring-theme-primary/50">
+                            <option value="">Alle Kategorien</option>
+                            {categories.map(category => (
+                                <option value={category}>{category}</option>
+                            ))}
+                        </select>
+                    </div>
+                    
+                    <!-- Venue Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-theme-text-muted mb-2">Venue</label>
+                        <select id="venueFilter" class="w-full px-3 py-2 bg-theme-background border border-theme-border/30 rounded-lg focus:ring-2 focus:ring-theme-primary/50">
+                            <option value="">Alle Venues</option>
+                            {venues.map(venue => (
+                                <option value={venue}>{venue}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Tags Filter -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-theme-text-muted mb-2">Tags</label>
+                    <div class="flex flex-wrap gap-2" id="tagsContainer">
+                        {allTags.map(tag => (
+                            <button 
+                                class="tag-filter px-3 py-1 text-sm bg-theme-background border border-theme-border/30 rounded-full hover:bg-theme-primary/10 hover:border-theme-primary/50 transition-all"
+                                data-tag={tag}
+                            >
+                                {tag}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                
+                <!-- Quick Filters -->
+                <div class="flex flex-wrap gap-2">
+                    <button class="quick-filter px-4 py-2 text-sm bg-theme-primary/10 text-theme-primary rounded-lg hover:bg-theme-primary/20 transition-all" data-preset="recent">
+                        🕒 Letzte 2 Jahre
+                    </button>
+                    <button class="quick-filter px-4 py-2 text-sm bg-theme-secondary/10 text-theme-secondary rounded-lg hover:bg-theme-secondary/20 transition-all" data-preset="long">
+                        📖 Lange Vorträge (>15 Min)
+                    </button>
+                    <button class="quick-filter px-4 py-2 text-sm bg-theme-accent/10 text-theme-accent rounded-lg hover:bg-theme-accent/20 transition-all" data-preset="psychology">
+                        🧠 Psychology Tags
+                    </button>
+                    <button id="clearFilters" class="px-4 py-2 text-sm bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all">
+                        ❌ Filter zurücksetzen
+                    </button>
+                </div>
+                
+                <!-- Results Counter -->
+                <div class="mt-4 pt-4 border-t border-theme-border/20">
+                    <div class="text-sm text-theme-text-muted">
+                        <span id="resultsCount">{combinedData.length}</span> von {combinedData.length} Vorträgen angezeigt
+                        • <span id="filteredWords">-</span> Wörter geschätzt
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Combined Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div id="contentContainer" class="space-y-12">
+            {combinedData.map(item => (
+                <article 
+                    class="content-item bg-theme-card rounded-xl p-8 border border-theme-border/20 shadow-sm"
+                    data-title={item.title.toLowerCase()}
+                    data-year={item.year}
+                    data-category={item.category}
+                    data-venue={item.venue}
+                    data-tags={JSON.stringify(item.tags)}
+                    data-reading-time={item.readingTime}
+                >
+                    <!-- Talk Header -->
+                    <div class="border-b border-theme-border/20 pb-6 mb-8">
+                        <div class="flex justify-between items-start mb-4">
+                            <h2 class="text-3xl font-bold text-theme-text">
+                                {item.title}
+                            </h2>
+                            <button 
+                                class="copy-single-content bg-theme-accent/10 text-theme-accent px-4 py-2 rounded-lg hover:bg-theme-accent/20 transition-all flex items-center gap-2 text-sm font-medium"
+                                data-content-id={item.id}
+                            >
+                                <span>📋</span> Kopieren
+                            </button>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-4 text-sm text-theme-text-muted mb-4">
+                            <span class="flex items-center gap-1">
+                                <span>📅</span> {new Date(item.date).toLocaleDateString('de-DE')}
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <span>🏛️</span> {item.venue}
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <span>⏱️</span> {item.duration}
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <span>📖</span> {item.readingTime} Min Lesezeit
+                            </span>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            {item.tags.map(tag => (
+                                <span class="px-2 py-1 text-xs bg-theme-primary/10 text-theme-primary rounded-full">
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
+                        
+                        <!-- Summary Preview -->
+                        <div class="bg-theme-background/50 rounded-lg p-4">
+                            <p class="text-theme-text-muted italic">
+                                {item.summary}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Content Sections -->
+                    <div class="content-sections">
+                        <!-- Both Analysis and Transcript (default) -->
+                        <div class="content-type both-content">
+                            <div class="grid lg:grid-cols-2 gap-8">
+                                <!-- Analysis Column -->
+                                <div class="analysis-column">
+                                    <div class="sticky top-32">
+                                        <div class="bg-theme-secondary/5 rounded-lg p-6 border border-theme-secondary/20">
+                                            <h3 class="text-xl font-bold text-theme-text mb-4 flex items-center gap-2">
+                                                <span>📊</span> Analyse & Insights
+                                            </h3>
+                                            <div class="prose prose-sm max-w-none text-theme-text" set:html={item.analysisContent} />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Transcript Column -->
+                                <div class="transcript-column">
+                                    <div class="bg-theme-primary/5 rounded-lg p-6 border border-theme-primary/20">
+                                        <h3 class="text-xl font-bold text-theme-text mb-4 flex items-center gap-2">
+                                            <span>📜</span> Vollständiges Transkript
+                                        </h3>
+                                        <div class="prose prose-sm max-w-none text-theme-text" set:html={item.transcriptContent} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Analysis Only -->
+                        <div class="content-type analysis-only" style="display: none;">
+                            <div class="bg-theme-secondary/5 rounded-lg p-6 border border-theme-secondary/20">
+                                <h3 class="text-xl font-bold text-theme-text mb-6 flex items-center gap-2">
+                                    <span>📊</span> Analyse & Insights
+                                </h3>
+                                <div class="prose prose-lg max-w-none text-theme-text" set:html={item.analysisContent} />
+                            </div>
+                        </div>
+                        
+                        <!-- Transcript Only -->
+                        <div class="content-type transcript-only" style="display: none;">
+                            <div class="bg-theme-primary/5 rounded-lg p-6 border border-theme-primary/20">
+                                <h3 class="text-xl font-bold text-theme-text mb-6 flex items-center gap-2">
+                                    <span>📜</span> Vollständiges Transkript
+                                </h3>
+                                <div class="prose prose-lg max-w-none text-theme-text" set:html={item.transcriptContent} />
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            ))}
+        </div>
+        
+        <!-- No Results -->
+        <div id="noResults" class="text-center py-12" style="display: none;">
+            <div class="text-6xl mb-4">🔍</div>
+            <h3 class="text-xl font-semibold text-theme-text mb-2">Keine Ergebnisse gefunden</h3>
+            <p class="text-theme-text-muted">Versuche andere Filter oder Suchbegriffe</p>
+        </div>
+    </div>
+    
+    <Footer />
+
+    <script>
+        // Store all content data for filtering
+        const contentData = {JSON.stringify(combinedData)};
+        let filteredContent = [...contentData];
+        let activeContentType = 'both';
+        let activeFilters = {
+            search: '',
+            year: '',
+            category: '',
+            venue: '',
+            tags: []
+        };
+
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const yearFilter = document.getElementById('yearFilter');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const venueFilter = document.getElementById('venueFilter');
+        const tagsContainer = document.getElementById('tagsContainer');
+        const contentContainer = document.getElementById('contentContainer');
+        const resultsCount = document.getElementById('resultsCount');
+        const filteredWords = document.getElementById('filteredWords');
+        const totalWords = document.getElementById('totalWords');
+        const currentSelection = document.getElementById('currentSelection');
+        const noResults = document.getElementById('noResults');
+        const copyAllBtn = document.getElementById('copyAllContent');
+        const copyFilteredBtn = document.getElementById('copyFilteredContent');
+        const clearFiltersBtn = document.getElementById('clearFilters');
+
+        // Content Type Management
+        function switchContentType(contentType) {
+            activeContentType = contentType;
+            
+            // Update toggle appearance
+            document.querySelectorAll('.content-toggle').forEach(toggle => {
+                if (toggle.dataset.content === contentType) {
+                    toggle.classList.add('active', 'bg-theme-accent', 'text-white');
+                    toggle.classList.remove('bg-theme-card', 'border');
+                } else {
+                    toggle.classList.remove('active', 'bg-theme-accent', 'text-white');
+                    toggle.classList.add('bg-theme-card', 'border', 'border-theme-border/30');
+                }
+            });
+            
+            // Show/hide content sections
+            document.querySelectorAll('.content-type').forEach(section => {
+                if ((contentType === 'both' && section.classList.contains('both-content')) ||
+                    (contentType === 'analysis' && section.classList.contains('analysis-only')) ||
+                    (contentType === 'transcript' && section.classList.contains('transcript-only'))) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+            
+            // Update selection text
+            const selectionNames = {
+                'both': 'Analyse + Transkript',
+                'analysis': 'Nur Analysen',  
+                'transcript': 'Nur Transkripte'
+            };
+            currentSelection.textContent = selectionNames[contentType];
+            
+            updateWordCount();
+        }
+
+        function updateWordCount() {
+            const visibleContent = filteredContent.length > 0 ? filteredContent : contentData;
+            let wordCount = 0;
+            
+            visibleContent.forEach(item => {
+                switch(activeContentType) {
+                    case 'both':
+                        wordCount += (item.readingTime * 250); // Estimate words for full content
+                        break;
+                    case 'analysis':
+                        wordCount += (item.readingTime * 100); // Estimate words for analysis only
+                        break;
+                    case 'transcript':
+                        wordCount += (item.readingTime * 150); // Estimate words for transcript only  
+                        break;
+                }
+            });
+            
+            filteredWords.textContent = wordCount.toLocaleString();
+        }
+
+        // Filter Functions
+        function applyFilters() {
+            const contentItems = document.querySelectorAll('.content-item');
+            let visibleCount = 0;
+            
+            filteredContent = contentData.filter(item => {
+                // Search filter
+                if (activeFilters.search) {
+                    const searchLower = activeFilters.search.toLowerCase();
+                    const matchesTitle = item.title.toLowerCase().includes(searchLower);
+                    const matchesAnalysis = item.analysisContent.toLowerCase().includes(searchLower);
+                    const matchesTranscript = item.transcriptContent.toLowerCase().includes(searchLower);
+                    const matchesSummary = item.summary.toLowerCase().includes(searchLower);
+                    if (!matchesTitle && !matchesAnalysis && !matchesTranscript && !matchesSummary) return false;
+                }
+                
+                // Year filter
+                if (activeFilters.year && item.year != activeFilters.year) return false;
+                
+                // Category filter
+                if (activeFilters.category && item.category !== activeFilters.category) return false;
+                
+                // Venue filter
+                if (activeFilters.venue && item.venue !== activeFilters.venue) return false;
+                
+                // Tags filter
+                if (activeFilters.tags.length > 0) {
+                    const hasTag = activeFilters.tags.some(tag => item.tags.includes(tag));
+                    if (!hasTag) return false;
+                }
+                
+                return true;
+            });
+
+            // Show/hide content items
+            contentItems.forEach(item => {
+                const contentId = item.querySelector('.copy-single-content').dataset.contentId;
+                const isVisible = filteredContent.some(content => content.id === contentId);
+                
+                if (isVisible) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Update counters
+            resultsCount.textContent = visibleCount;
+            updateWordCount();
+            
+            // Show/hide no results
+            if (visibleCount === 0) {
+                noResults.style.display = 'block';
+                contentContainer.style.display = 'none';
+            } else {
+                noResults.style.display = 'none';
+                contentContainer.style.display = 'block';
+            }
+            
+            // Show/hide filtered copy button
+            const hasActiveFilters = Object.values(activeFilters).some(filter => 
+                Array.isArray(filter) ? filter.length > 0 : filter !== ''
+            );
+            copyFilteredBtn.style.display = hasActiveFilters ? 'inline-flex' : 'none';
+        }
+
+        // Event Listeners
+        searchInput.addEventListener('input', (e) => {
+            activeFilters.search = e.target.value;
+            applyFilters();
+        });
+
+        yearFilter.addEventListener('change', (e) => {
+            activeFilters.year = e.target.value;
+            applyFilters();
+        });
+
+        categoryFilter.addEventListener('change', (e) => {
+            activeFilters.category = e.target.value;
+            applyFilters();
+        });
+
+        venueFilter.addEventListener('change', (e) => {
+            activeFilters.venue = e.target.value;
+            applyFilters();
+        });
+
+        // Content type toggles
+        document.querySelectorAll('.content-toggle').forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                switchContentType(e.target.dataset.content);
+            });
+        });
+
+        // Tag filters
+        tagsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('tag-filter')) {
+                const tag = e.target.dataset.tag;
+                if (activeFilters.tags.includes(tag)) {
+                    activeFilters.tags = activeFilters.tags.filter(t => t !== tag);
+                    e.target.classList.remove('active');
+                } else {
+                    activeFilters.tags.push(tag);
+                    e.target.classList.add('active');
+                }
+                applyFilters();
+            }
+        });
+
+        // Quick filters
+        document.querySelectorAll('.quick-filter').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const preset = e.target.dataset.preset;
+                
+                switch(preset) {
+                    case 'recent':
+                        clearAllFilters();
+                        activeFilters.year = new Date().getFullYear();
+                        yearFilter.value = activeFilters.year;
+                        applyFilters();
+                        break;
+                    case 'long':
+                        clearAllFilters();
+                        // Filter for talks longer than 15 minutes reading time
+                        filteredContent = contentData.filter(item => item.readingTime > 15);
+                        applyFilters();
+                        break;
+                    case 'psychology':
+                        clearAllFilters();
+                        activeFilters.tags = ['psychology'];
+                        document.querySelector('[data-tag="psychology"]')?.classList.add('active');
+                        applyFilters();
+                        break;
+                }
+            });
+        });
+
+        // Clear filters
+        clearFiltersBtn.addEventListener('click', clearAllFilters);
+
+        function clearAllFilters() {
+            activeFilters = { search: '', year: '', category: '', venue: '', tags: [] };
+            searchInput.value = '';
+            yearFilter.value = '';
+            categoryFilter.value = '';
+            venueFilter.value = '';
+            document.querySelectorAll('.tag-filter.active').forEach(tag => {
+                tag.classList.remove('active');
+            });
+            applyFilters();
+        }
+
+        // Copy functions
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                return false;
+            }
+        }
+
+        function showCopyFeedback(button, success = true) {
+            const originalText = button.innerHTML;
+            button.innerHTML = success ? '<span>✅</span> Kopiert!' : '<span>❌</span> Fehler';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 2000);
+        }
+
+        function getContentByType(item) {
+            switch(activeContentType) {
+                case 'analysis':
+                    return `# ${item.title}\\n\\nDatum: ${new Date(item.date).toLocaleDateString('de-DE')}\\nVenue: ${item.venue}\\nDauer: ${item.duration}\\n\\n${item.analysisContent}`;
+                case 'transcript':
+                    return `# ${item.title}\\n\\nDatum: ${new Date(item.date).toLocaleDateString('de-DE')}\\nVenue: ${item.venue}\\nDauer: ${item.duration}\\n\\n${item.transcriptContent}`;
+                default:
+                    return `# ${item.title}\\n\\nDatum: ${new Date(item.date).toLocaleDateString('de-DE')}\\nVenue: ${item.venue}\\nDauer: ${item.duration}\\n\\n${item.fullContent}`;
+            }
+        }
+
+        // Copy all content
+        copyAllBtn.addEventListener('click', async (e) => {
+            const allContent = contentData.map(item => 
+                `${getContentByType(item)}\\n\\n---\\n\\n`
+            ).join('');
+            
+            const success = await copyToClipboard(allContent);
+            showCopyFeedback(e.target, success);
+        });
+
+        // Copy filtered content
+        copyFilteredBtn.addEventListener('click', async (e) => {
+            const filteredContentText = filteredContent.map(item => 
+                `${getContentByType(item)}\\n\\n---\\n\\n`
+            ).join('');
+            
+            const success = await copyToClipboard(filteredContentText);
+            showCopyFeedback(e.target, success);
+        });
+
+        // Copy single content
+        document.addEventListener('click', async (e) => {
+            if (e.target.closest('.copy-single-content')) {
+                const button = e.target.closest('.copy-single-content');
+                const contentId = button.dataset.contentId;
+                const item = contentData.find(c => c.id === contentId);
+                
+                if (item) {
+                    const content = getContentByType(item);
+                    const success = await copyToClipboard(content);
+                    showCopyFeedback(button, success);
+                }
+            }
+        });
+
+        // Add active styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .tag-filter.active {
+                background-color: var(--theme-primary) !important;
+                color: white !important;
+                border-color: var(--theme-primary) !important;
+            }
+            .content-toggle.active {
+                background-color: var(--theme-accent) !important;
+                color: white !important;
+                border-color: var(--theme-accent) !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize word count
+        updateWordCount();
+    </script>
+</body>
+</html>

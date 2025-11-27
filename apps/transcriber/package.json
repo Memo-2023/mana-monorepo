@@ -1,0 +1,22 @@
+{
+  "name": "transcriber",
+  "version": "1.0.0",
+  "private": true,
+  "description": "YouTube Transcriber - AI-powered video transcription",
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:backend": "pnpm --filter @transcriber/backend dev",
+    "dev:web": "pnpm --filter @transcriber/web dev",
+    "dev:landing": "pnpm --filter @transcriber/landing dev",
+    "dev:mobile": "pnpm --filter @transcriber/mobile dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "turbo": "^1.13.4",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
