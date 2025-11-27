@@ -207,3 +207,49 @@ export const slidesApi = {
     if (!response.ok) throw new Error('Failed to reorder slides');
   }
 };
+
+// Share API
+export interface ShareLink {
+  id: string;
+  deckId: string;
+  shareCode: string;
+  expiresAt: string | null;
+  createdAt: string;
+}
+
+export const shareApi = {
+  // Public - no auth required
+  async getByCode(code: string): Promise<{ deck: any; slides: any[] }> {
+    const response = await fetch(`${API_URL}/share/${code}`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Shared deck not found or link has expired');
+      }
+      throw new Error('Failed to fetch shared deck');
+    }
+    return response.json();
+  },
+
+  // Authenticated endpoints
+  async createShare(deckId: string, expiresAt?: string): Promise<ShareLink> {
+    const response = await fetchWithAuth(`${API_URL}/share/deck/${deckId}`, {
+      method: 'POST',
+      body: JSON.stringify({ expiresAt })
+    });
+    if (!response.ok) throw new Error('Failed to create share link');
+    return response.json();
+  },
+
+  async getSharesForDeck(deckId: string): Promise<ShareLink[]> {
+    const response = await fetchWithAuth(`${API_URL}/share/deck/${deckId}/links`);
+    if (!response.ok) throw new Error('Failed to get share links');
+    return response.json();
+  },
+
+  async deleteShare(shareId: string): Promise<void> {
+    const response = await fetchWithAuth(`${API_URL}/share/${shareId}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) throw new Error('Failed to delete share link');
+  }
+};

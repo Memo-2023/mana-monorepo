@@ -71,19 +71,23 @@ pnpm db:seed                     # Seed database
 
 ### Backend API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/health` | GET | Health check |
-| `/api/decks` | GET | Get user's decks |
-| `/api/decks` | POST | Create new deck |
-| `/api/decks/:id` | GET | Get deck details |
-| `/api/decks/:id` | PUT | Update deck |
-| `/api/decks/:id` | DELETE | Delete deck |
-| `/api/decks/:id/slides` | GET | Get slides for deck |
-| `/api/decks/:id/slides` | POST | Add slide to deck |
-| `/api/slides/:id` | PUT | Update slide |
-| `/api/slides/:id` | DELETE | Delete slide |
-| `/api/slides/reorder` | POST | Reorder slides |
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/health` | GET | No | Health check |
+| `/api/decks` | GET | Yes | Get user's decks |
+| `/api/decks` | POST | Yes | Create new deck |
+| `/api/decks/:id` | GET | Yes | Get deck details |
+| `/api/decks/:id` | PUT | Yes | Update deck |
+| `/api/decks/:id` | DELETE | Yes | Delete deck |
+| `/api/decks/:id/slides` | GET | Yes | Get slides for deck |
+| `/api/decks/:id/slides` | POST | Yes | Add slide to deck |
+| `/api/slides/:id` | PUT | Yes | Update slide |
+| `/api/slides/:id` | DELETE | Yes | Delete slide |
+| `/api/slides/reorder` | PUT | Yes | Reorder slides |
+| `/api/share/:code` | GET | No | Get shared deck (public) |
+| `/api/share/deck/:id` | POST | Yes | Create share link |
+| `/api/share/deck/:id/links` | GET | Yes | Get share links for deck |
+| `/api/share/:shareId` | DELETE | Yes | Delete share link |
 
 ### Data Models
 
@@ -109,6 +113,13 @@ pnpm db:seed                     # Seed database
 
 **Theme** - Visual theme
 - `id`, `name`, `colors`, `fonts`, `isDefault`
+
+**SharedDeck** - Share link for deck
+- `id` (string) - Unique identifier
+- `deckId` (string) - Reference to deck
+- `shareCode` (string) - Unique share code (12 chars)
+- `expiresAt` (timestamp?) - Optional expiration
+- `createdAt` (timestamp)
 
 ### Environment Variables
 
@@ -161,7 +172,7 @@ Located at `packages/shared/`
 
 The SvelteKit web app provides feature parity with the mobile app:
 
-- **Authentication**: Login/Register with Mana Core Auth
+- **Authentication**: Login/Register/Forgot Password with Mana Core Auth
 - **Deck Management**: Create, edit, delete presentation decks
 - **Slide Editor**: Create slides with title, body, bullet points, images
 - **Presentation Mode**: Fullscreen presentation with keyboard navigation
@@ -170,6 +181,8 @@ The SvelteKit web app provides feature parity with the mobile app:
   - ESC to exit
   - Timer with start/pause
   - Speaker notes toggle
+- **Sharing**: Create share links for decks, public view without auth
+- **Profile**: View user info and deck statistics
 - **Settings**: Theme switching (light/dark/system), account info
 
 ### Web App Structure
@@ -185,8 +198,11 @@ src/
 │   ├── +page.svelte         # Deck list (home)
 │   ├── login/               # Login page
 │   ├── register/            # Register page
+│   ├── forgot-password/     # Password reset page
 │   ├── deck/[id]/           # Deck editor with slides
 │   ├── present/[id]/        # Presentation mode
+│   ├── shared/[code]/       # Public shared deck view
+│   ├── profile/             # User profile page
 │   └── settings/            # Settings page
 └── app.css                  # Global styles
 ```

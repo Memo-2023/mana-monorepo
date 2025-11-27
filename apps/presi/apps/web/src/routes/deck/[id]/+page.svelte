@@ -2,17 +2,26 @@
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
+  import { browser } from '$app/environment';
   import { decksStore } from '$lib/stores/decks.svelte';
+  import { shareApi, type ShareLink } from '$lib/api/client';
   import type { Slide, SlideContent } from '@presi/shared';
   import {
     ArrowLeft, Play, Plus, Trash2, GripVertical, ChevronUp, ChevronDown,
-    Image, Type, List, Edit3, X, Save
+    Image, Type, List, Edit3, X, Save, Share2, Link, Copy, Check, ExternalLink
   } from 'lucide-svelte';
 
   let showSlideModal = $state(false);
   let editingSlide = $state<Slide | null>(null);
   let showDeleteModal = $state(false);
   let slideToDelete = $state<Slide | null>(null);
+
+  // Share modal state
+  let showShareModal = $state(false);
+  let shareLinks = $state<ShareLink[]>([]);
+  let isLoadingShares = $state(false);
+  let isCreatingShare = $state(false);
+  let copiedLinkId = $state<string | null>(null);
 
   // Slide form state
   let slideTitle = $state('');
@@ -117,6 +126,58 @@
   function updateBulletPoint(index: number, value: string) {
     slideBulletPoints[index] = value;
   }
+
+  // Share functions
+  async function openShareModal() {
+    showShareModal = true;
+    isLoadingShares = true;
+    try {
+      shareLinks = await shareApi.getSharesForDeck(deckId);
+    } catch (e) {
+      console.error('Failed to load share links:', e);
+    } finally {
+      isLoadingShares = false;
+    }
+  }
+
+  async function createShareLink() {
+    isCreatingShare = true;
+    try {
+      const newShare = await shareApi.createShare(deckId);
+      shareLinks = [newShare, ...shareLinks];
+    } catch (e) {
+      console.error('Failed to create share link:', e);
+    } finally {
+      isCreatingShare = false;
+    }
+  }
+
+  async function deleteShareLink(shareId: string) {
+    try {
+      await shareApi.deleteShare(shareId);
+      shareLinks = shareLinks.filter(s => s.id !== shareId);
+    } catch (e) {
+      console.error('Failed to delete share link:', e);
+    }
+  }
+
+  function getShareUrl(shareCode: string): string {
+    if (!browser) return '';
+    return `${window.location.origin}/shared/${shareCode}`;
+  }
+
+  async function copyShareLink(share: ShareLink) {
+    const url = getShareUrl(share.shareCode);
+    try {
+      await navigator.clipboard.writeText(url);
+      copiedLinkId = share.id;
+      setTimeout(() => {
+        copiedLinkId = null;
+      }, 2000);
+    } catch (e) {
+      console.error('Failed to copy link:', e);
+    }
+  }
 </script>
 
 <svelte:head>
@@ -153,6 +214,13 @@
         >
           <Plus class="w-5 h-5" />
           Add Slide
+        </button>
+        <button
+          onclick={openShareModal}
+          class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium rounded-lg transition-colors"
+        >
+          <Share2 class="w-5 h-5" />
+          Share
         </button>
         {#if decksStore.currentSlides.length > 0}
           <a
@@ -422,6 +490,109 @@
         >
           Delete
         </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+<!-- Share Modal -->
+{#if showShareModal}
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-lg">
+      <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
+            <Share2 class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+          </div>
+          <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Share Presentation</h2>
+        </div>
+        <button
+          onclick={() => showShareModal = false}
+          class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"
+        >
+          <X class="w-5 h-5 text-slate-600 dark:text-slate-400" />
+        </button>
+      </div>
+
+      <div class="p-6">
+        {#if isLoadingShares}
+          <div class="flex items-center justify-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-4 border-primary-500 border-t-transparent"></div>
+          </div>
+        {:else}
+          <div class="space-y-4">
+            <!-- Create new link button -->
+            <button
+              onclick={createShareLink}
+              disabled={isCreatingShare}
+              class="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-400 hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors disabled:opacity-50"
+            >
+              <Link class="w-5 h-5" />
+              {isCreatingShare ? 'Creating...' : 'Create Share Link'}
+            </button>
+
+            <!-- Existing links -->
+            {#if shareLinks.length > 0}
+              <div class="space-y-3 mt-4">
+                <h3 class="text-sm font-medium text-slate-700 dark:text-slate-300">Active Links</h3>
+                {#each shareLinks as share (share.id)}
+                  <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 text-sm font-mono text-slate-600 dark:text-slate-400">
+                        <Link class="w-4 h-4 flex-shrink-0" />
+                        <span class="truncate">{getShareUrl(share.shareCode)}</span>
+                      </div>
+                      <div class="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                        Created {new Date(share.createdAt).toLocaleDateString()}
+                        {#if share.expiresAt}
+                          · Expires {new Date(share.expiresAt).toLocaleDateString()}
+                        {/if}
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <a
+                        href="/shared/{share.shareCode}"
+                        target="_blank"
+                        class="p-2 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
+                        title="Open in new tab"
+                      >
+                        <ExternalLink class="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                      </a>
+                      <button
+                        onclick={() => copyShareLink(share)}
+                        class="p-2 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
+                        title="Copy link"
+                      >
+                        {#if copiedLinkId === share.id}
+                          <Check class="w-4 h-4 text-green-600" />
+                        {:else}
+                          <Copy class="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                        {/if}
+                      </button>
+                      <button
+                        onclick={() => deleteShareLink(share.id)}
+                        class="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                        title="Delete link"
+                      >
+                        <Trash2 class="w-4 h-4 text-red-500" />
+                      </button>
+                    </div>
+                  </div>
+                {/each}
+              </div>
+            {:else}
+              <p class="text-center text-sm text-slate-500 dark:text-slate-400 py-4">
+                No share links yet. Create one to share this presentation.
+              </p>
+            {/if}
+          </div>
+        {/if}
+      </div>
+
+      <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 rounded-b-xl">
+        <p class="text-xs text-slate-500 dark:text-slate-400 text-center">
+          Anyone with the link can view this presentation without signing in.
+        </p>
       </div>
     </div>
   </div>
