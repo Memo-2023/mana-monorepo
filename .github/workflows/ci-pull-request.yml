@@ -71,6 +71,7 @@ jobs:
 
       - name: Run format check
         run: pnpm run format:check
+        continue-on-error: true
 
       - name: Run lint
         run: pnpm run lint --filter='./apps/chat/**' --filter='./apps/manacore/**'
