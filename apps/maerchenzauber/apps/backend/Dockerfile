@@ -6,48 +6,14 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install build dependencies
-RUN apk add --no-cache python3 make g++ git openssh-client
-
-# Configure git to use HTTPS with token
-RUN git config --global url."https://github.com/".insteadOf "git@github.com:" && \
-    git config --global url."https://".insteadOf "git://"
-
-# Clone, build and package mana-core as a tarball
-RUN --mount=type=secret,id=github_token \
-    if [ -f /run/secrets/github_token ]; then \
-        export GITHUB_TOKEN=$(cat /run/secrets/github_token) && \
-        echo "Using GitHub token for private repo access" && \
-        git clone https://${GITHUB_TOKEN}@github.com/Memo-2023/mana-core-nestjs-package.git /tmp/mana-core; \
-    else \
-        echo "No GitHub token provided, attempting public clone" && \
-        git clone https://github.com/Memo-2023/mana-core-nestjs-package.git /tmp/mana-core; \
-    fi && \
-    cd /tmp/mana-core && \
-    npm install --force && \
-    npm run build && \
-    npm pack && \
-    mv *.tgz /app/mana-core.tgz && \
-    echo "Mana-core packaged as tarball at /app/mana-core.tgz"
+RUN apk add --no-cache python3 make g++
 
 # Copy backend package.json
 COPY apps/maerchenzauber/apps/backend/package.json ./backend/package.json
 
-# Replace GitHub URL with the tarball (../ because package.json is in backend/)
-RUN sed -i 's|"git+https://github.com/Memo-2023/mana-core-nestjs-package.git"|"file:../mana-core.tgz"|g' backend/package.json || \
-    sed -i 's|"github:Memo-2023/mana-core-nestjs-package"|"file:../mana-core.tgz"|g' backend/package.json
-
-# Debug: Verify the replacement and file existence
-RUN echo "=== Verifying tarball and package.json ===" && \
-    ls -la mana-core.tgz && \
-    echo "Tarball exists at /app/mana-core.tgz" && \
-    echo "Checking package.json replacement:" && \
-    grep -n "mana-core" backend/package.json && \
-    echo "=== End verification ==="
-
 # Install backend dependencies
 WORKDIR /app/backend
-RUN npm install --legacy-peer-deps && \
-    echo "Dependencies installed with mana-core from tarball"
+RUN npm install --legacy-peer-deps
 
 # Copy shared packages source code and build them if they exist
 WORKDIR /app
