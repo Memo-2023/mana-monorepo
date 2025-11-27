@@ -1,0 +1,196 @@
+name: CD - Staging Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service to deploy (leave empty for all)'
+        required: false
+        type: choice
+        options:
+          - all
+          - mana-core-auth
+          - maerchenzauber-backend
+          - chat-backend
+          - manadeck-backend
+          - nutriphi-backend
+          - news-api
+  workflow_call:
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9.15.0'
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.manacore.app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH for deployment
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+
+      - name: Add staging server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Prepare deployment directory
+        run: |
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+            mkdir -p ~/manacore-staging
+            cd ~/manacore-staging
+
+            # Create required directories
+            mkdir -p logs
+            mkdir -p data/postgres
+            mkdir -p data/redis
+          EOF
+
+      - name: Copy docker-compose file
+        run: |
+          scp docker-compose.staging.yml ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:~/manacore-staging/docker-compose.yml
+
+      - name: Copy environment file
+        run: |
+          # Create staging env file from secrets
+          cat > .env.staging << EOF
+          # Database
+          POSTGRES_HOST=${{ secrets.STAGING_POSTGRES_HOST }}
+          POSTGRES_PORT=${{ secrets.STAGING_POSTGRES_PORT }}
+          POSTGRES_DB=${{ secrets.STAGING_POSTGRES_DB }}
+          POSTGRES_USER=${{ secrets.STAGING_POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.STAGING_POSTGRES_PASSWORD }}
+
+          # Redis
+          REDIS_HOST=${{ secrets.STAGING_REDIS_HOST }}
+          REDIS_PORT=${{ secrets.STAGING_REDIS_PORT }}
+
+          # Mana Core Auth
+          MANA_SERVICE_URL=${{ secrets.STAGING_MANA_SERVICE_URL }}
+          JWT_SECRET=${{ secrets.STAGING_JWT_SECRET }}
+          JWT_PUBLIC_KEY=${{ secrets.STAGING_JWT_PUBLIC_KEY }}
+          JWT_PRIVATE_KEY=${{ secrets.STAGING_JWT_PRIVATE_KEY }}
+
+          # Supabase
+          SUPABASE_URL=${{ secrets.STAGING_SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.STAGING_SUPABASE_SERVICE_ROLE_KEY }}
+
+          # Azure OpenAI
+          AZURE_OPENAI_ENDPOINT=${{ secrets.STAGING_AZURE_OPENAI_ENDPOINT }}
+          AZURE_OPENAI_API_KEY=${{ secrets.STAGING_AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_API_VERSION=2024-12-01-preview
+
+          # Environment
+          NODE_ENV=staging
+          EOF
+
+          scp .env.staging ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:~/manacore-staging/.env
+          rm .env.staging
+
+      - name: Pull latest Docker images
+        run: |
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+            cd ~/manacore-staging
+            docker compose pull
+          EOF
+
+      - name: Deploy services
+        run: |
+          SERVICE="${{ github.event.inputs.service || 'all' }}"
+
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
+            cd ~/manacore-staging
+
+            # Determine which services to deploy
+            if [ "$SERVICE" == "all" ]; then
+              echo "Deploying all services..."
+              docker compose up -d
+            else
+              echo "Deploying service: $SERVICE"
+              docker compose up -d $SERVICE
+            fi
+
+            # Wait for services to be healthy
+            sleep 10
+            docker compose ps
+          EOF
+
+      - name: Run health checks
+        run: |
+          # Wait for services to fully start
+          sleep 30
+
+          # Health check for each service
+          SERVICES=(
+            "mana-core-auth:3001:/api/v1/health"
+            "maerchenzauber-backend:3002:/health"
+            "chat-backend:3002:/api/health"
+          )
+
+          for SERVICE_CONFIG in "${SERVICES[@]}"; do
+            IFS=':' read -r SERVICE PORT PATH <<< "$SERVICE_CONFIG"
+
+            echo "Checking health of $SERVICE..."
+            ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
+              HEALTH=\$(docker compose -f ~/manacore-staging/docker-compose.yml exec -T $SERVICE wget -q -O - http://localhost:$PORT$PATH || echo "FAILED")
+
+              if [[ "\$HEALTH" == *"FAILED"* ]]; then
+                echo "❌ Health check failed for $SERVICE"
+                docker compose -f ~/manacore-staging/docker-compose.yml logs --tail=50 $SERVICE
+                exit 1
+              else
+                echo "✅ Health check passed for $SERVICE"
+              fi
+          EOF
+          done
+
+      - name: Run database migrations
+        run: |
+          # Run migrations for services that need them
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+            cd ~/manacore-staging
+
+            # Mana Core Auth migrations
+            docker compose exec -T mana-core-auth pnpm run db:migrate || echo "Auth migrations skipped"
+          EOF
+
+      - name: Deployment summary
+        run: |
+          echo "## Staging Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: Staging" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployed by**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Services Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "Service: ${{ github.event.inputs.service || 'all' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Health Checks" >> $GITHUB_STEP_SUMMARY
+          echo "All health checks passed ✅" >> $GITHUB_STEP_SUMMARY
+
+  notify-deployment:
+    name: Notify Deployment
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: always()
+    steps:
+      - name: Deployment notification
+        run: |
+          STATUS="${{ needs.deploy-staging.result }}"
+
+          if [ "$STATUS" == "success" ]; then
+            echo "✅ Staging deployment completed successfully"
+          else
+            echo "❌ Staging deployment failed"
+            exit 1
+          fi
