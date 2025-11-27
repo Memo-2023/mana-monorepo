@@ -212,12 +212,27 @@ const APP_CONFIGS = [
 		},
 	},
 
+	// Picture Backend (NestJS)
+	{
+		path: 'apps/picture/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: () => '3003',
+			DATABASE_URL: () => 'postgresql://picture:picturepassword@localhost:5434/picture',
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			REPLICATE_API_TOKEN: (env) => env.MAERCHENZAUBER_REPLICATE_API_KEY, // Reuse existing Replicate key
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
 	// Picture Mobile (Expo)
 	{
 		path: 'apps/picture/apps/mobile/.env',
 		vars: {
 			EXPO_PUBLIC_SUPABASE_URL: (env) => env.PICTURE_SUPABASE_URL,
 			EXPO_PUBLIC_SUPABASE_ANON_KEY: (env) => env.PICTURE_SUPABASE_ANON_KEY,
+			EXPO_PUBLIC_BACKEND_URL: (env) => env.PICTURE_BACKEND_URL || 'http://localhost:3003',
+			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 		},
 	},
 
@@ -227,8 +242,40 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_SUPABASE_URL: (env) => env.PICTURE_SUPABASE_URL,
 			PUBLIC_SUPABASE_ANON_KEY: (env) => env.PICTURE_SUPABASE_ANON_KEY,
+			PUBLIC_BACKEND_URL: (env) => env.PICTURE_BACKEND_URL || 'http://localhost:3003',
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_GOOGLE_CLIENT_ID: (env) => env.PICTURE_GOOGLE_CLIENT_ID || '',
 			PUBLIC_APPLE_CLIENT_ID: (env) => env.PICTURE_APPLE_CLIENT_ID || '',
+		},
+	},
+
+	// Quote Backend (NestJS)
+	{
+		path: 'apps/quote/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.QUOTE_BACKEND_PORT || '3007',
+			DATABASE_URL: (env) => env.QUOTE_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Quote Mobile (Expo)
+	{
+		path: 'apps/quote/apps/mobile/.env',
+		vars: {
+			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.QUOTE_BACKEND_PORT || '3007'}`,
+			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Quote Web (SvelteKit)
+	{
+		path: 'apps/quote/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.QUOTE_BACKEND_PORT || '3007'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 		},
 	},
 ];

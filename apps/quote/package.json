@@ -1,0 +1,25 @@
+{
+  "name": "quote",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Quote App - Daily Inspiration",
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:backend": "pnpm --filter @quote/backend dev",
+    "dev:web": "pnpm --filter @quote/web dev",
+    "dev:landing": "pnpm --filter @quote/landing dev",
+    "dev:mobile": "pnpm --filter @quote/mobile dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean",
+    "db:push": "pnpm --filter @quote/backend db:push",
+    "db:studio": "pnpm --filter @quote/backend db:studio",
+    "db:seed": "pnpm --filter @quote/backend db:seed"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
