@@ -2,7 +2,7 @@
   "name": "manacore-monorepo",
   "version": "1.0.0",
   "private": true,
-  "description": "Manacore Monorepo containing maerchenzauber, manacore, manadeck, memoro, picture, uload, chat, nutriphi, news, wisekeep, and quote",
+  "description": "Manacore Monorepo containing maerchenzauber, manacore, manadeck, memoro, picture, uload, chat, nutriphi, news, wisekeep, quote, and bauntown",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -86,6 +86,9 @@
     "dev:quote:landing": "pnpm --filter @quote/landing dev",
     "dev:quote:backend": "pnpm --filter @quote/backend dev",
     "dev:quote:app": "turbo run dev --filter=@quote/web --filter=@quote/backend",
+
+    "bauntown:dev": "turbo run dev --filter=bauntown...",
+    "dev:bauntown:landing": "pnpm --filter @bauntown/landing dev",
 
     "docker:up": "docker compose -f docker-compose.dev.yml --env-file .env.development up -d postgres redis",
     "docker:up:auth": "docker compose -f docker-compose.dev.yml --env-file .env.development --profile auth up -d",
