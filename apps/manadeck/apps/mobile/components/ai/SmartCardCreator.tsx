@@ -14,7 +14,6 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { useAIStore } from '../../store/aiStore';
 import { GeneratedCard, GenerationOptions } from '../../utils/supabaseAIService';
-import { AudioRecorder } from './AudioRecorder';
 import { ImageCardCreator } from './ImageCardCreator';
 
 interface SmartCardCreatorProps {
@@ -32,7 +31,7 @@ export const SmartCardCreator: React.FC<SmartCardCreatorProps> = ({ deckId, onCa
     saveGeneratedCards,
   } = useAIStore();
 
-  const [inputMode, setInputMode] = useState<'text' | 'voice' | 'image'>('text');
+  const [inputMode, setInputMode] = useState<'text' | 'image'>('text');
   const [textInput, setTextInput] = useState('');
   const [options, setOptions] = useState<GenerationOptions>({
     cardTypes: ['flashcard', 'quiz'],
@@ -186,7 +185,6 @@ export const SmartCardCreator: React.FC<SmartCardCreatorProps> = ({ deckId, onCa
         <View className="mb-4 flex-row space-x-2">
           {[
             { key: 'text', label: 'Text', icon: 'text' },
-            { key: 'voice', label: 'Sprache', icon: 'mic' },
             { key: 'image', label: 'Bild', icon: 'image' },
           ].map((mode) => (
             <Pressable
@@ -228,17 +226,6 @@ export const SmartCardCreator: React.FC<SmartCardCreatorProps> = ({ deckId, onCa
               style={{ textAlignVertical: 'top' }}
             />
           </Card>
-        )}
-
-        {inputMode === 'voice' && (
-          <View className="mb-4">
-            <AudioRecorder
-              onTranscriptionComplete={(text) => {
-                setTextInput(text);
-                setInputMode('text');
-              }}
-            />
-          </View>
         )}
 
         {inputMode === 'image' && (

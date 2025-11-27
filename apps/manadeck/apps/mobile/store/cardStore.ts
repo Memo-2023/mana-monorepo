@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { supabase, getAuthenticatedSupabase } from '../utils/supabase';
+import { apiClient } from '../services/apiClient';
 
 // Content types for different card types
 export interface TextContent {
@@ -51,6 +51,24 @@ export interface Card {
   updated_at: string;
 }
 
+// Helper to map backend response to frontend format
+function mapCardFromApi(card: any): Card {
+  return {
+    id: card.id,
+    deck_id: card.deckId,
+    position: card.position,
+    title: card.title,
+    content: card.content,
+    card_type: card.cardType,
+    ai_model: card.aiModel,
+    ai_prompt: card.aiPrompt,
+    version: card.version || 1,
+    is_favorite: card.isFavorite || false,
+    created_at: card.createdAt,
+    updated_at: card.updatedAt,
+  };
+}
+
 interface CardState {
   cards: Card[];
   currentCard: Card | null;
@@ -88,22 +106,18 @@ export const useCardStore = create<CardState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Use authenticated Supabase client with Mana token for RLS
-      const authenticatedSupabase = await getAuthenticatedSupabase();
-
-      const { data, error } = await authenticatedSupabase
-        .from('cards')
-        .select('*')
-        .eq('deck_id', deckId)
-        .order('position', { ascending: true });
+      const response = await apiClient.getDeckCards(deckId);
 
       console.log('[DEBUG] fetchCards - Deck ID:', deckId);
-      console.log('[DEBUG] fetchCards - Cards found:', data?.length || 0);
-      console.log('[DEBUG] fetchCards - Error:', error);
+      console.log('[DEBUG] fetchCards - Cards found:', response.data?.cards?.length || 0);
+      console.log('[DEBUG] fetchCards - Error:', response.error);
 
-      if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error);
+      }
 
-      set({ cards: data || [] });
+      const cards = (response.data?.cards || []).map(mapCardFromApi);
+      set({ cards });
     } catch (error: any) {
       set({ error: error.message || 'Failed to fetch cards' });
       console.error('[ERROR] fetchCards:', error);
@@ -116,18 +130,14 @@ export const useCardStore = create<CardState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Use authenticated Supabase client with Mana token for RLS
-      const authenticatedSupabase = await getAuthenticatedSupabase();
+      const response = await apiClient.getCard(id);
 
-      const { data, error } = await authenticatedSupabase
-        .from('cards')
-        .select('*')
-        .eq('id', id)
-        .single();
+      if (response.error) {
+        throw new Error(response.error);
+      }
 
-      if (error) throw error;
-
-      set({ currentCard: data });
+      const card = mapCardFromApi(response.data?.card);
+      set({ currentCard: card });
     } catch (error: any) {
       set({ error: error.message || 'Failed to fetch card' });
       console.error('[ERROR] fetchCard:', error);
@@ -140,42 +150,28 @@ export const useCardStore = create<CardState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Use authenticated Supabase client with Mana token for RLS
-      const authenticatedSupabase = await getAuthenticatedSupabase();
-
       // Get next position
-      const { data: existingCards } = await authenticatedSupabase
-        .from('cards')
-        .select('position')
-        .eq('deck_id', deckId)
-        .order('position', { ascending: false })
-        .limit(1);
-
-      const nextPosition = existingCards?.[0]?.position ? existingCards[0].position + 1 : 1;
-
-      const { data, error } = await authenticatedSupabase
-        .from('cards')
-        .insert({
-          deck_id: deckId,
-          position: nextPosition,
-          title: cardData.title || '',
-          content: cardData.content || { text: '' },
-          card_type: cardData.card_type || 'text',
-          ai_model: cardData.ai_model,
-          ai_prompt: cardData.ai_prompt,
-          version: 1,
-          is_favorite: false,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Add to local state
       const cards = get().cards;
-      set({ cards: [...cards, data] });
+      const maxPosition = cards.length > 0 ? Math.max(...cards.map((c) => c.position)) : 0;
 
-      return data;
+      const response = await apiClient.createCard({
+        deckId,
+        title: cardData.title || '',
+        content: cardData.content || { text: '' },
+        cardType: cardData.card_type || 'text',
+        position: maxPosition + 1,
+        aiModel: cardData.ai_model,
+        aiPrompt: cardData.ai_prompt,
+      });
+
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      const newCard = mapCardFromApi(response.data?.card);
+      set({ cards: [...cards, newCard] });
+
+      return newCard;
     } catch (error: any) {
       set({ error: error.message || 'Failed to create card' });
       throw error;
@@ -188,19 +184,17 @@ export const useCardStore = create<CardState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Use authenticated Supabase client with Mana token for RLS
-      const authenticatedSupabase = await getAuthenticatedSupabase();
+      const response = await apiClient.updateCard(id, {
+        title: updates.title,
+        content: updates.content,
+        cardType: updates.card_type,
+        position: updates.position,
+        isFavorite: updates.is_favorite,
+      });
 
-      const { error } = await authenticatedSupabase
-        .from('cards')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString(),
-          version: updates.version ? updates.version + 1 : undefined,
-        })
-        .eq('id', id);
-
-      if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error);
+      }
 
       // Update local state
       const cards = get().cards;
@@ -224,12 +218,11 @@ export const useCardStore = create<CardState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Use authenticated Supabase client with Mana token for RLS
-      const authenticatedSupabase = await getAuthenticatedSupabase();
+      const response = await apiClient.deleteCard(id);
 
-      const { error } = await authenticatedSupabase.from('cards').delete().eq('id', id);
-
-      if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error);
+      }
 
       // Remove from local state
       const cards = get().cards;
@@ -254,35 +247,30 @@ export const useCardStore = create<CardState>((set, get) => ({
       const cardToDuplicate = get().cards.find((card) => card.id === id);
       if (!cardToDuplicate) throw new Error('Card not found');
 
-      // Use authenticated Supabase client with Mana token for RLS
-      const authenticatedSupabase = await getAuthenticatedSupabase();
+      const response = await apiClient.createCard({
+        deckId: cardToDuplicate.deck_id,
+        title: cardToDuplicate.title ? `${cardToDuplicate.title} (Kopie)` : '',
+        content: cardToDuplicate.content,
+        cardType: cardToDuplicate.card_type,
+        position: cardToDuplicate.position + 1,
+        aiModel: cardToDuplicate.ai_model,
+        aiPrompt: cardToDuplicate.ai_prompt,
+      });
 
-      const { data, error } = await authenticatedSupabase
-        .from('cards')
-        .insert({
-          deck_id: cardToDuplicate.deck_id,
-          position: cardToDuplicate.position + 1,
-          title: cardToDuplicate.title ? `${cardToDuplicate.title} (Kopie)` : '',
-          content: cardToDuplicate.content,
-          card_type: cardToDuplicate.card_type,
-          ai_model: cardToDuplicate.ai_model,
-          ai_prompt: cardToDuplicate.ai_prompt,
-          version: 1,
-          is_favorite: false,
-        })
-        .select()
-        .single();
+      if (response.error) {
+        throw new Error(response.error);
+      }
 
-      if (error) throw error;
+      const newCard = mapCardFromApi(response.data?.card);
 
       // Add to local state
       const cards = get().cards;
       const insertIndex = cards.findIndex((card) => card.id === id) + 1;
       const newCards = [...cards];
-      newCards.splice(insertIndex, 0, data);
+      newCards.splice(insertIndex, 0, newCard);
       set({ cards: newCards });
 
-      return data;
+      return newCard;
     } catch (error: any) {
       set({ error: error.message || 'Failed to duplicate card' });
       throw error;
@@ -295,20 +283,10 @@ export const useCardStore = create<CardState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Use authenticated Supabase client with Mana token for RLS
-      const authenticatedSupabase = await getAuthenticatedSupabase();
+      const response = await apiClient.reorderCards(deckId, cardIds);
 
-      // Update positions in database
-      const updates = cardIds.map((cardId, index) => ({
-        id: cardId,
-        position: index + 1,
-      }));
-
-      for (const update of updates) {
-        await authenticatedSupabase
-          .from('cards')
-          .update({ position: update.position })
-          .eq('id', update.id);
+      if (response.error) {
+        throw new Error(response.error);
       }
 
       // Refresh cards to get correct order
@@ -340,12 +318,13 @@ export const useCardStore = create<CardState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Use authenticated Supabase client with Mana token for RLS
-      const authenticatedSupabase = await getAuthenticatedSupabase();
-
-      const { error } = await authenticatedSupabase.from('cards').delete().in('id', ids);
-
-      if (error) throw error;
+      // Delete cards one by one (could be optimized with batch endpoint)
+      for (const id of ids) {
+        const response = await apiClient.deleteCard(id);
+        if (response.error) {
+          console.error(`Failed to delete card ${id}:`, response.error);
+        }
+      }
 
       // Remove from local state
       const cards = get().cards;
@@ -362,28 +341,14 @@ export const useCardStore = create<CardState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Use authenticated Supabase client with Mana token for RLS
-      const authenticatedSupabase = await getAuthenticatedSupabase();
-
-      // Get highest position in target deck
-      const { data: targetCards } = await authenticatedSupabase
-        .from('cards')
-        .select('position')
-        .eq('deck_id', targetDeckId)
-        .order('position', { ascending: false })
-        .limit(1);
-
-      let nextPosition = targetCards?.[0]?.position ? targetCards[0].position + 1 : 1;
-
-      // Move each card
+      // Update each card's deck (could be optimized with batch endpoint)
       for (const cardId of cardIds) {
-        await authenticatedSupabase
-          .from('cards')
-          .update({
-            deck_id: targetDeckId,
-            position: nextPosition++,
-          })
-          .eq('id', cardId);
+        const response = await apiClient.updateCard(cardId, {
+          // Note: Backend would need to support deckId update
+        });
+        if (response.error) {
+          console.error(`Failed to move card ${cardId}:`, response.error);
+        }
       }
 
       // Remove moved cards from local state

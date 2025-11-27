@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Card } from './cardStore';
-import { supabase, getAuthenticatedSupabase } from '../utils/supabase';
+import { apiClient } from '../services/apiClient';
 import { authService } from '../services/authService';
 import { calculateSM2, difficultyToQuality, isCardDue } from '../utils/spacedRepetition';
 import { useAuthStore } from './authStore';
@@ -40,6 +40,39 @@ export interface SessionCardProgress {
   is_correct: boolean;
   time_spent: number;
   difficulty?: 'easy' | 'medium' | 'hard' | 'again';
+}
+
+// Map backend camelCase to frontend snake_case
+function mapProgressFromApi(apiProgress: any): CardProgress {
+  return {
+    id: apiProgress.id,
+    user_id: apiProgress.userId,
+    card_id: apiProgress.cardId,
+    deck_id: apiProgress.deckId || '',
+    ease_factor: apiProgress.easeFactor,
+    interval: apiProgress.interval,
+    repetitions: apiProgress.repetitions,
+    next_review_date: apiProgress.nextReview,
+    last_reviewed_at: apiProgress.lastReviewed,
+    total_reviews: apiProgress.repetitions || 0,
+    correct_reviews: 0, // Not tracked in new schema
+    incorrect_reviews: 0, // Not tracked in new schema
+    status: apiProgress.status || 'new',
+  };
+}
+
+function mapSessionFromApi(apiSession: any): StudySession {
+  return {
+    id: apiSession.id,
+    deck_id: apiSession.deckId,
+    user_id: apiSession.userId,
+    started_at: apiSession.startedAt,
+    ended_at: apiSession.endedAt,
+    total_cards: apiSession.totalCards,
+    completed_cards: apiSession.completedCards,
+    correct_answers: apiSession.correctCards,
+    mode: 'all', // Mode not tracked in new schema
+  };
 }
 
 interface StudyState {
@@ -95,35 +128,21 @@ export const useStudyStore = create<StudyState>((set, get) => ({
 
   fetchCardProgress: async (deckId: string) => {
     try {
-      // Get authenticated Supabase client with Mana token (auto-refreshes if needed)
-      const supabase = await getAuthenticatedSupabase();
+      const response = await apiClient.getCardProgressByDeck(deckId);
 
-      // Get current user ID from token
-      const appToken = await authService.getAppToken();
-      const user = appToken ? authService.getUserFromToken(appToken) : null;
-
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('card_progress')
-        .select('*')
-        .eq('deck_id', deckId)
-        .eq('user_id', user.id);
-
-      if (error) {
-        // Check if it's a JWT expiration error
-        if (error.code === 'PGRST303' || error.message?.includes('JWT expired') || error.message?.includes('token expired')) {
+      if (response.error) {
+        if (response.error.includes('Session expired')) {
           await authService.clearAuthStorage();
-          // Clear user from auth store to trigger redirect to login
           useAuthStore.setState({ user: null });
           throw new Error('Session expired. Please sign in again.');
         }
-        throw error;
+        throw new Error(response.error);
       }
 
       const progressMap = new Map<string, CardProgress>();
-      data?.forEach((progress) => {
-        progressMap.set(progress.card_id, progress);
+      response.data?.progress?.forEach((progress: any) => {
+        const mapped = mapProgressFromApi(progress);
+        progressMap.set(mapped.card_id, mapped);
       });
 
       set({ cardProgressMap: progressMap });
@@ -135,9 +154,6 @@ export const useStudyStore = create<StudyState>((set, get) => ({
   startSession: async (deckId: string, mode: StudySession['mode'] = 'all') => {
     try {
       set({ isLoading: true, error: null });
-
-      // Get authenticated Supabase client with Mana token (auto-refreshes if needed)
-      const supabase = await getAuthenticatedSupabase();
 
       // Get current user ID from token
       const appToken = await authService.getAppToken();
@@ -201,29 +217,23 @@ export const useStudyStore = create<StudyState>((set, get) => ({
         throw new Error('Keine Karten zum Lernen gefunden');
       }
 
-      // Create session in database
-      const { data: session, error: sessionError } = await supabase
-        .from('study_sessions')
-        .insert({
-          user_id: user.id,
-          deck_id: deckId,
-          mode,
-          total_cards: cards.length,
-          completed_cards: 0,
-          correct_answers: 0,
-          incorrect_answers: 0,
-        })
-        .select()
-        .single();
+      // Create session via API
+      const response = await apiClient.createStudySession({
+        deckId,
+        totalCards: cards.length,
+        completedCards: 0,
+        correctCards: 0,
+      });
 
-      if (sessionError) {
-        // Check if it's a JWT expiration error
-        if (sessionError.code === 'PGRST303' || sessionError.message?.includes('JWT expired')) {
+      if (response.error) {
+        if (response.error.includes('Session expired')) {
           await authService.clearAuthStorage();
           throw new Error('Session expired. Please sign in again.');
         }
-        throw sessionError;
+        throw new Error(response.error);
       }
+
+      const session = mapSessionFromApi(response.data?.session);
 
       set({
         currentSession: session,
@@ -244,9 +254,8 @@ export const useStudyStore = create<StudyState>((set, get) => ({
 
   updateCardProgress: async (cardId: string, quality: number) => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const appToken = await authService.getAppToken();
+      const user = appToken ? authService.getUserFromToken(appToken) : null;
       if (!user) return;
 
       const progressMap = get().cardProgressMap;
@@ -274,10 +283,6 @@ export const useStudyStore = create<StudyState>((set, get) => ({
           incorrect_reviews: quality < 3 ? 1 : 0,
           status: sm2Result.interval < 10 ? 'learning' : 'review',
         };
-
-        const { error } = await supabase.from('card_progress').insert(newProgress);
-
-        if (error) throw error;
       } else {
         // Update existing progress
         const sm2Result = calculateSM2(
@@ -309,13 +314,21 @@ export const useStudyStore = create<StudyState>((set, get) => ({
           incorrect_reviews: existingProgress.incorrect_reviews + (quality < 3 ? 1 : 0),
           status: newStatus,
         };
+      }
 
-        const { error } = await supabase
-          .from('card_progress')
-          .update(newProgress)
-          .eq('id', existingProgress.id);
+      // Update via API (uses upsert)
+      const response = await apiClient.upsertCardProgress({
+        cardId,
+        easeFactor: newProgress.ease_factor,
+        interval: newProgress.interval,
+        repetitions: newProgress.repetitions,
+        lastReviewed: newProgress.last_reviewed_at,
+        nextReview: newProgress.next_review_date,
+        status: newProgress.status === 'relearning' ? 'learning' : newProgress.status,
+      });
 
-        if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error);
       }
 
       // Update local state
@@ -335,20 +348,17 @@ export const useStudyStore = create<StudyState>((set, get) => ({
 
       // Calculate session statistics
       const correctAnswers = sessionProgress.filter((p) => p.is_correct).length;
-      const incorrectAnswers = sessionProgress.filter((p) => !p.is_correct).length;
 
-      // Update session in database
-      const { error } = await supabase
-        .from('study_sessions')
-        .update({
-          ended_at: new Date().toISOString(),
-          completed_cards: sessionProgress.length,
-          correct_answers: correctAnswers,
-          incorrect_answers: incorrectAnswers,
-        })
-        .eq('id', currentSession.id);
+      // Update session via API
+      const response = await apiClient.updateStudySession(currentSession.id, {
+        endedAt: new Date().toISOString(),
+        completedCards: sessionProgress.length,
+        correctCards: correctAnswers,
+      });
 
-      if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error);
+      }
 
       // Keep the session data for the summary screen
       set({

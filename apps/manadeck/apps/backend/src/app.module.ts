@@ -17,6 +17,8 @@ import {
   CardRepository,
   UserStatsRepository,
   DeckTemplateRepository,
+  StudySessionRepository,
+  CardProgressRepository,
 } from './database';
 
 @Module({
@@ -72,6 +74,8 @@ import {
     CardRepository,
     UserStatsRepository,
     DeckTemplateRepository,
+    StudySessionRepository,
+    CardProgressRepository,
   ],
 })
 export class AppModule implements NestModule {

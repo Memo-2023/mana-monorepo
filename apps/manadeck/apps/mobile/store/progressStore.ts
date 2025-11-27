@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { supabase } from '../utils/supabase';
+import { apiClient } from '../services/apiClient';
 
 export interface DailyProgress {
   date: string; // YYYY-MM-DD
@@ -36,6 +36,22 @@ export interface Statistics {
   best_accuracy_day: string;
   most_studied_day: string;
   favorite_time_of_day: string;
+}
+
+// Map backend session format to local format
+function mapSessionFromApi(apiSession: any) {
+  return {
+    id: apiSession.id,
+    user_id: apiSession.userId,
+    deck_id: apiSession.deckId,
+    started_at: apiSession.startedAt,
+    ended_at: apiSession.endedAt,
+    total_cards: apiSession.totalCards || 0,
+    completed_cards: apiSession.completedCards || 0,
+    correct_answers: apiSession.correctCards || 0,
+    time_spent_seconds: apiSession.timeSpentSeconds || 0,
+    mode: 'all',
+  };
 }
 
 interface ProgressState {
@@ -75,25 +91,24 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
   error: null,
   selectedPeriod: 'week',
 
-  fetchDailyProgress: async (userId: string, startDate: Date, endDate: Date) => {
+  fetchDailyProgress: async (_userId: string, startDate: Date, endDate: Date) => {
     try {
       set({ isLoading: true, error: null });
 
-      // Fetch study sessions in date range
-      const { data: sessions, error } = await supabase
-        .from('study_sessions')
-        .select('*')
-        .eq('user_id', userId)
-        .gte('started_at', startDate.toISOString())
-        .lte('started_at', endDate.toISOString())
-        .order('started_at', { ascending: true });
+      // Fetch study sessions in date range via API
+      const response = await apiClient.getStudySessionsByDateRange(
+        startDate.toISOString(),
+        endDate.toISOString()
+      );
 
-      if (error) throw error;
+      if (response.error) throw new Error(response.error);
+
+      const sessions = (response.data?.sessions || []).map(mapSessionFromApi);
 
       // Group sessions by date
       const progressMap = new Map<string, DailyProgress>();
 
-      sessions?.forEach((session) => {
+      sessions.forEach((session: any) => {
         const date = new Date(session.started_at).toISOString().split('T')[0];
         const existing = progressMap.get(date) || {
           date,
@@ -107,7 +122,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
         const sessionDuration = session.ended_at
           ? (new Date(session.ended_at).getTime() - new Date(session.started_at).getTime()) / 60000
-          : 0;
+          : (session.time_spent_seconds || 0) / 60;
 
         progressMap.set(date, {
           ...existing,
@@ -204,67 +219,65 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     };
   },
 
-  fetchStreakInfo: async (userId: string) => {
+  fetchStreakInfo: async (_userId: string) => {
     try {
       // Fetch all study sessions for streak calculation
-      const { data: sessions, error } = await supabase
-        .from('study_sessions')
-        .select('started_at')
-        .eq('user_id', userId)
-        .order('started_at', { ascending: true });
+      const response = await apiClient.getStudySessions();
 
-      if (error) throw error;
+      if (response.error) throw new Error(response.error);
 
-      const streakInfo = get().calculateStreak(sessions || []);
+      const sessions = (response.data?.sessions || []).map(mapSessionFromApi);
+      const streakInfo = get().calculateStreak(sessions);
       set({ streakInfo });
     } catch (error: any) {
       console.error('Error fetching streak info:', error);
     }
   },
 
-  fetchDeckProgress: async (userId: string) => {
+  fetchDeckProgress: async (_userId: string) => {
     try {
       set({ isLoading: true });
 
-      // Fetch all decks with card counts
-      const { data: decks, error: decksError } = await supabase
-        .from('decks')
-        .select('*, cards(count)')
-        .eq('user_id', userId);
+      // Fetch all decks
+      const decksResponse = await apiClient.getDecks();
+      if (decksResponse.error) throw new Error(decksResponse.error);
 
-      if (decksError) throw decksError;
+      // Fetch all card progress
+      const progressResponse = await apiClient.getCardProgress();
+      if (progressResponse.error) throw new Error(progressResponse.error);
 
-      // Fetch card progress for all decks
-      const { data: cardProgress, error: progressError } = await supabase
-        .from('card_progress')
-        .select('*')
-        .eq('user_id', userId);
-
-      if (progressError) throw progressError;
+      const decks = decksResponse.data?.decks || [];
+      const cardProgressList = progressResponse.data?.progress || [];
 
       // Calculate progress per deck
       const deckProgressList: DeckProgress[] = [];
 
-      decks?.forEach((deck) => {
-        const deckCardProgress = cardProgress?.filter((cp) => cp.deck_id === deck.id) || [];
+      for (const deck of decks) {
+        // Get cards count for this deck
+        const cardsResponse = await apiClient.getDeckCards(deck.id);
+        const totalCards = cardsResponse.data?.count || 0;
+
+        // Filter progress for this deck's cards
+        const deckCards = cardsResponse.data?.cards || [];
+        const deckCardIds = new Set(deckCards.map((c: any) => c.id));
+        const deckCardProgress = cardProgressList.filter((cp: any) => deckCardIds.has(cp.cardId));
 
         const mastered = deckCardProgress.filter(
-          (cp) => cp.ease_factor >= 2.5 && cp.interval >= 21
+          (cp: any) => cp.easeFactor >= 2.5 && cp.interval >= 21
         ).length;
 
         const learning = deckCardProgress.filter(
-          (cp) => cp.status === 'learning' || cp.status === 'relearning'
+          (cp: any) => cp.status === 'learning'
         ).length;
 
-        const newCards = deckCardProgress.filter((cp) => cp.status === 'new').length;
+        const newCards = deckCardProgress.filter((cp: any) => cp.status === 'new').length;
 
         const avgEaseFactor =
           deckCardProgress.length > 0
-            ? deckCardProgress.reduce((sum, cp) => sum + cp.ease_factor, 0) /
+            ? deckCardProgress.reduce((sum: number, cp: any) => sum + (cp.easeFactor || 2.5), 0) /
               deckCardProgress.length
             : 2.5;
 
-        const totalCards = deck.cards?.[0]?.count || 0;
         const studiedCards = deckCardProgress.length;
 
         deckProgressList.push({
@@ -277,7 +290,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
           average_ease_factor: Math.round(avgEaseFactor * 100) / 100,
           completion_percentage: totalCards > 0 ? Math.round((mastered / totalCards) * 100) : 0,
         });
-      });
+      }
 
       set({ deckProgress: deckProgressList });
     } catch (error: any) {
@@ -287,15 +300,14 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     }
   },
 
-  fetchStatistics: async (userId: string) => {
+  fetchStatistics: async (_userId: string) => {
     try {
       // Fetch all sessions for statistics
-      const { data: sessions, error } = await supabase
-        .from('study_sessions')
-        .select('*')
-        .eq('user_id', userId);
+      const response = await apiClient.getStudySessions();
 
-      if (error) throw error;
+      if (response.error) throw new Error(response.error);
+
+      const sessions = (response.data?.sessions || []).map(mapSessionFromApi);
       if (!sessions || sessions.length === 0) return;
 
       // Calculate statistics
@@ -309,7 +321,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       const timeOfDayCount = new Map<number, number>();
 
-      sessions.forEach((session) => {
+      sessions.forEach((session: any) => {
         totalCards += session.completed_cards || 0;
         totalCorrect += session.correct_answers || 0;
 
@@ -317,6 +329,8 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
           const duration =
             (new Date(session.ended_at).getTime() - new Date(session.started_at).getTime()) / 60000;
           totalTime += duration;
+        } else if (session.time_spent_seconds) {
+          totalTime += session.time_spent_seconds / 60;
         }
 
         // Track accuracy

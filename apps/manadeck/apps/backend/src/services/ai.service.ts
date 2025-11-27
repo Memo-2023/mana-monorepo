@@ -238,6 +238,122 @@ Ensure variety in the questions and good coverage of the subject matter.`;
     return `- Mix of ${cardTypes.join(', ')} cards as appropriate for the content`;
   }
 
+  /**
+   * Generate cards from an image using Gemini Vision
+   */
+  async generateFromImage(
+    imageBase64: string,
+    context?: string,
+    cardCount: number = 5,
+  ): AsyncResult<DeckGenerationData> {
+    const startTime = Date.now();
+
+    if (!this.ai) {
+      return err(ServiceError.unavailable('AI (Google Gemini not configured)'));
+    }
+
+    try {
+      const prompt = `Analyze this image and create ${cardCount} educational flashcards based on its content.
+${context ? `Context: ${context}` : ''}
+
+For each concept, term, or important element you identify in the image, create a flashcard or quiz question.
+
+Return the cards as a JSON object with a "cards" array containing objects with:
+- cardType: "flashcard" or "quiz"
+- title: short title
+- content: { front, back, hint } for flashcards OR { question, options, correctAnswer, explanation } for quiz`;
+
+      const response = await this.ai.models.generateContent({
+        model: this.model,
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              { text: prompt },
+              {
+                inlineData: {
+                  mimeType: 'image/jpeg',
+                  data: imageBase64,
+                },
+              },
+            ],
+          },
+        ],
+        config: {
+          responseMimeType: 'application/json',
+        },
+      });
+
+      const generationTime = Date.now() - startTime;
+      const responseText = response.text?.trim();
+
+      if (!responseText) {
+        return err(ServiceError.generationFailed('Google Gemini', 'Empty response from AI'));
+      }
+
+      const parsed = JSON.parse(responseText);
+      const cards: GeneratedCard[] = parsed.cards || [];
+
+      this.logger.log(`Generated ${cards.length} cards from image in ${generationTime}ms`);
+
+      return ok({
+        cards,
+        metadata: {
+          model: this.model,
+          tokensUsed: response.usageMetadata?.totalTokenCount,
+          generationTime,
+        },
+      });
+    } catch (error) {
+      this.logger.error('AI image generation failed:', error);
+      return err(
+        ServiceError.generationFailed(
+          'Google Gemini',
+          error instanceof Error ? error.message : 'Unknown error',
+        ),
+      );
+    }
+  }
+
+  /**
+   * Enhance card content using AI
+   */
+  async enhanceContent(
+    content: string,
+    cardType: string,
+  ): AsyncResult<{ enhancedContent: string }> {
+    if (!this.ai) {
+      return err(ServiceError.unavailable('AI (Google Gemini not configured)'));
+    }
+
+    try {
+      const prompt = `Improve and enhance this ${cardType} card content. Make it clearer, more educational, and engaging.
+
+Original content:
+${content}
+
+Return the enhanced content in the same JSON format as the input, but improved.`;
+
+      const response = await this.ai.models.generateContent({
+        model: this.model,
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+        },
+      });
+
+      const responseText = response.text?.trim();
+      if (!responseText) {
+        return ok({ enhancedContent: content });
+      }
+
+      return ok({ enhancedContent: responseText });
+    } catch (error) {
+      this.logger.error('AI content enhancement failed:', error);
+      return ok({ enhancedContent: content }); // Return original on failure
+    }
+  }
+
   private buildResponseSchema(cardTypes: CardType[]): any {
     const cardSchemas: any[] = [];
 

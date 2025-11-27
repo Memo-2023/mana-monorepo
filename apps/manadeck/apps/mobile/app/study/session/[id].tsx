@@ -10,7 +10,6 @@ import { CardView } from '../../../components/card/CardView';
 import { Button } from '../../../components/ui/Button';
 import { Card as UICard } from '../../../components/ui/Card';
 import { QuizContent } from '../../../store/cardStore';
-import { AudioCard } from '../../../components/study/AudioCard';
 import { useThemeColors } from '../../../utils/themeUtils';
 
 export default function StudySessionScreen() {
@@ -34,7 +33,6 @@ export default function StudySessionScreen() {
   const colors = useThemeColors();
 
   const [sessionStarted, setSessionStarted] = useState(false);
-  const [audioEnabled, setAudioEnabled] = useState(false);
 
   useEffect(() => {
     if (deckId && !sessionStarted) {
@@ -118,22 +116,7 @@ export default function StudySessionScreen() {
             </Pressable>
           ),
           headerRight: () => (
-            <View style={{ marginRight: spacing.content.small, flexDirection: 'row', alignItems: 'center' }}>
-              <Pressable
-                onPress={() => setAudioEnabled(!audioEnabled)}
-                style={({ pressed }) => ({
-                  marginRight: 12,
-                  borderRadius: 20,
-                  backgroundColor: colors.muted,
-                  padding: 8,
-                  opacity: pressed ? 0.7 : 1
-                })}>
-                <Icon
-                  name={audioEnabled ? 'volume-high' : 'volume-mute'}
-                  size={20}
-                  color={audioEnabled ? colors.primary : colors.mutedForeground}
-                />
-              </Pressable>
+            <View style={{ marginRight: 16, flexDirection: 'row', alignItems: 'center' }}>
               <Text style={{ fontWeight: '500', color: colors.foreground }}>
                 {currentCardIndex + 1}/{sessionCards.length}
               </Text>
@@ -200,13 +183,6 @@ export default function StudySessionScreen() {
               />
             ) : (
               <CardView card={currentCard} mode="study" />
-            )}
-
-            {/* Audio Controls */}
-            {audioEnabled && (
-              <View style={{ marginTop: spacing.lg }}>
-                <AudioCard card={currentCard} autoPlay={true} showControls={true} />
-              </View>
             )}
           </View>
 

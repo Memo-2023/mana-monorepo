@@ -3,15 +3,33 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { deckStore } from '$lib/stores/deckStore.svelte';
+	import { progressStore } from '$lib/stores/progressStore.svelte';
+	import { cardStore } from '$lib/stores/cardStore.svelte';
 	import { Button, Badge, Card } from '@manacore/shared-ui';
 
 	let deckId = $derived($page.params.id);
 	let showDeleteConfirm = $state(false);
 	let deleting = $state(false);
 
-	onMount(() => {
+	// Calculate deck-specific progress
+	let dueCount = $state(0);
+	let masteredCount = $state(0);
+
+	onMount(async () => {
 		if (deckId) {
-			deckStore.fetchDeck(deckId);
+			await Promise.all([
+				deckStore.fetchDeck(deckId),
+				progressStore.fetchDeckProgress(deckId),
+				cardStore.fetchCards(deckId)
+			]);
+
+			// Calculate progress
+			const progress = progressStore.cardProgress;
+			masteredCount = progress.filter((p) => p.ease_factor >= 2.5 && p.interval >= 21).length;
+			dueCount = progress.filter((p) => {
+				if (!p.next_review) return false;
+				return new Date(p.next_review) <= new Date();
+			}).length;
 		}
 	});
 
@@ -83,20 +101,20 @@
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 			<Card>
 				<div class="text-center">
-					<div class="text-3xl font-bold">{deck.card_count || 0}</div>
+					<div class="text-3xl font-bold">{cardStore.cards.length || deck.card_count || 0}</div>
 					<div class="text-sm text-muted-foreground">Total Cards</div>
 				</div>
 			</Card>
 			<Card>
 				<div class="text-center">
-					<div class="text-3xl font-bold">0</div>
+					<div class="text-3xl font-bold text-green-500">{masteredCount}</div>
 					<div class="text-sm text-muted-foreground">Mastered</div>
 				</div>
 			</Card>
 			<Card>
 				<div class="text-center">
-					<div class="text-3xl font-bold">0</div>
-					<div class="text-sm text-muted-foreground">To Review</div>
+					<div class="text-3xl font-bold text-orange-500">{dueCount}</div>
+					<div class="text-sm text-muted-foreground">Due for Review</div>
 				</div>
 			</Card>
 		</div>

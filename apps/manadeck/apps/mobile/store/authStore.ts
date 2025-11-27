@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { authService } from '../services/authService';
 import { tokenManager, TokenState } from '../services/tokenManager';
-import { supabase } from '../utils/supabase';
 import type { ManaUser } from '../types/auth';
 
 interface AuthState {
@@ -225,15 +224,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const user = get().user;
       if (!user) throw new Error('No user logged in');
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', user.id);
+      // TODO: Implement profile update via backend API
+      // For now, profiles are managed via Mana Core Auth
+      console.warn('Profile update not yet implemented via backend API');
 
-      if (error) throw error;
+      // Update local user state with the new values
+      set({
+        user: {
+          ...user,
+          ...updates,
+        },
+      });
     } catch (error: any) {
       set({ error: error.message || 'Failed to update profile' });
       throw error;

@@ -77,12 +77,8 @@ export const deckStore = {
 		error = null;
 
 		try {
-			// For now, find in local decks or fetch all
-			// TODO: Add GET /v1/api/decks/:id endpoint to backend
-			if (decks.length === 0) {
-				await this.fetchDecks();
-			}
-			currentDeck = decks.find((d) => d.id === id) || null;
+			const response = await apiRequest<{ deck: Deck }>(`/v1/api/decks/${id}`);
+			currentDeck = response.deck || null;
 			if (!currentDeck) {
 				throw new Error('Deck not found');
 			}

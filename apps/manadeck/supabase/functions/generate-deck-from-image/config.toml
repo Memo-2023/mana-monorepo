@@ -1,3 +1,0 @@
-# Disable automatic JWT verification by Supabase Edge Gateway
-# We'll manually verify the Mana Core JWT inside the function
-verify_jwt = false

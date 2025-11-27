@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { getAuthenticatedSupabase } from '../utils/supabase';
-import { authService } from '../services/authService';
+import { apiClient } from '../services/apiClient';
 import { useAuthStore } from './authStore';
 
 export interface Deck {
@@ -16,6 +15,24 @@ export interface Deck {
   created_at: string;
   updated_at: string;
   card_count?: number;
+}
+
+// Helper to map backend response to frontend format
+function mapDeckFromApi(deck: any): Deck {
+  return {
+    id: deck.id,
+    user_id: deck.userId,
+    title: deck.title,
+    description: deck.description,
+    cover_image_url: deck.coverImageUrl,
+    is_public: deck.isPublic,
+    settings: deck.settings || {},
+    tags: deck.tags || [],
+    metadata: deck.metadata || {},
+    created_at: deck.createdAt,
+    updated_at: deck.updatedAt,
+    card_count: deck.card_count || 0,
+  };
 }
 
 interface DeckState {
@@ -43,46 +60,18 @@ export const useDeckStore = create<DeckState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Get authenticated Supabase client with Mana token (auto-refreshes if needed)
-      const supabase = await getAuthenticatedSupabase();
+      const response = await apiClient.getDecks();
 
-      // Get current user ID from token
-      const appToken = await authService.getAppToken();
-      const user = appToken ? authService.getUserFromToken(appToken) : null;
-
-      if (!user) {
-        throw new Error('Not authenticated');
-      }
-
-      const { data, error } = await supabase
-        .from('decks')
-        .select(
-          `
-          *,
-          card_count:cards(count)
-        `
-        )
-        .or(`user_id.eq.${user.id},and(is_public.eq.true,user_id.eq.00000000-0000-0000-0000-000000000001)`)
-        .order('updated_at', { ascending: false });
-
-      if (error) {
-        // Check if it's a JWT expiration error
-        if (error.code === 'PGRST303' || error.message?.includes('JWT expired') || error.message?.includes('token expired')) {
-          // Token expired, clear invalid token and let user re-authenticate
-          await authService.clearAuthStorage();
-          // Clear user from auth store to trigger redirect to login
+      if (response.error) {
+        // Check for auth errors
+        if (response.error.includes('expired') || response.error.includes('Not authenticated')) {
           useAuthStore.setState({ user: null });
           throw new Error('Session expired. Please sign in again.');
         }
-        throw error;
+        throw new Error(response.error);
       }
 
-      const decksWithCount =
-        data?.map((deck) => ({
-          ...deck,
-          card_count: deck.card_count?.[0]?.count || 0,
-        })) || [];
-
+      const decksWithCount = (response.data?.decks || []).map(mapDeckFromApi);
       set({ decks: decksWithCount });
     } catch (error: any) {
       set({ error: error.message || 'Failed to fetch decks' });
@@ -96,38 +85,18 @@ export const useDeckStore = create<DeckState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // Get authenticated Supabase client with Mana token (auto-refreshes if needed)
-      const supabase = await getAuthenticatedSupabase();
+      const response = await apiClient.getDeck(id);
 
-      const { data, error } = await supabase
-        .from('decks')
-        .select(
-          `
-          *,
-          card_count:cards(count)
-        `
-        )
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        // Check if it's a JWT expiration error
-        if (error.code === 'PGRST303' || error.message?.includes('JWT expired') || error.message?.includes('token expired')) {
-          // Token expired, clear invalid token and let user re-authenticate
-          await authService.clearAuthStorage();
-          // Clear user from auth store to trigger redirect to login
+      if (response.error) {
+        if (response.error.includes('expired') || response.error.includes('Not authenticated')) {
           useAuthStore.setState({ user: null });
           throw new Error('Session expired. Please sign in again.');
         }
-        throw error;
+        throw new Error(response.error);
       }
 
-      const deckWithCount = {
-        ...data,
-        card_count: data.card_count?.[0]?.count || 0,
-      };
-
-      set({ currentDeck: deckWithCount });
+      const deck = mapDeckFromApi(response.data?.deck);
+      set({ currentDeck: deck });
     } catch (error: any) {
       set({ error: error.message || 'Failed to fetch deck' });
       console.error('Error fetching deck:', error);
@@ -140,29 +109,25 @@ export const useDeckStore = create<DeckState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const response = await apiClient.createDeck({
+        title: deckData.title || 'Untitled Deck',
+        description: deckData.description,
+        coverImageUrl: deckData.cover_image_url,
+        isPublic: deckData.is_public,
+        settings: deckData.settings,
+        tags: deckData.tags,
+        metadata: deckData.metadata,
+      });
 
-      const { data, error } = await supabase
-        .from('decks')
-        .insert({
-          ...deckData,
-          user_id: user.id,
-          settings: deckData.settings || {},
-          tags: deckData.tags || [],
-          metadata: deckData.metadata || {},
-        })
-        .select()
-        .single();
+      if (response.error) {
+        throw new Error(response.error);
+      }
 
-      if (error) throw error;
-
+      const newDeck = mapDeckFromApi(response.data?.deck);
       const decks = get().decks;
-      set({ decks: [data, ...decks] });
+      set({ decks: [newDeck, ...decks] });
 
-      return data;
+      return newDeck;
     } catch (error: any) {
       set({ error: error.message || 'Failed to create deck' });
       throw error;
@@ -175,15 +140,19 @@ export const useDeckStore = create<DeckState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      const { error } = await supabase
-        .from('decks')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id);
+      const response = await apiClient.updateDeck(id, {
+        title: updates.title,
+        description: updates.description,
+        coverImageUrl: updates.cover_image_url,
+        isPublic: updates.is_public,
+        settings: updates.settings,
+        tags: updates.tags,
+        metadata: updates.metadata,
+      });
 
-      if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error);
+      }
 
       const decks = get().decks;
       set({
@@ -205,9 +174,11 @@ export const useDeckStore = create<DeckState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      const { error } = await supabase.from('decks').delete().eq('id', id);
+      const response = await apiClient.deleteDeck(id);
 
-      if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error);
+      }
 
       const decks = get().decks;
       set({ decks: decks.filter((deck) => deck.id !== id) });
