@@ -2,7 +2,7 @@
   "name": "manacore-monorepo",
   "version": "1.0.0",
   "private": true,
-  "description": "Manacore Monorepo containing maerchenzauber, manacore, manadeck, memoro, picture, uload, chat, nutriphi, news, wisekeep, quote, and bauntown",
+  "description": "Manacore Monorepo containing maerchenzauber, manacore, manadeck, memoro, picture, uload, chat, nutriphi, news, wisekeep, quote, bauntown, presi, and reader",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -89,6 +89,18 @@
 
     "bauntown:dev": "turbo run dev --filter=bauntown...",
     "dev:bauntown:landing": "pnpm --filter @bauntown/landing dev",
+
+    "presi:dev": "turbo run dev --filter=presi...",
+    "dev:presi:mobile": "pnpm --filter @presi/mobile dev",
+    "dev:presi:web": "pnpm --filter @presi/web dev",
+    "dev:presi:backend": "pnpm --filter @presi/backend dev",
+    "dev:presi:app": "turbo run dev --filter=@presi/web --filter=@presi/backend",
+    "presi:db:push": "pnpm --filter @presi/backend db:push",
+    "presi:db:studio": "pnpm --filter @presi/backend db:studio",
+    "presi:db:seed": "pnpm --filter @presi/backend db:seed",
+
+    "reader:dev": "turbo run dev --filter=reader...",
+    "dev:reader:mobile": "pnpm --filter @reader/mobile dev",
 
     "docker:up": "docker compose -f docker-compose.dev.yml --env-file .env.development up -d postgres redis",
     "docker:up:auth": "docker compose -f docker-compose.dev.yml --env-file .env.development --profile auth up -d",
