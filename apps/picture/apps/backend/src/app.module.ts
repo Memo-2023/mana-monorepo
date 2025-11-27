@@ -10,6 +10,8 @@ import { BoardItemModule } from './board-item/board-item.module';
 import { UploadModule } from './upload/upload.module';
 import { GenerateModule } from './generate/generate.module';
 import { ExploreModule } from './explore/explore.module';
+import { ProfileModule } from './profile/profile.module';
+import { BatchModule } from './batch/batch.module';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { ExploreModule } from './explore/explore.module';
     UploadModule,
     GenerateModule,
     ExploreModule,
+    ProfileModule,
+    BatchModule,
   ],
 })
 export class AppModule {}
