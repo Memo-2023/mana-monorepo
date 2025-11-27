@@ -17,9 +17,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Slider } from '~/components/ui/Slider';
 import { useAuth } from '~/contexts/AuthContext';
-import { supabase } from '~/utils/supabase';
 import { useModelSelection } from '~/store/modelStore';
-import { generateImage } from '~/services/imageGeneration';
+import { generateAndWait } from '~/services/api/generate';
 import { useTheme } from '~/contexts/ThemeContext';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -92,65 +91,31 @@ export function RemixBottomSheet({
     setIsGenerating(true);
 
     try {
-      // Create generation record with source image
-      const { data: generation, error: genError } = await supabase
-        .from('image_generations')
-        .insert({
-          user_id: user.id,
-          prompt: prompt.trim(),
-          model: selectedModel.name,
-          width: 1024,
-          height: 1024,
-          steps: selectedModel.default_steps,
-          guidance_scale: selectedModel.default_guidance_scale,
-          source_image_url: imageUrl,
-          generation_strength: strength,
-          status: 'pending'
-        })
-        .select()
-        .single();
-
-      if (genError) throw genError;
-
-      // Get session for auth
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No active session');
-
-      // Call edge function with optional img2img parameters
-      const requestBody: any = {
+      // Use Backend API for remix generation
+      const result = await generateAndWait({
         prompt: prompt.trim(),
-        model_id: selectedModel.replicate_id,
-        model_version: selectedModel.version,
+        modelId: selectedModel.id,
         width: 1024,
         height: 1024,
-        num_inference_steps: selectedModel.default_steps,
-        guidance_scale: selectedModel.default_guidance_scale,
-        generation_id: generation.id,
-      };
-
-      // Add img2img parameters only if model supports it
-      if (selectedModel.supports_img2img) {
-        requestBody.source_image_url = imageUrl;
-        requestBody.strength = strength;
-      }
-
-      const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: requestBody,
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        }
+        steps: selectedModel.defaultSteps || selectedModel.default_steps,
+        guidanceScale: selectedModel.defaultGuidanceScale || selectedModel.default_guidance_scale,
+        // Add img2img parameters only if model supports it
+        sourceImageUrl: selectedModel.supportsImg2Img || selectedModel.supports_img2img ? imageUrl : undefined,
+        generationStrength: selectedModel.supportsImg2Img || selectedModel.supports_img2img ? strength : undefined,
       });
 
-      if (error) throw error;
+      if (result.status === 'failed') {
+        throw new Error(result.errorMessage || 'Generation failed');
+      }
 
       Alert.alert(
-        'Erfolgreich!', 
-        `Remix wurde in ${data.generation_time} Sekunden generiert.`,
+        'Erfolgreich!',
+        `Remix wurde in ${result.generationTimeSeconds || 0} Sekunden generiert.`,
         [
-          { 
-            text: 'Anzeigen', 
+          {
+            text: 'Anzeigen',
             onPress: () => {
-              onSuccess?.(data.image.id);
+              onSuccess?.(result.image?.id || '');
               onClose();
             }
           },
@@ -161,7 +126,7 @@ export function RemixBottomSheet({
     } catch (error: any) {
       console.error('Remix error:', error);
       Alert.alert(
-        'Fehler', 
+        'Fehler',
         error.message || 'Remix konnte nicht erstellt werden'
       );
     } finally {

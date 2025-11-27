@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean } from 'class-validator';
 
 export class GenerateImageDto {
   @IsString()
@@ -6,6 +6,10 @@ export class GenerateImageDto {
 
   @IsString()
   modelId: string;
+
+  @IsString()
+  @IsOptional()
+  modelVersion?: string;
 
   @IsString()
   @IsOptional()
@@ -38,4 +42,12 @@ export class GenerateImageDto {
   @IsNumber()
   @IsOptional()
   generationStrength?: number;
+
+  @IsString()
+  @IsOptional()
+  style?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  waitForResult?: boolean;
 }

@@ -8,7 +8,14 @@ import {
 import { eq, and, isNull, isNotNull, desc, inArray, sql } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { type Database } from '../db/connection';
-import { images, imageTags, type Image } from '../db/schema';
+import {
+  images,
+  imageTags,
+  imageLikes,
+  imageGenerations,
+  type Image,
+  type ImageGeneration,
+} from '../db/schema';
 import { GetImagesQueryDto } from './dto/image.dto';
 
 @Injectable()
@@ -267,6 +274,263 @@ export class ImageService {
       throw error;
     }
   }
+
+  async getArchivedCount(userId: string): Promise<{ count: number }> {
+    try {
+      const result = await this.db
+        .select({ count: sql<number>`count(*)` })
+        .from(images)
+        .where(and(eq(images.userId, userId), isNotNull(images.archivedAt)));
+
+      return { count: Number(result[0]?.count || 0) };
+    } catch (error) {
+      this.logger.error('Error getting archived count', error);
+      throw error;
+    }
+  }
+
+  async batchArchiveImages(
+    imageIds: string[],
+    userId: string,
+  ): Promise<{ affected: number }> {
+    try {
+      const result = await this.db
+        .update(images)
+        .set({
+          archivedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(and(inArray(images.id, imageIds), eq(images.userId, userId)))
+        .returning();
+
+      return { affected: result.length };
+    } catch (error) {
+      this.logger.error('Error batch archiving images', error);
+      throw error;
+    }
+  }
+
+  async batchRestoreImages(
+    imageIds: string[],
+    userId: string,
+  ): Promise<{ affected: number }> {
+    try {
+      const result = await this.db
+        .update(images)
+        .set({
+          archivedAt: null,
+          updatedAt: new Date(),
+        })
+        .where(and(inArray(images.id, imageIds), eq(images.userId, userId)))
+        .returning();
+
+      return { affected: result.length };
+    } catch (error) {
+      this.logger.error('Error batch restoring images', error);
+      throw error;
+    }
+  }
+
+  async batchDeleteImages(
+    imageIds: string[],
+    userId: string,
+  ): Promise<{ affected: number }> {
+    try {
+      // Delete image-tag relations first
+      await this.db.delete(imageTags).where(inArray(imageTags.imageId, imageIds));
+
+      // Delete the images (only those owned by user)
+      const result = await this.db
+        .delete(images)
+        .where(and(inArray(images.id, imageIds), eq(images.userId, userId)))
+        .returning();
+
+      return { affected: result.length };
+    } catch (error) {
+      this.logger.error('Error batch deleting images', error);
+      throw error;
+    }
+  }
+
+  // ==================== LIKES ====================
+
+  async likeImage(
+    imageId: string,
+    userId: string,
+  ): Promise<{ liked: boolean; likeCount: number }> {
+    try {
+      // Check if image exists and is public (or owned by user)
+      const image = await this.db
+        .select()
+        .from(images)
+        .where(eq(images.id, imageId))
+        .limit(1);
+
+      if (image.length === 0) {
+        throw new NotFoundException(`Image with id ${imageId} not found`);
+      }
+
+      // Only allow liking public images (or own images)
+      if (!image[0].isPublic && image[0].userId !== userId) {
+        throw new ForbiddenException('Cannot like a private image');
+      }
+
+      // Check if already liked
+      const existingLike = await this.db
+        .select()
+        .from(imageLikes)
+        .where(
+          and(eq(imageLikes.imageId, imageId), eq(imageLikes.userId, userId)),
+        )
+        .limit(1);
+
+      if (existingLike.length > 0) {
+        // Already liked, return current state
+        const count = await this.getLikeCount(imageId);
+        return { liked: true, likeCount: count };
+      }
+
+      // Add like
+      await this.db.insert(imageLikes).values({
+        imageId,
+        userId,
+      });
+
+      const count = await this.getLikeCount(imageId);
+      return { liked: true, likeCount: count };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      this.logger.error(`Error liking image ${imageId}`, error);
+      throw error;
+    }
+  }
+
+  async unlikeImage(
+    imageId: string,
+    userId: string,
+  ): Promise<{ liked: boolean; likeCount: number }> {
+    try {
+      // Check if image exists
+      const image = await this.db
+        .select()
+        .from(images)
+        .where(eq(images.id, imageId))
+        .limit(1);
+
+      if (image.length === 0) {
+        throw new NotFoundException(`Image with id ${imageId} not found`);
+      }
+
+      // Delete like
+      await this.db
+        .delete(imageLikes)
+        .where(
+          and(eq(imageLikes.imageId, imageId), eq(imageLikes.userId, userId)),
+        );
+
+      const count = await this.getLikeCount(imageId);
+      return { liked: false, likeCount: count };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Error unliking image ${imageId}`, error);
+      throw error;
+    }
+  }
+
+  async getLikeStatus(
+    imageId: string,
+    userId: string,
+  ): Promise<{ liked: boolean; likeCount: number }> {
+    try {
+      // Check if image exists
+      const image = await this.db
+        .select()
+        .from(images)
+        .where(eq(images.id, imageId))
+        .limit(1);
+
+      if (image.length === 0) {
+        throw new NotFoundException(`Image with id ${imageId} not found`);
+      }
+
+      // Check if liked by user
+      const existingLike = await this.db
+        .select()
+        .from(imageLikes)
+        .where(
+          and(eq(imageLikes.imageId, imageId), eq(imageLikes.userId, userId)),
+        )
+        .limit(1);
+
+      const count = await this.getLikeCount(imageId);
+
+      return {
+        liked: existingLike.length > 0,
+        likeCount: count,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Error getting like status for image ${imageId}`, error);
+      throw error;
+    }
+  }
+
+  private async getLikeCount(imageId: string): Promise<number> {
+    const result = await this.db
+      .select({ count: sql<number>`count(*)` })
+      .from(imageLikes)
+      .where(eq(imageLikes.imageId, imageId));
+
+    return Number(result[0]?.count || 0);
+  }
+
+  // ==================== GENERATION DETAILS ====================
+
+  async getGenerationDetails(
+    generationId: string,
+    userId: string,
+  ): Promise<Partial<ImageGeneration> | null> {
+    try {
+      const result = await this.db
+        .select({
+          steps: imageGenerations.steps,
+          guidanceScale: imageGenerations.guidanceScale,
+          generationTimeSeconds: imageGenerations.generationTimeSeconds,
+          status: imageGenerations.status,
+        })
+        .from(imageGenerations)
+        .where(
+          and(
+            eq(imageGenerations.id, generationId),
+            eq(imageGenerations.userId, userId),
+          ),
+        )
+        .limit(1);
+
+      if (result.length === 0) {
+        return null;
+      }
+
+      return result[0];
+    } catch (error) {
+      this.logger.error(
+        `Error fetching generation details ${generationId}`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  // ==================== PRIVATE HELPERS ====================
 
   private async verifyOwnership(id: string, userId: string): Promise<void> {
     const result = await this.db

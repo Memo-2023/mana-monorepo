@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, TextInput, View } from 'react-native';
 import { Link, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { supabase } from '~/utils/supabase';
+import { useAuth } from '~/contexts/AuthContext';
 import { useTheme } from '~/contexts/ThemeContext';
 import { Button } from '~/components/Button';
 import { Text } from '~/components/Text';
@@ -10,23 +10,23 @@ import { Container } from '~/components/Container';
 
 export default function ResetPasswordScreen() {
   const { theme } = useTheme();
+  const { resetPassword: resetPasswordAuth } = useAuth();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function resetPassword() {
+  async function handleResetPassword() {
     if (!email) {
       Alert.alert('Fehler', 'Bitte E-Mail-Adresse eingeben');
       return;
     }
 
     setLoading(true);
-    
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: 'picture://reset-password',
-    });
+
+    const { error } = await resetPasswordAuth(email.trim());
 
     if (error) {
-      Alert.alert('Fehler', error.message);
+      const errorMessage = error.message || 'Passwort-Zurücksetzung fehlgeschlagen';
+      Alert.alert('Fehler', errorMessage);
     } else {
       Alert.alert(
         'E-Mail gesendet!',
@@ -34,7 +34,7 @@ export default function ResetPasswordScreen() {
         [{ text: 'OK', onPress: () => router.back() }]
       );
     }
-    
+
     setLoading(false);
   }
 
@@ -68,9 +68,9 @@ export default function ResetPasswordScreen() {
               />
             </View>
 
-            <Button 
+            <Button
               title={loading ? "Senden..." : "Link senden"}
-              onPress={resetPassword}
+              onPress={handleResetPassword}
               disabled={loading}
               className="mt-4"
             />

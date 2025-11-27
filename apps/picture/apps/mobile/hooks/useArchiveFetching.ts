@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { supabase } from '~/utils/supabase';
 import { useTagStore } from '~/store/tagStore';
 import { usePagination } from '~/hooks/usePagination';
 import { PAGINATION } from '~/constants';
 import { ImageItem } from '~/types/gallery';
+import { getImages } from '~/services/api/images';
 
 type UseArchiveFetchingProps = {
   userId: string | undefined;
@@ -30,25 +30,12 @@ export function useArchiveFetching({ userId, onError }: UseArchiveFetchingProps)
         pagination.setLoadingMore(true);
       }
 
-      // Query only archived images (archived_at IS NOT NULL)
-      let query = supabase
-        .from('images')
-        .select('id, public_url, prompt, created_at, is_favorite, model, blurhash, archived_at')
-        .eq('user_id', userId)
-        .not('archived_at', 'is', null); // Only archived images
-
-      // Apply pagination
-      const from = pageNum * PAGINATION.GALLERY_PAGE_SIZE;
-      const to = from + PAGINATION.GALLERY_PAGE_SIZE - 1;
-
-      const { data, error } = await query
-        .order('archived_at', { ascending: false }) // Sort by archive date (newest first)
-        .range(from, to);
-
-      if (error) throw error;
-
-      // Fetch tags for all images - PARALLEL for performance
-      const imageData = data || [];
+      // Fetch archived images from backend API
+      const imageData = await getImages({
+        page: pageNum + 1, // API uses 1-based pagination
+        limit: PAGINATION.GALLERY_PAGE_SIZE,
+        archived: true,
+      });
 
       // Check if there are more images
       pagination.setHasMore(imageData.length >= PAGINATION.GALLERY_PAGE_SIZE);
@@ -58,10 +45,16 @@ export function useArchiveFetching({ userId, onError }: UseArchiveFetchingProps)
         imageData.map(image => fetchImageTags(image.id))
       );
 
-      // Add tags to images
-      const imagesWithTags = imageData.map(img => ({
-        ...img,
-        tags: getImageTags(img.id)
+      // Map API response to ImageItem format and add tags
+      const imagesWithTags: ImageItem[] = imageData.map(img => ({
+        id: img.id,
+        publicUrl: img.publicUrl || null,
+        prompt: img.prompt,
+        createdAt: img.createdAt,
+        isFavorite: img.isFavorite,
+        model: img.model,
+        blurhash: img.blurhash,
+        tags: getImageTags(img.id),
       }));
 
       // Either replace or append images

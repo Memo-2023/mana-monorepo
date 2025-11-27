@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, TextInput, View } from 'react-native';
 import { Link, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { supabase } from '~/utils/supabase';
+import { useAuth } from '~/contexts/AuthContext';
 import { useTheme } from '~/contexts/ThemeContext';
 import { Button } from '~/components/Button';
 import { Text } from '~/components/Text';
@@ -10,43 +10,14 @@ import { Container } from '~/components/Container';
 
 export default function LoginScreen() {
   const { theme } = useTheme();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  // Test if JavaScript is running
-  useEffect(() => {
-    console.log('LoginScreen mounted - JavaScript is running');
-    console.log('Platform:', Platform.OS);
-    if (Platform.OS === 'web') {
-      // Add click handler directly to window to test
-      const testHandler = (e: any) => {
-        console.log('Window click detected at:', e.clientX, e.clientY);
-      };
-      window.addEventListener('click', testHandler);
-      
-      // Add visible debug element to web page
-      const debugDiv = document.createElement('div');
-      debugDiv.style.position = 'fixed';
-      debugDiv.style.top = '10px';
-      debugDiv.style.left = '10px';
-      debugDiv.style.backgroundColor = 'red';
-      debugDiv.style.color = 'white';
-      debugDiv.style.padding = '10px';
-      debugDiv.style.zIndex = '9999';
-      debugDiv.textContent = 'React Native Web is running!';
-      document.body.appendChild(debugDiv);
-      
-      return () => {
-        window.removeEventListener('click', testHandler);
-        debugDiv.remove();
-      };
-    }
-  }, []);
 
   async function signInWithEmail() {
     console.log('signInWithEmail called', { email, password: '***' });
-    
+
     if (!email || !password) {
       if (Platform.OS === 'web') {
         alert('Bitte E-Mail und Passwort eingeben');
@@ -57,17 +28,15 @@ export default function LoginScreen() {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: password,
-    });
+    const { error } = await signIn(email.trim(), password);
 
     if (error) {
       console.error('Login error:', error);
+      const errorMessage = error.message || 'Anmeldung fehlgeschlagen';
       if (Platform.OS === 'web') {
-        alert(`Login fehlgeschlagen: ${error.message}`);
+        alert(`Login fehlgeschlagen: ${errorMessage}`);
       } else {
-        Alert.alert('Login fehlgeschlagen', error.message);
+        Alert.alert('Login fehlgeschlagen', errorMessage);
       }
     } else {
       console.log('Login successful, redirecting...');
@@ -89,7 +58,7 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Container>
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           className="flex-1"
         >
@@ -128,7 +97,7 @@ export default function LoginScreen() {
               />
             </View>
 
-            <Button 
+            <Button
               title={loading ? "Anmelden..." : "Anmelden"}
               onPress={signInWithEmail}
               disabled={loading}

@@ -96,16 +96,13 @@ export default function GalleryScreen() {
     .filter(img => img.status === 'generating' || img.status === 'completed')
     .map(img => ({
       id: img.status === 'completed' && img.realImageId ? img.realImageId : img.tempId,
-      user_id: user?.id || '',
       prompt: img.prompt,
-      image_url: img.status === 'completed' && img.imageUrl ? img.imageUrl : '',
-      public_url: img.status === 'completed' && img.imageUrl ? img.imageUrl : null,
-      width: img.width,
-      height: img.height,
-      created_at: new Date(img.startTime).toISOString(),
-      is_favorite: false,
-      is_public: false,
+      publicUrl: img.status === 'completed' && img.imageUrl ? img.imageUrl : null,
+      createdAt: new Date(img.startTime).toISOString(),
+      isFavorite: false,
+      model: img.model,
       tags: [],
+      blurhash: null,
       // Mark as generating for special rendering (only while generating)
       _isGenerating: img.status === 'generating',
     } as any));
@@ -152,16 +149,16 @@ export default function GalleryScreen() {
   const renderImage = useCallback(({ item }: { item: ImageItem }) => (
     <ImageCard
       id={item.id}
-      publicUrl={item.public_url}
+      publicUrl={item.publicUrl}
       prompt={item.prompt}
-      createdAt={item.created_at}
-      isFavorite={item.is_favorite}
+      createdAt={item.createdAt}
+      isFavorite={item.isFavorite}
       model={item.model}
       tags={item.tags}
       viewMode={galleryViewMode}
       blurhash={item.blurhash}
       isGenerating={(item as any)._isGenerating}
-      onToggleFavorite={() => toggleFavorite(item.id, item.is_favorite)}
+      onToggleFavorite={() => toggleFavorite(item.id, item.isFavorite)}
     />
   ), [galleryViewMode, toggleFavorite]);
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
-import { generateImage } from '~/services/imageGeneration';
+import { generateAndWait, type GenerationStatus } from '~/services/api/generate';
 import { useAuth } from '~/contexts/AuthContext';
 import { useModelSelection } from '~/store/modelStore';
 import { useTagStore, Tag } from '~/store/tagStore';
@@ -153,14 +153,14 @@ export function useImageGeneration() {
     }
 
     try {
-      // Generate image in background
-      const result = await generateImage({
+      // Generate image via Backend API (synchronous mode)
+      const result = await generateAndWait({
         prompt: prompt.trim(),
-        model_id: selectedModel.id,
+        modelId: selectedModel.id,
         width,
         height,
         steps,
-        guidance_scale: guidanceScale,
+        guidanceScale,
       });
 
       // Add tags if needed
@@ -169,14 +169,14 @@ export function useImageGeneration() {
       }
 
       // Mark as completed with real image data
-      completeGeneratingImage(tempId, result.image, result.generation_time);
+      completeGeneratingImage(tempId, result.image, result.generationTimeSeconds || 0);
 
       // Clear form
       setPrompt('');
       setSelectedTags([]);
 
       // Call success callback with generation time
-      options?.onSuccess?.(result.generation_time);
+      options?.onSuccess?.(result.generationTimeSeconds || 0);
 
     } catch (error: any) {
       console.error('Generation error:', error);

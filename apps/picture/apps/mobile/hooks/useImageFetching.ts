@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { supabase } from '~/utils/supabase';
 import { useTagStore } from '~/store/tagStore';
 import { usePagination } from '~/hooks/usePagination';
 import { PAGINATION } from '~/constants';
 import { ImageItem, FilterMode } from '~/types/gallery';
+import { getImages, toggleFavorite as apiToggleFavorite } from '~/services/api/images';
 
 type UseImageFetchingProps = {
   userId: string | undefined;
@@ -43,48 +43,17 @@ export function useImageFetching({ userId, filterMode, onError }: UseImageFetchi
         pagination.setLoadingMore(true);
       }
 
-      console.log('🔍 Building Supabase query...');
-      let query = supabase
-        .from('images')
-        .select('id, public_url, prompt, created_at, is_favorite, model, blurhash')
-        .eq('user_id', userId)
-        .is('archived_at', null); // Only show non-archived images
+      console.log('🔍 Fetching images via API...');
 
-      // Apply favorite filter if needed
-      if (filterMode === 'favorites') {
-        console.log('🔍 Adding favorites filter');
-        query = query.eq('is_favorite', true);
-      }
+      // Fetch images from backend API
+      const imageData = await getImages({
+        page: pageNum + 1, // API uses 1-based pagination
+        limit: PAGINATION.GALLERY_PAGE_SIZE,
+        archived: false,
+        favoritesOnly: filterMode === 'favorites',
+      });
 
-      // Apply pagination
-      const from = pageNum * PAGINATION.GALLERY_PAGE_SIZE;
-      const to = from + PAGINATION.GALLERY_PAGE_SIZE - 1;
-      console.log('🔍 Fetching range:', { from, to, pageSize: PAGINATION.GALLERY_PAGE_SIZE });
-
-      console.log('⏳ Executing Supabase query...');
-
-      // Add timeout to detect hanging queries
-      const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Query timeout after 10s')), 10000)
-      );
-
-      const queryPromise = query
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-      const { data, error } = await Promise.race([queryPromise, timeout]) as any;
-
-      console.log('✅ Supabase query completed');
-
-      if (error) {
-        console.error('❌ Error fetching images from Supabase:', error);
-        throw error;
-      }
-
-      console.log('✅ Images fetched:', data?.length || 0, 'images');
-
-      // Fetch tags for all images - PARALLEL for massive speed boost
-      const imageData = data || [];
+      console.log('✅ Images fetched:', imageData.length, 'images');
 
       // Check if there are more images
       pagination.setHasMore(imageData.length >= PAGINATION.GALLERY_PAGE_SIZE);
@@ -94,10 +63,16 @@ export function useImageFetching({ userId, filterMode, onError }: UseImageFetchi
         imageData.map(image => fetchImageTags(image.id))
       );
 
-      // Add tags to images
-      const imagesWithTags = imageData.map(img => ({
-        ...img,
-        tags: getImageTags(img.id)
+      // Map API response to ImageItem format and add tags
+      const imagesWithTags: ImageItem[] = imageData.map(img => ({
+        id: img.id,
+        publicUrl: img.publicUrl || null,
+        prompt: img.prompt,
+        createdAt: img.createdAt,
+        isFavorite: img.isFavorite,
+        model: img.model,
+        blurhash: img.blurhash,
+        tags: getImageTags(img.id),
       }));
 
       // Either replace or append images
@@ -133,16 +108,11 @@ export function useImageFetching({ userId, filterMode, onError }: UseImageFetchi
 
   const toggleFavorite = async (imageId: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('images')
-        .update({ is_favorite: !currentStatus })
-        .eq('id', imageId);
-
-      if (!error) {
-        pagination.setItems(pagination.items.map(img =>
-          img.id === imageId ? { ...img, is_favorite: !currentStatus } : img
-        ));
-      }
+      await apiToggleFavorite(imageId, !currentStatus);
+      // Update local state
+      pagination.setItems(pagination.items.map(img =>
+        img.id === imageId ? { ...img, isFavorite: !currentStatus } : img
+      ));
     } catch (error) {
       console.error('Error toggling favorite:', error);
       onError?.(error as Error);

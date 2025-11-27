@@ -91,17 +91,17 @@ export default function ExploreScreen() {
   const renderImage = useCallback(({ item }: { item: ExploreImageItem }) => (
     <ImageCard
       id={item.id}
-      publicUrl={item.public_url}
+      publicUrl={item.publicUrl}
       prompt={item.prompt}
-      createdAt={item.created_at}
+      createdAt={item.createdAt}
       model={item.model}
       tags={item.tags}
       viewMode={exploreViewMode}
       blurhash={item.blurhash}
       creatorUsername={item.creator?.username || undefined}
-      likesCount={item.likes_count}
-      userHasLiked={item.user_has_liked}
-      onToggleLike={() => toggleLike(item.id, item.user_has_liked || false)}
+      likesCount={item.likesCount}
+      userHasLiked={item.userHasLiked}
+      onToggleLike={() => toggleLike(item.id, item.userHasLiked || false)}
     />
   ), [exploreViewMode, toggleLike]);
 

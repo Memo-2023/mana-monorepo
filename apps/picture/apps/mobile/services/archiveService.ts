@@ -1,4 +1,18 @@
-import { supabase } from '~/utils/supabase';
+/**
+ * Archive Service - Using NestJS Backend API
+ */
+
+import {
+  archiveImage as apiArchiveImage,
+  restoreImage as apiRestoreImage,
+  deleteImage as apiDeleteImage,
+  getArchivedCount as apiGetArchivedCount,
+  getArchivedImages as apiGetArchivedImages,
+  batchArchiveImages as apiBatchArchiveImages,
+  batchRestoreImages as apiBatchRestoreImages,
+  batchDeleteImages as apiBatchDeleteImages,
+  type Image,
+} from './api/images';
 import { logger } from '~/utils/logger';
 
 /**
@@ -7,17 +21,7 @@ import { logger } from '~/utils/logger';
 export async function archiveImage(imageId: string): Promise<void> {
   try {
     logger.info('Archiving image:', imageId);
-
-    const { error } = await supabase
-      .from('images')
-      .update({ archived_at: new Date().toISOString() })
-      .eq('id', imageId);
-
-    if (error) {
-      logger.error('Failed to archive image:', error);
-      throw error;
-    }
-
+    await apiArchiveImage(imageId);
     logger.success('Image archived successfully');
   } catch (error) {
     logger.error('Archive error:', error);
@@ -31,17 +35,7 @@ export async function archiveImage(imageId: string): Promise<void> {
 export async function restoreImage(imageId: string): Promise<void> {
   try {
     logger.info('Restoring image:', imageId);
-
-    const { error } = await supabase
-      .from('images')
-      .update({ archived_at: null })
-      .eq('id', imageId);
-
-    if (error) {
-      logger.error('Failed to restore image:', error);
-      throw error;
-    }
-
+    await apiRestoreImage(imageId);
     logger.success('Image restored successfully');
   } catch (error) {
     logger.error('Restore error:', error);
@@ -50,48 +44,12 @@ export async function restoreImage(imageId: string): Promise<void> {
 }
 
 /**
- * Delete an archived image permanently (from storage and database)
+ * Delete an archived image permanently
  */
 export async function deleteArchivedImage(imageId: string): Promise<void> {
   try {
     logger.info('Deleting archived image:', imageId);
-
-    // 1. Get image details for storage_path
-    const { data: image, error: fetchError } = await supabase
-      .from('images')
-      .select('storage_path')
-      .eq('id', imageId)
-      .single();
-
-    if (fetchError) {
-      logger.error('Failed to fetch image details:', fetchError);
-      throw fetchError;
-    }
-
-    // 2. Delete from storage if path exists
-    if (image?.storage_path) {
-      logger.debug('Deleting from storage:', image.storage_path);
-      const { error: storageError } = await supabase.storage
-        .from('generated-images')
-        .remove([image.storage_path]);
-
-      if (storageError) {
-        logger.warn('Storage deletion failed (file may not exist):', storageError);
-        // Don't throw - continue with DB deletion
-      }
-    }
-
-    // 3. Delete from database
-    const { error: dbError } = await supabase
-      .from('images')
-      .delete()
-      .eq('id', imageId);
-
-    if (dbError) {
-      logger.error('Failed to delete from database:', dbError);
-      throw dbError;
-    }
-
+    await apiDeleteImage(imageId);
     logger.success('Image deleted successfully');
   } catch (error) {
     logger.error('Delete error:', error);
@@ -104,18 +62,8 @@ export async function deleteArchivedImage(imageId: string): Promise<void> {
  */
 export async function getArchivedCount(userId: string): Promise<number> {
   try {
-    const { count, error } = await supabase
-      .from('images')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .not('archived_at', 'is', null);
-
-    if (error) {
-      logger.error('Failed to get archived count:', error);
-      return 0;
-    }
-
-    return count || 0;
+    // Note: userId is no longer needed as the backend uses the JWT token
+    return await apiGetArchivedCount();
   } catch (error) {
     logger.error('Count error:', error);
     return 0;
@@ -127,27 +75,9 @@ export async function getArchivedCount(userId: string): Promise<number> {
  */
 export async function getArchivedImages(userId: string, page: number = 0, limit: number = 20) {
   try {
-    const from = page * limit;
-    const to = from + limit - 1;
-
-    const { data, error, count } = await supabase
-      .from('images')
-      .select('*', { count: 'exact' })
-      .eq('user_id', userId)
-      .not('archived_at', 'is', null)
-      .order('archived_at', { ascending: false })
-      .range(from, to);
-
-    if (error) {
-      logger.error('Failed to fetch archived images:', error);
-      throw error;
-    }
-
-    return {
-      items: data || [],
-      total: count || 0,
-      hasMore: count ? to < count - 1 : false,
-    };
+    // Note: userId is no longer needed as the backend uses the JWT token
+    // API uses 1-based pagination, so add 1 to page
+    return await apiGetArchivedImages(page + 1, limit);
   } catch (error) {
     logger.error('Fetch archived images error:', error);
     throw error;
@@ -160,17 +90,7 @@ export async function getArchivedImages(userId: string, page: number = 0, limit:
 export async function batchArchiveImages(imageIds: string[]): Promise<void> {
   try {
     logger.info('Batch archiving images:', imageIds.length);
-
-    const { error } = await supabase
-      .from('images')
-      .update({ archived_at: new Date().toISOString() })
-      .in('id', imageIds);
-
-    if (error) {
-      logger.error('Failed to batch archive:', error);
-      throw error;
-    }
-
+    await apiBatchArchiveImages(imageIds);
     logger.success('Batch archive successful');
   } catch (error) {
     logger.error('Batch archive error:', error);
@@ -184,17 +104,7 @@ export async function batchArchiveImages(imageIds: string[]): Promise<void> {
 export async function batchRestoreImages(imageIds: string[]): Promise<void> {
   try {
     logger.info('Batch restoring images:', imageIds.length);
-
-    const { error } = await supabase
-      .from('images')
-      .update({ archived_at: null })
-      .in('id', imageIds);
-
-    if (error) {
-      logger.error('Failed to batch restore:', error);
-      throw error;
-    }
-
+    await apiBatchRestoreImages(imageIds);
     logger.success('Batch restore successful');
   } catch (error) {
     logger.error('Batch restore error:', error);
@@ -208,43 +118,7 @@ export async function batchRestoreImages(imageIds: string[]): Promise<void> {
 export async function batchDeleteArchivedImages(imageIds: string[]): Promise<void> {
   try {
     logger.info('Batch deleting images:', imageIds.length);
-
-    // 1. Get all storage paths
-    const { data: images, error: fetchError } = await supabase
-      .from('images')
-      .select('storage_path')
-      .in('id', imageIds);
-
-    if (fetchError) {
-      logger.error('Failed to fetch images for batch delete:', fetchError);
-      throw fetchError;
-    }
-
-    // 2. Delete from storage
-    const storagePaths = images?.map(img => img.storage_path).filter(Boolean) || [];
-    if (storagePaths.length > 0) {
-      logger.debug('Deleting from storage:', storagePaths.length, 'files');
-      const { error: storageError } = await supabase.storage
-        .from('generated-images')
-        .remove(storagePaths);
-
-      if (storageError) {
-        logger.warn('Some storage deletions failed:', storageError);
-        // Don't throw - continue with DB deletion
-      }
-    }
-
-    // 3. Delete from database
-    const { error: dbError } = await supabase
-      .from('images')
-      .delete()
-      .in('id', imageIds);
-
-    if (dbError) {
-      logger.error('Failed to batch delete from database:', dbError);
-      throw dbError;
-    }
-
+    await apiBatchDeleteImages(imageIds);
     logger.success('Batch delete successful');
   } catch (error) {
     logger.error('Batch delete error:', error);

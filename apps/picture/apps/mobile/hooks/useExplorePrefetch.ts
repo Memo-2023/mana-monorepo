@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { Image } from 'expo-image';
-import { supabase } from '~/utils/supabase';
 import { PAGINATION } from '~/constants';
 import { ViewMode } from '~/types/gallery';
 import { SortMode } from '~/types/explore';
 import { getThumbnailUrl, getSizeForViewMode } from '~/utils/image';
 import { PREFETCH_DEBOUNCE_MS } from '~/constants/gallery';
+import { getExploreImages } from '~/services/api/explore';
 
 type UseExplorePrefetchProps = {
   hasMore: boolean;
@@ -40,34 +40,21 @@ export function useExplorePrefetch({
         // Get the last few images that would be from the next page
         const prefetchCount = Math.min(6, PAGINATION.EXPLORE_PAGE_SIZE);
 
-        // Calculate what the next page would be
-        const nextPageNum = currentPage + 1;
+        // Calculate what the next page would be (API uses 1-based pagination)
+        const nextPageNum = currentPage + 2;
 
-        let query = supabase
-          .from('images')
-          .select('id, public_url')
-          .eq('is_public', true);
-
-        // Apply same sorting as main query
-        switch (sortMode) {
-          case 'recent':
-          case 'popular':
-          case 'trending':
-            query = query.order('created_at', { ascending: false });
-            break;
-        }
-
-        const from = nextPageNum * PAGINATION.EXPLORE_PAGE_SIZE;
-        const to = from + prefetchCount - 1;
-
-        const { data } = await query.range(from, to);
+        const data = await getExploreImages({
+          page: nextPageNum,
+          limit: prefetchCount,
+          sortBy: sortMode,
+        });
 
         if (data && data.length > 0) {
           // Prefetch thumbnails for next page
           const thumbnailSize = getSizeForViewMode(viewMode);
           data.forEach(img => {
-            if (img.public_url) {
-              const thumbnailUrl = getThumbnailUrl(img.public_url, thumbnailSize);
+            if (img.publicUrl) {
+              const thumbnailUrl = getThumbnailUrl(img.publicUrl, thumbnailSize);
               if (thumbnailUrl) {
                 Image.prefetch(thumbnailUrl);
               }

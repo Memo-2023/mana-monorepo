@@ -1,12 +1,12 @@
 /**
  * Async Image Generation Service for Mobile App
  *
- * This service provides React hooks for async image generation using the job queue system.
+ * This service provides React hooks for async image generation using the NestJS backend.
  * It handles:
- * - Starting image generation via start-generation Edge Function
- * - Subscribing to real-time updates via Supabase Realtime
+ * - Starting image generation via Backend API
+ * - Polling for status updates
  * - Managing loading states and progress
- * - Error handling and retries
+ * - Error handling
  *
  * Usage:
  * ```tsx
@@ -14,40 +14,39 @@
  *
  * await generate({
  *   prompt: 'A beautiful sunset',
- *   model_id: 'black-forest-labs/flux-dev'
+ *   modelId: 'uuid-of-model'
  * });
  * ```
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '~/utils/supabase';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
-  startImageGeneration,
-  subscribeToGeneration,
-  type GenerateImageJobParams
-} from '@picture/shared/queue';
+  generateImage,
+  checkGenerationStatus,
+  cancelGeneration,
+  type GenerateImageParams,
+  type GenerationStatus,
+} from './api';
 import { logger } from '~/utils/logger';
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-export type GenerationStatus = 'idle' | 'queued' | 'processing' | 'downloading' | 'completed' | 'failed';
+export type GenerationStatusType = 'idle' | 'pending' | 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
 
 export interface GenerationResult {
   generationId: string;
-  jobId: string;
   imageUrl: string | null;
-  status: GenerationStatus;
+  status: GenerationStatusType;
 }
 
 export interface GenerationState {
-  status: GenerationStatus;
+  status: GenerationStatusType;
   progress: number; // 0-100
   imageUrl: string | null;
   error: string | null;
   generationId: string | null;
-  jobId: string | null;
 }
 
 // ============================================================================
@@ -55,7 +54,7 @@ export interface GenerationState {
 // ============================================================================
 
 /**
- * React hook for async image generation with real-time updates
+ * React hook for async image generation with polling updates
  *
  * @example
  * ```tsx
@@ -66,7 +65,7 @@ export interface GenerationState {
  *     try {
  *       await generate({
  *         prompt: 'A beautiful sunset over mountains',
- *         model_id: 'black-forest-labs/flux-dev',
+ *         modelId: 'your-model-uuid',
  *         width: 1024,
  *         height: 1024
  *       });
@@ -102,17 +101,19 @@ export function useImageGeneration() {
     imageUrl: null,
     error: null,
     generationId: null,
-    jobId: null
   });
 
-  const unsubscribeRef = useRef<(() => void) | null>(null);
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const mountedRef = useRef(true);
 
-  // Cleanup subscription on unmount
+  // Cleanup on unmount
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
-      if (unsubscribeRef.current) {
-        unsubscribeRef.current();
-        unsubscribeRef.current = null;
+      mountedRef.current = false;
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
       }
     };
   }, []);
@@ -120,133 +121,142 @@ export function useImageGeneration() {
   /**
    * Calculate progress based on status
    */
-  const calculateProgress = (status: GenerationStatus): number => {
+  const calculateProgress = (status: GenerationStatusType): number => {
     switch (status) {
-      case 'idle': return 0;
-      case 'queued': return 10;
-      case 'processing': return 50;
-      case 'downloading': return 80;
-      case 'completed': return 100;
-      case 'failed': return 0;
-      default: return 0;
+      case 'idle':
+        return 0;
+      case 'pending':
+        return 5;
+      case 'queued':
+        return 10;
+      case 'processing':
+        return 50;
+      case 'completed':
+        return 100;
+      case 'failed':
+      case 'cancelled':
+        return 0;
+      default:
+        return 0;
     }
   };
+
+  /**
+   * Poll for generation status
+   */
+  const startPolling = useCallback((generationId: string) => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+    }
+
+    pollingRef.current = setInterval(async () => {
+      if (!mountedRef.current) {
+        if (pollingRef.current) {
+          clearInterval(pollingRef.current);
+          pollingRef.current = null;
+        }
+        return;
+      }
+
+      try {
+        const status = await checkGenerationStatus(generationId);
+        logger.debug('Generation status update:', status);
+
+        const statusType = status.status as GenerationStatusType;
+        const progress = calculateProgress(statusType);
+
+        setState((prev) => ({
+          ...prev,
+          status: statusType,
+          progress,
+          error: status.errorMessage || null,
+          imageUrl: status.image?.publicUrl || null,
+        }));
+
+        // Stop polling when done
+        if (
+          statusType === 'completed' ||
+          statusType === 'failed' ||
+          statusType === 'cancelled'
+        ) {
+          if (pollingRef.current) {
+            clearInterval(pollingRef.current);
+            pollingRef.current = null;
+          }
+        }
+      } catch (error: any) {
+        logger.error('Error polling generation status:', error);
+      }
+    }, 2000);
+  }, []);
 
   /**
    * Start image generation
    */
-  const generate = useCallback(async (params: GenerateImageJobParams) => {
-    try {
-      logger.info('Starting image generation...');
-      logger.debug('Parameters:', params);
+  const generate = useCallback(
+    async (params: Omit<GenerateImageParams, 'waitForResult'>) => {
+      try {
+        logger.info('Starting image generation...');
+        logger.debug('Parameters:', params);
 
-      // Reset state
-      setState({
-        status: 'queued',
-        progress: 10,
-        imageUrl: null,
-        error: null,
-        generationId: null,
-        jobId: null
-      });
+        // Reset state
+        setState({
+          status: 'pending',
+          progress: 5,
+          imageUrl: null,
+          error: null,
+          generationId: null,
+        });
 
-      // Start generation via Edge Function
-      const { generationId, jobId } = await startImageGeneration(supabase, params);
+        // Start generation via Backend API
+        // Use async mode (waitForResult: false) for mobile to show progress
+        const response = await generateImage({ ...params, waitForResult: false });
 
-      logger.info('Generation started:', { generationId, jobId });
+        logger.info('Generation started:', { generationId: response.generationId });
 
-      // Update state with IDs
-      setState(prev => ({
-        ...prev,
-        generationId,
-        jobId,
-        status: 'queued',
-        progress: 10
-      }));
-
-      // Subscribe to real-time updates
-      const unsubscribe = subscribeToGeneration(supabase, generationId, (generation) => {
-        logger.debug('Generation update:', generation);
-
-        const status = generation.status as GenerationStatus;
-        const progress = calculateProgress(status);
-
-        setState(prev => ({
+        // Update state with generation ID
+        setState((prev) => ({
           ...prev,
-          status,
-          progress,
-          error: generation.error_message || null
+          generationId: response.generationId,
+          status: response.status as GenerationStatusType,
+          progress: calculateProgress(response.status as GenerationStatusType),
         }));
 
-        // If completed, fetch the image
-        if (status === 'completed') {
-          fetchCompletedImage(generationId);
+        // If already completed (sync mode), we're done
+        if (response.status === 'completed' && response.image) {
+          setState((prev) => ({
+            ...prev,
+            status: 'completed',
+            progress: 100,
+            imageUrl: response.image?.publicUrl || null,
+          }));
+          return;
         }
 
-        // Cleanup subscription when done
-        if (status === 'completed' || status === 'failed') {
-          if (unsubscribeRef.current) {
-            unsubscribeRef.current();
-            unsubscribeRef.current = null;
-          }
-        }
-      });
-
-      unsubscribeRef.current = unsubscribe;
-
-    } catch (error: any) {
-      logger.error('Generation error:', error);
-      setState(prev => ({
-        ...prev,
-        status: 'failed',
-        error: error.message || 'Failed to start generation',
-        progress: 0
-      }));
-      throw error;
-    }
-  }, []);
-
-  /**
-   * Fetch completed image from database
-   */
-  const fetchCompletedImage = async (generationId: string) => {
-    try {
-      const { data: image, error } = await supabase
-        .from('images')
-        .select('public_url')
-        .eq('generation_id', generationId)
-        .single();
-
-      if (error) {
+        // Start polling for status updates
+        startPolling(response.generationId);
+      } catch (error: any) {
+        logger.error('Generation error:', error);
+        setState((prev) => ({
+          ...prev,
+          status: 'failed',
+          error: error.message || 'Failed to start generation',
+          progress: 0,
+        }));
         throw error;
       }
-
-      if (image?.public_url) {
-        setState(prev => ({
-          ...prev,
-          imageUrl: image.public_url,
-          status: 'completed',
-          progress: 100
-        }));
-      }
-    } catch (error: any) {
-      logger.error('Failed to fetch completed image:', error);
-      setState(prev => ({
-        ...prev,
-        error: 'Image generated but failed to retrieve URL',
-        status: 'failed'
-      }));
-    }
-  };
+    },
+    [startPolling],
+  );
 
   /**
    * Reset state to idle
    */
   const reset = useCallback(() => {
-    // Cleanup subscription
-    if (unsubscribeRef.current) {
-      unsubscribeRef.current();
-      unsubscribeRef.current = null;
+    // Stop polling
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
     }
 
     setState({
@@ -255,7 +265,6 @@ export function useImageGeneration() {
       imageUrl: null,
       error: null,
       generationId: null,
-      jobId: null
     });
   }, []);
 
@@ -268,12 +277,7 @@ export function useImageGeneration() {
     }
 
     try {
-      // Update generation to cancelled status
-      await supabase
-        .from('image_generations')
-        .update({ status: 'failed', error_message: 'Cancelled by user' })
-        .eq('id', state.generationId);
-
+      await cancelGeneration(state.generationId);
       reset();
     } catch (error: any) {
       logger.error('Failed to cancel generation:', error);
@@ -286,11 +290,14 @@ export function useImageGeneration() {
     imageUrl: state.imageUrl,
     error: state.error,
     generationId: state.generationId,
-    jobId: state.jobId,
     generate,
     reset,
     cancel,
-    isGenerating: state.status !== 'idle' && state.status !== 'completed' && state.status !== 'failed'
+    isGenerating:
+      state.status !== 'idle' &&
+      state.status !== 'completed' &&
+      state.status !== 'failed' &&
+      state.status !== 'cancelled',
   };
 }
 
@@ -299,53 +306,19 @@ export function useImageGeneration() {
 // ============================================================================
 
 /**
- * React hook for fetching user's generation history with real-time updates
- *
- * @example
- * ```tsx
- * function HistoryScreen() {
- *   const { generations, loading, error, refresh } = useGenerationHistory();
- *
- *   return (
- *     <FlatList
- *       data={generations}
- *       refreshing={loading}
- *       onRefresh={refresh}
- *       renderItem={({ item }) => (
- *         <GenerationCard generation={item} />
- *       )}
- *     />
- *   );
- * }
- * ```
+ * React hook for fetching user's generation history
+ * Note: This hook now uses the backend API instead of Supabase Realtime
  */
 export function useGenerationHistory(limit: number = 20) {
-  const [generations, setGenerations] = useState<any[]>([]);
+  const [generations, setGenerations] = useState<GenerationStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchGenerations = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { data, error: fetchError } = await supabase
-        .from('image_generations')
-        .select('*, images(*)')
-        .order('created_at', { ascending: false })
-        .limit(limit);
-
-      if (fetchError) {
-        throw fetchError;
-      }
-
-      setGenerations(data || []);
-    } catch (err: any) {
-      logger.error('Failed to fetch generations:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    // TODO: Add /generate/history endpoint to backend
+    // For now, return empty array
+    setLoading(false);
+    setGenerations([]);
   };
 
   // Initial fetch
@@ -353,48 +326,11 @@ export function useGenerationHistory(limit: number = 20) {
     fetchGenerations();
   }, [limit]);
 
-  // Subscribe to new generations
-  useEffect(() => {
-    const channel = supabase
-      .channel('user-generations')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'image_generations'
-        },
-        (payload) => {
-          logger.debug('New generation:', payload.new);
-          setGenerations(prev => [payload.new, ...prev]);
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'image_generations'
-        },
-        (payload) => {
-          logger.debug('Generation updated:', payload.new);
-          setGenerations(prev =>
-            prev.map(gen => (gen.id === payload.new.id ? payload.new : gen))
-          );
-        }
-      )
-      .subscribe();
-
-    return () => {
-      channel.unsubscribe();
-    };
-  }, []);
-
   return {
     generations,
     loading,
     error,
-    refresh: fetchGenerations
+    refresh: fetchGenerations,
   };
 }
 
@@ -405,58 +341,14 @@ export function useGenerationHistory(limit: number = 20) {
 /**
  * Get generation status with details
  */
-export async function getGenerationStatus(generationId: string) {
-  const { data, error } = await supabase
-    .from('image_generations')
-    .select('*')
-    .eq('id', generationId)
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
+export async function getGenerationStatus(generationId: string): Promise<GenerationStatus> {
+  return checkGenerationStatus(generationId);
 }
 
 /**
  * Get completed image for a generation
  */
 export async function getGenerationImage(generationId: string) {
-  const { data, error } = await supabase
-    .from('images')
-    .select('*')
-    .eq('generation_id', generationId)
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
-
-/**
- * Check if user can generate (rate limiting)
- */
-export async function checkCanGenerate(userId: string): Promise<{ canGenerate: boolean; reason?: string }> {
-  try {
-    const { data, error } = await supabase.rpc('get_user_limits', {
-      p_user_id: userId
-    });
-
-    if (error) {
-      throw error;
-    }
-
-    return {
-      canGenerate: data.can_generate,
-      reason: data.limit_reason
-    };
-  } catch (error: any) {
-    logger.error('Failed to check rate limit:', error);
-    return {
-      canGenerate: true // Fail open
-    };
-  }
+  const status = await checkGenerationStatus(generationId);
+  return status.image || null;
 }

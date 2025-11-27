@@ -1,6 +1,6 @@
-import { supabase } from '~/utils/supabase';
 import { router } from 'expo-router';
 import { ExploreImageItem } from '~/types/explore';
+import { likeImage, unlikeImage } from '~/services/api/images';
 
 type UseImageLikesProps = {
   userId: string | undefined;
@@ -17,30 +17,17 @@ export function useImageLikes({ userId, items, setItems, onError }: UseImageLike
     }
 
     try {
-      if (userHasLiked) {
-        // Unlike
-        await supabase
-          .from('image_likes')
-          .delete()
-          .eq('image_id', imageId)
-          .eq('user_id', userId);
-      } else {
-        // Like
-        await supabase
-          .from('image_likes')
-          .insert({
-            image_id: imageId,
-            user_id: userId
-          });
-      }
+      const result = userHasLiked
+        ? await unlikeImage(imageId)
+        : await likeImage(imageId);
 
-      // Update local state
+      // Update local state with API response
       setItems(items.map(img =>
         img.id === imageId
           ? {
               ...img,
-              user_has_liked: !userHasLiked,
-              likes_count: (img.likes_count || 0) + (userHasLiked ? -1 : 1)
+              userHasLiked: result.liked,
+              likesCount: result.likeCount,
             }
           : img
       ));

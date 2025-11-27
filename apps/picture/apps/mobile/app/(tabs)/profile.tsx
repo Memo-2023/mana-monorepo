@@ -11,22 +11,20 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '~/components/Button';
 import { Text } from '~/components/Text';
-import { PageHeader } from '~/components/PageHeader';
 import { useAuth } from '~/contexts/AuthContext';
-import { supabase } from '~/utils/supabase';
 import { useModelSelection } from '~/store/modelStore';
 import { ThemePicker } from '~/components/ThemePicker';
 import { useTheme } from '~/contexts/ThemeContext';
 import { useViewStore } from '~/store/viewStore';
 import { ViewToggle } from '~/components/ViewToggle';
 import { GenerationSettings } from '~/components/settings/GenerationSettings';
-import { getArchivedCount } from '~/services/archiveService';
-
-type Profile = {
-  username: string;
-  email: string;
-  avatar_url: string | null;
-};
+import {
+  getMyProfile,
+  updateProfile as apiUpdateProfile,
+  getUserStats,
+  type Profile,
+  type UserStats,
+} from '~/services/api/profiles';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -36,7 +34,6 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [updating, setUpdating] = useState(false);
   const [username, setUsername] = useState('');
-  const [archivedCount, setArchivedCount] = useState(0);
   const { resetLoadingState, isLoading: modelsLoading } = useModelSelection();
   const { galleryViewMode, setGalleryViewMode, exploreViewMode, setExploreViewMode } = useViewStore();
 
@@ -61,17 +58,7 @@ export default function ProfileScreen() {
     console.log('🔍 Fetching profile for user:', user.id);
 
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('username, email, avatar_url')
-        .eq('id', user.id)
-        .single();
-
-      if (error) {
-        console.error('❌ Profile fetch error:', error);
-        throw error;
-      }
-
+      const data = await getMyProfile();
       console.log('✅ Profile fetched:', data);
       setProfile(data);
       setUsername(data.username || '');
@@ -82,17 +69,11 @@ export default function ProfileScreen() {
 
   const updateProfile = async () => {
     if (!user) return;
-    
+
     setUpdating(true);
 
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ username: username.trim() })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
+      await apiUpdateProfile({ username: username.trim() });
       Alert.alert('Erfolg', 'Profil wurde aktualisiert');
       fetchProfile();
     } catch (error: any) {
@@ -127,27 +108,16 @@ export default function ProfileScreen() {
     );
   };
 
-  const getImageStats = async () => {
-    if (!user) return { total: 0, favorites: 0 };
-
-    const { data: images } = await supabase
-      .from('images')
-      .select('id, is_favorite, archived_at')
-      .eq('user_id', user.id)
-      .is('archived_at', null); // Only count non-archived images
-
-    return {
-      total: images?.length || 0,
-      favorites: images?.filter(img => img.is_favorite).length || 0
-    };
-  };
-
-  const [stats, setStats] = useState({ total: 0, favorites: 0 });
+  const [stats, setStats] = useState<UserStats>({
+    totalImages: 0,
+    favoriteImages: 0,
+    archivedImages: 0,
+    publicImages: 0,
+  });
 
   useEffect(() => {
     if (user) {
-      getImageStats().then(setStats);
-      getArchivedCount(user.id).then(setArchivedCount);
+      getUserStats().then(setStats).catch(console.error);
     }
   }, [user]);
 
@@ -185,12 +155,12 @@ export default function ProfileScreen() {
             {/* Stats */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingTop: 16, borderTopWidth: 1, borderTopColor: theme.colors.border }}>
               <View style={{ alignItems: 'center' }}>
-                <Text variant="h2" weight="bold" style={{ color: theme.colors.primary.default }}>{stats.total}</Text>
+                <Text variant="h2" weight="bold" style={{ color: theme.colors.primary.default }}>{stats.totalImages}</Text>
                 <Text variant="bodySmall" color="secondary">Bilder</Text>
               </View>
               <View style={{ width: 1, backgroundColor: theme.colors.border }} />
               <View style={{ alignItems: 'center' }}>
-                <Text variant="h2" weight="bold" style={{ color: theme.colors.primary.default }}>{stats.favorites}</Text>
+                <Text variant="h2" weight="bold" style={{ color: theme.colors.primary.default }}>{stats.favoriteImages}</Text>
                 <Text variant="bodySmall" color="secondary">Favoriten</Text>
               </View>
             </View>
@@ -226,16 +196,16 @@ export default function ProfileScreen() {
               <View>
                 <Text variant="body" weight="semibold">Archiv</Text>
                 <Text variant="bodySmall" color="secondary">
-                  {archivedCount === 0
+                  {stats.archivedImages === 0
                     ? 'Keine archivierten Bilder'
-                    : archivedCount === 1
+                    : stats.archivedImages === 1
                       ? '1 archiviertes Bild'
-                      : `${archivedCount} archivierte Bilder`}
+                      : `${stats.archivedImages} archivierte Bilder`}
                 </Text>
               </View>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              {archivedCount > 0 && (
+              {stats.archivedImages > 0 && (
                 <View
                   style={{
                     backgroundColor: theme.colors.primary.default,
@@ -245,7 +215,7 @@ export default function ProfileScreen() {
                   }}
                 >
                   <Text variant="bodySmall" weight="semibold" style={{ color: '#fff' }}>
-                    {archivedCount}
+                    {stats.archivedImages}
                   </Text>
                 </View>
               )}

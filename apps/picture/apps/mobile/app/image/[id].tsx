@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { supabase } from '~/utils/supabase';
 import { useAuth } from '~/contexts/AuthContext';
 import { useTheme } from '~/contexts/ThemeContext';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -34,33 +33,36 @@ import { Text } from '~/components/Text';
 import { RemixBottomSheet } from '~/components/remix/RemixBottomSheet';
 import { getThumbnailUrl } from '~/utils/image';
 import { archiveImage, restoreImage } from '~/services/archiveService';
+import {
+  getImages,
+  toggleFavorite as apiToggleFavorite,
+  publishImage,
+  unpublishImage,
+  deleteImage as apiDeleteImage,
+  getGenerationDetails as apiGetGenerationDetails,
+  type Image as ApiImage,
+  type GenerationDetails,
+} from '~/services/api/images';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 type ImageDetails = {
   id: string;
-  public_url: string;
+  publicUrl: string | null;
   prompt: string;
-  negative_prompt?: string;
-  model: string;
-  width: number;
-  height: number;
-  created_at: string;
-  is_favorite: boolean;
-  is_public: boolean;
-  generation_id: string;
-  user_id: string;
-  file_size: number;
-  format: string;
-  storage_path?: string;
-  archived_at?: string | null;
-};
-
-type GenerationDetails = {
-  steps: number;
-  guidance_scale: number;
-  generation_time_seconds?: number;
-  status: string;
+  negativePrompt?: string;
+  model: string | null;
+  width: number | null;
+  height: number | null;
+  createdAt: string;
+  isFavorite: boolean;
+  isPublic: boolean;
+  generationId?: string;
+  userId: string;
+  fileSize: number | null;
+  format: string | null;
+  storagePath: string;
+  archivedAt?: string | null;
 };
 
 // Separate component for zoomable image to use hooks properly
@@ -96,7 +98,7 @@ function ZoomableImage({
       // Download image to cache directory
       const fileUri = `${FileSystem.cacheDirectory}picture_share_${item.id}.jpg`;
 
-      const downloadResult = await FileSystem.downloadAsync(item.public_url, fileUri);
+      const downloadResult = await FileSystem.downloadAsync(item.publicUrl!, fileUri);
 
       if (downloadResult.status !== 200) {
         throw new Error('Download failed');
@@ -207,12 +209,12 @@ function ZoomableImage({
       <GestureDetector gesture={composed}>
         <Animated.View style={[{ flex: 1 }, animatedStyle]}>
           <Image
-            source={{ uri: getThumbnailUrl(item.public_url, 'full') }}
+            source={{ uri: getThumbnailUrl(item.publicUrl, 'full') || undefined }}
             style={{ width: screenWidth, height: screenHeight }}
             contentFit="contain"
             transition={300}
             cachePolicy="memory-disk"
-            placeholder={{ uri: getThumbnailUrl(item.public_url, 'medium') }}
+            placeholder={{ uri: getThumbnailUrl(item.publicUrl, 'medium') || undefined }}
           />
         </Animated.View>
       </GestureDetector>
@@ -234,6 +236,7 @@ export default function ImageDetailScreen() {
 
   const [image, setImage] = useState<ImageDetails | null>(null);
   const [generation, setGeneration] = useState<GenerationDetails | null>(null);
+  // GenerationDetails type is now imported from API
   const [loading, setLoading] = useState(true);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -265,7 +268,7 @@ export default function ImageDetailScreen() {
 
         // Load generation details and tags in parallel
         await Promise.all([
-          fetchGenerationDetails(currentImage.generation_id),
+          currentImage.generationId ? fetchGenerationDetails(currentImage.generationId) : Promise.resolve(),
           fetchImageTags(currentImage.id).then(() => {
             const tags = getImageTags(currentImage.id);
             setImageTags(tags);
@@ -286,38 +289,39 @@ export default function ImageDetailScreen() {
     if (!user) return;
 
     try {
-      const { data: imageData, error } = await supabase
-        .from('images')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      // Fetch all images (non-archived) via API
+      // Using a large limit to get all images for gallery navigation
+      const imageData = await getImages({
+        page: 1,
+        limit: 1000, // Large limit to get all images
+        archived: false,
+      });
 
-      if (error) throw error;
+      if (imageData && imageData.length > 0) {
+        // Map API response to ImageDetails type
+        const imagesWithDetails: ImageDetails[] = imageData.map(img => ({
+          id: img.id,
+          publicUrl: img.publicUrl || null,
+          prompt: img.prompt,
+          negativePrompt: img.negativePrompt,
+          model: img.model || null,
+          width: img.width || null,
+          height: img.height || null,
+          createdAt: img.createdAt,
+          isFavorite: img.isFavorite,
+          isPublic: img.isPublic,
+          generationId: img.generationId,
+          userId: img.userId,
+          fileSize: img.fileSize || null,
+          format: img.format || null,
+          storagePath: img.storagePath,
+          archivedAt: img.archivedAt,
+        }));
 
-      if (imageData) {
-        // Fix public URLs if needed
-        const imagesWithUrls = await Promise.all(
-          imageData.map(async (img) => {
-            if (!img.public_url && img.storage_path) {
-              const { data: urlData } = supabase.storage
-                .from('generated-images')
-                .getPublicUrl(img.storage_path);
-
-              img.public_url = urlData.publicUrl;
-
-              await supabase
-                .from('images')
-                .update({ public_url: urlData.publicUrl })
-                .eq('id', img.id);
-            }
-            return img;
-          })
-        );
-
-        setAllImages(imagesWithUrls);
+        setAllImages(imagesWithDetails);
 
         // Find initial index based on the id param
-        const initialIndex = imagesWithUrls.findIndex(img => img.id === id);
+        const initialIndex = imagesWithDetails.findIndex(img => img.id === id);
         if (initialIndex !== -1) {
           setCurrentIndex(initialIndex);
         }
@@ -333,13 +337,8 @@ export default function ImageDetailScreen() {
     if (!generationId) return;
 
     try {
-      const { data: genData, error } = await supabase
-        .from('image_generations')
-        .select('steps, guidance_scale, generation_time_seconds, status')
-        .eq('id', generationId)
-        .single();
-
-      if (!error && genData) {
+      const genData = await apiGetGenerationDetails(generationId);
+      if (genData) {
         setGeneration(genData);
       }
     } catch (error) {
@@ -357,14 +356,9 @@ export default function ImageDetailScreen() {
     if (!image) return;
 
     try {
-      const { error } = await supabase
-        .from('images')
-        .update({ is_favorite: !image.is_favorite })
-        .eq('id', image.id);
-
-      if (!error) {
-        setImage({ ...image, is_favorite: !image.is_favorite });
-      }
+      const newFavoriteStatus = !image.isFavorite;
+      await apiToggleFavorite(image.id, newFavoriteStatus);
+      setImage({ ...image, isFavorite: newFavoriteStatus });
     } catch (error) {
       console.error('Error toggling favorite:', error);
     }
@@ -374,13 +368,12 @@ export default function ImageDetailScreen() {
     if (!image) return;
 
     try {
-      const { error } = await supabase
-        .from('images')
-        .update({ is_public: !image.is_public })
-        .eq('id', image.id);
-
-      if (!error) {
-        setImage({ ...image, is_public: !image.is_public });
+      if (image.isPublic) {
+        await unpublishImage(image.id);
+        setImage({ ...image, isPublic: false });
+      } else {
+        await publishImage(image.id);
+        setImage({ ...image, isPublic: true });
       }
     } catch (error) {
       console.error('Error toggling public:', error);
@@ -388,7 +381,7 @@ export default function ImageDetailScreen() {
   };
 
   const handleDownload = async () => {
-    if (!image?.public_url) return;
+    if (!image?.publicUrl) return;
 
     setDownloading(true);
     try {
@@ -400,7 +393,7 @@ export default function ImageDetailScreen() {
 
       // Use cache directory for temporary download
       const fileUri = `${FileSystem.cacheDirectory}picture_${image.id}.${image.format || 'webp'}`;
-      const downloadResult = await FileSystem.downloadAsync(image.public_url, fileUri);
+      const downloadResult = await FileSystem.downloadAsync(image.publicUrl, fileUri);
 
       if (downloadResult.status !== 200) throw new Error('Download fehlgeschlagen');
 
@@ -417,7 +410,7 @@ export default function ImageDetailScreen() {
   };
 
   const handleShare = async () => {
-    if (!image?.public_url) return;
+    if (!image?.publicUrl) return;
 
     try {
       // Check if sharing is available
@@ -430,7 +423,7 @@ export default function ImageDetailScreen() {
       // Download image to cache directory
       const fileUri = `${FileSystem.cacheDirectory}picture_share_${image.id}.jpg`;
 
-      const downloadResult = await FileSystem.downloadAsync(image.public_url, fileUri);
+      const downloadResult = await FileSystem.downloadAsync(image.publicUrl, fileUri);
 
       if (downloadResult.status !== 200) {
         throw new Error('Download failed');
@@ -458,7 +451,7 @@ export default function ImageDetailScreen() {
     if (!image) return;
 
     try {
-      if (image.archived_at) {
+      if (image.archivedAt) {
         // Restore from archive
         await restoreImage(image.id);
         Alert.alert('✓', 'Bild wurde wiederhergestellt', [
@@ -489,18 +482,7 @@ export default function ImageDetailScreen() {
           onPress: async () => {
             setDeleting(true);
             try {
-              if (image?.storage_path) {
-                await supabase.storage
-                  .from('generated-images')
-                  .remove([image.storage_path]);
-              }
-
-              const { error: dbError } = await supabase
-                .from('images')
-                .delete()
-                .eq('id', id);
-
-              if (dbError) throw dbError;
+              await apiDeleteImage(id!);
 
               Alert.alert('Erfolg', 'Bild wurde gelöscht', [
                 { text: 'OK', onPress: () => router.back() }
@@ -517,7 +499,8 @@ export default function ImageDetailScreen() {
     );
   };
 
-  const formatFileSize = (bytes: number) => {
+  const formatFileSize = (bytes: number | null) => {
+    if (!bytes) return '-';
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1048576) return Math.round(bytes / 1024) + ' KB';
     return (bytes / 1048576).toFixed(2) + ' MB';
@@ -681,9 +664,9 @@ export default function ImageDetailScreen() {
               }}
             >
               <Ionicons
-                name={image.is_favorite ? 'heart' : 'heart-outline'}
+                name={image.isFavorite ? 'heart' : 'heart-outline'}
                 size={24}
-                color={image.is_favorite ? '#ef4444' : '#fff'}
+                color={image.isFavorite ? '#ef4444' : '#fff'}
               />
             </Pressable>
           </View>
@@ -713,7 +696,7 @@ export default function ImageDetailScreen() {
             style={styles.actionButton}
           >
             <Ionicons
-              name={image.is_public ? 'globe-outline' : 'lock-closed-outline'}
+              name={image.isPublic ? 'globe-outline' : 'lock-closed-outline'}
               size={24}
               color="#fff"
             />
@@ -751,7 +734,7 @@ export default function ImageDetailScreen() {
                     onPress: handleCopyPrompt,
                   },
                   {
-                    text: image.archived_at ? 'Wiederherstellen' : 'Archivieren',
+                    text: image.archivedAt ? 'Wiederherstellen' : 'Archivieren',
                     onPress: handleArchiveToggle,
                   },
                   {
@@ -824,12 +807,12 @@ export default function ImageDetailScreen() {
             </View>
 
             {/* Negative Prompt */}
-            {image.negative_prompt && (
+            {image.negativePrompt && (
               <View style={{ marginBottom: 16 }}>
                 <Text variant="bodySmall" color="secondary" style={{ marginBottom: 4 }}>
                   Negativer Prompt
                 </Text>
-                <Text variant="body">{image.negative_prompt}</Text>
+                <Text variant="body">{image.negativePrompt}</Text>
               </View>
             )}
 
@@ -852,10 +835,10 @@ export default function ImageDetailScreen() {
                         paddingHorizontal: 12,
                         paddingVertical: 6,
                         borderRadius: 12,
-                        backgroundColor: `${tag.color}20`,
+                        backgroundColor: `${tag.color || '#888888'}20`,
                       }}
                     >
-                      <Text style={{ color: tag.color, fontSize: 12 }}>
+                      <Text style={{ color: tag.color || '#888888', fontSize: 12 }}>
                         #{tag.name}
                       </Text>
                     </View>
@@ -905,7 +888,7 @@ export default function ImageDetailScreen() {
                   {detailsLoading ? (
                     <View style={{ width: 30, height: 12, backgroundColor: theme.colors.border, borderRadius: 4 }} />
                   ) : (
-                    <Text variant="bodySmall">{generation?.guidance_scale || '-'}</Text>
+                    <Text variant="bodySmall">{generation?.guidanceScale || '-'}</Text>
                   )}
                 </View>
 
@@ -914,18 +897,18 @@ export default function ImageDetailScreen() {
                   {detailsLoading ? (
                     <View style={{ width: 40, height: 12, backgroundColor: theme.colors.border, borderRadius: 4 }} />
                   ) : (
-                    <Text variant="bodySmall">{generation?.generation_time_seconds ? `${generation.generation_time_seconds}s` : '-'}</Text>
+                    <Text variant="bodySmall">{generation?.generationTimeSeconds ? `${generation.generationTimeSeconds}s` : '-'}</Text>
                   )}
                 </View>
 
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                   <Text variant="bodySmall" color="secondary">Dateigröße</Text>
-                  <Text variant="bodySmall">{formatFileSize(image.file_size)}</Text>
+                  <Text variant="bodySmall">{formatFileSize(image.fileSize)}</Text>
                 </View>
 
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                   <Text variant="bodySmall" color="secondary">Erstellt</Text>
-                  <Text variant="bodySmall">{formatDate(image.created_at)}</Text>
+                  <Text variant="bodySmall">{formatDate(image.createdAt)}</Text>
                 </View>
               </View>
             </View>
@@ -947,9 +930,9 @@ export default function ImageDetailScreen() {
       )}
 
       {/* Remix Bottom Sheet */}
-      {image && (
+      {image && image.publicUrl && (
         <RemixBottomSheet
-          imageUrl={image.public_url}
+          imageUrl={image.publicUrl}
           imageId={image.id}
           originalPrompt={image.prompt}
           isOpen={showRemixSheet}

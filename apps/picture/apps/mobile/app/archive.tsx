@@ -137,10 +137,10 @@ export default function ArchiveScreen() {
         <View style={{ position: 'relative' }}>
           <ImageCard
             id={item.id}
-            publicUrl={item.public_url}
+            publicUrl={item.publicUrl}
             prompt={item.prompt}
-            createdAt={item.created_at}
-            isFavorite={item.is_favorite}
+            createdAt={item.createdAt}
+            isFavorite={item.isFavorite}
             model={item.model}
             tags={item.tags}
             viewMode="grid3"

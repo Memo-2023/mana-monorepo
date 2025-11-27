@@ -36,3 +36,9 @@ export class ToggleFavoriteDto {
   @IsBoolean()
   isFavorite: boolean;
 }
+
+export class BatchImageIdsDto {
+  @IsArray()
+  @IsString({ each: true })
+  imageIds: string[];
+}

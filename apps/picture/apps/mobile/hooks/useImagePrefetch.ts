@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { Image } from 'expo-image';
-import { supabase } from '~/utils/supabase';
 import { PAGINATION } from '~/constants';
 import { FilterMode, ViewMode } from '~/types/gallery';
 import { getThumbnailUrl, getSizeForViewMode } from '~/utils/image';
 import { PREFETCH_DEBOUNCE_MS } from '~/constants/gallery';
+import { getImages } from '~/services/api/images';
 
 type UseImagePrefetchProps = {
   hasMore: boolean;
@@ -41,31 +41,22 @@ export function useImagePrefetch({
         // Get the last few images that would be from the next page
         const prefetchCount = Math.min(6, PAGINATION.GALLERY_PAGE_SIZE);
 
-        // Calculate what the next page would be
-        const nextPageNum = currentPage + 1;
+        // Calculate what the next page would be (API uses 1-based pagination)
+        const nextPageNum = currentPage + 2;
 
-        let query = supabase
-          .from('images')
-          .select('id, public_url')
-          .eq('user_id', userId);
-
-        if (filterMode === 'favorites') {
-          query = query.eq('is_favorite', true);
-        }
-
-        const from = nextPageNum * PAGINATION.GALLERY_PAGE_SIZE;
-        const to = from + prefetchCount - 1;
-
-        const { data } = await query
-          .order('created_at', { ascending: false })
-          .range(from, to);
+        const data = await getImages({
+          page: nextPageNum,
+          limit: prefetchCount,
+          archived: false,
+          favoritesOnly: filterMode === 'favorites',
+        });
 
         if (data && data.length > 0) {
           // Prefetch thumbnails for next page
           const thumbnailSize = getSizeForViewMode(viewMode);
           data.forEach(img => {
-            if (img.public_url) {
-              const thumbnailUrl = getThumbnailUrl(img.public_url, thumbnailSize);
+            if (img.publicUrl) {
+              const thumbnailUrl = getThumbnailUrl(img.publicUrl, thumbnailSize);
               if (thumbnailUrl) {
                 Image.prefetch(thumbnailUrl);
               }

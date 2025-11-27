@@ -5,7 +5,7 @@ import {
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
-import { eq, and, max, inArray, gt, lt } from 'drizzle-orm';
+import { eq, and, max, inArray, gt, lt, sql } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { type Database } from '../db/connection';
 import { boards, boardItems, images, type BoardItem } from '../db/schema';
@@ -375,7 +375,7 @@ export class BoardItemService {
         // Shift all other items up
         await this.db
           .update(boardItems)
-          .set({ zIndex: boardItems.zIndex + 1 } as any)
+          .set({ zIndex: sql`${boardItems.zIndex} + 1` })
           .where(eq(boardItems.boardId, item[0].boardId));
       } else if (direction === 'up') {
         // Find the next item above

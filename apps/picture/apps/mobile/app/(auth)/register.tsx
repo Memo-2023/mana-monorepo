@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, TextInput, View } from 'react-native';
 import { Link, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { supabase } from '~/utils/supabase';
+import { useAuth } from '~/contexts/AuthContext';
 import { useTheme } from '~/contexts/ThemeContext';
 import { Button } from '~/components/Button';
 import { Text } from '~/components/Text';
@@ -10,6 +10,7 @@ import { Container } from '~/components/Container';
 
 export default function RegisterScreen() {
   const { theme } = useTheme();
+  const { signUp } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -27,39 +28,32 @@ export default function RegisterScreen() {
     }
 
     setLoading(true);
-    
-    const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password: password,
-      options: {
-        data: {
-          username: username.trim(),
-        },
-      },
-    });
+
+    const { data, error } = await signUp(email.trim(), password, username.trim());
 
     if (error) {
-      Alert.alert('Registrierung fehlgeschlagen', error.message);
+      const errorMessage = error.message || 'Registrierung fehlgeschlagen';
+      Alert.alert('Registrierung fehlgeschlagen', errorMessage);
       setLoading(false);
       return;
     }
 
-    if (data?.user) {
-      // Profile will be created automatically by database trigger
+    if (data) {
+      // User is now signed in after successful signup
       Alert.alert(
         'Registrierung erfolgreich!',
-        'Bitte überprüfe deine E-Mail, um dein Konto zu bestätigen.',
-        [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }]
+        'Du bist jetzt angemeldet.',
+        [{ text: 'OK', onPress: () => router.replace('/(tabs)/generate') }]
       );
     }
-    
+
     setLoading(false);
   }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Container>
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           className="flex-1"
         >
@@ -111,7 +105,7 @@ export default function RegisterScreen() {
               />
             </View>
 
-            <Button 
+            <Button
               title={loading ? "Registrieren..." : "Registrieren"}
               onPress={signUpWithEmail}
               disabled={loading}

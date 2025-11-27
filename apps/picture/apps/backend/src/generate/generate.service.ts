@@ -16,9 +16,15 @@ import {
   type ImageGeneration,
   type Image,
 } from '../db/schema';
-import { ReplicateService } from './replicate.service';
+import { ReplicateService, GenerationParams } from './replicate.service';
 import { StorageService } from '../upload/storage.service';
 import { GenerateImageDto } from './dto/generate.dto';
+
+export interface GenerateResponse {
+  generationId: string;
+  status: string;
+  image?: Image;
+}
 
 @Injectable()
 export class GenerateService {
@@ -36,10 +42,13 @@ export class GenerateService {
       'http://localhost:3003';
   }
 
+  /**
+   * Generate an image - supports both async (webhook) and sync (polling) modes
+   */
   async generateImage(
     userId: string,
     dto: GenerateImageDto,
-  ): Promise<{ generationId: string; status: string }> {
+  ): Promise<GenerateResponse> {
     try {
       // Get model info
       const modelResult = await this.db
@@ -63,6 +72,7 @@ export class GenerateService {
           prompt: dto.prompt,
           negativePrompt: dto.negativePrompt,
           model: model.name,
+          style: dto.style,
           width: dto.width || model.defaultWidth || 1024,
           height: dto.height || model.defaultHeight || 1024,
           steps: dto.steps || model.defaultSteps || 25,
@@ -76,57 +86,170 @@ export class GenerateService {
 
       const generation = generationResult[0];
 
-      // Start the prediction
-      try {
-        const webhookUrl = `${this.webhookBaseUrl}/api/generate/webhook`;
+      // Build generation params
+      const generationParams: GenerationParams = {
+        prompt: dto.prompt,
+        negativePrompt: dto.negativePrompt,
+        modelId: model.replicateId,
+        modelVersion: dto.modelVersion || model.version,
+        width: dto.width || model.defaultWidth || 1024,
+        height: dto.height || model.defaultHeight || 1024,
+        steps: dto.steps || model.defaultSteps || 25,
+        guidanceScale: dto.guidanceScale || model.defaultGuidanceScale || 7.5,
+        seed: dto.seed,
+        sourceImageUrl: dto.sourceImageUrl,
+        strength: dto.generationStrength,
+        style: dto.style,
+      };
 
-        const prediction = await this.replicateService.createPrediction(
-          model.replicateId,
-          model.version || '',
-          {
-            prompt: dto.prompt,
-            negative_prompt: dto.negativePrompt,
-            width: dto.width || model.defaultWidth || 1024,
-            height: dto.height || model.defaultHeight || 1024,
-            num_inference_steps: dto.steps || model.defaultSteps || 25,
-            guidance_scale: dto.guidanceScale || model.defaultGuidanceScale || 7.5,
-            seed: dto.seed,
-            image: dto.sourceImageUrl,
-            prompt_strength: dto.generationStrength,
-          },
-          webhookUrl,
-        );
-
-        // Update generation with prediction ID
-        await this.db
-          .update(imageGenerations)
-          .set({
-            replicatePredictionId: prediction.id,
-            status: 'processing',
-          })
-          .where(eq(imageGenerations.id, generation.id));
-
-        return {
-          generationId: generation.id,
-          status: 'processing',
-        };
-      } catch (error) {
-        // Update generation as failed
-        await this.db
-          .update(imageGenerations)
-          .set({
-            status: 'failed',
-            errorMessage: error instanceof Error ? error.message : 'Unknown error',
-          })
-          .where(eq(imageGenerations.id, generation.id));
-
-        throw error;
+      // If waitForResult is true, use synchronous generation with polling
+      if (dto.waitForResult) {
+        return this.generateSync(generation, generationParams);
       }
+
+      // Otherwise use async generation with webhook
+      return this.generateAsync(generation, model, generationParams);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
       this.logger.error('Error generating image', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Synchronous generation - polls until complete
+   */
+  private async generateSync(
+    generation: ImageGeneration,
+    params: GenerationParams,
+  ): Promise<GenerateResponse> {
+    try {
+      // Update status to processing
+      await this.db
+        .update(imageGenerations)
+        .set({ status: 'processing' })
+        .where(eq(imageGenerations.id, generation.id));
+
+      // Process generation with polling
+      const result = await this.replicateService.processGeneration(params);
+
+      if (!result.success || !result.outputUrl) {
+        await this.db
+          .update(imageGenerations)
+          .set({
+            status: 'failed',
+            errorMessage: result.error || 'Generation failed',
+          })
+          .where(eq(imageGenerations.id, generation.id));
+
+        return {
+          generationId: generation.id,
+          status: 'failed',
+        };
+      }
+
+      // Download and upload to storage
+      const { storagePath, publicUrl } = await this.storageService.uploadFromUrl(
+        result.outputUrl,
+        generation.userId,
+        `generated-${generation.id}.${result.format || 'png'}`,
+      );
+
+      // Create image record
+      const imageResult = await this.db
+        .insert(images)
+        .values({
+          userId: generation.userId,
+          generationId: generation.id,
+          prompt: generation.prompt,
+          negativePrompt: generation.negativePrompt,
+          model: generation.model,
+          style: generation.style,
+          storagePath,
+          publicUrl,
+          filename: `generated-${generation.id}.${result.format || 'png'}`,
+          width: result.width || generation.width,
+          height: result.height || generation.height,
+          format: result.format || 'png',
+        })
+        .returning();
+
+      // Update generation as completed
+      await this.db
+        .update(imageGenerations)
+        .set({
+          status: 'completed',
+          generationTimeSeconds: result.generationTimeSeconds,
+          completedAt: new Date(),
+        })
+        .where(eq(imageGenerations.id, generation.id));
+
+      return {
+        generationId: generation.id,
+        status: 'completed',
+        image: imageResult[0],
+      };
+    } catch (error) {
+      this.logger.error(`Error in sync generation for ${generation.id}`, error);
+
+      await this.db
+        .update(imageGenerations)
+        .set({
+          status: 'failed',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        })
+        .where(eq(imageGenerations.id, generation.id));
+
+      return {
+        generationId: generation.id,
+        status: 'failed',
+      };
+    }
+  }
+
+  /**
+   * Async generation - uses webhook for completion
+   */
+  private async generateAsync(
+    generation: ImageGeneration,
+    model: any,
+    params: GenerationParams,
+  ): Promise<GenerateResponse> {
+    try {
+      const webhookUrl = `${this.webhookBaseUrl}/api/generate/webhook`;
+
+      const prediction = await this.replicateService.createPrediction(
+        model.replicateId,
+        params.modelVersion || model.version || '',
+        params,
+        webhookUrl,
+      );
+
+      // Update generation with prediction ID
+      await this.db
+        .update(imageGenerations)
+        .set({
+          replicatePredictionId: prediction.id,
+          status: 'processing',
+        })
+        .where(eq(imageGenerations.id, generation.id));
+
+      return {
+        generationId: generation.id,
+        status: 'processing',
+      };
+    } catch (error) {
+      // Update generation as failed
+      await this.db
+        .update(imageGenerations)
+        .set({
+          status: 'failed',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        })
+        .where(eq(imageGenerations.id, generation.id));
+
       throw error;
     }
   }
@@ -325,20 +448,32 @@ export class GenerateService {
 
   private async processCompletedGeneration(
     generation: ImageGeneration,
-    output: string[] | string,
+    output: string[] | string | { url?: string },
   ): Promise<void> {
     try {
-      const imageUrl = Array.isArray(output) ? output[0] : output;
-
-      if (!imageUrl) {
+      // Extract output URL
+      let imageUrl: string;
+      if (Array.isArray(output)) {
+        imageUrl = output[0];
+      } else if (typeof output === 'string') {
+        imageUrl = output;
+      } else if (output && typeof output === 'object' && output.url) {
+        imageUrl = output.url;
+      } else {
         throw new Error('No output URL from generation');
       }
+
+      // Determine format from URL
+      let format = 'png';
+      if (imageUrl.includes('.webp')) format = 'webp';
+      else if (imageUrl.includes('.jpg') || imageUrl.includes('.jpeg')) format = 'jpeg';
+      else if (imageUrl.includes('.svg')) format = 'svg';
 
       // Download and upload to storage
       const { storagePath, publicUrl } = await this.storageService.uploadFromUrl(
         imageUrl,
         generation.userId,
-        `generated-${generation.id}.png`,
+        `generated-${generation.id}.${format}`,
       );
 
       // Create image record
@@ -348,12 +483,13 @@ export class GenerateService {
         prompt: generation.prompt,
         negativePrompt: generation.negativePrompt,
         model: generation.model,
+        style: generation.style,
         storagePath,
         publicUrl,
-        filename: `generated-${generation.id}.png`,
+        filename: `generated-${generation.id}.${format}`,
         width: generation.width,
         height: generation.height,
-        format: 'png',
+        format,
       });
 
       // Update generation as completed

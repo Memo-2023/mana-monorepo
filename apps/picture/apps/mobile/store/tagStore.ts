@@ -1,18 +1,22 @@
 import { create } from 'zustand';
-import { supabase } from '~/utils/supabase';
+import {
+  getTags as apiGetTags,
+  createTag as apiCreateTag,
+  updateTag as apiUpdateTag,
+  deleteTag as apiDeleteTag,
+  getImageTags as apiGetImageTags,
+  addTagToImage as apiAddTagToImage,
+  removeTagFromImage as apiRemoveTagFromImage,
+  type Tag,
+} from '~/services/api/tags';
 
-export interface Tag {
-  id: string;
-  name: string;
-  color: string | null;
-  created_at: string;
-}
+export type { Tag };
 
 export interface ImageTag {
   id: string;
-  image_id: string;
-  tag_id: string;
-  added_at: string;
+  imageId: string;
+  tagId: string;
+  addedAt: string;
   tag?: Tag;
 }
 
@@ -29,16 +33,16 @@ interface TagStore {
   createTag: (name: string, color?: string) => Promise<Tag | null>;
   updateTag: (id: string, updates: Partial<Tag>) => Promise<boolean>;
   deleteTag: (id: string) => Promise<boolean>;
-  
+
   // Actions - Image Tags
   fetchImageTags: (imageId: string) => Promise<void>;
   addTagsToImage: (imageId: string, tagIds: string[]) => Promise<boolean>;
   removeTagFromImage: (imageId: string, tagId: string) => Promise<boolean>;
-  
+
   // Actions - Filtering
   toggleTagFilter: (tagId: string) => void;
   clearTagFilters: () => void;
-  
+
   // Helpers
   getTagByName: (name: string) => Tag | undefined;
   getImageTags: (imageId: string) => Tag[];
@@ -56,13 +60,8 @@ export const useTagStore = create<TagStore>((set, get) => ({
   fetchTags: async () => {
     set({ isLoading: true, error: null });
     try {
-      const { data, error } = await supabase
-        .from('tags')
-        .select('*')
-        .order('name');
-
-      if (error) throw error;
-      set({ tags: data || [], isLoading: false });
+      const tags = await apiGetTags();
+      set({ tags, isLoading: false });
     } catch (error: any) {
       set({ error: error.message, isLoading: false });
     }
@@ -78,32 +77,19 @@ export const useTagStore = create<TagStore>((set, get) => ({
       // Generate random color if not provided
       const tagColor = color || `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
 
-      const { data, error } = await supabase
-        .from('tags')
-        .insert({ name: name.toLowerCase().trim(), color: tagColor })
-        .select()
-        .single();
+      const newTag = await apiCreateTag({
+        name: name.toLowerCase().trim(),
+        color: tagColor,
+      });
 
-      if (error) {
-        // If unique constraint error, fetch existing tag
-        if (error.code === '23505') {
-          const { data: existingTag } = await supabase
-            .from('tags')
-            .select('*')
-            .eq('name', name.toLowerCase().trim())
-            .single();
-          
-          if (existingTag) {
-            set(state => ({ tags: [...state.tags.filter(t => t.id !== existingTag.id), existingTag] }));
-            return existingTag;
-          }
-        }
-        throw error;
-      }
-
-      set(state => ({ tags: [...state.tags, data] }));
-      return data;
+      set(state => ({ tags: [...state.tags, newTag] }));
+      return newTag;
     } catch (error: any) {
+      // If already exists error, re-fetch tags
+      if (error.message?.includes('already exists')) {
+        await get().fetchTags();
+        return get().getTagByName(name) || null;
+      }
       set({ error: error.message });
       return null;
     }
@@ -112,16 +98,16 @@ export const useTagStore = create<TagStore>((set, get) => ({
   // Update tag
   updateTag: async (id: string, updates: Partial<Tag>) => {
     try {
-      const { error } = await supabase
-        .from('tags')
-        .update(updates)
-        .eq('id', id);
-
-      if (error) throw error;
+      // Only pass name and color to API (convert null to undefined)
+      const updateData = {
+        name: updates.name,
+        color: updates.color ?? undefined,
+      };
+      const updatedTag = await apiUpdateTag(id, updateData);
 
       set(state => ({
-        tags: state.tags.map(tag => 
-          tag.id === id ? { ...tag, ...updates } : tag
+        tags: state.tags.map(tag =>
+          tag.id === id ? updatedTag : tag
         )
       }));
       return true;
@@ -134,12 +120,7 @@ export const useTagStore = create<TagStore>((set, get) => ({
   // Delete tag
   deleteTag: async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('tags')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await apiDeleteTag(id);
 
       set(state => ({
         tags: state.tags.filter(tag => tag.id !== id),
@@ -161,18 +142,8 @@ export const useTagStore = create<TagStore>((set, get) => ({
   // Fetch tags for specific image
   fetchImageTags: async (imageId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('image_tags')
-        .select(`
-          *,
-          tag:tags(*)
-        `)
-        .eq('image_id', imageId);
+      const tags = await apiGetImageTags(imageId);
 
-      if (error) throw error;
-
-      const tags = data?.map(it => it.tag).filter(Boolean) as Tag[] || [];
-      
       set(state => {
         const newImageTags = new Map(state.imageTags);
         newImageTags.set(imageId, tags);
@@ -186,24 +157,17 @@ export const useTagStore = create<TagStore>((set, get) => ({
   // Add tags to image
   addTagsToImage: async (imageId: string, tagIds: string[]) => {
     try {
-      // Prepare insert data
-      const imageTagsData = tagIds.map(tagId => ({
-        image_id: imageId,
-        tag_id: tagId
-      }));
-
-      const { error } = await supabase
-        .from('image_tags')
-        .insert(imageTagsData);
-
-      if (error) throw error;
+      // Add tags sequentially (API doesn't support batch)
+      await Promise.all(
+        tagIds.map(tagId => apiAddTagToImage(imageId, tagId))
+      );
 
       // Update local state
       const allTags = get().tags;
       const newTags = tagIds
         .map(id => allTags.find(t => t.id === id))
         .filter(Boolean) as Tag[];
-      
+
       set(state => {
         const newImageTags = new Map(state.imageTags);
         const currentTags = newImageTags.get(imageId) || [];
@@ -224,13 +188,7 @@ export const useTagStore = create<TagStore>((set, get) => ({
   // Remove tag from image
   removeTagFromImage: async (imageId: string, tagId: string) => {
     try {
-      const { error } = await supabase
-        .from('image_tags')
-        .delete()
-        .eq('image_id', imageId)
-        .eq('tag_id', tagId);
-
-      if (error) throw error;
+      await apiRemoveTagFromImage(imageId, tagId);
 
       set(state => {
         const newImageTags = new Map(state.imageTags);
@@ -262,7 +220,7 @@ export const useTagStore = create<TagStore>((set, get) => ({
 
   // Get tag by name
   getTagByName: (name: string) => {
-    return get().tags.find(tag => 
+    return get().tags.find(tag =>
       tag.name.toLowerCase() === name.toLowerCase().trim()
     );
   },

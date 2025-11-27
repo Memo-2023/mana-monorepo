@@ -2,10 +2,10 @@ import { Tag } from '~/store/tagStore';
 
 export type ImageItem = {
   id: string;
-  public_url: string | null;
+  publicUrl: string | null;
   prompt: string;
-  created_at: string;
-  is_favorite: boolean;
+  createdAt: string;
+  isFavorite: boolean;
   model?: string;
   tags?: Tag[];
   blurhash?: string | null;

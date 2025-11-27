@@ -19,6 +19,7 @@
   "dependencies": {
     "@callstack/liquid-glass": "^0.4.2",
     "@expo/vector-icons": "^15.0.2",
+    "@manacore/shared-auth": "workspace:*",
     "@picture/design-tokens": "workspace:*",
     "@picture/shared": "workspace:*",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -37,6 +38,7 @@
     "expo-location": "~19.0.7",
     "expo-media-library": "~18.2.0",
     "expo-router": "~6.0.10",
+    "expo-secure-store": "~15.0.7",
     "expo-sharing": "~14.0.7",
     "expo-status-bar": "~3.0.8",
     "expo-symbols": "^1.0.7",
