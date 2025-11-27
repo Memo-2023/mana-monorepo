@@ -1,0 +1,89 @@
+# Multi-stage Dockerfile for SvelteKit web applications
+# This is a template - copy and customize for each web app
+
+# ============================================
+# Build Stage
+# ============================================
+FROM node:20-alpine AS builder
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+WORKDIR /app
+
+# Copy workspace files
+COPY pnpm-workspace.yaml ./
+COPY package.json ./
+COPY pnpm-lock.yaml ./
+
+# Copy all shared packages
+COPY packages/ ./packages/
+
+# Copy the specific web app
+ARG SERVICE_PATH
+COPY ${SERVICE_PATH} ./${SERVICE_PATH}
+
+# Install all dependencies
+RUN pnpm install --frozen-lockfile
+
+# Build shared packages first
+RUN pnpm run build:packages
+
+# Build the web app
+WORKDIR /app/${SERVICE_PATH}
+RUN pnpm build
+
+# ============================================
+# Production Stage
+# ============================================
+FROM node:20-alpine AS production
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
+    && apk add --no-cache curl
+
+WORKDIR /app
+
+# Copy workspace files
+COPY --from=builder /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/pnpm-lock.yaml ./
+
+# Copy built packages
+COPY --from=builder /app/packages ./packages
+
+# Copy the built web app
+ARG SERVICE_PATH
+COPY --from=builder /app/${SERVICE_PATH}/build ./${SERVICE_PATH}/build
+COPY --from=builder /app/${SERVICE_PATH}/package.json ./${SERVICE_PATH}/package.json
+
+# Install production dependencies
+RUN pnpm install --prod --frozen-lockfile
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S sveltekit -u 1001
+
+# Change ownership
+RUN chown -R sveltekit:nodejs /app
+
+# Switch to non-root user
+USER sveltekit
+
+# Set working directory to service
+WORKDIR /app/${SERVICE_PATH}
+
+# Expose port
+ARG PORT=3000
+EXPOSE ${PORT}
+
+# Environment variables
+ENV NODE_ENV=production
+ENV PORT=${PORT}
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+  CMD curl -f http://localhost:${PORT}/ || exit 1
+
+# Start the application
+CMD ["node", "build"]

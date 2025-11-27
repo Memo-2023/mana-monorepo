@@ -1,0 +1,48 @@
+{
+	"name": "@manacore/test-config",
+	"version": "0.1.0",
+	"description": "Shared test configurations for Manacore monorepo",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./jest-backend": "./jest.config.backend.js",
+		"./jest-mobile": "./jest.config.mobile.js",
+		"./vitest-base": "./vitest.config.base.ts",
+		"./vitest-svelte": "./vitest.config.svelte.ts",
+		"./playwright": "./playwright.config.base.ts"
+	},
+	"files": [
+		"*.js",
+		"*.ts"
+	],
+	"scripts": {
+		"type-check": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@types/node": "^24.10.1",
+		"typescript": "^5.9.3"
+	},
+	"peerDependencies": {
+		"@playwright/test": "^1.40.0",
+		"jest": "^29.0.0",
+		"vitest": "^3.0.0"
+	},
+	"peerDependenciesMeta": {
+		"@playwright/test": {
+			"optional": true
+		},
+		"jest": {
+			"optional": true
+		},
+		"vitest": {
+			"optional": true
+		}
+	},
+	"keywords": [
+		"testing",
+		"jest",
+		"vitest",
+		"playwright",
+		"config"
+	]
+}

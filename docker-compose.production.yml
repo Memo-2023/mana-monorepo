@@ -1,0 +1,253 @@
+version: '3.9'
+
+services:
+  # ============================================
+  # Backend Services (Production)
+  # ============================================
+
+  mana-core-auth:
+    image: ${DOCKER_REGISTRY:-wuesteon}/mana-core-auth:${AUTH_VERSION:-latest}
+    container_name: mana-core-auth-prod
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: ${AUTH_DATABASE_URL}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+    ports:
+      - "127.0.0.1:3001:3001"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - manacore-prod
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  maerchenzauber-backend:
+    image: ${DOCKER_REGISTRY:-wuesteon}/maerchenzauber-backend:${MAERCHENZAUBER_VERSION:-latest}
+    container_name: maerchenzauber-backend-prod
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      MANA_SERVICE_URL: http://mana-core-auth:3001
+      SUPABASE_URL: ${MAERCHENZAUBER_SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${MAERCHENZAUBER_SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${MAERCHENZAUBER_SUPABASE_SERVICE_ROLE_KEY}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY}
+      AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-2024-12-01-preview}
+    ports:
+      - "127.0.0.1:3002:3002"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - manacore-prod
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 512M
+
+  chat-backend:
+    image: ${DOCKER_REGISTRY:-wuesteon}/chat-backend:${CHAT_VERSION:-latest}
+    container_name: chat-backend-prod
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      MANA_SERVICE_URL: http://mana-core-auth:3001
+      SUPABASE_URL: ${CHAT_SUPABASE_URL}
+      SUPABASE_SERVICE_KEY: ${CHAT_SUPABASE_SERVICE_KEY}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY}
+      AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-2024-12-01-preview}
+    ports:
+      - "127.0.0.1:3003:3002"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - manacore-prod
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 512M
+
+  manadeck-backend:
+    image: ${DOCKER_REGISTRY:-wuesteon}/manadeck-backend:${MANADECK_VERSION:-latest}
+    container_name: manadeck-backend-prod
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      MANA_SERVICE_URL: http://mana-core-auth:3001
+      SUPABASE_URL: ${MANADECK_SUPABASE_URL}
+      SUPABASE_SERVICE_KEY: ${MANADECK_SUPABASE_SERVICE_KEY}
+    ports:
+      - "127.0.0.1:3004:3003"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - manacore-prod
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  nutriphi-backend:
+    image: ${DOCKER_REGISTRY:-wuesteon}/nutriphi-backend:${NUTRIPHI_VERSION:-latest}
+    container_name: nutriphi-backend-prod
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3004
+      MANA_SERVICE_URL: http://mana-core-auth:3001
+      SUPABASE_URL: ${NUTRIPHI_SUPABASE_URL}
+      SUPABASE_SERVICE_KEY: ${NUTRIPHI_SUPABASE_SERVICE_KEY}
+    ports:
+      - "127.0.0.1:3005:3004"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - manacore-prod
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  news-api:
+    image: ${DOCKER_REGISTRY:-wuesteon}/news-api:${NEWS_VERSION:-latest}
+    container_name: news-api-prod
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+      MANA_SERVICE_URL: http://mana-core-auth:3001
+    ports:
+      - "127.0.0.1:3006:3005"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - manacore-prod
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  # ============================================
+  # Monitoring (Optional but recommended)
+  # ============================================
+
+  # Uncomment if you want container monitoring
+  # watchtower:
+  #   image: containrrr/watchtower
+  #   container_name: watchtower-prod
+  #   restart: always
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   command: --interval 300 --cleanup
+  #   networks:
+  #     - manacore-prod
+
+# ============================================
+# Networks
+# ============================================
+
+networks:
+  manacore-prod:
+    driver: bridge
+    name: manacore-production

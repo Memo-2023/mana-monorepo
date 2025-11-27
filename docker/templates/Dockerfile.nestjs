@@ -1,0 +1,88 @@
+# Multi-stage Dockerfile for NestJS backend services
+# This is a template - copy and customize for each backend service
+
+# ============================================
+# Build Stage
+# ============================================
+FROM node:20-alpine AS builder
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+WORKDIR /app
+
+# Copy workspace files
+COPY pnpm-workspace.yaml ./
+COPY package.json ./
+COPY pnpm-lock.yaml ./
+
+# Copy all shared packages (adjust based on dependencies)
+COPY packages/ ./packages/
+
+# Copy the specific backend service
+# CUSTOMIZE THIS: Replace with your service path
+# Example: COPY apps/chat/apps/backend ./apps/chat/apps/backend
+ARG SERVICE_PATH
+COPY ${SERVICE_PATH} ./${SERVICE_PATH}
+
+# Install all dependencies (including devDependencies for build)
+RUN pnpm install --frozen-lockfile
+
+# Build shared packages first
+RUN pnpm run build:packages
+
+# Build the backend service
+WORKDIR /app/${SERVICE_PATH}
+RUN pnpm build
+
+# ============================================
+# Production Stage
+# ============================================
+FROM node:20-alpine AS production
+
+# Install pnpm and system dependencies
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
+    && apk add --no-cache \
+       postgresql-client \
+       curl \
+       wget
+
+WORKDIR /app
+
+# Copy workspace files
+COPY --from=builder /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/pnpm-lock.yaml ./
+
+# Copy built packages and service
+COPY --from=builder /app/packages ./packages
+ARG SERVICE_PATH
+COPY --from=builder /app/${SERVICE_PATH} ./${SERVICE_PATH}
+
+# Install production dependencies only
+RUN pnpm install --prod --frozen-lockfile
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
+
+# Change ownership
+RUN chown -R nestjs:nodejs /app
+
+# Switch to non-root user
+USER nestjs
+
+# Set working directory to service
+WORKDIR /app/${SERVICE_PATH}
+
+# Expose port (customize per service)
+ARG PORT=3000
+EXPOSE ${PORT}
+
+# Health check (customize endpoint per service)
+ARG HEALTH_PATH=/health
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}${HEALTH_PATH} || exit 1
+
+# Start the application
+CMD ["node", "dist/main.js"]
