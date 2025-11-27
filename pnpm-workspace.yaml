@@ -8,6 +8,15 @@ packages:
   # Product-specific packages
   - 'apps/*/packages/*'
 
+  # Games
+  - 'games/*'
+
+  # Sub-apps within games (if needed)
+  - 'games/*/apps/*'
+
+  # Game-specific packages
+  - 'games/*/packages/*'
+
   # Standalone microservices
   - 'services/*'
 

@@ -56,7 +56,7 @@ Each project has its own `CLAUDE.md` with detailed project-specific commands.
 ### Monorepo Structure
 ```
 manacore-monorepo/
-├── apps/                    # All product applications
+├── apps/                    # SaaS product applications
 │   ├── chat/
 │   │   ├── apps/
 │   │   │   ├── backend/     # NestJS API
@@ -67,6 +67,8 @@ manacore-monorepo/
 │   ├── maerchenzauber/
 │   ├── manadeck/
 │   └── ...
+├── games/                   # Game projects
+│   └── {game-name}/         # Individual games
 ├── services/                # Standalone microservices
 │   └── mana-core-auth/      # Central authentication service
 ├── packages/                # Monorepo-wide shared packages
