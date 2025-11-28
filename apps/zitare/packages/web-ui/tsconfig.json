@@ -1,0 +1,20 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"strict": true,
+		"resolveJsonModule": true,
+		"allowJs": true,
+		"checkJs": true,
+		"paths": {
+			"@zitare/shared": ["../shared/src/index.ts"],
+			"@zitare/web-ui": ["./src/index.ts"],
+			"@zitare/web-ui/*": ["./src/*"]
+		}
+	},
+	"include": ["src/**/*.ts", "src/**/*.svelte"],
+	"exclude": ["node_modules"]
+}

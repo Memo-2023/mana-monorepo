@@ -229,8 +229,6 @@ const APP_CONFIGS = [
 	{
 		path: 'apps/picture/apps/mobile/.env',
 		vars: {
-			EXPO_PUBLIC_SUPABASE_URL: (env) => env.PICTURE_SUPABASE_URL,
-			EXPO_PUBLIC_SUPABASE_ANON_KEY: (env) => env.PICTURE_SUPABASE_ANON_KEY,
 			EXPO_PUBLIC_BACKEND_URL: (env) => env.PICTURE_BACKEND_URL || 'http://localhost:3003',
 			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 		},
@@ -240,8 +238,6 @@ const APP_CONFIGS = [
 	{
 		path: 'apps/picture/apps/web/.env',
 		vars: {
-			PUBLIC_SUPABASE_URL: (env) => env.PICTURE_SUPABASE_URL,
-			PUBLIC_SUPABASE_ANON_KEY: (env) => env.PICTURE_SUPABASE_ANON_KEY,
 			PUBLIC_BACKEND_URL: (env) => env.PICTURE_BACKEND_URL || 'http://localhost:3003',
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_GOOGLE_CLIENT_ID: (env) => env.PICTURE_GOOGLE_CLIENT_ID || '',
@@ -249,32 +245,32 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Quote Backend (NestJS)
+	// Zitare Backend (NestJS)
 	{
-		path: 'apps/quote/apps/backend/.env',
+		path: 'apps/zitare/apps/backend/.env',
 		vars: {
 			NODE_ENV: () => 'development',
-			PORT: (env) => env.QUOTE_BACKEND_PORT || '3007',
-			DATABASE_URL: (env) => env.QUOTE_DATABASE_URL,
+			PORT: (env) => env.ZITARE_BACKEND_PORT || '3007',
+			DATABASE_URL: (env) => env.ZITARE_DATABASE_URL,
 			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
 		},
 	},
 
-	// Quote Mobile (Expo)
+	// Zitare Mobile (Expo)
 	{
-		path: 'apps/quote/apps/mobile/.env',
+		path: 'apps/zitare/apps/mobile/.env',
 		vars: {
-			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.QUOTE_BACKEND_PORT || '3007'}`,
+			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.ZITARE_BACKEND_PORT || '3007'}`,
 			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 		},
 	},
 
-	// Quote Web (SvelteKit)
+	// Zitare Web (SvelteKit)
 	{
-		path: 'apps/quote/apps/web/.env',
+		path: 'apps/zitare/apps/web/.env',
 		vars: {
-			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.QUOTE_BACKEND_PORT || '3007'}`,
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.ZITARE_BACKEND_PORT || '3007'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 		},
 	},
@@ -306,6 +302,36 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.PRESI_BACKEND_PORT || '3008'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Mana Games Backend (NestJS)
+	{
+		path: 'games/mana-games/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.MANA_GAMES_BACKEND_PORT || '3011',
+			// Google Gemini
+			GOOGLE_GENAI_API_KEY: (env) => env.MANA_GAMES_GOOGLE_GENAI_API_KEY,
+			// Anthropic Claude
+			ANTHROPIC_API_KEY: (env) => env.MANA_GAMES_ANTHROPIC_API_KEY,
+			// Azure OpenAI
+			AZURE_OPENAI_ENDPOINT: (env) => env.MANA_GAMES_AZURE_OPENAI_ENDPOINT,
+			AZURE_OPENAI_API_KEY: (env) => env.MANA_GAMES_AZURE_OPENAI_API_KEY,
+			AZURE_OPENAI_DEPLOYMENT: (env) => env.MANA_GAMES_AZURE_OPENAI_DEPLOYMENT || 'gpt-4o',
+			// GitHub
+			GITHUB_TOKEN: (env) => env.MANA_GAMES_GITHUB_TOKEN,
+			GITHUB_OWNER: (env) => env.MANA_GAMES_GITHUB_OWNER || 'tillschneider',
+			GITHUB_REPO: (env) => env.MANA_GAMES_GITHUB_REPO || 'mana-games',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Mana Games Web (Astro)
+	{
+		path: 'games/mana-games/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MANA_GAMES_BACKEND_PORT || '3011'}`,
 		},
 	},
 ];

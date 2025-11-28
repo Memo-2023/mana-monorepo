@@ -1,0 +1,25 @@
+{
+	"name": "zitare",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Zitare App - Daily Inspiration",
+	"scripts": {
+		"dev": "turbo run dev",
+		"dev:backend": "pnpm --filter @zitare/backend dev",
+		"dev:web": "pnpm --filter @zitare/web dev",
+		"dev:landing": "pnpm --filter @zitare/landing dev",
+		"dev:mobile": "pnpm --filter @zitare/mobile dev",
+		"build": "turbo run build",
+		"lint": "turbo run lint",
+		"type-check": "turbo run type-check",
+		"clean": "turbo run clean",
+		"db:push": "pnpm --filter @zitare/backend db:push",
+		"db:studio": "pnpm --filter @zitare/backend db:studio",
+		"db:seed": "pnpm --filter @zitare/backend db:seed"
+	},
+	"devDependencies": {
+		"turbo": "^2.3.0",
+		"typescript": "^5.9.3"
+	},
+	"packageManager": "pnpm@9.15.0"
+}
