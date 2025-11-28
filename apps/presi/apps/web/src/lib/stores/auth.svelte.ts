@@ -1,75 +1,190 @@
-import { browser } from '$app/environment';
-import { authApi } from '$lib/api/client';
+/**
+ * Auth Store - Manages authentication state using Svelte 5 runes
+ * Uses Mana Core Auth
+ */
 
-interface User {
-	id: string;
-	email: string;
+import { browser } from '$app/environment';
+import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
+import { PUBLIC_MANA_CORE_AUTH_URL } from '$env/static/public';
+
+// Initialize Mana Core Auth only on the client side
+const MANA_AUTH_URL = PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+
+// Lazy initialization to avoid SSR issues with localStorage
+let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
+let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null = null;
+
+function getAuthService() {
+	if (!browser) return null;
+	if (!_authService) {
+		const auth = initializeWebAuth({ baseUrl: MANA_AUTH_URL });
+		_authService = auth.authService;
+		_tokenManager = auth.tokenManager;
+	}
+	return _authService;
 }
 
-function createAuthStore() {
-	let isAuthenticated = $state(false);
-	let user = $state<User | null>(null);
-	let isLoading = $state(true);
+// State
+let user = $state<UserData | null>(null);
+let loading = $state(true);
+let initialized = $state(false);
 
-	function init() {
-		if (!browser) {
-			isLoading = false;
+export const auth = {
+	// Getters
+	get user() {
+		return user;
+	},
+	get isLoading() {
+		return loading;
+	},
+	get isAuthenticated() {
+		return !!user;
+	},
+	get initialized() {
+		return initialized;
+	},
+
+	/**
+	 * Initialize auth state from stored tokens
+	 */
+	async init() {
+		if (initialized) return;
+
+		const authService = getAuthService();
+		if (!authService) {
+			initialized = true;
+			loading = false;
 			return;
 		}
 
-		const token = localStorage.getItem('accessToken');
-		if (token) {
-			// Decode JWT to get user info
-			try {
-				const payload = JSON.parse(atob(token.split('.')[1]));
-				user = { id: payload.sub, email: payload.email };
-				isAuthenticated = true;
-			} catch (e) {
-				console.error('Failed to decode token:', e);
-				localStorage.removeItem('accessToken');
-				localStorage.removeItem('refreshToken');
+		loading = true;
+		try {
+			const authenticated = await authService.isAuthenticated();
+			if (authenticated) {
+				const userData = await authService.getUserFromToken();
+				user = userData;
 			}
+			initialized = true;
+		} catch (error) {
+			console.error('Failed to initialize auth:', error);
+			user = null;
+		} finally {
+			loading = false;
 		}
-		isLoading = false;
-	}
+	},
 
-	async function login(email: string, password: string) {
-		const data = await authApi.login(email, password);
-		const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
-		user = { id: payload.sub, email: payload.email };
-		isAuthenticated = true;
-		return data;
-	}
+	/**
+	 * Sign in with email and password
+	 * Returns AuthResult compatible format for shared-auth-ui
+	 */
+	async login(email: string, password: string): Promise<{ success: boolean; error?: string }> {
+		const authService = getAuthService();
+		if (!authService) {
+			return { success: false, error: 'Auth not available on server' };
+		}
 
-	async function register(email: string, password: string) {
-		const data = await authApi.register(email, password);
-		const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
-		user = { id: payload.sub, email: payload.email };
-		isAuthenticated = true;
-		return data;
-	}
+		try {
+			const result = await authService.signIn(email, password);
 
-	function logout() {
-		authApi.logout();
-		user = null;
-		isAuthenticated = false;
-	}
+			if (!result.success) {
+				return { success: false, error: result.error || 'Login failed' };
+			}
 
-	return {
-		get isAuthenticated() {
-			return isAuthenticated;
-		},
-		get user() {
-			return user;
-		},
-		get isLoading() {
-			return isLoading;
-		},
-		init,
-		login,
-		register,
-		logout,
-	};
-}
+			// Get user data from token
+			const userData = await authService.getUserFromToken();
+			user = userData;
 
-export const auth = createAuthStore();
+			return { success: true };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
+		}
+	},
+
+	/**
+	 * Sign up with email and password
+	 */
+	async register(
+		email: string,
+		password: string
+	): Promise<{ success: boolean; error?: string; needsVerification?: boolean }> {
+		const authService = getAuthService();
+		if (!authService) {
+			return { success: false, error: 'Auth not available on server', needsVerification: false };
+		}
+
+		try {
+			const result = await authService.signUp(email, password);
+
+			if (!result.success) {
+				return { success: false, error: result.error || 'Signup failed', needsVerification: false };
+			}
+
+			// Mana Core Auth requires separate login after signup
+			if (result.needsVerification) {
+				return { success: true, needsVerification: true };
+			}
+
+			// Auto sign in after successful signup
+			const signInResult = await this.login(email, password);
+			return { ...signInResult, needsVerification: false };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage, needsVerification: false };
+		}
+	},
+
+	/**
+	 * Sign out
+	 */
+	async logout() {
+		const authService = getAuthService();
+		if (!authService) {
+			user = null;
+			return;
+		}
+
+		try {
+			await authService.signOut();
+			user = null;
+		} catch (error) {
+			console.error('Sign out error:', error);
+			// Clear user even if sign out fails
+			user = null;
+		}
+	},
+
+	/**
+	 * Send password reset email
+	 */
+	async forgotPassword(email: string): Promise<{ success: boolean; error?: string }> {
+		const authService = getAuthService();
+		if (!authService) {
+			return { success: false, error: 'Auth not available on server' };
+		}
+
+		try {
+			const result = await authService.forgotPassword(email);
+
+			if (!result.success) {
+				return { success: false, error: result.error || 'Password reset failed' };
+			}
+
+			return { success: true };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
+		}
+	},
+
+	/**
+	 * Get access token for API calls
+	 */
+	async getAccessToken() {
+		const authService = getAuthService();
+		if (!authService) {
+			return null;
+		}
+		return await authService.getAppToken();
+	},
+};

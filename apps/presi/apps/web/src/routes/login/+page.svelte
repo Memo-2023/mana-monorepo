@@ -1,119 +1,65 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { LoginPage } from '@manacore/shared-auth-ui';
+	import { PresiLogo } from '@manacore/shared-branding';
 	import { auth } from '$lib/stores/auth.svelte';
-	import { Presentation, Mail, Lock, AlertCircle } from 'lucide-svelte';
+	import AppSlider from '$lib/components/AppSlider.svelte';
 
-	let email = $state('');
-	let password = $state('');
-	let error = $state('');
-	let isLoading = $state(false);
+	// Get redirect URL from query params
+	const redirectTo = $derived($page.url.searchParams.get('redirectTo') || '/');
 
-	async function handleSubmit(e: SubmitEvent) {
-		e.preventDefault();
-		error = '';
-		isLoading = true;
+	// English translations
+	const translations = {
+		title: 'Sign In',
+		subtitle: 'Sign in with your account',
+		emailPlaceholder: 'Email',
+		passwordPlaceholder: 'Password',
+		rememberMe: 'Remember me',
+		forgotPassword: 'Forgot password?',
+		signInButton: 'Sign In',
+		signingIn: 'Signing in...',
+		success: 'Success!',
+		orDivider: 'or',
+		noAccount: "Don't have an account?",
+		createAccount: 'Create one',
+		skipToForm: 'Skip to login form',
+		showPassword: 'Show password',
+		hidePassword: 'Hide password',
+		emailRequired: 'Email is required',
+		emailInvalid: 'Please enter a valid email address',
+		passwordRequired: 'Password is required',
+		signInFailed: 'Sign in failed',
+		googleSignInFailed: 'Google sign in failed',
+		signInSuccess: 'Successfully signed in. Redirecting...',
+		googleSignInSuccess: 'Successfully signed in with Google. Redirecting...',
+	};
 
-		try {
-			await auth.login(email, password);
-			goto('/');
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Login failed';
-		} finally {
-			isLoading = false;
-		}
+	async function handleSignIn(email: string, password: string) {
+		return auth.login(email, password);
 	}
 </script>
 
 <svelte:head>
-	<title>Login - Presi</title>
+	<title>Login | Presi</title>
 </svelte:head>
 
-<div class="min-h-screen flex items-center justify-center px-4">
-	<div class="w-full max-w-md">
-		<div class="text-center mb-8">
-			<div class="flex justify-center mb-4">
-				<div class="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-xl">
-					<Presentation class="w-10 h-10 text-primary-600 dark:text-primary-400" />
-				</div>
-			</div>
-			<h1 class="text-2xl font-bold text-slate-900 dark:text-white">Welcome back</h1>
-			<p class="text-slate-600 dark:text-slate-400 mt-1">Sign in to your Presi account</p>
-		</div>
-
-		<form
-			onsubmit={handleSubmit}
-			class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 space-y-4"
-		>
-			{#if error}
-				<div
-					class="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm"
-				>
-					<AlertCircle class="w-4 h-4 flex-shrink-0" />
-					{error}
-				</div>
-			{/if}
-
-			<div>
-				<label
-					for="email"
-					class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-				>
-					Email
-				</label>
-				<div class="relative">
-					<Mail class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-					<input
-						type="email"
-						id="email"
-						bind:value={email}
-						required
-						class="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-						placeholder="you@example.com"
-					/>
-				</div>
-			</div>
-
-			<div>
-				<label
-					for="password"
-					class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-				>
-					Password
-				</label>
-				<div class="relative">
-					<Lock class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-					<input
-						type="password"
-						id="password"
-						bind:value={password}
-						required
-						class="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-						placeholder="••••••••"
-					/>
-				</div>
-			</div>
-
-			<button
-				type="submit"
-				disabled={isLoading}
-				class="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-			>
-				{isLoading ? 'Signing in...' : 'Sign in'}
-			</button>
-
-			<div class="flex items-center justify-between text-sm">
-				<a
-					href="/forgot-password"
-					class="text-slate-600 dark:text-slate-400 hover:text-primary-600"
-				>
-					Forgot password?
-				</a>
-				<p class="text-slate-600 dark:text-slate-400">
-					No account?
-					<a href="/register" class="text-primary-600 hover:text-primary-700 font-medium">Sign up</a
-					>
-				</p>
-			</div>
-		</form>
-	</div>
-</div>
+<LoginPage
+	appName="Presi"
+	logo={PresiLogo}
+	primaryColor="#f97316"
+	onSignIn={handleSignIn}
+	{goto}
+	enableGoogle={false}
+	enableApple={false}
+	successRedirect={redirectTo}
+	registerPath="/register"
+	forgotPasswordPath="/forgot-password"
+	lightBackground="#fff7ed"
+	darkBackground="#1c1210"
+	{translations}
+>
+	{#snippet appSlider()}
+		<AppSlider />
+	{/snippet}
+</LoginPage>

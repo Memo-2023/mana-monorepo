@@ -209,7 +209,8 @@ export class AuthService {
 		if (!privateKeyRaw) {
 			throw new Error('JWT private key not configured');
 		}
-		const privateKey: string = privateKeyRaw;
+		// Convert escaped newlines to actual newlines (for Docker env vars)
+		const privateKey: string = privateKeyRaw.replace(/\\n/g, '\n');
 		const accessTokenExpiry = this.configService.get<string>('jwt.accessTokenExpiry') || '15m';
 		const refreshTokenExpiry = this.configService.get<string>('jwt.refreshTokenExpiry') || '7d';
 		const issuer = this.configService.get<string>('jwt.issuer');

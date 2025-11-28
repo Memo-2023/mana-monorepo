@@ -30,6 +30,10 @@
 	},
 	"dependencies": {
 		"@presi/shared": "workspace:*",
+		"@manacore/shared-auth": "workspace:*",
+		"@manacore/shared-auth-ui": "workspace:*",
+		"@manacore/shared-branding": "workspace:*",
+		"@manacore/shared-ui": "workspace:*",
 		"lucide-svelte": "^0.460.0"
 	},
 	"type": "module"
