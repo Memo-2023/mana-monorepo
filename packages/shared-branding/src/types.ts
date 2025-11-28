@@ -1,7 +1,7 @@
 /**
  * App identifiers for branding
  */
-export type AppId = 'memoro' | 'manacore' | 'manadeck' | 'maerchenzauber' | 'uload' | 'chat';
+export type AppId = 'memoro' | 'manacore' | 'manadeck' | 'maerchenzauber' | 'uload' | 'chat' | 'presi';
 
 /**
  * App branding configuration
