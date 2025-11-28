@@ -53,7 +53,7 @@
 </script>
 
 <svelte:head>
-	<title>New Transcription - Transcriber</title>
+	<title>New Transcription | Wisekeep</title>
 </svelte:head>
 
 <div class="max-w-2xl mx-auto px-4 py-8">
@@ -72,7 +72,7 @@
 				bind:value={url}
 				placeholder="https://www.youtube.com/watch?v=..."
 				required
-				class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+				class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
 			/>
 		</div>
 
@@ -81,7 +81,7 @@
 			<select
 				id="language"
 				bind:value={language}
-				class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+				class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
 			>
 				{#each languages as lang}
 					<option value={lang.code}>{lang.name}</option>
@@ -116,7 +116,7 @@
 				<select
 					id="model"
 					bind:value={model}
-					class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+					class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
 				>
 					{#each models as m}
 						<option value={m.value}>{m.label}</option>
@@ -128,7 +128,7 @@
 		<button
 			type="submit"
 			disabled={loading || !url}
-			class="w-full py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+			class="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
 		>
 			{loading ? 'Starting...' : 'Start Transcription'}
 		</button>

@@ -24,7 +24,7 @@
 </script>
 
 <svelte:head>
-	<title>Transcriber - Dashboard</title>
+	<title>Dashboard | Wisekeep</title>
 </svelte:head>
 
 <div class="max-w-7xl mx-auto px-4 py-8">
@@ -38,7 +38,7 @@
 		<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
 			<div class="bg-white p-6 rounded-lg shadow-sm border">
 				<div class="text-sm text-gray-500 mb-1">Total Transcripts</div>
-				<div class="text-3xl font-bold text-primary-600">{stats.totalTranscripts}</div>
+				<div class="text-3xl font-bold text-purple-600">{stats.totalTranscripts}</div>
 			</div>
 			<div class="bg-white p-6 rounded-lg shadow-sm border">
 				<div class="text-sm text-gray-500 mb-1">Storage Used</div>
@@ -59,7 +59,7 @@
 		<h2 class="text-xl font-semibold mb-4">Quick Start</h2>
 		<a
 			href="/transcribe"
-			class="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
+			class="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
 		>
 			Start New Transcription
 		</a>
@@ -87,7 +87,7 @@
 						</div>
 						<div class="w-full bg-gray-200 rounded-full h-2">
 							<div
-								class="bg-primary-600 h-2 rounded-full transition-all"
+								class="bg-purple-600 h-2 rounded-full transition-all"
 								style="width: {job.progress}%"
 							></div>
 						</div>

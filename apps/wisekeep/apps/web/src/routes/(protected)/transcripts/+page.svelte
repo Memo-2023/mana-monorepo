@@ -18,7 +18,7 @@
 </script>
 
 <svelte:head>
-	<title>Transcripts - Transcriber</title>
+	<title>Transcripts | Wisekeep</title>
 </svelte:head>
 
 <div class="max-w-7xl mx-auto px-4 py-8">
@@ -31,7 +31,7 @@
 			<p class="text-gray-500 mb-4">No transcripts yet</p>
 			<a
 				href="/transcribe"
-				class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+				class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
 			>
 				Create your first transcript
 			</a>
@@ -54,7 +54,7 @@
 					</div>
 					{#if job.transcriptText}
 						<details class="mt-4">
-							<summary class="cursor-pointer text-sm text-primary-600 hover:text-primary-700">
+							<summary class="cursor-pointer text-sm text-purple-600 hover:text-purple-700">
 								View transcript
 							</summary>
 							<pre

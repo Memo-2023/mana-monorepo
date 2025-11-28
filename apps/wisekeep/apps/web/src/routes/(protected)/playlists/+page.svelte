@@ -29,7 +29,7 @@
 </script>
 
 <svelte:head>
-	<title>Playlists - Transcriber</title>
+	<title>Playlists | Wisekeep</title>
 </svelte:head>
 
 <div class="max-w-7xl mx-auto px-4 py-8">
