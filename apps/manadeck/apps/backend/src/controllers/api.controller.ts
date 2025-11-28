@@ -708,8 +708,9 @@ export class ApiController {
 		const session = await this.studySessionRepository.create({
 			userId: user.sub,
 			deckId: sessionData.deckId,
+			mode: sessionData.mode || 'all',
 			startedAt: sessionData.startedAt || new Date(),
-			endedAt: sessionData.endedAt,
+			completedAt: sessionData.endedAt,
 			totalCards: sessionData.totalCards || 0,
 			completedCards: sessionData.completedCards || 0,
 			correctCards: sessionData.correctCards || 0,
@@ -732,7 +733,7 @@ export class ApiController {
 		this.logger.log(`Updating study session ${sessionId} for user: ${user.sub}`);
 
 		const session = await this.studySessionRepository.update(sessionId, user.sub, {
-			endedAt: sessionData.endedAt,
+			completedAt: sessionData.endedAt,
 			totalCards: sessionData.totalCards,
 			completedCards: sessionData.completedCards,
 			correctCards: sessionData.correctCards,
