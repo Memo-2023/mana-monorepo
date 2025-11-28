@@ -119,7 +119,7 @@
 	</div>
 {:else}
 	<!-- Navigation Layout -->
-	<div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
+	<div class="layout-container">
 		<!-- Floating/Sidebar Pill Navigation -->
 		<PillNavigation
 			items={navItems}
@@ -140,15 +140,57 @@
 
 		<!-- Main Content with dynamic padding based on nav mode -->
 		<main
-			class="flex-1 transition-all duration-300 {isCollapsed
-				? ''
-				: isSidebarMode
-					? 'pl-[180px]'
-					: 'pt-24'}"
+			class="main-content"
+			class:sidebar-mode={isSidebarMode && !isCollapsed}
+			class:floating-mode={!isSidebarMode && !isCollapsed}
 		>
-			<div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+			<div class="content-wrapper">
 				{@render children()}
 			</div>
 		</main>
 	</div>
 {/if}
+
+<style>
+	.layout-container {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+	}
+
+	.main-content {
+		flex: 1;
+		transition: all 300ms ease;
+	}
+
+	/* Floating nav mode - add top padding for fixed nav */
+	.main-content.floating-mode {
+		padding-top: 100px; /* Explicit space for floating nav */
+	}
+
+	/* Sidebar mode - add left padding for sidebar nav */
+	.main-content.sidebar-mode {
+		padding-left: 180px;
+	}
+
+	.content-wrapper {
+		max-width: 80rem; /* max-w-7xl */
+		margin-left: auto;
+		margin-right: auto;
+		padding: 2rem 1rem; /* py-8 px-4 */
+	}
+
+	@media (min-width: 640px) {
+		.content-wrapper {
+			padding-left: 1.5rem;
+			padding-right: 1.5rem;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.content-wrapper {
+			padding-left: 2rem;
+			padding-right: 2rem;
+		}
+	}
+</style>
