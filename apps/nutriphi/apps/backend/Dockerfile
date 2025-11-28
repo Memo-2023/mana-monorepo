@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -26,7 +26,7 @@ RUN pnpm --filter @manacore/nutriphi-database build
 RUN pnpm --filter @nutriphi/backend build
 
 # Production stage
-FROM node:20-alpine AS runner
+FROM node:25-alpine AS runner
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
