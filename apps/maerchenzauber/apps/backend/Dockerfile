@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 
 # Set working directory to monorepo root
 WORKDIR /app
@@ -38,7 +38,7 @@ RUN echo "=== Listing dist contents ===" && \
     echo "=== Build complete ==="
 
 # Production stage
-FROM node:20-alpine
+FROM node:25-alpine
 
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
