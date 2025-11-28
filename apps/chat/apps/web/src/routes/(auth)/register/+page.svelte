@@ -1,43 +1,36 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { RegisterPage } from '@manacore/shared-auth-ui';
+	import { ChatLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import AppSlider from '$lib/components/AppSlider.svelte';
 
-	let email = $state('');
-	let password = $state('');
-	let confirmPassword = $state('');
-	let error = $state<string | null>(null);
-	let loading = $state(false);
-	let success = $state(false);
+	// German translations
+	const translations = {
+		title: 'Konto erstellen',
+		emailPlaceholder: 'E-Mail',
+		passwordPlaceholder: 'Passwort',
+		confirmPasswordPlaceholder: 'Passwort bestätigen',
+		passwordRequirements:
+			'Passwort muss mindestens 8 Zeichen mit Kleinbuchstaben, Großbuchstaben, Zahl und Sonderzeichen enthalten.',
+		createAccountButton: 'Konto erstellen',
+		creatingAccount: 'Wird erstellt...',
+		backToLogin: 'Zurück zur Anmeldung',
+		showPassword: 'Passwort anzeigen',
+		hidePassword: 'Passwort verbergen',
+		emailRequired: 'E-Mail ist erforderlich',
+		passwordRequired: 'Passwort ist erforderlich',
+		confirmPasswordRequired: 'Bitte bestätige dein Passwort',
+		passwordsDoNotMatch: 'Passwörter stimmen nicht überein',
+		passwordTooShort: 'Passwort muss mindestens 8 Zeichen lang sein',
+		passwordStrengthError:
+			'Passwort muss Kleinbuchstaben, Großbuchstaben, Zahl und Sonderzeichen enthalten',
+		registrationFailed: 'Registrierung fehlgeschlagen',
+		accountCreated: 'Konto erstellt! Bitte überprüfe deine E-Mails zur Bestätigung.',
+	};
 
-	async function handleSubmit(e: Event) {
-		e.preventDefault();
-		error = null;
-
-		if (password !== confirmPassword) {
-			error = 'Die Passwörter stimmen nicht überein';
-			return;
-		}
-
-		if (password.length < 6) {
-			error = 'Das Passwort muss mindestens 6 Zeichen lang sein';
-			return;
-		}
-
-		loading = true;
-
-		const result = await authStore.signUp(email, password);
-
-		if (result.success) {
-			if (result.needsVerification) {
-				success = true;
-			} else {
-				goto('/');
-			}
-		} else {
-			error = result.error || 'Registrierung fehlgeschlagen';
-		}
-
-		loading = false;
+	async function handleSignUp(email: string, password: string) {
+		return authStore.signUp(email, password);
 	}
 </script>
 
@@ -45,133 +38,19 @@
 	<title>Registrieren | ManaChat</title>
 </svelte:head>
 
-<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
-	<div class="text-center mb-8">
-		<h1 class="text-2xl font-bold text-gray-900 dark:text-white">ManaChat</h1>
-		<p class="text-gray-600 dark:text-gray-400 mt-2">Erstelle dein Konto</p>
-	</div>
-
-	{#if success}
-		<div
-			class="p-4 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg"
-		>
-			<p class="text-green-700 dark:text-green-400 text-center">
-				Bitte überprüfe deine E-Mails, um dein Konto zu bestätigen.
-			</p>
-			<div class="mt-4 text-center">
-				<a href="/login" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">
-					Zur Anmeldung
-				</a>
-			</div>
-		</div>
-	{:else}
-		{#if error}
-			<div
-				class="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm"
-			>
-				{error}
-			</div>
-		{/if}
-
-		<form onsubmit={handleSubmit} class="space-y-4">
-			<div>
-				<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-					E-Mail
-				</label>
-				<input
-					type="email"
-					id="email"
-					bind:value={email}
-					required
-					disabled={loading}
-					class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600
-                 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                 focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                 disabled:opacity-50 disabled:cursor-not-allowed"
-					placeholder="deine@email.de"
-				/>
-			</div>
-
-			<div>
-				<label
-					for="password"
-					class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-				>
-					Passwort
-				</label>
-				<input
-					type="password"
-					id="password"
-					bind:value={password}
-					required
-					disabled={loading}
-					class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600
-                 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                 focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                 disabled:opacity-50 disabled:cursor-not-allowed"
-					placeholder="••••••••"
-				/>
-			</div>
-
-			<div>
-				<label
-					for="confirmPassword"
-					class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-				>
-					Passwort bestätigen
-				</label>
-				<input
-					type="password"
-					id="confirmPassword"
-					bind:value={confirmPassword}
-					required
-					disabled={loading}
-					class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600
-                 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                 focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                 disabled:opacity-50 disabled:cursor-not-allowed"
-					placeholder="••••••••"
-				/>
-			</div>
-
-			<button
-				type="submit"
-				disabled={loading}
-				class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg
-               transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-			>
-				{#if loading}
-					<span class="inline-flex items-center gap-2">
-						<svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-							<circle
-								class="opacity-25"
-								cx="12"
-								cy="12"
-								r="10"
-								stroke="currentColor"
-								stroke-width="4"
-							></circle>
-							<path
-								class="opacity-75"
-								fill="currentColor"
-								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-							></path>
-						</svg>
-						Wird registriert...
-					</span>
-				{:else}
-					Registrieren
-				{/if}
-			</button>
-		</form>
-
-		<div class="mt-6 text-center">
-			<p class="text-gray-600 dark:text-gray-400">
-				Bereits ein Konto?
-				<a href="/login" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">
-					Jetzt anmelden
-				</a>
-			</p>
-		</div>
-	{/if}
-</div>
+<RegisterPage
+	appName="ManaChat"
+	logo={ChatLogo}
+	primaryColor="#0ea5e9"
+	onSignUp={handleSignUp}
+	{goto}
+	successRedirect="/chat"
+	loginPath="/login"
+	lightBackground="#e0f2fe"
+	darkBackground="#0c1929"
+	{translations}
+>
+	{#snippet appSlider()}
+		<AppSlider />
+	{/snippet}
+</RegisterPage>

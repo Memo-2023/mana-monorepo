@@ -4,6 +4,7 @@
 	import { LoginPage } from '@manacore/shared-auth-ui';
 	import { ChatLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import AppSlider from '$lib/components/AppSlider.svelte';
 
 	// Get redirect URL from query params
 	const redirectTo = $derived($page.url.searchParams.get('redirectTo') || '/chat');
@@ -57,4 +58,8 @@
 	lightBackground="#e0f2fe"
 	darkBackground="#0c1929"
 	{translations}
-/>
+>
+	{#snippet appSlider()}
+		<AppSlider />
+	{/snippet}
+</LoginPage>
