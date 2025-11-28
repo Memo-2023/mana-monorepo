@@ -23,9 +23,10 @@ async function fetchApi<T>(
 	const { method = 'GET', body, token } = options;
 
 	// Get token from localStorage if not provided
+	// Token is stored by @manacore/shared-auth under '@auth/appToken'
 	let authToken = token;
 	if (!authToken && browser) {
-		authToken = localStorage.getItem('mana_token') || undefined;
+		authToken = localStorage.getItem('@auth/appToken') || undefined;
 	}
 
 	if (!authToken) {
