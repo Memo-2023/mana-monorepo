@@ -1,9 +1,9 @@
 import { writable, derived, type Writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { TranscriptionJob } from '$lib/api/client';
-import { PUBLIC_API_URL } from '$env/static/public';
 
-const WS_URL = (PUBLIC_API_URL || 'http://localhost:3006').replace('http', 'ws');
+const API_URL = 'http://localhost:3006';
+const WS_URL = API_URL.replace('http', 'ws');
 
 export const jobs: Writable<Map<string, TranscriptionJob>> = writable(new Map());
 export const isConnected = writable(false);

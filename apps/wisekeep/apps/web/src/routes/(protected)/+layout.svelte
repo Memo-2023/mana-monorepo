@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -11,22 +11,31 @@
 	let isChecking = $state(true);
 
 	// Check auth on mount and redirect if not authenticated
-	onMount(async () => {
-		await authStore.initialize();
+	onMount(() => {
+		const init = async () => {
+			try {
+				await authStore.initialize();
+			} catch (e) {
+				console.error('Auth init failed:', e);
+			}
 
-		if (!authStore.isAuthenticated) {
-			const redirectTo = encodeURIComponent(data.pathname || '/');
-			goto(`/login?redirectTo=${redirectTo}`);
-			return;
-		}
+			if (!authStore.isAuthenticated) {
+				const redirectTo = encodeURIComponent(data.pathname || '/dashboard');
+				goto(`/login?redirectTo=${redirectTo}`);
+				return;
+			}
 
-		// Initialize WebSocket after auth check
-		initWebSocket();
-		isChecking = false;
-	});
+			// Initialize WebSocket after auth check
+			initWebSocket();
+			isChecking = false;
+		};
 
-	onDestroy(() => {
-		cleanup();
+		init();
+
+		// Return cleanup function
+		return () => {
+			cleanup();
+		};
 	});
 
 	async function handleSignOut() {
@@ -44,11 +53,11 @@
 	<div class="min-h-screen flex flex-col">
 		<header class="bg-white shadow-sm border-b">
 			<div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-				<a href="/" class="text-xl font-bold text-purple-600">Wisekeep</a>
+				<a href="/dashboard" class="text-xl font-bold text-purple-600">Wisekeep</a>
 				<nav class="flex items-center gap-6">
 					<a
-						href="/"
-						class="transition-colors {$page.url.pathname === '/'
+						href="/dashboard"
+						class="transition-colors {$page.url.pathname === '/dashboard'
 							? 'text-purple-600 font-medium'
 							: 'text-gray-600 hover:text-gray-900'}"
 					>
