@@ -198,8 +198,10 @@ const APP_CONFIGS = [
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.MANADECK_BACKEND_PORT || '3004',
-			SUPABASE_URL: (env) => env.MANADECK_SUPABASE_URL,
-			SUPABASE_ANON_KEY: (env) => env.MANADECK_SUPABASE_ANON_KEY,
+			DATABASE_URL: (env) => env.MANADECK_DATABASE_URL,
+			MANA_SERVICE_URL: (env) => env.MANA_CORE_AUTH_URL,
+			APP_ID: (env) => env.MANADECK_APP_ID,
+			GOOGLE_GENAI_API_KEY: (env) => env.GOOGLE_GENAI_API_KEY,
 		},
 	},
 

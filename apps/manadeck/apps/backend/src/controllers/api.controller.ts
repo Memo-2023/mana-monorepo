@@ -51,7 +51,7 @@ export class ApiController {
 		// Include credit balance in profile
 		let creditBalance = 0;
 		try {
-			const balance = await this.creditClient.getCreditBalance(user.sub);
+			const balance = await this.creditClient.getBalance(user.sub);
 			creditBalance = balance.balance || 0;
 		} catch (error) {
 			this.logger.warn(`Failed to fetch credit balance for user ${user.sub}:`, error);
@@ -69,7 +69,7 @@ export class ApiController {
 		this.logger.log(`Getting credit balance for user: ${user.sub}`);
 
 		try {
-			const balance = await this.creditClient.getCreditBalance(user.sub);
+			const balance = await this.creditClient.getBalance(user.sub);
 
 			return {
 				userId: user.sub,

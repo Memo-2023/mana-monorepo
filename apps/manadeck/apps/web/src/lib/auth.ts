@@ -9,7 +9,7 @@
  * - utils/jwt.ts
  */
 
-import { PUBLIC_API_URL } from '$env/static/public';
+import { PUBLIC_API_URL, PUBLIC_MANA_CORE_AUTH_URL } from '$env/static/public';
 import {
 	createAuthService,
 	createTokenManager,
@@ -127,22 +127,22 @@ setNetworkAdapter(webNetworkAdapter);
 
 // Create auth service instance
 export const authService = createAuthService({
-	baseUrl: PUBLIC_API_URL,
+	baseUrl: PUBLIC_MANA_CORE_AUTH_URL,
 	storageKeys: {
 		APP_TOKEN: STORAGE_KEYS.APP_TOKEN,
 		REFRESH_TOKEN: STORAGE_KEYS.REFRESH_TOKEN,
 		USER_EMAIL: STORAGE_KEYS.USER_EMAIL,
 	},
 	endpoints: {
-		signIn: '/v1/auth/signin',
-		signUp: '/v1/auth/signup',
-		signOut: '/v1/auth/logout',
-		refresh: '/v1/auth/refresh',
-		validate: '/v1/auth/validate',
-		forgotPassword: '/v1/auth/forgot-password',
-		googleSignIn: '/v1/auth/google-signin',
-		appleSignIn: '/v1/auth/apple-signin',
-		credits: '/v1/auth/credits',
+		signIn: '/api/v1/auth/login',
+		signUp: '/api/v1/auth/register',
+		signOut: '/api/v1/auth/logout',
+		refresh: '/api/v1/auth/refresh',
+		validate: '/api/v1/auth/validate',
+		forgotPassword: '/api/v1/auth/forgot-password',
+		googleSignIn: '/api/v1/auth/google-signin',
+		appleSignIn: '/api/v1/auth/apple-signin',
+		credits: '/api/v1/credits/balance',
 	},
 });
 
