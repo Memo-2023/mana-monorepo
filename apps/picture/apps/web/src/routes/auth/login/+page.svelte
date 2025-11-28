@@ -6,7 +6,7 @@
 	import PictureLogo from '$lib/components/branding/PictureLogo.svelte';
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
-	import { authService } from '$lib/services/authService';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { onMount } from 'svelte';
 	import { PUBLIC_GOOGLE_CLIENT_ID, PUBLIC_APPLE_CLIENT_ID } from '$env/static/public';
 
@@ -20,15 +20,17 @@
 	});
 
 	async function handleSignIn(email: string, password: string) {
-		return authService.signIn(email, password);
+		return authStore.signIn(email, password);
 	}
 
 	async function handleSignInWithGoogle() {
-		return authService.signInWithGoogle();
+		// TODO: Implement OAuth with Mana Core Auth when ready
+		return { success: false, error: 'Google Sign-In not yet implemented' };
 	}
 
 	async function handleSignInWithApple() {
-		return authService.signInWithApple();
+		// TODO: Implement OAuth with Mana Core Auth when ready
+		return { success: false, error: 'Apple Sign-In not yet implemented' };
 	}
 </script>
 

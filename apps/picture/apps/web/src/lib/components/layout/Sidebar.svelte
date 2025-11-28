@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { user } from '$lib/stores/auth';
-	import { supabase } from '$lib/supabase';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { currentTheme } from '$lib/stores/theme';
@@ -26,7 +25,7 @@
 	let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	async function handleLogout() {
-		await supabase.auth.signOut();
+		await authStore.signOut();
 		goto('/auth/login');
 	}
 
@@ -469,11 +468,11 @@
 					class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
 					style="background-color: {$currentTheme.primary.default};"
 				>
-					{$user?.email?.charAt(0).toUpperCase()}
+					{authStore.user?.email?.charAt(0).toUpperCase()}
 				</div>
 				<div class="flex-1 overflow-hidden text-left">
 					<p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
-						{$user?.email?.split('@')[0]}
+						{authStore.user?.email?.split('@')[0]}
 					</p>
 					<p class="truncate text-xs text-gray-500 dark:text-gray-400">Account</p>
 				</div>
@@ -545,7 +544,7 @@
 			class="flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-white"
 			style="background-color: {$currentTheme.primary.default};"
 		>
-			{$user?.email?.charAt(0).toUpperCase()}
+			{authStore.user?.email?.charAt(0).toUpperCase()}
 		</button>
 	</div>
 

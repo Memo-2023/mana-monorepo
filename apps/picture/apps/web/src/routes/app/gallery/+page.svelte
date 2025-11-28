@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { user } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import {
 		images,
 		isLoading,
@@ -67,12 +67,12 @@
 	});
 
 	async function loadInitialImages() {
-		if (!$user) return;
+		if (!authStore.user) return;
 
 		isLoading.set(true);
 		try {
 			const data = await getImages({
-				userId: $user.id,
+				userId: authStore.user.id,
 				page: 1,
 				tagIds: $selectedTags.length > 0 ? $selectedTags : undefined,
 				favoritesOnly: $showFavoritesOnly,
@@ -88,14 +88,14 @@
 	}
 
 	async function loadMoreImages() {
-		if (!$user || !$hasMore || $isLoading || loadingMore) return;
+		if (!authStore.user || !$hasMore || $isLoading || loadingMore) return;
 
 		loadingMore = true;
 		const nextPage = $currentPage + 1;
 
 		try {
 			const newImages = await getImages({
-				userId: $user.id,
+				userId: authStore.user.id,
 				page: nextPage,
 				tagIds: $selectedTags.length > 0 ? $selectedTags : undefined,
 				favoritesOnly: $showFavoritesOnly,

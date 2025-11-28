@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { user } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { currentBoard } from '$lib/stores/boards';
 	import {
 		canvasItems,
@@ -40,7 +40,7 @@
 	});
 
 	async function loadBoard() {
-		if (!$user) return;
+		if (!authStore.user) return;
 
 		isLoading = true;
 		try {
@@ -48,7 +48,7 @@
 			const board = await getBoardById(boardId);
 
 			// Check if user has access
-			if (board.user_id !== $user.id && !board.is_public) {
+			if (board.user_id !== authStore.user.id && !board.is_public) {
 				showToast('Zugriff verweigert', 'error');
 				goto('/app/board');
 				return;
@@ -75,7 +75,7 @@
 	}
 
 	async function handleAddText() {
-		if (!$user || !boardId) return;
+		if (!authStore.user || !boardId) return;
 
 		try {
 			// Add text to center of visible area

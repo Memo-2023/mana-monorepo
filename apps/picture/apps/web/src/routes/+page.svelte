@@ -1,18 +1,15 @@
 <script lang="ts">
-	import { user } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
-	onMount(() => {
-		const unsubscribe = user.subscribe((currentUser) => {
-			if (currentUser) {
-				goto('/app/gallery');
-			} else {
-				goto('/auth/login');
-			}
-		});
-
-		return unsubscribe;
+	onMount(async () => {
+		await authStore.initialize();
+		if (authStore.isAuthenticated) {
+			goto('/app/gallery');
+		} else {
+			goto('/auth/login');
+		}
 	});
 </script>
 

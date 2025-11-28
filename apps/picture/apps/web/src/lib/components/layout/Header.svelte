@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { user } from '$lib/stores/auth';
-	import { supabase } from '$lib/supabase';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 
@@ -8,7 +7,7 @@
 	let showMobileMenu = $state(false);
 
 	async function handleLogout() {
-		await supabase.auth.signOut();
+		await authStore.signOut();
 		goto('/auth/login');
 	}
 
@@ -86,7 +85,7 @@
 					<div
 						class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white dark:bg-blue-500"
 					>
-						{$user?.email?.charAt(0).toUpperCase()}
+						{authStore.user?.email?.charAt(0).toUpperCase()}
 					</div>
 					<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path
@@ -103,7 +102,7 @@
 						class="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800"
 					>
 						<div class="border-b border-gray-100 px-4 py-2 dark:border-gray-700">
-							<p class="text-sm font-medium text-gray-900 dark:text-gray-100">{$user?.email}</p>
+							<p class="text-sm font-medium text-gray-900 dark:text-gray-100">{authStore.user?.email}</p>
 						</div>
 						<a
 							href="/app/profile"

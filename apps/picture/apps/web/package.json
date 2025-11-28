@@ -16,6 +16,7 @@
 		"clean": "rm -rf .svelte-kit build node_modules"
 	},
 	"dependencies": {
+		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-i18n": "workspace:*",
@@ -26,7 +27,6 @@
 		"@manacore/shared-ui": "workspace:*",
 		"@picture/design-tokens": "workspace:*",
 		"@picture/shared": "workspace:*",
-		"@supabase/supabase-js": "^2.38.4",
 		"konva": "^10.0.2",
 		"posthog-js": "^1.273.1",
 		"svelte-i18n": "^4.0.1"

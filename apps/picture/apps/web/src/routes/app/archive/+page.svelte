@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { user } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import {
 		archivedImages,
 		isLoadingArchive,
@@ -47,11 +47,11 @@
 	});
 
 	async function loadInitialImages() {
-		if (!$user) return;
+		if (!authStore.user) return;
 
 		isLoadingArchive.set(true);
 		try {
-			const data = await getImages({ userId: $user.id, page: 1, archived: true });
+			const data = await getImages({ userId: authStore.user.id, page: 1, archived: true });
 			archivedImages.set(data);
 			currentArchivePage.set(1);
 			hasMoreArchive.set(data.length === 20);
@@ -63,13 +63,13 @@
 	}
 
 	async function loadMoreImages() {
-		if (!$user || !$hasMoreArchive || $isLoadingArchive || loadingMore) return;
+		if (!authStore.user || !$hasMoreArchive || $isLoadingArchive || loadingMore) return;
 
 		loadingMore = true;
 		const nextPage = $currentArchivePage + 1;
 
 		try {
-			const newImages = await getImages({ userId: $user.id, page: nextPage, archived: true });
+			const newImages = await getImages({ userId: authStore.user.id, page: nextPage, archived: true });
 			if (newImages.length > 0) {
 				archivedImages.update((current) => [...current, ...newImages]);
 				currentArchivePage.set(nextPage);

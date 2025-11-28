@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { user } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { models, selectedModel, isLoadingModels } from '$lib/stores/models';
 	import { isGenerating, generationProgress, generationError } from '$lib/stores/generate';
 	import { getActiveModels } from '$lib/api/models';
@@ -45,7 +45,7 @@
 	}
 
 	async function handleGenerate() {
-		if (!$user || !selectedModelId || !prompt.trim()) return;
+		if (!authStore.user || !selectedModelId || !prompt.trim()) return;
 
 		isGenerating.set(true);
 		generationError.set('');

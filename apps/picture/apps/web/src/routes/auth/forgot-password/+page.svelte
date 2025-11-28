@@ -3,13 +3,13 @@
 	import { ForgotPasswordPage } from '@manacore/shared-auth-ui';
 	import { getForgotPasswordTranslations } from '@manacore/shared-i18n';
 	import PictureLogo from '$lib/components/branding/PictureLogo.svelte';
-	import { authService } from '$lib/services/authService';
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	// Default to German
 	const translations = getForgotPasswordTranslations('de');
 
 	async function handleForgotPassword(email: string) {
-		return authService.forgotPassword(email);
+		return authStore.resetPassword(email);
 	}
 </script>
 

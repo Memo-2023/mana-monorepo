@@ -1,12 +1,11 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ModelService } from './model.service';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @Controller('models')
-@UseGuards(JwtAuthGuard)
 export class ModelController {
 	constructor(private readonly modelService: ModelService) {}
 
+	// Models are public - no auth required
 	@Get()
 	async getActiveModels() {
 		return this.modelService.getActiveModels();

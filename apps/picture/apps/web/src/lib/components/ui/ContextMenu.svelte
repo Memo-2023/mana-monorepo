@@ -7,7 +7,7 @@
 		hideTagSubmenu,
 	} from '$lib/stores/contextMenu';
 	import { tags } from '$lib/stores/tags';
-	import { user } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { addTagToImage, removeTagFromImage, getImageTags } from '$lib/api/tags';
 	import { archiveImage, unarchiveImage, deleteImage, toggleFavorite } from '$lib/api/images';
 	import { images } from '$lib/stores/images';
@@ -29,7 +29,7 @@
 	const isFavorite = $derived($contextMenu.image?.is_favorite === true);
 
 	// Check if current image belongs to current user
-	const isOwnImage = $derived($contextMenu.image?.user_id === $user?.id);
+	const isOwnImage = $derived($contextMenu.image?.user_id === authStore.user?.id);
 
 	interface MenuItem {
 		label: string;

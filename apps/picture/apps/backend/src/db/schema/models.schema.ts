@@ -2,7 +2,7 @@ import { pgTable, uuid, text, timestamp, boolean, integer, real } from 'drizzle-
 
 export const models = pgTable('models', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	name: text('name').notNull(),
+	name: text('name').notNull().unique(),
 	displayName: text('display_name').notNull(),
 	description: text('description'),
 	replicateId: text('replicate_id').notNull(),

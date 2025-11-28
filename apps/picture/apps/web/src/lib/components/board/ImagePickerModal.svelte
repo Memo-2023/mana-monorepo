@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { user } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { images, isLoading as isLoadingImages } from '$lib/stores/images';
 	import { canvasItems, addCanvasItem } from '$lib/stores/canvas';
 	import { getImages } from '$lib/api/images';
@@ -30,18 +30,18 @@
 
 	// Load images when modal opens
 	$effect(() => {
-		if (open && $user) {
+		if (open && authStore.user) {
 			loadImages();
 		}
 	});
 
 	async function loadImages() {
-		if (!$user) return;
+		if (!authStore.user) return;
 
 		isLoadingImages.set(true);
 		try {
 			const data = await getImages({
-				userId: $user.id,
+				userId: authStore.user.id,
 				page: 1,
 				limit: 50,
 				archived: false,

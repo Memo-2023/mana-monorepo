@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { user } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { uploadMultipleImages, type UploadProgress } from '$lib/api/upload';
 	import { showToast } from '$lib/stores/toast';
@@ -11,7 +11,7 @@
 	let successCount = $state(0);
 
 	async function handleFilesSelected(files: File[]) {
-		if (!$user) {
+		if (!authStore.user) {
 			showToast('Bitte melde dich an', 'error');
 			return;
 		}
@@ -20,7 +20,7 @@
 		successCount = 0;
 
 		try {
-			const uploadedImages = await uploadMultipleImages(files, $user.id, (progress) => {
+			const uploadedImages = await uploadMultipleImages(files, authStore.user.id, (progress) => {
 				uploadProgress = progress;
 			});
 

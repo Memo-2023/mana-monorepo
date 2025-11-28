@@ -3,7 +3,7 @@
 	import { RegisterPage, setGoogleClientId } from '@manacore/shared-auth-ui';
 	import { getRegisterTranslations } from '@manacore/shared-i18n';
 	import PictureLogo from '$lib/components/branding/PictureLogo.svelte';
-	import { authService } from '$lib/services/authService';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { onMount } from 'svelte';
 	import { PUBLIC_GOOGLE_CLIENT_ID, PUBLIC_APPLE_CLIENT_ID } from '$env/static/public';
 
@@ -17,15 +17,17 @@
 	});
 
 	async function handleSignUp(email: string, password: string) {
-		return authService.signUp(email, password);
+		return authStore.signUp(email, password);
 	}
 
 	async function handleSignUpWithGoogle() {
-		return authService.signInWithGoogle();
+		// TODO: Implement OAuth with Mana Core Auth when ready
+		return { success: false, error: 'Google Sign-Up not yet implemented' };
 	}
 
 	async function handleSignUpWithApple() {
-		return authService.signInWithApple();
+		// TODO: Implement OAuth with Mana Core Auth when ready
+		return { success: false, error: 'Apple Sign-Up not yet implemented' };
 	}
 </script>
 

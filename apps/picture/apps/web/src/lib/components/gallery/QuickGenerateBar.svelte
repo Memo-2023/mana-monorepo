@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { user } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { models, selectedModel, isLoadingModels } from '$lib/stores/models';
 	import { isGenerating, generationProgress, generationError } from '$lib/stores/generate';
 	import { isSidebarCollapsed } from '$lib/stores/sidebar';
@@ -70,7 +70,7 @@
 	}
 
 	async function handleQuickGenerate() {
-		if (!$user || !selectedModelId || !prompt.trim()) return;
+		if (!authStore.user || !selectedModelId || !prompt.trim()) return;
 
 		isGenerating.set(true);
 		generationError.set('');

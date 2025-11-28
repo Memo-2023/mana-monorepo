@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { user } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import {
 		boards,
 		isLoadingBoards,
@@ -58,11 +58,11 @@
 	});
 
 	async function loadInitialBoards() {
-		if (!$user) return;
+		if (!authStore.user) return;
 
 		isLoadingBoards.set(true);
 		try {
-			const data = await getBoards({ userId: $user.id, page: 1 });
+			const data = await getBoards({ userId: authStore.user.id, page: 1 });
 			boards.set(data);
 			currentBoardsPage.set(1);
 			hasBoardsMore.set(data.length === 20);
@@ -75,13 +75,13 @@
 	}
 
 	async function loadMoreBoards() {
-		if (!$user || !$hasBoardsMore || $isLoadingBoards || loadingMore) return;
+		if (!authStore.user || !$hasBoardsMore || $isLoadingBoards || loadingMore) return;
 
 		loadingMore = true;
 		const nextPage = $currentBoardsPage + 1;
 
 		try {
-			const newBoards = await getBoards({ userId: $user.id, page: nextPage });
+			const newBoards = await getBoards({ userId: authStore.user.id, page: nextPage });
 			if (newBoards.length > 0) {
 				boards.update((current) => [...current, ...newBoards]);
 				currentBoardsPage.set(nextPage);
@@ -97,13 +97,13 @@
 	}
 
 	async function handleCreateBoard() {
-		if (!$user || !boardName.trim()) return;
+		if (!authStore.user || !boardName.trim()) return;
 
 		isCreating = true;
 		try {
 			const { createBoard } = await import('$lib/api/boards');
 			const newBoard = await createBoard({
-				user_id: $user.id,
+				user_id: authStore.user.id,
 				name: boardName,
 				description: boardDescription || null,
 			});
@@ -136,10 +136,10 @@
 	}
 
 	async function handleDuplicateBoard(boardId: string) {
-		if (!$user) return;
+		if (!authStore.user) return;
 
 		try {
-			const newBoard = await duplicateBoard(boardId, $user.id);
+			const newBoard = await duplicateBoard(boardId, authStore.user.id);
 			addBoard({ ...newBoard, item_count: 0 });
 			showToast('Board dupliziert', 'success');
 		} catch (error) {

@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { user } from '$lib/stores/auth';
-	import { supabase } from '$lib/supabase';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -11,8 +10,7 @@
 	async function handleLogout() {
 		isLoggingOut = true;
 		try {
-			const { error } = await supabase.auth.signOut();
-			if (error) throw error;
+			await authStore.signOut();
 			goto('/');
 		} catch (error) {
 			console.error('Error logging out:', error);
@@ -58,9 +56,9 @@
 					>
 						<div>
 							<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</h3>
-							<p class="mt-1 text-gray-900 dark:text-gray-100">{$user?.email || 'Not available'}</p>
+							<p class="mt-1 text-gray-900 dark:text-gray-100">{authStore.user?.email || 'Not available'}</p>
 						</div>
-						{#if $user?.email_confirmed_at}
+						{#if authStore.user?.email}
 							<span class="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
 								Verified
 							</span>
@@ -77,7 +75,7 @@
 					<div class="flex items-center justify-between border-b border-gray-200 pb-4">
 						<div>
 							<h3 class="text-sm font-medium text-gray-500">User ID</h3>
-							<p class="mt-1 font-mono text-sm text-gray-900">{$user?.id || 'Not available'}</p>
+							<p class="mt-1 font-mono text-sm text-gray-900">{authStore.user?.id || 'Not available'}</p>
 						</div>
 					</div>
 
@@ -85,7 +83,7 @@
 					<div class="flex items-center justify-between">
 						<div>
 							<h3 class="text-sm font-medium text-gray-500">Member Since</h3>
-							<p class="mt-1 text-gray-900">{formatDate($user?.created_at)}</p>
+							<p class="mt-1 text-gray-900">-</p>
 						</div>
 					</div>
 				</div>
