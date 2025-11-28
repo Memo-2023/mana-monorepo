@@ -209,6 +209,8 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_SUPABASE_URL: (env) => env.MANADECK_SUPABASE_URL,
 			PUBLIC_SUPABASE_ANON_KEY: (env) => env.MANADECK_SUPABASE_ANON_KEY,
+			PUBLIC_API_URL: (env) => `http://localhost:${env.MANADECK_BACKEND_PORT || '3004'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 		},
 	},
 
