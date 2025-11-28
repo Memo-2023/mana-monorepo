@@ -1,0 +1,183 @@
+---
+// Keine Props benötigt
+---
+
+<div id="install-prompt" class="install-prompt hidden">
+  <div class="prompt-content">
+    <div class="prompt-icon">📱</div>
+    <div class="prompt-text">
+      <h3>App installieren</h3>
+      <p>Installiere Mana Games für schnelleren Zugriff!</p>
+    </div>
+    <div class="prompt-actions">
+      <button id="install-button" class="install-btn">Installieren</button>
+      <button id="dismiss-button" class="dismiss-btn">Später</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .install-prompt {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    max-width: 400px;
+    width: calc(100% - 2rem);
+    transition: all 0.3s ease;
+  }
+
+  .install-prompt.hidden {
+    display: none;
+  }
+
+  .prompt-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .prompt-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+  }
+
+  .prompt-text h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    color: var(--color-text);
+  }
+
+  .prompt-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+  }
+
+  .prompt-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .install-btn,
+  .dismiss-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+  }
+
+  .install-btn {
+    background-color: var(--color-accent);
+    color: #000;
+  }
+
+  .install-btn:hover {
+    background-color: var(--color-accent-secondary);
+    transform: translateY(-1px);
+  }
+
+  .dismiss-btn {
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+  }
+
+  .dismiss-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  @media (max-width: 768px) {
+    .install-prompt {
+      bottom: 1rem;
+      padding: 1rem;
+    }
+
+    .prompt-content {
+      flex-wrap: wrap;
+    }
+
+    .prompt-icon {
+      font-size: 2rem;
+    }
+
+    .prompt-actions {
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .install-btn,
+    .dismiss-btn {
+      flex: 1;
+    }
+  }
+</style>
+
+<script>
+  let deferredPrompt: any;
+  const installPrompt = document.getElementById('install-prompt');
+  const installButton = document.getElementById('install-button');
+  const dismissButton = document.getElementById('dismiss-button');
+
+  // Prüfe ob App bereits installiert ist
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    // App ist bereits installiert
+  } else {
+    // Zeige Prompt nach 30 Sekunden oder 3 Seitenaufrufen
+    const promptShown = localStorage.getItem('install-prompt-shown');
+    const pageViews = parseInt(localStorage.getItem('page-views') || '0') + 1;
+    localStorage.setItem('page-views', pageViews.toString());
+
+    if (!promptShown && pageViews >= 3) {
+      setTimeout(() => {
+        if (installPrompt && deferredPrompt) {
+          installPrompt.classList.remove('hidden');
+        }
+      }, 30000);
+    }
+  }
+
+  // Installationsprompt abfangen
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+
+  // Install Button Handler
+  installButton?.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      console.log('PWA wurde installiert');
+    }
+    
+    deferredPrompt = null;
+    installPrompt?.classList.add('hidden');
+    localStorage.setItem('install-prompt-shown', 'true');
+  });
+
+  // Dismiss Button Handler
+  dismissButton?.addEventListener('click', () => {
+    installPrompt?.classList.add('hidden');
+    localStorage.setItem('install-prompt-shown', 'true');
+  });
+
+  // App wurde installiert
+  window.addEventListener('appinstalled', () => {
+    console.log('PWA wurde erfolgreich installiert');
+    installPrompt?.classList.add('hidden');
+  });
+</script>

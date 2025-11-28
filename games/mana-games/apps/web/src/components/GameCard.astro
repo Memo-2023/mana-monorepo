@@ -1,0 +1,305 @@
+---
+import GameStats from './GameStats.astro';
+import Button from './Button.astro';
+
+export interface Props {
+  title: string;
+  description: string;
+  slug: string;
+  thumbnail?: string;
+  tags?: string[];
+  complexity?: 'Minimal' | 'Einfach' | 'Mittel' | 'Komplex';
+  codeStats?: {
+    total: number;
+    code: number;
+    comments: number;
+  };
+}
+
+const { title, description, slug, thumbnail, tags = [], complexity, codeStats } = Astro.props;
+---
+
+<article class="game-card">
+  <a href={`/games/${slug}`} class="card-link">
+    <div class="card-image">
+      {thumbnail ? (
+        <img src={thumbnail} alt={title} />
+      ) : (
+        <div class="placeholder">
+          <span>{title.charAt(0)}</span>
+        </div>
+      )}
+    </div>
+    
+    <div class="card-content">
+      <h3 class="card-title">{title}</h3>
+      <p class="card-description">{description}</p>
+      
+      <div class="card-meta">
+        {complexity && (
+          <span class={`complexity complexity-${complexity.toLowerCase()}`}>
+            {complexity}
+          </span>
+        )}
+        
+        {tags.length > 0 && (
+          <div class="card-tags">
+            {tags.map((tag) => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        )}
+      </div>
+      
+      {codeStats && (
+        <div class="code-info">
+          <span class="code-lines">
+            {codeStats.total} Zeilen
+            <span class="code-detail">({codeStats.code} Code / {codeStats.comments} Kommentare)</span>
+          </span>
+        </div>
+      )}
+      
+      <GameStats gameId={slug} />
+    </div>
+    
+    <div class="hover-buttons">
+      <Button 
+        href={`/games/${slug}/playground`} 
+        variant="secondary" 
+        size="small"
+        class="code-btn" 
+        onclick="event.stopPropagation(); event.preventDefault(); window.location.href=this.href;"
+      >
+        Code
+      </Button>
+      <Button 
+        variant="primary" 
+        size="small"
+        class="play-btn"
+      >
+        Spielen
+      </Button>
+    </div>
+  </a>
+</article>
+
+<style>
+  /* Basis Card Styling */
+  .game-card {
+    position: relative;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .game-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  /* Link Container */
+  .card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* Bild/Placeholder Section */
+  .card-image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #0a0a0a;
+    overflow: hidden;
+  }
+
+  .card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+    color: var(--color-accent);
+    font-size: 4rem;
+    font-weight: 900;
+    text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+  }
+
+  /* Content Section */
+  .card-content {
+    padding: 1.5rem;
+  }
+
+  .card-title {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .card-description {
+    margin: 0 0 1rem 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+  }
+
+  /* Tags */
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Hover Buttons */
+  .hover-buttons {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .game-card:hover .hover-buttons {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .hover-buttons :global(.play-btn) {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    border-radius: 20px;
+  }
+
+  .hover-buttons :global(.code-btn) {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .card-image {
+      height: 150px;
+    }
+
+    .card-content {
+      padding: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+    }
+
+    .card-description {
+      font-size: 0.9rem;
+    }
+  }
+
+  /* Code Info */
+  .code-info {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .code-lines {
+    font-size: 0.8rem;
+    color: var(--color-accent);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .code-lines::before {
+    content: '< >';
+    font-family: monospace;
+    opacity: 0.7;
+  }
+
+  .code-detail {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    font-weight: normal;
+    margin-left: 0.25rem;
+  }
+
+  /* Card Meta Section */
+  .card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* Complexity Badge */
+  .complexity {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 12px;
+    align-self: flex-start;
+  }
+
+  .complexity-minimal {
+    background: #4ade80;
+    color: #000;
+  }
+
+  .complexity-einfach {
+    background: #60a5fa;
+    color: #000;
+  }
+
+  .complexity-mittel {
+    background: #fbbf24;
+    color: #000;
+  }
+
+  .complexity-komplex {
+    background: #f87171;
+    color: #000;
+  }
+</style>
+
+<script>
+  // Fallback für fehlende Bilder
+  const images = document.querySelectorAll('.card-image img');
+  images.forEach(img => {
+    img.addEventListener('error', function() {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'placeholder';
+      placeholder.innerHTML = `<span>${this.alt.charAt(0)}</span>`;
+      this.parentElement.replaceChild(placeholder, this);
+    });
+  });
+</script>

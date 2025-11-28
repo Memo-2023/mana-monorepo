@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Balloon Pop</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(180deg, #87CEEB 0%, #98FB98 50%, #90EE90 100%);
+            color: #fff;
+            font-family: 'Comic Sans MS', cursive;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+        
+        canvas {
+            border: 3px solid #fff;
+            border-radius: 20px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+            cursor: crosshair;
+        }
+        
+        .ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 22px;
+            z-index: 10;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .score {
+            color: #ff6b35;
+            font-weight: bold;
+            font-size: 24px;
+        }
+        
+        .level {
+            color: #4CAF50;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+        
+        .combo {
+            color: #ff1744;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(50, 150, 250, 0.95);
+            padding: 30px;
+            border: 3px solid #fff;
+            border-radius: 25px;
+            z-index: 20;
+            display: none;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        button {
+            background: linear-gradient(145deg, #ff6b35, #ff8c42);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 16px;
+            border-radius: 25px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .powerup-ui {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 16px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .powerup-active {
+            color: #ffff00;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <div class="ui">
+        <div class="score">🎈 Punkte: <span id="score">0</span></div>
+        <div class="level">Level: <span id="level">1</span></div>
+        <div class="combo">Combo: <span id="combo">0</span>x</div>
+    </div>
+    
+    <div class="powerup-ui" id="powerupStatus">
+        <!-- Power-up Status wird hier angezeigt -->
+    </div>
+    
+    <div class="controls">
+        🖱️ Klicke auf die Ballons zum Platzen lassen!
+    </div>
+    
+    <div class="game-over" id="gameOver">
+        <h2>🎉 Spiel beendet!</h2>
+        <p>Endpunktzahl: <span id="finalScore">0</span></p>
+        <p>Erreichte Level: <span id="finalLevel">1</span></p>
+        <p id="achievement"></p>
+        <button onclick="restartGame()">🔄 Nochmal spielen</button>
+    </div>
+    
+    <script>
+        // Game ID für Statistiken
+        const GAME_ID = 'balloon-pop';
+        
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Spiel-Zustand
+        let gameRunning = true;
+        let score = 0;
+        let level = 1;
+        let combo = 0;
+        let comboTimer = 0;
+        let balloonsMissed = 0;
+        let maxMissed = 10;
+        
+        // Power-ups
+        let multiShotActive = false;
+        let multiShotTimer = 0;
+        let slowTimeActive = false;
+        let slowTimeTimer = 0;
+        
+        // Arrays für Spielobjekte
+        const balloons = [];
+        const particles = [];
+        const clouds = [];
+        const powerups = [];
+        
+        // Ballon-Typen
+        const balloonTypes = {
+            normal: { color: '#ff6b35', points: 10, speed: 1 },
+            fast: { color: '#ff1744', points: 20, speed: 2 },
+            big: { color: '#9c27b0', points: 30, speed: 0.7, size: 1.5 },
+            bonus: { color: '#ffff00', points: 50, speed: 1.2 },
+            bomb: { color: '#424242', points: -20, speed: 1.5 }
+        };
+        
+        // Wolken für Hintergrund erstellen
+        function createClouds() {
+            for (let i = 0; i < 6; i++) {
+                clouds.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * 200,
+                    size: 40 + Math.random() * 60,
+                    speed: 0.2 + Math.random() * 0.3,
+                    opacity: 0.6 + Math.random() * 0.3
+                });
+            }
+        }
+        
+        // Ballon erstellen
+        function createBalloon() {
+            const typeNames = Object.keys(balloonTypes);
+            let typeName;
+            
+            // Wahrscheinlichkeiten basierend auf Level
+            const rand = Math.random();
+            if (rand < 0.5) typeName = 'normal';
+            else if (rand < 0.7) typeName = 'fast';
+            else if (rand < 0.85) typeName = 'big';
+            else if (rand < 0.95) typeName = 'bonus';
+            else typeName = 'bomb';
+            
+            const type = balloonTypes[typeName];
+            const baseSize = 25;
+            const size = baseSize * (type.size || 1);
+            
+            balloons.push({
+                x: Math.random() * (canvas.width - size * 2) + size,
+                y: canvas.height + size,
+                size: size,
+                type: typeName,
+                color: type.color,
+                points: type.points,
+                speed: type.speed * (slowTimeActive ? 0.5 : 1),
+                wiggle: Math.random() * Math.PI * 2,
+                wiggleSpeed: 0.02 + Math.random() * 0.02,
+                string: true
+            });
+        }
+        
+        // Power-up erstellen
+        function createPowerup() {
+            const types = ['multishot', 'slowtime'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            powerups.push({
+                x: Math.random() * (canvas.width - 30) + 15,
+                y: canvas.height + 15,
+                size: 20,
+                type: type,
+                speed: 0.8,
+                rotation: 0,
+                pulse: 0
+            });
+        }
+        
+        // Partikel-Effekt erstellen
+        function createParticles(x, y, color, count = 8) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.5) * 12 - 5,
+                    size: Math.random() * 4 + 2,
+                    life: 30,
+                    maxLife: 30,
+                    color: color,
+                    gravity: 0.3
+                });
+            }
+        }
+        
+        // Maus-Klick Event
+        canvas.addEventListener('click', (e) => {
+            if (!gameRunning) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            let hit = false;
+            
+            // Prüfe Ballons
+            for (let i = balloons.length - 1; i >= 0; i--) {
+                const balloon = balloons[i];
+                const distance = Math.sqrt(
+                    (mouseX - balloon.x) ** 2 + (mouseY - balloon.y) ** 2
+                );
+                
+                if (distance < balloon.size) {
+                    // Ballon getroffen
+                    hit = true;
+                    
+                    if (balloon.type === 'bomb') {
+                        // Bombe - negative Punkte
+                        score += balloon.points;
+                        combo = 0;
+                        createParticles(balloon.x, balloon.y, '#ff0000', 12);
+                    } else {
+                        // Normaler Ballon
+                        combo++;
+                        comboTimer = 180; // 3 Sekunden
+                        const comboBonus = Math.floor(combo / 5);
+                        score += balloon.points + (comboBonus * 5);
+                        createParticles(balloon.x, balloon.y, balloon.color, 10);
+                        
+                        // Sende Score Update für Statistiken
+                        window.parent.postMessage({
+                            type: 'GAME_EVENT',
+                            gameId: GAME_ID,
+                            event: 'SCORE_UPDATE',
+                            data: { score: score }
+                        }, '*');
+                    }
+                    
+                    balloons.splice(i, 1);
+                    
+                    // Multi-Shot: nur ein Ballon pro Klick
+                    if (!multiShotActive) break;
+                }
+            }
+            
+            // Prüfe Power-ups
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                const powerup = powerups[i];
+                const distance = Math.sqrt(
+                    (mouseX - powerup.x) ** 2 + (mouseY - powerup.y) ** 2
+                );
+                
+                if (distance < powerup.size) {
+                    if (powerup.type === 'multishot') {
+                        multiShotActive = true;
+                        multiShotTimer = 300; // 5 Sekunden
+                    } else if (powerup.type === 'slowtime') {
+                        slowTimeActive = true;
+                        slowTimeTimer = 600; // 10 Sekunden
+                    }
+                    
+                    createParticles(powerup.x, powerup.y, '#ffff00', 6);
+                    powerups.splice(i, 1);
+                    break;
+                }
+            }
+            
+            // Combo-Timer zurücksetzen wenn kein Treffer
+            if (!hit) {
+                combo = Math.max(0, combo - 1);
+            }
+        });
+        
+        // Ballons updaten
+        function updateBalloons() {
+            for (let i = balloons.length - 1; i >= 0; i--) {
+                const balloon = balloons[i];
+                
+                // Bewegung
+                const currentSpeed = balloon.speed * (slowTimeActive ? 0.5 : 1);
+                balloon.y -= currentSpeed;
+                balloon.wiggle += balloon.wiggleSpeed;
+                balloon.x += Math.sin(balloon.wiggle) * 0.8;
+                
+                // Ballon entkommen
+                if (balloon.y + balloon.size < 0) {
+                    balloons.splice(i, 1);
+                    balloonsMissed++;
+                    combo = 0;
+                }
+            }
+        }
+        
+        // Power-ups updaten
+        function updatePowerups() {
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                const powerup = powerups[i];
+                
+                powerup.y -= powerup.speed;
+                powerup.rotation += 0.1;
+                powerup.pulse += 0.15;
+                
+                if (powerup.y + powerup.size < 0) {
+                    powerups.splice(i, 1);
+                }
+            }
+            
+            // Power-up Timer
+            if (multiShotTimer > 0) {
+                multiShotTimer--;
+                if (multiShotTimer <= 0) {
+                    multiShotActive = false;
+                }
+            }
+            
+            if (slowTimeTimer > 0) {
+                slowTimeTimer--;
+                if (slowTimeTimer <= 0) {
+                    slowTimeActive = false;
+                }
+            }
+        }
+        
+        // Wolken updaten
+        function updateClouds() {
+            for (const cloud of clouds) {
+                cloud.x += cloud.speed;
+                if (cloud.x > canvas.width + cloud.size) {
+                    cloud.x = -cloud.size;
+                    cloud.y = Math.random() * 200;
+                }
+            }
+        }
+        
+        // Partikel updaten
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const particle = particles[i];
+                
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.vy += particle.gravity;
+                particle.life--;
+                
+                if (particle.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+        
+        // Zeichnen
+        function draw() {
+            // Himmel-Gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(0.5, '#98FB98');
+            gradient.addColorStop(1, '#90EE90');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Wolken zeichnen
+            for (const cloud of clouds) {
+                ctx.globalAlpha = cloud.opacity;
+                ctx.fillStyle = '#ffffff';
+                
+                // Einfache Wolken-Form
+                ctx.beginPath();
+                ctx.arc(cloud.x, cloud.y, cloud.size * 0.5, 0, Math.PI * 2);
+                ctx.arc(cloud.x + cloud.size * 0.3, cloud.y, cloud.size * 0.4, 0, Math.PI * 2);
+                ctx.arc(cloud.x - cloud.size * 0.3, cloud.y, cloud.size * 0.4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+            
+            // Ballons zeichnen
+            for (const balloon of balloons) {
+                // Ballon-String
+                if (balloon.string) {
+                    ctx.strokeStyle = '#8B4513';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(balloon.x, balloon.y + balloon.size);
+                    ctx.lineTo(balloon.x, balloon.y + balloon.size + 30);
+                    ctx.stroke();
+                }
+                
+                // Ballon-Körper
+                ctx.fillStyle = balloon.color;
+                ctx.beginPath();
+                ctx.arc(balloon.x, balloon.y, balloon.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Ballon-Highlight
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.beginPath();
+                ctx.arc(balloon.x - balloon.size * 0.3, balloon.y - balloon.size * 0.3, 
+                       balloon.size * 0.2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Spezielle Markierungen
+                if (balloon.type === 'bomb') {
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('💣', balloon.x, balloon.y + 5);
+                } else if (balloon.type === 'bonus') {
+                    ctx.fillStyle = '#000';
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('★', balloon.x, balloon.y + 4);
+                }
+            }
+            
+            // Power-ups zeichnen
+            for (const powerup of powerups) {
+                ctx.save();
+                ctx.translate(powerup.x, powerup.y);
+                ctx.rotate(powerup.rotation);
+                
+                const pulseSize = powerup.size + Math.sin(powerup.pulse) * 3;
+                
+                ctx.fillStyle = '#4CAF50';
+                ctx.fillRect(-pulseSize/2, -pulseSize/2, pulseSize, pulseSize);
+                
+                // Symbol
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                if (powerup.type === 'multishot') {
+                    ctx.fillText('⚡', 0, 4);
+                } else {
+                    ctx.fillText('⏰', 0, 4);
+                }
+                
+                ctx.restore();
+            }
+            
+            // Partikel zeichnen
+            for (const particle of particles) {
+                ctx.globalAlpha = particle.life / particle.maxLife;
+                ctx.fillStyle = particle.color;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+            
+            // Slow-Time Effekt
+            if (slowTimeActive) {
+                ctx.fillStyle = 'rgba(100, 200, 255, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+        
+        // Spawn-System
+        let balloonSpawnTimer = 0;
+        let powerupSpawnTimer = 0;
+        
+        function handleSpawning() {
+            balloonSpawnTimer++;
+            powerupSpawnTimer++;
+            
+            // Ballons spawnen (Häufigkeit steigt mit Level)
+            const spawnRate = Math.max(30, 80 - level * 3);
+            if (balloonSpawnTimer >= spawnRate) {
+                createBalloon();
+                balloonSpawnTimer = 0;
+            }
+            
+            // Power-ups spawnen
+            if (powerupSpawnTimer >= 900 && powerups.length < 1) {
+                createPowerup();
+                powerupSpawnTimer = 0;
+            }
+        }
+        
+        // Spiel-Loop
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            updateBalloons();
+            updatePowerups();
+            updateClouds();
+            updateParticles();
+            handleSpawning();
+            
+            // Combo-Timer
+            if (comboTimer > 0) {
+                comboTimer--;
+                if (comboTimer <= 0) {
+                    combo = 0;
+                }
+            }
+            
+            // Level-System
+            const newLevel = Math.floor(score / 500) + 1;
+            if (newLevel > level) {
+                level = newLevel;
+                // Bonus für Level-Up
+                score += level * 50;
+                createParticles(canvas.width/2, canvas.height/2, '#ffff00', 15);
+            }
+            
+            draw();
+            
+            // UI updaten
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = level;
+            document.getElementById('combo').textContent = combo;
+            
+            // Power-up Status
+            const powerupStatus = document.getElementById('powerupStatus');
+            let statusText = '';
+            if (multiShotActive) {
+                statusText += `⚡ Multi-Shot: ${Math.ceil(multiShotTimer / 60)}s<br>`;
+            }
+            if (slowTimeActive) {
+                statusText += `⏰ Slow-Time: ${Math.ceil(slowTimeTimer / 60)}s`;
+            }
+            powerupStatus.innerHTML = statusText;
+            
+            // Spiel beenden
+            if (balloonsMissed >= maxMissed) {
+                gameOver();
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Game Over
+        function gameOver() {
+            gameRunning = false;
+            
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalLevel').textContent = level;
+            
+            let achievement = '';
+            if (score >= 2000) achievement = '🏆 Ballon-Meister!';
+            else if (score >= 1000) achievement = '🥈 Profi-Platzer!';
+            else if (score >= 500) achievement = '🥉 Guter Start!';
+            else achievement = '🎈 Weiter üben!';
+            
+            document.getElementById('achievement').textContent = achievement;
+            document.getElementById('gameOver').style.display = 'block';
+            
+            // Sende Game Over Event
+            window.parent.postMessage({
+                type: 'GAME_EVENT',
+                gameId: GAME_ID,
+                event: 'GAME_OVER',
+                data: { score: score }
+            }, '*');
+            
+            // Achievement prüfen
+            if (score >= 2000) {
+                window.parent.postMessage({
+                    type: 'GAME_EVENT',
+                    gameId: GAME_ID,
+                    event: 'ACHIEVEMENT_UNLOCKED',
+                    data: {
+                        achievementId: 'balloon_master',
+                        name: 'Balloon Master',
+                        description: 'Score 2000 points in Balloon Pop',
+                        icon: '🏆'
+                    }
+                }, '*');
+            }
+            
+            if (combo >= 20) {
+                window.parent.postMessage({
+                    type: 'GAME_EVENT',
+                    gameId: GAME_ID,
+                    event: 'ACHIEVEMENT_UNLOCKED',
+                    data: {
+                        achievementId: 'combo_popper',
+                        name: 'Combo Popper',
+                        description: 'Achieve a 20x combo in Balloon Pop',
+                        icon: '💥'
+                    }
+                }, '*');
+            }
+        }
+        
+        // Neustart
+        function restartGame() {
+            gameRunning = true;
+            score = 0;
+            level = 1;
+            combo = 0;
+            comboTimer = 0;
+            balloonsMissed = 0;
+            
+            // Power-ups zurücksetzen
+            multiShotActive = false;
+            multiShotTimer = 0;
+            slowTimeActive = false;
+            slowTimeTimer = 0;
+            
+            // Arrays leeren
+            balloons.length = 0;
+            particles.length = 0;
+            powerups.length = 0;
+            
+            // Timer zurücksetzen
+            balloonSpawnTimer = 0;
+            powerupSpawnTimer = 0;
+            
+            document.getElementById('gameOver').style.display = 'none';
+            gameLoop();
+        }
+        
+        // Spiel starten
+        createClouds();
+        gameLoop();
+        
+        // Sende Game Loaded Event für Statistiken
+        window.parent.postMessage({
+            type: 'GAME_LOADED',
+            gameId: GAME_ID
+        }, '*');
+    </script>
+</body>
+</html>

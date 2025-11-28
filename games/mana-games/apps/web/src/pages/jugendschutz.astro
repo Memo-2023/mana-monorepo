@@ -1,0 +1,601 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/Button.astro';
+---
+
+<Layout title="Jugendschutz">
+  <div class="jugendschutz-container">
+    <header class="jugendschutz-header">
+      <div class="header-icon">🛡️</div>
+      <h1>Jugendschutz bei Mana Games</h1>
+      <p class="subtitle">Sicher spielen für alle Altersgruppen</p>
+    </header>
+
+    <section class="intro-section">
+      <div class="intro-card">
+        <p>
+          Bei Mana Games liegt uns die Sicherheit und das Wohlbefinden junger Spieler besonders 
+          am Herzen. Unsere Plattform ist so gestaltet, dass Kinder und Jugendliche sicher und 
+          altersgerecht spielen können.
+        </p>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Unsere Jugendschutz-Prinzipien</h2>
+      
+      <div class="principles-grid">
+        <div class="principle-card">
+          <div class="card-icon">🎮</div>
+          <h3>Altersgerechte Inhalte</h3>
+          <p>
+            Alle unsere Spiele sind familienfreundlich und enthalten keine Gewalt, 
+            explizite Inhalte oder verstörende Elemente.
+          </p>
+        </div>
+        
+        <div class="principle-card">
+          <div class="card-icon">🚫</div>
+          <h3>Keine Werbung</h3>
+          <p>
+            Unsere Plattform ist komplett werbefrei. Kinder werden nicht mit 
+            kommerziellen Inhalten oder In-App-Käufen konfrontiert.
+          </p>
+        </div>
+        
+        <div class="principle-card">
+          <div class="card-icon">🔒</div>
+          <h3>Datenschutz</h3>
+          <p>
+            Wir sammeln keine persönlichen Daten von Kindern. Alle Spielstände 
+            werden nur lokal im Browser gespeichert.
+          </p>
+        </div>
+        
+        <div class="principle-card">
+          <div class="card-icon">💬</div>
+          <h3>Kein Chat</h3>
+          <p>
+            Es gibt keine Chat-Funktionen oder soziale Features, die eine 
+            Kontaktaufnahme zwischen Nutzern ermöglichen.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Altersempfehlungen</h2>
+      
+      <div class="age-recommendations">
+        <div class="age-group">
+          <div class="age-badge" style="--badge-color: #4ade80;">0-6 Jahre</div>
+          <h4>Vorschulalter</h4>
+          <p>Einfache Spiele mit großen Buttons und klaren visuellen Elementen:</p>
+          <ul>
+            <li>Memory-Spiele</li>
+            <li>Einfache Puzzle</li>
+            <li>Farb- und Formspiele</li>
+          </ul>
+        </div>
+        
+        <div class="age-group">
+          <div class="age-badge" style="--badge-color: #22d3ee;">6-12 Jahre</div>
+          <h4>Grundschulalter</h4>
+          <p>Spiele die Geschicklichkeit und logisches Denken fördern:</p>
+          <ul>
+            <li>Jump'n'Run Spiele</li>
+            <li>Einfache Strategiespiele</li>
+            <li>Lernspiele</li>
+          </ul>
+        </div>
+        
+        <div class="age-group">
+          <div class="age-badge" style="--badge-color: #a78bfa;">12+ Jahre</div>
+          <h4>Jugendliche</h4>
+          <p>Komplexere Spiele mit anspruchsvollen Herausforderungen:</p>
+          <ul>
+            <li>Tower Defense</li>
+            <li>Komplexe Puzzle</li>
+            <li>Strategiespiele</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Hinweise für Eltern</h2>
+      
+      <div class="parent-tips">
+        <div class="tip-card">
+          <h3>🕐 Spielzeiten begrenzen</h3>
+          <p>
+            Auch wenn unsere Spiele pädagogisch wertvoll sind, empfehlen wir 
+            altersgerechte Bildschirmzeiten einzuhalten.
+          </p>
+          <div class="time-recommendations">
+            <div class="time-item">
+              <strong>3-6 Jahre:</strong> max. 30 Minuten täglich
+            </div>
+            <div class="time-item">
+              <strong>6-9 Jahre:</strong> max. 1 Stunde täglich
+            </div>
+            <div class="time-item">
+              <strong>10+ Jahre:</strong> max. 2 Stunden täglich
+            </div>
+          </div>
+        </div>
+        
+        <div class="tip-card">
+          <h3>👨‍👩‍👧 Gemeinsam spielen</h3>
+          <p>
+            Nutzen Sie die Gelegenheit, mit Ihren Kindern gemeinsam zu spielen. 
+            Das fördert nicht nur die Bindung, sondern ermöglicht auch Gespräche 
+            über das Spielerlebnis.
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🎯 Altersgerechte Auswahl</h3>
+          <p>
+            Achten Sie auf die Komplexitätsstufen unserer Spiele:
+          </p>
+          <ul class="complexity-list">
+            <li><span class="badge minimal">Minimal</span> - Für die Kleinsten</li>
+            <li><span class="badge einfach">Einfach</span> - Ab Grundschulalter</li>
+            <li><span class="badge mittel">Mittel</span> - Für erfahrene Spieler</li>
+            <li><span class="badge komplex">Komplex</span> - Herausfordernd</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>KI-Generator und Jugendschutz</h2>
+      
+      <div class="ai-safety">
+        <div class="safety-info">
+          <h3>Sichere KI-Nutzung</h3>
+          <p>
+            Unser KI-Spielegenerator verfügt über eingebaute Sicherheitsmechanismen:
+          </p>
+          <ul>
+            <li>Filterung ungeeigneter Begriffe und Themen</li>
+            <li>Automatische Prüfung generierter Inhalte</li>
+            <li>Keine Generierung von gewalttätigen oder ungeeigneten Spielen</li>
+          </ul>
+        </div>
+        
+        <div class="warning-box">
+          <h4>⚠️ Empfehlung</h4>
+          <p>
+            Wir empfehlen, dass Kinder unter 12 Jahren den KI-Generator nur 
+            unter Aufsicht von Erwachsenen nutzen.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Technische Schutzmaßnahmen</h2>
+      
+      <div class="tech-measures">
+        <div class="measure">
+          <div class="measure-icon">🌐</div>
+          <div class="measure-content">
+            <h4>Keine externen Links</h4>
+            <p>Unsere Spiele enthalten keine Links zu externen Websites.</p>
+          </div>
+        </div>
+        
+        <div class="measure">
+          <div class="measure-icon">📵</div>
+          <div class="measure-content">
+            <h4>Offline spielbar</h4>
+            <p>Nach dem ersten Laden können alle Spiele offline gespielt werden.</p>
+          </div>
+        </div>
+        
+        <div class="measure">
+          <div class="measure-icon">🔐</div>
+          <div class="measure-content">
+            <h4>Lokale Datenspeicherung</h4>
+            <p>Alle Daten bleiben auf dem Gerät des Nutzers.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Kontakt und Meldungen</h2>
+      
+      <div class="contact-info">
+        <p>
+          Haben Sie Bedenken bezüglich eines Spiels oder möchten Sie uns auf 
+          problematische Inhalte hinweisen? Wir nehmen jeden Hinweis ernst.
+        </p>
+        
+        <div class="contact-card">
+          <h3>Jugendschutzbeauftragter</h3>
+          <p>
+            E-Mail: jugendschutz@[ihre-domain].de<br>
+            Wir antworten innerhalb von 24 Stunden auf alle Anfragen.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>Weitere Ressourcen</h2>
+      
+      <div class="resources">
+        <h3>Hilfreiche Links für Eltern:</h3>
+        <ul class="resource-list">
+          <li>
+            <a href="https://www.klicksafe.de" target="_blank" rel="noopener noreferrer">
+              klicksafe.de - EU-Initiative für mehr Sicherheit im Netz
+            </a>
+          </li>
+          <li>
+            <a href="https://www.schau-hin.info" target="_blank" rel="noopener noreferrer">
+              SCHAU HIN! - Medienratgeber für Familien
+            </a>
+          </li>
+          <li>
+            <a href="https://www.jugendschutz.net" target="_blank" rel="noopener noreferrer">
+              jugendschutz.net - Kompetenzzentrum für Jugendschutz im Internet
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="footer-actions">
+      <Button href="/" variant="ghost">Zurück zur Startseite</Button>
+      <Button href="/agb" variant="ghost">Nutzungsbedingungen</Button>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .jugendschutz-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 0;
+  }
+
+  .jugendschutz-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .header-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .jugendschutz-header h1 {
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--color-text), var(--color-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: 1.2rem;
+    color: var(--color-text-secondary);
+  }
+
+  .intro-section {
+    margin-bottom: 3rem;
+  }
+
+  .intro-card {
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), transparent);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .intro-card p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .content-section {
+    margin-bottom: 4rem;
+  }
+
+  .content-section h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: var(--color-text);
+  }
+
+  .content-section h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--color-text);
+  }
+
+  .content-section h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+  }
+
+  .content-section p {
+    color: var(--color-text-secondary);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+  }
+
+  .principle-card {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .principle-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--color-accent);
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
+  }
+
+  .card-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .age-recommendations {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+
+  .age-group {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    padding: 2rem;
+  }
+
+  .age-badge {
+    display: inline-block;
+    background: var(--badge-color, var(--color-accent));
+    color: #000;
+    padding: 0.5rem 1.5rem;
+    border-radius: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .age-group ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .age-group li {
+    padding: 0.5rem 0;
+    color: var(--color-text-secondary);
+    position: relative;
+    padding-left: 1.5rem;
+  }
+
+  .age-group li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
+  }
+
+  .parent-tips {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .tip-card {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    padding: 2rem;
+  }
+
+  .time-recommendations {
+    background: var(--color-bg);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  .time-item {
+    padding: 0.5rem 0;
+    color: var(--color-text-secondary);
+  }
+
+  .complexity-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 1rem;
+  }
+
+  .complexity-list li {
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .badge.minimal {
+    background: #4ade80;
+    color: #000;
+  }
+
+  .badge.einfach {
+    background: #22d3ee;
+    color: #000;
+  }
+
+  .badge.mittel {
+    background: #fbbf24;
+    color: #000;
+  }
+
+  .badge.komplex {
+    background: #f87171;
+    color: #000;
+  }
+
+  .ai-safety {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .safety-info {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    padding: 2rem;
+  }
+
+  .safety-info ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 1rem;
+  }
+
+  .safety-info li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: var(--color-text-secondary);
+  }
+
+  .safety-info li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
+  }
+
+  .warning-box {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+  }
+
+  .tech-measures {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .measure {
+    display: flex;
+    gap: 1.5rem;
+    align-items: start;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+  }
+
+  .measure-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+
+  .contact-info {
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.05), transparent);
+    border-radius: 1rem;
+    padding: 2rem;
+  }
+
+  .contact-card {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .resource-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 1rem;
+  }
+
+  .resource-list li {
+    padding: 0.75rem 0;
+  }
+
+  .resource-list a {
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .resource-list a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+  }
+
+  .footer-actions {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 768px) {
+    .jugendschutz-header h1 {
+      font-size: 2rem;
+    }
+
+    .content-section h2 {
+      font-size: 1.5rem;
+    }
+
+    .principles-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .age-recommendations {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

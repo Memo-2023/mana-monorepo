@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Click Race</title>
+    <style>
+        /* Grundlegende Styles für die Seite */
+        body {
+            margin: 0;
+            background: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial;
+        }
+        
+        /* Container für das Spiel */
+        #game {
+            text-align: center;
+        }
+        
+        /* Das klickbare Quadrat */
+        #target {
+            width: 100px;
+            height: 100px;
+            background: #f00;
+            margin: 20px auto;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        
+        /* Animation beim Klicken */
+        #target:active {
+            transform: scale(0.9);
+        }
+        
+        /* Restart-Button Style */
+        #restart {
+            display: none;
+            padding: 10px 20px;
+            background: #00ff00;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        
+        #restart:hover {
+            background: #00cc00;
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <h1>CLICK RACE</h1>
+        <p>30 Klicks so schnell wie möglich!</p>
+        <div id="target"></div>
+        <h2 id="info">Klicke zum Starten!</h2>
+        <button id="restart" onclick="restart()">NOCHMAL!</button>
+    </div>
+    <script>
+        // Spielvariablen
+        let clicks = 0;          // Anzahl der Klicks
+        let startTime = 0;       // Startzeit für die Zeitmessung
+        let gameStarted = false; // Track ob das Spiel läuft
+        
+        // DOM-Elemente holen
+        const target = document.getElementById('target');
+        const info = document.getElementById('info');
+        const restartBtn = document.getElementById('restart');
+        
+        // Game ID für Statistiken
+        const GAME_ID = 'click-race';
+        
+        // Sende Game Loaded Event beim Laden
+        window.addEventListener('load', () => {
+            window.parent.postMessage({
+                type: 'GAME_LOADED',
+                gameId: GAME_ID
+            }, '*');
+        });
+        
+        // Klick-Handler für das rote Quadrat
+        target.onclick = () => {
+            // Beim ersten Klick Timer starten
+            if (clicks === 0) {
+                startTime = Date.now();
+                gameStarted = true;
+            }
+            
+            // Klicks zählen
+            clicks++;
+            
+            // Prüfen ob Spiel noch läuft
+            if (clicks < 30) {
+                // Farbe ändern basierend auf Fortschritt
+                target.style.background = `hsl(${clicks * 12}, 100%, 50%)`;
+                // Anzeige aktualisieren
+                info.textContent = `${30 - clicks} übrig`;
+            } else {
+                // Spiel beendet - Zeit berechnen
+                const time = ((Date.now() - startTime) / 1000).toFixed(2);
+                const timeInMs = Math.round(time * 1000);
+                info.textContent = `FERTIG! Zeit: ${time}s`;
+                
+                // Quadrat verstecken und Restart-Button zeigen
+                target.style.display = 'none';
+                restartBtn.style.display = 'inline-block';
+                
+                // Sende Score (Zeit in Millisekunden - niedriger ist besser)
+                window.parent.postMessage({
+                    type: 'GAME_EVENT',
+                    gameId: GAME_ID,
+                    event: 'GAME_OVER',
+                    data: { score: timeInMs }
+                }, '*');
+                
+                // Achievement prüfen
+                if (timeInMs < 5000) {
+                    window.parent.postMessage({
+                        type: 'GAME_EVENT',
+                        gameId: GAME_ID,
+                        event: 'ACHIEVEMENT_UNLOCKED',
+                        data: {
+                            achievement: {
+                                id: 'speed-demon',
+                                name: 'Speed Demon',
+                                description: '30 Klicks in unter 5 Sekunden!'
+                            }
+                        }
+                    }, '*');
+                }
+                
+                if (timeInMs < 3000) {
+                    window.parent.postMessage({
+                        type: 'GAME_EVENT',
+                        gameId: GAME_ID,
+                        event: 'ACHIEVEMENT_UNLOCKED',
+                        data: {
+                            achievement: {
+                                id: 'lightning-fast',
+                                name: 'Blitzschnell',
+                                description: '30 Klicks in unter 3 Sekunden!'
+                            }
+                        }
+                    }, '*');
+                }
+                
+                gameStarted = false;
+            }
+        };
+        
+        // Restart-Funktion
+        function restart() {
+            // Alle Werte zurücksetzen
+            clicks = 0;
+            startTime = 0;
+            gameStarted = false;
+            // UI zurücksetzen
+            target.style.display = 'block';
+            target.style.background = '#f00';
+            restartBtn.style.display = 'none';
+            info.textContent = 'Klicke zum Starten!';
+        }
+        
+        // Sende Game Ended Event beim Verlassen
+        window.addEventListener('beforeunload', () => {
+            if (gameStarted) {
+                window.parent.postMessage({
+                    type: 'GAME_ENDED',
+                    gameId: GAME_ID
+                }, '*');
+            }
+        });
+    </script>
+</body>
+</html>

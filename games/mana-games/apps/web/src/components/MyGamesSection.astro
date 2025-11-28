@@ -1,0 +1,529 @@
+---
+export interface Props {
+  maxGames?: number;
+}
+
+const { maxGames = 8 } = Astro.props;
+---
+
+<div class="my-games-section">
+  <div class="section-header">
+    <h2>Meine generierten Spiele</h2>
+    <div class="section-actions">
+      <button id="viewAllMyGames" class="action-btn">
+        Alle anzeigen
+      </button>
+      <button id="clearMyGames" class="action-btn danger hidden">
+        Alle löschen
+      </button>
+    </div>
+  </div>
+  
+  <div id="myGamesContainer" class="my-games-container">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Lade deine Spiele...</p>
+    </div>
+  </div>
+  
+  <div id="emptyState" class="empty-state hidden">
+    <div class="empty-content">
+      <p class="empty-icon">🎮</p>
+      <p class="empty-text">Du hast noch keine Spiele erstellt</p>
+      <a href="/create" class="create-btn">
+        Erstelle dein erstes Spiel
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  interface SavedGame {
+    id: string;
+    title: string;
+    description: string;
+    prompt: string;
+    html: string;
+    createdAt: Date;
+    updatedAt: Date;
+    thumbnail?: string;
+    stats?: {
+      linesOfCode: number;
+      hasAnimation: boolean;
+      hasSound: boolean;
+    };
+  }
+
+  class MyGamesManager {
+    private dbName = 'ManaGamesDB';
+    private storeName = 'generatedGames';
+    private db: IDBDatabase | null = null;
+    private container: HTMLElement;
+    private emptyState: HTMLElement;
+    private viewAllBtn: HTMLElement;
+    private clearBtn: HTMLElement;
+    private maxGames: number;
+
+    constructor(maxGames: number = 8) {
+      this.container = document.getElementById('myGamesContainer')!;
+      this.emptyState = document.getElementById('emptyState')!;
+      this.viewAllBtn = document.getElementById('viewAllMyGames')!;
+      this.clearBtn = document.getElementById('clearMyGames')!;
+      this.maxGames = maxGames;
+      
+      this.init();
+    }
+
+    async init() {
+      await this.openDB();
+      await this.loadGames();
+      
+      // Event listeners
+      this.viewAllBtn.addEventListener('click', () => {
+        window.location.href = '/my-games';
+      });
+      
+      this.clearBtn.addEventListener('click', async () => {
+        if (confirm('Bist du sicher, dass du alle deine generierten Spiele löschen möchtest?')) {
+          await this.clearAllGames();
+        }
+      });
+    }
+
+    async openDB(): Promise<void> {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(this.dbName, 1);
+
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          this.db = request.result;
+          resolve();
+        };
+
+        request.onupgradeneeded = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+          if (!db.objectStoreNames.contains(this.storeName)) {
+            const store = db.createObjectStore(this.storeName, { keyPath: 'id' });
+            store.createIndex('createdAt', 'createdAt', { unique: false });
+            store.createIndex('title', 'title', { unique: false });
+          }
+        };
+      });
+    }
+
+    async loadGames() {
+      try {
+        const games = await this.getAllGames();
+        
+        if (games.length === 0) {
+          this.showEmptyState();
+          return;
+        }
+        
+        // Sort by creation date (newest first)
+        games.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        
+        // Show only first maxGames
+        const displayGames = games.slice(0, this.maxGames);
+        this.renderGames(displayGames, games.length);
+        
+        // Show/hide buttons
+        if (games.length > this.maxGames) {
+          this.viewAllBtn.classList.remove('hidden');
+        }
+        this.clearBtn.classList.remove('hidden');
+        
+      } catch (error) {
+        console.error('Error loading games:', error);
+        this.showError();
+      }
+    }
+
+    async getAllGames(): Promise<SavedGame[]> {
+      if (!this.db) await this.openDB();
+
+      return new Promise((resolve, reject) => {
+        const transaction = this.db!.transaction([this.storeName], 'readonly');
+        const store = transaction.objectStore(this.storeName);
+        const request = store.getAll();
+
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async deleteGame(id: string): Promise<void> {
+      if (!this.db) await this.openDB();
+
+      return new Promise((resolve, reject) => {
+        const transaction = this.db!.transaction([this.storeName], 'readwrite');
+        const store = transaction.objectStore(this.storeName);
+        const request = store.delete(id);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async clearAllGames() {
+      if (!this.db) await this.openDB();
+
+      const transaction = this.db!.transaction([this.storeName], 'readwrite');
+      const store = transaction.objectStore(this.storeName);
+      await store.clear();
+      
+      this.showEmptyState();
+      this.clearBtn.classList.add('hidden');
+      this.viewAllBtn.classList.add('hidden');
+    }
+
+    renderGames(games: SavedGame[], totalCount: number) {
+      const gamesHTML = games.map(game => this.createGameCard(game)).join('');
+      
+      this.container.innerHTML = `
+        <div class="games-grid">
+          ${gamesHTML}
+        </div>
+        ${totalCount > this.maxGames ? `
+          <p class="more-games-text">
+            +${totalCount - this.maxGames} weitere Spiele in deiner Bibliothek
+          </p>
+        ` : ''}
+      `;
+      
+      // Add event listeners to game cards
+      this.container.querySelectorAll('.delete-game-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const gameId = (e.target as HTMLElement).closest('.delete-game-btn')?.getAttribute('data-game-id');
+          if (gameId) {
+            await this.deleteGame(gameId);
+            await this.loadGames();
+          }
+        });
+      });
+      
+      this.container.querySelectorAll('.my-game-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (!(e.target as HTMLElement).closest('.delete-game-btn')) {
+            const gameId = card.getAttribute('data-game-id');
+            if (gameId) {
+              window.location.href = `/play-generated?id=${gameId}`;
+            }
+          }
+        });
+      });
+    }
+
+    createGameCard(game: SavedGame): string {
+      const date = new Date(game.createdAt).toLocaleDateString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      
+      return `
+        <div class="my-game-card" data-game-id="${game.id}">
+          <div class="game-thumbnail">
+            ${game.thumbnail 
+              ? `<img src="${game.thumbnail}" alt="${game.title}" />`
+              : `<div class="placeholder-thumbnail">🎮</div>`
+            }
+            <button class="delete-game-btn" data-game-id="${game.id}" title="Spiel löschen">
+              <span>×</span>
+            </button>
+          </div>
+          <div class="game-info">
+            <h3>${game.title}</h3>
+            <p class="game-date">${date}</p>
+            ${game.stats ? `
+              <div class="game-stats">
+                <span>${game.stats.linesOfCode} Zeilen</span>
+                ${game.stats.hasAnimation ? '<span>🎬</span>' : ''}
+                ${game.stats.hasSound ? '<span>🔊</span>' : ''}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    showEmptyState() {
+      this.container.classList.add('hidden');
+      this.emptyState.classList.remove('hidden');
+    }
+
+    showError() {
+      this.container.innerHTML = `
+        <div class="error-state">
+          <p>Fehler beim Laden der Spiele</p>
+        </div>
+      `;
+    }
+  }
+
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const maxGames = parseInt(document.querySelector('.my-games-section')?.getAttribute('data-max-games') || '8');
+    new MyGamesManager(maxGames);
+  });
+</script>
+
+<style>
+  .my-games-section {
+    margin: 3rem 0;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .section-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .action-btn {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+
+  .action-btn:hover {
+    background: var(--color-bg);
+    border-color: var(--color-accent);
+  }
+
+  .action-btn.danger {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+
+  .action-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+  }
+
+  .my-games-container {
+    min-height: 200px;
+  }
+
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--color-text-secondary);
+  }
+
+  .spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .my-game-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .my-game-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-accent);
+    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.1);
+  }
+
+  .game-thumbnail {
+    position: relative;
+    aspect-ratio: 4/3;
+    background: var(--color-bg);
+    overflow: hidden;
+  }
+
+  .game-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .placeholder-thumbnail {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--color-text-muted);
+  }
+
+  .delete-game-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .my-game-card:hover .delete-game-btn {
+    opacity: 1;
+  }
+
+  .delete-game-btn:hover {
+    background: rgba(239, 68, 68, 0.9);
+    transform: scale(1.1);
+  }
+
+  .game-info {
+    padding: 1rem;
+  }
+
+  .game-info h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .game-date {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .game-stats {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
+
+  .game-stats span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .more-games-text {
+    text-align: center;
+    color: var(--color-text-secondary);
+    margin-top: 2rem;
+    font-size: 0.9rem;
+  }
+
+  .empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+
+  .empty-content {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin: 0 0 1rem 0;
+    opacity: 0.3;
+  }
+
+  .empty-text {
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+    margin: 0 0 2rem 0;
+  }
+
+  .create-btn {
+    display: inline-block;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+
+  .create-btn:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .error-state {
+    text-align: center;
+    padding: 3rem;
+    color: #ef4444;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  @media (max-width: 768px) {
+    .games-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .section-header {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .section-actions {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+</style>

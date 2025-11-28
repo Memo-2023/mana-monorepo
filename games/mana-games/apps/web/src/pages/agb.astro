@@ -1,0 +1,470 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/Button.astro';
+---
+
+<Layout title="Nutzungsbedingungen">
+  <div class="agb-container">
+    <header class="agb-header">
+      <h1>Allgemeine Geschäftsbedingungen</h1>
+      <p class="subtitle">Nutzungsbedingungen für Mana Games</p>
+      <p class="last-updated">Stand: Januar 2024</p>
+    </header>
+
+    <nav class="toc">
+      <h2>Inhaltsverzeichnis</h2>
+      <ol>
+        <li><a href="#geltungsbereich">Geltungsbereich</a></li>
+        <li><a href="#nutzung">Nutzung der Plattform</a></li>
+        <li><a href="#registrierung">Registrierung und Nutzerkonto</a></li>
+        <li><a href="#inhalte">Nutzergenierte Inhalte</a></li>
+        <li><a href="#verhaltensregeln">Verhaltensregeln</a></li>
+        <li><a href="#geistigeseigentum">Geistiges Eigentum</a></li>
+        <li><a href="#haftung">Haftungsausschluss</a></li>
+        <li><a href="#datenschutz">Datenschutz</a></li>
+        <li><a href="#aenderungen">Änderungen der AGB</a></li>
+        <li><a href="#schlussbestimmungen">Schlussbestimmungen</a></li>
+      </ol>
+    </nav>
+
+    <section id="geltungsbereich" class="content-section">
+      <h2>§ 1 Geltungsbereich</h2>
+      
+      <p>
+        (1) Diese Allgemeinen Geschäftsbedingungen (nachfolgend "AGB") gelten für die Nutzung 
+        der Website mana-games.netlify.app (nachfolgend "Plattform") und alle darauf angebotenen 
+        Dienste und Spiele.
+      </p>
+      
+      <p>
+        (2) Mit der Nutzung der Plattform akzeptieren Sie diese AGB. Wenn Sie mit diesen 
+        Bedingungen nicht einverstanden sind, nutzen Sie bitte unsere Dienste nicht.
+      </p>
+      
+      <p>
+        (3) Die Plattform richtet sich an Nutzer aller Altersgruppen. Für minderjährige 
+        Nutzer gelten zusätzlich unsere <a href="/jugendschutz">Jugendschutzbestimmungen</a>.
+      </p>
+    </section>
+
+    <section id="nutzung" class="content-section">
+      <h2>§ 2 Nutzung der Plattform</h2>
+      
+      <p>
+        (1) Die Nutzung der Plattform und der darauf angebotenen Spiele ist grundsätzlich 
+        kostenlos und ohne Registrierung möglich.
+      </p>
+      
+      <p>
+        (2) Wir gewähren Ihnen ein nicht-exklusives, nicht übertragbares, widerrufliches 
+        Recht zur persönlichen Nutzung der Plattform und der Spiele.
+      </p>
+      
+      <div class="highlight-box">
+        <h4>Erlaubte Nutzung umfasst:</h4>
+        <ul>
+          <li>Spielen aller verfügbaren Spiele</li>
+          <li>Erstellen eigener Spiele mit dem KI-Generator</li>
+          <li>Speichern von Spielständen im lokalen Browser-Speicher</li>
+          <li>Teilen von Links zu Spielen</li>
+        </ul>
+      </div>
+      
+      <div class="warning-box">
+        <h4>Nicht erlaubt ist:</h4>
+        <ul>
+          <li>Kommerzielle Nutzung ohne ausdrückliche Genehmigung</li>
+          <li>Automatisierte Zugriffe (Bots, Scraping)</li>
+          <li>Umgehung von Sicherheitsmaßnahmen</li>
+          <li>Verbreitung von Schadsoftware</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="registrierung" class="content-section">
+      <h2>§ 3 Registrierung und Nutzerkonto</h2>
+      
+      <p>
+        (1) Aktuell ist keine Registrierung für die Nutzung der Plattform erforderlich. 
+        Alle Daten werden lokal in Ihrem Browser gespeichert.
+      </p>
+      
+      <p>
+        (2) Sollten wir in Zukunft Nutzerkonten einführen, werden wir Sie rechtzeitig 
+        informieren und separate Bedingungen dafür bereitstellen.
+      </p>
+    </section>
+
+    <section id="inhalte" class="content-section">
+      <h2>§ 4 Nutzergenierte Inhalte</h2>
+      
+      <p>
+        (1) Mit unserem KI-Generator können Sie eigene Spiele erstellen. Diese werden 
+        ausschließlich lokal in Ihrem Browser gespeichert.
+      </p>
+      
+      <p>
+        (2) Sie sind für die von Ihnen erstellten Inhalte selbst verantwortlich und 
+        stellen sicher, dass diese:
+      </p>
+      
+      <ul class="content-list">
+        <li>Keine Rechte Dritter verletzen</li>
+        <li>Keine illegalen Inhalte enthalten</li>
+        <li>Nicht diskriminierend, beleidigend oder anstößig sind</li>
+        <li>Keine Gewaltverherrlichung oder extremistische Inhalte beinhalten</li>
+        <li>Jugendschutzbestimmungen einhalten</li>
+      </ul>
+      
+      <p>
+        (3) Wir behalten uns vor, bei Kenntnis von rechtswidrigen Inhalten entsprechende 
+        Maßnahmen zu ergreifen.
+      </p>
+    </section>
+
+    <section id="verhaltensregeln" class="content-section">
+      <h2>§ 5 Verhaltensregeln</h2>
+      
+      <div class="rules-grid">
+        <div class="rule-card positive">
+          <h4>✅ Erwünschtes Verhalten</h4>
+          <ul>
+            <li>Respektvoller Umgang mit anderen Nutzern</li>
+            <li>Konstruktives Feedback</li>
+            <li>Melden von Bugs und Problemen</li>
+            <li>Teilen von kreativen Ideen</li>
+          </ul>
+        </div>
+        
+        <div class="rule-card negative">
+          <h4>❌ Unerwünschtes Verhalten</h4>
+          <ul>
+            <li>Spam oder Werbung</li>
+            <li>Hacking-Versuche</li>
+            <li>Verbreitung falscher Informationen</li>
+            <li>Belästigung anderer Nutzer</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="geistigeseigentum" class="content-section">
+      <h2>§ 6 Geistiges Eigentum</h2>
+      
+      <p>
+        (1) Alle Rechte an der Plattform, dem Design, den offiziellen Spielen und dem 
+        Quellcode liegen bei uns bzw. unseren Lizenzgebern.
+      </p>
+      
+      <p>
+        (2) Die Plattform ist Open Source. Details zur Lizenzierung finden Sie auf unserer 
+        <a href="/copyright">Copyright-Seite</a>.
+      </p>
+      
+      <p>
+        (3) An den von Ihnen mit dem KI-Generator erstellten Spielen räumen Sie uns ein 
+        einfaches, nicht-exklusives Nutzungsrecht ein, sofern Sie diese öffentlich teilen.
+      </p>
+    </section>
+
+    <section id="haftung" class="content-section">
+      <h2>§ 7 Haftungsausschluss</h2>
+      
+      <div class="info-box">
+        <p>
+          (1) Die Nutzung der Plattform erfolgt auf eigene Gefahr. Wir übernehmen keine 
+          Gewähr für die ständige Verfügbarkeit, Fehlerfreiheit oder Vollständigkeit der 
+          angebotenen Dienste.
+        </p>
+      </div>
+      
+      <p>
+        (2) Wir haften nur für Schäden, die durch vorsätzliches oder grob fahrlässiges 
+        Verhalten unsererseits entstehen. Die Haftung für leichte Fahrlässigkeit ist 
+        ausgeschlossen, soweit keine wesentlichen Vertragspflichten verletzt werden.
+      </p>
+      
+      <p>
+        (3) Für Datenverluste, insbesondere von lokal gespeicherten Spielständen oder 
+        selbst erstellten Spielen, übernehmen wir keine Haftung. Wir empfehlen regelmäßige 
+        Backups wichtiger Daten.
+      </p>
+      
+      <p>
+        (4) Die Haftung für mittelbare und Folgeschäden ist ausgeschlossen.
+      </p>
+    </section>
+
+    <section id="datenschutz" class="content-section">
+      <h2>§ 8 Datenschutz</h2>
+      
+      <p>
+        Der Schutz Ihrer Daten ist uns wichtig. Einzelheiten zur Datenverarbeitung finden 
+        Sie in unserer <a href="/datenschutz">Datenschutzerklärung</a>.
+      </p>
+    </section>
+
+    <section id="aenderungen" class="content-section">
+      <h2>§ 9 Änderungen der AGB</h2>
+      
+      <p>
+        (1) Wir behalten uns vor, diese AGB jederzeit zu ändern. Änderungen werden auf 
+        der Plattform bekannt gegeben.
+      </p>
+      
+      <p>
+        (2) Die weitere Nutzung der Plattform nach Bekanntgabe von Änderungen gilt als 
+        Zustimmung zu den geänderten Bedingungen.
+      </p>
+    </section>
+
+    <section id="schlussbestimmungen" class="content-section">
+      <h2>§ 10 Schlussbestimmungen</h2>
+      
+      <p>
+        (1) Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des 
+        UN-Kaufrechts.
+      </p>
+      
+      <p>
+        (2) Sollten einzelne Bestimmungen dieser AGB unwirksam sein oder werden, berührt 
+        dies die Wirksamkeit der übrigen Bestimmungen nicht.
+      </p>
+      
+      <p>
+        (3) Gerichtsstand für alle Streitigkeiten aus diesem Vertragsverhältnis ist, 
+        soweit gesetzlich zulässig, [Ihr Ort].
+      </p>
+    </section>
+
+    <div class="footer-actions">
+      <Button href="/" variant="ghost">Zurück zur Startseite</Button>
+      <Button href="/datenschutz" variant="ghost">Datenschutz</Button>
+      <Button href="/impressum" variant="ghost">Impressum</Button>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .agb-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 0;
+  }
+
+  .agb-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .agb-header h1 {
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--color-text), var(--color-text-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: 1.2rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .last-updated {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  .toc {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .toc h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--color-text);
+  }
+
+  .toc ol {
+    padding-left: 1.5rem;
+  }
+
+  .toc li {
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .toc a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .toc a:hover {
+    color: var(--color-accent);
+  }
+
+  .content-section {
+    margin-bottom: 3rem;
+    scroll-margin-top: 2rem;
+  }
+
+  .content-section h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--color-text);
+  }
+
+  .content-section h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+  }
+
+  .content-section p {
+    color: var(--color-text-secondary);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+
+  .highlight-box, .warning-box, .info-box {
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .highlight-box {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+  }
+
+  .warning-box {
+    background: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+  }
+
+  .info-box {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+  }
+
+  .highlight-box ul, .warning-box ul, .content-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0;
+  }
+
+  .highlight-box li, .warning-box li, .content-list li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: var(--color-text-secondary);
+  }
+
+  .highlight-box li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
+  }
+
+  .warning-box li::before {
+    content: "✗";
+    position: absolute;
+    left: 0;
+    color: #ff3b30;
+  }
+
+  .content-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
+  }
+
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .rule-card {
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+  }
+
+  .rule-card.positive {
+    background: rgba(0, 255, 136, 0.05);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+  }
+
+  .rule-card.negative {
+    background: rgba(255, 59, 48, 0.05);
+    border: 1px solid rgba(255, 59, 48, 0.2);
+  }
+
+  .rule-card h4 {
+    margin-bottom: 1rem;
+  }
+
+  .rule-card ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .rule-card li {
+    padding: 0.5rem 0;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .footer-actions {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    .agb-header h1 {
+      font-size: 2rem;
+    }
+
+    .content-section h2 {
+      font-size: 1.5rem;
+    }
+
+    .toc {
+      padding: 1.5rem;
+    }
+
+    .rules-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

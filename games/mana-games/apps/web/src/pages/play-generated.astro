@@ -1,0 +1,401 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Generiertes Spiel" fullWidth={true} hideFooter={true}>
+  <div class="game-container">
+    <div class="game-header">
+      <button id="backBtn" class="back-btn">
+        ← Zurück
+      </button>
+      <h1 id="gameTitle">Lade Spiel...</h1>
+      <div class="game-actions">
+        <button id="editBtn" class="action-btn">
+          📝 Bearbeiten
+        </button>
+        <button id="fullscreenBtn" class="action-btn">
+          ⛶ Vollbild
+        </button>
+        <button id="deleteBtn" class="action-btn danger">
+          🗑️ Löschen
+        </button>
+      </div>
+    </div>
+    
+    <div class="game-frame-container">
+      <div id="loadingState" class="loading-state">
+        <div class="spinner"></div>
+        <p>Lade dein Spiel...</p>
+      </div>
+      
+      <iframe 
+        id="gameFrame"
+        class="game-iframe hidden"
+        sandbox="allow-scripts allow-same-origin"
+      ></iframe>
+      
+      <div id="errorState" class="error-state hidden">
+        <p>❌ Spiel konnte nicht geladen werden</p>
+        <p class="error-detail">Das gesuchte Spiel wurde nicht gefunden.</p>
+        <a href="/" class="home-link">Zurück zur Startseite</a>
+      </div>
+    </div>
+    
+    <div class="game-info">
+      <p id="gameDescription" class="game-description"></p>
+      <p id="gameDate" class="game-date"></p>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Get game ID from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const gameId = urlParams.get('id');
+
+  if (!gameId) {
+    window.location.href = '/';
+  }
+
+  // Game Storage
+  class GameStorage {
+    constructor() {
+      this.dbName = 'ManaGamesDB';
+      this.storeName = 'generatedGames';
+      this.db = null;
+    }
+
+    async init() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(this.dbName, 1);
+
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          this.db = request.result;
+          resolve();
+        };
+
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains(this.storeName)) {
+            const store = db.createObjectStore(this.storeName, { keyPath: 'id' });
+            store.createIndex('createdAt', 'createdAt', { unique: false });
+            store.createIndex('title', 'title', { unique: false });
+          }
+        };
+      });
+    }
+
+    async getGame(id) {
+      if (!this.db) await this.init();
+
+      return new Promise((resolve, reject) => {
+        const transaction = this.db.transaction([this.storeName], 'readonly');
+        const store = transaction.objectStore(this.storeName);
+        const request = store.get(id);
+
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async deleteGame(id) {
+      if (!this.db) await this.init();
+
+      return new Promise((resolve, reject) => {
+        const transaction = this.db.transaction([this.storeName], 'readwrite');
+        const store = transaction.objectStore(this.storeName);
+        const request = store.delete(id);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    }
+  }
+
+  // Initialize
+  const gameStorage = new GameStorage();
+  const loadingState = document.getElementById('loadingState');
+  const errorState = document.getElementById('errorState');
+  const gameFrame = document.getElementById('gameFrame');
+  const gameTitle = document.getElementById('gameTitle');
+  const gameDescription = document.getElementById('gameDescription');
+  const gameDate = document.getElementById('gameDate');
+  const backBtn = document.getElementById('backBtn');
+  const editBtn = document.getElementById('editBtn');
+  const fullscreenBtn = document.getElementById('fullscreenBtn');
+  const deleteBtn = document.getElementById('deleteBtn');
+
+  // Load game
+  async function loadGame() {
+    try {
+      const game = await gameStorage.getGame(gameId);
+      
+      if (!game) {
+        showError();
+        return;
+      }
+
+      // Update UI
+      document.title = `${game.title} - ManaGames`;
+      gameTitle.textContent = game.title;
+      gameDescription.textContent = game.description || game.prompt;
+      
+      const date = new Date(game.createdAt).toLocaleDateString('de-DE', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      gameDate.textContent = `Erstellt am ${date}`;
+
+      // Display game
+      const blob = new Blob([game.html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      gameFrame.src = url;
+
+      gameFrame.addEventListener('load', () => {
+        URL.revokeObjectURL(url);
+        hideLoading();
+      }, { once: true });
+
+    } catch (error) {
+      console.error('Error loading game:', error);
+      showError();
+    }
+  }
+
+  function hideLoading() {
+    loadingState.classList.add('hidden');
+    gameFrame.classList.remove('hidden');
+  }
+
+  function showError() {
+    loadingState.classList.add('hidden');
+    errorState.classList.remove('hidden');
+  }
+
+  // Event handlers
+  backBtn.addEventListener('click', () => {
+    window.history.back();
+  });
+
+  editBtn.addEventListener('click', () => {
+    // Store game ID in sessionStorage for the create page to load
+    sessionStorage.setItem('editGameId', gameId);
+    window.location.href = '/create';
+  });
+
+  fullscreenBtn.addEventListener('click', () => {
+    if (gameFrame.requestFullscreen) {
+      gameFrame.requestFullscreen();
+    }
+  });
+
+  deleteBtn.addEventListener('click', async () => {
+    if (confirm('Bist du sicher, dass du dieses Spiel löschen möchtest?')) {
+      try {
+        await gameStorage.deleteGame(gameId);
+        window.location.href = '/';
+      } catch (error) {
+        console.error('Error deleting game:', error);
+        alert('Fehler beim Löschen des Spiels');
+      }
+    }
+  });
+
+  // Load game on page load
+  loadGame();
+</script>
+
+<style>
+  .game-container {
+    height: calc(100vh - 60px);
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+  }
+
+  .back-btn {
+    background: var(--color-bg);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+
+  .back-btn:hover {
+    border-color: var(--color-accent);
+    transform: translateX(-2px);
+  }
+
+  #gameTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .game-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    background: var(--color-bg);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+
+  .action-btn:hover {
+    background: var(--color-surface);
+    border-color: var(--color-accent);
+  }
+
+  .action-btn.danger {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+
+  .action-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+  }
+
+  .game-frame-container {
+    flex: 1;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .game-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .loading-state, .error-state {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+  }
+
+  .spinner {
+    width: 3rem;
+    height: 3rem;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-state p, .error-state p {
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+  }
+
+  .error-detail {
+    font-size: 0.9rem !important;
+    color: var(--color-text-muted) !important;
+  }
+
+  .home-link {
+    margin-top: 1rem;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+
+  .home-link:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .game-info {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+  }
+
+  .game-description {
+    color: var(--color-text);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .game-date {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  @media (max-width: 768px) {
+    .game-container {
+      padding: 0.5rem;
+    }
+
+    .game-header {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .game-actions {
+      width: 100%;
+      justify-content: center;
+    }
+
+    #gameTitle {
+      font-size: 1.25rem;
+    }
+  }
+</style>

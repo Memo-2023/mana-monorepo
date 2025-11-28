@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Maze Runner</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .game-container {
+            position: relative;
+            text-align: center;
+        }
+
+        .ui-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 0 10px;
+            width: 600px;
+            box-sizing: border-box;
+        }
+
+        .score, .timer, .level {
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .score {
+            color: #00ff88;
+        }
+
+        .timer {
+            color: #ff6b6b;
+        }
+
+        .level {
+            color: #4ecdc4;
+        }
+
+        canvas {
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+            background: #0a0a0a;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .game-over, .level-complete, .start-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00ff88;
+            padding: 30px;
+            text-align: center;
+            display: none;
+            z-index: 10;
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.5);
+        }
+
+        .start-screen {
+            display: block;
+        }
+
+        h2 {
+            margin: 0 0 20px 0;
+            font-size: 32px;
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        .game-over h2 {
+            color: #ff6b6b;
+        }
+
+        .level-complete h2 {
+            color: #00ff88;
+        }
+
+        .start-screen h2 {
+            color: #4ecdc4;
+        }
+
+        button {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background: #00cc6a;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+        }
+
+        .instructions {
+            margin: 20px 0;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        .stats {
+            margin: 15px 0;
+            font-size: 20px;
+        }
+
+        .collectibles {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .collectible-item {
+            text-align: center;
+        }
+
+        .collectible-icon {
+            font-size: 30px;
+            margin-bottom: 5px;
+        }
+
+        .powerup-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .powerup-indicator.active {
+            opacity: 1;
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.2); }
+        }
+
+        .trail {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00ff88;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        @keyframes fadeTrail {
+            to {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="ui-container">
+            <div class="score">PUNKTE: <span id="score">0</span></div>
+            <div class="level">LEVEL: <span id="level">1</span></div>
+            <div class="timer">ZEIT: <span id="timer">60</span>s</div>
+        </div>
+        
+        <canvas id="gameCanvas" width="600" height="600"></canvas>
+        
+        <div class="powerup-indicator" id="powerupIndicator">⚡</div>
+        
+        <div class="start-screen" id="startScreen">
+            <h2>NEON MAZE RUNNER</h2>
+            <div class="instructions">
+                <p><strong>Steuerung:</strong> WASD oder Pfeiltasten</p>
+                <p><strong>Ziel:</strong> Sammle alle Diamanten und finde den Ausgang!</p>
+                <p><strong>Tipp:</strong> Achte auf Power-ups und die Zeit!</p>
+            </div>
+            <div class="collectibles">
+                <div class="collectible-item">
+                    <div class="collectible-icon">💎</div>
+                    <div>Diamanten<br>+100 Punkte</div>
+                </div>
+                <div class="collectible-item">
+                    <div class="collectible-icon">⚡</div>
+                    <div>Speed Boost<br>2x Geschwindigkeit</div>
+                </div>
+                <div class="collectible-item">
+                    <div class="collectible-icon">🕐</div>
+                    <div>Zeitbonus<br>+15 Sekunden</div>
+                </div>
+            </div>
+            <button onclick="startGame()">SPIEL STARTEN</button>
+        </div>
+        
+        <div class="game-over" id="gameOverScreen">
+            <h2>GAME OVER</h2>
+            <div class="stats">
+                <p>Erreichte Punkte: <span id="finalScore">0</span></p>
+                <p>Erreichte Level: <span id="finalLevel">1</span></p>
+            </div>
+            <button onclick="restartGame()">NOCHMAL SPIELEN</button>
+        </div>
+        
+        <div class="level-complete" id="levelCompleteScreen">
+            <h2>LEVEL GESCHAFFT!</h2>
+            <div class="stats">
+                <p>Level Punkte: <span id="levelScore">0</span></p>
+                <p>Zeit Bonus: <span id="timeBonus">0</span></p>
+            </div>
+            <button onclick="nextLevel()">NÄCHSTES LEVEL</button>
+        </div>
+    </div>
+
+    <script>
+        // Game ID für Statistiken
+        const GAME_ID = 'neon-maze-runner';
+        
+        // Canvas und Kontext
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // UI Elemente
+        const scoreElement = document.getElementById('score');
+        const timerElement = document.getElementById('timer');
+        const levelElement = document.getElementById('level');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const levelCompleteScreen = document.getElementById('levelCompleteScreen');
+        const powerupIndicator = document.getElementById('powerupIndicator');
+        
+        // Spielkonstanten
+        const CELL_SIZE = 30;
+        const GRID_WIDTH = Math.floor(canvas.width / CELL_SIZE);
+        const GRID_HEIGHT = Math.floor(canvas.height / CELL_SIZE);
+        
+        // Spielzustand
+        let maze = [];
+        let player = { x: 1, y: 1 };
+        let exit = { x: 1, y: 1 }; // Wird später gesetzt
+        let diamonds = [];
+        let powerups = [];
+        let score = 0;
+        let level = 1;
+        let timeLeft = 60;
+        let gameRunning = false;
+        let timerInterval = null;
+        let speedBoost = false;
+        let speedBoostTimer = 0;
+        let particles = [];
+        
+        // Eingabe
+        let keys = {};
+        let moveTimer = 0;
+        const MOVE_DELAY = 150; // Millisekunden zwischen Bewegungen
+        const BOOSTED_MOVE_DELAY = 75;
+        
+        // Eingabe-Handler
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+        
+        // Maze-Generation (Recursive Backtracking)
+        function generateMaze() {
+            // Initialisiere Gitter mit Wänden
+            maze = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(1));
+            
+            // Startposition
+            const stack = [];
+            const startX = 1;
+            const startY = 1;
+            maze[startY][startX] = 0;
+            stack.push({ x: startX, y: startY });
+            
+            // Richtungen
+            const directions = [
+                { dx: 0, dy: -2 }, // Oben
+                { dx: 2, dy: 0 },  // Rechts
+                { dx: 0, dy: 2 },  // Unten
+                { dx: -2, dy: 0 }  // Links
+            ];
+            
+            while (stack.length > 0) {
+                const current = stack[stack.length - 1];
+                
+                // Finde unbesuchte Nachbarn
+                const neighbors = [];
+                for (const dir of directions) {
+                    const nx = current.x + dir.dx;
+                    const ny = current.y + dir.dy;
+                    
+                    if (nx > 0 && nx < GRID_WIDTH - 1 && 
+                        ny > 0 && ny < GRID_HEIGHT - 1 && 
+                        maze[ny][nx] === 1) {
+                        neighbors.push({ x: nx, y: ny, dx: dir.dx / 2, dy: dir.dy / 2 });
+                    }
+                }
+                
+                if (neighbors.length > 0) {
+                    // Wähle zufälligen Nachbarn
+                    const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                    
+                    // Entferne Wand zwischen current und next
+                    maze[current.y + next.dy][current.x + next.dx] = 0;
+                    maze[next.y][next.x] = 0;
+                    
+                    stack.push(next);
+                } else {
+                    stack.pop();
+                }
+            }
+            
+            // Füge viele zusätzliche Pfade hinzu für interessanteres Gameplay
+            const extraPaths = 15 + level * 3;
+            for (let i = 0; i < extraPaths; i++) {
+                const x = Math.floor(Math.random() * (GRID_WIDTH - 2)) + 1;
+                const y = Math.floor(Math.random() * (GRID_HEIGHT - 2)) + 1;
+                if (maze[y][x] === 1) {
+                    // Prüfe ob mindestens ein Nachbar ein Pfad ist
+                    if (maze[y-1][x] === 0 || maze[y+1][x] === 0 || 
+                        maze[y][x-1] === 0 || maze[y][x+1] === 0) {
+                        maze[y][x] = 0;
+                    }
+                }
+            }
+            
+            // Finde eine gute Position für den Ausgang (weit vom Start entfernt)
+            let maxDistance = 0;
+            let bestExit = { x: GRID_WIDTH - 2, y: GRID_HEIGHT - 2 };
+            
+            // Suche nach dem entferntesten erreichbaren Punkt
+            for (let y = 1; y < GRID_HEIGHT - 1; y++) {
+                for (let x = 1; x < GRID_WIDTH - 1; x++) {
+                    if (maze[y][x] === 0) {
+                        const distance = Math.abs(x - player.x) + Math.abs(y - player.y);
+                        if (distance > maxDistance) {
+                            maxDistance = distance;
+                            bestExit = { x, y };
+                        }
+                    }
+                }
+            }
+            
+            exit.x = bestExit.x;
+            exit.y = bestExit.y;
+            maze[exit.y][exit.x] = 0;
+        }
+        
+        // Platziere Sammelobjekte
+        function placeCollectibles() {
+            diamonds = [];
+            powerups = [];
+            
+            // Anzahl basierend auf Level
+            const diamondCount = 3 + Math.floor(level / 3);
+            const powerupCount = 1 + Math.floor(level / 4);
+            
+            // Platziere Diamanten
+            for (let i = 0; i < diamondCount; i++) {
+                let placed = false;
+                while (!placed) {
+                    const x = Math.floor(Math.random() * GRID_WIDTH);
+                    const y = Math.floor(Math.random() * GRID_HEIGHT);
+                    
+                    if (maze[y][x] === 0 && 
+                        !(x === player.x && y === player.y) && 
+                        !(x === exit.x && y === exit.y) &&
+                        !diamonds.some(d => d.x === x && d.y === y)) {
+                        diamonds.push({ x, y, collected: false });
+                        placed = true;
+                    }
+                }
+            }
+            
+            // Platziere Power-ups
+            for (let i = 0; i < powerupCount; i++) {
+                let placed = false;
+                while (!placed) {
+                    const x = Math.floor(Math.random() * GRID_WIDTH);
+                    const y = Math.floor(Math.random() * GRID_HEIGHT);
+                    
+                    if (maze[y][x] === 0 && 
+                        !(x === player.x && y === player.y) && 
+                        !(x === exit.x && y === exit.y) &&
+                        !diamonds.some(d => d.x === x && d.y === y) &&
+                        !powerups.some(p => p.x === x && p.y === y)) {
+                        
+                        const type = Math.random() < 0.7 ? 'speed' : 'time';
+                        powerups.push({ x, y, type, collected: false });
+                        placed = true;
+                    }
+                }
+            }
+        }
+        
+        // Partikel-Effekt
+        function createParticle(x, y, color, count = 10) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x * CELL_SIZE + CELL_SIZE / 2,
+                    y: y * CELL_SIZE + CELL_SIZE / 2,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    life: 1,
+                    color: color
+                });
+            }
+        }
+        
+        // Update Partikel
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.02;
+                p.vx *= 0.98;
+                p.vy *= 0.98;
+                
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+        
+        // Bewege Spieler
+        function movePlayer(dx, dy) {
+            const newX = player.x + dx;
+            const newY = player.y + dy;
+            
+            // Prüfe Kollision
+            if (newX >= 0 && newX < GRID_WIDTH && 
+                newY >= 0 && newY < GRID_HEIGHT && 
+                maze[newY][newX] === 0) {
+                
+                // Trail-Effekt
+                createTrail(player.x * CELL_SIZE + CELL_SIZE / 2, 
+                           player.y * CELL_SIZE + CELL_SIZE / 2);
+                
+                player.x = newX;
+                player.y = newY;
+                
+                // Prüfe Diamanten
+                diamonds.forEach(diamond => {
+                    if (!diamond.collected && diamond.x === player.x && diamond.y === player.y) {
+                        diamond.collected = true;
+                        score += 100;
+                        scoreElement.textContent = score;
+                        createParticle(diamond.x, diamond.y, '#00ff88', 20);
+                        
+                        // Sende Score Update für Statistiken
+                        window.parent.postMessage({
+                            type: 'GAME_EVENT',
+                            gameId: GAME_ID,
+                            event: 'SCORE_UPDATE',
+                            data: { score: score }
+                        }, '*');
+                    }
+                });
+                
+                // Prüfe Power-ups
+                powerups.forEach(powerup => {
+                    if (!powerup.collected && powerup.x === player.x && powerup.y === player.y) {
+                        powerup.collected = true;
+                        
+                        if (powerup.type === 'speed') {
+                            speedBoost = true;
+                            speedBoostTimer = 5000; // 5 Sekunden
+                            powerupIndicator.classList.add('active');
+                            createParticle(powerup.x, powerup.y, '#ffff00', 30);
+                        } else if (powerup.type === 'time') {
+                            timeLeft += 15;
+                            timerElement.textContent = timeLeft;
+                            createParticle(powerup.x, powerup.y, '#00ffff', 30);
+                        }
+                    }
+                });
+                
+                // Prüfe Ausgang
+                if (player.x === exit.x && player.y === exit.y) {
+                    const allDiamondsCollected = diamonds.every(d => d.collected);
+                    if (allDiamondsCollected) {
+                        levelComplete();
+                    }
+                }
+            }
+        }
+        
+        // Trail-Effekt
+        function createTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.className = 'trail';
+            trail.style.left = x + 'px';
+            trail.style.top = y + 'px';
+            trail.style.background = speedBoost ? '#ffff00' : '#ff00ff';
+            document.body.appendChild(trail);
+            
+            trail.style.animation = 'fadeTrail 0.5s ease-out forwards';
+            setTimeout(() => trail.remove(), 500);
+        }
+        
+        // Update Spiel
+        function update(deltaTime) {
+            if (!gameRunning) return;
+            
+            // Update Speed Boost
+            if (speedBoost) {
+                speedBoostTimer -= deltaTime;
+                if (speedBoostTimer <= 0) {
+                    speedBoost = false;
+                    powerupIndicator.classList.remove('active');
+                }
+            }
+            
+            // Spielerbewegung
+            moveTimer -= deltaTime;
+            const currentMoveDelay = speedBoost ? BOOSTED_MOVE_DELAY : MOVE_DELAY;
+            
+            if (moveTimer <= 0) {
+                let moved = false;
+                
+                if (keys['w'] || keys['arrowup']) {
+                    movePlayer(0, -1);
+                    moved = true;
+                } else if (keys['s'] || keys['arrowdown']) {
+                    movePlayer(0, 1);
+                    moved = true;
+                } else if (keys['a'] || keys['arrowleft']) {
+                    movePlayer(-1, 0);
+                    moved = true;
+                } else if (keys['d'] || keys['arrowright']) {
+                    movePlayer(1, 0);
+                    moved = true;
+                }
+                
+                if (moved) {
+                    moveTimer = currentMoveDelay;
+                }
+            }
+            
+            // Update Partikel
+            updateParticles();
+        }
+        
+        // Zeichne Spiel
+        function draw() {
+            // Clear
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Zeichne Maze
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    if (maze[y][x] === 1) {
+                        // Wand mit Neon-Effekt
+                        ctx.fillStyle = '#1a1a2e';
+                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                        
+                        // Neon-Rand
+                        ctx.strokeStyle = '#16213e';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(x * CELL_SIZE + 0.5, y * CELL_SIZE + 0.5, 
+                                     CELL_SIZE - 1, CELL_SIZE - 1);
+                    }
+                }
+            }
+            
+            // Zeichne Ausgang
+            ctx.save();
+            ctx.translate(exit.x * CELL_SIZE + CELL_SIZE / 2, 
+                         exit.y * CELL_SIZE + CELL_SIZE / 2);
+            
+            const allDiamondsCollected = diamonds.every(d => d.collected);
+            if (allDiamondsCollected) {
+                // Animierter Ausgang wenn alle Diamanten gesammelt
+                ctx.rotate(Date.now() * 0.002);
+                ctx.fillStyle = '#00ff88';
+                ctx.fillRect(-CELL_SIZE / 3, -CELL_SIZE / 3, CELL_SIZE * 2/3, CELL_SIZE * 2/3);
+                
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#00ff88';
+                ctx.fillStyle = '#00ff88';
+                ctx.fillRect(-CELL_SIZE / 4, -CELL_SIZE / 4, CELL_SIZE / 2, CELL_SIZE / 2);
+                ctx.shadowBlur = 0;
+            } else {
+                // Inaktiver Ausgang
+                ctx.fillStyle = '#333';
+                ctx.fillRect(-CELL_SIZE / 3, -CELL_SIZE / 3, CELL_SIZE * 2/3, CELL_SIZE * 2/3);
+                ctx.strokeStyle = '#555';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-CELL_SIZE / 3, -CELL_SIZE / 3, CELL_SIZE * 2/3, CELL_SIZE * 2/3);
+            }
+            ctx.restore();
+            
+            // Zeichne Diamanten
+            diamonds.forEach(diamond => {
+                if (!diamond.collected) {
+                    ctx.save();
+                    ctx.translate(diamond.x * CELL_SIZE + CELL_SIZE / 2, 
+                                 diamond.y * CELL_SIZE + CELL_SIZE / 2);
+                    ctx.rotate(Date.now() * 0.003);
+                    
+                    // Diamant-Form (größer für größere Zellen)
+                    ctx.beginPath();
+                    ctx.moveTo(0, -CELL_SIZE / 2.5);
+                    ctx.lineTo(CELL_SIZE / 3, -CELL_SIZE / 5);
+                    ctx.lineTo(CELL_SIZE / 3, CELL_SIZE / 5);
+                    ctx.lineTo(0, CELL_SIZE / 2.5);
+                    ctx.lineTo(-CELL_SIZE / 3, CELL_SIZE / 5);
+                    ctx.lineTo(-CELL_SIZE / 3, -CELL_SIZE / 5);
+                    ctx.closePath();
+                    
+                    ctx.fillStyle = '#00ff88';
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = '#00ff88';
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    
+                    ctx.strokeStyle = '#00cc6a';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    
+                    ctx.restore();
+                }
+            });
+            
+            // Zeichne Power-ups
+            powerups.forEach(powerup => {
+                if (!powerup.collected) {
+                    ctx.save();
+                    ctx.translate(powerup.x * CELL_SIZE + CELL_SIZE / 2, 
+                                 powerup.y * CELL_SIZE + CELL_SIZE / 2);
+                    
+                    if (powerup.type === 'speed') {
+                        // Blitz-Symbol
+                        ctx.fillStyle = '#ffff00';
+                        ctx.shadowBlur = 20;
+                        ctx.shadowColor = '#ffff00';
+                        ctx.font = '20px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('⚡', 0, 0);
+                    } else if (powerup.type === 'time') {
+                        // Uhr-Symbol
+                        ctx.fillStyle = '#00ffff';
+                        ctx.shadowBlur = 20;
+                        ctx.shadowColor = '#00ffff';
+                        ctx.font = '20px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('🕐', 0, 0);
+                    }
+                    
+                    ctx.shadowBlur = 0;
+                    ctx.restore();
+                }
+            });
+            
+            // Zeichne Spieler
+            ctx.save();
+            ctx.translate(player.x * CELL_SIZE + CELL_SIZE / 2, 
+                         player.y * CELL_SIZE + CELL_SIZE / 2);
+            
+            // Spieler mit Glow-Effekt (größer für größere Zellen)
+            ctx.beginPath();
+            ctx.arc(0, 0, CELL_SIZE / 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = speedBoost ? '#ffff00' : '#ff00ff';
+            ctx.shadowBlur = speedBoost ? 30 : 25;
+            ctx.shadowColor = speedBoost ? '#ffff00' : '#ff00ff';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // Mittlerer Ring
+            ctx.beginPath();
+            ctx.arc(0, 0, CELL_SIZE / 3, 0, Math.PI * 2);
+            ctx.strokeStyle = speedBoost ? '#ffcc00' : '#ff66ff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Innerer Kreis
+            ctx.beginPath();
+            ctx.arc(0, 0, CELL_SIZE / 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            
+            ctx.restore();
+            
+            // Zeichne Partikel
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+            
+            // Zeichne verbleibende Diamanten-Anzeige
+            const remainingDiamonds = diamonds.filter(d => !d.collected).length;
+            if (remainingDiamonds > 0) {
+                ctx.fillStyle = '#00ff88';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.fillText(`💎 ${remainingDiamonds}`, 10, 10);
+            }
+        }
+        
+        // Game Loop
+        let lastTime = 0;
+        function gameLoop(currentTime) {
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+            
+            update(deltaTime);
+            draw();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Timer
+        function updateTimer() {
+            if (!gameRunning) return;
+            
+            timeLeft--;
+            timerElement.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                gameOver();
+            }
+        }
+        
+        // Level abgeschlossen
+        function levelComplete() {
+            gameRunning = false;
+            clearInterval(timerInterval);
+            
+            // Berechne Bonus
+            const timeBonus = timeLeft * 10;
+            score += timeBonus;
+            
+            document.getElementById('levelScore').textContent = score;
+            document.getElementById('timeBonus').textContent = timeBonus;
+            levelCompleteScreen.style.display = 'block';
+        }
+        
+        // Game Over
+        function gameOver() {
+            gameRunning = false;
+            clearInterval(timerInterval);
+            
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalLevel').textContent = level;
+            gameOverScreen.style.display = 'block';
+            
+            // Sende Game Over Event
+            window.parent.postMessage({
+                type: 'GAME_EVENT',
+                gameId: GAME_ID,
+                event: 'GAME_OVER',
+                data: { score: score }
+            }, '*');
+            
+            // Achievement prüfen
+            if (score >= 1000) {
+                window.parent.postMessage({
+                    type: 'GAME_EVENT',
+                    gameId: GAME_ID,
+                    event: 'ACHIEVEMENT_UNLOCKED',
+                    data: {
+                        achievementId: 'maze_explorer',
+                        name: 'Maze Explorer',
+                        description: 'Score 1000 points in Neon Maze Runner',
+                        icon: '🌟'
+                    }
+                }, '*');
+            }
+            
+            if (level >= 10) {
+                window.parent.postMessage({
+                    type: 'GAME_EVENT',
+                    gameId: GAME_ID,
+                    event: 'ACHIEVEMENT_UNLOCKED',
+                    data: {
+                        achievementId: 'maze_master',
+                        name: 'Maze Master',
+                        description: 'Reach level 10 in Neon Maze Runner',
+                        icon: '🏆'
+                    }
+                }, '*');
+            }
+        }
+        
+        // Starte Spiel
+        function startGame() {
+            startScreen.style.display = 'none';
+            initLevel();
+            gameRunning = true;
+            timerInterval = setInterval(updateTimer, 1000);
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Initialisiere Level
+        function initLevel() {
+            // Reset Speed Boost
+            speedBoost = false;
+            speedBoostTimer = 0;
+            powerupIndicator.classList.remove('active');
+            
+            // Zeit basierend auf Level
+            timeLeft = 60 + (level - 1) * 10;
+            timerElement.textContent = timeLeft;
+            levelElement.textContent = level;
+            
+            // Generiere neues Maze
+            generateMaze();
+            
+            // Setze Spielerposition
+            player = { x: 1, y: 1 };
+            
+            // Platziere Sammelobjekte
+            placeCollectibles();
+            
+            // Clear particles
+            particles = [];
+        }
+        
+        // Nächstes Level
+        function nextLevel() {
+            levelCompleteScreen.style.display = 'none';
+            level++;
+            initLevel();
+            gameRunning = true;
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+        
+        // Neustart
+        function restartGame() {
+            gameOverScreen.style.display = 'none';
+            score = 0;
+            level = 1;
+            scoreElement.textContent = score;
+            initLevel();
+            gameRunning = true;
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+        
+        // Initialisierung
+        console.log('Neon Maze Runner geladen!');
+        console.log('Ein prozedural generiertes Labyrinth-Spiel mit Sammelobjekten.');
+        
+        // Sende Game Loaded Event für Statistiken
+        window.parent.postMessage({
+            type: 'GAME_LOADED',
+            gameId: GAME_ID
+        }, '*');
+    </script>
+</body>
+</html>
