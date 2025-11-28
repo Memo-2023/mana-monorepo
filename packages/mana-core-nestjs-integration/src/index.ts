@@ -10,9 +10,11 @@ export {
 
 // Guards
 export { AuthGuard } from './guards/auth.guard';
+export { OptionalAuthGuard } from './guards/optional-auth.guard';
 
 // Decorators
 export { CurrentUser, JwtPayload } from './decorators/current-user.decorator';
+export { Public, IS_PUBLIC_KEY } from './decorators/public.decorator';
 
 // Services
 export {

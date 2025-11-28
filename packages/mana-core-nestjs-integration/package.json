@@ -9,6 +9,16 @@
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js",
 			"require": "./dist/index.js"
+		},
+		"./guards": {
+			"types": "./dist/guards/index.d.ts",
+			"import": "./dist/guards/index.js",
+			"require": "./dist/guards/index.js"
+		},
+		"./decorators": {
+			"types": "./dist/decorators/index.d.ts",
+			"import": "./dist/decorators/index.js",
+			"require": "./dist/decorators/index.js"
 		}
 	},
 	"scripts": {
