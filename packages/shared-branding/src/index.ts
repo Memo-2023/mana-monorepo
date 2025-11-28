@@ -21,10 +21,26 @@ export {
 	StorytellerLogo,
 	UloadLogo,
 	ChatLogo,
+	PresiLogo,
 } from './logos';
 
 // Configuration
 export { APP_BRANDING, getAppBranding, getAllAppBrandings } from './config';
+
+// App Icons (SVG data URLs)
+export { APP_ICONS, type AppIconId } from './app-icons';
+
+// Mana Apps Configuration
+export {
+	MANA_APPS,
+	getManaApp,
+	getManaAppsByStatus,
+	getAvailableManaApps,
+	APP_STATUS_LABELS,
+	APP_SLIDER_LABELS,
+	type ManaApp,
+	type AppStatus,
+} from './mana-apps';
 
 // Types
 export type { AppId, AppBranding, LogoProps, AppLogoWithNameProps } from './types';

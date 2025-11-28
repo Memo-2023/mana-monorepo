@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { AppSlider, type AppItem } from '@manacore/shared-ui';
+	import { APP_ICONS } from '@manacore/shared-branding';
 	import { theme } from '$lib/stores/theme';
 	import { t } from 'svelte-i18n';
 
@@ -11,7 +12,7 @@
 			name: 'Memoro',
 			description: $t('app_slider.memoro_desc'),
 			longDescription: $t('app_slider.memoro_long_desc'),
-			icon: '/images/app-icons/memoro-logo-gradient.png',
+			icon: APP_ICONS.memoro,
 			color: '#f8d62b',
 			comingSoon: false,
 			status: 'published',
@@ -20,7 +21,7 @@
 			name: 'Märchenzauber',
 			description: $t('app_slider.maerchenzauber_desc'),
 			longDescription: $t('app_slider.maerchenzauber_long_desc'),
-			icon: '/images/app-icons/maerchenzauber-logo-gradient.png',
+			icon: APP_ICONS.maerchenzauber,
 			color: '#FF6B9D',
 			comingSoon: true,
 			status: 'beta',
@@ -29,7 +30,7 @@
 			name: 'ManaDeck',
 			description: $t('app_slider.manadeck_desc'),
 			longDescription: $t('app_slider.manadeck_long_desc'),
-			icon: '/images/app-icons/manadeck-logo-gradient.png',
+			icon: APP_ICONS.manadeck,
 			color: '#8b5cf6',
 			comingSoon: true,
 			status: 'development',
@@ -38,7 +39,7 @@
 			name: 'Moodlit',
 			description: $t('app_slider.moodlit_desc'),
 			longDescription: $t('app_slider.moodlit_long_desc'),
-			icon: '/images/app-icons/moodlit-logo-gradient.png',
+			icon: APP_ICONS.moodlit,
 			color: '#9C27B0',
 			comingSoon: true,
 			status: 'planning',
@@ -47,7 +48,7 @@
 			name: 'Manacore',
 			description: $t('app_slider.manacore_desc'),
 			longDescription: $t('app_slider.manacore_long_desc'),
-			icon: '/images/app-icons/manacore-logo-gradient.png',
+			icon: APP_ICONS.manacore,
 			color: '#00BCD4',
 			comingSoon: true,
 			status: 'development',

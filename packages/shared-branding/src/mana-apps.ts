@@ -1,0 +1,216 @@
+/**
+ * Central configuration for all Mana ecosystem apps
+ * This is the single source of truth for AppSlider components
+ */
+
+import { APP_ICONS, type AppIconId } from './app-icons';
+
+export type AppStatus = 'published' | 'beta' | 'development' | 'planning';
+
+export interface ManaApp {
+	id: AppIconId;
+	name: string;
+	description: {
+		de: string;
+		en: string;
+	};
+	longDescription: {
+		de: string;
+		en: string;
+	};
+	icon: string; // Data URL from APP_ICONS
+	color: string;
+	comingSoon: boolean;
+	status: AppStatus;
+	url?: string; // Optional URL for the app
+}
+
+/**
+ * All apps in the Mana ecosystem
+ * Order determines display order in AppSlider
+ */
+export const MANA_APPS: ManaApp[] = [
+	{
+		id: 'chat',
+		name: 'ManaChat',
+		description: {
+			de: 'KI Chat Assistent',
+			en: 'AI Chat Assistant',
+		},
+		longDescription: {
+			de: 'Dein intelligenter KI-Begleiter für Gespräche, Fragen und kreative Aufgaben.',
+			en: 'Your intelligent AI companion for conversations, questions, and creative tasks.',
+		},
+		icon: APP_ICONS.chat,
+		color: '#0ea5e9',
+		comingSoon: false,
+		status: 'beta',
+	},
+	{
+		id: 'memoro',
+		name: 'Memoro',
+		description: {
+			de: 'KI Sprachnotizen',
+			en: 'AI Voice Memos',
+		},
+		longDescription: {
+			de: 'Verwandle deine Sprachnotizen in organisiertes, durchsuchbares Wissen mit KI-gestützter Transkription.',
+			en: 'Transform your voice memos into organized, searchable knowledge with AI-powered transcription.',
+		},
+		icon: APP_ICONS.memoro,
+		color: '#f8d62b',
+		comingSoon: false,
+		status: 'published',
+	},
+	{
+		id: 'presi',
+		name: 'Presi',
+		description: {
+			de: 'Präsentations-Creator',
+			en: 'Presentation Creator',
+		},
+		longDescription: {
+			de: 'Erstelle beeindruckende Präsentationen mit KI-gestützten Design-Vorschlägen.',
+			en: 'Create stunning presentations with AI-powered design suggestions.',
+		},
+		icon: APP_ICONS.presi,
+		color: '#f97316',
+		comingSoon: false,
+		status: 'development',
+	},
+	{
+		id: 'manadeck',
+		name: 'ManaDeck',
+		description: {
+			de: 'KI Karteikarten',
+			en: 'AI Flashcards',
+		},
+		longDescription: {
+			de: 'Lerne intelligenter mit KI-generierten Karteikarten und Spaced Repetition.',
+			en: 'Learn smarter with AI-generated flashcards and spaced repetition.',
+		},
+		icon: APP_ICONS.manadeck,
+		color: '#8b5cf6',
+		comingSoon: true,
+		status: 'development',
+	},
+	{
+		id: 'maerchenzauber',
+		name: 'Märchenzauber',
+		description: {
+			de: 'KI Geschichten',
+			en: 'AI Stories',
+		},
+		longDescription: {
+			de: 'Erstelle magische, personalisierte Geschichten für Kinder mit KI-gestütztem Storytelling.',
+			en: 'Create magical, personalized stories for children with AI-powered storytelling.',
+		},
+		icon: APP_ICONS.maerchenzauber,
+		color: '#FF6B9D',
+		comingSoon: true,
+		status: 'beta',
+	},
+	{
+		id: 'picture',
+		name: 'ManaPicture',
+		description: {
+			de: 'KI Bildgenerierung',
+			en: 'AI Image Generation',
+		},
+		longDescription: {
+			de: 'Erschaffe einzigartige Bilder mit der Kraft künstlicher Intelligenz.',
+			en: 'Create unique images with the power of artificial intelligence.',
+		},
+		icon: APP_ICONS.picture,
+		color: '#22c55e',
+		comingSoon: true,
+		status: 'development',
+	},
+	{
+		id: 'zitare',
+		name: 'Zitare',
+		description: {
+			de: 'Tägliche Inspiration',
+			en: 'Daily Inspiration',
+		},
+		longDescription: {
+			de: 'Entdecke inspirierende Zitate und Weisheiten für jeden Tag.',
+			en: 'Discover inspiring quotes and wisdom for every day.',
+		},
+		icon: APP_ICONS.zitare,
+		color: '#f59e0b',
+		comingSoon: true,
+		status: 'development',
+	},
+	{
+		id: 'wisekeep',
+		name: 'WiseKeep',
+		description: {
+			de: 'KI Wissensextraktion',
+			en: 'AI Knowledge Extraction',
+		},
+		longDescription: {
+			de: 'Extrahiere Weisheiten und Erkenntnisse aus Videos und Texten.',
+			en: 'Extract wisdom and insights from videos and texts.',
+		},
+		icon: APP_ICONS.wisekeep,
+		color: '#6366f1',
+		comingSoon: true,
+		status: 'planning',
+	},
+];
+
+/**
+ * Get a specific app by ID
+ */
+export function getManaApp(id: AppIconId): ManaApp | undefined {
+	return MANA_APPS.find((app) => app.id === id);
+}
+
+/**
+ * Get apps filtered by status
+ */
+export function getManaAppsByStatus(status: AppStatus): ManaApp[] {
+	return MANA_APPS.filter((app) => app.status === status);
+}
+
+/**
+ * Get only published/available apps
+ */
+export function getAvailableManaApps(): ManaApp[] {
+	return MANA_APPS.filter((app) => !app.comingSoon);
+}
+
+/**
+ * Status labels in German and English
+ */
+export const APP_STATUS_LABELS = {
+	de: {
+		published: 'Live',
+		beta: 'Beta',
+		development: 'In Entwicklung',
+		planning: 'Geplant',
+	},
+	en: {
+		published: 'Live',
+		beta: 'Beta',
+		development: 'In Development',
+		planning: 'Planned',
+	},
+} as const;
+
+/**
+ * Common labels for AppSlider in German and English
+ */
+export const APP_SLIDER_LABELS = {
+	de: {
+		title: 'Teil des Mana Ecosystems',
+		comingSoon: 'Demnächst',
+		openApp: 'App öffnen',
+	},
+	en: {
+		title: 'Part of the Mana Ecosystem',
+		comingSoon: 'Coming Soon',
+		openApp: 'Open App',
+	},
+} as const;
