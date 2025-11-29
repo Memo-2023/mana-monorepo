@@ -78,6 +78,10 @@
 		theme.toggleMode();
 	}
 
+	function handleThemeModeChange(mode: 'light' | 'dark' | 'system') {
+		theme.setMode(mode);
+	}
+
 	function handleLogout() {
 		auth.logout();
 		goto('/login');
@@ -167,6 +171,8 @@
 				showThemeVariants={true}
 				{themeVariantItems}
 				{currentThemeVariantLabel}
+				themeMode={theme.mode}
+				onThemeModeChange={handleThemeModeChange}
 				showLanguageSwitcher={false}
 				showLogout={true}
 				onLogout={handleLogout}

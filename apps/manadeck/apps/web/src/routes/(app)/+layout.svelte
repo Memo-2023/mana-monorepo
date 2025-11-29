@@ -18,7 +18,7 @@
 	let isCollapsed = $state(false);
 
 	// Get theme state
-	let effectiveMode = $derived(theme.effectiveMode);
+	let isDark = $derived(theme.isDark);
 
 	// Navigation items for ManaDeck
 	const navItems: PillNavItem[] = [
@@ -100,6 +100,10 @@
 		theme.toggleMode();
 	}
 
+	function handleThemeModeChange(mode: 'light' | 'dark' | 'system') {
+		theme.setMode(mode);
+	}
+
 	async function handleSignOut() {
 		await authStore.signOut();
 		goto('/login');
@@ -132,16 +136,16 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if authStore.loading}
-	<div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+	<div class="min-h-screen flex items-center justify-center bg-background">
 		<div class="text-center">
 			<div
-				class="inline-block animate-spin h-8 w-8 border-4 border-primary-500 border-t-transparent rounded-full"
+				class="inline-block animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"
 			></div>
-			<p class="mt-4 text-gray-500 dark:text-gray-400">Loading...</p>
+			<p class="mt-4 text-muted-foreground">Loading...</p>
 		</div>
 	</div>
 {:else if authStore.isAuthenticated}
-	<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+	<div class="min-h-screen bg-background">
 		<!-- Pill Navigation -->
 		<PillNavigation
 			items={navItems}
@@ -150,7 +154,7 @@
 			homeRoute="/decks"
 			onLogout={handleSignOut}
 			onToggleTheme={handleToggleTheme}
-			isDark={effectiveMode === 'dark'}
+			{isDark}
 			{isSidebarMode}
 			onModeChange={handleModeChange}
 			{isCollapsed}
@@ -159,6 +163,8 @@
 			showThemeVariants={true}
 			{themeVariantItems}
 			{currentThemeVariantLabel}
+			themeMode={theme.mode}
+			onThemeModeChange={handleThemeModeChange}
 			showLanguageSwitcher={false}
 			primaryColor="#6366f1"
 		/>

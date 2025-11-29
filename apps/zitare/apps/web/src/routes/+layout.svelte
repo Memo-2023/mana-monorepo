@@ -107,6 +107,10 @@
 		theme.toggleMode();
 	}
 
+	function handleThemeModeChange(mode: 'light' | 'dark' | 'system') {
+		theme.setMode(mode);
+	}
+
 	async function handleLogout() {
 		await authStore.signOut();
 		goto('/login');
@@ -169,6 +173,8 @@
 			showThemeVariants={true}
 			{themeVariantItems}
 			{currentThemeVariantLabel}
+			themeMode={theme.mode}
+			onThemeModeChange={handleThemeModeChange}
 			showLanguageSwitcher={false}
 			showLogout={authStore.isAuthenticated}
 			onLogout={handleLogout}

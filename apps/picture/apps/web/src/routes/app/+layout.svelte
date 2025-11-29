@@ -46,6 +46,10 @@
 		theme.toggleMode();
 	}
 
+	function handleThemeModeChange(mode: 'light' | 'dark' | 'system') {
+		theme.setMode(mode);
+	}
+
 	// Client-side auth check
 	$effect(() => {
 		if (authStore.initialized && !authStore.loading && !authStore.user) {
@@ -203,6 +207,8 @@
 				showThemeVariants={true}
 				{themeVariantItems}
 				{currentThemeVariantLabel}
+				themeMode={theme.mode}
+				onThemeModeChange={handleThemeModeChange}
 				showLanguageSwitcher={false}
 				primaryColor="#3b82f6"
 			/>
