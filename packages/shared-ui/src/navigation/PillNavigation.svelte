@@ -351,7 +351,7 @@
 					icon="palette"
 				>
 					{#snippet header()}
-						<div class="theme-mode-selector pill glass-pill">
+						<div class="theme-mode-selector glass-pill">
 							<button
 								type="button"
 								onclick={() => onThemeModeChange?.('light')}
@@ -908,10 +908,23 @@
 		transition: all 0.3s ease;
 	}
 
-	/* Theme mode selector in dropdown header - extends .pill.glass-pill */
+	/* Theme mode selector in dropdown header */
 	:global(.theme-mode-selector) {
+		display: flex !important;
+		align-items: center !important;
 		gap: 0.25rem !important;
 		padding: 0.25rem !important;
+		border-radius: 9999px !important;
+		background: rgba(245, 245, 245, 0.95) !important;
+		border: 1px solid rgba(0, 0, 0, 0.1) !important;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+		color: #374151 !important;
+	}
+
+	:global(.dark .theme-mode-selector) {
+		background: rgba(40, 40, 40, 0.95) !important;
+		border: 1px solid rgba(255, 255, 255, 0.15) !important;
+		color: #f3f4f6 !important;
 	}
 
 	:global(.mode-btn) {

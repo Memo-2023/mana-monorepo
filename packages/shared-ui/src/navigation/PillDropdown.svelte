@@ -250,7 +250,8 @@
 		cursor: pointer;
 	}
 
-	.glass-pill {
+	.glass-pill,
+	:global(.fan-container .glass-pill) {
 		background: rgba(255, 255, 255, 0.85);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
@@ -261,7 +262,8 @@
 		color: #374151;
 	}
 
-	:global(.dark) .glass-pill {
+	:global(.dark) .glass-pill,
+	:global(.dark .fan-container .glass-pill) {
 		background: rgba(255, 255, 255, 0.12);
 		border: 1px solid rgba(255, 255, 255, 0.15);
 		color: #f3f4f6;
