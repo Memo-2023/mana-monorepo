@@ -21,17 +21,17 @@
 	};
 </script>
 
-<div class="rounded-xl p-4 bg-content border border-theme">
-	<h3 class="mb-4 text-xl font-bold text-theme">{title}</h3>
+<div class="cost-card">
+	<h3 class="cost-card__title">{title}</h3>
 
-	<div class="space-y-3">
+	<div class="cost-card__list">
 		{#each costs as item}
-			<div class="flex items-center justify-between">
-				<div class="flex items-center">
+			<div class="cost-card__item">
+				<div class="cost-card__item-left">
 					<svg
-						class="mr-2 h-[18px] w-[18px]"
+						class="cost-card__icon"
 						fill="none"
-						stroke="#4287f5"
+						stroke="currentColor"
 						viewBox="0 0 24 24"
 						stroke-width="2"
 						stroke-linecap="round"
@@ -39,11 +39,11 @@
 					>
 						<path d={iconPaths[item.icon] || iconPaths['mic-outline']} />
 					</svg>
-					<p class="text-sm text-theme-secondary">
+					<p class="cost-card__action">
 						{item.action}
 					</p>
 				</div>
-				<p class="text-base font-semibold text-theme">
+				<p class="cost-card__cost">
 					{item.cost}
 					{manaLabel}
 				</p>
@@ -51,3 +51,65 @@
 		{/each}
 	</div>
 </div>
+
+<style>
+	.cost-card {
+		position: relative;
+		padding: 1rem;
+		border-radius: 0.75rem;
+		background: rgba(255, 255, 255, 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	}
+
+	:global(.dark) .cost-card {
+		background: rgba(255, 255, 255, 0.08);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+	}
+
+	.cost-card__title {
+		margin: 0 0 1rem 0;
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: hsl(var(--foreground));
+	}
+
+	.cost-card__list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.cost-card__item {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.cost-card__item-left {
+		display: flex;
+		align-items: center;
+	}
+
+	.cost-card__icon {
+		width: 1.125rem;
+		height: 1.125rem;
+		margin-right: 0.5rem;
+		color: hsl(var(--primary, 221 83% 53%));
+	}
+
+	.cost-card__action {
+		margin: 0;
+		font-size: 0.875rem;
+		color: hsl(var(--muted-foreground));
+	}
+
+	.cost-card__cost {
+		margin: 0;
+		font-size: 1rem;
+		font-weight: 600;
+		color: hsl(var(--foreground));
+	}
+</style>

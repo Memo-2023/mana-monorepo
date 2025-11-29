@@ -29,21 +29,15 @@
 <button
 	{disabled}
 	onclick={disabled ? undefined : onclick}
-	class="flex w-full h-12 items-center justify-between rounded-lg border px-4 font-medium transition-all duration-200"
-	class:bg-mana={variant === 'accent' && !disabled}
-	class:border-mana={variant === 'accent' && !disabled}
-	class:text-white={variant === 'accent' && !disabled}
-	class:bg-menu={variant === 'primary' && !disabled}
-	class:border-theme={variant === 'primary' && !disabled}
-	class:text-theme={variant === 'primary' && !disabled}
-	class:bg-content={variant === 'secondary' && !disabled}
-	class:hover:bg-menu-hover={!disabled}
-	class:opacity-50={disabled}
-	class:cursor-not-allowed={disabled}
+	class="subscription-button"
+	class:subscription-button--primary={variant === 'primary'}
+	class:subscription-button--secondary={variant === 'secondary'}
+	class:subscription-button--accent={variant === 'accent'}
+	class:subscription-button--disabled={disabled}
 >
-	<div class="flex items-center justify-center">
+	<div class="subscription-button__content">
 		<svg
-			class="mr-2 h-4 w-4"
+			class="subscription-button__icon subscription-button__icon--left"
 			fill="none"
 			stroke="currentColor"
 			viewBox="0 0 24 24"
@@ -57,7 +51,7 @@
 	</div>
 
 	<svg
-		class="ml-2 h-4 w-4"
+		class="subscription-button__icon subscription-button__icon--right"
 		fill="none"
 		stroke="currentColor"
 		viewBox="0 0 24 24"
@@ -68,3 +62,90 @@
 		<path d={iconPaths[iconName] || iconPaths['arrow-forward-outline']} />
 	</svg>
 </button>
+
+<style>
+	.subscription-button {
+		display: flex;
+		width: 100%;
+		height: 3rem;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 1rem;
+		border-radius: 0.5rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.subscription-button--primary {
+		background: rgba(0, 0, 0, 0.05);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		color: hsl(var(--foreground));
+	}
+
+	:global(.dark) .subscription-button--primary {
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+	}
+
+	.subscription-button--primary:hover:not(.subscription-button--disabled) {
+		background: rgba(0, 0, 0, 0.08);
+	}
+
+	:global(.dark) .subscription-button--primary:hover:not(.subscription-button--disabled) {
+		background: rgba(255, 255, 255, 0.15);
+	}
+
+	.subscription-button--secondary {
+		background: rgba(255, 255, 255, 0.8);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		color: hsl(var(--foreground));
+	}
+
+	:global(.dark) .subscription-button--secondary {
+		background: rgba(255, 255, 255, 0.08);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+	}
+
+	.subscription-button--secondary:hover:not(.subscription-button--disabled) {
+		background: rgba(255, 255, 255, 0.9);
+	}
+
+	:global(.dark) .subscription-button--secondary:hover:not(.subscription-button--disabled) {
+		background: rgba(255, 255, 255, 0.12);
+	}
+
+	.subscription-button--accent {
+		background: hsl(var(--primary, 221 83% 53%));
+		border: 1px solid hsl(var(--primary, 221 83% 53%));
+		color: white;
+	}
+
+	.subscription-button--accent:hover:not(.subscription-button--disabled) {
+		filter: brightness(1.1);
+	}
+
+	.subscription-button--disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.subscription-button__content {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.subscription-button__icon {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	.subscription-button__icon--left {
+		margin-right: 0.5rem;
+	}
+
+	.subscription-button__icon--right {
+		margin-left: 0.5rem;
+	}
+</style>

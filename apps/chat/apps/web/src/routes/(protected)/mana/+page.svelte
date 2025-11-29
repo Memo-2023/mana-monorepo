@@ -16,17 +16,24 @@
 	<title>Mana - ManaChat</title>
 </svelte:head>
 
-<div class="min-h-screen p-4 md:p-8" style="background-color: hsl(var(--color-background));">
-	<div class="mx-auto max-w-6xl">
-		<SubscriptionPage
-			appName="ManaChat"
-			onSubscribe={handleSubscribe}
-			onBuyPackage={handleBuyPackage}
-			currentPlanId="free"
-			pageTitle="Wähle dein Abo"
-			subscriptionsTitle="Abonnements"
-			packagesTitle="Einmal-Pakete"
-			yearlyDiscount="2 Monate gratis"
-		/>
-	</div>
+<div class="mana-page">
+	<SubscriptionPage
+		appName="ManaChat"
+		onSubscribe={handleSubscribe}
+		onBuyPackage={handleBuyPackage}
+		currentPlanId="free"
+		pageTitle="Wähle dein Abo"
+		subscriptionsTitle="Abonnements"
+		packagesTitle="Einmal-Pakete"
+		yearlyDiscount="2 Monate gratis"
+	/>
 </div>
+
+<style>
+	.mana-page {
+		min-height: 100%;
+		width: 100%;
+		overflow-x: hidden;
+		background-color: hsl(var(--background));
+	}
+</style>

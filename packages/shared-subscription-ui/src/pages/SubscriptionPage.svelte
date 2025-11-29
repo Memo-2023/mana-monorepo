@@ -84,35 +84,43 @@
 	<title>Mana - {appName}</title>
 </svelte:head>
 
-<div class="flex h-full flex-col">
+<div class="subscription-page">
 	<!-- Content Area -->
-	<div class="flex-1 overflow-y-auto">
-		<div class="mx-auto max-w-5xl pb-12">
-			<h1 class="mb-8 text-3xl font-bold text-theme">{pageTitle}</h1>
+	<div class="subscription-page__content">
+		<div class="subscription-page__container">
+			<!-- Header -->
+			<div class="subscription-page__header">
+				<div class="subscription-page__icon">
+					<svg viewBox="0 0 24 24" fill="currentColor" class="w-10 h-10">
+						<path d="M12.3 1c.03.05 7.3 9.67 7.3 13.7 0 4.03-3.27 7.3-7.3 7.3S5 18.73 5 14.7C5 10.66 12.3 1 12.3 1zm0 6.4c-.02.03-3.65 4.83-3.65 6.84 0 2.02 1.64 3.65 3.65 3.65s3.65-1.64 3.65-3.65c0-2.01-3.62-6.81-3.65-6.84z" />
+					</svg>
+				</div>
+				<h1 class="subscription-page__title">{pageTitle}</h1>
+				<p class="subscription-page__subtitle">Wähle das passende Paket für deine Bedürfnisse</p>
+			</div>
 
 			<!-- Active Section (Usage & Costs) -->
-			<section class="mb-8">
-				<div class="mb-4">
+			<section class="subscription-page__section">
+				<div class="subscription-page__usage-grid">
 					<UsageCard {usageData} currentPlan={currentPlanName()} />
-				</div>
-
-				<div class="mb-4">
 					<CostCard {costs} />
 				</div>
 			</section>
 
 			<!-- Billing Toggle -->
-			<BillingToggle
-				{billingCycle}
-				onChange={(cycle: BillingCycle) => (billingCycle = cycle)}
-				{yearlyDiscount}
-			/>
+			<div class="subscription-page__toggle">
+				<BillingToggle
+					{billingCycle}
+					onChange={(cycle: BillingCycle) => (billingCycle = cycle)}
+					{yearlyDiscount}
+				/>
+			</div>
 
 			<!-- Subscriptions Section -->
-			<section class="mb-12 pt-2">
-				<h2 class="mb-6 text-2xl font-bold text-theme">{subscriptionsTitle}</h2>
+			<section class="subscription-page__section">
+				<h2 class="subscription-page__section-title">{subscriptionsTitle}</h2>
 
-				<div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+				<div class="subscription-page__cards-grid">
 					<!-- Free Tier -->
 					<SubscriptionCard
 						plan={subscriptions.find((plan) => plan.id === 'free')!}
@@ -132,10 +140,10 @@
 			</section>
 
 			<!-- One-time Purchases Section -->
-			<section class="mb-12">
-				<h2 class="mb-6 text-2xl font-bold text-theme">{packagesTitle}</h2>
+			<section class="subscription-page__section">
+				<h2 class="subscription-page__section-title">{packagesTitle}</h2>
 
-				<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+				<div class="subscription-page__cards-grid">
 					{#each packages as pkg}
 						<PackageCard package={pkg} onSelect={onBuyPackage} />
 					{/each}
@@ -144,3 +152,128 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	.subscription-page {
+		display: flex;
+		flex-direction: column;
+		min-height: 100%;
+		width: 100%;
+	}
+
+	.subscription-page__content {
+		flex: 1;
+		overflow-x: hidden;
+		overflow-y: auto;
+		padding: 1rem;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.subscription-page__container {
+		max-width: 72rem;
+		margin: 0 auto;
+		padding-bottom: 3rem;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.subscription-page__header {
+		text-align: center;
+		margin-bottom: 2.5rem;
+	}
+
+	.subscription-page__icon {
+		width: 5rem;
+		height: 5rem;
+		margin: 0 auto 1.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 1rem;
+		background: rgba(255, 255, 255, 0.7);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		color: hsl(var(--primary, 221 83% 53%));
+	}
+
+	:global(.dark) .subscription-page__icon {
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
+	.subscription-page__title {
+		font-size: 1.875rem;
+		font-weight: 600;
+		color: hsl(var(--foreground));
+		margin: 0 0 0.75rem 0;
+	}
+
+	.subscription-page__subtitle {
+		font-size: 1rem;
+		color: hsl(var(--muted-foreground));
+		margin: 0;
+	}
+
+	.subscription-page__section {
+		margin-bottom: 2.5rem;
+	}
+
+	.subscription-page__section-title {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: hsl(var(--foreground));
+		margin: 0 0 1.5rem 0;
+	}
+
+	.subscription-page__usage-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 1rem;
+	}
+
+	@media (min-width: 768px) {
+		.subscription-page__usage-grid {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+
+	.subscription-page__toggle {
+		display: flex;
+		justify-content: center;
+		margin-bottom: 2rem;
+	}
+
+	.subscription-page__cards-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 1.5rem;
+	}
+
+	@media (min-width: 480px) {
+		.subscription-page__cards-grid {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	@media (min-width: 768px) {
+		.subscription-page__cards-grid {
+			grid-template-columns: repeat(2, 1fr);
+			gap: 1.5rem;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.subscription-page__cards-grid {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+
+	@media (min-width: 1280px) {
+		.subscription-page__cards-grid {
+			grid-template-columns: repeat(4, 1fr);
+		}
+	}
+</style>
