@@ -1,16 +1,49 @@
 <script lang="ts">
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import Sidebar from '$lib/components/layout/Sidebar.svelte';
-	import KeyboardShortcutsModal from '$lib/components/ui/KeyboardShortcutsModal.svelte';
-	import { currentTheme } from '$lib/stores/theme';
-	import { isSidebarCollapsed, toggleSidebar } from '$lib/stores/sidebar';
-	import { isUIVisible, toggleUI, showKeyboardShortcuts } from '$lib/stores/ui';
-	import { viewMode } from '$lib/stores/view';
 	import { page } from '$app/stores';
+	import { PillNavigation } from '@manacore/shared-ui';
+	import type { PillNavItem, PillNavElement } from '@manacore/shared-ui';
+	import KeyboardShortcutsModal from '$lib/components/ui/KeyboardShortcutsModal.svelte';
+	import { currentTheme, actualMode, toggleThemeMode } from '$lib/stores/theme';
+	import { isUIVisible, toggleUI, showKeyboardShortcuts } from '$lib/stores/ui';
+	import { viewMode, setViewMode, type ViewMode } from '$lib/stores/view';
+	import { browser } from '$app/environment';
 
 	let { children } = $props();
+
+	// PillNav state
+	let isSidebarMode = $state(false);
+	let isCollapsed = $state(false);
+
+	// Load persisted nav state
+	$effect(() => {
+		if (browser) {
+			const savedSidebarMode = localStorage.getItem('picture-nav-sidebar');
+			const savedCollapsed = localStorage.getItem('picture-nav-collapsed');
+			if (savedSidebarMode !== null) isSidebarMode = savedSidebarMode === 'true';
+			if (savedCollapsed !== null) isCollapsed = savedCollapsed === 'true';
+		}
+	});
+
+	function handleModeChange(isSidebar: boolean) {
+		isSidebarMode = isSidebar;
+		if (browser) localStorage.setItem('picture-nav-sidebar', String(isSidebar));
+	}
+
+	function handleCollapsedChange(collapsed: boolean) {
+		isCollapsed = collapsed;
+		if (browser) localStorage.setItem('picture-nav-collapsed', String(collapsed));
+	}
+
+	async function handleLogout() {
+		await authStore.signOut();
+		goto('/auth/login');
+	}
+
+	function handleToggleTheme() {
+		toggleThemeMode();
+	}
 
 	// Client-side auth check
 	$effect(() => {
@@ -19,9 +52,42 @@
 		}
 	});
 
+	// Navigation items
+	const navItems: PillNavItem[] = [
+		{ href: '/app/gallery', label: 'Galerie', icon: 'home' },
+		{ href: '/app/board', label: 'Moodboards', icon: 'grid' },
+		{ href: '/app/explore', label: 'Entdecken', icon: 'search' },
+		{ href: '/app/generate', label: 'Generieren', icon: 'fire' },
+		{ href: '/app/upload', label: 'Upload', icon: 'upload' },
+		{ href: '/app/tags', label: 'Tags', icon: 'tag' },
+		{ href: '/app/archive', label: 'Archiv', icon: 'archive' },
+		{ href: '/app/subscription', label: 'Abo', icon: 'creditCard' },
+	];
+
+	// View mode options for tab group
+	const viewModeOptions = [
+		{ id: 'single', icon: 'list', title: 'Liste (1)' },
+		{ id: 'grid3', icon: 'grid', title: 'Mittel (2)' },
+		{ id: 'gridSmall', icon: 'gridSmall', title: 'Klein (3)' },
+	];
+
+	// Elements (divider + view mode tabs)
+	let elements: PillNavElement[] = $derived([
+		{ type: 'divider' as const },
+		{
+			type: 'tabs' as const,
+			sectionLabel: 'Ansicht',
+			options: viewModeOptions,
+			value: $viewMode === 'grid5' ? 'gridSmall' : $viewMode,
+			onChange: (id: string) => {
+				const mode = id === 'gridSmall' ? 'grid5' : id as ViewMode;
+				setViewMode(mode);
+			},
+		},
+	]);
+
 	// Global keyboard shortcuts
 	function handleKeyDown(e: KeyboardEvent) {
-		// Ignore if user is typing in an input/textarea
 		const target = e.target as HTMLElement;
 		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
 			return;
@@ -65,19 +131,15 @@
 				break;
 			case '1':
 				e.preventDefault();
-				viewMode.set('single');
+				setViewMode('single');
 				break;
 			case '2':
 				e.preventDefault();
-				viewMode.set('grid3');
+				setViewMode('grid3');
 				break;
 			case '3':
 				e.preventDefault();
-				viewMode.set('grid5');
-				break;
-			case 's':
-				e.preventDefault();
-				toggleSidebar();
+				setViewMode('grid5');
 				break;
 		}
 	}
@@ -96,20 +158,34 @@
 	</div>
 {:else if authStore.user}
 	<div class="min-h-screen" style="background-color: {$currentTheme.background};">
-		<!-- Sidebar (conditionally visible) -->
+		<!-- PillNavigation (conditionally visible) -->
 		{#if $isUIVisible}
-			<Sidebar />
+			<PillNavigation
+				items={navItems}
+				{elements}
+				currentPath={$page.url.pathname}
+				appName="Picture"
+				homeRoute="/app/gallery"
+				onLogout={handleLogout}
+				onToggleTheme={handleToggleTheme}
+				isDark={$actualMode === 'dark'}
+				{isSidebarMode}
+				onModeChange={handleModeChange}
+				{isCollapsed}
+				onCollapsedChange={handleCollapsedChange}
+				showThemeToggle={true}
+				showLanguageSwitcher={false}
+				primaryColor="#3b82f6"
+			/>
 		{/if}
 
 		<!-- Main Content Area -->
 		<main
-			class="transition-all duration-300 {$isSidebarCollapsed || !$isUIVisible
-				? 'lg:pl-0'
-				: 'lg:pl-[17rem]'}"
+			class="main-content transition-all duration-300"
+			class:sidebar-mode={isSidebarMode && !isCollapsed && $isUIVisible}
+			class:floating-mode={!isSidebarMode && !isCollapsed && $isUIVisible}
 		>
-			<!-- Desktop: Left padding when sidebar is open -->
-			<!-- Mobile: Top padding for header + Bottom padding for nav -->
-			<div class="min-h-screen pb-20 pt-16 lg:pb-0 lg:pt-0">
+			<div class="min-h-screen">
 				{@render children?.()}
 			</div>
 		</main>
@@ -118,3 +194,26 @@
 		<KeyboardShortcutsModal />
 	</div>
 {/if}
+
+<style>
+	/* Floating nav mode - add top padding for fixed nav */
+	.main-content.floating-mode {
+		padding-top: 80px;
+	}
+
+	/* Sidebar mode - add left padding for sidebar nav */
+	.main-content.sidebar-mode {
+		padding-left: 180px;
+	}
+
+	/* Mobile adjustments */
+	@media (max-width: 768px) {
+		.main-content.floating-mode {
+			padding-top: 70px;
+		}
+		.main-content.sidebar-mode {
+			padding-left: 0;
+			padding-top: 70px;
+		}
+	}
+</style>

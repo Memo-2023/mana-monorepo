@@ -4,6 +4,7 @@ export { default as Sidebar } from './Sidebar.svelte';
 export { default as SidebarSection } from './SidebarSection.svelte';
 export { default as PillNavigation } from './PillNavigation.svelte';
 export { default as PillDropdown } from './PillDropdown.svelte';
+export { default as PillTabGroup } from './PillTabGroup.svelte';
 export type {
 	NavItem,
 	NavbarProps,
@@ -13,4 +14,8 @@ export type {
 	PillNavItem,
 	PillDropdownItem,
 	PillNavigationProps,
+	PillTabOption,
+	PillTabGroupConfig,
+	PillDivider,
+	PillNavElement,
 } from './types';

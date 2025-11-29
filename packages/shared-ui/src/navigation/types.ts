@@ -39,6 +39,44 @@ export interface PillDropdownItem {
 	active?: boolean;
 }
 
+// ============ Pill Tab Group Types ============
+
+export interface PillTabOption {
+	/** Unique identifier for the tab */
+	id: string;
+	/** Icon name (predefined) */
+	icon?: string;
+	/** Custom SVG icon HTML */
+	iconSvg?: string;
+	/** Optional label (shown in sidebar mode) */
+	label?: string;
+	/** Tooltip text */
+	title?: string;
+	/** Whether this option is disabled */
+	disabled?: boolean;
+}
+
+export interface PillTabGroupConfig {
+	/** Discriminator for type checking */
+	type: 'tabs';
+	/** Tab options */
+	options: PillTabOption[];
+	/** Currently selected tab id */
+	value: string;
+	/** Called when selection changes */
+	onChange: (id: string) => void;
+	/** Optional section label (shown above in sidebar mode) */
+	sectionLabel?: string;
+}
+
+export interface PillDivider {
+	/** Discriminator for type checking */
+	type: 'divider';
+}
+
+/** Union type for all elements that can appear in PillNavigation */
+export type PillNavElement = PillNavItem | PillTabGroupConfig | PillDivider;
+
 export interface PillNavigationProps {
 	/** Navigation items */
 	items: PillNavItem[];

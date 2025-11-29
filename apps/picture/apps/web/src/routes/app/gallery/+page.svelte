@@ -18,6 +18,7 @@
 	import ContextMenu from '$lib/components/ui/ContextMenu.svelte';
 	import ImageSkeleton from '$lib/components/ui/ImageSkeleton.svelte';
 	import ViewModeSwitcher from '$lib/components/ui/ViewModeSwitcher.svelte';
+	import TagPills from '$lib/components/tags/TagPills.svelte';
 	import { onMount } from 'svelte';
 
 	let loadingMore = $state(false);
@@ -118,6 +119,70 @@
 <svelte:head>
 	<title>Gallery - Picture</title>
 </svelte:head>
+
+<!-- Filter Bar -->
+<div class="sticky top-0 z-20 px-4 py-3">
+	<div class="flex flex-wrap items-center gap-3">
+		<!-- Favorites Toggle -->
+		<button
+			onclick={() => showFavoritesOnly.update((v) => !v)}
+			class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all {$showFavoritesOnly
+				? 'bg-blue-600 text-white'
+				: 'bg-gray-100/80 text-gray-700 backdrop-blur-xl hover:bg-gray-200/80 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700/80'}"
+		>
+			<svg
+				class="h-4 w-4"
+				fill={$showFavoritesOnly ? 'currentColor' : 'none'}
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+				/>
+			</svg>
+			<span>Favoriten</span>
+		</button>
+
+		<!-- Tags -->
+		{#if $tags.length > 0}
+			<div class="flex flex-wrap items-center gap-2">
+				<span class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Tags:</span>
+				<TagPills />
+			</div>
+		{/if}
+
+		<!-- Reset Filter -->
+		{#if $selectedTags.length > 0 || $showFavoritesOnly}
+			<button
+				onclick={() => {
+					selectedTags.set([]);
+					showFavoritesOnly.set(false);
+				}}
+				class="ml-auto text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+			>
+				Filter zurücksetzen
+			</button>
+		{/if}
+	</div>
+
+	<!-- Active Filter Summary -->
+	{#if $selectedTags.length > 0 || $showFavoritesOnly}
+		<div class="mt-2 rounded-lg bg-blue-50/80 px-3 py-1.5 backdrop-blur-xl dark:bg-blue-900/30">
+			<p class="text-xs font-medium text-blue-900 dark:text-blue-100">
+				{#if $showFavoritesOnly && $selectedTags.length > 0}
+					Favoriten + {$selectedTags.length} {$selectedTags.length === 1 ? 'Tag' : 'Tags'}
+				{:else if $showFavoritesOnly}
+					Nur Favoriten
+				{:else}
+					{$selectedTags.length} {$selectedTags.length === 1 ? 'Tag' : 'Tags'} ausgewählt
+				{/if}
+			</p>
+		</div>
+	{/if}
+</div>
 
 {#if $isLoading}
 	<div class="px-4 py-8">

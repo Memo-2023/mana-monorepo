@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { PillNavItem, PillDropdownItem } from './types';
+	import type { PillNavItem, PillDropdownItem, PillNavElement, PillTabGroupConfig } from './types';
 	import PillDropdown from './PillDropdown.svelte';
+	import PillTabGroup from './PillTabGroup.svelte';
 
 	interface Props {
 		/** Navigation items */
@@ -38,6 +39,10 @@
 		showThemeToggle?: boolean;
 		/** Primary color for active state (CSS custom property or hex) */
 		primaryColor?: string;
+		/** Additional elements (tab groups, dividers) to show after nav items */
+		elements?: PillNavElement[];
+		/** Show logout button */
+		showLogout?: boolean;
 	}
 
 	let {
@@ -58,7 +63,22 @@
 		showLanguageSwitcher = false,
 		showThemeToggle = true,
 		primaryColor,
+		elements = [],
+		showLogout = true,
 	}: Props = $props();
+
+	// Type guards for elements
+	function isTabGroup(element: PillNavElement): element is PillTabGroupConfig {
+		return 'type' in element && element.type === 'tabs';
+	}
+
+	function isDivider(element: PillNavElement): element is { type: 'divider' } {
+		return 'type' in element && element.type === 'divider';
+	}
+
+	function isNavItem(element: PillNavElement): element is PillNavItem {
+		return 'href' in element;
+	}
 
 	// Local state for uncontrolled mode
 	let internalSidebarMode = $state(false);
@@ -137,6 +157,10 @@
 		chevronUp: 'M5 15l7-7 7 7',
 		chevronLeft: 'M15 19l-7-7 7-7',
 		menu: 'M4 6h16M4 12h16M4 18h16',
+		fire: 'M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z',
+		grid: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z',
+		gridSmall:
+			'M4 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM10 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5zM16 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5zM4 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zM10 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2zM16 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2z',
 	};
 
 	function getIconPath(name: string): string {
@@ -233,6 +257,36 @@
 				</a>
 			{/each}
 
+			<!-- Additional Elements (Tab Groups, Dividers) -->
+			{#each elements as element}
+				{#if isTabGroup(element)}
+					<PillTabGroup
+						options={element.options}
+						value={element.value}
+						onChange={element.onChange}
+						sectionLabel={element.sectionLabel}
+						{isSidebarMode}
+						{primaryColor}
+					/>
+				{:else if isDivider(element)}
+					<div class="pill-divider" class:sidebar-divider={isSidebarMode}></div>
+				{:else if isNavItem(element)}
+					<a href={element.href} class="pill glass-pill" class:active={isActive(element.href)}>
+						{#if element.icon}
+							<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d={getIconPath(element.icon)}
+								/>
+							</svg>
+						{/if}
+						<span class="pill-label">{element.label}</span>
+					</a>
+				{/if}
+			{/each}
+
 			<!-- Language Switcher -->
 			{#if showLanguageSwitcher && languageItems.length > 0}
 				<PillDropdown
@@ -274,7 +328,7 @@
 			{/if}
 
 			<!-- Logout -->
-			{#if onLogout}
+			{#if onLogout && showLogout}
 				<button onclick={onLogout} class="pill glass-pill logout-pill" title="Logout">
 					<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -427,6 +481,25 @@
 		);
 		border-color: var(--pill-primary-color, var(--color-primary-500, rgba(248, 214, 43, 0.4)));
 		color: var(--pill-primary-color, var(--color-primary-500, #f8d62b));
+	}
+
+	/* Divider */
+	.pill-divider {
+		width: 1px;
+		height: 1.5rem;
+		background: rgba(0, 0, 0, 0.15);
+		flex-shrink: 0;
+		margin: 0 0.25rem;
+	}
+
+	:global(.dark) .pill-divider {
+		background: rgba(255, 255, 255, 0.2);
+	}
+
+	.sidebar-divider {
+		width: 100%;
+		height: 1px;
+		margin: 0.5rem 0;
 	}
 
 	/* Logout pill */

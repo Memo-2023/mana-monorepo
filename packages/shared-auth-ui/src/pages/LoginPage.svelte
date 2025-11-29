@@ -253,6 +253,12 @@
 			emailInput.focus();
 		}
 	}
+
+	// Dev credentials auto-fill (only works in development)
+	function fillDevCredentials() {
+		email = 'till.schneider@memoro.ai';
+		password = 'Aa-12345678';
+	}
 </script>
 
 <svelte:head>
@@ -283,23 +289,24 @@
 	<main>
 		<!-- Top Section - Logo -->
 		<div class="flex flex-col items-center justify-center pt-16 pb-8">
-			<div
-				class="flex items-center justify-center rounded-full transition-all mb-4"
+			<button
+				type="button"
+				onclick={fillDevCredentials}
+				class="flex items-center justify-center rounded-full transition-all mb-4 cursor-pointer hover:scale-105 active:scale-95"
 				class:success-pulse={showSuccess}
 				style="width: 120px; height: 120px; border: 3px solid {showSuccess
 					? '#22c55e'
 					: primaryColor}; background-color: {isDark ? '#000' : '#fff'}; box-shadow: {isDark
 					? '0 6px 12px rgba(0, 0, 0, 0.4)'
 					: '0 6px 12px rgba(0, 0, 0, 0.15)'};"
-				role="img"
-				aria-label="{appName} logo"
+				aria-label="{appName} logo - Click to fill dev credentials"
 			>
 				{#if showSuccess}
 					<Icon name="check" size={55} color="#22c55e" />
 				{:else}
 					<Logo size={55} color={primaryColor} />
 				{/if}
-			</div>
+			</button>
 			<h1 class="text-2xl font-semibold" style="color: {isDark ? '#ffffff' : '#000000'};">
 				{appName}
 			</h1>
