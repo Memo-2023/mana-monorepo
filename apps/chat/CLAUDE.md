@@ -66,7 +66,7 @@ pnpm preview                     # Preview production build
 - **Mobile**: React Native 0.76.7 + Expo SDK 52, NativeWind, Expo Router
 - **Web**: SvelteKit 2.x, Svelte 5, Tailwind CSS 4
 - **Landing**: Astro 5.16, Tailwind CSS
-- **Backend**: NestJS 10, Azure OpenAI, Supabase
+- **Backend**: NestJS 10, Google Gemini AI, Supabase
 - **Types**: TypeScript 5.x
 
 ## Architecture
@@ -89,12 +89,11 @@ pnpm preview                     # Preview production build
 #### Backend (.env)
 
 ```
-AZURE_OPENAI_ENDPOINT=https://...
-AZURE_OPENAI_API_KEY=...
-AZURE_OPENAI_API_VERSION=2024-12-01-preview
+GOOGLE_GENAI_API_KEY=...
 SUPABASE_URL=https://...
 SUPABASE_SERVICE_KEY=...
-PORT=3001
+PORT=3002
+DEV_BYPASS_AUTH=true  # Optional: Skip auth in development
 ```
 
 #### Mobile (.env)
@@ -115,11 +114,11 @@ EXPO_PUBLIC_BACKEND_URL=http://localhost:3001
 
 ## AI Models Available
 
-| Model ID                             | Name        | Description               |
-| ------------------------------------ | ----------- | ------------------------- |
-| 550e8400-e29b-41d4-a716-446655440000 | GPT-O3-Mini | Fast, efficient responses |
-| 550e8400-e29b-41d4-a716-446655440004 | GPT-4o-Mini | Compact, powerful         |
-| 550e8400-e29b-41d4-a716-446655440005 | GPT-4o      | Most advanced             |
+| Model ID                             | Name              | Description                    | Default |
+| ------------------------------------ | ----------------- | ------------------------------ | ------- |
+| 550e8400-e29b-41d4-a716-446655440101 | Gemini 2.5 Flash  | Fast, efficient responses      | Yes     |
+| 550e8400-e29b-41d4-a716-446655440102 | Gemini 2.0 Flash-Lite | Ultra-lightweight model    | No      |
+| 550e8400-e29b-41d4-a716-446655440103 | Gemini 2.5 Pro    | Most capable model             | No      |
 
 ## Important Notes
 
