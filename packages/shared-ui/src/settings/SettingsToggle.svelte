@@ -173,8 +173,15 @@
 	}
 
 	.settings-toggle__switch--on {
-		background-color: hsl(var(--primary));
+		background: hsl(var(--primary));
 		border-color: hsl(var(--primary));
+		box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
+	}
+
+	:global(.dark) .settings-toggle__switch--on {
+		background: hsl(var(--primary));
+		border-color: hsl(var(--primary));
+		box-shadow: 0 0 0 2px hsl(var(--primary) / 0.3);
 	}
 
 	.settings-toggle__thumb {
@@ -193,6 +200,19 @@
 
 	.settings-toggle__switch--on .settings-toggle__thumb {
 		transform: translateX(1.25rem);
+	}
+
+	.settings-toggle__switch:hover:not(:disabled) {
+		border-color: rgba(0, 0, 0, 0.2);
+	}
+
+	:global(.dark) .settings-toggle__switch:hover:not(:disabled) {
+		border-color: rgba(255, 255, 255, 0.25);
+	}
+
+	.settings-toggle__switch--on:hover:not(:disabled) {
+		filter: brightness(1.1);
+		border-color: hsl(var(--primary));
 	}
 
 	.settings-toggle__switch:focus-visible {
