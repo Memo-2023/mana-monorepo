@@ -75,7 +75,7 @@ async function seed() {
 				isDefault: false,
 			},
 			// ============================================
-			// Azure OpenAI GPT-5 Family (Alternative)
+			// Azure OpenAI GPT-5 Family (Inactive - no deployment)
 			// ============================================
 			{
 				id: '550e8400-e29b-41d4-a716-446655440001',
@@ -87,7 +87,7 @@ async function seed() {
 					max_tokens: 8192,
 					deployment: 'gpt-5-mini',
 				},
-				isActive: true,
+				isActive: false,
 				isDefault: false,
 			},
 			{
@@ -100,7 +100,7 @@ async function seed() {
 					max_tokens: 4096,
 					deployment: 'gpt-5-nano',
 				},
-				isActive: true,
+				isActive: false,
 				isDefault: false,
 			},
 			{
@@ -113,7 +113,7 @@ async function seed() {
 					max_tokens: 16384,
 					deployment: 'gpt-5-chat',
 				},
-				isActive: true,
+				isActive: false,
 				isDefault: false,
 			},
 			{
@@ -126,7 +126,7 @@ async function seed() {
 					max_tokens: 32768,
 					deployment: 'gpt-5',
 				},
-				isActive: true,
+				isActive: false,
 				isDefault: false,
 			},
 			{
@@ -139,10 +139,10 @@ async function seed() {
 					max_tokens: 32768,
 					deployment: 'gpt-5-codex',
 				},
-				isActive: true,
+				isActive: false,
 				isDefault: false,
 			},
-			// O-Series Reasoning Models
+			// O-Series Reasoning Models (Inactive - no deployment)
 			{
 				id: '550e8400-e29b-41d4-a716-446655440006',
 				name: 'o4-mini',
@@ -153,7 +153,7 @@ async function seed() {
 					max_tokens: 16384,
 					deployment: 'o4-mini',
 				},
-				isActive: true,
+				isActive: false,
 				isDefault: false,
 			},
 			{
@@ -166,7 +166,7 @@ async function seed() {
 					max_tokens: 32768,
 					deployment: 'o3',
 				},
-				isActive: true,
+				isActive: false,
 				isDefault: false,
 			},
 		];
