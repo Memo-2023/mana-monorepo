@@ -178,6 +178,11 @@
 <style>
 	.pill-dropdown {
 		position: relative;
+		z-index: 1;
+	}
+
+	.pill-dropdown:has(.fan-container) {
+		z-index: 10000;
 	}
 
 	.trigger-button {
@@ -338,6 +343,8 @@
 		animation: fanIn 0.15s ease-out forwards;
 		opacity: 0;
 		transform: translateY(10px);
+		position: relative;
+		z-index: 1;
 	}
 
 	.fan-up .dropdown-header {

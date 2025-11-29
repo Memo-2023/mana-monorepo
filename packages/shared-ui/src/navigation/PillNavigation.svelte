@@ -84,6 +84,8 @@
 		settingsHref?: string;
 		/** Mana/subscription page href */
 		manaHref?: string;
+		/** Profile page href */
+		profileHref?: string;
 	}
 
 	let {
@@ -116,6 +118,7 @@
 		userEmail,
 		settingsHref = '/settings',
 		manaHref,
+		profileHref,
 	}: Props = $props();
 
 	// Type guards for elements
@@ -224,6 +227,7 @@
 			'M4 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM10 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5zM16 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5zM4 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zM10 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2zM16 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2z',
 		palette:
 			'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01',
+		chat: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
 	};
 
 	function getIconPath(name: string): string {
@@ -238,37 +242,6 @@
 		style={primaryColor ? `--pill-primary-color: ${primaryColor}` : ''}
 	>
 		<div class="pill-nav-container" class:sidebar-container={isSidebarMode}>
-			<!-- Control Button (left position in horizontal mode) -->
-			{#if !isSidebarMode}
-				<div class="pill glass-pill segmented-control">
-					<button
-						onclick={toggleSidebarMode}
-						class="segment-btn"
-						title="Switch to sidebar navigation"
-					>
-						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d={getIconPath('chevronDown')}
-							/>
-						</svg>
-					</button>
-					<div class="segment-divider"></div>
-					<button onclick={collapseNav} class="segment-btn" title="Collapse navigation">
-						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d={getIconPath('chevronLeft')}
-							/>
-						</svg>
-					</button>
-				</div>
-			{/if}
-
 			<!-- Logo pill / App Switcher -->
 			{#if showAppSwitcher && appItems.length > 0}
 				<PillDropdown
@@ -378,7 +351,7 @@
 					icon="palette"
 				>
 					{#snippet header()}
-						<div class="theme-mode-selector">
+						<div class="theme-mode-selector pill glass-pill">
 							<button
 								type="button"
 								onclick={() => onThemeModeChange?.('light')}
@@ -469,6 +442,19 @@
 			{#if userEmail}
 				<PillDropdown
 					items={[
+						...(profileHref
+							? [
+									{
+										id: 'profile',
+										label: 'Profil',
+										icon: 'user',
+										onClick: () => {
+											window.location.href = profileHref;
+										},
+										active: currentPath === profileHref,
+									},
+								]
+							: []),
 						{
 							id: 'settings',
 							label: 'Einstellungen',
@@ -503,6 +489,37 @@
 					</svg>
 					<span class="pill-label">Logout</span>
 				</button>
+			{/if}
+
+			<!-- Control Button (right position in horizontal mode, bottom in sidebar mode) -->
+			{#if !isSidebarMode}
+				<div class="pill glass-pill segmented-control">
+					<button onclick={collapseNav} class="segment-btn" title="Collapse navigation">
+						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d={getIconPath('chevronLeft')}
+							/>
+						</svg>
+					</button>
+					<div class="segment-divider"></div>
+					<button
+						onclick={toggleSidebarMode}
+						class="segment-btn"
+						title="Switch to sidebar navigation"
+					>
+						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d={getIconPath('chevronDown')}
+							/>
+						</svg>
+					</button>
+				</div>
 			{/if}
 
 			<!-- Control Button (bottom position in sidebar mode) -->
@@ -714,13 +731,30 @@
 		gap: 0.5rem;
 		overflow-y: auto;
 		overflow-x: hidden;
-		padding: 0.5rem 0.75rem;
+		padding: 1rem 1rem;
 		height: 100%;
 	}
 
 	.sidebar-container .pill {
 		justify-content: flex-start;
 		width: 100%;
+	}
+
+	.sidebar-container :global(.pill-dropdown) {
+		width: 100%;
+	}
+
+	.sidebar-container :global(.pill-dropdown .trigger-button) {
+		width: 100%;
+		justify-content: flex-start;
+	}
+
+	.sidebar-container .segmented-control {
+		width: 100%;
+	}
+
+	.sidebar-container .segmented-control .segment-btn {
+		flex: 1;
 	}
 
 	/* Transparent pills in sidebar mode */
@@ -820,6 +854,14 @@
 		transition: background 0.2s;
 	}
 
+	.segment-btn:first-child {
+		border-radius: 9999px 0 0 9999px;
+	}
+
+	.segment-btn:last-child {
+		border-radius: 0 9999px 9999px 0;
+	}
+
 	.segment-btn:hover {
 		background: rgba(0, 0, 0, 0.05);
 	}
@@ -839,7 +881,7 @@
 	}
 
 	.sidebar-segmented {
-		margin: 0 0.75rem;
+		margin: 0;
 	}
 
 	/* FAB for collapsed state */
@@ -866,28 +908,13 @@
 		transition: all 0.3s ease;
 	}
 
-	/* Theme mode selector in dropdown header */
-	.theme-mode-selector {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		padding: 0.25rem;
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		border-radius: 9999px;
-		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	/* Theme mode selector in dropdown header - extends .pill.glass-pill */
+	:global(.theme-mode-selector) {
+		gap: 0.25rem !important;
+		padding: 0.25rem !important;
 	}
 
-	:global(.dark) .theme-mode-selector {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-	}
-
-	.mode-btn {
+	:global(.mode-btn) {
 		display: flex;
 		flex: 1;
 		align-items: center;
@@ -901,19 +928,19 @@
 		transition: all 0.15s;
 	}
 
-	:global(.dark) .mode-btn {
+	:global(.dark .mode-btn) {
 		color: #f3f4f6;
 	}
 
-	.mode-btn:hover:not(.active) {
+	:global(.mode-btn:hover:not(.active)) {
 		background: rgba(0, 0, 0, 0.05);
 	}
 
-	:global(.dark) .mode-btn:hover:not(.active) {
+	:global(.dark .mode-btn:hover:not(.active)) {
 		background: rgba(255, 255, 255, 0.1);
 	}
 
-	.mode-btn.active {
+	:global(.mode-btn.active) {
 		background: var(--pill-primary-color, var(--color-primary-500, rgba(248, 214, 43, 0.2)));
 		background: color-mix(
 			in srgb,
@@ -922,7 +949,7 @@
 		);
 	}
 
-	:global(.dark) .mode-btn.active {
+	:global(.dark .mode-btn.active) {
 		background: color-mix(
 			in srgb,
 			var(--pill-primary-color, var(--color-primary-500, #3b82f6)) 30%,
@@ -930,7 +957,7 @@
 		);
 	}
 
-	.mode-icon {
+	:global(.mode-icon) {
 		width: 1rem;
 		height: 1rem;
 	}

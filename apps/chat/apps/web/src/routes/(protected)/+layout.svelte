@@ -56,6 +56,7 @@
 		{ href: '/spaces', label: 'Spaces', icon: 'building' },
 		{ href: '/documents', label: 'Dokumente', icon: 'archive' },
 		{ href: '/archive', label: 'Archiv', icon: 'list' },
+		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
 	// User email for user dropdown
@@ -188,6 +189,7 @@
 			{userEmail}
 			settingsHref="/settings"
 			manaHref="/mana"
+			profileHref="/profile"
 		/>
 
 		<!-- Main Content with dynamic padding based on nav mode -->
