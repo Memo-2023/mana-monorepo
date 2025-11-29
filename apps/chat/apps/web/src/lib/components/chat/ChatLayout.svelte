@@ -103,17 +103,21 @@
 >
 	<!-- Left Column: Conversation List -->
 	<div
-		class="relative flex flex-shrink-0 flex-col bg-muted/30 border-r border-border"
+		class="relative flex flex-shrink-0 flex-col bg-background"
 		style="width: {leftColumnWidth}px;"
 	>
-		<!-- Search Bar -->
-		<div class="px-3 py-3 border-b border-border">
+		<!-- Floating Search Bar -->
+		<div
+			class="absolute top-0 left-0 right-0 z-20 py-3 pr-3 transition-all duration-300"
+			class:pl-16={$isNavCollapsed}
+			class:pl-4={!$isNavCollapsed}
+		>
 			<div class="relative">
 				<input
 					type="text"
 					bind:value={searchQuery}
 					placeholder="Konversationen durchsuchen..."
-					class="w-full rounded-xl border border-border bg-white/70 dark:bg-black/50 backdrop-blur-xl px-4 py-2.5 pl-10 text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
+					class="w-full rounded-xl bg-white/70 dark:bg-white/10 backdrop-blur-xl border border-black/10 dark:border-white/20 px-4 py-2.5 pl-10 text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-lg"
 				/>
 				<MagnifyingGlass
 					size={16}
@@ -134,15 +138,18 @@
 
 		<!-- Conversation List (Scrollable) -->
 		<div class="flex-1 overflow-hidden flex flex-col">
-			<div class="flex-1 overflow-y-auto py-3 px-3 scrollbar-hide">
+			<div class="flex-1 overflow-y-auto pl-4 pr-3 pt-[68px] pb-3 scrollbar-hide">
 				<!-- New Chat Button -->
 				<a
 					href="/chat"
 					class="flex items-center gap-2 w-full mb-3 px-4 py-2.5 rounded-xl
-							 bg-primary text-primary-foreground font-medium text-sm
-							 shadow-md hover:bg-primary/90 transition-colors"
+							 bg-white/80 dark:bg-white/10 backdrop-blur-xl
+							 border border-black/10 dark:border-white/20
+							 text-foreground font-medium text-sm
+							 shadow-md hover:shadow-lg hover:bg-white dark:hover:bg-white/20
+							 transition-all duration-200 hover:-translate-y-0.5"
 				>
-					<Plus size={18} weight="bold" />
+					<Plus size={18} weight="bold" class="text-primary" />
 					Neuer Chat
 				</a>
 
@@ -162,7 +169,7 @@
 							</p>
 							<button
 								onclick={() => (searchQuery = '')}
-								class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+								class="rounded-xl bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-black/10 dark:border-white/20 px-4 py-2 text-sm font-medium text-foreground shadow-md hover:shadow-lg transition-all"
 							>
 								Suche leeren
 							</button>
@@ -176,10 +183,10 @@
 					{#each filteredConversations as conv (conv.id)}
 						<a
 							href="/chat/{conv.id}"
-							class="block w-full rounded-xl border bg-surface p-4 text-left transition-all mb-3 hover:shadow-md
+							class="block w-full rounded-xl bg-white/60 dark:bg-white/5 backdrop-blur-sm border border-black/10 dark:border-white/20 p-4 text-left transition-all mb-3 hover:shadow-md hover:bg-white/80 dark:hover:bg-white/10
 								   {isActive(conv.id)
-								? 'border-primary bg-primary/5 shadow-md'
-								: 'border-border hover:bg-muted/50'}"
+								? 'bg-white/90 dark:bg-white/15 shadow-md border-primary/30'
+								: ''}"
 						>
 							<!-- Title Row -->
 							<div class="mb-1.5 flex items-center gap-2">
@@ -230,7 +237,7 @@
 	></button>
 
 	<!-- Right Column: Chat Content -->
-	<div class="flex flex-1 flex-col bg-surface overflow-hidden">
+	<div class="flex flex-1 flex-col bg-background overflow-hidden">
 		{@render children()}
 	</div>
 </div>

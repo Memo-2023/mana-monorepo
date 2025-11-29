@@ -59,18 +59,18 @@
 		// Add optimistic user message
 		const tempUserMessage: Message = {
 			id: `temp-${Date.now()}`,
-			conversation_id: '',
+			conversationId: '',
 			sender: 'user',
-			message_text: text,
-			created_at: new Date().toISOString(),
+			messageText: text,
+			createdAt: new Date().toISOString(),
 		};
 		messages = [...messages, tempUserMessage];
 
 		try {
 			// Determine mode and model based on template
 			const mode = selectedTemplate ? 'template' : 'free';
-			const modelToUse = selectedTemplate?.model_id || selectedModelId;
-			const docMode = selectedTemplate?.document_mode || documentMode;
+			const modelToUse = selectedTemplate?.modelId || selectedModelId;
+			const docMode = selectedTemplate?.documentMode || documentMode;
 
 			// Create new conversation
 			const conversationId = await conversationService.createConversation(
@@ -115,11 +115,11 @@
 
 		// If template has a model, update selected model
 		const template = templates.find((t) => t.id === target.value);
-		if (template?.model_id) {
-			selectedModelId = template.model_id;
+		if (template?.modelId) {
+			selectedModelId = template.modelId;
 		}
 		// If template has document mode, enable it
-		if (template?.document_mode) {
+		if (template?.documentMode) {
 			documentMode = true;
 		}
 	}
@@ -135,103 +135,141 @@
 
 <ChatLayout>
 	{#snippet children()}
-		<div class="flex flex-col h-full">
-			<!-- Welcome Header -->
-			<div class="flex-shrink-0 border-b border-border bg-surface/50 backdrop-blur-sm px-6 py-4">
-				<div class="flex items-center justify-between">
-					<div class="flex items-center gap-3">
-						<div
-							class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center"
-						>
-							<Sparkle size={22} weight="fill" class="text-primary-foreground" />
-						</div>
-						<div>
-							<h2 class="text-lg font-semibold text-foreground">Neuer Chat</h2>
-							<p class="text-sm text-muted-foreground">Starte eine neue Unterhaltung</p>
-						</div>
-					</div>
-					<div class="flex items-center gap-3 flex-wrap">
-						<!-- Model Selector -->
-						<ModelSelector
-							{models}
-							{selectedModelId}
-							onSelect={handleModelSelect}
-							disabled={isSending}
-						/>
-
-						<!-- Template Selector -->
-						{#if templates.length > 0}
-							<select
-								onchange={handleTemplateSelect}
-								value={selectedTemplateId}
-								disabled={isSending}
-								class="px-3 py-1.5 text-sm border border-border rounded-lg
-                       bg-surface text-foreground
-                       focus:ring-2 focus:ring-primary focus:border-transparent
-                       disabled:opacity-50"
-							>
-								<option value="">Ohne Vorlage</option>
-								{#each templates as template}
-									<option value={template.id}>
-										{template.name}
-										{template.is_default ? ' (Standard)' : ''}
-									</option>
-								{/each}
-							</select>
-						{/if}
-
-						<!-- Document Mode Toggle -->
-						<button
-							onclick={toggleDocumentMode}
-							disabled={isSending}
-							class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors
-                     {documentMode
-								? 'bg-primary/10 text-primary border border-primary/30'
-								: 'bg-muted text-muted-foreground border border-border'}
-                     hover:bg-opacity-80 disabled:opacity-50"
-							title="Dokumentmodus aktivieren"
-						>
-							<FileText size={16} weight="bold" />
-							Dokument
-						</button>
-					</div>
-				</div>
-			</div>
-
+		<div class="flex flex-col h-full bg-background">
 			<!-- Messages Area -->
 			<main class="flex-1 overflow-hidden">
 				{#if messages.length === 0 && !isSending}
-					<!-- Empty State -->
+					<!-- Empty State - Centered Content -->
 					<div class="h-full flex flex-col items-center justify-center px-6">
-						<div class="text-center max-w-md">
+						<div class="text-center max-w-xl w-full">
+							<!-- Icon -->
 							<div
-								class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center"
+								class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-white/70 dark:bg-white/10 backdrop-blur-xl border border-black/10 dark:border-white/20 shadow-lg flex items-center justify-center"
 							>
-								<Sparkle size={32} weight="duotone" class="text-primary" />
+								<Sparkle size={40} weight="duotone" class="text-primary" />
 							</div>
-							<h3 class="text-xl font-semibold text-foreground mb-2">Worüber möchtest du reden?</h3>
-							<p class="text-muted-foreground mb-6">
+
+							<!-- Title -->
+							<h3 class="text-2xl font-semibold text-foreground mb-3">Worüber möchtest du reden?</h3>
+							<p class="text-muted-foreground mb-8">
 								Stelle eine Frage, bitte um Hilfe bei einem Projekt oder starte einfach eine
 								Unterhaltung.
 							</p>
-							<div class="flex flex-wrap justify-center gap-2">
+
+							<!-- Suggestion Pills -->
+							<div class="flex flex-wrap justify-center gap-3 mb-8">
 								<button
 									onclick={() => handleSend('Erkläre mir, wie KI funktioniert')}
-									class="px-4 py-2 text-sm rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-colors"
+									class="px-5 py-2.5 text-sm font-medium rounded-full bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-black/10 dark:border-white/20 text-foreground shadow-md hover:shadow-lg hover:bg-white dark:hover:bg-white/20 transition-all duration-200 hover:-translate-y-0.5"
 								>
 									Erkläre mir KI
 								</button>
 								<button
 									onclick={() => handleSend('Hilf mir beim Schreiben eines Textes')}
-									class="px-4 py-2 text-sm rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-colors"
+									class="px-5 py-2.5 text-sm font-medium rounded-full bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-black/10 dark:border-white/20 text-foreground shadow-md hover:shadow-lg hover:bg-white dark:hover:bg-white/20 transition-all duration-200 hover:-translate-y-0.5"
 								>
 									Beim Schreiben helfen
 								</button>
 								<button
 									onclick={() => handleSend('Was sind aktuelle Technologie-Trends?')}
-									class="px-4 py-2 text-sm rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-colors"
+									class="px-5 py-2.5 text-sm font-medium rounded-full bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-black/10 dark:border-white/20 text-foreground shadow-md hover:shadow-lg hover:bg-white dark:hover:bg-white/20 transition-all duration-200 hover:-translate-y-0.5"
 								>
 									Tech-Trends
+								</button>
+							</div>
+
+							<!-- Options Bar -->
+							<div
+								class="inline-flex items-center gap-2 p-1.5 rounded-full bg-white/70 dark:bg-white/10 backdrop-blur-xl border border-black/10 dark:border-white/20 shadow-md"
+							>
+								<!-- Model Selector -->
+								<div class="relative">
+									<select
+										value={selectedModelId}
+										onchange={(e) => handleModelSelect((e.target as HTMLSelectElement).value)}
+										disabled={isSending}
+										class="appearance-none bg-transparent text-foreground text-sm font-medium rounded-full pl-4 pr-8 py-2 border-0 focus:outline-none focus:ring-0 disabled:opacity-50 cursor-pointer"
+									>
+										{#if models.length === 0}
+											<option value="">Laden...</option>
+										{:else}
+											{#each models as model (model.id)}
+												<option value={model.id}>{model.name}</option>
+											{/each}
+										{/if}
+									</select>
+									<div
+										class="absolute inset-y-0 right-2 flex items-center pointer-events-none"
+									>
+										<svg
+											class="w-4 h-4 text-muted-foreground"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M19 9l-7 7-7-7"
+											/>
+										</svg>
+									</div>
+								</div>
+
+								<!-- Divider -->
+								<div class="w-px h-6 bg-black/10 dark:bg-white/20"></div>
+
+								<!-- Template Selector -->
+								{#if templates.length > 0}
+									<div class="relative">
+										<select
+											onchange={handleTemplateSelect}
+											value={selectedTemplateId}
+											disabled={isSending}
+											class="appearance-none bg-transparent text-foreground text-sm font-medium rounded-full pl-4 pr-8 py-2 border-0 focus:outline-none focus:ring-0 disabled:opacity-50 cursor-pointer"
+										>
+											<option value="">Ohne Vorlage</option>
+											{#each templates as template}
+												<option value={template.id}>
+													{template.name}
+													{template.isDefault ? ' ★' : ''}
+												</option>
+											{/each}
+										</select>
+										<div
+											class="absolute inset-y-0 right-2 flex items-center pointer-events-none"
+										>
+											<svg
+												class="w-4 h-4 text-muted-foreground"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M19 9l-7 7-7-7"
+												/>
+											</svg>
+										</div>
+									</div>
+									<div class="w-px h-6 bg-black/10 dark:bg-white/20"></div>
+								{/if}
+
+								<!-- Document Mode Toggle -->
+								<button
+									onclick={toggleDocumentMode}
+									disabled={isSending}
+									class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 disabled:opacity-50
+                     {documentMode
+										? 'bg-primary/20 text-primary'
+										: 'text-foreground hover:bg-black/5 dark:hover:bg-white/10'}"
+									title="Dokumentmodus aktivieren"
+								>
+									<FileText size={16} weight={documentMode ? 'fill' : 'bold'} />
+									<span>Dokument</span>
 								</button>
 							</div>
 						</div>
@@ -244,7 +282,7 @@
 			</main>
 
 			<!-- Floating Chat Input -->
-			<div class="flex-shrink-0 p-4 bg-gradient-to-t from-surface via-surface to-transparent">
+			<div class="flex-shrink-0 p-4 bg-gradient-to-t from-background via-background to-transparent">
 				<div class="max-w-3xl mx-auto">
 					<ChatInput onSend={handleSend} disabled={isSending || isLoading} />
 				</div>
@@ -253,7 +291,7 @@
 			<!-- Error Message -->
 			{#if error}
 				<div
-					class="fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 bg-destructive text-destructive-foreground rounded-lg shadow-lg z-50"
+					class="fixed bottom-24 left-1/2 -translate-x-1/2 px-6 py-3 bg-white/90 dark:bg-black/80 backdrop-blur-xl border border-destructive/30 text-destructive rounded-full shadow-lg z-50"
 				>
 					{error}
 				</div>
