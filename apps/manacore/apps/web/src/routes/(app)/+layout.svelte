@@ -53,8 +53,8 @@
 	// Navigation items for ManaCore
 	const navItems: PillNavItem[] = [
 		{ href: '/dashboard', label: 'Dashboard', icon: 'home' },
-		{ href: '/credits', label: 'Credits', icon: 'sparkles' },
-		{ href: '/feedback', label: 'Feedback', icon: 'message-square' },
+		{ href: '/credits', label: 'Credits', icon: 'creditCard' },
+		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 		{ href: '/profile', label: 'Profil', icon: 'user' },
 		{ href: '/settings', label: 'Settings', icon: 'settings' },
 	];
@@ -138,16 +138,16 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if loading || authStore.loading}
-	<div class="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+	<div class="flex min-h-screen items-center justify-center bg-background">
 		<div class="text-center">
 			<div
 				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary-500 border-r-transparent"
 			></div>
-			<p class="text-gray-500 dark:text-gray-400">Loading...</p>
+			<p class="text-muted-foreground">Loading...</p>
 		</div>
 	</div>
 {:else if authStore.isAuthenticated}
-	<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+	<div class="min-h-screen bg-background">
 		<!-- Pill Navigation -->
 		<PillNavigation
 			items={navItems}
