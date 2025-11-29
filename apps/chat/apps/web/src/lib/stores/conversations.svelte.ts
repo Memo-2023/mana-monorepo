@@ -12,6 +12,17 @@ let archivedConversations = $state<Conversation[]>([]);
 let isLoading = $state(false);
 let error = $state<string | null>(null);
 
+/**
+ * Sort conversations: pinned first, then by updatedAt descending
+ */
+function sortConversations(list: Conversation[]): Conversation[] {
+	return [...list].sort((a, b) => {
+		if (a.isPinned && !b.isPinned) return -1;
+		if (!a.isPinned && b.isPinned) return 1;
+		return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+	});
+}
+
 export const conversationsStore = {
 	// Getters
 	get conversations() {
@@ -102,6 +113,9 @@ export const conversationsStore = {
 				conversations = conversations.filter((c) => c.id !== conversationId);
 				archivedConversations = [{ ...conversation, isArchived: true }, ...archivedConversations];
 			}
+			toastStore.success('Konversation archiviert');
+		} else {
+			toastStore.error('Konversation konnte nicht archiviert werden');
 		}
 
 		return success;
@@ -117,8 +131,11 @@ export const conversationsStore = {
 			const conversation = archivedConversations.find((c) => c.id === conversationId);
 			if (conversation) {
 				archivedConversations = archivedConversations.filter((c) => c.id !== conversationId);
-				conversations = [{ ...conversation, isArchived: false }, ...conversations];
+				conversations = sortConversations([{ ...conversation, isArchived: false }, ...conversations]);
 			}
+			toastStore.success('Konversation wiederhergestellt');
+		} else {
+			toastStore.error('Konversation konnte nicht wiederhergestellt werden');
 		}
 
 		return success;
@@ -133,6 +150,9 @@ export const conversationsStore = {
 		if (success) {
 			conversations = conversations.filter((c) => c.id !== conversationId);
 			archivedConversations = archivedConversations.filter((c) => c.id !== conversationId);
+			toastStore.success('Konversation gelöscht');
+		} else {
+			toastStore.error('Konversation konnte nicht gelöscht werden');
 		}
 
 		return success;
@@ -145,15 +165,11 @@ export const conversationsStore = {
 		const success = await conversationService.pinConversation(conversationId);
 
 		if (success) {
-			conversations = conversations.map((c) =>
-				c.id === conversationId ? { ...c, isPinned: true } : c
+			conversations = sortConversations(
+				conversations.map((c) => (c.id === conversationId ? { ...c, isPinned: true } : c))
 			);
-			// Re-sort: pinned first, then by updatedAt
-			conversations = [...conversations].sort((a, b) => {
-				if (a.isPinned && !b.isPinned) return -1;
-				if (!a.isPinned && b.isPinned) return 1;
-				return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-			});
+		} else {
+			toastStore.error('Konversation konnte nicht angepinnt werden');
 		}
 
 		return success;
@@ -166,15 +182,11 @@ export const conversationsStore = {
 		const success = await conversationService.unpinConversation(conversationId);
 
 		if (success) {
-			conversations = conversations.map((c) =>
-				c.id === conversationId ? { ...c, isPinned: false } : c
+			conversations = sortConversations(
+				conversations.map((c) => (c.id === conversationId ? { ...c, isPinned: false } : c))
 			);
-			// Re-sort: pinned first, then by updatedAt
-			conversations = [...conversations].sort((a, b) => {
-				if (a.isPinned && !b.isPinned) return -1;
-				if (!a.isPinned && b.isPinned) return 1;
-				return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-			});
+		} else {
+			toastStore.error('Konversation konnte nicht losgelöst werden');
 		}
 
 		return success;

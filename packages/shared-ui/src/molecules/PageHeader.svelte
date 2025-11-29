@@ -21,6 +21,11 @@
 	 * </PageHeader>
 	 * ```
 	 *
+	 * @example With back navigation
+	 * ```svelte
+	 * <PageHeader title="Space Details" backHref="/spaces" />
+	 * ```
+	 *
 	 * @example With breadcrumb and icon
 	 * ```svelte
 	 * <PageHeader title="Edit Profile">
@@ -48,6 +53,8 @@
 		size?: HeaderSize;
 		/** Whether to show bottom border */
 		bordered?: boolean;
+		/** Back navigation href (shows back arrow button) */
+		backHref?: string;
 		/** Icon snippet (before title) */
 		icon?: Snippet;
 		/** Breadcrumb snippet (above title) */
@@ -65,6 +72,7 @@
 		description,
 		size = 'md',
 		bordered = false,
+		backHref,
 		icon,
 		breadcrumb,
 		actions,

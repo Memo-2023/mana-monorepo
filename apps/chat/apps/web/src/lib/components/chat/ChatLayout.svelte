@@ -26,18 +26,36 @@
 	const MIN_WIDTH = 260;
 	const MAX_WIDTH = 450;
 
-	// Search state
+	// Search state with debouncing
 	let searchQuery = $state('');
+	let debouncedSearchQuery = $state('');
+	let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+	// Debounce search input (200ms delay)
+	$effect(() => {
+		if (searchDebounceTimer) {
+			clearTimeout(searchDebounceTimer);
+		}
+		searchDebounceTimer = setTimeout(() => {
+			debouncedSearchQuery = searchQuery;
+		}, 200);
+
+		return () => {
+			if (searchDebounceTimer) {
+				clearTimeout(searchDebounceTimer);
+			}
+		};
+	});
 
 	// Get conversations from store
 	let conversations = $derived(conversationsStore.conversations);
 	let isLoading = $derived(conversationsStore.isLoading);
 
-	// Filtered conversations based on search
+	// Filtered conversations based on debounced search
 	let filteredConversations = $derived(
-		searchQuery.trim()
+		debouncedSearchQuery.trim()
 			? conversations.filter((conv) =>
-					conv.title?.toLowerCase().includes(searchQuery.toLowerCase())
+					conv.title?.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
 				)
 			: conversations
 	);

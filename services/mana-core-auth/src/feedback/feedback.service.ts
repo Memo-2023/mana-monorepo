@@ -58,7 +58,7 @@ export class FeedbackService {
 		};
 	}
 
-	async getPublicFeedback(userId: string, query: FeedbackQueryDto) {
+	async getPublicFeedback(userId: string | null, query: FeedbackQueryDto) {
 		const db = this.getDb();
 		const { appId, status, category, sort = 'votes', limit = 20, offset = 0 } = query;
 
@@ -90,22 +90,25 @@ export class FeedbackService {
 			.from(userFeedback)
 			.where(and(...conditions));
 
-		// Get user's votes
-		const feedbackIds = feedbackItems.map((f) => f.id);
-		const userVotes =
-			feedbackIds.length > 0
-				? await db
-						.select({ feedbackId: feedbackVotes.feedbackId })
-						.from(feedbackVotes)
-						.where(
-							and(
-								eq(feedbackVotes.userId, userId),
-								sql`${feedbackVotes.feedbackId} = ANY(${feedbackIds})`
+		// Get user's votes (only if authenticated)
+		let votedFeedbackIds = new Set<string>();
+		if (userId) {
+			const feedbackIds = feedbackItems.map((f) => f.id);
+			const userVotes =
+				feedbackIds.length > 0
+					? await db
+							.select({ feedbackId: feedbackVotes.feedbackId })
+							.from(feedbackVotes)
+							.where(
+								and(
+									eq(feedbackVotes.userId, userId),
+									sql`${feedbackVotes.feedbackId} = ANY(${feedbackIds})`
+								)
 							)
-						)
-					: [];
+						: [];
 
-		const votedFeedbackIds = new Set(userVotes.map((v) => v.feedbackId));
+			votedFeedbackIds = new Set(userVotes.map((v) => v.feedbackId));
+		}
 
 		return {
 			success: true,

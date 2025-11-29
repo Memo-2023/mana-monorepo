@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { conversationService } from '$lib/services/conversation';
 	import { chatService } from '$lib/services/chat';
 	import { documentService } from '$lib/services/document';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
 	import MessageList from '$lib/components/chat/MessageList.svelte';
 	import ChatInput from '$lib/components/chat/ChatInput.svelte';
 	import ChatLayout from '$lib/components/chat/ChatLayout.svelte';
@@ -33,44 +33,77 @@
 	let showVersionsModal = $state(false);
 	let showDocumentPanel = $state(true);
 
+	// Track current request to prevent race conditions
+	let currentLoadId = $state(0);
+
 	const conversationId = $derived($page.params.id ?? '');
 	const isDocumentMode = $derived(conversation?.documentMode ?? false);
 
-	onMount(async () => {
-		await loadData();
+	// React to conversationId changes with race condition protection
+	$effect(() => {
+		if (conversationId) {
+			loadData(conversationId);
+		}
 	});
 
-	async function loadData() {
+	async function loadData(targetConversationId: string) {
+		// Increment load ID to track this request
+		const loadId = ++currentLoadId;
+
 		isLoading = true;
 		error = null;
 
 		try {
 			// Load models
-			models = await chatService.getModels();
+			const loadedModels = await chatService.getModels();
+
+			// Check if this request is still current
+			if (loadId !== currentLoadId) return;
+			models = loadedModels;
 
 			// Load conversation
-			conversation = await conversationService.getConversation(conversationId);
+			const loadedConversation = await conversationService.getConversation(targetConversationId);
 
-			if (!conversation) {
+			// Check if this request is still current
+			if (loadId !== currentLoadId) return;
+
+			if (!loadedConversation) {
 				error = 'Konversation nicht gefunden';
 				return;
 			}
 
-			// Set model from conversation
-			selectedModelId = conversation.modelId;
+			conversation = loadedConversation;
+			selectedModelId = loadedConversation.modelId;
 
 			// Load messages
-			messages = await conversationService.getMessages(conversationId);
+			const loadedMessages = await conversationService.getMessages(targetConversationId);
+
+			// Check if this request is still current
+			if (loadId !== currentLoadId) return;
+			messages = loadedMessages;
 
 			// Load document if in document mode
-			if (conversation.documentMode) {
-				document = await documentService.getLatestDocument(conversationId);
-				documentContent = document?.content ?? '';
+			if (loadedConversation.documentMode) {
+				const loadedDocument = await documentService.getLatestDocument(targetConversationId);
+
+				// Check if this request is still current
+				if (loadId !== currentLoadId) return;
+				document = loadedDocument;
+				documentContent = loadedDocument?.content ?? '';
+			} else {
+				document = null;
+				documentContent = '';
 			}
 		} catch (e) {
+			// Only show error if this request is still current
+			if (loadId !== currentLoadId) return;
 			error = e instanceof Error ? e.message : 'Fehler beim Laden';
+			toastStore.error(error);
 		} finally {
-			isLoading = false;
+			// Only update loading state if this request is still current
+			if (loadId === currentLoadId) {
+				isLoading = false;
+			}
 		}
 	}
 
