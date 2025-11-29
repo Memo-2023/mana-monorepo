@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ThemeStore } from '@manacore/shared-theme';
-	import { Icon } from '@manacore/shared-icons';
+	import { Sun, Moon } from '@manacore/shared-icons';
 
 	interface Props {
 		/** Theme store instance */
@@ -31,9 +31,9 @@
 	title={showTooltip ? getTooltipText() : undefined}
 >
 	{#if theme.effectiveMode === 'dark'}
-		<Icon name="sun" {size} class="theme-toggle-icon" />
+		<Sun {size} weight="bold" class="theme-toggle-icon" />
 	{:else}
-		<Icon name="moon" {size} class="theme-toggle-icon" />
+		<Moon {size} weight="bold" class="theme-toggle-icon" />
 	{/if}
 </button>
 

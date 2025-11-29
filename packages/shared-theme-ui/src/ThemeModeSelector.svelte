@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ThemeStore, ThemeMode } from '@manacore/shared-theme';
-	import { Icon } from '@manacore/shared-icons';
+	import { Sun, Moon, Desktop } from '@manacore/shared-icons';
 
 	interface Props {
 		/** Theme store instance */
@@ -11,15 +11,15 @@
 
 	let { theme, class: className = '' }: Props = $props();
 
-	const modes: { mode: ThemeMode; icon: string; label: string }[] = [
-		{ mode: 'light', icon: 'sun', label: 'Light' },
-		{ mode: 'dark', icon: 'moon', label: 'Dark' },
-		{ mode: 'system', icon: 'monitor', label: 'System' },
+	const modes: { mode: ThemeMode; label: string }[] = [
+		{ mode: 'light', label: 'Light' },
+		{ mode: 'dark', label: 'Dark' },
+		{ mode: 'system', label: 'System' },
 	];
 </script>
 
 <div class="mode-selector {className}" role="radiogroup" aria-label="Theme mode">
-	{#each modes as { mode, icon, label }}
+	{#each modes as { mode, label }}
 		{@const isActive = theme.mode === mode}
 		<button
 			type="button"
@@ -30,7 +30,13 @@
 			aria-checked={isActive}
 			aria-label="{label} mode"
 		>
-			<Icon name={icon} size={16} />
+			{#if mode === 'light'}
+				<Sun size={16} weight="bold" />
+			{:else if mode === 'dark'}
+				<Moon size={16} weight="bold" />
+			{:else}
+				<Desktop size={16} weight="bold" />
+			{/if}
 			<span class="label">{label}</span>
 		</button>
 	{/each}

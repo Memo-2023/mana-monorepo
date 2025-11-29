@@ -1,15 +1,16 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import ConversationList from '$lib/components/chat/ConversationList.svelte';
+	import { X, List } from '@manacore/shared-icons';
 
 	let { children }: { children: any } = $props();
 	let showSidebar = $state(true);
 
-	onMount(async () => {
-		if (authStore.user) {
-			await conversationsStore.loadConversations(authStore.user.id);
+	// Wait for auth to be initialized before loading conversations
+	$effect(() => {
+		if (authStore.initialized && authStore.user) {
+			conversationsStore.loadConversations(authStore.user.id);
 		}
 	});
 
@@ -27,23 +28,9 @@
 		aria-label={showSidebar ? 'Seitenleiste schließen' : 'Seitenleiste öffnen'}
 	>
 		{#if showSidebar}
-			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M6 18L18 6M6 6l12 12"
-				/>
-			</svg>
+			<X size={24} weight="bold" />
 		{:else}
-			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 6h16M4 12h16M4 18h16"
-				/>
-			</svg>
+			<List size={24} weight="bold" />
 		{/if}
 	</button>
 

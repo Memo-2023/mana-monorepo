@@ -31,7 +31,7 @@
 	 * ```
 	 */
 
-	import { Icon } from '@manacore/shared-icons';
+	import { Warning, WarningCircle, Info } from '@manacore/shared-icons';
 	import Modal from './Modal.svelte';
 	import { Text, Button } from '../atoms';
 
@@ -72,20 +72,17 @@
 
 	const variantConfig: Record<
 		ConfirmationVariant,
-		{ iconName: string; iconColor: string; buttonVariant: 'danger' | 'primary' }
+		{ iconColor: string; buttonVariant: 'danger' | 'primary' }
 	> = {
 		danger: {
-			iconName: 'alert-triangle',
 			iconColor: 'text-red-500',
 			buttonVariant: 'danger',
 		},
 		warning: {
-			iconName: 'alert-circle',
 			iconColor: 'text-yellow-500',
 			buttonVariant: 'primary',
 		},
 		info: {
-			iconName: 'info',
 			iconColor: 'text-blue-500',
 			buttonVariant: 'primary',
 		},
@@ -100,8 +97,14 @@
 
 <Modal {visible} {onClose} {title} maxWidth="sm">
 	{#snippet icon()}
-		<div class="p-2 rounded-full bg-menu-hover">
-			<Icon name={config.iconName} size={20} class={config.iconColor} />
+		<div class="p-2 rounded-full bg-menu-hover {config.iconColor}">
+			{#if variant === 'danger'}
+				<Warning size={20} weight="bold" />
+			{:else if variant === 'warning'}
+				<WarningCircle size={20} weight="bold" />
+			{:else}
+				<Info size={20} weight="bold" />
+			{/if}
 		</div>
 	{/snippet}
 

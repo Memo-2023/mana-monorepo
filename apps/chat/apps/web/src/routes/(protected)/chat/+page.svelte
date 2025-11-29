@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { chatService } from '$lib/services/chat';
 	import { conversationService } from '$lib/services/conversation';
@@ -11,6 +10,7 @@
 	import ModelSelector from '$lib/components/chat/ModelSelector.svelte';
 	import { theme } from '$lib/stores/theme';
 	import type { AIModel, Message, Template } from '@chat/types';
+	import { FileText, Moon } from '@manacore/shared-icons';
 
 	let models = $state<AIModel[]>([]);
 	let templates = $state<Template[]>([]);
@@ -21,11 +21,20 @@
 	let isLoading = $state(true);
 	let isSending = $state(false);
 	let error = $state<string | null>(null);
+	let dataLoaded = $state(false);
 
 	// Get selected template
 	const selectedTemplate = $derived(templates.find((t) => t.id === selectedTemplateId));
 
-	onMount(async () => {
+	// Wait for auth to be initialized before loading data
+	$effect(() => {
+		if (authStore.initialized && !dataLoaded) {
+			loadData();
+		}
+	});
+
+	async function loadData() {
+		dataLoaded = true;
 		models = await chatService.getModels();
 		if (models.length > 0) {
 			selectedModelId = models[0].id;
@@ -37,7 +46,7 @@
 		}
 
 		isLoading = false;
-	});
+	}
 
 	async function handleSend(text: string) {
 		if (!authStore.user || !selectedModelId) return;
@@ -175,14 +184,7 @@
                  hover:bg-opacity-80 disabled:opacity-50"
 					title="Dokumentmodus aktivieren"
 				>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-						/>
-					</svg>
+					<FileText size={16} weight="bold" />
 					Dokument
 				</button>
 			</div>
@@ -195,14 +197,7 @@
                  hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
 					aria-label="Theme wechseln"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-						/>
-					</svg>
+					<Moon size={20} weight="bold" />
 				</button>
 			</div>
 		</div>

@@ -1,8 +1,8 @@
 {
 	"name": "@manacore/shared-icons",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"private": true,
-	"description": "Shared Phosphor Icons (Bold) for Manacore SvelteKit web apps",
+	"description": "Phosphor Icons for all Manacore SvelteKit web apps",
 	"type": "module",
 	"svelte": "./src/index.ts",
 	"main": "./src/index.ts",
@@ -11,13 +11,6 @@
 		".": {
 			"svelte": "./src/index.ts",
 			"default": "./src/index.ts"
-		},
-		"./Icon.svelte": {
-			"svelte": "./src/Icon.svelte",
-			"default": "./src/Icon.svelte"
-		},
-		"./iconPaths": {
-			"default": "./src/iconPaths.ts"
 		}
 	},
 	"scripts": {
@@ -30,5 +23,8 @@
 		"svelte": "^5.16.6",
 		"svelte-check": "^4.2.1",
 		"typescript": "^5.9.3"
+	},
+	"dependencies": {
+		"phosphor-svelte": "^3.0.1"
 	}
 }

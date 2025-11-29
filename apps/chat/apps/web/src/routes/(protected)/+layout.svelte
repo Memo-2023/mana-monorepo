@@ -3,14 +3,99 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { theme } from '$lib/stores/theme';
+	import {
+		isSidebarMode as sidebarModeStore,
+		isNavCollapsed as collapsedStore,
+	} from '$lib/stores/navigation';
+	import { PillNavigation } from '@manacore/shared-ui';
+	import type { PillNavItem } from '@manacore/shared-ui';
 	import type { LayoutData } from './$types';
 
 	let { children, data }: { children: any; data: LayoutData } = $props();
 
 	let isChecking = $state(true);
+	let isSidebarMode = $state(false);
+	let isCollapsed = $state(false);
+
+	// Use theme store's isDark directly
+	let isDark = $derived(theme.isDark);
+
+	// Navigation items for Chat
+	const navItems: PillNavItem[] = [
+		{ href: '/', label: 'Chat', icon: 'home' },
+		{ href: '/templates', label: 'Templates', icon: 'document' },
+		{ href: '/spaces', label: 'Spaces', icon: 'building' },
+		{ href: '/documents', label: 'Dokumente', icon: 'archive' },
+		{ href: '/archive', label: 'Archiv', icon: 'list' },
+	];
+
+	// Navigation shortcuts (Ctrl+1-5)
+	const navRoutes = navItems.map((item) => item.href);
+
+	function handleKeydown(event: KeyboardEvent) {
+		const target = event.target as HTMLElement;
+
+		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+			return;
+		}
+
+		if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
+			const num = parseInt(event.key);
+			if (num >= 1 && num <= navRoutes.length) {
+				event.preventDefault();
+				const route = navRoutes[num - 1];
+				if (route) {
+					goto(route);
+				}
+			}
+		}
+	}
+
+	function handleModeChange(isSidebar: boolean) {
+		isSidebarMode = isSidebar;
+		sidebarModeStore.set(isSidebar);
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem('chat-nav-sidebar', String(isSidebar));
+		}
+	}
+
+	function handleCollapsedChange(collapsed: boolean) {
+		isCollapsed = collapsed;
+		collapsedStore.set(collapsed);
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem('chat-nav-collapsed', String(collapsed));
+		}
+	}
+
+	function handleToggleTheme() {
+		theme.toggleMode();
+	}
+
+	async function handleLogout() {
+		await authStore.signOut();
+		goto('/login');
+	}
 
 	// Check auth on mount and redirect if not authenticated
 	onMount(async () => {
+		// Initialize theme
+		theme.initialize();
+
+		// Initialize sidebar mode from localStorage
+		const savedSidebar = localStorage.getItem('chat-nav-sidebar');
+		if (savedSidebar === 'true') {
+			isSidebarMode = true;
+			sidebarModeStore.set(true);
+		}
+
+		// Initialize collapsed state from localStorage
+		const savedCollapsed = localStorage.getItem('chat-nav-collapsed');
+		if (savedCollapsed === 'true') {
+			isCollapsed = true;
+			collapsedStore.set(true);
+		}
+
 		await authStore.initialize();
 
 		if (!authStore.isAuthenticated) {
@@ -21,112 +106,95 @@
 
 		isChecking = false;
 	});
-
-	async function handleSignOut() {
-		await authStore.signOut();
-		goto('/login');
-	}
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 {#if isChecking}
 	<!-- Loading state while checking auth -->
-	<div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-		<div
-			class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"
-		></div>
+	<div class="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+		<div class="text-center">
+			<div
+				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"
+			></div>
+			<p class="text-gray-500 dark:text-gray-400">Laden...</p>
+		</div>
 	</div>
 {:else}
-	<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-		<!-- Top Navigation -->
-		<nav class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="flex justify-between h-16">
-					<div class="flex items-center">
-						<a href="/" class="text-xl font-bold text-gray-900 dark:text-white"> ManaChat </a>
-						<div class="hidden sm:ml-8 sm:flex sm:space-x-4">
-							<a
-								href="/"
-								class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                       {$page.url.pathname === '/' || $page.url.pathname.startsWith('/chat')
-									? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-									: 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}"
-							>
-								Chat
-							</a>
-							<a
-								href="/templates"
-								class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                       {$page.url.pathname.startsWith('/templates')
-									? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-									: 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}"
-							>
-								Templates
-							</a>
-							<a
-								href="/spaces"
-								class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                       {$page.url.pathname.startsWith('/spaces')
-									? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-									: 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}"
-							>
-								Spaces
-							</a>
-							<a
-								href="/documents"
-								class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                       {$page.url.pathname.startsWith('/documents')
-									? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-									: 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}"
-							>
-								Dokumente
-							</a>
-							<a
-								href="/archive"
-								class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                       {$page.url.pathname.startsWith('/archive')
-									? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-									: 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}"
-							>
-								Archiv
-							</a>
-						</div>
-					</div>
+	<!-- Navigation Layout -->
+	<div class="layout-container">
+		<!-- Floating/Sidebar Pill Navigation -->
+		<PillNavigation
+			items={navItems}
+			currentPath={$page.url.pathname}
+			appName="ManaChat"
+			homeRoute="/"
+			onToggleTheme={handleToggleTheme}
+			{isDark}
+			{isSidebarMode}
+			onModeChange={handleModeChange}
+			{isCollapsed}
+			onCollapsedChange={handleCollapsedChange}
+			showThemeToggle={true}
+			showLanguageSwitcher={false}
+			showLogout={true}
+			onLogout={handleLogout}
+			primaryColor="#3b82f6"
+		/>
 
-					<div class="flex items-center gap-4">
-						{#if authStore.user}
-							<span class="text-sm text-gray-600 dark:text-gray-400 hidden sm:block">
-								{authStore.user.email}
-							</span>
-						{/if}
-						<a
-							href="/profile"
-							class="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-							aria-label="Profil"
-						>
-							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-								/>
-							</svg>
-						</a>
-						<button
-							onclick={handleSignOut}
-							class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300
-                     hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-						>
-							Abmelden
-						</button>
-					</div>
-				</div>
+		<!-- Main Content with dynamic padding based on nav mode -->
+		<main
+			class="main-content bg-gray-50 dark:bg-gray-900"
+			class:sidebar-mode={isSidebarMode && !isCollapsed}
+			class:floating-mode={!isSidebarMode && !isCollapsed}
+		>
+			<div class="content-wrapper">
+				{@render children()}
 			</div>
-		</nav>
-
-		<!-- Main Content -->
-		<main>
-			{@render children()}
 		</main>
 	</div>
 {/if}
+
+<style>
+	.layout-container {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+	}
+
+	.main-content {
+		flex: 1;
+		transition: all 300ms ease;
+	}
+
+	/* Floating nav mode - add top padding for fixed nav */
+	.main-content.floating-mode {
+		padding-top: 100px;
+	}
+
+	/* Sidebar mode - add left padding for sidebar nav */
+	.main-content.sidebar-mode {
+		padding-left: 180px;
+	}
+
+	.content-wrapper {
+		max-width: 80rem;
+		margin-left: auto;
+		margin-right: auto;
+		padding: 2rem 1rem;
+	}
+
+	@media (min-width: 640px) {
+		.content-wrapper {
+			padding-left: 1.5rem;
+			padding-right: 1.5rem;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.content-wrapper {
+			padding-left: 2rem;
+			padding-right: 2rem;
+		}
+	}
+</style>

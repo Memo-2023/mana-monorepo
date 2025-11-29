@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { Icon } from '@manacore/shared-icons';
+	import { X } from '@manacore/shared-icons';
 	import Text from '../atoms/Text.svelte';
 
 	interface Props {
@@ -87,7 +87,7 @@
 						class="p-2 rounded-full hover:bg-menu-hover transition-colors"
 						aria-label="Close"
 					>
-						<Icon name="x" size={20} class="text-theme-muted" />
+						<X size={20} weight="bold" class="text-theme-muted" />
 					</button>
 				</div>
 			{/if}

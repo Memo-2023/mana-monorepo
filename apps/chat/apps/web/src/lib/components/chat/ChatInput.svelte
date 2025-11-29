@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { PaperPlaneTilt } from '@manacore/shared-icons';
+
 	interface Props {
 		onSend: (message: string) => void;
 		disabled?: boolean;
@@ -66,14 +68,7 @@
              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600
              transition-colors"
 		>
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-				/>
-			</svg>
+			<PaperPlaneTilt size={20} weight="bold" />
 		</button>
 	</div>
 	<p class="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
