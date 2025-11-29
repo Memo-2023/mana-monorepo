@@ -49,15 +49,17 @@
 	// Current theme variant label
 	let currentThemeVariantLabel = $derived(THEME_DEFINITIONS[theme.variant].label);
 
-	// Navigation items for Chat
+	// Navigation items for Chat (settings moved to user dropdown)
 	const navItems: PillNavItem[] = [
 		{ href: '/chat', label: 'Chat', icon: 'home' },
 		{ href: '/templates', label: 'Templates', icon: 'document' },
 		{ href: '/spaces', label: 'Spaces', icon: 'building' },
 		{ href: '/documents', label: 'Dokumente', icon: 'archive' },
 		{ href: '/archive', label: 'Archiv', icon: 'list' },
-		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 	];
+
+	// User email for user dropdown
+	let userEmail = $derived(authStore.user?.email);
 
 	// Check if current page is a chat page (needs full-width layout)
 	let isChatPage = $derived($page.url.pathname.startsWith('/chat'));
@@ -183,6 +185,8 @@
 			primaryColor="#3b82f6"
 			showAppSwitcher={true}
 			{appItems}
+			{userEmail}
+			settingsHref="/settings"
 		/>
 
 		<!-- Main Content with dynamic padding based on nav mode -->

@@ -3,7 +3,24 @@
 	import type { PillNavItem, PillDropdownItem, PillNavElement, PillTabGroupConfig, PillAppItem } from './types';
 	import PillDropdown from './PillDropdown.svelte';
 	import PillTabGroup from './PillTabGroup.svelte';
-	import PillAppDropdown from './PillAppDropdown.svelte';
+
+	// Convert app items to dropdown items
+	function appItemsToDropdownItems(apps: PillAppItem[]): PillDropdownItem[] {
+		return apps.map((app) => ({
+			id: app.id,
+			label: app.name,
+			onClick: () => {
+				if (app.isCurrent) {
+					// Navigate to home route for current app
+					window.location.href = '/';
+				} else if (app.url) {
+					window.open(app.url, '_blank', 'noopener,noreferrer');
+				}
+			},
+			active: app.isCurrent,
+			disabled: false,
+		}));
+	}
 
 	interface Props {
 		/** Navigation items */
@@ -58,6 +75,10 @@
 		appItems?: PillAppItem[];
 		/** Show app switcher dropdown */
 		showAppSwitcher?: boolean;
+		/** User email for user dropdown */
+		userEmail?: string;
+		/** Settings page href */
+		settingsHref?: string;
 	}
 
 	let {
@@ -87,6 +108,8 @@
 		onThemeModeChange,
 		appItems = [],
 		showAppSwitcher = false,
+		userEmail,
+		settingsHref = '/settings',
 	}: Props = $props();
 
 	// Type guards for elements
@@ -232,12 +255,11 @@
 
 			<!-- Logo pill / App Switcher -->
 			{#if showAppSwitcher && appItems.length > 0}
-				<PillAppDropdown
-					apps={appItems}
-					currentAppName={appName}
-					{logo}
-					{homeRoute}
+				<PillDropdown
+					items={appItemsToDropdownItems(appItems)}
 					direction="down"
+					label={appName}
+					icon="grid"
 				/>
 			{:else}
 				<a href={homeRoute} class="pill glass-pill logo-pill">
@@ -410,8 +432,33 @@
 				</button>
 			{/if}
 
-			<!-- Logout -->
-			{#if onLogout && showLogout}
+			<!-- User Menu Dropdown -->
+			{#if userEmail}
+				<PillDropdown
+					items={[
+						{
+							id: 'settings',
+							label: 'Einstellungen',
+							icon: 'settings',
+							onClick: () => {
+								window.location.href = settingsHref;
+							},
+							active: currentPath === settingsHref,
+						},
+						{
+							id: 'logout',
+							label: 'Logout',
+							icon: 'logout',
+							onClick: () => onLogout?.(),
+							danger: true,
+						},
+					]}
+					direction="down"
+					label={userEmail}
+					icon="user"
+				/>
+			{:else if onLogout && showLogout}
+				<!-- Fallback to standalone logout if no user email -->
 				<button onclick={onLogout} class="pill glass-pill logout-pill" title="Logout">
 					<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
