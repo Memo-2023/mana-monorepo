@@ -11,6 +11,7 @@ async function bootstrap() {
 			'http://localhost:3000',
 			'http://localhost:5173',
 			'http://localhost:5177',
+			'http://localhost:5178', // Presi web app
 			'http://localhost:8081',
 			'exp://localhost:8081',
 			'http://localhost:3001', // Mana Core Auth

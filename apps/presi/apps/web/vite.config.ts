@@ -6,6 +6,7 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	server: {
 		port: 5178,
+		strictPort: true,
 		fs: {
 			allow: [
 				// Allow serving files from the monorepo root node_modules

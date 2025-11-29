@@ -10,7 +10,8 @@ import type {
 	ReorderSlidesDto,
 } from '@presi/shared';
 
-const API_URL = PUBLIC_BACKEND_URL || 'http://localhost:3008';
+const BASE_URL = PUBLIC_BACKEND_URL || 'http://localhost:3008';
+const API_URL = `${BASE_URL}/api`;
 const AUTH_URL = PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
 
 function getToken(): string | null {
