@@ -16,7 +16,7 @@ async function bootstrap() {
 			'exp://localhost:8081',
 			'http://localhost:3001', // Mana Core Auth
 		],
-		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+		methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 		credentials: true,
 	});
 

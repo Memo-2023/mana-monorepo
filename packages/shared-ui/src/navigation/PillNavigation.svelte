@@ -9,6 +9,9 @@
 		return apps.map((app) => ({
 			id: app.id,
 			label: app.name,
+			// Use image icon if available, otherwise use grid as fallback
+			imageUrl: app.icon,
+			icon: app.icon ? undefined : 'grid',
 			onClick: () => {
 				if (app.isCurrent) {
 					// Navigate to home route for current app

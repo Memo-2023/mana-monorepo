@@ -27,8 +27,10 @@ export interface PillDropdownItem {
 	id: string;
 	/** Display label */
 	label: string;
-	/** Icon name */
+	/** Icon name (SVG path) */
 	icon?: string;
+	/** Image URL for icon (data URL or regular URL) */
+	imageUrl?: string;
 	/** Click handler */
 	onClick: () => void;
 	/** Whether item is disabled */

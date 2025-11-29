@@ -164,7 +164,7 @@ export const conversationService = {
 
 		const response = await chatApi.createCompletion({
 			messages: [{ role: 'user', content: titlePrompt }],
-			modelId: '550e8400-e29b-41d4-a716-446655440004', // GPT-4o-Mini
+			modelId: '550e8400-e29b-41d4-a716-446655440101', // Gemini 2.5 Flash (default)
 			temperature: 0.3,
 			maxTokens: 50,
 		});

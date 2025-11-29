@@ -80,6 +80,8 @@
 			'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z',
 		logout:
 			'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
+		// App icons
+		grid: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z',
 	};
 
 	function getIcon(iconName: string) {
@@ -139,7 +141,9 @@
 					class:active-pill={item.active}
 					style="animation-delay: {(header ? i + 1 : i) * 15}ms"
 				>
-					{#if item.icon}
+					{#if item.imageUrl}
+						<img src={item.imageUrl} alt="" class="pill-image-icon" />
+					{:else if item.icon}
 						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
 								stroke-linecap="round"
@@ -294,6 +298,14 @@
 		width: 1rem;
 		height: 1rem;
 		flex-shrink: 0;
+	}
+
+	.pill-image-icon {
+		width: 1.25rem;
+		height: 1.25rem;
+		flex-shrink: 0;
+		border-radius: 0.25rem;
+		object-fit: cover;
 	}
 
 	.check-icon {
