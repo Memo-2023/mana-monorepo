@@ -22,6 +22,7 @@
 		"dev:manacore:web": "pnpm --filter @manacore/web dev",
 		"dev:manacore:landing": "pnpm --filter @manacore/landing dev",
 		"dev:manacore:mobile": "pnpm --filter @manacore/mobile dev",
+		"dev:manacore:app": "pnpm --filter @manacore/web dev",
 		"dev:manadeck:web": "pnpm --filter @manadeck/web dev",
 		"dev:manadeck:landing": "pnpm --filter @manadeck/landing dev",
 		"dev:manadeck:backend": "pnpm --filter @manadeck/backend dev",
