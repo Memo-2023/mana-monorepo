@@ -3,7 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem, PillNavElement } from '@manacore/shared-ui';
+	import type { PillNavItem, PillNavElement, PillDropdownItem } from '@manacore/shared-ui';
+	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import KeyboardShortcutsModal from '$lib/components/ui/KeyboardShortcutsModal.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { isUIVisible, toggleUI, showKeyboardShortcuts } from '$lib/stores/ui';
@@ -71,6 +72,27 @@
 		{ id: 'gridSmall', icon: 'gridSmall', title: 'Klein (3)' },
 	];
 
+	// Theme variant dropdown items
+	let themeVariantItems = $derived<PillDropdownItem[]>([
+		...theme.variants.map((variant) => ({
+			id: variant,
+			label: `${THEME_DEFINITIONS[variant].emoji} ${THEME_DEFINITIONS[variant].label}`,
+			onClick: () => theme.setVariant(variant),
+			active: theme.variant === variant,
+		})),
+		{
+			id: 'all-themes',
+			label: '🎨 Alle Themes',
+			onClick: () => goto('/app/themes'),
+			active: false,
+		},
+	]);
+
+	// Current theme variant label
+	let currentThemeVariantLabel = $derived(
+		`${THEME_DEFINITIONS[theme.variant].emoji} ${THEME_DEFINITIONS[theme.variant].label}`
+	);
+
 	// Elements (divider + view mode tabs)
 	let elements: PillNavElement[] = $derived([
 		{ type: 'divider' as const },
@@ -129,6 +151,10 @@
 				e.preventDefault();
 				goto('/app/archive');
 				break;
+			case 't':
+				e.preventDefault();
+				goto('/app/themes');
+				break;
 			case '1':
 				e.preventDefault();
 				setViewMode('single');
@@ -174,6 +200,9 @@
 				{isCollapsed}
 				onCollapsedChange={handleCollapsedChange}
 				showThemeToggle={true}
+				showThemeVariants={true}
+				{themeVariantItems}
+				{currentThemeVariantLabel}
 				showLanguageSwitcher={false}
 				primaryColor="#3b82f6"
 			/>

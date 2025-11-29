@@ -9,7 +9,8 @@
 		isNavCollapsed as collapsedStore,
 	} from '$lib/stores/navigation';
 	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 
 	let { children } = $props();
 
@@ -28,6 +29,27 @@
 		{ href: '/profile', label: 'Profile', icon: 'user' },
 	];
 
+	// Theme variant dropdown items
+	let themeVariantItems = $derived<PillDropdownItem[]>([
+		...theme.variants.map((variant) => ({
+			id: variant,
+			label: `${THEME_DEFINITIONS[variant].emoji} ${THEME_DEFINITIONS[variant].label}`,
+			onClick: () => theme.setVariant(variant),
+			active: theme.variant === variant,
+		})),
+		{
+			id: 'all-themes',
+			label: '🎨 Alle Themes',
+			onClick: () => goto('/themes'),
+			active: false,
+		},
+	]);
+
+	// Current theme variant label
+	let currentThemeVariantLabel = $derived(
+		`${THEME_DEFINITIONS[theme.variant].emoji} ${THEME_DEFINITIONS[theme.variant].label}`
+	);
+
 	// Navigation shortcuts (Ctrl+1-5)
 	const navRoutes = navItems.map((item) => item.href);
 
@@ -37,6 +59,7 @@
 			return;
 		}
 
+		// Ctrl+Number navigation
 		if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
 			const num = parseInt(event.key);
 			if (num >= 1 && num <= navRoutes.length) {
@@ -45,6 +68,14 @@
 				if (route) {
 					goto(route);
 				}
+			}
+		}
+
+		// Single key shortcuts (no modifiers)
+		if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+			if (event.key.toLowerCase() === 't') {
+				event.preventDefault();
+				goto('/themes');
 			}
 		}
 	}
@@ -125,6 +156,9 @@
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
 			showThemeToggle={true}
+			showThemeVariants={true}
+			{themeVariantItems}
+			{currentThemeVariantLabel}
 			showLanguageSwitcher={false}
 			primaryColor="#6366f1"
 		/>

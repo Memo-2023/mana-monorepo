@@ -44,5 +44,6 @@ export type {
 	KeyboardShortcut,
 	PillNavItem,
 	PillDropdownItem,
+	PillNavElement,
 	PillNavigationProps,
 } from './navigation';

@@ -20,14 +20,20 @@
 	let isCollapsed = $state(false);
 
 	// Theme variant dropdown items
-	let themeVariantItems = $derived<PillDropdownItem[]>(
-		theme.variants.map((variant) => ({
+	let themeVariantItems = $derived<PillDropdownItem[]>([
+		...theme.variants.map((variant) => ({
 			id: variant,
 			label: `${THEME_DEFINITIONS[variant].emoji} ${THEME_DEFINITIONS[variant].label}`,
 			onClick: () => theme.setVariant(variant),
 			active: theme.variant === variant,
-		}))
-	);
+		})),
+		{
+			id: 'all-themes',
+			label: '🎨 Alle Themes',
+			onClick: () => goto('/themes'),
+			active: false,
+		},
+	]);
 
 	// Current theme variant label
 	let currentThemeVariantLabel = $derived(
@@ -76,6 +82,21 @@
 		goto('/login');
 	}
 
+	function handleKeydown(event: KeyboardEvent) {
+		const target = event.target as HTMLElement;
+		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+			return;
+		}
+
+		// Single key shortcuts (no modifiers)
+		if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+			if (event.key.toLowerCase() === 't') {
+				event.preventDefault();
+				goto('/themes');
+			}
+		}
+	}
+
 	// Redirect to login if not authenticated
 	$effect(() => {
 		if (!auth.isLoading && !auth.isAuthenticated && !publicRoutes.includes($page.url.pathname)) {
@@ -109,6 +130,8 @@
 		return cleanup;
 	});
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 <svelte:head>
 	<title>Presi - Presentation Creator</title>
