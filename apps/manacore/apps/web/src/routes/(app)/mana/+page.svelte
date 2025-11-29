@@ -2,17 +2,38 @@
 	import { SubscriptionPage } from '@manacore/shared-subscription-ui';
 
 	function handleSubscribe(planId: string) {
-		alert(`Subscribe to plan: ${planId}\n\nThis would trigger RevenueCat purchase flow.`);
+		console.log('Subscribe to plan:', planId);
+		alert(`Abo "${planId}" ausgewählt. Bezahlsystem wird noch integriert.`);
 	}
 
 	function handleBuyPackage(packageId: string) {
-		alert(`Buy package: ${packageId}\n\nThis would trigger RevenueCat purchase flow.`);
+		console.log('Buy package:', packageId);
+		alert(`Paket "${packageId}" ausgewählt. Bezahlsystem wird noch integriert.`);
 	}
 </script>
 
-<SubscriptionPage
-	appName="ManaCore"
-	onSubscribe={handleSubscribe}
-	onBuyPackage={handleBuyPackage}
-	currentPlanId="free"
-/>
+<svelte:head>
+	<title>Mana - ManaCore</title>
+</svelte:head>
+
+<div class="mana-page">
+	<SubscriptionPage
+		appName="ManaCore"
+		onSubscribe={handleSubscribe}
+		onBuyPackage={handleBuyPackage}
+		currentPlanId="free"
+		pageTitle="Wähle dein Abo"
+		subscriptionsTitle="Abonnements"
+		packagesTitle="Einmal-Pakete"
+		yearlyDiscount="2 Monate gratis"
+	/>
+</div>
+
+<style>
+	.mana-page {
+		min-height: 100%;
+		width: 100%;
+		overflow-x: hidden;
+		background-color: hsl(var(--background));
+	}
+</style>

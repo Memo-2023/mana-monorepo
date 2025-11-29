@@ -53,6 +53,7 @@
 	// Navigation items for ManaCore
 	const navItems: PillNavItem[] = [
 		{ href: '/dashboard', label: 'Dashboard', icon: 'home' },
+		{ href: '/mana', label: 'Mana', icon: 'fire' },
 		{ href: '/credits', label: 'Credits', icon: 'creditCard' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 		{ href: '/profile', label: 'Profil', icon: 'user' },
