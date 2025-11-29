@@ -125,6 +125,16 @@
 		return 'href' in element;
 	}
 
+	// Truncate email for display (show first part before @, max 12 chars)
+	function truncateEmail(email: string, maxLength = 12): string {
+		const atIndex = email.indexOf('@');
+		const localPart = atIndex > 0 ? email.substring(0, atIndex) : email;
+		if (localPart.length <= maxLength) {
+			return localPart;
+		}
+		return localPart.substring(0, maxLength) + '…';
+	}
+
 	// Local state for uncontrolled mode
 	let internalSidebarMode = $state(false);
 	let internalCollapsed = $state(false);
@@ -454,7 +464,7 @@
 						},
 					]}
 					direction="down"
-					label={userEmail}
+					label={truncateEmail(userEmail)}
 					icon="user"
 				/>
 			{:else if onLogout && showLogout}

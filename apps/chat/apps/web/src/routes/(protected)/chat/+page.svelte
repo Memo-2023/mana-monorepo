@@ -37,7 +37,9 @@
 		dataLoaded = true;
 		models = await chatService.getModels();
 		if (models.length > 0) {
-			selectedModelId = models[0].id;
+			// Find default model, or fall back to first model
+			const defaultModel = models.find((m) => m.isDefault);
+			selectedModelId = defaultModel?.id || models[0].id;
 		}
 
 		// Load user templates

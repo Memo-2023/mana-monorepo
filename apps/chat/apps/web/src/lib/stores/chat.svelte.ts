@@ -47,7 +47,9 @@ export const chatStore = {
 		try {
 			models = await chatService.getModels();
 			if (models.length > 0 && !selectedModelId) {
-				selectedModelId = models[0].id;
+				// Find default model, or fall back to first model
+				const defaultModel = models.find((m) => m.isDefault);
+				selectedModelId = defaultModel?.id || models[0].id;
 			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load models';
