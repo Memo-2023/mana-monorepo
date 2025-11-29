@@ -103,8 +103,6 @@
 							generationProgress.set(`Warte auf Verarbeitung... (${i + 1}/${totalImages})`);
 						} else if (progress.status === 'processing') {
 							generationProgress.set(`Verarbeite Bild ${i + 1}/${totalImages}...`);
-						} else if (progress.status === 'downloading') {
-							generationProgress.set(`Speichere Bild ${i + 1}/${totalImages}...`);
 						} else if (progress.status === 'completed') {
 							unsubscribe();
 							resolve();

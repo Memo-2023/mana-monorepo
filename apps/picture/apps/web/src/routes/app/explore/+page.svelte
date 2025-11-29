@@ -18,10 +18,8 @@
 	import ContextMenu from '$lib/components/ui/ContextMenu.svelte';
 	import { MagnifyingGlass, X, Heart } from '@manacore/shared-icons';
 	import { onMount } from 'svelte';
-	import type { Database } from '@picture/shared/types';
+	import type { Image } from '$lib/api/images';
 	import type { ViewMode } from '$lib/stores/view';
-
-	type Image = Database['public']['Tables']['images']['Row'];
 
 	let loadingMore = $state(false);
 	let observer: IntersectionObserver | null = null;

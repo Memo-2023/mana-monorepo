@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { viewMode, cycleViewMode, type ViewMode } from '$lib/stores/view';
-	import { List, SquaresFour, Squares } from '@manacore/shared-icons';
+	import { List, SquaresFour, Square } from '@manacore/shared-icons';
 
 	function getLabel(mode: ViewMode) {
 		switch (mode) {
@@ -24,7 +24,7 @@
 	{:else if $viewMode === 'grid3'}
 		<SquaresFour size={20} />
 	{:else}
-		<Squares size={20} />
+		<Square size={20} />
 	{/if}
 	<span class="hidden sm:inline">{getLabel($viewMode)}</span>
 </button>

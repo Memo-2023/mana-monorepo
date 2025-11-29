@@ -26,9 +26,10 @@
 	let observer: IntersectionObserver | null = null;
 	let loadMoreTrigger = $state<HTMLElement | null>(null);
 
-	onMount(async () => {
-		await loadTags();
-		loadInitialImages();
+	onMount(() => {
+		loadTags().then(() => {
+			loadInitialImages();
+		});
 
 		// Setup Intersection Observer for infinite scroll
 		observer = new IntersectionObserver(
@@ -74,7 +75,6 @@
 		isLoading.set(true);
 		try {
 			const data = await getImages({
-				userId: authStore.user.id,
 				page: 1,
 				tagIds: $selectedTags.length > 0 ? $selectedTags : undefined,
 				favoritesOnly: $showFavoritesOnly,
@@ -97,7 +97,6 @@
 
 		try {
 			const newImages = await getImages({
-				userId: authStore.user.id,
 				page: nextPage,
 				tagIds: $selectedTags.length > 0 ? $selectedTags : undefined,
 				favoritesOnly: $showFavoritesOnly,

@@ -26,13 +26,13 @@
 	let showImagePicker = $state(false);
 	let isLoading = $state(true);
 
-	onMount(async () => {
+	onMount(() => {
 		if (!boardId) {
 			goto('/app/board');
 			return;
 		}
 
-		await loadBoard();
+		loadBoard();
 
 		return () => {
 			resetCanvasState();
@@ -41,7 +41,7 @@
 	});
 
 	async function loadBoard() {
-		if (!authStore.user) return;
+		if (!authStore.user || !boardId) return;
 
 		isLoading = true;
 		try {
@@ -49,7 +49,7 @@
 			const board = await getBoardById(boardId);
 
 			// Check if user has access
-			if (board.user_id !== authStore.user.id && !board.is_public) {
+			if (board.userId !== authStore.user.id && !board.isPublic) {
 				showToast('Zugriff verweigert', 'error');
 				goto('/app/board');
 				return;

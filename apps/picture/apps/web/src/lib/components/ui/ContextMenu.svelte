@@ -13,7 +13,7 @@
 	import { images } from '$lib/stores/images';
 	import { archivedImages } from '$lib/stores/archive';
 	import { showToast } from '$lib/stores/toast';
-	import type { Database } from '@picture/shared/types';
+	import type { Tag } from '$lib/api/tags';
 	import {
 		DownloadSimple,
 		Link,
@@ -26,21 +26,19 @@
 		Check,
 	} from '@manacore/shared-icons';
 
-	type TagType = Database['public']['Tables']['tags']['Row'];
-
 	let tagSubmenuElement = $state<HTMLElement | null>(null);
-	let imageTags = $state<TagType[]>([]);
+	let imageTags = $state<Tag[]>([]);
 
 	// Check if current image is archived
 	const isArchived = $derived(
-		$contextMenu.image?.archived_at !== null && $contextMenu.image?.archived_at !== undefined
+		$contextMenu.image?.archivedAt !== null && $contextMenu.image?.archivedAt !== undefined
 	);
 
 	// Check if current image is favorite
-	const isFavorite = $derived($contextMenu.image?.is_favorite === true);
+	const isFavorite = $derived($contextMenu.image?.isFavorite === true);
 
 	// Check if current image belongs to current user
-	const isOwnImage = $derived($contextMenu.image?.user_id === authStore.user?.id);
+	const isOwnImage = $derived($contextMenu.image?.userId === authStore.user?.id);
 
 	type IconName = 'download' | 'link' | 'heart' | 'tag' | 'archive' | 'restore' | 'trash';
 
@@ -72,7 +70,7 @@
 		showTagSubmenu(rect.right, rect.top);
 	}
 
-	async function handleAddTag(tag: TagType) {
+	async function handleAddTag(tag: Tag) {
 		if (!$contextMenu.image) return;
 
 		try {
@@ -85,7 +83,7 @@
 		}
 	}
 
-	async function handleRemoveTag(tag: TagType) {
+	async function handleRemoveTag(tag: Tag) {
 		if (!$contextMenu.image) return;
 
 		try {
@@ -99,10 +97,10 @@
 	}
 
 	function handleDownload() {
-		if (!$contextMenu.image?.public_url) return;
+		if (!$contextMenu.image?.publicUrl) return;
 
 		const link = document.createElement('a');
-		link.href = $contextMenu.image.public_url;
+		link.href = $contextMenu.image.publicUrl;
 		link.download = $contextMenu.image.filename || 'image.png';
 		link.click();
 		hideContextMenu();
@@ -110,9 +108,9 @@
 	}
 
 	function handleCopyLink() {
-		if (!$contextMenu.image?.public_url) return;
+		if (!$contextMenu.image?.publicUrl) return;
 
-		navigator.clipboard.writeText($contextMenu.image.public_url);
+		navigator.clipboard.writeText($contextMenu.image.publicUrl);
 		hideContextMenu();
 		showToast('Link kopiert', 'success');
 	}
@@ -171,12 +169,12 @@
 			// Update in all stores
 			images.update((current) =>
 				current.map((img) =>
-					img.id === $contextMenu.image?.id ? { ...img, is_favorite: newFavoriteStatus } : img
+					img.id === $contextMenu.image?.id ? { ...img, isFavorite: newFavoriteStatus } : img
 				)
 			);
 			archivedImages.update((current) =>
 				current.map((img) =>
-					img.id === $contextMenu.image?.id ? { ...img, is_favorite: newFavoriteStatus } : img
+					img.id === $contextMenu.image?.id ? { ...img, isFavorite: newFavoriteStatus } : img
 				)
 			);
 

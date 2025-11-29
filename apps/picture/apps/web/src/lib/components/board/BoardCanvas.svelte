@@ -146,7 +146,8 @@
 		// Stage click to deselect
 		stage.on('click', (e) => {
 			console.log('[Canvas] Stage clicked, target:', e.target.getType());
-			if (e.target === stage || e.target === backgroundLayer) {
+			const targetType = e.target.getType();
+			if (targetType === 'Stage' || e.target.name() === 'background') {
 				console.log('[Canvas] Deselecting all');
 				deselectAll();
 				transformer.nodes([]);
@@ -437,7 +438,7 @@
 		textarea.style.width = `${textNode.width() * textNode.scaleX()}px`;
 		textarea.style.fontSize = `${textNode.fontSize()}px`;
 		textarea.style.fontFamily = textNode.fontFamily();
-		textarea.style.color = textNode.fill();
+		textarea.style.color = String(textNode.fill());
 		textarea.style.border = '2px solid #4A90E2';
 		textarea.style.padding = '4px';
 		textarea.style.margin = '0px';

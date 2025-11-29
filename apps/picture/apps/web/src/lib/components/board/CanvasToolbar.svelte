@@ -46,15 +46,12 @@
 	const hasSelection = $derived($selectedItemIds.length > 0);
 
 	async function handleExport() {
-		// Get the stage element
-		const stage = document.querySelector('.konvajs-content canvas') as HTMLCanvasElement;
-		if (!stage) return;
+		// Get the canvas element
+		const canvas = document.querySelector('.konvajs-content canvas') as HTMLCanvasElement;
+		if (!canvas) return;
 
-		// Create download link
-		const dataURL = stage.toDataURL({
-			pixelRatio: 2, // Retina quality
-			mimeType: 'image/png',
-		});
+		// Create download link using standard canvas API
+		const dataURL = canvas.toDataURL('image/png');
 
 		const link = document.createElement('a');
 		link.download = `${boardName}.png`;

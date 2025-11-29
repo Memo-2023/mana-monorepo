@@ -77,7 +77,10 @@ export interface ThemeColors {
 export interface ThemeVariantDefinition {
 	name: string;
 	label: string;
+	/** Emoji representation of the theme */
 	emoji: string;
+	/** Icon name for the theme (e.g., 'sparkle', 'leaf', 'hexagon', 'waves') */
+	icon: string;
 	/** The primary hue for this variant (used for accent colors) */
 	hue: number;
 	light: ThemeColors;

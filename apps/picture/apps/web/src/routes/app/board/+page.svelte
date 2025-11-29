@@ -32,9 +32,9 @@
 	let showDeleteModal = $state(false);
 	let deletingBoard = $state<string | null>(null);
 
-	onMount(async () => {
+	onMount(() => {
 		resetBoardsState();
-		await loadInitialBoards();
+		loadInitialBoards();
 
 		// Setup Intersection Observer for infinite scroll
 		observer = new IntersectionObserver(
@@ -63,7 +63,7 @@
 
 		isLoadingBoards.set(true);
 		try {
-			const data = await getBoards({ userId: authStore.user.id, page: 1 });
+			const data = await getBoards({ page: 1 });
 			boards.set(data);
 			currentBoardsPage.set(1);
 			hasBoardsMore.set(data.length === 20);
@@ -82,7 +82,7 @@
 		const nextPage = $currentBoardsPage + 1;
 
 		try {
-			const newBoards = await getBoards({ userId: authStore.user.id, page: nextPage });
+			const newBoards = await getBoards({ page: nextPage });
 			if (newBoards.length > 0) {
 				boards.update((current) => [...current, ...newBoards]);
 				currentBoardsPage.set(nextPage);
@@ -104,11 +104,10 @@
 		try {
 			const { createBoard } = await import('$lib/api/boards');
 			const newBoard = await createBoard({
-				user_id: authStore.user.id,
 				name: boardName,
-				description: boardDescription || null,
+				description: boardDescription || undefined,
 			});
-			addBoard({ ...newBoard, item_count: 0 });
+			addBoard({ ...newBoard, itemCount: 0 });
 			showCreateBoardModal.set(false);
 			boardName = '';
 			boardDescription = '';
@@ -140,8 +139,8 @@
 		if (!authStore.user) return;
 
 		try {
-			const newBoard = await duplicateBoard(boardId, authStore.user.id);
-			addBoard({ ...newBoard, item_count: 0 });
+			const newBoard = await duplicateBoard(boardId);
+			addBoard({ ...newBoard, itemCount: 0 });
 			showToast('Board dupliziert', 'success');
 		} catch (error) {
 			console.error('Error duplicating board:', error);
@@ -214,11 +213,11 @@
 					<button
 						onclick={() => openBoard(board.id)}
 						class="block w-full overflow-hidden bg-gray-100 dark:bg-gray-700"
-						style="aspect-ratio: 4/3; background-color: {board.background_color || '#ffffff'}"
+						style="aspect-ratio: 4/3; background-color: {board.backgroundColor || '#ffffff'}"
 					>
-						{#if board.thumbnail_url}
+						{#if board.thumbnailUrl}
 							<img
-								src={board.thumbnail_url}
+								src={board.thumbnailUrl}
 								alt={board.name}
 								class="h-full w-full object-cover transition-transform group-hover:scale-105"
 							/>
@@ -245,8 +244,8 @@
 						<div
 							class="mt-3 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400"
 						>
-							<span>{board.item_count} {board.item_count === 1 ? 'Bild' : 'Bilder'}</span>
-							<span>{new Date(board.updated_at).toLocaleDateString('de-DE')}</span>
+							<span>{board.itemCount} {board.itemCount === 1 ? 'Bild' : 'Bilder'}</span>
+							<span>{new Date(board.updatedAt).toLocaleDateString('de-DE')}</span>
 						</div>
 
 						<!-- Actions -->

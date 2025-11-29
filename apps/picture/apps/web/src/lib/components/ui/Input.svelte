@@ -10,7 +10,7 @@
 		class?: string;
 		id?: string;
 		name?: string;
-		autocomplete?: string;
+		autocomplete?: AutoFill;
 		onchange?: (e: Event) => void;
 		oninput?: (e: Event) => void;
 	}
@@ -26,7 +26,7 @@
 		class: className = '',
 		id = '',
 		name = '',
-		autocomplete = '',
+		autocomplete,
 		onchange,
 		oninput,
 	}: Props = $props();

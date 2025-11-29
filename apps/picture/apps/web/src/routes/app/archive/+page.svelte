@@ -6,16 +6,13 @@
 		hasMoreArchive,
 		currentArchivePage,
 	} from '$lib/stores/archive';
-	import { getImages } from '$lib/api/images';
+	import { getImages, type Image } from '$lib/api/images';
 	import ArchivedImageCard from '$lib/components/archive/ArchivedImageCard.svelte';
 	import ArchivedImageModal from '$lib/components/archive/ArchivedImageModal.svelte';
 	import ImageSkeleton from '$lib/components/ui/ImageSkeleton.svelte';
 	import ContextMenu from '$lib/components/ui/ContextMenu.svelte';
 	import { Archive } from '@manacore/shared-icons';
 	import { onMount } from 'svelte';
-	import type { Database } from '@picture/shared/types';
-
-	type Image = Database['public']['Tables']['images']['Row'];
 
 	let loadingMore = $state(false);
 	let observer: IntersectionObserver | null = null;
@@ -52,7 +49,7 @@
 
 		isLoadingArchive.set(true);
 		try {
-			const data = await getImages({ userId: authStore.user.id, page: 1, archived: true });
+			const data = await getImages({ page: 1, archived: true });
 			archivedImages.set(data);
 			currentArchivePage.set(1);
 			hasMoreArchive.set(data.length === 20);
@@ -70,7 +67,7 @@
 		const nextPage = $currentArchivePage + 1;
 
 		try {
-			const newImages = await getImages({ userId: authStore.user.id, page: nextPage, archived: true });
+			const newImages = await getImages({ page: nextPage, archived: true });
 			if (newImages.length > 0) {
 				archivedImages.update((current) => [...current, ...newImages]);
 				currentArchivePage.set(nextPage);

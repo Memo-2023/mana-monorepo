@@ -14,7 +14,7 @@
 
 	let { children, data } = $props();
 
-	onMount(async () => {
+	onMount(() => {
 		// Initialize theme (applies CSS variables and loads from localStorage)
 		const cleanupTheme = theme.initialize();
 
@@ -22,14 +22,14 @@
 		initPostHog();
 
 		// Initialize auth with Mana Core
-		await authStore.initialize();
-
-		// Identify user in PostHog if logged in
-		if (authStore.user) {
-			analytics.identify(authStore.user.id, {
-				email: authStore.user.email,
-			});
-		}
+		authStore.initialize().then(() => {
+			// Identify user in PostHog if logged in
+			if (authStore.user) {
+				analytics.identify(authStore.user.id, {
+					email: authStore.user.email,
+				});
+			}
+		});
 
 		return () => {
 			cleanupTheme();

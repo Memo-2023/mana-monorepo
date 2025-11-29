@@ -1,16 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { tags, isLoadingTags } from '$lib/stores/tags';
-	import { getAllTags, createTag, updateTag, deleteTag } from '$lib/api/tags';
+	import { getAllTags, createTag, updateTag, deleteTag, type Tag } from '$lib/api/tags';
 	import { showToast } from '$lib/stores/toast';
 	import { Plus, Tag as TagIcon, PencilSimple, Trash } from '@manacore/shared-icons';
-	import type { Database } from '@picture/shared/types';
-
-	type TagType = Database['public']['Tables']['tags']['Row'];
 
 	let showCreateModal = $state(false);
 	let showEditModal = $state(false);
-	let editingTag = $state<TagType | null>(null);
+	let editingTag = $state<Tag | null>(null);
 	let newTagName = $state('');
 	let newTagColor = $state('#3B82F6');
 	let editTagName = $state('');
@@ -63,7 +60,7 @@
 		}
 	}
 
-	function openEditModal(tag: TagType) {
+	function openEditModal(tag: Tag) {
 		editingTag = tag;
 		editTagName = tag.name;
 		editTagColor = tag.color || '#3B82F6';
@@ -158,7 +155,7 @@
 								<div>
 									<h3 class="font-medium text-gray-900 dark:text-gray-100">{tag.name}</h3>
 									<p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-										{tag.created_at ? new Date(tag.created_at).toLocaleDateString('de-DE') : ''}
+										{tag.createdAt ? new Date(tag.createdAt).toLocaleDateString('de-DE') : ''}
 									</p>
 								</div>
 							</div>

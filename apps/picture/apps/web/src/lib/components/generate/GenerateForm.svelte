@@ -68,8 +68,6 @@
 						generationProgress.set('Queued for processing...');
 					} else if (progress.status === 'processing') {
 						generationProgress.set('Processing...');
-					} else if (progress.status === 'downloading') {
-						generationProgress.set('Saving image...');
 					} else if (progress.status === 'completed') {
 						unsubscribe();
 						resolve();
