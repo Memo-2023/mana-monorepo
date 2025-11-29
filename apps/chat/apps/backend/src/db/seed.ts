@@ -41,7 +41,7 @@ async function seed() {
 				description: 'Fastest & most cost-effective - ideal for everyday tasks',
 				provider: 'gemini',
 				parameters: {
-					model: 'gemini-2.5-flash-preview-05-20',
+					model: 'gemini-2.5-flash',
 					temperature: 0.7,
 					max_tokens: 8192,
 				},
@@ -50,11 +50,11 @@ async function seed() {
 			},
 			{
 				id: '550e8400-e29b-41d4-a716-446655440102',
-				name: 'Gemini 2.5 Flash-Lite',
+				name: 'Gemini 2.0 Flash-Lite',
 				description: 'Ultra-fast lightweight model - minimal latency',
 				provider: 'gemini',
 				parameters: {
-					model: 'gemini-2.5-flash-lite-preview-06-17',
+					model: 'gemini-2.0-flash-lite',
 					temperature: 0.7,
 					max_tokens: 4096,
 				},
@@ -67,7 +67,7 @@ async function seed() {
 				description: 'Most powerful Gemini - complex reasoning & analysis',
 				provider: 'gemini',
 				parameters: {
-					model: 'gemini-2.5-pro-preview-06-05',
+					model: 'gemini-2.5-pro',
 					temperature: 0.7,
 					max_tokens: 16384,
 				},
