@@ -3,6 +3,7 @@
  */
 
 import { conversationService } from '$lib/services/conversation';
+import { toastStore } from './toast.svelte';
 import type { Conversation } from '@chat/types';
 
 // State
@@ -36,7 +37,9 @@ export const conversationsStore = {
 		try {
 			conversations = await conversationService.getConversations(spaceId);
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load conversations';
+			const message = e instanceof Error ? e.message : 'Konversationen konnten nicht geladen werden';
+			error = message;
+			toastStore.error(message);
 			conversations = [];
 		} finally {
 			isLoading = false;
@@ -53,7 +56,9 @@ export const conversationsStore = {
 		try {
 			archivedConversations = await conversationService.getArchivedConversations();
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load archived conversations';
+			const message = e instanceof Error ? e.message : 'Archivierte Konversationen konnten nicht geladen werden';
+			error = message;
+			toastStore.error(message);
 			archivedConversations = [];
 		} finally {
 			isLoading = false;

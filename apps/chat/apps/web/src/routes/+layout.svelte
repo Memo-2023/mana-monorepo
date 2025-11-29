@@ -2,6 +2,7 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { theme } from '$lib/stores/theme';
+	import Toast from '$lib/components/Toast.svelte';
 
 	let { children } = $props();
 
@@ -14,3 +15,6 @@
 <div class="min-h-screen bg-background text-foreground">
 	{@render children()}
 </div>
+
+<!-- Global Toast notifications -->
+<Toast />

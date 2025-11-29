@@ -68,6 +68,7 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173,http://localhost:8081}
       CREDITS_SIGNUP_BONUS: ${CREDITS_SIGNUP_BONUS:-150}
       CREDITS_DAILY_FREE: ${CREDITS_DAILY_FREE:-5}
+      GOOGLE_GENAI_API_KEY: ${GOOGLE_GENAI_API_KEY}
     depends_on:
       postgres:
         condition: service_healthy
