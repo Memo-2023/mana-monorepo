@@ -338,7 +338,6 @@
 					items={languageItems}
 					direction="down"
 					label={currentLanguageLabel}
-					icon="globe"
 				/>
 			{/if}
 

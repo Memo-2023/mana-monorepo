@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import { locale } from 'svelte-i18n';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
@@ -11,6 +12,8 @@
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
 	} from '$lib/stores/navigation';
+	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
+	import { setLocale, supportedLocales } from '$lib/i18n';
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
 	import '../app.css';
 
@@ -45,6 +48,16 @@
 
 	// Current theme variant label
 	let currentThemeVariantLabel = $derived(THEME_DEFINITIONS[theme.variant].label);
+
+	// Language selector items
+	let currentLocale = $derived($locale || 'de');
+	function handleLocaleChange(newLocale: string) {
+		setLocale(newLocale as any);
+	}
+	let languageItems = $derived(
+		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
+	);
+	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
 	// Navigation items for Zitare
 	const navItems: PillNavItem[] = [
@@ -175,7 +188,9 @@
 			{currentThemeVariantLabel}
 			themeMode={theme.mode}
 			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={false}
+			showLanguageSwitcher={true}
+			{languageItems}
+			{currentLanguageLabel}
 			showLogout={authStore.isAuthenticated}
 			onLogout={handleLogout}
 			primaryColor="#f59e0b"

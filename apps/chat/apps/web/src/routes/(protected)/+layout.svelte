@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { locale } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
@@ -12,6 +13,8 @@
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
+	import { setLocale, supportedLocales } from '$lib/i18n';
 	import type { LayoutData } from './$types';
 
 	// App switcher items
@@ -48,6 +51,16 @@
 
 	// Current theme variant label
 	let currentThemeVariantLabel = $derived(THEME_DEFINITIONS[theme.variant].label);
+
+	// Language selector items
+	let currentLocale = $derived($locale || 'de');
+	function handleLocaleChange(newLocale: string) {
+		setLocale(newLocale as any);
+	}
+	let languageItems = $derived(
+		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
+	);
+	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
 	// Navigation items for Chat (settings moved to user dropdown)
 	const navItems: PillNavItem[] = [
@@ -180,7 +193,9 @@
 			{currentThemeVariantLabel}
 			themeMode={theme.mode}
 			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={false}
+			showLanguageSwitcher={true}
+			{languageItems}
+			{currentLanguageLabel}
 			showLogout={true}
 			onLogout={handleLogout}
 			primaryColor="#3b82f6"

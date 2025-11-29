@@ -1,20 +1,19 @@
 <script lang="ts">
 	import { locale } from 'svelte-i18n';
-	import { LanguageSelector } from '@manacore/shared-i18n';
+	import { PillDropdown } from '@manacore/shared-ui';
+	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
-	import { theme } from '$lib/stores/theme';
 
 	let currentLocale = $derived($locale || 'de');
 
 	function handleLocaleChange(newLocale: string) {
 		setLocale(newLocale as any);
 	}
+
+	let languageItems = $derived(
+		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
+	);
+	let currentLabel = $derived(getCurrentLanguageLabel(currentLocale));
 </script>
 
-<LanguageSelector
-	{currentLocale}
-	{supportedLocales}
-	onLocaleChange={handleLocaleChange}
-	isDark={theme.isDark}
-	primaryColor="#0ea5e9"
-/>
+<PillDropdown items={languageItems} label={currentLabel} direction="down" />

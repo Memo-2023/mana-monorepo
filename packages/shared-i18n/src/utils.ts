@@ -2,7 +2,7 @@
  * i18n utility functions
  */
 
-import { type LanguageCode, isLanguageSupported } from './languages';
+import { type LanguageCode, isLanguageSupported, getLanguageInfo } from './languages';
 
 /**
  * Detect user's preferred locale from browser
@@ -240,4 +240,51 @@ export function interpolate(text: string, values: Record<string, string | number
 	return text.replace(/\{(\w+)\}/g, (match, key) => {
 		return key in values ? String(values[key]) : match;
 	});
+}
+
+/**
+ * Interface for PillDropdown items (matches shared-ui type)
+ */
+export interface LanguageDropdownItem {
+	id: string;
+	label: string;
+	icon?: string;
+	onClick: () => void;
+	active?: boolean;
+}
+
+/**
+ * Create PillDropdown items for language selection
+ * @param supportedLocales - Array of supported locale codes (e.g., ['de', 'en', 'it', 'fr', 'es'])
+ * @param currentLocale - Currently selected locale
+ * @param onLocaleChange - Callback when locale changes
+ * @returns Array of items compatible with PillDropdown
+ */
+export function getLanguageDropdownItems(
+	supportedLocales: readonly string[],
+	currentLocale: string,
+	onLocaleChange: (locale: string) => void
+): LanguageDropdownItem[] {
+	return supportedLocales.map((locale) => {
+		const info = getLanguageInfo(locale);
+		return {
+			id: locale,
+			label: info ? `${info.emoji} ${info.nativeName}` : locale.toUpperCase(),
+			onClick: () => onLocaleChange(locale),
+			active: currentLocale === locale,
+		};
+	});
+}
+
+/**
+ * Get current language label for PillDropdown trigger
+ * @param currentLocale - Currently selected locale
+ * @returns Label with flag emoji and language code (e.g., "🇩🇪 DE")
+ */
+export function getCurrentLanguageLabel(currentLocale: string): string {
+	const info = getLanguageInfo(currentLocale);
+	if (info) {
+		return `${info.emoji} ${currentLocale.toUpperCase()}`;
+	}
+	return currentLocale.toUpperCase();
 }

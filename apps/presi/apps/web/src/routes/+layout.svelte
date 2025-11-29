@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import { locale } from 'svelte-i18n';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { auth } from '$lib/stores/auth.svelte';
@@ -11,6 +12,8 @@
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
 	} from '$lib/stores/navigation';
+	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
+	import { setLocale, supportedLocales } from '$lib/i18n';
 	import '../app.css';
 
 	let { children } = $props();
@@ -39,6 +42,16 @@
 
 	// Current theme variant label
 	let currentThemeVariantLabel = $derived(THEME_DEFINITIONS[theme.variant].label);
+
+	// Language selector items
+	let currentLocale = $derived($locale || 'de');
+	function handleLocaleChange(newLocale: string) {
+		setLocale(newLocale as any);
+	}
+	let languageItems = $derived(
+		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
+	);
+	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
 	// Navigation items for Presi
 	const navItems: PillNavItem[] = [
@@ -173,7 +186,9 @@
 				{currentThemeVariantLabel}
 				themeMode={theme.mode}
 				onThemeModeChange={handleThemeModeChange}
-				showLanguageSwitcher={false}
+				showLanguageSwitcher={true}
+				{languageItems}
+				{currentLanguageLabel}
 				showLogout={true}
 				onLogout={handleLogout}
 				primaryColor="#64748b"

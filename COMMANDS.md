@@ -9,6 +9,8 @@ pnpm dev:chat:app
 
 pnpm dev:picture:app
 
+pnpm dev:manacore:app
+
 
 
 Übersicht aller wichtigen Befehle zum Starten, Stoppen und Verwalten der Apps.

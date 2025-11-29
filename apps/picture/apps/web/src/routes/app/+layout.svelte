@@ -2,9 +2,12 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { locale } from 'svelte-i18n';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillNavElement, PillDropdownItem } from '@manacore/shared-ui';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
+	import { setLocale, supportedLocales } from '$lib/i18n';
 	import KeyboardShortcutsModal from '$lib/components/ui/KeyboardShortcutsModal.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { isUIVisible, toggleUI, showKeyboardShortcuts } from '$lib/stores/ui';
@@ -96,6 +99,16 @@
 
 	// Current theme variant label
 	let currentThemeVariantLabel = $derived(THEME_DEFINITIONS[theme.variant].label);
+
+	// Language selector items
+	let currentLocale = $derived($locale || 'de');
+	function handleLocaleChange(newLocale: string) {
+		setLocale(newLocale as any);
+	}
+	let languageItems = $derived(
+		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
+	);
+	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
 	// Elements (divider + view mode tabs)
 	let elements: PillNavElement[] = $derived([
@@ -209,7 +222,9 @@
 				{currentThemeVariantLabel}
 				themeMode={theme.mode}
 				onThemeModeChange={handleThemeModeChange}
-				showLanguageSwitcher={false}
+				showLanguageSwitcher={true}
+				{languageItems}
+				{currentLanguageLabel}
 				primaryColor="#3b82f6"
 			/>
 		{/if}

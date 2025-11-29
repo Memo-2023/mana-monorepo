@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import { locale } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/authStore.svelte';
 	import { theme } from '$lib/stores/theme';
 	import {
@@ -11,6 +12,8 @@
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
+	import { setLocale, supportedLocales } from '$lib/i18n';
 
 	let { children } = $props();
 
@@ -49,6 +52,16 @@
 
 	// Current theme variant label
 	let currentThemeVariantLabel = $derived(THEME_DEFINITIONS[theme.variant].label);
+
+	// Language selector items
+	let currentLocale = $derived($locale || 'de');
+	function handleLocaleChange(newLocale: string) {
+		setLocale(newLocale as any);
+	}
+	let languageItems = $derived(
+		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
+	);
+	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
 	// Navigation shortcuts (Ctrl+1-5)
 	const navRoutes = navItems.map((item) => item.href);
@@ -165,7 +178,9 @@
 			{currentThemeVariantLabel}
 			themeMode={theme.mode}
 			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={false}
+			showLanguageSwitcher={true}
+			{languageItems}
+			{currentLanguageLabel}
 			primaryColor="#6366f1"
 		/>
 

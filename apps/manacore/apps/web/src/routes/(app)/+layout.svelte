@@ -3,9 +3,12 @@
 	import { page } from '$app/stores';
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
+	import { locale } from 'svelte-i18n';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
+	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/authStore.svelte';
 	import {
@@ -46,6 +49,16 @@
 
 	// Current theme variant label
 	let currentThemeVariantLabel = $derived(THEME_DEFINITIONS[theme.variant].label);
+
+	// Language selector items
+	let currentLocale = $derived($locale || 'de');
+	function handleLocaleChange(newLocale: string) {
+		setLocale(newLocale as any);
+	}
+	let languageItems = $derived(
+		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
+	);
+	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email);
@@ -167,7 +180,9 @@
 			{currentThemeVariantLabel}
 			themeMode={theme.mode}
 			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={false}
+			showLanguageSwitcher={true}
+			{languageItems}
+			{currentLanguageLabel}
 			showLogout={true}
 			primaryColor="#6366f1"
 			showAppSwitcher={true}

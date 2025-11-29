@@ -34,6 +34,10 @@ export {
 	formatRelativeTime,
 	getPluralCategory,
 	interpolate,
+	// PillDropdown language helpers
+	type LanguageDropdownItem,
+	getLanguageDropdownItems,
+	getCurrentLanguageLabel,
 } from './utils';
 
 // Common translations
