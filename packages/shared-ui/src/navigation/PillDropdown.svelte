@@ -18,6 +18,7 @@
 	let internalOpen = $state(false);
 	let triggerButton: HTMLButtonElement;
 	let dropdownPosition = $state({ top: 0, left: 0 });
+	let openSubmenuId = $state<string | null>(null);
 
 	const open = $derived(onToggle ? isOpen : internalOpen);
 
@@ -45,6 +46,7 @@
 	}
 
 	function close() {
+		openSubmenuId = null;
 		if (onToggle) {
 			onToggle(false);
 		} else {
@@ -52,8 +54,25 @@
 		}
 	}
 
+	function toggleSubmenu(itemId: string) {
+		openSubmenuId = openSubmenuId === itemId ? null : itemId;
+	}
+
 	function handleItemClick(item: PillDropdownItem) {
-		item.onClick();
+		if (item.submenu && item.submenu.length > 0) {
+			toggleSubmenu(item.id);
+			return;
+		}
+		if (item.onClick) {
+			item.onClick();
+		}
+		close();
+	}
+
+	function handleSubmenuItemClick(item: PillDropdownItem) {
+		if (item.onClick) {
+			item.onClick();
+		}
 		close();
 	}
 
@@ -62,6 +81,7 @@
 			'M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129',
 		check: 'M5 13l4 4L19 7',
 		chevronDown: 'M19 9l-7 7-7-7',
+		chevronRight: 'M9 5l7 7-7 7',
 		globe:
 			'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9',
 		palette:
@@ -135,41 +155,81 @@
 			{/if}
 
 			{#each items.filter((i) => !i.disabled) as item, i (item.id)}
-				<button
-					onclick={() => handleItemClick(item)}
-					class="pill glass-pill fan-pill"
-					class:danger-pill={item.danger}
-					class:active-pill={item.active}
-					style="animation-delay: {(header ? i + 1 : i) * 15}ms"
-				>
-					{#if item.imageUrl}
-						<img src={item.imageUrl} alt="" class="pill-image-icon" />
-					{:else if item.icon === 'mana'}
-						<svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor">
-							<path d={getIcon('mana')} />
-						</svg>
-					{:else if item.icon}
-						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d={getIcon(item.icon)}
-							/>
-						</svg>
+				{#if item.divider}
+					<div class="dropdown-divider" style="animation-delay: {(header ? i + 1 : i) * 15}ms"></div>
+				{:else}
+					<button
+						onclick={() => handleItemClick(item)}
+						class="pill glass-pill fan-pill"
+						class:danger-pill={item.danger}
+						class:active-pill={item.active}
+						class:has-submenu={item.submenu && item.submenu.length > 0}
+						class:submenu-open={openSubmenuId === item.id}
+						style="animation-delay: {(header ? i + 1 : i) * 15}ms"
+					>
+						{#if item.imageUrl}
+							<img src={item.imageUrl} alt="" class="pill-image-icon" />
+						{:else if item.icon === 'mana'}
+							<svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor">
+								<path d={getIcon('mana')} />
+							</svg>
+						{:else if item.icon}
+							<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d={getIcon(item.icon)}
+								/>
+							</svg>
+						{/if}
+						<span class="pill-label">{item.label}</span>
+						{#if item.active}
+							<svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d={getIcon('check')}
+								/>
+							</svg>
+						{:else if item.submenu && item.submenu.length > 0}
+							<svg class="chevron-submenu" class:rotated={openSubmenuId === item.id} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d={getIcon('chevronDown')}
+								/>
+							</svg>
+						{/if}
+					</button>
+					<!-- Submenu items -->
+					{#if item.submenu && item.submenu.length > 0 && openSubmenuId === item.id}
+						<div class="submenu-container">
+							{#each item.submenu.filter((si) => !si.disabled) as subitem, si (subitem.id)}
+								<button
+									onclick={() => handleSubmenuItemClick(subitem)}
+									class="pill glass-pill fan-pill submenu-item"
+									class:active-pill={subitem.active}
+									style="animation-delay: {si * 15}ms"
+								>
+									<span class="pill-label">{subitem.label}</span>
+									{#if subitem.active}
+										<svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d={getIcon('check')}
+											/>
+										</svg>
+									{/if}
+								</button>
+							{/each}
+						</div>
 					{/if}
-					<span class="pill-label">{item.label}</span>
-					{#if item.active}
-						<svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d={getIcon('check')}
-							/>
-						</svg>
-					{/if}
-				</button>
+				{/if}
 			{/each}
 		</div>
 	{/if}
@@ -351,5 +411,62 @@
 
 	.fan-up .dropdown-header {
 		transform: translateY(-10px);
+	}
+
+	/* Divider in dropdown */
+	.dropdown-divider {
+		height: 1px;
+		background: rgba(0, 0, 0, 0.1);
+		margin: 0.25rem 0.5rem;
+		animation: fanIn 0.15s ease-out forwards;
+		opacity: 0;
+	}
+
+	:global(.dark) .dropdown-divider {
+		background: rgba(255, 255, 255, 0.15);
+	}
+
+	/* Submenu styles */
+	.chevron-submenu {
+		width: 0.75rem;
+		height: 0.75rem;
+		margin-left: auto;
+		transition: transform 0.2s;
+	}
+
+	.chevron-submenu.rotated {
+		transform: rotate(180deg);
+	}
+
+	.has-submenu {
+		justify-content: flex-start;
+	}
+
+	.submenu-open {
+		background: rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.dark) .submenu-open {
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	.submenu-container {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding-left: 1rem;
+		margin-top: -0.25rem;
+		margin-bottom: 0.25rem;
+	}
+
+	.submenu-item {
+		padding: 0.375rem 0.75rem;
+		font-size: 0.8125rem;
+		animation: fanIn 0.15s ease-out forwards;
+		opacity: 0;
+	}
+
+	.submenu-item .pill-label {
+		flex: 1;
 	}
 </style>

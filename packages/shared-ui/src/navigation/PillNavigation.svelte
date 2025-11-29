@@ -332,16 +332,7 @@
 				{/if}
 			{/each}
 
-			<!-- Language Switcher -->
-			{#if showLanguageSwitcher && languageItems.length > 0}
-				<PillDropdown
-					items={languageItems}
-					direction="down"
-					label={currentLanguageLabel}
-				/>
-			{/if}
-
-			<!-- Theme Variant Selector -->
+				<!-- Theme Variant Selector -->
 			{#if showThemeVariants && themeVariantItems.length > 0}
 				<PillDropdown
 					items={themeVariantItems}
@@ -463,6 +454,16 @@
 							},
 							active: currentPath === settingsHref,
 						},
+						...(showLanguageSwitcher && languageItems.length > 0
+							? [
+									{ id: 'language-divider', label: '', divider: true },
+									...languageItems.map((item) => ({
+										...item,
+										id: `lang-${item.id}`,
+									})),
+								]
+							: []),
+						{ id: 'logout-divider', label: '', divider: true },
 						{
 							id: 'logout',
 							label: 'Logout',

@@ -32,13 +32,17 @@ export interface PillDropdownItem {
 	/** Image URL for icon (data URL or regular URL) */
 	imageUrl?: string;
 	/** Click handler */
-	onClick: () => void;
+	onClick?: () => void;
 	/** Whether item is disabled */
 	disabled?: boolean;
 	/** Whether item should be styled as danger/destructive */
 	danger?: boolean;
 	/** Whether this item is currently active/selected */
 	active?: boolean;
+	/** Whether this item is a divider */
+	divider?: boolean;
+	/** Nested submenu items */
+	submenu?: PillDropdownItem[];
 }
 
 export interface PillAppItem {
