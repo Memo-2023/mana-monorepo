@@ -42,6 +42,76 @@
 			: conversations
 	);
 
+	// Split into pinned and unpinned
+	let pinnedConversations = $derived(filteredConversations.filter((conv) => conv.isPinned));
+	let unpinnedConversations = $derived(filteredConversations.filter((conv) => !conv.isPinned));
+
+	// Date section types
+	type DateSection = 'today' | 'yesterday' | 'thisWeek' | 'thisMonth' | 'older';
+
+	const sectionLabels: Record<DateSection, string> = {
+		today: 'Heute',
+		yesterday: 'Gestern',
+		thisWeek: 'Diese Woche',
+		thisMonth: 'Dieser Monat',
+		older: 'Älter'
+	};
+
+	function getDateSection(dateString: string): DateSection {
+		const date = new Date(dateString);
+		const now = new Date();
+
+		// Reset time to compare just dates
+		const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+		const yesterday = new Date(today);
+		yesterday.setDate(yesterday.getDate() - 1);
+
+		const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+		if (dateOnly.getTime() === today.getTime()) {
+			return 'today';
+		}
+		if (dateOnly.getTime() === yesterday.getTime()) {
+			return 'yesterday';
+		}
+
+		// This week (last 7 days)
+		const weekAgo = new Date(today);
+		weekAgo.setDate(weekAgo.getDate() - 7);
+		if (dateOnly > weekAgo) {
+			return 'thisWeek';
+		}
+
+		// This month
+		const monthAgo = new Date(today);
+		monthAgo.setDate(monthAgo.getDate() - 30);
+		if (dateOnly > monthAgo) {
+			return 'thisMonth';
+		}
+
+		return 'older';
+	}
+
+	// Group unpinned conversations by date sections
+	let groupedConversations = $derived(() => {
+		const groups: Record<DateSection, typeof unpinnedConversations> = {
+			today: [],
+			yesterday: [],
+			thisWeek: [],
+			thisMonth: [],
+			older: []
+		};
+
+		for (const conv of unpinnedConversations) {
+			const section = getDateSection(conv.updatedAt || conv.createdAt);
+			groups[section].push(conv);
+		}
+
+		return groups;
+	});
+
+	const sectionOrder: DateSection[] = ['today', 'yesterday', 'thisWeek', 'thisMonth', 'older'];
+
 	// Resizer handlers
 	function startResize(e: MouseEvent) {
 		e.preventDefault();
@@ -66,7 +136,7 @@
 		window.addEventListener('mouseup', stopResize);
 
 		if (authStore.user) {
-			conversationsStore.loadConversations(authStore.user.id);
+			conversationsStore.loadConversations();
 		}
 	});
 
@@ -240,81 +310,160 @@
 						{/if}
 					</div>
 				{:else}
-					{#each filteredConversations as conv (conv.id)}
-						<a
-							href="/chat/{conv.id}"
-							class="group block w-full rounded-xl bg-white/60 dark:bg-white/5 backdrop-blur-sm border border-black/10 dark:border-white/20 p-4 text-left transition-all mb-3 hover:shadow-md hover:bg-white/80 dark:hover:bg-white/10
-								   {isActive(conv.id)
-								? 'bg-white/90 dark:bg-white/15 shadow-md border-primary/30'
-								: ''}"
-						>
-							<!-- Title Row -->
-							<div class="mb-1.5 flex items-center gap-2">
-								{#if conv.isPinned}
-									<PushPin
-										size={16}
-										weight="fill"
-										class="flex-shrink-0 text-primary"
-									/>
-								{:else}
-									<ChatCircle
-										size={16}
-										weight={isActive(conv.id) ? 'fill' : 'regular'}
-										class="flex-shrink-0 {isActive(conv.id)
-											? 'text-primary'
-											: 'text-muted-foreground'}"
-									/>
-								{/if}
-								<h3 class="text-sm font-semibold line-clamp-1 text-foreground flex-1">
-									{conv.title || 'Neue Konversation'}
-								</h3>
-							</div>
-
-							<!-- Preview -->
-							<p class="mb-2 text-sm text-muted-foreground line-clamp-2">
-								{getPreview(conv.title)}
-							</p>
-
-							<!-- Footer -->
-							<div class="flex items-center justify-between">
-								<span class="text-xs text-muted-foreground">
-									{formatDate(conv.updatedAt || conv.createdAt)}
-								</span>
-								<div class="flex items-center gap-1">
-									{#if conv.documentMode}
-										<span
-											class="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full"
-										>
-											Dokument
-										</span>
-									{/if}
-									<!-- Action Buttons (visible on hover) -->
-									<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-										<button
-											onclick={(e) => handleTogglePin(e, conv.id, conv.isPinned)}
-											class="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors {conv.isPinned ? 'text-primary' : ''}"
-											title={conv.isPinned ? 'Nicht mehr anpinnen' : 'Anpinnen'}
-										>
-											<PushPin size={14} weight={conv.isPinned ? 'fill' : 'bold'} />
-										</button>
-										<button
-											onclick={(e) => handleArchive(e, conv.id)}
-											class="p-1.5 text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
-											title="Archivieren"
-										>
-											<Archive size={14} weight="bold" />
-										</button>
-										<button
-											onclick={(e) => handleDelete(e, conv.id)}
-											class="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-											title="Löschen"
-										>
-											<Trash size={14} weight="bold" />
-										</button>
+					<!-- Pinned Section -->
+					{#if pinnedConversations.length > 0}
+						<div class="mb-5">
+							<h4 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+								<PushPin size={12} weight="fill" class="text-primary" />
+								Angepinnt
+							</h4>
+							{#each pinnedConversations as conv (conv.id)}
+								<a
+									href="/chat/{conv.id}"
+									class="group block w-full rounded-xl bg-white/60 dark:bg-white/5 backdrop-blur-sm border border-black/10 dark:border-white/20 p-4 text-left transition-all mb-3 hover:shadow-md hover:bg-white/80 dark:hover:bg-white/10
+										   {isActive(conv.id)
+										? 'bg-white/90 dark:bg-white/15 shadow-md border-primary/30'
+										: ''}"
+								>
+									<!-- Title Row -->
+									<div class="mb-1.5 flex items-center gap-2">
+										<PushPin
+											size={16}
+											weight="fill"
+											class="flex-shrink-0 text-primary"
+										/>
+										<h3 class="text-sm font-semibold line-clamp-1 text-foreground flex-1">
+											{conv.title || 'Neue Konversation'}
+										</h3>
 									</div>
-								</div>
+
+									<!-- Preview -->
+									<p class="mb-2 text-sm text-muted-foreground line-clamp-2">
+										{getPreview(conv.title)}
+									</p>
+
+									<!-- Footer -->
+									<div class="flex items-center justify-between">
+										<span class="text-xs text-muted-foreground">
+											{formatDate(conv.updatedAt || conv.createdAt)}
+										</span>
+										<div class="flex items-center gap-1">
+											{#if conv.documentMode}
+												<span
+													class="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full"
+												>
+													Dokument
+												</span>
+											{/if}
+											<!-- Action Buttons (visible on hover) -->
+											<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+												<button
+													onclick={(e) => handleTogglePin(e, conv.id, true)}
+													class="p-1.5 text-primary hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+													title="Nicht mehr anpinnen"
+												>
+													<PushPin size={14} weight="fill" />
+												</button>
+												<button
+													onclick={(e) => handleArchive(e, conv.id)}
+													class="p-1.5 text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
+													title="Archivieren"
+												>
+													<Archive size={14} weight="bold" />
+												</button>
+												<button
+													onclick={(e) => handleDelete(e, conv.id)}
+													class="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+													title="Löschen"
+												>
+													<Trash size={14} weight="bold" />
+												</button>
+											</div>
+										</div>
+									</div>
+								</a>
+							{/each}
+						</div>
+					{/if}
+
+					<!-- Grouped Conversations by Date -->
+					{#each sectionOrder as section}
+						{@const convs = groupedConversations()[section]}
+						{#if convs.length > 0}
+							<div class="mb-5">
+								<h4 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+									{sectionLabels[section]}
+								</h4>
+								{#each convs as conv (conv.id)}
+									<a
+										href="/chat/{conv.id}"
+										class="group block w-full rounded-xl bg-white/60 dark:bg-white/5 backdrop-blur-sm border border-black/10 dark:border-white/20 p-4 text-left transition-all mb-3 hover:shadow-md hover:bg-white/80 dark:hover:bg-white/10
+											   {isActive(conv.id)
+											? 'bg-white/90 dark:bg-white/15 shadow-md border-primary/30'
+											: ''}"
+									>
+										<!-- Title Row -->
+										<div class="mb-1.5 flex items-center gap-2">
+											<ChatCircle
+												size={16}
+												weight={isActive(conv.id) ? 'fill' : 'regular'}
+												class="flex-shrink-0 {isActive(conv.id)
+													? 'text-primary'
+													: 'text-muted-foreground'}"
+											/>
+											<h3 class="text-sm font-semibold line-clamp-1 text-foreground flex-1">
+												{conv.title || 'Neue Konversation'}
+											</h3>
+										</div>
+
+										<!-- Preview -->
+										<p class="mb-2 text-sm text-muted-foreground line-clamp-2">
+											{getPreview(conv.title)}
+										</p>
+
+										<!-- Footer -->
+										<div class="flex items-center justify-between">
+											<span class="text-xs text-muted-foreground">
+												{formatDate(conv.updatedAt || conv.createdAt)}
+											</span>
+											<div class="flex items-center gap-1">
+												{#if conv.documentMode}
+													<span
+														class="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full"
+													>
+														Dokument
+													</span>
+												{/if}
+												<!-- Action Buttons (visible on hover) -->
+												<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+													<button
+														onclick={(e) => handleTogglePin(e, conv.id, false)}
+														class="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+														title="Anpinnen"
+													>
+														<PushPin size={14} weight="bold" />
+													</button>
+													<button
+														onclick={(e) => handleArchive(e, conv.id)}
+														class="p-1.5 text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
+														title="Archivieren"
+													>
+														<Archive size={14} weight="bold" />
+													</button>
+													<button
+														onclick={(e) => handleDelete(e, conv.id)}
+														class="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+														title="Löschen"
+													>
+														<Trash size={14} weight="bold" />
+													</button>
+												</div>
+											</div>
+										</div>
+									</a>
+								{/each}
 							</div>
-						</a>
+						{/if}
 					{/each}
 				{/if}
 			</div>

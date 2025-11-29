@@ -7,6 +7,30 @@
 
 import { browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
+import type {
+	Conversation,
+	Message,
+	Template,
+	Space,
+	SpaceMember,
+	Document,
+	AIModel,
+	ChatMessage,
+	ChatCompletionResponse,
+} from '@chat/types';
+
+// Re-export types for convenience
+export type {
+	Conversation,
+	Message,
+	Template,
+	Space,
+	SpaceMember,
+	Document,
+	AIModel,
+	ChatMessage,
+	ChatCompletionResponse,
+};
 
 const API_BASE = env.PUBLIC_BACKEND_URL || 'http://localhost:3002';
 
@@ -62,30 +86,6 @@ async function fetchApi<T>(
 }
 
 // ============ Conversation API ============
-
-export type Conversation = {
-	id: string;
-	userId: string;
-	modelId: string;
-	templateId?: string;
-	spaceId?: string;
-	title?: string;
-	conversationMode: 'free' | 'guided' | 'template';
-	documentMode: boolean;
-	isArchived: boolean;
-	isPinned: boolean;
-	createdAt: string;
-	updatedAt: string;
-};
-
-export type Message = {
-	id: string;
-	conversationId: string;
-	sender: 'user' | 'assistant' | 'system';
-	messageText: string;
-	createdAt: string;
-	updatedAt: string;
-};
 
 export const conversationApi = {
 	async getConversations(spaceId?: string): Promise<Conversation[]> {
@@ -230,21 +230,6 @@ export const conversationApi = {
 
 // ============ Template API ============
 
-export type Template = {
-	id: string;
-	userId: string;
-	name: string;
-	description: string | null;
-	systemPrompt: string;
-	initialQuestion: string | null;
-	modelId: string | null;
-	color: string;
-	isDefault: boolean;
-	documentMode: boolean;
-	createdAt: string;
-	updatedAt: string;
-};
-
 export const templateApi = {
 	async getTemplates(): Promise<Template[]> {
 		const { data, error } = await fetchApi<Template[]>('/templates');
@@ -340,29 +325,6 @@ export const templateApi = {
 };
 
 // ============ Space API ============
-
-export type Space = {
-	id: string;
-	ownerId: string;
-	name: string;
-	description?: string;
-	isArchived: boolean;
-	createdAt: string;
-	updatedAt: string;
-};
-
-export type SpaceMember = {
-	id: string;
-	spaceId: string;
-	userId: string;
-	role: 'owner' | 'admin' | 'member' | 'viewer';
-	invitationStatus: 'pending' | 'accepted' | 'declined';
-	invitedBy?: string;
-	invitedAt: string;
-	joinedAt?: string;
-	createdAt: string;
-	updatedAt: string;
-};
 
 export const spaceApi = {
 	async getUserSpaces(): Promise<Space[]> {
@@ -520,15 +482,6 @@ export const spaceApi = {
 
 // ============ Document API ============
 
-export type Document = {
-	id: string;
-	conversationId: string;
-	version: number;
-	content: string;
-	createdAt: string;
-	updatedAt: string;
-};
-
 export const documentApi = {
 	async getLatestDocument(conversationId: string): Promise<Document | null> {
 		const { data, error } = await fetchApi<Document | null>(
@@ -604,26 +557,9 @@ export const documentApi = {
 
 // ============ Model API ============
 
-export type Model = {
-	id: string;
-	name: string;
-	description?: string;
-	provider: 'gemini' | 'azure' | 'openai';
-	parameters?: {
-		deployment?: string;
-		temperature?: number;
-		max_tokens?: number;
-		top_p?: number;
-	};
-	isActive: boolean;
-	isDefault: boolean;
-	createdAt: string;
-	updatedAt: string;
-};
-
 export const modelApi = {
-	async getModels(): Promise<Model[]> {
-		const { data, error } = await fetchApi<Model[]>('/models');
+	async getModels(): Promise<AIModel[]> {
+		const { data, error } = await fetchApi<AIModel[]>('/models');
 		if (error) {
 			console.error('Error loading models:', error);
 			return [];
@@ -631,8 +567,8 @@ export const modelApi = {
 		return data || [];
 	},
 
-	async getModel(id: string): Promise<Model | null> {
-		const { data, error } = await fetchApi<Model>(`/models/${id}`);
+	async getModel(id: string): Promise<AIModel | null> {
+		const { data, error } = await fetchApi<AIModel>(`/models/${id}`);
 		if (error) {
 			console.error('Error loading model:', error);
 			return null;
@@ -642,20 +578,6 @@ export const modelApi = {
 };
 
 // ============ Chat API ============
-
-export type ChatMessage = {
-	role: 'system' | 'user' | 'assistant';
-	content: string;
-};
-
-export type ChatCompletionResponse = {
-	content: string;
-	usage: {
-		prompt_tokens: number;
-		completion_tokens: number;
-		total_tokens: number;
-	};
-};
 
 export const chatApi = {
 	async createCompletion(options: {

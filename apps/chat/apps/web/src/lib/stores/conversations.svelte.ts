@@ -27,14 +27,14 @@ export const conversationsStore = {
 	},
 
 	/**
-	 * Load conversations for a user
+	 * Load conversations (userId is derived from JWT on backend)
 	 */
-	async loadConversations(userId: string, spaceId?: string) {
+	async loadConversations(spaceId?: string) {
 		isLoading = true;
 		error = null;
 
 		try {
-			conversations = await conversationService.getConversations(userId, spaceId);
+			conversations = await conversationService.getConversations(spaceId);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load conversations';
 			conversations = [];
@@ -46,12 +46,12 @@ export const conversationsStore = {
 	/**
 	 * Load archived conversations
 	 */
-	async loadArchivedConversations(userId: string) {
+	async loadArchivedConversations() {
 		isLoading = true;
 		error = null;
 
 		try {
-			archivedConversations = await conversationService.getArchivedConversations(userId);
+			archivedConversations = await conversationService.getArchivedConversations();
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load archived conversations';
 			archivedConversations = [];

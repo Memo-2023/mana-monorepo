@@ -36,7 +36,7 @@
 
 			// Load conversations in this space
 			if (authStore.user) {
-				conversations = await conversationService.getConversations(authStore.user.id, spaceId);
+				conversations = await conversationService.getConversations(spaceId);
 			}
 
 			// Load models
@@ -56,14 +56,11 @@
 	async function handleNewChat() {
 		if (!authStore.user || !selectedModelId) return;
 
-		const conversationId = await conversationService.createConversation(
-			authStore.user.id,
-			selectedModelId,
-			'free',
-			undefined,
-			false,
-			spaceId
-		);
+		const conversationId = await conversationService.createConversation({
+			modelId: selectedModelId,
+			mode: 'free',
+			spaceId,
+		});
 
 		if (conversationId) {
 			goto(`/chat/${conversationId}`);

@@ -48,16 +48,15 @@
 		if (!template || !authStore.user) return;
 
 		// Create a new conversation with this template
-		const conversationId = await conversationService.createConversation(
-			authStore.user.id,
-			template.modelId || '550e8400-e29b-41d4-a716-446655440101', // Default to Gemini 2.5 Flash
-			'template',
-			template.id,
-			template.documentMode
-		);
+		const conversationId = await conversationService.createConversation({
+			modelId: template.modelId || '550e8400-e29b-41d4-a716-446655440101', // Default to Gemini 2.5 Flash
+			mode: 'template',
+			templateId: template.id,
+			documentMode: template.documentMode,
+		});
 
 		if (conversationId) {
-			await conversationsStore.loadConversations(authStore.user.id);
+			await conversationsStore.loadConversations();
 			goto(`/chat/${conversationId}`);
 		}
 	}

@@ -7,10 +7,10 @@ import {
 	modelApi,
 	type ChatMessage,
 	type ChatCompletionResponse,
-	type Model,
+	type AIModel,
 } from './api';
 
-export type { ChatMessage, ChatCompletionResponse };
+export type { ChatMessage, ChatCompletionResponse, AIModel };
 
 export interface ChatCompletionRequest {
 	messages: ChatMessage[];
@@ -23,7 +23,7 @@ export const chatService = {
 	/**
 	 * Get available AI models
 	 */
-	async getModels(): Promise<Model[]> {
+	async getModels(): Promise<AIModel[]> {
 		return modelApi.getModels();
 	},
 

@@ -10,7 +10,7 @@
 
 	onMount(async () => {
 		if (authStore.user) {
-			await conversationsStore.loadArchivedConversations(authStore.user.id);
+			await conversationsStore.loadArchivedConversations();
 			conversations = conversationsStore.archivedConversations;
 		}
 		isLoading = false;

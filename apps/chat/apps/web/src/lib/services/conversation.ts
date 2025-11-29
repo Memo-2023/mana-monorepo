@@ -1,5 +1,8 @@
 /**
  * Conversation Service - CRUD operations via Backend API
+ *
+ * Note: userId is derived from JWT token on the backend,
+ * so we don't need to pass it from the frontend.
  */
 
 import { conversationApi, chatApi, type Conversation, type Message, type ChatMessage } from './api';
@@ -10,36 +13,35 @@ export const conversationService = {
 	/**
 	 * Create a new conversation
 	 */
-	async createConversation(
-		userId: string,
-		modelId: string,
-		mode: 'free' | 'guided' | 'template' = 'free',
-		templateId?: string,
-		documentMode: boolean = false,
-		spaceId?: string
-	): Promise<string | null> {
+	async createConversation(options: {
+		modelId: string;
+		mode?: 'free' | 'guided' | 'template';
+		templateId?: string;
+		documentMode?: boolean;
+		spaceId?: string;
+	}): Promise<string | null> {
 		const conversation = await conversationApi.createConversation({
-			modelId,
-			conversationMode: mode,
-			templateId,
-			documentMode,
-			spaceId,
+			modelId: options.modelId,
+			conversationMode: options.mode ?? 'free',
+			templateId: options.templateId,
+			documentMode: options.documentMode ?? false,
+			spaceId: options.spaceId,
 		});
 
 		return conversation?.id || null;
 	},
 
 	/**
-	 * Get all active conversations for a user
+	 * Get all active conversations
 	 */
-	async getConversations(userId: string, spaceId?: string): Promise<Conversation[]> {
+	async getConversations(spaceId?: string): Promise<Conversation[]> {
 		return conversationApi.getConversations(spaceId);
 	},
 
 	/**
 	 * Get archived conversations
 	 */
-	async getArchivedConversations(userId: string): Promise<Conversation[]> {
+	async getArchivedConversations(): Promise<Conversation[]> {
 		return conversationApi.getArchivedConversations();
 	},
 

@@ -72,13 +72,12 @@
 			const docMode = selectedTemplate?.documentMode || documentMode;
 
 			// Create new conversation
-			const conversationId = await conversationService.createConversation(
-				authStore.user.id,
-				modelToUse,
-				mode as 'free' | 'guided' | 'template',
-				selectedTemplate?.id,
-				docMode
-			);
+			const conversationId = await conversationService.createConversation({
+				modelId: modelToUse,
+				mode: mode as 'free' | 'guided' | 'template',
+				templateId: selectedTemplate?.id,
+				documentMode: docMode,
+			});
 
 			if (!conversationId) {
 				throw new Error('Konversation konnte nicht erstellt werden');
@@ -92,7 +91,7 @@
 			);
 
 			// Reload conversations list
-			await conversationsStore.loadConversations(authStore.user.id);
+			await conversationsStore.loadConversations();
 
 			// Navigate to the new conversation
 			goto(`/chat/${conversationId}`);
