@@ -378,7 +378,23 @@ export default function ProfileScreen() {
 			</View>
 
 			<View style={styles.settingsSection}>
-				<Text style={[styles.sectionTitle, { color: colors.text }]}>Einstellungen</Text>
+				<Text style={[styles.sectionTitle, { color: colors.text }]}>Schnellzugriff</Text>
+
+				<TouchableOpacity
+					style={[styles.settingItem, { borderBottomColor: colors.border }]}
+					onPress={() => router.push('/settings')}
+				>
+					<View style={styles.settingIconContainer}>
+						<Ionicons name="settings-outline" size={24} color={colors.primary} />
+					</View>
+					<View style={styles.settingContent}>
+						<Text style={[styles.settingTitle, { color: colors.text }]}>Einstellungen</Text>
+						<Text style={[styles.settingValue, { color: colors.text + '80' }]}>
+							Erscheinungsbild, Benachrichtigungen & mehr
+						</Text>
+					</View>
+					<Ionicons name="chevron-forward" size={20} color={colors.text + '60'} />
+				</TouchableOpacity>
 
 				<TouchableOpacity
 					style={[styles.settingItem, { borderBottomColor: colors.border }]}
@@ -392,17 +408,6 @@ export default function ProfileScreen() {
 						<Text style={[styles.settingValue, { color: colors.text + '80' }]}>
 							{isDarkMode ? 'Dunkel' : 'Hell'}
 						</Text>
-					</View>
-					<Ionicons name="chevron-forward" size={20} color={colors.text + '60'} />
-				</TouchableOpacity>
-
-				<TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.border }]}>
-					<View style={styles.settingIconContainer}>
-						<Ionicons name="notifications" size={24} color={colors.primary} />
-					</View>
-					<View style={styles.settingContent}>
-						<Text style={[styles.settingTitle, { color: colors.text }]}>Benachrichtigungen</Text>
-						<Text style={[styles.settingValue, { color: colors.text + '80' }]}>Ein</Text>
 					</View>
 					<Ionicons name="chevron-forward" size={20} color={colors.text + '60'} />
 				</TouchableOpacity>

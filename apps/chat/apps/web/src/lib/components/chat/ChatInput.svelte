@@ -40,8 +40,10 @@
 	}
 </script>
 
-<div class="border-t border-border bg-surface p-4">
-	<div class="flex items-end gap-3 max-w-4xl mx-auto">
+<div class="relative">
+	<div
+		class="flex items-end gap-3 rounded-2xl border border-border bg-white/70 dark:bg-black/50 backdrop-blur-xl p-2 shadow-lg"
+	>
 		<div class="flex-1 relative">
 			<textarea
 				bind:this={textareaEl}
@@ -51,10 +53,9 @@
 				{placeholder}
 				{disabled}
 				rows="1"
-				class="w-full resize-none rounded-xl border border-border
-               bg-muted text-foreground
-               px-4 py-3 text-sm
-               focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+				class="w-full resize-none rounded-xl border-0 bg-transparent
+               px-4 py-3 text-sm text-foreground
+               focus:outline-none focus:ring-0
                disabled:opacity-50 disabled:cursor-not-allowed
                placeholder:text-muted-foreground"
 			></textarea>
@@ -66,12 +67,12 @@
 			class="flex-shrink-0 p-3 rounded-xl bg-primary text-primary-foreground
              hover:bg-primary/90 active:bg-primary/80
              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary
-             transition-colors"
+             transition-all duration-200 shadow-md hover:shadow-lg"
 		>
 			<PaperPlaneTilt size={20} weight="bold" />
 		</button>
 	</div>
-	<p class="text-xs text-muted-foreground text-center mt-2">
+	<p class="text-xs text-muted-foreground text-center mt-2 opacity-70">
 		Enter zum Senden, Shift+Enter für neue Zeile
 	</p>
 </div>
