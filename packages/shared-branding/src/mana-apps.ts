@@ -230,3 +230,53 @@ export const APP_SLIDER_LABELS = {
 		openApp: 'Open App',
 	},
 } as const;
+
+/**
+ * Default app URLs for local development and production
+ */
+export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
+	chat: { dev: 'http://localhost:5174', prod: 'https://chat.manacore.app' },
+	memoro: { dev: 'http://localhost:5175', prod: 'https://memoro.manacore.app' },
+	presi: { dev: 'http://localhost:5176', prod: 'https://presi.manacore.app' },
+	manadeck: { dev: 'http://localhost:5177', prod: 'https://manadeck.manacore.app' },
+	maerchenzauber: { dev: 'http://localhost:5178', prod: 'https://maerchenzauber.manacore.app' },
+	picture: { dev: 'http://localhost:5179', prod: 'https://picture.manacore.app' },
+	zitare: { dev: 'http://localhost:5180', prod: 'https://zitare.manacore.app' },
+	wisekeep: { dev: 'http://localhost:5181', prod: 'https://wisekeep.manacore.app' },
+	nutriphi: { dev: 'http://localhost:5182', prod: 'https://nutriphi.manacore.app' },
+};
+
+/**
+ * App item type for PillNavigation app switcher
+ */
+export interface PillAppItemConfig {
+	id: string;
+	name: string;
+	url: string;
+	icon?: string;
+	color?: string;
+	isCurrent?: boolean;
+}
+
+/**
+ * Get app items for PillNavigation app switcher
+ * @param currentAppId - The ID of the current app to mark as active
+ * @param isDev - Whether to use development URLs (default: auto-detect)
+ * @param customUrls - Optional custom URL overrides per app
+ */
+export function getPillAppItems(
+	currentAppId?: AppIconId,
+	isDev?: boolean,
+	customUrls?: Partial<Record<AppIconId, string>>
+): PillAppItemConfig[] {
+	const isDevMode = isDev ?? (typeof window !== 'undefined' && window.location.hostname === 'localhost');
+
+	return MANA_APPS.map((app) => ({
+		id: app.id,
+		name: app.name,
+		url: customUrls?.[app.id] || (isDevMode ? APP_URLS[app.id].dev : APP_URLS[app.id].prod),
+		icon: app.icon,
+		color: app.color,
+		isCurrent: app.id === currentAppId,
+	}));
+}

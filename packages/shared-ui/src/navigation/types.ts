@@ -39,6 +39,21 @@ export interface PillDropdownItem {
 	active?: boolean;
 }
 
+export interface PillAppItem {
+	/** Unique identifier (app id) */
+	id: string;
+	/** App display name */
+	name: string;
+	/** App URL */
+	url: string;
+	/** App icon (data URL or regular URL) */
+	icon?: string;
+	/** App brand color */
+	color?: string;
+	/** Whether this is the current app */
+	isCurrent?: boolean;
+}
+
 // ============ Pill Tab Group Types ============
 
 export interface PillTabOption {

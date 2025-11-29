@@ -38,8 +38,11 @@ export {
 	getAvailableManaApps,
 	APP_STATUS_LABELS,
 	APP_SLIDER_LABELS,
+	APP_URLS,
+	getPillAppItems,
 	type ManaApp,
 	type AppStatus,
+	type PillAppItemConfig,
 } from './mana-apps';
 
 // Types

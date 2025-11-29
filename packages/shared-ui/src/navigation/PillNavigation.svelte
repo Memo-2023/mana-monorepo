@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { PillNavItem, PillDropdownItem, PillNavElement, PillTabGroupConfig } from './types';
+	import type { PillNavItem, PillDropdownItem, PillNavElement, PillTabGroupConfig, PillAppItem } from './types';
 	import PillDropdown from './PillDropdown.svelte';
 	import PillTabGroup from './PillTabGroup.svelte';
+	import PillAppDropdown from './PillAppDropdown.svelte';
 
 	interface Props {
 		/** Navigation items */
@@ -53,6 +54,10 @@
 		themeMode?: 'light' | 'dark' | 'system';
 		/** Called when theme mode changes */
 		onThemeModeChange?: (mode: 'light' | 'dark' | 'system') => void;
+		/** App items for app switcher dropdown */
+		appItems?: PillAppItem[];
+		/** Show app switcher dropdown */
+		showAppSwitcher?: boolean;
 	}
 
 	let {
@@ -80,6 +85,8 @@
 		showThemeVariants = false,
 		themeMode = 'system',
 		onThemeModeChange,
+		appItems = [],
+		showAppSwitcher = false,
 	}: Props = $props();
 
 	// Type guards for elements
@@ -223,14 +230,24 @@
 				</div>
 			{/if}
 
-			<!-- Logo pill -->
-			<a href={homeRoute} class="pill glass-pill logo-pill">
-				{#if logo}
-					{@render logo()}
-				{:else}
-					<span class="pill-label font-bold">{appName}</span>
-				{/if}
-			</a>
+			<!-- Logo pill / App Switcher -->
+			{#if showAppSwitcher && appItems.length > 0}
+				<PillAppDropdown
+					apps={appItems}
+					currentAppName={appName}
+					{logo}
+					{homeRoute}
+					direction="down"
+				/>
+			{:else}
+				<a href={homeRoute} class="pill glass-pill logo-pill">
+					{#if logo}
+						{@render logo()}
+					{:else}
+						<span class="pill-label font-bold">{appName}</span>
+					{/if}
+				</a>
+			{/if}
 
 			<!-- Navigation Items -->
 			{#each items as item}
