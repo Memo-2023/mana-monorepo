@@ -249,6 +249,34 @@ const APP_CONFIGS = [
 		},
 	},
 
+	// Nutriphi Backend (NestJS)
+	{
+		path: 'apps/nutriphi/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.NUTRIPHI_BACKEND_PORT || '3002',
+			DATABASE_URL: (env) => env.NUTRIPHI_DATABASE_URL,
+			MANACORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			GEMINI_API_KEY: (env) => env.NUTRIPHI_GEMINI_API_KEY,
+			S3_ENDPOINT: (env) => env.NUTRIPHI_S3_ENDPOINT,
+			S3_ACCESS_KEY_ID: (env) => env.NUTRIPHI_S3_ACCESS_KEY_ID,
+			S3_SECRET_ACCESS_KEY: (env) => env.NUTRIPHI_S3_SECRET_ACCESS_KEY,
+			S3_BUCKET_NAME: (env) => env.NUTRIPHI_S3_BUCKET_NAME,
+			S3_REGION: (env) => env.NUTRIPHI_S3_REGION,
+			S3_PUBLIC_URL: (env) => env.NUTRIPHI_S3_PUBLIC_URL,
+		},
+	},
+
+	// Nutriphi Web (SvelteKit)
+	{
+		path: 'apps/nutriphi/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.NUTRIPHI_BACKEND_PORT || '3002'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MIDDLEWARE_APP_ID: (env) => env.NUTRIPHI_APP_ID || 'nutriphi',
+		},
+	},
+
 	// Zitare Backend (NestJS)
 	{
 		path: 'apps/zitare/apps/backend/.env',

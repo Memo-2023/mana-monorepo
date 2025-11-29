@@ -44,6 +44,9 @@ const wisekeepSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fil
 // Moodlit icon (colorful gradient circle)
 const moodlitSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0)"><rect x="103" y="103" width="819" height="819" rx="409.5" fill="white"/><g filter="url(#filter0)"><circle cx="611" cy="250" r="314" fill="#D10000"/></g><g filter="url(#filter1)"><circle cx="231" cy="393" r="314" fill="#D17A00"/></g><g filter="url(#filter2)"><circle cx="735" cy="625" r="314" fill="#FFEA00"/></g><g filter="url(#filter3)"><circle cx="409" cy="844" r="314" fill="#0033FF"/></g></g><rect x="107" y="107" width="811" height="811" rx="405.5" stroke="white" stroke-opacity="0.2" stroke-width="8"/><defs><filter id="filter0" x="-2" y="-363" width="1226" height="1226" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="149" result="effect1"/></filter><filter id="filter1" x="-382" y="-220" width="1226" height="1226" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="149" result="effect1"/></filter><filter id="filter2" x="122" y="12" width="1226" height="1226" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="149" result="effect1"/></filter><filter id="filter3" x="-204" y="231" width="1226" height="1226" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="149" result="effect1"/></filter><clipPath id="clip0"><rect x="103" y="103" width="819" height="819" rx="409.5" fill="white"/></clipPath></defs></svg>`;
 
+// Nutriphi icon (nutrition/heart with gradient)
+const nutriphiSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#nutriGrad)"/><path d="M512 760C512 760 280 600 280 420C280 340 344 280 424 280C472 280 512 308 512 308C512 308 552 280 600 280C680 280 744 340 744 420C744 600 512 760 512 760Z" fill="white"/><path d="M512 280V200" stroke="white" stroke-width="24" stroke-linecap="round"/><path d="M512 200C512 200 560 160 600 180" stroke="white" stroke-width="24" stroke-linecap="round"/><defs><linearGradient id="nutriGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#10b981"/><stop offset="1" stop-color="#059669"/></linearGradient></defs></svg>`;
+
 /**
  * App icons as data URLs
  * Use these directly in <img src={APP_ICONS.memoro}> or CSS background-image
@@ -60,6 +63,7 @@ export const APP_ICONS = {
 	zitare: svgToDataUrl(zitareSvg),
 	wisekeep: svgToDataUrl(wisekeepSvg),
 	moodlit: svgToDataUrl(moodlitSvg),
+	nutriphi: svgToDataUrl(nutriphiSvg),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;

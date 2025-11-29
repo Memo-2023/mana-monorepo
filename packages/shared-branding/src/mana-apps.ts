@@ -158,6 +158,22 @@ export const MANA_APPS: ManaApp[] = [
 		comingSoon: true,
 		status: 'planning',
 	},
+	{
+		id: 'nutriphi',
+		name: 'Nutriphi',
+		description: {
+			de: 'KI Ernährungstracker',
+			en: 'AI Nutrition Tracker',
+		},
+		longDescription: {
+			de: 'Tracke deine Ernährung mit KI-gestützter Foto-Analyse und erhalte detaillierte Nährwertinformationen.',
+			en: 'Track your nutrition with AI-powered photo analysis and get detailed nutritional information.',
+		},
+		icon: APP_ICONS.nutriphi,
+		color: '#10b981',
+		comingSoon: false,
+		status: 'development',
+	},
 ];
 
 /**
