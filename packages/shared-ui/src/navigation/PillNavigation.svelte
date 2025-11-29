@@ -825,14 +825,14 @@
 	/* FAB for collapsed state */
 	.nav-fab {
 		position: fixed;
-		top: 1rem;
-		left: 1rem;
+		top: 0;
+		left: 0;
 		z-index: 1001;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0.75rem;
-		border-radius: 9999px;
+		padding: 0.875rem;
+		border-radius: 0 0 1rem 0;
 		cursor: pointer;
 		border: none;
 	}
