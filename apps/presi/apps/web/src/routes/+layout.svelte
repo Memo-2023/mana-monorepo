@@ -3,8 +3,10 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { auth } from '$lib/stores/auth.svelte';
+	import { theme } from '$lib/stores/theme';
+	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
@@ -16,7 +18,21 @@
 	let loading = $state(true);
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
-	let isDark = $state(false);
+
+	// Theme variant dropdown items
+	let themeVariantItems = $derived<PillDropdownItem[]>(
+		theme.variants.map((variant) => ({
+			id: variant,
+			label: `${THEME_DEFINITIONS[variant].emoji} ${THEME_DEFINITIONS[variant].label}`,
+			onClick: () => theme.setVariant(variant),
+			active: theme.variant === variant,
+		}))
+	);
+
+	// Current theme variant label
+	let currentThemeVariantLabel = $derived(
+		`${THEME_DEFINITIONS[theme.variant].emoji} ${THEME_DEFINITIONS[theme.variant].label}`
+	);
 
 	// Navigation items for Presi
 	const navItems: PillNavItem[] = [
@@ -52,9 +68,7 @@
 	}
 
 	function handleToggleTheme() {
-		isDark = !isDark;
-		localStorage.setItem('theme', isDark ? 'dark' : 'light');
-		document.documentElement.classList.toggle('dark', isDark);
+		theme.toggleMode();
 	}
 
 	function handleLogout() {
@@ -74,10 +88,7 @@
 		auth.init();
 
 		// Initialize theme
-		isDark =
-			localStorage.getItem('theme') === 'dark' ||
-			(!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-		document.documentElement.classList.toggle('dark', isDark);
+		const cleanup = theme.initialize();
 
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('presi-nav-sidebar');
@@ -94,6 +105,8 @@
 		}
 
 		loading = false;
+
+		return cleanup;
 	});
 </script>
 
@@ -102,12 +115,12 @@
 </svelte:head>
 
 {#if loading || auth.isLoading}
-	<div class="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
+	<div class="flex min-h-screen items-center justify-center bg-background">
 		<div class="text-center">
 			<div
-				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary-500 border-r-transparent"
+				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
 			></div>
-			<p class="text-slate-500 dark:text-slate-400">Laden...</p>
+			<p class="text-muted-foreground">Laden...</p>
 		</div>
 	</div>
 {:else if auth.isAuthenticated || publicRoutes.includes($page.url.pathname)}
@@ -121,16 +134,19 @@
 				appName="Presi"
 				homeRoute="/"
 				onToggleTheme={handleToggleTheme}
-				{isDark}
+				isDark={theme.isDark}
 				{isSidebarMode}
 				onModeChange={handleModeChange}
 				{isCollapsed}
 				onCollapsedChange={handleCollapsedChange}
 				showThemeToggle={true}
+				showThemeVariants={true}
+				{themeVariantItems}
+				{currentThemeVariantLabel}
 				showLanguageSwitcher={false}
 				showLogout={true}
 				onLogout={handleLogout}
-				primaryColor="#0ea5e9"
+				primaryColor="#64748b"
 			/>
 
 			<!-- Main Content with dynamic padding based on nav mode -->
@@ -146,7 +162,7 @@
 		</div>
 	{:else}
 		<!-- Public/Presentation routes without nav -->
-		<main class="min-h-screen bg-slate-50 dark:bg-slate-900">
+		<main class="min-h-screen bg-background">
 			{@render children()}
 		</main>
 	{/if}

@@ -14,11 +14,22 @@
 	import { archivedImages } from '$lib/stores/archive';
 	import { showToast } from '$lib/stores/toast';
 	import type { Database } from '@picture/shared/types';
+	import {
+		DownloadSimple,
+		Link,
+		Heart,
+		Tag as TagIcon,
+		Archive,
+		ArrowCounterClockwise,
+		Trash,
+		CaretRight,
+		Check,
+	} from '@manacore/shared-icons';
 
-	type Tag = Database['public']['Tables']['tags']['Row'];
+	type TagType = Database['public']['Tables']['tags']['Row'];
 
 	let tagSubmenuElement = $state<HTMLElement | null>(null);
-	let imageTags = $state<Tag[]>([]);
+	let imageTags = $state<TagType[]>([]);
 
 	// Check if current image is archived
 	const isArchived = $derived(
@@ -31,9 +42,11 @@
 	// Check if current image belongs to current user
 	const isOwnImage = $derived($contextMenu.image?.user_id === authStore.user?.id);
 
+	type IconName = 'download' | 'link' | 'heart' | 'tag' | 'archive' | 'restore' | 'trash';
+
 	interface MenuItem {
 		label: string;
-		icon: string;
+		iconName: IconName;
 		action: () => void;
 		submenu?: boolean;
 		divider?: boolean;
@@ -59,7 +72,7 @@
 		showTagSubmenu(rect.right, rect.top);
 	}
 
-	async function handleAddTag(tag: Tag) {
+	async function handleAddTag(tag: TagType) {
 		if (!$contextMenu.image) return;
 
 		try {
@@ -72,7 +85,7 @@
 		}
 	}
 
-	async function handleRemoveTag(tag: Tag) {
+	async function handleRemoveTag(tag: TagType) {
 		if (!$contextMenu.image) return;
 
 		try {
@@ -181,23 +194,23 @@
 	const menuItems = $derived([
 		{
 			label: 'Herunterladen',
-			icon: 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4',
+			iconName: 'download' as IconName,
 			action: handleDownload,
 		},
 		{
 			label: 'Link kopieren',
-			icon: 'M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3',
+			iconName: 'link' as IconName,
 			action: handleCopyLink,
 		},
 		{
 			label: isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten',
-			icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+			iconName: 'heart' as IconName,
 			action: handleToggleFavorite,
 			filled: isFavorite,
 		},
 		{
 			label: 'Tags',
-			icon: 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z',
+			iconName: 'tag' as IconName,
 			action: () => {},
 			submenu: true,
 			divider: true,
@@ -207,9 +220,7 @@
 			? [
 					{
 						label: isArchived ? 'Wiederherstellen' : 'Archivieren',
-						icon: isArchived
-							? 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
-							: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4',
+						iconName: (isArchived ? 'restore' : 'archive') as IconName,
 						action: handleArchive,
 						divider: true,
 					},
@@ -220,7 +231,7 @@
 			? [
 					{
 						label: 'Löschen',
-						icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
+						iconName: 'trash' as IconName,
 						action: handleDelete,
 					},
 				]
@@ -278,24 +289,26 @@
 					: ''}"
 				role="menuitem"
 			>
-				<svg
-					class="h-4 w-4 flex-shrink-0"
-					fill={item.filled ? 'currentColor' : 'none'}
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={item.icon} />
-				</svg>
+				<span class="flex-shrink-0">
+					{#if item.iconName === 'download'}
+						<DownloadSimple size={16} weight={item.filled ? 'fill' : 'regular'} />
+					{:else if item.iconName === 'link'}
+						<Link size={16} weight={item.filled ? 'fill' : 'regular'} />
+					{:else if item.iconName === 'heart'}
+						<Heart size={16} weight={item.filled ? 'fill' : 'regular'} />
+					{:else if item.iconName === 'tag'}
+						<TagIcon size={16} weight={item.filled ? 'fill' : 'regular'} />
+					{:else if item.iconName === 'archive'}
+						<Archive size={16} weight={item.filled ? 'fill' : 'regular'} />
+					{:else if item.iconName === 'restore'}
+						<ArrowCounterClockwise size={16} weight={item.filled ? 'fill' : 'regular'} />
+					{:else if item.iconName === 'trash'}
+						<Trash size={16} weight={item.filled ? 'fill' : 'regular'} />
+					{/if}
+				</span>
 				<span class="flex-1">{item.label}</span>
 				{#if item.submenu}
-					<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 5l7 7-7 7"
-						/>
-					</svg>
+					<CaretRight size={16} />
 				{/if}
 			</button>
 		{/each}
@@ -339,19 +352,7 @@
 						></div>
 						<span class="flex-1 text-gray-700 dark:text-gray-300">{tag.name}</span>
 						{#if hasTag}
-							<svg
-								class="h-4 w-4 text-blue-600 dark:text-blue-400"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="3"
-									d="M5 13l4 4L19 7"
-								/>
-							</svg>
+							<Check size={16} weight="bold" class="text-blue-600 dark:text-blue-400" />
 						{/if}
 					</button>
 				{/each}

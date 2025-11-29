@@ -36,11 +36,11 @@
 
 <div class="flex flex-col h-full">
 	<!-- New Chat Button -->
-	<div class="p-3 border-b border-gray-200 dark:border-gray-700">
+	<div class="p-3 border-b border-border">
 		<a
 			href="/chat"
 			class="flex items-center justify-center gap-2 w-full px-4 py-2.5
-             bg-blue-600 hover:bg-blue-700 text-white rounded-lg
+             bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg
              font-medium transition-colors"
 		>
 			<Plus size={20} weight="bold" />
@@ -53,11 +53,11 @@
 		{#if isLoading}
 			<div class="flex items-center justify-center py-8">
 				<div
-					class="animate-spin w-6 h-6 border-2 border-blue-500 border-r-transparent rounded-full"
+					class="animate-spin w-6 h-6 border-2 border-primary border-r-transparent rounded-full"
 				></div>
 			</div>
 		{:else if conversations.length === 0}
-			<div class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+			<div class="px-4 py-8 text-center text-muted-foreground">
 				<p class="text-sm">Keine Konversationen</p>
 				<p class="text-xs mt-1">Starte einen neuen Chat</p>
 			</div>
@@ -69,14 +69,14 @@
 						href="/chat/{conv.id}"
 						class="block px-3 py-2 mx-2 rounded-lg transition-colors
                    {isActive
-							? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-							: 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'}"
+							? 'bg-primary/10 text-primary'
+							: 'hover:bg-muted text-foreground'}"
 					>
 						<div class="flex items-center justify-between gap-2">
 							<span class="text-sm font-medium truncate">
 								{truncateTitle(conv.title || 'Neue Konversation')}
 							</span>
-							<span class="text-xs text-gray-500 dark:text-gray-500 flex-shrink-0">
+							<span class="text-xs text-muted-foreground flex-shrink-0">
 								{formatDate(conv.updated_at || conv.created_at)}
 							</span>
 						</div>

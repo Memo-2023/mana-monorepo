@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { validateImage } from '$lib/api/upload';
 	import type { UploadProgress } from '$lib/api/upload';
+	import { CloudArrowUp, X } from '@manacore/shared-icons';
 
 	interface Props {
 		onFilesSelected: (files: File[]) => void;
@@ -104,19 +105,11 @@
 			role="button"
 			tabindex="0"
 		>
-			<svg
-				class="mb-4 h-16 w-16 {isDragging ? 'text-blue-500' : 'text-gray-400 dark:text-gray-600'}"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-				/>
-			</svg>
+			<CloudArrowUp
+				size={64}
+				weight="regular"
+				class="mb-4 {isDragging ? 'text-blue-500' : 'text-gray-400 dark:text-gray-600'}"
+			/>
 
 			<h3 class="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
 				{isDragging ? 'Loslassen zum Hochladen' : 'Bilder hochladen'}
@@ -178,14 +171,7 @@
 									onclick={() => removeFile(index)}
 									class="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-gray-900 opacity-0 transition-opacity hover:bg-white group-hover:opacity-100"
 								>
-									<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M6 18L18 6M6 6l12 12"
-										/>
-									</svg>
+									<X size={16} weight="bold" />
 								</button>
 							{/if}
 
@@ -255,14 +241,7 @@
 						onclick={handleUpload}
 						class="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-base font-medium text-white transition-all hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
 					>
-						<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-							/>
-						</svg>
+						<CloudArrowUp size={20} weight="bold" />
 						{selectedFiles.length}
 						{selectedFiles.length === 1 ? 'Bild' : 'Bilder'} hochladen
 					</button>

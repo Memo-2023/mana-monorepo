@@ -29,8 +29,8 @@
 <div class="flex {isUser ? 'justify-end' : 'justify-start'} mb-4">
 	<div
 		class="max-w-[80%] rounded-2xl px-4 py-3 {isUser
-			? 'bg-blue-600 text-white rounded-br-md'
-			: 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-md'}"
+			? 'bg-primary text-primary-foreground rounded-br-md'
+			: 'bg-muted text-foreground rounded-bl-md'}"
 	>
 		{#if isUser}
 			<p class="whitespace-pre-wrap">{message.message_text}</p>
@@ -39,7 +39,7 @@
 				{@html htmlContent}
 			</div>
 		{/if}
-		<div class="text-xs mt-1 {isUser ? 'text-blue-200' : 'text-gray-500 dark:text-gray-400'}">
+		<div class="text-xs mt-1 {isUser ? 'text-primary-foreground/70' : 'text-muted-foreground'}">
 			{formattedTime}
 		</div>
 	</div>

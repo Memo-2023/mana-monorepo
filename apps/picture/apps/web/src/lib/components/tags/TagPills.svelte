@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { tags, selectedTags } from '$lib/stores/tags';
 	import type { Database } from '@picture/shared/types';
+	import { Check } from '@manacore/shared-icons';
 
 	type Tag = Database['public']['Tables']['tags']['Row'];
 
@@ -38,14 +39,7 @@
 			{/if}
 			<span>{tag.name}</span>
 			{#if selected}
-				<svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="3"
-						d="M5 13l4 4L19 7"
-					/>
-				</svg>
+				<Check size={14} weight="bold" />
 			{/if}
 		</button>
 	{/each}

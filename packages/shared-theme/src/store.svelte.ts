@@ -219,4 +219,12 @@ export const APP_THEME_CONFIGS = {
 			dark: '280 60% 60%' as HSLValue,
 		},
 	},
+	picture: {
+		appId: 'picture',
+		defaultVariant: 'ocean' as ThemeVariant,
+		primaryColor: {
+			light: '217 91% 60%' as HSLValue, // Blue #3b82f6
+			dark: '217 91% 60%' as HSLValue,
+		},
+	},
 } as const;

@@ -1,7 +1,5 @@
 import { writable } from 'svelte/store';
-import type { Database } from '@picture/shared/types';
-
-type Tag = Database['public']['Tables']['tags']['Row'];
+import type { Tag } from '$lib/api/tags';
 
 export const tags = writable<Tag[]>([]);
 export const selectedTags = writable<string[]>([]);

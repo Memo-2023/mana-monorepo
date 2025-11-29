@@ -17,6 +17,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import { showToast } from '$lib/stores/toast';
+	import { Plus, SquaresFour, Image, Trash } from '@manacore/shared-icons';
 
 	let loadingMore = $state(false);
 	let observer: IntersectionObserver | null = null;
@@ -172,9 +173,7 @@
 			</p>
 		</div>
 		<Button onclick={() => showCreateBoardModal.set(true)}>
-			<svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
+			<Plus size={20} class="mr-2" />
 			Neues Board
 		</Button>
 	</div>
@@ -193,19 +192,7 @@
 	{:else if $boards.length === 0}
 		<!-- Empty State -->
 		<div class="flex flex-col items-center justify-center py-20">
-			<svg
-				class="h-24 w-24 text-gray-300 dark:text-gray-600"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="1.5"
-					d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"
-				/>
-			</svg>
+			<SquaresFour size={96} weight="thin" class="text-gray-300 dark:text-gray-600" />
 			<h3 class="mt-4 text-xl font-semibold text-gray-900 dark:text-gray-100">
 				Keine Boards vorhanden
 			</h3>
@@ -237,19 +224,7 @@
 							/>
 						{:else}
 							<div class="flex h-full items-center justify-center">
-								<svg
-									class="h-16 w-16 text-gray-300 dark:text-gray-600"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke="currentColor"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="1.5"
-										d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-									/>
-								</svg>
+								<Image size={64} weight="thin" class="text-gray-300 dark:text-gray-600" />
 							</div>
 						{/if}
 					</button>
@@ -285,14 +260,7 @@
 								Duplizieren
 							</Button>
 							<Button size="sm" variant="danger" onclick={() => confirmDelete(board.id)}>
-								<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-									/>
-								</svg>
+								<Trash size={16} />
 							</Button>
 						</div>
 					</div>

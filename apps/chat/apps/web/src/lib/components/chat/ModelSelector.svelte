@@ -22,9 +22,9 @@
 		value={selectedModelId}
 		onchange={handleChange}
 		{disabled}
-		class="appearance-none bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100
-           text-sm rounded-lg px-3 py-2 pr-8 border border-gray-200 dark:border-gray-700
-           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+		class="appearance-none bg-muted text-foreground
+           text-sm rounded-lg px-3 py-2 pr-8 border border-border
+           focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
            disabled:opacity-50 disabled:cursor-not-allowed
            cursor-pointer min-w-[160px]"
 	>
@@ -37,6 +37,6 @@
 		{/if}
 	</select>
 	<div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-		<CaretDown size={16} weight="bold" class="text-gray-500" />
+		<CaretDown size={16} weight="bold" class="text-muted-foreground" />
 	</div>
 </div>

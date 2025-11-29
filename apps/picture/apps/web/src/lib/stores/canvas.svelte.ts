@@ -155,7 +155,9 @@ export const canvasStore = {
 	},
 
 	updateItem(id: string, updates: Partial<BoardItem>) {
-		canvasItems = canvasItems.map((item) => (item.id === id ? { ...item, ...updates } : item));
+		canvasItems = canvasItems.map((item) =>
+			item.id === id ? ({ ...item, ...updates } as BoardItem) : item
+		);
 		saveToHistory();
 	},
 

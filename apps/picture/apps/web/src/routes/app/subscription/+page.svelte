@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { SubscriptionPage } from '@manacore/shared-subscription-ui';
-	import { currentTheme } from '$lib/stores/theme';
 	import { showToast } from '$lib/stores/toast';
 
 	function handleSubscribe(planId: string) {
@@ -18,7 +17,7 @@
 	<title>Abonnement - Picture</title>
 </svelte:head>
 
-<div class="min-h-screen p-4 md:p-8" style="background-color: {$currentTheme.background};">
+<div class="min-h-screen p-4 md:p-8" style="background-color: hsl(var(--color-background));">
 	<div class="mx-auto max-w-6xl">
 		<SubscriptionPage
 			appName="Picture"

@@ -31,7 +31,7 @@ const lumeLight: ThemeColors = {
 	primaryForeground: '0 0% 0%', // Black text on gold
 	secondary: '47 100% 41%', // #D4B200 - Darker gold
 	secondaryForeground: '0 0% 0%',
-	background: '0 0% 87%', // #dddddd - Light gray
+	background: '45 30% 96%', // Warm cream with gold tint
 	foreground: '0 0% 17%', // #2c2c2c - Dark text
 	surface: '0 0% 100%', // #ffffff - White
 	surfaceHover: '0 0% 96%', // #f5f5f5
@@ -52,15 +52,15 @@ const lumeDark: ThemeColors = {
 	primaryForeground: '0 0% 0%', // Black text on gold
 	secondary: '47 70% 29%', // #7C6B16 - Muted gold
 	secondaryForeground: '0 0% 100%',
-	background: '0 0% 6%', // #101010 - Very dark
+	background: '40 10% 7%', // Very dark with warm tint
 	foreground: '0 0% 100%', // #ffffff - White text
-	surface: '0 0% 12%', // #1E1E1E - Dark surface
-	surfaceHover: '0 0% 16%', // #292929
-	surfaceElevated: '0 0% 14%', // #242424
-	muted: '0 0% 20%', // #333333
-	mutedForeground: '0 0% 60%', // #999999
-	border: '0 0% 26%', // #424242
-	borderStrong: '0 0% 35%', // #595959
+	surface: '40 8% 12%', // Dark surface with warm tint
+	surfaceHover: '40 8% 16%',
+	surfaceElevated: '40 8% 14%',
+	muted: '40 6% 20%',
+	mutedForeground: '40 5% 60%',
+	border: '40 6% 26%',
+	borderStrong: '40 5% 35%',
 	error: '6 78% 57%', // #e74c3c
 	success: '145 63% 49%', // #2ecc71
 	warning: '48 100% 50%', // #f1c40f
@@ -94,15 +94,15 @@ const natureDark: ThemeColors = {
 	primaryForeground: '0 0% 100%',
 	secondary: '122 30% 35%', // Muted green
 	secondaryForeground: '0 0% 100%',
-	background: '0 0% 7%', // #121212
+	background: '120 12% 6%', // Very dark with green tint
 	foreground: '0 0% 100%', // White
-	surface: '120 10% 12%', // Slight green tint
-	surfaceHover: '120 10% 16%',
-	surfaceElevated: '120 10% 14%',
-	muted: '120 10% 20%',
+	surface: '120 10% 11%', // Slight green tint
+	surfaceHover: '120 10% 15%',
+	surfaceElevated: '120 10% 13%',
+	muted: '120 10% 19%',
 	mutedForeground: '120 10% 60%',
-	border: '120 10% 25%',
-	borderStrong: '120 10% 35%',
+	border: '120 10% 24%',
+	borderStrong: '120 10% 34%',
 	error: '0 65% 57%',
 	success: '122 50% 55%',
 	warning: '48 100% 50%',
@@ -136,11 +136,11 @@ const stoneDark: ThemeColors = {
 	primaryForeground: '0 0% 0%',
 	secondary: '200 12% 35%',
 	secondaryForeground: '0 0% 100%',
-	background: '0 0% 7%', // #121212
+	background: '210 15% 8%', // Very dark with blue-gray tint
 	foreground: '0 0% 100%',
-	surface: '200 10% 12%',
-	surfaceHover: '200 10% 16%',
-	surfaceElevated: '200 10% 14%',
+	surface: '200 12% 12%',
+	surfaceHover: '200 12% 16%',
+	surfaceElevated: '200 12% 14%',
 	muted: '200 10% 20%',
 	mutedForeground: '200 10% 60%',
 	border: '200 10% 25%',
@@ -178,15 +178,15 @@ const oceanDark: ThemeColors = {
 	primaryForeground: '0 0% 0%',
 	secondary: '199 60% 35%',
 	secondaryForeground: '0 0% 100%',
-	background: '0 0% 7%', // #121212
+	background: '200 25% 7%', // Very dark with blue tint
 	foreground: '0 0% 100%',
-	surface: '199 30% 12%', // Slight blue tint
-	surfaceHover: '199 30% 16%',
-	surfaceElevated: '199 30% 14%',
-	muted: '199 20% 20%',
-	mutedForeground: '199 20% 60%',
-	border: '199 20% 25%',
-	borderStrong: '199 20% 35%',
+	surface: '199 20% 11%', // Slight blue tint
+	surfaceHover: '199 20% 15%',
+	surfaceElevated: '199 20% 13%',
+	muted: '199 15% 19%',
+	mutedForeground: '199 15% 60%',
+	border: '199 15% 24%',
+	borderStrong: '199 15% 34%',
 	error: '4 90% 58%',
 	success: '145 63% 49%',
 	warning: '48 100% 50%',

@@ -5,7 +5,7 @@
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillNavElement } from '@manacore/shared-ui';
 	import KeyboardShortcutsModal from '$lib/components/ui/KeyboardShortcutsModal.svelte';
-	import { currentTheme, actualMode, toggleThemeMode } from '$lib/stores/theme';
+	import { theme } from '$lib/stores/theme';
 	import { isUIVisible, toggleUI, showKeyboardShortcuts } from '$lib/stores/ui';
 	import { viewMode, setViewMode, type ViewMode } from '$lib/stores/view';
 	import { browser } from '$app/environment';
@@ -42,7 +42,7 @@
 	}
 
 	function handleToggleTheme() {
-		toggleThemeMode();
+		theme.toggleMode();
 	}
 
 	// Client-side auth check
@@ -157,7 +157,7 @@
 		</div>
 	</div>
 {:else if authStore.user}
-	<div class="min-h-screen" style="background-color: {$currentTheme.background};">
+	<div class="min-h-screen" style="background-color: hsl(var(--color-background));">
 		<!-- PillNavigation (conditionally visible) -->
 		{#if $isUIVisible}
 			<PillNavigation
@@ -168,7 +168,7 @@
 				homeRoute="/app/gallery"
 				onLogout={handleLogout}
 				onToggleTheme={handleToggleTheme}
-				isDark={$actualMode === 'dark'}
+				isDark={theme.isDark}
 				{isSidebarMode}
 				onModeChange={handleModeChange}
 				{isCollapsed}

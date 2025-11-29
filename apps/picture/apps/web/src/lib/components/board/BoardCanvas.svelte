@@ -226,13 +226,13 @@
 			const konvaImage = new Konva.Image({
 				id: item.id,
 				name: item.id,
-				x: item.position_x,
-				y: item.position_y,
+				x: item.positionX,
+				y: item.positionY,
 				image: imageObj,
 				width: item.width || imageObj.width,
 				height: item.height || imageObj.height,
-				scaleX: item.scale_x,
-				scaleY: item.scale_y,
+				scaleX: item.scaleX,
+				scaleY: item.scaleY,
 				rotation: item.rotation,
 				draggable: true,
 				opacity: item.opacity,
@@ -273,9 +273,9 @@
 		const konvaText = new Konva.Text({
 			id: item.id,
 			name: item.id,
-			x: item.position_x,
-			y: item.position_y,
-			text: item.text_content,
+			x: item.positionX,
+			y: item.positionY,
+			text: item.textContent,
 			fontSize: item.font_size,
 			fontFamily: item.properties?.fontFamily || 'Arial',
 			fontStyle: `${item.properties?.fontStyle || 'normal'} ${item.properties?.fontWeight || 'normal'}`,
@@ -283,8 +283,8 @@
 			width: item.width || 300,
 			align: item.properties?.textAlign || 'left',
 			rotation: item.rotation,
-			scaleX: item.scale_x,
-			scaleY: item.scale_y,
+			scaleX: item.scaleX,
+			scaleY: item.scaleY,
 			opacity: item.opacity,
 			draggable: true,
 			lineHeight: item.properties?.lineHeight || 1.2,
@@ -364,12 +364,12 @@
 
 		// Update store
 		updateCanvasItem(itemId, {
-			position_x: x,
-			position_y: y,
+			positionX: x,
+			positionY: y,
 		});
 
 		// Save to database
-		await saveBoardItem(itemId, { position_x: x, position_y: y });
+		await saveBoardItem(itemId, { positionX: x, positionY: y });
 	}
 
 	async function handleTransformEnd(node: Konva.Image, itemId: string) {
@@ -379,15 +379,15 @@
 
 		// Update store
 		updateCanvasItem(itemId, {
-			scale_x: scaleX,
-			scale_y: scaleY,
+			scaleX: scaleX,
+			scaleY: scaleY,
 			rotation: rotation,
 		});
 
 		// Save to database
 		await saveBoardItem(itemId, {
-			scale_x: scaleX,
-			scale_y: scaleY,
+			scaleX: scaleX,
+			scaleY: scaleY,
 			rotation: rotation,
 		});
 	}
@@ -405,16 +405,16 @@
 		// Update store
 		updateCanvasItem(itemId, {
 			width: Math.round(width),
-			scale_x: 1,
-			scale_y: scaleY,
+			scaleX: 1,
+			scaleY: scaleY,
 			rotation: rotation,
 		});
 
 		// Save to database
 		await saveBoardItem(itemId, {
 			width: Math.round(width),
-			scale_x: 1,
-			scale_y: scaleY,
+			scaleX: 1,
+			scaleY: scaleY,
 			rotation: rotation,
 		});
 	}
@@ -459,8 +459,8 @@
 			layer.batchDraw();
 
 			// Update store and database
-			updateCanvasItem(item.id, { text_content: newText });
-			await saveBoardItem(item.id, { text_content: newText });
+			updateCanvasItem(item.id, { textContent: newText });
+			await saveBoardItem(item.id, { textContent: newText });
 			stopEditingText();
 		};
 

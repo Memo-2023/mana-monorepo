@@ -1,8 +1,6 @@
 <script lang="ts">
-	import type { Database } from '@picture/shared/types';
+	import type { Image } from '$lib/api/images';
 	import { showContextMenu } from '$lib/stores/contextMenu';
-
-	type Image = Database['public']['Tables']['images']['Row'];
 
 	interface Props {
 		image: Image;
@@ -38,7 +36,7 @@
 	type="button"
 >
 	<img
-		src={image.public_url}
+		src={image.publicUrl}
 		alt={image.prompt}
 		class="h-full w-full object-cover transition-opacity duration-300 {imageLoaded
 			? 'opacity-100'
@@ -52,7 +50,7 @@
 		class="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100"
 	>
 		<p class="text-base font-medium text-white">{image.prompt}</p>
-		<p class="mt-1 text-sm text-gray-300">{formatDate(image.created_at)}</p>
+		<p class="mt-1 text-sm text-gray-300">{formatDate(image.createdAt)}</p>
 	</div>
 
 	<!-- Archived badge - always visible -->

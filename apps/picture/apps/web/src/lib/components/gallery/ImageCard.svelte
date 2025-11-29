@@ -1,9 +1,7 @@
 <script lang="ts">
-	import type { Database } from '@picture/shared/types';
+	import type { Image } from '$lib/api/images';
 	import type { ViewMode } from '$lib/stores/view';
 	import { showContextMenu } from '$lib/stores/contextMenu';
-
-	type Image = Database['public']['Tables']['images']['Row'];
 
 	interface Props {
 		image: Image;
@@ -49,7 +47,7 @@
 >
 	<div class="w-full {aspectClass}">
 		<img
-			src={image.public_url}
+			src={image.publicUrl}
 			alt={image.prompt}
 			class="h-full w-full object-cover transition-opacity duration-300 {imageLoaded
 				? 'opacity-100'
@@ -68,13 +66,13 @@
 			</p>
 			{#if viewMode !== 'grid5'}
 				<p class="text-sm text-white/80">
-					{formatDate(image.created_at)}
+					{formatDate(image.createdAt)}
 				</p>
 			{/if}
 		</div>
 	</div>
 
-	{#if image.archived_at}
+	{#if image.archivedAt}
 		<div class="absolute right-2 top-2 rounded-full bg-black/50 px-2 py-1 text-xs text-white">
 			Archived
 		</div>

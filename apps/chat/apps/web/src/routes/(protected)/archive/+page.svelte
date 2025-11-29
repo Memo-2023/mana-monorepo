@@ -53,12 +53,12 @@
 	<title>Archiv | ManaChat</title>
 </svelte:head>
 
-<div class="min-h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900 py-8">
+<div class="min-h-[calc(100vh-4rem)] bg-background py-8">
 	<div class="max-w-4xl mx-auto px-4">
 		<!-- Header -->
 		<div class="mb-6">
-			<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Archiv</h1>
-			<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+			<h1 class="text-2xl font-bold text-foreground">Archiv</h1>
+			<p class="text-sm text-muted-foreground mt-1">
 				Deine archivierten Konversationen.
 			</p>
 		</div>
@@ -67,14 +67,14 @@
 		{#if isLoading}
 			<div class="flex items-center justify-center py-16">
 				<div
-					class="animate-spin w-8 h-8 border-4 border-blue-500 border-r-transparent rounded-full"
+					class="animate-spin w-8 h-8 border-4 border-primary border-r-transparent rounded-full"
 				></div>
 			</div>
 		{:else if conversations.length === 0}
 			<!-- Empty State -->
 			<div class="text-center py-16">
 				<svg
-					class="w-16 h-16 text-gray-400 mx-auto mb-4"
+					class="w-16 h-16 text-muted-foreground mx-auto mb-4"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -86,24 +86,24 @@
 						d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
 					/>
 				</svg>
-				<h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">
+				<h3 class="text-lg font-medium text-foreground mb-1">
 					Keine archivierten Konversationen
 				</h3>
-				<p class="text-gray-500 dark:text-gray-400">Archivierte Gespräche erscheinen hier.</p>
+				<p class="text-muted-foreground">Archivierte Gespräche erscheinen hier.</p>
 			</div>
 		{:else}
 			<!-- Conversation List -->
 			<div class="space-y-3">
 				{#each conversations as conv (conv.id)}
 					<div
-						class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700
+						class="group bg-surface rounded-xl border border-border
                    shadow-sm hover:shadow-md transition-all overflow-hidden"
 					>
 						<button onclick={() => handleConversationClick(conv.id)} class="w-full p-4 text-left">
 							<div class="flex items-center justify-between mb-2">
 								<div class="flex items-center gap-2">
 									<svg
-										class="w-5 h-5 text-gray-400"
+										class="w-5 h-5 text-muted-foreground"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -115,14 +115,14 @@
 											d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
 										/>
 									</svg>
-									<h3 class="font-semibold text-gray-900 dark:text-white">
+									<h3 class="font-semibold text-foreground">
 										{conv.title || 'Unbenannte Konversation'}
 									</h3>
 								</div>
-								<span class="text-xs text-gray-500">{formatDate(conv.updated_at)}</span>
+								<span class="text-xs text-muted-foreground">{formatDate(conv.updated_at)}</span>
 							</div>
-							<div class="flex items-center gap-2 text-xs text-gray-500">
-								<span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">
+							<div class="flex items-center gap-2 text-xs text-muted-foreground">
+								<span class="px-2 py-0.5 bg-muted rounded">
 									{conv.conversation_mode === 'free'
 										? 'Freier Modus'
 										: conv.conversation_mode === 'guided'
@@ -134,12 +134,12 @@
 
 						<!-- Actions -->
 						<div
-							class="flex justify-end gap-2 px-4 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
+							class="flex justify-end gap-2 px-4 py-2 border-t border-border bg-muted/50"
 						>
 							<button
 								onclick={() => handleUnarchive(conv.id)}
-								class="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400
-                       hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20
+								class="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground
+                       hover:text-primary hover:bg-primary/10
                        rounded-lg transition-colors"
 							>
 								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -154,8 +154,8 @@
 							</button>
 							<button
 								onclick={() => handleDelete(conv.id)}
-								class="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400
-                       hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20
+								class="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground
+                       hover:text-destructive hover:bg-destructive/10
                        rounded-lg transition-colors"
 							>
 								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

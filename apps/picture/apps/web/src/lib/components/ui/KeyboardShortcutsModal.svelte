@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { showKeyboardShortcuts } from '$lib/stores/ui';
+	import { X } from '@manacore/shared-icons';
 
 	interface Shortcut {
 		key: string;
@@ -56,14 +57,7 @@
 					class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100/80 text-gray-600 backdrop-blur-xl transition-all hover:bg-gray-200/80 dark:bg-gray-800/80 dark:text-gray-400 dark:hover:bg-gray-700/80"
 					aria-label="Schließen"
 				>
-					<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
+					<X size={20} weight="bold" />
 				</button>
 			</div>
 

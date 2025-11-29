@@ -8,6 +8,7 @@
 	import { generateImageAsync, subscribeToGenerationUpdates } from '$lib/api/generate-async';
 	import Button from '../ui/Button.svelte';
 	import Card from '../ui/Card.svelte';
+	import { XCircle, Lightning } from '@manacore/shared-icons';
 
 	let prompt = $state('');
 	let negativePrompt = $state('');
@@ -26,7 +27,7 @@
 			const data = await getActiveModels();
 			models.set(data);
 			// Select default model
-			const defaultModel = data.find((m) => m.is_default) || data[0];
+			const defaultModel = data.find((m) => m.isDefault) || data[0];
 			if (defaultModel) {
 				selectedModelId = defaultModel.id;
 				selectedModel.set(defaultModel);
@@ -55,8 +56,8 @@
 			// Start generation with new async API
 			const { generationId } = await generateImageAsync({
 				prompt: prompt.trim(),
-				model_id: selectedModelId,
-				negative_prompt: negativePrompt.trim() || undefined,
+				modelId: selectedModelId,
+				negativePrompt: negativePrompt.trim() || undefined,
 			});
 
 			// Wait for completion using realtime subscription
@@ -113,13 +114,7 @@
 			<div class="rounded-md bg-red-50 p-4">
 				<div class="flex">
 					<div class="flex-shrink-0">
-						<svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-							<path
-								fill-rule="evenodd"
-								d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-								clip-rule="evenodd"
-							/>
-						</svg>
+						<XCircle size={20} weight="fill" class="text-red-400" />
 					</div>
 					<div class="ml-3">
 						<p class="text-sm text-red-800">{$generationError}</p>
@@ -159,7 +154,7 @@
 					{#each $models as model}
 						<option value={model.id}>
 							{model.name}
-							{model.is_default ? '(Default)' : ''}
+							{model.isDefault ? '(Default)' : ''}
 						</option>
 					{/each}
 				{/if}
@@ -223,14 +218,7 @@
 			disabled={!canGenerate}
 			loading={$isGenerating}
 		>
-			<svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M13 10V3L4 14h7v7l9-11h-7z"
-				/>
-			</svg>
+			<Lightning size={20} class="mr-2" />
 			{$isGenerating ? 'Generating...' : 'Generate Image'}
 		</Button>
 	</div>

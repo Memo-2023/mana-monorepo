@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { AppSlider, type AppItem } from '@manacore/shared-ui';
 	import { APP_ICONS } from '@manacore/shared-branding';
-	import { actualMode } from '$lib/stores/theme';
+	import { theme } from '$lib/stores/theme';
 	import { t } from 'svelte-i18n';
-
-	let isDark = $derived($actualMode === 'dark');
 
 	let apps = $derived<AppItem[]>([
 		{
@@ -78,7 +76,7 @@
 <AppSlider
 	{apps}
 	title={$t('app_slider.title')}
-	{isDark}
+	isDark={theme.isDark}
 	{statusLabels}
 	comingSoonLabel={$t('app_slider.coming_soon')}
 	openAppLabel={$t('app_slider.download')}

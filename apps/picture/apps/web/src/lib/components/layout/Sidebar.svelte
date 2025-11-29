@@ -2,7 +2,6 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { currentTheme } from '$lib/stores/theme';
 	import { viewMode, cycleViewMode, type ViewMode } from '$lib/stores/view';
 	import { isSidebarCollapsed, setSidebarCollapsed } from '$lib/stores/sidebar';
 	import {
@@ -19,6 +18,24 @@
 	import { searchPublicImages, getPublicImages } from '$lib/api/explore';
 	import { showKeyboardShortcuts } from '$lib/stores/ui';
 	import TagPills from '$lib/components/tags/TagPills.svelte';
+	import {
+		List,
+		Image,
+		SquaresFour,
+		Square,
+		MagnifyingGlass,
+		Lightning,
+		CloudArrowUp,
+		Tag,
+		Archive,
+		CurrencyCircleDollar,
+		Question,
+		CaretLeft,
+		CaretDown,
+		User,
+		SignOut,
+		Heart,
+	} from '@manacore/shared-icons';
 
 	let showUserMenu = $state(false);
 	let searchInput = $state('');
@@ -33,16 +50,15 @@
 		return $page.url.pathname === path;
 	}
 
-	function getViewModeIcon(mode: ViewMode) {
-		switch (mode) {
-			case 'single':
-				return 'M4 6h16M4 12h16M4 18h16';
-			case 'grid3':
-				return 'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z';
-			case 'grid5':
-				return 'M4 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM10 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5zM16 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5z';
-		}
-	}
+	type IconName =
+		| 'gallery'
+		| 'board'
+		| 'explore'
+		| 'generate'
+		| 'upload'
+		| 'tags'
+		| 'archive'
+		| 'subscription';
 
 	function handleSearchInput(e: Event) {
 		const target = e.target as HTMLInputElement;
@@ -103,50 +119,18 @@
 	interface NavItem {
 		path: string;
 		label: string;
-		icon: string;
+		iconName: IconName;
 	}
 
 	const navItems: NavItem[] = [
-		{
-			path: '/app/gallery',
-			label: 'Galerie',
-			icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
-		},
-		{
-			path: '/app/board',
-			label: 'Moodboards',
-			icon: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z',
-		},
-		{
-			path: '/app/explore',
-			label: 'Entdecken',
-			icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
-		},
-		{
-			path: '/app/generate',
-			label: 'Generieren',
-			icon: 'M13 10V3L4 14h7v7l9-11h-7z',
-		},
-		{
-			path: '/app/upload',
-			label: 'Upload',
-			icon: 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12',
-		},
-		{
-			path: '/app/tags',
-			label: 'Tags',
-			icon: 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z',
-		},
-		{
-			path: '/app/archive',
-			label: 'Archiv',
-			icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4',
-		},
-		{
-			path: '/app/subscription',
-			label: 'Abonnement',
-			icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-		},
+		{ path: '/app/gallery', label: 'Galerie', iconName: 'gallery' },
+		{ path: '/app/board', label: 'Moodboards', iconName: 'board' },
+		{ path: '/app/explore', label: 'Entdecken', iconName: 'explore' },
+		{ path: '/app/generate', label: 'Generieren', iconName: 'generate' },
+		{ path: '/app/upload', label: 'Upload', iconName: 'upload' },
+		{ path: '/app/tags', label: 'Tags', iconName: 'tags' },
+		{ path: '/app/archive', label: 'Archiv', iconName: 'archive' },
+		{ path: '/app/subscription', label: 'Abonnement', iconName: 'subscription' },
 	];
 </script>
 
@@ -157,14 +141,7 @@
 	class:-translate-x-[calc(100%+2rem)]={!$isSidebarCollapsed}
 	aria-label="Sidebar öffnen"
 >
-	<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-		<path
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			stroke-width="2"
-			d="M4 6h16M4 12h16M4 18h16"
-		/>
-	</svg>
+	<List size={24} weight="bold" />
 </button>
 
 <!-- Sidebar for Desktop -->
@@ -182,9 +159,7 @@
 			class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 backdrop-blur-xl transition-colors hover:bg-gray-100/80 hover:text-gray-600 dark:hover:bg-gray-800/80 dark:hover:text-gray-300"
 			aria-label="Sidebar schließen"
 		>
-			<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-			</svg>
+			<CaretLeft size={20} weight="bold" />
 		</button>
 	</div>
 
@@ -198,16 +173,29 @@
 					? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
 					: 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}"
 			>
-				<svg
-					class="h-5 w-5 {active
+				<span
+					class="{active
 						? 'text-blue-600 dark:text-blue-400'
 						: 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'}"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
 				>
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={item.icon} />
-				</svg>
+					{#if item.iconName === 'gallery'}
+						<Image size={20} />
+					{:else if item.iconName === 'board'}
+						<SquaresFour size={20} />
+					{:else if item.iconName === 'explore'}
+						<MagnifyingGlass size={20} />
+					{:else if item.iconName === 'generate'}
+						<Lightning size={20} />
+					{:else if item.iconName === 'upload'}
+						<CloudArrowUp size={20} />
+					{:else if item.iconName === 'tags'}
+						<Tag size={20} />
+					{:else if item.iconName === 'archive'}
+						<Archive size={20} />
+					{:else if item.iconName === 'subscription'}
+						<CurrencyCircleDollar size={20} />
+					{/if}
+				</span>
 				<span>{item.label}</span>
 			</a>
 		{/each}
@@ -220,19 +208,9 @@
 			onclick={() => showKeyboardShortcuts.set(true)}
 			class="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 transition-all hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
 		>
-			<svg
-				class="h-5 w-5 text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-				/>
-			</svg>
+			<span class="text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300">
+				<Question size={20} />
+			</span>
 			<span>Tastaturkürzel</span>
 		</button>
 
@@ -255,9 +233,7 @@
 						: 'text-gray-400 hover:bg-gray-100/80 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800/80 dark:hover:text-gray-300'}"
 					title="Liste"
 				>
-					<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-						<path d="M4 6h16M4 12h16M4 18h16" />
-					</svg>
+					<List size={20} weight="bold" />
 				</button>
 				<button
 					onclick={() => viewMode.set('grid3')}
@@ -267,11 +243,7 @@
 						: 'text-gray-400 hover:bg-gray-100/80 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800/80 dark:hover:text-gray-300'}"
 					title="Mittel"
 				>
-					<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-						<path
-							d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
-						/>
-					</svg>
+					<SquaresFour size={20} weight="bold" />
 				</button>
 				<button
 					onclick={() => viewMode.set('grid5')}
@@ -281,11 +253,7 @@
 						: 'text-gray-400 hover:bg-gray-100/80 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800/80 dark:hover:text-gray-300'}"
 					title="Klein"
 				>
-					<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-						<path
-							d="M4 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM10 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5zM16 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5zM4 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zM10 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2zM16 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2z"
-						/>
-					</svg>
+					<Square size={20} weight="bold" />
 				</button>
 			</div>
 		</div>
@@ -319,19 +287,7 @@
 							? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
 							: 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'}"
 					>
-						<svg
-							class="h-4 w-4"
-							fill={$showExploreFavoritesOnly ? 'currentColor' : 'none'}
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-							/>
-						</svg>
+						<Heart size={16} weight={$showExploreFavoritesOnly ? 'fill' : 'regular'} />
 						<span>Favoriten</span>
 					</button>
 				</div>
@@ -350,19 +306,9 @@
 							placeholder="Prompts..."
 							class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-9 text-sm text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
 						/>
-						<svg
-							class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-							/>
-						</svg>
+						<span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+							<MagnifyingGlass size={16} />
+						</span>
 					</div>
 				</div>
 
@@ -417,19 +363,7 @@
 							? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
 							: 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'}"
 					>
-						<svg
-							class="h-4 w-4"
-							fill={$showFavoritesOnly ? 'currentColor' : 'none'}
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-							/>
-						</svg>
+						<Heart size={16} weight={$showFavoritesOnly ? 'fill' : 'regular'} />
 						<span>Favoriten</span>
 					</button>
 
@@ -466,7 +400,7 @@
 			>
 				<div
 					class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
-					style="background-color: {$currentTheme.primary.default};"
+					style="background-color: hsl(var(--color-primary));"
 				>
 					{authStore.user?.email?.charAt(0).toUpperCase()}
 				</div>
@@ -476,19 +410,9 @@
 					</p>
 					<p class="truncate text-xs text-gray-500 dark:text-gray-400">Account</p>
 				</div>
-				<svg
-					class="h-4 w-4 text-gray-400 transition-transform {showUserMenu ? 'rotate-180' : ''}"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M19 9l-7 7-7-7"
-					/>
-				</svg>
+				<span class="text-gray-400 transition-transform {showUserMenu ? 'rotate-180' : ''}">
+					<CaretDown size={16} />
+				</span>
 			</button>
 
 			{#if showUserMenu}
@@ -500,28 +424,14 @@
 						onclick={() => (showUserMenu = false)}
 						class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
 					>
-						<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-							/>
-						</svg>
+						<User size={16} />
 						Profil & Einstellungen
 					</a>
 					<button
 						onclick={handleLogout}
 						class="flex w-full items-center gap-3 border-t border-gray-200 px-4 py-3 text-left text-sm text-red-600 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-red-400 dark:hover:bg-gray-700"
 					>
-						<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-							/>
-						</svg>
+						<SignOut size={16} />
 						Abmelden
 					</button>
 				</div>
@@ -542,7 +452,7 @@
 		<button
 			onclick={() => (showUserMenu = !showUserMenu)}
 			class="flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-white"
-			style="background-color: {$currentTheme.primary.default};"
+			style="background-color: hsl(var(--color-primary));"
 		>
 			{authStore.user?.email?.charAt(0).toUpperCase()}
 		</button>
@@ -561,14 +471,25 @@
 							? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
 							: 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'}"
 					>
-						<svg
-							class="h-5 w-5 {active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={item.icon} />
-						</svg>
+						<span class="{active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}">
+							{#if item.iconName === 'gallery'}
+								<Image size={20} />
+							{:else if item.iconName === 'board'}
+								<SquaresFour size={20} />
+							{:else if item.iconName === 'explore'}
+								<MagnifyingGlass size={20} />
+							{:else if item.iconName === 'generate'}
+								<Lightning size={20} />
+							{:else if item.iconName === 'upload'}
+								<CloudArrowUp size={20} />
+							{:else if item.iconName === 'tags'}
+								<Tag size={20} />
+							{:else if item.iconName === 'archive'}
+								<Archive size={20} />
+							{:else if item.iconName === 'subscription'}
+								<CurrencyCircleDollar size={20} />
+							{/if}
+						</span>
 						{item.label}
 					</a>
 				{/each}
@@ -577,28 +498,16 @@
 					onclick={() => (showUserMenu = false)}
 					class="flex items-center gap-3 border-b border-gray-100 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
 				>
-					<svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-						/>
-					</svg>
+					<span class="text-gray-400">
+						<User size={20} />
+					</span>
 					Profil & Einstellungen
 				</a>
 				<button
 					onclick={handleLogout}
 					class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-red-600 transition-colors hover:bg-gray-50 dark:text-red-400 dark:hover:bg-gray-800"
 				>
-					<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-						/>
-					</svg>
+					<SignOut size={20} />
 					Abmelden
 				</button>
 			</nav>
@@ -619,9 +528,23 @@
 					? 'text-blue-600 dark:text-blue-400'
 					: 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'}"
 			>
-				<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={item.icon} />
-				</svg>
+				{#if item.iconName === 'gallery'}
+					<Image size={24} />
+				{:else if item.iconName === 'board'}
+					<SquaresFour size={24} />
+				{:else if item.iconName === 'explore'}
+					<MagnifyingGlass size={24} />
+				{:else if item.iconName === 'generate'}
+					<Lightning size={24} />
+				{:else if item.iconName === 'upload'}
+					<CloudArrowUp size={24} />
+				{:else if item.iconName === 'tags'}
+					<Tag size={24} />
+				{:else if item.iconName === 'archive'}
+					<Archive size={24} />
+				{:else if item.iconName === 'subscription'}
+					<CurrencyCircleDollar size={24} />
+				{/if}
 				<span class="text-xs font-medium">{item.label}</span>
 			</a>
 		{/each}

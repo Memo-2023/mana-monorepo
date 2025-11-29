@@ -23,8 +23,8 @@
 	<!-- Sidebar Toggle (mobile) -->
 	<button
 		onclick={toggleSidebar}
-		class="fixed bottom-4 left-4 z-50 p-3 bg-blue-600 text-white rounded-full shadow-lg
-           sm:hidden hover:bg-blue-700 transition-colors"
+		class="fixed bottom-4 left-4 z-50 p-3 bg-primary text-primary-foreground rounded-full shadow-lg
+           sm:hidden hover:bg-primary/90 transition-colors"
 		aria-label={showSidebar ? 'Seitenleiste schließen' : 'Seitenleiste öffnen'}
 	>
 		{#if showSidebar}
@@ -36,7 +36,7 @@
 
 	<!-- Sidebar -->
 	<aside
-		class="w-72 flex-shrink-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700
+		class="w-72 flex-shrink-0 bg-surface border-r border-border
            transition-transform duration-200 ease-in-out
            fixed sm:static inset-y-0 left-0 z-40 top-16
            {showSidebar

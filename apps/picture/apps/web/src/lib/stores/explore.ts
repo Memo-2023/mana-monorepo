@@ -1,7 +1,5 @@
 import { writable } from 'svelte/store';
-import type { Database } from '@picture/shared/types';
-
-type Image = Database['public']['Tables']['images']['Row'];
+import type { Image } from '$lib/api/images';
 
 export const exploreImages = writable<Image[]>([]);
 export const isLoadingExplore = writable(false);

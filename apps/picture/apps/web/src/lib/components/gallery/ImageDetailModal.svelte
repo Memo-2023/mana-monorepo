@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { Database } from '@picture/shared/types';
+	import type { Image } from '$lib/api/images';
+	import type { Tag } from '$lib/api/tags';
 	import {
 		archiveImage,
 		deleteImage,
@@ -11,9 +12,18 @@
 	import { showToast } from '$lib/stores/toast';
 	import { fade, fly } from 'svelte/transition';
 	import { getImageTags, getAllTags, addTagToImage, removeTagFromImage } from '$lib/api/tags';
-
-	type Image = Database['public']['Tables']['images']['Row'];
-	type Tag = Database['public']['Tables']['tags']['Row'];
+	import {
+		X,
+		Info,
+		Tag as TagIcon,
+		DownloadSimple,
+		Globe,
+		CaretLeft,
+		CaretRight,
+		Archive,
+		Trash,
+		Check,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		image: Image | null;
@@ -33,7 +43,7 @@
 	let isPublishing = $state(false);
 
 	// Get current image index
-	const currentIndex = $derived(image ? $images.findIndex((img) => img.id === image.id) : -1);
+	const currentIndex = $derived(image ? $images.findIndex((img) => img.id === image?.id) : -1);
 
 	const hasPrevious = $derived(currentIndex > 0);
 	const hasNext = $derived(currentIndex >= 0 && currentIndex < $images.length - 1);
@@ -87,12 +97,13 @@
 
 	async function handleArchive() {
 		if (!image) return;
+		const imageId = image.id;
 
 		isArchiving = true;
 		try {
-			await archiveImage(image.id);
+			await archiveImage(imageId);
 			// Update store
-			images.update((current) => current.filter((img) => img.id !== image.id));
+			images.update((current) => current.filter((img) => img.id !== imageId));
 			showToast('Bild erfolgreich archiviert', 'success');
 			onClose();
 		} catch (error) {
@@ -105,6 +116,7 @@
 
 	async function handleDelete() {
 		if (!image) return;
+		const imageId = image.id;
 		if (
 			!confirm(
 				'Bist du sicher, dass du dieses Bild löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.'
@@ -114,9 +126,9 @@
 
 		isDeleting = true;
 		try {
-			await deleteImage(image.id);
+			await deleteImage(imageId);
 			// Update store
-			images.update((current) => current.filter((img) => img.id !== image.id));
+			images.update((current) => current.filter((img) => img.id !== imageId));
 			showToast('Bild erfolgreich gelöscht', 'success');
 			onClose();
 		} catch (error) {
@@ -128,9 +140,9 @@
 	}
 
 	function handleDownload() {
-		if (!image) return;
+		if (!image || !image.publicUrl) return;
 		const filename = `picture-${image.id}.png`;
-		downloadImage(image.public_url, filename);
+		downloadImage(image.publicUrl, filename);
 		showToast('Download gestartet', 'success');
 	}
 
@@ -199,7 +211,7 @@
 			await publishImage(image.id);
 			// Update local image state
 			if (image) {
-				image = { ...image, is_public: true };
+				image = { ...image, isPublic: true };
 			}
 			showToast('Bild erfolgreich veröffentlicht!', 'success');
 			closePublishModal();
@@ -219,7 +231,7 @@
 			await unpublishImage(image.id);
 			// Update local image state
 			if (image) {
-				image = { ...image, is_public: false };
+				image = { ...image, isPublic: false };
 			}
 			showToast('Bild nicht mehr öffentlich', 'success');
 			closePublishModal();
@@ -249,14 +261,7 @@
 			class="fixed right-4 top-4 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-xl transition-all hover:bg-white/20"
 			aria-label="Schließen"
 		>
-			<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M6 18L18 6M6 6l12 12"
-				/>
-			</svg>
+			<X size={24} weight="bold" />
 		</button>
 
 		<!-- Info Toggle -->
@@ -270,14 +275,7 @@
 				: ''}"
 			aria-label="Info anzeigen"
 		>
-			<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-				/>
-			</svg>
+			<Info size={24} />
 		</button>
 
 		<!-- Tags Button -->
@@ -289,14 +287,7 @@
 			class="fixed right-4 top-36 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-xl transition-all hover:bg-white/20"
 			aria-label="Tags verwalten"
 		>
-			<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-				/>
-			</svg>
+			<TagIcon size={24} />
 		</button>
 
 		<!-- Download Button -->
@@ -308,14 +299,7 @@
 			class="fixed right-4 top-52 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-xl transition-all hover:bg-white/20"
 			aria-label="Download"
 		>
-			<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-				/>
-			</svg>
+			<DownloadSimple size={24} />
 		</button>
 
 		<!-- Publish Button -->
@@ -324,19 +308,12 @@
 				e.stopPropagation();
 				openPublishModal();
 			}}
-			class="fixed right-4 top-[17rem] z-[60] flex h-12 w-12 items-center justify-center rounded-full transition-all {image?.is_public
+			class="fixed right-4 top-[17rem] z-[60] flex h-12 w-12 items-center justify-center rounded-full transition-all {image?.isPublic
 				? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
 				: 'bg-white/10 text-white hover:bg-white/20'} backdrop-blur-xl"
 			aria-label="Veröffentlichen"
 		>
-			<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-				/>
-			</svg>
+			<Globe size={24} />
 		</button>
 
 		<!-- Main Image Container -->
@@ -351,20 +328,13 @@
 					class="absolute left-4 top-1/2 z-[60] flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-xl transition-all hover:bg-white/20"
 					aria-label="Vorheriges Bild"
 				>
-					<svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M15 19l-7-7 7-7"
-						/>
-					</svg>
+					<CaretLeft size={28} weight="bold" />
 				</button>
 			{/if}
 
 			<!-- Image -->
 			<img
-				src={image.public_url}
+				src={image.publicUrl}
 				alt={image.prompt}
 				class="max-h-full max-w-full object-contain"
 				onclick={(e) => e.stopPropagation()}
@@ -380,14 +350,7 @@
 					class="absolute right-4 top-1/2 z-[60] flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-xl transition-all hover:bg-white/20"
 					aria-label="Nächstes Bild"
 				>
-					<svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 5l7 7-7 7"
-						/>
-					</svg>
+					<CaretRight size={28} weight="bold" />
 				</button>
 			{/if}
 		</div>
@@ -423,7 +386,7 @@
 									<h3 class="mb-1 text-xs font-semibold uppercase tracking-wide text-white/60">
 										Model
 									</h3>
-									<p class="text-sm text-white">{image.model_id || 'Unknown'}</p>
+									<p class="text-sm text-white">{image.model || 'Unknown'}</p>
 								</div>
 
 								{#if imageTags.length > 0}
@@ -456,7 +419,7 @@
 									<h3 class="mb-1 text-xs font-semibold uppercase tracking-wide text-white/60">
 										Erstellt
 									</h3>
-									<p class="text-sm text-white">{formatDate(image.created_at)}</p>
+									<p class="text-sm text-white">{formatDate(image.createdAt)}</p>
 								</div>
 
 								<!-- Actions -->
@@ -465,14 +428,7 @@
 										onclick={handleDownload}
 										class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-white/20 px-4 py-2.5 text-sm font-medium text-white backdrop-blur-xl transition-all hover:bg-white/30"
 									>
-										<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-											/>
-										</svg>
+										<DownloadSimple size={16} />
 										Download
 									</button>
 
@@ -481,14 +437,7 @@
 										disabled={isArchiving || isDeleting}
 										class="flex items-center justify-center gap-2 rounded-lg bg-white/20 px-4 py-2.5 text-sm font-medium text-white backdrop-blur-xl transition-all hover:bg-white/30 disabled:opacity-50"
 									>
-										<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
-											/>
-										</svg>
+										<Archive size={16} />
 									</button>
 
 									<button
@@ -496,14 +445,7 @@
 										disabled={isArchiving || isDeleting}
 										class="flex items-center justify-center gap-2 rounded-lg bg-red-500/20 px-4 py-2.5 text-sm font-medium text-white backdrop-blur-xl transition-all hover:bg-red-500/30 disabled:opacity-50"
 									>
-										<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-											/>
-										</svg>
+										<Trash size={16} />
 									</button>
 								</div>
 							</div>
@@ -535,14 +477,7 @@
 						class="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
 						aria-label="Schließen"
 					>
-						<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
+						<X size={20} weight="bold" />
 					</button>
 				</div>
 
@@ -578,19 +513,7 @@
 									</span>
 								</div>
 								{#if isSelected}
-									<svg
-										class="h-5 w-5 text-blue-600 dark:text-blue-400"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M5 13l4 4L19 7"
-										/>
-									</svg>
+									<Check size={20} weight="bold" class="text-blue-600 dark:text-blue-400" />
 								{/if}
 							</button>
 						{/each}
@@ -625,25 +548,18 @@
 			>
 				<div class="mb-4 flex items-center justify-between">
 					<h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-						{image.is_public ? 'Veröffentlichung entfernen' : 'Bild veröffentlichen'}
+						{image.isPublic ? 'Veröffentlichung entfernen' : 'Bild veröffentlichen'}
 					</h2>
 					<button
 						onclick={closePublishModal}
 						class="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
 						aria-label="Schließen"
 					>
-						<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
+						<X size={20} weight="bold" />
 					</button>
 				</div>
 
-				{#if image.is_public}
+				{#if image.isPublic}
 					<div class="mb-6">
 						<p class="text-gray-600 dark:text-gray-400">
 							Dieses Bild ist derzeit öffentlich und kann von anderen Nutzern im Explore-Bereich

@@ -22,8 +22,8 @@
 <div class="flex items-center justify-center min-h-screen">
 	<div class="text-center">
 		<div
-			class="animate-spin w-10 h-10 border-4 border-blue-500 border-r-transparent rounded-full mx-auto"
+			class="animate-spin w-10 h-10 border-4 border-primary border-r-transparent rounded-full mx-auto"
 		></div>
-		<p class="mt-4 text-gray-600 dark:text-gray-400">Wird geladen...</p>
+		<p class="mt-4 text-muted-foreground">Wird geladen...</p>
 	</div>
 </div>

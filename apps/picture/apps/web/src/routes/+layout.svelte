@@ -6,8 +6,8 @@
 	import { onMount } from 'svelte';
 	import { initPostHog, analytics } from '$lib/analytics/posthog';
 
-	// Import theme stores to initialize them
-	import '$lib/stores/theme';
+	// Import and initialize theme
+	import { theme } from '$lib/stores/theme';
 
 	// Initialize i18n
 	import '$lib/i18n';
@@ -15,6 +15,9 @@
 	let { children, data } = $props();
 
 	onMount(async () => {
+		// Initialize theme (applies CSS variables and loads from localStorage)
+		const cleanupTheme = theme.initialize();
+
 		// Initialize PostHog
 		initPostHog();
 
@@ -27,6 +30,10 @@
 				email: authStore.user.email,
 			});
 		}
+
+		return () => {
+			cleanupTheme();
+		};
 	});
 </script>
 

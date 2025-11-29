@@ -36,7 +36,7 @@
 <svelte:window onclick={() => (showMenu = false)} />
 
 <div
-	class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700
+	class="group relative bg-surface rounded-xl border border-border
          shadow-sm hover:shadow-md transition-all cursor-pointer"
 	onclick={() => onSelect(space.id)}
 	onkeydown={(e) => e.key === 'Enter' && onSelect(space.id)}
@@ -47,13 +47,13 @@
 		<div class="flex items-start justify-between gap-3">
 			<div class="flex-1 min-w-0">
 				<div class="flex items-center gap-2 mb-1">
-					<UsersThree size={20} weight="bold" class="text-blue-500 flex-shrink-0" />
-					<h3 class="text-base font-semibold text-gray-900 dark:text-white truncate">
+					<UsersThree size={20} weight="bold" class="text-primary flex-shrink-0" />
+					<h3 class="text-base font-semibold text-foreground truncate">
 						{space.name}
 					</h3>
 					{#if isOwner}
 						<span
-							class="px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded"
+							class="px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded"
 						>
 							Besitzer
 						</span>
@@ -61,12 +61,12 @@
 				</div>
 
 				{#if space.description}
-					<p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+					<p class="text-sm text-muted-foreground line-clamp-2 mb-2">
 						{space.description}
 					</p>
 				{/if}
 
-				<p class="text-xs text-gray-500 dark:text-gray-500">
+				<p class="text-xs text-muted-foreground">
 					Erstellt: {formatDate(space.created_at)}
 				</p>
 			</div>
@@ -75,8 +75,8 @@
 			<div class="relative">
 				<button
 					onclick={handleMenuClick}
-					class="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300
-                 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+					class="p-2 text-muted-foreground hover:text-foreground
+                 hover:bg-muted rounded-lg transition-colors"
 					aria-label="Optionen"
 				>
 					<DotsThreeVertical size={20} weight="bold" />
@@ -84,8 +84,8 @@
 
 				{#if showMenu}
 					<div
-						class="absolute right-0 top-full mt-1 py-1 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg
-                   border border-gray-200 dark:border-gray-700 z-10"
+						class="absolute right-0 top-full mt-1 py-1 w-40 bg-surface rounded-lg shadow-lg
+                   border border-border z-10"
 						onclick={(e) => e.stopPropagation()}
 						onkeydown={() => {}}
 						role="menu"
@@ -94,8 +94,8 @@
 						{#if isOwner}
 							<button
 								onclick={() => handleAction(() => onEdit(space.id))}
-								class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300
-                       hover:bg-gray-100 dark:hover:bg-gray-700"
+								class="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground
+                       hover:bg-muted"
 								role="menuitem"
 							>
 								<Gear size={16} weight="bold" />
@@ -103,8 +103,8 @@
 							</button>
 							<button
 								onclick={() => handleAction(() => onDelete(space.id))}
-								class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400
-                       hover:bg-red-50 dark:hover:bg-red-900/20"
+								class="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive
+                       hover:bg-destructive/10"
 								role="menuitem"
 							>
 								<Trash size={16} weight="bold" />
@@ -113,8 +113,8 @@
 						{:else}
 							<button
 								onclick={() => handleAction(() => onLeave(space.id))}
-								class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400
-                       hover:bg-red-50 dark:hover:bg-red-900/20"
+								class="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive
+                       hover:bg-destructive/10"
 								role="menuitem"
 							>
 								<SignOut size={16} weight="bold" />

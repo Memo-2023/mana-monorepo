@@ -1,11 +1,10 @@
 <script lang="ts">
-	import type { Database } from '@picture/shared/types';
+	import type { Image } from '$lib/api/images';
 	import Modal from '../ui/Modal.svelte';
 	import Button from '../ui/Button.svelte';
 	import { unarchiveImage, deleteImage, downloadImage } from '$lib/api/images';
 	import { archivedImages } from '$lib/stores/archive';
-
-	type Image = Database['public']['Tables']['images']['Row'];
+	import { DownloadSimple, ArrowCounterClockwise, Trash } from '@manacore/shared-icons';
 
 	interface Props {
 		image: Image | null;
@@ -54,9 +53,9 @@
 	}
 
 	function handleDownload() {
-		if (!image) return;
+		if (!image || !image.publicUrl) return;
 		const filename = `picture-${image.id}.png`;
-		downloadImage(image.public_url, filename);
+		downloadImage(image.publicUrl, filename);
 	}
 
 	function formatDate(dateString: string) {
@@ -77,7 +76,7 @@
 			<!-- Image -->
 			<div class="flex-1">
 				<img
-					src={image.public_url}
+					src={image.publicUrl}
 					alt={image.prompt}
 					class="h-auto w-full rounded-lg object-contain"
 				/>
@@ -101,26 +100,19 @@
 				<!-- Model -->
 				<div>
 					<h3 class="mb-2 text-sm font-medium text-gray-500">Model</h3>
-					<p class="text-gray-900">{image.model_id || 'Unknown'}</p>
+					<p class="text-gray-900">{image.model || 'Unknown'}</p>
 				</div>
 
 				<!-- Created At -->
 				<div>
 					<h3 class="mb-2 text-sm font-medium text-gray-500">Created</h3>
-					<p class="text-gray-900">{formatDate(image.created_at)}</p>
+					<p class="text-gray-900">{formatDate(image.createdAt)}</p>
 				</div>
 
 				<!-- Actions -->
 				<div class="space-y-2">
 					<Button variant="primary" class="w-full" onclick={handleDownload}>
-						<svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-							/>
-						</svg>
+						<DownloadSimple size={20} class="mr-2" />
 						Download
 					</Button>
 
@@ -131,14 +123,7 @@
 						loading={isUnarchiving}
 						disabled={isUnarchiving || isDeleting}
 					>
-						<svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-							/>
-						</svg>
+						<ArrowCounterClockwise size={20} class="mr-2" />
 						Restore to Gallery
 					</Button>
 
@@ -149,14 +134,7 @@
 						loading={isDeleting}
 						disabled={isUnarchiving || isDeleting}
 					>
-						<svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-							/>
-						</svg>
+						<Trash size={20} class="mr-2" />
 						Delete Permanently
 					</Button>
 				</div>

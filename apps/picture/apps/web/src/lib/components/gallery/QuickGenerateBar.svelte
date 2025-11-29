@@ -12,6 +12,7 @@
 		type AdvancedSettings,
 		type AspectRatio,
 	} from '$lib/components/generate/AdvancedSettingsModal.svelte';
+	import { Gear, Lightning, X } from '@manacore/shared-icons';
 
 	interface Props {
 		onGenerated?: () => void;
@@ -36,8 +37,8 @@
 	$effect(() => {
 		if ($selectedModel) {
 			// Update defaults from model
-			advancedSettings.steps = $selectedModel.default_steps || 50;
-			advancedSettings.guidanceScale = parseFloat($selectedModel.default_guidance_scale) || 7.5;
+			advancedSettings.steps = $selectedModel.defaultSteps || 50;
+			advancedSettings.guidanceScale = $selectedModel.defaultGuidanceScale || 7.5;
 		}
 	});
 
@@ -51,7 +52,7 @@
 			const data = await getActiveModels();
 			models.set(data);
 			// Select default model
-			const defaultModel = data.find((m) => m.is_default) || data[0];
+			const defaultModel = data.find((m) => m.isDefault) || data[0];
 			if (defaultModel) {
 				selectedModelId = defaultModel.id;
 				selectedModel.set(defaultModel);
@@ -87,11 +88,11 @@
 				// Start generation with new async API
 				const { generationId } = await generateImageAsync({
 					prompt: prompt.trim(),
-					model_id: selectedModelId,
+					modelId: selectedModelId,
 					width: advancedSettings.aspectRatio.width,
 					height: advancedSettings.aspectRatio.height,
-					num_inference_steps: advancedSettings.steps,
-					guidance_scale: advancedSettings.guidanceScale,
+					numInferenceSteps: advancedSettings.steps,
+					guidanceScale: advancedSettings.guidanceScale,
 				});
 
 				// Wait for completion using realtime subscription
@@ -222,7 +223,7 @@
 								{#each $models as model}
 									<option value={model.id}>
 										{model.name}
-										{model.is_default ? '(Standard)' : ''}
+										{model.isDefault ? '(Standard)' : ''}
 									</option>
 								{/each}
 							{/if}
@@ -260,20 +261,7 @@
 							class="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gray-100/80 text-gray-600 backdrop-blur-xl transition-all hover:bg-gray-200/80 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-800/80 dark:text-gray-400 dark:hover:bg-gray-700/80"
 							aria-label="Einstellungen"
 						>
-							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-								/>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-								/>
-							</svg>
+							<Gear size={20} />
 							{#if hasCustomSettings}
 								<span class="absolute right-0 top-0 flex h-3 w-3">
 									<span
@@ -300,19 +288,7 @@
 									class="h-5 w-5 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"
 								></div>
 							{:else}
-								<svg
-									class="h-5 w-5 text-white"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke="currentColor"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M13 10V3L4 14h7v7l9-11h-7z"
-									/>
-								</svg>
+								<Lightning size={20} weight="fill" class="text-white" />
 								<span class="text-sm font-medium text-white">Generieren</span>
 							{/if}
 						</button>
@@ -324,14 +300,7 @@
 							class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gray-100/80 text-gray-600 backdrop-blur-xl transition-all hover:bg-gray-200/80 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-800/80 dark:text-gray-400 dark:hover:bg-gray-700/80"
 							aria-label="Schließen"
 						>
-							<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M6 18L18 6M6 6l12 12"
-								/>
-							</svg>
+							<X size={20} weight="bold" />
 						</button>
 					</div>
 				</div>
@@ -346,14 +315,7 @@
 				class="flex h-14 items-center justify-center gap-2 rounded-full bg-blue-600/90 px-6 text-white shadow-2xl backdrop-blur-xl transition-all hover:scale-105 hover:bg-blue-700/90 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500/90 dark:hover:bg-blue-600/90"
 				aria-label="Generieren"
 			>
-				<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M13 10V3L4 14h7v7l9-11h-7z"
-					/>
-				</svg>
+				<Lightning size={24} weight="fill" />
 				<span class="text-sm font-medium">Bild generieren</span>
 			</button>
 		</div>
@@ -370,14 +332,7 @@
 						class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-600/90 text-white backdrop-blur-xl transition-all hover:bg-blue-700/90 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500/90 dark:hover:bg-blue-600/90"
 						aria-label="Erweitern"
 					>
-						<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M13 10V3L4 14h7v7l9-11h-7z"
-							/>
-						</svg>
+						<Lightning size={24} weight="fill" />
 					</button>
 					<div class="flex-1 text-sm text-gray-600 dark:text-gray-400">Bild generieren...</div>
 				</div>

@@ -19,6 +19,7 @@
 	import CanvasToolbar from '$lib/components/board/CanvasToolbar.svelte';
 	import ImagePickerModal from '$lib/components/board/ImagePickerModal.svelte';
 	import ImagePropertiesPanel from '$lib/components/board/ImagePropertiesPanel.svelte';
+	import { X, SlidersHorizontal } from '@manacore/shared-icons';
 
 	const boardId = $derived($page.params.id);
 
@@ -152,25 +153,9 @@
 			title={$showPropertiesPanel ? 'Eigenschaften ausblenden' : 'Eigenschaften anzeigen'}
 		>
 			{#if $showPropertiesPanel}
-				<!-- Close Icon -->
-				<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M6 18L18 6M6 6l12 12"
-					/>
-				</svg>
+				<X size={24} />
 			{:else}
-				<!-- Settings/Sliders Icon -->
-				<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-					/>
-				</svg>
+				<SlidersHorizontal size={24} />
 			{/if}
 		</button>
 

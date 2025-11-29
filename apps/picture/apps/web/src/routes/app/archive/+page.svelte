@@ -11,6 +11,7 @@
 	import ArchivedImageModal from '$lib/components/archive/ArchivedImageModal.svelte';
 	import ImageSkeleton from '$lib/components/ui/ImageSkeleton.svelte';
 	import ContextMenu from '$lib/components/ui/ContextMenu.svelte';
+	import { Archive } from '@manacore/shared-icons';
 	import { onMount } from 'svelte';
 	import type { Database } from '@picture/shared/types';
 
@@ -100,19 +101,7 @@
 {:else if $archivedImages.length === 0}
 	<div class="flex min-h-[400px] items-center justify-center px-4 py-8">
 		<div class="text-center">
-			<svg
-				class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-600"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
-				/>
-			</svg>
+			<Archive size={64} weight="thin" class="mx-auto text-gray-400 dark:text-gray-600" />
 			<h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Kein Archiv</h3>
 			<p class="mt-2 text-gray-600 dark:text-gray-400">
 				Archiviere Bilder aus deiner Galerie, um sie organisiert zu halten ohne sie zu löschen

@@ -43,6 +43,12 @@
 		elements?: PillNavElement[];
 		/** Show logout button */
 		showLogout?: boolean;
+		/** Theme variant dropdown items */
+		themeVariantItems?: PillDropdownItem[];
+		/** Current theme variant label */
+		currentThemeVariantLabel?: string;
+		/** Show theme variant selector */
+		showThemeVariants?: boolean;
 	}
 
 	let {
@@ -65,6 +71,9 @@
 		primaryColor,
 		elements = [],
 		showLogout = true,
+		themeVariantItems = [],
+		currentThemeVariantLabel = 'Theme',
+		showThemeVariants = false,
 	}: Props = $props();
 
 	// Type guards for elements
@@ -161,6 +170,8 @@
 		grid: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z',
 		gridSmall:
 			'M4 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM10 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5zM16 5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V5zM4 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zM10 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2zM16 11a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2z',
+		palette:
+			'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01',
 	};
 
 	function getIconPath(name: string): string {
@@ -294,6 +305,16 @@
 					direction="down"
 					label={currentLanguageLabel}
 					icon="globe"
+				/>
+			{/if}
+
+			<!-- Theme Variant Selector -->
+			{#if showThemeVariants && themeVariantItems.length > 0}
+				<PillDropdown
+					items={themeVariantItems}
+					direction="down"
+					label={currentThemeVariantLabel}
+					icon="palette"
 				/>
 			{/if}
 

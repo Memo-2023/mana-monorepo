@@ -1,15 +1,14 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { images, isLoading as isLoadingImages } from '$lib/stores/images';
 	import { canvasItems, addCanvasItem } from '$lib/stores/canvas';
 	import { getImages } from '$lib/api/images';
-	import { addBoardItem, isImageOnBoard } from '$lib/api/boardItems';
+	import { addBoardItem } from '$lib/api/boardItems';
 	import { showToast } from '$lib/stores/toast';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import type { Database } from '@picture/shared/types';
+	import { MagnifyingGlass, Image as ImageIcon, Check } from '@manacore/shared-icons';
 
 	interface Props {
 		open: boolean;
@@ -17,8 +16,6 @@
 	}
 
 	let { open, onClose }: Props = $props();
-
-	type Image = Database['public']['Tables']['images']['Row'];
 
 	let selectedImages = $state<Set<string>>(new Set());
 	let isAdding = $state(false);
@@ -41,7 +38,6 @@
 		isLoadingImages.set(true);
 		try {
 			const data = await getImages({
-				userId: authStore.user.id,
 				page: 1,
 				limit: 50,
 				archived: false,
@@ -72,7 +68,7 @@
 	}
 
 	function isImageAlreadyOnBoard(imageId: string): boolean {
-		return $canvasItems.some((item) => item.image_id === imageId);
+		return $canvasItems.some((item) => item.imageId === imageId);
 	}
 
 	async function handleAddImages() {
@@ -94,17 +90,11 @@
 
 				// Add to board
 				const boardItem = await addBoardItem({
-					board_id: boardId,
-					image_id: imageId,
-					position_x: 100 + addedCount * 20, // Offset each image slightly
-					position_y: 100 + addedCount * 20,
-					scale_x: 1,
-					scale_y: 1,
-					rotation: 0,
-					z_index: addedCount,
-					opacity: 1,
-					width: image.width || 400,
-					height: image.height || 300,
+					boardId: boardId,
+					itemType: 'image',
+					imageId: imageId,
+					positionX: 100 + addedCount * 20, // Offset each image slightly
+					positionY: 100 + addedCount * 20,
 				});
 
 				// Add to canvas
@@ -160,19 +150,7 @@
 					placeholder="Bilder suchen..."
 					class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pl-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
 				/>
-				<svg
-					class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-					/>
-				</svg>
+				<MagnifyingGlass size={20} class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 			</div>
 
 			<Button
@@ -204,19 +182,7 @@
 				</div>
 			{:else if filteredImages.length === 0}
 				<div class="flex h-full flex-col items-center justify-center py-12">
-					<svg
-						class="h-16 w-16 text-gray-300 dark:text-gray-600"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="1.5"
-							d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-						/>
-					</svg>
+					<ImageIcon size={64} weight="thin" class="text-gray-300 dark:text-gray-600" />
 					<p class="mt-4 text-gray-600 dark:text-gray-400">
 						{searchQuery ? 'Keine Bilder gefunden' : 'Keine Bilder in deiner Galerie'}
 					</p>
@@ -236,7 +202,7 @@
 								: 'hover:ring-2 hover:ring-gray-300'}"
 						>
 							<img
-								src={image.public_url}
+								src={image.publicUrl}
 								alt={image.prompt || 'Image'}
 								class="h-full w-full object-cover"
 							/>
@@ -246,14 +212,7 @@
 								<div
 									class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-white"
 								>
-									<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="3"
-											d="M5 13l4 4L19 7"
-										/>
-									</svg>
+									<Check size={16} weight="bold" />
 								</div>
 							{/if}
 

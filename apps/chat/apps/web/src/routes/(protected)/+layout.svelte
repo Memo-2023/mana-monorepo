@@ -4,12 +4,13 @@
 	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { theme } from '$lib/stores/theme';
+	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
 	} from '$lib/stores/navigation';
 	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import type { LayoutData } from './$types';
 
 	let { children, data }: { children: any; data: LayoutData } = $props();
@@ -20,6 +21,29 @@
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
+
+	// Theme variant dropdown items
+	let themeVariantItems = $derived<PillDropdownItem[]>([
+		// Theme variants
+		...theme.variants.map((variant) => ({
+			id: variant,
+			label: `${THEME_DEFINITIONS[variant].emoji} ${THEME_DEFINITIONS[variant].label}`,
+			onClick: () => theme.setVariant(variant),
+			active: theme.variant === variant,
+		})),
+		// Separator and link to full themes page
+		{
+			id: 'all-themes',
+			label: '🎨 Alle Themes',
+			onClick: () => goto('/themes'),
+			active: false,
+		},
+	]);
+
+	// Current theme variant label
+	let currentThemeVariantLabel = $derived(
+		`${THEME_DEFINITIONS[theme.variant].emoji} ${THEME_DEFINITIONS[theme.variant].label}`
+	);
 
 	// Navigation items for Chat
 	const navItems: PillNavItem[] = [
@@ -112,12 +136,12 @@
 
 {#if isChecking}
 	<!-- Loading state while checking auth -->
-	<div class="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+	<div class="flex min-h-screen items-center justify-center bg-background">
 		<div class="text-center">
 			<div
-				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"
+				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
 			></div>
-			<p class="text-gray-500 dark:text-gray-400">Laden...</p>
+			<p class="text-muted-foreground">Laden...</p>
 		</div>
 	</div>
 {:else}
@@ -136,6 +160,9 @@
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
 			showThemeToggle={true}
+			showThemeVariants={true}
+			{themeVariantItems}
+			{currentThemeVariantLabel}
 			showLanguageSwitcher={false}
 			showLogout={true}
 			onLogout={handleLogout}
@@ -144,7 +171,7 @@
 
 		<!-- Main Content with dynamic padding based on nav mode -->
 		<main
-			class="main-content bg-gray-50 dark:bg-gray-900"
+			class="main-content bg-background"
 			class:sidebar-mode={isSidebarMode && !isCollapsed}
 			class:floating-mode={!isSidebarMode && !isCollapsed}
 		>

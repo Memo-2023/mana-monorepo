@@ -68,7 +68,7 @@ export const contextMenuStore = {
 		contextMenuState = { ...initialState };
 	},
 
-	showTagSubmenu(x: number, y: number) {
+	openTagSubmenu(x: number, y: number) {
 		contextMenuState = {
 			...contextMenuState,
 			showTagSubmenu: true,
@@ -95,7 +95,7 @@ export function hideContextMenu() {
 }
 
 export function showTagSubmenu(x: number, y: number) {
-	contextMenuStore.showTagSubmenu(x, y);
+	contextMenuStore.openTagSubmenu(x, y);
 }
 
 export function hideTagSubmenu() {

@@ -138,11 +138,11 @@
 <div class="flex flex-col h-full">
 	<!-- Chat Header -->
 	<header
-		class="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3"
+		class="flex-shrink-0 border-b border-border bg-surface px-4 py-3"
 	>
 		<div class="flex items-center justify-between max-w-4xl mx-auto">
 			<div class="flex items-center gap-3 flex-wrap">
-				<h2 class="text-lg font-semibold text-gray-900 dark:text-white">Neuer Chat</h2>
+				<h2 class="text-lg font-semibold text-foreground">Neuer Chat</h2>
 
 				<!-- Model Selector -->
 				<ModelSelector
@@ -158,9 +158,9 @@
 						onchange={handleTemplateSelect}
 						value={selectedTemplateId}
 						disabled={isSending}
-						class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg
-                   bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-blue-500 focus:border-transparent
+						class="px-3 py-1.5 text-sm border border-border rounded-lg
+                   bg-surface text-foreground
+                   focus:ring-2 focus:ring-primary focus:border-transparent
                    disabled:opacity-50"
 					>
 						<option value="">Ohne Vorlage</option>
@@ -179,8 +179,8 @@
 					disabled={isSending}
 					class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors
                  {documentMode
-						? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700'
-						: 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600'}
+						? 'bg-primary/10 text-primary border border-primary/30'
+						: 'bg-muted text-muted-foreground border border-border'}
                  hover:bg-opacity-80 disabled:opacity-50"
 					title="Dokumentmodus aktivieren"
 				>
@@ -192,9 +192,9 @@
 			<div class="flex items-center gap-2">
 				<button
 					onclick={toggleTheme}
-					class="p-2 text-gray-700 dark:text-gray-300
-                 bg-gray-100 dark:bg-gray-800 rounded-lg
-                 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+					class="p-2 text-muted-foreground
+                 bg-muted rounded-lg
+                 hover:bg-muted/80 transition-colors"
 					aria-label="Theme wechseln"
 				>
 					<Moon size={20} weight="bold" />
@@ -204,7 +204,7 @@
 	</header>
 
 	<!-- Messages Area -->
-	<main class="flex-1 overflow-hidden bg-white dark:bg-gray-900">
+	<main class="flex-1 overflow-hidden bg-surface">
 		<div class="h-full max-w-4xl mx-auto flex flex-col">
 			<MessageList {messages} isTyping={isSending} />
 		</div>

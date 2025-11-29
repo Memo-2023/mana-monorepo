@@ -2,6 +2,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { List, X, CaretDown } from '@manacore/shared-icons';
 
 	let showUserMenu = $state(false);
 	let showMobileMenu = $state(false);
@@ -30,14 +31,11 @@
 				class="flex items-center justify-center rounded-lg p-2 text-gray-700 hover:bg-gray-100 md:hidden dark:text-gray-300 dark:hover:bg-gray-800"
 				aria-label="Menu"
 			>
-				<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d={showMobileMenu ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'}
-					/>
-				</svg>
+				{#if showMobileMenu}
+					<X size={24} weight="bold" />
+				{:else}
+					<List size={24} weight="bold" />
+				{/if}
 			</button>
 
 			<!-- Desktop Navigation -->
@@ -87,14 +85,7 @@
 					>
 						{authStore.user?.email?.charAt(0).toUpperCase()}
 					</div>
-					<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M19 9l-7 7-7-7"
-						/>
-					</svg>
+					<CaretDown size={16} />
 				</button>
 
 				{#if showUserMenu}

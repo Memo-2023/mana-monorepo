@@ -23,6 +23,22 @@
 		"./ThemeModeSelector.svelte": {
 			"svelte": "./src/ThemeModeSelector.svelte",
 			"default": "./src/ThemeModeSelector.svelte"
+		},
+		"./ThemeColorPreview.svelte": {
+			"svelte": "./src/components/ThemeColorPreview.svelte",
+			"default": "./src/components/ThemeColorPreview.svelte"
+		},
+		"./ThemeCard.svelte": {
+			"svelte": "./src/components/ThemeCard.svelte",
+			"default": "./src/components/ThemeCard.svelte"
+		},
+		"./ThemeGrid.svelte": {
+			"svelte": "./src/components/ThemeGrid.svelte",
+			"default": "./src/components/ThemeGrid.svelte"
+		},
+		"./ThemePage.svelte": {
+			"svelte": "./src/pages/ThemePage.svelte",
+			"default": "./src/pages/ThemePage.svelte"
 		}
 	},
 	"peerDependencies": {

@@ -1,8 +1,5 @@
 import { writable, derived } from 'svelte/store';
-import type { Database } from '@picture/shared/types';
-import type { BoardWithCount } from '$lib/api/boards';
-
-type Board = Database['public']['Tables']['boards']['Row'];
+import type { Board, BoardWithCount } from '$lib/api/boards';
 
 // Current boards list
 export const boards = writable<BoardWithCount[]>([]);
@@ -30,9 +27,9 @@ export const shareBoardId = writable<string | null>(null);
 
 // Board settings (for canvas)
 export const boardSettings = derived(currentBoard, ($currentBoard) => ({
-	width: $currentBoard?.canvas_width || 2000,
-	height: $currentBoard?.canvas_height || 1500,
-	backgroundColor: $currentBoard?.background_color || '#ffffff',
+	width: $currentBoard?.canvasWidth || 2000,
+	height: $currentBoard?.canvasHeight || 1500,
+	backgroundColor: $currentBoard?.backgroundColor || '#ffffff',
 }));
 
 // Helper functions for board management
@@ -59,7 +56,7 @@ export function removeBoardFromList(boardId: string) {
 export function incrementBoardItemCount(boardId: string) {
 	boards.update((current) =>
 		current.map((board) =>
-			board.id === boardId ? { ...board, item_count: board.item_count + 1 } : board
+			board.id === boardId ? { ...board, itemCount: board.itemCount + 1 } : board
 		)
 	);
 }
@@ -67,7 +64,7 @@ export function incrementBoardItemCount(boardId: string) {
 export function decrementBoardItemCount(boardId: string) {
 	boards.update((current) =>
 		current.map((board) =>
-			board.id === boardId ? { ...board, item_count: Math.max(0, board.item_count - 1) } : board
+			board.id === boardId ? { ...board, itemCount: Math.max(0, board.itemCount - 1) } : board
 		)
 	);
 }

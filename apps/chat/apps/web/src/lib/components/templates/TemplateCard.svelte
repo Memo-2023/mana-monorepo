@@ -19,10 +19,10 @@
 </script>
 
 <div
-	class="group relative flex rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all
+	class="group relative flex rounded-xl overflow-hidden bg-surface shadow-sm hover:shadow-md transition-all
          {template.is_default
-		? 'ring-2 ring-blue-500'
-		: 'border border-gray-200 dark:border-gray-700'}"
+		? 'ring-2 ring-primary'
+		: 'border border-border'}"
 >
 	<!-- Color Indicator -->
 	<div class="w-2 flex-shrink-0" style="background-color: {template.color}"></div>
@@ -32,23 +32,23 @@
 		<div class="flex items-start justify-between gap-3">
 			<div class="flex-1 min-w-0">
 				<div class="flex items-center gap-2 mb-1">
-					<h3 class="text-base font-semibold text-gray-900 dark:text-white truncate">
+					<h3 class="text-base font-semibold text-foreground truncate">
 						{template.name}
 					</h3>
 					{#if template.is_default}
-						<span class="px-2 py-0.5 text-xs font-medium bg-blue-500 text-white rounded">
+						<span class="px-2 py-0.5 text-xs font-medium bg-primary text-primary-foreground rounded">
 							Standard
 						</span>
 					{/if}
 				</div>
 
 				{#if template.description}
-					<p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+					<p class="text-sm text-muted-foreground line-clamp-2 mb-2">
 						{template.description}
 					</p>
 				{/if}
 
-				<p class="text-xs text-gray-500 dark:text-gray-500 italic line-clamp-2">
+				<p class="text-xs text-muted-foreground italic line-clamp-2">
 					{truncatePrompt(template.system_prompt)}
 				</p>
 			</div>
@@ -58,7 +58,7 @@
 				{#if !template.is_default}
 					<button
 						onclick={() => onSetDefault(template.id)}
-						class="p-1.5 text-gray-500 hover:text-yellow-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+						class="p-1.5 text-muted-foreground hover:text-yellow-500 hover:bg-muted rounded-lg transition-colors"
 						title="Als Standard setzen"
 						aria-label="Als Standard setzen"
 					>
@@ -67,7 +67,7 @@
 				{/if}
 				<button
 					onclick={() => onEdit(template.id)}
-					class="p-1.5 text-gray-500 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+					class="p-1.5 text-muted-foreground hover:text-primary hover:bg-muted rounded-lg transition-colors"
 					title="Bearbeiten"
 					aria-label="Bearbeiten"
 				>
@@ -75,7 +75,7 @@
 				</button>
 				<button
 					onclick={() => onDelete(template.id)}
-					class="p-1.5 text-gray-500 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+					class="p-1.5 text-muted-foreground hover:text-destructive hover:bg-muted rounded-lg transition-colors"
 					title="Löschen"
 					aria-label="Löschen"
 				>

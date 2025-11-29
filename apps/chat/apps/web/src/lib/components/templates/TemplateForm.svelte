@@ -76,8 +76,8 @@
 	}
 </script>
 
-<div class="bg-white dark:bg-gray-900 p-6 rounded-xl max-w-2xl mx-auto">
-	<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">
+<div class="bg-surface p-6 rounded-xl max-w-2xl mx-auto">
+	<h2 class="text-xl font-bold text-foreground mb-6">
 		{isEditMode ? 'Vorlage bearbeiten' : 'Neue Vorlage erstellen'}
 	</h2>
 
@@ -90,7 +90,7 @@
 	>
 		<!-- Name -->
 		<div>
-			<label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+			<label for="name" class="block text-sm font-medium text-foreground mb-1">
 				Name *
 			</label>
 			<input
@@ -99,13 +99,13 @@
 				bind:value={name}
 				maxlength={50}
 				placeholder="Name der Vorlage"
-				class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-800
-               text-gray-900 dark:text-white placeholder-gray-500
-               {errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}
-               focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				class="w-full px-3 py-2 border rounded-lg bg-muted
+               text-foreground placeholder-muted-foreground
+               {errors.name ? 'border-destructive' : 'border-border'}
+               focus:ring-2 focus:ring-primary focus:border-transparent"
 			/>
 			{#if errors.name}
-				<p class="mt-1 text-sm text-red-500">{errors.name}</p>
+				<p class="mt-1 text-sm text-destructive">{errors.name}</p>
 			{/if}
 		</div>
 
@@ -113,7 +113,7 @@
 		<div>
 			<label
 				for="description"
-				class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+				class="block text-sm font-medium text-foreground mb-1"
 			>
 				Beschreibung (optional)
 			</label>
@@ -123,9 +123,9 @@
 				maxlength={200}
 				rows={2}
 				placeholder="Kurze Beschreibung dieser Vorlage"
-				class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-               bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500
-               focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+				class="w-full px-3 py-2 border border-border rounded-lg
+               bg-muted text-foreground placeholder-muted-foreground
+               focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
 			></textarea>
 		</div>
 
@@ -133,7 +133,7 @@
 		<div>
 			<label
 				for="systemPrompt"
-				class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+				class="block text-sm font-medium text-foreground mb-1"
 			>
 				System-Prompt *
 			</label>
@@ -142,15 +142,15 @@
 				bind:value={systemPrompt}
 				rows={5}
 				placeholder="System-Prompt für die KI"
-				class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-800
-               text-gray-900 dark:text-white placeholder-gray-500
-               {errors.systemPrompt ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}
-               focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+				class="w-full px-3 py-2 border rounded-lg bg-muted
+               text-foreground placeholder-muted-foreground
+               {errors.systemPrompt ? 'border-destructive' : 'border-border'}
+               focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
 			></textarea>
 			{#if errors.systemPrompt}
-				<p class="mt-1 text-sm text-red-500">{errors.systemPrompt}</p>
+				<p class="mt-1 text-sm text-destructive">{errors.systemPrompt}</p>
 			{:else}
-				<p class="mt-1 text-xs text-gray-500">
+				<p class="mt-1 text-xs text-muted-foreground">
 					Der System-Prompt definiert die Rolle und das Verhalten der KI.
 				</p>
 			{/if}
@@ -160,7 +160,7 @@
 		<div>
 			<label
 				for="initialQuestion"
-				class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+				class="block text-sm font-medium text-foreground mb-1"
 			>
 				Beispielfrage (optional)
 			</label>
@@ -169,18 +169,18 @@
 				bind:value={initialQuestion}
 				rows={2}
 				placeholder="Beispiel für eine passende Frage oder Anweisung"
-				class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-               bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500
-               focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+				class="w-full px-3 py-2 border border-border rounded-lg
+               bg-muted text-foreground placeholder-muted-foreground
+               focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
 			></textarea>
-			<p class="mt-1 text-xs text-gray-500">
+			<p class="mt-1 text-xs text-muted-foreground">
 				Diese Frage wird als Vorschlag angezeigt, wenn die Vorlage ausgewählt wird.
 			</p>
 		</div>
 
 		<!-- Color -->
 		<div>
-			<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"> Farbe </label>
+			<label class="block text-sm font-medium text-foreground mb-2"> Farbe </label>
 			<div class="flex flex-wrap gap-2">
 				{#each TEMPLATE_COLORS as color}
 					<button
@@ -210,22 +210,22 @@
 
 		<!-- Model -->
 		<div>
-			<label for="model" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+			<label for="model" class="block text-sm font-medium text-foreground mb-1">
 				Bevorzugtes Modell (optional)
 			</label>
 			<select
 				id="model"
 				bind:value={selectedModelId}
-				class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-               bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white
-               focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				class="w-full px-3 py-2 border border-border rounded-lg
+               bg-muted text-foreground
+               focus:ring-2 focus:ring-primary focus:border-transparent"
 			>
 				<option value="">Kein Modell ausgewählt</option>
 				{#each models as model}
 					<option value={model.id}>{model.name}</option>
 				{/each}
 			</select>
-			<p class="mt-1 text-xs text-gray-500">
+			<p class="mt-1 text-xs text-muted-foreground">
 				Falls ausgewählt, wird dieses Modell automatisch mit der Vorlage verwendet.
 			</p>
 		</div>
@@ -237,18 +237,18 @@
 				onclick={() => (documentMode = !documentMode)}
 				class="w-full flex items-center justify-between p-4 border rounded-lg transition-colors
                {documentMode
-					? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-					: 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800'}"
+					? 'border-primary bg-primary/10'
+					: 'border-border bg-muted'}"
 			>
 				<div class="text-left">
-					<p class="font-medium text-gray-900 dark:text-white">Dokumentmodus aktivieren</p>
-					<p class="text-xs text-gray-500 mt-0.5">
+					<p class="font-medium text-foreground">Dokumentmodus aktivieren</p>
+					<p class="text-xs text-muted-foreground mt-0.5">
 						Ermöglicht die Bearbeitung eines Dokuments während der Konversation
 					</p>
 				</div>
 				<div
 					class="w-6 h-6 rounded-full flex items-center justify-center
-                 {documentMode ? 'bg-blue-500' : 'bg-gray-400'}"
+                 {documentMode ? 'bg-primary' : 'bg-muted-foreground'}"
 				>
 					{#if documentMode}
 						<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,15 +278,15 @@
 			<button
 				type="button"
 				onclick={onCancel}
-				class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300
-               rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+				class="flex-1 px-4 py-2.5 border border-border text-foreground
+               rounded-lg font-medium hover:bg-muted transition-colors"
 			>
 				Abbrechen
 			</button>
 			<button
 				type="submit"
-				class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium
-               hover:bg-blue-700 transition-colors"
+				class="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium
+               hover:bg-primary/90 transition-colors"
 			>
 				{isEditMode ? 'Speichern' : 'Erstellen'}
 			</button>

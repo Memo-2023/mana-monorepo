@@ -1,11 +1,21 @@
 <script lang="ts">
 	import { selectedItems, updateCanvasItem, removeSelectedItems } from '$lib/stores/canvas';
-	import { updateBoardItem, changeBoardItemZIndex } from '$lib/api/boardItems';
+	import { updateBoardItem, changeBoardItemZIndex, isImageItem } from '$lib/api/boardItems';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { showToast } from '$lib/stores/toast';
+	import {
+		Image,
+		CaretDoubleUp,
+		CaretDoubleDown,
+		ArrowUp,
+		ArrowDown,
+		Trash,
+		CursorClick,
+	} from '@manacore/shared-icons';
 
 	const selectedItem = $derived($selectedItems[0] || null);
 	const hasMultipleSelected = $derived($selectedItems.length > 1);
+	const selectedImageItem = $derived(selectedItem && isImageItem(selectedItem) ? selectedItem : null);
 
 	// Local state for inputs (synced with selected item)
 	let positionX = $state(0);
@@ -19,10 +29,10 @@
 	// Update local state when selection changes
 	$effect(() => {
 		if (selectedItem) {
-			positionX = Math.round(selectedItem.position_x);
-			positionY = Math.round(selectedItem.position_y);
-			scaleX = Math.round(selectedItem.scale_x * 100);
-			scaleY = Math.round(selectedItem.scale_y * 100);
+			positionX = Math.round(selectedItem.positionX);
+			positionY = Math.round(selectedItem.positionY);
+			scaleX = Math.round(selectedItem.scaleX * 100);
+			scaleY = Math.round(selectedItem.scaleY * 100);
 			rotation = Math.round(selectedItem.rotation);
 			opacity = Math.round(selectedItem.opacity * 100);
 		}
@@ -31,7 +41,7 @@
 	async function handlePositionChange(axis: 'x' | 'y', value: number) {
 		if (!selectedItem) return;
 
-		const updates = axis === 'x' ? { position_x: value } : { position_y: value };
+		const updates = axis === 'x' ? { positionX: value } : { positionY: value };
 
 		updateCanvasItem(selectedItem.id, updates);
 
@@ -50,11 +60,11 @@
 		let updates: any = {};
 
 		if (lockAspectRatio) {
-			updates = { scale_x: scale, scale_y: scale };
+			updates = { scaleX: scale, scaleY: scale };
 			scaleX = percent;
 			scaleY = percent;
 		} else {
-			updates = axis === 'x' ? { scale_x: scale } : { scale_y: scale };
+			updates = axis === 'x' ? { scaleX: scale } : { scaleY: scale };
 		}
 
 		updateCanvasItem(selectedItem.id, updates);
@@ -137,19 +147,7 @@
 		class="h-full overflow-y-auto border-l border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900"
 	>
 		<div class="text-center">
-			<svg
-				class="mx-auto h-12 w-12 text-gray-400"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-				/>
-			</svg>
+			<Image size={48} weight="regular" class="mx-auto text-gray-400" />
 			<h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
 				{$selectedItems.length} Bilder ausgewählt
 			</h3>
@@ -170,22 +168,24 @@
 			</h3>
 
 			<!-- Image Preview -->
-			<div class="mb-6 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-				<img src={selectedItem.image.public_url} alt="Preview" class="w-full" />
-			</div>
-
-			<!-- Prompt Info -->
-			{#if selectedItem.image.prompt}
-				<div class="mb-6">
-					<label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-						Prompt
-					</label>
-					<p
-						class="rounded-lg bg-gray-50 p-3 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-					>
-						{selectedItem.image.prompt}
-					</p>
+			{#if selectedImageItem?.image}
+				<div class="mb-6 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+					<img src={selectedImageItem.image.publicUrl} alt="Preview" class="w-full" />
 				</div>
+
+				<!-- Prompt Info -->
+				{#if selectedImageItem.image.prompt}
+					<div class="mb-6">
+						<label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+							Prompt
+						</label>
+						<p
+							class="rounded-lg bg-gray-50 p-3 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+						>
+							{selectedImageItem.image.prompt}
+						</p>
+					</div>
+				{/if}
 			{/if}
 
 			<!-- Position -->
@@ -339,56 +339,28 @@
 						onclick={() => handleLayerChange('top')}
 						class="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
 					>
-						<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M5 15l7-7 7 7"
-							/>
-						</svg>
+						<CaretDoubleUp size={16} />
 						Nach vorne
 					</button>
 					<button
 						onclick={() => handleLayerChange('bottom')}
 						class="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
 					>
-						<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 9l-7 7-7-7"
-							/>
-						</svg>
+						<CaretDoubleDown size={16} />
 						Nach hinten
 					</button>
 					<button
 						onclick={() => handleLayerChange('up')}
 						class="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
 					>
-						<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M5 10l7-7m0 0l7 7m-7-7v18"
-							/>
-						</svg>
+						<ArrowUp size={16} />
 						Eine Ebene
 					</button>
 					<button
 						onclick={() => handleLayerChange('down')}
 						class="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
 					>
-						<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 14l-7 7m0 0l-7-7m7 7V3"
-							/>
-						</svg>
+						<ArrowDown size={16} />
 						Eine Ebene
 					</button>
 				</div>
@@ -397,22 +369,24 @@
 			<!-- Dimensions Info -->
 			<div class="mb-6 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
 				<div class="text-xs text-gray-500 dark:text-gray-400">
-					<div class="flex justify-between py-1">
-						<span>Original:</span>
-						<span class="font-medium"
-							>{selectedItem.image.width} × {selectedItem.image.height}px</span
-						>
-					</div>
-					<div class="flex justify-between py-1">
-						<span>Aktuell:</span>
-						<span class="font-medium">
-							{Math.round((selectedItem.image.width || 0) * selectedItem.scale_x)} ×
-							{Math.round((selectedItem.image.height || 0) * selectedItem.scale_y)}px
-						</span>
-					</div>
+					{#if selectedImageItem?.image}
+						<div class="flex justify-between py-1">
+							<span>Original:</span>
+							<span class="font-medium"
+								>{selectedImageItem.image.width} × {selectedImageItem.image.height}px</span
+							>
+						</div>
+						<div class="flex justify-between py-1">
+							<span>Aktuell:</span>
+							<span class="font-medium">
+								{Math.round((selectedImageItem.image.width || 0) * selectedItem.scaleX)} ×
+								{Math.round((selectedImageItem.image.height || 0) * selectedItem.scaleY)}px
+							</span>
+						</div>
+					{/if}
 					<div class="flex justify-between py-1">
 						<span>Z-Index:</span>
-						<span class="font-medium">{selectedItem.z_index}</span>
+						<span class="font-medium">{selectedItem.zIndex}</span>
 					</div>
 				</div>
 			</div>
@@ -423,14 +397,7 @@
 					Transform zurücksetzen
 				</Button>
 				<Button variant="danger" class="w-full" onclick={handleDelete}>
-					<svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-						/>
-					</svg>
+					<Trash size={16} class="mr-2" />
 					Bild entfernen
 				</Button>
 			</div>
@@ -442,19 +409,7 @@
 		class="flex h-full items-center justify-center border-l border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900"
 	>
 		<div class="text-center">
-			<svg
-				class="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="1.5"
-					d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-				/>
-			</svg>
+			<CursorClick size={48} weight="thin" class="mx-auto text-gray-300 dark:text-gray-600" />
 			<p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
 				Wähle ein Bild aus, um<br />seine Eigenschaften zu bearbeiten
 			</p>

@@ -179,23 +179,23 @@
 {#if isLoading}
 	<div class="flex items-center justify-center h-full">
 		<div
-			class="animate-spin w-8 h-8 border-4 border-blue-500 border-r-transparent rounded-full"
+			class="animate-spin w-8 h-8 border-4 border-primary border-r-transparent rounded-full"
 		></div>
 	</div>
 {:else if error && !conversation}
 	<div class="flex flex-col items-center justify-center h-full text-center p-4">
-		<p class="text-red-500 mb-4">{error}</p>
-		<a href="/chat" class="text-blue-600 hover:underline">Zurück zum Chat</a>
+		<p class="text-destructive mb-4">{error}</p>
+		<a href="/chat" class="text-primary hover:underline">Zurück zum Chat</a>
 	</div>
 {:else}
 	<div class="flex flex-col h-full">
 		<!-- Chat Header -->
 		<header
-			class="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3"
+			class="flex-shrink-0 border-b border-border bg-surface px-4 py-3"
 		>
 			<div class="flex items-center justify-between max-w-4xl mx-auto">
 				<div class="flex items-center gap-4">
-					<h2 class="text-lg font-semibold text-gray-900 dark:text-white truncate max-w-xs">
+					<h2 class="text-lg font-semibold text-foreground truncate max-w-xs">
 						{conversation?.title || 'Chat'}
 					</h2>
 					<ModelSelector
@@ -211,8 +211,8 @@
 							onclick={toggleDocumentPanel}
 							class="p-2 transition-colors rounded-lg
                      {showDocumentPanel
-								? 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30'
-								: 'text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'}"
+								? 'text-primary bg-primary/10'
+								: 'text-foreground bg-muted hover:bg-muted/80'}"
 							aria-label="Dokument-Panel"
 							title="Dokument-Panel ein/ausblenden"
 						>
@@ -228,9 +228,7 @@
 					{/if}
 					<button
 						onclick={handleArchive}
-						class="p-2 text-gray-700 dark:text-gray-300
-                   bg-gray-100 dark:bg-gray-800 rounded-lg
-                   hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+						class="p-2 text-foreground bg-muted rounded-lg hover:bg-muted/80 transition-colors"
 						aria-label="Archivieren"
 						title="Archivieren"
 					>
@@ -245,9 +243,7 @@
 					</button>
 					<button
 						onclick={handleDelete}
-						class="p-2 text-red-600 dark:text-red-400
-                   bg-gray-100 dark:bg-gray-800 rounded-lg
-                   hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+						class="p-2 text-destructive bg-muted rounded-lg hover:bg-destructive/10 transition-colors"
 						aria-label="Löschen"
 						title="Löschen"
 					>
@@ -262,9 +258,7 @@
 					</button>
 					<button
 						onclick={toggleTheme}
-						class="p-2 text-gray-700 dark:text-gray-300
-                   bg-gray-100 dark:bg-gray-800 rounded-lg
-                   hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+						class="p-2 text-foreground bg-muted rounded-lg hover:bg-muted/80 transition-colors"
 						aria-label="Theme wechseln"
 					>
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -289,7 +283,7 @@
 					: 'w-full'}"
 			>
 				<!-- Messages Area -->
-				<main class="flex-1 overflow-hidden bg-white dark:bg-gray-900">
+				<main class="flex-1 overflow-hidden bg-surface">
 					<div class="h-full max-w-4xl mx-auto flex flex-col">
 						<MessageList {messages} isTyping={isSending} />
 					</div>
@@ -302,15 +296,15 @@
 			<!-- Document Panel -->
 			{#if isDocumentMode && showDocumentPanel}
 				<div
-					class="hidden lg:flex lg:w-1/2 flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
+					class="hidden lg:flex lg:w-1/2 flex-col border-l border-border bg-surface"
 				>
 					<!-- Document Header -->
 					<div
-						class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700"
+						class="flex items-center justify-between px-4 py-3 border-b border-border"
 					>
 						<div class="flex items-center gap-2">
 							<svg
-								class="w-5 h-5 text-blue-600 dark:text-blue-400"
+								class="w-5 h-5 text-primary"
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"
@@ -322,10 +316,10 @@
 									d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
 								/>
 							</svg>
-							<span class="font-medium text-gray-900 dark:text-white">Dokument</span>
+							<span class="font-medium text-foreground">Dokument</span>
 							{#if document}
 								<span
-									class="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded"
+									class="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded"
 								>
 									v{document.version}
 								</span>
@@ -334,8 +328,8 @@
 						<div class="flex items-center gap-2">
 							<button
 								onclick={loadVersions}
-								class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white
-                       hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+								class="p-1.5 text-muted-foreground hover:text-foreground
+                       hover:bg-muted rounded transition-colors"
 								title="Versionen anzeigen"
 							>
 								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -350,8 +344,8 @@
 							<button
 								onclick={saveDocument}
 								disabled={isSavingDocument || !documentContent.trim()}
-								class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white
-                       bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400
+								class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary-foreground
+                       bg-primary hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground
                        rounded-lg transition-colors"
 							>
 								{#if isSavingDocument}
@@ -385,9 +379,9 @@ Du kannst Markdown verwenden:
 - Aufzählung
 **Fett** und *Kursiv*"
 							class="w-full h-full min-h-[300px] p-4 text-sm font-mono
-                     bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white
-                     border border-gray-200 dark:border-gray-700 rounded-lg
-                     focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                     bg-muted text-foreground
+                     border border-border rounded-lg
+                     focus:ring-2 focus:ring-primary focus:border-transparent
                      resize-none"
 						></textarea>
 					</div>
@@ -398,7 +392,7 @@ Du kannst Markdown verwenden:
 		<!-- Error Message -->
 		{#if error}
 			<div
-				class="fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 bg-red-500 text-white rounded-lg shadow-lg"
+				class="fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 bg-destructive text-destructive-foreground rounded-lg shadow-lg"
 			>
 				{error}
 			</div>
@@ -409,15 +403,15 @@ Du kannst Markdown verwenden:
 	{#if showVersionsModal}
 		<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
 			<div
-				class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] flex flex-col"
+				class="bg-surface rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] flex flex-col"
 			>
 				<div
-					class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700"
+					class="flex items-center justify-between p-4 border-b border-border"
 				>
-					<h3 class="text-lg font-semibold text-gray-900 dark:text-white">Dokumentversionen</h3>
+					<h3 class="text-lg font-semibold text-foreground">Dokumentversionen</h3>
 					<button
 						onclick={() => (showVersionsModal = false)}
-						class="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+						class="p-1 text-muted-foreground hover:text-foreground"
 						aria-label="Schließen"
 					>
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -432,7 +426,7 @@ Du kannst Markdown verwenden:
 				</div>
 				<div class="flex-1 overflow-auto p-4">
 					{#if documentVersions.length === 0}
-						<p class="text-center text-gray-500 dark:text-gray-400 py-8">
+						<p class="text-center text-muted-foreground py-8">
 							Keine Versionen vorhanden
 						</p>
 					{:else}
@@ -440,16 +434,16 @@ Du kannst Markdown verwenden:
 							{#each documentVersions as version (version.id)}
 								<button
 									onclick={() => restoreVersion(version)}
-									class="w-full p-3 text-left rounded-lg border border-gray-200 dark:border-gray-700
-                         hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors
-                         {version.id === document?.id ? 'ring-2 ring-blue-500' : ''}"
+									class="w-full p-3 text-left rounded-lg border border-border
+                         hover:bg-muted transition-colors
+                         {version.id === document?.id ? 'ring-2 ring-primary' : ''}"
 								>
 									<div class="flex items-center justify-between mb-1">
-										<span class="font-medium text-gray-900 dark:text-white">
+										<span class="font-medium text-foreground">
 											Version {version.version}
 											{version.id === document?.id ? ' (aktuell)' : ''}
 										</span>
-										<span class="text-xs text-gray-500">
+										<span class="text-xs text-muted-foreground">
 											{new Date(version.created_at).toLocaleDateString('de-DE', {
 												day: '2-digit',
 												month: 'short',
@@ -458,7 +452,7 @@ Du kannst Markdown verwenden:
 											})}
 										</span>
 									</div>
-									<p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+									<p class="text-sm text-muted-foreground line-clamp-2">
 										{version.content.substring(0, 100)}...
 									</p>
 								</button>

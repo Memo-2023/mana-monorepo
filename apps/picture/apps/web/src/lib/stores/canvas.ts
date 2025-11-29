@@ -86,7 +86,7 @@ export function addCanvasItem(item: BoardItem) {
 
 export function updateCanvasItem(id: string, updates: Partial<BoardItem>) {
 	canvasItems.update((items) =>
-		items.map((item) => (item.id === id ? { ...item, ...updates } : item))
+		items.map((item) => (item.id === id ? ({ ...item, ...updates } as BoardItem) : item))
 	);
 	saveToHistory();
 }
@@ -137,14 +137,14 @@ export function deselectAll() {
 
 export function bringToFront(id: string) {
 	const items = get(canvasItems);
-	const maxZIndex = Math.max(...items.map((item) => item.z_index));
-	updateCanvasItem(id, { z_index: maxZIndex + 1 });
+	const maxZIndex = Math.max(...items.map((item) => item.zIndex));
+	updateCanvasItem(id, { zIndex: maxZIndex + 1 });
 }
 
 export function sendToBack(id: string) {
 	const items = get(canvasItems);
-	const minZIndex = Math.min(...items.map((item) => item.z_index));
-	updateCanvasItem(id, { z_index: minZIndex - 1 });
+	const minZIndex = Math.min(...items.map((item) => item.zIndex));
+	updateCanvasItem(id, { zIndex: minZIndex - 1 });
 }
 
 export function moveForward(id: string) {
@@ -152,11 +152,11 @@ export function moveForward(id: string) {
 	const item = items.find((i) => i.id === id);
 	if (!item) return;
 
-	const itemsAbove = items.filter((i) => i.z_index > item.z_index);
+	const itemsAbove = items.filter((i) => i.zIndex > item.zIndex);
 	if (itemsAbove.length === 0) return;
 
-	const nextZIndex = Math.min(...itemsAbove.map((i) => i.z_index));
-	updateCanvasItem(id, { z_index: nextZIndex + 0.5 });
+	const nextZIndex = Math.min(...itemsAbove.map((i) => i.zIndex));
+	updateCanvasItem(id, { zIndex: nextZIndex + 0.5 });
 }
 
 export function moveBackward(id: string) {
@@ -164,11 +164,11 @@ export function moveBackward(id: string) {
 	const item = items.find((i) => i.id === id);
 	if (!item) return;
 
-	const itemsBelow = items.filter((i) => i.z_index < item.z_index);
+	const itemsBelow = items.filter((i) => i.zIndex < item.zIndex);
 	if (itemsBelow.length === 0) return;
 
-	const prevZIndex = Math.max(...itemsBelow.map((i) => i.z_index));
-	updateCanvasItem(id, { z_index: prevZIndex - 0.5 });
+	const prevZIndex = Math.max(...itemsBelow.map((i) => i.zIndex));
+	updateCanvasItem(id, { zIndex: prevZIndex - 0.5 });
 }
 
 // Zoom functions

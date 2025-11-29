@@ -77,20 +77,20 @@
 	<title>Dokumente | ManaChat</title>
 </svelte:head>
 
-<div class="min-h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900 py-8">
+<div class="min-h-[calc(100vh-4rem)] bg-background py-8">
 	<div class="max-w-6xl mx-auto px-4">
 		<!-- Header -->
 		<div class="flex items-center justify-between mb-6">
 			<div>
-				<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dokumente</h1>
-				<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+				<h1 class="text-2xl font-bold text-foreground">Dokumente</h1>
+				<p class="text-sm text-muted-foreground mt-1">
 					Alle Dokumente aus deinen Konversationen im Dokumentmodus.
 				</p>
 			</div>
 			<button
 				onclick={loadDocuments}
-				class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200
-               hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+				class="p-2 text-muted-foreground hover:text-foreground
+               hover:bg-muted rounded-lg transition-colors"
 				aria-label="Aktualisieren"
 			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,14 +108,14 @@
 		{#if isLoading}
 			<div class="flex items-center justify-center py-16">
 				<div
-					class="animate-spin w-8 h-8 border-4 border-blue-500 border-r-transparent rounded-full"
+					class="animate-spin w-8 h-8 border-4 border-primary border-r-transparent rounded-full"
 				></div>
 			</div>
 		{:else if documents.length === 0}
 			<!-- Empty State -->
 			<div class="text-center py-16">
 				<svg
-					class="w-16 h-16 text-gray-400 mx-auto mb-4"
+					class="w-16 h-16 text-muted-foreground mx-auto mb-4"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -127,10 +127,10 @@
 						d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
 					/>
 				</svg>
-				<h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">
+				<h3 class="text-lg font-medium text-foreground mb-1">
 					Keine Dokumente gefunden
 				</h3>
-				<p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+				<p class="text-muted-foreground max-w-sm mx-auto">
 					Erstelle ein neues Dokument in einer Konversation mit aktiviertem Dokumentmodus.
 				</p>
 			</div>
@@ -140,19 +140,19 @@
 				{#each documents as doc (doc.id)}
 					<button
 						onclick={() => navigateToConversation(doc.conversation_id)}
-						class="text-left p-0 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700
-                   shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all overflow-hidden"
+						class="text-left p-0 bg-surface rounded-xl border border-border
+                   shadow-sm hover:shadow-md hover:border-primary/50 transition-all overflow-hidden"
 					>
 						<!-- Header -->
-						<div class="p-4 border-b border-gray-100 dark:border-gray-700">
-							<h3 class="font-semibold text-gray-900 dark:text-white line-clamp-2 mb-2">
+						<div class="p-4 border-b border-border">
+							<h3 class="font-semibold text-foreground line-clamp-2 mb-2">
 								{extractTitle(doc.content)}
 							</h3>
-							<div class="flex items-center justify-between text-xs text-gray-500">
+							<div class="flex items-center justify-between text-xs text-muted-foreground">
 								<span class="truncate">{doc.conversation_title}</span>
 								<div class="flex items-center gap-2 flex-shrink-0">
 									<span>{formatDate(doc.updated_at)}</span>
-									<span class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded font-medium">
+									<span class="px-1.5 py-0.5 bg-muted rounded font-medium">
 										v{doc.version}
 									</span>
 								</div>
@@ -161,7 +161,7 @@
 
 						<!-- Preview -->
 						<div class="p-4 h-32 overflow-hidden">
-							<p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-5">
+							<p class="text-sm text-muted-foreground line-clamp-5">
 								{getPreview(doc.content)}
 							</p>
 						</div>

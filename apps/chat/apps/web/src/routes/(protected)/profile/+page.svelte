@@ -26,27 +26,27 @@
 	<title>Profil | ManaChat</title>
 </svelte:head>
 
-<div class="min-h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900 py-8">
+<div class="min-h-[calc(100vh-4rem)] bg-background py-8">
 	<div class="max-w-2xl mx-auto px-4">
 		<!-- Header -->
 		<div class="mb-8">
-			<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Profil</h1>
-			<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+			<h1 class="text-2xl font-bold text-foreground">Profil</h1>
+			<p class="text-sm text-muted-foreground mt-1">
 				Verwalte dein Konto und deine Einstellungen.
 			</p>
 		</div>
 
 		<!-- Profile Card -->
 		<div
-			class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden mb-6"
+			class="bg-surface rounded-xl border border-border shadow-sm overflow-hidden mb-6"
 		>
 			<div class="p-6">
 				<div class="flex items-center gap-4 mb-6">
 					<div
-						class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center"
+						class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center"
 					>
 						<svg
-							class="w-8 h-8 text-blue-600 dark:text-blue-400"
+							class="w-8 h-8 text-primary"
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -60,10 +60,10 @@
 						</svg>
 					</div>
 					<div>
-						<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<h2 class="text-lg font-semibold text-foreground">
 							{authStore.user?.email || 'Benutzer'}
 						</h2>
-						<p class="text-sm text-gray-500">
+						<p class="text-sm text-muted-foreground">
 							Mitglied seit {formatDate(authStore.user?.created_at)}
 						</p>
 					</div>
@@ -71,19 +71,19 @@
 
 				<div class="space-y-4">
 					<div
-						class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700"
+						class="flex items-center justify-between py-3 border-b border-border"
 					>
 						<div>
-							<p class="font-medium text-gray-900 dark:text-white">E-Mail</p>
-							<p class="text-sm text-gray-500">{authStore.user?.email || '-'}</p>
+							<p class="font-medium text-foreground">E-Mail</p>
+							<p class="text-sm text-muted-foreground">{authStore.user?.email || '-'}</p>
 						</div>
 					</div>
 					<div
-						class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700"
+						class="flex items-center justify-between py-3 border-b border-border"
 					>
 						<div>
-							<p class="font-medium text-gray-900 dark:text-white">Benutzer-ID</p>
-							<p class="text-sm text-gray-500 font-mono">{authStore.user?.id || '-'}</p>
+							<p class="font-medium text-foreground">Benutzer-ID</p>
+							<p class="text-sm text-muted-foreground font-mono">{authStore.user?.id || '-'}</p>
 						</div>
 					</div>
 				</div>
@@ -92,22 +92,22 @@
 
 		<!-- Settings Card -->
 		<div
-			class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden mb-6"
+			class="bg-surface rounded-xl border border-border shadow-sm overflow-hidden mb-6"
 		>
 			<div class="p-6">
-				<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Einstellungen</h3>
+				<h3 class="text-lg font-semibold text-foreground mb-4">Einstellungen</h3>
 
 				<div class="space-y-4">
 					<!-- Theme Toggle -->
 					<div class="flex items-center justify-between py-3">
 						<div>
-							<p class="font-medium text-gray-900 dark:text-white">Dunkler Modus</p>
-							<p class="text-sm text-gray-500">Aktiviere den dunklen Modus für die App</p>
+							<p class="font-medium text-foreground">Dunkler Modus</p>
+							<p class="text-sm text-muted-foreground">Aktiviere den dunklen Modus für die App</p>
 						</div>
 						<button
 							onclick={toggleTheme}
 							class="relative w-12 h-6 rounded-full transition-colors
-                     {theme.mode === 'dark' ? 'bg-blue-600' : 'bg-gray-300'}"
+                     {theme.mode === 'dark' ? 'bg-primary' : 'bg-muted'}"
 							role="switch"
 							aria-checked={theme.mode === 'dark'}
 							aria-label="Dunkler Modus umschalten"
@@ -124,14 +124,14 @@
 
 		<!-- Sign Out -->
 		<div
-			class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden"
+			class="bg-surface rounded-xl border border-border shadow-sm overflow-hidden"
 		>
 			<div class="p-6">
 				<button
 					onclick={handleSignOut}
-					class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-900/20
-                 text-red-600 dark:text-red-400 rounded-lg font-medium
-                 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+					class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-destructive/10
+                 text-destructive rounded-lg font-medium
+                 hover:bg-destructive/20 transition-colors"
 				>
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path

@@ -19,6 +19,7 @@
 	import ImageSkeleton from '$lib/components/ui/ImageSkeleton.svelte';
 	import ViewModeSwitcher from '$lib/components/ui/ViewModeSwitcher.svelte';
 	import TagPills from '$lib/components/tags/TagPills.svelte';
+	import { Heart } from '@manacore/shared-icons';
 	import { onMount } from 'svelte';
 
 	let loadingMore = $state(false);
@@ -130,19 +131,7 @@
 				? 'bg-blue-600 text-white'
 				: 'bg-gray-100/80 text-gray-700 backdrop-blur-xl hover:bg-gray-200/80 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700/80'}"
 		>
-			<svg
-				class="h-4 w-4"
-				fill={$showFavoritesOnly ? 'currentColor' : 'none'}
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-				/>
-			</svg>
+			<Heart size={16} weight={$showFavoritesOnly ? 'fill' : 'regular'} />
 			<span>Favoriten</span>
 		</button>
 
