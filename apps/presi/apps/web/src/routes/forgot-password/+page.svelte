@@ -1,24 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { locale } from 'svelte-i18n';
 	import { ForgotPasswordPage } from '@manacore/shared-auth-ui';
+	import { getForgotPasswordTranslations } from '@manacore/shared-i18n';
 	import { PresiLogo } from '@manacore/shared-branding';
 	import { auth } from '$lib/stores/auth.svelte';
 	import AppSlider from '$lib/components/AppSlider.svelte';
+	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
+	import '$lib/i18n';
 
-	// English translations
-	const translations = {
-		titleForm: 'Reset Password',
-		titleSuccess: 'Email Sent',
-		description: "Enter your email address and we'll send you a link to reset your password.",
-		emailPlaceholder: 'Email',
-		sendResetLinkButton: 'Send Reset Link',
-		sending: 'Sending...',
-		backToLogin: 'Back to Login',
-		resendEmail: 'Resend Email',
-		successMessage: "We've sent a password reset link to {email}. Please check your inbox.",
-		emailRequired: 'Email is required',
-		sendFailed: 'Failed to send reset email',
-	};
+	// Get translations based on current locale
+	const translations = $derived(getForgotPasswordTranslations($locale || 'de'));
 
 	async function handleForgotPassword(email: string) {
 		return auth.forgotPassword(email);
@@ -26,7 +18,7 @@
 </script>
 
 <svelte:head>
-	<title>Forgot Password | Presi</title>
+	<title>{translations.titleForm} | Presi</title>
 </svelte:head>
 
 <ForgotPasswordPage
@@ -40,6 +32,9 @@
 	darkBackground="#1c1210"
 	{translations}
 >
+	{#snippet headerControls()}
+		<LanguageSelector />
+	{/snippet}
 	{#snippet appSlider()}
 		<AppSlider />
 	{/snippet}

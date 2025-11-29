@@ -1,33 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { locale } from 'svelte-i18n';
 	import { RegisterPage } from '@manacore/shared-auth-ui';
+	import { getRegisterTranslations } from '@manacore/shared-i18n';
 	import { PresiLogo } from '@manacore/shared-branding';
 	import { auth } from '$lib/stores/auth.svelte';
 	import AppSlider from '$lib/components/AppSlider.svelte';
+	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
+	import '$lib/i18n';
 
-	// English translations
-	const translations = {
-		title: 'Create Account',
-		emailPlaceholder: 'Email',
-		passwordPlaceholder: 'Password',
-		confirmPasswordPlaceholder: 'Confirm Password',
-		passwordRequirements:
-			'Password must be at least 8 characters with lowercase, uppercase, number, and special character.',
-		createAccountButton: 'Create Account',
-		creatingAccount: 'Creating Account...',
-		backToLogin: 'Back to Login',
-		showPassword: 'Show password',
-		hidePassword: 'Hide password',
-		emailRequired: 'Email is required',
-		passwordRequired: 'Password is required',
-		confirmPasswordRequired: 'Please confirm your password',
-		passwordsDoNotMatch: 'Passwords do not match',
-		passwordTooShort: 'Password must be at least 8 characters',
-		passwordStrengthError:
-			'Password must include lowercase, uppercase, number, and special character',
-		registrationFailed: 'Registration failed',
-		accountCreated: 'Account created! Please check your email to verify your account.',
-	};
+	// Get translations based on current locale
+	const translations = $derived(getRegisterTranslations($locale || 'de'));
 
 	async function handleSignUp(email: string, password: string) {
 		return auth.register(email, password);
@@ -35,7 +18,7 @@
 </script>
 
 <svelte:head>
-	<title>Register | Presi</title>
+	<title>{translations.title} | Presi</title>
 </svelte:head>
 
 <RegisterPage
@@ -50,6 +33,9 @@
 	darkBackground="#1c1210"
 	{translations}
 >
+	{#snippet headerControls()}
+		<LanguageSelector />
+	{/snippet}
 	{#snippet appSlider()}
 		<AppSlider />
 	{/snippet}

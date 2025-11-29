@@ -35,6 +35,7 @@
 		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-feedback-service": "workspace:*",
 		"@manacore/shared-feedback-ui": "workspace:*",
+		"@manacore/shared-i18n": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-profile-ui": "workspace:*",
 		"@manacore/shared-subscription-ui": "workspace:*",
@@ -42,7 +43,8 @@
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
-		"lucide-svelte": "^0.460.0"
+		"lucide-svelte": "^0.460.0",
+		"svelte-i18n": "^4.0.1"
 	},
 	"type": "module"
 }

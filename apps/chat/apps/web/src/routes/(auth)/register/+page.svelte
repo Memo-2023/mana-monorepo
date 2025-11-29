@@ -1,33 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { locale } from 'svelte-i18n';
 	import { RegisterPage } from '@manacore/shared-auth-ui';
+	import { getRegisterTranslations } from '@manacore/shared-i18n';
 	import { ChatLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import AppSlider from '$lib/components/AppSlider.svelte';
+	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
+	import '$lib/i18n';
 
-	// German translations
-	const translations = {
-		title: 'Konto erstellen',
-		emailPlaceholder: 'E-Mail',
-		passwordPlaceholder: 'Passwort',
-		confirmPasswordPlaceholder: 'Passwort bestätigen',
-		passwordRequirements:
-			'Passwort muss mindestens 8 Zeichen mit Kleinbuchstaben, Großbuchstaben, Zahl und Sonderzeichen enthalten.',
-		createAccountButton: 'Konto erstellen',
-		creatingAccount: 'Wird erstellt...',
-		backToLogin: 'Zurück zur Anmeldung',
-		showPassword: 'Passwort anzeigen',
-		hidePassword: 'Passwort verbergen',
-		emailRequired: 'E-Mail ist erforderlich',
-		passwordRequired: 'Passwort ist erforderlich',
-		confirmPasswordRequired: 'Bitte bestätige dein Passwort',
-		passwordsDoNotMatch: 'Passwörter stimmen nicht überein',
-		passwordTooShort: 'Passwort muss mindestens 8 Zeichen lang sein',
-		passwordStrengthError:
-			'Passwort muss Kleinbuchstaben, Großbuchstaben, Zahl und Sonderzeichen enthalten',
-		registrationFailed: 'Registrierung fehlgeschlagen',
-		accountCreated: 'Konto erstellt! Bitte überprüfe deine E-Mails zur Bestätigung.',
-	};
+	// Get translations based on current locale
+	const translations = $derived(getRegisterTranslations($locale || 'de'));
 
 	async function handleSignUp(email: string, password: string) {
 		return authStore.signUp(email, password);
@@ -35,7 +18,7 @@
 </script>
 
 <svelte:head>
-	<title>Registrieren | ManaChat</title>
+	<title>{translations.title} | ManaChat</title>
 </svelte:head>
 
 <RegisterPage
@@ -50,6 +33,9 @@
 	darkBackground="#0c1929"
 	{translations}
 >
+	{#snippet headerControls()}
+		<LanguageSelector />
+	{/snippet}
 	{#snippet appSlider()}
 		<AppSlider />
 	{/snippet}

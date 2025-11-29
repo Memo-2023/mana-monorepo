@@ -313,6 +313,9 @@ importers:
       marked:
         specifier: ^17.0.0
         version: 17.0.1
+      svelte-i18n:
+        specifier: ^4.0.1
+        version: 4.0.1(svelte@5.44.0)
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^6.0.0
@@ -1776,6 +1779,9 @@ importers:
       '@manacore/shared-feedback-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-feedback-ui
+      '@manacore/shared-i18n':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-i18n
       '@manacore/shared-icons':
         specifier: workspace:*
         version: link:../../../../packages/shared-icons
@@ -1803,6 +1809,9 @@ importers:
       lucide-svelte:
         specifier: ^0.460.0
         version: 0.460.1(svelte@5.44.0)
+      svelte-i18n:
+        specifier: ^4.0.1
+        version: 4.0.1(svelte@5.44.0)
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^3.0.0
@@ -2164,6 +2173,9 @@ importers:
       '@manacore/shared-feedback-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-feedback-ui
+      '@manacore/shared-i18n':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-i18n
       '@manacore/shared-icons':
         specifier: workspace:*
         version: link:../../../../packages/shared-icons
@@ -2191,6 +2203,9 @@ importers:
       '@zitare/web-ui':
         specifier: workspace:*
         version: link:../../packages/web-ui
+      svelte-i18n:
+        specifier: ^4.0.1
+        version: 4.0.1(svelte@5.44.0)
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^3.0.0

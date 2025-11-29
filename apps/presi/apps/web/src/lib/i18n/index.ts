@@ -19,7 +19,7 @@ register('es', () => import('./locales/es.json'));
 function getInitialLocale(): SupportedLocale {
 	if (browser) {
 		// Check localStorage first
-		const stored = localStorage.getItem('picture_locale');
+		const stored = localStorage.getItem('presi_locale');
 		if (stored && supportedLocales.includes(stored as SupportedLocale)) {
 			return stored as SupportedLocale;
 		}
@@ -44,7 +44,7 @@ init({
 export function setLocale(newLocale: SupportedLocale) {
 	locale.set(newLocale);
 	if (browser) {
-		localStorage.setItem('picture_locale', newLocale);
+		localStorage.setItem('presi_locale', newLocale);
 	}
 }
 

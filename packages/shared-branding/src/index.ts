@@ -22,6 +22,8 @@ export {
 	UloadLogo,
 	ChatLogo,
 	PresiLogo,
+	NutriPhiLogo,
+	ZitareLogo,
 } from './logos';
 
 // Configuration

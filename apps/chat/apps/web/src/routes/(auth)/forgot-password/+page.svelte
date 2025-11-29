@@ -1,26 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { locale } from 'svelte-i18n';
 	import { ForgotPasswordPage } from '@manacore/shared-auth-ui';
+	import { getForgotPasswordTranslations } from '@manacore/shared-i18n';
 	import { ChatLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import AppSlider from '$lib/components/AppSlider.svelte';
+	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
+	import '$lib/i18n';
 
-	// German translations
-	const translations = {
-		titleForm: 'Passwort zurücksetzen',
-		titleSuccess: 'E-Mail gesendet',
-		description:
-			'Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.',
-		emailPlaceholder: 'E-Mail',
-		sendResetLinkButton: 'Link senden',
-		sending: 'Wird gesendet...',
-		backToLogin: 'Zurück zur Anmeldung',
-		resendEmail: 'E-Mail erneut senden',
-		successMessage:
-			'Wir haben einen Link zum Zurücksetzen deines Passworts an {email} gesendet. Bitte überprüfe deinen Posteingang.',
-		emailRequired: 'E-Mail ist erforderlich',
-		sendFailed: 'Fehler beim Senden der E-Mail',
-	};
+	// Get translations based on current locale
+	const translations = $derived(getForgotPasswordTranslations($locale || 'de'));
 
 	async function handleForgotPassword(email: string) {
 		return authStore.resetPassword(email);
@@ -28,7 +18,7 @@
 </script>
 
 <svelte:head>
-	<title>Passwort zurücksetzen | ManaChat</title>
+	<title>{translations.titleForm} | ManaChat</title>
 </svelte:head>
 
 <ForgotPasswordPage
@@ -42,6 +32,9 @@
 	darkBackground="#0c1929"
 	{translations}
 >
+	{#snippet headerControls()}
+		<LanguageSelector />
+	{/snippet}
 	{#snippet appSlider()}
 		<AppSlider />
 	{/snippet}

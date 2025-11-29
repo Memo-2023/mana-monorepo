@@ -74,6 +74,8 @@
 		darkBackground?: string;
 		/** App slider snippet */
 		appSlider?: Snippet;
+		/** Header controls snippet (e.g., language selector) */
+		headerControls?: Snippet;
 		/** Translations for i18n support */
 		translations?: Partial<RegisterTranslations>;
 	}
@@ -89,6 +91,7 @@
 		lightBackground = '#f5f5f5',
 		darkBackground = '#121212',
 		appSlider,
+		headerControls,
 		translations = {},
 	}: Props = $props();
 
@@ -220,6 +223,12 @@
 	class="flex min-h-screen flex-col justify-between"
 	style="background-color: {getPageBackground()}; max-width: 100vw; overflow-x: hidden;"
 >
+	{#if headerControls}
+		<div style="position: absolute; top: 1rem; right: 1rem; z-index: 50; opacity: 0.6; display: flex; gap: 0.75rem;">
+			{@render headerControls()}
+		</div>
+	{/if}
+
 	<!-- Top Section - Logo -->
 	<div class="flex flex-col items-center justify-center pt-16 pb-8">
 		<div

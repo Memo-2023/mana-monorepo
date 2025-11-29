@@ -1,0 +1,23 @@
+{
+	"app_slider": {
+		"title": "Altre App Manacore",
+		"memoro_desc": "Memo vocali con IA",
+		"memoro_long_desc": "Trasforma la tua voce in appunti organizzati e azionabili con trascrizione e analisi basate su IA. Perfetto per catturare idee in movimento.",
+		"maerchenzauber_desc": "Storie magiche della buonanotte",
+		"maerchenzauber_long_desc": "Crea storie della buonanotte personalizzate per i tuoi bambini con l'IA. Accendi l'immaginazione e rendi ogni notte magica con racconti unici.",
+		"manadeck_desc": "Flashcard con IA",
+		"manadeck_long_desc": "Crea e studia con flashcard intelligenti e ripetizione spaziata basata su IA.",
+		"picture_desc": "Generazione immagini con IA",
+		"picture_long_desc": "Crea immagini straordinarie con l'IA. Trasforma le tue idee in opere d'arte visive in pochi secondi.",
+		"moodlit_desc": "Il tuo compagno d'umore",
+		"moodlit_long_desc": "Monitora e comprendi le tue emozioni con approfondimenti basati su IA. Sviluppa la consapevolezza emotiva e migliora il tuo benessere mentale.",
+		"manacore_desc": "Suite di produttività IA",
+		"manacore_long_desc": "L'hub centrale per tutte le app Manacore. Gestisci i tuoi abbonamenti, sincronizza i dati e accedi a potenti strumenti IA da un unico posto.",
+		"coming_soon": "Prossimamente",
+		"download": "Scarica",
+		"status_published": "Pubblicato",
+		"status_beta": "Beta",
+		"status_development": "In sviluppo",
+		"status_planning": "Pianificato"
+	}
+}
