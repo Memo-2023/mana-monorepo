@@ -77,7 +77,7 @@
 								{truncateTitle(conv.title || 'Neue Konversation')}
 							</span>
 							<span class="text-xs text-muted-foreground flex-shrink-0">
-								{formatDate(conv.updated_at || conv.created_at)}
+								{formatDate(conv.updatedAt || conv.createdAt)}
 							</span>
 						</div>
 					</a>

@@ -1,25 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
 	import { conversationService } from '$lib/services/conversation';
 	import { chatService } from '$lib/services/chat';
 	import { documentService } from '$lib/services/document';
-	import { conversationsStore } from '$lib/stores/conversations.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import MessageList from '$lib/components/chat/MessageList.svelte';
 	import ChatInput from '$lib/components/chat/ChatInput.svelte';
-	import ModelSelector from '$lib/components/chat/ModelSelector.svelte';
 	import ChatLayout from '$lib/components/chat/ChatLayout.svelte';
 	import type { Conversation, Message, AIModel, Document } from '@chat/types';
 	import {
-		Archive,
-		Trash,
 		FileText,
 		ClockCounterClockwise,
 		X,
 		FloppyDisk,
-		ChatCircle,
 	} from '@manacore/shared-icons';
 
 	let conversation = $state<Conversation | null>(null);
@@ -39,7 +33,7 @@
 	let showDocumentPanel = $state(true);
 
 	const conversationId = $derived($page.params.id ?? '');
-	const isDocumentMode = $derived(conversation?.document_mode ?? false);
+	const isDocumentMode = $derived(conversation?.documentMode ?? false);
 
 	onMount(async () => {
 		await loadData();
@@ -62,13 +56,13 @@
 			}
 
 			// Set model from conversation
-			selectedModelId = conversation.model_id;
+			selectedModelId = conversation.modelId;
 
 			// Load messages
 			messages = await conversationService.getMessages(conversationId);
 
 			// Load document if in document mode
-			if (conversation.document_mode) {
+			if (conversation.documentMode) {
 				document = await documentService.getLatestDocument(conversationId);
 				documentContent = document?.content ?? '';
 			}
@@ -121,10 +115,10 @@
 		// Optimistic update - add user message
 		const tempUserMessage: Message = {
 			id: `temp-user-${Date.now()}`,
-			conversation_id: conversationId,
+			conversationId: conversationId,
 			sender: 'user',
-			message_text: text,
-			created_at: new Date().toISOString(),
+			messageText: text,
+			createdAt: new Date().toISOString(),
 		};
 		messages = [...messages, tempUserMessage];
 
@@ -155,26 +149,6 @@
 	function handleModelSelect(modelId: string) {
 		selectedModelId = modelId;
 	}
-
-	async function handleArchive() {
-		if (!conversation) return;
-
-		const success = await conversationsStore.archiveConversation(conversationId);
-		if (success) {
-			goto('/chat');
-		}
-	}
-
-	async function handleDelete() {
-		if (!conversation) return;
-
-		if (confirm('Möchtest du diese Konversation wirklich löschen?')) {
-			const success = await conversationsStore.deleteConversation(conversationId);
-			if (success) {
-				goto('/chat');
-			}
-		}
-	}
 </script>
 
 <svelte:head>
@@ -196,70 +170,6 @@
 			</div>
 		{:else}
 			<div class="flex flex-col h-full">
-				<!-- Chat Header -->
-				<header
-					class="flex-shrink-0 border-b border-border bg-surface/50 backdrop-blur-sm px-6 py-4"
-				>
-					<div class="flex items-center justify-between">
-						<div class="flex items-center gap-3">
-							<div
-								class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center"
-							>
-								<ChatCircle size={22} weight="fill" class="text-primary-foreground" />
-							</div>
-							<div>
-								<h2 class="text-lg font-semibold text-foreground truncate max-w-xs">
-									{conversation?.title || 'Chat'}
-								</h2>
-								<p class="text-sm text-muted-foreground">
-									{messages.length} Nachricht{messages.length !== 1 ? 'en' : ''}
-								</p>
-							</div>
-						</div>
-						<div class="flex items-center gap-2">
-							<!-- Model Selector -->
-							<ModelSelector
-								{models}
-								{selectedModelId}
-								onSelect={handleModelSelect}
-								disabled={isSending}
-							/>
-
-							{#if isDocumentMode}
-								<button
-									onclick={toggleDocumentPanel}
-									class="p-2.5 transition-colors rounded-xl
-                             {showDocumentPanel
-										? 'text-primary bg-primary/10 border border-primary/30'
-										: 'text-muted-foreground bg-muted border border-border hover:bg-muted/80'}"
-									aria-label="Dokument-Panel"
-									title="Dokument-Panel ein/ausblenden"
-								>
-									<FileText size={18} weight="bold" />
-								</button>
-							{/if}
-
-							<button
-								onclick={handleArchive}
-								class="p-2.5 text-muted-foreground bg-muted border border-border rounded-xl hover:bg-muted/80 transition-colors"
-								aria-label="Archivieren"
-								title="Archivieren"
-							>
-								<Archive size={18} weight="bold" />
-							</button>
-
-							<button
-								onclick={handleDelete}
-								class="p-2.5 text-destructive bg-muted border border-border rounded-xl hover:bg-destructive/10 transition-colors"
-								aria-label="Löschen"
-								title="Löschen"
-							>
-								<Trash size={18} weight="bold" />
-							</button>
-						</div>
-					</div>
-				</header>
-
 				<!-- Main Content Area -->
 				<div class="flex-1 flex overflow-hidden">
 					<!-- Chat Area -->
@@ -277,10 +187,17 @@
 
 						<!-- Floating Chat Input -->
 						<div
-							class="flex-shrink-0 p-4 bg-gradient-to-t from-surface via-surface to-transparent"
+							class="flex-shrink-0 p-4 bg-gradient-to-t from-background via-background to-transparent"
 						>
 							<div class="max-w-3xl mx-auto">
-								<ChatInput onSend={handleSend} disabled={isSending} />
+								<ChatInput
+									onSend={handleSend}
+									disabled={isSending}
+									{models}
+									{selectedModelId}
+									onModelSelect={handleModelSelect}
+									documentMode={isDocumentMode}
+								/>
 							</div>
 						</div>
 					</div>
@@ -399,7 +316,7 @@ Du kannst Markdown verwenden:
 													{version.id === document?.id ? ' (aktuell)' : ''}
 												</span>
 												<span class="text-xs text-muted-foreground">
-													{new Date(version.created_at).toLocaleDateString('de-DE', {
+													{new Date(version.createdAt).toLocaleDateString('de-DE', {
 														day: '2-digit',
 														month: 'short',
 														hour: '2-digit',

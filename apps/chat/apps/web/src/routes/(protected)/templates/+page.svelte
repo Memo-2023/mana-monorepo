@@ -50,10 +50,10 @@
 		// Create a new conversation with this template
 		const conversationId = await conversationService.createConversation(
 			authStore.user.id,
-			template.model_id || '550e8400-e29b-41d4-a716-446655440101', // Default to Gemini 2.5 Flash
+			template.modelId || '550e8400-e29b-41d4-a716-446655440101', // Default to Gemini 2.5 Flash
 			'template',
 			template.id,
-			template.document_mode
+			template.documentMode
 		);
 
 		if (conversationId) {
@@ -70,24 +70,24 @@
 			await templatesStore.updateTemplate(data.id, {
 				name: data.name,
 				description: data.description,
-				system_prompt: data.system_prompt,
-				initial_question: data.initial_question,
+				systemPrompt: data.systemPrompt,
+				initialQuestion: data.initialQuestion,
 				color: data.color,
-				model_id: data.model_id,
-				document_mode: data.document_mode,
+				modelId: data.modelId,
+				documentMode: data.documentMode,
 			});
 		} else {
 			// Create new template
 			await templatesStore.createTemplate({
-				user_id: authStore.user.id,
+				userId: authStore.user.id,
 				name: data.name!,
 				description: data.description ?? null,
-				system_prompt: data.system_prompt!,
-				initial_question: data.initial_question ?? null,
+				systemPrompt: data.systemPrompt!,
+				initialQuestion: data.initialQuestion ?? null,
 				color: data.color!,
-				model_id: data.model_id ?? null,
-				is_default: false,
-				document_mode: data.document_mode ?? false,
+				modelId: data.modelId ?? null,
+				isDefault: false,
+				documentMode: data.documentMode ?? false,
 			});
 		}
 

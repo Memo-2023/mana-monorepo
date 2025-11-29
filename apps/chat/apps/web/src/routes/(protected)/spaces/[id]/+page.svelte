@@ -189,7 +189,7 @@
 									<h3 class="font-medium text-foreground">
 										{conv.title || 'Neue Konversation'}
 									</h3>
-									<span class="text-xs text-muted-foreground">{formatDate(conv.updated_at)}</span>
+									<span class="text-xs text-muted-foreground">{formatDate(conv.updatedAt)}</span>
 								</div>
 							</a>
 						{/each}

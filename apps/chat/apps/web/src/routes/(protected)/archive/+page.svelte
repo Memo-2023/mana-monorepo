@@ -119,13 +119,13 @@
 										{conv.title || 'Unbenannte Konversation'}
 									</h3>
 								</div>
-								<span class="text-xs text-muted-foreground">{formatDate(conv.updated_at)}</span>
+								<span class="text-xs text-muted-foreground">{formatDate(conv.updatedAt)}</span>
 							</div>
 							<div class="flex items-center gap-2 text-xs text-muted-foreground">
 								<span class="px-2 py-0.5 bg-muted rounded">
-									{conv.conversation_mode === 'free'
+									{conv.conversationMode === 'free'
 										? 'Freier Modus'
-										: conv.conversation_mode === 'guided'
+										: conv.conversationMode === 'guided'
 											? 'Geführter Modus'
 											: 'Vorlagen-Modus'}
 								</span>

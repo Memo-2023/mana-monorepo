@@ -64,7 +64,7 @@
 			await spacesStore.createSpace({
 				name: data.name,
 				description: data.description,
-				owner_id: authStore.user.id,
+				ownerId: authStore.user.id,
 			});
 		}
 
@@ -78,7 +78,7 @@
 	}
 
 	function isOwner(space: Space): boolean {
-		return space.owner_id === authStore.user?.id;
+		return space.ownerId === authStore.user?.id;
 	}
 </script>
 

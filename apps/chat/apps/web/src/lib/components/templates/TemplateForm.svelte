@@ -27,11 +27,11 @@
 	// Form state
 	let name = $state(template?.name ?? '');
 	let description = $state(template?.description ?? '');
-	let systemPrompt = $state(template?.system_prompt ?? '');
-	let initialQuestion = $state(template?.initial_question ?? '');
+	let systemPrompt = $state(template?.systemPrompt ?? '');
+	let initialQuestion = $state(template?.initialQuestion ?? '');
 	let selectedColor = $state(template?.color ?? TEMPLATE_COLORS[0]);
-	let selectedModelId = $state(template?.model_id ?? '');
-	let documentMode = $state(template?.document_mode ?? false);
+	let selectedModelId = $state(template?.modelId ?? '');
+	let documentMode = $state(template?.documentMode ?? false);
 
 	// Models
 	let models = $state<AIModel[]>([]);
@@ -67,11 +67,11 @@
 			id: template?.id,
 			name,
 			description: description.trim() || null,
-			system_prompt: systemPrompt,
-			initial_question: initialQuestion.trim() || null,
+			systemPrompt: systemPrompt,
+			initialQuestion: initialQuestion.trim() || null,
 			color: selectedColor,
-			model_id: selectedModelId || null,
-			document_mode: documentMode,
+			modelId: selectedModelId || null,
+			documentMode: documentMode,
 		});
 	}
 </script>

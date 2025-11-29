@@ -27,7 +27,7 @@ export const spaceService = {
 	async createSpace(space: {
 		name: string;
 		description?: string;
-		owner_id: string;
+		ownerId: string;
 	}): Promise<string | null> {
 		const result = await spaceApi.createSpace(space.name, space.description);
 		return result?.id || null;

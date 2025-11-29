@@ -20,7 +20,7 @@
 
 <div
 	class="group relative flex rounded-xl overflow-hidden bg-surface shadow-sm hover:shadow-md transition-all
-         {template.is_default
+         {template.isDefault
 		? 'ring-2 ring-primary'
 		: 'border border-border'}"
 >
@@ -35,7 +35,7 @@
 					<h3 class="text-base font-semibold text-foreground truncate">
 						{template.name}
 					</h3>
-					{#if template.is_default}
+					{#if template.isDefault}
 						<span class="px-2 py-0.5 text-xs font-medium bg-primary text-primary-foreground rounded">
 							Standard
 						</span>
@@ -49,13 +49,13 @@
 				{/if}
 
 				<p class="text-xs text-muted-foreground italic line-clamp-2">
-					{truncatePrompt(template.system_prompt)}
+					{truncatePrompt(template.systemPrompt)}
 				</p>
 			</div>
 
 			<!-- Actions -->
 			<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-				{#if !template.is_default}
+				{#if !template.isDefault}
 					<button
 						onclick={() => onSetDefault(template.id)}
 						class="p-1.5 text-muted-foreground hover:text-yellow-500 hover:bg-muted rounded-lg transition-colors"

@@ -67,7 +67,7 @@
 				{/if}
 
 				<p class="text-xs text-muted-foreground">
-					Erstellt: {formatDate(space.created_at)}
+					Erstellt: {formatDate(space.createdAt)}
 				</p>
 			</div>
 

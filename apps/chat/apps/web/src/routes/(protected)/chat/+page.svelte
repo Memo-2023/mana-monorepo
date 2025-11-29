@@ -7,10 +7,9 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import MessageList from '$lib/components/chat/MessageList.svelte';
 	import ChatInput from '$lib/components/chat/ChatInput.svelte';
-	import ModelSelector from '$lib/components/chat/ModelSelector.svelte';
 	import ChatLayout from '$lib/components/chat/ChatLayout.svelte';
 	import type { AIModel, Message, Template } from '@chat/types';
-	import { FileText, Sparkle } from '@manacore/shared-icons';
+	import { Sparkle } from '@manacore/shared-icons';
 
 	let models = $state<AIModel[]>([]);
 	let templates = $state<Template[]>([]);
@@ -157,7 +156,7 @@
 							</p>
 
 							<!-- Suggestion Pills -->
-							<div class="flex flex-wrap justify-center gap-3 mb-8">
+							<div class="flex flex-wrap justify-center gap-3">
 								<button
 									onclick={() => handleSend('Erkläre mir, wie KI funktioniert')}
 									class="px-5 py-2.5 text-sm font-medium rounded-full bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-black/10 dark:border-white/20 text-foreground shadow-md hover:shadow-lg hover:bg-white dark:hover:bg-white/20 transition-all duration-200 hover:-translate-y-0.5"
@@ -177,101 +176,6 @@
 									Tech-Trends
 								</button>
 							</div>
-
-							<!-- Options Bar -->
-							<div
-								class="inline-flex items-center gap-2 p-1.5 rounded-full bg-white/70 dark:bg-white/10 backdrop-blur-xl border border-black/10 dark:border-white/20 shadow-md"
-							>
-								<!-- Model Selector -->
-								<div class="relative">
-									<select
-										value={selectedModelId}
-										onchange={(e) => handleModelSelect((e.target as HTMLSelectElement).value)}
-										disabled={isSending}
-										class="appearance-none bg-transparent text-foreground text-sm font-medium rounded-full pl-4 pr-8 py-2 border-0 focus:outline-none focus:ring-0 disabled:opacity-50 cursor-pointer"
-									>
-										{#if models.length === 0}
-											<option value="">Laden...</option>
-										{:else}
-											{#each models as model (model.id)}
-												<option value={model.id}>{model.name}</option>
-											{/each}
-										{/if}
-									</select>
-									<div
-										class="absolute inset-y-0 right-2 flex items-center pointer-events-none"
-									>
-										<svg
-											class="w-4 h-4 text-muted-foreground"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M19 9l-7 7-7-7"
-											/>
-										</svg>
-									</div>
-								</div>
-
-								<!-- Divider -->
-								<div class="w-px h-6 bg-black/10 dark:bg-white/20"></div>
-
-								<!-- Template Selector -->
-								{#if templates.length > 0}
-									<div class="relative">
-										<select
-											onchange={handleTemplateSelect}
-											value={selectedTemplateId}
-											disabled={isSending}
-											class="appearance-none bg-transparent text-foreground text-sm font-medium rounded-full pl-4 pr-8 py-2 border-0 focus:outline-none focus:ring-0 disabled:opacity-50 cursor-pointer"
-										>
-											<option value="">Ohne Vorlage</option>
-											{#each templates as template}
-												<option value={template.id}>
-													{template.name}
-													{template.isDefault ? ' ★' : ''}
-												</option>
-											{/each}
-										</select>
-										<div
-											class="absolute inset-y-0 right-2 flex items-center pointer-events-none"
-										>
-											<svg
-												class="w-4 h-4 text-muted-foreground"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M19 9l-7 7-7-7"
-												/>
-											</svg>
-										</div>
-									</div>
-									<div class="w-px h-6 bg-black/10 dark:bg-white/20"></div>
-								{/if}
-
-								<!-- Document Mode Toggle -->
-								<button
-									onclick={toggleDocumentMode}
-									disabled={isSending}
-									class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 disabled:opacity-50
-                     {documentMode
-										? 'bg-primary/20 text-primary'
-										: 'text-foreground hover:bg-black/5 dark:hover:bg-white/10'}"
-									title="Dokumentmodus aktivieren"
-								>
-									<FileText size={16} weight={documentMode ? 'fill' : 'bold'} />
-									<span>Dokument</span>
-								</button>
-							</div>
 						</div>
 					</div>
 				{:else}
@@ -284,7 +188,15 @@
 			<!-- Floating Chat Input -->
 			<div class="flex-shrink-0 p-4 bg-gradient-to-t from-background via-background to-transparent">
 				<div class="max-w-3xl mx-auto">
-					<ChatInput onSend={handleSend} disabled={isSending || isLoading} />
+					<ChatInput
+						onSend={handleSend}
+						disabled={isSending || isLoading}
+						{models}
+						{selectedModelId}
+						onModelSelect={handleModelSelect}
+						{documentMode}
+						onDocumentModeToggle={toggleDocumentMode}
+					/>
 				</div>
 			</div>
 

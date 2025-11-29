@@ -84,7 +84,7 @@ export const conversationsStore = {
 			const conversation = conversations.find((c) => c.id === conversationId);
 			if (conversation) {
 				conversations = conversations.filter((c) => c.id !== conversationId);
-				archivedConversations = [{ ...conversation, is_archived: true }, ...archivedConversations];
+				archivedConversations = [{ ...conversation, isArchived: true }, ...archivedConversations];
 			}
 		}
 
@@ -101,7 +101,7 @@ export const conversationsStore = {
 			const conversation = archivedConversations.find((c) => c.id === conversationId);
 			if (conversation) {
 				archivedConversations = archivedConversations.filter((c) => c.id !== conversationId);
-				conversations = [{ ...conversation, is_archived: false }, ...conversations];
+				conversations = [{ ...conversation, isArchived: false }, ...conversations];
 			}
 		}
 

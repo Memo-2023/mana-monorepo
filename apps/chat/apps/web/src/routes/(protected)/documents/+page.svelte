@@ -139,7 +139,7 @@
 			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{#each documents as doc (doc.id)}
 					<button
-						onclick={() => navigateToConversation(doc.conversation_id)}
+						onclick={() => navigateToConversation(doc.conversationId)}
 						class="text-left p-0 bg-surface rounded-xl border border-border
                    shadow-sm hover:shadow-md hover:border-primary/50 transition-all overflow-hidden"
 					>
@@ -149,9 +149,9 @@
 								{extractTitle(doc.content)}
 							</h3>
 							<div class="flex items-center justify-between text-xs text-muted-foreground">
-								<span class="truncate">{doc.conversation_title}</span>
+								<span class="truncate">{doc.conversationTitle}</span>
 								<div class="flex items-center gap-2 flex-shrink-0">
-									<span>{formatDate(doc.updated_at)}</span>
+									<span>{formatDate(doc.updatedAt)}</span>
 									<span class="px-1.5 py-0.5 bg-muted rounded font-medium">
 										v{doc.version}
 									</span>

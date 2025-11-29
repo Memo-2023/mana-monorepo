@@ -4,7 +4,8 @@
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { isSidebarMode, isNavCollapsed } from '$lib/stores/navigation';
-	import { MagnifyingGlass, X, Plus, ChatCircle } from '@manacore/shared-icons';
+	import { MagnifyingGlass, X, Plus, ChatCircle, Archive, Trash } from '@manacore/shared-icons';
+	import { goto } from '$app/navigation';
 	import type { Snippet } from 'svelte';
 
 	interface Props {
@@ -93,6 +94,28 @@
 	// Check if current conversation is active
 	function isActive(convId: string): boolean {
 		return $page.params.id === convId;
+	}
+
+	// Archive conversation
+	async function handleArchive(e: MouseEvent, convId: string) {
+		e.preventDefault();
+		e.stopPropagation();
+		const success = await conversationsStore.archiveConversation(convId);
+		if (success && isActive(convId)) {
+			goto('/chat');
+		}
+	}
+
+	// Delete conversation
+	async function handleDelete(e: MouseEvent, convId: string) {
+		e.preventDefault();
+		e.stopPropagation();
+		if (confirm('Möchtest du diese Konversation wirklich löschen?')) {
+			const success = await conversationsStore.deleteConversation(convId);
+			if (success && isActive(convId)) {
+				goto('/chat');
+			}
+		}
 	}
 </script>
 
@@ -183,7 +206,7 @@
 					{#each filteredConversations as conv (conv.id)}
 						<a
 							href="/chat/{conv.id}"
-							class="block w-full rounded-xl bg-white/60 dark:bg-white/5 backdrop-blur-sm border border-black/10 dark:border-white/20 p-4 text-left transition-all mb-3 hover:shadow-md hover:bg-white/80 dark:hover:bg-white/10
+							class="group block w-full rounded-xl bg-white/60 dark:bg-white/5 backdrop-blur-sm border border-black/10 dark:border-white/20 p-4 text-left transition-all mb-3 hover:shadow-md hover:bg-white/80 dark:hover:bg-white/10
 								   {isActive(conv.id)
 								? 'bg-white/90 dark:bg-white/15 shadow-md border-primary/30'
 								: ''}"
@@ -210,15 +233,34 @@
 							<!-- Footer -->
 							<div class="flex items-center justify-between">
 								<span class="text-xs text-muted-foreground">
-									{formatDate(conv.updated_at || conv.created_at)}
+									{formatDate(conv.updatedAt || conv.createdAt)}
 								</span>
-								{#if conv.document_mode}
-									<span
-										class="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full"
-									>
-										Dokument
-									</span>
-								{/if}
+								<div class="flex items-center gap-1">
+									{#if conv.documentMode}
+										<span
+											class="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full"
+										>
+											Dokument
+										</span>
+									{/if}
+									<!-- Action Buttons (visible on hover) -->
+									<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+										<button
+											onclick={(e) => handleArchive(e, conv.id)}
+											class="p-1.5 text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
+											title="Archivieren"
+										>
+											<Archive size={14} weight="bold" />
+										</button>
+										<button
+											onclick={(e) => handleDelete(e, conv.id)}
+											class="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+											title="Löschen"
+										>
+											<Trash size={14} weight="bold" />
+										</button>
+									</div>
+								</div>
 							</div>
 						</a>
 					{/each}

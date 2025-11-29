@@ -71,10 +71,10 @@ export const chatStore = {
 		// Add user message
 		const userMessage: Message = {
 			id: `temp-${++messageCounter}`,
-			conversation_id: '',
+			conversationId: '',
 			sender: 'user',
-			message_text: text,
-			created_at: new Date().toISOString(),
+			messageText: text,
+			createdAt: new Date().toISOString(),
 		};
 		messages = [...messages, userMessage];
 
@@ -82,7 +82,7 @@ export const chatStore = {
 			// Build chat messages for API
 			const chatMessages: ChatMessage[] = messages.map((m) => ({
 				role: m.sender === 'user' ? 'user' : 'assistant',
-				content: m.message_text,
+				content: m.messageText,
 			}));
 
 			const request: ChatCompletionRequest = {
@@ -96,10 +96,10 @@ export const chatStore = {
 				// Add assistant message
 				const assistantMessage: Message = {
 					id: `temp-${++messageCounter}`,
-					conversation_id: '',
+					conversationId: '',
 					sender: 'assistant',
-					message_text: response.content,
-					created_at: new Date().toISOString(),
+					messageText: response.content,
+					createdAt: new Date().toISOString(),
 				};
 				messages = [...messages, assistantMessage];
 			} else {

@@ -7,7 +7,7 @@ import { documentApi, conversationApi, type Document } from './api';
 export type { Document };
 
 export type DocumentWithConversation = Document & {
-	conversation_title: string;
+	conversationTitle: string;
 };
 
 export const documentService = {
@@ -35,7 +35,7 @@ export const documentService = {
 			if (doc) {
 				documents.push({
 					...doc,
-					conversation_title: conv.title || 'Unbenannte Konversation',
+					conversationTitle: conv.title || 'Unbenannte Konversation',
 				});
 			}
 		}

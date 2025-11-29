@@ -106,7 +106,7 @@ export const templatesStore = {
 			if (success) {
 				templates = templates.map((t) => ({
 					...t,
-					is_default: t.id === templateId,
+					isDefault: t.id === templateId,
 				}));
 			}
 			return success;

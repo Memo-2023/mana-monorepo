@@ -49,7 +49,7 @@ export const spacesStore = {
 			const spaceId = await spaceService.createSpace(space);
 			if (spaceId) {
 				// Reload spaces to get the new one with full data
-				await this.loadSpaces(space.owner_id);
+				await this.loadSpaces(space.ownerId);
 			}
 			return spaceId;
 		} catch (e) {
