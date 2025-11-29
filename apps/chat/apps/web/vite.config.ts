@@ -15,6 +15,9 @@ export default defineConfig({
 			'@manacore/shared-branding',
 			'@manacore/shared-ui',
 			'@manacore/shared-theme-ui',
+			'@manacore/shared-feedback-types',
+			'@manacore/shared-feedback-service',
+			'@manacore/shared-feedback-ui',
 		],
 	},
 	optimizeDeps: {
@@ -24,6 +27,9 @@ export default defineConfig({
 			'@manacore/shared-branding',
 			'@manacore/shared-ui',
 			'@manacore/shared-theme-ui',
+			'@manacore/shared-feedback-types',
+			'@manacore/shared-feedback-service',
+			'@manacore/shared-feedback-ui',
 		],
 	},
 });

@@ -5,6 +5,7 @@
 	import { chatService } from '$lib/services/chat';
 	import { documentService } from '$lib/services/document';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { conversationsStore } from '$lib/stores/conversations.svelte';
 	import MessageList from '$lib/components/chat/MessageList.svelte';
 	import ChatInput from '$lib/components/chat/ChatInput.svelte';
 	import ChatLayout from '$lib/components/chat/ChatLayout.svelte';

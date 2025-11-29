@@ -4,7 +4,8 @@
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { isSidebarMode, isNavCollapsed } from '$lib/stores/navigation';
-	import { MagnifyingGlass, X, Plus, ChatCircle, Archive, Trash } from '@manacore/shared-icons';
+	import { MagnifyingGlass, X, Plus, ChatCircle, Archive, Trash, PushPin } from '@manacore/shared-icons';
+	import { ConfirmationModal } from '@manacore/shared-ui';
 	import { goto } from '$app/navigation';
 	import type { Snippet } from 'svelte';
 
@@ -13,6 +14,11 @@
 	}
 
 	let { children }: Props = $props();
+
+	// Delete confirmation modal state
+	let showDeleteModal = $state(false);
+	let deleteTargetId = $state<string | null>(null);
+	let isDeleting = $state(false);
 
 	// Resizer state
 	let leftColumnWidth = $state(320);
@@ -106,16 +112,47 @@
 		}
 	}
 
-	// Delete conversation
-	async function handleDelete(e: MouseEvent, convId: string) {
+	// Pin/unpin conversation
+	async function handleTogglePin(e: MouseEvent, convId: string, isPinned: boolean) {
 		e.preventDefault();
 		e.stopPropagation();
-		if (confirm('Möchtest du diese Konversation wirklich löschen?')) {
-			const success = await conversationsStore.deleteConversation(convId);
-			if (success && isActive(convId)) {
+		if (isPinned) {
+			await conversationsStore.unpinConversation(convId);
+		} else {
+			await conversationsStore.pinConversation(convId);
+		}
+	}
+
+	// Open delete confirmation modal
+	function handleDelete(e: MouseEvent, convId: string) {
+		e.preventDefault();
+		e.stopPropagation();
+		deleteTargetId = convId;
+		showDeleteModal = true;
+	}
+
+	// Confirm delete action
+	async function confirmDelete() {
+		if (!deleteTargetId) return;
+
+		isDeleting = true;
+		try {
+			const wasActive = isActive(deleteTargetId);
+			const success = await conversationsStore.deleteConversation(deleteTargetId);
+			if (success && wasActive) {
 				goto('/chat');
 			}
+		} finally {
+			isDeleting = false;
+			showDeleteModal = false;
+			deleteTargetId = null;
 		}
+	}
+
+	// Close delete modal
+	function closeDeleteModal() {
+		showDeleteModal = false;
+		deleteTargetId = null;
 	}
 </script>
 
@@ -213,13 +250,21 @@
 						>
 							<!-- Title Row -->
 							<div class="mb-1.5 flex items-center gap-2">
-								<ChatCircle
-									size={16}
-									weight={isActive(conv.id) ? 'fill' : 'regular'}
-									class="flex-shrink-0 {isActive(conv.id)
-										? 'text-primary'
-										: 'text-muted-foreground'}"
-								/>
+								{#if conv.isPinned}
+									<PushPin
+										size={16}
+										weight="fill"
+										class="flex-shrink-0 text-primary"
+									/>
+								{:else}
+									<ChatCircle
+										size={16}
+										weight={isActive(conv.id) ? 'fill' : 'regular'}
+										class="flex-shrink-0 {isActive(conv.id)
+											? 'text-primary'
+											: 'text-muted-foreground'}"
+									/>
+								{/if}
 								<h3 class="text-sm font-semibold line-clamp-1 text-foreground flex-1">
 									{conv.title || 'Neue Konversation'}
 								</h3>
@@ -245,6 +290,13 @@
 									{/if}
 									<!-- Action Buttons (visible on hover) -->
 									<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+										<button
+											onclick={(e) => handleTogglePin(e, conv.id, conv.isPinned)}
+											class="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors {conv.isPinned ? 'text-primary' : ''}"
+											title={conv.isPinned ? 'Nicht mehr anpinnen' : 'Anpinnen'}
+										>
+											<PushPin size={14} weight={conv.isPinned ? 'fill' : 'bold'} />
+										</button>
 										<button
 											onclick={(e) => handleArchive(e, conv.id)}
 											class="p-1.5 text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
@@ -283,6 +335,19 @@
 		{@render children()}
 	</div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<ConfirmationModal
+	visible={showDeleteModal}
+	onClose={closeDeleteModal}
+	onConfirm={confirmDelete}
+	variant="danger"
+	title="Konversation löschen?"
+	message="Diese Aktion kann nicht rückgängig gemacht werden. Alle Nachrichten werden dauerhaft gelöscht."
+	confirmLabel="Löschen"
+	cancelLabel="Abbrechen"
+	loading={isDeleting}
+/>
 
 <style>
 	/* Hide scrollbar completely */

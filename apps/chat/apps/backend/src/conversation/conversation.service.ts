@@ -28,7 +28,7 @@ export class ConversationService {
 				.select()
 				.from(conversations)
 				.where(and(...conditions))
-				.orderBy(desc(conversations.updatedAt));
+				.orderBy(desc(conversations.isPinned), desc(conversations.updatedAt));
 
 			return ok(result);
 		} catch (error) {
@@ -265,6 +265,48 @@ export class ConversationService {
 		} catch (error) {
 			this.logger.error('Error getting message count', error);
 			return err(DatabaseError.queryFailed('Failed to get message count'));
+		}
+	}
+
+	async pinConversation(conversationId: string, userId: string): AsyncResult<Conversation> {
+		try {
+			// First verify the conversation belongs to the user
+			const convResult = await this.getConversation(conversationId, userId);
+			if (!convResult.ok) {
+				return err(convResult.error);
+			}
+
+			const result = await this.db
+				.update(conversations)
+				.set({ isPinned: true, updatedAt: new Date() })
+				.where(eq(conversations.id, conversationId))
+				.returning();
+
+			return ok(result[0]);
+		} catch (error) {
+			this.logger.error('Error pinning conversation', error);
+			return err(DatabaseError.queryFailed('Failed to pin conversation'));
+		}
+	}
+
+	async unpinConversation(conversationId: string, userId: string): AsyncResult<Conversation> {
+		try {
+			// First verify the conversation belongs to the user
+			const convResult = await this.getConversation(conversationId, userId);
+			if (!convResult.ok) {
+				return err(convResult.error);
+			}
+
+			const result = await this.db
+				.update(conversations)
+				.set({ isPinned: false, updatedAt: new Date() })
+				.where(eq(conversations.id, conversationId))
+				.returning();
+
+			return ok(result[0]);
+		} catch (error) {
+			this.logger.error('Error unpinning conversation', error);
+			return err(DatabaseError.queryFailed('Failed to unpin conversation'));
 		}
 	}
 }

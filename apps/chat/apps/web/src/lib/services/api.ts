@@ -73,6 +73,7 @@ export type Conversation = {
 	conversationMode: 'free' | 'guided' | 'template';
 	documentMode: boolean;
 	isArchived: boolean;
+	isPinned: boolean;
 	createdAt: string;
 	updatedAt: string;
 };
@@ -199,6 +200,28 @@ export const conversationApi = {
 		});
 		if (error) {
 			console.error('Error deleting conversation:', error);
+			return false;
+		}
+		return true;
+	},
+
+	async pinConversation(conversationId: string): Promise<boolean> {
+		const { error } = await fetchApi<Conversation>(`/conversations/${conversationId}/pin`, {
+			method: 'PATCH',
+		});
+		if (error) {
+			console.error('Error pinning conversation:', error);
+			return false;
+		}
+		return true;
+	},
+
+	async unpinConversation(conversationId: string): Promise<boolean> {
+		const { error } = await fetchApi<Conversation>(`/conversations/${conversationId}/unpin`, {
+			method: 'PATCH',
+		});
+		if (error) {
+			console.error('Error unpinning conversation:', error);
 			return false;
 		}
 		return true;

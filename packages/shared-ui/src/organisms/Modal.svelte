@@ -65,14 +65,14 @@
 		<div
 			class="relative flex max-h-[90vh] w-full {maxWidthClasses[
 				maxWidth
-			]} flex-col rounded-xl border border-theme bg-menu shadow-xl"
+			]} flex-col rounded-2xl border border-black/10 dark:border-white/20 bg-white/80 dark:bg-white/10 backdrop-blur-xl shadow-2xl"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
 			{#if showHeader}
 				<!-- Header -->
-				<div class="flex items-center justify-between p-6 border-b border-theme">
-					<div class="flex items-center gap-2 flex-1">
+				<div class="flex items-center justify-between p-6 border-b border-black/10 dark:border-white/10">
+					<div class="flex items-center gap-3 flex-1">
 						{#if icon}
 							{@render icon()}
 						{/if}
@@ -84,10 +84,10 @@
 					</div>
 					<button
 						onclick={onClose}
-						class="p-2 rounded-full hover:bg-menu-hover transition-colors"
+						class="p-2 rounded-xl bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 transition-all duration-200 hover:scale-105"
 						aria-label="Close"
 					>
-						<X size={20} weight="bold" class="text-theme-muted" />
+						<X size={18} weight="bold" class="text-muted-foreground" />
 					</button>
 				</div>
 			{/if}
@@ -99,7 +99,7 @@
 
 			<!-- Footer (optional) -->
 			{#if footer}
-				<div class="border-t border-theme p-6">
+				<div class="border-t border-black/10 dark:border-white/10 p-6">
 					{@render footer()}
 				</div>
 			{/if}

@@ -28,6 +28,7 @@ export interface Conversation {
 	documentMode: boolean;
 	title?: string;
 	isArchived: boolean;
+	isPinned: boolean;
 	createdAt: string;
 	updatedAt: string;
 }

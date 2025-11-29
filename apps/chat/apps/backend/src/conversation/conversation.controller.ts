@@ -165,6 +165,34 @@ export class ConversationController {
 		return result.value;
 	}
 
+	@Patch(':id/pin')
+	async pinConversation(
+		@Param('id') id: string,
+		@CurrentUser() user: CurrentUserData
+	): Promise<Conversation> {
+		const result = await this.conversationService.pinConversation(id, user.userId);
+
+		if (!isOk(result)) {
+			throw result.error;
+		}
+
+		return result.value;
+	}
+
+	@Patch(':id/unpin')
+	async unpinConversation(
+		@Param('id') id: string,
+		@CurrentUser() user: CurrentUserData
+	): Promise<Conversation> {
+		const result = await this.conversationService.unpinConversation(id, user.userId);
+
+		if (!isOk(result)) {
+			throw result.error;
+		}
+
+		return result.value;
+	}
+
 	@Delete(':id')
 	async deleteConversation(
 		@Param('id') id: string,

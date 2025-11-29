@@ -77,6 +77,7 @@ const APP_CONFIGS = [
 			CREDITS_DAILY_FREE: (env) => env.CREDITS_DAILY_FREE,
 			RATE_LIMIT_TTL: (env) => env.RATE_LIMIT_TTL,
 			RATE_LIMIT_MAX: (env) => env.RATE_LIMIT_MAX,
+			GOOGLE_GENAI_API_KEY: (env) => env.GOOGLE_GENAI_API_KEY,
 		},
 	},
 
@@ -86,9 +87,11 @@ const APP_CONFIGS = [
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.CHAT_BACKEND_PORT || '3002',
+			DEV_BYPASS_AUTH: () => 'true',
 			AZURE_OPENAI_ENDPOINT: (env) => env.AZURE_OPENAI_ENDPOINT,
 			AZURE_OPENAI_API_KEY: (env) => env.AZURE_OPENAI_API_KEY,
 			AZURE_OPENAI_API_VERSION: (env) => env.AZURE_OPENAI_API_VERSION,
+			GOOGLE_GENAI_API_KEY: (env) => env.GOOGLE_GENAI_API_KEY,
 			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			DATABASE_URL: (env) => env.CHAT_DATABASE_URL,
 		},

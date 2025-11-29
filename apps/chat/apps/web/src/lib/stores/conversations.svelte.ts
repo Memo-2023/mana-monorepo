@@ -75,6 +75,17 @@ export const conversationsStore = {
 	},
 
 	/**
+	 * Update conversation title via API and update local state
+	 */
+	async updateConversationTitle(conversationId: string, title: string): Promise<boolean> {
+		const success = await conversationService.updateTitle(conversationId, title);
+		if (success) {
+			this.updateConversation(conversationId, { title });
+		}
+		return success;
+	},
+
+	/**
 	 * Archive a conversation
 	 */
 	async archiveConversation(conversationId: string) {
@@ -117,6 +128,48 @@ export const conversationsStore = {
 		if (success) {
 			conversations = conversations.filter((c) => c.id !== conversationId);
 			archivedConversations = archivedConversations.filter((c) => c.id !== conversationId);
+		}
+
+		return success;
+	},
+
+	/**
+	 * Pin a conversation (moves it to top of list)
+	 */
+	async pinConversation(conversationId: string) {
+		const success = await conversationService.pinConversation(conversationId);
+
+		if (success) {
+			conversations = conversations.map((c) =>
+				c.id === conversationId ? { ...c, isPinned: true } : c
+			);
+			// Re-sort: pinned first, then by updatedAt
+			conversations = [...conversations].sort((a, b) => {
+				if (a.isPinned && !b.isPinned) return -1;
+				if (!a.isPinned && b.isPinned) return 1;
+				return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+			});
+		}
+
+		return success;
+	},
+
+	/**
+	 * Unpin a conversation
+	 */
+	async unpinConversation(conversationId: string) {
+		const success = await conversationService.unpinConversation(conversationId);
+
+		if (success) {
+			conversations = conversations.map((c) =>
+				c.id === conversationId ? { ...c, isPinned: false } : c
+			);
+			// Re-sort: pinned first, then by updatedAt
+			conversations = [...conversations].sort((a, b) => {
+				if (a.isPinned && !b.isPinned) return -1;
+				if (!a.isPinned && b.isPinned) return 1;
+				return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+			});
 		}
 
 		return success;

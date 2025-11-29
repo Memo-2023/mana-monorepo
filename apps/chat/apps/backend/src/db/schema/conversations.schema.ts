@@ -18,6 +18,7 @@ export const conversations = pgTable('conversations', {
 	conversationMode: conversationModeEnum('conversation_mode').default('free').notNull(),
 	documentMode: boolean('document_mode').default(false).notNull(),
 	isArchived: boolean('is_archived').default(false).notNull(),
+	isPinned: boolean('is_pinned').default(false).notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });

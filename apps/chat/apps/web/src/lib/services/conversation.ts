@@ -98,6 +98,20 @@ export const conversationService = {
 	},
 
 	/**
+	 * Pin a conversation
+	 */
+	async pinConversation(conversationId: string): Promise<boolean> {
+		return conversationApi.pinConversation(conversationId);
+	},
+
+	/**
+	 * Unpin a conversation
+	 */
+	async unpinConversation(conversationId: string): Promise<boolean> {
+		return conversationApi.unpinConversation(conversationId);
+	},
+
+	/**
 	 * Send a message and get AI response
 	 */
 	async sendMessageAndGetResponse(
@@ -142,7 +156,7 @@ export const conversationService = {
 		// Generate title if this is a new conversation (first or second message)
 		let title: string | undefined;
 		if (messages.length <= 2) {
-			title = await this.generateTitle(userMessage);
+			title = await this.generateTitle(userMessage, modelId);
 			if (title) {
 				await this.updateTitle(conversationId, title);
 			}
@@ -157,32 +171,50 @@ export const conversationService = {
 	},
 
 	/**
-	 * Generate a conversation title based on user message
+	 * Generate a conversation title based on user message using AI
 	 */
-	async generateTitle(userMessage: string): Promise<string> {
-		const titlePrompt = `Schreibe eine kurze, prägnante Überschrift (maximal 5 Wörter) für diesen Chat: "${userMessage}"`;
+	async generateTitle(userMessage: string, modelId: string): Promise<string> {
+		try {
+			const titlePrompt = `Schreibe eine kurze, prägnante Überschrift (maximal 5 Wörter) für diesen Chat: "${userMessage}"`;
 
-		const response = await chatApi.createCompletion({
-			messages: [{ role: 'user', content: titlePrompt }],
-			modelId: '550e8400-e29b-41d4-a716-446655440101', // Gemini 2.5 Flash (default)
-			temperature: 0.3,
-			maxTokens: 50,
-		});
+			const response = await chatApi.createCompletion({
+				messages: [{ role: 'user', content: titlePrompt }],
+				modelId,
+				temperature: 0.3,
+				maxTokens: 50,
+			});
 
-		if (!response) {
-			return 'Neue Konversation';
+			if (!response) {
+				console.warn('Title generation returned no response, using fallback');
+				return this.createFallbackTitle(userMessage);
+			}
+
+			// Clean up title
+			let title = response.content
+				.trim()
+				.replace(/^["']|["']$/g, '')
+				.replace(/\.$/g, '');
+
+			if (title.length > 100) {
+				title = title.substring(0, 97) + '...';
+			}
+
+			return title || this.createFallbackTitle(userMessage);
+		} catch (error) {
+			console.error('Error generating title:', error);
+			return this.createFallbackTitle(userMessage);
 		}
+	},
 
-		// Clean up title
-		let title = response.content
-			.trim()
-			.replace(/^["']|["']$/g, '')
-			.replace(/\.$/g, '');
-
-		if (title.length > 100) {
-			title = title.substring(0, 97) + '...';
+	/**
+	 * Create a fallback title from the first words of the message
+	 */
+	createFallbackTitle(message: string): string {
+		const words = message.trim().split(/\s+/).slice(0, 5);
+		let title = words.join(' ');
+		if (message.trim().split(/\s+/).length > 5) {
+			title += '...';
 		}
-
-		return title;
+		return title || 'Neue Konversation';
 	},
 };
