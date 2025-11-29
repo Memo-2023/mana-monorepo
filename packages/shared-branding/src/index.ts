@@ -36,6 +36,7 @@ export {
 	getManaApp,
 	getManaAppsByStatus,
 	getAvailableManaApps,
+	getActiveManaApps,
 	APP_STATUS_LABELS,
 	APP_SLIDER_LABELS,
 	APP_URLS,

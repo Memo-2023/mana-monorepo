@@ -23,6 +23,8 @@ export interface ManaApp {
 	comingSoon: boolean;
 	status: AppStatus;
 	url?: string; // Optional URL for the app
+	/** Whether this app is archived (in apps-archived folder) */
+	archived?: boolean;
 }
 
 /**
@@ -61,6 +63,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f8d62b',
 		comingSoon: false,
 		status: 'published',
+		archived: true,
 	},
 	{
 		id: 'presi',
@@ -109,6 +112,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#FF6B9D',
 		comingSoon: true,
 		status: 'beta',
+		archived: true,
 	},
 	{
 		id: 'picture',
@@ -157,6 +161,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#6366f1',
 		comingSoon: true,
 		status: 'planning',
+		archived: true,
 	},
 	{
 		id: 'nutriphi',
@@ -173,6 +178,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#10b981',
 		comingSoon: false,
 		status: 'development',
+		archived: true,
 	},
 ];
 
@@ -195,6 +201,13 @@ export function getManaAppsByStatus(status: AppStatus): ManaApp[] {
  */
 export function getAvailableManaApps(): ManaApp[] {
 	return MANA_APPS.filter((app) => !app.comingSoon);
+}
+
+/**
+ * Get only active (non-archived) apps
+ */
+export function getActiveManaApps(): ManaApp[] {
+	return MANA_APPS.filter((app) => !app.archived);
 }
 
 /**
@@ -260,6 +273,7 @@ export interface PillAppItemConfig {
 
 /**
  * Get app items for PillNavigation app switcher
+ * Only returns active (non-archived) apps
  * @param currentAppId - The ID of the current app to mark as active
  * @param isDev - Whether to use development URLs (default: auto-detect)
  * @param customUrls - Optional custom URL overrides per app
@@ -271,7 +285,8 @@ export function getPillAppItems(
 ): PillAppItemConfig[] {
 	const isDevMode = isDev ?? (typeof window !== 'undefined' && window.location.hostname === 'localhost');
 
-	return MANA_APPS.map((app) => ({
+	// Only show active (non-archived) apps
+	return getActiveManaApps().map((app) => ({
 		id: app.id,
 		name: app.name,
 		url: customUrls?.[app.id] || (isDevMode ? APP_URLS[app.id].dev : APP_URLS[app.id].prod),
