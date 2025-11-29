@@ -81,6 +81,8 @@
 			'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
 		// App icons
 		grid: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z',
+		// Mana icon (water drop)
+		mana: 'M12.3 1c.03.05 7.3 9.67 7.3 13.7 0 4.03-3.27 7.3-7.3 7.3S5 18.73 5 14.7C5 10.66 12.3 1 12.3 1zm0 6.4c-.02.03-3.65 4.83-3.65 6.84 0 2.02 1.64 3.65 3.65 3.65s3.65-1.64 3.65-3.65c0-2.01-3.62-6.81-3.65-6.84z',
 	};
 
 	function getIcon(iconName: string) {
@@ -142,6 +144,10 @@
 				>
 					{#if item.imageUrl}
 						<img src={item.imageUrl} alt="" class="pill-image-icon" />
+					{:else if item.icon === 'mana'}
+						<svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor">
+							<path d={getIcon('mana')} />
+						</svg>
 					{:else if item.icon}
 						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path

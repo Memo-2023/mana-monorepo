@@ -82,6 +82,8 @@
 		userEmail?: string;
 		/** Settings page href */
 		settingsHref?: string;
+		/** Mana/subscription page href */
+		manaHref?: string;
 	}
 
 	let {
@@ -113,6 +115,7 @@
 		showAppSwitcher = false,
 		userEmail,
 		settingsHref = '/settings',
+		manaHref,
 	}: Props = $props();
 
 	// Type guards for elements
@@ -449,6 +452,19 @@
 			{#if userEmail}
 				<PillDropdown
 					items={[
+						...(manaHref
+							? [
+									{
+										id: 'mana',
+										label: 'Mana',
+										icon: 'mana',
+										onClick: () => {
+											window.location.href = manaHref;
+										},
+										active: currentPath === manaHref,
+									},
+								]
+							: []),
 						{
 							id: 'settings',
 							label: 'Einstellungen',

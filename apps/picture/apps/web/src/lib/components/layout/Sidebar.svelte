@@ -28,7 +28,6 @@
 		CloudArrowUp,
 		Tag,
 		Archive,
-		CurrencyCircleDollar,
 		Question,
 		CaretLeft,
 		CaretDown,
@@ -58,7 +57,7 @@
 		| 'upload'
 		| 'tags'
 		| 'archive'
-		| 'subscription';
+		| 'mana';
 
 	function handleSearchInput(e: Event) {
 		const target = e.target as HTMLInputElement;
@@ -130,7 +129,7 @@
 		{ path: '/app/upload', label: 'Upload', iconName: 'upload' },
 		{ path: '/app/tags', label: 'Tags', iconName: 'tags' },
 		{ path: '/app/archive', label: 'Archiv', iconName: 'archive' },
-		{ path: '/app/subscription', label: 'Abonnement', iconName: 'subscription' },
+		{ path: '/app/mana', label: 'Mana', iconName: 'mana' },
 	];
 </script>
 
@@ -192,8 +191,10 @@
 						<Tag size={20} />
 					{:else if item.iconName === 'archive'}
 						<Archive size={20} />
-					{:else if item.iconName === 'subscription'}
-						<CurrencyCircleDollar size={20} />
+					{:else if item.iconName === 'mana'}
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+							<path d="M12.3 1c.03.05 7.3 9.67 7.3 13.7 0 4.03-3.27 7.3-7.3 7.3S5 18.73 5 14.7C5 10.66 12.3 1 12.3 1zm0 6.4c-.02.03-3.65 4.83-3.65 6.84 0 2.02 1.64 3.65 3.65 3.65s3.65-1.64 3.65-3.65c0-2.01-3.62-6.81-3.65-6.84z" />
+						</svg>
 					{/if}
 				</span>
 				<span>{item.label}</span>
@@ -486,8 +487,10 @@
 								<Tag size={20} />
 							{:else if item.iconName === 'archive'}
 								<Archive size={20} />
-							{:else if item.iconName === 'subscription'}
-								<CurrencyCircleDollar size={20} />
+							{:else if item.iconName === 'mana'}
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+									<path d="M12.3 1c.03.05 7.3 9.67 7.3 13.7 0 4.03-3.27 7.3-7.3 7.3S5 18.73 5 14.7C5 10.66 12.3 1 12.3 1zm0 6.4c-.02.03-3.65 4.83-3.65 6.84 0 2.02 1.64 3.65 3.65 3.65s3.65-1.64 3.65-3.65c0-2.01-3.62-6.81-3.65-6.84z" />
+								</svg>
 							{/if}
 						</span>
 						{item.label}
@@ -542,8 +545,10 @@
 					<Tag size={24} />
 				{:else if item.iconName === 'archive'}
 					<Archive size={24} />
-				{:else if item.iconName === 'subscription'}
-					<CurrencyCircleDollar size={24} />
+				{:else if item.iconName === 'mana'}
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M12.3 1c.03.05 7.3 9.67 7.3 13.7 0 4.03-3.27 7.3-7.3 7.3S5 18.73 5 14.7C5 10.66 12.3 1 12.3 1zm0 6.4c-.02.03-3.65 4.83-3.65 6.84 0 2.02 1.64 3.65 3.65 3.65s3.65-1.64 3.65-3.65c0-2.01-3.62-6.81-3.65-6.84z" />
+					</svg>
 				{/if}
 				<span class="text-xs font-medium">{item.label}</span>
 			</a>

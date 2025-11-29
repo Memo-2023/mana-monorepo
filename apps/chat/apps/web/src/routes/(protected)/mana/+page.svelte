@@ -1,26 +1,25 @@
 <script lang="ts">
 	import { SubscriptionPage } from '@manacore/shared-subscription-ui';
-	import { showToast } from '$lib/stores/toast';
 
 	function handleSubscribe(planId: string) {
 		console.log('Subscribe to plan:', planId);
-		showToast(`Abo "${planId}" ausgewählt. Bezahlsystem wird noch integriert.`, 'info', 5000);
+		alert(`Abo "${planId}" ausgewählt. Bezahlsystem wird noch integriert.`);
 	}
 
 	function handleBuyPackage(packageId: string) {
 		console.log('Buy package:', packageId);
-		showToast(`Paket "${packageId}" ausgewählt. Bezahlsystem wird noch integriert.`, 'info', 5000);
+		alert(`Paket "${packageId}" ausgewählt. Bezahlsystem wird noch integriert.`);
 	}
 </script>
 
 <svelte:head>
-	<title>Abonnement - Picture</title>
+	<title>Mana - ManaChat</title>
 </svelte:head>
 
 <div class="min-h-screen p-4 md:p-8" style="background-color: hsl(var(--color-background));">
 	<div class="mx-auto max-w-6xl">
 		<SubscriptionPage
-			appName="Picture"
+			appName="ManaChat"
 			onSubscribe={handleSubscribe}
 			onBuyPackage={handleBuyPackage}
 			currentPlanId="free"

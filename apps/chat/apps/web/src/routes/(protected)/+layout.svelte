@@ -187,6 +187,7 @@
 			{appItems}
 			{userEmail}
 			settingsHref="/settings"
+			manaHref="/mana"
 		/>
 
 		<!-- Main Content with dynamic padding based on nav mode -->

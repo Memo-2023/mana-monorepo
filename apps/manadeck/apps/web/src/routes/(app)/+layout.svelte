@@ -25,7 +25,7 @@
 		{ href: '/decks', label: 'Decks', icon: 'archive' },
 		{ href: '/explore', label: 'Explore', icon: 'search' },
 		{ href: '/progress', label: 'Progress', icon: 'chart' },
-		{ href: '/subscription', label: 'Mana', icon: 'mana' },
+		{ href: '/mana', label: 'Mana', icon: 'mana' },
 		{ href: '/profile', label: 'Profile', icon: 'user' },
 	];
 

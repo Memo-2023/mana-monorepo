@@ -25,7 +25,7 @@
 		{ href: '/dashboard', label: 'Dashboard', icon: 'home' },
 		{ href: '/organizations', label: 'Organizations', icon: 'building' },
 		{ href: '/teams', label: 'Teams', icon: 'users' },
-		{ href: '/subscription', label: 'Subscription', icon: 'creditCard' },
+		{ href: '/mana', label: 'Mana', icon: 'mana' },
 		{ href: '/settings', label: 'Settings', icon: 'settings' },
 	];
 

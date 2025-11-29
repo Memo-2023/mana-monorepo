@@ -62,7 +62,7 @@
 		{ href: '/app/upload', label: 'Upload', icon: 'upload' },
 		{ href: '/app/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/app/archive', label: 'Archiv', icon: 'archive' },
-		{ href: '/app/subscription', label: 'Abo', icon: 'creditCard' },
+		{ href: '/app/mana', label: 'Mana', icon: 'mana' },
 	];
 
 	// View mode options for tab group
