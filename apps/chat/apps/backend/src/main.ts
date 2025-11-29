@@ -10,7 +10,8 @@ async function bootstrap() {
 		origin: [
 			'http://localhost:3000',
 			'http://localhost:5173',
-			'http://localhost:5178', // Chat web app
+			'http://localhost:5174', // Chat web app (dev server port)
+			'http://localhost:5178', // Chat web app (alternative)
 			'http://localhost:8081',
 			'exp://localhost:8081',
 			'http://localhost:3001', // Mana Core Auth

@@ -1,12 +1,31 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+// Development test user ID - used when DEV_BYPASS_AUTH=true
+const DEV_USER_ID = '17cb0be7-058a-4964-9e18-1fe7055fd014';
+
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
 	constructor(private configService: ConfigService) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.switchToHttp().getRequest();
+
+		// Development mode: bypass auth if DEV_BYPASS_AUTH is set
+		const isDev = this.configService.get<string>('NODE_ENV') === 'development';
+		const bypassAuth = this.configService.get<string>('DEV_BYPASS_AUTH') === 'true';
+
+		if (isDev && bypassAuth) {
+			// Use test user for development
+			request.user = {
+				userId: DEV_USER_ID,
+				email: 'test@example.com',
+				role: 'user',
+				sessionId: 'dev-session',
+			};
+			return true;
+		}
+
 		const token = this.extractTokenFromHeader(request);
 
 		if (!token) {

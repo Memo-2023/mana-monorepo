@@ -2,6 +2,7 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { eq } from 'drizzle-orm';
 import { type AsyncResult, ok, err, ValidationError, ServiceError } from '@manacore/shared-errors';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { type Database } from '../db/connection';
 import { models, type Model } from '../db/schema/models.schema';
@@ -10,23 +11,36 @@ import { ChatCompletionDto, ChatCompletionResponseDto } from './dto/chat-complet
 @Injectable()
 export class ChatService {
 	private readonly logger = new Logger(ChatService.name);
-	private readonly apiKey: string;
-	private readonly endpoint: string;
-	private readonly apiVersion: string;
+	// Azure OpenAI config
+	private readonly azureApiKey: string;
+	private readonly azureEndpoint: string;
+	private readonly azureApiVersion: string;
+	// Google Gemini config
+	private readonly geminiClient: GoogleGenerativeAI | null = null;
 
 	constructor(
 		private configService: ConfigService,
 		@Inject(DATABASE_CONNECTION) private readonly db: Database
 	) {
-		this.apiKey = this.configService.get<string>('AZURE_OPENAI_API_KEY') || '';
-		this.endpoint =
+		// Azure OpenAI setup
+		this.azureApiKey = this.configService.get<string>('AZURE_OPENAI_API_KEY') || '';
+		this.azureEndpoint =
 			this.configService.get<string>('AZURE_OPENAI_ENDPOINT') ||
 			'https://memoroseopenai.openai.azure.com';
-		this.apiVersion =
+		this.azureApiVersion =
 			this.configService.get<string>('AZURE_OPENAI_API_VERSION') || '2024-12-01-preview';
 
-		if (!this.apiKey) {
-			this.logger.warn('AZURE_OPENAI_API_KEY is not set!');
+		// Google Gemini setup
+		const geminiApiKey = this.configService.get<string>('GOOGLE_GENAI_API_KEY');
+		if (geminiApiKey) {
+			this.geminiClient = new GoogleGenerativeAI(geminiApiKey);
+			this.logger.log('Google Gemini client initialized');
+		} else {
+			this.logger.warn('GOOGLE_GENAI_API_KEY is not set - Gemini models unavailable');
+		}
+
+		if (!this.azureApiKey) {
+			this.logger.warn('AZURE_OPENAI_API_KEY is not set - Azure models unavailable');
 		}
 	}
 
@@ -65,6 +79,101 @@ export class ChatService {
 			this.logger.log(`User ${userId} creating chat completion with model ${dto.modelId}`);
 		}
 
+		// Route to appropriate provider
+		if (model.provider === 'gemini') {
+			return this.createGeminiCompletion(model, dto);
+		} else {
+			return this.createAzureCompletion(model, dto);
+		}
+	}
+
+	private async createGeminiCompletion(
+		model: Model,
+		dto: ChatCompletionDto
+	): AsyncResult<ChatCompletionResponseDto> {
+		if (!this.geminiClient) {
+			return err(ServiceError.externalError('Google Gemini', 'Gemini client not configured'));
+		}
+
+		const params = model.parameters as {
+			model?: string;
+			temperature?: number;
+			max_tokens?: number;
+		} | null;
+
+		const modelName = params?.model || 'gemini-2.5-flash';
+		const temperature = dto.temperature ?? params?.temperature ?? 0.7;
+		const maxTokens = dto.maxTokens ?? params?.max_tokens ?? 8192;
+
+		this.logger.log(`Sending request to Google Gemini model: ${modelName}`);
+
+		try {
+			const genModel = this.geminiClient.getGenerativeModel({
+				model: modelName,
+				generationConfig: {
+					temperature,
+					maxOutputTokens: maxTokens,
+				},
+			});
+
+			// Convert messages to Gemini format
+			// Gemini expects alternating user/model messages, with system as first user message
+			const systemMessages = dto.messages.filter((m) => m.role === 'system');
+			const chatMessages = dto.messages.filter((m) => m.role !== 'system');
+
+			// Build history for chat (all but last message)
+			const history = chatMessages.slice(0, -1).map((msg) => ({
+				role: msg.role === 'user' ? 'user' : 'model',
+				parts: [{ text: msg.content }],
+			}));
+
+			// Last message to send
+			const lastMessage = chatMessages[chatMessages.length - 1];
+			let userPrompt = lastMessage?.content || '';
+
+			// Prepend system instruction if present
+			if (systemMessages.length > 0) {
+				const systemPrompt = systemMessages.map((m) => m.content).join('\n');
+				userPrompt = `${systemPrompt}\n\n${userPrompt}`;
+			}
+
+			const chat = genModel.startChat({ history });
+			const result = await chat.sendMessage(userPrompt);
+			const response = result.response;
+			const messageContent = response.text();
+
+			if (!messageContent) {
+				this.logger.warn('No message content in Gemini response');
+				return err(ServiceError.generationFailed('Google Gemini', 'No response generated'));
+			}
+
+			// Gemini provides usage metadata
+			const usageMetadata = response.usageMetadata;
+
+			return ok({
+				content: messageContent,
+				usage: {
+					prompt_tokens: usageMetadata?.promptTokenCount || 0,
+					completion_tokens: usageMetadata?.candidatesTokenCount || 0,
+					total_tokens: usageMetadata?.totalTokenCount || 0,
+				},
+			});
+		} catch (error) {
+			this.logger.error('Error calling Google Gemini API', error);
+			return err(
+				ServiceError.generationFailed(
+					'Google Gemini',
+					error instanceof Error ? error.message : 'Unknown error',
+					error instanceof Error ? error : undefined
+				)
+			);
+		}
+	}
+
+	private async createAzureCompletion(
+		model: Model,
+		dto: ChatCompletionDto
+	): AsyncResult<ChatCompletionResponseDto> {
 		const params = model.parameters as {
 			deployment?: string;
 			temperature?: number;
@@ -91,16 +200,16 @@ export class ChatService {
 			requestBody.temperature = temperature;
 		}
 
-		const url = `${this.endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${this.apiVersion}`;
+		const url = `${this.azureEndpoint}/openai/deployments/${deployment}/chat/completions?api-version=${this.azureApiVersion}`;
 
-		this.logger.log(`Sending request to: ${url}`);
+		this.logger.log(`Sending request to Azure OpenAI: ${url}`);
 
 		try {
 			const response = await fetch(url, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'api-key': this.apiKey,
+					'api-key': this.azureApiKey,
 				},
 				body: JSON.stringify(requestBody),
 			});

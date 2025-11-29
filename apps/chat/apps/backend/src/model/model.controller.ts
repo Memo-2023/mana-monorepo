@@ -1,11 +1,10 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { isOk } from '@manacore/shared-errors';
 import { ModelService } from './model.service';
 import { type Model } from '../db/schema/models.schema';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
+// Models are publicly accessible - no auth required to list available models
 @Controller('models')
-@UseGuards(JwtAuthGuard)
 export class ModelController {
 	constructor(private readonly modelService: ModelService) {}
 

@@ -12,6 +12,7 @@ export const models = pgTable('models', {
 		top_p?: number;
 	}>(),
 	isActive: boolean('is_active').default(true).notNull(),
+	isDefault: boolean('is_default').default(false).notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });

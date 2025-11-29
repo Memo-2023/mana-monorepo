@@ -32,41 +32,142 @@ async function seed() {
 		console.log('Seeding AI models...');
 
 		const modelData = [
+			// ============================================
+			// Google Gemini Models (Primary - fast & cost-effective)
+			// ============================================
 			{
-				id: '550e8400-e29b-41d4-a716-446655440000',
-				name: 'GPT-O3-Mini',
-				description: 'Fast, efficient responses for everyday tasks',
+				id: '550e8400-e29b-41d4-a716-446655440101',
+				name: 'Gemini 2.5 Flash',
+				description: 'Fastest & most cost-effective - ideal for everyday tasks',
+				provider: 'gemini',
+				parameters: {
+					model: 'gemini-2.5-flash-preview-05-20',
+					temperature: 0.7,
+					max_tokens: 8192,
+				},
+				isActive: true,
+				isDefault: true, // Default model
+			},
+			{
+				id: '550e8400-e29b-41d4-a716-446655440102',
+				name: 'Gemini 2.5 Flash-Lite',
+				description: 'Ultra-fast lightweight model - minimal latency',
+				provider: 'gemini',
+				parameters: {
+					model: 'gemini-2.5-flash-lite-preview-06-17',
+					temperature: 0.7,
+					max_tokens: 4096,
+				},
+				isActive: true,
+				isDefault: false,
+			},
+			{
+				id: '550e8400-e29b-41d4-a716-446655440103',
+				name: 'Gemini 2.5 Pro',
+				description: 'Most powerful Gemini - complex reasoning & analysis',
+				provider: 'gemini',
+				parameters: {
+					model: 'gemini-2.5-pro-preview-06-05',
+					temperature: 0.7,
+					max_tokens: 16384,
+				},
+				isActive: true,
+				isDefault: false,
+			},
+			// ============================================
+			// Azure OpenAI GPT-5 Family (Alternative)
+			// ============================================
+			{
+				id: '550e8400-e29b-41d4-a716-446655440001',
+				name: 'GPT-5 Mini',
+				description: 'Fast & cost-effective - best for everyday tasks',
 				provider: 'azure',
 				parameters: {
 					temperature: 0.7,
-					max_tokens: 800,
-					deployment: 'gpt-o3-mini-se',
+					max_tokens: 8192,
+					deployment: 'gpt-5-mini',
 				},
 				isActive: true,
+				isDefault: false,
+			},
+			{
+				id: '550e8400-e29b-41d4-a716-446655440002',
+				name: 'GPT-5 Nano',
+				description: 'Ultra-fast responses with low latency',
+				provider: 'azure',
+				parameters: {
+					temperature: 0.7,
+					max_tokens: 4096,
+					deployment: 'gpt-5-nano',
+				},
+				isActive: true,
+				isDefault: false,
+			},
+			{
+				id: '550e8400-e29b-41d4-a716-446655440003',
+				name: 'GPT-5 Chat',
+				description: 'Advanced multimodal conversations with emotional intelligence',
+				provider: 'azure',
+				parameters: {
+					temperature: 0.7,
+					max_tokens: 16384,
+					deployment: 'gpt-5-chat',
+				},
+				isActive: true,
+				isDefault: false,
 			},
 			{
 				id: '550e8400-e29b-41d4-a716-446655440004',
-				name: 'GPT-4o-Mini',
-				description: 'Compact and powerful for complex tasks',
+				name: 'GPT-5',
+				description: 'Most powerful LLM - logic-heavy & multi-step tasks',
 				provider: 'azure',
 				parameters: {
 					temperature: 0.7,
-					max_tokens: 1000,
-					deployment: 'gpt-4o-mini-se',
+					max_tokens: 32768,
+					deployment: 'gpt-5',
 				},
 				isActive: true,
+				isDefault: false,
 			},
 			{
 				id: '550e8400-e29b-41d4-a716-446655440005',
-				name: 'GPT-4o',
-				description: 'Most advanced model for demanding tasks',
+				name: 'GPT-5 Codex',
+				description: 'Optimized for coding & front-end development',
 				provider: 'azure',
 				parameters: {
 					temperature: 0.7,
-					max_tokens: 2000,
-					deployment: 'gpt-4o-se',
+					max_tokens: 32768,
+					deployment: 'gpt-5-codex',
 				},
 				isActive: true,
+				isDefault: false,
+			},
+			// O-Series Reasoning Models
+			{
+				id: '550e8400-e29b-41d4-a716-446655440006',
+				name: 'o4-mini',
+				description: 'Latest reasoning model - best for STEM & code',
+				provider: 'azure',
+				parameters: {
+					temperature: 1, // Reasoning models work best with temp=1
+					max_tokens: 16384,
+					deployment: 'o4-mini',
+				},
+				isActive: true,
+				isDefault: false,
+			},
+			{
+				id: '550e8400-e29b-41d4-a716-446655440007',
+				name: 'o3',
+				description: 'Advanced reasoning - 20% fewer errors than o1',
+				provider: 'azure',
+				parameters: {
+					temperature: 1,
+					max_tokens: 32768,
+					deployment: 'o3',
+				},
+				isActive: true,
+				isDefault: false,
 			},
 		];
 
