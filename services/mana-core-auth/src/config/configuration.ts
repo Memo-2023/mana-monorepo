@@ -44,4 +44,8 @@ export default () => ({
 		signupBonus: parseInt(process.env.CREDITS_SIGNUP_BONUS || '150', 10),
 		dailyFreeCredits: parseInt(process.env.CREDITS_DAILY_FREE || '5', 10),
 	},
+
+	ai: {
+		geminiApiKey: process.env.GOOGLE_GENAI_API_KEY || '',
+	},
 });

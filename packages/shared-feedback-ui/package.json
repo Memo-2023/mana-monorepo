@@ -1,0 +1,55 @@
+{
+	"name": "@manacore/shared-feedback-ui",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"svelte": "./src/index.ts",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": {
+			"svelte": "./src/index.ts",
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		},
+		"./FeedbackPage.svelte": {
+			"svelte": "./src/FeedbackPage.svelte",
+			"default": "./src/FeedbackPage.svelte"
+		},
+		"./FeedbackForm.svelte": {
+			"svelte": "./src/FeedbackForm.svelte",
+			"default": "./src/FeedbackForm.svelte"
+		},
+		"./FeedbackList.svelte": {
+			"svelte": "./src/FeedbackList.svelte",
+			"default": "./src/FeedbackList.svelte"
+		},
+		"./FeedbackCard.svelte": {
+			"svelte": "./src/FeedbackCard.svelte",
+			"default": "./src/FeedbackCard.svelte"
+		},
+		"./VoteButton.svelte": {
+			"svelte": "./src/VoteButton.svelte",
+			"default": "./src/VoteButton.svelte"
+		},
+		"./StatusBadge.svelte": {
+			"svelte": "./src/StatusBadge.svelte",
+			"default": "./src/StatusBadge.svelte"
+		}
+	},
+	"scripts": {
+		"check": "svelte-check --tsconfig ./tsconfig.json"
+	},
+	"dependencies": {
+		"@manacore/shared-feedback-types": "workspace:*",
+		"@manacore/shared-feedback-service": "workspace:*"
+	},
+	"devDependencies": {
+		"svelte": "^5.0.0",
+		"svelte-check": "^4.0.0",
+		"typescript": "^5.7.3"
+	},
+	"peerDependencies": {
+		"svelte": "^5.0.0"
+	}
+}

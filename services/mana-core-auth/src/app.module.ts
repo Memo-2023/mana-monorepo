@@ -5,6 +5,8 @@ import { APP_FILTER } from '@nestjs/core';
 import configuration from './config/configuration';
 import { AuthModule } from './auth/auth.module';
 import { CreditsModule } from './credits/credits.module';
+import { FeedbackModule } from './feedback/feedback.module';
+import { AiModule } from './ai/ai.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 @Module({
@@ -19,8 +21,10 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 				limit: 100, // 100 requests per minute
 			},
 		]),
+		AiModule,
 		AuthModule,
 		CreditsModule,
+		FeedbackModule,
 	],
 	providers: [
 		{
