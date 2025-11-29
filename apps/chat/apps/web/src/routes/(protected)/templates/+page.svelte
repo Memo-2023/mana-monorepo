@@ -50,7 +50,7 @@
 		// Create a new conversation with this template
 		const conversationId = await conversationService.createConversation(
 			authStore.user.id,
-			template.model_id || '550e8400-e29b-41d4-a716-446655440004', // Default to GPT-4o-Mini
+			template.model_id || '550e8400-e29b-41d4-a716-446655440101', // Default to Gemini 2.5 Flash
 			'template',
 			template.id,
 			template.document_mode
