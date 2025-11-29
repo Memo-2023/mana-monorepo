@@ -4,7 +4,6 @@ export { default as RegisterPage } from './pages/RegisterPage.svelte';
 export { default as ForgotPasswordPage } from './pages/ForgotPasswordPage.svelte';
 
 // Components
-export { default as Icon } from './components/Icon.svelte';
 export { default as GoogleSignInButton } from './components/GoogleSignInButton.svelte';
 export { default as AppleSignInButton } from './components/AppleSignInButton.svelte';
 
@@ -30,12 +29,9 @@ export {
 } from './utils/appleAuth';
 
 // Types
-export type { AuthUIConfig, AuthServiceInterface, AuthResult, IconName } from './types';
+export type { AuthUIConfig, AuthServiceInterface, AuthResult } from './types';
 
 // Page Translation Types
 export type { LoginTranslations } from './pages/LoginPage.svelte';
 export type { RegisterTranslations } from './pages/RegisterPage.svelte';
 export type { ForgotPasswordTranslations } from './pages/ForgotPasswordPage.svelte';
-
-// Icon paths
-export { iconPaths } from './icons/iconPaths';

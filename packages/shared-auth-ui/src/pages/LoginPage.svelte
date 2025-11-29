@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Component, Snippet } from 'svelte';
 	import type { AuthResult } from '../types';
-	import Icon from '../components/Icon.svelte';
+	import { Check, Warning, Eye, EyeSlash, SignIn } from '@manacore/shared-icons';
 	import GoogleSignInButton from '../components/GoogleSignInButton.svelte';
 	import AppleSignInButton from '../components/AppleSignInButton.svelte';
 
@@ -22,18 +22,15 @@
 		skipToForm: string;
 		showPassword: string;
 		hidePassword: string;
-		// Error messages
 		emailRequired: string;
 		emailInvalid: string;
 		passwordRequired: string;
 		signInFailed: string;
 		googleSignInFailed: string;
-		// Success messages
 		signInSuccess: string;
 		googleSignInSuccess: string;
 	}
 
-	/** Default English translations */
 	const defaultTranslations: LoginTranslations = {
 		title: 'Sign In',
 		subtitle: 'Sign in with your Mana account',
@@ -60,39 +57,22 @@
 	};
 
 	interface Props {
-		/** App name */
 		appName: string;
-		/** Logo component */
 		logo: Component<{ size?: number; color?: string }>;
-		/** Primary color (hex) */
 		primaryColor: string;
-		/** Sign in function */
 		onSignIn: (email: string, password: string) => Promise<AuthResult>;
-		/** Sign in with Google function */
 		onSignInWithGoogle?: (idToken: string) => Promise<AuthResult>;
-		/** Sign in with Apple function */
 		onSignInWithApple?: (identityToken: string) => Promise<AuthResult>;
-		/** Navigation function */
 		goto: (path: string) => void;
-		/** Enable Google Sign-In */
 		enableGoogle?: boolean;
-		/** Enable Apple Sign-In */
 		enableApple?: boolean;
-		/** Success redirect path */
 		successRedirect?: string;
-		/** Register page path */
 		registerPath?: string;
-		/** Forgot password page path */
 		forgotPasswordPath?: string;
-		/** Light background color */
 		lightBackground?: string;
-		/** Dark background color */
 		darkBackground?: string;
-		/** AppSlider snippet to render at the bottom (optional) */
 		appSlider?: Snippet;
-		/** Header snippet for controls like theme toggle and language selector */
 		headerControls?: Snippet;
-		/** Translations for i18n support */
 		translations?: Partial<LoginTranslations>;
 	}
 
@@ -116,7 +96,6 @@
 		translations = {},
 	}: Props = $props();
 
-	// Merge provided translations with defaults
 	const t = $derived({ ...defaultTranslations, ...translations });
 
 	let loading = $state(false);
@@ -132,56 +111,43 @@
 	let passwordInput: HTMLInputElement;
 	let successAnnouncement = $state('');
 
-	// Check for dark mode
-	let isDark = $state(false);
+	// Initialize isDark synchronously to avoid flash
+	let isDark = $state(
+		typeof window !== 'undefined'
+			? window.matchMedia('(prefers-color-scheme: dark)').matches
+			: false
+	);
+
 	$effect(() => {
 		if (typeof window !== 'undefined') {
-			isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-			const listener = (e: MediaQueryListEvent) => {
-				isDark = e.matches;
-			};
-			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', listener);
-			return () => {
-				window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', listener);
-			};
+			const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+			isDark = mediaQuery.matches;
+			const listener = (e: MediaQueryListEvent) => (isDark = e.matches);
+			mediaQuery.addEventListener('change', listener);
+			return () => mediaQuery.removeEventListener('change', listener);
 		}
 	});
 
-	// Autofocus email field on mount
 	$effect(() => {
-		if (emailInput) {
-			emailInput.focus();
-		}
+		if (emailInput) emailInput.focus();
 	});
-
-	function getPageBackground() {
-		return isDark ? darkBackground : lightBackground;
-	}
 
 	function isValidEmail(email: string): boolean {
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		return emailRegex.test(email);
+		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 	}
 
 	function triggerErrorShake() {
 		shakeError = true;
-		setTimeout(() => {
-			shakeError = false;
-		}, 500);
+		setTimeout(() => (shakeError = false), 500);
 	}
 
 	function setError(message: string, field: 'email' | 'password' | 'general' = 'general') {
 		error = message;
 		errorField = field;
 		triggerErrorShake();
-
-		// Focus the problematic field for better accessibility
 		setTimeout(() => {
-			if (field === 'email' && emailInput) {
-				emailInput.focus();
-			} else if (field === 'password' && passwordInput) {
-				passwordInput.focus();
-			}
+			if (field === 'email' && emailInput) emailInput.focus();
+			else if (field === 'password' && passwordInput) passwordInput.focus();
 		}, 100);
 	}
 
@@ -199,13 +165,11 @@
 			loading = false;
 			return;
 		}
-
 		if (!isValidEmail(email)) {
 			setError(t.emailInvalid, 'email');
 			loading = false;
 			return;
 		}
-
 		if (!password) {
 			setError(t.passwordRequired, 'password');
 			loading = false;
@@ -213,16 +177,12 @@
 		}
 
 		const result = await onSignIn(email, password);
-
 		loading = false;
 
 		if (result.success) {
-			// Show success feedback before redirect
 			showSuccess = true;
 			successAnnouncement = t.signInSuccess;
-			setTimeout(() => {
-				goto(successRedirect);
-			}, 600);
+			setTimeout(() => goto(successRedirect), 600);
 		} else {
 			setError(result.error || t.signInFailed, 'general');
 		}
@@ -230,7 +190,6 @@
 
 	async function handleGoogleSuccess(idToken: string) {
 		if (!onSignInWithGoogle) return;
-
 		loading = true;
 		clearError();
 
@@ -240,21 +199,16 @@
 		if (result.success) {
 			showSuccess = true;
 			successAnnouncement = t.googleSignInSuccess;
-			setTimeout(() => {
-				goto(successRedirect);
-			}, 600);
+			setTimeout(() => goto(successRedirect), 600);
 		} else {
 			setError(result.error || t.googleSignInFailed, 'general');
 		}
 	}
 
 	function skipToForm() {
-		if (emailInput) {
-			emailInput.focus();
-		}
+		if (emailInput) emailInput.focus();
 	}
 
-	// Dev credentials auto-fill (only works in development)
 	function fillDevCredentials() {
 		email = 'till.schneider@memoro.ai';
 		password = 'Aa-12345678';
@@ -263,107 +217,71 @@
 
 <svelte:head>
 	<title>Login - {appName}</title>
+	<meta name="theme-color" content={darkBackground} media="(prefers-color-scheme: dark)" />
+	<meta name="theme-color" content={lightBackground} media="(prefers-color-scheme: light)" />
 </svelte:head>
 
-<!-- Skip Link for keyboard users -->
 <button class="skip-link" onclick={skipToForm} type="button">
 	{t.skipToForm}
 </button>
 
-<!-- Screen reader announcements -->
-<div aria-live="polite" aria-atomic="true" class="sr-only">
+<div class="sr-only" aria-live="polite" aria-atomic="true">
 	{successAnnouncement}
 </div>
 
 <div
-	class="flex min-h-screen flex-col justify-between"
-	style="background-color: {getPageBackground()};"
+	class="page-container"
+	style:--light-bg={lightBackground}
+	style:--dark-bg={darkBackground}
+	style:--primary-color={primaryColor}
 >
-	<!-- Header Controls (Theme Toggle, Language Selector, etc.) -->
 	{#if headerControls}
-		<div class="absolute right-4 top-4 z-50 flex items-center gap-3 opacity-60">
+		<div class="header-controls">
 			{@render headerControls()}
 		</div>
 	{/if}
 
-	<main>
-		<!-- Top Section - Logo -->
-		<div class="flex flex-col items-center justify-center pt-16 pb-8">
+	<main class="main-content">
+		<!-- Logo Section -->
+		<div class="logo-section">
 			<button
 				type="button"
 				onclick={fillDevCredentials}
-				class="flex items-center justify-center rounded-full transition-all mb-4 cursor-pointer hover:scale-105 active:scale-95"
+				class="logo-button"
 				class:success-pulse={showSuccess}
-				style="width: 120px; height: 120px; border: 3px solid {showSuccess
-					? '#22c55e'
-					: primaryColor}; background-color: {isDark ? '#000' : '#fff'}; box-shadow: {isDark
-					? '0 6px 12px rgba(0, 0, 0, 0.4)'
-					: '0 6px 12px rgba(0, 0, 0, 0.15)'};"
-				aria-label="{appName} logo - Click to fill dev credentials"
+				style:border-color={showSuccess ? '#22c55e' : primaryColor}
+				aria-label="{appName} logo"
 			>
 				{#if showSuccess}
-					<Icon name="check" size={55} color="#22c55e" />
+					<Check size={55} class="text-green-500" />
 				{:else}
 					<Logo size={55} color={primaryColor} />
 				{/if}
 			</button>
-			<h1 class="text-2xl font-semibold" style="color: {isDark ? '#ffffff' : '#000000'};">
-				{appName}
-			</h1>
+			<h1 class="app-name">{appName}</h1>
 		</div>
 
-		<!-- Middle Section - Auth Form -->
-		<div class="flex-1 flex items-start justify-center px-5 pt-8 pb-8">
+		<!-- Form Section -->
+		<div class="form-section">
 			<div
-				class="w-full max-w-md rounded-xl p-6"
+				class="form-card"
 				class:shake={shakeError}
-				style="background-color: {isDark
-					? 'rgba(255, 255, 255, 0.08)'
-					: 'rgba(255, 255, 255, 0.7)'}; backdrop-filter: blur(10px); border: 1px solid {isDark
-					? 'rgba(255, 255, 255, 0.1)'
-					: 'rgba(0, 0, 0, 0.1)'};"
 			>
-				<!-- Title -->
-				<div class="mb-6">
-					<h2
-						class="text-center text-xl font-semibold"
-						style="color: {isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)'};"
-					>
-						{t.title}
-					</h2>
-					<p
-						class="mt-2 text-sm text-center"
-						style="color: {isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};"
-					>
-						{t.subtitle}
-					</p>
+				<div class="form-header">
+					<h2 class="form-title">{t.title}</h2>
+					<p class="form-subtitle">{t.subtitle}</p>
 				</div>
 
-				<!-- Error Messages -->
 				{#if error}
-					<div
-						id="form-error"
-						role="alert"
-						aria-live="assertive"
-						class="mb-4 rounded-xl bg-red-500/20 border border-red-500/30 p-3 flex items-center gap-2"
-					>
-						<Icon name="warning" size={18} color="#ef4444" />
-						<p class="text-sm text-red-500">{error}</p>
+					<div class="error-message" id="form-error" role="alert" aria-live="assertive">
+						<Warning size={18} class="text-red-500 shrink-0" />
+						<p>{error}</p>
 					</div>
 				{/if}
 
-				<!-- Login Form -->
-				<form
-					onsubmit={(e) => {
-						e.preventDefault();
-						handleLogin();
-					}}
-					class="pb-4"
-					aria-busy={loading}
-					aria-describedby={error ? 'form-error' : undefined}
-				>
-					<!-- Email Field -->
-					<div class="mb-3">
+				<form onsubmit={(e) => { e.preventDefault(); handleLogin(); }} aria-busy={loading}>
+					<!-- Email -->
+					<div class="input-group">
 						<label for="email" class="sr-only">{t.emailPlaceholder}</label>
 						<input
 							id="email"
@@ -374,143 +292,84 @@
 							required
 							autocomplete="email"
 							aria-invalid={errorField === 'email'}
-							aria-describedby={errorField === 'email' ? 'form-error' : undefined}
-							class="h-14 w-full rounded-xl border px-4 text-lg transition-colors focus:outline-none focus:ring-2"
-							style="background-color: {isDark
-								? 'rgba(0, 0, 0, 0.2)'
-								: 'rgba(255, 255, 255, 0.8)'}; border-color: {errorField === 'email'
-								? '#ef4444'
-								: isDark
-									? 'rgba(255, 255, 255, 0.2)'
-									: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
-								? '#ffffff'
-								: '#000000'}; --tw-ring-color: {errorField === 'email' ? '#ef4444' : primaryColor};"
+							class="input-field"
+							class:input-error={errorField === 'email'}
+							style:--ring-color={errorField === 'email' ? '#ef4444' : primaryColor}
 						/>
 					</div>
 
-					<!-- Password Field -->
-					<div class="mb-3 relative">
+					<!-- Password -->
+					<div class="input-group">
 						<label for="password" class="sr-only">{t.passwordPlaceholder}</label>
-						<input
-							id="password"
-							type={showPassword ? 'text' : 'password'}
-							bind:this={passwordInput}
-							bind:value={password}
-							placeholder={t.passwordPlaceholder}
-							required
-							autocomplete="current-password"
-							aria-invalid={errorField === 'password'}
-							aria-describedby={errorField === 'password' ? 'form-error' : undefined}
-							class="h-14 w-full rounded-xl border px-4 pr-12 text-lg transition-colors focus:outline-none focus:ring-2"
-							style="background-color: {isDark
-								? 'rgba(0, 0, 0, 0.2)'
-								: 'rgba(255, 255, 255, 0.8)'}; border-color: {errorField === 'password'
-								? '#ef4444'
-								: isDark
-									? 'rgba(255, 255, 255, 0.2)'
-									: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
-								? '#ffffff'
-								: '#000000'}; --tw-ring-color: {errorField === 'password'
-								? '#ef4444'
-								: primaryColor};"
-						/>
-						<button
-							type="button"
-							onclick={() => (showPassword = !showPassword)}
-							class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors touch-target flex items-center justify-center"
-							aria-label={showPassword ? t.hidePassword : t.showPassword}
-							aria-pressed={showPassword}
-							title={showPassword ? t.hidePassword : t.showPassword}
-						>
-							<Icon
-								name={showPassword ? 'eye-off' : 'eye'}
-								size={20}
-								color={isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'}
+						<div class="input-wrapper">
+							<input
+								id="password"
+								type={showPassword ? 'text' : 'password'}
+								bind:this={passwordInput}
+								bind:value={password}
+								placeholder={t.passwordPlaceholder}
+								required
+								autocomplete="current-password"
+								aria-invalid={errorField === 'password'}
+								class="input-field has-icon"
+								class:input-error={errorField === 'password'}
+								style:--ring-color={errorField === 'password' ? '#ef4444' : primaryColor}
 							/>
-						</button>
+							<button
+								type="button"
+								onclick={() => (showPassword = !showPassword)}
+								class="password-toggle"
+								aria-label={showPassword ? t.hidePassword : t.showPassword}
+							>
+								{#if showPassword}
+									<EyeSlash size={20} />
+								{:else}
+									<Eye size={20} />
+								{/if}
+							</button>
+						</div>
 					</div>
 
-					<!-- Remember Me & Forgot Password Row -->
-					<div class="mb-4 flex items-center justify-between">
-						<label class="flex items-center gap-2 cursor-pointer touch-target">
-							<input
-								type="checkbox"
-								bind:checked={rememberMe}
-								class="w-5 h-5 rounded border-2 transition-colors cursor-pointer"
-								style="accent-color: {primaryColor};"
-							/>
-							<span
-								class="text-sm"
-								style="color: {isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'};"
-							>
-								{t.rememberMe}
-							</span>
+					<!-- Remember & Forgot -->
+					<div class="options-row">
+						<label class="remember-label">
+							<input type="checkbox" bind:checked={rememberMe} style:accent-color={primaryColor} />
+							<span>{t.rememberMe}</span>
 						</label>
-
-						<button
-							type="button"
-							onclick={() => goto(forgotPasswordPath)}
-							class="text-sm font-medium transition-opacity hover:opacity-70 touch-target flex items-center justify-center px-2"
-							style="color: {primaryColor};"
-						>
+						<button type="button" onclick={() => goto(forgotPasswordPath)} class="forgot-link" style:color={primaryColor}>
 							{t.forgotPassword}
 						</button>
 					</div>
 
-					<!-- Submit Button -->
+					<!-- Submit -->
 					<button
 						type="submit"
 						disabled={loading || showSuccess}
-						aria-disabled={loading || showSuccess}
-						class="flex h-14 w-full items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 disabled:opacity-50 border-2 touch-target"
-						style="background-color: {showSuccess
-							? '#22c55e'
-							: primaryColor + '60'}; border-color: {showSuccess
-							? '#22c55e'
-							: primaryColor}; color: {isDark ? '#ffffff' : '#000000'};"
+						class="submit-button"
+						style:background-color={showSuccess ? '#22c55e' : primaryColor + '60'}
+						style:border-color={showSuccess ? '#22c55e' : primaryColor}
 					>
 						{#if loading}
-							<svg
-								class="spinner w-5 h-5"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								aria-hidden="true"
-							>
+							<svg class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 								<circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
 								<path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
 							</svg>
 							<span>{t.signingIn}</span>
 						{:else if showSuccess}
-							<Icon name="check" size={20} />
+							<Check size={20} />
 							<span>{t.success}</span>
 						{:else}
-							<Icon name="sign-in" size={20} />
+							<SignIn size={20} />
 							<span>{t.signInButton}</span>
 						{/if}
 					</button>
 				</form>
 
-				<!-- Social Login -->
 				{#if enableGoogle || enableApple}
-					<div class="my-4 flex items-center gap-3" role="separator" aria-orientation="horizontal">
-						<div
-							class="flex-1 border-t"
-							style="border-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"
-						></div>
-						<span
-							class="text-xs"
-							style="color: {isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'};"
-							>{t.orDivider}</span
-						>
-						<div
-							class="flex-1 border-t"
-							style="border-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"
-						></div>
+					<div class="divider">
+						<span>{t.orDivider}</span>
 					</div>
-
-					<div class="mb-4 flex flex-col gap-2" role="group" aria-label="Social login options">
+					<div class="social-buttons">
 						{#if enableGoogle && onSignInWithGoogle}
 							<GoogleSignInButton onSuccess={handleGoogleSuccess} />
 						{/if}
@@ -520,57 +379,463 @@
 					</div>
 				{/if}
 
-				<!-- Register Link -->
-				<div class="mt-4 text-center">
-					<p
-						class="text-sm"
-						style="color: {isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};"
-					>
-						{t.noAccount}
-						<button
-							type="button"
-							onclick={() => goto(registerPath)}
-							class="font-medium transition-opacity hover:opacity-70 touch-target inline-flex items-center justify-center px-1"
-							style="color: {primaryColor};"
-						>
-							{t.createAccount}
-						</button>
-					</p>
-				</div>
+				<p class="register-link">
+					{t.noAccount}
+					<button type="button" onclick={() => goto(registerPath)} style:color={primaryColor}>
+						{t.createAccount}
+					</button>
+				</p>
 			</div>
 		</div>
 	</main>
 
-	<!-- App Slider -->
 	{#if appSlider}
-		<div class="w-full pb-8 px-2 pt-4">
+		<footer class="app-slider-section">
 			{@render appSlider()}
-		</div>
-	{:else}
-		<!-- Bottom padding -->
-		<div class="pb-8"></div>
+		</footer>
 	{/if}
 </div>
 
 <style>
+	:global(html, body) {
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	.page-container {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+		min-height: 100dvh;
+		width: 100%;
+		max-width: 100vw;
+		overflow-x: hidden;
+		margin: 0;
+		padding: 0;
+		/* Use CSS variable with dark fallback */
+		background-color: var(--dark-bg, #121212);
+	}
+
+	@media (prefers-color-scheme: light) {
+		.page-container {
+			background-color: var(--light-bg, #f5f5f5);
+		}
+	}
+
+	.header-controls {
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		z-index: 50;
+		opacity: 0.6;
+		display: flex;
+		gap: 0.75rem;
+	}
+
+	.main-content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.logo-section {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 3rem 1rem 1.5rem;
+	}
+
+	.logo-button {
+		width: 100px;
+		height: 100px;
+		border-radius: 50%;
+		border: 3px solid;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 0.75rem;
+		cursor: pointer;
+		transition: transform 0.2s;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		/* Dark mode default */
+		background-color: #000;
+	}
+
+	@media (prefers-color-scheme: light) {
+		.logo-button {
+			background-color: #fff;
+		}
+	}
+
+	.logo-button:hover {
+		transform: scale(1.05);
+	}
+
+	.logo-button:active {
+		transform: scale(0.95);
+	}
+
+	.app-name {
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: #fff;
+	}
+
+	@media (prefers-color-scheme: light) {
+		.app-name {
+			color: #000;
+		}
+	}
+
+	.form-section {
+		flex: 1;
+		display: flex;
+		justify-content: center;
+		padding: 1rem 1rem 2rem;
+	}
+
+	.form-card {
+		width: 100%;
+		max-width: 400px;
+		border-radius: 1rem;
+		padding: 1.5rem;
+		border: 1px solid;
+		backdrop-filter: blur(10px);
+		/* Dark mode default */
+		background-color: rgba(255, 255, 255, 0.08);
+		border-color: rgba(255, 255, 255, 0.1);
+	}
+
+	@media (prefers-color-scheme: light) {
+		.form-card {
+			background-color: rgba(255, 255, 255, 0.7);
+			border-color: rgba(0, 0, 0, 0.1);
+		}
+	}
+
+	.form-header {
+		text-align: center;
+		margin-bottom: 1.5rem;
+	}
+
+	.form-title {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	.form-subtitle {
+		font-size: 0.875rem;
+		margin-top: 0.5rem;
+		color: rgba(255, 255, 255, 0.6);
+	}
+
+	@media (prefers-color-scheme: light) {
+		.form-title {
+			color: rgba(0, 0, 0, 0.9);
+		}
+		.form-subtitle {
+			color: rgba(0, 0, 0, 0.6);
+		}
+	}
+
+	.error-message {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem;
+		margin-bottom: 1rem;
+		border-radius: 0.75rem;
+		background: rgba(239, 68, 68, 0.15);
+		border: 1px solid rgba(239, 68, 68, 0.3);
+		color: #ef4444;
+		font-size: 0.875rem;
+	}
+
+	.input-group {
+		margin-bottom: 0.75rem;
+	}
+
+	.input-wrapper {
+		position: relative;
+	}
+
+	.input-field {
+		width: 100%;
+		height: 3.5rem;
+		padding: 0 1rem;
+		border: 1px solid;
+		border-radius: 0.75rem;
+		font-size: 1rem;
+		transition: border-color 0.2s, box-shadow 0.2s;
+		/* Dark mode default */
+		background-color: rgba(0, 0, 0, 0.2);
+		border-color: rgba(255, 255, 255, 0.2);
+		color: #fff;
+	}
+
+	.input-field.input-error {
+		border-color: #ef4444;
+	}
+
+	@media (prefers-color-scheme: light) {
+		.input-field {
+			background-color: rgba(255, 255, 255, 0.8);
+			border-color: rgba(0, 0, 0, 0.1);
+			color: #000;
+		}
+		.input-field.input-error {
+			border-color: #ef4444;
+		}
+	}
+
+	.input-field:focus {
+		outline: none;
+		box-shadow: 0 0 0 2px var(--ring-color, currentColor);
+	}
+
+	.input-field.has-icon {
+		padding-right: 3rem;
+	}
+
+	.password-toggle {
+		position: absolute;
+		right: 0;
+		top: 0;
+		height: 100%;
+		width: 3rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: none;
+		border: none;
+		cursor: pointer;
+		transition: opacity 0.2s;
+		color: rgba(255, 255, 255, 0.5);
+	}
+
+	@media (prefers-color-scheme: light) {
+		.password-toggle {
+			color: rgba(0, 0, 0, 0.4);
+		}
+	}
+
+	.password-toggle:hover {
+		opacity: 0.8;
+	}
+
+	.options-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+		font-size: 0.875rem;
+	}
+
+	.remember-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		color: rgba(255, 255, 255, 0.7);
+	}
+
+	@media (prefers-color-scheme: light) {
+		.remember-label {
+			color: rgba(0, 0, 0, 0.7);
+		}
+	}
+
+	.remember-label input[type="checkbox"] {
+		width: 1.125rem;
+		height: 1.125rem;
+		cursor: pointer;
+		background-color: transparent;
+		border: 1.5px solid rgba(255, 255, 255, 0.4);
+		border-radius: 0.25rem;
+		appearance: none;
+		-webkit-appearance: none;
+		display: grid;
+		place-content: center;
+	}
+
+	.remember-label input[type="checkbox"]::before {
+		content: "";
+		width: 0.65rem;
+		height: 0.65rem;
+		transform: scale(0);
+		transition: transform 0.1s ease-in-out;
+		box-shadow: inset 1rem 1rem var(--primary-color, #fff);
+		clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+	}
+
+	.remember-label input[type="checkbox"]:checked {
+		border-color: var(--primary-color, #fff);
+	}
+
+	.remember-label input[type="checkbox"]:checked::before {
+		transform: scale(1);
+	}
+
+	@media (prefers-color-scheme: light) {
+		.remember-label input[type="checkbox"] {
+			border-color: rgba(0, 0, 0, 0.3);
+		}
+	}
+
+	.forgot-link {
+		background: none;
+		border: none;
+		cursor: pointer;
+		font-weight: 500;
+		padding: 0.25rem;
+	}
+
+	.forgot-link:hover {
+		opacity: 0.7;
+	}
+
+	.submit-button {
+		width: 100%;
+		height: 3.5rem;
+		border: 2px solid;
+		border-radius: 0.75rem;
+		font-weight: 500;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		transition: opacity 0.2s;
+		color: #fff;
+	}
+
+	@media (prefers-color-scheme: light) {
+		.submit-button {
+			color: #000;
+		}
+	}
+
+	.submit-button:hover:not(:disabled) {
+		opacity: 0.85;
+	}
+
+	.submit-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.divider {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		margin: 1.25rem 0;
+	}
+
+	.divider::before,
+	.divider::after {
+		content: '';
+		flex: 1;
+		height: 1px;
+		background: currentColor;
+		opacity: 0.2;
+	}
+
+	.divider span {
+		font-size: 0.75rem;
+		color: rgba(255, 255, 255, 0.5);
+	}
+
+	@media (prefers-color-scheme: light) {
+		.divider span {
+			color: rgba(0, 0, 0, 0.5);
+		}
+	}
+
+	.social-buttons {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.register-link {
+		text-align: center;
+		font-size: 0.875rem;
+		margin-top: 1rem;
+		color: rgba(255, 255, 255, 0.6);
+	}
+
+	@media (prefers-color-scheme: light) {
+		.register-link {
+			color: rgba(0, 0, 0, 0.6);
+		}
+	}
+
+	.register-link button {
+		background: none;
+		border: none;
+		cursor: pointer;
+		font-weight: 500;
+		padding: 0.25rem;
+	}
+
+	.register-link button:hover {
+		opacity: 0.7;
+	}
+
+	.app-slider-section {
+		width: 100%;
+		padding: 0 0 1rem;
+	}
+
+	/* Entrance Animations */
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes fadeInScale {
+		from {
+			opacity: 0;
+			transform: scale(0.9);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	@keyframes fadeIn {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
+
+	.logo-section {
+		animation: fadeInScale 0.5s ease-out both;
+	}
+
+	.form-card {
+		animation: fadeInUp 0.5s ease-out 0.15s both;
+	}
+
+	.app-slider-section {
+		animation: fadeIn 0.5s ease-out 0.3s both;
+	}
+
+	/* Interactive Animations */
 	@keyframes shake {
-		0%,
-		100% {
-			transform: translateX(0);
-		}
-		10%,
-		30%,
-		50%,
-		70%,
-		90% {
-			transform: translateX(-4px);
-		}
-		20%,
-		40%,
-		60%,
-		80% {
-			transform: translateX(4px);
-		}
+		0%, 100% { transform: translateX(0); }
+		10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+		20%, 40%, 60%, 80% { transform: translateX(4px); }
 	}
 
 	.shake {
@@ -578,51 +843,25 @@
 	}
 
 	@keyframes spin {
-		from {
-			transform: rotate(0deg);
-		}
-		to {
-			transform: rotate(360deg);
-		}
+		to { transform: rotate(360deg); }
 	}
 
 	.spinner {
+		width: 1.25rem;
+		height: 1.25rem;
 		animation: spin 1s linear infinite;
 	}
 
 	@keyframes success-pulse {
-		0% {
-			transform: scale(1);
-			opacity: 1;
-		}
-		50% {
-			transform: scale(1.05);
-			opacity: 0.9;
-		}
-		100% {
-			transform: scale(1);
-			opacity: 1;
-		}
+		0%, 100% { transform: scale(1); }
+		50% { transform: scale(1.05); }
 	}
 
 	.success-pulse {
 		animation: success-pulse 0.6s ease-in-out;
 	}
 
-	/* Respect reduced motion preference */
-	@media (prefers-reduced-motion: reduce) {
-		.shake,
-		.spinner,
-		.success-pulse {
-			animation: none;
-		}
-
-		* {
-			transition-duration: 0.01ms !important;
-			animation-duration: 0.01ms !important;
-		}
-	}
-
+	/* Accessibility */
 	.sr-only {
 		position: absolute;
 		width: 1px;
@@ -632,19 +871,17 @@
 		overflow: hidden;
 		clip: rect(0, 0, 0, 0);
 		white-space: nowrap;
-		border-width: 0;
+		border: 0;
 	}
 
-	/* Skip link styling */
 	.skip-link {
 		position: absolute;
 		top: -40px;
 		left: 0;
 		background: #000;
 		color: #fff;
-		padding: 8px 16px;
+		padding: 0.5rem 1rem;
 		z-index: 100;
-		text-decoration: none;
 		font-weight: 500;
 	}
 
@@ -652,9 +889,39 @@
 		top: 0;
 	}
 
-	/* Ensure minimum touch target size (44x44px) */
-	.touch-target {
-		min-width: 44px;
-		min-height: 44px;
+	/* Reduced motion */
+	@media (prefers-reduced-motion: reduce) {
+		.logo-section,
+		.form-card,
+		.app-slider-section,
+		.shake,
+		.spinner,
+		.success-pulse {
+			animation: none;
+		}
+		* {
+			transition-duration: 0.01ms !important;
+		}
+	}
+
+	/* Mobile adjustments */
+	@media (max-width: 480px) {
+		.logo-section {
+			padding-top: 2rem;
+		}
+
+		.logo-button {
+			width: 80px;
+			height: 80px;
+		}
+
+		.logo-button :global(svg) {
+			width: 40px;
+			height: 40px;
+		}
+
+		.form-card {
+			padding: 1.25rem;
+		}
 	}
 </style>

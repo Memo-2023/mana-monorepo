@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Component, Snippet } from 'svelte';
 	import type { AuthResult } from '../types';
-	import Icon from '../components/Icon.svelte';
+	import { Key, ArrowLeft, EnvelopeOpen, SignIn } from '@manacore/shared-icons';
 
 	type PageMode = 'form' | 'success';
 
@@ -136,7 +136,7 @@
 
 <div
 	class="flex min-h-screen flex-col justify-between"
-	style="background-color: {getPageBackground()};"
+	style="background-color: {getPageBackground()}; max-width: 100vw; overflow-x: hidden;"
 >
 	<!-- Top Section - Logo -->
 	<div class="flex flex-col items-center justify-center pt-16 pb-8">
@@ -221,7 +221,7 @@
 							? '#ffffff'
 							: '#000000'};"
 					>
-						<Icon name="key" size={20} />
+						<Key size={20} class="inline-block" />
 						{loading ? t.sending : t.sendResetLinkButton}
 					</button>
 				</form>
@@ -233,7 +233,7 @@
 						class="flex h-10 w-full items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80"
 						style="color: {isDark ? '#ffffff' : '#000000'};"
 					>
-						<Icon name="arrow-left" size={20} />
+						<ArrowLeft size={20} class="inline-block" />
 						{t.backToLogin}
 					</button>
 				</div>
@@ -244,9 +244,9 @@
 					<div class="flex flex-col items-center mb-6">
 						<div
 							class="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-							style="background-color: {primaryColor}30;"
+							style="background-color: {primaryColor}30; color: {primaryColor};"
 						>
-							<Icon name="mail-open" size={40} color={primaryColor} />
+							<EnvelopeOpen size={40} />
 						</div>
 
 						<p
@@ -268,7 +268,7 @@
 								? '#ffffff'
 								: '#000000'};"
 						>
-							<Icon name="sign-in" size={20} />
+							<SignIn size={20} class="inline-block" />
 							{t.backToLogin}
 						</button>
 

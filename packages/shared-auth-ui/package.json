@@ -18,7 +18,8 @@
 	],
 	"peerDependencies": {
 		"svelte": "^5.0.0",
-		"@manacore/shared-auth": "workspace:*"
+		"@manacore/shared-auth": "workspace:*",
+		"@manacore/shared-icons": "workspace:*"
 	},
 	"devDependencies": {
 		"svelte": "^5.16.0",

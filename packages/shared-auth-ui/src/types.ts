@@ -61,20 +61,3 @@ export interface AuthResult {
 	needsVerification?: boolean;
 }
 
-/**
- * Icon names available in the icon set
- */
-export type IconName =
-	| 'user-plus'
-	| 'sign-in'
-	| 'eye'
-	| 'eye-off'
-	| 'key'
-	| 'arrow-left'
-	| 'info'
-	| 'mail-open'
-	| 'lock'
-	| 'shield-check'
-	| 'arrows-left-right'
-	| 'envelope'
-	| 'folder';

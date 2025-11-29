@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
 	import type { AuthResult } from '../types';
-	import Icon from '../components/Icon.svelte';
+	import { Eye, EyeSlash, UserPlus, ArrowLeft } from '@manacore/shared-icons';
 
 	import type { Snippet } from 'svelte';
 
@@ -218,7 +218,7 @@
 
 <div
 	class="flex min-h-screen flex-col justify-between"
-	style="background-color: {getPageBackground()};"
+	style="background-color: {getPageBackground()}; max-width: 100vw; overflow-x: hidden;"
 >
 	<!-- Top Section - Logo -->
 	<div class="flex flex-col items-center justify-center pt-16 pb-8">
@@ -296,64 +296,68 @@
 					/>
 				</div>
 
-				<div class="mb-2 relative">
-					<input
-						type={showPassword ? 'text' : 'password'}
-						bind:value={password}
-						placeholder={t.passwordPlaceholder}
-						required
-						minlength={8}
-						class="h-14 w-full rounded-xl border px-4 pr-12 text-lg transition-colors focus:outline-none focus:ring-2"
-						style="background-color: {isDark
-							? 'rgba(0, 0, 0, 0.2)'
-							: 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark
-							? 'rgba(255, 255, 255, 0.2)'
-							: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
-							? '#ffffff'
-							: '#000000'}; --tw-ring-color: {primaryColor};"
-					/>
-					<button
-						type="button"
-						onclick={() => (showPassword = !showPassword)}
-						class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
-						aria-label={showPassword ? t.hidePassword : t.showPassword}
-					>
-						<Icon
-							name={showPassword ? 'eye-off' : 'eye'}
-							size={20}
-							color={isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'}
+				<div class="mb-2">
+					<div class="relative">
+						<input
+							type={showPassword ? 'text' : 'password'}
+							bind:value={password}
+							placeholder={t.passwordPlaceholder}
+							required
+							minlength={8}
+							class="h-14 w-full rounded-xl border px-4 pr-14 text-lg transition-colors focus:outline-none focus:ring-2"
+							style="background-color: {isDark
+								? 'rgba(0, 0, 0, 0.2)'
+								: 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark
+								? 'rgba(255, 255, 255, 0.2)'
+								: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
+								? '#ffffff'
+								: '#000000'}; --tw-ring-color: {primaryColor};"
 						/>
-					</button>
+						<button
+							type="button"
+							onclick={() => (showPassword = !showPassword)}
+							class="absolute inset-y-0 right-0 flex items-center justify-center w-14 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+							aria-label={showPassword ? t.hidePassword : t.showPassword}
+						>
+							{#if showPassword}
+								<EyeSlash size={20} />
+							{:else}
+								<Eye size={20} />
+							{/if}
+						</button>
+					</div>
 				</div>
 
-				<div class="mb-2 relative">
-					<input
-						type={showConfirmPassword ? 'text' : 'password'}
-						bind:value={confirmPassword}
-						placeholder={t.confirmPasswordPlaceholder}
-						required
-						minlength={8}
-						class="h-14 w-full rounded-xl border px-4 pr-12 text-lg transition-colors focus:outline-none focus:ring-2"
-						style="background-color: {isDark
-							? 'rgba(0, 0, 0, 0.2)'
-							: 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark
-							? 'rgba(255, 255, 255, 0.2)'
-							: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
-							? '#ffffff'
-							: '#000000'}; --tw-ring-color: {primaryColor};"
-					/>
-					<button
-						type="button"
-						onclick={() => (showConfirmPassword = !showConfirmPassword)}
-						class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
-						aria-label={showConfirmPassword ? t.hidePassword : t.showPassword}
-					>
-						<Icon
-							name={showConfirmPassword ? 'eye-off' : 'eye'}
-							size={20}
-							color={isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'}
+				<div class="mb-2">
+					<div class="relative">
+						<input
+							type={showConfirmPassword ? 'text' : 'password'}
+							bind:value={confirmPassword}
+							placeholder={t.confirmPasswordPlaceholder}
+							required
+							minlength={8}
+							class="h-14 w-full rounded-xl border px-4 pr-14 text-lg transition-colors focus:outline-none focus:ring-2"
+							style="background-color: {isDark
+								? 'rgba(0, 0, 0, 0.2)'
+								: 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark
+								? 'rgba(255, 255, 255, 0.2)'
+								: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
+								? '#ffffff'
+								: '#000000'}; --tw-ring-color: {primaryColor};"
 						/>
-					</button>
+						<button
+							type="button"
+							onclick={() => (showConfirmPassword = !showConfirmPassword)}
+							class="absolute inset-y-0 right-0 flex items-center justify-center w-14 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+							aria-label={showConfirmPassword ? t.hidePassword : t.showPassword}
+						>
+							{#if showConfirmPassword}
+								<EyeSlash size={20} />
+							{:else}
+								<Eye size={20} />
+							{/if}
+						</button>
+					</div>
 				</div>
 
 				<!-- Password Requirements -->
@@ -372,7 +376,7 @@
 						? '#ffffff'
 						: '#000000'};"
 				>
-					<Icon name="user-plus" size={20} />
+					<UserPlus size={20} class="inline-block" />
 					{loading ? t.creatingAccount : t.createAccountButton}
 				</button>
 			</form>
@@ -384,7 +388,7 @@
 					class="flex h-10 w-full items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80"
 					style="color: {isDark ? '#ffffff' : '#000000'};"
 				>
-					<Icon name="arrow-left" size={20} />
+					<ArrowLeft size={20} class="inline-block" />
 					{t.backToLogin}
 				</button>
 			</div>
