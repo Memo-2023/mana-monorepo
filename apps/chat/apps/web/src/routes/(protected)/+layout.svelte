@@ -11,7 +11,11 @@
 	} from '$lib/stores/navigation';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { getPillAppItems } from '@manacore/shared-branding';
 	import type { LayoutData } from './$types';
+
+	// App switcher items
+	const appItems = getPillAppItems('chat');
 
 	let { children, data }: { children: any; data: LayoutData } = $props();
 
@@ -177,6 +181,8 @@
 			showLogout={true}
 			onLogout={handleLogout}
 			primaryColor="#3b82f6"
+			showAppSwitcher={true}
+			{appItems}
 		/>
 
 		<!-- Main Content with dynamic padding based on nav mode -->
