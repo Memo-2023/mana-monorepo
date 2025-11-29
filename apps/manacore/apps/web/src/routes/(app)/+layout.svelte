@@ -4,30 +4,58 @@
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
 	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/authStore.svelte';
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
 	} from '$lib/stores/navigation';
+	import { getPillAppItems } from '@manacore/shared-branding';
 
 	let { children }: { children: Snippet } = $props();
+
+	// App switcher items
+	const appItems = getPillAppItems('manacore');
 
 	let loading = $state(true);
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
 
 	// Get theme state
-	let effectiveMode = $derived(theme.effectiveMode);
+	let isDark = $derived(theme.isDark);
+
+	// Theme variant dropdown items
+	let themeVariantItems = $derived<PillDropdownItem[]>([
+		...theme.variants.map((variant) => ({
+			id: variant,
+			label: THEME_DEFINITIONS[variant].label,
+			icon: THEME_DEFINITIONS[variant].icon,
+			onClick: () => theme.setVariant(variant),
+			active: theme.variant === variant,
+		})),
+		{
+			id: 'all-themes',
+			label: 'Alle Themes',
+			icon: 'palette',
+			onClick: () => goto('/themes'),
+			active: false,
+		},
+	]);
+
+	// Current theme variant label
+	let currentThemeVariantLabel = $derived(THEME_DEFINITIONS[theme.variant].label);
+
+	// User email for user dropdown
+	let userEmail = $derived(authStore.user?.email);
 
 	// Navigation items for ManaCore
 	const navItems: PillNavItem[] = [
 		{ href: '/dashboard', label: 'Dashboard', icon: 'home' },
-		{ href: '/organizations', label: 'Organizations', icon: 'building' },
-		{ href: '/teams', label: 'Teams', icon: 'users' },
+		{ href: '/credits', label: 'Credits', icon: 'sparkles' },
+		{ href: '/feedback', label: 'Feedback', icon: 'message-square' },
 		{ href: '/profile', label: 'Profil', icon: 'user' },
-		{ href: '/mana', label: 'Mana', icon: 'mana' },
 		{ href: '/settings', label: 'Settings', icon: 'settings' },
 	];
 
@@ -70,6 +98,10 @@
 
 	function handleToggleTheme() {
 		theme.toggleMode();
+	}
+
+	function handleThemeModeChange(mode: 'light' | 'dark' | 'system') {
+		theme.setMode(mode);
 	}
 
 	async function handleSignOut() {
@@ -124,14 +156,25 @@
 			homeRoute="/dashboard"
 			onLogout={handleSignOut}
 			onToggleTheme={handleToggleTheme}
-			isDark={effectiveMode === 'dark'}
+			{isDark}
 			{isSidebarMode}
 			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
 			showThemeToggle={true}
+			showThemeVariants={true}
+			{themeVariantItems}
+			{currentThemeVariantLabel}
+			themeMode={theme.mode}
+			onThemeModeChange={handleThemeModeChange}
 			showLanguageSwitcher={false}
+			showLogout={true}
 			primaryColor="#6366f1"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			profileHref="/profile"
 		/>
 
 		<!-- Main content with dynamic padding -->
