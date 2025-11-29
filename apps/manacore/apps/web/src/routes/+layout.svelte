@@ -1,29 +1,20 @@
 <script lang="ts">
 	import '../app.css';
-	import { invalidate } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { theme } from '$lib/stores/theme';
+	import { authStore } from '$lib/stores/authStore.svelte';
 
-	let { data, children } = $props();
+	let { children } = $props();
 
-	onMount(() => {
+	onMount(async () => {
 		// Initialize theme
 		const cleanupTheme = theme.initialize();
 
-		// Setup auth state change listener
-		const {
-			data: { subscription },
-		} = data.supabase.auth.onAuthStateChange(async (event, session) => {
-			if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-				invalidate('supabase:auth');
-			} else if (event === 'SIGNED_OUT') {
-				invalidate('supabase:auth');
-			}
-		});
+		// Initialize auth
+		await authStore.initialize();
 
 		return () => {
 			cleanupTheme();
-			subscription.unsubscribe();
 		};
 	});
 </script>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Card } from '@manacore/shared-ui';
+	import { Card, PageHeader } from '@manacore/shared-ui';
 
 	let { data } = $props();
 
@@ -26,12 +26,11 @@
 </script>
 
 <div>
-	<div class="mb-8">
-		<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-		<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-			Welcome back, {data.profile?.first_name || data.session?.user?.email}
-		</p>
-	</div>
+	<PageHeader
+		title="Dashboard"
+		description="Welcome back, {data.profile?.first_name || data.session?.user?.email}"
+		size="lg"
+	/>
 
 	<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 		{#each stats as stat}

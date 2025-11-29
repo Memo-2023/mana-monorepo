@@ -1,0 +1,14 @@
+/**
+ * Feedback Service Instance for ManaCore Web App
+ */
+
+import { createFeedbackService } from '@manacore/shared-feedback-service';
+import { authStore } from '$lib/stores/authStore.svelte';
+
+const MANA_AUTH_URL = 'http://localhost:3001'; // TODO: Use PUBLIC_MANA_CORE_AUTH_URL from env
+
+export const feedbackService = createFeedbackService({
+	apiUrl: MANA_AUTH_URL,
+	appId: 'manacore',
+	getAuthToken: async () => authStore.getAccessToken(),
+});

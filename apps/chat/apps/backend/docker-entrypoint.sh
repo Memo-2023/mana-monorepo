@@ -11,7 +11,7 @@ until pg_isready -h ${DB_HOST:-postgres} -p ${DB_PORT:-5432} -U ${DB_USER:-chat}
 done
 echo "PostgreSQL is up!"
 
-cd /app/chat/backend
+cd /app/apps/chat/apps/backend
 
 # Run schema push (for development) or migrations (for production)
 if [ "$NODE_ENV" = "production" ] && [ -d "src/db/migrations/meta" ]; then

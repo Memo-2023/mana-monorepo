@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { documentService } from '$lib/services/document';
+	import { PageHeader } from '@manacore/shared-ui';
 	import type { DocumentWithConversation } from '@chat/types';
 
 	let documents = $state<DocumentWithConversation[]>([]);
@@ -79,30 +80,29 @@
 
 <div class="min-h-[calc(100vh-4rem)] bg-background py-8">
 	<div class="max-w-6xl mx-auto px-4">
-		<!-- Header -->
-		<div class="flex items-center justify-between mb-6">
-			<div>
-				<h1 class="text-2xl font-bold text-foreground">Dokumente</h1>
-				<p class="text-sm text-muted-foreground mt-1">
-					Alle Dokumente aus deinen Konversationen im Dokumentmodus.
-				</p>
-			</div>
-			<button
-				onclick={loadDocuments}
-				class="p-2 text-muted-foreground hover:text-foreground
-               hover:bg-muted rounded-lg transition-colors"
-				aria-label="Aktualisieren"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-					/>
-				</svg>
-			</button>
-		</div>
+		<PageHeader
+			title="Dokumente"
+			description="Alle Dokumente aus deinen Konversationen im Dokumentmodus."
+			size="lg"
+		>
+			{#snippet actions()}
+				<button
+					onclick={loadDocuments}
+					class="p-2 text-muted-foreground hover:text-foreground
+                   hover:bg-muted rounded-lg transition-colors"
+					aria-label="Aktualisieren"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+						/>
+					</svg>
+				</button>
+			{/snippet}
+		</PageHeader>
 
 		<!-- Loading State -->
 		{#if isLoading}

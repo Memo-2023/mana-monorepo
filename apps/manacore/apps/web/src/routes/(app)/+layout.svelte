@@ -6,12 +6,13 @@
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
+	import { authStore } from '$lib/stores/authStore.svelte';
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
 	} from '$lib/stores/navigation';
 
-	let { data, children }: { data: any; children: Snippet } = $props();
+	let { children }: { children: Snippet } = $props();
 
 	let loading = $state(true);
 	let isSidebarMode = $state(false);
@@ -25,6 +26,7 @@
 		{ href: '/dashboard', label: 'Dashboard', icon: 'home' },
 		{ href: '/organizations', label: 'Organizations', icon: 'building' },
 		{ href: '/teams', label: 'Teams', icon: 'users' },
+		{ href: '/profile', label: 'Profil', icon: 'user' },
 		{ href: '/mana', label: 'Mana', icon: 'mana' },
 		{ href: '/settings', label: 'Settings', icon: 'settings' },
 	];
@@ -71,12 +73,13 @@
 	}
 
 	async function handleSignOut() {
-		await data.supabase.auth.signOut();
+		await authStore.signOut();
 		goto('/login');
 	}
 
 	$effect(() => {
-		if (!data.session) {
+		// Redirect to login if not authenticated (after initialization)
+		if (authStore.initialized && !authStore.isAuthenticated) {
 			goto('/login');
 		}
 	});
@@ -102,7 +105,7 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-{#if loading}
+{#if loading || authStore.loading}
 	<div class="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
 		<div class="text-center">
 			<div
@@ -111,7 +114,7 @@
 			<p class="text-gray-500 dark:text-gray-400">Loading...</p>
 		</div>
 	</div>
-{:else}
+{:else if authStore.isAuthenticated}
 	<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
 		<!-- Pill Navigation -->
 		<PillNavigation

@@ -27,7 +27,14 @@
 		"vite": "^6.0.0"
 	},
 	"dependencies": {
+		"@manacore/shared-auth": "workspace:*",
+		"@manacore/shared-auth-ui": "workspace:*",
+		"@manacore/shared-branding": "workspace:*",
+		"@manacore/shared-feedback-service": "workspace:*",
+		"@manacore/shared-feedback-ui": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
+		"@manacore/shared-profile-ui": "workspace:*",
+		"@manacore/shared-subscription-ui": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",

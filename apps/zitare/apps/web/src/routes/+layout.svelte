@@ -5,6 +5,7 @@
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
@@ -53,6 +54,8 @@
 		{ href: '/authors', label: 'Autoren', icon: 'users' },
 		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
 		{ href: '/lists', label: 'Listen', icon: 'list' },
+		{ href: '/profile', label: 'Profil', icon: 'user' },
+		{ href: '/mana', label: 'Mana', icon: 'sparkles' },
 	];
 
 	// Navigation shortcuts (Ctrl+1-5)
@@ -104,9 +107,17 @@
 		theme.toggleMode();
 	}
 
-	onMount(() => {
+	async function handleLogout() {
+		await authStore.signOut();
+		goto('/login');
+	}
+
+	onMount(async () => {
 		// Initialize theme
 		theme.initialize();
+
+		// Initialize auth
+		await authStore.initialize();
 
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('zitare-nav-sidebar');
@@ -159,7 +170,8 @@
 			{themeVariantItems}
 			{currentThemeVariantLabel}
 			showLanguageSwitcher={false}
-			showLogout={false}
+			showLogout={authStore.isAuthenticated}
+			onLogout={handleLogout}
 			primaryColor="#f59e0b"
 		/>
 

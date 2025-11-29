@@ -3,6 +3,7 @@
 	import { tags, isLoadingTags } from '$lib/stores/tags';
 	import { getAllTags, createTag, updateTag, deleteTag, type Tag } from '$lib/api/tags';
 	import { showToast } from '$lib/stores/toast';
+	import { PageHeader } from '@manacore/shared-ui';
 	import { Plus, Tag as TagIcon, PencilSimple, Trash } from '@manacore/shared-icons';
 
 	let showCreateModal = $state(false);
@@ -105,22 +106,21 @@
 
 <div class="min-h-screen px-4 py-8">
 	<div class="mx-auto max-w-4xl">
-		<!-- Header -->
-		<div class="mb-8 flex items-center justify-between">
-			<div>
-				<h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Tag-Verwaltung</h1>
-				<p class="mt-2 text-gray-600 dark:text-gray-400">
-					Verwalte deine Tags für eine bessere Organisation deiner Bilder
-				</p>
-			</div>
-			<button
-				onclick={() => (showCreateModal = true)}
-				class="flex items-center gap-2 rounded-2xl bg-blue-600/90 px-6 py-3 text-sm font-medium text-white backdrop-blur-xl transition-all hover:bg-blue-700/90 dark:bg-blue-500/90 dark:hover:bg-blue-600/90"
-			>
-				<Plus size={20} />
-				Neuer Tag
-			</button>
-		</div>
+		<PageHeader
+			title="Tag-Verwaltung"
+			description="Verwalte deine Tags für eine bessere Organisation deiner Bilder"
+			size="lg"
+		>
+			{#snippet actions()}
+				<button
+					onclick={() => (showCreateModal = true)}
+					class="flex items-center gap-2 rounded-2xl bg-blue-600/90 px-6 py-3 text-sm font-medium text-white backdrop-blur-xl transition-all hover:bg-blue-700/90 dark:bg-blue-500/90 dark:hover:bg-blue-600/90"
+				>
+					<Plus size={20} />
+					Neuer Tag
+				</button>
+			{/snippet}
+		</PageHeader>
 
 		<!-- Tags Grid -->
 		{#if $isLoadingTags}

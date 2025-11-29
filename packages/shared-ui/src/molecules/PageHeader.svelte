@@ -110,6 +110,24 @@
 
 	<div class="flex items-center justify-between gap-4">
 		<div class="flex items-center gap-3 min-w-0">
+			<!-- Back Button -->
+			{#if backHref}
+				<a
+					href={backHref}
+					class="page-header__back flex-shrink-0 p-1.5 -ml-1.5 rounded-lg text-theme-secondary hover:text-theme hover:bg-theme-secondary/10 transition-colors"
+					aria-label="Zurück"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M15 19l-7-7 7-7"
+						/>
+					</svg>
+				</a>
+			{/if}
+
 			<!-- Icon -->
 			{#if icon}
 				<div class="page-header__icon flex-shrink-0 text-theme-secondary">

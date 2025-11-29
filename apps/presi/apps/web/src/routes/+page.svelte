@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { decksStore } from '$lib/stores/decks.svelte';
+	import { PageHeader } from '@manacore/shared-ui';
 	import { Plus, Presentation, Trash2, MoreVertical, Clock, Layers } from 'lucide-svelte';
 
 	let showCreateModal = $state(false);
@@ -60,19 +61,21 @@
 </svelte:head>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-	<div class="flex justify-between items-center mb-8">
-		<div>
-			<h1 class="text-2xl font-bold text-slate-900 dark:text-white">My Presentations</h1>
-			<p class="text-slate-600 dark:text-slate-400 mt-1">Create and manage your slide decks</p>
-		</div>
-		<button
-			onclick={() => (showCreateModal = true)}
-			class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
-		>
-			<Plus class="w-5 h-5" />
-			New Deck
-		</button>
-	</div>
+	<PageHeader
+		title="My Presentations"
+		description="Create and manage your slide decks"
+		size="lg"
+	>
+		{#snippet actions()}
+			<button
+				onclick={() => (showCreateModal = true)}
+				class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
+			>
+				<Plus class="w-5 h-5" />
+				New Deck
+			</button>
+		{/snippet}
+	</PageHeader>
 
 	{#if decksStore.isLoading}
 		<div class="flex items-center justify-center py-16">

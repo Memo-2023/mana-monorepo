@@ -4,6 +4,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { spacesStore } from '$lib/stores/spaces.svelte';
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
+	import { PageHeader } from '@manacore/shared-ui';
 	import SpaceCard from '$lib/components/spaces/SpaceCard.svelte';
 	import SpaceForm from '$lib/components/spaces/SpaceForm.svelte';
 	import type { Space } from '@chat/types';
@@ -88,30 +89,29 @@
 
 <div class="min-h-[calc(100vh-4rem)] bg-background py-8">
 	<div class="max-w-4xl mx-auto px-4">
-		<!-- Header -->
-		<div class="flex items-center justify-between mb-6">
-			<div>
-				<h1 class="text-2xl font-bold text-foreground">Spaces</h1>
-				<p class="text-sm text-muted-foreground mt-1">
-					Organisiere deine Konversationen in kollaborativen Arbeitsbereichen.
-				</p>
-			</div>
-			<button
-				onclick={handleCreateNew}
-				class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium
-               hover:bg-primary/90 transition-colors"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 4v16m8-8H4"
-					/>
-				</svg>
-				Neuen Space erstellen
-			</button>
-		</div>
+		<PageHeader
+			title="Spaces"
+			description="Organisiere deine Konversationen in kollaborativen Arbeitsbereichen."
+			size="lg"
+		>
+			{#snippet actions()}
+				<button
+					onclick={handleCreateNew}
+					class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium
+                   hover:bg-primary/90 transition-colors"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 4v16m8-8H4"
+						/>
+					</svg>
+					Neuen Space erstellen
+				</button>
+			{/snippet}
+		</PageHeader>
 
 		<!-- Loading State -->
 		{#if spacesStore.isLoading}

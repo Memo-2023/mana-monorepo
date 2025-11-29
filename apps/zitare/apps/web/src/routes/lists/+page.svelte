@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { listsStore, type QuoteList } from '$lib/stores/lists';
 	import { quotesDE } from '@zitare/shared';
+	import { PageHeader } from '@manacore/shared-ui';
 	import { toast } from '$lib/stores/toast';
 
 	let lists = $state<QuoteList[]>([]);
@@ -69,23 +70,24 @@
 
 <div class="lists-page">
 	<div class="header-container">
-		<div class="header-row">
-			<div>
-				<h2>Meine Listen</h2>
-				<p class="subtitle">{lists.length} {lists.length === 1 ? 'Liste' : 'Listen'}</p>
-			</div>
-
-			<button class="create-fab" onclick={openCreateModal} aria-label="Neue Liste erstellen">
-				<svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 4v16m8-8H4"
-					/>
-				</svg>
-			</button>
-		</div>
+		<PageHeader
+			title="Meine Listen"
+			description="{lists.length} {lists.length === 1 ? 'Liste' : 'Listen'}"
+			size="lg"
+		>
+			{#snippet actions()}
+				<button class="create-fab" onclick={openCreateModal} aria-label="Neue Liste erstellen">
+					<svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 4v16m8-8H4"
+						/>
+					</svg>
+				</button>
+			{/snippet}
+		</PageHeader>
 
 		{#if lists.length > 3}
 			<div class="search-container">

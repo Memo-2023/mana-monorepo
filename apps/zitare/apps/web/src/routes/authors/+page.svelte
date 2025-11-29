@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { authorsDE, quotesDE, type Author } from '@zitare/shared';
+	import { PageHeader } from '@manacore/shared-ui';
 	import AuthorCard from '$lib/components/AuthorCard.svelte';
 
 	// Get quote counts for each author
@@ -97,29 +98,29 @@
 
 <div class="authors-page">
 	<div class="header-container">
-		<div class="header-row">
-			<h2>Autoren</h2>
-
-			<button class="search-fab" onclick={toggleSearch} aria-label="Toggle search">
-				<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					{#if isSearchOpen}
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					{:else}
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-						/>
-					{/if}
-				</svg>
-			</button>
-		</div>
+		<PageHeader title="Autoren" size="lg">
+			{#snippet actions()}
+				<button class="search-fab" onclick={toggleSearch} aria-label="Toggle search">
+					<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						{#if isSearchOpen}
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
+						{:else}
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+							/>
+						{/if}
+					</svg>
+				</button>
+			{/snippet}
+		</PageHeader>
 
 		{#if isSearchOpen}
 			<div class="search-bar">

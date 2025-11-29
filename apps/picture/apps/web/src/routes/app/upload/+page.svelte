@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { uploadMultipleImages, type UploadProgress } from '$lib/api/upload';
 	import { showToast } from '$lib/stores/toast';
+	import { PageHeader } from '@manacore/shared-ui';
 	import DropZone from '$lib/components/upload/DropZone.svelte';
 	import { images } from '$lib/stores/images';
 	import { Check, Image, CloudArrowUp, CheckCircle } from '@manacore/shared-icons';
@@ -58,13 +59,11 @@
 
 <div class="min-h-screen px-4 py-8">
 	<div class="mx-auto max-w-5xl">
-		<!-- Header -->
-		<div class="mb-8">
-			<h1 class="mb-2 text-3xl font-bold text-gray-900 dark:text-white">Bilder hochladen</h1>
-			<p class="text-gray-600 dark:text-gray-400">
-				Lade deine eigenen Bilder hoch und verwalte sie in deiner Galerie
-			</p>
-		</div>
+		<PageHeader
+			title="Bilder hochladen"
+			description="Lade deine eigenen Bilder hoch und verwalte sie in deiner Galerie"
+			size="lg"
+		/>
 
 		<!-- Upload Success Banner -->
 		{#if successCount > 0 && !uploading}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { PageHeader } from '@manacore/shared-ui';
 	import GenerateForm from '$lib/components/generate/GenerateForm.svelte';
 	import { CheckCircle } from '@manacore/shared-icons';
 </script>
@@ -8,12 +9,11 @@
 </svelte:head>
 
 <div class="container mx-auto px-4 py-8">
-	<div class="mb-8">
-		<h1 class="text-3xl font-bold text-gray-900">Generate Image</h1>
-		<p class="mt-2 text-gray-600">
-			Create stunning AI-generated images from your text descriptions
-		</p>
-	</div>
+	<PageHeader
+		title="Generate Image"
+		description="Create stunning AI-generated images from your text descriptions"
+		size="lg"
+	/>
 
 	<div class="mx-auto max-w-3xl">
 		<GenerateForm />

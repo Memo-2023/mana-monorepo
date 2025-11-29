@@ -5,6 +5,7 @@
 	import { templatesStore } from '$lib/stores/templates.svelte';
 	import { conversationService } from '$lib/services/conversation';
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
+	import { PageHeader } from '@manacore/shared-ui';
 	import TemplateCard from '$lib/components/templates/TemplateCard.svelte';
 	import TemplateForm from '$lib/components/templates/TemplateForm.svelte';
 	import type { Template } from '@chat/types';
@@ -106,31 +107,29 @@
 
 <div class="min-h-[calc(100vh-4rem)] bg-background py-8">
 	<div class="max-w-4xl mx-auto px-4">
-		<!-- Header -->
-		<div class="flex items-center justify-between mb-6">
-			<div>
-				<h1 class="text-2xl font-bold text-foreground">Vorlagen</h1>
-				<p class="text-sm text-muted-foreground mt-1">
-					Erstelle Vorlagen mit benutzerdefinierten System-Prompts für verschiedene
-					KI-Verhaltensweisen.
-				</p>
-			</div>
-			<button
-				onclick={handleCreateNew}
-				class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium
-               hover:bg-primary/90 transition-colors"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 4v16m8-8H4"
-					/>
-				</svg>
-				Neue Vorlage
-			</button>
-		</div>
+		<PageHeader
+			title="Vorlagen"
+			description="Erstelle Vorlagen mit benutzerdefinierten System-Prompts für verschiedene KI-Verhaltensweisen."
+			size="lg"
+		>
+			{#snippet actions()}
+				<button
+					onclick={handleCreateNew}
+					class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium
+                   hover:bg-primary/90 transition-colors"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 4v16m8-8H4"
+						/>
+					</svg>
+					Neue Vorlage
+				</button>
+			{/snippet}
+		</PageHeader>
 
 		<!-- Loading State -->
 		{#if templatesStore.isLoading}

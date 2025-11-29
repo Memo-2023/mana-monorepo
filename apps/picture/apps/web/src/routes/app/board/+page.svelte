@@ -14,6 +14,7 @@
 		removeBoardFromList,
 	} from '$lib/stores/boards';
 	import { getBoards, deleteBoard, duplicateBoard } from '$lib/api/boards';
+	import { PageHeader } from '@manacore/shared-ui';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import { showToast } from '$lib/stores/toast';
@@ -163,19 +164,18 @@
 </svelte:head>
 
 <div class="min-h-screen px-4 py-8">
-	<!-- Header -->
-	<div class="mb-8 flex items-center justify-between">
-		<div>
-			<h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Moodboards</h1>
-			<p class="mt-2 text-gray-600 dark:text-gray-400">
-				Erstelle und organisiere deine Bilder auf einem Canvas
-			</p>
-		</div>
-		<Button onclick={() => showCreateBoardModal.set(true)}>
-			<Plus size={20} class="mr-2" />
-			Neues Board
-		</Button>
-	</div>
+	<PageHeader
+		title="Moodboards"
+		description="Erstelle und organisiere deine Bilder auf einem Canvas"
+		size="lg"
+	>
+		{#snippet actions()}
+			<Button onclick={() => showCreateBoardModal.set(true)}>
+				<Plus size={20} class="mr-2" />
+				Neues Board
+			</Button>
+		{/snippet}
+	</PageHeader>
 
 	<!-- Loading State -->
 	{#if $isLoadingBoards}

@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
+	import { PageHeader } from '@manacore/shared-ui';
 	import type { Conversation } from '@chat/types';
 
 	let conversations = $state<Conversation[]>([]);
@@ -55,13 +56,7 @@
 
 <div class="min-h-[calc(100vh-4rem)] bg-background py-8">
 	<div class="max-w-4xl mx-auto px-4">
-		<!-- Header -->
-		<div class="mb-6">
-			<h1 class="text-2xl font-bold text-foreground">Archiv</h1>
-			<p class="text-sm text-muted-foreground mt-1">
-				Deine archivierten Konversationen.
-			</p>
-		</div>
+		<PageHeader title="Archiv" description="Deine archivierten Konversationen." size="lg" />
 
 		<!-- Loading State -->
 		{#if isLoading}

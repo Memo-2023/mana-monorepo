@@ -7,6 +7,7 @@
 	import { spaceService } from '$lib/services/space';
 	import { conversationService } from '$lib/services/conversation';
 	import { chatService } from '$lib/services/chat';
+	import { PageHeader } from '@manacore/shared-ui';
 	import type { Space, Conversation, AIModel } from '@chat/types';
 
 	const spaceId = $derived($page.params.id ?? '');
@@ -97,29 +98,12 @@
 {:else if space}
 	<div class="min-h-[calc(100vh-4rem)] bg-background py-8">
 		<div class="max-w-4xl mx-auto px-4">
-			<!-- Header -->
-			<div class="mb-6">
-				<div class="flex items-center gap-2 mb-2">
-					<a
-						href="/spaces"
-						class="p-1 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors"
-						aria-label="Zurück zu Spaces"
-					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M15 19l-7-7 7-7"
-							/>
-						</svg>
-					</a>
-					<h1 class="text-2xl font-bold text-foreground">{space.name}</h1>
-				</div>
-				{#if space.description}
-					<p class="text-sm text-muted-foreground">{space.description}</p>
-				{/if}
-			</div>
+			<PageHeader
+				title={space.name}
+				description={space.description}
+				backHref="/spaces"
+				size="lg"
+			/>
 
 			<!-- New Chat Section -->
 			<div

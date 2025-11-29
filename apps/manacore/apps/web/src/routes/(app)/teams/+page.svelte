@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Card, Button } from '@manacore/shared-ui';
+	import { Card, Button, PageHeader } from '@manacore/shared-ui';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -19,20 +19,20 @@
 </script>
 
 <div>
-	<div class="mb-8 flex items-center justify-between">
-		<div>
-			<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Teams</h1>
-			<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-				Manage your teams and collaborate with members
-			</p>
-		</div>
-		<Button variant="primary">
-			<svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
-			Create Team
-		</Button>
-	</div>
+	<PageHeader
+		title="Teams"
+		description="Manage your teams and collaborate with members"
+		size="lg"
+	>
+		{#snippet actions()}
+			<Button variant="primary">
+				<svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+				</svg>
+				Create Team
+			</Button>
+		{/snippet}
+	</PageHeader>
 
 	{#if data.teams && data.teams.length > 0}
 		<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

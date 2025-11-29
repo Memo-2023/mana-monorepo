@@ -44,6 +44,7 @@
 	const navItems: PillNavItem[] = [
 		{ href: '/', label: 'Decks', icon: 'document' },
 		{ href: '/profile', label: 'Profil', icon: 'user' },
+		{ href: '/mana', label: 'Mana', icon: 'sparkles' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 	];
 
