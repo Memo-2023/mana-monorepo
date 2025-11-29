@@ -47,12 +47,16 @@
 
 	// Navigation items for Chat
 	const navItems: PillNavItem[] = [
-		{ href: '/', label: 'Chat', icon: 'home' },
+		{ href: '/chat', label: 'Chat', icon: 'home' },
 		{ href: '/templates', label: 'Templates', icon: 'document' },
 		{ href: '/spaces', label: 'Spaces', icon: 'building' },
 		{ href: '/documents', label: 'Dokumente', icon: 'archive' },
 		{ href: '/archive', label: 'Archiv', icon: 'list' },
+		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 	];
+
+	// Check if current page is a chat page (needs full-width layout)
+	let isChatPage = $derived($page.url.pathname.startsWith('/chat'));
 
 	// Navigation shortcuts (Ctrl+1-5)
 	const navRoutes = navItems.map((item) => item.href);
@@ -94,6 +98,10 @@
 
 	function handleToggleTheme() {
 		theme.toggleMode();
+	}
+
+	function handleThemeModeChange(mode: 'light' | 'dark' | 'system') {
+		theme.setMode(mode);
 	}
 
 	async function handleLogout() {
@@ -152,7 +160,7 @@
 			items={navItems}
 			currentPath={$page.url.pathname}
 			appName="ManaChat"
-			homeRoute="/"
+			homeRoute="/chat"
 			onToggleTheme={handleToggleTheme}
 			{isDark}
 			{isSidebarMode}
@@ -163,6 +171,8 @@
 			showThemeVariants={true}
 			{themeVariantItems}
 			{currentThemeVariantLabel}
+			themeMode={theme.mode}
+			onThemeModeChange={handleThemeModeChange}
 			showLanguageSwitcher={false}
 			showLogout={true}
 			onLogout={handleLogout}
@@ -174,10 +184,16 @@
 			class="main-content bg-background"
 			class:sidebar-mode={isSidebarMode && !isCollapsed}
 			class:floating-mode={!isSidebarMode && !isCollapsed}
+			class:chat-page={isChatPage}
 		>
-			<div class="content-wrapper">
+			{#if isChatPage}
+				<!-- Full-width layout for chat pages -->
 				{@render children()}
-			</div>
+			{:else}
+				<div class="content-wrapper">
+					{@render children()}
+				</div>
+			{/if}
 		</main>
 	</div>
 {/if}
@@ -202,6 +218,11 @@
 	/* Sidebar mode - add left padding for sidebar nav */
 	.main-content.sidebar-mode {
 		padding-left: 180px;
+	}
+
+	/* Chat page - no content wrapper, but keep nav padding */
+	.main-content.chat-page {
+		overflow: hidden;
 	}
 
 	.content-wrapper {

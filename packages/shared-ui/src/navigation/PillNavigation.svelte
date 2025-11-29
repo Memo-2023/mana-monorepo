@@ -35,7 +35,7 @@
 		currentLanguageLabel?: string;
 		/** Show language switcher */
 		showLanguageSwitcher?: boolean;
-		/** Show theme toggle */
+		/** Show theme toggle (standalone button, hidden if showThemeVariants is true) */
 		showThemeToggle?: boolean;
 		/** Primary color for active state (CSS custom property or hex) */
 		primaryColor?: string;
@@ -49,6 +49,10 @@
 		currentThemeVariantLabel?: string;
 		/** Show theme variant selector */
 		showThemeVariants?: boolean;
+		/** Current theme mode ('light', 'dark', 'system') */
+		themeMode?: 'light' | 'dark' | 'system';
+		/** Called when theme mode changes */
+		onThemeModeChange?: (mode: 'light' | 'dark' | 'system') => void;
 	}
 
 	let {
@@ -74,6 +78,8 @@
 		themeVariantItems = [],
 		currentThemeVariantLabel = 'Theme',
 		showThemeVariants = false,
+		themeMode = 'system',
+		onThemeModeChange,
 	}: Props = $props();
 
 	// Type guards for elements
@@ -315,11 +321,50 @@
 					direction="down"
 					label={currentThemeVariantLabel}
 					icon="palette"
-				/>
+				>
+					{#snippet header()}
+						<div class="theme-mode-selector">
+							<button
+								type="button"
+								onclick={() => onThemeModeChange?.('light')}
+								class="mode-btn"
+								class:active={themeMode === 'light'}
+								title="Light mode"
+							>
+								<svg class="mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={getIconPath('sun')} />
+								</svg>
+							</button>
+							<button
+								type="button"
+								onclick={() => onThemeModeChange?.('dark')}
+								class="mode-btn"
+								class:active={themeMode === 'dark'}
+								title="Dark mode"
+							>
+								<svg class="mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={getIconPath('moon')} />
+								</svg>
+							</button>
+							<button
+								type="button"
+								onclick={() => onThemeModeChange?.('system')}
+								class="mode-btn"
+								class:active={themeMode === 'system'}
+								title="System mode"
+							>
+								<svg class="mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<rect x="2" y="3" width="20" height="14" rx="2" stroke-width="2" />
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8M12 17v4" />
+								</svg>
+							</button>
+						</div>
+					{/snippet}
+				</PillDropdown>
 			{/if}
 
-			<!-- Theme Toggle -->
-			{#if showThemeToggle && onToggleTheme}
+			<!-- Theme Toggle (only show when not using theme variants dropdown) -->
+			{#if showThemeToggle && onToggleTheme && !showThemeVariants}
 				<button
 					onclick={onToggleTheme}
 					class="pill glass-pill"
@@ -722,5 +767,74 @@
 
 	.pill-nav-container {
 		transition: all 0.3s ease;
+	}
+
+	/* Theme mode selector in dropdown header */
+	.theme-mode-selector {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem;
+		background: rgba(255, 255, 255, 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		border-radius: 9999px;
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	}
+
+	:global(.dark) .theme-mode-selector {
+		background: rgba(255, 255, 255, 0.12);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+	}
+
+	.mode-btn {
+		display: flex;
+		flex: 1;
+		align-items: center;
+		justify-content: center;
+		padding: 0.375rem;
+		border: none;
+		background: transparent;
+		border-radius: 9999px;
+		cursor: pointer;
+		color: #374151;
+		transition: all 0.15s;
+	}
+
+	:global(.dark) .mode-btn {
+		color: #f3f4f6;
+	}
+
+	.mode-btn:hover:not(.active) {
+		background: rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.dark) .mode-btn:hover:not(.active) {
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	.mode-btn.active {
+		background: var(--pill-primary-color, var(--color-primary-500, rgba(248, 214, 43, 0.2)));
+		background: color-mix(
+			in srgb,
+			var(--pill-primary-color, var(--color-primary-500, #3b82f6)) 20%,
+			white 80%
+		);
+	}
+
+	:global(.dark) .mode-btn.active {
+		background: color-mix(
+			in srgb,
+			var(--pill-primary-color, var(--color-primary-500, #3b82f6)) 30%,
+			transparent 70%
+		);
+	}
+
+	.mode-icon {
+		width: 1rem;
+		height: 1rem;
 	}
 </style>

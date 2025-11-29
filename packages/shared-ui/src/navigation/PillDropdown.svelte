@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import type { PillDropdownItem } from './types';
 
 	interface Props {
@@ -8,9 +9,11 @@
 		icon?: 'globe' | 'language' | 'chevronDown' | 'check' | string;
 		isOpen?: boolean;
 		onToggle?: (open: boolean) => void;
+		/** Optional header content (e.g., mode selector) */
+		header?: Snippet;
 	}
 
-	let { items, direction = 'down', label, icon, isOpen = false, onToggle }: Props = $props();
+	let { items, direction = 'down', label, icon, isOpen = false, onToggle, header }: Props = $props();
 
 	let internalOpen = $state(false);
 	let triggerButton: HTMLButtonElement;
@@ -115,13 +118,20 @@
 			class:fan-down={direction === 'down'}
 			style="top: {dropdownPosition.top}px; left: {dropdownPosition.left}px;"
 		>
+			<!-- Optional header (e.g., mode selector) -->
+			{#if header}
+				<div class="dropdown-header">
+					{@render header()}
+				</div>
+			{/if}
+
 			{#each items.filter((i) => !i.disabled) as item, i (item.id)}
 				<button
 					onclick={() => handleItemClick(item)}
 					class="pill glass-pill fan-pill"
 					class:danger-pill={item.danger}
 					class:active-pill={item.active}
-					style="animation-delay: {i * 15}ms"
+					style="animation-delay: {(header ? i + 1 : i) * 15}ms"
 				>
 					{#if item.icon}
 						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -298,5 +308,16 @@
 		background: transparent;
 		border: none;
 		cursor: default;
+	}
+
+	/* Header for custom content (e.g., mode selector) */
+	.dropdown-header {
+		animation: fanIn 0.15s ease-out forwards;
+		opacity: 0;
+		transform: translateY(10px);
+	}
+
+	.fan-up .dropdown-header {
+		transform: translateY(-10px);
 	}
 </style>
