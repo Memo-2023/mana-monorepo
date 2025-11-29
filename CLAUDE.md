@@ -12,18 +12,29 @@ This is a pnpm workspace monorepo containing multiple product applications with 
 
 ## Projects
 
-| Project            | Description                      | Apps                                                      |
-| ------------------ | -------------------------------- | --------------------------------------------------------- |
-| **maerchenzauber** | AI story generation              | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
-| **manacore**       | Multi-app ecosystem platform     | Expo mobile, SvelteKit web                                |
-| **manadeck**       | Card/deck management             | NestJS backend, Expo mobile, SvelteKit web                |
-| **memoro**         | Voice memo & AI analysis         | Expo mobile, SvelteKit web, Astro landing                 |
-| **picture**        | AI image generation              | Expo mobile, SvelteKit web, Astro landing                 |
-| **uload**          | URL shortener                    | SvelteKit web, PocketBase/Drizzle                         |
-| **chat**           | AI chat application              | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
-| **wisekeep**       | AI wisdom extraction from video  | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
-| **zitare**         | Daily inspiration quotes         | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
-| **bauntown**       | Community website for developers | Astro landing                                             |
+| Project      | Description                  | Apps                                                      |
+| ------------ | ---------------------------- | --------------------------------------------------------- |
+| **manacore** | Multi-app ecosystem platform | Expo mobile, SvelteKit web                                |
+| **manadeck** | Card/deck management         | NestJS backend, Expo mobile, SvelteKit web                |
+| **picture**  | AI image generation          | Expo mobile, SvelteKit web, Astro landing                 |
+| **chat**     | AI chat application          | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
+| **zitare**   | Daily inspiration quotes     | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
+| **presi**    | Presentation tool            | NestJS backend, Expo mobile, SvelteKit web                |
+
+### Archived Projects (`apps-archived/`)
+
+These projects are temporarily archived and excluded from the workspace. To re-activate, move back to `apps/`.
+
+| Project            | Description                      |
+| ------------------ | -------------------------------- |
+| **bauntown**       | Community website for developers |
+| **maerchenzauber** | AI story generation              |
+| **memoro**         | Voice memo & AI analysis         |
+| **news**           | News aggregation                 |
+| **nutriphi**       | Nutrition tracking               |
+| **reader**         | Reading app                      |
+| **uload**          | URL shortener                    |
+| **wisekeep**       | AI wisdom extraction from video  |
 
 ## Development Commands
 
@@ -32,18 +43,17 @@ This is a pnpm workspace monorepo containing multiple product applications with 
 pnpm install
 
 # Start specific project (runs all apps in project)
-pnpm run maerchenzauber:dev
-pnpm run memoro:dev
+pnpm run manacore:dev
+pnpm run manadeck:dev
 pnpm run picture:dev
 pnpm run chat:dev
-pnpm run wisekeep:dev
 pnpm run zitare:dev
-pnpm run bauntown:dev
+pnpm run presi:dev
 
 # Start specific app within project
-pnpm run dev:memoro:mobile      # Just mobile app
-pnpm run dev:chat:backend       # Just NestJS backend
-pnpm run dev:maerchenzauber:app # Web + backend together
+pnpm run dev:chat:mobile     # Just mobile app
+pnpm run dev:chat:backend    # Just NestJS backend
+pnpm run dev:chat:app        # Web + backend together
 
 # Build & quality
 pnpm run build
@@ -59,7 +69,7 @@ Each project has its own `CLAUDE.md` with detailed project-specific commands.
 
 ```
 manacore-monorepo/
-├── apps/                    # SaaS product applications
+├── apps/                    # Active SaaS product applications
 │   ├── chat/
 │   │   ├── apps/
 │   │   │   ├── backend/     # NestJS API
@@ -67,9 +77,18 @@ manacore-monorepo/
 │   │   │   ├── web/         # SvelteKit web app
 │   │   │   └── landing/     # Astro marketing page
 │   │   └── packages/        # Project-specific shared code
-│   ├── maerchenzauber/
 │   ├── manadeck/
+│   ├── picture/
 │   └── ...
+├── apps-archived/           # Archived apps (excluded from workspace)
+│   ├── bauntown/
+│   ├── maerchenzauber/
+│   ├── memoro/
+│   ├── news/
+│   ├── nutriphi/
+│   ├── reader/
+│   ├── uload/
+│   └── wisekeep/
 ├── games/                   # Game projects
 │   └── {game-name}/         # Individual games
 ├── services/                # Standalone microservices
@@ -248,11 +267,10 @@ PORT=...
 
 Each project has its own `CLAUDE.md` with detailed information:
 
-- `apps/maerchenzauber/CLAUDE.md` - Story generation specifics, AI services
 - `apps/manacore/CLAUDE.md` - Multi-app ecosystem, auth details
-- `apps/memoro/CLAUDE.md` - Audio recording, AI processing
-- `apps/uload/CLAUDE.md` - URL shortener, Drizzle ORM
+- `apps/manadeck/CLAUDE.md` - Card/deck management
 - `apps/chat/CLAUDE.md` - Chat API endpoints, AI models
+- `apps/picture/CLAUDE.md` - AI image generation
 - `services/mana-core-auth/` - Central authentication service
 
 Navigate to the specific project directory to work on it.

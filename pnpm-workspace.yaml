@@ -22,3 +22,9 @@ packages:
 
   # Monorepo-wide shared packages
   - 'packages/*'
+
+  # Archived apps (excluded from workspace, available for future use)
+  # To re-activate: move app back to apps/ folder
+  # - 'apps-archived/*'
+  # - 'apps-archived/*/apps/*'
+  # - 'apps-archived/*/packages/*'
