@@ -1,21 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 
-	async function checkAuthAndRedirect() {
-		const { authStore } = await import('$lib/stores/auth.svelte');
+	onMount(async () => {
 		await authStore.initialize();
-
 		if (authStore.isAuthenticated) {
 			goto('/dashboard', { replaceState: true });
 		} else {
 			goto('/login', { replaceState: true });
 		}
-	}
-
-	if (browser) {
-		checkAuthAndRedirect();
-	}
+	});
 </script>
 
 <svelte:head>

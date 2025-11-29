@@ -11,31 +11,32 @@
 	let isChecking = $state(true);
 
 	// Check auth on mount and redirect if not authenticated
-	onMount(() => {
-		const init = async () => {
-			try {
-				await authStore.initialize();
-			} catch (e) {
-				console.error('Auth init failed:', e);
+	onMount(async () => {
+		let shouldRedirect = false;
+
+		try {
+			await authStore.initialize();
+			shouldRedirect = !authStore.isAuthenticated;
+
+			if (!shouldRedirect) {
+				// Initialize WebSocket after auth check
+				initWebSocket();
 			}
+		} catch (error) {
+			console.error('Protected layout init error:', error);
+			shouldRedirect = true;
+		}
 
-			if (!authStore.isAuthenticated) {
-				const redirectTo = encodeURIComponent(data.pathname || '/dashboard');
-				goto(`/login?redirectTo=${redirectTo}`);
-				return;
-			}
+		// Always set isChecking to false
+		isChecking = false;
 
-			// Initialize WebSocket after auth check
-			initWebSocket();
-			isChecking = false;
-		};
-
-		init();
+		if (shouldRedirect) {
+			const redirectTo = encodeURIComponent(data.pathname || '/dashboard');
+			goto(`/login?redirectTo=${redirectTo}`);
+		}
 
 		// Return cleanup function
-		return () => {
-			cleanup();
-		};
+		return () => cleanup();
 	});
 
 	async function handleSignOut() {

@@ -7,7 +7,7 @@
 	import AppSlider from '$lib/components/AppSlider.svelte';
 
 	// Get redirect URL from query params
-	const redirectTo = $derived($page.url.searchParams.get('redirectTo') || '/');
+	const redirectTo = $derived($page.url.searchParams.get('redirectTo') || '/dashboard');
 
 	// German translations
 	const translations = {
