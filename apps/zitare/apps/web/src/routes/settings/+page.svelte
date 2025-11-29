@@ -1,6 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { theme } from '$lib/stores/theme';
+	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import { ThemeColorPreview } from '@manacore/shared-theme-ui';
+	import { Sparkle, Leaf, Hexagon, Waves } from '@manacore/shared-icons';
+
+	// Theme icon mapping
+	const themeIcons = {
+		sparkle: Sparkle,
+		leaf: Leaf,
+		hexagon: Hexagon,
+		waves: Waves,
+	} as const;
 
 	// Settings state
 	let language = $state<'de' | 'en'>('de');
@@ -8,8 +20,6 @@
 
 	// Load settings from localStorage on mount
 	onMount(() => {
-		theme.init();
-
 		const savedLanguage = localStorage.getItem('language');
 		const savedUserName = localStorage.getItem('userName');
 
@@ -23,7 +33,7 @@
 	}
 
 	function toggleDarkMode() {
-		theme.toggle();
+		theme.toggleMode();
 	}
 
 	function setLanguageSetting(lang: 'de' | 'en') {
@@ -43,37 +53,10 @@
 			window.location.href = '/';
 		}
 	}
-
-	const themes = [
-		{
-			id: 'default' as const,
-			name: 'Standard',
-			desc: 'Klassisch & elegant',
-			gradientDark: ['#1e293b', '#334155'],
-			gradientLight: ['#94a3b8', '#cbd5e1'],
-			color: '#64748b',
-		},
-		{
-			id: 'colorful' as const,
-			name: 'Farbenfroh',
-			desc: 'Lebendig & energetisch',
-			gradientDark: ['#be185d', '#e11d48'],
-			gradientLight: ['#fb7185', '#fbbf24'],
-			color: '#e11d48',
-		},
-		{
-			id: 'nature' as const,
-			name: 'Natur',
-			desc: 'Beruhigend & harmonisch',
-			gradientDark: ['#16a34a', '#22c55e'],
-			gradientLight: ['#86efac', '#34d399'],
-			color: '#16a34a',
-		},
-	];
 </script>
 
 <svelte:head>
-	<title>Einstellungen - Quotes Web App</title>
+	<title>Einstellungen - Zitare</title>
 </svelte:head>
 
 <div class="settings-page">
@@ -112,9 +95,32 @@
 					<p class="setting-description">Dunkles Farbschema verwenden</p>
 				</div>
 				<label class="toggle">
-					<input type="checkbox" checked={$theme === 'dark'} onchange={toggleDarkMode} />
+					<input type="checkbox" checked={theme.isDark} onchange={toggleDarkMode} />
 					<span class="toggle-slider"></span>
 				</label>
+			</div>
+		</div>
+
+		<!-- Current Theme -->
+		<div class="setting-card">
+			<div class="setting-row">
+				<div class="setting-content">
+					<h3>Aktuelles Theme</h3>
+					<p class="setting-description theme-label">
+						{#if THEME_DEFINITIONS[theme.variant].icon && themeIcons[THEME_DEFINITIONS[theme.variant].icon as keyof typeof themeIcons]}
+							<svelte:component
+								this={themeIcons[THEME_DEFINITIONS[theme.variant].icon as keyof typeof themeIcons]}
+								size={16}
+								weight="duotone"
+								class="theme-icon"
+							/>
+						{/if}
+						{THEME_DEFINITIONS[theme.variant].label}
+					</p>
+				</div>
+				<button class="theme-btn" onclick={() => goto('/themes')}>
+					Themes wählen
+				</button>
 			</div>
 		</div>
 
@@ -126,17 +132,11 @@
 			</div>
 
 			<div class="theme-preview">
-				<div class="preview-colors">
-					<div class="color-swatch primary">
-						<span>Primary</span>
-					</div>
-					<div class="color-swatch surface">
-						<span>Surface</span>
-					</div>
-					<div class="color-swatch text">
-						<span>Text</span>
-					</div>
-				</div>
+				<ThemeColorPreview
+					variant={theme.variant}
+					mode={theme.isDark ? 'dark' : 'light'}
+					size="lg"
+				/>
 			</div>
 		</div>
 	</section>
@@ -214,7 +214,7 @@
 	h1 {
 		font-size: 2rem;
 		margin: 0;
-		color: rgb(var(--color-text-primary));
+		color: hsl(var(--foreground));
 	}
 
 	.settings-section {
@@ -227,13 +227,13 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: rgb(var(--color-text-secondary));
+		color: hsl(var(--muted-foreground));
 		margin-bottom: var(--spacing-md);
 	}
 
 	.setting-card {
-		background: rgb(var(--color-surface));
-		border: 1px solid rgb(var(--color-border));
+		background: hsl(var(--card));
+		border: 1px solid hsl(var(--border));
 		border-radius: var(--radius-lg);
 		padding: var(--spacing-lg);
 		margin-bottom: var(--spacing-md);
@@ -265,18 +265,28 @@
 	h3 {
 		font-size: 1rem;
 		font-weight: 600;
-		color: rgb(var(--color-text-primary));
+		color: hsl(var(--foreground));
 		margin: 0 0 var(--spacing-xs) 0;
 	}
 
 	.setting-description {
 		font-size: 0.875rem;
-		color: rgb(var(--color-text-secondary));
+		color: hsl(var(--muted-foreground));
 		margin: 0;
 	}
 
+	.setting-description.theme-label {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.setting-description.theme-label :global(.theme-icon) {
+		color: hsl(var(--primary));
+	}
+
 	.setting-value {
-		color: rgb(var(--color-text-secondary));
+		color: hsl(var(--muted-foreground));
 		font-size: 0.95rem;
 	}
 
@@ -285,9 +295,9 @@
 		width: 100%;
 		padding: var(--spacing-sm) var(--spacing-md);
 		border-radius: var(--radius-md);
-		border: 2px solid rgb(var(--color-border));
-		background: rgb(var(--color-background));
-		color: rgb(var(--color-text-primary));
+		border: 2px solid hsl(var(--border));
+		background: hsl(var(--background));
+		color: hsl(var(--foreground));
 		font-size: 1rem;
 		margin-bottom: var(--spacing-sm);
 		transition: border-color var(--transition-fast);
@@ -295,7 +305,7 @@
 
 	.text-input:focus {
 		outline: none;
-		border-color: rgb(var(--color-primary));
+		border-color: hsl(var(--primary));
 	}
 
 	/* Toggle Switch */
@@ -320,7 +330,7 @@
 		left: 0;
 		right: 0;
 		bottom: 0;
-		background-color: rgb(var(--color-border));
+		background-color: hsl(var(--border));
 		transition: var(--transition-base);
 		border-radius: 31px;
 	}
@@ -338,50 +348,34 @@
 	}
 
 	.toggle input:checked + .toggle-slider {
-		background-color: rgb(var(--color-primary));
+		background-color: hsl(var(--primary));
 	}
 
 	.toggle input:checked + .toggle-slider:before {
 		transform: translateX(20px);
 	}
 
+	/* Theme Button */
+	.theme-btn {
+		padding: var(--spacing-sm) var(--spacing-md);
+		border-radius: var(--radius-md);
+		background: hsl(var(--primary));
+		color: hsl(var(--primary-foreground));
+		font-weight: 500;
+		border: none;
+		cursor: pointer;
+		transition: background var(--transition-fast);
+	}
+
+	.theme-btn:hover {
+		background: hsl(var(--primary) / 0.9);
+	}
+
 	/* Theme Preview */
 	.theme-preview {
 		margin-top: var(--spacing-md);
-	}
-
-	.preview-colors {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: var(--spacing-md);
-	}
-
-	.color-swatch {
-		padding: var(--spacing-lg);
-		border-radius: var(--radius-md);
-		text-align: center;
-		font-weight: 500;
-		font-size: 0.875rem;
 		display: flex;
-		align-items: center;
 		justify-content: center;
-		min-height: 80px;
-	}
-
-	.color-swatch.primary {
-		background: rgb(var(--color-primary));
-		color: white;
-	}
-
-	.color-swatch.surface {
-		background: rgb(var(--color-surface));
-		color: rgb(var(--color-text-primary));
-		border: 1px solid rgb(var(--color-border));
-	}
-
-	.color-swatch.text {
-		background: rgb(var(--color-text-primary));
-		color: rgb(var(--color-background));
 	}
 
 	/* Language Toggle */
@@ -389,29 +383,29 @@
 		display: flex;
 		border-radius: var(--radius-full);
 		overflow: hidden;
-		background: rgb(var(--color-surface));
-		border: 1px solid rgb(var(--color-border));
+		background: hsl(var(--card));
+		border: 1px solid hsl(var(--border));
 	}
 
 	.lang-btn {
 		padding: var(--spacing-sm) var(--spacing-md);
 		border: none;
 		background: transparent;
-		color: rgb(var(--color-text-primary));
+		color: hsl(var(--foreground));
 		font-weight: 500;
 		cursor: pointer;
 		transition: background var(--transition-fast);
 	}
 
 	.lang-btn.active {
-		background: rgb(var(--color-primary));
-		color: white;
+		background: hsl(var(--primary));
+		color: hsl(var(--primary-foreground));
 	}
 
 	/* Danger Zone */
 	.setting-card.danger {
-		background: rgba(var(--color-error), 0.1);
-		border-color: rgba(var(--color-error), 0.2);
+		background: hsl(var(--destructive) / 0.1);
+		border-color: hsl(var(--destructive) / 0.2);
 	}
 
 	.danger-btn {
@@ -427,7 +421,7 @@
 	}
 
 	.danger-title {
-		color: rgb(var(--color-error));
+		color: hsl(var(--destructive));
 	}
 
 	.danger-icon {
@@ -447,16 +441,6 @@
 
 		.section-title {
 			font-size: 0.7rem;
-		}
-
-		.preview-colors {
-			grid-template-columns: 1fr;
-			gap: var(--spacing-sm);
-		}
-
-		.color-swatch {
-			min-height: 60px;
-			padding: var(--spacing-md);
 		}
 	}
 </style>

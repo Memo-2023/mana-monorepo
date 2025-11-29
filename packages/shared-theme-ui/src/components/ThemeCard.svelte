@@ -1,9 +1,17 @@
 <script lang="ts">
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
-	import { Check, Lock, Clock, Star } from '@manacore/shared-icons';
+	import { Check, Lock, Clock, Star, Sparkle, Leaf, Hexagon, Waves } from '@manacore/shared-icons';
 	import type { ThemeStatus } from '../types';
 	import ThemeColorPreview from './ThemeColorPreview.svelte';
+
+	// Theme icon components map
+	const themeIcons = {
+		sparkle: Sparkle,
+		leaf: Leaf,
+		hexagon: Hexagon,
+		waves: Waves,
+	} as const;
 
 	interface Props {
 		variant: ThemeVariant;
@@ -93,7 +101,14 @@
 
 	<!-- Header -->
 	<div class="flex items-center gap-2 mb-3">
-		<span class="text-xl">{definition.emoji}</span>
+		{#if definition.icon && themeIcons[definition.icon as keyof typeof themeIcons]}
+			<svelte:component
+				this={themeIcons[definition.icon as keyof typeof themeIcons]}
+				size={20}
+				weight="duotone"
+				class="text-primary"
+			/>
+		{/if}
 		<span class="font-semibold text-foreground">{definition.label}</span>
 	</div>
 

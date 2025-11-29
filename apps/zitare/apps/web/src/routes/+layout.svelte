@@ -3,8 +3,9 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
+	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
@@ -18,8 +19,31 @@
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
 
-	// Get theme state
-	let isDark = $state(false);
+	// Use theme store's isDark directly
+	let isDark = $derived(theme.isDark);
+
+	// Theme variant dropdown items
+	let themeVariantItems = $derived<PillDropdownItem[]>([
+		// Theme variants
+		...theme.variants.map((variant) => ({
+			id: variant,
+			label: THEME_DEFINITIONS[variant].label,
+			icon: THEME_DEFINITIONS[variant].icon,
+			onClick: () => theme.setVariant(variant),
+			active: theme.variant === variant,
+		})),
+		// Separator and link to full themes page
+		{
+			id: 'all-themes',
+			label: 'Alle Themes',
+			icon: 'palette',
+			onClick: () => goto('/themes'),
+			active: false,
+		},
+	]);
+
+	// Current theme variant label
+	let currentThemeVariantLabel = $derived(THEME_DEFINITIONS[theme.variant].label);
 
 	// Navigation items for Zitare
 	const navItems: PillNavItem[] = [
@@ -77,14 +101,12 @@
 	}
 
 	function handleToggleTheme() {
-		theme.toggle();
-		isDark = !isDark;
+		theme.toggleMode();
 	}
 
 	onMount(() => {
 		// Initialize theme
-		theme.init();
-		isDark = document.documentElement.classList.contains('dark');
+		theme.initialize();
 
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('zitare-nav-sidebar');
@@ -109,12 +131,12 @@
 <ToastContainer />
 
 {#if loading}
-	<div class="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+	<div class="flex min-h-screen items-center justify-center bg-background">
 		<div class="text-center">
 			<div
-				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-amber-500 border-r-transparent"
+				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
 			></div>
-			<p class="text-gray-500 dark:text-gray-400">Laden...</p>
+			<p class="text-muted-foreground">Laden...</p>
 		</div>
 	</div>
 {:else}
@@ -133,6 +155,9 @@
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
 			showThemeToggle={true}
+			showThemeVariants={true}
+			{themeVariantItems}
+			{currentThemeVariantLabel}
 			showLanguageSwitcher={false}
 			showLogout={false}
 			primaryColor="#f59e0b"
@@ -140,7 +165,7 @@
 
 		<!-- Main Content with dynamic padding based on nav mode -->
 		<main
-			class="main-content"
+			class="main-content bg-background"
 			class:sidebar-mode={isSidebarMode && !isCollapsed}
 			class:floating-mode={!isSidebarMode && !isCollapsed}
 		>

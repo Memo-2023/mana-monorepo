@@ -27,23 +27,23 @@
 		// Theme variants
 		...theme.variants.map((variant) => ({
 			id: variant,
-			label: `${THEME_DEFINITIONS[variant].emoji} ${THEME_DEFINITIONS[variant].label}`,
+			label: THEME_DEFINITIONS[variant].label,
+			icon: THEME_DEFINITIONS[variant].icon,
 			onClick: () => theme.setVariant(variant),
 			active: theme.variant === variant,
 		})),
 		// Separator and link to full themes page
 		{
 			id: 'all-themes',
-			label: '🎨 Alle Themes',
+			label: 'Alle Themes',
+			icon: 'palette',
 			onClick: () => goto('/themes'),
 			active: false,
 		},
 	]);
 
 	// Current theme variant label
-	let currentThemeVariantLabel = $derived(
-		`${THEME_DEFINITIONS[theme.variant].emoji} ${THEME_DEFINITIONS[theme.variant].label}`
-	);
+	let currentThemeVariantLabel = $derived(THEME_DEFINITIONS[theme.variant].label);
 
 	// Navigation items for Chat
 	const navItems: PillNavItem[] = [

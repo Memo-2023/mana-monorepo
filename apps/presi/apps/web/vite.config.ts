@@ -21,16 +21,20 @@ export default defineConfig({
 	},
 	ssr: {
 		noExternal: [
+			'@manacore/shared-icons',
 			'@manacore/shared-ui',
 			'@manacore/shared-theme',
+			'@manacore/shared-theme-ui',
 			'@manacore/shared-auth-ui',
 			'@manacore/shared-branding',
 		],
 	},
 	optimizeDeps: {
 		exclude: [
+			'@manacore/shared-icons',
 			'@manacore/shared-ui',
 			'@manacore/shared-theme',
+			'@manacore/shared-theme-ui',
 			'@manacore/shared-auth-ui',
 			'@manacore/shared-branding',
 		],

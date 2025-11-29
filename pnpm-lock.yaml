@@ -1728,12 +1728,18 @@ importers:
       '@manacore/shared-branding':
         specifier: workspace:*
         version: link:../../../../packages/shared-branding
+      '@manacore/shared-icons':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-icons
       '@manacore/shared-tailwind':
         specifier: workspace:*
         version: link:../../../../packages/shared-tailwind
       '@manacore/shared-theme':
         specifier: workspace:*
         version: link:../../../../packages/shared-theme
+      '@manacore/shared-theme-ui':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-theme-ui
       '@manacore/shared-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-ui
@@ -2089,6 +2095,18 @@ importers:
 
   apps/zitare/apps/web:
     dependencies:
+      '@manacore/shared-icons':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-icons
+      '@manacore/shared-tailwind':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-tailwind
+      '@manacore/shared-theme':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-theme
+      '@manacore/shared-theme-ui':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-theme-ui
       '@manacore/shared-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-ui
@@ -2108,15 +2126,12 @@ importers:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^5.0.0
         version: 5.1.1(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))
+      '@tailwindcss/vite':
+        specifier: ^4.1.7
+        version: 4.1.17(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.25
-      autoprefixer:
-        specifier: ^10.4.16
-        version: 10.4.22(postcss@8.5.6)
-      postcss:
-        specifier: ^8.4.32
-        version: 8.5.6
       prettier:
         specifier: ^3.1.1
         version: 3.6.2
@@ -2130,8 +2145,8 @@ importers:
         specifier: ^4.0.0
         version: 4.3.4(picomatch@4.0.3)(svelte@5.44.0)(typescript@5.9.3)
       tailwindcss:
-        specifier: ^3.4.0
-        version: 3.4.18(tsx@4.20.6)(yaml@2.8.1)
+        specifier: ^4.1.7
+        version: 4.1.17
       tslib:
         specifier: ^2.4.1
         version: 2.8.1
@@ -23336,6 +23351,13 @@ snapshots:
     dependencies:
       postcss-selector-parser: 6.0.10
       tailwindcss: 4.1.17
+
+  '@tailwindcss/vite@4.1.17(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))':
+    dependencies:
+      '@tailwindcss/node': 4.1.17
+      '@tailwindcss/oxide': 4.1.17
+      tailwindcss: 4.1.17
+      vite: 6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)
 
   '@tailwindcss/vite@4.1.17(vite@7.2.4(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))':
     dependencies:

@@ -1,8 +1,9 @@
 import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	plugins: [sveltekit()],
+	plugins: [tailwindcss(), sveltekit()],
 	server: {
 		port: 5177,
 		strictPort: true,
@@ -12,7 +13,11 @@ export default defineConfig({
 			'@zitare/shared',
 			'@zitare/web-ui',
 			'@zitare/content',
+			'@manacore/shared-icons',
 			'@manacore/shared-ui',
+			'@manacore/shared-tailwind',
+			'@manacore/shared-theme',
+			'@manacore/shared-theme-ui',
 		],
 	},
 	optimizeDeps: {
@@ -20,7 +25,11 @@ export default defineConfig({
 			'@zitare/shared',
 			'@zitare/web-ui',
 			'@zitare/content',
+			'@manacore/shared-icons',
 			'@manacore/shared-ui',
+			'@manacore/shared-tailwind',
+			'@manacore/shared-theme',
+			'@manacore/shared-theme-ui',
 		],
 	},
 });
