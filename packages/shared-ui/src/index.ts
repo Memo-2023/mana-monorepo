@@ -47,3 +47,14 @@ export type {
 	PillNavElement,
 	PillNavigationProps,
 } from './navigation';
+
+// Settings
+export {
+	SettingsPage,
+	SettingsSection,
+	SettingsCard,
+	SettingsRow,
+	SettingsToggle,
+	SettingsDangerZone,
+	SettingsDangerButton,
+} from './settings';

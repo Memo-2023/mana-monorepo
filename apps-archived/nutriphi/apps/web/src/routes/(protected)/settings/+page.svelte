@@ -2,6 +2,15 @@
 	import { goto } from '$app/navigation';
 	import { auth, user } from '$lib/stores/auth';
 	import { theme } from '$lib/stores/theme';
+	import {
+		SettingsPage,
+		SettingsSection,
+		SettingsCard,
+		SettingsRow,
+		SettingsToggle,
+		SettingsDangerZone,
+		SettingsDangerButton,
+	} from '@manacore/shared-ui';
 
 	let isDeleting = $state(false);
 	let showDeleteConfirm = $state(false);
@@ -25,129 +34,215 @@
 		await auth.signOut();
 		goto('/login');
 	}
+
+	function toggleDarkMode(value: boolean) {
+		theme.toggleMode();
+	}
 </script>
 
-<div class="mx-auto max-w-2xl space-y-6">
-	<!-- Header -->
-	<div>
-		<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Einstellungen</h1>
-		<p class="text-gray-600 dark:text-gray-400">Verwalte dein Konto und App-Einstellungen</p>
-	</div>
+<SettingsPage title="Einstellungen" subtitle="Verwalte dein Konto und App-Einstellungen">
+	<!-- Account Section -->
+	<SettingsSection title="Konto">
+		{#snippet icon()}
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+				/>
+			</svg>
+		{/snippet}
 
-	<!-- Account -->
-	<div class="rounded-2xl bg-white p-6 shadow-lg dark:bg-gray-800">
-		<h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Konto</h2>
-		<div class="space-y-4">
-			<div class="flex items-center justify-between">
-				<div>
-					<p class="font-medium text-gray-900 dark:text-white">E-Mail</p>
-					<p class="text-gray-600 dark:text-gray-400">{$user?.email || 'Nicht angemeldet'}</p>
-				</div>
-			</div>
-			<div class="flex items-center justify-between">
-				<div>
-					<p class="font-medium text-gray-900 dark:text-white">Benutzer-ID</p>
-					<p class="font-mono text-sm text-gray-600 dark:text-gray-400">{$user?.id || '—'}</p>
-				</div>
-			</div>
-		</div>
-	</div>
+		<SettingsCard>
+			<SettingsRow label="E-Mail" description={$user?.email || 'Nicht angemeldet'}>
+				{#snippet icon()}
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+						/>
+					</svg>
+				{/snippet}
+			</SettingsRow>
+			<SettingsRow label="Benutzer-ID" border={false}>
+				{#snippet icon()}
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
+						/>
+					</svg>
+				{/snippet}
+				<span class="font-mono text-xs text-[hsl(var(--muted-foreground))]">{$user?.id || '—'}</span>
+			</SettingsRow>
+		</SettingsCard>
+	</SettingsSection>
 
-	<!-- Appearance -->
-	<div class="rounded-2xl bg-white p-6 shadow-lg dark:bg-gray-800">
-		<h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Erscheinungsbild</h2>
-		<div class="space-y-4">
-			<div class="flex items-center justify-between">
-				<div>
-					<p class="font-medium text-gray-900 dark:text-white">Dunkles Design</p>
-					<p class="text-sm text-gray-600 dark:text-gray-400">
-						Aktiviere den Dark Mode für eine augenfreundliche Ansicht
-					</p>
-				</div>
-				<button
-					onclick={() => theme.toggleMode()}
-					class="relative h-7 w-12 rounded-full transition-colors {effectiveMode === 'dark'
-						? 'bg-green-500'
-						: 'bg-gray-200 dark:bg-gray-700'}"
-				>
-					<span
-						class="absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-transform {effectiveMode ===
-						'dark'
-							? 'translate-x-6'
-							: 'translate-x-1'}"
-					></span>
-				</button>
-			</div>
-		</div>
-	</div>
+	<!-- Appearance Section -->
+	<SettingsSection title="Erscheinungsbild">
+		{#snippet icon()}
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+				/>
+			</svg>
+		{/snippet}
 
-	<!-- Data Management -->
-	<div class="rounded-2xl bg-white p-6 shadow-lg dark:bg-gray-800">
-		<h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Datenverwaltung</h2>
-		<div class="space-y-4">
-			<div class="flex items-center justify-between">
-				<div>
-					<p class="font-medium text-gray-900 dark:text-white">Daten exportieren</p>
-					<p class="text-sm text-gray-600 dark:text-gray-400">
-						Exportiere alle deine Mahlzeiten und Statistiken
-					</p>
-				</div>
-				<button
-					onclick={() => goto('/export')}
-					class="rounded-xl bg-gray-100 px-4 py-2 font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-				>
+		<SettingsCard>
+			<SettingsToggle
+				label="Dunkles Design"
+				description="Aktiviere den Dark Mode für eine augenfreundliche Ansicht"
+				isOn={effectiveMode === 'dark'}
+				onToggle={toggleDarkMode}
+			>
+				{#snippet icon()}
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+						/>
+					</svg>
+				{/snippet}
+			</SettingsToggle>
+		</SettingsCard>
+	</SettingsSection>
+
+	<!-- Data Management Section -->
+	<SettingsSection title="Datenverwaltung">
+		{#snippet icon()}
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
+				/>
+			</svg>
+		{/snippet}
+
+		<SettingsCard>
+			<SettingsRow
+				label="Daten exportieren"
+				description="Exportiere alle deine Mahlzeiten und Statistiken"
+				onclick={() => goto('/export')}
+			>
+				{#snippet icon()}
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+						/>
+					</svg>
+				{/snippet}
+				<span class="px-4 py-2 text-sm font-medium bg-[hsl(var(--muted))] text-[hsl(var(--foreground))] rounded-lg">
 					Export
-				</button>
-			</div>
+				</span>
+			</SettingsRow>
+		</SettingsCard>
 
-			<hr class="border-gray-200 dark:border-gray-700" />
-
-			<div class="flex items-center justify-between">
-				<div>
-					<p class="font-medium text-red-600 dark:text-red-400">Alle Daten löschen</p>
-					<p class="text-sm text-gray-600 dark:text-gray-400">
-						Löscht alle deine Mahlzeiten und Statistiken unwiderruflich
-					</p>
-				</div>
-				{#if showDeleteConfirm}
+		<SettingsDangerZone title="Gefahrenbereich">
+			{#if showDeleteConfirm}
+				<div class="px-5 py-4 flex items-center justify-between gap-4">
+					<div>
+						<p class="font-medium text-[hsl(var(--foreground))]">Alle Daten löschen</p>
+						<p class="text-sm text-[hsl(var(--muted-foreground))]">
+							Löscht alle deine Mahlzeiten und Statistiken unwiderruflich
+						</p>
+					</div>
 					<div class="flex gap-2">
 						<button
 							onclick={() => (showDeleteConfirm = false)}
-							class="rounded-xl bg-gray-100 px-4 py-2 font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+							class="px-4 py-2 text-sm font-medium bg-[hsl(var(--muted))] text-[hsl(var(--foreground))] rounded-lg hover:bg-[hsl(var(--muted)/0.8)]"
 						>
 							Abbrechen
 						</button>
 						<button
 							onclick={handleDeleteAllData}
 							disabled={isDeleting}
-							class="rounded-xl bg-red-500 px-4 py-2 font-medium text-white hover:bg-red-600 disabled:opacity-50"
+							class="px-4 py-2 text-sm font-medium bg-[hsl(var(--destructive))] text-white rounded-lg hover:bg-[hsl(var(--destructive)/0.9)] disabled:opacity-50"
 						>
 							{isDeleting ? 'Wird gelöscht...' : 'Bestätigen'}
 						</button>
 					</div>
-				{:else}
-					<button
-						onclick={handleDeleteAllData}
-						class="rounded-xl bg-red-100 px-4 py-2 font-medium text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
-					>
-						Löschen
-					</button>
-				{/if}
-			</div>
-		</div>
-	</div>
+				</div>
+			{:else}
+				<SettingsDangerButton
+					label="Alle Daten löschen"
+					description="Löscht alle deine Mahlzeiten und Statistiken unwiderruflich"
+					buttonText="Löschen"
+					onclick={handleDeleteAllData}
+					border={false}
+				>
+					{#snippet icon()}
+						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+							/>
+						</svg>
+					{/snippet}
+				</SettingsDangerButton>
+			{/if}
+		</SettingsDangerZone>
+	</SettingsSection>
 
-	<!-- Logout -->
-	<button
-		onclick={handleLogout}
-		class="w-full rounded-2xl border-2 border-red-500 bg-white py-4 font-semibold text-red-600 transition-colors hover:bg-red-50 dark:bg-gray-800 dark:hover:bg-red-900/20"
-	>
-		Abmelden
-	</button>
+	<!-- Logout Section -->
+	<SettingsDangerZone title="Abmelden">
+		<SettingsDangerButton
+			label="Abmelden"
+			description="Von deinem Konto abmelden"
+			buttonText="Abmelden"
+			onclick={handleLogout}
+			border={false}
+		>
+			{#snippet icon()}
+				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+					/>
+				</svg>
+			{/snippet}
+		</SettingsDangerButton>
+	</SettingsDangerZone>
 
 	<!-- App Info -->
-	<div class="text-center text-sm text-gray-500 dark:text-gray-400">
-		<p>Nutriphi Web v0.1.0</p>
-		<p>Teil des Mana Core Ökosystems</p>
-	</div>
-</div>
+	<SettingsSection title="Über">
+		{#snippet icon()}
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+		{/snippet}
+
+		<SettingsCard>
+			<SettingsRow label="Version" border={false}>
+				<span class="text-sm text-[hsl(var(--muted-foreground))]">0.1.0</span>
+			</SettingsRow>
+		</SettingsCard>
+
+		<p class="text-center text-sm text-[hsl(var(--muted-foreground))] mt-4">
+			Teil des Mana Core Ökosystems
+		</p>
+	</SettingsSection>
+</SettingsPage>

@@ -4,15 +4,15 @@
 	import { theme } from '$lib/stores/theme';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { ThemeColorPreview } from '@manacore/shared-theme-ui';
-	import { Sparkle, Leaf, Hexagon, Waves } from '@manacore/shared-icons';
-
-	// Theme icon mapping
-	const themeIcons = {
-		sparkle: Sparkle,
-		leaf: Leaf,
-		hexagon: Hexagon,
-		waves: Waves,
-	} as const;
+	import {
+		SettingsPage,
+		SettingsSection,
+		SettingsCard,
+		SettingsRow,
+		SettingsToggle,
+		SettingsDangerZone,
+		SettingsDangerButton,
+	} from '@manacore/shared-ui';
 
 	// Settings state
 	let language = $state<'de' | 'en'>('de');
@@ -32,7 +32,7 @@
 		localStorage.setItem(key, String(value));
 	}
 
-	function toggleDarkMode() {
+	function toggleDarkMode(value: boolean) {
 		theme.toggleMode();
 	}
 
@@ -59,388 +59,191 @@
 	<title>Einstellungen - Zitare</title>
 </svelte:head>
 
-<div class="settings-page">
-	<div class="header-container">
-		<h1>Einstellungen</h1>
-	</div>
-
+<SettingsPage title="Einstellungen" subtitle="Passe die App an deine Vorlieben an.">
 	<!-- Personal Section -->
-	<section class="settings-section">
-		<h2 class="section-title">Persönlich</h2>
+	<SettingsSection title="Persönlich">
+		{#snippet icon()}
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+				/>
+			</svg>
+		{/snippet}
 
-		<div class="setting-card">
-			<div class="setting-header">
-				<h3>Dein Name</h3>
+		<SettingsCard>
+			<div class="px-5 py-4">
+				<label class="block">
+					<span class="font-medium text-[hsl(var(--foreground))] mb-2 block">Dein Name</span>
+					<input
+						type="text"
+						bind:value={userName}
+						onblur={saveUserName}
+						placeholder="Name eingeben..."
+						class="w-full px-3 py-2 rounded-lg border-2 border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] focus:border-[hsl(var(--primary))] focus:outline-none transition-colors"
+					/>
+				</label>
+				<p class="text-sm text-[hsl(var(--muted-foreground))] mt-2">
+					Wird als Standard-Autor für eigene Zitate verwendet
+				</p>
 			</div>
-			<input
-				type="text"
-				bind:value={userName}
-				onblur={saveUserName}
-				placeholder="Name eingeben..."
-				class="text-input"
-			/>
-			<p class="setting-description">Wird als Standard-Autor für eigene Zitate verwendet</p>
-		</div>
-	</section>
+		</SettingsCard>
+	</SettingsSection>
 
 	<!-- Appearance Section -->
-	<section class="settings-section">
-		<h2 class="section-title">Aussehen</h2>
-
-		<!-- Dark Mode Toggle -->
-		<div class="setting-card">
-			<div class="setting-row">
-				<div class="setting-content">
-					<h3>Dark Mode</h3>
-					<p class="setting-description">Dunkles Farbschema verwenden</p>
-				</div>
-				<label class="toggle">
-					<input type="checkbox" checked={theme.isDark} onchange={toggleDarkMode} />
-					<span class="toggle-slider"></span>
-				</label>
-			</div>
-		</div>
-
-		<!-- Current Theme -->
-		<div class="setting-card">
-			<div class="setting-row">
-				<div class="setting-content">
-					<h3>Aktuelles Theme</h3>
-					<p class="setting-description theme-label">
-						{#if THEME_DEFINITIONS[theme.variant].icon && themeIcons[THEME_DEFINITIONS[theme.variant].icon as keyof typeof themeIcons]}
-							<svelte:component
-								this={themeIcons[THEME_DEFINITIONS[theme.variant].icon as keyof typeof themeIcons]}
-								size={16}
-								weight="duotone"
-								class="theme-icon"
-							/>
-						{/if}
-						{THEME_DEFINITIONS[theme.variant].label}
-					</p>
-				</div>
-				<button class="theme-btn" onclick={() => goto('/themes')}>
-					Themes wählen
-				</button>
-			</div>
-		</div>
-
-		<!-- Theme Preview -->
-		<div class="setting-card">
-			<div class="setting-header">
-				<h3>Farbvorschau</h3>
-				<p class="setting-description">So sieht die App mit dem aktuellen Theme aus</p>
-			</div>
-
-			<div class="theme-preview">
-				<ThemeColorPreview
-					variant={theme.variant}
-					mode={theme.isDark ? 'dark' : 'light'}
-					size="lg"
+	<SettingsSection title="Aussehen">
+		{#snippet icon()}
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
 				/>
+			</svg>
+		{/snippet}
+
+		<SettingsCard>
+			<SettingsToggle
+				label="Dark Mode"
+				description="Dunkles Farbschema verwenden"
+				isOn={theme.isDark}
+				onToggle={toggleDarkMode}
+			>
+				{#snippet icon()}
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+						/>
+					</svg>
+				{/snippet}
+			</SettingsToggle>
+
+			<SettingsRow
+				label="Aktuelles Theme"
+				description={THEME_DEFINITIONS[theme.variant].label}
+				onclick={() => goto('/themes')}
+			>
+				{#snippet icon()}
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+						/>
+					</svg>
+				{/snippet}
+				<span class="px-3 py-1.5 text-sm font-medium bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] rounded-lg">
+					Themes wählen
+				</span>
+			</SettingsRow>
+
+			<div class="px-5 py-4 border-t border-[hsl(var(--border))]">
+				<p class="font-medium text-[hsl(var(--foreground))] mb-2">Farbvorschau</p>
+				<p class="text-sm text-[hsl(var(--muted-foreground))] mb-4">
+					So sieht die App mit dem aktuellen Theme aus
+				</p>
+				<div class="flex justify-center">
+					<ThemeColorPreview
+						variant={theme.variant}
+						mode={theme.isDark ? 'dark' : 'light'}
+						size="lg"
+					/>
+				</div>
 			</div>
-		</div>
-	</section>
+		</SettingsCard>
+	</SettingsSection>
 
 	<!-- Language Section -->
-	<section class="settings-section">
-		<h2 class="section-title">Sprache</h2>
+	<SettingsSection title="Sprache">
+		{#snippet icon()}
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+				/>
+			</svg>
+		{/snippet}
 
-		<div class="setting-card">
-			<div class="setting-row">
-				<div class="setting-content">
-					<h3>Sprache</h3>
-					<p class="setting-description">Sprache der App und Zitate</p>
-				</div>
-				<div class="language-toggle">
-					<button
-						class="lang-btn"
-						class:active={language === 'de'}
-						onclick={() => setLanguageSetting('de')}
-					>
-						DE
-					</button>
-					<button
-						class="lang-btn"
-						class:active={language === 'en'}
-						onclick={() => setLanguageSetting('en')}
-					>
-						EN
-					</button>
+		<SettingsCard>
+			<div class="px-5 py-4">
+				<div class="flex items-center justify-between">
+					<div>
+						<p class="font-medium text-[hsl(var(--foreground))]">Sprache</p>
+						<p class="text-sm text-[hsl(var(--muted-foreground))]">Sprache der App und Zitate</p>
+					</div>
+					<div class="flex rounded-full overflow-hidden border border-[hsl(var(--border))]">
+						<button
+							class="px-4 py-2 text-sm font-medium transition-colors
+								{language === 'de'
+								? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
+								: 'bg-transparent text-[hsl(var(--foreground))]'}"
+							onclick={() => setLanguageSetting('de')}
+						>
+							DE
+						</button>
+						<button
+							class="px-4 py-2 text-sm font-medium transition-colors
+								{language === 'en'
+								? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
+								: 'bg-transparent text-[hsl(var(--foreground))]'}"
+							onclick={() => setLanguageSetting('en')}
+						>
+							EN
+						</button>
+					</div>
 				</div>
 			</div>
-		</div>
-	</section>
+		</SettingsCard>
+	</SettingsSection>
 
 	<!-- About Section -->
-	<section class="settings-section">
-		<h2 class="section-title">Über</h2>
+	<SettingsSection title="Über">
+		{#snippet icon()}
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+		{/snippet}
 
-		<div class="setting-card">
-			<div class="setting-row">
-				<span>Version</span>
-				<span class="setting-value">1.0.0</span>
-			</div>
-		</div>
-	</section>
+		<SettingsCard>
+			<SettingsRow label="Version" border={false}>
+				<span class="text-[hsl(var(--muted-foreground))]">1.0.0</span>
+			</SettingsRow>
+		</SettingsCard>
+	</SettingsSection>
 
 	<!-- Data Section -->
-	<section class="settings-section">
-		<h2 class="section-title">Daten</h2>
-
-		<div class="setting-card danger">
-			<button class="danger-btn" onclick={resetAllData}>
-				<div>
-					<h3 class="danger-title">Alle Daten zurücksetzen</h3>
-					<p class="setting-description">Löscht Favoriten, Playlists und Einstellungen</p>
-				</div>
-				<span class="danger-icon">🗑️</span>
-			</button>
-		</div>
-	</section>
-</div>
-
-<style>
-	.settings-page {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding-bottom: var(--spacing-2xl);
-	}
-
-	.header-container {
-		max-width: 700px;
-		margin: 0 auto var(--spacing-2xl);
-	}
-
-	h1 {
-		font-size: 2rem;
-		margin: 0;
-		color: hsl(var(--foreground));
-	}
-
-	.settings-section {
-		max-width: 700px;
-		margin: 0 auto var(--spacing-2xl);
-	}
-
-	.section-title {
-		font-size: 0.75rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		color: hsl(var(--muted-foreground));
-		margin-bottom: var(--spacing-md);
-	}
-
-	.setting-card {
-		background: hsl(var(--card));
-		border: 1px solid hsl(var(--border));
-		border-radius: var(--radius-lg);
-		padding: var(--spacing-lg);
-		margin-bottom: var(--spacing-md);
-		transition:
-			transform var(--transition-base),
-			box-shadow var(--transition-base);
-	}
-
-	.setting-card:hover {
-		transform: translateY(-2px);
-		box-shadow: var(--shadow-md);
-	}
-
-	.setting-header {
-		margin-bottom: 1rem;
-	}
-
-	.setting-row {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 1rem;
-	}
-
-	.setting-content {
-		flex: 1;
-	}
-
-	h3 {
-		font-size: 1rem;
-		font-weight: 600;
-		color: hsl(var(--foreground));
-		margin: 0 0 var(--spacing-xs) 0;
-	}
-
-	.setting-description {
-		font-size: 0.875rem;
-		color: hsl(var(--muted-foreground));
-		margin: 0;
-	}
-
-	.setting-description.theme-label {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-	}
-
-	.setting-description.theme-label :global(.theme-icon) {
-		color: hsl(var(--primary));
-	}
-
-	.setting-value {
-		color: hsl(var(--muted-foreground));
-		font-size: 0.95rem;
-	}
-
-	/* Text Input */
-	.text-input {
-		width: 100%;
-		padding: var(--spacing-sm) var(--spacing-md);
-		border-radius: var(--radius-md);
-		border: 2px solid hsl(var(--border));
-		background: hsl(var(--background));
-		color: hsl(var(--foreground));
-		font-size: 1rem;
-		margin-bottom: var(--spacing-sm);
-		transition: border-color var(--transition-fast);
-	}
-
-	.text-input:focus {
-		outline: none;
-		border-color: hsl(var(--primary));
-	}
-
-	/* Toggle Switch */
-	.toggle {
-		position: relative;
-		width: 51px;
-		height: 31px;
-		display: inline-block;
-		cursor: pointer;
-	}
-
-	.toggle input {
-		opacity: 0;
-		width: 0;
-		height: 0;
-	}
-
-	.toggle-slider {
-		position: absolute;
-		cursor: pointer;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background-color: hsl(var(--border));
-		transition: var(--transition-base);
-		border-radius: 31px;
-	}
-
-	.toggle-slider:before {
-		position: absolute;
-		content: '';
-		height: 25px;
-		width: 25px;
-		left: 3px;
-		bottom: 3px;
-		background-color: white;
-		transition: var(--transition-base);
-		border-radius: 50%;
-	}
-
-	.toggle input:checked + .toggle-slider {
-		background-color: hsl(var(--primary));
-	}
-
-	.toggle input:checked + .toggle-slider:before {
-		transform: translateX(20px);
-	}
-
-	/* Theme Button */
-	.theme-btn {
-		padding: var(--spacing-sm) var(--spacing-md);
-		border-radius: var(--radius-md);
-		background: hsl(var(--primary));
-		color: hsl(var(--primary-foreground));
-		font-weight: 500;
-		border: none;
-		cursor: pointer;
-		transition: background var(--transition-fast);
-	}
-
-	.theme-btn:hover {
-		background: hsl(var(--primary) / 0.9);
-	}
-
-	/* Theme Preview */
-	.theme-preview {
-		margin-top: var(--spacing-md);
-		display: flex;
-		justify-content: center;
-	}
-
-	/* Language Toggle */
-	.language-toggle {
-		display: flex;
-		border-radius: var(--radius-full);
-		overflow: hidden;
-		background: hsl(var(--card));
-		border: 1px solid hsl(var(--border));
-	}
-
-	.lang-btn {
-		padding: var(--spacing-sm) var(--spacing-md);
-		border: none;
-		background: transparent;
-		color: hsl(var(--foreground));
-		font-weight: 500;
-		cursor: pointer;
-		transition: background var(--transition-fast);
-	}
-
-	.lang-btn.active {
-		background: hsl(var(--primary));
-		color: hsl(var(--primary-foreground));
-	}
-
-	/* Danger Zone */
-	.setting-card.danger {
-		background: hsl(var(--destructive) / 0.1);
-		border-color: hsl(var(--destructive) / 0.2);
-	}
-
-	.danger-btn {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		width: 100%;
-		background: transparent;
-		border: none;
-		cursor: pointer;
-		padding: 0;
-		text-align: left;
-	}
-
-	.danger-title {
-		color: hsl(var(--destructive));
-	}
-
-	.danger-icon {
-		font-size: 1.25rem;
-	}
-
-	/* Mobile Responsiveness */
-	@media (max-width: 768px) {
-		.header-container,
-		.settings-section {
-			max-width: 100%;
-		}
-
-		h1 {
-			font-size: 1.5rem;
-		}
-
-		.section-title {
-			font-size: 0.7rem;
-		}
-	}
-</style>
+	<SettingsDangerZone title="Daten">
+		<SettingsDangerButton
+			label="Alle Daten zurücksetzen"
+			description="Löscht Favoriten, Playlists und Einstellungen"
+			buttonText="Zurücksetzen"
+			onclick={resetAllData}
+			border={false}
+		>
+			{#snippet icon()}
+				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+					/>
+				</svg>
+			{/snippet}
+		</SettingsDangerButton>
+	</SettingsDangerZone>
+</SettingsPage>

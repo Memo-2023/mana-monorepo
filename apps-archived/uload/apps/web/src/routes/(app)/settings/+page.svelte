@@ -4,6 +4,14 @@
 	import { page } from '$app/stores';
 	import { toastMessages, notify } from '$lib/services/toast';
 	import * as m from '$paraglide/messages';
+	import {
+		SettingsPage,
+		SettingsSection,
+		SettingsCard,
+		SettingsRow,
+		SettingsDangerZone,
+		SettingsDangerButton,
+	} from '@manacore/shared-ui';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	let isSubmitting = $state(false);
@@ -28,14 +36,8 @@
 	}
 </script>
 
-<div class="min-h-screen bg-theme-background">
-	<div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-		<div class="mb-8">
-			<h1 class="text-3xl font-bold text-theme-text dark:text-white">Settings</h1>
-			<p class="mt-2 text-theme-text dark:text-theme-text">Manage your account and preferences</p>
-		</div>
-
-		<div class="space-y-6">
+<SettingsPage title="Settings" subtitle="Manage your account and preferences" maxWidth="3xl">
+	<div class="space-y-6">
 			<!-- Profile Section -->
 			<div class="rounded-xl bg-white p-6 shadow-xl dark:bg-theme-surface">
 				<h2 class="mb-6 text-xl font-semibold text-theme-text dark:text-white">
@@ -779,5 +781,4 @@
 				</div>
 			</div>
 		</div>
-	</div>
-</div>
+</SettingsPage>
