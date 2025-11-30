@@ -453,20 +453,21 @@
 	.submenu-container {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
-		padding-left: 1rem;
-		margin-top: -0.25rem;
-		margin-bottom: 0.25rem;
+		gap: 0.5rem;
+		margin-top: 0;
+		margin-bottom: 0;
 	}
 
 	.submenu-item {
-		padding: 0.375rem 0.75rem;
-		font-size: 0.8125rem;
+		padding: 0.5rem 0.875rem;
+		font-size: 0.875rem;
 		animation: fanIn 0.15s ease-out forwards;
 		opacity: 0;
+		justify-content: flex-start;
 	}
 
 	.submenu-item .pill-label {
 		flex: 1;
+		text-align: left;
 	}
 </style>

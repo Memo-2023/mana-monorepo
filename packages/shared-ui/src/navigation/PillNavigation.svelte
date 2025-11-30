@@ -457,10 +457,14 @@
 						...(showLanguageSwitcher && languageItems.length > 0
 							? [
 									{ id: 'language-divider', label: '', divider: true },
-									...languageItems.map((item) => ({
-										...item,
-										id: `lang-${item.id}`,
-									})),
+									{
+										id: 'language',
+										label: currentLanguageLabel,
+										submenu: languageItems.map((item) => ({
+											...item,
+											id: `lang-${item.id}`,
+										})),
+									},
 								]
 							: []),
 						{ id: 'logout-divider', label: '', divider: true },

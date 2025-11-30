@@ -269,7 +269,7 @@ export function getLanguageDropdownItems(
 		const info = getLanguageInfo(locale);
 		return {
 			id: locale,
-			label: info ? `${info.emoji} ${info.nativeName}` : locale.toUpperCase(),
+			label: info ? `${info.emoji}  ${info.nativeName}` : locale.toUpperCase(),
 			onClick: () => onLocaleChange(locale),
 			active: currentLocale === locale,
 		};
@@ -279,12 +279,12 @@ export function getLanguageDropdownItems(
 /**
  * Get current language label for PillDropdown trigger
  * @param currentLocale - Currently selected locale
- * @returns Label with flag emoji and language code (e.g., "🇩🇪 DE")
+ * @returns Label with flag emoji and native name (e.g., "🇩🇪 Deutsch")
  */
 export function getCurrentLanguageLabel(currentLocale: string): string {
 	const info = getLanguageInfo(currentLocale);
 	if (info) {
-		return `${info.emoji} ${currentLocale.toUpperCase()}`;
+		return `${info.emoji}  ${info.nativeName}`;
 	}
 	return currentLocale.toUpperCase();
 }
