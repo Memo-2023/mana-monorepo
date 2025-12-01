@@ -65,16 +65,6 @@ jobs:
             fi
           done < coverage_dirs.txt
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./coverage-combined
-          flags: unittests
-          name: manacore-monorepo
-          fail_ci_if_error: false
-          verbose: true
-
       - name: Generate coverage summary
         run: |
           echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY

@@ -67,16 +67,6 @@ jobs:
         env:
           NODE_ENV: test
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./apps/${{ matrix.project }}/apps/backend/coverage/lcov.info
-          flags: backend-${{ matrix.project }}
-          name: backend-${{ matrix.project }}
-          fail_ci_if_error: false
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
       - name: Check coverage thresholds
         run: |
           echo "Checking coverage meets 80% threshold..."
@@ -132,16 +122,6 @@ jobs:
         env:
           NODE_ENV: test
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./apps/${{ matrix.project }}/apps/mobile/coverage/lcov.info
-          flags: mobile-${{ matrix.project }}
-          name: mobile-${{ matrix.project }}
-          fail_ci_if_error: false
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
   # ====================
   # 3. TEST WEB APPS
   # ====================
@@ -193,16 +173,6 @@ jobs:
         run: pnpm --filter @${{ matrix.project }}/web test:unit -- --coverage --run
         env:
           NODE_ENV: test
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./apps/${{ matrix.project }}/apps/web/coverage/lcov.info
-          flags: web-${{ matrix.project }}
-          name: web-${{ matrix.project }}
-          fail_ci_if_error: false
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # ====================
   # 4. E2E TESTS (WEB)
@@ -297,16 +267,6 @@ jobs:
         env:
           NODE_ENV: test
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./packages/*/coverage/lcov.info
-          flags: shared-packages
-          name: shared-packages
-          fail_ci_if_error: false
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
   # ====================
   # 6. LINT & FORMAT CHECK
   # ====================
@@ -368,15 +328,11 @@ jobs:
         run: |
           echo "## 📊 Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Coverage reports uploaded to Codecov" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Jobs Status" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Backend Tests: ${{ needs.test-backends.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Mobile Tests: ${{ needs.test-mobile.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Web Tests: ${{ needs.test-web.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Shared Packages Tests: ${{ needs.test-shared-packages.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "View detailed coverage at [Codecov](https://codecov.io/gh/${{ github.repository }})" >> $GITHUB_STEP_SUMMARY
+          echo "- Backend Tests: ${{ needs.test-backends.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Mobile Tests: ${{ needs.test-mobile.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Web Tests: ${{ needs.test-web.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Shared Packages Tests: ${{ needs.test-shared-packages.result }}" >> $GITHUB_STEP_SUMMARY
 
   # ====================
   # 8. TEST STATUS CHECK
