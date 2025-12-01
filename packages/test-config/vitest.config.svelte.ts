@@ -66,9 +66,6 @@ export default defineConfig({
 		// Hooks timeout
 		hookTimeout: 10000,
 
-		// Watch mode ignore patterns
-		watchExclude: ['**/node_modules/**', '**/build/**', '**/.svelte-kit/**', '**/coverage/**'],
-
 		// Reporters
 		reporters: process.env.CI ? ['verbose', 'github-actions'] : ['verbose'],
 

@@ -71,9 +71,6 @@ export default defineConfig({
 		// Teardown timeout
 		teardownTimeout: 10000,
 
-		// Watch mode ignore patterns
-		watchExclude: ['**/node_modules/**', '**/dist/**', '**/coverage/**'],
-
 		// Reporters
 		reporters: process.env.CI ? ['verbose', 'github-actions'] : ['verbose'],
 
