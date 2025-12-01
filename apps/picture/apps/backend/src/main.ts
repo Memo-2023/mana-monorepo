@@ -8,14 +8,14 @@ async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
 	// Enable CORS for mobile and web apps
-	const allowedOrigins = [
+	const allowedOrigins = process.env.CORS_ORIGINS?.split(',').map((origin) => origin.trim()) || [
 		'http://localhost:3000',
 		'http://localhost:5173',
 		'http://localhost:5174',
 		'http://localhost:5175',
 		'http://localhost:8081',
 		'exp://localhost:8081',
-		'http://localhost:3001', // Mana Core Auth
+		'http://localhost:3001',
 	];
 
 	app.enableCors({
@@ -47,9 +47,9 @@ async function bootstrap() {
 	});
 
 	// Set global prefix for API routes
-	app.setGlobalPrefix('api');
+	app.setGlobalPrefix('api/v1');
 
-	const port = process.env.PORT || 3003;
+	const port = process.env.PORT || 3006;
 	await app.listen(port);
 	console.log(`Picture backend running on http://localhost:${port}`);
 }

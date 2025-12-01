@@ -1,10 +1,10 @@
-import { Controller, Post, Put, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { SlideService } from './slide.service';
 import { CreateSlideDto, UpdateSlideDto, ReorderSlidesDto } from './slide.dto';
-import { AuthGuard } from '../auth/auth.guard';
+import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 
 @Controller()
-@UseGuards(AuthGuard)
+@UseGuards(JwtAuthGuard)
 export class SlideController {
 	constructor(private readonly slideService: SlideService) {}
 
@@ -12,27 +12,27 @@ export class SlideController {
 	async create(
 		@Param('deckId') deckId: string,
 		@Body() createSlideDto: CreateSlideDto,
-		@Request() req: { user: { sub: string } }
+		@CurrentUser() user: CurrentUserData
 	) {
-		return this.slideService.create(deckId, req.user.sub, createSlideDto);
+		return this.slideService.create(deckId, user.userId, createSlideDto);
 	}
 
 	@Put('slides/:id')
 	async update(
 		@Param('id') id: string,
 		@Body() updateSlideDto: UpdateSlideDto,
-		@Request() req: { user: { sub: string } }
+		@CurrentUser() user: CurrentUserData
 	) {
-		return this.slideService.update(id, req.user.sub, updateSlideDto);
+		return this.slideService.update(id, user.userId, updateSlideDto);
 	}
 
 	@Delete('slides/:id')
-	async remove(@Param('id') id: string, @Request() req: { user: { sub: string } }) {
-		return this.slideService.remove(id, req.user.sub);
+	async remove(@Param('id') id: string, @CurrentUser() user: CurrentUserData) {
+		return this.slideService.remove(id, user.userId);
 	}
 
 	@Put('slides/reorder')
-	async reorder(@Body() reorderDto: ReorderSlidesDto, @Request() req: { user: { sub: string } }) {
-		return this.slideService.reorder(req.user.sub, reorderDto);
+	async reorder(@Body() reorderDto: ReorderSlidesDto, @CurrentUser() user: CurrentUserData) {
+		return this.slideService.reorder(user.userId, reorderDto);
 	}
 }

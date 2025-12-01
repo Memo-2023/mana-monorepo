@@ -36,7 +36,7 @@ async function bootstrap() {
 	});
 
 	// Global prefix
-	app.setGlobalPrefix('v1', {
+	app.setGlobalPrefix('api/v1', {
 		exclude: ['health', 'health/ready', 'health/live'],
 	});
 

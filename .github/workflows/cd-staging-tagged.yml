@@ -1,0 +1,368 @@
+name: CD - Staging (Tagged Releases)
+
+on:
+  push:
+    tags:
+      # Pattern: {project}-staging-v{version} or {project}-v{version}-staging
+      # Examples: chat-staging-v1.0.0, picture-v2.1.0-staging, mana-core-auth-staging-v1.0.0
+      # For multi-app: chat-all-staging-v1.0.0 (deploys backend + web + landing)
+      - '*-staging-v*'
+      - '*-v*-staging'
+  workflow_dispatch:
+    inputs:
+      project:
+        description: 'Project to deploy'
+        required: true
+        type: choice
+        options:
+          - chat
+          - picture
+          - manadeck
+          - zitare
+          - presi
+          - mana-core-auth
+      apps:
+        description: 'Apps to deploy (comma-separated: backend,web,landing or "all")'
+        required: true
+        type: string
+        default: 'backend'
+      version:
+        description: 'Version tag (e.g., v1.0.0)'
+        required: false
+        type: string
+        default: 'latest'
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9.15.0'
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
+
+jobs:
+  # Parse tag or inputs to determine what to deploy
+  parse-deployment:
+    name: Parse Deployment Target
+    runs-on: ubuntu-latest
+    outputs:
+      project: ${{ steps.parse.outputs.project }}
+      version: ${{ steps.parse.outputs.version }}
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Parse tag or inputs
+        id: parse
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            # Parse from tag: {project}-staging-v{version} or {project}-v{version}-staging
+            # Also supports: {project}-all-staging-v{version} for multi-app deploy
+            TAG="${GITHUB_REF#refs/tags/}"
+            echo "Parsing tag: $TAG"
+
+            # Extract project, app hint, and version from tag
+            if [[ "$TAG" =~ ^(.+)-all-staging-v(.+)$ ]]; then
+              PROJECT="${BASH_REMATCH[1]}"
+              VERSION="v${BASH_REMATCH[2]}"
+              APPS="all"
+            elif [[ "$TAG" =~ ^(.+)-staging-v(.+)$ ]]; then
+              PROJECT="${BASH_REMATCH[1]}"
+              VERSION="v${BASH_REMATCH[2]}"
+              APPS="backend"
+            elif [[ "$TAG" =~ ^(.+)-v(.+)-staging$ ]]; then
+              PROJECT="${BASH_REMATCH[1]}"
+              VERSION="v${BASH_REMATCH[2]}"
+              APPS="backend"
+            else
+              echo "Invalid tag format: $TAG"
+              exit 1
+            fi
+          else
+            # Use workflow dispatch inputs
+            PROJECT="${{ github.event.inputs.project }}"
+            APPS="${{ github.event.inputs.apps }}"
+            VERSION="${{ github.event.inputs.version }}"
+          fi
+
+          echo "Project: $PROJECT"
+          echo "Apps: $APPS"
+          echo "Version: $VERSION"
+
+          echo "project=$PROJECT" >> $GITHUB_OUTPUT
+          echo "apps=$APPS" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate build matrix
+        id: matrix
+        run: |
+          PROJECT="${{ steps.parse.outputs.project }}"
+          APPS="${{ steps.parse.outputs.apps }}"
+          VERSION="${{ steps.parse.outputs.version }}"
+
+          # Define available apps per project
+          declare -A PROJECT_APPS
+          PROJECT_APPS[chat]="backend,web,landing"
+          PROJECT_APPS[picture]="backend,web,landing"
+          PROJECT_APPS[manadeck]="backend,web"
+          PROJECT_APPS[zitare]="backend,web"
+          PROJECT_APPS[presi]="backend,web"
+          PROJECT_APPS[mana-core-auth]="service"
+
+          # Expand "all" to available apps
+          if [ "$APPS" == "all" ]; then
+            APPS="${PROJECT_APPS[$PROJECT]}"
+          fi
+
+          # Build JSON matrix
+          MATRIX='{"include":['
+          FIRST=true
+
+          IFS=',' read -ra APP_ARRAY <<< "$APPS"
+          for APP in "${APP_ARRAY[@]}"; do
+            APP=$(echo "$APP" | xargs)  # Trim whitespace
+
+            # Determine paths based on project and app
+            case "$PROJECT" in
+              mana-core-auth)
+                DOCKERFILE_PATH="services/mana-core-auth/Dockerfile"
+                CONTEXT_PATH="."
+                IMAGE_NAME="mana-core-auth"
+                PORT="3001"
+                HEALTH_PATH="/api/v1/health"
+                ;;
+              *)
+                case "$APP" in
+                  backend|service)
+                    DOCKERFILE_PATH="apps/$PROJECT/apps/backend/Dockerfile"
+                    CONTEXT_PATH="."
+                    IMAGE_NAME="${PROJECT}-backend"
+                    ;;
+                  web)
+                    DOCKERFILE_PATH="docker/templates/Dockerfile.sveltekit"
+                    CONTEXT_PATH="apps/$PROJECT/apps/web"
+                    IMAGE_NAME="${PROJECT}-web"
+                    ;;
+                  landing)
+                    DOCKERFILE_PATH="docker/templates/Dockerfile.astro"
+                    CONTEXT_PATH="apps/$PROJECT/apps/landing"
+                    IMAGE_NAME="${PROJECT}-landing"
+                    ;;
+                esac
+
+                # Set ports per project
+                case "$PROJECT" in
+                  chat) PORT="3002" ;;
+                  picture) PORT="3006" ;;
+                  manadeck) PORT="3009" ;;
+                  zitare) PORT="3007" ;;
+                  presi) PORT="3008" ;;
+                esac
+                HEALTH_PATH="/api/health"
+                ;;
+            esac
+
+            if [ "$FIRST" = true ]; then
+              FIRST=false
+            else
+              MATRIX+=','
+            fi
+
+            MATRIX+="{\"app\":\"$APP\",\"image_name\":\"$IMAGE_NAME\",\"dockerfile_path\":\"$DOCKERFILE_PATH\",\"context_path\":\"$CONTEXT_PATH\",\"port\":\"$PORT\",\"health_path\":\"$HEALTH_PATH\"}"
+          done
+
+          MATRIX+=']}'
+
+          echo "Generated matrix: $MATRIX"
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+  # Build and push Docker images (parallel for multi-app)
+  build:
+    name: Build ${{ matrix.image_name }}
+    runs-on: ubuntu-latest
+    needs: parse-deployment
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.parse-deployment.outputs.matrix) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check Dockerfile exists
+        id: check
+        run: |
+          if [ -f "${{ matrix.dockerfile_path }}" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Dockerfile not found: ${{ matrix.dockerfile_path }}"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.check.outputs.exists == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        if: steps.check.outputs.exists == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        if: steps.check.outputs.exists == 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_PREFIX }}/${{ matrix.image_name }}
+          tags: |
+            type=raw,value=${{ needs.parse-deployment.outputs.version }}
+            type=raw,value=staging-latest
+            type=sha,prefix=staging-
+
+      - name: Build and push
+        if: steps.check.outputs.exists == 'true'
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context_path }}
+          file: ${{ matrix.dockerfile_path }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=staging
+
+      - name: Build summary
+        run: |
+          echo "## Build: ${{ matrix.image_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Project**: ${{ needs.parse-deployment.outputs.project }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **App**: ${{ matrix.app }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ needs.parse-deployment.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image**: ${{ env.IMAGE_PREFIX }}/${{ matrix.image_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tags**: ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+
+  # Deploy to staging (parallel for multi-app)
+  deploy:
+    name: Deploy ${{ matrix.image_name }}
+    runs-on: ubuntu-latest
+    needs: [parse-deployment, build]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.parse-deployment.outputs.matrix) }}
+    environment:
+      name: staging
+      url: https://staging.manacore.app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+
+      - name: Add staging server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy service
+        env:
+          VERSION: ${{ needs.parse-deployment.outputs.version }}
+          IMAGE_NAME: ${{ matrix.image_name }}
+        run: |
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
+            cd ~/manacore-staging
+
+            echo "Deploying $IMAGE_NAME:$VERSION to staging..."
+
+            # Pull the new image
+            docker pull ${{ env.IMAGE_PREFIX }}/$IMAGE_NAME:$VERSION
+
+            # Restart only the specific service
+            SERVICE_NAME=\$(echo "$IMAGE_NAME" | tr '-' '_')
+
+            if docker compose ps | grep -q "\$SERVICE_NAME"; then
+              echo "Updating existing service: \$SERVICE_NAME"
+              docker compose pull \$SERVICE_NAME || true
+              docker compose up -d --no-deps --force-recreate \$SERVICE_NAME
+            else
+              echo "Service \$SERVICE_NAME not found in compose, starting..."
+              docker compose up -d \$SERVICE_NAME
+            fi
+
+            # Wait for startup
+            sleep 10
+            docker compose ps \$SERVICE_NAME
+
+            # Cleanup old images
+            docker image prune -f
+          EOF
+
+      - name: Health check
+        if: matrix.app == 'backend' || matrix.app == 'service'
+        run: |
+          PORT="${{ matrix.port }}"
+          HEALTH_PATH="${{ matrix.health_path }}"
+
+          echo "Running health check on port $PORT$HEALTH_PATH..."
+
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
+            for i in {1..5}; do
+              RESPONSE=\$(curl -s -o /dev/null -w "%{http_code}" http://localhost:$PORT$HEALTH_PATH || echo "000")
+              if [ "\$RESPONSE" == "200" ]; then
+                echo "Health check passed (attempt \$i)"
+                exit 0
+              fi
+              echo "Health check failed (attempt \$i), response: \$RESPONSE"
+              sleep 5
+            done
+            echo "Health check failed after 5 attempts"
+            exit 1
+          EOF
+
+      - name: Deployment summary
+        run: |
+          echo "## Deploy: ${{ matrix.image_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: Staging" >> $GITHUB_STEP_SUMMARY
+          echo "- **Project**: ${{ needs.parse-deployment.outputs.project }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **App**: ${{ matrix.app }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ needs.parse-deployment.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image**: ${{ env.IMAGE_PREFIX }}/${{ matrix.image_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployed by**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+  # Notify on completion
+  notify:
+    name: Deployment Complete
+    runs-on: ubuntu-latest
+    needs: [parse-deployment, build, deploy]
+    if: always()
+    steps:
+      - name: Deployment notification
+        run: |
+          BUILD_STATUS="${{ needs.build.result }}"
+          DEPLOY_STATUS="${{ needs.deploy.result }}"
+          PROJECT="${{ needs.parse-deployment.outputs.project }}"
+          VERSION="${{ needs.parse-deployment.outputs.version }}"
+
+          echo "## Staging Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | $BUILD_STATUS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy | $DEPLOY_STATUS |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Project**: $PROJECT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$BUILD_STATUS" == "success" ] && [ "$DEPLOY_STATUS" == "success" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "All apps deployed successfully to staging" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Some deployments failed - check individual job logs" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi

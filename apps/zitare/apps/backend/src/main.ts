@@ -6,15 +6,17 @@ async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 
 	// Enable CORS for mobile and web apps
+	const corsOrigins = process.env.CORS_ORIGINS?.split(',').map((origin) => origin.trim()) || [
+		'http://localhost:3000',
+		'http://localhost:5173',
+		'http://localhost:5177',
+		'http://localhost:8081',
+		'exp://localhost:8081',
+		'http://localhost:3001',
+	];
+
 	app.enableCors({
-		origin: [
-			'http://localhost:3000',
-			'http://localhost:5173',
-			'http://localhost:5177',
-			'http://localhost:8081',
-			'exp://localhost:8081',
-			'http://localhost:3001', // Mana Core Auth
-		],
+		origin: corsOrigins,
 		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 		credentials: true,
 	});
@@ -29,7 +31,7 @@ async function bootstrap() {
 	);
 
 	// Set global prefix for API routes
-	app.setGlobalPrefix('api');
+	app.setGlobalPrefix('api/v1');
 
 	const port = process.env.PORT || 3007;
 	await app.listen(port);

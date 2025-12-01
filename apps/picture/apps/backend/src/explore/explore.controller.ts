@@ -1,6 +1,6 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ExploreService } from './explore.service';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '@manacore/shared-nestjs-auth';
 import { GetPublicImagesDto, SearchPublicImagesDto } from './dto/explore.dto';
 
 @Controller('explore')

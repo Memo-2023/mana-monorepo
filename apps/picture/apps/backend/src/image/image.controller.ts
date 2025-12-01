@@ -10,8 +10,7 @@ import {
 	UseGuards,
 } from '@nestjs/common';
 import { ImageService } from './image.service';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { CurrentUser, CurrentUserData } from '../common/decorators/current-user.decorator';
+import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { GetImagesQueryDto, ToggleFavoriteDto, BatchImageIdsDto } from './dto/image.dto';
 
 @Controller('images')

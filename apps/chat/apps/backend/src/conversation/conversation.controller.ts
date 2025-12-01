@@ -13,8 +13,7 @@ import { isOk } from '@manacore/shared-errors';
 import { ConversationService } from './conversation.service';
 import { type Conversation } from '../db/schema/conversations.schema';
 import { type Message } from '../db/schema/messages.schema';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { CurrentUser, CurrentUserData } from '../common/decorators/current-user.decorator';
+import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 
 @Controller('conversations')
 @UseGuards(JwtAuthGuard)

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { TagService } from './tag.service';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '@manacore/shared-nestjs-auth';
 import { CreateTagDto, UpdateTagDto } from './dto/tag.dto';
 
 @Controller('tags')

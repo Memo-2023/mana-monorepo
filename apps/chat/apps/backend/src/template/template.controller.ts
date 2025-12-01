@@ -2,8 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@n
 import { isOk } from '@manacore/shared-errors';
 import { TemplateService } from './template.service';
 import { type Template } from '../db/schema/templates.schema';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { CurrentUser, CurrentUserData } from '../common/decorators/current-user.decorator';
+import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 
 @Controller('templates')
 @UseGuards(JwtAuthGuard)
