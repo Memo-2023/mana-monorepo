@@ -1,21 +1,29 @@
 /**
- * JWT Token Validation Tests (B2C/B2B)
+ * JWT Token Validation Tests (Minimal Claims)
  *
- * Comprehensive tests for JWT token validation covering:
- * - B2C user token structure (personal credits, no organization)
- * - B2B employee token structure (organization context, allocated credits)
- * - B2B owner token structure (owner role, full permissions)
- * - Token validation (signature, expiry, issuer, audience)
- * - Token refresh (credit updates, organization context)
- * - Edge cases (multiple orgs, removed from org, deleted org)
+ * Tests for JWT token validation with minimal claims:
+ * - sub (user ID)
+ * - email
+ * - role
+ * - sid (session ID)
+ *
+ * ARCHITECTURE DECISION (2024-12):
+ * We use MINIMAL JWT claims. Organization and credit data should be fetched
+ * via API calls, not embedded in JWTs. See docs/AUTHENTICATION_ARCHITECTURE.md
+ *
+ * Why minimal claims?
+ * 1. Credit balance changes frequently - JWT would be stale
+ * 2. Organization context available via Better Auth org plugin APIs
+ * 3. Smaller tokens = better performance
+ * 4. Follows Better Auth's session-based design
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
-import { createBetterAuth, JWTCustomPayload } from './better-auth.config';
+import { JWTCustomPayload } from './better-auth.config';
 import { createMockConfigService } from '../__tests__/utils/test-helpers';
-import { mockUserFactory, mockBalanceFactory } from '../__tests__/utils/mock-factories';
+import { mockUserFactory } from '../__tests__/utils/mock-factories';
 
 // Mock external dependencies
 jest.mock('../db/connection');
@@ -23,7 +31,7 @@ jest.mock('nanoid', () => ({
 	nanoid: jest.fn(() => 'mock-nanoid-123'),
 }));
 
-describe('JWT Token Validation (B2C/B2B)', () => {
+describe('JWT Token Validation (Minimal Claims)', () => {
 	let configService: ConfigService;
 	let mockDb: any;
 	let secret: string;
@@ -62,23 +70,19 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 		jest.clearAllMocks();
 	});
 
-	describe('B2C User Tokens', () => {
-		it('should generate token with correct B2C claims', () => {
-			const b2cUser = mockUserFactory.create({
-				id: 'b2c-user-123',
-				email: 'b2cuser@example.com',
+	describe('Minimal JWT Claims Structure', () => {
+		it('should generate token with minimal claims only', () => {
+			const user = mockUserFactory.create({
+				id: 'user-123',
+				email: 'user@example.com',
 				role: 'user',
 			});
 
 			const payload: JWTCustomPayload = {
-				sub: b2cUser.id,
-				email: b2cUser.email,
-				role: b2cUser.role,
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
-				app_id: 'memoro',
-				device_id: 'device-xyz',
+				sub: user.id,
+				email: user.email,
+				role: user.role,
+				sid: 'session-abc-123',
 			};
 
 			const token = jwt.sign(payload, secret, {
@@ -95,103 +99,28 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 			}) as JWTCustomPayload;
 
 			expect(decoded).toMatchObject({
-				sub: 'b2c-user-123',
-				email: 'b2cuser@example.com',
+				sub: 'user-123',
+				email: 'user@example.com',
 				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
-				app_id: 'memoro',
-				device_id: 'device-xyz',
-			});
-		});
-
-		it('should have organization null for B2C users', () => {
-			const payload: JWTCustomPayload = {
-				sub: 'b2c-user-123',
-				email: 'b2cuser@example.com',
-				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 100,
-			};
-
-			const token = jwt.sign(payload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
+				sid: 'session-abc-123',
 			});
 
-			const decoded = jwt.verify(token, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(decoded.customer_type).toBe('b2c');
-			expect(decoded.organization).toBeNull();
+			// Verify NO complex claims are present
+			expect((decoded as any).customer_type).toBeUndefined();
+			expect((decoded as any).organization).toBeUndefined();
+			expect((decoded as any).credit_balance).toBeUndefined();
+			expect((decoded as any).app_id).toBeUndefined();
+			expect((decoded as any).device_id).toBeUndefined();
 		});
 
-		it('should include personal credit balance for B2C users', () => {
-			const payload: JWTCustomPayload = {
-				sub: 'b2c-user-123',
-				email: 'b2cuser@example.com',
-				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 250,
-			};
-
-			const token = jwt.sign(payload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const decoded = jwt.verify(token, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(decoded.credit_balance).toBe(250);
-		});
-
-		it('should include app_id and device_id when provided', () => {
-			const payload: JWTCustomPayload = {
-				sub: 'b2c-user-123',
-				email: 'b2cuser@example.com',
-				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
-				app_id: 'chat',
-				device_id: 'iphone-15-pro',
-			};
-
-			const token = jwt.sign(payload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const decoded = jwt.verify(token, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(decoded.app_id).toBe('chat');
-			expect(decoded.device_id).toBe('iphone-15-pro');
-		});
-
-		it('should have standard JWT claims (sub, iat, exp)', () => {
+		it('should include standard JWT claims (sub, iat, exp, iss, aud)', () => {
 			const now = Math.floor(Date.now() / 1000);
 
 			const payload: JWTCustomPayload = {
-				sub: 'b2c-user-123',
-				email: 'b2cuser@example.com',
+				sub: 'user-123',
+				email: 'user@example.com',
 				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
+				sid: 'session-123',
 			};
 
 			const token = jwt.sign(payload, secret, {
@@ -206,198 +135,37 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 			});
 
 			// Standard JWT claims
-			expect(decoded.sub).toBe('b2c-user-123');
+			expect(decoded.sub).toBe('user-123');
 			expect(decoded.iat).toBeGreaterThanOrEqual(now);
 			expect(decoded.exp).toBeGreaterThan(decoded.iat);
 			expect(decoded.iss).toBe('mana-core');
 			expect(decoded.aud).toBe('manacore');
 		});
-	});
 
-	describe('B2B Employee Token Structure', () => {
-		it('should generate token with organization context for B2B employee', () => {
-			const payload: JWTCustomPayload = {
-				sub: 'b2b-employee-123',
-				email: 'employee@company.com',
-				role: 'user',
-				customer_type: 'b2b',
-				organization: {
-					id: 'org-acme-123',
-					name: 'ACME Corporation',
-					role: 'member',
-				},
-				credit_balance: 50, // Allocated credits
-			};
+		it('should support different user roles', () => {
+			const roles = ['user', 'admin', 'service'];
 
-			const token = jwt.sign(payload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
+			roles.forEach((role) => {
+				const payload: JWTCustomPayload = {
+					sub: `${role}-user-123`,
+					email: `${role}@example.com`,
+					role,
+					sid: `session-${role}`,
+				};
+
+				const token = jwt.sign(payload, secret, {
+					algorithm: 'HS256',
+					expiresIn: '15m',
+					issuer: 'mana-core',
+					audience: 'manacore',
+				});
+
+				const decoded = jwt.verify(token, secret, {
+					algorithms: ['HS256'],
+				}) as JWTCustomPayload;
+
+				expect(decoded.role).toBe(role);
 			});
-
-			const decoded = jwt.verify(token, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(decoded).toMatchObject({
-				sub: 'b2b-employee-123',
-				email: 'employee@company.com',
-				customer_type: 'b2b',
-				organization: {
-					id: 'org-acme-123',
-					name: 'ACME Corporation',
-					role: 'member',
-				},
-				credit_balance: 50,
-			});
-		});
-
-		it('should have employee role as member or admin', () => {
-			// Test member role
-			const memberPayload: JWTCustomPayload = {
-				sub: 'employee-1',
-				email: 'member@company.com',
-				role: 'user',
-				customer_type: 'b2b',
-				organization: {
-					id: 'org-123',
-					name: 'Test Org',
-					role: 'member',
-				},
-				credit_balance: 30,
-			};
-
-			const memberToken = jwt.sign(memberPayload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const memberDecoded = jwt.verify(memberToken, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(memberDecoded.organization?.role).toBe('member');
-
-			// Test admin role
-			const adminPayload: JWTCustomPayload = {
-				sub: 'employee-2',
-				email: 'admin@company.com',
-				role: 'user',
-				customer_type: 'b2b',
-				organization: {
-					id: 'org-123',
-					name: 'Test Org',
-					role: 'admin',
-				},
-				credit_balance: 100,
-			};
-
-			const adminToken = jwt.sign(adminPayload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const adminDecoded = jwt.verify(adminToken, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(adminDecoded.organization?.role).toBe('admin');
-		});
-
-		it('should include allocated credit balance for B2B employee', () => {
-			const payload: JWTCustomPayload = {
-				sub: 'employee-123',
-				email: 'employee@company.com',
-				role: 'user',
-				customer_type: 'b2b',
-				organization: {
-					id: 'org-123',
-					name: 'Test Org',
-					role: 'member',
-				},
-				credit_balance: 75, // Credits allocated by owner
-			};
-
-			const token = jwt.sign(payload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const decoded = jwt.verify(token, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(decoded.credit_balance).toBe(75);
-		});
-	});
-
-	describe('B2B Owner Token Structure', () => {
-		it('should have organization.role as owner for B2B owners', () => {
-			const payload: JWTCustomPayload = {
-				sub: 'owner-123',
-				email: 'owner@company.com',
-				role: 'user',
-				customer_type: 'b2b',
-				organization: {
-					id: 'org-123',
-					name: 'My Company',
-					role: 'owner',
-				},
-				credit_balance: 1000,
-			};
-
-			const token = jwt.sign(payload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const decoded = jwt.verify(token, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(decoded.organization?.role).toBe('owner');
-		});
-
-		it('should include owner permissions in organization context', () => {
-			const payload: JWTCustomPayload = {
-				sub: 'owner-123',
-				email: 'owner@company.com',
-				role: 'user',
-				customer_type: 'b2b',
-				organization: {
-					id: 'org-123',
-					name: 'My Company',
-					role: 'owner',
-				},
-				credit_balance: 1000,
-			};
-
-			const token = jwt.sign(payload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const decoded = jwt.verify(token, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			// Owner role should have full permissions
-			expect(decoded.customer_type).toBe('b2b');
-			expect(decoded.organization?.role).toBe('owner');
-
-			// Owners typically have higher credit balances
-			expect(decoded.credit_balance).toBeGreaterThan(0);
 		});
 	});
 
@@ -407,9 +175,7 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 				sub: 'user-123',
 				email: 'user@example.com',
 				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
+				sid: 'session-123',
 			};
 
 			const token = jwt.sign(payload, secret, {
@@ -432,9 +198,7 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 				sub: 'user-123',
 				email: 'user@example.com',
 				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
+				sid: 'session-123',
 			};
 
 			// Create token that expires immediately
@@ -463,9 +227,7 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 				sub: 'user-123',
 				email: 'user@example.com',
 				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
+				sid: 'session-123',
 			};
 
 			const token = jwt.sign(payload, secret, {
@@ -489,9 +251,7 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 				sub: 'user-123',
 				email: 'user@example.com',
 				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
+				sid: 'session-123',
 			};
 
 			const token = jwt.sign(payload, secret, {
@@ -515,9 +275,7 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 				sub: 'user-123',
 				email: 'user@example.com',
 				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
+				sid: 'session-123',
 			};
 
 			const token = jwt.sign(payload, secret, {
@@ -527,10 +285,10 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 				audience: 'manacore',
 			});
 
-			// Tamper with the token
+			// Tamper with the token - try to change role to admin
 			const parts = token.split('.');
 			const tamperedPayload = Buffer.from(
-				JSON.stringify({ ...payload, credit_balance: 99999 })
+				JSON.stringify({ ...payload, role: 'admin' })
 			).toString('base64url');
 			const tamperedToken = `${parts[0]}.${tamperedPayload}.${parts[2]}`;
 
@@ -541,326 +299,28 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 			}).toThrow('invalid signature');
 		});
 
-		it('should reject tokens with invalid algorithm', () => {
+		it('should reject tokens signed with wrong secret', () => {
 			const payload: JWTCustomPayload = {
 				sub: 'user-123',
 				email: 'user@example.com',
 				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
+				sid: 'session-123',
 			};
 
-			// Sign with HS256 (symmetric)
-			const token = jwt.sign(payload, 'secret-key', {
+			// Sign with different secret
+			const token = jwt.sign(payload, 'wrong-secret-key', {
 				algorithm: 'HS256',
 				expiresIn: '15m',
 				issuer: 'mana-core',
 				audience: 'manacore',
 			});
 
-			// Try to verify with wrong secret
+			// Try to verify with correct secret
 			expect(() => {
 				jwt.verify(token, secret, {
 					algorithms: ['HS256'],
 				});
 			}).toThrow();
-		});
-	});
-
-	describe('Token Refresh', () => {
-		it('should issue new token with updated credit_balance', () => {
-			// Original token
-			const originalPayload: JWTCustomPayload = {
-				sub: 'user-123',
-				email: 'user@example.com',
-				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
-			};
-
-			const originalToken = jwt.sign(originalPayload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			// User spent 50 credits, refresh token should reflect new balance
-			const newPayload: JWTCustomPayload = {
-				...originalPayload,
-				credit_balance: 100, // Updated balance
-			};
-
-			const refreshedToken = jwt.sign(newPayload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const decoded = jwt.verify(refreshedToken, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(decoded.credit_balance).toBe(100);
-		});
-
-		it('should maintain organization context on refresh for B2B users', () => {
-			const originalPayload: JWTCustomPayload = {
-				sub: 'employee-123',
-				email: 'employee@company.com',
-				role: 'user',
-				customer_type: 'b2b',
-				organization: {
-					id: 'org-123',
-					name: 'Test Company',
-					role: 'member',
-				},
-				credit_balance: 75,
-			};
-
-			const originalToken = jwt.sign(originalPayload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			// Refresh token with updated credit balance
-			const refreshedPayload: JWTCustomPayload = {
-				...originalPayload,
-				credit_balance: 50, // Used some credits
-			};
-
-			const refreshedToken = jwt.sign(refreshedPayload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const decoded = jwt.verify(refreshedToken, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			// Organization context should be maintained
-			expect(decoded.organization).toMatchObject({
-				id: 'org-123',
-				name: 'Test Company',
-				role: 'member',
-			});
-			expect(decoded.credit_balance).toBe(50);
-		});
-
-		it('should update organization if user switched orgs', () => {
-			const originalPayload: JWTCustomPayload = {
-				sub: 'employee-123',
-				email: 'employee@company.com',
-				role: 'user',
-				customer_type: 'b2b',
-				organization: {
-					id: 'org-old-123',
-					name: 'Old Company',
-					role: 'member',
-				},
-				credit_balance: 75,
-			};
-
-			const originalToken = jwt.sign(originalPayload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			// User switched to a different organization
-			const newPayload: JWTCustomPayload = {
-				...originalPayload,
-				organization: {
-					id: 'org-new-456',
-					name: 'New Company',
-					role: 'admin', // Different role in new org
-				},
-				credit_balance: 100, // Different balance in new org
-			};
-
-			const refreshedToken = jwt.sign(newPayload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const decoded = jwt.verify(refreshedToken, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(decoded.organization).toMatchObject({
-				id: 'org-new-456',
-				name: 'New Company',
-				role: 'admin',
-			});
-			expect(decoded.credit_balance).toBe(100);
-		});
-	});
-
-	describe('Edge Cases', () => {
-		it('should include active org only when user belongs to multiple orgs', () => {
-			// User belongs to multiple orgs but token should only include active one
-			const payload: JWTCustomPayload = {
-				sub: 'multi-org-user',
-				email: 'user@example.com',
-				role: 'user',
-				customer_type: 'b2b',
-				organization: {
-					id: 'org-active-123', // Only active org
-					name: 'Active Company',
-					role: 'member',
-				},
-				credit_balance: 50,
-			};
-
-			const token = jwt.sign(payload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const decoded = jwt.verify(token, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			// Should only have one organization (the active one)
-			expect(decoded.organization).toMatchObject({
-				id: 'org-active-123',
-				name: 'Active Company',
-				role: 'member',
-			});
-		});
-
-		it('should reflect when user is removed from org', () => {
-			// After user is removed from org, they become B2C
-			const payload: JWTCustomPayload = {
-				sub: 'removed-user',
-				email: 'user@example.com',
-				role: 'user',
-				customer_type: 'b2c', // Changed to B2C
-				organization: null, // No org anymore
-				credit_balance: 0, // Personal balance (starts at 0)
-			};
-
-			const token = jwt.sign(payload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const decoded = jwt.verify(token, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(decoded.customer_type).toBe('b2c');
-			expect(decoded.organization).toBeNull();
-		});
-
-		it('should handle deleted org gracefully', () => {
-			// When org is deleted, user should revert to B2C
-			const payload: JWTCustomPayload = {
-				sub: 'orphaned-user',
-				email: 'user@example.com',
-				role: 'user',
-				customer_type: 'b2c',
-				organization: null, // Org was deleted
-				credit_balance: 0,
-			};
-
-			const token = jwt.sign(payload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			expect(() => {
-				const decoded = jwt.verify(token, secret, {
-					algorithms: ['HS256'],
-				}) as JWTCustomPayload;
-
-				expect(decoded.customer_type).toBe('b2c');
-				expect(decoded.organization).toBeNull();
-			}).not.toThrow();
-		});
-
-		it('should handle zero credit balance', () => {
-			const payload: JWTCustomPayload = {
-				sub: 'broke-user',
-				email: 'user@example.com',
-				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 0, // No credits
-			};
-
-			const token = jwt.sign(payload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const decoded = jwt.verify(token, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(decoded.credit_balance).toBe(0);
-		});
-
-		it('should handle missing optional fields (app_id, device_id)', () => {
-			const payload: JWTCustomPayload = {
-				sub: 'user-123',
-				email: 'user@example.com',
-				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
-				// app_id and device_id are optional
-			};
-
-			const token = jwt.sign(payload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const decoded = jwt.verify(token, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(decoded.app_id).toBeUndefined();
-			expect(decoded.device_id).toBeUndefined();
-		});
-
-		it('should handle malformed JWT gracefully', () => {
-			const malformedToken = 'this.is.not.a.valid.jwt';
-
-			expect(() => {
-				jwt.verify(malformedToken, secret, {
-					algorithms: ['HS256'],
-				});
-			}).toThrow('jwt malformed');
-		});
-
-		it('should handle empty token', () => {
-			expect(() => {
-				jwt.verify('', secret, {
-					algorithms: ['HS256'],
-				});
-			}).toThrow('jwt must be provided');
 		});
 	});
 
@@ -870,9 +330,7 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 				sub: 'user-123',
 				email: 'user@example.com',
 				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
+				sid: 'session-123',
 			};
 
 			const token = jwt.sign(payload, secret, {
@@ -897,9 +355,7 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 				sub: 'user-123',
 				email: 'user@example.com',
 				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
+				sid: 'session-123',
 			};
 
 			const token = jwt.sign(payload, secret, {
@@ -918,97 +374,124 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 		});
 	});
 
-	describe('Custom Claims Validation', () => {
-		it('should validate customer_type is either b2c or b2b', () => {
-			const b2cPayload: JWTCustomPayload = {
-				sub: 'user-1',
-				email: 'user1@example.com',
-				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 100,
-			};
+	describe('Edge Cases', () => {
+		it('should handle malformed JWT gracefully', () => {
+			const malformedToken = 'this.is.not.a.valid.jwt';
 
-			const b2cToken = jwt.sign(b2cPayload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const b2cDecoded = jwt.verify(b2cToken, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(b2cDecoded.customer_type).toBe('b2c');
-
-			const b2bPayload: JWTCustomPayload = {
-				sub: 'user-2',
-				email: 'user2@example.com',
-				role: 'user',
-				customer_type: 'b2b',
-				organization: {
-					id: 'org-123',
-					name: 'Test Org',
-					role: 'member',
-				},
-				credit_balance: 50,
-			};
-
-			const b2bToken = jwt.sign(b2bPayload, secret, {
-				algorithm: 'HS256',
-				expiresIn: '15m',
-				issuer: 'mana-core',
-				audience: 'manacore',
-			});
-
-			const b2bDecoded = jwt.verify(b2bToken, secret, {
-				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
-
-			expect(b2bDecoded.customer_type).toBe('b2b');
-		});
-
-		it('should validate organization.role is owner, admin, or member', () => {
-			const roles: Array<'owner' | 'admin' | 'member'> = ['owner', 'admin', 'member'];
-
-			roles.forEach((role) => {
-				const payload: JWTCustomPayload = {
-					sub: `user-${role}`,
-					email: `${role}@example.com`,
-					role: 'user',
-					customer_type: 'b2b',
-					organization: {
-						id: 'org-123',
-						name: 'Test Org',
-						role,
-					},
-					credit_balance: 100,
-				};
-
-				const token = jwt.sign(payload, secret, {
-					algorithm: 'HS256',
-					expiresIn: '15m',
-					issuer: 'mana-core',
-					audience: 'manacore',
-				});
-
-				const decoded = jwt.verify(token, secret, {
+			expect(() => {
+				jwt.verify(malformedToken, secret, {
 					algorithms: ['HS256'],
-				}) as JWTCustomPayload;
-
-				expect(decoded.organization?.role).toBe(role);
-			});
+				});
+			}).toThrow('jwt malformed');
 		});
 
-		it('should validate credit_balance is a number', () => {
+		it('should handle empty token', () => {
+			expect(() => {
+				jwt.verify('', secret, {
+					algorithms: ['HS256'],
+				});
+			}).toThrow('jwt must be provided');
+		});
+
+		it('should handle token with missing required claims', () => {
+			// Token with only sub (missing email, role, sid)
+			const minimalPayload = { sub: 'user-123' };
+
+			const token = jwt.sign(minimalPayload, secret, {
+				algorithm: 'HS256',
+				expiresIn: '15m',
+				issuer: 'mana-core',
+				audience: 'manacore',
+			});
+
+			// Token is technically valid, but application should validate claims
+			const decoded = jwt.verify(token, secret, {
+				algorithms: ['HS256'],
+			}) as any;
+
+			expect(decoded.sub).toBe('user-123');
+			expect(decoded.email).toBeUndefined();
+			expect(decoded.role).toBeUndefined();
+			expect(decoded.sid).toBeUndefined();
+		});
+	});
+
+	describe('Token Refresh Behavior', () => {
+		it('should issue new token with same user claims', () => {
+			const originalPayload: JWTCustomPayload = {
+				sub: 'user-123',
+				email: 'user@example.com',
+				role: 'user',
+				sid: 'session-original',
+			};
+
+			const originalToken = jwt.sign(originalPayload, secret, {
+				algorithm: 'HS256',
+				expiresIn: '15m',
+				issuer: 'mana-core',
+				audience: 'manacore',
+			});
+
+			// Refresh creates new token with new session ID
+			const refreshedPayload: JWTCustomPayload = {
+				...originalPayload,
+				sid: 'session-refreshed', // New session ID
+			};
+
+			const refreshedToken = jwt.sign(refreshedPayload, secret, {
+				algorithm: 'HS256',
+				expiresIn: '15m',
+				issuer: 'mana-core',
+				audience: 'manacore',
+			});
+
+			const decoded = jwt.verify(refreshedToken, secret, {
+				algorithms: ['HS256'],
+			}) as JWTCustomPayload;
+
+			// User claims should be maintained
+			expect(decoded.sub).toBe('user-123');
+			expect(decoded.email).toBe('user@example.com');
+			expect(decoded.role).toBe('user');
+			// Session ID should be new
+			expect(decoded.sid).toBe('session-refreshed');
+		});
+
+		it('should maintain user role across refreshes', () => {
+			const adminPayload: JWTCustomPayload = {
+				sub: 'admin-123',
+				email: 'admin@example.com',
+				role: 'admin',
+				sid: 'session-123',
+			};
+
+			const token = jwt.sign(adminPayload, secret, {
+				algorithm: 'HS256',
+				expiresIn: '15m',
+				issuer: 'mana-core',
+				audience: 'manacore',
+			});
+
+			const decoded = jwt.verify(token, secret, {
+				algorithms: ['HS256'],
+			}) as JWTCustomPayload;
+
+			// Admin role should be preserved
+			expect(decoded.role).toBe('admin');
+		});
+	});
+
+	describe('Architecture Decision Documentation', () => {
+		/**
+		 * This test documents what is NOT in the JWT by design.
+		 * See docs/AUTHENTICATION_ARCHITECTURE.md for full explanation.
+		 */
+		it('should NOT contain organization data (fetch via API instead)', () => {
 			const payload: JWTCustomPayload = {
 				sub: 'user-123',
 				email: 'user@example.com',
 				role: 'user',
-				customer_type: 'b2c',
-				organization: null,
-				credit_balance: 150,
+				sid: 'session-123',
 			};
 
 			const token = jwt.sign(payload, secret, {
@@ -1020,9 +503,64 @@ describe('JWT Token Validation (B2C/B2B)', () => {
 
 			const decoded = jwt.verify(token, secret, {
 				algorithms: ['HS256'],
-			}) as JWTCustomPayload;
+			}) as any;
 
-			expect(typeof decoded.credit_balance).toBe('number');
+			// Organization data should be fetched via:
+			// - session.activeOrganizationId (from Better Auth session)
+			// - GET /organization/get-active-member (for details)
+			expect(decoded.organization).toBeUndefined();
+			expect(decoded.organizationId).toBeUndefined();
+		});
+
+		it('should NOT contain credit balance (fetch via API instead)', () => {
+			const payload: JWTCustomPayload = {
+				sub: 'user-123',
+				email: 'user@example.com',
+				role: 'user',
+				sid: 'session-123',
+			};
+
+			const token = jwt.sign(payload, secret, {
+				algorithm: 'HS256',
+				expiresIn: '15m',
+				issuer: 'mana-core',
+				audience: 'manacore',
+			});
+
+			const decoded = jwt.verify(token, secret, {
+				algorithms: ['HS256'],
+			}) as any;
+
+			// Credit balance should be fetched via:
+			// - GET /api/v1/credits/balance
+			// Credit balance changes too frequently to embed in JWT
+			expect(decoded.credit_balance).toBeUndefined();
+			expect(decoded.credits).toBeUndefined();
+		});
+
+		it('should NOT contain customer_type (derive from session instead)', () => {
+			const payload: JWTCustomPayload = {
+				sub: 'user-123',
+				email: 'user@example.com',
+				role: 'user',
+				sid: 'session-123',
+			};
+
+			const token = jwt.sign(payload, secret, {
+				algorithm: 'HS256',
+				expiresIn: '15m',
+				issuer: 'mana-core',
+				audience: 'manacore',
+			});
+
+			const decoded = jwt.verify(token, secret, {
+				algorithms: ['HS256'],
+			}) as any;
+
+			// Customer type should be derived from:
+			// - B2B = session.activeOrganizationId != null
+			// - B2C = session.activeOrganizationId == null
+			expect(decoded.customer_type).toBeUndefined();
 		});
 	});
 });

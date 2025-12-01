@@ -167,7 +167,9 @@ describe('AuthController', () => {
 					name: 'Test User',
 					role: 'user',
 				},
-				token: 'jwt-access-token',
+				accessToken: 'jwt-access-token',
+				refreshToken: 'session-refresh-token',
+				expiresIn: 900,
 			};
 
 			betterAuthService.signIn.mockResolvedValue(expectedResult);
@@ -193,7 +195,9 @@ describe('AuthController', () => {
 
 			betterAuthService.signIn.mockResolvedValue({
 				user: { id: '123', email: 'user@example.com', name: 'Test', role: 'user' },
-				token: 'token',
+				accessToken: 'jwt-token',
+				refreshToken: 'refresh-token',
+				expiresIn: 900,
 			});
 
 			await controller.login(loginDto);
