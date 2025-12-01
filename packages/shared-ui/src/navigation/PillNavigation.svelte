@@ -187,6 +187,22 @@
 		onCollapsedChange !== undefined ? (externalCollapsed ?? false) : internalCollapsed
 	);
 
+	// Mobile detection for dropdown direction
+	let isMobile = $state(false);
+	$effect(() => {
+		if (typeof window !== 'undefined') {
+			const checkMobile = () => {
+				isMobile = window.innerWidth <= 768;
+			};
+			checkMobile();
+			window.addEventListener('resize', checkMobile);
+			return () => window.removeEventListener('resize', checkMobile);
+		}
+	});
+
+	// Dropdown direction: up on mobile (nav at bottom), down on desktop/sidebar
+	const dropdownDirection = $derived<'up' | 'down'>(isMobile && !isSidebarMode ? 'up' : 'down');
+
 	function toggleSidebarMode() {
 		const newValue = !isSidebarMode;
 		if (onModeChange) {
@@ -277,7 +293,7 @@
 			{#if showAppSwitcher && appItems.length > 0}
 				<PillDropdown
 					items={createAppDropdownItems(appItems, allAppsHref, allAppsLabel)}
-					direction="down"
+					direction={dropdownDirection}
 					label={appName}
 					icon="grid"
 				/>
@@ -367,7 +383,7 @@
 			{#if showThemeVariants && themeVariantItems.length > 0}
 				<PillDropdown
 					items={themeVariantItems}
-					direction="down"
+					direction={dropdownDirection}
 					label={currentThemeVariantLabel}
 					icon="palette"
 				>
@@ -522,7 +538,7 @@
 									]
 								: []),
 					]}
-					direction="down"
+					direction={dropdownDirection}
 					label={truncateEmail(userEmail)}
 					icon="user"
 				/>
@@ -626,6 +642,15 @@
 		z-index: 1000;
 		padding: 0.75rem 0 1.5rem;
 		pointer-events: none;
+	}
+
+	/* Mobile: position at bottom */
+	@media (max-width: 768px) {
+		.pill-nav:not(.sidebar-mode) {
+			top: auto;
+			bottom: 0;
+			padding: 1rem 0 calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+		}
 	}
 
 	.pill-nav-container {
@@ -775,6 +800,47 @@
 		border: none;
 	}
 
+	/* Mobile: Sidebar as bottom sheet */
+	@media (max-width: 768px) {
+		.pill-nav.sidebar-mode {
+			top: auto;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			width: 100%;
+			max-height: 70vh;
+			padding: 1.5rem 0 calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(12px);
+			-webkit-backdrop-filter: blur(12px);
+			border-top: 1px solid rgba(0, 0, 0, 0.1);
+			border-radius: 1.5rem 1.5rem 0 0;
+			box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+		}
+
+		/* Drag handle */
+		.pill-nav.sidebar-mode::before {
+			content: '';
+			position: absolute;
+			top: 0.625rem;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 2.5rem;
+			height: 0.25rem;
+			background: rgba(0, 0, 0, 0.2);
+			border-radius: 9999px;
+		}
+
+		:global(.dark) .pill-nav.sidebar-mode {
+			background: rgba(30, 30, 30, 0.95);
+			border-top: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		:global(.dark) .pill-nav.sidebar-mode::before {
+			background: rgba(255, 255, 255, 0.3);
+		}
+	}
+
 	.sidebar-container {
 		flex-direction: column;
 		align-items: stretch;
@@ -783,6 +849,21 @@
 		overflow-x: hidden;
 		padding: 1rem 1rem;
 		height: 100%;
+	}
+
+	/* Mobile: Sidebar container adjustments */
+	@media (max-width: 768px) {
+		.sidebar-container {
+			padding: 1rem 1.5rem 1rem;
+			gap: 0.5rem;
+			height: auto;
+			max-height: calc(70vh - 2rem);
+		}
+
+		/* Hide spacer on mobile - not needed in bottom sheet */
+		.sidebar-container .sidebar-spacer {
+			display: none;
+		}
 	}
 
 	.sidebar-container .pill {
@@ -807,7 +888,7 @@
 		flex: 1;
 	}
 
-	/* Transparent pills in sidebar mode */
+	/* Transparent pills in sidebar mode (desktop) */
 	.sidebar-container .glass-pill,
 	.sidebar-container :global(.pill-dropdown .trigger-button) {
 		background: transparent;
@@ -829,6 +910,33 @@
 	:global(.dark) .sidebar-container :global(.pill-dropdown .trigger-button:hover) {
 		background: rgba(255, 255, 255, 0.05);
 		border-color: rgba(255, 255, 255, 0.1);
+	}
+
+	/* Mobile: Visible pills in sidebar/bottom-sheet mode */
+	@media (max-width: 768px) {
+		.sidebar-container .glass-pill,
+		.sidebar-container :global(.pill-dropdown .trigger-button) {
+			background: rgba(0, 0, 0, 0.05);
+			border: 1px solid rgba(0, 0, 0, 0.08);
+		}
+
+		.sidebar-container .glass-pill:hover,
+		.sidebar-container :global(.pill-dropdown .trigger-button:hover) {
+			background: rgba(0, 0, 0, 0.1);
+			border-color: rgba(0, 0, 0, 0.15);
+		}
+
+		:global(.dark) .sidebar-container .glass-pill,
+		:global(.dark) .sidebar-container :global(.pill-dropdown .trigger-button) {
+			background: rgba(255, 255, 255, 0.08);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		:global(.dark) .sidebar-container .glass-pill:hover,
+		:global(.dark) .sidebar-container :global(.pill-dropdown .trigger-button:hover) {
+			background: rgba(255, 255, 255, 0.15);
+			border-color: rgba(255, 255, 255, 0.2);
+		}
 	}
 
 	/* Keep active state visible */
@@ -947,6 +1055,17 @@
 		border-radius: 0 0 1rem 0;
 		cursor: pointer;
 		border: none;
+	}
+
+	/* Mobile: FAB at bottom left */
+	@media (max-width: 768px) {
+		.nav-fab {
+			top: auto;
+			bottom: 0;
+			left: 0;
+			border-radius: 0 1rem 0 0;
+			padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.875rem);
+		}
 	}
 
 	/* Transitions */
