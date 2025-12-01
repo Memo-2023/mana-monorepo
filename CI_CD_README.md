@@ -57,7 +57,7 @@ Complete CI/CD pipeline for the manacore-monorepo with automated testing, buildi
 Located in `scripts/deploy/`:
 
 1. **build-and-push.sh**: Build and push Docker images
-2. **deploy-hetzner.sh**: Deploy to Hetzner/Coolify servers
+2. **deploy-hetzner.sh**: Deploy to Hetzner/Hetzner VPSs
 3. **health-check.sh**: Verify service health
 4. **rollback.sh**: Emergency rollback procedures
 5. **migrate-db.sh**: Database migration runner

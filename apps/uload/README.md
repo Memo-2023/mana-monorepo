@@ -56,7 +56,7 @@ docker-compose up --build
 
 ## 📝 Documentation
 
-- [Deployment Guide](./DEPLOYMENT.md) - Complete Coolify deployment instructions
+- [Deployment Guide](./DEPLOYMENT.md) - Complete Docker Compose deployment instructions
 - [Lessons Learned](./DEPLOYMENT_LESSONS_LEARNED.md) - Troubleshooting and insights
 - [Domain Setup](./DOMAIN_SETUP_ULO_AD.md) - ulo.ad configuration
 - [Coolify Setup](./COOLIFY_SETUP.md) - Detailed Coolify configuration

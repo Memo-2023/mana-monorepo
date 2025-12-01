@@ -1,0 +1,26 @@
+{
+	"moduleFileExtensions": ["js", "json", "ts"],
+	"rootDir": ".",
+	"testEnvironment": "node",
+	"testRegex": ".e2e-spec.ts$",
+	"transform": {
+		"^.+\\.(t|j)s$": ["ts-jest", {
+			"tsconfig": {
+				"esModuleInterop": true,
+				"allowSyntheticDefaultImports": true
+			}
+		}]
+	},
+	"transformIgnorePatterns": [
+		"node_modules/(?!(nanoid|better-auth)/)"
+	],
+	"moduleNameMapper": {
+		"^nanoid$": "<rootDir>/__mocks__/nanoid.ts",
+		"^better-auth$": "<rootDir>/__mocks__/better-auth.ts",
+		"^better-auth/plugins$": "<rootDir>/__mocks__/better-auth-plugins.ts",
+		"^better-auth/plugins/(.*)$": "<rootDir>/__mocks__/better-auth-plugins.ts",
+		"^better-auth/adapters/(.*)$": "<rootDir>/__mocks__/better-auth-adapters.ts"
+	},
+	"testTimeout": 30000,
+	"setupFilesAfterEnv": ["./setup-e2e.ts"]
+}
