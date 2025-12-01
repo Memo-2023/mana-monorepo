@@ -1,0 +1,33 @@
+{
+	"name": "@manacore/shared-nestjs-auth",
+	"version": "1.0.0",
+	"description": "Shared authentication utilities for NestJS backends - JWT validation via Mana Core Auth",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"clean": "rm -rf dist",
+		"prepublishOnly": "pnpm build"
+	},
+	"files": [
+		"dist"
+	],
+	"peerDependencies": {
+		"@nestjs/common": "^10.0.0 || ^11.0.0",
+		"@nestjs/config": "^3.0.0 || ^4.0.0"
+	},
+	"devDependencies": {
+		"@nestjs/common": "^10.0.0",
+		"@nestjs/config": "^3.0.0",
+		"@types/node": "^20.0.0",
+		"typescript": "^5.0.0"
+	},
+	"keywords": [
+		"nestjs",
+		"auth",
+		"jwt",
+		"manacore"
+	],
+	"author": "Mana Core Team",
+	"license": "MIT"
+}

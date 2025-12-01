@@ -1,5 +1,4 @@
 import { DynamicModule, Module, Global, Provider } from '@nestjs/common';
-import { HttpModule, HttpService } from '@nestjs/axios';
 import {
 	ManaCoreModuleOptions,
 	ManaCoreModuleAsyncOptions,
@@ -16,7 +15,6 @@ export class ManaCoreModule {
 	static forRoot(options: ManaCoreModuleOptions): DynamicModule {
 		return {
 			module: ManaCoreModule,
-			imports: [HttpModule],
 			providers: [
 				{
 					provide: MANA_CORE_OPTIONS,
@@ -34,7 +32,7 @@ export class ManaCoreModule {
 
 		return {
 			module: ManaCoreModule,
-			imports: [...(options.imports || []), HttpModule],
+			imports: options.imports || [],
 			providers: [...asyncProviders, AuthGuard, CreditClientService],
 			exports: [MANA_CORE_OPTIONS, AuthGuard, CreditClientService],
 		};

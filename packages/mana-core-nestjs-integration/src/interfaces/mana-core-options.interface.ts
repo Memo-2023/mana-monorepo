@@ -1,7 +1,10 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
 
 export interface ManaCoreModuleOptions {
-	manaServiceUrl: string;
+	/**
+	 * @deprecated No longer used - auth URL is read from MANA_CORE_AUTH_URL env variable
+	 */
+	manaServiceUrl?: string;
 	appId: string;
 	serviceKey?: string;
 	signupRedirectUrl?: string;

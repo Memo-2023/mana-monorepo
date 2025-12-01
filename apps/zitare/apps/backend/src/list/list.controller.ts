@@ -6,9 +6,9 @@ import {
 	Delete,
 	Body,
 	Param,
-	Headers,
-	UnauthorizedException,
+	UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { ListService } from './list.service';
 import { IsString, IsNotEmpty, IsOptional, IsArray } from 'class-validator';
 
@@ -43,47 +43,27 @@ class AddQuoteDto {
 	quoteId!: string;
 }
 
-// Simple JWT extraction - in production, use proper auth middleware
-function extractUserId(authHeader?: string): string {
-	if (!authHeader?.startsWith('Bearer ')) {
-		throw new UnauthorizedException('Missing or invalid authorization header');
-	}
-
-	try {
-		const token = authHeader.substring(7);
-		const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-		if (!payload.sub) {
-			throw new UnauthorizedException('Invalid token payload');
-		}
-		return payload.sub;
-	} catch {
-		throw new UnauthorizedException('Invalid token');
-	}
-}
-
 @Controller('lists')
+@UseGuards(JwtAuthGuard)
 export class ListController {
 	constructor(private readonly listService: ListService) {}
 
 	@Get()
-	async findAll(@Headers('authorization') authHeader: string) {
-		const userId = extractUserId(authHeader);
-		const lists = await this.listService.findByUserId(userId);
+	async findAll(@CurrentUser() user: CurrentUserData) {
+		const lists = await this.listService.findByUserId(user.userId);
 		return { lists };
 	}
 
 	@Get(':id')
-	async findOne(@Headers('authorization') authHeader: string, @Param('id') id: string) {
-		const userId = extractUserId(authHeader);
-		const list = await this.listService.findById(userId, id);
+	async findOne(@CurrentUser() user: CurrentUserData, @Param('id') id: string) {
+		const list = await this.listService.findById(user.userId, id);
 		return { list };
 	}
 
 	@Post()
-	async create(@Headers('authorization') authHeader: string, @Body() dto: CreateListDto) {
-		const userId = extractUserId(authHeader);
+	async create(@CurrentUser() user: CurrentUserData, @Body() dto: CreateListDto) {
 		const list = await this.listService.create({
-			userId,
+			userId: user.userId,
 			name: dto.name,
 			description: dto.description,
 		});
@@ -92,41 +72,37 @@ export class ListController {
 
 	@Put(':id')
 	async update(
-		@Headers('authorization') authHeader: string,
+		@CurrentUser() user: CurrentUserData,
 		@Param('id') id: string,
 		@Body() dto: UpdateListDto
 	) {
-		const userId = extractUserId(authHeader);
-		const list = await this.listService.update(userId, id, dto);
+		const list = await this.listService.update(user.userId, id, dto);
 		return { list };
 	}
 
 	@Delete(':id')
-	async delete(@Headers('authorization') authHeader: string, @Param('id') id: string) {
-		const userId = extractUserId(authHeader);
-		await this.listService.delete(userId, id);
+	async delete(@CurrentUser() user: CurrentUserData, @Param('id') id: string) {
+		await this.listService.delete(user.userId, id);
 		return { success: true };
 	}
 
 	@Post(':id/quotes')
 	async addQuote(
-		@Headers('authorization') authHeader: string,
+		@CurrentUser() user: CurrentUserData,
 		@Param('id') id: string,
 		@Body() dto: AddQuoteDto
 	) {
-		const userId = extractUserId(authHeader);
-		const list = await this.listService.addQuoteToList(userId, id, dto.quoteId);
+		const list = await this.listService.addQuoteToList(user.userId, id, dto.quoteId);
 		return { list };
 	}
 
 	@Delete(':id/quotes/:quoteId')
 	async removeQuote(
-		@Headers('authorization') authHeader: string,
+		@CurrentUser() user: CurrentUserData,
 		@Param('id') id: string,
 		@Param('quoteId') quoteId: string
 	) {
-		const userId = extractUserId(authHeader);
-		const list = await this.listService.removeQuoteFromList(userId, id, quoteId);
+		const list = await this.listService.removeQuoteFromList(user.userId, id, quoteId);
 		return { list };
 	}
 }

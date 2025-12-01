@@ -5,10 +5,10 @@ import {
 	Delete,
 	Body,
 	Param,
-	Headers,
-	UnauthorizedException,
+	UseGuards,
 	ConflictException,
 } from '@nestjs/common';
+import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { FavoriteService } from './favorite.service';
 import { IsString, IsNotEmpty } from 'class-validator';
 
@@ -18,56 +18,35 @@ class CreateFavoriteDto {
 	quoteId!: string;
 }
 
-// Simple JWT extraction - in production, use proper auth middleware
-function extractUserId(authHeader?: string): string {
-	if (!authHeader?.startsWith('Bearer ')) {
-		throw new UnauthorizedException('Missing or invalid authorization header');
-	}
-
-	try {
-		const token = authHeader.substring(7);
-		const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-		if (!payload.sub) {
-			throw new UnauthorizedException('Invalid token payload');
-		}
-		return payload.sub;
-	} catch {
-		throw new UnauthorizedException('Invalid token');
-	}
-}
-
 @Controller('favorites')
+@UseGuards(JwtAuthGuard)
 export class FavoriteController {
 	constructor(private readonly favoriteService: FavoriteService) {}
 
 	@Get()
-	async findAll(@Headers('authorization') authHeader: string) {
-		const userId = extractUserId(authHeader);
-		const favorites = await this.favoriteService.findByUserId(userId);
+	async findAll(@CurrentUser() user: CurrentUserData) {
+		const favorites = await this.favoriteService.findByUserId(user.userId);
 		return { favorites };
 	}
 
 	@Post()
-	async create(@Headers('authorization') authHeader: string, @Body() dto: CreateFavoriteDto) {
-		const userId = extractUserId(authHeader);
-
+	async create(@CurrentUser() user: CurrentUserData, @Body() dto: CreateFavoriteDto) {
 		// Check if already favorited
-		const exists = await this.favoriteService.exists(userId, dto.quoteId);
+		const exists = await this.favoriteService.exists(user.userId, dto.quoteId);
 		if (exists) {
 			throw new ConflictException('Quote already in favorites');
 		}
 
 		const favorite = await this.favoriteService.create({
-			userId,
+			userId: user.userId,
 			quoteId: dto.quoteId,
 		});
 		return { favorite };
 	}
 
 	@Delete(':quoteId')
-	async delete(@Headers('authorization') authHeader: string, @Param('quoteId') quoteId: string) {
-		const userId = extractUserId(authHeader);
-		await this.favoriteService.delete(userId, quoteId);
+	async delete(@CurrentUser() user: CurrentUserData, @Param('quoteId') quoteId: string) {
+		await this.favoriteService.delete(user.userId, quoteId);
 		return { success: true };
 	}
 }

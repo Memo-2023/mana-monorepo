@@ -139,12 +139,146 @@ apps/{project}/
 
 ### Authentication Architecture
 
-All projects use a **middleware-based authentication** pattern via Mana Core:
+All projects use **mana-core-auth** as the central authentication service:
 
-- Middleware issues: `manaToken`, `appToken` (Supabase-compatible JWT), `refreshToken`
-- Mobile apps use `@manacore/shared-auth` package for auth services
-- Tokens stored via platform-specific storage (SecureStore on mobile, localStorage on web)
-- Supabase RLS policies use JWT claims (`sub`, `role`, `app_id`)
+```
+┌─────────────┐     ┌─────────────┐     ┌────────────────┐
+│   Client    │────>│  Backend    │────>│ mana-core-auth │
+│ (Web/Mobile)│     │  (NestJS)   │     │  (port 3001)   │
+└─────────────┘     └─────────────┘     └────────────────┘
+      │                   │                     │
+      │ Bearer token      │ POST /validate      │
+      │                   │ {token}             │
+      │                   │<────────────────────│
+      │                   │ {valid, payload}    │
+      │<──────────────────│                     │
+      │ Response          │                     │
+```
+
+#### Key Components
+
+| Component | Purpose |
+|-----------|---------|
+| `services/mana-core-auth` | Central auth service (Better Auth + EdDSA JWT) |
+| `@manacore/shared-nestjs-auth` | Shared NestJS guards/decorators for JWT validation |
+| `@mana-core/nestjs-integration` | Extended NestJS module with auth + credits |
+| `@manacore/shared-auth` | Client-side auth for web/mobile apps |
+
+#### NestJS Backend Integration
+
+**Option 1: Simple auth only** - Use `@manacore/shared-nestjs-auth`:
+
+```typescript
+// In your controller
+import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
+
+@Controller('api')
+@UseGuards(JwtAuthGuard)
+export class MyController {
+  @Get('profile')
+  getProfile(@CurrentUser() user: CurrentUserData) {
+    return { userId: user.userId, email: user.email };
+  }
+}
+```
+
+**Option 2: Auth + Credits** - Use `@mana-core/nestjs-integration`:
+
+```typescript
+// app.module.ts
+import { ManaCoreModule } from '@mana-core/nestjs-integration';
+
+@Module({
+  imports: [
+    ManaCoreModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        appId: config.get('APP_ID'),
+        serviceKey: config.get('MANA_CORE_SERVICE_KEY'),
+        debug: config.get('NODE_ENV') === 'development',
+      }),
+      inject: [ConfigService],
+    }),
+  ],
+})
+export class AppModule {}
+
+// In controller
+import { AuthGuard } from '@mana-core/nestjs-integration/guards';
+import { CurrentUser } from '@mana-core/nestjs-integration/decorators';
+import { CreditClientService } from '@mana-core/nestjs-integration';
+
+@Controller('api')
+@UseGuards(AuthGuard)
+export class ApiController {
+  constructor(private creditClient: CreditClientService) {}
+
+  @Post('generate')
+  async generate(@CurrentUser() user: any) {
+    await this.creditClient.consumeCredits(user.sub, 'generation', 10, 'AI generation');
+    // ... do work
+  }
+}
+```
+
+#### Required Environment Variables
+
+```env
+# All backends need this
+MANA_CORE_AUTH_URL=http://localhost:3001
+
+# For development bypass (optional)
+NODE_ENV=development
+DEV_BYPASS_AUTH=true
+DEV_USER_ID=your-test-user-id
+
+# For credit operations (optional)
+MANA_CORE_SERVICE_KEY=your-service-key
+APP_ID=your-app-id
+```
+
+#### JWT Token Structure (EdDSA)
+
+```json
+{
+  "sub": "user-id",
+  "email": "user@example.com",
+  "role": "user",
+  "sid": "session-id",
+  "exp": 1764606251,
+  "iss": "manacore",
+  "aud": "manacore"
+}
+```
+
+#### Testing Auth Integration
+
+```bash
+# 1. Start mana-core-auth
+pnpm dev:auth
+
+# 2. Start a backend (e.g., Zitare)
+pnpm dev:zitare:backend
+
+# 3. Get a token
+TOKEN=$(curl -s -X POST http://localhost:3001/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "password"}' | jq -r '.accessToken')
+
+# 4. Call protected endpoint
+curl http://localhost:3007/api/favorites \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+#### Integrated Backends
+
+| Backend | Package | Port |
+|---------|---------|------|
+| Chat | `@mana-core/nestjs-integration` | 3002 |
+| Picture | `@manacore/shared-nestjs-auth` | 3006 |
+| Zitare | `@manacore/shared-nestjs-auth` | 3007 |
+| Presi | Custom (same pattern) | 3008 |
+| ManaDeck | `@mana-core/nestjs-integration` | 3009 |
 
 ### Svelte 5 Runes Mode (Web Apps)
 
@@ -165,15 +299,17 @@ $: doubled = count * 2;
 
 ## Shared Packages (`packages/`)
 
-| Package                     | Purpose                                                 |
-| --------------------------- | ------------------------------------------------------- |
-| `@manacore/shared-auth`     | Configurable auth service, token manager, JWT utilities |
-| `@manacore/shared-supabase` | Unified Supabase client                                 |
-| `@manacore/shared-types`    | Common TypeScript types                                 |
-| `@manacore/shared-utils`    | Utility functions                                       |
-| `@manacore/shared-ui`       | React Native UI components                              |
-| `@manacore/shared-theme`    | Theme configuration                                     |
-| `@manacore/shared-i18n`     | Internationalization                                    |
+| Package                          | Purpose                                                 |
+| -------------------------------- | ------------------------------------------------------- |
+| `@manacore/shared-nestjs-auth`   | NestJS JWT validation guards via mana-core-auth         |
+| `@mana-core/nestjs-integration`  | NestJS module with auth guards + credit client          |
+| `@manacore/shared-auth`          | Client-side auth service for web/mobile apps            |
+| `@manacore/shared-supabase`      | Unified Supabase client                                 |
+| `@manacore/shared-types`         | Common TypeScript types                                 |
+| `@manacore/shared-utils`         | Utility functions                                       |
+| `@manacore/shared-ui`            | React Native UI components                              |
+| `@manacore/shared-theme`         | Theme configuration                                     |
+| `@manacore/shared-i18n`          | Internationalization                                    |
 
 Import shared packages:
 

@@ -1,6 +1,5 @@
 import { Injectable, Inject, Optional, Logger } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
+import { ConfigService } from '@nestjs/config';
 import { MANA_CORE_OPTIONS } from '../mana-core.module';
 import { ManaCoreModuleOptions } from '../interfaces/mana-core-options.interface';
 
@@ -26,8 +25,34 @@ export class CreditClientService {
 		@Inject(MANA_CORE_OPTIONS)
 		private readonly options?: ManaCoreModuleOptions,
 		@Optional()
-		private readonly httpService?: HttpService
+		private readonly configService?: ConfigService
 	) {}
+
+	private getAuthUrl(): string {
+		return (
+			this.configService?.get<string>('MANA_CORE_AUTH_URL') ||
+			process.env.MANA_CORE_AUTH_URL ||
+			'http://localhost:3001'
+		);
+	}
+
+	private getServiceKey(): string {
+		return (
+			this.options?.serviceKey ||
+			this.configService?.get<string>('MANA_CORE_SERVICE_KEY') ||
+			process.env.MANA_CORE_SERVICE_KEY ||
+			''
+		);
+	}
+
+	private getAppId(): string {
+		return (
+			this.options?.appId ||
+			this.configService?.get<string>('APP_ID') ||
+			process.env.APP_ID ||
+			''
+		);
+	}
 
 	async validateCredits(
 		userId: string,
@@ -56,10 +81,11 @@ export class CreditClientService {
 	}
 
 	async getBalance(userId: string): Promise<CreditBalance> {
-		if (!this.httpService || !this.options?.manaServiceUrl) {
-			this.logger.warn(
-				'HTTP service or Mana service URL not configured, returning default balance'
-			);
+		const authUrl = this.getAuthUrl();
+		const serviceKey = this.getServiceKey();
+
+		if (!serviceKey) {
+			this.logger.warn('Service key not configured, returning default balance');
 			return {
 				balance: 1000,
 				freeCreditsRemaining: 100,
@@ -69,28 +95,30 @@ export class CreditClientService {
 		}
 
 		try {
-			const response = await firstValueFrom(
-				this.httpService.get<CreditBalance>(
-					`${this.options.manaServiceUrl}/credits/balance/${userId}`,
-					{
-						headers: {
-							'X-Service-Key': this.options.serviceKey || '',
-							'X-App-Id': this.options.appId || '',
-						},
-					}
-				)
-			);
+			const response = await fetch(`${authUrl}/api/v1/credits/balance/${userId}`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-Service-Key': serviceKey,
+					'X-App-Id': this.getAppId(),
+				},
+			});
 
-			return response.data;
+			if (!response.ok) {
+				this.logger.warn(`Credit balance request failed: ${response.status}`);
+				return this.getDefaultBalance();
+			}
+
+			const data = (await response.json()) as CreditBalance;
+			return {
+				balance: data.balance || 0,
+				freeCreditsRemaining: data.freeCreditsRemaining || 0,
+				totalEarned: data.totalEarned || 0,
+				totalSpent: data.totalSpent || 0,
+			};
 		} catch (error) {
 			this.logger.error(`Failed to get balance for user ${userId}:`, error);
-			// Return default balance on error
-			return {
-				balance: 1000,
-				freeCreditsRemaining: 100,
-				totalEarned: 0,
-				totalSpent: 0,
-			};
+			return this.getDefaultBalance();
 		}
 	}
 
@@ -101,37 +129,41 @@ export class CreditClientService {
 		description: string,
 		metadata?: Record<string, any>
 	): Promise<boolean> {
-		if (!this.httpService || !this.options?.manaServiceUrl) {
-			this.logger.warn(
-				'HTTP service or Mana service URL not configured, skipping credit consumption'
-			);
+		const authUrl = this.getAuthUrl();
+		const serviceKey = this.getServiceKey();
+
+		if (!serviceKey) {
+			this.logger.warn('Service key not configured, skipping credit consumption');
 			return true;
 		}
 
 		try {
-			await firstValueFrom(
-				this.httpService.post(
-					`${this.options.manaServiceUrl}/credits/use`,
-					{
-						userId,
-						amount,
-						appId: this.options.appId,
-						description,
-						metadata: {
-							operation,
-							...metadata,
-						},
+			const response = await fetch(`${authUrl}/api/v1/credits/use`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-Service-Key': serviceKey,
+					'X-App-Id': this.getAppId(),
+				},
+				body: JSON.stringify({
+					userId,
+					amount,
+					appId: this.getAppId(),
+					description,
+					metadata: {
+						operation,
+						...metadata,
 					},
-					{
-						headers: {
-							'X-Service-Key': this.options.serviceKey || '',
-							'X-App-Id': this.options.appId || '',
-						},
-					}
-				)
-			);
+				}),
+			});
 
-			if (this.options.debug) {
+			if (!response.ok) {
+				const errorText = await response.text().catch(() => 'Unknown error');
+				this.logger.error(`Failed to consume credits: ${response.status} ${errorText}`);
+				return false;
+			}
+
+			if (this.options?.debug) {
 				this.logger.log(`Consumed ${amount} credits for user ${userId}: ${description}`);
 			}
 
@@ -148,32 +180,38 @@ export class CreditClientService {
 		description: string,
 		metadata?: Record<string, any>
 	): Promise<boolean> {
-		if (!this.httpService || !this.options?.manaServiceUrl) {
-			this.logger.warn('HTTP service or Mana service URL not configured, skipping credit refund');
+		const authUrl = this.getAuthUrl();
+		const serviceKey = this.getServiceKey();
+
+		if (!serviceKey) {
+			this.logger.warn('Service key not configured, skipping credit refund');
 			return true;
 		}
 
 		try {
-			await firstValueFrom(
-				this.httpService.post(
-					`${this.options.manaServiceUrl}/credits/refund`,
-					{
-						userId,
-						amount,
-						appId: this.options.appId,
-						description,
-						metadata,
-					},
-					{
-						headers: {
-							'X-Service-Key': this.options.serviceKey || '',
-							'X-App-Id': this.options.appId || '',
-						},
-					}
-				)
-			);
+			const response = await fetch(`${authUrl}/api/v1/credits/refund`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-Service-Key': serviceKey,
+					'X-App-Id': this.getAppId(),
+				},
+				body: JSON.stringify({
+					userId,
+					amount,
+					appId: this.getAppId(),
+					description,
+					metadata,
+				}),
+			});
 
-			if (this.options.debug) {
+			if (!response.ok) {
+				const errorText = await response.text().catch(() => 'Unknown error');
+				this.logger.error(`Failed to refund credits: ${response.status} ${errorText}`);
+				return false;
+			}
+
+			if (this.options?.debug) {
 				this.logger.log(`Refunded ${amount} credits for user ${userId}: ${description}`);
 			}
 
@@ -182,5 +220,14 @@ export class CreditClientService {
 			this.logger.error(`Failed to refund credits for user ${userId}:`, error);
 			return false;
 		}
+	}
+
+	private getDefaultBalance(): CreditBalance {
+		return {
+			balance: 1000,
+			freeCreditsRemaining: 100,
+			totalEarned: 0,
+			totalSpent: 0,
+		};
 	}
 }

@@ -39,20 +39,12 @@ import {
 			ignoreEnvFile: process.env.NODE_ENV === 'production',
 		}),
 
-		// Mana Core authentication
+		// Mana Core authentication (validates JWT via mana-core-auth service)
 		ManaCoreModule.forRootAsync({
 			imports: [ConfigModule],
 			useFactory: (configService: ConfigService) => ({
-				manaServiceUrl: configService.get<string>(
-					'MANA_SERVICE_URL',
-					'https://mana-core-middleware-111768794939.europe-west3.run.app'
-				),
 				appId: configService.get<string>('APP_ID', 'cea4bfc6-a4de-4e17-91e2-54275940156e'),
-				serviceKey: configService.get<string>('MANA_SUPABASE_SECRET_KEY', ''), // Required for service-to-service communication
-				signupRedirectUrl: configService.get<string>(
-					'SIGNUP_REDIRECT_URL',
-					'https://manadeck.com/welcome'
-				),
+				serviceKey: configService.get<string>('MANA_CORE_SERVICE_KEY', ''),
 				debug: configService.get('NODE_ENV') === 'development',
 			}),
 			inject: [ConfigService],
