@@ -7,12 +7,16 @@
 	import type { PillNavItem, PillNavElement, PillDropdownItem } from '@manacore/shared-ui';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
+	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import KeyboardShortcutsModal from '$lib/components/ui/KeyboardShortcutsModal.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { isUIVisible, toggleUI, showKeyboardShortcuts } from '$lib/stores/ui';
 	import { viewMode, setViewMode, type ViewMode } from '$lib/stores/view';
 	import { browser } from '$app/environment';
+
+	// App switcher items
+	const appItems = getPillAppItems('picture');
 
 	let { children } = $props();
 
@@ -109,6 +113,9 @@
 		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
+
+	// User email for user dropdown
+	let userEmail = $derived(authStore.user?.email);
 
 	// Elements (divider + view mode tabs)
 	let elements: PillNavElement[] = $derived([
@@ -225,7 +232,14 @@
 				showLanguageSwitcher={true}
 				{languageItems}
 				{currentLanguageLabel}
+				showLogout={true}
 				primaryColor="#3b82f6"
+				showAppSwitcher={true}
+				{appItems}
+				{userEmail}
+				settingsHref="/app/settings"
+				manaHref="/app/mana"
+				profileHref="/app/profile"
 			/>
 		{/if}
 

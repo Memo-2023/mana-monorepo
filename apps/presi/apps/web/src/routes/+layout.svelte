@@ -13,8 +13,12 @@
 		isNavCollapsed as collapsedStore,
 	} from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
+	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import '../app.css';
+
+	// App switcher items
+	const appItems = getPillAppItems('presi');
 
 	let { children } = $props();
 
@@ -52,6 +56,9 @@
 		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
+
+	// User email for user dropdown
+	let userEmail = $derived(auth.user?.email);
 
 	// Navigation items for Presi
 	const navItems: PillNavItem[] = [
@@ -192,6 +199,12 @@
 				showLogout={true}
 				onLogout={handleLogout}
 				primaryColor="#64748b"
+				showAppSwitcher={true}
+				{appItems}
+				{userEmail}
+				settingsHref="/settings"
+				manaHref="/mana"
+				profileHref="/profile"
 			/>
 
 			<!-- Main Content with dynamic padding based on nav mode -->

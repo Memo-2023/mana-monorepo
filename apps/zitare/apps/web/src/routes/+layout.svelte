@@ -13,9 +13,13 @@
 		isNavCollapsed as collapsedStore,
 	} from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
+	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
 	import '../app.css';
+
+	// App switcher items
+	const appItems = getPillAppItems('zitare');
 
 	let { children } = $props();
 
@@ -58,6 +62,9 @@
 		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
+
+	// User email for user dropdown
+	let userEmail = $derived(authStore.user?.email);
 
 	// Navigation items for Zitare
 	const navItems: PillNavItem[] = [
@@ -194,6 +201,12 @@
 			showLogout={authStore.isAuthenticated}
 			onLogout={handleLogout}
 			primaryColor="#f59e0b"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			manaHref="/mana"
+			profileHref="/profile"
 		/>
 
 		<!-- Main Content with dynamic padding based on nav mode -->

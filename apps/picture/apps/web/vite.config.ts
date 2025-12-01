@@ -8,4 +8,8 @@ export default defineConfig({
 		port: 5175,
 		strictPort: true,
 	},
+	ssr: {
+		// Process @manacore packages that contain .svelte.ts files with runes
+		noExternal: ['@manacore/shared-theme', '@manacore/shared-auth'],
+	},
 });

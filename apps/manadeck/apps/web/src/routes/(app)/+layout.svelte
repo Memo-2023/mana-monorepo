@@ -13,7 +13,11 @@
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
+	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+
+	// App switcher items
+	const appItems = getPillAppItems('manadeck');
 
 	let { children } = $props();
 
@@ -62,6 +66,9 @@
 		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
+
+	// User email for user dropdown
+	let userEmail = $derived(authStore.user?.email);
 
 	// Navigation shortcuts (Ctrl+1-5)
 	const navRoutes = navItems.map((item) => item.href);
@@ -181,7 +188,14 @@
 			showLanguageSwitcher={true}
 			{languageItems}
 			{currentLanguageLabel}
+			showLogout={true}
 			primaryColor="#6366f1"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			manaHref="/mana"
+			profileHref="/profile"
 		/>
 
 		<!-- Main content with dynamic padding -->
