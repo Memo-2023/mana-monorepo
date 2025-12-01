@@ -62,7 +62,10 @@
 
 	// Navigation items for Presi
 	// Profile, Mana, and Settings are in the user dropdown via profileHref, manaHref, settingsHref
-	const navItems: PillNavItem[] = [{ href: '/', label: 'Decks', icon: 'document' }];
+	const navItems: PillNavItem[] = [
+		{ href: '/', label: 'Decks', icon: 'document' },
+		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
+	];
 
 	// Public routes that don't require auth
 	const publicRoutes = ['/login', '/register', '/forgot-password'];

@@ -14,9 +14,15 @@ const BASE_URL = PUBLIC_BACKEND_URL || 'http://localhost:3008';
 const API_URL = `${BASE_URL}/api`;
 const AUTH_URL = PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
 
+// Storage keys must match @manacore/shared-auth
+const STORAGE_KEYS = {
+	APP_TOKEN: '@auth/appToken',
+	REFRESH_TOKEN: '@auth/refreshToken',
+};
+
 function getToken(): string | null {
 	if (!browser) return null;
-	return localStorage.getItem('accessToken');
+	return localStorage.getItem(STORAGE_KEYS.APP_TOKEN);
 }
 
 async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
@@ -49,8 +55,8 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
 		}
 		// Clear tokens and redirect to login
 		if (browser) {
-			localStorage.removeItem('accessToken');
-			localStorage.removeItem('refreshToken');
+			localStorage.removeItem(STORAGE_KEYS.APP_TOKEN);
+			localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
 			window.location.href = '/login';
 		}
 	}
@@ -61,21 +67,21 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
 async function refreshToken(): Promise<boolean> {
 	if (!browser) return false;
 
-	const refreshToken = localStorage.getItem('refreshToken');
-	if (!refreshToken) return false;
+	const storedRefreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+	if (!storedRefreshToken) return false;
 
 	try {
-		const response = await fetch(`${AUTH_URL}/auth/refresh`, {
+		const response = await fetch(`${AUTH_URL}/api/v1/auth/refresh`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ refreshToken }),
+			body: JSON.stringify({ refreshToken: storedRefreshToken }),
 		});
 
 		if (response.ok) {
 			const data = await response.json();
-			localStorage.setItem('accessToken', data.accessToken);
+			localStorage.setItem(STORAGE_KEYS.APP_TOKEN, data.accessToken);
 			if (data.refreshToken) {
-				localStorage.setItem('refreshToken', data.refreshToken);
+				localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, data.refreshToken);
 			}
 			return true;
 		}
@@ -86,10 +92,10 @@ async function refreshToken(): Promise<boolean> {
 	return false;
 }
 
-// Auth API
+// Auth API (legacy - prefer using @manacore/shared-auth via auth store)
 export const authApi = {
 	async login(email: string, password: string) {
-		const response = await fetch(`${AUTH_URL}/auth/login`, {
+		const response = await fetch(`${AUTH_URL}/api/v1/auth/login`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ email, password }),
@@ -102,14 +108,14 @@ export const authApi = {
 
 		const data = await response.json();
 		if (browser) {
-			localStorage.setItem('accessToken', data.accessToken);
-			localStorage.setItem('refreshToken', data.refreshToken);
+			localStorage.setItem(STORAGE_KEYS.APP_TOKEN, data.accessToken);
+			localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, data.refreshToken);
 		}
 		return data;
 	},
 
 	async register(email: string, password: string) {
-		const response = await fetch(`${AUTH_URL}/auth/register`, {
+		const response = await fetch(`${AUTH_URL}/api/v1/auth/register`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ email, password }),
@@ -122,22 +128,22 @@ export const authApi = {
 
 		const data = await response.json();
 		if (browser) {
-			localStorage.setItem('accessToken', data.accessToken);
-			localStorage.setItem('refreshToken', data.refreshToken);
+			localStorage.setItem(STORAGE_KEYS.APP_TOKEN, data.accessToken);
+			localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, data.refreshToken);
 		}
 		return data;
 	},
 
 	logout() {
 		if (browser) {
-			localStorage.removeItem('accessToken');
-			localStorage.removeItem('refreshToken');
+			localStorage.removeItem(STORAGE_KEYS.APP_TOKEN);
+			localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
 		}
 	},
 
 	isAuthenticated(): boolean {
 		if (!browser) return false;
-		return !!localStorage.getItem('accessToken');
+		return !!localStorage.getItem(STORAGE_KEYS.APP_TOKEN);
 	},
 };
 

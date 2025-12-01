@@ -328,6 +328,7 @@ const APP_CONFIGS = [
 			PORT: (env) => env.PRESI_BACKEND_PORT || '3008',
 			DATABASE_URL: (env) => env.PRESI_DATABASE_URL,
 			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			JWT_PUBLIC_KEY: (env) => env.JWT_PUBLIC_KEY,
 			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
 		},
 	},
