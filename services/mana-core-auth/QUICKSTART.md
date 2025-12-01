@@ -350,9 +350,8 @@ pnpm db:studio
 ## Resources
 
 - **Full Documentation:** `README.md`
-- **Implementation Summary:** `IMPLEMENTATION_SUMMARY.md`
-- **Master Plan:** `../../.hive-mind/MASTER_PLAN_CENTRAL_AUTH_SYSTEM.md`
-- **Docker Guide:** `../../.hive-mind/DOCKER_DEPLOYMENT_GUIDE.md`
+- **Database Schema:** `docs/DATABASE_SCHEMA.md`
+- **Migration Guide:** `MIGRATIONS.md`
 
 ## Support
 

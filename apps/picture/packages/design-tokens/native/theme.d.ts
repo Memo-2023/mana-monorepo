@@ -949,13 +949,4 @@ declare function isValidThemeVariant(variant: string): variant is ThemeVariant;
  */
 type NativeTheme = ReturnType<typeof createNativeTheme>;
 
-export {
-	type ColorMode,
-	type NativeTheme,
-	type SemanticColors,
-	type ThemeVariant,
-	createNativeTheme,
-	getThemeColors,
-	getThemeVariants,
-	isValidThemeVariant,
-};
+export { type ColorMode, type NativeTheme, type SemanticColors, type ThemeVariant, createNativeTheme, getThemeColors, getThemeVariants, isValidThemeVariant };

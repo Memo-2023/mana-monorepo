@@ -17,7 +17,7 @@ Diese Anleitung beschreibt das Deployment einer SvelteKit + PocketBase Anwendung
 │         Hetzner VPS                 │
 │                                     │
 │  ┌─────────────────────────────┐   │
-│  │      Coolify Platform       │   │
+│  │      Docker Compose       │   │
 │  │                             │   │
 │  │  ┌───────────────────────┐  │   │
 │  │  │   Docker Container    │  │   │

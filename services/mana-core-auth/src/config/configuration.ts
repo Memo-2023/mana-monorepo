@@ -7,8 +7,9 @@ export default () => ({
 	},
 
 	jwt: {
-		publicKey: process.env.JWT_PUBLIC_KEY || '',
-		privateKey: process.env.JWT_PRIVATE_KEY || '',
+		// Convert \n string literals to actual newlines for PEM format
+		publicKey: (process.env.JWT_PUBLIC_KEY || '').replace(/\\n/g, '\n'),
+		privateKey: (process.env.JWT_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
 		accessTokenExpiry: process.env.JWT_ACCESS_TOKEN_EXPIRY || '15m',
 		refreshTokenExpiry: process.env.JWT_REFRESH_TOKEN_EXPIRY || '7d',
 		issuer: process.env.JWT_ISSUER || 'manacore',

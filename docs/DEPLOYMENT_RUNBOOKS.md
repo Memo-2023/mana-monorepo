@@ -29,19 +29,19 @@
 - [ ] GitHub account (for CI/CD)
 - [ ] Supabase projects created (one per product)
 
-### Step 1: Install Coolify
+### Step 1: Set up Docker Compose
 
 ```bash
 # SSH into server
 ssh root@your-server-ip
 
-# Install Coolify (automated installer)
+# Set up Docker Compose (automated installer)
 curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
 
 # Verify installation
 coolify --version
 
-# Access Coolify UI
+# Access Docker Compose configuration
 # Navigate to: http://your-server-ip:8000
 # Create admin account
 ```
@@ -146,7 +146,7 @@ curl -X POST http://localhost:3001/api/auth/register \
 
 ### Step 7: Configure SSL (Coolify Auto)
 
-In Coolify UI:
+In Docker Compose configuration:
 
 1. Navigate to: Settings → Domains
 2. Add domain: `auth.manacore.app`
@@ -283,7 +283,7 @@ docker compose --profile picture up -d
 docker compose exec picture-backend pnpm migration:run
 
 # Step 8: Configure Coolify routing
-# In Coolify UI:
+# In Docker Compose configuration:
 # - Add new application: picture-backend
 # - Domain: api-picture.manacore.app
 # - Port: 3005
@@ -365,7 +365,7 @@ curl -f http://localhost:3012/api/health
 ./scripts/smoke-test.sh http://localhost:3012
 
 # Step 10: Switch traffic to green (Coolify)
-# In Coolify UI or via API:
+# In Docker Compose configuration or via API:
 coolify switch-deployment chat green
 
 # Or manually update Nginx:

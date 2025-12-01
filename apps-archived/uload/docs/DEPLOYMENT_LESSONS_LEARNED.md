@@ -11,7 +11,7 @@ Deployment einer SvelteKit + PocketBase Anwendung auf Hetzner VPS mit Coolify.
 │            Hetzner VPS (91.99.221.179)       │
 │                                              │
 │  ┌────────────────────────────────────────┐ │
-│  │           Coolify Platform              │ │
+│  │           Docker Compose              │ │
 │  │                                         │ │
 │  │  ┌───────────────────────────────────┐ │ │
 │  │  │     Docker Container               │ │ │
@@ -116,7 +116,7 @@ POCKETBASE_ADMIN_PASSWORD=p0ck3tRA1N
 
 - **Problem:** Supervisor kann nicht starten ohne die ENV Variables
 - **Symptom:** Endlosschleife im Container mit Supervisor Error
-- **Lösung:** ALLE benötigten ENV Variables in Coolify UI setzen
+- **Lösung:** ALLE benötigten ENV Variables in Docker Compose configuration setzen
 
 ### 2. Docker Build Context
 

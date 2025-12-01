@@ -39,7 +39,7 @@ The manacore-monorepo contains **10 product projects** with **37 deployable serv
 - **Shared infrastructure** for databases (PostgreSQL) and caching (Redis)
 - **Multi-stage Docker builds** optimized for pnpm workspace monorepo
 - **Blue-green deployment** strategy with zero-downtime rollbacks
-- **Coolify-first design** with Kubernetes compatibility
+- **Docker Compose orchestration** with GitHub Container Registry
 - **CDN-first static assets** (Astro landing pages, mobile OTA bundles)
 
 ---
@@ -986,17 +986,17 @@ k8s/
 
 #### Staging Environment
 
-- **Location:** Coolify server (separate from production)
-- **Orchestration:** Coolify
+- **Location:** Hetzner VPS (CCX32)
+- **Orchestration:** Docker Compose
 - **Database:** Dedicated Supabase project (staging)
 - **Domains:** `staging-chat.manacore.app`, `staging-api-chat.manacore.app`
-- **SSL:** Let's Encrypt (automatic)
+- **SSL:** Let's Encrypt via Traefik
 - **Purpose:** Integration testing, QA, stakeholder demos
 
 #### Production Environment
 
-- **Location:** Coolify (current) or Kubernetes (future)
-- **Orchestration:** Coolify with auto-scaling
+- **Location:** Hetzner VPS (CCX42) or Kubernetes (future)
+- **Orchestration:** Docker Compose with zero-downtime deployments
 - **Database:** Production Supabase projects (per-project isolation)
 - **Domains:** `chat.manacore.app`, `api-chat.manacore.app`, etc.
 - **SSL:** Let's Encrypt with auto-renewal

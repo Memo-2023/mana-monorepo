@@ -87,9 +87,10 @@ cat cicd/SETUP.md
 
 ### Infrastructure
 
-- **Platform**: Coolify + Hetzner
+- **Platform**: Docker Compose + Hetzner VPS
 - **Cost**: ~$56/month (92% cheaper than alternatives)
 - **Services**: 39+ deployable services across 10 projects
+- **Container Registry**: GitHub Container Registry (ghcr.io)
 
 ### CI/CD Pipeline
 
@@ -178,14 +179,14 @@ The Hive Mind has delivered:
 
 **Estimated Total**: 5-7 days for full implementation
 
-| Week        | Focus                 | Deliverable                        |
-| ----------- | --------------------- | ---------------------------------- |
-| **Week 1**  | Infrastructure setup  | Hetzner server + Coolify installed |
-| **Week 1**  | Secrets configuration | All GitHub secrets configured      |
-| **Week 1**  | First deployment      | Chat project deployed to staging   |
-| **Week 2**  | Testing validation    | CI/CD pipeline tested end-to-end   |
-| **Week 2**  | Production deployment | First project in production        |
-| **Week 3+** | Full rollout          | All 10 projects deployed           |
+| Week        | Focus                 | Deliverable                            |
+| ----------- | --------------------- | -------------------------------------- |
+| **Week 1**  | Infrastructure setup  | Hetzner server + Docker Compose setup  |
+| **Week 1**  | Secrets configuration | All GitHub secrets configured          |
+| **Week 1**  | First deployment      | Chat project deployed to staging       |
+| **Week 2**  | Testing validation    | CI/CD pipeline tested end-to-end       |
+| **Week 2**  | Production deployment | First project in production            |
+| **Week 3+** | Full rollout          | All 10 projects deployed               |
 
 ---
 
@@ -244,10 +245,10 @@ The Hive Mind has delivered:
 - [Workflow Syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions)
 - Our guide: `GITHUB_ACTIONS.md`
 
-### Coolify
+### Docker & Docker Compose
 
-- [Coolify Documentation](https://coolify.io/docs)
-- [GitHub Repository](https://github.com/coollabsio/coolify)
+- [Docker Documentation](https://docs.docker.com/)
+- [Docker Compose Documentation](https://docs.docker.com/compose/)
 
 ### Hetzner
 
