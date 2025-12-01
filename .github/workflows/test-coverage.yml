@@ -52,7 +52,7 @@ jobs:
       - name: Collect coverage reports
         run: |
           # Find all coverage directories
-          find . -type d -name coverage -path "*/apps/*/apps/*" -o -path "*/services/*" > coverage_dirs.txt
+          find . -type d -name coverage \( -path "*/apps/*/apps/*" -o -path "*/services/*" \) > coverage_dirs.txt
 
           # Create combined coverage directory
           mkdir -p coverage-combined
@@ -110,6 +110,7 @@ jobs:
             services/**/coverage
             coverage-combined
           retention-days: 30
+          if-no-files-found: warn
 
       - name: Check coverage thresholds
         run: |
@@ -147,11 +148,14 @@ jobs:
 
       - name: Download coverage reports
         uses: actions/download-artifact@v4
+        continue-on-error: true
+        id: download-coverage
         with:
           name: coverage-reports
           path: coverage-reports
 
       - name: Create coverage badge
+        if: steps.download-coverage.outcome == 'success'
         run: |
           # Calculate overall coverage
           TOTAL_LINES=0
@@ -175,7 +179,12 @@ jobs:
           fi
 
       - name: Update README badge
+        if: steps.download-coverage.outcome == 'success'
         run: |
           echo "Coverage badge data ready: ${{ env.COVERAGE }}%"
           # This would update a badge in the README or create a gist
           # Implementation depends on chosen badge service (shields.io, codecov, etc.)
+
+      - name: Skip badge update
+        if: steps.download-coverage.outcome != 'success'
+        run: echo "No coverage reports available - skipping badge update"
