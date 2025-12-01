@@ -205,6 +205,7 @@
 			settingsHref="/settings"
 			manaHref="/mana"
 			profileHref="/profile"
+			allAppsHref="/apps"
 		/>
 
 		<!-- Main Content with dynamic padding based on nav mode -->

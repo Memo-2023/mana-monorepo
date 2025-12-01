@@ -58,3 +58,6 @@ export {
 	SettingsDangerZone,
 	SettingsDangerButton,
 } from './settings';
+
+// Pages
+export { default as AppsPage } from './pages/AppsPage.svelte';

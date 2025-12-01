@@ -68,7 +68,7 @@
 
 	// Navigation items for Zitare
 	const navItems: PillNavItem[] = [
-		{ href: '/', label: 'Zitate', icon: 'chat' },
+		{ href: '/', label: 'Zitate', icon: 'document' },
 		{ href: '/search', label: 'Suche', icon: 'search' },
 		{ href: '/authors', label: 'Autoren', icon: 'users' },
 		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
@@ -214,10 +214,15 @@
 			class="main-content bg-background"
 			class:sidebar-mode={isSidebarMode && !isCollapsed}
 			class:floating-mode={!isSidebarMode && !isCollapsed}
+			class:full-height={$page.url.pathname === '/'}
 		>
-			<div class="content-wrapper">
+			{#if $page.url.pathname === '/'}
 				{@render children()}
-			</div>
+			{:else}
+				<div class="content-wrapper">
+					{@render children()}
+				</div>
+			{/if}
 		</main>
 	</div>
 {/if}
@@ -242,6 +247,23 @@
 	/* Sidebar mode - add left padding for sidebar nav */
 	.main-content.sidebar-mode {
 		padding-left: 180px;
+	}
+
+	/* Full height mode for scrollable pages like home */
+	.main-content.full-height {
+		display: flex;
+		flex-direction: column;
+		height: calc(100vh - 100px);
+		overflow: hidden;
+	}
+
+	.main-content.full-height.floating-mode {
+		height: 100vh;
+		padding-top: 0;
+	}
+
+	.main-content.full-height.sidebar-mode {
+		height: 100vh;
 	}
 
 	.content-wrapper {

@@ -32,6 +32,7 @@
 		"svelte": "^5.0.0"
 	},
 	"dependencies": {
+		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-icons": "workspace:*"
 	}
 }

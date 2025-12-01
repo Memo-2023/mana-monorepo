@@ -27,13 +27,11 @@
 	// Get theme state
 	let isDark = $derived(theme.isDark);
 
-	// Navigation items for ManaDeck
+	// Navigation items for ManaDeck (Mana and Profile are in user dropdown)
 	const navItems: PillNavItem[] = [
 		{ href: '/decks', label: 'Decks', icon: 'archive' },
 		{ href: '/explore', label: 'Explore', icon: 'search' },
 		{ href: '/progress', label: 'Progress', icon: 'chart' },
-		{ href: '/mana', label: 'Mana', icon: 'mana' },
-		{ href: '/profile', label: 'Profile', icon: 'user' },
 	];
 
 	// Theme variant dropdown items
@@ -196,6 +194,7 @@
 			settingsHref="/settings"
 			manaHref="/mana"
 			profileHref="/profile"
+			allAppsHref="/apps"
 		/>
 
 		<!-- Main content with dynamic padding -->

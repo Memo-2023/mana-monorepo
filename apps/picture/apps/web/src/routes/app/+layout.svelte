@@ -239,6 +239,7 @@
 				settingsHref="/app/settings"
 				manaHref="/app/mana"
 				profileHref="/app/profile"
+				allAppsHref="/app/apps"
 			/>
 		{/if}
 

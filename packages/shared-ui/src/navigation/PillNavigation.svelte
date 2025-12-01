@@ -4,9 +4,13 @@
 	import PillDropdown from './PillDropdown.svelte';
 	import PillTabGroup from './PillTabGroup.svelte';
 
-	// Convert app items to dropdown items
-	function appItemsToDropdownItems(apps: PillAppItem[]): PillDropdownItem[] {
-		return apps.map((app) => ({
+	// Convert app items to dropdown items (will be computed as derived)
+	function createAppDropdownItems(
+		apps: PillAppItem[],
+		allAppsUrl?: string,
+		allAppsText?: string
+	): PillDropdownItem[] {
+		const items: PillDropdownItem[] = apps.map((app) => ({
 			id: app.id,
 			label: app.name,
 			// Use image icon if available, otherwise use grid as fallback
@@ -23,6 +27,24 @@
 			active: app.isCurrent,
 			disabled: false,
 		}));
+
+		// Add "All Apps" link at the end if href is provided
+		if (allAppsUrl) {
+			items.push(
+				{ id: 'all-apps-divider', label: '', divider: true },
+				{
+					id: 'all-apps',
+					label: allAppsText || 'Alle Apps',
+					icon: 'grid',
+					onClick: () => {
+						window.location.href = allAppsUrl;
+					},
+					active: false,
+				}
+			);
+		}
+
+		return items;
 	}
 
 	interface Props {
@@ -86,6 +108,12 @@
 		manaHref?: string;
 		/** Profile page href */
 		profileHref?: string;
+		/** Login page href (shown when not logged in) */
+		loginHref?: string;
+		/** All Apps page href */
+		allAppsHref?: string;
+		/** All Apps label (default: "Alle Apps") */
+		allAppsLabel?: string;
 	}
 
 	let {
@@ -119,6 +147,9 @@
 		settingsHref = '/settings',
 		manaHref,
 		profileHref,
+		loginHref,
+		allAppsHref,
+		allAppsLabel = 'Alle Apps',
 	}: Props = $props();
 
 	// Type guards for elements
@@ -245,7 +276,7 @@
 			<!-- Logo pill / App Switcher -->
 			{#if showAppSwitcher && appItems.length > 0}
 				<PillDropdown
-					items={appItemsToDropdownItems(appItems)}
+					items={createAppDropdownItems(appItems, allAppsHref, allAppsLabel)}
 					direction="down"
 					label={appName}
 					icon="grid"
@@ -467,14 +498,29 @@
 									},
 								]
 							: []),
-						{ id: 'logout-divider', label: '', divider: true },
-						{
-							id: 'logout',
-							label: 'Logout',
-							icon: 'logout',
-							onClick: () => onLogout?.(),
-							danger: true,
-						},
+						{ id: 'auth-divider', label: '', divider: true },
+						...(showLogout && onLogout
+							? [
+									{
+										id: 'logout',
+										label: 'Logout',
+										icon: 'logout',
+										onClick: () => onLogout?.(),
+										danger: true,
+									},
+								]
+							: loginHref
+								? [
+										{
+											id: 'login',
+											label: 'Login',
+											icon: 'user',
+											onClick: () => {
+												window.location.href = loginHref;
+											},
+										},
+									]
+								: []),
 					]}
 					direction="down"
 					label={truncateEmail(userEmail)}

@@ -61,12 +61,8 @@
 	let userEmail = $derived(auth.user?.email);
 
 	// Navigation items for Presi
-	const navItems: PillNavItem[] = [
-		{ href: '/', label: 'Decks', icon: 'document' },
-		{ href: '/profile', label: 'Profil', icon: 'user' },
-		{ href: '/mana', label: 'Mana', icon: 'sparkles' },
-		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
-	];
+	// Profile, Mana, and Settings are in the user dropdown via profileHref, manaHref, settingsHref
+	const navItems: PillNavItem[] = [{ href: '/', label: 'Decks', icon: 'document' }];
 
 	// Public routes that don't require auth
 	const publicRoutes = ['/login', '/register', '/forgot-password'];
@@ -205,6 +201,7 @@
 				settingsHref="/settings"
 				manaHref="/mana"
 				profileHref="/profile"
+				allAppsHref="/apps"
 			/>
 
 			<!-- Main Content with dynamic padding based on nav mode -->

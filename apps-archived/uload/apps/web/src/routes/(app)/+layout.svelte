@@ -1,39 +1,100 @@
 <script lang="ts">
-	import Navigation from '$lib/components/Navigation.svelte';
-	import FloatingSidebar from '$lib/components/FloatingSidebar.svelte';
-	import MobileSidebar from '$lib/components/MobileSidebar.svelte';
-	import AccountSwitcher from '$lib/components/AccountSwitcher.svelte';
-	import WorkspaceSwitcher from '$lib/components/WorkspaceSwitcher.svelte';
-	import NotificationBell from '$lib/components/NotificationBell.svelte';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { accountsStore } from '$lib/stores/accounts';
 	import { workspacesStore } from '$lib/stores/workspaces';
 	import { activeWorkspace } from '$lib/stores/activeWorkspace';
 	import type { LayoutData } from './$types';
+	import { PillNavigation } from '@manacore/shared-ui';
+	import type { PillNavItem } from '@manacore/shared-ui';
+	import { getPillAppItems } from '@manacore/shared-branding';
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
-	let sidebarCollapsed = $state(false);
-	let mounted = $state(false);
-	let mobileMenuOpen = $state(false);
+
+	// App switcher items
+	const appItems = getPillAppItems('uload');
+
+	// User email for dropdown
+	let userEmail = $derived(data.user?.email);
+
+	// Navigation items for uload
+	const navItems: PillNavItem[] = [
+		{ href: '/', label: 'Dashboard', icon: 'home' },
+		{ href: '/links', label: 'Links', icon: 'link' },
+		{ href: '/analytics', label: 'Analytics', icon: 'chart' },
+		{ href: '/teams', label: 'Teams', icon: 'users' },
+		{ href: '/settings', label: 'Settings', icon: 'settings' },
+	];
+
+	let loading = $state(true);
+	let isSidebarMode = $state(false);
+	let isCollapsed = $state(false);
+	let isDark = $state(false);
+
+	// Navigation shortcuts (Ctrl+1-5)
+	const navRoutes = ['/', '/links', '/analytics', '/teams', '/settings'];
+
+	function handleKeydown(event: KeyboardEvent) {
+		const target = event.target as HTMLElement;
+		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+			return;
+		}
+
+		if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
+			const num = parseInt(event.key);
+			if (num >= 1 && num <= 5) {
+				event.preventDefault();
+				const route = navRoutes[num - 1];
+				if (route) {
+					goto(route);
+				}
+			}
+		}
+	}
+
+	function handleModeChange(isSidebar: boolean) {
+		isSidebarMode = isSidebar;
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem('uload-nav-sidebar', String(isSidebar));
+		}
+	}
+
+	function handleCollapsedChange(collapsed: boolean) {
+		isCollapsed = collapsed;
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem('uload-nav-collapsed', String(collapsed));
+		}
+	}
+
+	function handleToggleTheme() {
+		isDark = !isDark;
+		document.documentElement.classList.toggle('dark', isDark);
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem('uload-dark-mode', String(isDark));
+		}
+	}
+
+	async function handleLogout() {
+		// Clear local storage and redirect
+		if (typeof localStorage !== 'undefined') {
+			localStorage.removeItem('auth_token');
+		}
+		goto('/login');
+	}
 
 	// Watch for URL workspace parameter changes
 	$effect(() => {
 		const urlWorkspaceId = $page.url.searchParams.get('workspace');
 		if (urlWorkspaceId) {
-			// URL parameter takes precedence
 			activeWorkspace.initFromUrl(urlWorkspaceId);
 		}
 	});
 
 	onMount(() => {
-		mounted = true;
-
 		// Initialize both stores during migration
 		if (data.user) {
-			// Old accounts store for backwards compatibility
 			accountsStore.init(data.user, data.sharedAccounts || [], data.viewingAs);
-			// New workspaces store
 			workspacesStore.init(
 				data.user,
 				data.personalWorkspace,
@@ -41,11 +102,9 @@
 				data.currentWorkspaceId
 			);
 
-			// Initialize active workspace from URL or localStorage
 			const urlWorkspaceId = $page.url.searchParams.get('workspace');
 			if (urlWorkspaceId) {
 				activeWorkspace.initFromUrl(urlWorkspaceId);
-				// Try to find workspace data
 				const workspace =
 					data.teamWorkspaces?.find((w) => w.id === urlWorkspaceId) ||
 					(data.personalWorkspace?.id === urlWorkspaceId ? data.personalWorkspace : null);
@@ -55,93 +114,78 @@
 			}
 		}
 
-		if (typeof window !== 'undefined') {
-			const stored = localStorage.getItem('sidebar-collapsed');
-			if (stored !== null) {
-				sidebarCollapsed = stored === 'true';
+		// Restore nav mode from localStorage
+		if (typeof localStorage !== 'undefined') {
+			const savedSidebar = localStorage.getItem('uload-nav-sidebar');
+			if (savedSidebar === 'true') {
+				isSidebarMode = true;
 			}
-
-			// Listen for storage changes to sync sidebar state
-			const handleStorageChange = () => {
-				const stored = localStorage.getItem('sidebar-collapsed');
-				if (stored !== null) {
-					sidebarCollapsed = stored === 'true';
-				}
-			};
-
-			window.addEventListener('storage', handleStorageChange);
-			return () => window.removeEventListener('storage', handleStorageChange);
+			const savedCollapsed = localStorage.getItem('uload-nav-collapsed');
+			if (savedCollapsed === 'true') {
+				isCollapsed = true;
+			}
+			const savedDark = localStorage.getItem('uload-dark-mode');
+			if (savedDark === 'true') {
+				isDark = true;
+				document.documentElement.classList.add('dark');
+			}
 		}
+
+		loading = false;
 	});
 </script>
 
-<!-- Full screen background container -->
-<div class="fixed inset-0 -z-10 bg-theme-background"></div>
+<svelte:window onkeydown={handleKeydown} />
 
-<!-- Floating Sidebar for authenticated users on desktop -->
-<FloatingSidebar user={data.user} />
-
-<!-- Mobile Sidebar (overlay) -->
-<MobileSidebar user={data.user} open={mobileMenuOpen} onClose={() => (mobileMenuOpen = false)} />
-
-<!-- Top Navigation Bar with Menu Button for mobile/tablet -->
-{#if data.user}
-	<nav
-		class="bg-theme-surface/80 sticky top-0 z-30 border-b border-theme-border shadow-sm backdrop-blur-xl lg:hidden"
-	>
-		<div class="mx-auto max-w-7xl px-4 sm:px-6">
-			<div class="flex h-16 items-center justify-between">
-				<!-- Logo & Menu Button -->
-				<div class="flex items-center gap-3">
-					<button
-						onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
-						class="rounded-lg p-2 text-theme-text transition-colors hover:bg-theme-surface-hover"
-						aria-label="Menu"
-					>
-						<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4 6h16M4 12h16M4 18h16"
-							/>
-						</svg>
-					</button>
-					<a href="/" class="flex items-center space-x-2 transition-opacity hover:opacity-80">
-						<svg
-							class="h-8 w-8 text-theme-primary"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-							/>
-						</svg>
-						<span class="text-xl font-bold text-theme-text">uload</span>
-					</a>
-				</div>
-
-				<!-- Notifications & Workspace Switcher -->
-				<div class="flex items-center gap-2">
-					<NotificationBell />
-					<WorkspaceSwitcher />
-				</div>
-			</div>
+{#if loading}
+	<div class="flex min-h-screen items-center justify-center">
+		<div class="text-center">
+			<div
+				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-indigo-500 border-r-transparent"
+			></div>
+			<p class="text-gray-600 dark:text-gray-400">Laden...</p>
 		</div>
-	</nav>
-{/if}
+	</div>
+{:else}
+	<div class="flex min-h-screen flex-col">
+		<PillNavigation
+			items={navItems}
+			currentPath={$page.url.pathname}
+			appName="uload"
+			homeRoute="/"
+			onLogout={handleLogout}
+			onToggleTheme={handleToggleTheme}
+			{isDark}
+			{isSidebarMode}
+			onModeChange={handleModeChange}
+			{isCollapsed}
+			onCollapsedChange={handleCollapsedChange}
+			showThemeToggle={true}
+			primaryColor="#6366f1"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			manaHref="/subscription"
+			profileHref="/profile"
+			allAppsHref="/apps"
+		>
+			{#snippet logo()}
+				<span class="text-xl">🔗</span>
+				<span class="pill-label font-bold">uload</span>
+			{/snippet}
+		</PillNavigation>
 
-<!-- Main Content with responsive margin -->
-<main
-	class="min-h-screen transition-all duration-300 {mounted && data.user
-		? sidebarCollapsed
-			? 'lg:pl-24'
-			: 'lg:pl-72'
-		: ''}"
->
-	{@render children?.()}
-</main>
+		<main
+			class="main-content flex-1 transition-all duration-300 {isCollapsed
+				? ''
+				: isSidebarMode
+					? 'pl-[180px]'
+					: 'pt-20'}"
+		>
+			<div class="container mx-auto px-4 py-8">
+				{@render children?.()}
+			</div>
+		</main>
+	</div>
+{/if}
