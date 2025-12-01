@@ -38,6 +38,8 @@
 		"dev:chat:landing": "pnpm --filter @chat/landing dev",
 		"dev:chat:backend": "pnpm --filter @chat/backend start:dev",
 		"dev:chat:app": "turbo run dev --filter=@chat/web --filter=@chat/backend",
+		"dev:auth": "pnpm --filter mana-core-auth start:dev",
+		"dev:chat:full": "concurrently \"pnpm dev:auth\" \"pnpm dev:chat:backend\"",
 		"zitare:dev": "turbo run dev --filter=zitare...",
 		"dev:zitare:mobile": "pnpm --filter @zitare/mobile dev",
 		"dev:zitare:web": "pnpm --filter @zitare/web dev",
@@ -74,6 +76,7 @@
 		"docker:clean": "docker compose -f docker-compose.dev.yml --env-file .env.development --profile all down -v"
 	},
 	"devDependencies": {
+		"concurrently": "^9.2.0",
 		"prettier": "^3.3.3",
 		"prettier-plugin-astro": "^0.14.1",
 		"prettier-plugin-svelte": "^3.4.0",

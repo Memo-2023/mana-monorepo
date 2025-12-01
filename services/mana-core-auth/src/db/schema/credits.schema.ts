@@ -10,6 +10,7 @@ import {
 	boolean,
 } from 'drizzle-orm/pg-core';
 import { users } from './auth.schema';
+import { organizations } from './organizations.schema';
 
 export const creditsSchema = pgSchema('credits');
 
@@ -33,7 +34,7 @@ export const transactionStatusEnum = pgEnum('transaction_status', [
 
 // Credit balances (one per user)
 export const balances = creditsSchema.table('balances', {
-	userId: uuid('user_id')
+	userId: text('user_id')
 		.primaryKey()
 		.references(() => users.id, { onDelete: 'cascade' }),
 	balance: integer('balance').default(0).notNull(),
@@ -42,7 +43,7 @@ export const balances = creditsSchema.table('balances', {
 	lastDailyResetAt: timestamp('last_daily_reset_at', { withTimezone: true }).defaultNow(),
 	totalEarned: integer('total_earned').default(0).notNull(),
 	totalSpent: integer('total_spent').default(0).notNull(),
-	version: integer('version').default(0).notNull(), // For optimistic locking
+	version: integer('version').default(0).notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
@@ -52,7 +53,7 @@ export const transactions = creditsSchema.table(
 	'transactions',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id')
+		userId: text('user_id')
 			.references(() => users.id, { onDelete: 'cascade' })
 			.notNull(),
 		type: transactionTypeEnum('type').notNull(),
@@ -60,9 +61,10 @@ export const transactions = creditsSchema.table(
 		amount: integer('amount').notNull(),
 		balanceBefore: integer('balance_before').notNull(),
 		balanceAfter: integer('balance_after').notNull(),
-		appId: text('app_id').notNull(), // 'memoro', 'chat', 'picture', etc.
+		appId: text('app_id').notNull(),
 		description: text('description').notNull(),
-		metadata: jsonb('metadata'), // Additional context
+		organizationId: text('organization_id').references(() => organizations.id),
+		metadata: jsonb('metadata'),
 		idempotencyKey: text('idempotency_key').unique(),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 		completedAt: timestamp('completed_at', { withTimezone: true }),
@@ -70,6 +72,7 @@ export const transactions = creditsSchema.table(
 	(table) => ({
 		userIdIdx: index('transactions_user_id_idx').on(table.userId),
 		appIdIdx: index('transactions_app_id_idx').on(table.appId),
+		organizationIdIdx: index('transactions_organization_id_idx').on(table.organizationId),
 		createdAtIdx: index('transactions_created_at_idx').on(table.createdAt),
 		idempotencyKeyIdx: index('transactions_idempotency_key_idx').on(table.idempotencyKey),
 	})
@@ -80,8 +83,8 @@ export const packages = creditsSchema.table('packages', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
 	description: text('description'),
-	credits: integer('credits').notNull(), // Number of credits
-	priceEuroCents: integer('price_euro_cents').notNull(), // Price in euro cents
+	credits: integer('credits').notNull(),
+	priceEuroCents: integer('price_euro_cents').notNull(),
 	stripePriceId: text('stripe_price_id').unique(),
 	active: boolean('active').default(true).notNull(),
 	sortOrder: integer('sort_order').default(0).notNull(),
@@ -95,7 +98,7 @@ export const purchases = creditsSchema.table(
 	'purchases',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id')
+		userId: text('user_id')
 			.references(() => users.id, { onDelete: 'cascade' })
 			.notNull(),
 		packageId: uuid('package_id').references(() => packages.id),
@@ -121,7 +124,7 @@ export const usageStats = creditsSchema.table(
 	'usage_stats',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id')
+		userId: text('user_id')
 			.references(() => users.id, { onDelete: 'cascade' })
 			.notNull(),
 		appId: text('app_id').notNull(),
@@ -132,5 +135,49 @@ export const usageStats = creditsSchema.table(
 	(table) => ({
 		userIdDateIdx: index('usage_stats_user_id_date_idx').on(table.userId, table.date),
 		appIdDateIdx: index('usage_stats_app_id_date_idx').on(table.appId, table.date),
+	})
+);
+
+// Organization credit balances (B2B)
+export const organizationBalances = creditsSchema.table('organization_balances', {
+	organizationId: text('organization_id')
+		.primaryKey()
+		.references(() => organizations.id, { onDelete: 'cascade' }),
+	balance: integer('balance').default(0).notNull(),
+	allocatedCredits: integer('allocated_credits').default(0).notNull(),
+	availableCredits: integer('available_credits').default(0).notNull(),
+	totalPurchased: integer('total_purchased').default(0).notNull(),
+	totalAllocated: integer('total_allocated').default(0).notNull(),
+	version: integer('version').default(0).notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+// Credit allocations (B2B - tracking allocations from org to employees)
+export const creditAllocations = creditsSchema.table(
+	'credit_allocations',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		organizationId: text('organization_id')
+			.references(() => organizations.id, { onDelete: 'cascade' })
+			.notNull(),
+		employeeId: text('employee_id')
+			.references(() => users.id, { onDelete: 'cascade' })
+			.notNull(),
+		amount: integer('amount').notNull(),
+		allocatedBy: text('allocated_by')
+			.references(() => users.id)
+			.notNull(),
+		reason: text('reason'),
+		balanceBefore: integer('balance_before').notNull(),
+		balanceAfter: integer('balance_after').notNull(),
+		metadata: jsonb('metadata'),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => ({
+		organizationIdIdx: index('credit_allocations_organization_id_idx').on(table.organizationId),
+		employeeIdIdx: index('credit_allocations_employee_id_idx').on(table.employeeId),
+		allocatedByIdx: index('credit_allocations_allocated_by_idx').on(table.allocatedBy),
+		createdAtIdx: index('credit_allocations_created_at_idx').on(table.createdAt),
 	})
 );

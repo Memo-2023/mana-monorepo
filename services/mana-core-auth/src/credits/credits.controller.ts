@@ -1,13 +1,18 @@
-import { Controller, Get, Post, Body, UseGuards, Query, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Query, ParseIntPipe, Param } from '@nestjs/common';
 import { CreditsService } from './credits.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser, CurrentUserData } from '../common/decorators/current-user.decorator';
 import { UseCreditsDto } from './dto/use-credits.dto';
+import { AllocateCreditsDto } from './dto/allocate-credits.dto';
 
 @Controller('credits')
 @UseGuards(JwtAuthGuard)
 export class CreditsController {
 	constructor(private readonly creditsService: CreditsService) {}
+
+	// ============================================================================
+	// PERSONAL / B2C ENDPOINTS
+	// ============================================================================
 
 	@Get('balance')
 	async getBalance(@CurrentUser() user: CurrentUserData) {
@@ -36,5 +41,52 @@ export class CreditsController {
 	@Get('packages')
 	async getPackages() {
 		return this.creditsService.getPackages();
+	}
+
+	// ============================================================================
+	// ORGANIZATION / B2B ENDPOINTS
+	// ============================================================================
+
+	/**
+	 * Allocate credits from organization to employee
+	 * Only organization owners can allocate credits
+	 */
+	@Post('organization/allocate')
+	async allocateCredits(
+		@CurrentUser() user: CurrentUserData,
+		@Body() allocateDto: AllocateCreditsDto
+	) {
+		return this.creditsService.allocateCredits(user.userId, allocateDto);
+	}
+
+	/**
+	 * Get organization credit balance and allocation stats
+	 */
+	@Get('organization/:organizationId/balance')
+	async getOrganizationBalance(@Param('organizationId') organizationId: string) {
+		return this.creditsService.getOrganizationBalance(organizationId);
+	}
+
+	/**
+	 * Get employee's credit balance within an organization context
+	 */
+	@Get('organization/:organizationId/employee/:employeeId/balance')
+	async getEmployeeBalance(
+		@Param('organizationId') organizationId: string,
+		@Param('employeeId') employeeId: string
+	) {
+		return this.creditsService.getEmployeeCreditBalance(employeeId, organizationId);
+	}
+
+	/**
+	 * Deduct credits with organization tracking (for B2B usage)
+	 */
+	@Post('organization/:organizationId/use')
+	async deductCreditsWithOrgTracking(
+		@CurrentUser() user: CurrentUserData,
+		@Param('organizationId') organizationId: string,
+		@Body() useCreditsDto: UseCreditsDto
+	) {
+		return this.creditsService.deductCredits(user.userId, useCreditsDto, organizationId);
 	}
 }

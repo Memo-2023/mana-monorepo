@@ -45,14 +45,14 @@
 - [ ] **Assignee**: \***\*\_\*\***
 - [ ] **Due date**: \***\*\_\*\***
 
-### 1.3 Install Coolify on Staging 🔥
+### 1.3 Install Docker & Docker Compose on Staging 🔥
 
-- [ ] Follow Coolify installation: `curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash`
-- [ ] Wait for installation (5-10 minutes)
-- [ ] Access Coolify UI: `https://SERVER_IP:8000`
-- [ ] Complete initial setup wizard
-- [ ] Create admin account (save credentials securely!)
-- [ ] **Estimated time**: 30 minutes
+- [ ] Install Docker: `curl -fsSL https://get.docker.com | bash`
+- [ ] Add user to docker group: `usermod -aG docker $USER`
+- [ ] Install Docker Compose: `apt-get update && apt-get install docker-compose-plugin`
+- [ ] Verify installation: `docker --version && docker compose version`
+- [ ] Test Docker: `docker run hello-world`
+- [ ] **Estimated time**: 15 minutes
 - [ ] **Assignee**: \***\*\_\*\***
 - [ ] **Due date**: \***\*\_\*\***
 
@@ -228,7 +228,7 @@
 - [ ] **Assignee**: \***\*\_\*\***
 - [ ] **Due date**: \***\*\_\*\***
 
-### 3.3 Configure Reverse Proxy (Nginx/Coolify)
+### 3.3 Configure Reverse Proxy (Traefik/Nginx)
 
 - [ ] Plan domain structure:
   - `chat.manacore.app` → Chat web app
@@ -236,8 +236,9 @@
   - `maerchenzauber.com` → Landing page
   - `app.maerchenzauber.com` → Web app
   - etc.
-- [ ] Set up domains in Coolify or configure Nginx
-- [ ] Generate SSL certificates (Let's Encrypt)
+- [ ] Set up Traefik in docker-compose (see docker-compose.production.yml)
+- [ ] Configure domain routing labels in Docker Compose services
+- [ ] Generate SSL certificates (Let's Encrypt via Traefik)
 - [ ] Configure CORS for API endpoints
 - [ ] **Estimated time**: 1-2 hours
 - [ ] **Assignee**: \***\*\_\*\***
@@ -347,9 +348,10 @@
 
 - [ ] Create Hetzner CCX42 server (16 vCPU, 64 GB RAM, $100/month)
   - OR reuse CCX32 if resources sufficient
-- [ ] Install Coolify on production server
+- [ ] Install Docker & Docker Compose on production server
 - [ ] Configure firewall rules (only 22, 80, 443)
 - [ ] Set up SSH key access
+- [ ] Clone repository and set up deployment directory
 - [ ] **Estimated time**: 30 minutes
 - [ ] **Assignee**: \***\*\_\*\***
 - [ ] **Due date**: \***\*\_\*\***

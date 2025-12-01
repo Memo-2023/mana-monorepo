@@ -239,7 +239,7 @@ All notable changes and progress updates for the CI/CD implementation.
 
 #### Decision Made
 
-- ✅ **Platform**: Coolify + Hetzner
+- ✅ **Platform**: Docker Compose + Hetzner VPS
 - ✅ **Rationale**: 92% cost savings, excellent performance, flexibility
 - ✅ **Estimated Cost**: $50-100/month (vs $300+ for alternatives)
 - ✅ **Decision Matrix Score**: 8.40/10
@@ -268,7 +268,7 @@ All notable changes and progress updates for the CI/CD implementation.
 - ✅ Established consensus protocols
 - ✅ Set up collective memory and coordination
 
-**Objective**: Design complete hosting architecture and CI/CD plan for Hetzner/Coolify deployment
+**Objective**: Design complete hosting architecture and CI/CD plan for Hetzner/Docker Compose deployment
 
 **Status**: Hive Mind operational, workers assigned
 

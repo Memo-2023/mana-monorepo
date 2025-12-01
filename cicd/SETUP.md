@@ -99,7 +99,7 @@
    apt update && apt upgrade -y
    ```
 
-### Step 3: Install Coolify (10 minutes)
+### Step 3: Set up Docker Compose (10 minutes)
 
 1. On your server (via SSH), run:
 
@@ -111,7 +111,7 @@
    - The script will install Docker, Coolify, and dependencies
    - You'll see progress messages
 
-3. Once complete, access Coolify UI:
+3. Once complete, access Docker Compose configuration:
 
    ```
    https://YOUR_SERVER_IP:8000
@@ -501,7 +501,7 @@ cp docker/templates/Dockerfile.astro apps/bauntown/Dockerfile
 
 ### 3.3 Configure Domains and SSL
 
-**In Coolify UI**:
+**In Docker Compose configuration**:
 
 1. Add a new "Resource" → "Service"
 2. For each web app/landing:

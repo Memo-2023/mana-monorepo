@@ -38,8 +38,8 @@ This document outlines the complete plan for implementing CI/CD infrastructure f
 
 ### Infrastructure Stack
 
-- **Platform**: Coolify (open-source PaaS)
-- **Hosting**: Hetzner Cloud (German data centers)
+- **Platform**: Docker Compose orchestration
+- **Hosting**: Hetzner Cloud VPS (German data centers)
 - **Container Runtime**: Docker + Docker Compose
 - **CI/CD**: GitHub Actions
 - **Monitoring**: Prometheus + Grafana + Loki
@@ -134,7 +134,7 @@ This document outlines the complete plan for implementing CI/CD infrastructure f
 
 - Set up Hetzner account
 - Provision staging server (CCX32)
-- Install Coolify
+- Install Docker & Docker Compose
 - Configure GitHub Container Registry
 
 **Day 1 Afternoon** (3-4 hours):
@@ -603,7 +603,7 @@ Traffic → Blue → Switch traffic → Green
 ### Phase 1 Complete When:
 
 - [x] Hetzner account created
-- [x] Staging server provisioned and Coolify installed
+- [x] Staging server provisioned and Docker installed
 - [x] GitHub secrets configured
 - [x] First service deployed to staging
 - [x] CI/CD pipeline tested end-to-end
@@ -671,6 +671,13 @@ Traffic → Blue → Switch traffic → Green
 - **Impact**: Critical
 - **Mitigation**: Security best practices, automated audits, minimal attack surface
 - **Contingency**: Incident response plan, security patches, audit logs
+
+**Risk 6: Migration Complexity**
+
+- **Likelihood**: Medium (now addressed - migration complete)
+- **Impact**: Medium
+- **Mitigation**: Completed migration from Coolify to Docker Compose, removed legacy artifacts
+- **Contingency**: Docker Compose provides simpler, more maintainable deployment
 
 ---
 

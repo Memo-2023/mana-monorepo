@@ -43,7 +43,7 @@ Located in repository root:
 Located in `scripts/deploy/`:
 
 1. `build-and-push.sh` - Build and push Docker images to registry
-2. `deploy-hetzner.sh` - Deploy to Hetzner/Coolify servers via SSH
+2. `deploy-hetzner.sh` - Deploy to Hetzner/Hetzner VPSs via SSH
 3. `health-check.sh` - Verify service health across environments
 4. `rollback.sh` - Emergency rollback with backup restoration
 5. `migrate-db.sh` - Database migration runner
