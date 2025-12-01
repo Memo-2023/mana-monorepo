@@ -140,7 +140,7 @@ jobs:
 
       - name: Image digest
         if: steps.check-dockerfile.outputs.exists == 'true'
-        run: echo "Image digest: ${{ steps.meta.outputs.digest }}"
+        run: echo "Image digest - ${{ steps.meta.outputs.digest }}"
 
   # Trigger staging deployment
   trigger-staging-deploy:
