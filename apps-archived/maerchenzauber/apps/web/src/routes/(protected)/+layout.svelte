@@ -3,9 +3,25 @@
 	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/authStore.svelte';
 	import { onMount } from 'svelte';
-	import Sidebar from '$lib/components/layout/Sidebar.svelte';
-	import Header from '$lib/components/layout/Header.svelte';
 	import ToastContainer from '$lib/components/ui/ToastContainer.svelte';
+	import { PillNavigation } from '@manacore/shared-ui';
+	import type { PillNavItem } from '@manacore/shared-ui';
+	import { getPillAppItems } from '@manacore/shared-branding';
+
+	// App switcher items
+	const appItems = getPillAppItems('maerchenzauber');
+
+	// User email for dropdown
+	let userEmail = $derived(authStore.user?.email);
+
+	// Navigation items for Märchenzauber
+	const navItems: PillNavItem[] = [
+		{ href: '/dashboard', label: 'Dashboard', icon: 'home' },
+		{ href: '/stories', label: 'Geschichten', icon: 'document' },
+		{ href: '/characters', label: 'Charaktere', icon: 'users' },
+		{ href: '/discover', label: 'Entdecken', icon: 'compass' },
+		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
+	];
 
 	let { children } = $props();
 	let loading = $state(true);

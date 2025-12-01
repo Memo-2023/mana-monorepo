@@ -11,6 +11,13 @@
 	import { onMount } from 'svelte';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { getPillAppItems } from '@manacore/shared-branding';
+
+	// App switcher items
+	const appItems = getPillAppItems('memoro');
+
+	// User email for dropdown
+	let userEmail = $derived(auth.user?.email);
 
 	// Navigation shortcuts (Ctrl+1-9)
 	const navRoutes = [
@@ -179,6 +186,13 @@
 			{languageItems}
 			{currentLanguageLabel}
 			primaryColor="#F7D44C"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			manaHref="/subscription"
+			profileHref="/profile"
+			allAppsHref="/apps"
 		>
 			{#snippet logo()}
 				<svg

@@ -1,15 +1,15 @@
 /**
- * Feedback Service Instance for Zitare Web App
+ * Feedback Service Instance for uLoad Web App
  */
 
 import { createFeedbackService } from '@manacore/shared-feedback-service';
-import { authStore } from '$lib/stores/auth.svelte';
+import { pb } from '$lib/pocketbase';
 import { PUBLIC_MANA_CORE_AUTH_URL } from '$env/static/public';
 
 const MANA_AUTH_URL = PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
 
 export const feedbackService = createFeedbackService({
 	apiUrl: MANA_AUTH_URL,
-	appId: 'zitare',
-	getAuthToken: async () => authStore.getAccessToken(),
+	appId: 'uload',
+	getAuthToken: async () => pb.authStore.token || '',
 });

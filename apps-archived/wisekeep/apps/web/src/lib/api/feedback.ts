@@ -1,5 +1,5 @@
 /**
- * Feedback Service Instance for Zitare Web App
+ * Feedback Service Instance for Wisekeep Web App
  */
 
 import { createFeedbackService } from '@manacore/shared-feedback-service';
@@ -10,6 +10,6 @@ const MANA_AUTH_URL = PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
 
 export const feedbackService = createFeedbackService({
 	apiUrl: MANA_AUTH_URL,
-	appId: 'zitare',
+	appId: 'wisekeep',
 	getAuthToken: async () => authStore.getAccessToken(),
 });

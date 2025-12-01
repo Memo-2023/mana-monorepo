@@ -63,19 +63,17 @@
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
-	// User email for user dropdown
-	let userEmail = $derived(authStore.user?.email);
+	// User email for user dropdown (fallback to 'Menü' when not logged in)
+	let userEmail = $derived(authStore.user?.email || 'Menü');
 
 	// Navigation items for Zitare
 	const navItems: PillNavItem[] = [
-		{ href: '/', label: 'Start', icon: 'home' },
+		{ href: '/', label: 'Zitate', icon: 'chat' },
 		{ href: '/search', label: 'Suche', icon: 'search' },
-		{ href: '/discover', label: 'Entdecken', icon: 'compass' },
 		{ href: '/authors', label: 'Autoren', icon: 'users' },
 		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
 		{ href: '/lists', label: 'Listen', icon: 'list' },
-		{ href: '/profile', label: 'Profil', icon: 'user' },
-		{ href: '/mana', label: 'Mana', icon: 'sparkles' },
+		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
 	// Navigation shortcuts (Ctrl+1-5)
@@ -200,6 +198,7 @@
 			{currentLanguageLabel}
 			showLogout={authStore.isAuthenticated}
 			onLogout={handleLogout}
+			loginHref="/login"
 			primaryColor="#f59e0b"
 			showAppSwitcher={true}
 			{appItems}
@@ -207,6 +206,7 @@
 			settingsHref="/settings"
 			manaHref="/mana"
 			profileHref="/profile"
+			allAppsHref="/apps"
 		/>
 
 		<!-- Main Content with dynamic padding based on nav mode -->

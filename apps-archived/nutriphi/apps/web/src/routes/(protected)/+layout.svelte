@@ -10,6 +10,13 @@
 	import { onMount } from 'svelte';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem } from '@manacore/shared-ui';
+	import { getPillAppItems } from '@manacore/shared-branding';
+
+	// App switcher items
+	const appItems = getPillAppItems('nutriphi');
+
+	// User email for dropdown
+	let userEmail = $derived(auth.user?.email);
 
 	// Navigation shortcuts (Ctrl+1-7)
 	const navRoutes = [
@@ -134,6 +141,13 @@
 			onCollapsedChange={handleCollapsedChange}
 			showThemeToggle={true}
 			primaryColor="#22c55e"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			manaHref="/subscription"
+			profileHref="/profile"
+			allAppsHref="/apps"
 		>
 			{#snippet logo()}
 				<span class="text-xl">🥗</span>
