@@ -33,6 +33,7 @@
 		"drizzle-kit": "^0.30.2",
 		"drizzle-orm": "^0.38.3",
 		"helmet": "^8.0.0",
+		"jose": "^6.1.2",
 		"jsonwebtoken": "^9.0.2",
 		"nanoid": "^5.0.9",
 		"postgres": "^3.4.5",

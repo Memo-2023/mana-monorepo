@@ -62,6 +62,7 @@ import type {
 	BetterAuthSession,
 } from '../types/better-auth.types';
 import * as jwt from 'jsonwebtoken';
+import { jwtVerify, createRemoteJWKSet } from 'jose';
 
 // Re-export DTOs and result types for external use
 export type {
@@ -418,6 +419,73 @@ export class BetterAuthService {
 
 			const { user } = result;
 
+			// Get session token (used as refresh token)
+			const session = hasSession(result) ? result.session : null;
+			const sessionToken = session?.token || (hasToken(result) ? result.token : '');
+
+			// Generate JWT access token using Better Auth's JWT plugin
+			let accessToken = '';
+			try {
+				const api = this.auth.api as any;
+
+				// Use Better Auth's signJWT with the jwks table
+				const jwtResult = await api.signJWT({
+					body: {
+						payload: {
+							sub: user.id,
+							email: user.email,
+							role: (user as BetterAuthUser).role || 'user',
+							sid: session?.id || '',
+						},
+					},
+				});
+
+				accessToken = jwtResult?.token || '';
+
+				// Fallback to manual JWT if Better Auth fails
+				if (!accessToken) {
+					throw new Error('Better Auth signJWT returned empty token');
+				}
+			} catch (jwtError) {
+				console.warn('[signIn] Better Auth signJWT failed, using manual JWT generation:', jwtError);
+
+				// Fallback: Generate JWT manually using jsonwebtoken
+				const privateKey = this.configService.get<string>('jwt.privateKey');
+				const issuer = this.configService.get<string>('jwt.issuer') || 'manacore';
+				const audience = this.configService.get<string>('jwt.audience') || 'manacore';
+
+				console.log('[signIn] Private key exists:', !!privateKey);
+				console.log('[signIn] Private key length:', privateKey?.length);
+				console.log('[signIn] Private key starts with:', privateKey?.substring(0, 30));
+				console.log('[signIn] Issuer:', issuer);
+				console.log('[signIn] Audience:', audience);
+
+				if (privateKey) {
+					const payload = {
+						sub: user.id,
+						email: user.email,
+						role: (user as BetterAuthUser).role || 'user',
+						sid: session?.id || '',
+					};
+
+					accessToken = jwt.sign(payload, privateKey, {
+						algorithm: 'RS256',
+						expiresIn: '15m',
+						issuer,
+						audience,
+					});
+
+					console.log('[signIn] Generated JWT (first 50 chars):', accessToken?.substring(0, 50));
+					// Decode to verify
+					const decoded = jwt.decode(accessToken, { complete: true });
+					console.log('[signIn] Generated JWT header:', decoded?.header);
+					console.log('[signIn] Generated JWT payload:', decoded?.payload);
+				} else {
+					console.error('[signIn] No JWT private key configured');
+					accessToken = sessionToken;
+				}
+			}
+
 			return {
 				user: {
 					id: user.id,
@@ -425,7 +493,9 @@ export class BetterAuthService {
 					name: user.name,
 					role: (user as BetterAuthUser).role,
 				},
-				token: hasToken(result) ? result.token : '',
+				accessToken,
+				refreshToken: sessionToken,
+				expiresIn: 15 * 60, // 15 minutes in seconds
 			};
 		} catch (error: unknown) {
 			if (error instanceof Error) {
@@ -617,7 +687,7 @@ export class BetterAuthService {
 			}
 
 			// Check if refresh token is expired
-			if (new Date() > session.refreshTokenExpiresAt) {
+			if (!session.refreshTokenExpiresAt || new Date() > session.refreshTokenExpiresAt) {
 				throw new UnauthorizedException('Refresh token expired');
 			}
 
@@ -715,30 +785,88 @@ export class BetterAuthService {
 	 */
 	async validateToken(token: string): Promise<ValidateTokenResult> {
 		try {
-			const publicKey = this.configService.get<string>('jwt.publicKey');
-			if (!publicKey) {
-				throw new Error('JWT public key not configured');
-			}
+			console.log('[validateToken] Token (first 50 chars):', token?.substring(0, 50));
 
-			const audience = this.configService.get<string>('jwt.audience');
-			const issuer = this.configService.get<string>('jwt.issuer');
+			// Decode to check the algorithm
+			const decoded = jwt.decode(token, { complete: true });
+			console.log('[validateToken] Decoded header:', decoded?.header);
 
-			const payload = jwt.verify(token, publicKey, {
-				algorithms: ['RS256'],
-				audience,
+			// Use our JWKS endpoint (NestJS prefix: /api/v1)
+			const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
+			const jwksUrl = new URL('/api/v1/auth/jwks', baseUrl);
+
+			console.log('[validateToken] Using JWKS from:', jwksUrl.toString());
+
+			// Create JWKS fetcher
+			const JWKS = createRemoteJWKSet(jwksUrl);
+
+			// Get issuer/audience from config (Better Auth uses BASE_URL by default)
+			const issuer = this.configService.get<string>('jwt.issuer') || baseUrl;
+			const audience = this.configService.get<string>('jwt.audience') || baseUrl;
+
+			console.log('[validateToken] Issuer:', issuer);
+			console.log('[validateToken] Audience:', audience);
+
+			// Verify using jose library with Better Auth's JWKS
+			const { payload } = await jwtVerify(token, JWKS, {
 				issuer,
-			}) as TokenPayload;
+				audience,
+			});
+
+			console.log('[validateToken] Verification SUCCESS');
+			console.log('[validateToken] Payload:', payload);
 
 			return {
 				valid: true,
-				payload,
+				payload: payload as unknown as TokenPayload,
 			};
 		} catch (error: unknown) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			console.error('[validateToken] Verification FAILED:', errorMessage);
 			return {
 				valid: false,
 				error: errorMessage,
 			};
+		}
+	}
+
+	/**
+	 * Get JWKS (JSON Web Key Set)
+	 *
+	 * Returns public keys for JWT verification.
+	 * Proxies to Better Auth's internal JWKS.
+	 *
+	 * @returns JWKS with public keys
+	 */
+	async getJwks(): Promise<{ keys: unknown[] }> {
+		try {
+			// Better Auth exposes JWKS via auth.api
+			const api = this.auth.api as any;
+
+			// Try to get JWKS from Better Auth
+			if (api.getJwks) {
+				const result = await api.getJwks();
+				return result;
+			}
+
+			// Fallback: read from jwks table directly
+			const db = getDb(this.databaseUrl);
+			const { jwks } = await import('../../db/schema/auth.schema');
+			const keys = await db.select().from(jwks);
+
+			// Convert to JWKS format (EdDSA public keys)
+			return {
+				keys: keys.map((key) => {
+					try {
+						return JSON.parse(key.publicKey);
+					} catch {
+						return { kid: key.id, publicKey: key.publicKey };
+					}
+				}),
+			};
+		} catch (error) {
+			console.error('[getJwks] Error:', error);
+			return { keys: [] };
 		}
 	}
 

@@ -126,6 +126,17 @@ export class AuthController {
 		return this.betterAuthService.validateToken(body.token);
 	}
 
+	/**
+	 * Get JWKS (JSON Web Key Set)
+	 *
+	 * Returns public keys for JWT verification.
+	 * This is a passthrough to Better Auth's JWKS.
+	 */
+	@Get('jwks')
+	async getJwks() {
+		return this.betterAuthService.getJwks();
+	}
+
 	// =========================================================================
 	// B2B Registration
 	// =========================================================================

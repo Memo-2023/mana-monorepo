@@ -5,8 +5,9 @@ export default defineConfig({
 	schema: './src/db/schema/index.ts',
 	out: './src/db/migrations',
 	dbCredentials: {
-		url: process.env.DATABASE_URL || 'postgresql://manacore:password@localhost:5432/manacore',
+		url: process.env.DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/manacore',
 	},
+	schemaFilter: ['auth', 'credits', 'public'],
 	verbose: true,
 	strict: true,
 });

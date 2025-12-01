@@ -441,9 +441,9 @@ export interface SignInResult {
 		name: string | null;
 		role?: string;
 	};
-	token: string;
-	refreshToken?: string;
-	expiresIn?: number;
+	accessToken: string;
+	refreshToken: string;
+	expiresIn: number;
 }
 
 /**

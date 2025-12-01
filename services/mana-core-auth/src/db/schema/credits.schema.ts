@@ -34,7 +34,7 @@ export const transactionStatusEnum = pgEnum('transaction_status', [
 
 // Credit balances (one per user)
 export const balances = creditsSchema.table('balances', {
-	userId: uuid('user_id')
+	userId: text('user_id')
 		.primaryKey()
 		.references(() => users.id, { onDelete: 'cascade' }),
 	balance: integer('balance').default(0).notNull(),
@@ -43,7 +43,7 @@ export const balances = creditsSchema.table('balances', {
 	lastDailyResetAt: timestamp('last_daily_reset_at', { withTimezone: true }).defaultNow(),
 	totalEarned: integer('total_earned').default(0).notNull(),
 	totalSpent: integer('total_spent').default(0).notNull(),
-	version: integer('version').default(0).notNull(), // For optimistic locking
+	version: integer('version').default(0).notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
@@ -53,7 +53,7 @@ export const transactions = creditsSchema.table(
 	'transactions',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id')
+		userId: text('user_id')
 			.references(() => users.id, { onDelete: 'cascade' })
 			.notNull(),
 		type: transactionTypeEnum('type').notNull(),
@@ -61,10 +61,10 @@ export const transactions = creditsSchema.table(
 		amount: integer('amount').notNull(),
 		balanceBefore: integer('balance_before').notNull(),
 		balanceAfter: integer('balance_after').notNull(),
-		appId: text('app_id').notNull(), // 'memoro', 'chat', 'picture', etc.
+		appId: text('app_id').notNull(),
 		description: text('description').notNull(),
-		organizationId: text('organization_id').references(() => organizations.id), // NULL for B2C, set for B2B
-		metadata: jsonb('metadata'), // Additional context
+		organizationId: text('organization_id').references(() => organizations.id),
+		metadata: jsonb('metadata'),
 		idempotencyKey: text('idempotency_key').unique(),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 		completedAt: timestamp('completed_at', { withTimezone: true }),
@@ -83,8 +83,8 @@ export const packages = creditsSchema.table('packages', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
 	description: text('description'),
-	credits: integer('credits').notNull(), // Number of credits
-	priceEuroCents: integer('price_euro_cents').notNull(), // Price in euro cents
+	credits: integer('credits').notNull(),
+	priceEuroCents: integer('price_euro_cents').notNull(),
 	stripePriceId: text('stripe_price_id').unique(),
 	active: boolean('active').default(true).notNull(),
 	sortOrder: integer('sort_order').default(0).notNull(),
@@ -98,7 +98,7 @@ export const purchases = creditsSchema.table(
 	'purchases',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id')
+		userId: text('user_id')
 			.references(() => users.id, { onDelete: 'cascade' })
 			.notNull(),
 		packageId: uuid('package_id').references(() => packages.id),
@@ -124,7 +124,7 @@ export const usageStats = creditsSchema.table(
 	'usage_stats',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id')
+		userId: text('user_id')
 			.references(() => users.id, { onDelete: 'cascade' })
 			.notNull(),
 		appId: text('app_id').notNull(),
@@ -143,12 +143,12 @@ export const organizationBalances = creditsSchema.table('organization_balances',
 	organizationId: text('organization_id')
 		.primaryKey()
 		.references(() => organizations.id, { onDelete: 'cascade' }),
-	balance: integer('balance').default(0).notNull(), // Total purchased credits
-	allocatedCredits: integer('allocated_credits').default(0).notNull(), // Sum of credits allocated to employees
-	availableCredits: integer('available_credits').default(0).notNull(), // balance - allocated_credits
-	totalPurchased: integer('total_purchased').default(0).notNull(), // Total credits ever purchased
-	totalAllocated: integer('total_allocated').default(0).notNull(), // Total ever allocated
-	version: integer('version').default(0).notNull(), // For optimistic locking
+	balance: integer('balance').default(0).notNull(),
+	allocatedCredits: integer('allocated_credits').default(0).notNull(),
+	availableCredits: integer('available_credits').default(0).notNull(),
+	totalPurchased: integer('total_purchased').default(0).notNull(),
+	totalAllocated: integer('total_allocated').default(0).notNull(),
+	version: integer('version').default(0).notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
@@ -161,17 +161,17 @@ export const creditAllocations = creditsSchema.table(
 		organizationId: text('organization_id')
 			.references(() => organizations.id, { onDelete: 'cascade' })
 			.notNull(),
-		employeeId: uuid('employee_id')
+		employeeId: text('employee_id')
 			.references(() => users.id, { onDelete: 'cascade' })
 			.notNull(),
-		amount: integer('amount').notNull(), // Amount allocated (can be positive or negative)
-		allocatedBy: uuid('allocated_by')
+		amount: integer('amount').notNull(),
+		allocatedBy: text('allocated_by')
 			.references(() => users.id)
-			.notNull(), // Owner or admin who made the allocation
-		reason: text('reason'), // Optional reason for allocation
-		balanceBefore: integer('balance_before').notNull(), // Employee balance before
-		balanceAfter: integer('balance_after').notNull(), // Employee balance after
-		metadata: jsonb('metadata'), // Additional context
+			.notNull(),
+		reason: text('reason'),
+		balanceBefore: integer('balance_before').notNull(),
+		balanceAfter: integer('balance_after').notNull(),
+		metadata: jsonb('metadata'),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	},
 	(table) => ({
