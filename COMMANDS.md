@@ -1,17 +1,14 @@
 # Manacore Monorepo - Befehle
-
 # Alles starten (PostgreSQL, Redis, Auth, Chat)
-pnpm docker:up:all
 
+pnpm docker:up:all
 pnpm docker:down
 
 pnpm dev:chat:app
-
 pnpm dev:picture:app
-
 pnpm dev:manacore:app
-
 pnpm dev:zitare:app
+pnpm dev:presi:app
 
 
 
