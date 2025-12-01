@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Component, Snippet } from 'svelte';
 	import type { AuthResult } from '../types';
-	import { Check, Warning, Eye, EyeSlash, SignIn } from '@manacore/shared-icons';
+	import { Check, Warning, Eye, EyeSlash, SignIn, Sun, Moon } from '@manacore/shared-icons';
 	import GoogleSignInButton from '../components/GoogleSignInButton.svelte';
 	import AppleSignInButton from '../components/AppleSignInButton.svelte';
 
@@ -111,22 +111,36 @@
 	let passwordInput: HTMLInputElement;
 	let successAnnouncement = $state('');
 
-	// Initialize isDark synchronously to avoid flash
-	let isDark = $state(
+	// Theme state - can be toggled manually, defaults to system preference
+	let userThemePreference = $state<'light' | 'dark' | null>(null);
+	let systemIsDark = $state(
 		typeof window !== 'undefined'
 			? window.matchMedia('(prefers-color-scheme: dark)').matches
 			: false
 	);
 
+	// Effective dark mode based on user preference or system
+	let isDark = $derived(userThemePreference !== null ? userThemePreference === 'dark' : systemIsDark);
+
 	$effect(() => {
 		if (typeof window !== 'undefined') {
 			const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-			isDark = mediaQuery.matches;
-			const listener = (e: MediaQueryListEvent) => (isDark = e.matches);
+			systemIsDark = mediaQuery.matches;
+			const listener = (e: MediaQueryListEvent) => (systemIsDark = e.matches);
 			mediaQuery.addEventListener('change', listener);
 			return () => mediaQuery.removeEventListener('change', listener);
 		}
 	});
+
+	function toggleTheme() {
+		if (userThemePreference === null) {
+			// First toggle: switch to opposite of system
+			userThemePreference = systemIsDark ? 'light' : 'dark';
+		} else {
+			// Subsequent toggles: just flip
+			userThemePreference = userThemePreference === 'dark' ? 'light' : 'dark';
+		}
+	}
 
 	$effect(() => {
 		if (emailInput) emailInput.focus();
@@ -231,10 +245,26 @@
 
 <div
 	class="page-container"
+	class:dark={isDark}
+	class:light={!isDark}
 	style:--light-bg={lightBackground}
 	style:--dark-bg={darkBackground}
 	style:--primary-color={primaryColor}
 >
+	<!-- Theme Toggle - Top Left -->
+	<button
+		type="button"
+		onclick={toggleTheme}
+		class="theme-toggle"
+		aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+	>
+		{#if isDark}
+			<Sun size={20} weight="bold" />
+		{:else}
+			<Moon size={20} weight="bold" />
+		{/if}
+	</button>
+
 	{#if headerControls}
 		<div class="header-controls">
 			{@render headerControls()}
@@ -414,14 +444,46 @@
 		overflow-x: hidden;
 		margin: 0;
 		padding: 0;
-		/* Use CSS variable with dark fallback */
+		/* Dark mode default */
 		background-color: var(--dark-bg, #121212);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.page-container {
-			background-color: var(--light-bg, #f5f5f5);
-		}
+	.page-container.light {
+		background-color: var(--light-bg, #f5f5f5);
+	}
+
+	.theme-toggle {
+		position: absolute;
+		top: 1rem;
+		left: 1rem;
+		z-index: 50;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 0.5rem;
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		background: rgba(255, 255, 255, 0.1);
+		color: rgba(255, 255, 255, 0.7);
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.light .theme-toggle {
+		border-color: rgba(0, 0, 0, 0.2);
+		background: rgba(0, 0, 0, 0.05);
+		color: rgba(0, 0, 0, 0.7);
+	}
+
+	.theme-toggle:hover {
+		background: rgba(255, 255, 255, 0.2);
+		color: #fff;
+	}
+
+	.light .theme-toggle:hover {
+		background: rgba(0, 0, 0, 0.1);
+		color: #000;
 	}
 
 	.header-controls {
@@ -463,10 +525,8 @@
 		background-color: #000;
 	}
 
-	@media (prefers-color-scheme: light) {
-		.logo-button {
-			background-color: #fff;
-		}
+	.light .logo-button {
+		background-color: #fff;
 	}
 
 	.logo-button:hover {
@@ -483,10 +543,8 @@
 		color: #fff;
 	}
 
-	@media (prefers-color-scheme: light) {
-		.app-name {
-			color: #000;
-		}
+	.light .app-name {
+		color: #000;
 	}
 
 	.form-section {
@@ -508,11 +566,9 @@
 		border-color: rgba(255, 255, 255, 0.1);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.form-card {
-			background-color: rgba(255, 255, 255, 0.7);
-			border-color: rgba(0, 0, 0, 0.1);
-		}
+	.light .form-card {
+		background-color: rgba(255, 255, 255, 0.7);
+		border-color: rgba(0, 0, 0, 0.1);
 	}
 
 	.form-header {
@@ -532,13 +588,12 @@
 		color: rgba(255, 255, 255, 0.6);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.form-title {
-			color: rgba(0, 0, 0, 0.9);
-		}
-		.form-subtitle {
-			color: rgba(0, 0, 0, 0.6);
-		}
+	.light .form-title {
+		color: rgba(0, 0, 0, 0.9);
+	}
+
+	.light .form-subtitle {
+		color: rgba(0, 0, 0, 0.6);
 	}
 
 	.error-message {
@@ -580,15 +635,14 @@
 		border-color: #ef4444;
 	}
 
-	@media (prefers-color-scheme: light) {
-		.input-field {
-			background-color: rgba(255, 255, 255, 0.8);
-			border-color: rgba(0, 0, 0, 0.1);
-			color: #000;
-		}
-		.input-field.input-error {
-			border-color: #ef4444;
-		}
+	.light .input-field {
+		background-color: rgba(255, 255, 255, 0.8);
+		border-color: rgba(0, 0, 0, 0.1);
+		color: #000;
+	}
+
+	.light .input-field.input-error {
+		border-color: #ef4444;
 	}
 
 	.input-field:focus {
@@ -616,10 +670,8 @@
 		color: rgba(255, 255, 255, 0.5);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.password-toggle {
-			color: rgba(0, 0, 0, 0.4);
-		}
+	.light .password-toggle {
+		color: rgba(0, 0, 0, 0.4);
 	}
 
 	.password-toggle:hover {
@@ -642,10 +694,8 @@
 		color: rgba(255, 255, 255, 0.7);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.remember-label {
-			color: rgba(0, 0, 0, 0.7);
-		}
+	.light .remember-label {
+		color: rgba(0, 0, 0, 0.7);
 	}
 
 	.remember-label input[type="checkbox"] {
@@ -679,10 +729,8 @@
 		transform: scale(1);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.remember-label input[type="checkbox"] {
-			border-color: rgba(0, 0, 0, 0.3);
-		}
+	.light .remember-label input[type="checkbox"] {
+		border-color: rgba(0, 0, 0, 0.3);
 	}
 
 	.forgot-link {
@@ -712,10 +760,8 @@
 		color: #fff;
 	}
 
-	@media (prefers-color-scheme: light) {
-		.submit-button {
-			color: #000;
-		}
+	.light .submit-button {
+		color: #000;
 	}
 
 	.submit-button:hover:not(:disabled) {
@@ -748,10 +794,8 @@
 		color: rgba(255, 255, 255, 0.5);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.divider span {
-			color: rgba(0, 0, 0, 0.5);
-		}
+	.light .divider span {
+		color: rgba(0, 0, 0, 0.5);
 	}
 
 	.social-buttons {
@@ -768,10 +812,8 @@
 		color: rgba(255, 255, 255, 0.6);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.register-link {
-			color: rgba(0, 0, 0, 0.6);
-		}
+	.light .register-link {
+		color: rgba(0, 0, 0, 0.6);
 	}
 
 	.register-link button {
