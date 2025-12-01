@@ -109,9 +109,9 @@
 		<div class="divider"></div>
 
 		<!-- Theme Toggle -->
-		<button onclick={() => theme.toggle()} class="nav-item">
+		<button onclick={() => theme.toggleMode()} class="nav-item">
 			<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				{#if $theme === 'dark'}
+				{#if theme.isDark}
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -127,7 +127,7 @@
 					/>
 				{/if}
 			</svg>
-			<span>{$theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+			<span>{theme.isDark ? 'Light Mode' : 'Dark Mode'}</span>
 		</button>
 	</nav>
 
@@ -209,13 +209,13 @@
 				<!-- Theme Toggle Mobile -->
 				<button
 					onclick={() => {
-						theme.toggle();
+						theme.toggleMode();
 						showUserMenu = false;
 					}}
 					class="mobile-nav-item"
 				>
 					<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						{#if $theme === 'dark'}
+						{#if theme.isDark}
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -231,7 +231,7 @@
 							/>
 						{/if}
 					</svg>
-					{$theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+					{theme.isDark ? 'Light Mode' : 'Dark Mode'}
 				</button>
 			</nav>
 		</div>

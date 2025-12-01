@@ -11,6 +11,8 @@ pnpm dev:picture:app
 
 pnpm dev:manacore:app
 
+pnpm dev:zitare:app
+
 
 
 Übersicht aller wichtigen Befehle zum Starten, Stoppen und Verwalten der Apps.

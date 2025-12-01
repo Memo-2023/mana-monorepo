@@ -257,6 +257,9 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	zitare: { dev: 'http://localhost:5180', prod: 'https://zitare.manacore.app' },
 	wisekeep: { dev: 'http://localhost:5181', prod: 'https://wisekeep.manacore.app' },
 	nutriphi: { dev: 'http://localhost:5182', prod: 'https://nutriphi.manacore.app' },
+	manacore: { dev: 'http://localhost:5173', prod: 'https://manacore.app' },
+	mana: { dev: 'http://localhost:5173', prod: 'https://manacore.app' },
+	moodlit: { dev: 'http://localhost:5183', prod: 'https://moodlit.manacore.app' },
 };
 
 /**
