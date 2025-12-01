@@ -1,11 +1,10 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { eq, and, or, desc, sql } from 'drizzle-orm';
-import { ConfigService } from '@nestjs/config';
-import { createClient } from '@supabase/supabase-js';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { type Database } from '../db/connection';
 import { boards, boardItems, type Board } from '../db/schema';
 import { CreateBoardDto, UpdateBoardDto, GetBoardsQueryDto } from './dto/board.dto';
+import { StorageService } from '../upload/storage.service';
 
 export interface BoardWithCount extends Board {
 	itemCount: number;
@@ -14,18 +13,11 @@ export interface BoardWithCount extends Board {
 @Injectable()
 export class BoardService {
 	private readonly logger = new Logger(BoardService.name);
-	private supabase: ReturnType<typeof createClient>;
 
 	constructor(
 		@Inject(DATABASE_CONNECTION) private readonly db: Database,
-		private configService: ConfigService
-	) {
-		const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
-		const supabaseKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
-		if (supabaseUrl && supabaseKey) {
-			this.supabase = createClient(supabaseUrl, supabaseKey);
-		}
-	}
+		private readonly storageService: StorageService
+	) {}
 
 	async getBoards(userId: string, query: GetBoardsQueryDto): Promise<BoardWithCount[]> {
 		try {
@@ -266,35 +258,14 @@ export class BoardService {
 		try {
 			await this.verifyOwnership(id, userId);
 
-			if (!this.supabase) {
-				throw new Error('Supabase not configured');
-			}
-
-			// Convert data URL to buffer
-			const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, '');
-			const buffer = Buffer.from(base64Data, 'base64');
-
-			// Upload to Supabase Storage
-			const filename = `boards/${id}/thumbnail-${Date.now()}.png`;
-			const { error: uploadError } = await this.supabase.storage
-				.from('user-uploads')
-				.upload(filename, buffer, {
-					contentType: 'image/png',
-					upsert: true,
-				});
-
-			if (uploadError) {
-				throw uploadError;
-			}
-
-			// Get public URL
-			const { data: urlData } = this.supabase.storage.from('user-uploads').getPublicUrl(filename);
+			// Upload thumbnail using StorageService
+			const thumbnailUrl = await this.storageService.uploadBoardThumbnail(id, dataUrl);
 
 			// Update board with thumbnail URL
 			const result = await this.db
 				.update(boards)
 				.set({
-					thumbnailUrl: urlData.publicUrl,
+					thumbnailUrl,
 					updatedAt: new Date(),
 				})
 				.where(eq(boards.id, id))

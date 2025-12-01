@@ -28,3 +28,15 @@ export interface UserStatsResponse {
 	archivedImages: number;
 	publicImages: number;
 }
+
+export interface RateLimitsResponse {
+	daily_used: number;
+	daily_limit: number;
+	daily_reset_at: string;
+	hourly_used: number;
+	hourly_limit: number;
+	hourly_reset_at: string;
+	active_generations: number;
+	max_concurrent: number;
+	total_all_time: number;
+}

@@ -224,11 +224,21 @@ const APP_CONFIGS = [
 		path: 'apps/picture/apps/backend/.env',
 		vars: {
 			NODE_ENV: () => 'development',
-			PORT: () => '3003',
-			DATABASE_URL: () => 'postgresql://picture:picturepassword@localhost:5434/picture',
+			PORT: (env) => env.PICTURE_BACKEND_PORT || '3003',
+			BACKEND_URL: (env) => env.PICTURE_BACKEND_URL || 'http://localhost:3003',
+			DATABASE_URL: (env) => env.PICTURE_DATABASE_URL || 'postgresql://picture:picturepassword@localhost:5434/picture',
 			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			REPLICATE_API_TOKEN: (env) => env.MAERCHENZAUBER_REPLICATE_API_KEY, // Reuse existing Replicate key
+			REPLICATE_API_TOKEN: (env) => env.MAERCHENZAUBER_REPLICATE_API_KEY,
 			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+			// Storage configuration
+			STORAGE_MODE: (env) => env.PICTURE_STORAGE_MODE || 'local',
+			LOCAL_STORAGE_PATH: (env) => env.PICTURE_LOCAL_STORAGE_PATH || './uploads',
+			S3_ENDPOINT: (env) => env.PICTURE_S3_ENDPOINT || '',
+			S3_REGION: (env) => env.PICTURE_S3_REGION || 'eu-central-1',
+			S3_ACCESS_KEY: (env) => env.PICTURE_S3_ACCESS_KEY || '',
+			S3_SECRET_KEY: (env) => env.PICTURE_S3_SECRET_KEY || '',
+			S3_BUCKET: (env) => env.PICTURE_S3_BUCKET || 'picture-uploads',
+			STORAGE_PUBLIC_URL: (env) => env.PICTURE_STORAGE_PUBLIC_URL || '',
 		},
 	},
 
@@ -241,7 +251,7 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Picture Web (SvelteKit)
+	// Picture Web (SvelteKit) - No Supabase, uses Backend API
 	{
 		path: 'apps/picture/apps/web/.env',
 		vars: {

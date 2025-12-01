@@ -1,1 +1,1 @@
-export * from './supabase';
+// API exports - now handled via backend endpoints

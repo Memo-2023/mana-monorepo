@@ -64,7 +64,7 @@
 		}
 	});
 
-	// Navigation items
+	// Navigation items (Mana is in user dropdown via manaHref)
 	const navItems: PillNavItem[] = [
 		{ href: '/app/gallery', label: 'Galerie', icon: 'home' },
 		{ href: '/app/board', label: 'Moodboards', icon: 'grid' },
@@ -73,7 +73,6 @@
 		{ href: '/app/upload', label: 'Upload', icon: 'upload' },
 		{ href: '/app/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/app/archive', label: 'Archiv', icon: 'archive' },
-		{ href: '/app/mana', label: 'Mana', icon: 'mana' },
 	];
 
 	// View mode options for tab group

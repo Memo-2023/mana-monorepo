@@ -63,3 +63,36 @@ export async function getUserStats(): Promise<UserStats> {
 		}
 	);
 }
+
+export interface RateLimits {
+	daily_used: number;
+	daily_limit: number;
+	daily_reset_at: string;
+	hourly_used: number;
+	hourly_limit: number;
+	hourly_reset_at: string;
+	active_generations: number;
+	max_concurrent: number;
+	total_all_time: number;
+}
+
+/**
+ * Get user rate limits for image generation
+ */
+export async function getRateLimits(): Promise<RateLimits> {
+	const { data, error } = await fetchApi<RateLimits>('/profiles/rate-limits');
+	if (error) throw error;
+	return (
+		data || {
+			daily_used: 0,
+			daily_limit: 100,
+			daily_reset_at: new Date().toISOString(),
+			hourly_used: 0,
+			hourly_limit: 20,
+			hourly_reset_at: new Date().toISOString(),
+			active_generations: 0,
+			max_concurrent: 5,
+			total_all_time: 0,
+		}
+	);
+}

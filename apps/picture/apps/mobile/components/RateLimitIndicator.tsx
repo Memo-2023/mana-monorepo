@@ -2,21 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Pressable } from 'react-native';
 import { Icon } from './Icon';
 import { Text } from './Text';
-import { supabase } from '~/utils/supabase';
+import { getRateLimits, type RateLimits } from '~/services/api/profiles';
 import { useAuth } from '~/contexts/AuthContext';
 import { useTheme } from '~/contexts/ThemeContext';
-
-interface RateLimits {
-	daily_used: number;
-	daily_limit: number;
-	daily_reset_at: string;
-	hourly_used: number;
-	hourly_limit: number;
-	hourly_reset_at: string;
-	active_generations: number;
-	max_concurrent: number;
-	total_all_time: number;
-}
 
 interface RateLimitIndicatorProps {
 	compact?: boolean;
@@ -34,11 +22,7 @@ export function RateLimitIndicator({ compact = false, onRefresh }: RateLimitIndi
 		if (!user) return;
 
 		try {
-			const { data, error } = await supabase.rpc('get_user_limits', {
-				p_user_id: user.id,
-			});
-
-			if (error) throw error;
+			const data = await getRateLimits();
 			setLimits(data);
 		} catch (error) {
 			console.error('Error fetching rate limits:', error);

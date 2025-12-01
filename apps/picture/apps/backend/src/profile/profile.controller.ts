@@ -2,7 +2,7 @@ import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser, CurrentUserData } from '../common/decorators/current-user.decorator';
-import { UpdateProfileDto, ProfileResponse, UserStatsResponse } from './dto/profile.dto';
+import { UpdateProfileDto, ProfileResponse, UserStatsResponse, RateLimitsResponse } from './dto/profile.dto';
 
 @Controller('profiles')
 @UseGuards(JwtAuthGuard)
@@ -26,5 +26,10 @@ export class ProfileController {
 	@Get('stats')
 	async getMyStats(@CurrentUser() user: CurrentUserData): Promise<UserStatsResponse> {
 		return this.profileService.getUserStats(user.userId);
+	}
+
+	@Get('rate-limits')
+	async getRateLimits(@CurrentUser() user: CurrentUserData): Promise<RateLimitsResponse> {
+		return this.profileService.getRateLimits(user.userId);
 	}
 }

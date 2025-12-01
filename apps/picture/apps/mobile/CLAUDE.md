@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the **mobile app** within the "picture" monorepo. It's an Expo React Native application built with TypeScript, using Expo Router for navigation and NativeWind (Tailwind CSS) for styling. The app integrates with Supabase for backend services and uses Zustand for state management.
+This is the **mobile app** within the "picture" monorepo. It's an Expo React Native application built with TypeScript, using Expo Router for navigation and NativeWind (Tailwind CSS) for styling. The app integrates with a NestJS backend for all API calls and uses Zustand for state management.
 
 ## Monorepo Structure
 
@@ -13,11 +13,12 @@ This app is part of a PNPM workspace monorepo:
 ```
 picture/
 ├── apps/
+│   ├── backend/          # NestJS API server
 │   ├── mobile/           # This React Native app (Expo)
 │   ├── web/              # SvelteKit web app
 │   └── landing/          # Astro landing page
 ├── packages/
-│   └── shared/           # Shared code (Supabase types, API client)
+│   └── shared/           # Shared code (TypeScript types, utilities)
 └── pnpm-workspace.yaml
 ```
 
@@ -25,14 +26,12 @@ picture/
 
 The shared package provides:
 
-- **Supabase Database Types** - Auto-generated TypeScript types from database schema
-- **Supabase Client** - Configured API client for all apps
+- **Database Types** - TypeScript types from database schema
 - **Shared Utilities** - Common helper functions and types
 
 Import from shared package:
 
 ```tsx
-import { supabase } from '@picture/shared';
 import type { Database } from '@picture/shared/types';
 ```
 
@@ -82,16 +81,28 @@ Zustand store in `store/store.ts` - Currently contains a sample "bears" store th
 
 ### Backend Integration
 
-Supabase client is imported from `@picture/shared`:
+All API calls go through the NestJS backend:
 
 ```tsx
-import { supabase } from '@picture/shared';
+import { fetchApi } from '~/services/api/client';
+import { getRateLimits } from '~/services/api/profiles';
+import { generateImage } from '~/services/api/generate';
 ```
 
-- Shared client configured with AsyncStorage for auth persistence
+- API client configured with JWT authentication via `@manacore/shared-auth`
 - Environment variables managed at root level
-- MCP server configured for Supabase integration (see root `.mcp.json`)
-- Database types auto-generated in shared package
+- Database is PostgreSQL accessed through the backend
+
+### API Services
+
+Located in `services/api/`:
+
+- `client.ts` - Base API client with auth handling
+- `images.ts` - Image CRUD operations
+- `generate.ts` - Image generation endpoints
+- `models.ts` - AI model endpoints
+- `profiles.ts` - User profile and rate limits
+- `tags.ts` - Image tagging
 
 ### Styling
 
@@ -118,7 +129,7 @@ import { supabase } from '@picture/shared';
 
 - **Navigation**: expo-router, react-navigation
 - **UI**: NativeWind, @expo/vector-icons
-- **Backend**: @supabase/supabase-js
+- **Auth**: @manacore/shared-auth
 - **State**: zustand
 - **Development**: expo-dev-client for custom native builds
 
@@ -126,8 +137,8 @@ import { supabase } from '@picture/shared';
 
 Required environment variables (in `.env` or similar):
 
-- `EXPO_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `EXPO_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
+- `EXPO_PUBLIC_API_URL` - Backend API URL
+- `EXPO_PUBLIC_MIDDLEWARE_API_URL` - Auth middleware URL
 
 ## EAS Build Configuration
 
@@ -137,35 +148,3 @@ The project is configured for EAS Build with:
 - Preview builds for internal distribution
 - Production builds with auto-incrementing version numbers
 - Project ID: `a74891be-7ff7-420c-9ff0-d33c37a59e5a`
-
-## Supabase Edge Functions
-
-### WICHTIG: Workflow für Edge Function Änderungen
-
-**⚠️ KRITISCH: Bevor du eine Edge Function änderst, MUSS folgender Workflow eingehalten werden:**
-
-1. **ERST Commit erstellen**
-
-   ```bash
-   git add .
-   git commit -m "Before Edge Function changes"
-   ```
-
-2. **DANN lokale Änderungen vornehmen**
-   - Bearbeite die Function in `supabase/functions/[function-name]/`
-   - Teste lokal mit: `npx supabase functions serve [function-name]`
-
-3. **ZULETZT auf Supabase deployen**
-   ```bash
-   npx supabase functions deploy [function-name]
-   ```
-
-### Edge Functions Struktur
-
-```
-supabase/
-└── functions/
-    └── [function-name]/
-        ├── index.ts     # Function Code
-        └── README.md    # Dokumentation
-```

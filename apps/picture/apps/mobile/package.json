@@ -24,7 +24,6 @@
 		"@picture/shared": "workspace:*",
 		"@react-native-async-storage/async-storage": "2.2.0",
 		"@react-navigation/native": "^7.0.3",
-		"@supabase/supabase-js": "^2.38.4",
 		"blurhash": "^2.0.5",
 		"expo": "54.0.12",
 		"expo-blur": "~15.0.7",
