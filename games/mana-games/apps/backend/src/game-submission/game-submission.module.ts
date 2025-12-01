@@ -3,7 +3,7 @@ import { GameSubmissionController } from './game-submission.controller';
 import { GameSubmissionService } from './game-submission.service';
 
 @Module({
-  controllers: [GameSubmissionController],
-  providers: [GameSubmissionService],
+	controllers: [GameSubmissionController],
+	providers: [GameSubmissionService],
 })
 export class GameSubmissionModule {}

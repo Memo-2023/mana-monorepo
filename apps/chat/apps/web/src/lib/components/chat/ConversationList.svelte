@@ -138,9 +138,7 @@
 							<a
 								href="/chat/{conv.id}"
 								class="block px-3 py-2 mx-2 rounded-lg transition-colors
-								       {isActive
-									? 'bg-primary/10 text-primary'
-									: 'hover:bg-muted text-foreground'}"
+								       {isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-foreground'}"
 							>
 								<div class="flex items-center justify-between gap-2">
 									<span class="text-sm font-medium truncate pr-6">

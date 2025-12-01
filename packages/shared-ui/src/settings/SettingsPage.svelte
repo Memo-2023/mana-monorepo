@@ -14,13 +14,7 @@
 		children: Snippet;
 	}
 
-	let {
-		title,
-		subtitle,
-		maxWidth = 'md',
-		class: className = '',
-		children,
-	}: Props = $props();
+	let { title, subtitle, maxWidth = 'md', class: className = '', children }: Props = $props();
 
 	const maxWidthClasses = {
 		sm: 'max-w-lg',

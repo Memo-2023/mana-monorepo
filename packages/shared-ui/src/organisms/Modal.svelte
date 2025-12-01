@@ -71,7 +71,9 @@
 		>
 			{#if showHeader}
 				<!-- Header -->
-				<div class="flex items-center justify-between p-6 border-b border-black/10 dark:border-white/10">
+				<div
+					class="flex items-center justify-between p-6 border-b border-black/10 dark:border-white/10"
+				>
 					<div class="flex items-center gap-3 flex-1">
 						{#if icon}
 							{@render icon()}

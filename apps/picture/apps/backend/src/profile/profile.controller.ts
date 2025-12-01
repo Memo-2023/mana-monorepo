@@ -1,7 +1,12 @@
 import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
-import { UpdateProfileDto, ProfileResponse, UserStatsResponse, RateLimitsResponse } from './dto/profile.dto';
+import {
+	UpdateProfileDto,
+	ProfileResponse,
+	UserStatsResponse,
+	RateLimitsResponse,
+} from './dto/profile.dto';
 
 @Controller('profiles')
 @UseGuards(JwtAuthGuard)

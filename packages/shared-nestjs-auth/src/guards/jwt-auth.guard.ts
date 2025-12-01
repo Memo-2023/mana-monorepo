@@ -89,8 +89,7 @@ export class JwtAuthGuard implements CanActivate {
 	 * Validate token with Mana Core Auth service
 	 */
 	private async validateToken(token: string): Promise<CurrentUserData> {
-		const authUrl =
-			this.configService.get<string>('MANA_CORE_AUTH_URL') || 'http://localhost:3001';
+		const authUrl = this.configService.get<string>('MANA_CORE_AUTH_URL') || 'http://localhost:3001';
 
 		const response = await fetch(`${authUrl}/api/v1/auth/validate`, {
 			method: 'POST',

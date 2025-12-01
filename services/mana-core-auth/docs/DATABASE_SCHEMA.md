@@ -3,6 +3,7 @@
 ## Overview
 
 The Mana Core authentication service uses PostgreSQL with two main schemas:
+
 - `auth` - User authentication, sessions, and organization management
 - `credits` - Credit system for B2C and B2B customers
 
@@ -43,6 +44,7 @@ credits.organization_balances ←───────────────�
 ### Core Tables
 
 #### auth.organizations
+
 Stores organization/company information for B2B customers.
 
 ```sql
@@ -58,11 +60,13 @@ CREATE TABLE auth.organizations (
 ```
 
 **Key Design Decisions:**
+
 - Uses TEXT for IDs (Better Auth requirement - nanoid/ULID format)
 - Slug is unique and URL-friendly for organization pages
 - Metadata field allows flexible custom attributes
 
 #### auth.members
+
 Links users to organizations with roles (owner, admin, member).
 
 ```sql
@@ -80,11 +84,13 @@ CREATE INDEX members_organization_user_idx ON auth.members(organization_id, user
 ```
 
 **Key Design Decisions:**
+
 - Composite index on (organization_id, user_id) for fast membership checks
 - user_id is TEXT to match Better Auth expectations (actual data is UUID cast to TEXT)
 - ON DELETE CASCADE ensures members are removed when org is deleted
 
 #### auth.invitations
+
 Tracks pending, accepted, and rejected organization invitations.
 
 ```sql
@@ -105,6 +111,7 @@ CREATE INDEX invitations_status_idx ON auth.invitations(status);
 ```
 
 **Key Design Decisions:**
+
 - Index on email for quick lookup of pending invitations
 - Index on status for filtering active invitations
 - ON DELETE SET NULL for inviter (keeps history even if inviter deleted)
@@ -113,6 +120,7 @@ CREATE INDEX invitations_status_idx ON auth.invitations(status);
 ## Organization Credit Management
 
 ### credits.organization_balances
+
 Tracks credit pools for B2B organizations.
 
 ```sql
@@ -130,6 +138,7 @@ CREATE TABLE credits.organization_balances (
 ```
 
 **Key Design Decisions:**
+
 - `balance`: Organization's total purchased credits
 - `allocated_credits`: Sum of credits allocated to employees (not yet spent)
 - `available_credits`: Credits owner can still allocate (calculated: balance - allocated_credits)
@@ -138,12 +147,14 @@ CREATE TABLE credits.organization_balances (
 - `version`: Enables optimistic locking to prevent race conditions
 
 **Credit Flow:**
+
 1. Owner purchases credits → `balance` increases
 2. Owner allocates to employee → `allocated_credits` increases, `available_credits` decreases
 3. Employee spends credits → employee's `credits.balances.balance` decreases
 4. Owner deallocates from employee → `allocated_credits` decreases, `available_credits` increases
 
 ### credits.credit_allocations
+
 Immutable audit trail of all credit allocations.
 
 ```sql
@@ -167,6 +178,7 @@ CREATE INDEX credit_allocations_created_at_idx ON credits.credit_allocations(cre
 ```
 
 **Key Design Decisions:**
+
 - **Immutable**: No updates or deletes allowed (audit trail)
 - `amount` can be positive (allocation) or negative (deallocation/adjustment)
 - `balance_before`/`balance_after` track exact state changes
@@ -174,6 +186,7 @@ CREATE INDEX credit_allocations_created_at_idx ON credits.credit_allocations(cre
 - `reason` field for transparency and accountability
 
 ### credits.transactions (Updated)
+
 Extended to support B2B transactions.
 
 ```sql
@@ -185,6 +198,7 @@ CREATE INDEX transactions_organization_id_idx ON credits.transactions(organizati
 ```
 
 **Key Design Decisions:**
+
 - `organization_id` is **nullable** (NULL for B2C users, set for B2B employees)
 - ON DELETE SET NULL preserves transaction history even if org deleted
 - Enables organization-wide usage analytics and reporting
@@ -194,6 +208,7 @@ CREATE INDEX transactions_organization_id_idx ON credits.transactions(organizati
 ### The UUID vs TEXT Challenge
 
 **Problem:**
+
 - Better Auth uses TEXT IDs (nanoid/ULID format like "abc123xyz")
 - Our existing system uses UUID for user IDs
 - PostgreSQL doesn't allow direct foreign keys between UUID and TEXT
@@ -211,18 +226,19 @@ FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
 ```
 
 **In Application Code:**
+
 ```typescript
 // When inserting a member
 await db.insert(members).values({
-  id: nanoid(),
-  organization_id: "org_abc123",
-  user_id: userId.toString(), // Convert UUID to TEXT
-  role: 'member'
+	id: nanoid(),
+	organization_id: 'org_abc123',
+	user_id: userId.toString(), // Convert UUID to TEXT
+	role: 'member',
 });
 
 // When querying
 const member = await db.query.members.findFirst({
-  where: eq(members.userId, userId.toString())
+	where: eq(members.userId, userId.toString()),
 });
 ```
 
@@ -243,26 +259,31 @@ auth.is_organization_owner(org_id TEXT) → BOOLEAN
 ### Key Policies
 
 **Organizations:**
+
 - Members can view their organizations
 - Any user can create organizations (Better Auth adds them as owner)
 - Only owners can update/delete organizations
 
 **Members:**
+
 - Members can view other members in their orgs
 - Owners/admins can add/remove/update members
 - Members can remove themselves
 
 **Invitations:**
+
 - Members can view org invitations
 - Invitees can view invitations sent to them
 - Owners/admins can create/manage invitations
 - Inviters and invitees can delete invitations
 
 **Organization Balances:**
+
 - Members can view org balance
 - Only owners can modify balances
 
 **Credit Allocations:**
+
 - Employees can view allocations to them
 - Owners/admins can view all org allocations
 - Only owners can create allocations
@@ -286,16 +307,19 @@ psql $DATABASE_URL -f src/db/migrations/0001_better_auth_organizations.sql
 ### Migration Files
 
 **Up Migration:** `0001_better_auth_organizations.sql`
+
 - Creates organization tables
 - Creates credit management tables
 - Adds foreign keys and indexes
 - Sets up triggers
 
 **Down Migration:** `0001_better_auth_organizations_down.sql`
+
 - Reverses all changes
 - Safe rollback path
 
 **RLS Policies:** `postgres/init/03-organization-rls.sql`
+
 - Applied automatically in Docker
 - Can be run manually: `psql $DATABASE_URL -f postgres/init/03-organization-rls.sql`
 
@@ -332,6 +356,7 @@ VALUES ('org_abc123');
 ### Indexes
 
 All critical query paths are indexed:
+
 - Organization lookups by slug
 - Member lookups by user_id and organization_id
 - Invitation lookups by email and status
@@ -343,15 +368,18 @@ Both `credits.balances` and `credits.organization_balances` use a `version` colu
 
 ```typescript
 // Prevent race conditions when allocating credits
-await db.update(organizationBalances)
-  .set({
-    allocated_credits: sql`allocated_credits + ${amount}`,
-    version: sql`version + 1`
-  })
-  .where(and(
-    eq(organizationBalances.organizationId, orgId),
-    eq(organizationBalances.version, currentVersion)
-  ));
+await db
+	.update(organizationBalances)
+	.set({
+		allocated_credits: sql`allocated_credits + ${amount}`,
+		version: sql`version + 1`,
+	})
+	.where(
+		and(
+			eq(organizationBalances.organizationId, orgId),
+			eq(organizationBalances.version, currentVersion)
+		)
+	);
 ```
 
 ## Schema Relationships
@@ -399,12 +427,14 @@ ADD COLUMN credits_expire_at TIMESTAMPTZ;
 ### Common Issues
 
 **Foreign Key Errors (UUID vs TEXT):**
+
 ```sql
 -- Check if casting is needed
 SELECT user_id::uuid FROM auth.members WHERE user_id ~ '^[0-9a-f-]{36}$';
 ```
 
 **RLS Policy Blocking Queries:**
+
 ```sql
 -- Temporarily disable RLS for debugging (development only!)
 ALTER TABLE auth.organizations DISABLE ROW LEVEL SECURITY;
@@ -414,17 +444,18 @@ SELECT * FROM pg_policies WHERE tablename = 'organizations';
 ```
 
 **Optimistic Lock Failures:**
+
 ```typescript
 // Retry logic for version conflicts
 const maxRetries = 3;
 for (let i = 0; i < maxRetries; i++) {
-  try {
-    await allocateCredits(orgId, employeeId, amount);
-    break;
-  } catch (err) {
-    if (i === maxRetries - 1) throw err;
-    await sleep(100 * Math.pow(2, i)); // Exponential backoff
-  }
+	try {
+		await allocateCredits(orgId, employeeId, amount);
+		break;
+	} catch (err) {
+		if (i === maxRetries - 1) throw err;
+		await sleep(100 * Math.pow(2, i)); // Exponential backoff
+	}
 }
 ```
 

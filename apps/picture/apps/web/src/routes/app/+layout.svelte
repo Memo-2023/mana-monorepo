@@ -125,7 +125,7 @@
 			options: viewModeOptions,
 			value: $viewMode === 'grid5' ? 'gridSmall' : $viewMode,
 			onChange: (id: string) => {
-				const mode = id === 'gridSmall' ? 'grid5' : id as ViewMode;
+				const mode = id === 'gridSmall' ? 'grid5' : (id as ViewMode);
 				setViewMode(mode);
 			},
 		},

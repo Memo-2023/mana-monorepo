@@ -114,11 +114,11 @@ EXPO_PUBLIC_BACKEND_URL=http://localhost:3001
 
 ## AI Models Available
 
-| Model ID                             | Name              | Description                    | Default |
-| ------------------------------------ | ----------------- | ------------------------------ | ------- |
-| 550e8400-e29b-41d4-a716-446655440101 | Gemini 2.5 Flash  | Fast, efficient responses      | Yes     |
-| 550e8400-e29b-41d4-a716-446655440102 | Gemini 2.0 Flash-Lite | Ultra-lightweight model    | No      |
-| 550e8400-e29b-41d4-a716-446655440103 | Gemini 2.5 Pro    | Most capable model             | No      |
+| Model ID                             | Name                  | Description               | Default |
+| ------------------------------------ | --------------------- | ------------------------- | ------- |
+| 550e8400-e29b-41d4-a716-446655440101 | Gemini 2.5 Flash      | Fast, efficient responses | Yes     |
+| 550e8400-e29b-41d4-a716-446655440102 | Gemini 2.0 Flash-Lite | Ultra-lightweight model   | No      |
+| 550e8400-e29b-41d4-a716-446655440103 | Gemini 2.5 Pro        | Most capable model        | No      |
 
 ## Important Notes
 

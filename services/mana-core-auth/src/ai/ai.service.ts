@@ -74,8 +74,7 @@ Antworte NUR mit validem JSON in diesem Format (keine Markdown-Codeblocks, kein 
 
 	private fallbackAnalysis(feedbackText: string): FeedbackAnalysis {
 		// Simple fallback: use first 60 chars as title, default category
-		const title =
-			feedbackText.length > 60 ? feedbackText.substring(0, 57) + '...' : feedbackText;
+		const title = feedbackText.length > 60 ? feedbackText.substring(0, 57) + '...' : feedbackText;
 
 		// Simple keyword-based category detection
 		const lowerText = feedbackText.toLowerCase();
@@ -88,7 +87,11 @@ Antworte NUR mit validem JSON in diesem Format (keine Markdown-Codeblocks, kein 
 			lowerText.includes('funktioniert nicht')
 		) {
 			category = 'bug';
-		} else if (lowerText.includes('?') || lowerText.includes('frage') || lowerText.includes('wie')) {
+		} else if (
+			lowerText.includes('?') ||
+			lowerText.includes('frage') ||
+			lowerText.includes('wie')
+		) {
 			category = 'question';
 		} else if (
 			lowerText.includes('besser') ||

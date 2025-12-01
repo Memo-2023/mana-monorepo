@@ -4,7 +4,15 @@
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { isSidebarMode, isNavCollapsed } from '$lib/stores/navigation';
-	import { MagnifyingGlass, X, Plus, ChatCircle, Archive, Trash, PushPin } from '@manacore/shared-icons';
+	import {
+		MagnifyingGlass,
+		X,
+		Plus,
+		ChatCircle,
+		Archive,
+		Trash,
+		PushPin,
+	} from '@manacore/shared-icons';
 	import { ConfirmationModal } from '@manacore/shared-ui';
 	import { goto } from '$app/navigation';
 	import type { Snippet } from 'svelte';
@@ -72,7 +80,7 @@
 		yesterday: 'Gestern',
 		thisWeek: 'Diese Woche',
 		thisMonth: 'Dieser Monat',
-		older: 'Älter'
+		older: 'Älter',
 	};
 
 	function getDateSection(dateString: string): DateSection {
@@ -117,7 +125,7 @@
 			yesterday: [],
 			thisWeek: [],
 			thisMonth: [],
-			older: []
+			older: [],
 		};
 
 		for (const conv of unpinnedConversations) {
@@ -331,7 +339,9 @@
 					<!-- Pinned Section -->
 					{#if pinnedConversations.length > 0}
 						<div class="mb-5">
-							<h4 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+							<h4
+								class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5"
+							>
 								<PushPin size={12} weight="fill" class="text-primary" />
 								Angepinnt
 							</h4>
@@ -339,17 +349,11 @@
 								<a
 									href="/chat/{conv.id}"
 									class="group block w-full rounded-xl bg-white/60 dark:bg-white/5 backdrop-blur-sm border border-black/10 dark:border-white/20 p-4 text-left transition-all mb-3 hover:shadow-md hover:bg-white/80 dark:hover:bg-white/10
-										   {isActive(conv.id)
-										? 'bg-white/90 dark:bg-white/15 shadow-md border-primary/30'
-										: ''}"
+										   {isActive(conv.id) ? 'bg-white/90 dark:bg-white/15 shadow-md border-primary/30' : ''}"
 								>
 									<!-- Title Row -->
 									<div class="mb-1.5 flex items-center gap-2">
-										<PushPin
-											size={16}
-											weight="fill"
-											class="flex-shrink-0 text-primary"
-										/>
+										<PushPin size={16} weight="fill" class="flex-shrink-0 text-primary" />
 										<h3 class="text-sm font-semibold line-clamp-1 text-foreground flex-1">
 											{conv.title || 'Neue Konversation'}
 										</h3>
@@ -367,14 +371,14 @@
 										</span>
 										<div class="flex items-center gap-1">
 											{#if conv.documentMode}
-												<span
-													class="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full"
-												>
+												<span class="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
 													Dokument
 												</span>
 											{/if}
 											<!-- Action Buttons (visible on hover) -->
-											<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+											<div
+												class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+											>
 												<button
 													onclick={(e) => handleTogglePin(e, conv.id, true)}
 													class="p-1.5 text-primary hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
@@ -409,16 +413,16 @@
 						{@const convs = groupedConversations()[section]}
 						{#if convs.length > 0}
 							<div class="mb-5">
-								<h4 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+								<h4
+									class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2"
+								>
 									{sectionLabels[section]}
 								</h4>
 								{#each convs as conv (conv.id)}
 									<a
 										href="/chat/{conv.id}"
 										class="group block w-full rounded-xl bg-white/60 dark:bg-white/5 backdrop-blur-sm border border-black/10 dark:border-white/20 p-4 text-left transition-all mb-3 hover:shadow-md hover:bg-white/80 dark:hover:bg-white/10
-											   {isActive(conv.id)
-											? 'bg-white/90 dark:bg-white/15 shadow-md border-primary/30'
-											: ''}"
+											   {isActive(conv.id) ? 'bg-white/90 dark:bg-white/15 shadow-md border-primary/30' : ''}"
 									>
 										<!-- Title Row -->
 										<div class="mb-1.5 flex items-center gap-2">
@@ -446,14 +450,14 @@
 											</span>
 											<div class="flex items-center gap-1">
 												{#if conv.documentMode}
-													<span
-														class="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full"
-													>
+													<span class="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
 														Dokument
 													</span>
 												{/if}
 												<!-- Action Buttons (visible on hover) -->
-												<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+												<div
+													class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+												>
 													<button
 														onclick={(e) => handleTogglePin(e, conv.id, false)}
 														class="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"

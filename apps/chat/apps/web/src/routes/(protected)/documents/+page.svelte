@@ -127,9 +127,7 @@
 						d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
 					/>
 				</svg>
-				<h3 class="text-lg font-medium text-foreground mb-1">
-					Keine Dokumente gefunden
-				</h3>
+				<h3 class="text-lg font-medium text-foreground mb-1">Keine Dokumente gefunden</h3>
 				<p class="text-muted-foreground max-w-sm mx-auto">
 					Erstelle ein neues Dokument in einer Konversation mit aktiviertem Dokumentmodus.
 				</p>

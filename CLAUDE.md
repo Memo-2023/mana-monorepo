@@ -157,12 +157,12 @@ All projects use **mana-core-auth** as the central authentication service:
 
 #### Key Components
 
-| Component | Purpose |
-|-----------|---------|
-| `services/mana-core-auth` | Central auth service (Better Auth + EdDSA JWT) |
-| `@manacore/shared-nestjs-auth` | Shared NestJS guards/decorators for JWT validation |
-| `@mana-core/nestjs-integration` | Extended NestJS module with auth + credits |
-| `@manacore/shared-auth` | Client-side auth for web/mobile apps |
+| Component                       | Purpose                                            |
+| ------------------------------- | -------------------------------------------------- |
+| `services/mana-core-auth`       | Central auth service (Better Auth + EdDSA JWT)     |
+| `@manacore/shared-nestjs-auth`  | Shared NestJS guards/decorators for JWT validation |
+| `@mana-core/nestjs-integration` | Extended NestJS module with auth + credits         |
+| `@manacore/shared-auth`         | Client-side auth for web/mobile apps               |
 
 #### NestJS Backend Integration
 
@@ -175,10 +175,10 @@ import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nes
 @Controller('api')
 @UseGuards(JwtAuthGuard)
 export class MyController {
-  @Get('profile')
-  getProfile(@CurrentUser() user: CurrentUserData) {
-    return { userId: user.userId, email: user.email };
-  }
+	@Get('profile')
+	getProfile(@CurrentUser() user: CurrentUserData) {
+		return { userId: user.userId, email: user.email };
+	}
 }
 ```
 
@@ -189,17 +189,17 @@ export class MyController {
 import { ManaCoreModule } from '@mana-core/nestjs-integration';
 
 @Module({
-  imports: [
-    ManaCoreModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
-        appId: config.get('APP_ID'),
-        serviceKey: config.get('MANA_CORE_SERVICE_KEY'),
-        debug: config.get('NODE_ENV') === 'development',
-      }),
-      inject: [ConfigService],
-    }),
-  ],
+	imports: [
+		ManaCoreModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (config: ConfigService) => ({
+				appId: config.get('APP_ID'),
+				serviceKey: config.get('MANA_CORE_SERVICE_KEY'),
+				debug: config.get('NODE_ENV') === 'development',
+			}),
+			inject: [ConfigService],
+		}),
+	],
 })
 export class AppModule {}
 
@@ -211,13 +211,13 @@ import { CreditClientService } from '@mana-core/nestjs-integration';
 @Controller('api')
 @UseGuards(AuthGuard)
 export class ApiController {
-  constructor(private creditClient: CreditClientService) {}
+	constructor(private creditClient: CreditClientService) {}
 
-  @Post('generate')
-  async generate(@CurrentUser() user: any) {
-    await this.creditClient.consumeCredits(user.sub, 'generation', 10, 'AI generation');
-    // ... do work
-  }
+	@Post('generate')
+	async generate(@CurrentUser() user: any) {
+		await this.creditClient.consumeCredits(user.sub, 'generation', 10, 'AI generation');
+		// ... do work
+	}
 }
 ```
 
@@ -241,13 +241,13 @@ APP_ID=your-app-id
 
 ```json
 {
-  "sub": "user-id",
-  "email": "user@example.com",
-  "role": "user",
-  "sid": "session-id",
-  "exp": 1764606251,
-  "iss": "manacore",
-  "aud": "manacore"
+	"sub": "user-id",
+	"email": "user@example.com",
+	"role": "user",
+	"sid": "session-id",
+	"exp": 1764606251,
+	"iss": "manacore",
+	"aud": "manacore"
 }
 ```
 
@@ -272,12 +272,12 @@ curl http://localhost:3007/api/favorites \
 
 #### Integrated Backends
 
-| Backend | Package | Port |
-|---------|---------|------|
-| Chat | `@mana-core/nestjs-integration` | 3002 |
-| Picture | `@manacore/shared-nestjs-auth` | 3006 |
-| Zitare | `@manacore/shared-nestjs-auth` | 3007 |
-| Presi | Custom (same pattern) | 3008 |
+| Backend  | Package                         | Port |
+| -------- | ------------------------------- | ---- |
+| Chat     | `@mana-core/nestjs-integration` | 3002 |
+| Picture  | `@manacore/shared-nestjs-auth`  | 3006 |
+| Zitare   | `@manacore/shared-nestjs-auth`  | 3007 |
+| Presi    | Custom (same pattern)           | 3008 |
 | ManaDeck | `@mana-core/nestjs-integration` | 3009 |
 
 ### Svelte 5 Runes Mode (Web Apps)
@@ -299,17 +299,17 @@ $: doubled = count * 2;
 
 ## Shared Packages (`packages/`)
 
-| Package                          | Purpose                                                 |
-| -------------------------------- | ------------------------------------------------------- |
-| `@manacore/shared-nestjs-auth`   | NestJS JWT validation guards via mana-core-auth         |
-| `@mana-core/nestjs-integration`  | NestJS module with auth guards + credit client          |
-| `@manacore/shared-auth`          | Client-side auth service for web/mobile apps            |
-| `@manacore/shared-supabase`      | Unified Supabase client                                 |
-| `@manacore/shared-types`         | Common TypeScript types                                 |
-| `@manacore/shared-utils`         | Utility functions                                       |
-| `@manacore/shared-ui`            | React Native UI components                              |
-| `@manacore/shared-theme`         | Theme configuration                                     |
-| `@manacore/shared-i18n`          | Internationalization                                    |
+| Package                         | Purpose                                         |
+| ------------------------------- | ----------------------------------------------- |
+| `@manacore/shared-nestjs-auth`  | NestJS JWT validation guards via mana-core-auth |
+| `@mana-core/nestjs-integration` | NestJS module with auth guards + credit client  |
+| `@manacore/shared-auth`         | Client-side auth service for web/mobile apps    |
+| `@manacore/shared-supabase`     | Unified Supabase client                         |
+| `@manacore/shared-types`        | Common TypeScript types                         |
+| `@manacore/shared-utils`        | Utility functions                               |
+| `@manacore/shared-ui`           | React Native UI components                      |
+| `@manacore/shared-theme`        | Theme configuration                             |
+| `@manacore/shared-i18n`         | Internationalization                            |
 
 Import shared packages:
 

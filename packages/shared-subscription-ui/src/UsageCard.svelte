@@ -53,10 +53,7 @@
 
 		<!-- Progress Bar -->
 		<div class="usage-card__progress-track">
-			<div
-				class="usage-card__progress-fill"
-				style="width: {availablePercentage}%;"
-			></div>
+			<div class="usage-card__progress-fill" style="width: {availablePercentage}%;"></div>
 		</div>
 
 		<!-- Percentage -->
@@ -91,7 +88,9 @@
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
 		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 	}
 
 	:global(.dark) .usage-card {
@@ -156,7 +155,7 @@
 	.usage-card__progress-fill {
 		height: 100%;
 		border-radius: 0.5rem;
-		background: linear-gradient(90deg, #4287f5 0%, #66B2FF 100%);
+		background: linear-gradient(90deg, #4287f5 0%, #66b2ff 100%);
 		box-shadow: 0 0 4px rgba(66, 135, 245, 0.5);
 	}
 

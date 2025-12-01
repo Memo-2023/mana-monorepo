@@ -19,18 +19,8 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { jwt } from 'better-auth/plugins/jwt';
 import { organization } from 'better-auth/plugins/organization';
 import { getDb } from '../db/connection';
-import {
-	organizations,
-	members,
-	invitations,
-} from '../db/schema/organizations.schema';
-import {
-	users,
-	sessions,
-	accounts,
-	verificationTokens,
-	jwks,
-} from '../db/schema/auth.schema';
+import { organizations, members, invitations } from '../db/schema/organizations.schema';
+import { users, sessions, accounts, verificationTokens, jwks } from '../db/schema/auth.schema';
 import type { JWTPayloadContext } from './types/better-auth.types';
 
 /**

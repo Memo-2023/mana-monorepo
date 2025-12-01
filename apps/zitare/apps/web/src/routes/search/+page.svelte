@@ -131,8 +131,20 @@
 	<div class="search-header">
 		<h2>Suche</h2>
 		<div class="search-input-wrapper">
-			<svg class="search-icon" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+			<svg
+				class="search-icon"
+				width="20"
+				height="20"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+				/>
 			</svg>
 			<input
 				type="text"
@@ -144,7 +156,12 @@
 			{#if searchTerm}
 				<button class="clear-btn" onclick={() => (searchTerm = '')} aria-label="Clear search">
 					<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
 					</svg>
 				</button>
 			{/if}
@@ -157,10 +174,18 @@
 			<button class="tab" class:active={activeTab === 'all'} onclick={() => (activeTab = 'all')}>
 				Alle ({filteredQuotes.length + filteredAuthors.length})
 			</button>
-			<button class="tab" class:active={activeTab === 'quotes'} onclick={() => (activeTab = 'quotes')}>
+			<button
+				class="tab"
+				class:active={activeTab === 'quotes'}
+				onclick={() => (activeTab = 'quotes')}
+			>
 				Zitate ({filteredQuotes.length})
 			</button>
-			<button class="tab" class:active={activeTab === 'authors'} onclick={() => (activeTab = 'authors')}>
+			<button
+				class="tab"
+				class:active={activeTab === 'authors'}
+				onclick={() => (activeTab = 'authors')}
+			>
 				Autoren ({filteredAuthors.length})
 			</button>
 		</div>
@@ -168,7 +193,15 @@
 		{#if totalResults === 0}
 			<div class="empty-state">
 				<div class="empty-icon">
-					<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="64"
+						height="64"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="1.5"
+					>
 						<circle cx="11" cy="11" r="8"></circle>
 						<path d="m21 21-4.35-4.35"></path>
 					</svg>
@@ -234,7 +267,15 @@
 	{:else}
 		<div class="hint">
 			<div class="hint-icon">
-				<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="48"
+					height="48"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.5"
+				>
 					<circle cx="11" cy="11" r="8"></circle>
 					<path d="m21 21-4.35-4.35"></path>
 				</svg>

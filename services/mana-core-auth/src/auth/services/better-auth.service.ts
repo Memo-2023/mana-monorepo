@@ -24,13 +24,7 @@ import { ConfigService } from '@nestjs/config';
 import { createBetterAuth, type BetterAuthInstance } from '../better-auth.config';
 import { getDb } from '../../db/connection';
 import { balances, organizationBalances } from '../../db/schema/credits.schema';
-import {
-	hasUser,
-	hasToken,
-	hasMember,
-	hasMembers,
-	hasSession,
-} from '../types/better-auth.types';
+import { hasUser, hasToken, hasMember, hasMembers, hasSession } from '../types/better-auth.types';
 import type {
 	RegisterB2CDto,
 	RegisterB2BDto,

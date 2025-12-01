@@ -486,19 +486,13 @@ describe('B2C User Journey (E2E)', () => {
 		});
 
 		it('should reject SQL injection attempts in email field', async () => {
-			const sqlInjectionPayloads = [
-				"admin'--",
-				"' OR '1'='1",
-				"'; DROP TABLE users; --",
-			];
+			const sqlInjectionPayloads = ["admin'--", "' OR '1'='1", "'; DROP TABLE users; --"];
 
 			for (const payload of sqlInjectionPayloads) {
-				const response = await request(app.getHttpServer())
-					.post('/auth/login')
-					.send({
-						email: payload,
-						password: 'SomePassword123!',
-					});
+				const response = await request(app.getHttpServer()).post('/auth/login').send({
+					email: payload,
+					password: 'SomePassword123!',
+				});
 
 				// Should fail safely without SQL injection
 				expect([400, 401]).toContain(response.status);

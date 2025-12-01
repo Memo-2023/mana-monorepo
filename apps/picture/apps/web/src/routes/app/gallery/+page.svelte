@@ -137,7 +137,9 @@
 		<!-- Tags -->
 		{#if $tags.length > 0}
 			<div class="flex flex-wrap items-center gap-2">
-				<span class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Tags:</span>
+				<span class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+					>Tags:</span
+				>
 				<TagPills />
 			</div>
 		{/if}

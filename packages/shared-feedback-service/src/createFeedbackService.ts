@@ -39,10 +39,7 @@ export function createFeedbackService(config: FeedbackServiceConfig) {
 	/**
 	 * Helper to make authenticated requests
 	 */
-	async function fetchWithAuth<T>(
-		endpoint: string,
-		options: RequestInit = {}
-	): Promise<T> {
+	async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 		const token = await getAuthToken();
 
 		if (!token) {

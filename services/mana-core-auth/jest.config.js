@@ -19,9 +19,7 @@ module.exports = {
 	coverageDirectory: '../coverage',
 	testEnvironment: 'node',
 	// Handle ESM modules (nanoid, better-auth)
-	transformIgnorePatterns: [
-		'node_modules/(?!(nanoid|better-auth)/)',
-	],
+	transformIgnorePatterns: ['node_modules/(?!(nanoid|better-auth)/)'],
 	moduleNameMapper: {
 		'^src/(.*)$': '<rootDir>/$1',
 		'^nanoid$': '<rootDir>/../test/__mocks__/nanoid.ts',

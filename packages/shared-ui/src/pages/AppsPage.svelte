@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { MANA_APPS, APP_URLS, APP_STATUS_LABELS, type ManaApp, type AppIconId } from '@manacore/shared-branding';
+	import {
+		MANA_APPS,
+		APP_URLS,
+		APP_STATUS_LABELS,
+		type ManaApp,
+		type AppIconId,
+	} from '@manacore/shared-branding';
 
 	interface Props {
 		/** Current app ID to highlight */
@@ -12,12 +18,7 @@
 		onAppClick?: (app: ManaApp) => void;
 	}
 
-	let {
-		currentAppId,
-		title = 'Alle Apps',
-		locale = 'de',
-		onAppClick,
-	}: Props = $props();
+	let { currentAppId, title = 'Alle Apps', locale = 'de', onAppClick }: Props = $props();
 
 	// Filter active apps (non-archived)
 	const apps = $derived(MANA_APPS.filter((app) => !app.archived));
@@ -155,13 +156,7 @@
 
 <!-- Modal -->
 {#if selectedAppIndex !== null}
-	<div
-		class="modal-overlay"
-		onclick={closeModal}
-		role="dialog"
-		aria-modal="true"
-		tabindex="-1"
-	>
+	<div class="modal-overlay" onclick={closeModal} role="dialog" aria-modal="true" tabindex="-1">
 		<button onclick={closeModal} class="modal-close-btn" aria-label="Close modal">
 			<svg
 				width="24"
@@ -202,7 +197,10 @@
 						tabindex="0"
 					>
 						<div class="modal-card-status">
-							<div class="modal-status-dot" style="background-color: {getStatusColor(app.status)};"></div>
+							<div
+								class="modal-status-dot"
+								style="background-color: {getStatusColor(app.status)};"
+							></div>
 							<span class="modal-status-label">{statusLabels[app.status]}</span>
 						</div>
 
@@ -224,7 +222,9 @@
 
 						<div class="modal-app-action">
 							{#if app.comingSoon}
-								<span class="modal-coming-soon">{locale === 'de' ? 'Demnächst' : 'Coming Soon'}</span>
+								<span class="modal-coming-soon"
+									>{locale === 'de' ? 'Demnächst' : 'Coming Soon'}</span
+								>
 							{:else}
 								<button
 									class="modal-open-btn"
@@ -303,7 +303,10 @@
 		border: 1px solid rgba(0, 0, 0, 0.08);
 		background-color: rgba(255, 255, 255, 0.8);
 		backdrop-filter: blur(10px);
-		transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+		transition:
+			transform 0.2s ease,
+			box-shadow 0.2s ease,
+			border-color 0.2s ease;
 		text-align: center;
 	}
 
@@ -427,7 +430,9 @@
 		background-color: rgba(255, 255, 255, 0.1);
 		color: #fff;
 		cursor: pointer;
-		transition: background-color 0.2s, transform 0.2s;
+		transition:
+			background-color 0.2s,
+			transform 0.2s;
 	}
 
 	.modal-close-btn:hover {
@@ -473,7 +478,9 @@
 		background-color: rgba(255, 255, 255, 0.08);
 		backdrop-filter: blur(20px);
 		transform-style: preserve-3d;
-		transition: transform 0.1s ease-out, background-color 0.2s ease;
+		transition:
+			transform 0.1s ease-out,
+			background-color 0.2s ease;
 		animation: modalCardIn 0.3s ease-out both;
 	}
 
@@ -575,7 +582,9 @@
 		font-weight: 600;
 		border: 2px solid;
 		cursor: pointer;
-		transition: opacity 0.2s, transform 0.2s;
+		transition:
+			opacity 0.2s,
+			transform 0.2s;
 		color: #fff;
 	}
 

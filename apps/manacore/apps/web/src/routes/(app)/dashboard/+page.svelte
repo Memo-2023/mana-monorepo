@@ -38,7 +38,9 @@
 		},
 		{
 			name: 'Gratis-Credits heute',
-			value: creditBalance ? `${creditBalance.freeCreditsRemaining}/${creditBalance.dailyFreeCredits}` : '...',
+			value: creditBalance
+				? `${creditBalance.freeCreditsRemaining}/${creditBalance.dailyFreeCredits}`
+				: '...',
 			icon: '🎁',
 			href: '/credits',
 		},
@@ -56,10 +58,14 @@
 
 	function getTransactionIcon(type: string): string {
 		switch (type) {
-			case 'purchase': return '💳';
-			case 'usage': return '⚡';
-			case 'bonus': return '🎁';
-			default: return '📝';
+			case 'purchase':
+				return '💳';
+			case 'usage':
+				return '⚡';
+			case 'bonus':
+				return '🎁';
+			default:
+				return '📝';
 		}
 	}
 </script>
@@ -99,10 +105,7 @@
 		<Card>
 			<h2 class="mb-4 text-lg font-semibold">Schnellzugriff</h2>
 			<div class="space-y-2">
-				<a
-					href="/credits"
-					class="block rounded-lg p-3 hover:bg-surface-hover transition-colors"
-				>
+				<a href="/credits" class="block rounded-lg p-3 hover:bg-surface-hover transition-colors">
 					<div class="flex items-center">
 						<span class="text-2xl">💰</span>
 						<div class="ml-3">
@@ -111,10 +114,7 @@
 						</div>
 					</div>
 				</a>
-				<a
-					href="/feedback"
-					class="block rounded-lg p-3 hover:bg-surface-hover transition-colors"
-				>
+				<a href="/feedback" class="block rounded-lg p-3 hover:bg-surface-hover transition-colors">
 					<div class="flex items-center">
 						<span class="text-2xl">💬</span>
 						<div class="ml-3">
@@ -123,10 +123,7 @@
 						</div>
 					</div>
 				</a>
-				<a
-					href="/profile"
-					class="block rounded-lg p-3 hover:bg-surface-hover transition-colors"
-				>
+				<a href="/profile" class="block rounded-lg p-3 hover:bg-surface-hover transition-colors">
 					<div class="flex items-center">
 						<span class="text-2xl">👤</span>
 						<div class="ml-3">
@@ -163,7 +160,9 @@
 			{:else}
 				<div class="space-y-3">
 					{#each recentTransactions as tx}
-						<div class="flex items-center justify-between py-2 border-b border-border last:border-0">
+						<div
+							class="flex items-center justify-between py-2 border-b border-border last:border-0"
+						>
 							<div class="flex items-center gap-3">
 								<span class="text-xl">{getTransactionIcon(tx.type)}</span>
 								<div>
@@ -173,7 +172,11 @@
 									</p>
 								</div>
 							</div>
-							<span class="font-semibold {tx.amount > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
+							<span
+								class="font-semibold {tx.amount > 0
+									? 'text-green-600 dark:text-green-400'
+									: 'text-red-600 dark:text-red-400'}"
+							>
 								{tx.amount > 0 ? '+' : ''}{formatCredits(tx.amount)}
 							</span>
 						</div>

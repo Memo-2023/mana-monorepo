@@ -43,7 +43,9 @@
 		favorites = new Set(favorites);
 
 		// Update quote's favorite status
-		quotes = quotes.map((q) => (q.id === quoteId ? { ...q, isFavorite: favorites.has(quoteId) } : q));
+		quotes = quotes.map((q) =>
+			q.id === quoteId ? { ...q, isFavorite: favorites.has(quoteId) } : q
+		);
 
 		// Save to localStorage
 		localStorage.setItem('favorites', JSON.stringify([...favorites]));
@@ -85,7 +87,17 @@
 
 	{#if quotes.length > 0}
 		<div class="scroll-hint">
-			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
 				<polyline points="6 9 12 15 18 9"></polyline>
 			</svg>
 			<span>Scrollen für mehr</span>
@@ -144,7 +156,11 @@
 	}
 
 	@keyframes bounce-arrow {
-		0%, 20%, 50%, 80%, 100% {
+		0%,
+		20%,
+		50%,
+		80%,
+		100% {
 			transform: translateY(0);
 		}
 		40% {

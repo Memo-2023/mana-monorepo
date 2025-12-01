@@ -93,7 +93,10 @@ export const toastStore = {
  * Helper function for API error handling
  * Use this in services/stores to show user-friendly error messages
  */
-export function handleApiError(error: unknown, fallbackMessage: string = 'Ein Fehler ist aufgetreten'): string {
+export function handleApiError(
+	error: unknown,
+	fallbackMessage: string = 'Ein Fehler ist aufgetreten'
+): string {
 	const message = error instanceof Error ? error.message : fallbackMessage;
 	toastStore.error(message);
 	return message;

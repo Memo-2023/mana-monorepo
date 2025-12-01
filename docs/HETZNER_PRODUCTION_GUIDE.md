@@ -28,6 +28,7 @@
 #### Entry-Level Production (Small Applications)
 
 **Hetzner CX23**: 2 vCPUs, 4 GB RAM, 40 GB storage, 20 TB traffic
+
 - **Price**: €3.49/month
 - **Use Case**: Single container apps, development/staging environments
 - **Suitable For**: Individual microservices, low-traffic applications
@@ -35,11 +36,13 @@
 #### Mid-Tier Production (Standard Applications)
 
 **Hetzner CPX21**: 3 shared vCPUs, 4 GB RAM, 80 GB storage
+
 - **Price**: ~€7/month
 - **Use Case**: Multi-container applications, small microservices
 - **Best For**: 2-3 backend services + web apps
 
 **Hetzner CX33**: 2 vCPUs, 8 GB RAM, 80 GB storage, 20 TB traffic
+
 - **Price**: €5.49/month
 - **Use Case**: Standard production workloads
 - **Best For**: Full stack with 5-6 services
@@ -47,11 +50,13 @@
 #### High-Performance Production
 
 **CCX Series**: Dedicated vCPUs for CPU-intensive workloads
+
 - **CCX42**: 16 vCPU, 64 GB RAM - €101/month
 - **Use Case**: High-traffic applications, full monorepo deployment
 - **Best For**: 10+ services with monitoring stack
 
 **CAX ARM Series**: 40% better cost efficiency
+
 - **CAX21**: 4 ARM vCPUs, 8 GB RAM - ~€8/month
 - **Use Case**: ARM-compatible Docker images
 - **Benefit**: Better performance-per-euro
@@ -59,11 +64,13 @@
 ### ARM vs x86 Considerations
 
 **ARM64 (CAX) Advantages**:
+
 - 40% cost savings
 - Better performance-per-euro
 - Modern Docker images support ARM64
 
 **Compatibility Check**:
+
 - Node.js: ✅ Full ARM64 support
 - Python: ✅ Full ARM64 support
 - Go: ✅ Native ARM64
@@ -71,6 +78,7 @@
 - Redis: ✅ Official ARM images
 
 **Check Your Dependencies**:
+
 ```bash
 # Test ARM compatibility locally (M1/M2 Mac)
 docker buildx build --platform linux/arm64 .
@@ -85,11 +93,13 @@ docker buildx build --platform linux/arm64 .
 **Recommended**: Use **Docker CE App** from Hetzner Cloud Apps during server creation.
 
 **Benefits**:
+
 - Docker and docker-compose pre-installed
 - Optimized for Hetzner infrastructure
 - Eliminates manual installation errors
 
 **Alternative** (Manual Installation):
+
 ```bash
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
@@ -144,18 +154,17 @@ hcloud server attach-to-network <server-id> --network production-network --ip 10
 ```json
 // /etc/docker/daemon.json
 {
-  "mtu": 1450,
-  "default-address-pools": [
-    {"base": "172.17.0.0/12", "size": 24}
-  ],
-  "live-restore": true,
-  "userland-proxy": false,
-  "no-new-privileges": true,
-  "icc": false
+	"mtu": 1450,
+	"default-address-pools": [{ "base": "172.17.0.0/12", "size": 24 }],
+	"live-restore": true,
+	"userland-proxy": false,
+	"no-new-privileges": true,
+	"icc": false
 }
 ```
 
 **Apply Configuration**:
+
 ```bash
 systemctl restart docker
 ```
@@ -170,6 +179,7 @@ systemctl restart docker
 ### Floating IPs (High Availability)
 
 **Use Cases**:
+
 - High availability setups
 - Zero-downtime deployments
 - Failover scenarios
@@ -213,22 +223,24 @@ Internet → Hetzner LB → Private Network → Docker Containers
 **Configuration Options**:
 
 1. **Direct Binding**: App containers bind to private IPs
+
    ```yaml
    services:
      web:
        networks:
          - private
        ports:
-         - "10.0.1.2:3000:3000"
+         - '10.0.1.2:3000:3000'
    ```
 
 2. **Traefik Reverse Proxy**: LB routes to Traefik on Docker Swarm
+
    ```yaml
    services:
      traefik:
        ports:
-         - "80:80"
-         - "443:443"
+         - '80:80'
+         - '443:443'
        networks:
          - public
          - private
@@ -252,6 +264,7 @@ Internet → Hetzner LB → Private Network → Docker Containers
 ### Block Storage Volumes
 
 **Characteristics**:
+
 - Attach to **single server only** (not shared)
 - ext4 or xfs filesystems (ext4 recommended)
 - Up to 10 TB per volume
@@ -297,6 +310,7 @@ volumes:
 #### Option 1: Borg Backup with Storage Box (Recommended)
 
 **Why Borg?**
+
 - Deduplication (saves space)
 - Compression (lz4, zstd)
 - Encryption (AES-256)
@@ -434,6 +448,7 @@ cp /var/lib/docker/volumes/redis-data/_data/dump.rdb \
 **Critical Warning**:
 
 ❌ **DO NOT store Docker images on Storage Box**
+
 - Causes instability (storage can disconnect)
 - Docker requires 100% available storage
 - Use only for application data, NOT `/var/lib/docker`
@@ -447,8 +462,8 @@ volumes:
     driver: local
     driver_opts:
       type: cifs
-      o: "username=u123456,password=${STORAGE_BOX_PASSWORD},addr=u123456.your-storagebox.de"
-      device: "//u123456.your-storagebox.de/uploads"
+      o: 'username=u123456,password=${STORAGE_BOX_PASSWORD},addr=u123456.your-storagebox.de'
+      device: '//u123456.your-storagebox.de/uploads'
 ```
 
 ---
@@ -549,17 +564,17 @@ ufw status verbose
 ```json
 // /etc/docker/daemon.json
 {
-  "live-restore": true,
-  "userland-proxy": false,
-  "no-new-privileges": true,
-  "icc": false,
-  "log-driver": "json-file",
-  "log-opts": {
-    "max-size": "10m",
-    "max-file": "3"
-  },
-  "metrics-addr": "127.0.0.1:9323",
-  "experimental": true
+	"live-restore": true,
+	"userland-proxy": false,
+	"no-new-privileges": true,
+	"icc": false,
+	"log-driver": "json-file",
+	"log-opts": {
+		"max-size": "10m",
+		"max-file": "3"
+	},
+	"metrics-addr": "127.0.0.1:9323",
+	"experimental": true
 }
 ```
 
@@ -578,7 +593,7 @@ services:
       - NET_BIND_SERVICE
     tmpfs:
       - /tmp:noexec,nosuid,size=100m
-    user: "1000:1000"
+    user: '1000:1000'
 ```
 
 #### 4. Fail2ban Configuration
@@ -683,6 +698,7 @@ cd /opt/prometheus-grafana
 ```
 
 **Included Components**:
+
 - Prometheus (metrics collection)
 - Grafana (visualization)
 - cAdvisor (container metrics)
@@ -708,7 +724,7 @@ services:
       - '--storage.tsdb.retention.time=30d'
       - '--web.enable-lifecycle'
     ports:
-      - "127.0.0.1:9090:9090"
+      - '127.0.0.1:9090:9090'
     restart: unless-stopped
     networks:
       - monitoring
@@ -724,7 +740,7 @@ services:
       - GF_INSTALL_PLUGINS=redis-datasource,grafana-piechart-panel
       - GF_SERVER_ROOT_URL=https://grafana.yourdomain.com
     ports:
-      - "127.0.0.1:3000:3000"
+      - '127.0.0.1:3000:3000'
     restart: unless-stopped
     networks:
       - monitoring
@@ -741,7 +757,7 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     ports:
-      - "127.0.0.1:8080:8080"
+      - '127.0.0.1:8080:8080'
     restart: unless-stopped
     networks:
       - monitoring
@@ -757,7 +773,7 @@ services:
     volumes:
       - '/:/host:ro,rslave'
     ports:
-      - "127.0.0.1:9100:9100"
+      - '127.0.0.1:9100:9100'
     restart: unless-stopped
     networks:
       - monitoring
@@ -769,7 +785,7 @@ services:
       - loki-data:/loki
       - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
     ports:
-      - "127.0.0.1:3100:3100"
+      - '127.0.0.1:3100:3100'
     restart: unless-stopped
     networks:
       - monitoring
@@ -861,8 +877,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Container {{ $labels.job }} is down"
-          description: "Container {{ $labels.job }} has been down for more than 1 minute."
+          summary: 'Container {{ $labels.job }} is down'
+          description: 'Container {{ $labels.job }} has been down for more than 1 minute.'
 
       - alert: HighMemoryUsage
         expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) > 0.9
@@ -870,8 +886,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "High memory usage on {{ $labels.name }}"
-          description: "Container {{ $labels.name }} memory usage is above 90%."
+          summary: 'High memory usage on {{ $labels.name }}'
+          description: 'Container {{ $labels.name }} memory usage is above 90%.'
 
       - alert: HighCPUUsage
         expr: rate(container_cpu_usage_seconds_total[5m]) > 0.8
@@ -879,8 +895,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "High CPU usage on {{ $labels.name }}"
-          description: "Container {{ $labels.name }} CPU usage is above 80%."
+          summary: 'High CPU usage on {{ $labels.name }}'
+          description: 'Container {{ $labels.name }} CPU usage is above 80%.'
 
   - name: host
     interval: 30s
@@ -891,8 +907,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Host out of disk space"
-          description: "Disk space is below 10%."
+          summary: 'Host out of disk space'
+          description: 'Disk space is below 10%.'
 
       - alert: HostHighCPULoad
         expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
@@ -900,8 +916,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Host high CPU load"
-          description: "CPU load is > 80%."
+          summary: 'Host high CPU load'
+          description: 'CPU load is > 80%.'
 ```
 
 ### Hetzner-Specific Monitoring
@@ -926,6 +942,7 @@ scrape_configs:
 ```
 
 **Available Grafana Dashboards**:
+
 - **Hetzner Cloud Servers**: Dashboard ID 16169
 - **Hetzner Cloud Servers & Load Balancers**: Dashboard ID 20257
 
@@ -1131,6 +1148,7 @@ jobs:
 #### Option 2: Self-Hosted GitHub Runner on Hetzner
 
 **Benefits**:
+
 - 3-10x cheaper than GitHub-hosted runners
 - Faster builds with persistent caching
 - Full control over environment
@@ -1275,11 +1293,13 @@ Production (Large): CCX42 (€101/month)
 **Cost Savings**: 40% lower operational costs vs x86
 
 **Example**:
+
 - **CX21** (x86): 2 vCPU, 4GB RAM - €6/month
 - **CAX21** (ARM): 4 vCPU, 8GB RAM - ~€8/month
 - **Better**: More CPUs, more RAM, same price range
 
 **Requirements**:
+
 - ARM64-compatible Docker images
 - Test thoroughly before production migration
 
@@ -1322,6 +1342,7 @@ hcloud snapshot list -o json | \
 ```
 
 **Cost Impact**:
+
 - Volumes: €0.05/GB/month (even when detached)
 - Snapshots: €0.01/GB/month
 - Storage Box: €0.04/GB/month (cheaper for cold storage)
@@ -1332,6 +1353,7 @@ hcloud snapshot list -o json | \
 **Additional Traffic**: €1.19/TB
 
 **Optimization**:
+
 - Use private networks for inter-server communication (free)
 - Enable compression in Nginx/Traefik
 - Serve static assets from CDN (Cloudflare free)
@@ -1347,21 +1369,25 @@ gzip_types text/plain text/css text/xml application/json application/javascript;
 #### 5. Load Balancer Optimization
 
 **Pricing**:
+
 - Small LB (5K connections): €5.39/month
 - Large LB (40K connections): €15.49/month
 
 **When to Use**:
+
 - Multi-server setups only
 - For single server, use Nginx/Traefik directly (no LB cost)
 
 #### 6. Monitoring Costs
 
 **Self-Hosted** (Prometheus + Grafana):
+
 - Cost: ~€0/month (runs on same server)
 - Overhead: ~200MB RAM
 - No external service fees
 
 **External Monitoring** (Datadog, New Relic):
+
 - Cost: $20-50+/month per host
 - Only if specific features required
 
@@ -1430,6 +1456,7 @@ hcloud billing get-month $YEAR_MONTH | jq
 ```
 
 **Set Billing Alerts** (via Hetzner Console):
+
 - Alert at €50
 - Alert at €100
 - Alert at €150
@@ -1454,6 +1481,7 @@ hcloud billing get-month $YEAR_MONTH | jq
 ### When to Use Docker Swarm
 
 **Best For**:
+
 - Small to medium deployments (<50 nodes)
 - Teams familiar with Docker Compose
 - Quick setup requirements (<30 minutes to production)
@@ -1461,6 +1489,7 @@ hcloud billing get-month $YEAR_MONTH | jq
 - Projects prioritizing simplicity over features
 
 **Advantages**:
+
 - Native Docker integration (same CLI)
 - Easy migration from docker-compose
 - Lower learning curve
@@ -1491,6 +1520,7 @@ docker service update \
 ### When to Use Kubernetes (k3s)
 
 **Best For**:
+
 - Medium to large deployments (>20 nodes)
 - Complex microservices architectures
 - Need for advanced networking (service mesh)
@@ -1498,6 +1528,7 @@ docker service update \
 - Enterprise compliance requirements
 
 **Advantages on Hetzner**:
+
 - k3s optimized for Hetzner's cost structure
 - 40% lower costs vs MicroK8s
 - Production-grade availability
@@ -1505,29 +1536,31 @@ docker service update \
 - Better for multi-tenant applications
 
 **k3s Recommended** over full Kubernetes:
+
 - 50% less memory usage
 - Single binary installation
 - Hetzner-specific tooling available
 
 ### Quick Comparison
 
-| Factor | Docker Swarm | k3s on Hetzner |
-|--------|--------------|----------------|
-| **Setup Time** | 15 minutes | 30-60 minutes |
-| **Learning Curve** | Low | Medium |
-| **Resource Overhead** | Minimal (~100MB) | Low (~500MB) |
-| **Ecosystem** | Limited | Extensive |
-| **Cost (3 nodes)** | ~€21/month | ~€21/month |
-| **Operational Complexity** | Lower | Higher |
-| **Max Scale** | ~50 nodes | 1000+ nodes |
-| **Auto-Scaling** | Manual | HPA (Horizontal Pod Autoscaler) |
-| **Service Mesh** | No | Yes (Linkerd, Istio) |
+| Factor                     | Docker Swarm     | k3s on Hetzner                  |
+| -------------------------- | ---------------- | ------------------------------- |
+| **Setup Time**             | 15 minutes       | 30-60 minutes                   |
+| **Learning Curve**         | Low              | Medium                          |
+| **Resource Overhead**      | Minimal (~100MB) | Low (~500MB)                    |
+| **Ecosystem**              | Limited          | Extensive                       |
+| **Cost (3 nodes)**         | ~€21/month       | ~€21/month                      |
+| **Operational Complexity** | Lower            | Higher                          |
+| **Max Scale**              | ~50 nodes        | 1000+ nodes                     |
+| **Auto-Scaling**           | Manual           | HPA (Horizontal Pod Autoscaler) |
+| **Service Mesh**           | No               | Yes (Linkerd, Istio)            |
 
 ### Recommendation for Manacore Monorepo
 
 **Start with Docker Swarm**, then migrate to k3s if needed:
 
 **Rationale**:
+
 1. **Faster Time to Market**: 15-minute setup vs 1+ week for K8s
 2. **Lower Complexity**: Existing Docker Compose knowledge sufficient
 3. **Cost Effective**: Same infrastructure cost, lower ops overhead
@@ -1952,12 +1985,14 @@ This guide provides a comprehensive production deployment strategy for the Manac
 - **Maintainable**: Automated deployments and backups
 
 **Estimated Time to Production**:
+
 - Initial setup: 4-6 hours
 - Application deployment: 2-3 hours
 - Testing and hardening: 4-6 hours
 - **Total**: ~10-15 hours for complete production deployment
 
 **Monthly Operational Cost**:
+
 - Single server: €14-28/month
 - HA setup: €37-50/month
 - Full monorepo: €166/month
@@ -1965,6 +2000,7 @@ This guide provides a comprehensive production deployment strategy for the Manac
 ---
 
 **Related Documentation**:
+
 - `DOCKER_SETUP_ANALYSIS.md` - Current Docker setup analysis
 - `DOCKER_COMPOSE_PRODUCTION_ARCHITECTURE.md` - Architecture design
 - `DEPLOYMENT_HETZNER.md` - Deployment options comparison

@@ -64,7 +64,9 @@
 						/>
 					</svg>
 				{/snippet}
-				<span class="font-mono text-xs text-[hsl(var(--muted-foreground))]">{auth.user?.id || '-'}</span>
+				<span class="font-mono text-xs text-[hsl(var(--muted-foreground))]"
+					>{auth.user?.id || '-'}</span
+				>
 			</SettingsRow>
 		</SettingsCard>
 	</SettingsSection>
@@ -85,9 +87,7 @@
 		<SettingsCard>
 			<div class="px-5 py-4">
 				<p class="font-medium text-[hsl(var(--foreground))] mb-2">Theme</p>
-				<p class="text-sm text-[hsl(var(--muted-foreground))] mb-4">
-					Choose your preferred theme
-				</p>
+				<p class="text-sm text-[hsl(var(--muted-foreground))] mb-4">Choose your preferred theme</p>
 				<div class="grid grid-cols-3 gap-3">
 					<button
 						onclick={() => setThemeMode('light')}
@@ -96,7 +96,12 @@
 							? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.1)]'
 							: 'border-[hsl(var(--border))]'}"
 					>
-						<svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg
+							class="w-6 h-6 text-amber-500"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -113,7 +118,12 @@
 							? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.1)]'
 							: 'border-[hsl(var(--border))]'}"
 					>
-						<svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg
+							class="w-6 h-6 text-indigo-500"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -130,7 +140,12 @@
 							? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.1)]'
 							: 'border-[hsl(var(--border))]'}"
 					>
-						<svg class="w-6 h-6 text-[hsl(var(--muted-foreground))]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg
+							class="w-6 h-6 text-[hsl(var(--muted-foreground))]"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"

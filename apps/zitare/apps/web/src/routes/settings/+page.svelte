@@ -139,7 +139,9 @@
 						/>
 					</svg>
 				{/snippet}
-				<span class="px-3 py-1.5 text-sm font-medium bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] rounded-lg">
+				<span
+					class="px-3 py-1.5 text-sm font-medium bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] rounded-lg"
+				>
 					Themes wählen
 				</span>
 			</SettingsRow>

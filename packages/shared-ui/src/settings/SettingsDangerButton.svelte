@@ -33,7 +33,9 @@
 </script>
 
 <div
-	class="settings-danger-button {border ? 'settings-danger-button--border' : ''} {disabled ? 'settings-danger-button--disabled' : ''} {className}"
+	class="settings-danger-button {border ? 'settings-danger-button--border' : ''} {disabled
+		? 'settings-danger-button--disabled'
+		: ''} {className}"
 >
 	<div class="settings-danger-button__content">
 		{#if icon}
@@ -49,12 +51,7 @@
 		</div>
 	</div>
 
-	<button
-		type="button"
-		{onclick}
-		class="settings-danger-button__button"
-		{disabled}
-	>
+	<button type="button" {onclick} class="settings-danger-button__button" {disabled}>
 		{buttonText || label}
 	</button>
 </div>

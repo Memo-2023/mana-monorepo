@@ -12,7 +12,9 @@
 Choose the document that best fits your needs:
 
 ### I need quick answers
+
 → **AUTH_QUICK_REFERENCE.md** (6.4 KB)
+
 - Essential endpoints table
 - Common curl commands
 - Guard patterns
@@ -21,7 +23,9 @@ Choose the document that best fits your needs:
 - 5-minute read
 
 ### I'm implementing auth in a new backend
+
 → **AUTH_VALIDATION_CHECKLIST.md** (11 KB)
+
 - Pre-integration checklist
 - Implementation steps
 - Testing procedures
@@ -30,7 +34,9 @@ Choose the document that best fits your needs:
 - Use for approval
 
 ### I need comprehensive details
+
 → **AUTH_ARCHITECTURE_REPORT.md** (24 KB)
+
 - Complete 15-section guide
 - API routes documented
 - JWT format explained
@@ -41,7 +47,9 @@ Choose the document that best fits your needs:
 - Use as reference
 
 ### I need executive summary
+
 → **AUTH_ANALYSIS_SUMMARY.md** (11 KB)
+
 - Key findings
 - Architecture decisions
 - Validation results
@@ -53,14 +61,14 @@ Choose the document that best fits your needs:
 
 ## Document Comparison
 
-| Aspect | Quick Ref | Checklist | Report | Summary |
-|--------|-----------|-----------|--------|---------|
-| **Audience** | Developers | Implementers | Architects | Managers |
-| **Length** | Short | Medium | Comprehensive | Medium |
-| **Details** | Minimal | Practical | Complete | Strategic |
-| **Use Case** | Daily lookup | Integration | Reference | Overview |
-| **Sign-off** | N/A | Yes | N/A | N/A |
-| **Code Examples** | Many | Some | Complete | Few |
+| Aspect            | Quick Ref    | Checklist    | Report        | Summary   |
+| ----------------- | ------------ | ------------ | ------------- | --------- |
+| **Audience**      | Developers   | Implementers | Architects    | Managers  |
+| **Length**        | Short        | Medium       | Comprehensive | Medium    |
+| **Details**       | Minimal      | Practical    | Complete      | Strategic |
+| **Use Case**      | Daily lookup | Integration  | Reference     | Overview  |
+| **Sign-off**      | N/A          | Yes          | N/A           | N/A       |
+| **Code Examples** | Many         | Some         | Complete      | Few       |
 
 ---
 
@@ -69,6 +77,7 @@ Choose the document that best fits your needs:
 ### Core Concepts
 
 **Covered in:**
+
 - **Service Architecture** → Report (Section 1)
 - **JWT Algorithm** → Report (Section 2), Summary (Finding 2)
 - **Token Claims** → Report (Section 2), Quick Ref (Token Structure)
@@ -77,6 +86,7 @@ Choose the document that best fits your needs:
 ### Implementation
 
 **Covered in:**
+
 - **Backend Setup** → Checklist (Implementation), Report (Section 9)
 - **Guard Usage** → Quick Ref (Guard Patterns), Report (Section 4)
 - **Decorator Patterns** → Report (Section 4), Checklist (Guard Setup)
@@ -85,6 +95,7 @@ Choose the document that best fits your needs:
 ### Testing & Validation
 
 **Covered in:**
+
 - **Manual Testing** → Checklist (Testing section), Quick Ref (Requests)
 - **Dev Bypass** → Quick Ref (Development Bypass), Checklist (Testing)
 - **Integration Testing** → Checklist (Integration Testing)
@@ -93,6 +104,7 @@ Choose the document that best fits your needs:
 ### Security & Operations
 
 **Covered in:**
+
 - **Security** → Report (Section 13), Summary (Risk Assessment)
 - **Environment Config** → Report (Section 6), Checklist (Env Variables)
 - **Troubleshooting** → Report (Section 10), Quick Ref (Troubleshooting)
@@ -103,26 +115,31 @@ Choose the document that best fits your needs:
 ## Implementation Workflow
 
 ### Step 1: Review Architecture (30 min)
+
 1. Start with **AUTH_QUICK_REFERENCE.md** - understand basics
 2. Read **AUTH_ANALYSIS_SUMMARY.md** - understand decisions
 3. Skim **AUTH_ARCHITECTURE_REPORT.md** sections 1-4
 
 ### Step 2: Plan Integration (15 min)
+
 1. Read **AUTH_VALIDATION_CHECKLIST.md** Pre-Integration section
 2. Determine integration path (A or B)
 3. Set up environment variables
 
 ### Step 3: Implement (2-3 hours)
+
 1. Reference **AUTH_ARCHITECTURE_REPORT.md** Section 9
 2. Follow **AUTH_VALIDATION_CHECKLIST.md** Implementation section
 3. Use code examples from Quick Reference
 
 ### Step 4: Test (1-2 hours)
+
 1. Follow **AUTH_VALIDATION_CHECKLIST.md** Testing section
 2. Use curl commands from Quick Reference
 3. Verify development bypass works
 
 ### Step 5: Validate (30 min)
+
 1. Complete **AUTH_VALIDATION_CHECKLIST.md** all sections
 2. Get code review approval
 3. Sign off checklist
@@ -132,6 +149,7 @@ Choose the document that best fits your needs:
 ## File Locations in Monorepo
 
 ### Documentation (At Monorepo Root)
+
 ```
 /
 ├── AUTH_DOCUMENTATION_INDEX.md (this file)
@@ -142,6 +160,7 @@ Choose the document that best fits your needs:
 ```
 
 ### Source Code (Analyzed)
+
 ```
 services/mana-core-auth/
 ├── src/auth/
@@ -163,6 +182,7 @@ packages/
 ## Key Findings Summary
 
 ### Central Service
+
 - **Name:** mana-core-auth
 - **Port:** 3001
 - **Framework:** NestJS + Better Auth
@@ -170,11 +190,13 @@ packages/
 - **Database:** PostgreSQL with Drizzle
 
 ### Integration Patterns
+
 - **Path A:** `@manacore/shared-nestjs-auth` (lightweight)
 - **Path B:** `@mana-core/nestjs-integration` (with credits)
 - **Pattern:** Centralized validation via `/api/v1/auth/validate`
 
 ### Canonical Design
+
 - **JWT Claims:** Minimal (sub, email, role, sid only)
 - **Token Expiry:** 15 minutes (access), 7 days (refresh)
 - **Rotation:** Refresh token rotation + soft delete
@@ -182,6 +204,7 @@ packages/
 - **Injection:** Use `@CurrentUser()` decorator
 
 ### Environment Setup
+
 ```env
 # Required
 MANA_CORE_AUTH_URL=http://localhost:3001
@@ -251,6 +274,7 @@ See **AUTH_ARCHITECTURE_REPORT.md** Section 10 for troubleshooting guide.
 ## Testing Quick Commands
 
 ### Get Token
+
 ```bash
 curl -X POST http://localhost:3001/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -258,12 +282,14 @@ curl -X POST http://localhost:3001/api/v1/auth/login \
 ```
 
 ### Test Protected Endpoint
+
 ```bash
 curl http://localhost:3007/api/favorites \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 ### Validate Token
+
 ```bash
 curl -X POST http://localhost:3001/api/v1/auth/validate \
   -H "Content-Type: application/json" \
@@ -271,6 +297,7 @@ curl -X POST http://localhost:3001/api/v1/auth/validate \
 ```
 
 ### Decode Token
+
 ```bash
 echo $TOKEN | cut -d'.' -f2 | base64 -d | jq '.'
 ```
@@ -299,17 +326,20 @@ More commands in **AUTH_QUICK_REFERENCE.md**.
 ## Support & Resources
 
 ### Documents in This Analysis
+
 - **Getting started?** → AUTH_QUICK_REFERENCE.md
 - **Implementing?** → AUTH_VALIDATION_CHECKLIST.md
 - **Deep dive?** → AUTH_ARCHITECTURE_REPORT.md
 - **Executive brief?** → AUTH_ANALYSIS_SUMMARY.md
 
 ### External Resources
+
 - **Better Auth Docs:** https://www.better-auth.com/docs
 - **JWT.io:** https://jwt.io (decoder)
 - **EdDSA:** https://en.wikipedia.org/wiki/EdDSA
 
 ### Project Resources
+
 - **Source code:** services/mana-core-auth/
 - **Project guide:** services/mana-core-auth/CLAUDE.md
 - **Example backend:** apps/zitare/apps/backend/
@@ -323,12 +353,14 @@ More commands in **AUTH_QUICK_REFERENCE.md**.
 **Version:** 1.0
 
 ### When to Update
+
 - Architecture changes
 - New integration patterns discovered
 - Breaking changes to API
 - Security updates
 
 ### Update Process
+
 1. Update AUTH_ARCHITECTURE_REPORT.md (source of truth)
 2. Update AUTH_VALIDATION_CHECKLIST.md if implementation changes
 3. Update AUTH_QUICK_REFERENCE.md if commands change
@@ -344,6 +376,7 @@ More commands in **AUTH_QUICK_REFERENCE.md**.
 **Status:** APPROVED FOR PRODUCTION USE
 
 **Next Steps:**
+
 1. Share documents with development team
 2. Reference in PR review process
 3. Use checklist for new backend integrations
@@ -356,6 +389,7 @@ More commands in **AUTH_QUICK_REFERENCE.md**.
 ## Table of Contents (All Documents)
 
 ### AUTH_QUICK_REFERENCE.md
+
 1. Core Service
 2. Essential Endpoints
 3. Backend Integration
@@ -371,6 +405,7 @@ More commands in **AUTH_QUICK_REFERENCE.md**.
 13. Related Packages
 
 ### AUTH_VALIDATION_CHECKLIST.md
+
 1. Pre-Integration Checklist
 2. Implementation Checklist
 3. API Route Validation
@@ -384,6 +419,7 @@ More commands in **AUTH_QUICK_REFERENCE.md**.
 11. Sign-Off
 
 ### AUTH_ARCHITECTURE_REPORT.md
+
 1. Executive Summary
 2. API Route Structure & Versioning
 3. JWT Token Format & Structure
@@ -401,6 +437,7 @@ More commands in **AUTH_QUICK_REFERENCE.md**.
 15. References & Further Reading
 
 ### AUTH_ANALYSIS_SUMMARY.md
+
 1. Objective
 2. Key Findings
 3. Architecture Decisions (Validated)

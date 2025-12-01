@@ -12,10 +12,5 @@ export { default as ThemeGrid } from './components/ThemeGrid.svelte';
 export { default as ThemePage } from './pages/ThemePage.svelte';
 
 // Types
-export type {
-	ThemeStatus,
-	ThemeCardData,
-	ThemePageProps,
-	ThemePageTranslations,
-} from './types';
+export type { ThemeStatus, ThemeCardData, ThemePageProps, ThemePageTranslations } from './types';
 export { defaultTranslations } from './types';

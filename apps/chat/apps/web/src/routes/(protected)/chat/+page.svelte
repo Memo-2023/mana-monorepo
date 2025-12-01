@@ -148,7 +148,9 @@
 							</div>
 
 							<!-- Title -->
-							<h3 class="text-2xl font-semibold text-foreground mb-3">Worüber möchtest du reden?</h3>
+							<h3 class="text-2xl font-semibold text-foreground mb-3">
+								Worüber möchtest du reden?
+							</h3>
 							<p class="text-muted-foreground mb-8">
 								Stelle eine Frage, bitte um Hilfe bei einem Projekt oder starte einfach eine
 								Unterhaltung.

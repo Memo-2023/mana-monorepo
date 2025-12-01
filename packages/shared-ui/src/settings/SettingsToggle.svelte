@@ -39,7 +39,9 @@
 </script>
 
 <div
-	class="settings-toggle {border ? 'settings-toggle--border' : ''} {disabled ? 'settings-toggle--disabled' : ''} {className}"
+	class="settings-toggle {border ? 'settings-toggle--border' : ''} {disabled
+		? 'settings-toggle--disabled'
+		: ''} {className}"
 >
 	<div class="settings-toggle__content">
 		{#if icon}

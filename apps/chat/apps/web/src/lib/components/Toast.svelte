@@ -28,7 +28,9 @@
 		{#each toasts as toast (toast.id)}
 			{@const Icon = icons[toast.type]}
 			<div
-				class="flex items-start gap-3 px-4 py-3 rounded-xl shadow-lg backdrop-blur-xl border border-white/20 animate-slide-in {colors[toast.type]}"
+				class="flex items-start gap-3 px-4 py-3 rounded-xl shadow-lg backdrop-blur-xl border border-white/20 animate-slide-in {colors[
+					toast.type
+				]}"
 				role="alert"
 			>
 				<Icon size={20} weight="fill" class="flex-shrink-0 mt-0.5" />

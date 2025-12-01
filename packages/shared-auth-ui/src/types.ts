@@ -60,4 +60,3 @@ export interface AuthResult {
 	error?: string;
 	needsVerification?: boolean;
 }
-

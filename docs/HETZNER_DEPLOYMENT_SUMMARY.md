@@ -13,12 +13,14 @@ Your monorepo has **solid Docker foundations** but needs **4 critical fixes** (2
 ### Current State: ⚠️ Not Production Ready
 
 **What's Working**:
+
 - Multi-environment Docker Compose setups ✅
 - 4 containerized backends (auth, chat, picture, manadeck) ✅
 - Health checks and dependency management ✅
 - Security best practices (non-root, Alpine, network isolation) ✅
 
 **What Needs Fixing**:
+
 1. ❌ Missing Prometheus configuration (`docker/prometheus/prometheus.yml`)
 2. ❌ Missing Grafana provisioning (`docker/grafana/provisioning/`)
 3. ❌ ManaDeck uses Node 18 (should be Node 20)
@@ -113,6 +115,7 @@ echo "0 2 * * * /usr/local/bin/docker-backup.sh" | crontab -
 ### For Your Monorepo Size (10 backends, 10 web apps)
 
 **Option 1: Single Server (Development/Staging)** - €28/month
+
 ```
 Server: Hetzner CX33 (4 vCPU, 8GB RAM)
 - All services on one server
@@ -121,6 +124,7 @@ Server: Hetzner CX33 (4 vCPU, 8GB RAM)
 ```
 
 **Option 2: Production HA Setup** - €37/month
+
 ```
 2x Hetzner CPX21 (3 vCPU, 4GB RAM) - €14/month
 + Load Balancer - €5.39/month
@@ -129,6 +133,7 @@ Server: Hetzner CX33 (4 vCPU, 8GB RAM)
 ```
 
 **Option 3: Full Monorepo (All Services)** - €166/month
+
 ```
 3x App Servers (CX33) - €84/month
 1x DB Server (CX31) - €28/month
@@ -146,6 +151,7 @@ Savings: 60-75%
 ## Cost Breakdown: What You'll Pay Monthly
 
 ### Minimal Production (5 services)
+
 ```
 Server (CPX21):              €7.00/month
 Volume (50GB):               €2.50/month
@@ -155,6 +161,7 @@ Total:                      €13.81/month
 ```
 
 ### Your Current Setup (Full Monorepo)
+
 ```
 3x Servers (CX33):          €84.00/month
 1x Database Server:         €28.00/month
@@ -217,27 +224,32 @@ Traefik (SSL + Reverse Proxy)
 ## Key Files & Locations
 
 ### Documentation (Created Today)
+
 - `docs/DOCKER_SETUP_ANALYSIS.md` - Complete current state analysis
 - `docs/HETZNER_PRODUCTION_GUIDE.md` - Comprehensive deployment guide
 - `docs/HETZNER_DEPLOYMENT_SUMMARY.md` - This quick reference
 
 ### Existing Documentation
+
 - `docs/DEPLOYMENT_HETZNER.md` - Deployment options comparison (German)
 - `docs/DOCKER_GUIDE.md` - Docker usage guide
 - `docs/DEPLOYMENT_ARCHITECTURE.md` - Architecture details
 
 ### Docker Configuration Files
+
 - `docker-compose.yml` - Full stack with monitoring
 - `docker-compose.dev.yml` - Development environment
 - `docker-compose.staging.yml` - Staging deployment
 - `docker-compose.production.yml` - Production deployment
 
 ### Docker Templates
+
 - `docker/templates/Dockerfile.nestjs` - NestJS backend template
 - `docker/templates/Dockerfile.sveltekit` - SvelteKit web template
 - `docker/templates/Dockerfile.astro` - Astro landing page template
 
 ### Active Service Dockerfiles
+
 - `services/mana-core-auth/Dockerfile` ✅
 - `apps/chat/apps/backend/Dockerfile` ✅
 - `apps/picture/apps/backend/Dockerfile` ✅
@@ -277,19 +289,23 @@ Traefik (SSL + Reverse Proxy)
 ### What You Get
 
 **Metrics Collection**:
+
 - Prometheus - Time-series metrics database
 - cAdvisor - Container resource usage
 - Node Exporter - Host system metrics
 
 **Visualization**:
+
 - Grafana - Dashboards and alerts
 - Pre-built dashboards for Docker, PostgreSQL, Redis
 
 **Logging**:
+
 - Loki - Log aggregation
 - Promtail - Log collection from containers
 
 **Access**:
+
 - Grafana UI: `http://your-server:3000`
 - Prometheus UI: `http://your-server:9090`
 
@@ -524,30 +540,35 @@ curl http://localhost:3000/health
 ### How to Know You're Production Ready
 
 ✅ **Infrastructure**
+
 - [ ] Server accessible via SSH with key authentication
 - [ ] Docker and docker-compose installed and working
 - [ ] Firewall configured (Hetzner + UFW)
 - [ ] Private network configured (if multi-server)
 
 ✅ **Application**
+
 - [ ] All services start and pass health checks
 - [ ] Environment variables properly configured
 - [ ] SSL/TLS working (Let's Encrypt)
 - [ ] Database migrations run successfully
 
 ✅ **Monitoring**
+
 - [ ] Prometheus collecting metrics
 - [ ] Grafana dashboards accessible
 - [ ] Alerts configured and tested
 - [ ] Logs centralized in Loki
 
 ✅ **Backups**
+
 - [ ] Automated daily backups running
 - [ ] Storage Box configured
 - [ ] Restore procedure tested
 - [ ] Retention policy configured
 
 ✅ **CI/CD**
+
 - [ ] GitHub Actions workflow working
 - [ ] Automated deployments successful
 - [ ] Rollback procedure tested
@@ -581,12 +602,14 @@ curl http://localhost:3000/health
 ## Summary
 
 You have:
+
 - ✅ **Solid foundation** with multi-environment Docker setup
 - ✅ **4 containerized services** ready to deploy
 - ✅ **Complete documentation** for production deployment
 - ⚠️ **4 critical fixes** needed (2-4 hours of work)
 
 After fixes:
+
 - 🚀 **2-4 hours** to deploy to Hetzner
 - 💰 **€14-166/month** depending on scale (60-75% cheaper than AWS)
 - 📊 **Complete monitoring** with Prometheus + Grafana

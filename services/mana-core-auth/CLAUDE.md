@@ -9,6 +9,7 @@ Mana Core Auth is the central authentication service for the Mana Universe ecosy
 ### 1. ALWAYS USE BETTER AUTH - NO EXCEPTIONS
 
 **DO NOT** implement custom authentication logic. Better Auth handles:
+
 - User registration and sign-in
 - JWT token generation (EdDSA algorithm)
 - JWT token verification (via JWKS)
@@ -19,13 +20,13 @@ Mana Core Auth is the central authentication service for the Mana Universe ecosy
 
 ### 2. JWT Rules
 
-| DO | DON'T |
-|----|-------|
-| Use `jose` library for JWT operations | Use `jsonwebtoken` library |
-| Use Better Auth's JWKS endpoint | Configure RSA keys in `.env` |
-| Use EdDSA algorithm (Better Auth default) | Use RS256 or HS256 |
-| Fetch JWKS from `/api/v1/auth/jwks` | Hardcode public keys |
-| Keep JWT claims minimal | Add credit_balance, org data to JWT |
+| DO                                        | DON'T                               |
+| ----------------------------------------- | ----------------------------------- |
+| Use `jose` library for JWT operations     | Use `jsonwebtoken` library          |
+| Use Better Auth's JWKS endpoint           | Configure RSA keys in `.env`        |
+| Use EdDSA algorithm (Better Auth default) | Use RS256 or HS256                  |
+| Fetch JWKS from `/api/v1/auth/jwks`       | Hardcode public keys                |
+| Keep JWT claims minimal                   | Add credit_balance, org data to JWT |
 
 ### 3. Before Making Auth Changes
 
@@ -100,12 +101,12 @@ services/mana-core-auth/
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/auth/better-auth.config.ts` | Better Auth configuration with JWT + Org plugins |
-| `src/auth/services/better-auth.service.ts` | Main auth service - ALL auth logic here |
-| `src/db/schema/auth.schema.ts` | User, session, account, jwks tables |
-| `docs/AUTHENTICATION_ARCHITECTURE.md` | Comprehensive auth documentation |
+| File                                       | Purpose                                          |
+| ------------------------------------------ | ------------------------------------------------ |
+| `src/auth/better-auth.config.ts`           | Better Auth configuration with JWT + Org plugins |
+| `src/auth/services/better-auth.service.ts` | Main auth service - ALL auth logic here          |
+| `src/db/schema/auth.schema.ts`             | User, session, account, jwks tables              |
+| `docs/AUTHENTICATION_ARCHITECTURE.md`      | Comprehensive auth documentation                 |
 
 ## Environment Variables
 
@@ -136,6 +137,7 @@ Other services call `POST /api/v1/auth/validate` with the JWT. The validation us
 ### Adding JWT claims
 
 **DON'T** add dynamic data to JWT claims. Keep them minimal:
+
 - `sub` (user ID)
 - `email`
 - `role`

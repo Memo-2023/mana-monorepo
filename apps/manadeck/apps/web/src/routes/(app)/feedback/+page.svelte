@@ -4,8 +4,4 @@
 	import { authStore } from '$lib/stores/authStore.svelte';
 </script>
 
-<FeedbackPage
-	{feedbackService}
-	appName="ManaDeck"
-	currentUserId={authStore.user?.id}
-/>
+<FeedbackPage {feedbackService} appName="ManaDeck" currentUserId={authStore.user?.id} />

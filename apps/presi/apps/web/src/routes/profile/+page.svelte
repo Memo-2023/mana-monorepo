@@ -110,9 +110,7 @@
 								class="flex items-center justify-between p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
 							>
 								<div class="flex items-center gap-3">
-									<div
-										class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center"
-									>
+									<div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
 										<FolderOpen class="w-5 h-5 text-primary" />
 									</div>
 									<div>

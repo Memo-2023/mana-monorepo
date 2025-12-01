@@ -5,13 +5,13 @@ import { GameSubmissionModule } from './game-submission/game-submission.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    HealthModule,
-    GameGeneratorModule,
-    GameSubmissionModule,
-  ],
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+		}),
+		HealthModule,
+		GameGeneratorModule,
+		GameSubmissionModule,
+	],
 })
 export class AppModule {}

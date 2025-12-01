@@ -165,9 +165,7 @@ describe('Credit Flow Integration Tests', () => {
 			// Balance should be unchanged
 			const balanceAfterSecond = await creditsService.getBalance(userId);
 
-			expect(balanceAfterSecond.freeCreditsRemaining).toBe(
-				balanceAfterFirst.freeCreditsRemaining
-			);
+			expect(balanceAfterSecond.freeCreditsRemaining).toBe(balanceAfterFirst.freeCreditsRemaining);
 			expect(balanceAfterSecond.totalSpent).toBe(balanceAfterFirst.totalSpent);
 		});
 
@@ -447,9 +445,7 @@ describe('Credit Flow Integration Tests', () => {
 			// Balance should be unchanged
 			const balanceAfterError = await creditsService.getBalance(userId);
 
-			expect(balanceAfterError.freeCreditsRemaining).toBe(
-				initialBalance.freeCreditsRemaining
-			);
+			expect(balanceAfterError.freeCreditsRemaining).toBe(initialBalance.freeCreditsRemaining);
 			expect(balanceAfterError.balance).toBe(initialBalance.balance);
 			expect(balanceAfterError.totalSpent).toBe(initialBalance.totalSpent);
 		});

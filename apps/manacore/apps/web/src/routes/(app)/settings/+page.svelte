@@ -57,7 +57,9 @@
 
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
-			<div class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+			<div
+				class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+			></div>
 		</div>
 	{:else}
 		<div class="space-y-6">
@@ -65,7 +67,9 @@
 			<Card>
 				<div class="p-6">
 					<div class="flex items-center gap-3 mb-6">
-						<div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+						<div
+							class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary"
+						>
 							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									stroke-linecap="round"
@@ -82,13 +86,17 @@
 					</div>
 
 					{#if profileSuccess}
-						<div class="mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+						<div
+							class="mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400"
+						>
 							Profil erfolgreich aktualisiert!
 						</div>
 					{/if}
 
 					{#if profileError}
-						<div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+						<div
+							class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400"
+						>
 							{profileError}
 						</div>
 					{/if}
@@ -109,30 +117,16 @@
 						<div class="grid gap-4 sm:grid-cols-2">
 							<div>
 								<label for="firstName" class="mb-2 block text-sm font-medium">Vorname</label>
-								<Input
-									type="text"
-									id="firstName"
-									bind:value={firstName}
-									placeholder="Max"
-								/>
+								<Input type="text" id="firstName" bind:value={firstName} placeholder="Max" />
 							</div>
 
 							<div>
 								<label for="lastName" class="mb-2 block text-sm font-medium">Nachname</label>
-								<Input
-									type="text"
-									id="lastName"
-									bind:value={lastName}
-									placeholder="Mustermann"
-								/>
+								<Input type="text" id="lastName" bind:value={lastName} placeholder="Mustermann" />
 							</div>
 						</div>
 
-						<Button
-							onclick={handleUpdateProfile}
-							loading={savingProfile}
-							class="w-full sm:w-auto"
-						>
+						<Button onclick={handleUpdateProfile} loading={savingProfile} class="w-full sm:w-auto">
 							{savingProfile ? 'Speichern...' : 'Änderungen speichern'}
 						</Button>
 					</div>
@@ -144,7 +138,9 @@
 				<div class="p-6">
 					<div class="flex items-center justify-between mb-6">
 						<div class="flex items-center gap-3">
-							<div class="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400">
+							<div
+								class="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400"
+							>
 								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path
 										stroke-linecap="round"
@@ -172,7 +168,9 @@
 						<div class="rounded-lg bg-surface-hover p-4 text-center">
 							<p class="text-sm text-muted-foreground">Gratis heute</p>
 							<p class="text-2xl font-bold text-green-600 dark:text-green-400">
-								{creditBalance ? `${creditBalance.freeCreditsRemaining}/${creditBalance.dailyFreeCredits}` : '...'}
+								{creditBalance
+									? `${creditBalance.freeCreditsRemaining}/${creditBalance.dailyFreeCredits}`
+									: '...'}
 							</p>
 						</div>
 						<div class="rounded-lg bg-surface-hover p-4 text-center">
@@ -204,7 +202,9 @@
 			<Card>
 				<div class="p-6">
 					<div class="flex items-center gap-3 mb-6">
-						<div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+						<div
+							class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+						>
 							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									stroke-linecap="round"
@@ -226,7 +226,9 @@
 								<p class="font-medium">Konto-Status</p>
 								<p class="text-sm text-muted-foreground">Dein aktueller Kontostatus</p>
 							</div>
-							<span class="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400">
+							<span
+								class="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400"
+							>
 								Aktiv
 							</span>
 						</div>
@@ -236,7 +238,9 @@
 								<p class="font-medium">Rolle</p>
 								<p class="text-sm text-muted-foreground">Deine Berechtigungsstufe</p>
 							</div>
-							<span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
+							<span
+								class="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+							>
 								{authStore.user?.role || 'user'}
 							</span>
 						</div>
@@ -258,7 +262,9 @@
 			<Card>
 				<div class="p-6 border-red-200 dark:border-red-800">
 					<div class="flex items-center gap-3 mb-6">
-						<div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400">
+						<div
+							class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+						>
 							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									stroke-linecap="round"
@@ -282,11 +288,7 @@
 									Das Löschen deines Kontos kann nicht rückgängig gemacht werden.
 								</p>
 							</div>
-							<Button
-								variant="destructive"
-								disabled
-								class="bg-red-600 hover:bg-red-700 text-white"
-							>
+							<Button variant="destructive" disabled class="bg-red-600 hover:bg-red-700 text-white">
 								Konto löschen
 							</Button>
 						</div>

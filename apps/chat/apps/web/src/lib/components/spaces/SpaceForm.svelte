@@ -50,9 +50,7 @@
 	>
 		<!-- Name -->
 		<div>
-			<label for="name" class="block text-sm font-medium text-foreground mb-1">
-				Name *
-			</label>
+			<label for="name" class="block text-sm font-medium text-foreground mb-1"> Name * </label>
 			<input
 				type="text"
 				id="name"
@@ -71,10 +69,7 @@
 
 		<!-- Description -->
 		<div>
-			<label
-				for="description"
-				class="block text-sm font-medium text-foreground mb-1"
-			>
+			<label for="description" class="block text-sm font-medium text-foreground mb-1">
 				Beschreibung (optional)
 			</label>
 			<textarea

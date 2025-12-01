@@ -20,6 +20,7 @@
 ```
 
 Legend:
+
 - ✓ = Implemented/Present
 - ✗ = Missing/Not implemented
 - ? = Not analyzed in this audit
@@ -63,19 +64,20 @@ Legend:
 ```
 
 Current hardcoded CORS allowed origins (should be environment variable):
+
 ```javascript
 // In 4 backends
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173',    // Primary web dev port
-  'http://localhost:5174',    // Secondary web port
-  'http://localhost:5175',    // Tertiary web port
-  'http://localhost:5177',    // Zitare web
-  'http://localhost:5178',    // Chat web / Presi web
-  'http://localhost:8081',    // Expo dev server
-  'exp://localhost:8081',     // Expo protocol
-  'http://localhost:3001',    // Mana Core Auth
-]
+	'http://localhost:3000',
+	'http://localhost:5173', // Primary web dev port
+	'http://localhost:5174', // Secondary web port
+	'http://localhost:5175', // Tertiary web port
+	'http://localhost:5177', // Zitare web
+	'http://localhost:5178', // Chat web / Presi web
+	'http://localhost:8081', // Expo dev server
+	'exp://localhost:8081', // Expo protocol
+	'http://localhost:3001', // Mana Core Auth
+];
 ```
 
 ---
@@ -113,11 +115,11 @@ Port 3011 ━━━━━━━━ Mana Games (ACTIVE)
 MANA_CORE_AUTH_PORT (3001)
   ↓ (generate-env.mjs line 61)
   ├→ services/mana-core-auth/.env {PORT}
-  
+
 CHAT_BACKEND_PORT (3002)
   ↓ (generate-env.mjs line 89)
   ├→ apps/chat/apps/backend/.env {PORT}
-  
+
 MANA_CORE_AUTH_URL (http://localhost:3001)
   ↓ (generate-env.mjs multiple lines)
   ├→ apps/chat/apps/backend/.env {MANA_CORE_AUTH_URL}

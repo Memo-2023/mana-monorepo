@@ -26,7 +26,9 @@ import { randomBytes } from 'crypto';
 
 // Helper to generate random IDs (avoiding nanoid ESM issues in Jest)
 const generateId = (length: number = 16): string => {
-	return randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
+	return randomBytes(Math.ceil(length / 2))
+		.toString('hex')
+		.slice(0, length);
 };
 
 describe('B2B Organization Journey (E2E)', () => {

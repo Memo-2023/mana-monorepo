@@ -20,9 +20,7 @@
 
 <div
 	class="group relative flex rounded-xl overflow-hidden bg-surface shadow-sm hover:shadow-md transition-all
-         {template.isDefault
-		? 'ring-2 ring-primary'
-		: 'border border-border'}"
+         {template.isDefault ? 'ring-2 ring-primary' : 'border border-border'}"
 >
 	<!-- Color Indicator -->
 	<div class="w-2 flex-shrink-0" style="background-color: {template.color}"></div>
@@ -36,7 +34,9 @@
 						{template.name}
 					</h3>
 					{#if template.isDefault}
-						<span class="px-2 py-0.5 text-xs font-medium bg-primary text-primary-foreground rounded">
+						<span
+							class="px-2 py-0.5 text-xs font-medium bg-primary text-primary-foreground rounded"
+						>
 							Standard
 						</span>
 					{/if}

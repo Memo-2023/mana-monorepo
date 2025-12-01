@@ -1,4 +1,5 @@
 # Manacore Monorepo - Befehle
+
 # Alles starten (PostgreSQL, Redis, Auth, Chat)
 
 pnpm docker:up:all
@@ -9,8 +10,6 @@ pnpm dev:picture:app
 pnpm dev:manacore:app
 pnpm dev:zitare:app
 pnpm dev:presi:app
-
-
 
 Übersicht aller wichtigen Befehle zum Starten, Stoppen und Verwalten der Apps.
 
@@ -116,12 +115,12 @@ pnpm db:studio            # Drizzle Studio öffnen
 
 ## Chat
 
-| App | Port | Befehl |
-|-----|------|--------|
-| Web | 5174 | `pnpm dev:chat:web` |
+| App     | Port | Befehl                  |
+| ------- | ---- | ----------------------- |
+| Web     | 5174 | `pnpm dev:chat:web`     |
 | Backend | 3002 | `pnpm dev:chat:backend` |
-| Mobile | 8081 | `pnpm dev:chat:mobile` |
-| Landing | - | `pnpm dev:chat:landing` |
+| Mobile  | 8081 | `pnpm dev:chat:mobile`  |
+| Landing | -    | `pnpm dev:chat:landing` |
 
 ```bash
 # Web + Backend zusammen starten
@@ -135,12 +134,12 @@ pnpm chat:dev
 
 ## Picture
 
-| App | Port | Befehl |
-|-----|------|--------|
-| Web | 5173 | `pnpm dev:picture:web` |
-| Backend | - | `pnpm dev:picture:backend` |
-| Mobile | 8081 | `pnpm dev:picture:mobile` |
-| Landing | - | `pnpm dev:picture:landing` |
+| App     | Port | Befehl                     |
+| ------- | ---- | -------------------------- |
+| Web     | 5173 | `pnpm dev:picture:web`     |
+| Backend | -    | `pnpm dev:picture:backend` |
+| Mobile  | 8081 | `pnpm dev:picture:mobile`  |
+| Landing | -    | `pnpm dev:picture:landing` |
 
 ```bash
 # Web + Backend zusammen starten
@@ -154,12 +153,12 @@ pnpm picture:dev
 
 ## Manadeck
 
-| App | Port | Befehl |
-|-----|------|--------|
-| Web | - | `pnpm dev:manadeck:web` |
-| Backend | - | `pnpm dev:manadeck:backend` |
-| Mobile | 8081 | `pnpm dev:manadeck:mobile` |
-| Landing | - | `pnpm dev:manadeck:landing` |
+| App     | Port | Befehl                      |
+| ------- | ---- | --------------------------- |
+| Web     | -    | `pnpm dev:manadeck:web`     |
+| Backend | -    | `pnpm dev:manadeck:backend` |
+| Mobile  | 8081 | `pnpm dev:manadeck:mobile`  |
+| Landing | -    | `pnpm dev:manadeck:landing` |
 
 ```bash
 # Web + Backend zusammen starten
@@ -173,12 +172,12 @@ pnpm manadeck:dev
 
 ## Zitare
 
-| App | Port | Befehl |
-|-----|------|--------|
-| Web | - | `pnpm dev:zitare:web` |
-| Backend | - | `pnpm dev:zitare:backend` |
-| Mobile | 8081 | `pnpm dev:zitare:mobile` |
-| Landing | - | `pnpm dev:zitare:landing` |
+| App     | Port | Befehl                    |
+| ------- | ---- | ------------------------- |
+| Web     | -    | `pnpm dev:zitare:web`     |
+| Backend | -    | `pnpm dev:zitare:backend` |
+| Mobile  | 8081 | `pnpm dev:zitare:mobile`  |
+| Landing | -    | `pnpm dev:zitare:landing` |
 
 ```bash
 # Web + Backend zusammen starten
@@ -192,11 +191,11 @@ pnpm zitare:dev
 
 ## Presi
 
-| App | Port | Befehl |
-|-----|------|--------|
-| Web | - | `pnpm dev:presi:web` |
-| Backend | - | `pnpm dev:presi:backend` |
-| Mobile | 8081 | `pnpm dev:presi:mobile` |
+| App     | Port | Befehl                   |
+| ------- | ---- | ------------------------ |
+| Web     | -    | `pnpm dev:presi:web`     |
+| Backend | -    | `pnpm dev:presi:backend` |
+| Mobile  | 8081 | `pnpm dev:presi:mobile`  |
 
 ```bash
 # Web + Backend zusammen starten
@@ -215,11 +214,11 @@ pnpm presi:db:seed     # Seed-Daten
 
 ## Manacore
 
-| App | Port | Befehl |
-|-----|------|--------|
-| Web | - | `pnpm dev:manacore:web` |
-| Mobile | 8081 | `pnpm dev:manacore:mobile` |
-| Landing | - | `pnpm dev:manacore:landing` |
+| App     | Port | Befehl                      |
+| ------- | ---- | --------------------------- |
+| Web     | -    | `pnpm dev:manacore:web`     |
+| Mobile  | 8081 | `pnpm dev:manacore:mobile`  |
+| Landing | -    | `pnpm dev:manacore:landing` |
 
 ```bash
 # Alles

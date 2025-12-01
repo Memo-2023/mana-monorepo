@@ -341,7 +341,10 @@ describe('AuthController', () => {
 		it('should return invalid for expired token', async () => {
 			const body = { token: 'expired-token' };
 
-			betterAuthService.validateToken.mockResolvedValue({ valid: false, error: 'Token expired' } as any);
+			betterAuthService.validateToken.mockResolvedValue({
+				valid: false,
+				error: 'Token expired',
+			} as any);
 
 			const result = await controller.validate(body);
 
@@ -483,7 +486,11 @@ describe('AuthController', () => {
 	describe('POST /auth/organizations/:id/invite', () => {
 		it('should invite an employee to organization', async () => {
 			const orgId = 'org-123';
-			const inviteDto = { organizationId: orgId, employeeEmail: 'employee@acme.com', role: 'member' as const };
+			const inviteDto = {
+				organizationId: orgId,
+				employeeEmail: 'employee@acme.com',
+				role: 'member' as const,
+			};
 
 			const expectedResult = {
 				id: 'invitation-123',
@@ -508,7 +515,11 @@ describe('AuthController', () => {
 
 		it('should throw ForbiddenException when inviter lacks permission', async () => {
 			const orgId = 'org-123';
-			const inviteDto = { organizationId: orgId, employeeEmail: 'employee@acme.com', role: 'member' as const };
+			const inviteDto = {
+				organizationId: orgId,
+				employeeEmail: 'employee@acme.com',
+				role: 'member' as const,
+			};
 
 			betterAuthService.inviteEmployee.mockRejectedValue(
 				new ForbiddenException('You do not have permission to invite members')
@@ -585,9 +596,9 @@ describe('AuthController', () => {
 				new ForbiddenException('You do not have permission to remove members')
 			);
 
-			await expect(controller.removeMember('org-123', 'member-456', mockAuthHeader)).rejects.toThrow(
-				ForbiddenException
-			);
+			await expect(
+				controller.removeMember('org-123', 'member-456', mockAuthHeader)
+			).rejects.toThrow(ForbiddenException);
 		});
 	});
 

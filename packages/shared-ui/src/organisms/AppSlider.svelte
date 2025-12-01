@@ -113,7 +113,9 @@
 				>
 					<div
 						class="status-indicator"
-						style="background-color: {getStatusColor(app.status)}; box-shadow: 0 0 8px {getStatusColor(app.status)};"
+						style="background-color: {getStatusColor(
+							app.status
+						)}; box-shadow: 0 0 8px {getStatusColor(app.status)};"
 					></div>
 
 					<div class="app-icon-wrapper">
@@ -142,26 +144,29 @@
 		aria-modal="true"
 		tabindex="-1"
 	>
-		<button
-			onclick={closeModal}
-			class="modal-close-btn"
-			aria-label="Close modal"
-		>
-			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		<button onclick={closeModal} class="modal-close-btn" aria-label="Close modal">
+			<svg
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
 				<path d="M18 6L6 18M6 6l12 12" />
 			</svg>
 		</button>
 
-		<div
-			bind:this={modalScrollContainer}
-			class="modal-scroll-container scrollbar-hide"
-		>
+		<div bind:this={modalScrollContainer} class="modal-scroll-container scrollbar-hide">
 			<div class="modal-cards-wrapper">
 				{#each apps as app, index}
 					<div
 						class="modal-card"
 						class:active={selectedApp === index}
-						style="transform: perspective(1000px) rotateX({cardRotations[index]?.rotateX || 0}deg) rotateY({cardRotations[index]?.rotateY || 0}deg);"
+						style="transform: perspective(1000px) rotateX({cardRotations[index]?.rotateX ||
+							0}deg) rotateY({cardRotations[index]?.rotateY || 0}deg);"
 						onclick={(e) => {
 							e.stopPropagation();
 							selectedApp = index;
@@ -274,7 +279,9 @@
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		background-color: rgba(255, 255, 255, 0.06);
 		backdrop-filter: blur(10px);
-		transition: transform 0.2s ease, background-color 0.2s ease;
+		transition:
+			transform 0.2s ease,
+			background-color 0.2s ease;
 		/* Staggered entrance animation */
 		animation: fadeInUp 0.4s ease-out both;
 		animation-delay: calc(0.3s + var(--index) * 0.08s);
@@ -363,7 +370,8 @@
 	}
 
 	@keyframes pulse {
-		0%, 100% {
+		0%,
+		100% {
 			opacity: 1;
 		}
 		50% {
@@ -418,7 +426,9 @@
 		background-color: rgba(255, 255, 255, 0.1);
 		color: #fff;
 		cursor: pointer;
-		transition: background-color 0.2s, transform 0.2s;
+		transition:
+			background-color 0.2s,
+			transform 0.2s;
 	}
 
 	.modal-close-btn:hover {
@@ -455,7 +465,9 @@
 		background-color: rgba(255, 255, 255, 0.08);
 		backdrop-filter: blur(20px);
 		transform-style: preserve-3d;
-		transition: transform 0.1s ease-out, background-color 0.2s ease;
+		transition:
+			transform 0.1s ease-out,
+			background-color 0.2s ease;
 		animation: modalCardIn 0.3s ease-out both;
 	}
 
@@ -593,7 +605,9 @@
 		font-weight: 600;
 		border: 2px solid;
 		cursor: pointer;
-		transition: opacity 0.2s, transform 0.2s;
+		transition:
+			opacity 0.2s,
+			transform 0.2s;
 		color: #fff;
 	}
 
@@ -609,8 +623,12 @@
 	}
 
 	@keyframes fadeIn {
-		from { opacity: 0; }
-		to { opacity: 1; }
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
 	}
 
 	@keyframes modalCardIn {

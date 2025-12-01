@@ -83,9 +83,7 @@ export interface Template {
 }
 
 export type TemplateCreate = Omit<Template, 'id' | 'createdAt' | 'updatedAt'>;
-export type TemplateUpdate = Partial<
-	Omit<Template, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
->;
+export type TemplateUpdate = Partial<Omit<Template, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>;
 
 // Space Types
 export interface Space {

@@ -4,8 +4,4 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 </script>
 
-<FeedbackPage
-	{feedbackService}
-	appName="Zitare"
-	currentUserId={authStore.user?.id}
-/>
+<FeedbackPage {feedbackService} appName="Zitare" currentUserId={authStore.user?.id} />

@@ -81,9 +81,7 @@
 						d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
 					/>
 				</svg>
-				<h3 class="text-lg font-medium text-foreground mb-1">
-					Keine archivierten Konversationen
-				</h3>
+				<h3 class="text-lg font-medium text-foreground mb-1">Keine archivierten Konversationen</h3>
 				<p class="text-muted-foreground">Archivierte Gespräche erscheinen hier.</p>
 			</div>
 		{:else}
@@ -128,9 +126,7 @@
 						</button>
 
 						<!-- Actions -->
-						<div
-							class="flex justify-end gap-2 px-4 py-2 border-t border-border bg-muted/50"
-						>
+						<div class="flex justify-end gap-2 px-4 py-2 border-t border-border bg-muted/50">
 							<button
 								onclick={() => handleUnarchive(conv.id)}
 								class="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground

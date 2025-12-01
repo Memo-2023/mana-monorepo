@@ -120,7 +120,9 @@
 	);
 
 	// Effective dark mode based on user preference or system
-	let isDark = $derived(userThemePreference !== null ? userThemePreference === 'dark' : systemIsDark);
+	let isDark = $derived(
+		userThemePreference !== null ? userThemePreference === 'dark' : systemIsDark
+	);
 
 	$effect(() => {
 		if (typeof window !== 'undefined') {
@@ -293,10 +295,7 @@
 
 		<!-- Form Section -->
 		<div class="form-section">
-			<div
-				class="form-card"
-				class:shake={shakeError}
-			>
+			<div class="form-card" class:shake={shakeError}>
 				<div class="form-header">
 					<h2 class="form-title">{t.title}</h2>
 					<p class="form-subtitle">{t.subtitle}</p>
@@ -309,7 +308,13 @@
 					</div>
 				{/if}
 
-				<form onsubmit={(e) => { e.preventDefault(); handleLogin(); }} aria-busy={loading}>
+				<form
+					onsubmit={(e) => {
+						e.preventDefault();
+						handleLogin();
+					}}
+					aria-busy={loading}
+				>
 					<!-- Email -->
 					<div class="input-group">
 						<label for="email" class="sr-only">{t.emailPlaceholder}</label>
@@ -366,7 +371,12 @@
 							<input type="checkbox" bind:checked={rememberMe} style:accent-color={primaryColor} />
 							<span>{t.rememberMe}</span>
 						</label>
-						<button type="button" onclick={() => goto(forgotPasswordPath)} class="forgot-link" style:color={primaryColor}>
+						<button
+							type="button"
+							onclick={() => goto(forgotPasswordPath)}
+							class="forgot-link"
+							style:color={primaryColor}
+						>
 							{t.forgotPassword}
 						</button>
 					</div>
@@ -380,7 +390,13 @@
 						style:border-color={showSuccess ? '#22c55e' : primaryColor}
 					>
 						{#if loading}
-							<svg class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<svg
+								class="spinner"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
 								<circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
 								<path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
 							</svg>
@@ -624,7 +640,9 @@
 		border: 1px solid;
 		border-radius: 0.75rem;
 		font-size: 1rem;
-		transition: border-color 0.2s, box-shadow 0.2s;
+		transition:
+			border-color 0.2s,
+			box-shadow 0.2s;
 		/* Dark mode default */
 		background-color: rgba(0, 0, 0, 0.2);
 		border-color: rgba(255, 255, 255, 0.2);
@@ -698,7 +716,7 @@
 		color: rgba(0, 0, 0, 0.7);
 	}
 
-	.remember-label input[type="checkbox"] {
+	.remember-label input[type='checkbox'] {
 		width: 1.125rem;
 		height: 1.125rem;
 		cursor: pointer;
@@ -711,8 +729,8 @@
 		place-content: center;
 	}
 
-	.remember-label input[type="checkbox"]::before {
-		content: "";
+	.remember-label input[type='checkbox']::before {
+		content: '';
 		width: 0.65rem;
 		height: 0.65rem;
 		transform: scale(0);
@@ -721,15 +739,15 @@
 		clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
 	}
 
-	.remember-label input[type="checkbox"]:checked {
+	.remember-label input[type='checkbox']:checked {
 		border-color: var(--primary-color, #fff);
 	}
 
-	.remember-label input[type="checkbox"]:checked::before {
+	.remember-label input[type='checkbox']:checked::before {
 		transform: scale(1);
 	}
 
-	.light .remember-label input[type="checkbox"] {
+	.light .remember-label input[type='checkbox'] {
 		border-color: rgba(0, 0, 0, 0.3);
 	}
 
@@ -857,8 +875,12 @@
 	}
 
 	@keyframes fadeIn {
-		from { opacity: 0; }
-		to { opacity: 1; }
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
 	}
 
 	.logo-section {
@@ -875,9 +897,23 @@
 
 	/* Interactive Animations */
 	@keyframes shake {
-		0%, 100% { transform: translateX(0); }
-		10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-		20%, 40%, 60%, 80% { transform: translateX(4px); }
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		10%,
+		30%,
+		50%,
+		70%,
+		90% {
+			transform: translateX(-4px);
+		}
+		20%,
+		40%,
+		60%,
+		80% {
+			transform: translateX(4px);
+		}
 	}
 
 	.shake {
@@ -885,7 +921,9 @@
 	}
 
 	@keyframes spin {
-		to { transform: rotate(360deg); }
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	.spinner {
@@ -895,8 +933,13 @@
 	}
 
 	@keyframes success-pulse {
-		0%, 100% { transform: scale(1); }
-		50% { transform: scale(1.05); }
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.05);
+		}
 	}
 
 	.success-pulse {

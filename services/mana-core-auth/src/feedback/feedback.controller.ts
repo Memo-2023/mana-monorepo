@@ -41,10 +41,7 @@ export class FeedbackController {
 
 	@Get('my')
 	@UseGuards(JwtAuthGuard)
-	async getMyFeedback(
-		@CurrentUser() user: CurrentUserData,
-		@Query('appId') appId?: string
-	) {
+	async getMyFeedback(@CurrentUser() user: CurrentUserData, @Query('appId') appId?: string) {
 		return this.feedbackService.getMyFeedback(user.userId, appId);
 	}
 

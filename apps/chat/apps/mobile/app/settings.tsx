@@ -134,8 +134,7 @@ export default function SettingsScreen() {
 									style={[
 										styles.themeOption,
 										{
-											borderColor:
-												selectedTheme === theme.id ? colors.primary : colors.border,
+											borderColor: selectedTheme === theme.id ? colors.primary : colors.border,
 											backgroundColor:
 												selectedTheme === theme.id ? colors.primary + '10' : 'transparent',
 										},
@@ -272,9 +271,7 @@ export default function SettingsScreen() {
 								style={styles.settingIcon}
 							/>
 							<View>
-								<Text style={[styles.settingLabel, { color: colors.text }]}>
-									Passwort ändern
-								</Text>
+								<Text style={[styles.settingLabel, { color: colors.text }]}>Passwort ändern</Text>
 								<Text style={[styles.settingDescription, { color: colors.text + '70' }]}>
 									Aktualisiere dein Passwort regelmäßig
 								</Text>
@@ -285,12 +282,7 @@ export default function SettingsScreen() {
 
 					<TouchableOpacity style={styles.actionRowLast} onPress={handleDeleteChatHistory}>
 						<View style={styles.settingInfo}>
-							<Ionicons
-								name="trash-outline"
-								size={22}
-								color="#FF3B30"
-								style={styles.settingIcon}
-							/>
+							<Ionicons name="trash-outline" size={22} color="#FF3B30" style={styles.settingIcon} />
 							<View>
 								<Text style={[styles.settingLabel, { color: '#FF3B30' }]}>
 									Chat-Verlauf löschen

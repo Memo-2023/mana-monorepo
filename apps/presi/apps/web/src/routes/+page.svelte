@@ -61,11 +61,7 @@
 </svelte:head>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-	<PageHeader
-		title="My Presentations"
-		description="Create and manage your slide decks"
-		size="lg"
-	>
+	<PageHeader title="My Presentations" description="Create and manage your slide decks" size="lg">
 		{#snippet actions()}
 			<button
 				onclick={() => (showCreateModal = true)}

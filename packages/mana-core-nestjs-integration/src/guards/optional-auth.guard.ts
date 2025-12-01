@@ -1,10 +1,4 @@
-import {
-	Injectable,
-	CanActivate,
-	ExecutionContext,
-	Inject,
-	Optional,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Inject, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MANA_CORE_OPTIONS } from '../mana-core.module';
 import { ManaCoreModuleOptions } from '../interfaces/mana-core-options.interface';

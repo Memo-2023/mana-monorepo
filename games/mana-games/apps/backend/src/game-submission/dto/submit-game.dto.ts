@@ -2,71 +2,71 @@ import { IsString, IsArray, IsOptional, IsObject, ValidateNested, IsIn } from 'c
 import { Type } from 'class-transformer';
 
 class AuthorDto {
-  @IsString()
-  name: string;
+	@IsString()
+	name: string;
 
-  @IsOptional()
-  @IsString()
-  email?: string;
+	@IsOptional()
+	@IsString()
+	email?: string;
 
-  @IsOptional()
-  @IsString()
-  github?: string;
+	@IsOptional()
+	@IsString()
+	github?: string;
 }
 
 class FileDto {
-  @IsString()
-  name: string;
+	@IsString()
+	name: string;
 
-  @IsString()
-  content: string;
+	@IsString()
+	content: string;
 }
 
 class FilesDto {
-  @ValidateNested()
-  @Type(() => FileDto)
-  html: FileDto;
+	@ValidateNested()
+	@Type(() => FileDto)
+	html: FileDto;
 
-  @ValidateNested()
-  @Type(() => FileDto)
-  screenshot: FileDto;
+	@ValidateNested()
+	@Type(() => FileDto)
+	screenshot: FileDto;
 }
 
 export class SubmitGameDto {
-  @IsString()
-  title: string;
+	@IsString()
+	title: string;
 
-  @IsString()
-  description: string;
+	@IsString()
+	description: string;
 
-  @IsString()
-  controls: string;
+	@IsString()
+	controls: string;
 
-  @IsIn(['Einfach', 'Mittel', 'Schwer'])
-  difficulty: string;
+	@IsIn(['Einfach', 'Mittel', 'Schwer'])
+	difficulty: string;
 
-  @IsIn(['Minimal', 'Einfach', 'Mittel', 'Komplex'])
-  complexity: string;
+	@IsIn(['Minimal', 'Einfach', 'Mittel', 'Komplex'])
+	complexity: string;
 
-  @IsArray()
-  @IsString({ each: true })
-  tags: string[];
+	@IsArray()
+	@IsString({ each: true })
+	tags: string[];
 
-  @ValidateNested()
-  @Type(() => AuthorDto)
-  author: AuthorDto;
+	@ValidateNested()
+	@Type(() => AuthorDto)
+	author: AuthorDto;
 
-  @ValidateNested()
-  @Type(() => FilesDto)
-  files: FilesDto;
+	@ValidateNested()
+	@Type(() => FilesDto)
+	files: FilesDto;
 
-  @IsString()
-  submittedAt: string;
+	@IsString()
+	submittedAt: string;
 }
 
 export class SubmitGameResponseDto {
-  success: boolean;
-  message: string;
-  prUrl: string;
-  prNumber: number;
+	success: boolean;
+	message: string;
+	prUrl: string;
+	prNumber: number;
 }

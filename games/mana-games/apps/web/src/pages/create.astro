@@ -3,909 +3,972 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Spiel erstellen - ManaGames" fullWidth={true} hideFooter={true}>
-  <div class="create-page">
-    <div class="split-container">
-      <!-- Left Side: Generator Form & Editor -->
-      <div class="left-panel">
-        <!-- Generator Form -->
-        <div id="generatorSection" class="generator-section">
-          <div class="page-header">
-            <h1>KI Spiel Generator</h1>
-            <p class="subtitle">Beschreibe dein Traumspiel und die KI erstellt es für dich</p>
-          </div>
+	<div class="create-page">
+		<div class="split-container">
+			<!-- Left Side: Generator Form & Editor -->
+			<div class="left-panel">
+				<!-- Generator Form -->
+				<div id="generatorSection" class="generator-section">
+					<div class="page-header">
+						<h1>KI Spiel Generator</h1>
+						<p class="subtitle">Beschreibe dein Traumspiel und die KI erstellt es für dich</p>
+					</div>
 
-          <div class="form-card">
-            <div class="form-content">
-              <!-- Game Description Textarea -->
-              <div class="form-group">
-                <label class="form-label" id="formLabel">Was für ein Spiel möchtest du?</label>
-                <textarea 
-                  id="gameDescription" 
-                  placeholder="Beispiel: Ein einfaches Weltraum-Shooter Spiel wo ich mit einem Raumschiff Asteroiden ausweichen muss. Das Spiel sollte immer schneller werden und Punkte für überlebte Zeit geben."
-                  class="form-textarea"
-                  rows="6"
-                ></textarea>
-                <div class="form-hints" id="formHints">
-                  <p class="hint-title">💡 Tipps für gute Beschreibungen:</p>
-                  <ul class="hint-list">
-                    <li>Beschreibe das Spielziel (z.B. "Sammle Münzen", "Weiche Hindernissen aus")</li>
-                    <li>Nenne das Setting/Thema (z.B. "im Weltraum", "Unterwasser", "Retro-Arcade")</li>
-                    <li>Erwähne gewünschte Mechaniken (z.B. "mit Maus steuern", "Power-ups sammeln")</li>
-                    <li>Halte es einfach - komplexe Spiele brauchen länger</li>
-                  </ul>
-                </div>
-              </div>
+					<div class="form-card">
+						<div class="form-content">
+							<!-- Game Description Textarea -->
+							<div class="form-group">
+								<label class="form-label" id="formLabel">Was für ein Spiel möchtest du?</label>
+								<textarea
+									id="gameDescription"
+									placeholder="Beispiel: Ein einfaches Weltraum-Shooter Spiel wo ich mit einem Raumschiff Asteroiden ausweichen muss. Das Spiel sollte immer schneller werden und Punkte für überlebte Zeit geben."
+									class="form-textarea"
+									rows="6"></textarea>
+								<div class="form-hints" id="formHints">
+									<p class="hint-title">💡 Tipps für gute Beschreibungen:</p>
+									<ul class="hint-list">
+										<li>
+											Beschreibe das Spielziel (z.B. "Sammle Münzen", "Weiche Hindernissen aus")
+										</li>
+										<li>
+											Nenne das Setting/Thema (z.B. "im Weltraum", "Unterwasser", "Retro-Arcade")
+										</li>
+										<li>
+											Erwähne gewünschte Mechaniken (z.B. "mit Maus steuern", "Power-ups sammeln")
+										</li>
+										<li>Halte es einfach - komplexe Spiele brauchen länger</li>
+									</ul>
+								</div>
+							</div>
 
-              <!-- Quick Actions (Initially Hidden) -->
-              <div id="quickActions" class="quick-actions hidden">
-                <p class="quick-actions-title">Schnell-Verbesserungen:</p>
-                <div class="quick-actions-grid">
-                  <button class="quick-action-btn" data-prompt="Mache das Spiel deutlich schwieriger und herausfordernder">
-                    ⚡ Schwieriger
-                  </button>
-                  <button class="quick-action-btn" data-prompt="Verbessere die Grafik mit schöneren Farben und flüssigeren Animationen">
-                    🎨 Bessere Grafik
-                  </button>
-                  <button class="quick-action-btn" data-prompt="Füge Soundeffekte und Hintergrundmusik hinzu">
-                    🎵 Sound hinzufügen
-                  </button>
-                  <button class="quick-action-btn" data-prompt="Füge ein besseres Punkte-System mit Highscore und Combos hinzu">
-                    🏆 Punkte-System
-                  </button>
-                  <button class="quick-action-btn" data-prompt="Füge Power-ups und Bonus-Items hinzu">
-                    💎 Power-ups
-                  </button>
-                  <button class="quick-action-btn" data-prompt="Füge verschiedene Level oder Spielmodi hinzu">
-                    🎯 Mehr Level
-                  </button>
-                </div>
-              </div>
+							<!-- Quick Actions (Initially Hidden) -->
+							<div id="quickActions" class="quick-actions hidden">
+								<p class="quick-actions-title">Schnell-Verbesserungen:</p>
+								<div class="quick-actions-grid">
+									<button
+										class="quick-action-btn"
+										data-prompt="Mache das Spiel deutlich schwieriger und herausfordernder"
+									>
+										⚡ Schwieriger
+									</button>
+									<button
+										class="quick-action-btn"
+										data-prompt="Verbessere die Grafik mit schöneren Farben und flüssigeren Animationen"
+									>
+										🎨 Bessere Grafik
+									</button>
+									<button
+										class="quick-action-btn"
+										data-prompt="Füge Soundeffekte und Hintergrundmusik hinzu"
+									>
+										🎵 Sound hinzufügen
+									</button>
+									<button
+										class="quick-action-btn"
+										data-prompt="Füge ein besseres Punkte-System mit Highscore und Combos hinzu"
+									>
+										🏆 Punkte-System
+									</button>
+									<button
+										class="quick-action-btn"
+										data-prompt="Füge Power-ups und Bonus-Items hinzu"
+									>
+										💎 Power-ups
+									</button>
+									<button
+										class="quick-action-btn"
+										data-prompt="Füge verschiedene Level oder Spielmodi hinzu"
+									>
+										🎯 Mehr Level
+									</button>
+								</div>
+							</div>
 
-              <!-- Model Selection -->
-              <div class="model-selection">
-                <label class="form-label">KI-Modell auswählen:</label>
-                <div class="model-grid">
-                  <!-- Google Gemini -->
-                  <label class="model-option">
-                    <input type="radio" name="model" value="gemini-2.0-flash" checked>
-                    <span class="model-card">
-                      <span class="model-provider">Google</span>
-                      <span class="model-name">Gemini 2.0 Flash</span>
-                      <span class="model-desc">Schnell & günstig</span>
-                    </span>
-                  </label>
-                  <label class="model-option">
-                    <input type="radio" name="model" value="gemini-2.5-flash">
-                    <span class="model-card">
-                      <span class="model-provider">Google</span>
-                      <span class="model-name">Gemini 2.5 Flash</span>
-                      <span class="model-desc">Schnell & gut</span>
-                    </span>
-                  </label>
-                  <label class="model-option">
-                    <input type="radio" name="model" value="gemini-2.5-pro">
-                    <span class="model-card">
-                      <span class="model-provider">Google</span>
-                      <span class="model-name">Gemini 2.5 Pro</span>
-                      <span class="model-desc">Höchste Qualität</span>
-                    </span>
-                  </label>
-                  <!-- Anthropic Claude -->
-                  <label class="model-option">
-                    <input type="radio" name="model" value="claude-3.5-haiku">
-                    <span class="model-card">
-                      <span class="model-provider">Anthropic</span>
-                      <span class="model-name">Claude 3.5 Haiku</span>
-                      <span class="model-desc">Schnell & präzise</span>
-                    </span>
-                  </label>
-                  <label class="model-option">
-                    <input type="radio" name="model" value="claude-3.5-sonnet">
-                    <span class="model-card">
-                      <span class="model-provider">Anthropic</span>
-                      <span class="model-name">Claude Sonnet 4</span>
-                      <span class="model-desc">Beste Code-Qualität</span>
-                    </span>
-                  </label>
-                  <!-- Azure OpenAI -->
-                  <label class="model-option">
-                    <input type="radio" name="model" value="gpt-4o-mini">
-                    <span class="model-card">
-                      <span class="model-provider">OpenAI</span>
-                      <span class="model-name">GPT-4o Mini</span>
-                      <span class="model-desc">Ausgewogen</span>
-                    </span>
-                  </label>
-                  <label class="model-option">
-                    <input type="radio" name="model" value="gpt-4o">
-                    <span class="model-card">
-                      <span class="model-provider">OpenAI</span>
-                      <span class="model-name">GPT-4o</span>
-                      <span class="model-desc">Sehr gut</span>
-                    </span>
-                  </label>
-                </div>
-              </div>
+							<!-- Model Selection -->
+							<div class="model-selection">
+								<label class="form-label">KI-Modell auswählen:</label>
+								<div class="model-grid">
+									<!-- Google Gemini -->
+									<label class="model-option">
+										<input type="radio" name="model" value="gemini-2.0-flash" checked />
+										<span class="model-card">
+											<span class="model-provider">Google</span>
+											<span class="model-name">Gemini 2.0 Flash</span>
+											<span class="model-desc">Schnell & günstig</span>
+										</span>
+									</label>
+									<label class="model-option">
+										<input type="radio" name="model" value="gemini-2.5-flash" />
+										<span class="model-card">
+											<span class="model-provider">Google</span>
+											<span class="model-name">Gemini 2.5 Flash</span>
+											<span class="model-desc">Schnell & gut</span>
+										</span>
+									</label>
+									<label class="model-option">
+										<input type="radio" name="model" value="gemini-2.5-pro" />
+										<span class="model-card">
+											<span class="model-provider">Google</span>
+											<span class="model-name">Gemini 2.5 Pro</span>
+											<span class="model-desc">Höchste Qualität</span>
+										</span>
+									</label>
+									<!-- Anthropic Claude -->
+									<label class="model-option">
+										<input type="radio" name="model" value="claude-3.5-haiku" />
+										<span class="model-card">
+											<span class="model-provider">Anthropic</span>
+											<span class="model-name">Claude 3.5 Haiku</span>
+											<span class="model-desc">Schnell & präzise</span>
+										</span>
+									</label>
+									<label class="model-option">
+										<input type="radio" name="model" value="claude-3.5-sonnet" />
+										<span class="model-card">
+											<span class="model-provider">Anthropic</span>
+											<span class="model-name">Claude Sonnet 4</span>
+											<span class="model-desc">Beste Code-Qualität</span>
+										</span>
+									</label>
+									<!-- Azure OpenAI -->
+									<label class="model-option">
+										<input type="radio" name="model" value="gpt-4o-mini" />
+										<span class="model-card">
+											<span class="model-provider">OpenAI</span>
+											<span class="model-name">GPT-4o Mini</span>
+											<span class="model-desc">Ausgewogen</span>
+										</span>
+									</label>
+									<label class="model-option">
+										<input type="radio" name="model" value="gpt-4o" />
+										<span class="model-card">
+											<span class="model-provider">OpenAI</span>
+											<span class="model-name">GPT-4o</span>
+											<span class="model-desc">Sehr gut</span>
+										</span>
+									</label>
+								</div>
+							</div>
 
-              <!-- Generate Button -->
-              <button 
-                id="generateBtn"
-                class="generate-btn"
-                disabled
-              >
-                Spiel generieren
-              </button>
+							<!-- Generate Button -->
+							<button id="generateBtn" class="generate-btn" disabled> Spiel generieren </button>
 
-              <!-- Example Prompts -->
-              <div class="examples" id="examplePrompts">
-                <p class="examples-title">Beispiele zum Ausprobieren:</p>
-                <div class="example-grid">
-                  <button class="example-btn" data-prompt="Ein Snake-Spiel im Neon-Stil wo die Schlange immer schneller wird">
-                    🐍 Neon Snake
-                  </button>
-                  <button class="example-btn" data-prompt="Ein Plattformspiel wo ich als Astronaut auf dem Mond herumhüpfe und Sterne sammle">
-                    🚀 Mond-Abenteuer
-                  </button>
-                  <button class="example-btn" data-prompt="Ein Puzzle-Spiel wo ich farbige Blöcke matching muss, ähnlich wie Tetris aber einfacher">
-                    🧩 Block Puzzle
-                  </button>
-                  <button class="example-btn" data-prompt="Ein Reaktionsspiel wo bunte Kreise erscheinen die ich schnell anklicken muss">
-                    🎯 Klick-Challenge
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+							<!-- Example Prompts -->
+							<div class="examples" id="examplePrompts">
+								<p class="examples-title">Beispiele zum Ausprobieren:</p>
+								<div class="example-grid">
+									<button
+										class="example-btn"
+										data-prompt="Ein Snake-Spiel im Neon-Stil wo die Schlange immer schneller wird"
+									>
+										🐍 Neon Snake
+									</button>
+									<button
+										class="example-btn"
+										data-prompt="Ein Plattformspiel wo ich als Astronaut auf dem Mond herumhüpfe und Sterne sammle"
+									>
+										🚀 Mond-Abenteuer
+									</button>
+									<button
+										class="example-btn"
+										data-prompt="Ein Puzzle-Spiel wo ich farbige Blöcke matching muss, ähnlich wie Tetris aber einfacher"
+									>
+										🧩 Block Puzzle
+									</button>
+									<button
+										class="example-btn"
+										data-prompt="Ein Reaktionsspiel wo bunte Kreise erscheinen die ich schnell anklicken muss"
+									>
+										🎯 Klick-Challenge
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
 
-          <!-- Loading State -->
-          <div id="loading" class="loading-container hidden">
-            <div class="loading-content">
-              <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span class="loading-text" id="loadingText">KI generiert dein Spiel... (kann 10-20 Sekunden dauern)</span>
-            </div>
-          </div>
+					<!-- Loading State -->
+					<div id="loading" class="loading-container hidden">
+						<div class="loading-content">
+							<svg
+								class="spinner"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+							>
+								<circle
+									class="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="4"></circle>
+								<path
+									class="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+								></path>
+							</svg>
+							<span class="loading-text" id="loadingText"
+								>KI generiert dein Spiel... (kann 10-20 Sekunden dauern)</span
+							>
+						</div>
+					</div>
 
-          <!-- Error State -->
-          <div id="error" class="error-container hidden">
-            <p class="error-message" id="errorMessage"></p>
-          </div>
-        </div>
+					<!-- Error State -->
+					<div id="error" class="error-container hidden">
+						<p class="error-message" id="errorMessage"></p>
+					</div>
+				</div>
 
-        <!-- Editor Panel (Initially Hidden) -->
-        <div id="editorPanel" class="editor-panel hidden">
-          <div class="editor-header">
-            <h3>Code Editor</h3>
-            <div class="editor-actions">
-              <button id="runBtn" class="editor-btn primary">
-                <span class="icon">▶</span>
-                Ausführen
-              </button>
-              <button id="closeEditorBtn" class="editor-btn">
-                <span class="icon">✕</span>
-              </button>
-            </div>
-          </div>
-          <div id="editor" class="code-editor"></div>
-        </div>
-      </div>
+				<!-- Editor Panel (Initially Hidden) -->
+				<div id="editorPanel" class="editor-panel hidden">
+					<div class="editor-header">
+						<h3>Code Editor</h3>
+						<div class="editor-actions">
+							<button id="runBtn" class="editor-btn primary">
+								<span class="icon">▶</span>
+								Ausführen
+							</button>
+							<button id="closeEditorBtn" class="editor-btn">
+								<span class="icon">✕</span>
+							</button>
+						</div>
+					</div>
+					<div id="editor" class="code-editor"></div>
+				</div>
+			</div>
 
-      <!-- Right Side: Game Preview -->
-      <div class="right-panel">
-        <div id="gamePreviewSection" class="game-preview-section">
-          <div class="preview-panel">
-            <div class="preview-header">
-              <h3>Generiertes Spiel</h3>
-              <div class="preview-actions">
-                <button id="toggleEditorBtn" class="editor-btn">
-                  <span class="icon">📝</span>
-                  Code bearbeiten
-                </button>
-                <button id="fullscreenPreviewBtn" class="editor-btn">
-                  <span class="icon">⛶</span>
-                </button>
-                <button id="downloadBtn" class="editor-btn">
-                  <span class="icon">💾</span>
-                </button>
-                <button id="saveToLibraryBtn" class="editor-btn hidden">
-                  <span class="icon">📚</span>
-                  Speichern
-                </button>
-              </div>
-            </div>
-            <div class="preview-frame">
-              <div id="placeholderMessage" class="placeholder-message">
-                <p>🎮 Hier erscheint dein generiertes Spiel</p>
-              </div>
-              <iframe 
-                id="gameFrame"
-                class="game-iframe hidden"
-                sandbox="allow-scripts allow-same-origin"
-              ></iframe>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+			<!-- Right Side: Game Preview -->
+			<div class="right-panel">
+				<div id="gamePreviewSection" class="game-preview-section">
+					<div class="preview-panel">
+						<div class="preview-header">
+							<h3>Generiertes Spiel</h3>
+							<div class="preview-actions">
+								<button id="toggleEditorBtn" class="editor-btn">
+									<span class="icon">📝</span>
+									Code bearbeiten
+								</button>
+								<button id="fullscreenPreviewBtn" class="editor-btn">
+									<span class="icon">⛶</span>
+								</button>
+								<button id="downloadBtn" class="editor-btn">
+									<span class="icon">💾</span>
+								</button>
+								<button id="saveToLibraryBtn" class="editor-btn hidden">
+									<span class="icon">📚</span>
+									Speichern
+								</button>
+							</div>
+						</div>
+						<div class="preview-frame">
+							<div id="placeholderMessage" class="placeholder-message">
+								<p>🎮 Hier erscheint dein generiertes Spiel</p>
+							</div>
+							<iframe
+								id="gameFrame"
+								class="game-iframe hidden"
+								sandbox="allow-scripts allow-same-origin"></iframe>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </Layout>
 
 <script>
-  // Form elements
-  const gameDescriptionTextarea = document.getElementById('gameDescription') as HTMLTextAreaElement;
-  const generateBtn = document.getElementById('generateBtn') as HTMLButtonElement;
-  const exampleBtns = document.querySelectorAll('.example-btn');
-  const quickActionBtns = document.querySelectorAll('.quick-action-btn');
-  
-  // State elements
-  const loadingDiv = document.getElementById('loading')!;
-  const loadingText = document.getElementById('loadingText')!;
-  const errorDiv = document.getElementById('error')!;
-  const errorMessage = document.getElementById('errorMessage')!;
-  const gameFrame = document.getElementById('gameFrame') as HTMLIFrameElement;
-  const downloadBtn = document.getElementById('downloadBtn')!;
-  const fullscreenPreviewBtn = document.getElementById('fullscreenPreviewBtn')!;
-  const toggleEditorBtn = document.getElementById('toggleEditorBtn')!;
-  const closeEditorBtn = document.getElementById('closeEditorBtn')!;
-  const runBtn = document.getElementById('runBtn')!;
-  const rightPanel = document.querySelector('.right-panel') as HTMLElement;
-  const saveToLibraryBtn = document.getElementById('saveToLibraryBtn')!;
-  
-  // Sections
-  const gamePreviewSection = document.getElementById('gamePreviewSection')!;
-  const editorPanel = document.getElementById('editorPanel')!;
-  const generatorSection = document.getElementById('generatorSection')!;
-  const formLabel = document.getElementById('formLabel')!;
-  const formHints = document.getElementById('formHints')!;
-  const quickActions = document.getElementById('quickActions')!;
-  const examplePrompts = document.getElementById('examplePrompts')!;
-
-  // Game state
-  interface GameState {
-    originalPrompt: string;
-    currentCode: string;
-    isIterating: boolean;
-    iterationCount: number;
-    editingGameId?: string;
-  }
-
-  let gameState: GameState = {
-    originalPrompt: '',
-    currentCode: '',
-    isIterating: false,
-    iterationCount: 0,
-    editingGameId: undefined
-  };
-
-  // Save selected model preference
-  function saveModelPreference(model: string) {
-    localStorage.setItem('preferredModel', model);
-  }
-
-  // Load model preference
-  function loadModelPreference() {
-    const saved = localStorage.getItem('preferredModel');
-    if (saved) {
-      const radio = document.querySelector(`input[name="model"][value="${saved}"]`) as HTMLInputElement;
-      if (radio) {
-        radio.checked = true;
-      }
-    }
-  }
-
-  let cm: any; // CodeMirror instance
-
-  // IndexedDB Setup
-  interface SavedGame {
-    id: string;
-    title: string;
-    description: string;
-    prompt: string;
-    html: string;
-    createdAt: Date;
-    updatedAt: Date;
-    thumbnail?: string;
-    stats?: {
-      linesOfCode: number;
-      hasAnimation: boolean;
-      hasSound: boolean;
-    };
-  }
-
-  class GameStorage {
-    private dbName = 'ManaGamesDB';
-    private storeName = 'generatedGames';
-    private db: IDBDatabase | null = null;
-
-    async init(): Promise<void> {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open(this.dbName, 1);
-
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => {
-          this.db = request.result;
-          resolve();
-        };
-
-        request.onupgradeneeded = (event) => {
-          const db = (event.target as IDBOpenDBRequest).result;
-          if (!db.objectStoreNames.contains(this.storeName)) {
-            const store = db.createObjectStore(this.storeName, { keyPath: 'id' });
-            store.createIndex('createdAt', 'createdAt', { unique: false });
-            store.createIndex('title', 'title', { unique: false });
-          }
-        };
-      });
-    }
-
-    async saveGame(game: Omit<SavedGame, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-      if (!this.db) await this.init();
-      
-      const id = `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const savedGame: SavedGame = {
-        ...game,
-        id,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-
-      return new Promise((resolve, reject) => {
-        const transaction = this.db!.transaction([this.storeName], 'readwrite');
-        const store = transaction.objectStore(this.storeName);
-        const request = store.add(savedGame);
-
-        request.onsuccess = () => resolve(id);
-        request.onerror = () => reject(request.error);
-      });
-    }
-
-    async getGame(id: string): Promise<SavedGame | null> {
-      if (!this.db) await this.init();
-
-      return new Promise((resolve, reject) => {
-        const transaction = this.db!.transaction([this.storeName], 'readonly');
-        const store = transaction.objectStore(this.storeName);
-        const request = store.get(id);
-
-        request.onsuccess = () => resolve(request.result || null);
-        request.onerror = () => reject(request.error);
-      });
-    }
-
-    async getAllGames(): Promise<SavedGame[]> {
-      if (!this.db) await this.init();
-
-      return new Promise((resolve, reject) => {
-        const transaction = this.db!.transaction([this.storeName], 'readonly');
-        const store = transaction.objectStore(this.storeName);
-        const request = store.getAll();
-
-        request.onsuccess = () => resolve(request.result || []);
-        request.onerror = () => reject(request.error);
-      });
-    }
-
-    async deleteGame(id: string): Promise<void> {
-      if (!this.db) await this.init();
-
-      return new Promise((resolve, reject) => {
-        const transaction = this.db!.transaction([this.storeName], 'readwrite');
-        const store = transaction.objectStore(this.storeName);
-        const request = store.delete(id);
-
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-      });
-    }
-
-    async updateGame(id: string, updates: Partial<SavedGame>): Promise<void> {
-      if (!this.db) await this.init();
-
-      const existingGame = await this.getGame(id);
-      if (!existingGame) throw new Error('Game not found');
-
-      const updatedGame: SavedGame = {
-        ...existingGame,
-        ...updates,
-        updatedAt: new Date()
-      };
-
-      return new Promise((resolve, reject) => {
-        const transaction = this.db!.transaction([this.storeName], 'readwrite');
-        const store = transaction.objectStore(this.storeName);
-        const request = store.put(updatedGame);
-
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-      });
-    }
-  }
-
-  const gameStorage = new GameStorage();
-
-  // Check if we're editing an existing game
-  async function checkForEditMode() {
-    const editGameId = sessionStorage.getItem('editGameId');
-    if (editGameId) {
-      sessionStorage.removeItem('editGameId'); // Clear it so it doesn't persist
-      
-      try {
-        const game = await gameStorage.getGame(editGameId);
-        if (game) {
-          // Load the game into the editor
-          gameState.originalPrompt = game.prompt || game.description;
-          gameState.currentCode = game.html;
-          gameState.isIterating = true;
-          gameState.iterationCount = 1;
-          gameState.editingGameId = editGameId;
-          
-          // Update UI to show the game
-          displayGame(game.html);
-          
-          // Update editor if initialized
-          if (cm) {
-            cm.setValue(game.html);
-          }
-          
-          // Switch to iteration mode
-          enableIterationMode();
-          
-          // Pre-fill the description with a message
-          gameDescriptionTextarea.value = '';
-          gameDescriptionTextarea.placeholder = `Du bearbeitest "${game.title}". Was möchtest du ändern?`;
-          
-          // Show the game frame
-          const placeholderMessage = document.getElementById('placeholderMessage');
-          if (placeholderMessage) {
-            placeholderMessage.classList.add('hidden');
-          }
-          gameFrame.classList.remove('hidden');
-          saveToLibraryBtn.classList.remove('hidden');
-          
-          // Show notification
-          showNotification(`Spiel "${game.title}" wurde geladen`, 'success');
-        }
-      } catch (error) {
-        console.error('Error loading game for edit:', error);
-        showNotification('Fehler beim Laden des Spiels', 'error');
-      }
-    }
-  }
-
-  // Import CodeMirror CSS
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css';
-  document.head.appendChild(link);
-
-  const themeLink = document.createElement('link');
-  themeLink.rel = 'stylesheet';
-  themeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css';
-  document.head.appendChild(themeLink);
-
-  // Import CodeMirror
-  const script = document.createElement('script');
-  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js';
-  document.head.appendChild(script);
-
-  script.onload = () => {
-    // Load modes
-    const modes = ['xml', 'javascript', 'css', 'htmlmixed'];
-    let loadedModes = 0;
-    
-    modes.forEach(mode => {
-      const modeScript = document.createElement('script');
-      modeScript.src = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/${mode}/${mode}.min.js`;
-      document.head.appendChild(modeScript);
-      modeScript.onload = () => {
-        loadedModes++;
-        if (loadedModes === modes.length) {
-          initializeEditor();
-          // Check for edit mode after editor is initialized
-          checkForEditMode();
-          // Load model preference
-          loadModelPreference();
-          
-          // Add event listeners to model radio buttons
-          document.querySelectorAll('input[name="model"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-              const model = (e.target as HTMLInputElement).value;
-              saveModelPreference(model);
-            });
-          });
-        }
-      };
-    });
-  };
-
-  function initializeEditor() {
-    const editor = document.getElementById('editor');
-    
-    // Initialize CodeMirror
-    cm = (window as any).CodeMirror(editor, {
-      value: '',
-      mode: 'htmlmixed',
-      theme: 'monokai',
-      lineNumbers: true,
-      lineWrapping: true,
-      indentUnit: 2,
-      tabSize: 2,
-      viewportMargin: Infinity
-    });
-
-    // Force CodeMirror to fill the container
-    setTimeout(() => {
-      cm.setSize('100%', '100%');
-      cm.refresh();
-    }, 100);
-  }
-
-  // Enable iteration mode after successful generation
-  function enableIterationMode() {
-    gameState.isIterating = true;
-    
-    // Hide page header when game is generated
-    const pageHeader = document.querySelector('.page-header') as HTMLElement;
-    if (pageHeader) {
-      pageHeader.classList.add('hidden');
-    }
-    
-    // Update button
-    generateBtn.innerHTML = '<span class="icon">🔄</span> Spiel verbessern';
-    generateBtn.classList.add('iteration-mode');
-    
-    // Update form
-    formLabel.textContent = 'Was möchtest du am Spiel ändern?';
-    gameDescriptionTextarea.placeholder = 'z.B. "Füge Power-ups hinzu", "Mache es schwieriger", "Bessere Grafik"...';
-    gameDescriptionTextarea.value = '';
-    
-    // Hide original hints and examples, show quick actions
-    formHints.classList.add('hidden');
-    examplePrompts.classList.add('hidden');
-    quickActions.classList.remove('hidden');
-  }
-
-  // Disable iteration mode (for new game)
-  function disableIterationMode() {
-    gameState = {
-      originalPrompt: '',
-      currentCode: '',
-      isIterating: false,
-      iterationCount: 0,
-      editingGameId: undefined
-    };
-    
-    // Show page header again
-    const pageHeader = document.querySelector('.page-header') as HTMLElement;
-    if (pageHeader) {
-      pageHeader.classList.remove('hidden');
-    }
-    
-    // Reset button
-    generateBtn.innerHTML = 'Spiel generieren';
-    generateBtn.classList.remove('iteration-mode');
-    
-    // Reset form
-    formLabel.textContent = 'Was für ein Spiel möchtest du?';
-    gameDescriptionTextarea.placeholder = 'Beispiel: Ein einfaches Weltraum-Shooter Spiel wo ich mit einem Raumschiff Asteroiden ausweichen muss. Das Spiel sollte immer schneller werden und Punkte für überlebte Zeit geben.';
-    
-    // Show original hints and examples, hide quick actions
-    formHints.classList.remove('hidden');
-    examplePrompts.classList.remove('hidden');
-    quickActions.classList.add('hidden');
-  }
-
-  // Example button clicks
-  exampleBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const prompt = btn.getAttribute('data-prompt');
-      if (prompt) {
-        gameDescriptionTextarea.value = prompt;
-        checkFormValidity();
-        gameDescriptionTextarea.focus();
-      }
-    });
-  });
-
-  // Quick action button clicks
-  quickActionBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const prompt = btn.getAttribute('data-prompt');
-      if (prompt) {
-        gameDescriptionTextarea.value = prompt;
-        checkFormValidity();
-        generateBtn.click(); // Auto-submit
-      }
-    });
-  });
-
-  // Form validation
-  function checkFormValidity() {
-    const isValid = gameDescriptionTextarea.value.trim().length > 10;
-    generateBtn.disabled = !isValid;
-  }
-
-  gameDescriptionTextarea.addEventListener('input', checkFormValidity);
-
-  // Generate/Iterate game
-  generateBtn.addEventListener('click', async () => {
-    // Reset states
-    errorDiv.classList.add('hidden');
-    loadingDiv.classList.remove('hidden');
-    generateBtn.disabled = true;
-
-    const description = gameDescriptionTextarea.value.trim();
-    const selectedModel = (document.querySelector('input[name="model"]:checked') as HTMLInputElement)?.value || 'gemini-2.0-flash';
-    
-    // Save the selected model preference
-    saveModelPreference(selectedModel);
-    
-    // Update loading text based on mode and model
-    const modelName = document.querySelector(`input[name="model"][value="${selectedModel}"]`)?.parentElement?.querySelector('.model-name')?.textContent || 'KI';
-    const isSlowModel = selectedModel === 'gemini-2.5-pro' || selectedModel === 'claude-3.5-sonnet' || selectedModel === 'gpt-4o';
-    
-    if (gameState.isIterating) {
-      loadingText.textContent = isSlowModel 
-        ? `${modelName} verbessert dein Spiel... (kann 30-60 Sekunden dauern)`
-        : `${modelName} verbessert dein Spiel... (kann 10-20 Sekunden dauern)`;
-    } else {
-      loadingText.textContent = isSlowModel
-        ? `${modelName} generiert dein Spiel... (kann 30-60 Sekunden dauern)`
-        : `${modelName} generiert dein Spiel... (kann 10-20 Sekunden dauern)`;
-    }
-
-    try {
-      const requestBody: any = {
-        description: description,
-        mode: gameState.isIterating ? 'iterate' : 'create',
-        model: selectedModel
-      };
-
-      // If iterating, include original prompt and current code
-      if (gameState.isIterating) {
-        requestBody.originalPrompt = gameState.originalPrompt;
-        requestBody.currentCode = gameState.currentCode;
-        requestBody.iterationCount = gameState.iterationCount;
-      }
-
-      // Backend URL (from environment or default)
-      const backendUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3011';
-      const apiUrl = `${backendUrl}/api/games/generate`;
-
-      // Hinweis für langsame Modelle
-      if (isSlowModel) {
-        loadingText.textContent += '\n⚠️ Dieses Modell ist langsamer. Bitte hab Geduld...';
-      }
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Spezielle Fehlerbehandlung für verschiedene Status-Codes
-        if (response.status === 504) {
-          throw new Error(data.error || 'Zeitüberschreitung - bitte versuche es erneut oder wähle ein schnelleres Modell');
-        } else if (response.status === 502) {
-          throw new Error('Server-Fehler - bitte versuche es in ein paar Sekunden erneut');
-        } else if (response.status === 500) {
-          throw new Error(data.error || 'Interner Server-Fehler');
-        } else {
-          throw new Error(data.error || 'Fehler beim Generieren des Spiels');
-        }
-      }
-
-      // Success - update game state
-      if (!gameState.isIterating) {
-        gameState.originalPrompt = description;
-      }
-      gameState.currentCode = data.html;
-      gameState.iterationCount++;
-      
-      // Display game
-      displayGame(data.html);
-      
-      // Update editor
-      if (cm) {
-        cm.setValue(data.html);
-      }
-      
-      loadingDiv.classList.add('hidden');
-      
-      // Show game frame and hide placeholder
-      const placeholderMessage = document.getElementById('placeholderMessage');
-      if (placeholderMessage) {
-        placeholderMessage.classList.add('hidden');
-      }
-      gameFrame.classList.remove('hidden');
-      
-      // Show save button
-      saveToLibraryBtn.classList.remove('hidden');
-      
-      // Enable iteration mode if not already
-      if (!gameState.isIterating) {
-        enableIterationMode();
-      }
-      
-      // Show success notification for iterations
-      if (gameState.isIterating) {
-        showNotification('Spiel wurde verbessert!', 'success');
-      }
-
-    } catch (error) {
-      loadingDiv.classList.add('hidden');
-      errorDiv.classList.remove('hidden');
-      errorMessage.textContent = error instanceof Error ? error.message : 'Ein unerwarteter Fehler ist aufgetreten';
-    } finally {
-      generateBtn.disabled = false;
-      checkFormValidity();
-    }
-  });
-
-  // Display game in iframe
-  function displayGame(html: string) {
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    gameFrame.src = url;
-
-    // Clean up old blob URLs
-    gameFrame.addEventListener('load', () => {
-      URL.revokeObjectURL(url);
-    }, { once: true });
-  }
-
-  // Toggle editor
-  toggleEditorBtn.addEventListener('click', () => {
-    editorPanel.classList.toggle('hidden');
-    generatorSection.classList.toggle('hidden');
-    
-    if (!editorPanel.classList.contains('hidden')) {
-      toggleEditorBtn.innerHTML = '<span class="icon">📝</span> Generator anzeigen';
-      setTimeout(() => {
-        cm.refresh();
-      }, 100);
-    } else {
-      toggleEditorBtn.innerHTML = '<span class="icon">📝</span> Code bearbeiten';
-    }
-  });
-
-  // Close editor
-  closeEditorBtn.addEventListener('click', () => {
-    editorPanel.classList.add('hidden');
-    generatorSection.classList.remove('hidden');
-    toggleEditorBtn.innerHTML = '<span class="icon">📝</span> Code bearbeiten';
-  });
-
-  // Run code
-  runBtn.addEventListener('click', () => {
-    const code = cm.getValue();
-    gameState.currentCode = code;
-    displayGame(code);
-    showNotification('Code ausgeführt!', 'success');
-  });
-
-  // Fullscreen
-  fullscreenPreviewBtn.addEventListener('click', () => {
-    if (gameFrame.requestFullscreen) {
-      gameFrame.requestFullscreen();
-    }
-  });
-
-  // Download
-  downloadBtn.addEventListener('click', () => {
-    const blob = new Blob([gameState.currentCode], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `mana-game-${Date.now()}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  // Save to Library
-  saveToLibraryBtn.addEventListener('click', async () => {
-    if (!gameState.currentCode) {
-      showNotification('Kein Spiel zum Speichern vorhanden', 'error');
-      return;
-    }
-
-    try {
-      saveToLibraryBtn.disabled = true;
-      saveToLibraryBtn.innerHTML = '<span class="icon">⏳</span> Speichern...';
-
-      const title = extractGameTitle(gameState.currentCode);
-      const stats = analyzeGameStats(gameState.currentCode);
-      const thumbnail = await generateThumbnail(gameState.currentCode);
-
-      if (gameState.editingGameId) {
-        // Update existing game
-        await gameStorage.updateGame(gameState.editingGameId, {
-          title,
-          html: gameState.currentCode,
-          thumbnail,
-          stats
-        });
-        showNotification(`"${title}" wurde aktualisiert!`, 'success');
-      } else {
-        // Save new game
-        const gameId = await gameStorage.saveGame({
-          title,
-          description: gameState.originalPrompt,
-          prompt: gameState.originalPrompt,
-          html: gameState.currentCode,
-          thumbnail,
-          stats
-        });
-        showNotification(`"${title}" wurde in deiner Bibliothek gespeichert!`, 'success');
-      }
-      
-      // Update button to show saved state
-      saveToLibraryBtn.innerHTML = '<span class="icon">✓</span> Gespeichert';
-      setTimeout(() => {
-        saveToLibraryBtn.innerHTML = '<span class="icon">📚</span> Speichern';
-        saveToLibraryBtn.disabled = false;
-      }, 2000);
-
-    } catch (error) {
-      console.error('Error saving game:', error);
-      showNotification('Fehler beim Speichern des Spiels', 'error');
-      saveToLibraryBtn.innerHTML = '<span class="icon">📚</span> Speichern';
-      saveToLibraryBtn.disabled = false;
-    }
-  });
-
-  // Listen for game messages
-  window.addEventListener('message', (event) => {
-    if (event.source === gameFrame.contentWindow) {
-      console.log('Game message:', event.data);
-    }
-  });
-
-  // Auto-resize textarea
-  gameDescriptionTextarea.addEventListener('input', () => {
-    gameDescriptionTextarea.style.height = 'auto';
-    gameDescriptionTextarea.style.height = gameDescriptionTextarea.scrollHeight + 'px';
-  });
-
-  // Helper functions for game metadata extraction
-  function extractGameTitle(html: string): string {
-    const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-    if (titleMatch) {
-      return titleMatch[1].replace(' - ManaGames', '').trim();
-    }
-    
-    // Fallback: Try to find game name in comments or h1
-    const h1Match = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
-    if (h1Match) {
-      return h1Match[1].trim();
-    }
-    
-    return 'Unbenanntes Spiel';
-  }
-
-  function analyzeGameStats(html: string) {
-    const lines = html.split('\n');
-    const codeLines = lines.filter(line => line.trim().length > 0);
-    
-    return {
-      linesOfCode: codeLines.length,
-      hasAnimation: html.includes('requestAnimationFrame') || html.includes('setInterval'),
-      hasSound: html.includes('Audio') || html.includes('sound') || html.includes('music')
-    };
-  }
-
-  function generateThumbnail(html: string): Promise<string> {
-    return new Promise((resolve) => {
-      // For now, return a placeholder
-      // In future, we could capture actual game screenshot
-      const svg = `
+	// Form elements
+	const gameDescriptionTextarea = document.getElementById('gameDescription') as HTMLTextAreaElement;
+	const generateBtn = document.getElementById('generateBtn') as HTMLButtonElement;
+	const exampleBtns = document.querySelectorAll('.example-btn');
+	const quickActionBtns = document.querySelectorAll('.quick-action-btn');
+
+	// State elements
+	const loadingDiv = document.getElementById('loading')!;
+	const loadingText = document.getElementById('loadingText')!;
+	const errorDiv = document.getElementById('error')!;
+	const errorMessage = document.getElementById('errorMessage')!;
+	const gameFrame = document.getElementById('gameFrame') as HTMLIFrameElement;
+	const downloadBtn = document.getElementById('downloadBtn')!;
+	const fullscreenPreviewBtn = document.getElementById('fullscreenPreviewBtn')!;
+	const toggleEditorBtn = document.getElementById('toggleEditorBtn')!;
+	const closeEditorBtn = document.getElementById('closeEditorBtn')!;
+	const runBtn = document.getElementById('runBtn')!;
+	const rightPanel = document.querySelector('.right-panel') as HTMLElement;
+	const saveToLibraryBtn = document.getElementById('saveToLibraryBtn')!;
+
+	// Sections
+	const gamePreviewSection = document.getElementById('gamePreviewSection')!;
+	const editorPanel = document.getElementById('editorPanel')!;
+	const generatorSection = document.getElementById('generatorSection')!;
+	const formLabel = document.getElementById('formLabel')!;
+	const formHints = document.getElementById('formHints')!;
+	const quickActions = document.getElementById('quickActions')!;
+	const examplePrompts = document.getElementById('examplePrompts')!;
+
+	// Game state
+	interface GameState {
+		originalPrompt: string;
+		currentCode: string;
+		isIterating: boolean;
+		iterationCount: number;
+		editingGameId?: string;
+	}
+
+	let gameState: GameState = {
+		originalPrompt: '',
+		currentCode: '',
+		isIterating: false,
+		iterationCount: 0,
+		editingGameId: undefined,
+	};
+
+	// Save selected model preference
+	function saveModelPreference(model: string) {
+		localStorage.setItem('preferredModel', model);
+	}
+
+	// Load model preference
+	function loadModelPreference() {
+		const saved = localStorage.getItem('preferredModel');
+		if (saved) {
+			const radio = document.querySelector(
+				`input[name="model"][value="${saved}"]`
+			) as HTMLInputElement;
+			if (radio) {
+				radio.checked = true;
+			}
+		}
+	}
+
+	let cm: any; // CodeMirror instance
+
+	// IndexedDB Setup
+	interface SavedGame {
+		id: string;
+		title: string;
+		description: string;
+		prompt: string;
+		html: string;
+		createdAt: Date;
+		updatedAt: Date;
+		thumbnail?: string;
+		stats?: {
+			linesOfCode: number;
+			hasAnimation: boolean;
+			hasSound: boolean;
+		};
+	}
+
+	class GameStorage {
+		private dbName = 'ManaGamesDB';
+		private storeName = 'generatedGames';
+		private db: IDBDatabase | null = null;
+
+		async init(): Promise<void> {
+			return new Promise((resolve, reject) => {
+				const request = indexedDB.open(this.dbName, 1);
+
+				request.onerror = () => reject(request.error);
+				request.onsuccess = () => {
+					this.db = request.result;
+					resolve();
+				};
+
+				request.onupgradeneeded = (event) => {
+					const db = (event.target as IDBOpenDBRequest).result;
+					if (!db.objectStoreNames.contains(this.storeName)) {
+						const store = db.createObjectStore(this.storeName, { keyPath: 'id' });
+						store.createIndex('createdAt', 'createdAt', { unique: false });
+						store.createIndex('title', 'title', { unique: false });
+					}
+				};
+			});
+		}
+
+		async saveGame(game: Omit<SavedGame, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+			if (!this.db) await this.init();
+
+			const id = `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+			const savedGame: SavedGame = {
+				...game,
+				id,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			};
+
+			return new Promise((resolve, reject) => {
+				const transaction = this.db!.transaction([this.storeName], 'readwrite');
+				const store = transaction.objectStore(this.storeName);
+				const request = store.add(savedGame);
+
+				request.onsuccess = () => resolve(id);
+				request.onerror = () => reject(request.error);
+			});
+		}
+
+		async getGame(id: string): Promise<SavedGame | null> {
+			if (!this.db) await this.init();
+
+			return new Promise((resolve, reject) => {
+				const transaction = this.db!.transaction([this.storeName], 'readonly');
+				const store = transaction.objectStore(this.storeName);
+				const request = store.get(id);
+
+				request.onsuccess = () => resolve(request.result || null);
+				request.onerror = () => reject(request.error);
+			});
+		}
+
+		async getAllGames(): Promise<SavedGame[]> {
+			if (!this.db) await this.init();
+
+			return new Promise((resolve, reject) => {
+				const transaction = this.db!.transaction([this.storeName], 'readonly');
+				const store = transaction.objectStore(this.storeName);
+				const request = store.getAll();
+
+				request.onsuccess = () => resolve(request.result || []);
+				request.onerror = () => reject(request.error);
+			});
+		}
+
+		async deleteGame(id: string): Promise<void> {
+			if (!this.db) await this.init();
+
+			return new Promise((resolve, reject) => {
+				const transaction = this.db!.transaction([this.storeName], 'readwrite');
+				const store = transaction.objectStore(this.storeName);
+				const request = store.delete(id);
+
+				request.onsuccess = () => resolve();
+				request.onerror = () => reject(request.error);
+			});
+		}
+
+		async updateGame(id: string, updates: Partial<SavedGame>): Promise<void> {
+			if (!this.db) await this.init();
+
+			const existingGame = await this.getGame(id);
+			if (!existingGame) throw new Error('Game not found');
+
+			const updatedGame: SavedGame = {
+				...existingGame,
+				...updates,
+				updatedAt: new Date(),
+			};
+
+			return new Promise((resolve, reject) => {
+				const transaction = this.db!.transaction([this.storeName], 'readwrite');
+				const store = transaction.objectStore(this.storeName);
+				const request = store.put(updatedGame);
+
+				request.onsuccess = () => resolve();
+				request.onerror = () => reject(request.error);
+			});
+		}
+	}
+
+	const gameStorage = new GameStorage();
+
+	// Check if we're editing an existing game
+	async function checkForEditMode() {
+		const editGameId = sessionStorage.getItem('editGameId');
+		if (editGameId) {
+			sessionStorage.removeItem('editGameId'); // Clear it so it doesn't persist
+
+			try {
+				const game = await gameStorage.getGame(editGameId);
+				if (game) {
+					// Load the game into the editor
+					gameState.originalPrompt = game.prompt || game.description;
+					gameState.currentCode = game.html;
+					gameState.isIterating = true;
+					gameState.iterationCount = 1;
+					gameState.editingGameId = editGameId;
+
+					// Update UI to show the game
+					displayGame(game.html);
+
+					// Update editor if initialized
+					if (cm) {
+						cm.setValue(game.html);
+					}
+
+					// Switch to iteration mode
+					enableIterationMode();
+
+					// Pre-fill the description with a message
+					gameDescriptionTextarea.value = '';
+					gameDescriptionTextarea.placeholder = `Du bearbeitest "${game.title}". Was möchtest du ändern?`;
+
+					// Show the game frame
+					const placeholderMessage = document.getElementById('placeholderMessage');
+					if (placeholderMessage) {
+						placeholderMessage.classList.add('hidden');
+					}
+					gameFrame.classList.remove('hidden');
+					saveToLibraryBtn.classList.remove('hidden');
+
+					// Show notification
+					showNotification(`Spiel "${game.title}" wurde geladen`, 'success');
+				}
+			} catch (error) {
+				console.error('Error loading game for edit:', error);
+				showNotification('Fehler beim Laden des Spiels', 'error');
+			}
+		}
+	}
+
+	// Import CodeMirror CSS
+	const link = document.createElement('link');
+	link.rel = 'stylesheet';
+	link.href = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css';
+	document.head.appendChild(link);
+
+	const themeLink = document.createElement('link');
+	themeLink.rel = 'stylesheet';
+	themeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css';
+	document.head.appendChild(themeLink);
+
+	// Import CodeMirror
+	const script = document.createElement('script');
+	script.src = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js';
+	document.head.appendChild(script);
+
+	script.onload = () => {
+		// Load modes
+		const modes = ['xml', 'javascript', 'css', 'htmlmixed'];
+		let loadedModes = 0;
+
+		modes.forEach((mode) => {
+			const modeScript = document.createElement('script');
+			modeScript.src = `https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/${mode}/${mode}.min.js`;
+			document.head.appendChild(modeScript);
+			modeScript.onload = () => {
+				loadedModes++;
+				if (loadedModes === modes.length) {
+					initializeEditor();
+					// Check for edit mode after editor is initialized
+					checkForEditMode();
+					// Load model preference
+					loadModelPreference();
+
+					// Add event listeners to model radio buttons
+					document.querySelectorAll('input[name="model"]').forEach((radio) => {
+						radio.addEventListener('change', (e) => {
+							const model = (e.target as HTMLInputElement).value;
+							saveModelPreference(model);
+						});
+					});
+				}
+			};
+		});
+	};
+
+	function initializeEditor() {
+		const editor = document.getElementById('editor');
+
+		// Initialize CodeMirror
+		cm = (window as any).CodeMirror(editor, {
+			value: '',
+			mode: 'htmlmixed',
+			theme: 'monokai',
+			lineNumbers: true,
+			lineWrapping: true,
+			indentUnit: 2,
+			tabSize: 2,
+			viewportMargin: Infinity,
+		});
+
+		// Force CodeMirror to fill the container
+		setTimeout(() => {
+			cm.setSize('100%', '100%');
+			cm.refresh();
+		}, 100);
+	}
+
+	// Enable iteration mode after successful generation
+	function enableIterationMode() {
+		gameState.isIterating = true;
+
+		// Hide page header when game is generated
+		const pageHeader = document.querySelector('.page-header') as HTMLElement;
+		if (pageHeader) {
+			pageHeader.classList.add('hidden');
+		}
+
+		// Update button
+		generateBtn.innerHTML = '<span class="icon">🔄</span> Spiel verbessern';
+		generateBtn.classList.add('iteration-mode');
+
+		// Update form
+		formLabel.textContent = 'Was möchtest du am Spiel ändern?';
+		gameDescriptionTextarea.placeholder =
+			'z.B. "Füge Power-ups hinzu", "Mache es schwieriger", "Bessere Grafik"...';
+		gameDescriptionTextarea.value = '';
+
+		// Hide original hints and examples, show quick actions
+		formHints.classList.add('hidden');
+		examplePrompts.classList.add('hidden');
+		quickActions.classList.remove('hidden');
+	}
+
+	// Disable iteration mode (for new game)
+	function disableIterationMode() {
+		gameState = {
+			originalPrompt: '',
+			currentCode: '',
+			isIterating: false,
+			iterationCount: 0,
+			editingGameId: undefined,
+		};
+
+		// Show page header again
+		const pageHeader = document.querySelector('.page-header') as HTMLElement;
+		if (pageHeader) {
+			pageHeader.classList.remove('hidden');
+		}
+
+		// Reset button
+		generateBtn.innerHTML = 'Spiel generieren';
+		generateBtn.classList.remove('iteration-mode');
+
+		// Reset form
+		formLabel.textContent = 'Was für ein Spiel möchtest du?';
+		gameDescriptionTextarea.placeholder =
+			'Beispiel: Ein einfaches Weltraum-Shooter Spiel wo ich mit einem Raumschiff Asteroiden ausweichen muss. Das Spiel sollte immer schneller werden und Punkte für überlebte Zeit geben.';
+
+		// Show original hints and examples, hide quick actions
+		formHints.classList.remove('hidden');
+		examplePrompts.classList.remove('hidden');
+		quickActions.classList.add('hidden');
+	}
+
+	// Example button clicks
+	exampleBtns.forEach((btn) => {
+		btn.addEventListener('click', () => {
+			const prompt = btn.getAttribute('data-prompt');
+			if (prompt) {
+				gameDescriptionTextarea.value = prompt;
+				checkFormValidity();
+				gameDescriptionTextarea.focus();
+			}
+		});
+	});
+
+	// Quick action button clicks
+	quickActionBtns.forEach((btn) => {
+		btn.addEventListener('click', () => {
+			const prompt = btn.getAttribute('data-prompt');
+			if (prompt) {
+				gameDescriptionTextarea.value = prompt;
+				checkFormValidity();
+				generateBtn.click(); // Auto-submit
+			}
+		});
+	});
+
+	// Form validation
+	function checkFormValidity() {
+		const isValid = gameDescriptionTextarea.value.trim().length > 10;
+		generateBtn.disabled = !isValid;
+	}
+
+	gameDescriptionTextarea.addEventListener('input', checkFormValidity);
+
+	// Generate/Iterate game
+	generateBtn.addEventListener('click', async () => {
+		// Reset states
+		errorDiv.classList.add('hidden');
+		loadingDiv.classList.remove('hidden');
+		generateBtn.disabled = true;
+
+		const description = gameDescriptionTextarea.value.trim();
+		const selectedModel =
+			(document.querySelector('input[name="model"]:checked') as HTMLInputElement)?.value ||
+			'gemini-2.0-flash';
+
+		// Save the selected model preference
+		saveModelPreference(selectedModel);
+
+		// Update loading text based on mode and model
+		const modelName =
+			document
+				.querySelector(`input[name="model"][value="${selectedModel}"]`)
+				?.parentElement?.querySelector('.model-name')?.textContent || 'KI';
+		const isSlowModel =
+			selectedModel === 'gemini-2.5-pro' ||
+			selectedModel === 'claude-3.5-sonnet' ||
+			selectedModel === 'gpt-4o';
+
+		if (gameState.isIterating) {
+			loadingText.textContent = isSlowModel
+				? `${modelName} verbessert dein Spiel... (kann 30-60 Sekunden dauern)`
+				: `${modelName} verbessert dein Spiel... (kann 10-20 Sekunden dauern)`;
+		} else {
+			loadingText.textContent = isSlowModel
+				? `${modelName} generiert dein Spiel... (kann 30-60 Sekunden dauern)`
+				: `${modelName} generiert dein Spiel... (kann 10-20 Sekunden dauern)`;
+		}
+
+		try {
+			const requestBody: any = {
+				description: description,
+				mode: gameState.isIterating ? 'iterate' : 'create',
+				model: selectedModel,
+			};
+
+			// If iterating, include original prompt and current code
+			if (gameState.isIterating) {
+				requestBody.originalPrompt = gameState.originalPrompt;
+				requestBody.currentCode = gameState.currentCode;
+				requestBody.iterationCount = gameState.iterationCount;
+			}
+
+			// Backend URL (from environment or default)
+			const backendUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3011';
+			const apiUrl = `${backendUrl}/api/games/generate`;
+
+			// Hinweis für langsame Modelle
+			if (isSlowModel) {
+				loadingText.textContent += '\n⚠️ Dieses Modell ist langsamer. Bitte hab Geduld...';
+			}
+
+			const response = await fetch(apiUrl, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(requestBody),
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				// Spezielle Fehlerbehandlung für verschiedene Status-Codes
+				if (response.status === 504) {
+					throw new Error(
+						data.error ||
+							'Zeitüberschreitung - bitte versuche es erneut oder wähle ein schnelleres Modell'
+					);
+				} else if (response.status === 502) {
+					throw new Error('Server-Fehler - bitte versuche es in ein paar Sekunden erneut');
+				} else if (response.status === 500) {
+					throw new Error(data.error || 'Interner Server-Fehler');
+				} else {
+					throw new Error(data.error || 'Fehler beim Generieren des Spiels');
+				}
+			}
+
+			// Success - update game state
+			if (!gameState.isIterating) {
+				gameState.originalPrompt = description;
+			}
+			gameState.currentCode = data.html;
+			gameState.iterationCount++;
+
+			// Display game
+			displayGame(data.html);
+
+			// Update editor
+			if (cm) {
+				cm.setValue(data.html);
+			}
+
+			loadingDiv.classList.add('hidden');
+
+			// Show game frame and hide placeholder
+			const placeholderMessage = document.getElementById('placeholderMessage');
+			if (placeholderMessage) {
+				placeholderMessage.classList.add('hidden');
+			}
+			gameFrame.classList.remove('hidden');
+
+			// Show save button
+			saveToLibraryBtn.classList.remove('hidden');
+
+			// Enable iteration mode if not already
+			if (!gameState.isIterating) {
+				enableIterationMode();
+			}
+
+			// Show success notification for iterations
+			if (gameState.isIterating) {
+				showNotification('Spiel wurde verbessert!', 'success');
+			}
+		} catch (error) {
+			loadingDiv.classList.add('hidden');
+			errorDiv.classList.remove('hidden');
+			errorMessage.textContent =
+				error instanceof Error ? error.message : 'Ein unerwarteter Fehler ist aufgetreten';
+		} finally {
+			generateBtn.disabled = false;
+			checkFormValidity();
+		}
+	});
+
+	// Display game in iframe
+	function displayGame(html: string) {
+		const blob = new Blob([html], { type: 'text/html' });
+		const url = URL.createObjectURL(blob);
+		gameFrame.src = url;
+
+		// Clean up old blob URLs
+		gameFrame.addEventListener(
+			'load',
+			() => {
+				URL.revokeObjectURL(url);
+			},
+			{ once: true }
+		);
+	}
+
+	// Toggle editor
+	toggleEditorBtn.addEventListener('click', () => {
+		editorPanel.classList.toggle('hidden');
+		generatorSection.classList.toggle('hidden');
+
+		if (!editorPanel.classList.contains('hidden')) {
+			toggleEditorBtn.innerHTML = '<span class="icon">📝</span> Generator anzeigen';
+			setTimeout(() => {
+				cm.refresh();
+			}, 100);
+		} else {
+			toggleEditorBtn.innerHTML = '<span class="icon">📝</span> Code bearbeiten';
+		}
+	});
+
+	// Close editor
+	closeEditorBtn.addEventListener('click', () => {
+		editorPanel.classList.add('hidden');
+		generatorSection.classList.remove('hidden');
+		toggleEditorBtn.innerHTML = '<span class="icon">📝</span> Code bearbeiten';
+	});
+
+	// Run code
+	runBtn.addEventListener('click', () => {
+		const code = cm.getValue();
+		gameState.currentCode = code;
+		displayGame(code);
+		showNotification('Code ausgeführt!', 'success');
+	});
+
+	// Fullscreen
+	fullscreenPreviewBtn.addEventListener('click', () => {
+		if (gameFrame.requestFullscreen) {
+			gameFrame.requestFullscreen();
+		}
+	});
+
+	// Download
+	downloadBtn.addEventListener('click', () => {
+		const blob = new Blob([gameState.currentCode], { type: 'text/html' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `mana-game-${Date.now()}.html`;
+		a.click();
+		URL.revokeObjectURL(url);
+	});
+
+	// Save to Library
+	saveToLibraryBtn.addEventListener('click', async () => {
+		if (!gameState.currentCode) {
+			showNotification('Kein Spiel zum Speichern vorhanden', 'error');
+			return;
+		}
+
+		try {
+			saveToLibraryBtn.disabled = true;
+			saveToLibraryBtn.innerHTML = '<span class="icon">⏳</span> Speichern...';
+
+			const title = extractGameTitle(gameState.currentCode);
+			const stats = analyzeGameStats(gameState.currentCode);
+			const thumbnail = await generateThumbnail(gameState.currentCode);
+
+			if (gameState.editingGameId) {
+				// Update existing game
+				await gameStorage.updateGame(gameState.editingGameId, {
+					title,
+					html: gameState.currentCode,
+					thumbnail,
+					stats,
+				});
+				showNotification(`"${title}" wurde aktualisiert!`, 'success');
+			} else {
+				// Save new game
+				const gameId = await gameStorage.saveGame({
+					title,
+					description: gameState.originalPrompt,
+					prompt: gameState.originalPrompt,
+					html: gameState.currentCode,
+					thumbnail,
+					stats,
+				});
+				showNotification(`"${title}" wurde in deiner Bibliothek gespeichert!`, 'success');
+			}
+
+			// Update button to show saved state
+			saveToLibraryBtn.innerHTML = '<span class="icon">✓</span> Gespeichert';
+			setTimeout(() => {
+				saveToLibraryBtn.innerHTML = '<span class="icon">📚</span> Speichern';
+				saveToLibraryBtn.disabled = false;
+			}, 2000);
+		} catch (error) {
+			console.error('Error saving game:', error);
+			showNotification('Fehler beim Speichern des Spiels', 'error');
+			saveToLibraryBtn.innerHTML = '<span class="icon">📚</span> Speichern';
+			saveToLibraryBtn.disabled = false;
+		}
+	});
+
+	// Listen for game messages
+	window.addEventListener('message', (event) => {
+		if (event.source === gameFrame.contentWindow) {
+			console.log('Game message:', event.data);
+		}
+	});
+
+	// Auto-resize textarea
+	gameDescriptionTextarea.addEventListener('input', () => {
+		gameDescriptionTextarea.style.height = 'auto';
+		gameDescriptionTextarea.style.height = gameDescriptionTextarea.scrollHeight + 'px';
+	});
+
+	// Helper functions for game metadata extraction
+	function extractGameTitle(html: string): string {
+		const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+		if (titleMatch) {
+			return titleMatch[1].replace(' - ManaGames', '').trim();
+		}
+
+		// Fallback: Try to find game name in comments or h1
+		const h1Match = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
+		if (h1Match) {
+			return h1Match[1].trim();
+		}
+
+		return 'Unbenanntes Spiel';
+	}
+
+	function analyzeGameStats(html: string) {
+		const lines = html.split('\n');
+		const codeLines = lines.filter((line) => line.trim().length > 0);
+
+		return {
+			linesOfCode: codeLines.length,
+			hasAnimation: html.includes('requestAnimationFrame') || html.includes('setInterval'),
+			hasSound: html.includes('Audio') || html.includes('sound') || html.includes('music'),
+		};
+	}
+
+	function generateThumbnail(html: string): Promise<string> {
+		return new Promise((resolve) => {
+			// For now, return a placeholder
+			// In future, we could capture actual game screenshot
+			const svg = `
         <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
           <rect width="400" height="300" fill="#1a1a1a"/>
           <text x="200" y="150" font-family="Arial" font-size="24" fill="#00ff88" text-anchor="middle">
@@ -913,670 +976,676 @@ import Layout from '../layouts/Layout.astro';
           </text>
         </svg>
       `;
-      
-      // Convert string to base64 with proper encoding for Unicode
-      const base64 = btoa(unescape(encodeURIComponent(svg)));
-      resolve('data:image/svg+xml;base64,' + base64);
-    });
-  }
 
-  // Notification helper
-  function showNotification(message: string, type: 'success' | 'error' = 'success') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      notification.classList.add('show');
-    }, 10);
-    
-    setTimeout(() => {
-      notification.classList.remove('show');
-      setTimeout(() => notification.remove(), 300);
-    }, 2000);
-  }
+			// Convert string to base64 with proper encoding for Unicode
+			const base64 = btoa(unescape(encodeURIComponent(svg)));
+			resolve('data:image/svg+xml;base64,' + base64);
+		});
+	}
+
+	// Notification helper
+	function showNotification(message: string, type: 'success' | 'error' = 'success') {
+		const notification = document.createElement('div');
+		notification.className = `notification ${type}`;
+		notification.textContent = message;
+		document.body.appendChild(notification);
+
+		setTimeout(() => {
+			notification.classList.add('show');
+		}, 10);
+
+		setTimeout(() => {
+			notification.classList.remove('show');
+			setTimeout(() => notification.remove(), 300);
+		}, 2000);
+	}
 </script>
 
 <style>
-  .create-page {
-    height: calc(100vh - 60px);
-    overflow: hidden;
-    padding: 1rem;
-    box-sizing: border-box;
-  }
-
-  .split-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    height: 100%;
-    gap: 1px;
-    background: var(--color-border);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  /* Left Panel */
-  .left-panel {
-    background: var(--color-bg);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    padding: 2rem;
-    align-items: center;
-  }
-  
-  .left-panel > * {
-    width: 100%;
-    max-width: 600px;
-  }
-
-  /* Right Panel */
-  .right-panel {
-    background: var(--color-bg);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* Game Preview Section */
-  .game-preview-section {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .preview-panel {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    overflow: hidden;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .preview-header {
-    background: var(--color-bg);
-    padding: 0.75rem 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--color-border);
-    flex-shrink: 0;
-  }
-
-  .preview-header h3 {
-    margin: 0;
-    font-size: 1rem;
-    color: var(--color-text);
-  }
-
-  .preview-actions {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .preview-frame {
-    flex: 1;
-    background: var(--color-bg);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .game-iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-  }
-
-  /* Editor Panel */
-  .editor-panel {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    height: calc(100% - 2rem);
-    margin-top: 1rem;
-    width: 100%;
-  }
-
-  .editor-panel.hidden {
-    display: none;
-  }
-
-  .editor-header {
-    background: var(--color-bg);
-    padding: 0.75rem 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .editor-header h3 {
-    margin: 0;
-    font-size: 1rem;
-    color: var(--color-text);
-  }
-
-  .editor-actions {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .code-editor {
-    flex: 1;
-    overflow: hidden;
-  }
-
-  .code-editor .CodeMirror {
-    height: 100%;
-    font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
-    font-size: 14px;
-  }
-
-  /* Generator Section */
-  .generator-section {
-    flex: 1;
-    width: 100%;
-  }
-
-  .generator-section.hidden {
-    display: none;
-  }
-
-  .page-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    transition: opacity 0.3s ease, max-height 0.3s ease;
-  }
-  
-  .page-header.hidden {
-    opacity: 0;
-    max-height: 0;
-    margin: 0;
-    overflow: hidden;
-  }
-
-  .page-header h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--color-text);
-    margin-bottom: 0.5rem;
-  }
-
-  .subtitle {
-    color: var(--color-text-secondary);
-    font-size: 1.1rem;
-  }
-
-  /* Form Card */
-  .form-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .form-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .form-label {
-    color: var(--color-text);
-    font-weight: 500;
-    font-size: 1.1rem;
-  }
-
-  .form-textarea {
-    background: var(--color-bg);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 1rem;
-    font-size: 1rem;
-    font-family: inherit;
-    transition: all 0.2s ease;
-    resize: vertical;
-    min-height: 120px;
-  }
-
-  .form-textarea:focus {
-    outline: none;
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
-  }
-
-  .form-textarea::placeholder {
-    color: var(--color-text-muted);
-    font-size: 0.95rem;
-  }
-
-  /* Hints */
-  .form-hints {
-    background: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-top: 0.5rem;
-  }
-
-  .hint-title {
-    color: var(--color-text);
-    font-weight: 500;
-    margin: 0 0 0.5rem 0;
-    font-size: 0.9rem;
-  }
-
-  .hint-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .hint-list li {
-    color: var(--color-text-secondary);
-    font-size: 0.85rem;
-    padding-left: 1.5rem;
-    position: relative;
-  }
-
-  .hint-list li::before {
-    content: "•";
-    position: absolute;
-    left: 0.5rem;
-    color: var(--color-accent);
-  }
-
-  /* Quick Actions */
-  .quick-actions {
-    margin-top: 1rem;
-  }
-
-  .quick-actions-title {
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
-    margin: 0 0 0.75rem 0;
-  }
-
-  .quick-actions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 0.5rem;
-  }
-
-  .quick-action-btn {
-    background: var(--color-bg);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-    font-family: inherit;
-  }
-
-  .quick-action-btn:hover {
-    border-color: var(--color-accent);
-    background: rgba(0, 255, 136, 0.05);
-    transform: translateY(-1px);
-  }
-
-  /* Model Selection */
-  .model-selection {
-    margin-top: 1rem;
-  }
-
-  .model-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 0.75rem;
-    margin-top: 0.75rem;
-  }
-
-  .model-option {
-    position: relative;
-    cursor: pointer;
-  }
-
-  .model-option input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .model-card {
-    display: flex;
-    flex-direction: column;
-    padding: 0.75rem;
-    background: var(--color-bg);
-    border: 2px solid var(--color-border);
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    text-align: center;
-  }
-
-  .model-option:hover .model-card {
-    border-color: var(--color-accent);
-    background: rgba(0, 255, 136, 0.05);
-  }
-
-  .model-option input[type="radio"]:checked + .model-card {
-    border-color: var(--color-accent);
-    background: rgba(0, 255, 136, 0.1);
-    box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2);
-  }
-
-  .model-provider {
-    font-size: 0.65rem;
-    color: var(--color-accent);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.15rem;
-  }
-
-  .model-name {
-    font-weight: 600;
-    color: var(--color-text);
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .model-desc {
-    font-size: 0.75rem;
-    color: var(--color-text-secondary);
-  }
-
-  /* Examples */
-  .examples {
-    margin-top: 1rem;
-  }
-
-  .examples-title {
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
-    margin: 0 0 0.75rem 0;
-  }
-
-  .example-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0.75rem;
-  }
-
-  .example-btn {
-    background: var(--color-bg);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: left;
-    font-family: inherit;
-  }
-
-  .example-btn:hover {
-    border-color: var(--color-accent);
-    background: rgba(0, 255, 136, 0.05);
-  }
-
-  /* Editor Buttons */
-  .editor-btn {
-    background: var(--color-surface);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: inherit;
-  }
-
-  .editor-btn:hover {
-    background: var(--color-bg);
-    border-color: var(--color-accent);
-  }
-
-  .editor-btn.primary {
-    background: var(--color-accent);
-    color: var(--color-bg);
-    border-color: var(--color-accent);
-  }
-
-  .editor-btn.primary:hover {
-    background: var(--color-accent-hover);
-  }
-
-  .editor-btn .icon {
-    font-size: 1rem;
-  }
-
-  /* Generate Button */
-  .generate-btn {
-    background: var(--color-accent);
-    color: var(--color-bg);
-    border: none;
-    border-radius: 8px;
-    padding: 1rem;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  .generate-btn:hover:not(:disabled) {
-    background: var(--color-accent-hover);
-    transform: translateY(-1px);
-  }
-
-  .generate-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .generate-btn.iteration-mode {
-    background: #3b82f6;
-  }
-
-  .generate-btn.iteration-mode:hover:not(:disabled) {
-    background: #2563eb;
-  }
-
-  .generate-btn .icon {
-    font-size: 1.2rem;
-  }
-
-  /* Loading State */
-  .loading-container {
-    background: rgba(0, 0, 0, 0.8);
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-
-  .loading-content {
-    background: var(--color-surface);
-    padding: 2rem;
-    border-radius: 12px;
-    border: 1px solid var(--color-border);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .spinner {
-    width: 2rem;
-    height: 2rem;
-    color: var(--color-accent);
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-  .loading-text {
-    color: var(--color-text);
-    font-size: 1.1rem;
-  }
-
-  /* Error State */
-  .error-container {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.5);
-    border-radius: 8px;
-    padding: 1rem;
-    margin: 2rem 0;
-  }
-
-  .error-message {
-    color: #ef4444;
-    margin: 0;
-  }
-
-  /* Notifications */
-  .notification {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 1rem 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transform: translateY(100px);
-    opacity: 0;
-    transition: all 0.3s ease;
-    z-index: 1000;
-  }
-
-  .notification.show {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  .notification.success {
-    border-color: var(--color-accent);
-    background: rgba(0, 255, 136, 0.1);
-  }
-
-  .notification.error {
-    border-color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
-  }
-
-  /* Utilities */
-  .hidden {
-    display: none !important;
-  }
-
-  /* Placeholder Message */
-  .placeholder-message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: var(--color-text-muted);
-    font-size: 1.2rem;
-  }
-
-  .placeholder-message p {
-    margin: 0;
-  }
-
-  /* Responsive */
-  @media (max-width: 1200px) {
-    .split-container {
-      grid-template-columns: 1fr;
-      grid-template-rows: 1fr 1fr;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .create-page {
-      padding: 0.5rem;
-    }
-
-    .page-header h1 {
-      font-size: 2rem;
-    }
-
-    .form-card {
-      padding: 1.5rem;
-    }
-
-    .example-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .quick-actions-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .preview-frame {
-      height: 400px;
-    }
-  }
-  
-  /* Debug Borders for Create Page */
-  body.debug-borders .split-container {
-    outline-color: rgba(255, 0, 255, 0.8) !important;
-    outline-width: 3px !important;
-  }
-  
-  body.debug-borders .left-panel {
-    outline-color: rgba(0, 255, 255, 0.6) !important;
-  }
-  
-  body.debug-borders .right-panel {
-    outline-color: rgba(255, 255, 0, 0.6) !important;
-  }
-  
-  body.debug-borders .generator-section {
-    outline-color: rgba(0, 255, 0, 0.5) !important;
-  }
-  
-  body.debug-borders .editor-panel {
-    outline-color: rgba(255, 128, 0, 0.6) !important;
-  }
-  
-  body.debug-borders .preview-panel {
-    outline-color: rgba(128, 0, 255, 0.6) !important;
-  }
+	.create-page {
+		height: calc(100vh - 60px);
+		overflow: hidden;
+		padding: 1rem;
+		box-sizing: border-box;
+	}
+
+	.split-container {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		height: 100%;
+		gap: 1px;
+		background: var(--color-border);
+		border-radius: 12px;
+		overflow: hidden;
+	}
+
+	/* Left Panel */
+	.left-panel {
+		background: var(--color-bg);
+		display: flex;
+		flex-direction: column;
+		overflow-y: auto;
+		padding: 2rem;
+		align-items: center;
+	}
+
+	.left-panel > * {
+		width: 100%;
+		max-width: 600px;
+	}
+
+	/* Right Panel */
+	.right-panel {
+		background: var(--color-bg);
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	/* Game Preview Section */
+	.game-preview-section {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.preview-panel {
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		overflow: hidden;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.preview-header {
+		background: var(--color-bg);
+		padding: 0.75rem 1rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		border-bottom: 1px solid var(--color-border);
+		flex-shrink: 0;
+	}
+
+	.preview-header h3 {
+		margin: 0;
+		font-size: 1rem;
+		color: var(--color-text);
+	}
+
+	.preview-actions {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.preview-frame {
+		flex: 1;
+		background: var(--color-bg);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.game-iframe {
+		width: 100%;
+		height: 100%;
+		border: none;
+		display: block;
+	}
+
+	/* Editor Panel */
+	.editor-panel {
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 12px;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		height: calc(100% - 2rem);
+		margin-top: 1rem;
+		width: 100%;
+	}
+
+	.editor-panel.hidden {
+		display: none;
+	}
+
+	.editor-header {
+		background: var(--color-bg);
+		padding: 0.75rem 1rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.editor-header h3 {
+		margin: 0;
+		font-size: 1rem;
+		color: var(--color-text);
+	}
+
+	.editor-actions {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.code-editor {
+		flex: 1;
+		overflow: hidden;
+	}
+
+	.code-editor .CodeMirror {
+		height: 100%;
+		font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+		font-size: 14px;
+	}
+
+	/* Generator Section */
+	.generator-section {
+		flex: 1;
+		width: 100%;
+	}
+
+	.generator-section.hidden {
+		display: none;
+	}
+
+	.page-header {
+		text-align: center;
+		margin-bottom: 2rem;
+		transition:
+			opacity 0.3s ease,
+			max-height 0.3s ease;
+	}
+
+	.page-header.hidden {
+		opacity: 0;
+		max-height: 0;
+		margin: 0;
+		overflow: hidden;
+	}
+
+	.page-header h1 {
+		font-size: 2rem;
+		font-weight: 700;
+		color: var(--color-text);
+		margin-bottom: 0.5rem;
+	}
+
+	.subtitle {
+		color: var(--color-text-secondary);
+		font-size: 1.1rem;
+	}
+
+	/* Form Card */
+	.form-card {
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 12px;
+		padding: 1.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.form-content {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.form-label {
+		color: var(--color-text);
+		font-weight: 500;
+		font-size: 1.1rem;
+	}
+
+	.form-textarea {
+		background: var(--color-bg);
+		color: var(--color-text);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		padding: 1rem;
+		font-size: 1rem;
+		font-family: inherit;
+		transition: all 0.2s ease;
+		resize: vertical;
+		min-height: 120px;
+	}
+
+	.form-textarea:focus {
+		outline: none;
+		border-color: var(--color-accent);
+		box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+	}
+
+	.form-textarea::placeholder {
+		color: var(--color-text-muted);
+		font-size: 0.95rem;
+	}
+
+	/* Hints */
+	.form-hints {
+		background: var(--color-bg);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		padding: 1rem;
+		margin-top: 0.5rem;
+	}
+
+	.hint-title {
+		color: var(--color-text);
+		font-weight: 500;
+		margin: 0 0 0.5rem 0;
+		font-size: 0.9rem;
+	}
+
+	.hint-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.hint-list li {
+		color: var(--color-text-secondary);
+		font-size: 0.85rem;
+		padding-left: 1.5rem;
+		position: relative;
+	}
+
+	.hint-list li::before {
+		content: '•';
+		position: absolute;
+		left: 0.5rem;
+		color: var(--color-accent);
+	}
+
+	/* Quick Actions */
+	.quick-actions {
+		margin-top: 1rem;
+	}
+
+	.quick-actions-title {
+		color: var(--color-text-secondary);
+		font-size: 0.9rem;
+		margin: 0 0 0.75rem 0;
+	}
+
+	.quick-actions-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+		gap: 0.5rem;
+	}
+
+	.quick-action-btn {
+		background: var(--color-bg);
+		color: var(--color-text);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		padding: 0.75rem 1rem;
+		font-size: 0.9rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		text-align: center;
+		font-family: inherit;
+	}
+
+	.quick-action-btn:hover {
+		border-color: var(--color-accent);
+		background: rgba(0, 255, 136, 0.05);
+		transform: translateY(-1px);
+	}
+
+	/* Model Selection */
+	.model-selection {
+		margin-top: 1rem;
+	}
+
+	.model-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+		gap: 0.75rem;
+		margin-top: 0.75rem;
+	}
+
+	.model-option {
+		position: relative;
+		cursor: pointer;
+	}
+
+	.model-option input[type='radio'] {
+		position: absolute;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.model-card {
+		display: flex;
+		flex-direction: column;
+		padding: 0.75rem;
+		background: var(--color-bg);
+		border: 2px solid var(--color-border);
+		border-radius: 8px;
+		transition: all 0.2s ease;
+		text-align: center;
+	}
+
+	.model-option:hover .model-card {
+		border-color: var(--color-accent);
+		background: rgba(0, 255, 136, 0.05);
+	}
+
+	.model-option input[type='radio']:checked + .model-card {
+		border-color: var(--color-accent);
+		background: rgba(0, 255, 136, 0.1);
+		box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2);
+	}
+
+	.model-provider {
+		font-size: 0.65rem;
+		color: var(--color-accent);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		margin-bottom: 0.15rem;
+	}
+
+	.model-name {
+		font-weight: 600;
+		color: var(--color-text);
+		font-size: 0.9rem;
+		margin-bottom: 0.25rem;
+	}
+
+	.model-desc {
+		font-size: 0.75rem;
+		color: var(--color-text-secondary);
+	}
+
+	/* Examples */
+	.examples {
+		margin-top: 1rem;
+	}
+
+	.examples-title {
+		color: var(--color-text-secondary);
+		font-size: 0.9rem;
+		margin: 0 0 0.75rem 0;
+	}
+
+	.example-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 0.75rem;
+	}
+
+	.example-btn {
+		background: var(--color-bg);
+		color: var(--color-text);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		padding: 0.75rem 1rem;
+		font-size: 0.9rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		text-align: left;
+		font-family: inherit;
+	}
+
+	.example-btn:hover {
+		border-color: var(--color-accent);
+		background: rgba(0, 255, 136, 0.05);
+	}
+
+	/* Editor Buttons */
+	.editor-btn {
+		background: var(--color-surface);
+		color: var(--color-text);
+		border: 1px solid var(--color-border);
+		border-radius: 6px;
+		padding: 0.5rem 1rem;
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-family: inherit;
+	}
+
+	.editor-btn:hover {
+		background: var(--color-bg);
+		border-color: var(--color-accent);
+	}
+
+	.editor-btn.primary {
+		background: var(--color-accent);
+		color: var(--color-bg);
+		border-color: var(--color-accent);
+	}
+
+	.editor-btn.primary:hover {
+		background: var(--color-accent-hover);
+	}
+
+	.editor-btn .icon {
+		font-size: 1rem;
+	}
+
+	/* Generate Button */
+	.generate-btn {
+		background: var(--color-accent);
+		color: var(--color-bg);
+		border: none;
+		border-radius: 8px;
+		padding: 1rem;
+		font-size: 1.1rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+	}
+
+	.generate-btn:hover:not(:disabled) {
+		background: var(--color-accent-hover);
+		transform: translateY(-1px);
+	}
+
+	.generate-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.generate-btn.iteration-mode {
+		background: #3b82f6;
+	}
+
+	.generate-btn.iteration-mode:hover:not(:disabled) {
+		background: #2563eb;
+	}
+
+	.generate-btn .icon {
+		font-size: 1.2rem;
+	}
+
+	/* Loading State */
+	.loading-container {
+		background: rgba(0, 0, 0, 0.8);
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1000;
+	}
+
+	.loading-content {
+		background: var(--color-surface);
+		padding: 2rem;
+		border-radius: 12px;
+		border: 1px solid var(--color-border);
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.spinner {
+		width: 2rem;
+		height: 2rem;
+		color: var(--color-accent);
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	.loading-text {
+		color: var(--color-text);
+		font-size: 1.1rem;
+	}
+
+	/* Error State */
+	.error-container {
+		background: rgba(239, 68, 68, 0.1);
+		border: 1px solid rgba(239, 68, 68, 0.5);
+		border-radius: 8px;
+		padding: 1rem;
+		margin: 2rem 0;
+	}
+
+	.error-message {
+		color: #ef4444;
+		margin: 0;
+	}
+
+	/* Notifications */
+	.notification {
+		position: fixed;
+		bottom: 2rem;
+		right: 2rem;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		padding: 1rem 1.5rem;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+		transform: translateY(100px);
+		opacity: 0;
+		transition: all 0.3s ease;
+		z-index: 1000;
+	}
+
+	.notification.show {
+		transform: translateY(0);
+		opacity: 1;
+	}
+
+	.notification.success {
+		border-color: var(--color-accent);
+		background: rgba(0, 255, 136, 0.1);
+	}
+
+	.notification.error {
+		border-color: #ef4444;
+		background: rgba(239, 68, 68, 0.1);
+	}
+
+	/* Utilities */
+	.hidden {
+		display: none !important;
+	}
+
+	/* Placeholder Message */
+	.placeholder-message {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		text-align: center;
+		color: var(--color-text-muted);
+		font-size: 1.2rem;
+	}
+
+	.placeholder-message p {
+		margin: 0;
+	}
+
+	/* Responsive */
+	@media (max-width: 1200px) {
+		.split-container {
+			grid-template-columns: 1fr;
+			grid-template-rows: 1fr 1fr;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.create-page {
+			padding: 0.5rem;
+		}
+
+		.page-header h1 {
+			font-size: 2rem;
+		}
+
+		.form-card {
+			padding: 1.5rem;
+		}
+
+		.example-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.quick-actions-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.preview-frame {
+			height: 400px;
+		}
+	}
+
+	/* Debug Borders for Create Page */
+	body.debug-borders .split-container {
+		outline-color: rgba(255, 0, 255, 0.8) !important;
+		outline-width: 3px !important;
+	}
+
+	body.debug-borders .left-panel {
+		outline-color: rgba(0, 255, 255, 0.6) !important;
+	}
+
+	body.debug-borders .right-panel {
+		outline-color: rgba(255, 255, 0, 0.6) !important;
+	}
+
+	body.debug-borders .generator-section {
+		outline-color: rgba(0, 255, 0, 0.5) !important;
+	}
+
+	body.debug-borders .editor-panel {
+		outline-color: rgba(255, 128, 0, 0.6) !important;
+	}
+
+	body.debug-borders .preview-panel {
+		outline-color: rgba(128, 0, 255, 0.6) !important;
+	}
 </style>

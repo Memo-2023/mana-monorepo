@@ -11,11 +11,7 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import {
-	ConflictException,
-	NotFoundException,
-	ForbiddenException,
-} from '@nestjs/common';
+import { ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { BetterAuthService } from './better-auth.service';
 import { createMockConfigService } from '../../__tests__/utils/test-helpers';
 
@@ -156,9 +152,7 @@ describe('BetterAuthService', () => {
 			};
 
 			// Mock Better Auth error for existing user
-			mockAuthApi.signUpEmail.mockRejectedValue(
-				new Error('User with this email already exists')
-			);
+			mockAuthApi.signUpEmail.mockRejectedValue(new Error('User with this email already exists'));
 
 			await expect(service.registerB2C(registerDto)).rejects.toThrow(ConflictException);
 			await expect(service.registerB2C(registerDto)).rejects.toThrow(
@@ -365,9 +359,7 @@ describe('BetterAuthService', () => {
 			});
 
 			// Mock organization creation failure
-			mockAuthApi.createOrganization.mockRejectedValue(
-				new Error('Failed to create organization')
-			);
+			mockAuthApi.createOrganization.mockRejectedValue(new Error('Failed to create organization'));
 
 			await expect(service.registerB2B(registerDto)).rejects.toThrow(
 				'Failed to create organization'
@@ -411,9 +403,7 @@ describe('BetterAuthService', () => {
 				organizationName: 'Acme Corporation',
 			};
 
-			mockAuthApi.signUpEmail.mockRejectedValue(
-				new Error('User with this email already exists')
-			);
+			mockAuthApi.signUpEmail.mockRejectedValue(new Error('User with this email already exists'));
 
 			await expect(service.registerB2B(registerDto)).rejects.toThrow(ConflictException);
 			await expect(service.registerB2B(registerDto)).rejects.toThrow('Owner email already exists');
@@ -526,13 +516,9 @@ describe('BetterAuthService', () => {
 				inviterToken: 'inviter-token',
 			};
 
-			mockAuthApi.inviteMember.mockRejectedValue(
-				new Error('User is already a member')
-			);
+			mockAuthApi.inviteMember.mockRejectedValue(new Error('User is already a member'));
 
-			await expect(service.inviteEmployee(inviteDto)).rejects.toThrow(
-				'User is already a member'
-			);
+			await expect(service.inviteEmployee(inviteDto)).rejects.toThrow('User is already a member');
 		});
 
 		it('should throw ForbiddenException if inviter lacks permission', async () => {
@@ -588,9 +574,7 @@ describe('BetterAuthService', () => {
 				userToken: 'user-token',
 			};
 
-			mockAuthApi.acceptInvitation.mockRejectedValue(
-				new Error('Invitation expired')
-			);
+			mockAuthApi.acceptInvitation.mockRejectedValue(new Error('Invitation expired'));
 
 			await expect(service.acceptInvitation(acceptDto)).rejects.toThrow(NotFoundException);
 			await expect(service.acceptInvitation(acceptDto)).rejects.toThrow(
@@ -604,9 +588,7 @@ describe('BetterAuthService', () => {
 				userToken: 'user-token',
 			};
 
-			mockAuthApi.acceptInvitation.mockRejectedValue(
-				new Error('Invitation not found')
-			);
+			mockAuthApi.acceptInvitation.mockRejectedValue(new Error('Invitation not found'));
 
 			await expect(service.acceptInvitation(acceptDto)).rejects.toThrow(NotFoundException);
 		});
@@ -652,9 +634,7 @@ describe('BetterAuthService', () => {
 		});
 
 		it('should return empty array on error', async () => {
-			mockAuthApi.getFullOrganization.mockRejectedValue(
-				new Error('Database error')
-			);
+			mockAuthApi.getFullOrganization.mockRejectedValue(new Error('Database error'));
 
 			const result = await service.getOrganizationMembers('org-123');
 
@@ -698,13 +678,9 @@ describe('BetterAuthService', () => {
 				removerToken: 'admin-token',
 			};
 
-			mockAuthApi.removeMember.mockRejectedValue(
-				new Error('Member not found')
-			);
+			mockAuthApi.removeMember.mockRejectedValue(new Error('Member not found'));
 
-			await expect(service.removeMember(removeDto)).rejects.toThrow(
-				'Member not found'
-			);
+			await expect(service.removeMember(removeDto)).rejects.toThrow('Member not found');
 		});
 
 		it('should throw ForbiddenException if remover lacks permission', async () => {
@@ -782,9 +758,7 @@ describe('BetterAuthService', () => {
 				new Error('Organization not found or you are not a member')
 			);
 
-			await expect(service.setActiveOrganization(setActiveDto)).rejects.toThrow(
-				NotFoundException
-			);
+			await expect(service.setActiveOrganization(setActiveDto)).rejects.toThrow(NotFoundException);
 			await expect(service.setActiveOrganization(setActiveDto)).rejects.toThrow(
 				'Organization not found or you are not a member'
 			);
@@ -970,13 +944,9 @@ describe('BetterAuthService', () => {
 				name: 'Test User',
 			};
 
-			mockAuthApi.signUpEmail.mockRejectedValue(
-				new Error('Unexpected server error')
-			);
+			mockAuthApi.signUpEmail.mockRejectedValue(new Error('Unexpected server error'));
 
-			await expect(service.registerB2C(registerDto)).rejects.toThrow(
-				'Unexpected server error'
-			);
+			await expect(service.registerB2C(registerDto)).rejects.toThrow('Unexpected server error');
 		});
 
 		it('should propagate network errors', async () => {
@@ -987,13 +957,9 @@ describe('BetterAuthService', () => {
 				inviterToken: 'token',
 			};
 
-			mockAuthApi.inviteMember.mockRejectedValue(
-				new Error('Network timeout')
-			);
+			mockAuthApi.inviteMember.mockRejectedValue(new Error('Network timeout'));
 
-			await expect(service.inviteEmployee(inviteDto)).rejects.toThrow(
-				'Network timeout'
-			);
+			await expect(service.inviteEmployee(inviteDto)).rejects.toThrow('Network timeout');
 		});
 	});
 });

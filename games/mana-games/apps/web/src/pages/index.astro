@@ -6,13 +6,16 @@ import HorizontalScroller from '../components/HorizontalScroller.astro';
 import { games } from '../data/games';
 
 // Filtere offizielle Spiele (ohne community flag)
-const officialGames = games.filter(game => !game.community);
+const officialGames = games.filter((game) => !game.community);
 
 // Kategorisiere Spiele nach Genres für verschiedene Scroller
-const arcadeGames = officialGames.filter(game => game.tags.includes('Arcade'));
-const puzzleGames = officialGames.filter(game => game.tags.includes('Puzzle'));
-const actionGames = officialGames.filter(game => 
-  game.tags.includes('Action') || game.tags.includes('Shooter') || game.tags.includes('Jump n Run')
+const arcadeGames = officialGames.filter((game) => game.tags.includes('Arcade'));
+const puzzleGames = officialGames.filter((game) => game.tags.includes('Puzzle'));
+const actionGames = officialGames.filter(
+	(game) =>
+		game.tags.includes('Action') ||
+		game.tags.includes('Shooter') ||
+		game.tags.includes('Jump n Run')
 );
 
 // Sortiere nach Beliebtheit/Komplexität
@@ -20,633 +23,615 @@ const featuredGames = [...officialGames].slice(0, 8);
 ---
 
 <Layout title="Startseite" fullWidth={true}>
-  <section class="hero">
-    <div class="hero-content">
-      <h1 class="hero-title">
-        <span class="line line-1">
-          <span id="changingWord">Spiele</span>
-          <span class="line line-2">ohne&nbsp;&nbsp;&nbsp;Grenzen</span>
-        </span>
-      </h1>
-    </div>
-    <div class="hero-visual">
-      <div class="floating-squares">
-        <div class="square"></div>
-        <div class="square"></div>
-        <div class="square"></div>
-      </div>
-    </div>
-  </section>
+	<section class="hero">
+		<div class="hero-content">
+			<h1 class="hero-title">
+				<span class="line line-1">
+					<span id="changingWord">Spiele</span>
+					<span class="line line-2">ohne&nbsp;&nbsp;&nbsp;Grenzen</span>
+				</span>
+			</h1>
+		</div>
+		<div class="hero-visual">
+			<div class="floating-squares">
+				<div class="square"></div>
+				<div class="square"></div>
+				<div class="square"></div>
+			</div>
+		</div>
+	</section>
 
-  <section class="stats-section">
-    <div class="stats-container">
-      <div class="stat">
-        <span class="stat-number">{officialGames.length}</span>
-        <span class="stat-label">Spiele</span>
-      </div>
-      <div class="stat-divider"></div>
-      <div class="stat">
-        <span class="stat-number">100%</span>
-        <span class="stat-label">Kostenlos</span>
-      </div>
-      <div class="stat-divider"></div>
-      <div class="stat">
-        <span class="stat-number">100%</span>
-        <span class="stat-label">Werbefrei</span>
-      </div>
-      <div class="stat-divider"></div>
-      <a href="/stats" class="stat stat-link">
-        <span class="stat-number">📊</span>
-        <span class="stat-label">Meine Stats</span>
-      </a>
-    </div>
-  </section>
+	<section class="stats-section">
+		<div class="stats-container">
+			<div class="stat">
+				<span class="stat-number">{officialGames.length}</span>
+				<span class="stat-label">Spiele</span>
+			</div>
+			<div class="stat-divider"></div>
+			<div class="stat">
+				<span class="stat-number">100%</span>
+				<span class="stat-label">Kostenlos</span>
+			</div>
+			<div class="stat-divider"></div>
+			<div class="stat">
+				<span class="stat-number">100%</span>
+				<span class="stat-label">Werbefrei</span>
+			</div>
+			<div class="stat-divider"></div>
+			<a href="/stats" class="stat stat-link">
+				<span class="stat-number">📊</span>
+				<span class="stat-label">Meine Stats</span>
+			</a>
+		</div>
+	</section>
 
-  <!-- Featured Official Games - Netflix Style -->
-  <HorizontalScroller 
-    title="Offizielle Mana Games" 
-    games={featuredGames}
-    id="featured-scroller"
-  />
+	<!-- Featured Official Games - Netflix Style -->
+	<HorizontalScroller title="Offizielle Mana Games" games={featuredGames} id="featured-scroller" />
 
-  <!-- My Games Section -->
-  <MyGamesSection maxGames={4} />
+	<!-- My Games Section -->
+	<MyGamesSection maxGames={4} />
 
-  <!-- Genre-basierte Scroller -->
-  {arcadeGames.length > 0 && (
-    <HorizontalScroller 
-      title="Arcade Spiele" 
-      games={arcadeGames}
-      id="arcade-scroller"
-    />
-  )}
+	<!-- Genre-basierte Scroller -->
+	{
+		arcadeGames.length > 0 && (
+			<HorizontalScroller title="Arcade Spiele" games={arcadeGames} id="arcade-scroller" />
+		)
+	}
 
-  {puzzleGames.length > 0 && (
-    <HorizontalScroller 
-      title="Puzzle & Denkspiele" 
-      games={puzzleGames}
-      id="puzzle-scroller"
-    />
-  )}
+	{
+		puzzleGames.length > 0 && (
+			<HorizontalScroller title="Puzzle & Denkspiele" games={puzzleGames} id="puzzle-scroller" />
+		)
+	}
 
-  {actionGames.length > 0 && (
-    <HorizontalScroller 
-      title="Action & Adventure" 
-      games={actionGames}
-      id="action-scroller"
-    />
-  )}
+	{
+		actionGames.length > 0 && (
+			<HorizontalScroller title="Action & Adventure" games={actionGames} id="action-scroller" />
+		)
+	}
 
-  <section class="games-section">
-    <div class="section-header">
-      <h2>Alle Spiele durchsuchen</h2>
-      <div class="filter-tabs">
-        <button class="filter-tab active" data-filter="all">
-          Alle
-        </button>
-        <button class="filter-tab" data-filter="official">
-          Offizielle
-        </button>
-        <button class="filter-tab" data-filter="my-games">
-          Meine Spiele
-        </button>
-        <button class="filter-tab" data-filter="community">
-          Community
-        </button>
-      </div>
-    </div>
-    
-    <div id="officialGames" class="games-grid">
-      {officialGames.map((game, index) => (
-        <div class="game-wrapper" style={`--delay: ${0.4 + index * 0.1}s`}>
-          <GameCard
-            title={game.title}
-            description={game.description}
-            slug={game.slug}
-            thumbnail={game.thumbnail}
-            tags={game.tags}
-            complexity={game.complexity}
-            codeStats={game.codeStats}
-          />
-        </div>
-      ))}
-    </div>
-    
-    <div id="myGamesGrid" class="games-grid hidden">
-      <!-- Will be populated by JavaScript -->
-    </div>
-    
-    <div id="communityGamesGrid" class="games-grid hidden">
-      <!-- Will be populated by JavaScript -->
-    </div>
-    
-    <div id="allGamesGrid" class="games-grid hidden">
-      <!-- Will be populated by JavaScript -->
-    </div>
-  </section>
+	<section class="games-section">
+		<div class="section-header">
+			<h2>Alle Spiele durchsuchen</h2>
+			<div class="filter-tabs">
+				<button class="filter-tab active" data-filter="all"> Alle </button>
+				<button class="filter-tab" data-filter="official"> Offizielle </button>
+				<button class="filter-tab" data-filter="my-games"> Meine Spiele </button>
+				<button class="filter-tab" data-filter="community"> Community </button>
+			</div>
+		</div>
+
+		<div id="officialGames" class="games-grid">
+			{
+				officialGames.map((game, index) => (
+					<div class="game-wrapper" style={`--delay: ${0.4 + index * 0.1}s`}>
+						<GameCard
+							title={game.title}
+							description={game.description}
+							slug={game.slug}
+							thumbnail={game.thumbnail}
+							tags={game.tags}
+							complexity={game.complexity}
+							codeStats={game.codeStats}
+						/>
+					</div>
+				))
+			}
+		</div>
+
+		<div id="myGamesGrid" class="games-grid hidden">
+			<!-- Will be populated by JavaScript -->
+		</div>
+
+		<div id="communityGamesGrid" class="games-grid hidden">
+			<!-- Will be populated by JavaScript -->
+		</div>
+
+		<div id="allGamesGrid" class="games-grid hidden">
+			<!-- Will be populated by JavaScript -->
+		</div>
+	</section>
 </Layout>
 
 <style>
-  .hero {
-    position: relative;
-    min-height: 30vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-  }
+	.hero {
+		position: relative;
+		min-height: 30vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 1.5rem;
+		overflow: hidden;
+	}
 
-  .hero-content {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-  }
+	.hero-content {
+		position: relative;
+		z-index: 2;
+		text-align: center;
+	}
 
-  .hero-title {
-    font-size: clamp(2.5rem, 7vw, 4.5rem);
-    font-weight: 900;
-    line-height: 0.85;
-    margin-bottom: 1rem;
-    letter-spacing: -0.05em;
-  }
+	.hero-title {
+		font-size: clamp(2.5rem, 7vw, 4.5rem);
+		font-weight: 900;
+		line-height: 0.85;
+		margin-bottom: 1rem;
+		letter-spacing: -0.05em;
+	}
 
-  .line {
-    display: inline;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeInUp 0.4s ease forwards;
-  }
+	.line {
+		display: inline;
+		opacity: 0;
+		transform: translateY(20px);
+		animation: fadeInUp 0.4s ease forwards;
+	}
 
-  .line-1 {
-    animation-delay: 0s;
-  }
+	.line-1 {
+		animation-delay: 0s;
+	}
 
-  .line-2 {
-    animation-delay: 0.1s;
-    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-left: 0.1em;
-  }
+	.line-2 {
+		animation-delay: 0.1s;
+		background: linear-gradient(90deg, var(--color-accent), var(--color-accent-secondary));
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		margin-left: 0.1em;
+	}
 
-  #changingWord {
-    display: inline-block;
-    min-width: 3em;
-    text-align: right;
-    position: relative;
-    color: var(--color-text);
-  }
+	#changingWord {
+		display: inline-block;
+		min-width: 3em;
+		text-align: right;
+		position: relative;
+		color: var(--color-text);
+	}
 
-  .word-fade-out {
-    animation: fadeOut 0.3s ease-out forwards;
-  }
+	.word-fade-out {
+		animation: fadeOut 0.3s ease-out forwards;
+	}
 
-  .word-fade-in {
-    animation: fadeIn 0.3s ease-in forwards;
-  }
+	.word-fade-in {
+		animation: fadeIn 0.3s ease-in forwards;
+	}
 
-  @keyframes fadeOut {
-    to {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-  }
+	@keyframes fadeOut {
+		to {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
+	}
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
 
+	/* Floating visual elements */
+	.hero-visual {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		pointer-events: none;
+		opacity: 0.1;
+	}
 
-  /* Floating visual elements */
-  .hero-visual {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    opacity: 0.1;
-  }
+	.floating-squares {
+		position: relative;
+		width: 100%;
+		height: 100%;
+	}
 
-  .floating-squares {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
+	.square {
+		position: absolute;
+		border: 1px solid rgba(0, 255, 136, 0.2);
+		border-radius: 1rem;
+	}
 
-  .square {
-    position: absolute;
-    border: 1px solid rgba(0, 255, 136, 0.2);
-    border-radius: 1rem;
-  }
+	.square:nth-child(1) {
+		width: 200px;
+		height: 200px;
+		top: 10%;
+		left: 10%;
+		transform: rotate(15deg);
+	}
 
-  .square:nth-child(1) {
-    width: 200px;
-    height: 200px;
-    top: 10%;
-    left: 10%;
-    transform: rotate(15deg);
-  }
+	.square:nth-child(2) {
+		width: 300px;
+		height: 300px;
+		top: 50%;
+		right: 10%;
+		transform: rotate(-20deg);
+	}
 
-  .square:nth-child(2) {
-    width: 300px;
-    height: 300px;
-    top: 50%;
-    right: 10%;
-    transform: rotate(-20deg);
-  }
+	.square:nth-child(3) {
+		width: 150px;
+		height: 150px;
+		bottom: 10%;
+		left: 50%;
+		transform: rotate(45deg);
+	}
 
-  .square:nth-child(3) {
-    width: 150px;
-    height: 150px;
-    bottom: 10%;
-    left: 50%;
-    transform: rotate(45deg);
-  }
+	@keyframes fadeInUp {
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
 
-  @keyframes fadeInUp {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+	/* Stats Section */
+	.stats-section {
+		margin-top: -1rem;
+		margin-bottom: 2.5rem;
+		opacity: 0;
+		transform: translateY(15px);
+		animation: fadeInUp 0.4s ease 0.3s forwards;
+	}
 
-  /* Stats Section */
-  .stats-section {
-    margin-top: -1rem;
-    margin-bottom: 2.5rem;
-    opacity: 0;
-    transform: translateY(15px);
-    animation: fadeInUp 0.4s ease 0.3s forwards;
-  }
+	.stats-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 2.5rem;
+		flex-wrap: wrap;
+	}
 
-  .stats-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2.5rem;
-    flex-wrap: wrap;
-  }
+	.stat {
+		text-align: center;
+	}
 
-  .stat {
-    text-align: center;
-  }
+	.stat-number {
+		display: block;
+		font-size: 1.75rem;
+		font-weight: 900;
+		color: var(--color-accent);
+		line-height: 1;
+		margin-bottom: 0.25rem;
+	}
 
-  .stat-number {
-    display: block;
-    font-size: 1.75rem;
-    font-weight: 900;
-    color: var(--color-accent);
-    line-height: 1;
-    margin-bottom: 0.25rem;
-  }
+	.stat-label {
+		display: block;
+		font-size: 0.75rem;
+		color: var(--color-text-secondary);
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		opacity: 0.7;
+	}
 
-  .stat-label {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--color-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    opacity: 0.7;
-  }
+	.stat-divider {
+		width: 1px;
+		height: 30px;
+		background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.1), transparent);
+	}
 
-  .stat-divider {
-    width: 1px;
-    height: 30px;
-    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.1), transparent);
-  }
+	.stat-link {
+		text-decoration: none;
+		transition: all 0.2s ease;
+		cursor: pointer;
+	}
 
-  .stat-link {
-    text-decoration: none;
-    transition: all 0.2s ease;
-    cursor: pointer;
-  }
+	.stat-link:hover {
+		transform: translateY(-2px);
+	}
 
-  .stat-link:hover {
-    transform: translateY(-2px);
-  }
+	.stat-link .stat-number {
+		font-size: 2rem;
+	}
 
-  .stat-link .stat-number {
-    font-size: 2rem;
-  }
+	.stat-link:hover .stat-number {
+		transform: scale(1.1);
+		transition: transform 0.2s ease;
+	}
 
-  .stat-link:hover .stat-number {
-    transform: scale(1.1);
-    transition: transform 0.2s ease;
-  }
+	/* Games Section */
+	.games-section {
+		position: relative;
+		margin-top: 4rem;
+		margin-bottom: 6rem;
+		padding-top: 3rem;
+		border-top: 1px solid var(--color-border);
+	}
 
-  /* Games Section */
-  .games-section {
-    position: relative;
-    margin-top: 4rem;
-    margin-bottom: 6rem;
-    padding-top: 3rem;
-    border-top: 1px solid var(--color-border);
-  }
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 3rem;
+	}
 
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 3rem;
-  }
+	.section-header h2 {
+		font-size: 1.75rem;
+		font-weight: 700;
+		color: var(--color-text);
+		margin: 0;
+	}
 
-  .section-header h2 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--color-text);
-    margin: 0;
-  }
+	.filter-tabs {
+		display: flex;
+		gap: 0.5rem;
+		background: var(--color-surface);
+		padding: 0.25rem;
+		border-radius: 10px;
+		border: 1px solid var(--color-border);
+	}
 
-  .filter-tabs {
-    display: flex;
-    gap: 0.5rem;
-    background: var(--color-surface);
-    padding: 0.25rem;
-    border-radius: 10px;
-    border: 1px solid var(--color-border);
-  }
+	.filter-tab {
+		background: transparent;
+		color: var(--color-text-secondary);
+		border: none;
+		border-radius: 8px;
+		padding: 0.5rem 1.25rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		font-family: inherit;
+	}
 
-  .filter-tab {
-    background: transparent;
-    color: var(--color-text-secondary);
-    border: none;
-    border-radius: 8px;
-    padding: 0.5rem 1.25rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: inherit;
-  }
+	.filter-tab:hover {
+		color: var(--color-text);
+	}
 
-  .filter-tab:hover {
-    color: var(--color-text);
-  }
+	.filter-tab.active {
+		background: var(--color-bg);
+		color: var(--color-accent);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	}
 
-  .filter-tab.active {
-    background: var(--color-bg);
-    color: var(--color-accent);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
+	.hidden {
+		display: none !important;
+	}
 
-  .hidden {
-    display: none !important;
-  }
+	.games-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: 2rem;
+		align-items: stretch;
+	}
 
-  .games-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
-    align-items: stretch;
-  }
+	.game-wrapper {
+		opacity: 0;
+		transform: translateY(15px);
+		animation: fadeInUp 0.3s ease var(--delay) forwards;
+	}
 
-  .game-wrapper {
-    opacity: 0;
-    transform: translateY(15px);
-    animation: fadeInUp 0.3s ease var(--delay) forwards;
-  }
+	/* Minimal grid line decoration */
+	.games-section::before {
+		content: '';
+		position: absolute;
+		top: -3rem;
+		left: 0;
+		width: 100px;
+		height: 2px;
+		background: linear-gradient(90deg, var(--color-accent), transparent);
+	}
 
-  /* Minimal grid line decoration */
-  .games-section::before {
-    content: '';
-    position: absolute;
-    top: -3rem;
-    left: 0;
-    width: 100px;
-    height: 2px;
-    background: linear-gradient(90deg, var(--color-accent), transparent);
-  }
+	/* Generated game cards styling */
+	.my-game-card {
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 12px;
+		overflow: hidden;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
 
-  /* Generated game cards styling */
-  .my-game-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
+	.my-game-card:hover {
+		transform: translateY(-2px);
+		border-color: var(--color-accent);
+		box-shadow: 0 4px 12px rgba(0, 255, 136, 0.1);
+	}
 
-  .my-game-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--color-accent);
-    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.1);
-  }
+	.my-game-card .card-thumbnail {
+		aspect-ratio: 16/9;
+		background: var(--color-bg);
+		overflow: hidden;
+	}
 
-  .my-game-card .card-thumbnail {
-    aspect-ratio: 16/9;
-    background: var(--color-bg);
-    overflow: hidden;
-  }
+	.my-game-card .card-thumbnail img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
 
-  .my-game-card .card-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+	.my-game-card .placeholder-thumbnail {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 3rem;
+		color: var(--color-text-muted);
+	}
 
-  .my-game-card .placeholder-thumbnail {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3rem;
-    color: var(--color-text-muted);
-  }
+	.my-game-card .card-content {
+		padding: 1.5rem;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+	}
 
-  .my-game-card .card-content {
-    padding: 1.5rem;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
+	.my-game-card .card-title {
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: var(--color-text);
+		margin: 0 0 0.5rem 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
 
-  .my-game-card .card-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--color-text);
-    margin: 0 0 0.5rem 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+	.my-game-card .card-description {
+		color: var(--color-text-secondary);
+		font-size: 0.9rem;
+		margin: 0 0 1rem 0;
+		flex: 1;
+		overflow: hidden;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+	}
 
-  .my-game-card .card-description {
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
-    margin: 0 0 1rem 0;
-    flex: 1;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-  }
+	.my-game-card .card-meta {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-size: 0.85rem;
+	}
 
-  .my-game-card .card-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.85rem;
-  }
+	.my-game-card .complexity-badge {
+		background: var(--color-accent);
+		color: var(--color-bg);
+		padding: 0.25rem 0.75rem;
+		border-radius: 12px;
+		font-weight: 600;
+		font-size: 0.75rem;
+	}
 
-  .my-game-card .complexity-badge {
-    background: var(--color-accent);
-    color: var(--color-bg);
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.75rem;
-  }
+	.my-game-card .creation-date {
+		color: var(--color-text-muted);
+	}
 
-  .my-game-card .creation-date {
-    color: var(--color-text-muted);
-  }
+	@media (max-width: 768px) {
+		.hero {
+			min-height: 25vh;
+			margin-bottom: 1rem;
+		}
 
-  @media (max-width: 768px) {
-    .hero {
-      min-height: 25vh;
-      margin-bottom: 1rem;
-    }
+		.hero-title {
+			font-size: clamp(2rem, 9vw, 3rem);
+		}
 
-    .hero-title {
-      font-size: clamp(2rem, 9vw, 3rem);
-    }
+		.stats-container {
+			gap: 2rem;
+		}
 
+		.stats-section {
+			margin-top: -0.5rem;
+			margin-bottom: 2rem;
+		}
 
-    .stats-container {
-      gap: 2rem;
-    }
+		.stat-number {
+			font-size: 1.5rem;
+		}
 
-    .stats-section {
-      margin-top: -0.5rem;
-      margin-bottom: 2rem;
-    }
+		.stat-label {
+			font-size: 0.7rem;
+		}
 
-    .stat-number {
-      font-size: 1.5rem;
-    }
+		.stat-divider {
+			height: 25px;
+		}
 
-    .stat-label {
-      font-size: 0.7rem;
-    }
+		.games-grid {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
 
-    .stat-divider {
-      height: 25px;
-    }
-
-    .games-grid {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    .square {
-      display: none;
-    }
-  }
+		.square {
+			display: none;
+		}
+	}
 </style>
 
 <script>
-  // Wörter-Animation für den Hero-Text
-  const words = ['Spiele', 'Baue', 'Lerne'];
-  let currentWordIndex = 0;
-  const changingWord = document.getElementById('changingWord');
+	// Wörter-Animation für den Hero-Text
+	const words = ['Spiele', 'Baue', 'Lerne'];
+	let currentWordIndex = 0;
+	const changingWord = document.getElementById('changingWord');
 
-  function changeWord() {
-    // Fade out
-    changingWord.classList.add('word-fade-out');
-    
-    setTimeout(() => {
-      // Wechsle zum nächsten Wort
-      currentWordIndex = (currentWordIndex + 1) % words.length;
-      changingWord.textContent = words[currentWordIndex];
-      
-      // Fade in
-      changingWord.classList.remove('word-fade-out');
-      changingWord.classList.add('word-fade-in');
-      
-      setTimeout(() => {
-        changingWord.classList.remove('word-fade-in');
-      }, 300);
-    }, 300);
-  }
+	function changeWord() {
+		// Fade out
+		changingWord.classList.add('word-fade-out');
 
-  // Starte Animation nach 2 Sekunden, dann alle 3 Sekunden
-  setTimeout(() => {
-    changeWord();
-    setInterval(changeWord, 3000);
-  }, 2000);
+		setTimeout(() => {
+			// Wechsle zum nächsten Wort
+			currentWordIndex = (currentWordIndex + 1) % words.length;
+			changingWord.textContent = words[currentWordIndex];
 
-  // Filter functionality
-  const filterTabs = document.querySelectorAll('.filter-tab');
-  const officialGames = document.getElementById('officialGames');
-  const myGamesGrid = document.getElementById('myGamesGrid');
-  const communityGamesGrid = document.getElementById('communityGamesGrid');
-  const allGamesGrid = document.getElementById('allGamesGrid');
+			// Fade in
+			changingWord.classList.remove('word-fade-out');
+			changingWord.classList.add('word-fade-in');
 
-  // GameStorage class (simplified version for reading)
-  class GameStorage {
-    private dbName = 'ManaGamesDB';
-    private storeName = 'generatedGames';
-    private db: IDBDatabase | null = null;
+			setTimeout(() => {
+				changingWord.classList.remove('word-fade-in');
+			}, 300);
+		}, 300);
+	}
 
-    async init(): Promise<void> {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open(this.dbName, 1);
+	// Starte Animation nach 2 Sekunden, dann alle 3 Sekunden
+	setTimeout(() => {
+		changeWord();
+		setInterval(changeWord, 3000);
+	}, 2000);
 
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => {
-          this.db = request.result;
-          resolve();
-        };
+	// Filter functionality
+	const filterTabs = document.querySelectorAll('.filter-tab');
+	const officialGames = document.getElementById('officialGames');
+	const myGamesGrid = document.getElementById('myGamesGrid');
+	const communityGamesGrid = document.getElementById('communityGamesGrid');
+	const allGamesGrid = document.getElementById('allGamesGrid');
 
-        request.onupgradeneeded = (event) => {
-          const db = (event.target as IDBOpenDBRequest).result;
-          if (!db.objectStoreNames.contains(this.storeName)) {
-            const store = db.createObjectStore(this.storeName, { keyPath: 'id' });
-            store.createIndex('createdAt', 'createdAt', { unique: false });
-            store.createIndex('title', 'title', { unique: false });
-          }
-        };
-      });
-    }
+	// GameStorage class (simplified version for reading)
+	class GameStorage {
+		private dbName = 'ManaGamesDB';
+		private storeName = 'generatedGames';
+		private db: IDBDatabase | null = null;
 
-    async getAllGames(): Promise<any[]> {
-      if (!this.db) await this.init();
+		async init(): Promise<void> {
+			return new Promise((resolve, reject) => {
+				const request = indexedDB.open(this.dbName, 1);
 
-      return new Promise((resolve, reject) => {
-        const transaction = this.db!.transaction([this.storeName], 'readonly');
-        const store = transaction.objectStore(this.storeName);
-        const request = store.getAll();
+				request.onerror = () => reject(request.error);
+				request.onsuccess = () => {
+					this.db = request.result;
+					resolve();
+				};
 
-        request.onsuccess = () => resolve(request.result || []);
-        request.onerror = () => reject(request.error);
-      });
-    }
-  }
+				request.onupgradeneeded = (event) => {
+					const db = (event.target as IDBOpenDBRequest).result;
+					if (!db.objectStoreNames.contains(this.storeName)) {
+						const store = db.createObjectStore(this.storeName, { keyPath: 'id' });
+						store.createIndex('createdAt', 'createdAt', { unique: false });
+						store.createIndex('title', 'title', { unique: false });
+					}
+				};
+			});
+		}
 
-  const gameStorage = new GameStorage();
+		async getAllGames(): Promise<any[]> {
+			if (!this.db) await this.init();
 
-  // Load and display my games
-  async function loadMyGames() {
-    try {
-      const myGames = await gameStorage.getAllGames();
-      
-      if (myGames.length === 0) {
-        myGamesGrid.innerHTML = `
+			return new Promise((resolve, reject) => {
+				const transaction = this.db!.transaction([this.storeName], 'readonly');
+				const store = transaction.objectStore(this.storeName);
+				const request = store.getAll();
+
+				request.onsuccess = () => resolve(request.result || []);
+				request.onerror = () => reject(request.error);
+			});
+		}
+	}
+
+	const gameStorage = new GameStorage();
+
+	// Load and display my games
+	async function loadMyGames() {
+		try {
+			const myGames = await gameStorage.getAllGames();
+
+			if (myGames.length === 0) {
+				myGamesGrid.innerHTML = `
           <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
             <p style="color: var(--color-text-secondary); font-size: 1.1rem;">
               Du hast noch keine eigenen Spiele erstellt
@@ -656,23 +641,25 @@ const featuredGames = [...officialGames].slice(0, 8);
             </a>
           </div>
         `;
-        return;
-      }
+				return;
+			}
 
-      // Sort by creation date (newest first)
-      myGames.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+			// Sort by creation date (newest first)
+			myGames.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-      // Create game cards
-      const gameCards = myGames.map((game, index) => {
-        const date = new Date(game.createdAt).toLocaleDateString('de-DE');
-        return `
+			// Create game cards
+			const gameCards = myGames
+				.map((game, index) => {
+					const date = new Date(game.createdAt).toLocaleDateString('de-DE');
+					return `
           <div class="game-wrapper" style="--delay: ${0.4 + index * 0.1}s">
             <div class="game-card my-game-card" onclick="window.location.href='/play-generated?id=${game.id}'">
               <div class="card-thumbnail">
-                ${game.thumbnail 
-                  ? `<img src="${game.thumbnail}" alt="${game.title}" />`
-                  : `<div class="placeholder-thumbnail">🎮</div>`
-                }
+                ${
+									game.thumbnail
+										? `<img src="${game.thumbnail}" alt="${game.title}" />`
+										: `<div class="placeholder-thumbnail">🎮</div>`
+								}
               </div>
               <div class="card-content">
                 <h3 class="card-title">${game.title}</h3>
@@ -685,20 +672,20 @@ const featuredGames = [...officialGames].slice(0, 8);
             </div>
           </div>
         `;
-      }).join('');
+				})
+				.join('');
 
-      myGamesGrid.innerHTML = gameCards;
+			myGamesGrid.innerHTML = gameCards;
+		} catch (error) {
+			console.error('Error loading my games:', error);
+			myGamesGrid.innerHTML = '<p style="color: #ef4444;">Fehler beim Laden der Spiele</p>';
+		}
+	}
 
-    } catch (error) {
-      console.error('Error loading my games:', error);
-      myGamesGrid.innerHTML = '<p style="color: #ef4444;">Fehler beim Laden der Spiele</p>';
-    }
-  }
-
-  // Load community games
-  async function loadCommunityGames() {
-    // For now, show a placeholder - will be populated when community games are added
-    communityGamesGrid.innerHTML = `
+	// Load community games
+	async function loadCommunityGames() {
+		// For now, show a placeholder - will be populated when community games are added
+		communityGamesGrid.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
         <p style="color: var(--color-text-secondary); font-size: 1.1rem;">
           Noch keine Community-Spiele verfügbar
@@ -708,71 +695,71 @@ const featuredGames = [...officialGames].slice(0, 8);
         </a>
       </div>
     `;
-  }
+	}
 
-  // Merge official and my games for "All" view
-  async function loadAllGames() {
-    const officialGamesHTML = officialGames.innerHTML;
-    const myGames = await gameStorage.getAllGames();
-    
-    // Clone official games
-    allGamesGrid.innerHTML = officialGamesHTML;
-    
-    // Add my games if any
-    if (myGames.length > 0) {
-      const myGamesHTML = myGamesGrid.innerHTML;
-      allGamesGrid.innerHTML = officialGamesHTML + myGamesHTML;
-    }
-  }
+	// Merge official and my games for "All" view
+	async function loadAllGames() {
+		const officialGamesHTML = officialGames.innerHTML;
+		const myGames = await gameStorage.getAllGames();
 
-  // Filter tab click handlers
-  filterTabs.forEach(tab => {
-    tab.addEventListener('click', async () => {
-      // Update active tab
-      filterTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      
-      const filter = tab.getAttribute('data-filter');
-      
-      // Show/hide appropriate grids
-      officialGames.classList.add('hidden');
-      myGamesGrid.classList.add('hidden');
-      communityGamesGrid.classList.add('hidden');
-      allGamesGrid.classList.add('hidden');
-      
-      switch(filter) {
-        case 'official':
-          officialGames.classList.remove('hidden');
-          break;
-        case 'my-games':
-          if (myGamesGrid.innerHTML === '') {
-            await loadMyGames();
-          }
-          myGamesGrid.classList.remove('hidden');
-          break;
-        case 'community':
-          if (communityGamesGrid.innerHTML === '') {
-            await loadCommunityGames();
-          }
-          communityGamesGrid.classList.remove('hidden');
-          break;
-        case 'all':
-        default:
-          if (allGamesGrid.innerHTML === '') {
-            await loadAllGames();
-          }
-          allGamesGrid.classList.remove('hidden');
-          break;
-      }
-    });
-  });
+		// Clone official games
+		allGamesGrid.innerHTML = officialGamesHTML;
 
-  // Initialize with "All" view
-  document.addEventListener('DOMContentLoaded', async () => {
-    // Trigger click on "All" tab to load combined view
-    const allTab = document.querySelector('[data-filter="all"]');
-    if (allTab) {
-      (allTab as HTMLElement).click();
-    }
-  });
+		// Add my games if any
+		if (myGames.length > 0) {
+			const myGamesHTML = myGamesGrid.innerHTML;
+			allGamesGrid.innerHTML = officialGamesHTML + myGamesHTML;
+		}
+	}
+
+	// Filter tab click handlers
+	filterTabs.forEach((tab) => {
+		tab.addEventListener('click', async () => {
+			// Update active tab
+			filterTabs.forEach((t) => t.classList.remove('active'));
+			tab.classList.add('active');
+
+			const filter = tab.getAttribute('data-filter');
+
+			// Show/hide appropriate grids
+			officialGames.classList.add('hidden');
+			myGamesGrid.classList.add('hidden');
+			communityGamesGrid.classList.add('hidden');
+			allGamesGrid.classList.add('hidden');
+
+			switch (filter) {
+				case 'official':
+					officialGames.classList.remove('hidden');
+					break;
+				case 'my-games':
+					if (myGamesGrid.innerHTML === '') {
+						await loadMyGames();
+					}
+					myGamesGrid.classList.remove('hidden');
+					break;
+				case 'community':
+					if (communityGamesGrid.innerHTML === '') {
+						await loadCommunityGames();
+					}
+					communityGamesGrid.classList.remove('hidden');
+					break;
+				case 'all':
+				default:
+					if (allGamesGrid.innerHTML === '') {
+						await loadAllGames();
+					}
+					allGamesGrid.classList.remove('hidden');
+					break;
+			}
+		});
+	});
+
+	// Initialize with "All" view
+	document.addEventListener('DOMContentLoaded', async () => {
+		// Trigger click on "All" tab to load combined view
+		const allTab = document.querySelector('[data-filter="all"]');
+		if (allTab) {
+			(allTab as HTMLElement).click();
+		}
+	});
 </script>

@@ -217,9 +217,7 @@ describe('Authentication Flow Integration Tests', () => {
 			await authService.logout(sessionId);
 
 			// Attempt to refresh with revoked token
-			await expect(authService.refreshToken(refreshToken)).rejects.toThrow(
-				'Invalid refresh token'
-			);
+			await expect(authService.refreshToken(refreshToken)).rejects.toThrow('Invalid refresh token');
 		});
 	});
 

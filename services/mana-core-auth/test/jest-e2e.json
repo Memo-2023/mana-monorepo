@@ -4,16 +4,17 @@
 	"testEnvironment": "node",
 	"testRegex": ".e2e-spec.ts$",
 	"transform": {
-		"^.+\\.(t|j)s$": ["ts-jest", {
-			"tsconfig": {
-				"esModuleInterop": true,
-				"allowSyntheticDefaultImports": true
+		"^.+\\.(t|j)s$": [
+			"ts-jest",
+			{
+				"tsconfig": {
+					"esModuleInterop": true,
+					"allowSyntheticDefaultImports": true
+				}
 			}
-		}]
+		]
 	},
-	"transformIgnorePatterns": [
-		"node_modules/(?!(nanoid|better-auth)/)"
-	],
+	"transformIgnorePatterns": ["node_modules/(?!(nanoid|better-auth)/)"],
 	"moduleNameMapper": {
 		"^nanoid$": "<rootDir>/__mocks__/nanoid.ts",
 		"^better-auth$": "<rootDir>/__mocks__/better-auth.ts",

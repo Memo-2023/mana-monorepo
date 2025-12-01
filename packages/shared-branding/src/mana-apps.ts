@@ -286,7 +286,8 @@ export function getPillAppItems(
 	isDev?: boolean,
 	customUrls?: Partial<Record<AppIconId, string>>
 ): PillAppItemConfig[] {
-	const isDevMode = isDev ?? (typeof window !== 'undefined' && window.location.hostname === 'localhost');
+	const isDevMode =
+		isDev ?? (typeof window !== 'undefined' && window.location.hostname === 'localhost');
 
 	// Only show active (non-archived) apps
 	return getActiveManaApps().map((app) => ({

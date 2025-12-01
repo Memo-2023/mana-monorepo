@@ -3,7 +3,12 @@ import { eq, and, isNull, isNotNull, sql, gte, inArray } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { type Database } from '../db/connection';
 import { profiles, images, imageGenerations, type Profile } from '../db/schema';
-import { UpdateProfileDto, ProfileResponse, UserStatsResponse, RateLimitsResponse } from './dto/profile.dto';
+import {
+	UpdateProfileDto,
+	ProfileResponse,
+	UserStatsResponse,
+	RateLimitsResponse,
+} from './dto/profile.dto';
 
 @Injectable()
 export class ProfileService {
@@ -156,13 +161,17 @@ export class ProfileService {
 			const dailyResult = await this.db
 				.select({ count: sql<number>`count(*)` })
 				.from(imageGenerations)
-				.where(and(eq(imageGenerations.userId, userId), gte(imageGenerations.createdAt, startOfDay)));
+				.where(
+					and(eq(imageGenerations.userId, userId), gte(imageGenerations.createdAt, startOfDay))
+				);
 
 			// Count hourly generations
 			const hourlyResult = await this.db
 				.select({ count: sql<number>`count(*)` })
 				.from(imageGenerations)
-				.where(and(eq(imageGenerations.userId, userId), gte(imageGenerations.createdAt, startOfHour)));
+				.where(
+					and(eq(imageGenerations.userId, userId), gte(imageGenerations.createdAt, startOfHour))
+				);
 
 			// Count active generations (pending, queued, processing)
 			const activeResult = await this.db

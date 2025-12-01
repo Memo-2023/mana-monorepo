@@ -341,18 +341,11 @@ export class CreditsService {
 			const [member] = await tx
 				.select()
 				.from(members)
-				.where(
-					and(
-						eq(members.organizationId, organizationId),
-						eq(members.userId, allocatorUserId)
-					)
-				)
+				.where(and(eq(members.organizationId, organizationId), eq(members.userId, allocatorUserId)))
 				.limit(1);
 
 			if (!member || member.role !== 'owner') {
-				throw new ForbiddenException(
-					'Only organization owners can allocate credits'
-				);
+				throw new ForbiddenException('Only organization owners can allocate credits');
 			}
 
 			// 2. Get organization balance with row lock
@@ -441,12 +434,7 @@ export class CreditsService {
 					version: employeeBalance.version + 1,
 					updatedAt: new Date(),
 				})
-				.where(
-					and(
-						eq(balances.userId, employeeId),
-						eq(balances.version, employeeBalance.version)
-					)
-				)
+				.where(and(eq(balances.userId, employeeId), eq(balances.version, employeeBalance.version)))
 				.returning();
 
 			if (updateEmployeeResult.length === 0) {
@@ -506,11 +494,7 @@ export class CreditsService {
 		const db = this.getDb();
 
 		// Get employee's personal balance
-		const [balance] = await db
-			.select()
-			.from(balances)
-			.where(eq(balances.userId, userId))
-			.limit(1);
+		const [balance] = await db.select().from(balances).where(eq(balances.userId, userId)).limit(1);
 
 		if (!balance) {
 			return null;
@@ -571,11 +555,7 @@ export class CreditsService {
 	 * Deduct credits with organization tracking
 	 * Enhanced version of useCredits that tracks organization_id for B2B users
 	 */
-	async deductCredits(
-		userId: string,
-		useCreditsDto: UseCreditsDto,
-		organizationId?: string
-	) {
+	async deductCredits(userId: string, useCreditsDto: UseCreditsDto, organizationId?: string) {
 		const db = this.getDb();
 
 		// Check for idempotency

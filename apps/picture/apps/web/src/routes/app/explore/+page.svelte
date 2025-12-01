@@ -178,7 +178,10 @@
 				placeholder="Bilder suchen..."
 				class="w-full rounded-full border border-gray-300/50 bg-white/80 px-4 py-2 pl-10 text-sm text-gray-900 placeholder-gray-500 backdrop-blur-xl transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600/50 dark:bg-gray-800/80 dark:text-gray-100 dark:placeholder-gray-400"
 			/>
-			<MagnifyingGlass size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+			<MagnifyingGlass
+				size={16}
+				class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+			/>
 			{#if searchInput}
 				<button
 					onclick={() => {

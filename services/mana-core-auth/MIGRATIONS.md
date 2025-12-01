@@ -18,10 +18,10 @@ src/db/schema/
 
 ## Commands
 
-| Command         | Description                           |
-| --------------- | ------------------------------------- |
-| `pnpm db:push`  | Sync schema to database               |
-| `pnpm db:studio`| Open Drizzle Studio to view/edit data |
+| Command          | Description                           |
+| ---------------- | ------------------------------------- |
+| `pnpm db:push`   | Sync schema to database               |
+| `pnpm db:studio` | Open Drizzle Studio to view/edit data |
 
 ## First-Time Setup
 

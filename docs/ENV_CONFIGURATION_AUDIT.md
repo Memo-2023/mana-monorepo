@@ -1,4 +1,5 @@
 # Environment Configuration Audit Report
+
 ## Mana Universe Monorepo - Backend Authentication & Configuration
 
 **Date:** December 1, 2025
@@ -12,6 +13,7 @@
 The monorepo has **CRITICAL PORT CONFLICTS** that will prevent multiple backends from running simultaneously. Additionally, there are inconsistencies in environment variable naming conventions across backends and missing configuration examples for some projects.
 
 **Status:** NEEDS IMMEDIATE ACTION
+
 - 2 port conflicts identified
 - 3 naming convention inconsistencies
 - 5 backends missing .env.example files
@@ -23,18 +25,18 @@ The monorepo has **CRITICAL PORT CONFLICTS** that will prevent multiple backends
 
 ### Current Assignments (from .env.development)
 
-| Backend | Port | Env Variable | Status | Conflict |
-|---------|------|--------------|--------|----------|
-| Mana Core Auth | 3001 | MANA_CORE_AUTH_PORT | ✓ Unique | No |
-| Chat | 3002 | CHAT_BACKEND_PORT | ✓ Unique | No |
-| **Maerchenzauber** | **3003** | MAERCHENZAUBER_BACKEND_PORT | ⚠ CONFLICT | **Yes** |
-| Manadeck | 3004 | MANADECK_BACKEND_PORT | ✓ Unique | No |
-| **Picture** | **3003** | PICTURE_BACKEND_PORT | ⚠ CONFLICT | **Yes** |
-| **Nutriphi** | **3002** | NUTRIPHI_BACKEND_PORT | ⚠ CONFLICT | **Yes** |
-| Zitare | 3007 | ZITARE_BACKEND_PORT | ✓ Unique | No |
-| Presi | 3008 | PRESI_BACKEND_PORT | ✓ Unique | No |
-| Mana Games | 3011 | MANA_GAMES_BACKEND_PORT | ✓ Unique | No |
-| Voxel Lava | 3010 | VOXEL_LAVA_BACKEND_PORT | ✓ Unique | No |
+| Backend            | Port     | Env Variable                | Status      | Conflict |
+| ------------------ | -------- | --------------------------- | ----------- | -------- |
+| Mana Core Auth     | 3001     | MANA_CORE_AUTH_PORT         | ✓ Unique    | No       |
+| Chat               | 3002     | CHAT_BACKEND_PORT           | ✓ Unique    | No       |
+| **Maerchenzauber** | **3003** | MAERCHENZAUBER_BACKEND_PORT | ⚠ CONFLICT | **Yes**  |
+| Manadeck           | 3004     | MANADECK_BACKEND_PORT       | ✓ Unique    | No       |
+| **Picture**        | **3003** | PICTURE_BACKEND_PORT        | ⚠ CONFLICT | **Yes**  |
+| **Nutriphi**       | **3002** | NUTRIPHI_BACKEND_PORT       | ⚠ CONFLICT | **Yes**  |
+| Zitare             | 3007     | ZITARE_BACKEND_PORT         | ✓ Unique    | No       |
+| Presi              | 3008     | PRESI_BACKEND_PORT          | ✓ Unique    | No       |
+| Mana Games         | 3011     | MANA_GAMES_BACKEND_PORT     | ✓ Unique    | No       |
+| Voxel Lava         | 3010     | VOXEL_LAVA_BACKEND_PORT     | ✓ Unique    | No       |
 
 ### PORT CONFLICTS FOUND
 
@@ -47,7 +49,9 @@ The monorepo has **CRITICAL PORT CONFLICTS** that will prevent multiple backends
    - Nutriphi Backend: `NUTRIPHI_BACKEND_PORT=3002`
 
 ### RECOMMENDATION
+
 Reassign conflicting ports:
+
 - Maerchenzauber: Keep 3003, reassign Picture to **3005** or **3006**
 - OR reassign Maerchenzauber to **3005** and keep Picture at 3003
 - Nutriphi: Reassign to **3006** or another available port
@@ -61,12 +65,14 @@ Reassign conflicting ports:
 ### Central Configuration (.env.development)
 
 **PRESENT & CONFIGURED:**
+
 - ✓ `MANA_CORE_AUTH_URL=http://localhost:3001` (Line 16)
 - ✓ `DEV_BYPASS_AUTH=true` (Line 59 - Chat only)
 - ✓ JWT_PRIVATE_KEY & JWT_PUBLIC_KEY (Lines 19-20)
 - ✓ CORS_ORIGINS=... (Line 41)
 
 **MISSING CENTRALIZED:**
+
 - ✗ `DEV_USER_ID` - NOT in .env.development
   - Used hardcoded in Chat: `17cb0be7-058a-4964-9e18-1fe7055fd014`
   - Should be centralized in .env.development
@@ -77,13 +83,13 @@ Reassign conflicting ports:
 
 ### Backend-Specific Auth Configuration
 
-| Backend | Auth URL Var | Dev Bypass | Dev User ID | Status |
-|---------|--------------|-----------|-------------|--------|
-| **Chat** | MANA_CORE_AUTH_URL | ✓ Configured | ✗ Hardcoded | ⚠ Partially |
-| **Picture** | MANA_CORE_AUTH_URL | ✗ Missing | ✗ Not checked | ✗ Incomplete |
-| **Zitare** | MANA_CORE_AUTH_URL | ✗ Missing | ✗ Not checked | ✗ Incomplete |
-| **Presi** | MANA_CORE_AUTH_URL | ✗ Missing | ✗ Not checked | ✗ Incomplete |
-| **Manadeck** | MANA_SERVICE_URL | ✗ Not in generation | ✗ Not mapped | ✗ Not generated |
+| Backend      | Auth URL Var       | Dev Bypass          | Dev User ID   | Status          |
+| ------------ | ------------------ | ------------------- | ------------- | --------------- |
+| **Chat**     | MANA_CORE_AUTH_URL | ✓ Configured        | ✗ Hardcoded   | ⚠ Partially    |
+| **Picture**  | MANA_CORE_AUTH_URL | ✗ Missing           | ✗ Not checked | ✗ Incomplete    |
+| **Zitare**   | MANA_CORE_AUTH_URL | ✗ Missing           | ✗ Not checked | ✗ Incomplete    |
+| **Presi**    | MANA_CORE_AUTH_URL | ✗ Missing           | ✗ Not checked | ✗ Incomplete    |
+| **Manadeck** | MANA_SERVICE_URL   | ✗ Not in generation | ✗ Not mapped  | ✗ Not generated |
 
 ### ISSUE: Naming Convention Inconsistency
 
@@ -104,6 +110,7 @@ INCONSISTENT:
 
 **STANDARDIZATION NEEDED:**
 All backends should use consistent naming:
+
 - Recommend: `MANA_CORE_AUTH_URL` (most common)
 
 ---
@@ -112,16 +119,17 @@ All backends should use consistent naming:
 
 ### Generate-env.mjs Coverage Analysis
 
-| Backend | .env.example | generate-env.mjs | .env Generated | Coverage |
-|---------|--------------|------------------|----------------|----------|
-| Chat | ✓ Exists | ✓ Lines 85-98 | ✓ Will generate | ✓ Complete |
-| Picture | ✓ Exists | ✓ Lines 223-243 | ✓ Will generate | ✓ Complete |
-| Manadeck | ✓ Exists | ✓ Lines 199-209 | ✓ Will generate | ✓ Complete |
-| **Zitare** | ✗ Missing | ✓ Lines 294-303 | ✓ Will generate | ⚠ Missing example |
-| **Presi** | ✗ Missing | ✓ Lines 323-334 | ✓ Will generate | ⚠ Missing example |
-| Mana-Core-Auth | ✓ Exists | ✓ Lines 57-82 | ✓ Will generate | ✓ Complete |
+| Backend        | .env.example | generate-env.mjs | .env Generated  | Coverage           |
+| -------------- | ------------ | ---------------- | --------------- | ------------------ |
+| Chat           | ✓ Exists     | ✓ Lines 85-98    | ✓ Will generate | ✓ Complete         |
+| Picture        | ✓ Exists     | ✓ Lines 223-243  | ✓ Will generate | ✓ Complete         |
+| Manadeck       | ✓ Exists     | ✓ Lines 199-209  | ✓ Will generate | ✓ Complete         |
+| **Zitare**     | ✗ Missing    | ✓ Lines 294-303  | ✓ Will generate | ⚠ Missing example |
+| **Presi**      | ✗ Missing    | ✓ Lines 323-334  | ✓ Will generate | ⚠ Missing example |
+| Mana-Core-Auth | ✓ Exists     | ✓ Lines 57-82    | ✓ Will generate | ✓ Complete         |
 
 **Missing .env.example files:**
+
 - `/apps/zitare/apps/backend/.env.example` - Should document PORT, DATABASE_URL, MANA_CORE_AUTH_URL, CORS_ORIGINS
 - `/apps/presi/apps/backend/.env.example` - Should document PORT, DATABASE_URL, MANA_CORE_AUTH_URL, JWT_PUBLIC_KEY, CORS_ORIGINS
 
@@ -132,63 +140,69 @@ All backends should use consistent naming:
 ### Hardcoded in Source Code
 
 **Chat Backend** (`apps/chat/apps/backend/src/common/guards/jwt-auth.guard.ts`):
+
 ```typescript
-const DEV_USER_ID = '17cb0be7-058a-4964-9e18-1fe7055fd014';  // Line 1
+const DEV_USER_ID = '17cb0be7-058a-4964-9e18-1fe7055fd014'; // Line 1
 ```
+
 - Should be: `configService.get('DEV_USER_ID')`
 - Should be in .env.development: `DEV_USER_ID=17cb0be7-058a-4964-9e18-1fe7055fd014`
 
 ### Hardcoded CORS Origins in main.ts
 
 **Chat** (`src/main.ts` lines 10-18):
+
 ```typescript
 origin: [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:5178',
-    'http://localhost:8081',
-    'exp://localhost:8081',
-    'http://localhost:3001', // Mana Core Auth
-]
+	'http://localhost:3000',
+	'http://localhost:5173',
+	'http://localhost:5174',
+	'http://localhost:5178',
+	'http://localhost:8081',
+	'exp://localhost:8081',
+	'http://localhost:3001', // Mana Core Auth
+];
 ```
 
 **Picture** (`src/main.ts` lines 11-19):
+
 ```typescript
 const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:5175',
-    'http://localhost:8081',
-    'exp://localhost:8081',
-    'http://localhost:3001',
-]
+	'http://localhost:3000',
+	'http://localhost:5173',
+	'http://localhost:5174',
+	'http://localhost:5175',
+	'http://localhost:8081',
+	'exp://localhost:8081',
+	'http://localhost:3001',
+];
 ```
 
 **Presi** (`src/main.ts` lines 10-17):
+
 ```typescript
 origin: [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:5177',
-    'http://localhost:5178',
-    'http://localhost:8081',
-    'exp://localhost:8081',
-    'http://localhost:3001',
-]
+	'http://localhost:3000',
+	'http://localhost:5173',
+	'http://localhost:5177',
+	'http://localhost:5178',
+	'http://localhost:8081',
+	'exp://localhost:8081',
+	'http://localhost:3001',
+];
 ```
 
 **Zitare** (`src/main.ts` lines 10-16):
+
 ```typescript
 origin: [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:5177',
-    'http://localhost:8081',
-    'exp://localhost:8081',
-    'http://localhost:3001',
-]
+	'http://localhost:3000',
+	'http://localhost:5173',
+	'http://localhost:5177',
+	'http://localhost:8081',
+	'exp://localhost:8081',
+	'http://localhost:3001',
+];
 ```
 
 **RECOMMENDATION:** Move CORS_ORIGINS to .env.development (already exists as CORS_ORIGINS global variable, but not used by all backends)
@@ -199,25 +213,26 @@ origin: [
 
 ### Configuration Module Setup
 
-| Backend | ConfigModule | Validation | Env File Path | Status |
-|---------|--------------|-----------|----------------|--------|
-| Chat | ✓ ConfigModule.forRoot() | ✗ No validation schema | `.env` | ⚠ Minimal |
-| Picture | ✓ ConfigModule.forRoot() | ✗ No validation schema | `.env` | ⚠ Minimal |
-| Zitare | ✓ ConfigModule.forRoot() | ✗ No validation schema | `.env` | ⚠ Minimal |
-| Presi | ✓ ConfigModule.forRoot() | ✗ No validation schema | `.env` | ⚠ Minimal |
-| Manadeck | ✓ ConfigModule.forRoot() | ✓ Joi schema | `.env` | ✓ Complete |
-| Mana-Core-Auth | ✓ ConfigModule.forRoot() | ✓ Config service | `.env` | ✓ Complete |
+| Backend        | ConfigModule             | Validation             | Env File Path | Status     |
+| -------------- | ------------------------ | ---------------------- | ------------- | ---------- |
+| Chat           | ✓ ConfigModule.forRoot() | ✗ No validation schema | `.env`        | ⚠ Minimal |
+| Picture        | ✓ ConfigModule.forRoot() | ✗ No validation schema | `.env`        | ⚠ Minimal |
+| Zitare         | ✓ ConfigModule.forRoot() | ✗ No validation schema | `.env`        | ⚠ Minimal |
+| Presi          | ✓ ConfigModule.forRoot() | ✗ No validation schema | `.env`        | ⚠ Minimal |
+| Manadeck       | ✓ ConfigModule.forRoot() | ✓ Joi schema           | `.env`        | ✓ Complete |
+| Mana-Core-Auth | ✓ ConfigModule.forRoot() | ✓ Config service       | `.env`        | ✓ Complete |
 
 **ISSUE:** Chat, Picture, Zitare, Presi lack validation schemas.
 
 **EXAMPLE (Manadeck validation.schema.ts):**
+
 ```typescript
 export const validationSchema = Joi.object({
-    NODE_ENV: Joi.string().valid('development', 'production'),
-    PORT: Joi.number().required(),
-    DATABASE_URL: Joi.string().required(),
-    MANA_CORE_AUTH_URL: Joi.string().required(),
-    // ... etc
+	NODE_ENV: Joi.string().valid('development', 'production'),
+	PORT: Joi.number().required(),
+	DATABASE_URL: Joi.string().required(),
+	MANA_CORE_AUTH_URL: Joi.string().required(),
+	// ... etc
 });
 ```
 
@@ -321,18 +336,18 @@ export const validationSchema = Joi.object({
 
 ## 8. UPDATED PORT ASSIGNMENTS (RECOMMENDED)
 
-| Backend | Recommended Port | Current | Status |
-|---------|-----------------|---------|--------|
-| Mana Core Auth | 3001 | 3001 | ✓ Keep |
-| Chat | 3002 | 3002 | ✓ Keep |
-| Maerchenzauber | 3003 | 3003 | ✓ Keep |
-| Manadeck | 3004 | 3004 | ✓ Keep |
-| Picture | **3005** | 3003 | **CHANGE** |
-| Nutriphi | **3006** | 3002 | **CHANGE** |
-| Zitare | 3007 | 3007 | ✓ Keep |
-| Presi | 3008 | 3008 | ✓ Keep |
-| Voxel Lava | 3010 | 3010 | ✓ Keep |
-| Mana Games | 3011 | 3011 | ✓ Keep |
+| Backend        | Recommended Port | Current | Status     |
+| -------------- | ---------------- | ------- | ---------- |
+| Mana Core Auth | 3001             | 3001    | ✓ Keep     |
+| Chat           | 3002             | 3002    | ✓ Keep     |
+| Maerchenzauber | 3003             | 3003    | ✓ Keep     |
+| Manadeck       | 3004             | 3004    | ✓ Keep     |
+| Picture        | **3005**         | 3003    | **CHANGE** |
+| Nutriphi       | **3006**         | 3002    | **CHANGE** |
+| Zitare         | 3007             | 3007    | ✓ Keep     |
+| Presi          | 3008             | 3008    | ✓ Keep     |
+| Voxel Lava     | 3010             | 3010    | ✓ Keep     |
+| Mana Games     | 3011             | 3011    | ✓ Keep     |
 
 ---
 
@@ -340,32 +355,32 @@ export const validationSchema = Joi.object({
 
 ### Required for All Backends
 
-| Variable | Purpose | Centralized | Backend Usage |
-|----------|---------|------------|---|
-| NODE_ENV | Environment type | ✓ .env.development | All |
-| PORT | Server port | ✓ Individual vars | All |
-| DATABASE_URL | PostgreSQL connection | ✓ Individual vars | Chat, Manadeck, Picture, Zitare, Presi |
-| MANA_CORE_AUTH_URL | Auth service URL | ✓ .env.development | Chat, Picture, Zitare, Presi, Manadeck |
-| CORS_ORIGINS | Allowed origins | ✓ .env.development | All (hardcoded, should use env) |
+| Variable           | Purpose               | Centralized        | Backend Usage                          |
+| ------------------ | --------------------- | ------------------ | -------------------------------------- |
+| NODE_ENV           | Environment type      | ✓ .env.development | All                                    |
+| PORT               | Server port           | ✓ Individual vars  | All                                    |
+| DATABASE_URL       | PostgreSQL connection | ✓ Individual vars  | Chat, Manadeck, Picture, Zitare, Presi |
+| MANA_CORE_AUTH_URL | Auth service URL      | ✓ .env.development | Chat, Picture, Zitare, Presi, Manadeck |
+| CORS_ORIGINS       | Allowed origins       | ✓ .env.development | All (hardcoded, should use env)        |
 
 ### Optional but Recommended
 
-| Variable | Purpose | Centralized | Backend Usage |
-|----------|---------|------------|---|
-| DEV_BYPASS_AUTH | Skip auth in dev | ⚠ Partial | Chat only |
-| DEV_USER_ID | Dev test user | ✗ Hardcoded | Chat |
-| JWT_PUBLIC_KEY | Token validation | ✓ .env.development | Presi |
+| Variable        | Purpose          | Centralized        | Backend Usage |
+| --------------- | ---------------- | ------------------ | ------------- |
+| DEV_BYPASS_AUTH | Skip auth in dev | ⚠ Partial         | Chat only     |
+| DEV_USER_ID     | Dev test user    | ✗ Hardcoded        | Chat          |
+| JWT_PUBLIC_KEY  | Token validation | ✓ .env.development | Presi         |
 
 ### Backend-Specific
 
-| Backend | Key Variables | Centralized |
-|---------|---|---|
-| Chat | GOOGLE_GENAI_API_KEY, AZURE_OPENAI_* | ✓ .env.development |
-| Picture | REPLICATE_API_TOKEN, S3_* vars | ✓ .env.development |
-| Zitare | (None beyond base) | ✓ .env.development |
-| Presi | (None beyond base) | ✓ .env.development |
-| Manadeck | GOOGLE_GENAI_API_KEY | ✓ .env.development |
-| Mana-Core-Auth | JWT_*, STRIPE_*, CREDITS_* | ✓ .env.development |
+| Backend        | Key Variables                         | Centralized        |
+| -------------- | ------------------------------------- | ------------------ |
+| Chat           | GOOGLE*GENAI_API_KEY, AZURE_OPENAI*\* | ✓ .env.development |
+| Picture        | REPLICATE*API_TOKEN, S3*\* vars       | ✓ .env.development |
+| Zitare         | (None beyond base)                    | ✓ .env.development |
+| Presi          | (None beyond base)                    | ✓ .env.development |
+| Manadeck       | GOOGLE_GENAI_API_KEY                  | ✓ .env.development |
+| Mana-Core-Auth | JWT*\*, STRIPE*_, CREDITS\__          | ✓ .env.development |
 
 ---
 
@@ -393,6 +408,7 @@ export const validationSchema = Joi.object({
 ## AUDIT DETAILS
 
 **Files Reviewed:**
+
 - .env.development (202 lines)
 - scripts/generate-env.mjs (433 lines)
 - 6 backends app.module.ts files
@@ -405,4 +421,3 @@ export const validationSchema = Joi.object({
 **Lines of Code Reviewed:** 2,000+
 **Issues Identified:** 8 critical/major issues
 **Port Conflicts Found:** 2 (affecting 3 backends)
-

@@ -303,7 +303,12 @@ export const mockMemberFactory = {
  * Mock Credit Allocation Factory
  */
 export const mockCreditAllocationFactory = {
-	create: (organizationId: string, employeeId: string, allocatedBy: string, overrides: Partial<any> = {}) => ({
+	create: (
+		organizationId: string,
+		employeeId: string,
+		allocatedBy: string,
+		overrides: Partial<any> = {}
+	) => ({
 		id: nanoid(),
 		organizationId,
 		employeeId,

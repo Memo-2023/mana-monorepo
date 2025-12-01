@@ -117,7 +117,9 @@
 	);
 
 	// Effective dark mode based on user preference or system
-	let isDark = $derived(userThemePreference !== null ? userThemePreference === 'dark' : systemIsDark);
+	let isDark = $derived(
+		userThemePreference !== null ? userThemePreference === 'dark' : systemIsDark
+	);
 
 	$effect(() => {
 		if (typeof window !== 'undefined') {
@@ -241,7 +243,13 @@
 	<button
 		type="button"
 		onclick={toggleTheme}
-		style="position: absolute; top: 1rem; left: 1rem; z-index: 50; display: flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; border: 1px solid {isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)'}; background: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'}; color: {isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'}; cursor: pointer; transition: all 0.2s ease;"
+		style="position: absolute; top: 1rem; left: 1rem; z-index: 50; display: flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; border: 1px solid {isDark
+			? 'rgba(255, 255, 255, 0.2)'
+			: 'rgba(0, 0, 0, 0.2)'}; background: {isDark
+			? 'rgba(255, 255, 255, 0.1)'
+			: 'rgba(0, 0, 0, 0.05)'}; color: {isDark
+			? 'rgba(255, 255, 255, 0.7)'
+			: 'rgba(0, 0, 0, 0.7)'}; cursor: pointer; transition: all 0.2s ease;"
 		aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
 	>
 		{#if isDark}
@@ -252,7 +260,9 @@
 	</button>
 
 	{#if headerControls}
-		<div style="position: absolute; top: 1rem; right: 1rem; z-index: 50; opacity: 0.6; display: flex; gap: 0.75rem;">
+		<div
+			style="position: absolute; top: 1rem; right: 1rem; z-index: 50; opacity: 0.6; display: flex; gap: 0.75rem;"
+		>
 			{@render headerControls()}
 		</div>
 	{/if}

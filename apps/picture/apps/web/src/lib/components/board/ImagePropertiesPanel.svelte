@@ -15,7 +15,9 @@
 
 	const selectedItem = $derived($selectedItems[0] || null);
 	const hasMultipleSelected = $derived($selectedItems.length > 1);
-	const selectedImageItem = $derived(selectedItem && isImageItem(selectedItem) ? selectedItem : null);
+	const selectedImageItem = $derived(
+		selectedItem && isImageItem(selectedItem) ? selectedItem : null
+	);
 
 	// Local state for inputs (synced with selected item)
 	let positionX = $state(0);

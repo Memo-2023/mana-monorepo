@@ -1,6 +1,12 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { PillNavItem, PillDropdownItem, PillNavElement, PillTabGroupConfig, PillAppItem } from './types';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		PillNavElement,
+		PillTabGroupConfig,
+		PillAppItem,
+	} from './types';
 	import PillDropdown from './PillDropdown.svelte';
 	import PillTabGroup from './PillTabGroup.svelte';
 
@@ -256,7 +262,8 @@
 		creditCard:
 			'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',
 		search: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
-		heart: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+		heart:
+			'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
 		list: 'M4 6h16M4 10h16M4 14h16M4 18h16',
 		compass:
 			'M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM16.24 7.76L14.12 14.12L7.76 16.24L9.88 9.88L16.24 7.76Z',
@@ -379,7 +386,7 @@
 				{/if}
 			{/each}
 
-				<!-- Theme Variant Selector -->
+			<!-- Theme Variant Selector -->
 			{#if showThemeVariants && themeVariantItems.length > 0}
 				<PillDropdown
 					items={themeVariantItems}
@@ -397,7 +404,12 @@
 								title="Light mode"
 							>
 								<svg class="mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={getIconPath('sun')} />
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d={getIconPath('sun')}
+									/>
 								</svg>
 							</button>
 							<button
@@ -408,7 +420,12 @@
 								title="Dark mode"
 							>
 								<svg class="mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={getIconPath('moon')} />
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d={getIconPath('moon')}
+									/>
 								</svg>
 							</button>
 							<button
@@ -420,7 +437,12 @@
 							>
 								<svg class="mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<rect x="2" y="3" width="20" height="14" rx="2" stroke-width="2" />
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8M12 17v4" />
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M8 21h8M12 17v4"
+									/>
 								</svg>
 							</button>
 						</div>
@@ -1086,7 +1108,9 @@
 		border-radius: 9999px !important;
 		background: rgba(245, 245, 245, 0.95) !important;
 		border: 1px solid rgba(0, 0, 0, 0.1) !important;
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
 		color: #374151 !important;
 	}
 

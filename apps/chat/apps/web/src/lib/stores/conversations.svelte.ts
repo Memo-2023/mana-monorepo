@@ -48,7 +48,8 @@ export const conversationsStore = {
 		try {
 			conversations = await conversationService.getConversations(spaceId);
 		} catch (e) {
-			const message = e instanceof Error ? e.message : 'Konversationen konnten nicht geladen werden';
+			const message =
+				e instanceof Error ? e.message : 'Konversationen konnten nicht geladen werden';
 			error = message;
 			toastStore.error(message);
 			conversations = [];
@@ -67,7 +68,8 @@ export const conversationsStore = {
 		try {
 			archivedConversations = await conversationService.getArchivedConversations();
 		} catch (e) {
-			const message = e instanceof Error ? e.message : 'Archivierte Konversationen konnten nicht geladen werden';
+			const message =
+				e instanceof Error ? e.message : 'Archivierte Konversationen konnten nicht geladen werden';
 			error = message;
 			toastStore.error(message);
 			archivedConversations = [];
@@ -131,7 +133,10 @@ export const conversationsStore = {
 			const conversation = archivedConversations.find((c) => c.id === conversationId);
 			if (conversation) {
 				archivedConversations = archivedConversations.filter((c) => c.id !== conversationId);
-				conversations = sortConversations([{ ...conversation, isArchived: false }, ...conversations]);
+				conversations = sortConversations([
+					{ ...conversation, isArchived: false },
+					...conversations,
+				]);
 			}
 			toastStore.success('Konversation wiederhergestellt');
 		} else {

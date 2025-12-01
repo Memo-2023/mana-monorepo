@@ -90,9 +90,7 @@
 	>
 		<!-- Name -->
 		<div>
-			<label for="name" class="block text-sm font-medium text-foreground mb-1">
-				Name *
-			</label>
+			<label for="name" class="block text-sm font-medium text-foreground mb-1"> Name * </label>
 			<input
 				type="text"
 				id="name"
@@ -111,10 +109,7 @@
 
 		<!-- Description -->
 		<div>
-			<label
-				for="description"
-				class="block text-sm font-medium text-foreground mb-1"
-			>
+			<label for="description" class="block text-sm font-medium text-foreground mb-1">
 				Beschreibung (optional)
 			</label>
 			<textarea
@@ -131,10 +126,7 @@
 
 		<!-- System Prompt -->
 		<div>
-			<label
-				for="systemPrompt"
-				class="block text-sm font-medium text-foreground mb-1"
-			>
+			<label for="systemPrompt" class="block text-sm font-medium text-foreground mb-1">
 				System-Prompt *
 			</label>
 			<textarea
@@ -158,10 +150,7 @@
 
 		<!-- Initial Question -->
 		<div>
-			<label
-				for="initialQuestion"
-				class="block text-sm font-medium text-foreground mb-1"
-			>
+			<label for="initialQuestion" class="block text-sm font-medium text-foreground mb-1">
 				Beispielfrage (optional)
 			</label>
 			<textarea
@@ -236,9 +225,7 @@
 				type="button"
 				onclick={() => (documentMode = !documentMode)}
 				class="w-full flex items-center justify-between p-4 border rounded-lg transition-colors
-               {documentMode
-					? 'border-primary bg-primary/10'
-					: 'border-border bg-muted'}"
+               {documentMode ? 'border-primary bg-primary/10' : 'border-border bg-muted'}"
 			>
 				<div class="text-left">
 					<p class="font-medium text-foreground">Dokumentmodus aktivieren</p>

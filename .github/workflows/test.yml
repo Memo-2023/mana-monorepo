@@ -55,6 +55,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build shared packages
+        run: pnpm run build:packages
+
       - name: Type check
         run: pnpm --filter @${{ matrix.project }}/backend type-check
         continue-on-error: true
@@ -117,6 +120,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build shared packages
+        run: pnpm run build:packages
+
       - name: Type check
         run: pnpm --filter @${{ matrix.project }}/mobile type-check
         continue-on-error: true
@@ -176,6 +182,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build shared packages
+        run: pnpm run build:packages
+
       - name: Type check
         run: pnpm --filter @${{ matrix.project }}/web check
         continue-on-error: true
@@ -228,6 +237,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build shared packages
+        run: pnpm run build:packages
+
       - name: Install Playwright browsers
         run: pnpm --filter @${{ matrix.project }}/web exec playwright install --with-deps chromium
 
@@ -273,6 +285,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build shared packages
+        run: pnpm run build:packages
+
       - name: Type check shared packages
         run: pnpm --filter '@manacore/*' type-check
         continue-on-error: true
@@ -317,6 +332,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build shared packages
+        run: pnpm run build:packages
 
       - name: Check formatting
         run: pnpm run format:check

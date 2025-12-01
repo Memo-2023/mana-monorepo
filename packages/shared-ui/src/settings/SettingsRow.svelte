@@ -40,7 +40,9 @@
 {#if href}
 	<a
 		{href}
-		class="settings-row {border ? 'settings-row--border' : ''} settings-row--clickable {disabled ? 'settings-row--disabled' : ''} {className}"
+		class="settings-row {border ? 'settings-row--border' : ''} settings-row--clickable {disabled
+			? 'settings-row--disabled'
+			: ''} {className}"
 	>
 		<div class="settings-row__content">
 			{#if icon}
@@ -69,7 +71,9 @@
 	<button
 		type="button"
 		{onclick}
-		class="settings-row {border ? 'settings-row--border' : ''} settings-row--clickable {disabled ? 'settings-row--disabled' : ''} {className}"
+		class="settings-row {border ? 'settings-row--border' : ''} settings-row--clickable {disabled
+			? 'settings-row--disabled'
+			: ''} {className}"
 		{disabled}
 	>
 		<div class="settings-row__content">
@@ -97,7 +101,9 @@
 	</button>
 {:else}
 	<div
-		class="settings-row {border ? 'settings-row--border' : ''} {disabled ? 'settings-row--disabled' : ''} {className}"
+		class="settings-row {border ? 'settings-row--border' : ''} {disabled
+			? 'settings-row--disabled'
+			: ''} {className}"
 	>
 		<div class="settings-row__content">
 			{#if icon}

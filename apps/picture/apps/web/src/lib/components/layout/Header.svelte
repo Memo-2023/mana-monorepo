@@ -93,7 +93,9 @@
 						class="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800"
 					>
 						<div class="border-b border-gray-100 px-4 py-2 dark:border-gray-700">
-							<p class="text-sm font-medium text-gray-900 dark:text-gray-100">{authStore.user?.email}</p>
+							<p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+								{authStore.user?.email}
+							</p>
 						</div>
 						<a
 							href="/app/profile"

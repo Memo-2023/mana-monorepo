@@ -11,6 +11,9 @@ build/
 node_modules/
 .turbo/
 
+# Archived apps (excluded from workspace)
+apps-archived/
+
 # Lock files
 pnpm-lock.yaml
 package-lock.json
@@ -31,8 +34,57 @@ TESTING_STRATEGY_AUTH_CREDITS.md
 .eslintcache
 .prettiercache
 
-# Files with pseudo-code or example syntax
-apps/maerchenzauber/apps/mobile/ANALYTICS.md
-apps/maerchenzauber/apps/landing/src/components/sections/CharacterGallery.astro
-apps/maerchenzauber/apps/landing/src/components/sections/StoryShowcase.astro
-apps/maerchenzauber/apps/landing/src/pages/privacy.astro
+# Astro files with JSX-style comments (valid Astro but Prettier can't parse)
+apps/manacore/apps/landing/src/components/content/HeroSection.astro
+apps/manacore/apps/landing/src/components/sections/ManaPrinciple.astro
+apps/manacore/apps/landing/src/pages/apps/index.astro
+apps/manacore/apps/landing/src/pages/privacy/index.astro
+games/mana-games/apps/web/src/layouts/Layout.astro
+games/mana-games/apps/web/src/pages/games/[slug].astro
+games/mana-games/apps/web/src/pages/games/*.astro
+packages/shared-landing-ui/src/sections/HeroSection.astro
+packages/shared-landing-ui/src/sections/StepsSection.astro
+packages/shared-landing-ui/src/sections/TestimonialSection.astro
+
+# Documentation files with unfenced code examples
+**/docs/**/*.md
+**/Docs/**/*.md
+**/*CLAUDE.md
+**/*README.md
+**/*GUIDE*.md
+**/*SETUP*.md
+**/*ARCHITECTURE*.md
+**/*PLAN*.md
+**/*REPORT*.md
+**/*MIGRATION*.md
+**/*SYSTEM*.md
+**/*IMPLEMENTATION*.md
+**/*TESTING*.md
+**/*SPACING*.md
+**/*CREDIT*.md
+**/*AUTH*.md
+**/*JWT*.md
+**/*I18N*.md
+**/*ROUTE*.md
+**/*ANDROID*.md
+**/*IOS*.md
+apps/chat/FEATURE_REQUIREMENTS.md
+apps/manadeck/CI_CD_SETUP_GUIDE.md
+apps/manadeck/MANA_CORE_INTEGRATION_CHECKLIST.md
+apps/picture/DEPLOYMENT_COMPLETE.md
+apps/zitare/apps/web/THEMING.md
+BACKEND_DESIGN_PATTERN_AUDIT.md
+COMPATIBILITY_MATRIX_AND_REMEDIATION.md
+cicd/
+
+# Astro files with JSX comments
+apps/picture/apps/landing/src/components/Features.astro
+apps/picture/apps/landing/src/components/promptTemplates/CategoryGrid.astro
+
+# Partial/temporary files
+**/.!*
+
+# Quick start guides with code examples
+**/*QUICK*.md
+**/*QUICKSTART*.md
+

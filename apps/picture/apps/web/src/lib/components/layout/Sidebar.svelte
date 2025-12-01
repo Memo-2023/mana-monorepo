@@ -173,9 +173,9 @@
 					: 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}"
 			>
 				<span
-					class="{active
+					class={active
 						? 'text-blue-600 dark:text-blue-400'
-						: 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'}"
+						: 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'}
 				>
 					{#if item.iconName === 'gallery'}
 						<Image size={20} />
@@ -193,7 +193,9 @@
 						<Archive size={20} />
 					{:else if item.iconName === 'mana'}
 						<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-							<path d="M12.3 1c.03.05 7.3 9.67 7.3 13.7 0 4.03-3.27 7.3-7.3 7.3S5 18.73 5 14.7C5 10.66 12.3 1 12.3 1zm0 6.4c-.02.03-3.65 4.83-3.65 6.84 0 2.02 1.64 3.65 3.65 3.65s3.65-1.64 3.65-3.65c0-2.01-3.62-6.81-3.65-6.84z" />
+							<path
+								d="M12.3 1c.03.05 7.3 9.67 7.3 13.7 0 4.03-3.27 7.3-7.3 7.3S5 18.73 5 14.7C5 10.66 12.3 1 12.3 1zm0 6.4c-.02.03-3.65 4.83-3.65 6.84 0 2.02 1.64 3.65 3.65 3.65s3.65-1.64 3.65-3.65c0-2.01-3.62-6.81-3.65-6.84z"
+							/>
 						</svg>
 					{/if}
 				</span>
@@ -209,7 +211,9 @@
 			onclick={() => showKeyboardShortcuts.set(true)}
 			class="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 transition-all hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
 		>
-			<span class="text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300">
+			<span
+				class="text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300"
+			>
 				<Question size={20} />
 			</span>
 			<span>Tastaturkürzel</span>
@@ -472,7 +476,7 @@
 							? 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
 							: 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'}"
 					>
-						<span class="{active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}">
+						<span class={active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}>
 							{#if item.iconName === 'gallery'}
 								<Image size={20} />
 							{:else if item.iconName === 'board'}
@@ -489,7 +493,9 @@
 								<Archive size={20} />
 							{:else if item.iconName === 'mana'}
 								<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-									<path d="M12.3 1c.03.05 7.3 9.67 7.3 13.7 0 4.03-3.27 7.3-7.3 7.3S5 18.73 5 14.7C5 10.66 12.3 1 12.3 1zm0 6.4c-.02.03-3.65 4.83-3.65 6.84 0 2.02 1.64 3.65 3.65 3.65s3.65-1.64 3.65-3.65c0-2.01-3.62-6.81-3.65-6.84z" />
+									<path
+										d="M12.3 1c.03.05 7.3 9.67 7.3 13.7 0 4.03-3.27 7.3-7.3 7.3S5 18.73 5 14.7C5 10.66 12.3 1 12.3 1zm0 6.4c-.02.03-3.65 4.83-3.65 6.84 0 2.02 1.64 3.65 3.65 3.65s3.65-1.64 3.65-3.65c0-2.01-3.62-6.81-3.65-6.84z"
+									/>
 								</svg>
 							{/if}
 						</span>
@@ -547,7 +553,9 @@
 					<Archive size={24} />
 				{:else if item.iconName === 'mana'}
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-						<path d="M12.3 1c.03.05 7.3 9.67 7.3 13.7 0 4.03-3.27 7.3-7.3 7.3S5 18.73 5 14.7C5 10.66 12.3 1 12.3 1zm0 6.4c-.02.03-3.65 4.83-3.65 6.84 0 2.02 1.64 3.65 3.65 3.65s3.65-1.64 3.65-3.65c0-2.01-3.62-6.81-3.65-6.84z" />
+						<path
+							d="M12.3 1c.03.05 7.3 9.67 7.3 13.7 0 4.03-3.27 7.3-7.3 7.3S5 18.73 5 14.7C5 10.66 12.3 1 12.3 1zm0 6.4c-.02.03-3.65 4.83-3.65 6.84 0 2.02 1.64 3.65 3.65 3.65s3.65-1.64 3.65-3.65c0-2.01-3.62-6.81-3.65-6.84z"
+						/>
 					</svg>
 				{/if}
 				<span class="text-xs font-medium">{item.label}</span>

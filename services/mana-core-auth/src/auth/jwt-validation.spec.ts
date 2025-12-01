@@ -287,9 +287,9 @@ describe('JWT Token Validation (Minimal Claims)', () => {
 
 			// Tamper with the token - try to change role to admin
 			const parts = token.split('.');
-			const tamperedPayload = Buffer.from(
-				JSON.stringify({ ...payload, role: 'admin' })
-			).toString('base64url');
+			const tamperedPayload = Buffer.from(JSON.stringify({ ...payload, role: 'admin' })).toString(
+				'base64url'
+			);
 			const tamperedToken = `${parts[0]}.${tamperedPayload}.${parts[2]}`;
 
 			expect(() => {

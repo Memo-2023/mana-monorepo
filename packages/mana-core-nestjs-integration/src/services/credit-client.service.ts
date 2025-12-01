@@ -47,10 +47,7 @@ export class CreditClientService {
 
 	private getAppId(): string {
 		return (
-			this.options?.appId ||
-			this.configService?.get<string>('APP_ID') ||
-			process.env.APP_ID ||
-			''
+			this.options?.appId || this.configService?.get<string>('APP_ID') || process.env.APP_ID || ''
 		);
 	}
 

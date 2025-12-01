@@ -92,20 +92,20 @@
 
 	function handleBuyPackage(pkg: CreditPackage) {
 		// TODO: Integrate with Stripe
-		alert(`Paket "${pkg.name}" kaufen\n\n${formatCredits(pkg.credits)} Credits für ${formatPrice(pkg.priceEuroCents)}\n\nStripe-Integration kommt bald!`);
+		alert(
+			`Paket "${pkg.name}" kaufen\n\n${formatCredits(pkg.credits)} Credits für ${formatPrice(pkg.priceEuroCents)}\n\nStripe-Integration kommt bald!`
+		);
 	}
 </script>
 
 <div>
-	<PageHeader
-		title="Credits"
-		description="Verwalte deine Mana Credits"
-		size="lg"
-	/>
+	<PageHeader title="Credits" description="Verwalte deine Mana Credits" size="lg" />
 
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
-			<div class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+			<div
+				class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+			></div>
 		</div>
 	{:else if error}
 		<Card>
@@ -195,7 +195,9 @@
 					{:else}
 						<div class="space-y-3">
 							{#each transactions.slice(0, 5) as tx}
-								<div class="flex items-center justify-between py-2 border-b border-border last:border-0">
+								<div
+									class="flex items-center justify-between py-2 border-b border-border last:border-0"
+								>
 									<div class="flex items-center gap-3">
 										<span class="text-xl">{getTransactionIcon(tx.type)}</span>
 										<div>
@@ -232,7 +234,9 @@
 								>
 									<div class="text-left">
 										<p class="font-medium">{pkg.name}</p>
-										<p class="text-sm text-muted-foreground">{formatCredits(pkg.credits)} Credits</p>
+										<p class="text-sm text-muted-foreground">
+											{formatCredits(pkg.credits)} Credits
+										</p>
 									</div>
 									<span class="font-semibold text-primary">{formatPrice(pkg.priceEuroCents)}</span>
 								</button>
@@ -247,7 +251,6 @@
 					{/if}
 				</Card>
 			</div>
-
 		{:else if activeTab === 'transactions'}
 			<Card>
 				<h3 class="text-lg font-semibold mb-4">Transaktionsverlauf</h3>
@@ -288,7 +291,6 @@
 					</div>
 				{/if}
 			</Card>
-
 		{:else if activeTab === 'packages'}
 			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{#each packages as pkg}

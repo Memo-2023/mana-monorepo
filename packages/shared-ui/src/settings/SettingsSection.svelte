@@ -12,12 +12,7 @@
 		children: Snippet;
 	}
 
-	let {
-		title,
-		icon,
-		class: className = '',
-		children,
-	}: Props = $props();
+	let { title, icon, class: className = '', children }: Props = $props();
 </script>
 
 <section class="settings-section {className}">

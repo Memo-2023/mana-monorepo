@@ -4,10 +4,10 @@ import { GenerateGameDto, GenerateGameResponseDto } from './dto/generate-game.dt
 
 @Controller('games')
 export class GameGeneratorController {
-  constructor(private readonly gameGeneratorService: GameGeneratorService) {}
+	constructor(private readonly gameGeneratorService: GameGeneratorService) {}
 
-  @Post('generate')
-  async generateGame(@Body() dto: GenerateGameDto): Promise<GenerateGameResponseDto> {
-    return this.gameGeneratorService.generateGame(dto);
-  }
+	@Post('generate')
+	async generateGame(@Body() dto: GenerateGameDto): Promise<GenerateGameResponseDto> {
+		return this.gameGeneratorService.generateGame(dto);
+	}
 }

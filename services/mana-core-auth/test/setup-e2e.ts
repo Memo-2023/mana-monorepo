@@ -12,7 +12,10 @@ jest.setTimeout(30000);
  * Generate random ID using crypto
  */
 const generateRandomId = (length: number = 10): string => {
-	return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
+	return crypto
+		.randomBytes(Math.ceil(length / 2))
+		.toString('hex')
+		.slice(0, length);
 };
 
 /**

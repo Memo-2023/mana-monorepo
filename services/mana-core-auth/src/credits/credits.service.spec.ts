@@ -360,9 +360,7 @@ describe('CreditsService', () => {
 				return callback(txMock);
 			});
 
-			await expect(service.useCredits(userId, useCreditsDto)).rejects.toThrow(
-				BadRequestException
-			);
+			await expect(service.useCredits(userId, useCreditsDto)).rejects.toThrow(BadRequestException);
 			await expect(service.useCredits(userId, useCreditsDto)).rejects.toThrow(
 				'Insufficient credits'
 			);
@@ -387,9 +385,7 @@ describe('CreditsService', () => {
 				return callback(txMock);
 			});
 
-			await expect(service.useCredits(userId, useCreditsDto)).rejects.toThrow(
-				NotFoundException
-			);
+			await expect(service.useCredits(userId, useCreditsDto)).rejects.toThrow(NotFoundException);
 			await expect(service.useCredits(userId, useCreditsDto)).rejects.toThrow(
 				'User balance not found'
 			);
@@ -436,9 +432,7 @@ describe('CreditsService', () => {
 					values: jest.fn().mockReturnThis(),
 				};
 
-				txMock.returning.mockResolvedValue([
-					mockTransactionFactory.create(userId),
-				]);
+				txMock.returning.mockResolvedValue([mockTransactionFactory.create(userId)]);
 
 				return callback(txMock);
 			});
@@ -477,9 +471,7 @@ describe('CreditsService', () => {
 				return callback(txMock);
 			});
 
-			await expect(service.useCredits(userId, useCreditsDto)).rejects.toThrow(
-				ConflictException
-			);
+			await expect(service.useCredits(userId, useCreditsDto)).rejects.toThrow(ConflictException);
 			await expect(service.useCredits(userId, useCreditsDto)).rejects.toThrow(
 				'Balance was modified by another transaction'
 			);
@@ -551,9 +543,7 @@ describe('CreditsService', () => {
 					}),
 				};
 
-				txMock.returning.mockResolvedValue([
-					mockTransactionFactory.create(userId),
-				]);
+				txMock.returning.mockResolvedValue([mockTransactionFactory.create(userId)]);
 
 				return callback(txMock);
 			});
@@ -615,9 +605,7 @@ describe('CreditsService', () => {
 					}),
 				};
 
-				txMock.returning.mockResolvedValue([
-					mockTransactionFactory.create(userId),
-				]);
+				txMock.returning.mockResolvedValue([mockTransactionFactory.create(userId)]);
 
 				return callback(txMock);
 			});
@@ -795,12 +783,7 @@ describe('CreditsService', () => {
 				lastDailyResetAt: lastMonth,
 			});
 
-			mockDb.mockResults(
-				[mockBalance],
-				[],
-				[],
-				[{ ...mockBalance, freeCreditsRemaining: 55 }]
-			);
+			mockDb.mockResults([mockBalance], [], [], [{ ...mockBalance, freeCreditsRemaining: 55 }]);
 
 			await service.getBalance(userId);
 
@@ -863,9 +846,7 @@ describe('CreditsService', () => {
 					values: jest.fn().mockReturnThis(),
 				};
 
-				txMock.returning.mockResolvedValue([
-					mockTransactionFactory.create(userId, { amount: 0 }),
-				]);
+				txMock.returning.mockResolvedValue([mockTransactionFactory.create(userId, { amount: 0 })]);
 
 				return callback(txMock);
 			});
@@ -908,9 +889,7 @@ describe('CreditsService', () => {
 					values: jest.fn().mockReturnThis(),
 				};
 
-				txMock.returning.mockResolvedValue([
-					mockTransactionFactory.create(userId),
-				]);
+				txMock.returning.mockResolvedValue([mockTransactionFactory.create(userId)]);
 
 				return callback(txMock);
 			});
@@ -1126,9 +1105,9 @@ describe('CreditsService', () => {
 				return callback(txMock);
 			});
 
-			await expect(
-				service.allocateCredits(allocatorUserId, allocateDto)
-			).rejects.toThrow(ForbiddenException);
+			await expect(service.allocateCredits(allocatorUserId, allocateDto)).rejects.toThrow(
+				ForbiddenException
+			);
 		});
 
 		it('should throw BadRequestException if org has insufficient available credits', async () => {
@@ -1167,9 +1146,9 @@ describe('CreditsService', () => {
 				return callback(txMock);
 			});
 
-			await expect(
-				service.allocateCredits(allocatorUserId, allocateDto)
-			).rejects.toThrow(BadRequestException);
+			await expect(service.allocateCredits(allocatorUserId, allocateDto)).rejects.toThrow(
+				BadRequestException
+			);
 		});
 
 		it('should auto-create employee balance if it does not exist', async () => {
@@ -1530,12 +1509,12 @@ describe('CreditsService', () => {
 				return callback(txMock);
 			});
 
-			await expect(
-				service.allocateCredits(allocatorUserId, allocateDto)
-			).rejects.toThrow(ConflictException);
-			await expect(
-				service.allocateCredits(allocatorUserId, allocateDto)
-			).rejects.toThrow('Organization balance was modified by another transaction');
+			await expect(service.allocateCredits(allocatorUserId, allocateDto)).rejects.toThrow(
+				ConflictException
+			);
+			await expect(service.allocateCredits(allocatorUserId, allocateDto)).rejects.toThrow(
+				'Organization balance was modified by another transaction'
+			);
 		});
 	});
 
@@ -1671,12 +1650,12 @@ describe('CreditsService', () => {
 			// Mock: No org balance found - .limit(1) returns empty
 			mockDb.limit.mockResolvedValueOnce([]);
 
-			await expect(
-				service.getOrganizationBalance(organizationId)
-			).rejects.toThrow(NotFoundException);
-			await expect(
-				service.getOrganizationBalance(organizationId)
-			).rejects.toThrow('Organization balance not found');
+			await expect(service.getOrganizationBalance(organizationId)).rejects.toThrow(
+				NotFoundException
+			);
+			await expect(service.getOrganizationBalance(organizationId)).rejects.toThrow(
+				'Organization balance not found'
+			);
 		});
 	});
 
@@ -1716,9 +1695,7 @@ describe('CreditsService', () => {
 					}),
 				};
 
-				txMock.returning.mockResolvedValue([
-					mockTransactionFactory.create(userId),
-				]);
+				txMock.returning.mockResolvedValue([mockTransactionFactory.create(userId)]);
 
 				return callback(txMock);
 			});
@@ -1769,9 +1746,7 @@ describe('CreditsService', () => {
 					}),
 				};
 
-				txMock.returning.mockResolvedValue([
-					mockTransactionFactory.create(userId),
-				]);
+				txMock.returning.mockResolvedValue([mockTransactionFactory.create(userId)]);
 
 				return callback(txMock);
 			});
@@ -1843,12 +1818,12 @@ describe('CreditsService', () => {
 				return callback(txMock);
 			});
 
-			await expect(
-				service.deductCredits(userId, useCreditsDto, organizationId)
-			).rejects.toThrow(ConflictException);
-			await expect(
-				service.deductCredits(userId, useCreditsDto, organizationId)
-			).rejects.toThrow('Balance was modified by another transaction');
+			await expect(service.deductCredits(userId, useCreditsDto, organizationId)).rejects.toThrow(
+				ConflictException
+			);
+			await expect(service.deductCredits(userId, useCreditsDto, organizationId)).rejects.toThrow(
+				'Balance was modified by another transaction'
+			);
 		});
 
 		it('should handle insufficient credits error', async () => {
@@ -1876,12 +1851,12 @@ describe('CreditsService', () => {
 				return callback(txMock);
 			});
 
-			await expect(
-				service.deductCredits(userId, useCreditsDto, organizationId)
-			).rejects.toThrow(BadRequestException);
-			await expect(
-				service.deductCredits(userId, useCreditsDto, organizationId)
-			).rejects.toThrow('Insufficient credits');
+			await expect(service.deductCredits(userId, useCreditsDto, organizationId)).rejects.toThrow(
+				BadRequestException
+			);
+			await expect(service.deductCredits(userId, useCreditsDto, organizationId)).rejects.toThrow(
+				'Insufficient credits'
+			);
 		});
 	});
 });

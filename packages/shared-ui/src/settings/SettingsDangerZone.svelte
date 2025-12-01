@@ -10,11 +10,7 @@
 		children: Snippet;
 	}
 
-	let {
-		title = 'Danger Zone',
-		class: className = '',
-		children,
-	}: Props = $props();
+	let { title = 'Danger Zone', class: className = '', children }: Props = $props();
 </script>
 
 <section class="settings-danger-zone {className}">

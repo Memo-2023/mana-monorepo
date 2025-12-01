@@ -10,12 +10,7 @@
 	import ChatInput from '$lib/components/chat/ChatInput.svelte';
 	import ChatLayout from '$lib/components/chat/ChatLayout.svelte';
 	import type { Conversation, Message, AIModel, Document } from '@chat/types';
-	import {
-		FileText,
-		ClockCounterClockwise,
-		X,
-		FloppyDisk,
-	} from '@manacore/shared-icons';
+	import { FileText, ClockCounterClockwise, X, FloppyDisk } from '@manacore/shared-icons';
 
 	let conversation = $state<Conversation | null>(null);
 	let messages = $state<Message[]>([]);
@@ -247,9 +242,7 @@
 									<FileText size={18} weight="bold" class="text-primary" />
 									<span class="font-medium text-foreground">Dokument</span>
 									{#if document}
-										<span
-											class="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-lg"
-										>
+										<span class="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-lg">
 											v{document.version}
 										</span>
 									{/if}

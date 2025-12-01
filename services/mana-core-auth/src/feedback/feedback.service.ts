@@ -105,7 +105,7 @@ export class FeedbackService {
 									sql`${feedbackVotes.feedbackId} = ANY(${feedbackIds})`
 								)
 							)
-						: [];
+					: [];
 
 			votedFeedbackIds = new Set(userVotes.map((v) => v.feedbackId));
 		}
@@ -144,7 +144,7 @@ export class FeedbackService {
 								sql`${feedbackVotes.feedbackId} = ANY(${feedbackIds})`
 							)
 						)
-					: [];
+				: [];
 
 		const votedFeedbackIds = new Set(userVotes.map((v) => v.feedbackId));
 

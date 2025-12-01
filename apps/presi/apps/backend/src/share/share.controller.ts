@@ -27,10 +27,7 @@ export class ShareController {
 
 	@Get('deck/:deckId/links')
 	@UseGuards(JwtAuthGuard)
-	async getSharesForDeck(
-		@Param('deckId') deckId: string,
-		@CurrentUser() user: CurrentUserData
-	) {
+	async getSharesForDeck(@Param('deckId') deckId: string, @CurrentUser() user: CurrentUserData) {
 		return this.shareService.getSharesForDeck(deckId, user.userId);
 	}
 

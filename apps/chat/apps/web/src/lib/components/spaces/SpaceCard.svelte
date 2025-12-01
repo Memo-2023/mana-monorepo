@@ -52,9 +52,7 @@
 						{space.name}
 					</h3>
 					{#if isOwner}
-						<span
-							class="px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded"
-						>
+						<span class="px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded">
 							Besitzer
 						</span>
 					{/if}

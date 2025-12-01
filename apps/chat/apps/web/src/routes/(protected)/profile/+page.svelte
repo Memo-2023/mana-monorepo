@@ -31,7 +31,11 @@
 	}
 
 	function handleDeleteAccount() {
-		if (confirm('Bist du sicher, dass du dein Konto löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+		if (
+			confirm(
+				'Bist du sicher, dass du dein Konto löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.'
+			)
+		) {
 			alert('Konto löschen wird noch implementiert.');
 		}
 	}
