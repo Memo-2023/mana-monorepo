@@ -9,6 +9,7 @@ pnpm docker:down
 
 pnpm dev:chat:app
 pnpm dev:contacts:app
+pnpm dev:calendar:app
 pnpm dev:picture:app
 pnpm dev:manacore:app
 pnpm dev:zitare:app

@@ -1,0 +1,9 @@
+{
+	"name": "storage",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Cloud storage application (like Google Drive/Dropbox)",
+	"scripts": {
+		"dev": "turbo run dev"
+	}
+}

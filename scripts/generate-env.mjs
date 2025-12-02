@@ -456,6 +456,36 @@ const APP_CONFIGS = [
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 		},
 	},
+
+	// Storage Backend (NestJS)
+	{
+		path: 'apps/storage/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.STORAGE_BACKEND_PORT || '3016',
+			DATABASE_URL: (env) => env.STORAGE_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			S3_ENDPOINT: (env) => env.S3_ENDPOINT,
+			S3_REGION: (env) => env.S3_REGION,
+			S3_ACCESS_KEY: (env) => env.S3_ACCESS_KEY,
+			S3_SECRET_KEY: (env) => env.S3_SECRET_KEY,
+			STORAGE_S3_PUBLIC_URL: (env) => env.STORAGE_S3_PUBLIC_URL,
+			STORAGE_MAX_FILE_SIZE: (env) => env.STORAGE_MAX_FILE_SIZE || '104857600',
+			STORAGE_MAX_FILES_PER_UPLOAD: (env) => env.STORAGE_MAX_FILES_PER_UPLOAD || '10',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Storage Web (SvelteKit)
+	{
+		path: 'apps/storage/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.STORAGE_BACKEND_PORT || '3016'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
 ];
 
 function main() {

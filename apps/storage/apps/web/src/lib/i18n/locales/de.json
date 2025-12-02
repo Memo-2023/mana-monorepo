@@ -1,0 +1,77 @@
+{
+	"app": {
+		"name": "Storage",
+		"description": "Sichere Cloud-Speicherung für deine Dateien"
+	},
+	"nav": {
+		"files": "Dateien",
+		"shared": "Geteilt",
+		"favorites": "Favoriten",
+		"trash": "Papierkorb",
+		"search": "Suche",
+		"settings": "Einstellungen",
+		"profile": "Profil",
+		"feedback": "Feedback"
+	},
+	"files": {
+		"title": "Meine Dateien",
+		"upload": "Hochladen",
+		"newFolder": "Neuer Ordner",
+		"empty": "Keine Dateien vorhanden",
+		"dropHere": "Dateien hier ablegen",
+		"viewGrid": "Rasteransicht",
+		"viewList": "Listenansicht"
+	},
+	"folder": {
+		"create": "Ordner erstellen",
+		"name": "Ordnername",
+		"color": "Ordnerfarbe"
+	},
+	"actions": {
+		"download": "Herunterladen",
+		"rename": "Umbenennen",
+		"move": "Verschieben",
+		"share": "Teilen",
+		"favorite": "Als Favorit markieren",
+		"unfavorite": "Favorit entfernen",
+		"delete": "Löschen",
+		"restore": "Wiederherstellen",
+		"permanentDelete": "Endgültig löschen"
+	},
+	"trash": {
+		"title": "Papierkorb",
+		"empty": "Papierkorb ist leer",
+		"emptyTrash": "Papierkorb leeren",
+		"restoreAll": "Alle wiederherstellen"
+	},
+	"share": {
+		"title": "Teilen",
+		"createLink": "Link erstellen",
+		"copyLink": "Link kopieren",
+		"linkCopied": "Link kopiert!",
+		"accessLevel": "Zugriffsebene",
+		"view": "Ansehen",
+		"download": "Herunterladen",
+		"edit": "Bearbeiten",
+		"password": "Passwortschutz",
+		"expiration": "Ablaufdatum",
+		"maxDownloads": "Max. Downloads"
+	},
+	"search": {
+		"title": "Suche",
+		"placeholder": "Dateien und Ordner durchsuchen...",
+		"noResults": "Keine Ergebnisse gefunden"
+	},
+	"favorites": {
+		"title": "Favoriten",
+		"empty": "Keine Favoriten vorhanden"
+	},
+	"common": {
+		"loading": "Laden...",
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"confirm": "Bestätigen",
+		"error": "Fehler",
+		"success": "Erfolgreich"
+	}
+}
