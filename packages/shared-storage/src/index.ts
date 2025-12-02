@@ -1,5 +1,5 @@
 // Main client
-export { StorageClient } from './client.js';
+export { StorageClient } from './client';
 
 // Factory functions
 export {
@@ -13,7 +13,7 @@ export {
 	createCalendarStorage,
 	createContactsStorage,
 	createStorageStorage,
-} from './factory.js';
+} from './factory';
 
 // Utilities
 export {
@@ -26,7 +26,7 @@ export {
 	DOCUMENT_EXTENSIONS,
 	AUDIO_EXTENSIONS,
 	VIDEO_EXTENSIONS,
-} from './utils.js';
+} from './utils';
 
 // Types
 export {
@@ -38,4 +38,4 @@ export {
 	type PresignedUrlOptions,
 	type UploadResult,
 	type FileInfo,
-} from './types.js';
+} from './types';

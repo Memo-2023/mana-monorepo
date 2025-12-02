@@ -15,7 +15,7 @@ import type {
 	PresignedUrlOptions,
 	UploadResult,
 	FileInfo,
-} from './types.js';
+} from './types';
 
 /**
  * S3-compatible storage client for MinIO (local) and Hetzner Object Storage (production)

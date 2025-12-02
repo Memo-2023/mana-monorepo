@@ -1,5 +1,5 @@
-import { StorageClient } from './client.js';
-import { BUCKETS, type StorageConfig, type BucketConfig, type BucketName } from './types.js';
+import { StorageClient } from './client';
+import { BUCKETS, type StorageConfig, type BucketConfig, type BucketName } from './types';
 
 /**
  * Environment variable names for storage configuration
