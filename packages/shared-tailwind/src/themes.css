@@ -161,6 +161,23 @@
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
   --radius-3xl: 2rem;
+
+  /* ShadCN-style aliases (without color- prefix) for shared components */
+  --background: var(--color-background);
+  --foreground: var(--color-foreground);
+  --primary: var(--color-primary);
+  --primary-foreground: var(--color-primary-foreground);
+  --secondary: var(--color-secondary);
+  --secondary-foreground: var(--color-secondary-foreground);
+  --muted: var(--color-muted);
+  --muted-foreground: var(--color-muted-foreground);
+  --border: var(--color-border);
+  --input: var(--color-input);
+  --ring: var(--color-ring);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-foreground);
+  --accent: var(--color-surface-hover);
+  --accent-foreground: var(--color-foreground);
 }
 
 /* ===== Dark Mode ===== */

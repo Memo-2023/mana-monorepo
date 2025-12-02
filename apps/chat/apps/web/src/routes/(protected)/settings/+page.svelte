@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { theme } from '$lib/stores/theme';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { THEME_DEFINITIONS, type ThemeVariant } from '@manacore/shared-theme';
 	import {
 		SettingsPage,
@@ -9,6 +11,7 @@
 		SettingsToggle,
 		SettingsDangerZone,
 		SettingsDangerButton,
+		GlobalSettingsSection,
 	} from '@manacore/shared-ui';
 
 	// Available theme variants
@@ -26,6 +29,10 @@
 		// TODO: Implement chat history deletion
 		alert('Diese Funktion wird bald verfügbar sein.');
 	}
+
+	onMount(async () => {
+		await userSettings.load();
+	});
 </script>
 
 <svelte:head>
@@ -207,6 +214,9 @@
 			</SettingsDangerButton>
 		</SettingsDangerZone>
 	</SettingsSection>
+
+	<!-- Global Settings Section -->
+	<GlobalSettingsSection {userSettings} />
 
 	<!-- About Section -->
 	<SettingsSection title="Über die App">

@@ -124,24 +124,9 @@
 	}
 }
 
-/* Legacy color variable compatibility */
+/* Shadow variables */
 @layer base {
 	:root {
-		--color-primary: var(--primary);
-		--color-background: var(--background);
-		--color-surface: var(--card);
-		--color-surface-elevated: var(--card);
-		--color-text-primary: var(--foreground);
-		--color-text-secondary: var(--muted-foreground);
-		--color-text-tertiary: var(--muted-foreground);
-		--color-border: var(--border);
-		--color-border-hover: var(--border);
-		--color-success: 142 76% 36%;
-		--color-warning: 38 92% 50%;
-		--color-error: 0 84% 60%;
-		--color-info: 217 91% 60%;
-
-		/* Shadows */
 		--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 		--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 		--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);

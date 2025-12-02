@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { theme } from '$lib/stores/theme';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import {
 		SettingsPage,
 		SettingsSection,
@@ -10,6 +12,7 @@
 		SettingsToggle,
 		SettingsDangerZone,
 		SettingsDangerButton,
+		GlobalSettingsSection,
 	} from '@manacore/shared-ui';
 
 	function handleLogout() {
@@ -20,6 +23,10 @@
 	function setThemeMode(mode: 'light' | 'dark' | 'system') {
 		theme.setMode(mode);
 	}
+
+	onMount(async () => {
+		await userSettings.load();
+	});
 </script>
 
 <svelte:head>
@@ -159,6 +166,9 @@
 			</div>
 		</SettingsCard>
 	</SettingsSection>
+
+	<!-- Global Settings Section -->
+	<GlobalSettingsSection {userSettings} />
 
 	<!-- Danger Zone -->
 	<SettingsDangerZone title="Danger Zone">

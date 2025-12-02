@@ -4,20 +4,23 @@
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { theme } from '$lib/stores/theme';
-	import { settingsStore, type WeekStartDay, type TimeFormat } from '$lib/stores/settings.svelte';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
+	import { settingsStore, type WeekStartDay, type TimeFormat, type AllDayDisplayMode } from '$lib/stores/settings.svelte';
 	import { setLocale, supportedLocales, type SupportedLocale } from '$lib/i18n';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import { GlobalSettingsSection } from '@manacore/shared-ui';
 	import type { CalendarViewType } from '@calendar/shared';
 
 	// Get current locale from svelte-i18n
 	import { locale } from 'svelte-i18n';
 
-	onMount(() => {
+	onMount(async () => {
 		if (!authStore.isAuthenticated) {
 			goto('/login');
 			return;
 		}
 		settingsStore.initialize();
+		await userSettings.load();
 	});
 
 	function handleThemeChange(mode: 'light' | 'dark' | 'system') {
@@ -275,6 +278,85 @@
 				</div>
 			</label>
 		</div>
+
+		<div class="setting-item">
+			<label class="toggle-setting">
+				<input
+					type="checkbox"
+					checked={settingsStore.filterHoursEnabled}
+					onchange={() => settingsStore.set('filterHoursEnabled', !settingsStore.filterHoursEnabled)}
+				/>
+				<div class="toggle-info">
+					<span class="setting-label">Stunden filtern</span>
+					<span class="setting-description">Nur bestimmte Stunden in der Tages-/Wochenansicht anzeigen</span>
+				</div>
+			</label>
+		</div>
+
+		{#if settingsStore.filterHoursEnabled}
+			<div class="setting-item hour-range-setting">
+				<div class="setting-info">
+					<span class="setting-label">Sichtbare Stunden</span>
+					<span class="setting-description">Zeitbereich der in der Kalenderansicht angezeigt wird</span>
+				</div>
+				<div class="hour-range-inputs">
+					<div class="hour-input-group">
+						<label for="start-hour">Von</label>
+						<select
+							id="start-hour"
+							class="select-input hour-select"
+							value={settingsStore.dayStartHour}
+							onchange={(e) => settingsStore.set('dayStartHour', Number(e.currentTarget.value))}
+						>
+							{#each Array.from({ length: 24 }, (_, i) => i) as hour}
+								{#if hour < settingsStore.dayEndHour}
+									<option value={hour}>{hour.toString().padStart(2, '0')}:00</option>
+								{/if}
+							{/each}
+						</select>
+					</div>
+					<span class="hour-separator">–</span>
+					<div class="hour-input-group">
+						<label for="end-hour">Bis</label>
+						<select
+							id="end-hour"
+							class="select-input hour-select"
+							value={settingsStore.dayEndHour}
+							onchange={(e) => settingsStore.set('dayEndHour', Number(e.currentTarget.value))}
+						>
+							{#each Array.from({ length: 24 }, (_, i) => i + 1) as hour}
+								{#if hour > settingsStore.dayStartHour}
+									<option value={hour}>{hour.toString().padStart(2, '0')}:00</option>
+								{/if}
+							{/each}
+						</select>
+					</div>
+				</div>
+			</div>
+		{/if}
+
+		<div class="setting-item">
+			<div class="setting-info">
+				<span class="setting-label">Ganztägige Termine</span>
+				<span class="setting-description">Wie sollen ganztägige Termine angezeigt werden?</span>
+			</div>
+			<div class="button-group">
+				<button
+					class="group-button"
+					class:active={settingsStore.allDayDisplayMode === 'header'}
+					onclick={() => settingsStore.set('allDayDisplayMode', 'header' as AllDayDisplayMode)}
+				>
+					In Kopfzeile
+				</button>
+				<button
+					class="group-button"
+					class:active={settingsStore.allDayDisplayMode === 'block'}
+					onclick={() => settingsStore.set('allDayDisplayMode', 'block' as AllDayDisplayMode)}
+				>
+					Als Tagesblock
+				</button>
+			</div>
+		</div>
 	</section>
 
 	<!-- Termin-Einstellungen -->
@@ -314,6 +396,11 @@
 				{/each}
 			</select>
 		</div>
+	</section>
+
+	<!-- Global App Settings -->
+	<section class="settings-section">
+		<GlobalSettingsSection {userSettings} />
 	</section>
 
 	<!-- Konto -->
@@ -576,5 +663,39 @@
 
 	.text-destructive {
 		color: hsl(var(--color-error));
+	}
+
+	/* Hour range settings */
+	.hour-range-setting {
+		padding-left: 2rem;
+		border-left: 2px solid hsl(var(--color-primary) / 0.3);
+		margin-left: 0.5rem;
+	}
+
+	.hour-range-inputs {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.hour-input-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.hour-input-group label {
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.hour-select {
+		width: 100px;
+	}
+
+	.hour-separator {
+		font-size: 1.25rem;
+		color: hsl(var(--color-muted-foreground));
+		margin-top: 1.25rem;
 	}
 </style>

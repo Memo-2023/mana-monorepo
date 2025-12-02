@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { theme } from '$lib/stores/theme.svelte';
+	import { theme } from '$lib/stores/theme';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import {
@@ -17,7 +17,7 @@
 </script>
 
 <svelte:head>
-	<title>Einstellungen - Storage</title>
+	<title>Einstellungen - Picture</title>
 </svelte:head>
 
 <SettingsPage title="Einstellungen" subtitle="Passe die App an deine Vorlieben an.">
@@ -71,31 +71,6 @@
 						</button>
 					{/each}
 				</div>
-			</div>
-		</SettingsCard>
-	</SettingsSection>
-
-	<!-- Storage Section -->
-	<SettingsSection title="Speicher">
-		{#snippet icon()}
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
-				/>
-			</svg>
-		{/snippet}
-
-		<SettingsCard>
-			<div class="px-5 py-4">
-				<p class="font-medium text-[hsl(var(--foreground))] mb-2">Speicherplatz</p>
-				<p class="text-sm text-[hsl(var(--muted-foreground))] mb-4">Dein genutzter Speicherplatz</p>
-				<div class="w-full h-2 bg-[hsl(var(--muted))] rounded-full overflow-hidden mb-2">
-					<div class="h-full bg-[hsl(var(--primary))] rounded-full" style="width: 25%"></div>
-				</div>
-				<p class="text-sm text-[hsl(var(--muted-foreground))]">2.5 GB von 10 GB verwendet</p>
 			</div>
 		</SettingsCard>
 	</SettingsSection>

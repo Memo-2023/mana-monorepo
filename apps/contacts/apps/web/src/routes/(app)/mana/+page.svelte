@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { SubscriptionPage } from '@manacore/shared-subscription-ui';
+	import { toasts } from '$lib/stores/toast';
 
 	function handleSubscribe(planId: string) {
 		console.log('Subscribe to plan:', planId);
-		alert(`Abo "${planId}" ausgewählt. Bezahlsystem wird noch integriert.`);
+		toasts.info(`Abo "${planId}" ausgewählt. Bezahlsystem wird noch integriert.`);
 	}
 
 	function handleBuyPackage(packageId: string) {
 		console.log('Buy package:', packageId);
-		alert(`Paket "${packageId}" ausgewählt. Bezahlsystem wird noch integriert.`);
+		toasts.info(`Paket "${packageId}" ausgewählt. Bezahlsystem wird noch integriert.`);
 	}
 </script>
 
@@ -34,6 +35,6 @@
 		min-height: 100%;
 		width: 100%;
 		overflow-x: hidden;
-		background-color: hsl(var(--color-background));
+		background-color: hsl(var(--background));
 	}
 </style>

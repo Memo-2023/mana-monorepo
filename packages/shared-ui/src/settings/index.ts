@@ -6,3 +6,4 @@ export { default as SettingsRow } from './SettingsRow.svelte';
 export { default as SettingsToggle } from './SettingsToggle.svelte';
 export { default as SettingsDangerZone } from './SettingsDangerZone.svelte';
 export { default as SettingsDangerButton } from './SettingsDangerButton.svelte';
+export { default as GlobalSettingsSection } from './GlobalSettingsSection.svelte';

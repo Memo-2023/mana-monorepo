@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { theme } from '$lib/stores/theme';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { ThemeColorPreview } from '@manacore/shared-theme-ui';
 	import {
@@ -12,6 +13,7 @@
 		SettingsToggle,
 		SettingsDangerZone,
 		SettingsDangerButton,
+		GlobalSettingsSection,
 	} from '@manacore/shared-ui';
 
 	// Settings state
@@ -19,12 +21,15 @@
 	let userName = $state('');
 
 	// Load settings from localStorage on mount
-	onMount(() => {
+	onMount(async () => {
 		const savedLanguage = localStorage.getItem('language');
 		const savedUserName = localStorage.getItem('userName');
 
 		if (savedLanguage) language = savedLanguage as 'de' | 'en';
 		if (savedUserName) userName = savedUserName;
+
+		// Load user settings from server
+		await userSettings.load();
 	});
 
 	// Save settings to localStorage
@@ -226,6 +231,9 @@
 			</SettingsRow>
 		</SettingsCard>
 	</SettingsSection>
+
+	<!-- Global Settings Section -->
+	<GlobalSettingsSection {userSettings} />
 
 	<!-- Data Section -->
 	<SettingsDangerZone title="Daten">
