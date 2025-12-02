@@ -226,8 +226,8 @@
 	}
 
 	function fillDevCredentials() {
-		email = 'till.schneider@memoro.ai';
-		password = 'Aa-12345678';
+		email = 't@t.de';
+		password = 'testtesttest';
 	}
 </script>
 
