@@ -12,7 +12,8 @@ export type AppId =
 	| 'nutriphi'
 	| 'zitare'
 	| 'picture'
-	| 'contacts';
+	| 'contacts'
+	| 'calendar';
 
 /**
  * App branding configuration

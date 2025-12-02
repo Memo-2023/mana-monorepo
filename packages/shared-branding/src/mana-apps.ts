@@ -196,6 +196,38 @@ export const MANA_APPS: ManaApp[] = [
 		comingSoon: false,
 		status: 'development',
 	},
+	{
+		id: 'calendar',
+		name: 'Kalender',
+		description: {
+			de: 'Smarte Kalenderverwaltung',
+			en: 'Smart Calendar Management',
+		},
+		longDescription: {
+			de: 'Organisiere deine Zeit intelligent mit persönlichen und geteilten Kalendern, wiederkehrenden Terminen und Erinnerungen.',
+			en: 'Organize your time intelligently with personal and shared calendars, recurring events, and reminders.',
+		},
+		icon: APP_ICONS.calendar,
+		color: '#0ea5e9',
+		comingSoon: false,
+		status: 'development',
+	},
+	{
+		id: 'storage',
+		name: 'Storage',
+		description: {
+			de: 'Cloud-Speicherung',
+			en: 'Cloud Storage',
+		},
+		longDescription: {
+			de: 'Sichere Cloud-Speicherung für deine Dateien mit Ordnern, Versionierung, Sharing und mehr.',
+			en: 'Secure cloud storage for your files with folders, versioning, sharing, and more.',
+		},
+		icon: APP_ICONS.storage,
+		color: '#3b82f6',
+		comingSoon: false,
+		status: 'development',
+	},
 ];
 
 /**
@@ -269,7 +301,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	presi: { dev: 'http://localhost:5176', prod: 'https://presi.manacore.app' },
 	manadeck: { dev: 'http://localhost:5177', prod: 'https://manadeck.manacore.app' },
 	maerchenzauber: { dev: 'http://localhost:5178', prod: 'https://maerchenzauber.manacore.app' },
-	picture: { dev: 'http://localhost:5179', prod: 'https://picture.manacore.app' },
+	picture: { dev: 'http://localhost:5185', prod: 'https://picture.manacore.app' },
 	zitare: { dev: 'http://localhost:5180', prod: 'https://zitare.manacore.app' },
 	wisekeep: { dev: 'http://localhost:5181', prod: 'https://wisekeep.manacore.app' },
 	nutriphi: { dev: 'http://localhost:5182', prod: 'https://nutriphi.manacore.app' },
@@ -277,6 +309,8 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	mana: { dev: 'http://localhost:5173', prod: 'https://manacore.app' },
 	moodlit: { dev: 'http://localhost:5183', prod: 'https://moodlit.manacore.app' },
 	contacts: { dev: 'http://localhost:5184', prod: 'https://contacts.manacore.app' },
+	calendar: { dev: 'http://localhost:5179', prod: 'https://calendar.manacore.app' },
+	storage: { dev: 'http://localhost:5185', prod: 'https://storage.manacore.app' },
 };
 
 /**

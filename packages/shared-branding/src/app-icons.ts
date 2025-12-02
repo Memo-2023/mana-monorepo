@@ -48,6 +48,12 @@ const nutriphiSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fil
 // Contacts icon (address book/person with gradient)
 const contactsSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#contactsGrad)"/><circle cx="512" cy="380" r="100" fill="white"/><path d="M320 620C320 540 408 480 512 480C616 480 704 540 704 620V680C704 702.091 685.091 720 663 720H361C338.909 720 320 702.091 320 680V620Z" fill="white"/><rect x="240" y="300" width="24" height="80" rx="12" fill="white" fill-opacity="0.6"/><rect x="240" y="420" width="24" height="80" rx="12" fill="white" fill-opacity="0.6"/><rect x="240" y="540" width="24" height="80" rx="12" fill="white" fill-opacity="0.6"/><defs><linearGradient id="contactsGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs></svg>`;
 
+// Calendar icon (calendar with gradient)
+const calendarSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#calendarGrad)"/><rect x="260" y="320" width="504" height="424" rx="24" fill="white"/><rect x="260" y="320" width="504" height="100" rx="24" fill="white"/><rect x="260" y="396" width="504" height="24" fill="#0ea5e9" fill-opacity="0.3"/><rect x="340" y="260" width="24" height="100" rx="12" fill="white"/><rect x="660" y="260" width="24" height="100" rx="12" fill="white"/><rect x="300" y="480" width="80" height="60" rx="8" fill="#0ea5e9" fill-opacity="0.2"/><rect x="400" y="480" width="80" height="60" rx="8" fill="#0ea5e9" fill-opacity="0.2"/><rect x="500" y="480" width="80" height="60" rx="8" fill="#0ea5e9"/><rect x="600" y="480" width="80" height="60" rx="8" fill="#0ea5e9" fill-opacity="0.2"/><rect x="300" y="560" width="80" height="60" rx="8" fill="#0ea5e9" fill-opacity="0.2"/><rect x="400" y="560" width="80" height="60" rx="8" fill="#0ea5e9" fill-opacity="0.2"/><rect x="500" y="560" width="80" height="60" rx="8" fill="#0ea5e9" fill-opacity="0.2"/><rect x="600" y="560" width="80" height="60" rx="8" fill="#0ea5e9" fill-opacity="0.2"/><rect x="300" y="640" width="80" height="60" rx="8" fill="#0ea5e9" fill-opacity="0.2"/><rect x="400" y="640" width="80" height="60" rx="8" fill="#0ea5e9" fill-opacity="0.2"/><rect x="500" y="640" width="80" height="60" rx="8" fill="#0ea5e9" fill-opacity="0.2"/><rect x="600" y="640" width="80" height="60" rx="8" fill="#0ea5e9" fill-opacity="0.2"/><defs><linearGradient id="calendarGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#0ea5e9"/><stop offset="1" stop-color="#0284c7"/></linearGradient></defs></svg>`;
+
+// Storage icon (cloud storage with gradient)
+const storageSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#storageGrad)"/><path d="M720 520C720 448.471 662.529 391 591 391C584.614 391 578.337 391.479 572.195 392.404C546.867 332.088 487.173 290 418 290C328.157 290 256 362.157 256 452C256 461.033 256.748 469.887 258.179 478.5C214.762 497.476 184 540.728 184 591C184 658.32 238.68 713 306 713H680C749.32 713 804 658.32 804 591C804 547.831 779.054 510.325 742.5 491.5C734.321 503.137 728 516.893 728 532V536C728 567.48 755.482 593 789 593" stroke="white" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/><path d="M512 500V700M512 700L420 608M512 700L604 608" stroke="white" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="storageGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient></defs></svg>`;
+
 /**
  * App icons as data URLs
  * Use these directly in <img src={APP_ICONS.memoro}> or CSS background-image
@@ -66,6 +72,8 @@ export const APP_ICONS = {
 	moodlit: svgToDataUrl(moodlitSvg),
 	nutriphi: svgToDataUrl(nutriphiSvg),
 	contacts: svgToDataUrl(contactsSvg),
+	calendar: svgToDataUrl(calendarSvg),
+	storage: svgToDataUrl(storageSvg),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;
