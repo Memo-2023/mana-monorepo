@@ -12,6 +12,7 @@ export {
 	createPresiStorage,
 	createCalendarStorage,
 	createContactsStorage,
+	createStorageStorage,
 } from './factory.js';
 
 // Utilities

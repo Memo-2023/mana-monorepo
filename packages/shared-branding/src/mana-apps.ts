@@ -180,6 +180,22 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 		archived: true,
 	},
+	{
+		id: 'contacts',
+		name: 'ManaContacts',
+		description: {
+			de: 'Kontaktverwaltung',
+			en: 'Contact Management',
+		},
+		longDescription: {
+			de: 'Verwalte deine Kontakte übersichtlich mit Gruppen, Tags und Notizen.',
+			en: 'Manage your contacts clearly with groups, tags, and notes.',
+		},
+		icon: APP_ICONS.contacts,
+		color: '#3b82f6',
+		comingSoon: false,
+		status: 'development',
+	},
 ];
 
 /**
@@ -260,6 +276,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	manacore: { dev: 'http://localhost:5173', prod: 'https://manacore.app' },
 	mana: { dev: 'http://localhost:5173', prod: 'https://manacore.app' },
 	moodlit: { dev: 'http://localhost:5183', prod: 'https://moodlit.manacore.app' },
+	contacts: { dev: 'http://localhost:5184', prod: 'https://contacts.manacore.app' },
 };
 
 /**

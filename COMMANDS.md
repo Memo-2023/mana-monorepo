@@ -3,13 +3,38 @@
 # Alles starten (PostgreSQL, Redis, Auth, Chat)
 
 pnpm docker:up:all
+
+
 pnpm docker:down
 
 pnpm dev:chat:app
+pnpm dev:contacts:app
 pnpm dev:picture:app
 pnpm dev:manacore:app
 pnpm dev:zitare:app
 pnpm dev:presi:app
+
+# Deployment Landingpages:
+## Einzelne Landing Page
+  pnpm deploy:landing:chat
+  pnpm deploy:landing:picture
+  pnpm deploy:landing:manacore
+  pnpm deploy:landing:manadeck
+  pnpm deploy:landing:zitare
+
+   Hier sind alle Landing Page URLs:
+
+    | Projekt  | URL                                |
+  |----------|------------------------------------|
+  | Chat     | https://chat-landing-90m.pages.dev |
+  | Picture  | https://picture-landing.pages.dev  |
+  | ManaCore | https://manacore-landing.pages.dev |
+  | ManaDeck | https://manadeck-landing.pages.dev |
+  | Zitare   | https://zitare-landing.pages.dev   |
+  | Presi    | https://presi-landing.pages.dev    |
+
+  ## Alle auf einmal
+  pnpm deploy:landing:all
 
 Übersicht aller wichtigen Befehle zum Starten, Stoppen und Verwalten der Apps.
 

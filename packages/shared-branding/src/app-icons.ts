@@ -45,6 +45,9 @@ const moodlitSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill
 // Nutriphi icon (nutrition/heart with gradient)
 const nutriphiSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#nutriGrad)"/><path d="M512 760C512 760 280 600 280 420C280 340 344 280 424 280C472 280 512 308 512 308C512 308 552 280 600 280C680 280 744 340 744 420C744 600 512 760 512 760Z" fill="white"/><path d="M512 280V200" stroke="white" stroke-width="24" stroke-linecap="round"/><path d="M512 200C512 200 560 160 600 180" stroke="white" stroke-width="24" stroke-linecap="round"/><defs><linearGradient id="nutriGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#10b981"/><stop offset="1" stop-color="#059669"/></linearGradient></defs></svg>`;
 
+// Contacts icon (address book/person with gradient)
+const contactsSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#contactsGrad)"/><circle cx="512" cy="380" r="100" fill="white"/><path d="M320 620C320 540 408 480 512 480C616 480 704 540 704 620V680C704 702.091 685.091 720 663 720H361C338.909 720 320 702.091 320 680V620Z" fill="white"/><rect x="240" y="300" width="24" height="80" rx="12" fill="white" fill-opacity="0.6"/><rect x="240" y="420" width="24" height="80" rx="12" fill="white" fill-opacity="0.6"/><rect x="240" y="540" width="24" height="80" rx="12" fill="white" fill-opacity="0.6"/><defs><linearGradient id="contactsGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs></svg>`;
+
 /**
  * App icons as data URLs
  * Use these directly in <img src={APP_ICONS.memoro}> or CSS background-image
@@ -62,6 +65,7 @@ export const APP_ICONS = {
 	wisekeep: svgToDataUrl(wisekeepSvg),
 	moodlit: svgToDataUrl(moodlitSvg),
 	nutriphi: svgToDataUrl(nutriphiSvg),
+	contacts: svgToDataUrl(contactsSvg),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;

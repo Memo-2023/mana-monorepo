@@ -400,6 +400,7 @@ pnpm docker:up
 | `presi-storage` | Presi | Presentation slides |
 | `calendar-storage` | Calendar | Calendar attachments |
 | `contacts-storage` | Contacts | Contact avatars/files |
+| `storage-storage` | Storage | Cloud drive files |
 
 ### Usage in Backend
 

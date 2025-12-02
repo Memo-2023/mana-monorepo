@@ -83,6 +83,7 @@ export const BUCKETS = {
 	PRESI: 'presi-storage',
 	CALENDAR: 'calendar-storage',
 	CONTACTS: 'contacts-storage',
+	STORAGE: 'storage-storage',
 } as const;
 
 export type BucketName = (typeof BUCKETS)[keyof typeof BUCKETS];

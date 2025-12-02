@@ -1,0 +1,64 @@
+{
+	"app": {
+		"name": "Contacts"
+	},
+	"nav": {
+		"contacts": "Kontakte",
+		"groups": "Gruppen",
+		"favorites": "Favoriten",
+		"archive": "Archiv",
+		"search": "Suche",
+		"settings": "Einstellungen",
+		"feedback": "Feedback"
+	},
+	"contacts": {
+		"title": "Kontakte",
+		"new": "Neuer Kontakt",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
+		"search": "Kontakte durchsuchen...",
+		"noContacts": "Keine Kontakte gefunden",
+		"addFirst": "Füge deinen ersten Kontakt hinzu",
+		"favorites": "Favoriten",
+		"archive": "Archiv"
+	},
+	"contact": {
+		"firstName": "Vorname",
+		"lastName": "Nachname",
+		"displayName": "Anzeigename",
+		"email": "E-Mail",
+		"phone": "Telefon",
+		"mobile": "Mobil",
+		"company": "Firma",
+		"jobTitle": "Position",
+		"department": "Abteilung",
+		"street": "Straße",
+		"city": "Stadt",
+		"postalCode": "PLZ",
+		"country": "Land",
+		"website": "Website",
+		"birthday": "Geburtstag",
+		"notes": "Notizen"
+	},
+	"groups": {
+		"title": "Gruppen",
+		"new": "Neue Gruppe",
+		"noGroups": "Keine Gruppen vorhanden"
+	},
+	"actions": {
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"delete": "Löschen",
+		"edit": "Bearbeiten",
+		"create": "Erstellen",
+		"favorite": "Favorit",
+		"unfavorite": "Kein Favorit",
+		"archive": "Archivieren",
+		"unarchive": "Wiederherstellen"
+	},
+	"messages": {
+		"saved": "Gespeichert",
+		"deleted": "Gelöscht",
+		"error": "Ein Fehler ist aufgetreten"
+	}
+}

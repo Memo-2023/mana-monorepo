@@ -11,7 +11,8 @@ export type AppId =
 	| 'presi'
 	| 'nutriphi'
 	| 'zitare'
-	| 'picture';
+	| 'picture'
+	| 'contacts';
 
 /**
  * App branding configuration

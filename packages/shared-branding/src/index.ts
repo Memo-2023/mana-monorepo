@@ -24,6 +24,7 @@ export {
 	PresiLogo,
 	NutriPhiLogo,
 	ZitareLogo,
+	ContactsLogo,
 } from './logos';
 
 // Configuration

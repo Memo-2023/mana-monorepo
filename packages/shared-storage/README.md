@@ -29,6 +29,7 @@ The following buckets are automatically created:
 | `presi-storage` | Presi | Presentation slides |
 | `calendar-storage` | Calendar | Calendar attachments |
 | `contacts-storage` | Contacts | Contact avatars/files |
+| `storage-storage` | Storage | Cloud drive files |
 
 ## Usage
 
@@ -89,6 +90,7 @@ import {
   createPresiStorage,
   createCalendarStorage,
   createContactsStorage,
+  createStorageStorage,
 } from '@manacore/shared-storage';
 ```
 

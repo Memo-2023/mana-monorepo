@@ -83,6 +83,7 @@ services:
       mc mb --ignore-existing myminio/presi-storage;
       mc mb --ignore-existing myminio/calendar-storage;
       mc mb --ignore-existing myminio/contacts-storage;
+      mc mb --ignore-existing myminio/storage-storage;
       mc anonymous set download myminio/picture-storage;
       echo 'Buckets created successfully';
       exit 0;

@@ -1,0 +1,64 @@
+{
+	"app": {
+		"name": "Contacts"
+	},
+	"nav": {
+		"contacts": "Contacts",
+		"groups": "Groups",
+		"favorites": "Favorites",
+		"archive": "Archive",
+		"search": "Search",
+		"settings": "Settings",
+		"feedback": "Feedback"
+	},
+	"contacts": {
+		"title": "Contacts",
+		"new": "New Contact",
+		"edit": "Edit",
+		"delete": "Delete",
+		"search": "Search contacts...",
+		"noContacts": "No contacts found",
+		"addFirst": "Add your first contact",
+		"favorites": "Favorites",
+		"archive": "Archive"
+	},
+	"contact": {
+		"firstName": "First Name",
+		"lastName": "Last Name",
+		"displayName": "Display Name",
+		"email": "Email",
+		"phone": "Phone",
+		"mobile": "Mobile",
+		"company": "Company",
+		"jobTitle": "Job Title",
+		"department": "Department",
+		"street": "Street",
+		"city": "City",
+		"postalCode": "Postal Code",
+		"country": "Country",
+		"website": "Website",
+		"birthday": "Birthday",
+		"notes": "Notes"
+	},
+	"groups": {
+		"title": "Groups",
+		"new": "New Group",
+		"noGroups": "No groups available"
+	},
+	"actions": {
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"edit": "Edit",
+		"create": "Create",
+		"favorite": "Favorite",
+		"unfavorite": "Unfavorite",
+		"archive": "Archive",
+		"unarchive": "Restore"
+	},
+	"messages": {
+		"saved": "Saved",
+		"deleted": "Deleted",
+		"error": "An error occurred"
+	}
+}

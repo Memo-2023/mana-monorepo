@@ -11,3 +11,4 @@ export { default as ChatLogo } from './ChatLogo.svelte';
 export { default as PresiLogo } from './PresiLogo.svelte';
 export { default as NutriPhiLogo } from './NutriPhiLogo.svelte';
 export { default as ZitareLogo } from './ZitareLogo.svelte';
+export { default as ContactsLogo } from './ContactsLogo.svelte';

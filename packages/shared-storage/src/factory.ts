@@ -119,3 +119,13 @@ export function createCalendarStorage(): StorageClient {
 export function createContactsStorage(): StorageClient {
 	return createStorageClient({ name: BUCKETS.CONTACTS });
 }
+
+/**
+ * Create a storage client for the Storage project (cloud drive)
+ */
+export function createStorageStorage(publicUrl?: string): StorageClient {
+	return createStorageClient({
+		name: BUCKETS.STORAGE,
+		publicUrl: publicUrl ?? process.env.STORAGE_S3_PUBLIC_URL,
+	});
+}

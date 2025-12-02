@@ -387,6 +387,75 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MANA_GAMES_BACKEND_PORT || '3011'}`,
 		},
 	},
+
+	// Calendar Backend (NestJS)
+	{
+		path: 'apps/calendar/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.CALENDAR_BACKEND_PORT || '3014',
+			DATABASE_URL: (env) => env.CALENDAR_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Calendar Mobile (Expo)
+	{
+		path: 'apps/calendar/apps/mobile/.env',
+		vars: {
+			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CALENDAR_BACKEND_PORT || '3014'}`,
+			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Calendar Web (SvelteKit)
+	{
+		path: 'apps/calendar/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CALENDAR_BACKEND_PORT || '3014'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Contacts Backend (NestJS)
+	{
+		path: 'apps/contacts/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.CONTACTS_BACKEND_PORT || '3015',
+			DATABASE_URL: (env) => env.CONTACTS_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			S3_ENDPOINT: (env) => env.S3_ENDPOINT,
+			S3_REGION: (env) => env.S3_REGION,
+			S3_ACCESS_KEY: (env) => env.S3_ACCESS_KEY,
+			S3_SECRET_KEY: (env) => env.S3_SECRET_KEY,
+			S3_BUCKET: (env) => env.CONTACTS_S3_BUCKET || 'contacts-photos',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Contacts Mobile (Expo)
+	{
+		path: 'apps/contacts/apps/mobile/.env',
+		vars: {
+			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CONTACTS_BACKEND_PORT || '3015'}`,
+			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Contacts Web (SvelteKit)
+	{
+		path: 'apps/contacts/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CONTACTS_BACKEND_PORT || '3015'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
 ];
 
 function main() {
