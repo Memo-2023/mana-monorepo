@@ -44,6 +44,50 @@ services:
       timeout: 5s
       retries: 5
 
+  # MinIO Object Storage (S3-compatible)
+  minio:
+    image: minio/minio:latest
+    container_name: manacore-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web Console
+    networks:
+      - manacore-network
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # MinIO bucket initialization (runs once)
+  minio-init:
+    image: minio/mc:latest
+    container_name: manacore-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set myminio http://minio:9000 $${MINIO_ROOT_USER:-minioadmin} $${MINIO_ROOT_PASSWORD:-minioadmin};
+      mc mb --ignore-existing myminio/picture-images;
+      mc mb --ignore-existing myminio/chat-files;
+      mc mb --ignore-existing myminio/manadeck-assets;
+      mc mb --ignore-existing myminio/nutriphi-meals;
+      mc mb --ignore-existing myminio/presi-slides;
+      mc anonymous set download myminio/picture-images;
+      echo 'Buckets created successfully';
+      exit 0;
+      "
+    networks:
+      - manacore-network
+
   # Mana Core Auth Service
   mana-core-auth:
     profiles: ["auth", "all"]
@@ -115,3 +159,4 @@ networks:
 volumes:
   postgres-data:
   redis-data:
+  minio-data:

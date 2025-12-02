@@ -304,6 +304,7 @@ $: doubled = count * 2;
 | `@manacore/shared-nestjs-auth`  | NestJS JWT validation guards via mana-core-auth |
 | `@mana-core/nestjs-integration` | NestJS module with auth guards + credit client  |
 | `@manacore/shared-auth`         | Client-side auth service for web/mobile apps    |
+| `@manacore/shared-storage`      | S3-compatible storage (MinIO local, Hetzner prod) |
 | `@manacore/shared-supabase`     | Unified Supabase client                         |
 | `@manacore/shared-types`        | Common TypeScript types                         |
 | `@manacore/shared-utils`        | Utility functions                               |
@@ -324,6 +325,77 @@ import { formatDate, truncate } from '@manacore/shared-utils';
 - Row Level Security (RLS) policies enforce access control via JWT claims
 - Each project has its own Supabase project/schema
 - Types typically generated via `supabase gen types`
+
+## Object Storage (MinIO / Hetzner)
+
+S3-compatible object storage for file uploads, generated images, etc.
+
+### Architecture
+
+| Environment | Service | Purpose |
+|-------------|---------|---------|
+| **Local** | MinIO (Docker) | S3-compatible local storage |
+| **Production** | Hetzner Object Storage | Cost-effective S3-compatible cloud storage |
+
+### Local Development
+
+```bash
+# Start infrastructure (includes MinIO)
+pnpm docker:up
+
+# MinIO Web Console: http://localhost:9001
+# Username: minioadmin
+# Password: minioadmin
+
+# S3 API endpoint: http://localhost:9000
+```
+
+### Pre-configured Buckets
+
+| Bucket | Project | Purpose |
+|--------|---------|---------|
+| `picture-images` | Picture | AI-generated images |
+| `chat-files` | Chat | User file uploads |
+| `manadeck-assets` | ManaDeck | Card/deck assets |
+| `nutriphi-meals` | NutriPhi | Meal photos |
+| `presi-slides` | Presi | Presentation slides |
+
+### Usage in Backend
+
+```typescript
+import { createPictureStorage, generateUserFileKey, getContentType } from '@manacore/shared-storage';
+
+const storage = createPictureStorage();
+
+// Upload
+const key = generateUserFileKey(userId, 'image.png');
+const result = await storage.upload(key, buffer, {
+  contentType: getContentType('image.png'),
+  public: true,
+});
+
+// Download
+const data = await storage.download(key);
+
+// Presigned URLs
+const uploadUrl = await storage.getUploadUrl(key, { expiresIn: 3600 });
+```
+
+### Environment Variables
+
+```env
+# Local (in .env.development)
+S3_ENDPOINT=http://localhost:9000
+S3_REGION=us-east-1
+S3_ACCESS_KEY=minioadmin
+S3_SECRET_KEY=minioadmin
+
+# Production (Hetzner)
+S3_ENDPOINT=https://fsn1.your-objectstorage.com
+S3_REGION=fsn1
+S3_ACCESS_KEY=your-access-key
+S3_SECRET_KEY=your-secret-key
+```
 
 ## Adding Dependencies
 

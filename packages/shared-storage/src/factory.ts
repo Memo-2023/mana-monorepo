@@ -1,0 +1,107 @@
+import { StorageClient } from './client.js';
+import { BUCKETS, type StorageConfig, type BucketConfig, type BucketName } from './types.js';
+
+/**
+ * Environment variable names for storage configuration
+ */
+const ENV_KEYS = {
+	ENDPOINT: 'S3_ENDPOINT',
+	REGION: 'S3_REGION',
+	ACCESS_KEY: 'S3_ACCESS_KEY',
+	SECRET_KEY: 'S3_SECRET_KEY',
+} as const;
+
+/**
+ * Default configuration for local MinIO development
+ */
+const MINIO_DEFAULTS: StorageConfig = {
+	endpoint: 'http://localhost:9000',
+	region: 'us-east-1',
+	accessKeyId: 'minioadmin',
+	secretAccessKey: 'minioadmin',
+	forcePathStyle: true,
+};
+
+/**
+ * Get storage configuration from environment variables
+ * Falls back to MinIO defaults in development
+ */
+export function getStorageConfig(): StorageConfig {
+	const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+
+	// Use environment variables if available, otherwise use MinIO defaults
+	return {
+		endpoint: process.env[ENV_KEYS.ENDPOINT] ?? (isDev ? MINIO_DEFAULTS.endpoint : ''),
+		region: process.env[ENV_KEYS.REGION] ?? MINIO_DEFAULTS.region,
+		accessKeyId: process.env[ENV_KEYS.ACCESS_KEY] ?? (isDev ? MINIO_DEFAULTS.accessKeyId : ''),
+		secretAccessKey:
+			process.env[ENV_KEYS.SECRET_KEY] ?? (isDev ? MINIO_DEFAULTS.secretAccessKey : ''),
+		forcePathStyle: isDev || process.env[ENV_KEYS.ENDPOINT]?.includes('localhost'),
+	};
+}
+
+/**
+ * Create a storage client for a specific bucket
+ */
+export function createStorageClient(
+	bucket: BucketName | BucketConfig,
+	config?: Partial<StorageConfig>
+): StorageClient {
+	const storageConfig = {
+		...getStorageConfig(),
+		...config,
+	};
+
+	const bucketConfig: BucketConfig = typeof bucket === 'string' ? { name: bucket } : bucket;
+
+	// Validate configuration
+	if (!storageConfig.endpoint) {
+		throw new Error('S3_ENDPOINT is required for storage configuration');
+	}
+	if (!storageConfig.accessKeyId || !storageConfig.secretAccessKey) {
+		throw new Error('S3_ACCESS_KEY and S3_SECRET_KEY are required');
+	}
+
+	return new StorageClient(storageConfig, bucketConfig);
+}
+
+/**
+ * Create a storage client for the Picture project
+ */
+export function createPictureStorage(publicUrl?: string): StorageClient {
+	return createStorageClient({
+		name: BUCKETS.PICTURE,
+		publicUrl: publicUrl ?? process.env.PICTURE_STORAGE_PUBLIC_URL,
+	});
+}
+
+/**
+ * Create a storage client for the Chat project
+ */
+export function createChatStorage(): StorageClient {
+	return createStorageClient({ name: BUCKETS.CHAT });
+}
+
+/**
+ * Create a storage client for the ManaDeck project
+ */
+export function createManaDeckStorage(): StorageClient {
+	return createStorageClient({ name: BUCKETS.MANADECK });
+}
+
+/**
+ * Create a storage client for the NutriPhi project
+ */
+export function createNutriPhiStorage(publicUrl?: string): StorageClient {
+	return createStorageClient({
+		name: BUCKETS.NUTRIPHI,
+		publicUrl: publicUrl ?? process.env.NUTRIPHI_S3_PUBLIC_URL,
+	});
+}
+
+/**
+ * Create a storage client for the Presi project
+ */
+export function createPresiStorage(): StorageClient {
+	return createStorageClient({ name: BUCKETS.PRESI });
+}
