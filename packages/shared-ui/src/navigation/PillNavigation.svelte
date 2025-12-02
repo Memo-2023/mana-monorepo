@@ -131,6 +131,8 @@
 		onA11yReduceMotionChange?: (reduce: boolean) => void;
 		/** Show a11y quick toggles in theme dropdown */
 		showA11yQuickToggles?: boolean;
+		/** Desktop navigation position (mobile always at bottom) */
+		desktopPosition?: 'top' | 'bottom';
 	}
 
 	let {
@@ -172,6 +174,7 @@
 		a11yReduceMotion = false,
 		onA11yReduceMotionChange,
 		showA11yQuickToggles = false,
+		desktopPosition = 'top',
 	}: Props = $props();
 
 	// Type guards for elements
@@ -313,6 +316,7 @@
 	<nav
 		class="pill-nav"
 		class:sidebar-mode={isSidebarMode}
+		class:desktop-bottom={desktopPosition === 'bottom'}
 		style={primaryColor ? `--pill-primary-color: ${primaryColor}` : ''}
 	>
 		<div class="pill-nav-container" class:sidebar-container={isSidebarMode}>
@@ -701,7 +705,7 @@
 
 <!-- FAB for collapsed state -->
 {#if isCollapsed}
-	<button onclick={expandNav} class="nav-fab glass-pill" title="Expand navigation">
+	<button onclick={expandNav} class="nav-fab glass-pill" class:desktop-bottom={desktopPosition === 'bottom'} title="Expand navigation">
 		<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
 				stroke-linecap="round"
@@ -724,7 +728,16 @@
 		pointer-events: none;
 	}
 
-	/* Mobile: position at bottom */
+	/* Desktop bottom position */
+	@media (min-width: 769px) {
+		.pill-nav.desktop-bottom:not(.sidebar-mode) {
+			top: auto;
+			bottom: 0;
+			padding: 1rem 0 0.75rem;
+		}
+	}
+
+	/* Mobile: always position at bottom */
 	@media (max-width: 768px) {
 		.pill-nav:not(.sidebar-mode) {
 			top: auto;
@@ -1137,7 +1150,16 @@
 		border: none;
 	}
 
-	/* Mobile: FAB at bottom left */
+	/* Desktop: FAB at bottom when desktop-bottom */
+	@media (min-width: 769px) {
+		.nav-fab.desktop-bottom {
+			top: auto;
+			bottom: 0;
+			border-radius: 0 1rem 0 0;
+		}
+	}
+
+	/* Mobile: FAB always at bottom left */
 	@media (max-width: 768px) {
 		.nav-fab {
 			top: auto;

@@ -7,6 +7,7 @@
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
@@ -144,9 +145,10 @@
 		// Initialize auth
 		await authStore.initialize();
 
-		// Load calendars if authenticated
+		// Load calendars and user settings if authenticated
 		if (authStore.isAuthenticated) {
 			await calendarsStore.fetchCalendars();
+			await userSettings.load();
 		}
 
 		// Initialize sidebar mode from localStorage
@@ -196,6 +198,7 @@
 			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
+			desktopPosition={userSettings.nav.desktopPosition}
 			showThemeToggle={true}
 			showThemeVariants={true}
 			{themeVariantItems}

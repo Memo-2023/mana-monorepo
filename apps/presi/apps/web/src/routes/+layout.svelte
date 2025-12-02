@@ -6,6 +6,7 @@
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { auth } from '$lib/stores/auth.svelte';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import {
@@ -128,9 +129,12 @@
 		}
 	});
 
-	onMount(() => {
+	onMount(async () => {
 		// Initialize auth
 		auth.init();
+
+		// Load user settings
+		await userSettings.load();
 
 		// Initialize theme
 		const cleanup = theme.initialize();
@@ -186,6 +190,7 @@
 				onModeChange={handleModeChange}
 				{isCollapsed}
 				onCollapsedChange={handleCollapsedChange}
+				desktopPosition={userSettings.nav.desktopPosition}
 				showThemeToggle={true}
 				showThemeVariants={true}
 				{themeVariantItems}

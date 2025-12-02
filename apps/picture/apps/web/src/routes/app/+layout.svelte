@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
@@ -61,6 +62,13 @@
 	$effect(() => {
 		if (authStore.initialized && !authStore.loading && !authStore.user) {
 			goto('/auth/login');
+		}
+	});
+
+	// Load user settings when authenticated
+	$effect(() => {
+		if (authStore.initialized && authStore.user) {
+			userSettings.load();
 		}
 	});
 
@@ -222,6 +230,7 @@
 				onModeChange={handleModeChange}
 				{isCollapsed}
 				onCollapsedChange={handleCollapsedChange}
+				desktopPosition={userSettings.nav.desktopPosition}
 				showThemeToggle={true}
 				showThemeVariants={true}
 				{themeVariantItems}

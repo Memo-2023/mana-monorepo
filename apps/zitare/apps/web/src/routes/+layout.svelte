@@ -7,6 +7,7 @@
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
@@ -141,6 +142,11 @@
 		// Initialize auth
 		await authStore.initialize();
 
+		// Load user settings if authenticated
+		if (authStore.isAuthenticated) {
+			await userSettings.load();
+		}
+
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('zitare-nav-sidebar');
 		if (savedSidebar === 'true') {
@@ -187,6 +193,7 @@
 			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
+			desktopPosition={userSettings.nav.desktopPosition}
 			showThemeToggle={true}
 			showThemeVariants={true}
 			{themeVariantItems}

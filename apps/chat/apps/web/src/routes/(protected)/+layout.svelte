@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import {
@@ -156,6 +157,9 @@
 			return;
 		}
 
+		// Load user settings
+		await userSettings.load();
+
 		isChecking = false;
 	});
 </script>
@@ -187,6 +191,7 @@
 			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
+			desktopPosition={userSettings.nav.desktopPosition}
 			showThemeToggle={true}
 			showThemeVariants={true}
 			{themeVariantItems}

@@ -11,6 +11,7 @@
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/authStore.svelte';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
@@ -129,7 +130,7 @@
 		}
 	});
 
-	onMount(() => {
+	onMount(async () => {
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('manacore-nav-sidebar');
 		if (savedSidebar === 'true') {
@@ -142,6 +143,11 @@
 		if (savedCollapsed === 'true') {
 			isCollapsed = true;
 			collapsedStore.set(true);
+		}
+
+		// Load user settings from server
+		if (authStore.isAuthenticated) {
+			await userSettings.load();
 		}
 
 		loading = false;
@@ -174,6 +180,7 @@
 			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
+			desktopPosition={userSettings.nav.desktopPosition}
 			showThemeToggle={true}
 			showThemeVariants={true}
 			{themeVariantItems}

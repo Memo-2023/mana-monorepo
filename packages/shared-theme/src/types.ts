@@ -203,3 +203,107 @@ export interface A11yStoreConfig {
 	/** Default settings override */
 	defaults?: Partial<A11ySettings>;
 }
+
+// ============================================================================
+// Global User Settings Types (synced via mana-core-auth)
+// ============================================================================
+
+/**
+ * Navigation position for desktop (mobile always at bottom)
+ */
+export type NavPosition = 'top' | 'bottom';
+
+/**
+ * Navigation settings
+ */
+export interface NavSettings {
+	/** Desktop navigation position */
+	desktopPosition: NavPosition;
+	/** Whether sidebar is collapsed */
+	sidebarCollapsed: boolean;
+}
+
+/**
+ * Theme settings (synced to server)
+ */
+export interface ThemeSettings {
+	/** Theme mode preference */
+	mode: ThemeMode;
+	/** Color scheme / variant */
+	colorScheme: string;
+}
+
+/**
+ * Global settings that apply to all apps by default
+ */
+export interface GlobalSettings {
+	nav: NavSettings;
+	theme: ThemeSettings;
+	locale: string;
+}
+
+/**
+ * Per-app override settings (partial, only overridden values)
+ */
+export interface AppOverride {
+	nav?: Partial<NavSettings>;
+	theme?: Partial<ThemeSettings>;
+}
+
+/**
+ * Full user settings response from API
+ */
+export interface UserSettingsResponse {
+	globalSettings: GlobalSettings;
+	appOverrides: Record<string, AppOverride>;
+}
+
+/**
+ * Default global settings
+ */
+export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
+	nav: { desktopPosition: 'top', sidebarCollapsed: false },
+	theme: { mode: 'system', colorScheme: 'ocean' },
+	locale: 'de',
+};
+
+/**
+ * User settings store interface
+ */
+export interface UserSettingsStore {
+	/** Resolved navigation settings (global + app override) */
+	readonly nav: NavSettings;
+	/** Resolved theme settings (global + app override) */
+	readonly theme: ThemeSettings;
+	/** Current locale */
+	readonly locale: string;
+	/** Raw global settings */
+	readonly globalSettings: GlobalSettings;
+	/** Whether current app has an override */
+	readonly hasAppOverride: boolean;
+	/** Whether settings are being synced */
+	readonly syncing: boolean;
+	/** Whether settings are loaded */
+	readonly loaded: boolean;
+
+	/** Load settings from server */
+	load: () => Promise<void>;
+	/** Update global settings */
+	updateGlobal: (settings: Partial<GlobalSettings>) => Promise<void>;
+	/** Update app-specific override */
+	updateAppOverride: (settings: AppOverride) => Promise<void>;
+	/** Remove app override (revert to global) */
+	removeAppOverride: () => Promise<void>;
+}
+
+/**
+ * User settings store configuration
+ */
+export interface UserSettingsStoreConfig {
+	/** App identifier (e.g., 'calendar', 'chat') */
+	appId: string;
+	/** Auth service base URL */
+	authUrl: string;
+	/** Function to get current access token */
+	getAccessToken: () => Promise<string | null>;
+}

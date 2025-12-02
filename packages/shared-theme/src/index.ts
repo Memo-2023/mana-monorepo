@@ -15,7 +15,19 @@ export type {
 	A11ySettings,
 	A11yStore,
 	A11yStoreConfig,
+	// User Settings Types (synced via mana-core-auth)
+	NavPosition,
+	NavSettings,
+	ThemeSettings,
+	GlobalSettings,
+	AppOverride,
+	UserSettingsResponse,
+	UserSettingsStore,
+	UserSettingsStoreConfig,
 } from './types';
+
+// User Settings Constants
+export { DEFAULT_GLOBAL_SETTINGS } from './types';
 
 // Constants
 export {
@@ -43,6 +55,9 @@ export { createThemeStore, APP_THEME_CONFIGS } from './store.svelte';
 
 // A11y Store
 export { createA11yStore } from './a11y-store.svelte';
+
+// User Settings Store
+export { createUserSettingsStore } from './user-settings-store.svelte';
 
 // Utils
 export {

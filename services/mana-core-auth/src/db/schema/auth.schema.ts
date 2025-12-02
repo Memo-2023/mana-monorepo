@@ -124,3 +124,27 @@ export const jwks = authSchema.table('jwks', {
 	privateKey: text('private_key').notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+// User settings table (synced across all apps)
+export const userSettings = authSchema.table('user_settings', {
+	userId: text('user_id')
+		.primaryKey()
+		.references(() => users.id, { onDelete: 'cascade' }),
+
+	// Global defaults (applies to all apps)
+	// { nav: { desktopPosition, sidebarCollapsed }, theme: { mode, colorScheme }, locale }
+	globalSettings: jsonb('global_settings')
+		.default({
+			nav: { desktopPosition: 'top', sidebarCollapsed: false },
+			theme: { mode: 'system', colorScheme: 'ocean' },
+			locale: 'de',
+		})
+		.notNull(),
+
+	// Per-app overrides
+	// { "calendar": { nav: {...}, theme: {...} }, "chat": {...} }
+	appOverrides: jsonb('app_overrides').default({}).notNull(),
+
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});

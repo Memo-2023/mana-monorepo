@@ -3,6 +3,8 @@
 	import { Button, Input, Card, PageHeader } from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/authStore.svelte';
 	import { creditsService, type CreditBalance } from '$lib/api/credits';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
+	import type { NavPosition, ThemeMode } from '@manacore/shared-theme';
 
 	let loading = $state(true);
 	let savingProfile = $state(false);
@@ -20,12 +22,39 @@
 		if (authStore.isAuthenticated) {
 			try {
 				creditBalance = await creditsService.getBalance();
+				// Load user settings from server
+				await userSettings.load();
 			} catch (e) {
-				console.error('Failed to load credits:', e);
+				console.error('Failed to load data:', e);
 			}
 		}
 		loading = false;
 	});
+
+	// Navigation position handler
+	async function handleNavPositionChange(position: NavPosition) {
+		await userSettings.updateGlobal({ nav: { ...userSettings.globalSettings.nav, desktopPosition: position } });
+	}
+
+	// Sidebar collapsed handler
+	async function handleSidebarChange(collapsed: boolean) {
+		await userSettings.updateGlobal({ nav: { ...userSettings.globalSettings.nav, sidebarCollapsed: collapsed } });
+	}
+
+	// Theme mode handler
+	async function handleThemeModeChange(mode: ThemeMode) {
+		await userSettings.updateGlobal({ theme: { ...userSettings.globalSettings.theme, mode } });
+	}
+
+	// Color scheme handler
+	async function handleColorSchemeChange(colorScheme: string) {
+		await userSettings.updateGlobal({ theme: { ...userSettings.globalSettings.theme, colorScheme } });
+	}
+
+	// Locale handler
+	async function handleLocaleChange(locale: string) {
+		await userSettings.updateGlobal({ locale });
+	}
 
 	function formatCredits(amount: number): string {
 		return amount.toLocaleString('de-DE');
@@ -130,6 +159,193 @@
 							{savingProfile ? 'Speichern...' : 'Änderungen speichern'}
 						</Button>
 					</div>
+				</div>
+			</Card>
+
+			<!-- Default App Settings Section -->
+			<Card>
+				<div class="p-6">
+					<div class="flex items-center gap-3 mb-6">
+						<div
+							class="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400"
+						>
+							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+								/>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+								/>
+							</svg>
+						</div>
+						<div>
+							<h2 class="text-lg font-semibold">Standard App-Einstellungen</h2>
+							<p class="text-sm text-muted-foreground">
+								Diese Einstellungen gelten für alle Mana Apps
+							</p>
+						</div>
+					</div>
+
+					<div class="space-y-6">
+						<!-- Navigation Settings -->
+						<div class="space-y-4">
+							<h3 class="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+								Navigation
+							</h3>
+
+							<div class="flex items-center justify-between py-3 border-b border-border">
+								<div>
+									<p class="font-medium">Position (Desktop)</p>
+									<p class="text-sm text-muted-foreground">Position der Navigation auf großen Bildschirmen</p>
+								</div>
+								<div class="flex gap-2">
+									<button
+										class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {userSettings.globalSettings.nav.desktopPosition === 'top'
+											? 'bg-primary text-primary-foreground'
+											: 'bg-surface-hover hover:bg-surface-hover/80'}"
+										onclick={() => handleNavPositionChange('top')}
+									>
+										Oben
+									</button>
+									<button
+										class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {userSettings.globalSettings.nav.desktopPosition === 'bottom'
+											? 'bg-primary text-primary-foreground'
+											: 'bg-surface-hover hover:bg-surface-hover/80'}"
+										onclick={() => handleNavPositionChange('bottom')}
+									>
+										Unten
+									</button>
+								</div>
+							</div>
+
+							<div class="flex items-center justify-between py-3">
+								<div>
+									<p class="font-medium">Sidebar eingeklappt</p>
+									<p class="text-sm text-muted-foreground">Standard-Zustand der Sidebar</p>
+								</div>
+								<button
+									class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {userSettings.globalSettings.nav.sidebarCollapsed
+										? 'bg-primary'
+										: 'bg-gray-200 dark:bg-gray-700'}"
+									onclick={() => handleSidebarChange(!userSettings.globalSettings.nav.sidebarCollapsed)}
+								>
+									<span
+										class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {userSettings.globalSettings.nav.sidebarCollapsed
+											? 'translate-x-6'
+											: 'translate-x-1'}"
+									></span>
+								</button>
+							</div>
+						</div>
+
+						<!-- Theme Settings -->
+						<div class="space-y-4">
+							<h3 class="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+								Erscheinungsbild
+							</h3>
+
+							<div class="flex items-center justify-between py-3 border-b border-border">
+								<div>
+									<p class="font-medium">Farbmodus</p>
+									<p class="text-sm text-muted-foreground">Hell, Dunkel oder automatisch</p>
+								</div>
+								<div class="flex gap-2">
+									<button
+										class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {userSettings.globalSettings.theme.mode === 'light'
+											? 'bg-primary text-primary-foreground'
+											: 'bg-surface-hover hover:bg-surface-hover/80'}"
+										onclick={() => handleThemeModeChange('light')}
+									>
+										Hell
+									</button>
+									<button
+										class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {userSettings.globalSettings.theme.mode === 'dark'
+											? 'bg-primary text-primary-foreground'
+											: 'bg-surface-hover hover:bg-surface-hover/80'}"
+										onclick={() => handleThemeModeChange('dark')}
+									>
+										Dunkel
+									</button>
+									<button
+										class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {userSettings.globalSettings.theme.mode === 'system'
+											? 'bg-primary text-primary-foreground'
+											: 'bg-surface-hover hover:bg-surface-hover/80'}"
+										onclick={() => handleThemeModeChange('system')}
+									>
+										System
+									</button>
+								</div>
+							</div>
+
+							<div class="flex items-center justify-between py-3">
+								<div>
+									<p class="font-medium">Farbschema</p>
+									<p class="text-sm text-muted-foreground">Akzentfarbe der Benutzeroberfläche</p>
+								</div>
+								<div class="flex gap-2">
+									{#each [
+										{ id: 'ocean', label: 'Ozean', color: 'bg-blue-500' },
+										{ id: 'forest', label: 'Wald', color: 'bg-green-500' },
+										{ id: 'sunset', label: 'Sonnenuntergang', color: 'bg-orange-500' },
+										{ id: 'lavender', label: 'Lavendel', color: 'bg-purple-500' }
+									] as scheme}
+										<button
+											class="w-8 h-8 rounded-full transition-all {scheme.color} {userSettings.globalSettings.theme.colorScheme === scheme.id
+												? 'ring-2 ring-offset-2 ring-primary'
+												: 'hover:scale-110'}"
+											onclick={() => handleColorSchemeChange(scheme.id)}
+											title={scheme.label}
+										></button>
+									{/each}
+								</div>
+							</div>
+						</div>
+
+						<!-- Language Settings -->
+						<div class="space-y-4">
+							<h3 class="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+								Sprache
+							</h3>
+
+							<div class="flex items-center justify-between py-3">
+								<div>
+									<p class="font-medium">Anzeigesprache</p>
+									<p class="text-sm text-muted-foreground">Sprache der Benutzeroberfläche</p>
+								</div>
+								<div class="flex gap-2">
+									{#each [
+										{ id: 'de', label: 'DE' },
+										{ id: 'en', label: 'EN' },
+										{ id: 'fr', label: 'FR' },
+										{ id: 'es', label: 'ES' },
+										{ id: 'it', label: 'IT' }
+									] as lang}
+										<button
+											class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {userSettings.globalSettings.locale === lang.id
+												? 'bg-primary text-primary-foreground'
+												: 'bg-surface-hover hover:bg-surface-hover/80'}"
+											onclick={() => handleLocaleChange(lang.id)}
+										>
+											{lang.label}
+										</button>
+									{/each}
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{#if userSettings.syncing}
+						<div class="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+							<div class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+							<span>Einstellungen werden synchronisiert...</span>
+						</div>
+					{/if}
 				</div>
 			</Card>
 

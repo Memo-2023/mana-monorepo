@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/authStore.svelte';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { theme } from '$lib/stores/theme';
 	import {
 		isSidebarMode as sidebarModeStore,
@@ -135,6 +136,9 @@
 			return;
 		}
 
+		// Load user settings
+		await userSettings.load();
+
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('manadeck-nav-sidebar');
 		if (savedSidebar === 'true') {
@@ -177,6 +181,7 @@
 			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
+			desktopPosition={userSettings.nav.desktopPosition}
 			showThemeToggle={true}
 			showThemeVariants={true}
 			{themeVariantItems}
