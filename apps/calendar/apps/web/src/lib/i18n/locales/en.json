@@ -1,0 +1,86 @@
+{
+	"app": {
+		"name": "Calendar",
+		"loading": "Loading..."
+	},
+	"nav": {
+		"calendar": "Calendar",
+		"calendars": "Calendars",
+		"agenda": "Agenda",
+		"settings": "Settings",
+		"feedback": "Feedback"
+	},
+	"views": {
+		"day": "Day",
+		"week": "Week",
+		"month": "Month",
+		"year": "Year",
+		"agenda": "Agenda"
+	},
+	"calendar": {
+		"today": "Today",
+		"newEvent": "New Event",
+		"noEvents": "No events",
+		"allDay": "All day",
+		"myCalendars": "My Calendars",
+		"sharedCalendars": "Shared Calendars"
+	},
+	"event": {
+		"title": "Title",
+		"description": "Description",
+		"location": "Location",
+		"start": "Start",
+		"end": "End",
+		"allDay": "All day",
+		"repeat": "Repeat",
+		"reminder": "Reminder",
+		"calendar": "Calendar",
+		"save": "Save",
+		"delete": "Delete",
+		"cancel": "Cancel"
+	},
+	"repeat": {
+		"none": "Don't repeat",
+		"daily": "Daily",
+		"weekly": "Weekly",
+		"monthly": "Monthly",
+		"yearly": "Yearly"
+	},
+	"reminder": {
+		"atTime": "At time of event",
+		"5min": "5 minutes before",
+		"15min": "15 minutes before",
+		"30min": "30 minutes before",
+		"1hour": "1 hour before",
+		"1day": "1 day before"
+	},
+	"share": {
+		"share": "Share",
+		"shareCalendar": "Share calendar",
+		"permissions": "Permissions",
+		"read": "View only",
+		"write": "Can edit",
+		"admin": "Admin",
+		"pending": "Pending",
+		"accepted": "Accepted"
+	},
+	"auth": {
+		"login": "Login",
+		"logout": "Logout",
+		"register": "Register",
+		"email": "Email",
+		"password": "Password",
+		"forgotPassword": "Forgot password?"
+	},
+	"common": {
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"edit": "Edit",
+		"add": "Add",
+		"close": "Close",
+		"search": "Search",
+		"error": "Error",
+		"success": "Success"
+	}
+}

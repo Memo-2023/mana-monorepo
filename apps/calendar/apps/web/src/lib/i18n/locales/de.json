@@ -1,0 +1,86 @@
+{
+	"app": {
+		"name": "Kalender",
+		"loading": "Laden..."
+	},
+	"nav": {
+		"calendar": "Kalender",
+		"calendars": "Kalender",
+		"agenda": "Agenda",
+		"settings": "Einstellungen",
+		"feedback": "Feedback"
+	},
+	"views": {
+		"day": "Tag",
+		"week": "Woche",
+		"month": "Monat",
+		"year": "Jahr",
+		"agenda": "Agenda"
+	},
+	"calendar": {
+		"today": "Heute",
+		"newEvent": "Neuer Termin",
+		"noEvents": "Keine Termine",
+		"allDay": "Ganztägig",
+		"myCalendars": "Meine Kalender",
+		"sharedCalendars": "Geteilte Kalender"
+	},
+	"event": {
+		"title": "Titel",
+		"description": "Beschreibung",
+		"location": "Ort",
+		"start": "Beginn",
+		"end": "Ende",
+		"allDay": "Ganztägig",
+		"repeat": "Wiederholen",
+		"reminder": "Erinnerung",
+		"calendar": "Kalender",
+		"save": "Speichern",
+		"delete": "Löschen",
+		"cancel": "Abbrechen"
+	},
+	"repeat": {
+		"none": "Nicht wiederholen",
+		"daily": "Täglich",
+		"weekly": "Wöchentlich",
+		"monthly": "Monatlich",
+		"yearly": "Jährlich"
+	},
+	"reminder": {
+		"atTime": "Zum Zeitpunkt",
+		"5min": "5 Minuten vorher",
+		"15min": "15 Minuten vorher",
+		"30min": "30 Minuten vorher",
+		"1hour": "1 Stunde vorher",
+		"1day": "1 Tag vorher"
+	},
+	"share": {
+		"share": "Teilen",
+		"shareCalendar": "Kalender teilen",
+		"permissions": "Berechtigungen",
+		"read": "Nur lesen",
+		"write": "Lesen & Schreiben",
+		"admin": "Administrator",
+		"pending": "Ausstehend",
+		"accepted": "Akzeptiert"
+	},
+	"auth": {
+		"login": "Anmelden",
+		"logout": "Abmelden",
+		"register": "Registrieren",
+		"email": "E-Mail",
+		"password": "Passwort",
+		"forgotPassword": "Passwort vergessen?"
+	},
+	"common": {
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"delete": "Löschen",
+		"edit": "Bearbeiten",
+		"add": "Hinzufügen",
+		"close": "Schließen",
+		"search": "Suchen",
+		"error": "Fehler",
+		"success": "Erfolgreich"
+	}
+}
