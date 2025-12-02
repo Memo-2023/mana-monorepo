@@ -101,7 +101,7 @@ const gridCols = {
                   <svg
                     class:list={[
                       "w-5 h-5",
-                      i < testimonial.rating ? "text-[var(--color-primary)]" : "text-[var(--color-border)]"
+                      i < (testimonial.rating ?? 0) ? "text-[var(--color-primary)]" : "text-[var(--color-border)]"
                     ]}
                     fill="currentColor"
                     viewBox="0 0 20 20"

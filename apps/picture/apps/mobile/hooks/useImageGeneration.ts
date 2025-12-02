@@ -82,11 +82,11 @@ export function useImageGeneration() {
 
 	useEffect(() => {
 		if (selectedModel) {
-			setSteps(selectedModel.default_steps);
-			setGuidanceScale(selectedModel.default_guidance_scale);
+			setSteps(selectedModel.defaultSteps ?? 4);
+			setGuidanceScale(selectedModel.defaultGuidanceScale ?? 3.5);
 
-			const maxDimension = Math.min(selectedModel.max_width, selectedModel.max_height);
-			const minDimension = Math.max(selectedModel.min_width, selectedModel.min_height);
+			const maxDimension = Math.min(selectedModel.maxWidth ?? 1024, selectedModel.maxHeight ?? 1024);
+			const minDimension = Math.max(selectedModel.minWidth ?? 256, selectedModel.minHeight ?? 256);
 
 			let newWidth = selectedAspectRatio.width;
 			let newHeight = selectedAspectRatio.height;
@@ -170,7 +170,7 @@ export function useImageGeneration() {
 			}
 
 			// Mark as completed with real image data
-			completeGeneratingImage(tempId, result.image, result.generationTimeSeconds || 0);
+			completeGeneratingImage(tempId, result.image ?? {}, result.generationTimeSeconds || 0);
 
 			// Clear form
 			setPrompt('');

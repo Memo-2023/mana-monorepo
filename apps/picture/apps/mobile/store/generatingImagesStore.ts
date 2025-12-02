@@ -90,7 +90,7 @@ export const useGeneratingImagesStore = create<GeneratingImagesStore>((set, get)
 					endTime: Date.now(),
 					generationTime,
 					realImageId: realImage.id,
-					imageUrl: realImage.image_url,
+					imageUrl: realImage.publicUrl ?? undefined,
 				});
 			}
 			return { generatingImages: newMap };

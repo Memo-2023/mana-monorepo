@@ -110,6 +110,43 @@ apps/{project}/
 └── package.json
 ```
 
+### Turborepo Configuration
+
+**CRITICAL: Avoid Recursive Turbo Calls**
+
+Parent workspace packages (e.g., `apps/chat/package.json`, `apps/zitare/package.json`) must **NEVER** have scripts that call `turbo run <task>` for tasks that turbo orchestrates from the root.
+
+```jsonc
+// WRONG - Creates infinite recursion!
+// apps/chat/package.json
+{
+  "scripts": {
+    "type-check": "turbo run type-check",  // DON'T DO THIS
+    "build": "turbo run build",            // DON'T DO THIS
+    "lint": "turbo run lint"               // DON'T DO THIS
+  }
+}
+
+// CORRECT - Let root turbo handle orchestration
+// apps/chat/package.json
+{
+  "scripts": {
+    "dev": "turbo run dev"  // OK for dev (persistent task, scoped)
+    // No type-check, build, lint scripts - handled by root turbo
+  }
+}
+```
+
+**Why this matters:** When root turbo runs `type-check`, it finds packages with `type-check` scripts and runs them. If that script is `turbo run type-check`, it spawns another turbo process that does the same thing → infinite loop. This causes tasks to run for 10+ minutes with thousands of duplicate task entries.
+
+**The `dev` script exception:** Using `turbo run dev` in parent packages is acceptable because:
+1. It's typically run directly on that package (scoped)
+2. Dev tasks are persistent and turbo handles them differently
+
+**Current turbo.json settings:**
+- `concurrency: "5"` - Parallel task limit (adjust based on machine)
+- `type-check` has `dependsOn: ["^type-check"]` - Dependencies are checked first
+
 ### Technology Stack by App Type
 
 **Mobile Apps (Expo):**

@@ -8,7 +8,7 @@ interface Props {
 	as?: 'div' | 'section' | 'article' | 'main';
 }
 
-const { size = 'lg', class: className = '', as: Element = 'div' } = Astro.props;
+const { size = 'lg', class: className = '', as: Element = 'div' } = Astro.props as Props;
 
 const sizes = {
 	sm: 'max-w-3xl',

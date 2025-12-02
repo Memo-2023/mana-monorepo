@@ -1,5 +1,6 @@
 {
 	"$schema": "https://turbo.build/schema.json",
+	"concurrency": "5",
 	"globalEnv": [
 		"NODE_ENV",
 		"MANA_CORE_AUTH_URL",

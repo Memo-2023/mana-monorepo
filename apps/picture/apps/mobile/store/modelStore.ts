@@ -95,7 +95,7 @@ export const useModelStore = create<ModelState>((set, get) => ({
 			}
 
 			// Find default model
-			const defaultModel = models.find((m) => m.is_default) || models[0] || null;
+			const defaultModel = models.find((m) => m.isDefault) || models[0] || null;
 
 			set({
 				models,
@@ -151,7 +151,7 @@ export const useModelStore = create<ModelState>((set, get) => ({
 	// Get default model
 	getDefaultModel: () => {
 		const { models } = get();
-		return models.find((m) => m.is_default) || models[0] || null;
+		return models.find((m) => m.isDefault) || models[0] || null;
 	},
 
 	// Check if cache is stale
