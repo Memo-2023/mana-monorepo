@@ -10,7 +10,7 @@ export const conversationModeEnum = pgEnum('conversation_mode', ['free', 'guided
 
 export const conversations = pgTable('conversations', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(), // TEXT to support Better Auth nanoid format
 	modelId: uuid('model_id').references(() => models.id),
 	templateId: uuid('template_id').references(() => templates.id),
 	spaceId: uuid('space_id').references(() => spaces.id, { onDelete: 'set null' }),

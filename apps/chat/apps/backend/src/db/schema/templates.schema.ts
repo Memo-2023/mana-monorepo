@@ -4,7 +4,7 @@ import { models } from './models.schema';
 
 export const templates = pgTable('templates', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(), // TEXT to support Better Auth nanoid format
 	name: text('name').notNull(),
 	description: text('description'),
 	systemPrompt: text('system_prompt').notNull(),

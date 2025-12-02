@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, integer, numeric } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, integer, numeric } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { conversations } from './conversations.schema';
 import { messages } from './messages.schema';
@@ -12,7 +12,7 @@ export const usageLogs = pgTable('usage_logs', {
 	messageId: uuid('message_id')
 		.references(() => messages.id, { onDelete: 'cascade' })
 		.notNull(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(), // TEXT to support Better Auth nanoid format
 	modelId: uuid('model_id').references(() => models.id),
 	promptTokens: integer('prompt_tokens').default(0).notNull(),
 	completionTokens: integer('completion_tokens').default(0).notNull(),

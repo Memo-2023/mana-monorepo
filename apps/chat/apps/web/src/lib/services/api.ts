@@ -58,7 +58,7 @@ async function fetchApi<T>(
 	}
 
 	try {
-		const response = await fetch(`${API_BASE}/api${endpoint}`, {
+		const response = await fetch(`${API_BASE}/api/v1${endpoint}`, {
 			method,
 			headers: {
 				'Content-Type': 'application/json',

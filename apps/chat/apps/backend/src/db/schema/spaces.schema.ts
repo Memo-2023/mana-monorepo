@@ -10,7 +10,7 @@ export const invitationStatusEnum = pgEnum('invitation_status', [
 
 export const spaces = pgTable('spaces', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	ownerId: uuid('owner_id').notNull(),
+	ownerId: text('owner_id').notNull(), // TEXT to support Better Auth nanoid format
 	name: text('name').notNull(),
 	description: text('description'),
 	isArchived: boolean('is_archived').default(false).notNull(),
@@ -23,10 +23,10 @@ export const spaceMembers = pgTable('space_members', {
 	spaceId: uuid('space_id')
 		.references(() => spaces.id, { onDelete: 'cascade' })
 		.notNull(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(), // TEXT to support Better Auth nanoid format
 	role: memberRoleEnum('role').default('member').notNull(),
 	invitationStatus: invitationStatusEnum('invitation_status').default('pending').notNull(),
-	invitedBy: uuid('invited_by'),
+	invitedBy: text('invited_by'), // TEXT to support Better Auth nanoid format
 	invitedAt: timestamp('invited_at', { withTimezone: true }).defaultNow().notNull(),
 	joinedAt: timestamp('joined_at', { withTimezone: true }),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
