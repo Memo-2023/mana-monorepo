@@ -45,15 +45,18 @@
 		settingsStore.showOnlyWeekdays ? allDays.filter((day) => !isWeekend(day)) : allDays
 	);
 
-	// Generate hours (0-23 or 7-23 depending on setting)
+	// Generate hours (filtered based on settings)
 	let allHours = Array.from({ length: 24 }, (_, i) => i);
 	let hours = $derived(
-		settingsStore.hideEarlyHours ? allHours.filter((h) => h >= 7) : allHours
+		settingsStore.filterHoursEnabled
+			? allHours.filter((h) => h >= settingsStore.dayStartHour && h < settingsStore.dayEndHour)
+			: allHours
 	);
 
 	// Calculate visible hours range for positioning
-	let firstVisibleHour = $derived(settingsStore.hideEarlyHours ? 7 : 0);
-	let totalVisibleHours = $derived(24 - firstVisibleHour);
+	let firstVisibleHour = $derived(settingsStore.filterHoursEnabled ? settingsStore.dayStartHour : 0);
+	let lastVisibleHour = $derived(settingsStore.filterHoursEnabled ? settingsStore.dayEndHour : 24);
+	let totalVisibleHours = $derived(lastVisibleHour - firstVisibleHour);
 
 	// Helper to convert minutes to percentage position (accounting for hidden hours)
 	function minutesToPercent(minutes: number): number {
@@ -100,6 +103,9 @@
 	let resizePreviewTop = $state(0);
 	let resizePreviewHeight = $state(0);
 
+	// Track if we actually moved during drag/resize (to prevent click on simple mousedown/up)
+	let hasMoved = $state(false);
+
 	// Reference to the days container for position calculations
 	let daysContainerEl: HTMLDivElement;
 
@@ -110,6 +116,25 @@
 	function getAllDayEventsForDay(day: Date) {
 		return eventsStore.getEventsForDay(day).filter((e) => e.isAllDay);
 	}
+
+	// Get display mode for an event (per-event override takes precedence over global setting)
+	function getEventDisplayMode(event: any): 'header' | 'block' {
+		return event.metadata?.allDayDisplayMode || settingsStore.allDayDisplayMode;
+	}
+
+	// Split all-day events by display mode
+	function getHeaderAllDayEventsForDay(day: Date) {
+		return getAllDayEventsForDay(day).filter(e => getEventDisplayMode(e) === 'header');
+	}
+
+	function getBlockAllDayEventsForDay(day: Date) {
+		return getAllDayEventsForDay(day).filter(e => getEventDisplayMode(e) === 'block');
+	}
+
+	// Check if there are any all-day events to show in header
+	let hasAnyHeaderAllDayEvents = $derived(
+		days.some(day => getHeaderAllDayEventsForDay(day).length > 0)
+	);
 
 	function getEventStyle(event: any) {
 		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
@@ -132,10 +157,11 @@
 	}
 
 	function handleEventClick(event: any, e: MouseEvent) {
-		// Don't navigate if we just finished dragging or resizing
-		if (isDragging || isResizing) {
+		// Don't navigate if we just finished dragging or resizing, or if we moved
+		if (isDragging || isResizing || hasMoved) {
 			e.preventDefault();
 			e.stopPropagation();
+			setTimeout(() => { hasMoved = false; }, 100);
 			return;
 		}
 		goto(`/event/${event.id}`);
@@ -186,6 +212,7 @@
 
 		isDragging = true;
 		draggedEvent = event;
+		hasMoved = false;
 
 		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
 		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
@@ -208,12 +235,14 @@
 	function handleDragMove(e: PointerEvent) {
 		if (!isDragging || !draggedEvent) return;
 
+		hasMoved = true;
+
 		// Calculate new position
 		const newDay = getDayFromX(e.clientX);
 		const newMinutes = getMinutesFromY(e.clientY) - dragOffsetMinutes;
 
-		// Clamp to valid range (firstVisibleHour to 23:45)
-		const clampedMinutes = Math.max(firstVisibleHour * 60, Math.min(24 * 60 - 15, newMinutes));
+		// Clamp to valid range (firstVisibleHour to lastVisibleHour)
+		const clampedMinutes = Math.max(firstVisibleHour * 60, Math.min(lastVisibleHour * 60 - 15, newMinutes));
 
 		// Update preview
 		dragPreviewTop = minutesToPercent(clampedMinutes);
@@ -226,9 +255,10 @@
 		document.removeEventListener('pointermove', handleDragMove);
 		document.removeEventListener('pointerup', handleDragEnd);
 
-		if (!isDragging || !draggedEvent || !dragTargetDay) {
+		if (!isDragging || !draggedEvent || !dragTargetDay || !hasMoved) {
 			isDragging = false;
 			draggedEvent = null;
+			hasMoved = false;
 			return;
 		}
 
@@ -258,6 +288,7 @@
 		isDragging = false;
 		draggedEvent = null;
 		dragTargetDay = null;
+		hasMoved = false;
 	}
 
 	// ========== Resize Functions ==========
@@ -269,6 +300,7 @@
 		isResizing = true;
 		resizeEvent = event;
 		resizeEdge = edge;
+		hasMoved = false;
 
 		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
 		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
@@ -289,13 +321,14 @@
 	function handleResizeMove(e: PointerEvent) {
 		if (!isResizing || !resizeEvent || !resizeOriginalStart || !resizeOriginalEnd) return;
 
+		hasMoved = true;
 		const currentMinutes = getMinutesFromY(e.clientY);
 		const originalStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
 		const originalEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
 
 		if (resizeEdge === 'bottom') {
 			// Resize from bottom - change end time
-			const newEndMinutes = Math.max(originalStartMinutes + 15, Math.min(24 * 60, currentMinutes));
+			const newEndMinutes = Math.max(originalStartMinutes + 15, Math.min(lastVisibleHour * 60, currentMinutes));
 			const newDuration = newEndMinutes - originalStartMinutes;
 			resizePreviewHeight = (newDuration / (totalVisibleHours * 60)) * 100;
 		} else {
@@ -311,9 +344,12 @@
 		document.removeEventListener('pointermove', handleResizeMove);
 		document.removeEventListener('pointerup', handleResizeEnd);
 
-		if (!isResizing || !resizeEvent || !resizeOriginalStart || !resizeOriginalEnd) {
+		if (!isResizing || !resizeEvent || !resizeOriginalStart || !resizeOriginalEnd || !hasMoved) {
 			isResizing = false;
 			resizeEvent = null;
+			resizeOriginalStart = null;
+			resizeOriginalEnd = null;
+			hasMoved = false;
 			return;
 		}
 
@@ -325,13 +361,13 @@
 		let newEnd = resizeOriginalEnd;
 
 		if (resizeEdge === 'bottom') {
-			const newEndMinutes = Math.max(originalStartMinutes + 15, Math.min(24 * 60, currentMinutes));
+			const newEndMinutes = Math.max(originalStartMinutes + 15, Math.min(lastVisibleHour * 60, currentMinutes));
 			const newHours = Math.floor(newEndMinutes / 60);
 			const newMins = newEndMinutes % 60;
 			newEnd = setHours(new Date(resizeOriginalEnd), newHours);
 			newEnd = setMinutes(newEnd, newMins);
 		} else {
-			const newStartMinutes = Math.max(0, Math.min(originalEndMinutes - 15, currentMinutes));
+			const newStartMinutes = Math.max(firstVisibleHour * 60, Math.min(originalEndMinutes - 15, currentMinutes));
 			const newHours = Math.floor(newStartMinutes / 60);
 			const newMins = newStartMinutes % 60;
 			newStart = setHours(new Date(resizeOriginalStart), newHours);
@@ -349,28 +385,56 @@
 		resizeEvent = null;
 		resizeOriginalStart = null;
 		resizeOriginalEnd = null;
+		hasMoved = false;
 	}
+
+	// ========== Keyboard Handling ==========
+
+	function handleKeyDown(e: KeyboardEvent) {
+		if (e.key === 'Escape' && (isDragging || isResizing)) {
+			e.preventDefault();
+			document.removeEventListener('pointermove', handleDragMove);
+			document.removeEventListener('pointerup', handleDragEnd);
+			document.removeEventListener('pointermove', handleResizeMove);
+			document.removeEventListener('pointerup', handleResizeEnd);
+			isDragging = false;
+			draggedEvent = null;
+			dragTargetDay = null;
+			isResizing = false;
+			resizeEvent = null;
+			resizeOriginalStart = null;
+			resizeOriginalEnd = null;
+			hasMoved = false;
+		}
+	}
+
+	$effect(() => {
+		document.addEventListener('keydown', handleKeyDown);
+		return () => document.removeEventListener('keydown', handleKeyDown);
+	});
 </script>
 
 <div class="multi-day-view" class:compact={columnClass === 'compact'} class:very-compact={columnClass === 'very-compact'}>
-	<!-- All-day events row -->
-	<div class="all-day-row">
-		<div class="time-gutter"></div>
-		{#each days as day}
-			<div class="all-day-cell">
-				{#each getAllDayEventsForDay(day) as event}
-					<button
-						class="all-day-event"
-						style="background-color: {calendarsStore.getColor(event.calendarId)}"
-						onclick={(e) => handleEventClick(event, e)}
-						title={event.title}
-					>
-						{event.title}
-					</button>
-				{/each}
-			</div>
-		{/each}
-	</div>
+	<!-- All-day events row (only shown when there are header-mode all-day events) -->
+	{#if hasAnyHeaderAllDayEvents}
+		<div class="all-day-row">
+			<div class="time-gutter"></div>
+			{#each days as day}
+				<div class="all-day-cell">
+					{#each getHeaderAllDayEventsForDay(day) as event}
+						<button
+							class="all-day-event"
+							style="background-color: {calendarsStore.getColor(event.calendarId)}"
+							onclick={(e) => handleEventClick(event, e)}
+							title={event.title}
+						>
+							{event.title}
+						</button>
+					{/each}
+				</div>
+			{/each}
+		</div>
+	{/if}
 
 	<!-- Day headers -->
 	<div class="day-headers">
@@ -406,7 +470,19 @@
 						></button>
 					{/each}
 
-					<!-- Events -->
+					<!-- Block-style all-day events -->
+					{#each getBlockAllDayEventsForDay(day) as event (event.id)}
+						<button
+							class="all-day-block-event"
+							style="background-color: {calendarsStore.getColor(event.calendarId)}"
+							onclick={(e) => handleEventClick(event, e)}
+							title={event.title}
+						>
+							<span class="event-title">{event.title}</span>
+						</button>
+					{/each}
+
+					<!-- Timed events -->
 					{#each getEventsForDay(day) as event (event.id)}
 						{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
 						{@const isBeingResized = isResizing && resizeEvent?.id === event.id}
@@ -480,8 +556,6 @@
 	.multi-day-view {
 		display: flex;
 		flex-direction: column;
-		
-		
 	}
 
 	.all-day-row {
@@ -517,6 +591,50 @@
 	.very-compact .all-day-event {
 		padding: 2px 4px;
 		font-size: 0.65rem;
+	}
+
+	/* Block-style all-day events (displayed as full-day blocks in the grid) */
+	.all-day-block-event {
+		position: absolute;
+		top: 0;
+		left: 2px;
+		right: 2px;
+		bottom: 0;
+		padding: 4px 6px;
+		color: white;
+		border: none;
+		border-radius: var(--radius-sm);
+		text-align: left;
+		cursor: pointer;
+		z-index: 0;
+		opacity: 0.3;
+		overflow: hidden;
+		display: flex;
+		align-items: flex-start;
+	}
+
+	.compact .all-day-block-event,
+	.very-compact .all-day-block-event {
+		left: 1px;
+		right: 1px;
+		padding: 2px 4px;
+	}
+
+	.all-day-block-event:hover {
+		opacity: 0.5;
+	}
+
+	.all-day-block-event .event-title {
+		font-size: 0.75rem;
+		font-weight: 500;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.compact .all-day-block-event .event-title,
+	.very-compact .all-day-block-event .event-title {
+		font-size: 0.6rem;
 	}
 
 	.day-headers {
@@ -589,7 +707,6 @@
 	.time-grid {
 		flex: 1;
 		display: flex;
-		
 	}
 
 	.time-column {
@@ -672,8 +789,11 @@
 	}
 
 	.event-card.resizing {
-		opacity: 0.9;
+		opacity: 0.85;
 		z-index: 100;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+		outline: 2px dashed rgba(255, 255, 255, 0.6);
+		outline-offset: -2px;
 	}
 
 	.event-card.drag-ghost {
