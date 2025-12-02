@@ -106,7 +106,7 @@
 	{/if}
 
 	<!-- Main Calendar Area -->
-	<div class="calendar-main">
+	<div class="calendar-main" class:expanded={settingsStore.sidebarCollapsed}>
 		<CalendarHeader />
 
 		<div class="calendar-content">
@@ -133,8 +133,7 @@
 	.calendar-layout {
 		display: flex;
 		gap: 1.5rem;
-		flex: 1;
-		min-height: 0;
+		width: 100%;
 		position: relative;
 	}
 
@@ -153,8 +152,13 @@
 		width: 0;
 		opacity: 0;
 		overflow: hidden;
-		margin-right: -1.5rem;
 		pointer-events: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.calendar-layout:has(.calendar-sidebar.collapsed) {
+		gap: 0;
 	}
 
 	.sidebar-collapse-btn {
@@ -243,17 +247,19 @@
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
-		min-height: 0;
 		background: hsl(var(--color-surface));
 		border-radius: var(--radius-lg);
 		border: 1px solid hsl(var(--color-border));
-		overflow: hidden;
+		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.calendar-main.expanded {
+		border-radius: 0;
+		border: none;
 	}
 
 	.calendar-content {
 		flex: 1;
-		min-height: 0;
-		overflow: hidden;
 	}
 
 	@media (max-width: 1024px) {

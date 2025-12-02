@@ -2,22 +2,44 @@
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { goto } from '$app/navigation';
 	import {
 		format,
 		isToday,
 		parseISO,
 		differenceInMinutes,
+		addMinutes,
+		setHours,
+		setMinutes,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
 
-	let hours = Array.from({ length: 24 }, (_, i) => i);
+	// Constants
+	const HOUR_HEIGHT = 60; // pixels per hour
+	const SNAP_MINUTES = 15; // snap to 15-minute intervals
+
+	// Generate hours (0-23 or 7-23 depending on setting)
+	let allHours = Array.from({ length: 24 }, (_, i) => i);
+	let hours = $derived(
+		settingsStore.hideEarlyHours ? allHours.filter((h) => h >= 7) : allHours
+	);
+
+	// Calculate visible hours range for positioning
+	let firstVisibleHour = $derived(settingsStore.hideEarlyHours ? 7 : 0);
+	let totalVisibleHours = $derived(24 - firstVisibleHour);
+
+	// Helper to convert minutes to percentage position (accounting for hidden hours)
+	function minutesToPercent(minutes: number): number {
+		const adjustedMinutes = minutes - firstVisibleHour * 60;
+		return (adjustedMinutes / (totalVisibleHours * 60)) * 100;
+	}
 
 	// Current time indicator position
 	let now = $state(new Date());
 	let currentTimePosition = $derived.by(() => {
 		const minutes = now.getHours() * 60 + now.getMinutes();
-		return (minutes / (24 * 60)) * 100;
+		return minutesToPercent(minutes);
 	});
 
 	// Update current time every minute
@@ -36,6 +58,208 @@
 		eventsStore.getEventsForDay(viewStore.currentDate).filter((e) => e.isAllDay)
 	);
 
+	// ============================================================================
+	// Drag & Drop State
+	// ============================================================================
+	let isDragging = $state(false);
+	let draggedEvent = $state<any>(null);
+	let dragOffsetMinutes = $state(0);
+	let dragPreviewTop = $state(0);
+	let dragPreviewHeight = $state(0);
+	let dayColumnRef = $state<HTMLElement | null>(null);
+
+	// ============================================================================
+	// Resize State
+	// ============================================================================
+	let isResizing = $state(false);
+	let resizeEvent = $state<any>(null);
+	let resizeEdge = $state<'top' | 'bottom'>('bottom');
+	let resizeOriginalStart = $state<Date | null>(null);
+	let resizeOriginalEnd = $state<Date | null>(null);
+	let resizePreviewTop = $state(0);
+	let resizePreviewHeight = $state(0);
+
+	// ============================================================================
+	// Helper Functions
+	// ============================================================================
+	function getMinutesFromY(y: number): number {
+		if (!dayColumnRef) return 0;
+		const rect = dayColumnRef.getBoundingClientRect();
+		const scrollTop = dayColumnRef.parentElement?.scrollTop || 0;
+		const relativeY = y - rect.top + scrollTop;
+		// Account for hidden early hours
+		const visibleMinutes = (relativeY / (totalVisibleHours * HOUR_HEIGHT)) * totalVisibleHours * 60;
+		const totalMinutes = visibleMinutes + firstVisibleHour * 60;
+		// Snap to 15-minute intervals
+		return Math.round(totalMinutes / SNAP_MINUTES) * SNAP_MINUTES;
+	}
+
+	function snapToGrid(minutes: number): number {
+		return Math.round(minutes / SNAP_MINUTES) * SNAP_MINUTES;
+	}
+
+	// ============================================================================
+	// Drag Handlers
+	// ============================================================================
+	function startDrag(event: any, e: PointerEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const startMinutes = start.getHours() * 60 + start.getMinutes();
+		const duration = differenceInMinutes(end, start);
+
+		const clickMinutes = getMinutesFromY(e.clientY);
+		dragOffsetMinutes = clickMinutes - startMinutes;
+
+		isDragging = true;
+		draggedEvent = event;
+		dragPreviewTop = minutesToPercent(startMinutes);
+		dragPreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
+
+		document.addEventListener('pointermove', handleDragMove);
+		document.addEventListener('pointerup', handleDragEnd);
+	}
+
+	function handleDragMove(e: PointerEvent) {
+		if (!isDragging || !draggedEvent) return;
+
+		const mouseMinutes = getMinutesFromY(e.clientY);
+		const newStartMinutes = snapToGrid(mouseMinutes - dragOffsetMinutes);
+		const clampedMinutes = Math.max(firstVisibleHour * 60, Math.min(newStartMinutes, 24 * 60 - 15));
+
+		dragPreviewTop = minutesToPercent(clampedMinutes);
+	}
+
+	function handleDragEnd(e: PointerEvent) {
+		if (!isDragging || !draggedEvent) {
+			cleanup();
+			return;
+		}
+
+		const mouseMinutes = getMinutesFromY(e.clientY);
+		const newStartMinutes = snapToGrid(mouseMinutes - dragOffsetMinutes);
+		const clampedMinutes = Math.max(0, Math.min(newStartMinutes, 24 * 60 - 30));
+
+		const start = typeof draggedEvent.startTime === 'string' ? parseISO(draggedEvent.startTime) : draggedEvent.startTime;
+		const end = typeof draggedEvent.endTime === 'string' ? parseISO(draggedEvent.endTime) : draggedEvent.endTime;
+		const duration = differenceInMinutes(end, start);
+
+		// Create new start time on same day
+		let newStart = new Date(viewStore.currentDate);
+		newStart = setHours(newStart, Math.floor(clampedMinutes / 60));
+		newStart = setMinutes(newStart, clampedMinutes % 60);
+		newStart.setSeconds(0, 0);
+
+		const newEnd = addMinutes(newStart, duration);
+
+		// Update event
+		eventsStore.updateEvent(draggedEvent.id, {
+			startTime: newStart.toISOString(),
+			endTime: newEnd.toISOString(),
+		});
+
+		cleanup();
+	}
+
+	// ============================================================================
+	// Resize Handlers
+	// ============================================================================
+	function startResize(event: any, edge: 'top' | 'bottom', e: PointerEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		isResizing = true;
+		resizeEvent = event;
+		resizeEdge = edge;
+
+		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		resizeOriginalStart = start;
+		resizeOriginalEnd = end;
+
+		const startMinutes = start.getHours() * 60 + start.getMinutes();
+		const duration = differenceInMinutes(end, start);
+		resizePreviewTop = minutesToPercent(startMinutes);
+		resizePreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
+
+		document.addEventListener('pointermove', handleResizeMove);
+		document.addEventListener('pointerup', handleResizeEnd);
+	}
+
+	function handleResizeMove(e: PointerEvent) {
+		if (!isResizing || !resizeEvent || !resizeOriginalStart || !resizeOriginalEnd) return;
+
+		const mouseMinutes = getMinutesFromY(e.clientY);
+		const snappedMinutes = snapToGrid(mouseMinutes);
+
+		const origStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
+		const origEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
+
+		if (resizeEdge === 'top') {
+			const newStartMinutes = Math.min(snappedMinutes, origEndMinutes - SNAP_MINUTES);
+			const clampedStart = Math.max(firstVisibleHour * 60, newStartMinutes);
+			resizePreviewTop = minutesToPercent(clampedStart);
+			resizePreviewHeight = ((origEndMinutes - clampedStart) / (totalVisibleHours * 60)) * 100;
+		} else {
+			const newEndMinutes = Math.max(snappedMinutes, origStartMinutes + SNAP_MINUTES);
+			const clampedEnd = Math.min(24 * 60, newEndMinutes);
+			resizePreviewHeight = ((clampedEnd - origStartMinutes) / (totalVisibleHours * 60)) * 100;
+		}
+	}
+
+	function handleResizeEnd(e: PointerEvent) {
+		if (!isResizing || !resizeEvent || !resizeOriginalStart || !resizeOriginalEnd) {
+			cleanup();
+			return;
+		}
+
+		const mouseMinutes = getMinutesFromY(e.clientY);
+		const snappedMinutes = snapToGrid(mouseMinutes);
+
+		const origStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
+		const origEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
+
+		let newStart = new Date(resizeOriginalStart);
+		let newEnd = new Date(resizeOriginalEnd);
+
+		if (resizeEdge === 'top') {
+			const newStartMinutes = Math.max(0, Math.min(snappedMinutes, origEndMinutes - SNAP_MINUTES));
+			newStart = setHours(new Date(viewStore.currentDate), Math.floor(newStartMinutes / 60));
+			newStart = setMinutes(newStart, newStartMinutes % 60);
+			newStart.setSeconds(0, 0);
+		} else {
+			const newEndMinutes = Math.min(24 * 60, Math.max(snappedMinutes, origStartMinutes + SNAP_MINUTES));
+			newEnd = setHours(new Date(viewStore.currentDate), Math.floor(newEndMinutes / 60));
+			newEnd = setMinutes(newEnd, newEndMinutes % 60);
+			newEnd.setSeconds(0, 0);
+		}
+
+		eventsStore.updateEvent(resizeEvent.id, {
+			startTime: newStart.toISOString(),
+			endTime: newEnd.toISOString(),
+		});
+
+		cleanup();
+	}
+
+	function cleanup() {
+		isDragging = false;
+		draggedEvent = null;
+		isResizing = false;
+		resizeEvent = null;
+		resizeOriginalStart = null;
+		resizeOriginalEnd = null;
+		document.removeEventListener('pointermove', handleDragMove);
+		document.removeEventListener('pointerup', handleDragEnd);
+		document.removeEventListener('pointermove', handleResizeMove);
+		document.removeEventListener('pointerup', handleResizeEnd);
+	}
+
+	// ============================================================================
+	// Event Styling
+	// ============================================================================
 	function getEventStyle(event: any) {
 		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
 		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
@@ -43,19 +267,29 @@
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
 		const duration = differenceInMinutes(end, start);
 
-		const top = (startMinutes / (24 * 60)) * 100;
-		const height = Math.max((duration / (24 * 60)) * 100, 2);
+		// Use percentage-based positioning for consistency with other views
+		const top = minutesToPercent(startMinutes);
+		const height = Math.max((duration / (totalVisibleHours * 60)) * 100, 1.5); // minimum ~20px at 60px/hour
 
 		const color = calendarsStore.getColor(event.calendarId);
 
 		return `top: ${top}%; height: ${height}%; background-color: ${color};`;
 	}
 
-	function handleEventClick(event: any) {
+	function handleEventClick(event: any, e: MouseEvent) {
+		// Don't navigate if dragging or resizing
+		if (isDragging || isResizing) {
+			e.preventDefault();
+			e.stopPropagation();
+			return;
+		}
 		goto(`/event/${event.id}`);
 	}
 
 	function handleSlotClick(hour: number) {
+		// Don't create event if dragging or resizing
+		if (isDragging || isResizing) return;
+
 		const startTime = new Date(viewStore.currentDate);
 		startTime.setHours(hour, 0, 0, 0);
 		goto(`/event/new?start=${startTime.toISOString()}`);
@@ -74,7 +308,7 @@
 					<button
 						class="all-day-event"
 						style="background-color: {calendarsStore.getColor(event.calendarId)}"
-						onclick={() => handleEventClick(event)}
+						onclick={(e) => handleEventClick(event, e)}
 					>
 						{event.title}
 					</button>
@@ -93,7 +327,11 @@
 			{/each}
 		</div>
 
-		<div class="day-column" class:today={isToday(viewStore.currentDate)}>
+		<div
+			class="day-column"
+			class:today={isToday(viewStore.currentDate)}
+			bind:this={dayColumnRef}
+		>
 			{#each hours as hour}
 				<button
 					class="hour-slot"
@@ -104,11 +342,27 @@
 
 			<!-- Events -->
 			{#each timedEvents as event}
-				<button
+				{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
+				{@const isBeingResized = isResizing && resizeEvent?.id === event.id}
+				<div
 					class="event-card"
-					style={getEventStyle(event)}
-					onclick={() => handleEventClick(event)}
+					class:dragging={isBeingDragged}
+					class:resizing={isBeingResized}
+					style={isBeingDragged ? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};` : isBeingResized ? `top: ${resizePreviewTop}%; height: ${resizePreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};` : getEventStyle(event)}
+					onpointerdown={(e) => startDrag(event, e)}
+					onclick={(e) => handleEventClick(event, e)}
+					role="button"
+					tabindex="0"
 				>
+					<!-- Top resize handle -->
+					<div
+						class="resize-handle top"
+						onpointerdown={(e) => startResize(event, 'top', e)}
+						role="slider"
+						aria-label="Startzeit ändern"
+						tabindex="-1"
+					></div>
+
 					<span class="event-time">
 						{format(typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime, 'HH:mm')} -
 						{format(typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime, 'HH:mm')}
@@ -117,7 +371,16 @@
 					{#if event.location}
 						<span class="event-location">{event.location}</span>
 					{/if}
-				</button>
+
+					<!-- Bottom resize handle -->
+					<div
+						class="resize-handle bottom"
+						onpointerdown={(e) => startResize(event, 'bottom', e)}
+						role="slider"
+						aria-label="Endzeit ändern"
+						tabindex="-1"
+					></div>
+				</div>
 			{/each}
 
 			<!-- Current time indicator -->
@@ -132,7 +395,7 @@
 	.day-view {
 		display: flex;
 		flex-direction: column;
-		height: 100%;
+		
 	}
 
 	.all-day-section {
@@ -166,7 +429,7 @@
 	.time-grid {
 		flex: 1;
 		display: flex;
-		overflow-y: auto;
+		
 	}
 
 	.time-column {
@@ -195,6 +458,8 @@
 		flex: 1;
 		position: relative;
 		border-left: 1px solid hsl(var(--color-border));
+		/* Fixed height for percentage positioning to work */
+		height: calc(24 * var(--hour-height));
 	}
 
 	.day-column.today {
@@ -208,11 +473,66 @@
 		color: white;
 		border: none;
 		text-align: left;
-		cursor: pointer;
+		cursor: grab;
 		z-index: 1;
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
+		padding: 4px 8px;
+		border-radius: var(--radius-sm);
+		overflow: hidden;
+		touch-action: none;
+		user-select: none;
+		transition: box-shadow 150ms ease, opacity 150ms ease;
+	}
+
+	.event-card:hover {
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	}
+
+	.event-card.dragging {
+		cursor: grabbing;
+		opacity: 0.9;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+		z-index: 100;
+	}
+
+	.event-card.resizing {
+		cursor: ns-resize;
+		opacity: 0.9;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+		z-index: 100;
+	}
+
+	/* Resize Handles */
+	.resize-handle {
+		position: absolute;
+		left: 0;
+		right: 0;
+		height: 8px;
+		cursor: ns-resize;
+		opacity: 0;
+		transition: opacity 150ms ease;
+		z-index: 10;
+	}
+
+	.resize-handle.top {
+		top: 0;
+		border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+	}
+
+	.resize-handle.bottom {
+		bottom: 0;
+		border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+	}
+
+	.event-card:hover .resize-handle {
+		opacity: 1;
+		background: rgba(255, 255, 255, 0.3);
+	}
+
+	.resize-handle:hover {
+		background: rgba(255, 255, 255, 0.5) !important;
 	}
 
 	.event-time {
@@ -228,5 +548,40 @@
 	.event-location {
 		font-size: 0.75rem;
 		opacity: 0.8;
+	}
+
+	/* Time indicator */
+	.time-indicator {
+		position: absolute;
+		left: 0;
+		right: 0;
+		height: 2px;
+		background: hsl(var(--color-error));
+		z-index: 50;
+	}
+
+	.time-indicator::before {
+		content: '';
+		position: absolute;
+		left: -4px;
+		top: -4px;
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background: hsl(var(--color-error));
+	}
+
+	/* Hour slots */
+	.hour-slot {
+		height: var(--hour-height);
+		width: 100%;
+		border: none;
+		background: transparent;
+		border-bottom: 1px solid hsl(var(--color-border) / 0.5);
+		cursor: pointer;
+	}
+
+	.hour-slot:hover {
+		background: hsl(var(--color-muted) / 0.2);
 	}
 </style>

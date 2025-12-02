@@ -8,17 +8,30 @@
 		format,
 		eachDayOfInterval,
 		isToday,
+		isSameDay,
 		parseISO,
 		differenceInMinutes,
 		isWeekend,
+		addMinutes,
+		setHours,
+		setMinutes,
 	} from 'date-fns';
-	import { de } from 'date-fns/locale';
+	import { de, enUS, fr, es, it } from 'date-fns/locale';
+	import { locale } from 'svelte-i18n';
+
+	// Constants
+	const HOUR_HEIGHT = 60; // px - should match CSS --hour-height
+	const MINUTES_PER_SLOT = 15; // Snap to 15-minute intervals
 
 	// Props
 	interface Props {
 		dayCount: 5 | 10 | 14;
 	}
 	let { dayCount }: Props = $props();
+
+	// Get date-fns locale based on current app locale
+	const dateLocales = { de, en: enUS, fr, es, it };
+	let currentDateLocale = $derived(dateLocales[$locale?.substring(0, 2) as keyof typeof dateLocales] || de);
 
 	// Generate days based on view range, optionally filtering weekends
 	let allDays = $derived(
@@ -32,14 +45,27 @@
 		settingsStore.showOnlyWeekdays ? allDays.filter((day) => !isWeekend(day)) : allDays
 	);
 
-	// Generate hours (0-23)
-	let hours = Array.from({ length: 24 }, (_, i) => i);
+	// Generate hours (0-23 or 7-23 depending on setting)
+	let allHours = Array.from({ length: 24 }, (_, i) => i);
+	let hours = $derived(
+		settingsStore.hideEarlyHours ? allHours.filter((h) => h >= 7) : allHours
+	);
+
+	// Calculate visible hours range for positioning
+	let firstVisibleHour = $derived(settingsStore.hideEarlyHours ? 7 : 0);
+	let totalVisibleHours = $derived(24 - firstVisibleHour);
+
+	// Helper to convert minutes to percentage position (accounting for hidden hours)
+	function minutesToPercent(minutes: number): number {
+		const adjustedMinutes = minutes - firstVisibleHour * 60;
+		return (adjustedMinutes / (totalVisibleHours * 60)) * 100;
+	}
 
 	// Current time indicator position
 	let now = $state(new Date());
 	let currentTimePosition = $derived.by(() => {
 		const minutes = now.getHours() * 60 + now.getMinutes();
-		return (minutes / (24 * 60)) * 100;
+		return minutesToPercent(minutes);
 	});
 
 	// Update current time every minute
@@ -57,6 +83,26 @@
 		return 'very-compact';
 	});
 
+	// ========== Drag & Drop State ==========
+	let isDragging = $state(false);
+	let draggedEvent = $state<any>(null);
+	let dragOffsetMinutes = $state(0);
+	let dragTargetDay = $state<Date | null>(null);
+	let dragPreviewTop = $state(0);
+	let dragPreviewHeight = $state(0);
+
+	// ========== Resize State ==========
+	let isResizing = $state(false);
+	let resizeEvent = $state<any>(null);
+	let resizeEdge = $state<'top' | 'bottom'>('bottom');
+	let resizeOriginalStart = $state<Date | null>(null);
+	let resizeOriginalEnd = $state<Date | null>(null);
+	let resizePreviewTop = $state(0);
+	let resizePreviewHeight = $state(0);
+
+	// Reference to the days container for position calculations
+	let daysContainerEl: HTMLDivElement;
+
 	function getEventsForDay(day: Date) {
 		return eventsStore.getEventsForDay(day).filter((e) => !e.isAllDay);
 	}
@@ -72,22 +118,237 @@
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
 		const duration = differenceInMinutes(end, start);
 
-		const top = (startMinutes / (24 * 60)) * 100;
-		const height = Math.max((duration / (24 * 60)) * 100, 2); // Min 2% height
+		const top = minutesToPercent(startMinutes);
+		const height = Math.max((duration / (totalVisibleHours * 60)) * 100, 2); // Min 2% height
 
 		const color = calendarsStore.getColor(event.calendarId);
 
 		return `top: ${top}%; height: ${height}%; background-color: ${color};`;
 	}
 
-	function handleEventClick(event: any) {
+	function formatEventTime(date: Date | string): string {
+		const d = typeof date === 'string' ? parseISO(date) : date;
+		return settingsStore.formatTime(d);
+	}
+
+	function handleEventClick(event: any, e: MouseEvent) {
+		// Don't navigate if we just finished dragging or resizing
+		if (isDragging || isResizing) {
+			e.preventDefault();
+			e.stopPropagation();
+			return;
+		}
 		goto(`/event/${event.id}`);
 	}
 
 	function handleSlotClick(day: Date, hour: number) {
+		// Don't create new event if dragging
+		if (isDragging || isResizing) return;
+
 		const startTime = new Date(day);
 		startTime.setHours(hour, 0, 0, 0);
 		goto(`/event/new?start=${startTime.toISOString()}`);
+	}
+
+	// ========== Drag & Drop Functions ==========
+
+	function getDayFromX(clientX: number): Date | null {
+		if (!daysContainerEl) return null;
+
+		const rect = daysContainerEl.getBoundingClientRect();
+		const relativeX = clientX - rect.left;
+		const dayWidth = rect.width / days.length;
+		const dayIndex = Math.floor(relativeX / dayWidth);
+
+		if (dayIndex >= 0 && dayIndex < days.length) {
+			return days[dayIndex];
+		}
+		return null;
+	}
+
+	function getMinutesFromY(clientY: number): number {
+		if (!daysContainerEl) return 0;
+
+		const rect = daysContainerEl.getBoundingClientRect();
+		const scrollTop = daysContainerEl.parentElement?.scrollTop || 0;
+		const relativeY = clientY - rect.top + scrollTop;
+		// Account for hidden early hours
+		const visibleMinutes = (relativeY / (totalVisibleHours * HOUR_HEIGHT)) * totalVisibleHours * 60;
+		const totalMinutes = visibleMinutes + firstVisibleHour * 60;
+
+		// Snap to 15-minute intervals
+		return Math.round(totalMinutes / MINUTES_PER_SLOT) * MINUTES_PER_SLOT;
+	}
+
+	function startDrag(event: any, e: PointerEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		isDragging = true;
+		draggedEvent = event;
+
+		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const duration = differenceInMinutes(end, start);
+
+		// Calculate initial preview position
+		const startMinutes = start.getHours() * 60 + start.getMinutes();
+		dragPreviewTop = minutesToPercent(startMinutes);
+		dragPreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
+		dragTargetDay = start;
+
+		// Calculate offset from event start to click position
+		const clickMinutes = getMinutesFromY(e.clientY);
+		dragOffsetMinutes = clickMinutes - startMinutes;
+
+		document.addEventListener('pointermove', handleDragMove);
+		document.addEventListener('pointerup', handleDragEnd);
+	}
+
+	function handleDragMove(e: PointerEvent) {
+		if (!isDragging || !draggedEvent) return;
+
+		// Calculate new position
+		const newDay = getDayFromX(e.clientX);
+		const newMinutes = getMinutesFromY(e.clientY) - dragOffsetMinutes;
+
+		// Clamp to valid range (firstVisibleHour to 23:45)
+		const clampedMinutes = Math.max(firstVisibleHour * 60, Math.min(24 * 60 - 15, newMinutes));
+
+		// Update preview
+		dragPreviewTop = minutesToPercent(clampedMinutes);
+		if (newDay) {
+			dragTargetDay = newDay;
+		}
+	}
+
+	async function handleDragEnd(e: PointerEvent) {
+		document.removeEventListener('pointermove', handleDragMove);
+		document.removeEventListener('pointerup', handleDragEnd);
+
+		if (!isDragging || !draggedEvent || !dragTargetDay) {
+			isDragging = false;
+			draggedEvent = null;
+			return;
+		}
+
+		const start = typeof draggedEvent.startTime === 'string' ? parseISO(draggedEvent.startTime) : draggedEvent.startTime;
+		const end = typeof draggedEvent.endTime === 'string' ? parseISO(draggedEvent.endTime) : draggedEvent.endTime;
+		const duration = differenceInMinutes(end, start);
+
+		// Calculate new start time
+		const newMinutes = getMinutesFromY(e.clientY) - dragOffsetMinutes;
+		const clampedMinutes = Math.max(0, Math.min(24 * 60 - 15, newMinutes));
+		const newHours = Math.floor(clampedMinutes / 60);
+		const newMins = clampedMinutes % 60;
+
+		let newStart = new Date(dragTargetDay);
+		newStart = setHours(newStart, newHours);
+		newStart = setMinutes(newStart, newMins);
+
+		const newEnd = addMinutes(newStart, duration);
+
+		// Update event via store
+		await eventsStore.updateEvent(draggedEvent.id, {
+			startTime: newStart.toISOString(),
+			endTime: newEnd.toISOString(),
+		});
+
+		// Reset state
+		isDragging = false;
+		draggedEvent = null;
+		dragTargetDay = null;
+	}
+
+	// ========== Resize Functions ==========
+
+	function startResize(event: any, edge: 'top' | 'bottom', e: PointerEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		isResizing = true;
+		resizeEvent = event;
+		resizeEdge = edge;
+
+		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+
+		resizeOriginalStart = start;
+		resizeOriginalEnd = end;
+
+		// Set initial preview
+		const startMinutes = start.getHours() * 60 + start.getMinutes();
+		const duration = differenceInMinutes(end, start);
+		resizePreviewTop = minutesToPercent(startMinutes);
+		resizePreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
+
+		document.addEventListener('pointermove', handleResizeMove);
+		document.addEventListener('pointerup', handleResizeEnd);
+	}
+
+	function handleResizeMove(e: PointerEvent) {
+		if (!isResizing || !resizeEvent || !resizeOriginalStart || !resizeOriginalEnd) return;
+
+		const currentMinutes = getMinutesFromY(e.clientY);
+		const originalStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
+		const originalEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
+
+		if (resizeEdge === 'bottom') {
+			// Resize from bottom - change end time
+			const newEndMinutes = Math.max(originalStartMinutes + 15, Math.min(24 * 60, currentMinutes));
+			const newDuration = newEndMinutes - originalStartMinutes;
+			resizePreviewHeight = (newDuration / (totalVisibleHours * 60)) * 100;
+		} else {
+			// Resize from top - change start time
+			const newStartMinutes = Math.max(firstVisibleHour * 60, Math.min(originalEndMinutes - 15, currentMinutes));
+			const newDuration = originalEndMinutes - newStartMinutes;
+			resizePreviewTop = minutesToPercent(newStartMinutes);
+			resizePreviewHeight = (newDuration / (totalVisibleHours * 60)) * 100;
+		}
+	}
+
+	async function handleResizeEnd(e: PointerEvent) {
+		document.removeEventListener('pointermove', handleResizeMove);
+		document.removeEventListener('pointerup', handleResizeEnd);
+
+		if (!isResizing || !resizeEvent || !resizeOriginalStart || !resizeOriginalEnd) {
+			isResizing = false;
+			resizeEvent = null;
+			return;
+		}
+
+		const currentMinutes = getMinutesFromY(e.clientY);
+		const originalStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
+		const originalEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
+
+		let newStart = resizeOriginalStart;
+		let newEnd = resizeOriginalEnd;
+
+		if (resizeEdge === 'bottom') {
+			const newEndMinutes = Math.max(originalStartMinutes + 15, Math.min(24 * 60, currentMinutes));
+			const newHours = Math.floor(newEndMinutes / 60);
+			const newMins = newEndMinutes % 60;
+			newEnd = setHours(new Date(resizeOriginalEnd), newHours);
+			newEnd = setMinutes(newEnd, newMins);
+		} else {
+			const newStartMinutes = Math.max(0, Math.min(originalEndMinutes - 15, currentMinutes));
+			const newHours = Math.floor(newStartMinutes / 60);
+			const newMins = newStartMinutes % 60;
+			newStart = setHours(new Date(resizeOriginalStart), newHours);
+			newStart = setMinutes(newStart, newMins);
+		}
+
+		// Update event via store
+		await eventsStore.updateEvent(resizeEvent.id, {
+			startTime: newStart.toISOString(),
+			endTime: newEnd.toISOString(),
+		});
+
+		// Reset state
+		isResizing = false;
+		resizeEvent = null;
+		resizeOriginalStart = null;
+		resizeOriginalEnd = null;
 	}
 </script>
 
@@ -101,7 +362,7 @@
 					<button
 						class="all-day-event"
 						style="background-color: {calendarsStore.getColor(event.calendarId)}"
-						onclick={() => handleEventClick(event)}
+						onclick={(e) => handleEventClick(event, e)}
 						title={event.title}
 					>
 						{event.title}
@@ -134,33 +395,76 @@
 		</div>
 
 		<!-- Day columns -->
-		<div class="days-container">
+		<div class="days-container" bind:this={daysContainerEl}>
 			{#each days as day}
 				<div class="day-column" class:today={isToday(day)}>
 					{#each hours as hour}
 						<button
 							class="hour-slot"
 							onclick={() => handleSlotClick(day, hour)}
-							aria-label={`${format(day, 'EEEE', { locale: de })} ${hour}:00 Uhr`}
+							aria-label={`${format(day, 'EEEE', { locale: currentDateLocale })} ${settingsStore.formatHour(hour)}`}
 						></button>
 					{/each}
 
 					<!-- Events -->
-					{#each getEventsForDay(day) as event}
-						<button
+					{#each getEventsForDay(day) as event (event.id)}
+						{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
+						{@const isBeingResized = isResizing && resizeEvent?.id === event.id}
+						<div
 							class="event-card"
-							style={getEventStyle(event)}
-							onclick={() => handleEventClick(event)}
-							title={`${format(typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime, 'HH:mm')} - ${event.title}`}
+							class:dragging={isBeingDragged}
+							class:resizing={isBeingResized}
+							style={isBeingDragged
+								? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
+								: isBeingResized
+									? `top: ${resizePreviewTop}%; height: ${resizePreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
+									: getEventStyle(event)}
+							role="button"
+							tabindex="0"
+							onpointerdown={(e) => startDrag(event, e)}
+							onclick={(e) => handleEventClick(event, e)}
+							onkeydown={(e) => e.key === 'Enter' && goto(`/event/${event.id}`)}
+							title={`${formatEventTime(event.startTime)} - ${event.title}`}
 						>
+							<!-- Top resize handle -->
+							<div
+								class="resize-handle top"
+								onpointerdown={(e) => startResize(event, 'top', e)}
+								role="slider"
+								aria-label="Startzeit ändern"
+								tabindex="-1"
+							></div>
+
 							{#if columnClass !== 'very-compact'}
 								<span class="event-time">
-									{format(typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime, 'HH:mm')}
+									{formatEventTime(event.startTime)}
 								</span>
 							{/if}
 							<span class="event-title">{event.title}</span>
-						</button>
+
+							<!-- Bottom resize handle -->
+							<div
+								class="resize-handle bottom"
+								onpointerdown={(e) => startResize(event, 'bottom', e)}
+								role="slider"
+								aria-label="Endzeit ändern"
+								tabindex="-1"
+							></div>
+						</div>
 					{/each}
+
+					<!-- Drag preview ghost (for cross-day dragging) -->
+					{#if isDragging && draggedEvent && dragTargetDay && isSameDay(day, dragTargetDay) && !getEventsForDay(day).some(e => e.id === draggedEvent.id)}
+						<div
+							class="event-card drag-ghost"
+							style="top: {dragPreviewTop}%; height: {dragPreviewHeight}%; background-color: {calendarsStore.getColor(draggedEvent.calendarId)};"
+						>
+							{#if columnClass !== 'very-compact'}
+								<span class="event-time">{formatEventTime(draggedEvent.startTime)}</span>
+							{/if}
+							<span class="event-title">{draggedEvent.title}</span>
+						</div>
+					{/if}
 
 					<!-- Current time indicator -->
 					{#if isToday(day)}
@@ -176,8 +480,8 @@
 	.multi-day-view {
 		display: flex;
 		flex-direction: column;
-		height: 100%;
-		min-height: 0;
+		
+		
 	}
 
 	.all-day-row {
@@ -285,7 +589,7 @@
 	.time-grid {
 		flex: 1;
 		display: flex;
-		overflow-y: auto;
+		
 	}
 
 	.time-column {
@@ -346,11 +650,36 @@
 		color: white;
 		border: none;
 		text-align: left;
-		cursor: pointer;
+		cursor: grab;
 		z-index: 1;
 		padding: 2px 4px;
 		border-radius: var(--radius-sm);
 		overflow: hidden;
+		transition: box-shadow 0.15s ease, opacity 0.15s ease;
+		touch-action: none;
+		user-select: none;
+	}
+
+	.event-card:hover {
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	}
+
+	.event-card.dragging {
+		cursor: grabbing;
+		opacity: 0.9;
+		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+		z-index: 100;
+	}
+
+	.event-card.resizing {
+		opacity: 0.9;
+		z-index: 100;
+	}
+
+	.event-card.drag-ghost {
+		opacity: 0.6;
+		pointer-events: none;
+		border: 2px dashed white;
 	}
 
 	.compact .event-card,
@@ -360,9 +689,47 @@
 		padding: 1px 2px;
 	}
 
+	/* Resize handles */
+	.resize-handle {
+		position: absolute;
+		left: 0;
+		right: 0;
+		height: 8px;
+		cursor: ns-resize;
+		opacity: 0;
+		transition: opacity 0.15s ease;
+		z-index: 2;
+	}
+
+	.resize-handle.top {
+		top: 0;
+		border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+	}
+
+	.resize-handle.bottom {
+		bottom: 0;
+		border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+	}
+
+	.event-card:hover .resize-handle {
+		opacity: 1;
+		background: rgba(255, 255, 255, 0.3);
+	}
+
+	.resize-handle:hover {
+		background: rgba(255, 255, 255, 0.5) !important;
+	}
+
+	/* Compact resize handles */
+	.compact .resize-handle,
+	.very-compact .resize-handle {
+		height: 6px;
+	}
+
 	.event-time {
 		font-size: 0.65rem;
 		opacity: 0.9;
+		display: block;
 	}
 
 	.compact .event-time {
@@ -391,7 +758,7 @@
 		left: 0;
 		right: 0;
 		height: 2px;
-		background: hsl(var(--color-destructive));
+		background: hsl(var(--color-error));
 		z-index: 2;
 	}
 
@@ -403,6 +770,6 @@
 		width: 10px;
 		height: 10px;
 		border-radius: 50%;
-		background: hsl(var(--color-destructive));
+		background: hsl(var(--color-error));
 	}
 </style>

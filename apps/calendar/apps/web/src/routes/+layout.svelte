@@ -9,6 +9,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
@@ -222,7 +223,7 @@
 			class:sidebar-mode={isSidebarMode && !isCollapsed}
 			class:floating-mode={!isSidebarMode && !isCollapsed}
 		>
-			<div class="content-wrapper">
+			<div class="content-wrapper" class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}>
 				{@render children()}
 			</div>
 		</main>
@@ -237,9 +238,6 @@
 	}
 
 	.main-content {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
 		transition: all 300ms ease;
 	}
 
@@ -252,8 +250,6 @@
 	}
 
 	.content-wrapper {
-		flex: 1;
-		min-height: 0;
 		max-width: 100%;
 		margin-left: auto;
 		margin-right: auto;
@@ -270,5 +266,15 @@
 		.content-wrapper {
 			padding: 2rem;
 		}
+	}
+
+	/* Full width when calendar sidebar is collapsed */
+	.content-wrapper.calendar-expanded {
+		width: 100%;
+		max-width: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
 	}
 </style>

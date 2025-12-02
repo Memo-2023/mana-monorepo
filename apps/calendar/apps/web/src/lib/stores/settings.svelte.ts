@@ -17,6 +17,9 @@ export interface CalendarAppSettings {
 	showOnlyWeekdays: boolean;
 	showWeekNumbers: boolean;
 	timeFormat: TimeFormat;
+	filterHoursEnabled: boolean; // Filter visible hours
+	dayStartHour: number; // First visible hour (0-23)
+	dayEndHour: number; // Last visible hour (0-23)
 
 	// UI settings
 	sidebarCollapsed: boolean;
@@ -32,6 +35,7 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	showOnlyWeekdays: false,
 	showWeekNumbers: false,
 	timeFormat: '24h',
+	hideEarlyHours: false,
 	sidebarCollapsed: false,
 	defaultEventDuration: 60,
 	defaultReminder: 15,
@@ -89,6 +93,9 @@ export const settingsStore = {
 	},
 	get timeFormat() {
 		return settings.timeFormat;
+	},
+	get hideEarlyHours() {
+		return settings.hideEarlyHours;
 	},
 	get defaultEventDuration() {
 		return settings.defaultEventDuration;

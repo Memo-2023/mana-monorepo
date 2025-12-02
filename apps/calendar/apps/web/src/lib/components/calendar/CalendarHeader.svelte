@@ -81,15 +81,28 @@
 	</div>
 
 	<div class="header-right">
-		<!-- Weekdays only toggle -->
-		<button
-			class="weekdays-toggle"
-			class:active={settingsStore.showOnlyWeekdays}
-			onclick={() => settingsStore.set('showOnlyWeekdays', !settingsStore.showOnlyWeekdays)}
-			title="Nur Wochentage anzeigen (Mo-Fr)"
-		>
-			Mo-Fr
-		</button>
+		<!-- Filter toggles -->
+		<div class="filter-toggles">
+			<!-- Weekdays only toggle -->
+			<button
+				class="filter-toggle"
+				class:active={settingsStore.showOnlyWeekdays}
+				onclick={() => settingsStore.set('showOnlyWeekdays', !settingsStore.showOnlyWeekdays)}
+				title="Nur Wochentage anzeigen (Mo-Fr)"
+			>
+				Mo-Fr
+			</button>
+
+			<!-- Hide early hours toggle -->
+			<button
+				class="filter-toggle"
+				class:active={settingsStore.hideEarlyHours}
+				onclick={() => settingsStore.set('hideEarlyHours', !settingsStore.hideEarlyHours)}
+				title="Frühe Stunden ausblenden (0-6 Uhr)"
+			>
+				7-24
+			</button>
+		</div>
 
 		<div class="view-selector">
 			{#each visibleViews as type}
@@ -168,7 +181,12 @@
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 	}
 
-	.weekdays-toggle {
+	.filter-toggles {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.filter-toggle {
 		padding: 0.5rem 0.75rem;
 		border: 1px solid hsl(var(--color-border));
 		background: transparent;
@@ -180,12 +198,12 @@
 		transition: all 150ms ease;
 	}
 
-	.weekdays-toggle:hover {
+	.filter-toggle:hover {
 		background: hsl(var(--color-muted));
 		color: hsl(var(--color-foreground));
 	}
 
-	.weekdays-toggle.active {
+	.filter-toggle.active {
 		background: hsl(var(--color-primary));
 		color: hsl(var(--color-primary-foreground));
 		border-color: hsl(var(--color-primary));

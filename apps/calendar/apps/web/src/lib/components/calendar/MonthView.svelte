@@ -15,6 +15,13 @@
 		isToday,
 		isSameDay,
 		isWeekend,
+		setYear,
+		setMonth,
+		setDate,
+		getHours,
+		getMinutes,
+		differenceInMinutes,
+		addMinutes,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
 
@@ -53,16 +60,127 @@
 		return result;
 	});
 
+	// ============================================================================
+	// Drag & Drop State
+	// ============================================================================
+	let isDragging = $state(false);
+	let draggedEvent = $state<any>(null);
+	let dragTargetDay = $state<Date | null>(null);
+	let monthViewRef = $state<HTMLElement | null>(null);
+
+	// Store for day cell refs
+	let dayCellRefs = $state<Map<string, HTMLElement>>(new Map());
+
+	function setDayCellRef(day: Date, el: HTMLElement | null) {
+		const key = format(day, 'yyyy-MM-dd');
+		if (el) {
+			dayCellRefs.set(key, el);
+		} else {
+			dayCellRefs.delete(key);
+		}
+	}
+
+	// Svelte action for binding day cell refs
+	function bindDayCellRef(node: HTMLElement, day: Date) {
+		setDayCellRef(day, node);
+		return {
+			destroy() {
+				setDayCellRef(day, null);
+			}
+		};
+	}
+
+	// ============================================================================
+	// Helper Functions
+	// ============================================================================
+	function getDayFromPoint(x: number, y: number): Date | null {
+		for (const [key, el] of dayCellRefs) {
+			const rect = el.getBoundingClientRect();
+			if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+				return new Date(key);
+			}
+		}
+		return null;
+	}
+
+	// ============================================================================
+	// Drag Handlers
+	// ============================================================================
+	function startDrag(event: any, e: PointerEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		isDragging = true;
+		draggedEvent = event;
+
+		document.addEventListener('pointermove', handleDragMove);
+		document.addEventListener('pointerup', handleDragEnd);
+	}
+
+	function handleDragMove(e: PointerEvent) {
+		if (!isDragging || !draggedEvent) return;
+
+		const targetDay = getDayFromPoint(e.clientX, e.clientY);
+		dragTargetDay = targetDay;
+	}
+
+	function handleDragEnd(e: PointerEvent) {
+		if (!isDragging || !draggedEvent) {
+			cleanup();
+			return;
+		}
+
+		const targetDay = getDayFromPoint(e.clientX, e.clientY);
+
+		if (targetDay) {
+			const start = typeof draggedEvent.startTime === 'string' ? new Date(draggedEvent.startTime) : draggedEvent.startTime;
+			const end = typeof draggedEvent.endTime === 'string' ? new Date(draggedEvent.endTime) : draggedEvent.endTime;
+			const duration = differenceInMinutes(end, start);
+
+			// Keep the same time, change the date
+			let newStart = new Date(targetDay);
+			newStart.setHours(getHours(start), getMinutes(start), 0, 0);
+
+			const newEnd = addMinutes(newStart, duration);
+
+			eventsStore.updateEvent(draggedEvent.id, {
+				startTime: newStart.toISOString(),
+				endTime: newEnd.toISOString(),
+			});
+		}
+
+		cleanup();
+	}
+
+	function cleanup() {
+		isDragging = false;
+		draggedEvent = null;
+		dragTargetDay = null;
+		document.removeEventListener('pointermove', handleDragMove);
+		document.removeEventListener('pointerup', handleDragEnd);
+	}
+
+	// ============================================================================
+	// Event Handlers
+	// ============================================================================
 	function getEventsForDay(day: Date) {
 		return eventsStore.getEventsForDay(day).slice(0, 3); // Max 3 events shown
 	}
 
 	function handleDayClick(day: Date) {
+		// Don't navigate if dragging
+		if (isDragging) return;
 		viewStore.setDate(day);
 		viewStore.setViewType('day');
 	}
 
 	function handleEventClick(event: any, e: MouseEvent) {
+		// Don't navigate if dragging
+		if (isDragging) {
+			e.preventDefault();
+			e.stopPropagation();
+			return;
+		}
 		e.stopPropagation();
 		goto(`/event/${event.id}`);
 	}
@@ -74,7 +192,7 @@
 	}
 </script>
 
-<div class="month-view" style="--column-count: {columnCount}">
+<div class="month-view" style="--column-count: {columnCount}" bind:this={monthViewRef}>
 	<!-- Week day headers -->
 	<div class="weekday-headers">
 		{#each weekDays as day}
@@ -87,11 +205,14 @@
 		{#each weeks as week}
 			<div class="week-row">
 				{#each week as day}
+					{@const isDropTarget = isDragging && dragTargetDay && isSameDay(day, dragTargetDay)}
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<div
 						class="day-cell"
 						class:other-month={!isSameMonth(day, viewStore.currentDate)}
 						class:today={isToday(day)}
+						class:drop-target={isDropTarget}
+						use:bindDayCellRef={day}
 						onclick={() => handleDayClick(day)}
 						onkeydown={(e) => e.key === 'Enter' && handleDayClick(day)}
 						role="button"
@@ -103,16 +224,21 @@
 
 						<div class="day-events">
 							{#each getEventsForDay(day) as event}
-								<button
+								{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
+								<div
 									class="event-pill"
+									class:dragging={isBeingDragged}
 									style="background-color: {calendarsStore.getColor(event.calendarId)}"
+									onpointerdown={(e) => startDrag(event, e)}
 									onclick={(e) => handleEventClick(event, e)}
+									role="button"
+									tabindex="0"
 								>
 									{#if !event.isAllDay}
 										<span class="event-time">{format(typeof event.startTime === 'string' ? new Date(event.startTime) : event.startTime, 'HH:mm')}</span>
 									{/if}
 									<span class="event-title">{event.title}</span>
-								</button>
+								</div>
 							{/each}
 
 							{#if eventsStore.getEventsForDay(day).length > 3}
@@ -135,7 +261,7 @@
 	.month-view {
 		display: flex;
 		flex-direction: column;
-		height: 100%;
+		
 	}
 
 	.weekday-headers {
@@ -229,10 +355,24 @@
 		color: white;
 		border-radius: var(--radius-sm);
 		border: none;
-		cursor: pointer;
+		cursor: grab;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		touch-action: none;
+		user-select: none;
+		transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
+	}
+
+	.event-pill:hover {
+		transform: scale(1.02);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+	}
+
+	.event-pill.dragging {
+		cursor: grabbing;
+		opacity: 0.5;
+		transform: scale(0.95);
 	}
 
 	.event-time {
@@ -257,5 +397,12 @@
 
 	.more-events:hover {
 		color: hsl(var(--color-primary));
+	}
+
+	/* Drop target highlighting */
+	.day-cell.drop-target {
+		background-color: hsl(var(--color-primary) / 0.2) !important;
+		outline: 2px dashed hsl(var(--color-primary));
+		outline-offset: -2px;
 	}
 </style>

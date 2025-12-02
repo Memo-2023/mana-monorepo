@@ -46,14 +46,27 @@
 		getWeek(viewStore.viewRange.start, { weekStartsOn: settingsStore.weekStartsOn })
 	);
 
-	// Generate hours (0-23)
-	let hours = Array.from({ length: 24 }, (_, i) => i);
+	// Generate hours (0-23 or 7-23 depending on setting)
+	let allHours = Array.from({ length: 24 }, (_, i) => i);
+	let hours = $derived(
+		settingsStore.hideEarlyHours ? allHours.filter((h) => h >= 7) : allHours
+	);
+
+	// Calculate visible hours range for positioning
+	let firstVisibleHour = $derived(settingsStore.hideEarlyHours ? 7 : 0);
+	let totalVisibleHours = $derived(24 - firstVisibleHour);
+
+	// Helper to convert minutes to percentage position (accounting for hidden hours)
+	function minutesToPercent(minutes: number): number {
+		const adjustedMinutes = minutes - firstVisibleHour * 60;
+		return (adjustedMinutes / (totalVisibleHours * 60)) * 100;
+	}
 
 	// Current time indicator position
 	let now = $state(new Date());
 	let currentTimePosition = $derived.by(() => {
 		const minutes = now.getHours() * 60 + now.getMinutes();
-		return (minutes / (24 * 60)) * 100;
+		return minutesToPercent(minutes);
 	});
 
 	// Update current time every minute
@@ -99,8 +112,8 @@
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
 		const duration = differenceInMinutes(end, start);
 
-		const top = (startMinutes / (24 * 60)) * 100;
-		const height = Math.max((duration / (24 * 60)) * 100, 2); // Min 2% height
+		const top = minutesToPercent(startMinutes);
+		const height = Math.max((duration / (totalVisibleHours * 60)) * 100, 2); // Min 2% height
 
 		const color = calendarsStore.getColor(event.calendarId);
 
@@ -153,7 +166,9 @@
 		const rect = daysContainerEl.getBoundingClientRect();
 		const scrollTop = daysContainerEl.parentElement?.scrollTop || 0;
 		const relativeY = clientY - rect.top + scrollTop;
-		const totalMinutes = (relativeY / (24 * HOUR_HEIGHT)) * 24 * 60;
+		// Account for hidden early hours
+		const visibleMinutes = (relativeY / (totalVisibleHours * HOUR_HEIGHT)) * totalVisibleHours * 60;
+		const totalMinutes = visibleMinutes + firstVisibleHour * 60;
 
 		// Snap to 15-minute intervals
 		return Math.round(totalMinutes / MINUTES_PER_SLOT) * MINUTES_PER_SLOT;
@@ -172,8 +187,8 @@
 
 		// Calculate initial preview position
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
-		dragPreviewTop = (startMinutes / (24 * 60)) * 100;
-		dragPreviewHeight = (duration / (24 * 60)) * 100;
+		dragPreviewTop = minutesToPercent(startMinutes);
+		dragPreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
 		dragTargetDay = start;
 
 		// Calculate offset from event start to click position
@@ -191,11 +206,11 @@
 		const newDay = getDayFromX(e.clientX);
 		const newMinutes = getMinutesFromY(e.clientY) - dragOffsetMinutes;
 
-		// Clamp to valid range (0-23:45)
-		const clampedMinutes = Math.max(0, Math.min(24 * 60 - 15, newMinutes));
+		// Clamp to valid range (firstVisibleHour to 23:45)
+		const clampedMinutes = Math.max(firstVisibleHour * 60, Math.min(24 * 60 - 15, newMinutes));
 
 		// Update preview
-		dragPreviewTop = (clampedMinutes / (24 * 60)) * 100;
+		dragPreviewTop = minutesToPercent(clampedMinutes);
 		if (newDay) {
 			dragTargetDay = newDay;
 		}
@@ -258,8 +273,8 @@
 		// Set initial preview
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
 		const duration = differenceInMinutes(end, start);
-		resizePreviewTop = (startMinutes / (24 * 60)) * 100;
-		resizePreviewHeight = (duration / (24 * 60)) * 100;
+		resizePreviewTop = minutesToPercent(startMinutes);
+		resizePreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
 
 		document.addEventListener('pointermove', handleResizeMove);
 		document.addEventListener('pointerup', handleResizeEnd);
@@ -276,13 +291,13 @@
 			// Resize from bottom - change end time
 			const newEndMinutes = Math.max(originalStartMinutes + 15, Math.min(24 * 60, currentMinutes));
 			const newDuration = newEndMinutes - originalStartMinutes;
-			resizePreviewHeight = (newDuration / (24 * 60)) * 100;
+			resizePreviewHeight = (newDuration / (totalVisibleHours * 60)) * 100;
 		} else {
 			// Resize from top - change start time
-			const newStartMinutes = Math.max(0, Math.min(originalEndMinutes - 15, currentMinutes));
+			const newStartMinutes = Math.max(firstVisibleHour * 60, Math.min(originalEndMinutes - 15, currentMinutes));
 			const newDuration = originalEndMinutes - newStartMinutes;
-			resizePreviewTop = (newStartMinutes / (24 * 60)) * 100;
-			resizePreviewHeight = (newDuration / (24 * 60)) * 100;
+			resizePreviewTop = minutesToPercent(newStartMinutes);
+			resizePreviewHeight = (newDuration / (totalVisibleHours * 60)) * 100;
 		}
 	}
 
@@ -464,8 +479,8 @@
 	.week-view {
 		display: flex;
 		flex-direction: column;
-		height: 100%;
-		min-height: 0;
+		
+		
 	}
 
 	.week-number-indicator {
@@ -553,8 +568,8 @@
 	.time-grid {
 		flex: 1;
 		display: flex;
-		overflow-y: auto;
-		min-height: 0;
+		
+		
 	}
 
 	.time-column {

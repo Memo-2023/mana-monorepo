@@ -30,9 +30,9 @@
 		--transition-slow: 300ms ease;
 
 		/* Calendar-specific */
-		--hour-height: 60px;
-		--day-header-height: 48px;
-		--time-column-width: 64px;
+		--hour-height: 48px;
+		--day-header-height: 40px;
+		--time-column-width: 56px;
 	}
 }
 
