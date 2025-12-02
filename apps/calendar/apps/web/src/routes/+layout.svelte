@@ -238,6 +238,8 @@
 
 	.main-content {
 		flex: 1;
+		display: flex;
+		flex-direction: column;
 		transition: all 300ms ease;
 	}
 
@@ -250,15 +252,12 @@
 	}
 
 	.content-wrapper {
+		flex: 1;
+		min-height: 0;
 		max-width: 100%;
 		margin-left: auto;
 		margin-right: auto;
 		padding: 1rem;
-		height: calc(100vh - 100px);
-	}
-
-	.main-content.sidebar-mode .content-wrapper {
-		height: 100vh;
 	}
 
 	@media (min-width: 640px) {

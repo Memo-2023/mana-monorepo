@@ -42,7 +42,9 @@
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
+		"@neodrag/svelte": "^2.3.3",
 		"date-fns": "^4.1.0",
+		"svelte-dnd-action": "^0.9.68",
 		"svelte-i18n": "^4.0.1"
 	},
 	"type": "module"

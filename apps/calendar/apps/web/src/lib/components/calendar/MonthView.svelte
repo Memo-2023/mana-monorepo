@@ -2,6 +2,7 @@
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { goto } from '$app/navigation';
 	import {
 		format,
@@ -13,27 +14,41 @@
 		isSameMonth,
 		isToday,
 		isSameDay,
+		isWeekend,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
 
 	// Get all days to display in the month grid (including days from prev/next months)
-	let calendarDays = $derived.by(() => {
+	let allCalendarDays = $derived.by(() => {
 		const monthStart = startOfMonth(viewStore.currentDate);
 		const monthEnd = endOfMonth(viewStore.currentDate);
-		const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-		const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+		const calendarStart = startOfWeek(monthStart, { weekStartsOn: settingsStore.weekStartsOn });
+		const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: settingsStore.weekStartsOn });
 
 		return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 	});
 
-	// Week day headers
-	const weekDays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+	// Filter weekends if option is active
+	let calendarDays = $derived(
+		settingsStore.showOnlyWeekdays ? allCalendarDays.filter((day) => !isWeekend(day)) : allCalendarDays
+	);
+
+	// Week day headers - depends on week start setting
+	const weekDaysFromMonday = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+	const weekDaysFromSunday = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+	let allWeekDays = $derived(settingsStore.weekStartsOn === 1 ? weekDaysFromMonday : weekDaysFromSunday);
+	let weekDays = $derived(
+		settingsStore.showOnlyWeekdays ? allWeekDays.slice(0, 5) : allWeekDays
+	);
+
+	// Number of columns for grid
+	let columnCount = $derived(settingsStore.showOnlyWeekdays ? 5 : 7);
 
 	// Group days into weeks
 	let weeks = $derived.by(() => {
 		const result: Date[][] = [];
-		for (let i = 0; i < calendarDays.length; i += 7) {
-			result.push(calendarDays.slice(i, i + 7));
+		for (let i = 0; i < calendarDays.length; i += columnCount) {
+			result.push(calendarDays.slice(i, i + columnCount));
 		}
 		return result;
 	});
@@ -59,7 +74,7 @@
 	}
 </script>
 
-<div class="month-view">
+<div class="month-view" style="--column-count: {columnCount}">
 	<!-- Week day headers -->
 	<div class="weekday-headers">
 		{#each weekDays as day}
@@ -125,7 +140,7 @@
 
 	.weekday-headers {
 		display: grid;
-		grid-template-columns: repeat(7, 1fr);
+		grid-template-columns: repeat(var(--column-count, 7), 1fr);
 		border-bottom: 1px solid hsl(var(--color-border));
 	}
 
@@ -147,7 +162,7 @@
 	.week-row {
 		flex: 1;
 		display: grid;
-		grid-template-columns: repeat(7, 1fr);
+		grid-template-columns: repeat(var(--column-count, 7), 1fr);
 		min-height: 100px;
 	}
 

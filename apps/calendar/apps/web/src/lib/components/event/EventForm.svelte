@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { settingsStore } from '$lib/stores/settings.svelte';
 	import type { CalendarEvent, CreateEventInput, UpdateEventInput } from '@calendar/shared';
-	import { format, addHours, parseISO } from 'date-fns';
+	import { format, addMinutes, parseISO } from 'date-fns';
 
 	interface Props {
 		mode: 'create' | 'edit';
@@ -33,7 +34,7 @@
 	let endDate = $state('');
 	let endTime = $state('');
 
-	// Initialize date/time fields
+	// Initialize date/time fields using settings for default duration
 	$effect(() => {
 		if (event) {
 			const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
@@ -43,7 +44,8 @@
 			endDate = format(end, 'yyyy-MM-dd');
 			endTime = format(end, 'HH:mm');
 		} else if (initialStartTime) {
-			const end = addHours(initialStartTime, 1);
+			// Use default event duration from settings
+			const end = addMinutes(initialStartTime, settingsStore.defaultEventDuration);
 			startDate = format(initialStartTime, 'yyyy-MM-dd');
 			startTime = format(initialStartTime, 'HH:mm');
 			endDate = format(end, 'yyyy-MM-dd');
@@ -51,7 +53,8 @@
 		} else {
 			const now = new Date();
 			now.setMinutes(0, 0, 0);
-			const end = addHours(now, 1);
+			// Use default event duration from settings
+			const end = addMinutes(now, settingsStore.defaultEventDuration);
 			startDate = format(now, 'yyyy-MM-dd');
 			startTime = format(now, 'HH:mm');
 			endDate = format(end, 'yyyy-MM-dd');

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { viewStore } from '$lib/stores/view.svelte';
+	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import type { CalendarViewType } from '@calendar/shared';
@@ -7,25 +8,40 @@
 	// View type labels
 	const viewLabels: Record<CalendarViewType, string> = {
 		day: 'Tag',
+		'5day': '5 Tage',
 		week: 'Woche',
+		'10day': '10 Tage',
+		'14day': '14 Tage',
 		month: 'Monat',
 		year: 'Jahr',
 		agenda: 'Agenda',
 	};
 
+	// Views to show in selector
+	const visibleViews: CalendarViewType[] = ['day', '5day', 'week', '10day', '14day', 'month'];
+
 	// Format title based on view type
 	let title = $derived.by(() => {
 		const date = viewStore.currentDate;
+		const rangeStart = viewStore.viewRange.start;
+		const rangeEnd = viewStore.viewRange.end;
+
+		// Helper to format date range
+		const formatRange = () => {
+			if (rangeStart.getMonth() === rangeEnd.getMonth()) {
+				return format(rangeStart, 'd.', { locale: de }) + ' - ' + format(rangeEnd, 'd. MMMM yyyy', { locale: de });
+			}
+			return format(rangeStart, 'd. MMM', { locale: de }) + ' - ' + format(rangeEnd, 'd. MMM yyyy', { locale: de });
+		};
+
 		switch (viewStore.viewType) {
 			case 'day':
 				return format(date, 'EEEE, d. MMMM yyyy', { locale: de });
+			case '5day':
 			case 'week':
-				const weekStart = viewStore.viewRange.start;
-				const weekEnd = viewStore.viewRange.end;
-				if (weekStart.getMonth() === weekEnd.getMonth()) {
-					return format(weekStart, 'd.', { locale: de }) + ' - ' + format(weekEnd, 'd. MMMM yyyy', { locale: de });
-				}
-				return format(weekStart, 'd. MMM', { locale: de }) + ' - ' + format(weekEnd, 'd. MMM yyyy', { locale: de });
+			case '10day':
+			case '14day':
+				return formatRange();
 			case 'month':
 				return format(date, 'MMMM yyyy', { locale: de });
 			case 'year':
@@ -65,8 +81,18 @@
 	</div>
 
 	<div class="header-right">
+		<!-- Weekdays only toggle -->
+		<button
+			class="weekdays-toggle"
+			class:active={settingsStore.showOnlyWeekdays}
+			onclick={() => settingsStore.set('showOnlyWeekdays', !settingsStore.showOnlyWeekdays)}
+			title="Nur Wochentage anzeigen (Mo-Fr)"
+		>
+			Mo-Fr
+		</button>
+
 		<div class="view-selector">
-			{#each (['day', 'week', 'month'] as const) as type}
+			{#each visibleViews as type}
 				<button
 					class="view-btn"
 					class:active={viewStore.viewType === type}
@@ -140,6 +166,29 @@
 		background: hsl(var(--color-background));
 		color: hsl(var(--color-foreground));
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+	}
+
+	.weekdays-toggle {
+		padding: 0.5rem 0.75rem;
+		border: 1px solid hsl(var(--color-border));
+		background: transparent;
+		border-radius: var(--radius-md);
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+		transition: all 150ms ease;
+	}
+
+	.weekdays-toggle:hover {
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
+	}
+
+	.weekdays-toggle.active {
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
+		border-color: hsl(var(--color-primary));
 	}
 
 	.btn-icon {

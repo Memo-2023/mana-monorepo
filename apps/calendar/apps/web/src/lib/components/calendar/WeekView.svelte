@@ -2,26 +2,48 @@
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { goto } from '$app/navigation';
 	import {
 		format,
 		eachDayOfInterval,
-		eachHourOfInterval,
 		startOfDay,
-		endOfDay,
-		isSameDay,
 		isToday,
+		isWeekend,
+		isSameDay,
 		parseISO,
 		differenceInMinutes,
+		addMinutes,
+		setHours,
+		setMinutes,
+		getWeek,
 	} from 'date-fns';
-	import { de } from 'date-fns/locale';
+	import { de, enUS, fr, es, it } from 'date-fns/locale';
+	import { locale } from 'svelte-i18n';
 
-	// Generate days of the week
-	let days = $derived(
+	// Constants
+	const HOUR_HEIGHT = 60; // px - should match CSS --hour-height
+	const MINUTES_PER_SLOT = 15; // Snap to 15-minute intervals
+
+	// Get date-fns locale based on current app locale
+	const dateLocales = { de, en: enUS, fr, es, it };
+	let currentDateLocale = $derived(dateLocales[$locale?.substring(0, 2) as keyof typeof dateLocales] || de);
+
+	// Generate days of the week, optionally filtering weekends
+	let allDays = $derived(
 		eachDayOfInterval({
 			start: viewStore.viewRange.start,
 			end: viewStore.viewRange.end,
 		})
+	);
+
+	let days = $derived(
+		settingsStore.showOnlyWeekdays ? allDays.filter((day) => !isWeekend(day)) : allDays
+	);
+
+	// Get week number for display
+	let weekNumber = $derived(
+		getWeek(viewStore.viewRange.start, { weekStartsOn: settingsStore.weekStartsOn })
 	);
 
 	// Generate hours (0-23)
@@ -41,6 +63,26 @@
 		}, 60000);
 		return () => clearInterval(interval);
 	});
+
+	// Drag & Drop State
+	let isDragging = $state(false);
+	let draggedEvent = $state<any>(null);
+	let dragOffsetMinutes = $state(0);
+	let dragTargetDay = $state<Date | null>(null);
+	let dragPreviewTop = $state(0);
+	let dragPreviewHeight = $state(0);
+
+	// Resize State
+	let isResizing = $state(false);
+	let resizeEvent = $state<any>(null);
+	let resizeEdge = $state<'top' | 'bottom'>('bottom');
+	let resizeOriginalStart = $state<Date | null>(null);
+	let resizeOriginalEnd = $state<Date | null>(null);
+	let resizePreviewTop = $state(0);
+	let resizePreviewHeight = $state(0);
+
+	// Reference to the days container for position calculations
+	let daysContainerEl: HTMLDivElement;
 
 	function getEventsForDay(day: Date) {
 		return eventsStore.getEventsForDay(day).filter((e) => !e.isAllDay);
@@ -65,28 +107,252 @@
 		return `top: ${top}%; height: ${height}%; background-color: ${color};`;
 	}
 
-	function handleEventClick(event: any) {
+	function formatEventTime(date: Date | string): string {
+		const d = typeof date === 'string' ? parseISO(date) : date;
+		return settingsStore.formatTime(d);
+	}
+
+	function handleEventClick(event: any, e: MouseEvent) {
+		// Don't navigate if we just finished dragging or resizing
+		if (isDragging || isResizing) {
+			e.preventDefault();
+			e.stopPropagation();
+			return;
+		}
 		goto(`/event/${event.id}`);
 	}
 
 	function handleSlotClick(day: Date, hour: number) {
+		// Don't create new event if dragging
+		if (isDragging || isResizing) return;
+
 		const startTime = new Date(day);
 		startTime.setHours(hour, 0, 0, 0);
 		goto(`/event/new?start=${startTime.toISOString()}`);
 	}
+
+	// ========== Drag & Drop Functions ==========
+
+	function getDayFromX(clientX: number): Date | null {
+		if (!daysContainerEl) return null;
+
+		const rect = daysContainerEl.getBoundingClientRect();
+		const relativeX = clientX - rect.left;
+		const dayWidth = rect.width / days.length;
+		const dayIndex = Math.floor(relativeX / dayWidth);
+
+		if (dayIndex >= 0 && dayIndex < days.length) {
+			return days[dayIndex];
+		}
+		return null;
+	}
+
+	function getMinutesFromY(clientY: number): number {
+		if (!daysContainerEl) return 0;
+
+		const rect = daysContainerEl.getBoundingClientRect();
+		const scrollTop = daysContainerEl.parentElement?.scrollTop || 0;
+		const relativeY = clientY - rect.top + scrollTop;
+		const totalMinutes = (relativeY / (24 * HOUR_HEIGHT)) * 24 * 60;
+
+		// Snap to 15-minute intervals
+		return Math.round(totalMinutes / MINUTES_PER_SLOT) * MINUTES_PER_SLOT;
+	}
+
+	function startDrag(event: any, e: PointerEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		isDragging = true;
+		draggedEvent = event;
+
+		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const duration = differenceInMinutes(end, start);
+
+		// Calculate initial preview position
+		const startMinutes = start.getHours() * 60 + start.getMinutes();
+		dragPreviewTop = (startMinutes / (24 * 60)) * 100;
+		dragPreviewHeight = (duration / (24 * 60)) * 100;
+		dragTargetDay = start;
+
+		// Calculate offset from event start to click position
+		const clickMinutes = getMinutesFromY(e.clientY);
+		dragOffsetMinutes = clickMinutes - startMinutes;
+
+		document.addEventListener('pointermove', handleDragMove);
+		document.addEventListener('pointerup', handleDragEnd);
+	}
+
+	function handleDragMove(e: PointerEvent) {
+		if (!isDragging || !draggedEvent) return;
+
+		// Calculate new position
+		const newDay = getDayFromX(e.clientX);
+		const newMinutes = getMinutesFromY(e.clientY) - dragOffsetMinutes;
+
+		// Clamp to valid range (0-23:45)
+		const clampedMinutes = Math.max(0, Math.min(24 * 60 - 15, newMinutes));
+
+		// Update preview
+		dragPreviewTop = (clampedMinutes / (24 * 60)) * 100;
+		if (newDay) {
+			dragTargetDay = newDay;
+		}
+	}
+
+	async function handleDragEnd(e: PointerEvent) {
+		document.removeEventListener('pointermove', handleDragMove);
+		document.removeEventListener('pointerup', handleDragEnd);
+
+		if (!isDragging || !draggedEvent || !dragTargetDay) {
+			isDragging = false;
+			draggedEvent = null;
+			return;
+		}
+
+		const start = typeof draggedEvent.startTime === 'string' ? parseISO(draggedEvent.startTime) : draggedEvent.startTime;
+		const end = typeof draggedEvent.endTime === 'string' ? parseISO(draggedEvent.endTime) : draggedEvent.endTime;
+		const duration = differenceInMinutes(end, start);
+
+		// Calculate new start time
+		const newMinutes = getMinutesFromY(e.clientY) - dragOffsetMinutes;
+		const clampedMinutes = Math.max(0, Math.min(24 * 60 - 15, newMinutes));
+		const newHours = Math.floor(clampedMinutes / 60);
+		const newMins = clampedMinutes % 60;
+
+		let newStart = new Date(dragTargetDay);
+		newStart = setHours(newStart, newHours);
+		newStart = setMinutes(newStart, newMins);
+
+		const newEnd = addMinutes(newStart, duration);
+
+		// Update event via store
+		await eventsStore.updateEvent(draggedEvent.id, {
+			startTime: newStart.toISOString(),
+			endTime: newEnd.toISOString(),
+		});
+
+		// Reset state
+		isDragging = false;
+		draggedEvent = null;
+		dragTargetDay = null;
+	}
+
+	// ========== Resize Functions ==========
+
+	function startResize(event: any, edge: 'top' | 'bottom', e: PointerEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		isResizing = true;
+		resizeEvent = event;
+		resizeEdge = edge;
+
+		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+
+		resizeOriginalStart = start;
+		resizeOriginalEnd = end;
+
+		// Set initial preview
+		const startMinutes = start.getHours() * 60 + start.getMinutes();
+		const duration = differenceInMinutes(end, start);
+		resizePreviewTop = (startMinutes / (24 * 60)) * 100;
+		resizePreviewHeight = (duration / (24 * 60)) * 100;
+
+		document.addEventListener('pointermove', handleResizeMove);
+		document.addEventListener('pointerup', handleResizeEnd);
+	}
+
+	function handleResizeMove(e: PointerEvent) {
+		if (!isResizing || !resizeEvent || !resizeOriginalStart || !resizeOriginalEnd) return;
+
+		const currentMinutes = getMinutesFromY(e.clientY);
+		const originalStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
+		const originalEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
+
+		if (resizeEdge === 'bottom') {
+			// Resize from bottom - change end time
+			const newEndMinutes = Math.max(originalStartMinutes + 15, Math.min(24 * 60, currentMinutes));
+			const newDuration = newEndMinutes - originalStartMinutes;
+			resizePreviewHeight = (newDuration / (24 * 60)) * 100;
+		} else {
+			// Resize from top - change start time
+			const newStartMinutes = Math.max(0, Math.min(originalEndMinutes - 15, currentMinutes));
+			const newDuration = originalEndMinutes - newStartMinutes;
+			resizePreviewTop = (newStartMinutes / (24 * 60)) * 100;
+			resizePreviewHeight = (newDuration / (24 * 60)) * 100;
+		}
+	}
+
+	async function handleResizeEnd(e: PointerEvent) {
+		document.removeEventListener('pointermove', handleResizeMove);
+		document.removeEventListener('pointerup', handleResizeEnd);
+
+		if (!isResizing || !resizeEvent || !resizeOriginalStart || !resizeOriginalEnd) {
+			isResizing = false;
+			resizeEvent = null;
+			return;
+		}
+
+		const currentMinutes = getMinutesFromY(e.clientY);
+		const originalStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
+		const originalEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
+
+		let newStart = resizeOriginalStart;
+		let newEnd = resizeOriginalEnd;
+
+		if (resizeEdge === 'bottom') {
+			const newEndMinutes = Math.max(originalStartMinutes + 15, Math.min(24 * 60, currentMinutes));
+			const newHours = Math.floor(newEndMinutes / 60);
+			const newMins = newEndMinutes % 60;
+			newEnd = setHours(new Date(resizeOriginalEnd), newHours);
+			newEnd = setMinutes(newEnd, newMins);
+		} else {
+			const newStartMinutes = Math.max(0, Math.min(originalEndMinutes - 15, currentMinutes));
+			const newHours = Math.floor(newStartMinutes / 60);
+			const newMins = newStartMinutes % 60;
+			newStart = setHours(new Date(resizeOriginalStart), newHours);
+			newStart = setMinutes(newStart, newMins);
+		}
+
+		// Update event via store
+		await eventsStore.updateEvent(resizeEvent.id, {
+			startTime: newStart.toISOString(),
+			endTime: newEnd.toISOString(),
+		});
+
+		// Reset state
+		isResizing = false;
+		resizeEvent = null;
+		resizeOriginalStart = null;
+		resizeOriginalEnd = null;
+	}
 </script>
 
 <div class="week-view">
+	<!-- Week number indicator (if enabled) -->
+	{#if settingsStore.showWeekNumbers}
+		<div class="week-number-indicator">
+			KW {weekNumber}
+		</div>
+	{/if}
+
 	<!-- All-day events row -->
 	<div class="all-day-row">
-		<div class="time-gutter"></div>
+		<div class="time-gutter">
+			{#if settingsStore.showWeekNumbers}
+				<span class="week-label">KW {weekNumber}</span>
+			{/if}
+		</div>
 		{#each days as day}
 			<div class="all-day-cell">
 				{#each getAllDayEventsForDay(day) as event}
 					<button
 						class="all-day-event"
 						style="background-color: {calendarsStore.getColor(event.calendarId)}"
-						onclick={() => handleEventClick(event)}
+						onclick={() => goto(`/event/${event.id}`)}
 					>
 						{event.title}
 					</button>
@@ -100,7 +366,7 @@
 		<div class="time-gutter"></div>
 		{#each days as day}
 			<div class="day-header" class:today={isToday(day)}>
-				<span class="day-name">{format(day, 'EEE', { locale: de })}</span>
+				<span class="day-name">{format(day, 'EEE', { locale: currentDateLocale })}</span>
 				<span class="day-number" class:today={isToday(day)}>{format(day, 'd')}</span>
 			</div>
 		{/each}
@@ -112,36 +378,77 @@
 		<div class="time-column">
 			{#each hours as hour}
 				<div class="time-label">
-					{hour.toString().padStart(2, '0')}:00
+					{settingsStore.formatHour(hour)}
 				</div>
 			{/each}
 		</div>
 
 		<!-- Day columns -->
-		<div class="days-container">
+		<div class="days-container" bind:this={daysContainerEl}>
 			{#each days as day, dayIndex}
 				<div class="day-column" class:today={isToday(day)}>
 					{#each hours as hour}
 						<button
 							class="hour-slot"
 							onclick={() => handleSlotClick(day, hour)}
-							aria-label={`${format(day, 'EEEE', { locale: de })} ${hour}:00 Uhr`}
+							aria-label={`${format(day, 'EEEE', { locale: currentDateLocale })} ${settingsStore.formatHour(hour)}`}
 						></button>
 					{/each}
 
 					<!-- Events -->
-					{#each getEventsForDay(day) as event}
-						<button
+					{#each getEventsForDay(day) as event (event.id)}
+						{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
+						{@const isBeingResized = isResizing && resizeEvent?.id === event.id}
+						<div
 							class="event-card"
-							style={getEventStyle(event)}
-							onclick={() => handleEventClick(event)}
+							class:dragging={isBeingDragged}
+							class:resizing={isBeingResized}
+							style={isBeingDragged
+								? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
+								: isBeingResized
+									? `top: ${resizePreviewTop}%; height: ${resizePreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
+									: getEventStyle(event)}
+							role="button"
+							tabindex="0"
+							onpointerdown={(e) => startDrag(event, e)}
+							onclick={(e) => handleEventClick(event, e)}
+							onkeydown={(e) => e.key === 'Enter' && goto(`/event/${event.id}`)}
 						>
+							<!-- Top resize handle -->
+							<div
+								class="resize-handle top"
+								onpointerdown={(e) => startResize(event, 'top', e)}
+								role="slider"
+								aria-label="Startzeit ändern"
+								tabindex="-1"
+							></div>
+
 							<span class="event-time">
-								{format(typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime, 'HH:mm')}
+								{formatEventTime(event.startTime)}
 							</span>
 							<span class="event-title">{event.title}</span>
-						</button>
+
+							<!-- Bottom resize handle -->
+							<div
+								class="resize-handle bottom"
+								onpointerdown={(e) => startResize(event, 'bottom', e)}
+								role="slider"
+								aria-label="Endzeit ändern"
+								tabindex="-1"
+							></div>
+						</div>
 					{/each}
+
+					<!-- Drag preview ghost (for cross-day dragging) -->
+					{#if isDragging && draggedEvent && dragTargetDay && isSameDay(day, dragTargetDay) && !getEventsForDay(day).some(e => e.id === draggedEvent.id)}
+						<div
+							class="event-card drag-ghost"
+							style="top: {dragPreviewTop}%; height: {dragPreviewHeight}%; background-color: {calendarsStore.getColor(draggedEvent.calendarId)};"
+						>
+							<span class="event-time">{formatEventTime(draggedEvent.startTime)}</span>
+							<span class="event-title">{draggedEvent.title}</span>
+						</div>
+					{/if}
 
 					<!-- Current time indicator -->
 					{#if isToday(day)}
@@ -158,6 +465,11 @@
 		display: flex;
 		flex-direction: column;
 		height: 100%;
+		min-height: 0;
+	}
+
+	.week-number-indicator {
+		display: none; /* Hidden by default, shown in gutter instead */
 	}
 
 	.all-day-row {
@@ -195,6 +507,16 @@
 	.time-gutter {
 		width: var(--time-column-width);
 		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.week-label {
+		font-size: 0.625rem;
+		color: hsl(var(--color-muted-foreground));
+		text-transform: uppercase;
+		font-weight: 500;
 	}
 
 	.day-header {
@@ -232,6 +554,7 @@
 		flex: 1;
 		display: flex;
 		overflow-y: auto;
+		min-height: 0;
 	}
 
 	.time-column {
@@ -252,6 +575,7 @@
 	.days-container {
 		flex: 1;
 		display: flex;
+		position: relative;
 	}
 
 	.day-column {
@@ -264,20 +588,62 @@
 		background: hsl(var(--color-primary) / 0.05);
 	}
 
+	.hour-slot {
+		height: var(--hour-height);
+		width: 100%;
+		border: none;
+		border-bottom: 1px solid hsl(var(--color-border) / 0.5);
+		background: transparent;
+		cursor: pointer;
+	}
+
+	.hour-slot:hover {
+		background: hsl(var(--color-muted) / 0.3);
+	}
+
 	.event-card {
 		position: absolute;
 		left: 2px;
 		right: 2px;
+		padding: 2px 4px;
 		color: white;
 		border: none;
+		border-radius: var(--radius-sm);
 		text-align: left;
-		cursor: pointer;
+		cursor: grab;
 		z-index: 1;
+		overflow: hidden;
+		transition: box-shadow 0.15s ease, opacity 0.15s ease;
+		touch-action: none;
+		user-select: none;
+	}
+
+	.event-card:hover {
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	}
+
+	.event-card.dragging {
+		cursor: grabbing;
+		opacity: 0.9;
+		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+		z-index: 100;
+	}
+
+	.event-card.resizing {
+		opacity: 0.9;
+		z-index: 100;
+	}
+
+	.event-card.drag-ghost {
+		opacity: 0.6;
+		pointer-events: none;
+		border: 2px dashed white;
 	}
 
 	.event-time {
 		font-size: 0.65rem;
 		opacity: 0.9;
+		display: block;
 	}
 
 	.event-title {
@@ -287,5 +653,56 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+	/* Resize handles */
+	.resize-handle {
+		position: absolute;
+		left: 0;
+		right: 0;
+		height: 8px;
+		cursor: ns-resize;
+		opacity: 0;
+		transition: opacity 0.15s ease;
+		z-index: 2;
+	}
+
+	.resize-handle.top {
+		top: 0;
+		border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+	}
+
+	.resize-handle.bottom {
+		bottom: 0;
+		border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+	}
+
+	.event-card:hover .resize-handle {
+		opacity: 1;
+		background: rgba(255, 255, 255, 0.3);
+	}
+
+	.resize-handle:hover {
+		background: rgba(255, 255, 255, 0.5) !important;
+	}
+
+	.time-indicator {
+		position: absolute;
+		left: 0;
+		right: 0;
+		height: 2px;
+		background: hsl(var(--color-error));
+		z-index: 2;
+	}
+
+	.time-indicator::before {
+		content: '';
+		position: absolute;
+		left: -4px;
+		top: -4px;
+		width: 10px;
+		height: 10px;
+		background: hsl(var(--color-error));
+		border-radius: 50%;
 	}
 </style>

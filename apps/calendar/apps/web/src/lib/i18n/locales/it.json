@@ -12,10 +12,14 @@
 	},
 	"views": {
 		"day": "Giorno",
+		"5day": "5 giorni",
 		"week": "Settimana",
+		"10day": "10 giorni",
+		"14day": "14 giorni",
 		"month": "Mese",
 		"year": "Anno",
-		"agenda": "Agenda"
+		"agenda": "Agenda",
+		"weekdaysOnly": "Solo giorni feriali"
 	},
 	"calendar": {
 		"today": "Oggi",
