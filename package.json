@@ -54,6 +54,24 @@
 		"presi:db:push": "pnpm --filter @presi/backend db:push",
 		"presi:db:studio": "pnpm --filter @presi/backend db:studio",
 		"presi:db:seed": "pnpm --filter @presi/backend db:seed",
+		"contacts:dev": "turbo run dev --filter=contacts...",
+		"dev:contacts:mobile": "pnpm --filter @contacts/mobile dev",
+		"dev:contacts:web": "pnpm --filter @contacts/web dev",
+		"dev:contacts:landing": "pnpm --filter @contacts/landing dev",
+		"dev:contacts:backend": "pnpm --filter @contacts/backend dev",
+		"dev:contacts:app": "turbo run dev --filter=@contacts/web --filter=@contacts/backend",
+		"contacts:db:push": "pnpm --filter @contacts/backend db:push",
+		"contacts:db:studio": "pnpm --filter @contacts/backend db:studio",
+		"contacts:db:seed": "pnpm --filter @contacts/backend db:seed",
+		"calendar:dev": "turbo run dev --filter=calendar...",
+		"dev:calendar:mobile": "pnpm --filter @calendar/mobile dev",
+		"dev:calendar:web": "pnpm --filter @calendar/web dev",
+		"dev:calendar:landing": "pnpm --filter @calendar/landing dev",
+		"dev:calendar:backend": "pnpm --filter @calendar/backend dev",
+		"dev:calendar:app": "turbo run dev --filter=@calendar/web --filter=@calendar/backend",
+		"calendar:db:push": "pnpm --filter @calendar/backend db:push",
+		"calendar:db:studio": "pnpm --filter @calendar/backend db:studio",
+		"calendar:db:seed": "pnpm --filter @calendar/backend db:seed",
 		"voxel-lava:dev": "turbo run dev --filter=@voxel-lava/web --filter=@voxel-lava/backend",
 		"dev:voxel-lava:web": "pnpm --filter @voxel-lava/web dev",
 		"dev:voxel-lava:backend": "pnpm --filter @voxel-lava/backend start:dev",
@@ -75,7 +93,16 @@
 		"docker:logs:auth": "docker compose -f docker-compose.dev.yml --env-file .env.development logs -f mana-core-auth",
 		"docker:logs:chat": "docker compose -f docker-compose.dev.yml --env-file .env.development logs -f chat-backend",
 		"docker:ps": "docker compose -f docker-compose.dev.yml --env-file .env.development ps -a",
-		"docker:clean": "docker compose -f docker-compose.dev.yml --env-file .env.development --profile all down -v"
+		"docker:clean": "docker compose -f docker-compose.dev.yml --env-file .env.development --profile all down -v",
+		"deploy:landing:chat": "pnpm --filter @chat/landing build && npx wrangler pages deploy apps/chat/apps/landing/dist --project-name=chat-landing",
+		"deploy:landing:picture": "pnpm --filter @picture/landing build && npx wrangler pages deploy apps/picture/apps/landing/dist --project-name=picture-landing",
+		"deploy:landing:manacore": "pnpm --filter @manacore/landing build && npx wrangler pages deploy apps/manacore/apps/landing/dist --project-name=manacore-landing",
+		"deploy:landing:manadeck": "pnpm --filter @manadeck/landing build && npx wrangler pages deploy apps/manadeck/apps/landing/dist --project-name=manadeck-landing",
+		"deploy:landing:zitare": "pnpm --filter @zitare/landing build && npx wrangler pages deploy apps/zitare/apps/landing/dist --project-name=zitare-landing",
+		"deploy:landing:all": "pnpm deploy:landing:chat && pnpm deploy:landing:picture && pnpm deploy:landing:manacore && pnpm deploy:landing:manadeck && pnpm deploy:landing:zitare",
+		"cf:login": "npx wrangler login",
+		"cf:projects:list": "npx wrangler pages project list",
+		"cf:projects:create": "echo 'Creating Cloudflare Pages projects...' && npx wrangler pages project create chat-landing --production-branch=main && npx wrangler pages project create picture-landing --production-branch=main && npx wrangler pages project create manacore-landing --production-branch=main && npx wrangler pages project create manadeck-landing --production-branch=main && npx wrangler pages project create zitare-landing --production-branch=main"
 	},
 	"devDependencies": {
 		"concurrently": "^9.2.0",
@@ -83,7 +110,8 @@
 		"prettier-plugin-astro": "^0.14.1",
 		"prettier-plugin-svelte": "^3.4.0",
 		"turbo": "^2.3.0",
-		"typescript": "^5.9.3"
+		"typescript": "^5.9.3",
+		"wrangler": "^4.51.0"
 	},
 	"engines": {
 		"node": ">=18.0.0"

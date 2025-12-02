@@ -20,6 +20,7 @@ This is a pnpm workspace monorepo containing multiple product applications with 
 | **chat**     | AI chat application          | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
 | **zitare**   | Daily inspiration quotes     | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
 | **presi**    | Presentation tool            | NestJS backend, Expo mobile, SvelteKit web                |
+| **contacts** | Contact management           | NestJS backend, SvelteKit web                             |
 
 ### Archived Projects (`apps-archived/`)
 
@@ -49,6 +50,7 @@ pnpm run picture:dev
 pnpm run chat:dev
 pnpm run zitare:dev
 pnpm run presi:dev
+pnpm run contacts:dev
 
 # Start specific app within project
 pnpm run dev:chat:mobile     # Just mobile app
@@ -432,6 +434,65 @@ S3_ENDPOINT=https://fsn1.your-objectstorage.com
 S3_REGION=fsn1
 S3_ACCESS_KEY=your-access-key
 S3_SECRET_KEY=your-secret-key
+```
+
+## Landing Pages (Cloudflare Pages)
+
+All landing pages are deployed to Cloudflare Pages using Direct Upload via Wrangler CLI.
+
+### Landing Pages
+
+| Project | Package | Cloudflare Project | URL |
+|---------|---------|-------------------|-----|
+| Chat | `@chat/landing` | `chat-landing` | https://chat-landing.pages.dev |
+| Picture | `@picture/landing` | `picture-landing` | https://picture-landing.pages.dev |
+| ManaCore | `@manacore/landing` | `manacore-landing` | https://manacore-landing.pages.dev |
+| ManaDeck | `@manadeck/landing` | `manadeck-landing` | https://manadeck-landing.pages.dev |
+| Zitare | `@zitare/landing` | `zitare-landing` | https://zitare-landing.pages.dev |
+
+### Local Deployment
+
+```bash
+# First time: Login to Cloudflare
+pnpm cf:login
+
+# Create projects (one-time setup)
+pnpm cf:projects:create
+
+# Deploy individual landing page
+pnpm deploy:landing:chat
+pnpm deploy:landing:picture
+pnpm deploy:landing:manacore
+pnpm deploy:landing:manadeck
+pnpm deploy:landing:zitare
+
+# Deploy all landing pages
+pnpm deploy:landing:all
+
+# List all projects
+pnpm cf:projects:list
+```
+
+### Adding New Landing Pages
+
+1. Create the landing page in `apps/{project}/apps/landing/`
+2. Add `wrangler.toml`:
+   ```toml
+   name = "{project}-landing"
+   compatibility_date = "2024-12-01"
+   pages_build_output_dir = "dist"
+   ```
+3. Add deploy script to root `package.json`:
+   ```json
+   "deploy:landing:{project}": "pnpm --filter @{project}/landing build && npx wrangler pages deploy apps/{project}/apps/landing/dist --project-name={project}-landing"
+   ```
+4. Create Cloudflare project: `npx wrangler pages project create {project}-landing --production-branch=main`
+
+### Custom Domains
+
+```bash
+# Add custom domain to a project
+npx wrangler pages project add-domain chat-landing chat.manacore.app
 ```
 
 ## Adding Dependencies
