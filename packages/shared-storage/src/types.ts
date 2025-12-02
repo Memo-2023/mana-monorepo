@@ -76,11 +76,13 @@ export interface FileInfo {
  * Predefined bucket names for each project
  */
 export const BUCKETS = {
-	PICTURE: 'picture-images',
-	CHAT: 'chat-files',
-	MANADECK: 'manadeck-assets',
-	NUTRIPHI: 'nutriphi-meals',
-	PRESI: 'presi-slides',
+	PICTURE: 'picture-storage',
+	CHAT: 'chat-storage',
+	MANADECK: 'manadeck-storage',
+	NUTRIPHI: 'nutriphi-storage',
+	PRESI: 'presi-storage',
+	CALENDAR: 'calendar-storage',
+	CONTACTS: 'contacts-storage',
 } as const;
 
 export type BucketName = (typeof BUCKETS)[keyof typeof BUCKETS];

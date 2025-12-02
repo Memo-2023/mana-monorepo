@@ -393,11 +393,13 @@ pnpm docker:up
 
 | Bucket | Project | Purpose |
 |--------|---------|---------|
-| `picture-images` | Picture | AI-generated images |
-| `chat-files` | Chat | User file uploads |
-| `manadeck-assets` | ManaDeck | Card/deck assets |
-| `nutriphi-meals` | NutriPhi | Meal photos |
-| `presi-slides` | Presi | Presentation slides |
+| `picture-storage` | Picture | AI-generated images |
+| `chat-storage` | Chat | User file uploads |
+| `manadeck-storage` | ManaDeck | Card/deck assets |
+| `nutriphi-storage` | NutriPhi | Meal photos |
+| `presi-storage` | Presi | Presentation slides |
+| `calendar-storage` | Calendar | Calendar attachments |
+| `contacts-storage` | Contacts | Contact avatars/files |
 
 ### Usage in Backend
 

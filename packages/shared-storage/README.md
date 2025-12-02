@@ -22,11 +22,13 @@ The following buckets are automatically created:
 
 | Bucket | Project | Purpose |
 |--------|---------|---------|
-| `picture-images` | Picture | Generated AI images |
-| `chat-files` | Chat | User file uploads |
-| `manadeck-assets` | ManaDeck | Card/deck assets |
-| `nutriphi-meals` | NutriPhi | Meal photos |
-| `presi-slides` | Presi | Presentation slides |
+| `picture-storage` | Picture | Generated AI images |
+| `chat-storage` | Chat | User file uploads |
+| `manadeck-storage` | ManaDeck | Card/deck assets |
+| `nutriphi-storage` | NutriPhi | Meal photos |
+| `presi-storage` | Presi | Presentation slides |
+| `calendar-storage` | Calendar | Calendar attachments |
+| `contacts-storage` | Contacts | Contact avatars/files |
 
 ## Usage
 
@@ -45,7 +47,7 @@ const result = await storage.upload(key, imageBuffer, {
   public: true,
 });
 
-console.log(result.url); // http://localhost:9000/picture-images/users/user-123/uuid.png
+console.log(result.url); // http://localhost:9000/picture-storage/users/user-123/uuid.png
 
 // Download a file
 const buffer = await storage.download(key);
@@ -85,6 +87,8 @@ import {
   createManaDeckStorage,
   createNutriPhiStorage,
   createPresiStorage,
+  createCalendarStorage,
+  createContactsStorage,
 } from '@manacore/shared-storage';
 ```
 
@@ -110,8 +114,8 @@ S3_ACCESS_KEY=your-access-key
 S3_SECRET_KEY=your-secret-key
 
 # Optional: public URLs for CDN access
-PICTURE_STORAGE_PUBLIC_URL=https://picture-images.fsn1.your-objectstorage.com
-NUTRIPHI_S3_PUBLIC_URL=https://nutriphi-meals.fsn1.your-objectstorage.com
+PICTURE_STORAGE_PUBLIC_URL=https://picture-storage.fsn1.your-objectstorage.com
+NUTRIPHI_S3_PUBLIC_URL=https://nutriphi-storage.fsn1.your-objectstorage.com
 ```
 
 ## Utilities

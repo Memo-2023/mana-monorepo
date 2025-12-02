@@ -105,3 +105,17 @@ export function createNutriPhiStorage(publicUrl?: string): StorageClient {
 export function createPresiStorage(): StorageClient {
 	return createStorageClient({ name: BUCKETS.PRESI });
 }
+
+/**
+ * Create a storage client for the Calendar project
+ */
+export function createCalendarStorage(): StorageClient {
+	return createStorageClient({ name: BUCKETS.CALENDAR });
+}
+
+/**
+ * Create a storage client for the Contacts project
+ */
+export function createContactsStorage(): StorageClient {
+	return createStorageClient({ name: BUCKETS.CONTACTS });
+}

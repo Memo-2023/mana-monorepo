@@ -10,6 +10,8 @@ export {
 	createManaDeckStorage,
 	createNutriPhiStorage,
 	createPresiStorage,
+	createCalendarStorage,
+	createContactsStorage,
 } from './factory.js';
 
 // Utilities
