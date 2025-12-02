@@ -107,9 +107,9 @@
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
-		background: hsl(var(--card));
+		background: hsl(var(--color-surface));
 		border-radius: var(--radius-lg);
-		border: 1px solid hsl(var(--border));
+		border: 1px solid hsl(var(--color-border));
 		overflow: hidden;
 	}
 

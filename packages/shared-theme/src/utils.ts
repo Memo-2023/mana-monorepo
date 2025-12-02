@@ -1,5 +1,6 @@
-import type { ThemeColors, ThemeVariant, EffectiveMode, HSLValue } from './types';
+import type { ThemeColors, ThemeVariant, EffectiveMode, HSLValue, A11ySettings } from './types';
 import { THEME_DEFINITIONS, CSS_VAR_PREFIX } from './constants';
+import { applyA11yTransformations, applyA11yAttributes } from './a11y-utils';
 
 /**
  * Check if code is running in browser
@@ -90,12 +91,20 @@ export function colorsToCssVars(colors: ThemeColors): Record<string, string> {
 export function applyThemeToDocument(
 	variant: ThemeVariant,
 	effectiveMode: EffectiveMode,
-	primaryOverride?: { light: HSLValue; dark: HSLValue }
+	primaryOverride?: { light: HSLValue; dark: HSLValue },
+	a11ySettings?: A11ySettings
 ): void {
 	if (!isBrowser()) return;
 
 	const root = document.documentElement;
-	const colors = getThemeColors(variant, effectiveMode, primaryOverride);
+	let colors = getThemeColors(variant, effectiveMode, primaryOverride);
+
+	// Apply A11y transformations if provided
+	if (a11ySettings) {
+		colors = applyA11yTransformations(colors, effectiveMode, a11ySettings);
+		applyA11yAttributes(a11ySettings);
+	}
+
 	const cssVars = colorsToCssVars(colors);
 
 	// Set CSS variables

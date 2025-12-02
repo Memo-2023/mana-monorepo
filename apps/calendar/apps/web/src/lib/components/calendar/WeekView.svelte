@@ -162,7 +162,7 @@
 
 	.all-day-row {
 		display: flex;
-		border-bottom: 1px solid hsl(var(--border));
+		border-bottom: 1px solid hsl(var(--color-border));
 		min-height: 32px;
 	}
 
@@ -172,7 +172,7 @@
 		flex-wrap: wrap;
 		gap: 2px;
 		padding: 4px;
-		border-left: 1px solid hsl(var(--border));
+		border-left: 1px solid hsl(var(--color-border));
 	}
 
 	.all-day-event {
@@ -189,7 +189,7 @@
 
 	.day-headers {
 		display: flex;
-		border-bottom: 1px solid hsl(var(--border));
+		border-bottom: 1px solid hsl(var(--color-border));
 	}
 
 	.time-gutter {
@@ -203,12 +203,12 @@
 		flex-direction: column;
 		align-items: center;
 		padding: 0.5rem;
-		border-left: 1px solid hsl(var(--border));
+		border-left: 1px solid hsl(var(--color-border));
 	}
 
 	.day-name {
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		text-transform: uppercase;
 	}
 
@@ -224,8 +224,8 @@
 	}
 
 	.day-number.today {
-		background: hsl(var(--primary));
-		color: hsl(var(--primary-foreground));
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
 	}
 
 	.time-grid {
@@ -244,7 +244,7 @@
 		padding-right: 0.5rem;
 		text-align: right;
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		position: relative;
 		top: -0.5em;
 	}
@@ -257,11 +257,11 @@
 	.day-column {
 		flex: 1;
 		position: relative;
-		border-left: 1px solid hsl(var(--border));
+		border-left: 1px solid hsl(var(--color-border));
 	}
 
 	.day-column.today {
-		background: hsl(var(--primary) / 0.05);
+		background: hsl(var(--color-primary) / 0.05);
 	}
 
 	.event-card {

@@ -19,7 +19,14 @@ export class CalendarController {
 
 	@Get()
 	async findAll(@CurrentUser() user: CurrentUserData) {
-		const calendars = await this.calendarService.findAll(user.userId);
+		let calendars = await this.calendarService.findAll(user.userId);
+
+		// Lazy creation: if no calendars exist, create a default one
+		if (calendars.length === 0) {
+			const defaultCalendar = await this.calendarService.getOrCreateDefaultCalendar(user.userId);
+			calendars = [defaultCalendar];
+		}
+
 		return { calendars };
 	}
 

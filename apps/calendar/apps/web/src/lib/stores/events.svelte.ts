@@ -13,9 +13,9 @@ let error = $state<string | null>(null);
 let loadedRange = $state<{ start: Date; end: Date } | null>(null);
 
 export const eventsStore = {
-	// Getters
+	// Getters - always return safe values
 	get events() {
-		return events;
+		return events ?? [];
 	},
 	get loading() {
 		return loading;
@@ -40,7 +40,9 @@ export const eventsStore = {
 		if (result.error) {
 			error = result.error.message;
 		} else {
-			events = result.data || [];
+			// API returns { events: [...] }
+			const data = result.data as { events: CalendarEvent[] } | null;
+			events = data?.events || [];
 			loadedRange = { start: startDate, end: endDate };
 		}
 
@@ -94,7 +96,9 @@ export const eventsStore = {
 		const result = await api.createEvent(data);
 
 		if (result.data) {
-			events = [...events, result.data];
+			// API returns { event: {...} }
+			const responseData = result.data as { event: CalendarEvent };
+			events = [...events, responseData.event];
 		}
 
 		return result;
@@ -107,7 +111,9 @@ export const eventsStore = {
 		const result = await api.updateEvent(id, data);
 
 		if (result.data) {
-			events = events.map((e) => (e.id === id ? result.data! : e));
+			// API returns { event: {...} }
+			const responseData = result.data as { event: CalendarEvent };
+			events = events.map((e) => (e.id === id ? responseData.event : e));
 		}
 
 		return result;

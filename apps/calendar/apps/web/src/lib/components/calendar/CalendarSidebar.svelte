@@ -43,9 +43,9 @@
 
 <style>
 	.calendar-sidebar-section {
-		background: hsl(var(--card));
+		background: hsl(var(--color-surface));
 		border-radius: var(--radius-lg);
-		border: 1px solid hsl(var(--border));
+		border: 1px solid hsl(var(--color-border));
 		padding: 1rem;
 	}
 
@@ -59,7 +59,7 @@
 	.section-title {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin: 0;
 	}
 
@@ -69,12 +69,12 @@
 		background: transparent;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.add-btn:hover {
-		background: hsl(var(--muted));
-		color: hsl(var(--foreground));
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
 	}
 
 	.calendar-list {
@@ -93,7 +93,7 @@
 	}
 
 	.calendar-item:hover {
-		background: hsl(var(--muted) / 0.5);
+		background: hsl(var(--color-muted) / 0.5);
 	}
 
 	.calendar-item input {
@@ -110,12 +110,12 @@
 
 	.calendar-name {
 		font-size: 0.875rem;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.empty-message {
 		font-size: 0.875rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		text-align: center;
 		padding: 1rem;
 	}

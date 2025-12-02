@@ -18,7 +18,14 @@
 	let description = $state(event?.description || '');
 	let location = $state(event?.location || '');
 	let isAllDay = $state(event?.isAllDay || false);
-	let calendarId = $state(event?.calendarId || calendarsStore.defaultCalendar?.id || '');
+	let calendarId = $state(event?.calendarId || '');
+
+	// Set default calendar when calendars are loaded
+	$effect(() => {
+		if (!calendarId && calendarsStore.defaultCalendar?.id) {
+			calendarId = calendarsStore.defaultCalendar.id;
+		}
+	});
 
 	// Date/time handling
 	let startDate = $state('');
@@ -58,6 +65,7 @@
 		e.preventDefault();
 
 		if (!title.trim()) return;
+		if (!calendarId) return;
 
 		const startDateTime = new Date(`${startDate}T${isAllDay ? '00:00' : startTime}`);
 		const endDateTime = new Date(`${endDate}T${isAllDay ? '23:59' : endTime}`);
@@ -158,7 +166,7 @@
 		<button type="button" class="px-4 py-2 rounded-lg font-medium text-foreground bg-transparent hover:bg-muted transition-colors" onclick={onCancel}>
 			Abbrechen
 		</button>
-		<button type="submit" class="px-4 py-2 rounded-lg font-medium text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled={submitting || !title.trim()}>
+		<button type="submit" class="px-4 py-2 rounded-lg font-medium text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled={submitting || !title.trim() || !calendarId}>
 			{mode === 'create' ? 'Erstellen' : 'Speichern'}
 		</button>
 	</div>

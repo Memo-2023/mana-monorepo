@@ -126,7 +126,7 @@
 	.weekday-headers {
 		display: grid;
 		grid-template-columns: repeat(7, 1fr);
-		border-bottom: 1px solid hsl(var(--border));
+		border-bottom: 1px solid hsl(var(--color-border));
 	}
 
 	.weekday-header {
@@ -134,7 +134,7 @@
 		text-align: center;
 		font-size: 0.75rem;
 		font-weight: 600;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		text-transform: uppercase;
 	}
 
@@ -152,7 +152,7 @@
 	}
 
 	.day-cell {
-		border: 1px solid hsl(var(--border));
+		border: 1px solid hsl(var(--color-border));
 		border-top: none;
 		border-left: none;
 		padding: var(--spacing-xs);
@@ -165,15 +165,15 @@
 	}
 
 	.day-cell:first-child {
-		border-left: 1px solid hsl(var(--border));
+		border-left: 1px solid hsl(var(--color-border));
 	}
 
 	.day-cell:hover {
-		background-color: hsl(var(--muted) / 0.3);
+		background-color: hsl(var(--color-muted) / 0.3);
 	}
 
 	.day-cell.today {
-		background-color: hsl(var(--primary) / 0.1);
+		background-color: hsl(var(--color-primary) / 0.1);
 	}
 
 	.day-cell.other-month {
@@ -193,8 +193,8 @@
 	}
 
 	.day-number.today {
-		background: hsl(var(--primary));
-		color: hsl(var(--primary-foreground));
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
 	}
 
 	.day-events {
@@ -232,7 +232,7 @@
 
 	.more-events {
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		background: transparent;
 		border: none;
 		cursor: pointer;
@@ -241,6 +241,6 @@
 	}
 
 	.more-events:hover {
-		color: hsl(var(--primary));
+		color: hsl(var(--color-primary));
 	}
 </style>

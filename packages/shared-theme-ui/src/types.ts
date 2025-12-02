@@ -85,3 +85,58 @@ export const defaultTranslations: ThemePageTranslations = {
 	lightPreview: 'Hell',
 	darkPreview: 'Dunkel',
 };
+
+// ============================================================================
+// A11y (Accessibility) Types
+// ============================================================================
+
+/**
+ * Translations for A11y settings
+ */
+export interface A11yTranslations {
+	/** Section title */
+	a11yTitle: string;
+	/** Contrast setting label */
+	contrastLabel: string;
+	/** Normal contrast option */
+	contrastNormal: string;
+	/** High contrast option */
+	contrastHigh: string;
+	/** Colorblind setting label */
+	colorblindLabel: string;
+	/** No colorblind adaptation */
+	colorblindNone: string;
+	/** Deuteranopia option */
+	colorblindDeuteranopia: string;
+	/** Protanopia option */
+	colorblindProtanopia: string;
+	/** Monochrome option */
+	colorblindMonochrome: string;
+	/** Reduce motion label */
+	reduceMotionLabel: string;
+	/** Reduce motion description */
+	reduceMotionDescription: string;
+	/** System default label */
+	systemDefault: string;
+	/** Reset button */
+	reset: string;
+}
+
+/**
+ * Default German A11y translations
+ */
+export const defaultA11yTranslations: A11yTranslations = {
+	a11yTitle: 'Barrierefreiheit',
+	contrastLabel: 'Kontrast',
+	contrastNormal: 'Normal',
+	contrastHigh: 'Hoch',
+	colorblindLabel: 'Farbsehschwäche',
+	colorblindNone: 'Keine',
+	colorblindDeuteranopia: 'Rot-Grün (Deuteranopie)',
+	colorblindProtanopia: 'Rot-Blindheit (Protanopie)',
+	colorblindMonochrome: 'Monochrom',
+	reduceMotionLabel: 'Animationen reduzieren',
+	reduceMotionDescription: 'Deaktiviert Animationen und Übergänge',
+	systemDefault: 'System',
+	reset: 'Zurücksetzen',
+};

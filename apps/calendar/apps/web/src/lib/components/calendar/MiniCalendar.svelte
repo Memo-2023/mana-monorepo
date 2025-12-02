@@ -103,12 +103,12 @@
 		background: transparent;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.nav-btn:hover {
-		background: hsl(var(--muted));
-		color: hsl(var(--foreground));
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
 	}
 
 	.weekday-row {
@@ -120,7 +120,7 @@
 	.weekday {
 		text-align: center;
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		font-weight: 500;
 	}
 
@@ -141,25 +141,25 @@
 		font-size: 0.75rem;
 		border: none;
 		background: transparent;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		transition: all var(--transition-fast);
 	}
 
 	.day:hover {
-		background: hsl(var(--muted));
+		background: hsl(var(--color-muted));
 	}
 
 	.day.other-month {
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		opacity: 0.5;
 	}
 
 	.day.today {
-		background: hsl(var(--primary));
-		color: hsl(var(--primary-foreground));
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
 	}
 
 	.day.selected {
-		border: 2px solid hsl(var(--primary));
+		border: 2px solid hsl(var(--color-primary));
 	}
 </style>

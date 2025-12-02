@@ -11,9 +11,13 @@
 
 	// Group events by date
 	let groupedEvents = $derived.by(() => {
-		const groups: Map<string, typeof eventsStore.events> = new Map();
+		// Safety check: ensure events is an array
+		const currentEvents = eventsStore.events ?? [];
+		if (!Array.isArray(currentEvents)) return [];
 
-		for (const event of eventsStore.events) {
+		const groups: Map<string, typeof currentEvents> = new Map();
+
+		for (const event of currentEvents) {
 			const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
 			const dateKey = format(start, 'yyyy-MM-dd');
 
@@ -132,19 +136,19 @@
 	.page-header h1 {
 		font-size: 1.75rem;
 		font-weight: 700;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin: 0 0 0.25rem 0;
 	}
 
 	.subtitle {
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		margin: 0;
 	}
 
 	.loading {
 		text-align: center;
 		padding: 2rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.empty-state {
@@ -153,7 +157,7 @@
 	}
 
 	.empty-state p {
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		margin-bottom: 1rem;
 	}
 
@@ -172,7 +176,7 @@
 	.date-header {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		margin: 0;
@@ -180,7 +184,7 @@
 	}
 
 	.date-header.today {
-		color: hsl(var(--primary));
+		color: hsl(var(--color-primary));
 	}
 
 	.event-item {
@@ -211,13 +215,13 @@
 
 	.event-time {
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		margin-bottom: 0.25rem;
 	}
 
 	.event-title {
 		font-weight: 500;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -225,7 +229,7 @@
 
 	.event-location {
 		font-size: 0.875rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		margin-top: 0.25rem;
 	}
 </style>

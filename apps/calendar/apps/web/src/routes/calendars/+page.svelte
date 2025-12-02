@@ -220,7 +220,7 @@
 		width: 48px;
 		height: 42px;
 		padding: 4px;
-		border: 2px solid hsl(var(--border));
+		border: 2px solid hsl(var(--color-border));
 		border-radius: var(--radius-md);
 		cursor: pointer;
 	}
@@ -263,9 +263,9 @@
 	.badge {
 		font-size: 0.75rem;
 		padding: 0.125rem 0.5rem;
-		background: hsl(var(--muted));
+		background: hsl(var(--color-muted));
 		border-radius: var(--radius-sm);
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.calendar-actions {
@@ -279,12 +279,12 @@
 	}
 
 	.text-destructive {
-		color: hsl(var(--destructive));
+		color: hsl(var(--color-error));
 	}
 
 	.empty-state {
 		text-align: center;
 		padding: 2rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>

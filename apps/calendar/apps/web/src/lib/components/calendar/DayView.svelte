@@ -137,13 +137,13 @@
 
 	.all-day-section {
 		display: flex;
-		border-bottom: 1px solid hsl(var(--border));
+		border-bottom: 1px solid hsl(var(--color-border));
 		padding: 0.5rem 0;
 	}
 
 	.all-day-label {
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.all-day-events {
@@ -179,7 +179,7 @@
 		padding-right: 0.5rem;
 		text-align: right;
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		position: relative;
 		top: -0.5em;
 	}
@@ -194,11 +194,11 @@
 	.day-column {
 		flex: 1;
 		position: relative;
-		border-left: 1px solid hsl(var(--border));
+		border-left: 1px solid hsl(var(--color-border));
 	}
 
 	.day-column.today {
-		background: hsl(var(--primary) / 0.05);
+		background: hsl(var(--color-primary) / 0.05);
 	}
 
 	.event-card {

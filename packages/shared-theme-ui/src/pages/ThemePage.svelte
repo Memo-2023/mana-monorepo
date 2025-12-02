@@ -1,9 +1,10 @@
 <script lang="ts">
-	import type { ThemeVariant, ThemeMode } from '@manacore/shared-theme';
+	import type { ThemeVariant, ThemeMode, A11yStore } from '@manacore/shared-theme';
 	import { ArrowLeft, Sun, Moon, Desktop } from '@manacore/shared-icons';
-	import type { ThemeCardData, ThemePageTranslations } from '../types';
-	import { defaultTranslations } from '../types';
+	import type { ThemeCardData, ThemePageTranslations, A11yTranslations } from '../types';
+	import { defaultTranslations, defaultA11yTranslations } from '../types';
 	import ThemeGrid from '../components/ThemeGrid.svelte';
+	import A11ySettings from '../components/A11ySettings.svelte';
 
 	interface Props {
 		// Theme Store Integration
@@ -30,6 +31,11 @@
 
 		// Translations
 		translations?: Partial<ThemePageTranslations>;
+
+		// A11y Settings
+		a11yStore?: A11yStore;
+		showA11ySettings?: boolean;
+		a11yTranslations?: Partial<A11yTranslations>;
 	}
 
 	let {
@@ -46,10 +52,14 @@
 		showLockedThemes = true,
 		onUnlockTheme,
 		translations = {},
+		a11yStore,
+		showA11ySettings = false,
+		a11yTranslations = {},
 	}: Props = $props();
 
 	// Merge translations with defaults
 	const t = $derived({ ...defaultTranslations, ...translations });
+	const a11yT = $derived({ ...defaultA11yTranslations, ...a11yTranslations });
 
 	const modes: { mode: ThemeMode; icon: typeof Sun; label: string }[] = $derived([
 		{ mode: 'light', icon: Sun, label: t.lightMode },
@@ -121,5 +131,15 @@
 				{translations}
 			/>
 		</section>
+
+		<!-- A11y Settings -->
+		{#if showA11ySettings && a11yStore}
+			<section class="mt-8 pt-8 border-t border-border">
+				<h2 class="text-sm font-medium text-muted-foreground mb-4">
+					{a11yT.a11yTitle}
+				</h2>
+				<A11ySettings store={a11yStore} translations={a11yTranslations} />
+			</section>
+		{/if}
 	</div>
 </div>

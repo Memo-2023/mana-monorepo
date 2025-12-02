@@ -120,6 +120,17 @@
 		allAppsHref?: string;
 		/** All Apps label (default: "Alle Apps") */
 		allAppsLabel?: string;
+		// A11y Settings
+		/** A11y contrast level */
+		a11yContrast?: 'normal' | 'high';
+		/** Called when a11y contrast changes */
+		onA11yContrastChange?: (contrast: 'normal' | 'high') => void;
+		/** A11y reduce motion setting */
+		a11yReduceMotion?: boolean;
+		/** Called when a11y reduce motion changes */
+		onA11yReduceMotionChange?: (reduce: boolean) => void;
+		/** Show a11y quick toggles in theme dropdown */
+		showA11yQuickToggles?: boolean;
 	}
 
 	let {
@@ -156,6 +167,11 @@
 		loginHref,
 		allAppsHref,
 		allAppsLabel = 'Alle Apps',
+		a11yContrast = 'normal',
+		onA11yContrastChange,
+		a11yReduceMotion = false,
+		onA11yReduceMotionChange,
+		showA11yQuickToggles = false,
 	}: Props = $props();
 
 	// Type guards for elements
@@ -241,6 +257,10 @@
 	// Icon SVG paths
 	const icons: Record<string, string> = {
 		mic: 'M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z',
+		calendar:
+			'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+		folder:
+			'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z',
 		archive: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4',
 		upload: 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12',
 		music:
@@ -446,6 +466,44 @@
 								</svg>
 							</button>
 						</div>
+					{/snippet}
+					{#snippet footer()}
+						{#if showA11yQuickToggles}
+							<div class="a11y-quick-toggles glass-pill">
+								<!-- Contrast Toggle -->
+								<button
+									type="button"
+									onclick={() => onA11yContrastChange?.(a11yContrast === 'high' ? 'normal' : 'high')}
+									class="a11y-btn"
+									class:active={a11yContrast === 'high'}
+									title="Hoher Kontrast"
+									aria-pressed={a11yContrast === 'high'}
+								>
+									<svg class="a11y-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<circle cx="12" cy="12" r="10" />
+										<path d="M12 2v20M12 2a10 10 0 0 1 0 20" fill="currentColor" />
+									</svg>
+								</button>
+								<!-- Reduce Motion Toggle -->
+								<button
+									type="button"
+									onclick={() => onA11yReduceMotionChange?.(!a11yReduceMotion)}
+									class="a11y-btn"
+									class:active={a11yReduceMotion}
+									title="Animationen reduzieren"
+									aria-pressed={a11yReduceMotion}
+								>
+									<svg class="a11y-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										{#if a11yReduceMotion}
+											<rect x="6" y="4" width="4" height="16" rx="1" />
+											<rect x="14" y="4" width="4" height="16" rx="1" />
+										{:else}
+											<polygon points="5 3 19 12 5 21 5 3" />
+										{/if}
+									</svg>
+								</button>
+							</div>
+						{/if}
 					{/snippet}
 				</PillDropdown>
 			{/if}
@@ -1164,6 +1222,73 @@
 	}
 
 	:global(.mode-icon) {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	/* A11y quick toggles in dropdown footer */
+	:global(.a11y-quick-toggles) {
+		display: flex !important;
+		align-items: center !important;
+		gap: 0.25rem !important;
+		padding: 0.25rem !important;
+		border-radius: 9999px !important;
+		background: rgba(245, 245, 245, 0.95) !important;
+		border: 1px solid rgba(0, 0, 0, 0.1) !important;
+		color: #374151 !important;
+	}
+
+	:global(.dark .a11y-quick-toggles) {
+		background: rgba(40, 40, 40, 0.95) !important;
+		border: 1px solid rgba(255, 255, 255, 0.15) !important;
+		color: #f3f4f6 !important;
+	}
+
+	:global(.a11y-btn) {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.375rem;
+		border: none;
+		background: transparent;
+		border-radius: 9999px;
+		cursor: pointer;
+		color: #6b7280;
+		transition: all 0.15s;
+	}
+
+	:global(.dark .a11y-btn) {
+		color: #9ca3af;
+	}
+
+	:global(.a11y-btn:hover:not(.active)) {
+		background: rgba(0, 0, 0, 0.05);
+		color: #374151;
+	}
+
+	:global(.dark .a11y-btn:hover:not(.active)) {
+		background: rgba(255, 255, 255, 0.1);
+		color: #f3f4f6;
+	}
+
+	:global(.a11y-btn.active) {
+		background: color-mix(
+			in srgb,
+			var(--pill-primary-color, var(--color-primary-500, #3b82f6)) 20%,
+			white 80%
+		);
+		color: var(--pill-primary-color, var(--color-primary-500, #3b82f6));
+	}
+
+	:global(.dark .a11y-btn.active) {
+		background: color-mix(
+			in srgb,
+			var(--pill-primary-color, var(--color-primary-500, #3b82f6)) 30%,
+			transparent 70%
+		);
+	}
+
+	:global(.a11y-icon) {
 		width: 1rem;
 		height: 1rem;
 	}

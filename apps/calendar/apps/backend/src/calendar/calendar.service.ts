@@ -116,7 +116,7 @@ export class CalendarService {
 
 		// Create a new default calendar
 		return this.create(userId, {
-			name: 'My Calendar',
+			name: 'Mein Kalender',
 			isDefault: true,
 			color: '#3B82F6',
 		});

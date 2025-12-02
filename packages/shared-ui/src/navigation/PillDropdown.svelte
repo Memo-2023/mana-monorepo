@@ -11,6 +11,8 @@
 		onToggle?: (open: boolean) => void;
 		/** Optional header content (e.g., mode selector) */
 		header?: Snippet;
+		/** Optional footer content (e.g., a11y toggles) */
+		footer?: Snippet;
 	}
 
 	let {
@@ -21,6 +23,7 @@
 		isOpen = false,
 		onToggle,
 		header,
+		footer,
 	}: Props = $props();
 
 	let internalOpen = $state(false);
@@ -248,6 +251,13 @@
 					{/if}
 				{/if}
 			{/each}
+
+			<!-- Optional footer (e.g., a11y toggles) -->
+			{#if footer}
+				<div class="dropdown-footer">
+					{@render footer()}
+				</div>
+			{/if}
 		</div>
 	{/if}
 </div>
@@ -486,5 +496,35 @@
 	.submenu-item .pill-label {
 		flex: 1;
 		text-align: left;
+	}
+
+	/* Footer for custom content (e.g., a11y toggles) */
+	.dropdown-footer {
+		animation: fanIn 0.15s ease-out forwards;
+		opacity: 0;
+		transform: translateY(10px);
+		position: relative;
+		z-index: 1;
+		margin-top: 0.25rem;
+		padding-top: 0.5rem;
+		border-top: 1px solid rgba(0, 0, 0, 0.1);
+	}
+
+	:global(.dark) .dropdown-footer {
+		border-top-color: rgba(255, 255, 255, 0.15);
+	}
+
+	.fan-up .dropdown-footer {
+		transform: translateY(-10px);
+		margin-top: 0;
+		margin-bottom: 0.25rem;
+		padding-top: 0;
+		padding-bottom: 0.5rem;
+		border-top: none;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	}
+
+	:global(.dark) .fan-up .dropdown-footer {
+		border-bottom-color: rgba(255, 255, 255, 0.15);
 	}
 </style>

@@ -77,7 +77,7 @@
 	const navItems: PillNavItem[] = [
 		{ href: '/', label: 'Kalender', icon: 'calendar' },
 		{ href: '/agenda', label: 'Agenda', icon: 'list' },
-		{ href: '/calendars', label: 'Meine Kalender', icon: 'document' },
+		{ href: '/calendars', label: 'Meine Kalender', icon: 'folder' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];

@@ -85,8 +85,8 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 1rem 1.5rem;
-		border-bottom: 1px solid hsl(var(--border));
-		background: hsl(var(--card));
+		border-bottom: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 	}
 
 	.header-left {
@@ -103,7 +103,7 @@
 	.header-title {
 		font-size: 1.25rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin: 0;
 	}
 
@@ -115,7 +115,7 @@
 
 	.view-selector {
 		display: flex;
-		background: hsl(var(--muted));
+		background: hsl(var(--color-muted));
 		border-radius: var(--radius-md);
 		padding: 0.25rem;
 	}
@@ -127,18 +127,18 @@
 		border-radius: var(--radius-sm);
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: all 150ms ease;
 	}
 
 	.view-btn:hover {
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.view-btn.active {
-		background: hsl(var(--background));
-		color: hsl(var(--foreground));
+		background: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 	}
 

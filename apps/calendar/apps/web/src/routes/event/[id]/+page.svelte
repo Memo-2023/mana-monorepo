@@ -159,7 +159,7 @@
 	.page-title {
 		font-size: 1.5rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin: 0;
 	}
 
@@ -171,7 +171,7 @@
 	.loading {
 		text-align: center;
 		padding: 2rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.event-details {
@@ -189,15 +189,15 @@
 	.label {
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.value {
 		font-size: 1rem;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.text-destructive {
-		color: hsl(var(--destructive));
+		color: hsl(var(--color-error));
 	}
 </style>

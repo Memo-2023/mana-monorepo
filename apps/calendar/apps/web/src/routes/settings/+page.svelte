@@ -134,12 +134,12 @@
 		font-weight: 600;
 		margin: 0 0 1rem 0;
 		padding-bottom: 0.75rem;
-		border-bottom: 1px solid hsl(var(--border));
+		border-bottom: 1px solid hsl(var(--color-border));
 	}
 
 	.setting-item {
 		padding: 1rem 0;
-		border-bottom: 1px solid hsl(var(--border) / 0.5);
+		border-bottom: 1px solid hsl(var(--color-border) / 0.5);
 	}
 
 	.setting-item:last-child {
@@ -156,17 +156,17 @@
 
 	.setting-label {
 		font-weight: 500;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.setting-description {
 		font-size: 0.875rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.setting-value {
 		font-size: 0.875rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.theme-options {
@@ -179,22 +179,22 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.5rem 1rem;
-		border: 2px solid hsl(var(--border));
+		border: 2px solid hsl(var(--color-border));
 		border-radius: var(--radius-md);
 		background: transparent;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		font-size: 0.875rem;
 		cursor: pointer;
 		transition: all 150ms ease;
 	}
 
 	.theme-option:hover {
-		border-color: hsl(var(--primary) / 0.5);
+		border-color: hsl(var(--color-primary) / 0.5);
 	}
 
 	.theme-option.active {
-		border-color: hsl(var(--primary));
-		background: hsl(var(--primary) / 0.1);
+		border-color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.1);
 	}
 
 	.variant-grid {
@@ -209,7 +209,7 @@
 		align-items: center;
 		gap: 0.25rem;
 		padding: 0.75rem;
-		border: 2px solid hsl(var(--border));
+		border: 2px solid hsl(var(--color-border));
 		border-radius: var(--radius-md);
 		background: transparent;
 		cursor: pointer;
@@ -217,12 +217,12 @@
 	}
 
 	.variant-option:hover {
-		border-color: hsl(var(--primary) / 0.5);
+		border-color: hsl(var(--color-primary) / 0.5);
 	}
 
 	.variant-option.active {
-		border-color: hsl(var(--primary));
-		background: hsl(var(--primary) / 0.1);
+		border-color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.1);
 	}
 
 	.variant-icon {
@@ -231,10 +231,10 @@
 
 	.variant-label {
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.text-destructive {
-		color: hsl(var(--destructive));
+		color: hsl(var(--color-error));
 	}
 </style>
