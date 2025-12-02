@@ -10,6 +10,24 @@ This is a pnpm workspace monorepo containing multiple product applications with 
 **Build System:** Turborepo
 **Node Version:** 20+
 
+## Detailed Guidelines
+
+For comprehensive guidelines on code patterns and conventions, see the `.claude/` directory:
+
+| Document | Purpose |
+|----------|---------|
+| [`.claude/GUIDELINES.md`](.claude/GUIDELINES.md) | Main reference overview |
+| [`.claude/guidelines/code-style.md`](.claude/guidelines/code-style.md) | Formatting, naming, linting |
+| [`.claude/guidelines/database.md`](.claude/guidelines/database.md) | Drizzle ORM, schema patterns |
+| [`.claude/guidelines/testing.md`](.claude/guidelines/testing.md) | Jest/Vitest, mock factories |
+| [`.claude/guidelines/nestjs-backend.md`](.claude/guidelines/nestjs-backend.md) | Controllers, services, DTOs |
+| [`.claude/guidelines/error-handling.md`](.claude/guidelines/error-handling.md) | Go-style Result types, error codes |
+| [`.claude/guidelines/sveltekit-web.md`](.claude/guidelines/sveltekit-web.md) | Svelte 5 runes, stores |
+| [`.claude/guidelines/expo-mobile.md`](.claude/guidelines/expo-mobile.md) | React Native, NativeWind |
+| [`.claude/guidelines/authentication.md`](.claude/guidelines/authentication.md) | Mana Core Auth integration |
+
+**Always consult these guidelines before making changes.**
+
 ## Projects
 
 | Project      | Description                  | Apps                                                      |
