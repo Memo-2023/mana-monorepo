@@ -77,143 +77,90 @@
 	}
 </script>
 
-<form onsubmit={handleSubmit}>
-	<div class="form-group">
-		<label for="title">Titel *</label>
+<form onsubmit={handleSubmit} class="flex flex-col gap-4">
+	<div class="flex flex-col gap-2">
+		<label for="title" class="text-sm font-medium text-foreground">Titel *</label>
 		<input
 			type="text"
 			id="title"
-			class="input"
+			class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
 			bind:value={title}
 			placeholder="Terminname eingeben"
 			required
 		/>
 	</div>
 
-	<div class="form-group">
-		<label for="calendar">Kalender</label>
-		<select id="calendar" class="input" bind:value={calendarId}>
+	<div class="flex flex-col gap-2">
+		<label for="calendar" class="text-sm font-medium text-foreground">Kalender</label>
+		<select id="calendar" class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors" bind:value={calendarId}>
 			{#each calendarsStore.calendars as cal}
 				<option value={cal.id}>{cal.name}</option>
 			{/each}
 		</select>
 	</div>
 
-	<div class="form-group">
-		<label class="checkbox-label">
-			<input type="checkbox" bind:checked={isAllDay} />
-			Ganztägig
+	<div class="flex flex-col gap-2">
+		<label class="flex items-center gap-2 cursor-pointer">
+			<input type="checkbox" bind:checked={isAllDay} class="w-4 h-4 accent-primary" />
+			<span class="text-sm font-medium text-foreground">Ganztägig</span>
 		</label>
 	</div>
 
-	<div class="form-row">
-		<div class="form-group">
-			<label for="startDate">Beginn</label>
-			<input type="date" id="startDate" class="input" bind:value={startDate} required />
+	<div class="flex gap-4">
+		<div class="flex-1 flex flex-col gap-2">
+			<label for="startDate" class="text-sm font-medium text-foreground">Beginn</label>
+			<input type="date" id="startDate" class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors" bind:value={startDate} required />
 		</div>
 		{#if !isAllDay}
-			<div class="form-group">
-				<label for="startTime">Uhrzeit</label>
-				<input type="time" id="startTime" class="input" bind:value={startTime} required />
+			<div class="flex-1 flex flex-col gap-2">
+				<label for="startTime" class="text-sm font-medium text-foreground">Uhrzeit</label>
+				<input type="time" id="startTime" class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors" bind:value={startTime} required />
 			</div>
 		{/if}
 	</div>
 
-	<div class="form-row">
-		<div class="form-group">
-			<label for="endDate">Ende</label>
-			<input type="date" id="endDate" class="input" bind:value={endDate} required />
+	<div class="flex gap-4">
+		<div class="flex-1 flex flex-col gap-2">
+			<label for="endDate" class="text-sm font-medium text-foreground">Ende</label>
+			<input type="date" id="endDate" class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors" bind:value={endDate} required />
 		</div>
 		{#if !isAllDay}
-			<div class="form-group">
-				<label for="endTime">Uhrzeit</label>
-				<input type="time" id="endTime" class="input" bind:value={endTime} required />
+			<div class="flex-1 flex flex-col gap-2">
+				<label for="endTime" class="text-sm font-medium text-foreground">Uhrzeit</label>
+				<input type="time" id="endTime" class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors" bind:value={endTime} required />
 			</div>
 		{/if}
 	</div>
 
-	<div class="form-group">
-		<label for="location">Ort</label>
+	<div class="flex flex-col gap-2">
+		<label for="location" class="text-sm font-medium text-foreground">Ort</label>
 		<input
 			type="text"
 			id="location"
-			class="input"
+			class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
 			bind:value={location}
 			placeholder="Ort hinzufügen"
 		/>
 	</div>
 
-	<div class="form-group">
-		<label for="description">Beschreibung</label>
+	<div class="flex flex-col gap-2">
+		<label for="description" class="text-sm font-medium text-foreground">Beschreibung</label>
 		<textarea
 			id="description"
-			class="input"
+			class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors resize-y min-h-20"
 			rows="3"
 			bind:value={description}
 			placeholder="Beschreibung hinzufügen"
 		></textarea>
 	</div>
 
-	<div class="form-actions">
-		<button type="button" class="btn btn-ghost" onclick={onCancel}>
+	<div class="flex justify-end gap-3 pt-4 border-t border-border">
+		<button type="button" class="px-4 py-2 rounded-lg font-medium text-foreground bg-transparent hover:bg-muted transition-colors" onclick={onCancel}>
 			Abbrechen
 		</button>
-		<button type="submit" class="btn btn-primary" disabled={submitting || !title.trim()}>
+		<button type="submit" class="px-4 py-2 rounded-lg font-medium text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled={submitting || !title.trim()}>
 			{mode === 'create' ? 'Erstellen' : 'Speichern'}
 		</button>
 	</div>
 </form>
 
-<style>
-	form {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.form-group {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.form-group label {
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: hsl(var(--foreground));
-	}
-
-	.form-row {
-		display: flex;
-		gap: 1rem;
-	}
-
-	.form-row .form-group {
-		flex: 1;
-	}
-
-	.checkbox-label {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		cursor: pointer;
-	}
-
-	.checkbox-label input {
-		width: 18px;
-		height: 18px;
-	}
-
-	textarea.input {
-		resize: vertical;
-		min-height: 80px;
-	}
-
-	.form-actions {
-		display: flex;
-		justify-content: flex-end;
-		gap: 0.75rem;
-		padding-top: 1rem;
-		border-top: 1px solid hsl(var(--border));
-	}
-</style>

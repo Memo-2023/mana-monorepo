@@ -66,6 +66,13 @@
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
+	// Check if current route is an auth route (no navigation needed)
+	let isAuthRoute = $derived(
+		$page.url.pathname.startsWith('/login') ||
+			$page.url.pathname.startsWith('/register') ||
+			$page.url.pathname.startsWith('/forgot-password')
+	);
+
 	// Navigation items for Calendar
 	const navItems: PillNavItem[] = [
 		{ href: '/', label: 'Kalender', icon: 'calendar' },
@@ -163,7 +170,10 @@
 
 <ToastContainer />
 
-{#if loading}
+{#if isAuthRoute}
+	<!-- Auth routes: no navigation, just render content -->
+	{@render children()}
+{:else if loading}
 	<div class="flex min-h-screen items-center justify-center bg-background">
 		<div class="text-center">
 			<div

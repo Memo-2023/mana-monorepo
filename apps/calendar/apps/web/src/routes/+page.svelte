@@ -50,8 +50,11 @@
 <div class="calendar-layout">
 	<!-- Left Sidebar -->
 	<aside class="calendar-sidebar">
-		<button class="btn btn-primary w-full mb-4" onclick={handleNewEvent}>
-			<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		<button
+			class="w-full mb-4 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-primary-foreground bg-primary hover:bg-primary/90 transition-colors"
+			onclick={handleNewEvent}
+		>
+			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
 			</svg>
 			Neuer Termin

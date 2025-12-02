@@ -1,30 +1,49 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { authStore } from '$lib/stores/auth.svelte';
-	import { toast } from '$lib/stores/toast';
+	import { page } from '$app/stores';
+	import { locale } from 'svelte-i18n';
 	import { LoginPage } from '@manacore/shared-auth-ui';
+	import { getLoginTranslations } from '@manacore/shared-i18n';
+	import { CalendarLogo } from '@manacore/shared-branding';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import AppSlider from '$lib/components/AppSlider.svelte';
+	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
+	import '$lib/i18n';
 
-	async function handleLogin(email: string, password: string) {
-		const result = await authStore.signIn(email, password);
+	// Get redirect URL from query params
+	const redirectTo = $derived($page.url.searchParams.get('redirectTo') || '/');
 
-		if (!result.success) {
-			toast.error(result.error || 'Anmeldung fehlgeschlagen');
-			return { success: false, error: result.error };
-		}
+	// Get translations based on current locale
+	const translations = $derived(getLoginTranslations($locale || 'de'));
 
-		toast.success('Erfolgreich angemeldet');
-		goto('/');
-		return { success: true };
+	async function handleSignIn(email: string, password: string) {
+		return authStore.signIn(email, password);
 	}
 </script>
 
 <svelte:head>
-	<title>Anmelden | Kalender</title>
+	<title>{translations.title} | Kalender</title>
 </svelte:head>
 
 <LoginPage
-	onLogin={handleLogin}
-	registerUrl="/register"
-	forgotPasswordUrl="/forgot-password"
 	appName="Kalender"
-/>
+	logo={CalendarLogo}
+	primaryColor="#0ea5e9"
+	onSignIn={handleSignIn}
+	{goto}
+	enableGoogle={false}
+	enableApple={false}
+	successRedirect={redirectTo}
+	registerPath="/register"
+	forgotPasswordPath="/forgot-password"
+	lightBackground="#e0f2fe"
+	darkBackground="#0c1929"
+	{translations}
+>
+	{#snippet headerControls()}
+		<LanguageSelector />
+	{/snippet}
+	{#snippet appSlider()}
+		<AppSlider />
+	{/snippet}
+</LoginPage>

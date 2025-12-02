@@ -1,27 +1,41 @@
 <script lang="ts">
-	import { authStore } from '$lib/stores/auth.svelte';
-	import { toast } from '$lib/stores/toast';
+	import { goto } from '$app/navigation';
+	import { locale } from 'svelte-i18n';
 	import { ForgotPasswordPage } from '@manacore/shared-auth-ui';
+	import { getForgotPasswordTranslations } from '@manacore/shared-i18n';
+	import { CalendarLogo } from '@manacore/shared-branding';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import AppSlider from '$lib/components/AppSlider.svelte';
+	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
+	import '$lib/i18n';
 
-	async function handleResetPassword(email: string) {
-		const result = await authStore.resetPassword(email);
+	// Get translations based on current locale
+	const translations = $derived(getForgotPasswordTranslations($locale || 'de'));
 
-		if (!result.success) {
-			toast.error(result.error || 'Anfrage fehlgeschlagen');
-			return { success: false, error: result.error };
-		}
-
-		toast.success('E-Mail gesendet. Bitte überprüfen Sie Ihren Posteingang.');
-		return { success: true };
+	async function handleForgotPassword(email: string) {
+		return authStore.resetPassword(email);
 	}
 </script>
 
 <svelte:head>
-	<title>Passwort vergessen | Kalender</title>
+	<title>{translations.titleForm} | Kalender</title>
 </svelte:head>
 
 <ForgotPasswordPage
-	onResetPassword={handleResetPassword}
-	loginUrl="/login"
 	appName="Kalender"
-/>
+	logo={CalendarLogo}
+	primaryColor="#0ea5e9"
+	onForgotPassword={handleForgotPassword}
+	{goto}
+	loginPath="/login"
+	lightBackground="#e0f2fe"
+	darkBackground="#0c1929"
+	{translations}
+>
+	{#snippet headerControls()}
+		<LanguageSelector />
+	{/snippet}
+	{#snippet appSlider()}
+		<AppSlider />
+	{/snippet}
+</ForgotPasswordPage>

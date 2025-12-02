@@ -10,11 +10,20 @@ let calendars = $state<Calendar[]>([]);
 let loading = $state(false);
 let error = $state<string | null>(null);
 
+// Helper to safely get calendars array (Svelte 5 runes safety)
+function getCalendarsArray(): Calendar[] {
+	const arr = calendars ?? [];
+	return Array.isArray(arr) ? arr : [];
+}
+
 // Derived: visible calendars
-const visibleCalendars = $derived(calendars.filter((c) => c.isVisible));
+const visibleCalendars = $derived(getCalendarsArray().filter((c) => c.isVisible));
 
 // Derived: default calendar
-const defaultCalendar = $derived(calendars.find((c) => c.isDefault) || calendars[0]);
+const defaultCalendar = $derived.by(() => {
+	const arr = getCalendarsArray();
+	return arr.find((c) => c.isDefault) || arr[0] || null;
+});
 
 export const calendarsStore = {
 	// Getters
@@ -74,7 +83,7 @@ export const calendarsStore = {
 		const result = await api.updateCalendar(id, data);
 
 		if (result.data) {
-			calendars = calendars.map((c) => (c.id === id ? result.data! : c));
+			calendars = getCalendarsArray().map((c) => (c.id === id ? result.data! : c));
 		}
 
 		return result;
@@ -87,7 +96,7 @@ export const calendarsStore = {
 		const result = await api.deleteCalendar(id);
 
 		if (!result.error) {
-			calendars = calendars.filter((c) => c.id !== id);
+			calendars = getCalendarsArray().filter((c) => c.id !== id);
 		}
 
 		return result;
@@ -97,7 +106,8 @@ export const calendarsStore = {
 	 * Toggle calendar visibility
 	 */
 	async toggleVisibility(id: string) {
-		const calendar = calendars.find((c) => c.id === id);
+		const arr = getCalendarsArray();
+		const calendar = arr.find((c) => c.id === id);
 		if (!calendar) return;
 
 		return this.updateCalendar(id, { isVisible: !calendar.isVisible });
@@ -107,14 +117,14 @@ export const calendarsStore = {
 	 * Get calendar by ID
 	 */
 	getById(id: string) {
-		return calendars.find((c) => c.id === id);
+		return getCalendarsArray().find((c) => c.id === id);
 	},
 
 	/**
 	 * Get calendar color by ID (with fallback)
 	 */
 	getColor(id: string) {
-		const calendar = calendars.find((c) => c.id === id);
+		const calendar = getCalendarsArray().find((c) => c.id === id);
 		return calendar?.color || '#3b82f6';
 	},
 };

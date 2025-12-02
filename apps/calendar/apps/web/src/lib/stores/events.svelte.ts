@@ -52,7 +52,11 @@ export const eventsStore = {
 	 * Get events for a specific day
 	 */
 	getEventsForDay(date: Date) {
-		return events.filter((event) => {
+		// Safety check: ensure events is an array (Svelte 5 runes safety)
+		const currentEvents = events ?? [];
+		if (!Array.isArray(currentEvents)) return [];
+
+		return currentEvents.filter((event) => {
 			const eventStart = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
 			const eventEnd = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
 
@@ -70,7 +74,11 @@ export const eventsStore = {
 	 * Get events within a time range
 	 */
 	getEventsInRange(start: Date, end: Date) {
-		return events.filter((event) => {
+		// Safety check: ensure events is an array (Svelte 5 runes safety)
+		const currentEvents = events ?? [];
+		if (!Array.isArray(currentEvents)) return [];
+
+		return currentEvents.filter((event) => {
 			const eventStart = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
 			const eventEnd = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
 
@@ -122,7 +130,11 @@ export const eventsStore = {
 	 * Get event by ID
 	 */
 	getById(id: string) {
-		return events.find((e) => e.id === id);
+		// Safety check: ensure events is an array (Svelte 5 runes safety)
+		const currentEvents = events ?? [];
+		if (!Array.isArray(currentEvents)) return undefined;
+
+		return currentEvents.find((e) => e.id === id);
 	},
 
 	/**
