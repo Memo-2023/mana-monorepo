@@ -8,6 +8,11 @@ export interface EventAttendee {
 }
 
 /**
+ * How to display all-day events
+ */
+export type AllDayDisplayMode = 'header' | 'block';
+
+/**
  * Event metadata stored in JSONB
  */
 export interface EventMetadata {
@@ -23,6 +28,8 @@ export interface EventMetadata {
 	priority?: 'low' | 'normal' | 'high';
 	/** Tags/labels for the event */
 	tags?: string[];
+	/** Override for all-day display mode (uses global setting if not set) */
+	allDayDisplayMode?: AllDayDisplayMode;
 }
 
 /**

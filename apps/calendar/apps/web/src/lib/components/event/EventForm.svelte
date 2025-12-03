@@ -20,6 +20,9 @@
 	let location = $state(event?.location || '');
 	let isAllDay = $state(event?.isAllDay || false);
 	let calendarId = $state(event?.calendarId || '');
+	let allDayDisplayMode = $state<'default' | 'header' | 'block'>(
+		event?.metadata?.allDayDisplayMode || 'default'
+	);
 
 	// Set default calendar when calendars are loaded
 	$effect(() => {
@@ -73,6 +76,11 @@
 		const startDateTime = new Date(`${startDate}T${isAllDay ? '00:00' : startTime}`);
 		const endDateTime = new Date(`${endDate}T${isAllDay ? '23:59' : endTime}`);
 
+		// Build metadata with display mode if not default
+		const metadata = isAllDay && allDayDisplayMode !== 'default'
+			? { ...(event?.metadata || {}), allDayDisplayMode: allDayDisplayMode as 'header' | 'block' }
+			: event?.metadata;
+
 		const data: CreateEventInput | UpdateEventInput = {
 			title: title.trim(),
 			description: description.trim() || undefined,
@@ -81,6 +89,7 @@
 			startTime: startDateTime.toISOString(),
 			endTime: endDateTime.toISOString(),
 			calendarId,
+			metadata,
 		};
 
 		submitting = true;
@@ -116,6 +125,21 @@
 			<span class="text-sm font-medium text-foreground">Ganztägig</span>
 		</label>
 	</div>
+
+	{#if isAllDay}
+		<div class="flex flex-col gap-2">
+			<label for="displayMode" class="text-sm font-medium text-foreground">Anzeigeart</label>
+			<select
+				id="displayMode"
+				class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
+				bind:value={allDayDisplayMode}
+			>
+				<option value="default">Standard (aus Einstellungen)</option>
+				<option value="header">In Kopfzeile</option>
+				<option value="block">Als Tagesblock</option>
+			</select>
+		</div>
+	{/if}
 
 	<div class="flex gap-4">
 		<div class="flex-1 flex flex-col gap-2">

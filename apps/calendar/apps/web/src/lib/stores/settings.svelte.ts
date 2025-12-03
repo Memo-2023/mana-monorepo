@@ -9,6 +9,7 @@ import type { CalendarViewType } from '@calendar/shared';
 // Settings types
 export type WeekStartDay = 0 | 1; // 0 = Sunday, 1 = Monday
 export type TimeFormat = '24h' | '12h';
+export type AllDayDisplayMode = 'header' | 'block'; // header = separate row, block = full day block in grid
 
 export interface CalendarAppSettings {
 	// View settings
@@ -20,6 +21,7 @@ export interface CalendarAppSettings {
 	filterHoursEnabled: boolean; // Filter visible hours
 	dayStartHour: number; // First visible hour (0-23)
 	dayEndHour: number; // Last visible hour (0-23)
+	allDayDisplayMode: AllDayDisplayMode; // How to display all-day events
 
 	// UI settings
 	sidebarCollapsed: boolean;
@@ -35,7 +37,10 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	showOnlyWeekdays: false,
 	showWeekNumbers: false,
 	timeFormat: '24h',
-	hideEarlyHours: false,
+	filterHoursEnabled: false,
+	dayStartHour: 6,
+	dayEndHour: 20,
+	allDayDisplayMode: 'header',
 	sidebarCollapsed: false,
 	defaultEventDuration: 60,
 	defaultReminder: 15,
@@ -94,8 +99,17 @@ export const settingsStore = {
 	get timeFormat() {
 		return settings.timeFormat;
 	},
-	get hideEarlyHours() {
-		return settings.hideEarlyHours;
+	get filterHoursEnabled() {
+		return settings.filterHoursEnabled;
+	},
+	get dayStartHour() {
+		return settings.dayStartHour;
+	},
+	get dayEndHour() {
+		return settings.dayEndHour;
+	},
+	get allDayDisplayMode() {
+		return settings.allDayDisplayMode;
 	},
 	get defaultEventDuration() {
 		return settings.defaultEventDuration;

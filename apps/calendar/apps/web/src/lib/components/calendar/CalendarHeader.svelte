@@ -60,18 +60,18 @@
 
 <header class="calendar-header">
 	<div class="header-left">
-		<button class="btn btn-ghost" onclick={() => viewStore.goToToday()}>
+		<button class="today-btn" onclick={() => viewStore.goToToday()}>
 			Heute
 		</button>
 
 		<div class="nav-buttons">
-			<button class="btn btn-ghost btn-icon" onclick={() => viewStore.goToPrevious()} aria-label="Zurück">
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<button class="nav-btn" onclick={() => viewStore.goToPrevious()} aria-label="Zurück">
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
 				</svg>
 			</button>
-			<button class="btn btn-ghost btn-icon" onclick={() => viewStore.goToNext()} aria-label="Weiter">
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<button class="nav-btn" onclick={() => viewStore.goToNext()} aria-label="Weiter">
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 				</svg>
 			</button>
@@ -93,14 +93,14 @@
 				Mo-Fr
 			</button>
 
-			<!-- Hide early hours toggle -->
+			<!-- Filter hours toggle -->
 			<button
 				class="filter-toggle"
-				class:active={settingsStore.hideEarlyHours}
-				onclick={() => settingsStore.set('hideEarlyHours', !settingsStore.hideEarlyHours)}
-				title="Frühe Stunden ausblenden (0-6 Uhr)"
+				class:active={settingsStore.filterHoursEnabled}
+				onclick={() => settingsStore.set('filterHoursEnabled', !settingsStore.filterHoursEnabled)}
+				title="Stunden filtern ({settingsStore.dayStartHour}-{settingsStore.dayEndHour} Uhr)"
 			>
-				7-24
+				{settingsStore.dayStartHour}-{settingsStore.dayEndHour}
 			</button>
 		</div>
 
@@ -123,7 +123,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 1rem 1.5rem;
+		padding: 0.5rem 1rem;
 		border-bottom: 1px solid hsl(var(--color-border));
 		background: hsl(var(--color-surface));
 	}
@@ -131,16 +131,50 @@
 	.header-left {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		gap: 0.5rem;
+	}
+
+	.today-btn {
+		padding: 0.25rem 0.625rem;
+		border: 1px solid hsl(var(--color-border));
+		background: transparent;
+		border-radius: var(--radius-sm);
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: hsl(var(--color-foreground));
+		cursor: pointer;
+		transition: all 150ms ease;
+	}
+
+	.today-btn:hover {
+		background: hsl(var(--color-muted));
 	}
 
 	.nav-buttons {
 		display: flex;
-		gap: 0.25rem;
+		gap: 0.125rem;
+	}
+
+	.nav-btn {
+		padding: 0.25rem;
+		border: none;
+		background: transparent;
+		border-radius: var(--radius-sm);
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+		transition: all 150ms ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nav-btn:hover {
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
 	}
 
 	.header-title {
-		font-size: 1.25rem;
+		font-size: 1rem;
 		font-weight: 600;
 		color: hsl(var(--color-foreground));
 		margin: 0;
@@ -149,22 +183,22 @@
 	.header-right {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		gap: 0.75rem;
 	}
 
 	.view-selector {
 		display: flex;
 		background: hsl(var(--color-muted));
 		border-radius: var(--radius-md);
-		padding: 0.25rem;
+		padding: 0.125rem;
 	}
 
 	.view-btn {
-		padding: 0.5rem 1rem;
+		padding: 0.25rem 0.625rem;
 		border: none;
 		background: transparent;
 		border-radius: var(--radius-sm);
-		font-size: 0.875rem;
+		font-size: 0.75rem;
 		font-weight: 500;
 		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
@@ -183,15 +217,15 @@
 
 	.filter-toggles {
 		display: flex;
-		gap: 0.5rem;
+		gap: 0.25rem;
 	}
 
 	.filter-toggle {
-		padding: 0.5rem 0.75rem;
+		padding: 0.25rem 0.5rem;
 		border: 1px solid hsl(var(--color-border));
 		background: transparent;
-		border-radius: var(--radius-md);
-		font-size: 0.75rem;
+		border-radius: var(--radius-sm);
+		font-size: 0.6875rem;
 		font-weight: 600;
 		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
@@ -209,14 +243,11 @@
 		border-color: hsl(var(--color-primary));
 	}
 
-	.btn-icon {
-		padding: 0.5rem;
-	}
-
 	@media (max-width: 640px) {
 		.calendar-header {
 			flex-direction: column;
-			gap: 1rem;
+			gap: 0.5rem;
+			padding: 0.5rem;
 		}
 
 		.header-left {
@@ -225,7 +256,7 @@
 		}
 
 		.header-title {
-			font-size: 1rem;
+			font-size: 0.875rem;
 		}
 	}
 </style>
