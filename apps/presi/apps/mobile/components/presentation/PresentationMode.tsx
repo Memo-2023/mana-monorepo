@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SlideView } from '../slides/SlideView';
-import { Slide } from '../../types/models';
+import { type Slide } from '../../types/models';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useTheme } from '../ThemeProvider';
 

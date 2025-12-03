@@ -13,7 +13,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { storage } from '../../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { createSlide, updateSlide } from '../../services/firestore';
-import { Slide } from '../../types/models';
+import { type Slide } from '../../types/models';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useTheme } from '../ThemeProvider';
 

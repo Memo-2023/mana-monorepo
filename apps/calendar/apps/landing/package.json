@@ -10,7 +10,6 @@
 		"preview": "astro preview",
 		"astro": "astro",
 		"type-check": "astro check",
-		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"clean": "rm -rf dist .astro node_modules"
 	},

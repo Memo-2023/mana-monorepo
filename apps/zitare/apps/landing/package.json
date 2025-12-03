@@ -6,8 +6,7 @@
 		"dev": "astro dev",
 		"build": "astro build",
 		"preview": "astro preview",
-		"astro": "astro",
-		"lint": "eslint ."
+		"astro": "astro"
 	},
 	"dependencies": {
 		"@manacore/shared-landing-ui": "workspace:*",

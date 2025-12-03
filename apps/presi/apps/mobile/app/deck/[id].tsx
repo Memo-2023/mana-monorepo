@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getDeckSlides, getDeck, deleteSlide, reorderSlide } from '../../services/firestore';
-import { Slide, Deck } from '../../types/models';
+import { type Slide, type Deck } from '../../types/models';
 import { SlideList } from '../../components/slides/SlideList';
 import { SlideEditor } from '../../components/slides/SlideEditor';
 import { PresentationMode } from '../../components/presentation/PresentationMode';
@@ -234,7 +234,7 @@ export default function DeckScreen() {
 					/>
 					<Header
 						title={deck?.name || 'Loading...'}
-						showPresent={true}
+						showPresent
 						onPresentPress={handleStartPresentation}
 						disabled={!slides.length}
 						slideCount={slides.length}
@@ -244,7 +244,7 @@ export default function DeckScreen() {
 				<Modal
 					visible={isCreateModalVisible}
 					animationType="fade"
-					transparent={true}
+					transparent
 					onRequestClose={() => {
 						setIsCreateModalVisible(false);
 						setEditingSlide(null);
@@ -314,7 +314,7 @@ export default function DeckScreen() {
 				<Modal
 					visible={isDeleteModalVisible}
 					animationType="fade"
-					transparent={true}
+					transparent
 					onRequestClose={() => setIsDeleteModalVisible(false)}
 				>
 					<View
@@ -386,7 +386,7 @@ export default function DeckScreen() {
 					animationType="fade"
 					transparent={false}
 					onRequestClose={() => setIsPresentationMode(false)}
-					statusBarTranslucent={true}
+					statusBarTranslucent
 				>
 					<View style={{ flex: 1, backgroundColor: theme.colors.backgroundPage }}>
 						<PresentationMode slides={slides} onClose={() => setIsPresentationMode(false)} />

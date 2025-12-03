@@ -13,7 +13,7 @@ import {
 	writeBatch,
 } from 'firebase/firestore';
 import { db, auth } from '../firebaseConfig';
-import { Deck, Slide } from '../types/models';
+import { type Deck, type Slide } from '../types/models';
 
 // Decks
 export const getUserDecks = async (userId: string): Promise<Deck[]> => {

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getTheme, Theme } from './constants';
+import { getTheme, type Theme } from './constants';
 
 export type ColorMode = 'system' | 'light' | 'dark';
 export type ContrastLevel = 1 | 2 | 3 | 4 | 5;
@@ -42,7 +42,7 @@ const hexToRgb = (hex: string) => {
 };
 
 // Hilfsfunktion zum Konvertieren von RGB zu Hex mit Alpha
-const rgbaToHex = (r: number, g: number, b: number, a: number = 1) => {
+const rgbaToHex = (r: number, g: number, b: number, a = 1) => {
 	const alpha = Math.round(a * 255);
 	return (
 		'#' +

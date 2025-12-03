@@ -9,8 +9,7 @@
 		"./types": "./src/types/index.ts"
 	},
 	"scripts": {
-		"type-check": "tsc --noEmit",
-		"lint": "eslint ."
+		"type-check": "tsc --noEmit"
 	},
 	"devDependencies": {
 		"typescript": "^5.7.3"

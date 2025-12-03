@@ -7,12 +7,12 @@ import {
 	getDeckSlides,
 	migrateDecksToNewSchema,
 } from '../services/firestore';
-import { Deck, Slide } from '../types/models';
+import { type Deck, Slide } from '../types/models';
 import { DeckList } from '../components/decks/DeckList';
 import { CreateDeckForm } from '../components/forms/CreateDeckForm';
 import { DeckShareSettings } from '../components/decks/DeckShareSettings';
 import { auth } from '../firebaseConfig';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { ThemeProvider } from '../components/ThemeProvider';
 import { useTheme } from '../components/ThemeProvider';
