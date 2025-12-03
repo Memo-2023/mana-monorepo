@@ -15,8 +15,8 @@
  * These tests will be updated when Better Auth organization plugin is fully integrated.
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { Test, type TestingModule } from '@nestjs/testing';
+import { type INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { ConfigService } from '@nestjs/config';
@@ -25,7 +25,7 @@ import { organizations, members } from '../../src/db/schema';
 import { randomBytes } from 'crypto';
 
 // Helper to generate random IDs (avoiding nanoid ESM issues in Jest)
-const generateId = (length: number = 16): string => {
+const generateId = (length = 16): string => {
 	return randomBytes(Math.ceil(length / 2))
 		.toString('hex')
 		.slice(0, length);

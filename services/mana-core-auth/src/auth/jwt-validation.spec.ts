@@ -19,9 +19,9 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
+import { type ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
-import { JWTCustomPayload } from './better-auth.config';
+import { type JWTCustomPayload } from './better-auth.config';
 import { createMockConfigService } from '../__tests__/utils/test-helpers';
 import { mockUserFactory } from '../__tests__/utils/mock-factories';
 

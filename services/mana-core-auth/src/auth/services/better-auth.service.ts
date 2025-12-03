@@ -20,7 +20,7 @@ import {
 	ForbiddenException,
 	UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { type ConfigService } from '@nestjs/config';
 import { createBetterAuth, type BetterAuthInstance } from '../better-auth.config';
 import { getDb } from '../../db/connection';
 import { balances, organizationBalances } from '../../db/schema/credits.schema';

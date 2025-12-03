@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { type ConfigService } from '@nestjs/config';
 import { eq, and, desc, sql, count } from 'drizzle-orm';
 import { getDb } from '../db/connection';
 import { userFeedback, feedbackVotes } from '../db/schema';
-import { CreateFeedbackDto, FeedbackQueryDto } from './dto';
-import { AiService } from '../ai/ai.service';
+import { type CreateFeedbackDto, type FeedbackQueryDto } from './dto';
+import { type AiService } from '../ai/ai.service';
 
 @Injectable()
 export class FeedbackService {

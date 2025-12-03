@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { isOk } from '@manacore/shared-errors';
-import { SpaceService } from './space.service';
+import { type SpaceService } from './space.service';
 import { type Space, type SpaceMember } from '../db/schema/spaces.schema';
-import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { JwtAuthGuard, CurrentUser, type CurrentUserData } from '@manacore/shared-nestjs-auth';
 
 @Controller('spaces')
 @UseGuards(JwtAuthGuard)

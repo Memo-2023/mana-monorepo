@@ -1,17 +1,8 @@
 import React, { useState } from 'react';
-import {
-	Alert,
-	StyleSheet,
-	View,
-	TextInput,
-	TouchableOpacity,
-	Text,
-	Image,
-	Platform,
-} from 'react-native';
+import { Alert, StyleSheet, View, TextInput, TouchableOpacity, Text, Platform } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { supabase } from '../utils/supabase';
-import { useTheme, useThemeColors, lightColors, darkColors } from '../utils/themeContext';
+import { useTheme, useThemeColors } from '../utils/themeContext';
 
 export default function Auth() {
 	const { isDarkMode } = useTheme();

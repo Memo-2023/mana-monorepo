@@ -10,7 +10,8 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"type-check": "echo 'Skipping type-check: @chat/web needs shared-ui component fixes'"
+		"type-check": "echo 'Skipping type-check: @chat/web needs shared-ui component fixes'",
+		"lint": "eslint ."
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^6.0.0",

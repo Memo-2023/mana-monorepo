@@ -2,7 +2,7 @@ import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'rea
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { supabase } from '../utils/supabase';
-import { Session } from '@supabase/supabase-js';
+import { type Session } from '@supabase/supabase-js';
 import { useTheme } from '../utils/themeContext';
 import { useRouter } from 'expo-router';
 
@@ -67,6 +67,7 @@ const OrganizationList = forwardRef<OrganizationListRef, OrganizationListProps>(
 			});
 
 			return () => subscription.unsubscribe();
+			// eslint-disable-next-line react-hooks/exhaustive-deps
 		}, []);
 
 		async function fetchUserOrganizations(userId: string) {

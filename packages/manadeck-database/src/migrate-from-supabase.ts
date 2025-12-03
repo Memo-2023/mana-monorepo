@@ -20,7 +20,6 @@ import {
 	deckTemplates,
 	aiGenerations,
 	userStats,
-	dailyProgress,
 } from './schema/index.js';
 
 // Initialize Supabase client

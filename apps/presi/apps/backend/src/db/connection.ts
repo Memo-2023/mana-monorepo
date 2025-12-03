@@ -2,7 +2,7 @@ import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as schema from './schema';
 
 // Use require for postgres to avoid ESM/CommonJS interop issues
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+
 const postgres = require('postgres');
 
 let connection: ReturnType<typeof postgres> | null = null;

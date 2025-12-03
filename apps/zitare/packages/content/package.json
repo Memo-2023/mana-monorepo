@@ -10,7 +10,8 @@
 		"./config": "./src/config/index.ts"
 	},
 	"scripts": {
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"lint": "eslint ."
 	},
 	"dependencies": {
 		"@zitare/shared": "workspace:*"

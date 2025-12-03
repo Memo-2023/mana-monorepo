@@ -55,14 +55,14 @@ export const mockSessionFactory = {
  * Mock Password Factory
  */
 export const mockPasswordFactory = {
-	create: async (userId: string, password: string = 'TestPassword123!') => ({
+	create: async (userId: string, password = 'TestPassword123!') => ({
 		userId,
 		hashedPassword: await bcrypt.hash(password, 12),
 		createdAt: new Date(),
 		updatedAt: new Date(),
 	}),
 
-	createSync: (userId: string, password: string = 'TestPassword123!') => ({
+	createSync: (userId: string, password = 'TestPassword123!') => ({
 		userId,
 		hashedPassword: bcrypt.hashSync(password, 12),
 		createdAt: new Date(),
@@ -88,7 +88,7 @@ export const mockBalanceFactory = {
 		...overrides,
 	}),
 
-	withBalance: (userId: string, balance: number, freeCredits: number = 0) => {
+	withBalance: (userId: string, balance: number, freeCredits = 0) => {
 		return mockBalanceFactory.create(userId, {
 			balance,
 			freeCreditsRemaining: freeCredits,
@@ -263,7 +263,7 @@ export const mockOrganizationBalanceFactory = {
 		...overrides,
 	}),
 
-	withBalance: (organizationId: string, balance: number, allocated: number = 0) => {
+	withBalance: (organizationId: string, balance: number, allocated = 0) => {
 		return mockOrganizationBalanceFactory.create(organizationId, {
 			balance,
 			allocatedCredits: allocated,

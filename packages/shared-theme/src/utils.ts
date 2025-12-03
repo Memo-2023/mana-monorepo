@@ -225,7 +225,7 @@ export function generateThemeCSS(
 	css += '}\n\n';
 
 	// Each variant
-	for (const [variantName, definition] of Object.entries(THEME_DEFINITIONS)) {
+	for (const [variantName] of Object.entries(THEME_DEFINITIONS)) {
 		const variant = variantName as ThemeVariant;
 		const override = primaryOverrides?.[variant];
 

@@ -1,5 +1,5 @@
 import type { RecurrencePattern, RecurrenceFrequency, Weekday } from '../types/recurrence';
-import { addDays, addWeeks, addMonths, addYears } from './date';
+import { addDays, addMonths, addYears } from './date';
 
 /**
  * Parse an RFC 5545 RRULE string to a RecurrencePattern object
@@ -46,13 +46,14 @@ export function parseRRule(rrule: string): RecurrencePattern | null {
 				pattern.count = parseInt(value, 10);
 				break;
 
-			case 'UNTIL':
+			case 'UNTIL': {
 				// Parse UNTIL date (format: YYYYMMDD or YYYYMMDDTHHMMSSZ)
 				const year = parseInt(value.substring(0, 4), 10);
 				const month = parseInt(value.substring(4, 6), 10) - 1;
 				const day = parseInt(value.substring(6, 8), 10);
 				pattern.until = new Date(year, month, day, 23, 59, 59);
 				break;
+			}
 		}
 	}
 
@@ -188,7 +189,7 @@ export function generateOccurrences(
 	rangeStart: Date,
 	rangeEnd: Date,
 	exceptions: string[] = [],
-	maxOccurrences: number = 365
+	maxOccurrences = 365
 ): Date[] {
 	const occurrences: Date[] = [];
 	const exceptionsSet = new Set(exceptions);

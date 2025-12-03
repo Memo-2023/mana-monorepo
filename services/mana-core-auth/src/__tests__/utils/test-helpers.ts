@@ -4,7 +4,7 @@
  * Common utilities for writing tests
  */
 
-import { ConfigService } from '@nestjs/config';
+import { type ConfigService } from '@nestjs/config';
 
 /**
  * Create mock ConfigService
@@ -40,7 +40,7 @@ export const createMockConfigService = (overrides: Record<string, any> = {}): Co
 /**
  * Create a test date with specific offset
  */
-export const createTestDate = (offsetMs: number = 0): Date => {
+export const createTestDate = (offsetMs = 0): Date => {
 	return new Date(Date.now() + offsetMs);
 };
 
@@ -110,7 +110,7 @@ export const assertHelpers = {
 	/**
 	 * Assert that a date is recent (within last N seconds)
 	 */
-	assertIsRecent: (date: Date, withinSeconds: number = 5) => {
+	assertIsRecent: (date: Date, withinSeconds = 5) => {
 		const now = Date.now();
 		const dateMs = date.getTime();
 		const diff = Math.abs(now - dateMs);
@@ -206,7 +206,7 @@ export const securityTestHelpers = {
 	isConstantTime: async (
 		fn1: () => Promise<any>,
 		fn2: () => Promise<any>,
-		threshold: number = 10
+		threshold = 10
 	): Promise<boolean> => {
 		const time1 = await securityTestHelpers.measureExecutionTime(fn1);
 		const time2 = await securityTestHelpers.measureExecutionTime(fn2);
@@ -265,7 +265,7 @@ export const performanceHelpers = {
 	/**
 	 * Run a function N times and measure average execution time
 	 */
-	benchmark: async (fn: () => Promise<any>, iterations: number = 100): Promise<number> => {
+	benchmark: async (fn: () => Promise<any>, iterations = 100): Promise<number> => {
 		const times: number[] = [];
 
 		for (let i = 0; i < iterations; i++) {

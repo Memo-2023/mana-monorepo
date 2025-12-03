@@ -11,7 +11,8 @@
 	"scripts": {
 		"build": "tsc",
 		"clean": "rm -rf dist",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"lint": "eslint ."
 	},
 	"dependencies": {
 		"base64-js": "^1.5.1"

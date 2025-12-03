@@ -55,7 +55,7 @@ export default function Teams() {
 									<Text className="text-sm font-semibold text-white">Neues Team</Text>
 								</TouchableOpacity>
 							</View>
-							<TeamList hideTitle={true} />
+							<TeamList hideTitle />
 						</>
 					) : (
 						<>

@@ -1,5 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import {
+	Injectable,
+	type CanActivate,
+	type ExecutionContext,
+	UnauthorizedException,
+} from '@nestjs/common';
+import { type ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 
 @Injectable()

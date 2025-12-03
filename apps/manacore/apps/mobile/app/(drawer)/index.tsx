@@ -1,8 +1,7 @@
 import { Stack, useRouter } from 'expo-router';
-import { ScrollView, Text, View, TouchableOpacity, Pressable } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 
-import { Container } from '~/components/Container';
 import DashboardStats from '../../components/DashboardStats';
 import { useTheme } from '../../utils/themeContext';
 

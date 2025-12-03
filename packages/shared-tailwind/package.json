@@ -13,6 +13,9 @@
 		"./components.css": "./src/components.css",
 		"./v4": "./src/tailwind-v4.css"
 	},
+	"scripts": {
+		"lint": "eslint ."
+	},
 	"peerDependencies": {
 		"tailwindcss": "^3.0.0 || ^4.0.0"
 	},

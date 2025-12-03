@@ -7,7 +7,7 @@
  * - Daily free credit reset
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
 import { CreditsService } from '../../src/credits/credits.service';
 import { AuthService } from '../../src/auth/auth.service';

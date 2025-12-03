@@ -16,7 +16,8 @@
 		"src"
 	],
 	"scripts": {
-		"type-check": "svelte-check --tsconfig ./tsconfig.json"
+		"type-check": "svelte-check --tsconfig ./tsconfig.json",
+		"lint": "eslint ."
 	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"

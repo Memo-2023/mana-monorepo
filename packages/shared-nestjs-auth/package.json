@@ -7,7 +7,8 @@
 	"scripts": {
 		"build": "tsc",
 		"clean": "rm -rf dist",
-		"prepublishOnly": "pnpm build"
+		"prepublishOnly": "pnpm build",
+		"lint": "eslint ."
 	},
 	"files": [
 		"dist"

@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { Text, TouchableOpacity, TouchableOpacityProps, View } from 'react-native';
+import { Text, TouchableOpacity, type TouchableOpacityProps, type View } from 'react-native';
 
 type ButtonProps = {
 	title: string;

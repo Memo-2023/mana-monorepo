@@ -11,8 +11,6 @@
 		"build:mobile": "pnpm --filter @picture/mobile build:prod",
 		"build:web": "pnpm --filter @picture/web build",
 		"build:landing": "pnpm --filter @picture/landing build",
-		"lint": "pnpm run --recursive lint",
-		"type-check": "pnpm run --recursive type-check",
 		"clean": "pnpm run --recursive clean && rm -rf node_modules",
 		"android": "expo run:android",
 		"ios": "expo run:ios"

@@ -1,66 +1,58 @@
 // @ts-check
-import eslint from '@eslint/js';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import globals from 'globals';
-import tseslint from 'typescript-eslint';
-
 /**
- * Root ESLint config for the monorepo.
- * Individual projects can override with their own eslint.config.* files.
+ * Root ESLint configuration for Manacore monorepo
+ *
+ * Uses @manacore/eslint-config for unified linting across all packages.
+ * Apps can use their own eslint.config.* to add framework-specific rules.
+ *
+ * Config hierarchy:
+ * 1. Root: base + typescript + prettier (this file)
+ * 2. SvelteKit: adds svelteConfig
+ * 3. Expo Mobile: adds reactConfig
+ * 4. NestJS Backend: adds nestjsConfig
  */
-export default tseslint.config(
+import { baseConfig, typescriptConfig, prettierConfig } from '@manacore/eslint-config';
+
+export default [
+	// ============================================
 	// Global ignores
+	// ============================================
 	{
 		ignores: [
+			// Build outputs
 			'**/node_modules/**',
 			'**/dist/**',
 			'**/build/**',
+			'**/coverage/**',
+			'**/.turbo/**',
+
+			// Framework-specific
 			'**/.svelte-kit/**',
 			'**/.expo/**',
 			'**/.next/**',
-			'**/coverage/**',
+
+			// Archived projects
 			'**/apps-archived/**',
-			// Ignore projects with their own ESLint configs
-			'apps/manadeck/apps/mobile/**',
-			'apps/picture/apps/mobile/**',
-			'apps/picture/apps/web/**',
-			'games/voxel-lava/apps/web/**',
+
+			// Generated files
+			'**/*.d.ts',
+			'**/generated/**',
+
+			// Apps with their own ESLint configs (framework-specific)
+			// These import from @manacore/eslint-config but add framework rules
+			'apps/*/apps/mobile/**',
+			'apps/*/apps/web/**',
+			'apps/*/apps/backend/**',
+			'apps/*/apps/landing/**',
+			'games/*/apps/**',
+			'services/**',
 		],
 	},
-	// Base JavaScript rules
-	eslint.configs.recommended,
-	// TypeScript rules (without type-checking for speed)
-	...tseslint.configs.recommended,
-	// Prettier integration
-	eslintPluginPrettierRecommended,
-	// Global settings
-	{
-		languageOptions: {
-			globals: {
-				...globals.node,
-				...globals.browser,
-				...globals.es2022,
-			},
-			ecmaVersion: 2022,
-			sourceType: 'module',
-		},
-	},
-	// TypeScript-specific rules
-	{
-		files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
-		rules: {
-			'@typescript-eslint/no-explicit-any': 'warn',
-			'@typescript-eslint/no-unused-vars': [
-				'error',
-				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-			],
-		},
-	},
-	// JavaScript-specific rules
-	{
-		files: ['**/*.js', '**/*.jsx', '**/*.mjs', '**/*.cjs'],
-		rules: {
-			'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
-		},
-	}
-);
+
+	// ============================================
+	// Base configuration for all files
+	// ============================================
+	...baseConfig,
+	...typescriptConfig,
+	...prettierConfig,
+];

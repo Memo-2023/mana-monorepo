@@ -42,7 +42,8 @@
 		}
 	},
 	"scripts": {
-		"check": "svelte-check --tsconfig ./tsconfig.json"
+		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"lint": "eslint ."
 	},
 	"dependencies": {
 		"@manacore/shared-subscription-types": "workspace:*"

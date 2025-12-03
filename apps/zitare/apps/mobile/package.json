@@ -15,8 +15,8 @@
 		"build:preview": "pnpm run build:biographies && eas build --profile preview",
 		"build:prod": "pnpm run build:biographies && eas build --profile production",
 		"prebuild": "expo prebuild",
-		"lint": "eslint \"**/*.{js,jsx,ts,tsx}\" && prettier -c \"**/*.{js,jsx,ts,tsx,json}\"",
-		"format": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix && prettier \"**/*.{js,jsx,ts,tsx,json}\" --write",
+		"lint": "eslint .",
+		"format": "eslint . --fix",
 		"web": "pnpm run build:biographies && expo start --web"
 	},
 	"dependencies": {

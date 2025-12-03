@@ -20,7 +20,7 @@ interface CacheConfig {
 	version?: number;
 }
 
-let dbPromises: Map<string, Promise<IDBDatabase>> = new Map();
+const dbPromises: Map<string, Promise<IDBDatabase>> = new Map();
 
 /**
  * Initialize IndexedDB connection

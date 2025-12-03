@@ -2,7 +2,7 @@
  * i18n utility functions
  */
 
-import { type LanguageCode, isLanguageSupported, getLanguageInfo } from './languages';
+import { getLanguageInfo } from './languages';
 
 /**
  * Detect user's preferred locale from browser
@@ -10,7 +10,7 @@ import { type LanguageCode, isLanguageSupported, getLanguageInfo } from './langu
  */
 export function detectBrowserLocale(
 	supportedLocales: readonly string[],
-	defaultLocale: string = 'en'
+	defaultLocale = 'en'
 ): string {
 	if (typeof navigator === 'undefined') {
 		return defaultLocale;
@@ -85,7 +85,7 @@ export function storeLocale(storageKey: string, locale: string): void {
 export function getInitialLocale(
 	storageKey: string,
 	supportedLocales: readonly string[],
-	defaultLocale: string = 'en'
+	defaultLocale = 'en'
 ): string {
 	// Check localStorage first
 	const stored = getStoredLocale(storageKey, supportedLocales);
@@ -139,7 +139,7 @@ export function matchesLanguage(locale: string, language: string): boolean {
 export function findBestMatch(
 	preferredLocale: string,
 	supportedLocales: readonly string[],
-	defaultLocale: string = 'en'
+	defaultLocale = 'en'
 ): string {
 	const normalized = normalizeLocale(preferredLocale);
 
@@ -168,7 +168,7 @@ export function findBestMatch(
  */
 export function formatLocalizedNumber(
 	value: number,
-	locale: string = 'en',
+	locale = 'en',
 	options?: Intl.NumberFormatOptions
 ): string {
 	return new Intl.NumberFormat(locale, options).format(value);
@@ -179,7 +179,7 @@ export function formatLocalizedNumber(
  */
 export function formatLocalizedDate(
 	date: Date | string | number,
-	locale: string = 'en',
+	locale = 'en',
 	options?: Intl.DateTimeFormatOptions
 ): string {
 	const dateObj = date instanceof Date ? date : new Date(date);
@@ -191,7 +191,7 @@ export function formatLocalizedDate(
  */
 export function formatRelativeTime(
 	date: Date | string | number,
-	locale: string = 'en',
+	locale = 'en',
 	style: 'long' | 'short' | 'narrow' = 'long'
 ): string {
 	const dateObj = date instanceof Date ? date : new Date(date);
@@ -227,7 +227,7 @@ export function formatRelativeTime(
 /**
  * Get plural form category
  */
-export function getPluralCategory(count: number, locale: string = 'en'): Intl.LDMLPluralRule {
+export function getPluralCategory(count: number, locale = 'en'): Intl.LDMLPluralRule {
 	const pr = new Intl.PluralRules(locale);
 	return pr.select(count);
 }

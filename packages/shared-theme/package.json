@@ -27,6 +27,9 @@
 			"default": "./src/utils.ts"
 		}
 	},
+	"scripts": {
+		"lint": "eslint ."
+	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"
 	},

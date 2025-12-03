@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
-import { LevelService } from './level.service';
-import { CreateLevelDto } from './dto/create-level.dto';
-import { UpdateLevelDto } from './dto/update-level.dto';
-import { RecordPlayDto } from './dto/record-play.dto';
+import { type LevelService } from './level.service';
+import { type CreateLevelDto } from './dto/create-level.dto';
+import { type UpdateLevelDto } from './dto/update-level.dto';
+import { type RecordPlayDto } from './dto/record-play.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { CurrentUser, CurrentUserPayload } from '../common/decorators/current-user.decorator';
+import { CurrentUser, type CurrentUserPayload } from '../common/decorators/current-user.decorator';
 
 @Controller('levels')
 export class LevelController {

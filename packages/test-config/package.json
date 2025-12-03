@@ -16,7 +16,8 @@
 		"*.ts"
 	],
 	"scripts": {
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"lint": "eslint ."
 	},
 	"devDependencies": {
 		"@types/node": "^24.10.1",

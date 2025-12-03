@@ -28,6 +28,9 @@
 			"default": "./src/organisms/index.ts"
 		}
 	},
+	"scripts": {
+		"lint": "eslint ."
+	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"
 	},

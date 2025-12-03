@@ -68,7 +68,7 @@ export default function Organizations() {
 									<Text className="text-sm font-semibold text-white">Neue Organisation</Text>
 								</TouchableOpacity>
 							</View>
-							<OrganizationList hideTitle={true} ref={organizationListRef} />
+							<OrganizationList hideTitle ref={organizationListRef} />
 						</>
 					) : (
 						<>

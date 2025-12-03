@@ -38,7 +38,8 @@
 		"db:studio": "dotenv -- drizzle-kit studio",
 		"db:reset": "docker compose down -v && docker compose up -d && sleep 3 && pnpm db:push",
 		"db:test": "dotenv -- tsx src/test-connection.ts",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"lint": "eslint ."
 	},
 	"dependencies": {
 		"drizzle-orm": "^0.36.0",
