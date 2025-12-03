@@ -22,8 +22,16 @@
 		getMinutes,
 		differenceInMinutes,
 		addMinutes,
+		setHours,
+		setMinutes,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
+
+	interface Props {
+		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
+	}
+
+	let { onQuickCreate }: Props = $props();
 
 	// Get all days to display in the month grid (including days from prev/next months)
 	let allCalendarDays = $derived.by(() => {
@@ -143,10 +151,18 @@
 
 			const newEnd = addMinutes(newStart, duration);
 
-			eventsStore.updateEvent(draggedEvent.id, {
-				startTime: newStart.toISOString(),
-				endTime: newEnd.toISOString(),
-			});
+			// Update event (use updateDraftEvent for draft events)
+			if (eventsStore.isDraftEvent(draggedEvent.id)) {
+				eventsStore.updateDraftEvent({
+					startTime: newStart.toISOString(),
+					endTime: newEnd.toISOString(),
+				});
+			} else {
+				eventsStore.updateEvent(draggedEvent.id, {
+					startTime: newStart.toISOString(),
+					endTime: newEnd.toISOString(),
+				});
+			}
 		}
 
 		cleanup();
@@ -167,11 +183,30 @@
 		return eventsStore.getEventsForDay(day).slice(0, 3); // Max 3 events shown
 	}
 
-	function handleDayClick(day: Date) {
+	function handleDayClick(day: Date, e: MouseEvent) {
 		// Don't navigate if dragging
 		if (isDragging) return;
-		viewStore.setDate(day);
-		viewStore.setViewType('day');
+
+		// If onQuickCreate callback provided, open quick event overlay
+		if (onQuickCreate) {
+			// Set start time to current hour (or 9 AM if in the past)
+			const now = new Date();
+			let startTime = setMinutes(setHours(day, now.getHours()), 0);
+
+			// If the selected day is today and current hour is reasonable, use next hour
+			if (isSameDay(day, now)) {
+				startTime = setMinutes(setHours(day, now.getHours() + 1), 0);
+			} else {
+				// For other days, default to 9 AM
+				startTime = setMinutes(setHours(day, 9), 0);
+			}
+
+			onQuickCreate(startTime, { x: e.clientX, y: e.clientY });
+		} else {
+			// Fallback: navigate to day view
+			viewStore.setDate(day);
+			viewStore.setViewType('day');
+		}
 	}
 
 	function handleEventClick(event: any, e: MouseEvent) {
@@ -182,7 +217,7 @@
 			return;
 		}
 		e.stopPropagation();
-		goto(`/event/${event.id}`);
+		goto(`/?event=${event.id}`);
 	}
 
 	function handleMoreClick(day: Date, e: MouseEvent) {
@@ -213,8 +248,8 @@
 						class:today={isToday(day)}
 						class:drop-target={isDropTarget}
 						use:bindDayCellRef={day}
-						onclick={() => handleDayClick(day)}
-						onkeydown={(e) => e.key === 'Enter' && handleDayClick(day)}
+						onclick={(e) => handleDayClick(day, e)}
+						onkeydown={(e) => e.key === 'Enter' && handleDayClick(day, e as unknown as MouseEvent)}
 						role="button"
 						tabindex="0"
 					>
@@ -225,12 +260,15 @@
 						<div class="day-events">
 							{#each getEventsForDay(day) as event}
 								{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
+								{@const isDraft = eventsStore.isDraftEvent(event.id)}
 								<div
 									class="event-pill"
 									class:dragging={isBeingDragged}
+									class:draft={isDraft}
+									data-event-id={event.id}
 									style="background-color: {calendarsStore.getColor(event.calendarId)}"
 									onpointerdown={(e) => startDrag(event, e)}
-									onclick={(e) => handleEventClick(event, e)}
+									onclick={(e) => !isDraft && handleEventClick(event, e)}
 									role="button"
 									tabindex="0"
 								>
@@ -241,10 +279,15 @@
 													? new Date(event.startTime)
 													: event.startTime,
 												'HH:mm'
+											)}-{format(
+												typeof event.endTime === 'string'
+													? new Date(event.endTime)
+													: event.endTime,
+												'HH:mm'
 											)}</span
 										>
 									{/if}
-									<span class="event-title">{event.title}</span>
+									<span class="event-title">{event.title || (isDraft ? '(Neuer Termin)' : '')}</span>
 								</div>
 							{/each}
 
@@ -377,6 +420,21 @@
 		cursor: grabbing;
 		opacity: 0.5;
 		transform: scale(0.95);
+	}
+
+	.event-pill.draft {
+		outline: 2px solid hsl(var(--color-primary));
+		outline-offset: -1px;
+		animation: pulse-outline 1.5s ease-in-out infinite;
+	}
+
+	@keyframes pulse-outline {
+		0%, 100% {
+			outline-color: hsl(var(--color-primary));
+		}
+		50% {
+			outline-color: hsl(var(--color-primary) / 0.5);
+		}
 	}
 
 	.event-time {

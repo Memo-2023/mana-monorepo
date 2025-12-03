@@ -15,6 +15,12 @@
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
 
+	interface Props {
+		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
+	}
+
+	let { onQuickCreate }: Props = $props();
+
 	// Constants
 	const HOUR_HEIGHT = 60; // pixels per hour
 	const SNAP_MINUTES = 15; // snap to 15-minute intervals
@@ -176,11 +182,18 @@
 
 		const newEnd = addMinutes(newStart, duration);
 
-		// Update event
-		eventsStore.updateEvent(draggedEvent.id, {
-			startTime: newStart.toISOString(),
-			endTime: newEnd.toISOString(),
-		});
+		// Update event (use updateDraftEvent for draft events)
+		if (eventsStore.isDraftEvent(draggedEvent.id)) {
+			eventsStore.updateDraftEvent({
+				startTime: newStart.toISOString(),
+				endTime: newEnd.toISOString(),
+			});
+		} else {
+			eventsStore.updateEvent(draggedEvent.id, {
+				startTime: newStart.toISOString(),
+				endTime: newEnd.toISOString(),
+			});
+		}
 
 		cleanup();
 	}
@@ -260,10 +273,18 @@
 			newEnd.setSeconds(0, 0);
 		}
 
-		eventsStore.updateEvent(resizeEvent.id, {
-			startTime: newStart.toISOString(),
-			endTime: newEnd.toISOString(),
-		});
+		// Update event (use updateDraftEvent for draft events)
+		if (eventsStore.isDraftEvent(resizeEvent.id)) {
+			eventsStore.updateDraftEvent({
+				startTime: newStart.toISOString(),
+				endTime: newEnd.toISOString(),
+			});
+		} else {
+			eventsStore.updateEvent(resizeEvent.id, {
+				startTime: newStart.toISOString(),
+				endTime: newEnd.toISOString(),
+			});
+		}
 
 		cleanup();
 	}
@@ -325,16 +346,21 @@
 			setTimeout(() => { hasMoved = false; }, 100);
 			return;
 		}
-		goto(`/event/${event.id}`);
+		goto(`/?event=${event.id}`);
 	}
 
-	function handleSlotClick(hour: number) {
+	function handleSlotClick(hour: number, e: MouseEvent) {
 		// Don't create event if dragging or resizing
 		if (isDragging || isResizing) return;
 
 		const startTime = new Date(viewStore.currentDate);
 		startTime.setHours(hour, 0, 0, 0);
-		goto(`/event/new?start=${startTime.toISOString()}`);
+
+		if (onQuickCreate) {
+			onQuickCreate(startTime, { x: e.clientX, y: e.clientY });
+		} else {
+			goto(`/event/new?start=${startTime.toISOString()}`);
+		}
 	}
 </script>
 
@@ -377,7 +403,7 @@
 			{#each hours as hour}
 				<button
 					class="hour-slot"
-					onclick={() => handleSlotClick(hour)}
+					onclick={(e) => handleSlotClick(hour, e)}
 					aria-label={`${hour}:00 Uhr`}
 				></button>
 			{/each}
@@ -397,13 +423,16 @@
 			{#each timedEvents as event}
 				{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
 				{@const isBeingResized = isResizing && resizeEvent?.id === event.id}
+				{@const isDraft = eventsStore.isDraftEvent(event.id)}
 				<div
 					class="event-card"
 					class:dragging={isBeingDragged}
 					class:resizing={isBeingResized}
+					class:draft={isDraft}
+					data-event-id={event.id}
 					style={isBeingDragged ? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};` : isBeingResized ? `top: ${resizePreviewTop}%; height: ${resizePreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};` : getEventStyle(event)}
 					onpointerdown={(e) => startDrag(event, e)}
-					onclick={(e) => handleEventClick(event, e)}
+					onclick={(e) => !isDraft && handleEventClick(event, e)}
 					role="button"
 					tabindex="0"
 				>
@@ -426,7 +455,7 @@
 							'HH:mm'
 						)}
 					</span>
-					<span class="event-title">{event.title}</span>
+					<span class="event-title">{event.title || (isDraft ? '(Neuer Termin)' : '')}</span>
 					{#if event.location}
 						<span class="event-location">{event.location}</span>
 					{/if}
@@ -591,6 +620,21 @@
 		z-index: 100;
 		outline: 2px dashed rgba(255, 255, 255, 0.6);
 		outline-offset: -2px;
+	}
+
+	.event-card.draft {
+		outline: 2px solid hsl(var(--color-primary));
+		outline-offset: -1px;
+		animation: pulse-outline 1.5s ease-in-out infinite;
+	}
+
+	@keyframes pulse-outline {
+		0%, 100% {
+			outline-color: hsl(var(--color-primary));
+		}
+		50% {
+			outline-color: hsl(var(--color-primary) / 0.5);
+		}
 	}
 
 	/* Resize Handles */

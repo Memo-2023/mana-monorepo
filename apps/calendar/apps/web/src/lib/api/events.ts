@@ -23,7 +23,11 @@ export async function getEvents(params: QueryEventsParams) {
 }
 
 export async function getEvent(id: string) {
-	return fetchApi<CalendarEvent>(`/events/${id}`);
+	const result = await fetchApi<{ event: CalendarEvent }>(`/events/${id}`);
+	if (result.error || !result.data) {
+		return { data: null, error: result.error };
+	}
+	return { data: result.data.event, error: null };
 }
 
 export async function getEventsByCalendar(calendarId: string) {
@@ -31,17 +35,25 @@ export async function getEventsByCalendar(calendarId: string) {
 }
 
 export async function createEvent(data: CreateEventInput) {
-	return fetchApi<CalendarEvent>('/events', {
+	const result = await fetchApi<{ event: CalendarEvent }>('/events', {
 		method: 'POST',
 		body: data,
 	});
+	if (result.error || !result.data) {
+		return { data: null, error: result.error };
+	}
+	return { data: result.data.event, error: null };
 }
 
 export async function updateEvent(id: string, data: UpdateEventInput) {
-	return fetchApi<CalendarEvent>(`/events/${id}`, {
+	const result = await fetchApi<{ event: CalendarEvent }>(`/events/${id}`, {
 		method: 'PUT',
 		body: data,
 	});
+	if (result.error || !result.data) {
+		return { data: null, error: result.error };
+	}
+	return { data: result.data.event, error: null };
 }
 
 export async function deleteEvent(id: string) {

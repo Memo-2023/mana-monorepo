@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import type { CalendarEvent, CreateEventInput, UpdateEventInput } from '@calendar/shared';
+	import type { CalendarEvent, CreateEventInput, UpdateEventInput, LocationDetails } from '@calendar/shared';
 	import { format, addMinutes, parseISO } from 'date-fns';
 
 	interface Props {
@@ -23,6 +23,23 @@
 	let allDayDisplayMode = $state<'default' | 'header' | 'block'>(
 		event?.metadata?.allDayDisplayMode || 'default'
 	);
+
+	// Location details state
+	let showLocationDetails = $state(false);
+	let locationStreet = $state(event?.metadata?.locationDetails?.street || '');
+	let locationPostalCode = $state(event?.metadata?.locationDetails?.postalCode || '');
+	let locationCity = $state(event?.metadata?.locationDetails?.city || '');
+	let locationCountry = $state(event?.metadata?.locationDetails?.country || '');
+
+	// Auto-expand location details if any field is filled
+	$effect(() => {
+		if (event?.metadata?.locationDetails) {
+			const details = event.metadata.locationDetails;
+			if (details.street || details.postalCode || details.city || details.country) {
+				showLocationDetails = true;
+			}
+		}
+	});
 
 	// Set default calendar when calendars are loaded
 	$effect(() => {
@@ -77,10 +94,36 @@
 		const startDateTime = new Date(`${startDate}T${isAllDay ? '00:00' : startTime}`);
 		const endDateTime = new Date(`${endDate}T${isAllDay ? '23:59' : endTime}`);
 
-		// Build metadata with display mode if not default
-		const metadata = isAllDay && allDayDisplayMode !== 'default'
-			? { ...(event?.metadata || {}), allDayDisplayMode: allDayDisplayMode as 'header' | 'block' }
-			: event?.metadata;
+		// Build location details if any field is filled
+		const locationDetails: LocationDetails | undefined =
+			(locationStreet.trim() || locationPostalCode.trim() || locationCity.trim() || locationCountry.trim())
+				? {
+					street: locationStreet.trim() || undefined,
+					postalCode: locationPostalCode.trim() || undefined,
+					city: locationCity.trim() || undefined,
+					country: locationCountry.trim() || undefined,
+				}
+				: undefined;
+
+		// Build metadata
+		let metadata = { ...(event?.metadata || {}) };
+
+		// Add display mode if not default
+		if (isAllDay && allDayDisplayMode !== 'default') {
+			metadata.allDayDisplayMode = allDayDisplayMode as 'header' | 'block';
+		} else {
+			delete metadata.allDayDisplayMode;
+		}
+
+		// Add location details
+		if (locationDetails) {
+			metadata.locationDetails = locationDetails;
+		} else {
+			delete metadata.locationDetails;
+		}
+
+		// Only include metadata if it has properties
+		const finalMetadata = Object.keys(metadata).length > 0 ? metadata : undefined;
 
 		const data: CreateEventInput | UpdateEventInput = {
 			title: title.trim(),
@@ -90,7 +133,7 @@
 			startTime: startDateTime.toISOString(),
 			endTime: endDateTime.toISOString(),
 			calendarId,
-			metadata,
+			metadata: finalMetadata,
 		};
 
 		submitting = true;
@@ -203,8 +246,70 @@
 			id="location"
 			class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
 			bind:value={location}
-			placeholder="Ort hinzufügen"
+			placeholder="Ortsname oder Beschreibung"
 		/>
+
+		<!-- Toggle for address details -->
+		<button
+			type="button"
+			class="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors self-start"
+			onclick={() => showLocationDetails = !showLocationDetails}
+		>
+			<svg class="w-4 h-4 transition-transform" class:rotate-90={showLocationDetails} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+			</svg>
+			{showLocationDetails ? 'Adressdetails ausblenden' : 'Adressdetails hinzufügen'}
+		</button>
+
+		<!-- Address detail fields -->
+		{#if showLocationDetails}
+			<div class="flex flex-col gap-3 p-3 bg-muted/50 rounded-lg border border-border mt-1">
+				<div class="flex flex-col gap-1">
+					<label for="street" class="text-xs font-medium text-muted-foreground">Straße</label>
+					<input
+						type="text"
+						id="street"
+						class="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors text-sm"
+						bind:value={locationStreet}
+						placeholder="Musterstraße 123"
+					/>
+				</div>
+
+				<div class="flex gap-3">
+					<div class="flex flex-col gap-1 w-1/3">
+						<label for="postalCode" class="text-xs font-medium text-muted-foreground">PLZ</label>
+						<input
+							type="text"
+							id="postalCode"
+							class="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors text-sm"
+							bind:value={locationPostalCode}
+							placeholder="12345"
+						/>
+					</div>
+					<div class="flex flex-col gap-1 flex-1">
+						<label for="city" class="text-xs font-medium text-muted-foreground">Stadt</label>
+						<input
+							type="text"
+							id="city"
+							class="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors text-sm"
+							bind:value={locationCity}
+							placeholder="Musterstadt"
+						/>
+					</div>
+				</div>
+
+				<div class="flex flex-col gap-1">
+					<label for="country" class="text-xs font-medium text-muted-foreground">Land</label>
+					<input
+						type="text"
+						id="country"
+						class="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors text-sm"
+						bind:value={locationCountry}
+						placeholder="Deutschland"
+					/>
+				</div>
+			</div>
+		{/if}
 	</div>
 
 	<div class="flex flex-col gap-2">

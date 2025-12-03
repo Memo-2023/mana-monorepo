@@ -64,7 +64,8 @@
 	}
 
 	function handleEventClick(eventId: string) {
-		goto(`/event/${eventId}`);
+		// Navigate to calendar with event modal
+		goto(`/?event=${eventId}`);
 	}
 </script>
 

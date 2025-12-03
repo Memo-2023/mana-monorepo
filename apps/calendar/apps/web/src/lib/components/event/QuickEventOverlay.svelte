@@ -2,69 +2,267 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import { goto } from '$app/navigation';
-	import { format, addMinutes } from 'date-fns';
+	import type { LocationDetails } from '@calendar/shared';
+	import { format, addMinutes, parseISO } from 'date-fns';
+	import { de } from 'date-fns/locale';
+	import { tick, onMount, onDestroy } from 'svelte';
 
 	interface Props {
 		startTime: Date;
-		position: { x: number; y: number };
 		onClose: () => void;
 		onCreated?: () => void;
 	}
 
-	let { startTime, position, onClose, onCreated }: Props = $props();
+	let { startTime, onClose, onCreated }: Props = $props();
 
-	// Form state
+	// Input ref for programmatic focus
+	let titleInputRef = $state<HTMLInputElement | null>(null);
+
+	// Position tracking
+	let overlayPosition = $state({ left: 0, top: 0 });
+	let positionInitialized = $state(false);
+
+	// Track when draft event was last modified (to ignore clicks after drag/resize)
+	let lastDraftUpdateTime = $state(0);
+
+	// Calculate position relative to draft event element
+	function updatePosition() {
+		if (typeof window === 'undefined') return;
+
+		const draftElement = document.querySelector('[data-event-id="__draft__"]');
+		if (!draftElement) {
+			// Fallback: center in viewport
+			const viewportWidth = window.innerWidth;
+			const viewportHeight = window.innerHeight;
+			overlayPosition = {
+				left: Math.max(16, (viewportWidth - 380) / 2),
+				top: Math.max(16, (viewportHeight - 450) / 2),
+			};
+			positionInitialized = true;
+			return;
+		}
+
+		const rect = draftElement.getBoundingClientRect();
+		const overlayWidth = 380;
+		const maxOverlayHeight = 450;
+		const margin = 16;
+		const gap = 8; // Gap between event and overlay
+
+		const viewportWidth = window.innerWidth;
+		const viewportHeight = window.innerHeight;
+
+		// Try to position to the right of the event
+		let left = rect.right + gap;
+		let top = rect.top;
+
+		// If not enough space on the right, try left side
+		if (left + overlayWidth > viewportWidth - margin) {
+			left = rect.left - overlayWidth - gap;
+		}
+
+		// If still no space, position below/above
+		if (left < margin) {
+			left = Math.max(margin, Math.min(rect.left, viewportWidth - overlayWidth - margin));
+			top = rect.bottom + gap;
+
+			// If no space below, position above
+			if (top + maxOverlayHeight > viewportHeight - margin) {
+				top = rect.top - maxOverlayHeight - gap;
+			}
+		}
+
+		// Final clamps
+		left = Math.max(margin, Math.min(left, viewportWidth - overlayWidth - margin));
+		top = Math.max(margin, Math.min(top, viewportHeight - maxOverlayHeight - margin));
+
+		overlayPosition = { left, top };
+		positionInitialized = true;
+	}
+
+	// Handle clicks outside overlay (but allow clicks on draft event)
+	function handleDocumentClick(e: MouseEvent) {
+		// Ignore clicks within 250ms of draft event update (drag/resize just ended)
+		if (Date.now() - lastDraftUpdateTime < 250) {
+			return;
+		}
+
+		const target = e.target as HTMLElement;
+		const overlay = document.querySelector('.quick-event-overlay');
+		const draftEvent = document.querySelector('[data-event-id="__draft__"]');
+
+		// Don't close if clicking on overlay or draft event
+		if (overlay?.contains(target) || draftEvent?.contains(target)) {
+			return;
+		}
+
+		// Close overlay for clicks outside
+		onClose();
+	}
+
+	onMount(() => {
+		// Initial position calculation with slight delay for DOM update
+		requestAnimationFrame(() => {
+			updatePosition();
+		});
+
+		// Add click listener with slight delay to avoid immediate close
+		setTimeout(() => {
+			document.addEventListener('click', handleDocumentClick);
+		}, 100);
+	});
+
+	onDestroy(() => {
+		document.removeEventListener('click', handleDocumentClick);
+	});
+
+	// Update position when draft event changes (user dragged it)
+	// Also track the update time to prevent closing overlay after drag/resize
+	$effect(() => {
+		const draft = eventsStore.draftEvent;
+		if (draft && positionInitialized) {
+			// Track when draft was updated (for click ignore logic)
+			lastDraftUpdateTime = Date.now();
+
+			// Use requestAnimationFrame to wait for DOM update
+			requestAnimationFrame(() => {
+				updatePosition();
+			});
+		}
+	});
+
+	// Focus input when overlay opens
+	$effect(() => {
+		if (titleInputRef) {
+			tick().then(() => {
+				titleInputRef?.focus();
+			});
+		}
+	});
+
+	// Form state - initialize from draft event
 	let title = $state('');
 	let calendarId = $state('');
-	let isExpanded = $state(false);
 	let description = $state('');
 	let location = $state('');
 	let isAllDay = $state(false);
+	let allDayDisplayMode = $state<'default' | 'header' | 'block'>('default');
+
+	// Location details state
+	let showLocationDetails = $state(false);
+	let locationStreet = $state('');
+	let locationPostalCode = $state('');
+	let locationCity = $state('');
+	let locationCountry = $state('');
 	let submitting = $state(false);
 
-	// Time fields
-	let endTime = $derived(addMinutes(startTime, settingsStore.defaultEventDuration));
-	let startTimeStr = $derived(format(startTime, 'HH:mm'));
-	let endTimeStr = $state('');
-	let startDateStr = $derived(format(startTime, 'yyyy-MM-dd'));
-	let endDateStr = $state('');
+	// Date/time fields - derive from draft event
+	let draftStart = $derived(() => {
+		const draft = eventsStore.draftEvent;
+		if (draft) {
+			return typeof draft.startTime === 'string' ? parseISO(draft.startTime) : draft.startTime;
+		}
+		return startTime;
+	});
 
-	// Initialize end time string
+	let draftEnd = $derived(() => {
+		const draft = eventsStore.draftEvent;
+		if (draft) {
+			return typeof draft.endTime === 'string' ? parseISO(draft.endTime) : draft.endTime;
+		}
+		return addMinutes(startTime, settingsStore.defaultEventDuration);
+	});
+
+	// Display date/time - derived from draft event
+	let displayStartDate = $derived(format(draftStart(), 'yyyy-MM-dd'));
+	let displayStartTime = $derived(format(draftStart(), 'HH:mm'));
+	let displayEndDate = $derived(format(draftEnd(), 'yyyy-MM-dd'));
+	let displayEndTime = $derived(format(draftEnd(), 'HH:mm'));
+
+	// Editable date/time strings (for form inputs)
+	let startDateStr = $state(format(startTime, 'yyyy-MM-dd'));
+	let startTimeStr = $state(format(startTime, 'HH:mm'));
+	let endDateStr = $state('');
+	let endTimeStr = $state('');
+
+	// Sync form fields from draft event when it changes (e.g., user drags it)
 	$effect(() => {
-		endTimeStr = format(endTime, 'HH:mm');
-		endDateStr = format(endTime, 'yyyy-MM-dd');
+		startDateStr = displayStartDate;
+		startTimeStr = displayStartTime;
+		endDateStr = displayEndDate;
+		endTimeStr = displayEndTime;
 	});
 
 	// Set default calendar
 	$effect(() => {
 		if (!calendarId && calendarsStore.defaultCalendar?.id) {
 			calendarId = calendarsStore.defaultCalendar.id;
+			// Update draft event with calendar
+			eventsStore.updateDraftEvent({ calendarId });
 		}
 	});
 
-	// Calculate overlay position (ensure it stays within viewport)
-	let overlayStyle = $derived.by(() => {
-		const overlayWidth = isExpanded ? 360 : 300;
-		const overlayHeight = isExpanded ? 400 : 180;
+	// Update draft event when title changes
+	function handleTitleChange(e: Event) {
+		const target = e.target as HTMLInputElement;
+		title = target.value;
+		eventsStore.updateDraftEvent({ title: target.value });
+	}
 
-		let left = position.x;
-		let top = position.y;
+	// Update draft event when time fields change
+	function handleStartDateChange(e: Event) {
+		const target = e.target as HTMLInputElement;
+		startDateStr = target.value;
+		updateDraftTimes();
+	}
 
-		// Keep within viewport bounds
-		if (typeof window !== 'undefined') {
-			if (left + overlayWidth > window.innerWidth - 20) {
-				left = window.innerWidth - overlayWidth - 20;
-			}
-			if (top + overlayHeight > window.innerHeight - 20) {
-				top = window.innerHeight - overlayHeight - 20;
-			}
-			if (left < 20) left = 20;
-			if (top < 20) top = 20;
-		}
+	function handleStartTimeChange(e: Event) {
+		const target = e.target as HTMLInputElement;
+		startTimeStr = target.value;
+		updateDraftTimes();
+	}
 
-		return `left: ${left}px; top: ${top}px;`;
-	});
+	function handleEndDateChange(e: Event) {
+		const target = e.target as HTMLInputElement;
+		endDateStr = target.value;
+		updateDraftTimes();
+	}
+
+	function handleEndTimeChange(e: Event) {
+		const target = e.target as HTMLInputElement;
+		endTimeStr = target.value;
+		updateDraftTimes();
+	}
+
+	function updateDraftTimes() {
+		const startDateTime = isAllDay
+			? new Date(`${startDateStr}T00:00:00`)
+			: new Date(`${startDateStr}T${startTimeStr}`);
+		const endDateTime = isAllDay
+			? new Date(`${endDateStr}T23:59:59`)
+			: new Date(`${endDateStr}T${endTimeStr}`);
+
+		eventsStore.updateDraftEvent({
+			startTime: startDateTime.toISOString(),
+			endTime: endDateTime.toISOString(),
+			isAllDay,
+		});
+	}
+
+	// Update draft when calendar changes
+	function handleCalendarChange(e: Event) {
+		const target = e.target as HTMLSelectElement;
+		calendarId = target.value;
+		eventsStore.updateDraftEvent({ calendarId: target.value });
+	}
+
+	// Update draft when all-day changes
+	function handleAllDayToggle() {
+		isAllDay = !isAllDay;
+		updateDraftTimes();
+	}
+
+	// Overlay style
+	let overlayStyle = $derived(`left: ${overlayPosition.left}px; top: ${overlayPosition.top}px;`);
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -80,6 +278,28 @@
 				? new Date(`${endDateStr}T23:59:59`)
 				: new Date(`${endDateStr}T${endTimeStr}`);
 
+			// Build location details if any field is filled
+			const locationDetails: LocationDetails | undefined =
+				locationStreet.trim() || locationPostalCode.trim() || locationCity.trim() || locationCountry.trim()
+					? {
+							street: locationStreet.trim() || undefined,
+							postalCode: locationPostalCode.trim() || undefined,
+							city: locationCity.trim() || undefined,
+							country: locationCountry.trim() || undefined,
+						}
+					: undefined;
+
+			// Build metadata
+			let metadata: Record<string, unknown> | undefined = undefined;
+
+			if (isAllDay && allDayDisplayMode !== 'default') {
+				metadata = { allDayDisplayMode: allDayDisplayMode as 'header' | 'block' };
+			}
+
+			if (locationDetails) {
+				metadata = { ...(metadata || {}), locationDetails };
+			}
+
 			await eventsStore.createEvent({
 				title: title.trim(),
 				calendarId,
@@ -88,6 +308,7 @@
 				isAllDay,
 				description: description.trim() || undefined,
 				location: location.trim() || undefined,
+				metadata,
 			});
 
 			onCreated?.();
@@ -96,24 +317,6 @@
 			console.error('Failed to create event:', error);
 		} finally {
 			submitting = false;
-		}
-	}
-
-	function handleMoreOptions() {
-		const params = new URLSearchParams({
-			start: startTime.toISOString(),
-			title: title.trim(),
-			calendar: calendarId,
-		});
-		if (description) params.set('description', description);
-		if (location) params.set('location', location);
-		goto(`/event/new?${params.toString()}`);
-		onClose();
-	}
-
-	function handleBackdropClick(e: MouseEvent) {
-		if (e.target === e.currentTarget) {
-			onClose();
 		}
 	}
 
@@ -126,23 +329,18 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<!-- Backdrop -->
-<div class="overlay-backdrop" onclick={handleBackdropClick} role="presentation">
-	<!-- Overlay -->
-	<div
-		class="quick-event-overlay"
-		class:expanded={isExpanded}
-		style={overlayStyle}
-		role="dialog"
-		aria-modal="true"
-		aria-label="Termin erstellen"
-	>
+<!-- Overlay (no blocking backdrop - allows interaction with calendar) -->
+<div
+	class="quick-event-overlay"
+	style={overlayStyle}
+	role="dialog"
+	aria-modal="true"
+	aria-label="Termin erstellen"
+>
 		<form onsubmit={handleSubmit}>
 			<!-- Header -->
 			<div class="overlay-header">
-				<span class="time-badge">
-					{format(startTime, 'EEE, d. MMM')} {startTimeStr}
-				</span>
+				<span class="header-title">Neuer Termin</span>
 				<button type="button" class="close-btn" onclick={onClose} aria-label="Schließen">
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -150,131 +348,258 @@
 				</button>
 			</div>
 
-			<!-- Title input -->
-			<div class="form-group">
-				<input
-					type="text"
-					class="title-input"
-					bind:value={title}
-					placeholder="Termin hinzufügen"
-					autofocus
-				/>
-			</div>
+			<!-- Scrollable content -->
+			<div class="overlay-content">
+				<!-- Title input -->
+				<div class="form-group">
+					<input
+						type="text"
+						class="title-input"
+						value={title}
+						oninput={handleTitleChange}
+						bind:this={titleInputRef}
+						placeholder="Titel hinzufügen"
+					/>
+				</div>
 
-			<!-- Calendar select (compact) -->
-			<div class="form-group compact-row">
-				<div class="calendar-dot" style="background-color: {calendarsStore.getColor(calendarId)}"></div>
-				<select class="compact-select" bind:value={calendarId}>
-					{#each calendarsStore.calendars as cal}
-						<option value={cal.id}>{cal.name}</option>
-					{/each}
-				</select>
-			</div>
+				<!-- Time display under title -->
+				<div class="time-display">
+					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					<span>
+						{format(draftStart(), 'EEEE, d. MMMM yyyy', { locale: de })}
+						{#if !isAllDay}
+							· {displayStartTime} – {displayEndTime}
+						{:else}
+							· Ganztägig
+						{/if}
+					</span>
+				</div>
 
-			<!-- Expanded section -->
-			{#if isExpanded}
-				<div class="expanded-section">
-					<!-- All day toggle -->
-					<label class="toggle-row">
-						<input type="checkbox" bind:checked={isAllDay} />
+				<!-- Calendar select -->
+				<div class="form-row">
+					<div class="row-icon">
+						<div class="calendar-dot" style="background-color: {calendarsStore.getColor(calendarId)}"></div>
+					</div>
+					<div class="row-content">
+						<label class="field-label">Kalender</label>
+						<select class="field-select" value={calendarId} onchange={handleCalendarChange}>
+							{#each calendarsStore.calendars as cal}
+								<option value={cal.id}>{cal.name}</option>
+							{/each}
+						</select>
+					</div>
+				</div>
+
+				<!-- All day toggle -->
+				<div class="form-row clickable" onclick={handleAllDayToggle}>
+					<div class="row-icon">
+						<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+						</svg>
+					</div>
+					<div class="row-content toggle-content">
 						<span>Ganztägig</span>
-					</label>
+						<input type="checkbox" checked={isAllDay} class="toggle-checkbox" onclick={(e) => e.stopPropagation()} onchange={handleAllDayToggle} />
+					</div>
+				</div>
 
-					<!-- Time fields -->
-					{#if !isAllDay}
-						<div class="time-row">
-							<div class="time-field">
-								<label>Von</label>
-								<input type="time" bind:value={startTimeStr} />
-							</div>
-							<span class="time-sep">–</span>
-							<div class="time-field">
-								<label>Bis</label>
-								<input type="time" bind:value={endTimeStr} />
-							</div>
+				<!-- All-day display mode -->
+				{#if isAllDay}
+					<div class="form-row sub-row">
+						<div class="row-icon"></div>
+						<div class="row-content">
+							<label class="field-label">Anzeigeart</label>
+							<select class="field-select" bind:value={allDayDisplayMode}>
+								<option value="default">Standard (aus Einstellungen)</option>
+								<option value="header">In Kopfzeile</option>
+								<option value="block">Als Tagesblock</option>
+							</select>
 						</div>
-					{/if}
+					</div>
+				{/if}
 
-					<!-- Location -->
-					<div class="form-group">
+				<!-- Start date/time -->
+				<div class="form-row">
+					<div class="row-icon">
+						<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+						</svg>
+					</div>
+					<div class="row-content datetime-row">
+						<div class="datetime-field">
+							<label class="field-label">Beginn</label>
+							<input type="date" class="field-input" value={startDateStr} onchange={handleStartDateChange} />
+						</div>
+						{#if !isAllDay}
+							<div class="datetime-field time-field">
+								<label class="field-label">Uhrzeit</label>
+								<input type="time" class="field-input" value={startTimeStr} onchange={handleStartTimeChange} />
+							</div>
+						{/if}
+					</div>
+				</div>
+
+				<!-- End date/time -->
+				<div class="form-row">
+					<div class="row-icon">
+						<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+						</svg>
+					</div>
+					<div class="row-content datetime-row">
+						<div class="datetime-field">
+							<label class="field-label">Ende</label>
+							<input type="date" class="field-input" value={endDateStr} onchange={handleEndDateChange} />
+						</div>
+						{#if !isAllDay}
+							<div class="datetime-field time-field">
+								<label class="field-label">Uhrzeit</label>
+								<input type="time" class="field-input" value={endTimeStr} onchange={handleEndTimeChange} />
+							</div>
+						{/if}
+					</div>
+				</div>
+
+				<!-- Location -->
+				<div class="form-row">
+					<div class="row-icon">
+						<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+						</svg>
+					</div>
+					<div class="row-content">
 						<input
 							type="text"
-							class="field-input"
+							class="field-input full"
 							bind:value={location}
 							placeholder="Ort hinzufügen"
 						/>
+						<!-- Toggle for address details -->
+						<button
+							type="button"
+							class="address-toggle"
+							onclick={() => (showLocationDetails = !showLocationDetails)}
+						>
+							<svg class="toggle-chevron" class:rotated={showLocationDetails} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+							</svg>
+							{showLocationDetails ? 'Adressdetails ausblenden' : 'Adressdetails hinzufügen'}
+						</button>
 					</div>
+				</div>
 
-					<!-- Description -->
-					<div class="form-group">
+				<!-- Location details (expandable) -->
+				{#if showLocationDetails}
+					<div class="form-row sub-row">
+						<div class="row-icon"></div>
+						<div class="row-content address-details-form">
+							<div class="address-field">
+								<label class="field-label">Straße</label>
+								<input
+									type="text"
+									class="field-input"
+									bind:value={locationStreet}
+									placeholder="Musterstraße 123"
+								/>
+							</div>
+							<div class="address-row">
+								<div class="address-field postal">
+									<label class="field-label">PLZ</label>
+									<input
+										type="text"
+										class="field-input"
+										bind:value={locationPostalCode}
+										placeholder="12345"
+									/>
+								</div>
+								<div class="address-field city">
+									<label class="field-label">Stadt</label>
+									<input
+										type="text"
+										class="field-input"
+										bind:value={locationCity}
+										placeholder="Musterstadt"
+									/>
+								</div>
+							</div>
+							<div class="address-field">
+								<label class="field-label">Land</label>
+								<input
+									type="text"
+									class="field-input"
+									bind:value={locationCountry}
+									placeholder="Deutschland"
+								/>
+							</div>
+						</div>
+					</div>
+				{/if}
+
+				<!-- Description -->
+				<div class="form-row">
+					<div class="row-icon">
+						<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+						</svg>
+					</div>
+					<div class="row-content">
 						<textarea
-							class="field-input"
+							class="field-textarea"
 							bind:value={description}
-							placeholder="Beschreibung"
-							rows="2"
+							placeholder="Beschreibung hinzufügen"
+							rows="3"
 						></textarea>
 					</div>
 				</div>
-			{/if}
+			</div>
 
-			<!-- Actions -->
+			<!-- Actions (sticky footer) -->
 			<div class="overlay-actions">
-				<button
-					type="button"
-					class="expand-btn"
-					onclick={() => isExpanded = !isExpanded}
-				>
-					{isExpanded ? 'Weniger' : 'Mehr Optionen'}
-					<svg class="w-3 h-3" class:rotated={isExpanded} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-					</svg>
+				<button type="button" class="btn-ghost" onclick={onClose}>
+					Abbrechen
 				</button>
-
-				<div class="action-buttons">
-					<button type="button" class="btn-ghost" onclick={handleMoreOptions}>
-						Alle Optionen
-					</button>
-					<button type="submit" class="btn-primary" disabled={submitting || !title.trim()}>
-						Speichern
-					</button>
-				</div>
+				<button type="submit" class="btn-primary" disabled={submitting || !title.trim()}>
+					{submitting ? 'Speichern...' : 'Speichern'}
+				</button>
 			</div>
 		</form>
-	</div>
 </div>
 
 <style>
-	.overlay-backdrop {
-		position: fixed;
-		inset: 0;
-		z-index: 1000;
-		background: transparent;
-	}
-
 	.quick-event-overlay {
 		position: fixed;
-		width: 300px;
+		width: 380px;
+		max-height: 450px;
 		background: hsl(var(--color-surface));
 		border: 1px solid hsl(var(--color-border));
 		border-radius: var(--radius-lg);
-		box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1);
 		z-index: 1001;
-		overflow: hidden;
+		display: flex;
+		flex-direction: column;
 		animation: slideIn 150ms ease-out;
+		overflow: hidden; /* Prevent any content from overflowing */
 	}
 
-	.quick-event-overlay.expanded {
-		width: 360px;
+	.quick-event-overlay form {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		min-height: 0; /* Allow form to shrink below content size */
+		height: 100%;
 	}
 
 	@keyframes slideIn {
 		from {
 			opacity: 0;
-			transform: translateY(-8px);
+			transform: translateY(-8px) scale(0.98);
 		}
 		to {
 			opacity: 1;
-			transform: translateY(0);
+			transform: translateY(0) scale(1);
 		}
 	}
 
@@ -282,19 +607,19 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 0.75rem 1rem;
+		padding: 1rem 1.25rem;
 		border-bottom: 1px solid hsl(var(--color-border));
-		background: hsl(var(--color-muted) / 0.3);
+		flex-shrink: 0;
 	}
 
-	.time-badge {
-		font-size: 0.75rem;
-		font-weight: 500;
-		color: hsl(var(--color-muted-foreground));
+	.header-title {
+		font-size: 1rem;
+		font-weight: 600;
+		color: hsl(var(--color-foreground));
 	}
 
 	.close-btn {
-		padding: 0.25rem;
+		padding: 0.375rem;
 		border: none;
 		background: transparent;
 		color: hsl(var(--color-muted-foreground));
@@ -308,16 +633,24 @@
 		color: hsl(var(--color-foreground));
 	}
 
+	.overlay-content {
+		flex: 1;
+		min-height: 0; /* Important for flex scroll */
+		overflow-y: auto;
+		overscroll-behavior: contain; /* Prevent scroll chaining to background */
+		padding: 0.75rem 0;
+	}
+
 	.form-group {
-		padding: 0.5rem 1rem;
+		padding: 0 1.25rem;
 	}
 
 	.title-input {
 		width: 100%;
-		padding: 0.5rem 0;
+		padding: 0.75rem 0;
 		border: none;
 		background: transparent;
-		font-size: 1rem;
+		font-size: 1.25rem;
 		font-weight: 500;
 		color: hsl(var(--color-foreground));
 		outline: none;
@@ -327,94 +660,135 @@
 		color: hsl(var(--color-muted-foreground));
 	}
 
-	.compact-row {
+	.time-display {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
+		padding: 0.5rem 1.25rem 1rem;
+		font-size: 0.875rem;
+		color: hsl(var(--color-muted-foreground));
+		border-bottom: 1px solid hsl(var(--color-border));
+		margin-bottom: 0.5rem;
+	}
+
+	.icon {
+		width: 18px;
+		height: 18px;
+		flex-shrink: 0;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.form-row {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+		padding: 0.625rem 1.25rem;
+	}
+
+	.form-row.clickable {
+		cursor: pointer;
+		transition: background-color 150ms;
+	}
+
+	.form-row.clickable:hover {
+		background: hsl(var(--color-muted) / 0.3);
+	}
+
+	.form-row.sub-row {
 		padding-top: 0;
 	}
 
-	.calendar-dot {
-		width: 12px;
-		height: 12px;
-		border-radius: 50%;
+	.row-icon {
+		width: 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding-top: 0.25rem;
 		flex-shrink: 0;
 	}
 
-	.compact-select {
+	.calendar-dot {
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+	}
+
+	.row-content {
 		flex: 1;
-		padding: 0.25rem 0.5rem;
-		border: 1px solid hsl(var(--color-border));
-		border-radius: var(--radius-sm);
-		background: hsl(var(--color-background));
-		color: hsl(var(--color-foreground));
-		font-size: 0.875rem;
-		cursor: pointer;
+		min-width: 0;
 	}
 
-	.expanded-section {
-		border-top: 1px solid hsl(var(--color-border));
-		padding-top: 0.5rem;
-	}
-
-	.toggle-row {
+	.toggle-content {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 1rem;
-		cursor: pointer;
+		justify-content: space-between;
 		font-size: 0.875rem;
-	}
-
-	.toggle-row input {
-		accent-color: hsl(var(--color-primary));
-	}
-
-	.time-row {
-		display: flex;
-		align-items: flex-end;
-		gap: 0.5rem;
-		padding: 0.5rem 1rem;
-	}
-
-	.time-field {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.time-field label {
-		font-size: 0.75rem;
-		color: hsl(var(--color-muted-foreground));
-	}
-
-	.time-field input {
-		padding: 0.375rem 0.5rem;
-		border: 1px solid hsl(var(--color-border));
-		border-radius: var(--radius-sm);
-		background: hsl(var(--color-background));
 		color: hsl(var(--color-foreground));
-		font-size: 0.875rem;
 	}
 
-	.time-sep {
-		padding-bottom: 0.375rem;
+	.toggle-checkbox {
+		width: 18px;
+		height: 18px;
+		accent-color: hsl(var(--color-primary));
+		cursor: pointer;
+	}
+
+	.field-label {
+		display: block;
+		font-size: 0.75rem;
+		font-weight: 500;
 		color: hsl(var(--color-muted-foreground));
+		margin-bottom: 0.25rem;
 	}
 
+	.field-select,
 	.field-input {
 		width: 100%;
-		padding: 0.5rem;
+		padding: 0.5rem 0.625rem;
 		border: 1px solid hsl(var(--color-border));
 		border-radius: var(--radius-sm);
 		background: hsl(var(--color-background));
 		color: hsl(var(--color-foreground));
 		font-size: 0.875rem;
-		resize: none;
 	}
 
+	.field-select:focus,
 	.field-input:focus {
+		outline: none;
+		border-color: hsl(var(--color-primary));
+	}
+
+	.field-input.full {
+		padding: 0.625rem;
+	}
+
+	.datetime-row {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.datetime-field {
+		flex: 1;
+	}
+
+	.datetime-field.time-field {
+		flex: 0 0 100px;
+	}
+
+	.field-textarea {
+		width: 100%;
+		padding: 0.625rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: var(--radius-sm);
+		background: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
+		font-size: 0.875rem;
+		resize: vertical;
+		min-height: 80px;
+		font-family: inherit;
+	}
+
+	.field-textarea:focus {
 		outline: none;
 		border-color: hsl(var(--color-primary));
 	}
@@ -422,52 +796,22 @@
 	.overlay-actions {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		padding: 0.75rem 1rem;
+		justify-content: flex-end;
+		gap: 0.75rem;
+		padding: 1rem 1.25rem;
 		border-top: 1px solid hsl(var(--color-border));
-		background: hsl(var(--color-muted) / 0.2);
-	}
-
-	.expand-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		padding: 0.375rem 0.5rem;
-		border: none;
-		background: transparent;
-		color: hsl(var(--color-muted-foreground));
-		font-size: 0.75rem;
-		cursor: pointer;
-		border-radius: var(--radius-sm);
-		transition: all 150ms;
-	}
-
-	.expand-btn:hover {
-		color: hsl(var(--color-foreground));
-		background: hsl(var(--color-muted));
-	}
-
-	.expand-btn svg {
-		transition: transform 150ms;
-	}
-
-	.expand-btn svg.rotated {
-		transform: rotate(180deg);
-	}
-
-	.action-buttons {
-		display: flex;
-		gap: 0.5rem;
+		background: hsl(var(--color-surface));
+		flex-shrink: 0;
 	}
 
 	.btn-ghost {
-		padding: 0.375rem 0.75rem;
-		border: 1px solid hsl(var(--color-border));
+		padding: 0.5rem 1rem;
+		border: none;
 		background: transparent;
 		color: hsl(var(--color-foreground));
-		font-size: 0.75rem;
+		font-size: 0.875rem;
 		font-weight: 500;
-		border-radius: var(--radius-sm);
+		border-radius: var(--radius-md);
 		cursor: pointer;
 		transition: all 150ms;
 	}
@@ -477,13 +821,13 @@
 	}
 
 	.btn-primary {
-		padding: 0.375rem 0.75rem;
+		padding: 0.5rem 1.25rem;
 		border: none;
 		background: hsl(var(--color-primary));
 		color: hsl(var(--color-primary-foreground));
-		font-size: 0.75rem;
+		font-size: 0.875rem;
 		font-weight: 500;
-		border-radius: var(--radius-sm);
+		border-radius: var(--radius-md);
 		cursor: pointer;
 		transition: all 150ms;
 	}
@@ -495,5 +839,86 @@
 	.btn-primary:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+	}
+
+	/* Scrollbar styling */
+	.overlay-content {
+		scrollbar-width: thin;
+		scrollbar-color: hsl(var(--color-muted)) transparent;
+	}
+
+	.overlay-content::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.overlay-content::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.overlay-content::-webkit-scrollbar-thumb {
+		background: hsl(var(--color-muted));
+		border-radius: 3px;
+	}
+
+	.overlay-content::-webkit-scrollbar-thumb:hover {
+		background: hsl(var(--color-muted-foreground));
+	}
+
+	/* Address toggle and details */
+	.address-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		margin-top: 0.5rem;
+		padding: 0;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-primary));
+		font-size: 0.8125rem;
+		cursor: pointer;
+		transition: color 150ms;
+	}
+
+	.address-toggle:hover {
+		color: hsl(var(--color-primary) / 0.8);
+	}
+
+	.toggle-chevron {
+		width: 14px;
+		height: 14px;
+		transition: transform 150ms ease;
+	}
+
+	.toggle-chevron.rotated {
+		transform: rotate(90deg);
+	}
+
+	.address-details-form {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		padding: 0.75rem;
+		background: hsl(var(--color-muted) / 0.3);
+		border-radius: var(--radius-sm);
+		border: 1px solid hsl(var(--color-border));
+	}
+
+	.address-field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	.address-row {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.address-field.postal {
+		flex: 0 0 80px;
+	}
+
+	.address-field.city {
+		flex: 1;
 	}
 </style>

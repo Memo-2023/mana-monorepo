@@ -7,7 +7,7 @@
 	}
 
 	function handleAddCalendar() {
-		goto('/calendars/new');
+		goto('/settings');
 	}
 </script>
 

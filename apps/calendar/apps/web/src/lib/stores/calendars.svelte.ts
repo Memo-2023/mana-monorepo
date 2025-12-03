@@ -72,9 +72,7 @@ export const calendarsStore = {
 		const result = await api.createCalendar(data);
 
 		if (result.data) {
-			// API returns { calendar: {...} }
-			const responseData = result.data as { calendar: Calendar };
-			calendars = [...calendars, responseData.calendar];
+			calendars = [...calendars, result.data];
 		}
 
 		return result;
@@ -87,9 +85,7 @@ export const calendarsStore = {
 		const result = await api.updateCalendar(id, data);
 
 		if (result.data) {
-			// API returns { calendar: {...} }
-			const responseData = result.data as { calendar: Calendar };
-			calendars = getCalendarsArray().map((c) => (c.id === id ? responseData.calendar : c));
+			calendars = getCalendarsArray().map((c) => (c.id === id ? result.data! : c));
 		}
 
 		return result;

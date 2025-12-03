@@ -26,8 +26,9 @@
 	// Props
 	interface Props {
 		dayCount: 5 | 10 | 14;
+		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
 	}
-	let { dayCount }: Props = $props();
+	let { dayCount, onQuickCreate }: Props = $props();
 
 	// Get date-fns locale based on current app locale
 	const dateLocales = { de, en: enUS, fr, es, it };
@@ -164,16 +165,21 @@
 			setTimeout(() => { hasMoved = false; }, 100);
 			return;
 		}
-		goto(`/event/${event.id}`);
+		goto(`/?event=${event.id}`);
 	}
 
-	function handleSlotClick(day: Date, hour: number) {
+	function handleSlotClick(day: Date, hour: number, e: MouseEvent) {
 		// Don't create new event if dragging
 		if (isDragging || isResizing) return;
 
 		const startTime = new Date(day);
 		startTime.setHours(hour, 0, 0, 0);
-		goto(`/event/new?start=${startTime.toISOString()}`);
+
+		if (onQuickCreate) {
+			onQuickCreate(startTime, { x: e.clientX, y: e.clientY });
+		} else {
+			goto(`/event/new?start=${startTime.toISOString()}`);
+		}
 	}
 
 	// ========== Drag & Drop Functions ==========
@@ -278,11 +284,18 @@
 
 		const newEnd = addMinutes(newStart, duration);
 
-		// Update event via store
-		await eventsStore.updateEvent(draggedEvent.id, {
-			startTime: newStart.toISOString(),
-			endTime: newEnd.toISOString(),
-		});
+		// Update event via store (use updateDraftEvent for draft events)
+		if (eventsStore.isDraftEvent(draggedEvent.id)) {
+			eventsStore.updateDraftEvent({
+				startTime: newStart.toISOString(),
+				endTime: newEnd.toISOString(),
+			});
+		} else {
+			await eventsStore.updateEvent(draggedEvent.id, {
+				startTime: newStart.toISOString(),
+				endTime: newEnd.toISOString(),
+			});
+		}
 
 		// Reset state
 		isDragging = false;
@@ -374,11 +387,18 @@
 			newStart = setMinutes(newStart, newMins);
 		}
 
-		// Update event via store
-		await eventsStore.updateEvent(resizeEvent.id, {
-			startTime: newStart.toISOString(),
-			endTime: newEnd.toISOString(),
-		});
+		// Update event via store (use updateDraftEvent for draft events)
+		if (eventsStore.isDraftEvent(resizeEvent.id)) {
+			eventsStore.updateDraftEvent({
+				startTime: newStart.toISOString(),
+				endTime: newEnd.toISOString(),
+			});
+		} else {
+			await eventsStore.updateEvent(resizeEvent.id, {
+				startTime: newStart.toISOString(),
+				endTime: newEnd.toISOString(),
+			});
+		}
 
 		// Reset state
 		isResizing = false;
@@ -465,7 +485,7 @@
 					{#each hours as hour}
 						<button
 							class="hour-slot"
-							onclick={() => handleSlotClick(day, hour)}
+							onclick={(e) => handleSlotClick(day, hour, e)}
 							aria-label={`${format(day, 'EEEE', { locale: currentDateLocale })} ${settingsStore.formatHour(hour)}`}
 						></button>
 					{/each}
@@ -486,10 +506,13 @@
 					{#each getEventsForDay(day) as event (event.id)}
 						{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
 						{@const isBeingResized = isResizing && resizeEvent?.id === event.id}
+						{@const isDraft = eventsStore.isDraftEvent(event.id)}
 						<div
 							class="event-card"
 							class:dragging={isBeingDragged}
 							class:resizing={isBeingResized}
+							class:draft={isDraft}
+							data-event-id={event.id}
 							style={isBeingDragged
 								? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
 								: isBeingResized
@@ -498,9 +521,9 @@
 							role="button"
 							tabindex="0"
 							onpointerdown={(e) => startDrag(event, e)}
-							onclick={(e) => handleEventClick(event, e)}
-							onkeydown={(e) => e.key === 'Enter' && goto(`/event/${event.id}`)}
-							title={`${formatEventTime(event.startTime)} - ${event.title}`}
+							onclick={(e) => !isDraft && handleEventClick(event, e)}
+							onkeydown={(e) => !isDraft && e.key === 'Enter' && goto(`/?event=${event.id}`)}
+							title={`${formatEventTime(event.startTime)} - ${formatEventTime(event.endTime)}: ${event.title || (isDraft ? '(Neuer Termin)' : '')}`}
 						>
 							<!-- Top resize handle -->
 							<div
@@ -513,10 +536,10 @@
 
 							{#if columnClass !== 'very-compact'}
 								<span class="event-time">
-									{formatEventTime(event.startTime)}
+									{formatEventTime(event.startTime)} - {formatEventTime(event.endTime)}
 								</span>
 							{/if}
-							<span class="event-title">{event.title}</span>
+							<span class="event-title">{event.title || (isDraft ? '(Neuer Termin)' : '')}</span>
 
 							<!-- Bottom resize handle -->
 							<div
@@ -794,6 +817,21 @@
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 		outline: 2px dashed rgba(255, 255, 255, 0.6);
 		outline-offset: -2px;
+	}
+
+	.event-card.draft {
+		outline: 2px solid hsl(var(--color-primary));
+		outline-offset: -1px;
+		animation: pulse-outline 1.5s ease-in-out infinite;
+	}
+
+	@keyframes pulse-outline {
+		0%, 100% {
+			outline-color: hsl(var(--color-primary));
+		}
+		50% {
+			outline-color: hsl(var(--color-primary) / 0.5);
+		}
 	}
 
 	.event-card.drag-ghost {

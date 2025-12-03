@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
@@ -11,12 +12,53 @@
 	import DayView from '$lib/components/calendar/DayView.svelte';
 	import MonthView from '$lib/components/calendar/MonthView.svelte';
 	import MultiDayView from '$lib/components/calendar/MultiDayView.svelte';
+	import YearView from '$lib/components/calendar/YearView.svelte';
 	import MiniCalendar from '$lib/components/calendar/MiniCalendar.svelte';
 	import CalendarSidebar from '$lib/components/calendar/CalendarSidebar.svelte';
-	import { format } from 'date-fns';
+	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
+	import EventDetailModal from '$lib/components/event/EventDetailModal.svelte';
+	import { format, addMinutes } from 'date-fns';
 	import { de } from 'date-fns/locale';
 
 	let initialized = $state(false);
+
+	// Quick event overlay state
+	let showQuickCreate = $state(false);
+	let quickCreateDate = $state<Date>(new Date());
+
+	// Event modal state (local state for reactivity)
+	let selectedEventId = $state<string | null>(null);
+
+	// Derive modal open state from URL
+	let modalEventId = $derived($page.url.searchParams.get('event'));
+
+	function handleQuickCreate(date: Date, position: { x: number; y: number }) {
+		quickCreateDate = date;
+
+		// Create draft event immediately so it appears in the grid
+		const defaultCalendar = calendarsStore.defaultCalendar;
+		const endTime = addMinutes(date, settingsStore.defaultEventDuration);
+
+		eventsStore.createDraftEvent({
+			calendarId: defaultCalendar?.id || '',
+			title: '',
+			startTime: date.toISOString(),
+			endTime: endTime.toISOString(),
+			isAllDay: false,
+		});
+
+		showQuickCreate = true;
+	}
+
+	function handleQuickCreateClose() {
+		showQuickCreate = false;
+		eventsStore.clearDraftEvent();
+	}
+
+	function handleEventCreated() {
+		// Event is automatically added to store, draft is cleared
+		eventsStore.clearDraftEvent();
+	}
 
 	onMount(async () => {
 		if (!authStore.isAuthenticated) {
@@ -28,6 +70,11 @@
 		await eventsStore.fetchEvents(viewStore.viewRange.start, viewStore.viewRange.end);
 		initialized = true;
 	});
+
+	function handleEventModalClose() {
+		// Remove event param from URL
+		goto('/', { replaceState: true });
+	}
 
 	// Refetch events when view changes
 	$effect(() => {
@@ -108,22 +155,41 @@
 
 		<div class="calendar-content">
 			{#if viewStore.viewType === 'day'}
-				<DayView />
+				<DayView onQuickCreate={handleQuickCreate} />
 			{:else if viewStore.viewType === '5day'}
-				<MultiDayView dayCount={5} />
+				<MultiDayView dayCount={5} onQuickCreate={handleQuickCreate} />
 			{:else if viewStore.viewType === 'week'}
-				<WeekView />
+				<WeekView onQuickCreate={handleQuickCreate} />
 			{:else if viewStore.viewType === '10day'}
-				<MultiDayView dayCount={10} />
+				<MultiDayView dayCount={10} onQuickCreate={handleQuickCreate} />
 			{:else if viewStore.viewType === '14day'}
-				<MultiDayView dayCount={14} />
+				<MultiDayView dayCount={14} onQuickCreate={handleQuickCreate} />
 			{:else if viewStore.viewType === 'month'}
-				<MonthView />
+				<MonthView onQuickCreate={handleQuickCreate} />
+			{:else if viewStore.viewType === 'year'}
+				<YearView onQuickCreate={handleQuickCreate} />
 			{:else}
-				<WeekView />
+				<WeekView onQuickCreate={handleQuickCreate} />
 			{/if}
 		</div>
 	</div>
+
+	<!-- Quick Event Overlay -->
+	{#if showQuickCreate}
+		<QuickEventOverlay
+			startTime={quickCreateDate}
+			onClose={handleQuickCreateClose}
+			onCreated={handleEventCreated}
+		/>
+	{/if}
+
+	<!-- Event Detail Modal -->
+	{#if modalEventId}
+		<EventDetailModal
+			eventId={modalEventId}
+			onClose={handleEventModalClose}
+		/>
+	{/if}
 </div>
 
 <style>

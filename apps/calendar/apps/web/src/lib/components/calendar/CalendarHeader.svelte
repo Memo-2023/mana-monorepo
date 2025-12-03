@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { isNavCollapsed } from '$lib/stores/navigation';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import type { CalendarViewType } from '@calendar/shared';
@@ -18,7 +19,7 @@
 	};
 
 	// Views to show in selector
-	const visibleViews: CalendarViewType[] = ['day', '5day', 'week', '10day', '14day', 'month'];
+	const visibleViews: CalendarViewType[] = ['day', '5day', 'week', '10day', '14day', 'month', 'year'];
 
 	// Format title based on view type
 	let title = $derived.by(() => {
@@ -58,7 +59,7 @@
 	}
 </script>
 
-<header class="calendar-header">
+<header class="calendar-header" class:nav-collapsed={$isNavCollapsed}>
 	<div class="header-left">
 		<button class="today-btn" onclick={() => viewStore.goToToday()}>
 			Heute
@@ -123,9 +124,14 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 0.5rem 1rem;
-		border-bottom: 1px solid hsl(var(--color-border));
-		background: hsl(var(--color-surface));
+		padding: 0.75rem 1rem;
+		background: hsl(var(--color-background));
+		border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+		transition: padding-left 300ms ease;
+	}
+
+	.calendar-header.nav-collapsed {
+		padding-left: 4rem;
 	}
 
 	.header-left {
@@ -174,7 +180,7 @@
 	}
 
 	.header-title {
-		font-size: 1rem;
+		font-size: 1.25rem;
 		font-weight: 600;
 		color: hsl(var(--color-foreground));
 		margin: 0;

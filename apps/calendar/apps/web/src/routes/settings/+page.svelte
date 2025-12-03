@@ -6,10 +6,18 @@
 	import { theme } from '$lib/stores/theme';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { settingsStore, type WeekStartDay, type TimeFormat, type AllDayDisplayMode } from '$lib/stores/settings.svelte';
+	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { toast } from '$lib/stores/toast';
 	import { setLocale, supportedLocales, type SupportedLocale } from '$lib/i18n';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { GlobalSettingsSection } from '@manacore/shared-ui';
-	import type { CalendarViewType } from '@calendar/shared';
+	import type { CalendarViewType, Calendar } from '@calendar/shared';
+
+	// Calendar management state
+	let editingCalendar = $state<Calendar | null>(null);
+	let showNewCalendarForm = $state(false);
+	let newCalendarName = $state('');
+	let newCalendarColor = $state('#3b82f6');
 
 	// Get current locale from svelte-i18n
 	import { locale } from 'svelte-i18n';
@@ -22,6 +30,52 @@
 		settingsStore.initialize();
 		await userSettings.load();
 	});
+
+	// Calendar management functions
+	async function handleCreateCalendar() {
+		if (!newCalendarName.trim()) return;
+
+		const result = await calendarsStore.createCalendar({
+			name: newCalendarName.trim(),
+			color: newCalendarColor,
+		});
+
+		if (result.error) {
+			toast.error(`Fehler: ${result.error.message}`);
+			return;
+		}
+
+		toast.success('Kalender erstellt');
+		newCalendarName = '';
+		showNewCalendarForm = false;
+	}
+
+	async function handleDeleteCalendar(calendar: Calendar) {
+		if (!confirm(`Möchten Sie "${calendar.name}" wirklich löschen?`)) {
+			return;
+		}
+
+		const result = await calendarsStore.deleteCalendar(calendar.id);
+
+		if (result.error) {
+			toast.error(`Fehler: ${result.error.message}`);
+			return;
+		}
+
+		toast.success('Kalender gelöscht');
+	}
+
+	async function handleUpdateCalendar(calendar: Calendar, name: string, color: string) {
+		const result = await calendarsStore.updateCalendar(calendar.id, { name, color });
+
+		if (result.error) {
+			toast.error(`Fehler: ${result.error.message}`);
+			return;
+		}
+
+		toast.success('Kalender aktualisiert');
+		editingCalendar = null;
+	}
 
 	function handleThemeChange(mode: 'light' | 'dark' | 'system') {
 		theme.setMode(mode);
@@ -95,6 +149,101 @@
 	<header class="page-header">
 		<h1>Einstellungen</h1>
 	</header>
+
+	<!-- Meine Kalender -->
+	<section class="settings-section card">
+		<div class="calendars-header">
+			<h2>Meine Kalender</h2>
+			<button class="btn btn-primary btn-sm" onclick={() => (showNewCalendarForm = true)}>
+				Neuer Kalender
+			</button>
+		</div>
+
+		{#if showNewCalendarForm}
+			<div class="new-calendar-form">
+				<form
+					onsubmit={(e) => {
+						e.preventDefault();
+						handleCreateCalendar();
+					}}
+				>
+					<div class="calendar-form-row">
+						<input
+							type="text"
+							class="input"
+							placeholder="Kalender Name"
+							bind:value={newCalendarName}
+						/>
+						<input type="color" class="color-input" bind:value={newCalendarColor} />
+					</div>
+					<div class="calendar-form-actions">
+						<button type="button" class="btn btn-ghost" onclick={() => (showNewCalendarForm = false)}>
+							Abbrechen
+						</button>
+						<button type="submit" class="btn btn-primary" disabled={!newCalendarName.trim()}>
+							Erstellen
+						</button>
+					</div>
+				</form>
+			</div>
+		{/if}
+
+		<div class="calendar-list">
+			{#each calendarsStore.calendars as calendar}
+				<div class="calendar-card">
+					{#if editingCalendar?.id === calendar.id}
+						<form
+							onsubmit={(e) => {
+								e.preventDefault();
+								const form = e.target as HTMLFormElement;
+								const name = (form.elements.namedItem('name') as HTMLInputElement).value;
+								const color = (form.elements.namedItem('color') as HTMLInputElement).value;
+								handleUpdateCalendar(calendar, name, color);
+							}}
+						>
+							<div class="calendar-form-row">
+								<input type="text" name="name" class="input" value={calendar.name} />
+								<input type="color" name="color" class="color-input" value={calendar.color} />
+							</div>
+							<div class="calendar-form-actions">
+								<button type="button" class="btn btn-ghost" onclick={() => (editingCalendar = null)}>
+									Abbrechen
+								</button>
+								<button type="submit" class="btn btn-primary"> Speichern </button>
+							</div>
+						</form>
+					{:else}
+						<div class="calendar-info">
+							<span class="color-dot" style="background-color: {calendar.color}"></span>
+							<span class="calendar-name">{calendar.name}</span>
+							{#if calendar.isDefault}
+								<span class="badge">Standard</span>
+							{/if}
+						</div>
+						<div class="calendar-actions">
+							<button class="btn btn-ghost btn-sm" onclick={() => (editingCalendar = calendar)}>
+								Bearbeiten
+							</button>
+							{#if !calendar.isDefault}
+								<button
+									class="btn btn-ghost btn-sm text-destructive"
+									onclick={() => handleDeleteCalendar(calendar)}
+								>
+									Löschen
+								</button>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			{/each}
+
+			{#if calendarsStore.calendars.length === 0}
+				<div class="empty-state">
+					<p>Keine Kalender vorhanden</p>
+				</div>
+			{/if}
+		</div>
+	</section>
 
 	<!-- Sprache -->
 	<section class="settings-section card">
@@ -702,5 +851,108 @@
 		font-size: 1.25rem;
 		color: hsl(var(--color-muted-foreground));
 		margin-top: 1.25rem;
+	}
+
+	/* Calendar management styles */
+	.calendars-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 1rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid hsl(var(--color-border));
+	}
+
+	.calendars-header h2 {
+		margin: 0;
+		padding: 0;
+		border: none;
+	}
+
+	.new-calendar-form {
+		margin-bottom: 1rem;
+		padding: 1rem;
+		background: hsl(var(--color-muted) / 0.3);
+		border-radius: var(--radius-md);
+	}
+
+	.calendar-form-row {
+		display: flex;
+		gap: 0.75rem;
+		margin-bottom: 1rem;
+	}
+
+	.calendar-form-row .input {
+		flex: 1;
+	}
+
+	.color-input {
+		width: 48px;
+		height: 42px;
+		padding: 4px;
+		border: 2px solid hsl(var(--color-border));
+		border-radius: var(--radius-md);
+		cursor: pointer;
+	}
+
+	.calendar-form-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 0.5rem;
+	}
+
+	.calendar-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.calendar-card {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.75rem;
+		background: hsl(var(--color-muted) / 0.2);
+		border-radius: var(--radius-md);
+	}
+
+	.calendar-info {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.color-dot {
+		width: 16px;
+		height: 16px;
+		border-radius: var(--radius-full);
+	}
+
+	.calendar-name {
+		font-weight: 500;
+	}
+
+	.badge {
+		font-size: 0.75rem;
+		padding: 0.125rem 0.5rem;
+		background: hsl(var(--color-muted));
+		border-radius: var(--radius-sm);
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.calendar-actions {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.btn-sm {
+		padding: 0.25rem 0.75rem;
+		font-size: 0.875rem;
+	}
+
+	.empty-state {
+		text-align: center;
+		padding: 1.5rem;
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>

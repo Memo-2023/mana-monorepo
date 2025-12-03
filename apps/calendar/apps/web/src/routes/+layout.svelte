@@ -79,7 +79,6 @@
 	const navItems: PillNavItem[] = [
 		{ href: '/', label: 'Kalender', icon: 'calendar' },
 		{ href: '/agenda', label: 'Agenda', icon: 'list' },
-		{ href: '/calendars', label: 'Meine Kalender', icon: 'folder' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
@@ -242,10 +241,12 @@
 
 	.main-content {
 		transition: all 300ms ease;
+		position: relative;
+		z-index: 0;
 	}
 
 	.main-content.floating-mode {
-		padding-top: 100px;
+		padding-top: 70px;
 	}
 
 	.main-content.sidebar-mode {
@@ -257,6 +258,8 @@
 		margin-left: auto;
 		margin-right: auto;
 		padding: 1rem;
+		position: relative;
+		z-index: 0;
 	}
 
 	@media (min-width: 640px) {

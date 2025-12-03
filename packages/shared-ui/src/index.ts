@@ -57,6 +57,7 @@ export {
 	SettingsToggle,
 	SettingsDangerZone,
 	SettingsDangerButton,
+	GlobalSettingsSection,
 } from './settings';
 
 // Pages

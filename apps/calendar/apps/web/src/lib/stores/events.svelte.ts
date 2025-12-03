@@ -12,6 +12,9 @@ let loading = $state(false);
 let error = $state<string | null>(null);
 let loadedRange = $state<{ start: Date; end: Date } | null>(null);
 
+// Draft event for quick create (temporary event shown in grid before saving)
+let draftEvent = $state<CalendarEvent | null>(null);
+
 export const eventsStore = {
 	// Getters - always return safe values
 	get events() {
@@ -22,6 +25,9 @@ export const eventsStore = {
 	},
 	get error() {
 		return error;
+	},
+	get draftEvent() {
+		return draftEvent;
 	},
 
 	/**
@@ -51,14 +57,14 @@ export const eventsStore = {
 	},
 
 	/**
-	 * Get events for a specific day
+	 * Get events for a specific day (including draft event)
 	 */
-	getEventsForDay(date: Date) {
+	getEventsForDay(date: Date, includeDraft = true) {
 		// Safety check: ensure events is an array (Svelte 5 runes safety)
 		const currentEvents = events ?? [];
 		if (!Array.isArray(currentEvents)) return [];
 
-		return currentEvents.filter((event) => {
+		const result = currentEvents.filter((event) => {
 			const eventStart =
 				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
 			const eventEnd = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
@@ -74,6 +80,17 @@ export const eventsStore = {
 			// For timed events, check if event starts on this day
 			return isSameDay(date, eventStart);
 		});
+
+		// Include draft event if it exists and is on this day
+		if (includeDraft && draftEvent) {
+			const draftStart =
+				typeof draftEvent.startTime === 'string' ? parseISO(draftEvent.startTime) : draftEvent.startTime;
+			if (isSameDay(date, draftStart)) {
+				result.push(draftEvent);
+			}
+		}
+
+		return result;
 	},
 
 	/**
@@ -101,9 +118,7 @@ export const eventsStore = {
 		const result = await api.createEvent(data);
 
 		if (result.data) {
-			// API returns { event: {...} }
-			const responseData = result.data as { event: CalendarEvent };
-			events = [...events, responseData.event];
+			events = [...events, result.data];
 		}
 
 		return result;
@@ -116,9 +131,7 @@ export const eventsStore = {
 		const result = await api.updateEvent(id, data);
 
 		if (result.data) {
-			// API returns { event: {...} }
-			const responseData = result.data as { event: CalendarEvent };
-			events = events.map((e) => (e.id === id ? responseData.event : e));
+			events = events.map((e) => (e.id === id ? result.data! : e));
 		}
 
 		return result;
@@ -154,5 +167,59 @@ export const eventsStore = {
 	clear() {
 		events = [];
 		loadedRange = null;
+	},
+
+	// ========== Draft Event Methods ==========
+
+	/**
+	 * Create a draft event (shown immediately in grid, not saved yet)
+	 */
+	createDraftEvent(data: Partial<CalendarEvent>) {
+		draftEvent = {
+			id: '__draft__',
+			calendarId: data.calendarId || '',
+			userId: '',
+			title: data.title || '',
+			description: data.description || null,
+			location: data.location || null,
+			startTime: data.startTime || new Date().toISOString(),
+			endTime: data.endTime || new Date().toISOString(),
+			isAllDay: data.isAllDay || false,
+			timezone: data.timezone || null,
+			recurrenceRule: null,
+			recurrenceEndDate: null,
+			recurrenceExceptions: null,
+			parentEventId: null,
+			color: data.color || null,
+			status: 'confirmed',
+			externalId: null,
+			metadata: data.metadata || null,
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		} as CalendarEvent;
+		return draftEvent;
+	},
+
+	/**
+	 * Update the draft event (when user changes time by dragging)
+	 */
+	updateDraftEvent(data: Partial<CalendarEvent>) {
+		if (draftEvent) {
+			draftEvent = { ...draftEvent, ...data };
+		}
+	},
+
+	/**
+	 * Clear the draft event (on cancel or after saving)
+	 */
+	clearDraftEvent() {
+		draftEvent = null;
+	},
+
+	/**
+	 * Check if an event is the draft event
+	 */
+	isDraftEvent(eventId: string) {
+		return eventId === '__draft__';
 	},
 };

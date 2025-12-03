@@ -4,7 +4,6 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { goto } from '$app/navigation';
-	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
 	import {
 		format,
 		eachDayOfInterval,
@@ -21,6 +20,12 @@
 	} from 'date-fns';
 	import { de, enUS, fr, es, it } from 'date-fns/locale';
 	import { locale } from 'svelte-i18n';
+
+	interface Props {
+		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
+	}
+
+	let { onQuickCreate }: Props = $props();
 
 	// Constants
 	const HOUR_HEIGHT = 60; // px - should match CSS --hour-height
@@ -101,11 +106,6 @@
 	// Track if we actually moved during drag/resize (to prevent click on simple mousedown/up)
 	let hasMoved = $state(false);
 
-	// Quick Event Overlay State
-	let showQuickEvent = $state(false);
-	let quickEventStartTime = $state<Date | null>(null);
-	let quickEventPosition = $state({ x: 0, y: 0 });
-
 	// Reference to the days container for position calculations
 	let daysContainerEl: HTMLDivElement;
 
@@ -165,7 +165,7 @@
 			setTimeout(() => { hasMoved = false; }, 100);
 			return;
 		}
-		goto(`/event/${event.id}`);
+		goto(`/?event=${event.id}`);
 	}
 
 	function handleSlotClick(day: Date, hour: number, e: MouseEvent) {
@@ -175,15 +175,11 @@
 		const startTime = new Date(day);
 		startTime.setHours(hour, 0, 0, 0);
 
-		// Show quick event overlay at click position
-		quickEventStartTime = startTime;
-		quickEventPosition = { x: e.clientX, y: e.clientY };
-		showQuickEvent = true;
-	}
-
-	function closeQuickEvent() {
-		showQuickEvent = false;
-		quickEventStartTime = null;
+		if (onQuickCreate) {
+			onQuickCreate(startTime, { x: e.clientX, y: e.clientY });
+		} else {
+			goto(`/event/new?start=${startTime.toISOString()}`);
+		}
 	}
 
 	// ========== Drag & Drop Functions ==========
@@ -288,11 +284,18 @@
 
 		const newEnd = addMinutes(newStart, duration);
 
-		// Update event via store
-		await eventsStore.updateEvent(draggedEvent.id, {
-			startTime: newStart.toISOString(),
-			endTime: newEnd.toISOString(),
-		});
+		// Update event via store (use updateDraftEvent for draft events)
+		if (eventsStore.isDraftEvent(draggedEvent.id)) {
+			eventsStore.updateDraftEvent({
+				startTime: newStart.toISOString(),
+				endTime: newEnd.toISOString(),
+			});
+		} else {
+			await eventsStore.updateEvent(draggedEvent.id, {
+				startTime: newStart.toISOString(),
+				endTime: newEnd.toISOString(),
+			});
+		}
 
 		// Reset state
 		isDragging = false;
@@ -384,11 +387,18 @@
 			newStart = setMinutes(newStart, newMins);
 		}
 
-		// Update event via store
-		await eventsStore.updateEvent(resizeEvent.id, {
-			startTime: newStart.toISOString(),
-			endTime: newEnd.toISOString(),
-		});
+		// Update event via store (use updateDraftEvent for draft events)
+		if (eventsStore.isDraftEvent(resizeEvent.id)) {
+			eventsStore.updateDraftEvent({
+				startTime: newStart.toISOString(),
+				endTime: newEnd.toISOString(),
+			});
+		} else {
+			await eventsStore.updateEvent(resizeEvent.id, {
+				startTime: newStart.toISOString(),
+				endTime: newEnd.toISOString(),
+			});
+		}
 
 		// Reset state
 		isResizing = false;
@@ -450,7 +460,7 @@
 						<button
 							class="all-day-event"
 							style="background-color: {calendarsStore.getColor(event.calendarId)}"
-							onclick={() => goto(`/event/${event.id}`)}
+							onclick={() => goto(`/?event=${event.id}`)}
 						>
 							{event.title}
 						</button>
@@ -499,7 +509,7 @@
 						<button
 							class="all-day-block-event"
 							style="background-color: {calendarsStore.getColor(event.calendarId)}"
-							onclick={() => goto(`/event/${event.id}`)}
+							onclick={() => goto(`/?event=${event.id}`)}
 						>
 							<span class="event-title">{event.title}</span>
 						</button>
@@ -509,10 +519,13 @@
 					{#each getEventsForDay(day) as event (event.id)}
 						{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
 						{@const isBeingResized = isResizing && resizeEvent?.id === event.id}
+						{@const isDraft = eventsStore.isDraftEvent(event.id)}
 						<div
 							class="event-card"
 							class:dragging={isBeingDragged}
 							class:resizing={isBeingResized}
+							class:draft={isDraft}
+							data-event-id={event.id}
 							style={isBeingDragged
 								? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
 								: isBeingResized
@@ -521,8 +534,8 @@
 							role="button"
 							tabindex="0"
 							onpointerdown={(e) => startDrag(event, e)}
-							onclick={(e) => handleEventClick(event, e)}
-							onkeydown={(e) => e.key === 'Enter' && goto(`/event/${event.id}`)}
+							onclick={(e) => !isDraft && handleEventClick(event, e)}
+							onkeydown={(e) => !isDraft && e.key === 'Enter' && goto(`/?event=${event.id}`)}
 						>
 							<!-- Top resize handle -->
 							<div
@@ -534,9 +547,9 @@
 							></div>
 
 							<span class="event-time">
-								{formatEventTime(event.startTime)}
+								{formatEventTime(event.startTime)} - {formatEventTime(event.endTime)}
 							</span>
-							<span class="event-title">{event.title}</span>
+							<span class="event-title">{event.title || (isDraft ? '(Neuer Termin)' : '')}</span>
 
 							<!-- Bottom resize handle -->
 							<div
@@ -779,6 +792,21 @@
 		opacity: 0.6;
 		pointer-events: none;
 		border: 2px dashed white;
+	}
+
+	.event-card.draft {
+		outline: 2px solid hsl(var(--color-primary));
+		outline-offset: -1px;
+		animation: pulse-outline 1.5s ease-in-out infinite;
+	}
+
+	@keyframes pulse-outline {
+		0%, 100% {
+			outline-color: hsl(var(--color-primary));
+		}
+		50% {
+			outline-color: hsl(var(--color-primary) / 0.5);
+		}
 	}
 
 	.event-time {

@@ -13,6 +13,20 @@ export interface EventAttendee {
 export type AllDayDisplayMode = 'header' | 'block';
 
 /**
+ * Structured location/address details
+ */
+export interface LocationDetails {
+	/** Street address */
+	street?: string;
+	/** Postal/ZIP code */
+	postalCode?: string;
+	/** City/Town */
+	city?: string;
+	/** Country */
+	country?: string;
+}
+
+/**
  * Event metadata stored in JSONB
  */
 export interface EventMetadata {
@@ -30,6 +44,8 @@ export interface EventMetadata {
 	tags?: string[];
 	/** Override for all-day display mode (uses global setting if not set) */
 	allDayDisplayMode?: AllDayDisplayMode;
+	/** Structured location details */
+	locationDetails?: LocationDetails;
 }
 
 /**

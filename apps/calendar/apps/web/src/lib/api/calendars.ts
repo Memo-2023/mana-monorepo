@@ -14,17 +14,25 @@ export async function getCalendar(id: string) {
 }
 
 export async function createCalendar(data: CreateCalendarInput) {
-	return fetchApi<Calendar>('/calendars', {
+	const result = await fetchApi<{ calendar: Calendar }>('/calendars', {
 		method: 'POST',
 		body: data,
 	});
+	if (result.error || !result.data) {
+		return { data: null, error: result.error };
+	}
+	return { data: result.data.calendar, error: null };
 }
 
 export async function updateCalendar(id: string, data: UpdateCalendarInput) {
-	return fetchApi<Calendar>(`/calendars/${id}`, {
+	const result = await fetchApi<{ calendar: Calendar }>(`/calendars/${id}`, {
 		method: 'PUT',
 		body: data,
 	});
+	if (result.error || !result.data) {
+		return { data: null, error: result.error };
+	}
+	return { data: result.data.calendar, error: null };
 }
 
 export async function deleteCalendar(id: string) {
