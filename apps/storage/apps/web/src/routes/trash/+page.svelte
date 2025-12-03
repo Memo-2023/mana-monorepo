@@ -132,10 +132,7 @@
 							<RotateCcw size={16} />
 							Wiederherstellen
 						</button>
-						<button
-							class="delete-btn"
-							onclick={() => handlePermanentDelete(folder.id, 'folder')}
-						>
+						<button class="delete-btn" onclick={() => handlePermanentDelete(folder.id, 'folder')}>
 							Endgültig löschen
 						</button>
 					</div>

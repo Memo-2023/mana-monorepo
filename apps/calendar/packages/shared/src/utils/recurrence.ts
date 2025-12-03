@@ -111,7 +111,11 @@ export function describeRecurrence(pattern: RecurrencePattern | null): string {
 
 		case 'WEEKLY':
 			if (pattern.byDay && pattern.byDay.length > 0) {
-				if (pattern.byDay.length === 5 && !pattern.byDay.includes('SA') && !pattern.byDay.includes('SU')) {
+				if (
+					pattern.byDay.length === 5 &&
+					!pattern.byDay.includes('SA') &&
+					!pattern.byDay.includes('SU')
+				) {
 					return interval === 1 ? 'Every weekday' : `Every ${interval} weeks on weekdays`;
 				}
 				const days = pattern.byDay.map(dayToLabel).join(', ');
@@ -122,7 +126,9 @@ export function describeRecurrence(pattern: RecurrencePattern | null): string {
 		case 'MONTHLY':
 			if (pattern.byMonthDay && pattern.byMonthDay.length > 0) {
 				const days = pattern.byMonthDay.join(', ');
-				return interval === 1 ? `Monthly on day ${days}` : `Every ${interval} months on day ${days}`;
+				return interval === 1
+					? `Monthly on day ${days}`
+					: `Every ${interval} months on day ${days}`;
 			}
 			return interval === 1 ? 'Monthly' : `Every ${interval} months`;
 
@@ -205,7 +211,10 @@ export function generateOccurrences(
 		// Check if this date matches the pattern
 		if (matchesPattern(currentDate, pattern)) {
 			// Check if date is in range and not in exceptions
-			if (currentDate >= rangeStart && !exceptionsSet.has(currentDate.toISOString().split('T')[0])) {
+			if (
+				currentDate >= rangeStart &&
+				!exceptionsSet.has(currentDate.toISOString().split('T')[0])
+			) {
 				occurrences.push(new Date(currentDate));
 			}
 		}

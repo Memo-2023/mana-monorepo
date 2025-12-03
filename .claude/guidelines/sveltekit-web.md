@@ -44,22 +44,22 @@ apps/{project}/apps/web/
 
 ```svelte
 <script lang="ts">
-  // Reactive state
-  let count = $state(0);
-  let name = $state('');
-  let items = $state<string[]>([]);
+	// Reactive state
+	let count = $state(0);
+	let name = $state('');
+	let items = $state<string[]>([]);
 
-  // Object state
-  let user = $state<User | null>(null);
+	// Object state
+	let user = $state<User | null>(null);
 
-  // Functions that modify state
-  function increment() {
-    count++;  // Direct mutation works
-  }
+	// Functions that modify state
+	function increment() {
+		count++; // Direct mutation works
+	}
 
-  function addItem(item: string) {
-    items = [...items, item];  // Or reassignment
-  }
+	function addItem(item: string) {
+		items = [...items, item]; // Or reassignment
+	}
 </script>
 ```
 
@@ -67,25 +67,21 @@ apps/{project}/apps/web/
 
 ```svelte
 <script lang="ts">
-  let count = $state(0);
-  let items = $state<Item[]>([]);
+	let count = $state(0);
+	let items = $state<Item[]>([]);
 
-  // Computed value - updates automatically
-  const doubled = $derived(count * 2);
-  const itemCount = $derived(items.length);
-  const hasItems = $derived(items.length > 0);
+	// Computed value - updates automatically
+	const doubled = $derived(count * 2);
+	const itemCount = $derived(items.length);
+	const hasItems = $derived(items.length > 0);
 
-  // Complex derived
-  const sortedItems = $derived(
-    [...items].sort((a, b) => a.name.localeCompare(b.name))
-  );
+	// Complex derived
+	const sortedItems = $derived([...items].sort((a, b) => a.name.localeCompare(b.name)));
 
-  // Derived with conditions
-  const displayText = $derived(
-    count === 0 ? 'No items' :
-    count === 1 ? '1 item' :
-    `${count} items`
-  );
+	// Derived with conditions
+	const displayText = $derived(
+		count === 0 ? 'No items' : count === 1 ? '1 item' : `${count} items`
+	);
 </script>
 ```
 
@@ -93,30 +89,30 @@ apps/{project}/apps/web/
 
 ```svelte
 <script lang="ts">
-  import { browser } from '$app/environment';
+	import { browser } from '$app/environment';
 
-  let searchQuery = $state('');
-  let results = $state<SearchResult[]>([]);
+	let searchQuery = $state('');
+	let results = $state<SearchResult[]>([]);
 
-  // Run effect when dependencies change
-  $effect(() => {
-    if (!browser) return;
+	// Run effect when dependencies change
+	$effect(() => {
+		if (!browser) return;
 
-    // This runs when searchQuery changes
-    const timer = setTimeout(async () => {
-      results = await search(searchQuery);
-    }, 300);
+		// This runs when searchQuery changes
+		const timer = setTimeout(async () => {
+			results = await search(searchQuery);
+		}, 300);
 
-    // Cleanup function
-    return () => clearTimeout(timer);
-  });
+		// Cleanup function
+		return () => clearTimeout(timer);
+	});
 
-  // Effect for initialization
-  $effect(() => {
-    if (browser) {
-      loadInitialData();
-    }
-  });
+	// Effect for initialization
+	$effect(() => {
+		if (browser) {
+			loadInitialData();
+		}
+	});
 </script>
 ```
 
@@ -124,34 +120,29 @@ apps/{project}/apps/web/
 
 ```svelte
 <script lang="ts">
-  import type { File } from '$lib/types';
+	import type { File } from '$lib/types';
 
-  // Define props with types
-  interface Props {
-    file: File;
-    selected?: boolean;
-    onDelete?: (id: string) => void;
-    onSelect?: (file: File) => void;
-  }
+	// Define props with types
+	interface Props {
+		file: File;
+		selected?: boolean;
+		onDelete?: (id: string) => void;
+		onSelect?: (file: File) => void;
+	}
 
-  // Destructure with defaults
-  let {
-    file,
-    selected = false,
-    onDelete,
-    onSelect
-  }: Props = $props();
+	// Destructure with defaults
+	let { file, selected = false, onDelete, onSelect }: Props = $props();
 
-  function handleDelete() {
-    onDelete?.(file.id);
-  }
+	function handleDelete() {
+		onDelete?.(file.id);
+	}
 </script>
 
 <div class:selected onclick={() => onSelect?.(file)}>
-  <span>{file.name}</span>
-  {#if onDelete}
-    <button onclick={handleDelete}>Delete</button>
-  {/if}
+	<span>{file.name}</span>
+	{#if onDelete}
+		<button onclick={handleDelete}>Delete</button>
+	{/if}
 </div>
 ```
 
@@ -159,12 +150,12 @@ apps/{project}/apps/web/
 
 ```svelte
 <script lang="ts">
-  interface Props {
-    value: string;
-    disabled?: boolean;
-  }
+	interface Props {
+		value: string;
+		disabled?: boolean;
+	}
 
-  let { value = $bindable(), disabled = false }: Props = $props();
+	let { value = $bindable(), disabled = false }: Props = $props();
 </script>
 
 <input bind:value {disabled} />
@@ -190,68 +181,76 @@ let error = $state<AppError | null>(null);
 let selectedId = $state<string | null>(null);
 
 // Derived values
-const selectedFile = $derived(
-  files.find(f => f.id === selectedId) ?? null
-);
+const selectedFile = $derived(files.find((f) => f.id === selectedId) ?? null);
 
 const fileCount = $derived(files.length);
 
 // Actions
 async function loadFiles(folderId?: string): Promise<void> {
-  if (!browser) return;
+	if (!browser) return;
 
-  loading = true;
-  error = null;
+	loading = true;
+	error = null;
 
-  const result = await api.files.list(folderId);
+	const result = await api.files.list(folderId);
 
-  if (result.ok) {
-    files = result.data;
-  } else {
-    error = result.error;
-  }
+	if (result.ok) {
+		files = result.data;
+	} else {
+		error = result.error;
+	}
 
-  loading = false;
+	loading = false;
 }
 
 async function deleteFile(id: string): Promise<boolean> {
-  const result = await api.files.delete(id);
+	const result = await api.files.delete(id);
 
-  if (result.ok) {
-    files = files.filter(f => f.id !== id);
-    if (selectedId === id) selectedId = null;
-    return true;
-  }
+	if (result.ok) {
+		files = files.filter((f) => f.id !== id);
+		if (selectedId === id) selectedId = null;
+		return true;
+	}
 
-  error = result.error;
-  return false;
+	error = result.error;
+	return false;
 }
 
 function selectFile(id: string | null): void {
-  selectedId = id;
+	selectedId = id;
 }
 
 function reset(): void {
-  files = [];
-  loading = false;
-  error = null;
-  selectedId = null;
+	files = [];
+	loading = false;
+	error = null;
+	selectedId = null;
 }
 
 // Export as object with getters
 export const fileStore = {
-  // Getters for state
-  get files() { return files; },
-  get loading() { return loading; },
-  get error() { return error; },
-  get selectedFile() { return selectedFile; },
-  get fileCount() { return fileCount; },
+	// Getters for state
+	get files() {
+		return files;
+	},
+	get loading() {
+		return loading;
+	},
+	get error() {
+		return error;
+	},
+	get selectedFile() {
+		return selectedFile;
+	},
+	get fileCount() {
+		return fileCount;
+	},
 
-  // Actions
-  loadFiles,
-  deleteFile,
-  selectFile,
-  reset,
+	// Actions
+	loadFiles,
+	deleteFile,
+	selectFile,
+	reset,
 };
 ```
 
@@ -259,32 +258,32 @@ export const fileStore = {
 
 ```svelte
 <script lang="ts">
-  import { fileStore } from '$lib/stores/files.svelte';
-  import { onMount } from 'svelte';
+	import { fileStore } from '$lib/stores/files.svelte';
+	import { onMount } from 'svelte';
 
-  onMount(() => {
-    fileStore.loadFiles();
-  });
+	onMount(() => {
+		fileStore.loadFiles();
+	});
 
-  async function handleDelete(id: string) {
-    const success = await fileStore.deleteFile(id);
-    if (success) {
-      showToast('File deleted');
-    }
-  }
+	async function handleDelete(id: string) {
+		const success = await fileStore.deleteFile(id);
+		if (success) {
+			showToast('File deleted');
+		}
+	}
 </script>
 
 {#if fileStore.loading}
-  <LoadingSpinner />
+	<LoadingSpinner />
 {:else if fileStore.error}
-  <ErrorMessage message={fileStore.error.message} />
+	<ErrorMessage message={fileStore.error.message} />
 {:else}
-  <FileList
-    files={fileStore.files}
-    selectedId={fileStore.selectedFile?.id}
-    onSelect={(file) => fileStore.selectFile(file.id)}
-    onDelete={handleDelete}
-  />
+	<FileList
+		files={fileStore.files}
+		selectedId={fileStore.selectedFile?.id}
+		onSelect={(file) => fileStore.selectFile(file.id)}
+		onDelete={handleDelete}
+	/>
 {/if}
 ```
 
@@ -300,90 +299,85 @@ import { ErrorCode } from '@manacore/shared-errors';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
 interface ApiResponse<T> {
-  ok: boolean;
-  data?: T;
-  error?: AppError;
+	ok: boolean;
+	data?: T;
+	error?: AppError;
 }
 
-async function request<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<Result<T>> {
-  if (!browser) {
-    return { ok: false, error: { code: ErrorCode.INTERNAL_ERROR, message: 'SSR not supported' } };
-  }
+async function request<T>(endpoint: string, options: RequestInit = {}): Promise<Result<T>> {
+	if (!browser) {
+		return { ok: false, error: { code: ErrorCode.INTERNAL_ERROR, message: 'SSR not supported' } };
+	}
 
-  try {
-    const token = authStore.token;
+	try {
+		const token = authStore.token;
 
-    const response = await fetch(`${PUBLIC_BACKEND_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...options.headers,
-      },
-    });
+		const response = await fetch(`${PUBLIC_BACKEND_URL}${endpoint}`, {
+			...options,
+			headers: {
+				'Content-Type': 'application/json',
+				...(token ? { Authorization: `Bearer ${token}` } : {}),
+				...options.headers,
+			},
+		});
 
-    // Handle 401 - redirect to login
-    if (response.status === 401) {
-      authStore.logout();
-      goto('/login');
-      return { ok: false, error: { code: ErrorCode.UNAUTHORIZED, message: 'Session expired' } };
-    }
+		// Handle 401 - redirect to login
+		if (response.status === 401) {
+			authStore.logout();
+			goto('/login');
+			return { ok: false, error: { code: ErrorCode.UNAUTHORIZED, message: 'Session expired' } };
+		}
 
-    const json: ApiResponse<T> = await response.json();
+		const json: ApiResponse<T> = await response.json();
 
-    if (!json.ok || json.error) {
-      return {
-        ok: false,
-        error: json.error ?? { code: ErrorCode.UNKNOWN_ERROR, message: 'Request failed' },
-      };
-    }
+		if (!json.ok || json.error) {
+			return {
+				ok: false,
+				error: json.error ?? { code: ErrorCode.UNKNOWN_ERROR, message: 'Request failed' },
+			};
+		}
 
-    return { ok: true, data: json.data as T };
-  } catch (error) {
-    return {
-      ok: false,
-      error: { code: ErrorCode.EXTERNAL_SERVICE_ERROR, message: 'Network error' },
-    };
-  }
+		return { ok: true, data: json.data as T };
+	} catch (error) {
+		return {
+			ok: false,
+			error: { code: ErrorCode.EXTERNAL_SERVICE_ERROR, message: 'Network error' },
+		};
+	}
 }
 
 // Typed API endpoints
 export const api = {
-  files: {
-    list: (folderId?: string) =>
-      request<File[]>(`/api/v1/files${folderId ? `?folderId=${folderId}` : ''}`),
+	files: {
+		list: (folderId?: string) =>
+			request<File[]>(`/api/v1/files${folderId ? `?folderId=${folderId}` : ''}`),
 
-    get: (id: string) =>
-      request<File>(`/api/v1/files/${id}`),
+		get: (id: string) => request<File>(`/api/v1/files/${id}`),
 
-    create: (data: CreateFileDto) =>
-      request<File>('/api/v1/files', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
+		create: (data: CreateFileDto) =>
+			request<File>('/api/v1/files', {
+				method: 'POST',
+				body: JSON.stringify(data),
+			}),
 
-    update: (id: string, data: UpdateFileDto) =>
-      request<File>(`/api/v1/files/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-      }),
+		update: (id: string, data: UpdateFileDto) =>
+			request<File>(`/api/v1/files/${id}`, {
+				method: 'PATCH',
+				body: JSON.stringify(data),
+			}),
 
-    delete: (id: string) =>
-      request<void>(`/api/v1/files/${id}`, { method: 'DELETE' }),
-  },
+		delete: (id: string) => request<void>(`/api/v1/files/${id}`, { method: 'DELETE' }),
+	},
 
-  folders: {
-    list: () => request<Folder[]>('/api/v1/folders'),
-    get: (id: string) => request<Folder>(`/api/v1/folders/${id}`),
-    create: (data: CreateFolderDto) =>
-      request<Folder>('/api/v1/folders', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
-  },
+	folders: {
+		list: () => request<Folder[]>('/api/v1/folders'),
+		get: (id: string) => request<Folder>(`/api/v1/folders/${id}`),
+		create: (data: CreateFolderDto) =>
+			request<Folder>('/api/v1/folders', {
+				method: 'POST',
+				body: JSON.stringify(data),
+			}),
+	},
 };
 ```
 
@@ -412,32 +406,32 @@ src/routes/
 ```svelte
 <!-- src/routes/(app)/+layout.svelte -->
 <script lang="ts">
-  import { browser } from '$app/environment';
-  import { goto } from '$app/navigation';
-  import { authStore } from '$lib/stores/auth.svelte';
-  import Sidebar from '$lib/components/layout/Sidebar.svelte';
+	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 
-  let { children } = $props();
+	let { children } = $props();
 
-  // Check auth on mount
-  $effect(() => {
-    if (browser && !authStore.isAuthenticated) {
-      goto('/login');
-    }
-  });
+	// Check auth on mount
+	$effect(() => {
+		if (browser && !authStore.isAuthenticated) {
+			goto('/login');
+		}
+	});
 </script>
 
 {#if authStore.isAuthenticated}
-  <div class="flex h-screen">
-    <Sidebar />
-    <main class="flex-1 overflow-auto">
-      {@render children()}
-    </main>
-  </div>
+	<div class="flex h-screen">
+		<Sidebar />
+		<main class="flex-1 overflow-auto">
+			{@render children()}
+		</main>
+	</div>
 {:else}
-  <div class="flex items-center justify-center h-screen">
-    <LoadingSpinner />
-  </div>
+	<div class="flex items-center justify-center h-screen">
+		<LoadingSpinner />
+	</div>
 {/if}
 ```
 
@@ -446,41 +440,41 @@ src/routes/
 ```svelte
 <!-- src/routes/(app)/files/[id]/+page.svelte -->
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { api } from '$lib/api/client';
+	import { page } from '$app/stores';
+	import { api } from '$lib/api/client';
 
-  let file = $state<File | null>(null);
-  let loading = $state(true);
-  let error = $state<string | null>(null);
+	let file = $state<File | null>(null);
+	let loading = $state(true);
+	let error = $state<string | null>(null);
 
-  // Load file when ID changes
-  $effect(() => {
-    const fileId = $page.params.id;
-    loadFile(fileId);
-  });
+	// Load file when ID changes
+	$effect(() => {
+		const fileId = $page.params.id;
+		loadFile(fileId);
+	});
 
-  async function loadFile(id: string) {
-    loading = true;
-    error = null;
+	async function loadFile(id: string) {
+		loading = true;
+		error = null;
 
-    const result = await api.files.get(id);
+		const result = await api.files.get(id);
 
-    if (result.ok) {
-      file = result.data;
-    } else {
-      error = result.error.message;
-    }
+		if (result.ok) {
+			file = result.data;
+		} else {
+			error = result.error.message;
+		}
 
-    loading = false;
-  }
+		loading = false;
+	}
 </script>
 
 {#if loading}
-  <LoadingSpinner />
+	<LoadingSpinner />
 {:else if error}
-  <ErrorMessage message={error} />
+	<ErrorMessage message={error} />
 {:else if file}
-  <FileViewer {file} />
+	<FileViewer {file} />
 {/if}
 ```
 
@@ -491,51 +485,51 @@ src/routes/
 ```svelte
 <!-- src/lib/components/files/FileCard.svelte -->
 <script lang="ts">
-  import type { File } from '$lib/types';
-  import { formatBytes, formatDate } from '$lib/utils/format';
-  import FileIcon from './FileIcon.svelte';
+	import type { File } from '$lib/types';
+	import { formatBytes, formatDate } from '$lib/utils/format';
+	import FileIcon from './FileIcon.svelte';
 
-  interface Props {
-    file: File;
-    selected?: boolean;
-    onSelect?: () => void;
-    onDelete?: () => void;
-  }
+	interface Props {
+		file: File;
+		selected?: boolean;
+		onSelect?: () => void;
+		onDelete?: () => void;
+	}
 
-  let { file, selected = false, onSelect, onDelete }: Props = $props();
+	let { file, selected = false, onSelect, onDelete }: Props = $props();
 
-  const formattedSize = $derived(formatBytes(file.size));
-  const formattedDate = $derived(formatDate(file.createdAt));
+	const formattedSize = $derived(formatBytes(file.size));
+	const formattedDate = $derived(formatDate(file.createdAt));
 </script>
 
 <div
-  class="p-4 rounded-lg border transition-colors cursor-pointer
+	class="p-4 rounded-lg border transition-colors cursor-pointer
          {selected ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'}"
-  onclick={onSelect}
-  role="button"
-  tabindex="0"
-  onkeydown={(e) => e.key === 'Enter' && onSelect?.()}
+	onclick={onSelect}
+	role="button"
+	tabindex="0"
+	onkeydown={(e) => e.key === 'Enter' && onSelect?.()}
 >
-  <div class="flex items-start gap-3">
-    <FileIcon mimeType={file.mimeType} />
+	<div class="flex items-start gap-3">
+		<FileIcon mimeType={file.mimeType} />
 
-    <div class="flex-1 min-w-0">
-      <h3 class="font-medium truncate">{file.name}</h3>
-      <p class="text-sm text-gray-500">
-        {formattedSize} • {formattedDate}
-      </p>
-    </div>
+		<div class="flex-1 min-w-0">
+			<h3 class="font-medium truncate">{file.name}</h3>
+			<p class="text-sm text-gray-500">
+				{formattedSize} • {formattedDate}
+			</p>
+		</div>
 
-    {#if onDelete}
-      <button
-        class="p-2 text-gray-400 hover:text-red-500"
-        onclick|stopPropagation={onDelete}
-        aria-label="Delete file"
-      >
-        <TrashIcon />
-      </button>
-    {/if}
-  </div>
+		{#if onDelete}
+			<button
+				class="p-2 text-gray-400 hover:text-red-500"
+				onclick|stopPropagation={onDelete}
+				aria-label="Delete file"
+			>
+				<TrashIcon />
+			</button>
+		{/if}
+	</div>
 </div>
 ```
 
@@ -606,13 +600,13 @@ src/routes/
 import sharedConfig from '@manacore/shared-tailwind';
 
 export default {
-  presets: [sharedConfig],
-  content: ['./src/**/*.{html,js,svelte,ts}'],
-  theme: {
-    extend: {
-      // Project-specific overrides
-    },
-  },
+	presets: [sharedConfig],
+	content: ['./src/**/*.{html,js,svelte,ts}'],
+	theme: {
+		extend: {
+			// Project-specific overrides
+		},
+	},
 };
 ```
 
@@ -625,16 +619,16 @@ export default {
 
 /* Custom utilities */
 @layer utilities {
-  .scrollbar-thin {
-    scrollbar-width: thin;
-  }
+	.scrollbar-thin {
+		scrollbar-width: thin;
+	}
 }
 
 /* Custom components */
 @layer components {
-  .btn-primary {
-    @apply px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors;
-  }
+	.btn-primary {
+		@apply px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors;
+	}
 }
 ```
 
@@ -642,63 +636,63 @@ export default {
 
 ```svelte
 <script lang="ts">
-  import { api } from '$lib/api/client';
+	import { api } from '$lib/api/client';
 
-  let name = $state('');
-  let email = $state('');
-  let loading = $state(false);
-  let errors = $state<Record<string, string>>({});
+	let name = $state('');
+	let email = $state('');
+	let loading = $state(false);
+	let errors = $state<Record<string, string>>({});
 
-  async function handleSubmit(e: SubmitEvent) {
-    e.preventDefault();
-    errors = {};
+	async function handleSubmit(e: SubmitEvent) {
+		e.preventDefault();
+		errors = {};
 
-    // Client-side validation
-    if (!name.trim()) errors.name = 'Name is required';
-    if (!email.trim()) errors.email = 'Email is required';
-    if (Object.keys(errors).length > 0) return;
+		// Client-side validation
+		if (!name.trim()) errors.name = 'Name is required';
+		if (!email.trim()) errors.email = 'Email is required';
+		if (Object.keys(errors).length > 0) return;
 
-    loading = true;
-    const result = await api.users.create({ name, email });
-    loading = false;
+		loading = true;
+		const result = await api.users.create({ name, email });
+		loading = false;
 
-    if (result.ok) {
-      goto('/users');
-    } else {
-      // Handle server errors
-      if (result.error.code === 'ERR_5002') {
-        errors.email = 'Email already exists';
-      } else {
-        errors.form = result.error.message;
-      }
-    }
-  }
+		if (result.ok) {
+			goto('/users');
+		} else {
+			// Handle server errors
+			if (result.error.code === 'ERR_5002') {
+				errors.email = 'Email already exists';
+			} else {
+				errors.form = result.error.message;
+			}
+		}
+	}
 </script>
 
 <form onsubmit={handleSubmit}>
-  {#if errors.form}
-    <div class="text-red-500 mb-4">{errors.form}</div>
-  {/if}
+	{#if errors.form}
+		<div class="text-red-500 mb-4">{errors.form}</div>
+	{/if}
 
-  <div class="mb-4">
-    <label for="name">Name</label>
-    <input id="name" bind:value={name} class:border-red-500={errors.name} />
-    {#if errors.name}
-      <span class="text-red-500 text-sm">{errors.name}</span>
-    {/if}
-  </div>
+	<div class="mb-4">
+		<label for="name">Name</label>
+		<input id="name" bind:value={name} class:border-red-500={errors.name} />
+		{#if errors.name}
+			<span class="text-red-500 text-sm">{errors.name}</span>
+		{/if}
+	</div>
 
-  <div class="mb-4">
-    <label for="email">Email</label>
-    <input id="email" type="email" bind:value={email} class:border-red-500={errors.email} />
-    {#if errors.email}
-      <span class="text-red-500 text-sm">{errors.email}</span>
-    {/if}
-  </div>
+	<div class="mb-4">
+		<label for="email">Email</label>
+		<input id="email" type="email" bind:value={email} class:border-red-500={errors.email} />
+		{#if errors.email}
+			<span class="text-red-500 text-sm">{errors.email}</span>
+		{/if}
+	</div>
 
-  <button type="submit" disabled={loading} class="btn-primary">
-    {loading ? 'Saving...' : 'Save'}
-  </button>
+	<button type="submit" disabled={loading} class="btn-primary">
+		{loading ? 'Saving...' : 'Save'}
+	</button>
 </form>
 ```
 

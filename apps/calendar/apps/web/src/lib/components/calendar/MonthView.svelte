@@ -94,17 +94,21 @@
 									onclick={(e) => handleEventClick(event, e)}
 								>
 									{#if !event.isAllDay}
-										<span class="event-time">{format(typeof event.startTime === 'string' ? new Date(event.startTime) : event.startTime, 'HH:mm')}</span>
+										<span class="event-time"
+											>{format(
+												typeof event.startTime === 'string'
+													? new Date(event.startTime)
+													: event.startTime,
+												'HH:mm'
+											)}</span
+										>
 									{/if}
 									<span class="event-title">{event.title}</span>
 								</button>
 							{/each}
 
 							{#if eventsStore.getEventsForDay(day).length > 3}
-								<button
-									class="more-events"
-									onclick={(e) => handleMoreClick(day, e)}
-								>
+								<button class="more-events" onclick={(e) => handleMoreClick(day, e)}>
 									+{eventsStore.getEventsForDay(day).length - 3} mehr
 								</button>
 							{/if}

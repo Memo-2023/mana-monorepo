@@ -81,9 +81,7 @@ export class CalendarService {
 			}
 		}
 
-		await this.db
-			.delete(calendars)
-			.where(and(eq(calendars.id, id), eq(calendars.userId, userId)));
+		await this.db.delete(calendars).where(and(eq(calendars.id, id), eq(calendars.userId, userId)));
 	}
 
 	async getOrCreateDefaultCalendar(userId: string): Promise<Calendar> {

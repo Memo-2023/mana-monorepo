@@ -1,13 +1,4 @@
-import {
-	Controller,
-	Get,
-	Post,
-	Put,
-	Delete,
-	Body,
-	Param,
-	UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { ShareService } from './share.service';
 import { CreateShareDto, UpdateShareDto } from './dto';
@@ -50,10 +41,7 @@ export class ShareController {
 	}
 
 	@Delete('calendars/:calendarId/shares/:shareId')
-	async delete(
-		@CurrentUser() user: CurrentUserData,
-		@Param('shareId') shareId: string
-	) {
+	async delete(@CurrentUser() user: CurrentUserData, @Param('shareId') shareId: string) {
 		await this.shareService.delete(shareId, user.userId);
 		return { success: true };
 	}
@@ -69,19 +57,13 @@ export class ShareController {
 	}
 
 	@Post('shares/:shareId/accept')
-	async acceptInvitation(
-		@CurrentUser() user: CurrentUserData,
-		@Param('shareId') shareId: string
-	) {
+	async acceptInvitation(@CurrentUser() user: CurrentUserData, @Param('shareId') shareId: string) {
 		const share = await this.shareService.acceptInvitation(shareId, user.userId);
 		return { share };
 	}
 
 	@Post('shares/:shareId/decline')
-	async declineInvitation(
-		@CurrentUser() user: CurrentUserData,
-		@Param('shareId') shareId: string
-	) {
+	async declineInvitation(@CurrentUser() user: CurrentUserData, @Param('shareId') shareId: string) {
 		const share = await this.shareService.declineInvitation(shareId, user.userId);
 		return { share };
 	}

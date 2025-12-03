@@ -19,7 +19,11 @@ export class FileService {
 				.select()
 				.from(files)
 				.where(
-					and(eq(files.userId, userId), eq(files.parentFolderId, parentFolderId), eq(files.isDeleted, false))
+					and(
+						eq(files.userId, userId),
+						eq(files.parentFolderId, parentFolderId),
+						eq(files.isDeleted, false)
+					)
 				);
 		}
 
@@ -27,7 +31,9 @@ export class FileService {
 		return this.db
 			.select()
 			.from(files)
-			.where(and(eq(files.userId, userId), isNull(files.parentFolderId), eq(files.isDeleted, false)));
+			.where(
+				and(eq(files.userId, userId), isNull(files.parentFolderId), eq(files.isDeleted, false))
+			);
 	}
 
 	async findOne(userId: string, id: string): Promise<File> {
@@ -43,11 +49,7 @@ export class FileService {
 		return result[0];
 	}
 
-	async upload(
-		userId: string,
-		file: Express.Multer.File,
-		dto: CreateFileDto
-	): Promise<File> {
+	async upload(userId: string, file: Express.Multer.File, dto: CreateFileDto): Promise<File> {
 		if (!file) {
 			throw new BadRequestException('No file provided');
 		}

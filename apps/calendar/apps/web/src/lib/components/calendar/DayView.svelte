@@ -3,12 +3,7 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { goto } from '$app/navigation';
-	import {
-		format,
-		isToday,
-		parseISO,
-		differenceInMinutes,
-	} from 'date-fns';
+	import { format, isToday, parseISO, differenceInMinutes } from 'date-fns';
 	import { de } from 'date-fns/locale';
 
 	let hours = Array.from({ length: 24 }, (_, i) => i);
@@ -110,8 +105,14 @@
 					onclick={() => handleEventClick(event)}
 				>
 					<span class="event-time">
-						{format(typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime, 'HH:mm')} -
-						{format(typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime, 'HH:mm')}
+						{format(
+							typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime,
+							'HH:mm'
+						)} -
+						{format(
+							typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime,
+							'HH:mm'
+						)}
 					</span>
 					<span class="event-title">{event.title}</span>
 					{#if event.location}

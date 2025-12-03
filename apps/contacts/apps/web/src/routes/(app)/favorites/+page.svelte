@@ -82,7 +82,9 @@
 		<h1 class="title">Favoriten</h1>
 		<div class="title-icon">
 			<svg class="icon" fill="currentColor" viewBox="0 0 24 24">
-				<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+				<path
+					d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+				/>
 			</svg>
 		</div>
 	</header>
@@ -90,7 +92,12 @@
 	<!-- Search -->
 	<div class="search-wrapper">
 		<svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+			/>
 		</svg>
 		<input
 			type="text"
@@ -103,10 +110,15 @@
 	{#if error}
 		<div class="error-banner" role="alert">
 			<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+				/>
 			</svg>
 			<span>{error}</span>
-			<button onclick={() => error = null} class="dismiss-btn">&times;</button>
+			<button onclick={() => (error = null)} class="dismiss-btn">&times;</button>
 		</div>
 	{/if}
 
@@ -118,14 +130,26 @@
 		<div class="empty-state">
 			<div class="empty-icon">
 				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+					/>
 				</svg>
 			</div>
 			<h2 class="empty-title">Keine Favoriten</h2>
-			<p class="empty-description">Markiere Kontakte als Favoriten, um sie hier schnell zu finden.</p>
+			<p class="empty-description">
+				Markiere Kontakte als Favoriten, um sie hier schnell zu finden.
+			</p>
 			<a href="/" class="btn btn-primary">
 				<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+					/>
 				</svg>
 				Zu Kontakten
 			</a>
@@ -134,7 +158,12 @@
 		<div class="empty-state">
 			<div class="empty-icon">
 				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+					/>
 				</svg>
 			</div>
 			<h2 class="empty-title">Keine Ergebnisse</h2>
@@ -179,7 +208,9 @@
 						aria-label="Aus Favoriten entfernen"
 					>
 						<svg class="heart-icon" fill="currentColor" viewBox="0 0 24 24">
-							<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+							<path
+								d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+							/>
 						</svg>
 					</button>
 				</div>
@@ -399,7 +430,11 @@
 		width: 3rem;
 		height: 3rem;
 		border-radius: 50%;
-		background: linear-gradient(135deg, hsl(var(--color-primary)) 0%, hsl(var(--color-primary) / 0.7) 100%);
+		background: linear-gradient(
+			135deg,
+			hsl(var(--color-primary)) 0%,
+			hsl(var(--color-primary) / 0.7) 100%
+		);
 		color: hsl(var(--color-primary-foreground));
 		display: flex;
 		align-items: center;

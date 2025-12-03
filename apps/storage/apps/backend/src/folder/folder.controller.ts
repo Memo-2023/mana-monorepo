@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	Post,
+	Patch,
+	Delete,
+	Body,
+	Param,
+	Query,
+	UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, type CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { FolderService } from './folder.service';
 import { CreateFolderDto } from './dto/create-folder.dto';
@@ -10,7 +20,10 @@ export class FolderController {
 	constructor(private readonly folderService: FolderService) {}
 
 	@Get()
-	async findAll(@CurrentUser() user: CurrentUserData, @Query('parentFolderId') parentFolderId?: string) {
+	async findAll(
+		@CurrentUser() user: CurrentUserData,
+		@Query('parentFolderId') parentFolderId?: string
+	) {
 		return this.folderService.findAll(user.userId, parentFolderId);
 	}
 
@@ -25,12 +38,20 @@ export class FolderController {
 	}
 
 	@Patch(':id')
-	async update(@CurrentUser() user: CurrentUserData, @Param('id') id: string, @Body() dto: UpdateFolderDto) {
+	async update(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id') id: string,
+		@Body() dto: UpdateFolderDto
+	) {
 		return this.folderService.update(user.userId, id, dto);
 	}
 
 	@Patch(':id/move')
-	async move(@CurrentUser() user: CurrentUserData, @Param('id') id: string, @Body() dto: MoveFolderDto) {
+	async move(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id') id: string,
+		@Body() dto: MoveFolderDto
+	) {
 		return this.folderService.move(user.userId, id, dto);
 	}
 

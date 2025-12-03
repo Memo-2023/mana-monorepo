@@ -77,19 +77,13 @@ export class NoteController {
 	}
 
 	@Delete(':id')
-	async delete(
-		@CurrentUser() user: CurrentUserData,
-		@Param('id', ParseUUIDPipe) id: string
-	) {
+	async delete(@CurrentUser() user: CurrentUserData, @Param('id', ParseUUIDPipe) id: string) {
 		await this.noteService.delete(id, user.userId);
 		return { success: true };
 	}
 
 	@Post(':id/pin')
-	async togglePin(
-		@CurrentUser() user: CurrentUserData,
-		@Param('id', ParseUUIDPipe) id: string
-	) {
+	async togglePin(@CurrentUser() user: CurrentUserData, @Param('id', ParseUUIDPipe) id: string) {
 		const note = await this.noteService.togglePin(id, user.userId);
 		return { note };
 	}

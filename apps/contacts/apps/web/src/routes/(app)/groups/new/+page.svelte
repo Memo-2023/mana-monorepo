@@ -69,7 +69,12 @@
 	<div class="preview-section">
 		<div class="preview-color" style="background-color: {color}">
 			<svg class="preview-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+				/>
 			</svg>
 		</div>
 		<p class="preview-name">{name || 'Neue Gruppe'}</p>
@@ -81,19 +86,35 @@
 	{#if error}
 		<div class="error-banner" role="alert">
 			<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+				/>
 			</svg>
 			<span>{error}</span>
 		</div>
 	{/if}
 
-	<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="form">
+	<form
+		onsubmit={(e) => {
+			e.preventDefault();
+			handleSubmit();
+		}}
+		class="form"
+	>
 		<!-- Name Section -->
 		<section class="form-section">
 			<div class="section-header">
 				<div class="section-icon">
 					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+						/>
 					</svg>
 				</div>
 				<h2 class="section-title">Gruppenname</h2>
@@ -126,7 +147,12 @@
 			<div class="section-header">
 				<div class="section-icon" style="background-color: {color}20; color: {color}">
 					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+						/>
 					</svg>
 				</div>
 				<h2 class="section-title">Farbe</h2>
@@ -138,12 +164,17 @@
 						class="color-option"
 						class:selected={color === presetColor}
 						style="background-color: {presetColor}"
-						onclick={() => color = presetColor}
+						onclick={() => (color = presetColor)}
 						aria-label="Farbe {presetColor}"
 					>
 						{#if color === presetColor}
 							<svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="3"
+									d="M5 13l4 4L19 7"
+								/>
 							</svg>
 						{/if}
 					</button>
@@ -152,12 +183,7 @@
 			<div class="custom-color">
 				<label for="customColor" class="label">Oder eigene Farbe wählen:</label>
 				<div class="color-input-wrapper">
-					<input
-						id="customColor"
-						type="color"
-						bind:value={color}
-						class="color-input"
-					/>
+					<input id="customColor" type="color" bind:value={color} class="color-input" />
 					<input
 						type="text"
 						bind:value={color}
@@ -171,19 +197,34 @@
 
 		<!-- Action Buttons -->
 		<div class="actions">
-			<a href="/groups" class="btn btn-secondary">
-				Abbrechen
-			</a>
+			<a href="/groups" class="btn btn-secondary"> Abbrechen </a>
 			<button type="submit" disabled={loading} class="btn btn-primary">
 				{#if loading}
 					<svg class="spinner" viewBox="0 0 24 24" fill="none">
-						<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-opacity="0.25" />
-						<path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+						<circle
+							cx="12"
+							cy="12"
+							r="10"
+							stroke="currentColor"
+							stroke-width="3"
+							stroke-opacity="0.25"
+						/>
+						<path
+							d="M12 2a10 10 0 0 1 10 10"
+							stroke="currentColor"
+							stroke-width="3"
+							stroke-linecap="round"
+						/>
 					</svg>
 					<span>Erstellen...</span>
 				{:else}
 					<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M5 13l4 4L19 7"
+						/>
 					</svg>
 					<span>Gruppe erstellen</span>
 				{/if}

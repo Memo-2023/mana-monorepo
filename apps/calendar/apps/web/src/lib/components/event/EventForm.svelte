@@ -29,7 +29,8 @@
 	// Initialize date/time fields
 	$effect(() => {
 		if (event) {
-			const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+			const start =
+				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
 			const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
 			startDate = format(start, 'yyyy-MM-dd');
 			startTime = format(start, 'HH:mm');
@@ -92,7 +93,11 @@
 
 	<div class="flex flex-col gap-2">
 		<label for="calendar" class="text-sm font-medium text-foreground">Kalender</label>
-		<select id="calendar" class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors" bind:value={calendarId}>
+		<select
+			id="calendar"
+			class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
+			bind:value={calendarId}
+		>
 			{#each calendarsStore.calendars as cal}
 				<option value={cal.id}>{cal.name}</option>
 			{/each}
@@ -109,12 +114,24 @@
 	<div class="flex gap-4">
 		<div class="flex-1 flex flex-col gap-2">
 			<label for="startDate" class="text-sm font-medium text-foreground">Beginn</label>
-			<input type="date" id="startDate" class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors" bind:value={startDate} required />
+			<input
+				type="date"
+				id="startDate"
+				class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
+				bind:value={startDate}
+				required
+			/>
 		</div>
 		{#if !isAllDay}
 			<div class="flex-1 flex flex-col gap-2">
 				<label for="startTime" class="text-sm font-medium text-foreground">Uhrzeit</label>
-				<input type="time" id="startTime" class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors" bind:value={startTime} required />
+				<input
+					type="time"
+					id="startTime"
+					class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
+					bind:value={startTime}
+					required
+				/>
 			</div>
 		{/if}
 	</div>
@@ -122,12 +139,24 @@
 	<div class="flex gap-4">
 		<div class="flex-1 flex flex-col gap-2">
 			<label for="endDate" class="text-sm font-medium text-foreground">Ende</label>
-			<input type="date" id="endDate" class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors" bind:value={endDate} required />
+			<input
+				type="date"
+				id="endDate"
+				class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
+				bind:value={endDate}
+				required
+			/>
 		</div>
 		{#if !isAllDay}
 			<div class="flex-1 flex flex-col gap-2">
 				<label for="endTime" class="text-sm font-medium text-foreground">Uhrzeit</label>
-				<input type="time" id="endTime" class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors" bind:value={endTime} required />
+				<input
+					type="time"
+					id="endTime"
+					class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
+					bind:value={endTime}
+					required
+				/>
 			</div>
 		{/if}
 	</div>
@@ -155,12 +184,19 @@
 	</div>
 
 	<div class="flex justify-end gap-3 pt-4 border-t border-border">
-		<button type="button" class="px-4 py-2 rounded-lg font-medium text-foreground bg-transparent hover:bg-muted transition-colors" onclick={onCancel}>
+		<button
+			type="button"
+			class="px-4 py-2 rounded-lg font-medium text-foreground bg-transparent hover:bg-muted transition-colors"
+			onclick={onCancel}
+		>
 			Abbrechen
 		</button>
-		<button type="submit" class="px-4 py-2 rounded-lg font-medium text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled={submitting || !title.trim()}>
+		<button
+			type="submit"
+			class="px-4 py-2 rounded-lg font-medium text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+			disabled={submitting || !title.trim()}
+		>
 			{mode === 'create' ? 'Erstellen' : 'Speichern'}
 		</button>
 	</div>
 </form>
-

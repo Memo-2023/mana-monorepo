@@ -7,6 +7,7 @@ All projects use **Drizzle ORM** with **PostgreSQL**. This document covers schem
 ## ORM: Drizzle
 
 ### Why Drizzle?
+
 - Full TypeScript type inference
 - SQL-like syntax (no magic)
 - Lightweight and fast
@@ -24,30 +25,30 @@ let connection: ReturnType<typeof postgres> | null = null;
 let db: ReturnType<typeof drizzle> | null = null;
 
 export function getConnection(databaseUrl: string) {
-  if (!connection) {
-    connection = postgres(databaseUrl, {
-      max: 10,              // Max connections
-      idle_timeout: 20,     // Seconds before closing idle
-      connect_timeout: 10,  // Connection timeout
-    });
-  }
-  return connection;
+	if (!connection) {
+		connection = postgres(databaseUrl, {
+			max: 10, // Max connections
+			idle_timeout: 20, // Seconds before closing idle
+			connect_timeout: 10, // Connection timeout
+		});
+	}
+	return connection;
 }
 
 export function getDb(databaseUrl: string) {
-  if (!db) {
-    const conn = getConnection(databaseUrl);
-    db = drizzle(conn, { schema });
-  }
-  return db;
+	if (!db) {
+		const conn = getConnection(databaseUrl);
+		db = drizzle(conn, { schema });
+	}
+	return db;
 }
 
 export async function closeConnection() {
-  if (connection) {
-    await connection.end();
-    connection = null;
-    db = null;
-  }
+	if (connection) {
+		await connection.end();
+		connection = null;
+		db = null;
+	}
 }
 
 export type Database = ReturnType<typeof getDb>;
@@ -65,22 +66,22 @@ export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
 
 @Global()
 @Module({
-  providers: [
-    {
-      provide: DATABASE_CONNECTION,
-      useFactory: (configService: ConfigService): Database => {
-        const databaseUrl = configService.get<string>('DATABASE_URL');
-        return getDb(databaseUrl);
-      },
-      inject: [ConfigService],
-    },
-  ],
-  exports: [DATABASE_CONNECTION],
+	providers: [
+		{
+			provide: DATABASE_CONNECTION,
+			useFactory: (configService: ConfigService): Database => {
+				const databaseUrl = configService.get<string>('DATABASE_URL');
+				return getDb(databaseUrl);
+			},
+			inject: [ConfigService],
+		},
+	],
+	exports: [DATABASE_CONNECTION],
 })
 export class DatabaseModule implements OnModuleDestroy {
-  async onModuleDestroy() {
-    await closeConnection();
-  }
+	async onModuleDestroy() {
+		await closeConnection();
+	}
 }
 ```
 
@@ -104,44 +105,57 @@ src/db/
 
 ```typescript
 // src/db/schema/files.schema.ts
-import { pgTable, uuid, varchar, text, boolean, timestamp, bigint, integer } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	uuid,
+	varchar,
+	text,
+	boolean,
+	timestamp,
+	bigint,
+	integer,
+} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-export const files = pgTable('files', {
-  // Primary key - always UUID with auto-generation
-  id: uuid('id').primaryKey().defaultRandom(),
+export const files = pgTable(
+	'files',
+	{
+		// Primary key - always UUID with auto-generation
+		id: uuid('id').primaryKey().defaultRandom(),
 
-  // Foreign keys
-  userId: varchar('user_id', { length: 255 }).notNull(),
-  parentFolderId: uuid('parent_folder_id').references(() => folders.id, { onDelete: 'set null' }),
+		// Foreign keys
+		userId: varchar('user_id', { length: 255 }).notNull(),
+		parentFolderId: uuid('parent_folder_id').references(() => folders.id, { onDelete: 'set null' }),
 
-  // Required fields
-  name: varchar('name', { length: 500 }).notNull(),
-  mimeType: varchar('mime_type', { length: 255 }).notNull(),
-  size: bigint('size', { mode: 'number' }).notNull(),
-  storagePath: varchar('storage_path', { length: 1000 }).notNull(),
-  storageKey: varchar('storage_key', { length: 500 }).notNull().unique(),
+		// Required fields
+		name: varchar('name', { length: 500 }).notNull(),
+		mimeType: varchar('mime_type', { length: 255 }).notNull(),
+		size: bigint('size', { mode: 'number' }).notNull(),
+		storagePath: varchar('storage_path', { length: 1000 }).notNull(),
+		storageKey: varchar('storage_key', { length: 500 }).notNull().unique(),
 
-  // Optional fields
-  description: text('description'),
+		// Optional fields
+		description: text('description'),
 
-  // Boolean flags with defaults
-  isFavorite: boolean('is_favorite').default(false).notNull(),
-  isPublic: boolean('is_public').default(false).notNull(),
+		// Boolean flags with defaults
+		isFavorite: boolean('is_favorite').default(false).notNull(),
+		isPublic: boolean('is_public').default(false).notNull(),
 
-  // Soft delete
-  isDeleted: boolean('is_deleted').default(false).notNull(),
-  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+		// Soft delete
+		isDeleted: boolean('is_deleted').default(false).notNull(),
+		deletedAt: timestamp('deleted_at', { withTimezone: true }),
 
-  // Timestamps - ALWAYS include these
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  // Indexes for common queries
-  userIdIdx: index('idx_files_user_id').on(table.userId),
-  parentFolderIdx: index('idx_files_parent_folder').on(table.parentFolderId),
-  createdAtIdx: index('idx_files_created_at').on(table.createdAt),
-}));
+		// Timestamps - ALWAYS include these
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => ({
+		// Indexes for common queries
+		userIdIdx: index('idx_files_user_id').on(table.userId),
+		parentFolderIdx: index('idx_files_parent_folder').on(table.parentFolderId),
+		createdAtIdx: index('idx_files_created_at').on(table.createdAt),
+	})
+);
 
 // Type exports - ALWAYS include these
 export type File = typeof files.$inferSelect;
@@ -153,22 +167,22 @@ export type NewFile = typeof files.$inferInsert;
 ```typescript
 // Define relations separately for clarity
 export const filesRelations = relations(files, ({ one, many }) => ({
-  folder: one(folders, {
-    fields: [files.parentFolderId],
-    references: [folders.id],
-  }),
-  versions: many(fileVersions),
-  tags: many(fileTags),
+	folder: one(folders, {
+		fields: [files.parentFolderId],
+		references: [folders.id],
+	}),
+	versions: many(fileVersions),
+	tags: many(fileTags),
 }));
 
 export const foldersRelations = relations(folders, ({ one, many }) => ({
-  parent: one(folders, {
-    fields: [folders.parentFolderId],
-    references: [folders.id],
-    relationName: 'parentChild',
-  }),
-  children: many(folders, { relationName: 'parentChild' }),
-  files: many(files),
+	parent: one(folders, {
+		fields: [folders.parentFolderId],
+		references: [folders.id],
+		relationName: 'parentChild',
+	}),
+	children: many(folders, { relationName: 'parentChild' }),
+	files: many(files),
 }));
 ```
 
@@ -176,30 +190,30 @@ export const foldersRelations = relations(folders, ({ one, many }) => ({
 
 ### Tables
 
-| Rule | Example |
-|------|---------|
-| Use snake_case | `user_sessions`, `file_versions` |
-| Use plural nouns | `users`, `files`, `tags` |
-| Junction tables: `{entity1}_{entity2}` | `file_tags`, `user_roles` |
+| Rule                                   | Example                          |
+| -------------------------------------- | -------------------------------- |
+| Use snake_case                         | `user_sessions`, `file_versions` |
+| Use plural nouns                       | `users`, `files`, `tags`         |
+| Junction tables: `{entity1}_{entity2}` | `file_tags`, `user_roles`        |
 
 ### Columns
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Primary key | `id` | `id` |
-| Foreign key | `{entity}_id` | `user_id`, `folder_id` |
-| Boolean | `is_` or `has_` prefix | `is_deleted`, `has_password` |
-| Timestamp | `_at` suffix | `created_at`, `deleted_at` |
-| Count | `_count` suffix | `download_count` |
-| Version | `version` or `current_version` | `version` |
+| Type        | Convention                     | Example                      |
+| ----------- | ------------------------------ | ---------------------------- |
+| Primary key | `id`                           | `id`                         |
+| Foreign key | `{entity}_id`                  | `user_id`, `folder_id`       |
+| Boolean     | `is_` or `has_` prefix         | `is_deleted`, `has_password` |
+| Timestamp   | `_at` suffix                   | `created_at`, `deleted_at`   |
+| Count       | `_count` suffix                | `download_count`             |
+| Version     | `version` or `current_version` | `version`                    |
 
 ### Indexes
 
 ```typescript
 // Pattern: idx_{table}_{column(s)}
-index('idx_files_user_id').on(table.userId)
-index('idx_files_created_at').on(table.createdAt)
-index('idx_messages_conversation_created').on(table.conversationId, table.createdAt)
+index('idx_files_user_id').on(table.userId);
+index('idx_files_created_at').on(table.createdAt);
+index('idx_messages_conversation_created').on(table.conversationId, table.createdAt);
 ```
 
 ## Common Patterns
@@ -309,27 +323,27 @@ type TransactionType = typeof transactionTypeEnum.enumValues[number];
 
 ```typescript
 async function getPaginated(
-  userId: string,
-  page: number = 1,
-  limit: number = 20
+	userId: string,
+	page: number = 1,
+	limit: number = 20
 ): Promise<Result<{ items: File[]; total: number }>> {
-  const offset = (page - 1) * limit;
+	const offset = (page - 1) * limit;
 
-  const [items, countResult] = await Promise.all([
-    db
-      .select()
-      .from(files)
-      .where(and(eq(files.userId, userId), eq(files.isDeleted, false)))
-      .orderBy(desc(files.createdAt))
-      .limit(limit)
-      .offset(offset),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(files)
-      .where(and(eq(files.userId, userId), eq(files.isDeleted, false))),
-  ]);
+	const [items, countResult] = await Promise.all([
+		db
+			.select()
+			.from(files)
+			.where(and(eq(files.userId, userId), eq(files.isDeleted, false)))
+			.orderBy(desc(files.createdAt))
+			.limit(limit)
+			.offset(offset),
+		db
+			.select({ count: sql<number>`count(*)` })
+			.from(files)
+			.where(and(eq(files.userId, userId), eq(files.isDeleted, false))),
+	]);
 
-  return ok({ items, total: countResult[0].count });
+	return ok({ items, total: countResult[0].count });
 }
 ```
 
@@ -342,14 +356,14 @@ async function getPaginated(
 import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
-  schema: './src/db/schema/index.ts',
-  out: './src/db/migrations',
-  driver: 'pg',
-  dbCredentials: {
-    connectionString: process.env.DATABASE_URL!,
-  },
-  verbose: true,
-  strict: true,
+	schema: './src/db/schema/index.ts',
+	out: './src/db/migrations',
+	driver: 'pg',
+	dbCredentials: {
+		connectionString: process.env.DATABASE_URL!,
+	},
+	verbose: true,
+	strict: true,
 });
 ```
 
@@ -378,14 +392,14 @@ import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 
 async function runMigrations() {
-  const connection = postgres(process.env.DATABASE_URL!, { max: 1 });
-  const db = drizzle(connection);
+	const connection = postgres(process.env.DATABASE_URL!, { max: 1 });
+	const db = drizzle(connection);
 
-  console.log('Running migrations...');
-  await migrate(db, { migrationsFolder: './src/db/migrations' });
-  console.log('Migrations complete');
+	console.log('Running migrations...');
+	await migrate(db, { migrationsFolder: './src/db/migrations' });
+	console.log('Migrations complete');
 
-  await connection.end();
+	await connection.end();
 }
 
 runMigrations().catch(console.error);
@@ -397,32 +411,27 @@ runMigrations().catch(console.error);
 
 ```typescript
 const filesWithTags = await db
-  .select({
-    file: files,
-    tags: sql<string[]>`array_agg(${tags.name})`,
-  })
-  .from(files)
-  .leftJoin(fileTags, eq(files.id, fileTags.fileId))
-  .leftJoin(tags, eq(fileTags.tagId, tags.id))
-  .where(eq(files.userId, userId))
-  .groupBy(files.id);
+	.select({
+		file: files,
+		tags: sql<string[]>`array_agg(${tags.name})`,
+	})
+	.from(files)
+	.leftJoin(fileTags, eq(files.id, fileTags.fileId))
+	.leftJoin(tags, eq(fileTags.tagId, tags.id))
+	.where(eq(files.userId, userId))
+	.groupBy(files.id);
 ```
 
 ### Transactions
 
 ```typescript
 const result = await db.transaction(async (tx) => {
-  // All operations in same transaction
-  const [file] = await tx
-    .insert(files)
-    .values(newFile)
-    .returning();
+	// All operations in same transaction
+	const [file] = await tx.insert(files).values(newFile).returning();
 
-  await tx
-    .insert(fileVersions)
-    .values({ fileId: file.id, versionNumber: 1 });
+	await tx.insert(fileVersions).values({ fileId: file.id, versionNumber: 1 });
 
-  return file;
+	return file;
 });
 ```
 
@@ -430,12 +439,12 @@ const result = await db.transaction(async (tx) => {
 
 ```typescript
 await db
-  .insert(userSettings)
-  .values({ userId, theme: 'dark' })
-  .onConflictDoUpdate({
-    target: userSettings.userId,
-    set: { theme: 'dark', updatedAt: new Date() },
-  });
+	.insert(userSettings)
+	.values({ userId, theme: 'dark' })
+	.onConflictDoUpdate({
+		target: userSettings.userId,
+		set: { theme: 'dark', updatedAt: new Date() },
+	});
 ```
 
 ## Anti-Patterns
@@ -446,15 +455,15 @@ await db
 // BAD - N+1 queries
 const files = await db.select().from(files);
 for (const file of files) {
-  const tags = await db.select().from(tags).where(eq(tags.fileId, file.id));  // N queries!
+	const tags = await db.select().from(tags).where(eq(tags.fileId, file.id)); // N queries!
 }
 
 // GOOD - Single query with join
 const filesWithTags = await db
-  .select()
-  .from(files)
-  .leftJoin(fileTags, eq(files.id, fileTags.fileId))
-  .leftJoin(tags, eq(fileTags.tagId, tags.id));
+	.select()
+	.from(files)
+	.leftJoin(fileTags, eq(files.id, fileTags.fileId))
+	.leftJoin(tags, eq(fileTags.tagId, tags.id));
 ```
 
 ### 2. Missing Indexes

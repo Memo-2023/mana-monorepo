@@ -25,7 +25,10 @@
 				<span class="setting-description">Wähle zwischen Hell, Dunkel oder System</span>
 			</div>
 			<div class="setting-control">
-				<select value={theme.mode} onchange={(e) => theme.setMode((e.target as HTMLSelectElement).value as any)}>
+				<select
+					value={theme.mode}
+					onchange={(e) => theme.setMode((e.target as HTMLSelectElement).value as any)}
+				>
 					<option value="light">Hell</option>
 					<option value="dark">Dunkel</option>
 					<option value="system">System</option>
@@ -39,7 +42,10 @@
 				<span class="setting-description">Wähle eine Farbpalette</span>
 			</div>
 			<div class="setting-control">
-				<select value={theme.variant} onchange={(e) => theme.setVariant((e.target as HTMLSelectElement).value as any)}>
+				<select
+					value={theme.variant}
+					onchange={(e) => theme.setVariant((e.target as HTMLSelectElement).value as any)}
+				>
 					{#each theme.variants as variant}
 						<option value={variant}>{THEME_DEFINITIONS[variant].label}</option>
 					{/each}

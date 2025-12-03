@@ -5,7 +5,10 @@ export default defineConfig({
 	schema: './src/db/schema/index.ts',
 	out: './src/db/migrations',
 	dbCredentials: {
-		url: process.env.CONTACTS_DATABASE_URL || process.env.DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/contacts',
+		url:
+			process.env.CONTACTS_DATABASE_URL ||
+			process.env.DATABASE_URL ||
+			'postgresql://manacore:devpassword@localhost:5432/contacts',
 	},
 	verbose: true,
 	strict: true,

@@ -137,7 +137,10 @@
 							onclick={() => handleEventClick(event)}
 						>
 							<span class="event-time">
-								{format(typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime, 'HH:mm')}
+								{format(
+									typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime,
+									'HH:mm'
+								)}
 							</span>
 							<span class="event-title">{event.title}</span>
 						</button>

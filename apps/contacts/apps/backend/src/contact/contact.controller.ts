@@ -173,10 +173,7 @@ export class ContactController {
 	}
 
 	@Get(':id')
-	async findOne(
-		@CurrentUser() user: CurrentUserData,
-		@Param('id', ParseUUIDPipe) id: string
-	) {
+	async findOne(@CurrentUser() user: CurrentUserData, @Param('id', ParseUUIDPipe) id: string) {
 		const contact = await this.contactService.findById(id, user.userId);
 		if (!contact) {
 			return { contact: null };
@@ -212,10 +209,7 @@ export class ContactController {
 	}
 
 	@Delete(':id')
-	async delete(
-		@CurrentUser() user: CurrentUserData,
-		@Param('id', ParseUUIDPipe) id: string
-	) {
+	async delete(@CurrentUser() user: CurrentUserData, @Param('id', ParseUUIDPipe) id: string) {
 		await this.contactService.delete(id, user.userId);
 		return { success: true };
 	}

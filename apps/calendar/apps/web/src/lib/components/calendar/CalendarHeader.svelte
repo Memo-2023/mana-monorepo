@@ -23,9 +23,17 @@
 				const weekStart = viewStore.viewRange.start;
 				const weekEnd = viewStore.viewRange.end;
 				if (weekStart.getMonth() === weekEnd.getMonth()) {
-					return format(weekStart, 'd.', { locale: de }) + ' - ' + format(weekEnd, 'd. MMMM yyyy', { locale: de });
+					return (
+						format(weekStart, 'd.', { locale: de }) +
+						' - ' +
+						format(weekEnd, 'd. MMMM yyyy', { locale: de })
+					);
 				}
-				return format(weekStart, 'd. MMM', { locale: de }) + ' - ' + format(weekEnd, 'd. MMM yyyy', { locale: de });
+				return (
+					format(weekStart, 'd. MMM', { locale: de }) +
+					' - ' +
+					format(weekEnd, 'd. MMM yyyy', { locale: de })
+				);
 			case 'month':
 				return format(date, 'MMMM yyyy', { locale: de });
 			case 'year':
@@ -44,17 +52,28 @@
 
 <header class="calendar-header">
 	<div class="header-left">
-		<button class="btn btn-ghost" onclick={() => viewStore.goToToday()}>
-			Heute
-		</button>
+		<button class="btn btn-ghost" onclick={() => viewStore.goToToday()}> Heute </button>
 
 		<div class="nav-buttons">
-			<button class="btn btn-ghost btn-icon" onclick={() => viewStore.goToPrevious()} aria-label="Zurück">
+			<button
+				class="btn btn-ghost btn-icon"
+				onclick={() => viewStore.goToPrevious()}
+				aria-label="Zurück"
+			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M15 19l-7-7 7-7"
+					/>
 				</svg>
 			</button>
-			<button class="btn btn-ghost btn-icon" onclick={() => viewStore.goToNext()} aria-label="Weiter">
+			<button
+				class="btn btn-ghost btn-icon"
+				onclick={() => viewStore.goToNext()}
+				aria-label="Weiter"
+			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 				</svg>
@@ -66,7 +85,7 @@
 
 	<div class="header-right">
 		<div class="view-selector">
-			{#each (['day', 'week', 'month'] as const) as type}
+			{#each ['day', 'week', 'month'] as const as type}
 				<button
 					class="view-btn"
 					class:active={viewStore.viewType === type}

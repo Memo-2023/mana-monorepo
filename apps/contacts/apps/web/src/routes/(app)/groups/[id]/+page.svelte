@@ -22,8 +22,18 @@
 	let color = $state('#6366f1');
 
 	const presetColors = [
-		'#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#14b8a6',
-		'#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#ec4899',
+		'#ef4444',
+		'#f97316',
+		'#f59e0b',
+		'#84cc16',
+		'#22c55e',
+		'#14b8a6',
+		'#06b6d4',
+		'#3b82f6',
+		'#6366f1',
+		'#8b5cf6',
+		'#a855f7',
+		'#ec4899',
 	];
 
 	const groupContacts = $derived(() => {
@@ -162,11 +172,16 @@
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
 			</svg>
 		</a>
-		<h1 class="title">{isEditing ? 'Gruppe bearbeiten' : (group?.name || 'Gruppe')}</h1>
+		<h1 class="title">{isEditing ? 'Gruppe bearbeiten' : group?.name || 'Gruppe'}</h1>
 		{#if !loading && group && !isEditing}
-			<button onclick={() => isEditing = true} class="edit-button" aria-label="Bearbeiten">
+			<button onclick={() => (isEditing = true)} class="edit-button" aria-label="Bearbeiten">
 				<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+					/>
 				</svg>
 			</button>
 		{:else}
@@ -182,7 +197,12 @@
 		<div class="error-state">
 			<div class="error-icon">
 				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+					/>
 				</svg>
 			</div>
 			<h2 class="error-title">Fehler</h2>
@@ -193,10 +213,15 @@
 		{#if error}
 			<div class="error-banner" role="alert">
 				<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+					/>
 				</svg>
 				<span>{error}</span>
-				<button onclick={() => error = null} class="dismiss-btn">&times;</button>
+				<button onclick={() => (error = null)} class="dismiss-btn">&times;</button>
 			</div>
 		{/if}
 
@@ -205,18 +230,34 @@
 			<div class="preview-section">
 				<div class="preview-color" style="background-color: {color}">
 					<svg class="preview-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+						/>
 					</svg>
 				</div>
 				<p class="preview-name">{name || 'Gruppenname'}</p>
 			</div>
 
-			<form onsubmit={(e) => { e.preventDefault(); handleSave(); }} class="form">
+			<form
+				onsubmit={(e) => {
+					e.preventDefault();
+					handleSave();
+				}}
+				class="form"
+			>
 				<section class="form-section">
 					<div class="section-header">
 						<div class="section-icon">
 							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+								/>
 							</svg>
 						</div>
 						<h2 class="section-title">Details</h2>
@@ -227,7 +268,8 @@
 					</div>
 					<div class="form-field">
 						<label for="description" class="label">Beschreibung</label>
-						<textarea id="description" bind:value={description} rows="3" class="input textarea"></textarea>
+						<textarea id="description" bind:value={description} rows="3" class="input textarea"
+						></textarea>
 					</div>
 				</section>
 
@@ -235,7 +277,12 @@
 					<div class="section-header">
 						<div class="section-icon" style="background-color: {color}20; color: {color}">
 							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+								/>
 							</svg>
 						</div>
 						<h2 class="section-title">Farbe</h2>
@@ -247,11 +294,16 @@
 								class="color-option"
 								class:selected={color === presetColor}
 								style="background-color: {presetColor}"
-								onclick={() => color = presetColor}
+								onclick={() => (color = presetColor)}
 							>
 								{#if color === presetColor}
 									<svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="3"
+											d="M5 13l4 4L19 7"
+										/>
 									</svg>
 								{/if}
 							</button>
@@ -264,8 +316,22 @@
 					<button type="submit" disabled={saving} class="btn btn-primary">
 						{#if saving}
 							<svg class="spinner-sm" viewBox="0 0 24 24">
-								<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-opacity="0.25" fill="none" />
-								<path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" />
+								<circle
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="3"
+									stroke-opacity="0.25"
+									fill="none"
+								/>
+								<path
+									d="M12 2a10 10 0 0 1 10 10"
+									stroke="currentColor"
+									stroke-width="3"
+									stroke-linecap="round"
+									fill="none"
+								/>
 							</svg>
 							Speichern...
 						{:else}
@@ -278,7 +344,12 @@
 			<!-- Delete Button -->
 			<button onclick={handleDelete} class="delete-group-btn">
 				<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+					/>
 				</svg>
 				Gruppe löschen
 			</button>
@@ -287,7 +358,12 @@
 			<div class="preview-section">
 				<div class="preview-color" style="background-color: {group.color || '#6366f1'}">
 					<svg class="preview-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+						/>
 					</svg>
 				</div>
 				<p class="preview-name">{group.name}</p>
@@ -301,13 +377,23 @@
 				<div class="section-header">
 					<div class="section-icon">
 						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+							/>
 						</svg>
 					</div>
 					<h2 class="section-title">Kontakte ({groupContacts().length})</h2>
-					<button onclick={() => showAddContacts = true} class="add-contact-btn">
+					<button onclick={() => (showAddContacts = true)} class="add-contact-btn">
 						<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 4v16m8-8H4"
+							/>
 						</svg>
 						Hinzufügen
 					</button>
@@ -332,9 +418,18 @@
 										<span class="contact-email">{contact.email}</span>
 									{/if}
 								</div>
-								<button onclick={() => handleRemoveContact(contact.id)} class="remove-btn" aria-label="Entfernen">
+								<button
+									onclick={() => handleRemoveContact(contact.id)}
+									class="remove-btn"
+									aria-label="Entfernen"
+								>
 									<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M6 18L18 6M6 6l12 12"
+										/>
 									</svg>
 								</button>
 							</div>
@@ -348,15 +443,20 @@
 
 <!-- Add Contacts Modal -->
 {#if showAddContacts}
-	<div class="modal-backdrop" onclick={() => showAddContacts = false} role="presentation">
+	<div class="modal-backdrop" onclick={() => (showAddContacts = false)} role="presentation">
 		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog">
 			<div class="modal-header">
 				<h2 class="modal-title">Kontakte hinzufügen</h2>
-				<button onclick={() => showAddContacts = false} class="modal-close">&times;</button>
+				<button onclick={() => (showAddContacts = false)} class="modal-close">&times;</button>
 			</div>
 			<div class="modal-search">
 				<svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+					/>
 				</svg>
 				<input
 					type="text"
@@ -368,7 +468,9 @@
 			<div class="modal-content">
 				{#if availableContacts().length === 0}
 					<p class="no-results">
-						{searchQuery ? 'Keine Kontakte gefunden' : 'Alle Kontakte sind bereits in dieser Gruppe'}
+						{searchQuery
+							? 'Keine Kontakte gefunden'
+							: 'Alle Kontakte sind bereits in dieser Gruppe'}
 					</p>
 				{:else}
 					{#each availableContacts() as contact (contact.id)}
@@ -387,7 +489,12 @@
 								{/if}
 							</div>
 							<svg class="add-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 4v16m8-8H4"
+								/>
 							</svg>
 						</button>
 					{/each}
@@ -417,7 +524,8 @@
 		margin-bottom: 0.5rem;
 	}
 
-	.back-button, .edit-button {
+	.back-button,
+	.edit-button {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -475,7 +583,9 @@
 	}
 
 	@keyframes spin {
-		to { transform: rotate(360deg); }
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	.error-state {
@@ -724,7 +834,8 @@
 		gap: 0.5rem;
 	}
 
-	.contact-item, .add-contact-item {
+	.contact-item,
+	.add-contact-item {
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
@@ -753,7 +864,11 @@
 		width: 2.5rem;
 		height: 2.5rem;
 		border-radius: 50%;
-		background: linear-gradient(135deg, hsl(var(--color-primary)) 0%, hsl(var(--color-primary) / 0.7) 100%);
+		background: linear-gradient(
+			135deg,
+			hsl(var(--color-primary)) 0%,
+			hsl(var(--color-primary) / 0.7) 100%
+		);
 		color: hsl(var(--color-primary-foreground));
 		display: flex;
 		align-items: center;
@@ -816,7 +931,8 @@
 		color: hsl(var(--color-primary));
 	}
 
-	.no-contacts, .no-results {
+	.no-contacts,
+	.no-results {
 		text-align: center;
 		color: hsl(var(--color-muted-foreground));
 		padding: 1rem;

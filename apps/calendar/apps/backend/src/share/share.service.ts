@@ -22,17 +22,11 @@ export class ShareService {
 		// Verify user owns the calendar
 		await this.calendarService.findByIdOrThrow(calendarId, userId);
 
-		return this.db
-			.select()
-			.from(calendarShares)
-			.where(eq(calendarShares.calendarId, calendarId));
+		return this.db.select().from(calendarShares).where(eq(calendarShares.calendarId, calendarId));
 	}
 
 	async findById(id: string): Promise<CalendarShare | null> {
-		const result = await this.db
-			.select()
-			.from(calendarShares)
-			.where(eq(calendarShares.id, id));
+		const result = await this.db.select().from(calendarShares).where(eq(calendarShares.id, id));
 		return result[0] || null;
 	}
 
@@ -43,10 +37,7 @@ export class ShareService {
 			.where(
 				and(
 					eq(calendarShares.status, 'pending'),
-					or(
-						eq(calendarShares.sharedWithUserId, userId),
-						eq(calendarShares.sharedWithEmail, email)
-					)
+					or(eq(calendarShares.sharedWithUserId, userId), eq(calendarShares.sharedWithEmail, email))
 				)
 			);
 	}
@@ -174,10 +165,7 @@ export class ShareService {
 			.select()
 			.from(calendarShares)
 			.where(
-				and(
-					eq(calendarShares.sharedWithUserId, userId),
-					eq(calendarShares.status, 'accepted')
-				)
+				and(eq(calendarShares.sharedWithUserId, userId), eq(calendarShares.status, 'accepted'))
 			);
 	}
 }

@@ -29,7 +29,10 @@ export class FileController {
 	constructor(private readonly fileService: FileService) {}
 
 	@Get()
-	async findAll(@CurrentUser() user: CurrentUserData, @Query('parentFolderId') parentFolderId?: string) {
+	async findAll(
+		@CurrentUser() user: CurrentUserData,
+		@Query('parentFolderId') parentFolderId?: string
+	) {
 		return this.fileService.findAll(user.userId, parentFolderId);
 	}
 
@@ -101,12 +104,20 @@ export class FileController {
 	}
 
 	@Patch(':id')
-	async update(@CurrentUser() user: CurrentUserData, @Param('id') id: string, @Body() dto: UpdateFileDto) {
+	async update(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id') id: string,
+		@Body() dto: UpdateFileDto
+	) {
 		return this.fileService.update(user.userId, id, dto);
 	}
 
 	@Patch(':id/move')
-	async move(@CurrentUser() user: CurrentUserData, @Param('id') id: string, @Body() dto: MoveFileDto) {
+	async move(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id') id: string,
+		@Body() dto: MoveFileDto
+	) {
 		return this.fileService.move(user.userId, id, dto);
 	}
 

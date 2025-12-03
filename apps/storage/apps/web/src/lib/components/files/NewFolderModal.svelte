@@ -63,7 +63,12 @@
 				</button>
 			</div>
 
-			<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+			<form
+				onsubmit={(e) => {
+					e.preventDefault();
+					handleSubmit();
+				}}
+			>
 				<div class="form-group">
 					<label for="folder-name">Ordnername</label>
 					<input

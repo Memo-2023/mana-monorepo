@@ -46,7 +46,9 @@ export class TagService {
 	}
 
 	async removeTagFromFile(fileId: string, tagId: string): Promise<void> {
-		await this.db.delete(fileTags).where(and(eq(fileTags.fileId, fileId), eq(fileTags.tagId, tagId)));
+		await this.db
+			.delete(fileTags)
+			.where(and(eq(fileTags.fileId, fileId), eq(fileTags.tagId, tagId)));
 	}
 
 	async getFileTags(fileId: string): Promise<Tag[]> {

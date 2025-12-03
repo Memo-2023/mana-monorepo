@@ -1,13 +1,4 @@
-import {
-	Controller,
-	Get,
-	Post,
-	Put,
-	Delete,
-	Body,
-	Param,
-	UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { CalendarService } from './calendar.service';
 import { CreateCalendarDto, UpdateCalendarDto } from './dto';

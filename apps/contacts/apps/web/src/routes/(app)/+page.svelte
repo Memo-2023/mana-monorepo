@@ -52,10 +52,7 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between">
 		<h1 class="text-2xl font-bold text-foreground">{$_('contacts.title')}</h1>
-		<a
-			href="/contacts/new"
-			class="btn btn-primary flex items-center gap-2"
-		>
+		<a href="/contacts/new" class="btn btn-primary flex items-center gap-2">
 			<span>+</span>
 			<span>{$_('contacts.new')}</span>
 		</a>

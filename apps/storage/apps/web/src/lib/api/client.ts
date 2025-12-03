@@ -22,10 +22,7 @@ async function getHeaders(): Promise<HeadersInit> {
 	return headers;
 }
 
-async function request<T>(
-	endpoint: string,
-	options: RequestInit = {}
-): Promise<ApiResponse<T>> {
+async function request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
 	try {
 		const headers = await getHeaders();
 		const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -170,11 +167,9 @@ export const filesApi = {
 			body: JSON.stringify({ parentFolderId }),
 		}),
 
-	delete: (id: string) =>
-		request<{ success: boolean }>(`/files/${id}`, { method: 'DELETE' }),
+	delete: (id: string) => request<{ success: boolean }>(`/files/${id}`, { method: 'DELETE' }),
 
-	toggleFavorite: (id: string) =>
-		request<StorageFile>(`/files/${id}/favorite`, { method: 'POST' }),
+	toggleFavorite: (id: string) => request<StorageFile>(`/files/${id}/favorite`, { method: 'POST' }),
 };
 
 // Folders API
@@ -205,8 +200,7 @@ export const foldersApi = {
 			body: JSON.stringify({ parentFolderId }),
 		}),
 
-	delete: (id: string) =>
-		request<{ success: boolean }>(`/folders/${id}`, { method: 'DELETE' }),
+	delete: (id: string) => request<{ success: boolean }>(`/folders/${id}`, { method: 'DELETE' }),
 
 	toggleFavorite: (id: string) =>
 		request<StorageFolder>(`/folders/${id}/favorite`, { method: 'POST' }),
@@ -232,8 +226,7 @@ export const sharesApi = {
 			body: JSON.stringify(data),
 		}),
 
-	delete: (id: string) =>
-		request<{ success: boolean }>(`/shares/${id}`, { method: 'DELETE' }),
+	delete: (id: string) => request<{ success: boolean }>(`/shares/${id}`, { method: 'DELETE' }),
 };
 
 // Tags API
@@ -252,8 +245,7 @@ export const tagsApi = {
 			body: JSON.stringify(data),
 		}),
 
-	delete: (id: string) =>
-		request<{ success: boolean }>(`/tags/${id}`, { method: 'DELETE' }),
+	delete: (id: string) => request<{ success: boolean }>(`/tags/${id}`, { method: 'DELETE' }),
 };
 
 // Trash API
@@ -274,8 +266,9 @@ export const trashApi = {
 // Search API
 export const searchApi = {
 	search: (query: string) =>
-		request<{ files: StorageFile[]; folders: StorageFolder[] }>(`/search?q=${encodeURIComponent(query)}`),
+		request<{ files: StorageFile[]; folders: StorageFolder[] }>(
+			`/search?q=${encodeURIComponent(query)}`
+		),
 
-	favorites: () =>
-		request<{ files: StorageFile[]; folders: StorageFolder[] }>('/favorites'),
+	favorites: () => request<{ files: StorageFile[]; folders: StorageFolder[] }>('/favorites'),
 };

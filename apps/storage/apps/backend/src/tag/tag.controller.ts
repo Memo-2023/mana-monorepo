@@ -13,7 +13,10 @@ export class TagController {
 	}
 
 	@Post()
-	async create(@CurrentUser() user: CurrentUserData, @Body() dto: { name: string; color?: string }) {
+	async create(
+		@CurrentUser() user: CurrentUserData,
+		@Body() dto: { name: string; color?: string }
+	) {
 		return this.tagService.create(user.userId, dto.name, dto.color);
 	}
 
