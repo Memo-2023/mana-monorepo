@@ -7,6 +7,7 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { isSidebarMode as sidebarModeStore } from '$lib/stores/navigation';
 	import CalendarHeader from '$lib/components/calendar/CalendarHeader.svelte';
 	import WeekView from '$lib/components/calendar/WeekView.svelte';
 	import DayView from '$lib/components/calendar/DayView.svelte';
@@ -127,7 +128,7 @@
 
 	<!-- FAB when sidebar is collapsed -->
 	{#if settingsStore.sidebarCollapsed}
-		<div class="sidebar-fab">
+		<div class="sidebar-fab" class:pill-sidebar={$sidebarModeStore}>
 			<button
 				class="fab-expand"
 				onclick={() => settingsStore.toggleSidebar()}
@@ -257,6 +258,11 @@
 		gap: 0.5rem;
 		z-index: 50;
 		animation: fab-slide-in 300ms cubic-bezier(0.4, 0, 0.2, 1);
+		transition: left 300ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.sidebar-fab.pill-sidebar {
+		left: 195px;
 	}
 
 	@keyframes fab-slide-in {
