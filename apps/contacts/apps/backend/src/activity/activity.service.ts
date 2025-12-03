@@ -10,11 +10,7 @@ export type ActivityType = 'created' | 'updated' | 'called' | 'emailed' | 'met' 
 export class ActivityService {
 	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {}
 
-	async findByContactId(
-		contactId: string,
-		userId: string,
-		limit = 50
-	): Promise<ContactActivity[]> {
+	async findByContactId(contactId: string, userId: string, limit = 50): Promise<ContactActivity[]> {
 		return this.db
 			.select()
 			.from(contactActivities)

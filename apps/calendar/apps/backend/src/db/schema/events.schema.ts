@@ -1,4 +1,13 @@
-import { pgTable, uuid, timestamp, varchar, text, boolean, jsonb, index } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	uuid,
+	timestamp,
+	varchar,
+	text,
+	boolean,
+	jsonb,
+	index,
+} from 'drizzle-orm/pg-core';
 import { calendars } from './calendars.schema';
 
 /**

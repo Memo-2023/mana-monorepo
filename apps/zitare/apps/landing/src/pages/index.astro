@@ -64,23 +64,28 @@ const sampleQuotes = [
 const faqs = [
 	{
 		question: 'Ist Zitare kostenlos?',
-		answer: 'Ja, Zitare ist kostenlos nutzbar. Du hast Zugriff auf alle Zitate und Features ohne Abo oder versteckte Kosten.',
+		answer:
+			'Ja, Zitare ist kostenlos nutzbar. Du hast Zugriff auf alle Zitate und Features ohne Abo oder versteckte Kosten.',
 	},
 	{
 		question: 'Welche Autoren sind in der Sammlung?',
-		answer: 'Unsere Sammlung umfasst über 1000 Zitate von Philosophen wie Sokrates und Nietzsche, Wissenschaftlern wie Einstein und Curie, sowie modernen Denkern und Führungspersönlichkeiten.',
+		answer:
+			'Unsere Sammlung umfasst über 1000 Zitate von Philosophen wie Sokrates und Nietzsche, Wissenschaftlern wie Einstein und Curie, sowie modernen Denkern und Führungspersönlichkeiten.',
 	},
 	{
 		question: 'Kann ich Zitate offline lesen?',
-		answer: 'Ja, mit der mobilen App werden deine Lieblingszitate lokal gespeichert. So hast du auch ohne Internetverbindung Zugriff auf Inspiration.',
+		answer:
+			'Ja, mit der mobilen App werden deine Lieblingszitate lokal gespeichert. So hast du auch ohne Internetverbindung Zugriff auf Inspiration.',
 	},
 	{
 		question: 'Wie kann ich Zitate teilen?',
-		answer: 'Jedes Zitat kann direkt aus der App geteilt werden - per WhatsApp, Instagram, E-Mail oder als Bild für Social Media.',
+		answer:
+			'Jedes Zitat kann direkt aus der App geteilt werden - per WhatsApp, Instagram, E-Mail oder als Bild für Social Media.',
 	},
 	{
 		question: 'Werden neue Zitate hinzugefügt?',
-		answer: 'Ja, wir erweitern unsere Sammlung regelmäßig mit neuen, sorgfältig ausgewählten Zitaten aus verschiedenen Epochen und Kulturen.',
+		answer:
+			'Ja, wir erweitern unsere Sammlung regelmäßig mit neuen, sorgfältig ausgewählten Zitaten aus verschiedenen Epochen und Kulturen.',
 	},
 ];
 ---
@@ -123,15 +128,19 @@ const faqs = [
 				</div>
 
 				<div class="grid md:grid-cols-3 gap-6">
-					{sampleQuotes.map((quote) => (
-						<div class="bg-background-page rounded-2xl p-8 border border-border hover:border-primary/30 transition-all duration-300 group">
-							<div class="text-4xl text-primary/30 mb-4 group-hover:text-primary/50 transition-colors">"</div>
-							<p class="quote-text text-text-primary text-lg mb-6 leading-relaxed">
-								{quote.text}
-							</p>
-							<p class="text-text-muted text-sm">— {quote.author}</p>
-						</div>
-					))}
+					{
+						sampleQuotes.map((quote) => (
+							<div class="bg-background-page rounded-2xl p-8 border border-border hover:border-primary/30 transition-all duration-300 group">
+								<div class="text-4xl text-primary/30 mb-4 group-hover:text-primary/50 transition-colors">
+									"
+								</div>
+								<p class="quote-text text-text-primary text-lg mb-6 leading-relaxed">
+									{quote.text}
+								</p>
+								<p class="text-text-muted text-sm">— {quote.author}</p>
+							</div>
+						))
+					}
 				</div>
 			</Container>
 		</section>
@@ -150,13 +159,11 @@ const faqs = [
 		<section id="about" class="py-20 bg-background-card">
 			<Container size="md">
 				<div class="text-center">
-					<h2 class="text-3xl md:text-4xl font-bold text-text-primary mb-6">
-						Über Zitare
-					</h2>
+					<h2 class="text-3xl md:text-4xl font-bold text-text-primary mb-6">Über Zitare</h2>
 					<p class="text-text-secondary text-lg mb-6 leading-relaxed">
-						Zitare ist deine tägliche Quelle für Inspiration und Weisheit. Wir haben über 1000 Zitate
-						von den einflussreichsten Denkern, Philosophen, Wissenschaftlern und Führungspersönlichkeiten
-						der Geschichte sorgfältig zusammengestellt.
+						Zitare ist deine tägliche Quelle für Inspiration und Weisheit. Wir haben über 1000
+						Zitate von den einflussreichsten Denkern, Philosophen, Wissenschaftlern und
+						Führungspersönlichkeiten der Geschichte sorgfältig zusammengestellt.
 					</p>
 					<p class="text-text-secondary text-lg leading-relaxed">
 						Ob du Motivation suchst, nach Weisheit strebst oder einfach einen Moment der Reflexion

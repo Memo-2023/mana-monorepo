@@ -32,9 +32,7 @@ export class EventService {
 
 		// Exclude cancelled unless requested
 		if (!query.includeCancelled) {
-			conditions.push(
-				or(eq(events.status, 'confirmed'), eq(events.status, 'tentative')) as any
-			);
+			conditions.push(or(eq(events.status, 'confirmed'), eq(events.status, 'tentative')) as any);
 		}
 
 		// Search filter

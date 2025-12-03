@@ -27,7 +27,9 @@ export class StorageService {
 		subfolder?: string
 	) {
 		if (!validateFileSize(buffer.length, this.maxFileSize / (1024 * 1024))) {
-			throw new Error(`File size exceeds maximum allowed size of ${this.maxFileSize / (1024 * 1024)}MB`);
+			throw new Error(
+				`File size exceeds maximum allowed size of ${this.maxFileSize / (1024 * 1024)}MB`
+			);
 		}
 
 		const storageKey = generateUserFileKey(userId, originalName, subfolder);

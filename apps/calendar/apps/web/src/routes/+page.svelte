@@ -73,10 +73,7 @@
 			Neuer Termin
 		</button>
 
-		<MiniCalendar
-			selectedDate={viewStore.currentDate}
-			onDateSelect={handleDateSelect}
-		/>
+		<MiniCalendar selectedDate={viewStore.currentDate} onDateSelect={handleDateSelect} />
 
 		<CalendarSidebar />
 	</aside>

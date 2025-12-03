@@ -83,9 +83,7 @@
 	{:else if groupedEvents.length === 0}
 		<div class="empty-state card">
 			<p>Keine Termine in den nächsten 30 Tagen</p>
-			<button class="btn btn-primary" onclick={() => goto('/event/new')}>
-				Termin erstellen
-			</button>
+			<button class="btn btn-primary" onclick={() => goto('/event/new')}> Termin erstellen </button>
 		</div>
 	{:else}
 		<div class="event-list">
@@ -106,8 +104,16 @@
 									{#if event.isAllDay}
 										Ganztägig
 									{:else}
-										{format(typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime, 'HH:mm')} -
-										{format(typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime, 'HH:mm')}
+										{format(
+											typeof event.startTime === 'string'
+												? parseISO(event.startTime)
+												: event.startTime,
+											'HH:mm'
+										)} -
+										{format(
+											typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime,
+											'HH:mm'
+										)}
 									{/if}
 								</div>
 								<div class="event-title">{event.title}</div>

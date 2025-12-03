@@ -112,10 +112,13 @@
 		"deploy:landing:all": "pnpm deploy:landing:chat && pnpm deploy:landing:picture && pnpm deploy:landing:manacore && pnpm deploy:landing:manadeck && pnpm deploy:landing:zitare && pnpm deploy:landing:presi",
 		"cf:login": "npx wrangler login",
 		"cf:projects:list": "npx wrangler pages project list",
-		"cf:projects:create": "echo 'Creating Cloudflare Pages projects...' && npx wrangler pages project create chat-landing --production-branch=main && npx wrangler pages project create picture-landing --production-branch=main && npx wrangler pages project create manacore-landing --production-branch=main && npx wrangler pages project create manadeck-landing --production-branch=main && npx wrangler pages project create zitare-landing --production-branch=main"
+		"cf:projects:create": "echo 'Creating Cloudflare Pages projects...' && npx wrangler pages project create chat-landing --production-branch=main && npx wrangler pages project create picture-landing --production-branch=main && npx wrangler pages project create manacore-landing --production-branch=main && npx wrangler pages project create manadeck-landing --production-branch=main && npx wrangler pages project create zitare-landing --production-branch=main",
+		"prepare": "husky"
 	},
 	"devDependencies": {
 		"concurrently": "^9.2.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.2.7",
 		"prettier": "^3.3.3",
 		"prettier-plugin-astro": "^0.14.1",
 		"prettier-plugin-svelte": "^3.4.0",

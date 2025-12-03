@@ -47,7 +47,9 @@ export class SearchService {
 		const favoriteFolders = await this.db
 			.select()
 			.from(folders)
-			.where(and(eq(folders.userId, userId), eq(folders.isDeleted, false), eq(folders.isFavorite, true)));
+			.where(
+				and(eq(folders.userId, userId), eq(folders.isDeleted, false), eq(folders.isFavorite, true))
+			);
 
 		return { files: favoriteFiles, folders: favoriteFolders };
 	}

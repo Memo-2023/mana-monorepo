@@ -28,7 +28,13 @@ export class FolderService {
 		return this.db
 			.select()
 			.from(folders)
-			.where(and(eq(folders.userId, userId), isNull(folders.parentFolderId), eq(folders.isDeleted, false)));
+			.where(
+				and(
+					eq(folders.userId, userId),
+					isNull(folders.parentFolderId),
+					eq(folders.isDeleted, false)
+				)
+			);
 	}
 
 	async findOne(userId: string, id: string): Promise<Folder> {

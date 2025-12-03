@@ -1,4 +1,13 @@
-import { pgTable, uuid, timestamp, varchar, text, boolean, jsonb, integer } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	uuid,
+	timestamp,
+	varchar,
+	text,
+	boolean,
+	jsonb,
+	integer,
+} from 'drizzle-orm/pg-core';
 
 /**
  * Provider-specific metadata

@@ -1,4 +1,12 @@
-import { IsString, IsOptional, IsBoolean, IsIn, IsEmail, IsDateString, IsUUID } from 'class-validator';
+import {
+	IsString,
+	IsOptional,
+	IsBoolean,
+	IsIn,
+	IsEmail,
+	IsDateString,
+	IsUUID,
+} from 'class-validator';
 
 export class CreateShareDto {
 	@IsUUID()

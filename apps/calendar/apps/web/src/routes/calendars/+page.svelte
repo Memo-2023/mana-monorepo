@@ -71,15 +71,18 @@
 <div class="calendars-page">
 	<header class="page-header">
 		<h1>Meine Kalender</h1>
-		<button class="btn btn-primary" onclick={() => (showNewForm = true)}>
-			Neuer Kalender
-		</button>
+		<button class="btn btn-primary" onclick={() => (showNewForm = true)}> Neuer Kalender </button>
 	</header>
 
 	{#if showNewForm}
 		<div class="card new-calendar-form">
 			<h2>Neuer Kalender</h2>
-			<form onsubmit={(e) => { e.preventDefault(); handleCreateCalendar(); }}>
+			<form
+				onsubmit={(e) => {
+					e.preventDefault();
+					handleCreateCalendar();
+				}}
+			>
 				<div class="form-row">
 					<input
 						type="text"
@@ -87,11 +90,7 @@
 						placeholder="Kalender Name"
 						bind:value={newCalendarName}
 					/>
-					<input
-						type="color"
-						class="color-input"
-						bind:value={newCalendarColor}
-					/>
+					<input type="color" class="color-input" bind:value={newCalendarColor} />
 				</div>
 				<div class="form-actions">
 					<button type="button" class="btn btn-ghost" onclick={() => (showNewForm = false)}>
@@ -119,26 +118,14 @@
 						}}
 					>
 						<div class="form-row">
-							<input
-								type="text"
-								name="name"
-								class="input"
-								value={calendar.name}
-							/>
-							<input
-								type="color"
-								name="color"
-								class="color-input"
-								value={calendar.color}
-							/>
+							<input type="text" name="name" class="input" value={calendar.name} />
+							<input type="color" name="color" class="color-input" value={calendar.color} />
 						</div>
 						<div class="form-actions">
 							<button type="button" class="btn btn-ghost" onclick={() => (editingCalendar = null)}>
 								Abbrechen
 							</button>
-							<button type="submit" class="btn btn-primary">
-								Speichern
-							</button>
+							<button type="submit" class="btn btn-primary"> Speichern </button>
 						</div>
 					</form>
 				{:else}
@@ -150,10 +137,7 @@
 						{/if}
 					</div>
 					<div class="calendar-actions">
-						<button
-							class="btn btn-ghost btn-sm"
-							onclick={() => (editingCalendar = calendar)}
-						>
+						<button class="btn btn-ghost btn-sm" onclick={() => (editingCalendar = calendar)}>
 							Bearbeiten
 						</button>
 						{#if !calendar.isDefault}

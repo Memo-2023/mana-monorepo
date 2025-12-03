@@ -51,10 +51,7 @@ export class GroupService {
 	}
 
 	async addContactToGroup(contactId: string, groupId: string): Promise<void> {
-		await this.db
-			.insert(contactToGroups)
-			.values({ contactId, groupId })
-			.onConflictDoNothing();
+		await this.db.insert(contactToGroups).values({ contactId, groupId }).onConflictDoNothing();
 	}
 
 	async removeContactFromGroup(contactId: string, groupId: string): Promise<void> {

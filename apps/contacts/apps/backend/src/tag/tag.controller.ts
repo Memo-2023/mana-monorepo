@@ -67,10 +67,7 @@ export class TagController {
 	}
 
 	@Delete(':id')
-	async delete(
-		@CurrentUser() user: CurrentUserData,
-		@Param('id', ParseUUIDPipe) id: string
-	) {
+	async delete(@CurrentUser() user: CurrentUserData, @Param('id', ParseUUIDPipe) id: string) {
 		await this.tagService.delete(id, user.userId);
 		return { success: true };
 	}

@@ -6,7 +6,7 @@ services:
   # ============================================
 
   mana-core-auth:
-    image: ${DOCKER_REGISTRY:-wuesteon}/mana-core-auth:${AUTH_VERSION:-latest}
+    image: ${DOCKER_REGISTRY:-ghcr.io/memo-2023}/mana-core-auth:${AUTH_VERSION:-latest}
     container_name: mana-core-auth-prod
     restart: always
     environment:
@@ -44,7 +44,7 @@ services:
           memory: 256M
 
   maerchenzauber-backend:
-    image: ${DOCKER_REGISTRY:-wuesteon}/maerchenzauber-backend:${MAERCHENZAUBER_VERSION:-latest}
+    image: ${DOCKER_REGISTRY:-ghcr.io/memo-2023}/maerchenzauber-backend:${MAERCHENZAUBER_VERSION:-latest}
     container_name: maerchenzauber-backend-prod
     restart: always
     depends_on:
@@ -84,7 +84,7 @@ services:
           memory: 512M
 
   chat-backend:
-    image: ${DOCKER_REGISTRY:-wuesteon}/chat-backend:${CHAT_VERSION:-latest}
+    image: ${DOCKER_REGISTRY:-ghcr.io/memo-2023}/chat-backend:${CHAT_VERSION:-latest}
     container_name: chat-backend-prod
     restart: always
     depends_on:
@@ -123,7 +123,7 @@ services:
           memory: 512M
 
   manadeck-backend:
-    image: ${DOCKER_REGISTRY:-wuesteon}/manadeck-backend:${MANADECK_VERSION:-latest}
+    image: ${DOCKER_REGISTRY:-ghcr.io/memo-2023}/manadeck-backend:${MANADECK_VERSION:-latest}
     container_name: manadeck-backend-prod
     restart: always
     depends_on:
@@ -159,7 +159,7 @@ services:
           memory: 256M
 
   nutriphi-backend:
-    image: ${DOCKER_REGISTRY:-wuesteon}/nutriphi-backend:${NUTRIPHI_VERSION:-latest}
+    image: ${DOCKER_REGISTRY:-ghcr.io/memo-2023}/nutriphi-backend:${NUTRIPHI_VERSION:-latest}
     container_name: nutriphi-backend-prod
     restart: always
     depends_on:
@@ -195,7 +195,7 @@ services:
           memory: 256M
 
   news-api:
-    image: ${DOCKER_REGISTRY:-wuesteon}/news-api:${NEWS_VERSION:-latest}
+    image: ${DOCKER_REGISTRY:-ghcr.io/memo-2023}/news-api:${NEWS_VERSION:-latest}
     container_name: news-api-prod
     restart: always
     depends_on:

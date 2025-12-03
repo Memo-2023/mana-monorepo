@@ -39,7 +39,12 @@
 			Funktionen du dir wünschst.
 		</p>
 
-		<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+		<form
+			onsubmit={(e) => {
+				e.preventDefault();
+				handleSubmit();
+			}}
+		>
 			<div class="form-group">
 				<label>Art des Feedbacks</label>
 				<div class="type-selector">

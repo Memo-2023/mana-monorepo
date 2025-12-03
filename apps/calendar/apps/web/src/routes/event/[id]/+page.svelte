@@ -87,23 +87,14 @@
 				<h1 class="page-title">{isEditing ? 'Termin bearbeiten' : event.title}</h1>
 				{#if !isEditing}
 					<div class="actions">
-						<button class="btn btn-ghost" onclick={() => (isEditing = true)}>
-							Bearbeiten
-						</button>
-						<button class="btn btn-ghost text-destructive" onclick={handleDelete}>
-							Löschen
-						</button>
+						<button class="btn btn-ghost" onclick={() => (isEditing = true)}> Bearbeiten </button>
+						<button class="btn btn-ghost text-destructive" onclick={handleDelete}> Löschen </button>
 					</div>
 				{/if}
 			</div>
 
 			{#if isEditing}
-				<EventForm
-					mode="edit"
-					{event}
-					onSave={handleSave}
-					onCancel={handleCancel}
-				/>
+				<EventForm mode="edit" {event} onSave={handleSave} onCancel={handleCancel} />
 			{:else}
 				<div class="event-details">
 					<div class="detail-row">
@@ -133,9 +124,7 @@
 					{/if}
 
 					<div class="detail-row">
-						<button class="btn btn-ghost" onclick={() => goto('/')}>
-							Zurück zum Kalender
-						</button>
+						<button class="btn btn-ghost" onclick={() => goto('/')}> Zurück zum Kalender </button>
 					</div>
 				</div>
 			{/if}

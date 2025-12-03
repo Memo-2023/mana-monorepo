@@ -61,9 +61,7 @@ export class ReminderService {
 			throw new NotFoundException(`Reminder with id ${id} not found`);
 		}
 
-		await this.db
-			.delete(reminders)
-			.where(and(eq(reminders.id, id), eq(reminders.userId, userId)));
+		await this.db.delete(reminders).where(and(eq(reminders.id, id), eq(reminders.userId, userId)));
 	}
 
 	async getPendingReminders(): Promise<Reminder[]> {
@@ -74,9 +72,7 @@ export class ReminderService {
 		return this.db
 			.select()
 			.from(reminders)
-			.where(
-				and(eq(reminders.status, 'pending'), lte(reminders.reminderTime, oneMinuteFromNow))
-			);
+			.where(and(eq(reminders.status, 'pending'), lte(reminders.reminderTime, oneMinuteFromNow)));
 	}
 
 	async markAsSent(id: string): Promise<void> {
@@ -116,7 +112,9 @@ export class ReminderService {
 
 				// TODO: Implement actual notification sending
 				// For now, just log and mark as sent
-				console.log(`[Reminder] Event "${event.title}" starting in ${reminder.minutesBefore} minutes`);
+				console.log(
+					`[Reminder] Event "${event.title}" starting in ${reminder.minutesBefore} minutes`
+				);
 
 				if (reminder.notifyPush) {
 					// TODO: Send push notification via Expo Push API
@@ -145,9 +143,7 @@ export class ReminderService {
 			.where(and(eq(reminders.eventId, eventId), eq(reminders.status, 'pending')));
 
 		for (const reminder of eventReminders) {
-			const newReminderTime = new Date(
-				newStartTime.getTime() - reminder.minutesBefore * 60 * 1000
-			);
+			const newReminderTime = new Date(newStartTime.getTime() - reminder.minutesBefore * 60 * 1000);
 
 			await this.db
 				.update(reminders)

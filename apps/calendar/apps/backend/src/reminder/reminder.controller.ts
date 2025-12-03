@@ -1,12 +1,4 @@
-import {
-	Controller,
-	Get,
-	Post,
-	Delete,
-	Body,
-	Param,
-	UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { ReminderService } from './reminder.service';
 import { CreateReminderDto } from './dto';
@@ -17,10 +9,7 @@ export class ReminderController {
 	constructor(private readonly reminderService: ReminderService) {}
 
 	@Get('events/:eventId/reminders')
-	async findByEvent(
-		@CurrentUser() user: CurrentUserData,
-		@Param('eventId') eventId: string
-	) {
+	async findByEvent(@CurrentUser() user: CurrentUserData, @Param('eventId') eventId: string) {
 		const reminders = await this.reminderService.findByEvent(eventId, user.userId);
 		return { reminders };
 	}

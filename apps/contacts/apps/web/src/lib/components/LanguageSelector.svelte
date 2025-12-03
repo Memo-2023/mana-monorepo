@@ -30,9 +30,7 @@
 	</button>
 
 	{#if isOpen}
-		<div
-			class="absolute right-0 mt-2 w-40 rounded-md border border-border bg-card shadow-lg z-50"
-		>
+		<div class="absolute right-0 mt-2 w-40 rounded-md border border-border bg-card shadow-lg z-50">
 			{#each supportedLocales as lang}
 				<button
 					onclick={() => handleSelect(lang)}

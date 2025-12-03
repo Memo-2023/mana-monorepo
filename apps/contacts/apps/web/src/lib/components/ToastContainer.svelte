@@ -36,7 +36,9 @@
 			class="flex items-center gap-3 rounded-lg bg-card px-4 py-3 shadow-lg border border-border animate-in slide-in-from-right duration-200"
 		>
 			<span
-				class="{getColorClass(toast.type)} flex h-6 w-6 items-center justify-center rounded-full text-white text-sm"
+				class="{getColorClass(
+					toast.type
+				)} flex h-6 w-6 items-center justify-center rounded-full text-white text-sm"
 			>
 				{getIcon(toast.type)}
 			</span>

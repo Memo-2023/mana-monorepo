@@ -85,7 +85,10 @@ export function useImageGeneration() {
 			setSteps(selectedModel.defaultSteps ?? 4);
 			setGuidanceScale(selectedModel.defaultGuidanceScale ?? 3.5);
 
-			const maxDimension = Math.min(selectedModel.maxWidth ?? 1024, selectedModel.maxHeight ?? 1024);
+			const maxDimension = Math.min(
+				selectedModel.maxWidth ?? 1024,
+				selectedModel.maxHeight ?? 1024
+			);
 			const minDimension = Math.max(selectedModel.minWidth ?? 256, selectedModel.minHeight ?? 256);
 
 			let newWidth = selectedAspectRatio.width;

@@ -24,7 +24,10 @@
 				class:active={theme.variant === variant}
 				onclick={() => theme.setVariant(variant)}
 			>
-				<div class="theme-preview" style="background: linear-gradient(135deg, {def.colors.primary}, {def.colors.accent})">
+				<div
+					class="theme-preview"
+					style="background: linear-gradient(135deg, {def.colors.primary}, {def.colors.accent})"
+				>
 					{#if theme.variant === variant}
 						<div class="check-badge">
 							<Check size={16} />

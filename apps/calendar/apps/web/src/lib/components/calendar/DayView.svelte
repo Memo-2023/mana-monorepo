@@ -417,8 +417,14 @@
 					></div>
 
 					<span class="event-time">
-						{format(typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime, 'HH:mm')} -
-						{format(typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime, 'HH:mm')}
+						{format(
+							typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime,
+							'HH:mm'
+						)} -
+						{format(
+							typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime,
+							'HH:mm'
+						)}
 					</span>
 					<span class="event-title">{event.title}</span>
 					{#if event.location}

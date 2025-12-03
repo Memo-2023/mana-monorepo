@@ -59,12 +59,16 @@ export const eventsStore = {
 		if (!Array.isArray(currentEvents)) return [];
 
 		return currentEvents.filter((event) => {
-			const eventStart = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+			const eventStart =
+				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
 			const eventEnd = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
 
 			// For all-day events, check if day falls within event range
 			if (event.isAllDay) {
-				return isWithinInterval(date, { start: eventStart, end: eventEnd }) || isSameDay(date, eventStart);
+				return (
+					isWithinInterval(date, { start: eventStart, end: eventEnd }) ||
+					isSameDay(date, eventStart)
+				);
 			}
 
 			// For timed events, check if event starts on this day
@@ -81,7 +85,8 @@ export const eventsStore = {
 		if (!Array.isArray(currentEvents)) return [];
 
 		return currentEvents.filter((event) => {
-			const eventStart = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+			const eventStart =
+				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
 			const eventEnd = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
 
 			// Check if event overlaps with the range

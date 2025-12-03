@@ -99,6 +99,8 @@ export class TrashService {
 
 		// Delete from database
 		await this.db.delete(files).where(and(eq(files.userId, userId), eq(files.isDeleted, true)));
-		await this.db.delete(folders).where(and(eq(folders.userId, userId), eq(folders.isDeleted, true)));
+		await this.db
+			.delete(folders)
+			.where(and(eq(folders.userId, userId), eq(folders.isDeleted, true)));
 	}
 }

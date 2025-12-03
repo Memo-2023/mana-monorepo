@@ -62,10 +62,7 @@ export class GroupController {
 	}
 
 	@Get(':id')
-	async findOne(
-		@CurrentUser() user: CurrentUserData,
-		@Param('id', ParseUUIDPipe) id: string
-	) {
+	async findOne(@CurrentUser() user: CurrentUserData, @Param('id', ParseUUIDPipe) id: string) {
 		const group = await this.groupService.findById(id, user.userId);
 		const contactIds = group ? await this.groupService.getContactsInGroup(id) : [];
 		return { group, contactIds };
@@ -91,10 +88,7 @@ export class GroupController {
 	}
 
 	@Delete(':id')
-	async delete(
-		@CurrentUser() user: CurrentUserData,
-		@Param('id', ParseUUIDPipe) id: string
-	) {
+	async delete(@CurrentUser() user: CurrentUserData, @Param('id', ParseUUIDPipe) id: string) {
 		await this.groupService.delete(id, user.userId);
 		return { success: true };
 	}
