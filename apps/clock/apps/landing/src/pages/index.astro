@@ -1,0 +1,159 @@
+---
+import Layout from '@layouts/Layout.astro';
+import Hero from '@components/Hero.astro';
+import Features from '@components/Features.astro';
+import CTA from '@components/CTA.astro';
+import Footer from '@components/Footer.astro';
+
+// Pricing data
+const pricingPlans = [
+	{
+		name: 'Free',
+		price: '0',
+		period: '/Monat',
+		description: 'Perfekt für Einzelpersonen',
+		features: [
+			{ text: 'Unbegrenzte Wecker', included: true },
+			{ text: 'Unbegrenzte Timer', included: true },
+			{ text: 'Stoppuhr', included: true },
+			{ text: 'Pomodoro-Timer', included: true },
+			{ text: 'Geräte-Sync', included: false },
+			{ text: 'Push-Benachrichtigungen', included: false },
+		],
+		cta: {
+			text: 'Kostenlos starten',
+			href: '#',
+		},
+	},
+	{
+		name: 'Pro',
+		price: '2,99',
+		period: '/Monat',
+		description: 'Für Power-User',
+		features: [
+			{ text: 'Alles aus Free', included: true },
+			{ text: 'Geräte-Sync', included: true },
+			{ text: 'Push-Benachrichtigungen', included: true },
+			{ text: 'Unbegrenzte Weltuhr-Städte', included: true },
+			{ text: 'Eigene Alarm-Sounds', included: true },
+			{ text: 'Widgets', included: true },
+		],
+		cta: {
+			text: 'Pro starten',
+			href: '#',
+		},
+		highlighted: true,
+		badge: 'Beliebt',
+	},
+	{
+		name: 'Team',
+		price: '4,99',
+		period: '/Monat',
+		description: 'Für Teams & Familien',
+		features: [
+			{ text: 'Alles aus Pro', included: true },
+			{ text: 'Bis zu 5 Nutzer', included: true },
+			{ text: 'Geteilte Timer', included: true },
+			{ text: 'Team-Statistiken', included: true },
+			{ text: 'Admin-Dashboard', included: true },
+			{ text: 'Priority Support', included: true },
+		],
+		cta: {
+			text: 'Team erstellen',
+			href: '#',
+		},
+	},
+];
+---
+
+<Layout
+	title="Clock - Uhren, Wecker & Timer"
+	description="Weltzeituhr, Wecker, Timer, Stoppuhr und Pomodoro in einer App. Synchronisiere zwischen Geräten. Kostenlos starten."
+>
+	<Hero />
+	<Features />
+
+	<!-- Pricing Section -->
+	<section id="pricing" class="bg-dark-bg">
+		<div class="container">
+			<div class="mx-auto mb-16 max-w-3xl text-center">
+				<span
+					class="mb-4 inline-block text-sm font-medium uppercase tracking-wider text-primary-400"
+				>
+					Preise
+				</span>
+				<h2 class="mb-6 text-3xl font-bold md:text-4xl">Einfache, transparente Preise</h2>
+				<p class="text-lg text-gray-400">Starte kostenlos, upgrade wenn du mehr brauchst</p>
+			</div>
+
+			<div class="mx-auto grid max-w-5xl gap-8 md:grid-cols-3">
+				{
+					pricingPlans.map((plan) => (
+						<div
+							class={`relative rounded-xl border p-6 ${plan.highlighted ? 'border-primary-500 bg-primary-500/10' : 'border-dark-border bg-dark-card'}`}
+						>
+							{plan.badge && (
+								<div class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary-500 px-3 py-1 text-xs font-medium text-white">
+									{plan.badge}
+								</div>
+							)}
+							<h3 class="mb-2 text-xl font-semibold">{plan.name}</h3>
+							<p class="mb-4 text-sm text-gray-400">{plan.description}</p>
+							<div class="mb-6">
+								<span class="text-4xl font-bold">{plan.price}€</span>
+								<span class="text-gray-500">{plan.period}</span>
+							</div>
+							<ul class="mb-8 space-y-3">
+								{plan.features.map((feature) => (
+									<li
+										class={`flex items-center gap-2 text-sm ${feature.included ? 'text-white' : 'text-gray-600'}`}
+									>
+										{feature.included ? (
+											<svg
+												class="h-5 w-5 text-green-500"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M5 13l4 4L19 7"
+												/>
+											</svg>
+										) : (
+											<svg
+												class="h-5 w-5 text-gray-600"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M6 18L18 6M6 6l12 12"
+												/>
+											</svg>
+										)}
+										{feature.text}
+									</li>
+								))}
+							</ul>
+							<a
+								href={plan.cta.href}
+								class={`btn w-full ${plan.highlighted ? 'btn-primary' : 'btn-secondary'}`}
+							>
+								{plan.cta.text}
+							</a>
+						</div>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<CTA />
+	<Footer />
+</Layout>

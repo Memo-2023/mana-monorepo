@@ -1,0 +1,149 @@
+{
+	"app": {
+		"name": "Clock",
+		"loading": "Laden..."
+	},
+	"nav": {
+		"dashboard": "Übersicht",
+		"alarms": "Wecker",
+		"timers": "Timer",
+		"stopwatch": "Stoppuhr",
+		"pomodoro": "Pomodoro",
+		"worldClock": "Weltzeituhr",
+		"settings": "Einstellungen",
+		"feedback": "Feedback"
+	},
+	"auth": {
+		"login": "Anmelden",
+		"register": "Registrieren",
+		"logout": "Abmelden",
+		"forgotPassword": "Passwort vergessen",
+		"email": "E-Mail",
+		"password": "Passwort",
+		"confirmPassword": "Passwort bestätigen"
+	},
+	"dashboard": {
+		"title": "Übersicht",
+		"nextAlarm": "Nächster Wecker",
+		"activeTimers": "Aktive Timer",
+		"worldClocks": "Weltuhr"
+	},
+	"alarm": {
+		"title": "Wecker",
+		"add": "Wecker hinzufügen",
+		"edit": "Wecker bearbeiten",
+		"delete": "Wecker löschen",
+		"label": "Bezeichnung",
+		"time": "Zeit",
+		"repeat": "Wiederholen",
+		"sound": "Ton",
+		"snooze": "Schlummern",
+		"snoozeMinutes": "{minutes} Minuten",
+		"enabled": "Aktiviert",
+		"disabled": "Deaktiviert",
+		"noAlarms": "Keine Wecker eingestellt",
+		"days": {
+			"sun": "So",
+			"mon": "Mo",
+			"tue": "Di",
+			"wed": "Mi",
+			"thu": "Do",
+			"fri": "Fr",
+			"sat": "Sa"
+		},
+		"once": "Einmalig",
+		"daily": "Täglich",
+		"weekdays": "Wochentags",
+		"weekends": "Am Wochenende",
+		"custom": "Benutzerdefiniert"
+	},
+	"timer": {
+		"title": "Timer",
+		"add": "Timer hinzufügen",
+		"start": "Start",
+		"pause": "Pause",
+		"reset": "Zurücksetzen",
+		"stop": "Stopp",
+		"delete": "Löschen",
+		"label": "Bezeichnung",
+		"duration": "Dauer",
+		"hours": "Stunden",
+		"minutes": "Minuten",
+		"seconds": "Sekunden",
+		"noTimers": "Keine Timer aktiv",
+		"presets": "Schnellauswahl",
+		"finished": "Timer abgelaufen!"
+	},
+	"stopwatch": {
+		"title": "Stoppuhr",
+		"start": "Start",
+		"stop": "Stopp",
+		"lap": "Runde",
+		"reset": "Zurücksetzen",
+		"laps": "Runden",
+		"noLaps": "Noch keine Runden",
+		"best": "Beste",
+		"worst": "Längste",
+		"total": "Gesamt"
+	},
+	"pomodoro": {
+		"title": "Pomodoro",
+		"work": "Arbeiten",
+		"break": "Pause",
+		"longBreak": "Lange Pause",
+		"sessions": "Sitzungen",
+		"sessionsCompleted": "{count} von {total} Sitzungen",
+		"start": "Start",
+		"pause": "Pause",
+		"skip": "Überspringen",
+		"reset": "Zurücksetzen",
+		"presets": {
+			"classic": "Klassisch",
+			"shortFocus": "Kurzer Fokus",
+			"deepWork": "Tiefe Arbeit"
+		},
+		"settings": {
+			"workDuration": "Arbeitszeit",
+			"breakDuration": "Pausenzeit",
+			"longBreakDuration": "Lange Pause",
+			"sessionsBeforeLongBreak": "Sitzungen bis zur langen Pause"
+		}
+	},
+	"worldClock": {
+		"title": "Weltzeituhr",
+		"add": "Stadt hinzufügen",
+		"search": "Stadt oder Zeitzone suchen...",
+		"noClocks": "Keine Städte hinzugefügt",
+		"difference": "{hours} Std. {direction}",
+		"ahead": "voraus",
+		"behind": "zurück",
+		"same": "Gleiche Zeit"
+	},
+	"settings": {
+		"title": "Einstellungen",
+		"general": "Allgemein",
+		"appearance": "Darstellung",
+		"sounds": "Töne",
+		"notifications": "Benachrichtigungen",
+		"language": "Sprache",
+		"theme": "Design",
+		"darkMode": "Dunkelmodus",
+		"clockFormat": "Uhrzeitformat",
+		"format24h": "24 Stunden",
+		"format12h": "12 Stunden (AM/PM)"
+	},
+	"common": {
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"delete": "Löschen",
+		"edit": "Bearbeiten",
+		"add": "Hinzufügen",
+		"confirm": "Bestätigen",
+		"yes": "Ja",
+		"no": "Nein",
+		"ok": "OK",
+		"loading": "Laden...",
+		"error": "Fehler",
+		"success": "Erfolg"
+	}
+}

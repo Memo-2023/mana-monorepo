@@ -228,6 +228,54 @@ export const MANA_APPS: ManaApp[] = [
 		comingSoon: false,
 		status: 'development',
 	},
+	{
+		id: 'clock',
+		name: 'Clock',
+		description: {
+			de: 'Uhren & Wecker',
+			en: 'Clocks & Alarms',
+		},
+		longDescription: {
+			de: 'Weltzeituhr, Wecker, Timer und stilvolle Uhren-Widgets in einer App.',
+			en: 'World clock, alarms, timers, and stylish clock widgets in one app.',
+		},
+		icon: APP_ICONS.clock,
+		color: '#f59e0b',
+		comingSoon: false,
+		status: 'development',
+	},
+	{
+		id: 'todo',
+		name: 'Todo',
+		description: {
+			de: 'Aufgabenverwaltung',
+			en: 'Task Management',
+		},
+		longDescription: {
+			de: 'Verwalte Aufgaben mit Projekten, Labels, Subtasks und wiederkehrenden Terminen.',
+			en: 'Manage tasks with projects, labels, subtasks, and recurring schedules.',
+		},
+		icon: APP_ICONS.todo,
+		color: '#8b5cf6',
+		comingSoon: false,
+		status: 'development',
+	},
+	{
+		id: 'mail',
+		name: 'ManaMail',
+		description: {
+			de: 'Smart Email Client',
+			en: 'Smart Email Client',
+		},
+		longDescription: {
+			de: 'Intelligenter E-Mail-Client mit KI-Zusammenfassungen, Smart Reply und Multi-Account-Unterstützung.',
+			en: 'Intelligent email client with AI summaries, smart reply, and multi-account support.',
+		},
+		icon: APP_ICONS.mail,
+		color: '#6366f1',
+		comingSoon: false,
+		status: 'development',
+	},
 ];
 
 /**
@@ -311,6 +359,9 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	contacts: { dev: 'http://localhost:5184', prod: 'https://contacts.manacore.app' },
 	calendar: { dev: 'http://localhost:5179', prod: 'https://calendar.manacore.app' },
 	storage: { dev: 'http://localhost:5185', prod: 'https://storage.manacore.app' },
+	clock: { dev: 'http://localhost:5187', prod: 'https://clock.manacore.app' },
+	todo: { dev: 'http://localhost:5188', prod: 'https://todo.manacore.app' },
+	mail: { dev: 'http://localhost:5186', prod: 'https://mail.manacore.app' },
 };
 
 /**

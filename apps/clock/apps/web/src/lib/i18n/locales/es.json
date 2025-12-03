@@ -1,0 +1,149 @@
+{
+	"app": {
+		"name": "Clock",
+		"loading": "Cargando..."
+	},
+	"nav": {
+		"dashboard": "Panel",
+		"alarms": "Alarmas",
+		"timers": "Temporizadores",
+		"stopwatch": "Cronómetro",
+		"pomodoro": "Pomodoro",
+		"worldClock": "Reloj mundial",
+		"settings": "Ajustes",
+		"feedback": "Feedback"
+	},
+	"auth": {
+		"login": "Iniciar sesión",
+		"register": "Registrarse",
+		"logout": "Cerrar sesión",
+		"forgotPassword": "Olvidé mi contraseña",
+		"email": "Correo electrónico",
+		"password": "Contraseña",
+		"confirmPassword": "Confirmar contraseña"
+	},
+	"dashboard": {
+		"title": "Panel",
+		"nextAlarm": "Próxima alarma",
+		"activeTimers": "Temporizadores activos",
+		"worldClocks": "Relojes mundiales"
+	},
+	"alarm": {
+		"title": "Alarmas",
+		"add": "Agregar alarma",
+		"edit": "Editar alarma",
+		"delete": "Eliminar alarma",
+		"label": "Etiqueta",
+		"time": "Hora",
+		"repeat": "Repetir",
+		"sound": "Sonido",
+		"snooze": "Posponer",
+		"snoozeMinutes": "{minutes} minutos",
+		"enabled": "Activada",
+		"disabled": "Desactivada",
+		"noAlarms": "No hay alarmas configuradas",
+		"days": {
+			"sun": "Dom",
+			"mon": "Lun",
+			"tue": "Mar",
+			"wed": "Mié",
+			"thu": "Jue",
+			"fri": "Vie",
+			"sat": "Sáb"
+		},
+		"once": "Una vez",
+		"daily": "Diario",
+		"weekdays": "Días laborables",
+		"weekends": "Fines de semana",
+		"custom": "Personalizado"
+	},
+	"timer": {
+		"title": "Temporizadores",
+		"add": "Agregar temporizador",
+		"start": "Iniciar",
+		"pause": "Pausar",
+		"reset": "Reiniciar",
+		"stop": "Detener",
+		"delete": "Eliminar",
+		"label": "Etiqueta",
+		"duration": "Duración",
+		"hours": "Horas",
+		"minutes": "Minutos",
+		"seconds": "Segundos",
+		"noTimers": "No hay temporizadores activos",
+		"presets": "Selección rápida",
+		"finished": "¡Temporizador terminado!"
+	},
+	"stopwatch": {
+		"title": "Cronómetro",
+		"start": "Iniciar",
+		"stop": "Detener",
+		"lap": "Vuelta",
+		"reset": "Reiniciar",
+		"laps": "Vueltas",
+		"noLaps": "Aún no hay vueltas",
+		"best": "Mejor",
+		"worst": "Peor",
+		"total": "Total"
+	},
+	"pomodoro": {
+		"title": "Pomodoro",
+		"work": "Trabajo",
+		"break": "Descanso",
+		"longBreak": "Descanso largo",
+		"sessions": "Sesiones",
+		"sessionsCompleted": "{count} de {total} sesiones",
+		"start": "Iniciar",
+		"pause": "Pausar",
+		"skip": "Saltar",
+		"reset": "Reiniciar",
+		"presets": {
+			"classic": "Clásico",
+			"shortFocus": "Enfoque corto",
+			"deepWork": "Trabajo profundo"
+		},
+		"settings": {
+			"workDuration": "Duración del trabajo",
+			"breakDuration": "Duración del descanso",
+			"longBreakDuration": "Duración del descanso largo",
+			"sessionsBeforeLongBreak": "Sesiones antes del descanso largo"
+		}
+	},
+	"worldClock": {
+		"title": "Reloj mundial",
+		"add": "Agregar ciudad",
+		"search": "Buscar ciudad o zona horaria...",
+		"noClocks": "No hay ciudades agregadas",
+		"difference": "{hours} hrs {direction}",
+		"ahead": "adelante",
+		"behind": "atrás",
+		"same": "Misma hora"
+	},
+	"settings": {
+		"title": "Ajustes",
+		"general": "General",
+		"appearance": "Apariencia",
+		"sounds": "Sonidos",
+		"notifications": "Notificaciones",
+		"language": "Idioma",
+		"theme": "Tema",
+		"darkMode": "Modo oscuro",
+		"clockFormat": "Formato de hora",
+		"format24h": "24 horas",
+		"format12h": "12 horas (AM/PM)"
+	},
+	"common": {
+		"save": "Guardar",
+		"cancel": "Cancelar",
+		"delete": "Eliminar",
+		"edit": "Editar",
+		"add": "Agregar",
+		"confirm": "Confirmar",
+		"yes": "Sí",
+		"no": "No",
+		"ok": "OK",
+		"loading": "Cargando...",
+		"error": "Error",
+		"success": "Éxito"
+	}
+}

@@ -1,0 +1,149 @@
+{
+	"app": {
+		"name": "Clock",
+		"loading": "Loading..."
+	},
+	"nav": {
+		"dashboard": "Dashboard",
+		"alarms": "Alarms",
+		"timers": "Timers",
+		"stopwatch": "Stopwatch",
+		"pomodoro": "Pomodoro",
+		"worldClock": "World Clock",
+		"settings": "Settings",
+		"feedback": "Feedback"
+	},
+	"auth": {
+		"login": "Sign In",
+		"register": "Sign Up",
+		"logout": "Sign Out",
+		"forgotPassword": "Forgot Password",
+		"email": "Email",
+		"password": "Password",
+		"confirmPassword": "Confirm Password"
+	},
+	"dashboard": {
+		"title": "Dashboard",
+		"nextAlarm": "Next Alarm",
+		"activeTimers": "Active Timers",
+		"worldClocks": "World Clocks"
+	},
+	"alarm": {
+		"title": "Alarms",
+		"add": "Add Alarm",
+		"edit": "Edit Alarm",
+		"delete": "Delete Alarm",
+		"label": "Label",
+		"time": "Time",
+		"repeat": "Repeat",
+		"sound": "Sound",
+		"snooze": "Snooze",
+		"snoozeMinutes": "{minutes} minutes",
+		"enabled": "Enabled",
+		"disabled": "Disabled",
+		"noAlarms": "No alarms set",
+		"days": {
+			"sun": "Sun",
+			"mon": "Mon",
+			"tue": "Tue",
+			"wed": "Wed",
+			"thu": "Thu",
+			"fri": "Fri",
+			"sat": "Sat"
+		},
+		"once": "Once",
+		"daily": "Daily",
+		"weekdays": "Weekdays",
+		"weekends": "Weekends",
+		"custom": "Custom"
+	},
+	"timer": {
+		"title": "Timers",
+		"add": "Add Timer",
+		"start": "Start",
+		"pause": "Pause",
+		"reset": "Reset",
+		"stop": "Stop",
+		"delete": "Delete",
+		"label": "Label",
+		"duration": "Duration",
+		"hours": "Hours",
+		"minutes": "Minutes",
+		"seconds": "Seconds",
+		"noTimers": "No active timers",
+		"presets": "Quick Select",
+		"finished": "Timer finished!"
+	},
+	"stopwatch": {
+		"title": "Stopwatch",
+		"start": "Start",
+		"stop": "Stop",
+		"lap": "Lap",
+		"reset": "Reset",
+		"laps": "Laps",
+		"noLaps": "No laps yet",
+		"best": "Best",
+		"worst": "Worst",
+		"total": "Total"
+	},
+	"pomodoro": {
+		"title": "Pomodoro",
+		"work": "Work",
+		"break": "Break",
+		"longBreak": "Long Break",
+		"sessions": "Sessions",
+		"sessionsCompleted": "{count} of {total} sessions",
+		"start": "Start",
+		"pause": "Pause",
+		"skip": "Skip",
+		"reset": "Reset",
+		"presets": {
+			"classic": "Classic",
+			"shortFocus": "Short Focus",
+			"deepWork": "Deep Work"
+		},
+		"settings": {
+			"workDuration": "Work Duration",
+			"breakDuration": "Break Duration",
+			"longBreakDuration": "Long Break Duration",
+			"sessionsBeforeLongBreak": "Sessions Before Long Break"
+		}
+	},
+	"worldClock": {
+		"title": "World Clock",
+		"add": "Add City",
+		"search": "Search city or timezone...",
+		"noClocks": "No cities added",
+		"difference": "{hours} hrs {direction}",
+		"ahead": "ahead",
+		"behind": "behind",
+		"same": "Same time"
+	},
+	"settings": {
+		"title": "Settings",
+		"general": "General",
+		"appearance": "Appearance",
+		"sounds": "Sounds",
+		"notifications": "Notifications",
+		"language": "Language",
+		"theme": "Theme",
+		"darkMode": "Dark Mode",
+		"clockFormat": "Clock Format",
+		"format24h": "24 Hours",
+		"format12h": "12 Hours (AM/PM)"
+	},
+	"common": {
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"edit": "Edit",
+		"add": "Add",
+		"confirm": "Confirm",
+		"yes": "Yes",
+		"no": "No",
+		"ok": "OK",
+		"loading": "Loading...",
+		"error": "Error",
+		"success": "Success"
+	}
+}

@@ -436,6 +436,10 @@ const APP_CONFIGS = [
 			S3_SECRET_KEY: (env) => env.S3_SECRET_KEY,
 			S3_BUCKET: (env) => env.CONTACTS_S3_BUCKET || 'contacts-photos',
 			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+			// Google OAuth for contacts import
+			GOOGLE_CLIENT_ID: (env) => env.CONTACTS_GOOGLE_CLIENT_ID,
+			GOOGLE_CLIENT_SECRET: (env) => env.CONTACTS_GOOGLE_CLIENT_SECRET,
+			GOOGLE_REDIRECT_URI: (env) => env.CONTACTS_GOOGLE_REDIRECT_URI,
 		},
 	},
 
@@ -483,6 +487,52 @@ const APP_CONFIGS = [
 		path: 'apps/storage/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.STORAGE_BACKEND_PORT || '3016'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Clock Backend (NestJS)
+	{
+		path: 'apps/clock/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.CLOCK_BACKEND_PORT || '3017',
+			DATABASE_URL: (env) => env.CLOCK_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Clock Web (SvelteKit)
+	{
+		path: 'apps/clock/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CLOCK_BACKEND_PORT || '3017'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Todo Backend (NestJS)
+	{
+		path: 'apps/todo/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.TODO_BACKEND_PORT || '3018',
+			DATABASE_URL: (env) => env.TODO_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Todo Web (SvelteKit)
+	{
+		path: 'apps/todo/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.TODO_BACKEND_PORT || '3018'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 		},
 	},

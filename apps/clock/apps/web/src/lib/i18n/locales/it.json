@@ -1,0 +1,149 @@
+{
+	"app": {
+		"name": "Clock",
+		"loading": "Caricamento..."
+	},
+	"nav": {
+		"dashboard": "Panoramica",
+		"alarms": "Sveglie",
+		"timers": "Timer",
+		"stopwatch": "Cronometro",
+		"pomodoro": "Pomodoro",
+		"worldClock": "Orologio mondiale",
+		"settings": "Impostazioni",
+		"feedback": "Feedback"
+	},
+	"auth": {
+		"login": "Accedi",
+		"register": "Registrati",
+		"logout": "Esci",
+		"forgotPassword": "Password dimenticata",
+		"email": "Email",
+		"password": "Password",
+		"confirmPassword": "Conferma password"
+	},
+	"dashboard": {
+		"title": "Panoramica",
+		"nextAlarm": "Prossima sveglia",
+		"activeTimers": "Timer attivi",
+		"worldClocks": "Orologi mondiali"
+	},
+	"alarm": {
+		"title": "Sveglie",
+		"add": "Aggiungi sveglia",
+		"edit": "Modifica sveglia",
+		"delete": "Elimina sveglia",
+		"label": "Etichetta",
+		"time": "Ora",
+		"repeat": "Ripeti",
+		"sound": "Suono",
+		"snooze": "Posticipa",
+		"snoozeMinutes": "{minutes} minuti",
+		"enabled": "Attiva",
+		"disabled": "Disattiva",
+		"noAlarms": "Nessuna sveglia impostata",
+		"days": {
+			"sun": "Dom",
+			"mon": "Lun",
+			"tue": "Mar",
+			"wed": "Mer",
+			"thu": "Gio",
+			"fri": "Ven",
+			"sat": "Sab"
+		},
+		"once": "Una volta",
+		"daily": "Giornaliero",
+		"weekdays": "Giorni feriali",
+		"weekends": "Fine settimana",
+		"custom": "Personalizzato"
+	},
+	"timer": {
+		"title": "Timer",
+		"add": "Aggiungi timer",
+		"start": "Avvia",
+		"pause": "Pausa",
+		"reset": "Reimposta",
+		"stop": "Ferma",
+		"delete": "Elimina",
+		"label": "Etichetta",
+		"duration": "Durata",
+		"hours": "Ore",
+		"minutes": "Minuti",
+		"seconds": "Secondi",
+		"noTimers": "Nessun timer attivo",
+		"presets": "Selezione rapida",
+		"finished": "Timer terminato!"
+	},
+	"stopwatch": {
+		"title": "Cronometro",
+		"start": "Avvia",
+		"stop": "Ferma",
+		"lap": "Giro",
+		"reset": "Reimposta",
+		"laps": "Giri",
+		"noLaps": "Nessun giro ancora",
+		"best": "Migliore",
+		"worst": "Peggiore",
+		"total": "Totale"
+	},
+	"pomodoro": {
+		"title": "Pomodoro",
+		"work": "Lavoro",
+		"break": "Pausa",
+		"longBreak": "Pausa lunga",
+		"sessions": "Sessioni",
+		"sessionsCompleted": "{count} di {total} sessioni",
+		"start": "Avvia",
+		"pause": "Pausa",
+		"skip": "Salta",
+		"reset": "Reimposta",
+		"presets": {
+			"classic": "Classico",
+			"shortFocus": "Focus breve",
+			"deepWork": "Lavoro profondo"
+		},
+		"settings": {
+			"workDuration": "Durata lavoro",
+			"breakDuration": "Durata pausa",
+			"longBreakDuration": "Durata pausa lunga",
+			"sessionsBeforeLongBreak": "Sessioni prima della pausa lunga"
+		}
+	},
+	"worldClock": {
+		"title": "Orologio mondiale",
+		"add": "Aggiungi città",
+		"search": "Cerca città o fuso orario...",
+		"noClocks": "Nessuna città aggiunta",
+		"difference": "{hours} ore {direction}",
+		"ahead": "avanti",
+		"behind": "indietro",
+		"same": "Stessa ora"
+	},
+	"settings": {
+		"title": "Impostazioni",
+		"general": "Generale",
+		"appearance": "Aspetto",
+		"sounds": "Suoni",
+		"notifications": "Notifiche",
+		"language": "Lingua",
+		"theme": "Tema",
+		"darkMode": "Modalità scura",
+		"clockFormat": "Formato ora",
+		"format24h": "24 ore",
+		"format12h": "12 ore (AM/PM)"
+	},
+	"common": {
+		"save": "Salva",
+		"cancel": "Annulla",
+		"delete": "Elimina",
+		"edit": "Modifica",
+		"add": "Aggiungi",
+		"confirm": "Conferma",
+		"yes": "Sì",
+		"no": "No",
+		"ok": "OK",
+		"loading": "Caricamento...",
+		"error": "Errore",
+		"success": "Successo"
+	}
+}

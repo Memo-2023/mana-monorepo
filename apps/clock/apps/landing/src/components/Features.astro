@@ -1,0 +1,68 @@
+---
+// Features section for Clock landing page
+const features = [
+	{
+		icon: '🌍',
+		title: 'Weltzeituhr',
+		description:
+			'Behalte mehrere Zeitzonen im Blick. Perfekt für internationale Teams und Reisende.',
+	},
+	{
+		icon: '⏰',
+		title: 'Wecker',
+		description:
+			'Erstelle wiederkehrende Wecker mit verschiedenen Tönen. Snooze-Funktion inklusive.',
+	},
+	{
+		icon: '⏱',
+		title: 'Timer',
+		description:
+			'Starte mehrere Timer gleichzeitig. Speichere deine Lieblings-Presets für schnellen Zugriff.',
+	},
+	{
+		icon: '⏲',
+		title: 'Stoppuhr',
+		description: 'Präzise Zeitmessung mit Rundenzeiten. Ideal für Sport und produktives Arbeiten.',
+	},
+	{
+		icon: '🍅',
+		title: 'Pomodoro',
+		description:
+			'Steigere deine Produktivität mit der bewährten Pomodoro-Technik. Anpassbare Intervalle.',
+	},
+	{
+		icon: '🔄',
+		title: 'Geräte-Sync',
+		description: 'Deine Wecker und Timer synchronisieren automatisch zwischen all deinen Geräten.',
+	},
+];
+---
+
+<section id="features" class="bg-dark-surface">
+	<div class="container">
+		<div class="mx-auto mb-16 max-w-3xl text-center">
+			<span class="mb-4 inline-block text-sm font-medium uppercase tracking-wider text-primary-400">
+				Funktionen
+			</span>
+			<h2 class="mb-6 text-3xl font-bold md:text-4xl">
+				Alles was du für dein Zeitmanagement brauchst
+			</h2>
+			<p class="text-lg text-gray-400">
+				Von der Weltzeituhr bis zum Pomodoro-Timer - Clock vereint alle Zeit-Tools in einer
+				eleganten App.
+			</p>
+		</div>
+
+		<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+			{
+				features.map((feature) => (
+					<div class="group rounded-xl border border-dark-border bg-dark-card p-6 transition-all hover:border-primary-500/50 hover:bg-dark-card/80">
+						<div class="mb-4 text-4xl">{feature.icon}</div>
+						<h3 class="mb-3 text-xl font-semibold">{feature.title}</h3>
+						<p class="text-gray-400">{feature.description}</p>
+					</div>
+				))
+			}
+		</div>
+	</div>
+</section>
