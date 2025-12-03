@@ -2,6 +2,10 @@
 	"app": {
 		"name": "Contacts"
 	},
+	"common": {
+		"back": "Back",
+		"cancel": "Cancel"
+	},
 	"nav": {
 		"contacts": "Contacts",
 		"groups": "Groups",
@@ -9,7 +13,50 @@
 		"archive": "Archive",
 		"search": "Search",
 		"settings": "Settings",
-		"feedback": "Feedback"
+		"feedback": "Feedback",
+		"import": "Import"
+	},
+	"import": {
+		"title": "Import Contacts",
+		"subtitle": "Import contacts from vCard or CSV files",
+		"tabs": {
+			"file": "File Import",
+			"google": "Google Contacts"
+		},
+		"processing": "Processing file...",
+		"importing": "Importing...",
+		"downloadTemplate": "Download CSV template",
+		"dropzone": {
+			"title": "Drop file here",
+			"subtitle": "or click to select"
+		},
+		"preview": {
+			"total": "Total",
+			"valid": "Valid",
+			"duplicates": "Duplicates",
+			"selected": "Selected",
+			"errors": "Parse errors",
+			"duplicateHandling": "How should duplicates be handled?",
+			"skip": "Skip",
+			"merge": "Merge",
+			"create": "Create anyway",
+			"contacts": "Contacts to import",
+			"selectAll": "Select all",
+			"deselectAll": "Deselect all",
+			"duplicateTag": "Duplicate",
+			"matchesWith": "Matches with",
+			"importButton": "Import {count} contacts"
+		},
+		"result": {
+			"title": "Import complete",
+			"subtitle": "Your contacts have been successfully imported",
+			"imported": "Imported",
+			"merged": "Merged",
+			"skipped": "Skipped",
+			"errors": "Errors",
+			"importMore": "Import more",
+			"done": "Done"
+		}
 	},
 	"contacts": {
 		"title": "Contacts",
@@ -60,5 +107,27 @@
 		"saved": "Saved",
 		"deleted": "Deleted",
 		"error": "An error occurred"
+	},
+	"google": {
+		"loading": "Checking connection...",
+		"connect": {
+			"title": "Connect to Google",
+			"subtitle": "Import your contacts directly from Google Contacts",
+			"button": "Connect with Google"
+		},
+		"connected": "Connected to Google",
+		"disconnect": "Disconnect",
+		"contacts": "Contacts",
+		"loadMore": "Load more"
+	},
+	"export": {
+		"title": "Export Contacts",
+		"button": "Export",
+		"format": "Select format",
+		"selectedCount": "{count} contacts selected",
+		"allContacts": "All contacts will be exported",
+		"includeArchived": "Include archived contacts",
+		"exporting": "Exporting...",
+		"success": "Export successful"
 	}
 }

@@ -7,6 +7,9 @@ import { TagModule } from './tag/tag.module';
 import { NoteModule } from './note/note.module';
 import { ActivityModule } from './activity/activity.module';
 import { HealthModule } from './health/health.module';
+import { ImportModule } from './import/import.module';
+import { ExportModule } from './export/export.module';
+import { GoogleModule } from './google/google.module';
 
 @Module({
 	imports: [
@@ -21,6 +24,9 @@ import { HealthModule } from './health/health.module';
 		NoteModule,
 		ActivityModule,
 		HealthModule,
+		ImportModule,
+		ExportModule,
+		GoogleModule,
 	],
 })
 export class AppModule {}

@@ -2,6 +2,10 @@
 	"app": {
 		"name": "Contacts"
 	},
+	"common": {
+		"back": "Zurück",
+		"cancel": "Abbrechen"
+	},
 	"nav": {
 		"contacts": "Kontakte",
 		"groups": "Gruppen",
@@ -9,7 +13,50 @@
 		"archive": "Archiv",
 		"search": "Suche",
 		"settings": "Einstellungen",
-		"feedback": "Feedback"
+		"feedback": "Feedback",
+		"import": "Importieren"
+	},
+	"import": {
+		"title": "Kontakte importieren",
+		"subtitle": "Importiere Kontakte aus vCard- oder CSV-Dateien",
+		"tabs": {
+			"file": "Datei-Import",
+			"google": "Google Kontakte"
+		},
+		"processing": "Datei wird verarbeitet...",
+		"importing": "Importiere...",
+		"downloadTemplate": "CSV-Vorlage herunterladen",
+		"dropzone": {
+			"title": "Datei hierher ziehen",
+			"subtitle": "oder klicken zum Auswählen"
+		},
+		"preview": {
+			"total": "Gesamt",
+			"valid": "Gültig",
+			"duplicates": "Duplikate",
+			"selected": "Ausgewählt",
+			"errors": "Fehler beim Parsen",
+			"duplicateHandling": "Wie sollen Duplikate behandelt werden?",
+			"skip": "Überspringen",
+			"merge": "Zusammenführen",
+			"create": "Trotzdem erstellen",
+			"contacts": "Kontakte zum Importieren",
+			"selectAll": "Alle auswählen",
+			"deselectAll": "Alle abwählen",
+			"duplicateTag": "Duplikat",
+			"matchesWith": "Stimmt überein mit",
+			"importButton": "{count} Kontakte importieren"
+		},
+		"result": {
+			"title": "Import abgeschlossen",
+			"subtitle": "Deine Kontakte wurden erfolgreich importiert",
+			"imported": "Importiert",
+			"merged": "Zusammengeführt",
+			"skipped": "Übersprungen",
+			"errors": "Fehler",
+			"importMore": "Weitere importieren",
+			"done": "Fertig"
+		}
 	},
 	"contacts": {
 		"title": "Kontakte",
@@ -60,5 +107,27 @@
 		"saved": "Gespeichert",
 		"deleted": "Gelöscht",
 		"error": "Ein Fehler ist aufgetreten"
+	},
+	"google": {
+		"loading": "Verbindung wird geprüft...",
+		"connect": {
+			"title": "Mit Google verbinden",
+			"subtitle": "Importiere deine Kontakte direkt aus Google Kontakte",
+			"button": "Mit Google verbinden"
+		},
+		"connected": "Verbunden mit Google",
+		"disconnect": "Trennen",
+		"contacts": "Kontakte",
+		"loadMore": "Mehr laden"
+	},
+	"export": {
+		"title": "Kontakte exportieren",
+		"button": "Exportieren",
+		"format": "Format auswählen",
+		"selectedCount": "{count} Kontakte ausgewählt",
+		"allContacts": "Alle Kontakte werden exportiert",
+		"includeArchived": "Archivierte Kontakte einschließen",
+		"exporting": "Exportiere...",
+		"success": "Export erfolgreich"
 	}
 }
