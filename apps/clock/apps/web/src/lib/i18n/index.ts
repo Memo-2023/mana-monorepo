@@ -40,7 +40,7 @@ function getInitialLocale(): SupportedLocale {
 	return 'de';
 }
 
-// Initialize
+// Initialize i18n at module scope (required for SSR)
 init({
 	fallbackLocale: 'de',
 	initialLocale: getInitialLocale(),
@@ -53,3 +53,6 @@ export function setLocale(newLocale: SupportedLocale) {
 		localStorage.setItem('clock-locale', newLocale);
 	}
 }
+
+// Wait for locale to be loaded (useful for SSR)
+export { waitLocale } from 'svelte-i18n';

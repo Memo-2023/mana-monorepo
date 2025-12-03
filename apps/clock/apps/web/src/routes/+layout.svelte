@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { locale } from 'svelte-i18n';
+	import { locale, isLoading as isLocaleLoading } from 'svelte-i18n';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
@@ -14,7 +14,7 @@
 	} from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
-	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { setLocale, supportedLocales, waitLocale } from '$lib/i18n';
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
 	import '../app.css';
 
@@ -77,8 +77,8 @@
 	const navItems: PillNavItem[] = [
 		{ href: '/', label: 'Übersicht', icon: 'home' },
 		{ href: '/alarms', label: 'Wecker', icon: 'bell' },
-		{ href: '/timers', label: 'Timer', icon: 'clock' },
-		{ href: '/stopwatch', label: 'Stoppuhr', icon: 'activity' },
+		{ href: '/timers', label: 'Timer', icon: 'timer' },
+		{ href: '/stopwatch', label: 'Stoppuhr', icon: 'stopwatch' },
 		{ href: '/pomodoro', label: 'Pomodoro', icon: 'target' },
 		{ href: '/world-clock', label: 'Weltzeituhr', icon: 'globe' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
@@ -137,6 +137,9 @@
 	}
 
 	onMount(async () => {
+		// Wait for locale to be loaded
+		await waitLocale();
+
 		// Initialize theme
 		theme.initialize();
 
@@ -165,10 +168,21 @@
 
 <ToastContainer />
 
-{#if isAuthRoute}
+{#if $isLocaleLoading}
+	<!-- Wait for locale to be loaded -->
+	<div class="flex min-h-screen items-center justify-center bg-background">
+		<div class="text-center">
+			<div
+				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
+			></div>
+			<p class="text-muted-foreground">Laden...</p>
+		</div>
+	</div>
+{:else if isAuthRoute}
 	<!-- Auth routes: no navigation, just render content -->
 	{@render children()}
 {:else if loading}
+	<!-- App initialization loading -->
 	<div class="flex min-h-screen items-center justify-center bg-background">
 		<div class="text-center">
 			<div
