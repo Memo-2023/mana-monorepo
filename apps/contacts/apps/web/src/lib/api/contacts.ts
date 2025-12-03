@@ -120,40 +120,45 @@ export const contactsApi = {
 		return fetchWithAuth(`/contacts${query ? `?${query}` : ''}`);
 	},
 
-	async get(id: string) {
-		return fetchWithAuth(`/contacts/${id}`);
+	async get(id: string): Promise<Contact> {
+		const response = await fetchWithAuth(`/contacts/${id}`);
+		return response.contact;
 	},
 
-	async create(data: Partial<Contact>) {
-		return fetchWithAuth('/contacts', {
+	async create(data: Partial<Contact>): Promise<Contact> {
+		const response = await fetchWithAuth('/contacts', {
 			method: 'POST',
 			body: JSON.stringify(data),
 		});
+		return response.contact;
 	},
 
-	async update(id: string, data: Partial<Contact>) {
-		return fetchWithAuth(`/contacts/${id}`, {
+	async update(id: string, data: Partial<Contact>): Promise<Contact> {
+		const response = await fetchWithAuth(`/contacts/${id}`, {
 			method: 'PATCH',
 			body: JSON.stringify(data),
 		});
+		return response.contact;
 	},
 
-	async delete(id: string) {
-		return fetchWithAuth(`/contacts/${id}`, {
+	async delete(id: string): Promise<void> {
+		await fetchWithAuth(`/contacts/${id}`, {
 			method: 'DELETE',
 		});
 	},
 
-	async toggleFavorite(id: string) {
-		return fetchWithAuth(`/contacts/${id}/favorite`, {
+	async toggleFavorite(id: string): Promise<Contact> {
+		const response = await fetchWithAuth(`/contacts/${id}/favorite`, {
 			method: 'POST',
 		});
+		return response.contact;
 	},
 
-	async toggleArchive(id: string) {
-		return fetchWithAuth(`/contacts/${id}/archive`, {
+	async toggleArchive(id: string): Promise<Contact> {
+		const response = await fetchWithAuth(`/contacts/${id}/archive`, {
 			method: 'POST',
 		});
+		return response.contact;
 	},
 };
 

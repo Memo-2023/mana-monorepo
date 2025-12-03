@@ -113,6 +113,10 @@ export class ImapProvider implements EmailProvider {
 			const uid = parseInt(externalId, 10);
 
 			for await (const message of this.client.fetch(uid, { source: true }, { uid: true })) {
+				if (!message.source) {
+					this.logger.warn(`Email ${externalId} has no source`);
+					continue;
+				}
 				const parsed = await simpleParser(message.source);
 				return this.parseEmail(message, parsed);
 			}
@@ -161,6 +165,10 @@ export class ImapProvider implements EmailProvider {
 			{ uid: true }
 		)) {
 			try {
+				if (!message.source) {
+					this.logger.warn(`Email UID ${message.uid} has no source`);
+					continue;
+				}
 				const parsed = await simpleParser(message.source);
 				const email = this.parseEmail(message, parsed);
 				emails.push(email);

@@ -33,6 +33,7 @@
 	},
 	"dependencies": {
 		"@manacore/shared-branding": "workspace:*",
-		"@manacore/shared-icons": "workspace:*"
+		"@manacore/shared-icons": "workspace:*",
+		"@manacore/shared-theme": "workspace:*"
 	}
 }

@@ -8,6 +8,9 @@ pnpm docker:down
 
 pnpm dev:chat:app
 pnpm dev:contacts:app
+pnpm dev:todo:app
+pnpm dev:clock:app
+pnpm dev:mail:app
 pnpm dev:storage:app
 pnpm dev:calendar:app
 pnpm dev:picture:app
