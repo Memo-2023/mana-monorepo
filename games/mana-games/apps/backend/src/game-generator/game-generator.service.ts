@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { GenerateGameDto, GenerateGameResponseDto } from './dto/generate-game.dto';
 import { GoogleGenAI } from '@google/genai';
 import Anthropic from '@anthropic-ai/sdk';
-import { AzureOpenAI } from '@azure/openai';
+import { AzureOpenAI } from 'openai';
 
 type AIProvider = 'google' | 'anthropic' | 'azure';
 
