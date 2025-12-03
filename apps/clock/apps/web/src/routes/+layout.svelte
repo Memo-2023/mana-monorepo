@@ -30,14 +30,14 @@
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
 
-	// Theme variant dropdown items
+	// Theme variant dropdown items (with SSR fallback)
 	let themeVariantItems = $derived<PillDropdownItem[]>([
-		...theme.variants.map((variant) => ({
+		...(theme.variants || []).map((variant) => ({
 			id: variant,
-			label: THEME_DEFINITIONS[variant].label,
-			icon: THEME_DEFINITIONS[variant].icon,
+			label: THEME_DEFINITIONS[variant]?.label || variant,
+			icon: THEME_DEFINITIONS[variant]?.icon || '🎨',
 			onClick: () => theme.setVariant(variant),
-			active: theme.variant === variant,
+			active: (theme.variant || 'lume') === variant,
 		})),
 		{
 			id: 'all-themes',
@@ -48,8 +48,10 @@
 		},
 	]);
 
-	// Current theme variant label
-	let currentThemeVariantLabel = $derived(THEME_DEFINITIONS[theme.variant].label);
+	// Current theme variant label (with SSR fallback)
+	let currentThemeVariantLabel = $derived(
+		THEME_DEFINITIONS[theme.variant]?.label || THEME_DEFINITIONS.lume?.label || 'Lume'
+	);
 
 	// Language selector items
 	let currentLocale = $derived($locale || 'de');
