@@ -39,6 +39,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **zitare**   | Daily inspiration quotes     | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
 | **presi**    | Presentation tool            | NestJS backend, Expo mobile, SvelteKit web                |
 | **contacts** | Contact management           | NestJS backend, SvelteKit web                             |
+| **mail**     | Email client with AI         | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
 
 ### Archived Projects (`apps-archived/`)
 
@@ -69,6 +70,7 @@ pnpm run chat:dev
 pnpm run zitare:dev
 pnpm run presi:dev
 pnpm run contacts:dev
+pnpm run mail:dev
 
 # Start specific app within project
 pnpm run dev:chat:mobile     # Just mobile app

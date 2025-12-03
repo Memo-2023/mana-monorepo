@@ -7,7 +7,7 @@
 | App | Port | URL |
 |-----|------|-----|
 | Backend | 3017 | http://localhost:3017 |
-| Web App | 5186 | http://localhost:5186 |
+| Web App | 5187 | http://localhost:5187 |
 | Landing Page | 4323 | http://localhost:4323 |
 
 ## Project Structure
@@ -72,7 +72,7 @@ pnpm clock:dev                    # Run all clock apps
 
 # Einzelne Apps starten
 pnpm dev:clock:backend            # Start backend server (port 3017)
-pnpm dev:clock:web                # Start web app (port 5186)
+pnpm dev:clock:web                # Start web app (port 5187)
 pnpm dev:clock:landing            # Start landing page (port 4323)
 pnpm dev:clock:app                # Start web + backend together
 
@@ -340,7 +340,7 @@ pnpm dev:clock:landing  # Terminal 3 (optional)
 
 ### 3. URLs öffnen
 
-- Web App: http://localhost:5186
+- Web App: http://localhost:5187
 - Landing: http://localhost:4323
 - API Health: http://localhost:3017/api/v1/health
 
@@ -379,7 +379,7 @@ curl -X POST http://localhost:3017/api/v1/timers/$TIMER_ID/start \
 
 1. **Authentication**: Nutzt Mana Core Auth (JWT im Authorization Header)
 2. **Database**: PostgreSQL mit Drizzle ORM (Port 5432)
-3. **Port**: Backend läuft auf Port 3017, Web auf 5186, Landing auf 4323
+3. **Port**: Backend läuft auf Port 3017, Web auf 5187, Landing auf 4323
 4. **i18n**: 5 Sprachen unterstützt (DE, EN, FR, ES, IT)
 5. **Theme**: Amber/Orange (#f59e0b) als Primärfarbe
 6. **Local Features**: Stoppuhr und Pomodoro laufen lokal ohne Backend-Sync

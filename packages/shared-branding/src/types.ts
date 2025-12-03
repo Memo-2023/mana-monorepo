@@ -13,7 +13,11 @@ export type AppId =
 	| 'zitare'
 	| 'picture'
 	| 'contacts'
-	| 'calendar';
+	| 'calendar'
+	| 'storage'
+	| 'clock'
+	| 'todo'
+	| 'mail';
 
 /**
  * App branding configuration

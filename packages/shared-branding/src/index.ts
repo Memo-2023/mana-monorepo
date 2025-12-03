@@ -26,6 +26,9 @@ export {
 	ZitareLogo,
 	ContactsLogo,
 	CalendarLogo,
+	StorageLogo,
+	TodoLogo,
+	MailLogo,
 } from './logos';
 
 // Configuration

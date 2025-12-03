@@ -1,0 +1,26 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { DatabaseModule } from './db/database.module';
+import { HealthModule } from './health/health.module';
+import { ProjectModule } from './project/project.module';
+import { TaskModule } from './task/task.module';
+import { LabelModule } from './label/label.module';
+import { ReminderModule } from './reminder/reminder.module';
+
+@Module({
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			envFilePath: '.env',
+		}),
+		ScheduleModule.forRoot(),
+		DatabaseModule,
+		HealthModule,
+		ProjectModule,
+		TaskModule,
+		LabelModule,
+		ReminderModule,
+	],
+})
+export class AppModule {}
