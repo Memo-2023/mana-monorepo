@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
-	import { theme } from '$lib/stores/theme';
+	import { theme } from '$lib/stores/theme.svelte';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 

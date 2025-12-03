@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { theme } from '$lib/stores/theme';
+	import { theme } from '$lib/stores/theme.svelte';
 	import { THEME_DEFINITIONS, THEME_VARIANTS } from '@manacore/shared-theme';
 </script>
 
