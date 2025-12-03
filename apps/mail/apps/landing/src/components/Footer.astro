@@ -1,0 +1,95 @@
+---
+const footerLinks = {
+	product: [
+		{ href: '#features', label: 'Features' },
+		{ href: '#pricing', label: 'Preise' },
+		{ href: '#faq', label: 'FAQ' },
+	],
+	legal: [
+		{ href: '/privacy', label: 'Datenschutz' },
+		{ href: '/terms', label: 'AGB' },
+		{ href: '/imprint', label: 'Impressum' },
+	],
+};
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="bg-background-card border-t border-border">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+		<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+			<!-- Brand -->
+			<div class="col-span-1 md:col-span-2">
+				<a href="/" class="flex items-center gap-2 mb-4">
+					<svg
+						class="w-8 h-8 text-primary"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="1.5"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
+						></path>
+					</svg>
+					<span class="font-bold text-xl text-text-primary">ManaMail</span>
+				</a>
+				<p class="text-text-secondary text-sm max-w-md">
+					Dein intelligenter E-Mail-Client. Verwalte alle deine E-Mail-Konten an einem Ort - mit
+					KI-Unterstützung für intelligente Zusammenfassungen, Smart Replies und automatische
+					Kategorisierung.
+				</p>
+			</div>
+
+			<!-- Product Links -->
+			<div>
+				<h3 class="font-semibold text-text-primary mb-4">Produkt</h3>
+				<ul class="space-y-2">
+					{
+						footerLinks.product.map((link) => (
+							<li>
+								<a
+									href={link.href}
+									class="text-text-secondary hover:text-text-primary transition-colors text-sm"
+								>
+									{link.label}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+
+			<!-- Legal Links -->
+			<div>
+				<h3 class="font-semibold text-text-primary mb-4">Rechtliches</h3>
+				<ul class="space-y-2">
+					{
+						footerLinks.legal.map((link) => (
+							<li>
+								<a
+									href={link.href}
+									class="text-text-secondary hover:text-text-primary transition-colors text-sm"
+								>
+									{link.label}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+		</div>
+
+		<!-- Bottom -->
+		<div
+			class="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4"
+		>
+			<p class="text-text-muted text-sm">
+				&copy; {currentYear} ManaMail. Alle Rechte vorbehalten.
+			</p>
+			<p class="text-text-muted text-sm">Made with 💜 in Germany</p>
+		</div>
+	</div>
+</footer>

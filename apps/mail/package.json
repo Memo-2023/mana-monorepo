@@ -1,0 +1,23 @@
+{
+	"name": "mail",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Mail App - Email Client with AI Features and Multi-Account Support",
+	"scripts": {
+		"dev": "turbo run dev",
+		"dev:backend": "pnpm --filter @mail/backend dev",
+		"dev:web": "pnpm --filter @mail/web dev",
+		"dev:landing": "pnpm --filter @mail/landing dev",
+		"dev:mobile": "pnpm --filter @mail/mobile dev",
+		"build": "turbo run build",
+		"lint": "turbo run lint",
+		"clean": "turbo run clean",
+		"db:push": "pnpm --filter @mail/backend db:push",
+		"db:studio": "pnpm --filter @mail/backend db:studio",
+		"db:seed": "pnpm --filter @mail/backend db:seed"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	},
+	"packageManager": "pnpm@9.15.0"
+}

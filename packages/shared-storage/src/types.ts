@@ -84,6 +84,7 @@ export const BUCKETS = {
 	CALENDAR: 'calendar-storage',
 	CONTACTS: 'contacts-storage',
 	STORAGE: 'storage-storage',
+	MAIL: 'mail-storage',
 } as const;
 
 export type BucketName = (typeof BUCKETS)[keyof typeof BUCKETS];
