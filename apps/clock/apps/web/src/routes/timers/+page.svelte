@@ -370,10 +370,7 @@
 				{#each allTimers as timer (timer.id)}
 					{@const isLocal = isLocalTimer(timer)}
 					<div
-						class="card relative overflow-hidden transition-all"
-						class:ring-2={timer.status === 'running'}
-						class:ring-primary={timer.status === 'running'}
-						class:bg-success/5={timer.status === 'finished'}
+						class="card relative overflow-hidden transition-all {timer.status === 'running' ? 'ring-2 ring-primary' : ''} {timer.status === 'finished' ? 'bg-green-500/5' : ''}"
 					>
 						<!-- Progress background -->
 						<div
@@ -400,9 +397,7 @@
 							<!-- Time Display -->
 							<div class="mb-4 text-center">
 								<span
-									class="font-mono text-5xl font-light tracking-tight"
-									class:text-primary={timer.status === 'running'}
-									class:text-success={timer.status === 'finished'}
+									class="font-mono text-5xl font-light tracking-tight {timer.status === 'running' ? 'text-primary' : ''} {timer.status === 'finished' ? 'text-green-500' : ''}"
 								>
 									{getTimerDisplay(timer)}
 								</span>
@@ -411,9 +406,7 @@
 							<!-- Progress bar -->
 							<div class="mb-4 h-1.5 overflow-hidden rounded-full bg-muted">
 								<div
-									class="h-full rounded-full transition-all duration-1000"
-									class:bg-primary={timer.status !== 'finished'}
-									class:bg-success={timer.status === 'finished'}
+									class="h-full rounded-full transition-all duration-1000 {timer.status === 'finished' ? 'bg-green-500' : 'bg-primary'}"
 									style="width: {getProgress(timer)}%"
 								></div>
 							</div>
