@@ -9,6 +9,8 @@
 		"build": "turbo run build",
 		"test": "turbo run test",
 		"lint": "turbo run lint",
+		"lint:root": "eslint .",
+		"lint:fix": "eslint . --fix",
 		"type-check": "turbo run type-check",
 		"clean": "turbo run clean",
 		"format": "prettier --config .prettierrc.json --write \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
