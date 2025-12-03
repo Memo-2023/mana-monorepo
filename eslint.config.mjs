@@ -45,23 +45,22 @@ export default tseslint.config(
 			sourceType: 'module',
 		},
 	},
-	// TypeScript-specific rules (relaxed for monorepo compatibility)
+	// TypeScript-specific rules
 	{
 		files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
 		rules: {
-			'@typescript-eslint/no-explicit-any': 'off',
+			'@typescript-eslint/no-explicit-any': 'warn',
 			'@typescript-eslint/no-unused-vars': [
-				'warn',
+				'error',
 				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
 			],
-			'@typescript-eslint/no-require-imports': 'off',
 		},
 	},
 	// JavaScript-specific rules
 	{
 		files: ['**/*.js', '**/*.jsx', '**/*.mjs', '**/*.cjs'],
 		rules: {
-			'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+			'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
 		},
 	}
 );
