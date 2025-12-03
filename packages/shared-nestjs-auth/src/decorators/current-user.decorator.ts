@@ -1,5 +1,5 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { CurrentUserData } from '../types';
+import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
+import { type CurrentUserData } from '../types';
 
 /**
  * Parameter decorator to extract the current user from the request.

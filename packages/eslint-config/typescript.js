@@ -21,6 +21,8 @@ export const typescriptConfig = [
 			parserOptions: {
 				ecmaVersion: 2022,
 				sourceType: 'module',
+				projectService: true,
+				tsconfigRootDir: import.meta.dirname,
 			},
 		},
 		plugins: {

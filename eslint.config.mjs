@@ -38,13 +38,27 @@ export default [
 			'**/*.d.ts',
 			'**/generated/**',
 
+			// Config files (tool-specific, not part of app code)
+			'**/drizzle.config.ts',
+			'playwright.config.ts',
+			'vitest.config.ts',
+			'tests/**',
+
+			// Documentation examples
+			'docs/test-examples/**',
+
+			// Games with specific runtime environments
+			'games/whopixels/**',
+
 			// Apps with their own ESLint configs (framework-specific)
 			// These import from @manacore/eslint-config but add framework rules
 			'apps/*/apps/mobile/**',
 			'apps/*/apps/web/**',
 			'apps/*/apps/backend/**',
 			'apps/*/apps/landing/**',
+			'apps/*/packages/**', // Project-specific packages
 			'games/*/apps/**',
+			'games/*/packages/**', // Game-specific packages
 			'services/**',
 		],
 	},

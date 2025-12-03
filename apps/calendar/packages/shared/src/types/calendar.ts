@@ -60,7 +60,15 @@ export interface UpdateCalendarInput {
 /**
  * Calendar view types
  */
-export type CalendarViewType = 'day' | '5day' | 'week' | '10day' | '14day' | 'month' | 'year' | 'agenda';
+export type CalendarViewType =
+	| 'day'
+	| '5day'
+	| 'week'
+	| '10day'
+	| '14day'
+	| 'month'
+	| 'year'
+	| 'agenda';
 
 /**
  * Default calendar colors

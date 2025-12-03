@@ -4,7 +4,7 @@
  * This package provides a unified Supabase client and common database utilities.
  */
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { SupabaseConfig } from '@manacore/shared-types';
 
 export { SupabaseClient } from '@supabase/supabase-js';

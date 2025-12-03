@@ -99,7 +99,7 @@ export function createFeatureFlags<T extends Record<string, FeatureFlag>>(
  */
 export function isFeatureEnabled(
 	featureName: string,
-	defaultValue: boolean = false,
+	defaultValue = false,
 	env: NodeJS.ProcessEnv = process.env
 ): boolean {
 	const envVar = `FEATURE_${featureName.toUpperCase().replace(/[^A-Z0-9]/g, '_')}`;

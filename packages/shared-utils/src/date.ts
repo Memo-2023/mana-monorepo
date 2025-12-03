@@ -17,7 +17,7 @@ export type LocaleKey = keyof typeof locales;
  */
 export function formatDate(
 	date: string | Date,
-	formatStr: string = 'PPP',
+	formatStr = 'PPP',
 	locale: LocaleKey = 'de'
 ): string {
 	const dateObj = typeof date === 'string' ? parseISO(date) : date;

@@ -30,7 +30,10 @@ function parseEnvFile(content) {
 		if (match) {
 			let [, key, value] = match;
 			// Handle quoted values
-			if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+			if (
+				(value.startsWith('"') && value.endsWith('"')) ||
+				(value.startsWith("'") && value.endsWith("'"))
+			) {
 				value = value.slice(1, -1);
 			}
 			env[key.trim()] = value;
@@ -142,7 +145,8 @@ const APP_CONFIGS = [
 	{
 		path: 'apps/maerchenzauber/apps/mobile/.env',
 		vars: {
-			EXPO_PUBLIC_STORYTELLER_BACKEND_URL: (env) => `http://localhost:${env.MAERCHENZAUBER_BACKEND_PORT || '3003'}`,
+			EXPO_PUBLIC_STORYTELLER_BACKEND_URL: (env) =>
+				`http://localhost:${env.MAERCHENZAUBER_BACKEND_PORT || '3003'}`,
 			EXPO_ROUTER_APP_ROOT: () => 'app',
 		},
 	},
@@ -227,7 +231,8 @@ const APP_CONFIGS = [
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.PICTURE_BACKEND_PORT || '3003',
 			BACKEND_URL: (env) => env.PICTURE_BACKEND_URL || 'http://localhost:3003',
-			DATABASE_URL: (env) => env.PICTURE_DATABASE_URL || 'postgresql://picture:picturepassword@localhost:5434/picture',
+			DATABASE_URL: (env) =>
+				env.PICTURE_DATABASE_URL || 'postgresql://picture:picturepassword@localhost:5434/picture',
 			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			DEV_BYPASS_AUTH: () => 'true',
 			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',

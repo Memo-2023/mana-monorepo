@@ -3,8 +3,6 @@
  * Generic types for creating auth stores with custom user types
  */
 
-import type { AuthResult as BaseAuthResult } from '@manacore/shared-types';
-
 /**
  * Base user interface that all app-specific user types must extend
  */

@@ -1,4 +1,8 @@
-import { ErrorCode, ERROR_CODE_TO_HTTP_STATUS, ERROR_CODE_RETRYABLE } from '../types/error-codes';
+import {
+	type ErrorCode,
+	ERROR_CODE_TO_HTTP_STATUS,
+	ERROR_CODE_RETRYABLE,
+} from '../types/error-codes';
 
 /**
  * Additional context that can be attached to errors.

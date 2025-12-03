@@ -118,7 +118,7 @@ export function getEnv(
  */
 export function getBoolEnv(
 	key: string,
-	defaultValue: boolean = false,
+	defaultValue = false,
 	env: NodeJS.ProcessEnv = process.env
 ): boolean {
 	const value = env[key];

@@ -315,7 +315,7 @@ class BootScene extends Phaser.Scene {
 		const brickWidth = 16;
 
 		for (let y = 0; y < tileSize; y += brickHeight) {
-			let offset = y % (brickHeight * 2) === 0 ? 0 : brickWidth / 2;
+			const offset = y % (brickHeight * 2) === 0 ? 0 : brickWidth / 2;
 			for (let x = offset; x < tileSize; x += brickWidth) {
 				stoneWallGraphics.fillRect(x, y, brickWidth - 1, brickHeight - 1);
 			}
@@ -330,7 +330,7 @@ class BootScene extends Phaser.Scene {
 		// Steinmuster für die Wand
 		stoneWallFlowerGraphics.fillStyle(0x555555);
 		for (let y = 0; y < tileSize; y += brickHeight) {
-			let offset = y % (brickHeight * 2) === 0 ? 0 : brickWidth / 2;
+			const offset = y % (brickHeight * 2) === 0 ? 0 : brickWidth / 2;
 			for (let x = offset; x < tileSize; x += brickWidth) {
 				stoneWallFlowerGraphics.fillRect(x, y, brickWidth - 1, brickHeight - 1);
 			}
