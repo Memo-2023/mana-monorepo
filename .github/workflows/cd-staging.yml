@@ -39,13 +39,18 @@ jobs:
           ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
 
       - name: Add staging server to known hosts
+        env:
+          STAGING_HOST: 46.224.108.214
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H $STAGING_HOST >> ~/.ssh/known_hosts
 
       - name: Prepare deployment directory
+        env:
+          STAGING_USER: deploy
+          STAGING_HOST: 46.224.108.214
         run: |
-          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+          ssh $STAGING_USER@$STAGING_HOST << 'EOF'
             mkdir -p ~/manacore-staging
             cd ~/manacore-staging
 
@@ -56,27 +61,33 @@ jobs:
           EOF
 
       - name: Copy docker-compose file
+        env:
+          STAGING_USER: deploy
+          STAGING_HOST: 46.224.108.214
         run: |
-          scp docker-compose.staging.yml ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:~/manacore-staging/docker-compose.yml
+          scp docker-compose.staging.yml $STAGING_USER@$STAGING_HOST:~/manacore-staging/docker-compose.yml
 
       - name: Copy environment file
+        env:
+          STAGING_USER: deploy
+          STAGING_HOST: 46.224.108.214
         run: |
-          # Create staging env file from secrets
+          # Create staging env file (mix of hardcoded config and secrets)
           cat > .env.staging << EOF
-          # Database
-          POSTGRES_HOST=${{ secrets.STAGING_POSTGRES_HOST }}
-          POSTGRES_PORT=${{ secrets.STAGING_POSTGRES_PORT }}
-          POSTGRES_DB=${{ secrets.STAGING_POSTGRES_DB }}
-          POSTGRES_USER=${{ secrets.STAGING_POSTGRES_USER }}
+          # Database - Configuration
+          POSTGRES_HOST=postgres
+          POSTGRES_PORT=5432
+          POSTGRES_DB=manacore
+          POSTGRES_USER=postgres
           POSTGRES_PASSWORD=${{ secrets.STAGING_POSTGRES_PASSWORD }}
 
-          # Redis
-          REDIS_HOST=${{ secrets.STAGING_REDIS_HOST }}
-          REDIS_PORT=${{ secrets.STAGING_REDIS_PORT }}
+          # Redis - Configuration
+          REDIS_HOST=redis
+          REDIS_PORT=6379
           REDIS_PASSWORD=${{ secrets.STAGING_REDIS_PASSWORD }}
 
-          # Mana Core Auth
-          MANA_SERVICE_URL=${{ secrets.STAGING_MANA_SERVICE_URL }}
+          # Mana Core Auth - Configuration
+          MANA_SERVICE_URL=http://mana-core-auth:3001
           JWT_SECRET=${{ secrets.STAGING_JWT_SECRET }}
           JWT_PUBLIC_KEY=${{ secrets.STAGING_JWT_PUBLIC_KEY }}
           JWT_PRIVATE_KEY=${{ secrets.STAGING_JWT_PRIVATE_KEY }}
@@ -95,28 +106,37 @@ jobs:
           NODE_ENV=staging
           EOF
 
-          scp .env.staging ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:~/manacore-staging/.env
+          scp .env.staging $STAGING_USER@$STAGING_HOST:~/manacore-staging/.env
           rm .env.staging
 
       - name: Login to GitHub Container Registry on staging server
+        env:
+          STAGING_USER: deploy
+          STAGING_HOST: 46.224.108.214
         run: |
-          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
+          ssh $STAGING_USER@$STAGING_HOST << EOF
             # Login to ghcr.io with GitHub token
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           EOF
 
       - name: Pull latest Docker images
+        env:
+          STAGING_USER: deploy
+          STAGING_HOST: 46.224.108.214
         run: |
-          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+          ssh $STAGING_USER@$STAGING_HOST << 'EOF'
             cd ~/manacore-staging
             docker compose pull
           EOF
 
       - name: Deploy services
+        env:
+          STAGING_USER: deploy
+          STAGING_HOST: 46.224.108.214
         run: |
           SERVICE="${{ github.event.inputs.service || 'all' }}"
 
-          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
+          ssh $STAGING_USER@$STAGING_HOST << EOF
             cd ~/manacore-staging
 
             # Determine which services to deploy
@@ -137,8 +157,11 @@ jobs:
           EOF
 
       - name: Run health checks
+        env:
+          STAGING_USER: deploy
+          STAGING_HOST: 46.224.108.214
         run: |
-          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+          ssh $STAGING_USER@$STAGING_HOST << 'EOF'
             cd ~/manacore-staging
 
             # Wait for services to fully start
@@ -189,9 +212,12 @@ jobs:
           EOF
 
       - name: Run database migrations
+        env:
+          STAGING_USER: deploy
+          STAGING_HOST: 46.224.108.214
         run: |
           # Run migrations for services that need them
-          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+          ssh $STAGING_USER@$STAGING_HOST << 'EOF'
             cd ~/manacore-staging
 
             # Mana Core Auth migrations
