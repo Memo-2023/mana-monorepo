@@ -73,6 +73,7 @@ jobs:
           # Redis
           REDIS_HOST=${{ secrets.STAGING_REDIS_HOST }}
           REDIS_PORT=${{ secrets.STAGING_REDIS_PORT }}
+          REDIS_PASSWORD=${{ secrets.STAGING_REDIS_PASSWORD }}
 
           # Mana Core Auth
           MANA_SERVICE_URL=${{ secrets.STAGING_MANA_SERVICE_URL }}
@@ -127,39 +128,65 @@ jobs:
               docker compose up -d $SERVICE
             fi
 
-            # Wait for services to be healthy
-            sleep 10
+            # Wait for initial startup
+            echo "Waiting for services to start..."
+            sleep 15
+
+            echo "=== Container Status ==="
             docker compose ps
           EOF
 
       - name: Run health checks
         run: |
-          # Wait for services to fully start
-          sleep 30
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+            cd ~/manacore-staging
 
-          # Health check for each service
-          SERVICES=(
-            "mana-core-auth:3001:/api/v1/health"
-            "chat-backend:3002:/api/health"
-            "manadeck-backend:3003:/api/health"
-          )
+            # Wait for services to fully start
+            echo "Waiting 60s for services to fully initialize..."
+            sleep 60
 
-          for SERVICE_CONFIG in "${SERVICES[@]}"; do
-            IFS=':' read -r SERVICE PORT PATH <<< "$SERVICE_CONFIG"
+            echo "=== Container Status ==="
+            docker compose ps
 
-            echo "Checking health of $SERVICE..."
-            ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
-              HEALTH=\$(docker compose -f ~/manacore-staging/docker-compose.yml exec -T $SERVICE wget -q -O - http://localhost:$PORT$PATH || echo "FAILED")
+            echo ""
+            echo "=== Health Checks ==="
 
-              if [[ "\$HEALTH" == *"FAILED"* ]]; then
-                echo "❌ Health check failed for $SERVICE"
-                docker compose -f ~/manacore-staging/docker-compose.yml logs --tail=50 $SERVICE
-                exit 1
-              else
-                echo "✅ Health check passed for $SERVICE"
-              fi
+            # Check mana-core-auth
+            echo "Checking mana-core-auth..."
+            if docker compose exec -T mana-core-auth wget -q -O - http://localhost:3001/api/v1/health > /dev/null 2>&1; then
+              echo "✅ mana-core-auth is healthy"
+            else
+              echo "❌ mana-core-auth health check failed"
+              echo "=== Logs ==="
+              docker compose logs --tail=50 mana-core-auth
+              exit 1
+            fi
+
+            # Check chat-backend
+            echo "Checking chat-backend..."
+            if docker compose exec -T chat-backend wget -q -O - http://localhost:3002/api/health > /dev/null 2>&1; then
+              echo "✅ chat-backend is healthy"
+            else
+              echo "❌ chat-backend health check failed"
+              echo "=== Logs ==="
+              docker compose logs --tail=50 chat-backend
+              exit 1
+            fi
+
+            # Check manadeck-backend
+            echo "Checking manadeck-backend..."
+            if docker compose exec -T manadeck-backend wget -q -O - http://localhost:3003/api/health > /dev/null 2>&1; then
+              echo "✅ manadeck-backend is healthy"
+            else
+              echo "❌ manadeck-backend health check failed"
+              echo "=== Logs ==="
+              docker compose logs --tail=50 manadeck-backend
+              exit 1
+            fi
+
+            echo ""
+            echo "✅ All health checks passed!"
           EOF
-          done
 
       - name: Run database migrations
         run: |
