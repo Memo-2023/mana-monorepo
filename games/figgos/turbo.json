@@ -1,0 +1,8 @@
+{
+	"extends": ["//"],
+	"tasks": {
+		"dev": { "persistent": true, "cache": false },
+		"build": { "dependsOn": ["^build"] },
+		"type-check": { "dependsOn": ["^type-check"] }
+	}
+}
