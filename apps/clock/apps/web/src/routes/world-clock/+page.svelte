@@ -1,16 +1,32 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { _ } from 'svelte-i18n';
+	import { PageHeader } from '@manacore/shared-ui';
 	import { worldClocksStore } from '$lib/stores/world-clocks.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { toast } from '$lib/stores/toast';
 	import { POPULAR_TIMEZONES } from '@clock/shared';
+	import WorldMap from '$lib/components/WorldMap.svelte';
 
 	// State
 	let showAddModal = $state(false);
 	let searchQuery = $state('');
 	let currentTime = $state(new Date());
 	let interval: ReturnType<typeof setInterval> | null = null;
+	let showMap = $state(true);
+
+	// Selected city timezones for map highlighting
+	let selectedTimezones = $derived(worldClocksStore.worldClocks.map((wc) => wc.timezone));
+
+	// Handle map city click
+	function handleMapCityClick(timezone: string, cityName: string) {
+		const alreadyAdded = worldClocksStore.worldClocks.some((wc) => wc.timezone === timezone);
+		if (alreadyAdded) {
+			toast.info(`${cityName} ist bereits hinzugefügt`);
+		} else {
+			addCity(timezone, cityName);
+		}
+	}
 
 	// Filtered timezones based on search
 	let filteredTimezones = $derived(
@@ -139,14 +155,53 @@
 	}
 </script>
 
-<div class="space-y-6">
-	<!-- Header -->
-	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold text-foreground">{$_('worldClock.title')}</h1>
-		<button class="btn btn-primary" onclick={openAddModal}>
-			+ {$_('worldClock.add')}
-		</button>
-	</div>
+<PageHeader title={$_('worldClock.title')} size="md" centered>
+	{#snippet actions()}
+		<div class="flex items-center gap-2">
+			<button
+				class="btn btn-ghost btn-sm px-2"
+				onclick={() => (showMap = !showMap)}
+				title={showMap ? 'Karte ausblenden' : 'Karte anzeigen'}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="18"
+					height="18"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<circle cx="12" cy="12" r="10" />
+					<path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+					<path d="M2 12h20" />
+				</svg>
+			</button>
+			<button class="btn btn-primary btn-sm" onclick={openAddModal}>
+				+ {$_('worldClock.add')}
+			</button>
+		</div>
+	{/snippet}
+</PageHeader>
+
+<div class="world-clock-page">
+	<!-- World Map (Full Width) -->
+	{#if showMap}
+		<div class="map-section">
+			<div class="map-container">
+				<WorldMap
+					selectedCities={selectedTimezones}
+					onCityClick={handleMapCityClick}
+					{currentTime}
+				/>
+			</div>
+			<p class="text-center text-xs text-muted-foreground py-2">
+				Klicke auf eine Stadt um sie hinzuzufügen
+			</p>
+		</div>
+	{/if}
 
 	<!-- World Clock List -->
 	{#if worldClocksStore.loading}
@@ -169,15 +224,26 @@
 				<div class="world-clock-card relative">
 					<!-- Delete button -->
 					<button
-						class="absolute right-3 top-3 text-muted-foreground hover:text-error"
+						class="absolute right-3 top-3 text-muted-foreground hover:text-error p-0.5"
 						onclick={() => removeCity(clock.id)}
 					>
-						✕
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-3.5 w-3.5"
+							viewBox="0 0 20 20"
+							fill="currentColor"
+						>
+							<path
+								fill-rule="evenodd"
+								d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+								clip-rule="evenodd"
+							/>
+						</svg>
 					</button>
 
 					<!-- Day/Night indicator -->
 					<div class="mb-2 flex items-center gap-2">
-						<span class="text-xl">{isDay ? '☀️' : '🌙'}</span>
+						<span class="text-xs text-muted-foreground">{isDay ? 'Tag' : 'Nacht'}</span>
 						<span class="city-name">{clock.cityName}</span>
 					</div>
 
@@ -206,8 +272,19 @@
 			<div class="card w-full max-w-md max-h-[80vh] flex flex-col">
 				<div class="flex items-center justify-between mb-4">
 					<h2 class="text-xl font-semibold">{$_('worldClock.add')}</h2>
-					<button class="text-muted-foreground hover:text-foreground" onclick={closeAddModal}>
-						✕
+					<button class="text-muted-foreground hover:text-foreground p-0.5" onclick={closeAddModal}>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4"
+							viewBox="0 0 20 20"
+							fill="currentColor"
+						>
+							<path
+								fill-rule="evenodd"
+								d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+								clip-rule="evenodd"
+							/>
+						</svg>
 					</button>
 				</div>
 
@@ -252,3 +329,65 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	.world-clock-page {
+		display: flex;
+		flex-direction: column;
+		min-height: calc(100vh - 180px);
+	}
+
+	.map-section {
+		display: flex;
+		flex-direction: column;
+		margin: 0 -1rem 1rem -1rem;
+		background: hsl(var(--color-card));
+		border-bottom: 1px solid hsl(var(--color-border));
+	}
+
+	.map-container {
+		width: 100%;
+		max-height: 50vh;
+		overflow: hidden;
+	}
+
+	.map-container :global(.world-map-container) {
+		border-radius: 0;
+		box-shadow: none;
+	}
+
+	@media (min-width: 768px) {
+		.map-section {
+			margin: 0 -1.5rem 1.5rem -1.5rem;
+		}
+
+		.map-container {
+			max-height: 60vh;
+		}
+	}
+
+	.world-clock-card {
+		background: hsl(var(--color-card));
+		border-radius: var(--radius-lg);
+		padding: 1rem;
+		border: 1px solid hsl(var(--color-border));
+	}
+
+	.city-name {
+		font-weight: 500;
+		color: hsl(var(--color-foreground));
+	}
+
+	.time-display {
+		font-size: 2.5rem;
+		font-weight: 300;
+		font-variant-numeric: tabular-nums;
+		color: hsl(var(--color-foreground));
+		line-height: 1;
+	}
+
+	.timezone-info {
+		font-size: 0.8125rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+</style>

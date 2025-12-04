@@ -1,33 +1,32 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
+	import { PageHeader } from '@manacore/shared-ui';
 	import { pomodoroStore } from '$lib/stores/pomodoro.svelte';
 	import { POMODORO_PRESETS } from '@clock/shared';
 
-	// SVG circle properties
-	const radius = 120;
+	const radius = 90;
 	const circumference = 2 * Math.PI * radius;
 
 	let strokeDashoffset = $derived(circumference - (pomodoroStore.progress / 100) * circumference);
 
 	let phaseLabel = $derived(
 		{
-			work: $_('pomodoro.work'),
-			break: $_('pomodoro.break'),
-			longBreak: $_('pomodoro.longBreak'),
+			work: 'Arbeit',
+			break: 'Pause',
+			longBreak: 'Lange Pause',
 		}[pomodoroStore.phase]
 	);
 
 	let phaseColor = $derived(
 		{
 			work: 'hsl(var(--color-primary))',
-			break: 'hsl(var(--color-success))',
-			longBreak: 'hsl(var(--color-info))',
+			break: 'hsl(142, 71%, 45%)',
+			longBreak: 'hsl(199, 89%, 48%)',
 		}[pomodoroStore.phase]
 	);
 
 	onMount(() => {
-		// Request notification permission
 		pomodoroStore.requestNotificationPermission();
 	});
 
@@ -41,87 +40,44 @@
 	}
 </script>
 
-<div class="flex flex-col items-center space-y-8">
-	<!-- Header -->
-	<h1 class="text-2xl font-bold text-foreground">{$_('pomodoro.title')}</h1>
+<PageHeader title={$_('pomodoro.title')} size="md" centered />
 
-	<!-- Phase indicator -->
-	<div class="text-center">
-		<span
-			class="inline-block rounded-full px-4 py-1 text-sm font-medium"
-			style="background-color: {phaseColor}; color: white;"
-		>
-			{phaseLabel}
-		</span>
-	</div>
-
-	<!-- Progress Ring -->
-	<div class="relative">
-		<svg width="280" height="280" class="-rotate-90">
-			<!-- Background circle -->
+<div class="pomodoro-container">
+	<!-- Progress Ring with Time -->
+	<div class="pomodoro-ring-wrapper">
+		<svg width="200" height="200" class="-rotate-90">
 			<circle
-				cx="140"
-				cy="140"
+				cx="100"
+				cy="100"
 				r={radius}
 				fill="none"
 				stroke="hsl(var(--color-muted))"
-				stroke-width="8"
+				stroke-width="6"
 			/>
-			<!-- Progress circle -->
 			<circle
-				cx="140"
-				cy="140"
+				cx="100"
+				cy="100"
 				r={radius}
 				fill="none"
 				stroke={phaseColor}
-				stroke-width="8"
+				stroke-width="6"
 				stroke-linecap="round"
 				stroke-dasharray={circumference}
 				stroke-dashoffset={strokeDashoffset}
 				class="transition-all duration-1000 ease-linear"
 			/>
 		</svg>
-
-		<!-- Time display -->
-		<div class="absolute inset-0 flex flex-col items-center justify-center">
-			<span class="digital-clock text-5xl font-light text-foreground">
-				{pomodoroStore.formattedTime}
-			</span>
-			<span class="mt-2 text-sm text-muted-foreground">
-				{$_('pomodoro.sessionsCompleted', {
-					values: {
-						count: pomodoroStore.completedSessions,
-						total: pomodoroStore.sessionsBeforeLongBreak,
-					},
-				})}
-			</span>
+		<div class="pomodoro-time">
+			<span class="text-4xl font-light tabular-nums">{pomodoroStore.formattedTime}</span>
+			<span class="text-xs text-muted-foreground mt-1">{phaseLabel}</span>
 		</div>
 	</div>
 
-	<!-- Controls -->
-	<div class="flex gap-4">
-		{#if pomodoroStore.isRunning}
-			<button class="btn btn-secondary btn-xl" onclick={() => pomodoroStore.pause()}>
-				{$_('pomodoro.pause')}
-			</button>
-		{:else}
-			<button class="btn btn-primary btn-xl" onclick={() => pomodoroStore.start()}>
-				{$_('pomodoro.start')}
-			</button>
-		{/if}
-		<button class="btn btn-ghost btn-xl" onclick={() => pomodoroStore.skip()}>
-			{$_('pomodoro.skip')}
-		</button>
-		<button class="btn btn-ghost btn-xl" onclick={() => pomodoroStore.reset()}>
-			{$_('pomodoro.reset')}
-		</button>
-	</div>
-
-	<!-- Sessions Progress -->
-	<div class="flex gap-2">
+	<!-- Session dots -->
+	<div class="flex justify-center gap-1.5 mb-4">
 		{#each Array(pomodoroStore.sessionsBeforeLongBreak) as _, i}
 			<div
-				class="h-3 w-3 rounded-full transition-colors"
+				class="h-2 w-2 rounded-full transition-colors"
 				class:bg-primary={i <
 					pomodoroStore.completedSessions % pomodoroStore.sessionsBeforeLongBreak}
 				class:bg-muted={i >=
@@ -130,43 +86,51 @@
 		{/each}
 	</div>
 
-	<!-- Presets -->
-	<div class="card w-full max-w-md">
-		<h3 class="mb-3 text-sm font-medium text-muted-foreground">{$_('timer.presets')}</h3>
-		<div class="grid gap-2 sm:grid-cols-3">
-			{#each POMODORO_PRESETS as preset}
-				<button class="btn btn-secondary btn-sm text-left" onclick={() => loadPreset(preset)}>
-					<div>
-						<div class="font-medium">{preset.nameDE}</div>
-						<div class="text-xs text-muted-foreground">
-							{preset.workDuration / 60}:{preset.breakDuration / 60} min
-						</div>
-					</div>
-				</button>
-			{/each}
-		</div>
+	<!-- Controls -->
+	<div class="flex justify-center gap-2 mb-6">
+		{#if pomodoroStore.isRunning}
+			<button class="btn btn-secondary" onclick={() => pomodoroStore.pause()}> Pause </button>
+		{:else}
+			<button class="btn btn-primary" onclick={() => pomodoroStore.start()}> Start </button>
+		{/if}
+		<button class="btn btn-ghost" onclick={() => pomodoroStore.skip()}> Skip </button>
+		<button class="btn btn-ghost" onclick={() => pomodoroStore.reset()}> Reset </button>
 	</div>
 
-	<!-- Current Settings -->
-	<div class="card w-full max-w-md">
-		<h3 class="mb-3 text-sm font-medium text-muted-foreground">Aktuelle Einstellungen</h3>
-		<div class="grid grid-cols-2 gap-4 text-sm">
-			<div>
-				<span class="text-muted-foreground">{$_('pomodoro.settings.workDuration')}:</span>
-				<span class="ml-1 font-medium">{pomodoroStore.settings.workDuration / 60} min</span>
-			</div>
-			<div>
-				<span class="text-muted-foreground">{$_('pomodoro.settings.breakDuration')}:</span>
-				<span class="ml-1 font-medium">{pomodoroStore.settings.breakDuration / 60} min</span>
-			</div>
-			<div>
-				<span class="text-muted-foreground">{$_('pomodoro.settings.longBreakDuration')}:</span>
-				<span class="ml-1 font-medium">{pomodoroStore.settings.longBreakDuration / 60} min</span>
-			</div>
-			<div>
-				<span class="text-muted-foreground">Sitzungen:</span>
-				<span class="ml-1 font-medium">{pomodoroStore.settings.sessionsBeforeLongBreak}</span>
-			</div>
-		</div>
+	<!-- Presets -->
+	<div class="grid grid-cols-3 gap-1.5">
+		{#each POMODORO_PRESETS as preset}
+			<button class="alarm-tile text-center" onclick={() => loadPreset(preset)}>
+				<span class="text-sm font-medium">{preset.nameDE}</span>
+				<span class="text-[10px] text-muted-foreground block">
+					{preset.workDuration / 60}/{preset.breakDuration / 60} min
+				</span>
+			</button>
+		{/each}
 	</div>
 </div>
+
+<style>
+	.pomodoro-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding-top: 1rem;
+	}
+
+	.pomodoro-ring-wrapper {
+		position: relative;
+		width: 200px;
+		height: 200px;
+		margin-bottom: 1rem;
+	}
+
+	.pomodoro-time {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+</style>

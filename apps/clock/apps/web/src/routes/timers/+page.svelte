@@ -2,19 +2,18 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { browser } from '$app/environment';
+	import { PageHeader } from '@manacore/shared-ui';
 	import { timersStore } from '$lib/stores/timers.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { toast } from '$lib/stores/toast';
 	import { QUICK_TIMER_PRESETS, formatDuration } from '@clock/shared';
 
-	// Form state
-	let showForm = $state(false);
-	let formHours = $state(0);
+	// Form state (inline on page)
 	let formMinutes = $state(5);
 	let formSeconds = $state(0);
 	let formLabel = $state('');
 
-	// Local timers (for quick timers without backend)
+	// Local timers
 	interface LocalTimer {
 		id: string;
 		label: string;
@@ -24,56 +23,20 @@
 		createdAt: Date;
 	}
 	let localTimers = $state<LocalTimer[]>([]);
-
-	// Recently used presets (stored in localStorage)
-	let recentPresets = $state<{ label: string; seconds: number }[]>([]);
-	const RECENT_STORAGE_KEY = 'clock-recent-timers';
-	const MAX_RECENT = 5;
-
-	// Local countdown intervals
 	let intervals: Map<string, ReturnType<typeof setInterval>> = new Map();
-
-	// Combined timers (backend + local)
 	let allTimers = $derived([...timersStore.timers, ...localTimers]);
 
 	onMount(async () => {
-		// Load recent presets from localStorage
-		if (browser) {
-			const saved = localStorage.getItem(RECENT_STORAGE_KEY);
-			if (saved) {
-				try {
-					recentPresets = JSON.parse(saved);
-				} catch {
-					recentPresets = [];
-				}
-			}
-		}
-
-		// Fetch backend timers if authenticated
 		if (authStore.isAuthenticated) {
 			await timersStore.fetchTimers();
 		}
 	});
 
 	onDestroy(() => {
-		// Clear all intervals
 		intervals.forEach((interval) => clearInterval(interval));
 	});
 
-	function saveRecentPreset(preset: { label: string; seconds: number }) {
-		// Add to recent, removing duplicates
-		recentPresets = [
-			preset,
-			...recentPresets.filter((p) => p.seconds !== preset.seconds),
-		].slice(0, MAX_RECENT);
-
-		if (browser) {
-			localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(recentPresets));
-		}
-	}
-
 	function startLocalCountdown(timerId: string, isLocal: boolean = false) {
-		// Clear existing interval if any
 		if (intervals.has(timerId)) {
 			clearInterval(intervals.get(timerId));
 		}
@@ -90,7 +53,11 @@
 				const newRemaining = Math.max(0, timer.remainingSeconds - 1);
 				localTimers = localTimers.map((t) =>
 					t.id === timerId
-						? { ...t, remainingSeconds: newRemaining, status: newRemaining === 0 ? 'finished' : 'running' }
+						? {
+								...t,
+								remainingSeconds: newRemaining,
+								status: newRemaining === 0 ? 'finished' : 'running',
+							}
 						: t
 				);
 
@@ -98,7 +65,6 @@
 					clearInterval(interval);
 					intervals.delete(timerId);
 					toast.success($_('timer.finished'));
-					// Play notification sound
 					if (browser && 'Notification' in window && Notification.permission === 'granted') {
 						new Notification('Timer', { body: 'Timer abgelaufen!' });
 					}
@@ -125,69 +91,30 @@
 		intervals.set(timerId, interval);
 	}
 
-	function openForm() {
-		formHours = 0;
-		formMinutes = 5;
-		formSeconds = 0;
-		formLabel = '';
-		showForm = true;
-	}
-
-	function closeForm() {
-		showForm = false;
-	}
-
-	async function createTimer() {
-		const durationSeconds = formHours * 3600 + formMinutes * 60 + formSeconds;
+	function createAndStartTimer() {
+		const durationSeconds = formMinutes * 60 + formSeconds;
 		if (durationSeconds <= 0) {
 			toast.error('Bitte eine gültige Zeit eingeben');
 			return;
 		}
 
-		if (authStore.isAuthenticated) {
-			const result = await timersStore.createTimer({
-				durationSeconds,
-				label: formLabel || undefined,
-			});
-
-			if (result.success) {
-				toast.success('Timer erstellt');
-				closeForm();
-			} else {
-				toast.error(result.error || 'Fehler beim Erstellen');
-			}
-		} else {
-			// Create local timer
-			const newTimer: LocalTimer = {
-				id: crypto.randomUUID(),
-				label: formLabel || formatDuration(durationSeconds),
-				durationSeconds,
-				remainingSeconds: durationSeconds,
-				status: 'idle',
-				createdAt: new Date(),
-			};
-			localTimers = [...localTimers, newTimer];
-			toast.success('Timer erstellt');
-			closeForm();
-		}
-	}
-
-	function createQuickTimer(seconds: number, label: string) {
-		// Save to recent
-		saveRecentPreset({ label, seconds });
-
-		// Create local timer and start immediately
 		const newTimer: LocalTimer = {
 			id: crypto.randomUUID(),
-			label: label,
-			durationSeconds: seconds,
-			remainingSeconds: seconds,
+			label: formLabel || formatDuration(durationSeconds),
+			durationSeconds,
+			remainingSeconds: durationSeconds,
 			status: 'running',
 			createdAt: new Date(),
 		};
 		localTimers = [...localTimers, newTimer];
 		startLocalCountdown(newTimer.id, true);
-		toast.success(`Timer ${label} gestartet`);
+		toast.success('Timer gestartet');
+		formLabel = '';
+	}
+
+	function setPreset(seconds: number) {
+		formMinutes = Math.floor(seconds / 60);
+		formSeconds = seconds % 60;
 	}
 
 	async function handleStart(id: string, isLocal: boolean) {
@@ -198,12 +125,7 @@
 			startLocalCountdown(id, true);
 		} else {
 			const result = await timersStore.startTimer(id);
-			if (result.success) {
-				const timer = timersStore.timers.find((t) => t.id === id);
-				if (timer) {
-					startLocalCountdown(id, false);
-				}
-			}
+			if (result.success) startLocalCountdown(id, false);
 		}
 	}
 
@@ -212,11 +134,8 @@
 			clearInterval(intervals.get(id));
 			intervals.delete(id);
 		}
-
 		if (isLocal) {
-			localTimers = localTimers.map((t) =>
-				t.id === id ? { ...t, status: 'paused' as const } : t
-			);
+			localTimers = localTimers.map((t) => (t.id === id ? { ...t, status: 'paused' as const } : t));
 		} else {
 			await timersStore.pauseTimer(id);
 		}
@@ -227,7 +146,6 @@
 			clearInterval(intervals.get(id));
 			intervals.delete(id);
 		}
-
 		if (isLocal) {
 			localTimers = localTimers.map((t) =>
 				t.id === id ? { ...t, remainingSeconds: t.durationSeconds, status: 'idle' as const } : t
@@ -242,15 +160,10 @@
 			clearInterval(intervals.get(id));
 			intervals.delete(id);
 		}
-
 		if (isLocal) {
 			localTimers = localTimers.filter((t) => t.id !== id);
-			toast.success('Timer gelöscht');
 		} else {
-			const result = await timersStore.deleteTimer(id);
-			if (result.success) {
-				toast.success('Timer gelöscht');
-			}
+			await timersStore.deleteTimer(id);
 		}
 	}
 
@@ -267,189 +180,120 @@
 	function isLocalTimer(timer: any): boolean {
 		return localTimers.some((t) => t.id === timer.id);
 	}
-
-	// Preset icons based on duration
-	function getPresetIcon(seconds: number): string {
-		if (seconds <= 60) return '⚡';
-		if (seconds <= 300) return '☕';
-		if (seconds <= 900) return '📝';
-		if (seconds <= 1800) return '💪';
-		if (seconds <= 2700) return '🎯';
-		return '🏃';
-	}
 </script>
 
-<div class="mx-auto max-w-4xl space-y-8 pb-8">
-	<!-- Header -->
-	<div class="text-center">
-		<h1 class="text-3xl font-bold text-foreground">{$_('timer.title')}</h1>
-		<p class="mt-2 text-muted-foreground">Schnelle Timer für jeden Anlass</p>
-	</div>
+<PageHeader title={$_('timer.title')} size="md" centered />
 
-	<!-- Quick Timer Presets - Hero Section -->
-	<div class="card bg-gradient-to-br from-primary/10 to-primary/5 p-8">
-		<h2 class="mb-6 text-center text-lg font-semibold text-foreground">
-			{$_('timer.presets')}
-		</h2>
-		<div class="grid grid-cols-4 gap-4 sm:grid-cols-4 md:grid-cols-8">
-			{#each QUICK_TIMER_PRESETS as preset}
-				<button
-					class="group flex flex-col items-center gap-2 rounded-2xl bg-background p-4 shadow-sm transition-all hover:scale-105 hover:shadow-md active:scale-95"
-					onclick={() => createQuickTimer(preset.seconds, preset.label)}
-				>
-					<span class="text-2xl transition-transform group-hover:scale-110">
-						{getPresetIcon(preset.seconds)}
-					</span>
-					<span class="text-sm font-medium text-foreground">{preset.label}</span>
-				</button>
-			{/each}
+<div class="space-y-4">
+	<!-- Quick Create Form -->
+	<div class="quick-create">
+		<div class="flex items-center gap-1">
+			<input
+				type="number"
+				class="time-input-inline w-12 text-center"
+				min="0"
+				max="99"
+				bind:value={formMinutes}
+			/>
+			<span class="text-muted-foreground">:</span>
+			<input
+				type="number"
+				class="time-input-inline w-12 text-center"
+				min="0"
+				max="59"
+				bind:value={formSeconds}
+			/>
 		</div>
+		<input type="text" class="label-input" placeholder="Bezeichnung" bind:value={formLabel} />
+		<button class="btn btn-primary btn-sm" onclick={createAndStartTimer}> Start </button>
 	</div>
 
-	<!-- Recently Used Section -->
-	{#if recentPresets.length > 0}
-		<div class="card">
-			<div class="mb-4 flex items-center justify-between">
-				<h3 class="text-lg font-semibold text-foreground">Zuletzt verwendet</h3>
-				<button
-					class="text-sm text-muted-foreground hover:text-foreground"
-					onclick={() => {
-						recentPresets = [];
-						if (browser) localStorage.removeItem(RECENT_STORAGE_KEY);
-					}}
-				>
-					Löschen
-				</button>
-			</div>
-			<div class="flex flex-wrap gap-3">
-				{#each recentPresets as preset}
-					<button
-						class="flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm font-medium transition-all hover:bg-primary hover:text-primary-foreground"
-						onclick={() => createQuickTimer(preset.seconds, preset.label)}
-					>
-						<span class="text-lg">{getPresetIcon(preset.seconds)}</span>
-						{preset.label}
-					</button>
-				{/each}
-			</div>
-		</div>
-	{/if}
-
-	<!-- Custom Timer Button -->
-	<div class="flex justify-center">
-		<button
-			class="btn btn-primary btn-lg flex items-center gap-2 px-8"
-			onclick={openForm}
-		>
-			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
-			{$_('timer.add')}
-		</button>
+	<!-- Quick Presets -->
+	<div class="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
+		{#each QUICK_TIMER_PRESETS as preset}
+			<button class="alarm-tile text-center" onclick={() => setPreset(preset.seconds)}>
+				<span class="text-lg font-light tabular-nums">{preset.label}</span>
+			</button>
+		{/each}
 	</div>
 
-	<!-- Active Timers -->
+	<!-- Loading State -->
 	{#if timersStore.loading}
-		<div class="flex justify-center py-12">
-			<div class="h-10 w-10 animate-spin rounded-full border-4 border-primary border-r-transparent"></div>
+		<div class="flex justify-center py-8">
+			<div
+				class="h-6 w-6 animate-spin rounded-full border-2 border-primary border-r-transparent"
+			></div>
 		</div>
-	{:else if allTimers.length === 0}
-		<div class="card bg-muted/30 py-16 text-center">
-			<div class="mb-4 text-5xl opacity-50">⏱️</div>
-			<p class="text-lg text-muted-foreground">{$_('timer.noTimers')}</p>
-			<p class="mt-2 text-sm text-muted-foreground">
-				Klicke auf einen Preset oben oder erstelle einen eigenen Timer
-			</p>
-		</div>
-	{:else}
-		<div class="space-y-4">
-			<h3 class="text-lg font-semibold text-foreground">
-				Aktive Timer ({allTimers.length})
-			</h3>
-			<div class="grid gap-4 sm:grid-cols-2">
+	{:else if allTimers.length > 0}
+		<!-- Active Timers -->
+		<div>
+			<h2 class="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">
+				Aktiv ({allTimers.length})
+			</h2>
+			<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
 				{#each allTimers as timer (timer.id)}
 					{@const isLocal = isLocalTimer(timer)}
-					<div
-						class="card relative overflow-hidden transition-all {timer.status === 'running' ? 'ring-2 ring-primary' : ''} {timer.status === 'finished' ? 'bg-green-500/5' : ''}"
-					>
-						<!-- Progress background -->
-						<div
-							class="absolute inset-0 bg-primary/10 transition-all duration-1000"
-							style="width: {getProgress(timer)}%"
-						></div>
-
-						<div class="relative">
-							<!-- Label -->
-							<div class="mb-3 flex items-center justify-between">
-								<span class="text-sm font-medium text-muted-foreground">
-									{timer.label || 'Timer'}
-								</span>
-								<span
-									class="rounded-full px-2 py-0.5 text-xs font-medium"
-									class:bg-primary={timer.status === 'running'}
-									class:text-primary-foreground={timer.status === 'running'}
-									class:bg-muted={timer.status !== 'running'}
+					<div class="alarm-tile" class:active={timer.status === 'running'}>
+						<div class="flex items-start justify-between mb-1">
+							<span
+								class="text-xl font-light tabular-nums"
+								class:text-primary={timer.status === 'running'}
+								class:text-green-500={timer.status === 'finished'}
+							>
+								{getTimerDisplay(timer)}
+							</span>
+							<button
+								class="text-muted-foreground hover:text-error p-0.5 -mr-1"
+								onclick={(e) => {
+									e.stopPropagation();
+									handleDelete(timer.id, isLocal);
+								}}
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-3.5 w-3.5"
+									viewBox="0 0 20 20"
+									fill="currentColor"
 								>
-									{timer.status === 'running' ? 'Läuft' : timer.status === 'paused' ? 'Pausiert' : timer.status === 'finished' ? 'Fertig' : 'Bereit'}
-								</span>
-							</div>
-
-							<!-- Time Display -->
-							<div class="mb-4 text-center">
-								<span
-									class="font-mono text-5xl font-light tracking-tight {timer.status === 'running' ? 'text-primary' : ''} {timer.status === 'finished' ? 'text-green-500' : ''}"
-								>
-									{getTimerDisplay(timer)}
-								</span>
-							</div>
-
-							<!-- Progress bar -->
-							<div class="mb-4 h-1.5 overflow-hidden rounded-full bg-muted">
-								<div
-									class="h-full rounded-full transition-all duration-1000 {timer.status === 'finished' ? 'bg-green-500' : 'bg-primary'}"
-									style="width: {getProgress(timer)}%"
-								></div>
-							</div>
-
-							<!-- Controls -->
-							<div class="flex items-center gap-2">
-								{#if timer.status === 'running'}
-									<button
-										class="btn btn-secondary flex-1"
-										onclick={() => handlePause(timer.id, isLocal)}
-									>
-										⏸️ {$_('timer.pause')}
-									</button>
-								{:else if timer.status === 'finished'}
-									<button
-										class="btn btn-primary flex-1"
-										onclick={() => handleReset(timer.id, isLocal)}
-									>
-										🔄 Neu starten
-									</button>
-								{:else}
-									<button
-										class="btn btn-primary flex-1"
-										onclick={() => handleStart(timer.id, isLocal)}
-									>
-										▶️ {$_('timer.start')}
-									</button>
-								{/if}
+									<path
+										fill-rule="evenodd"
+										d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							</button>
+						</div>
+						<div class="text-[10px] text-muted-foreground truncate mb-2">{timer.label}</div>
+						<div class="h-1 bg-muted rounded-full overflow-hidden mb-2">
+							<div
+								class="h-full rounded-full transition-all duration-1000"
+								class:bg-primary={timer.status !== 'finished'}
+								class:bg-green-500={timer.status === 'finished'}
+								style="width: {getProgress(timer)}%"
+							></div>
+						</div>
+						<div class="flex gap-1">
+							{#if timer.status === 'running'}
 								<button
-									class="btn btn-ghost"
-									onclick={() => handleReset(timer.id, isLocal)}
-									title="Zurücksetzen"
+									class="btn btn-secondary btn-sm flex-1 text-xs"
+									onclick={() => handlePause(timer.id, isLocal)}
 								>
-									↺
+									Pause
 								</button>
+							{:else}
 								<button
-									class="btn btn-ghost text-destructive hover:bg-destructive/10"
-									onclick={() => handleDelete(timer.id, isLocal)}
-									title="Löschen"
+									class="btn btn-primary btn-sm flex-1 text-xs"
+									onclick={() => handleStart(timer.id, isLocal)}
 								>
-									🗑️
+									{timer.status === 'finished' ? 'Neu' : 'Start'}
 								</button>
-							</div>
+							{/if}
+							<button
+								class="btn btn-ghost btn-sm text-xs"
+								onclick={() => handleReset(timer.id, isLocal)}
+							>
+								Reset
+							</button>
 						</div>
 					</div>
 				{/each}
@@ -457,117 +301,3 @@
 		</div>
 	{/if}
 </div>
-
-<!-- Form Modal -->
-{#if showForm}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-		<div class="card w-full max-w-md animate-in fade-in zoom-in-95">
-			<div class="mb-6 flex items-center justify-between">
-				<h2 class="text-xl font-semibold">{$_('timer.add')}</h2>
-				<button class="btn btn-ghost btn-sm" onclick={closeForm}>✕</button>
-			</div>
-
-			<form
-				onsubmit={(e) => {
-					e.preventDefault();
-					createTimer();
-				}}
-			>
-				<!-- Duration -->
-				<div class="mb-6">
-					<label class="mb-3 block text-sm font-medium">{$_('timer.duration')}</label>
-					<div class="grid grid-cols-3 gap-3">
-						<div>
-							<label class="mb-1.5 block text-xs text-muted-foreground text-center">{$_('timer.hours')}</label>
-							<input
-								type="number"
-								class="input text-center text-2xl font-light"
-								min="0"
-								max="99"
-								bind:value={formHours}
-							/>
-						</div>
-						<div>
-							<label class="mb-1.5 block text-xs text-muted-foreground text-center">{$_('timer.minutes')}</label>
-							<input
-								type="number"
-								class="input text-center text-2xl font-light"
-								min="0"
-								max="59"
-								bind:value={formMinutes}
-							/>
-						</div>
-						<div>
-							<label class="mb-1.5 block text-xs text-muted-foreground text-center">{$_('timer.seconds')}</label>
-							<input
-								type="number"
-								class="input text-center text-2xl font-light"
-								min="0"
-								max="59"
-								bind:value={formSeconds}
-							/>
-						</div>
-					</div>
-				</div>
-
-				<!-- Quick presets in modal -->
-				<div class="mb-6">
-					<label class="mb-2 block text-xs text-muted-foreground">Schnellauswahl</label>
-					<div class="flex flex-wrap gap-2">
-						{#each [1, 3, 5, 10, 15, 30] as mins}
-							<button
-								type="button"
-								class="rounded-full bg-muted px-3 py-1 text-sm hover:bg-primary hover:text-primary-foreground"
-								onclick={() => {
-									formHours = 0;
-									formMinutes = mins;
-									formSeconds = 0;
-								}}
-							>
-								{mins} min
-							</button>
-						{/each}
-					</div>
-				</div>
-
-				<!-- Label -->
-				<div class="mb-6">
-					<label class="mb-1.5 block text-sm font-medium">{$_('timer.label')}</label>
-					<input
-						type="text"
-						class="input"
-						placeholder="z.B. Tee kochen, Pause, Meeting..."
-						bind:value={formLabel}
-					/>
-				</div>
-
-				<!-- Actions -->
-				<div class="flex gap-3">
-					<button type="button" class="btn btn-secondary flex-1" onclick={closeForm}>
-						{$_('common.cancel')}
-					</button>
-					<button type="submit" class="btn btn-primary flex-1">
-						Timer erstellen
-					</button>
-				</div>
-			</form>
-		</div>
-	</div>
-{/if}
-
-<style>
-	.animate-in {
-		animation: animate-in 0.2s ease-out;
-	}
-
-	@keyframes animate-in {
-		from {
-			opacity: 0;
-			transform: scale(0.95);
-		}
-		to {
-			opacity: 1;
-			transform: scale(1);
-		}
-	}
-</style>
