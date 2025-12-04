@@ -10,12 +10,13 @@ on:
         options:
           - all
           - mana-core-auth
-          - maerchenzauber-backend
           - chat-backend
           - manadeck-backend
-          - nutriphi-backend
-          - news-api
   workflow_call:
+
+permissions:
+  contents: read
+  packages: read
 
 env:
   NODE_VERSION: '20'
@@ -96,6 +97,13 @@ jobs:
           scp .env.staging ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:~/manacore-staging/.env
           rm .env.staging
 
+      - name: Login to GitHub Container Registry on staging server
+        run: |
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
+            # Login to ghcr.io with GitHub token
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          EOF
+
       - name: Pull latest Docker images
         run: |
           ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
@@ -132,8 +140,8 @@ jobs:
           # Health check for each service
           SERVICES=(
             "mana-core-auth:3001:/api/v1/health"
-            "maerchenzauber-backend:3002:/health"
             "chat-backend:3002:/api/health"
+            "manadeck-backend:3003:/api/health"
           )
 
           for SERVICE_CONFIG in "${SERVICES[@]}"; do
