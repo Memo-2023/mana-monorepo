@@ -4,7 +4,7 @@ import { eq, and, desc, sql, count } from 'drizzle-orm';
 import { getDb } from '../db/connection';
 import { userFeedback, feedbackVotes } from '../db/schema';
 import { type CreateFeedbackDto, type FeedbackQueryDto } from './dto';
-import { type AiService } from '../ai/ai.service';
+import { AiService } from '../ai/ai.service';
 
 @Injectable()
 export class FeedbackService {

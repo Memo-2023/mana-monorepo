@@ -10,7 +10,7 @@ import {
 	HttpCode,
 	HttpStatus,
 } from '@nestjs/common';
-import { type BetterAuthService } from './services/better-auth.service';
+import { BetterAuthService } from './services/better-auth.service';
 import { type RegisterDto } from './dto/register.dto';
 import { type LoginDto } from './dto/login.dto';
 import { type RefreshTokenDto } from './dto/refresh-token.dto';

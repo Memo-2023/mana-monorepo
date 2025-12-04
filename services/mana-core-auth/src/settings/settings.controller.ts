@@ -1,5 +1,5 @@
 import { Controller, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
-import { type SettingsService } from './settings.service';
+import { SettingsService } from './settings.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser, type CurrentUserData } from '../common/decorators/current-user.decorator';
 import { type UpdateGlobalSettingsDto, type UpdateAppOverrideDto } from './dto';

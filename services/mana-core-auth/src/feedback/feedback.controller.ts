@@ -9,7 +9,7 @@ import {
 	UseGuards,
 	Headers,
 } from '@nestjs/common';
-import { type FeedbackService } from './feedback.service';
+import { FeedbackService } from './feedback.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { OptionalAuthGuard } from '../common/guards/optional-auth.guard';
 import { CurrentUser, type CurrentUserData } from '../common/decorators/current-user.decorator';

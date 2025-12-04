@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, UseGuards, Query, ParseIntPipe, Param } from '@nestjs/common';
-import { type CreditsService } from './credits.service';
+import { CreditsService } from './credits.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser, type CurrentUserData } from '../common/decorators/current-user.decorator';
 import { type UseCreditsDto } from './dto/use-credits.dto';
