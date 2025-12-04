@@ -84,7 +84,13 @@
 		"noLaps": "Noch keine Runden",
 		"best": "Beste",
 		"worst": "Längste",
-		"total": "Gesamt"
+		"total": "Gesamt",
+		"new": "Neu",
+		"continue": "Weiter",
+		"noStopwatches": "Keine Stoppuhren",
+		"noStopwatchesDescription": "Starte deine erste Stoppuhr, um mehrere Zeitmessungen parallel zu verfolgen.",
+		"startFirst": "Erste Stoppuhr starten",
+		"otherStopwatches": "Weitere Stoppuhren"
 	},
 	"pomodoro": {
 		"title": "Pomodoro",
@@ -144,6 +150,96 @@
 		"ok": "OK",
 		"loading": "Laden...",
 		"error": "Fehler",
-		"success": "Erfolg"
+		"success": "Erfolg",
+		"back": "Zurück"
+	},
+	"clockFaces": {
+		"title": "Zifferblätter",
+		"subtitle": "Wähle dein bevorzugtes Uhren-Design für die Startseite",
+		"customize": "Zifferblatt anpassen",
+		"currentSelection": "Aktuelle Auswahl",
+		"analog": "Analoge Uhren",
+		"digital": "Digitale Uhren",
+		"selected": "Ausgewählt",
+		"classic": {
+			"name": "Klassisch",
+			"description": "Elegante Uhr mit römischen Ziffern"
+		},
+		"minimalist": {
+			"name": "Minimalistisch",
+			"description": "Schlichtes Design mit Stundenmarkierungen"
+		},
+		"modern": {
+			"name": "Modern",
+			"description": "Zeitgemäßer Stil mit arabischen Zahlen"
+		},
+		"elegant": {
+			"name": "Elegant",
+			"description": "Luxuriöse goldene Akzente"
+		},
+		"sporty": {
+			"name": "Sportlich",
+			"description": "Dynamisches Design wie bei Sportuhren"
+		},
+		"lcd": {
+			"name": "LCD",
+			"description": "Klassisches 7-Segment LCD-Display"
+		},
+		"flip": {
+			"name": "Fallblatt",
+			"description": "Retro-Stil wie alte Bahnhofsuhren"
+		},
+		"matrix": {
+			"name": "Matrix",
+			"description": "Punktmatrix LED-Anzeige"
+		},
+		"neon": {
+			"name": "Neon",
+			"description": "Leuchtender Neonröhren-Effekt"
+		},
+		"binary": {
+			"name": "Binär",
+			"description": "Zeit im Binärformat dargestellt"
+		},
+		"vintage": {
+			"name": "Vintage",
+			"description": "Antike Uhr mit gealterter Patina"
+		},
+		"nautical": {
+			"name": "Nautisch",
+			"description": "Marine-Stil mit Messing-Schiffsuhr"
+		},
+		"industrial": {
+			"name": "Industrie",
+			"description": "Fabrik-Stil mit Metall-Akzenten"
+		},
+		"bauhaus": {
+			"name": "Bauhaus",
+			"description": "Geometrisches Design mit Primärfarben"
+		},
+		"railway": {
+			"name": "Bahnhof",
+			"description": "Schweizer Bahnhofsuhr-Design"
+		},
+		"retro": {
+			"name": "Retro",
+			"description": "Pixel-Stil CRT-Anzeige"
+		},
+		"gradient": {
+			"name": "Farbverlauf",
+			"description": "Moderne Anzeige mit Farbwechsel"
+		},
+		"terminal": {
+			"name": "Terminal",
+			"description": "Kommandozeilen-Interface-Stil"
+		},
+		"typewriter": {
+			"name": "Schreibmaschine",
+			"description": "Vintage mechanischer Tastatur-Stil"
+		},
+		"radar": {
+			"name": "Radar",
+			"description": "Militär-Radarschirm-Anzeige"
+		}
 	}
 }

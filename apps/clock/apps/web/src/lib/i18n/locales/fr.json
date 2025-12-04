@@ -84,7 +84,13 @@
 		"noLaps": "Pas encore de tours",
 		"best": "Meilleur",
 		"worst": "Pire",
-		"total": "Total"
+		"total": "Total",
+		"new": "Nouveau",
+		"continue": "Continuer",
+		"noStopwatches": "Aucun chronomètre",
+		"noStopwatchesDescription": "Démarrez votre premier chronomètre pour suivre plusieurs mesures de temps simultanément.",
+		"startFirst": "Démarrer le premier chronomètre",
+		"otherStopwatches": "Autres chronomètres"
 	},
 	"pomodoro": {
 		"title": "Pomodoro",
@@ -144,6 +150,96 @@
 		"ok": "OK",
 		"loading": "Chargement...",
 		"error": "Erreur",
-		"success": "Succès"
+		"success": "Succès",
+		"back": "Retour"
+	},
+	"clockFaces": {
+		"title": "Cadrans",
+		"subtitle": "Choisissez votre design d'horloge préféré pour la page d'accueil",
+		"customize": "Personnaliser l'horloge",
+		"currentSelection": "Sélection actuelle",
+		"analog": "Horloges analogiques",
+		"digital": "Horloges numériques",
+		"selected": "Sélectionné",
+		"classic": {
+			"name": "Classique",
+			"description": "Horloge élégante avec chiffres romains"
+		},
+		"minimalist": {
+			"name": "Minimaliste",
+			"description": "Design épuré avec marqueurs d'heures"
+		},
+		"modern": {
+			"name": "Moderne",
+			"description": "Style contemporain avec chiffres arabes"
+		},
+		"elegant": {
+			"name": "Élégant",
+			"description": "Accents dorés luxueux"
+		},
+		"sporty": {
+			"name": "Sportif",
+			"description": "Design audacieux inspiré des montres de sport"
+		},
+		"lcd": {
+			"name": "LCD",
+			"description": "Affichage LCD classique à 7 segments"
+		},
+		"flip": {
+			"name": "Flip",
+			"description": "Style rétro à volets"
+		},
+		"matrix": {
+			"name": "Matrice",
+			"description": "Affichage LED à matrice de points"
+		},
+		"neon": {
+			"name": "Néon",
+			"description": "Effet tube néon lumineux"
+		},
+		"binary": {
+			"name": "Binaire",
+			"description": "Heure affichée en format binaire"
+		},
+		"vintage": {
+			"name": "Vintage",
+			"description": "Horloge ancienne avec patine vieillie"
+		},
+		"nautical": {
+			"name": "Nautique",
+			"description": "Horloge de navire en laiton style marin"
+		},
+		"industrial": {
+			"name": "Industriel",
+			"description": "Style usine avec accents métalliques"
+		},
+		"bauhaus": {
+			"name": "Bauhaus",
+			"description": "Design géométrique avec couleurs primaires"
+		},
+		"railway": {
+			"name": "Gare",
+			"description": "Style horloge de gare suisse"
+		},
+		"retro": {
+			"name": "Rétro",
+			"description": "Affichage CRT style pixel"
+		},
+		"gradient": {
+			"name": "Dégradé",
+			"description": "Affichage moderne avec changements de couleur"
+		},
+		"terminal": {
+			"name": "Terminal",
+			"description": "Style interface ligne de commande"
+		},
+		"typewriter": {
+			"name": "Machine à écrire",
+			"description": "Style clavier mécanique vintage"
+		},
+		"radar": {
+			"name": "Radar",
+			"description": "Affichage écran radar militaire"
+		}
 	}
 }

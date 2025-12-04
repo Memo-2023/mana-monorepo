@@ -84,7 +84,13 @@
 		"noLaps": "No laps yet",
 		"best": "Best",
 		"worst": "Worst",
-		"total": "Total"
+		"total": "Total",
+		"new": "New",
+		"continue": "Continue",
+		"noStopwatches": "No Stopwatches",
+		"noStopwatchesDescription": "Start your first stopwatch to track multiple time measurements simultaneously.",
+		"startFirst": "Start First Stopwatch",
+		"otherStopwatches": "Other Stopwatches"
 	},
 	"pomodoro": {
 		"title": "Pomodoro",
@@ -144,6 +150,96 @@
 		"ok": "OK",
 		"loading": "Loading...",
 		"error": "Error",
-		"success": "Success"
+		"success": "Success",
+		"back": "Back"
+	},
+	"clockFaces": {
+		"title": "Clock Faces",
+		"subtitle": "Choose your preferred clock design for the homepage",
+		"customize": "Customize Clock",
+		"currentSelection": "Current Selection",
+		"analog": "Analog Clocks",
+		"digital": "Digital Clocks",
+		"selected": "Selected",
+		"classic": {
+			"name": "Classic",
+			"description": "Elegant clock with Roman numerals"
+		},
+		"minimalist": {
+			"name": "Minimalist",
+			"description": "Clean design with only hour markers"
+		},
+		"modern": {
+			"name": "Modern",
+			"description": "Contemporary style with Arabic numerals"
+		},
+		"elegant": {
+			"name": "Elegant",
+			"description": "Luxurious golden accents"
+		},
+		"sporty": {
+			"name": "Sporty",
+			"description": "Bold design inspired by sports watches"
+		},
+		"lcd": {
+			"name": "LCD",
+			"description": "Classic 7-segment LCD display"
+		},
+		"flip": {
+			"name": "Flip Clock",
+			"description": "Retro split-flap display style"
+		},
+		"matrix": {
+			"name": "Matrix",
+			"description": "Dot matrix LED display"
+		},
+		"neon": {
+			"name": "Neon",
+			"description": "Glowing neon tube effect"
+		},
+		"binary": {
+			"name": "Binary",
+			"description": "Time displayed in binary format"
+		},
+		"vintage": {
+			"name": "Vintage",
+			"description": "Antique clock with aged patina"
+		},
+		"nautical": {
+			"name": "Nautical",
+			"description": "Marine-inspired brass ship clock"
+		},
+		"industrial": {
+			"name": "Industrial",
+			"description": "Factory-style with metal accents"
+		},
+		"bauhaus": {
+			"name": "Bauhaus",
+			"description": "Geometric design with primary colors"
+		},
+		"railway": {
+			"name": "Railway",
+			"description": "Swiss railway station clock style"
+		},
+		"retro": {
+			"name": "Retro",
+			"description": "Pixel-style CRT display"
+		},
+		"gradient": {
+			"name": "Gradient",
+			"description": "Modern display with color shifts"
+		},
+		"terminal": {
+			"name": "Terminal",
+			"description": "Command-line interface style"
+		},
+		"typewriter": {
+			"name": "Typewriter",
+			"description": "Vintage mechanical keyboard style"
+		},
+		"radar": {
+			"name": "Radar",
+			"description": "Military radar screen display"
+		}
 	}
 }

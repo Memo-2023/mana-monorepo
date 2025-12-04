@@ -84,7 +84,13 @@
 		"noLaps": "Aún no hay vueltas",
 		"best": "Mejor",
 		"worst": "Peor",
-		"total": "Total"
+		"total": "Total",
+		"new": "Nuevo",
+		"continue": "Continuar",
+		"noStopwatches": "Sin cronómetros",
+		"noStopwatchesDescription": "Inicia tu primer cronómetro para seguir múltiples mediciones de tiempo simultáneamente.",
+		"startFirst": "Iniciar primer cronómetro",
+		"otherStopwatches": "Otros cronómetros"
 	},
 	"pomodoro": {
 		"title": "Pomodoro",
@@ -144,6 +150,96 @@
 		"ok": "OK",
 		"loading": "Cargando...",
 		"error": "Error",
-		"success": "Éxito"
+		"success": "Éxito",
+		"back": "Volver"
+	},
+	"clockFaces": {
+		"title": "Esferas de Reloj",
+		"subtitle": "Elige tu diseño de reloj preferido para la página de inicio",
+		"customize": "Personalizar reloj",
+		"currentSelection": "Selección actual",
+		"analog": "Relojes analógicos",
+		"digital": "Relojes digitales",
+		"selected": "Seleccionado",
+		"classic": {
+			"name": "Clásico",
+			"description": "Reloj elegante con números romanos"
+		},
+		"minimalist": {
+			"name": "Minimalista",
+			"description": "Diseño limpio con marcadores de hora"
+		},
+		"modern": {
+			"name": "Moderno",
+			"description": "Estilo contemporáneo con números árabes"
+		},
+		"elegant": {
+			"name": "Elegante",
+			"description": "Acentos dorados de lujo"
+		},
+		"sporty": {
+			"name": "Deportivo",
+			"description": "Diseño audaz inspirado en relojes deportivos"
+		},
+		"lcd": {
+			"name": "LCD",
+			"description": "Pantalla LCD clásica de 7 segmentos"
+		},
+		"flip": {
+			"name": "Flip",
+			"description": "Estilo retro de paneles giratorios"
+		},
+		"matrix": {
+			"name": "Matriz",
+			"description": "Pantalla LED de matriz de puntos"
+		},
+		"neon": {
+			"name": "Neón",
+			"description": "Efecto de tubo de neón brillante"
+		},
+		"binary": {
+			"name": "Binario",
+			"description": "Hora mostrada en formato binario"
+		},
+		"vintage": {
+			"name": "Vintage",
+			"description": "Reloj antiguo con pátina envejecida"
+		},
+		"nautical": {
+			"name": "Náutico",
+			"description": "Reloj de barco de latón estilo marino"
+		},
+		"industrial": {
+			"name": "Industrial",
+			"description": "Estilo fábrica con acentos metálicos"
+		},
+		"bauhaus": {
+			"name": "Bauhaus",
+			"description": "Diseño geométrico con colores primarios"
+		},
+		"railway": {
+			"name": "Estación",
+			"description": "Estilo reloj de estación suiza"
+		},
+		"retro": {
+			"name": "Retro",
+			"description": "Pantalla CRT estilo pixel"
+		},
+		"gradient": {
+			"name": "Degradado",
+			"description": "Pantalla moderna con cambios de color"
+		},
+		"terminal": {
+			"name": "Terminal",
+			"description": "Estilo interfaz de línea de comandos"
+		},
+		"typewriter": {
+			"name": "Máquina de escribir",
+			"description": "Estilo teclado mecánico vintage"
+		},
+		"radar": {
+			"name": "Radar",
+			"description": "Pantalla de radar militar"
+		}
 	}
 }
