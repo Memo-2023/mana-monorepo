@@ -13,6 +13,7 @@ COPY pnpm-lock.yaml ./
 
 # Copy shared packages
 COPY packages/shared-errors ./packages/shared-errors
+COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
 
 # Copy chat backend
 COPY apps/chat/apps/backend ./apps/chat/apps/backend
@@ -22,6 +23,9 @@ RUN pnpm install --frozen-lockfile
 
 # Build shared packages first
 WORKDIR /app/packages/shared-errors
+RUN pnpm build
+
+WORKDIR /app/packages/shared-nestjs-auth
 RUN pnpm build
 
 # Build the backend
