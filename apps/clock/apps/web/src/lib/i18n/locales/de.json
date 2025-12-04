@@ -10,6 +10,7 @@
 		"stopwatch": "Stoppuhr",
 		"pomodoro": "Pomodoro",
 		"worldClock": "Weltzeituhr",
+		"lifeClock": "Lebensuhr",
 		"settings": "Einstellungen",
 		"feedback": "Feedback"
 	},
@@ -124,6 +125,35 @@
 		"ahead": "voraus",
 		"behind": "zurück",
 		"same": "Gleiche Zeit"
+	},
+	"lifeClock": {
+		"title": "Lebensuhr",
+		"description": "Gib dein Geburtsdatum ein, um zu sehen, wie viele Tage du bereits gelebt hast.",
+		"daysLived": "Tage gelebt",
+		"since": "seit",
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"showMore": "Mehr Details",
+		"showLess": "Weniger anzeigen",
+		"nextMilestone": "Nächster Meilenstein",
+		"inDays": "in {days} Tagen",
+		"stats": {
+			"hours": "Stunden",
+			"minutes": "Minuten",
+			"weeks": "Wochen",
+			"months": "Monate"
+		},
+		"funFacts": {
+			"title": "Ungefähre Schätzungen",
+			"heartbeats": "Herzschläge",
+			"breaths": "Atemzüge",
+			"sunrises": "Sonnenaufgänge",
+			"sleepHours": "Stunden geschlafen"
+		},
+		"milestones": {
+			"title": "Meilensteine",
+			"days": "Tage"
+		}
 	},
 	"settings": {
 		"title": "Einstellungen",

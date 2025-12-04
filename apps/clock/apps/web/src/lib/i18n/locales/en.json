@@ -10,6 +10,7 @@
 		"stopwatch": "Stopwatch",
 		"pomodoro": "Pomodoro",
 		"worldClock": "World Clock",
+		"lifeClock": "Life Clock",
 		"settings": "Settings",
 		"feedback": "Feedback"
 	},
@@ -124,6 +125,35 @@
 		"ahead": "ahead",
 		"behind": "behind",
 		"same": "Same time"
+	},
+	"lifeClock": {
+		"title": "Life Clock",
+		"description": "Enter your birth date to see how many days you have lived.",
+		"daysLived": "days lived",
+		"since": "since",
+		"save": "Save",
+		"cancel": "Cancel",
+		"showMore": "Show more",
+		"showLess": "Show less",
+		"nextMilestone": "Next Milestone",
+		"inDays": "in {days} days",
+		"stats": {
+			"hours": "Hours",
+			"minutes": "Minutes",
+			"weeks": "Weeks",
+			"months": "Months"
+		},
+		"funFacts": {
+			"title": "Approximate Estimates",
+			"heartbeats": "Heartbeats",
+			"breaths": "Breaths",
+			"sunrises": "Sunrises",
+			"sleepHours": "Hours slept"
+		},
+		"milestones": {
+			"title": "Milestones",
+			"days": "days"
+		}
 	},
 	"settings": {
 		"title": "Settings",
