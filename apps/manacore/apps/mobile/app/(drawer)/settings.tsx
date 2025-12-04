@@ -7,14 +7,13 @@ import {
 	ScrollView,
 	TextInput,
 	Alert,
-	ActivityIndicator,
 } from 'react-native';
 import { Stack } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Container } from '~/components/Container';
-import { useTheme, ThemeMode } from '~/utils/themeContext';
+import { useTheme, type ThemeMode } from '~/utils/themeContext';
 import { supabase } from '../../utils/supabase';
-import { Session } from '@supabase/supabase-js';
+import { type Session } from '@supabase/supabase-js';
 
 interface Profile {
 	id: string;

@@ -5,11 +5,9 @@ import {
 	Text,
 	View,
 	TouchableOpacity,
-	TextInput,
 	Alert,
 	ActivityIndicator,
 	Modal,
-	Pressable,
 } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 
@@ -27,62 +25,17 @@ export default function TeamDetails() {
 	}>();
 	const { isDarkMode } = useTheme();
 	const [teamName, setTeamName] = useState(initialTeamName || '');
-	const [isEditing, setIsEditing] = useState(false);
-	const [newTeamName, setNewTeamName] = useState('');
-	const [loading, setLoading] = useState(false);
 	const [deletingTeam, setDeletingTeam] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 	useEffect(() => {
 		if (initialTeamName) {
 			setTeamName(initialTeamName);
-			setNewTeamName(initialTeamName);
 		}
 	}, [initialTeamName]);
 
 	const navigateBack = () => {
 		router.push('/teams');
-	};
-
-	const startEditing = () => {
-		setIsEditing(true);
-		setNewTeamName(teamName);
-	};
-
-	const cancelEditing = () => {
-		setIsEditing(false);
-	};
-
-	const updateTeamName = async () => {
-		if (!newTeamName.trim()) {
-			Alert.alert('Fehler', 'Der Teamname darf nicht leer sein.');
-			return;
-		}
-
-		if (newTeamName.trim() === teamName) {
-			setIsEditing(false);
-			return;
-		}
-
-		setLoading(true);
-
-		try {
-			const { error } = await supabase
-				.from('teams')
-				.update({ name: newTeamName.trim() })
-				.eq('id', teamId);
-
-			if (error) throw error;
-
-			setTeamName(newTeamName.trim());
-			setIsEditing(false);
-			Alert.alert('Erfolg', 'Der Teamname wurde erfolgreich aktualisiert.');
-		} catch (error) {
-			console.error('Fehler beim Aktualisieren des Teamnamens:', error);
-			Alert.alert('Fehler', 'Es ist ein Fehler beim Aktualisieren des Teamnamens aufgetreten.');
-		} finally {
-			setLoading(false);
-		}
 	};
 
 	const deleteTeam = () => {
@@ -111,7 +64,7 @@ export default function TeamDetails() {
 			console.log('Checking for dependencies...');
 
 			// 1. Prüfe auf credit_transactions
-			const { data: txData, error: txCheckError } = await supabase
+			const { data: txData } = await supabase
 				.from('credit_transactions')
 				.select('id')
 				.eq('team_id', teamId);
@@ -119,7 +72,7 @@ export default function TeamDetails() {
 			console.log('Credit transactions:', txData);
 
 			// 2. Prüfe auf team_members
-			const { data: memberData, error: memberCheckError } = await supabase
+			const { data: memberData } = await supabase
 				.from('team_members')
 				.select('user_id')
 				.eq('team_id', teamId);
@@ -127,7 +80,7 @@ export default function TeamDetails() {
 			console.log('Team members:', memberData);
 
 			// 3. Prüfe auf user_roles
-			const { data: roleData, error: roleCheckError } = await supabase
+			const { data: roleData } = await supabase
 				.from('user_roles')
 				.select('id')
 				.eq('team_id', teamId);
@@ -240,7 +193,7 @@ export default function TeamDetails() {
 			{/* Lösch-Bestätigungsmodal */}
 			<Modal
 				animationType="fade"
-				transparent={true}
+				transparent
 				visible={showDeleteModal}
 				onRequestClose={cancelDelete}
 			>
@@ -265,8 +218,7 @@ export default function TeamDetails() {
 						<Text
 							className={`mb-6 text-center text-base ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}
 						>
-							Möchtest du das Team "{teamName}" wirklich löschen? Diese Aktion kann nicht rückgängig
-							gemacht werden.
+							{`Möchtest du das Team "${teamName}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`}
 						</Text>
 
 						<View className="flex-row justify-between">

@@ -225,7 +225,10 @@
 			class:sidebar-mode={isSidebarMode && !isCollapsed}
 			class:floating-mode={!isSidebarMode && !isCollapsed}
 		>
-			<div class="content-wrapper" class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}>
+			<div
+				class="content-wrapper"
+				class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}
+			>
 				{@render children()}
 			</div>
 		</main>

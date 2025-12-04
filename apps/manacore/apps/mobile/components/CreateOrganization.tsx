@@ -9,7 +9,7 @@ import {
 	ScrollView,
 } from 'react-native';
 import { supabase } from '../utils/supabase';
-import { Session } from '@supabase/supabase-js';
+import { type Session } from '@supabase/supabase-js';
 import { useTheme } from '../utils/themeContext';
 
 interface UserRole {

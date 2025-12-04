@@ -24,7 +24,8 @@
 	"scripts": {
 		"build": "tsc",
 		"dev": "tsc --watch",
-		"clean": "rm -rf dist"
+		"clean": "rm -rf dist",
+		"lint": "eslint ."
 	},
 	"dependencies": {
 		"@nestjs/common": "^10.0.0 || ^11.0.0",

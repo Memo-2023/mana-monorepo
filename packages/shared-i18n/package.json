@@ -12,7 +12,8 @@
 		"./translations/common": "./src/translations/common/index.ts"
 	},
 	"scripts": {
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"lint": "eslint ."
 	},
 	"devDependencies": {
 		"svelte": "^5.43.14",

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { supabase } from '../utils/supabase';
-import { Session } from '@supabase/supabase-js';
+import { type Session } from '@supabase/supabase-js';
 import { useTheme, lightColors, darkColors } from '../utils/themeContext';
 
 export default function DashboardStats() {

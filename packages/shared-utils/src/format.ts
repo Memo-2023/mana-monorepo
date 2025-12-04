@@ -93,7 +93,7 @@ export function formatDurationHumanReadable(seconds: number, locale: 'en' | 'de'
 /**
  * Format file size from bytes to human readable string
  */
-export function formatFileSize(bytes: number, decimals: number = 1): string {
+export function formatFileSize(bytes: number, decimals = 1): string {
 	if (bytes === 0) return '0 B';
 	if (!Number.isFinite(bytes) || bytes < 0) return '--';
 
@@ -107,18 +107,14 @@ export function formatFileSize(bytes: number, decimals: number = 1): string {
 /**
  * Format number with thousands separator
  */
-export function formatNumber(num: number, locale: string = 'de-DE'): string {
+export function formatNumber(num: number, locale = 'de-DE'): string {
 	return num.toLocaleString(locale);
 }
 
 /**
  * Format currency
  */
-export function formatCurrency(
-	amount: number,
-	currency: string = 'EUR',
-	locale: string = 'de-DE'
-): string {
+export function formatCurrency(amount: number, currency = 'EUR', locale = 'de-DE'): string {
 	return new Intl.NumberFormat(locale, {
 		style: 'currency',
 		currency,
@@ -128,11 +124,7 @@ export function formatCurrency(
 /**
  * Format percentage
  */
-export function formatPercent(
-	value: number,
-	decimals: number = 0,
-	locale: string = 'de-DE'
-): string {
+export function formatPercent(value: number, decimals = 0, locale = 'de-DE'): string {
 	return new Intl.NumberFormat(locale, {
 		style: 'percent',
 		minimumFractionDigits: decimals,

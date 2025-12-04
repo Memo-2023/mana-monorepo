@@ -246,7 +246,7 @@ const server = http.createServer((req, res) => {
 
 	// Get the file extension
 	const extname = path.extname(filePath);
-	let contentType = MIME_TYPES[extname] || 'application/octet-stream';
+	const contentType = MIME_TYPES[extname] || 'application/octet-stream';
 
 	// Read the file
 	fs.readFile(filePath, (error, content) => {

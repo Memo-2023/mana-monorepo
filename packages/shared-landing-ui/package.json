@@ -19,7 +19,8 @@
 		"src"
 	],
 	"scripts": {
-		"type-check": "astro check"
+		"type-check": "astro check",
+		"lint": "eslint ."
 	},
 	"peerDependencies": {
 		"astro": ">=5.0.0",

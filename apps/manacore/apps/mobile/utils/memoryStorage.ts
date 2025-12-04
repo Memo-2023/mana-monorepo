@@ -12,7 +12,7 @@ interface StorageData {
 
 class HybridStorageService {
 	private memoryStorage: StorageData = {};
-	private isAsyncStorageAvailable: boolean = false;
+	private isAsyncStorageAvailable = false;
 
 	constructor() {
 		// Check if we're in an environment where AsyncStorage is available
@@ -34,7 +34,7 @@ class HybridStorageService {
 			if (this.isAsyncStorageAvailable) {
 				await this.syncFromAsyncStorage();
 			}
-		} catch (error) {
+		} catch (_error) {
 			console.warn('AsyncStorage not available, falling back to memory storage');
 			this.isAsyncStorageAvailable = false;
 		}

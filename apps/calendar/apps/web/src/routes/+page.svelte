@@ -107,7 +107,12 @@
 			title="Sidebar ausblenden"
 		>
 			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+				/>
 			</svg>
 		</button>
 
@@ -135,16 +140,22 @@
 				title="Sidebar einblenden"
 			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+					/>
 				</svg>
 			</button>
-			<button
-				class="fab-new-event"
-				onclick={handleNewEvent}
-				title="Neuer Termin"
-			>
+			<button class="fab-new-event" onclick={handleNewEvent} title="Neuer Termin">
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 4v16m8-8H4"
+					/>
 				</svg>
 			</button>
 		</div>
@@ -186,10 +197,7 @@
 
 	<!-- Event Detail Modal -->
 	{#if modalEventId}
-		<EventDetailModal
-			eventId={modalEventId}
-			onClose={handleEventModalClose}
-		/>
+		<EventDetailModal eventId={modalEventId} onClose={handleEventModalClose} />
 	{/if}
 </div>
 

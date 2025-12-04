@@ -18,7 +18,7 @@ function StackNavigator() {
 					header: ({ route, options }) => {
 						let title = options.title || '';
 						let showAddDeck = false;
-						let rightContent = options.headerRight?.({});
+						const rightContent = options.headerRight?.({});
 
 						if (route.name === 'index') {
 							title = `My Decks (${route.params?.deckCount || 0})`;

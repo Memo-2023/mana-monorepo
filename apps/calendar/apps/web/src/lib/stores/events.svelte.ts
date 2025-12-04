@@ -84,7 +84,9 @@ export const eventsStore = {
 		// Include draft event if it exists and is on this day
 		if (includeDraft && draftEvent) {
 			const draftStart =
-				typeof draftEvent.startTime === 'string' ? parseISO(draftEvent.startTime) : draftEvent.startTime;
+				typeof draftEvent.startTime === 'string'
+					? parseISO(draftEvent.startTime)
+					: draftEvent.startTime;
 			if (isSameDay(date, draftStart)) {
 				result.push(draftEvent);
 			}

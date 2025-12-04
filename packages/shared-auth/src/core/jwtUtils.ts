@@ -30,7 +30,7 @@ export function decodeToken(token: string): DecodedToken | null {
 /**
  * Check if a token is valid locally (not expired)
  */
-export function isTokenValidLocally(token: string, bufferSeconds: number = 10): boolean {
+export function isTokenValidLocally(token: string, bufferSeconds = 10): boolean {
 	try {
 		const payload = decodeToken(token);
 		if (!payload || !payload.exp) {

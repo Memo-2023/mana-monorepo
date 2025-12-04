@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { supabase } from '../utils/supabase';
-import { Session } from '@supabase/supabase-js';
+import { type Session } from '@supabase/supabase-js';
 
 interface Profile {
 	id: string;
@@ -21,6 +21,7 @@ export default function Account({ session }: { session: Session }) {
 
 	useEffect(() => {
 		if (session) getProfile();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [session]);
 
 	async function getProfile() {

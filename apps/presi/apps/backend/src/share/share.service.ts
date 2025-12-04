@@ -2,8 +2,8 @@ import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nest
 import { eq, and, gt, or, isNull } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { type Database } from '../db/connection';
-import { sharedDecks, decks, slides } from '../db/schema';
-import { DeckService } from '../deck/deck.service';
+import { sharedDecks, slides } from '../db/schema';
+import { type DeckService } from '../deck/deck.service';
 import { randomBytes } from 'crypto';
 
 @Injectable()

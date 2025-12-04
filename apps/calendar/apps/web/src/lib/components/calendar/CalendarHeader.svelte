@@ -19,7 +19,15 @@
 	};
 
 	// Views to show in selector
-	const visibleViews: CalendarViewType[] = ['day', '5day', 'week', '10day', '14day', 'month', 'year'];
+	const visibleViews: CalendarViewType[] = [
+		'day',
+		'5day',
+		'week',
+		'10day',
+		'14day',
+		'month',
+		'year',
+	];
 
 	// Format title based on view type
 	let title = $derived.by(() => {
@@ -30,9 +38,17 @@
 		// Helper to format date range
 		const formatRange = () => {
 			if (rangeStart.getMonth() === rangeEnd.getMonth()) {
-				return format(rangeStart, 'd.', { locale: de }) + ' - ' + format(rangeEnd, 'd. MMMM yyyy', { locale: de });
+				return (
+					format(rangeStart, 'd.', { locale: de }) +
+					' - ' +
+					format(rangeEnd, 'd. MMMM yyyy', { locale: de })
+				);
 			}
-			return format(rangeStart, 'd. MMM', { locale: de }) + ' - ' + format(rangeEnd, 'd. MMM yyyy', { locale: de });
+			return (
+				format(rangeStart, 'd. MMM', { locale: de }) +
+				' - ' +
+				format(rangeEnd, 'd. MMM yyyy', { locale: de })
+			);
 		};
 
 		switch (viewStore.viewType) {
@@ -61,14 +77,17 @@
 
 <header class="calendar-header" class:nav-collapsed={$isNavCollapsed}>
 	<div class="header-left">
-		<button class="today-btn" onclick={() => viewStore.goToToday()}>
-			Heute
-		</button>
+		<button class="today-btn" onclick={() => viewStore.goToToday()}> Heute </button>
 
 		<div class="nav-buttons">
 			<button class="nav-btn" onclick={() => viewStore.goToPrevious()} aria-label="Zurück">
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M15 19l-7-7 7-7"
+					/>
 				</svg>
 			</button>
 			<button class="nav-btn" onclick={() => viewStore.goToNext()} aria-label="Weiter">

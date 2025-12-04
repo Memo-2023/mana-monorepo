@@ -10,7 +10,8 @@
 	},
 	"scripts": {
 		"type-check": "tsc --noEmit",
-		"clean": "rm -rf dist"
+		"clean": "rm -rf dist",
+		"lint": "eslint ."
 	},
 	"dependencies": {
 		"@supabase/supabase-js": "^2.81.1"

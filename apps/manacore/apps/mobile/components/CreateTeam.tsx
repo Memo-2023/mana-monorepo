@@ -9,7 +9,7 @@ import {
 	ScrollView,
 } from 'react-native';
 import { supabase } from '../utils/supabase';
-import { Session } from '@supabase/supabase-js';
+import { type Session } from '@supabase/supabase-js';
 import { useTheme } from '../utils/themeContext';
 import { useRouter } from 'expo-router';
 
@@ -30,7 +30,7 @@ interface CreateTeamProps {
 }
 
 export default function CreateTeam({ onTeamCreated }: CreateTeamProps) {
-	const router = useRouter();
+	const _router = useRouter();
 	const [session, setSession] = useState<Session | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [organizations, setOrganizations] = useState<Organization[]>([]);

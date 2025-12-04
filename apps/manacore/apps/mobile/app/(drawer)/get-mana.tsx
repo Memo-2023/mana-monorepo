@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Stack } from 'expo-router';
-import { ScrollView, Text, View, TouchableOpacity, Image, Alert } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, Alert } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 
 import { Container } from '~/components/Container';
 import { useTheme } from '../../utils/themeContext';
-import { supabase } from '../../utils/supabase';
 
 // Definiere die Mana-Pakete
 const manaPacks = [

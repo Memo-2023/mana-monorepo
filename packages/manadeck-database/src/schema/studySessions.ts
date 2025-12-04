@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, integer, timestamp, index, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, integer, timestamp, index, pgEnum } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { decks } from './decks.js';
 

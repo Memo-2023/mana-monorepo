@@ -11,7 +11,7 @@ jest.setTimeout(30000);
 /**
  * Generate random ID using crypto
  */
-const generateRandomId = (length: number = 10): string => {
+const generateRandomId = (length = 10): string => {
 	return crypto
 		.randomBytes(Math.ceil(length / 2))
 		.toString('hex')
@@ -41,7 +41,7 @@ global.e2eTestUtils = {
 	/**
 	 * Wait for server to be ready
 	 */
-	waitForServer: async (url: string, maxAttempts: number = 30): Promise<void> => {
+	waitForServer: async (url: string, maxAttempts = 30): Promise<void> => {
 		for (let i = 0; i < maxAttempts; i++) {
 			try {
 				const response = await fetch(`${url}/health/live`);

@@ -230,10 +230,7 @@ export function createCreditService(config: CreditServiceConfig) {
 	/**
 	 * Calculate cost for multiple units of an operation
 	 */
-	async function calculateCost(
-		operation: StandardOperationType,
-		quantity: number = 1
-	): Promise<number> {
+	async function calculateCost(operation: StandardOperationType, quantity = 1): Promise<number> {
 		const unitCost = await getOperationCost(operation);
 		return unitCost * quantity;
 	}
@@ -241,7 +238,7 @@ export function createCreditService(config: CreditServiceConfig) {
 	/**
 	 * Calculate cost synchronously (uses cached values)
 	 */
-	function calculateCostSync(operation: StandardOperationType, quantity: number = 1): number {
+	function calculateCostSync(operation: StandardOperationType, quantity = 1): number {
 		const unitCost = getOperationCostSync(operation);
 		return unitCost * quantity;
 	}
@@ -288,7 +285,7 @@ export function createCreditService(config: CreditServiceConfig) {
 	/**
 	 * Format credit amount for display
 	 */
-	function formatCredits(amount: number, locale: string = 'en-US'): string {
+	function formatCredits(amount: number, locale = 'en-US'): string {
 		return new Intl.NumberFormat(locale).format(amount);
 	}
 

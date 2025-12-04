@@ -18,7 +18,8 @@
 		const groups: Map<string, typeof currentEvents> = new Map();
 
 		for (const event of currentEvents) {
-			const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+			const start =
+				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
 			const dateKey = format(start, 'yyyy-MM-dd');
 
 			if (!groups.has(dateKey)) {

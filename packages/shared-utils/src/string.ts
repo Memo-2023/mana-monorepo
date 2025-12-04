@@ -21,7 +21,7 @@ export function capitalize(str: string): string {
 /**
  * Generate a random string ID
  */
-export function generateId(length: number = 8): string {
+export function generateId(length = 8): string {
 	const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
 	let result = '';
 	for (let i = 0; i < length; i++) {

@@ -106,12 +106,17 @@ export class CreditClientService {
 				return this.getDefaultBalance();
 			}
 
-			const data = (await response.json()) as CreditBalance;
+			const {
+				balance = 0,
+				freeCreditsRemaining = 0,
+				totalEarned = 0,
+				totalSpent = 0,
+			} = (await response.json()) as CreditBalance;
 			return {
-				balance: data.balance || 0,
-				freeCreditsRemaining: data.freeCreditsRemaining || 0,
-				totalEarned: data.totalEarned || 0,
-				totalSpent: data.totalSpent || 0,
+				balance,
+				freeCreditsRemaining,
+				totalEarned,
+				totalSpent,
 			};
 		} catch (error) {
 			this.logger.error(`Failed to get balance for user ${userId}:`, error);

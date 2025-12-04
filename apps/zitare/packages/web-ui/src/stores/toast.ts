@@ -12,7 +12,7 @@ export interface Toast {
 function createToastStore() {
 	const { subscribe, update } = writable<Toast[]>([]);
 
-	function addToast(message: string, type: ToastType = 'info', duration: number = 3000) {
+	function addToast(message: string, type: ToastType = 'info', duration = 3000) {
 		const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 		const toast: Toast = {

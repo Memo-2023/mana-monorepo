@@ -18,7 +18,6 @@
  */
 
 import type {
-	Feedback,
 	CreateFeedbackInput,
 	FeedbackQueryParams,
 	FeedbackResponse,

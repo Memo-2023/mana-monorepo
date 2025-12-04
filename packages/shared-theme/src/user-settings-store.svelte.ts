@@ -111,11 +111,7 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 	/**
 	 * Make an API request to the settings endpoint
 	 */
-	async function apiRequest<T>(
-		method: string,
-		path: string,
-		body?: object
-	): Promise<T | null> {
+	async function apiRequest<T>(method: string, path: string, body?: object): Promise<T | null> {
 		const token = await getAccessToken();
 		if (!token) {
 			console.warn('No access token available for settings API');

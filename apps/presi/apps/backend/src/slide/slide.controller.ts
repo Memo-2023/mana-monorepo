@@ -1,7 +1,7 @@
 import { Controller, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
-import { SlideService } from './slide.service';
-import { CreateSlideDto, UpdateSlideDto, ReorderSlidesDto } from './slide.dto';
-import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { type SlideService } from './slide.service';
+import { type CreateSlideDto, type UpdateSlideDto, type ReorderSlidesDto } from './slide.dto';
+import { JwtAuthGuard, CurrentUser, type CurrentUserData } from '@manacore/shared-nestjs-auth';
 
 @Controller()
 @UseGuards(JwtAuthGuard)

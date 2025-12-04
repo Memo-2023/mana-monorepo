@@ -14,7 +14,8 @@
 		"src"
 	],
 	"scripts": {
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"lint": "eslint ."
 	},
 	"dependencies": {
 		"@manacore/shared-subscription-types": "workspace:*"

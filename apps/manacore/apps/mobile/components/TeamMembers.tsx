@@ -10,8 +10,7 @@ import {
 } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { supabase } from '../utils/supabase';
-import { Session } from '@supabase/supabase-js';
-import { useLocalSearchParams } from 'expo-router';
+import { type Session } from '@supabase/supabase-js';
 import { useTheme } from '../utils/themeContext';
 
 interface TeamMember {
@@ -45,7 +44,7 @@ export default function TeamMembers({ teamId }: TeamMembersProps) {
 	const [members, setMembers] = useState<TeamMember[]>([]);
 	const [newMemberEmail, setNewMemberEmail] = useState('');
 	const [inviting, setInviting] = useState(false);
-	const [userRole, setUserRole] = useState<string | null>(null);
+	const [_userRole, setUserRole] = useState<string | null>(null);
 	const [isAdmin, setIsAdmin] = useState(false);
 	const { isDarkMode } = useTheme();
 	const [isEditing, setIsEditing] = useState(false);
@@ -95,6 +94,7 @@ export default function TeamMembers({ teamId }: TeamMembersProps) {
 		});
 
 		return () => subscription.unsubscribe();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [teamId]);
 
 	async function checkUserRole(userId: string, teamId: string) {

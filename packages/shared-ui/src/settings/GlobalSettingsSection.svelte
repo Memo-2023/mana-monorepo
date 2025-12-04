@@ -102,7 +102,9 @@
 				{#if showNavigation}
 					<!-- Navigation Settings -->
 					<div class="space-y-4">
-						<h3 class="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
+						<h3
+							class="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider"
+						>
 							Navigation
 						</h3>
 
@@ -135,10 +137,14 @@
 							</div>
 						</div>
 
-						<div class="flex items-center justify-between py-2 border-t border-[hsl(var(--border))]">
+						<div
+							class="flex items-center justify-between py-2 border-t border-[hsl(var(--border))]"
+						>
 							<div>
 								<p class="font-medium text-[hsl(var(--foreground))]">Sidebar eingeklappt</p>
-								<p class="text-sm text-[hsl(var(--muted-foreground))]">Standard-Zustand der Sidebar</p>
+								<p class="text-sm text-[hsl(var(--muted-foreground))]">
+									Standard-Zustand der Sidebar
+								</p>
 							</div>
 							<button
 								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {userSettings
@@ -161,15 +167,21 @@
 
 				{#if showTheme}
 					<!-- Theme Settings -->
-					<div class="space-y-4 {showNavigation ? 'pt-4 border-t border-[hsl(var(--border))]' : ''}">
-						<h3 class="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
+					<div
+						class="space-y-4 {showNavigation ? 'pt-4 border-t border-[hsl(var(--border))]' : ''}"
+					>
+						<h3
+							class="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider"
+						>
 							Erscheinungsbild
 						</h3>
 
 						<div class="flex items-center justify-between py-2">
 							<div>
 								<p class="font-medium text-[hsl(var(--foreground))]">Farbmodus</p>
-								<p class="text-sm text-[hsl(var(--muted-foreground))]">Hell, Dunkel oder automatisch</p>
+								<p class="text-sm text-[hsl(var(--muted-foreground))]">
+									Hell, Dunkel oder automatisch
+								</p>
 							</div>
 							<div class="flex gap-1">
 								{#each ['light', 'dark', 'system'] as mode}
@@ -186,10 +198,14 @@
 							</div>
 						</div>
 
-						<div class="flex items-center justify-between py-2 border-t border-[hsl(var(--border))]">
+						<div
+							class="flex items-center justify-between py-2 border-t border-[hsl(var(--border))]"
+						>
 							<div>
 								<p class="font-medium text-[hsl(var(--foreground))]">Farbschema</p>
-								<p class="text-sm text-[hsl(var(--muted-foreground))]">Akzentfarbe der Benutzeroberfläche</p>
+								<p class="text-sm text-[hsl(var(--muted-foreground))]">
+									Akzentfarbe der Benutzeroberfläche
+								</p>
 							</div>
 							<div class="flex gap-2">
 								{#each colorSchemes as scheme}
@@ -214,14 +230,18 @@
 							? 'pt-4 border-t border-[hsl(var(--border))]'
 							: ''}"
 					>
-						<h3 class="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
+						<h3
+							class="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider"
+						>
 							Sprache
 						</h3>
 
 						<div class="flex items-center justify-between py-2">
 							<div>
 								<p class="font-medium text-[hsl(var(--foreground))]">Anzeigesprache</p>
-								<p class="text-sm text-[hsl(var(--muted-foreground))]">Sprache der Benutzeroberfläche</p>
+								<p class="text-sm text-[hsl(var(--muted-foreground))]">
+									Sprache der Benutzeroberfläche
+								</p>
 							</div>
 							<div class="flex gap-1">
 								{#each languages as lang}

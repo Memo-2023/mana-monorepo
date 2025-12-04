@@ -106,7 +106,10 @@ export const viewStore = {
 
 		// Load view type from settings or localStorage (for backwards compatibility)
 		const savedView = localStorage.getItem('calendar-view-type');
-		if (savedView && ['day', '5day', 'week', '10day', '14day', 'month', 'year', 'agenda'].includes(savedView)) {
+		if (
+			savedView &&
+			['day', '5day', 'week', '10day', '14day', 'month', 'year', 'agenda'].includes(savedView)
+		) {
 			viewType = savedView as CalendarViewType;
 		} else {
 			// Use default view from settings

@@ -25,7 +25,8 @@
 	"scripts": {
 		"build": "tsc -p tsconfig.build.json",
 		"type-check": "tsc --noEmit",
-		"clean": "rm -rf dist"
+		"clean": "rm -rf dist",
+		"lint": "eslint ."
 	},
 	"peerDependencies": {
 		"@nestjs/common": ">=10.0.0"

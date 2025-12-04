@@ -9,11 +9,11 @@ import {
 	UseGuards,
 	Headers,
 } from '@nestjs/common';
-import { FeedbackService } from './feedback.service';
+import { type FeedbackService } from './feedback.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { OptionalAuthGuard } from '../common/guards/optional-auth.guard';
-import { CurrentUser, CurrentUserData } from '../common/decorators/current-user.decorator';
-import { CreateFeedbackDto, FeedbackQueryDto } from './dto';
+import { CurrentUser, type CurrentUserData } from '../common/decorators/current-user.decorator';
+import { type CreateFeedbackDto, type FeedbackQueryDto } from './dto';
 
 @Controller('feedback')
 export class FeedbackController {

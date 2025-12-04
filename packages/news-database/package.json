@@ -27,7 +27,8 @@
 		"db:migrate": "dotenv -- drizzle-kit migrate",
 		"db:push": "dotenv -- drizzle-kit push --force",
 		"db:studio": "dotenv -- drizzle-kit studio",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"lint": "eslint ."
 	},
 	"dependencies": {
 		"drizzle-orm": "^0.36.0",

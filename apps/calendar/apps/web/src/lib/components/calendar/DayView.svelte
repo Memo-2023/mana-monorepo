@@ -34,7 +34,9 @@
 	);
 
 	// Calculate visible hours range for positioning
-	let firstVisibleHour = $derived(settingsStore.filterHoursEnabled ? settingsStore.dayStartHour : 0);
+	let firstVisibleHour = $derived(
+		settingsStore.filterHoursEnabled ? settingsStore.dayStartHour : 0
+	);
 	let lastVisibleHour = $derived(settingsStore.filterHoursEnabled ? settingsStore.dayEndHour : 24);
 	let totalVisibleHours = $derived(lastVisibleHour - firstVisibleHour);
 
@@ -74,12 +76,10 @@
 
 	// Split all-day events by display mode
 	let headerAllDayEvents = $derived(
-		allDayEvents.filter(e => getEventDisplayMode(e) === 'header')
+		allDayEvents.filter((e) => getEventDisplayMode(e) === 'header')
 	);
 
-	let blockAllDayEvents = $derived(
-		allDayEvents.filter(e => getEventDisplayMode(e) === 'block')
-	);
+	let blockAllDayEvents = $derived(allDayEvents.filter((e) => getEventDisplayMode(e) === 'block'));
 
 	// ============================================================================
 	// Drag & Drop State
@@ -155,7 +155,10 @@
 		hasMoved = true;
 		const mouseMinutes = getMinutesFromY(e.clientY);
 		const newStartMinutes = snapToGrid(mouseMinutes - dragOffsetMinutes);
-		const clampedMinutes = Math.max(firstVisibleHour * 60, Math.min(newStartMinutes, lastVisibleHour * 60 - 15));
+		const clampedMinutes = Math.max(
+			firstVisibleHour * 60,
+			Math.min(newStartMinutes, lastVisibleHour * 60 - 15)
+		);
 
 		dragPreviewTop = minutesToPercent(clampedMinutes);
 	}
@@ -168,10 +171,19 @@
 
 		const mouseMinutes = getMinutesFromY(e.clientY);
 		const newStartMinutes = snapToGrid(mouseMinutes - dragOffsetMinutes);
-		const clampedMinutes = Math.max(firstVisibleHour * 60, Math.min(newStartMinutes, lastVisibleHour * 60 - 30));
+		const clampedMinutes = Math.max(
+			firstVisibleHour * 60,
+			Math.min(newStartMinutes, lastVisibleHour * 60 - 30)
+		);
 
-		const start = typeof draggedEvent.startTime === 'string' ? parseISO(draggedEvent.startTime) : draggedEvent.startTime;
-		const end = typeof draggedEvent.endTime === 'string' ? parseISO(draggedEvent.endTime) : draggedEvent.endTime;
+		const start =
+			typeof draggedEvent.startTime === 'string'
+				? parseISO(draggedEvent.startTime)
+				: draggedEvent.startTime;
+		const end =
+			typeof draggedEvent.endTime === 'string'
+				? parseISO(draggedEvent.endTime)
+				: draggedEvent.endTime;
 		const duration = differenceInMinutes(end, start);
 
 		// Create new start time on same day
@@ -262,12 +274,18 @@
 		let newEnd = new Date(resizeOriginalEnd);
 
 		if (resizeEdge === 'top') {
-			const newStartMinutes = Math.max(firstVisibleHour * 60, Math.min(snappedMinutes, origEndMinutes - SNAP_MINUTES));
+			const newStartMinutes = Math.max(
+				firstVisibleHour * 60,
+				Math.min(snappedMinutes, origEndMinutes - SNAP_MINUTES)
+			);
 			newStart = setHours(new Date(viewStore.currentDate), Math.floor(newStartMinutes / 60));
 			newStart = setMinutes(newStart, newStartMinutes % 60);
 			newStart.setSeconds(0, 0);
 		} else {
-			const newEndMinutes = Math.min(lastVisibleHour * 60, Math.max(snappedMinutes, origStartMinutes + SNAP_MINUTES));
+			const newEndMinutes = Math.min(
+				lastVisibleHour * 60,
+				Math.max(snappedMinutes, origStartMinutes + SNAP_MINUTES)
+			);
 			newEnd = setHours(new Date(viewStore.currentDate), Math.floor(newEndMinutes / 60));
 			newEnd = setMinutes(newEnd, newEndMinutes % 60);
 			newEnd.setSeconds(0, 0);
@@ -343,7 +361,9 @@
 		if (isDragging || isResizing || hasMoved) {
 			e.preventDefault();
 			e.stopPropagation();
-			setTimeout(() => { hasMoved = false; }, 100);
+			setTimeout(() => {
+				hasMoved = false;
+			}, 100);
 			return;
 		}
 		goto(`/?event=${event.id}`);
@@ -395,11 +415,7 @@
 			{/each}
 		</div>
 
-		<div
-			class="day-column"
-			class:today={isToday(viewStore.currentDate)}
-			bind:this={dayColumnRef}
-		>
+		<div class="day-column" class:today={isToday(viewStore.currentDate)} bind:this={dayColumnRef}>
 			{#each hours as hour}
 				<button
 					class="hour-slot"
@@ -430,7 +446,11 @@
 					class:resizing={isBeingResized}
 					class:draft={isDraft}
 					data-event-id={event.id}
-					style={isBeingDragged ? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};` : isBeingResized ? `top: ${resizePreviewTop}%; height: ${resizePreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};` : getEventStyle(event)}
+					style={isBeingDragged
+						? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
+						: isBeingResized
+							? `top: ${resizePreviewTop}%; height: ${resizePreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
+							: getEventStyle(event)}
 					onpointerdown={(e) => startDrag(event, e)}
 					onclick={(e) => !isDraft && handleEventClick(event, e)}
 					role="button"
@@ -599,7 +619,9 @@
 		overflow: hidden;
 		touch-action: none;
 		user-select: none;
-		transition: box-shadow 150ms ease, opacity 150ms ease;
+		transition:
+			box-shadow 150ms ease,
+			opacity 150ms ease;
 	}
 
 	.event-card:hover {
@@ -629,7 +651,8 @@
 	}
 
 	@keyframes pulse-outline {
-		0%, 100% {
+		0%,
+		100% {
 			outline-color: hsl(var(--color-primary));
 		}
 		50% {

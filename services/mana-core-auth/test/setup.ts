@@ -19,11 +19,7 @@ global.testUtils = {
 	/**
 	 * Wait for a condition to be true
 	 */
-	waitFor: async (
-		condition: () => boolean,
-		timeout: number = 5000,
-		interval: number = 100
-	): Promise<void> => {
+	waitFor: async (condition: () => boolean, timeout = 5000, interval = 100): Promise<void> => {
 		const startTime = Date.now();
 		while (!condition()) {
 			if (Date.now() - startTime > timeout) {

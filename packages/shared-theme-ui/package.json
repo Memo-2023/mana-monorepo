@@ -41,6 +41,9 @@
 			"default": "./src/pages/ThemePage.svelte"
 		}
 	},
+	"scripts": {
+		"lint": "eslint ."
+	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"
 	},

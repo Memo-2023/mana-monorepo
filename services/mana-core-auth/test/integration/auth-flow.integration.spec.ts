@@ -7,7 +7,7 @@
  * - Multi-device sessions
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from '../../src/auth/auth.service';
 import { CreditsService } from '../../src/credits/credits.service';

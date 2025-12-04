@@ -47,6 +47,7 @@ export default function OrganizationDetails() {
 		}
 
 		fetchOrganizationDetails();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [initialOrgName, orgId]);
 
 	const fetchOrganizationDetails = async () => {
@@ -93,14 +94,6 @@ export default function OrganizationDetails() {
 					.select('roles(name)')
 					.eq('user_id', session.user.id)
 					.eq('organization_id', orgId);
-
-				// Supabase gibt die Daten in einem anderen Format zurück als erwartet
-				// Definiere den korrekten Typ für die Benutzerrolle
-				interface UserRoleWithRoles {
-					roles: {
-						name: string;
-					};
-				}
 
 				if (currentUserRolesError) throw currentUserRolesError;
 
@@ -314,7 +307,7 @@ export default function OrganizationDetails() {
 			{/* Lösch-Bestätigungsmodal */}
 			<Modal
 				animationType="fade"
-				transparent={true}
+				transparent
 				visible={showDeleteModal}
 				onRequestClose={cancelDelete}
 			>
@@ -339,8 +332,7 @@ export default function OrganizationDetails() {
 						<Text
 							className={`mb-6 text-center text-base ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}
 						>
-							Möchtest du die Organisation "{orgName}" wirklich löschen? Diese Aktion kann nicht
-							rückgängig gemacht werden.
+							{`Möchtest du die Organisation "${orgName}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`}
 						</Text>
 
 						<View className="flex-row justify-between">

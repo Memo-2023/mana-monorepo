@@ -5,7 +5,7 @@ import {
 	ConflictException,
 	ForbiddenException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { type ConfigService } from '@nestjs/config';
 import { eq, and, sql, desc, sum } from 'drizzle-orm';
 import { getDb } from '../db/connection';
 import {
@@ -19,8 +19,8 @@ import {
 	members,
 	organizations,
 } from '../db/schema';
-import { UseCreditsDto } from './dto/use-credits.dto';
-import { AllocateCreditsDto } from './dto/allocate-credits.dto';
+import { type UseCreditsDto } from './dto/use-credits.dto';
+import { type AllocateCreditsDto } from './dto/allocate-credits.dto';
 
 @Injectable()
 export class CreditsService {
@@ -138,8 +138,8 @@ export class CreditsService {
 			}
 
 			// Calculate deduction from free and paid credits
-			let freeCreditsUsed = Math.min(useCreditsDto.amount, currentBalance.freeCreditsRemaining);
-			let paidCreditsUsed = useCreditsDto.amount - freeCreditsUsed;
+			const freeCreditsUsed = Math.min(useCreditsDto.amount, currentBalance.freeCreditsRemaining);
+			const paidCreditsUsed = useCreditsDto.amount - freeCreditsUsed;
 
 			const newFreeCredits = currentBalance.freeCreditsRemaining - freeCreditsUsed;
 			const newBalance = currentBalance.balance - paidCreditsUsed;
@@ -204,7 +204,7 @@ export class CreditsService {
 		});
 	}
 
-	async getTransactionHistory(userId: string, limit: number = 50, offset: number = 0) {
+	async getTransactionHistory(userId: string, limit = 50, offset = 0) {
 		const db = this.getDb();
 
 		const transactionList = await db
@@ -596,8 +596,8 @@ export class CreditsService {
 			}
 
 			// Calculate deduction from free and paid credits
-			let freeCreditsUsed = Math.min(useCreditsDto.amount, currentBalance.freeCreditsRemaining);
-			let paidCreditsUsed = useCreditsDto.amount - freeCreditsUsed;
+			const freeCreditsUsed = Math.min(useCreditsDto.amount, currentBalance.freeCreditsRemaining);
+			const paidCreditsUsed = useCreditsDto.amount - freeCreditsUsed;
 
 			const newFreeCredits = currentBalance.freeCreditsRemaining - freeCreditsUsed;
 			const newBalance = currentBalance.balance - paidCreditsUsed;

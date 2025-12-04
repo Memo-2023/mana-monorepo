@@ -7,7 +7,7 @@ import {
 	Logger,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { AppError } from '../errors/app-error';
+import { type AppError } from '../errors/app-error';
 import { isAppError, isCreditError, isRateLimitError } from '../guards/type-guards';
 import { ErrorCode } from '../types/error-codes';
 

@@ -106,10 +106,6 @@ export function createAuthService(config: AuthServiceConfig) {
 		 */
 		async signUp(email: string, password: string): Promise<AuthResult> {
 			try {
-				const storage = getStorageAdapter();
-				const deviceAdapter = getDeviceAdapter();
-				const deviceInfo = await deviceAdapter.getDeviceInfo();
-
 				const response = await fetch(`${baseUrl}${endpoints.signUp}`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -128,7 +124,8 @@ export function createAuthService(config: AuthServiceConfig) {
 					return { success: false, error: errorData.message || 'Sign up failed' };
 				}
 
-				const responseData = await response.json();
+				// Consume response to avoid unhandled promise
+				await response.json();
 
 				// Mana Core Auth returns user data immediately on registration
 				// User needs to sign in separately to get tokens

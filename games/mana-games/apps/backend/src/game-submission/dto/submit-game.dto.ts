@@ -1,4 +1,4 @@
-import { IsString, IsArray, IsOptional, IsObject, ValidateNested, IsIn } from 'class-validator';
+import { IsString, IsArray, IsOptional, ValidateNested, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class AuthorDto {

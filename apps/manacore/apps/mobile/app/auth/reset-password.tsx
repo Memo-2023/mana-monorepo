@@ -10,7 +10,6 @@ import {
 	Platform,
 } from 'react-native';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
-import { supabase } from '../../utils/supabase';
 import { useTheme } from '../../utils/themeContext';
 
 export default function ResetPasswordScreen() {
@@ -32,6 +31,7 @@ export default function ResetPasswordScreen() {
 			return;
 		}
 		verifyToken();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const verifyToken = async () => {

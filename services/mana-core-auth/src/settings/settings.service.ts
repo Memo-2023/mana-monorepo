@@ -1,14 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { type ConfigService } from '@nestjs/config';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../db/connection';
 import { userSettings } from '../db/schema';
 import {
-	UpdateGlobalSettingsDto,
-	UpdateAppOverrideDto,
-	GlobalSettings,
-	AppOverride,
-	UserSettingsResponse,
+	type UpdateGlobalSettingsDto,
+	type UpdateAppOverrideDto,
+	type GlobalSettings,
+	type AppOverride,
+	type UserSettingsResponse,
 } from './dto';
 
 // Default settings for new users

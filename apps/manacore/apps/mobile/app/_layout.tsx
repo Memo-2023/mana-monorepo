@@ -5,7 +5,7 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider } from '~/utils/themeContext';
 import { supabase } from '../utils/supabase';
-import { Session } from '@supabase/supabase-js';
+import { type Session } from '@supabase/supabase-js';
 
 export const unstable_settings = {
 	// Ensure that reloading on `/modal` keeps a back button present.
@@ -54,6 +54,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 			// leite ihn zur Hauptseite um
 			router.replace('/');
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [session, segments, isLoading]);
 
 	// Zeige nichts während des Ladens

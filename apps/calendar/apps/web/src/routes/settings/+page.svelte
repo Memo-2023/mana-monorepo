@@ -5,7 +5,12 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
-	import { settingsStore, type WeekStartDay, type TimeFormat, type AllDayDisplayMode } from '$lib/stores/settings.svelte';
+	import {
+		settingsStore,
+		type WeekStartDay,
+		type TimeFormat,
+		type AllDayDisplayMode,
+	} from '$lib/stores/settings.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { toast } from '$lib/stores/toast';
 	import { setLocale, supportedLocales, type SupportedLocale } from '$lib/i18n';
@@ -177,7 +182,11 @@
 						<input type="color" class="color-input" bind:value={newCalendarColor} />
 					</div>
 					<div class="calendar-form-actions">
-						<button type="button" class="btn btn-ghost" onclick={() => (showNewCalendarForm = false)}>
+						<button
+							type="button"
+							class="btn btn-ghost"
+							onclick={() => (showNewCalendarForm = false)}
+						>
 							Abbrechen
 						</button>
 						<button type="submit" class="btn btn-primary" disabled={!newCalendarName.trim()}>
@@ -206,7 +215,11 @@
 								<input type="color" name="color" class="color-input" value={calendar.color} />
 							</div>
 							<div class="calendar-form-actions">
-								<button type="button" class="btn btn-ghost" onclick={() => (editingCalendar = null)}>
+								<button
+									type="button"
+									class="btn btn-ghost"
+									onclick={() => (editingCalendar = null)}
+								>
 									Abbrechen
 								</button>
 								<button type="submit" class="btn btn-primary"> Speichern </button>
@@ -435,11 +448,14 @@
 				<input
 					type="checkbox"
 					checked={settingsStore.filterHoursEnabled}
-					onchange={() => settingsStore.set('filterHoursEnabled', !settingsStore.filterHoursEnabled)}
+					onchange={() =>
+						settingsStore.set('filterHoursEnabled', !settingsStore.filterHoursEnabled)}
 				/>
 				<div class="toggle-info">
 					<span class="setting-label">Stunden filtern</span>
-					<span class="setting-description">Nur bestimmte Stunden in der Tages-/Wochenansicht anzeigen</span>
+					<span class="setting-description"
+						>Nur bestimmte Stunden in der Tages-/Wochenansicht anzeigen</span
+					>
 				</div>
 			</label>
 		</div>
@@ -448,7 +464,9 @@
 			<div class="setting-item hour-range-setting">
 				<div class="setting-info">
 					<span class="setting-label">Sichtbare Stunden</span>
-					<span class="setting-description">Zeitbereich der in der Kalenderansicht angezeigt wird</span>
+					<span class="setting-description"
+						>Zeitbereich der in der Kalenderansicht angezeigt wird</span
+					>
 				</div>
 				<div class="hour-range-inputs">
 					<div class="hour-input-group">
@@ -526,7 +544,9 @@
 			>
 				{#each durationOptions as duration}
 					<option value={duration}>
-						{duration >= 60 ? `${duration / 60} Stunde${duration > 60 ? 'n' : ''}` : `${duration} Minuten`}
+						{duration >= 60
+							? `${duration / 60} Stunde${duration > 60 ? 'n' : ''}`
+							: `${duration} Minuten`}
 					</option>
 				{/each}
 			</select>

@@ -11,7 +11,7 @@ import {
 	Pressable,
 } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Slide } from '../../types/models';
+import { type Slide } from '../../types/models';
 import { useTheme } from '../ThemeProvider';
 import { MenuRoot, MenuTrigger, MenuContent, MenuItem, MenuItemTitle } from '../common/menu';
 

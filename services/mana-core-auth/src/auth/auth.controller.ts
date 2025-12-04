@@ -10,14 +10,14 @@ import {
 	HttpCode,
 	HttpStatus,
 } from '@nestjs/common';
-import { BetterAuthService } from './services/better-auth.service';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { RegisterB2BDto } from './dto/register-b2b.dto';
-import { InviteEmployeeDto } from './dto/invite-employee.dto';
-import { AcceptInvitationDto } from './dto/accept-invitation.dto';
-import { SetActiveOrganizationDto } from './dto/set-active-organization.dto';
+import { type BetterAuthService } from './services/better-auth.service';
+import { type RegisterDto } from './dto/register.dto';
+import { type LoginDto } from './dto/login.dto';
+import { type RefreshTokenDto } from './dto/refresh-token.dto';
+import { type RegisterB2BDto } from './dto/register-b2b.dto';
+import { type InviteEmployeeDto } from './dto/invite-employee.dto';
+import { type AcceptInvitationDto } from './dto/accept-invitation.dto';
+import { type SetActiveOrganizationDto } from './dto/set-active-organization.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 /**

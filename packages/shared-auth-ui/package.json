@@ -16,6 +16,9 @@
 	"files": [
 		"src"
 	],
+	"scripts": {
+		"lint": "eslint ."
+	},
 	"peerDependencies": {
 		"svelte": "^5.0.0",
 		"@manacore/shared-auth": "workspace:*",

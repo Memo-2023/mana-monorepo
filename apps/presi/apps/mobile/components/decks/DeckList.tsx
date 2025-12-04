@@ -11,7 +11,7 @@ import {
 	Pressable,
 } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Deck } from '../../types/models';
+import { type Deck } from '../../types/models';
 import { useTheme } from '../../components/ThemeProvider';
 import { CreateItemButton } from '../common/CreateItemButton';
 import { MenuRoot, MenuTrigger, MenuContent, MenuItem, MenuItemTitle } from '../common/menu';

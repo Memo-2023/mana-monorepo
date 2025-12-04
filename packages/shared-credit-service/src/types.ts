@@ -4,8 +4,6 @@
  * Types for credit/mana operations across all apps
  */
 
-import type { OperationPricing, ManaBalance } from '@manacore/shared-subscription-types';
-
 /**
  * Credit balance with additional metadata
  */

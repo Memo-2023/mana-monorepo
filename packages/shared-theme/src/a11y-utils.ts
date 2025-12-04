@@ -1,11 +1,4 @@
-import type {
-	ThemeColors,
-	EffectiveMode,
-	HSLValue,
-	ContrastLevel,
-	ColorblindMode,
-	A11ySettings,
-} from './types';
+import type { ThemeColors, EffectiveMode, HSLValue, ColorblindMode, A11ySettings } from './types';
 import { parseHSL, createHSL, isBrowser } from './utils';
 import { HIGH_CONTRAST_CONFIG, COLORBLIND_TRANSFORMS, MOTION_DEFAULTS } from './a11y-constants';
 
@@ -31,13 +24,8 @@ export function createReducedMotionListener(callback: (reduces: boolean) => void
 
 	const handler = (e: MediaQueryListEvent) => callback(e.matches);
 
-	if (mediaQuery.addEventListener) {
-		mediaQuery.addEventListener('change', handler);
-		return () => mediaQuery.removeEventListener('change', handler);
-	}
-
-	mediaQuery.addListener(handler);
-	return () => mediaQuery.removeListener(handler);
+	mediaQuery.addEventListener('change', handler);
+	return () => mediaQuery.removeEventListener('change', handler);
 }
 
 /**
@@ -72,7 +60,14 @@ type ColorRole = 'background' | 'foreground' | 'border' | 'primary' | 'semantic'
  * Get the role of a color based on its key
  */
 function getColorRole(colorKey: keyof ThemeColors): ColorRole {
-	const backgrounds = ['background', 'surface', 'surfaceHover', 'surfaceElevated', 'muted', 'input'];
+	const backgrounds = [
+		'background',
+		'surface',
+		'surfaceHover',
+		'surfaceElevated',
+		'muted',
+		'input',
+	];
 	const foregrounds = ['foreground', 'primaryForeground', 'secondaryForeground', 'mutedForeground'];
 	const borders = ['border', 'borderStrong', 'ring'];
 	const primaries = ['primary', 'secondary'];
@@ -161,12 +156,7 @@ export function applyHighContrast(colors: ThemeColors, mode: EffectiveMode): The
 /**
  * Shift hue within a range
  */
-function shiftHueInRange(
-	h: number,
-	rangeStart: number,
-	rangeEnd: number,
-	shift: number
-): number {
+function shiftHueInRange(h: number, rangeStart: number, rangeEnd: number, shift: number): number {
 	if (h >= rangeStart && h <= rangeEnd) {
 		return (h + shift) % 360;
 	}
@@ -208,10 +198,7 @@ function applyColorblindToColor(hsl: HSLValue, mode: ColorblindMode): HSLValue {
 /**
  * Apply colorblind transformations to all theme colors
  */
-export function applyColorblindTransform(
-	colors: ThemeColors,
-	mode: ColorblindMode
-): ThemeColors {
+export function applyColorblindTransform(colors: ThemeColors, mode: ColorblindMode): ThemeColors {
 	if (mode === 'none') return colors;
 
 	const result = { ...colors };

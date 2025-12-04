@@ -12,7 +12,8 @@
 		"./revenueCat": "./src/revenueCat.ts"
 	},
 	"scripts": {
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"lint": "eslint ."
 	},
 	"devDependencies": {
 		"typescript": "^5.7.3"

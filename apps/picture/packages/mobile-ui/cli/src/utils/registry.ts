@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { ComponentRegistry, ComponentInfo } from '../types';
+import { type ComponentRegistry, type ComponentInfo } from '../types';
 import { getRegistryPath } from './paths';
 
 /**
