@@ -148,6 +148,12 @@
 		if (authStore.isAuthenticated) {
 			await calendarsStore.fetchCalendars();
 			await userSettings.load();
+
+			// Redirect to start page if on root and a custom start page is set
+			const currentPath = window.location.pathname;
+			if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
+				goto(userSettings.startPage, { replaceState: true });
+			}
 		}
 
 		// Initialize sidebar mode from localStorage
@@ -225,7 +231,10 @@
 			class:sidebar-mode={isSidebarMode && !isCollapsed}
 			class:floating-mode={!isSidebarMode && !isCollapsed}
 		>
-			<div class="content-wrapper" class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}>
+			<div
+				class="content-wrapper"
+				class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}
+			>
 				{@render children()}
 			</div>
 		</main>

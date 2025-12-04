@@ -160,6 +160,12 @@
 		// Load user settings
 		await userSettings.load();
 
+		// Redirect to start page if on /chat and a custom start page is set
+		const currentPath = window.location.pathname;
+		if (currentPath === '/chat' && userSettings.startPage && userSettings.startPage !== '/chat') {
+			goto(userSettings.startPage, { replaceState: true });
+		}
+
 		isChecking = false;
 	});
 </script>

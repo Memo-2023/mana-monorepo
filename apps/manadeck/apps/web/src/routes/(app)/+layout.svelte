@@ -139,6 +139,12 @@
 		// Load user settings
 		await userSettings.load();
 
+		// Redirect to start page if on root and a custom start page is set
+		const currentPath = window.location.pathname;
+		if (currentPath === '/decks' && userSettings.startPage && userSettings.startPage !== '/decks') {
+			goto(userSettings.startPage, { replaceState: true });
+		}
+
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('manadeck-nav-sidebar');
 		if (savedSidebar === 'true') {

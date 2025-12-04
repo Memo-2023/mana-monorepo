@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { theme } from '$lib/stores/theme.svelte';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import { GlobalSettingsSection } from '@manacore/shared-ui';
 
 	// Settings state
 	let clockFormat = $state<'24h' | '12h'>('24h');
@@ -29,6 +31,11 @@
 		es: 'Español',
 		it: 'Italiano',
 	};
+
+	// Translation function for GlobalSettingsSection
+	function translate(key: string): string {
+		return $_?.(key) ?? key;
+	}
 </script>
 
 <div class="mx-auto max-w-2xl space-y-6">
@@ -160,4 +167,17 @@
 			Töne können für einzelne Wecker und Timer in deren Einstellungen angepasst werden.
 		</p>
 	</div>
+
+	<!-- Global Settings Section -->
+	<GlobalSettingsSection
+		{userSettings}
+		appId="clock"
+		showNavigation={false}
+		showTheme={false}
+		showLanguage={false}
+		showGeneral={true}
+		title="Globale Einstellungen"
+		description="Diese Einstellungen gelten für alle Mana Apps"
+		t={translate}
+	/>
 </div>

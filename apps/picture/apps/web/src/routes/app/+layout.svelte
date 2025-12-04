@@ -68,7 +68,22 @@
 	// Load user settings when authenticated
 	$effect(() => {
 		if (authStore.initialized && authStore.user) {
-			userSettings.load();
+			userSettings.load().then(() => {
+				// Redirect to start page if on /app and a custom start page is set
+				const currentPath = window.location.pathname;
+				if (
+					currentPath === '/app' &&
+					userSettings.startPage &&
+					userSettings.startPage !== '/' &&
+					userSettings.startPage !== '/app'
+				) {
+					// Prepend /app if the start page doesn't include it
+					const targetPath = userSettings.startPage.startsWith('/app')
+						? userSettings.startPage
+						: `/app${userSettings.startPage}`;
+					goto(targetPath, { replaceState: true });
+				}
+			});
 		}
 	});
 

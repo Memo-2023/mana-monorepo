@@ -145,6 +145,12 @@
 		// Load user settings if authenticated
 		if (authStore.isAuthenticated) {
 			await userSettings.load();
+
+			// Redirect to start page if on root and a custom start page is set
+			const currentPath = window.location.pathname;
+			if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
+				goto(userSettings.startPage, { replaceState: true });
+			}
 		}
 
 		// Initialize sidebar mode from localStorage

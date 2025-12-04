@@ -6,6 +6,7 @@
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { projectsStore } from '$lib/stores/projects.svelte';
 	import { labelsStore } from '$lib/stores/labels.svelte';
 	import { theme } from '$lib/stores/theme';
@@ -137,7 +138,17 @@
 
 		// Load data if authenticated
 		if (authStore.isAuthenticated) {
-			await Promise.all([projectsStore.fetchProjects(), labelsStore.fetchLabels()]);
+			await Promise.all([
+				projectsStore.fetchProjects(),
+				labelsStore.fetchLabels(),
+				userSettings.load(),
+			]);
+
+			// Redirect to start page if on root and a custom start page is set
+			const currentPath = window.location.pathname;
+			if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
+				goto(userSettings.startPage, { replaceState: true });
+			}
 		}
 
 		// Initialize sidebar mode from localStorage
@@ -183,7 +194,7 @@
 			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
-			desktopPosition="bottom"
+			desktopPosition={userSettings.nav.desktopPosition}
 			showThemeToggle={true}
 			showThemeVariants={true}
 			{themeVariantItems}

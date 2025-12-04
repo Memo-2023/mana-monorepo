@@ -148,6 +148,16 @@
 		// Load user settings from server
 		if (authStore.isAuthenticated) {
 			await userSettings.load();
+
+			// Redirect to start page if on /dashboard and a custom start page is set
+			const currentPath = window.location.pathname;
+			if (
+				currentPath === '/dashboard' &&
+				userSettings.startPage &&
+				userSettings.startPage !== '/dashboard'
+			) {
+				goto(userSettings.startPage, { replaceState: true });
+			}
 		}
 
 		loading = false;
