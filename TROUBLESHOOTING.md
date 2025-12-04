@@ -7,6 +7,7 @@ Common issues and solutions for the manacore-monorepo.
 - [Recursive Turbo Calls](#recursive-turbo-calls)
 - [Build Issues](#build-issues)
 - [Linting Issues](#linting-issues)
+- [NestJS Dependency Injection](#nestjs-dependency-injection)
 
 ---
 
@@ -266,6 +267,141 @@ for pkg in apps/*/package.json games/*/package.json; do
   fi
 done
 ```
+
+---
+
+## NestJS Dependency Injection
+
+### Problem: "Nest can't resolve dependencies" Error
+
+**Symptoms:**
+
+- NestJS fails to start with error: `Nest can't resolve dependencies of the XService (?)`
+- Error mentions "argument Function at index [0] is available"
+- The module imports look correct but service still won't inject
+
+**Root Cause:**
+
+Using **type-only imports** (`import { type X }`) for classes that need to be injected. TypeScript erases type-only imports at compile time, so the actual class is not available at runtime for dependency injection.
+
+### ❌ WRONG - Type-Only Import
+
+```typescript
+// services/mana-core-auth/src/ai/ai.service.ts - DON'T DO THIS!
+import { Injectable } from '@nestjs/common';
+import { type ConfigService } from '@nestjs/config'; // ❌ Type-only import
+
+@Injectable()
+export class AiService {
+	constructor(private configService: ConfigService) {
+		// NestJS can't inject ConfigService because it was type-only imported!
+	}
+}
+```
+
+**What happens:**
+
+1. TypeScript compiles the code
+2. The `type` keyword tells TypeScript to erase the import at compile time
+3. The compiled JS has NO import for ConfigService
+4. At runtime, NestJS can't find the ConfigService class to inject
+5. Error: "Nest can't resolve dependencies of the AiService (?)"
+
+### ✅ CORRECT - Regular Import
+
+```typescript
+// services/mana-core-auth/src/ai/ai.service.ts - CORRECT
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config'; // ✅ Regular import
+
+@Injectable()
+export class AiService {
+	constructor(private configService: ConfigService) {
+		// ConfigService is properly imported and can be injected
+	}
+}
+```
+
+### The Rule
+
+> **For NestJS dependency injection, NEVER use type-only imports (`import { type X }`) for classes you need to inject.**
+
+- ✅ `import { ConfigService }` - Regular import (works)
+- ❌ `import { type ConfigService }` - Type-only import (breaks DI)
+- ✅ `import type { MyInterface }` - Type-only for interfaces (fine, not injected)
+- ✅ `import { type MyType, MyClass }` - Mixed (MyType erased, MyClass available)
+
+### How to Fix
+
+1. Find the service with the DI error
+2. Check all imports for classes used in the constructor
+3. Remove the `type` keyword from class imports:
+
+```diff
+  import { Injectable } from '@nestjs/common';
+- import { type ConfigService } from '@nestjs/config';
++ import { ConfigService } from '@nestjs/config';
+
+  @Injectable()
+  export class AiService {
+    constructor(private configService: ConfigService) {}
+  }
+```
+
+4. Rebuild and test:
+
+```bash
+pnpm --filter mana-core-auth build
+pnpm --filter mana-core-auth start:dev
+```
+
+### Debugging
+
+If you're still getting DI errors after removing type-only imports:
+
+1. **Check the module imports the provider's dependencies:**
+
+```typescript
+@Module({
+	imports: [ConfigModule], // ← ConfigService needs ConfigModule
+	providers: [AiService],
+	exports: [AiService],
+})
+export class AiModule {}
+```
+
+2. **Verify the compiled JavaScript:**
+
+```bash
+# Build the service
+pnpm --filter mana-core-auth build
+
+# Check the compiled output
+cat services/mana-core-auth/dist/ai/ai.service.js | grep "require"
+
+# Should see:
+# const config_1 = require("@nestjs/config");  ✅ Good
+# NOT:
+# const config_1 = undefined;  ❌ Bad (type-only import)
+```
+
+3. **Check Docker builds:**
+
+If the error only happens in Docker but not locally:
+
+```bash
+# Build Docker image without cache
+docker build --no-cache -f services/mana-core-auth/Dockerfile -t test .
+
+# Check the compiled code in the image
+docker run --rm --entrypoint cat test /app/dist/ai/ai.service.js
+```
+
+### Related Issues
+
+- [Commit d69cc607](https://github.com/Memo-2023/manacore-monorepo/commit/d69cc607) - Fixed type-only ConfigService import in AiService
+- TypeScript `import type` vs `import { type }` - both erase at compile time
+- Docker layer caching can hide fixes if source wasn't properly copied
 
 ---
 
