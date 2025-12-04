@@ -1,0 +1,23 @@
+{
+	"name": "finance",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Finance App - Budget & Expense Tracking for ManaCore Ecosystem",
+	"scripts": {
+		"dev": "turbo run dev",
+		"dev:backend": "pnpm --filter @finance/backend dev",
+		"dev:web": "pnpm --filter @finance/web dev",
+		"dev:mobile": "pnpm --filter @finance/mobile dev",
+		"dev:landing": "pnpm --filter @finance/landing dev",
+		"build": "turbo run build",
+		"lint": "turbo run lint",
+		"clean": "turbo run clean",
+		"db:push": "pnpm --filter @finance/backend db:push",
+		"db:studio": "pnpm --filter @finance/backend db:studio",
+		"db:seed": "pnpm --filter @finance/backend db:seed"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	},
+	"packageManager": "pnpm@9.15.0"
+}

@@ -536,6 +536,70 @@ const APP_CONFIGS = [
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 		},
 	},
+
+	// Moodlit Backend (NestJS)
+	{
+		path: 'apps/moodlit/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.MOODLIT_BACKEND_PORT || '3012',
+			DATABASE_URL: (env) => env.MOODLIT_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Moodlit Mobile (Expo)
+	{
+		path: 'apps/moodlit/apps/mobile/.env',
+		vars: {
+			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MOODLIT_BACKEND_PORT || '3012'}`,
+			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Moodlit Web (SvelteKit)
+	{
+		path: 'apps/moodlit/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MOODLIT_BACKEND_PORT || '3012'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Finance Backend (NestJS)
+	{
+		path: 'apps/finance/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.FINANCE_BACKEND_PORT || '3019',
+			DATABASE_URL: (env) => env.FINANCE_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Finance Mobile (Expo)
+	{
+		path: 'apps/finance/apps/mobile/.env',
+		vars: {
+			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.FINANCE_BACKEND_PORT || '3019'}`,
+			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Finance Web (SvelteKit)
+	{
+		path: 'apps/finance/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.FINANCE_BACKEND_PORT || '3019'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
 ];
 
 function main() {
