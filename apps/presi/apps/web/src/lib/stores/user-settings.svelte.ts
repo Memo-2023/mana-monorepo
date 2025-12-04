@@ -8,12 +8,12 @@
  */
 
 import { createUserSettingsStore } from '@manacore/shared-theme';
-import { authStore } from './auth.svelte';
+import { auth } from './auth.svelte';
 
 const MANA_AUTH_URL = 'http://localhost:3001';
 
 export const userSettings = createUserSettingsStore({
 	appId: 'presi',
 	authUrl: MANA_AUTH_URL,
-	getAccessToken: () => authStore.getAccessToken(),
+	getAccessToken: () => auth.getAccessToken(),
 });

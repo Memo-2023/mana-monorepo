@@ -5,10 +5,10 @@
 import { browser } from '$app/environment';
 import {
 	THEME_DEFINITIONS,
+	THEME_VARIANTS,
 	type ThemeMode,
 	type ThemeVariant,
-	DEFAULT_THEME_VARIANT,
-	FREE_THEME_VARIANTS,
+	DEFAULT_VARIANT,
 } from '@manacore/shared-theme';
 
 const STORAGE_KEY_MODE = 'storage-theme-mode';
@@ -16,7 +16,7 @@ const STORAGE_KEY_VARIANT = 'storage-theme-variant';
 
 function createThemeStore() {
 	let mode = $state<ThemeMode>('system');
-	let variant = $state<ThemeVariant>(DEFAULT_THEME_VARIANT);
+	let variant = $state<ThemeVariant>(DEFAULT_VARIANT);
 	let systemPrefersDark = $state(false);
 
 	function getSystemPreference(): boolean {
@@ -46,7 +46,7 @@ function createThemeStore() {
 			return mode === 'dark' || (mode === 'system' && systemPrefersDark);
 		},
 		get variants() {
-			return FREE_THEME_VARIANTS;
+			return THEME_VARIANTS;
 		},
 
 		initialize() {

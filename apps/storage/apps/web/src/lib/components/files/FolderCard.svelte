@@ -37,7 +37,7 @@
 	let folderColor = $derived(folder.color ? colorMap[folder.color] || folder.color : undefined);
 </script>
 
-<button class="folder-card" onclick={onClick} type="button">
+<div class="folder-card" onclick={onClick} role="button" tabindex="0">
 	<div class="folder-icon" style:color={folderColor}>
 		<Folder size={40} strokeWidth={1.5} fill="currentColor" />
 		{#if folder.isFavorite}
@@ -65,7 +65,7 @@
 			<button class="danger" onclick={() => handleAction('delete')}>Löschen</button>
 		</div>
 	{/if}
-</button>
+</div>
 
 <style>
 	.folder-card {

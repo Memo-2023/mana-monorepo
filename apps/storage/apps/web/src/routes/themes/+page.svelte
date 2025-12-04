@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Palette, Check } from 'lucide-svelte';
 	import { theme } from '$lib/stores/theme.svelte';
-	import { THEME_DEFINITIONS, ALL_THEME_VARIANTS, type ThemeVariant } from '@manacore/shared-theme';
+	import { THEME_DEFINITIONS, THEME_VARIANTS, type ThemeVariant } from '@manacore/shared-theme';
 </script>
 
 <svelte:head>
@@ -17,7 +17,7 @@
 	</div>
 
 	<div class="themes-grid">
-		{#each ALL_THEME_VARIANTS as variant}
+		{#each THEME_VARIANTS as variant}
 			{@const def = THEME_DEFINITIONS[variant]}
 			<button
 				class="theme-card"

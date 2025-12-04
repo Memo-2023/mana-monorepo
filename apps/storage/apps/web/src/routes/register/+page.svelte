@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { locale } from 'svelte-i18n';
 	import { RegisterPage } from '@manacore/shared-auth-ui';
-	import { StorageLogo } from '@manacore/shared-branding';
+	import { ManaIcon } from '@manacore/shared-branding';
 	import { getRegisterTranslations } from '@manacore/shared-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
@@ -21,7 +21,7 @@
 
 <RegisterPage
 	appName="Storage"
-	logo={StorageLogo}
+	logo={ManaIcon}
 	primaryColor="#3b82f6"
 	onSignUp={handleSignUp}
 	{goto}

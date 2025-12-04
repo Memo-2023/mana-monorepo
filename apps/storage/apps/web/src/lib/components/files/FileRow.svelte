@@ -45,7 +45,7 @@
 	const Icon = getFileIcon(file.mimeType);
 </script>
 
-<button class="file-row" onclick={onClick} type="button">
+<div class="file-row" onclick={onClick} role="button" tabindex="0">
 	<span class="col-name">
 		<span class="icon">
 			<Icon size={20} strokeWidth={1.5} />
@@ -75,7 +75,7 @@
 			</div>
 		{/if}
 	</span>
-</button>
+</div>
 
 <style>
 	.file-row {

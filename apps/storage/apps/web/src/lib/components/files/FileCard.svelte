@@ -51,7 +51,7 @@
 	const Icon = getFileIcon(file.mimeType);
 </script>
 
-<button class="file-card" onclick={onClick} type="button">
+<div class="file-card" onclick={onClick} role="button" tabindex="0">
 	<div class="file-icon">
 		<Icon size={40} strokeWidth={1.5} />
 		{#if file.isFavorite}
@@ -81,7 +81,7 @@
 			<button class="danger" onclick={() => handleAction('delete')}>Löschen</button>
 		</div>
 	{/if}
-</button>
+</div>
 
 <style>
 	.file-card {

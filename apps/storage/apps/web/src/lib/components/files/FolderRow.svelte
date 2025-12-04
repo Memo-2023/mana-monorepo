@@ -38,7 +38,7 @@
 	}
 </script>
 
-<button class="folder-row" onclick={onClick} type="button">
+<div class="folder-row" onclick={onClick} role="button" tabindex="0">
 	<span class="col-name">
 		<span class="icon" style:color={folderColor}>
 			<Folder size={20} strokeWidth={1.5} fill="currentColor" />
@@ -67,7 +67,7 @@
 			</div>
 		{/if}
 	</span>
-</button>
+</div>
 
 <style>
 	.folder-row {
