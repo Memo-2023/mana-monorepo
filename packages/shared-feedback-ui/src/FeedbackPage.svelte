@@ -1,5 +1,9 @@
 <script lang="ts">
-	import type { FeedbackService, Feedback } from '@manacore/shared-feedback-service';
+	import type {
+		FeedbackService,
+		Feedback,
+		CreateFeedbackInput,
+	} from '@manacore/shared-feedback-service';
 	import FeedbackForm from './FeedbackForm.svelte';
 	import FeedbackList from './FeedbackList.svelte';
 
@@ -66,7 +70,7 @@
 		}
 	}
 
-	async function handleSubmit(input: { title?: string; feedbackText: string; category?: string }) {
+	async function handleSubmit(input: CreateFeedbackInput) {
 		isSubmitting = true;
 		try {
 			await feedbackService.createFeedback(input);
