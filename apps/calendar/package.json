@@ -9,8 +9,6 @@
 		"dev:web": "pnpm --filter @calendar/web dev",
 		"dev:landing": "pnpm --filter @calendar/landing dev",
 		"dev:mobile": "pnpm --filter @calendar/mobile dev",
-		"build": "turbo run build",
-		"clean": "turbo run clean",
 		"db:push": "pnpm --filter @calendar/backend db:push",
 		"db:studio": "pnpm --filter @calendar/backend db:studio",
 		"db:seed": "pnpm --filter @calendar/backend db:seed"

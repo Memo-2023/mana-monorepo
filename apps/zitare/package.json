@@ -9,8 +9,6 @@
 		"dev:web": "pnpm --filter @zitare/web dev",
 		"dev:landing": "pnpm --filter @zitare/landing dev",
 		"dev:mobile": "pnpm --filter @zitare/mobile dev",
-		"build": "turbo run build",
-		"clean": "turbo run clean",
 		"db:push": "pnpm --filter @zitare/backend db:push",
 		"db:studio": "pnpm --filter @zitare/backend db:studio",
 		"db:seed": "pnpm --filter @zitare/backend db:seed"

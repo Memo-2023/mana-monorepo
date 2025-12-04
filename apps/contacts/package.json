@@ -9,8 +9,6 @@
 		"dev:web": "pnpm --filter @contacts/web dev",
 		"dev:landing": "pnpm --filter @contacts/landing dev",
 		"dev:mobile": "pnpm --filter @contacts/mobile dev",
-		"build": "turbo run build",
-		"clean": "turbo run clean",
 		"db:push": "pnpm --filter @contacts/backend db:push",
 		"db:studio": "pnpm --filter @contacts/backend db:studio",
 		"db:seed": "pnpm --filter @contacts/backend db:seed"

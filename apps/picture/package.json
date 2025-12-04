@@ -7,7 +7,6 @@
 		"dev:mobile": "pnpm --filter @picture/mobile dev",
 		"dev:web": "pnpm --filter @picture/web dev",
 		"dev:landing": "pnpm --filter @picture/landing dev",
-		"build": "pnpm run --recursive build",
 		"build:mobile": "pnpm --filter @picture/mobile build:prod",
 		"build:web": "pnpm --filter @picture/web build",
 		"build:landing": "pnpm --filter @picture/landing build",

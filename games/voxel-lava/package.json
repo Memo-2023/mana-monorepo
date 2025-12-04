@@ -4,9 +4,7 @@
 	"private": true,
 	"description": "3D Voxel Lava Game - Build and play voxel levels",
 	"scripts": {
-		"dev": "turbo run dev",
-		"build": "turbo run build",
-		"clean": "turbo run clean"
+		"dev": "turbo run dev"
 	},
 	"devDependencies": {
 		"turbo": "^2.5.4"
