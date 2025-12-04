@@ -29,6 +29,7 @@ export {
 	StorageLogo,
 	TodoLogo,
 	MailLogo,
+	MoodlitLogo,
 } from './logos';
 
 // Configuration

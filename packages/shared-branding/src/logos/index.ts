@@ -16,3 +16,4 @@ export { default as CalendarLogo } from './CalendarLogo.svelte';
 export { default as StorageLogo } from './StorageLogo.svelte';
 export { default as TodoLogo } from './TodoLogo.svelte';
 export { default as MailLogo } from './MailLogo.svelte';
+export { default as MoodlitLogo } from './MoodlitLogo.svelte';

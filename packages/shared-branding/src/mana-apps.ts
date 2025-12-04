@@ -276,6 +276,22 @@ export const MANA_APPS: ManaApp[] = [
 		comingSoon: false,
 		status: 'development',
 	},
+	{
+		id: 'moodlit',
+		name: 'Moodlit',
+		description: {
+			de: 'Ambient Lighting & Moods',
+			en: 'Ambient Lighting & Moods',
+		},
+		longDescription: {
+			de: 'Erstelle beruhigende Lichtstimmungen mit animierten Farbverläufen für entspannte Atmosphäre.',
+			en: 'Create calming ambient lighting with animated color gradients for a relaxed atmosphere.',
+		},
+		icon: APP_ICONS.moodlit,
+		color: '#8b5cf6',
+		comingSoon: false,
+		status: 'development',
+	},
 ];
 
 /**
@@ -355,7 +371,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	nutriphi: { dev: 'http://localhost:5182', prod: 'https://nutriphi.manacore.app' },
 	manacore: { dev: 'http://localhost:5173', prod: 'https://manacore.app' },
 	mana: { dev: 'http://localhost:5173', prod: 'https://manacore.app' },
-	moodlit: { dev: 'http://localhost:5183', prod: 'https://moodlit.manacore.app' },
+	moodlit: { dev: 'http://localhost:5182', prod: 'https://moodlit.manacore.app' },
 	contacts: { dev: 'http://localhost:5184', prod: 'https://contacts.manacore.app' },
 	calendar: { dev: 'http://localhost:5179', prod: 'https://calendar.manacore.app' },
 	storage: { dev: 'http://localhost:5185', prod: 'https://storage.manacore.app' },
