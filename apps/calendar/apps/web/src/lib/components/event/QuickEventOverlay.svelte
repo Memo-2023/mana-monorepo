@@ -280,7 +280,10 @@
 
 			// Build location details if any field is filled
 			const locationDetails: LocationDetails | undefined =
-				locationStreet.trim() || locationPostalCode.trim() || locationCity.trim() || locationCountry.trim()
+				locationStreet.trim() ||
+				locationPostalCode.trim() ||
+				locationCity.trim() ||
+				locationCountry.trim()
 					? {
 							street: locationStreet.trim() || undefined,
 							postalCode: locationPostalCode.trim() || undefined,
@@ -337,235 +340,313 @@
 	aria-modal="true"
 	aria-label="Termin erstellen"
 >
-		<form onsubmit={handleSubmit}>
-			<!-- Header -->
-			<div class="overlay-header">
-				<span class="header-title">Neuer Termin</span>
-				<button type="button" class="close-btn" onclick={onClose} aria-label="Schließen">
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-					</svg>
-				</button>
+	<form onsubmit={handleSubmit}>
+		<!-- Header -->
+		<div class="overlay-header">
+			<span class="header-title">Neuer Termin</span>
+			<button type="button" class="close-btn" onclick={onClose} aria-label="Schließen">
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
+				</svg>
+			</button>
+		</div>
+
+		<!-- Scrollable content -->
+		<div class="overlay-content">
+			<!-- Title input -->
+			<div class="form-group">
+				<input
+					type="text"
+					class="title-input"
+					value={title}
+					oninput={handleTitleChange}
+					bind:this={titleInputRef}
+					placeholder="Titel hinzufügen"
+				/>
 			</div>
 
-			<!-- Scrollable content -->
-			<div class="overlay-content">
-				<!-- Title input -->
-				<div class="form-group">
+			<!-- Time display under title -->
+			<div class="time-display">
+				<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+					/>
+				</svg>
+				<span>
+					{format(draftStart(), 'EEEE, d. MMMM yyyy', { locale: de })}
+					{#if !isAllDay}
+						· {displayStartTime} – {displayEndTime}
+					{:else}
+						· Ganztägig
+					{/if}
+				</span>
+			</div>
+
+			<!-- Calendar select -->
+			<div class="form-row">
+				<div class="row-icon">
+					<div
+						class="calendar-dot"
+						style="background-color: {calendarsStore.getColor(calendarId)}"
+					></div>
+				</div>
+				<div class="row-content">
+					<label class="field-label">Kalender</label>
+					<select class="field-select" value={calendarId} onchange={handleCalendarChange}>
+						{#each calendarsStore.calendars as cal}
+							<option value={cal.id}>{cal.name}</option>
+						{/each}
+					</select>
+				</div>
+			</div>
+
+			<!-- All day toggle -->
+			<div class="form-row clickable" onclick={handleAllDayToggle}>
+				<div class="row-icon">
+					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+						/>
+					</svg>
+				</div>
+				<div class="row-content toggle-content">
+					<span>Ganztägig</span>
 					<input
-						type="text"
-						class="title-input"
-						value={title}
-						oninput={handleTitleChange}
-						bind:this={titleInputRef}
-						placeholder="Titel hinzufügen"
+						type="checkbox"
+						checked={isAllDay}
+						class="toggle-checkbox"
+						onclick={(e) => e.stopPropagation()}
+						onchange={handleAllDayToggle}
 					/>
 				</div>
+			</div>
 
-				<!-- Time display under title -->
-				<div class="time-display">
-					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-					</svg>
-					<span>
-						{format(draftStart(), 'EEEE, d. MMMM yyyy', { locale: de })}
-						{#if !isAllDay}
-							· {displayStartTime} – {displayEndTime}
-						{:else}
-							· Ganztägig
-						{/if}
-					</span>
-				</div>
-
-				<!-- Calendar select -->
-				<div class="form-row">
-					<div class="row-icon">
-						<div class="calendar-dot" style="background-color: {calendarsStore.getColor(calendarId)}"></div>
-					</div>
+			<!-- All-day display mode -->
+			{#if isAllDay}
+				<div class="form-row sub-row">
+					<div class="row-icon"></div>
 					<div class="row-content">
-						<label class="field-label">Kalender</label>
-						<select class="field-select" value={calendarId} onchange={handleCalendarChange}>
-							{#each calendarsStore.calendars as cal}
-								<option value={cal.id}>{cal.name}</option>
-							{/each}
+						<label class="field-label">Anzeigeart</label>
+						<select class="field-select" bind:value={allDayDisplayMode}>
+							<option value="default">Standard (aus Einstellungen)</option>
+							<option value="header">In Kopfzeile</option>
+							<option value="block">Als Tagesblock</option>
 						</select>
 					</div>
 				</div>
+			{/if}
 
-				<!-- All day toggle -->
-				<div class="form-row clickable" onclick={handleAllDayToggle}>
-					<div class="row-icon">
-						<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-						</svg>
-					</div>
-					<div class="row-content toggle-content">
-						<span>Ganztägig</span>
-						<input type="checkbox" checked={isAllDay} class="toggle-checkbox" onclick={(e) => e.stopPropagation()} onchange={handleAllDayToggle} />
-					</div>
-				</div>
-
-				<!-- All-day display mode -->
-				{#if isAllDay}
-					<div class="form-row sub-row">
-						<div class="row-icon"></div>
-						<div class="row-content">
-							<label class="field-label">Anzeigeart</label>
-							<select class="field-select" bind:value={allDayDisplayMode}>
-								<option value="default">Standard (aus Einstellungen)</option>
-								<option value="header">In Kopfzeile</option>
-								<option value="block">Als Tagesblock</option>
-							</select>
-						</div>
-					</div>
-				{/if}
-
-				<!-- Start date/time -->
-				<div class="form-row">
-					<div class="row-icon">
-						<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-						</svg>
-					</div>
-					<div class="row-content datetime-row">
-						<div class="datetime-field">
-							<label class="field-label">Beginn</label>
-							<input type="date" class="field-input" value={startDateStr} onchange={handleStartDateChange} />
-						</div>
-						{#if !isAllDay}
-							<div class="datetime-field time-field">
-								<label class="field-label">Uhrzeit</label>
-								<input type="time" class="field-input" value={startTimeStr} onchange={handleStartTimeChange} />
-							</div>
-						{/if}
-					</div>
-				</div>
-
-				<!-- End date/time -->
-				<div class="form-row">
-					<div class="row-icon">
-						<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-						</svg>
-					</div>
-					<div class="row-content datetime-row">
-						<div class="datetime-field">
-							<label class="field-label">Ende</label>
-							<input type="date" class="field-input" value={endDateStr} onchange={handleEndDateChange} />
-						</div>
-						{#if !isAllDay}
-							<div class="datetime-field time-field">
-								<label class="field-label">Uhrzeit</label>
-								<input type="time" class="field-input" value={endTimeStr} onchange={handleEndTimeChange} />
-							</div>
-						{/if}
-					</div>
-				</div>
-
-				<!-- Location -->
-				<div class="form-row">
-					<div class="row-icon">
-						<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-						</svg>
-					</div>
-					<div class="row-content">
-						<input
-							type="text"
-							class="field-input full"
-							bind:value={location}
-							placeholder="Ort hinzufügen"
+			<!-- Start date/time -->
+			<div class="form-row">
+				<div class="row-icon">
+					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
 						/>
-						<!-- Toggle for address details -->
-						<button
-							type="button"
-							class="address-toggle"
-							onclick={() => (showLocationDetails = !showLocationDetails)}
-						>
-							<svg class="toggle-chevron" class:rotated={showLocationDetails} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-							</svg>
-							{showLocationDetails ? 'Adressdetails ausblenden' : 'Adressdetails hinzufügen'}
-						</button>
-					</div>
+					</svg>
 				</div>
+				<div class="row-content datetime-row">
+					<div class="datetime-field">
+						<label class="field-label">Beginn</label>
+						<input
+							type="date"
+							class="field-input"
+							value={startDateStr}
+							onchange={handleStartDateChange}
+						/>
+					</div>
+					{#if !isAllDay}
+						<div class="datetime-field time-field">
+							<label class="field-label">Uhrzeit</label>
+							<input
+								type="time"
+								class="field-input"
+								value={startTimeStr}
+								onchange={handleStartTimeChange}
+							/>
+						</div>
+					{/if}
+				</div>
+			</div>
 
-				<!-- Location details (expandable) -->
-				{#if showLocationDetails}
-					<div class="form-row sub-row">
-						<div class="row-icon"></div>
-						<div class="row-content address-details-form">
-							<div class="address-field">
-								<label class="field-label">Straße</label>
+			<!-- End date/time -->
+			<div class="form-row">
+				<div class="row-icon">
+					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+						/>
+					</svg>
+				</div>
+				<div class="row-content datetime-row">
+					<div class="datetime-field">
+						<label class="field-label">Ende</label>
+						<input
+							type="date"
+							class="field-input"
+							value={endDateStr}
+							onchange={handleEndDateChange}
+						/>
+					</div>
+					{#if !isAllDay}
+						<div class="datetime-field time-field">
+							<label class="field-label">Uhrzeit</label>
+							<input
+								type="time"
+								class="field-input"
+								value={endTimeStr}
+								onchange={handleEndTimeChange}
+							/>
+						</div>
+					{/if}
+				</div>
+			</div>
+
+			<!-- Location -->
+			<div class="form-row">
+				<div class="row-icon">
+					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+						/>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+						/>
+					</svg>
+				</div>
+				<div class="row-content">
+					<input
+						type="text"
+						class="field-input full"
+						bind:value={location}
+						placeholder="Ort hinzufügen"
+					/>
+					<!-- Toggle for address details -->
+					<button
+						type="button"
+						class="address-toggle"
+						onclick={() => (showLocationDetails = !showLocationDetails)}
+					>
+						<svg
+							class="toggle-chevron"
+							class:rotated={showLocationDetails}
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9 5l7 7-7 7"
+							/>
+						</svg>
+						{showLocationDetails ? 'Adressdetails ausblenden' : 'Adressdetails hinzufügen'}
+					</button>
+				</div>
+			</div>
+
+			<!-- Location details (expandable) -->
+			{#if showLocationDetails}
+				<div class="form-row sub-row">
+					<div class="row-icon"></div>
+					<div class="row-content address-details-form">
+						<div class="address-field">
+							<label class="field-label">Straße</label>
+							<input
+								type="text"
+								class="field-input"
+								bind:value={locationStreet}
+								placeholder="Musterstraße 123"
+							/>
+						</div>
+						<div class="address-row">
+							<div class="address-field postal">
+								<label class="field-label">PLZ</label>
 								<input
 									type="text"
 									class="field-input"
-									bind:value={locationStreet}
-									placeholder="Musterstraße 123"
+									bind:value={locationPostalCode}
+									placeholder="12345"
 								/>
 							</div>
-							<div class="address-row">
-								<div class="address-field postal">
-									<label class="field-label">PLZ</label>
-									<input
-										type="text"
-										class="field-input"
-										bind:value={locationPostalCode}
-										placeholder="12345"
-									/>
-								</div>
-								<div class="address-field city">
-									<label class="field-label">Stadt</label>
-									<input
-										type="text"
-										class="field-input"
-										bind:value={locationCity}
-										placeholder="Musterstadt"
-									/>
-								</div>
-							</div>
-							<div class="address-field">
-								<label class="field-label">Land</label>
+							<div class="address-field city">
+								<label class="field-label">Stadt</label>
 								<input
 									type="text"
 									class="field-input"
-									bind:value={locationCountry}
-									placeholder="Deutschland"
+									bind:value={locationCity}
+									placeholder="Musterstadt"
 								/>
 							</div>
 						</div>
-					</div>
-				{/if}
-
-				<!-- Description -->
-				<div class="form-row">
-					<div class="row-icon">
-						<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
-						</svg>
-					</div>
-					<div class="row-content">
-						<textarea
-							class="field-textarea"
-							bind:value={description}
-							placeholder="Beschreibung hinzufügen"
-							rows="3"
-						></textarea>
+						<div class="address-field">
+							<label class="field-label">Land</label>
+							<input
+								type="text"
+								class="field-input"
+								bind:value={locationCountry}
+								placeholder="Deutschland"
+							/>
+						</div>
 					</div>
 				</div>
-			</div>
+			{/if}
 
-			<!-- Actions (sticky footer) -->
-			<div class="overlay-actions">
-				<button type="button" class="btn-ghost" onclick={onClose}>
-					Abbrechen
-				</button>
-				<button type="submit" class="btn-primary" disabled={submitting || !title.trim()}>
-					{submitting ? 'Speichern...' : 'Speichern'}
-				</button>
+			<!-- Description -->
+			<div class="form-row">
+				<div class="row-icon">
+					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 6h16M4 12h16M4 18h7"
+						/>
+					</svg>
+				</div>
+				<div class="row-content">
+					<textarea
+						class="field-textarea"
+						bind:value={description}
+						placeholder="Beschreibung hinzufügen"
+						rows="3"
+					></textarea>
+				</div>
 			</div>
-		</form>
+		</div>
+
+		<!-- Actions (sticky footer) -->
+		<div class="overlay-actions">
+			<button type="button" class="btn-ghost" onclick={onClose}> Abbrechen </button>
+			<button type="submit" class="btn-primary" disabled={submitting || !title.trim()}>
+				{submitting ? 'Speichern...' : 'Speichern'}
+			</button>
+		</div>
+	</form>
 </div>
 
 <style>
@@ -576,7 +657,9 @@
 		background: hsl(var(--color-surface));
 		border: 1px solid hsl(var(--color-border));
 		border-radius: var(--radius-lg);
-		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1);
+		box-shadow:
+			0 20px 60px rgba(0, 0, 0, 0.2),
+			0 4px 16px rgba(0, 0, 0, 0.1);
 		z-index: 1001;
 		display: flex;
 		flex-direction: column;

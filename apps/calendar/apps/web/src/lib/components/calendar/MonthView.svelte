@@ -45,16 +45,18 @@
 
 	// Filter weekends if option is active
 	let calendarDays = $derived(
-		settingsStore.showOnlyWeekdays ? allCalendarDays.filter((day) => !isWeekend(day)) : allCalendarDays
+		settingsStore.showOnlyWeekdays
+			? allCalendarDays.filter((day) => !isWeekend(day))
+			: allCalendarDays
 	);
 
 	// Week day headers - depends on week start setting
 	const weekDaysFromMonday = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 	const weekDaysFromSunday = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-	let allWeekDays = $derived(settingsStore.weekStartsOn === 1 ? weekDaysFromMonday : weekDaysFromSunday);
-	let weekDays = $derived(
-		settingsStore.showOnlyWeekdays ? allWeekDays.slice(0, 5) : allWeekDays
+	let allWeekDays = $derived(
+		settingsStore.weekStartsOn === 1 ? weekDaysFromMonday : weekDaysFromSunday
 	);
+	let weekDays = $derived(settingsStore.showOnlyWeekdays ? allWeekDays.slice(0, 5) : allWeekDays);
 
 	// Number of columns for grid
 	let columnCount = $derived(settingsStore.showOnlyWeekdays ? 5 : 7);
@@ -94,7 +96,7 @@
 		return {
 			destroy() {
 				setDayCellRef(day, null);
-			}
+			},
 		};
 	}
 
@@ -141,8 +143,14 @@
 		const targetDay = getDayFromPoint(e.clientX, e.clientY);
 
 		if (targetDay) {
-			const start = typeof draggedEvent.startTime === 'string' ? new Date(draggedEvent.startTime) : draggedEvent.startTime;
-			const end = typeof draggedEvent.endTime === 'string' ? new Date(draggedEvent.endTime) : draggedEvent.endTime;
+			const start =
+				typeof draggedEvent.startTime === 'string'
+					? new Date(draggedEvent.startTime)
+					: draggedEvent.startTime;
+			const end =
+				typeof draggedEvent.endTime === 'string'
+					? new Date(draggedEvent.endTime)
+					: draggedEvent.endTime;
 			const duration = differenceInMinutes(end, start);
 
 			// Keep the same time, change the date
@@ -280,14 +288,13 @@
 													: event.startTime,
 												'HH:mm'
 											)}-{format(
-												typeof event.endTime === 'string'
-													? new Date(event.endTime)
-													: event.endTime,
+												typeof event.endTime === 'string' ? new Date(event.endTime) : event.endTime,
 												'HH:mm'
 											)}</span
 										>
 									{/if}
-									<span class="event-title">{event.title || (isDraft ? '(Neuer Termin)' : '')}</span>
+									<span class="event-title">{event.title || (isDraft ? '(Neuer Termin)' : '')}</span
+									>
 								</div>
 							{/each}
 
@@ -308,7 +315,6 @@
 	.month-view {
 		display: flex;
 		flex-direction: column;
-		
 	}
 
 	.weekday-headers {
@@ -408,7 +414,10 @@
 		text-overflow: ellipsis;
 		touch-action: none;
 		user-select: none;
-		transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
+		transition:
+			transform 150ms ease,
+			box-shadow 150ms ease,
+			opacity 150ms ease;
 	}
 
 	.event-pill:hover {
@@ -429,7 +438,8 @@
 	}
 
 	@keyframes pulse-outline {
-		0%, 100% {
+		0%,
+		100% {
 			outline-color: hsl(var(--color-primary));
 		}
 		50% {

@@ -262,8 +262,7 @@
 		mic: 'M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z',
 		calendar:
 			'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
-		folder:
-			'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z',
+		folder: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z',
 		archive: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4',
 		upload: 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12',
 		music:
@@ -477,13 +476,20 @@
 								<!-- Contrast Toggle -->
 								<button
 									type="button"
-									onclick={() => onA11yContrastChange?.(a11yContrast === 'high' ? 'normal' : 'high')}
+									onclick={() =>
+										onA11yContrastChange?.(a11yContrast === 'high' ? 'normal' : 'high')}
 									class="a11y-btn"
 									class:active={a11yContrast === 'high'}
 									title="Hoher Kontrast"
 									aria-pressed={a11yContrast === 'high'}
 								>
-									<svg class="a11y-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<svg
+										class="a11y-icon"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+									>
 										<circle cx="12" cy="12" r="10" />
 										<path d="M12 2v20M12 2a10 10 0 0 1 0 20" fill="currentColor" />
 									</svg>
@@ -497,7 +503,13 @@
 									title="Animationen reduzieren"
 									aria-pressed={a11yReduceMotion}
 								>
-									<svg class="a11y-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<svg
+										class="a11y-icon"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+									>
 										{#if a11yReduceMotion}
 											<rect x="6" y="4" width="4" height="16" rx="1" />
 											<rect x="14" y="4" width="4" height="16" rx="1" />
@@ -705,7 +717,12 @@
 
 <!-- FAB for collapsed state -->
 {#if isCollapsed}
-	<button onclick={expandNav} class="nav-fab glass-pill" class:desktop-bottom={desktopPosition === 'bottom'} title="Expand navigation">
+	<button
+		onclick={expandNav}
+		class="nav-fab glass-pill"
+		class:desktop-bottom={desktopPosition === 'bottom'}
+		title="Expand navigation"
+	>
 		<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
 				stroke-linecap="round"

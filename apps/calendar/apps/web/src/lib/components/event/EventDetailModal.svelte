@@ -104,11 +104,9 @@
 
 	// Get calendar info for the event
 	let calendarName = $derived(
-		event ? calendarsStore.calendars.find(c => c.id === event!.calendarId)?.name : undefined
+		event ? calendarsStore.calendars.find((c) => c.id === event!.calendarId)?.name : undefined
 	);
-	let calendarColor = $derived(
-		event ? calendarsStore.getColor(event.calendarId) : '#3b82f6'
-	);
+	let calendarColor = $derived(event ? calendarsStore.getColor(event.calendarId) : '#3b82f6');
 
 	// Format recurrence rule to human readable text
 	function formatRecurrence(rule: string): string {
@@ -120,9 +118,18 @@
 				const days = rule.match(/BYDAY=([A-Z,]+)/)?.[1];
 				if (days) {
 					const dayMap: Record<string, string> = {
-						MO: 'Mo', TU: 'Di', WE: 'Mi', TH: 'Do', FR: 'Fr', SA: 'Sa', SU: 'So'
+						MO: 'Mo',
+						TU: 'Di',
+						WE: 'Mi',
+						TH: 'Do',
+						FR: 'Fr',
+						SA: 'Sa',
+						SU: 'So',
 					};
-					const translatedDays = days.split(',').map(d => dayMap[d] || d).join(', ');
+					const translatedDays = days
+						.split(',')
+						.map((d) => dayMap[d] || d)
+						.join(', ');
 					return `Wöchentlich (${translatedDays})`;
 				}
 			}
@@ -153,20 +160,35 @@
 					{#if !isEditing}
 						<button class="btn btn-ghost" onclick={() => (isEditing = true)}>
 							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+								/>
 							</svg>
 							Bearbeiten
 						</button>
 						<button class="btn btn-ghost text-destructive" onclick={handleDelete}>
 							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+								/>
 							</svg>
 							Löschen
 						</button>
 					{/if}
 					<button class="btn btn-ghost btn-close" onclick={onClose} aria-label="Schließen">
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
 						</svg>
 					</button>
 				</div>
@@ -194,7 +216,12 @@
 						<div class="detail-row">
 							<span class="detail-icon">
 								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
 								</svg>
 							</span>
 							<div class="detail-content">
@@ -208,7 +235,12 @@
 							<div class="detail-row">
 								<span class="detail-icon">
 									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+										/>
 									</svg>
 								</span>
 								<div class="detail-content">
@@ -223,8 +255,18 @@
 							<div class="detail-row">
 								<span class="detail-icon">
 									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+										/>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+										/>
 									</svg>
 								</span>
 								<div class="detail-content">
@@ -257,15 +299,30 @@
 							<div class="detail-row">
 								<span class="detail-icon">
 									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+										/>
 									</svg>
 								</span>
 								<div class="detail-content">
 									<span class="detail-label">Videokonferenz</span>
-									<a href={event.metadata.conferenceUrl} target="_blank" rel="noopener noreferrer" class="detail-link">
+									<a
+										href={event.metadata.conferenceUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="detail-link"
+									>
 										Beitreten
 										<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+											/>
 										</svg>
 									</a>
 								</div>
@@ -277,15 +334,30 @@
 							<div class="detail-row">
 								<span class="detail-icon">
 									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+										/>
 									</svg>
 								</span>
 								<div class="detail-content">
 									<span class="detail-label">Link</span>
-									<a href={event.metadata.url} target="_blank" rel="noopener noreferrer" class="detail-link">
+									<a
+										href={event.metadata.url}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="detail-link"
+									>
 										{new URL(event.metadata.url).hostname}
 										<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+											/>
 										</svg>
 									</a>
 								</div>
@@ -297,7 +369,12 @@
 							<div class="detail-row">
 								<span class="detail-icon">
 									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M4 6h16M4 12h16M4 18h7"
+										/>
 									</svg>
 								</span>
 								<div class="detail-content">
@@ -312,7 +389,12 @@
 							<div class="detail-row">
 								<span class="detail-icon">
 									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+										/>
 									</svg>
 								</span>
 								<div class="detail-content">
@@ -322,8 +404,17 @@
 											<div class="attendee">
 												<span class="attendee-name">{attendee.name || attendee.email}</span>
 												{#if attendee.status}
-													<span class="attendee-status" class:accepted={attendee.status === 'accepted'} class:declined={attendee.status === 'declined'} class:tentative={attendee.status === 'tentative'}>
-														{attendee.status === 'accepted' ? '✓' : attendee.status === 'declined' ? '✗' : '?'}
+													<span
+														class="attendee-status"
+														class:accepted={attendee.status === 'accepted'}
+														class:declined={attendee.status === 'declined'}
+														class:tentative={attendee.status === 'tentative'}
+													>
+														{attendee.status === 'accepted'
+															? '✓'
+															: attendee.status === 'declined'
+																? '✗'
+																: '?'}
 													</span>
 												{/if}
 											</div>

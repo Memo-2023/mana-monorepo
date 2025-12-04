@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import type { CalendarEvent, CreateEventInput, UpdateEventInput, LocationDetails } from '@calendar/shared';
+	import type {
+		CalendarEvent,
+		CreateEventInput,
+		UpdateEventInput,
+		LocationDetails,
+	} from '@calendar/shared';
 	import { format, addMinutes, parseISO } from 'date-fns';
 
 	interface Props {
@@ -96,13 +101,16 @@
 
 		// Build location details if any field is filled
 		const locationDetails: LocationDetails | undefined =
-			(locationStreet.trim() || locationPostalCode.trim() || locationCity.trim() || locationCountry.trim())
+			locationStreet.trim() ||
+			locationPostalCode.trim() ||
+			locationCity.trim() ||
+			locationCountry.trim()
 				? {
-					street: locationStreet.trim() || undefined,
-					postalCode: locationPostalCode.trim() || undefined,
-					city: locationCity.trim() || undefined,
-					country: locationCountry.trim() || undefined,
-				}
+						street: locationStreet.trim() || undefined,
+						postalCode: locationPostalCode.trim() || undefined,
+						city: locationCity.trim() || undefined,
+						country: locationCountry.trim() || undefined,
+					}
 				: undefined;
 
 		// Build metadata
@@ -253,9 +261,15 @@
 		<button
 			type="button"
 			class="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors self-start"
-			onclick={() => showLocationDetails = !showLocationDetails}
+			onclick={() => (showLocationDetails = !showLocationDetails)}
 		>
-			<svg class="w-4 h-4 transition-transform" class:rotate-90={showLocationDetails} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<svg
+				class="w-4 h-4 transition-transform"
+				class:rotate-90={showLocationDetails}
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 			</svg>
 			{showLocationDetails ? 'Adressdetails ausblenden' : 'Adressdetails hinzufügen'}
@@ -331,7 +345,11 @@
 		>
 			Abbrechen
 		</button>
-		<button type="submit" class="px-4 py-2 rounded-lg font-medium text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled={submitting || !title.trim() || !calendarId}>
+		<button
+			type="submit"
+			class="px-4 py-2 rounded-lg font-medium text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+			disabled={submitting || !title.trim() || !calendarId}
+		>
 			{mode === 'create' ? 'Erstellen' : 'Speichern'}
 		</button>
 	</div>

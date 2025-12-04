@@ -33,7 +33,9 @@
 
 	// Get date-fns locale based on current app locale
 	const dateLocales = { de, en: enUS, fr, es, it };
-	let currentDateLocale = $derived(dateLocales[$locale?.substring(0, 2) as keyof typeof dateLocales] || de);
+	let currentDateLocale = $derived(
+		dateLocales[$locale?.substring(0, 2) as keyof typeof dateLocales] || de
+	);
 
 	// Generate days of the week, optionally filtering weekends
 	let allDays = $derived(
@@ -61,7 +63,9 @@
 	);
 
 	// Calculate visible hours range for positioning
-	let firstVisibleHour = $derived(settingsStore.filterHoursEnabled ? settingsStore.dayStartHour : 0);
+	let firstVisibleHour = $derived(
+		settingsStore.filterHoursEnabled ? settingsStore.dayStartHour : 0
+	);
 	let lastVisibleHour = $derived(settingsStore.filterHoursEnabled ? settingsStore.dayEndHour : 24);
 	let totalVisibleHours = $derived(lastVisibleHour - firstVisibleHour);
 
@@ -124,16 +128,16 @@
 
 	// Split all-day events by display mode
 	function getHeaderAllDayEventsForDay(day: Date) {
-		return getAllDayEventsForDay(day).filter(e => getEventDisplayMode(e) === 'header');
+		return getAllDayEventsForDay(day).filter((e) => getEventDisplayMode(e) === 'header');
 	}
 
 	function getBlockAllDayEventsForDay(day: Date) {
-		return getAllDayEventsForDay(day).filter(e => getEventDisplayMode(e) === 'block');
+		return getAllDayEventsForDay(day).filter((e) => getEventDisplayMode(e) === 'block');
 	}
 
 	// Check if there are any all-day events to show in header
 	let hasAnyHeaderAllDayEvents = $derived(
-		days.some(day => getHeaderAllDayEventsForDay(day).length > 0)
+		days.some((day) => getHeaderAllDayEventsForDay(day).length > 0)
 	);
 
 	function getEventStyle(event: any) {
@@ -162,7 +166,9 @@
 			e.preventDefault();
 			e.stopPropagation();
 			// Reset hasMoved after a short delay to allow for the next clean click
-			setTimeout(() => { hasMoved = false; }, 100);
+			setTimeout(() => {
+				hasMoved = false;
+			}, 100);
 			return;
 		}
 		goto(`/?event=${event.id}`);
@@ -248,7 +254,10 @@
 		const newMinutes = getMinutesFromY(e.clientY) - dragOffsetMinutes;
 
 		// Clamp to valid range (firstVisibleHour to lastVisibleHour)
-		const clampedMinutes = Math.max(firstVisibleHour * 60, Math.min(lastVisibleHour * 60 - 15, newMinutes));
+		const clampedMinutes = Math.max(
+			firstVisibleHour * 60,
+			Math.min(lastVisibleHour * 60 - 15, newMinutes)
+		);
 
 		// Update preview
 		dragPreviewTop = minutesToPercent(clampedMinutes);
@@ -268,8 +277,14 @@
 			return;
 		}
 
-		const start = typeof draggedEvent.startTime === 'string' ? parseISO(draggedEvent.startTime) : draggedEvent.startTime;
-		const end = typeof draggedEvent.endTime === 'string' ? parseISO(draggedEvent.endTime) : draggedEvent.endTime;
+		const start =
+			typeof draggedEvent.startTime === 'string'
+				? parseISO(draggedEvent.startTime)
+				: draggedEvent.startTime;
+		const end =
+			typeof draggedEvent.endTime === 'string'
+				? parseISO(draggedEvent.endTime)
+				: draggedEvent.endTime;
 		const duration = differenceInMinutes(end, start);
 
 		// Calculate new start time
@@ -336,17 +351,24 @@
 
 		hasMoved = true;
 		const currentMinutes = getMinutesFromY(e.clientY);
-		const originalStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
+		const originalStartMinutes =
+			resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
 		const originalEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
 
 		if (resizeEdge === 'bottom') {
 			// Resize from bottom - change end time
-			const newEndMinutes = Math.max(originalStartMinutes + 15, Math.min(lastVisibleHour * 60, currentMinutes));
+			const newEndMinutes = Math.max(
+				originalStartMinutes + 15,
+				Math.min(lastVisibleHour * 60, currentMinutes)
+			);
 			const newDuration = newEndMinutes - originalStartMinutes;
 			resizePreviewHeight = (newDuration / (totalVisibleHours * 60)) * 100;
 		} else {
 			// Resize from top - change start time
-			const newStartMinutes = Math.max(firstVisibleHour * 60, Math.min(originalEndMinutes - 15, currentMinutes));
+			const newStartMinutes = Math.max(
+				firstVisibleHour * 60,
+				Math.min(originalEndMinutes - 15, currentMinutes)
+			);
 			const newDuration = originalEndMinutes - newStartMinutes;
 			resizePreviewTop = minutesToPercent(newStartMinutes);
 			resizePreviewHeight = (newDuration / (totalVisibleHours * 60)) * 100;
@@ -367,20 +389,27 @@
 		}
 
 		const currentMinutes = getMinutesFromY(e.clientY);
-		const originalStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
+		const originalStartMinutes =
+			resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
 		const originalEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
 
 		let newStart = resizeOriginalStart;
 		let newEnd = resizeOriginalEnd;
 
 		if (resizeEdge === 'bottom') {
-			const newEndMinutes = Math.max(originalStartMinutes + 15, Math.min(lastVisibleHour * 60, currentMinutes));
+			const newEndMinutes = Math.max(
+				originalStartMinutes + 15,
+				Math.min(lastVisibleHour * 60, currentMinutes)
+			);
 			const newHours = Math.floor(newEndMinutes / 60);
 			const newMins = newEndMinutes % 60;
 			newEnd = setHours(new Date(resizeOriginalEnd), newHours);
 			newEnd = setMinutes(newEnd, newMins);
 		} else {
-			const newStartMinutes = Math.max(firstVisibleHour * 60, Math.min(originalEndMinutes - 15, currentMinutes));
+			const newStartMinutes = Math.max(
+				firstVisibleHour * 60,
+				Math.min(originalEndMinutes - 15, currentMinutes)
+			);
 			const newHours = Math.floor(newStartMinutes / 60);
 			const newMins = newStartMinutes % 60;
 			newStart = setHours(new Date(resizeOriginalStart), newHours);
@@ -563,10 +592,12 @@
 					{/each}
 
 					<!-- Drag preview ghost (for cross-day dragging) -->
-					{#if isDragging && draggedEvent && dragTargetDay && isSameDay(day, dragTargetDay) && !getEventsForDay(day).some(e => e.id === draggedEvent.id)}
+					{#if isDragging && draggedEvent && dragTargetDay && isSameDay(day, dragTargetDay) && !getEventsForDay(day).some((e) => e.id === draggedEvent.id)}
 						<div
 							class="event-card drag-ghost"
-							style="top: {dragPreviewTop}%; height: {dragPreviewHeight}%; background-color: {calendarsStore.getColor(draggedEvent.calendarId)};"
+							style="top: {dragPreviewTop}%; height: {dragPreviewHeight}%; background-color: {calendarsStore.getColor(
+								draggedEvent.calendarId
+							)};"
 						>
 							<span class="event-time">{formatEventTime(draggedEvent.startTime)}</span>
 							<span class="event-title">{draggedEvent.title}</span>
@@ -764,7 +795,9 @@
 		cursor: grab;
 		z-index: 1;
 		overflow: hidden;
-		transition: box-shadow 0.15s ease, opacity 0.15s ease;
+		transition:
+			box-shadow 0.15s ease,
+			opacity 0.15s ease;
 		touch-action: none;
 		user-select: none;
 	}
@@ -801,7 +834,8 @@
 	}
 
 	@keyframes pulse-outline {
-		0%, 100% {
+		0%,
+		100% {
 			outline-color: hsl(var(--color-primary));
 		}
 		50% {

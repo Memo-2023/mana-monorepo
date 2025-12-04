@@ -43,8 +43,7 @@
 				<div class="flex gap-2">
 					{#each ['light', 'dark', 'system'] as mode}
 						<button
-							class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {theme.mode ===
-							mode
+							class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {theme.mode === mode
 								? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
 								: 'bg-[hsl(var(--muted))] hover:bg-[hsl(var(--muted))]/80 text-[hsl(var(--foreground))]'}"
 							onclick={() => theme.setMode(mode as 'light' | 'dark' | 'system')}

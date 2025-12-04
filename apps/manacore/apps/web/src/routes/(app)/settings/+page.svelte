@@ -33,12 +33,16 @@
 
 	// Navigation position handler
 	async function handleNavPositionChange(position: NavPosition) {
-		await userSettings.updateGlobal({ nav: { ...userSettings.globalSettings.nav, desktopPosition: position } });
+		await userSettings.updateGlobal({
+			nav: { ...userSettings.globalSettings.nav, desktopPosition: position },
+		});
 	}
 
 	// Sidebar collapsed handler
 	async function handleSidebarChange(collapsed: boolean) {
-		await userSettings.updateGlobal({ nav: { ...userSettings.globalSettings.nav, sidebarCollapsed: collapsed } });
+		await userSettings.updateGlobal({
+			nav: { ...userSettings.globalSettings.nav, sidebarCollapsed: collapsed },
+		});
 	}
 
 	// Theme mode handler
@@ -48,7 +52,9 @@
 
 	// Color scheme handler
 	async function handleColorSchemeChange(colorScheme: string) {
-		await userSettings.updateGlobal({ theme: { ...userSettings.globalSettings.theme, colorScheme } });
+		await userSettings.updateGlobal({
+			theme: { ...userSettings.globalSettings.theme, colorScheme },
+		});
 	}
 
 	// Locale handler
@@ -202,11 +208,14 @@
 							<div class="flex items-center justify-between py-3 border-b border-border">
 								<div>
 									<p class="font-medium">Position (Desktop)</p>
-									<p class="text-sm text-muted-foreground">Position der Navigation auf großen Bildschirmen</p>
+									<p class="text-sm text-muted-foreground">
+										Position der Navigation auf großen Bildschirmen
+									</p>
 								</div>
 								<div class="flex gap-2">
 									<button
-										class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {userSettings.globalSettings.nav.desktopPosition === 'top'
+										class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {userSettings
+											.globalSettings.nav.desktopPosition === 'top'
 											? 'bg-primary text-primary-foreground'
 											: 'bg-surface-hover hover:bg-surface-hover/80'}"
 										onclick={() => handleNavPositionChange('top')}
@@ -214,7 +223,8 @@
 										Oben
 									</button>
 									<button
-										class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {userSettings.globalSettings.nav.desktopPosition === 'bottom'
+										class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {userSettings
+											.globalSettings.nav.desktopPosition === 'bottom'
 											? 'bg-primary text-primary-foreground'
 											: 'bg-surface-hover hover:bg-surface-hover/80'}"
 										onclick={() => handleNavPositionChange('bottom')}
@@ -230,13 +240,16 @@
 									<p class="text-sm text-muted-foreground">Standard-Zustand der Sidebar</p>
 								</div>
 								<button
-									class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {userSettings.globalSettings.nav.sidebarCollapsed
+									class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {userSettings
+										.globalSettings.nav.sidebarCollapsed
 										? 'bg-primary'
 										: 'bg-gray-200 dark:bg-gray-700'}"
-									onclick={() => handleSidebarChange(!userSettings.globalSettings.nav.sidebarCollapsed)}
+									onclick={() =>
+										handleSidebarChange(!userSettings.globalSettings.nav.sidebarCollapsed)}
 								>
 									<span
-										class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {userSettings.globalSettings.nav.sidebarCollapsed
+										class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {userSettings
+											.globalSettings.nav.sidebarCollapsed
 											? 'translate-x-6'
 											: 'translate-x-1'}"
 									></span>
@@ -257,7 +270,8 @@
 								</div>
 								<div class="flex gap-2">
 									<button
-										class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {userSettings.globalSettings.theme.mode === 'light'
+										class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {userSettings
+											.globalSettings.theme.mode === 'light'
 											? 'bg-primary text-primary-foreground'
 											: 'bg-surface-hover hover:bg-surface-hover/80'}"
 										onclick={() => handleThemeModeChange('light')}
@@ -265,7 +279,8 @@
 										Hell
 									</button>
 									<button
-										class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {userSettings.globalSettings.theme.mode === 'dark'
+										class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {userSettings
+											.globalSettings.theme.mode === 'dark'
 											? 'bg-primary text-primary-foreground'
 											: 'bg-surface-hover hover:bg-surface-hover/80'}"
 										onclick={() => handleThemeModeChange('dark')}
@@ -273,7 +288,8 @@
 										Dunkel
 									</button>
 									<button
-										class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {userSettings.globalSettings.theme.mode === 'system'
+										class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {userSettings
+											.globalSettings.theme.mode === 'system'
 											? 'bg-primary text-primary-foreground'
 											: 'bg-surface-hover hover:bg-surface-hover/80'}"
 										onclick={() => handleThemeModeChange('system')}
@@ -289,14 +305,10 @@
 									<p class="text-sm text-muted-foreground">Akzentfarbe der Benutzeroberfläche</p>
 								</div>
 								<div class="flex gap-2">
-									{#each [
-										{ id: 'ocean', label: 'Ozean', color: 'bg-blue-500' },
-										{ id: 'forest', label: 'Wald', color: 'bg-green-500' },
-										{ id: 'sunset', label: 'Sonnenuntergang', color: 'bg-orange-500' },
-										{ id: 'lavender', label: 'Lavendel', color: 'bg-purple-500' }
-									] as scheme}
+									{#each [{ id: 'ocean', label: 'Ozean', color: 'bg-blue-500' }, { id: 'forest', label: 'Wald', color: 'bg-green-500' }, { id: 'sunset', label: 'Sonnenuntergang', color: 'bg-orange-500' }, { id: 'lavender', label: 'Lavendel', color: 'bg-purple-500' }] as scheme}
 										<button
-											class="w-8 h-8 rounded-full transition-all {scheme.color} {userSettings.globalSettings.theme.colorScheme === scheme.id
+											class="w-8 h-8 rounded-full transition-all {scheme.color} {userSettings
+												.globalSettings.theme.colorScheme === scheme.id
 												? 'ring-2 ring-offset-2 ring-primary'
 												: 'hover:scale-110'}"
 											onclick={() => handleColorSchemeChange(scheme.id)}
@@ -319,15 +331,10 @@
 									<p class="text-sm text-muted-foreground">Sprache der Benutzeroberfläche</p>
 								</div>
 								<div class="flex gap-2">
-									{#each [
-										{ id: 'de', label: 'DE' },
-										{ id: 'en', label: 'EN' },
-										{ id: 'fr', label: 'FR' },
-										{ id: 'es', label: 'ES' },
-										{ id: 'it', label: 'IT' }
-									] as lang}
+									{#each [{ id: 'de', label: 'DE' }, { id: 'en', label: 'EN' }, { id: 'fr', label: 'FR' }, { id: 'es', label: 'ES' }, { id: 'it', label: 'IT' }] as lang}
 										<button
-											class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {userSettings.globalSettings.locale === lang.id
+											class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {userSettings
+												.globalSettings.locale === lang.id
 												? 'bg-primary text-primary-foreground'
 												: 'bg-surface-hover hover:bg-surface-hover/80'}"
 											onclick={() => handleLocaleChange(lang.id)}
@@ -342,7 +349,9 @@
 
 					{#if userSettings.syncing}
 						<div class="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-							<div class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+							<div
+								class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
+							></div>
 							<span>Einstellungen werden synchronisiert...</span>
 						</div>
 					{/if}
