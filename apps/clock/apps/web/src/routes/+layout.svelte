@@ -7,6 +7,7 @@
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
@@ -81,6 +82,7 @@
 		{ href: '/stopwatch', label: 'Stoppuhr', icon: 'stopwatch' },
 		{ href: '/pomodoro', label: 'Pomodoro', icon: 'target' },
 		{ href: '/world-clock', label: 'Weltzeituhr', icon: 'globe' },
+		{ href: '/life', label: 'Lebensuhr', icon: 'heart' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
@@ -145,6 +147,15 @@
 
 		// Initialize auth
 		await authStore.initialize();
+
+		// Load user settings (includes start page preference)
+		await userSettings.load();
+
+		// Redirect to start page if on root and a custom start page is set
+		const currentPath = window.location.pathname;
+		if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
+			goto(userSettings.startPage, { replaceState: true });
+		}
 
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('clock-nav-sidebar');

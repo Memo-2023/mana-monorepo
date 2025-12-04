@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { _ } from 'svelte-i18n';
+	import { ClockFace } from '$lib/components/clock-faces';
+	import { clockFaceStore } from '$lib/stores/clock-face.svelte';
 
 	// Current time state
 	let currentTime = $state(new Date());
@@ -13,23 +14,39 @@
 
 	// Formatted time strings
 	let timeString = $derived(
-		`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+		`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
 	);
 	let dateString = $derived(
 		currentTime.toLocaleDateString('de-DE', {
 			weekday: 'long',
-			year: 'numeric',
-			month: 'long',
 			day: 'numeric',
+			month: 'long',
+			year: 'numeric',
 		})
 	);
 
-	// Clock hand rotations
-	let secondRotation = $derived((seconds / 60) * 360);
-	let minuteRotation = $derived(((minutes + seconds / 60) / 60) * 360);
-	let hourRotation = $derived((((hours % 12) + minutes / 60) / 12) * 360);
+	// Days remaining calculations
+	let daysLeftInMonth = $derived(() => {
+		const year = currentTime.getFullYear();
+		const month = currentTime.getMonth();
+		const lastDay = new Date(year, month + 1, 0).getDate();
+		const today = currentTime.getDate();
+		return lastDay - today;
+	});
+
+	let daysLeftInYear = $derived(() => {
+		const year = currentTime.getFullYear();
+		const endOfYear = new Date(year, 11, 31);
+		const today = new Date(year, currentTime.getMonth(), currentTime.getDate());
+		const diffTime = endOfYear.getTime() - today.getTime();
+		return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+	});
+
+	// Selected clock face
+	let selectedFace = $derived(clockFaceStore.selectedFace);
 
 	onMount(() => {
+		clockFaceStore.initialize();
 		interval = setInterval(() => {
 			currentTime = new Date();
 		}, 1000);
@@ -42,126 +59,117 @@
 	});
 </script>
 
-<div class="space-y-8">
-	<!-- Header -->
-	<div class="text-center">
-		<h1 class="text-3xl font-bold text-foreground">{$_('dashboard.title')}</h1>
-		<p class="mt-2 text-muted-foreground">{dateString}</p>
-	</div>
-
-	<!-- Main Clock Display -->
-	<div class="flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-16">
-		<!-- Analog Clock -->
-		<div class="clock-face">
-			<!-- Hour markers -->
-			{#each Array(12) as _, i}
-				<div
-					class="clock-marker hour-marker"
-					style="transform: translateX(-50%) rotate({i * 30}deg) translateY(-130px)"
-				></div>
-			{/each}
-
-			<!-- Minute markers -->
-			{#each Array(60) as _, i}
-				{#if i % 5 !== 0}
-					<div
-						class="clock-marker minute-marker"
-						style="transform: translateX(-50%) rotate({i * 6}deg) translateY(-134px)"
-					></div>
-				{/if}
-			{/each}
-
-			<!-- Clock hands -->
-			<div
-				class="clock-hand hour"
-				style="transform: translateX(-50%) rotate({hourRotation}deg)"
-			></div>
-			<div
-				class="clock-hand minute"
-				style="transform: translateX(-50%) rotate({minuteRotation}deg)"
-			></div>
-			<div
-				class="clock-hand second"
-				style="transform: translateX(-50%) rotate({secondRotation}deg)"
-			></div>
-
-			<!-- Center dot -->
-			<div class="clock-center"></div>
+<div class="home-container">
+	<!-- Center: Clock Face and Info -->
+	<div class="clock-center">
+		<div class="clock-display">
+			<ClockFace type={selectedFace} {hours} {minutes} {seconds} size={320} />
 		</div>
 
-		<!-- Digital Clock -->
-		<div class="text-center">
-			<div class="digital-clock digital-clock-large text-foreground">
-				{timeString}
+		<!-- Info below clock -->
+		<div class="bottom-info">
+			<p class="time-display">{timeString}</p>
+			<p class="date-display">{dateString}</p>
+			<div class="countdown-info">
+				<span class="countdown-item">
+					<span class="countdown-value">{daysLeftInMonth()}</span>
+					<span class="countdown-label">Tage bis Monatsende</span>
+				</span>
+				<span class="countdown-divider">·</span>
+				<span class="countdown-item">
+					<span class="countdown-value">{daysLeftInYear()}</span>
+					<span class="countdown-label">Tage bis Jahresende</span>
+				</span>
 			</div>
 		</div>
 	</div>
 
-	<!-- Quick Access Cards -->
-	<div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-		<!-- Next Alarm Card -->
-		<a href="/alarms" class="card hover:border-primary/50 transition-colors">
-			<div class="flex items-center gap-3">
-				<div class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/10">
-					<span class="text-xl">🔔</span>
-				</div>
-				<div>
-					<p class="text-sm text-muted-foreground">{$_('dashboard.nextAlarm')}</p>
-					<p class="font-medium text-foreground">Nicht eingestellt</p>
-				</div>
-			</div>
-		</a>
-
-		<!-- Active Timers Card -->
-		<a href="/timers" class="card hover:border-primary/50 transition-colors">
-			<div class="flex items-center gap-3">
-				<div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/10">
-					<span class="text-xl">⏱</span>
-				</div>
-				<div>
-					<p class="text-sm text-muted-foreground">{$_('dashboard.activeTimers')}</p>
-					<p class="font-medium text-foreground">0 aktiv</p>
-				</div>
-			</div>
-		</a>
-
-		<!-- Stopwatch Card -->
-		<a href="/stopwatch" class="card hover:border-primary/50 transition-colors">
-			<div class="flex items-center gap-3">
-				<div class="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/10">
-					<span class="text-xl">⏲</span>
-				</div>
-				<div>
-					<p class="text-sm text-muted-foreground">{$_('nav.stopwatch')}</p>
-					<p class="font-medium text-foreground">Bereit</p>
-				</div>
-			</div>
-		</a>
-
-		<!-- World Clock Card -->
-		<a href="/world-clock" class="card hover:border-primary/50 transition-colors">
-			<div class="flex items-center gap-3">
-				<div class="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/10">
-					<span class="text-xl">🌍</span>
-				</div>
-				<div>
-					<p class="text-sm text-muted-foreground">{$_('dashboard.worldClocks')}</p>
-					<p class="font-medium text-foreground">0 Städte</p>
-				</div>
-			</div>
-		</a>
-	</div>
-
-	<!-- Pomodoro Quick Start -->
-	<div class="card mt-6">
-		<div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
-			<div>
-				<h3 class="text-lg font-semibold text-foreground">{$_('pomodoro.title')}</h3>
-				<p class="text-sm text-muted-foreground">Starte eine fokussierte Arbeitssitzung</p>
-			</div>
-			<a href="/pomodoro" class="btn btn-primary btn-lg">
-				{$_('pomodoro.start')}
-			</a>
-		</div>
-	</div>
+	<!-- Bottom Right: Customize link -->
+	<a href="/clock-faces" class="customize-link"> Zifferblatt anpassen </a>
 </div>
+
+<style>
+	.home-container {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		height: calc(100vh - 120px);
+		min-height: 400px;
+	}
+
+	.bottom-info {
+		text-align: center;
+		margin-top: 1.5rem;
+	}
+
+	.time-display {
+		font-size: 2.5rem;
+		font-weight: 300;
+		font-variant-numeric: tabular-nums;
+		color: hsl(var(--color-foreground));
+		letter-spacing: 0.02em;
+	}
+
+	.date-display {
+		font-size: 0.875rem;
+		color: hsl(var(--color-muted-foreground));
+		margin-top: 0.25rem;
+	}
+
+	.countdown-info {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		margin-top: 1rem;
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.countdown-item {
+		display: flex;
+		align-items: baseline;
+		gap: 0.25rem;
+	}
+
+	.countdown-value {
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		color: hsl(var(--color-foreground));
+	}
+
+	.countdown-label {
+		opacity: 0.8;
+	}
+
+	.countdown-divider {
+		opacity: 0.4;
+	}
+
+	.clock-center {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.clock-display {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.customize-link {
+		position: absolute;
+		bottom: 1rem;
+		right: 1rem;
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+		transition: color 0.15s ease;
+	}
+
+	.customize-link:hover {
+		color: hsl(var(--color-foreground));
+	}
+</style>
