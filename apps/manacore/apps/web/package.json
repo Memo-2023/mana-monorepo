@@ -59,6 +59,7 @@
 		"@manacore/shared-utils": "workspace:*",
 		"@supabase/ssr": "^0.5.2",
 		"@supabase/supabase-js": "^2.81.1",
+		"svelte-dnd-action": "^0.9.68",
 		"svelte-i18n": "^4.0.0"
 	},
 	"type": "module"

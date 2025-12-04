@@ -6,6 +6,75 @@
 		"back": "Zurück",
 		"loading": "Lädt..."
 	},
+	"dashboard": {
+		"title": "Dashboard",
+		"welcome": "Willkommen zurück",
+		"customize": "Anpassen",
+		"done": "Fertig",
+		"no_data": "Keine Daten verfügbar",
+		"retry": "Erneut versuchen",
+		"widget_error": "Fehler beim Laden",
+		"remove_widget": "Entfernen",
+		"widgets": {
+			"credits": {
+				"title": "Credits",
+				"description": "Dein Kontostand",
+				"available": "Verfügbar",
+				"free_today": "Gratis heute",
+				"manage": "Verwalten"
+			},
+			"quick_actions": {
+				"title": "Schnellzugriff",
+				"description": "Schnelle Aktionen"
+			},
+			"transactions": {
+				"title": "Transaktionen",
+				"description": "Letzte Aktivitäten",
+				"empty": "Keine Transaktionen"
+			},
+			"tasks_today": {
+				"title": "Aufgaben heute",
+				"description": "Deine heutigen Aufgaben",
+				"empty": "Keine Aufgaben für heute"
+			},
+			"tasks_upcoming": {
+				"title": "Kommende Aufgaben",
+				"description": "Die nächsten 7 Tage",
+				"empty": "Keine kommenden Aufgaben"
+			},
+			"calendar": {
+				"title": "Kalender",
+				"description": "Anstehende Termine",
+				"empty": "Keine Termine"
+			},
+			"chat": {
+				"title": "Chat",
+				"description": "Letzte Unterhaltungen",
+				"empty": "Keine Unterhaltungen"
+			},
+			"contacts": {
+				"title": "Kontakte",
+				"description": "Deine Favoriten",
+				"empty": "Keine Favoriten",
+				"add_favorites": "Favoriten hinzufügen",
+				"view_all": "Alle anzeigen"
+			},
+			"zitare": {
+				"title": "Inspiration",
+				"description": "Zitat des Tages",
+				"empty": "Keine Favoriten",
+				"explore": "Zitate entdecken",
+				"refresh": "Neues Zitat",
+				"view_all": "Alle Zitate"
+			}
+		}
+	},
+	"credits": {
+		"available": "Verfügbar",
+		"daily_free": "Gratis heute",
+		"total_spent": "Verbraucht",
+		"manage": "Credits verwalten"
+	},
 	"app_slider": {
 		"title": "Teil des Mana Ökosystems",
 		"memoro_desc": "KI-gestützte Sprachnotizen",

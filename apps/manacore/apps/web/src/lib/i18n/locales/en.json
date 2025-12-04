@@ -6,6 +6,75 @@
 		"back": "Back",
 		"loading": "Loading..."
 	},
+	"dashboard": {
+		"title": "Dashboard",
+		"welcome": "Welcome back",
+		"customize": "Customize",
+		"done": "Done",
+		"no_data": "No data available",
+		"retry": "Try again",
+		"widget_error": "Failed to load",
+		"remove_widget": "Remove",
+		"widgets": {
+			"credits": {
+				"title": "Credits",
+				"description": "Your balance",
+				"available": "Available",
+				"free_today": "Free today",
+				"manage": "Manage"
+			},
+			"quick_actions": {
+				"title": "Quick Actions",
+				"description": "Quick access"
+			},
+			"transactions": {
+				"title": "Transactions",
+				"description": "Recent activity",
+				"empty": "No transactions"
+			},
+			"tasks_today": {
+				"title": "Tasks Today",
+				"description": "Your tasks for today",
+				"empty": "No tasks for today"
+			},
+			"tasks_upcoming": {
+				"title": "Upcoming Tasks",
+				"description": "Next 7 days",
+				"empty": "No upcoming tasks"
+			},
+			"calendar": {
+				"title": "Calendar",
+				"description": "Upcoming events",
+				"empty": "No events"
+			},
+			"chat": {
+				"title": "Chat",
+				"description": "Recent conversations",
+				"empty": "No conversations"
+			},
+			"contacts": {
+				"title": "Contacts",
+				"description": "Your favorites",
+				"empty": "No favorites",
+				"add_favorites": "Add favorites",
+				"view_all": "View all"
+			},
+			"zitare": {
+				"title": "Inspiration",
+				"description": "Quote of the day",
+				"empty": "No favorites",
+				"explore": "Explore quotes",
+				"refresh": "New quote",
+				"view_all": "All quotes"
+			}
+		}
+	},
+	"credits": {
+		"available": "Available",
+		"daily_free": "Free today",
+		"total_spent": "Spent",
+		"manage": "Manage credits"
+	},
 	"app_slider": {
 		"title": "Part of the Mana Ecosystem",
 		"memoro_desc": "AI-powered voice notes",
