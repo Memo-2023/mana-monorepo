@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { toasts, type Toast } from '$lib/stores/toast';
+	import { toasts } from '$lib/stores/toast';
+	import type { Toast } from '$lib/stores/toast';
 
 	function getIcon(type: Toast['type']) {
 		switch (type) {

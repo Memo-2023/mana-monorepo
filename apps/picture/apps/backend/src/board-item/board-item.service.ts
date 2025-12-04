@@ -1,8 +1,9 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { eq, and, max, inArray, gt, lt, sql } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { boards, boardItems, images, type BoardItem } from '../db/schema';
+import { Database } from '../db/connection';
+import { boards, boardItems, images } from '../db/schema';
+import type { BoardItem } from '../db/schema';
 import { AddImageToBoardDto, AddTextToBoardDto, UpdateBoardItemDto } from './dto/board-item.dto';
 
 export interface BoardItemWithImage extends BoardItem {

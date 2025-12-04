@@ -1,8 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { eq, and } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { favorites, type Favorite, type NewFavorite } from '../db/schema';
+import { Database } from '../db/connection';
+import { favorites } from '../db/schema';
+import type { Favorite, NewFavorite } from '../db/schema';
 
 @Injectable()
 export class FavoriteService {

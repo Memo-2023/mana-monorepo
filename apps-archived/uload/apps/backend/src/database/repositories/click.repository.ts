@@ -1,16 +1,8 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { DATABASE_TOKEN, type Database } from '../database.module';
-import {
-	clicks,
-	type Click,
-	type NewClick,
-	eq,
-	desc,
-	sql,
-	and,
-	gte,
-	lte,
-} from '@manacore/uload-database';
+import { DATABASE_TOKEN } from '../database.module';
+import type { Database } from '../database.module';
+import { clicks, eq, desc, sql, and, gte, lte } from '@manacore/uload-database';
+import type { Click, NewClick } from '@manacore/uload-database';
 
 export interface ClickStats {
 	totalClicks: number;

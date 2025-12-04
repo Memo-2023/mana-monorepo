@@ -1,5 +1,6 @@
 import { redirect, error, fail } from '@sveltejs/kit';
-import { parseUserAgent, type Link } from '$lib/pocketbase';
+import { parseUserAgent } from '$lib/pocketbase';
+import type { Link } from '$lib/pocketbase';
 import { linkCache } from '$lib/server/linkCache';
 import type { PageServerLoad, Actions } from './$types';
 

@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useTheme, type ThemeVariant } from '../components/ThemeProvider';
+import { useTheme } from '../components/ThemeProvider';
+import type { ThemeVariant } from '../components/ThemeProvider';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const THEME_PATTERNS: Record<ThemeVariant, any> = {

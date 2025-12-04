@@ -1,6 +1,7 @@
 import { Module, Global, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createClient, closeDb, type Database } from '@manacore/nutriphi-database';
+import { createClient, closeDb } from '@manacore/nutriphi-database';
+import type { Database } from '@manacore/nutriphi-database';
 
 export const DATABASE_TOKEN = 'DATABASE';
 

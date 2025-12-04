@@ -1,7 +1,7 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { isOk } from '@manacore/shared-errors';
-import { type ModelService } from './model.service';
-import { type Model } from '../db/schema/models.schema';
+import { ModelService } from './model.service';
+import { Model } from '../db/schema/models.schema';
 
 // Models are publicly accessible - no auth required to list available models
 @Controller('models')

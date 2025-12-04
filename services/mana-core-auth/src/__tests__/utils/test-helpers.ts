@@ -4,7 +4,7 @@
  * Common utilities for writing tests
  */
 
-import { type ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * Create mock ConfigService

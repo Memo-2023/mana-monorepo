@@ -11,9 +11,10 @@ import {
 import { Stack } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Container } from '~/components/Container';
-import { useTheme, type ThemeMode } from '~/utils/themeContext';
+import { useTheme } from '~/utils/themeContext';
+import type { ThemeMode } from '~/utils/themeContext';
 import { supabase } from '../../utils/supabase';
-import { type Session } from '@supabase/supabase-js';
+import { Session } from '@supabase/supabase-js';
 
 interface Profile {
 	id: string;

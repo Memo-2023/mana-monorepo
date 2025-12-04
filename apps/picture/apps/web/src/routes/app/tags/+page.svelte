@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { tags, isLoadingTags } from '$lib/stores/tags';
-	import { getAllTags, createTag, updateTag, deleteTag, type Tag } from '$lib/api/tags';
+	import { getAllTags, createTag, updateTag, deleteTag } from '$lib/api/tags';
+	import type { Tag } from '$lib/api/tags';
 	import { showToast } from '$lib/stores/toast';
 	import { PageHeader } from '@manacore/shared-ui';
 	import { Plus, Tag as TagIcon, PencilSimple, Trash } from '@manacore/shared-icons';

@@ -11,7 +11,8 @@ import {
 	NotFoundException,
 } from '@nestjs/common';
 import { AuthGuard, CurrentUser } from '@mana-core/nestjs-integration';
-import { LinksService, type CreateLinkDto, type UpdateLinkDto } from '../services/links.service';
+import { LinksService } from '../services/links.service';
+import type { CreateLinkDto, UpdateLinkDto } from '../services/links.service';
 
 @Controller('api/links')
 @UseGuards(AuthGuard)

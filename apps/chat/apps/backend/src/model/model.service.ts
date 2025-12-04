@@ -1,9 +1,10 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { eq, asc } from 'drizzle-orm';
-import { type AsyncResult, ok, err, DatabaseError, NotFoundError } from '@manacore/shared-errors';
+import { AsyncResult, ok, err, DatabaseError, NotFoundError } from '@manacore/shared-errors';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { models, type Model } from '../db/schema/models.schema';
+import { Database } from '../db/connection';
+import { models } from '../db/schema/models.schema';
+import type { Model } from '../db/schema/models.schema';
 
 @Injectable()
 export class ModelService {

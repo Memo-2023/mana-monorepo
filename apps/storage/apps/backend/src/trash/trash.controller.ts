@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Delete, Param, Query, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard, CurrentUser, type CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { JwtAuthGuard, CurrentUser } from '@manacore/shared-nestjs-auth';
+import type { CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { TrashService } from './trash.service';
 
 @Controller('api/v1/trash')

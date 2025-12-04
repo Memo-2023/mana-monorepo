@@ -1,7 +1,8 @@
 /**
  * Document Service - CRUD operations via Backend API
  */
-import { documentApi, type Document as ApiDocument } from './api';
+import { documentApi } from './api';
+import type { Document as ApiDocument } from './api';
 
 // Re-export type with backwards-compatible naming (snake_case for mobile)
 export interface Document {

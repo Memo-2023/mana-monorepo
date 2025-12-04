@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Share2, Link, Copy, Trash2 } from 'lucide-svelte';
-	import { sharesApi, type Share } from '$lib/api/client';
+	import { sharesApi } from '$lib/api/client';
+	import type { Share } from '$lib/api/client';
 	import { toast } from '$lib/stores/toast';
 
 	let shares = $state<Share[]>([]);

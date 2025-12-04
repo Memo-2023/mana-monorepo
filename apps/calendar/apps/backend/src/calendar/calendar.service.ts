@@ -1,8 +1,9 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { eq, and } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { calendars, type Calendar, type NewCalendar } from '../db/schema/calendars.schema';
+import { Database } from '../db/connection';
+import { calendars } from '../db/schema/calendars.schema';
+import type { Calendar, NewCalendar } from '../db/schema/calendars.schema';
 import { CreateCalendarDto, UpdateCalendarDto } from './dto';
 
 @Injectable()

@@ -2,7 +2,8 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { contactsApi, type Contact } from '$lib/api/contacts';
+	import { contactsApi } from '$lib/api/contacts';
+	import type { Contact } from '$lib/api/contacts';
 	import '$lib/i18n';
 
 	let contact = $state<Contact | null>(null);

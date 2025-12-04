@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { supabase } from '../utils/supabase';
-import { type Session } from '@supabase/supabase-js';
+import { Session } from '@supabase/supabase-js';
 
 interface Profile {
 	id: string;

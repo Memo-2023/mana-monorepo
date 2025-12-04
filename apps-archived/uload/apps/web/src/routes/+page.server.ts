@@ -1,5 +1,6 @@
 import { fail } from '@sveltejs/kit';
-import { pb, generateShortCode, type Link, type Click, type User } from '$lib/pocketbase';
+import { pb, generateShortCode } from '$lib/pocketbase';
+import type { Link, Click, User } from '$lib/pocketbase';
 import { getCollection } from '$lib/content';
 import type { BlogPostWithMeta } from '../content/config';
 import type { Actions, PageServerLoad } from './$types';

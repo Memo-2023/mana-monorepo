@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
-import { useTheme, type ColorMode, type ContrastLevel } from './ThemeProvider';
+import { useTheme } from './ThemeProvider';
+import type { ColorMode, ContrastLevel } from './ThemeProvider';
 
 const COLOR_MODES: { label: string; value: ColorMode }[] = [
 	{ label: 'System', value: 'system' },

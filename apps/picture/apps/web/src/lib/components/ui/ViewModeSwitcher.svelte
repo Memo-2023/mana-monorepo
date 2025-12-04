@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { viewMode, cycleViewMode, type ViewMode } from '$lib/stores/view';
+	import { viewMode, cycleViewMode } from '$lib/stores/view';
+	import type { ViewMode } from '$lib/stores/view';
 	import { List, SquaresFour, Square } from '@manacore/shared-icons';
 
 	function getLabel(mode: ViewMode) {

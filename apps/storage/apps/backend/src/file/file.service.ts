@@ -1,8 +1,9 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { eq, and, isNull } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { files, fileVersions, type File, type NewFile, type NewFileVersion } from '../db/schema';
+import { Database } from '../db/connection';
+import { files, fileVersions } from '../db/schema';
+import type { File, NewFile, NewFileVersion } from '../db/schema';
 import { StorageService } from '../storage/storage.service';
 import { CreateFileDto, UpdateFileDto, MoveFileDto } from './dto/create-file.dto';
 

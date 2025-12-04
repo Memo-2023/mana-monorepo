@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { type ComponentInfo } from '../types';
+import { ComponentInfo } from '../types';
 import { getComponentsPath, ensureDir } from './paths';
 
 /**

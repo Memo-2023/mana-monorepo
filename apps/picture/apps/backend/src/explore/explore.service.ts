@@ -1,8 +1,9 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { eq, and, isNull, desc, ilike } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { images, type Image } from '../db/schema';
+import { Database } from '../db/connection';
+import { images } from '../db/schema';
+import type { Image } from '../db/schema';
 import { GetPublicImagesDto, SearchPublicImagesDto } from './dto/explore.dto';
 
 @Injectable()

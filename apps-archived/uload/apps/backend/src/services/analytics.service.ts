@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as UAParser from 'ua-parser-js';
-import { ClickRepository, type ClickStats } from '../database/repositories';
+import { ClickRepository } from '../database/repositories';
+import type { ClickStats } from '../database/repositories';
 import { RedirectService } from './redirect.service';
 import type { NewClick } from '@manacore/uload-database';
 

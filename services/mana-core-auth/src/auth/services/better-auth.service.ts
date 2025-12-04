@@ -21,7 +21,8 @@ import {
 	UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createBetterAuth, type BetterAuthInstance } from '../better-auth.config';
+import { createBetterAuth } from '../better-auth.config';
+import type { BetterAuthInstance } from '../better-auth.config';
 import { getDb } from '../../db/connection';
 import { balances, organizationBalances } from '../../db/schema/credits.schema';
 import { hasUser, hasToken, hasMember, hasMembers, hasSession } from '../types/better-auth.types';

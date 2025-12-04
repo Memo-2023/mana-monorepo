@@ -1,5 +1,6 @@
 import type { StorytellerUser } from '$lib/types/auth';
-import { authService, type UserData } from '$lib/auth';
+import { authService } from '$lib/auth';
+import type { UserData } from '$lib/auth';
 
 // Svelte 5 runes-based auth store
 let user = $state<StorytellerUser | null>(null);

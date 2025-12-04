@@ -1,8 +1,10 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { isOk } from '@manacore/shared-errors';
-import { type ChatService } from './chat.service';
-import { type ChatCompletionDto, type ChatCompletionResponseDto } from './dto/chat-completion.dto';
-import { JwtAuthGuard, CurrentUser, type CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { ChatService } from './chat.service';
+import { ChatCompletionDto } from './dto/chat-completion.dto';
+import type { ChatCompletionResponseDto } from './dto/chat-completion.dto';
+import { JwtAuthGuard, CurrentUser } from '@manacore/shared-nestjs-auth';
+import type { CurrentUserData } from '@manacore/shared-nestjs-auth';
 
 @Controller('chat')
 @UseGuards(JwtAuthGuard)

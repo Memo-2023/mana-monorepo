@@ -5,7 +5,8 @@
 
 import { useMemo } from 'react';
 import { useIsDarkMode, useThemeType } from '~/store/settingsStore';
-import { getTheme, getCategoryGradient, type ThemeColors } from '~/themes/definitions';
+import { getTheme, getCategoryGradient } from '~/themes/definitions';
+import type { ThemeColors } from '~/themes/definitions';
 import type { ThemeType } from '~/store/settingsStore';
 
 export interface UseThemeReturn {

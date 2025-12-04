@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { toasts, dismissToast, type Toast } from '$lib/stores/toast';
+	import { toasts, dismissToast } from '$lib/stores/toast';
+	import type { Toast } from '$lib/stores/toast';
 	import { fly, fade } from 'svelte/transition';
 	import { CheckCircle, XCircle, Warning, Info, X } from '@manacore/shared-icons';
 

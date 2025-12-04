@@ -1,4 +1,5 @@
-import { writable, derived, type Writable } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
+import type { Writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { TranscriptionJob } from '$lib/api/client';
 

@@ -9,7 +9,8 @@
  * - Credit balance initialization
  */
 
-import { Test, type TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { BetterAuthService } from './better-auth.service';

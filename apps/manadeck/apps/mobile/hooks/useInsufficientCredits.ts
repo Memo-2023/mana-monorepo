@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { extractCreditError, type InsufficientCreditsError } from '../types/credits';
+import { extractCreditError } from '../types/credits';
+import type { InsufficientCreditsError } from '../types/credits';
 
 interface InsufficientCreditsState {
 	visible: boolean;

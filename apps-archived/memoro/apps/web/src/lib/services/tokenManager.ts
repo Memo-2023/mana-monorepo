@@ -4,7 +4,8 @@
  * Adapted from memoro_app patterns for SvelteKit
  */
 
-import { authService, type UserData } from './authService';
+import { authService } from './authService';
+import type { UserData } from './authService';
 import { browser } from '$app/environment';
 
 // Token state management

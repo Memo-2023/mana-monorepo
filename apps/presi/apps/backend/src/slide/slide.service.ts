@@ -1,10 +1,11 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { eq, max } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
+import { Database } from '../db/connection';
 import { slides, decks } from '../db/schema';
-import { type DeckService } from '../deck/deck.service';
-import { type CreateSlideDto, type UpdateSlideDto, type ReorderSlidesDto } from './slide.dto';
+import { DeckService } from '../deck/deck.service';
+import { CreateSlideDto } from './slide.dto';
+import type { UpdateSlideDto, ReorderSlidesDto } from './slide.dto';
 
 @Injectable()
 export class SlideService {

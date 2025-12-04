@@ -9,7 +9,8 @@ import {
 	Query,
 	UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard, CurrentUser, type CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { JwtAuthGuard, CurrentUser } from '@manacore/shared-nestjs-auth';
+import type { CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { FolderService } from './folder.service';
 import { CreateFolderDto } from './dto/create-folder.dto';
 import { UpdateFolderDto, MoveFolderDto } from './dto/update-folder.dto';

@@ -2,7 +2,7 @@ import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../components/ThemeProvider';
-import { type Deck } from '../../types/models';
+import { Deck } from '../../types/models';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import { SlideList } from '../../components/slides/SlideList';

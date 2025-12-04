@@ -2,7 +2,8 @@
  * Document Service - CRUD operations via Backend API
  */
 
-import { documentApi, conversationApi, type Document } from './api';
+import { documentApi, conversationApi } from './api';
+import type { Document } from './api';
 
 export type { Document };
 

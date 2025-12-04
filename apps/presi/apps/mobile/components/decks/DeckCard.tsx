@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { type Deck } from '../../types/models';
+import { Deck } from '../../types/models';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../../components/ThemeProvider';
 

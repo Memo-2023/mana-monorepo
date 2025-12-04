@@ -1,8 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { isOk } from '@manacore/shared-errors';
-import { type TemplateService } from './template.service';
-import { type Template } from '../db/schema/templates.schema';
-import { JwtAuthGuard, CurrentUser, type CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { TemplateService } from './template.service';
+import { Template } from '../db/schema/templates.schema';
+import { JwtAuthGuard, CurrentUser } from '@manacore/shared-nestjs-auth';
+import type { CurrentUserData } from '@manacore/shared-nestjs-auth';
 
 @Controller('templates')
 @UseGuards(JwtAuthGuard)

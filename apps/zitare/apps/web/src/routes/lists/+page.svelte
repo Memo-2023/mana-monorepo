@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { listsStore, type QuoteList } from '$lib/stores/lists';
+	import { listsStore } from '$lib/stores/lists';
+	import type { QuoteList } from '$lib/stores/lists';
 	import { quotesDE } from '@zitare/shared';
 	import { PageHeader } from '@manacore/shared-ui';
 	import { toast } from '$lib/stores/toast';

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { AppSlider, type AppItem } from '@manacore/shared-ui';
+	import { AppSlider } from '@manacore/shared-ui';
+import type { AppItem } from '@manacore/shared-ui';
 	import { APP_ICONS } from '@manacore/shared-branding';
 	import { t } from 'svelte-i18n';
 

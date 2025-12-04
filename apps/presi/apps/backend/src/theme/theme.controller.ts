@@ -1,5 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { type ThemeService } from './theme.service';
+import { ThemeService } from './theme.service';
 
 @Controller('themes')
 export class ThemeController {

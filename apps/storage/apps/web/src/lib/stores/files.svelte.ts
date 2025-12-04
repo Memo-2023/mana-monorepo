@@ -2,7 +2,8 @@
  * Files Store - Manages files and folders state
  */
 
-import { filesApi, foldersApi, type StorageFile, type StorageFolder } from '$lib/api/client';
+import { filesApi, foldersApi } from '$lib/api/client';
+import type { StorageFile, StorageFolder } from '$lib/api/client';
 
 let files = $state<StorageFile[]>([]);
 let folders = $state<StorageFolder[]>([]);

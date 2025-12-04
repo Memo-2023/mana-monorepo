@@ -1,5 +1,6 @@
 import { Module, Global, OnModuleDestroy, Logger } from '@nestjs/common';
-import { getDb, closeDb, type Database } from '@manacore/manadeck-database/client';
+import { getDb, closeDb } from '@manacore/manadeck-database/client';
+import type { Database } from '@manacore/manadeck-database/client';
 
 export const DATABASE_TOKEN = 'DATABASE';
 

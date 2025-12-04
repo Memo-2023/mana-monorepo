@@ -10,10 +10,11 @@ import {
 	UseGuards,
 } from '@nestjs/common';
 import { isOk } from '@manacore/shared-errors';
-import { type ConversationService } from './conversation.service';
-import { type Conversation } from '../db/schema/conversations.schema';
-import { type Message } from '../db/schema/messages.schema';
-import { JwtAuthGuard, CurrentUser, type CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { ConversationService } from './conversation.service';
+import { Conversation } from '../db/schema/conversations.schema';
+import { Message } from '../db/schema/messages.schema';
+import { JwtAuthGuard, CurrentUser } from '@manacore/shared-nestjs-auth';
+import type { CurrentUserData } from '@manacore/shared-nestjs-auth';
 
 @Controller('conversations')
 @UseGuards(JwtAuthGuard)

@@ -1,8 +1,9 @@
 import { Injectable, Inject, NotFoundException, Logger } from '@nestjs/common';
 import { eq, and } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { tags, imageTags, images, type Tag } from '../db/schema';
+import { Database } from '../db/connection';
+import { tags, imageTags, images } from '../db/schema';
+import type { Tag } from '../db/schema';
 import { CreateTagDto, UpdateTagDto } from './dto/tag.dto';
 
 @Injectable()

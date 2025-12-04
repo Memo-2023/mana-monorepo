@@ -1,4 +1,5 @@
-import { AppError, type ErrorContext } from '../errors/app-error';
+import { AppError } from '../errors/app-error';
+import type { ErrorContext } from '../errors/app-error';
 import { ErrorCode } from '../types/error-codes';
 import { isAppError } from '../guards/type-guards';
 

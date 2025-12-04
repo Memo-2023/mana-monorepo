@@ -1,8 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { eq, and, ilike, or } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { files, folders, type File, type Folder } from '../db/schema';
+import { Database } from '../db/connection';
+import { files, folders } from '../db/schema';
+import type { File, Folder } from '../db/schema';
 
 @Injectable()
 export class SearchService {

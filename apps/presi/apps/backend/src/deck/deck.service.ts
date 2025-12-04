@@ -1,9 +1,10 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { eq, and, desc } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
+import { Database } from '../db/connection';
 import { decks, slides } from '../db/schema';
-import { type CreateDeckDto, type UpdateDeckDto } from './deck.dto';
+import { CreateDeckDto } from './deck.dto';
+import type { UpdateDeckDto } from './deck.dto';
 
 @Injectable()
 export class DeckService {

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { quotesDE, authorsDE, type Quote, type Author } from '@zitare/shared';
+	import { quotesDE, authorsDE } from '@zitare/shared';
+	import type { Quote, Author } from '@zitare/shared';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
 	import AuthorCard from '$lib/components/AuthorCard.svelte';
 

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { groupsApi, type ContactGroup } from '$lib/api/contacts';
+	import { groupsApi } from '$lib/api/contacts';
+	import type { ContactGroup } from '$lib/api/contacts';
 	import '$lib/i18n';
 
 	let loading = $state(true);

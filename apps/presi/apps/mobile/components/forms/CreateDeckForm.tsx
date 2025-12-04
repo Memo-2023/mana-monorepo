@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../ThemeProvider';
 import { createDeck } from '../../services/firestore';
-import { type Deck } from '../../types/models';
+import { Deck } from '../../types/models';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 interface CreateDeckFormProps {

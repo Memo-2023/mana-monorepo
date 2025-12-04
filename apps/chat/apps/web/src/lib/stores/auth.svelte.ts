@@ -4,7 +4,8 @@
  */
 
 import { browser } from '$app/environment';
-import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
+import { initializeWebAuth } from '@manacore/shared-auth';
+import type { UserData } from '@manacore/shared-auth';
 import { PUBLIC_MANA_CORE_AUTH_URL } from '$env/static/public';
 
 // Initialize Mana Core Auth only on the client side

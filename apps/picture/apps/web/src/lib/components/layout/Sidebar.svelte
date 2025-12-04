@@ -2,7 +2,8 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { viewMode, cycleViewMode, type ViewMode } from '$lib/stores/view';
+	import { viewMode, cycleViewMode } from '$lib/stores/view';
+	import type { ViewMode } from '$lib/stores/view';
 	import { isSidebarCollapsed, setSidebarCollapsed } from '$lib/stores/sidebar';
 	import {
 		exploreSearchQuery,

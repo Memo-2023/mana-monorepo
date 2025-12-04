@@ -1,16 +1,8 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { DATABASE_TOKEN, type Database } from '../database.module';
-import {
-	links,
-	type Link,
-	type NewLink,
-	eq,
-	and,
-	desc,
-	sql,
-	or,
-	ilike,
-} from '@manacore/uload-database';
+import { DATABASE_TOKEN } from '../database.module';
+import type { Database } from '../database.module';
+import { links, eq, and, desc, sql, or, ilike } from '@manacore/uload-database';
+import type { Link, NewLink } from '@manacore/uload-database';
 
 export interface ListLinksOptions {
 	page?: number;

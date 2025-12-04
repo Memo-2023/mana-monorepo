@@ -17,7 +17,7 @@ import CommonHeader from '../components/molecules/CommonHeader';
 import SearchBar from '../components/molecules/SearchBar';
 import { usePublicStories } from '../hooks/usePublicStories';
 import StoryCardSkeleton from '../components/molecules/StoryCardSkeleton';
-import BottomFilterTabs, { type FilterTab } from '../components/molecules/BottomFilterTabs';
+import BottomFilterTabs, {FilterTab } from '../components/molecules/BottomFilterTabs';
 
 export default function DiscoverScreen() {
 	const router = useRouter();

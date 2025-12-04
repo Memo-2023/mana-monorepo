@@ -1,13 +1,8 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { DATABASE_TOKEN, type Database } from '../database.module';
-import {
-	userStats,
-	type UserStats,
-	type NewUserStats,
-	eq,
-	desc,
-	sql,
-} from '@manacore/manadeck-database';
+import { DATABASE_TOKEN } from '../database.module';
+import type { Database } from '../database.module';
+import { userStats, eq, desc, sql } from '@manacore/manadeck-database';
+import type { UserStats, NewUserStats } from '@manacore/manadeck-database';
 
 @Injectable()
 export class UserStatsRepository {

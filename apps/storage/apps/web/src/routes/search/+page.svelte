@@ -3,7 +3,8 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { Search, Grid, List } from 'lucide-svelte';
-	import { searchApi, type StorageFile, type StorageFolder } from '$lib/api/client';
+	import { searchApi } from '$lib/api/client';
+	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import { filesStore } from '$lib/stores/files.svelte';
 	import FileGrid from '$lib/components/files/FileGrid.svelte';
 	import FileList from '$lib/components/files/FileList.svelte';

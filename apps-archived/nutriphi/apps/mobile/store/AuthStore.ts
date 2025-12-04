@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { authService, type UserData, type AuthResult } from '../services/auth/authService';
+import { authService } from '../services/auth/authService';
+import type { UserData, AuthResult } from '../services/auth/authService';
 import { tokenManager } from '../services/auth/tokenManager';
 
 interface AuthState {

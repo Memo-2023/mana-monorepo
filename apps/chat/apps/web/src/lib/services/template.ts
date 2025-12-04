@@ -2,7 +2,8 @@
  * Template Service - CRUD operations via Backend API
  */
 
-import { templateApi, type Template } from './api';
+import { templateApi } from './api';
+import type { Template } from './api';
 
 export type { Template };
 

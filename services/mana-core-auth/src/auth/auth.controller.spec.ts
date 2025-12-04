@@ -22,7 +22,8 @@
  * - POST /auth/organizations/set-active - Set active organization
  */
 
-import { Test, type TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
 import {
 	UnauthorizedException,
 	ConflictException,

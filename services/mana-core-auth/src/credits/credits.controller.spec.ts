@@ -17,12 +17,13 @@
  * - POST /credits/organization/:orgId/use - Use credits with org tracking
  */
 
-import { Test, type TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CreditsController } from './credits.controller';
 import { CreditsService } from './credits.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { type CurrentUserData } from '../common/decorators/current-user.decorator';
+import { CurrentUserData } from '../common/decorators/current-user.decorator';
 import {
 	mockBalanceFactory,
 	mockTransactionFactory,

@@ -1,14 +1,12 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { eq, and, desc, asc, sql } from 'drizzle-orm';
-import { type AsyncResult, ok, err, DatabaseError, NotFoundError } from '@manacore/shared-errors';
+import { AsyncResult, ok, err, DatabaseError, NotFoundError } from '@manacore/shared-errors';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import {
-	conversations,
-	type Conversation,
-	type NewConversation,
-} from '../db/schema/conversations.schema';
-import { messages, type Message, type NewMessage } from '../db/schema/messages.schema';
+import { Database } from '../db/connection';
+import { conversations } from '../db/schema/conversations.schema';
+import type { Conversation, NewConversation } from '../db/schema/conversations.schema';
+import { messages } from '../db/schema/messages.schema';
+import type { Message, NewMessage } from '../db/schema/messages.schema';
 
 @Injectable()
 export class ConversationService {

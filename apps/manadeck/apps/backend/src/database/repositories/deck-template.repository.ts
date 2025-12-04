@@ -1,14 +1,8 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { DATABASE_TOKEN, type Database } from '../database.module';
-import {
-	deckTemplates,
-	type DeckTemplate,
-	type NewDeckTemplate,
-	eq,
-	and,
-	desc,
-	sql,
-} from '@manacore/manadeck-database';
+import { DATABASE_TOKEN } from '../database.module';
+import type { Database } from '../database.module';
+import { deckTemplates, eq, and, desc, sql } from '@manacore/manadeck-database';
+import type { DeckTemplate, NewDeckTemplate } from '@manacore/manadeck-database';
 
 @Injectable()
 export class DeckTemplateRepository {

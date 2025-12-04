@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Trash2, RotateCcw, AlertTriangle } from 'lucide-svelte';
-	import { trashApi, type StorageFile, type StorageFolder } from '$lib/api/client';
+	import { trashApi } from '$lib/api/client';
+	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import { toast } from '$lib/stores/toast';
 
 	let files = $state<StorageFile[]>([]);

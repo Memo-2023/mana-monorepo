@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
-import { type DeckService } from './deck.service';
-import { type CreateDeckDto, type UpdateDeckDto } from './deck.dto';
-import { JwtAuthGuard, CurrentUser, type CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { DeckService } from './deck.service';
+import { CreateDeckDto } from './deck.dto';
+import type { UpdateDeckDto } from './deck.dto';
+import { JwtAuthGuard, CurrentUser } from '@manacore/shared-nestjs-auth';
+import type { CurrentUserData } from '@manacore/shared-nestjs-auth';
 
 @Controller('decks')
 @UseGuards(JwtAuthGuard)

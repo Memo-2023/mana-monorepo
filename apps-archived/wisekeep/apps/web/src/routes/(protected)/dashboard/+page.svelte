@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { api, type Stats } from '$lib/api/client';
+	import { api } from '$lib/api/client';
+import type { Stats } from '$lib/api/client';
 	import { activeJobs, jobList } from '$lib/stores/jobs';
 
 	let stats: Stats | null = $state(null);

@@ -2,8 +2,9 @@ import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } fro
 import { ConfigService } from '@nestjs/config';
 import { eq } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { imageGenerations, images, models, type ImageGeneration, type Image } from '../db/schema';
+import { Database } from '../db/connection';
+import { imageGenerations, images, models } from '../db/schema';
+import type { ImageGeneration, Image } from '../db/schema';
 import { ReplicateService, GenerationParams } from './replicate.service';
 import { StorageService } from '../upload/storage.service';
 import { GenerateImageDto } from './dto/generate.dto';

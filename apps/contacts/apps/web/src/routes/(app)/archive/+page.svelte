@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { contactsApi, type Contact } from '$lib/api/contacts';
+	import { contactsApi } from '$lib/api/contacts';
+	import type { Contact } from '$lib/api/contacts';
 	import '$lib/i18n';
 
 	let loading = $state(true);

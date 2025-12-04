@@ -5,7 +5,7 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider } from '~/utils/themeContext';
 import { supabase } from '../utils/supabase';
-import { type Session } from '@supabase/supabase-js';
+import { Session } from '@supabase/supabase-js';
 
 export const unstable_settings = {
 	// Ensure that reloading on `/modal` keeps a back button present.

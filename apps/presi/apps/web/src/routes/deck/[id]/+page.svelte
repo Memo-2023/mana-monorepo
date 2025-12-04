@@ -4,7 +4,8 @@
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { decksStore } from '$lib/stores/decks.svelte';
-	import { shareApi, type ShareLink } from '$lib/api/client';
+	import { shareApi } from '$lib/api/client';
+	import type { ShareLink } from '$lib/api/client';
 	import type { Slide, SlideContent } from '@presi/shared';
 	import {
 		ArrowLeft,

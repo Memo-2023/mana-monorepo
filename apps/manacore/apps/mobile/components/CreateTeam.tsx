@@ -9,7 +9,7 @@ import {
 	ScrollView,
 } from 'react-native';
 import { supabase } from '../utils/supabase';
-import { type Session } from '@supabase/supabase-js';
+import { Session } from '@supabase/supabase-js';
 import { useTheme } from '../utils/themeContext';
 import { useRouter } from 'expo-router';
 

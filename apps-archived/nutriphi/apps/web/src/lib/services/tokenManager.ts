@@ -3,7 +3,8 @@
  * Handles JWT token lifecycle, refresh logic, and request queueing
  */
 
-import { authService, type UserData } from './authService';
+import { authService } from './authService';
+import type { UserData } from './authService';
 import { browser } from '$app/environment';
 
 export enum TokenState {

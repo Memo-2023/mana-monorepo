@@ -1,7 +1,8 @@
 /**
  * Template Service - CRUD operations via Backend API
  */
-import { templateApi, type Template as ApiTemplate } from './api';
+import { templateApi } from './api';
+import type { Template as ApiTemplate } from './api';
 
 // Re-export type with backwards-compatible naming (snake_case for mobile)
 export interface Template {

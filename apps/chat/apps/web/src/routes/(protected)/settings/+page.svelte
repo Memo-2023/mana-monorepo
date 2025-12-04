@@ -2,7 +2,8 @@
 	import { onMount } from 'svelte';
 	import { theme } from '$lib/stores/theme';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
-	import { THEME_DEFINITIONS, type ThemeVariant } from '@manacore/shared-theme';
+	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import type { ThemeVariant } from '@manacore/shared-theme';
 	import {
 		SettingsPage,
 		SettingsSection,

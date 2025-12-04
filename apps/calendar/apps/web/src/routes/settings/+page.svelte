@@ -5,15 +5,12 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
-	import {
-		settingsStore,
-		type WeekStartDay,
-		type TimeFormat,
-		type AllDayDisplayMode,
-	} from '$lib/stores/settings.svelte';
+	import { settingsStore } from '$lib/stores/settings.svelte';
+	import type { WeekStartDay, TimeFormat, AllDayDisplayMode } from '$lib/stores/settings.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { toast } from '$lib/stores/toast';
-	import { setLocale, supportedLocales, type SupportedLocale } from '$lib/i18n';
+	import { setLocale, supportedLocales } from '$lib/i18n';
+	import type { SupportedLocale } from '$lib/i18n';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { GlobalSettingsSection } from '@manacore/shared-ui';
 	import type { CalendarViewType, Calendar } from '@calendar/shared';

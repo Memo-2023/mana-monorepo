@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { type AsyncResult, ok, err, NotFoundError, DatabaseError } from '@manacore/shared-errors';
+import {AsyncResult, ok, err, NotFoundError, DatabaseError } from '@manacore/shared-errors';
 
 // Define interfaces for our character data
 export interface CharacterCreateDto {

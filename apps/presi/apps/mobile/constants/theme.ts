@@ -1,4 +1,4 @@
-import { type ColorSchemeName } from 'react-native';
+import { ColorSchemeName } from 'react-native';
 
 // Theme types
 export type ThemeVariant = 'lume' | 'nature' | 'stone';

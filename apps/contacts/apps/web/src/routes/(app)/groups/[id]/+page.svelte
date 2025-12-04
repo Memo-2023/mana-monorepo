@@ -2,7 +2,8 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { groupsApi, contactsApi, type ContactGroup, type Contact } from '$lib/api/contacts';
+	import { groupsApi, contactsApi } from '$lib/api/contacts';
+	import type { ContactGroup, Contact } from '$lib/api/contacts';
 	import '$lib/i18n';
 
 	let loading = $state(true);

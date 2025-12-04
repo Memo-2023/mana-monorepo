@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getTheme, type Theme } from './constants';
+import { getTheme } from './constants';
+import type { Theme } from './constants';
 
 export type ColorMode = 'system' | 'light' | 'dark';
 export type ContrastLevel = 1 | 2 | 3 | 4 | 5;

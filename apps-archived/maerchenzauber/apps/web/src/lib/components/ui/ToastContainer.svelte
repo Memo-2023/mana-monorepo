@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { toastStore, type Toast, type ToastType } from '$lib/stores/toast.svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
+import type { Toast, ToastType } from '$lib/stores/toast.svelte';
 
 	// Icon paths for each toast type
 	const icons: Record<ToastType, string> = {

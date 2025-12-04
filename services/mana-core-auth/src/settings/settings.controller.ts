@@ -1,8 +1,10 @@
 import { Controller, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { SettingsService } from './settings.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { CurrentUser, type CurrentUserData } from '../common/decorators/current-user.decorator';
-import { type UpdateGlobalSettingsDto, type UpdateAppOverrideDto } from './dto';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import type { CurrentUserData } from '../common/decorators/current-user.decorator';
+import { UpdateGlobalSettingsDto } from './dto';
+import type { UpdateAppOverrideDto } from './dto';
 
 @Controller('settings')
 @UseGuards(JwtAuthGuard)

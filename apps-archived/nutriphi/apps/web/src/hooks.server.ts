@@ -1,4 +1,4 @@
-import { type Handle } from '@sveltejs/kit';
+import {Handle } from '@sveltejs/kit';
 
 /**
  * Server hooks for Nutriphi Web

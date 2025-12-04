@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { listsStore, type QuoteList } from '$lib/stores/lists';
+	import { listsStore } from '$lib/stores/lists';
+	import type { QuoteList } from '$lib/stores/lists';
 	import { quotesDE, authorsDE } from '@zitare/shared';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
 	import { toast } from '$lib/stores/toast';

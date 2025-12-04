@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI, Type } from '@google/genai';
-import { type AsyncResult, ok, err, ServiceError } from '@manacore/shared-errors';
+import { AsyncResult, ok, err, ServiceError } from '@manacore/shared-errors';
 
 export type CardType = 'text' | 'flashcard' | 'quiz' | 'mixed';
 

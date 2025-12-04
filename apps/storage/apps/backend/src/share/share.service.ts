@@ -2,8 +2,9 @@ import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { eq, and } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { shares, type Share, type NewShare } from '../db/schema';
+import { Database } from '../db/connection';
+import { shares } from '../db/schema';
+import type { Share, NewShare } from '../db/schema';
 
 @Injectable()
 export class ShareService {

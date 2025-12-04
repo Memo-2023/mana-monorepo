@@ -1,8 +1,9 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { images, imageTags, type Image } from '../db/schema';
+import { Database } from '../db/connection';
+import { images, imageTags } from '../db/schema';
+import type { Image } from '../db/schema';
 import { StorageService } from './storage.service';
 
 @Injectable()

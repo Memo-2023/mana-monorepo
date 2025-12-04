@@ -1,5 +1,6 @@
 <script lang="ts" generics="T">
-	import { onMount, type Snippet } from 'svelte';
+	import { onMount } from 'svelte';
+import type { Snippet } from 'svelte';
 
 	interface Props {
 		items: T[];

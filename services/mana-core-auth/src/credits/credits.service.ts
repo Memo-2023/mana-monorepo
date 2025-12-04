@@ -19,8 +19,8 @@ import {
 	members,
 	organizations,
 } from '../db/schema';
-import { type UseCreditsDto } from './dto/use-credits.dto';
-import { type AllocateCreditsDto } from './dto/allocate-credits.dto';
+import { UseCreditsDto } from './dto/use-credits.dto';
+import { AllocateCreditsDto } from './dto/allocate-credits.dto';
 
 @Injectable()
 export class CreditsService {

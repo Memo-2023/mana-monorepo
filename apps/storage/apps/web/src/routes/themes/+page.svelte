@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { Palette, Check } from 'lucide-svelte';
 	import { theme } from '$lib/stores/theme.svelte';
-	import { THEME_DEFINITIONS, THEME_VARIANTS, type ThemeVariant } from '@manacore/shared-theme';
+	import { THEME_DEFINITIONS, THEME_VARIANTS } from '@manacore/shared-theme';
+	import type { ThemeVariant } from '@manacore/shared-theme';
 </script>
 
 <svelte:head>

@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
-import { themes, defaultTheme, type ThemePreset } from './presets';
+import { themes, defaultTheme } from './presets';
+import type { ThemePreset } from './presets';
 import { writable, derived, get } from 'svelte/store';
 
 export type ThemeMode = 'light' | 'dark' | 'system';

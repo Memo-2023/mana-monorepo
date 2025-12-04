@@ -1,8 +1,9 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { eq, and, or, ilike, desc, sql } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { contacts, type Contact, type NewContact } from '../db/schema';
+import { Database } from '../db/connection';
+import { contacts } from '../db/schema';
+import type { Contact, NewContact } from '../db/schema';
 
 export interface ContactFilters {
 	search?: string;

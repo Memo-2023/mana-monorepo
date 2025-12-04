@@ -1,5 +1,6 @@
 import { fail } from '@sveltejs/kit';
-import { pb, generateTagSlug, DEFAULT_TAG_COLORS, type Tag } from '$lib/pocketbase';
+import { pb, generateTagSlug, DEFAULT_TAG_COLORS } from '$lib/pocketbase';
+import type { Tag } from '$lib/pocketbase';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {

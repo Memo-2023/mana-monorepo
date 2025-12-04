@@ -5,7 +5,8 @@
  * so we don't need to pass it from the frontend.
  */
 
-import { conversationApi, chatApi, type Conversation, type Message, type ChatMessage } from './api';
+import { conversationApi, chatApi } from './api';
+import type { Conversation, Message, ChatMessage } from './api';
 
 export type { Conversation, Message };
 

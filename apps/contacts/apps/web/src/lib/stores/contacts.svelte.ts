@@ -2,7 +2,8 @@
  * Contacts Store - Manages contacts state using Svelte 5 runes
  */
 
-import { contactsApi, type Contact, type ContactFilters } from '$lib/api/contacts';
+import { contactsApi } from '$lib/api/contacts';
+import type { Contact, ContactFilters } from '$lib/api/contacts';
 
 // State
 let contacts = $state<Contact[]>([]);

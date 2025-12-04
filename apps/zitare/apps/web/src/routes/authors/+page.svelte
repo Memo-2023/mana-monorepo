@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { authorsDE, quotesDE, type Author } from '@zitare/shared';
+	import { authorsDE, quotesDE } from '@zitare/shared';
+	import type { Author } from '@zitare/shared';
 	import { PageHeader } from '@manacore/shared-ui';
 	import AuthorCard from '$lib/components/AuthorCard.svelte';
 

@@ -1,8 +1,8 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { eq, and, desc, inArray } from 'drizzle-orm';
-import { type AsyncResult, ok, err, DatabaseError, NotFoundError } from '@manacore/shared-errors';
+import { AsyncResult, ok, err, DatabaseError, NotFoundError } from '@manacore/shared-errors';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
+import { Database } from '../db/connection';
 import {
 	spaces,
 	spaceMembers,

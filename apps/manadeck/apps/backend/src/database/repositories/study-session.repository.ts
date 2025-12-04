@@ -1,16 +1,8 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { DATABASE_TOKEN, type Database } from '../database.module';
-import {
-	studySessions,
-	type StudySession,
-	type NewStudySession,
-	eq,
-	and,
-	desc,
-	gte,
-	lte,
-	sql,
-} from '@manacore/manadeck-database';
+import { DATABASE_TOKEN } from '../database.module';
+import type { Database } from '../database.module';
+import { studySessions, eq, and, desc, gte, lte, sql } from '@manacore/manadeck-database';
+import type { StudySession, NewStudySession } from '@manacore/manadeck-database';
 
 @Injectable()
 export class StudySessionRepository {

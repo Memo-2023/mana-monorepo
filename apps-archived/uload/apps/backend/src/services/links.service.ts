@@ -1,7 +1,8 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { nanoid } from 'nanoid';
-import { LinkRepository, type ListLinksOptions } from '../database/repositories';
+import { LinkRepository } from '../database/repositories';
+import type { ListLinksOptions } from '../database/repositories';
 import type { Link, NewLink } from '@manacore/uload-database';
 
 export interface CreateLinkDto {

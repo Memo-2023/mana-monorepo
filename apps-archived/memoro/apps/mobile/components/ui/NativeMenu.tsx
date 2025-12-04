@@ -1,4 +1,4 @@
-import React, { type FC, type ReactNode } from 'react';
+import React, {FC, type ReactNode } from 'react';
 // TODO: Migrate to @expo/ui ContextMenu
 import { MenuView } from '~/components/ui/MenuViewPlaceholder';
 import type { MenuActionConfig } from '~/config/menuActions';

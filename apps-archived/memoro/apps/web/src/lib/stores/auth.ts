@@ -5,7 +5,8 @@
 
 import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
-import { authService, type UserData } from '$lib/services/authService';
+import { authService } from '$lib/services/authService';
+import type { UserData } from '$lib/services/authService';
 import { tokenManager, TokenState } from '$lib/services/tokenManager';
 import { clearAuthClient } from '$lib/supabaseClient';
 

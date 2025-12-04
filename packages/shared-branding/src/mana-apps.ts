@@ -3,7 +3,8 @@
  * This is the single source of truth for AppSlider components
  */
 
-import { APP_ICONS, type AppIconId } from './app-icons';
+import { APP_ICONS } from './app-icons';
+import type { AppIconId } from './app-icons';
 
 export type AppStatus = 'published' | 'beta' | 'development' | 'planning';
 

@@ -1,8 +1,9 @@
 import { Injectable, Inject, NotFoundException, Logger } from '@nestjs/common';
 import { eq, desc } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { models, type Model } from '../db/schema';
+import { Database } from '../db/connection';
+import { models } from '../db/schema';
+import type { Model } from '../db/schema';
 
 @Injectable()
 export class ModelService {

@@ -1,8 +1,9 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { eq, and } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { contactTags, contactToTags, type ContactTag, type NewContactTag } from '../db/schema';
+import { Database } from '../db/connection';
+import { contactTags, contactToTags } from '../db/schema';
+import type { ContactTag, NewContactTag } from '../db/schema';
 
 @Injectable()
 export class TagService {

@@ -1,6 +1,7 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useTheme } from '~/contexts/ThemeContext';
-import { themes, type ThemeVariant, type ColorMode } from '@picture/design-tokens';
+import { themes } from '@picture/design-tokens';
+import type { ThemeVariant, ColorMode } from '@picture/design-tokens';
 import { Ionicons } from '@expo/vector-icons';
 
 // ThemeMode includes 'system' for automatic light/dark switching

@@ -1,5 +1,6 @@
 import { useToast } from '../contexts/ToastContext';
-import { useOnboardingStore, type PageName } from '~/features/onboarding';
+import { useOnboardingStore } from '~/features/onboarding';
+import type { PageName } from '~/features/onboarding';
 import { useToastStore } from '../store/toastStore';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useRef, useCallback, useState } from 'react';

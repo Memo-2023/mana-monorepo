@@ -1,5 +1,6 @@
 import { StorageClient } from './client';
-import { BUCKETS, type StorageConfig, type BucketConfig, type BucketName } from './types';
+import { BUCKETS } from './types';
+import type { StorageConfig, BucketConfig, BucketName } from './types';
 
 /**
  * Environment variable names for storage configuration

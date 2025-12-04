@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { toastStore, type Toast } from '$lib/stores/toast.svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
+	import type { Toast } from '$lib/stores/toast.svelte';
 	import { X, CheckCircle, XCircle, Warning, Info } from '@manacore/shared-icons';
 
 	let toasts = $derived(toastStore.toasts);

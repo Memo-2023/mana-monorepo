@@ -1,9 +1,10 @@
 import { Controller, Get, Post, Body, UseGuards, Query, ParseIntPipe, Param } from '@nestjs/common';
 import { CreditsService } from './credits.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { CurrentUser, type CurrentUserData } from '../common/decorators/current-user.decorator';
-import { type UseCreditsDto } from './dto/use-credits.dto';
-import { type AllocateCreditsDto } from './dto/allocate-credits.dto';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import type { CurrentUserData } from '../common/decorators/current-user.decorator';
+import { UseCreditsDto } from './dto/use-credits.dto';
+import { AllocateCreditsDto } from './dto/allocate-credits.dto';
 
 @Controller('credits')
 @UseGuards(JwtAuthGuard)

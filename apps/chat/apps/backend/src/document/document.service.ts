@@ -1,9 +1,9 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { eq, and, desc, sql } from 'drizzle-orm';
-import { type AsyncResult, ok, err, DatabaseError, NotFoundError } from '@manacore/shared-errors';
+import { AsyncResult, ok, err, DatabaseError, NotFoundError } from '@manacore/shared-errors';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { documents, type Document, type NewDocument } from '../db/schema/documents.schema';
+import { Database } from '../db/connection';
+import { documents, Document, NewDocument } from '../db/schema/documents.schema';
 import { conversations } from '../db/schema/conversations.schema';
 
 @Injectable()

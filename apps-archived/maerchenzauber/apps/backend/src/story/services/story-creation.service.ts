@@ -10,7 +10,7 @@ import { ImageSupabaseService } from '../../core/services/image-supabase.service
 import { CoreService } from '../../core/services/core.service';
 import { StoryCharacter, StoryResponse } from '../../core/models/story';
 import { StoryError } from '../../core/consts/errors.const';
-import { type Result, isOk } from '@manacore/shared-errors';
+import {Result, isOk } from '@manacore/shared-errors';
 import { StoryLogbookService } from '../../core/services/story-logbook.service';
 
 export interface StoryCreationParams {

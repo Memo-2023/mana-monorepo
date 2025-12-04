@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
-	import { uploadMultipleImages, type UploadProgress } from '$lib/api/upload';
+	import { uploadMultipleImages } from '$lib/api/upload';
+	import type { UploadProgress } from '$lib/api/upload';
 	import { showToast } from '$lib/stores/toast';
 	import { PageHeader } from '@manacore/shared-ui';
 	import DropZone from '$lib/components/upload/DropZone.svelte';

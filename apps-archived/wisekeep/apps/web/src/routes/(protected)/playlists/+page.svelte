@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { api, type Playlist } from '$lib/api/client';
+	import { api } from '$lib/api/client';
+import type { Playlist } from '$lib/api/client';
 
 	let playlists = $state<Playlist[]>([]);
 	let loading = $state(true);

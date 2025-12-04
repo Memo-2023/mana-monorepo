@@ -3,7 +3,8 @@
  * This service wraps the backend API for AI completions
  */
 import { availableModels } from '../config/azure';
-import { chatApi, modelApi, usageApi, type ChatMessage, type TokenUsage } from './api';
+import { chatApi, modelApi, usageApi } from './api';
+import type { ChatMessage, TokenUsage } from './api';
 
 // Re-export types for backward compatibility
 export type { ChatMessage };

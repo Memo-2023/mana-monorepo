@@ -2,7 +2,8 @@
 	import { onMount } from 'svelte';
 	import { Button, Input, Card, PageHeader } from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/authStore.svelte';
-	import { creditsService, type CreditBalance } from '$lib/api/credits';
+	import { creditsService } from '$lib/api/credits';
+	import type { CreditBalance } from '$lib/api/credits';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import type { NavPosition, ThemeMode } from '@manacore/shared-theme';
 

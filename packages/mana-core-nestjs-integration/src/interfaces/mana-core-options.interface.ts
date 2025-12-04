@@ -1,4 +1,5 @@
-import { type ModuleMetadata, type Type } from '@nestjs/common';
+import { type ModuleMetadata } from '@nestjs/common';
+import type { Type } from '@nestjs/common';
 
 export interface ManaCoreModuleOptions {
 	/**

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
-import { type Slide } from '../../types/models';
+import { Slide } from '../../types/models';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../ThemeProvider';
 

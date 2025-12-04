@@ -6,7 +6,8 @@
 		hasMoreArchive,
 		currentArchivePage,
 	} from '$lib/stores/archive';
-	import { getImages, type Image } from '$lib/api/images';
+	import { getImages } from '$lib/api/images';
+	import type { Image } from '$lib/api/images';
 	import ArchivedImageCard from '$lib/components/archive/ArchivedImageCard.svelte';
 	import ArchivedImageModal from '$lib/components/archive/ArchivedImageModal.svelte';
 	import ImageSkeleton from '$lib/components/ui/ImageSkeleton.svelte';

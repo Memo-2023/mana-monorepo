@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Card, PageHeader } from '@manacore/shared-ui';
-	import { creditsService, type CreditBalance, type CreditTransaction } from '$lib/api/credits';
+	import { creditsService } from '$lib/api/credits';
+	import type { CreditBalance, CreditTransaction } from '$lib/api/credits';
 	import { authStore } from '$lib/stores/authStore.svelte';
 
 	let { data } = $props();

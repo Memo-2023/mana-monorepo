@@ -1,6 +1,7 @@
 import { Module, Global, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { getDb, closeConnection, type Database } from './connection';
+import { getDb, closeConnection } from './connection';
+import type { Database } from './connection';
 
 export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
 

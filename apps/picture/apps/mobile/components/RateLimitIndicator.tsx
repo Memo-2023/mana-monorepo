@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Pressable } from 'react-native';
 import { Icon } from './Icon';
 import { Text } from './Text';
-import { getRateLimits, type RateLimits } from '~/services/api/profiles';
+import { getRateLimits } from '~/services/api/profiles';
+import type { RateLimits } from '~/services/api/profiles';
 import { useAuth } from '~/contexts/AuthContext';
 import { useTheme } from '~/contexts/ThemeContext';
 

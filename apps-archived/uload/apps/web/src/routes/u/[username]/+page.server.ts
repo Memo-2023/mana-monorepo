@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
-import { pb, type User, type Link } from '$lib/pocketbase';
+import { pb } from '$lib/pocketbase';
+import type { User, Link } from '$lib/pocketbase';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {

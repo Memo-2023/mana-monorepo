@@ -1,9 +1,10 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { eq, and, asc } from 'drizzle-orm';
-import { type AsyncResult, ok, err, DatabaseError, NotFoundError } from '@manacore/shared-errors';
+import { AsyncResult, ok, err, DatabaseError, NotFoundError } from '@manacore/shared-errors';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { templates, type Template, type NewTemplate } from '../db/schema/templates.schema';
+import { Database } from '../db/connection';
+import { templates } from '../db/schema/templates.schema';
+import type { Template, NewTemplate } from '../db/schema/templates.schema';
 
 @Injectable()
 export class TemplateService {

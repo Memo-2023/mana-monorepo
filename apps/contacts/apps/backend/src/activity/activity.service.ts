@@ -1,8 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { eq, and, desc } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { contactActivities, type ContactActivity, type NewContactActivity } from '../db/schema';
+import { Database } from '../db/connection';
+import { contactActivities } from '../db/schema';
+import type { ContactActivity, NewContactActivity } from '../db/schema';
 
 export type ActivityType = 'created' | 'updated' | 'called' | 'emailed' | 'met' | 'note_added';
 

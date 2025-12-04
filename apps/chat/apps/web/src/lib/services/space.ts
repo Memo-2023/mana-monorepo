@@ -2,7 +2,8 @@
  * Space Service - CRUD operations via Backend API
  */
 
-import { spaceApi, type Space, type SpaceMember } from './api';
+import { spaceApi } from './api';
+import type { Space, SpaceMember } from './api';
 
 export type { Space, SpaceMember };
 

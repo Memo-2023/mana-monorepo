@@ -1,5 +1,6 @@
 import { ErrorCode } from '../types/error-codes';
-import { AppError, type ErrorContext } from './app-error';
+import { AppError } from './app-error';
+import type { ErrorContext } from './app-error';
 
 type ServiceErrorCode =
 	| ErrorCode.INTERNAL_ERROR

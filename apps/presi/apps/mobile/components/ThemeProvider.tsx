@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
-import { getTheme, type Theme, type ThemeVariant } from '../constants/theme';
+import { getTheme } from '../constants/theme';
+import type { Theme, ThemeVariant } from '../constants/theme';
 
 export type ColorMode = 'system' | 'light' | 'dark';
 export type ContrastLevel = 1 | 2 | 3 | 4 | 5;

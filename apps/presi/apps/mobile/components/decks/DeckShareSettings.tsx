@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { useTheme } from '../ThemeProvider';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { type Deck, type CollaboratorRole } from '../../types/models';
+import { Deck } from '../../types/models';
+import type { CollaboratorRole } from '../../types/models';
 
 interface DeckShareSettingsProps {
 	deck: Deck;

@@ -13,7 +13,8 @@
 	import KeyboardShortcutsModal from '$lib/components/ui/KeyboardShortcutsModal.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { isUIVisible, toggleUI, showKeyboardShortcuts } from '$lib/stores/ui';
-	import { viewMode, setViewMode, type ViewMode } from '$lib/stores/view';
+	import { viewMode, setViewMode } from '$lib/stores/view';
+	import type { ViewMode } from '$lib/stores/view';
 	import { browser } from '$app/environment';
 
 	// App switcher items

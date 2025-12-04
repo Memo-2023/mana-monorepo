@@ -1,11 +1,11 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
+import { Database } from '../db/connection';
 import { levels, levelLikes, levelPlays } from '../db/schema';
-import { type CreateLevelDto } from './dto/create-level.dto';
-import { type UpdateLevelDto } from './dto/update-level.dto';
-import { type RecordPlayDto } from './dto/record-play.dto';
+import { CreateLevelDto } from './dto/create-level.dto';
+import { UpdateLevelDto } from './dto/update-level.dto';
+import { RecordPlayDto } from './dto/record-play.dto';
 
 @Injectable()
 export class LevelService {

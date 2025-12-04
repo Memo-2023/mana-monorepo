@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
-import { generateAndWait, type GenerationStatus } from '~/services/api/generate';
+import { generateAndWait } from '~/services/api/generate';
+import type { GenerationStatus } from '~/services/api/generate';
 import { useAuth } from '~/contexts/AuthContext';
 import { useModelSelection } from '~/store/modelStore';
 import { useTagStore, Tag } from '~/store/tagStore';

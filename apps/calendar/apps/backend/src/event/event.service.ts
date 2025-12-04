@@ -1,8 +1,8 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { eq, and, gte, lte, inArray, or, ilike } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { events, type Event, type NewEvent } from '../db/schema/events.schema';
+import { Database } from '../db/connection';
+import { events, Event, NewEvent } from '../db/schema/events.schema';
 import { calendars } from '../db/schema/calendars.schema';
 import { CalendarService } from '../calendar/calendar.service';
 import { CreateEventDto, UpdateEventDto, QueryEventsDto } from './dto';

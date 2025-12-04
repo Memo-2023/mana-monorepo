@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getDeckSlides, getDeck, deleteSlide, reorderSlide } from '../../services/firestore';
-import { type Slide, type Deck } from '../../types/models';
+import { Slide } from '../../types/models';
+import type { Deck } from '../../types/models';
 import { SlideList } from '../../components/slides/SlideList';
 import { SlideEditor } from '../../components/slides/SlideEditor';
 import { PresentationMode } from '../../components/presentation/PresentationMode';

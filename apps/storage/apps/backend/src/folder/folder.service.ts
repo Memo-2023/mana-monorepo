@@ -1,8 +1,9 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { eq, and, isNull } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { folders, type Folder, type NewFolder } from '../db/schema';
+import { Database } from '../db/connection';
+import { folders } from '../db/schema';
+import type { Folder, NewFolder } from '../db/schema';
 import { CreateFolderDto } from './dto/create-folder.dto';
 import { UpdateFolderDto, MoveFolderDto } from './dto/update-folder.dto';
 

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { toast, type Toast } from '../stores/toast';
+	import { toast } from '../stores/toast';
+	import type { Toast } from '../stores/toast';
 	import { fade, fly } from 'svelte/transition';
 
 	let toasts = $state<Toast[]>([]);

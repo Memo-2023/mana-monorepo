@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { locale } from 'svelte-i18n';
-	import { setLocale, supportedLocales, type SupportedLocale } from '$lib/i18n';
+	import { setLocale, supportedLocales } from '$lib/i18n';
+	import type { SupportedLocale } from '$lib/i18n';
 
 	const languageLabels: Record<SupportedLocale, string> = {
 		de: 'Deutsch',

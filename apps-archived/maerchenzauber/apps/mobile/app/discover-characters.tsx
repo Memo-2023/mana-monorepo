@@ -16,7 +16,7 @@ import CommonHeader from '../components/molecules/CommonHeader';
 import SearchBar from '../components/molecules/SearchBar';
 import Avatar from '../components/atoms/Avatar';
 import { usePublicCharacters } from '../hooks/usePublicCharacters';
-import BottomFilterTabs, { type FilterTab } from '../components/molecules/BottomFilterTabs';
+import BottomFilterTabs, {FilterTab } from '../components/molecules/BottomFilterTabs';
 
 export default function DiscoverCharactersScreen() {
 	const router = useRouter();

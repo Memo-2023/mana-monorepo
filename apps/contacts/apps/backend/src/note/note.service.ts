@@ -1,8 +1,9 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { eq, and, desc } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { contactNotes, type ContactNote, type NewContactNote } from '../db/schema';
+import { Database } from '../db/connection';
+import { contactNotes } from '../db/schema';
+import type { ContactNote, NewContactNote } from '../db/schema';
 
 @Injectable()
 export class NoteService {

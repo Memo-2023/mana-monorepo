@@ -1,7 +1,8 @@
 /**
  * Space Service - CRUD operations via Backend API
  */
-import { spaceApi, type Space as ApiSpace, type SpaceMember as ApiSpaceMember } from './api';
+import { spaceApi } from './api';
+import type { Space as ApiSpace, SpaceMember as ApiSpaceMember } from './api';
 
 // Re-export types with backwards-compatible naming (snake_case for mobile)
 export type Space = {

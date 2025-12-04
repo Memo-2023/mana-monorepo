@@ -1236,7 +1236,7 @@ export const useArticleStore = create<ArticleState>((set, get) => ({
   loadArticles: async (type) => {
     set({ isLoading: true });
     try {
-      const articles = await api.getArticles({ type });
+      const articles = await api.getArticles({});
       set({ articles, isLoading: false });
     } catch (error) {
       console.error('Failed to load articles:', error);

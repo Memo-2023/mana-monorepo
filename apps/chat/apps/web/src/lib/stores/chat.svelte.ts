@@ -2,7 +2,8 @@
  * Chat Store - Manages current chat state using Svelte 5 runes
  */
 
-import { chatService, type ChatCompletionRequest } from '$lib/services/chat';
+import { chatService } from '$lib/services/chat';
+import type { ChatCompletionRequest } from '$lib/services/chat';
 import type { Message, AIModel, ChatMessage } from '@chat/types';
 
 // State

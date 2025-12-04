@@ -12,8 +12,10 @@ import {
 import { FeedbackService } from './feedback.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { OptionalAuthGuard } from '../common/guards/optional-auth.guard';
-import { CurrentUser, type CurrentUserData } from '../common/decorators/current-user.decorator';
-import { type CreateFeedbackDto, type FeedbackQueryDto } from './dto';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import type { CurrentUserData } from '../common/decorators/current-user.decorator';
+import { CreateFeedbackDto } from './dto';
+import type { FeedbackQueryDto } from './dto';
 
 @Controller('feedback')
 export class FeedbackController {

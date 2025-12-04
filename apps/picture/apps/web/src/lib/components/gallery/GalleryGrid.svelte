@@ -2,7 +2,8 @@
 	import type { Image } from '$lib/api/images';
 	import ImageCard from './ImageCard.svelte';
 	import { selectedImage } from '$lib/stores/images';
-	import { viewMode, type ViewMode } from '$lib/stores/view';
+	import { viewMode } from '$lib/stores/view';
+	import type { ViewMode } from '$lib/stores/view';
 	import { Image as ImageIcon } from '@manacore/shared-icons';
 
 	interface Props {

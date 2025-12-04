@@ -1,8 +1,9 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { eq, and, or, desc, sql } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { boards, boardItems, type Board } from '../db/schema';
+import { Database } from '../db/connection';
+import { boards, boardItems } from '../db/schema';
+import type { Board } from '../db/schema';
 import { CreateBoardDto, UpdateBoardDto, GetBoardsQueryDto } from './dto/board.dto';
 import { StorageService } from '../upload/storage.service';
 

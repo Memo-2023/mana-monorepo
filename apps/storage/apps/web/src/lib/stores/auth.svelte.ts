@@ -4,7 +4,8 @@
  */
 
 import { browser } from '$app/environment';
-import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
+import { initializeWebAuth } from '@manacore/shared-auth';
+import type { UserData } from '@manacore/shared-auth';
 
 const MANA_AUTH_URL = 'http://localhost:3001';
 

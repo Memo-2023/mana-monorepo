@@ -10,7 +10,8 @@ import {
 	TextStyle,
 } from 'react-native';
 import { Text } from './Text';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority';
 import { useThemeColors } from '~/utils/themeUtils';
 
 const buttonVariants = cva('flex-row items-center justify-center rounded-lg transition-all', {

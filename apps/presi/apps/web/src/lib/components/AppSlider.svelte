@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { AppSlider, type AppItem } from '@manacore/shared-ui';
+	import { AppSlider } from '@manacore/shared-ui';
+	import type { AppItem } from '@manacore/shared-ui';
 	import { MANA_APPS, APP_STATUS_LABELS, APP_SLIDER_LABELS } from '@manacore/shared-branding';
 
 	// Convert MANA_APPS to AppItem format (English)

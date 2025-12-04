@@ -4,7 +4,8 @@
  * Matches memoro_app pattern with dual client approach
  */
 
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { env } from '$lib/config/env';
 import { browser } from '$app/environment';
 import { tokenManager } from './services/tokenManager';

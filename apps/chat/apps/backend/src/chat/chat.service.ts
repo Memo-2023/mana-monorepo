@@ -1,12 +1,14 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { eq } from 'drizzle-orm';
-import { type AsyncResult, ok, err, ValidationError, ServiceError } from '@manacore/shared-errors';
+import { AsyncResult, ok, err, ValidationError, ServiceError } from '@manacore/shared-errors';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { models, type Model } from '../db/schema/models.schema';
-import { type ChatCompletionDto, type ChatCompletionResponseDto } from './dto/chat-completion.dto';
+import { Database } from '../db/connection';
+import { models } from '../db/schema/models.schema';
+import type { Model } from '../db/schema/models.schema';
+import { ChatCompletionDto } from './dto/chat-completion.dto';
+import type { ChatCompletionResponseDto } from './dto/chat-completion.dto';
 
 @Injectable()
 export class ChatService {

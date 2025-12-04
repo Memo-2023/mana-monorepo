@@ -1,15 +1,8 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { DATABASE_TOKEN, type Database } from '../database.module';
-import {
-	cards,
-	decks,
-	type Card,
-	type NewCard,
-	eq,
-	and,
-	asc,
-	sql,
-} from '@manacore/manadeck-database';
+import { DATABASE_TOKEN } from '../database.module';
+import type { Database } from '../database.module';
+import { cards, decks, eq, and, asc, sql } from '@manacore/manadeck-database';
+import type { Card, NewCard } from '@manacore/manadeck-database';
 
 @Injectable()
 export class CardRepository {

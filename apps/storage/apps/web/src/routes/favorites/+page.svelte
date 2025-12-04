@@ -2,7 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { Heart, Grid, List } from 'lucide-svelte';
-	import { searchApi, type StorageFile, type StorageFolder } from '$lib/api/client';
+	import { searchApi } from '$lib/api/client';
+	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import { filesStore } from '$lib/stores/files.svelte';
 	import { toast } from '$lib/stores/toast';
 	import FileGrid from '$lib/components/files/FileGrid.svelte';

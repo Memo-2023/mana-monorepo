@@ -282,14 +282,14 @@ done
 
 **Root Cause:**
 
-Using **type-only imports** (`import { type X }`) for classes that need to be injected. TypeScript erases type-only imports at compile time, so the actual class is not available at runtime for dependency injection.
+Using **type-only imports** (`import {X }`) for classes that need to be injected. TypeScript erases type-only imports at compile time, so the actual class is not available at runtime for dependency injection.
 
 ### ❌ WRONG - Type-Only Import
 
 ```typescript
 // services/mana-core-auth/src/ai/ai.service.ts - DON'T DO THIS!
 import { Injectable } from '@nestjs/common';
-import { type ConfigService } from '@nestjs/config'; // ❌ Type-only import
+import { ConfigService } from '@nestjs/config'; // ❌ Type-only import
 
 @Injectable()
 export class AiService {
@@ -324,12 +324,12 @@ export class AiService {
 
 ### The Rule
 
-> **For NestJS dependency injection, NEVER use type-only imports (`import { type X }`) for classes you need to inject.**
+> **For NestJS dependency injection, NEVER use type-only imports (`import {X }`) for classes you need to inject.**
 
 - ✅ `import { ConfigService }` - Regular import (works)
-- ❌ `import { type ConfigService }` - Type-only import (breaks DI)
+- ❌ `import {ConfigService }` - Type-only import (breaks DI)
 - ✅ `import type { MyInterface }` - Type-only for interfaces (fine, not injected)
-- ✅ `import { type MyType, MyClass }` - Mixed (MyType erased, MyClass available)
+- ✅ `import {MyType, MyClass }` - Mixed (MyType erased, MyClass available)
 
 ### How to Fix
 
@@ -339,7 +339,7 @@ export class AiService {
 
 ```diff
   import { Injectable } from '@nestjs/common';
-- import { type ConfigService } from '@nestjs/config';
+- import {ConfigService } from '@nestjs/config';
 + import { ConfigService } from '@nestjs/config';
 
   @Injectable()
@@ -400,7 +400,7 @@ docker run --rm --entrypoint cat test /app/dist/ai/ai.service.js
 ### Related Issues
 
 - [Commit d69cc607](https://github.com/Memo-2023/manacore-monorepo/commit/d69cc607) - Fixed type-only ConfigService import in AiService
-- TypeScript `import type` vs `import { type }` - both erase at compile time
+- TypeScript `import type` vs `import {}` - both erase at compile time
 - Docker layer caching can hide fixes if source wasn't properly copied
 
 ---

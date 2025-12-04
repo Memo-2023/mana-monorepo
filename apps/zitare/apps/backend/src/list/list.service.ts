@@ -1,8 +1,9 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { eq, and } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
-import { userLists, type UserList, type NewUserList } from '../db/schema';
+import { Database } from '../db/connection';
+import { userLists } from '../db/schema';
+import type { UserList, NewUserList } from '../db/schema';
 
 @Injectable()
 export class ListService {

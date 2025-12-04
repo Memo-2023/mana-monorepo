@@ -2,7 +2,7 @@ import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nest
 import { eq, and, or } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { type Database } from '../db/connection';
+import { Database } from '../db/connection';
 import {
 	calendarShares,
 	type CalendarShare,

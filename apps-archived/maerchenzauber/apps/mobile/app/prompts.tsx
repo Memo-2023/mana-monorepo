@@ -21,7 +21,8 @@ import {
 	saveCharacterSystemPrompt,
 } from '../src/services/promptSettings';
 import { generateStory } from '../src/services/genAI';
-import { generateCharacter, type GeneratedCharacter } from '../src/services/characterGenAI';
+import { generateCharacter } from '../src/services/characterGenAI';
+import type { GeneratedCharacter } from '../src/services/characterGenAI';
 import { fetchWithAuth } from '../src/utils/api';
 
 type Tab = 'story' | 'character';
