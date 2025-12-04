@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
-import { type ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { eq, and, desc, sql, count } from 'drizzle-orm';
 import { getDb } from '../db/connection';
 import { userFeedback, feedbackVotes } from '../db/schema';

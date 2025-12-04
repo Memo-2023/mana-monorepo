@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { type ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../db/connection';
 import { userSettings } from '../db/schema';
