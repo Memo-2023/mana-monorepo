@@ -1,0 +1,4 @@
+// Statische Konfigurationswerte für die Produktion
+export const SUPABASE_URL = 'https://igxexenivpvivtqkweup.supabase.co';
+export const SUPABASE_ANON_KEY =
+	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlneGV4ZW5pdnB2aXZ0cWt3ZXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU2NzYzNTMsImV4cCI6MjA2MTI1MjM1M30.XmwmZo8dts6z_wONHS1hn3nd-P2IomNnhSMks_otm3M';
