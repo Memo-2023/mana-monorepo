@@ -1,5 +1,5 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { type ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { eq } from 'drizzle-orm';
 import { type AsyncResult, ok, err, ValidationError, ServiceError } from '@manacore/shared-errors';
 import { GoogleGenerativeAI } from '@google/generative-ai';
