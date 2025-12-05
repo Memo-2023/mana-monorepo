@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale, _ } from 'svelte-i18n';
-	import { authStore } from '$lib/stores/authStore.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { theme } from '$lib/stores/theme';
 	import {
 		isSidebarMode as sidebarModeStore,

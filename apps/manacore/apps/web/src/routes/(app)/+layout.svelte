@@ -10,7 +10,7 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { theme } from '$lib/stores/theme';
-	import { authStore } from '$lib/stores/authStore.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import {
 		isSidebarMode as sidebarModeStore,

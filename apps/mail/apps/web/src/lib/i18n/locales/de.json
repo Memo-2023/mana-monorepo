@@ -1,0 +1,105 @@
+{
+	"app": {
+		"name": "Mail",
+		"loading": "Laden..."
+	},
+	"nav": {
+		"inbox": "Posteingang",
+		"sent": "Gesendet",
+		"drafts": "Entwürfe",
+		"starred": "Markiert",
+		"archive": "Archiv",
+		"trash": "Papierkorb",
+		"spam": "Spam",
+		"settings": "Einstellungen",
+		"feedback": "Feedback"
+	},
+	"auth": {
+		"login": "Anmelden",
+		"register": "Registrieren",
+		"logout": "Abmelden",
+		"forgotPassword": "Passwort vergessen",
+		"email": "E-Mail",
+		"password": "Passwort",
+		"confirmPassword": "Passwort bestätigen"
+	},
+	"email": {
+		"compose": "Neue E-Mail",
+		"reply": "Antworten",
+		"replyAll": "Allen antworten",
+		"forward": "Weiterleiten",
+		"delete": "Löschen",
+		"archive": "Archivieren",
+		"markRead": "Als gelesen markieren",
+		"markUnread": "Als ungelesen markieren",
+		"star": "Mit Stern markieren",
+		"unstar": "Stern entfernen",
+		"to": "An",
+		"cc": "CC",
+		"bcc": "BCC",
+		"subject": "Betreff",
+		"body": "Nachricht",
+		"send": "Senden",
+		"saveDraft": "Als Entwurf speichern",
+		"discard": "Verwerfen",
+		"attachments": "Anhänge",
+		"addAttachment": "Anhang hinzufügen",
+		"noEmails": "Keine E-Mails",
+		"noSubject": "(Kein Betreff)",
+		"from": "Von",
+		"date": "Datum"
+	},
+	"folders": {
+		"title": "Ordner",
+		"add": "Ordner hinzufügen",
+		"edit": "Ordner bearbeiten",
+		"delete": "Ordner löschen",
+		"name": "Ordnername"
+	},
+	"labels": {
+		"title": "Labels",
+		"add": "Label hinzufügen",
+		"edit": "Label bearbeiten",
+		"delete": "Label löschen",
+		"name": "Labelname",
+		"color": "Farbe"
+	},
+	"accounts": {
+		"title": "E-Mail-Konten",
+		"add": "Konto hinzufügen",
+		"edit": "Konto bearbeiten",
+		"delete": "Konto löschen",
+		"name": "Kontoname",
+		"address": "E-Mail-Adresse",
+		"default": "Standardkonto"
+	},
+	"settings": {
+		"title": "Einstellungen",
+		"general": "Allgemein",
+		"appearance": "Darstellung",
+		"accounts": "Konten",
+		"signature": "Signatur",
+		"language": "Sprache",
+		"theme": "Design",
+		"darkMode": "Dunkelmodus",
+		"notifications": "Benachrichtigungen"
+	},
+	"common": {
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"delete": "Löschen",
+		"edit": "Bearbeiten",
+		"add": "Hinzufügen",
+		"confirm": "Bestätigen",
+		"yes": "Ja",
+		"no": "Nein",
+		"ok": "OK",
+		"loading": "Laden...",
+		"error": "Fehler",
+		"success": "Erfolg",
+		"back": "Zurück",
+		"search": "Suchen",
+		"select": "Auswählen",
+		"selectAll": "Alle auswählen"
+	}
+}

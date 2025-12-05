@@ -1,0 +1,133 @@
+{
+	"app": {
+		"name": "Finance",
+		"loading": "Chargement..."
+	},
+	"nav": {
+		"dashboard": "Tableau de bord",
+		"accounts": "Comptes",
+		"transactions": "Transactions",
+		"budgets": "Budgets",
+		"categories": "Catégories",
+		"reports": "Rapports",
+		"settings": "Paramètres",
+		"feedback": "Feedback"
+	},
+	"auth": {
+		"login": "Se connecter",
+		"register": "S'inscrire",
+		"logout": "Se déconnecter",
+		"forgotPassword": "Mot de passe oublié",
+		"email": "E-mail",
+		"password": "Mot de passe",
+		"confirmPassword": "Confirmer le mot de passe"
+	},
+	"dashboard": {
+		"title": "Aperçu financier",
+		"totalBalance": "Solde total",
+		"income": "Revenus",
+		"expenses": "Dépenses",
+		"savings": "Épargne",
+		"recentTransactions": "Transactions récentes",
+		"budgetOverview": "Aperçu du budget"
+	},
+	"accounts": {
+		"title": "Comptes",
+		"add": "Ajouter un compte",
+		"edit": "Modifier le compte",
+		"delete": "Supprimer le compte",
+		"name": "Nom du compte",
+		"type": "Type de compte",
+		"balance": "Solde",
+		"currency": "Devise",
+		"noAccounts": "Aucun compte",
+		"types": {
+			"checking": "Compte courant",
+			"savings": "Compte épargne",
+			"credit": "Carte de crédit",
+			"cash": "Espèces",
+			"investment": "Investissement"
+		}
+	},
+	"transactions": {
+		"title": "Transactions",
+		"add": "Ajouter une transaction",
+		"edit": "Modifier la transaction",
+		"delete": "Supprimer la transaction",
+		"amount": "Montant",
+		"date": "Date",
+		"description": "Description",
+		"category": "Catégorie",
+		"account": "Compte",
+		"type": "Type",
+		"noTransactions": "Aucune transaction",
+		"types": {
+			"income": "Revenu",
+			"expense": "Dépense",
+			"transfer": "Virement"
+		}
+	},
+	"budgets": {
+		"title": "Budgets",
+		"add": "Ajouter un budget",
+		"edit": "Modifier le budget",
+		"delete": "Supprimer le budget",
+		"name": "Nom du budget",
+		"amount": "Montant",
+		"spent": "Dépensé",
+		"remaining": "Restant",
+		"period": "Période",
+		"category": "Catégorie",
+		"noBudgets": "Aucun budget",
+		"periods": {
+			"weekly": "Hebdomadaire",
+			"monthly": "Mensuel",
+			"yearly": "Annuel"
+		}
+	},
+	"categories": {
+		"title": "Catégories",
+		"add": "Ajouter une catégorie",
+		"edit": "Modifier la catégorie",
+		"delete": "Supprimer la catégorie",
+		"name": "Nom",
+		"icon": "Icône",
+		"color": "Couleur",
+		"noCategories": "Aucune catégorie"
+	},
+	"reports": {
+		"title": "Rapports",
+		"incomeVsExpenses": "Revenus vs. Dépenses",
+		"categoryBreakdown": "Répartition par catégorie",
+		"trends": "Tendances",
+		"export": "Exporter"
+	},
+	"settings": {
+		"title": "Paramètres",
+		"general": "Général",
+		"appearance": "Apparence",
+		"currency": "Devise par défaut",
+		"language": "Langue",
+		"theme": "Thème",
+		"darkMode": "Mode sombre",
+		"notifications": "Notifications"
+	},
+	"common": {
+		"save": "Enregistrer",
+		"cancel": "Annuler",
+		"delete": "Supprimer",
+		"edit": "Modifier",
+		"add": "Ajouter",
+		"confirm": "Confirmer",
+		"yes": "Oui",
+		"no": "Non",
+		"ok": "OK",
+		"loading": "Chargement...",
+		"error": "Erreur",
+		"success": "Succès",
+		"back": "Retour",
+		"search": "Rechercher",
+		"filter": "Filtrer",
+		"sort": "Trier"
+	}
+}

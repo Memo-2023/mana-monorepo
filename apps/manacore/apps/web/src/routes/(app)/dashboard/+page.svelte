@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { PageHeader } from '@manacore/shared-ui';
-	import { authStore } from '$lib/stores/authStore.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { dashboardStore } from '$lib/stores/dashboard.svelte';
 	import DashboardGrid from '$lib/components/dashboard/DashboardGrid.svelte';
 

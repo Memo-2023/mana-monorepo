@@ -3,7 +3,7 @@
 	import { ForgotPasswordPage } from '@manacore/shared-auth-ui';
 	import { ManaDeckLogo } from '@manacore/shared-branding';
 	import AppSlider from '$lib/components/AppSlider.svelte';
-	import { authStore } from '$lib/stores/authStore.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	async function handleForgotPassword(email: string) {
 		return authStore.forgotPassword(email);

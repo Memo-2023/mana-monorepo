@@ -4,7 +4,7 @@
  * Provides authenticated fetch with exponential backoff retry.
  */
 
-import { authStore } from '$lib/stores/authStore.svelte';
+import { authStore } from '$lib/stores/auth.svelte';
 
 /**
  * Retry configuration

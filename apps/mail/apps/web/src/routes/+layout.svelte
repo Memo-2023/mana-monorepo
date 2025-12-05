@@ -9,6 +9,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { accountsStore } from '$lib/stores/accounts.svelte';
 	import { foldersStore } from '$lib/stores/folders.svelte';
+	import '$lib/i18n';
 	import '../app.css';
 
 	let { children } = $props();

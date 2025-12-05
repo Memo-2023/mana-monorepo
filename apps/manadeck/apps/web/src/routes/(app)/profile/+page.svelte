@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ProfilePage } from '@manacore/shared-profile-ui';
 	import type { UserProfile, ProfileActions } from '@manacore/shared-profile-ui';
-	import { authStore } from '$lib/stores/authStore.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 
 	// Map auth store user to UserProfile
