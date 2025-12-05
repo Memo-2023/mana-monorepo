@@ -201,13 +201,13 @@ const MentionTextInputBase: ForwardRefRenderFunction<TextInput, MentionTextInput
 		console.log('Berechne Dropdown-Position unter dem Cursor');
 
 		// Versuche, die Position des Cursors zu ermitteln
-		if (inputRef.current) {
+		if (localInputRef.current) {
 			try {
 				// Auf Web-Plattformen können wir die Cursor-Position ermitteln
 				if (Platform.OS === 'web') {
 					// Wir müssen auf die native DOM-Methoden zugreifen
 					// @ts-ignore - Wir wissen, dass wir auf Web sind
-					const input = inputRef.current._reactInternals?.stateNode;
+					const input = localInputRef.current._reactInternals?.stateNode;
 
 					if (input) {
 						// Ermittle die Cursor-Position im Textfeld
@@ -251,7 +251,7 @@ const MentionTextInputBase: ForwardRefRenderFunction<TextInput, MentionTextInput
 
 					// Berechne die Position relativ zum sichtbaren Bereich
 					// @ts-ignore - Wir wissen, dass wir auf Web sind
-					const scrollTop = inputRef.current._reactInternals?.stateNode?.scrollTop || 0;
+					const scrollTop = localInputRef.current._reactInternals?.stateNode?.scrollTop || 0;
 					const verticalOffset = (currentLine - 1) * lineHeight;
 					const cursorTop = verticalOffset - scrollTop + 50; // +50 für Padding und Header
 
@@ -459,8 +459,8 @@ const MentionTextInputBase: ForwardRefRenderFunction<TextInput, MentionTextInput
 		// Fokus auf das Eingabefeld setzen mit einer Verzögerung
 		// Dies ist wichtig, damit der Fokus nach dem Rendern wiederhergestellt wird
 		const refocusInput = () => {
-			if (inputRef.current) {
-				inputRef.current.focus();
+			if (localInputRef.current) {
+				localInputRef.current.focus();
 			} else {
 				// Wenn das Ref noch nicht verfügbar ist, versuche es erneut
 				setTimeout(refocusInput, 10);

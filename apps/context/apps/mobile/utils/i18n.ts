@@ -26,7 +26,8 @@ const resources = {
 // Get device language, fallback to English if not supported
 function getDeviceLanguage(): SupportedLanguage {
 	try {
-		const locale = Localization.locale;
+		const locales = Localization.getLocales();
+		const locale = locales[0]?.languageTag;
 		if (!locale) return 'en';
 
 		const languageCode = locale.split('-')[0] as SupportedLanguage;
@@ -91,11 +92,13 @@ export const isLanguageSupported = (code: string): code is SupportedLanguage => 
 
 // Helper function to get device locale info
 export const getDeviceLocaleInfo = () => {
+	const locales = Localization.getLocales();
+	const calendars = Localization.getCalendars();
 	return {
-		locale: Localization.locale,
-		locales: Localization.locales,
-		timezone: Localization.timezone,
-		isRTL: Localization.isRTL,
-		region: Localization.region,
+		locale: locales[0]?.languageTag,
+		locales: locales.map((l) => l.languageTag),
+		timezone: calendars[0]?.timeZone,
+		isRTL: locales[0]?.textDirection === 'rtl',
+		region: locales[0]?.regionCode,
 	};
 };

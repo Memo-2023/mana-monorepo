@@ -89,7 +89,8 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
 	};
 
 	const handleItemPress = (index: number, href?: string) => {
-		if (items[index].dropdownItems && items[index].dropdownItems?.length > 0) {
+		const item = items[index];
+		if (item?.dropdownItems && item.dropdownItems.length > 0) {
 			measureItem(index);
 			setActiveDropdown(activeDropdown === index ? null : index);
 		} else if (href) {

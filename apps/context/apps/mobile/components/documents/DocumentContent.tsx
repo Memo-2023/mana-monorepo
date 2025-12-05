@@ -14,6 +14,7 @@ export interface DocumentContentProps {
 	isNewDocument: boolean;
 	autoFocus?: boolean;
 	className?: string;
+	spaceId: string;
 }
 
 /**
@@ -27,6 +28,7 @@ export const DocumentContent: React.FC<DocumentContentProps> = ({
 	isNewDocument,
 	autoFocus = false,
 	className,
+	spaceId,
 }) => {
 	const { isDark } = useTheme();
 	const { width } = useWindowDimensions();
@@ -99,7 +101,7 @@ export const DocumentContent: React.FC<DocumentContentProps> = ({
 		},
 		link: {
 			color: isDark ? '#93c5fd' : '#3b82f6',
-			textDecorationLine: 'underline',
+			textDecorationLine: 'underline' as const,
 		},
 		code_inline: {
 			backgroundColor: isDark ? '#374151' : '#f3f4f6',
@@ -156,6 +158,7 @@ export const DocumentContent: React.FC<DocumentContentProps> = ({
 			>
 				<MentionTextInput
 					ref={textInputRef}
+					spaceId={spaceId}
 					value={content}
 					onChangeText={handleContentChange}
 					placeholder={
@@ -179,7 +182,7 @@ export const DocumentContent: React.FC<DocumentContentProps> = ({
 					// Accessibility
 					accessibilityLabel="Dokumentinhalt bearbeiten"
 					accessibilityHint="Hier können Sie Ihren Dokumentinhalt eingeben und bearbeiten"
-					accessibilityRole="textbox"
+					accessibilityRole="text"
 				/>
 			</View>
 		);

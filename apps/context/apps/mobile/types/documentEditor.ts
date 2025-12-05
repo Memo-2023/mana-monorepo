@@ -82,7 +82,7 @@ export function documentEditorReducer(
 				...state,
 				document: action.payload,
 				title: action.payload.title,
-				content: action.payload.content,
+				content: action.payload.content ?? '',
 				tags: action.payload.metadata?.tags || [],
 				unsavedChanges: false,
 			};

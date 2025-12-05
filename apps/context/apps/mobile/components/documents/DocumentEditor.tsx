@@ -7,8 +7,8 @@ import { DocumentContent } from './DocumentContent';
 import { DocumentToolbar, KeyboardShortcutsInfo } from './DocumentToolbar';
 import { DocumentTagsEditor } from './DocumentTagsEditor';
 import { DocumentHeader } from './DocumentHeader';
-import { VariantCreator } from './VariantCreator';
-import { BottomLLMToolbar } from './BottomLLMToolbar';
+import { VariantCreator } from '~/components/variants/VariantCreator';
+import { BottomLLMToolbar } from '~/components/ai/BottomLLMToolbar';
 import { Text } from '~/components/ui/Text';
 import { Skeleton } from '~/components/ui/Skeleton';
 import { EDITOR_CONFIG } from '~/config/editorConfig';
@@ -257,6 +257,7 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({ spaceId, documen
 								isNewDocument={isNewDocument}
 								autoFocus={isNewDocument && state.mode === 'edit'}
 								className="flex-1"
+								spaceId={spaceId}
 							/>
 						</ScrollView>
 					</View>

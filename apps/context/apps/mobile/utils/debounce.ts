@@ -2,7 +2,7 @@ export function debounce<T extends (...args: any[]) => any>(
 	func: T,
 	wait: number,
 	options?: { leading?: boolean; trailing?: boolean }
-): (...args: Parameters<T>) => void {
+): ((...args: Parameters<T>) => void) & { cancel: () => void } {
 	let timeout: NodeJS.Timeout | null = null;
 	let result: any;
 

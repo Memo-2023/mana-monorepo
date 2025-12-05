@@ -343,10 +343,11 @@ export const VariantCreator: React.FC<VariantCreatorProps> = ({
 												<Text
 													className={twMerge(
 														'ml-2',
-														vo.selected === option &&
-															(isDark
+														vo.selected === option
+															? isDark
 																? 'text-white font-semibold'
-																: 'text-indigo-800 font-semibold')
+																: 'text-indigo-800 font-semibold'
+															: ''
 													)}
 												>
 													{option}
