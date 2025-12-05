@@ -249,8 +249,8 @@ jobs:
           ssh $STAGING_USER@$STAGING_HOST << 'EOF'
             cd ~/manacore-staging
 
-            # Mana Core Auth migrations
-            docker compose exec -T mana-core-auth pnpm run db:migrate || echo "Auth migrations skipped"
+            # Mana Core Auth - push schema using Drizzle (--force skips interactive confirmation)
+            docker compose exec -T mana-core-auth npx drizzle-kit push --force || echo "Auth schema push skipped"
           EOF
 
       - name: Deployment summary

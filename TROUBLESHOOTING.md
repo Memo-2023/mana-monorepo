@@ -15,6 +15,7 @@ Common issues and solutions for the manacore-monorepo.
   - [Orphan Docker Containers](#problem-4-orphan-docker-containers)
   - [Client-Side Calling localhost Instead of Public IP](#problem-5-client-side-calling-localhost-instead-of-public-ip)
   - [CORS Blocking Cross-Origin Requests](#problem-6-cors-blocking-cross-origin-requests)
+  - [Missing Database Schema](#problem-7-missing-database-schema)
 
 ---
 
@@ -744,6 +745,65 @@ curl -X OPTIONS http://46.224.108.214:3001/api/v1/auth/register \
 
 ---
 
+### Problem 7: Missing Database Schema
+
+**Symptoms:**
+
+- API returns: `{"statusCode": 500, "message": "relation \"auth.users\" does not exist"}`
+- Registration/login endpoints fail with 500 error
+- Health check passes but auth endpoints fail
+
+**Root Cause:**
+
+The database exists but the schema hasn't been pushed. Drizzle ORM needs to run `db:push` to create:
+
+- `auth` schema with tables: users, accounts, sessions, passwords, verification, etc.
+- `credits` schema with tables: balances, transactions, packages, etc.
+
+**Why It Happened:**
+
+The CD workflow was calling `pnpm run db:migrate` but that script doesn't exist in the package.json. The correct script is `db:push` which runs `drizzle-kit push`.
+
+**Solution:**
+
+1. **Manual fix (immediate):**
+
+```bash
+ssh -i ~/.ssh/hetzner_deploy_key deploy@46.224.108.214
+cd ~/manacore-staging
+
+# Push schema to database (--force skips interactive confirmation)
+docker compose exec -T mana-core-auth npx drizzle-kit push --force
+```
+
+2. **Fix CD workflow (permanent):**
+
+```yaml
+# .github/workflows/cd-staging.yml - BEFORE
+docker compose exec -T mana-core-auth pnpm run db:migrate || echo "Auth migrations skipped"
+
+# .github/workflows/cd-staging.yml - AFTER
+docker compose exec -T mana-core-auth npx drizzle-kit push --force || echo "Auth schema push skipped"
+```
+
+**How to Verify:**
+
+```bash
+# Check if auth schema exists
+docker compose exec -T postgres psql -U postgres -d manacore_auth -c '\dt auth.*'
+
+# Should show 12 tables:
+# auth | accounts, invitations, jwks, members, organizations,
+#        passwords, security_events, sessions, two_factor_auth,
+#        user_settings, users, verification
+```
+
+**Files Changed:**
+
+- `.github/workflows/cd-staging.yml` - Line 253: `db:migrate` → `drizzle-kit push --force`
+
+---
+
 ### Complete Staging Deployment Checklist
 
 #### Before Deployment
@@ -751,6 +811,7 @@ curl -X OPTIONS http://46.224.108.214:3001/api/v1/auth/register \
 - [ ] Verify `docker-compose.staging.yml` has correct health check paths
 - [ ] Verify CI/CD workflow (`cd-staging.yml`) has matching health check paths
 - [ ] Check that required databases exist or CI creates them
+- [ ] Verify CD workflow runs `drizzle-kit push --force` to create schemas (not `db:migrate`)
 - [ ] Verify `CORS_ORIGINS` includes all frontend origins
 - [ ] Verify `PUBLIC_*_CLIENT` env vars have correct public IPs for browser access
 
@@ -852,9 +913,14 @@ docker compose exec -T chat-backend wget -q -O - http://localhost:3002/api/v1/he
 9. **CORS for Multi-Service Apps:** When frontend and backend are on different ports, configure CORS on the backend. Port differences count as different origins (e.g., `:3000` vs `:3001`).
 
 10. **Environment Variable Flow:**
+
     ```
     docker-compose.yml → Container env → process.env (SSR) → hooks.server.ts → window.__VAR__ (browser)
     ```
+
+11. **Database Schema vs Database:** Creating a database (`CREATE DATABASE`) is not enough - Drizzle needs `db:push` to create schemas and tables. Health checks may pass with empty database, but API calls will fail with "relation does not exist".
+
+12. **Drizzle Kit Interactive Mode:** `drizzle-kit push` prompts for confirmation. Use `--force` flag in CI/CD to skip interactive mode.
 
 ---
 
