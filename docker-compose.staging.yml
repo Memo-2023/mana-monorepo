@@ -74,6 +74,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      # CORS - Allow chat-web and other staging origins
+      CORS_ORIGINS: http://46.224.108.214:3000,http://46.224.108.214:3002,http://localhost:3000
     ports:
       - "3001:3001"
     healthcheck:
