@@ -1,6 +1,6 @@
 /**
- * Multi-app configuration for welcome page branding
- * Supports multiple apps using the same authentication system
+ * Multi-app configuration for Manacore dashboard and welcome page branding
+ * Defines all apps in the Mana ecosystem with their features and styling
  */
 
 export interface AppFeature {
@@ -24,140 +24,17 @@ export interface AppConfig {
 }
 
 /**
- * App configurations for different applications in the ecosystem
+ * App configurations for all applications in the Mana ecosystem
  */
 export const appConfigs: Record<string, AppConfig> = {
-	memoro: {
-		name: 'memoro',
-		displayName: 'Memoro',
-		tagline: 'Your Voice, Your Memories, AI-Powered',
-		description:
-			'Transform your voice recordings into searchable, organized memories with the power of AI.',
-		logoEmoji: '🎙️',
-		primaryColor: '#3B82F6',
-		accentColor: '#60A5FA',
-		features: [
-			{
-				icon: '🎤',
-				title: 'Voice Recording',
-				description: 'Capture your thoughts instantly with high-quality audio recording',
-				color: '#FF6B6B',
-			},
-			{
-				icon: '✨',
-				title: 'AI Transcription',
-				description: 'Automatic transcription and smart summarization of your recordings',
-				color: '#4ECDC4',
-			},
-			{
-				icon: '🔍',
-				title: 'Smart Search',
-				description: 'Find any memory instantly with powerful search across all your memos',
-				color: '#45B7D1',
-			},
-			{
-				icon: '🏷️',
-				title: 'Organization',
-				description: 'Tag, categorize, and organize your memories effortlessly',
-				color: '#FFEAA7',
-			},
-			{
-				icon: '🌐',
-				title: 'Web & Mobile',
-				description: 'Access your memories anywhere - web, iOS, and Android',
-				color: '#74B9FF',
-			},
-			{
-				icon: '👥',
-				title: 'Collaboration',
-				description: 'Share and collaborate on memories with spaces and teams',
-				color: '#DDA0DD',
-			},
-		],
-		dashboardRoute: '/dashboard',
-		website: 'https://memoro.app',
-	},
-
-	manadeck: {
-		name: 'manadeck',
-		displayName: 'ManaDeck',
-		tagline: 'Master Any Subject with AI-Powered Flashcards',
-		description: 'Create, study, and master flashcard decks with intelligent spaced repetition.',
-		logoEmoji: '🎴',
-		primaryColor: '#8B5CF6',
-		accentColor: '#A78BFA',
-		features: [
-			{
-				icon: '🎴',
-				title: 'Smart Flashcards',
-				description: 'AI-generated flashcards from your notes and content',
-				color: '#8B5CF6',
-			},
-			{
-				icon: '🧠',
-				title: 'Spaced Repetition',
-				description: 'Intelligent review scheduling for optimal retention',
-				color: '#EC4899',
-			},
-			{
-				icon: '📊',
-				title: 'Progress Tracking',
-				description: 'Detailed analytics and insights on your learning journey',
-				color: '#10B981',
-			},
-			{
-				icon: '🌍',
-				title: 'Multi-Language',
-				description: 'Study in any language with full internationalization',
-				color: '#F59E0B',
-			},
-		],
-		dashboardRoute: '/dashboard',
-	},
-
-	storyteller: {
-		name: 'storyteller',
-		displayName: 'Storyteller',
-		tagline: 'Craft Beautiful Stories with AI',
-		description:
-			'Create, edit, and publish captivating stories with AI-powered writing assistance.',
-		logoEmoji: '📖',
-		primaryColor: '#F59E0B',
-		accentColor: '#FBBF24',
-		features: [
-			{
-				icon: '✍️',
-				title: 'AI Writing Assistant',
-				description: "Get intelligent suggestions and overcome writer's block",
-				color: '#F59E0B',
-			},
-			{
-				icon: '📚',
-				title: 'Story Organization',
-				description: 'Manage chapters, characters, and plotlines effortlessly',
-				color: '#8B5CF6',
-			},
-			{
-				icon: '🎨',
-				title: 'Beautiful Formatting',
-				description: 'Professional typography and formatting tools',
-				color: '#EC4899',
-			},
-			{
-				icon: '🚀',
-				title: 'One-Click Publishing',
-				description: 'Publish your stories directly to multiple platforms',
-				color: '#10B981',
-			},
-		],
-		dashboardRoute: '/dashboard',
-	},
-
+	// ============================================
+	// CORE PLATFORM
+	// ============================================
 	manacore: {
 		name: 'manacore',
 		displayName: 'ManaCore',
-		tagline: 'Your Universal Account',
-		description: 'One account for all your Mana-powered applications.',
+		tagline: 'Dein Universal-Account',
+		description: 'Ein Account für alle Mana-Anwendungen.',
 		logoEmoji: '⚡',
 		primaryColor: '#6366F1',
 		accentColor: '#818CF8',
@@ -165,80 +42,587 @@ export const appConfigs: Record<string, AppConfig> = {
 			{
 				icon: '🔐',
 				title: 'Single Sign-On',
-				description: 'One account across all Mana applications',
+				description: 'Ein Account für alle Mana-Apps',
 				color: '#6366F1',
 			},
 			{
 				icon: '👤',
-				title: 'Unified Profile',
-				description: 'Manage your profile and preferences in one place',
+				title: 'Einheitliches Profil',
+				description: 'Verwalte dein Profil an einem Ort',
 				color: '#8B5CF6',
 			},
 			{
 				icon: '🏢',
-				title: 'Organization Management',
-				description: 'Create and manage teams across all apps',
+				title: 'Organisation & Teams',
+				description: 'Erstelle und verwalte Teams über alle Apps',
 				color: '#EC4899',
 			},
 			{
 				icon: '💳',
 				title: 'Mana Credits',
-				description: 'Universal credit system for all Mana services',
+				description: 'Universelles Credit-System für alle Mana-Services',
 				color: '#10B981',
 			},
 		],
 		dashboardRoute: '/dashboard',
 	},
+
+	// ============================================
+	// AI-POWERED APPS
+	// ============================================
+	chat: {
+		name: 'chat',
+		displayName: 'ManaChat',
+		tagline: 'KI Chat Assistent',
+		description: 'Dein intelligenter KI-Begleiter für Gespräche, Fragen und kreative Aufgaben.',
+		logoEmoji: '💬',
+		primaryColor: '#0EA5E9',
+		accentColor: '#38BDF8',
+		features: [
+			{
+				icon: '🤖',
+				title: 'Mehrere KI-Modelle',
+				description: 'Wähle zwischen verschiedenen AI-Modellen',
+				color: '#0EA5E9',
+			},
+			{
+				icon: '💬',
+				title: 'Konversationsverlauf',
+				description: 'Alle Chats gespeichert und durchsuchbar',
+				color: '#06B6D4',
+			},
+			{
+				icon: '📝',
+				title: 'Kreatives Schreiben',
+				description: 'Texte, Code und mehr generieren',
+				color: '#8B5CF6',
+			},
+			{
+				icon: '🌐',
+				title: 'Mehrsprachig',
+				description: 'Unterstützung für viele Sprachen',
+				color: '#10B981',
+			},
+		],
+		dashboardRoute: '/dashboard',
+		website: 'https://chat.manacore.app',
+	},
+
+	picture: {
+		name: 'picture',
+		displayName: 'ManaPicture',
+		tagline: 'KI Bildgenerierung',
+		description: 'Erschaffe einzigartige Bilder mit der Kraft künstlicher Intelligenz.',
+		logoEmoji: '🎨',
+		primaryColor: '#22C55E',
+		accentColor: '#4ADE80',
+		features: [
+			{
+				icon: '🎨',
+				title: 'KI-Bildgenerierung',
+				description: 'Erstelle Bilder aus Textbeschreibungen',
+				color: '#22C55E',
+			},
+			{
+				icon: '🖼️',
+				title: 'Galerie',
+				description: 'Alle generierten Bilder organisiert',
+				color: '#10B981',
+			},
+			{
+				icon: '✨',
+				title: 'Verschiedene Stile',
+				description: 'Fotorealistisch, Cartoon, Kunst und mehr',
+				color: '#8B5CF6',
+			},
+			{
+				icon: '📐',
+				title: 'Flexible Formate',
+				description: 'Verschiedene Größen und Seitenverhältnisse',
+				color: '#F59E0B',
+			},
+		],
+		dashboardRoute: '/dashboard',
+		website: 'https://picture.manacore.app',
+	},
+
+	presi: {
+		name: 'presi',
+		displayName: 'Presi',
+		tagline: 'Präsentations-Creator',
+		description: 'Erstelle beeindruckende Präsentationen mit KI-gestützten Design-Vorschlägen.',
+		logoEmoji: '📊',
+		primaryColor: '#F97316',
+		accentColor: '#FB923C',
+		features: [
+			{
+				icon: '📊',
+				title: 'Slide-Editor',
+				description: 'Intuitive Folien-Bearbeitung',
+				color: '#F97316',
+			},
+			{
+				icon: '🎨',
+				title: 'Design-Vorlagen',
+				description: 'Professionelle Templates',
+				color: '#EC4899',
+			},
+			{
+				icon: '✨',
+				title: 'KI-Unterstützung',
+				description: 'Automatische Design-Vorschläge',
+				color: '#8B5CF6',
+			},
+			{
+				icon: '📤',
+				title: 'Export',
+				description: 'PDF, PPTX und mehr',
+				color: '#10B981',
+			},
+		],
+		dashboardRoute: '/dashboard',
+		website: 'https://presi.manacore.app',
+	},
+
+	mail: {
+		name: 'mail',
+		displayName: 'ManaMail',
+		tagline: 'Smart Email Client',
+		description:
+			'Intelligenter E-Mail-Client mit KI-Zusammenfassungen, Smart Reply und Multi-Account.',
+		logoEmoji: '📧',
+		primaryColor: '#6366F1',
+		accentColor: '#818CF8',
+		features: [
+			{
+				icon: '📧',
+				title: 'Multi-Account',
+				description: 'Alle E-Mail-Konten an einem Ort',
+				color: '#6366F1',
+			},
+			{
+				icon: '🤖',
+				title: 'KI-Zusammenfassungen',
+				description: 'Lange E-Mails auf den Punkt gebracht',
+				color: '#8B5CF6',
+			},
+			{
+				icon: '⚡',
+				title: 'Smart Reply',
+				description: 'KI-generierte Antwortvorschläge',
+				color: '#10B981',
+			},
+			{
+				icon: '🔍',
+				title: 'Intelligente Suche',
+				description: 'Finde jede E-Mail sofort',
+				color: '#0EA5E9',
+			},
+		],
+		dashboardRoute: '/dashboard',
+		website: 'https://mail.manacore.app',
+	},
+
+	// ============================================
+	// PRODUCTIVITY APPS
+	// ============================================
+	manadeck: {
+		name: 'manadeck',
+		displayName: 'ManaDeck',
+		tagline: 'KI Karteikarten',
+		description: 'Lerne intelligenter mit KI-generierten Karteikarten und Spaced Repetition.',
+		logoEmoji: '🎴',
+		primaryColor: '#8B5CF6',
+		accentColor: '#A78BFA',
+		features: [
+			{
+				icon: '🎴',
+				title: 'Smarte Karteikarten',
+				description: 'KI-generierte Lernkarten aus deinen Notizen',
+				color: '#8B5CF6',
+			},
+			{
+				icon: '🧠',
+				title: 'Spaced Repetition',
+				description: 'Intelligente Wiederholung für optimales Lernen',
+				color: '#EC4899',
+			},
+			{
+				icon: '📊',
+				title: 'Lernfortschritt',
+				description: 'Detaillierte Statistiken und Insights',
+				color: '#10B981',
+			},
+			{
+				icon: '🌍',
+				title: 'Mehrsprachig',
+				description: 'Lerne in jeder Sprache',
+				color: '#F59E0B',
+			},
+		],
+		dashboardRoute: '/dashboard',
+		website: 'https://manadeck.manacore.app',
+	},
+
+	todo: {
+		name: 'todo',
+		displayName: 'ManaTodo',
+		tagline: 'Aufgabenverwaltung',
+		description: 'Verwalte Aufgaben mit Projekten, Labels, Subtasks und wiederkehrenden Terminen.',
+		logoEmoji: '✅',
+		primaryColor: '#8B5CF6',
+		accentColor: '#A78BFA',
+		features: [
+			{
+				icon: '✅',
+				title: 'Aufgaben',
+				description: 'Erstelle und verwalte Aufgaben',
+				color: '#8B5CF6',
+			},
+			{
+				icon: '📁',
+				title: 'Projekte',
+				description: 'Organisiere Aufgaben in Projekten',
+				color: '#10B981',
+			},
+			{
+				icon: '🏷️',
+				title: 'Labels & Tags',
+				description: 'Flexible Kategorisierung',
+				color: '#F59E0B',
+			},
+			{
+				icon: '🔄',
+				title: 'Wiederkehrend',
+				description: 'Automatisch wiederholende Aufgaben',
+				color: '#EC4899',
+			},
+		],
+		dashboardRoute: '/dashboard',
+		website: 'https://todo.manacore.app',
+	},
+
+	calendar: {
+		name: 'calendar',
+		displayName: 'ManaCalendar',
+		tagline: 'Smarte Kalenderverwaltung',
+		description:
+			'Organisiere deine Zeit mit persönlichen und geteilten Kalendern, wiederkehrenden Terminen und Erinnerungen.',
+		logoEmoji: '📅',
+		primaryColor: '#0EA5E9',
+		accentColor: '#38BDF8',
+		features: [
+			{
+				icon: '📅',
+				title: 'Kalender',
+				description: 'Persönliche und geteilte Kalender',
+				color: '#0EA5E9',
+			},
+			{
+				icon: '🔄',
+				title: 'Wiederkehrende Termine',
+				description: 'Flexible Wiederholungsmuster',
+				color: '#10B981',
+			},
+			{
+				icon: '🔔',
+				title: 'Erinnerungen',
+				description: 'Verpasse keinen Termin',
+				color: '#F59E0B',
+			},
+			{
+				icon: '🔗',
+				title: 'CalDAV/iCal Sync',
+				description: 'Synchronisiere mit anderen Apps',
+				color: '#8B5CF6',
+			},
+		],
+		dashboardRoute: '/dashboard',
+		website: 'https://calendar.manacore.app',
+	},
+
+	contacts: {
+		name: 'contacts',
+		displayName: 'ManaContacts',
+		tagline: 'Kontaktverwaltung',
+		description: 'Verwalte deine Kontakte übersichtlich mit Gruppen, Tags und Notizen.',
+		logoEmoji: '👥',
+		primaryColor: '#3B82F6',
+		accentColor: '#60A5FA',
+		features: [
+			{
+				icon: '👥',
+				title: 'Kontakte',
+				description: 'Alle Kontakte an einem Ort',
+				color: '#3B82F6',
+			},
+			{
+				icon: '🏷️',
+				title: 'Gruppen & Tags',
+				description: 'Flexible Organisation',
+				color: '#10B981',
+			},
+			{
+				icon: '📥',
+				title: 'Import/Export',
+				description: 'VCF, CSV und mehr',
+				color: '#F59E0B',
+			},
+			{
+				icon: '🔄',
+				title: 'Google Sync',
+				description: 'Synchronisiere mit Google Contacts',
+				color: '#EC4899',
+			},
+		],
+		dashboardRoute: '/dashboard',
+		website: 'https://contacts.manacore.app',
+	},
+
+	finance: {
+		name: 'finance',
+		displayName: 'ManaFinance',
+		tagline: 'Budget-Tracker & Finanzübersicht',
+		description:
+			'Behalte deine Finanzen im Blick mit Multi-Currency-Konten, Transaktionen und Budgets.',
+		logoEmoji: '💰',
+		primaryColor: '#10B981',
+		accentColor: '#34D399',
+		features: [
+			{
+				icon: '💰',
+				title: 'Konten',
+				description: 'Verwalte mehrere Konten',
+				color: '#10B981',
+			},
+			{
+				icon: '💳',
+				title: 'Transaktionen',
+				description: 'Erfasse Ein- und Ausgaben',
+				color: '#3B82F6',
+			},
+			{
+				icon: '📊',
+				title: 'Budgets',
+				description: 'Setze Limits und behalte den Überblick',
+				color: '#F59E0B',
+			},
+			{
+				icon: '🌍',
+				title: 'Multi-Currency',
+				description: 'Unterstützung für alle Währungen',
+				color: '#8B5CF6',
+			},
+		],
+		dashboardRoute: '/dashboard',
+		website: 'https://finance.manacore.app',
+	},
+
+	// ============================================
+	// UTILITY APPS
+	// ============================================
+	clock: {
+		name: 'clock',
+		displayName: 'ManaClock',
+		tagline: 'Uhren & Timer',
+		description: 'Weltzeituhr, Wecker, Timer und stilvolle Uhren-Widgets in einer App.',
+		logoEmoji: '⏰',
+		primaryColor: '#F59E0B',
+		accentColor: '#FBBF24',
+		features: [
+			{
+				icon: '🌍',
+				title: 'Weltzeituhr',
+				description: 'Zeitzonen weltweit im Blick',
+				color: '#0EA5E9',
+			},
+			{
+				icon: '⏰',
+				title: 'Wecker',
+				description: 'Flexible Alarm-Einstellungen',
+				color: '#F59E0B',
+			},
+			{
+				icon: '⏱️',
+				title: 'Timer & Stoppuhr',
+				description: 'Für alle Timing-Aufgaben',
+				color: '#10B981',
+			},
+			{
+				icon: '🍅',
+				title: 'Pomodoro',
+				description: 'Fokussiertes Arbeiten',
+				color: '#EF4444',
+			},
+		],
+		dashboardRoute: '/dashboard',
+		website: 'https://clock.manacore.app',
+	},
+
+	zitare: {
+		name: 'zitare',
+		displayName: 'Zitare',
+		tagline: 'Tägliche Inspiration',
+		description: 'Entdecke inspirierende Zitate und Weisheiten für jeden Tag.',
+		logoEmoji: '💡',
+		primaryColor: '#F59E0B',
+		accentColor: '#FBBF24',
+		features: [
+			{
+				icon: '💡',
+				title: 'Tägliche Zitate',
+				description: 'Jeden Tag neue Inspiration',
+				color: '#F59E0B',
+			},
+			{
+				icon: '❤️',
+				title: 'Favoriten',
+				description: 'Speichere deine Lieblingszitate',
+				color: '#EF4444',
+			},
+			{
+				icon: '🎯',
+				title: 'Personalisiert',
+				description: 'Zitate nach deinem Geschmack',
+				color: '#8B5CF6',
+			},
+			{
+				icon: '📤',
+				title: 'Teilen',
+				description: 'Teile Zitate mit Freunden',
+				color: '#10B981',
+			},
+		],
+		dashboardRoute: '/dashboard',
+		website: 'https://zitare.manacore.app',
+	},
+
+	storage: {
+		name: 'storage',
+		displayName: 'ManaStorage',
+		tagline: 'Cloud-Speicherung',
+		description: 'Sichere Cloud-Speicherung für deine Dateien mit Ordnern, Sharing und mehr.',
+		logoEmoji: '☁️',
+		primaryColor: '#3B82F6',
+		accentColor: '#60A5FA',
+		features: [
+			{
+				icon: '☁️',
+				title: 'Cloud-Speicher',
+				description: 'Deine Dateien sicher in der Cloud',
+				color: '#3B82F6',
+			},
+			{
+				icon: '📁',
+				title: 'Ordner',
+				description: 'Organisiere deine Dateien',
+				color: '#10B981',
+			},
+			{
+				icon: '🔗',
+				title: 'Sharing',
+				description: 'Teile Dateien mit anderen',
+				color: '#8B5CF6',
+			},
+			{
+				icon: '📱',
+				title: 'Überall verfügbar',
+				description: 'Zugriff von jedem Gerät',
+				color: '#F59E0B',
+			},
+		],
+		dashboardRoute: '/dashboard',
+		website: 'https://storage.manacore.app',
+	},
+
+	moodlit: {
+		name: 'moodlit',
+		displayName: 'Moodlit',
+		tagline: 'Ambient Lighting & Moods',
+		description:
+			'Erstelle beruhigende Lichtstimmungen mit animierten Farbverläufen für entspannte Atmosphäre.',
+		logoEmoji: '🌈',
+		primaryColor: '#8B5CF6',
+		accentColor: '#A78BFA',
+		features: [
+			{
+				icon: '🌈',
+				title: 'Farbverläufe',
+				description: 'Animierte Ambient-Beleuchtung',
+				color: '#8B5CF6',
+			},
+			{
+				icon: '🎨',
+				title: 'Themes',
+				description: 'Vordefinierte Stimmungen',
+				color: '#EC4899',
+			},
+			{
+				icon: '✨',
+				title: 'Animationen',
+				description: 'Sanfte, beruhigende Bewegungen',
+				color: '#F59E0B',
+			},
+			{
+				icon: '🌙',
+				title: 'Nachtmodus',
+				description: 'Perfekt zum Einschlafen',
+				color: '#6366F1',
+			},
+		],
+		dashboardRoute: '/dashboard',
+		website: 'https://moodlit.manacore.app',
+	},
 };
 
 /**
- * Default Mana branding for when no app is specified
+ * Default Mana branding for the platform overview
  */
 export const defaultManaConfig: AppConfig = {
 	name: 'mana',
 	displayName: 'Mana',
-	tagline: 'The Unified Application Platform',
+	tagline: 'Die einheitliche App-Plattform',
 	description:
-		'Access all your Mana-powered applications with a single account. Built for productivity, powered by AI.',
+		'Greife auf alle Mana-Apps mit einem einzigen Account zu. Gebaut für Produktivität, angetrieben von KI.',
 	logoEmoji: '⚡',
 	primaryColor: '#6366F1',
 	accentColor: '#818CF8',
 	features: [
 		{
-			icon: '🎙️',
-			title: 'Memoro',
-			description: 'AI-powered voice memos and memory management',
-			color: '#3B82F6',
+			icon: '💬',
+			title: 'ManaChat',
+			description: 'KI-Chat mit verschiedenen Modellen',
+			color: '#0EA5E9',
+		},
+		{
+			icon: '🎨',
+			title: 'ManaPicture',
+			description: 'KI-Bildgenerierung',
+			color: '#22C55E',
 		},
 		{
 			icon: '🎴',
 			title: 'ManaDeck',
-			description: 'Intelligent flashcard learning platform',
+			description: 'Intelligente Lernkarten',
 			color: '#8B5CF6',
 		},
 		{
-			icon: '📖',
-			title: 'Storyteller',
-			description: 'Creative writing with AI assistance',
+			icon: '📅',
+			title: 'ManaCalendar',
+			description: 'Smarte Kalenderverwaltung',
+			color: '#0EA5E9',
+		},
+		{
+			icon: '✅',
+			title: 'ManaTodo',
+			description: 'Aufgabenverwaltung mit Projekten',
+			color: '#8B5CF6',
+		},
+		{
+			icon: '💡',
+			title: 'Zitare',
+			description: 'Tägliche Inspiration',
 			color: '#F59E0B',
-		},
-		{
-			icon: '⚡',
-			title: 'ManaCore',
-			description: 'Universal account and organization management',
-			color: '#6366F1',
-		},
-		{
-			icon: '🔐',
-			title: 'Single Sign-On',
-			description: 'One account for all Mana applications',
-			color: '#10B981',
-		},
-		{
-			icon: '🌍',
-			title: 'Cross-Platform',
-			description: 'Web, iOS, and Android support',
-			color: '#EC4899',
 		},
 	],
 	dashboardRoute: '/dashboard',
@@ -255,4 +639,34 @@ export function getAppConfig(appName?: string | null): AppConfig {
 
 	const normalizedName = appName.toLowerCase().trim();
 	return appConfigs[normalizedName] || defaultManaConfig;
+}
+
+/**
+ * Get all active app configurations
+ */
+export function getAllAppConfigs(): AppConfig[] {
+	return Object.values(appConfigs);
+}
+
+/**
+ * Get app configurations by category
+ */
+export function getAppsByCategory(): {
+	core: AppConfig[];
+	ai: AppConfig[];
+	productivity: AppConfig[];
+	utility: AppConfig[];
+} {
+	return {
+		core: [appConfigs.manacore],
+		ai: [appConfigs.chat, appConfigs.picture, appConfigs.presi, appConfigs.mail],
+		productivity: [
+			appConfigs.manadeck,
+			appConfigs.todo,
+			appConfigs.calendar,
+			appConfigs.contacts,
+			appConfigs.finance,
+		],
+		utility: [appConfigs.clock, appConfigs.zitare, appConfigs.storage, appConfigs.moodlit],
+	};
 }
