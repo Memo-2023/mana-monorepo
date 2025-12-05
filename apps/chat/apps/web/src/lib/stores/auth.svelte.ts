@@ -10,15 +10,13 @@ import type { UserData } from '@manacore/shared-auth';
 // Get auth URL dynamically at runtime - fallback for SSR and client
 function getAuthUrl(): string {
 	if (browser && typeof window !== 'undefined') {
-		// Client-side: check for injected env or use default
-		return (
-			(window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
-				.__PUBLIC_MANA_CORE_AUTH_URL__ ||
-			import.meta.env.PUBLIC_MANA_CORE_AUTH_URL ||
-			'http://localhost:3001'
-		);
+		// Client-side: use injected window variable (set by hooks.server.ts)
+		// Falls back to localhost for local development
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
 	}
-	// Server-side: use process.env or default
+	// Server-side (SSR): use Docker internal URL for container-to-container communication
 	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
 }
 
