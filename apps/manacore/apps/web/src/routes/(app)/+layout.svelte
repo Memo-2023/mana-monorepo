@@ -125,8 +125,14 @@
 
 	$effect(() => {
 		// Redirect to login if not authenticated (after initialization)
-		if (authStore.initialized && !authStore.isAuthenticated) {
-			goto('/login');
+		// Use a small delay to ensure state has propagated after navigation
+		if (authStore.initialized && !authStore.loading && !authStore.isAuthenticated) {
+			// Small delay to handle navigation timing
+			setTimeout(() => {
+				if (!authStore.isAuthenticated) {
+					goto('/login');
+				}
+			}, 100);
 		}
 	});
 
