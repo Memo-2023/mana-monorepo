@@ -13,6 +13,8 @@ Common issues and solutions for the manacore-monorepo.
   - [chat-backend Container Unhealthy](#problem-2-chat-backend-container-unhealthy)
   - [SvelteKit Static Environment Variable Imports](#problem-3-sveltekit-static-environment-variable-imports)
   - [Orphan Docker Containers](#problem-4-orphan-docker-containers)
+  - [Client-Side Calling localhost Instead of Public IP](#problem-5-client-side-calling-localhost-instead-of-public-ip)
+  - [CORS Blocking Cross-Origin Requests](#problem-6-cors-blocking-cross-origin-requests)
 
 ---
 
@@ -599,6 +601,149 @@ docker rm -f manadeck-backend-staging manacore-nginx-staging
 
 ---
 
+### Problem 5: Client-Side Calling localhost Instead of Public IP
+
+**Symptoms:**
+
+- Browser console shows: `POST http://localhost:3001/api/v1/auth/register net::ERR_CONNECTION_REFUSED`
+- API calls work from server but fail from browser
+- The injected `window.__PUBLIC_MANA_CORE_AUTH_URL__` is empty or undefined
+
+**Root Cause:**
+
+SvelteKit's environment variables work differently on server vs client:
+
+- **Server-side (SSR):** Has access to `process.env`
+- **Client-side (browser):** Does NOT have access to `process.env` - needs explicit injection
+
+The initial fix using `process.env` only worked for SSR. Browser code falls back to `localhost`.
+
+**Solution - Runtime Environment Injection:**
+
+1. **Add client URLs to docker-compose.staging.yml:**
+
+```yaml
+chat-web:
+  environment:
+    # Server-side URLs (Docker internal network)
+    PUBLIC_BACKEND_URL: http://chat-backend:3002
+    PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+    # Client-side URLs (browser access via public IP)
+    PUBLIC_BACKEND_URL_CLIENT: http://46.224.108.214:3002
+    PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://46.224.108.214:3001
+```
+
+2. **Inject into HTML via hooks.server.ts:**
+
+```typescript
+// apps/chat/apps/web/src/hooks.server.ts
+import type { Handle } from '@sveltejs/kit';
+
+const PUBLIC_MANA_CORE_AUTH_URL_CLIENT =
+	process.env.PUBLIC_MANA_CORE_AUTH_URL_CLIENT || process.env.PUBLIC_MANA_CORE_AUTH_URL || '';
+
+export const handle: Handle = async ({ event, resolve }) => {
+	return resolve(event, {
+		transformPageChunk: ({ html }) => {
+			const envScript = `<script>
+window.__PUBLIC_MANA_CORE_AUTH_URL__ = "${PUBLIC_MANA_CORE_AUTH_URL_CLIENT}";
+</script>`;
+			return html.replace('<head>', `<head>${envScript}`);
+		},
+	});
+};
+```
+
+3. **Read from window in client code:**
+
+```typescript
+// apps/chat/apps/web/src/lib/stores/auth.svelte.ts
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+}
+```
+
+**How to Verify:**
+
+Open browser DevTools (F12) → Console:
+
+```javascript
+window.__PUBLIC_MANA_CORE_AUTH_URL__;
+// Should show: "http://46.224.108.214:3001"
+```
+
+---
+
+### Problem 6: CORS Blocking Cross-Origin Requests
+
+**Symptoms:**
+
+- Browser console shows: `Access to fetch at 'http://46.224.108.214:3001/...' from origin 'http://46.224.108.214:3000' has been blocked by CORS policy`
+- API calls work via curl but fail from browser
+- Preflight OPTIONS requests fail
+
+**Root Cause:**
+
+Browser security blocks requests between different origins (port counts as different origin):
+
+- chat-web: `http://46.224.108.214:3000`
+- mana-core-auth: `http://46.224.108.214:3001`
+
+Even though they're on the same IP, different ports = different origins = CORS blocked.
+
+**Solution:**
+
+Add `CORS_ORIGINS` environment variable to mana-core-auth in docker-compose.staging.yml:
+
+```yaml
+mana-core-auth:
+  environment:
+    # ... other env vars ...
+    # CORS - Allow chat-web and other staging origins
+    CORS_ORIGINS: http://46.224.108.214:3000,http://46.224.108.214:3002,http://localhost:3000
+```
+
+**CORS Configuration in mana-core-auth:**
+
+The service reads `CORS_ORIGINS` from environment:
+
+```typescript
+// services/mana-core-auth/src/config/configuration.ts
+cors: {
+  origin: process.env.CORS_ORIGINS?.split(',') || [
+    'http://localhost:3000',
+    'http://localhost:8081',
+  ],
+}
+
+// services/mana-core-auth/src/main.ts
+const corsOrigins = configService.get<string[]>('cors.origin') || [];
+app.enableCors({
+  origin: corsOrigins,
+  credentials: true,
+});
+```
+
+**How to Verify:**
+
+```bash
+# Test CORS preflight
+curl -X OPTIONS http://46.224.108.214:3001/api/v1/auth/register \
+  -H "Origin: http://46.224.108.214:3000" \
+  -H "Access-Control-Request-Method: POST" \
+  -v
+
+# Should see in response headers:
+# Access-Control-Allow-Origin: http://46.224.108.214:3000
+```
+
+---
+
 ### Complete Staging Deployment Checklist
 
 #### Before Deployment
@@ -606,6 +751,8 @@ docker rm -f manadeck-backend-staging manacore-nginx-staging
 - [ ] Verify `docker-compose.staging.yml` has correct health check paths
 - [ ] Verify CI/CD workflow (`cd-staging.yml`) has matching health check paths
 - [ ] Check that required databases exist or CI creates them
+- [ ] Verify `CORS_ORIGINS` includes all frontend origins
+- [ ] Verify `PUBLIC_*_CLIENT` env vars have correct public IPs for browser access
 
 #### During Deployment Failure
 
@@ -697,6 +844,17 @@ docker compose exec -T chat-backend wget -q -O - http://localhost:3002/api/v1/he
 5. **SvelteKit Environment Variables:** Use runtime patterns (`process.env`, `import.meta.env`) instead of `$env/static/public` for Docker builds.
 
 6. **Verify Before Commit:** Always check both `docker-compose.staging.yml` AND CI/CD workflows for matching paths.
+
+7. **Server vs Client URLs:** Docker internal URLs (e.g., `http://mana-core-auth:3001`) only work server-side. Browsers need public IPs. Use separate `_CLIENT` env vars for browser access.
+
+8. **SvelteKit Runtime Injection:** Use `hooks.server.ts` with `transformPageChunk` to inject environment variables into HTML at runtime. This is the only reliable way to pass server env vars to client code.
+
+9. **CORS for Multi-Service Apps:** When frontend and backend are on different ports, configure CORS on the backend. Port differences count as different origins (e.g., `:3000` vs `:3001`).
+
+10. **Environment Variable Flow:**
+    ```
+    docker-compose.yml → Container env → process.env (SSR) → hooks.server.ts → window.__VAR__ (browser)
+    ```
 
 ---
 
