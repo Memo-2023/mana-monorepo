@@ -516,6 +516,19 @@ pnpm cf:projects:list
 npx wrangler pages project add-domain chat-landing chat.manacore.app
 ```
 
+## Server Access
+
+### Hetzner Staging Server
+
+SSH access for deployment troubleshooting, log inspection, and service management:
+
+```bash
+ssh -i ~/.ssh/hetzner_deploy_key deploy@46.224.108.214
+```
+
+**User:** `deploy`
+**Key:** `~/.ssh/hetzner_deploy_key`
+
 ## Adding Dependencies
 
 ```bash
