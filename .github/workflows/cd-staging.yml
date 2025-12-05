@@ -21,6 +21,7 @@ on:
           - all
           - mana-core-auth
           - chat-backend
+          - chat-web
   workflow_call:
 
 permissions:
@@ -221,6 +222,17 @@ jobs:
               echo "❌ chat-backend health check failed"
               echo "=== Logs ==="
               docker compose logs --tail=50 chat-backend
+              exit 1
+            fi
+
+            # Check chat-web
+            echo "Checking chat-web..."
+            if docker compose exec -T chat-web wget -q -O - http://localhost:3000/health > /dev/null 2>&1; then
+              echo "✅ chat-web is healthy"
+            else
+              echo "❌ chat-web health check failed"
+              echo "=== Logs ==="
+              docker compose logs --tail=50 chat-web
               exit 1
             fi
 
