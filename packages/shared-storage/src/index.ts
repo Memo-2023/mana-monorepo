@@ -14,6 +14,7 @@ export {
 	createContactsStorage,
 	createStorageStorage,
 	createMailStorage,
+	createInventoryStorage,
 } from './factory';
 
 // Utilities

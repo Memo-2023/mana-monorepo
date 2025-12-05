@@ -1,0 +1,135 @@
+{
+	"app": {
+		"name": "Inventory",
+		"tagline": "Gerez votre inventaire"
+	},
+	"nav": {
+		"items": "Objets",
+		"favorites": "Favoris",
+		"archive": "Archive",
+		"categories": "Categories",
+		"locations": "Emplacements",
+		"import": "Importer",
+		"settings": "Parametres",
+		"feedback": "Feedback",
+		"mana": "Mana"
+	},
+	"items": {
+		"title": "Mes objets",
+		"new": "Nouvel objet",
+		"edit": "Modifier",
+		"delete": "Supprimer",
+		"search": "Rechercher...",
+		"empty": "Aucun objet trouve",
+		"emptyCreate": "Creez votre premier objet",
+		"confirmDelete": "Voulez-vous vraiment supprimer cet objet?",
+		"details": "Details",
+		"photos": "Photos",
+		"documents": "Documents"
+	},
+	"item": {
+		"name": "Nom",
+		"description": "Description",
+		"sku": "Reference",
+		"category": "Categorie",
+		"location": "Emplacement",
+		"purchaseDate": "Date d'achat",
+		"purchasePrice": "Prix d'achat",
+		"currency": "Devise",
+		"currentValue": "Valeur actuelle",
+		"condition": "Etat",
+		"warrantyExpires": "Garantie jusqu'au",
+		"warrantyNotes": "Notes de garantie",
+		"notes": "Notes",
+		"quantity": "Quantite",
+		"favorite": "Favori",
+		"archive": "Archiver",
+		"unarchive": "Restaurer"
+	},
+	"conditions": {
+		"new": "Neuf",
+		"like_new": "Comme neuf",
+		"good": "Bon",
+		"fair": "Acceptable",
+		"poor": "Mauvais"
+	},
+	"photos": {
+		"upload": "Telecharger des photos",
+		"setPrimary": "Definir comme principale",
+		"delete": "Supprimer",
+		"empty": "Aucune photo"
+	},
+	"documents": {
+		"upload": "Telecharger un document",
+		"download": "Telecharger",
+		"delete": "Supprimer",
+		"empty": "Aucun document",
+		"types": {
+			"receipt": "Recu",
+			"warranty": "Garantie",
+			"manual": "Manuel",
+			"other": "Autre"
+		}
+	},
+	"categories": {
+		"title": "Categories",
+		"new": "Nouvelle categorie",
+		"edit": "Modifier",
+		"delete": "Supprimer",
+		"empty": "Aucune categorie",
+		"confirmDelete": "Voulez-vous vraiment supprimer cette categorie?",
+		"name": "Nom",
+		"icon": "Icone",
+		"color": "Couleur",
+		"parent": "Categorie parente"
+	},
+	"locations": {
+		"title": "Emplacements",
+		"new": "Nouvel emplacement",
+		"edit": "Modifier",
+		"delete": "Supprimer",
+		"empty": "Aucun emplacement",
+		"confirmDelete": "Voulez-vous vraiment supprimer cet emplacement?",
+		"name": "Nom",
+		"description": "Description",
+		"parent": "Emplacement parent"
+	},
+	"import": {
+		"title": "Importer",
+		"csv": "Import CSV",
+		"selectFile": "Selectionner un fichier",
+		"template": "Telecharger le modele",
+		"success": "Import reussi",
+		"imported": "{count} objets importes"
+	},
+	"favorites": {
+		"title": "Favoris",
+		"empty": "Aucun favori"
+	},
+	"archive": {
+		"title": "Archive",
+		"empty": "Aucun objet archive"
+	},
+	"auth": {
+		"login": "Connexion",
+		"register": "S'inscrire",
+		"logout": "Deconnexion",
+		"forgotPassword": "Mot de passe oublie?",
+		"email": "E-mail",
+		"password": "Mot de passe",
+		"name": "Nom"
+	},
+	"common": {
+		"save": "Enregistrer",
+		"cancel": "Annuler",
+		"create": "Creer",
+		"edit": "Modifier",
+		"delete": "Supprimer",
+		"back": "Retour",
+		"loading": "Chargement...",
+		"error": "Une erreur s'est produite",
+		"noResults": "Aucun resultat",
+		"all": "Tous",
+		"none": "Aucun"
+	}
+}

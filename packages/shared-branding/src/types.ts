@@ -18,7 +18,8 @@ export type AppId =
 	| 'clock'
 	| 'todo'
 	| 'mail'
-	| 'moodlit';
+	| 'moodlit'
+	| 'inventory';
 
 /**
  * App branding configuration

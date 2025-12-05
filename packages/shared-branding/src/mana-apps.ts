@@ -292,6 +292,22 @@ export const MANA_APPS: ManaApp[] = [
 		comingSoon: false,
 		status: 'development',
 	},
+	{
+		id: 'inventory',
+		name: 'Inventory',
+		description: {
+			de: 'Besitz-Verwaltung',
+			en: 'Inventory Management',
+		},
+		longDescription: {
+			de: 'Verwalte deinen Besitz mit Fotos, Kaufbelegen, Garantie-Dokumenten, Kategorien und Standorten.',
+			en: 'Manage your belongings with photos, receipts, warranty documents, categories, and locations.',
+		},
+		icon: APP_ICONS.inventory,
+		color: '#14b8a6',
+		comingSoon: false,
+		status: 'development',
+	},
 ];
 
 /**
@@ -376,8 +392,9 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	calendar: { dev: 'http://localhost:5179', prod: 'https://calendar.manacore.app' },
 	storage: { dev: 'http://localhost:5185', prod: 'https://storage.manacore.app' },
 	clock: { dev: 'http://localhost:5187', prod: 'https://clock.manacore.app' },
-	todo: { dev: 'http://localhost:5188', prod: 'https://todo.manacore.app' },
+	todo: { dev: 'http://localhost:5189', prod: 'https://todo.manacore.app' },
 	mail: { dev: 'http://localhost:5186', prod: 'https://mail.manacore.app' },
+	inventory: { dev: 'http://localhost:5188', prod: 'https://inventory.manacore.app' },
 };
 
 /**

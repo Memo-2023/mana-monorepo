@@ -30,6 +30,7 @@ export {
 	TodoLogo,
 	MailLogo,
 	MoodlitLogo,
+	InventoryLogo,
 } from './logos';
 
 // Configuration

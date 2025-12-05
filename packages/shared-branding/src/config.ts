@@ -220,6 +220,19 @@ export const APP_BRANDING: Record<AppId, AppBranding> = {
 		logoStroke: true,
 		logoStrokeWidth: 1.5,
 	},
+	inventory: {
+		id: 'inventory',
+		name: 'Inventory',
+		tagline: 'Inventory Management',
+		primaryColor: '#14b8a6',
+		secondaryColor: '#2dd4bf',
+		// Box/package icon
+		logoPath:
+			'M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9',
+		logoViewBox: '0 0 24 24',
+		logoStroke: true,
+		logoStrokeWidth: 1.5,
+	},
 };
 
 /**

@@ -1,0 +1,135 @@
+{
+	"app": {
+		"name": "Inventory",
+		"tagline": "Verwalte dein Inventar"
+	},
+	"nav": {
+		"items": "Gegenstände",
+		"favorites": "Favoriten",
+		"archive": "Archiv",
+		"categories": "Kategorien",
+		"locations": "Standorte",
+		"import": "Importieren",
+		"settings": "Einstellungen",
+		"feedback": "Feedback",
+		"mana": "Mana"
+	},
+	"items": {
+		"title": "Meine Gegenstände",
+		"new": "Neuer Gegenstand",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
+		"search": "Suchen...",
+		"empty": "Keine Gegenstände gefunden",
+		"emptyCreate": "Erstelle deinen ersten Gegenstand",
+		"confirmDelete": "Möchtest du diesen Gegenstand wirklich löschen?",
+		"details": "Details",
+		"photos": "Fotos",
+		"documents": "Dokumente"
+	},
+	"item": {
+		"name": "Name",
+		"description": "Beschreibung",
+		"sku": "Artikelnummer",
+		"category": "Kategorie",
+		"location": "Standort",
+		"purchaseDate": "Kaufdatum",
+		"purchasePrice": "Kaufpreis",
+		"currency": "Währung",
+		"currentValue": "Aktueller Wert",
+		"condition": "Zustand",
+		"warrantyExpires": "Garantie bis",
+		"warrantyNotes": "Garantie-Hinweise",
+		"notes": "Notizen",
+		"quantity": "Menge",
+		"favorite": "Favorit",
+		"archive": "Archivieren",
+		"unarchive": "Wiederherstellen"
+	},
+	"conditions": {
+		"new": "Neu",
+		"like_new": "Wie neu",
+		"good": "Gut",
+		"fair": "Akzeptabel",
+		"poor": "Schlecht"
+	},
+	"photos": {
+		"upload": "Fotos hochladen",
+		"setPrimary": "Als Hauptbild",
+		"delete": "Löschen",
+		"empty": "Keine Fotos vorhanden"
+	},
+	"documents": {
+		"upload": "Dokument hochladen",
+		"download": "Herunterladen",
+		"delete": "Löschen",
+		"empty": "Keine Dokumente vorhanden",
+		"types": {
+			"receipt": "Kaufbeleg",
+			"warranty": "Garantieschein",
+			"manual": "Handbuch",
+			"other": "Sonstiges"
+		}
+	},
+	"categories": {
+		"title": "Kategorien",
+		"new": "Neue Kategorie",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
+		"empty": "Keine Kategorien vorhanden",
+		"confirmDelete": "Möchtest du diese Kategorie wirklich löschen?",
+		"name": "Name",
+		"icon": "Icon",
+		"color": "Farbe",
+		"parent": "Übergeordnete Kategorie"
+	},
+	"locations": {
+		"title": "Standorte",
+		"new": "Neuer Standort",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
+		"empty": "Keine Standorte vorhanden",
+		"confirmDelete": "Möchtest du diesen Standort wirklich löschen?",
+		"name": "Name",
+		"description": "Beschreibung",
+		"parent": "Übergeordneter Standort"
+	},
+	"import": {
+		"title": "Importieren",
+		"csv": "CSV Import",
+		"selectFile": "Datei auswählen",
+		"template": "Vorlage herunterladen",
+		"success": "Import erfolgreich",
+		"imported": "{count} Gegenstände importiert"
+	},
+	"favorites": {
+		"title": "Favoriten",
+		"empty": "Keine Favoriten vorhanden"
+	},
+	"archive": {
+		"title": "Archiv",
+		"empty": "Keine archivierten Gegenstände"
+	},
+	"auth": {
+		"login": "Anmelden",
+		"register": "Registrieren",
+		"logout": "Abmelden",
+		"forgotPassword": "Passwort vergessen?",
+		"email": "E-Mail",
+		"password": "Passwort",
+		"name": "Name"
+	},
+	"common": {
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"create": "Erstellen",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
+		"back": "Zurück",
+		"loading": "Laden...",
+		"error": "Ein Fehler ist aufgetreten",
+		"noResults": "Keine Ergebnisse",
+		"all": "Alle",
+		"none": "Keine"
+	}
+}

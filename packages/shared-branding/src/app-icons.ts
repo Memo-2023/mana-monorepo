@@ -63,6 +63,9 @@ const todoSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="n
 // Mail icon (envelope with gradient)
 const mailSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#mailGrad)"/><rect x="240" y="320" width="544" height="384" rx="24" fill="white"/><path d="M240 380L512 540L784 380" stroke="#6366f1" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/><rect x="320" y="520" width="200" height="16" rx="4" fill="#6366f1" fill-opacity="0.3"/><rect x="320" y="560" width="160" height="12" rx="3" fill="#6366f1" fill-opacity="0.2"/><rect x="320" y="592" width="240" height="12" rx="3" fill="#6366f1" fill-opacity="0.2"/><defs><linearGradient id="mailGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#4f46e5"/></linearGradient></defs></svg>`;
 
+// Inventory icon (box/package with gradient)
+const inventorySvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#inventoryGrad)"/><path d="M280 380L512 260L744 380V644L512 764L280 644V380Z" fill="white"/><path d="M512 500V764M280 380L512 500L744 380" stroke="#14b8a6" stroke-width="24" stroke-linejoin="round"/><path d="M396 320L628 440" stroke="#14b8a6" stroke-width="16" stroke-linecap="round"/><rect x="460" y="560" width="104" height="80" rx="8" fill="#14b8a6" fill-opacity="0.3"/><defs><linearGradient id="inventoryGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#14b8a6"/><stop offset="1" stop-color="#0d9488"/></linearGradient></defs></svg>`;
+
 /**
  * App icons as data URLs
  * Use these directly in <img src={APP_ICONS.memoro}> or CSS background-image
@@ -86,6 +89,7 @@ export const APP_ICONS = {
 	clock: svgToDataUrl(clockSvg),
 	todo: svgToDataUrl(todoSvg),
 	mail: svgToDataUrl(mailSvg),
+	inventory: svgToDataUrl(inventorySvg),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;
