@@ -37,9 +37,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **picture**  | AI image generation          | Expo mobile, SvelteKit web, Astro landing                 |
 | **chat**     | AI chat application          | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
 | **zitare**   | Daily inspiration quotes     | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
-| **presi**    | Presentation tool            | NestJS backend, Expo mobile, SvelteKit web                |
 | **contacts** | Contact management           | NestJS backend, SvelteKit web                             |
-| **mail**     | Email client with AI         | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
 
 ### Archived Projects (`apps-archived/`)
 
@@ -56,6 +54,9 @@ These projects are temporarily archived and excluded from the workspace. To re-a
 | **uload**          | URL shortener                    |
 | **wisekeep**       | AI wisdom extraction from video  |
 | **techbase**       | Software comparison platform     |
+| **inventory**      | Inventory management             |
+| **presi**          | Presentation tool                |
+| **storage**        | Cloud storage                    |
 
 ## Development Commands
 
