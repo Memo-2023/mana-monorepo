@@ -1,0 +1,405 @@
+import React, { useState } from 'react';
+import { View, TextInput, Modal, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '~/utils/theme/theme';
+import { Text } from '~/components/ui/Text';
+import { ThemedButton } from '~/components/ui/ThemedButton';
+import { updateSpace, deleteSpace } from '~/services/supabaseService';
+
+interface SpaceEditorProps {
+  visible: boolean;
+  onClose: () => void;
+  spaceId: string;
+  spaceName: string;
+  spaceDescription?: string;
+  spacePrefix?: string;
+  onUpdate: () => void;
+  onDelete?: () => void;
+}
+
+export const SpaceEditor: React.FC<SpaceEditorProps> = ({
+  visible,
+  onClose,
+  spaceId,
+  spaceName,
+  spaceDescription = '',
+  spacePrefix = '',
+  onUpdate,
+  onDelete
+}) => {
+  const { isDark } = useTheme();
+  const [name, setName] = useState(spaceName);
+  const [description, setDescription] = useState(spaceDescription);
+  const [prefix, setPrefix] = useState(spacePrefix);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [prefixError, setPrefixError] = useState<string | null>(null);
+
+  // Funktion zum Aktualisieren des Space
+  const handleUpdateSpace = async () => {
+    if (!name.trim()) {
+      setError('Der Name darf nicht leer sein.');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError(null);
+
+      // Validiere das Präfix (nur Buchstaben und Zahlen, max. 3 Zeichen)
+      if (prefix && !/^[A-Za-z0-9]{1,3}$/.test(prefix)) {
+        setPrefixError('Das Präfix darf nur Buchstaben und Zahlen enthalten und maximal 3 Zeichen lang sein.');
+        setSaving(false);
+        return;
+      }
+      
+      const { success, error } = await updateSpace(spaceId, {
+        name,
+        description: description || null,
+        prefix: prefix ? prefix.toUpperCase() : undefined
+      });
+
+      if (!success) {
+        const errorMessage = error?.message || 'Unbekannter Fehler';
+        setError(`Fehler beim Aktualisieren des Space: ${errorMessage}`);
+        return;
+      }
+
+      // Callback für erfolgreiche Aktualisierung
+      onUpdate();
+      // Schließe den Editor
+      onClose();
+    } catch (err: any) {
+      setError(`Unerwarteter Fehler: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Funktion zum Löschen des Space
+  const handleDeleteSpace = async () => {
+    try {
+      setSaving(true);
+      setError(null);
+
+      const { success, error } = await deleteSpace(spaceId);
+
+      if (!success) {
+        const errorMessage = error?.message || 'Unbekannter Fehler';
+        setError(`Fehler beim Löschen des Space: ${errorMessage}`);
+        return;
+      }
+
+      // Callback für erfolgreiches Löschen
+      if (onDelete) {
+        onDelete();
+      }
+      // Schließe den Editor
+      onClose();
+    } catch (err: any) {
+      setError(`Unerwarteter Fehler: ${err.message}`);
+    } finally {
+      setSaving(false);
+      setShowDeleteConfirmation(false);
+    }
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <Pressable 
+        style={styles.modalOverlay} 
+        onPress={onClose}
+      >
+        <Pressable 
+          style={[
+            styles.modalContent,
+            isDark && styles.modalContentDark
+          ]}
+          // Verhindert, dass Klicks auf den Inhalt das Modal schließen
+          onPress={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <View style={styles.header}>
+            <Text style={[
+              styles.title,
+              isDark && styles.titleDark
+            ]}>
+              Space bearbeiten
+            </Text>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <Ionicons 
+                name="close" 
+                size={24} 
+                color={isDark ? '#d1d5db' : '#4b5563'} 
+              />
+            </TouchableOpacity>
+          </View>
+
+          {error && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          )}
+
+          {/* Name */}
+          <View style={styles.inputContainer}>
+            <Text style={[
+              styles.label,
+              isDark && styles.labelDark
+            ]}>
+              Name
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                isDark && styles.inputDark
+              ]}
+              value={name}
+              onChangeText={setName}
+              placeholder="Name des Space"
+              placeholderTextColor={isDark ? '#666' : '#999'}
+            />
+          </View>
+
+          {/* Beschreibung */}
+          <View style={styles.inputContainer}>
+            <Text style={[
+              styles.label,
+              isDark && styles.labelDark
+            ]}>
+              Beschreibung
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                styles.textArea,
+                isDark && styles.inputDark
+              ]}
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Beschreibung (optional)"
+              placeholderTextColor={isDark ? '#666' : '#999'}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+          </View>
+          
+          {/* Space-Präfix */}
+          <View style={styles.inputContainer}>
+            <Text style={[
+              styles.label,
+              isDark && styles.labelDark
+            ]}>
+              Space-Präfix
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                isDark && styles.inputDark,
+                { textTransform: 'uppercase' }
+              ]}
+              value={prefix}
+              onChangeText={(text) => {
+                setPrefix(text);
+                setPrefixError(null);
+              }}
+              placeholder="Präfix für Dokument-IDs (z.B. M für Memoro)"
+              placeholderTextColor={isDark ? '#666' : '#999'}
+              maxLength={3}
+              autoCapitalize="characters"
+            />
+            {prefixError && (
+              <Text style={styles.errorText}>{prefixError}</Text>
+            )}
+            <Text style={[
+              styles.helperText,
+              isDark && styles.helperTextDark
+            ]}>
+              Dieses Präfix wird für die Dokument-IDs verwendet (z.B. MD1, MC2, MP3).
+            </Text>
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <ThemedButton
+              title="Speichern"
+              variant="primary"
+              onPress={handleUpdateSpace}
+              disabled={saving}
+              style={styles.saveButton}
+            />
+            <ThemedButton
+              title="Abbrechen"
+              variant="secondary"
+              onPress={onClose}
+            />
+          </View>
+
+          <View style={{ marginTop: 20, borderTopWidth: 1, borderTopColor: isDark ? '#4b5563' : '#e5e7eb', paddingTop: 20 }}>
+            {!showDeleteConfirmation ? (
+              <ThemedButton
+                title="Space löschen"
+                variant="danger"
+                onPress={() => setShowDeleteConfirmation(true)}
+              />
+            ) : (
+              <View style={styles.deleteConfirmation}>
+                <Text style={styles.deleteConfirmationText}>
+                  Möchten Sie diesen Space wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+                </Text>
+                <View style={styles.deleteButtons}>
+                  <ThemedButton
+                    title="Abbrechen"
+                    variant="secondary"
+                    onPress={() => setShowDeleteConfirmation(false)}
+                    style={{ flex: 1, marginRight: 8 }}
+                  />
+                  <ThemedButton
+                    title="Löschen"
+                    variant="danger"
+                    onPress={handleDeleteSpace}
+                    disabled={saving}
+                    style={{ flex: 1 }}
+                  />
+                </View>
+              </View>
+            )}
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+};
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 20,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 500,
+    borderRadius: 8,
+    padding: 20,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalContentDark: {
+    backgroundColor: '#1f2937',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#111827',
+  },
+  titleDark: {
+    color: '#f9fafb',
+  },
+  closeButton: {
+    padding: 5,
+  },
+  inputContainer: {
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+    color: '#111827',
+    fontWeight: '500',
+  },
+  labelDark: {
+    color: '#f9fafb',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 4,
+    padding: 10,
+    marginBottom: 5,
+    backgroundColor: '#f9fafb',
+    color: '#111827',
+  },
+  inputDark: {
+    backgroundColor: '#374151',
+    color: '#f9fafb',
+    borderColor: '#4b5563',
+  },
+  textArea: {
+    minHeight: 100,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  saveButton: {
+    flex: 1,
+    marginRight: 10,
+  },
+  deleteButton: {
+    backgroundColor: '#ef4444',
+  },
+  deleteButtonText: {
+    color: '#fff',
+  },
+  errorContainer: {
+    marginBottom: 15,
+    padding: 10,
+    backgroundColor: '#fee2e2',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#ef4444',
+  },
+  errorText: {
+    color: '#b91c1c',
+    fontSize: 14,
+    marginTop: 2,
+    marginBottom: 5,
+  },
+  helperText: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 2,
+  },
+  helperTextDark: {
+    color: '#9ca3af',
+  },
+  deleteConfirmation: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: '#fee2e2',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#ef4444',
+  },
+  deleteConfirmationText: {
+    color: '#b91c1c',
+    marginBottom: 10,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  deleteButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+});

@@ -6,21 +6,19 @@ pnpm docker:up:all
 
 pnpm docker:down
 
-pnpm dev:manacore:app
-pnpm dev:chat:app
-pnpm dev:contacts:app
-pnpm dev:todo:app
-pnpm dev:clock:app
-pnpm dev:mail:app
-pnpm dev:storage:app
 pnpm dev:calendar:app
-pnpm dev:finance:app
+pnpm dev:chat:app
+pnpm dev:clock:app
 pnpm dev:contacts:app
 pnpm dev:inventory:app
-pnpm dev:picture:app
 pnpm dev:manacore:app
-pnpm dev:zitare:app
+pnpm dev:manadeck:app
+pnpm dev:picture:app
 pnpm dev:presi:app
+pnpm dev:storage:app
+pnpm dev:techbase:app
+pnpm dev:todo:app
+pnpm dev:zitare:app
 
 # Deployment Landingpages:
 
@@ -381,42 +379,45 @@ pnpm --filter @manacore/shared-ui build
 
 ---
 
-## App-Übersicht (31 Apps gesamt)
+## App-Übersicht (30 Apps gesamt)
 
-### Aktive Apps (apps/) - 14 Apps
+### Aktive Apps (apps/) - 13 Apps
 
 calendar - Kalender-App für persönliches und geteiltes Zeitmanagement mit wiederkehrenden Terminen, CalDAV/iCal-Sync und Erinnerungen
 chat - KI-Chat-Anwendung mit verschiedenen KI-Modellen und Konversationsverlauf
 clock - Uhren-App mit Weltzeituhr, Wecker, Timer, Stoppuhr und Pomodoro-Timer
 contacts - Kontaktverwaltung mit Import/Export und Google-Synchronisation
-finance - Budget-Tracker & Finanzübersicht mit Multi-Currency-Konten, Transaktionen, Budgets und Reports
-mail - E-Mail-Client mit KI-Unterstützung für intelligentes Sortieren und Antworten
+inventory - Inventar-/Besitzverwaltung mit Fotos, Kaufbelegen, Garantie-Dokumenten und Standorten
 manacore - Multi-App Ecosystem Platform - zentrales Dashboard für alle Mana-Apps
 manadeck - Karteikarten-/Lernkarten-Management für Spaced Repetition Learning
-moodlit - Ambient Lighting & Mood App für Stimmungsbeleuchtung
 picture - KI-Bildgenerierung mit verschiedenen Modellen und Galerie-Verwaltung
 presi - Präsentations-Tool für Slides und Vorträge
 storage - Cloud-Speicher-App für Dateiverwaltung (ähnlich Dropbox/Google Drive)
+techbase - Mehrsprachige Software-Vergleichsplattform mit Astro.js, Voting-System und Kommentaren
 todo - Task-Management mit Projekten, Subtasks, Labels und wiederkehrenden Aufgaben
 zitare - Tägliche Inspirations-Zitate mit Favoriten und personalisierten Empfehlungen
 
-### Archivierte Apps (apps-archived/) - 8 Apps
+### Archivierte Apps (apps-archived/) - 11 Apps
 
 bauntown - Community-Website für Entwickler mit News, Projekten und Tutorials
+finance - Budget-Tracker & Finanzübersicht mit Multi-Currency-Konten, Transaktionen, Budgets und Reports
 maerchenzauber - KI-gestützte Kindermärchen-Generierung mit illustrierten Geschichten
+mail - E-Mail-Client mit KI-Unterstützung für intelligentes Sortieren und Antworten
 memoro - Sprachnotizen-App mit KI-Transkription und Analyse
+moodlit - Ambient Lighting & Mood App für Stimmungsbeleuchtung
 news - News-Aggregator für personalisierte Nachrichten
 nutriphi - KI-gestützter Ernährungs-Tracker mit Foto-Analyse via Google Gemini
 reader - Text-to-Speech App mit Google Chirp Voices für Offline-Wiedergabe
 uload - URL-Shortener und Link-Management-Platform (Live: ulo.ad)
 wisekeep - KI-gestützte Wissensextraktion aus YouTube-Videos mit Transkription
 
-### Games (games/) - 4 Games
+### Games (games/) - 5 Games
 
 figgos - Collectible Figure Game mit KI-generierten Fantasy-Figuren zum Sammeln
 mana-games - Browser-Spieleplatform mit 22+ Spielen und KI-Spielgenerierung
-voxel-lava - 3D Voxel Building & Platforming Game mit Level-Editor und Sharing
+voxelava - 3D Voxel Building & Platforming Game mit Level-Editor und Sharing
 whopixels - Pixel-Art-Editor-Spiel mit Phaser.js
+worldream - Text-first World-Building-Plattform für fiktive Welten mit @slug-Referenzen
 
 ### Services (services/) - 1 Service
 
