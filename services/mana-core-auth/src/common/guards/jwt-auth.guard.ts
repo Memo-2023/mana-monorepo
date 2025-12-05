@@ -1,9 +1,17 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as jwt from 'jsonwebtoken';
+import { jwtVerify, createRemoteJWKSet, type JWTPayload } from 'jose';
 
+/**
+ * JWT Auth Guard using JWKS (Better Auth compatible)
+ *
+ * Uses jose library with JWKS endpoint for EdDSA token verification.
+ * This is the correct approach for Better Auth which uses EdDSA keys.
+ */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
+	private jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
+
 	constructor(private configService: ConfigService) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -15,28 +23,31 @@ export class JwtAuthGuard implements CanActivate {
 		}
 
 		try {
-			const publicKey = this.configService.get<string>('jwt.publicKey');
-			if (!publicKey) {
-				throw new UnauthorizedException('JWT configuration error');
+			// Lazy initialize JWKS
+			if (!this.jwks) {
+				const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
+				const jwksUrl = new URL('/api/v1/auth/jwks', baseUrl);
+				this.jwks = createRemoteJWKSet(jwksUrl);
 			}
-			const audience = this.configService.get<string>('jwt.audience');
-			const issuer = this.configService.get<string>('jwt.issuer');
 
-			const payload = jwt.verify(token, publicKey, {
-				algorithms: ['RS256'],
-				audience,
+			const issuer = this.configService.get<string>('jwt.issuer') || 'manacore';
+			const audience = this.configService.get<string>('jwt.audience') || 'manacore';
+
+			const { payload } = await jwtVerify(token, this.jwks, {
 				issuer,
-			}) as jwt.JwtPayload;
+				audience,
+			});
 
 			// Attach user to request
 			request.user = {
 				userId: payload.sub,
-				email: payload.email,
-				role: payload.role,
+				email: payload.email as string,
+				role: payload.role as string,
 			};
 
 			return true;
 		} catch (error) {
+			console.debug('[JwtAuthGuard] Token verification failed:', error);
 			throw new UnauthorizedException('Invalid token');
 		}
 	}
