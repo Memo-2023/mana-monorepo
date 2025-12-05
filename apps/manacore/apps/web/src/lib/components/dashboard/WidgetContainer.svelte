@@ -22,6 +22,9 @@
 	import ChatRecentWidget from './widgets/ChatRecentWidget.svelte';
 	import ContactsFavoritesWidget from './widgets/ContactsFavoritesWidget.svelte';
 	import ZitareQuoteWidget from './widgets/ZitareQuoteWidget.svelte';
+	import PictureRecentWidget from './widgets/PictureRecentWidget.svelte';
+	import ManadeckProgressWidget from './widgets/ManadeckProgressWidget.svelte';
+	import ClockTimersWidget from './widgets/ClockTimersWidget.svelte';
 
 	interface Props {
 		widget: WidgetConfig;
@@ -59,6 +62,9 @@
 		'chat-recent': ChatRecentWidget,
 		'contacts-favorites': ContactsFavoritesWidget,
 		'zitare-quote': ZitareQuoteWidget,
+		'picture-recent': PictureRecentWidget,
+		'manadeck-progress': ManadeckProgressWidget,
+		'clock-timers': ClockTimersWidget,
 	} as const;
 
 	const WidgetComponent = $derived(widgetComponents[widget.type]);

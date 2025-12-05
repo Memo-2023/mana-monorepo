@@ -66,6 +66,32 @@
 				"explore": "Zitate entdecken",
 				"refresh": "Neues Zitat",
 				"view_all": "Alle Zitate"
+			},
+			"picture": {
+				"title": "Bilder",
+				"description": "Letzte KI-Generierungen",
+				"empty": "Noch keine Bilder erstellt",
+				"create": "Bild erstellen",
+				"view_all": "Alle Bilder"
+			},
+			"manadeck": {
+				"title": "Lernfortschritt",
+				"description": "Deine Lernkarten",
+				"empty": "Noch keine Decks erstellt",
+				"create_deck": "Deck erstellen",
+				"streak": "Tage Serie",
+				"due": "fällig",
+				"today": "heute gelernt",
+				"learned": "Gelernt",
+				"start_study": "Lernen starten"
+			},
+			"clock": {
+				"title": "Timer & Wecker",
+				"description": "Aktive Timer und Wecker",
+				"empty": "Keine aktiven Timer oder Wecker",
+				"open": "Clock öffnen",
+				"active_timers": "Aktive Timer",
+				"alarms": "Wecker"
 			}
 		}
 	},

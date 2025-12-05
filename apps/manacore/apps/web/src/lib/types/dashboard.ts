@@ -16,7 +16,10 @@ export type WidgetType =
 	| 'calendar-events' // Calendar API: upcoming events
 	| 'chat-recent' // Chat API: recent conversations
 	| 'contacts-favorites' // Contacts API: favorite contacts
-	| 'zitare-quote'; // Zitare API: favorite quotes
+	| 'zitare-quote' // Zitare API: daily inspiration quote
+	| 'picture-recent' // Picture API: recent generations
+	| 'manadeck-progress' // ManaDeck API: learning progress
+	| 'clock-timers'; // Clock: active timers and alarms
 
 /**
  * Widget size - maps to CSS Grid columns
@@ -101,7 +104,16 @@ export interface WidgetMeta {
 	/** Whether multiple instances are allowed */
 	allowMultiple: boolean;
 	/** Required backend (for status display) */
-	requiredBackend?: 'todo' | 'calendar' | 'chat' | 'contacts' | 'zitare' | 'mana-core-auth';
+	requiredBackend?:
+		| 'todo'
+		| 'calendar'
+		| 'chat'
+		| 'contacts'
+		| 'zitare'
+		| 'picture'
+		| 'manadeck'
+		| 'clock'
+		| 'mana-core-auth';
 }
 
 /**
@@ -187,6 +199,33 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		defaultSize: 'medium',
 		allowMultiple: false,
 		requiredBackend: 'zitare',
+	},
+	{
+		type: 'picture-recent',
+		nameKey: 'dashboard.widgets.picture.title',
+		descriptionKey: 'dashboard.widgets.picture.description',
+		icon: '🎨',
+		defaultSize: 'medium',
+		allowMultiple: false,
+		requiredBackend: 'picture',
+	},
+	{
+		type: 'manadeck-progress',
+		nameKey: 'dashboard.widgets.manadeck.title',
+		descriptionKey: 'dashboard.widgets.manadeck.description',
+		icon: '🎴',
+		defaultSize: 'medium',
+		allowMultiple: false,
+		requiredBackend: 'manadeck',
+	},
+	{
+		type: 'clock-timers',
+		nameKey: 'dashboard.widgets.clock.title',
+		descriptionKey: 'dashboard.widgets.clock.description',
+		icon: '⏰',
+		defaultSize: 'small',
+		allowMultiple: false,
+		requiredBackend: 'clock',
 	},
 ];
 
