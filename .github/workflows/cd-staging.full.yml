@@ -1,13 +1,10 @@
-# Simplified staging config: mana-core-auth + chat-backend only
-# Full config archived at: .github/workflows/cd-staging.full.yml
+# ARCHIVED: Full staging workflow with all services
+# Active simplified workflow: .github/workflows/cd-staging.yml
 #
-# To restore full config:
-#   cp .github/workflows/cd-staging.full.yml .github/workflows/cd-staging.yml
+# Services included: mana-core-auth, chat-backend, manadeck-backend
 #
-# To add a service back:
-#   1. Add service to workflow_dispatch options (line ~10)
-#   2. Add health check in "Run health checks" step
-#   3. Add service to docker-compose.staging.yml
+# To restore: cp .github/workflows/cd-staging.full.yml .github/workflows/cd-staging.yml
+
 name: CD - Staging Deployment
 
 on:
@@ -21,6 +18,7 @@ on:
           - all
           - mana-core-auth
           - chat-backend
+          - manadeck-backend
   workflow_call:
 
 permissions:
@@ -165,25 +163,6 @@ jobs:
             docker compose ps
           EOF
 
-      - name: Create databases
-        env:
-          STAGING_USER: deploy
-          STAGING_HOST: 46.224.108.214
-        run: |
-          ssh $STAGING_USER@$STAGING_HOST << 'EOF'
-            cd ~/manacore-staging
-
-            echo "Creating required databases..."
-
-            # Create manacore_auth database (for mana-core-auth service)
-            docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE manacore_auth;" 2>/dev/null || echo "manacore_auth database already exists"
-
-            # Create chat database (for chat-backend service)
-            docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE chat;" 2>/dev/null || echo "chat database already exists"
-
-            echo "✅ Databases ready"
-          EOF
-
       - name: Run health checks
         env:
           STAGING_USER: deploy
@@ -221,6 +200,17 @@ jobs:
               echo "❌ chat-backend health check failed"
               echo "=== Logs ==="
               docker compose logs --tail=50 chat-backend
+              exit 1
+            fi
+
+            # Check manadeck-backend
+            echo "Checking manadeck-backend..."
+            if docker compose exec -T manadeck-backend wget -q -O - http://localhost:3003/api/health > /dev/null 2>&1; then
+              echo "✅ manadeck-backend is healthy"
+            else
+              echo "❌ manadeck-backend health check failed"
+              echo "=== Logs ==="
+              docker compose logs --tail=50 manadeck-backend
               exit 1
             fi
 
