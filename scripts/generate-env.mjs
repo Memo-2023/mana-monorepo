@@ -600,6 +600,39 @@ const APP_CONFIGS = [
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 		},
 	},
+
+	// Worldream Web (SvelteKit)
+	{
+		path: 'games/worldream/apps/web/.env',
+		vars: {
+			PUBLIC_SUPABASE_URL: (env) => env.WORLDREAM_SUPABASE_URL,
+			PUBLIC_SUPABASE_ANON_KEY: (env) => env.WORLDREAM_SUPABASE_ANON_KEY,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			OPENAI_API_KEY: (env) => env.WORLDREAM_OPENAI_API_KEY,
+			GEMINI_API_KEY: (env) => env.WORLDREAM_GEMINI_API_KEY,
+			REPLICATE_API_TOKEN: (env) => env.WORLDREAM_REPLICATE_API_TOKEN,
+		},
+	},
+
+	// TechBase Backend (NestJS)
+	{
+		path: 'apps/techbase/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.TECHBASE_BACKEND_PORT || '3021',
+			DATABASE_URL: (env) => env.TECHBASE_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			CORS_ORIGINS: () => 'http://localhost:4321,http://localhost:5173',
+		},
+	},
+
+	// TechBase Web (Astro)
+	{
+		path: 'apps/techbase/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.TECHBASE_BACKEND_PORT || '3021'}`,
+		},
+	},
 ];
 
 function main() {

@@ -1,0 +1,80 @@
+---
+import { loadTranslations } from '../../utils/i18n';
+
+const { software, locale, isCompareMode = false } = Astro.props;
+const t = await loadTranslations(locale);
+---
+
+<div class="flex flex-col md:flex-row md:items-center mb-8">
+  <!-- Toggle minimize button for comparison mode -->
+  {isCompareMode && (
+    <button 
+      @click="toggleMinimize('left')" 
+      class="mr-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+      :aria-label="isLeftMinimized ? '${t.software.expandView}' : '${t.software.minimizeView}'"
+    >
+      <svg x-show="!isLeftMinimized" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+      </svg>
+      <svg x-show="isLeftMinimized" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+      </svg>
+    </button>
+  )}
+  
+  {software.logo && (
+    <div class="w-24 h-24 bg-white p-2 rounded-lg shadow-sm flex items-center justify-center mr-6 mb-4 md:mb-0">
+      <img src={software.logo} alt={software.name} class="max-w-full max-h-full" />
+    </div>
+  )}
+  
+  <div>
+    <h1 class="text-3xl font-bold">{software.name}</h1>
+    <div class="flex flex-wrap items-center mt-2">
+      {software.categories.map((category, index) => (
+        <>
+          <a 
+            href={`/${locale}/category/${category.toLowerCase().replace(' ', '-')}`} 
+            class="text-primary hover:underline"
+          >
+            {category}
+          </a>
+          {index < software.categories.length - 1 && (
+            <span class="mx-2 text-gray-400">•</span>
+          )}
+        </>
+      ))}
+    </div>
+  </div>
+  
+  <div class="md:ml-auto mt-4 md:mt-0 flex space-x-2">
+    <a 
+      href={software.website} 
+      target="_blank" 
+      rel="noopener noreferrer" 
+      class="btn btn-primary"
+    >
+      {t.common.visit || 'Visit Website'}
+    </a>
+    
+    <!-- Compare button -->
+    <button 
+      @click="toggleCompareMode" 
+      class="btn btn-secondary"
+      x-text="isCompareMode ? '${t.software.expandView}' : '${t.software.inlineCompare}'"
+    ></button>
+  </div>
+</div>
+
+<!-- Minimized view for left panel when in comparison mode -->
+<template x-if="isLeftMinimized && isCompareMode">
+  <div class="p-4 flex flex-col items-center justify-center border-r border-gray-200 dark:border-gray-700 h-full">
+    {software.logo && (
+      <div class="w-16 h-16 bg-white p-2 rounded-lg shadow-sm flex items-center justify-center mb-2">
+        <img src={software.logo} alt={software.name} class="max-w-full max-h-full" />
+      </div>
+    )}
+    <h2 class="text-center text-lg font-bold mb-2">{software.name}</h2>
+    <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-3">{software.description}</p>
+  </div>
+</template>

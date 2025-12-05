@@ -55,6 +55,7 @@ These projects are temporarily archived and excluded from the workspace. To re-a
 | **reader**         | Reading app                      |
 | **uload**          | URL shortener                    |
 | **wisekeep**       | AI wisdom extraction from video  |
+| **techbase**       | Software comparison platform     |
 
 ## Development Commands
 

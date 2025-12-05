@@ -1,0 +1,535 @@
+---
+import { loadTranslations } from '../../utils/i18n';
+
+const { currentSoftware, similarSoftware, locale } = Astro.props;
+const t = await loadTranslations(locale);
+---
+
+<div>
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-[200px] overflow-y-auto">
+    <h3 class="text-xl font-bold mb-4">{t.common.compare || 'Compare'}</h3>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">{t.software.compareDescription || 'Compare this software with others to find the best solution for your needs.'}</p>
+    
+    <a 
+      href={`/${locale}/compare?software=${currentSoftware.id}`} 
+      class="btn btn-secondary w-full"
+    >
+      {t.software.compare || 'Compare'}
+    </a>
+  </div>
+  
+  <!-- Similar Software List -->
+  <div 
+    x-show="isCompareMode && !selectedSoftwareId"
+    class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm h-full overflow-hidden"
+  >
+    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+      <h3 class="text-lg font-bold" id="software-selection-title">{t.software.selectAnother}</h3>
+      <div class="mt-4">
+        <input 
+          type="text" 
+          placeholder={t.common.search} 
+          class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
+          id="software-search-input"
+        />
+      </div>
+    </div>
+    
+    <div class="p-0 overflow-y-auto" style="max-height: calc(100vh - 200px);" id="software-list-container">
+      <!-- This will be populated via JavaScript -->
+      <div id="similar-software-list" style="display:none">{JSON.stringify(similarSoftware)}</div>
+    </div>
+  </div>
+  
+  <!-- Selected Software for Comparison -->
+  <div 
+    x-show="isCompareMode && selectedSoftwareId" 
+    x-transition
+    class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden"
+    id="comparison-container"
+  >
+    <div class="flex items-center p-4 border-b border-gray-200 dark:border-gray-700">
+      <button 
+        @click="toggleMinimize('right')" 
+        class="mr-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        :aria-label="isRightMinimized ? '${t.software.expandView}' : '${t.software.minimizeView}'"
+      >
+        <svg x-show="!isRightMinimized" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+        </svg>
+        <svg x-show="isRightMinimized" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+        </svg>
+      </button>
+      
+      <div class="flex items-center flex-1">
+        <div class="w-12 h-12 bg-white p-1 rounded-lg shadow-sm flex items-center justify-center mr-4">
+          <img id="compare-logo" alt="Software logo" class="max-w-full max-h-full" />
+        </div>
+        <div>
+          <h2 id="compare-name" class="text-xl font-bold"></h2>
+          <div id="compare-categories" class="flex flex-wrap text-sm text-gray-500"></div>
+        </div>
+      </div>
+      
+      <button 
+        @click="selectedSoftwareId = null" 
+        class="ml-auto btn btn-sm btn-secondary whitespace-nowrap"
+      >
+        {t.software.selectAnother}
+      </button>
+    </div>
+    
+    <div x-show="!isRightMinimized" class="p-6" id="compare-content">
+      <div class="text-center text-gray-500 dark:text-gray-400">
+        <svg class="animate-spin h-8 w-8 mx-auto mb-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Loading software details...
+      </div>
+    </div>
+    
+    <template x-if="isRightMinimized">
+      <div class="p-4 flex flex-col items-center justify-center border-l border-gray-200 dark:border-gray-700 h-full">
+        <div class="w-16 h-16 bg-white p-2 rounded-lg shadow-sm flex items-center justify-center mb-2">
+          <img id="compare-mini-logo" alt="Software logo" class="max-w-full max-h-full" />
+        </div>
+        <h2 id="compare-mini-name" class="text-center text-lg font-bold mb-2"></h2>
+        <p id="compare-mini-description" class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-3"></p>
+      </div>
+    </template>
+  </div>
+  
+  <!-- Mobile view switcher (only shown in compare mode on small screens) -->
+  <div 
+    x-show="isCompareMode" 
+    class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-3 flex justify-center space-x-4 lg:hidden z-10"
+  >
+    <button 
+      @click="switchViewSide('left')" 
+      class="px-4 py-2 rounded-md transition-colors"
+      :class="{'bg-primary text-white': currentViewSide === 'left', 'bg-gray-100 dark:bg-gray-700': currentViewSide !== 'left'}"
+    >
+      {currentSoftware.name}
+    </button>
+    <button 
+      x-show="selectedSoftwareId"
+      @click="switchViewSide('right')" 
+      class="px-4 py-2 rounded-md transition-colors"
+      :class="{'bg-primary text-white': currentViewSide === 'right', 'bg-gray-100 dark:bg-gray-700': currentViewSide !== 'right'}"
+      id="compare-tab-button"
+    >
+      Compare
+    </button>
+  </div>
+</div>
+
+<!-- Hidden data for JS -->
+<div id="current-software-categories" style="display:none">{JSON.stringify(currentSoftware.categories)}</div>
+<div id="current-software-name" style="display:none">{currentSoftware.name}</div>
+
+<script>
+  // Function to populate software items
+  window.populateSoftwareItems = function() {
+    const listContainer = document.getElementById('software-list-container');
+    const selectionTitle = document.getElementById('software-selection-title');
+    if (!listContainer) return;
+    
+    // Create a backup of the software list for the "back" button to use
+    if (!document.getElementById('software-list-backup')) {
+      const backupDiv = document.createElement('div');
+      backupDiv.id = 'software-list-backup';
+      backupDiv.style.display = 'none';
+      document.body.appendChild(backupDiv);
+    }
+    
+    listContainer.innerHTML = '<div class="p-4 text-center">Loading...</div>';
+    
+    // Get the current software's categories and similar software from hidden elements
+    const currentSoftwareCategories = JSON.parse(document.getElementById('current-software-categories').textContent);
+    const currentSoftwareName = document.getElementById('current-software-name').textContent;
+    const similarSoftwareList = JSON.parse(document.getElementById('similar-software-list').textContent);
+    
+    // Update the selection title with the primary category
+    if (selectionTitle && currentSoftwareCategories.length > 0) {
+      const primaryCategory = currentSoftwareCategories[0];
+      selectionTitle.textContent = `Other ${primaryCategory} software`;
+    }
+    
+    setTimeout(() => {
+      listContainer.innerHTML = '';
+      
+      // Use pre-filtered data from content collections on the server side
+      const filteredSoftware = similarSoftwareList;
+      
+      if (filteredSoftware.length === 0) {
+        const emptyEl = document.createElement('div');
+        emptyEl.classList.add('py-8', 'text-center', 'text-gray-500');
+        emptyEl.textContent = 'No similar software available for comparison';
+        listContainer.appendChild(emptyEl);
+        return;
+      }
+      
+      filteredSoftware.forEach(software => {
+        console.log("Rendering software item in ComparisonView:", software);
+        const item = document.createElement('div');
+        item.className = 'p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer';
+        
+        // Ensure categories is an array
+        const categories = Array.isArray(software.categories) 
+          ? software.categories.join(', ') 
+          : '';
+          
+        // Use logo if available, otherwise show first letter of name
+        const logoHtml = software.logo
+          ? `<img src="${software.logo}" alt="${software.name}" class="max-w-full max-h-full p-1" />`
+          : `<span class="text-lg">${software.name.charAt(0)}</span>`;
+        
+        item.innerHTML = `
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center mr-3">
+              ${logoHtml}
+            </div>
+            <div>
+              <div class="font-medium dark:text-white">${software.name}</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">${categories}</div>
+            </div>
+          </div>
+        `;
+        
+        item.addEventListener('click', async () => {
+          console.log(`Selected software for comparison in ComparisonView:`, software);
+          
+          // Get the alpine data context
+          const alpine = document.querySelector('[x-data]')?.__x;
+          if (alpine) {
+            alpine.$data.selectedSoftwareId = software.id;
+          }
+          
+          // Update URL params
+          const url = new URL(window.location.href);
+          url.searchParams.set('compare', software.id);
+          window.history.replaceState({}, '', url.toString());
+          
+          // Load software data
+          try {
+            const compareContainer = document.getElementById('comparison-container');
+            if (!compareContainer) {
+              console.error("Comparison container not found");
+              return;
+            }
+            
+            // Update basic info immediately for responsive UI
+            const nameEl = document.getElementById('compare-name');
+            const logoEl = document.getElementById('compare-logo');
+            if (nameEl) nameEl.textContent = software.name;
+            if (logoEl) logoEl.src = software.logo || '/logos/sample-logo.svg';
+            
+            // Fill in software features from local data before API call
+            const contentEl = document.getElementById('compare-content');
+            if (contentEl) {
+              contentEl.innerHTML = `
+                <div class="mb-8">
+                  <h2 class="text-xl font-bold mb-4">Overview</h2>
+                  <p class="text-gray-700 dark:text-gray-300">${software.description || "No description available"}</p>
+                </div>
+                
+                <div class="mb-8">
+                  <h2 class="text-xl font-bold mb-4">Features</h2>
+                  <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                    ${Array.isArray(software.features) && software.features.length > 0 
+                      ? software.features.map(f => `<li>${f}</li>`).join('') 
+                      : '<li>No features listed</li>'}
+                  </ul>
+                </div>
+                
+                ${Array.isArray(software.platforms) && software.platforms.length > 0 
+                  ? `<div class="mb-8">
+                      <h3 class="text-xl font-bold mb-4">Platforms</h3>
+                      <div class="flex flex-wrap gap-2 mb-6">
+                        ${software.platforms.map(p => `<span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm">${p}</span>`).join('')}
+                      </div>
+                    </div>`
+                  : ''}
+              `;
+            }
+            
+            // Get software data with API call if needed
+            await updateComparisonSoftware(software);
+          } catch (error) {
+            console.error('Error selecting software for comparison:', error);
+          }
+        });
+        
+        listContainer.appendChild(item);
+      });
+      
+      // Save a backup of the complete software list panel
+      const comparePanel = document.querySelector('#comparison-container');
+      const backupDiv = document.getElementById('software-list-backup');
+      if (comparePanel && backupDiv) {
+        backupDiv.innerHTML = comparePanel.innerHTML;
+      }
+    }, 100);
+  };
+  
+  // Function to update comparison software with full data
+  async function updateComparisonSoftware(software) {
+    // Get software data from API
+    const urlPathParts = window.location.pathname.split('/');
+    const locale = urlPathParts[1] || 'en'; // The first segment after the leading slash is the locale
+    
+    try {
+      // Show loading state in the comparison panel
+      const contentEl = document.getElementById('compare-content');
+      if (contentEl) {
+        contentEl.innerHTML = `
+          <div class="text-center text-gray-500 dark:text-gray-400">
+            <svg class="animate-spin h-8 w-8 mx-auto mb-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Loading software details...
+          </div>
+        `;
+      }
+      
+      // Use direct data if we already have it, otherwise load from API
+      let softwareData;
+      if (typeof software === 'object' && software.id && software.name) {
+        console.log("Using provided software data directly:", software.id);
+        // We already have software data, use it directly
+        softwareData = {
+          ...software,
+          // Add mock metrics for consistency if not present
+          metrics: software.metrics || {
+            easeOfUse: { average: 4.2, count: 15 },
+            featureRichness: { average: 3.8, count: 12 },
+            valueForMoney: { average: 4.5, count: 18 },
+            support: { average: 3.5, count: 10 },
+            reliability: { average: 4.0, count: 14 }
+          },
+          // Ensure we have features array
+          features: software.features || []
+        };
+      } else {
+        // Load the full software data from API
+        console.log("Loading software data from API for:", software.id);
+        softwareData = await loadSoftwareData(software.id, locale);
+      }
+      
+      if (!softwareData) {
+        throw new Error('Failed to load software data');
+      }
+      
+      // Update the UI elements
+      updateComparisonUI(softwareData);
+    } catch (error) {
+      console.error('Error updating comparison software:', error);
+      showComparisonError();
+    }
+  }
+  
+  // Function to update the UI with the loaded software data
+  function updateComparisonUI(software) {
+    if (!software) {
+      console.error("Cannot update UI: No software data provided");
+      showComparisonError();
+      return;
+    }
+    
+    // Ensure software has all required properties with fallbacks
+    const safeSoftware = {
+      name: software.name || "Unknown Software",
+      logo: software.logo || '/logos/sample-logo.svg',
+      description: software.description || "No description available",
+      categories: Array.isArray(software.categories) ? software.categories : [],
+      features: Array.isArray(software.features) ? software.features : ["No features listed"],
+      platforms: Array.isArray(software.platforms) ? software.platforms : []
+    };
+    
+    // Update header elements
+    const logoEl = document.getElementById('compare-logo');
+    const nameEl = document.getElementById('compare-name');
+    const categoriesEl = document.getElementById('compare-categories');
+    const miniLogoEl = document.getElementById('compare-mini-logo');
+    const miniNameEl = document.getElementById('compare-mini-name');
+    const miniDescEl = document.getElementById('compare-mini-description');
+    const tabButtonEl = document.getElementById('compare-tab-button');
+    
+    if (logoEl) logoEl.src = safeSoftware.logo;
+    if (miniLogoEl) miniLogoEl.src = safeSoftware.logo;
+    if (nameEl) nameEl.textContent = safeSoftware.name;
+    if (miniNameEl) miniNameEl.textContent = safeSoftware.name;
+    if (tabButtonEl) tabButtonEl.textContent = safeSoftware.name;
+    
+    if (categoriesEl) {
+      categoriesEl.innerHTML = '';
+      safeSoftware.categories.forEach((cat, i) => {
+        const span = document.createElement('span');
+        span.textContent = cat + (i < safeSoftware.categories.length - 1 ? ' • ' : '');
+        categoriesEl.appendChild(span);
+      });
+    }
+    
+    if (miniDescEl) miniDescEl.textContent = safeSoftware.description;
+    
+    // Update content area
+    const contentEl = document.getElementById('compare-content');
+    if (contentEl) {
+      contentEl.innerHTML = '';
+      
+      // Add description
+      const descDiv = document.createElement('div');
+      descDiv.className = 'mb-8';
+      
+      const descTitle = document.createElement('h2');
+      descTitle.className = 'text-xl font-bold mb-4';
+      descTitle.textContent = 'Overview';
+      
+      const descText = document.createElement('p');
+      descText.className = 'text-gray-700 dark:text-gray-300';
+      descText.textContent = safeSoftware.description;
+      
+      descDiv.appendChild(descTitle);
+      descDiv.appendChild(descText);
+      contentEl.appendChild(descDiv);
+      
+      // Add features
+      const featuresDiv = document.createElement('div');
+      featuresDiv.className = 'mb-8';
+      
+      const featuresTitle = document.createElement('h2');
+      featuresTitle.className = 'text-xl font-bold mb-4';
+      featuresTitle.textContent = 'Features';
+      
+      const featuresList = document.createElement('ul');
+      featuresList.className = 'list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300';
+      
+      safeSoftware.features.forEach(feature => {
+        const li = document.createElement('li');
+        li.textContent = feature;
+        featuresList.appendChild(li);
+      });
+      
+      featuresDiv.appendChild(featuresTitle);
+      featuresDiv.appendChild(featuresList);
+      contentEl.appendChild(featuresDiv);
+      
+      // Add platforms
+      if (safeSoftware.platforms.length > 0) {
+        const platformsDiv = document.createElement('div');
+        platformsDiv.className = 'mb-8';
+        
+        const platformsTitle = document.createElement('h3');
+        platformsTitle.className = 'text-xl font-bold mb-4';
+        platformsTitle.textContent = 'Platforms';
+        
+        const platformsContainer = document.createElement('div');
+        platformsContainer.className = 'flex flex-wrap gap-2 mb-6';
+        
+        safeSoftware.platforms.forEach(platform => {
+          const span = document.createElement('span');
+          span.className = 'px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm';
+          span.textContent = platform;
+          platformsContainer.appendChild(span);
+        });
+        
+        platformsDiv.appendChild(platformsTitle);
+        platformsDiv.appendChild(platformsContainer);
+        contentEl.appendChild(platformsDiv);
+      }
+    }
+  }
+  
+  // Function to show error in the comparison panel
+  function showComparisonError() {
+    const contentEl = document.getElementById('compare-content');
+    if (contentEl) {
+      contentEl.innerHTML = `
+        <div class="text-center py-8 text-red-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <p class="text-lg font-medium">Failed to load software data</p>
+          <p class="mt-2">Please try again later</p>
+        </div>
+      `;
+    }
+    
+    // Also update the software name so it's not "Select Software" anymore
+    const nameEl = document.getElementById('compare-name');
+    if (nameEl) {
+      nameEl.textContent = "Error loading software";
+    }
+  }
+  
+  // Function to load software data from API
+  async function loadSoftwareData(softwareId, locale) {
+    try {
+      // First try to fetch from the API
+      const response = await fetch(`/api/software/${softwareId}.json?lang=${locale}`);
+      
+      if (!response.ok) {
+        console.warn(`API request failed: ${response.status}. Trying fallback method.`);
+        throw new Error(`API request failed: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error("Error loading software data:", error);
+      
+      // Fallback: try to find the software in the similarity data
+      try {
+        const similarSoftwareList = JSON.parse(document.getElementById('similar-software-list').textContent);
+        const matchingSoftware = similarSoftwareList.find(s => s.id === softwareId);
+        
+        if (matchingSoftware) {
+          console.log("Using fallback data from similar-software-list");
+          // Add mock metrics for consistency
+          return {
+            ...matchingSoftware,
+            metrics: {
+              easeOfUse: { average: 4.2, count: 15 },
+              featureRichness: { average: 3.8, count: 12 },
+              valueForMoney: { average: 4.5, count: 18 },
+              support: { average: 3.5, count: 10 },
+              reliability: { average: 4.0, count: 14 }
+            }
+          };
+        }
+      } catch (fallbackError) {
+        console.error("Fallback method also failed:", fallbackError);
+      }
+      
+      return null;
+    }
+  }
+  
+  // Initialize - check if we're in compare mode
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const compareWith = urlParams.get('compare');
+      
+      // Check if we're in compare mode through Alpine.js
+      const alpine = document.querySelector('[x-data]')?.__x;
+      if (alpine && alpine.$data.isCompareMode) {
+        console.log("We're in compare mode, loading items immediately");
+        populateSoftwareItems();
+      } else if (compareWith) {
+        console.log("Compare parameter found in URL, loading items");
+        populateSoftwareItems();
+      }
+      
+      // Also add a direct event listener to the compare button to populate items
+      document.querySelectorAll('[x-text="isCompareMode ? \'${t.software.expandView}\' : \'${t.software.inlineCompare}\'"').forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Short delay to ensure Alpine has updated its state
+          setTimeout(() => populateSoftwareItems(), 100);
+        });
+      });
+    }, 500);
+  });
+</script>

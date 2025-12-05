@@ -1,0 +1,265 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ComparisonTable from '../../components/ComparisonTable.astro';
+import ComparisonView from '../../components/software/ComparisonView.astro';
+import { loadTranslations } from '../../utils/i18n';
+import { i18nConfig } from '../../content/config';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  return i18nConfig.locales.map(locale => {
+    return {
+      params: { lang: locale },
+      props: { locale }
+    };
+  });
+}
+
+const { locale } = Astro.props;
+const t = await loadTranslations(locale);
+
+// Get all software data for searching
+const allSoftware = await getCollection('software');
+
+// Filter software by locale for the search functionality
+const localeSoftware = allSoftware
+  .filter(entry => entry.id.startsWith(locale + '/'))
+  .map(entry => {
+    const id = entry.id.split('/')[1]; // Get the id part after locale/
+    return {
+      id,
+      ...entry.data,
+      // Add empty metrics for now - in real implementation, these would come from Supabase
+      metrics: {
+        easeOfUse: { average: 4.2, count: 15 },
+        featureRichness: { average: 3.8, count: 12 },
+        valueForMoney: { average: 4.5, count: 18 },
+        support: { average: 3.5, count: 10 },
+        reliability: { average: 4.0, count: 14 }
+      }
+    };
+  });
+
+// Get software to compare from URL params
+const urlParams = new URL(Astro.url).searchParams;
+const softwareIds = urlParams.getAll('software');
+
+// Get the actual software items to compare
+const compareSoftware = localeSoftware.filter(s => softwareIds.includes(s.id));
+---
+
+<BaseLayout title={`${t.common.compare} | TechBase`}>
+  <div class="container mx-auto px-4 py-8" x-data="{
+    searchTerm: '',
+    searchResults: [],
+    selectedSoftware: JSON.parse('${JSON.stringify(compareSoftware.map(s => s.id))}'),
+    showResults: false,
+    isSearching: false,
+    allSoftware: JSON.parse('${JSON.stringify(localeSoftware)}'),
+    
+    // On initialization, select software from URL
+    init() {
+      this.$watch('searchTerm', value => {
+        if (value.length >= 2) {
+          this.performSearch();
+        } else {
+          this.searchResults = [];
+          this.showResults = false;
+        }
+      });
+    },
+    
+    // Search for software
+    performSearch() {
+      if (this.searchTerm.length < 2) return;
+      
+      this.isSearching = true;
+      
+      // Simple client-side search
+      this.searchResults = this.allSoftware.filter(software => {
+        // Don't show already selected software
+        if (this.selectedSoftware.includes(software.id)) return false;
+        
+        // Search in name and description
+        return software.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+               software.description.toLowerCase().includes(this.searchTerm.toLowerCase());
+      }).slice(0, 5); // Limit to 5 results
+      
+      this.showResults = this.searchResults.length > 0;
+      this.isSearching = false;
+    },
+    
+    // Select software for comparison
+    selectSoftware(id) {
+      // Limit to 3 software items
+      if (this.selectedSoftware.length >= 3 && !this.selectedSoftware.includes(id)) {
+        alert('You can compare up to 3 software items at once.');
+        return;
+      }
+      
+      if (!this.selectedSoftware.includes(id)) {
+        this.selectedSoftware.push(id);
+      }
+      
+      this.searchTerm = '';
+      this.searchResults = [];
+      this.showResults = false;
+      
+      // Update URL params
+      this.updateUrlParams();
+    },
+    
+    // Remove software from comparison
+    removeSoftware(id) {
+      this.selectedSoftware = this.selectedSoftware.filter(s => s !== id);
+      this.updateUrlParams();
+    },
+    
+    // Update URL parameters
+    updateUrlParams() {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('software');
+      
+      this.selectedSoftware.forEach(id => {
+        url.searchParams.append('software', id);
+      });
+      
+      window.history.replaceState({}, '', url.toString());
+    },
+    
+    // Get a software item by ID
+    getSoftware(id) {
+      return this.allSoftware.find(s => s.id === id);
+    }
+  }">
+    <h1 class="text-3xl font-bold mb-8">{t.common.compare}</h1>
+    
+    <div class="mb-8">
+      <div class="flex flex-col md:flex-row md:items-end gap-4 mb-4">
+        <!-- Search box -->
+        <div class="flex-grow">
+          <label for="software-search" class="block mb-2 font-semibold">{t.common.search}:</label>
+          <div class="relative">
+            <input 
+              type="text" 
+              id="software-search" 
+              x-model="searchTerm"
+              class="w-full p-3 border border-gray-300 rounded"
+              :placeholder="`${t.common.search}...`"
+              @focus="showResults = searchResults.length > 0"
+            />
+            
+            <!-- Loading indicator -->
+            <div x-show="isSearching" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+            
+            <!-- Search results dropdown -->
+            <div 
+              x-show="showResults" 
+              @click.away="showResults = false"
+              class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"
+              x-transition:enter="transition ease-out duration-100"
+              x-transition:enter-start="transform opacity-0 scale-95"
+              x-transition:enter-end="transform opacity-100 scale-100"
+              x-transition:leave="transition ease-in duration-75"
+              x-transition:leave-start="transform opacity-100 scale-100"
+              x-transition:leave-end="transform opacity-0 scale-95"
+              style="display: none;"
+            >
+              <template x-if="searchResults.length === 0 && searchTerm.length >= 2">
+                <div class="p-4 text-center text-gray-500">
+                  No results found
+                </div>
+              </template>
+              
+              <template x-for="result in searchResults" :key="result.id">
+                <button
+                  @click="selectSoftware(result.id)"
+                  class="block w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                >
+                  <div class="flex items-start">
+                    <template x-if="result.logo">
+                      <div class="w-10 h-10 bg-white border border-gray-200 rounded mr-3 flex items-center justify-center">
+                        <img :src="result.logo" :alt="result.name" class="max-w-full max-h-full p-1">
+                      </div>
+                    </template>
+                    
+                    <div>
+                      <div class="font-medium" x-text="result.name"></div>
+                      <div class="text-sm text-gray-500 mt-0.5 line-clamp-1" x-text="result.description"></div>
+                    </div>
+                  </div>
+                </button>
+              </template>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Add button -->
+        <button 
+          @click="performSearch()"
+          class="bg-primary text-white px-6 py-3 rounded hover:bg-blue-600 transition-colors"
+          :disabled="searchTerm.length < 2"
+        >
+          {t.common.search}
+        </button>
+      </div>
+      
+      <!-- Selected software chips -->
+      <div class="flex flex-wrap gap-2 mt-4" x-show="selectedSoftware.length > 0">
+        <template x-for="id in selectedSoftware" :key="id">
+          <div class="flex items-center bg-gray-100 rounded-full pl-3 pr-2 py-1.5">
+            <template x-if="getSoftware(id)?.logo">
+              <img :src="getSoftware(id)?.logo" :alt="getSoftware(id)?.name" class="w-5 h-5 mr-2">
+            </template>
+            <span x-text="getSoftware(id)?.name" class="mr-1"></span>
+            <button 
+              @click="removeSoftware(id)"
+              class="ml-1 text-gray-500 hover:text-gray-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </template>
+      </div>
+    </div>
+    
+    <!-- Comparison Table -->
+    <template x-if="selectedSoftware.length >= 2">
+      <div>
+        <!-- The actual comparison table will be rendered server-side -->
+        {compareSoftware.length >= 2 && <ComparisonTable softwareList={compareSoftware} />}
+        
+        <!-- Using the enhanced comparison view component -->
+        {compareSoftware.length >= 1 && compareSoftware.map(software => (
+          <div class="mt-8">
+            <ComparisonView 
+              currentSoftware={software}
+              similarSoftware={localeSoftware.filter(s => s.id !== software.id).slice(0, 5)}
+              locale={locale}
+            />
+          </div>
+        ))}
+      </div>
+    </template>
+    
+    <!-- Empty State -->
+    <template x-if="selectedSoftware.length < 2">
+      <div class="text-center py-12 bg-gray-50 rounded-lg">
+        <div class="mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <p class="text-lg text-gray-600 mb-4">Select at least 2 software products to compare</p>
+        <p class="text-gray-500">Use the search box above to find and select software for comparison.</p>
+      </div>
+    </template>
+  </div>
+</BaseLayout>
