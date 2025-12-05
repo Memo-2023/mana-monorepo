@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .test-section h2 {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5558e3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .success {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        .error {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+        .info {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Memory System Test</h1>
+        
+        <div class="test-section">
+            <h2>1. Node auswählen</h2>
+            <input type="text" id="nodeSlug" placeholder="Node Slug eingeben (z.B. 'mira', 'neo-station')" />
+            <button onclick="testGetMemory()">Memory abrufen</button>
+            <div id="getResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Neue Erinnerung hinzufügen</h2>
+            <input type="text" id="addNodeSlug" placeholder="Node Slug" />
+            <textarea id="memoryContent" placeholder="Erinnerungsinhalt" rows="3"></textarea>
+            <select id="memoryTier">
+                <option value="short">Kurzzeit (1-3 Tage)</option>
+                <option value="medium">Mittelzeit (1-3 Monate)</option>
+                <option value="long">Langzeit (Permanent)</option>
+            </select>
+            <input type="range" id="importance" min="1" max="10" value="5" />
+            <span>Wichtigkeit: <span id="importanceValue">5</span></span>
+            <br><br>
+            <button onclick="testAddMemory()">Erinnerung hinzufügen</button>
+            <div id="addResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Memories altern lassen</h2>
+            <input type="text" id="processNodeSlug" placeholder="Node Slug" />
+            <button onclick="testProcessMemories()">Memories verarbeiten</button>
+            <div id="processResult" class="result" style="display:none;"></div>
+        </div>
+
+        <p class="info">
+            ℹ️ Öffne die Browser-Konsole (F12) für detaillierte Fehlerinformationen.
+        </p>
+    </div>
+
+    <script>
+        // Update importance display
+        document.getElementById('importance').addEventListener('input', (e) => {
+            document.getElementById('importanceValue').textContent = e.target.value;
+        });
+
+        async function testGetMemory() {
+            const slug = document.getElementById('nodeSlug').value.trim();
+            const resultDiv = document.getElementById('getResult');
+            
+            if (!slug) {
+                showResult(resultDiv, 'Bitte einen Node Slug eingeben!', 'error');
+                return;
+            }
+
+            try {
+                console.log(`Fetching memory for node: ${slug}`);
+                const response = await fetch(`/api/nodes/${slug}/memory`, {
+                    credentials: 'include'
+                });
+                
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (response.ok) {
+                    showResult(resultDiv, JSON.stringify(data, null, 2), 'success');
+                } else {
+                    showResult(resultDiv, `Error ${response.status}: ${JSON.stringify(data)}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showResult(resultDiv, `Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAddMemory() {
+            const slug = document.getElementById('addNodeSlug').value.trim();
+            const content = document.getElementById('memoryContent').value.trim();
+            const tier = document.getElementById('memoryTier').value;
+            const importance = parseInt(document.getElementById('importance').value);
+            const resultDiv = document.getElementById('addResult');
+            
+            if (!slug || !content) {
+                showResult(resultDiv, 'Bitte alle Felder ausfüllen!', 'error');
+                return;
+            }
+
+            try {
+                console.log('Adding memory:', { slug, content, tier, importance });
+                const response = await fetch(`/api/nodes/${slug}/memory`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        content,
+                        tier,
+                        importance
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (response.ok) {
+                    showResult(resultDiv, 'Erinnerung erfolgreich hinzugefügt!', 'success');
+                    // Clear form
+                    document.getElementById('memoryContent').value = '';
+                } else {
+                    showResult(resultDiv, `Error ${response.status}: ${JSON.stringify(data)}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showResult(resultDiv, `Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testProcessMemories() {
+            const slug = document.getElementById('processNodeSlug').value.trim();
+            const resultDiv = document.getElementById('processResult');
+            
+            if (!slug) {
+                showResult(resultDiv, 'Bitte einen Node Slug eingeben!', 'error');
+                return;
+            }
+
+            try {
+                console.log(`Processing memories for node: ${slug}`);
+                const response = await fetch(`/api/nodes/${slug}/memory/process`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({})
+                });
+                
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (response.ok) {
+                    showResult(resultDiv, 'Memories erfolgreich verarbeitet!', 'success');
+                } else {
+                    showResult(resultDiv, `Error ${response.status}: ${JSON.stringify(data)}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showResult(resultDiv, `Network error: ${error.message}`, 'error');
+            }
+        }
+
+        function showResult(div, message, type) {
+            div.textContent = message;
+            div.className = `result ${type}`;
+            div.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
