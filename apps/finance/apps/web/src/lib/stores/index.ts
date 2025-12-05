@@ -5,3 +5,6 @@ export { transactionsStore } from './transactions.svelte';
 export { budgetsStore } from './budgets.svelte';
 export { dashboardStore } from './dashboard.svelte';
 export { settingsStore } from './settings.svelte';
+export { theme } from './theme';
+export { isSidebarMode, isNavCollapsed } from './navigation';
+export { userSettings } from './user-settings.svelte';
