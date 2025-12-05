@@ -1,8 +1,3 @@
-# SIMPLIFIED: Only builds mana-core-auth + chat containers
-# Full config archived at: .github/workflows/ci-main.full.yml
-#
-# To restore: cp .github/workflows/ci-main.full.yml .github/workflows/ci-main.yml
-
 name: CI - Main Branch
 
 on:
@@ -18,15 +13,19 @@ concurrency:
 env:
   NODE_VERSION: '20'
   PNPM_VERSION: '9.15.0'
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
 jobs:
-  # Quick validation - skip heavy checks for faster iteration
+  # Full validation on main branch
   validate:
-    name: Quick Validate
+    name: Validate Main Branch
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -45,7 +44,35 @@ jobs:
       - name: Build shared packages
         run: pnpm run build:packages
 
-  # Build only mana-core-auth and chat Docker images
+      - name: Run format check
+        run: pnpm run format:check
+
+      - name: Run lint
+        run: pnpm run lint
+        continue-on-error: true
+
+      - name: Run type check
+        run: pnpm run type-check
+
+      - name: Build all projects
+        run: pnpm run build
+
+      - name: Run tests
+        run: pnpm run test || echo "Some tests failed"
+        continue-on-error: true
+
+      - name: Generate build summary
+        run: |
+          echo "## Main Branch Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Author**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Build Status" >> $GITHUB_STEP_SUMMARY
+          echo "All projects built successfully" >> $GITHUB_STEP_SUMMARY
+
+  # Build and push Docker images for backend services
   build-docker-images:
     name: Build Docker Images
     runs-on: ubuntu-latest
@@ -53,9 +80,12 @@ jobs:
     strategy:
       matrix:
         service:
-          - { name: 'mana-core-auth', path: 'services/mana-core-auth', port: '3001' }
+          - { name: 'maerchenzauber-backend', path: 'apps/maerchenzauber/apps/backend', port: '3002' }
           - { name: 'chat-backend', path: 'apps/chat/apps/backend', port: '3002' }
-          - { name: 'chat-web', path: 'apps/chat/apps/web', port: '3000' }
+          - { name: 'manadeck-backend', path: 'apps/manadeck/apps/backend', port: '3003' }
+          - { name: 'nutriphi-backend', path: 'apps/nutriphi/apps/backend', port: '3004' }
+          - { name: 'news-api', path: 'apps/news/apps/api', port: '3005' }
+          - { name: 'mana-core-auth', path: 'services/mana-core-auth', port: '3001' }
       fail-fast: false
     steps:
       - name: Checkout code
@@ -134,5 +164,5 @@ jobs:
         run: |
           echo "## Staging Deployment Triggered" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Docker images built: mana-core-auth, chat-backend, chat-web" >> $GITHUB_STEP_SUMMARY
+          echo "Docker images have been built and pushed successfully." >> $GITHUB_STEP_SUMMARY
           echo "Staging deployment workflow has been triggered." >> $GITHUB_STEP_SUMMARY

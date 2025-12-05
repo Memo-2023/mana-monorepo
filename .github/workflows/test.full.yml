@@ -1,10 +1,11 @@
-# DISABLED: Only runs manually for faster iteration
-# Full config archived at: .github/workflows/test.full.yml
-# To restore: cp .github/workflows/test.full.yml .github/workflows/test.yml
 name: Test Suite
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
 
 # Cancel in-progress runs for same PR/branch
 concurrency:

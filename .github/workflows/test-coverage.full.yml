@@ -1,10 +1,16 @@
-# DISABLED: Only runs manually for faster iteration
-# Full config archived at: .github/workflows/test-coverage.full.yml
-# To restore: cp .github/workflows/test-coverage.full.yml .github/workflows/test-coverage.yml
 name: Test Coverage
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  schedule:
+    # Run weekly on Sundays at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
 
 env:
   NODE_VERSION: '20'
