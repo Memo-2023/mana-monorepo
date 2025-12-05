@@ -216,7 +216,7 @@ jobs:
 
             # Check chat-backend
             echo "Checking chat-backend..."
-            if docker compose exec -T chat-backend wget -q -O - http://localhost:3002/api/health > /dev/null 2>&1; then
+            if docker compose exec -T chat-backend wget -q -O - http://localhost:3002/api/v1/health > /dev/null 2>&1; then
               echo "✅ chat-backend is healthy"
             else
               echo "❌ chat-backend health check failed"

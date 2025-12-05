@@ -8,6 +8,11 @@ Common issues and solutions for the manacore-monorepo.
 - [Build Issues](#build-issues)
 - [Linting Issues](#linting-issues)
 - [NestJS Dependency Injection](#nestjs-dependency-injection)
+- [Staging Deployment Issues](#staging-deployment-issues)
+  - [GitHub Running Disabled Workflows](#problem-1-github-running-disabled-workflows)
+  - [chat-backend Container Unhealthy](#problem-2-chat-backend-container-unhealthy)
+  - [SvelteKit Static Environment Variable Imports](#problem-3-sveltekit-static-environment-variable-imports)
+  - [Orphan Docker Containers](#problem-4-orphan-docker-containers)
 
 ---
 
@@ -402,6 +407,296 @@ docker run --rm --entrypoint cat test /app/dist/ai/ai.service.js
 - [Commit d69cc607](https://github.com/Memo-2023/manacore-monorepo/commit/d69cc607) - Fixed type-only ConfigService import in AiService
 - TypeScript `import type` vs `import {}` - both erase at compile time
 - Docker layer caching can hide fixes if source wasn't properly copied
+
+---
+
+## Staging Deployment Issues
+
+### Overview
+
+This section documents the complete troubleshooting journey for deploying mana-core-auth + chat (backend + web) to staging. It covers GitHub Actions CI/CD simplification, Docker health checks, database setup, and SvelteKit environment variables.
+
+### Problem 1: GitHub Running Disabled Workflows
+
+**Symptoms:**
+
+- Workflows with `.full.yml` extension were still running
+- `test.full.yml` was being recognized as a valid workflow
+- Multiple unnecessary workflows running on every push
+
+**What We Tried:**
+
+1. ❌ Renaming to `.disabled` extension → Still ran
+2. ❌ Renaming to `.full.yml` extension → Still ran (GitHub recognizes any `.yml` in `.github/workflows/`)
+
+**Solution:**
+
+- ✅ Rename to `.yml.bak` extension (GitHub ignores non-`.yml` files)
+
+```bash
+# Disable a workflow
+mv .github/workflows/test.yml .github/workflows/test.yml.bak
+
+# Re-enable a workflow
+mv .github/workflows/test.yml.bak .github/workflows/test.yml
+```
+
+**Files Changed:**
+
+- `test.yml` → `test.yml.bak`
+- `test-coverage.yml` → `test-coverage.yml.bak`
+- `ci-pull-request.yml` → `ci-pull-request.yml.bak`
+- `dependency-update.yml` → `dependency-update.yml.bak`
+
+---
+
+### Problem 2: chat-backend Container Unhealthy
+
+**Symptoms:**
+
+- Deployment failed with: `dependency failed to start: container chat-backend-staging is unhealthy`
+- chat-web wouldn't start because it depends on chat-backend being healthy
+
+**Debugging Steps:**
+
+```bash
+# Connect to staging server
+ssh -i ~/.ssh/hetzner_deploy_key deploy@46.224.108.214
+
+# Check container status
+cd ~/manacore-staging
+docker compose ps
+
+# Check logs for the failing container
+docker compose logs chat-backend --tail=100
+
+# Test health endpoint manually from inside container
+docker compose exec chat-backend wget -q -O - http://localhost:3002/api/v1/health
+```
+
+**Root Cause 1: Missing Database**
+
+The logs showed:
+
+```
+error: database "chat" does not exist
+```
+
+**Fix:** Create the database manually:
+
+```bash
+docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE chat;"
+```
+
+**Root Cause 2: Wrong Health Check Path**
+
+The `docker-compose.staging.yml` had:
+
+```yaml
+healthcheck:
+  test: ['CMD', 'wget', '...', 'http://localhost:3002/api/health'] # ❌ WRONG
+```
+
+But NestJS health endpoint is at `/api/v1/health`:
+
+```yaml
+healthcheck:
+  test: ['CMD', 'wget', '...', 'http://localhost:3002/api/v1/health'] # ✅ CORRECT
+```
+
+**How to Verify Health Endpoints:**
+
+| Service        | Port | Health Endpoint  |
+| -------------- | ---- | ---------------- |
+| mana-core-auth | 3001 | `/api/v1/health` |
+| chat-backend   | 3002 | `/api/v1/health` |
+| chat-web       | 3000 | `/health`        |
+
+```bash
+# Test from outside the server
+curl http://46.224.108.214:3001/api/v1/health
+curl http://46.224.108.214:3002/api/v1/health
+curl http://46.224.108.214:3000/health
+```
+
+---
+
+### Problem 3: SvelteKit Static Environment Variable Imports
+
+**Symptoms:**
+
+- Docker build failed with: `PUBLIC_MANA_CORE_AUTH_URL is not exported by $env/static/public`
+- Build error during `npm run build` in Docker
+
+**Root Cause:**
+
+SvelteKit's `$env/static/public` imports are resolved at **build time**, not runtime. When building in Docker, these environment variables don't exist.
+
+**❌ WRONG - Static Import (Build Time):**
+
+```typescript
+// apps/chat/apps/web/src/lib/stores/auth.svelte.ts
+import { PUBLIC_MANA_CORE_AUTH_URL } from '$env/static/public'; // ❌ Fails in Docker
+
+const authUrl = PUBLIC_MANA_CORE_AUTH_URL;
+```
+
+**✅ CORRECT - Runtime Environment Variable:**
+
+```typescript
+// apps/chat/apps/web/src/lib/stores/auth.svelte.ts
+import { browser } from '$app/environment';
+
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		// Client-side: check for injected env or use default
+		return (
+			(window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+				.__PUBLIC_MANA_CORE_AUTH_URL__ ||
+			import.meta.env.PUBLIC_MANA_CORE_AUTH_URL ||
+			'http://localhost:3001'
+		);
+	}
+	// Server-side: use process.env or default
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+}
+```
+
+**The Pattern:**
+
+1. Check if running in browser
+2. Try window-injected variable (for runtime injection)
+3. Try `import.meta.env` (for Vite build-time)
+4. Fall back to `process.env` (for SSR)
+5. Use localhost default for development
+
+**Files Fixed:**
+
+- `apps/chat/apps/web/src/lib/stores/auth.svelte.ts`
+- `apps/chat/apps/web/src/lib/services/feedback.ts`
+
+---
+
+### Problem 4: Orphan Docker Containers
+
+**Symptoms:**
+
+- Old containers from previous deployments still running
+- `docker compose ps` shows unexpected services
+
+**Fix:**
+
+```bash
+# Remove orphan containers
+docker compose down --remove-orphans
+
+# Bring up fresh
+docker compose up -d
+
+# Manually remove specific orphans
+docker rm -f manadeck-backend-staging manacore-nginx-staging
+```
+
+---
+
+### Complete Staging Deployment Checklist
+
+#### Before Deployment
+
+- [ ] Verify `docker-compose.staging.yml` has correct health check paths
+- [ ] Verify CI/CD workflow (`cd-staging.yml`) has matching health check paths
+- [ ] Check that required databases exist or CI creates them
+
+#### During Deployment Failure
+
+1. **SSH to server:**
+
+   ```bash
+   ssh -i ~/.ssh/hetzner_deploy_key deploy@46.224.108.214
+   cd ~/manacore-staging
+   ```
+
+2. **Check container status:**
+
+   ```bash
+   docker compose ps
+   ```
+
+3. **Check logs for failing container:**
+
+   ```bash
+   docker compose logs <container-name> --tail=100
+   ```
+
+4. **Common fixes:**
+
+   ```bash
+   # Create missing database
+   docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE <dbname>;"
+
+   # Restart a service
+   docker compose restart <service-name>
+
+   # Force recreate
+   docker compose up -d --force-recreate <service-name>
+   ```
+
+5. **Verify health:**
+   ```bash
+   curl http://localhost:3001/api/v1/health  # mana-core-auth
+   curl http://localhost:3002/api/v1/health  # chat-backend
+   curl http://localhost:3000/health         # chat-web
+   ```
+
+#### After Deployment
+
+- [ ] Verify all health endpoints respond
+- [ ] Check container logs for errors
+- [ ] Test actual functionality (login, API calls)
+
+---
+
+### Key Files for Staging Deployment
+
+| File                               | Purpose                               |
+| ---------------------------------- | ------------------------------------- |
+| `docker-compose.staging.yml`       | Service definitions and health checks |
+| `.github/workflows/cd-staging.yml` | CI/CD deployment workflow             |
+| `.github/workflows/ci-main.yml`    | Docker image builds on push to main   |
+
+### Health Check Patterns
+
+**Docker Compose (`docker-compose.staging.yml`):**
+
+```yaml
+healthcheck:
+  test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:PORT/ENDPOINT']
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s
+```
+
+**CI/CD Workflow (`cd-staging.yml`):**
+
+```bash
+# Check from inside container
+docker compose exec -T chat-backend wget -q -O - http://localhost:3002/api/v1/health
+```
+
+### Lessons Learned
+
+1. **GitHub Workflows:** Only files ending in `.yml` or `.yaml` in `.github/workflows/` are recognized. Use `.bak` extension to disable.
+
+2. **NestJS Health Endpoints:** All NestJS backends use `/api/v1/health`, not `/api/health`.
+
+3. **Docker Compose Dependencies:** When using `depends_on: condition: service_healthy`, the dependent service won't start until the health check passes.
+
+4. **Database Creation:** Must happen AFTER PostgreSQL is healthy but BEFORE dependent services run migrations.
+
+5. **SvelteKit Environment Variables:** Use runtime patterns (`process.env`, `import.meta.env`) instead of `$env/static/public` for Docker builds.
+
+6. **Verify Before Commit:** Always check both `docker-compose.staging.yml` AND CI/CD workflows for matching paths.
 
 ---
 
