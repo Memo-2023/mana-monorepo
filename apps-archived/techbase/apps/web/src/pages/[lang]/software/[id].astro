@@ -1,0 +1,137 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { loadTranslations } from '../../../utils/i18n';
+import { i18nConfig } from '../../../content/config';
+import { getCollection } from 'astro:content';
+import SoftwarePanel from '../../../components/software/SoftwarePanel.astro';
+import ComparePanel from '../../../components/software/ComparePanel.astro';
+
+export async function getStaticPaths() {
+  const allSoftware = await getCollection('software');
+  
+  return allSoftware.map(entry => {
+    const [locale, id] = entry.id.split('/');
+    return {
+      params: { lang: locale, id },
+      props: { entry, locale, id, allSoftware }
+    };
+  });
+}
+
+const { entry, locale, id, allSoftware } = Astro.props;
+const t = await loadTranslations(locale);
+
+// Get software data from the entry
+const software = {
+  id,
+  ...entry.data
+};
+
+// Prepare similar software for the comparison feature
+const similarSoftwareEntries = allSoftware.filter(item => {
+  // Skip the current software
+  if (item.id === entry.id) return false;
+  
+  // Extract the software's locale and categories
+  const [itemLocale, itemId] = item.id.split('/');
+  const itemCategories = item.data.categories || [];
+  
+  // Only include software with the same locale and at least one shared category
+  return itemLocale === locale && 
+    itemCategories.some(cat => software.categories.includes(cat));
+});
+
+// Convert entries to a more usable format for the frontend
+const similarSoftware = similarSoftwareEntries.map(item => {
+  const [itemLocale, itemId] = item.id.split('/');
+  return {
+    id: itemId,
+    name: item.data.name,
+    description: item.data.description,
+    categories: item.data.categories || [],
+    logo: item.data.logo || '/logos/sample-logo.svg'
+  };
+});
+
+
+// In a real implementation, these metrics would come from Supabase
+const metrics = {
+  easeOfUse: { average: 4.2, count: 15 },
+  featureRichness: { average: 3.8, count: 12 },
+  valueForMoney: { average: 4.5, count: 18 },
+  support: { average: 3.5, count: 10 },
+  reliability: { average: 4.0, count: 14 }
+};
+---
+
+<BaseLayout title={software.name}>
+  <div 
+    id="softwareDetail"
+    data-software-id={software.id}
+    data-software={JSON.stringify(software)}
+    data-similar-software={JSON.stringify(similarSoftware)}
+    class="container mx-auto px-0 py-8"
+  >
+    <!-- Entfernt - Controls werden direkt im Panel angezeigt -->
+    
+    <!-- Flexibles Layout für die Software-Ansicht -->
+    <div 
+      class="flex flex-col lg:flex-row software-container w-full" 
+      style="display: flex; width: 100%;"
+    >
+      <!-- Linke Spalte - Aktuelle Software -->
+      <div 
+        class="transition-all overflow-hidden left-panel px-4" 
+        style="flex: 1; width: 100%;"
+      >
+        <SoftwarePanel 
+          software={software} 
+          similarSoftware={similarSoftware} 
+          metrics={metrics} 
+          locale={locale}
+          mode="detail"
+        />
+      </div>
+      
+      <!-- Vergleichs-Panels (werden per JS angezeigt) -->
+      <div class="compare-panels-container hidden" style="display: none; flex: 1;">
+        <!-- Erstes Vergleichspanel -->
+        <div class="compare-panel-container hidden lg:border-l border-gray-200 dark:border-gray-700 px-4" style="flex: 1; width: 100%;">
+          <SoftwarePanel
+            software={software}
+            locale={locale}
+            mode="comparison"
+          />
+        </div>
+        
+        <!-- Zweites Vergleichspanel (initial versteckt) -->
+        <div class="compare-panel-container-2 hidden lg:border-l border-gray-200 dark:border-gray-700 px-4" style="flex: 1; width: 100%;">
+          <SoftwarePanel
+            software={software}
+            locale={locale}
+            mode="comparison"
+          />
+        </div>
+        
+        <!-- Drittes Vergleichspanel (initial versteckt) -->
+        <div class="compare-panel-container-3 hidden lg:border-l border-gray-200 dark:border-gray-700 px-4" style="flex: 1; width: 100%;">
+          <SoftwarePanel
+            software={software}
+            locale={locale}
+            mode="comparison"
+          />
+        </div>
+      </div>
+    </div>
+    
+    <!-- Mobile-Ansicht-Umschalter (via JS eingeblendet) -->
+    <div class="mobile-switcher hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-3 flex justify-center space-x-4 lg:hidden z-10">
+      <button class="left-view-btn px-4 py-2 rounded-md transition-colors bg-primary text-white">
+        {software.name}
+      </button>
+      <button class="right-view-btn px-4 py-2 rounded-md transition-colors bg-gray-100 dark:bg-gray-700">
+        Compare
+      </button>
+    </div>
+  </div>
+</BaseLayout>

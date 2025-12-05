@@ -53,6 +53,8 @@
 		size?: HeaderSize;
 		/** Whether to show bottom border */
 		bordered?: boolean;
+		/** Center the title (with actions on the right, back on the left) */
+		centered?: boolean;
 		/** Back navigation href (shows back arrow button) */
 		backHref?: string;
 		/** Icon snippet (before title) */
@@ -72,6 +74,7 @@
 		description,
 		size = 'md',
 		bordered = false,
+		centered = false,
 		backHref,
 		icon,
 		breadcrumb,
@@ -103,18 +106,23 @@
 >
 	<!-- Breadcrumb -->
 	{#if breadcrumb}
-		<div class="page-header__breadcrumb mb-2 text-sm text-theme-secondary">
+		<div
+			class="page-header__breadcrumb mb-2 text-sm text-theme-secondary {centered
+				? 'text-center'
+				: ''}"
+		>
 			{@render breadcrumb()}
 		</div>
 	{/if}
 
-	<div class="flex items-center justify-between gap-4">
-		<div class="flex items-center gap-3 min-w-0">
-			<!-- Back Button -->
+	{#if centered}
+		<!-- Centered Layout -->
+		<div class="relative flex items-center justify-center min-h-[2.5rem]">
+			<!-- Back Button (left) -->
 			{#if backHref}
 				<a
 					href={backHref}
-					class="page-header__back flex-shrink-0 p-1.5 -ml-1.5 rounded-lg text-theme-secondary hover:text-theme hover:bg-theme-secondary/10 transition-colors"
+					class="absolute left-0 p-1.5 rounded-lg text-theme-secondary hover:text-theme hover:bg-theme-secondary/10 transition-colors"
 					aria-label="Zurück"
 				>
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,16 +136,14 @@
 				</a>
 			{/if}
 
-			<!-- Icon -->
-			{#if icon}
-				<div class="page-header__icon flex-shrink-0 text-theme-secondary">
-					{@render icon()}
-				</div>
-			{/if}
-
-			<!-- Title & Description -->
-			<div class="min-w-0">
-				<h1 class="font-semibold text-theme {sizeClasses[size].title} truncate">
+			<!-- Centered Title & Description -->
+			<div class="text-center">
+				{#if icon}
+					<div class="page-header__icon inline-block text-theme-secondary mb-1">
+						{@render icon()}
+					</div>
+				{/if}
+				<h1 class="font-semibold text-theme {sizeClasses[size].title}">
 					{title}
 				</h1>
 				{#if description}
@@ -146,15 +152,64 @@
 					</Text>
 				{/if}
 			</div>
-		</div>
 
-		<!-- Actions -->
-		{#if actions}
-			<div class="page-header__actions flex-shrink-0 flex items-center gap-2">
-				{@render actions()}
+			<!-- Actions (right) -->
+			{#if actions}
+				<div class="absolute right-0 flex items-center gap-2">
+					{@render actions()}
+				</div>
+			{/if}
+		</div>
+	{:else}
+		<!-- Default Layout -->
+		<div class="flex items-center justify-between gap-4">
+			<div class="flex items-center gap-3 min-w-0">
+				<!-- Back Button -->
+				{#if backHref}
+					<a
+						href={backHref}
+						class="page-header__back flex-shrink-0 p-1.5 -ml-1.5 rounded-lg text-theme-secondary hover:text-theme hover:bg-theme-secondary/10 transition-colors"
+						aria-label="Zurück"
+					>
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M15 19l-7-7 7-7"
+							/>
+						</svg>
+					</a>
+				{/if}
+
+				<!-- Icon -->
+				{#if icon}
+					<div class="page-header__icon flex-shrink-0 text-theme-secondary">
+						{@render icon()}
+					</div>
+				{/if}
+
+				<!-- Title & Description -->
+				<div class="min-w-0">
+					<h1 class="font-semibold text-theme {sizeClasses[size].title} truncate">
+						{title}
+					</h1>
+					{#if description}
+						<Text variant="muted" class="mt-1">
+							{description}
+						</Text>
+					{/if}
+				</div>
 			</div>
-		{/if}
-	</div>
+
+			<!-- Actions -->
+			{#if actions}
+				<div class="page-header__actions flex-shrink-0 flex items-center gap-2">
+					{@render actions()}
+				</div>
+			{/if}
+		</div>
+	{/if}
 
 	<!-- Tabs/Navigation -->
 	{#if tabs}

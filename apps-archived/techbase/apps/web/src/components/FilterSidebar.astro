@@ -1,0 +1,227 @@
+---
+import { getLocaleFromUrl } from '../utils/i18n';
+
+const { categories = [], platforms = [] } = Astro.props;
+const locale = getLocaleFromUrl(Astro.url);
+
+// Define price ranges
+const priceRanges = [
+  { id: 'free', label: 'Free' },
+  { id: 'paid', label: 'Paid' },
+  { id: 'subscription', label: 'Subscription' }
+];
+
+// Define rating filters
+const ratingFilters = [
+  { metric: 'easeOfUse', label: 'Ease of Use' },
+  { metric: 'featureRichness', label: 'Feature Richness' },
+  { metric: 'valueForMoney', label: 'Value for Money' },
+  { metric: 'support', label: 'Support' },
+  { metric: 'reliability', label: 'Reliability' }
+];
+---
+
+<div class="p-4 transition-colors duration-200" x-data="{
+  showMobileFilters: false,
+  activeCategories: [],
+  activePlatforms: [],
+  activePriceRanges: [],
+  ratingThresholds: {
+    easeOfUse: 0,
+    featureRichness: 0,
+    valueForMoney: 0, 
+    support: 0,
+    reliability: 0
+  },
+  
+  toggleCategory(category) {
+    if (this.activeCategories.includes(category)) {
+      this.activeCategories = this.activeCategories.filter(c => c !== category);
+    } else {
+      this.activeCategories.push(category);
+    }
+    this.updateFilters();
+  },
+  
+  togglePlatform(platform) {
+    if (this.activePlatforms.includes(platform)) {
+      this.activePlatforms = this.activePlatforms.filter(p => p !== platform);
+    } else {
+      this.activePlatforms.push(platform);
+    }
+    this.updateFilters();
+  },
+  
+  togglePriceRange(range) {
+    if (this.activePriceRanges.includes(range)) {
+      this.activePriceRanges = this.activePriceRanges.filter(r => r !== range);
+    } else {
+      this.activePriceRanges.push(range);
+    }
+    this.updateFilters();
+  },
+  
+  updateRatingThreshold(metric, value) {
+    this.ratingThresholds[metric] = value;
+    this.updateFilters();
+  },
+  
+  clearFilters() {
+    this.activeCategories = [];
+    this.activePlatforms = [];
+    this.activePriceRanges = [];
+    this.ratingThresholds = {
+      easeOfUse: 0,
+      featureRichness: 0,
+      valueForMoney: 0,
+      support: 0,
+      reliability: 0
+    };
+    this.updateFilters();
+  },
+  
+  updateFilters() {
+    // Emit custom event for parent components to listen to
+    const filters = {
+      categories: this.activeCategories,
+      platforms: this.activePlatforms,
+      priceRanges: this.activePriceRanges,
+      ratingThresholds: this.ratingThresholds
+    };
+    
+    this.$dispatch('filters-updated', {
+      detail: filters
+    });
+  }
+}">
+  <!-- Mobile filter toggle -->
+  <div class="lg:hidden mb-4">
+    <button 
+      @click="showMobileFilters = !showMobileFilters" 
+      class="w-full flex items-center justify-between bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 p-3 rounded-md transition-colors duration-200"
+    >
+      <span class="font-medium">Filters</span>
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        class="h-5 w-5" 
+        :class="{'rotate-180': showMobileFilters}"
+        viewBox="0 0 20 20" 
+        fill="currentColor"
+      >
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+      </svg>
+    </button>
+  </div>
+  
+  <!-- Filter content -->
+  <div 
+    class="space-y-6 lg:block" 
+    :class="{'hidden': !showMobileFilters && window.innerWidth < 1024}"
+    x-transition
+  >
+    <!-- Categories -->
+    <div>
+      <h3 class="font-semibold text-lg mb-3 dark:text-white">Categories</h3>
+      <div class="space-y-2">
+        {categories.map(category => (
+          <label class="flex items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+            <input 
+              type="checkbox" 
+              value={category.id}
+              @click="toggleCategory(`${category.id}`)"
+              :checked="activeCategories.includes(`${category.id}`)"
+              class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary" 
+            />
+            <span class="ml-2 dark:text-gray-300">{category.name}</span>
+          </label>
+        ))}
+        {categories.length === 0 && (
+          <p class="text-sm text-gray-500 dark:text-gray-400">No additional categories available</p>
+        )}
+      </div>
+    </div>
+    
+    <!-- Platforms -->
+    <div>
+      <h3 class="font-semibold text-lg mb-3 dark:text-white">Platforms</h3>
+      <div class="space-y-2">
+        {platforms.map(platform => (
+          <label class="flex items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+            <input 
+              type="checkbox" 
+              value={platform}
+              @click="togglePlatform(`${platform}`)"
+              :checked="activePlatforms.includes(`${platform}`)"
+              class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary" 
+            />
+            <span class="ml-2 dark:text-gray-300">{platform}</span>
+          </label>
+        ))}
+        {platforms.length === 0 && (
+          <p class="text-sm text-gray-500 dark:text-gray-400">No platform filters available</p>
+        )}
+      </div>
+    </div>
+    
+    <!-- Price Range -->
+    <div>
+      <h3 class="font-semibold text-lg mb-3 dark:text-white">Price</h3>
+      <div class="space-y-2">
+        {priceRanges.map(range => (
+          <label class="flex items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+            <input 
+              type="checkbox" 
+              value={range.id}
+              @click="togglePriceRange(`${range.id}`)"
+              :checked="activePriceRanges.includes(`${range.id}`)"
+              class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary" 
+            />
+            <span class="ml-2 dark:text-gray-300">{range.label}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+    
+    <!-- Ratings -->
+    <div>
+      <h3 class="font-semibold text-lg mb-3 dark:text-white">Minimum Rating</h3>
+      <div class="space-y-4">
+        {ratingFilters.map(filter => (
+          <div>
+            <div class="flex justify-between mb-1">
+              <label for={`rating-${filter.metric}`} class="text-sm font-medium dark:text-gray-300">{filter.label}</label>
+              <span class="text-sm font-bold dark:text-white" x-text="ratingThresholds.${filter.metric}"></span>
+            </div>
+            <input 
+              type="range" 
+              id={`rating-${filter.metric}`}
+              min="0" 
+              max="5" 
+              step="0.5"
+              x-model="ratingThresholds.${filter.metric}"
+              @input="updateRatingThreshold('${filter.metric}', $event.target.value)"
+              class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer" 
+            />
+            <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <span>Any</span>
+              <span>5★</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+    
+    <!-- Clear Filters -->
+    <div class="pt-2">
+      <button 
+        @click="clearFilters()" 
+        class="text-sm text-primary dark:text-blue-400 font-medium hover:underline flex items-center"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        Clear all filters
+      </button>
+    </div>
+  </div>
+</div>

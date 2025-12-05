@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as jwt from 'jsonwebtoken';
+import { jwtVerify, createRemoteJWKSet } from 'jose';
 
 /**
- * Optional authentication guard
- * Attaches user to request if valid token is present, but doesn't require it
+ * Optional authentication guard using JWKS (Better Auth compatible)
+ *
+ * Attaches user to request if valid token is present, but doesn't require it.
+ * Uses jose library with JWKS endpoint for EdDSA token verification.
  */
 @Injectable()
 export class OptionalAuthGuard implements CanActivate {
+	private jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
+
 	constructor(private configService: ConfigService) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -22,26 +26,26 @@ export class OptionalAuthGuard implements CanActivate {
 		}
 
 		try {
-			const publicKey = this.configService.get<string>('jwt.publicKey');
-			if (!publicKey) {
-				request.user = null;
-				return true;
+			// Lazy initialize JWKS
+			if (!this.jwks) {
+				const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
+				const jwksUrl = new URL('/api/v1/auth/jwks', baseUrl);
+				this.jwks = createRemoteJWKSet(jwksUrl);
 			}
 
-			const audience = this.configService.get<string>('jwt.audience');
-			const issuer = this.configService.get<string>('jwt.issuer');
+			const issuer = this.configService.get<string>('jwt.issuer') || 'manacore';
+			const audience = this.configService.get<string>('jwt.audience') || 'manacore';
 
-			const payload = jwt.verify(token, publicKey, {
-				algorithms: ['RS256'],
-				audience,
+			const { payload } = await jwtVerify(token, this.jwks, {
 				issuer,
-			}) as jwt.JwtPayload;
+				audience,
+			});
 
 			// Attach user to request
 			request.user = {
 				userId: payload.sub,
-				email: payload.email,
-				role: payload.role,
+				email: payload.email as string,
+				role: payload.role as string,
 			};
 		} catch {
 			// Invalid token - allow request but no user

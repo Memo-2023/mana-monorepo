@@ -37,7 +37,6 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **picture**  | AI image generation          | Expo mobile, SvelteKit web, Astro landing                 |
 | **chat**     | AI chat application          | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
 | **zitare**   | Daily inspiration quotes     | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
-| **presi**    | Presentation tool            | NestJS backend, Expo mobile, SvelteKit web                |
 | **contacts** | Contact management           | NestJS backend, SvelteKit web                             |
 
 ### Archived Projects (`apps-archived/`)
@@ -54,6 +53,10 @@ These projects are temporarily archived and excluded from the workspace. To re-a
 | **reader**         | Reading app                      |
 | **uload**          | URL shortener                    |
 | **wisekeep**       | AI wisdom extraction from video  |
+| **techbase**       | Software comparison platform     |
+| **inventory**      | Inventory management             |
+| **presi**          | Presentation tool                |
+| **storage**        | Cloud storage                    |
 
 ## Development Commands
 
@@ -69,6 +72,7 @@ pnpm run chat:dev
 pnpm run zitare:dev
 pnpm run presi:dev
 pnpm run contacts:dev
+pnpm run mail:dev
 
 # Start specific app within project
 pnpm run dev:chat:mobile     # Just mobile app

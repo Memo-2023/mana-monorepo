@@ -1,0 +1,150 @@
+---
+import { getLocaleFromUrl } from '../utils/i18n';
+
+const { placeholder = 'Search...', showButton = true } = Astro.props;
+const locale = getLocaleFromUrl(Astro.url);
+---
+
+<div class="relative" 
+  data-locale={locale}
+  x-data="{ 
+    searchQuery: '', 
+    searchResults: [], 
+    isLoading: false, 
+    showResults: false, 
+    currentLocale: '',
+    init() {
+      // Get locale from the data attribute
+      this.currentLocale = this.$el.dataset.locale;
+      
+      this.$watch('searchQuery', value => {
+        if (value.length >= 2) {
+          this.performSearch();
+        } else {
+          this.searchResults = [];
+          this.showResults = false;
+        }
+      });
+    },
+    async performSearch() {
+      if (this.searchQuery.length < 2) return;
+      
+      this.isLoading = true;
+      try {
+        // Fetch all software data if we haven't already
+        if (!window.softwareData) {
+          const response = await fetch('/api/software.json');
+          window.softwareData = await response.json();
+        }
+        
+        // Filter software by the current locale
+        const localeSoftware = window.softwareData.filter(item => item.locale === this.currentLocale);
+        
+        // Perform search using Fuse.js
+      const fuse = new Fuse(localeSoftware, {
+        keys: ['name', 'description', 'features', 'categories'],
+        threshold: 0.4,
+        ignoreLocation: true
+      });
+      
+      this.searchResults = fuse.search(this.searchQuery).map(result => result.item);
+      this.showResults = this.searchResults.length > 0;
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      this.isLoading = false;
+    }
+  },
+  navigateToResult(url) {
+    window.location.href = url;
+  }
+}">
+  <div class="relative flex w-full">
+    <input
+      type="text"
+      x-model="searchQuery"
+      placeholder={placeholder}
+      class="w-full py-2 px-4 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-l focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+      @focus="showResults = searchResults.length > 0"
+      @blur="setTimeout(() => showResults = false, 200)"
+    />
+    
+    {showButton && (
+      <button
+        class="bg-primary dark:bg-blue-600 text-white px-4 py-2 rounded-r hover:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors duration-200"
+        @click="performSearch()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
+    )}
+    
+    <div
+      x-show="isLoading"
+      class="absolute right-4 top-1/2 transform -translate-y-1/2"
+    >
+      <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+  </div>
+  
+  <div
+    x-show="showResults"
+    @click.away="showResults = false"
+    class="absolute z-10 mt-2 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-96 overflow-y-auto transition-colors duration-200"
+    x-transition:enter="transition ease-out duration-100"
+    x-transition:enter-start="transform opacity-0 scale-95"
+    x-transition:enter-end="transform opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-75"
+    x-transition:leave-start="transform opacity-100 scale-100"
+    x-transition:leave-end="transform opacity-0 scale-95"
+    style="display: none;"
+  >
+    <template x-if="searchResults.length === 0 && searchQuery.length >= 2">
+      <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+        No results found
+      </div>
+    </template>
+    
+    <template x-for="result in searchResults" :key="result.id">
+      <a
+        :href="result.url"
+        class="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0 transition-colors duration-200"
+        @mousedown.prevent
+        @click.prevent="navigateToResult(result.url)"
+      >
+        <div class="flex items-start">
+          <template x-if="result.logo">
+            <div class="w-10 h-10 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded mr-3 flex items-center justify-center">
+              <img :src="result.logo" :alt="result.name" class="max-w-full max-h-full p-1">
+            </div>
+          </template>
+          
+          <div class="flex-1">
+            <div class="font-medium text-gray-900 dark:text-white" x-text="result.name"></div>
+            <div class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2" x-text="result.description"></div>
+            
+            <div class="flex flex-wrap gap-1 mt-2">
+              <template x-for="category in result.categories.slice(0, 3)" :key="category">
+                <span class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full" x-text="category"></span>
+              </template>
+            </div>
+          </div>
+        </div>
+      </a>
+    </template>
+  </div>
+</div>
+
+<!-- Add Fuse.js -->
+<script is:inline src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+
+<script>
+  // Initialize global variable for software data
+  if (typeof window !== 'undefined' && !window.softwareData) {
+    window.softwareData = null;
+  }
+</script>

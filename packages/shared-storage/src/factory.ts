@@ -130,3 +130,20 @@ export function createStorageStorage(publicUrl?: string): StorageClient {
 		publicUrl: publicUrl ?? process.env.STORAGE_S3_PUBLIC_URL,
 	});
 }
+
+/**
+ * Create a storage client for the Mail project
+ */
+export function createMailStorage(): StorageClient {
+	return createStorageClient({ name: BUCKETS.MAIL });
+}
+
+/**
+ * Create a storage client for the Inventory project
+ */
+export function createInventoryStorage(publicUrl?: string): StorageClient {
+	return createStorageClient({
+		name: BUCKETS.INVENTORY,
+		publicUrl: publicUrl ?? process.env.INVENTORY_S3_PUBLIC_URL,
+	});
+}

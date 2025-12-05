@@ -24,10 +24,14 @@ export type {
 	UserSettingsResponse,
 	UserSettingsStore,
 	UserSettingsStoreConfig,
+	// General Settings Types
+	StartPageConfig,
+	WeekStartDay,
+	GeneralSettings,
 } from './types';
 
 // User Settings Constants
-export { DEFAULT_GLOBAL_SETTINGS } from './types';
+export { DEFAULT_GLOBAL_SETTINGS, DEFAULT_GENERAL_SETTINGS } from './types';
 
 // Constants
 export {
@@ -89,3 +93,7 @@ export {
 	loadA11yFromStorage,
 	saveA11yToStorage,
 } from './a11y-utils';
+
+// App Routes
+export type { AppRoute, AppRouteConfig } from './app-routes';
+export { APP_ROUTES, getStartPage, getAvailableRoutes, getDefaultRoute } from './app-routes';

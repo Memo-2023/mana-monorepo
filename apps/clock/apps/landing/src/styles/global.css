@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		--color-background-page: #0a0a0a;
+		--color-background-card: #1a1a1a;
+		--color-background-card-hover: #242424;
+		--color-text-primary: #ffffff;
+		--color-text-secondary: #d1d5db;
+		--color-text-muted: #9ca3af;
+		--color-border: #262626;
+		--color-border-hover: #3f3f3f;
+	}
+
+	html {
+		scroll-behavior: smooth;
+	}
+
+	body {
+		@apply bg-dark-bg text-white;
+	}
+}
+
+@layer components {
+	.container {
+		@apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+	}
+
+	.btn {
+		@apply inline-flex items-center justify-center rounded-lg px-6 py-3 font-medium transition-all duration-200;
+	}
+
+	.btn-primary {
+		@apply bg-primary-500 text-white hover:bg-primary-600;
+	}
+
+	.btn-secondary {
+		@apply border border-dark-border bg-dark-card text-white hover:bg-dark-surface;
+	}
+
+	.gradient-text {
+		@apply bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent;
+	}
+
+	section {
+		@apply py-20 md:py-28;
+	}
+}
+
+/* Animate clock hands */
+@keyframes rotate-hour {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes rotate-minute {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes rotate-second {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.animate-hour {
+	animation: rotate-hour 43200s linear infinite;
+}
+
+.animate-minute {
+	animation: rotate-minute 3600s linear infinite;
+}
+
+.animate-second {
+	animation: rotate-second 60s linear infinite;
+}

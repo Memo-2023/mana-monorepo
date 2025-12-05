@@ -10,12 +10,18 @@ async function bootstrap() {
 
 	const configService = app.get(ConfigService);
 
-	// Security middleware
-	app.use(helmet());
+	// Security middleware - configure helmet to allow CORS
+	app.use(
+		helmet({
+			crossOriginResourcePolicy: { policy: 'cross-origin' },
+			crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+		})
+	);
 	app.use(cookieParser());
 
 	// CORS configuration
 	const corsOrigins = configService.get<string[]>('cors.origin') || [];
+	console.log('📋 CORS Origins configured:', corsOrigins);
 	app.enableCors({
 		origin: corsOrigins,
 		credentials: true,

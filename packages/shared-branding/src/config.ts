@@ -157,6 +157,82 @@ export const APP_BRANDING: Record<AppId, AppBranding> = {
 		logoStroke: true,
 		logoStrokeWidth: 1.5,
 	},
+	mail: {
+		id: 'mail',
+		name: 'Mail',
+		tagline: 'Smart Email Client',
+		primaryColor: '#6366f1',
+		secondaryColor: '#818cf8',
+		// Envelope icon
+		logoPath:
+			'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75',
+		logoViewBox: '0 0 24 24',
+		logoStroke: true,
+		logoStrokeWidth: 1.5,
+	},
+	storage: {
+		id: 'storage',
+		name: 'Storage',
+		tagline: 'Cloud Storage',
+		primaryColor: '#3b82f6',
+		secondaryColor: '#60a5fa',
+		// Cloud/storage icon
+		logoPath:
+			'M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z',
+		logoViewBox: '0 0 24 24',
+		logoStroke: true,
+		logoStrokeWidth: 1.5,
+	},
+	clock: {
+		id: 'clock',
+		name: 'Clock',
+		tagline: 'Clocks & Alarms',
+		primaryColor: '#f59e0b',
+		secondaryColor: '#fbbf24',
+		// Clock icon
+		logoPath: 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z',
+		logoViewBox: '0 0 24 24',
+		logoStroke: true,
+		logoStrokeWidth: 1.5,
+	},
+	todo: {
+		id: 'todo',
+		name: 'Todo',
+		tagline: 'Task Management',
+		primaryColor: '#8b5cf6',
+		secondaryColor: '#a78bfa',
+		// Checklist icon
+		logoPath: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+		logoViewBox: '0 0 24 24',
+		logoStroke: true,
+		logoStrokeWidth: 1.5,
+	},
+	moodlit: {
+		id: 'moodlit',
+		name: 'Moodlit',
+		tagline: 'Ambient Lighting',
+		primaryColor: '#8b5cf6',
+		secondaryColor: '#a78bfa',
+		// Lightbulb/ambient light icon
+		logoPath:
+			'M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18',
+		logoViewBox: '0 0 24 24',
+		logoStroke: true,
+		logoStrokeWidth: 1.5,
+	},
+	inventory: {
+		id: 'inventory',
+		name: 'Inventory',
+		tagline: 'Inventory Management',
+		primaryColor: '#14b8a6',
+		secondaryColor: '#2dd4bf',
+		// Box/package icon
+		logoPath:
+			'M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9',
+		logoViewBox: '0 0 24 24',
+		logoStroke: true,
+		logoStrokeWidth: 1.5,
+	},
 };
 
 /**

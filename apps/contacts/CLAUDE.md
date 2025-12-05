@@ -97,8 +97,17 @@ pnpm build                       # Build for production
 | `/api/v1/notes/:id`                   | DELETE | Delete note                |
 | `/api/v1/contacts/:id/activities`     | GET    | Get contact activities     |
 | `/api/v1/contacts/:id/activities`     | POST   | Log activity               |
-| `/api/v1/contacts/import`             | POST   | Import contacts (vCard/CSV)|
-| `/api/v1/contacts/export`             | GET    | Export contacts            |
+| `/api/v1/import/preview`              | POST   | Preview file import (vCard/CSV) |
+| `/api/v1/import/execute`              | POST   | Execute contact import     |
+| `/api/v1/import/template/csv`         | GET    | Download CSV template      |
+| `/api/v1/google/auth-url`             | GET    | Get Google OAuth URL       |
+| `/api/v1/google/callback`             | POST   | Exchange OAuth code        |
+| `/api/v1/google/status`               | GET    | Get Google connection status |
+| `/api/v1/google/disconnect`           | DELETE | Disconnect Google account  |
+| `/api/v1/google/contacts`             | GET    | Fetch Google contacts      |
+| `/api/v1/google/import`               | POST   | Import from Google         |
+| `/api/v1/export`                      | GET    | Quick export all contacts  |
+| `/api/v1/export`                      | POST   | Export with options        |
 | `/api/v1/organizations/:orgId/contacts` | GET  | Get organization contacts  |
 | `/api/v1/teams/:teamId/contacts`      | GET    | Get team contacts          |
 | `/api/v1/contacts/:id/share`          | POST   | Share contact              |
@@ -165,6 +174,20 @@ pnpm build                       # Build for production
 - `metadata` (JSONB)
 - `created_at` (TIMESTAMP)
 
+**connected_accounts** - OAuth provider connections (Google, etc.)
+
+- `id` (UUID) - Primary key
+- `user_id` (VARCHAR) - User reference
+- `provider` (VARCHAR) - Provider name (e.g., 'google')
+- `provider_account_id` (VARCHAR) - Provider's user ID
+- `provider_email` (VARCHAR) - Provider account email
+- `access_token` (TEXT) - OAuth access token (encrypted)
+- `refresh_token` (TEXT) - OAuth refresh token (encrypted)
+- `token_expires_at` (TIMESTAMP) - Token expiration time
+- `scope` (TEXT) - Granted OAuth scopes
+- `provider_data` (JSONB) - Additional provider-specific data
+- `created_at`, `updated_at` (TIMESTAMP)
+
 ### Environment Variables
 
 #### Backend (.env)
@@ -180,6 +203,12 @@ S3_REGION=us-east-1
 S3_ACCESS_KEY=minioadmin
 S3_SECRET_KEY=minioadmin
 S3_BUCKET=contacts-photos
+
+# Google OAuth (for contacts import)
+# Get credentials from https://console.cloud.google.com/apis/credentials
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+GOOGLE_REDIRECT_URI=http://localhost:5184/import?tab=google
 ```
 
 #### Mobile (.env)

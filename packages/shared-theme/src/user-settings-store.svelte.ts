@@ -6,9 +6,11 @@ import type {
 	NavSettings,
 	ThemeSettings,
 	UserSettingsResponse,
+	GeneralSettings,
 } from './types';
-import { DEFAULT_GLOBAL_SETTINGS } from './types';
+import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_GENERAL_SETTINGS } from './types';
 import { isBrowser } from './utils';
+import { getStartPage as getStartPageFromConfig } from './app-routes';
 
 const STORAGE_KEY_PREFIX = 'manacore-user-settings';
 
@@ -65,6 +67,15 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 
 	// Derived: whether this app has an override
 	const hasAppOverride = $derived(!!appOverrides[appId]);
+
+	// Derived: resolved general settings (always from global)
+	const general = $derived<GeneralSettings>({
+		...DEFAULT_GENERAL_SETTINGS,
+		...globalSettings.general,
+	});
+
+	// Derived: start page for current app
+	const startPage = $derived(getStartPageFromConfig(appId, general.startPages));
 
 	/**
 	 * Save current settings to localStorage (for offline fallback)
@@ -172,6 +183,14 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 			nav: { ...globalSettings.nav, ...settings.nav },
 			theme: { ...globalSettings.theme, ...settings.theme },
 			locale: settings.locale ?? globalSettings.locale,
+			general: {
+				...globalSettings.general,
+				...settings.general,
+				startPages: {
+					...globalSettings.general?.startPages,
+					...settings.general?.startPages,
+				},
+			},
 		};
 		saveToStorage();
 
@@ -235,6 +254,35 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 	}
 
 	/**
+	 * Update start page for a specific app
+	 */
+	async function setStartPage(targetAppId: string, path: string): Promise<void> {
+		await updateGlobal({
+			general: {
+				startPages: {
+					[targetAppId]: path,
+				},
+			},
+		} as Partial<GlobalSettings>);
+	}
+
+	/**
+	 * Update general settings
+	 */
+	async function updateGeneral(settings: Partial<GeneralSettings>): Promise<void> {
+		await updateGlobal({
+			general: {
+				...globalSettings.general,
+				...settings,
+				startPages: {
+					...globalSettings.general?.startPages,
+					...settings.startPages,
+				},
+			},
+		});
+	}
+
+	/**
 	 * Remove app override (revert to global settings)
 	 */
 	async function removeAppOverride(): Promise<void> {
@@ -276,6 +324,12 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 		get locale() {
 			return locale;
 		},
+		get general() {
+			return general;
+		},
+		get startPage() {
+			return startPage;
+		},
 		get globalSettings() {
 			return globalSettings;
 		},
@@ -293,5 +347,7 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 		updateGlobal,
 		updateAppOverride,
 		removeAppOverride,
+		setStartPage,
+		updateGeneral,
 	};
 }

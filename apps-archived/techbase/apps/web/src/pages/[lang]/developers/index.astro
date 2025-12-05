@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import DeveloperCard from '../../../components/DeveloperCard.astro';
+import { getCollection } from 'astro:content';
+import { loadTranslations } from '../../../utils/i18n';
+import { i18nConfig } from '../../../content/config';
+
+export async function getStaticPaths() {
+  return i18nConfig.locales.map(locale => {
+    return {
+      params: { lang: locale },
+      props: { locale }
+    };
+  });
+}
+
+const { locale } = Astro.props;
+const t = await loadTranslations(locale);
+
+// Get all developers
+const allDevelopers = await getCollection('developers');
+const developers = allDevelopers
+  .filter(entry => entry.id.startsWith(locale + '/'))
+  .map(entry => {
+    let id = entry.id.split('/')[1]; // Get the id part after locale/
+    // Remove .md extension if present
+    if (id.endsWith('.md')) {
+      id = id.replace('.md', '');
+    }
+    return {
+      id,
+      ...entry.data
+    };
+  });
+
+// Get software counts for each developer
+const allSoftware = await getCollection('software');
+const developerSoftwareCounts = {};
+
+developers.forEach(developer => {
+  // When comparing developer IDs, remove .md extension
+  developerSoftwareCounts[developer.id] = allSoftware.filter(
+    software => {
+      const devId = software.data.developer;
+      const cleanDevId = devId ? devId.replace('.md', '') : '';
+      return software.id.startsWith(locale + '/') && cleanDevId === developer.id;
+    }
+  ).length;
+});
+---
+
+<BaseLayout title={t.common.developers}>
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8 dark:text-white">{t.common.developers}</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {developers.map(developer => {
+        // Add the software count to the developer object for DeveloperCard
+        developer.softwareCount = developerSoftwareCounts[developer.id];
+        
+        return (
+          <a href={`/${locale}/developers/${developer.id}`} class="block group">
+            <DeveloperCard developer={developer} />
+          </a>
+        );
+      })}
+    </div>
+    
+    {developers.length === 0 && (
+      <div class="text-center py-12">
+        <p class="text-gray-600 dark:text-gray-400">No developers found.</p>
+      </div>
+    )}
+  </div>
+</BaseLayout>

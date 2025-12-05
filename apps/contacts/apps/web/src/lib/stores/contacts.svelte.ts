@@ -65,9 +65,9 @@ export const contactsStore = {
 		error = null;
 
 		try {
-			const result = await contactsApi.get(id);
-			selectedContact = result.contact;
-			return result.contact;
+			const contact = await contactsApi.get(id);
+			selectedContact = contact;
+			return contact;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load contact';
 			console.error('Failed to load contact:', e);
@@ -85,11 +85,11 @@ export const contactsStore = {
 		error = null;
 
 		try {
-			const result = await contactsApi.create(data);
+			const contact = await contactsApi.create(data);
 			// Add to local state
-			contacts = [result.contact, ...contacts];
+			contacts = [contact, ...contacts];
 			total += 1;
-			return result.contact;
+			return contact;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create contact';
 			console.error('Failed to create contact:', e);
@@ -107,13 +107,13 @@ export const contactsStore = {
 		error = null;
 
 		try {
-			const result = await contactsApi.update(id, data);
+			const contact = await contactsApi.update(id, data);
 			// Update in local state
-			contacts = contacts.map((c) => (c.id === id ? result.contact : c));
+			contacts = contacts.map((c) => (c.id === id ? contact : c));
 			if (selectedContact?.id === id) {
-				selectedContact = result.contact;
+				selectedContact = contact;
 			}
-			return result.contact;
+			return contact;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update contact';
 			console.error('Failed to update contact:', e);
@@ -152,13 +152,13 @@ export const contactsStore = {
 	 */
 	async toggleFavorite(id: string) {
 		try {
-			const result = await contactsApi.toggleFavorite(id);
+			const contact = await contactsApi.toggleFavorite(id);
 			// Update in local state
-			contacts = contacts.map((c) => (c.id === id ? result.contact : c));
+			contacts = contacts.map((c) => (c.id === id ? contact : c));
 			if (selectedContact?.id === id) {
-				selectedContact = result.contact;
+				selectedContact = contact;
 			}
-			return result.contact;
+			return contact;
 		} catch (e) {
 			console.error('Failed to toggle favorite:', e);
 			throw e;
@@ -170,14 +170,14 @@ export const contactsStore = {
 	 */
 	async toggleArchive(id: string) {
 		try {
-			const result = await contactsApi.toggleArchive(id);
+			const contact = await contactsApi.toggleArchive(id);
 			// Remove from current view if archived/unarchived
 			contacts = contacts.filter((c) => c.id !== id);
 			total -= 1;
 			if (selectedContact?.id === id) {
 				selectedContact = null;
 			}
-			return result.contact;
+			return contact;
 		} catch (e) {
 			console.error('Failed to toggle archive:', e);
 			throw e;

@@ -224,6 +224,29 @@ export interface NavSettings {
 }
 
 /**
+ * Start page configuration per app
+ * Keys are app IDs, values are route paths
+ */
+export type StartPageConfig = Record<string, string>;
+
+/**
+ * Day of week for calendar/week starts
+ */
+export type WeekStartDay = 'monday' | 'sunday';
+
+/**
+ * General settings (global preferences)
+ */
+export interface GeneralSettings {
+	/** Start page per app (e.g., { clock: '/stopwatch', calendar: '/week' }) */
+	startPages: StartPageConfig;
+	/** First day of week */
+	weekStartsOn: WeekStartDay;
+	/** Master toggle for all app sounds */
+	soundsEnabled: boolean;
+}
+
+/**
  * Theme settings (synced to server)
  */
 export interface ThemeSettings {
@@ -240,6 +263,8 @@ export interface GlobalSettings {
 	nav: NavSettings;
 	theme: ThemeSettings;
 	locale: string;
+	/** General preferences (start pages, sounds, etc.) */
+	general: GeneralSettings;
 }
 
 /**
@@ -259,12 +284,22 @@ export interface UserSettingsResponse {
 }
 
 /**
+ * Default general settings
+ */
+export const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
+	startPages: {}, // Empty = use app defaults
+	weekStartsOn: 'monday',
+	soundsEnabled: true,
+};
+
+/**
  * Default global settings
  */
 export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
 	nav: { desktopPosition: 'top', sidebarCollapsed: false },
 	theme: { mode: 'system', colorScheme: 'ocean' },
 	locale: 'de',
+	general: DEFAULT_GENERAL_SETTINGS,
 };
 
 /**
@@ -277,6 +312,10 @@ export interface UserSettingsStore {
 	readonly theme: ThemeSettings;
 	/** Current locale */
 	readonly locale: string;
+	/** Resolved general settings */
+	readonly general: GeneralSettings;
+	/** Start page for current app (resolved from settings or default) */
+	readonly startPage: string;
 	/** Raw global settings */
 	readonly globalSettings: GlobalSettings;
 	/** Whether current app has an override */
@@ -294,6 +333,10 @@ export interface UserSettingsStore {
 	updateAppOverride: (settings: AppOverride) => Promise<void>;
 	/** Remove app override (revert to global) */
 	removeAppOverride: () => Promise<void>;
+	/** Set start page for a specific app */
+	setStartPage: (appId: string, path: string) => Promise<void>;
+	/** Update general settings */
+	updateGeneral: (settings: Partial<GeneralSettings>) => Promise<void>;
 }
 
 /**

@@ -6,7 +6,7 @@
 	import { getLoginTranslations } from '@manacore/shared-i18n';
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
-	import { authStore } from '$lib/stores/authStore.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	// Get translations based on current locale
 	const translations = $derived(getLoginTranslations($locale || 'de'));

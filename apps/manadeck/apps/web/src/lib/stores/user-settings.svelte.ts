@@ -8,7 +8,7 @@
  */
 
 import { createUserSettingsStore } from '@manacore/shared-theme';
-import { authStore } from './authStore.svelte';
+import { authStore } from './auth.svelte';
 
 const MANA_AUTH_URL = 'http://localhost:3001';
 

@@ -1,0 +1,76 @@
+{
+	"app": {
+		"name": "Figgos",
+		"tagline": "Collect AI-Generated Fantasy Figures"
+	},
+	"nav": {
+		"home": "Home",
+		"create": "Create",
+		"shelf": "My Shelf",
+		"settings": "Settings",
+		"themes": "Themes"
+	},
+	"home": {
+		"title": "Community Figures",
+		"subtitle": "Discover amazing figures created by the community",
+		"empty": "No figures yet. Be the first to create one!"
+	},
+	"create": {
+		"title": "Create a Figure",
+		"subtitle": "Design your unique collectible figure",
+		"name": "Character Name",
+		"namePlaceholder": "Enter a name for your figure",
+		"description": "Character Description",
+		"descriptionPlaceholder": "Describe your character's appearance and personality",
+		"rarity": "Rarity",
+		"artifacts": "Artifacts & Items",
+		"artifactName": "Item Name",
+		"artifactDescription": "Item Description",
+		"addArtifact": "Add Artifact",
+		"isPublic": "Make Public",
+		"generate": "Generate Figure",
+		"generating": "Generating your figure..."
+	},
+	"shelf": {
+		"title": "My Shelf",
+		"subtitle": "Your personal figure collection",
+		"empty": "Your shelf is empty. Create your first figure!",
+		"createFirst": "Create Figure"
+	},
+	"figure": {
+		"likes": "likes",
+		"by": "by",
+		"lore": "Lore",
+		"items": "Items",
+		"archive": "Archive",
+		"delete": "Delete",
+		"makePublic": "Make Public",
+		"makePrivate": "Make Private"
+	},
+	"rarity": {
+		"common": "Common",
+		"rare": "Rare",
+		"epic": "Epic",
+		"legendary": "Legendary"
+	},
+	"auth": {
+		"login": "Log In",
+		"register": "Sign Up",
+		"logout": "Log Out",
+		"email": "Email",
+		"password": "Password",
+		"confirmPassword": "Confirm Password",
+		"forgotPassword": "Forgot Password?",
+		"noAccount": "Don't have an account?",
+		"hasAccount": "Already have an account?",
+		"resetPassword": "Reset Password"
+	},
+	"common": {
+		"loading": "Loading...",
+		"error": "An error occurred",
+		"retry": "Retry",
+		"cancel": "Cancel",
+		"save": "Save",
+		"close": "Close"
+	}
+}

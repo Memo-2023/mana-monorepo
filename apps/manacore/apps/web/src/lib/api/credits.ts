@@ -3,7 +3,7 @@
  * Handles credit balance, transactions, and packages
  */
 
-import { authStore } from '$lib/stores/authStore.svelte';
+import { authStore } from '$lib/stores/auth.svelte';
 
 const MANA_AUTH_URL = 'http://localhost:3001'; // TODO: Use PUBLIC_MANA_CORE_AUTH_URL from env
 

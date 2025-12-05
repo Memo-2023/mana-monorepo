@@ -1,0 +1,105 @@
+{
+	"app": {
+		"name": "Mail",
+		"loading": "Caricamento..."
+	},
+	"nav": {
+		"inbox": "Posta in arrivo",
+		"sent": "Inviati",
+		"drafts": "Bozze",
+		"starred": "Speciali",
+		"archive": "Archivio",
+		"trash": "Cestino",
+		"spam": "Spam",
+		"settings": "Impostazioni",
+		"feedback": "Feedback"
+	},
+	"auth": {
+		"login": "Accedi",
+		"register": "Registrati",
+		"logout": "Esci",
+		"forgotPassword": "Password dimenticata",
+		"email": "E-mail",
+		"password": "Password",
+		"confirmPassword": "Conferma password"
+	},
+	"email": {
+		"compose": "Scrivi",
+		"reply": "Rispondi",
+		"replyAll": "Rispondi a tutti",
+		"forward": "Inoltra",
+		"delete": "Elimina",
+		"archive": "Archivia",
+		"markRead": "Segna come letto",
+		"markUnread": "Segna come non letto",
+		"star": "Aggiungi a speciali",
+		"unstar": "Rimuovi da speciali",
+		"to": "A",
+		"cc": "CC",
+		"bcc": "CCN",
+		"subject": "Oggetto",
+		"body": "Messaggio",
+		"send": "Invia",
+		"saveDraft": "Salva come bozza",
+		"discard": "Elimina",
+		"attachments": "Allegati",
+		"addAttachment": "Aggiungi allegato",
+		"noEmails": "Nessuna email",
+		"noSubject": "(Nessun oggetto)",
+		"from": "Da",
+		"date": "Data"
+	},
+	"folders": {
+		"title": "Cartelle",
+		"add": "Aggiungi cartella",
+		"edit": "Modifica cartella",
+		"delete": "Elimina cartella",
+		"name": "Nome cartella"
+	},
+	"labels": {
+		"title": "Etichette",
+		"add": "Aggiungi etichetta",
+		"edit": "Modifica etichetta",
+		"delete": "Elimina etichetta",
+		"name": "Nome etichetta",
+		"color": "Colore"
+	},
+	"accounts": {
+		"title": "Account email",
+		"add": "Aggiungi account",
+		"edit": "Modifica account",
+		"delete": "Elimina account",
+		"name": "Nome account",
+		"address": "Indirizzo email",
+		"default": "Account predefinito"
+	},
+	"settings": {
+		"title": "Impostazioni",
+		"general": "Generale",
+		"appearance": "Aspetto",
+		"accounts": "Account",
+		"signature": "Firma",
+		"language": "Lingua",
+		"theme": "Tema",
+		"darkMode": "Modalità scura",
+		"notifications": "Notifiche"
+	},
+	"common": {
+		"save": "Salva",
+		"cancel": "Annulla",
+		"delete": "Elimina",
+		"edit": "Modifica",
+		"add": "Aggiungi",
+		"confirm": "Conferma",
+		"yes": "Sì",
+		"no": "No",
+		"ok": "OK",
+		"loading": "Caricamento...",
+		"error": "Errore",
+		"success": "Successo",
+		"back": "Indietro",
+		"search": "Cerca",
+		"select": "Seleziona",
+		"selectAll": "Seleziona tutto"
+	}
+}

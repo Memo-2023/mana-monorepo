@@ -1,0 +1,394 @@
+@import "tailwindcss";
+@import "@manacore/shared-tailwind/themes.css";
+
+/* Scan shared packages for Tailwind classes */
+@source "../../../packages/shared/src";
+@source "../../../../../packages/shared-ui/src";
+@source "../../../../../packages/shared-theme-ui/src";
+
+/* Mail-specific CSS Variables */
+@layer base {
+	:root {
+		/* Spacing */
+		--spacing-xs: 0.25rem;
+		--spacing-sm: 0.5rem;
+		--spacing-md: 1rem;
+		--spacing-lg: 1.5rem;
+		--spacing-xl: 2rem;
+		--spacing-2xl: 3rem;
+
+		/* Border Radius */
+		--radius-sm: 0.25rem;
+		--radius-md: 0.5rem;
+		--radius-lg: 0.75rem;
+		--radius-xl: 1rem;
+		--radius-full: 9999px;
+
+		/* Transitions */
+		--transition-fast: 150ms ease;
+		--transition-base: 200ms ease;
+		--transition-slow: 300ms ease;
+
+		/* Mail-specific */
+		--email-row-height: 56px;
+		--sidebar-width: 240px;
+		--detail-panel-width: 400px;
+	}
+}
+
+/* Email List Styles */
+.email-row {
+	height: var(--email-row-height);
+	display: flex;
+	align-items: center;
+	padding: 0 var(--spacing-md);
+	border-bottom: 1px solid hsl(var(--color-border) / 0.5);
+	cursor: pointer;
+	transition: background-color var(--transition-fast);
+}
+
+.email-row:hover {
+	background-color: hsl(var(--color-muted) / 0.3);
+}
+
+.email-row.selected {
+	background-color: hsl(var(--color-primary) / 0.1);
+}
+
+.email-row.unread {
+	font-weight: 600;
+}
+
+.email-row.unread .email-subject {
+	color: hsl(var(--color-foreground));
+}
+
+/* Email Checkbox */
+.email-checkbox {
+	width: 20px;
+	height: 20px;
+	border: 2px solid hsl(var(--color-border));
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+	transition: all var(--transition-fast);
+}
+
+.email-checkbox:checked {
+	background-color: hsl(var(--color-primary));
+	border-color: hsl(var(--color-primary));
+}
+
+/* Star button */
+.star-button {
+	padding: var(--spacing-xs);
+	border-radius: var(--radius-full);
+	transition: all var(--transition-fast);
+	color: hsl(var(--color-muted-foreground));
+}
+
+.star-button:hover {
+	background-color: hsl(var(--color-muted) / 0.5);
+}
+
+.star-button.starred {
+	color: hsl(45 93% 47%);
+}
+
+/* Email Avatar */
+.email-avatar {
+	width: 36px;
+	height: 36px;
+	border-radius: var(--radius-full);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 600;
+	font-size: 0.875rem;
+	color: white;
+	flex-shrink: 0;
+}
+
+/* Email Content */
+.email-content {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.email-subject {
+	font-size: 0.875rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: hsl(var(--color-muted-foreground));
+}
+
+.email-snippet {
+	font-size: 0.75rem;
+	color: hsl(var(--color-muted-foreground));
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.email-date {
+	font-size: 0.75rem;
+	color: hsl(var(--color-muted-foreground));
+	flex-shrink: 0;
+}
+
+/* Folder List */
+.folder-item {
+	display: flex;
+	align-items: center;
+	padding: var(--spacing-sm) var(--spacing-md);
+	border-radius: var(--radius-md);
+	cursor: pointer;
+	transition: all var(--transition-fast);
+	color: hsl(var(--color-foreground));
+}
+
+.folder-item:hover {
+	background-color: hsl(var(--color-muted) / 0.5);
+}
+
+.folder-item.active {
+	background-color: hsl(var(--color-primary) / 0.1);
+	color: hsl(var(--color-primary));
+}
+
+.folder-badge {
+	background-color: hsl(var(--color-primary));
+	color: hsl(var(--color-primary-foreground));
+	font-size: 0.625rem;
+	padding: 2px 6px;
+	border-radius: var(--radius-full);
+	font-weight: 600;
+}
+
+/* Compose Button */
+.compose-button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--spacing-sm);
+	width: 100%;
+	padding: var(--spacing-md);
+	background-color: hsl(var(--color-primary));
+	color: hsl(var(--color-primary-foreground));
+	border-radius: var(--radius-lg);
+	font-weight: 600;
+	transition: all var(--transition-base);
+}
+
+.compose-button:hover {
+	background-color: hsl(var(--color-primary) / 0.9);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px hsl(var(--color-primary) / 0.3);
+}
+
+/* Email Detail Panel */
+.email-detail {
+	background-color: hsl(var(--color-surface));
+	border-left: 1px solid hsl(var(--color-border));
+	height: 100%;
+	overflow-y: auto;
+}
+
+.email-detail-header {
+	padding: var(--spacing-lg);
+	border-bottom: 1px solid hsl(var(--color-border));
+}
+
+.email-detail-body {
+	padding: var(--spacing-lg);
+}
+
+/* AI Summary Card */
+.ai-summary-card {
+	background: linear-gradient(135deg, hsl(var(--color-primary) / 0.1), hsl(var(--color-secondary) / 0.1));
+	border: 1px solid hsl(var(--color-primary) / 0.2);
+	border-radius: var(--radius-lg);
+	padding: var(--spacing-md);
+	margin-bottom: var(--spacing-md);
+}
+
+.ai-summary-card .label {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-xs);
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: hsl(var(--color-primary));
+	margin-bottom: var(--spacing-xs);
+}
+
+/* Smart Reply Chips */
+.smart-reply-chip {
+	display: inline-flex;
+	padding: var(--spacing-sm) var(--spacing-md);
+	background-color: hsl(var(--color-muted));
+	border-radius: var(--radius-full);
+	font-size: 0.875rem;
+	cursor: pointer;
+	transition: all var(--transition-fast);
+}
+
+.smart-reply-chip:hover {
+	background-color: hsl(var(--color-primary) / 0.1);
+	color: hsl(var(--color-primary));
+}
+
+/* Category Badge */
+.category-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: var(--radius-full);
+	font-size: 0.625rem;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.category-badge.work {
+	background-color: hsl(217 91% 60% / 0.1);
+	color: hsl(217 91% 60%);
+}
+
+.category-badge.personal {
+	background-color: hsl(142 76% 36% / 0.1);
+	color: hsl(142 76% 36%);
+}
+
+.category-badge.newsletter {
+	background-color: hsl(262 83% 58% / 0.1);
+	color: hsl(262 83% 58%);
+}
+
+.category-badge.transactional {
+	background-color: hsl(31 97% 52% / 0.1);
+	color: hsl(31 97% 52%);
+}
+
+.category-badge.promotional {
+	background-color: hsl(350 89% 60% / 0.1);
+	color: hsl(350 89% 60%);
+}
+
+/* Label Chip */
+.label-chip {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: var(--radius-full);
+	font-size: 0.75rem;
+	font-weight: 500;
+}
+
+/* Card styles */
+.card {
+	background-color: hsl(var(--color-surface));
+	border-radius: var(--radius-lg);
+	padding: var(--spacing-lg);
+	border: 1px solid hsl(var(--color-border));
+}
+
+/* Button styles */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.5rem 1rem;
+	border-radius: var(--radius-md);
+	font-weight: 500;
+	font-size: 0.875rem;
+	transition: all var(--transition-base);
+	cursor: pointer;
+	border: none;
+	background: transparent;
+}
+
+.btn-primary {
+	background: hsl(var(--color-primary));
+	color: hsl(var(--color-primary-foreground));
+}
+
+.btn-primary:hover {
+	background: hsl(var(--color-primary) / 0.9);
+}
+
+.btn-primary:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.btn-secondary {
+	background: hsl(var(--color-secondary));
+	color: hsl(var(--color-secondary-foreground));
+}
+
+.btn-secondary:hover {
+	background: hsl(var(--color-secondary) / 0.8);
+}
+
+.btn-ghost {
+	background: transparent;
+	color: hsl(var(--color-foreground));
+}
+
+.btn-ghost:hover {
+	background: hsl(var(--color-muted));
+}
+
+.btn-icon {
+	padding: 0.5rem;
+}
+
+.btn-sm {
+	padding: 0.25rem 0.5rem;
+	font-size: 0.75rem;
+}
+
+/* Input styles */
+.input {
+	display: block;
+	width: 100%;
+	padding: 0.5rem 0.75rem;
+	border: 2px solid hsl(var(--color-border));
+	border-radius: var(--radius-md);
+	background-color: hsl(var(--color-background));
+	color: hsl(var(--color-foreground));
+	font-size: 0.875rem;
+	transition: border-color var(--transition-fast);
+}
+
+.input:focus {
+	outline: none;
+	border-color: hsl(var(--color-primary));
+}
+
+.input::placeholder {
+	color: hsl(var(--color-muted-foreground));
+}
+
+/* Scrollbar styling */
+@layer utilities {
+	.scrollbar-thin::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-thumb {
+		background-color: hsl(var(--muted-foreground) / 0.3);
+		border-radius: 3px;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+		background-color: hsl(var(--muted-foreground) / 0.5);
+	}
+}

@@ -1,0 +1,14 @@
+/**
+ * Dashboard API Services
+ *
+ * Re-exports all app-specific services for the dashboard.
+ */
+
+export { todoService, type Task, type Project } from './todo';
+export { calendarService, type Calendar, type CalendarEvent } from './calendar';
+export { chatService, type Conversation, type Message, type AiModel } from './chat';
+export { contactsService, type Contact, type ContactActivity } from './contacts';
+export { zitareService, type Favorite, type Quote, type QuoteList } from './zitare';
+export { pictureService, type GeneratedImage, type GenerationStats } from './picture';
+export { manadeckService, type Deck, type Card, type LearningProgress } from './manadeck';
+export { clockService, type Timer, type Alarm, type ClockStats } from './clock';

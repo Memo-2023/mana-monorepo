@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Remove focus outlines globally */
+* {
+  outline: none !important;
+}
+
+input, textarea, button, select, a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Specific React Native Web fixes */
+input, textarea {
+  outline-width: 0;
+  outline-color: transparent;
+  outline-style: none;
+  box-shadow: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}

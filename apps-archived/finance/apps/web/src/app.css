@@ -1,0 +1,180 @@
+@import 'tailwindcss';
+@import '@manacore/shared-tailwind/themes.css';
+
+/* Scan shared packages for Tailwind classes */
+@source "../../../packages/shared/src";
+@source "../../../../../packages/shared-ui/src";
+@source "../../../../../packages/shared-theme-ui/src";
+
+:root {
+	/* Finance App - Green/Emerald Theme */
+	--color-primary: #10b981;
+	--color-primary-hover: #059669;
+	--color-primary-light: #34d399;
+	--color-primary-dark: #047857;
+
+	--color-secondary: #ecfdf5;
+	--color-secondary-hover: #d1fae5;
+
+	--color-accent: #6ee7b7;
+	--color-accent-hover: #34d399;
+
+	/* Transaction types */
+	--color-income: #22c55e;
+	--color-income-bg: #dcfce7;
+	--color-expense: #ef4444;
+	--color-expense-bg: #fee2e2;
+	--color-transfer: #3b82f6;
+	--color-transfer-bg: #dbeafe;
+
+	/* Budget status */
+	--color-budget-ok: #22c55e;
+	--color-budget-warning: #eab308;
+	--color-budget-danger: #ef4444;
+	--color-budget-over: #dc2626;
+
+	/* Account types */
+	--color-checking: #3b82f6;
+	--color-savings: #22c55e;
+	--color-credit-card: #f97316;
+	--color-cash: #8b5cf6;
+	--color-investment: #06b6d4;
+	--color-loan: #ef4444;
+}
+
+/* Dark mode overrides */
+:root.dark {
+	--color-secondary: #064e3b;
+	--color-secondary-hover: #065f46;
+	--color-income-bg: #14532d;
+	--color-expense-bg: #7f1d1d;
+	--color-transfer-bg: #1e3a8a;
+}
+
+/* Transaction item styling */
+.transaction-item {
+	transition:
+		transform 0.15s ease,
+		box-shadow 0.15s ease;
+}
+
+.transaction-item:hover {
+	transform: translateY(-1px);
+}
+
+/* Amount styling */
+.amount-income {
+	color: var(--color-income);
+}
+
+.amount-expense {
+	color: var(--color-expense);
+}
+
+.amount-transfer {
+	color: var(--color-transfer);
+}
+
+/* Budget progress bar */
+.budget-progress {
+	height: 8px;
+	border-radius: 4px;
+	background-color: var(--color-secondary);
+	overflow: hidden;
+}
+
+.budget-progress-bar {
+	height: 100%;
+	border-radius: 4px;
+	transition: width 0.3s ease;
+}
+
+.budget-ok .budget-progress-bar {
+	background-color: var(--color-budget-ok);
+}
+
+.budget-warning .budget-progress-bar {
+	background-color: var(--color-budget-warning);
+}
+
+.budget-danger .budget-progress-bar {
+	background-color: var(--color-budget-danger);
+}
+
+.budget-over .budget-progress-bar {
+	background-color: var(--color-budget-over);
+}
+
+/* Account card */
+.account-card {
+	transition:
+		transform 0.15s ease,
+		box-shadow 0.15s ease;
+}
+
+.account-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Category chip */
+.category-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 9999px;
+	font-size: 0.75rem;
+	font-weight: 500;
+}
+
+/* Chart container */
+.chart-container {
+	position: relative;
+	width: 100%;
+	height: 300px;
+}
+
+/* Currency input */
+.currency-input {
+	font-variant-numeric: tabular-nums;
+}
+
+/* Date range picker */
+.date-range-picker {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+/* Quick stats */
+.stat-card {
+	transition:
+		transform 0.15s ease,
+		box-shadow 0.15s ease;
+}
+
+.stat-card:hover {
+	transform: translateY(-1px);
+}
+
+/* Filter chips */
+.filter-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 12px;
+	border-radius: 9999px;
+	font-size: 0.875rem;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.filter-chip:hover {
+	background-color: var(--color-secondary-hover);
+}
+
+.filter-chip.active {
+	background-color: var(--color-primary);
+	color: white;
+}

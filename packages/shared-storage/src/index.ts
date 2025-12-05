@@ -13,6 +13,8 @@ export {
 	createCalendarStorage,
 	createContactsStorage,
 	createStorageStorage,
+	createMailStorage,
+	createInventoryStorage,
 } from './factory';
 
 // Utilities

@@ -10,7 +10,7 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { theme } from '$lib/stores/theme';
-	import { authStore } from '$lib/stores/authStore.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import {
 		isSidebarMode as sidebarModeStore,
@@ -125,8 +125,14 @@
 
 	$effect(() => {
 		// Redirect to login if not authenticated (after initialization)
-		if (authStore.initialized && !authStore.isAuthenticated) {
-			goto('/login');
+		// Use a small delay to ensure state has propagated after navigation
+		if (authStore.initialized && !authStore.loading && !authStore.isAuthenticated) {
+			// Small delay to handle navigation timing
+			setTimeout(() => {
+				if (!authStore.isAuthenticated) {
+					goto('/login');
+				}
+			}, 100);
 		}
 	});
 
@@ -148,6 +154,16 @@
 		// Load user settings from server
 		if (authStore.isAuthenticated) {
 			await userSettings.load();
+
+			// Redirect to start page if on /dashboard and a custom start page is set
+			const currentPath = window.location.pathname;
+			if (
+				currentPath === '/dashboard' &&
+				userSettings.startPage &&
+				userSettings.startPage !== '/dashboard'
+			) {
+				goto(userSettings.startPage, { replaceState: true });
+			}
 		}
 
 		loading = false;

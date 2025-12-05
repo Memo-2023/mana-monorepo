@@ -1,0 +1,275 @@
+{
+	"app": {
+		"name": "Clock",
+		"loading": "Loading..."
+	},
+	"nav": {
+		"dashboard": "Dashboard",
+		"alarms": "Alarms",
+		"timers": "Timers",
+		"stopwatch": "Stopwatch",
+		"pomodoro": "Pomodoro",
+		"worldClock": "World Clock",
+		"lifeClock": "Life Clock",
+		"settings": "Settings",
+		"feedback": "Feedback"
+	},
+	"auth": {
+		"login": "Sign In",
+		"register": "Sign Up",
+		"logout": "Sign Out",
+		"forgotPassword": "Forgot Password",
+		"email": "Email",
+		"password": "Password",
+		"confirmPassword": "Confirm Password"
+	},
+	"dashboard": {
+		"title": "Dashboard",
+		"nextAlarm": "Next Alarm",
+		"activeTimers": "Active Timers",
+		"worldClocks": "World Clocks"
+	},
+	"alarm": {
+		"title": "Alarms",
+		"add": "Add Alarm",
+		"edit": "Edit Alarm",
+		"delete": "Delete Alarm",
+		"label": "Label",
+		"time": "Time",
+		"repeat": "Repeat",
+		"sound": "Sound",
+		"snooze": "Snooze",
+		"snoozeMinutes": "{minutes} minutes",
+		"enabled": "Enabled",
+		"disabled": "Disabled",
+		"noAlarms": "No alarms set",
+		"days": {
+			"sun": "Sun",
+			"mon": "Mon",
+			"tue": "Tue",
+			"wed": "Wed",
+			"thu": "Thu",
+			"fri": "Fri",
+			"sat": "Sat"
+		},
+		"once": "Once",
+		"daily": "Daily",
+		"weekdays": "Weekdays",
+		"weekends": "Weekends",
+		"custom": "Custom"
+	},
+	"timer": {
+		"title": "Timers",
+		"add": "Add Timer",
+		"start": "Start",
+		"pause": "Pause",
+		"reset": "Reset",
+		"stop": "Stop",
+		"delete": "Delete",
+		"label": "Label",
+		"duration": "Duration",
+		"hours": "Hours",
+		"minutes": "Minutes",
+		"seconds": "Seconds",
+		"noTimers": "No active timers",
+		"presets": "Quick Select",
+		"finished": "Timer finished!"
+	},
+	"stopwatch": {
+		"title": "Stopwatch",
+		"start": "Start",
+		"stop": "Stop",
+		"lap": "Lap",
+		"reset": "Reset",
+		"laps": "Laps",
+		"noLaps": "No laps yet",
+		"best": "Best",
+		"worst": "Worst",
+		"total": "Total",
+		"new": "New",
+		"continue": "Continue",
+		"noStopwatches": "No Stopwatches",
+		"noStopwatchesDescription": "Start your first stopwatch to track multiple time measurements simultaneously.",
+		"startFirst": "Start First Stopwatch",
+		"otherStopwatches": "Other Stopwatches"
+	},
+	"pomodoro": {
+		"title": "Pomodoro",
+		"work": "Work",
+		"break": "Break",
+		"longBreak": "Long Break",
+		"sessions": "Sessions",
+		"sessionsCompleted": "{count} of {total} sessions",
+		"start": "Start",
+		"pause": "Pause",
+		"skip": "Skip",
+		"reset": "Reset",
+		"presets": {
+			"classic": "Classic",
+			"shortFocus": "Short Focus",
+			"deepWork": "Deep Work"
+		},
+		"settings": {
+			"workDuration": "Work Duration",
+			"breakDuration": "Break Duration",
+			"longBreakDuration": "Long Break Duration",
+			"sessionsBeforeLongBreak": "Sessions Before Long Break"
+		}
+	},
+	"worldClock": {
+		"title": "World Clock",
+		"add": "Add City",
+		"search": "Search city or timezone...",
+		"noClocks": "No cities added",
+		"difference": "{hours} hrs {direction}",
+		"ahead": "ahead",
+		"behind": "behind",
+		"same": "Same time"
+	},
+	"lifeClock": {
+		"title": "Life Clock",
+		"description": "Enter your birth date to see how many days you have lived.",
+		"daysLived": "days lived",
+		"since": "since",
+		"save": "Save",
+		"cancel": "Cancel",
+		"showMore": "Show more",
+		"showLess": "Show less",
+		"nextMilestone": "Next Milestone",
+		"inDays": "in {days} days",
+		"stats": {
+			"hours": "Hours",
+			"minutes": "Minutes",
+			"weeks": "Weeks",
+			"months": "Months"
+		},
+		"funFacts": {
+			"title": "Approximate Estimates",
+			"heartbeats": "Heartbeats",
+			"breaths": "Breaths",
+			"sunrises": "Sunrises",
+			"sleepHours": "Hours slept"
+		},
+		"milestones": {
+			"title": "Milestones",
+			"days": "days"
+		}
+	},
+	"settings": {
+		"title": "Settings",
+		"general": "General",
+		"appearance": "Appearance",
+		"sounds": "Sounds",
+		"notifications": "Notifications",
+		"language": "Language",
+		"theme": "Theme",
+		"darkMode": "Dark Mode",
+		"clockFormat": "Clock Format",
+		"format24h": "24 Hours",
+		"format12h": "12 Hours (AM/PM)"
+	},
+	"common": {
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"edit": "Edit",
+		"add": "Add",
+		"confirm": "Confirm",
+		"yes": "Yes",
+		"no": "No",
+		"ok": "OK",
+		"loading": "Loading...",
+		"error": "Error",
+		"success": "Success",
+		"back": "Back"
+	},
+	"clockFaces": {
+		"title": "Clock Faces",
+		"subtitle": "Choose your preferred clock design for the homepage",
+		"customize": "Customize Clock",
+		"currentSelection": "Current Selection",
+		"analog": "Analog Clocks",
+		"digital": "Digital Clocks",
+		"selected": "Selected",
+		"classic": {
+			"name": "Classic",
+			"description": "Elegant clock with Roman numerals"
+		},
+		"minimalist": {
+			"name": "Minimalist",
+			"description": "Clean design with only hour markers"
+		},
+		"modern": {
+			"name": "Modern",
+			"description": "Contemporary style with Arabic numerals"
+		},
+		"elegant": {
+			"name": "Elegant",
+			"description": "Luxurious golden accents"
+		},
+		"sporty": {
+			"name": "Sporty",
+			"description": "Bold design inspired by sports watches"
+		},
+		"lcd": {
+			"name": "LCD",
+			"description": "Classic 7-segment LCD display"
+		},
+		"flip": {
+			"name": "Flip Clock",
+			"description": "Retro split-flap display style"
+		},
+		"matrix": {
+			"name": "Matrix",
+			"description": "Dot matrix LED display"
+		},
+		"neon": {
+			"name": "Neon",
+			"description": "Glowing neon tube effect"
+		},
+		"binary": {
+			"name": "Binary",
+			"description": "Time displayed in binary format"
+		},
+		"vintage": {
+			"name": "Vintage",
+			"description": "Antique clock with aged patina"
+		},
+		"nautical": {
+			"name": "Nautical",
+			"description": "Marine-inspired brass ship clock"
+		},
+		"industrial": {
+			"name": "Industrial",
+			"description": "Factory-style with metal accents"
+		},
+		"bauhaus": {
+			"name": "Bauhaus",
+			"description": "Geometric design with primary colors"
+		},
+		"railway": {
+			"name": "Railway",
+			"description": "Swiss railway station clock style"
+		},
+		"retro": {
+			"name": "Retro",
+			"description": "Pixel-style CRT display"
+		},
+		"gradient": {
+			"name": "Gradient",
+			"description": "Modern display with color shifts"
+		},
+		"terminal": {
+			"name": "Terminal",
+			"description": "Command-line interface style"
+		},
+		"typewriter": {
+			"name": "Typewriter",
+			"description": "Vintage mechanical keyboard style"
+		},
+		"radar": {
+			"name": "Radar",
+			"description": "Military radar screen display"
+		}
+	}
+}

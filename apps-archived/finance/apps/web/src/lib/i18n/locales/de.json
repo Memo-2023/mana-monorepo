@@ -1,0 +1,133 @@
+{
+	"app": {
+		"name": "Finance",
+		"loading": "Laden..."
+	},
+	"nav": {
+		"dashboard": "Übersicht",
+		"accounts": "Konten",
+		"transactions": "Transaktionen",
+		"budgets": "Budgets",
+		"categories": "Kategorien",
+		"reports": "Berichte",
+		"settings": "Einstellungen",
+		"feedback": "Feedback"
+	},
+	"auth": {
+		"login": "Anmelden",
+		"register": "Registrieren",
+		"logout": "Abmelden",
+		"forgotPassword": "Passwort vergessen",
+		"email": "E-Mail",
+		"password": "Passwort",
+		"confirmPassword": "Passwort bestätigen"
+	},
+	"dashboard": {
+		"title": "Finanzübersicht",
+		"totalBalance": "Gesamtguthaben",
+		"income": "Einnahmen",
+		"expenses": "Ausgaben",
+		"savings": "Ersparnis",
+		"recentTransactions": "Letzte Transaktionen",
+		"budgetOverview": "Budget-Übersicht"
+	},
+	"accounts": {
+		"title": "Konten",
+		"add": "Konto hinzufügen",
+		"edit": "Konto bearbeiten",
+		"delete": "Konto löschen",
+		"name": "Kontoname",
+		"type": "Kontotyp",
+		"balance": "Kontostand",
+		"currency": "Währung",
+		"noAccounts": "Keine Konten vorhanden",
+		"types": {
+			"checking": "Girokonto",
+			"savings": "Sparkonto",
+			"credit": "Kreditkarte",
+			"cash": "Bargeld",
+			"investment": "Investment"
+		}
+	},
+	"transactions": {
+		"title": "Transaktionen",
+		"add": "Transaktion hinzufügen",
+		"edit": "Transaktion bearbeiten",
+		"delete": "Transaktion löschen",
+		"amount": "Betrag",
+		"date": "Datum",
+		"description": "Beschreibung",
+		"category": "Kategorie",
+		"account": "Konto",
+		"type": "Art",
+		"noTransactions": "Keine Transaktionen vorhanden",
+		"types": {
+			"income": "Einnahme",
+			"expense": "Ausgabe",
+			"transfer": "Überweisung"
+		}
+	},
+	"budgets": {
+		"title": "Budgets",
+		"add": "Budget hinzufügen",
+		"edit": "Budget bearbeiten",
+		"delete": "Budget löschen",
+		"name": "Budgetname",
+		"amount": "Betrag",
+		"spent": "Ausgegeben",
+		"remaining": "Verbleibend",
+		"period": "Zeitraum",
+		"category": "Kategorie",
+		"noBudgets": "Keine Budgets vorhanden",
+		"periods": {
+			"weekly": "Wöchentlich",
+			"monthly": "Monatlich",
+			"yearly": "Jährlich"
+		}
+	},
+	"categories": {
+		"title": "Kategorien",
+		"add": "Kategorie hinzufügen",
+		"edit": "Kategorie bearbeiten",
+		"delete": "Kategorie löschen",
+		"name": "Name",
+		"icon": "Symbol",
+		"color": "Farbe",
+		"noCategories": "Keine Kategorien vorhanden"
+	},
+	"reports": {
+		"title": "Berichte",
+		"incomeVsExpenses": "Einnahmen vs. Ausgaben",
+		"categoryBreakdown": "Aufschlüsselung nach Kategorien",
+		"trends": "Trends",
+		"export": "Exportieren"
+	},
+	"settings": {
+		"title": "Einstellungen",
+		"general": "Allgemein",
+		"appearance": "Darstellung",
+		"currency": "Standardwährung",
+		"language": "Sprache",
+		"theme": "Design",
+		"darkMode": "Dunkelmodus",
+		"notifications": "Benachrichtigungen"
+	},
+	"common": {
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"delete": "Löschen",
+		"edit": "Bearbeiten",
+		"add": "Hinzufügen",
+		"confirm": "Bestätigen",
+		"yes": "Ja",
+		"no": "Nein",
+		"ok": "OK",
+		"loading": "Laden...",
+		"error": "Fehler",
+		"success": "Erfolg",
+		"back": "Zurück",
+		"search": "Suchen",
+		"filter": "Filtern",
+		"sort": "Sortieren"
+	}
+}

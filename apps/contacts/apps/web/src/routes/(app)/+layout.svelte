@@ -16,6 +16,13 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import ContactDetailModal from '$lib/components/ContactDetailModal.svelte';
+	import { contactsStore } from '$lib/stores/contacts.svelte';
+
+	// Check if we're on a contact detail route
+	const contactDetailMatch = $derived($page.url.pathname.match(/^\/contacts\/([0-9a-f-]{36})$/i));
+	const showContactModal = $derived(!!contactDetailMatch);
+	const modalContactId = $derived(contactDetailMatch?.[1] || null);
 
 	// App switcher items
 	const appItems = getPillAppItems('contacts');
@@ -131,6 +138,12 @@
 		goto('/login');
 	}
 
+	async function handleCloseContactModal() {
+		// Refresh contacts list in case something was changed
+		await contactsStore.loadContacts();
+		goto('/', { replaceState: false });
+	}
+
 	onMount(async () => {
 		// Redirect to login if not authenticated
 		if (!authStore.isAuthenticated) {
@@ -206,6 +219,11 @@
 			{@render children()}
 		</div>
 	</main>
+
+	<!-- Contact Detail Modal -->
+	{#if showContactModal && modalContactId}
+		<ContactDetailModal contactId={modalContactId} onClose={handleCloseContactModal} />
+	{/if}
 </div>
 
 <style>

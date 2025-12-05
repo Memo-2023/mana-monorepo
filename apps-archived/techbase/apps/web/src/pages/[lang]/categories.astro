@@ -1,0 +1,85 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { loadTranslations } from '../../utils/i18n';
+import { i18nConfig } from '../../content/config';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  return i18nConfig.locales.map(locale => {
+    return {
+      params: { lang: locale },
+      props: { locale }
+    };
+  });
+}
+
+const { locale } = Astro.props;
+const t = await loadTranslations(locale);
+
+// Fetch categories from content collections
+const allCategories = await getCollection('categories');
+
+// Filter categories by locale
+const categories = allCategories
+  .filter(entry => entry.id.startsWith(locale + '/'))
+  .map(entry => {
+    const id = entry.id.split('/')[1].replace('.md', ''); // Get the id part after locale/ and remove .md extension
+    return {
+      id,
+      ...entry.data,
+      // This would typically come from a database count
+      count: 5 
+    };
+  });
+---
+
+<BaseLayout title={t.common.categories}>
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8 text-center">{t.common.categories}</h1>
+    
+    {categories.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {categories.map(category => (
+          <a href={`/${locale}/category/${category.id}`} class="block group">
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 transition-all group-hover:shadow-md h-full">
+              <div class="p-6">
+                <div class="flex items-center mb-4">
+                  {category.icon && (
+                    <div class="w-12 h-12 rounded-full bg-primary bg-opacity-10 flex items-center justify-center mr-4">
+                      <span class="text-primary text-2xl">{category.icon}</span>
+                    </div>
+                  )}
+                  
+                  <h3 class="text-xl font-bold group-hover:text-primary">
+                    {category.name}
+                  </h3>
+                </div>
+                
+                <p class="text-gray-600">
+                  {category.description}
+                </p>
+              </div>
+              
+              <div class="bg-gray-50 px-6 py-3 border-t border-gray-100">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-500">
+                    {category.count || 0} Software
+                  </span>
+                  
+                  <span class="text-primary group-hover:underline">
+                    {t.common.explore} →
+                  </span>
+                </div>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-16 bg-gray-50 rounded-lg">
+        <p class="text-lg text-gray-600 mb-4">Noch keine Kategorien verfügbar.</p>
+        <p class="text-gray-500">Schauen Sie später wieder vorbei.</p>
+      </div>
+    )}
+  </div>
+</BaseLayout>

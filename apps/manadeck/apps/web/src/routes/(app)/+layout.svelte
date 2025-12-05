@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { authStore } from '$lib/stores/authStore.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { theme } from '$lib/stores/theme';
 	import {
@@ -138,6 +138,12 @@
 
 		// Load user settings
 		await userSettings.load();
+
+		// Redirect to start page if on root and a custom start page is set
+		const currentPath = window.location.pathname;
+		if (currentPath === '/decks' && userSettings.startPage && userSettings.startPage !== '/decks') {
+			goto(userSettings.startPage, { replaceState: true });
+		}
 
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('manadeck-nav-sidebar');

@@ -1,0 +1,10 @@
+{
+	"name": "figgos",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"dev": "turbo run dev",
+		"build": "turbo run build",
+		"type-check": "echo 'Skip: run pnpm install first'"
+	}
+}

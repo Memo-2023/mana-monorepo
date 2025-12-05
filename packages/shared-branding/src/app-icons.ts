@@ -54,6 +54,18 @@ const calendarSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fil
 // Storage icon (cloud storage with gradient)
 const storageSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#storageGrad)"/><path d="M720 520C720 448.471 662.529 391 591 391C584.614 391 578.337 391.479 572.195 392.404C546.867 332.088 487.173 290 418 290C328.157 290 256 362.157 256 452C256 461.033 256.748 469.887 258.179 478.5C214.762 497.476 184 540.728 184 591C184 658.32 238.68 713 306 713H680C749.32 713 804 658.32 804 591C804 547.831 779.054 510.325 742.5 491.5C734.321 503.137 728 516.893 728 532V536C728 567.48 755.482 593 789 593" stroke="white" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/><path d="M512 500V700M512 700L420 608M512 700L604 608" stroke="white" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="storageGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient></defs></svg>`;
 
+// Clock icon (analog clock with gradient)
+const clockSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#clockGrad)"/><circle cx="512" cy="512" r="280" stroke="white" stroke-width="40"/><circle cx="512" cy="512" r="20" fill="white"/><path d="M512 300V400" stroke="white" stroke-width="24" stroke-linecap="round"/><path d="M512 624V724" stroke="white" stroke-width="24" stroke-linecap="round"/><path d="M300 512H400" stroke="white" stroke-width="24" stroke-linecap="round"/><path d="M624 512H724" stroke="white" stroke-width="24" stroke-linecap="round"/><path d="M512 512V340" stroke="white" stroke-width="32" stroke-linecap="round"/><path d="M512 512L620 580" stroke="white" stroke-width="24" stroke-linecap="round"/><circle cx="662" cy="280" r="40" fill="white" fill-opacity="0.3"/><path d="M662 260V280L678 296" stroke="white" stroke-width="8" stroke-linecap="round"/><defs><linearGradient id="clockGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#f59e0b"/><stop offset="1" stop-color="#d97706"/></linearGradient></defs></svg>`;
+
+// Todo icon (checkbox/task list with gradient)
+const todoSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#todoGrad)"/><rect x="280" y="300" width="464" height="424" rx="24" fill="white"/><circle cx="360" cy="400" r="28" stroke="#8b5cf6" stroke-width="8"/><path d="M348 400L356 408L372 392" stroke="#8b5cf6" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><rect x="420" y="384" width="280" height="24" rx="6" fill="#8b5cf6" fill-opacity="0.3"/><circle cx="360" cy="512" r="28" stroke="#8b5cf6" stroke-width="8" fill="#8b5cf6"/><path d="M348 512L356 520L372 504" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><rect x="420" y="496" width="200" height="24" rx="6" fill="#8b5cf6" fill-opacity="0.5"/><circle cx="360" cy="624" r="28" stroke="#8b5cf6" stroke-width="8"/><rect x="420" y="608" width="240" height="24" rx="6" fill="#8b5cf6" fill-opacity="0.3"/><defs><linearGradient id="todoGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#8b5cf6"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs></svg>`;
+
+// Mail icon (envelope with gradient)
+const mailSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#mailGrad)"/><rect x="240" y="320" width="544" height="384" rx="24" fill="white"/><path d="M240 380L512 540L784 380" stroke="#6366f1" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/><rect x="320" y="520" width="200" height="16" rx="4" fill="#6366f1" fill-opacity="0.3"/><rect x="320" y="560" width="160" height="12" rx="3" fill="#6366f1" fill-opacity="0.2"/><rect x="320" y="592" width="240" height="12" rx="3" fill="#6366f1" fill-opacity="0.2"/><defs><linearGradient id="mailGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#4f46e5"/></linearGradient></defs></svg>`;
+
+// Inventory icon (box/package with gradient)
+const inventorySvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#inventoryGrad)"/><path d="M280 380L512 260L744 380V644L512 764L280 644V380Z" fill="white"/><path d="M512 500V764M280 380L512 500L744 380" stroke="#14b8a6" stroke-width="24" stroke-linejoin="round"/><path d="M396 320L628 440" stroke="#14b8a6" stroke-width="16" stroke-linecap="round"/><rect x="460" y="560" width="104" height="80" rx="8" fill="#14b8a6" fill-opacity="0.3"/><defs><linearGradient id="inventoryGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#14b8a6"/><stop offset="1" stop-color="#0d9488"/></linearGradient></defs></svg>`;
+
 /**
  * App icons as data URLs
  * Use these directly in <img src={APP_ICONS.memoro}> or CSS background-image
@@ -74,6 +86,10 @@ export const APP_ICONS = {
 	contacts: svgToDataUrl(contactsSvg),
 	calendar: svgToDataUrl(calendarSvg),
 	storage: svgToDataUrl(storageSvg),
+	clock: svgToDataUrl(clockSvg),
+	todo: svgToDataUrl(todoSvg),
+	mail: svgToDataUrl(mailSvg),
+	inventory: svgToDataUrl(inventorySvg),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;

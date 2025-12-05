@@ -1,0 +1,612 @@
+@import "tailwindcss";
+@import "@manacore/shared-tailwind/themes.css";
+
+/* Scan shared packages for Tailwind classes */
+@source "../../../packages/shared/src";
+@source "../../../../../packages/shared-ui/src";
+@source "../../../../../packages/shared-theme-ui/src";
+
+/* Clock-specific CSS Variables */
+@layer base {
+	:root {
+		/* Spacing */
+		--spacing-xs: 0.25rem;
+		--spacing-sm: 0.5rem;
+		--spacing-md: 1rem;
+		--spacing-lg: 1.5rem;
+		--spacing-xl: 2rem;
+		--spacing-2xl: 3rem;
+
+		/* Border Radius */
+		--radius-sm: 0.25rem;
+		--radius-md: 0.5rem;
+		--radius-lg: 0.75rem;
+		--radius-xl: 1rem;
+		--radius-full: 9999px;
+
+		/* Transitions */
+		--transition-fast: 150ms ease;
+		--transition-base: 200ms ease;
+		--transition-slow: 300ms ease;
+
+		/* Clock-specific */
+		--clock-size: 280px;
+		--timer-display-size: 120px;
+	}
+}
+
+/* Analog Clock Styles */
+.clock-face {
+	position: relative;
+	width: var(--clock-size);
+	height: var(--clock-size);
+	border-radius: 50%;
+	background-color: hsl(var(--color-surface));
+	border: 4px solid hsl(var(--color-border));
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.clock-hand {
+	position: absolute;
+	bottom: 50%;
+	left: 50%;
+	transform-origin: bottom center;
+	border-radius: 9999px;
+}
+
+.clock-hand.hour {
+	width: 6px;
+	height: 30%;
+	margin-left: -3px;
+	background-color: hsl(var(--color-foreground));
+}
+
+.clock-hand.minute {
+	width: 4px;
+	height: 40%;
+	margin-left: -2px;
+	background-color: hsl(var(--color-foreground));
+}
+
+.clock-hand.second {
+	width: 2px;
+	height: 45%;
+	margin-left: -1px;
+	background-color: hsl(var(--color-primary));
+}
+
+.clock-center {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 12px;
+	height: 12px;
+	margin: -6px;
+	border-radius: 50%;
+	background-color: hsl(var(--color-primary));
+}
+
+/* Clock markers */
+.clock-marker {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform-origin: center center;
+}
+
+.clock-marker.hour-marker {
+	width: 3px;
+	height: 10px;
+	background-color: hsl(var(--color-foreground));
+}
+
+.clock-marker.minute-marker {
+	width: 1px;
+	height: 6px;
+	background-color: hsl(var(--color-muted-foreground));
+}
+
+/* Digital Clock Styles */
+.digital-clock {
+	font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+	font-variant-numeric: tabular-nums;
+}
+
+.digital-clock-large {
+	font-size: 4rem;
+	font-weight: 200;
+	letter-spacing: -0.02em;
+}
+
+.digital-clock-medium {
+	font-size: 2.5rem;
+	font-weight: 300;
+}
+
+.digital-clock-small {
+	font-size: 1.5rem;
+	font-weight: 400;
+}
+
+/* Timer Display */
+.timer-display {
+	font-family: 'JetBrains Mono', 'SF Mono', monospace;
+	font-size: var(--timer-display-size);
+	font-weight: 200;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Stopwatch lap list */
+.lap-item {
+	display: flex;
+	justify-content: space-between;
+	padding: var(--spacing-sm) var(--spacing-md);
+	border-bottom: 1px solid hsl(var(--color-border) / 0.5);
+}
+
+.lap-item:last-child {
+	border-bottom: none;
+}
+
+.lap-item.best {
+	color: hsl(var(--color-success));
+}
+
+.lap-item.worst {
+	color: hsl(var(--color-error));
+}
+
+/* Quick Create Form */
+.quick-create {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	background-color: hsl(var(--color-surface));
+	border-radius: var(--radius-md);
+	padding: 0.5rem 0.75rem;
+	border: 1px solid hsl(var(--color-border));
+}
+
+.time-input-inline {
+	font-size: 1.5rem;
+	font-weight: 300;
+	width: 5rem;
+	padding: 0.25rem;
+	font-variant-numeric: tabular-nums;
+	background: transparent;
+	border: none;
+	color: hsl(var(--color-foreground));
+}
+
+.time-input-inline:focus {
+	outline: none;
+}
+
+.time-input-inline::-webkit-calendar-picker-indicator {
+	display: none;
+}
+
+.label-input {
+	flex: 1;
+	min-width: 0;
+	padding: 0.375rem 0.5rem;
+	font-size: 0.875rem;
+	background: transparent;
+	border: none;
+	color: hsl(var(--color-foreground));
+}
+
+.label-input:focus {
+	outline: none;
+}
+
+.label-input::placeholder {
+	color: hsl(var(--color-muted-foreground));
+}
+
+.day-selector-compact {
+	display: flex;
+	gap: 0.25rem;
+	padding: 0.5rem 0;
+}
+
+.day-selector-compact button {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	border: 1px solid hsl(var(--color-border));
+	background: transparent;
+	color: hsl(var(--color-muted-foreground));
+	font-size: 0.7rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all var(--transition-fast);
+}
+
+.day-selector-compact button:hover {
+	border-color: hsl(var(--color-primary));
+	color: hsl(var(--color-foreground));
+}
+
+.day-selector-compact button.active {
+	background-color: hsl(var(--color-primary));
+	border-color: hsl(var(--color-primary));
+	color: hsl(var(--color-primary-foreground));
+}
+
+/* Alarm Grid (responsive) */
+.alarm-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+	gap: 0.5rem;
+}
+
+/* Alarm Tile (Grid layout) */
+.alarm-tile {
+	background-color: hsl(var(--color-surface));
+	border-radius: var(--radius-md);
+	padding: 0.5rem;
+	border: 1px solid hsl(var(--color-border));
+	transition: all var(--transition-base);
+	cursor: pointer;
+	opacity: 0.5;
+}
+
+.alarm-tile:hover {
+	background-color: hsl(var(--color-muted) / 0.5);
+	opacity: 0.7;
+}
+
+.alarm-tile:active {
+	background-color: hsl(var(--color-muted));
+}
+
+.alarm-tile.active {
+	opacity: 1;
+	border-color: hsl(var(--color-primary) / 0.3);
+}
+
+.alarm-tile.active:hover {
+	opacity: 1;
+	border-color: hsl(var(--color-primary) / 0.5);
+}
+
+/* Alarm Card (legacy, for edit form) */
+.alarm-card {
+	background-color: hsl(var(--color-surface));
+	border-radius: var(--radius-lg);
+	padding: var(--spacing-lg);
+	border: 1px solid hsl(var(--color-border));
+	transition: all var(--transition-base);
+}
+
+.alarm-card:hover {
+	border-color: hsl(var(--color-primary) / 0.5);
+}
+
+.alarm-card.disabled {
+	opacity: 0.6;
+}
+
+/* World Clock Card */
+.world-clock-card {
+	background-color: hsl(var(--color-surface));
+	border-radius: var(--radius-lg);
+	padding: var(--spacing-lg);
+	border: 1px solid hsl(var(--color-border));
+}
+
+.world-clock-card .city-name {
+	font-size: 1.125rem;
+	font-weight: 500;
+}
+
+.world-clock-card .timezone-info {
+	font-size: 0.875rem;
+	color: hsl(var(--color-muted-foreground));
+}
+
+.world-clock-card .time-display {
+	font-size: 2rem;
+	font-weight: 300;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Pomodoro Progress Ring */
+.pomodoro-ring {
+	stroke: hsl(var(--color-primary));
+	stroke-linecap: round;
+	transform: rotate(-90deg);
+	transform-origin: center;
+	transition: stroke-dashoffset 1s linear;
+}
+
+.pomodoro-ring-bg {
+	stroke: hsl(var(--color-muted));
+}
+
+/* Card styles */
+.card {
+	background-color: hsl(var(--color-surface));
+	border-radius: var(--radius-lg);
+	padding: var(--spacing-lg);
+	border: 1px solid hsl(var(--color-border));
+}
+
+/* Button styles */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.5rem 1rem;
+	border-radius: var(--radius-md);
+	font-weight: 500;
+	font-size: 0.875rem;
+	transition: all var(--transition-base);
+	cursor: pointer;
+	border: none;
+	background: transparent;
+}
+
+.btn-primary {
+	background: hsl(var(--color-primary));
+	color: hsl(var(--color-primary-foreground));
+}
+
+.btn-primary:hover {
+	background: hsl(var(--color-primary) / 0.9);
+}
+
+.btn-primary:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.btn-secondary {
+	background: hsl(var(--color-secondary));
+	color: hsl(var(--color-secondary-foreground));
+}
+
+.btn-secondary:hover {
+	background: hsl(var(--color-secondary) / 0.8);
+}
+
+.btn-ghost {
+	background: transparent;
+	color: hsl(var(--color-foreground));
+}
+
+.btn-ghost:hover {
+	background: hsl(var(--color-muted));
+}
+
+.btn-icon {
+	padding: 0.5rem;
+}
+
+.btn-sm {
+	padding: 0.25rem 0.5rem;
+	font-size: 0.75rem;
+}
+
+.btn-lg {
+	padding: 0.75rem 1.5rem;
+	font-size: 1rem;
+}
+
+.btn-xl {
+	padding: 1rem 2rem;
+	font-size: 1.125rem;
+}
+
+/* Input styles */
+.input {
+	display: block;
+	width: 100%;
+	padding: 0.5rem 0.75rem;
+	border: 2px solid hsl(var(--color-border));
+	border-radius: var(--radius-md);
+	background-color: hsl(var(--color-background));
+	color: hsl(var(--color-foreground));
+	font-size: 0.875rem;
+	transition: border-color var(--transition-fast);
+}
+
+.input:focus {
+	outline: none;
+	border-color: hsl(var(--color-primary));
+}
+
+.input::placeholder {
+	color: hsl(var(--color-muted-foreground));
+}
+
+/* Time Input (for alarm) */
+.time-input {
+	font-size: 2rem;
+	font-weight: 300;
+	text-align: center;
+	width: 5rem;
+	padding: 0.5rem;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Time Input Small (for timer) */
+.time-input-sm {
+	font-size: 1.5rem;
+	font-weight: 300;
+	text-align: center;
+	width: 3.5rem;
+	padding: 0.375rem;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Time Input Large (for quick create) */
+.time-input-large {
+	font-size: 2.5rem;
+	font-weight: 200;
+	text-align: center;
+	width: auto;
+	padding: 0.25rem 0.5rem;
+	font-variant-numeric: tabular-nums;
+	background: transparent;
+	border: none;
+	color: hsl(var(--color-foreground));
+	cursor: pointer;
+}
+
+.time-input-large:focus {
+	outline: none;
+}
+
+.time-input-large::-webkit-calendar-picker-indicator {
+	display: none;
+}
+
+/* Toggle Switch (iOS-style) */
+.toggle-switch {
+	position: relative;
+	width: 44px;
+	height: 26px;
+	background-color: hsl(var(--color-muted));
+	border-radius: var(--radius-full);
+	cursor: pointer;
+	transition: background-color var(--transition-base);
+	border: none;
+	padding: 0;
+	flex-shrink: 0;
+}
+
+.toggle-switch.active {
+	background-color: hsl(var(--color-primary));
+}
+
+.toggle-switch .toggle-knob {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 22px;
+	height: 22px;
+	background-color: white;
+	border-radius: 50%;
+	transition: transform var(--transition-base);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch.active .toggle-knob {
+	transform: translateX(18px);
+}
+
+/* Toggle Switch Small (for grid tiles) */
+.toggle-switch-sm {
+	position: relative;
+	display: inline-block;
+	width: 36px;
+	height: 20px;
+	background-color: hsl(var(--color-muted));
+	border-radius: var(--radius-full);
+	transition: background-color var(--transition-base);
+	flex-shrink: 0;
+}
+
+.toggle-switch-sm.active {
+	background-color: hsl(var(--color-primary));
+}
+
+.toggle-switch-sm .toggle-knob {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 16px;
+	height: 16px;
+	background-color: white;
+	border-radius: 50%;
+	transition: transform var(--transition-base);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch-sm.active .toggle-knob {
+	transform: translateX(16px);
+}
+
+/* Legacy toggle (deprecated) */
+.toggle {
+	position: relative;
+	width: 44px;
+	height: 24px;
+	background-color: hsl(var(--color-muted));
+	border-radius: var(--radius-full);
+	cursor: pointer;
+	transition: background-color var(--transition-base);
+}
+
+.toggle.active {
+	background-color: hsl(var(--color-primary));
+}
+
+.toggle::after {
+	content: '';
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 20px;
+	height: 20px;
+	background-color: white;
+	border-radius: 50%;
+	transition: transform var(--transition-base);
+}
+
+.toggle.active::after {
+	transform: translateX(20px);
+}
+
+/* Day of week selector (for alarm repeat) */
+.day-selector {
+	display: flex;
+	gap: var(--spacing-xs);
+}
+
+.day-selector button {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	border: 2px solid hsl(var(--color-border));
+	background: transparent;
+	color: hsl(var(--color-foreground));
+	font-size: 0.75rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all var(--transition-fast);
+}
+
+.day-selector button:hover {
+	border-color: hsl(var(--color-primary));
+}
+
+.day-selector button.active {
+	background-color: hsl(var(--color-primary));
+	border-color: hsl(var(--color-primary));
+	color: hsl(var(--color-primary-foreground));
+}
+
+/* Scrollbar styling */
+@layer utilities {
+	.scrollbar-thin::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-thumb {
+		background-color: hsl(var(--muted-foreground) / 0.3);
+		border-radius: 3px;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+		background-color: hsl(var(--muted-foreground) / 0.5);
+	}
+}

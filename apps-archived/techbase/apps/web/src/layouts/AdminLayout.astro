@@ -1,0 +1,102 @@
+---
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} | TechBase Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Initial dark mode script to avoid flash of incorrect theme -->
+    <script is:inline>
+      // On page load, check for theme preference in localStorage
+      const theme = (() => {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+          return localStorage.getItem('theme');
+        }
+        // Default to dark theme
+        return 'dark';
+      })();
+            
+      // Apply theme class immediately to avoid flash
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+  </head>
+  <body class="bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-gray-800 dark:bg-gray-950 text-white fixed h-full hidden md:block transition-colors duration-200">
+        <div class="p-6">
+          <h1 class="text-2xl font-bold mb-6">TechBase Admin</h1>
+          
+          <nav class="space-y-2">
+            <a href="/admin" class="block py-2.5 px-4 rounded hover:bg-gray-700 dark:hover:bg-gray-800 transition duration-200">
+              Dashboard
+            </a>
+            <a href="/admin/comments" class="block py-2.5 px-4 rounded hover:bg-gray-700 dark:hover:bg-gray-800 transition duration-200">
+              Comments
+            </a>
+            <a href="/" class="block py-2.5 px-4 rounded hover:bg-gray-700 dark:hover:bg-gray-800 transition duration-200">
+              Back to Site
+            </a>
+          </nav>
+        </div>
+      </aside>
+      
+      <!-- Mobile navbar -->
+      <div class="md:hidden bg-gray-800 dark:bg-gray-950 text-white w-full fixed z-10 transition-colors duration-200">
+        <div class="flex items-center justify-between p-4">
+          <h1 class="text-xl font-bold">TechBase Admin</h1>
+          
+          <button class="p-2" id="mobile-menu-button">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+        
+        <div class="hidden p-4 bg-gray-700 dark:bg-gray-800" id="mobile-menu">
+          <nav class="space-y-2">
+            <a href="/admin" class="block py-2 px-4 rounded hover:bg-gray-600 dark:hover:bg-gray-700 transition duration-200">
+              Dashboard
+            </a>
+            <a href="/admin/comments" class="block py-2 px-4 rounded hover:bg-gray-600 dark:hover:bg-gray-700 transition duration-200">
+              Comments
+            </a>
+            <a href="/" class="block py-2 px-4 rounded hover:bg-gray-600 dark:hover:bg-gray-700 transition duration-200">
+              Back to Site
+            </a>
+          </nav>
+        </div>
+      </div>
+      
+      <!-- Main content -->
+      <main class="flex-1 p-6 md:p-10 md:ml-64 pt-20 md:pt-10">
+        <div class="max-w-7xl mx-auto">
+          <h1 class="text-3xl font-bold mb-6 dark:text-white">{title}</h1>
+          
+          <slot />
+        </div>
+      </main>
+    </div>
+    
+    <script>
+      document.getElementById('mobile-menu-button')?.addEventListener('click', () => {
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenu?.classList.toggle('hidden');
+      });
+    </script>
+  </body>
+</html>

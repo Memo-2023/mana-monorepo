@@ -1,0 +1,107 @@
+---
+// In a real application, this would handle authentication
+// For the demo, we'll implement a simple form that redirects to the admin area
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | TechBase Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full px-6 py-8 bg-white shadow-md rounded-lg" x-data="{ 
+      email: '', 
+      password: '',
+      error: '',
+      loading: false,
+      
+      handleSubmit() {
+        this.error = '';
+        this.loading = true;
+        
+        // Validate input
+        if (!this.email || !this.password) {
+          this.error = 'Please fill in all fields';
+          this.loading = false;
+          return;
+        }
+        
+        // Demo login logic (in a real app, this would call an API endpoint)
+        if (this.email === 'admin@techbase.ad' && this.password === 'admin') {
+          // Successful login
+          setTimeout(() => {
+            window.location.href = '/admin';
+          }, 1000);
+        } else {
+          // Failed login
+          this.error = 'Invalid email or password';
+          this.loading = false;
+        }
+      }
+    }">
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">TechBase Admin</h1>
+        <p class="text-gray-600">Sign in to access the admin panel</p>
+      </div>
+      
+      <form @submit.prevent="handleSubmit" class="space-y-4">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            x-model="email"
+            placeholder="admin@techbase.ad"
+            class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
+          />
+        </div>
+        
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            x-model="password"
+            placeholder="••••••••"
+            class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
+          />
+        </div>
+        
+        <!-- Error message -->
+        <div x-show="error" class="text-red-600 text-sm" x-text="error"></div>
+        
+        <button 
+          type="submit" 
+          class="w-full py-2 px-4 bg-primary text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+          :disabled="loading"
+        >
+          <span x-show="!loading">Sign In</span>
+          <span x-show="loading" class="flex items-center justify-center">
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Loading...
+          </span>
+        </button>
+      </form>
+      
+      <div class="mt-6 text-center text-sm text-gray-500">
+        <p class="mb-2">Demo credentials:</p>
+        <p>Email: admin@techbase.ad</p>
+        <p>Password: admin</p>
+      </div>
+      
+      <div class="mt-6 text-center">
+        <a href="/" class="text-sm text-primary hover:underline">← Back to website</a>
+      </div>
+    </div>
+    
+    <!-- Include Alpine.js from CDN -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  </body>
+</html>

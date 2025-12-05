@@ -1,0 +1,96 @@
+---
+const { screenshots, softwareName } = Astro.props;
+---
+
+<div class="mb-8 relative">
+  <h3 class="text-xl font-bold mb-4">Screenshots</h3>
+  <div class="relative">
+    {/* Navigation buttons - outside the scrolling area */}
+    <button 
+      id="prev-btn" 
+      class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full z-10"
+      aria-label="Previous screenshot"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+    <button 
+      id="next-btn" 
+      class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full z-10"
+      aria-label="Next screenshot"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+    
+    {/* Scrollable gallery area */}
+    <div id="screenshot-gallery" class="rounded-lg overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+      <div class="flex space-x-4 pb-4 pl-[calc(50%-150px)]" id="screenshot-container">
+        {screenshots.map((screenshot, index) => (
+          <div class={`screenshot-slide inline-block min-w-min flex-shrink-0 ${index === 0 ? 'active' : ''}`} data-index={index}>
+            <img 
+              src={screenshot} 
+              alt={`${softwareName} screenshot ${index + 1}`} 
+              class="h-auto max-h-[80vh] object-contain rounded-lg"
+              style="min-width: 300px;"
+            />
+          </div>
+        ))}
+        {/* Empty div at the end for equal spacing */}
+        <div class="pr-[calc(50%-150px)]"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Screenshot gallery functionality
+  document.addEventListener('DOMContentLoaded', () => {
+    const gallery = document.getElementById('screenshot-gallery');
+    if (gallery) {
+      const slides = document.querySelectorAll('.screenshot-slide');
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      
+      let currentIndex = 0;
+      const totalSlides = slides.length;
+      
+      function scrollToActiveSlide(index, behavior = 'smooth') {
+        if (index < 0) index = totalSlides - 1;
+        if (index >= totalSlides) index = 0;
+        
+        currentIndex = index;
+        
+        slides.forEach(slide => slide.classList.remove('active'));
+        slides[currentIndex].classList.add('active');
+        
+        const activeSlide = slides[currentIndex];
+        const galleryRect = gallery.getBoundingClientRect();
+        const slideRect = activeSlide.getBoundingClientRect();
+        
+        const scrollOffset = (slideRect.left + slideRect.width / 2) - (galleryRect.left + galleryRect.width / 2);
+        gallery.scrollBy({
+          left: scrollOffset,
+          behavior: behavior
+        });
+      }
+      
+      prevBtn?.addEventListener('click', () => scrollToActiveSlide(currentIndex - 1));
+      nextBtn?.addEventListener('click', () => scrollToActiveSlide(currentIndex + 1));
+      
+      slides.forEach((slide, index) => {
+        slide.addEventListener('click', () => {
+          scrollToActiveSlide(index);
+        });
+      });
+      
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          scrollToActiveSlide(0, 'auto');
+        }, 100);
+      });
+    }
+  });
+</script>

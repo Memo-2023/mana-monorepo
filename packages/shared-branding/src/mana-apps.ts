@@ -229,6 +229,86 @@ export const MANA_APPS: ManaApp[] = [
 		comingSoon: false,
 		status: 'development',
 	},
+	{
+		id: 'clock',
+		name: 'Clock',
+		description: {
+			de: 'Uhren & Wecker',
+			en: 'Clocks & Alarms',
+		},
+		longDescription: {
+			de: 'Weltzeituhr, Wecker, Timer und stilvolle Uhren-Widgets in einer App.',
+			en: 'World clock, alarms, timers, and stylish clock widgets in one app.',
+		},
+		icon: APP_ICONS.clock,
+		color: '#f59e0b',
+		comingSoon: false,
+		status: 'development',
+	},
+	{
+		id: 'todo',
+		name: 'Todo',
+		description: {
+			de: 'Aufgabenverwaltung',
+			en: 'Task Management',
+		},
+		longDescription: {
+			de: 'Verwalte Aufgaben mit Projekten, Labels, Subtasks und wiederkehrenden Terminen.',
+			en: 'Manage tasks with projects, labels, subtasks, and recurring schedules.',
+		},
+		icon: APP_ICONS.todo,
+		color: '#8b5cf6',
+		comingSoon: false,
+		status: 'development',
+	},
+	{
+		id: 'mail',
+		name: 'ManaMail',
+		description: {
+			de: 'Smart Email Client',
+			en: 'Smart Email Client',
+		},
+		longDescription: {
+			de: 'Intelligenter E-Mail-Client mit KI-Zusammenfassungen, Smart Reply und Multi-Account-Unterstützung.',
+			en: 'Intelligent email client with AI summaries, smart reply, and multi-account support.',
+		},
+		icon: APP_ICONS.mail,
+		color: '#6366f1',
+		comingSoon: false,
+		status: 'development',
+	},
+	{
+		id: 'moodlit',
+		name: 'Moodlit',
+		description: {
+			de: 'Ambient Lighting & Moods',
+			en: 'Ambient Lighting & Moods',
+		},
+		longDescription: {
+			de: 'Erstelle beruhigende Lichtstimmungen mit animierten Farbverläufen für entspannte Atmosphäre.',
+			en: 'Create calming ambient lighting with animated color gradients for a relaxed atmosphere.',
+		},
+		icon: APP_ICONS.moodlit,
+		color: '#8b5cf6',
+		comingSoon: false,
+		status: 'development',
+	},
+	{
+		id: 'inventory',
+		name: 'Inventory',
+		description: {
+			de: 'Besitz-Verwaltung',
+			en: 'Inventory Management',
+		},
+		longDescription: {
+			de: 'Verwalte deinen Besitz mit Fotos, Kaufbelegen, Garantie-Dokumenten, Kategorien und Standorten.',
+			en: 'Manage your belongings with photos, receipts, warranty documents, categories, and locations.',
+		},
+		icon: APP_ICONS.inventory,
+		color: '#14b8a6',
+		comingSoon: false,
+		status: 'development',
+	},
 ];
 
 /**
@@ -308,10 +388,14 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	nutriphi: { dev: 'http://localhost:5182', prod: 'https://nutriphi.manacore.app' },
 	manacore: { dev: 'http://localhost:5173', prod: 'https://manacore.app' },
 	mana: { dev: 'http://localhost:5173', prod: 'https://manacore.app' },
-	moodlit: { dev: 'http://localhost:5183', prod: 'https://moodlit.manacore.app' },
+	moodlit: { dev: 'http://localhost:5182', prod: 'https://moodlit.manacore.app' },
 	contacts: { dev: 'http://localhost:5184', prod: 'https://contacts.manacore.app' },
 	calendar: { dev: 'http://localhost:5179', prod: 'https://calendar.manacore.app' },
 	storage: { dev: 'http://localhost:5185', prod: 'https://storage.manacore.app' },
+	clock: { dev: 'http://localhost:5187', prod: 'https://clock.manacore.app' },
+	todo: { dev: 'http://localhost:5189', prod: 'https://todo.manacore.app' },
+	mail: { dev: 'http://localhost:5186', prod: 'https://mail.manacore.app' },
+	inventory: { dev: 'http://localhost:5188', prod: 'https://inventory.manacore.app' },
 };
 
 /**

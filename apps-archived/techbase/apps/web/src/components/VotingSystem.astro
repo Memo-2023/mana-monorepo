@@ -1,0 +1,140 @@
+---
+import { getLocaleFromUrl, loadTranslations } from '../utils/i18n';
+
+const { softwareId } = Astro.props;
+const locale = getLocaleFromUrl(Astro.url);
+const t = await loadTranslations(locale);
+
+const metrics = [
+  { id: 'usability', name: t.voting.usability },
+  { id: 'features', name: t.voting.features },
+  { id: 'performance', name: t.voting.performance },
+  { id: 'support', name: t.voting.support },
+  { id: 'value', name: t.voting.value }
+];
+---
+
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-8 transition-colors duration-200" 
+  data-software-id={softwareId}
+  data-metric-usability={t.voting.usability}
+  data-metric-features={t.voting.features}
+  data-metric-performance={t.voting.performance}
+  data-metric-support={t.voting.support}
+  data-metric-value={t.voting.value}
+  x-data="{
+  softwareId: '',
+  metrics: [],
+  ratings: {},
+  message: '',
+  showMessage: false,
+  loading: false,
+  init() {
+    // Software-ID aus Datenattribut lesen
+    this.softwareId = this.$el.getAttribute('data-software-id');
+    console.log('Initialized VotingSystem with software ID:', this.softwareId);
+    
+    // Metriken aus Datenattributen lesen
+    this.metrics = [
+      { id: 'usability', name: this.$el.getAttribute('data-metric-usability') },
+      { id: 'features', name: this.$el.getAttribute('data-metric-features') },
+      { id: 'performance', name: this.$el.getAttribute('data-metric-performance') },
+      { id: 'support', name: this.$el.getAttribute('data-metric-support') },
+      { id: 'value', name: this.$el.getAttribute('data-metric-value') }
+    ];
+    
+    // Ratings initialisieren
+    this.metrics.forEach(metric => {
+      this.ratings[metric.id] = 0;
+    });
+  },
+  setRating(metricId, rating) {
+    this.ratings[metricId] = rating;
+  },
+  async submitRatings() {
+    this.loading = true;
+    
+    for (const metricId in this.ratings) {
+      if (this.ratings[metricId] > 0) {
+        try {
+          const response = await fetch('/api/vote', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              softwareId: this.softwareId,
+              metric: metricId,
+              rating: this.ratings[metricId]
+            })
+          });
+          
+          if (!response.ok) {
+            throw new Error('Voting failed');
+          }
+        } catch (error) {
+          console.error('Error submitting vote:', error);
+        }
+      }
+    }
+    
+    this.loading = false;
+    this.message = t.voting.thankYou;
+    this.showMessage = true;
+    
+    // Reset ratings
+    Object.keys(this.ratings).forEach(key => {
+      this.ratings[key] = 0;
+    });
+    
+    // Hide message after 3 seconds
+    setTimeout(() => {
+      this.showMessage = false;
+    }, 3000);
+  }
+}">
+  <h3 class="text-xl font-bold mb-4 dark:text-white">{t.software.vote}</h3>
+  
+  <div class="space-y-4 mb-6">
+    <template x-for="metric in metrics" :key="metric.id">
+      <div>
+        <label class="block mb-2 font-medium dark:text-gray-200" x-text="metric.name"></label>
+        <div class="flex space-x-2">
+          <template x-for="star in [1, 2, 3, 4, 5]">
+            <button 
+              @click="setRating(metric.id, star)"
+              class="text-2xl"
+              :class="ratings[metric.id] >= star ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'"
+            >
+              ★
+            </button>
+          </template>
+        </div>
+      </div>
+    </template>
+  </div>
+  
+  <button 
+    @click="submitRatings"
+    class="btn btn-primary w-full"
+    :disabled="loading || Object.values(ratings).every(v => v === 0)"
+  >
+    <span x-show="!loading">{t.voting.submit}</span>
+    <span x-show="loading">
+      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Loading...
+    </span>
+  </button>
+  
+  <div 
+    x-show="showMessage" 
+    class="mt-4 p-3 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 rounded transition-colors duration-200"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+  >
+    <p x-text="message"></p>
+  </div>
+</div>

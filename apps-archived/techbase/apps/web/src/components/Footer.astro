@@ -1,0 +1,38 @@
+---
+import { getLocaleFromUrl } from '../utils/i18n';
+
+const locale = getLocaleFromUrl(Astro.url);
+const year = new Date().getFullYear();
+---
+
+<footer class="bg-gray-800 text-white py-8 mt-auto transition-colors duration-200">
+  <div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <h3 class="text-xl font-bold mb-4">TechBase</h3>
+        <p class="text-gray-300">Die zentrale Plattform für Software-Vergleiche und Bewertungen</p>
+      </div>
+      
+      <div>
+        <h3 class="text-xl font-bold mb-4">Links</h3>
+        <ul class="space-y-2">
+          <li><a href={`/${locale}`} class="text-gray-300 hover:text-white">Home</a></li>
+          <li><a href={`/${locale}/about`} class="text-gray-300 hover:text-white">Über uns</a></li>
+          <li><a href={`/${locale}/contact`} class="text-gray-300 hover:text-white">Kontakt</a></li>
+        </ul>
+      </div>
+      
+      <div>
+        <h3 class="text-xl font-bold mb-4">Rechtliches</h3>
+        <ul class="space-y-2">
+          <li><a href={`/${locale}/privacy`} class="text-gray-300 hover:text-white">Datenschutz</a></li>
+          <li><a href={`/${locale}/imprint`} class="text-gray-300 hover:text-white">Impressum</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="border-t border-gray-700 mt-8 pt-4 text-center text-gray-400">
+      &copy; {year} TechBase. Alle Rechte vorbehalten.
+    </div>
+  </div>
+</footer>

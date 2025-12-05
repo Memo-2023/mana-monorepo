@@ -441,6 +441,10 @@ const APP_CONFIGS = [
 			S3_SECRET_KEY: (env) => env.S3_SECRET_KEY,
 			S3_BUCKET: (env) => env.CONTACTS_S3_BUCKET || 'contacts-photos',
 			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+			// Google OAuth for contacts import
+			GOOGLE_CLIENT_ID: (env) => env.CONTACTS_GOOGLE_CLIENT_ID,
+			GOOGLE_CLIENT_SECRET: (env) => env.CONTACTS_GOOGLE_CLIENT_SECRET,
+			GOOGLE_REDIRECT_URI: (env) => env.CONTACTS_GOOGLE_REDIRECT_URI,
 		},
 	},
 
@@ -489,6 +493,149 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.STORAGE_BACKEND_PORT || '3016'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Clock Backend (NestJS)
+	{
+		path: 'apps/clock/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.CLOCK_BACKEND_PORT || '3017',
+			DATABASE_URL: (env) => env.CLOCK_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Clock Web (SvelteKit)
+	{
+		path: 'apps/clock/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CLOCK_BACKEND_PORT || '3017'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Todo Backend (NestJS)
+	{
+		path: 'apps/todo/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.TODO_BACKEND_PORT || '3018',
+			DATABASE_URL: (env) => env.TODO_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Todo Web (SvelteKit)
+	{
+		path: 'apps/todo/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.TODO_BACKEND_PORT || '3018'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Moodlit Backend (NestJS)
+	{
+		path: 'apps/moodlit/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.MOODLIT_BACKEND_PORT || '3012',
+			DATABASE_URL: (env) => env.MOODLIT_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Moodlit Mobile (Expo)
+	{
+		path: 'apps/moodlit/apps/mobile/.env',
+		vars: {
+			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MOODLIT_BACKEND_PORT || '3012'}`,
+			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Moodlit Web (SvelteKit)
+	{
+		path: 'apps/moodlit/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MOODLIT_BACKEND_PORT || '3012'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Finance Backend (NestJS)
+	{
+		path: 'apps/finance/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.FINANCE_BACKEND_PORT || '3019',
+			DATABASE_URL: (env) => env.FINANCE_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Finance Mobile (Expo)
+	{
+		path: 'apps/finance/apps/mobile/.env',
+		vars: {
+			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.FINANCE_BACKEND_PORT || '3019'}`,
+			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Finance Web (SvelteKit)
+	{
+		path: 'apps/finance/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.FINANCE_BACKEND_PORT || '3019'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Worldream Web (SvelteKit)
+	{
+		path: 'games/worldream/apps/web/.env',
+		vars: {
+			PUBLIC_SUPABASE_URL: (env) => env.WORLDREAM_SUPABASE_URL,
+			PUBLIC_SUPABASE_ANON_KEY: (env) => env.WORLDREAM_SUPABASE_ANON_KEY,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			OPENAI_API_KEY: (env) => env.WORLDREAM_OPENAI_API_KEY,
+			GEMINI_API_KEY: (env) => env.WORLDREAM_GEMINI_API_KEY,
+			REPLICATE_API_TOKEN: (env) => env.WORLDREAM_REPLICATE_API_TOKEN,
+		},
+	},
+
+	// TechBase Backend (NestJS)
+	{
+		path: 'apps/techbase/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.TECHBASE_BACKEND_PORT || '3021',
+			DATABASE_URL: (env) => env.TECHBASE_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			CORS_ORIGINS: () => 'http://localhost:4321,http://localhost:5173',
+		},
+	},
+
+	// TechBase Web (Astro)
+	{
+		path: 'apps/techbase/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.TECHBASE_BACKEND_PORT || '3021'}`,
 		},
 	},
 ];
