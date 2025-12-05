@@ -187,14 +187,22 @@ async function makeRequestWithToken(
 
 /**
  * Check if response indicates token expiration
+ * Only return true for explicit token expiration, not generic unauthorized errors
  */
 function isTokenExpiredResponse(responseData: Record<string, unknown>): boolean {
 	const error = responseData.error as Record<string, unknown> | undefined;
-	const errorMessage = String(error?.message || responseData.message || responseData.error || '');
+	const errorMessage = String(
+		error?.message || responseData.message || responseData.error || ''
+	).toLowerCase();
 	const errorCode = String(responseData.code || error?.code || '');
 
+	// Only trigger refresh for explicit token expiration messages
 	return (
-		errorMessage === 'JWT expired' || errorCode === 'PGRST301' || errorMessage === 'Unauthorized'
+		errorMessage.includes('jwt expired') ||
+		errorMessage.includes('token expired') ||
+		errorMessage.includes('token has expired') ||
+		errorCode === 'PGRST301' ||
+		errorCode === 'TOKEN_EXPIRED'
 	);
 }
 

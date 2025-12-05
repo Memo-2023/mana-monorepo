@@ -6,6 +6,7 @@ pnpm docker:up:all
 
 pnpm docker:down
 
+pnpm dev:manacore:app
 pnpm dev:chat:app
 pnpm dev:contacts:app
 pnpm dev:todo:app
@@ -14,6 +15,8 @@ pnpm dev:mail:app
 pnpm dev:storage:app
 pnpm dev:calendar:app
 pnpm dev:finance:app
+pnpm dev:contacts:app
+pnpm dev:inventory:app
 pnpm dev:picture:app
 pnpm dev:manacore:app
 pnpm dev:zitare:app
