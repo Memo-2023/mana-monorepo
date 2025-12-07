@@ -57,8 +57,8 @@
 		}
 	}
 
-	const displayedTasks = $derived(data.slice(0, MAX_DISPLAY));
-	const remainingCount = $derived(Math.max(0, data.length - MAX_DISPLAY));
+	const displayedTasks = $derived((data || []).slice(0, MAX_DISPLAY));
+	const remainingCount = $derived(Math.max(0, (data || []).length - MAX_DISPLAY));
 </script>
 
 <div>
@@ -67,9 +67,9 @@
 			<span>✅</span>
 			{$_('dashboard.widgets.tasks_today.title')}
 		</h3>
-		{#if data.length > 0}
+		{#if (data || []).length > 0}
 			<span class="rounded-full bg-primary/10 px-2 py-0.5 text-sm font-medium text-primary">
-				{data.length}
+				{(data || []).length}
 			</span>
 		{/if}
 	</div>
@@ -78,7 +78,7 @@
 		<WidgetSkeleton lines={4} />
 	{:else if state === 'error'}
 		<WidgetError {error} onRetry={load} {retrying} />
-	{:else if data.length === 0}
+	{:else if (data || []).length === 0}
 		<div class="py-6 text-center">
 			<div class="mb-2 text-3xl">🎉</div>
 			<p class="text-sm text-muted-foreground">

@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import { Card, PageHeader } from '@manacore/shared-ui';
 	import { creditsService } from '$lib/api/credits';
 	import type { CreditBalance, CreditTransaction } from '$lib/api/credits';
-	import { authStore } from '$lib/stores/authStore.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import { dashboardStore } from '$lib/stores/dashboard.svelte';
+	import DashboardGrid from '$lib/components/dashboard/DashboardGrid.svelte';
 
 	onMount(() => {
 		dashboardStore.initialize();

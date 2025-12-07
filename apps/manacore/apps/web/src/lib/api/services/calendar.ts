@@ -59,7 +59,15 @@ export const calendarService = {
 		const startDate = new Date().toISOString().split('T')[0];
 		const endDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-		return client.get<CalendarEvent[]>(`/events?startDate=${startDate}&endDate=${endDate}`);
+		const result = await client.get<{ events: CalendarEvent[] }>(
+			`/events?startDate=${startDate}&endDate=${endDate}`
+		);
+
+		if (result.error || !result.data) {
+			return { data: null, error: result.error };
+		}
+
+		return { data: result.data.events || [], error: null };
 	},
 
 	/**
@@ -67,14 +75,28 @@ export const calendarService = {
 	 */
 	async getTodayEvents(): Promise<ApiResult<CalendarEvent[]>> {
 		const today = new Date().toISOString().split('T')[0];
-		return client.get<CalendarEvent[]>(`/events?startDate=${today}&endDate=${today}`);
+		const result = await client.get<{ events: CalendarEvent[] }>(
+			`/events?startDate=${today}&endDate=${today}`
+		);
+
+		if (result.error || !result.data) {
+			return { data: null, error: result.error };
+		}
+
+		return { data: result.data.events || [], error: null };
 	},
 
 	/**
 	 * Get all calendars
 	 */
 	async getCalendars(): Promise<ApiResult<Calendar[]>> {
-		return client.get<Calendar[]>('/calendars');
+		const result = await client.get<{ calendars: Calendar[] }>('/calendars');
+
+		if (result.error || !result.data) {
+			return { data: null, error: result.error };
+		}
+
+		return { data: result.data.calendars || [], error: null };
 	},
 
 	/**
@@ -87,8 +109,14 @@ export const calendarService = {
 		const startDate = new Date().toISOString().split('T')[0];
 		const endDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-		return client.get<CalendarEvent[]>(
+		const result = await client.get<{ events: CalendarEvent[] }>(
 			`/events?calendarIds=${calendarId}&startDate=${startDate}&endDate=${endDate}`
 		);
+
+		if (result.error || !result.data) {
+			return { data: null, error: result.error };
+		}
+
+		return { data: result.data.events || [], error: null };
 	},
 };

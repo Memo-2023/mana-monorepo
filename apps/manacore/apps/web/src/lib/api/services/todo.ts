@@ -49,28 +49,52 @@ export const todoService = {
 	 * Get today's tasks
 	 */
 	async getTodayTasks(): Promise<ApiResult<Task[]>> {
-		return client.get<Task[]>('/tasks/today');
+		const result = await client.get<{ tasks: Task[] }>('/tasks/today');
+
+		if (result.error || !result.data) {
+			return { data: null, error: result.error };
+		}
+
+		return { data: result.data.tasks || [], error: null };
 	},
 
 	/**
 	 * Get upcoming tasks for the next N days
 	 */
 	async getUpcomingTasks(days: number = 7): Promise<ApiResult<Task[]>> {
-		return client.get<Task[]>(`/tasks/upcoming?days=${days}`);
+		const result = await client.get<{ tasks: Task[] }>(`/tasks/upcoming?days=${days}`);
+
+		if (result.error || !result.data) {
+			return { data: null, error: result.error };
+		}
+
+		return { data: result.data.tasks || [], error: null };
 	},
 
 	/**
 	 * Get inbox tasks (unassigned to project)
 	 */
 	async getInboxTasks(): Promise<ApiResult<Task[]>> {
-		return client.get<Task[]>('/tasks/inbox');
+		const result = await client.get<{ tasks: Task[] }>('/tasks/inbox');
+
+		if (result.error || !result.data) {
+			return { data: null, error: result.error };
+		}
+
+		return { data: result.data.tasks || [], error: null };
 	},
 
 	/**
 	 * Get all projects
 	 */
 	async getProjects(): Promise<ApiResult<Project[]>> {
-		return client.get<Project[]>('/projects');
+		const result = await client.get<{ projects: Project[] }>('/projects');
+
+		if (result.error || !result.data) {
+			return { data: null, error: result.error };
+		}
+
+		return { data: result.data.projects || [], error: null };
 	},
 
 	/**

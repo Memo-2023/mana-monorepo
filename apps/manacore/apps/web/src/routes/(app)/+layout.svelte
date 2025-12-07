@@ -123,22 +123,21 @@
 		goto('/login');
 	}
 
-	$effect(() => {
-		// Redirect to login if not authenticated (after initialization)
-		// Use a small delay to ensure state has propagated after navigation
-		if (authStore.initialized && !authStore.loading && !authStore.isAuthenticated) {
-			// Small delay to handle navigation timing
-			setTimeout(() => {
-				if (!authStore.isAuthenticated) {
-					goto('/login');
-				}
-			}, 100);
-		}
-	});
+	// Track initialization state
+	let isInitializing = $state(true);
 
 	onMount(async () => {
 		// Initialize auth store first
 		await authStore.initialize();
+
+		// Only after initialization is complete, check auth status
+		isInitializing = false;
+
+		// Redirect to login if not authenticated
+		if (!authStore.isAuthenticated) {
+			goto('/login');
+			return;
+		}
 
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('manacore-nav-sidebar');
@@ -155,19 +154,10 @@
 		}
 
 		// Load user settings from server (don't await - let it load in background)
-		if (authStore.isAuthenticated) {
-			userSettings.load().then(() => {
-				// Redirect to start page if on /dashboard and a custom start page is set
-				const currentPath = window.location.pathname;
-				if (
-					currentPath === '/dashboard' &&
-					userSettings.startPage &&
-					userSettings.startPage !== '/dashboard'
-				) {
-					goto(userSettings.startPage, { replaceState: true });
-				}
-			});
-		}
+		// Silently catch errors since settings endpoint may not exist yet
+		userSettings.load().catch(() => {
+			// Settings API not available - use defaults
+		});
 
 		loading = false;
 	});
@@ -175,7 +165,7 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-{#if loading || authStore.loading}
+{#if isInitializing || loading || authStore.loading}
 	<div class="flex min-h-screen items-center justify-center bg-background">
 		<div class="text-center">
 			<div
