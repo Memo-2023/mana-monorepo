@@ -38,7 +38,7 @@ export async function fetchApi<T>(
 			headers['Authorization'] = `Bearer ${authToken}`;
 		}
 
-		const response = await fetch(`${API_BASE}/api${endpoint}`, {
+		const response = await fetch(`${API_BASE}/api/v1${endpoint}`, {
 			method,
 			headers,
 			body: isFormData ? (body as FormData) : body ? JSON.stringify(body) : undefined,
@@ -89,7 +89,7 @@ export async function uploadFile(
 			headers['Authorization'] = `Bearer ${authToken}`;
 		}
 
-		const response = await fetch(`${API_BASE}/api${endpoint}`, {
+		const response = await fetch(`${API_BASE}/api/v1${endpoint}`, {
 			method: 'POST',
 			headers,
 			body: formData,
@@ -137,7 +137,7 @@ export async function uploadFiles(
 			headers['Authorization'] = `Bearer ${authToken}`;
 		}
 
-		const response = await fetch(`${API_BASE}/api${endpoint}`, {
+		const response = await fetch(`${API_BASE}/api/v1${endpoint}`, {
 			method: 'POST',
 			headers,
 			body: formData,

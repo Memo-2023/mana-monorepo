@@ -11,7 +11,7 @@ export interface GenerateImageParams {
 	negativePrompt?: string;
 	width?: number;
 	height?: number;
-	numInferenceSteps?: number;
+	steps?: number;
 	guidanceScale?: number;
 }
 

@@ -91,7 +91,7 @@
 					modelId: selectedModelId,
 					width: advancedSettings.aspectRatio.width,
 					height: advancedSettings.aspectRatio.height,
-					numInferenceSteps: advancedSettings.steps,
+					steps: advancedSettings.steps,
 					guidanceScale: advancedSettings.guidanceScale,
 				});
 
