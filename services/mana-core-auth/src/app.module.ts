@@ -6,6 +6,7 @@ import configuration from './config/configuration';
 import { AuthModule } from './auth/auth.module';
 import { CreditsModule } from './credits/credits.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { ReferralsModule } from './referrals/referrals.module';
 import { SettingsModule } from './settings/settings.module';
 import { AiModule } from './ai/ai.module';
 import { HealthModule } from './health/health.module';
@@ -28,6 +29,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 		CreditsModule,
 		FeedbackModule,
 		HealthModule,
+		ReferralsModule,
 		SettingsModule,
 	],
 	providers: [

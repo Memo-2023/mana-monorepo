@@ -374,6 +374,8 @@ export interface RegisterB2CDto {
 	email: string;
 	password: string;
 	name: string;
+	referralCode?: string;
+	sourceAppId?: string;
 }
 
 /**

@@ -80,10 +80,25 @@ export class ReferralTierService {
 	}
 
 	/**
-	 * Get the multiplier for a given tier
+	 * Get the multiplier for a given tier name
 	 */
-	getMultiplier(tier: TierName): number {
+	getMultiplierForTier(tier: TierName): number {
 		return TIER_CONFIG[tier]?.multiplier || 1.0;
+	}
+
+	/**
+	 * Get the multiplier for a user by their ID
+	 */
+	async getMultiplier(userId: string): Promise<number> {
+		const db = this.getDb();
+
+		const [tier] = await db.select().from(userTiers).where(eq(userTiers.userId, userId)).limit(1);
+
+		if (!tier) {
+			return 1.0; // Default bronze multiplier
+		}
+
+		return this.getMultiplierForTier(tier.tier as TierName);
 	}
 
 	/**
@@ -96,7 +111,7 @@ export class ReferralTierService {
 	): { base: number; multiplier: number; final: number } {
 		const bonusConfig = BONUS_AMOUNTS[eventType];
 		const base = isReferrer ? bonusConfig.referrer : bonusConfig.referee;
-		const multiplier = isReferrer ? this.getMultiplier(tier) : 1.0; // Referee doesn't get tier bonus
+		const multiplier = isReferrer ? this.getMultiplierForTier(tier) : 1.0; // Referee doesn't get tier bonus
 		const final = Math.round(base * multiplier);
 
 		return { base, multiplier, final };
@@ -203,7 +218,7 @@ export class ReferralTierService {
 	/**
 	 * Calculate tier from qualified count
 	 */
-	private calculateTierFromCount(count: number): TierName {
+	calculateTierFromCount(count: number): TierName {
 		if (count >= TIER_CONFIG.platinum.minQualified) return 'platinum';
 		if (count >= TIER_CONFIG.gold.minQualified) return 'gold';
 		if (count >= TIER_CONFIG.silver.minQualified) return 'silver';
