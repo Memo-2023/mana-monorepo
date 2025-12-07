@@ -27,6 +27,8 @@
 		"dev:manacore:landing": "pnpm --filter @manacore/landing dev",
 		"dev:manacore:mobile": "pnpm --filter @manacore/mobile dev",
 		"dev:manacore:app": "pnpm --filter @manacore/web dev",
+		"dev:manacore:backends": "concurrently -n auth,chat,calendar,contacts,todo,zitare,picture,manadeck,clock -c blue,green,yellow,magenta,cyan,red,white,gray,orange \"pnpm dev:auth\" \"pnpm dev:chat:backend\" \"pnpm dev:calendar:backend\" \"pnpm dev:contacts:backend\" \"pnpm dev:todo:backend\" \"pnpm dev:zitare:backend\" \"pnpm dev:picture:backend\" \"pnpm dev:manadeck:backend\" \"pnpm dev:clock:backend\"",
+		"dev:manacore:full": "concurrently -n web,backends -c cyan,yellow \"pnpm dev:manacore:web\" \"pnpm dev:manacore:backends\"",
 		"dev:manadeck:web": "pnpm --filter @manadeck/web dev",
 		"dev:manadeck:landing": "pnpm --filter @manadeck/landing dev",
 		"dev:manadeck:backend": "pnpm --filter @manadeck/backend dev",

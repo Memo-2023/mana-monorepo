@@ -34,7 +34,9 @@
 			error = result.error;
 			state = 'error';
 
-			if (retryCount < 3) {
+			// Don't retry if service is unavailable (network error)
+			const isServiceUnavailable = error?.includes('nicht erreichbar');
+			if (!isServiceUnavailable && retryCount < 3) {
 				retryCount++;
 				setTimeout(load, 5000 * retryCount);
 			}
@@ -53,7 +55,7 @@
 <div>
 	<div class="mb-3 flex items-center justify-between">
 		<h3 class="flex items-center gap-2 text-lg font-semibold">
-			<span>=¡</span>
+			<span>=ï¿½</span>
 			{$_('dashboard.widgets.zitare.title')}
 		</h3>
 		{#if state === 'success' && data}
@@ -108,7 +110,7 @@
 				rel="noopener"
 				class="block text-center text-sm text-primary hover:underline"
 			>
-				{$_('dashboard.widgets.zitare.view_all')} ’
+				{$_('dashboard.widgets.zitare.view_all')} ï¿½
 			</a>
 		</div>
 	{/if}

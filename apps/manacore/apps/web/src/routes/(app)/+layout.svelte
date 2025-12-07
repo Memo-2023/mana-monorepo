@@ -137,6 +137,9 @@
 	});
 
 	onMount(async () => {
+		// Initialize auth store first
+		await authStore.initialize();
+
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('manacore-nav-sidebar');
 		if (savedSidebar === 'true') {
@@ -151,19 +154,19 @@
 			collapsedStore.set(true);
 		}
 
-		// Load user settings from server
+		// Load user settings from server (don't await - let it load in background)
 		if (authStore.isAuthenticated) {
-			await userSettings.load();
-
-			// Redirect to start page if on /dashboard and a custom start page is set
-			const currentPath = window.location.pathname;
-			if (
-				currentPath === '/dashboard' &&
-				userSettings.startPage &&
-				userSettings.startPage !== '/dashboard'
-			) {
-				goto(userSettings.startPage, { replaceState: true });
-			}
+			userSettings.load().then(() => {
+				// Redirect to start page if on /dashboard and a custom start page is set
+				const currentPath = window.location.pathname;
+				if (
+					currentPath === '/dashboard' &&
+					userSettings.startPage &&
+					userSettings.startPage !== '/dashboard'
+				) {
+					goto(userSettings.startPage, { replaceState: true });
+				}
+			});
 		}
 
 		loading = false;

@@ -36,7 +36,9 @@
 			error = result.error;
 			state = 'error';
 
-			if (retryCount < 3) {
+			// Don't retry if service is unavailable (network error)
+			const isServiceUnavailable = error?.includes('nicht erreichbar');
+			if (!isServiceUnavailable && retryCount < 3) {
 				retryCount++;
 				setTimeout(load, 5000 * retryCount);
 			}
@@ -75,7 +77,7 @@
 		<WidgetError {error} onRetry={load} {retrying} />
 	{:else if data.length === 0}
 		<div class="py-6 text-center">
-			<div class="mb-2 text-3xl">=Ç</div>
+			<div class="mb-2 text-3xl">=ï¿½</div>
 			<p class="text-sm text-muted-foreground">
 				{$_('dashboard.widgets.contacts.empty')}
 			</p>
@@ -127,7 +129,7 @@
 			rel="noopener"
 			class="mt-3 block text-center text-sm text-primary hover:underline"
 		>
-			{$_('dashboard.widgets.contacts.view_all')} ’
+			{$_('dashboard.widgets.contacts.view_all')} ï¿½
 		</a>
 	{/if}
 </div>

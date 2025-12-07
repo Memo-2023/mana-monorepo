@@ -40,6 +40,21 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
+ * Check if error is a network/connection error that shouldn't be retried
+ */
+function isNetworkError(error: Error): boolean {
+	const message = error.message.toLowerCase();
+	return (
+		message.includes('failed to fetch') ||
+		message.includes('network') ||
+		message.includes('connection refused') ||
+		message.includes('err_connection_refused') ||
+		message.includes('econnrefused') ||
+		message.includes('load failed')
+	);
+}
+
+/**
  * Fetch with authentication and retry logic
  *
  * @param url - Full URL to fetch
@@ -93,7 +108,16 @@ export async function fetchWithRetry<T>(
 			const data = await response.json();
 			return { data, error: null };
 		} catch (e) {
-			lastError = e instanceof Error ? e.message : 'Unknown error';
+			const error = e instanceof Error ? e : new Error('Unknown error');
+			lastError = error.message;
+
+			// Don't retry on network errors (service unavailable)
+			if (isNetworkError(error)) {
+				return {
+					data: null,
+					error: 'Service nicht erreichbar',
+				};
+			}
 
 			// Don't retry on last attempt
 			if (attempt < config.maxRetries) {

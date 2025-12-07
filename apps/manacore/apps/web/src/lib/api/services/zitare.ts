@@ -7,7 +7,7 @@
 import { createApiClient, type ApiResult } from '../base-client';
 
 // Backend URL - falls back to localhost for development
-const ZITARE_API_URL = import.meta.env.PUBLIC_ZITARE_API_URL || 'http://localhost:3007';
+const ZITARE_API_URL = import.meta.env.PUBLIC_ZITARE_API_URL || 'http://localhost:3007/api/v1';
 
 const client = createApiClient(ZITARE_API_URL);
 

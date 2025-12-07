@@ -37,7 +37,9 @@
 			error = timersResult.error || alarmsResult.error || statsResult.error;
 			state = 'error';
 
-			if (retryCount < 3) {
+			// Don't retry if service is unavailable (network error)
+			const isServiceUnavailable = error?.includes('nicht erreichbar');
+			if (!isServiceUnavailable && retryCount < 3) {
 				retryCount++;
 				setTimeout(load, 5000 * retryCount);
 			}

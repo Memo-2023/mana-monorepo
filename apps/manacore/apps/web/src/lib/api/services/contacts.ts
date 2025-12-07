@@ -7,7 +7,7 @@
 import { createApiClient, type ApiResult } from '../base-client';
 
 // Backend URL - falls back to localhost for development
-const CONTACTS_API_URL = import.meta.env.PUBLIC_CONTACTS_API_URL || 'http://localhost:3015';
+const CONTACTS_API_URL = import.meta.env.PUBLIC_CONTACTS_API_URL || 'http://localhost:3015/api/v1';
 
 const client = createApiClient(CONTACTS_API_URL);
 

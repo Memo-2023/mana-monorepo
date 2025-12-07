@@ -7,7 +7,7 @@
 import { createApiClient, type ApiResult } from '../base-client';
 
 // Backend URL - falls back to localhost for development
-const MANADECK_API_URL = import.meta.env.PUBLIC_MANADECK_API_URL || 'http://localhost:3009';
+const MANADECK_API_URL = import.meta.env.PUBLIC_MANADECK_API_URL || 'http://localhost:3009/api/v1';
 
 const client = createApiClient(MANADECK_API_URL);
 
@@ -64,21 +64,21 @@ export const manadeckService = {
 	 * Get user's decks
 	 */
 	async getDecks(): Promise<ApiResult<Deck[]>> {
-		return client.get<Deck[]>('/api/decks');
+		return client.get<Deck[]>('/decks');
 	},
 
 	/**
 	 * Get learning progress
 	 */
 	async getLearningProgress(): Promise<ApiResult<LearningProgress>> {
-		return client.get<LearningProgress>('/api/progress');
+		return client.get<LearningProgress>('/progress');
 	},
 
 	/**
 	 * Get cards due for review today
 	 */
 	async getDueCards(limit = 10): Promise<ApiResult<Card[]>> {
-		return client.get<Card[]>(`/api/cards/due?limit=${limit}`);
+		return client.get<Card[]>(`/cards/due?limit=${limit}`);
 	},
 
 	/**

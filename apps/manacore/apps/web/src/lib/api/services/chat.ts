@@ -7,7 +7,7 @@
 import { createApiClient, type ApiResult } from '../base-client';
 
 // Backend URL - falls back to localhost for development
-const CHAT_API_URL = import.meta.env.PUBLIC_CHAT_API_URL || 'http://localhost:3002';
+const CHAT_API_URL = import.meta.env.PUBLIC_CHAT_API_URL || 'http://localhost:3002/api/v1';
 
 const client = createApiClient(CHAT_API_URL);
 

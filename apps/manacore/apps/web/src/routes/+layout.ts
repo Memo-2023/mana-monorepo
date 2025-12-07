@@ -12,6 +12,8 @@ export const load: LayoutLoad = async ({ data, depends }) => {
 	 */
 	depends('supabase:auth');
 
+	// Create Supabase client for database operations only
+	// Auth is handled by Mana Core Auth (@manacore/shared-auth)
 	const supabase = createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
 		global: {
 			fetch,
@@ -27,14 +29,7 @@ export const load: LayoutLoad = async ({ data, depends }) => {
 		},
 	});
 
-	/**
-	 * It's fine to use `getSession` here, because on the client, `getSession` is
-	 * safe, and on the server, it reads `session` from the `LayoutData`, which
-	 * safely checked the session using `safeGetSession`.
-	 */
-	const {
-		data: { session },
-	} = await supabase.auth.getSession();
-
-	return { session, supabase };
+	// Note: Auth session is managed by Mana Core Auth via authStore,
+	// not Supabase auth. Supabase is used for database operations only.
+	return { supabase };
 };

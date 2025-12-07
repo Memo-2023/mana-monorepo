@@ -20,7 +20,17 @@ export interface FetchInterceptorConfig {
  * Default patterns to skip
  */
 const DEFAULT_SKIP_PATTERNS = [
-	// Auth endpoints
+	// Auth endpoints (Mana Core Auth)
+	'/api/v1/auth/login',
+	'/api/v1/auth/register',
+	'/api/v1/auth/refresh',
+	'/api/v1/auth/logout',
+	'/api/v1/auth/forgot-password',
+	'/api/v1/auth/reset-password',
+	'/api/v1/auth/verify',
+	'/api/v1/auth/google-signin',
+	'/api/v1/auth/apple-signin',
+	// Legacy auth patterns (for backwards compatibility)
 	'/auth/signin',
 	'/auth/signup',
 	'/auth/refresh',
@@ -147,13 +157,18 @@ function shouldSkipInterception(url: string, skipPatterns: string[], backendUrl:
 		return true;
 	}
 
-	// Check if URL matches backend
-	const backendDomain = backendUrl
-		.replace(/https?:\/\//, '')
-		.replace(/:\d+$/, '')
-		.toLowerCase();
+	// Check if URL matches backend (must include full host:port)
+	// Parse backendUrl to get origin (protocol + host + port)
+	try {
+		const backendOrigin = new URL(backendUrl).origin.toLowerCase();
+		const requestOrigin = new URL(url).origin.toLowerCase();
 
-	if (!lowerUrl.includes(backendDomain)) {
+		// Only intercept if request origin matches backend origin
+		if (requestOrigin !== backendOrigin) {
+			return true;
+		}
+	} catch {
+		// If URL parsing fails, skip interception
 		return true;
 	}
 

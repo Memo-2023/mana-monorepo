@@ -9,7 +9,8 @@ declare global {
 			user: User | null;
 		}
 		interface PageData {
-			session: Session | null;
+			// Auth is handled by Mana Core Auth (@manacore/shared-auth), not Supabase
+			// Supabase is used for database operations only
 			supabase?: SupabaseClient;
 		}
 		// interface Error {}

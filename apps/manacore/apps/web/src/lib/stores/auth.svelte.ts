@@ -94,6 +94,15 @@ export const authStore = {
 			const userData = await authService.getUserFromToken();
 			user = userData;
 
+			// Mark as initialized so initialize() doesn't override
+			initialized = true;
+			loading = false;
+
+			// Update token manager state to reflect valid token
+			if (_tokenManager) {
+				await _tokenManager.getValidToken();
+			}
+
 			return { success: true };
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';

@@ -7,7 +7,7 @@
 import { createApiClient, type ApiResult } from '../base-client';
 
 // Backend URL - falls back to localhost for development
-const CALENDAR_API_URL = import.meta.env.PUBLIC_CALENDAR_API_URL || 'http://localhost:3014';
+const CALENDAR_API_URL = import.meta.env.PUBLIC_CALENDAR_API_URL || 'http://localhost:3014/api/v1';
 
 const client = createApiClient(CALENDAR_API_URL);
 

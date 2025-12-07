@@ -10,10 +10,14 @@ pnpm dev:calendar:app
 pnpm dev:chat:app
 pnpm dev:clock:app
 pnpm dev:contacts:app
-pnpm dev:inventory:app
-pnpm dev:manacore:app
+pnpm dev:context:app
+pnpm dev:manacore:app # Nur ManaCore Web
+pnpm dev:manacore:backends # Alle 9 Backends für Dashboard-Widgets
+pnpm dev:manacore:full # Web + alle Backends (empfohlen)
 pnpm dev:manadeck:app
 pnpm dev:picture:app
+
+pnpm dev:inventory:app
 pnpm dev:presi:app
 pnpm dev:storage:app
 pnpm dev:techbase:app
@@ -249,16 +253,43 @@ pnpm presi:db:seed     # Seed-Daten
 
 ## Manacore
 
-| App     | Port | Befehl                      |
-| ------- | ---- | --------------------------- |
-| Web     | -    | `pnpm dev:manacore:web`     |
-| Mobile  | 8081 | `pnpm dev:manacore:mobile`  |
-| Landing | -    | `pnpm dev:manacore:landing` |
+| App      | Port | Befehl                       |
+| -------- | ---- | ---------------------------- |
+| Web      | 5173 | `pnpm dev:manacore:web`      |
+| Mobile   | 8081 | `pnpm dev:manacore:mobile`   |
+| Landing  | -    | `pnpm dev:manacore:landing`  |
+| Backends | -    | `pnpm dev:manacore:backends` |
 
 ```bash
-# Alles
+# Nur ManaCore Web
+pnpm dev:manacore:app
+
+# Alle Backends für Dashboard-Widgets starten (9 Services parallel)
+# Startet: auth, chat, calendar, contacts, todo, zitare, picture, manadeck, clock
+pnpm dev:manacore:backends
+
+# ManaCore Web + alle Backends zusammen (empfohlen für Dashboard-Entwicklung)
+pnpm dev:manacore:full
+
+# Alles inkl. Mobile
 pnpm manacore:dev
 ```
+
+### Dashboard-Backends Übersicht
+
+Die Dashboard-Widgets benötigen diese Backend-Services:
+
+| Widget               | Backend  | Port |
+| -------------------- | -------- | ---- |
+| Credits              | auth     | 3001 |
+| Chat Recent          | chat     | 3002 |
+| Calendar Events      | calendar | 3014 |
+| Contacts Favorites   | contacts | 3015 |
+| Tasks Today/Upcoming | todo     | 3017 |
+| Zitare Quote         | zitare   | 3007 |
+| Picture Recent       | picture  | 3006 |
+| Manadeck Progress    | manadeck | 3009 |
+| Clock Timers         | clock    | 3018 |
 
 ---
 
