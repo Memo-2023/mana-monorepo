@@ -65,10 +65,7 @@
 
 	// Navigation items for Todo
 	const navItems: PillNavItem[] = [
-		{ href: '/', label: 'Inbox', icon: 'inbox' },
-		{ href: '/today', label: 'Heute', icon: 'calendar-day' },
-		{ href: '/upcoming', label: 'Demnächst', icon: 'calendar' },
-		{ href: '/completed', label: 'Erledigt', icon: 'check-circle' },
+		{ href: '/', label: 'Aufgaben', icon: 'list' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];

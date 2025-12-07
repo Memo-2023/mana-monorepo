@@ -113,6 +113,33 @@ export const tasksStore = {
 	},
 
 	/**
+	 * Fetch all tasks (incomplete + completed) for unified view
+	 */
+	async fetchAllTasks() {
+		loading = true;
+		error = null;
+		try {
+			// Fetch both incomplete and completed tasks
+			const [incompleteTasks, completedTasks] = await Promise.all([
+				tasksApi.getTasks({ isCompleted: false }),
+				tasksApi.getTasks({ isCompleted: true }),
+			]);
+			// Deduplicate tasks by ID (in case API returns duplicates)
+			const allTasks = [...incompleteTasks, ...completedTasks];
+			const uniqueTasksMap = new Map<string, Task>();
+			for (const task of allTasks) {
+				uniqueTasksMap.set(task.id, task);
+			}
+			tasks = Array.from(uniqueTasksMap.values());
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to fetch all tasks';
+			console.error('Failed to fetch all tasks:', e);
+		} finally {
+			loading = false;
+		}
+	},
+
+	/**
 	 * Get tasks for a specific project
 	 */
 	getTasksByProject(projectId: string | null): Task[] {
