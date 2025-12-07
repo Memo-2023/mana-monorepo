@@ -1,17 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { theme } from '$lib/stores/theme';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import type { WeekStartDay, TimeFormat, AllDayDisplayMode } from '$lib/stores/settings.svelte';
+	import type { TimeFormat, AllDayDisplayMode } from '$lib/stores/settings.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { toast } from '$lib/stores/toast';
-	import { setLocale, supportedLocales } from '$lib/i18n';
-	import type { SupportedLocale } from '$lib/i18n';
-	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { GlobalSettingsSection } from '@manacore/shared-ui';
 	import type { CalendarViewType, Calendar } from '@calendar/shared';
 
@@ -20,9 +15,6 @@
 	let showNewCalendarForm = $state(false);
 	let newCalendarName = $state('');
 	let newCalendarColor = $state('#3b82f6');
-
-	// Get current locale from svelte-i18n
-	import { locale } from 'svelte-i18n';
 
 	onMount(async () => {
 		if (!authStore.isAuthenticated) {
@@ -79,20 +71,8 @@
 		editingCalendar = null;
 	}
 
-	function handleThemeChange(mode: 'light' | 'dark' | 'system') {
-		theme.setMode(mode);
-	}
-
-	function handleLocaleChange(newLocale: SupportedLocale) {
-		setLocale(newLocale);
-	}
-
 	function handleViewChange(view: CalendarViewType) {
 		settingsStore.set('defaultView', view);
-	}
-
-	function handleWeekStartChange(day: WeekStartDay) {
-		settingsStore.set('weekStartsOn', day);
 	}
 
 	function handleTimeFormatChange(format: TimeFormat) {
@@ -106,15 +86,6 @@
 	function handleReminderChange(minutes: number) {
 		settingsStore.set('defaultReminder', minutes);
 	}
-
-	// Language labels
-	const localeLabels: Record<SupportedLocale, string> = {
-		de: 'Deutsch',
-		en: 'English',
-		fr: 'Français',
-		es: 'Español',
-		it: 'Italiano',
-	};
 
 	// View labels
 	const viewLabels: Record<CalendarViewType, string> = {
@@ -255,95 +226,14 @@
 		</div>
 	</section>
 
-	<!-- Sprache -->
-	<section class="settings-section card">
-		<h2>Sprache</h2>
-
-		<div class="setting-item">
-			<div class="setting-info">
-				<span class="setting-label">Anzeigesprache</span>
-				<span class="setting-description">Sprache für die Benutzeroberfläche</span>
-			</div>
-			<div class="locale-options">
-				{#each supportedLocales as loc}
-					<button
-						class="locale-option"
-						class:active={$locale === loc}
-						onclick={() => handleLocaleChange(loc)}
-					>
-						{localeLabels[loc]}
-					</button>
-				{/each}
-			</div>
-		</div>
-	</section>
-
-	<!-- Erscheinungsbild -->
-	<section class="settings-section card">
-		<h2>Erscheinungsbild</h2>
-
-		<div class="setting-item">
-			<div class="setting-info">
-				<span class="setting-label">Design-Modus</span>
-				<span class="setting-description">Wählen Sie zwischen hell, dunkel oder automatisch</span>
-			</div>
-			<div class="theme-options">
-				<button
-					class="theme-option"
-					class:active={theme.mode === 'light'}
-					onclick={() => handleThemeChange('light')}
-				>
-					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<circle cx="12" cy="12" r="5"></circle>
-						<path
-							d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-						></path>
-					</svg>
-					Hell
-				</button>
-				<button
-					class="theme-option"
-					class:active={theme.mode === 'dark'}
-					onclick={() => handleThemeChange('dark')}
-				>
-					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-					</svg>
-					Dunkel
-				</button>
-				<button
-					class="theme-option"
-					class:active={theme.mode === 'system'}
-					onclick={() => handleThemeChange('system')}
-				>
-					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-						<line x1="8" y1="21" x2="16" y2="21"></line>
-						<line x1="12" y1="17" x2="12" y2="21"></line>
-					</svg>
-					System
-				</button>
-			</div>
-		</div>
-
-		<div class="setting-item">
-			<div class="setting-info">
-				<span class="setting-label">Farbschema</span>
-				<span class="setting-description">Wählen Sie ein Farbschema für die App</span>
-			</div>
-			<div class="variant-grid">
-				{#each theme.variants as variant}
-					<button
-						class="variant-option"
-						class:active={theme.variant === variant}
-						onclick={() => theme.setVariant(variant)}
-					>
-						<span class="variant-icon">{THEME_DEFINITIONS[variant].icon}</span>
-						<span class="variant-label">{THEME_DEFINITIONS[variant].label}</span>
-					</button>
-				{/each}
-			</div>
-		</div>
+	<!-- Global App Settings (synced across all apps) -->
+	<section class="settings-section">
+		<GlobalSettingsSection
+			{userSettings}
+			appId="calendar"
+			title="App-Einstellungen"
+			description="Diese Einstellungen werden mit allen Mana Apps synchronisiert"
+		/>
 	</section>
 
 	<!-- Kalender-Ansicht -->
@@ -364,29 +254,6 @@
 					<option {value}>{label}</option>
 				{/each}
 			</select>
-		</div>
-
-		<div class="setting-item">
-			<div class="setting-info">
-				<span class="setting-label">Wochenstart</span>
-				<span class="setting-description">Erster Tag der Woche</span>
-			</div>
-			<div class="button-group">
-				<button
-					class="group-button"
-					class:active={settingsStore.weekStartsOn === 1}
-					onclick={() => handleWeekStartChange(1)}
-				>
-					Montag
-				</button>
-				<button
-					class="group-button"
-					class:active={settingsStore.weekStartsOn === 0}
-					onclick={() => handleWeekStartChange(0)}
-				>
-					Sonntag
-				</button>
-			</div>
 		</div>
 
 		<div class="setting-item">
@@ -564,11 +431,6 @@
 				{/each}
 			</select>
 		</div>
-	</section>
-
-	<!-- Global App Settings -->
-	<section class="settings-section">
-		<GlobalSettingsSection {userSettings} />
 	</section>
 
 	<!-- Konto -->

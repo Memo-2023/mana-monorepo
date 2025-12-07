@@ -1,9 +1,6 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
-	import { theme } from '$lib/stores/theme.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
-	import { setLocale, supportedLocales } from '$lib/i18n';
-	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { GlobalSettingsSection } from '@manacore/shared-ui';
 
 	// Settings state
@@ -24,14 +21,6 @@
 		}
 	}
 
-	const languageNames: Record<string, string> = {
-		de: 'Deutsch',
-		en: 'English',
-		fr: 'Français',
-		es: 'Español',
-		it: 'Italiano',
-	};
-
 	// Translation function for GlobalSettingsSection
 	function translate(key: string): string {
 		return $_?.(key) ?? key;
@@ -41,80 +30,21 @@
 <div class="mx-auto max-w-2xl space-y-6">
 	<h1 class="text-2xl font-bold text-foreground">{$_('settings.title')}</h1>
 
-	<!-- Appearance Section -->
+	<!-- Global Settings Section (synced across all apps) -->
+	<GlobalSettingsSection
+		{userSettings}
+		appId="clock"
+		title="App-Einstellungen"
+		description="Diese Einstellungen werden mit allen Mana Apps synchronisiert"
+		t={translate}
+	/>
+
+	<!-- Clock-specific Settings -->
 	<div class="card">
-		<h2 class="mb-4 text-lg font-semibold">{$_('settings.appearance')}</h2>
+		<h2 class="mb-4 text-lg font-semibold">{$_('settings.clockFormat')}</h2>
 
-		<!-- Theme Mode -->
-		<div class="mb-6">
-			<label class="mb-2 block text-sm font-medium">{$_('settings.darkMode')}</label>
-			<div class="flex gap-2">
-				<button
-					class="btn btn-sm"
-					class:btn-primary={theme.mode === 'light'}
-					class:btn-secondary={theme.mode !== 'light'}
-					onclick={() => theme.setMode('light')}
-				>
-					☀️ Light
-				</button>
-				<button
-					class="btn btn-sm"
-					class:btn-primary={theme.mode === 'dark'}
-					class:btn-secondary={theme.mode !== 'dark'}
-					onclick={() => theme.setMode('dark')}
-				>
-					🌙 Dark
-				</button>
-				<button
-					class="btn btn-sm"
-					class:btn-primary={theme.mode === 'system'}
-					class:btn-secondary={theme.mode !== 'system'}
-					onclick={() => theme.setMode('system')}
-				>
-					💻 System
-				</button>
-			</div>
-		</div>
-
-		<!-- Theme Variant -->
 		<div>
-			<label class="mb-2 block text-sm font-medium">{$_('settings.theme')}</label>
-			<div class="grid grid-cols-3 gap-2 sm:grid-cols-5">
-				{#each theme.variants as variant}
-					<button
-						class="flex flex-col items-center gap-1 rounded-lg border-2 p-3 transition-colors"
-						class:border-primary={theme.variant === variant}
-						class:border-transparent={theme.variant !== variant}
-						onclick={() => theme.setVariant(variant)}
-					>
-						<span class="text-xl">{THEME_DEFINITIONS[variant].icon}</span>
-						<span class="text-xs">{THEME_DEFINITIONS[variant].label}</span>
-					</button>
-				{/each}
-			</div>
-		</div>
-	</div>
-
-	<!-- General Section -->
-	<div class="card">
-		<h2 class="mb-4 text-lg font-semibold">{$_('settings.general')}</h2>
-
-		<!-- Language -->
-		<div class="mb-6">
-			<label class="mb-2 block text-sm font-medium">{$_('settings.language')}</label>
-			<select
-				class="input"
-				onchange={(e) => setLocale((e.target as HTMLSelectElement).value as any)}
-			>
-				{#each supportedLocales as locale}
-					<option value={locale}>{languageNames[locale]}</option>
-				{/each}
-			</select>
-		</div>
-
-		<!-- Clock Format -->
-		<div>
-			<label class="mb-2 block text-sm font-medium">{$_('settings.clockFormat')}</label>
+			<label class="mb-2 block text-sm font-medium">Zeitformat</label>
 			<div class="flex gap-2">
 				<button
 					class="btn btn-sm"
@@ -167,17 +97,4 @@
 			Töne können für einzelne Wecker und Timer in deren Einstellungen angepasst werden.
 		</p>
 	</div>
-
-	<!-- Global Settings Section -->
-	<GlobalSettingsSection
-		{userSettings}
-		appId="clock"
-		showNavigation={false}
-		showTheme={false}
-		showLanguage={false}
-		showGeneral={true}
-		title="Globale Einstellungen"
-		description="Diese Einstellungen gelten für alle Mana Apps"
-		t={translate}
-	/>
 </div>

@@ -168,6 +168,7 @@
 		currentPath={$page.url.pathname}
 		appName="Clock"
 		homeRoute="/"
+		desktopPosition={userSettings.nav.desktopPosition}
 		onToggleTheme={handleToggleTheme}
 		{isDark}
 		{isSidebarMode}
