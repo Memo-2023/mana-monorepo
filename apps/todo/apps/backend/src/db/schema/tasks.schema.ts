@@ -10,6 +10,7 @@ import {
 	index,
 } from 'drizzle-orm/pg-core';
 import { projects } from './projects.schema';
+import { kanbanColumns } from './kanban-columns.schema';
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
@@ -56,6 +57,10 @@ export const tasks = pgTable(
 		// Ordering
 		order: integer('order').default(0),
 
+		// Kanban
+		columnId: uuid('column_id').references(() => kanbanColumns.id, { onDelete: 'set null' }),
+		columnOrder: integer('column_order').default(0),
+
 		// Recurrence (RFC 5545 RRULE format)
 		recurrenceRule: varchar('recurrence_rule', { length: 500 }),
 		recurrenceEndDate: timestamp('recurrence_end_date', { withTimezone: true }),
@@ -77,6 +82,7 @@ export const tasks = pgTable(
 		statusIdx: index('tasks_status_idx').on(table.isCompleted, table.status),
 		parentIdx: index('tasks_parent_idx').on(table.parentTaskId),
 		orderIdx: index('tasks_order_idx').on(table.projectId, table.order),
+		columnIdx: index('tasks_column_idx').on(table.columnId, table.columnOrder),
 	})
 );
 

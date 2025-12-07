@@ -43,6 +43,10 @@ export interface Task {
 	// Ordering
 	order: number;
 
+	// Kanban
+	columnId?: string | null;
+	columnOrder?: number;
+
 	// Recurrence
 	recurrenceRule?: string | null;
 	recurrenceEndDate?: Date | string | null;

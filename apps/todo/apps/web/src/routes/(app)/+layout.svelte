@@ -66,6 +66,7 @@
 	// Navigation items for Todo
 	const navItems: PillNavItem[] = [
 		{ href: '/', label: 'Aufgaben', icon: 'list' },
+		{ href: '/kanban', label: 'Kanban', icon: 'columns' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
