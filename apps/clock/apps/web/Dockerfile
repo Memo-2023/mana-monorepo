@@ -57,12 +57,10 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
-# Copy built application
+# Copy built application and node_modules from builder
 COPY --from=builder /app/apps/clock/apps/web/build ./build
 COPY --from=builder /app/apps/clock/apps/web/package.json ./
-
-# Install only production dependencies for the built app
-RUN npm install --omit=dev
+COPY --from=builder /app/apps/clock/apps/web/node_modules ./node_modules
 
 # Expose port
 EXPOSE 5187
