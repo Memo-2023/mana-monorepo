@@ -40,7 +40,8 @@ env:
   NODE_VERSION: '20'
   PNPM_VERSION: '9.15.0'
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
+  # Note: repository_owner is lowercased for Docker compatibility
+  IMAGE_PREFIX: ghcr.io/memo-2023
 
 jobs:
   # Parse tag or inputs to determine what to deploy
@@ -163,14 +164,14 @@ jobs:
                     ;;
                 esac
 
-                # Set backend ports per project
+                # Set backend ports per project (must match docker-compose.staging.yml)
                 case "$PROJECT" in
                   chat) PORT="3002" ;;
                   picture) PORT="3006" ;;
                   manadeck) PORT="3009" ;;
                   zitare) PORT="3007" ;;
                   presi) PORT="3008" ;;
-                  calendar) PORT="3014" ;;
+                  calendar) PORT="3016" ;;
                   clock) PORT="3017" ;;
                   todo) PORT="3018" ;;
                 esac
@@ -180,7 +181,7 @@ jobs:
                   case "$PROJECT" in
                     manacore) PORT="5173" ;;
                     todo) PORT="5188" ;;
-                    calendar) PORT="5185" ;;
+                    calendar) PORT="5186" ;;
                     clock) PORT="5187" ;;
                     *) PORT="5173" ;;  # default SvelteKit port
                   esac
@@ -298,6 +299,13 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Sync docker-compose to staging
+        run: |
+          # Ensure staging directory exists
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} "mkdir -p ~/manacore-staging"
+          # Copy the docker-compose file
+          scp docker-compose.staging.yml ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:~/manacore-staging/docker-compose.yml
+
       - name: Deploy service
         env:
           VERSION: ${{ needs.parse-deployment.outputs.version }}
@@ -311,10 +319,10 @@ jobs:
             # Pull the new image
             docker pull ${{ env.IMAGE_PREFIX }}/$IMAGE_NAME:$VERSION
 
-            # Restart only the specific service
-            SERVICE_NAME=\$(echo "$IMAGE_NAME" | tr '-' '_')
+            # Service name matches docker-compose service name (with hyphens)
+            SERVICE_NAME="$IMAGE_NAME"
 
-            if docker compose ps | grep -q "\$SERVICE_NAME"; then
+            if docker compose ps -a | grep -q "$IMAGE_NAME"; then
               echo "Updating existing service: \$SERVICE_NAME"
               docker compose pull \$SERVICE_NAME || true
               docker compose up -d --no-deps --force-recreate \$SERVICE_NAME
