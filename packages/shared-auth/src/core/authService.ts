@@ -39,6 +39,7 @@ const DEFAULT_ENDPOINTS: AuthEndpoints = {
 	refresh: '/api/v1/auth/refresh',
 	validate: '/api/v1/auth/validate',
 	forgotPassword: '/api/v1/auth/forgot-password',
+	resetPassword: '/api/v1/auth/reset-password',
 	googleSignIn: '/api/v1/auth/google-signin',
 	appleSignIn: '/api/v1/auth/apple-signin',
 	credits: '/api/v1/credits/balance',
@@ -185,6 +186,41 @@ export function createAuthService(config: AuthServiceConfig) {
 				return { success: true };
 			} catch (error) {
 				console.error('Error sending password reset email:', error);
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Unknown error during password reset',
+				};
+			}
+		},
+
+		/**
+		 * Reset password with token
+		 */
+		async resetPassword(token: string, newPassword: string): Promise<AuthResult> {
+			try {
+				const response = await fetch(`${baseUrl}${endpoints.resetPassword}`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ token, newPassword }),
+				});
+
+				if (!response.ok) {
+					const errorData = await response.json();
+
+					if (errorData.message?.includes('expired')) {
+						return { success: false, error: 'Reset link has expired. Please request a new one.' };
+					}
+
+					if (errorData.message?.includes('invalid')) {
+						return { success: false, error: 'Invalid reset link. Please request a new one.' };
+					}
+
+					return { success: false, error: errorData.message || 'Password reset failed' };
+				}
+
+				return { success: true };
+			} catch (error) {
+				console.error('Error resetting password:', error);
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : 'Unknown error during password reset',

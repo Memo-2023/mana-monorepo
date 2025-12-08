@@ -1,7 +1,8 @@
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({ cookies }) => {
-	return {
-		cookies: cookies.getAll(),
-	};
+/**
+ * Server layout load - minimal, auth handled by mana-core-auth client-side
+ */
+export const load: LayoutServerLoad = async () => {
+	return {};
 };

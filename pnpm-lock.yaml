@@ -1442,9 +1442,6 @@ importers:
       '@manacore/shared-subscription-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-subscription-ui
-      '@manacore/shared-supabase':
-        specifier: workspace:*
-        version: link:../../../../packages/shared-supabase
       '@manacore/shared-tailwind':
         specifier: workspace:*
         version: link:../../../../packages/shared-tailwind
@@ -1463,12 +1460,6 @@ importers:
       '@manacore/shared-utils':
         specifier: workspace:*
         version: link:../../../../packages/shared-utils
-      '@supabase/ssr':
-        specifier: ^0.5.2
-        version: 0.5.2(@supabase/supabase-js@2.84.0)
-      '@supabase/supabase-js':
-        specifier: ^2.81.1
-        version: 2.84.0
       svelte-dnd-action:
         specifier: ^0.9.68
         version: 0.9.68(svelte@5.44.0)
@@ -9041,11 +9032,6 @@ packages:
   '@supabase/realtime-js@2.84.0':
     resolution: {integrity: sha512-ThqjxiCwWiZAroHnYPmnNl6tZk6jxGcG2a7Hp/3kcolPcMj89kWjUTA3cHmhdIWYsP84fHp8MAQjYWMLf7HEUg==}
     engines: {node: '>=20.0.0'}
-
-  '@supabase/ssr@0.5.2':
-    resolution: {integrity: sha512-n3plRhr2Bs8Xun1o4S3k1CDv17iH5QY9YcoEvXX3bxV1/5XSasA0mNXYycFmADIdtdE6BG9MRjP5CGIs8qxC8A==}
-    peerDependencies:
-      '@supabase/supabase-js': ^2.43.4
 
   '@supabase/ssr@0.7.0':
     resolution: {integrity: sha512-G65t5EhLSJ5c8hTCcXifSL9Q/ZRXvqgXeNo+d3P56f4U1IxwTqjB64UfmfixvmMcjuxnq2yGqEWVJqUcO+AzAg==}
@@ -26237,12 +26223,6 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
-
-  '@supabase/ssr@0.5.2(@supabase/supabase-js@2.84.0)':
-    dependencies:
-      '@supabase/supabase-js': 2.84.0
-      '@types/cookie': 0.6.0
-      cookie: 0.7.2
 
   '@supabase/ssr@0.7.0(@supabase/supabase-js@2.84.0)':
     dependencies:
