@@ -1,0 +1,72 @@
+# Build stage
+FROM node:20-alpine AS builder
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+WORKDIR /app
+
+# Copy root workspace files
+COPY pnpm-workspace.yaml ./
+COPY package.json ./
+COPY pnpm-lock.yaml ./
+
+# Copy shared packages needed by calendar web
+COPY packages/shared-auth ./packages/shared-auth
+COPY packages/shared-auth-ui ./packages/shared-auth-ui
+COPY packages/shared-branding ./packages/shared-branding
+COPY packages/shared-feedback-service ./packages/shared-feedback-service
+COPY packages/shared-feedback-types ./packages/shared-feedback-types
+COPY packages/shared-feedback-ui ./packages/shared-feedback-ui
+COPY packages/shared-i18n ./packages/shared-i18n
+COPY packages/shared-icons ./packages/shared-icons
+COPY packages/shared-tailwind ./packages/shared-tailwind
+COPY packages/shared-theme ./packages/shared-theme
+COPY packages/shared-theme-ui ./packages/shared-theme-ui
+COPY packages/shared-subscription-types ./packages/shared-subscription-types
+COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
+COPY packages/shared-profile-ui ./packages/shared-profile-ui
+COPY packages/shared-ui ./packages/shared-ui
+COPY packages/shared-utils ./packages/shared-utils
+
+# Copy calendar packages and web
+COPY apps/calendar/packages ./apps/calendar/packages
+COPY apps/calendar/apps/web ./apps/calendar/apps/web
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Build shared packages that need building
+WORKDIR /app/packages/shared-auth
+RUN pnpm build || true
+
+# Build the web app
+WORKDIR /app/apps/calendar/apps/web
+RUN pnpm build
+
+# Production stage
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# Copy built application
+COPY --from=builder /app/apps/calendar/apps/web/build ./build
+COPY --from=builder /app/apps/calendar/apps/web/package.json ./
+
+# Install only production dependencies for the built app
+RUN npm install --omit=dev 2>/dev/null || true
+
+# Expose port
+EXPOSE 5186
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=5186
+ENV HOST=0.0.0.0
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5186/health || exit 1
+
+# Run the app
+CMD ["node", "build"]

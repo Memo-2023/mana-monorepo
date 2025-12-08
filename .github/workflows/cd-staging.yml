@@ -24,6 +24,13 @@ on:
           - mana-core-auth
           - chat-backend
           - chat-web
+          - manacore-web
+          - todo-backend
+          - todo-web
+          - calendar-backend
+          - calendar-web
+          - clock-backend
+          - clock-web
   workflow_call:
 
 permissions:
@@ -184,6 +191,15 @@ jobs:
             # Create chat database (for chat-backend service)
             docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE chat;" 2>/dev/null || echo "chat database already exists"
 
+            # Create todo database (for todo-backend service)
+            docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE todo;" 2>/dev/null || echo "todo database already exists"
+
+            # Create calendar database (for calendar-backend service)
+            docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE calendar;" 2>/dev/null || echo "calendar database already exists"
+
+            # Create clock database (for clock-backend service)
+            docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE clock;" 2>/dev/null || echo "clock database already exists"
+
             echo "✅ Databases ready"
           EOF
 
@@ -235,6 +251,83 @@ jobs:
               echo "❌ chat-web health check failed"
               echo "=== Logs ==="
               docker compose logs --tail=50 chat-web
+              exit 1
+            fi
+
+            # Check manacore-web
+            echo "Checking manacore-web..."
+            if docker compose exec -T manacore-web wget -q -O - http://localhost:5173/health > /dev/null 2>&1; then
+              echo "✅ manacore-web is healthy"
+            else
+              echo "❌ manacore-web health check failed"
+              echo "=== Logs ==="
+              docker compose logs --tail=50 manacore-web
+              exit 1
+            fi
+
+            # Check todo-backend
+            echo "Checking todo-backend..."
+            if docker compose exec -T todo-backend wget -q -O - http://localhost:3018/api/v1/health > /dev/null 2>&1; then
+              echo "✅ todo-backend is healthy"
+            else
+              echo "❌ todo-backend health check failed"
+              echo "=== Logs ==="
+              docker compose logs --tail=50 todo-backend
+              exit 1
+            fi
+
+            # Check todo-web
+            echo "Checking todo-web..."
+            if docker compose exec -T todo-web wget -q -O - http://localhost:5188/health > /dev/null 2>&1; then
+              echo "✅ todo-web is healthy"
+            else
+              echo "❌ todo-web health check failed"
+              echo "=== Logs ==="
+              docker compose logs --tail=50 todo-web
+              exit 1
+            fi
+
+            # Check calendar-backend
+            echo "Checking calendar-backend..."
+            if docker compose exec -T calendar-backend wget -q -O - http://localhost:3016/api/v1/health > /dev/null 2>&1; then
+              echo "✅ calendar-backend is healthy"
+            else
+              echo "❌ calendar-backend health check failed"
+              echo "=== Logs ==="
+              docker compose logs --tail=50 calendar-backend
+              exit 1
+            fi
+
+            # Check calendar-web
+            echo "Checking calendar-web..."
+            if docker compose exec -T calendar-web wget -q -O - http://localhost:5186/health > /dev/null 2>&1; then
+              echo "✅ calendar-web is healthy"
+            else
+              echo "❌ calendar-web health check failed"
+              echo "=== Logs ==="
+              docker compose logs --tail=50 calendar-web
+              exit 1
+            fi
+
+            # Check clock-backend
+            echo "Checking clock-backend..."
+            if docker compose exec -T clock-backend wget -q -O - http://localhost:3017/api/v1/health > /dev/null 2>&1; then
+              echo "✅ clock-backend is healthy"
+            else
+              echo "❌ clock-backend health check failed"
+              echo "=== Logs ==="
+              docker compose logs --tail=50 clock-backend
+              exit 1
+            fi
+
+            # Check clock-web
+            echo "Checking clock-web..."
+            if docker compose exec -T clock-web wget -q -O - http://localhost:5187/health > /dev/null 2>&1; then
+              echo "✅ clock-web is healthy"
+            else
+              echo "❌ clock-web health check failed"
+              echo "=== Logs ==="
+              docker compose logs --tail=50 clock-web
               exit 1
             fi
 

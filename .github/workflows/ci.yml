@@ -86,6 +86,13 @@ jobs:
           - { name: 'mana-core-auth', path: 'services/mana-core-auth', port: '3001' }
           - { name: 'chat-backend', path: 'apps/chat/apps/backend', port: '3002' }
           - { name: 'chat-web', path: 'apps/chat/apps/web', port: '3000' }
+          - { name: 'manacore-web', path: 'apps/manacore/apps/web', port: '5173' }
+          - { name: 'todo-backend', path: 'apps/todo/apps/backend', port: '3018' }
+          - { name: 'todo-web', path: 'apps/todo/apps/web', port: '5188' }
+          - { name: 'calendar-backend', path: 'apps/calendar/apps/backend', port: '3016' }
+          - { name: 'calendar-web', path: 'apps/calendar/apps/web', port: '5186' }
+          - { name: 'clock-backend', path: 'apps/clock/apps/backend', port: '3017' }
+          - { name: 'clock-web', path: 'apps/clock/apps/web', port: '5187' }
       fail-fast: false
     steps:
       - name: Checkout code
