@@ -63,7 +63,7 @@ COPY --from=builder /app/apps/manacore/apps/web/build ./build
 COPY --from=builder /app/apps/manacore/apps/web/package.json ./
 
 # Install only production dependencies for the built app
-RUN npm install --omit=dev 2>/dev/null || true
+RUN npm install --omit=dev
 
 # Expose port
 EXPOSE 5173
