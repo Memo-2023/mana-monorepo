@@ -3,9 +3,11 @@ FROM node:20-alpine AS builder
 
 # Build arguments for SvelteKit static env vars
 ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-core-auth:3001
+ARG MIDDLEWARE_URL=http://mana-core-middleware:3000
 
 # Set as environment variables for build
 ENV PUBLIC_MANA_CORE_AUTH_URL=$PUBLIC_MANA_CORE_AUTH_URL
+ENV MIDDLEWARE_URL=$MIDDLEWARE_URL
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
