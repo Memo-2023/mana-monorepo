@@ -16,6 +16,7 @@ Common issues and solutions for the manacore-monorepo.
   - [Client-Side Calling localhost Instead of Public IP](#problem-5-client-side-calling-localhost-instead-of-public-ip)
   - [CORS Blocking Cross-Origin Requests](#problem-6-cors-blocking-cross-origin-requests)
   - [Missing Database Schema](#problem-7-missing-database-schema)
+  - [pnpm Symlinks Broken in Docker Container](#problem-8-pnpm-symlinks-broken-in-docker-container)
 
 ---
 
@@ -921,6 +922,134 @@ docker compose exec -T chat-backend wget -q -O - http://localhost:3002/api/v1/he
 11. **Database Schema vs Database:** Creating a database (`CREATE DATABASE`) is not enough - Drizzle needs `db:push` to create schemas and tables. Health checks may pass with empty database, but API calls will fail with "relation does not exist".
 
 12. **Drizzle Kit Interactive Mode:** `drizzle-kit push` prompts for confirmation. Use `--force` flag in CI/CD to skip interactive mode.
+
+13. **pnpm Symlinks in Docker:** pnpm uses symlinks to a central `.pnpm` store. When copying `node_modules` in Docker, you must preserve both the symlinks AND the target directory they point to. See [Problem 8](#problem-8-pnpm-symlinks-broken-in-docker-container).
+
+---
+
+### Problem 8: pnpm Symlinks Broken in Docker Container
+
+**Symptoms:**
+
+- Container starts but crashes with: `Cannot find package 'date-fns' imported from /app/build/server/chunks/_page.svelte-xxx.js`
+- Error `ERR_MODULE_NOT_FOUND` for packages that ARE in node_modules
+- Works locally but fails in Docker production stage
+- `ls node_modules/date-fns` shows a symlink pointing to `../../../../../node_modules/.pnpm/...`
+
+**Root Cause:**
+
+pnpm uses symlinks to a central `.pnpm` store at the monorepo root. When you copy only the app's `node_modules` in Docker, the symlinks point to paths that don't exist:
+
+```
+# In builder stage (pnpm workspace):
+/app/apps/todo/apps/web/node_modules/date-fns → ../../../../../node_modules/.pnpm/date-fns@4.1.0/node_modules/date-fns
+
+# In production stage (old broken approach):
+/app/node_modules/date-fns → ../../../../../node_modules/.pnpm/...
+# ↑ BROKEN! This path doesn't exist because we only copied to /app/
+```
+
+**❌ WRONG - Flattening Directory Structure:**
+
+```dockerfile
+# Production stage
+FROM node:20-alpine AS production
+
+WORKDIR /app  # ❌ Different from builder structure
+
+# Copy node_modules (symlinks will be broken!)
+COPY --from=builder /app/apps/todo/apps/web/node_modules ./node_modules  # ❌ BROKEN
+COPY --from=builder /app/apps/todo/apps/web/build ./build
+COPY --from=builder /app/apps/todo/apps/web/package.json ./
+
+CMD ["node", "build"]
+```
+
+The symlinks in `node_modules` point to `../../../../../node_modules/.pnpm/...` which resolves to a non-existent path from `/app/`.
+
+**✅ CORRECT - Preserve Directory Structure + Copy .pnpm Store:**
+
+```dockerfile
+# Production stage
+FROM node:20-alpine AS production
+
+# Keep same directory structure as builder so pnpm symlinks resolve correctly
+WORKDIR /app/apps/todo/apps/web  # ✅ Same as builder
+
+# Copy the pnpm store that symlinks point to (at /app/node_modules/.pnpm)
+COPY --from=builder /app/node_modules/.pnpm /app/node_modules/.pnpm  # ✅ Target of symlinks
+
+# Copy the app's node_modules (contains symlinks to the pnpm store)
+COPY --from=builder /app/apps/todo/apps/web/node_modules ./node_modules  # ✅ Symlinks work now
+
+# Copy built application
+COPY --from=builder /app/apps/todo/apps/web/build ./build
+COPY --from=builder /app/apps/todo/apps/web/package.json ./
+
+CMD ["node", "build"]
+```
+
+**Why This Works:**
+
+1. `WORKDIR /app/apps/todo/apps/web` - Production container has same path as builder
+2. Symlinks in `./node_modules/` point to `../../../../../node_modules/.pnpm/...`
+3. From `/app/apps/todo/apps/web/node_modules/`, going up 5 directories reaches `/app/`
+4. `/app/node_modules/.pnpm/` exists because we copied it!
+
+**How to Debug:**
+
+```bash
+# Check if symlinks are broken in the container
+docker exec <container> ls -la node_modules/date-fns
+# Shows: date-fns -> ../../../../../node_modules/.pnpm/date-fns@4.1.0/node_modules/date-fns
+
+# Check if the target exists
+docker exec <container> ls -la /app/node_modules/.pnpm/date-fns@4.1.0/
+# If "No such file or directory" → symlink is broken
+
+# Check the image size (should be ~1GB with .pnpm store, ~50MB without)
+docker images | grep todo-web
+```
+
+**Trade-offs:**
+
+| Approach                              | Image Size | Symlinks | Works |
+| ------------------------------------- | ---------- | -------- | ----- |
+| Copy only app's node_modules          | ~50MB      | Broken   | ❌    |
+| Copy app's node_modules + .pnpm store | ~1GB       | Working  | ✅    |
+
+The larger image size is the cost of pnpm's deduplication strategy. In a monorepo, this is actually more efficient than copying all dependencies flat.
+
+**Alternative: Use npm Instead of pnpm in Docker:**
+
+If image size is critical, you could use npm in the Docker build:
+
+```dockerfile
+# Alternative approach (not recommended for monorepos)
+FROM node:20-alpine AS production
+WORKDIR /app
+COPY --from=builder /app/apps/todo/apps/web/build ./build
+COPY --from=builder /app/apps/todo/apps/web/package.json ./
+
+# Clean install with npm (flattens dependencies)
+RUN npm install --omit=dev
+
+CMD ["node", "build"]
+```
+
+⚠️ **Warning:** This may fail with `workspace:*` protocol in package.json dependencies. Only works if all dependencies are published to npm.
+
+**Affected Files:**
+
+- `apps/todo/apps/web/Dockerfile`
+- `apps/manacore/apps/web/Dockerfile`
+- `apps/chat/apps/web/Dockerfile`
+- `apps/calendar/apps/web/Dockerfile`
+- `apps/clock/apps/web/Dockerfile`
+
+**Related Commits:**
+
+- `fd1c0ee6` - fix(docker): preserve pnpm symlink structure in web Dockerfiles
 
 ---
 
