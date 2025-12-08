@@ -9,6 +9,8 @@ This document captures common issues encountered during staging deployments and 
 3. [CD Workflow Version Tags](#3-cd-workflow-version-tags)
 4. [Database Setup](#4-database-setup)
 5. [User ID Format (Better Auth)](#5-user-id-format-better-auth)
+6. [Debugging Checklist](#6-debugging-checklist)
+7. [Summary: Common Mistakes to Avoid](#summary-common-mistakes-to-avoid)
 
 ---
 
@@ -61,6 +63,37 @@ function getApiUrl(): string {
   return 'http://localhost:3000'; // fallback for local dev
 }
 ```
+
+### Lazy Client Initialization Pattern
+
+**Important**: API clients must be lazily initialized to read the URL at request time, not at module load time:
+
+```typescript
+// CORRECT - Lazy initialization
+let _client: ReturnType<typeof createApiClient> | null = null;
+
+function getClient() {
+  if (!_client) {
+    _client = createApiClient(getApiUrl());  // URL evaluated when called
+  }
+  return _client;
+}
+
+export async function getTasks() {
+  return getClient().get('/tasks');  // Client created on first use
+}
+```
+
+```typescript
+// WRONG - Module-level initialization
+const client = createApiClient(getApiUrl());  // URL evaluated at import time!
+
+export async function getTasks() {
+  return client.get('/tasks');  // Will use stale URL
+}
+```
+
+**Why this matters**: When the module is imported, the `window` object may not have the injected environment variables yet. The lazy pattern ensures the URL is read only when the client is actually needed.
 
 ### Docker Compose Pattern
 
@@ -210,10 +243,20 @@ Backend database schemas use `uuid` type for `user_id`, but Better Auth generate
 Change `user_id` columns from `uuid` to `text`:
 
 ```sql
--- For each table with user_id
-ALTER TABLE tasks ALTER COLUMN user_id TYPE text;
-ALTER TABLE projects ALTER COLUMN user_id TYPE text;
+-- For each table with user_id (use USING clause for explicit conversion)
+ALTER TABLE tasks ALTER COLUMN user_id TYPE text USING user_id::text;
+ALTER TABLE projects ALTER COLUMN user_id TYPE text USING user_id::text;
 -- etc.
+```
+
+**Important**: Always use the `USING` clause when converting column types. Without it, PostgreSQL may silently fail or produce unexpected results:
+
+```sql
+-- CORRECT - Explicit conversion
+ALTER TABLE events ALTER COLUMN user_id TYPE text USING user_id::text;
+
+-- RISKY - May fail silently on some data types
+ALTER TABLE events ALTER COLUMN user_id TYPE text;
 ```
 
 ### Prevention
@@ -277,3 +320,89 @@ cd ~/manacore-staging && docker compose up -d --no-deps --force-recreate <servic
 | calendar-web | 5186 |
 | clock-web | 5187 |
 | todo-web | 5188 |
+
+---
+
+## 6. Debugging Checklist
+
+When something doesn't work on staging, follow this checklist:
+
+### API Returns Wrong Data or Fails
+
+1. **Check if calling correct URL**
+   ```bash
+   # In browser console
+   console.log(window.__PUBLIC_BACKEND_URL__)
+   ```
+   If undefined or localhost, the runtime env injection isn't working.
+
+2. **Check CORS**
+   ```bash
+   curl -I -X OPTIONS http://46.224.108.214:<port>/api/v1/endpoint \
+     -H "Origin: http://46.224.108.214:5173"
+   ```
+   Should return `Access-Control-Allow-Origin` header.
+
+3. **Check container logs**
+   ```bash
+   ssh deploy@46.224.108.214 "docker logs <container-name> --tail 100"
+   ```
+
+### 500 Internal Server Error
+
+1. **Check database exists**
+   ```bash
+   docker exec manacore-postgres-staging psql -U postgres -c '\l'
+   ```
+
+2. **Check tables exist**
+   ```bash
+   docker exec manacore-postgres-staging psql -U postgres -d <dbname> -c '\dt'
+   ```
+
+3. **Check for type mismatches** (especially user_id uuid vs text)
+
+### 401 Unauthorized
+
+1. **Check token is being sent**
+   ```bash
+   # In browser Network tab, check Authorization header
+   ```
+
+2. **Check JWKS endpoint**
+   ```bash
+   curl http://46.224.108.214:3001/api/v1/auth/jwks
+   ```
+
+3. **Check issuer/audience match** - Token must have `iss: manacore` and `aud: manacore`
+
+### Container Not Updated
+
+1. **Check image version**
+   ```bash
+   docker ps --format '{{.Names}}: {{.Image}}'
+   ```
+
+2. **Check .env file**
+   ```bash
+   cat ~/manacore-staging/.env | grep VERSION
+   ```
+
+3. **Force recreate**
+   ```bash
+   docker compose up -d --no-deps --force-recreate <service-name>
+   ```
+
+---
+
+## Summary: Common Mistakes to Avoid
+
+| Mistake | Consequence | Prevention |
+|---------|-------------|------------|
+| Using `import.meta.env` for Docker runtime | URLs baked at build time | Use `window.__PUBLIC_*__` with runtime injection |
+| Initializing API clients at module level | Client uses stale URLs | Use lazy initialization pattern |
+| Using `uuid` type for user_id | Better Auth IDs fail validation | Always use `text` type for user_id |
+| Missing CORS origin for manacore-web | Dashboard can't call backends | Add port 5173 to all backend CORS configs |
+| Wrong tag format for mana-core-auth | Deployment fails, can't find Dockerfile | Use `mana-core-auth-staging-v*` not `auth-staging-v*` |
+| Forgetting to create database | Backend crashes on startup | Create database before first deployment |
+| ALTER TABLE without USING clause | Silent failures on type conversion | Always use `USING column::new_type` |
