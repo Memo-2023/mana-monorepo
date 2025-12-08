@@ -1,9 +1,12 @@
-# CI Pipeline: Validates code on PRs, builds and deploys on push to protected branches
+# CI Pipeline: Validates code on PRs, builds images on push
 #
 # Flow:
 #   PR → dev/main     : Runs validation (required status check)
-#   Push → dev        : Builds images + deploys to staging
-#   Push → main       : Builds images (production deploy is manual)
+#   Push → dev/main   : Builds Docker images (NO auto-deploy)
+#
+# Deployments are triggered separately:
+#   - Manual: workflow_dispatch on cd-staging.yml / cd-production.yml
+#   - Tag-based: push tag like "chat-staging-v1.0.0" triggers cd-staging-tagged.yml
 #
 # Full config archived at: .github/workflows/ci-main.full.yml
 
@@ -130,21 +133,3 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # Trigger staging deployment after all images are built (only on push to dev)
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: build-docker-images
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-    steps:
-      - name: Trigger staging deployment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'cd-staging.yml',
-              ref: 'dev'
-            });
-            console.log('Staging deployment triggered');
