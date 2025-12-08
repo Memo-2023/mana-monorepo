@@ -1,6 +1,14 @@
 # Build stage
 FROM node:20-alpine AS builder
 
+# Build arguments for SvelteKit static env vars
+ARG PUBLIC_BACKEND_URL=http://todo-backend:3018
+ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-core-auth:3001
+
+# Set as environment variables for build
+ENV PUBLIC_BACKEND_URL=$PUBLIC_BACKEND_URL
+ENV PUBLIC_MANA_CORE_AUTH_URL=$PUBLIC_MANA_CORE_AUTH_URL
+
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
