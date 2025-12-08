@@ -95,3 +95,4 @@ yarn.lock
 
 # Claude Flow metrics
 .claude-flow/
+.claude-flow/metrics/
