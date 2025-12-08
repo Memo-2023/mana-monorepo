@@ -55,12 +55,18 @@ RUN pnpm build
 # Production stage
 FROM node:20-alpine AS production
 
-WORKDIR /app
+# Keep same directory structure as builder so pnpm symlinks resolve correctly
+WORKDIR /app/apps/todo/apps/web
 
-# Copy built application and node_modules from builder
+# Copy the pnpm store that symlinks point to (at /app/node_modules/.pnpm)
+COPY --from=builder /app/node_modules/.pnpm /app/node_modules/.pnpm
+
+# Copy the app's node_modules (contains symlinks to the pnpm store)
+COPY --from=builder /app/apps/todo/apps/web/node_modules ./node_modules
+
+# Copy built application
 COPY --from=builder /app/apps/todo/apps/web/build ./build
 COPY --from=builder /app/apps/todo/apps/web/package.json ./
-COPY --from=builder /app/apps/todo/apps/web/node_modules ./node_modules
 
 # Expose port
 EXPOSE 5188
