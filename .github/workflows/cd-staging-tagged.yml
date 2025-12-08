@@ -186,7 +186,7 @@ jobs:
                     *) PORT="5173" ;;  # default SvelteKit port
                   esac
                 fi
-                HEALTH_PATH="/health"
+                HEALTH_PATH="/api/v1/health"
                 ;;
             esac
 
