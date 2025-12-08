@@ -134,6 +134,18 @@ The CD workflow (`.github/workflows/cd-staging-tagged.yml`) now:
 2. Updates the `.env` file on staging server
 3. docker-compose reads from `.env`
 
+### Tag Naming Convention
+
+Tags must follow the exact project name as defined in the CD workflow:
+
+| Project | Correct Tag Format | Wrong Format |
+|---------|-------------------|--------------|
+| mana-core-auth | `mana-core-auth-staging-v1.0.0` | `auth-staging-v1.0.0` |
+| chat | `chat-staging-v1.0.0` or `chat-all-staging-v1.0.0` | - |
+| todo | `todo-staging-v1.0.0` or `todo-all-staging-v1.0.0` | - |
+
+**Note**: Using the wrong tag format (e.g., `auth-staging-*` instead of `mana-core-auth-staging-*`) will cause the workflow to fail because it won't find the correct Dockerfile path.
+
 ### Verifying Deployment
 
 ```bash
