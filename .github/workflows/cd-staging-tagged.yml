@@ -306,6 +306,12 @@ jobs:
           # Copy the docker-compose file
           scp docker-compose.staging.yml ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:~/manacore-staging/docker-compose.yml
 
+      - name: Login to GHCR on staging server
+        run: |
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+          EOF
+
       - name: Deploy service
         env:
           VERSION: ${{ needs.parse-deployment.outputs.version }}
