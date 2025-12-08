@@ -17,6 +17,7 @@ Common issues and solutions for the manacore-monorepo.
   - [CORS Blocking Cross-Origin Requests](#problem-6-cors-blocking-cross-origin-requests)
   - [Missing Database Schema](#problem-7-missing-database-schema)
   - [pnpm Symlinks Broken in Docker Container](#problem-8-pnpm-symlinks-broken-in-docker-container)
+  - [Hardcoded localhost URLs in SvelteKit Web Apps](#problem-9-hardcoded-localhost-urls-in-sveltekit-web-apps)
 
 ---
 
@@ -1050,6 +1051,101 @@ CMD ["node", "build"]
 **Related Commits:**
 
 - `fd1c0ee6` - fix(docker): preserve pnpm symlink structure in web Dockerfiles
+
+---
+
+### Problem 9: Hardcoded localhost URLs in SvelteKit Web Apps
+
+**Symptoms:**
+
+- Browser console shows: `POST http://localhost:3001/api/v1/auth/login net::ERR_CONNECTION_REFUSED`
+- App works locally but auth fails on staging/production
+- The `window.__PUBLIC_MANA_CORE_AUTH_URL__` may be set correctly, but code doesn't use it
+- Looking at the source code reveals hardcoded URLs like `const MANA_AUTH_URL = 'http://localhost:3001'`
+
+**Root Cause:**
+
+Developers hardcode `localhost:3001` directly in TypeScript files instead of using the runtime injection pattern. This works locally but breaks in Docker deployments.
+
+**Common Locations of Hardcoded URLs:**
+
+```typescript
+// ❌ These patterns are WRONG:
+
+// In auth.svelte.ts
+const MANA_AUTH_URL = 'http://localhost:3001';
+
+// In user-settings.svelte.ts
+const MANA_AUTH_URL = 'http://localhost:3001';
+
+// In feedback.ts or feedback page
+apiUrl: 'http://localhost:3001',
+
+// Using build-time env vars (also wrong for Docker)
+const MANA_AUTH_URL = import.meta.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+```
+
+**Solution:**
+
+1. **Create `hooks.server.ts`** if it doesn't exist (see Problem 5)
+2. **Use `getAuthUrl()` pattern in all files:**
+
+```typescript
+// ✅ CORRECT pattern
+import { browser } from '$app/environment';
+
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+}
+
+// Use getAuthUrl() instead of hardcoded string
+const auth = initializeWebAuth({ baseUrl: getAuthUrl() });
+```
+
+**How to Find Hardcoded URLs:**
+
+```bash
+# Search for hardcoded localhost:3001 in web apps
+grep -r "localhost:3001" apps/*/apps/web/src --include="*.ts" --include="*.svelte"
+
+# Check for the correct pattern (window injection)
+grep -r "__PUBLIC_MANA_CORE_AUTH_URL__" apps/*/apps/web/src
+```
+
+**Apps Status (as of 2024-12):**
+
+| App                 | Status       | Files to Fix                                                     |
+| ------------------- | ------------ | ---------------------------------------------------------------- |
+| `chat/apps/web`     | ✅ Fixed     | -                                                                |
+| `todo/apps/web`     | ✅ Fixed     | -                                                                |
+| `calendar/apps/web` | ✅ Fixed     | -                                                                |
+| `clock/apps/web`    | ✅ Fixed     | -                                                                |
+| `contacts/apps/web` | ❌ Needs Fix | auth.svelte.ts, user-settings.svelte.ts, feedback.ts             |
+| `manadeck/apps/web` | ❌ Needs Fix | user-settings.svelte.ts, feedback.ts                             |
+| `manacore/apps/web` | ❌ Needs Fix | auth.svelte.ts, user-settings.svelte.ts, feedback.ts, credits.ts |
+| `zitare/apps/web`   | ❌ Needs Fix | auth.svelte.ts, user-settings.svelte.ts, feedback.ts             |
+| `picture/apps/web`  | ❌ Needs Fix | user-settings.svelte.ts                                          |
+
+**Complete Fix Checklist for Each App:**
+
+- [ ] Create/update `src/hooks.server.ts` with env injection
+- [ ] Update `src/lib/stores/auth.svelte.ts` → use `getAuthUrl()` pattern
+- [ ] Update `src/lib/stores/user-settings.svelte.ts` → use `getAuthUrl()` pattern
+- [ ] Update any `feedback.ts` or feedback services → use `getAuthUrl()` pattern
+- [ ] Update any other files with hardcoded URLs
+- [ ] Add `PUBLIC_MANA_CORE_AUTH_URL_CLIENT` to `docker-compose.staging.yml`
+- [ ] Test locally with `pnpm dev`
+- [ ] Deploy and test on staging
+
+**See Also:**
+
+- [Problem 5: Client-Side Calling localhost Instead of Public IP](#problem-5-client-side-calling-localhost-instead-of-public-ip)
+- [SvelteKit Web Guidelines - Environment Variables](/.claude/guidelines/sveltekit-web.md#environment-variables)
 
 ---
 

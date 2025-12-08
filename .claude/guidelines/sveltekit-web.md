@@ -698,14 +698,137 @@ export default {
 
 ## Environment Variables
 
-```typescript
-// Access in .svelte or .ts files
-import { PUBLIC_BACKEND_URL, PUBLIC_MANA_CORE_AUTH_URL } from '$env/static/public';
+### Build-Time vs Runtime Variables
 
-// .env file
+SvelteKit has **two types** of environment variables:
+
+1. **Build-time** (`$env/static/public`) - Baked into the bundle at build time
+2. **Runtime** (`process.env`) - Available at runtime in server code
+
+**CRITICAL**: For Docker deployments, browser-facing URLs must use **runtime injection** because:
+
+- Docker images are built once but deployed to different environments (staging, production)
+- Build-time variables would require rebuilding the image for each environment
+- The browser cannot access `process.env` - it needs values injected into the HTML
+
+### ❌ WRONG - Hardcoded or Build-Time URLs
+
+```typescript
+// ❌ BAD - Hardcoded URL (won't work in Docker)
+const MANA_AUTH_URL = 'http://localhost:3001';
+
+// ❌ BAD - Build-time variable (works locally, breaks in Docker)
+import { PUBLIC_MANA_CORE_AUTH_URL } from '$env/static/public';
+const MANA_AUTH_URL = PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+
+// ❌ BAD - import.meta.env is also build-time
+const MANA_AUTH_URL = import.meta.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+```
+
+### ✅ CORRECT - Runtime Injection Pattern
+
+**Step 1: Create `hooks.server.ts`** to inject env vars into HTML:
+
+```typescript
+// src/hooks.server.ts
+import type { Handle } from '@sveltejs/kit';
+
+// Get client-side URLs from Docker runtime environment
+const PUBLIC_MANA_CORE_AUTH_URL_CLIENT =
+	process.env.PUBLIC_MANA_CORE_AUTH_URL_CLIENT || process.env.PUBLIC_MANA_CORE_AUTH_URL || '';
+const PUBLIC_BACKEND_URL_CLIENT =
+	process.env.PUBLIC_BACKEND_URL_CLIENT || process.env.PUBLIC_BACKEND_URL || '';
+
+export const handle: Handle = async ({ event, resolve }) => {
+	return resolve(event, {
+		transformPageChunk: ({ html }) => {
+			// Inject runtime environment variables into the HTML
+			const envScript = `<script>
+window.__PUBLIC_MANA_CORE_AUTH_URL__ = "${PUBLIC_MANA_CORE_AUTH_URL_CLIENT}";
+window.__PUBLIC_BACKEND_URL__ = "${PUBLIC_BACKEND_URL_CLIENT}";
+</script>`;
+			return html.replace('<head>', `<head>${envScript}`);
+		},
+	});
+};
+```
+
+**Step 2: Read from `window` in client code:**
+
+```typescript
+// src/lib/stores/auth.svelte.ts
+import { browser } from '$app/environment';
+
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		// Client-side: use injected window variable
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	// Server-side (SSR): use Docker internal URL
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+}
+
+// Use in auth service initialization
+const auth = initializeWebAuth({ baseUrl: getAuthUrl() });
+```
+
+**Step 3: Set environment variables in `docker-compose.staging.yml`:**
+
+```yaml
+services:
+  myapp-web:
+    environment:
+      # Server-side URLs (Docker internal network)
+      PUBLIC_BACKEND_URL: http://myapp-backend:3000
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      # Client-side URLs (browser access via public IP)
+      PUBLIC_BACKEND_URL_CLIENT: http://46.224.108.214:3000
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://46.224.108.214:3001
+```
+
+### Why Two URLs?
+
+| Variable                           | Purpose                           | Example                      |
+| ---------------------------------- | --------------------------------- | ---------------------------- |
+| `PUBLIC_MANA_CORE_AUTH_URL`        | Server-to-server (SSR, API calls) | `http://mana-core-auth:3001` |
+| `PUBLIC_MANA_CORE_AUTH_URL_CLIENT` | Browser to server                 | `http://46.224.108.214:3001` |
+
+Docker containers can reach each other by service name (`mana-core-auth`), but browsers need the public IP/domain.
+
+### Apps Using This Pattern Correctly
+
+- ✅ `chat/apps/web` - Has `hooks.server.ts` with runtime injection
+- ✅ `todo/apps/web` - Fixed
+- ✅ `calendar/apps/web` - Fixed
+- ✅ `clock/apps/web` - Fixed
+
+### Apps That Still Need Fixing
+
+- ❌ `contacts/apps/web`
+- ❌ `manadeck/apps/web`
+- ❌ `manacore/apps/web`
+- ❌ `zitare/apps/web`
+- ❌ `picture/apps/web`
+
+### Quick Checklist for New SvelteKit Apps
+
+- [ ] Create `src/hooks.server.ts` with env injection
+- [ ] Update `auth.svelte.ts` to use `getAuthUrl()` pattern
+- [ ] Update `user-settings.svelte.ts` to use `getAuthUrl()` pattern
+- [ ] Update any feedback services to use runtime URL
+- [ ] Add both `_CLIENT` and non-client env vars to `docker-compose.staging.yml`
+- [ ] Never hardcode `localhost:3001` anywhere
+
+### Simple .env (for local development only)
+
+```env
 PUBLIC_BACKEND_URL=http://localhost:3016
 PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
 ```
+
+These work locally because both the browser and server access `localhost`.
 
 ## Anti-Patterns to Avoid
 
