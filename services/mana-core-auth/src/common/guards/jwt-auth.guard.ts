@@ -5,7 +5,7 @@ import {
 	UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { jwtVerify, createRemoteJWKSet, type JWTPayload } from 'jose';
+import { jwtVerify, createRemoteJWKSet } from 'jose';
 
 /**
  * JWT Auth Guard using JWKS (Better Auth compatible)
@@ -23,7 +23,10 @@ export class JwtAuthGuard implements CanActivate {
 		const request = context.switchToHttp().getRequest();
 		const token = this.extractTokenFromHeader(request);
 
+		console.log('[JwtAuthGuard] Token (first 50 chars):', token?.substring(0, 50));
+
 		if (!token) {
+			console.log('[JwtAuthGuard] No token provided');
 			throw new UnauthorizedException('No token provided');
 		}
 
@@ -32,16 +35,21 @@ export class JwtAuthGuard implements CanActivate {
 			if (!this.jwks) {
 				const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
 				const jwksUrl = new URL('/api/v1/auth/jwks', baseUrl);
+				console.log('[JwtAuthGuard] Initializing JWKS from:', jwksUrl.toString());
 				this.jwks = createRemoteJWKSet(jwksUrl);
 			}
 
 			const issuer = this.configService.get<string>('jwt.issuer') || 'manacore';
 			const audience = this.configService.get<string>('jwt.audience') || 'manacore';
 
+			console.log('[JwtAuthGuard] Verifying with issuer:', issuer, 'audience:', audience);
+
 			const { payload } = await jwtVerify(token, this.jwks, {
 				issuer,
 				audience,
 			});
+
+			console.log('[JwtAuthGuard] Verification SUCCESS, user:', payload.sub);
 
 			// Attach user to request
 			request.user = {
@@ -52,7 +60,7 @@ export class JwtAuthGuard implements CanActivate {
 
 			return true;
 		} catch (error) {
-			console.debug('[JwtAuthGuard] Token verification failed:', error);
+			console.error('[JwtAuthGuard] Token verification FAILED:', error);
 			throw new UnauthorizedException('Invalid token');
 		}
 	}
