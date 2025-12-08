@@ -4,12 +4,32 @@
  * Fetches tasks from the Todo backend for dashboard widgets.
  */
 
+import { browser } from '$app/environment';
 import { createApiClient, type ApiResult } from '../base-client';
 
-// Backend URL - falls back to localhost for development
-const TODO_API_URL = import.meta.env.PUBLIC_TODO_API_URL || 'http://localhost:3017/api/v1';
+// Get Todo API URL dynamically at runtime
+function getTodoApiUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		// Client-side: use injected window variable (set by hooks.server.ts)
+		const injectedUrl = (window as unknown as { __PUBLIC_TODO_API_URL__?: string })
+			.__PUBLIC_TODO_API_URL__;
+		if (injectedUrl) {
+			return `${injectedUrl}/api/v1`;
+		}
+	}
+	// Fallback for local development
+	return 'http://localhost:3018/api/v1';
+}
 
-const client = createApiClient(TODO_API_URL);
+// Lazy-initialized client to ensure we get the correct URL at runtime
+let _client: ReturnType<typeof createApiClient> | null = null;
+
+function getClient() {
+	if (!_client) {
+		_client = createApiClient(getTodoApiUrl());
+	}
+	return _client;
+}
 
 /**
  * Task entity from Todo backend
@@ -49,7 +69,7 @@ export const todoService = {
 	 * Get today's tasks
 	 */
 	async getTodayTasks(): Promise<ApiResult<Task[]>> {
-		const result = await client.get<{ tasks: Task[] }>('/tasks/today');
+		const result = await getClient().get<{ tasks: Task[] }>('/tasks/today');
 
 		if (result.error || !result.data) {
 			return { data: null, error: result.error };
@@ -62,7 +82,7 @@ export const todoService = {
 	 * Get upcoming tasks for the next N days
 	 */
 	async getUpcomingTasks(days: number = 7): Promise<ApiResult<Task[]>> {
-		const result = await client.get<{ tasks: Task[] }>(`/tasks/upcoming?days=${days}`);
+		const result = await getClient().get<{ tasks: Task[] }>(`/tasks/upcoming?days=${days}`);
 
 		if (result.error || !result.data) {
 			return { data: null, error: result.error };
@@ -75,7 +95,7 @@ export const todoService = {
 	 * Get inbox tasks (unassigned to project)
 	 */
 	async getInboxTasks(): Promise<ApiResult<Task[]>> {
-		const result = await client.get<{ tasks: Task[] }>('/tasks/inbox');
+		const result = await getClient().get<{ tasks: Task[] }>('/tasks/inbox');
 
 		if (result.error || !result.data) {
 			return { data: null, error: result.error };
@@ -88,7 +108,7 @@ export const todoService = {
 	 * Get all projects
 	 */
 	async getProjects(): Promise<ApiResult<Project[]>> {
-		const result = await client.get<{ projects: Project[] }>('/projects');
+		const result = await getClient().get<{ projects: Project[] }>('/projects');
 
 		if (result.error || !result.data) {
 			return { data: null, error: result.error };

@@ -173,8 +173,16 @@ services:
     environment:
       NODE_ENV: staging
       PORT: 5173
+      # Auth URLs
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://46.224.108.214:3001
+      # Backend URLs for dashboard widgets
+      PUBLIC_TODO_API_URL: http://todo-backend:3018
+      PUBLIC_TODO_API_URL_CLIENT: http://46.224.108.214:3018
+      PUBLIC_CALENDAR_API_URL: http://calendar-backend:3016
+      PUBLIC_CALENDAR_API_URL_CLIENT: http://46.224.108.214:3016
+      PUBLIC_CLOCK_API_URL: http://clock-backend:3017
+      PUBLIC_CLOCK_API_URL_CLIENT: http://46.224.108.214:3017
     ports:
       - "5173:5173"
     healthcheck:
