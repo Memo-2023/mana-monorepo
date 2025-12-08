@@ -1,3 +1,10 @@
+# Production Deployment
+#
+# Triggered by:
+#   - Manual only (workflow_dispatch with confirmation)
+#
+# Flow: dev (staging) → main (production)
+# Requires typing "deploy" to confirm
 name: CD - Production Deployment
 
 on:

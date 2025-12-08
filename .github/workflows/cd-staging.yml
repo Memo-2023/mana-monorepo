@@ -1,11 +1,13 @@
-# Simplified staging config: mana-core-auth + chat-backend only
+# Staging Deployment
+#
+# Triggered by:
+#   - Automatic: Push to dev branch (via ci.yml)
+#   - Manual: workflow_dispatch
+#
 # Full config archived at: .github/workflows/cd-staging.full.yml
 #
-# To restore full config:
-#   cp .github/workflows/cd-staging.full.yml .github/workflows/cd-staging.yml
-#
-# To add a service back:
-#   1. Add service to workflow_dispatch options (line ~10)
+# To add a service:
+#   1. Add service to workflow_dispatch options
 #   2. Add health check in "Run health checks" step
 #   3. Add service to docker-compose.staging.yml
 name: CD - Staging Deployment
