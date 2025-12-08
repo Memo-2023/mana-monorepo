@@ -316,21 +316,54 @@ jobs:
         env:
           VERSION: ${{ needs.parse-deployment.outputs.version }}
           IMAGE_NAME: ${{ matrix.image_name }}
+          APP_TYPE: ${{ matrix.app }}
+          PROJECT: ${{ needs.parse-deployment.outputs.project }}
         run: |
+          # Compute the version variable name locally (before SSH)
+          # Map: todo-web -> TODO_WEB_VERSION, chat-backend -> CHAT_VERSION
+          case "$IMAGE_NAME" in
+            *-web)
+              PROJECT_UPPER=$(echo "$PROJECT" | tr '[:lower:]-' '[:upper:]_')
+              VERSION_VAR="${PROJECT_UPPER}_WEB_VERSION"
+              ;;
+            *-backend)
+              PROJECT_UPPER=$(echo "$PROJECT" | tr '[:lower:]-' '[:upper:]_')
+              VERSION_VAR="${PROJECT_UPPER}_VERSION"
+              ;;
+            mana-core-auth)
+              VERSION_VAR="AUTH_VERSION"
+              ;;
+            *)
+              VERSION_VAR=$(echo "$IMAGE_NAME" | tr '[:lower:]-' '[:upper:]_')_VERSION
+              ;;
+          esac
+
+          echo "Will set $VERSION_VAR=$VERSION for docker-compose"
+
           ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
             cd ~/manacore-staging
 
             echo "Deploying $IMAGE_NAME:$VERSION to staging..."
 
-            # Pull the new image
+            # Pull the new image with specific version tag
             docker pull ${{ env.IMAGE_PREFIX }}/$IMAGE_NAME:$VERSION
+
+            # Update .env file with the version for this service
+            # This ensures docker-compose uses the correct image tag
+            if grep -q "^$VERSION_VAR=" .env 2>/dev/null; then
+              sed -i "s/^$VERSION_VAR=.*/$VERSION_VAR=$VERSION/" .env
+            else
+              echo "$VERSION_VAR=$VERSION" >> .env
+            fi
+
+            echo "Updated .env: $VERSION_VAR=$VERSION"
+            grep "$VERSION_VAR" .env || true
 
             # Service name matches docker-compose service name (with hyphens)
             SERVICE_NAME="$IMAGE_NAME"
 
             if docker compose ps -a | grep -q "$IMAGE_NAME"; then
               echo "Updating existing service: \$SERVICE_NAME"
-              docker compose pull \$SERVICE_NAME || true
               docker compose up -d --no-deps --force-recreate \$SERVICE_NAME
             else
               echo "Service \$SERVICE_NAME not found in compose, starting..."
@@ -340,6 +373,10 @@ jobs:
             # Wait for startup
             sleep 10
             docker compose ps \$SERVICE_NAME
+
+            # Verify correct image is running
+            echo "Running image:"
+            docker inspect --format='{{.Config.Image}}' ${IMAGE_NAME}-staging 2>/dev/null || true
 
             # Cleanup old images
             docker image prune -f
