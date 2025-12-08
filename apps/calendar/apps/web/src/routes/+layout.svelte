@@ -32,52 +32,7 @@
 		</div>
 	</div>
 {:else}
-	<div class="layout-container">
-		<PillNavigation
-			items={navItems}
-			currentPath={$page.url.pathname}
-			appName="Kalender"
-			homeRoute="/"
-			onToggleTheme={handleToggleTheme}
-			{isDark}
-			{isSidebarMode}
-			onModeChange={handleModeChange}
-			{isCollapsed}
-			onCollapsedChange={handleCollapsedChange}
-			desktopPosition={userSettings.nav.desktopPosition}
-			showThemeToggle={true}
-			showThemeVariants={true}
-			{themeVariantItems}
-			{currentThemeVariantLabel}
-			themeMode={theme.mode}
-			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={true}
-			{languageItems}
-			{currentLanguageLabel}
-			showLogout={authStore.isAuthenticated}
-			onLogout={handleLogout}
-			loginHref="/login"
-			primaryColor="#3b82f6"
-			showAppSwitcher={true}
-			{appItems}
-			{userEmail}
-			settingsHref="/settings"
-			manaHref="/mana"
-			profileHref="/profile"
-			allAppsHref="/apps"
-		/>
-
-		<main
-			class="main-content bg-background"
-			class:sidebar-mode={isSidebarMode && !isCollapsed}
-			class:floating-mode={!isSidebarMode && !isCollapsed}
-		>
-			<div
-				class="content-wrapper"
-				class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}
-			>
-				{@render children()}
-			</div>
-		</main>
+	<div class="min-h-screen bg-background text-foreground">
+		{@render children()}
 	</div>
 {/if}
