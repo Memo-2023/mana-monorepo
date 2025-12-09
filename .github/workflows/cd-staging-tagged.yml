@@ -361,14 +361,17 @@ jobs:
 
             # Service name matches docker-compose service name (with hyphens)
             SERVICE_NAME="$IMAGE_NAME"
+            CONTAINER_NAME="${IMAGE_NAME}-staging"
 
-            if docker compose ps -a | grep -q "$IMAGE_NAME"; then
-              echo "Updating existing service: \$SERVICE_NAME"
-              docker compose up -d --no-deps --force-recreate \$SERVICE_NAME
-            else
-              echo "Service \$SERVICE_NAME not found in compose, starting..."
-              docker compose up -d \$SERVICE_NAME
+            # Remove any stale container with the same name (prevents "name already in use" error)
+            if docker ps -a --format '{{.Names}}' | grep -q "^\$CONTAINER_NAME\$"; then
+              echo "Removing stale container: \$CONTAINER_NAME"
+              docker rm -f \$CONTAINER_NAME 2>/dev/null || true
             fi
+
+            # Always use --force-recreate to ensure the new image is used
+            echo "Deploying service: \$SERVICE_NAME"
+            docker compose up -d --no-deps --force-recreate \$SERVICE_NAME
 
             # Wait for startup
             sleep 10
