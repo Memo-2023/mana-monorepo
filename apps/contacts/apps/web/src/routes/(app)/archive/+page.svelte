@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { contactsApi } from '$lib/api/contacts';
 	import type { Contact } from '$lib/api/contacts';
+	import { ContactListSkeleton } from '$lib/components/skeletons';
 	import '$lib/i18n';
 
 	let loading = $state(true);
@@ -140,9 +141,7 @@
 	{/if}
 
 	{#if loading}
-		<div class="loading-container">
-			<div class="spinner"></div>
-		</div>
+		<ContactListSkeleton count={6} />
 	{:else if contacts.length === 0}
 		<div class="empty-state">
 			<div class="empty-icon">

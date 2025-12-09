@@ -8,6 +8,7 @@
 	import { importApi, type ImportPreviewResponse, type DuplicateAction } from '$lib/api/import';
 	import { exportApi, type ExportFormat } from '$lib/api/export';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
+	import { ImportPreviewSkeleton } from '$lib/components/skeletons';
 	import '$lib/i18n';
 
 	type Tab = 'import' | 'export';
@@ -277,12 +278,7 @@
 			{#if importStep === 'upload'}
 				<div class="space-y-6">
 					{#if isLoading}
-						<div class="flex flex-col items-center justify-center py-12">
-							<div
-								class="h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
-							></div>
-							<p class="mt-4 text-muted-foreground">Datei wird verarbeitet...</p>
-						</div>
+						<ImportPreviewSkeleton />
 					{:else}
 						<FileUploader onFileSelect={handleFileSelect} />
 

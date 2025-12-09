@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { notesApi, type ContactNote } from '$lib/api/contacts';
+	import { ContactNotesSkeleton } from '$lib/components/skeletons';
 
 	interface Props {
 		contactId: string;
@@ -197,9 +198,7 @@
 
 	<!-- Notes List -->
 	{#if loading}
-		<div class="loading">
-			<span class="spinner"></span>
-		</div>
+		<ContactNotesSkeleton />
 	{:else if notes.length === 0 && !showAddForm}
 		<div class="empty-notes">
 			<p>{$_('notes.empty')}</p>

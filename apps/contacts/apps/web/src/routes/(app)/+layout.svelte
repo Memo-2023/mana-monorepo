@@ -17,9 +17,13 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import ContactDetailModal from '$lib/components/ContactDetailModal.svelte';
+	import SearchModal from '$lib/components/SearchModal.svelte';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
 	import { contactsSettings } from '$lib/stores/settings.svelte';
+
+	// Search modal state
+	let searchModalOpen = $state(false);
 
 	// Check if we're on a contact detail route
 	const contactDetailMatch = $derived($page.url.pathname.match(/^\/contacts\/([0-9a-f-]{36})$/i));
@@ -78,9 +82,10 @@
 		{ href: '/', label: 'Kontakte', icon: 'users' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
-		{ href: '/archive', label: 'Archiv', icon: 'archive' },
+		{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
+		{ href: '/help', label: 'Hilfe', icon: 'help-circle' },
 	];
 
 	// Navigation shortcuts (Ctrl+1-5)
@@ -92,7 +97,7 @@
 		// Cmd/Ctrl+K to open search (works even in inputs)
 		if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
 			event.preventDefault();
-			// TODO: Open search modal
+			searchModalOpen = true;
 			return;
 		}
 
@@ -231,6 +236,9 @@
 	{#if showContactModal && modalContactId}
 		<ContactDetailModal contactId={modalContactId} onClose={handleCloseContactModal} />
 	{/if}
+
+	<!-- Global Search Modal (Cmd/K) -->
+	<SearchModal bind:open={searchModalOpen} onClose={() => (searchModalOpen = false)} />
 </div>
 
 <style>

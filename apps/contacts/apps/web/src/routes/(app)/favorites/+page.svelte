@@ -7,6 +7,7 @@
 	import FavoriteCardView from '$lib/components/favorites/FavoriteCardView.svelte';
 	import FavoriteListView from '$lib/components/favorites/FavoriteListView.svelte';
 	import FavoriteAlphabetView from '$lib/components/favorites/FavoriteAlphabetView.svelte';
+	import { FavoriteGridSkeleton, ContactListSkeleton } from '$lib/components/skeletons';
 	import '$lib/i18n';
 
 	type ViewMode = 'cards' | 'list' | 'alphabet';
@@ -271,10 +272,12 @@
 	{/if}
 
 	{#if loading}
-		<div class="loading-container">
-			<div class="spinner"></div>
-			<p class="loading-text">Favoriten werden geladen...</p>
-		</div>
+		<!-- Skeleton loading based on view mode -->
+		{#if viewMode === 'cards'}
+			<FavoriteGridSkeleton count={6} />
+		{:else}
+			<ContactListSkeleton count={8} />
+		{/if}
 	{:else if contacts.length === 0}
 		<div class="empty-state">
 			<div class="empty-icon">

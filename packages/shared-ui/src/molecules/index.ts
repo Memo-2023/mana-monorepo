@@ -15,7 +15,15 @@ export { TagBadge } from './tags';
 export { AudioPlayer } from './media';
 
 // Loading components
-export { SkeletonBox, SkeletonText } from './loaders';
+export {
+	SkeletonBox,
+	SkeletonText,
+	SkeletonAvatar,
+	SkeletonRow,
+	SkeletonList,
+	SkeletonCard,
+	SkeletonGrid,
+} from './loaders';
 
 // Feedback components
 export { EmptyState } from './feedback';

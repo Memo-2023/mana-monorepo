@@ -3,6 +3,7 @@
 	import { _ } from 'svelte-i18n';
 	import { duplicatesApi, type DuplicateGroup } from '$lib/api/duplicates';
 	import MergeModal from '$lib/components/duplicates/MergeModal.svelte';
+	import { DuplicateListSkeleton } from '$lib/components/skeletons';
 	import { toasts } from '$lib/stores/toast';
 
 	let duplicates = $state<DuplicateGroup[]>([]);
@@ -132,11 +133,7 @@
 
 	<!-- Loading state -->
 	{#if loading}
-		<div class="flex justify-center py-12">
-			<div
-				class="h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
-			></div>
-		</div>
+		<DuplicateListSkeleton count={3} />
 	{:else if error}
 		<!-- Error state -->
 		<div class="text-center py-12">

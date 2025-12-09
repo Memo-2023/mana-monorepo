@@ -13,6 +13,7 @@
 	import ContactListView from '$lib/components/views/ContactListView.svelte';
 	import ContactGridView from '$lib/components/views/ContactGridView.svelte';
 	import ContactAlphabetView from '$lib/components/views/ContactAlphabetView.svelte';
+	import { ContactListSkeleton, ContactGridSkeleton } from '$lib/components/skeletons';
 	import { batchApi } from '$lib/api/batch';
 	import { toasts } from '$lib/stores/toast';
 
@@ -453,13 +454,13 @@
 		<ViewModeToggle />
 	</div>
 
-	<!-- Loading state -->
+	<!-- Loading state with skeleton -->
 	{#if contactsStore.loading}
-		<div class="flex justify-center py-12">
-			<div
-				class="h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
-			></div>
-		</div>
+		{#if viewModeStore.mode === 'grid'}
+			<ContactGridSkeleton count={8} />
+		{:else}
+			<ContactListSkeleton count={10} />
+		{/if}
 	{:else if contactsStore.contacts.length === 0}
 		<!-- Empty state -->
 		<div class="text-center py-12">

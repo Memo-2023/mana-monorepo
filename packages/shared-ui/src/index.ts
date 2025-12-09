@@ -15,7 +15,15 @@ export { TagBadge } from './molecules';
 export { AudioPlayer } from './molecules';
 
 // Loading/Skeletons
-export { SkeletonBox, SkeletonText } from './molecules';
+export {
+	SkeletonBox,
+	SkeletonText,
+	SkeletonAvatar,
+	SkeletonRow,
+	SkeletonList,
+	SkeletonCard,
+	SkeletonGrid,
+} from './molecules';
 
 // Feedback
 export { EmptyState } from './molecules';

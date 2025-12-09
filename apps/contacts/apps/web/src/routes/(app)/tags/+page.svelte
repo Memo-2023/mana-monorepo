@@ -3,6 +3,7 @@
 	import { _ } from 'svelte-i18n';
 	import { tagsApi } from '$lib/api/contacts';
 	import type { ContactTag } from '$lib/api/contacts';
+	import { TagGridSkeleton } from '$lib/components/skeletons';
 
 	let loading = $state(true);
 	let tags = $state<ContactTag[]>([]);
@@ -166,9 +167,7 @@
 	{/if}
 
 	{#if loading}
-		<div class="loading-container">
-			<div class="spinner"></div>
-		</div>
+		<TagGridSkeleton count={6} />
 	{:else if tags.length === 0}
 		<div class="empty-state">
 			<div class="empty-icon">

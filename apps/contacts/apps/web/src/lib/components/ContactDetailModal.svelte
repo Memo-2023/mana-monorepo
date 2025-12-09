@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { contactsApi, photoApi, type Contact } from '$lib/api/contacts';
 	import ContactNotes from './ContactNotes.svelte';
+	import { ContactDetailSkeleton } from '$lib/components/skeletons';
 
 	interface Props {
 		contactId: string;
@@ -276,25 +277,7 @@
 		<!-- Modal Body -->
 		<div class="modal-body">
 			{#if loading}
-				<div class="loading-container">
-					<svg class="spinner-lg" viewBox="0 0 24 24" fill="none">
-						<circle
-							cx="12"
-							cy="12"
-							r="10"
-							stroke="currentColor"
-							stroke-width="3"
-							stroke-opacity="0.25"
-						/>
-						<path
-							d="M12 2a10 10 0 0 1 10 10"
-							stroke="currentColor"
-							stroke-width="3"
-							stroke-linecap="round"
-						/>
-					</svg>
-					<p class="loading-text">Lade Kontakt...</p>
-				</div>
+				<ContactDetailSkeleton />
 			{:else if error && !contact}
 				<div class="error-container">
 					<div class="error-icon-wrapper">
