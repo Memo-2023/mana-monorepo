@@ -9,6 +9,7 @@ on:
   push:
     branches:
       - main
+      - dev
   workflow_dispatch:
 
 concurrency:
@@ -26,6 +27,8 @@ jobs:
           - { name: 'mana-core-auth', path: 'services/mana-core-auth', port: '3001' }
           - { name: 'chat-backend', path: 'apps/chat/apps/backend', port: '3002' }
           - { name: 'chat-web', path: 'apps/chat/apps/web', port: '3000' }
+          - { name: 'todo-backend', path: 'apps/todo/apps/backend', port: '3018' }
+          - { name: 'todo-web', path: 'apps/todo/apps/web', port: '5188' }
       fail-fast: false
     steps:
       - name: Checkout code

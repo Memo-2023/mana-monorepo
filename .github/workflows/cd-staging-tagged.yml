@@ -21,6 +21,7 @@ on:
           - zitare
           - presi
           - mana-core-auth
+          - todo
       apps:
         description: 'Apps to deploy (comma-separated: backend,web,landing or "all")'
         required: true
@@ -104,6 +105,7 @@ jobs:
           PROJECT_APPS[zitare]="backend,web"
           PROJECT_APPS[presi]="backend,web"
           PROJECT_APPS[mana-core-auth]="service"
+          PROJECT_APPS[todo]="backend,web"
 
           # Expand "all" to available apps
           if [ "$APPS" == "all" ]; then
@@ -153,6 +155,7 @@ jobs:
                   manadeck) PORT="3009" ;;
                   zitare) PORT="3007" ;;
                   presi) PORT="3008" ;;
+                  todo) PORT="3018" ;;
                 esac
                 HEALTH_PATH="/api/health"
                 ;;
@@ -289,7 +292,7 @@ jobs:
               docker compose up -d --no-deps --force-recreate \$SERVICE_NAME
             else
               echo "Service \$SERVICE_NAME not found in compose, starting..."
-              docker compose up -d \$SERVICE_NAME
+              docker compose up -d --force-recreate \$SERVICE_NAME
             fi
 
             # Wait for startup

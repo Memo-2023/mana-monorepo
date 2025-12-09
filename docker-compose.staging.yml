@@ -159,6 +159,68 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  todo-backend:
+    image: ${DOCKER_REGISTRY:-ghcr.io/memo-2023}/todo-backend:${TODO_BACKEND_VERSION:-latest}
+    container_name: todo-backend-staging
+    restart: unless-stopped
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: staging
+      PORT: 3018
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/todo
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+    ports:
+      - "3018:3018"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3018/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - manacore-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  todo-web:
+    image: ${DOCKER_REGISTRY:-ghcr.io/memo-2023}/todo-web:${TODO_WEB_VERSION:-latest}
+    container_name: todo-web-staging
+    restart: unless-stopped
+    depends_on:
+      todo-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: staging
+      PORT: 5188
+      # Server-side URLs (Docker internal network)
+      PUBLIC_BACKEND_URL: http://todo-backend:3018
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      # Client-side URLs (browser access via public IP)
+      PUBLIC_BACKEND_URL_CLIENT: http://46.224.108.214:3018
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://46.224.108.214:3001
+    ports:
+      - "5188:5188"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5188/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - manacore-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 # ============================================
 # Networks
 # ============================================
