@@ -205,8 +205,14 @@
 		}
 	}
 
+	// Reload contact when contactId changes
+	$effect(() => {
+		if (contactId) {
+			loadContact();
+		}
+	});
+
 	onMount(() => {
-		loadContact();
 		document.body.style.overflow = 'hidden';
 		return () => {
 			document.body.style.overflow = '';

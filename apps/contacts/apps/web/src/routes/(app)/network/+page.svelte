@@ -1,36 +1,21 @@
-<script context="module" lang="ts">
-	function getInitials(name: string): string {
-		const parts = name.split(' ');
-		if (parts.length >= 2) {
-			return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-		}
-		return name.substring(0, 2).toUpperCase();
-	}
-
-	function stringToColor(str: string): string {
-		let hash = 0;
-		for (let i = 0; i < str.length; i++) {
-			hash = str.charCodeAt(i) + ((hash << 5) - hash);
-		}
-		const hue = hash % 360;
-		return `hsl(${hue}, 70%, 50%)`;
-	}
-</script>
-
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 	import { networkStore, type SimulationNode } from '$lib/stores/network.svelte';
 	import NetworkGraph from '$lib/components/network/NetworkGraph.svelte';
 	import NetworkControls from '$lib/components/network/NetworkControls.svelte';
+	import ContactDetailModal from '$lib/components/ContactDetailModal.svelte';
 	import { NetworkGraphSkeleton } from '$lib/components/skeletons';
 	import '$lib/i18n';
 
 	let graphComponent: NetworkGraph;
 
 	function handleNodeClick(node: SimulationNode) {
-		// Select node (highlight connections)
+		// Select node (highlight connections and show detail sidebar)
 		networkStore.selectNode(node.id);
+	}
+
+	function handleCloseSidebar() {
+		networkStore.selectNode(null);
 	}
 
 	function handleZoomIn() {
@@ -43,12 +28,6 @@
 
 	function handleResetZoom() {
 		graphComponent?.resetZoom();
-	}
-
-	function handleViewContact() {
-		if (networkStore.selectedNodeId) {
-			goto(`/contacts/${networkStore.selectedNodeId}`);
-		}
 	}
 
 	onMount(() => {
@@ -94,118 +73,10 @@
 		{/if}
 	</div>
 
-	<!-- Selected Node Sidebar -->
-	{#if networkStore.selectedNode}
-		{@const node = networkStore.selectedNode}
-		{@const connectedNodes = networkStore.getConnectedNodes(node.id)}
-		{@const nodeLinks = networkStore.getNodeLinks(node.id)}
-
-		<div class="sidebar">
-			<div class="sidebar-header">
-				<h2 class="sidebar-title">Ausgewählter Kontakt</h2>
-				<button
-					class="sidebar-close"
-					onclick={() => networkStore.selectNode(null)}
-					aria-label="Schließen"
-				>
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
-				</button>
-			</div>
-
-			<div class="sidebar-content">
-				<!-- Contact Info -->
-				<div class="contact-card">
-					<div class="contact-avatar" style="background: {stringToColor(node.name)}">
-						{#if node.photoUrl}
-							<img src={node.photoUrl} alt={node.name} />
-						{:else}
-							{getInitials(node.name)}
-						{/if}
-					</div>
-					<div class="contact-info">
-						<h3 class="contact-name">{node.name}</h3>
-						{#if node.company}
-							<p class="contact-company">{node.company}</p>
-						{/if}
-					</div>
-					{#if node.isFavorite}
-						<span class="favorite-badge">⭐</span>
-					{/if}
-				</div>
-
-				<!-- Tags -->
-				{#if node.tags.length > 0}
-					<div class="section">
-						<h4 class="section-title">Tags</h4>
-						<div class="tags-list">
-							{#each node.tags as tag}
-								<span class="tag" style="background: {tag.color || 'hsl(var(--muted))'}">
-									{tag.name}
-								</span>
-							{/each}
-						</div>
-					</div>
-				{/if}
-
-				<!-- Connections -->
-				{#if connectedNodes.length > 0}
-					<div class="section">
-						<h4 class="section-title">
-							Verbindungen ({connectedNodes.length})
-						</h4>
-						<div class="connections-list">
-							{#each connectedNodes as connected}
-								{@const link = nodeLinks.find((l) => {
-									const sourceId = typeof l.source === 'string' ? l.source : l.source.id;
-									const targetId = typeof l.target === 'string' ? l.target : l.target.id;
-									return sourceId === connected.id || targetId === connected.id;
-								})}
-								<button
-									class="connection-item"
-									onclick={() => networkStore.selectNode(connected.id)}
-								>
-									<div
-										class="connection-avatar"
-										style="background: {stringToColor(connected.name)}"
-									>
-										{getInitials(connected.name)}
-									</div>
-									<div class="connection-info">
-										<span class="connection-name">{connected.name}</span>
-										{#if link}
-											<span class="connection-tags">
-												{link.sharedTags.join(', ')}
-											</span>
-										{/if}
-									</div>
-								</button>
-							{/each}
-						</div>
-					</div>
-				{/if}
-
-				<!-- Actions -->
-				<div class="sidebar-actions">
-					<button class="btn-primary" onclick={handleViewContact}>
-						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-							/>
-						</svg>
-						Kontakt anzeigen
-					</button>
-				</div>
-			</div>
+	<!-- Contact Detail Modal as Sidebar -->
+	{#if networkStore.selectedNodeId}
+		<div class="modal-sidebar-wrapper">
+			<ContactDetailModal contactId={networkStore.selectedNodeId} onClose={handleCloseSidebar} />
 		</div>
 	{/if}
 </div>
@@ -222,8 +93,7 @@
 	.controls-wrapper {
 		position: absolute;
 		top: 5rem; /* Below the nav */
-		left: 50%;
-		transform: translateX(-50%);
+		left: 1rem;
 		z-index: 10;
 		max-width: calc(100% - 2rem);
 	}
@@ -255,260 +125,76 @@
 		position: relative;
 	}
 
-	/* Sidebar */
-	.sidebar {
+	/* Modal Sidebar Wrapper - Override modal positioning */
+	.modal-sidebar-wrapper {
 		position: fixed;
+		top: 5rem; /* Below the pill nav */
 		right: 1rem;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 320px;
-		max-height: calc(100vh - 100px);
-		background: hsl(var(--card));
-		border: 1px solid hsl(var(--border));
-		border-radius: 1rem;
-		box-shadow: 0 8px 32px hsl(var(--foreground) / 0.1);
+		bottom: 1rem;
+		width: 400px;
+		max-width: calc(100vw - 2rem);
 		z-index: 50;
-		display: flex;
-		flex-direction: column;
-		overflow: hidden;
 	}
 
-	.sidebar-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 1rem 1.25rem;
-		border-bottom: 1px solid hsl(var(--border));
+	/* Override the modal styles when inside the sidebar wrapper */
+	.modal-sidebar-wrapper :global(.modal-backdrop) {
+		position: absolute;
+		background: transparent;
+		backdrop-filter: none;
+		padding: 0;
+		align-items: stretch;
+		justify-content: flex-end;
 	}
 
-	.sidebar-title {
-		font-size: 1rem;
-		font-weight: 600;
-		color: hsl(var(--foreground));
-	}
-
-	.sidebar-close {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 2rem;
-		height: 2rem;
-		background: none;
-		border: none;
-		color: hsl(var(--muted-foreground));
-		cursor: pointer;
-		border-radius: 0.5rem;
-		transition: all 0.2s;
-	}
-
-	.sidebar-close:hover {
-		background: hsl(var(--muted));
-		color: hsl(var(--foreground));
-	}
-
-	.sidebar-close svg {
-		width: 1.25rem;
-		height: 1.25rem;
-	}
-
-	.sidebar-content {
-		flex: 1;
-		overflow-y: auto;
-		padding: 1.25rem;
-	}
-
-	/* Contact Card */
-	.contact-card {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		padding: 1rem;
-		background: hsl(var(--muted) / 0.3);
-		border-radius: 0.75rem;
-		margin-bottom: 1.25rem;
-	}
-
-	.contact-avatar {
-		width: 3.5rem;
-		height: 3.5rem;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: white;
-		font-weight: 600;
-		font-size: 1.125rem;
-		overflow: hidden;
-	}
-
-	.contact-avatar img {
+	.modal-sidebar-wrapper :global(.modal-container) {
+		max-width: 100%;
 		width: 100%;
+		max-height: 100%;
 		height: 100%;
-		object-fit: cover;
+		border-radius: 1rem;
+		background: hsl(var(--card) / 0.8);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid hsl(var(--border) / 0.5);
+		animation: slideInRight 0.2s ease-out;
 	}
 
-	.contact-info {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.contact-name {
-		font-size: 1.0625rem;
-		font-weight: 600;
-		color: hsl(var(--foreground));
-		margin-bottom: 0.125rem;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.contact-company {
-		font-size: 0.8125rem;
-		color: hsl(var(--muted-foreground));
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.favorite-badge {
-		font-size: 1rem;
-	}
-
-	/* Sections */
-	.section {
-		margin-bottom: 1.25rem;
-	}
-
-	.section-title {
-		font-size: 0.8125rem;
-		font-weight: 600;
-		color: hsl(var(--muted-foreground));
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		margin-bottom: 0.75rem;
-	}
-
-	/* Tags */
-	.tags-list {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
-
-	.tag {
-		padding: 0.25rem 0.75rem;
-		border-radius: 9999px;
-		font-size: 0.75rem;
-		font-weight: 500;
-		color: white;
-	}
-
-	/* Connections */
-	.connections-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.connection-item {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		width: 100%;
-		padding: 0.625rem;
-		background: none;
-		border: 1px solid hsl(var(--border));
-		border-radius: 0.625rem;
-		cursor: pointer;
-		text-align: left;
-		transition: all 0.2s;
-	}
-
-	.connection-item:hover {
-		background: hsl(var(--muted) / 0.5);
-		border-color: hsl(var(--primary) / 0.3);
-	}
-
-	.connection-avatar {
-		width: 2.25rem;
-		height: 2.25rem;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: white;
-		font-weight: 600;
-		font-size: 0.75rem;
-		flex-shrink: 0;
-	}
-
-	.connection-info {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.connection-name {
-		display: block;
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: hsl(var(--foreground));
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.connection-tags {
-		display: block;
-		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	/* Actions */
-	.sidebar-actions {
-		padding-top: 1rem;
-		border-top: 1px solid hsl(var(--border));
-	}
-
-	.btn-primary {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		width: 100%;
-		padding: 0.75rem 1rem;
-		background: hsl(var(--primary));
-		color: hsl(var(--primary-foreground));
-		border: none;
-		border-radius: 0.625rem;
-		font-weight: 600;
-		font-size: 0.875rem;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.btn-primary:hover {
-		opacity: 0.9;
-	}
-
-	.btn-primary svg {
-		width: 1.125rem;
-		height: 1.125rem;
+	@keyframes slideInRight {
+		from {
+			opacity: 0;
+			transform: translateX(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
 	}
 
 	/* Responsive */
 	@media (max-width: 1024px) {
-		.sidebar {
-			position: fixed;
-			right: 0;
-			top: auto;
-			bottom: 0;
-			transform: none;
+		.modal-sidebar-wrapper {
 			width: 100%;
-			max-height: 50vh;
+			max-width: 100%;
+			top: auto;
+			right: 0;
+			bottom: 0;
+			height: 70vh;
+		}
+
+		.modal-sidebar-wrapper :global(.modal-container) {
 			border-radius: 1rem 1rem 0 0;
+			animation: slideInUp 0.2s ease-out;
+		}
+
+		@keyframes slideInUp {
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
 		}
 	}
 

@@ -163,9 +163,11 @@
 		align-items: center;
 		gap: 0.75rem;
 		padding: 0.75rem 1rem;
-		background: hsl(var(--card));
-		border: 1px solid hsl(var(--border));
-		border-radius: 0.75rem;
+		background: hsl(var(--card) / 0.8);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid hsl(var(--border) / 0.5);
+		border-radius: 9999px;
 		flex-wrap: wrap;
 	}
 
@@ -288,9 +290,11 @@
 	.filter-panel {
 		margin-top: 0.5rem;
 		padding: 0.75rem 1rem;
-		background: hsl(var(--card));
-		border: 1px solid hsl(var(--border));
-		border-radius: 0.75rem;
+		background: hsl(var(--card) / 0.8);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid hsl(var(--border) / 0.5);
+		border-radius: 1rem;
 	}
 
 	.filter-row {
