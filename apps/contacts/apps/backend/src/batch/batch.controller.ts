@@ -22,11 +22,6 @@ class BatchFavoriteDto extends BatchContactIdsDto {
 	favorite?: boolean = true;
 }
 
-class BatchGroupDto extends BatchContactIdsDto {
-	@IsString()
-	groupId: string;
-}
-
 class BatchTagsDto extends BatchContactIdsDto {
 	@IsArray()
 	@IsString({ each: true })
@@ -61,22 +56,6 @@ export class BatchController {
 			dto.contactIds,
 			user.userId,
 			dto.favorite ?? true
-		);
-		return result;
-	}
-
-	@Post('add-to-group')
-	async addToGroup(@CurrentUser() user: CurrentUserData, @Body() dto: BatchGroupDto) {
-		const result = await this.batchService.addToGroup(dto.contactIds, dto.groupId, user.userId);
-		return result;
-	}
-
-	@Post('remove-from-group')
-	async removeFromGroup(@CurrentUser() user: CurrentUserData, @Body() dto: BatchGroupDto) {
-		const result = await this.batchService.removeFromGroup(
-			dto.contactIds,
-			dto.groupId,
-			user.userId
 		);
 		return result;
 	}

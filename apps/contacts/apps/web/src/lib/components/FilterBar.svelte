@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { onMount } from 'svelte';
-	import { groupsApi, type ContactGroup, type Contact } from '$lib/api/contacts';
+	import { tagsApi, type ContactTag, type Contact } from '$lib/api/contacts';
 
 	export type ContactFilter = 'all' | 'favorites' | 'hasPhone' | 'hasEmail' | 'incomplete';
 	export type BirthdayFilter = 'all' | 'today' | 'thisWeek' | 'thisMonth';
 
 	interface Props {
 		contacts: Contact[];
-		selectedGroupId: string | null;
-		onGroupChange: (groupId: string | null) => void;
+		selectedTagId: string | null;
+		onTagChange: (tagId: string | null) => void;
 		contactFilter: ContactFilter;
 		onContactFilterChange: (filter: ContactFilter) => void;
 		birthdayFilter: BirthdayFilter;
@@ -20,8 +20,8 @@
 
 	let {
 		contacts,
-		selectedGroupId,
-		onGroupChange,
+		selectedTagId,
+		onTagChange,
 		contactFilter,
 		onContactFilterChange,
 		birthdayFilter,
@@ -30,9 +30,9 @@
 		onCompanyChange,
 	}: Props = $props();
 
-	let groups = $state<ContactGroup[]>([]);
+	let tags = $state<ContactTag[]>([]);
 	let showFilters = $state(false);
-	let loadingGroups = $state(true);
+	let loadingTags = $state(true);
 
 	// Extract unique companies from contacts
 	let companies = $derived.by(() => {
@@ -48,26 +48,26 @@
 	// Count active filters (excluding favorites since it has its own quick button)
 	let activeFilterCount = $derived.by(() => {
 		let count = 0;
-		if (selectedGroupId) count++;
+		if (selectedTagId) count++;
 		if (contactFilter !== 'all' && contactFilter !== 'favorites') count++;
 		if (birthdayFilter !== 'all') count++;
 		if (selectedCompany) count++;
 		return count;
 	});
 
-	async function loadGroups() {
+	async function loadTags() {
 		try {
-			const response = await groupsApi.list();
-			groups = response.groups || [];
+			const response = await tagsApi.list();
+			tags = response.tags || [];
 		} catch (e) {
-			console.error('Failed to load groups:', e);
+			console.error('Failed to load tags:', e);
 		} finally {
-			loadingGroups = false;
+			loadingTags = false;
 		}
 	}
 
 	function clearAllFilters() {
-		onGroupChange(null);
+		onTagChange(null);
 		// Keep favorites filter if active (controlled by separate quick button)
 		if (contactFilter !== 'favorites') {
 			onContactFilterChange('all');
@@ -77,7 +77,7 @@
 	}
 
 	onMount(() => {
-		loadGroups();
+		loadTags();
 	});
 </script>
 
@@ -106,12 +106,12 @@
 	<!-- Filter Pills (shown when filters are active) -->
 	{#if activeFilterCount > 0 && !showFilters}
 		<div class="active-filters">
-			{#if selectedGroupId}
-				{@const group = groups.find((g) => g.id === selectedGroupId)}
-				{#if group}
-					<button type="button" class="filter-pill" onclick={() => onGroupChange(null)}>
-						<span class="pill-color" style="background: {group.color || '#6366f1'}"></span>
-						{group.name}
+			{#if selectedTagId}
+				{@const tag = tags.find((t) => t.id === selectedTagId)}
+				{#if tag}
+					<button type="button" class="filter-pill" onclick={() => onTagChange(null)}>
+						<span class="pill-color" style="background: {tag.color || '#6366f1'}"></span>
+						{tag.name}
 						<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
 								stroke-linecap="round"
@@ -171,17 +171,17 @@
 	<!-- Expanded Filter Panel -->
 	{#if showFilters}
 		<div class="filter-panel">
-			<!-- Groups Filter -->
+			<!-- Tags Filter -->
 			<div class="filter-section">
-				<label class="filter-label">{$_('filters.group')}</label>
+				<label class="filter-label">{$_('filters.tag')}</label>
 				<select
 					class="filter-select"
-					value={selectedGroupId || ''}
-					onchange={(e) => onGroupChange(e.currentTarget.value || null)}
+					value={selectedTagId || ''}
+					onchange={(e) => onTagChange(e.currentTarget.value || null)}
 				>
-					<option value="">{$_('filters.allGroups')}</option>
-					{#each groups as group}
-						<option value={group.id}>{group.name}</option>
+					<option value="">{$_('filters.allTags')}</option>
+					{#each tags as tag}
+						<option value={tag.id}>{tag.name}</option>
 					{/each}
 				</select>
 			</div>

@@ -1,6 +1,5 @@
 import { authStore } from '$lib/stores/auth.svelte';
-
-const API_BASE = 'http://localhost:3015/api/v1';
+import { API_BASE } from './config';
 
 export interface ParsedContact {
 	firstName?: string;

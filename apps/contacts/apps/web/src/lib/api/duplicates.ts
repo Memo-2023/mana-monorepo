@@ -1,7 +1,6 @@
 import { authStore } from '$lib/stores/auth.svelte';
+import { API_BASE } from './config';
 import type { Contact } from './contacts';
-
-const API_BASE = 'http://localhost:3015/api/v1';
 
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
 	const token = await authStore.getAccessToken();

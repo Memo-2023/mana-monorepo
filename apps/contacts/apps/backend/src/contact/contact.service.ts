@@ -9,7 +9,6 @@ export interface ContactFilters {
 	search?: string;
 	isFavorite?: boolean;
 	isArchived?: boolean;
-	groupId?: string;
 	tagId?: string;
 	limit?: number;
 	offset?: number;

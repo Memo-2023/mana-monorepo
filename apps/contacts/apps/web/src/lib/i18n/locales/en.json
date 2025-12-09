@@ -140,8 +140,8 @@
 	"filters": {
 		"title": "Filters",
 		"clearAll": "Clear all",
-		"group": "Group",
-		"allGroups": "All groups",
+		"tag": "Tag",
+		"allTags": "All tags",
 		"contactInfo": "Contact info",
 		"contact": {
 			"all": "All contacts",

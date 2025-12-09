@@ -1,6 +1,5 @@
 import { authStore } from '$lib/stores/auth.svelte';
-
-const API_BASE = 'http://localhost:3015/api/v1';
+import { API_BASE } from './config';
 
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
 	const token = await authStore.getAccessToken();
@@ -52,20 +51,6 @@ export const batchApi = {
 		return fetchWithAuth('/batch/favorite', {
 			method: 'POST',
 			body: JSON.stringify({ contactIds, favorite }),
-		});
-	},
-
-	async addToGroup(contactIds: string[], groupId: string): Promise<BatchResult> {
-		return fetchWithAuth('/batch/add-to-group', {
-			method: 'POST',
-			body: JSON.stringify({ contactIds, groupId }),
-		});
-	},
-
-	async removeFromGroup(contactIds: string[], groupId: string): Promise<BatchResult> {
-		return fetchWithAuth('/batch/remove-from-group', {
-			method: 'POST',
-			body: JSON.stringify({ contactIds, groupId }),
 		});
 	},
 

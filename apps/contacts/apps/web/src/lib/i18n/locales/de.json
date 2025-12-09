@@ -140,8 +140,8 @@
 	"filters": {
 		"title": "Filter",
 		"clearAll": "Alle löschen",
-		"group": "Gruppe",
-		"allGroups": "Alle Gruppen",
+		"tag": "Tag",
+		"allTags": "Alle Tags",
 		"contactInfo": "Kontaktinfo",
 		"contact": {
 			"all": "Alle Kontakte",

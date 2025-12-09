@@ -145,10 +145,6 @@ class ContactQueryDto {
 
 	@IsUUID()
 	@IsOptional()
-	groupId?: string;
-
-	@IsUUID()
-	@IsOptional()
 	tagId?: string;
 
 	@IsOptional()

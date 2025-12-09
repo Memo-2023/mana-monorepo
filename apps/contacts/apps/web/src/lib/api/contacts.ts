@@ -1,6 +1,5 @@
 import { authStore } from '$lib/stores/auth.svelte';
-
-const API_BASE = 'http://localhost:3015/api/v1';
+import { API_BASE } from './config';
 
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
 	const token = await authStore.getAccessToken();
@@ -57,17 +56,6 @@ export interface Contact {
 	updatedAt: string;
 }
 
-export interface ContactGroup {
-	id: string;
-	userId: string;
-	name: string;
-	description?: string | null;
-	color?: string | null;
-	icon?: string | null;
-	isPreset: boolean;
-	createdAt: string;
-}
-
 export interface ContactTag {
 	id: string;
 	userId: string;
@@ -100,7 +88,6 @@ export interface ContactFilters {
 	search?: string;
 	isFavorite?: boolean;
 	isArchived?: boolean;
-	groupId?: string;
 	tagId?: string;
 	limit?: number;
 	offset?: number;
@@ -113,7 +100,6 @@ export const contactsApi = {
 		if (filters.search) params.set('search', filters.search);
 		if (filters.isFavorite !== undefined) params.set('isFavorite', String(filters.isFavorite));
 		if (filters.isArchived !== undefined) params.set('isArchived', String(filters.isArchived));
-		if (filters.groupId) params.set('groupId', filters.groupId);
 		if (filters.tagId) params.set('tagId', filters.tagId);
 		if (filters.limit) params.set('limit', String(filters.limit));
 		if (filters.offset) params.set('offset', String(filters.offset));
@@ -161,50 +147,6 @@ export const contactsApi = {
 			method: 'POST',
 		});
 		return response.contact;
-	},
-};
-
-// Groups API
-export const groupsApi = {
-	async list() {
-		return fetchWithAuth('/groups');
-	},
-
-	async get(id: string) {
-		return fetchWithAuth(`/groups/${id}`);
-	},
-
-	async create(data: { name: string; description?: string; color?: string }) {
-		return fetchWithAuth('/groups', {
-			method: 'POST',
-			body: JSON.stringify(data),
-		});
-	},
-
-	async update(id: string, data: { name?: string; description?: string; color?: string }) {
-		return fetchWithAuth(`/groups/${id}`, {
-			method: 'PATCH',
-			body: JSON.stringify(data),
-		});
-	},
-
-	async delete(id: string) {
-		return fetchWithAuth(`/groups/${id}`, {
-			method: 'DELETE',
-		});
-	},
-
-	async addContacts(groupId: string, contactIds: string[]) {
-		return fetchWithAuth(`/groups/${groupId}/contacts`, {
-			method: 'POST',
-			body: JSON.stringify({ contactIds }),
-		});
-	},
-
-	async removeContact(groupId: string, contactId: string) {
-		return fetchWithAuth(`/groups/${groupId}/contacts/${contactId}`, {
-			method: 'DELETE',
-		});
 	},
 };
 

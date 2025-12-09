@@ -76,7 +76,6 @@
 	// Navigation items for Contacts
 	const navItems: PillNavItem[] = [
 		{ href: '/', label: 'Kontakte', icon: 'users' },
-		{ href: '/groups', label: 'Gruppen', icon: 'folder' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
 		{ href: '/archive', label: 'Archiv', icon: 'archive' },

@@ -248,10 +248,10 @@ export const contactsStore = {
 	},
 
 	/**
-	 * Set group filter
+	 * Set tag filter
 	 */
-	setGroupId(groupId: string | undefined) {
-		filters = { ...filters, groupId };
+	setTagId(tagId: string | undefined) {
+		filters = { ...filters, tagId };
 	},
 
 	/**

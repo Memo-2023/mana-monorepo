@@ -1,75 +1,14 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { contacts, contactGroups } from './schema';
+import { contacts } from './schema';
 
 const DATABASE_URL =
 	process.env.DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/contacts';
 
 // User ID - can be set via environment variable or defaults to dev user
-const USER_ID = process.env.SEED_USER_ID || process.env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000';
-
-// System user ID for preset groups (visible to all users)
-const SYSTEM_USER_ID = 'system';
-
-// Preset groups available to all users
-interface PresetGroup {
-	name: string;
-	description: string;
-	color: string;
-	icon: string;
-}
-
-const presetGroups: PresetGroup[] = [
-	{
-		name: 'Familie',
-		description: 'Familienmitglieder und Verwandte',
-		color: '#ef4444', // Red
-		icon: 'home',
-	},
-	{
-		name: 'Freunde',
-		description: 'Freunde und Bekannte',
-		color: '#f97316', // Orange
-		icon: 'users',
-	},
-	{
-		name: 'Arbeit',
-		description: 'Kollegen und Geschäftskontakte',
-		color: '#3b82f6', // Blue
-		icon: 'briefcase',
-	},
-	{
-		name: 'Kunden',
-		description: 'Kunden und Auftraggeber',
-		color: '#22c55e', // Green
-		icon: 'building',
-	},
-	{
-		name: 'Partner',
-		description: 'Geschäftspartner und Lieferanten',
-		color: '#8b5cf6', // Purple
-		icon: 'handshake',
-	},
-	{
-		name: 'VIP',
-		description: 'Wichtige Kontakte',
-		color: '#eab308', // Yellow/Gold
-		icon: 'star',
-	},
-	{
-		name: 'Nachbarn',
-		description: 'Nachbarn und Anwohner',
-		color: '#14b8a6', // Teal
-		icon: 'map-pin',
-	},
-	{
-		name: 'Vereine',
-		description: 'Vereinsmitglieder und Clubs',
-		color: '#ec4899', // Pink
-		icon: 'flag',
-	},
-];
+const USER_ID =
+	process.env.SEED_USER_ID || process.env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000';
 
 interface SeedContact {
 	firstName: string;
@@ -534,46 +473,6 @@ const seedContacts: SeedContact[] = [
 	},
 ];
 
-async function seedPresetGroups() {
-	console.log('🏷️  Seeding preset groups...');
-
-	const connection = postgres(DATABASE_URL);
-	const db = drizzle(connection);
-
-	try {
-		const { sql, eq, and } = await import('drizzle-orm');
-
-		// Check if preset groups already exist
-		const existingPresets = await db
-			.select()
-			.from(contactGroups)
-			.where(and(eq(contactGroups.userId, SYSTEM_USER_ID), eq(contactGroups.isPreset, true)));
-
-		if (existingPresets.length > 0) {
-			console.log(`   ℹ️  ${existingPresets.length} preset groups already exist, skipping...`);
-			return;
-		}
-
-		// Insert preset groups
-		const groupsToInsert = presetGroups.map((group) => ({
-			userId: SYSTEM_USER_ID,
-			name: group.name,
-			description: group.description,
-			color: group.color,
-			icon: group.icon,
-			isPreset: true,
-		}));
-
-		await db.insert(contactGroups).values(groupsToInsert);
-		console.log(`   ✅ Inserted ${presetGroups.length} preset groups`);
-	} catch (error) {
-		console.error('❌ Preset groups seed failed:', error);
-		throw error;
-	} finally {
-		await connection.end();
-	}
-}
-
 async function seed() {
 	console.log('🌱 Starting seed...');
 	console.log(`📊 Preparing to insert ${seedContacts.length} contacts`);
@@ -633,15 +532,7 @@ async function seed() {
 	}
 }
 
-async function main() {
-	// First seed preset groups (system-wide)
-	await seedPresetGroups();
-
-	// Then seed contacts for test user
-	await seed();
-}
-
-main()
+seed()
 	.then(() => {
 		console.log('🎉 Seed completed!');
 		process.exit(0);
