@@ -349,6 +349,15 @@ async function getPaginated(
 
 ## Migrations
 
+> **Comprehensive Documentation**: See **[docs/DATABASE_MIGRATIONS.md](/docs/DATABASE_MIGRATIONS.md)** for full migration internals, CI/CD integration, zero-downtime patterns, and troubleshooting.
+
+### Quick Reference
+
+| Environment     | Command           | Purpose                         |
+| --------------- | ----------------- | ------------------------------- |
+| **Development** | `pnpm db:push`    | Fast iteration, direct sync     |
+| **Production**  | `pnpm db:migrate` | Tracked migrations with history |
+
 ### Configuration
 
 ```typescript
@@ -358,9 +367,9 @@ import { defineConfig } from 'drizzle-kit';
 export default defineConfig({
 	schema: './src/db/schema/index.ts',
 	out: './src/db/migrations',
-	driver: 'pg',
+	dialect: 'postgresql',
 	dbCredentials: {
-		connectionString: process.env.DATABASE_URL!,
+		url: process.env.DATABASE_URL!,
 	},
 	verbose: true,
 	strict: true,
@@ -370,40 +379,84 @@ export default defineConfig({
 ### Commands
 
 ```bash
-# Generate migration from schema changes
-pnpm drizzle-kit generate
+# Development - push schema directly (fast, no history)
+pnpm db:push
 
-# Push schema directly (development only)
-pnpm drizzle-kit push
-
-# Open Drizzle Studio
-pnpm drizzle-kit studio
-
-# Run migrations (production)
+# Production - generate and run migrations
+pnpm db:generate --name add_user_preferences
 pnpm db:migrate
+
+# Open Drizzle Studio for database inspection
+pnpm db:studio
 ```
 
-### Migration Runner
+### Migration Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Which command should I use?                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Local development?                                              │
+│  └── YES → pnpm db:push (fast, no tracking)                     │
+│                                                                  │
+│  Staging/Production?                                             │
+│  └── YES → pnpm db:generate + pnpm db:migrate (tracked)         │
+│                                                                  │
+│  Schema changed by someone else?                                 │
+│  └── YES → git pull + pnpm db:push (local)                      │
+│            git pull + pnpm db:migrate (staging/prod)            │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Concepts
+
+1. **Advisory Locks**: Migrations use PostgreSQL advisory locks to prevent concurrent execution
+2. **Migration Tracking**: `__drizzle_migrations` table + `meta/_journal.json` file
+3. **Migrations run BEFORE code deployment**: Ensures database is ready for new code
+4. **Never modify applied migrations**: Create new migrations instead
+5. **Zero-downtime**: Use expand-contract pattern for breaking schema changes
+
+### Production Migration Script
+
+Production backends use a migration script with advisory locks:
 
 ```typescript
-// src/db/migrate.ts
-import { drizzle } from 'drizzle-orm/postgres-js';
-import { migrate } from 'drizzle-orm/postgres-js/migrator';
-import postgres from 'postgres';
+// src/db/migrate.ts - Key features:
+// - Advisory lock (pg_try_advisory_lock) prevents concurrent migrations
+// - Retry logic with exponential backoff for transient failures
+// - Timeout protection (default 5 minutes)
+// - Graceful handling when no migrations exist
 
-async function runMigrations() {
-	const connection = postgres(process.env.DATABASE_URL!, { max: 1 });
-	const db = drizzle(connection);
+const MIGRATION_LOCK_ID = 987654321; // Unique per service
 
-	console.log('Running migrations...');
-	await migrate(db, { migrationsFolder: './src/db/migrations' });
-	console.log('Migrations complete');
-
-	await connection.end();
+async function acquireLock(db) {
+	const result = await db.execute(
+		sql`SELECT pg_try_advisory_lock(${MIGRATION_LOCK_ID}) as acquired`
+	);
+	return result[0]?.acquired === true;
 }
-
-runMigrations().catch(console.error);
 ```
+
+See `services/mana-core-auth/src/db/migrate.ts` for the full implementation.
+
+### Best Practices
+
+**DO:**
+
+- Run migrations before deploying new code
+- Test migrations in staging before production
+- Use `CONCURRENTLY` for index creation
+- Keep migrations small and focused
+- Commit migration files to version control
+
+**DON'T:**
+
+- Run `db:push` in production
+- Delete or modify applied migrations
+- Add NOT NULL without default or backfill
+- Drop columns immediately (wait 1-2 weeks)
 
 ## Query Patterns
 

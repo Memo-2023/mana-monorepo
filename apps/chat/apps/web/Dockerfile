@@ -1,6 +1,14 @@
 # Build stage
 FROM node:20-alpine AS builder
 
+# Build arguments for SvelteKit static env vars
+ARG PUBLIC_BACKEND_URL=http://chat-backend:3002
+ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-core-auth:3001
+
+# Set as environment variables for build
+ENV PUBLIC_BACKEND_URL=$PUBLIC_BACKEND_URL
+ENV PUBLIC_MANA_CORE_AUTH_URL=$PUBLIC_MANA_CORE_AUTH_URL
+
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
@@ -47,14 +55,18 @@ RUN pnpm build
 # Production stage
 FROM node:20-alpine AS production
 
-WORKDIR /app
+# Keep same directory structure as builder so pnpm symlinks resolve correctly
+WORKDIR /app/apps/chat/apps/web
+
+# Copy the pnpm store that symlinks point to (at /app/node_modules/.pnpm)
+COPY --from=builder /app/node_modules/.pnpm /app/node_modules/.pnpm
+
+# Copy the app's node_modules (contains symlinks to the pnpm store)
+COPY --from=builder /app/apps/chat/apps/web/node_modules ./node_modules
 
 # Copy built application
 COPY --from=builder /app/apps/chat/apps/web/build ./build
 COPY --from=builder /app/apps/chat/apps/web/package.json ./
-
-# Install only production dependencies for the built app
-RUN npm install --omit=dev 2>/dev/null || true
 
 # Expose port
 EXPOSE 3000

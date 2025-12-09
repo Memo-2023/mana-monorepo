@@ -1,21 +1,37 @@
 -- Create databases for all services
 -- This script runs on first container initialization
 
--- Create chat database
-CREATE DATABASE chat;
-
--- Create voxel_lava database
-CREATE DATABASE voxel_lava;
-
--- Create storage database (cloud drive)
-CREATE DATABASE storage;
-
--- Create todo database
-CREATE DATABASE todo;
+-- Core databases
+CREATE DATABASE IF NOT EXISTS chat;
+CREATE DATABASE IF NOT EXISTS zitare;
+CREATE DATABASE IF NOT EXISTS contacts;
+CREATE DATABASE IF NOT EXISTS calendar;
+CREATE DATABASE IF NOT EXISTS clock;
+CREATE DATABASE IF NOT EXISTS todo;
+CREATE DATABASE IF NOT EXISTS manadeck;
+CREATE DATABASE IF NOT EXISTS storage;
+CREATE DATABASE IF NOT EXISTS mail;
+CREATE DATABASE IF NOT EXISTS moodlit;
+CREATE DATABASE IF NOT EXISTS finance;
+CREATE DATABASE IF NOT EXISTS inventory;
+CREATE DATABASE IF NOT EXISTS techbase;
+CREATE DATABASE IF NOT EXISTS voxel_lava;
+CREATE DATABASE IF NOT EXISTS figgos;
 
 -- Grant all privileges to the default user
 GRANT ALL PRIVILEGES ON DATABASE chat TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE voxel_lava TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE manacore TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE storage TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE zitare TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE contacts TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE calendar TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE clock TO manacore;
 GRANT ALL PRIVILEGES ON DATABASE todo TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE manadeck TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE storage TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE mail TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE moodlit TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE finance TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE inventory TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE techbase TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE voxel_lava TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE figgos TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE manacore TO manacore;

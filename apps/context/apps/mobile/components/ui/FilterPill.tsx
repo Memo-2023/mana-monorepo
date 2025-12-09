@@ -186,7 +186,7 @@ export const FilterPill: React.FC<FilterPillProps> = ({
 								: isDark
 									? '#1f2937'
 									: '#d1d5db',
-							opacity: disabled ? 0.6 : (pressed ? 0.8 : 1),
+							opacity: disabled ? 0.6 : pressed ? 0.8 : 1,
 						},
 					]}
 					onPress={disabled ? undefined : actionButton.onPress}

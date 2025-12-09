@@ -4,12 +4,32 @@
  * Fetches contacts from the Contacts backend for dashboard widgets.
  */
 
+import { browser } from '$app/environment';
 import { createApiClient, type ApiResult } from '../base-client';
 
-// Backend URL - falls back to localhost for development
-const CONTACTS_API_URL = import.meta.env.PUBLIC_CONTACTS_API_URL || 'http://localhost:3015/api/v1';
+// Get Contacts API URL dynamically at runtime
+function getContactsApiUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		// Client-side: use injected window variable (set by hooks.server.ts)
+		const injectedUrl = (window as unknown as { __PUBLIC_CONTACTS_API_URL__?: string })
+			.__PUBLIC_CONTACTS_API_URL__;
+		if (injectedUrl) {
+			return `${injectedUrl}/api/v1`;
+		}
+	}
+	// Fallback for local development
+	return 'http://localhost:3015/api/v1';
+}
 
-const client = createApiClient(CONTACTS_API_URL);
+// Lazy-initialized client to ensure we get the correct URL at runtime
+let _client: ReturnType<typeof createApiClient> | null = null;
+
+function getClient() {
+	if (!_client) {
+		_client = createApiClient(getContactsApiUrl());
+	}
+	return _client;
+}
 
 /**
  * Contact entity from Contacts backend
@@ -55,7 +75,7 @@ export const contactsService = {
 	 * Get favorite contacts
 	 */
 	async getFavoriteContacts(limit: number = 5): Promise<ApiResult<Contact[]>> {
-		const result = await client.get<Contact[]>(`/contacts?isFavorite=true&limit=${limit}`);
+		const result = await getClient().get<Contact[]>(`/contacts?isFavorite=true&limit=${limit}`);
 		return result;
 	},
 
@@ -63,7 +83,7 @@ export const contactsService = {
 	 * Get recent contacts (by updatedAt)
 	 */
 	async getRecentContacts(limit: number = 5): Promise<ApiResult<Contact[]>> {
-		const result = await client.get<Contact[]>(`/contacts?limit=${limit}`);
+		const result = await getClient().get<Contact[]>(`/contacts?limit=${limit}`);
 
 		if (result.error || !result.data) {
 			return result;
@@ -82,7 +102,7 @@ export const contactsService = {
 	 * Get contacts with upcoming birthdays
 	 */
 	async getUpcomingBirthdays(days: number = 30): Promise<ApiResult<Contact[]>> {
-		const result = await client.get<Contact[]>('/contacts');
+		const result = await getClient().get<Contact[]>('/contacts');
 
 		if (result.error || !result.data) {
 			return result;
@@ -113,7 +133,7 @@ export const contactsService = {
 	 * Get contact count
 	 */
 	async getContactCount(): Promise<ApiResult<{ total: number; favorites: number }>> {
-		const result = await client.get<Contact[]>('/contacts');
+		const result = await getClient().get<Contact[]>('/contacts');
 
 		if (result.error || !result.data) {
 			return { data: null, error: result.error };

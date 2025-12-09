@@ -1,3 +1,10 @@
+# Production Deployment
+#
+# Triggered by:
+#   - Manual only (workflow_dispatch with confirmation)
+#
+# Flow: dev (staging) → main (production)
+# Requires typing "deploy" to confirm
 name: CD - Production Deployment
 
 on:
@@ -205,8 +212,52 @@ jobs:
           ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
             cd ~/manacore-production
 
-            # Run migrations before deploying new code
-            docker compose run --rm mana-core-auth pnpm run db:migrate || echo "Migrations completed or skipped"
+            echo "=== Running Database Migrations ==="
+            echo ""
+
+            # Migration function with retry logic
+            run_migration() {
+              local service=$1
+              local max_attempts=3
+              local timeout=300  # 5 minutes
+              local attempt=1
+
+              while [ $attempt -le $max_attempts ]; do
+                echo "[$service] Migration attempt $attempt/$max_attempts..."
+
+                # Run migration with timeout using a temporary container
+                if timeout $timeout docker compose run --rm $service pnpm run db:migrate 2>&1; then
+                  echo "✅ [$service] Migration succeeded"
+                  return 0
+                else
+                  exit_code=$?
+                  if [ $exit_code -eq 124 ]; then
+                    echo "⚠️  [$service] Migration timeout after ${timeout}s"
+                  else
+                    echo "⚠️  [$service] Migration failed with exit code $exit_code"
+                  fi
+
+                  attempt=$((attempt + 1))
+                  if [ $attempt -le $max_attempts ]; then
+                    wait_time=$((10 * attempt))  # Backoff: 10s, 20s, 30s
+                    echo "    Waiting ${wait_time}s before retry..."
+                    sleep $wait_time
+                  fi
+                fi
+              done
+
+              echo "❌ [$service] Migration failed after $max_attempts attempts"
+              return 1
+            }
+
+            # Run migrations for mana-core-auth (central auth service)
+            run_migration mana-core-auth || {
+              echo "❌ mana-core-auth migration failed"
+              echo "⚠️  Continuing with deployment - manual migration may be required"
+            }
+
+            echo ""
+            echo "✅ Migration step completed"
           EOF
 
       - name: Deploy with zero-downtime

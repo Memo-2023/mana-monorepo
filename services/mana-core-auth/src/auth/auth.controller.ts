@@ -18,6 +18,8 @@ import { RegisterB2BDto } from './dto/register-b2b.dto';
 import { InviteEmployeeDto } from './dto/invite-employee.dto';
 import { AcceptInvitationDto } from './dto/accept-invitation.dto';
 import { SetActiveOrganizationDto } from './dto/set-active-organization.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 /**
@@ -135,6 +137,39 @@ export class AuthController {
 	@Get('jwks')
 	async getJwks() {
 		return this.betterAuthService.getJwks();
+	}
+
+	// =========================================================================
+	// Password Reset Endpoints
+	// =========================================================================
+
+	/**
+	 * Request password reset
+	 *
+	 * Initiates the password reset flow by sending an email with a reset link.
+	 * Always returns success to prevent email enumeration attacks.
+	 */
+	@Post('forgot-password')
+	@HttpCode(HttpStatus.OK)
+	async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+		return this.betterAuthService.requestPasswordReset(
+			forgotPasswordDto.email,
+			forgotPasswordDto.redirectTo
+		);
+	}
+
+	/**
+	 * Reset password with token
+	 *
+	 * Completes the password reset using the token from the email link.
+	 */
+	@Post('reset-password')
+	@HttpCode(HttpStatus.OK)
+	async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+		return this.betterAuthService.resetPassword(
+			resetPasswordDto.token,
+			resetPasswordDto.newPassword
+		);
 	}
 
 	// =========================================================================

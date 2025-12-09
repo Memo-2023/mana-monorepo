@@ -50,9 +50,9 @@ export const BatchDocumentCreator: React.FC<BatchDocumentCreatorProps> = ({
 	const [subjectList, setSubjectList] = useState<string[]>([]);
 	const [documents, setDocuments] = useState<Document[]>([]);
 	const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
-	const [documentFilter, setDocumentFilter] = useState<
-		'all' | 'text' | 'context' | 'prompt'
-	>('context');
+	const [documentFilter, setDocumentFilter] = useState<'all' | 'text' | 'context' | 'prompt'>(
+		'context'
+	);
 	const [promptDocuments, setPromptDocuments] = useState<Document[]>([]);
 	const { mode, colors } = useTheme();
 	const isDark = mode === 'dark';

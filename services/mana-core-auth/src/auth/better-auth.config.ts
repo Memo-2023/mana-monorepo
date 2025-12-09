@@ -80,12 +80,36 @@ export function createBetterAuth(databaseUrl: string) {
 			},
 		}),
 
-		// Email/password authentication only
+		// Email/password authentication with password reset
 		emailAndPassword: {
 			enabled: true,
 			requireEmailVerification: false, // Can enable later
 			minPasswordLength: 12,
 			maxPasswordLength: 128,
+
+			/**
+			 * Password Reset Configuration
+			 *
+			 * Better Auth provides password reset via:
+			 * - auth.api.forgetPassword({ email }) - Sends reset email
+			 * - auth.api.resetPassword({ newPassword, token }) - Resets password
+			 *
+			 * @see https://www.better-auth.com/docs/authentication/email-password#password-reset
+			 */
+			sendResetPassword: async ({ user, url, token }) => {
+				// TODO: Implement email sending service (e.g., Resend, SendGrid)
+				// For now, log the reset URL for development
+				console.log('[Password Reset] User:', user.email);
+				console.log('[Password Reset] Reset URL:', url);
+				console.log('[Password Reset] Token:', token);
+
+				// In production, send an email like:
+				// await sendEmail({
+				//   to: user.email,
+				//   subject: 'Reset your password',
+				//   html: `<a href="${url}">Reset your password</a>`
+				// });
+			},
 		},
 
 		// Session configuration

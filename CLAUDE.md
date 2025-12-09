@@ -60,19 +60,46 @@ These projects are temporarily archived and excluded from the workspace. To re-a
 
 ## Development Commands
 
-```bash
-# Install dependencies
-pnpm install
+For detailed local development setup, see **[docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md)**.
 
+### Quick Start (Recommended)
+
+Use `dev:*:full` commands to start any app with automatic database setup:
+
+```bash
+pnpm docker:up           # Start PostgreSQL, Redis, MinIO
+pnpm dev:chat:full       # Start chat with auth + auto DB setup
+pnpm dev:zitare:full     # Start zitare with auth + auto DB setup
+pnpm dev:contacts:full   # Start contacts with auth + auto DB setup
+pnpm dev:calendar:full   # Start calendar with auth + auto DB setup
+pnpm dev:clock:full      # Start clock with auth + auto DB setup
+pnpm dev:todo:full       # Start todo with auth + auto DB setup
+pnpm dev:picture:full    # Start picture with auth + auto DB setup
+```
+
+These commands automatically:
+1. Create the database if missing
+2. Push the latest schema
+3. Start auth, backend, and web with colored output
+
+### Database Setup
+
+```bash
+pnpm setup:db            # Setup ALL databases and schemas
+pnpm setup:db:chat       # Setup just chat
+pnpm setup:db:auth       # Setup just auth
+```
+
+### Individual App Commands
+
+```bash
 # Start specific project (runs all apps in project)
 pnpm run manacore:dev
 pnpm run manadeck:dev
 pnpm run picture:dev
 pnpm run chat:dev
 pnpm run zitare:dev
-pnpm run presi:dev
 pnpm run contacts:dev
-pnpm run mail:dev
 
 # Start specific app within project
 pnpm run dev:chat:mobile     # Just mobile app
@@ -607,7 +634,9 @@ PORT=...
 
 ## Project-Specific Documentation
 
+- **[docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md)** - Database setup and `dev:*:full` commands
 - **[docs/ENVIRONMENT_VARIABLES.md](docs/ENVIRONMENT_VARIABLES.md)** - Complete environment setup guide
+- **[docs/DATABASE_MIGRATIONS.md](docs/DATABASE_MIGRATIONS.md)** - Migration best practices, CI/CD, rollback procedures
 
 Each project has its own `CLAUDE.md` with detailed information:
 

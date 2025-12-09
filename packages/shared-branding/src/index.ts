@@ -31,6 +31,7 @@ export {
 	MailLogo,
 	MoodlitLogo,
 	InventoryLogo,
+	ClockLogo,
 } from './logos';
 
 // Configuration

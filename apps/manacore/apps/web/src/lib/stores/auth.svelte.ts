@@ -7,9 +7,18 @@ import { browser } from '$app/environment';
 import { initializeWebAuth } from '@manacore/shared-auth';
 import type { UserData } from '@manacore/shared-auth';
 
-// Initialize Mana Core Auth only on the client side
-// TODO: Use PUBLIC_MANA_CORE_AUTH_URL from env when available
-const MANA_AUTH_URL = 'http://localhost:3001';
+// Get auth URL dynamically at runtime - fallback for SSR and client
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		// Client-side: use injected window variable (set by hooks.server.ts)
+		// Falls back to localhost for local development
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	// Server-side (SSR): use Docker internal URL for container-to-container communication
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+}
 
 // Lazy initialization to avoid SSR issues with localStorage
 let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
@@ -18,7 +27,7 @@ let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null =
 function getAuthService() {
 	if (!browser) return null;
 	if (!_authService) {
-		const auth = initializeWebAuth({ baseUrl: MANA_AUTH_URL });
+		const auth = initializeWebAuth({ baseUrl: getAuthUrl() });
 		_authService = auth.authService;
 		_tokenManager = auth.tokenManager;
 	}
@@ -171,6 +180,29 @@ export const authStore = {
 
 		try {
 			const result = await authService.forgotPassword(email);
+
+			if (!result.success) {
+				return { success: false, error: result.error || 'Password reset failed' };
+			}
+
+			return { success: true };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
+		}
+	},
+
+	/**
+	 * Reset password with token
+	 */
+	async resetPassword(token: string, newPassword: string) {
+		const authService = getAuthService();
+		if (!authService) {
+			return { success: false, error: 'Auth not available on server' };
+		}
+
+		try {
+			const result = await authService.resetPassword(token, newPassword);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Password reset failed' };

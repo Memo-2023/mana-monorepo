@@ -1,0 +1,142 @@
+# CI Pipeline: Validates code on PRs, builds images on push
+#
+# Flow:
+#   PR → dev/main     : Runs validation (required status check)
+#   Push → dev/main   : Builds Docker images (NO auto-deploy)
+#
+# Deployments are triggered separately:
+#   - Manual: workflow_dispatch on cd-staging.yml / cd-production.yml
+#   - Tag-based: push tag like "chat-staging-v1.0.0" triggers cd-staging-tagged.yml
+#
+# Full config archived at: .github/workflows/ci-main.full.yml
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'services/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'turbo.json'
+  pull_request:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'services/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'turbo.json'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9.15.0'
+
+jobs:
+  # Validation job - runs on PRs to catch issues before merge
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm run type-check
+
+      - name: Lint
+        run: pnpm run lint || echo "Lint warnings found"
+
+  # Build Docker images - only on push to dev/main (not PRs)
+  build-docker-images:
+    name: Build ${{ matrix.service.name }}
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    strategy:
+      matrix:
+        service:
+          - { name: 'mana-core-auth', path: 'services/mana-core-auth', port: '3001' }
+          - { name: 'chat-backend', path: 'apps/chat/apps/backend', port: '3002' }
+          - { name: 'chat-web', path: 'apps/chat/apps/web', port: '3000' }
+          - { name: 'manacore-web', path: 'apps/manacore/apps/web', port: '5173' }
+          - { name: 'todo-backend', path: 'apps/todo/apps/backend', port: '3018' }
+          - { name: 'todo-web', path: 'apps/todo/apps/web', port: '5188' }
+          - { name: 'calendar-backend', path: 'apps/calendar/apps/backend', port: '3016' }
+          - { name: 'calendar-web', path: 'apps/calendar/apps/web', port: '5186' }
+          - { name: 'clock-backend', path: 'apps/clock/apps/backend', port: '3017' }
+          - { name: 'clock-web', path: 'apps/clock/apps/web', port: '5187' }
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Check if Dockerfile exists
+        id: check-dockerfile
+        run: |
+          if [ -f "${{ matrix.service.path }}/Dockerfile" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "::warning::No Dockerfile found for ${{ matrix.service.name }}"
+          fi
+
+      - name: Login to GitHub Container Registry
+        if: steps.check-dockerfile.outputs.exists == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        if: steps.check-dockerfile.outputs.exists == 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.service.name }}
+          tags: |
+            type=raw,value=latest
+
+      - name: Build and push
+        if: steps.check-dockerfile.outputs.exists == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.service.path }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+

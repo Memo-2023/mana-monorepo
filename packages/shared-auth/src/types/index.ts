@@ -128,6 +128,7 @@ export interface AuthEndpoints {
 	refresh: string;
 	validate: string;
 	forgotPassword: string;
+	resetPassword: string;
 	googleSignIn: string;
 	appleSignIn: string;
 	credits: string;

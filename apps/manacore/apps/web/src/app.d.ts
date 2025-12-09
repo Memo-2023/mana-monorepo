@@ -1,18 +1,15 @@
-import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
-
+/**
+ * App type declarations for ManaCore web app
+ *
+ * Authentication is handled entirely by Mana Core Auth (@manacore/shared-auth).
+ * No Supabase is needed - all data comes from mana-core-auth APIs.
+ */
 declare global {
 	namespace App {
-		interface Locals {
-			supabase: SupabaseClient;
-			safeGetSession: () => Promise<{ session: Session | null; user: User | null }>;
-			session: Session | null;
-			user: User | null;
-		}
-		interface PageData {
-			// Auth is handled by Mana Core Auth (@manacore/shared-auth), not Supabase
-			// Supabase is used for database operations only
-			supabase?: SupabaseClient;
-		}
+		// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+		interface Locals {}
+		// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+		interface PageData {}
 		// interface Error {}
 		// interface Platform {}
 	}

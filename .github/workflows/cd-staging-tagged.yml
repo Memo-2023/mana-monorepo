@@ -21,6 +21,10 @@ on:
           - zitare
           - presi
           - mana-core-auth
+          - manacore
+          - todo
+          - calendar
+          - clock
       apps:
         description: 'Apps to deploy (comma-separated: backend,web,landing or "all")'
         required: true
@@ -36,7 +40,8 @@ env:
   NODE_VERSION: '20'
   PNPM_VERSION: '9.15.0'
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
+  # Note: repository_owner is lowercased for Docker compatibility
+  IMAGE_PREFIX: ghcr.io/memo-2023
 
 jobs:
   # Parse tag or inputs to determine what to deploy
@@ -104,6 +109,10 @@ jobs:
           PROJECT_APPS[zitare]="backend,web"
           PROJECT_APPS[presi]="backend,web"
           PROJECT_APPS[mana-core-auth]="service"
+          PROJECT_APPS[manacore]="web"
+          PROJECT_APPS[todo]="backend,web"
+          PROJECT_APPS[calendar]="backend,web"
+          PROJECT_APPS[clock]="backend,web"
 
           # Expand "all" to available apps
           if [ "$APPS" == "all" ]; then
@@ -135,8 +144,17 @@ jobs:
                     IMAGE_NAME="${PROJECT}-backend"
                     ;;
                   web)
-                    DOCKERFILE_PATH="docker/templates/Dockerfile.sveltekit"
-                    CONTEXT_PATH="apps/$PROJECT/apps/web"
+                    # Apps with their own Dockerfiles (need monorepo root for shared packages)
+                    case "$PROJECT" in
+                      manacore|todo|calendar|clock)
+                        DOCKERFILE_PATH="apps/$PROJECT/apps/web/Dockerfile"
+                        CONTEXT_PATH="."
+                        ;;
+                      *)
+                        DOCKERFILE_PATH="docker/templates/Dockerfile.sveltekit"
+                        CONTEXT_PATH="apps/$PROJECT/apps/web"
+                        ;;
+                    esac
                     IMAGE_NAME="${PROJECT}-web"
                     ;;
                   landing)
@@ -146,15 +164,29 @@ jobs:
                     ;;
                 esac
 
-                # Set ports per project
+                # Set backend ports per project (must match docker-compose.staging.yml)
                 case "$PROJECT" in
                   chat) PORT="3002" ;;
                   picture) PORT="3006" ;;
                   manadeck) PORT="3009" ;;
                   zitare) PORT="3007" ;;
                   presi) PORT="3008" ;;
+                  calendar) PORT="3016" ;;
+                  clock) PORT="3017" ;;
+                  todo) PORT="3018" ;;
                 esac
-                HEALTH_PATH="/api/health"
+
+                # Override ports for web apps (SvelteKit uses different ports)
+                if [ "$APP" == "web" ]; then
+                  case "$PROJECT" in
+                    manacore) PORT="5173" ;;
+                    todo) PORT="5188" ;;
+                    calendar) PORT="5186" ;;
+                    clock) PORT="5187" ;;
+                    *) PORT="5173" ;;  # default SvelteKit port
+                  esac
+                fi
+                HEALTH_PATH="/api/v1/health"
                 ;;
             esac
 
@@ -267,25 +299,71 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Sync docker-compose to staging
+        run: |
+          # Ensure staging directory exists
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} "mkdir -p ~/manacore-staging"
+          # Copy the docker-compose file
+          scp docker-compose.staging.yml ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:~/manacore-staging/docker-compose.yml
+
+      - name: Login to GHCR on staging server
+        run: |
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          EOF
+
       - name: Deploy service
         env:
           VERSION: ${{ needs.parse-deployment.outputs.version }}
           IMAGE_NAME: ${{ matrix.image_name }}
+          APP_TYPE: ${{ matrix.app }}
+          PROJECT: ${{ needs.parse-deployment.outputs.project }}
         run: |
+          # Compute the version variable name locally (before SSH)
+          # Map: todo-web -> TODO_WEB_VERSION, chat-backend -> CHAT_VERSION
+          case "$IMAGE_NAME" in
+            *-web)
+              PROJECT_UPPER=$(echo "$PROJECT" | tr '[:lower:]-' '[:upper:]_')
+              VERSION_VAR="${PROJECT_UPPER}_WEB_VERSION"
+              ;;
+            *-backend)
+              PROJECT_UPPER=$(echo "$PROJECT" | tr '[:lower:]-' '[:upper:]_')
+              VERSION_VAR="${PROJECT_UPPER}_VERSION"
+              ;;
+            mana-core-auth)
+              VERSION_VAR="AUTH_VERSION"
+              ;;
+            *)
+              VERSION_VAR=$(echo "$IMAGE_NAME" | tr '[:lower:]-' '[:upper:]_')_VERSION
+              ;;
+          esac
+
+          echo "Will set $VERSION_VAR=$VERSION for docker-compose"
+
           ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
             cd ~/manacore-staging
 
             echo "Deploying $IMAGE_NAME:$VERSION to staging..."
 
-            # Pull the new image
+            # Pull the new image with specific version tag
             docker pull ${{ env.IMAGE_PREFIX }}/$IMAGE_NAME:$VERSION
 
-            # Restart only the specific service
-            SERVICE_NAME=\$(echo "$IMAGE_NAME" | tr '-' '_')
+            # Update .env file with the version for this service
+            # This ensures docker-compose uses the correct image tag
+            if grep -q "^$VERSION_VAR=" .env 2>/dev/null; then
+              sed -i "s/^$VERSION_VAR=.*/$VERSION_VAR=$VERSION/" .env
+            else
+              echo "$VERSION_VAR=$VERSION" >> .env
+            fi
 
-            if docker compose ps | grep -q "\$SERVICE_NAME"; then
+            echo "Updated .env: $VERSION_VAR=$VERSION"
+            grep "$VERSION_VAR" .env || true
+
+            # Service name matches docker-compose service name (with hyphens)
+            SERVICE_NAME="$IMAGE_NAME"
+
+            if docker compose ps -a | grep -q "$IMAGE_NAME"; then
               echo "Updating existing service: \$SERVICE_NAME"
-              docker compose pull \$SERVICE_NAME || true
               docker compose up -d --no-deps --force-recreate \$SERVICE_NAME
             else
               echo "Service \$SERVICE_NAME not found in compose, starting..."
@@ -295,6 +373,10 @@ jobs:
             # Wait for startup
             sleep 10
             docker compose ps \$SERVICE_NAME
+
+            # Verify correct image is running
+            echo "Running image:"
+            docker inspect --format='{{.Config.Image}}' ${IMAGE_NAME}-staging 2>/dev/null || true
 
             # Cleanup old images
             docker image prune -f

@@ -1,141 +1,103 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { Button, Input, Card } from '@manacore/shared-ui';
+	import { authStore } from '$lib/stores/auth.svelte';
 
-	let { form } = $props();
 	let loading = $state(false);
 	let hasToken = $state(false);
-	let verifying = $state(true);
-	let verificationError = $state<string | null>(null);
+	let token = $state<string | null>(null);
+	let password = $state('');
+	let confirmPassword = $state('');
+	let error = $state<string | null>(null);
+	let success = $state(false);
 
-	onMount(async () => {
-		// Check if we have tokens in the URL hash (from password recovery email)
-		const hash = window.location.hash.substring(1); // Remove the '#'
-		const hashParams = new URLSearchParams(hash);
-		const accessToken = hashParams.get('access_token');
-		const refreshToken = hashParams.get('refresh_token');
-		const type = hashParams.get('type');
-
-		// Check if we have a token in the URL query params (from Supabase email link)
-		const queryToken = $page.url.searchParams.get('token');
-		const queryType = $page.url.searchParams.get('type');
-
-		if (accessToken && refreshToken && type === 'recovery') {
-			// Have tokens in hash - need to establish session
-			try {
-				const response = await fetch('/api/auth/set-session', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						access_token: accessToken,
-						refresh_token: refreshToken,
-					}),
-				});
-
-				const result = await response.json();
-
-				if (result.success) {
-					hasToken = true;
-					// Clean up URL by removing hash
-					window.history.replaceState({}, '', window.location.pathname);
-				} else {
-					verificationError = result.error || 'Failed to establish session';
-				}
-			} catch (error) {
-				console.error('Session establishment error:', error);
-				verificationError = 'Failed to establish session';
-			} finally {
-				verifying = false;
-			}
-		} else if (queryToken && queryType === 'recovery') {
-			// Have token in query params - need to verify via OTP
-			try {
-				const response = await fetch('/api/auth/verify-token', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ token: queryToken, type: queryType }),
-				});
-
-				const result = await response.json();
-
-				if (result.success) {
-					hasToken = true;
-					// Clean up URL by removing query params
-					window.history.replaceState({}, '', window.location.pathname);
-				} else {
-					verificationError = result.error || 'Invalid or expired reset link';
-				}
-			} catch (error) {
-				console.error('Token verification error:', error);
-				verificationError = 'Failed to verify reset link';
-			} finally {
-				verifying = false;
-			}
-		} else {
-			// No token found
-			verifying = false;
-		}
+	onMount(() => {
+		// Get token from URL query parameter
+		token = $page.url.searchParams.get('token');
+		hasToken = !!token;
 	});
+
+	async function handleSubmit(e: Event) {
+		e.preventDefault();
+		error = null;
+
+		if (!token) {
+			error = 'Reset token is missing';
+			return;
+		}
+
+		if (password !== confirmPassword) {
+			error = 'Passwords do not match';
+			return;
+		}
+
+		if (password.length < 12) {
+			error = 'Password must be at least 12 characters';
+			return;
+		}
+
+		loading = true;
+
+		try {
+			const result = await authStore.resetPassword(token, password);
+
+			if (!result.success) {
+				error = result.error || 'Failed to reset password';
+			} else {
+				success = true;
+				// Redirect to login after 3 seconds
+				setTimeout(() => {
+					goto('/login');
+				}, 3000);
+			}
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'An error occurred';
+		} finally {
+			loading = false;
+		}
+	}
 </script>
 
 <div>
 	<div class="text-center">
 		<h2 class="mb-2 text-3xl font-bold text-gray-900 dark:text-white">Reset Password</h2>
 		<p class="text-gray-600 dark:text-gray-400">
-			{#if verifying}
-				Verifying your reset link...
+			{#if success}
+				Password reset successfully
 			{:else if hasToken}
 				Enter your new password
 			{:else}
-				Token missing or expired
+				Invalid or missing reset token
 			{/if}
 		</p>
 	</div>
 
-	{#if verifying}
+	{#if success}
 		<Card class="mt-8">
 			<div class="text-center">
-				<div
-					class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
-				></div>
-				<p class="text-gray-600 dark:text-gray-400">Verifying your password reset link...</p>
-			</div>
-		</Card>
-	{:else if verificationError}
-		<Card class="mt-8">
-			<div class="text-center">
-				<div class="mb-4 text-6xl">⚠️</div>
+				<div class="mb-4 text-6xl">✅</div>
 				<p class="mb-4 text-gray-600 dark:text-gray-400">
-					{verificationError}
+					Your password has been reset successfully. You will be redirected to the login page
+					shortly.
 				</p>
 				<a
-					href="/forgot-password"
+					href="/login"
 					class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
 				>
-					Request a new reset link
+					Go to login
 				</a>
 			</div>
 		</Card>
 	{:else if hasToken}
 		<Card class="mt-8">
-			<form
-				method="POST"
-				use:enhance={() => {
-					loading = true;
-					return async ({ update }) => {
-						await update();
-						loading = false;
-					};
-				}}
-			>
-				{#if form?.error}
+			<form onsubmit={handleSubmit}>
+				{#if error}
 					<div
 						class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400"
 					>
-						{form.error}
+						{error}
 					</div>
 				{/if}
 
@@ -152,12 +114,13 @@
 							name="password"
 							id="password"
 							autocomplete="new-password"
-							placeholder="••••••••"
+							placeholder="Enter new password"
 							required
-							minlength={6}
+							minlength={12}
+							bind:value={password}
 						/>
 						<p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-							Must be at least 6 characters
+							Must be at least 12 characters
 						</p>
 					</div>
 
@@ -173,9 +136,10 @@
 							name="confirmPassword"
 							id="confirmPassword"
 							autocomplete="new-password"
-							placeholder="••••••••"
+							placeholder="Confirm new password"
 							required
-							minlength={6}
+							minlength={12}
+							bind:value={confirmPassword}
 						/>
 					</div>
 
@@ -195,10 +159,10 @@
 					This password reset link is invalid or has expired.
 				</p>
 				<a
-					href="/login"
+					href="/forgot-password"
 					class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
 				>
-					Back to login
+					Request a new reset link
 				</a>
 			</div>
 		</Card>

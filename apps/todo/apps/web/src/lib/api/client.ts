@@ -12,12 +12,28 @@ interface ApiError {
 	statusCode: number;
 }
 
+/**
+ * Get the backend URL, preferring runtime-injected value in browser
+ * This allows Docker to inject PUBLIC_BACKEND_URL_CLIENT at runtime
+ * instead of using the build-time PUBLIC_BACKEND_URL
+ */
+function getBackendUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const runtimeUrl = (window as Window & { __PUBLIC_BACKEND_URL__?: string })
+			.__PUBLIC_BACKEND_URL__;
+		if (runtimeUrl) {
+			return runtimeUrl;
+		}
+	}
+	return PUBLIC_BACKEND_URL || 'http://localhost:3018';
+}
+
 class ApiClient {
-	private baseUrl: string;
 	private accessToken: string | null = null;
 
-	constructor() {
-		this.baseUrl = PUBLIC_BACKEND_URL || 'http://localhost:3018';
+	// Use getter to evaluate URL at request time (browser may hydrate after construction)
+	private get baseUrl(): string {
+		return getBackendUrl();
 	}
 
 	setAccessToken(token: string | null) {

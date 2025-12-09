@@ -845,6 +845,92 @@ export class BetterAuthService {
 		}
 	}
 
+	// =========================================================================
+	// Password Reset Methods
+	// =========================================================================
+
+	/**
+	 * Request password reset
+	 *
+	 * Sends a password reset email to the user.
+	 * Uses Better Auth's forgetPassword API.
+	 *
+	 * @param email - User's email address
+	 * @param redirectTo - Optional URL to redirect after reset (used in email link)
+	 * @returns Success status
+	 */
+	async requestPasswordReset(
+		email: string,
+		redirectTo?: string
+	): Promise<{ success: boolean; message: string }> {
+		try {
+			// Better Auth's forgetPassword method
+			// See: https://www.better-auth.com/docs/authentication/email-password#password-reset
+			await (this.auth.api as any).forgetPassword({
+				body: {
+					email,
+					redirectTo,
+				},
+			});
+
+			// Always return success to prevent email enumeration
+			return {
+				success: true,
+				message: 'If an account with that email exists, a password reset link has been sent',
+			};
+		} catch (error) {
+			console.error('[requestPasswordReset] Error:', error);
+			// Always return success to prevent email enumeration attacks
+			return {
+				success: true,
+				message: 'If an account with that email exists, a password reset link has been sent',
+			};
+		}
+	}
+
+	/**
+	 * Reset password with token
+	 *
+	 * Resets the user's password using the token from the reset email.
+	 * Uses Better Auth's resetPassword API.
+	 *
+	 * @param token - Reset token from email link
+	 * @param newPassword - New password to set
+	 * @returns Success status
+	 * @throws UnauthorizedException if token is invalid or expired
+	 */
+	async resetPassword(
+		token: string,
+		newPassword: string
+	): Promise<{ success: boolean; message: string }> {
+		try {
+			// Better Auth's resetPassword method
+			// See: https://www.better-auth.com/docs/authentication/email-password#password-reset
+			await (this.auth.api as any).resetPassword({
+				body: {
+					token,
+					newPassword,
+				},
+			});
+
+			return {
+				success: true,
+				message: 'Password has been reset successfully',
+			};
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				if (
+					error.message?.includes('invalid') ||
+					error.message?.includes('expired') ||
+					error.message?.includes('not found')
+				) {
+					throw new UnauthorizedException('Invalid or expired reset token');
+				}
+			}
+			throw error;
+		}
+	}
+
 	/**
 	 * Get JWKS (JSON Web Key Set)
 	 *
