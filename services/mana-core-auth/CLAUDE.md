@@ -91,13 +91,25 @@ services/mana-core-auth/
 │   ├── credits/                    # Credit system
 │   ├── db/
 │   │   ├── schema/                 # Drizzle schemas
-│   │   └── connection.ts           # DB connection
+│   │   ├── migrations/             # Generated migration files
+│   │   ├── connection.ts           # DB connection
+│   │   └── migrate.ts              # Migration script with advisory locks
 │   └── config/
 │       └── configuration.ts        # App config
 ├── docs/
 │   └── AUTHENTICATION_ARCHITECTURE.md  # READ THIS FIRST
 └── test/
 ```
+
+## Database Migrations
+
+For comprehensive migration documentation, see **[docs/DATABASE_MIGRATIONS.md](/docs/DATABASE_MIGRATIONS.md)**.
+
+Key points:
+- Use `db:push` for development (fast iteration)
+- Use `db:generate` + `db:migrate` for production (tracked migrations)
+- Migrations use advisory locks to prevent concurrent execution
+- CI/CD runs migrations automatically before code deployment
 
 ## Key Files
 

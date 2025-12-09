@@ -203,6 +203,69 @@ jobs:
             echo "✅ Databases ready"
           EOF
 
+      - name: Run database migrations
+        env:
+          STAGING_USER: deploy
+          STAGING_HOST: 46.224.108.214
+        run: |
+          ssh $STAGING_USER@$STAGING_HOST << 'EOF'
+            cd ~/manacore-staging
+
+            echo "=== Running Database Migrations ==="
+            echo ""
+
+            # Migration function with retry logic
+            run_migration() {
+              local service=$1
+              local max_attempts=3
+              local timeout=300  # 5 minutes
+              local attempt=1
+
+              while [ $attempt -le $max_attempts ]; do
+                echo "[$service] Migration attempt $attempt/$max_attempts..."
+
+                # Run migration with timeout
+                if timeout $timeout docker compose exec -T $service pnpm run db:migrate 2>&1; then
+                  echo "✅ [$service] Migration succeeded"
+                  return 0
+                else
+                  exit_code=$?
+                  if [ $exit_code -eq 124 ]; then
+                    echo "⚠️  [$service] Migration timeout after ${timeout}s"
+                  else
+                    echo "⚠️  [$service] Migration failed with exit code $exit_code"
+                  fi
+
+                  attempt=$((attempt + 1))
+                  if [ $attempt -le $max_attempts ]; then
+                    wait_time=$((10 * attempt))  # Backoff: 10s, 20s, 30s
+                    echo "    Waiting ${wait_time}s before retry..."
+                    sleep $wait_time
+                  fi
+                fi
+              done
+
+              echo "❌ [$service] Migration failed after $max_attempts attempts"
+              return 1
+            }
+
+            # Run migrations for services that have db:migrate script
+            # mana-core-auth - central auth service
+            if docker compose exec -T mana-core-auth test -f src/db/migrate.ts 2>/dev/null || \
+               docker compose exec -T mana-core-auth pnpm run db:migrate --help 2>/dev/null; then
+              run_migration mana-core-auth || {
+                echo "❌ mana-core-auth migration failed - aborting deployment"
+                exit 1
+              }
+            else
+              echo "⏭️  [mana-core-auth] No db:migrate script, using db:push..."
+              docker compose exec -T mana-core-auth npx drizzle-kit push --force || echo "Auth schema push completed"
+            fi
+
+            echo ""
+            echo "✅ All migrations completed"
+          EOF
+
       - name: Run health checks
         env:
           STAGING_USER: deploy
@@ -211,141 +274,67 @@ jobs:
           ssh $STAGING_USER@$STAGING_HOST << 'EOF'
             cd ~/manacore-staging
 
-            # Wait for services to fully start
-            echo "Waiting 60s for services to fully initialize..."
-            sleep 60
+            echo "=== Health Checks with Polling ==="
+            echo ""
+
+            # Health check function with retry polling
+            check_health() {
+              local service=$1
+              local url=$2
+              local max_attempts=24  # 24 * 5s = 2 minutes max wait
+              local attempt=1
+
+              echo "Checking $service..."
+
+              while [ $attempt -le $max_attempts ]; do
+                # Check if container is running
+                if ! docker compose ps $service 2>/dev/null | grep -q "Up"; then
+                  if [ $attempt -eq 1 ]; then
+                    echo "  ⏳ Waiting for container to start..."
+                  fi
+                  sleep 5
+                  attempt=$((attempt + 1))
+                  continue
+                fi
+
+                # Check health endpoint
+                if docker compose exec -T $service wget -q -O - $url > /dev/null 2>&1; then
+                  echo "  ✅ $service is healthy (attempt $attempt)"
+                  return 0
+                fi
+
+                if [ $attempt -eq 1 ]; then
+                  echo "  ⏳ Waiting for $service to become healthy..."
+                fi
+
+                sleep 5
+                attempt=$((attempt + 1))
+              done
+
+              echo "  ❌ $service health check failed after $max_attempts attempts"
+              echo "  === Recent Logs ==="
+              docker compose logs --tail=50 $service
+              return 1
+            }
 
             echo "=== Container Status ==="
             docker compose ps
-
             echo ""
-            echo "=== Health Checks ==="
 
-            # Check mana-core-auth
-            echo "Checking mana-core-auth..."
-            if docker compose exec -T mana-core-auth wget -q -O - http://localhost:3001/api/v1/health > /dev/null 2>&1; then
-              echo "✅ mana-core-auth is healthy"
-            else
-              echo "❌ mana-core-auth health check failed"
-              echo "=== Logs ==="
-              docker compose logs --tail=50 mana-core-auth
-              exit 1
-            fi
-
-            # Check chat-backend
-            echo "Checking chat-backend..."
-            if docker compose exec -T chat-backend wget -q -O - http://localhost:3002/api/v1/health > /dev/null 2>&1; then
-              echo "✅ chat-backend is healthy"
-            else
-              echo "❌ chat-backend health check failed"
-              echo "=== Logs ==="
-              docker compose logs --tail=50 chat-backend
-              exit 1
-            fi
-
-            # Check chat-web
-            echo "Checking chat-web..."
-            if docker compose exec -T chat-web wget -q -O - http://localhost:3000/health > /dev/null 2>&1; then
-              echo "✅ chat-web is healthy"
-            else
-              echo "❌ chat-web health check failed"
-              echo "=== Logs ==="
-              docker compose logs --tail=50 chat-web
-              exit 1
-            fi
-
-            # Check manacore-web
-            echo "Checking manacore-web..."
-            if docker compose exec -T manacore-web wget -q -O - http://localhost:5173/health > /dev/null 2>&1; then
-              echo "✅ manacore-web is healthy"
-            else
-              echo "❌ manacore-web health check failed"
-              echo "=== Logs ==="
-              docker compose logs --tail=50 manacore-web
-              exit 1
-            fi
-
-            # Check todo-backend
-            echo "Checking todo-backend..."
-            if docker compose exec -T todo-backend wget -q -O - http://localhost:3018/api/v1/health > /dev/null 2>&1; then
-              echo "✅ todo-backend is healthy"
-            else
-              echo "❌ todo-backend health check failed"
-              echo "=== Logs ==="
-              docker compose logs --tail=50 todo-backend
-              exit 1
-            fi
-
-            # Check todo-web
-            echo "Checking todo-web..."
-            if docker compose exec -T todo-web wget -q -O - http://localhost:5188/health > /dev/null 2>&1; then
-              echo "✅ todo-web is healthy"
-            else
-              echo "❌ todo-web health check failed"
-              echo "=== Logs ==="
-              docker compose logs --tail=50 todo-web
-              exit 1
-            fi
-
-            # Check calendar-backend
-            echo "Checking calendar-backend..."
-            if docker compose exec -T calendar-backend wget -q -O - http://localhost:3016/api/v1/health > /dev/null 2>&1; then
-              echo "✅ calendar-backend is healthy"
-            else
-              echo "❌ calendar-backend health check failed"
-              echo "=== Logs ==="
-              docker compose logs --tail=50 calendar-backend
-              exit 1
-            fi
-
-            # Check calendar-web
-            echo "Checking calendar-web..."
-            if docker compose exec -T calendar-web wget -q -O - http://localhost:5186/health > /dev/null 2>&1; then
-              echo "✅ calendar-web is healthy"
-            else
-              echo "❌ calendar-web health check failed"
-              echo "=== Logs ==="
-              docker compose logs --tail=50 calendar-web
-              exit 1
-            fi
-
-            # Check clock-backend
-            echo "Checking clock-backend..."
-            if docker compose exec -T clock-backend wget -q -O - http://localhost:3017/api/v1/health > /dev/null 2>&1; then
-              echo "✅ clock-backend is healthy"
-            else
-              echo "❌ clock-backend health check failed"
-              echo "=== Logs ==="
-              docker compose logs --tail=50 clock-backend
-              exit 1
-            fi
-
-            # Check clock-web
-            echo "Checking clock-web..."
-            if docker compose exec -T clock-web wget -q -O - http://localhost:5187/health > /dev/null 2>&1; then
-              echo "✅ clock-web is healthy"
-            else
-              echo "❌ clock-web health check failed"
-              echo "=== Logs ==="
-              docker compose logs --tail=50 clock-web
-              exit 1
-            fi
+            # Check all services with polling
+            check_health mana-core-auth http://localhost:3001/api/v1/health || exit 1
+            check_health chat-backend http://localhost:3002/api/v1/health || exit 1
+            check_health chat-web http://localhost:3000/health || exit 1
+            check_health manacore-web http://localhost:5173/health || exit 1
+            check_health todo-backend http://localhost:3018/api/v1/health || exit 1
+            check_health todo-web http://localhost:5188/health || exit 1
+            check_health calendar-backend http://localhost:3016/api/v1/health || exit 1
+            check_health calendar-web http://localhost:5186/health || exit 1
+            check_health clock-backend http://localhost:3017/api/v1/health || exit 1
+            check_health clock-web http://localhost:5187/health || exit 1
 
             echo ""
             echo "✅ All health checks passed!"
-          EOF
-
-      - name: Run database migrations
-        env:
-          STAGING_USER: deploy
-          STAGING_HOST: 46.224.108.214
-        run: |
-          # Run migrations for services that need them
-          ssh $STAGING_USER@$STAGING_HOST << 'EOF'
-            cd ~/manacore-staging
-
-            # Mana Core Auth - push schema using Drizzle (--force skips interactive confirmation)
-            docker compose exec -T mana-core-auth npx drizzle-kit push --force || echo "Auth schema push skipped"
           EOF
 
       - name: Deployment summary

@@ -636,6 +636,7 @@ PORT=...
 
 - **[docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md)** - Database setup and `dev:*:full` commands
 - **[docs/ENVIRONMENT_VARIABLES.md](docs/ENVIRONMENT_VARIABLES.md)** - Complete environment setup guide
+- **[docs/DATABASE_MIGRATIONS.md](docs/DATABASE_MIGRATIONS.md)** - Migration best practices, CI/CD, rollback procedures
 
 Each project has its own `CLAUDE.md` with detailed information:
 
