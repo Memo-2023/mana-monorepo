@@ -200,6 +200,13 @@ export const contactsStore = {
 	},
 
 	/**
+	 * Set group filter
+	 */
+	setGroupId(groupId: string | undefined) {
+		filters = { ...filters, groupId };
+	},
+
+	/**
 	 * Clear selected contact
 	 */
 	clearSelected() {

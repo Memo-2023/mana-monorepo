@@ -21,87 +21,39 @@
 		class: className = '',
 		children,
 	}: Props = $props();
+
+	// Base card classes using Tailwind
+	const baseCardClasses =
+		'rounded-2xl overflow-hidden shadow-md border backdrop-blur-xl ' +
+		'bg-white/85 border-black/10 ' +
+		'dark:bg-white/[0.06] dark:border-white/10 dark:shadow-lg';
+
+	const dangerCardClasses =
+		'rounded-2xl overflow-hidden shadow-md border backdrop-blur-xl ' +
+		'bg-red-500/[0.08] border-red-500/30 ' +
+		'dark:bg-red-500/[0.12] dark:border-red-500/25 dark:shadow-lg';
+
+	const headerClasses =
+		'px-5 py-4 border-b border-black/[0.08] dark:border-white/10';
+
+	const dangerHeaderClasses =
+		'px-5 py-4 border-b border-red-500/20 bg-red-500/10';
 </script>
 
-<div class="settings-card settings-card--{variant} {className}">
+<div class="{variant === 'danger' ? dangerCardClasses : baseCardClasses} {className}">
 	{#if title || description}
-		<header class="settings-card__header">
+		<header class="{variant === 'danger' ? dangerHeaderClasses : headerClasses}">
 			{#if title}
-				<h3 class="settings-card__title">{title}</h3>
+				<h3 class="text-base font-semibold text-foreground {variant === 'danger' ? 'text-red-500 dark:text-red-400' : ''}">{title}</h3>
 			{/if}
 			{#if description}
-				<p class="settings-card__description">{description}</p>
+				<p class="text-sm text-muted-foreground mt-1">{description}</p>
 			{/if}
 		</header>
 	{/if}
 
-	<div class="settings-card__content">
+	<div class="flex flex-col">
 		{@render children()}
 	</div>
 </div>
 
-<style>
-	.settings-card {
-		/* Glass effect */
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		border-radius: 1rem;
-		overflow: hidden;
-		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-	}
-
-	:global(.dark) .settings-card {
-		background: rgba(255, 255, 255, 0.08);
-		border: 1px solid rgba(255, 255, 255, 0.12);
-	}
-
-	.settings-card--danger {
-		border-color: hsl(var(--destructive) / 0.3);
-		background: rgba(239, 68, 68, 0.08);
-	}
-
-	:global(.dark) .settings-card--danger {
-		background: rgba(239, 68, 68, 0.12);
-		border-color: rgba(239, 68, 68, 0.25);
-	}
-
-	.settings-card__header {
-		padding: 1rem 1.25rem;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-	}
-
-	:global(.dark) .settings-card__header {
-		border-bottom-color: rgba(255, 255, 255, 0.1);
-	}
-
-	.settings-card--danger .settings-card__header {
-		border-bottom-color: hsl(var(--destructive) / 0.2);
-		background: rgba(239, 68, 68, 0.1);
-	}
-
-	.settings-card__title {
-		font-size: 1rem;
-		font-weight: 600;
-		color: hsl(var(--foreground));
-		margin: 0;
-	}
-
-	.settings-card--danger .settings-card__title {
-		color: hsl(var(--destructive));
-	}
-
-	.settings-card__description {
-		font-size: 0.875rem;
-		color: hsl(var(--muted-foreground));
-		margin: 0.25rem 0 0 0;
-	}
-
-	.settings-card__content {
-		display: flex;
-		flex-direction: column;
-	}
-</style>

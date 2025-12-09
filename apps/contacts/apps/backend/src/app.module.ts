@@ -10,6 +10,9 @@ import { HealthModule } from './health/health.module';
 import { ImportModule } from './import/import.module';
 import { ExportModule } from './export/export.module';
 import { GoogleModule } from './google/google.module';
+import { DuplicatesModule } from './duplicates/duplicates.module';
+import { PhotoModule } from './photo/photo.module';
+import { BatchModule } from './batch/batch.module';
 
 @Module({
 	imports: [
@@ -27,6 +30,9 @@ import { GoogleModule } from './google/google.module';
 		ImportModule,
 		ExportModule,
 		GoogleModule,
+		DuplicatesModule,
+		PhotoModule,
+		BatchModule,
 	],
 })
 export class AppModule {}

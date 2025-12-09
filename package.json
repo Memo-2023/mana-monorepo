@@ -63,7 +63,7 @@
 		"dev:contacts:landing": "pnpm --filter @contacts/landing dev",
 		"dev:contacts:backend": "pnpm --filter @contacts/backend dev",
 		"dev:contacts:app": "turbo run dev --filter=@contacts/web --filter=@contacts/backend",
-		"dev:contacts:full": "./scripts/setup-databases.sh contacts && ./scripts/setup-databases.sh auth && concurrently -n auth,backend,web -c blue,green,cyan \"pnpm dev:auth\" \"pnpm dev:contacts:backend\" \"pnpm dev:contacts:web\"",
+		"dev:contacts:full": "./scripts/setup-databases.sh contacts && ./scripts/setup-databases.sh auth && pnpm contacts:db:seed && concurrently -n auth,backend,web -c blue,green,cyan \"pnpm dev:auth\" \"pnpm dev:contacts:backend\" \"pnpm dev:contacts:web\"",
 		"contacts:db:push": "pnpm --filter @contacts/backend db:push",
 		"contacts:db:studio": "pnpm --filter @contacts/backend db:studio",
 		"contacts:db:seed": "pnpm --filter @contacts/backend db:seed",

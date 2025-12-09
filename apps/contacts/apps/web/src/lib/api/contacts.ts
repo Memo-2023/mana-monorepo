@@ -63,6 +63,8 @@ export interface ContactGroup {
 	name: string;
 	description?: string | null;
 	color?: string | null;
+	icon?: string | null;
+	isPreset: boolean;
 	createdAt: string;
 }
 
@@ -284,6 +286,37 @@ export const activitiesApi = {
 		return fetchWithAuth(`/contacts/${contactId}/activities`, {
 			method: 'POST',
 			body: JSON.stringify(data),
+		});
+	},
+};
+
+// Photo API
+export const photoApi = {
+	async upload(contactId: string, file: File): Promise<{ photoUrl: string }> {
+		const token = await authStore.getAccessToken();
+
+		const formData = new FormData();
+		formData.append('photo', file);
+
+		const response = await fetch(`${API_BASE}/contacts/${contactId}/photo`, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+			body: formData,
+		});
+
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({ message: 'Upload failed' }));
+			throw new Error(error.message || 'Upload failed');
+		}
+
+		return response.json();
+	},
+
+	async delete(contactId: string): Promise<void> {
+		await fetchWithAuth(`/contacts/${contactId}/photo`, {
+			method: 'DELETE',
 		});
 	},
 };

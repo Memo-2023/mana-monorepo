@@ -67,7 +67,22 @@
 		"noContacts": "Keine Kontakte gefunden",
 		"addFirst": "Füge deinen ersten Kontakt hinzu",
 		"favorites": "Favoriten",
-		"archive": "Archiv"
+		"archive": "Archiv",
+		"contact": "Kontakt",
+		"contactsPlural": "Kontakte",
+		"call": "Anrufen",
+		"email": "E-Mail senden",
+		"favorite": "Als Favorit markieren",
+		"unfavorite": "Favorit entfernen"
+	},
+	"views": {
+		"list": "Listenansicht",
+		"grid": "Kachelansicht",
+		"alphabet": "Alphabetisch"
+	},
+	"sort": {
+		"firstName": "Vorname",
+		"lastName": "Nachname"
 	},
 	"contact": {
 		"firstName": "Vorname",
@@ -119,6 +134,28 @@
 		"disconnect": "Trennen",
 		"contacts": "Kontakte",
 		"loadMore": "Mehr laden"
+	},
+	"filters": {
+		"title": "Filter",
+		"clearAll": "Alle löschen",
+		"group": "Gruppe",
+		"allGroups": "Alle Gruppen",
+		"contactInfo": "Kontaktinfo",
+		"contact": {
+			"all": "Alle Kontakte",
+			"hasPhone": "Mit Telefon",
+			"hasEmail": "Mit E-Mail",
+			"incomplete": "Unvollständig"
+		},
+		"birthdayLabel": "Geburtstag",
+		"birthday": {
+			"all": "Alle",
+			"today": "Heute",
+			"thisWeek": "Diese Woche",
+			"thisMonth": "Diesen Monat"
+		},
+		"company": "Firma",
+		"allCompanies": "Alle Firmen"
 	},
 	"export": {
 		"title": "Kontakte exportieren",

@@ -18,6 +18,8 @@
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import ContactDetailModal from '$lib/components/ContactDetailModal.svelte';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
+	import { viewModeStore } from '$lib/stores/view-mode.svelte';
+	import { contactsSettings } from '$lib/stores/settings.svelte';
 
 	// Check if we're on a contact detail route
 	const contactDetailMatch = $derived($page.url.pathname.match(/^\/contacts\/([0-9a-f-]{36})$/i));
@@ -77,6 +79,7 @@
 		{ href: '/groups', label: 'Gruppen', icon: 'folder' },
 		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
 		{ href: '/archive', label: 'Archiv', icon: 'archive' },
+		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
@@ -154,6 +157,10 @@
 		// Load user settings
 		await userSettings.load();
 
+		// Initialize contacts settings and view mode
+		contactsSettings.initialize();
+		viewModeStore.initialize();
+
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('contacts-nav-sidebar');
 		if (savedSidebar === 'true') {
@@ -213,9 +220,9 @@
 	<main
 		class="main-content bg-background"
 		class:sidebar-mode={isSidebarMode && !isCollapsed}
-		class:floating-mode={!isSidebarMode && !isCollapsed}
+		class:floating-mode={!isSidebarMode}
 	>
-		<div class="content-wrapper">
+		<div class="content-wrapper" class:settings-page={$page.url.pathname === '/settings'}>
 			{@render children()}
 		</div>
 	</main>
@@ -240,7 +247,14 @@
 
 	/* Floating nav mode - add top padding for fixed nav */
 	.main-content.floating-mode {
-		padding-top: 100px;
+		padding-top: 80px;
+	}
+
+	/* Extra padding on mobile for larger nav */
+	@media (max-width: 768px) {
+		.main-content.floating-mode {
+			padding-top: 90px;
+		}
 	}
 
 	/* Sidebar mode - add left padding for sidebar nav */
@@ -255,10 +269,19 @@
 		padding: 2rem 1rem;
 	}
 
+	/* Settings page has its own padding and max-width */
+	.content-wrapper.settings-page {
+		max-width: none;
+		padding: 0;
+	}
+
 	@media (min-width: 640px) {
 		.content-wrapper {
 			padding-left: 1.5rem;
 			padding-right: 1.5rem;
+		}
+		.content-wrapper.settings-page {
+			padding: 0;
 		}
 	}
 
@@ -266,6 +289,9 @@
 		.content-wrapper {
 			padding-left: 2rem;
 			padding-right: 2rem;
+		}
+		.content-wrapper.settings-page {
+			padding: 0;
 		}
 	}
 </style>

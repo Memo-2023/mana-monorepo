@@ -67,7 +67,22 @@
 		"noContacts": "No contacts found",
 		"addFirst": "Add your first contact",
 		"favorites": "Favorites",
-		"archive": "Archive"
+		"archive": "Archive",
+		"contact": "Contact",
+		"contactsPlural": "Contacts",
+		"call": "Call",
+		"email": "Send email",
+		"favorite": "Mark as favorite",
+		"unfavorite": "Remove favorite"
+	},
+	"views": {
+		"list": "List view",
+		"grid": "Grid view",
+		"alphabet": "Alphabetical"
+	},
+	"sort": {
+		"firstName": "First Name",
+		"lastName": "Last Name"
 	},
 	"contact": {
 		"firstName": "First Name",
@@ -119,6 +134,28 @@
 		"disconnect": "Disconnect",
 		"contacts": "Contacts",
 		"loadMore": "Load more"
+	},
+	"filters": {
+		"title": "Filters",
+		"clearAll": "Clear all",
+		"group": "Group",
+		"allGroups": "All groups",
+		"contactInfo": "Contact info",
+		"contact": {
+			"all": "All contacts",
+			"hasPhone": "With phone",
+			"hasEmail": "With email",
+			"incomplete": "Incomplete"
+		},
+		"birthdayLabel": "Birthday",
+		"birthday": {
+			"all": "All",
+			"today": "Today",
+			"thisWeek": "This week",
+			"thisMonth": "This month"
+		},
+		"company": "Company",
+		"allCompanies": "All companies"
 	},
 	"export": {
 		"title": "Export Contacts",

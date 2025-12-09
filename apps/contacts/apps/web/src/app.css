@@ -61,8 +61,9 @@
 
 	/* Avatar styles */
 	.avatar {
-		width: 48px;
-		height: 48px;
+		width: 56px;
+		height: 56px;
+		min-width: 56px;
 		border-radius: var(--radius-full);
 		background-color: hsl(var(--primary));
 		color: hsl(var(--primary-foreground));
@@ -70,13 +71,13 @@
 		align-items: center;
 		justify-content: center;
 		font-weight: 600;
-		font-size: 1.125rem;
+		font-size: 1.25rem;
 	}
 
 	.avatar-lg {
-		width: 80px;
-		height: 80px;
-		font-size: 2rem;
+		width: 96px;
+		height: 96px;
+		font-size: 2.5rem;
 	}
 
 	/* Button styles */

@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, varchar, text, primaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, timestamp, varchar, text, primaryKey, boolean } from 'drizzle-orm/pg-core';
 import { contacts } from './contacts.schema';
 
 export const contactGroups = pgTable('contact_groups', {
@@ -7,6 +7,8 @@ export const contactGroups = pgTable('contact_groups', {
 	name: varchar('name', { length: 100 }).notNull(),
 	description: text('description'),
 	color: varchar('color', { length: 20 }),
+	icon: varchar('icon', { length: 50 }),
+	isPreset: boolean('is_preset').default(false).notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
