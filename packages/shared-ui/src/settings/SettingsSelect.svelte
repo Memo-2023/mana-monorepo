@@ -57,176 +57,55 @@
 			onchange(rawValue);
 		}
 	}
+
+	// Tailwind classes
+	const baseClasses = 'flex items-center justify-between gap-4 px-5 py-4';
+	const borderClasses = 'border-b border-black/[0.08] dark:border-white/10 last:border-b-0';
+	const disabledClasses = 'opacity-50 cursor-not-allowed';
+
+	const iconClasses =
+		'flex items-center justify-center flex-shrink-0 w-9 h-9 rounded-[0.625rem] bg-black/[0.04] dark:bg-white/[0.08] text-primary [&>svg]:w-[1.125rem] [&>svg]:h-[1.125rem]';
 </script>
 
 <div
-	class="settings-select {border ? 'settings-select--border' : ''} {disabled
-		? 'settings-select--disabled'
-		: ''} {className}"
+	class="{baseClasses} {border ? borderClasses : ''} {disabled ? disabledClasses : ''} {className}"
 >
-	<div class="settings-select__content">
+	<div class="flex items-center gap-3 flex-1 min-w-0">
 		{#if icon}
-			<span class="settings-select__icon">
+			<span class={iconClasses}>
 				{@render icon()}
 			</span>
 		{/if}
-		<div class="settings-select__text">
-			<span class="settings-select__label">{label}</span>
+		<div class="flex flex-col gap-0.5 min-w-0">
+			<span class="text-[0.9375rem] font-medium text-gray-700 dark:text-gray-100">{label}</span>
 			{#if description}
-				<span class="settings-select__description">{description}</span>
+				<span class="text-[0.8125rem] text-gray-500 dark:text-gray-400 leading-snug"
+					>{description}</span
+				>
 			{/if}
 		</div>
 	</div>
 
 	<select
-		class="settings-select__dropdown"
+		class="min-w-32 px-3 pr-8 py-2 text-sm font-medium text-gray-700 dark:text-gray-100
+			bg-black/[0.04] dark:bg-white/[0.08] border border-black/10 dark:border-white/[0.15]
+			rounded-lg cursor-pointer appearance-none transition-all duration-200
+			hover:border-black/20 dark:hover:border-white/25 hover:bg-black/[0.06] dark:hover:bg-white/[0.12]
+			focus-visible:outline-2 focus-visible:outline-primary/40 focus-visible:outline-offset-2 focus-visible:border-primary
+			disabled:cursor-not-allowed disabled:opacity-60
+			bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236b7280%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')]
+			dark:bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%239ca3af%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')]
+			bg-no-repeat bg-[right_0.5rem_center] bg-[length:1rem]"
 		value={value ?? ''}
 		onchange={handleChange}
 		{disabled}
 		aria-label={label}
 	>
 		{#each options as option}
-			<option value={option.value ?? ''}>{option.label}</option>
+			<option
+				value={option.value ?? ''}
+				class="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-100">{option.label}</option
+			>
 		{/each}
 	</select>
 </div>
-
-<style>
-	.settings-select {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
-		padding: 1rem 1.25rem;
-	}
-
-	.settings-select--border {
-		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-	}
-
-	:global(.dark) .settings-select--border {
-		border-bottom-color: rgba(255, 255, 255, 0.1);
-	}
-
-	.settings-select--border:last-child {
-		border-bottom: none;
-	}
-
-	.settings-select--disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.settings-select__content {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		flex: 1;
-		min-width: 0;
-	}
-
-	.settings-select__icon {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-shrink: 0;
-		width: 2.25rem;
-		height: 2.25rem;
-		border-radius: 0.625rem;
-		background: rgba(0, 0, 0, 0.04);
-		color: hsl(var(--primary));
-	}
-
-	:global(.dark) .settings-select__icon {
-		background: rgba(255, 255, 255, 0.08);
-	}
-
-	.settings-select__icon :global(svg) {
-		width: 1.125rem;
-		height: 1.125rem;
-	}
-
-	.settings-select__text {
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-		min-width: 0;
-	}
-
-	.settings-select__label {
-		font-size: 0.9375rem;
-		font-weight: 500;
-		color: #374151;
-	}
-
-	:global(.dark) .settings-select__label {
-		color: #f3f4f6;
-	}
-
-	.settings-select__description {
-		font-size: 0.8125rem;
-		color: #6b7280;
-		line-height: 1.4;
-	}
-
-	:global(.dark) .settings-select__description {
-		color: #9ca3af;
-	}
-
-	/* Select Dropdown - Glass style */
-	.settings-select__dropdown {
-		min-width: 8rem;
-		padding: 0.5rem 2rem 0.5rem 0.75rem;
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: #374151;
-		background-color: rgba(0, 0, 0, 0.04);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		border-radius: 0.5rem;
-		cursor: pointer;
-		appearance: none;
-		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-		background-repeat: no-repeat;
-		background-position: right 0.5rem center;
-		background-size: 1rem;
-		transition: all 0.2s ease;
-	}
-
-	:global(.dark) .settings-select__dropdown {
-		color: #f3f4f6;
-		background-color: rgba(255, 255, 255, 0.08);
-		border-color: rgba(255, 255, 255, 0.15);
-		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-	}
-
-	.settings-select__dropdown:hover:not(:disabled) {
-		border-color: rgba(0, 0, 0, 0.2);
-		background-color: rgba(0, 0, 0, 0.06);
-	}
-
-	:global(.dark) .settings-select__dropdown:hover:not(:disabled) {
-		border-color: rgba(255, 255, 255, 0.25);
-		background-color: rgba(255, 255, 255, 0.12);
-	}
-
-	.settings-select__dropdown:focus-visible {
-		outline: 2px solid hsl(var(--primary) / 0.4);
-		outline-offset: 2px;
-		border-color: hsl(var(--primary));
-	}
-
-	.settings-select__dropdown:disabled {
-		cursor: not-allowed;
-		opacity: 0.6;
-	}
-
-	.settings-select__dropdown option {
-		background-color: white;
-		color: #374151;
-	}
-
-	:global(.dark) .settings-select__dropdown option {
-		background-color: #1f2937;
-		color: #f3f4f6;
-	}
-</style>
