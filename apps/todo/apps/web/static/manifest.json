@@ -1,0 +1,71 @@
+{
+	"name": "Todo - Aufgabenverwaltung",
+	"short_name": "Todo",
+	"description": "Aufgaben und Projekte verwalten mit Kanban-Board, Subtasks und mehr",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#8b5cf6",
+	"orientation": "any",
+	"categories": ["productivity", "utilities"],
+	"lang": "de",
+	"dir": "ltr",
+	"icons": [
+		{
+			"src": "/icons/icon.svg",
+			"sizes": "any",
+			"type": "image/svg+xml",
+			"purpose": "any"
+		},
+		{
+			"src": "/icons/icon.svg",
+			"sizes": "any",
+			"type": "image/svg+xml",
+			"purpose": "maskable"
+		}
+	],
+	"shortcuts": [
+		{
+			"name": "Neue Aufgabe",
+			"short_name": "Neu",
+			"description": "Neue Aufgabe erstellen",
+			"url": "/?action=new",
+			"icons": [
+				{
+					"src": "/icons/icon.svg",
+					"sizes": "any",
+					"type": "image/svg+xml"
+				}
+			]
+		},
+		{
+			"name": "Kanban Board",
+			"short_name": "Kanban",
+			"description": "Kanban-Ansicht öffnen",
+			"url": "/kanban",
+			"icons": [
+				{
+					"src": "/icons/icon.svg",
+					"sizes": "any",
+					"type": "image/svg+xml"
+				}
+			]
+		},
+		{
+			"name": "Einstellungen",
+			"short_name": "Settings",
+			"description": "App-Einstellungen öffnen",
+			"url": "/settings",
+			"icons": [
+				{
+					"src": "/icons/icon.svg",
+					"sizes": "any",
+					"type": "image/svg+xml"
+				}
+			]
+		}
+	],
+	"screenshots": [],
+	"prefer_related_applications": false
+}
