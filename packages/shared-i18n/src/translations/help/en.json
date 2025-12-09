@@ -1,0 +1,65 @@
+{
+	"title": "Help & Support",
+	"subtitle": "Find answers and learn how to use the app",
+	"searchPlaceholder": "Search help articles...",
+	"sections": {
+		"faq": "FAQ",
+		"features": "Features",
+		"shortcuts": "Keyboard Shortcuts",
+		"gettingStarted": "Getting Started",
+		"changelog": "What's New",
+		"contact": "Contact Us"
+	},
+	"search": {
+		"noResults": "No results found for \"{query}\"",
+		"resultsCount": "{count} results found",
+		"searching": "Searching..."
+	},
+	"faq": {
+		"noItems": "No FAQs available",
+		"categories": {
+			"general": "General",
+			"account": "Account",
+			"billing": "Billing",
+			"features": "Features",
+			"technical": "Technical",
+			"privacy": "Privacy"
+		}
+	},
+	"features": {
+		"noItems": "No features documented yet",
+		"comingSoon": "Coming soon",
+		"learnMore": "Learn more"
+	},
+	"shortcuts": {
+		"noItems": "No keyboard shortcuts available"
+	},
+	"gettingStarted": {
+		"noItems": "No guides available yet",
+		"estimatedTime": "Estimated time",
+		"difficulty": {
+			"beginner": "Beginner",
+			"intermediate": "Intermediate",
+			"advanced": "Advanced"
+		}
+	},
+	"changelog": {
+		"noItems": "No updates yet",
+		"types": {
+			"major": "Major",
+			"minor": "Minor",
+			"patch": "Patch",
+			"beta": "Beta"
+		}
+	},
+	"contact": {
+		"noInfo": "Contact information not available",
+		"email": "Email us",
+		"responseTime": "Response time"
+	},
+	"common": {
+		"back": "Back",
+		"showMore": "Show more",
+		"showLess": "Show less"
+	}
+}

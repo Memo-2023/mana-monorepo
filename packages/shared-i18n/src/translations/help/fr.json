@@ -1,0 +1,65 @@
+{
+	"title": "Aide & Support",
+	"subtitle": "Trouvez des réponses et apprenez à utiliser l'application",
+	"searchPlaceholder": "Rechercher dans l'aide...",
+	"sections": {
+		"faq": "FAQ",
+		"features": "Fonctionnalités",
+		"shortcuts": "Raccourcis clavier",
+		"gettingStarted": "Premiers pas",
+		"changelog": "Nouveautés",
+		"contact": "Contact"
+	},
+	"search": {
+		"noResults": "Aucun résultat pour \"{query}\"",
+		"resultsCount": "{count} résultats trouvés",
+		"searching": "Recherche..."
+	},
+	"faq": {
+		"noItems": "Aucune FAQ disponible",
+		"categories": {
+			"general": "Général",
+			"account": "Compte",
+			"billing": "Facturation",
+			"features": "Fonctionnalités",
+			"technical": "Technique",
+			"privacy": "Confidentialité"
+		}
+	},
+	"features": {
+		"noItems": "Aucune fonctionnalité documentée",
+		"comingSoon": "Bientôt disponible",
+		"learnMore": "En savoir plus"
+	},
+	"shortcuts": {
+		"noItems": "Aucun raccourci clavier disponible"
+	},
+	"gettingStarted": {
+		"noItems": "Aucun guide disponible",
+		"estimatedTime": "Temps estimé",
+		"difficulty": {
+			"beginner": "Débutant",
+			"intermediate": "Intermédiaire",
+			"advanced": "Avancé"
+		}
+	},
+	"changelog": {
+		"noItems": "Aucune mise à jour",
+		"types": {
+			"major": "Majeure",
+			"minor": "Mineure",
+			"patch": "Correctif",
+			"beta": "Bêta"
+		}
+	},
+	"contact": {
+		"noInfo": "Informations de contact non disponibles",
+		"email": "Nous contacter",
+		"responseTime": "Délai de réponse"
+	},
+	"common": {
+		"back": "Retour",
+		"showMore": "Voir plus",
+		"showLess": "Voir moins"
+	}
+}
