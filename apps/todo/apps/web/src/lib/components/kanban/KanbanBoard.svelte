@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID } from 'svelte-dnd-action';
-	import { flip } from 'svelte/animate';
 	import type { KanbanColumn, Task, TaskPriority } from '@todo/shared';
 	import KanbanColumnComponent from './KanbanColumn.svelte';
 	import AddColumnButton from './AddColumnButton.svelte';
@@ -43,7 +42,12 @@
 	}
 
 	async function handleAddColumn(name: string) {
-		await kanbanStore.createColumn({ name, projectId });
+		const boardId = kanbanStore.currentBoardId;
+		if (!boardId) {
+			console.error('No board selected');
+			return;
+		}
+		await kanbanStore.createColumn({ name, boardId });
 	}
 
 	async function handleUpdateColumn(columnId: string, data: { name?: string; color?: string }) {
@@ -61,7 +65,10 @@
 	}
 
 	async function handleAddTask(columnId: string, title: string) {
-		await kanbanStore.createTaskInColumn(columnId, title, projectId);
+		// Get projectId from current board if available
+		const currentBoard = kanbanStore.currentBoard;
+		const taskProjectId = currentBoard?.projectId ?? projectId;
+		await kanbanStore.createTaskInColumn(columnId, title, taskProjectId ?? undefined);
 	}
 
 	async function handleTaskMove(taskId: string, toColumnId: string, order: number) {
@@ -109,15 +116,19 @@
 </script>
 
 <div class="kanban-board h-full">
-	{#if kanbanStore.loading}
-		<div class="flex items-center justify-center py-12">
-			<div
-				class="animate-spin h-8 w-8 border-4 border-primary border-r-transparent rounded-full"
-			></div>
-		</div>
-	{:else if kanbanStore.error}
-		<div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
-			{kanbanStore.error}
+	{#if kanbanStore.error}
+		<div
+			class="bg-destructive/10 text-destructive p-4 rounded-xl border border-destructive/20 flex items-center gap-3"
+		>
+			<svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+			<span>{kanbanStore.error}</span>
 		</div>
 	{:else}
 		<div
@@ -132,7 +143,7 @@
 			onfinalize={handleColumnDndFinalize}
 		>
 			{#each localColumns.filter((c) => c.id !== SHADOW_PLACEHOLDER_ITEM_ID) as column (column.id)}
-				<div animate:flip={{ duration: flipDurationMs }} class="flex-shrink-0">
+				<div class="flex-shrink-0">
 					<KanbanColumnComponent
 						{column}
 						tasks={getTasksForColumn(column.id)}
@@ -161,20 +172,52 @@
 	.columns-container {
 		min-height: 100%;
 		align-items: flex-start;
+		scroll-behavior: smooth;
+		padding-left: 1rem;
+		padding-right: 1rem;
 	}
 
-	/* Hide scrollbar but keep functionality */
+	/* Extra space after last column for better scroll experience */
+	.columns-container::after {
+		content: '';
+		flex-shrink: 0;
+		width: 1rem;
+	}
+
+	@media (min-width: 640px) {
+		.columns-container {
+			padding-left: 1.5rem;
+			padding-right: 1.5rem;
+		}
+		.columns-container::after {
+			width: 1.5rem;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.columns-container {
+			padding-left: 2rem;
+			padding-right: 2rem;
+		}
+		.columns-container::after {
+			width: 2rem;
+		}
+	}
+
+	/* Styled scrollbar */
 	.columns-container::-webkit-scrollbar {
-		height: 8px;
+		height: 10px;
 	}
 
 	.columns-container::-webkit-scrollbar-track {
-		background: transparent;
+		background: var(--muted);
+		border-radius: 5px;
 	}
 
 	.columns-container::-webkit-scrollbar-thumb {
 		background: var(--border);
-		border-radius: 4px;
+		border-radius: 5px;
+		border: 2px solid var(--muted);
 	}
 
 	.columns-container::-webkit-scrollbar-thumb:hover {

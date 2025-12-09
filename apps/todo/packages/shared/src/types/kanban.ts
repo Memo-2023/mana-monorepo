@@ -1,9 +1,41 @@
 import type { TaskStatus } from './task';
 
-export interface KanbanColumn {
+// Kanban Board
+export interface KanbanBoard {
 	id: string;
 	userId: string;
 	projectId?: string | null;
+	name: string;
+	color: string;
+	icon?: string | null;
+	order: number;
+	isGlobal: boolean;
+	createdAt: Date | string;
+	updatedAt: Date | string;
+}
+
+export interface CreateBoardInput {
+	name: string;
+	projectId?: string;
+	color?: string;
+	icon?: string;
+}
+
+export interface UpdateBoardInput {
+	name?: string;
+	color?: string;
+	icon?: string;
+}
+
+export interface ReorderBoardsInput {
+	boardIds: string[];
+}
+
+// Kanban Column
+export interface KanbanColumn {
+	id: string;
+	userId: string;
+	boardId: string;
 	name: string;
 	color: string;
 	order: number;
@@ -16,8 +48,8 @@ export interface KanbanColumn {
 
 export interface CreateColumnInput {
 	name: string;
+	boardId: string;
 	color?: string;
-	projectId?: string;
 	isDefault?: boolean;
 	defaultStatus?: TaskStatus;
 	autoComplete?: boolean;

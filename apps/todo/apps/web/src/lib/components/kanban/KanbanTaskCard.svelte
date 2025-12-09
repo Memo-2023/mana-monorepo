@@ -2,17 +2,33 @@
 	import type { Task } from '@todo/shared';
 	import { format, isToday, isPast, isTomorrow } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import TaskEditModal from '../TaskEditModal.svelte';
 
 	interface Props {
 		task: Task;
 		onToggleComplete?: () => void;
+		onSave?: (data: Partial<Task>) => void;
+		onDelete?: () => void;
 	}
 
-	let { task, onToggleComplete }: Props = $props();
+	let { task, onToggleComplete, onSave, onDelete }: Props = $props();
 
-	// Priority colors
+	// Modal state
+	let showModal = $state(false);
+
+	// Inline edit state
+	let isEditingTitle = $state(false);
+	let editTitle = $state('');
+	let titleInputRef = $state<HTMLInputElement | null>(null);
+
+	// Context menu state
+	let showContextMenu = $state(false);
+	let contextMenuX = $state(0);
+	let contextMenuY = $state(0);
+
+	// Priority colors (consistent with KanbanFilters)
 	const priorityColors: Record<string, string> = {
-		low: 'bg-green-500',
+		low: 'bg-blue-500',
 		medium: 'bg-yellow-500',
 		high: 'bg-orange-500',
 		urgent: 'bg-red-500',
@@ -40,107 +56,501 @@
 		const completed = task.subtasks.filter((s) => s.isCompleted).length;
 		return `${completed}/${task.subtasks.length}`;
 	});
+
+	// Click to open modal
+	function handleCardClick(e: MouseEvent) {
+		// Don't open modal if clicking on checkbox or during inline edit
+		if (isEditingTitle) return;
+		const target = e.target as HTMLElement;
+		if (target.closest('.task-checkbox')) return;
+		showModal = true;
+	}
+
+	// Double-click to edit title inline
+	function handleTitleDoubleClick(e: MouseEvent) {
+		e.stopPropagation();
+		editTitle = task.title;
+		isEditingTitle = true;
+		// Focus input after render
+		setTimeout(() => {
+			titleInputRef?.focus();
+			titleInputRef?.select();
+		}, 0);
+	}
+
+	// Save inline title edit
+	function saveInlineTitle() {
+		if (editTitle.trim() && editTitle.trim() !== task.title) {
+			onSave?.({ title: editTitle.trim() });
+		}
+		isEditingTitle = false;
+	}
+
+	// Cancel inline title edit
+	function cancelInlineTitle() {
+		isEditingTitle = false;
+		editTitle = '';
+	}
+
+	// Handle title input keydown
+	function handleTitleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			saveInlineTitle();
+		} else if (e.key === 'Escape') {
+			e.preventDefault();
+			cancelInlineTitle();
+		}
+	}
+
+	// Right-click context menu
+	function handleContextMenu(e: MouseEvent) {
+		e.preventDefault();
+		contextMenuX = e.clientX;
+		contextMenuY = e.clientY;
+		showContextMenu = true;
+	}
+
+	// Close context menu when clicking outside
+	function handleClickOutside() {
+		showContextMenu = false;
+	}
+
+	// Context menu actions
+	function handleContextEdit() {
+		showContextMenu = false;
+		showModal = true;
+	}
+
+	function handleContextToggleComplete() {
+		showContextMenu = false;
+		onToggleComplete?.();
+	}
+
+	function handleContextDelete() {
+		showContextMenu = false;
+		if (confirm('Aufgabe wirklich löschen?')) {
+			onDelete?.();
+		}
+	}
+
+	// Modal handlers
+	function handleModalClose() {
+		showModal = false;
+	}
+
+	function handleModalSave(data: Partial<Task>) {
+		onSave?.(data);
+		showModal = false;
+	}
+
+	function handleModalDelete(taskId: string) {
+		onDelete?.();
+		showModal = false;
+	}
 </script>
 
+<svelte:window onclick={handleClickOutside} />
+
 <div
-	class="kanban-card group bg-card border border-border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing"
-	class:opacity-60={task.isCompleted}
+	class="kanban-card group"
+	class:completed={task.isCompleted}
+	onclick={handleCardClick}
+	oncontextmenu={handleContextMenu}
+	role="button"
+	tabindex="0"
 >
 	<!-- Priority indicator -->
-	<div class="flex items-start gap-2">
-		<div
-			class="priority-dot {priorityColors[task.priority]} w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
-		></div>
+	<div class="priority-dot" style="background-color: {priorityColors[task.priority]}"></div>
 
-		<div class="flex-1 min-w-0">
-			<!-- Title -->
-			<h4
-				class="text-sm font-medium text-foreground line-clamp-2"
+	<!-- Checkbox -->
+	{#if onToggleComplete}
+		<button class="task-checkbox" class:checked={task.isCompleted} onclick={onToggleComplete}>
+			{#if task.isCompleted}
+				<svg class="check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="3"
+						d="M5 13l4 4L19 7"
+					/>
+				</svg>
+			{/if}
+		</button>
+	{/if}
+
+	<!-- Content -->
+	<div class="task-content">
+		{#if isEditingTitle}
+			<input
+				bind:this={titleInputRef}
+				type="text"
+				class="title-input"
+				bind:value={editTitle}
+				onkeydown={handleTitleKeydown}
+				onblur={saveInlineTitle}
+			/>
+		{:else}
+			<span
+				class="task-title"
 				class:line-through={task.isCompleted}
+				ondblclick={handleTitleDoubleClick}
 			>
 				{task.title}
-			</h4>
+			</span>
+		{/if}
 
-			<!-- Meta info -->
-			{#if dueDateText() || subtaskProgress() || (task.labels && task.labels.length > 0)}
-				<div class="flex items-center gap-2 mt-2 flex-wrap">
-					{#if dueDateText()}
-						<span
-							class="text-xs flex items-center gap-1 px-1.5 py-0.5 rounded {isOverdue()
-								? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-								: 'bg-muted text-muted-foreground'}"
-						>
-							<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-								/>
-							</svg>
-							{dueDateText()}
-						</span>
-					{/if}
-
-					{#if subtaskProgress()}
-						<span
-							class="text-xs text-muted-foreground flex items-center gap-1 bg-muted px-1.5 py-0.5 rounded"
-						>
-							<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-								/>
-							</svg>
-							{subtaskProgress()}
-						</span>
-					{/if}
-
-					{#if task.labels && task.labels.length > 0}
-						<div class="flex items-center gap-1">
-							{#each task.labels.slice(0, 2) as label}
-								<span
-									class="w-4 h-1.5 rounded-full"
-									style="background-color: {label.color}"
-									title={label.name}
-								></span>
-							{/each}
-							{#if task.labels.length > 2}
-								<span class="text-xs text-muted-foreground">+{task.labels.length - 2}</span>
-							{/if}
-						</div>
-					{/if}
-				</div>
-			{/if}
-		</div>
-
-		<!-- Complete button -->
-		{#if onToggleComplete}
-			<button
-				class="opacity-0 group-hover:opacity-100 flex-shrink-0 w-5 h-5 rounded-full border-2 border-muted-foreground hover:border-primary flex items-center justify-center transition-opacity"
-				class:bg-primary={task.isCompleted}
-				class:border-primary={task.isCompleted}
-				onclick={onToggleComplete}
-			>
-				{#if task.isCompleted}
-					<svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="3"
-							d="M5 13l4 4L19 7"
-						/>
-					</svg>
+		<!-- Meta info -->
+		{#if dueDateText() || subtaskProgress() || (task.labels && task.labels.length > 0)}
+			<div class="task-meta">
+				{#if dueDateText()}
+					<span class="meta-item" class:overdue={isOverdue()}>
+						<svg class="meta-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+							/>
+						</svg>
+						{dueDateText()}
+					</span>
 				{/if}
-			</button>
+
+				{#if subtaskProgress()}
+					<span class="meta-item">
+						<svg class="meta-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+							/>
+						</svg>
+						{subtaskProgress()}
+					</span>
+				{/if}
+
+				{#if task.labels && task.labels.length > 0}
+					{#each task.labels.slice(0, 2) as label}
+						<span class="label-tag" style="--label-color: {label.color}">
+							{label.name}
+						</span>
+					{/each}
+					{#if task.labels.length > 2}
+						<span class="meta-item">+{task.labels.length - 2}</span>
+					{/if}
+				{/if}
+			</div>
 		{/if}
 	</div>
 </div>
 
+<!-- Context Menu -->
+{#if showContextMenu}
+	<div
+		class="context-menu"
+		style="left: {contextMenuX}px; top: {contextMenuY}px"
+		onclick={(e) => e.stopPropagation()}
+	>
+		<button class="context-item" onclick={handleContextEdit}>
+			<svg class="context-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+				/>
+			</svg>
+			Bearbeiten
+		</button>
+		<button class="context-item" onclick={handleContextToggleComplete}>
+			<svg class="context-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				{#if task.isCompleted}
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+					/>
+				{:else}
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M5 13l4 4L19 7"
+					/>
+				{/if}
+			</svg>
+			{task.isCompleted ? 'Wiederherstellen' : 'Erledigen'}
+		</button>
+		<div class="context-divider"></div>
+		<button class="context-item danger" onclick={handleContextDelete}>
+			<svg class="context-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+				/>
+			</svg>
+			Löschen
+		</button>
+	</div>
+{/if}
+
+<!-- Task Edit Modal -->
+<TaskEditModal
+	{task}
+	open={showModal}
+	onClose={handleModalClose}
+	onSave={handleModalSave}
+	onDelete={handleModalDelete}
+/>
+
 <style>
 	.kanban-card {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.625rem 1rem;
+		border-radius: 9999px;
+		background: rgba(255, 255, 255, 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		transition: all 0.2s;
 		user-select: none;
+		cursor: pointer;
+	}
+
+	.kanban-card:active {
+		cursor: grabbing;
+	}
+
+	:global(.dark) .kanban-card {
+		background: rgba(255, 255, 255, 0.12);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+	}
+
+	.kanban-card:hover {
+		background: rgba(255, 255, 255, 0.95);
+		border-color: rgba(0, 0, 0, 0.15);
+		transform: translateY(-1px);
+		box-shadow:
+			0 10px 15px -3px rgba(0, 0, 0, 0.1),
+			0 4px 6px -2px rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.dark) .kanban-card:hover {
+		background: rgba(255, 255, 255, 0.2);
+		border-color: rgba(255, 255, 255, 0.25);
+	}
+
+	.kanban-card.completed {
+		opacity: 0.6;
+	}
+
+	/* Priority dot */
+	.priority-dot {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 9999px;
+		flex-shrink: 0;
+	}
+
+	/* Checkbox */
+	.task-checkbox {
+		width: 1.25rem;
+		height: 1.25rem;
+		border-radius: 9999px;
+		border: 2px solid rgba(0, 0, 0, 0.2);
+		background: transparent;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.15s;
+		flex-shrink: 0;
+		padding: 0;
+	}
+
+	:global(.dark) .task-checkbox {
+		border-color: rgba(255, 255, 255, 0.3);
+	}
+
+	.task-checkbox:hover {
+		border-color: #8b5cf6;
+		background: rgba(139, 92, 246, 0.1);
+	}
+
+	.task-checkbox.checked {
+		background: #8b5cf6;
+		border-color: #8b5cf6;
+	}
+
+	.check-icon {
+		width: 0.75rem;
+		height: 0.75rem;
+		color: white;
+	}
+
+	/* Content */
+	.task-content {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.task-title {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #374151;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		cursor: pointer;
+	}
+
+	:global(.dark) .task-title {
+		color: #f3f4f6;
+	}
+
+	.task-title.line-through {
+		text-decoration: line-through;
+		color: #9ca3af;
+	}
+
+	/* Inline title input */
+	.title-input {
+		width: 100%;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #374151;
+		background: rgba(255, 255, 255, 0.9);
+		border: 1px solid #8b5cf6;
+		border-radius: 0.5rem;
+		padding: 0.25rem 0.5rem;
+		outline: none;
+	}
+
+	:global(.dark) .title-input {
+		background: rgba(30, 30, 30, 0.9);
+		color: #f3f4f6;
+		border-color: #8b5cf6;
+	}
+
+	/* Meta info */
+	.task-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.meta-item {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		font-size: 0.75rem;
+		color: #6b7280;
+	}
+
+	:global(.dark) .meta-item {
+		color: #9ca3af;
+	}
+
+	.meta-item.overdue {
+		color: #ef4444;
+	}
+
+	.meta-icon {
+		width: 0.75rem;
+		height: 0.75rem;
+	}
+
+	.label-tag {
+		font-size: 0.625rem;
+		padding: 0.125rem 0.5rem;
+		border-radius: 9999px;
+		background: color-mix(in srgb, var(--label-color) 15%, transparent);
+		color: var(--label-color);
+		font-weight: 500;
+	}
+
+	/* Context Menu */
+	.context-menu {
+		position: fixed;
+		z-index: 100;
+		min-width: 160px;
+		padding: 0.375rem;
+		background: rgba(255, 255, 255, 0.95);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		border-radius: 0.75rem;
+		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+	}
+
+	:global(.dark) .context-menu {
+		background: rgba(40, 40, 40, 0.95);
+		border-color: rgba(255, 255, 255, 0.15);
+	}
+
+	.context-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 0.5rem 0.75rem;
+		border: none;
+		background: transparent;
+		font-size: 0.875rem;
+		color: #374151;
+		cursor: pointer;
+		border-radius: 0.5rem;
+		transition: background 0.15s;
+		text-align: left;
+	}
+
+	:global(.dark) .context-item {
+		color: #e5e7eb;
+	}
+
+	.context-item:hover {
+		background: rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.dark) .context-item:hover {
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	.context-item.danger {
+		color: #ef4444;
+	}
+
+	.context-item.danger:hover {
+		background: rgba(239, 68, 68, 0.1);
+	}
+
+	.context-icon {
+		width: 1rem;
+		height: 1rem;
+		flex-shrink: 0;
+	}
+
+	.context-divider {
+		height: 1px;
+		background: rgba(0, 0, 0, 0.1);
+		margin: 0.25rem 0.5rem;
+	}
+
+	:global(.dark) .context-divider {
+		background: rgba(255, 255, 255, 0.1);
 	}
 </style>

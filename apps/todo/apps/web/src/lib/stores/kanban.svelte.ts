@@ -1,19 +1,46 @@
 /**
- * Kanban Store - Manages kanban board state using Svelte 5 runes
+ * Kanban Store - Manages kanban boards, columns, and tasks using Svelte 5 runes
  */
 
-import type { KanbanColumn, Task } from '@todo/shared';
+import type { KanbanBoard, KanbanColumn, Task } from '@todo/shared';
 import * as kanbanApi from '$lib/api/kanban';
 import * as tasksApi from '$lib/api/tasks';
 
-// State
+// Board state
+let boards = $state<KanbanBoard[]>([]);
+let currentBoardId = $state<string | null>(null);
+
+// Column & Task state
 let columns = $state<KanbanColumn[]>([]);
 let tasksByColumn = $state<Record<string, Task[]>>({});
+
+// Loading & Error state
 let loading = $state(false);
+let boardsLoading = $state(false);
 let error = $state<string | null>(null);
 
 export const kanbanStore = {
-	// Getters
+	// =====================
+	// Board Getters
+	// =====================
+
+	get boards() {
+		return boards;
+	},
+	get currentBoardId() {
+		return currentBoardId;
+	},
+	get currentBoard() {
+		return boards.find((b) => b.id === currentBoardId) ?? null;
+	},
+	get globalBoard() {
+		return boards.find((b) => b.isGlobal) ?? null;
+	},
+
+	// =====================
+	// Column & Task Getters
+	// =====================
+
 	get columns() {
 		return columns;
 	},
@@ -23,18 +50,165 @@ export const kanbanStore = {
 	get loading() {
 		return loading;
 	},
+	get boardsLoading() {
+		return boardsLoading;
+	},
 	get error() {
 		return error;
 	},
 
+	// =====================
+	// Board Operations
+	// =====================
+
 	/**
-	 * Fetch columns and tasks grouped by column
+	 * Fetch all boards for the current user
 	 */
-	async fetchKanbanData(projectId?: string) {
+	async fetchBoards() {
+		boardsLoading = true;
+		error = null;
+		try {
+			boards = await kanbanApi.getBoards();
+
+			// If no current board selected, select global board or first board
+			if (!currentBoardId && boards.length > 0) {
+				const globalBoard = boards.find((b) => b.isGlobal);
+				currentBoardId = globalBoard?.id ?? boards[0].id;
+			}
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to fetch boards';
+			console.error('Failed to fetch boards:', e);
+		} finally {
+			boardsLoading = false;
+		}
+	},
+
+	/**
+	 * Get or create the global board
+	 */
+	async getOrCreateGlobalBoard() {
+		error = null;
+		try {
+			const globalBoard = await kanbanApi.getGlobalBoard();
+
+			// Update or add to boards list
+			const existingIndex = boards.findIndex((b) => b.id === globalBoard.id);
+			if (existingIndex >= 0) {
+				boards[existingIndex] = globalBoard;
+			} else {
+				boards = [globalBoard, ...boards];
+			}
+
+			return globalBoard;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to get global board';
+			console.error('Failed to get global board:', e);
+			throw e;
+		}
+	},
+
+	/**
+	 * Select a board and load its data
+	 */
+	async selectBoard(boardId: string) {
+		if (currentBoardId === boardId) return;
+
+		currentBoardId = boardId;
+		await this.fetchKanbanData(boardId);
+	},
+
+	/**
+	 * Create a new board
+	 */
+	async createBoard(data: { name: string; projectId?: string; color?: string; icon?: string }) {
+		error = null;
+		try {
+			const newBoard = await kanbanApi.createBoard(data);
+			boards = [...boards, newBoard];
+			return newBoard;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to create board';
+			console.error('Failed to create board:', e);
+			throw e;
+		}
+	},
+
+	/**
+	 * Update a board
+	 */
+	async updateBoard(id: string, data: { name?: string; color?: string; icon?: string }) {
+		error = null;
+		try {
+			const updated = await kanbanApi.updateBoard(id, data);
+			boards = boards.map((b) => (b.id === id ? updated : b));
+			return updated;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to update board';
+			console.error('Failed to update board:', e);
+			throw e;
+		}
+	},
+
+	/**
+	 * Delete a board
+	 */
+	async deleteBoard(id: string) {
+		error = null;
+		try {
+			await kanbanApi.deleteBoard(id);
+			boards = boards.filter((b) => b.id !== id);
+
+			// If deleted board was current, switch to global board
+			if (currentBoardId === id) {
+				const globalBoard = boards.find((b) => b.isGlobal);
+				currentBoardId = globalBoard?.id ?? boards[0]?.id ?? null;
+				if (currentBoardId) {
+					await this.fetchKanbanData(currentBoardId);
+				}
+			}
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to delete board';
+			console.error('Failed to delete board:', e);
+			throw e;
+		}
+	},
+
+	/**
+	 * Reorder boards (optimistic update)
+	 */
+	async reorderBoards(boardIds: string[]) {
+		error = null;
+		const previousBoards = [...boards];
+		try {
+			// Optimistic update
+			boards = boardIds
+				.map((id) => boards.find((b) => b.id === id))
+				.filter((b): b is KanbanBoard => b !== undefined);
+
+			// Persist to server
+			const updated = await kanbanApi.reorderBoards(boardIds);
+			boards = updated;
+		} catch (e) {
+			// Rollback on error
+			boards = previousBoards;
+			error = e instanceof Error ? e.message : 'Failed to reorder boards';
+			console.error('Failed to reorder boards:', e);
+			throw e;
+		}
+	},
+
+	// =====================
+	// Column & Task Operations
+	// =====================
+
+	/**
+	 * Fetch columns and tasks grouped by column for a board
+	 */
+	async fetchKanbanData(boardId: string) {
 		loading = true;
 		error = null;
 		try {
-			const data = await kanbanApi.getKanbanTasks(projectId);
+			const data = await kanbanApi.getKanbanTasks(boardId);
 			columns = data.columns;
 			tasksByColumn = data.tasksByColumn;
 		} catch (e) {
@@ -46,13 +220,13 @@ export const kanbanStore = {
 	},
 
 	/**
-	 * Fetch only columns
+	 * Fetch only columns for a board
 	 */
-	async fetchColumns(projectId?: string) {
+	async fetchColumns(boardId: string) {
 		loading = true;
 		error = null;
 		try {
-			columns = await kanbanApi.getColumns(projectId);
+			columns = await kanbanApi.getColumns(boardId);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to fetch columns';
 			console.error('Failed to fetch columns:', e);
@@ -66,8 +240,8 @@ export const kanbanStore = {
 	 */
 	async createColumn(data: {
 		name: string;
+		boardId: string;
 		color?: string;
-		projectId?: string;
 		defaultStatus?: string;
 		autoComplete?: boolean;
 	}) {
@@ -216,10 +390,10 @@ export const kanbanStore = {
 	/**
 	 * Initialize default columns if none exist
 	 */
-	async initializeDefaultColumns(projectId?: string) {
+	async initializeDefaultColumns(boardId: string) {
 		error = null;
 		try {
-			const newColumns = await kanbanApi.initializeColumns(projectId);
+			const newColumns = await kanbanApi.initializeColumns(boardId);
 			columns = newColumns;
 			// Initialize empty task arrays for each column
 			for (const col of newColumns) {
@@ -250,7 +424,6 @@ export const kanbanStore = {
 		try {
 			// Find the column to get its default status
 			const column = columns.find((c) => c.id === columnId);
-			const status = column?.defaultStatus || 'pending';
 
 			// Create the task
 			const newTask = await tasksApi.createTask({
@@ -280,9 +453,12 @@ export const kanbanStore = {
 	 * Clear all state (for logout)
 	 */
 	clear() {
+		boards = [];
+		currentBoardId = null;
 		columns = [];
 		tasksByColumn = {};
 		loading = false;
+		boardsLoading = false;
 		error = null;
 	},
 };

@@ -6,14 +6,13 @@ export class CreateColumnDto {
 	@MaxLength(100)
 	name: string;
 
+	@IsString()
+	boardId: string;
+
 	@IsOptional()
 	@IsString()
 	@MaxLength(7)
 	color?: string;
-
-	@IsOptional()
-	@IsString()
-	projectId?: string;
 
 	@IsOptional()
 	@IsBoolean()

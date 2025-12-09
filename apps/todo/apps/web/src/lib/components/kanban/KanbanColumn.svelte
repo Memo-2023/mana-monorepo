@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID } from 'svelte-dnd-action';
-	import { flip } from 'svelte/animate';
 	import type { KanbanColumn, Task } from '@todo/shared';
 	import KanbanTaskCard from './KanbanTaskCard.svelte';
 	import KanbanColumnHeader from './KanbanColumnHeader.svelte';
@@ -71,9 +70,31 @@
 			await tasksStore.completeTask(task.id);
 		}
 	}
+
+	async function handleSaveTask(task: Task, data: Partial<Task>) {
+		// Transform data to match updateTask API (convert null to undefined)
+		const updateData: Parameters<typeof tasksStore.updateTask>[1] = {};
+		if (data.title !== undefined) updateData.title = data.title;
+		if (data.description !== undefined) updateData.description = data.description ?? undefined;
+		if (data.projectId !== undefined) updateData.projectId = data.projectId;
+		if (data.dueDate !== undefined) updateData.dueDate = data.dueDate ?? undefined;
+		if (data.priority !== undefined) updateData.priority = data.priority;
+		if (data.status !== undefined) updateData.status = data.status;
+		if (data.subtasks !== undefined) updateData.subtasks = data.subtasks ?? undefined;
+		if (data.recurrenceRule !== undefined)
+			updateData.recurrenceRule = data.recurrenceRule ?? undefined;
+		if (data.metadata !== undefined) updateData.metadata = data.metadata;
+		if ((data as any).labelIds !== undefined) (updateData as any).labelIds = (data as any).labelIds;
+
+		await tasksStore.updateTask(task.id, updateData);
+	}
+
+	async function handleDeleteTask(task: Task) {
+		await tasksStore.deleteTask(task.id);
+	}
 </script>
 
-<div class="kanban-column flex flex-col bg-muted/50 rounded-xl min-w-[280px] max-w-[320px] h-full">
+<div class="kanban-column flex flex-col min-w-[300px] max-w-[340px] h-full">
 	<!-- Header -->
 	<KanbanColumnHeader
 		{column}
@@ -84,7 +105,7 @@
 
 	<!-- Tasks list with drag and drop -->
 	<div
-		class="flex-1 overflow-y-auto px-2 pb-2"
+		class="tasks-container flex-1 overflow-y-auto px-3 pb-3"
 		use:dndzone={{
 			items: localTasks,
 			flipDurationMs,
@@ -96,21 +117,20 @@
 		onfinalize={handleDndFinalize}
 	>
 		{#each localTasks.filter((t) => t.id !== SHADOW_PLACEHOLDER_ITEM_ID) as task (task.id)}
-			<div animate:flip={{ duration: flipDurationMs }} class="mb-2">
-				<KanbanTaskCard {task} onToggleComplete={() => handleToggleComplete(task)} />
+			<div class="mb-2.5 last:mb-0">
+				<KanbanTaskCard
+					{task}
+					onToggleComplete={() => handleToggleComplete(task)}
+					onSave={(data) => handleSaveTask(task, data)}
+					onDelete={() => handleDeleteTask(task)}
+				/>
 			</div>
 		{/each}
-
-		{#if localTasks.length === 0}
-			<div class="text-center py-4 text-muted-foreground text-sm">
-				<p>Keine Aufgaben</p>
-			</div>
-		{/if}
 	</div>
 
 	<!-- Quick Add Task -->
 	{#if onAddTask}
-		<div class="px-2 pb-2">
+		<div class="px-3 pb-3 pt-2">
 			<QuickAddTaskInline onAdd={onAddTask} />
 		</div>
 	{/if}
@@ -118,12 +138,55 @@
 
 <style>
 	.kanban-column {
-		min-height: 200px;
+		min-height: 250px;
+		max-height: calc(100vh - 280px);
+		background: rgba(255, 255, 255, 0.5);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		border-radius: 1.5rem;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.dark) .kanban-column {
+		background: rgba(255, 255, 255, 0.08);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.tasks-container {
+		min-height: 80px;
+	}
+
+	/* Custom scrollbar for tasks */
+	.tasks-container::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.tasks-container::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.tasks-container::-webkit-scrollbar-thumb {
+		background: rgba(0, 0, 0, 0.1);
+		border-radius: 3px;
+	}
+
+	:global(.dark) .tasks-container::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.15);
+	}
+
+	.tasks-container::-webkit-scrollbar-thumb:hover {
+		background: rgba(0, 0, 0, 0.2);
+	}
+
+	:global(.dark) .tasks-container::-webkit-scrollbar-thumb:hover {
+		background: rgba(255, 255, 255, 0.25);
 	}
 
 	:global(.drop-target) {
-		outline: 2px dashed var(--primary);
+		outline: 2px dashed #8b5cf6;
 		outline-offset: -2px;
-		border-radius: 0.5rem;
+		border-radius: 1.5rem;
+		background: rgba(139, 92, 246, 0.05);
 	}
 </style>

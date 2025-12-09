@@ -1,5 +1,15 @@
 import { apiClient } from './client';
-import type { KanbanColumn, Task } from '@todo/shared';
+import type { KanbanBoard, KanbanColumn, Task } from '@todo/shared';
+
+// Response types
+
+interface BoardsResponse {
+	boards: KanbanBoard[];
+}
+
+interface BoardResponse {
+	board: KanbanBoard;
+}
 
 interface ColumnsResponse {
 	columns: KanbanColumn[];
@@ -22,10 +32,25 @@ interface TasksResponse {
 	tasks: Task[];
 }
 
+// DTO types
+
+interface CreateBoardDto {
+	name: string;
+	projectId?: string;
+	color?: string;
+	icon?: string;
+}
+
+interface UpdateBoardDto {
+	name?: string;
+	color?: string;
+	icon?: string;
+}
+
 interface CreateColumnDto {
 	name: string;
+	boardId: string;
 	color?: string;
-	projectId?: string;
 	isDefault?: boolean;
 	defaultStatus?: string;
 	autoComplete?: boolean;
@@ -38,11 +63,54 @@ interface UpdateColumnDto {
 	autoComplete?: boolean;
 }
 
-// Column operations
+// =====================
+// Board operations
+// =====================
 
-export async function getColumns(projectId?: string): Promise<KanbanColumn[]> {
-	const query = projectId ? `?projectId=${projectId}` : '';
-	const response = await apiClient.get<ColumnsResponse>(`/api/v1/kanban/columns${query}`);
+export async function getBoards(): Promise<KanbanBoard[]> {
+	const response = await apiClient.get<BoardsResponse>('/api/v1/kanban/boards');
+	return response.boards;
+}
+
+export async function getGlobalBoard(): Promise<KanbanBoard> {
+	const response = await apiClient.get<BoardResponse>('/api/v1/kanban/boards/global');
+	return response.board;
+}
+
+export async function getBoard(id: string): Promise<KanbanBoard> {
+	const response = await apiClient.get<BoardResponse>(`/api/v1/kanban/boards/${id}`);
+	return response.board;
+}
+
+export async function createBoard(data: CreateBoardDto): Promise<KanbanBoard> {
+	const response = await apiClient.post<BoardResponse>('/api/v1/kanban/boards', data);
+	return response.board;
+}
+
+export async function updateBoard(id: string, data: UpdateBoardDto): Promise<KanbanBoard> {
+	const response = await apiClient.put<BoardResponse>(`/api/v1/kanban/boards/${id}`, data);
+	return response.board;
+}
+
+export async function deleteBoard(id: string): Promise<void> {
+	await apiClient.delete(`/api/v1/kanban/boards/${id}`);
+}
+
+export async function reorderBoards(boardIds: string[]): Promise<KanbanBoard[]> {
+	const response = await apiClient.put<BoardsResponse>('/api/v1/kanban/boards/reorder', {
+		boardIds,
+	});
+	return response.boards;
+}
+
+// =====================
+// Column operations
+// =====================
+
+export async function getColumns(boardId: string): Promise<KanbanColumn[]> {
+	const response = await apiClient.get<ColumnsResponse>(
+		`/api/v1/kanban/columns?boardId=${boardId}`
+	);
 	return response.columns;
 }
 
@@ -67,19 +135,23 @@ export async function reorderColumns(columnIds: string[]): Promise<KanbanColumn[
 	return response.columns;
 }
 
-export async function initializeColumns(projectId?: string): Promise<KanbanColumn[]> {
-	const query = projectId ? `?projectId=${projectId}` : '';
-	const response = await apiClient.post<ColumnsResponse>(`/api/v1/kanban/columns/init${query}`);
+export async function initializeColumns(boardId: string): Promise<KanbanColumn[]> {
+	const response = await apiClient.post<ColumnsResponse>(
+		`/api/v1/kanban/columns/init?boardId=${boardId}`
+	);
 	return response.columns;
 }
 
+// =====================
 // Task operations
+// =====================
 
 export async function getKanbanTasks(
-	projectId?: string
+	boardId: string
 ): Promise<{ columns: KanbanColumn[]; tasksByColumn: Record<string, Task[]> }> {
-	const query = projectId ? `?projectId=${projectId}` : '';
-	const response = await apiClient.get<KanbanTasksResponse>(`/api/v1/kanban/tasks${query}`);
+	const response = await apiClient.get<KanbanTasksResponse>(
+		`/api/v1/kanban/tasks?boardId=${boardId}`
+	);
 	return response;
 }
 

@@ -50,10 +50,13 @@
 	}
 </script>
 
-<div class="column-header flex items-center justify-between p-3 pb-2">
-	<div class="flex items-center gap-2 min-w-0 flex-1">
-		<!-- Color indicator -->
-		<div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {column.color}"></div>
+<div class="column-header flex items-center justify-between px-3.5 py-3">
+	<div class="flex items-center gap-2.5 min-w-0 flex-1">
+		<!-- Color indicator with glow -->
+		<div
+			class="w-3 h-3 rounded-full flex-shrink-0 ring-4 ring-opacity-20"
+			style="background-color: {column.color}; --tw-ring-color: {column.color}"
+		></div>
 
 		<!-- Name (editable) -->
 		{#if isEditing}
@@ -62,7 +65,7 @@
 				bind:value={editName}
 				onblur={handleSubmit}
 				onkeydown={handleKeydown}
-				class="text-sm font-semibold bg-transparent border-b border-primary outline-none text-foreground flex-1 min-w-0"
+				class="text-sm font-semibold bg-transparent border-b-2 border-primary outline-none text-foreground flex-1 min-w-0 py-0.5"
 				autofocus
 			/>
 		{:else}
@@ -78,8 +81,11 @@
 			</button>
 		{/if}
 
-		<!-- Task count -->
-		<span class="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full flex-shrink-0">
+		<!-- Task count badge -->
+		<span
+			class="text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 transition-colors"
+			style="background-color: color-mix(in srgb, {column.color} 15%, transparent); color: {column.color}"
+		>
 			{taskCount}
 		</span>
 	</div>
@@ -88,7 +94,7 @@
 	{#if onUpdate || onDelete}
 		<div class="relative">
 			<button
-				class="p-1 text-muted-foreground hover:text-foreground rounded transition-colors"
+				class="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all"
 				onclick={() => (showMenu = !showMenu)}
 			>
 				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,17 +109,23 @@
 
 			{#if showMenu}
 				<div
-					class="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg py-1 z-50 min-w-[150px]"
+					class="menu-popup absolute right-0 top-full mt-1 rounded-xl py-1.5 z-50 min-w-[160px] animate-in fade-in slide-in-from-top-2 duration-150"
 				>
 					{#if onUpdate}
 						<button
-							class="w-full px-3 py-2 text-left text-sm text-foreground hover:bg-accent flex items-center gap-2"
+							class="w-full px-3 py-2 text-left text-sm text-foreground hover:bg-muted rounded-lg mx-1 transition-colors flex items-center gap-2"
+							style="width: calc(100% - 0.5rem)"
 							onclick={() => {
 								isEditing = true;
 								showMenu = false;
 							}}
 						>
-							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<svg
+								class="w-4 h-4 text-muted-foreground"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -125,10 +137,16 @@
 						</button>
 
 						<button
-							class="w-full px-3 py-2 text-left text-sm text-foreground hover:bg-accent flex items-center gap-2"
+							class="w-full px-3 py-2 text-left text-sm text-foreground hover:bg-muted rounded-lg mx-1 transition-colors flex items-center gap-2"
+							style="width: calc(100% - 0.5rem)"
 							onclick={() => (showColorPicker = !showColorPicker)}
 						>
-							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<svg
+								class="w-4 h-4 text-muted-foreground"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -140,12 +158,13 @@
 						</button>
 
 						{#if showColorPicker}
-							<div class="px-3 py-2 flex flex-wrap gap-1 border-t border-border mt-1 pt-2">
+							<div class="px-3 py-2.5 flex flex-wrap gap-1.5 border-t border-border mt-1.5 pt-2.5">
 								{#each colors as color}
 									<button
-										class="w-6 h-6 rounded-full border-2 transition-transform hover:scale-110"
-										class:border-primary={color === column.color}
-										class:border-transparent={color !== column.color}
+										class="w-7 h-7 rounded-full border-2 transition-all hover:scale-110 hover:shadow-md {color ===
+										column.color
+											? 'border-primary ring-2 ring-primary/30'
+											: 'border-transparent'}"
 										style="background-color: {color}"
 										onclick={() => handleColorSelect(color)}
 									></button>
@@ -155,23 +174,26 @@
 					{/if}
 
 					{#if onDelete && !column.isDefault}
-						<button
-							class="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
-							onclick={() => {
-								onDelete?.();
-								showMenu = false;
-							}}
-						>
-							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-								/>
-							</svg>
-							Löschen
-						</button>
+						<div class="border-t border-border mt-1.5 pt-1.5">
+							<button
+								class="w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 rounded-lg mx-1 transition-colors flex items-center gap-2"
+								style="width: calc(100% - 0.5rem)"
+								onclick={() => {
+									onDelete?.();
+									showMenu = false;
+								}}
+							>
+								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+									/>
+								</svg>
+								Löschen
+							</button>
+						</div>
 					{/if}
 				</div>
 			{/if}
@@ -189,3 +211,45 @@
 		}}
 	></button>
 {/if}
+
+<style>
+	/* Glass popup effect */
+	.menu-popup {
+		background: rgba(255, 255, 255, 0.95);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		box-shadow:
+			0 10px 15px -3px rgba(0, 0, 0, 0.1),
+			0 4px 6px -2px rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.dark) .menu-popup {
+		background: rgba(30, 30, 30, 0.95);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+	}
+
+	/* Animation utilities */
+	.animate-in {
+		animation: animateIn 0.15s ease-out;
+	}
+
+	.fade-in {
+		--tw-enter-opacity: 0;
+	}
+
+	.slide-in-from-top-2 {
+		--tw-enter-translate-y: -0.5rem;
+	}
+
+	@keyframes animateIn {
+		from {
+			opacity: var(--tw-enter-opacity, 1);
+			transform: translateY(var(--tw-enter-translate-y, 0));
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+</style>

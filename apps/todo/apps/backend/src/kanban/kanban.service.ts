@@ -1,7 +1,12 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
-import { eq, and, asc, isNull } from 'drizzle-orm';
+import { eq, and, asc } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { type Database } from '../db/connection';
+import {
+	kanbanBoards,
+	type KanbanBoard,
+	type NewKanbanBoard,
+} from '../db/schema/kanban-boards.schema';
 import {
 	kanbanColumns,
 	type KanbanColumn,
@@ -9,10 +14,10 @@ import {
 	type KanbanTaskStatus,
 } from '../db/schema/kanban-columns.schema';
 import { tasks, type Task } from '../db/schema/tasks.schema';
-import { CreateColumnDto, UpdateColumnDto } from './dto';
+import { CreateBoardDto, UpdateBoardDto, CreateColumnDto, UpdateColumnDto } from './dto';
 
 // Default columns configuration
-const DEFAULT_COLUMNS: Omit<NewKanbanColumn, 'userId' | 'projectId'>[] = [
+const DEFAULT_COLUMNS: Omit<NewKanbanColumn, 'userId' | 'boardId'>[] = [
 	{
 		name: 'To Do',
 		color: '#6B7280',
@@ -43,19 +48,152 @@ const DEFAULT_COLUMNS: Omit<NewKanbanColumn, 'userId' | 'projectId'>[] = [
 export class KanbanService {
 	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {}
 
-	// Column operations
+	// =====================
+	// Board operations
+	// =====================
 
-	async findAllColumns(userId: string, projectId?: string | null): Promise<KanbanColumn[]> {
-		if (projectId) {
-			return this.db.query.kanbanColumns.findMany({
-				where: and(eq(kanbanColumns.userId, userId), eq(kanbanColumns.projectId, projectId)),
-				orderBy: [asc(kanbanColumns.order)],
-			});
+	async findAllBoards(userId: string): Promise<KanbanBoard[]> {
+		return this.db.query.kanbanBoards.findMany({
+			where: eq(kanbanBoards.userId, userId),
+			orderBy: [asc(kanbanBoards.order)],
+		});
+	}
+
+	async findBoardById(id: string, userId: string): Promise<KanbanBoard | null> {
+		const result = await this.db.query.kanbanBoards.findFirst({
+			where: and(eq(kanbanBoards.id, id), eq(kanbanBoards.userId, userId)),
+		});
+		return result ?? null;
+	}
+
+	async findBoardByIdOrThrow(id: string, userId: string): Promise<KanbanBoard> {
+		const board = await this.findBoardById(id, userId);
+		if (!board) {
+			throw new NotFoundException(`Board with id ${id} not found`);
+		}
+		return board;
+	}
+
+	async getOrCreateGlobalBoard(userId: string): Promise<KanbanBoard> {
+		// Check if global board exists
+		const existingGlobal = await this.db.query.kanbanBoards.findFirst({
+			where: and(eq(kanbanBoards.userId, userId), eq(kanbanBoards.isGlobal, true)),
+		});
+
+		if (existingGlobal) {
+			return existingGlobal;
 		}
 
-		// Global columns (no project)
+		// Create global board
+		const [globalBoard] = await this.db
+			.insert(kanbanBoards)
+			.values({
+				userId,
+				name: 'Alle Aufgaben',
+				color: '#8b5cf6',
+				order: 0,
+				isGlobal: true,
+			})
+			.returning();
+
+		// Initialize default columns for the global board
+		await this.initializeDefaultColumns(globalBoard.id, userId);
+
+		return globalBoard;
+	}
+
+	async createBoard(userId: string, dto: CreateBoardDto): Promise<KanbanBoard> {
+		// Get the highest order value
+		const existingBoards = await this.findAllBoards(userId);
+		const maxOrder = existingBoards.reduce((max, b) => Math.max(max, b.order ?? 0), -1);
+
+		const newBoard: NewKanbanBoard = {
+			userId,
+			projectId: dto.projectId ?? null,
+			name: dto.name,
+			color: dto.color ?? '#8b5cf6',
+			icon: dto.icon ?? null,
+			order: maxOrder + 1,
+			isGlobal: false,
+		};
+
+		const [created] = await this.db.insert(kanbanBoards).values(newBoard).returning();
+
+		// Initialize default columns for the new board
+		await this.initializeDefaultColumns(created.id, userId);
+
+		return created;
+	}
+
+	async updateBoard(id: string, userId: string, dto: UpdateBoardDto): Promise<KanbanBoard> {
+		await this.findBoardByIdOrThrow(id, userId);
+
+		const [updated] = await this.db
+			.update(kanbanBoards)
+			.set({
+				...dto,
+				updatedAt: new Date(),
+			})
+			.where(and(eq(kanbanBoards.id, id), eq(kanbanBoards.userId, userId)))
+			.returning();
+
+		return updated;
+	}
+
+	async deleteBoard(id: string, userId: string): Promise<void> {
+		const board = await this.findBoardByIdOrThrow(id, userId);
+
+		if (board.isGlobal) {
+			throw new BadRequestException('Cannot delete the global board');
+		}
+
+		// Get global board to move tasks to
+		const globalBoard = await this.getOrCreateGlobalBoard(userId);
+		const globalColumns = await this.findAllColumns(globalBoard.id, userId);
+		const firstGlobalColumn = globalColumns[0];
+
+		if (firstGlobalColumn) {
+			// Get all columns for this board
+			const boardColumns = await this.findAllColumns(id, userId);
+
+			// Move tasks from board columns to first global column
+			for (const column of boardColumns) {
+				await this.db
+					.update(tasks)
+					.set({
+						columnId: firstGlobalColumn.id,
+						updatedAt: new Date(),
+					})
+					.where(eq(tasks.columnId, column.id));
+			}
+		}
+
+		// Delete the board (columns will cascade delete)
+		await this.db
+			.delete(kanbanBoards)
+			.where(and(eq(kanbanBoards.id, id), eq(kanbanBoards.userId, userId)));
+	}
+
+	async reorderBoards(userId: string, boardIds: string[]): Promise<KanbanBoard[]> {
+		const updates = boardIds.map((id, index) =>
+			this.db
+				.update(kanbanBoards)
+				.set({ order: index, updatedAt: new Date() })
+				.where(and(eq(kanbanBoards.id, id), eq(kanbanBoards.userId, userId)))
+		);
+
+		await Promise.all(updates);
+
+		return this.findAllBoards(userId);
+	}
+
+	// =====================
+	// Column operations
+	// =====================
+
+	async findAllColumns(boardId: string, userId: string): Promise<KanbanColumn[]> {
 		return this.db.query.kanbanColumns.findMany({
-			where: and(eq(kanbanColumns.userId, userId), isNull(kanbanColumns.projectId)),
+			where: and(eq(kanbanColumns.boardId, boardId), eq(kanbanColumns.userId, userId)),
 			orderBy: [asc(kanbanColumns.order)],
 		});
 	}
@@ -76,13 +214,16 @@ export class KanbanService {
 	}
 
 	async createColumn(userId: string, dto: CreateColumnDto): Promise<KanbanColumn> {
-		// Get the highest order value for this scope
-		const existingColumns = await this.findAllColumns(userId, dto.projectId);
+		// Verify board exists
+		await this.findBoardByIdOrThrow(dto.boardId, userId);
+
+		// Get the highest order value for this board
+		const existingColumns = await this.findAllColumns(dto.boardId, userId);
 		const maxOrder = existingColumns.reduce((max, c) => Math.max(max, c.order ?? 0), -1);
 
 		const newColumn: NewKanbanColumn = {
 			userId,
-			projectId: dto.projectId ?? null,
+			boardId: dto.boardId,
 			name: dto.name,
 			color: dto.color ?? '#6B7280',
 			order: maxOrder + 1,
@@ -114,7 +255,7 @@ export class KanbanService {
 		const column = await this.findColumnByIdOrThrow(id, userId);
 
 		// Get first column to move tasks to
-		const columns = await this.findAllColumns(userId, column.projectId);
+		const columns = await this.findAllColumns(column.boardId, userId);
 		const firstColumn = columns.find((c) => c.id !== id);
 
 		if (!firstColumn) {
@@ -146,17 +287,17 @@ export class KanbanService {
 
 		await Promise.all(updates);
 
-		// Determine projectId from first column
+		// Determine boardId from first column
 		const firstColumn = await this.findColumnById(columnIds[0], userId);
-		return this.findAllColumns(userId, firstColumn?.projectId);
+		if (!firstColumn) {
+			return [];
+		}
+		return this.findAllColumns(firstColumn.boardId, userId);
 	}
 
-	async initializeDefaultColumns(
-		userId: string,
-		projectId?: string | null
-	): Promise<KanbanColumn[]> {
+	async initializeDefaultColumns(boardId: string, userId: string): Promise<KanbanColumn[]> {
 		// Check if columns already exist
-		const existing = await this.findAllColumns(userId, projectId);
+		const existing = await this.findAllColumns(boardId, userId);
 		if (existing.length > 0) {
 			return existing;
 		}
@@ -165,35 +306,51 @@ export class KanbanService {
 		const columnsToCreate: NewKanbanColumn[] = DEFAULT_COLUMNS.map((col) => ({
 			...col,
 			userId,
-			projectId: projectId ?? null,
+			boardId,
 		}));
 
 		await this.db.insert(kanbanColumns).values(columnsToCreate);
 
-		return this.findAllColumns(userId, projectId);
+		return this.findAllColumns(boardId, userId);
 	}
 
+	// =====================
 	// Task operations
+	// =====================
 
 	async getTasksGroupedByColumn(
-		userId: string,
-		projectId?: string | null
+		boardId: string,
+		userId: string
 	): Promise<{ columns: KanbanColumn[]; tasksByColumn: Record<string, Task[]> }> {
-		// Ensure columns exist
-		const columns = await this.initializeDefaultColumns(userId, projectId);
+		// Get board to check if it's global
+		const board = await this.findBoardByIdOrThrow(boardId, userId);
 
-		// Get all tasks for this user
+		// Ensure columns exist
+		const columns = await this.initializeDefaultColumns(boardId, userId);
+
+		// Get tasks based on board type
 		let userTasks: Task[];
-		if (projectId) {
-			userTasks = await this.db.query.tasks.findMany({
-				where: and(eq(tasks.userId, userId), eq(tasks.projectId, projectId)),
-				orderBy: [asc(tasks.columnOrder), asc(tasks.createdAt)],
-			});
-		} else {
+		if (board.isGlobal) {
+			// Global board: all tasks
 			userTasks = await this.db.query.tasks.findMany({
 				where: eq(tasks.userId, userId),
 				orderBy: [asc(tasks.columnOrder), asc(tasks.createdAt)],
 			});
+		} else if (board.projectId) {
+			// Project-specific board: only project tasks
+			userTasks = await this.db.query.tasks.findMany({
+				where: and(eq(tasks.userId, userId), eq(tasks.projectId, board.projectId)),
+				orderBy: [asc(tasks.columnOrder), asc(tasks.createdAt)],
+			});
+		} else {
+			// Custom board without project: tasks assigned to this board's columns
+			const columnIds = columns.map((c) => c.id);
+			userTasks = await this.db.query.tasks.findMany({
+				where: eq(tasks.userId, userId),
+				orderBy: [asc(tasks.columnOrder), asc(tasks.createdAt)],
+			});
+			// Filter to only tasks in this board's columns
+			userTasks = userTasks.filter((t) => t.columnId && columnIds.includes(t.columnId));
 		}
 
 		// Group tasks by column

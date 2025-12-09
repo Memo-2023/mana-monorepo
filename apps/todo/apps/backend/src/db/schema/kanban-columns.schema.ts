@@ -1,5 +1,5 @@
 import { pgTable, uuid, timestamp, varchar, boolean, integer, index } from 'drizzle-orm/pg-core';
-import { projects } from './projects.schema';
+import { kanbanBoards } from './kanban-boards.schema';
 
 // Define locally to avoid circular dependency with tasks.schema
 export type KanbanTaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
@@ -9,7 +9,9 @@ export const kanbanColumns = pgTable(
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
 		userId: uuid('user_id').notNull(),
-		projectId: uuid('project_id').references(() => projects.id, { onDelete: 'cascade' }),
+		boardId: uuid('board_id')
+			.references(() => kanbanBoards.id, { onDelete: 'cascade' })
+			.notNull(),
 
 		// Column properties
 		name: varchar('name', { length: 100 }).notNull(),
@@ -26,8 +28,8 @@ export const kanbanColumns = pgTable(
 	},
 	(table) => ({
 		userIdx: index('kanban_columns_user_idx').on(table.userId),
-		projectIdx: index('kanban_columns_project_idx').on(table.projectId),
-		orderIdx: index('kanban_columns_order_idx').on(table.userId, table.projectId, table.order),
+		boardIdx: index('kanban_columns_board_idx').on(table.boardId),
+		orderIdx: index('kanban_columns_order_idx').on(table.boardId, table.order),
 	})
 );
 
