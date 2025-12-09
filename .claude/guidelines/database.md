@@ -101,6 +101,26 @@ src/db/
 └── migrations/            # Generated migrations
 ```
 
+### User ID Column Type
+
+**CRITICAL**: Always use `text` for `user_id` columns, NOT `uuid`.
+
+Mana Core Auth (Better Auth) generates non-UUID user IDs:
+
+```
+Example: otUe1YrfENPdHnrF3g1vSBfpkQfambCZ
+```
+
+```typescript
+// CORRECT
+userId: text('user_id').notNull(),
+
+// WRONG - causes "invalid input syntax for type uuid" errors
+userId: uuid('user_id').notNull(),
+```
+
+See [Authentication Guidelines](./authentication.md#user-id-format) for details.
+
 ### Table Definition Pattern
 
 ```typescript
@@ -123,8 +143,10 @@ export const files = pgTable(
 		// Primary key - always UUID with auto-generation
 		id: uuid('id').primaryKey().defaultRandom(),
 
-		// Foreign keys
-		userId: varchar('user_id', { length: 255 }).notNull(),
+		// User ID - always TEXT (Better Auth uses non-UUID format)
+		userId: text('user_id').notNull(),
+
+		// Foreign keys to other tables (UUIDs are fine)
 		parentFolderId: uuid('parent_folder_id').references(() => folders.id, { onDelete: 'set null' }),
 
 		// Required fields

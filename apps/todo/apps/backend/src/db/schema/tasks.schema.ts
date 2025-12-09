@@ -45,7 +45,7 @@ export const tasks = pgTable(
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
 		projectId: uuid('project_id').references(() => projects.id, { onDelete: 'set null' }),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 		parentTaskId: uuid('parent_task_id'),
 
 		// Content

@@ -1,10 +1,10 @@
-import { pgTable, uuid, timestamp, varchar, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, varchar, index } from 'drizzle-orm/pg-core';
 
 export const labels = pgTable(
 	'labels',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 		name: varchar('name', { length: 100 }).notNull(),
 		color: varchar('color', { length: 7 }).default('#6B7280'),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),

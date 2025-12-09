@@ -1,11 +1,20 @@
-import { pgTable, uuid, timestamp, varchar, boolean, integer, index } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	uuid,
+	text,
+	timestamp,
+	varchar,
+	boolean,
+	integer,
+	index,
+} from 'drizzle-orm/pg-core';
 import { projects } from './projects.schema';
 
 export const kanbanBoards = pgTable(
 	'kanban_boards',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 		projectId: uuid('project_id').references(() => projects.id, { onDelete: 'cascade' }),
 
 		// Board properties
