@@ -3,8 +3,13 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { PillNavigation, CommandBar } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		CommandBarItem,
+		QuickAction,
+	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
@@ -17,8 +22,8 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import ContactDetailModal from '$lib/components/ContactDetailModal.svelte';
-	import SearchModal from '$lib/components/SearchModal.svelte';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
+	import { contactsApi } from '$lib/api/contacts';
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
 	import { contactsSettings } from '$lib/stores/settings.svelte';
 
@@ -152,6 +157,41 @@
 		goto('/', { replaceState: false });
 	}
 
+	// CommandBar search function
+	async function handleCommandBarSearch(query: string): Promise<CommandBarItem[]> {
+		const response = await contactsApi.list({ search: query, limit: 10 });
+		return (response.contacts || []).map((contact: any) => ({
+			id: contact.id,
+			title:
+				contact.displayName ||
+				[contact.firstName, contact.lastName].filter(Boolean).join(' ') ||
+				contact.email ||
+				'Unbekannt',
+			subtitle: contact.company || contact.email,
+			imageUrl: contact.photoUrl,
+			isFavorite: contact.isFavorite,
+		}));
+	}
+
+	// CommandBar item selection
+	function handleCommandBarSelect(item: CommandBarItem) {
+		goto(`/contacts/${item.id}`);
+	}
+
+	// CommandBar quick actions
+	const commandBarQuickActions: QuickAction[] = [
+		{
+			id: 'new',
+			label: 'Neuen Kontakt erstellen',
+			icon: 'plus',
+			href: '/contacts/new',
+			shortcut: 'N',
+		},
+		{ id: 'favorites', label: 'Favoriten anzeigen', icon: 'heart', href: '/favorites' },
+		{ id: 'tags', label: 'Tags verwalten', icon: 'tag', href: '/tags' },
+		{ id: 'import', label: 'Kontakte importieren', icon: 'upload', href: '/data?tab=import' },
+	];
+
 	onMount(async () => {
 		// Redirect to login if not authenticated
 		if (!authStore.isAuthenticated) {
@@ -238,7 +278,16 @@
 	{/if}
 
 	<!-- Global Search Modal (Cmd/K) -->
-	<SearchModal bind:open={searchModalOpen} onClose={() => (searchModalOpen = false)} />
+	<CommandBar
+		bind:open={searchModalOpen}
+		onClose={() => (searchModalOpen = false)}
+		onSearch={handleCommandBarSearch}
+		onSelect={handleCommandBarSelect}
+		quickActions={commandBarQuickActions}
+		placeholder="Kontakt suchen..."
+		emptyText="Keine Kontakte gefunden"
+		searchingText="Suche..."
+	/>
 </div>
 
 <style>
