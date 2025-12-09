@@ -26,7 +26,7 @@
 	let loadMoreTrigger: HTMLDivElement;
 
 	// Filter state
-	let selectedGroupId = $state<string | null>(null);
+	let selectedTagId = $state<string | null>(null);
 	let contactFilter = $state<ContactFilter>('all');
 	let birthdayFilter = $state<BirthdayFilter>('all');
 	let selectedCompany = $state<string | null>(null);
@@ -432,13 +432,13 @@
 		</button>
 		<FilterBar
 			contacts={contactsStore.contacts}
-			{selectedGroupId}
-			onGroupChange={(id) => {
-				selectedGroupId = id;
+			{selectedTagId}
+			onTagChange={(id) => {
+				selectedTagId = id;
 				if (id) {
-					contactsStore.setGroupId(id);
+					contactsStore.setTagId(id);
 				} else {
-					contactsStore.setGroupId(undefined);
+					contactsStore.setTagId(undefined);
 				}
 				contactsStore.loadContacts();
 			}}

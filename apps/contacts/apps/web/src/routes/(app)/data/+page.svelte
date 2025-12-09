@@ -8,7 +8,6 @@
 	import { importApi, type ImportPreviewResponse, type DuplicateAction } from '$lib/api/import';
 	import { exportApi, type ExportFormat } from '$lib/api/export';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
-	import { groupsStore } from '$lib/stores/groups.svelte';
 	import '$lib/i18n';
 
 	type Tab = 'import' | 'export';
@@ -40,18 +39,10 @@
 	let includeArchived = $state(false);
 	let includeNotes = $state(true);
 	let includePhotos = $state(true);
-	let selectedGroupId = $state<string | null>(null);
 	let onlyFavorites = $state(false);
 	let isExporting = $state(false);
 	let exportError = $state<string | null>(null);
 	let exportSuccess = $state(false);
-
-	// Load groups for export filter
-	$effect(() => {
-		if (activeTab === 'export' && groupsStore.groups.length === 0) {
-			groupsStore.loadGroups();
-		}
-	});
 
 	function setActiveTab(tab: Tab) {
 		activeTab = tab;
@@ -156,7 +147,6 @@
 		try {
 			await exportApi.exportContacts({
 				format: exportFormat,
-				groupId: selectedGroupId || undefined,
 				includeFavorites: onlyFavorites || undefined,
 				includeArchived,
 			});
@@ -529,20 +519,6 @@
 				<h3 class="font-semibold text-foreground">Filter</h3>
 
 				<div class="space-y-4">
-					<!-- Group Filter -->
-					<div>
-						<label class="block text-sm font-medium text-foreground mb-2">Gruppe</label>
-						<select
-							bind:value={selectedGroupId}
-							class="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-						>
-							<option value={null}>Alle Kontakte</option>
-							{#each groupsStore.groups as group}
-								<option value={group.id}>{group.name}</option>
-							{/each}
-						</select>
-					</div>
-
 					<!-- Favorites Only -->
 					<label class="flex items-center gap-3 cursor-pointer">
 						<input
