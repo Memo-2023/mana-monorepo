@@ -10,9 +10,11 @@
 	import TaskList from '$lib/components/TaskList.svelte';
 	import QuickAddTask from '$lib/components/QuickAddTask.svelte';
 	import CollapsibleSection from '$lib/components/CollapsibleSection.svelte';
+	import TaskEditModal from '$lib/components/TaskEditModal.svelte';
 	import type { Task } from '@todo/shared';
 
 	let isLoading = $state(true);
+	let editingTask = $state<Task | null>(null);
 
 	onMount(async () => {
 		if (!authStore.isAuthenticated) {
@@ -21,7 +23,13 @@
 		}
 
 		viewStore.setToday();
-		await tasksStore.fetchAllTasks();
+
+		try {
+			await tasksStore.fetchAllTasks();
+		} catch (error) {
+			console.error('Failed to load tasks:', error);
+		}
+
 		isLoading = false;
 	});
 
@@ -71,6 +79,42 @@
 			upcomingCount === 0 &&
 			completedTasks.length === 0
 	);
+
+	// Modal handlers
+	function openEditModal(task: Task) {
+		editingTask = task;
+	}
+
+	function closeEditModal() {
+		editingTask = null;
+	}
+
+	async function handleSaveTask(data: Partial<Task>) {
+		if (!editingTask) return;
+
+		try {
+			// Update task
+			await tasksStore.updateTask(editingTask.id, data);
+
+			// Update labels if provided
+			if ('labelIds' in data) {
+				await tasksStore.updateLabels(editingTask.id, (data as any).labelIds);
+			}
+
+			closeEditModal();
+		} catch (error) {
+			console.error('Failed to save task:', error);
+		}
+	}
+
+	async function handleDeleteTask(taskId: string) {
+		try {
+			await tasksStore.deleteTask(taskId);
+			closeEditModal();
+		} catch (error) {
+			console.error('Failed to delete task:', error);
+		}
+	}
 </script>
 
 <svelte:head>
@@ -114,7 +158,7 @@
 					variant="warning"
 					defaultOpen={true}
 				>
-					<TaskList tasks={overdueTasks} />
+					<TaskList tasks={overdueTasks} onEditTask={openEditModal} />
 				</CollapsibleSection>
 			{/if}
 
@@ -131,7 +175,7 @@
 						<p>Keine Aufgaben für heute</p>
 					</div>
 				{:else}
-					<TaskList tasks={todayTasks} />
+					<TaskList tasks={todayTasks} onEditTask={openEditModal} />
 				{/if}
 			</CollapsibleSection>
 
@@ -154,7 +198,7 @@
 								<h3 class="text-sm font-medium text-muted-foreground mb-2 pl-2">
 									{group.label} ({group.tasks.length})
 								</h3>
-								<TaskList tasks={group.tasks} />
+								<TaskList tasks={group.tasks} onEditTask={openEditModal} />
 							</div>
 						{/each}
 					</div>
@@ -174,12 +218,23 @@
 						<p>Noch keine erledigten Aufgaben</p>
 					</div>
 				{:else}
-					<TaskList tasks={completedTasks} showCompleted />
+					<TaskList tasks={completedTasks} showCompleted onEditTask={openEditModal} />
 				{/if}
 			</CollapsibleSection>
 		</div>
 	{/if}
 </div>
+
+<!-- Task Edit Modal -->
+{#if editingTask}
+	<TaskEditModal
+		task={editingTask}
+		open={true}
+		onClose={closeEditModal}
+		onSave={handleSaveTask}
+		onDelete={handleDeleteTask}
+	/>
+{/if}
 
 <style>
 	.unified-view {

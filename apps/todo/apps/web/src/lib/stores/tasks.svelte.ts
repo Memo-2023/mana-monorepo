@@ -119,18 +119,10 @@ export const tasksStore = {
 		loading = true;
 		error = null;
 		try {
-			// Fetch both incomplete and completed tasks
-			const [incompleteTasks, completedTasks] = await Promise.all([
-				tasksApi.getTasks({ isCompleted: false }),
-				tasksApi.getTasks({ isCompleted: true }),
-			]);
-			// Deduplicate tasks by ID (in case API returns duplicates)
-			const allTasks = [...incompleteTasks, ...completedTasks];
-			const uniqueTasksMap = new Map<string, Task>();
-			for (const task of allTasks) {
-				uniqueTasksMap.set(task.id, task);
-			}
-			tasks = Array.from(uniqueTasksMap.values());
+			// Fetch all tasks without filter - let frontend handle filtering
+			const allTasks = await tasksApi.getTasks({});
+			console.log('API response - all tasks:', allTasks.length);
+			tasks = allTasks;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to fetch all tasks';
 			console.error('Failed to fetch all tasks:', e);
@@ -171,9 +163,13 @@ export const tasksStore = {
 	 * Get tasks due today
 	 */
 	get todayTasks(): Task[] {
+		const today = startOfDay(new Date());
 		return tasks.filter((t) => {
-			if (!t.dueDate || t.isCompleted) return false;
-			return isToday(new Date(t.dueDate));
+			if (t.isCompleted) return false;
+			// Include tasks without dueDate as "today" tasks (inbox behavior)
+			if (!t.dueDate) return true;
+			const taskDate = startOfDay(new Date(t.dueDate));
+			return taskDate.getTime() === today.getTime();
 		});
 	},
 

@@ -6,9 +6,10 @@
 	interface Props {
 		tasks: Task[];
 		showCompleted?: boolean;
+		onEditTask?: (task: Task) => void;
 	}
 
-	let { tasks, showCompleted = false }: Props = $props();
+	let { tasks, showCompleted = false, onEditTask }: Props = $props();
 
 	async function handleToggleComplete(task: Task) {
 		if (task.isCompleted) {
@@ -30,6 +31,7 @@
 			{showCompleted}
 			onToggleComplete={() => handleToggleComplete(task)}
 			onDelete={() => handleDelete(task.id)}
+			onEdit={onEditTask ? () => onEditTask(task) : undefined}
 		/>
 	{/each}
 </div>

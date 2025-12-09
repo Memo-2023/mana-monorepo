@@ -9,9 +9,16 @@
 		showCompleted?: boolean;
 		onToggleComplete: () => void;
 		onDelete: () => void;
+		onEdit?: () => void;
 	}
 
-	let { task, showCompleted = false, onToggleComplete, onDelete }: Props = $props();
+	let { task, showCompleted = false, onToggleComplete, onDelete, onEdit }: Props = $props();
+
+	function handleContentClick() {
+		if (onEdit) {
+			onEdit();
+		}
+	}
 
 	// Priority colors
 	const priorityColors: Record<string, string> = {
@@ -67,8 +74,8 @@
 		{/if}
 	</button>
 
-	<!-- Content -->
-	<div class="task-content">
+	<!-- Content (clickable to edit) -->
+	<button type="button" class="task-content" onclick={handleContentClick}>
 		<span class="task-title" class:line-through={task.isCompleted}>
 			{task.title}
 		</span>
@@ -120,7 +127,7 @@
 				{/if}
 			</div>
 		{/if}
-	</div>
+	</button>
 
 	<!-- Project indicator -->
 	{#if projectColor()}
@@ -232,6 +239,11 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
+		background: none;
+		border: none;
+		padding: 0;
+		text-align: left;
+		cursor: pointer;
 	}
 
 	.task-title {

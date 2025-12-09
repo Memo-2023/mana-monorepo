@@ -28,7 +28,11 @@ export class QueryTasksDto {
 	status?: TaskStatus;
 
 	@IsOptional()
-	@Transform(({ value }) => value === 'true' || value === true)
+	@Transform(({ value }) => {
+		if (value === 'true' || value === true) return true;
+		if (value === 'false' || value === false) return false;
+		return undefined;
+	})
 	@IsBoolean()
 	isCompleted?: boolean;
 
