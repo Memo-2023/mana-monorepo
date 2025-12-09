@@ -67,6 +67,7 @@
 	const navItems: PillNavItem[] = [
 		{ href: '/', label: 'Aufgaben', icon: 'list' },
 		{ href: '/kanban', label: 'Kanban', icon: 'columns' },
+		{ href: '/statistics', label: 'Statistiken', icon: 'chart' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
@@ -157,6 +158,31 @@
 			isCollapsed = true;
 			collapsedStore.set(true);
 		}
+
+		// Register Service Worker for PWA
+		if ('serviceWorker' in navigator) {
+			try {
+				const registration = await navigator.serviceWorker.register('/sw.js', {
+					scope: '/',
+				});
+				console.log('Todo PWA: Service Worker registered', registration.scope);
+
+				// Check for updates
+				registration.addEventListener('updatefound', () => {
+					const newWorker = registration.installing;
+					if (newWorker) {
+						newWorker.addEventListener('statechange', () => {
+							if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+								// New version available
+								console.log('Todo PWA: New version available');
+							}
+						});
+					}
+				});
+			} catch (error) {
+				console.error('Todo PWA: Service Worker registration failed', error);
+			}
+		}
 	});
 </script>
 
@@ -202,7 +228,7 @@
 		class:sidebar-mode={isSidebarMode && !isCollapsed}
 		class:floating-mode={!isSidebarMode && !isCollapsed}
 	>
-		<div class="content-wrapper">
+		<div class="content-wrapper" class:full-width={$page.url.pathname === '/kanban'}>
 			{@render children()}
 		</div>
 	</main>
@@ -238,15 +264,29 @@
 		z-index: 0;
 	}
 
+	.content-wrapper.full-width {
+		max-width: none;
+		padding-left: 0;
+		padding-right: 0;
+	}
+
 	@media (min-width: 640px) {
 		.content-wrapper {
 			padding: 1.5rem;
+		}
+		.content-wrapper.full-width {
+			padding-left: 0;
+			padding-right: 0;
 		}
 	}
 
 	@media (min-width: 1024px) {
 		.content-wrapper {
 			padding: 2rem;
+		}
+		.content-wrapper.full-width {
+			padding-left: 0;
+			padding-right: 0;
 		}
 	}
 </style>

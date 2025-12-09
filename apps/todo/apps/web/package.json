@@ -28,7 +28,6 @@
 		"vite": "^6.0.0"
 	},
 	"dependencies": {
-		"@todo/shared": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",
@@ -42,7 +41,9 @@
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
+		"@todo/shared": "workspace:*",
 		"date-fns": "^4.1.0",
+		"lucide-svelte": "^0.556.0",
 		"svelte-dnd-action": "^0.9.68",
 		"svelte-i18n": "^4.0.1"
 	},
