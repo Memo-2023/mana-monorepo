@@ -210,28 +210,44 @@ export const groupsApi = {
 
 // Tags API
 export const tagsApi = {
-	async list() {
+	async list(): Promise<{ tags: ContactTag[] }> {
 		return fetchWithAuth('/tags');
 	},
 
-	async create(data: { name: string; color?: string }) {
+	async create(data: { name: string; color?: string }): Promise<{ tag: ContactTag }> {
 		return fetchWithAuth('/tags', {
 			method: 'POST',
 			body: JSON.stringify(data),
 		});
 	},
 
-	async update(id: string, data: { name?: string; color?: string }) {
+	async update(id: string, data: { name?: string; color?: string }): Promise<{ tag: ContactTag }> {
 		return fetchWithAuth(`/tags/${id}`, {
 			method: 'PATCH',
 			body: JSON.stringify(data),
 		});
 	},
 
-	async delete(id: string) {
+	async delete(id: string): Promise<{ success: boolean }> {
 		return fetchWithAuth(`/tags/${id}`, {
 			method: 'DELETE',
 		});
+	},
+
+	async addToContact(tagId: string, contactId: string): Promise<{ success: boolean }> {
+		return fetchWithAuth(`/tags/${tagId}/contacts/${contactId}`, {
+			method: 'POST',
+		});
+	},
+
+	async removeFromContact(tagId: string, contactId: string): Promise<{ success: boolean }> {
+		return fetchWithAuth(`/tags/${tagId}/contacts/${contactId}`, {
+			method: 'DELETE',
+		});
+	},
+
+	async getForContact(contactId: string): Promise<{ tagIds: string[] }> {
+		return fetchWithAuth(`/tags/contact/${contactId}`);
 	},
 };
 

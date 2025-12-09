@@ -4,11 +4,13 @@
 	},
 	"common": {
 		"back": "Zurück",
-		"cancel": "Abbrechen"
+		"cancel": "Abbrechen",
+		"loadingMore": "Lade weitere..."
 	},
 	"nav": {
 		"contacts": "Kontakte",
 		"groups": "Gruppen",
+		"tags": "Tags",
 		"favorites": "Favoriten",
 		"archive": "Archiv",
 		"search": "Suche",
@@ -143,6 +145,7 @@
 		"contactInfo": "Kontaktinfo",
 		"contact": {
 			"all": "Alle Kontakte",
+			"favorites": "Favoriten",
 			"hasPhone": "Mit Telefon",
 			"hasEmail": "Mit E-Mail",
 			"incomplete": "Unvollständig"
@@ -166,5 +169,34 @@
 		"includeArchived": "Archivierte Kontakte einschließen",
 		"exporting": "Exportiere...",
 		"success": "Export erfolgreich"
+	},
+	"notes": {
+		"title": "Notizen",
+		"add": "Notiz hinzufügen",
+		"addFirst": "Erste Notiz hinzufügen",
+		"empty": "Noch keine Notizen",
+		"placeholder": "Schreibe eine Notiz...",
+		"confirmDelete": "Diese Notiz löschen?",
+		"pin": "Notiz anheften",
+		"unpin": "Nicht mehr anheften",
+		"yesterday": "Gestern"
+	},
+	"tags": {
+		"title": "Tags",
+		"new": "Neuer Tag",
+		"edit": "Tag bearbeiten",
+		"noTags": "Noch keine Tags",
+		"createFirst": "Erstelle deinen ersten Tag um Kontakte zu organisieren",
+		"search": "Tags durchsuchen...",
+		"name": "Name",
+		"namePlaceholder": "Tag-Name eingeben",
+		"color": "Farbe",
+		"preview": "Vorschau",
+		"contactCount": "{count} Kontakte",
+		"confirmDelete": "Möchtest du \"{name}\" wirklich löschen?",
+		"noResults": "Keine Tags gefunden",
+		"noResultsFor": "Keine Ergebnisse für \"{query}\"",
+		"tagSingular": "Tag",
+		"tagPlural": "Tags"
 	}
 }

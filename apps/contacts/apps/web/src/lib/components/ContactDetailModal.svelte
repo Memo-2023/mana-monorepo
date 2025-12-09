@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { contactsApi, photoApi, type Contact } from '$lib/api/contacts';
+	import ContactNotes from './ContactNotes.svelte';
 
 	interface Props {
 		contactId: string;
@@ -848,6 +849,9 @@
 								</div>
 							</section>
 						{/if}
+
+						<!-- Contact Notes (separate from contact.notes field) -->
+						<ContactNotes {contactId} />
 					</div>
 				{/if}
 			{/if}

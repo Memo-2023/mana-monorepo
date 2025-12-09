@@ -71,4 +71,43 @@ export class TagController {
 		await this.tagService.delete(id, user.userId);
 		return { success: true };
 	}
+
+	@Post(':id/contacts/:contactId')
+	async addToContact(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id', ParseUUIDPipe) tagId: string,
+		@Param('contactId', ParseUUIDPipe) contactId: string
+	) {
+		// Verify tag belongs to user
+		const tag = await this.tagService.findById(tagId, user.userId);
+		if (!tag) {
+			throw new Error('Tag not found');
+		}
+		await this.tagService.addTagToContact(contactId, tagId);
+		return { success: true };
+	}
+
+	@Delete(':id/contacts/:contactId')
+	async removeFromContact(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id', ParseUUIDPipe) tagId: string,
+		@Param('contactId', ParseUUIDPipe) contactId: string
+	) {
+		// Verify tag belongs to user
+		const tag = await this.tagService.findById(tagId, user.userId);
+		if (!tag) {
+			throw new Error('Tag not found');
+		}
+		await this.tagService.removeTagFromContact(contactId, tagId);
+		return { success: true };
+	}
+
+	@Get('contact/:contactId')
+	async getTagsForContact(
+		@CurrentUser() user: CurrentUserData,
+		@Param('contactId', ParseUUIDPipe) contactId: string
+	) {
+		const tagIds = await this.tagService.getTagsForContact(contactId);
+		return { tagIds };
+	}
 }

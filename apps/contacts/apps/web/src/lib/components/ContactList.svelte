@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
 	import { goto } from '$app/navigation';
-	import ExportModal from '$lib/components/export/ExportModal.svelte';
 	import ViewModeToggle from '$lib/components/ViewModeToggle.svelte';
 	import SortToggle, { type SortField } from '$lib/components/SortToggle.svelte';
 	import FilterBar, {
@@ -20,13 +19,20 @@
 	let searchQuery = $state('');
 	let sortField = $state<SortField>('lastName');
 	let searchTimeout: ReturnType<typeof setTimeout>;
-	let showExportModal = $state(false);
+
+	// Infinite scroll
+	let scrollContainer: HTMLDivElement;
+	let intersectionObserver: IntersectionObserver | null = null;
+	let loadMoreTrigger: HTMLDivElement;
 
 	// Filter state
 	let selectedGroupId = $state<string | null>(null);
 	let contactFilter = $state<ContactFilter>('all');
 	let birthdayFilter = $state<BirthdayFilter>('all');
 	let selectedCompany = $state<string | null>(null);
+
+	// Count favorites for quick filter button
+	let favoritesCount = $derived(contactsStore.contacts.filter((c) => c.isFavorite).length);
 
 	// Batch selection state
 	let selectionMode = $state(false);
@@ -78,7 +84,9 @@
 		let result = [...contactsStore.contacts];
 
 		// Apply contact filter
-		if (contactFilter === 'hasPhone') {
+		if (contactFilter === 'favorites') {
+			result = result.filter((c) => c.isFavorite);
+		} else if (contactFilter === 'hasPhone') {
 			result = result.filter((c) => c.phone || c.mobile);
 		} else if (contactFilter === 'hasEmail') {
 			result = result.filter((c) => c.email);
@@ -218,10 +226,50 @@
 		}
 	}
 
+	function setupInfiniteScroll() {
+		if (intersectionObserver) {
+			intersectionObserver.disconnect();
+		}
+
+		intersectionObserver = new IntersectionObserver(
+			(entries) => {
+				const entry = entries[0];
+				if (entry?.isIntersecting && contactsStore.hasMore && !contactsStore.loadingMore) {
+					contactsStore.loadMore();
+				}
+			},
+			{
+				rootMargin: '200px',
+				threshold: 0.1,
+			}
+		);
+
+		if (loadMoreTrigger) {
+			intersectionObserver.observe(loadMoreTrigger);
+		}
+	}
+
 	onMount(async () => {
 		// Only load if not already loaded
 		if (contactsStore.contacts.length === 0) {
 			await contactsStore.loadContacts();
+		}
+
+		// Setup infinite scroll after DOM is ready
+		setupInfiniteScroll();
+	});
+
+	onDestroy(() => {
+		if (intersectionObserver) {
+			intersectionObserver.disconnect();
+		}
+	});
+
+	// Re-setup observer when trigger element changes
+	$effect(() => {
+		if (loadMoreTrigger && intersectionObserver) {
+			intersectionObserver.disconnect();
+			intersectionObserver.observe(loadMoreTrigger);
 		}
 	});
 </script>
@@ -247,22 +295,6 @@
 					/>
 				</svg>
 				<span class="hidden sm:inline">{selectionMode ? 'Fertig' : 'Auswählen'}</span>
-			</button>
-			<button
-				type="button"
-				onclick={() => (showExportModal = true)}
-				class="btn btn-secondary flex items-center gap-2"
-				title={$_('export.title')}
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-					/>
-				</svg>
-				<span class="hidden sm:inline">{$_('export.button')}</span>
 			</button>
 			<a href="/contacts/new" class="btn btn-primary flex items-center gap-2">
 				<span>+</span>
@@ -372,6 +404,32 @@
 				/>
 			</svg>
 		</div>
+		<!-- Quick Favorites Filter -->
+		<button
+			type="button"
+			class="favorites-quick-btn"
+			class:active={contactFilter === 'favorites'}
+			onclick={() => (contactFilter = contactFilter === 'favorites' ? 'all' : 'favorites')}
+			title={contactFilter === 'favorites' ? 'Alle Kontakte anzeigen' : 'Nur Favoriten anzeigen'}
+		>
+			<svg
+				class="w-5 h-5"
+				class:filled={contactFilter === 'favorites'}
+				fill={contactFilter === 'favorites' ? 'currentColor' : 'none'}
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+				/>
+			</svg>
+			{#if favoritesCount > 0}
+				<span class="favorites-count">{favoritesCount}</span>
+			{/if}
+		</button>
 		<FilterBar
 			contacts={contactsStore.contacts}
 			{selectedGroupId}
@@ -444,16 +502,25 @@
 			/>
 		{/if}
 
+		<!-- Infinite scroll trigger & loading more indicator -->
+		{#if contactsStore.hasMore}
+			<div bind:this={loadMoreTrigger} class="load-more-trigger">
+				{#if contactsStore.loadingMore}
+					<div class="loading-more">
+						<div class="loading-spinner"></div>
+						<span>{$_('common.loadingMore')}</span>
+					</div>
+				{/if}
+			</div>
+		{/if}
+
 		<!-- Total count -->
 		<p class="text-sm text-muted-foreground text-center">
-			{contactsStore.total}
+			{contactsStore.contacts.length} / {contactsStore.total}
 			{contactsStore.total === 1 ? $_('contacts.contact') : $_('contacts.contactsPlural')}
 		</p>
 	{/if}
 </div>
-
-<!-- Export Modal -->
-<ExportModal isOpen={showExportModal} onClose={() => (showExportModal = false)} />
 
 <style>
 	.batch-actions-bar {
@@ -495,5 +562,87 @@
 	.batch-btn-danger:hover:not(:disabled) {
 		background: hsl(var(--color-error) / 0.15);
 		color: hsl(var(--color-error));
+	}
+
+	/* Favorites Quick Filter Button */
+	.favorites-quick-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.5rem 0.75rem;
+		background: hsl(var(--background) / 0.75);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid hsl(var(--border) / 0.5);
+		border-radius: 9999px;
+		color: hsl(var(--muted-foreground));
+		cursor: pointer;
+		transition: all 0.2s ease;
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+
+	.favorites-quick-btn:hover {
+		color: hsl(var(--foreground));
+		border-color: hsl(var(--border));
+	}
+
+	.favorites-quick-btn.active {
+		color: #ef4444;
+		border-color: #ef4444 / 0.5;
+		background: hsl(0 84% 60% / 0.1);
+	}
+
+	.favorites-quick-btn.active:hover {
+		background: hsl(0 84% 60% / 0.15);
+	}
+
+	.favorites-count {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 1.25rem;
+		height: 1.25rem;
+		padding: 0 0.375rem;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		background: hsl(var(--muted));
+		border-radius: 9999px;
+	}
+
+	.favorites-quick-btn.active .favorites-count {
+		background: #ef4444;
+		color: white;
+	}
+
+	/* Infinite scroll */
+	.load-more-trigger {
+		height: 1px;
+		margin-top: 1rem;
+	}
+
+	.loading-more {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		padding: 1.5rem;
+		color: hsl(var(--muted-foreground));
+		font-size: 0.875rem;
+	}
+
+	.loading-spinner {
+		width: 1.25rem;
+		height: 1.25rem;
+		border: 2px solid hsl(var(--muted));
+		border-top-color: hsl(var(--primary));
+		border-radius: 50%;
+		animation: spin 0.8s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 </style>

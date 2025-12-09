@@ -31,7 +31,7 @@
 			try {
 				await googleApi.handleCallback(code);
 				// Remove code from URL
-				goto('/import?tab=google', { replaceState: true });
+				goto('/data?tab=import&source=google', { replaceState: true });
 			} catch (e) {
 				error = e instanceof Error ? e.message : 'Failed to connect';
 			}

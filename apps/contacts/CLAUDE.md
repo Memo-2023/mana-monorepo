@@ -208,7 +208,7 @@ S3_BUCKET=contacts-photos
 # Get credentials from https://console.cloud.google.com/apis/credentials
 GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your-client-secret
-GOOGLE_REDIRECT_URI=http://localhost:5184/import?tab=google
+GOOGLE_REDIRECT_URI=http://localhost:5184/data?tab=import&source=google
 ```
 
 #### Mobile (.env)

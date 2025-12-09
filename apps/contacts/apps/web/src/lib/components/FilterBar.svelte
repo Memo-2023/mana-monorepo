@@ -45,11 +45,11 @@
 		return Array.from(companySet).sort((a, b) => a.localeCompare(b, 'de'));
 	});
 
-	// Count active filters
+	// Count active filters (excluding favorites since it has its own quick button)
 	let activeFilterCount = $derived.by(() => {
 		let count = 0;
 		if (selectedGroupId) count++;
-		if (contactFilter !== 'all') count++;
+		if (contactFilter !== 'all' && contactFilter !== 'favorites') count++;
 		if (birthdayFilter !== 'all') count++;
 		if (selectedCompany) count++;
 		return count;
@@ -68,7 +68,10 @@
 
 	function clearAllFilters() {
 		onGroupChange(null);
-		onContactFilterChange('all');
+		// Keep favorites filter if active (controlled by separate quick button)
+		if (contactFilter !== 'favorites') {
+			onContactFilterChange('all');
+		}
 		onBirthdayFilterChange('all');
 		onCompanyChange(null);
 	}
@@ -120,7 +123,7 @@
 					</button>
 				{/if}
 			{/if}
-			{#if contactFilter !== 'all'}
+			{#if contactFilter !== 'all' && contactFilter !== 'favorites'}
 				<button type="button" class="filter-pill" onclick={() => onContactFilterChange('all')}>
 					{$_(`filters.contact.${contactFilter}`)}
 					<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -53,12 +53,6 @@
 		{ value: 'yyyy-MM-dd', label: 'JJJJ-MM-TT (ISO)' },
 	];
 
-	const exportFormatOptions = [
-		{ value: 'vcf', label: 'vCard (.vcf)' },
-		{ value: 'csv', label: 'CSV (.csv)' },
-		{ value: 'json', label: 'JSON (.json)' },
-	];
-
 	const duplicateSensitivityOptions = [
 		{ value: 'strict', label: 'Streng' },
 		{ value: 'normal', label: 'Normal' },
@@ -195,8 +189,7 @@
 				description="Standard-Sortierung der Kontakte"
 				options={sortByOptions}
 				value={contactsSettings.sortBy}
-				onchange={(v: string | number | null) =>
-					contactsSettings.set('sortBy', v as ContactSortBy)}
+				onchange={(v: string | number | null) => contactsSettings.set('sortBy', v as ContactSortBy)}
 			>
 				{#snippet icon()}
 					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -385,7 +378,7 @@
 	</SettingsSection>
 
 	<!-- Import/Export Section -->
-	<SettingsSection title="Import & Export">
+	<SettingsSection title="Daten">
 		{#snippet icon()}
 			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -398,13 +391,10 @@
 		{/snippet}
 
 		<SettingsCard>
-			<SettingsSelect
-				label="Standard-Exportformat"
-				description="Bevorzugtes Format für Kontakt-Export"
-				options={exportFormatOptions}
-				value={contactsSettings.defaultExportFormat}
-				onchange={(v: string | number | null) =>
-					contactsSettings.set('defaultExportFormat', v as 'vcf' | 'csv' | 'json')}
+			<SettingsRow
+				label="Kontakte importieren"
+				description="Aus Datei oder Google importieren"
+				href="/data?tab=import"
 			>
 				{#snippet icon()}
 					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -412,35 +402,16 @@
 							stroke-linecap="round"
 							stroke-linejoin="round"
 							stroke-width="2"
-							d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+							d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
 						/>
 					</svg>
 				{/snippet}
-			</SettingsSelect>
+			</SettingsRow>
 
-			<SettingsToggle
-				label="Notizen exportieren"
-				description="Notizen beim Export mit einschließen"
-				isOn={contactsSettings.includeNotesInExport}
-				onToggle={(v) => contactsSettings.set('includeNotesInExport', v)}
-			>
-				{#snippet icon()}
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-						/>
-					</svg>
-				{/snippet}
-			</SettingsToggle>
-
-			<SettingsToggle
-				label="Fotos exportieren"
-				description="Kontaktfotos beim Export mit einschließen"
-				isOn={contactsSettings.includePhotosInExport}
-				onToggle={(v) => contactsSettings.set('includePhotosInExport', v)}
+			<SettingsRow
+				label="Kontakte exportieren"
+				description="Als vCard oder CSV herunterladen"
+				href="/data?tab=export"
 				border={false}
 			>
 				{#snippet icon()}
@@ -449,11 +420,11 @@
 							stroke-linecap="round"
 							stroke-linejoin="round"
 							stroke-width="2"
-							d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+							d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
 						/>
 					</svg>
 				{/snippet}
-			</SettingsToggle>
+			</SettingsRow>
 		</SettingsCard>
 	</SettingsSection>
 

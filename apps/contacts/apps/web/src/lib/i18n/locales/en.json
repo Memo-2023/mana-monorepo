@@ -4,11 +4,13 @@
 	},
 	"common": {
 		"back": "Back",
-		"cancel": "Cancel"
+		"cancel": "Cancel",
+		"loadingMore": "Loading more..."
 	},
 	"nav": {
 		"contacts": "Contacts",
 		"groups": "Groups",
+		"tags": "Tags",
 		"favorites": "Favorites",
 		"archive": "Archive",
 		"search": "Search",
@@ -143,6 +145,7 @@
 		"contactInfo": "Contact info",
 		"contact": {
 			"all": "All contacts",
+			"favorites": "Favorites",
 			"hasPhone": "With phone",
 			"hasEmail": "With email",
 			"incomplete": "Incomplete"
@@ -166,5 +169,34 @@
 		"includeArchived": "Include archived contacts",
 		"exporting": "Exporting...",
 		"success": "Export successful"
+	},
+	"notes": {
+		"title": "Notes",
+		"add": "Add Note",
+		"addFirst": "Add your first note",
+		"empty": "No notes yet",
+		"placeholder": "Write a note...",
+		"confirmDelete": "Delete this note?",
+		"pin": "Pin note",
+		"unpin": "Unpin note",
+		"yesterday": "Yesterday"
+	},
+	"tags": {
+		"title": "Tags",
+		"new": "New Tag",
+		"edit": "Edit Tag",
+		"noTags": "No tags yet",
+		"createFirst": "Create your first tag to organize contacts",
+		"search": "Search tags...",
+		"name": "Name",
+		"namePlaceholder": "Enter tag name",
+		"color": "Color",
+		"preview": "Preview",
+		"contactCount": "{count} contacts",
+		"confirmDelete": "Are you sure you want to delete \"{name}\"?",
+		"noResults": "No tags found",
+		"noResultsFor": "No results for \"{query}\"",
+		"tagSingular": "Tag",
+		"tagPlural": "Tags"
 	}
 }
