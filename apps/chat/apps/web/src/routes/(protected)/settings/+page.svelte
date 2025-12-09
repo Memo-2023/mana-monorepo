@@ -1,9 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { theme } from '$lib/stores/theme';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
-	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
-	import type { ThemeVariant } from '@manacore/shared-theme';
 	import {
 		SettingsPage,
 		SettingsSection,
@@ -14,17 +11,6 @@
 		SettingsDangerButton,
 		GlobalSettingsSection,
 	} from '@manacore/shared-ui';
-
-	// Available theme variants
-	const themeVariants = theme.variants;
-
-	function setThemeVariant(variant: ThemeVariant) {
-		theme.setVariant(variant);
-	}
-
-	function toggleDarkMode(value: boolean) {
-		theme.toggleMode();
-	}
 
 	function handleDeleteChatHistory() {
 		// TODO: Implement chat history deletion
@@ -41,67 +27,8 @@
 </svelte:head>
 
 <SettingsPage title="Einstellungen" subtitle="Passe die App an deine Vorlieben an.">
-	<!-- Appearance Section -->
-	<SettingsSection title="Erscheinungsbild">
-		{#snippet icon()}
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
-				/>
-			</svg>
-		{/snippet}
-
-		<SettingsCard>
-			<SettingsToggle
-				label="Dunkler Modus"
-				description="Aktiviere den dunklen Modus für die App"
-				isOn={theme.mode === 'dark'}
-				onToggle={toggleDarkMode}
-			>
-				{#snippet icon()}
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-						/>
-					</svg>
-				{/snippet}
-			</SettingsToggle>
-
-			<div class="px-5 py-4">
-				<p class="font-medium text-[hsl(var(--foreground))] mb-2">Farbschema</p>
-				<p class="text-sm text-[hsl(var(--muted-foreground))] mb-4">
-					Wähle ein Farbschema für die App
-				</p>
-				<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-					{#each themeVariants as variant}
-						{@const def = THEME_DEFINITIONS[variant]}
-						<button
-							onclick={() => setThemeVariant(variant)}
-							class="flex items-center gap-3 p-3 rounded-lg border-2 transition-all
-								{theme.variant === variant
-								? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.05)]'
-								: 'border-[hsl(var(--border))] hover:border-[hsl(var(--primary)/0.5)]'}"
-						>
-							<span class="text-xl">{def.icon}</span>
-							<span
-								class="text-sm font-medium {theme.variant === variant
-									? 'text-[hsl(var(--primary))]'
-									: 'text-[hsl(var(--foreground))]'}"
-							>
-								{def.label}
-							</span>
-						</button>
-					{/each}
-				</div>
-			</div>
-		</SettingsCard>
-	</SettingsSection>
+	<!-- Global Settings Section (synced across all apps) -->
+	<GlobalSettingsSection {userSettings} appId="chat" />
 
 	<!-- Notifications Section -->
 	<SettingsSection title="Benachrichtigungen">
@@ -215,9 +142,6 @@
 			</SettingsDangerButton>
 		</SettingsDangerZone>
 	</SettingsSection>
-
-	<!-- Global Settings Section -->
-	<GlobalSettingsSection {userSettings} />
 
 	<!-- About Section -->
 	<SettingsSection title="Über die App">
