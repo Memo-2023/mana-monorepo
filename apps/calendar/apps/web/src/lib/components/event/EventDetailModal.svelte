@@ -8,6 +8,7 @@
 	import * as api from '$lib/api/events';
 	import { format, parseISO } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { EventDetailSkeleton } from '$lib/components/skeletons';
 
 	interface Props {
 		eventId: string;
@@ -147,10 +148,7 @@
 <div class="modal-backdrop" onclick={handleBackdropClick}>
 	<div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="modal-title">
 		{#if loading}
-			<div class="modal-loading">
-				<div class="spinner"></div>
-				<p>Laden...</p>
-			</div>
+			<EventDetailSkeleton />
 		{:else if event}
 			<div class="modal-header">
 				<h2 id="modal-title" class="modal-title">
@@ -473,31 +471,6 @@
 		to {
 			opacity: 1;
 			transform: translateY(0) scale(1);
-		}
-	}
-
-	.modal-loading {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: 3rem;
-		gap: 1rem;
-		color: hsl(var(--color-muted-foreground));
-	}
-
-	.spinner {
-		width: 2rem;
-		height: 2rem;
-		border: 3px solid hsl(var(--color-border));
-		border-top-color: hsl(var(--color-primary));
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
-	}
-
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
 		}
 	}
 

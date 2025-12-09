@@ -7,6 +7,7 @@
 	import { toast } from '$lib/stores/toast';
 	import type { CreateAlarmInput, Alarm } from '@clock/shared';
 	import { ALARM_SOUNDS, DEFAULT_ALARM_PRESETS } from '@clock/shared';
+	import { AlarmsSkeleton } from '$lib/components/skeletons';
 
 	// Quick create form (inline)
 	let newTime = $state('07:00');
@@ -194,11 +195,7 @@
 
 	<!-- Loading State -->
 	{#if alarmsStore.loading}
-		<div class="flex justify-center py-12">
-			<div
-				class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent"
-			></div>
-		</div>
+		<AlarmsSkeleton />
 	{:else}
 		<!-- Default Alarm Presets (Grid) -->
 		<div class="alarm-grid">
