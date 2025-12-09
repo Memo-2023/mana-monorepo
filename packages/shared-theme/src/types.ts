@@ -244,6 +244,10 @@ export interface GeneralSettings {
 	weekStartsOn: WeekStartDay;
 	/** Master toggle for all app sounds */
 	soundsEnabled: boolean;
+	/** Show confirmation dialog before deleting items */
+	confirmOnDelete: boolean;
+	/** Enable keyboard shortcuts globally */
+	keyboardShortcutsEnabled: boolean;
 }
 
 /**
@@ -290,6 +294,8 @@ export const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
 	startPages: {}, // Empty = use app defaults
 	weekStartsOn: 'monday',
 	soundsEnabled: true,
+	confirmOnDelete: true,
+	keyboardShortcutsEnabled: true,
 };
 
 /**
