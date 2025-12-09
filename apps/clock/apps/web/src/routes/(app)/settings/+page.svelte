@@ -1,7 +1,12 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { GlobalSettingsSection } from '@manacore/shared-ui';
+
+	onMount(async () => {
+		await userSettings.load();
+	});
 
 	// Settings state
 	let clockFormat = $state<'24h' | '12h'>('24h');
