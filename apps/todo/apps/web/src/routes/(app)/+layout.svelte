@@ -3,8 +3,13 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { PillNavigation, CommandBar } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		CommandBarItem,
+		QuickAction,
+	} from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { projectsStore } from '$lib/stores/projects.svelte';
@@ -17,11 +22,47 @@
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getTasks } from '$lib/api/tasks';
 
 	// App switcher items
 	const appItems = getPillAppItems('todo');
 
 	let { children } = $props();
+
+	// CommandBar state
+	let commandBarOpen = $state(false);
+
+	// CommandBar quick actions
+	const commandBarQuickActions: QuickAction[] = [
+		{ id: 'new', label: 'Neue Aufgabe erstellen', icon: 'plus', href: '/task/new', shortcut: 'N' },
+		{ id: 'kanban', label: 'Kanban-Board', icon: 'list', href: '/kanban' },
+		{ id: 'stats', label: 'Statistiken', icon: 'chart', href: '/statistics' },
+		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
+	];
+
+	// CommandBar search - search tasks
+	async function handleCommandBarSearch(query: string): Promise<CommandBarItem[]> {
+		if (!query.trim()) return [];
+
+		try {
+			const tasks = await getTasks({ search: query });
+			return tasks.slice(0, 10).map((task) => ({
+				id: task.id,
+				title: task.title,
+				subtitle: task.isCompleted
+					? '✓ Erledigt'
+					: task.dueDate
+						? new Date(task.dueDate).toLocaleDateString('de-DE')
+						: 'Kein Datum',
+			}));
+		} catch {
+			return [];
+		}
+	}
+
+	function handleCommandBarSelect(item: CommandBarItem) {
+		goto(`/task/${item.id}`);
+	}
 
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
@@ -77,6 +118,13 @@
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
+
+		// Cmd/Ctrl+K to open command bar (works even in inputs)
+		if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+			event.preventDefault();
+			commandBarOpen = true;
+			return;
+		}
 
 		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
 			return;
@@ -232,6 +280,18 @@
 			{@render children()}
 		</div>
 	</main>
+
+	<!-- Global Command Bar (Cmd/K) -->
+	<CommandBar
+		bind:open={commandBarOpen}
+		onClose={() => (commandBarOpen = false)}
+		onSearch={handleCommandBarSearch}
+		onSelect={handleCommandBarSelect}
+		quickActions={commandBarQuickActions}
+		placeholder="Aufgabe suchen..."
+		emptyText="Keine Aufgaben gefunden"
+		searchingText="Suche..."
+	/>
 </div>
 
 <style>

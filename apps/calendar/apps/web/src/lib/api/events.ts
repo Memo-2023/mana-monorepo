@@ -9,6 +9,7 @@ export interface QueryEventsParams {
 	startDate: string;
 	endDate: string;
 	calendarIds?: string[];
+	search?: string;
 }
 
 export async function getEvents(params: QueryEventsParams) {
@@ -19,7 +20,23 @@ export async function getEvents(params: QueryEventsParams) {
 	if (params.calendarIds?.length) {
 		searchParams.set('calendarIds', params.calendarIds.join(','));
 	}
+	if (params.search) {
+		searchParams.set('search', params.search);
+	}
 	return fetchApi<CalendarEvent[]>(`/events?${searchParams.toString()}`);
+}
+
+export async function searchEvents(query: string, limit: number = 10) {
+	// Search events within the next year
+	const now = new Date();
+	const oneYearFromNow = new Date();
+	oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+
+	return getEvents({
+		startDate: now.toISOString(),
+		endDate: oneYearFromNow.toISOString(),
+		search: query,
+	});
 }
 
 export async function getEvent(id: string) {

@@ -3,8 +3,13 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { PillNavigation, CommandBar } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		CommandBarItem,
+		QuickAction,
+	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
@@ -19,11 +24,48 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { searchEvents } from '$lib/api/events';
+	import { format } from 'date-fns';
+	import { de } from 'date-fns/locale';
 
 	// App switcher items
 	const appItems = getPillAppItems('calendar');
 
 	let { children } = $props();
+
+	// CommandBar state
+	let commandBarOpen = $state(false);
+
+	// CommandBar quick actions (no search for calendar yet)
+	const commandBarQuickActions: QuickAction[] = [
+		{ id: 'new', label: 'Neuen Termin erstellen', icon: 'plus', href: '/event/new', shortcut: 'N' },
+		{
+			id: 'today',
+			label: 'Zu Heute springen',
+			icon: 'calendar',
+			onclick: () => viewStore.goToToday(),
+		},
+		{ id: 'agenda', label: 'Agenda anzeigen', icon: 'list', href: '/agenda' },
+		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
+	];
+
+	// CommandBar search - search events
+	async function handleCommandBarSearch(query: string): Promise<CommandBarItem[]> {
+		if (!query.trim()) return [];
+
+		const result = await searchEvents(query);
+		if (result.error || !result.data) return [];
+
+		return result.data.slice(0, 10).map((event) => ({
+			id: event.id,
+			title: event.title,
+			subtitle: format(new Date(event.startTime), 'dd. MMM yyyy, HH:mm', { locale: de }),
+		}));
+	}
+
+	function handleCommandBarSelect(item: CommandBarItem) {
+		goto(`/event/${item.id}`);
+	}
 
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
@@ -78,6 +120,13 @@
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
+
+		// Cmd/Ctrl+K to open command bar (works even in inputs)
+		if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+			event.preventDefault();
+			commandBarOpen = true;
+			return;
+		}
 
 		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
 			return;
@@ -209,6 +258,18 @@
 			{@render children()}
 		</div>
 	</main>
+
+	<!-- Global Command Bar (Cmd/K) -->
+	<CommandBar
+		bind:open={commandBarOpen}
+		onClose={() => (commandBarOpen = false)}
+		onSearch={handleCommandBarSearch}
+		onSelect={handleCommandBarSelect}
+		quickActions={commandBarQuickActions}
+		placeholder="Termin suchen..."
+		emptyText="Keine Termine gefunden"
+		searchingText="Suche..."
+	/>
 </div>
 
 <style>

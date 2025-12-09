@@ -71,5 +71,9 @@ export {
 	GlobalSettingsSection,
 } from './settings';
 
+// Command Bar
+export { CommandBar } from './command-bar';
+export type { CommandBarItem, QuickAction } from './command-bar';
+
 // Pages
 export { default as AppsPage } from './pages/AppsPage.svelte';
