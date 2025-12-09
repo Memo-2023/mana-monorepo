@@ -104,13 +104,21 @@ export function createAuthService(config: AuthServiceConfig) {
 
 		/**
 		 * Sign up with email and password
+		 * @param email User email
+		 * @param password User password
+		 * @param referralCode Optional referral code for bonus credits
 		 */
-		async signUp(email: string, password: string): Promise<AuthResult> {
+		async signUp(email: string, password: string, referralCode?: string): Promise<AuthResult> {
 			try {
+				const body: Record<string, string> = { email, password };
+				if (referralCode) {
+					body.referralCode = referralCode;
+				}
+
 				const response = await fetch(`${baseUrl}${endpoints.signUp}`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ email, password }),
+					body: JSON.stringify(body),
 				});
 
 				if (!response.ok) {
