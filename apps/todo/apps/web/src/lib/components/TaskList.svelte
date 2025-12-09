@@ -23,7 +23,7 @@
 	}
 </script>
 
-<div class="task-list space-y-2">
+<div class="task-list">
 	{#each tasks as task (task.id)}
 		<TaskItem
 			{task}

@@ -15,10 +15,10 @@
 
 	// Priority colors
 	const priorityColors: Record<string, string> = {
-		low: 'bg-green-500',
-		medium: 'bg-yellow-500',
-		high: 'bg-orange-500',
-		urgent: 'bg-red-500',
+		low: '#22c55e',
+		medium: '#eab308',
+		high: '#f97316',
+		urgent: '#ef4444',
 	};
 
 	// Format due date
@@ -51,131 +51,281 @@
 	});
 </script>
 
-<div
-	class="task-item group flex items-start gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/5 transition-colors"
-	class:opacity-60={task.isCompleted}
->
+<div class="task-item group" class:completed={task.isCompleted}>
 	<!-- Priority indicator -->
-	<div class="priority-indicator {priorityColors[task.priority]} h-full min-h-[40px]"></div>
+	<div
+		class="priority-dot"
+		style="background-color: {priorityColors[task.priority] || priorityColors.medium}"
+	></div>
 
 	<!-- Checkbox -->
-	<button
-		class="task-checkbox flex-shrink-0 w-5 h-5 rounded-full border-2 border-muted-foreground hover:border-primary flex items-center justify-center mt-0.5"
-		class:bg-primary={task.isCompleted}
-		class:border-primary={task.isCompleted}
-		onclick={onToggleComplete}
-	>
+	<button class="task-checkbox" class:checked={task.isCompleted} onclick={onToggleComplete}>
 		{#if task.isCompleted}
-			<svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+			<svg class="check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
 			</svg>
 		{/if}
 	</button>
 
 	<!-- Content -->
-	<div class="flex-1 min-w-0">
-		<div class="flex items-start justify-between gap-2">
-			<h3
-				class="text-sm font-medium text-foreground truncate"
-				class:line-through={task.isCompleted}
-			>
-				{task.title}
-			</h3>
+	<div class="task-content">
+		<span class="task-title" class:line-through={task.isCompleted}>
+			{task.title}
+		</span>
 
-			<!-- Delete button (hidden by default, shown on hover) -->
-			<button
-				class="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-500 transition-opacity"
-				onclick={onDelete}
-			>
-				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-					/>
-				</svg>
-			</button>
-		</div>
+		<!-- Meta info inline -->
+		{#if dueDateText() || subtaskProgress() || (task.labels && task.labels.length > 0)}
+			<div class="task-meta">
+				{#if dueDateText()}
+					<span
+						class="meta-item date"
+						class:overdue={isOverdue()}
+						class:today={isToday(new Date(task.dueDate || 0))}
+					>
+						<svg class="meta-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+							/>
+						</svg>
+						{dueDateText()}
+					</span>
+				{/if}
 
-		{#if task.description}
-			<p class="text-xs text-muted-foreground mt-1 line-clamp-2">
-				{task.description}
-			</p>
-		{/if}
+				{#if subtaskProgress()}
+					<span class="meta-item">
+						<svg class="meta-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+							/>
+						</svg>
+						{subtaskProgress()}
+					</span>
+				{/if}
 
-		<!-- Meta info -->
-		<div class="flex items-center gap-3 mt-2 flex-wrap">
-			{#if dueDateText()}
-				<span
-					class="text-xs flex items-center gap-1"
-					class:text-red-500={isOverdue()}
-					class:text-orange-500={isToday(new Date(task.dueDate || 0))}
-					class:text-muted-foreground={!isOverdue() && !isToday(new Date(task.dueDate || 0))}
-				>
-					<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-						/>
-					</svg>
-					{dueDateText()}
-				</span>
-			{/if}
-
-			{#if subtaskProgress()}
-				<span class="text-xs text-muted-foreground flex items-center gap-1">
-					<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-						/>
-					</svg>
-					{subtaskProgress()}
-				</span>
-			{/if}
-
-			{#if task.labels && task.labels.length > 0}
-				<div class="flex items-center gap-1">
-					{#each task.labels.slice(0, 3) as label}
-						<span
-							class="text-xs px-1.5 py-0.5 rounded"
-							style="background-color: {label.color}20; color: {label.color}"
-						>
+				{#if task.labels && task.labels.length > 0}
+					{#each task.labels.slice(0, 2) as label}
+						<span class="label-tag" style="--label-color: {label.color}">
 							{label.name}
 						</span>
 					{/each}
-					{#if task.labels.length > 3}
-						<span class="text-xs text-muted-foreground">+{task.labels.length - 3}</span>
+					{#if task.labels.length > 2}
+						<span class="meta-item">+{task.labels.length - 2}</span>
 					{/if}
-				</div>
-			{/if}
-
-			{#if task.recurrenceRule}
-				<span class="text-xs text-muted-foreground flex items-center gap-1">
-					<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-						/>
-					</svg>
-					Wiederkehrend
-				</span>
-			{/if}
-		</div>
+				{/if}
+			</div>
+		{/if}
 	</div>
 
-	<!-- Project color indicator -->
+	<!-- Project indicator -->
 	{#if projectColor()}
-		<div
-			class="w-2 h-2 rounded-full flex-shrink-0"
-			style="background-color: {projectColor()}"
-		></div>
+		<div class="project-dot" style="background-color: {projectColor()}"></div>
 	{/if}
+
+	<!-- Delete button -->
+	<button class="delete-btn" onclick={onDelete}>
+		<svg class="delete-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M6 18L18 6M6 6l12 12"
+			/>
+		</svg>
+	</button>
 </div>
+
+<style>
+	.task-item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.625rem 1rem;
+		border-radius: 9999px;
+		background: rgba(255, 255, 255, 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		transition: all 0.2s;
+		margin-bottom: 0.5rem;
+	}
+
+	:global(.dark) .task-item {
+		background: rgba(255, 255, 255, 0.12);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+	}
+
+	.task-item:hover {
+		background: rgba(255, 255, 255, 0.95);
+		border-color: rgba(0, 0, 0, 0.15);
+		transform: translateY(-1px);
+		box-shadow:
+			0 10px 15px -3px rgba(0, 0, 0, 0.1),
+			0 4px 6px -2px rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.dark) .task-item:hover {
+		background: rgba(255, 255, 255, 0.2);
+		border-color: rgba(255, 255, 255, 0.25);
+	}
+
+	.task-item.completed {
+		opacity: 0.6;
+	}
+
+	/* Priority dot */
+	.priority-dot {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 9999px;
+		flex-shrink: 0;
+	}
+
+	/* Checkbox */
+	.task-checkbox {
+		width: 1.25rem;
+		height: 1.25rem;
+		border-radius: 9999px;
+		border: 2px solid rgba(0, 0, 0, 0.2);
+		background: transparent;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.15s;
+		flex-shrink: 0;
+		padding: 0;
+	}
+
+	:global(.dark) .task-checkbox {
+		border-color: rgba(255, 255, 255, 0.3);
+	}
+
+	.task-checkbox:hover {
+		border-color: #8b5cf6;
+		background: rgba(139, 92, 246, 0.1);
+	}
+
+	.task-checkbox.checked {
+		background: #8b5cf6;
+		border-color: #8b5cf6;
+	}
+
+	.check-icon {
+		width: 0.75rem;
+		height: 0.75rem;
+		color: white;
+	}
+
+	/* Content */
+	.task-content {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.task-title {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #374151;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	:global(.dark) .task-title {
+		color: #f3f4f6;
+	}
+
+	.task-title.line-through {
+		text-decoration: line-through;
+		color: #9ca3af;
+	}
+
+	/* Meta info */
+	.task-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.meta-item {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		font-size: 0.75rem;
+		color: #6b7280;
+	}
+
+	:global(.dark) .meta-item {
+		color: #9ca3af;
+	}
+
+	.meta-item.date.overdue {
+		color: #ef4444;
+	}
+
+	.meta-item.date.today {
+		color: #f97316;
+	}
+
+	.meta-icon {
+		width: 0.75rem;
+		height: 0.75rem;
+	}
+
+	.label-tag {
+		font-size: 0.625rem;
+		padding: 0.125rem 0.5rem;
+		border-radius: 9999px;
+		background: color-mix(in srgb, var(--label-color) 15%, transparent);
+		color: var(--label-color);
+		font-weight: 500;
+	}
+
+	/* Project dot */
+	.project-dot {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 9999px;
+		flex-shrink: 0;
+	}
+
+	/* Delete button */
+	.delete-btn {
+		opacity: 0;
+		padding: 0.25rem;
+		border: none;
+		background: transparent;
+		color: #9ca3af;
+		cursor: pointer;
+		border-radius: 9999px;
+		transition: all 0.15s;
+		flex-shrink: 0;
+	}
+
+	.task-item:hover .delete-btn {
+		opacity: 1;
+	}
+
+	.delete-btn:hover {
+		color: #ef4444;
+		background: rgba(239, 68, 68, 0.1);
+	}
+
+	.delete-icon {
+		width: 1rem;
+		height: 1rem;
+	}
+</style>
