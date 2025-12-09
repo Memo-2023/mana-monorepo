@@ -23,10 +23,21 @@ export interface Subtask {
 	order: number;
 }
 
+export type DurationUnit = 'minutes' | 'hours' | 'days';
+
+export interface EffectiveDuration {
+	value: number;
+	unit: DurationUnit;
+}
+
 export interface TaskMetadata {
 	notes?: string;
 	attachments?: string[];
 	linkedCalendarEventId?: string | null;
+	// Agile/Productivity metadata
+	storyPoints?: number | null; // Fibonacci: 1, 2, 3, 5, 8, 13, 21
+	effectiveDuration?: EffectiveDuration | null; // Actual time spent
+	funRating?: number | null; // 1-10 scale
 }
 
 export const tasks = pgTable(

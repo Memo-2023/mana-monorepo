@@ -141,6 +141,44 @@ Das `metadata`-Objekt enthält erweiterte Informationen.
 | `metadata.notes` | `string` | Zusätzliche Notizen |
 | `metadata.attachments` | `string[]` | URLs zu Dateianhängen |
 | `metadata.linkedCalendarEventId` | `string \| null` | ID eines verknüpften Kalender-Events |
+| `metadata.storyPoints` | `number \| null` | Storypoints (Fibonacci: 1, 2, 3, 5, 8, 13, 21) |
+| `metadata.effectiveDuration` | `EffectiveDuration \| null` | Effektive Dauer der Aufgabe |
+| `metadata.funRating` | `number \| null` | Spaß-Faktor (Skala 1-10) |
+
+### EffectiveDuration-Struktur
+
+```typescript
+interface EffectiveDuration {
+  value: number;        // Numerischer Wert
+  unit: DurationUnit;   // 'minutes' | 'hours' | 'days'
+}
+
+type DurationUnit = 'minutes' | 'hours' | 'days';
+```
+
+### Storypoints
+
+Storypoints verwenden die Fibonacci-Sequenz zur Aufwandsschätzung:
+
+| Wert | Typischer Aufwand |
+|------|-------------------|
+| 1 | Sehr klein, wenige Minuten |
+| 2 | Klein, unter einer Stunde |
+| 3 | Mittel, ein paar Stunden |
+| 5 | Größer, halber Tag |
+| 8 | Groß, ganzer Tag |
+| 13 | Sehr groß, mehrere Tage |
+| 21 | Epic, aufteilen empfohlen |
+
+### Spaß-Faktor
+
+Der Spaß-Faktor ist eine Skala von 1-10:
+
+| Bereich | Bedeutung | Farbe |
+|---------|-----------|-------|
+| 1-3 | Unangenehm | Rot (#ef4444) |
+| 4-6 | Neutral | Gelb (#eab308) |
+| 7-10 | Macht Spaß | Grün (#22c55e) |
 
 ### Beispiel
 ```typescript
@@ -151,7 +189,13 @@ Das `metadata`-Objekt enthält erweiterte Informationen.
       "https://storage.example.com/file1.pdf",
       "https://storage.example.com/image.png"
     ],
-    linkedCalendarEventId: "cal-event-123"
+    linkedCalendarEventId: "cal-event-123",
+    storyPoints: 5,
+    effectiveDuration: {
+      value: 2,
+      unit: "hours"
+    },
+    funRating: 7
   }
 }
 ```
@@ -223,7 +267,10 @@ const task: Task = {
   metadata: {
     notes: "Design-Specs sind im Anhang",
     attachments: ["https://storage.example.com/design-specs.pdf"],
-    linkedCalendarEventId: "cal-123"
+    linkedCalendarEventId: "cal-123",
+    storyPoints: 8,
+    effectiveDuration: { value: 4, unit: "hours" },
+    funRating: 6
   },
 
   // Timestamps
@@ -240,6 +287,20 @@ const task: Task = {
 - `priority` - Priorität-Picker (Niedrig, Mittel, Hoch, Dringend)
 - `projectId` - Projekt-Picker
 
+### Im TaskEditModal implementiert
+- Alle QuickAdd-Felder
+- `description` - Textarea
+- `dueTime` - Zeit-Picker
+- `startDate` - Datum-Picker
+- `status` - Select (Ausstehend, In Bearbeitung, Abgeschlossen, Abgebrochen)
+- `labels` - Multi-Select Dropdown
+- `subtasks` - Drag-and-Drop Liste
+- `recurrenceRule` - Select (Täglich, Wöchentlich, etc.)
+- `metadata.notes` - Textarea
+- `metadata.storyPoints` - Fibonacci-Buttons (1, 2, 3, 5, 8, 13, 21)
+- `metadata.effectiveDuration` - Quick-Select Chips + benutzerdefinierte Eingabe
+- `metadata.funRating` - 10-Punkte-Skala mit Farbverlauf
+
 ### Noch nicht im QuickAdd
 - Labels
 - Erinnerungen/Reminders
@@ -248,3 +309,6 @@ const task: Task = {
 - Beschreibung
 - Startdatum
 - Uhrzeit
+- Storypoints
+- Effektive Dauer
+- Spaß-Faktor
