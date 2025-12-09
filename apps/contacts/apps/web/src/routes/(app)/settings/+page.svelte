@@ -412,7 +412,6 @@
 				label="Kontakte exportieren"
 				description="Als vCard oder CSV herunterladen"
 				href="/data?tab=export"
-				border={false}
 			>
 				{#snippet icon()}
 					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -421,6 +420,24 @@
 							stroke-linejoin="round"
 							stroke-width="2"
 							d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+						/>
+					</svg>
+				{/snippet}
+			</SettingsRow>
+
+			<SettingsRow
+				label="Archiv"
+				description="Archivierte Kontakte anzeigen und verwalten"
+				href="/archive"
+				border={false}
+			>
+				{#snippet icon()}
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
 						/>
 					</svg>
 				{/snippet}
