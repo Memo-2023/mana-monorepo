@@ -7,6 +7,7 @@ pnpm docker:up:all
 pnpm docker:down
 
 pnpm dev:calendar:app
+pnpm dev:todo:full
 pnpm dev:chat:app
 pnpm dev:clock:app
 pnpm dev:contacts:app
@@ -21,7 +22,6 @@ pnpm dev:inventory:app
 pnpm dev:presi:app
 pnpm dev:storage:app
 pnpm dev:techbase:app
-pnpm dev:todo:app
 pnpm dev:zitare:app
 
 # Deployment Landingpages:
