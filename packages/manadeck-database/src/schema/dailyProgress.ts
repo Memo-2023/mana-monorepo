@@ -1,10 +1,10 @@
 import {
 	pgTable,
 	uuid,
+	text,
 	date,
 	integer,
 	decimal,
-	text,
 	timestamp,
 	index,
 	unique,
@@ -14,7 +14,7 @@ export const dailyProgress = pgTable(
 	'daily_progress',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 		date: date('date').notNull(),
 		cardsStudied: integer('cards_studied').default(0).notNull(),
 		timeSpentMinutes: integer('time_spent_minutes').default(0).notNull(),

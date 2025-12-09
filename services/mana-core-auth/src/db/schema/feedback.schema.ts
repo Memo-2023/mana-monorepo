@@ -38,7 +38,7 @@ export const userFeedback = feedbackSchema.table(
 	'user_feedback',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id')
+		userId: text('user_id')
 			.references(() => users.id, { onDelete: 'cascade' })
 			.notNull(),
 		appId: text('app_id').notNull(), // 'chat', 'picture', 'zitare', etc.
@@ -82,7 +82,7 @@ export const feedbackVotes = feedbackSchema.table(
 		feedbackId: uuid('feedback_id')
 			.references(() => userFeedback.id, { onDelete: 'cascade' })
 			.notNull(),
-		userId: uuid('user_id')
+		userId: text('user_id')
 			.references(() => users.id, { onDelete: 'cascade' })
 			.notNull(),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),

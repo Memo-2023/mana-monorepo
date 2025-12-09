@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, unique } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, unique } from 'drizzle-orm/pg-core';
 import { images } from './images.schema';
 
 export const imageLikes = pgTable(
@@ -8,7 +8,7 @@ export const imageLikes = pgTable(
 		imageId: uuid('image_id')
 			.notNull()
 			.references(() => images.id, { onDelete: 'cascade' }),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	},
 	(table) => ({

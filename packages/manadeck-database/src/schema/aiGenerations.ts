@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, jsonb, index, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, varchar, timestamp, jsonb, index, pgEnum } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { decks } from './decks.js';
 
@@ -25,7 +25,7 @@ export const aiGenerations = pgTable(
 	'ai_generations',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 		deckId: uuid('deck_id').references(() => decks.id, { onDelete: 'set null' }),
 		functionName: varchar('function_name', { length: 100 }).notNull(),
 		prompt: text('prompt').notNull(),

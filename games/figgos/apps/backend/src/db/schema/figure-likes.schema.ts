@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, unique } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, unique } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { figures } from './figures.schema';
 
@@ -9,7 +9,7 @@ export const figureLikes = pgTable(
 		figureId: uuid('figure_id')
 			.notNull()
 			.references(() => figures.id, { onDelete: 'cascade' }),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 		createdAt: timestamp('created_at').defaultNow(),
 	},
 	(table) => ({

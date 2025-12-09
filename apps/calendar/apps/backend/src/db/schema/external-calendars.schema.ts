@@ -1,9 +1,9 @@
 import {
 	pgTable,
 	uuid,
+	text,
 	timestamp,
 	varchar,
-	text,
 	boolean,
 	jsonb,
 	integer,
@@ -27,7 +27,7 @@ export interface ExternalCalendarProviderData {
  */
 export const externalCalendars = pgTable('external_calendars', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 
 	// Calendar identification
 	name: varchar('name', { length: 255 }).notNull(),

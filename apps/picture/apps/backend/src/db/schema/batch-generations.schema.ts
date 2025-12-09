@@ -10,7 +10,7 @@ export const batchStatusEnum = pgEnum('batch_status', [
 
 export const batchGenerations = pgTable('batch_generations', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	name: text('name'),
 
 	totalCount: integer('total_count').notNull(),

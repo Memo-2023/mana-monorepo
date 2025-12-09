@@ -5,7 +5,7 @@ export const levels = pgTable('levels', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
 	description: text('description'),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	voxelData: jsonb('voxel_data').notNull(),
 	spawnPoint: jsonb('spawn_point').notNull(),
 	worldSize: jsonb('world_size').notNull(),

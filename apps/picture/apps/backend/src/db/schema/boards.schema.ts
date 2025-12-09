@@ -2,7 +2,7 @@ import { pgTable, uuid, text, timestamp, boolean, integer } from 'drizzle-orm/pg
 
 export const boards = pgTable('boards', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 
 	name: text('name').notNull(),
 	description: text('description'),

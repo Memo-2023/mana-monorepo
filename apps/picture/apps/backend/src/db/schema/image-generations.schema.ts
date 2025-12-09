@@ -11,7 +11,7 @@ export const generationStatusEnum = pgEnum('generation_status', [
 
 export const imageGenerations = pgTable('image_generations', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	modelId: uuid('model_id'),
 	batchId: uuid('batch_id'),
 

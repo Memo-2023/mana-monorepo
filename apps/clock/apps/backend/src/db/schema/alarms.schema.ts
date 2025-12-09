@@ -1,8 +1,17 @@
-import { pgTable, uuid, varchar, time, boolean, integer, timestamp } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	uuid,
+	text,
+	varchar,
+	time,
+	boolean,
+	integer,
+	timestamp,
+} from 'drizzle-orm/pg-core';
 
 export const alarms = pgTable('alarms', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	label: varchar('label', { length: 255 }),
 	time: time('time').notNull(),
 	enabled: boolean('enabled').default(true).notNull(),

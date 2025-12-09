@@ -1,8 +1,8 @@
-import { pgTable, uuid, varchar, integer, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, varchar, integer, timestamp } from 'drizzle-orm/pg-core';
 
 export const worldClocks = pgTable('world_clocks', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	timezone: varchar('timezone', { length: 100 }).notNull(), // IANA timezone e.g. 'America/New_York'
 	cityName: varchar('city_name', { length: 255 }).notNull(),
 	sortOrder: integer('sort_order').default(0).notNull(),

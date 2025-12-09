@@ -4,7 +4,7 @@ import { users } from './users';
 // Better Auth Sessions
 export const sessions = pgTable('sessions', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id')
+	userId: text('user_id')
 		.references(() => users.id, { onDelete: 'cascade' })
 		.notNull(),
 	token: text('token').notNull().unique(),
@@ -18,7 +18,7 @@ export const sessions = pgTable('sessions', {
 // Better Auth Accounts (for OAuth providers)
 export const accounts = pgTable('accounts', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id')
+	userId: text('user_id')
 		.references(() => users.id, { onDelete: 'cascade' })
 		.notNull(),
 	providerId: text('provider_id').notNull(), // 'credential', 'google', 'apple', etc.

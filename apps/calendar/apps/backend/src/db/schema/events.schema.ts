@@ -1,9 +1,9 @@
 import {
 	pgTable,
 	uuid,
+	text,
 	timestamp,
 	varchar,
-	text,
 	boolean,
 	jsonb,
 	index,
@@ -41,7 +41,7 @@ export const events = pgTable(
 		calendarId: uuid('calendar_id')
 			.notNull()
 			.references(() => calendars.id, { onDelete: 'cascade' }),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 
 		// Basic info
 		title: varchar('title', { length: 500 }).notNull(),

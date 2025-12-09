@@ -21,7 +21,7 @@ export const links = pgTable(
 		originalUrl: text('original_url').notNull(),
 		title: text('title'),
 		description: text('description'),
-		userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+		userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 		isActive: boolean('is_active').default(true),
 		password: text('password'), // hashed
 		maxClicks: integer('max_clicks'),

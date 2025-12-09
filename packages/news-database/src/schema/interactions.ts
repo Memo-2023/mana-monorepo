@@ -1,6 +1,7 @@
 import {
 	pgTable,
 	uuid,
+	text,
 	timestamp,
 	boolean,
 	real,
@@ -15,7 +16,7 @@ export const userArticleInteractions = pgTable(
 	'user_article_interactions',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id')
+		userId: text('user_id')
 			.references(() => users.id, { onDelete: 'cascade' })
 			.notNull(),
 		articleId: uuid('article_id')

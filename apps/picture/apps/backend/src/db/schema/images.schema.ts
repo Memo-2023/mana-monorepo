@@ -2,7 +2,7 @@ import { pgTable, uuid, text, timestamp, boolean, integer } from 'drizzle-orm/pg
 
 export const images = pgTable('images', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	generationId: uuid('generation_id'),
 	sourceImageId: uuid('source_image_id'),
 
