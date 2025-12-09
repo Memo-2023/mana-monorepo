@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { groupsApi, type ContactGroup, type Contact } from '$lib/api/contacts';
 
-	export type ContactFilter = 'all' | 'hasPhone' | 'hasEmail' | 'incomplete';
+	export type ContactFilter = 'all' | 'favorites' | 'hasPhone' | 'hasEmail' | 'incomplete';
 	export type BirthdayFilter = 'all' | 'today' | 'thisWeek' | 'thisMonth';
 
 	interface Props {
@@ -110,7 +110,12 @@
 						<span class="pill-color" style="background: {group.color || '#6366f1'}"></span>
 						{group.name}
 						<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
 						</svg>
 					</button>
 				{/if}
@@ -119,7 +124,12 @@
 				<button type="button" class="filter-pill" onclick={() => onContactFilterChange('all')}>
 					{$_(`filters.contact.${contactFilter}`)}
 					<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
 					</svg>
 				</button>
 			{/if}
@@ -127,7 +137,12 @@
 				<button type="button" class="filter-pill" onclick={() => onBirthdayFilterChange('all')}>
 					{$_(`filters.birthday.${birthdayFilter}`)}
 					<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
 					</svg>
 				</button>
 			{/if}
@@ -135,7 +150,12 @@
 				<button type="button" class="filter-pill" onclick={() => onCompanyChange(null)}>
 					{selectedCompany}
 					<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
 					</svg>
 				</button>
 			{/if}
@@ -172,6 +192,7 @@
 					onchange={(e) => onContactFilterChange(e.currentTarget.value as ContactFilter)}
 				>
 					<option value="all">{$_('filters.contact.all')}</option>
+					<option value="favorites">{$_('filters.contact.favorites')}</option>
 					<option value="hasPhone">{$_('filters.contact.hasPhone')}</option>
 					<option value="hasEmail">{$_('filters.contact.hasEmail')}</option>
 					<option value="incomplete">{$_('filters.contact.incomplete')}</option>

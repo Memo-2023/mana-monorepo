@@ -61,30 +61,45 @@
 			onchange(clampedValue);
 		}
 	}
+
+	// Tailwind classes
+	const baseClasses = 'flex items-center justify-between gap-4 px-5 py-4';
+	const borderClasses = 'border-b border-black/[0.08] dark:border-white/10 last:border-b-0';
+	const disabledClasses = 'opacity-50 cursor-not-allowed';
+
+	const iconClasses =
+		'flex items-center justify-center flex-shrink-0 w-9 h-9 rounded-[0.625rem] bg-black/[0.04] dark:bg-white/[0.08] text-primary [&>svg]:w-[1.125rem] [&>svg]:h-[1.125rem]';
 </script>
 
 <div
-	class="settings-number {border ? 'settings-number--border' : ''} {disabled
-		? 'settings-number--disabled'
-		: ''} {className}"
+	class="{baseClasses} {border ? borderClasses : ''} {disabled ? disabledClasses : ''} {className}"
 >
-	<div class="settings-number__content">
+	<div class="flex items-center gap-3 flex-1 min-w-0">
 		{#if icon}
-			<span class="settings-number__icon">
+			<span class={iconClasses}>
 				{@render icon()}
 			</span>
 		{/if}
-		<div class="settings-number__text">
-			<span class="settings-number__label">{label}</span>
+		<div class="flex flex-col gap-0.5 min-w-0">
+			<span class="text-[0.9375rem] font-medium text-gray-700 dark:text-gray-100">{label}</span>
 			{#if description}
-				<span class="settings-number__description">{description}</span>
+				<span class="text-[0.8125rem] text-gray-500 dark:text-gray-400 leading-snug"
+					>{description}</span
+				>
 			{/if}
 		</div>
 	</div>
 
 	<input
 		type="number"
-		class="settings-number__input"
+		class="w-20 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-100 text-center
+			bg-black/[0.04] dark:bg-white/[0.08] border border-black/10 dark:border-white/[0.15]
+			rounded-lg transition-all duration-200
+			hover:border-black/20 dark:hover:border-white/25 hover:bg-black/[0.06] dark:hover:bg-white/[0.12]
+			focus-visible:outline-2 focus-visible:outline-primary/40 focus-visible:outline-offset-2 focus-visible:border-primary
+			disabled:cursor-not-allowed disabled:opacity-60
+			placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:font-normal
+			[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 		value={value ?? ''}
 		oninput={handleInput}
 		{min}
@@ -95,147 +110,3 @@
 		aria-label={label}
 	/>
 </div>
-
-<style>
-	.settings-number {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
-		padding: 1rem 1.25rem;
-	}
-
-	.settings-number--border {
-		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-	}
-
-	:global(.dark) .settings-number--border {
-		border-bottom-color: rgba(255, 255, 255, 0.1);
-	}
-
-	.settings-number--border:last-child {
-		border-bottom: none;
-	}
-
-	.settings-number--disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.settings-number__content {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		flex: 1;
-		min-width: 0;
-	}
-
-	.settings-number__icon {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-shrink: 0;
-		width: 2.25rem;
-		height: 2.25rem;
-		border-radius: 0.625rem;
-		background: rgba(0, 0, 0, 0.04);
-		color: hsl(var(--primary));
-	}
-
-	:global(.dark) .settings-number__icon {
-		background: rgba(255, 255, 255, 0.08);
-	}
-
-	.settings-number__icon :global(svg) {
-		width: 1.125rem;
-		height: 1.125rem;
-	}
-
-	.settings-number__text {
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-		min-width: 0;
-	}
-
-	.settings-number__label {
-		font-size: 0.9375rem;
-		font-weight: 500;
-		color: #374151;
-	}
-
-	:global(.dark) .settings-number__label {
-		color: #f3f4f6;
-	}
-
-	.settings-number__description {
-		font-size: 0.8125rem;
-		color: #6b7280;
-		line-height: 1.4;
-	}
-
-	:global(.dark) .settings-number__description {
-		color: #9ca3af;
-	}
-
-	/* Number Input - Glass style */
-	.settings-number__input {
-		width: 5rem;
-		padding: 0.5rem 0.75rem;
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: #374151;
-		text-align: center;
-		background-color: rgba(0, 0, 0, 0.04);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		border-radius: 0.5rem;
-		transition: all 0.2s ease;
-	}
-
-	:global(.dark) .settings-number__input {
-		color: #f3f4f6;
-		background-color: rgba(255, 255, 255, 0.08);
-		border-color: rgba(255, 255, 255, 0.15);
-	}
-
-	.settings-number__input:hover:not(:disabled) {
-		border-color: rgba(0, 0, 0, 0.2);
-		background-color: rgba(0, 0, 0, 0.06);
-	}
-
-	:global(.dark) .settings-number__input:hover:not(:disabled) {
-		border-color: rgba(255, 255, 255, 0.25);
-		background-color: rgba(255, 255, 255, 0.12);
-	}
-
-	.settings-number__input:focus-visible {
-		outline: 2px solid hsl(var(--primary) / 0.4);
-		outline-offset: 2px;
-		border-color: hsl(var(--primary));
-	}
-
-	.settings-number__input:disabled {
-		cursor: not-allowed;
-		opacity: 0.6;
-	}
-
-	.settings-number__input::placeholder {
-		color: #9ca3af;
-		font-weight: 400;
-	}
-
-	:global(.dark) .settings-number__input::placeholder {
-		color: #6b7280;
-	}
-
-	/* Hide spinner buttons */
-	.settings-number__input::-webkit-outer-spin-button,
-	.settings-number__input::-webkit-inner-spin-button {
-		-webkit-appearance: none;
-		margin: 0;
-	}
-
-	.settings-number__input[type='number'] {
-		-moz-appearance: textfield;
-	}
-</style>
