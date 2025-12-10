@@ -220,6 +220,42 @@ export class TaskService {
 	}
 
 	/**
+	 * Validates an RRULE string to prevent abuse (DoS, excessive occurrences).
+	 * Returns true if valid, false if invalid or too complex.
+	 */
+	private validateRRule(rruleString: string): boolean {
+		// Basic length check
+		if (!rruleString || rruleString.length > 500) {
+			return false;
+		}
+
+		try {
+			const rule = rrulestr(rruleString);
+
+			// Get occurrences for the next 10 years with a limit
+			// Daily tasks = ~3650/10yrs, hourly would be ~87600 (reject)
+			const maxOccurrences = 5000;
+			const tenYearsFromNow = new Date();
+			tenYearsFromNow.setFullYear(tenYearsFromNow.getFullYear() + 10);
+
+			const occurrences = rule.between(new Date(), tenYearsFromNow, true, (_, count) => {
+				// Stop iteration early if we exceed limit
+				return count < maxOccurrences;
+			});
+
+			// Reject if too many occurrences (prevents hourly/minutely abuse)
+			if (occurrences.length >= maxOccurrences) {
+				console.warn(`RRULE rejected: too many occurrences (${occurrences.length})`);
+				return false;
+			}
+
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
+	/**
 	 * Creates the next occurrence of a recurring task based on its RRULE.
 	 * Returns the newly created task, or null if no more occurrences should be created.
 	 */
@@ -228,6 +264,12 @@ export class TaskService {
 		userId: string
 	): Promise<TaskWithLabels | null> {
 		if (!task.recurrenceRule) return null;
+
+		// Validate RRULE complexity before parsing
+		if (!this.validateRRule(task.recurrenceRule)) {
+			console.warn(`Invalid or too complex RRULE for task ${task.id}`);
+			return null;
+		}
 
 		try {
 			// Parse the RRULE string

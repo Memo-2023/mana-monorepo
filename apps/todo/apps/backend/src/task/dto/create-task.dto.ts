@@ -6,13 +6,17 @@ import {
 	IsArray,
 	IsObject,
 	MaxLength,
+	MinLength,
 	IsDateString,
+	IsNotEmpty,
 } from 'class-validator';
 import type { TaskPriority, Subtask, TaskMetadata } from '../../db/schema/tasks.schema';
 
 export class CreateTaskDto {
 	@IsString()
-	@MaxLength(500)
+	@IsNotEmpty({ message: 'Titel darf nicht leer sein' })
+	@MinLength(1, { message: 'Titel muss mindestens 1 Zeichen haben' })
+	@MaxLength(500, { message: 'Titel darf maximal 500 Zeichen haben' })
 	title: string;
 
 	@IsOptional()
