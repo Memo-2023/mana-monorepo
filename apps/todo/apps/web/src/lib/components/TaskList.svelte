@@ -25,14 +25,18 @@
 	// Local mutable state for dnd-zone
 	let items = $state<Task[]>([]);
 
-	// Track last known tasks reference to detect parent updates
-	let lastTasksRef: Task[] | null = null;
+	// Create a stable key from task IDs to detect real changes
+	let lastTaskIds = '';
 
-	// Sync items with tasks only when tasks array reference changes
-	$effect.pre(() => {
-		if (tasks !== lastTasksRef) {
+	// Sync items with tasks only when the set of task IDs changes
+	$effect(() => {
+		const currentIds = tasks
+			.map((t) => t.id)
+			.sort()
+			.join(',');
+		if (currentIds !== lastTaskIds) {
 			items = [...tasks];
-			lastTasksRef = tasks;
+			lastTaskIds = currentIds;
 		}
 	});
 
@@ -54,7 +58,12 @@
 			onTaskDrop(movedTaskId, dropTargetDate);
 		}
 
+		// Update local state and sync lastTaskIds to prevent $effect from reverting
 		items = newItems;
+		lastTaskIds = newItems
+			.map((t) => t.id)
+			.sort()
+			.join(',');
 	}
 
 	async function handleToggleComplete(task: Task) {
