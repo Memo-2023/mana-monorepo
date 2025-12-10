@@ -4,11 +4,11 @@ Dokumentation des Git-Workflows für das ManaCore Monorepo.
 
 ## Branch-Struktur
 
-| Branch | Zweck |
-|--------|-------|
-| `main` | Produktion - stabile Releases |
-| `dev` | Entwicklung - Integration aller Features |
-| `till-dev`, `{name}-dev` | Persönliche Entwicklungs-Branches |
+| Branch                         | Zweck                                    |
+| ------------------------------ | ---------------------------------------- |
+| `main`                         | Produktion - stabile Releases            |
+| `dev`                          | Entwicklung - Integration aller Features |
+| `till-dev`, `{name}-dev`       | Persönliche Entwicklungs-Branches        |
 
 ## Workflow-Übersicht
 
@@ -19,7 +19,7 @@ main (Produktion)
   │
 dev (Integration)
   ↑
-  │ PR (squashed)
+  │ PR (einzelne Commits behalten)
   │
 till-dev (Feature-Entwicklung)
 ```
@@ -32,37 +32,16 @@ till-dev (Feature-Entwicklung)
 # Sicherstellen, dass du auf deinem Branch bist
 git checkout till-dev
 
-# Änderungen committen (viele kleine Commits sind OK)
+# Änderungen committen - kleine, aussagekräftige Commits
 git add .
 git commit -m "feat(app): add feature X"
 git commit -m "fix(app): fix bug Y"
 git commit -m "refactor(app): cleanup Z"
 ```
 
-### 2. Vor dem PR: Commits squashen
+### 2. Regelmäßig mit dev synchronisieren
 
-Wenn viele Commits angesammelt sind, sollten diese vor dem PR gequasht werden, um:
-- Merge-Konflikte zu minimieren
-- Die Git-History sauber zu halten
-- Code-Reviews zu vereinfachen
-
-```bash
-# Anzahl der Commits seit dev zählen
-git log --oneline origin/dev..HEAD | wc -l
-
-# Alle Commits seit dev zu einem squashen
-git reset --soft origin/dev
-
-# Einen neuen, zusammengefassten Commit erstellen
-git commit -m "feat: descriptive summary of all changes"
-
-# Force-Push zum Remote (überschreibt alte Commits)
-git push --force-with-lease
-```
-
-### 3. Rebase mit dev (falls nötig)
-
-Falls `dev` sich geändert hat, muss rebased werden:
+Halte deinen Branch aktuell, um große Konflikte zu vermeiden:
 
 ```bash
 # Neuesten Stand von dev holen
@@ -71,16 +50,17 @@ git fetch origin dev
 # Rebase durchführen
 git rebase origin/dev
 
-# Bei Konflikten:
-# 1. Konflikte lösen
+# Bei Konflikten: Jeden Commit einzeln lösen
+# 1. Konflikte in den angezeigten Dateien lösen
 # 2. git add <resolved-files>
 # 3. git rebase --continue
+# 4. Wiederholen bis alle Commits durchlaufen sind
 
 # Nach erfolgreichem Rebase pushen
 git push --force-with-lease
 ```
 
-### 4. Pull Request erstellen
+### 3. Pull Request erstellen
 
 ```bash
 gh pr create --base dev --head till-dev \
@@ -94,45 +74,37 @@ gh pr create --base dev --head till-dev \
 - [ ] Test case 2"
 ```
 
-## Squash-Strategie
+## Konflikt-Lösung beim Rebase
 
-### Wann squashen?
+### Allgemeiner Ablauf
 
-| Situation | Aktion |
-|-----------|--------|
-| Vor jedem PR | Immer squashen |
-| Bei vielen kleinen Commits (10+) | Squashen empfohlen |
-| Bei Rebase-Konflikten | Erst squashen, dann rebasen |
-| Tägliche Arbeit | Kleine Commits OK |
+Bei einem Rebase werden Commits einzeln auf den neuen Base-Branch angewendet. Konflikte müssen für jeden Commit separat gelöst werden - das gibt mehr Kontext und macht die Lösung einfacher.
 
-### Squash-Commit-Message Format
+```bash
+# Rebase starten
+git rebase origin/dev
 
+# Bei Konflikt: Status prüfen
+git status  # Zeigt konfliktbehaftete Dateien
+
+# Konflikte lösen, dann:
+git add <resolved-files>
+git rebase --continue
+
+# Nächster Commit wird angewendet...
+# Wiederholen bis fertig
 ```
-feat: kurze Zusammenfassung (max 50 Zeichen)
-
-## Neue Features
-- Feature 1: Beschreibung
-- Feature 2: Beschreibung
-
-## Bug Fixes
-- Fix 1: Beschreibung
-
-## Breaking Changes (falls vorhanden)
-- Breaking Change 1
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
-```
-
-## Konflikt-Lösung
 
 ### Einfache Konflikte
 
 ```bash
-# Konflikt in einer Datei
-git checkout --ours path/to/file    # Unsere Version behalten
-git checkout --theirs path/to/file  # Ihre Version behalten
+# Unsere Version behalten (die aus dem Feature-Branch)
+git checkout --ours path/to/file
+
+# Ihre Version behalten (die aus dev)
+git checkout --theirs path/to/file
+
+# Nach der Wahl:
 git add path/to/file
 git rebase --continue
 ```
@@ -142,7 +114,7 @@ git rebase --continue
 Diese Datei sollte nie manuell gemerged werden:
 
 ```bash
-# Ihre Version nehmen und neu installieren
+# Version aus dev nehmen und neu installieren
 git checkout --theirs pnpm-lock.yaml
 pnpm install --frozen-lockfile=false
 git add pnpm-lock.yaml
@@ -169,15 +141,15 @@ git rebase --abort  # Zurück zum Zustand vor dem Rebase
 
 Verwende [Conventional Commits](https://www.conventionalcommits.org/):
 
-| Prefix | Verwendung |
-|--------|------------|
-| `feat` | Neue Features |
-| `fix` | Bug Fixes |
-| `docs` | Dokumentation |
-| `style` | Formatting (kein Code-Change) |
-| `refactor` | Code-Refactoring |
-| `test` | Tests hinzufügen/ändern |
-| `chore` | Build, CI, Dependencies |
+| Prefix     | Verwendung                    |
+| ---------- | ----------------------------- |
+| `feat`     | Neue Features                 |
+| `fix`      | Bug Fixes                     |
+| `docs`     | Dokumentation                 |
+| `style`    | Formatting (kein Code-Change) |
+| `refactor` | Code-Refactoring              |
+| `test`     | Tests hinzufügen/ändern       |
+| `chore`    | Build, CI, Dependencies       |
 
 ### Scope (optional)
 
@@ -186,6 +158,13 @@ feat(contacts): add duplicate detection
 fix(calendar): fix event drag and drop
 docs(readme): update installation guide
 ```
+
+### Kleine, fokussierte Commits
+
+- Ein Commit = eine logische Änderung
+- Aussagekräftige Commit Messages
+- Leichter zu reviewen und bei Problemen zu debuggen
+- Einzelne Commits können bei Bedarf reverted werden
 
 ### Branch-Hygiene
 
@@ -202,23 +181,23 @@ git fetch --prune
 ```bash
 # 1. Feature entwickeln
 git checkout till-dev
-# ... viele Commits über mehrere Tage ...
+git commit -m "feat(network): add D3 force simulation"
+git commit -m "feat(network): add zoom and pan controls"
+git commit -m "fix(network): fix node positioning on load"
+git commit -m "docs(network): add keyboard shortcuts help"
 
-# 2. Vor PR: Status prüfen
+# 2. Vor PR: Mit dev synchronisieren
 git fetch origin dev
-git log --oneline origin/dev..HEAD  # 54 commits
+git rebase origin/dev
+# Konflikte einzeln lösen falls nötig...
 
-# 3. Squashen
-git reset --soft origin/dev
-git commit -m "feat: major update with network graphs, themes, and more"
-
-# 4. Pushen
+# 3. Pushen
 git push --force-with-lease
 
-# 5. PR erstellen
-gh pr create --base dev --head till-dev --title "feat: major update"
+# 4. PR erstellen
+gh pr create --base dev --head till-dev --title "feat(network): add network graph visualization"
 
-# 6. Nach Merge: Branch aktualisieren
+# 5. Nach Merge: Branch aktualisieren
 git fetch origin dev
 git checkout till-dev
 git reset --hard origin/dev
@@ -300,6 +279,14 @@ git reflog
 # Zu einem früheren Zustand zurückkehren
 git reset --hard HEAD@{2}
 ```
+
+### Viele Konflikte beim Rebase
+
+Wenn zu viele Konflikte auftreten:
+
+1. `git rebase --abort` - Rebase abbrechen
+2. Regelmäßiger rebasen (täglich/wöchentlich)
+3. Bei sehr alten Branches: Mit dem Team absprechen
 
 ---
 
