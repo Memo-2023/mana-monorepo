@@ -22,7 +22,7 @@
 			"outputs": []
 		},
 		"type-check": {
-			"dependsOn": ["^type-check"],
+			"dependsOn": ["^type-check", "^build"],
 			"outputs": []
 		},
 		"test": {
