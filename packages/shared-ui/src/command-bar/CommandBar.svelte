@@ -1,6 +1,47 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 
+	// Syntax highlighting patterns for command keywords
+	interface HighlightPattern {
+		pattern: RegExp;
+		className: string;
+	}
+
+	const HIGHLIGHT_PATTERNS: HighlightPattern[] = [
+		// Priority keywords (Todo)
+		{
+			pattern: /(!{1,3}|!?dringend|!?wichtig|!?normal|!?später|!?späer)\b/gi,
+			className: 'hl-priority',
+		},
+		// Tags
+		{ pattern: /#\w+/g, className: 'hl-tag' },
+		// Projects/Calendars/Companies (@reference)
+		{ pattern: /@\w+/g, className: 'hl-reference' },
+		// Date keywords
+		{
+			pattern:
+				/\b(heute|morgen|übermorgen|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|nächsten?\s+\w+|in\s+\d+\s+tagen?)\b/gi,
+			className: 'hl-date',
+		},
+		// Time patterns
+		{ pattern: /\b(\d{1,2}:\d{2}|um\s+\d{1,2}(\s*uhr)?|\d{1,2}\s*uhr)\b/gi, className: 'hl-time' },
+	];
+
+	function highlightText(text: string): string {
+		if (!text) return '';
+
+		let result = text;
+		// Escape HTML first
+		result = result.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+		// Apply highlights (process in order, avoiding double-highlighting)
+		for (const { pattern, className } of HIGHLIGHT_PATTERNS) {
+			result = result.replace(pattern, (match) => `<span class="${className}">${match}</span>`);
+		}
+
+		return result;
+	}
+
 	export interface CommandBarItem {
 		id: string;
 		title: string;
@@ -67,6 +108,9 @@
 	let createPreview = $derived(
 		searchQuery.trim() && onParseCreate ? onParseCreate(searchQuery) : null
 	);
+
+	// Highlighted text for overlay
+	let highlightedQuery = $derived(highlightText(searchQuery));
 
 	// Check if create option is selected (it's always first when available)
 	let isCreateSelected = $derived(selectedIndex === 0 && createPreview !== null);
@@ -220,7 +264,7 @@
 		onkeydown={handleKeydown}
 	>
 		<div class="command-modal">
-			<!-- Search Input -->
+			<!-- Search Input with Syntax Highlighting -->
 			<div class="command-input-wrapper">
 				<svg class="command-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
@@ -230,14 +274,21 @@
 						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
 					/>
 				</svg>
-				<input
-					bind:this={inputElement}
-					type="text"
-					{placeholder}
-					bind:value={searchQuery}
-					oninput={handleSearch}
-					class="command-input"
-				/>
+				<div class="input-highlight-container">
+					<!-- Highlight backdrop (shows colored keywords) -->
+					<div class="input-highlight-backdrop" aria-hidden="true">
+						{@html highlightedQuery}&nbsp;
+					</div>
+					<!-- Actual input (transparent text, visible caret) -->
+					<input
+						bind:this={inputElement}
+						type="text"
+						{placeholder}
+						bind:value={searchQuery}
+						oninput={handleSearch}
+						class="command-input"
+					/>
+				</div>
 				<kbd class="command-shortcut">ESC</kbd>
 			</div>
 
@@ -504,17 +555,68 @@
 		flex-shrink: 0;
 	}
 
-	.command-input {
+	/* Input with syntax highlighting overlay */
+	.input-highlight-container {
+		position: relative;
 		flex: 1;
+		min-width: 0;
+	}
+
+	.input-highlight-backdrop {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		font-size: 1rem;
+		font-family: inherit;
+		white-space: pre;
+		pointer-events: none;
+		color: hsl(var(--color-foreground));
+		overflow: hidden;
+	}
+
+	.command-input {
+		position: relative;
+		width: 100%;
 		border: none;
 		background: transparent;
 		font-size: 1rem;
-		color: hsl(var(--color-foreground));
+		font-family: inherit;
+		color: transparent;
+		caret-color: hsl(var(--color-foreground));
 		outline: none;
+		z-index: 1;
 	}
 
 	.command-input::placeholder {
 		color: hsl(var(--color-muted-foreground));
+	}
+
+	/* Syntax highlighting colors */
+	.input-highlight-backdrop :global(.hl-priority) {
+		color: hsl(var(--color-warning, 38 92% 50%));
+		font-weight: 600;
+	}
+
+	.input-highlight-backdrop :global(.hl-tag) {
+		color: hsl(var(--color-primary));
+		font-weight: 500;
+	}
+
+	.input-highlight-backdrop :global(.hl-reference) {
+		color: hsl(var(--color-success));
+		font-weight: 500;
+	}
+
+	.input-highlight-backdrop :global(.hl-date) {
+		color: hsl(262 83% 58%);
+		font-weight: 500;
+	}
+
+	.input-highlight-backdrop :global(.hl-time) {
+		color: hsl(262 83% 58%);
+		font-weight: 500;
 	}
 
 	.command-shortcut {
