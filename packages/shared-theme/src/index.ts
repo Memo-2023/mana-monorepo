@@ -117,4 +117,12 @@ export {
 
 // App Routes
 export type { AppRoute, AppRouteConfig } from './app-routes';
-export { APP_ROUTES, getStartPage, getAvailableRoutes, getDefaultRoute } from './app-routes';
+export {
+	APP_ROUTES,
+	getStartPage,
+	getAvailableRoutes,
+	getDefaultRoute,
+	filterHiddenNavItems,
+	getHideableRoutes,
+	isRouteHidden,
+} from './app-routes';

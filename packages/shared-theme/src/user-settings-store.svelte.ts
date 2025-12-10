@@ -314,6 +314,46 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 		}
 	}
 
+	/**
+	 * Get hidden nav items for a specific app
+	 */
+	function getHiddenNavItemsForApp(targetAppId: string): string[] {
+		return globalSettings.nav.hiddenNavItems?.[targetAppId] || [];
+	}
+
+	/**
+	 * Toggle visibility of a navigation item for an app
+	 */
+	async function toggleNavItemVisibility(targetAppId: string, href: string): Promise<void> {
+		const currentHidden = getHiddenNavItemsForApp(targetAppId);
+		const isHidden = currentHidden.includes(href);
+
+		const newHidden = isHidden ? currentHidden.filter((h) => h !== href) : [...currentHidden, href];
+
+		await setHiddenNavItems(targetAppId, newHidden);
+	}
+
+	/**
+	 * Set hidden nav items for an app
+	 */
+	async function setHiddenNavItems(targetAppId: string, hiddenHrefs: string[]): Promise<void> {
+		const newHiddenNavItems = {
+			...globalSettings.nav.hiddenNavItems,
+			[targetAppId]: hiddenHrefs,
+		};
+
+		// Remove empty arrays
+		if (hiddenHrefs.length === 0) {
+			delete newHiddenNavItems[targetAppId];
+		}
+
+		await updateGlobal({
+			nav: {
+				hiddenNavItems: newHiddenNavItems,
+			},
+		} as Partial<GlobalSettings>);
+	}
+
 	return {
 		get nav() {
 			return nav;
@@ -349,5 +389,8 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 		removeAppOverride,
 		setStartPage,
 		updateGeneral,
+		getHiddenNavItemsForApp,
+		toggleNavItemVisibility,
+		setHiddenNavItems,
 	};
 }

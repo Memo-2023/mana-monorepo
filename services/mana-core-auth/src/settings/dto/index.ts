@@ -18,6 +18,10 @@ export class NavSettingsDto {
 	@IsOptional()
 	@IsBoolean()
 	sidebarCollapsed?: boolean;
+
+	@IsOptional()
+	@IsObject()
+	hiddenNavItems?: Record<string, string[]>;
 }
 
 // Theme settings
@@ -70,6 +74,7 @@ export class UpdateAppOverrideDto {
 export interface NavSettings {
 	desktopPosition: 'top' | 'bottom';
 	sidebarCollapsed: boolean;
+	hiddenNavItems?: Record<string, string[]>;
 }
 
 export interface ThemeSettings {
