@@ -242,7 +242,7 @@ export const tasksStore = {
 	 * Update task optimistically (for drag and drop)
 	 * Updates local state immediately, then syncs with server
 	 */
-	updateTaskOptimistic(
+	async updateTaskOptimistic(
 		id: string,
 		data: {
 			dueDate?: string | null;
@@ -255,32 +255,25 @@ export const tasksStore = {
 
 		tasks = tasks.map((t) => (t.id === id ? { ...t, ...data } : t));
 
-		// Sync with server in background
-		if (data.isCompleted !== undefined) {
-			const apiCall = data.isCompleted ? tasksApi.completeTask(id) : tasksApi.uncompleteTask(id);
+		try {
+			// Handle completion state change first
+			if (data.isCompleted !== undefined && data.isCompleted !== originalTask.isCompleted) {
+				if (data.isCompleted) {
+					await tasksApi.completeTask(id);
+				} else {
+					await tasksApi.uncompleteTask(id);
+				}
+			}
 
-			apiCall
-				.then((updatedTask) => {
-					tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
-				})
-				.catch((e) => {
-					// Rollback on error
-					console.error('Failed to update task:', e);
-					tasks = tasks.map((t) => (t.id === id ? originalTask : t));
-				});
-		}
-
-		if (data.dueDate !== undefined) {
-			tasksApi
-				.updateTask(id, { dueDate: data.dueDate })
-				.then((updatedTask) => {
-					tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
-				})
-				.catch((e) => {
-					// Rollback on error
-					console.error('Failed to update task:', e);
-					tasks = tasks.map((t) => (t.id === id ? originalTask : t));
-				});
+			// Handle due date change
+			if (data.dueDate !== undefined) {
+				const updatedTask = await tasksApi.updateTask(id, { dueDate: data.dueDate });
+				tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
+			}
+		} catch (e) {
+			// Rollback on error
+			console.error('Failed to update task:', e);
+			tasks = tasks.map((t) => (t.id === id ? originalTask : t));
 		}
 	},
 

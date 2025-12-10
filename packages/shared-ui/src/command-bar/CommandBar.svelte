@@ -8,11 +8,11 @@
 	}
 
 	const HIGHLIGHT_PATTERNS: HighlightPattern[] = [
-		// Priority keywords (Todo)
-		{
-			pattern: /(!{1,3}|!?dringend|!?wichtig|!?normal|!?später|!?späer)\b/gi,
-			className: 'hl-priority',
-		},
+		// Priority keywords (Todo) - with specific colors per level
+		{ pattern: /(!{3,}|!?dringend)\b/gi, className: 'hl-priority-urgent' },
+		{ pattern: /(!{2}|!?wichtig)\b/gi, className: 'hl-priority-high' },
+		{ pattern: /!?normal\b/gi, className: 'hl-priority-medium' },
+		{ pattern: /!?sp[aä]ter\b/gi, className: 'hl-priority-low' },
 		// Tags
 		{ pattern: /#\w+/g, className: 'hl-tag' },
 		// Projects/Calendars/Companies (@reference)
@@ -593,9 +593,24 @@
 		color: hsl(var(--color-muted-foreground));
 	}
 
-	/* Syntax highlighting colors */
-	.input-highlight-backdrop :global(.hl-priority) {
-		color: hsl(var(--color-warning, 38 92% 50%));
+	/* Syntax highlighting colors - Priority levels with matching UI colors */
+	.input-highlight-backdrop :global(.hl-priority-urgent) {
+		color: #ef4444; /* red - Dringend */
+		font-weight: 600;
+	}
+
+	.input-highlight-backdrop :global(.hl-priority-high) {
+		color: #f97316; /* orange - Wichtig */
+		font-weight: 600;
+	}
+
+	.input-highlight-backdrop :global(.hl-priority-medium) {
+		color: #eab308; /* yellow - Normal */
+		font-weight: 600;
+	}
+
+	.input-highlight-backdrop :global(.hl-priority-low) {
+		color: #22c55e; /* green - Später */
 		font-weight: 600;
 	}
 

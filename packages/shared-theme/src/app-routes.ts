@@ -15,6 +15,8 @@ export interface AppRoute {
 	labelKey: string;
 	/** Optional icon name */
 	icon?: string;
+	/** If true, this route cannot be hidden (e.g., Settings, Home) */
+	alwaysVisible?: boolean;
 }
 
 /**
@@ -198,4 +200,47 @@ export function getAvailableRoutes(appId: string): AppRoute[] {
  */
 export function getDefaultRoute(appId: string): string {
 	return APP_ROUTES[appId]?.defaultRoute ?? '/';
+}
+
+/**
+ * Filter hidden navigation items from a list of nav items
+ * @param appId The app identifier
+ * @param items Array of nav items with href property
+ * @param hiddenNavItems Hidden items config (appId -> hidden paths)
+ * @returns Filtered array with hidden items removed
+ */
+export function filterHiddenNavItems<T extends { href: string }>(
+	appId: string,
+	items: T[],
+	hiddenNavItems: Record<string, string[]> = {}
+): T[] {
+	const hidden = hiddenNavItems[appId] || [];
+	return items.filter((item) => !hidden.includes(item.href));
+}
+
+/**
+ * Get routes that can be hidden for a specific app
+ * (excludes routes marked as alwaysVisible)
+ * @param appId The app identifier
+ * @returns Array of routes that can be hidden
+ */
+export function getHideableRoutes(appId: string): AppRoute[] {
+	const config = APP_ROUTES[appId];
+	return config?.availableRoutes.filter((r) => !r.alwaysVisible) || [];
+}
+
+/**
+ * Check if a route is hidden for a specific app
+ * @param appId The app identifier
+ * @param path The route path
+ * @param hiddenNavItems Hidden items config
+ * @returns True if the route is hidden
+ */
+export function isRouteHidden(
+	appId: string,
+	path: string,
+	hiddenNavItems: Record<string, string[]> = {}
+): boolean {
+	const hidden = hiddenNavItems[appId] || [];
+	return hidden.includes(path);
 }
