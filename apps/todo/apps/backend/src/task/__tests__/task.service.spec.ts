@@ -5,6 +5,9 @@ import { ProjectService } from '../../project/project.service';
 import { DATABASE_CONNECTION } from '../../db/database.module';
 
 // Mock database
+const mockSelectFrom = jest.fn().mockReturnThis();
+const mockSelectWhere = jest.fn();
+
 const mockDb = {
 	query: {
 		tasks: {
@@ -18,6 +21,10 @@ const mockDb = {
 			findMany: jest.fn(),
 		},
 	},
+	select: jest.fn().mockReturnValue({
+		from: mockSelectFrom,
+		where: mockSelectWhere,
+	}),
 	insert: jest.fn().mockReturnThis(),
 	update: jest.fn().mockReturnThis(),
 	delete: jest.fn().mockReturnThis(),
@@ -406,7 +413,7 @@ describe('TaskService', () => {
 	});
 
 	describe('getCompletedTasks', () => {
-		it('should return completed tasks with default limit', async () => {
+		it('should return completed tasks with pagination info', async () => {
 			const userId = 'user-123';
 			const mockTasks = Array(50)
 				.fill(null)
@@ -419,13 +426,16 @@ describe('TaskService', () => {
 
 			mockDb.query.tasks.findMany.mockResolvedValue(mockTasks);
 			mockDb.query.taskLabels.findMany.mockResolvedValue([]);
+			mockSelectWhere.mockResolvedValue([{ count: 75 }]);
 
 			const result = await service.getCompletedTasks(userId);
 
-			expect(result).toHaveLength(50);
+			expect(result.tasks).toHaveLength(50);
+			expect(result.total).toBe(75);
+			expect(result.hasMore).toBe(true);
 		});
 
-		it('should respect custom limit', async () => {
+		it('should respect custom limit and offset', async () => {
 			const userId = 'user-123';
 			const mockTasks = Array(10)
 				.fill(null)
@@ -438,10 +448,35 @@ describe('TaskService', () => {
 
 			mockDb.query.tasks.findMany.mockResolvedValue(mockTasks);
 			mockDb.query.taskLabels.findMany.mockResolvedValue([]);
+			mockSelectWhere.mockResolvedValue([{ count: 25 }]);
 
-			const result = await service.getCompletedTasks(userId, 10);
+			const result = await service.getCompletedTasks(userId, 10, 10);
 
-			expect(result).toHaveLength(10);
+			expect(result.tasks).toHaveLength(10);
+			expect(result.total).toBe(25);
+			expect(result.hasMore).toBe(true); // offset 10 + limit 10 = 20 < 25
+		});
+
+		it('should enforce max limit of 100', async () => {
+			const userId = 'user-123';
+			const mockTasks = Array(100)
+				.fill(null)
+				.map((_, i) => ({
+					id: `task-${i}`,
+					title: `Task ${i}`,
+					userId,
+					isCompleted: true,
+				}));
+
+			mockDb.query.tasks.findMany.mockResolvedValue(mockTasks);
+			mockDb.query.taskLabels.findMany.mockResolvedValue([]);
+			mockSelectWhere.mockResolvedValue([{ count: 200 }]);
+
+			// Request 500 tasks, should be capped at 100
+			const result = await service.getCompletedTasks(userId, 500, 0);
+
+			expect(result.tasks).toHaveLength(100);
+			expect(result.hasMore).toBe(true);
 		});
 	});
 

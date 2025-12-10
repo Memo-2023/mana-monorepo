@@ -4,13 +4,16 @@ import {
 	IsUUID,
 	IsEnum,
 	IsArray,
-	IsObject,
 	MaxLength,
 	MinLength,
 	IsDateString,
 	IsNotEmpty,
+	ValidateNested,
 } from 'class-validator';
-import type { TaskPriority, Subtask, TaskMetadata } from '../../db/schema/tasks.schema';
+import { Type } from 'class-transformer';
+import type { TaskPriority } from '../../db/schema/tasks.schema';
+import { CreateSubtaskDto } from './subtask.dto';
+import { TaskMetadataDto } from './metadata.dto';
 
 export class CreateTaskDto {
 	@IsString()
@@ -58,7 +61,9 @@ export class CreateTaskDto {
 
 	@IsOptional()
 	@IsArray()
-	subtasks?: Omit<Subtask, 'id'>[];
+	@ValidateNested({ each: true })
+	@Type(() => CreateSubtaskDto)
+	subtasks?: CreateSubtaskDto[];
 
 	@IsOptional()
 	@IsArray()
@@ -66,6 +71,7 @@ export class CreateTaskDto {
 	labelIds?: string[];
 
 	@IsOptional()
-	@IsObject()
-	metadata?: TaskMetadata;
+	@ValidateNested()
+	@Type(() => TaskMetadataDto)
+	metadata?: TaskMetadataDto;
 }
