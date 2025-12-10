@@ -1,9 +1,12 @@
 /**
  * API Client for Calendar Backend
+ *
+ * Token handling: Uses authStore.getValidToken() which automatically
+ * refreshes expired tokens before making requests.
  */
 
-import { browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
+import { authStore } from '$lib/stores/auth.svelte';
 
 const API_BASE = env.PUBLIC_BACKEND_URL || 'http://localhost:3014';
 
@@ -20,10 +23,8 @@ export async function fetchApi<T>(
 ): Promise<{ data: T | null; error: Error | null }> {
 	const { method = 'GET', body, token, isFormData = false } = options;
 
-	let authToken = token;
-	if (!authToken && browser) {
-		authToken = localStorage.getItem('@auth/appToken') || undefined;
-	}
+	// Get a valid token (auto-refreshes if expired)
+	const authToken = token || (await authStore.getValidToken());
 
 	try {
 		const headers: Record<string, string> = {};

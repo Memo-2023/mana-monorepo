@@ -3,10 +3,13 @@
  *
  * This replaces direct Supabase calls with backend API calls.
  * All database operations now go through the NestJS backend.
+ *
+ * Token handling: Uses authStore.getValidToken() which automatically
+ * refreshes expired tokens before making requests.
  */
 
-import { browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
+import { authStore } from '$lib/stores/auth.svelte';
 import type {
 	Conversation,
 	Message,
@@ -46,12 +49,8 @@ async function fetchApi<T>(
 ): Promise<{ data: T | null; error: Error | null }> {
 	const { method = 'GET', body, token } = options;
 
-	// Get token from localStorage if not provided
-	// Token is stored by @manacore/shared-auth under '@auth/appToken'
-	let authToken = token;
-	if (!authToken && browser) {
-		authToken = localStorage.getItem('@auth/appToken') || undefined;
-	}
+	// Get a valid token (auto-refreshes if expired)
+	const authToken = token || (await authStore.getValidToken());
 
 	if (!authToken) {
 		return { data: null, error: new Error('No authentication token') };

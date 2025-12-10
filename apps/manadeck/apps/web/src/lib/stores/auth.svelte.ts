@@ -1,5 +1,5 @@
 import type { ManaUser } from '$lib/types/auth';
-import { authService } from '$lib/auth';
+import { authService, tokenManager } from '$lib/auth';
 import type { UserData } from '$lib/auth';
 
 // Svelte 5 runes-based auth store
@@ -108,5 +108,21 @@ export const authStore = {
 	 */
 	async forgotPassword(email: string) {
 		return authService.forgotPassword(email);
+	},
+
+	/**
+	 * Get access token for API calls (raw token, no refresh)
+	 * @deprecated Use getValidToken() instead for automatic refresh
+	 */
+	async getAccessToken(): Promise<string | null> {
+		return await authService.getAppToken();
+	},
+
+	/**
+	 * Get a valid access token for API calls
+	 * Automatically refreshes if the token is expired or about to expire
+	 */
+	async getValidToken(): Promise<string | null> {
+		return await tokenManager.getValidToken();
 	},
 };

@@ -34,6 +34,13 @@ function getAuthService() {
 	return _authService;
 }
 
+function getTokenManager() {
+	if (!browser) return null;
+	// Ensure auth service is initialized first
+	getAuthService();
+	return _tokenManager;
+}
+
 // State
 let user = $state<UserData | null>(null);
 let loading = $state(true);
@@ -202,7 +209,8 @@ export const authStore = {
 	},
 
 	/**
-	 * Get access token for API calls
+	 * Get access token for API calls (raw token, no refresh)
+	 * @deprecated Use getValidToken() instead for automatic refresh
 	 */
 	async getAccessToken() {
 		const authService = getAuthService();
@@ -210,5 +218,17 @@ export const authStore = {
 			return null;
 		}
 		return await authService.getAppToken();
+	},
+
+	/**
+	 * Get a valid access token for API calls
+	 * Automatically refreshes if the token is expired or about to expire
+	 */
+	async getValidToken(): Promise<string | null> {
+		const tokenManager = getTokenManager();
+		if (!tokenManager) {
+			return null;
+		}
+		return await tokenManager.getValidToken();
 	},
 };

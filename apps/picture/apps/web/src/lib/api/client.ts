@@ -1,10 +1,13 @@
 /**
  * API Client for Picture Backend
  * Replaces direct Supabase calls with backend API calls.
+ *
+ * Token handling: Uses authStore.getValidToken() which automatically
+ * refreshes expired tokens before making requests.
  */
 
-import { browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
+import { authStore } from '$lib/stores/auth.svelte';
 
 const API_BASE = env.PUBLIC_BACKEND_URL || 'http://localhost:3003';
 
@@ -21,10 +24,8 @@ export async function fetchApi<T>(
 ): Promise<{ data: T | null; error: Error | null }> {
 	const { method = 'GET', body, token, isFormData = false } = options;
 
-	let authToken = token;
-	if (!authToken && browser) {
-		authToken = localStorage.getItem('@auth/appToken') || undefined;
-	}
+	// Get a valid token (auto-refreshes if expired)
+	const authToken = token || (await authStore.getValidToken());
 
 	try {
 		const headers: Record<string, string> = {};
@@ -75,10 +76,8 @@ export async function uploadFile(
 	file: File,
 	token?: string
 ): Promise<{ data: any; error: Error | null }> {
-	let authToken = token;
-	if (!authToken && browser) {
-		authToken = localStorage.getItem('@auth/appToken') || undefined;
-	}
+	// Get a valid token (auto-refreshes if expired)
+	const authToken = token || (await authStore.getValidToken());
 
 	try {
 		const formData = new FormData();
@@ -121,10 +120,8 @@ export async function uploadFiles(
 	files: File[],
 	token?: string
 ): Promise<{ data: any; error: Error | null }> {
-	let authToken = token;
-	if (!authToken && browser) {
-		authToken = localStorage.getItem('@auth/appToken') || undefined;
-	}
+	// Get a valid token (auto-refreshes if expired)
+	const authToken = token || (await authStore.getValidToken());
 
 	try {
 		const formData = new FormData();

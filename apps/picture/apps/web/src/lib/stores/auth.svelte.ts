@@ -39,6 +39,13 @@ async function getAuthService() {
 	return _authService;
 }
 
+async function getTokenManager() {
+	if (!browser) return null;
+	// Ensure auth service is initialized first
+	await getAuthService();
+	return _tokenManager;
+}
+
 // State using Svelte 5 runes
 let user = $state<UserData | null>(null);
 let loading = $state(true);
@@ -164,10 +171,26 @@ export const authStore = {
 		}
 	},
 
+	/**
+	 * Get access token for API calls (raw token, no refresh)
+	 * @deprecated Use getValidToken() instead for automatic refresh
+	 */
 	async getAccessToken(): Promise<string | null> {
 		const authService = await getAuthService();
 		if (!authService) return null;
 		return authService.getAppToken();
+	},
+
+	/**
+	 * Get a valid access token for API calls
+	 * Automatically refreshes if the token is expired or about to expire
+	 */
+	async getValidToken(): Promise<string | null> {
+		const tokenManager = await getTokenManager();
+		if (!tokenManager) {
+			return null;
+		}
+		return await tokenManager.getValidToken();
 	},
 
 	// For compatibility with old code that reads user store directly
