@@ -21,7 +21,7 @@ REDIS_PASSWORD=
 **Produktion (.env):**
 
 ```env
-# Füge deine Coolify Redis-Daten hier ein:
+# Füge deine Redis-Daten hier ein:
 REDIS_HOST=your-redis-host
 REDIS_PORT=6379
 REDIS_USERNAME=default
@@ -95,8 +95,8 @@ redis-cli flushall
 
 ## Nächste Schritte für Produktion:
 
-1. Redis in Coolify einrichten
-2. Umgebungsvariablen in Coolify setzen:
+1. Redis in Docker Compose einrichten
+2. Umgebungsvariablen setzen:
    - REDIS_HOST
    - REDIS_PORT
    - REDIS_PASSWORD

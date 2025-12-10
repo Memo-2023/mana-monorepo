@@ -11,7 +11,7 @@ Dieses Dokument analysiert die optimale Strategie für die Implementierung einer
 - **Framework**: SvelteKit 2.22 mit Svelte 5.0
 - **Backend**: PocketBase (eingebettet)
 - **Styling**: Tailwind CSS 4.0
-- **Deployment**: Docker + Coolify auf Hetzner VPS
+- **Deployment**: Docker Compose auf Hetzner VPS
 - **Hauptfunktionen**:
   - URL-Verkürzung mit QR-Code-Generierung
   - Benutzer-Dashboard mit Analytics
