@@ -25,7 +25,8 @@
 		"build": "tsc",
 		"dev": "tsc --watch",
 		"clean": "rm -rf dist",
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@nestjs/common": "^10.0.0 || ^11.0.0",
