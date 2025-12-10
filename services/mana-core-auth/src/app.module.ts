@@ -8,6 +8,8 @@ import { CreditsModule } from './credits/credits.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { ReferralsModule } from './referrals/referrals.module';
 import { SettingsModule } from './settings/settings.module';
+import { TagsModule } from './tags/tags.module';
+import { ThemesModule } from './themes/themes.module';
 import { AiModule } from './ai/ai.module';
 import { HealthModule } from './health/health.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -31,6 +33,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 		HealthModule,
 		ReferralsModule,
 		SettingsModule,
+		TagsModule,
+		ThemesModule,
 	],
 	providers: [
 		{

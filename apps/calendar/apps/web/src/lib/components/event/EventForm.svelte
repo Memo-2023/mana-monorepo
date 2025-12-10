@@ -1,11 +1,15 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
+	import { TagSelector, type Tag } from '@manacore/shared-ui';
 	import type {
 		CalendarEvent,
 		CreateEventInput,
 		UpdateEventInput,
 		LocationDetails,
+		EventTag,
 	} from '@calendar/shared';
 	import { format, addMinutes, parseISO } from 'date-fns';
 
@@ -35,6 +39,32 @@
 	let locationPostalCode = $state(event?.metadata?.locationDetails?.postalCode || '');
 	let locationCity = $state(event?.metadata?.locationDetails?.city || '');
 	let locationCountry = $state(event?.metadata?.locationDetails?.country || '');
+
+	// Tags state - store as Tag[] for compatibility with TagSelector
+	let selectedTags = $state<Tag[]>(
+		event?.tags?.map((t) => ({
+			id: t.id,
+			name: t.name,
+			color: t.color,
+		})) || []
+	);
+
+	// Convert EventTag to Tag type for shared-ui components
+	function eventTagToTag(tag: EventTag): Tag {
+		return {
+			id: tag.id,
+			name: tag.name,
+			color: tag.color,
+		};
+	}
+
+	// Handle tag selection changes
+	function handleTagsChange(newTags: Tag[]) {
+		selectedTags = newTags;
+	}
+
+	// Derived available tags for TagSelector
+	let availableTags = $derived(eventTagsStore.tags.map(eventTagToTag));
 
 	// Auto-expand location details if any field is filled
 	$effect(() => {
@@ -90,6 +120,13 @@
 
 	let submitting = $state(false);
 
+	// Load tags on mount
+	onMount(() => {
+		if (eventTagsStore.tags.length === 0) {
+			eventTagsStore.fetchTags();
+		}
+	});
+
 	function handleSubmit(e: Event) {
 		e.preventDefault();
 
@@ -142,6 +179,7 @@
 			endTime: endDateTime.toISOString(),
 			calendarId,
 			metadata: finalMetadata,
+			tagIds: selectedTags.length > 0 ? selectedTags.map((t) => t.id) : undefined,
 		};
 
 		submitting = true;
@@ -336,6 +374,20 @@
 			placeholder="Beschreibung hinzufügen"
 		></textarea>
 	</div>
+
+	<!-- Tags -->
+	{#if availableTags.length > 0 || eventTagsStore.loading}
+		<div class="flex flex-col gap-2">
+			<label class="text-sm font-medium text-foreground">Tags</label>
+			<TagSelector
+				tags={availableTags}
+				{selectedTags}
+				onTagsChange={handleTagsChange}
+				placeholder="Tags auswählen..."
+				addTagLabel="Tag hinzufügen"
+			/>
+		</div>
+	{/if}
 
 	<div class="flex justify-end gap-3 pt-4 border-t border-border">
 		<button

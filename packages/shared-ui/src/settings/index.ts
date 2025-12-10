@@ -10,3 +10,4 @@ export { default as SettingsTimeInput } from './SettingsTimeInput.svelte';
 export { default as SettingsDangerZone } from './SettingsDangerZone.svelte';
 export { default as SettingsDangerButton } from './SettingsDangerButton.svelte';
 export { default as GlobalSettingsSection } from './GlobalSettingsSection.svelte';
+export { default as NavVisibilitySettings } from './NavVisibilitySettings.svelte';

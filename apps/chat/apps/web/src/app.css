@@ -6,3 +6,5 @@
 @source "../../../../packages/shared-auth-ui/src";
 @source "../../../../packages/shared-branding/src";
 @source "../../../../packages/shared-theme-ui/src";
+@source "../../../../packages/shared-theme-ui/src/components";
+@source "../../../../packages/shared-theme-ui/src/pages";

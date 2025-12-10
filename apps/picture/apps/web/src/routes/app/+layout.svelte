@@ -6,7 +6,13 @@
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillNavElement, PillDropdownItem } from '@manacore/shared-ui';
-	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import {
+		THEME_DEFINITIONS,
+		DEFAULT_THEME_VARIANTS,
+		EXTENDED_THEME_VARIANTS,
+	} from '@manacore/shared-theme';
+	import type { ThemeVariant } from '@manacore/shared-theme';
+	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -88,8 +94,8 @@
 		}
 	});
 
-	// Navigation items (Mana is in user dropdown via manaHref)
-	const navItems: PillNavItem[] = [
+	// Base navigation items (Mana is in user dropdown via manaHref)
+	const baseNavItems: PillNavItem[] = [
 		{ href: '/app/gallery', label: 'Galerie', icon: 'home' },
 		{ href: '/app/board', label: 'Moodboards', icon: 'grid' },
 		{ href: '/app/explore', label: 'Entdecken', icon: 'search' },
@@ -99,6 +105,11 @@
 		{ href: '/app/archive', label: 'Archiv', icon: 'archive' },
 	];
 
+	// Navigation items filtered by visibility settings
+	const navItems = $derived(
+		filterHiddenNavItems('picture', baseNavItems, userSettings.nav.hiddenNavItems)
+	);
+
 	// View mode options for tab group
 	const viewModeOptions = [
 		{ id: 'single', icon: 'list', title: 'Liste (1)' },
@@ -106,9 +117,19 @@
 		{ id: 'gridSmall', icon: 'gridSmall', title: 'Klein (3)' },
 	];
 
+	// Get pinned themes from user settings (extended themes only)
+	let pinnedThemes = $derived<ThemeVariant[]>(
+		(userSettings.theme?.pinnedThemes || []).filter((t): t is ThemeVariant =>
+			EXTENDED_THEME_VARIANTS.includes(t as ThemeVariant)
+		)
+	);
+
+	// Visible themes in PillNav: default + pinned extended
+	let visibleThemes = $derived<ThemeVariant[]>([...DEFAULT_THEME_VARIANTS, ...pinnedThemes]);
+
 	// Theme variant dropdown items
 	let themeVariantItems = $derived<PillDropdownItem[]>([
-		...theme.variants.map((variant) => ({
+		...visibleThemes.map((variant) => ({
 			id: variant,
 			label: THEME_DEFINITIONS[variant].label,
 			icon: THEME_DEFINITIONS[variant].icon,

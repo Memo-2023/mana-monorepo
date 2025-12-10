@@ -7,12 +7,44 @@
 	interface Props {
 		task: Task;
 		showCompleted?: boolean;
+		animateComplete?: boolean;
 		onToggleComplete: () => void;
 		onDelete: () => void;
 		onEdit?: () => void;
 	}
 
-	let { task, showCompleted = false, onToggleComplete, onDelete, onEdit }: Props = $props();
+	let {
+		task,
+		showCompleted = false,
+		animateComplete = false,
+		onToggleComplete,
+		onDelete,
+		onEdit,
+	}: Props = $props();
+
+	// Animation state for completing
+	let isAnimatingComplete = $state(false);
+
+	// External animation trigger
+	$effect(() => {
+		if (animateComplete && !task.isCompleted) {
+			isAnimatingComplete = true;
+		}
+	});
+
+	function handleToggleClick() {
+		if (!task.isCompleted) {
+			// Animate before completing
+			isAnimatingComplete = true;
+			setTimeout(() => {
+				isAnimatingComplete = false;
+				onToggleComplete();
+			}, 500);
+		} else {
+			// Uncomplete immediately
+			onToggleComplete();
+		}
+	}
 
 	function handleContentClick() {
 		if (onEdit) {
@@ -58,7 +90,18 @@
 	});
 </script>
 
-<div class="task-item group" class:completed={task.isCompleted}>
+<div
+	class="task-item group"
+	class:completed={task.isCompleted}
+	class:completing={isAnimatingComplete}
+>
+	<!-- Drag handle -->
+	<div class="drag-handle">
+		<svg class="drag-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+		</svg>
+	</div>
+
 	<!-- Priority indicator -->
 	<div
 		class="priority-dot"
@@ -66,9 +109,20 @@
 	></div>
 
 	<!-- Checkbox -->
-	<button class="task-checkbox" class:checked={task.isCompleted} onclick={onToggleComplete}>
-		{#if task.isCompleted}
-			<svg class="check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+	<button
+		class="task-checkbox"
+		class:checked={task.isCompleted}
+		class:animating={isAnimatingComplete}
+		onclick={handleToggleClick}
+	>
+		{#if task.isCompleted || isAnimatingComplete}
+			<svg
+				class="check-icon"
+				class:animate-check={isAnimatingComplete}
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
 			</svg>
 		{/if}
@@ -80,27 +134,9 @@
 			{task.title}
 		</span>
 
-		<!-- Meta info inline -->
-		{#if dueDateText() || subtaskProgress() || (task.labels && task.labels.length > 0)}
+		<!-- Labels and subtasks below title -->
+		{#if subtaskProgress() || (task.labels && task.labels.length > 0)}
 			<div class="task-meta">
-				{#if dueDateText()}
-					<span
-						class="meta-item date"
-						class:overdue={isOverdue()}
-						class:today={isToday(new Date(task.dueDate || 0))}
-					>
-						<svg class="meta-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-							/>
-						</svg>
-						{dueDateText()}
-					</span>
-				{/if}
-
 				{#if subtaskProgress()}
 					<span class="meta-item">
 						<svg class="meta-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -129,6 +165,17 @@
 		{/if}
 	</button>
 
+	<!-- Due date (always on the right) -->
+	{#if dueDateText()}
+		<span
+			class="due-date"
+			class:overdue={isOverdue()}
+			class:today={task.dueDate && isToday(new Date(task.dueDate))}
+		>
+			{dueDateText()}
+		</span>
+	{/if}
+
 	<!-- Project indicator -->
 	{#if projectColor()}
 		<div class="project-dot" style="background-color: {projectColor()}"></div>
@@ -151,18 +198,16 @@
 	.task-item {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
-		padding: 0.625rem 1rem;
-		border-radius: 9999px;
+		gap: 0.625rem;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.5rem;
 		background: rgba(255, 255, 255, 0.85);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 		transition: all 0.2s;
-		margin-bottom: 0.5rem;
+		margin-bottom: 0.375rem;
 	}
 
 	:global(.dark) .task-item {
@@ -172,11 +217,8 @@
 
 	.task-item:hover {
 		background: rgba(255, 255, 255, 0.95);
-		border-color: rgba(0, 0, 0, 0.15);
-		transform: translateY(-1px);
-		box-shadow:
-			0 10px 15px -3px rgba(0, 0, 0, 0.1),
-			0 4px 6px -2px rgba(0, 0, 0, 0.05);
+		border-color: rgba(0, 0, 0, 0.12);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 	}
 
 	:global(.dark) .task-item:hover {
@@ -186,6 +228,54 @@
 
 	.task-item.completed {
 		opacity: 0.6;
+	}
+
+	/* Completing animation */
+	.task-item.completing {
+		background: rgba(34, 197, 94, 0.15);
+		border-color: rgba(34, 197, 94, 0.3);
+	}
+
+	:global(.dark) .task-item.completing {
+		background: rgba(34, 197, 94, 0.2);
+		border-color: rgba(34, 197, 94, 0.4);
+	}
+
+	/* Drag handle */
+	.drag-handle {
+		cursor: grab;
+		opacity: 0;
+		transition: opacity 0.15s;
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		padding: 0.125rem;
+		margin-left: -0.25rem;
+	}
+
+	.task-item:hover .drag-handle {
+		opacity: 0.4;
+	}
+
+	.drag-handle:hover {
+		opacity: 0.7 !important;
+	}
+
+	.drag-handle:active {
+		cursor: grabbing;
+	}
+
+	.drag-icon {
+		width: 1rem;
+		height: 1rem;
+		color: currentColor;
+	}
+
+	/* During drag, disable pointer events on interactive elements */
+	:global([aria-grabbed='true']) .task-checkbox,
+	:global([aria-grabbed='true']) .task-content,
+	:global([aria-grabbed='true']) .delete-btn {
+		pointer-events: none;
 	}
 
 	/* Priority dot */
@@ -226,10 +316,46 @@
 		border-color: #8b5cf6;
 	}
 
+	.task-checkbox.animating {
+		background: #22c55e;
+		border-color: #22c55e;
+		transform: scale(1.2);
+	}
+
 	.check-icon {
 		width: 0.75rem;
 		height: 0.75rem;
 		color: white;
+	}
+
+	.check-icon.animate-check {
+		animation: drawCheck 0.3s ease-out forwards;
+	}
+
+	.check-icon.animate-check path {
+		stroke-dasharray: 24;
+		stroke-dashoffset: 24;
+		animation: drawPath 0.3s ease-out forwards;
+	}
+
+	@keyframes drawPath {
+		to {
+			stroke-dashoffset: 0;
+		}
+	}
+
+	@keyframes drawCheck {
+		0% {
+			transform: scale(0.5);
+			opacity: 0;
+		}
+		50% {
+			transform: scale(1.2);
+		}
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
 	}
 
 	/* Content */
@@ -284,14 +410,6 @@
 		color: #9ca3af;
 	}
 
-	.meta-item.date.overdue {
-		color: #ef4444;
-	}
-
-	.meta-item.date.today {
-		color: #f97316;
-	}
-
 	.meta-icon {
 		width: 0.75rem;
 		height: 0.75rem;
@@ -304,6 +422,26 @@
 		background: color-mix(in srgb, var(--label-color) 15%, transparent);
 		color: var(--label-color);
 		font-weight: 500;
+	}
+
+	/* Due date */
+	.due-date {
+		font-size: 0.75rem;
+		color: #6b7280;
+		flex-shrink: 0;
+		white-space: nowrap;
+	}
+
+	:global(.dark) .due-date {
+		color: #9ca3af;
+	}
+
+	.due-date.overdue {
+		color: #ef4444;
+	}
+
+	.due-date.today {
+		color: #f97316;
 	}
 
 	/* Project dot */

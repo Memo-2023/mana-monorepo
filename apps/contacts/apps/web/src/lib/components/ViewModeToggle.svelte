@@ -3,9 +3,9 @@
 	import { viewModeStore, type ViewMode } from '$lib/stores/view-mode.svelte';
 
 	const modes: { id: ViewMode; icon: string; label: string }[] = [
+		{ id: 'alphabet', icon: 'alphabet', label: 'views.alphabet' },
 		{ id: 'list', icon: 'list', label: 'views.list' },
 		{ id: 'grid', icon: 'grid', label: 'views.grid' },
-		{ id: 'alphabet', icon: 'alphabet', label: 'views.alphabet' },
 	];
 </script>
 

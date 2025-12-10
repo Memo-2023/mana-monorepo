@@ -74,7 +74,14 @@
 	function scrollToLetter(letter: string) {
 		const element = document.getElementById(`section-${letter}`);
 		if (element) {
-			element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			const headerOffset = 100; // Account for sticky header
+			const elementPosition = element.getBoundingClientRect().top;
+			const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+			window.scrollTo({
+				top: offsetPosition,
+				behavior: 'smooth',
+			});
 		}
 	}
 </script>
@@ -294,6 +301,10 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
+	}
+
+	.section-contacts .alphabet-contact-card:last-child {
+		margin-bottom: 1rem;
 	}
 
 	.alphabet-contact-card {

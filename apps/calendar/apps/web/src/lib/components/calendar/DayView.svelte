@@ -3,6 +3,8 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { todosStore } from '$lib/stores/todos.svelte';
+	import TodoRow from './TodoRow.svelte';
 	import { goto } from '$app/navigation';
 	import {
 		format,
@@ -405,6 +407,16 @@
 		</div>
 	{/if}
 
+	<!-- Todos section -->
+	{#if todosStore.serviceAvailable && todosStore.getTodosForDay(viewStore.currentDate).length > 0}
+		<div class="todos-section">
+			<div class="time-gutter"></div>
+			<div class="todos-content">
+				<TodoRow date={viewStore.currentDate} maxVisible={4} />
+			</div>
+		</div>
+	{/if}
+
 	<!-- Time grid -->
 	<div class="time-grid scrollbar-thin">
 		<div class="time-column">
@@ -531,6 +543,16 @@
 		border-radius: var(--radius-sm);
 		border: none;
 		cursor: pointer;
+	}
+
+	/* Todos section */
+	.todos-section {
+		display: flex;
+		border-bottom: 1px solid hsl(var(--color-border) / 0.5);
+	}
+
+	.todos-content {
+		flex: 1;
 	}
 
 	/* Block-style all-day events (displayed as full-day blocks in the grid) */

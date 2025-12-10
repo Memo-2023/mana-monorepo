@@ -246,7 +246,7 @@ import { pgTable, uuid, varchar, text, boolean, timestamp, jsonb } from 'drizzle
 
 export const decks = pgTable('decks', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),  // text, not uuid - Better Auth uses non-UUID IDs
 	title: varchar('title', { length: 255 }).notNull(),
 	description: text('description'),
 	coverImageUrl: text('cover_image_url'),

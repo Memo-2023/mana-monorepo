@@ -1,9 +1,9 @@
-import { pgTable, uuid, integer, decimal, date, timestamp, index } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, decimal, date, timestamp, index } from 'drizzle-orm/pg-core';
 
 export const userStats = pgTable(
 	'user_stats',
 	{
-		userId: uuid('user_id').primaryKey(),
+		userId: text('user_id').primaryKey(),
 		totalWins: integer('total_wins').default(0).notNull(),
 		totalSessions: integer('total_sessions').default(0).notNull(),
 		totalCardsStudied: integer('total_cards_studied').default(0).notNull(),

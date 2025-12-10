@@ -32,11 +32,37 @@ All authentication is handled by **Mana Core Auth**, a centralized authenticatio
         │<──────────────────────│                       │
 ```
 
+## User ID Format
+
+**CRITICAL**: Mana Core Auth uses Better Auth, which generates **non-UUID user IDs**.
+
+```
+Example user ID: otUe1YrfENPdHnrF3g1vSBfpkQfambCZ
+```
+
+**Format details:**
+- 32 characters
+- Base62 alphabet (a-z, A-Z, 0-9)
+- ~190 bits of entropy (more than UUID's 122 bits)
+- NOT a valid UUID format
+
+**Database schema implications:**
+
+```typescript
+// CORRECT - use text for user_id
+userId: text('user_id').notNull(),
+
+// WRONG - will cause "invalid input syntax for type uuid" errors
+userId: uuid('user_id').notNull(),
+```
+
+Always use `text` type for `user_id` columns in all database schemas.
+
 ## Token Structure (EdDSA JWT)
 
 ```json
 {
-  "sub": "user-uuid-123",
+  "sub": "otUe1YrfENPdHnrF3g1vSBfpkQfambCZ",
   "email": "user@example.com",
   "role": "user",
   "sid": "session-id-456",
@@ -46,6 +72,8 @@ All authentication is handled by **Mana Core Auth**, a centralized authenticatio
   "aud": "manacore"
 }
 ```
+
+**Note**: The `sub` claim contains the Better Auth user ID (not a UUID).
 
 **Important**: Keep claims minimal. Do NOT include:
 - Credit balance (changes frequently)

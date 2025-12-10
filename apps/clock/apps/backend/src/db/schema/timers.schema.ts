@@ -1,8 +1,8 @@
-import { pgTable, uuid, varchar, integer, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, varchar, integer, timestamp } from 'drizzle-orm/pg-core';
 
 export const timers = pgTable('timers', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	label: varchar('label', { length: 255 }),
 	durationSeconds: integer('duration_seconds').notNull(),
 	remainingSeconds: integer('remaining_seconds'),

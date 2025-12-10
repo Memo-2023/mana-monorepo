@@ -1,5 +1,7 @@
+import { browser } from '$app/environment';
 import { authStore } from '$lib/stores/auth.svelte';
 import { API_BASE } from './config';
+import { createTagsClient, type Tag } from '@manacore/shared-tags';
 
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
 	const token = await authStore.getAccessToken();
@@ -56,13 +58,8 @@ export interface Contact {
 	updatedAt: string;
 }
 
-export interface ContactTag {
-	id: string;
-	userId: string;
-	name: string;
-	color?: string | null;
-	createdAt: string;
-}
+// Re-export Tag as ContactTag for backward compatibility
+export type ContactTag = Tag;
 
 export interface ContactNote {
 	id: string;
@@ -150,32 +147,70 @@ export const contactsApi = {
 	},
 };
 
-// Tags API
+// Tags API - Uses central Tags API from mana-core-auth
+// Contact-tag associations still use the Contacts backend
+
+// Get auth URL dynamically at runtime
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	return 'http://localhost:3001';
+}
+
+// Lazy-initialized tags client
+let _tagsClient: ReturnType<typeof createTagsClient> | null = null;
+
+function getTagsClient() {
+	if (!browser) return null;
+	if (!_tagsClient) {
+		_tagsClient = createTagsClient({
+			authUrl: getAuthUrl(),
+			getToken: async () => {
+				const token = await authStore.getAccessToken();
+				return token || '';
+			},
+		});
+	}
+	return _tagsClient;
+}
+
 export const tagsApi = {
+	// Get all tags from central Tags API
 	async list(): Promise<{ tags: ContactTag[] }> {
-		return fetchWithAuth('/tags');
+		const client = getTagsClient();
+		if (!client) return { tags: [] };
+		const tags = await client.getAll();
+		return { tags };
 	},
 
+	// Create tag via central Tags API
 	async create(data: { name: string; color?: string }): Promise<{ tag: ContactTag }> {
-		return fetchWithAuth('/tags', {
-			method: 'POST',
-			body: JSON.stringify(data),
-		});
+		const client = getTagsClient();
+		if (!client) throw new Error('Tags client not available');
+		const tag = await client.create(data);
+		return { tag };
 	},
 
+	// Update tag via central Tags API
 	async update(id: string, data: { name?: string; color?: string }): Promise<{ tag: ContactTag }> {
-		return fetchWithAuth(`/tags/${id}`, {
-			method: 'PATCH',
-			body: JSON.stringify(data),
-		});
+		const client = getTagsClient();
+		if (!client) throw new Error('Tags client not available');
+		const tag = await client.update(id, data);
+		return { tag };
 	},
 
+	// Delete tag via central Tags API
 	async delete(id: string): Promise<{ success: boolean }> {
-		return fetchWithAuth(`/tags/${id}`, {
-			method: 'DELETE',
-		});
+		const client = getTagsClient();
+		if (!client) throw new Error('Tags client not available');
+		await client.delete(id);
+		return { success: true };
 	},
 
+	// Contact-tag associations still use Contacts backend
 	async addToContact(tagId: string, contactId: string): Promise<{ success: boolean }> {
 		return fetchWithAuth(`/tags/${tagId}/contacts/${contactId}`, {
 			method: 'POST',
@@ -190,6 +225,14 @@ export const tagsApi = {
 
 	async getForContact(contactId: string): Promise<{ tagIds: string[] }> {
 		return fetchWithAuth(`/tags/contact/${contactId}`);
+	},
+
+	// Create default tags via central Tags API
+	async createDefaults(): Promise<{ tags: ContactTag[] }> {
+		const client = getTagsClient();
+		if (!client) return { tags: [] };
+		const tags = await client.createDefaults();
+		return { tags };
 	},
 };
 

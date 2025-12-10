@@ -33,18 +33,22 @@
 		'bg-red-500/[0.08] border-red-500/30 ' +
 		'dark:bg-red-500/[0.12] dark:border-red-500/25 dark:shadow-lg';
 
-	const headerClasses =
-		'px-5 py-4 border-b border-black/[0.08] dark:border-white/10';
+	const headerClasses = 'px-5 py-4 border-b border-black/[0.08] dark:border-white/10';
 
-	const dangerHeaderClasses =
-		'px-5 py-4 border-b border-red-500/20 bg-red-500/10';
+	const dangerHeaderClasses = 'px-5 py-4 border-b border-red-500/20 bg-red-500/10';
 </script>
 
 <div class="{variant === 'danger' ? dangerCardClasses : baseCardClasses} {className}">
 	{#if title || description}
-		<header class="{variant === 'danger' ? dangerHeaderClasses : headerClasses}">
+		<header class={variant === 'danger' ? dangerHeaderClasses : headerClasses}>
 			{#if title}
-				<h3 class="text-base font-semibold text-foreground {variant === 'danger' ? 'text-red-500 dark:text-red-400' : ''}">{title}</h3>
+				<h3
+					class="text-base font-semibold text-foreground {variant === 'danger'
+						? 'text-red-500 dark:text-red-400'
+						: ''}"
+				>
+					{title}
+				</h3>
 			{/if}
 			{#if description}
 				<p class="text-sm text-muted-foreground mt-1">{description}</p>
@@ -56,4 +60,3 @@
 		{@render children()}
 	</div>
 </div>
-

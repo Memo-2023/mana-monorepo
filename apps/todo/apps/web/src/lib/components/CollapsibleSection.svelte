@@ -39,7 +39,7 @@
 	<button
 		type="button"
 		onclick={() => (isOpen = !isOpen)}
-		class="section-header glass-pill w-full flex items-center gap-3 px-4 py-3 rounded-full cursor-pointer transition-all duration-200"
+		class="section-header w-full flex items-center gap-2 py-2 cursor-pointer transition-all duration-200"
 	>
 		<!-- Icon -->
 		<span class="icon-wrapper {iconColors[variant]}">
@@ -77,36 +77,8 @@
 </div>
 
 <style>
-	/* Glass pill effect matching PillNavigation */
-	.glass-pill {
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-		position: relative;
-		z-index: 1;
-	}
-
-	:global(.dark) .glass-pill {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-	}
-
-	.glass-pill:hover {
-		background: rgba(255, 255, 255, 0.95);
-		border-color: rgba(0, 0, 0, 0.15);
-		transform: translateY(-1px);
-		box-shadow:
-			0 10px 15px -3px rgba(0, 0, 0, 0.1),
-			0 4px 6px -2px rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .glass-pill:hover {
-		background: rgba(255, 255, 255, 0.2);
-		border-color: rgba(255, 255, 255, 0.25);
+	.section-header:hover {
+		opacity: 0.7;
 	}
 
 	.icon-wrapper {

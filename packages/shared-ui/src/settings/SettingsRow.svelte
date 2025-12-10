@@ -91,7 +91,12 @@
 		</div>
 	</a>
 {:else if onclick}
-	<button type="button" {onclick} class="{getRowClasses(border, true, disabled)} {className}" {disabled}>
+	<button
+		type="button"
+		{onclick}
+		class="{getRowClasses(border, true, disabled)} {className}"
+		{disabled}
+	>
 		<div class="flex items-center gap-3 flex-1 min-w-0">
 			{#if icon}
 				<span class={iconClasses}>

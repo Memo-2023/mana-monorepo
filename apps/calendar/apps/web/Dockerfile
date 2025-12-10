@@ -36,6 +36,7 @@ COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
 COPY packages/shared-profile-ui ./packages/shared-profile-ui
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
+COPY packages/shared-tags ./packages/shared-tags
 
 # Copy calendar packages and web
 COPY apps/calendar/packages ./apps/calendar/packages

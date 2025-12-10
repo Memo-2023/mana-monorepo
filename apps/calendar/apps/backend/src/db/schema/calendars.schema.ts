@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, varchar, text, boolean, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, varchar, boolean, jsonb } from 'drizzle-orm/pg-core';
 
 /**
  * Calendar settings stored in JSONB
@@ -16,7 +16,7 @@ export interface CalendarSettings {
  */
 export const calendars = pgTable('calendars', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
 	color: varchar('color', { length: 7 }).default('#3B82F6'),

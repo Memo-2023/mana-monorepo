@@ -1,4 +1,4 @@
-import { pgTable, uuid, integer, timestamp, index, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, timestamp, index, pgEnum } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { decks } from './decks.js';
 
@@ -12,7 +12,7 @@ export const studySessions = pgTable(
 		deckId: uuid('deck_id')
 			.notNull()
 			.references(() => decks.id, { onDelete: 'cascade' }),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 		mode: studyModeEnum('mode').notNull(),
 		totalCards: integer('total_cards').notNull().default(0),
 		completedCards: integer('completed_cards').notNull().default(0),

@@ -9,8 +9,9 @@ pnpm docker:down
 pnpm dev:calendar:app
 pnpm dev:todo:full
 pnpm dev:contacts:full
+pnpm dev:clock:full
+
 pnpm dev:chat:app
-pnpm dev:clock:app
 pnpm dev:context:app
 pnpm dev:manacore:app # Nur ManaCore Web
 pnpm dev:manacore:backends # Alle 9 Backends für Dashboard-Widgets

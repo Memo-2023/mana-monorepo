@@ -72,7 +72,9 @@
 			{isOn
 			? 'bg-primary border-primary shadow-[0_0_0_2px_hsl(var(--primary)/0.2)] dark:shadow-[0_0_0_2px_hsl(var(--primary)/0.3)]'
 			: 'bg-black/[0.08] border-black/10 dark:bg-white/[0.12] dark:border-white/[0.15]'}
-			{!disabled ? 'cursor-pointer hover:border-black/20 dark:hover:border-white/25' : 'cursor-not-allowed'}
+			{!disabled
+			? 'cursor-pointer hover:border-black/20 dark:hover:border-white/25'
+			: 'cursor-not-allowed'}
 			focus-visible:outline-2 focus-visible:outline-primary/40 focus-visible:outline-offset-2"
 		role="switch"
 		aria-checked={isOn}

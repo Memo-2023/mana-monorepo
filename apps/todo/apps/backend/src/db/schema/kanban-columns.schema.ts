@@ -1,4 +1,13 @@
-import { pgTable, uuid, timestamp, varchar, boolean, integer, index } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	uuid,
+	text,
+	timestamp,
+	varchar,
+	boolean,
+	integer,
+	index,
+} from 'drizzle-orm/pg-core';
 import { kanbanBoards } from './kanban-boards.schema';
 
 // Define locally to avoid circular dependency with tasks.schema
@@ -8,7 +17,7 @@ export const kanbanColumns = pgTable(
 	'kanban_columns',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 		boardId: uuid('board_id')
 			.references(() => kanbanBoards.id, { onDelete: 'cascade' })
 			.notNull(),

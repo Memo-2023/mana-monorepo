@@ -29,7 +29,7 @@ export const articles = pgTable(
 		summary: text('summary'),
 
 		// For user-saved articles
-		userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+		userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 		originalUrl: text('original_url'),
 		parsedContent: text('parsed_content'),
 		isArchived: boolean('is_archived').default(false),

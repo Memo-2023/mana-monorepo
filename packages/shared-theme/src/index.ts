@@ -28,10 +28,28 @@ export type {
 	StartPageConfig,
 	WeekStartDay,
 	GeneralSettings,
+	// Custom & Community Themes Types
+	ThemeColorsInput,
+	CustomTheme,
+	CreateCustomThemeInput,
+	UpdateCustomThemeInput,
+	CommunityTheme,
+	CommunityThemeQuery,
+	PaginatedCommunityThemes,
+	PublishThemeInput,
+	ThemeEditorState,
+	CustomThemesStore,
+	CustomThemesStoreConfig,
 } from './types';
 
 // User Settings Constants
 export { DEFAULT_GLOBAL_SETTINGS, DEFAULT_GENERAL_SETTINGS } from './types';
+
+// Theme Variant Categories
+export { DEFAULT_THEME_VARIANTS, EXTENDED_THEME_VARIANTS } from './types';
+
+// Custom Theme Constants
+export { MAIN_THEME_COLORS, EXTENDED_THEME_COLORS, THEME_COLOR_LABELS } from './types';
 
 // Constants
 export {
@@ -62,6 +80,9 @@ export { createA11yStore } from './a11y-store.svelte';
 
 // User Settings Store
 export { createUserSettingsStore } from './user-settings-store.svelte';
+
+// Custom Themes Store
+export { createCustomThemesStore } from './custom-themes-store.svelte';
 
 // Utils
 export {
@@ -96,4 +117,12 @@ export {
 
 // App Routes
 export type { AppRoute, AppRouteConfig } from './app-routes';
-export { APP_ROUTES, getStartPage, getAvailableRoutes, getDefaultRoute } from './app-routes';
+export {
+	APP_ROUTES,
+	getStartPage,
+	getAvailableRoutes,
+	getDefaultRoute,
+	filterHiddenNavItems,
+	getHideableRoutes,
+	isRouteHidden,
+} from './app-routes';

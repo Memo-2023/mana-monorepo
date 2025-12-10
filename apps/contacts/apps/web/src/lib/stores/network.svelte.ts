@@ -12,25 +12,15 @@ import {
 	forceCenter,
 	forceCollide,
 	type Simulation,
-	type SimulationNodeDatum,
-	type SimulationLinkDatum,
 } from 'd3-force';
+import type {
+	SimulationNode as SharedSimulationNode,
+	SimulationLink as SharedSimulationLink,
+} from '@manacore/shared-ui';
 
-// Extended types for D3 simulation
-export interface SimulationNode extends NetworkNode, SimulationNodeDatum {
-	x?: number;
-	y?: number;
-	vx?: number;
-	vy?: number;
-	fx?: number | null;
-	fy?: number | null;
-}
-
-export interface SimulationLink extends SimulationLinkDatum<SimulationNode> {
-	type: 'tag';
-	strength: number;
-	sharedTags: string[];
-}
+// Re-export types from shared-ui for convenience
+export type SimulationNode = SharedSimulationNode;
+export type SimulationLink = SharedSimulationLink;
 
 // State
 let nodes = $state<SimulationNode[]>([]);
@@ -42,6 +32,7 @@ let simulation: Simulation<SimulationNode, SimulationLink> | null = null;
 let searchQuery = $state('');
 let filterTagId = $state<string | null>(null);
 let filterCompany = $state<string | null>(null);
+let minStrength = $state(0);
 let tickCounter = $state(0); // Used to trigger reactivity on simulation tick
 let simulationInitialized = false;
 let dataLoaded = false; // Prevent double loading
@@ -57,7 +48,7 @@ const filteredNodes = $derived.by(() => {
 		result = result.filter(
 			(node) =>
 				node.name.toLowerCase().includes(query) ||
-				node.company?.toLowerCase().includes(query) ||
+				node.subtitle?.toLowerCase().includes(query) ||
 				node.tags.some((t) => t.name.toLowerCase().includes(query))
 		);
 	}
@@ -67,9 +58,9 @@ const filteredNodes = $derived.by(() => {
 		result = result.filter((node) => node.tags.some((t) => t.id === filterTagId));
 	}
 
-	// Company filter
+	// Company filter (uses subtitle field)
 	if (filterCompany) {
-		result = result.filter((node) => node.company === filterCompany);
+		result = result.filter((node) => node.subtitle === filterCompany);
 	}
 
 	return result;
@@ -80,16 +71,24 @@ const filteredLinks = $derived.by(() => {
 	return links.filter((link) => {
 		const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
 		const targetId = typeof link.target === 'string' ? link.target : link.target.id;
-		return filteredNodeIds.has(sourceId) && filteredNodeIds.has(targetId);
+		// Check if both nodes are visible and strength meets minimum
+		if (!filteredNodeIds.has(sourceId) || !filteredNodeIds.has(targetId)) {
+			return false;
+		}
+		// Filter by minimum strength
+		if (minStrength > 0 && link.strength < minStrength) {
+			return false;
+		}
+		return true;
 	});
 });
 
-// Get unique companies for filter dropdown
+// Get unique companies for filter dropdown (uses subtitle field)
 const uniqueCompanies = $derived.by(() => {
 	const companies = new Set<string>();
 	for (const node of nodes) {
-		if (node.company) {
-			companies.add(node.company);
+		if (node.subtitle) {
+			companies.add(node.subtitle);
 		}
 	}
 	return Array.from(companies).sort();
@@ -151,6 +150,9 @@ export const networkStore = {
 	get filterCompany() {
 		return filterCompany;
 	},
+	get minStrength() {
+		return minStrength;
+	},
 	get uniqueCompanies() {
 		return uniqueCompanies;
 	},
@@ -194,9 +196,10 @@ export const networkStore = {
 				'links'
 			);
 
-			// Convert to simulation nodes
+			// Convert to simulation nodes with subtitle for company
 			nodes = response.nodes.map((node) => ({
 				...node,
+				subtitle: node.company, // Map company to subtitle for shared component
 				x: undefined,
 				y: undefined,
 				vx: undefined,
@@ -393,12 +396,20 @@ export const networkStore = {
 	},
 
 	/**
+	 * Set minimum strength filter
+	 */
+	setMinStrength(strength: number) {
+		minStrength = strength;
+	},
+
+	/**
 	 * Clear all filters
 	 */
 	clearFilters() {
 		searchQuery = '';
 		filterTagId = null;
 		filterCompany = null;
+		minStrength = 0;
 	},
 
 	/**

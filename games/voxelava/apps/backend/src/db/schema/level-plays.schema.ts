@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, real, integer, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, real, integer, boolean } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { levels } from './levels.schema';
 
@@ -7,7 +7,7 @@ export const levelPlays = pgTable('level_plays', {
 	levelId: uuid('level_id')
 		.notNull()
 		.references(() => levels.id, { onDelete: 'cascade' }),
-	userId: uuid('user_id'),
+	userId: text('user_id'),
 	completionTime: real('completion_time'),
 	attempts: integer('attempts').default(1),
 	completed: boolean('completed').default(false),

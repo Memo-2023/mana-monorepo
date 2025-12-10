@@ -59,7 +59,7 @@ export interface ContactsAppSettings {
 
 const DEFAULT_SETTINGS: ContactsAppSettings = {
 	// Display Settings
-	defaultView: 'list',
+	defaultView: 'alphabet',
 	sortBy: 'name',
 	sortOrder: 'asc',
 	showPhotos: true,

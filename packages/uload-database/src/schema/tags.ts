@@ -12,7 +12,7 @@ export const tags = pgTable(
 		icon: text('icon'),
 		isPublic: boolean('is_public').default(false),
 		usageCount: integer('usage_count').default(0),
-		userId: uuid('user_id').references(() => users.id),
+		userId: text('user_id').references(() => users.id),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull(),
 	},

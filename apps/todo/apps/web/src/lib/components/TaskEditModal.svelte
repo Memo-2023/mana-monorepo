@@ -4,19 +4,26 @@
 		Subtask,
 		TaskPriority,
 		TaskStatus,
-		DurationUnit,
 		EffectiveDuration,
+		UpdateTaskInput,
 	} from '@todo/shared';
+	import { STATUS_OPTIONS, RECURRENCE_OPTIONS } from '@todo/shared';
 	import { projectsStore } from '$lib/stores/projects.svelte';
-	import { labelsStore } from '$lib/stores/labels.svelte';
 	import { format } from 'date-fns';
 	import SubtaskList from './SubtaskList.svelte';
+	import {
+		PrioritySelector,
+		StorypointsSelector,
+		DurationPicker,
+		FunRatingPicker,
+		TagSelector,
+	} from './form';
 
 	interface Props {
 		task: Task;
 		open: boolean;
 		onClose: () => void;
-		onSave: (data: Partial<Task>) => void;
+		onSave: (data: UpdateTaskInput) => void;
 		onDelete: (taskId: string) => void;
 	}
 
@@ -36,69 +43,12 @@
 	let recurrenceRule = $state('');
 	let notes = $state('');
 	let storyPoints = $state<number | null>(null);
-	let effectiveDurationValue = $state<number | null>(null);
-	let effectiveDurationUnit = $state<DurationUnit>('hours');
+	let effectiveDuration = $state<EffectiveDuration | null>(null);
 	let funRating = $state<number | null>(null);
-	let showCustomDuration = $state(false);
 
 	// UI state
-	let showLabelDropdown = $state(false);
 	let isLoading = $state(false);
 	let showDeleteConfirm = $state(false);
-
-	// Priority options
-	const priorities: { value: TaskPriority; label: string; color: string }[] = [
-		{ value: 'low', label: 'Niedrig', color: '#22c55e' },
-		{ value: 'medium', label: 'Mittel', color: '#eab308' },
-		{ value: 'high', label: 'Hoch', color: '#f97316' },
-		{ value: 'urgent', label: 'Dringend', color: '#ef4444' },
-	];
-
-	// Status options
-	const statuses: { value: TaskStatus; label: string }[] = [
-		{ value: 'pending', label: 'Ausstehend' },
-		{ value: 'in_progress', label: 'In Bearbeitung' },
-		{ value: 'completed', label: 'Abgeschlossen' },
-		{ value: 'cancelled', label: 'Abgebrochen' },
-	];
-
-	// Recurrence options
-	const recurrenceOptions = [
-		{ value: '', label: 'Keine Wiederholung' },
-		{ value: 'FREQ=DAILY', label: 'Täglich' },
-		{ value: 'FREQ=WEEKLY', label: 'Wöchentlich' },
-		{ value: 'FREQ=WEEKLY;INTERVAL=2', label: 'Alle 2 Wochen' },
-		{ value: 'FREQ=MONTHLY', label: 'Monatlich' },
-		{ value: 'FREQ=YEARLY', label: 'Jährlich' },
-	];
-
-	// Storypoints options (Fibonacci)
-	const storyPointOptions = [1, 2, 3, 5, 8, 13, 21];
-
-	// Quick duration options
-	const durationOptions: { label: string; value: number; unit: DurationUnit }[] = [
-		{ label: '15m', value: 15, unit: 'minutes' },
-		{ label: '30m', value: 30, unit: 'minutes' },
-		{ label: '1h', value: 1, unit: 'hours' },
-		{ label: '2h', value: 2, unit: 'hours' },
-		{ label: '4h', value: 4, unit: 'hours' },
-		{ label: '1d', value: 1, unit: 'days' },
-		{ label: '2d', value: 2, unit: 'days' },
-	];
-
-	// Duration unit options
-	const durationUnitOptions: { value: DurationUnit; label: string }[] = [
-		{ value: 'minutes', label: 'Minuten' },
-		{ value: 'hours', label: 'Stunden' },
-		{ value: 'days', label: 'Tage' },
-	];
-
-	// Fun rating color helper
-	function getFunRatingColor(rating: number): string {
-		if (rating <= 3) return '#ef4444'; // red
-		if (rating <= 6) return '#eab308'; // yellow
-		return '#22c55e'; // green
-	}
 
 	// Initialize form when task changes or modal opens
 	$effect(() => {
@@ -115,23 +65,9 @@
 			subtasks = task.subtasks ? [...task.subtasks] : [];
 			recurrenceRule = task.recurrenceRule || '';
 			notes = task.metadata?.notes || '';
-			// New metadata fields
+			// Metadata fields
 			storyPoints = task.metadata?.storyPoints ?? null;
-			if (task.metadata?.effectiveDuration) {
-				effectiveDurationValue = task.metadata.effectiveDuration.value;
-				effectiveDurationUnit = task.metadata.effectiveDuration.unit;
-				// Check if it's a custom value not in quick options
-				const isQuickOption = durationOptions.some(
-					(opt) =>
-						opt.value === task.metadata?.effectiveDuration?.value &&
-						opt.unit === task.metadata?.effectiveDuration?.unit
-				);
-				showCustomDuration = !isQuickOption;
-			} else {
-				effectiveDurationValue = null;
-				effectiveDurationUnit = 'hours';
-				showCustomDuration = false;
-			}
+			effectiveDuration = task.metadata?.effectiveDuration ?? null;
 			funRating = task.metadata?.funRating ?? null;
 			showDeleteConfirm = false;
 		}
@@ -157,16 +93,7 @@
 
 		isLoading = true;
 		try {
-			// Build effective duration object
-			let effectiveDuration: EffectiveDuration | null = null;
-			if (effectiveDurationValue !== null && effectiveDurationValue > 0) {
-				effectiveDuration = {
-					value: effectiveDurationValue,
-					unit: effectiveDurationUnit,
-				};
-			}
-
-			const data: Partial<Task> = {
+			const data: UpdateTaskInput = {
 				title: title.trim(),
 				description: description.trim() || null,
 				dueDate: dueDate ? new Date(dueDate).toISOString() : null,
@@ -184,10 +111,8 @@
 					effectiveDuration: effectiveDuration ?? undefined,
 					funRating: funRating ?? undefined,
 				},
+				labelIds: selectedLabelIds,
 			};
-
-			// Include labelIds for the update
-			(data as any).labelIds = selectedLabelIds;
 
 			onSave(data);
 		} finally {
@@ -203,36 +128,8 @@
 		}
 	}
 
-	function toggleLabel(labelId: string) {
-		if (selectedLabelIds.includes(labelId)) {
-			selectedLabelIds = selectedLabelIds.filter((id) => id !== labelId);
-		} else {
-			selectedLabelIds = [...selectedLabelIds, labelId];
-		}
-	}
-
 	function handleSubtasksChange(newSubtasks: Subtask[]) {
 		subtasks = newSubtasks;
-	}
-
-	function selectQuickDuration(opt: { value: number; unit: DurationUnit }) {
-		effectiveDurationValue = opt.value;
-		effectiveDurationUnit = opt.unit;
-		showCustomDuration = false;
-	}
-
-	function isQuickDurationSelected(opt: { value: number; unit: DurationUnit }): boolean {
-		return (
-			effectiveDurationValue === opt.value &&
-			effectiveDurationUnit === opt.unit &&
-			!showCustomDuration
-		);
-	}
-
-	function clearDuration() {
-		effectiveDurationValue = null;
-		effectiveDurationUnit = 'hours';
-		showCustomDuration = false;
 	}
 </script>
 
@@ -304,27 +201,14 @@
 				<!-- Priorität -->
 				<div class="form-section">
 					<label class="form-label">Priorität</label>
-					<div class="priority-buttons">
-						{#each priorities as p}
-							<button
-								type="button"
-								class="priority-btn"
-								class:selected={priority === p.value}
-								style="--priority-color: {p.color}"
-								onclick={() => (priority = p.value)}
-							>
-								<span class="priority-dot" style="background-color: {p.color}"></span>
-								{p.label}
-							</button>
-						{/each}
-					</div>
+					<PrioritySelector value={priority} onChange={(p) => (priority = p)} />
 				</div>
 
 				<!-- Status -->
 				<div class="form-section">
 					<label class="form-label" for="task-status">Status</label>
 					<select id="task-status" class="form-select" bind:value={status}>
-						{#each statuses as s}
+						{#each STATUS_OPTIONS as s}
 							<option value={s.value}>{s.label}</option>
 						{/each}
 					</select>
@@ -343,71 +227,13 @@
 					</select>
 				</div>
 
-				<!-- Labels -->
+				<!-- Tags -->
 				<div class="form-section">
-					<label class="form-label">Labels</label>
-					<div class="label-selector">
-						<button
-							type="button"
-							class="label-trigger"
-							onclick={() => (showLabelDropdown = !showLabelDropdown)}
-						>
-							{#if selectedLabelIds.length === 0}
-								<span class="text-muted">Labels auswählen...</span>
-							{:else}
-								<div class="selected-labels">
-									{#each selectedLabelIds.slice(0, 3) as labelId}
-										{@const label = labelsStore.getById(labelId)}
-										{#if label}
-											<span class="label-tag" style="--label-color: {label.color}">
-												{label.name}
-											</span>
-										{/if}
-									{/each}
-									{#if selectedLabelIds.length > 3}
-										<span class="label-more">+{selectedLabelIds.length - 3}</span>
-									{/if}
-								</div>
-							{/if}
-							<svg class="dropdown-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M19 9l-7 7-7-7"
-								/>
-							</svg>
-						</button>
-
-						{#if showLabelDropdown}
-							<div class="label-dropdown">
-								{#each labelsStore.labels as label}
-									<button
-										type="button"
-										class="label-option"
-										class:selected={selectedLabelIds.includes(label.id)}
-										onclick={() => toggleLabel(label.id)}
-									>
-										<span class="label-dot" style="background-color: {label.color}"></span>
-										<span class="label-name">{label.name}</span>
-										{#if selectedLabelIds.includes(label.id)}
-											<svg class="check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M5 13l4 4L19 7"
-												/>
-											</svg>
-										{/if}
-									</button>
-								{/each}
-								{#if labelsStore.labels.length === 0}
-									<div class="no-labels">Keine Labels vorhanden</div>
-								{/if}
-							</div>
-						{/if}
-					</div>
+					<label class="form-label">Tags</label>
+					<TagSelector
+						selectedIds={selectedLabelIds}
+						onChange={(ids) => (selectedLabelIds = ids)}
+					/>
 				</div>
 
 				<!-- Subtasks -->
@@ -420,7 +246,7 @@
 				<div class="form-section">
 					<label class="form-label" for="task-recurrence">Wiederholung</label>
 					<select id="task-recurrence" class="form-select" bind:value={recurrenceRule}>
-						{#each recurrenceOptions as option}
+						{#each RECURRENCE_OPTIONS as option}
 							<option value={option.value}>{option.label}</option>
 						{/each}
 					</select>
@@ -441,140 +267,22 @@
 				<!-- Storypoints -->
 				<div class="form-section">
 					<label class="form-label">Storypoints</label>
-					<div class="storypoint-buttons">
-						{#each storyPointOptions as sp}
-							<button
-								type="button"
-								class="storypoint-btn"
-								class:selected={storyPoints === sp}
-								onclick={() => (storyPoints = storyPoints === sp ? null : sp)}
-							>
-								{sp}
-							</button>
-						{/each}
-						{#if storyPoints !== null}
-							<button
-								type="button"
-								class="storypoint-clear"
-								onclick={() => (storyPoints = null)}
-								title="Zurücksetzen"
-							>
-								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M6 18L18 6M6 6l12 12"
-									/>
-								</svg>
-							</button>
-						{/if}
-					</div>
+					<StorypointsSelector value={storyPoints} onChange={(v) => (storyPoints = v)} />
 				</div>
 
 				<!-- Effektive Dauer -->
 				<div class="form-section">
 					<label class="form-label">Effektive Dauer</label>
-					<div class="duration-buttons">
-						{#each durationOptions as opt}
-							<button
-								type="button"
-								class="duration-btn"
-								class:selected={isQuickDurationSelected(opt)}
-								onclick={() => selectQuickDuration(opt)}
-							>
-								{opt.label}
-							</button>
-						{/each}
-						<button
-							type="button"
-							class="duration-btn"
-							class:selected={showCustomDuration}
-							onclick={() => (showCustomDuration = !showCustomDuration)}
-						>
-							...
-						</button>
-						{#if effectiveDurationValue !== null}
-							<button
-								type="button"
-								class="duration-clear"
-								onclick={clearDuration}
-								title="Zurücksetzen"
-							>
-								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M6 18L18 6M6 6l12 12"
-									/>
-								</svg>
-							</button>
-						{/if}
-					</div>
-					{#if showCustomDuration}
-						<div class="duration-custom">
-							<input
-								type="number"
-								class="form-input-sm duration-input"
-								bind:value={effectiveDurationValue}
-								placeholder="Wert"
-								min="1"
-							/>
-							<select class="form-select duration-unit" bind:value={effectiveDurationUnit}>
-								{#each durationUnitOptions as unit}
-									<option value={unit.value}>{unit.label}</option>
-								{/each}
-							</select>
-						</div>
-					{/if}
+					<DurationPicker value={effectiveDuration} onChange={(v) => (effectiveDuration = v)} />
 				</div>
 
 				<!-- Spaß-Faktor -->
 				<div class="form-section">
 					<label class="form-label">
-						Spaß-Faktor{#if funRating !== null}: <span
-								class="fun-rating-value"
-								style="color: {getFunRatingColor(funRating)}">{funRating}</span
+						Spaß-Faktor{#if funRating !== null}: <span class="fun-rating-value">{funRating}</span
 							>{/if}
 					</label>
-					<div class="fun-rating">
-						{#each Array(10) as _, i}
-							{@const rating = i + 1}
-							<button
-								type="button"
-								class="fun-rating-dot"
-								class:filled={funRating !== null && rating <= funRating}
-								style="--dot-color: {getFunRatingColor(rating)}"
-								onclick={() => (funRating = funRating === rating ? null : rating)}
-								title={rating}
-							>
-								<span class="dot"></span>
-							</button>
-						{/each}
-						{#if funRating !== null}
-							<button
-								type="button"
-								class="fun-rating-clear"
-								onclick={() => (funRating = null)}
-								title="Zurücksetzen"
-							>
-								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M6 18L18 6M6 6l12 12"
-									/>
-								</svg>
-							</button>
-						{/if}
-					</div>
-					<div class="fun-rating-labels">
-						<span>1</span>
-						<span>5</span>
-						<span>10</span>
-					</div>
+					<FunRatingPicker value={funRating} onChange={(v) => (funRating = v)} />
 				</div>
 			</div>
 
@@ -788,184 +496,6 @@
 		min-height: 80px;
 	}
 
-	/* Priority buttons */
-	.priority-buttons {
-		display: flex;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-	}
-
-	.priority-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.5rem 0.875rem;
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		border-radius: 9999px;
-		background: rgba(255, 255, 255, 0.8);
-		font-size: 0.8125rem;
-		color: #374151;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-
-	:global(.dark) .priority-btn {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
-		color: #e5e7eb;
-	}
-
-	.priority-btn:hover {
-		border-color: var(--priority-color);
-	}
-
-	.priority-btn.selected {
-		background: color-mix(in srgb, var(--priority-color) 15%, transparent);
-		border-color: var(--priority-color);
-		color: var(--priority-color);
-	}
-
-	.priority-dot {
-		width: 0.5rem;
-		height: 0.5rem;
-		border-radius: 9999px;
-	}
-
-	/* Label selector */
-	.label-selector {
-		position: relative;
-	}
-
-	.label-trigger {
-		width: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0.625rem 0.875rem;
-		border: 1px solid rgba(0, 0, 0, 0.15);
-		border-radius: 0.75rem;
-		background: rgba(255, 255, 255, 0.8);
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-
-	:global(.dark) .label-trigger {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
-	}
-
-	.label-trigger:hover {
-		border-color: rgba(0, 0, 0, 0.25);
-	}
-
-	.text-muted {
-		color: #9ca3af;
-		font-size: 0.875rem;
-	}
-
-	.selected-labels {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.375rem;
-	}
-
-	.label-tag {
-		font-size: 0.75rem;
-		padding: 0.125rem 0.5rem;
-		border-radius: 9999px;
-		background: color-mix(in srgb, var(--label-color) 15%, transparent);
-		color: var(--label-color);
-		font-weight: 500;
-	}
-
-	.label-more {
-		font-size: 0.75rem;
-		color: #6b7280;
-	}
-
-	.dropdown-arrow {
-		width: 1rem;
-		height: 1rem;
-		color: #9ca3af;
-	}
-
-	.label-dropdown {
-		position: absolute;
-		top: calc(100% + 0.5rem);
-		left: 0;
-		right: 0;
-		max-height: 200px;
-		overflow-y: auto;
-		padding: 0.375rem;
-		border-radius: 0.75rem;
-		background: rgba(255, 255, 255, 0.95);
-		backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-		z-index: 10;
-	}
-
-	:global(.dark) .label-dropdown {
-		background: rgba(40, 40, 40, 0.95);
-		border-color: rgba(255, 255, 255, 0.15);
-	}
-
-	.label-option {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		width: 100%;
-		padding: 0.5rem 0.75rem;
-		border: none;
-		background: transparent;
-		border-radius: 0.5rem;
-		cursor: pointer;
-		transition: background 0.15s;
-		text-align: left;
-	}
-
-	.label-option:hover {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .label-option:hover {
-		background: rgba(255, 255, 255, 0.1);
-	}
-
-	.label-option.selected {
-		background: rgba(139, 92, 246, 0.1);
-	}
-
-	.label-dot {
-		width: 0.625rem;
-		height: 0.625rem;
-		border-radius: 9999px;
-		flex-shrink: 0;
-	}
-
-	.label-name {
-		flex: 1;
-		font-size: 0.875rem;
-		color: #374151;
-	}
-
-	:global(.dark) .label-name {
-		color: #e5e7eb;
-	}
-
-	.check-icon {
-		width: 1rem;
-		height: 1rem;
-		color: #8b5cf6;
-	}
-
-	.no-labels {
-		padding: 0.75rem;
-		text-align: center;
-		font-size: 0.875rem;
-		color: #9ca3af;
-	}
-
 	/* Footer */
 	.modal-footer {
 		display: flex;
@@ -1054,164 +584,6 @@
 		to {
 			transform: rotate(360deg);
 		}
-	}
-
-	/* Storypoints */
-	.storypoint-buttons {
-		display: flex;
-		gap: 0.375rem;
-		flex-wrap: wrap;
-		align-items: center;
-	}
-
-	.storypoint-btn {
-		min-width: 2.25rem;
-		height: 2.25rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0 0.5rem;
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		border-radius: 9999px;
-		background: rgba(255, 255, 255, 0.8);
-		font-size: 0.8125rem;
-		font-weight: 500;
-		color: #374151;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-
-	:global(.dark) .storypoint-btn {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
-		color: #e5e7eb;
-	}
-
-	.storypoint-btn:hover {
-		border-color: #8b5cf6;
-	}
-
-	.storypoint-btn.selected {
-		background: rgba(139, 92, 246, 0.15);
-		border-color: #8b5cf6;
-		color: #8b5cf6;
-	}
-
-	.storypoint-clear,
-	.duration-clear,
-	.fun-rating-clear {
-		width: 2rem;
-		height: 2rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0;
-		border: none;
-		border-radius: 9999px;
-		background: rgba(239, 68, 68, 0.1);
-		color: #ef4444;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-
-	.storypoint-clear:hover,
-	.duration-clear:hover,
-	.fun-rating-clear:hover {
-		background: rgba(239, 68, 68, 0.2);
-	}
-
-	/* Duration */
-	.duration-buttons {
-		display: flex;
-		gap: 0.375rem;
-		flex-wrap: wrap;
-		align-items: center;
-	}
-
-	.duration-btn {
-		padding: 0.5rem 0.75rem;
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		border-radius: 9999px;
-		background: rgba(255, 255, 255, 0.8);
-		font-size: 0.8125rem;
-		color: #374151;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-
-	:global(.dark) .duration-btn {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
-		color: #e5e7eb;
-	}
-
-	.duration-btn:hover {
-		border-color: #8b5cf6;
-	}
-
-	.duration-btn.selected {
-		background: rgba(139, 92, 246, 0.15);
-		border-color: #8b5cf6;
-		color: #8b5cf6;
-	}
-
-	.duration-custom {
-		display: flex;
-		gap: 0.5rem;
-		margin-top: 0.75rem;
-	}
-
-	.duration-input {
-		width: 80px;
-	}
-
-	.duration-unit {
-		width: 120px;
-	}
-
-	/* Fun Rating */
-	.fun-rating {
-		display: flex;
-		gap: 0.25rem;
-		align-items: center;
-	}
-
-	.fun-rating-dot {
-		padding: 0.25rem;
-		border: none;
-		background: transparent;
-		cursor: pointer;
-		transition: transform 0.15s;
-	}
-
-	.fun-rating-dot:hover {
-		transform: scale(1.2);
-	}
-
-	.fun-rating-dot .dot {
-		display: block;
-		width: 1.25rem;
-		height: 1.25rem;
-		border-radius: 9999px;
-		background: rgba(0, 0, 0, 0.1);
-		transition: all 0.15s;
-	}
-
-	:global(.dark) .fun-rating-dot .dot {
-		background: rgba(255, 255, 255, 0.15);
-	}
-
-	.fun-rating-dot.filled .dot {
-		background: var(--dot-color);
-	}
-
-	.fun-rating-labels {
-		display: flex;
-		justify-content: space-between;
-		padding: 0 0.25rem;
-		margin-top: 0.25rem;
-		font-size: 0.6875rem;
-		color: #9ca3af;
 	}
 
 	.fun-rating-value {

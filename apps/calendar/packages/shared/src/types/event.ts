@@ -8,6 +8,18 @@ export interface EventAttendee {
 }
 
 /**
+ * Event tag with color
+ */
+export interface EventTag {
+	id: string;
+	userId: string;
+	name: string;
+	color: string;
+	createdAt: Date | string;
+	updatedAt: Date | string;
+}
+
+/**
  * How to display all-day events
  */
 export type AllDayDisplayMode = 'header' | 'block';
@@ -92,6 +104,9 @@ export interface CalendarEvent {
 	// Metadata
 	metadata?: EventMetadata | null;
 
+	// Tags (populated when fetched)
+	tags?: EventTag[];
+
 	createdAt: Date | string;
 	updatedAt: Date | string;
 }
@@ -124,6 +139,7 @@ export interface CreateEventInput {
 	color?: string;
 	status?: EventStatus;
 	metadata?: EventMetadata;
+	tagIds?: string[];
 }
 
 /**
@@ -144,6 +160,7 @@ export interface UpdateEventInput {
 	color?: string | null;
 	status?: EventStatus;
 	metadata?: EventMetadata;
+	tagIds?: string[];
 }
 
 /**

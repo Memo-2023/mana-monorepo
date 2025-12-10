@@ -21,7 +21,7 @@ export const projects = pgTable(
 	'projects',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 		name: varchar('name', { length: 255 }).notNull(),
 		description: text('description'),
 		color: varchar('color', { length: 7 }).default('#3B82F6'),

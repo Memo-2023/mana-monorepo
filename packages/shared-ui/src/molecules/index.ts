@@ -9,7 +9,18 @@ export type { SelectOption } from './Select.types';
 export { GlassCard, StatRow } from './stats';
 
 // Tag components
-export { TagBadge } from './tags';
+export {
+	TagBadge,
+	TagColorPicker,
+	TagEditModal,
+	TagSelector,
+	TagList,
+	TAG_COLORS,
+	DEFAULT_TAG_COLOR,
+	getRandomTagColor,
+	getTagColorByName,
+} from './tags';
+export type { Tag, TagData, TagColorName, TagColorHex } from './tags';
 
 // Media components
 export { AudioPlayer } from './media';

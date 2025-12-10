@@ -543,6 +543,20 @@ docker logs chat-backend-staging --tail 200
 # - Port conflicts
 ```
 
+### Container name conflict error
+
+If you see: `Error: The container name "/xxx-staging" is already in use`
+
+```bash
+# SSH to server and remove the stale container
+ssh deploy@46.224.108.214
+docker rm -f todo-web-staging  # Replace with actual container name
+
+# Then re-run the deployment
+```
+
+This can happen if a container was created outside of docker-compose or if a previous deployment failed mid-way.
+
 ---
 
 ## Managing Tags

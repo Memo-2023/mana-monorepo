@@ -156,9 +156,11 @@ pnpm preview                     # Preview build
 
 ## Database Schema
 
+> **Note**: `user_id` columns use TEXT type (not UUID) because Mana Core Auth generates non-UUID user IDs.
+
 ### projects
 - `id` (UUID) - Primary key
-- `user_id` (UUID) - Owner
+- `user_id` (TEXT) - Owner (Better Auth format)
 - `name` (VARCHAR) - Project name
 - `color` (VARCHAR) - Hex color
 - `icon` (VARCHAR) - Icon name
@@ -169,7 +171,7 @@ pnpm preview                     # Preview build
 ### tasks
 - `id` (UUID) - Primary key
 - `project_id` (UUID) - FK to projects (nullable = Inbox)
-- `user_id` (UUID) - Owner
+- `user_id` (TEXT) - Owner (Better Auth format)
 - `title` (VARCHAR) - Task title
 - `description` (TEXT) - Description
 - `due_date` (TIMESTAMP) - Due date
@@ -182,7 +184,7 @@ pnpm preview                     # Preview build
 
 ### labels
 - `id` (UUID) - Primary key
-- `user_id` (UUID) - Owner
+- `user_id` (TEXT) - Owner (Better Auth format)
 - `name` (VARCHAR) - Label name
 - `color` (VARCHAR) - Hex color
 
@@ -193,6 +195,7 @@ pnpm preview                     # Preview build
 ### reminders
 - `id` (UUID) - Primary key
 - `task_id` (UUID) - FK to tasks
+- `user_id` (TEXT) - Owner (Better Auth format)
 - `minutes_before` (INTEGER) - Offset
 - `type` (VARCHAR) - push/email/both
 - `status` (VARCHAR) - pending/sent/failed

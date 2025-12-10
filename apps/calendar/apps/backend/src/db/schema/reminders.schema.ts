@@ -1,4 +1,13 @@
-import { pgTable, uuid, timestamp, varchar, integer, boolean, index } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	uuid,
+	text,
+	timestamp,
+	varchar,
+	integer,
+	boolean,
+	index,
+} from 'drizzle-orm/pg-core';
 import { events } from './events.schema';
 
 /**
@@ -11,7 +20,7 @@ export const reminders = pgTable(
 		eventId: uuid('event_id')
 			.notNull()
 			.references(() => events.id, { onDelete: 'cascade' }),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 
 		// Timing
 		minutesBefore: integer('minutes_before').notNull(),

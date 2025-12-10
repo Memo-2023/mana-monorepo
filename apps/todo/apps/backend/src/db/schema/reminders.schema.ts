@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, varchar, integer, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, varchar, integer, index } from 'drizzle-orm/pg-core';
 import { tasks } from './tasks.schema';
 
 export type ReminderType = 'push' | 'email' | 'both';
@@ -11,7 +11,7 @@ export const reminders = pgTable(
 		taskId: uuid('task_id')
 			.notNull()
 			.references(() => tasks.id, { onDelete: 'cascade' }),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 
 		// Timing
 		minutesBefore: integer('minutes_before').notNull(),

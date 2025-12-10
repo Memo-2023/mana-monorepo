@@ -12,7 +12,7 @@ export const figures = pgTable('figures', {
 	isPublic: boolean('is_public').default(true),
 	isArchived: boolean('is_archived').default(false),
 	likes: integer('likes').default(0),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow(),
 });

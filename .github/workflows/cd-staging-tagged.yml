@@ -361,14 +361,17 @@ jobs:
 
             # Service name matches docker-compose service name (with hyphens)
             SERVICE_NAME="$IMAGE_NAME"
+            CONTAINER_NAME="${IMAGE_NAME}-staging"
 
-            if docker compose ps -a | grep -q "$IMAGE_NAME"; then
-              echo "Updating existing service: \$SERVICE_NAME"
-              docker compose up -d --no-deps --force-recreate \$SERVICE_NAME
-            else
-              echo "Service \$SERVICE_NAME not found in compose, starting..."
-              docker compose up -d \$SERVICE_NAME
+            # Remove any stale container with the same name (prevents "name already in use" error)
+            if docker ps -a --format '{{.Names}}' | grep -q "^\$CONTAINER_NAME\$"; then
+              echo "Removing stale container: \$CONTAINER_NAME"
+              docker rm -f \$CONTAINER_NAME 2>/dev/null || true
             fi
+
+            # Always use --force-recreate to ensure the new image is used
+            echo "Deploying service: \$SERVICE_NAME"
+            docker compose up -d --no-deps --force-recreate \$SERVICE_NAME
 
             # Wait for startup
             sleep 10
@@ -416,17 +419,118 @@ jobs:
           echo "- **Deployed by**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Timestamp**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
 
+  # Run database migrations after deploy
+  migrations:
+    name: Database Migrations
+    runs-on: ubuntu-latest
+    needs: [parse-deployment, deploy]
+    # Only run for projects with backends (not manacore which is web-only)
+    if: needs.parse-deployment.outputs.project != 'manacore'
+    steps:
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+
+      - name: Add staging server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Run database migrations
+        env:
+          PROJECT: ${{ needs.parse-deployment.outputs.project }}
+        run: |
+          # Determine service name based on project
+          case "$PROJECT" in
+            mana-core-auth)
+              SERVICE_NAME="mana-core-auth"
+              ;;
+            *)
+              SERVICE_NAME="${PROJECT}-backend"
+              ;;
+          esac
+
+          echo "Running database migrations for $SERVICE_NAME..."
+
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
+            cd ~/manacore-staging
+
+            echo "=== Database Migration for $SERVICE_NAME ==="
+
+            # Check if service is running
+            if ! docker compose ps $SERVICE_NAME --format '{{.State}}' 2>/dev/null | grep -q "running"; then
+              echo "⚠️  Service $SERVICE_NAME is not running, skipping migrations"
+              exit 0
+            fi
+
+            # Migration function with retry logic
+            run_db_push() {
+              local service=\$1
+              local max_attempts=3
+              local timeout=120  # 2 minutes
+              local attempt=1
+
+              while [ \$attempt -le \$max_attempts ]; do
+                echo "[\$service] db:push attempt \$attempt/\$max_attempts..."
+
+                # Try db:push with timeout (staging uses push, not migrate)
+                if timeout \$timeout docker compose exec -T \$service pnpm run db:push 2>&1; then
+                  echo "✅ [\$service] Database schema pushed successfully"
+                  return 0
+                else
+                  exit_code=\$?
+                  if [ \$exit_code -eq 124 ]; then
+                    echo "⚠️  [\$service] db:push timeout after \${timeout}s"
+                  else
+                    echo "⚠️  [\$service] db:push failed with exit code \$exit_code"
+                  fi
+
+                  attempt=\$((attempt + 1))
+                  if [ \$attempt -le \$max_attempts ]; then
+                    wait_time=\$((5 * attempt))  # Backoff: 5s, 10s, 15s
+                    echo "    Waiting \${wait_time}s before retry..."
+                    sleep \$wait_time
+                  fi
+                fi
+              done
+
+              echo "❌ [\$service] db:push failed after \$max_attempts attempts"
+              return 1
+            }
+
+            # Run db:push for the service
+            run_db_push $SERVICE_NAME || {
+              echo "❌ Database migration failed for $SERVICE_NAME"
+              echo "⚠️  You may need to run migrations manually:"
+              echo "    ssh deploy@\${{ secrets.STAGING_HOST }} 'cd ~/manacore-staging && docker compose exec -T $SERVICE_NAME pnpm run db:push'"
+              exit 1
+            }
+
+            echo ""
+            echo "✅ Database migrations completed for $SERVICE_NAME"
+          EOF
+
+      - name: Migration summary
+        if: always()
+        run: |
+          echo "## Database Migrations" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Project**: ${{ needs.parse-deployment.outputs.project }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
   # Notify on completion
   notify:
     name: Deployment Complete
     runs-on: ubuntu-latest
-    needs: [parse-deployment, build, deploy]
+    needs: [parse-deployment, build, deploy, migrations]
     if: always()
     steps:
       - name: Deployment notification
         run: |
           BUILD_STATUS="${{ needs.build.result }}"
           DEPLOY_STATUS="${{ needs.deploy.result }}"
+          MIGRATION_STATUS="${{ needs.migrations.result }}"
           PROJECT="${{ needs.parse-deployment.outputs.project }}"
           VERSION="${{ needs.parse-deployment.outputs.version }}"
 
@@ -436,13 +540,21 @@ jobs:
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Build | $BUILD_STATUS |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy | $DEPLOY_STATUS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Migrations | $MIGRATION_STATUS |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Project**: $PROJECT" >> $GITHUB_STEP_SUMMARY
           echo "- **Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
 
+          # Check all stages (migrations can be skipped for web-only projects)
           if [ "$BUILD_STATUS" == "success" ] && [ "$DEPLOY_STATUS" == "success" ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "All apps deployed successfully to staging" >> $GITHUB_STEP_SUMMARY
+            if [ "$MIGRATION_STATUS" == "success" ] || [ "$MIGRATION_STATUS" == "skipped" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "All stages completed successfully" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "⚠️  Migrations failed - database may need manual update" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
           else
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Some deployments failed - check individual job logs" >> $GITHUB_STEP_SUMMARY

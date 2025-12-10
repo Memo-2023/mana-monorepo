@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, integer, jsonb, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, varchar, integer, jsonb, timestamp } from 'drizzle-orm/pg-core';
 
 export interface PresetSettings {
 	// For pomodoro presets
@@ -12,7 +12,7 @@ export interface PresetSettings {
 
 export const presets = pgTable('presets', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	type: varchar('type', { length: 20 }).notNull(), // 'timer' | 'pomodoro'
 	name: varchar('name', { length: 255 }).notNull(),
 	durationSeconds: integer('duration_seconds').notNull(),

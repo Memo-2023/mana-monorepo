@@ -1,0 +1,38 @@
+# CODEOWNERS - Defines code ownership for PR review requirements
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# =============================================================================
+# Staging & Production Configuration
+# =============================================================================
+# These files control production/staging deployments and require team lead review
+# to prevent accidental configuration regressions (like HTTP vs HTTPS URLs)
+
+docker-compose.staging.yml              @wuesteon
+docker-compose.production.yml           @wuesteon
+docker/caddy/Caddyfile.staging          @wuesteon
+docker/caddy/Caddyfile.production       @wuesteon
+
+# =============================================================================
+# CI/CD Workflows
+# =============================================================================
+# Changes to deployment pipelines require review
+
+.github/workflows/cd-*.yml              @wuesteon
+.github/workflows/ci.yml                @wuesteon
+
+# =============================================================================
+# Core Infrastructure
+# =============================================================================
+# Shared packages and services that affect all apps
+
+services/mana-core-auth/                @wuesteon
+packages/shared-nestjs-auth/            @wuesteon
+packages/shared-auth/                   @wuesteon
+
+# =============================================================================
+# Workspace Configuration
+# =============================================================================
+# Root configuration files that affect the entire monorepo
+
+pnpm-workspace.yaml                     @wuesteon
+turbo.json                              @wuesteon

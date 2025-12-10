@@ -10,9 +10,9 @@ export type ViewMode = ContactView;
 
 const STORAGE_KEY = 'contacts-view-mode';
 
-// Get initial mode: current session preference > settings default > 'list'
+// Get initial mode: current session preference > settings default > 'alphabet'
 function getInitialMode(): ViewMode {
-	if (!browser) return 'list';
+	if (!browser) return 'alphabet';
 
 	// First check if there's a session-specific preference
 	const sessionMode = sessionStorage.getItem(STORAGE_KEY);
@@ -21,7 +21,7 @@ function getInitialMode(): ViewMode {
 	}
 
 	// Otherwise use the default from settings
-	return contactsSettings.defaultView || 'list';
+	return contactsSettings.defaultView || 'alphabet';
 }
 
 let mode = $state<ViewMode>(getInitialMode());
@@ -43,7 +43,7 @@ export const viewModeStore = {
 	 * Reset to default view from settings
 	 */
 	resetToDefault() {
-		mode = contactsSettings.defaultView || 'list';
+		mode = contactsSettings.defaultView || 'alphabet';
 		if (browser) {
 			sessionStorage.removeItem(STORAGE_KEY);
 		}
@@ -61,7 +61,7 @@ export const viewModeStore = {
 			mode = sessionMode;
 		} else {
 			// Use default from settings
-			mode = contactsSettings.defaultView || 'list';
+			mode = contactsSettings.defaultView || 'alphabet';
 		}
 	},
 };

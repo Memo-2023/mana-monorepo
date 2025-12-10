@@ -1,4 +1,12 @@
-import { IsOptional, IsString, IsObject, ValidateNested, IsBoolean, IsIn } from 'class-validator';
+import {
+	IsOptional,
+	IsString,
+	IsObject,
+	ValidateNested,
+	IsBoolean,
+	IsIn,
+	IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 // Nav settings
@@ -10,6 +18,10 @@ export class NavSettingsDto {
 	@IsOptional()
 	@IsBoolean()
 	sidebarCollapsed?: boolean;
+
+	@IsOptional()
+	@IsObject()
+	hiddenNavItems?: Record<string, string[]>;
 }
 
 // Theme settings
@@ -21,6 +33,11 @@ export class ThemeSettingsDto {
 	@IsOptional()
 	@IsString()
 	colorScheme?: string;
+
+	@IsOptional()
+	@IsArray()
+	@IsString({ each: true })
+	pinnedThemes?: string[];
 }
 
 // Global settings update
@@ -57,11 +74,13 @@ export class UpdateAppOverrideDto {
 export interface NavSettings {
 	desktopPosition: 'top' | 'bottom';
 	sidebarCollapsed: boolean;
+	hiddenNavItems?: Record<string, string[]>;
 }
 
 export interface ThemeSettings {
 	mode: 'light' | 'dark' | 'system';
 	colorScheme: string;
+	pinnedThemes: string[];
 }
 
 export interface GlobalSettings {

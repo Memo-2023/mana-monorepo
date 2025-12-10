@@ -13,7 +13,13 @@
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
-	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import {
+		THEME_DEFINITIONS,
+		DEFAULT_THEME_VARIANTS,
+		EXTENDED_THEME_VARIANTS,
+	} from '@manacore/shared-theme';
+	import type { ThemeVariant } from '@manacore/shared-theme';
+	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
@@ -110,9 +116,19 @@
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
 
+	// Get pinned themes from user settings (extended themes only)
+	let pinnedThemes = $derived<ThemeVariant[]>(
+		(userSettings.theme?.pinnedThemes || []).filter((t): t is ThemeVariant =>
+			EXTENDED_THEME_VARIANTS.includes(t as ThemeVariant)
+		)
+	);
+
+	// Visible themes in PillNav: default + pinned extended
+	let visibleThemes = $derived<ThemeVariant[]>([...DEFAULT_THEME_VARIANTS, ...pinnedThemes]);
+
 	// Theme variant dropdown items (with SSR fallback)
 	let themeVariantItems = $derived<PillDropdownItem[]>([
-		...(theme.variants || []).map((variant) => ({
+		...visibleThemes.map((variant) => ({
 			id: variant,
 			label: THEME_DEFINITIONS[variant]?.label || variant,
 			icon: THEME_DEFINITIONS[variant]?.icon || '🎨',
@@ -146,8 +162,8 @@
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
-	// Navigation items for Clock
-	const navItems: PillNavItem[] = [
+	// Base navigation items for Clock
+	const baseNavItems: PillNavItem[] = [
 		{ href: '/', label: 'Übersicht', icon: 'home' },
 		{ href: '/alarms', label: 'Wecker', icon: 'bell' },
 		{ href: '/timers', label: 'Timer', icon: 'timer' },
@@ -159,8 +175,13 @@
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
-	// Navigation shortcuts (Ctrl+1-9)
-	const navRoutes = navItems.map((item) => item.href);
+	// Navigation items filtered by visibility settings
+	const navItems = $derived(
+		filterHiddenNavItems('clock', baseNavItems, userSettings.nav.hiddenNavItems)
+	);
+
+	// Navigation shortcuts (Ctrl+1-9) - use base items for consistent shortcuts
+	const navRoutes = baseNavItems.map((item) => item.href);
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;

@@ -1,6 +1,13 @@
 @import "tailwindcss";
 @import "@manacore/shared-tailwind/themes.css";
 
+/* Scan shared packages for Tailwind classes */
+@source "../../../packages/shared/src";
+@source "../../../../../packages/shared-ui/src";
+@source "../../../../../packages/shared-theme-ui/src";
+@source "../../../../../packages/shared-theme-ui/src/components";
+@source "../../../../../packages/shared-theme-ui/src/pages";
+
 /* Contacts-specific CSS Variables */
 @layer base {
 	:root {

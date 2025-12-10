@@ -1,21 +1,45 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { networkStore, type SimulationNode } from '$lib/stores/network.svelte';
-	import NetworkGraph from '$lib/components/network/NetworkGraph.svelte';
-	import NetworkControls from '$lib/components/network/NetworkControls.svelte';
+	import { NetworkGraph, NetworkControls } from '@manacore/shared-ui';
 	import ContactDetailModal from '$lib/components/ContactDetailModal.svelte';
 	import { NetworkGraphSkeleton } from '$lib/components/skeletons';
 	import '$lib/i18n';
 
 	let graphComponent: NetworkGraph;
+	let controlsComponent: NetworkControls;
+	let graphContainer: HTMLDivElement;
 
 	function handleNodeClick(node: SimulationNode) {
 		// Select node (highlight connections and show detail sidebar)
 		networkStore.selectNode(node.id);
 	}
 
+	function handleNodeDoubleClick(node: SimulationNode) {
+		// Navigate to contact detail page
+		goto(`/contacts/${node.id}`);
+	}
+
+	function handleBackgroundClick() {
+		networkStore.selectNode(null);
+	}
+
 	function handleCloseSidebar() {
 		networkStore.selectNode(null);
+	}
+
+	function handleDragStart(node: SimulationNode) {
+		networkStore.fixNode(node.id, node.x ?? 0, node.y ?? 0);
+		networkStore.reheatSimulation();
+	}
+
+	function handleDrag(node: SimulationNode, x: number, y: number) {
+		networkStore.fixNode(node.id, x, y);
+	}
+
+	function handleDragEnd(node: SimulationNode) {
+		networkStore.releaseNode(node.id);
 	}
 
 	function handleZoomIn() {
@@ -30,8 +54,50 @@
 		graphComponent?.resetZoom();
 	}
 
+	function handleFocusSelected() {
+		graphComponent?.focusOnSelectedNode();
+	}
+
+	function handleFocusSearch() {
+		controlsComponent?.focusSearch();
+	}
+
+	function handleSearch(query: string) {
+		networkStore.setSearch(query);
+	}
+
+	function handleTagFilter(tagId: string | null) {
+		networkStore.setFilterTag(tagId);
+	}
+
+	function handleSubtitleFilter(company: string | null) {
+		networkStore.setFilterCompany(company);
+	}
+
+	function handleStrengthFilter(strength: number) {
+		networkStore.setMinStrength(strength);
+	}
+
+	function handleClearFilters() {
+		networkStore.clearFilters();
+	}
+
+	// Initialize simulation when data is loaded and container is ready
+	$effect(() => {
+		if (!networkStore.loading && networkStore.allNodes.length > 0 && graphContainer) {
+			const rect = graphContainer.getBoundingClientRect();
+			if (rect.width > 0 && rect.height > 0) {
+				networkStore.initSimulation(rect.width, rect.height);
+			}
+		}
+	});
+
 	onMount(() => {
 		networkStore.loadGraph();
+	});
+
+	onDestroy(() => {
+		networkStore.stopSimulation();
 	});
 </script>
 
@@ -43,9 +109,28 @@
 	<!-- Controls (floating) -->
 	<div class="controls-wrapper">
 		<NetworkControls
+			bind:this={controlsComponent}
+			searchQuery={networkStore.searchQuery}
+			tags={networkStore.uniqueTags}
+			selectedTagId={networkStore.filterTagId}
+			subtitles={networkStore.uniqueCompanies}
+			selectedSubtitle={networkStore.filterCompany}
+			subtitleLabel="Firma"
+			nodeCount={networkStore.nodes.length}
+			linkCount={networkStore.links.length}
+			nodeLabel="Kontakte"
+			linkLabel="Verbindungen"
+			searchPlaceholder="Kontakt suchen..."
+			minStrength={networkStore.minStrength}
+			onSearch={handleSearch}
+			onTagFilter={handleTagFilter}
+			onSubtitleFilter={handleSubtitleFilter}
+			onStrengthFilter={handleStrengthFilter}
 			onZoomIn={handleZoomIn}
 			onZoomOut={handleZoomOut}
 			onResetZoom={handleResetZoom}
+			onFocusSelected={handleFocusSelected}
+			onClearFilters={handleClearFilters}
 		/>
 	</div>
 
@@ -65,11 +150,23 @@
 	{/if}
 
 	<!-- Main Content -->
-	<div class="graph-container">
+	<div class="graph-container" bind:this={graphContainer}>
 		{#if networkStore.loading}
 			<NetworkGraphSkeleton />
 		{:else}
-			<NetworkGraph bind:this={graphComponent} onNodeClick={handleNodeClick} />
+			<NetworkGraph
+				bind:this={graphComponent}
+				nodes={networkStore.nodes}
+				links={networkStore.links}
+				selectedNodeId={networkStore.selectedNodeId}
+				onNodeClick={handleNodeClick}
+				onNodeDoubleClick={handleNodeDoubleClick}
+				onBackgroundClick={handleBackgroundClick}
+				onDragStart={handleDragStart}
+				onDrag={handleDrag}
+				onDragEnd={handleDragEnd}
+				onFocusSearch={handleFocusSearch}
+			/>
 		{/if}
 	</div>
 

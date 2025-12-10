@@ -1,6 +1,7 @@
 import {
 	pgTable,
 	uuid,
+	text,
 	integer,
 	timestamp,
 	index,
@@ -23,7 +24,7 @@ export const cardProgress = pgTable(
 	'card_progress',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id').notNull(),
+		userId: text('user_id').notNull(),
 		cardId: uuid('card_id')
 			.notNull()
 			.references(() => cards.id, { onDelete: 'cascade' }),

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID } from 'svelte-dnd-action';
 	import type { KanbanColumn, Task, TaskPriority } from '@todo/shared';
+	import { ConfirmationModal } from '@manacore/shared-ui';
 	import KanbanColumnComponent from './KanbanColumn.svelte';
 	import AddColumnButton from './AddColumnButton.svelte';
 	import { kanbanStore } from '$lib/stores/kanban.svelte';
@@ -24,6 +25,8 @@
 
 	// Local columns state for drag and drop
 	let localColumns = $state<KanbanColumn[]>([]);
+	let showDeleteConfirm = $state(false);
+	let columnToDelete = $state<string | null>(null);
 
 	// Sync with store
 	$effect(() => {
@@ -55,10 +58,17 @@
 		await kanbanStore.updateColumn(columnId, data);
 	}
 
-	async function handleDeleteColumn(columnId: string) {
-		if (confirm('Spalte wirklich löschen? Alle Aufgaben werden in die erste Spalte verschoben.')) {
-			await kanbanStore.deleteColumn(columnId);
+	function handleDeleteColumn(columnId: string) {
+		columnToDelete = columnId;
+		showDeleteConfirm = true;
+	}
+
+	async function confirmDeleteColumn() {
+		if (columnToDelete) {
+			await kanbanStore.deleteColumn(columnToDelete);
 		}
+		showDeleteConfirm = false;
+		columnToDelete = null;
 	}
 
 	async function handleTasksReorder(columnId: string, taskIds: string[]) {
@@ -166,6 +176,21 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Delete column confirmation modal -->
+<ConfirmationModal
+	visible={showDeleteConfirm}
+	onClose={() => {
+		showDeleteConfirm = false;
+		columnToDelete = null;
+	}}
+	onConfirm={confirmDeleteColumn}
+	variant="danger"
+	title="Spalte löschen?"
+	message="Alle Aufgaben dieser Spalte werden in die erste Spalte verschoben."
+	confirmLabel="Löschen"
+	cancelLabel="Abbrechen"
+/>
 
 <style>
 	.kanban-board {
