@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { eq, and, or, gte, lte, ilike, asc, desc, isNull, SQL } from 'drizzle-orm';
+import { eq, and, or, gte, lte, ilike, asc, desc, isNull, SQL, sql } from 'drizzle-orm';
 import { RRule, RRuleSet, rrulestr } from 'rrule';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { type Database } from '../db/connection';
@@ -452,14 +452,35 @@ export class TaskService {
 		return this.loadTaskLabelsBatch(result);
 	}
 
-	async getCompletedTasks(userId: string, limit: number = 50): Promise<TaskWithLabels[]> {
-		const result = await this.db.query.tasks.findMany({
-			where: and(eq(tasks.userId, userId), eq(tasks.isCompleted, true)),
-			orderBy: [desc(tasks.completedAt)],
-			limit,
-		});
+	async getCompletedTasks(
+		userId: string,
+		limit: number = 50,
+		offset: number = 0
+	): Promise<{ tasks: TaskWithLabels[]; total: number; hasMore: boolean }> {
+		// Enforce max limit to prevent abuse
+		const safeLimit = Math.min(limit, 100);
 
-		return this.loadTaskLabelsBatch(result);
+		const [result, countResult] = await Promise.all([
+			this.db.query.tasks.findMany({
+				where: and(eq(tasks.userId, userId), eq(tasks.isCompleted, true)),
+				orderBy: [desc(tasks.completedAt)],
+				limit: safeLimit,
+				offset,
+			}),
+			this.db
+				.select({ count: sql<number>`count(*)::int` })
+				.from(tasks)
+				.where(and(eq(tasks.userId, userId), eq(tasks.isCompleted, true))),
+		]);
+
+		const total = countResult[0]?.count ?? 0;
+		const tasksWithLabels = await this.loadTaskLabelsBatch(result);
+
+		return {
+			tasks: tasksWithLabels,
+			total,
+			hasMore: offset + safeLimit < total,
+		};
 	}
 
 	async reorder(

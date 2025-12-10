@@ -215,16 +215,20 @@
 	function handleModeChange(isSidebar: boolean) {
 		isSidebarMode = isSidebar;
 		sidebarModeStore.set(isSidebar);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('todo-nav-sidebar', String(isSidebar));
+		try {
+			localStorage?.setItem('todo-nav-sidebar', String(isSidebar));
+		} catch {
+			// localStorage not available or quota exceeded
 		}
 	}
 
 	function handleCollapsedChange(collapsed: boolean) {
 		isCollapsed = collapsed;
 		collapsedStore.set(collapsed);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('todo-nav-collapsed', String(collapsed));
+		try {
+			localStorage?.setItem('todo-nav-collapsed', String(collapsed));
+		} catch {
+			// localStorage not available or quota exceeded
 		}
 	}
 
@@ -263,18 +267,26 @@
 			goto(userSettings.startPage, { replaceState: true });
 		}
 
-		// Initialize sidebar mode from localStorage
-		const savedSidebar = localStorage.getItem('todo-nav-sidebar');
-		if (savedSidebar === 'true') {
-			isSidebarMode = true;
-			sidebarModeStore.set(true);
+		// Initialize sidebar mode from localStorage (with error handling for private browsing)
+		try {
+			const savedSidebar = localStorage?.getItem('todo-nav-sidebar');
+			if (savedSidebar === 'true') {
+				isSidebarMode = true;
+				sidebarModeStore.set(true);
+			}
+		} catch {
+			// localStorage not available (private browsing, quota exceeded, etc.)
 		}
 
 		// Initialize collapsed state from localStorage
-		const savedCollapsed = localStorage.getItem('todo-nav-collapsed');
-		if (savedCollapsed === 'true') {
-			isCollapsed = true;
-			collapsedStore.set(true);
+		try {
+			const savedCollapsed = localStorage?.getItem('todo-nav-collapsed');
+			if (savedCollapsed === 'true') {
+				isCollapsed = true;
+				collapsedStore.set(true);
+			}
+		} catch {
+			// localStorage not available
 		}
 
 		// Register Service Worker for PWA
