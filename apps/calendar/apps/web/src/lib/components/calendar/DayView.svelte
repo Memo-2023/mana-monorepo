@@ -75,8 +75,11 @@
 	);
 
 	// Get display mode for an event (per-event override takes precedence over global setting)
-	function getEventDisplayMode(event: any): 'header' | 'block' {
-		return event.metadata?.allDayDisplayMode || settingsStore.allDayDisplayMode;
+	function getEventDisplayMode(event: CalendarEvent): 'header' | 'block' {
+		return (
+			(event.metadata as { allDayDisplayMode?: 'header' | 'block' } | null)?.allDayDisplayMode ||
+			settingsStore.allDayDisplayMode
+		);
 	}
 
 	// Split all-day events by display mode
@@ -90,7 +93,7 @@
 	// Drag & Drop State
 	// ============================================================================
 	let isDragging = $state(false);
-	let draggedEvent = $state<any>(null);
+	let draggedEvent = $state<CalendarEvent | null>(null);
 	let dragOffsetMinutes = $state(0);
 	let dragPreviewTop = $state(0);
 	let dragPreviewHeight = $state(0);
@@ -100,7 +103,7 @@
 	// Resize State
 	// ============================================================================
 	let isResizing = $state(false);
-	let resizeEvent = $state<any>(null);
+	let resizeEvent = $state<CalendarEvent | null>(null);
 	let resizeEdge = $state<'top' | 'bottom'>('bottom');
 	let resizeOriginalStart = $state<Date | null>(null);
 	let resizeOriginalEnd = $state<Date | null>(null);
@@ -132,7 +135,7 @@
 	// ============================================================================
 	// Drag Handlers
 	// ============================================================================
-	function startDrag(event: any, e: PointerEvent) {
+	function startDrag(event: CalendarEvent, e: PointerEvent) {
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -218,7 +221,7 @@
 	// ============================================================================
 	// Resize Handlers
 	// ============================================================================
-	function startResize(event: any, edge: 'top' | 'bottom', e: PointerEvent) {
+	function startResize(event: CalendarEvent, edge: 'top' | 'bottom', e: PointerEvent) {
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -345,7 +348,7 @@
 	// ============================================================================
 	// Event Styling
 	// ============================================================================
-	function getEventStyle(event: any) {
+	function getEventStyle(event: CalendarEvent) {
 		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
 		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
 
@@ -459,6 +462,7 @@
 				{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
 				{@const isBeingResized = isResizing && resizeEvent?.id === event.id}
 				{@const isDraft = eventsStore.isDraftEvent(event.id)}
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
 				<div
 					class="event-card"
 					class:dragging={isBeingDragged}
@@ -481,6 +485,7 @@
 						onpointerdown={(e) => startResize(event, 'top', e)}
 						role="slider"
 						aria-label="Startzeit ändern"
+						aria-valuenow={0}
 						tabindex="-1"
 					></div>
 
@@ -505,6 +510,7 @@
 						onpointerdown={(e) => startResize(event, 'bottom', e)}
 						role="slider"
 						aria-label="Endzeit ändern"
+						aria-valuenow={0}
 						tabindex="-1"
 					></div>
 				</div>

@@ -242,9 +242,12 @@ export const todosStore = {
 		loading = true;
 		error = null;
 
+		console.log('[TodoStore] Fetching today todos...');
 		const result = await api.getTodayTasks();
+		console.log('[TodoStore] Result:', result);
 
 		if (result.error) {
+			console.error('[TodoStore] Error fetching todos:', result.error);
 			error = result.error.message;
 			serviceAvailable = false;
 		} else {
@@ -267,11 +270,18 @@ export const todosStore = {
 		loading = true;
 		error = null;
 
+		console.log('[TodoStore] Fetching upcoming todos...');
 		const result = await api.getUpcomingTasks();
+		console.log('[TodoStore] Upcoming result:', result);
 
 		if (result.error) {
+			console.error('[TodoStore] Error fetching upcoming:', result.error);
 			error = result.error.message;
-			serviceAvailable = false;
+			// Only set serviceAvailable to false if we have no todos yet
+			// (if fetchTodayTodos succeeded, we should still show the service as available)
+			if (todos.length === 0) {
+				serviceAvailable = false;
+			}
 		} else {
 			// Merge with existing todos (avoid duplicates)
 			const newTodos = result.data || [];
@@ -338,13 +348,20 @@ export const todosStore = {
 	},
 
 	/**
-	 * Delete a todo
+	 * Delete a todo (optimistic update)
 	 */
 	async deleteTodo(id: string) {
+		// Optimistic: remove todo immediately
+		const todoToDelete = todos.find((t) => t.id === id);
+		todos = todos.filter((t) => t.id !== id);
+
 		const result = await api.deleteTask(id);
 
-		if (!result.error) {
-			todos = todos.filter((t) => t.id !== id);
+		if (result.error) {
+			// Rollback: restore the todo on error
+			if (todoToDelete) {
+				todos = [...todos, todoToDelete];
+			}
 		}
 
 		return result;

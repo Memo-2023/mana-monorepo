@@ -84,6 +84,7 @@ export function createApiClient(config: ApiClientConfig) {
 			return { data, error: null };
 		} catch (error) {
 			clearTimeout(timeoutId);
+			console.error('[BaseClient] Fetch error:', error);
 
 			if (error instanceof Error && error.name === 'AbortError') {
 				return {
@@ -105,7 +106,7 @@ export function createApiClient(config: ApiClientConfig) {
 /**
  * Helper to build query strings from object
  */
-export function buildQueryString<T extends object>(params: T): string {
+export function buildQueryString(params: Record<string, unknown>): string {
 	const searchParams = new URLSearchParams();
 	Object.entries(params).forEach(([key, value]) => {
 		if (value !== undefined && value !== null) {

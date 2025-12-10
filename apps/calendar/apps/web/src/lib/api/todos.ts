@@ -167,7 +167,7 @@ const fetchTodoApi = todoClient.fetchApi;
 export async function getTasks(
 	query: TaskQuery = {}
 ): Promise<{ data: Task[] | null; error: Error | null }> {
-	const queryString = buildQueryString(query);
+	const queryString = buildQueryString(query as Record<string, unknown>);
 	const result = await fetchTodoApi<TasksResponse>(`/tasks${queryString}`);
 	return {
 		data: result.data?.tasks || null,
@@ -242,7 +242,9 @@ export async function uncompleteTask(
 }
 
 export async function getTodayTasks(): Promise<{ data: Task[] | null; error: Error | null }> {
+	console.log('[TodoAPI] Fetching /tasks/today from:', TODO_API_BASE);
 	const result = await fetchTodoApi<TasksResponse>('/tasks/today');
+	console.log('[TodoAPI] Response:', result);
 	return {
 		data: result.data?.tasks || null,
 		error: result.error,

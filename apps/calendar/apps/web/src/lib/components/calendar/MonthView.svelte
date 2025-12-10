@@ -80,7 +80,7 @@
 	// Drag & Drop State
 	// ============================================================================
 	let isDragging = $state(false);
-	let draggedEvent = $state<any>(null);
+	let draggedEvent = $state<CalendarEvent | null>(null);
 	let dragTargetDay = $state<Date | null>(null);
 	let monthViewRef = $state<HTMLElement | null>(null);
 
@@ -286,6 +286,7 @@
 							{#each getEventsForDay(day) as event}
 								{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
 								{@const isDraft = eventsStore.isDraftEvent(event.id)}
+								<!-- svelte-ignore a11y_click_events_have_key_events -->
 								<div
 									class="event-pill"
 									class:dragging={isBeingDragged}

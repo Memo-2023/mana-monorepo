@@ -147,15 +147,22 @@ export const eventsStore = {
 	},
 
 	/**
-	 * Delete an event
+	 * Delete an event (optimistic update)
 	 */
 	async deleteEvent(id: string) {
+		// Optimistic: remove event immediately
+		const eventToDelete = events.find((e) => e.id === id);
+		events = events.filter((e) => e.id !== id);
+
 		const result = await api.deleteEvent(id);
 
 		if (result.error) {
+			// Rollback: restore the event on error
+			if (eventToDelete) {
+				events = [...events, eventToDelete];
+			}
 			toastStore.error(`Termin konnte nicht gelöscht werden: ${result.error.message}`);
 		} else {
-			events = events.filter((e) => e.id !== id);
 			toastStore.success('Termin gelöscht');
 		}
 
