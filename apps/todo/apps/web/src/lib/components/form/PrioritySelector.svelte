@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { TaskPriority } from '@todo/shared';
+	import { PRIORITY_OPTIONS } from '@todo/shared';
 
 	interface Props {
 		value: TaskPriority;
@@ -7,17 +8,10 @@
 	}
 
 	let { value, onChange }: Props = $props();
-
-	const priorities: { value: TaskPriority; label: string; color: string }[] = [
-		{ value: 'low', label: 'Niedrig', color: '#22c55e' },
-		{ value: 'medium', label: 'Mittel', color: '#eab308' },
-		{ value: 'high', label: 'Hoch', color: '#f97316' },
-		{ value: 'urgent', label: 'Dringend', color: '#ef4444' },
-	];
 </script>
 
 <div class="priority-buttons">
-	{#each priorities as p}
+	{#each PRIORITY_OPTIONS as p}
 		<button
 			type="button"
 			class="priority-btn"

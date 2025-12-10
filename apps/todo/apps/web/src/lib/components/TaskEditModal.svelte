@@ -1,5 +1,13 @@
 <script lang="ts">
-	import type { Task, Subtask, TaskPriority, TaskStatus, EffectiveDuration } from '@todo/shared';
+	import type {
+		Task,
+		Subtask,
+		TaskPriority,
+		TaskStatus,
+		EffectiveDuration,
+		UpdateTaskInput,
+	} from '@todo/shared';
+	import { STATUS_OPTIONS, RECURRENCE_OPTIONS } from '@todo/shared';
 	import { projectsStore } from '$lib/stores/projects.svelte';
 	import { format } from 'date-fns';
 	import SubtaskList from './SubtaskList.svelte';
@@ -15,7 +23,7 @@
 		task: Task;
 		open: boolean;
 		onClose: () => void;
-		onSave: (data: Partial<Task>) => void;
+		onSave: (data: UpdateTaskInput) => void;
 		onDelete: (taskId: string) => void;
 	}
 
@@ -41,24 +49,6 @@
 	// UI state
 	let isLoading = $state(false);
 	let showDeleteConfirm = $state(false);
-
-	// Status options
-	const statuses: { value: TaskStatus; label: string }[] = [
-		{ value: 'pending', label: 'Ausstehend' },
-		{ value: 'in_progress', label: 'In Bearbeitung' },
-		{ value: 'completed', label: 'Abgeschlossen' },
-		{ value: 'cancelled', label: 'Abgebrochen' },
-	];
-
-	// Recurrence options
-	const recurrenceOptions = [
-		{ value: '', label: 'Keine Wiederholung' },
-		{ value: 'FREQ=DAILY', label: 'Täglich' },
-		{ value: 'FREQ=WEEKLY', label: 'Wöchentlich' },
-		{ value: 'FREQ=WEEKLY;INTERVAL=2', label: 'Alle 2 Wochen' },
-		{ value: 'FREQ=MONTHLY', label: 'Monatlich' },
-		{ value: 'FREQ=YEARLY', label: 'Jährlich' },
-	];
 
 	// Initialize form when task changes or modal opens
 	$effect(() => {
@@ -103,7 +93,7 @@
 
 		isLoading = true;
 		try {
-			const data: Partial<Task> = {
+			const data: UpdateTaskInput = {
 				title: title.trim(),
 				description: description.trim() || null,
 				dueDate: dueDate ? new Date(dueDate).toISOString() : null,
@@ -121,10 +111,8 @@
 					effectiveDuration: effectiveDuration ?? undefined,
 					funRating: funRating ?? undefined,
 				},
+				labelIds: selectedLabelIds,
 			};
-
-			// Include labelIds for the update
-			(data as any).labelIds = selectedLabelIds;
 
 			onSave(data);
 		} finally {
@@ -220,7 +208,7 @@
 				<div class="form-section">
 					<label class="form-label" for="task-status">Status</label>
 					<select id="task-status" class="form-select" bind:value={status}>
-						{#each statuses as s}
+						{#each STATUS_OPTIONS as s}
 							<option value={s.value}>{s.label}</option>
 						{/each}
 					</select>
@@ -258,7 +246,7 @@
 				<div class="form-section">
 					<label class="form-label" for="task-recurrence">Wiederholung</label>
 					<select id="task-recurrence" class="form-select" bind:value={recurrenceRule}>
-						{#each recurrenceOptions as option}
+						{#each RECURRENCE_OPTIONS as option}
 							<option value={option.value}>{option.label}</option>
 						{/each}
 					</select>

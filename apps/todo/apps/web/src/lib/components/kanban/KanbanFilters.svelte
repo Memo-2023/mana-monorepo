@@ -36,19 +36,19 @@
 		},
 		{
 			value: 'high',
-			label: 'Hoch',
+			label: 'Wichtig',
 			color: 'text-orange-600 dark:text-orange-400',
 			bgColor: 'bg-orange-500',
 		},
 		{
 			value: 'medium',
-			label: 'Mittel',
+			label: 'Normal',
 			color: 'text-yellow-600 dark:text-yellow-400',
 			bgColor: 'bg-yellow-500',
 		},
 		{
 			value: 'low',
-			label: 'Niedrig',
+			label: 'Später',
 			color: 'text-blue-600 dark:text-blue-400',
 			bgColor: 'bg-blue-500',
 		},

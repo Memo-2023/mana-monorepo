@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { TagList, TagEditModal, type Tag } from '@manacore/shared-ui';
+	import { TagList, TagEditModal, ConfirmationModal, type Tag } from '@manacore/shared-ui';
 	import { MagnifyingGlass, Plus, CaretLeft } from '@manacore/shared-icons';
 	import { labelsStore } from '$lib/stores/labels.svelte';
 	import type { Label } from '@todo/shared';
@@ -9,6 +9,8 @@
 	let searchQuery = $state('');
 	let showModal = $state(false);
 	let editingLabel = $state<Label | null>(null);
+	let showDeleteConfirm = $state(false);
+	let labelToDelete = $state<Tag | null>(null);
 
 	const filteredLabels = $derived.by(() => {
 		if (!searchQuery.trim()) return labelsStore.labels;
@@ -67,13 +69,21 @@
 		}
 	}
 
-	async function handleDeleteFromList(tag: Tag) {
-		if (!confirm(`Label "${tag.name}" wirklich löschen?`)) return;
+	function handleDeleteFromList(tag: Tag) {
+		labelToDelete = tag;
+		showDeleteConfirm = true;
+	}
+
+	async function confirmDeleteLabel() {
+		if (!labelToDelete) return;
 
 		try {
-			await labelsStore.deleteLabel(tag.id);
+			await labelsStore.deleteLabel(labelToDelete.id);
 		} catch (e) {
 			console.error('Failed to delete label:', e);
+		} finally {
+			showDeleteConfirm = false;
+			labelToDelete = null;
 		}
 	}
 
@@ -166,6 +176,21 @@
 	colorLabel="Farbe"
 	previewLabel="Vorschau"
 	deleteConfirmMessage={`Label "${editingLabel?.name || ''}" wirklich löschen?`}
+/>
+
+<!-- Delete confirmation modal -->
+<ConfirmationModal
+	visible={showDeleteConfirm}
+	onClose={() => {
+		showDeleteConfirm = false;
+		labelToDelete = null;
+	}}
+	onConfirm={confirmDeleteLabel}
+	variant="danger"
+	title="Label löschen?"
+	message={`Das Label "${labelToDelete?.name ?? ''}" wird unwiderruflich gelöscht.`}
+	confirmLabel="Löschen"
+	cancelLabel="Abbrechen"
 />
 
 <style>

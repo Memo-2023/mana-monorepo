@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID } from 'svelte-dnd-action';
-	import type { KanbanColumn, Task } from '@todo/shared';
+	import type { KanbanColumn, Task, UpdateTaskInput } from '@todo/shared';
 	import KanbanTaskCard from './KanbanTaskCard.svelte';
 	import KanbanColumnHeader from './KanbanColumnHeader.svelte';
 	import QuickAddTaskInline from './QuickAddTaskInline.svelte';
@@ -71,9 +71,9 @@
 		}
 	}
 
-	async function handleSaveTask(task: Task, data: Partial<Task>) {
+	async function handleSaveTask(task: Task, data: UpdateTaskInput) {
 		// Transform data to match updateTask API (convert null to undefined)
-		const updateData: Parameters<typeof tasksStore.updateTask>[1] = {};
+		const updateData: UpdateTaskInput = {};
 		if (data.title !== undefined) updateData.title = data.title;
 		if (data.description !== undefined) updateData.description = data.description ?? undefined;
 		if (data.projectId !== undefined) updateData.projectId = data.projectId;
@@ -84,7 +84,7 @@
 		if (data.recurrenceRule !== undefined)
 			updateData.recurrenceRule = data.recurrenceRule ?? undefined;
 		if (data.metadata !== undefined) updateData.metadata = data.metadata;
-		if ((data as any).labelIds !== undefined) (updateData as any).labelIds = (data as any).labelIds;
+		if (data.labelIds !== undefined) updateData.labelIds = data.labelIds;
 
 		await tasksStore.updateTask(task.id, updateData);
 	}

@@ -4,6 +4,7 @@
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { projectsStore } from '$lib/stores/projects.svelte';
 	import type { TaskPriority } from '@todo/shared';
+	import { PRIORITY_OPTIONS } from '@todo/shared';
 	import { format, addDays } from 'date-fns';
 	import { de } from 'date-fns/locale';
 
@@ -21,14 +22,6 @@
 	let showPriorityPicker = $state(false);
 	let showProjectPicker = $state(false);
 
-	// Priority options
-	const priorities: { value: TaskPriority; label: string; color: string }[] = [
-		{ value: 'low', label: 'Niedrig', color: '#22c55e' },
-		{ value: 'medium', label: 'Mittel', color: '#eab308' },
-		{ value: 'high', label: 'Hoch', color: '#f97316' },
-		{ value: 'urgent', label: 'Dringend', color: '#ef4444' },
-	];
-
 	// Quick date options
 	const dateOptions = [
 		{ label: 'Heute', date: new Date() },
@@ -38,7 +31,7 @@
 	];
 
 	// Derived values
-	let currentPriority = $derived(priorities.find((p) => p.value === selectedPriority)!);
+	let currentPriority = $derived(PRIORITY_OPTIONS.find((p) => p.value === selectedPriority)!);
 	let selectedProject = $derived(
 		selectedProjectId ? projectsStore.getById(selectedProjectId) : undefined
 	);
@@ -81,11 +74,14 @@
 			if (viewStore.currentView !== 'project') {
 				selectedProjectId = undefined;
 			}
-			inputRef?.focus();
 		} catch (error) {
 			console.error('Failed to create task:', error);
 		} finally {
 			isLoading = false;
+			// Focus after isLoading is reset (input is no longer disabled)
+			requestAnimationFrame(() => {
+				inputRef?.focus();
+			});
 		}
 	}
 
@@ -232,7 +228,7 @@
 
 				{#if showPriorityPicker}
 					<div class="dropdown" onclick={(e) => e.stopPropagation()} role="menu">
-						{#each priorities as priority}
+						{#each PRIORITY_OPTIONS as priority}
 							<button
 								type="button"
 								class="dropdown-item"

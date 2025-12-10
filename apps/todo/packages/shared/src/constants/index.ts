@@ -69,6 +69,9 @@ export const REMINDER_PRESETS = [
 	{ label: '1 week before', minutes: 10080 },
 ] as const;
 
+// Re-export task-specific constants (German localized versions)
+export * from './task';
+
 // View types
 export type ViewType =
 	| 'inbox'
