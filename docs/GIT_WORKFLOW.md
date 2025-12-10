@@ -224,6 +224,58 @@ git checkout till-dev
 git reset --hard origin/dev
 ```
 
+## Critical Configuration Files
+
+### Protected Files (CODEOWNERS)
+
+The following files are protected via `.github/CODEOWNERS` and require team lead review:
+
+| File | Reason |
+|------|--------|
+| `docker-compose.staging.yml` | Staging deployment config |
+| `docker-compose.production.yml` | Production deployment config |
+| `docker/caddy/Caddyfile.*` | Reverse proxy configuration |
+| `.github/workflows/cd-*.yml` | Deployment pipelines |
+
+### Configuration Conflict Prevention
+
+**Problem:** When rebasing a long-lived branch, configuration files can accidentally overwrite critical settings (e.g., HTTPS URLs reverted to HTTP).
+
+**Solution:** Always review configuration files carefully during rebase conflicts:
+
+```bash
+# During rebase, if docker-compose.staging.yml has conflicts:
+git diff HEAD -- docker-compose.staging.yml  # See what changed
+
+# Key things to verify:
+# 1. _CLIENT URLs use HTTPS staging domains (not HTTP IP addresses)
+# 2. CORS_ORIGINS include all HTTPS staging domains
+# 3. Environment variables haven't regressed
+```
+
+### Staging URL Rules
+
+**NEVER** use HTTP IP addresses for `_CLIENT` variables:
+
+```yaml
+# WRONG - HTTP IP address
+PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://46.224.108.214:3001
+
+# CORRECT - HTTPS staging domain
+PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
+```
+
+**CI Check:** The `staging-config-check.yml` workflow validates this on every PR that touches `docker-compose.staging.yml`.
+
+### Rebase Checklist for Config Files
+
+Before completing a rebase that touched configuration files:
+
+- [ ] `_CLIENT` URLs use `https://*.staging.manacore.ai` format
+- [ ] `CORS_ORIGINS` include all HTTPS staging domains
+- [ ] No HTTP IP addresses in client-facing URLs
+- [ ] Caddy config matches docker-compose port mappings
+
 ## Troubleshooting
 
 ### "fatal: no rebase in progress"
