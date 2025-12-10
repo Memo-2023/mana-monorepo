@@ -35,10 +35,16 @@ function getInitialLocale(): SupportedLocale {
 }
 
 // Initialize i18n at module scope (required for SSR)
+// Always set initialLocale to ensure it's never undefined
 init({
 	fallbackLocale: defaultLocale,
-	initialLocale: getInitialLocale(),
+	initialLocale: browser ? getInitialLocale() : defaultLocale,
 });
+
+// On browser, also explicitly set locale to ensure it's loaded
+if (browser) {
+	locale.set(getInitialLocale());
+}
 
 // Set locale and persist to localStorage
 export function setLocale(newLocale: SupportedLocale) {

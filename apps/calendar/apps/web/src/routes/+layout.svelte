@@ -1,5 +1,7 @@
 <script lang="ts">
 	import '../app.css';
+	// Initialize i18n early - must be imported before any component that uses $_
+	import { waitLocale } from '$lib/i18n';
 	import { onMount } from 'svelte';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -11,6 +13,9 @@
 	let loading = $state(true);
 
 	onMount(async () => {
+		// Wait for i18n locale to be loaded
+		await waitLocale();
+
 		// Initialize theme
 		theme.initialize();
 
