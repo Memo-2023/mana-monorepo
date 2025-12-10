@@ -8,6 +8,10 @@ export const THEME_VARIANTS: readonly ThemeVariant[] = [
 	'nature',
 	'stone',
 	'ocean',
+	'sunset',
+	'midnight',
+	'rose',
+	'lavender',
 ] as const;
 
 /**
@@ -194,6 +198,178 @@ const oceanDark: ThemeColors = {
 	ring: '199 98% 48%',
 };
 
+// ============================================================================
+// Extended Themes: Sunset, Midnight, Rose, Lavender
+// ============================================================================
+
+const sunsetLight: ThemeColors = {
+	primary: '15 90% 55%', // Coral/Orange
+	primaryForeground: '0 0% 100%',
+	secondary: '25 100% 60%', // Warm orange
+	secondaryForeground: '0 0% 0%',
+	background: '30 50% 97%', // Warm cream
+	foreground: '15 50% 20%', // Dark warm brown
+	surface: '0 0% 100%',
+	surfaceHover: '30 40% 95%',
+	surfaceElevated: '0 0% 100%',
+	muted: '30 30% 93%',
+	mutedForeground: '15 20% 45%',
+	border: '30 25% 88%',
+	borderStrong: '30 30% 75%',
+	error: '0 72% 55%',
+	success: '145 63% 42%',
+	warning: '36 100% 50%',
+	input: '0 0% 100%',
+	ring: '15 90% 55%',
+};
+
+const sunsetDark: ThemeColors = {
+	primary: '15 85% 58%', // Brighter coral in dark
+	primaryForeground: '0 0% 0%',
+	secondary: '25 60% 35%',
+	secondaryForeground: '0 0% 100%',
+	background: '15 20% 8%', // Dark with warm tint
+	foreground: '0 0% 100%',
+	surface: '15 15% 12%',
+	surfaceHover: '15 15% 16%',
+	surfaceElevated: '15 15% 14%',
+	muted: '15 12% 20%',
+	mutedForeground: '15 10% 60%',
+	border: '15 12% 25%',
+	borderStrong: '15 12% 35%',
+	error: '0 72% 55%',
+	success: '145 63% 49%',
+	warning: '48 100% 50%',
+	input: '15 20% 14%',
+	ring: '15 85% 58%',
+};
+
+const midnightLight: ThemeColors = {
+	primary: '260 70% 55%', // Deep purple/violet
+	primaryForeground: '0 0% 100%',
+	secondary: '270 60% 70%', // Lighter purple
+	secondaryForeground: '0 0% 0%',
+	background: '260 30% 97%', // Very light purple tint
+	foreground: '260 50% 20%', // Dark purple text
+	surface: '0 0% 100%',
+	surfaceHover: '260 25% 95%',
+	surfaceElevated: '0 0% 100%',
+	muted: '260 20% 93%',
+	mutedForeground: '260 20% 45%',
+	border: '260 20% 88%',
+	borderStrong: '260 25% 75%',
+	error: '0 72% 55%',
+	success: '145 63% 42%',
+	warning: '36 100% 50%',
+	input: '0 0% 100%',
+	ring: '260 70% 55%',
+};
+
+const midnightDark: ThemeColors = {
+	primary: '260 65% 60%', // Brighter purple in dark
+	primaryForeground: '0 0% 100%',
+	secondary: '270 40% 35%',
+	secondaryForeground: '0 0% 100%',
+	background: '260 25% 7%', // Deep dark purple
+	foreground: '0 0% 100%',
+	surface: '260 20% 11%',
+	surfaceHover: '260 20% 15%',
+	surfaceElevated: '260 20% 13%',
+	muted: '260 15% 19%',
+	mutedForeground: '260 12% 60%',
+	border: '260 15% 24%',
+	borderStrong: '260 15% 34%',
+	error: '0 72% 55%',
+	success: '145 63% 49%',
+	warning: '48 100% 50%',
+	input: '260 25% 14%',
+	ring: '260 65% 60%',
+};
+
+const roseLight: ThemeColors = {
+	primary: '340 80% 55%', // Pink/Magenta
+	primaryForeground: '0 0% 100%',
+	secondary: '350 70% 70%', // Lighter pink
+	secondaryForeground: '0 0% 0%',
+	background: '340 40% 97%', // Very light pink tint
+	foreground: '340 50% 20%', // Dark rose text
+	surface: '0 0% 100%',
+	surfaceHover: '340 30% 95%',
+	surfaceElevated: '0 0% 100%',
+	muted: '340 25% 93%',
+	mutedForeground: '340 20% 45%',
+	border: '340 25% 88%',
+	borderStrong: '340 30% 75%',
+	error: '0 72% 55%',
+	success: '145 63% 42%',
+	warning: '36 100% 50%',
+	input: '0 0% 100%',
+	ring: '340 80% 55%',
+};
+
+const roseDark: ThemeColors = {
+	primary: '340 75% 60%', // Brighter pink in dark
+	primaryForeground: '0 0% 100%',
+	secondary: '350 45% 35%',
+	secondaryForeground: '0 0% 100%',
+	background: '340 20% 8%', // Dark with pink tint
+	foreground: '0 0% 100%',
+	surface: '340 15% 12%',
+	surfaceHover: '340 15% 16%',
+	surfaceElevated: '340 15% 14%',
+	muted: '340 12% 20%',
+	mutedForeground: '340 10% 60%',
+	border: '340 12% 25%',
+	borderStrong: '340 12% 35%',
+	error: '0 72% 55%',
+	success: '145 63% 49%',
+	warning: '48 100% 50%',
+	input: '340 20% 14%',
+	ring: '340 75% 60%',
+};
+
+const lavenderLight: ThemeColors = {
+	primary: '270 60% 60%', // Lavender/Light purple
+	primaryForeground: '0 0% 100%',
+	secondary: '280 50% 75%', // Softer purple
+	secondaryForeground: '0 0% 0%',
+	background: '270 35% 97%', // Very light lavender
+	foreground: '270 40% 22%', // Dark lavender text
+	surface: '0 0% 100%',
+	surfaceHover: '270 25% 95%',
+	surfaceElevated: '0 0% 100%',
+	muted: '270 20% 93%',
+	mutedForeground: '270 18% 45%',
+	border: '270 20% 88%',
+	borderStrong: '270 25% 78%',
+	error: '0 72% 55%',
+	success: '145 63% 42%',
+	warning: '36 100% 50%',
+	input: '0 0% 100%',
+	ring: '270 60% 60%',
+};
+
+const lavenderDark: ThemeColors = {
+	primary: '270 55% 65%', // Brighter lavender in dark
+	primaryForeground: '0 0% 0%',
+	secondary: '280 35% 38%',
+	secondaryForeground: '0 0% 100%',
+	background: '270 20% 8%', // Dark with lavender tint
+	foreground: '0 0% 100%',
+	surface: '270 15% 12%',
+	surfaceHover: '270 15% 16%',
+	surfaceElevated: '270 15% 14%',
+	muted: '270 12% 20%',
+	mutedForeground: '270 10% 60%',
+	border: '270 12% 25%',
+	borderStrong: '270 12% 35%',
+	error: '0 72% 55%',
+	success: '145 63% 49%',
+	warning: '48 100% 50%',
+	input: '270 20% 14%',
+	ring: '270 55% 65%',
+};
+
 /**
  * Complete theme variant definitions
  */
@@ -233,6 +409,43 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		hue: 199,
 		light: oceanLight,
 		dark: oceanDark,
+	},
+	// Extended themes (not in PillNav by default, can be pinned)
+	sunset: {
+		name: 'sunset',
+		label: 'Sunset',
+		emoji: '🌅',
+		icon: 'sun',
+		hue: 15,
+		light: sunsetLight,
+		dark: sunsetDark,
+	},
+	midnight: {
+		name: 'midnight',
+		label: 'Midnight',
+		emoji: '🌙',
+		icon: 'moon',
+		hue: 260,
+		light: midnightLight,
+		dark: midnightDark,
+	},
+	rose: {
+		name: 'rose',
+		label: 'Rose',
+		emoji: '🌹',
+		icon: 'flower',
+		hue: 340,
+		light: roseLight,
+		dark: roseDark,
+	},
+	lavender: {
+		name: 'lavender',
+		label: 'Lavender',
+		emoji: '💜',
+		icon: 'sparkle',
+		hue: 270,
+		light: lavenderLight,
+		dark: lavenderDark,
 	},
 };
 

@@ -14,7 +14,7 @@ import {
 // Default settings for new users
 const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
 	nav: { desktopPosition: 'top', sidebarCollapsed: false },
-	theme: { mode: 'system', colorScheme: 'ocean' },
+	theme: { mode: 'system', colorScheme: 'ocean', pinnedThemes: [] },
 	locale: 'de',
 };
 

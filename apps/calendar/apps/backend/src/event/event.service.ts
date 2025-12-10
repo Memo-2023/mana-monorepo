@@ -5,13 +5,15 @@ import { Database } from '../db/connection';
 import { events, Event, NewEvent } from '../db/schema/events.schema';
 import { calendars } from '../db/schema/calendars.schema';
 import { CalendarService } from '../calendar/calendar.service';
+import { EventTagService } from '../event-tag/event-tag.service';
 import { CreateEventDto, UpdateEventDto, QueryEventsDto } from './dto';
 
 @Injectable()
 export class EventService {
 	constructor(
 		@Inject(DATABASE_CONNECTION) private db: Database,
-		private calendarService: CalendarService
+		private calendarService: CalendarService,
+		private eventTagService: EventTagService
 	) {}
 
 	async queryEvents(userId: string, query: QueryEventsDto): Promise<Event[]> {
@@ -104,6 +106,12 @@ export class EventService {
 		};
 
 		const [created] = await this.db.insert(events).values(newEvent).returning();
+
+		// Set tags if provided
+		if (dto.tagIds && dto.tagIds.length > 0) {
+			await this.eventTagService.setEventTags(created.id, dto.tagIds);
+		}
+
 		return created;
 	}
 
@@ -115,8 +123,11 @@ export class EventService {
 			await this.calendarService.findByIdOrThrow(dto.calendarId, userId);
 		}
 
+		// Handle tags separately
+		const { tagIds, ...eventData } = dto;
+
 		const updateData: Partial<NewEvent> = {
-			...dto,
+			...eventData,
 			startTime: dto.startTime ? new Date(dto.startTime) : undefined,
 			endTime: dto.endTime ? new Date(dto.endTime) : undefined,
 			recurrenceEndDate: dto.recurrenceEndDate ? new Date(dto.recurrenceEndDate) : undefined,
@@ -135,6 +146,11 @@ export class EventService {
 			.set(updateData)
 			.where(and(eq(events.id, id), eq(events.userId, userId)))
 			.returning();
+
+		// Update tags if provided
+		if (tagIds !== undefined) {
+			await this.eventTagService.setEventTags(id, tagIds);
+		}
 
 		return updated;
 	}
@@ -173,9 +189,24 @@ export class EventService {
 			.where(and(...conditions))
 			.orderBy(events.startTime);
 
-		return result.map((r) => ({
-			...r.event,
-			calendar: r.calendar,
-		}));
+		// Load tags for all events
+		const eventsWithCalendar = await Promise.all(
+			result.map(async (r) => {
+				const tags = await this.eventTagService.getTagsForEvent(r.event.id);
+				return {
+					...r.event,
+					calendar: r.calendar,
+					tags,
+				};
+			})
+		);
+
+		return eventsWithCalendar;
+	}
+
+	async getEventWithTags(id: string, userId: string) {
+		const event = await this.findByIdOrThrow(id, userId);
+		const tags = await this.eventTagService.getTagsForEvent(id);
+		return { ...event, tags };
 	}
 }

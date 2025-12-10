@@ -12,7 +12,12 @@
 	} from '$lib/stores/navigation';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
-	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import {
+		THEME_DEFINITIONS,
+		DEFAULT_THEME_VARIANTS,
+		EXTENDED_THEME_VARIANTS,
+	} from '@manacore/shared-theme';
+	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -35,9 +40,19 @@
 		{ href: '/progress', label: 'Progress', icon: 'chart' },
 	];
 
+	// Get pinned themes from user settings (extended themes only)
+	let pinnedThemes = $derived<ThemeVariant[]>(
+		(userSettings.theme?.pinnedThemes || []).filter((t): t is ThemeVariant =>
+			EXTENDED_THEME_VARIANTS.includes(t as ThemeVariant)
+		)
+	);
+
+	// Visible themes in PillNav: default + pinned extended
+	let visibleThemes = $derived<ThemeVariant[]>([...DEFAULT_THEME_VARIANTS, ...pinnedThemes]);
+
 	// Theme variant dropdown items
 	let themeVariantItems = $derived<PillDropdownItem[]>([
-		...theme.variants.map((variant) => ({
+		...visibleThemes.map((variant) => ({
 			id: variant,
 			label: THEME_DEFINITIONS[variant].label,
 			icon: THEME_DEFINITIONS[variant].icon,

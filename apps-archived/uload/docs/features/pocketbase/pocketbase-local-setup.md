@@ -5,7 +5,7 @@
 ### 1. Environment Separation
 
 - **Development**: `http://localhost:8090` (lokal)
-- **Production**: `https://pb.ulo.ad` (Docker)
+- **Production**: `https://pb.ulo.ad` (Coolify)
 - Automatische Umgebungserkennung basierend auf `dev` Flag
 
 ### 2. Code-Änderungen
@@ -181,10 +181,10 @@ Falls Probleme: Admin UI → Settings → API Rules
 | Aspekt         | Development           | Production        |
 | -------------- | --------------------- | ----------------- |
 | PocketBase URL | http://localhost:8090 | https://pb.ulo.ad |
-| Datenbank      | Lokal (SQLite)        | Cloud (Docker)    |
+| Datenbank      | Lokal (SQLite)        | Cloud (Coolify)   |
 | Auth           | Test-Accounts         | Echte User        |
 | Stripe         | Test-Keys             | Live-Keys         |
-| Redis          | localhost:6379        | Docker Redis      |
+| Redis          | localhost:6379        | Coolify Redis     |
 | SSL            | Nein (HTTP)           | Ja (HTTPS)        |
 | CSP            | Relaxed               | Strict            |
 

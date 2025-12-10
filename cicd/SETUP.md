@@ -99,46 +99,30 @@
    apt update && apt upgrade -y
    ```
 
-### Step 3: Set up Docker & Docker Compose (10 minutes)
+### Step 3: Set up Docker Compose (10 minutes)
 
-1. On your server (via SSH), install Docker:
-
-   ```bash
-   # Install Docker
-   curl -fsSL https://get.docker.com | bash
-
-   # Add your user to docker group
-   usermod -aG docker $USER
-
-   # Install Docker Compose plugin
-   apt-get update && apt-get install -y docker-compose-plugin
-
-   # Verify installation
-   docker --version
-   docker compose version
-   ```
-
-2. Set up the deployment directory:
+1. On your server (via SSH), run:
 
    ```bash
-   mkdir -p /opt/manacore
-   cd /opt/manacore
+   curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
    ```
 
-3. Clone your repository or copy docker-compose files:
+2. Wait 5-10 minutes for installation to complete
+   - The script will install Docker, Coolify, and dependencies
+   - You'll see progress messages
 
-   ```bash
-   git clone https://github.com/wuesteon/manacore-monorepo.git
-   cd manacore-monorepo
+3. Once complete, access Docker Compose configuration:
+
+   ```
+   https://YOUR_SERVER_IP:8000
    ```
 
-4. Configure environment variables:
+4. Complete initial setup wizard:
+   - Create admin account
+   - Set email (for SSL certificates)
+   - Configure basic settings
 
-   ```bash
-   cp .env.example .env
-   # Edit .env with your production values
-   nano .env
-   ```
+5. Save your Coolify credentials securely!
 
 ### Step 4: Configure GitHub Secrets (5 minutes)
 

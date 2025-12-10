@@ -1,8 +1,11 @@
 /**
  * Labels Store - Manages label state using Svelte 5 runes
+ *
+ * Uses the central Tags API from mana-core-auth. Labels and Tags are now
+ * unified across all Manacore apps (Todo, Calendar, Contacts).
  */
 
-import type { Label } from '@todo/shared';
+import type { Label } from '$lib/api/labels';
 import * as labelsApi from '$lib/api/labels';
 
 // State

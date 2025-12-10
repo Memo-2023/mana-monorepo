@@ -4,11 +4,13 @@
 	},
 	"common": {
 		"back": "Zurück",
-		"cancel": "Abbrechen"
+		"cancel": "Abbrechen",
+		"loadingMore": "Lade weitere..."
 	},
 	"nav": {
 		"contacts": "Kontakte",
 		"groups": "Gruppen",
+		"tags": "Tags",
 		"favorites": "Favoriten",
 		"archive": "Archiv",
 		"search": "Suche",
@@ -67,7 +69,22 @@
 		"noContacts": "Keine Kontakte gefunden",
 		"addFirst": "Füge deinen ersten Kontakt hinzu",
 		"favorites": "Favoriten",
-		"archive": "Archiv"
+		"archive": "Archiv",
+		"contact": "Kontakt",
+		"contactsPlural": "Kontakte",
+		"call": "Anrufen",
+		"email": "E-Mail senden",
+		"favorite": "Als Favorit markieren",
+		"unfavorite": "Favorit entfernen"
+	},
+	"views": {
+		"list": "Listenansicht",
+		"grid": "Kachelansicht",
+		"alphabet": "Alphabetisch"
+	},
+	"sort": {
+		"firstName": "Vorname",
+		"lastName": "Nachname"
 	},
 	"contact": {
 		"firstName": "Vorname",
@@ -120,6 +137,29 @@
 		"contacts": "Kontakte",
 		"loadMore": "Mehr laden"
 	},
+	"filters": {
+		"title": "Filter",
+		"clearAll": "Alle löschen",
+		"tag": "Tag",
+		"allTags": "Alle Tags",
+		"contactInfo": "Kontaktinfo",
+		"contact": {
+			"all": "Alle Kontakte",
+			"favorites": "Favoriten",
+			"hasPhone": "Mit Telefon",
+			"hasEmail": "Mit E-Mail",
+			"incomplete": "Unvollständig"
+		},
+		"birthdayLabel": "Geburtstag",
+		"birthday": {
+			"all": "Alle",
+			"today": "Heute",
+			"thisWeek": "Diese Woche",
+			"thisMonth": "Diesen Monat"
+		},
+		"company": "Firma",
+		"allCompanies": "Alle Firmen"
+	},
 	"export": {
 		"title": "Kontakte exportieren",
 		"button": "Exportieren",
@@ -129,5 +169,34 @@
 		"includeArchived": "Archivierte Kontakte einschließen",
 		"exporting": "Exportiere...",
 		"success": "Export erfolgreich"
+	},
+	"notes": {
+		"title": "Notizen",
+		"add": "Notiz hinzufügen",
+		"addFirst": "Erste Notiz hinzufügen",
+		"empty": "Noch keine Notizen",
+		"placeholder": "Schreibe eine Notiz...",
+		"confirmDelete": "Diese Notiz löschen?",
+		"pin": "Notiz anheften",
+		"unpin": "Nicht mehr anheften",
+		"yesterday": "Gestern"
+	},
+	"tags": {
+		"title": "Tags",
+		"new": "Neuer Tag",
+		"edit": "Tag bearbeiten",
+		"noTags": "Noch keine Tags",
+		"createFirst": "Erstelle deinen ersten Tag um Kontakte zu organisieren",
+		"search": "Tags durchsuchen...",
+		"name": "Name",
+		"namePlaceholder": "Tag-Name eingeben",
+		"color": "Farbe",
+		"preview": "Vorschau",
+		"contactCount": "{count} Kontakte",
+		"confirmDelete": "Möchtest du \"{name}\" wirklich löschen?",
+		"noResults": "Keine Tags gefunden",
+		"noResultsFor": "Keine Ergebnisse für \"{query}\"",
+		"tagSingular": "Tag",
+		"tagPlural": "Tags"
 	}
 }

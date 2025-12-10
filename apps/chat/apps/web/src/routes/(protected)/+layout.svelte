@@ -6,7 +6,12 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { theme } from '$lib/stores/theme';
-	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import {
+		THEME_DEFINITIONS,
+		DEFAULT_THEME_VARIANTS,
+		EXTENDED_THEME_VARIANTS,
+	} from '@manacore/shared-theme';
+	import type { ThemeVariant } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
@@ -30,10 +35,20 @@
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
 
+	// Get pinned themes from user settings (extended themes only)
+	let pinnedThemes = $derived<ThemeVariant[]>(
+		(userSettings.theme?.pinnedThemes || []).filter((t): t is ThemeVariant =>
+			EXTENDED_THEME_VARIANTS.includes(t as ThemeVariant)
+		)
+	);
+
+	// Visible themes in PillNav: default + pinned extended
+	let visibleThemes = $derived<ThemeVariant[]>([...DEFAULT_THEME_VARIANTS, ...pinnedThemes]);
+
 	// Theme variant dropdown items
 	let themeVariantItems = $derived<PillDropdownItem[]>([
-		// Theme variants
-		...theme.variants.map((variant) => ({
+		// Theme variants (only default + pinned)
+		...visibleThemes.map((variant) => ({
 			id: variant,
 			label: THEME_DEFINITIONS[variant].label,
 			icon: THEME_DEFINITIONS[variant].icon,

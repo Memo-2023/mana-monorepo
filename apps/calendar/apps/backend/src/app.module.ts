@@ -5,8 +5,10 @@ import { DatabaseModule } from './db/database.module';
 import { HealthModule } from './health/health.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { EventModule } from './event/event.module';
+import { EventTagModule } from './event-tag/event-tag.module';
 import { ReminderModule } from './reminder/reminder.module';
 import { ShareModule } from './share/share.module';
+import { NetworkModule } from './network/network.module';
 
 @Module({
 	imports: [
@@ -19,8 +21,10 @@ import { ShareModule } from './share/share.module';
 		HealthModule,
 		CalendarModule,
 		EventModule,
+		EventTagModule,
 		ReminderModule,
 		ShareModule,
+		NetworkModule,
 	],
 })
 export class AppModule {}

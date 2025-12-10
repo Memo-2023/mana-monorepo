@@ -13,21 +13,32 @@
 	}
 
 	let { title, icon, class: className = '', children }: Props = $props();
+
+	// Generate a slug from title for TOC navigation
+	const sectionId =
+		title
+			?.toLowerCase()
+			.replace(/[^a-z0-9]+/g, '-')
+			.replace(/(^-|-$)/g, '') || '';
 </script>
 
-<section class="settings-section {className}">
+<section class="settings-section {className}" data-settings-section={sectionId}>
 	{#if title}
-		<header class="settings-section__header">
-			{#if icon}
-				<span class="settings-section__icon">
-					{@render icon()}
-				</span>
-			{/if}
-			<h2 class="settings-section__title">{title}</h2>
+		<header class="section-header-wrapper">
+			<div class="section-header-pill">
+				{#if icon}
+					<span class="section-icon">
+						{@render icon()}
+					</span>
+				{/if}
+				<h2 class="section-title">
+					{title}
+				</h2>
+			</div>
 		</header>
 	{/if}
 
-	<div class="settings-section__content">
+	<div class="section-content">
 		{@render children()}
 	</div>
 </section>
@@ -39,48 +50,69 @@
 		gap: 0.75rem;
 	}
 
-	.settings-section__header {
-		display: flex;
+	.section-header-wrapper {
+		position: sticky;
+		top: 70px;
+		z-index: 20;
+		padding: 0.5rem 0;
+	}
+
+	.section-header-pill {
+		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding-left: 0.25rem;
-	}
-
-	.settings-section__icon {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 1.75rem;
-		height: 1.75rem;
-		border-radius: 0.5rem;
-		background: rgba(0, 0, 0, 0.04);
-		color: hsl(var(--primary));
-	}
-
-	:global(.dark) .settings-section__icon {
-		background: rgba(255, 255, 255, 0.08);
-	}
-
-	.settings-section__icon :global(svg) {
-		width: 1rem;
-		height: 1rem;
-	}
-
-	.settings-section__title {
+		padding: 0.5rem 1rem;
+		border-radius: 9999px;
 		font-size: 0.9375rem;
 		font-weight: 600;
+		white-space: nowrap;
+		background: rgba(255, 255, 255, 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 		color: #374151;
-		margin: 0;
-		letter-spacing: -0.01em;
 	}
 
-	:global(.dark) .settings-section__title {
+	:global(.dark) .section-header-pill {
+		background: rgba(255, 255, 255, 0.12);
+		border: 1px solid rgba(255, 255, 255, 0.15);
 		color: #f3f4f6;
 	}
 
-	.settings-section__content {
+	.section-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		color: hsl(var(--primary));
+	}
+
+	.section-icon :global(svg) {
+		width: 1.125rem;
+		height: 1.125rem;
+	}
+
+	.section-title {
+		margin: 0;
+		font-size: inherit;
+		font-weight: inherit;
+		color: inherit;
+		letter-spacing: -0.01em;
+	}
+
+	.section-content {
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
+	}
+
+	@media (max-width: 768px) {
+		.section-header-wrapper {
+			top: 80px;
+		}
 	}
 </style>

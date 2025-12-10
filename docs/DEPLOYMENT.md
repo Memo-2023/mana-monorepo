@@ -80,7 +80,7 @@ The manacore-monorepo uses a comprehensive CI/CD pipeline with the following fea
 - **Docker Hub**: For image storage (or alternative registry)
 - **Supabase**: For database services
 - **Azure**: For OpenAI services
-- **Hetzner + Docker Compose**: For hosting (recommended)
+- **Hetzner/Coolify**: For hosting (recommended)
 
 ### GitHub Secrets
 

@@ -6,8 +6,9 @@ import { contacts } from './schema';
 const DATABASE_URL =
 	process.env.DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/contacts';
 
-// User ID - can be set via environment variable or defaults to test user
-const USER_ID = process.env.SEED_USER_ID || 'seed-user-001';
+// User ID - can be set via environment variable or defaults to dev user
+const USER_ID =
+	process.env.SEED_USER_ID || process.env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000';
 
 interface SeedContact {
 	firstName: string;

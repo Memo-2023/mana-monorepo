@@ -21,7 +21,6 @@
 		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
-		"@getbrevo/brevo": "^3.0.1",
 		"@google/generative-ai": "^0.24.1",
 		"@nestjs/common": "^10.4.15",
 		"@nestjs/config": "^3.3.0",

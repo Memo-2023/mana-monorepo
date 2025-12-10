@@ -5,13 +5,19 @@
 import { contactsApi } from '$lib/api/contacts';
 import type { Contact, ContactFilters } from '$lib/api/contacts';
 
+// Default page size for pagination
+const DEFAULT_PAGE_SIZE = 50;
+
 // State
 let contacts = $state<Contact[]>([]);
 let selectedContact = $state<Contact | null>(null);
 let loading = $state(false);
+let loadingMore = $state(false);
 let error = $state<string | null>(null);
 let total = $state(0);
 let filters = $state<ContactFilters>({});
+let hasMore = $state(true);
+let currentOffset = $state(0);
 
 export const contactsStore = {
 	// Getters
@@ -24,6 +30,9 @@ export const contactsStore = {
 	get loading() {
 		return loading;
 	},
+	get loadingMore() {
+		return loadingMore;
+	},
 	get error() {
 		return error;
 	},
@@ -33,9 +42,12 @@ export const contactsStore = {
 	get filters() {
 		return filters;
 	},
+	get hasMore() {
+		return hasMore;
+	},
 
 	/**
-	 * Load contacts with optional filters
+	 * Load contacts with optional filters (resets to first page)
 	 */
 	async loadContacts(newFilters?: ContactFilters) {
 		if (newFilters) {
@@ -44,16 +56,52 @@ export const contactsStore = {
 
 		loading = true;
 		error = null;
+		currentOffset = 0;
 
 		try {
-			const result = await contactsApi.list(filters);
+			const result = await contactsApi.list({
+				...filters,
+				limit: DEFAULT_PAGE_SIZE,
+				offset: 0,
+			});
 			contacts = result.contacts;
 			total = result.total;
+			hasMore = contacts.length < total;
+			currentOffset = contacts.length;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load contacts';
 			console.error('Failed to load contacts:', e);
 		} finally {
 			loading = false;
+		}
+	},
+
+	/**
+	 * Load more contacts (infinite scroll)
+	 */
+	async loadMore() {
+		if (loadingMore || !hasMore) return;
+
+		loadingMore = true;
+		error = null;
+
+		try {
+			const result = await contactsApi.list({
+				...filters,
+				limit: DEFAULT_PAGE_SIZE,
+				offset: currentOffset,
+			});
+
+			const newContacts = result.contacts;
+			contacts = [...contacts, ...newContacts];
+			total = result.total;
+			currentOffset += newContacts.length;
+			hasMore = contacts.length < total;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to load more contacts';
+			console.error('Failed to load more contacts:', e);
+		} finally {
+			loadingMore = false;
 		}
 	},
 
@@ -197,6 +245,13 @@ export const contactsStore = {
 	 */
 	setSearch(search: string) {
 		filters = { ...filters, search };
+	},
+
+	/**
+	 * Set tag filter
+	 */
+	setTagId(tagId: string | undefined) {
+		filters = { ...filters, tagId };
 	},
 
 	/**

@@ -18,6 +18,7 @@
 	import CalendarSidebar from '$lib/components/calendar/CalendarSidebar.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
 	import EventDetailModal from '$lib/components/event/EventDetailModal.svelte';
+	import { CalendarViewSkeleton } from '$lib/components/skeletons';
 	import { format, addMinutes } from 'date-fns';
 	import { de } from 'date-fns/locale';
 
@@ -166,7 +167,9 @@
 		<CalendarHeader />
 
 		<div class="calendar-content">
-			{#if viewStore.viewType === 'day'}
+			{#if !initialized}
+				<CalendarViewSkeleton />
+			{:else if viewStore.viewType === 'day'}
 				<DayView onQuickCreate={handleQuickCreate} />
 			{:else if viewStore.viewType === '5day'}
 				<MultiDayView dayCount={5} onQuickCreate={handleQuickCreate} />

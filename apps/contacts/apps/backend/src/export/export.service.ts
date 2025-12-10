@@ -3,7 +3,7 @@ import { eq, and, inArray } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { type Database } from '../db/connection';
 import { contacts, type Contact } from '../db/schema';
-import { contactToGroups, contactToTags } from '../db/schema';
+import { contactToTags } from '../db/schema';
 import { ExportRequestDto, ExportFormat } from './dto/export.dto';
 import { generateVCardFile } from './generators/vcard.generator';
 import { generateCsvFile } from './generators/csv.generator';
@@ -48,7 +48,7 @@ export class ExportService {
 		userId: string,
 		options: ExportRequestDto
 	): Promise<Contact[]> {
-		const { contactIds, groupId, tagId, includeFavorites, includeArchived = false } = options;
+		const { contactIds, tagId, includeFavorites, includeArchived = false } = options;
 
 		// If specific contact IDs are provided, fetch those
 		if (contactIds && contactIds.length > 0) {
@@ -56,25 +56,6 @@ export class ExportService {
 				.select()
 				.from(contacts)
 				.where(and(eq(contacts.userId, userId), inArray(contacts.id, contactIds)));
-		}
-
-		// If a group is specified, get contacts in that group
-		if (groupId) {
-			const groupContacts = await this.db
-				.select({ contactId: contactToGroups.contactId })
-				.from(contactToGroups)
-				.where(eq(contactToGroups.groupId, groupId));
-
-			const contactIdsInGroup = groupContacts.map((gc) => gc.contactId);
-
-			if (contactIdsInGroup.length === 0) {
-				return [];
-			}
-
-			return this.db
-				.select()
-				.from(contacts)
-				.where(and(eq(contacts.userId, userId), inArray(contacts.id, contactIdsInGroup)));
 		}
 
 		// If a tag is specified, get contacts with that tag

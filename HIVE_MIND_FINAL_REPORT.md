@@ -13,7 +13,7 @@
 
 The Hive Mind collective has successfully analyzed, designed, and implemented a **complete production-ready deployment system** for the manacore-monorepo. Through coordinated effort across 4 specialized worker agents, we've delivered:
 
-- **Comprehensive hosting platform analysis** (Hetzner + Docker Compose recommended)
+- **Comprehensive hosting platform analysis** (Hetzner + Coolify recommended)
 - **Complete deployment architecture** for 39 services across 10 projects
 - **Fully automated CI/CD pipeline** with GitHub Actions
 - **Production-ready testing infrastructure** targeting 80% coverage
@@ -29,7 +29,7 @@ The Hive Mind collective has successfully analyzed, designed, and implemented a 
 
 ### 1️⃣ RESEARCHER AGENT - Infrastructure Analysis
 
-**Mission**: Research and compare Hetzner hosting options
+**Mission**: Research and compare Hetzner vs Coolify hosting options
 
 **Key Findings**:
 
@@ -70,7 +70,7 @@ The Hive Mind collective has successfully analyzed, designed, and implemented a 
 
 **Architecture Highlights**:
 
-- **Environment Stages**: Development (local) → Staging (Docker Compose) → Production (Docker Compose/K8s)
+- **Environment Stages**: Development (local) → Staging (Coolify) → Production (Coolify/K8s)
 - **Domain Strategy**: `{service}.manacore.app` (e.g., `api-chat.manacore.app`)
 - **Disaster Recovery**: RTO < 1 hour, RPO < 24 hours, automated daily backups
 - **Resource Requirements**: 15 vCPU, 15 GB RAM, 100 GB SSD (~$150-300/month single-server)
@@ -169,7 +169,7 @@ The Hive Mind collective has successfully analyzed, designed, and implemented a 
    - **Reasoning**: Instant rollback, minimal risk, production-proven
    - **Vote**: Unanimous approval
 
-3. **Container Orchestration**: Start with Docker Compose, migrate to K8s when scale demands
+3. **Container Orchestration**: Start with Coolify, migrate to K8s when scale demands
    - **Reasoning**: Simplicity now, scalability later
    - **Vote**: Unanimous approval
 
@@ -256,7 +256,7 @@ The Hive Mind collective has successfully analyzed, designed, and implemented a 
 **Week 3-4**:
 
 - [ ] Provision production server(s)
-- [ ] Set up production environment with Docker Compose
+- [ ] Set up production environment in Coolify
 - [ ] Deploy mana-core-auth service
 - [ ] Deploy first 2 projects (chat, picture)
 - [ ] Configure monitoring (Prometheus + Grafana)
@@ -409,7 +409,7 @@ The Hive Mind collective has successfully analyzed, designed, and implemented a 
 - ✅ ISO 27001 certified infrastructure (Hetzner)
 - ✅ SOC 2 Type II (Supabase)
 - ✅ Automated backup retention policies
-- ✅ Audit logs (GitHub Actions, Supabase)
+- ✅ Audit logs (GitHub Actions, Coolify, Supabase)
 
 ---
 
@@ -489,7 +489,7 @@ The Hive Mind collective has successfully analyzed, designed, and implemented a 
 **Session 2: Infrastructure Setup (2 hours)**
 
 - Hands-on: Set up Hetzner server
-- Hands-on: Set up Docker Compose
+- Hands-on: Install and configure Coolify
 - Practice: Deploy test service
 
 **Session 3: CI/CD Operations (2 hours)**
@@ -572,7 +572,7 @@ The Hive Mind collective has successfully analyzed, designed, and implemented a 
 ### Long-Term (6-12 Months)
 
 1. **Kubernetes Migration**
-   - Migrate from Docker Compose to Hetzner Kubernetes
+   - Migrate from Coolify to Hetzner Kubernetes
    - Implement Helm charts for all services
    - Set up Istio service mesh
 
@@ -829,7 +829,7 @@ pnpm test:e2e
 **Official Documentation**:
 
 - [Hetzner Cloud Docs](https://docs.hetzner.com/)
-- [Docker Compose Documentation](https://docs.docker.com/compose/)
+- [Coolify Documentation](https://coolify.io/docs)
 - [Turborepo Docs](https://turbo.build/repo/docs)
 - [pnpm Workspaces](https://pnpm.io/workspaces)
 - [GitHub Actions](https://docs.github.com/en/actions)

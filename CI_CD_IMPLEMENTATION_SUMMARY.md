@@ -52,7 +52,7 @@ All scripts in `scripts/deploy/`:
 | Script              | Purpose                      | Features                                           |
 | ------------------- | ---------------------------- | -------------------------------------------------- |
 | `build-and-push.sh` | Build and push Docker images | Error handling, colored output, progress tracking  |
-| `deploy-hetzner.sh` | Deploy to Hetzner VPS        | Zero-downtime, health checks, rollback on failure  |
+| `deploy-hetzner.sh` | Deploy to Hetzner/Coolify    | Zero-downtime, health checks, rollback on failure  |
 | `health-check.sh`   | Verify service health        | Multiple endpoints, timeout handling               |
 | `rollback.sh`       | Emergency rollback           | Automated backup restoration, confirmation prompts |
 | `migrate-db.sh`     | Run database migrations      | Supabase + Drizzle support, safe execution         |

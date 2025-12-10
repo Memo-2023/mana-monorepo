@@ -81,7 +81,7 @@ PUBLIC_POCKETBASE_URL=https://ulo.ad/api
 POCKETBASE_ADMIN_URL=http://localhost:8090  # Nur intern!
 ```
 
-### 3. Firewall Rules (in Hetzner)
+### 3. Firewall Rules (in Coolify/Hetzner)
 
 ```bash
 # Nur benötigte Ports öffnen
@@ -105,7 +105,7 @@ apt install fail2ban
 ### 2. Logs überwachen
 
 ```bash
-# In Monitoring einrichten für:
+# In Coolify Alerts einrichten für:
 - Fehlgeschlagene Admin-Logins
 - Ungewöhnlich viele API-Anfragen
 - 404 auf /_/ Route

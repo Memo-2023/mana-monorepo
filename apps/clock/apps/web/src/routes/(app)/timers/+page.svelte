@@ -7,6 +7,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { toast } from '$lib/stores/toast';
 	import { QUICK_TIMER_PRESETS, formatDuration } from '@clock/shared';
+	import { TimersSkeleton } from '$lib/components/skeletons';
 
 	// Form state (inline on page)
 	let formMinutes = $state(5);
@@ -219,11 +220,7 @@
 
 	<!-- Loading State -->
 	{#if timersStore.loading}
-		<div class="flex justify-center py-8">
-			<div
-				class="h-6 w-6 animate-spin rounded-full border-2 border-primary border-r-transparent"
-			></div>
-		</div>
+		<TimersSkeleton />
 	{:else if allTimers.length > 0}
 		<!-- Active Timers -->
 		<div>

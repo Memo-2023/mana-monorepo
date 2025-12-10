@@ -10,6 +10,7 @@
 		type GoogleImportResult,
 	} from '$lib/api/google';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
+	import { GoogleImportSkeleton } from '$lib/components/skeletons';
 
 	type Step = 'connect' | 'select' | 'result';
 
@@ -31,7 +32,7 @@
 			try {
 				await googleApi.handleCallback(code);
 				// Remove code from URL
-				goto('/import?tab=google', { replaceState: true });
+				goto('/data?tab=import&source=google', { replaceState: true });
 			} catch (e) {
 				error = e instanceof Error ? e.message : 'Failed to connect';
 			}
@@ -170,12 +171,7 @@
 	{/if}
 
 	{#if isLoading}
-		<div class="flex flex-col items-center justify-center py-12">
-			<div
-				class="h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
-			></div>
-			<p class="mt-4 text-muted-foreground">{$_('google.loading')}</p>
-		</div>
+		<GoogleImportSkeleton />
 	{:else if step === 'connect'}
 		<!-- Connect Step -->
 		<div class="bg-card rounded-xl p-8 text-center space-y-6">

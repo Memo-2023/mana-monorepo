@@ -3,12 +3,22 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { PillNavigation, CommandBar } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		CommandBarItem,
+		QuickAction,
+	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
-	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import {
+		THEME_DEFINITIONS,
+		DEFAULT_THEME_VARIANTS,
+		EXTENDED_THEME_VARIANTS,
+	} from '@manacore/shared-theme';
+	import type { ThemeVariant } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
@@ -18,6 +28,12 @@
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import ContactDetailModal from '$lib/components/ContactDetailModal.svelte';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
+	import { contactsApi } from '$lib/api/contacts';
+	import { viewModeStore } from '$lib/stores/view-mode.svelte';
+	import { contactsSettings } from '$lib/stores/settings.svelte';
+
+	// Search modal state
+	let searchModalOpen = $state(false);
 
 	// Check if we're on a contact detail route
 	const contactDetailMatch = $derived($page.url.pathname.match(/^\/contacts\/([0-9a-f-]{36})$/i));
@@ -35,10 +51,20 @@
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
 
+	// Get pinned themes from user settings (extended themes only)
+	let pinnedThemes = $derived<ThemeVariant[]>(
+		(userSettings.theme?.pinnedThemes || []).filter((t): t is ThemeVariant =>
+			EXTENDED_THEME_VARIANTS.includes(t as ThemeVariant)
+		)
+	);
+
+	// Visible themes in PillNav: default + pinned extended
+	let visibleThemes = $derived<ThemeVariant[]>([...DEFAULT_THEME_VARIANTS, ...pinnedThemes]);
+
 	// Theme variant dropdown items
 	let themeVariantItems = $derived<PillDropdownItem[]>([
-		// Theme variants
-		...theme.variants.map((variant) => ({
+		// Theme variants (only default + pinned)
+		...visibleThemes.map((variant) => ({
 			id: variant,
 			label: THEME_DEFINITIONS[variant].label,
 			icon: THEME_DEFINITIONS[variant].icon,
@@ -74,10 +100,12 @@
 	// Navigation items for Contacts
 	const navItems: PillNavItem[] = [
 		{ href: '/', label: 'Kontakte', icon: 'users' },
-		{ href: '/groups', label: 'Gruppen', icon: 'folder' },
+		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
-		{ href: '/archive', label: 'Archiv', icon: 'archive' },
+		{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
+		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
+		{ href: '/help', label: 'Hilfe', icon: 'help-circle' },
 	];
 
 	// Navigation shortcuts (Ctrl+1-5)
@@ -89,7 +117,7 @@
 		// Cmd/Ctrl+K to open search (works even in inputs)
 		if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
 			event.preventDefault();
-			// TODO: Open search modal
+			searchModalOpen = true;
 			return;
 		}
 
@@ -144,6 +172,41 @@
 		goto('/', { replaceState: false });
 	}
 
+	// CommandBar search function
+	async function handleCommandBarSearch(query: string): Promise<CommandBarItem[]> {
+		const response = await contactsApi.list({ search: query, limit: 10 });
+		return (response.contacts || []).map((contact: any) => ({
+			id: contact.id,
+			title:
+				contact.displayName ||
+				[contact.firstName, contact.lastName].filter(Boolean).join(' ') ||
+				contact.email ||
+				'Unbekannt',
+			subtitle: contact.company || contact.email,
+			imageUrl: contact.photoUrl,
+			isFavorite: contact.isFavorite,
+		}));
+	}
+
+	// CommandBar item selection
+	function handleCommandBarSelect(item: CommandBarItem) {
+		goto(`/contacts/${item.id}`);
+	}
+
+	// CommandBar quick actions
+	const commandBarQuickActions: QuickAction[] = [
+		{
+			id: 'new',
+			label: 'Neuen Kontakt erstellen',
+			icon: 'plus',
+			href: '/contacts/new',
+			shortcut: 'N',
+		},
+		{ id: 'favorites', label: 'Favoriten anzeigen', icon: 'heart', href: '/favorites' },
+		{ id: 'tags', label: 'Tags verwalten', icon: 'tag', href: '/tags' },
+		{ id: 'import', label: 'Kontakte importieren', icon: 'upload', href: '/data?tab=import' },
+	];
+
 	onMount(async () => {
 		// Redirect to login if not authenticated
 		if (!authStore.isAuthenticated) {
@@ -153,6 +216,10 @@
 
 		// Load user settings
 		await userSettings.load();
+
+		// Initialize contacts settings and view mode
+		contactsSettings.initialize();
+		viewModeStore.initialize();
 
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('contacts-nav-sidebar');
@@ -174,6 +241,9 @@
 
 <!-- Navigation Layout -->
 <div class="layout-container">
+	<!-- Shadow gradient above navigation -->
+	<div class="nav-shadow-gradient"></div>
+
 	<!-- Floating/Sidebar Pill Navigation -->
 	<PillNavigation
 		items={navItems}
@@ -213,7 +283,7 @@
 	<main
 		class="main-content bg-background"
 		class:sidebar-mode={isSidebarMode && !isCollapsed}
-		class:floating-mode={!isSidebarMode && !isCollapsed}
+		class:floating-mode={!isSidebarMode}
 	>
 		<div class="content-wrapper">
 			{@render children()}
@@ -224,6 +294,18 @@
 	{#if showContactModal && modalContactId}
 		<ContactDetailModal contactId={modalContactId} onClose={handleCloseContactModal} />
 	{/if}
+
+	<!-- Global Search Modal (Cmd/K) -->
+	<CommandBar
+		bind:open={searchModalOpen}
+		onClose={() => (searchModalOpen = false)}
+		onSearch={handleCommandBarSearch}
+		onSelect={handleCommandBarSelect}
+		quickActions={commandBarQuickActions}
+		placeholder="Kontakt suchen..."
+		emptyText="Keine Kontakte gefunden"
+		searchingText="Suche..."
+	/>
 </div>
 
 <style>
@@ -240,7 +322,14 @@
 
 	/* Floating nav mode - add top padding for fixed nav */
 	.main-content.floating-mode {
-		padding-top: 100px;
+		padding-top: 80px;
+	}
+
+	/* Extra padding on mobile for larger nav */
+	@media (max-width: 768px) {
+		.main-content.floating-mode {
+			padding-top: 90px;
+		}
 	}
 
 	/* Sidebar mode - add left padding for sidebar nav */
@@ -249,23 +338,44 @@
 	}
 
 	.content-wrapper {
-		max-width: 80rem;
+		max-width: 900px;
 		margin-left: auto;
 		margin-right: auto;
-		padding: 2rem 1rem;
+		padding: 1rem;
 	}
 
 	@media (min-width: 640px) {
 		.content-wrapper {
-			padding-left: 1.5rem;
-			padding-right: 1.5rem;
+			padding: 1.5rem;
 		}
 	}
 
 	@media (min-width: 1024px) {
 		.content-wrapper {
-			padding-left: 2rem;
-			padding-right: 2rem;
+			padding: 2rem;
+		}
+	}
+
+	/* Shadow gradient above pill navigation */
+	.nav-shadow-gradient {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 80px;
+		background: linear-gradient(
+			to bottom,
+			hsl(var(--background)) 0%,
+			hsl(var(--background)) 50%,
+			hsl(var(--background) / 0) 100%
+		);
+		pointer-events: none;
+		z-index: 40;
+	}
+
+	@media (max-width: 768px) {
+		.nav-shadow-gradient {
+			height: 90px;
 		}
 	}
 </style>

@@ -108,7 +108,7 @@ Modern Tech Stack:
 - Frontend: SvelteKit 2.0 + Svelte 5 (Cutting-Edge)
 - Backend: PocketBase (Embedded, Skalierbar)
 - Styling: Tailwind CSS 4.0 (Neueste Version)
-- Deployment: Docker Compose auf Hetzner VPS
+- Deployment: Docker + Coolify auf Hetzner VPS
 - Database: SQLite via PocketBase (Performant)
 - Payments: Stripe Integration
 

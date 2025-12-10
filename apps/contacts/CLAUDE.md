@@ -83,11 +83,6 @@ pnpm build                       # Build for production
 | `/api/v1/contacts/:id/favorite`       | POST   | Toggle favorite            |
 | `/api/v1/contacts/:id/archive`        | POST   | Toggle archive             |
 | `/api/v1/contacts/:id/photo`          | POST   | Upload contact photo       |
-| `/api/v1/groups`                      | GET    | Get user's groups          |
-| `/api/v1/groups`                      | POST   | Create new group           |
-| `/api/v1/groups/:id`                  | PATCH  | Update group               |
-| `/api/v1/groups/:id`                  | DELETE | Delete group               |
-| `/api/v1/groups/:id/contacts`         | POST   | Add contacts to group      |
 | `/api/v1/tags`                        | GET    | Get user's tags            |
 | `/api/v1/tags`                        | POST   | Create new tag             |
 | `/api/v1/tags/:id`                    | DELETE | Delete tag                 |
@@ -128,20 +123,6 @@ pnpm build                       # Build for production
 - `visibility` (VARCHAR) - private/team/organization/public
 - `shared_with` (JSONB) - Array of user IDs
 - `created_at`, `updated_at` (TIMESTAMP)
-
-**contact_groups** - Groups for organizing contacts
-
-- `id` (UUID) - Primary key
-- `user_id` (VARCHAR) - User reference
-- `name` (VARCHAR) - Group name
-- `description` (TEXT) - Optional description
-- `color` (VARCHAR) - Group color
-- `created_at` (TIMESTAMP)
-
-**contact_to_groups** - Many-to-many relation
-
-- `contact_id` (UUID) - Contact reference
-- `group_id` (UUID) - Group reference
 
 **contact_tags** - Tags for contacts
 
@@ -208,7 +189,7 @@ S3_BUCKET=contacts-photos
 # Get credentials from https://console.cloud.google.com/apis/credentials
 GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your-client-secret
-GOOGLE_REDIRECT_URI=http://localhost:5184/import?tab=google
+GOOGLE_REDIRECT_URI=http://localhost:5184/data?tab=import&source=google
 ```
 
 #### Mobile (.env)

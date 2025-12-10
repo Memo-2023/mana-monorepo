@@ -65,5 +65,18 @@ export {
 	getForgotPasswordTranslations,
 } from './translations/auth';
 
+// Help translations
+export {
+	en as helpTranslationsEn,
+	de as helpTranslationsDe,
+	it as helpTranslationsIt,
+	fr as helpTranslationsFr,
+	es as helpTranslationsEs,
+	type HelpTranslations,
+	type HelpLocale,
+	helpTranslations,
+	getHelpTranslations,
+} from './translations/help';
+
 // Components
 export { LanguageSelector } from './components';

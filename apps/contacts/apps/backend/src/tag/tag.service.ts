@@ -5,12 +5,36 @@ import { Database } from '../db/connection';
 import { contactTags, contactToTags } from '../db/schema';
 import type { ContactTag, NewContactTag } from '../db/schema';
 
+const DEFAULT_TAGS = [
+	{ name: 'Familie', color: '#ec4899' }, // pink
+	{ name: 'Freunde', color: '#22c55e' }, // green
+	{ name: 'Arbeit', color: '#3b82f6' }, // blue
+	{ name: 'Wichtig', color: '#ef4444' }, // red
+] as const;
+
 @Injectable()
 export class TagService {
 	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {}
 
 	async findByUserId(userId: string): Promise<ContactTag[]> {
-		return this.db.select().from(contactTags).where(eq(contactTags.userId, userId));
+		const tags = await this.db.select().from(contactTags).where(eq(contactTags.userId, userId));
+
+		// Create default tags on first access (when user has no tags yet)
+		if (tags.length === 0) {
+			return this.createDefaultTags(userId);
+		}
+
+		return tags;
+	}
+
+	private async createDefaultTags(userId: string): Promise<ContactTag[]> {
+		const tagsToCreate = DEFAULT_TAGS.map((tag) => ({
+			userId,
+			name: tag.name,
+			color: tag.color,
+		}));
+
+		return this.db.insert(contactTags).values(tagsToCreate).returning();
 	}
 
 	async findById(id: string, userId: string): Promise<ContactTag | null> {

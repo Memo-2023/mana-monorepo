@@ -6,6 +6,7 @@ import {
 	IsDateString,
 	IsUUID,
 	IsIn,
+	IsArray,
 	MaxLength,
 } from 'class-validator';
 import type { EventMetadata } from '../../db/schema/events.schema';
@@ -63,4 +64,9 @@ export class CreateEventDto {
 	@IsOptional()
 	@IsObject()
 	metadata?: EventMetadata;
+
+	@IsOptional()
+	@IsArray()
+	@IsUUID('4', { each: true })
+	tagIds?: string[];
 }

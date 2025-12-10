@@ -6,6 +6,7 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { format, parseISO, isToday, isTomorrow, addDays, startOfDay, endOfDay } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { AgendaSkeleton } from '$lib/components/skeletons';
 
 	let loading = $state(true);
 
@@ -81,7 +82,7 @@
 	</header>
 
 	{#if loading}
-		<div class="loading">Laden...</div>
+		<AgendaSkeleton />
 	{:else if groupedEvents.length === 0}
 		<div class="empty-state card">
 			<p>Keine Termine in den nächsten 30 Tagen</p>
@@ -151,12 +152,6 @@
 	.subtitle {
 		color: hsl(var(--color-muted-foreground));
 		margin: 0;
-	}
-
-	.loading {
-		text-align: center;
-		padding: 2rem;
-		color: hsl(var(--color-muted-foreground));
 	}
 
 	.empty-state {

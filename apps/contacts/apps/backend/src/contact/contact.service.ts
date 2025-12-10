@@ -9,7 +9,6 @@ export interface ContactFilters {
 	search?: string;
 	isFavorite?: boolean;
 	isArchived?: boolean;
-	groupId?: string;
 	tagId?: string;
 	limit?: number;
 	offset?: number;
@@ -22,23 +21,59 @@ export class ContactService {
 	async findByUserId(userId: string, filters: ContactFilters = {}): Promise<Contact[]> {
 		const { search, isFavorite, isArchived = false, limit = 50, offset = 0 } = filters;
 
-		let query = this.db
+		// When searching, use relevance-based sorting (name matches first, then company/email)
+		if (search) {
+			const searchLower = search.toLowerCase();
+			const query = this.db
+				.select({
+					contact: contacts,
+					// Relevance score: name matches get higher priority than company/email
+					relevance: sql<number>`
+						CASE
+							WHEN LOWER(${contacts.firstName}) LIKE ${`${searchLower}%`} THEN 100
+							WHEN LOWER(${contacts.lastName}) LIKE ${`${searchLower}%`} THEN 100
+							WHEN LOWER(${contacts.displayName}) LIKE ${`${searchLower}%`} THEN 90
+							WHEN LOWER(${contacts.firstName}) LIKE ${`%${searchLower}%`} THEN 80
+							WHEN LOWER(${contacts.lastName}) LIKE ${`%${searchLower}%`} THEN 80
+							WHEN LOWER(${contacts.displayName}) LIKE ${`%${searchLower}%`} THEN 70
+							WHEN LOWER(${contacts.email}) LIKE ${`%${searchLower}%`} THEN 50
+							WHEN LOWER(${contacts.company}) LIKE ${`%${searchLower}%`} THEN 40
+							ELSE 0
+						END
+					`.as('relevance'),
+				})
+				.from(contacts)
+				.where(
+					and(
+						eq(contacts.userId, userId),
+						eq(contacts.isArchived, isArchived),
+						isFavorite !== undefined ? eq(contacts.isFavorite, isFavorite) : undefined,
+						or(
+							ilike(contacts.firstName, `%${search}%`),
+							ilike(contacts.lastName, `%${search}%`),
+							ilike(contacts.displayName, `%${search}%`),
+							ilike(contacts.email, `%${search}%`),
+							ilike(contacts.company, `%${search}%`)
+						)
+					)
+				)
+				.orderBy(sql`relevance DESC`, desc(contacts.updatedAt))
+				.limit(limit)
+				.offset(offset);
+
+			const results = await query;
+			return results.map((r) => r.contact);
+		}
+
+		// Without search, just order by updatedAt
+		const query = this.db
 			.select()
 			.from(contacts)
 			.where(
 				and(
 					eq(contacts.userId, userId),
 					eq(contacts.isArchived, isArchived),
-					isFavorite !== undefined ? eq(contacts.isFavorite, isFavorite) : undefined,
-					search
-						? or(
-								ilike(contacts.firstName, `%${search}%`),
-								ilike(contacts.lastName, `%${search}%`),
-								ilike(contacts.displayName, `%${search}%`),
-								ilike(contacts.email, `%${search}%`),
-								ilike(contacts.company, `%${search}%`)
-							)
-						: undefined
+					isFavorite !== undefined ? eq(contacts.isFavorite, isFavorite) : undefined
 				)
 			)
 			.orderBy(desc(contacts.updatedAt))
