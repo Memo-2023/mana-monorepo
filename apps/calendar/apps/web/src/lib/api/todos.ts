@@ -73,6 +73,11 @@ export interface Task {
 	dueDate?: string | null;
 	dueTime?: string | null;
 	startDate?: string | null;
+	// Time-Blocking (for calendar integration)
+	scheduledDate?: string | null;
+	scheduledStartTime?: string | null; // HH:mm format
+	scheduledEndTime?: string | null; // HH:mm format
+	estimatedDuration?: number | null; // Duration in minutes
 	priority: TaskPriority;
 	status: TaskStatus;
 	isCompleted: boolean;
@@ -97,6 +102,11 @@ export interface CreateTaskInput {
 	projectId?: string | null;
 	dueDate?: string | null;
 	dueTime?: string | null;
+	// Time-Blocking
+	scheduledDate?: string | null;
+	scheduledStartTime?: string | null;
+	scheduledEndTime?: string | null;
+	estimatedDuration?: number | null;
 	priority?: TaskPriority;
 	labelIds?: string[];
 	subtasks?: Omit<Subtask, 'id'>[];
@@ -110,6 +120,11 @@ export interface UpdateTaskInput {
 	projectId?: string | null;
 	dueDate?: string | null;
 	dueTime?: string | null;
+	// Time-Blocking
+	scheduledDate?: string | null;
+	scheduledStartTime?: string | null;
+	scheduledEndTime?: string | null;
+	estimatedDuration?: number | null;
 	priority?: TaskPriority;
 	status?: TaskStatus;
 	isCompleted?: boolean;
@@ -242,9 +257,7 @@ export async function uncompleteTask(
 }
 
 export async function getTodayTasks(): Promise<{ data: Task[] | null; error: Error | null }> {
-	console.log('[TodoAPI] Fetching /tasks/today from:', TODO_API_BASE);
 	const result = await fetchTodoApi<TasksResponse>('/tasks/today');
-	console.log('[TodoAPI] Response:', result);
 	return {
 		data: result.data?.tasks || null,
 		error: result.error,

@@ -84,7 +84,6 @@ export function createApiClient(config: ApiClientConfig) {
 			return { data, error: null };
 		} catch (error) {
 			clearTimeout(timeoutId);
-			console.error('[BaseClient] Fetch error:', error);
 
 			if (error instanceof Error && error.name === 'AbortError') {
 				return {

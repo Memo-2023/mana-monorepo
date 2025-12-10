@@ -61,7 +61,7 @@ export const todosStore = {
 	// ========== Derived Getters ==========
 
 	/**
-	 * Get todos for a specific day
+	 * Get todos for a specific day (by dueDate)
 	 */
 	getTodosForDay(date: Date): Task[] {
 		const currentTodos = todos ?? [];
@@ -72,6 +72,48 @@ export const todosStore = {
 			const dueDate = typeof task.dueDate === 'string' ? parseISO(task.dueDate) : task.dueDate;
 			return isSameDay(dueDate, date);
 		});
+	},
+
+	/**
+	 * Get scheduled tasks for a specific day (by scheduledDate - for time-blocking)
+	 */
+	getScheduledTasksForDay(date: Date): Task[] {
+		const currentTodos = todos ?? [];
+		if (!Array.isArray(currentTodos)) return [];
+
+		return currentTodos.filter((task) => {
+			if (!task.scheduledDate || task.isCompleted) return false;
+			const scheduledDate =
+				typeof task.scheduledDate === 'string' ? parseISO(task.scheduledDate) : task.scheduledDate;
+			return isSameDay(scheduledDate, date);
+		});
+	},
+
+	/**
+	 * Get scheduled tasks within a date range (for time-blocking)
+	 */
+	getScheduledTasksInRange(start: Date, end: Date): Task[] {
+		const currentTodos = todos ?? [];
+		if (!Array.isArray(currentTodos)) return [];
+
+		return currentTodos.filter((task) => {
+			if (!task.scheduledDate) return false;
+			const scheduledDate =
+				typeof task.scheduledDate === 'string' ? parseISO(task.scheduledDate) : task.scheduledDate;
+			return isWithinInterval(scheduledDate, { start, end });
+		});
+	},
+
+	/**
+	 * Get unscheduled tasks (no scheduledDate - for sidebar drag source)
+	 */
+	get unscheduledForTimeBlocking(): Task[] {
+		const currentTodos = todos ?? [];
+		if (!Array.isArray(currentTodos)) return [];
+
+		return currentTodos
+			.filter((task) => !task.isCompleted && !task.scheduledDate)
+			.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
 	},
 
 	/**
@@ -175,17 +217,15 @@ export const todosStore = {
 	},
 
 	/**
-	 * Get combined sidebar todos (overdue + today, sorted by priority)
-	 * Limited to show in sidebar
+	 * Get combined sidebar todos (overdue + today + upcoming, sorted by date then priority)
 	 */
-	getSidebarTodos(limit = 5): Task[] {
+	getSidebarTodos(): Task[] {
 		const overdue = this.overdueTodos;
 		const today = this.todaysTodos;
+		const upcoming = this.upcomingTodos;
 
-		// Combine and sort: overdue first, then today, both by priority
-		const combined = [...overdue, ...today];
-
-		return combined.slice(0, limit);
+		// Combine: overdue first, then today, then upcoming
+		return [...overdue, ...today, ...upcoming];
 	},
 
 	/**
@@ -242,12 +282,9 @@ export const todosStore = {
 		loading = true;
 		error = null;
 
-		console.log('[TodoStore] Fetching today todos...');
 		const result = await api.getTodayTasks();
-		console.log('[TodoStore] Result:', result);
 
 		if (result.error) {
-			console.error('[TodoStore] Error fetching todos:', result.error);
 			error = result.error.message;
 			serviceAvailable = false;
 		} else {
@@ -270,12 +307,9 @@ export const todosStore = {
 		loading = true;
 		error = null;
 
-		console.log('[TodoStore] Fetching upcoming todos...');
 		const result = await api.getUpcomingTasks();
-		console.log('[TodoStore] Upcoming result:', result);
 
 		if (result.error) {
-			console.error('[TodoStore] Error fetching upcoming:', result.error);
 			error = result.error.message;
 			// Only set serviceAvailable to false if we have no todos yet
 			// (if fetchTodayTodos succeeded, we should still show the service as available)

@@ -5,21 +5,14 @@
 	import TodoDetailModal from '$lib/components/todo/TodoDetailModal.svelte';
 	import QuickAddTodo from '$lib/components/todo/QuickAddTodo.svelte';
 	import { ChevronDown, ChevronRight, Plus, CheckSquare, AlertTriangle } from 'lucide-svelte';
-	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-
-	interface Props {
-		maxItems?: number;
-	}
-
-	let { maxItems = 5 }: Props = $props();
 
 	let isExpanded = $state(true);
 	let showQuickAdd = $state(false);
 	let selectedTask = $state<Task | null>(null);
 
-	// Derived: combined overdue + today todos
-	const displayTodos = $derived(todosStore.getSidebarTodos(maxItems));
+	// Derived: all active todos (overdue + today + upcoming)
+	const displayTodos = $derived(todosStore.getSidebarTodos());
 	const overdueCount = $derived(todosStore.overdueTodos.length);
 	const totalActiveCount = $derived(todosStore.activeTodosCount);
 
@@ -52,10 +45,6 @@
 
 	function handleQuickAddCancel() {
 		showQuickAdd = false;
-	}
-
-	function goToAllTasks() {
-		goto('/tasks');
 	}
 </script>
 
@@ -118,12 +107,6 @@
 						/>
 					{/each}
 				</div>
-
-				{#if totalActiveCount > maxItems}
-					<button type="button" class="show-all-button" onclick={goToAllTasks}>
-						Alle {totalActiveCount} anzeigen
-					</button>
-				{/if}
 			{/if}
 
 			<!-- Quick Add -->
@@ -236,6 +219,8 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
+		max-height: 300px;
+		overflow-y: auto;
 	}
 
 	.service-unavailable,
@@ -267,24 +252,6 @@
 		to {
 			transform: rotate(360deg);
 		}
-	}
-
-	.show-all-button {
-		width: 100%;
-		padding: 0.5rem;
-		margin-top: 0.5rem;
-		border: none;
-		background: transparent;
-		color: hsl(var(--color-primary));
-		font-size: 0.8125rem;
-		font-weight: 500;
-		cursor: pointer;
-		border-radius: var(--radius-md);
-		transition: background 150ms ease;
-	}
-
-	.show-all-button:hover {
-		background: hsl(var(--color-primary) / 0.1);
 	}
 
 	.quick-add-wrapper {

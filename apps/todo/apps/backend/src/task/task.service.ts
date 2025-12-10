@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { eq, and, or, gte, lte, ilike, asc, desc, isNull, SQL, sql } from 'drizzle-orm';
+import { eq, and, or, gte, lte, ilike, asc, desc, isNull, SQL, sql, inArray } from 'drizzle-orm';
 import { RRule, RRuleSet, rrulestr } from 'rrule';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { type Database } from '../db/connection';
@@ -125,6 +125,11 @@ export class TaskService {
 			dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
 			dueTime: dto.dueTime,
 			startDate: dto.startDate ? new Date(dto.startDate) : null,
+			// Time-Blocking fields
+			scheduledDate: dto.scheduledDate ? new Date(dto.scheduledDate) : null,
+			scheduledStartTime: dto.scheduledStartTime,
+			scheduledEndTime: dto.scheduledEndTime,
+			estimatedDuration: dto.estimatedDuration,
 			priority: dto.priority ?? 'medium',
 			recurrenceRule: dto.recurrenceRule,
 			recurrenceEndDate: dto.recurrenceEndDate ? new Date(dto.recurrenceEndDate) : null,
@@ -157,6 +162,12 @@ export class TaskService {
 			startDate: dto.startDate
 				? new Date(dto.startDate)
 				: dto.startDate === null
+					? null
+					: undefined,
+			// Time-Blocking fields
+			scheduledDate: dto.scheduledDate
+				? new Date(dto.scheduledDate)
+				: dto.scheduledDate === null
 					? null
 					: undefined,
 			recurrenceEndDate: dto.recurrenceEndDate
@@ -434,21 +445,20 @@ export class TaskService {
 	}
 
 	async getUpcomingTasks(userId: string, days: number = 7): Promise<TaskWithLabels[]> {
+		// Ensure days is a valid number
+		const daysNum = typeof days === 'number' && !isNaN(days) ? days : 7;
+
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
-		const endDate = new Date(today);
-		endDate.setDate(endDate.getDate() + days);
-
-		// Use SQL date strings for more reliable comparison
-		const todayStr = today.toISOString();
-		const endDateStr = endDate.toISOString();
+		const endDate = new Date(today.getTime());
+		endDate.setDate(endDate.getDate() + daysNum);
 
 		const result = await this.db.query.tasks.findMany({
 			where: and(
 				eq(tasks.userId, userId),
 				eq(tasks.isCompleted, false),
-				gte(tasks.dueDate, todayStr),
-				lte(tasks.dueDate, endDateStr)
+				gte(tasks.dueDate, today),
+				lte(tasks.dueDate, endDate)
 			),
 			orderBy: [asc(tasks.dueDate), asc(tasks.order)],
 		});
@@ -529,17 +539,11 @@ export class TaskService {
 
 		const taskIds = taskList.map((t) => t.id);
 
-		// Single query to get all task-label relationships
-		// Use inArray for better performance with multiple IDs
+		// Single query to get all task-label relationships using inArray
 		const allTaskLabels = await this.db
 			.select()
 			.from(taskLabels)
-			.where(
-				sql`${taskLabels.taskId} IN (${sql.join(
-					taskIds.map((id) => sql`${id}`),
-					sql`, `
-				)})`
-			);
+			.where(inArray(taskLabels.taskId, taskIds));
 
 		if (allTaskLabels.length === 0) {
 			// No labels for any task - return tasks with empty labels array
@@ -549,16 +553,8 @@ export class TaskService {
 		// Get unique label IDs
 		const uniqueLabelIds = [...new Set(allTaskLabels.map((tl) => tl.labelId))];
 
-		// Single query to get all labels using IN clause
-		const allLabels = await this.db
-			.select()
-			.from(labels)
-			.where(
-				sql`${labels.id} IN (${sql.join(
-					uniqueLabelIds.map((id) => sql`${id}`),
-					sql`, `
-				)})`
-			);
+		// Single query to get all labels using inArray
+		const allLabels = await this.db.select().from(labels).where(inArray(labels.id, uniqueLabelIds));
 
 		// Create a map of labelId -> label for fast lookup
 		const labelMap = new Map(allLabels.map((l) => [l.id, l]));
