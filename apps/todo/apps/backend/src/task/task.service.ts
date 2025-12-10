@@ -439,12 +439,16 @@ export class TaskService {
 		const endDate = new Date(today);
 		endDate.setDate(endDate.getDate() + days);
 
+		// Use SQL date strings for more reliable comparison
+		const todayStr = today.toISOString();
+		const endDateStr = endDate.toISOString();
+
 		const result = await this.db.query.tasks.findMany({
 			where: and(
 				eq(tasks.userId, userId),
 				eq(tasks.isCompleted, false),
-				gte(tasks.dueDate, today),
-				lte(tasks.dueDate, endDate)
+				gte(tasks.dueDate, todayStr),
+				lte(tasks.dueDate, endDateStr)
 			),
 			orderBy: [asc(tasks.dueDate), asc(tasks.order)],
 		});
@@ -526,9 +530,16 @@ export class TaskService {
 		const taskIds = taskList.map((t) => t.id);
 
 		// Single query to get all task-label relationships
-		const allTaskLabels = await this.db.query.taskLabels.findMany({
-			where: or(...taskIds.map((id) => eq(taskLabels.taskId, id))),
-		});
+		// Use inArray for better performance with multiple IDs
+		const allTaskLabels = await this.db
+			.select()
+			.from(taskLabels)
+			.where(
+				sql`${taskLabels.taskId} IN (${sql.join(
+					taskIds.map((id) => sql`${id}`),
+					sql`, `
+				)})`
+			);
 
 		if (allTaskLabels.length === 0) {
 			// No labels for any task - return tasks with empty labels array
@@ -538,10 +549,16 @@ export class TaskService {
 		// Get unique label IDs
 		const uniqueLabelIds = [...new Set(allTaskLabels.map((tl) => tl.labelId))];
 
-		// Single query to get all labels
-		const allLabels = await this.db.query.labels.findMany({
-			where: or(...uniqueLabelIds.map((id) => eq(labels.id, id))),
-		});
+		// Single query to get all labels using IN clause
+		const allLabels = await this.db
+			.select()
+			.from(labels)
+			.where(
+				sql`${labels.id} IN (${sql.join(
+					uniqueLabelIds.map((id) => sql`${id}`),
+					sql`, `
+				)})`
+			);
 
 		// Create a map of labelId -> label for fast lookup
 		const labelMap = new Map(allLabels.map((l) => [l.id, l]));

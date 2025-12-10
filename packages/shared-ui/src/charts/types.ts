@@ -2,8 +2,6 @@
  * Shared Types for Chart Components
  */
 
-import type { Component } from 'svelte';
-
 // Stat card variant colors
 export type StatVariant = 'success' | 'primary' | 'neutral' | 'danger' | 'info' | 'accent';
 
@@ -17,11 +15,13 @@ export const STAT_VARIANT_COLORS: Record<StatVariant, { bg: string; color: strin
 };
 
 // StatsGrid types
+
 export interface StatItem {
 	id: string;
 	label: string;
 	value: number | string;
-	icon: Component;
+	/** Svelte component to render as icon (e.g., lucide-svelte icon) */
+	icon: any;
 	variant: StatVariant;
 	/** Optional: only show this stat if condition is true */
 	showCondition?: boolean;

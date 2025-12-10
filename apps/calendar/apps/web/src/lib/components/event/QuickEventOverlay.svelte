@@ -551,7 +551,7 @@
 					></div>
 				</div>
 				<div class="row-content">
-					<label class="field-label">Kalender</label>
+					<span class="field-label">Kalender</span>
 					{#if calendarsStore.calendars.length > 0}
 						<select class="field-select" value={calendarId} onchange={handleCalendarChange}>
 							{#each calendarsStore.calendars as cal}
@@ -565,7 +565,8 @@
 			</div>
 
 			<!-- All day toggle -->
-			<div class="form-row clickable" onclick={handleAllDayToggle}>
+			<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions a11y_no_noninteractive_element_to_interactive_role -->
+			<div class="form-row clickable" onclick={handleAllDayToggle} role="button" tabindex="0">
 				<div class="row-icon">
 					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -593,7 +594,7 @@
 				<div class="form-row sub-row">
 					<div class="row-icon"></div>
 					<div class="row-content">
-						<label class="field-label">Anzeigeart</label>
+						<span class="field-label">Anzeigeart</span>
 						<select class="field-select" bind:value={allDayDisplayMode}>
 							<option value="default">Standard (aus Einstellungen)</option>
 							<option value="header">In Kopfzeile</option>
@@ -617,7 +618,7 @@
 				</div>
 				<div class="row-content datetime-row">
 					<div class="datetime-field">
-						<label class="field-label">Beginn</label>
+						<span class="field-label">Beginn</span>
 						<input
 							type="date"
 							class="field-input"
@@ -627,7 +628,7 @@
 					</div>
 					{#if !isAllDay}
 						<div class="datetime-field time-field">
-							<label class="field-label">Uhrzeit</label>
+							<span class="field-label">Uhrzeit</span>
 							<input
 								type="time"
 								class="field-input"
@@ -653,7 +654,7 @@
 				</div>
 				<div class="row-content datetime-row">
 					<div class="datetime-field">
-						<label class="field-label">Ende</label>
+						<span class="field-label">Ende</span>
 						<input
 							type="date"
 							class="field-input"
@@ -663,7 +664,7 @@
 					</div>
 					{#if !isAllDay}
 						<div class="datetime-field time-field">
-							<label class="field-label">Uhrzeit</label>
+							<span class="field-label">Uhrzeit</span>
 							<input
 								type="time"
 								class="field-input"
@@ -731,7 +732,7 @@
 					<div class="row-icon"></div>
 					<div class="row-content address-details-form">
 						<div class="address-field">
-							<label class="field-label">Straße</label>
+							<span class="field-label">Straße</span>
 							<input
 								type="text"
 								class="field-input"
@@ -741,7 +742,7 @@
 						</div>
 						<div class="address-row">
 							<div class="address-field postal">
-								<label class="field-label">PLZ</label>
+								<span class="field-label">PLZ</span>
 								<input
 									type="text"
 									class="field-input"
@@ -750,7 +751,7 @@
 								/>
 							</div>
 							<div class="address-field city">
-								<label class="field-label">Stadt</label>
+								<span class="field-label">Stadt</span>
 								<input
 									type="text"
 									class="field-input"
@@ -760,7 +761,7 @@
 							</div>
 						</div>
 						<div class="address-field">
-							<label class="field-label">Land</label>
+							<span class="field-label">Land</span>
 							<input
 								type="text"
 								class="field-input"

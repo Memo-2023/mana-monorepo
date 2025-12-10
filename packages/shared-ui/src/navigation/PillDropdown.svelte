@@ -148,7 +148,11 @@
 
 	{#if open}
 		<!-- Backdrop -->
-		<button class="menu-backdrop" onclick={close} onkeydown={(e) => e.key === 'Escape' && close()}
+		<button
+			class="menu-backdrop"
+			onclick={close}
+			onkeydown={(e) => e.key === 'Escape' && close()}
+			aria-label="Close dropdown"
 		></button>
 
 		<!-- Dropdown items -->

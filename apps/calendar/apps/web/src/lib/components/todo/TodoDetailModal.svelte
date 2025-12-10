@@ -23,12 +23,21 @@
 	let isDeleting = $state(false);
 	let isToggling = $state(false);
 
-	// Form state
-	let title = $state(task.title);
-	let description = $state(task.description || '');
-	let dueDate = $state(task.dueDate ? formatDateForInput(task.dueDate) : '');
-	let dueTime = $state(task.dueTime || '');
-	let priority = $state<TaskPriority>(task.priority);
+	// Form state - initialized with derived values
+	let title = $state(initialTask.title);
+	let description = $state(initialTask.description || '');
+	let dueDate = $state(initialTask.dueDate ? formatDateForInput(initialTask.dueDate) : '');
+	let dueTime = $state(initialTask.dueTime || '');
+	let priority = $state<TaskPriority>(initialTask.priority);
+
+	// Sync form state when task changes
+	$effect(() => {
+		title = task.title;
+		description = task.description || '';
+		dueDate = task.dueDate ? formatDateForInput(task.dueDate) : '';
+		dueTime = task.dueTime || '';
+		priority = task.priority;
+	});
 
 	function formatDateForInput(date: string | Date | null | undefined): string {
 		if (!date) return '';
@@ -132,8 +141,8 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-<div class="modal-backdrop" onclick={handleBackdropClick}>
+<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions a11y_no_noninteractive_element_to_interactive_role -->
+<div class="modal-backdrop" onclick={handleBackdropClick} role="button" tabindex="-1">
 	<div class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true">
 		<!-- Header -->
 		<div class="modal-header">
@@ -168,14 +177,7 @@
 				>
 					<div class="form-group">
 						<label for="title">Titel</label>
-						<input
-							id="title"
-							type="text"
-							bind:value={title}
-							placeholder="Aufgabentitel"
-							required
-							autofocus
-						/>
+						<input id="title" type="text" bind:value={title} placeholder="Aufgabentitel" required />
 					</div>
 
 					<div class="form-group">
@@ -201,7 +203,7 @@
 					</div>
 
 					<div class="form-group">
-						<label>Priorität</label>
+						<span class="label-text">Priorität</span>
 						<div class="priority-options">
 							{#each Object.entries(PRIORITY_LABELS) as [key, label]}
 								<button

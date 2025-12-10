@@ -6,7 +6,7 @@ pnpm docker:up:all
 
 pnpm docker:down
 
-pnpm dev:calendar:app
+pnpm dev:calendar:full
 pnpm dev:todo:full
 pnpm dev:contacts:full
 pnpm dev:clock:full

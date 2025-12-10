@@ -209,6 +209,7 @@
 									: 'bg-gray-200 dark:bg-gray-700'}"
 								onclick={() =>
 									handleSidebarChange(!userSettings.globalSettings.nav.sidebarCollapsed)}
+								aria-label="Toggle sidebar collapsed state"
 							>
 								<span
 									class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {userSettings
@@ -416,6 +417,7 @@
 									? 'bg-[hsl(var(--primary))]'
 									: 'bg-gray-200 dark:bg-gray-700'}"
 								onclick={() => handleSoundsChange(!(userSettings.general?.soundsEnabled ?? true))}
+								aria-label="Toggle sound effects"
 							>
 								<span
 									class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {(userSettings

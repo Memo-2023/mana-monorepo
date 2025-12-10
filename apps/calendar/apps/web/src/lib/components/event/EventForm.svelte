@@ -383,7 +383,7 @@
 	<!-- Tags -->
 	{#if availableTags.length > 0 || eventTagsStore.loading}
 		<div class="flex flex-col gap-2">
-			<label class="text-sm font-medium text-foreground">Tags</label>
+			<span class="text-sm font-medium text-foreground">Tags</span>
 			<TagSelector
 				tags={availableTags}
 				{selectedTags}
