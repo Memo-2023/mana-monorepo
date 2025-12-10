@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { TagList, TagEditModal, ConfirmationModal, type Tag } from '@manacore/shared-ui';
-	import { MagnifyingGlass, Plus, CaretLeft } from '@manacore/shared-icons';
+	import { MagnifyingGlass, Plus, CaretLeft, Check } from '@manacore/shared-icons';
 	import { labelsStore } from '$lib/stores/labels.svelte';
 	import type { Label } from '@todo/shared';
 
@@ -11,6 +11,25 @@
 	let editingLabel = $state<Label | null>(null);
 	let showDeleteConfirm = $state(false);
 	let labelToDelete = $state<Tag | null>(null);
+
+	// Inline create state
+	let newTagName = $state('');
+	let newTagColor = $state('#8b5cf6');
+	let isCreating = $state(false);
+	let newTagInputRef = $state<HTMLInputElement | null>(null);
+
+	// Predefined color palette
+	const colorPalette = [
+		'#ef4444', // red
+		'#f97316', // orange
+		'#eab308', // yellow
+		'#22c55e', // green
+		'#14b8a6', // teal
+		'#3b82f6', // blue
+		'#8b5cf6', // violet
+		'#ec4899', // pink
+		'#6b7280', // gray
+	];
 
 	const filteredLabels = $derived.by(() => {
 		if (!searchQuery.trim()) return labelsStore.labels;
@@ -27,9 +46,27 @@
 		};
 	}
 
-	function openCreateModal() {
-		editingLabel = null;
-		showModal = true;
+	// Inline create handlers
+	async function handleInlineCreate() {
+		if (!newTagName.trim() || isCreating) return;
+
+		isCreating = true;
+		try {
+			await labelsStore.createLabel({ name: newTagName.trim(), color: newTagColor });
+			newTagName = '';
+			newTagColor = '#8b5cf6';
+		} catch (e) {
+			console.error('Failed to create tag:', e);
+		} finally {
+			isCreating = false;
+		}
+	}
+
+	function handleInlineKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' && newTagName.trim()) {
+			e.preventDefault();
+			handleInlineCreate();
+		}
 	}
 
 	function openEditModal(tag: Tag) {
@@ -49,8 +86,6 @@
 		try {
 			if (editingLabel) {
 				await labelsStore.updateLabel(editingLabel.id, { name, color });
-			} else {
-				await labelsStore.createLabel({ name, color });
 			}
 			closeModal();
 		} catch (e) {
@@ -109,10 +144,63 @@
 			<CaretLeft size={20} weight="bold" />
 		</a>
 		<h1 class="title">Tags</h1>
-		<button onclick={openCreateModal} class="add-button" aria-label="Neuer Tag">
-			<Plus size={20} weight="bold" />
-		</button>
 	</header>
+
+	<!-- Inline Create Form -->
+	<div class="inline-create-form">
+		<div class="create-input-row">
+			<!-- Name input -->
+			<input
+				bind:this={newTagInputRef}
+				type="text"
+				placeholder="Neuer Tag..."
+				bind:value={newTagName}
+				onkeydown={handleInlineKeydown}
+				class="create-input"
+				disabled={isCreating}
+			/>
+
+			<!-- Submit button -->
+			<button
+				type="button"
+				class="create-button"
+				onclick={handleInlineCreate}
+				disabled={!newTagName.trim() || isCreating}
+				aria-label="Tag erstellen"
+			>
+				{#if isCreating}
+					<div class="spinner"></div>
+				{:else}
+					<Plus size={18} weight="bold" />
+				{/if}
+			</button>
+		</div>
+
+		<!-- Color palette (always visible) -->
+		<div class="color-row">
+			<div class="color-palette">
+				{#each colorPalette as color}
+					<button
+						type="button"
+						class="color-option"
+						class:active={newTagColor === color}
+						style="background-color: {color}"
+						onclick={() => (newTagColor = color)}
+						aria-label="Farbe {color}"
+					></button>
+				{/each}
+			</div>
+
+			<!-- Preview -->
+			{#if newTagName.trim()}
+				<div class="create-preview">
+					<span class="preview-tag" style="--tag-color: {newTagColor}">
+						{newTagName}
+					</span>
+				</div>
+			{/if}
+		</div>
+	</div>
 
 	<!-- Search -->
 	<div class="search-wrapper">
@@ -149,15 +237,6 @@
 			{labelsStore.labels.length}
 			{labelsStore.labels.length === 1 ? 'Tag' : 'Tags'}
 		</p>
-	{/if}
-
-	{#if !labelsStore.loading && labelsStore.labels.length === 0 && !searchQuery}
-		<div class="empty-cta">
-			<button onclick={openCreateModal} class="btn btn-primary">
-				<Plus size={16} weight="bold" />
-				Neuer Tag
-			</button>
-		</div>
 	{/if}
 </div>
 
@@ -233,13 +312,89 @@
 		color: hsl(var(--foreground));
 	}
 
-	.add-button {
+	/* Inline Create Form */
+	.inline-create-form {
+		margin-bottom: 1.5rem;
+		padding: 1rem;
+		background: hsl(var(--muted) / 0.3);
+		border: 1.5px solid hsl(var(--border));
+		border-radius: 0.75rem;
+	}
+
+	.create-input-row {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	/* Color Row */
+	.color-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-top: 0.75rem;
+	}
+
+	.color-palette {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.color-option {
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: 50%;
+		border: 2px solid transparent;
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.color-option:hover {
+		transform: scale(1.15);
+	}
+
+	.color-option.active {
+		border-color: hsl(var(--foreground));
+		box-shadow: 0 0 0 2px hsl(var(--background));
+	}
+
+	/* Create Input */
+	.create-input {
+		flex: 1;
+		padding: 0.625rem 1rem;
+		border: 1.5px solid hsl(var(--border));
+		border-radius: 0.5rem;
+		background: hsl(var(--background));
+		color: hsl(var(--foreground));
+		font-size: 0.9375rem;
+		transition: all 0.2s ease;
+	}
+
+	.create-input:focus {
+		outline: none;
+		border-color: hsl(var(--primary));
+		box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
+	}
+
+	.create-input:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.create-input::placeholder {
+		color: hsl(var(--muted-foreground));
+	}
+
+	/* Create Button */
+	.create-button {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		width: 2.5rem;
 		height: 2.5rem;
-		border-radius: 50%;
+		border-radius: 0.5rem;
 		background: hsl(var(--primary));
 		color: hsl(var(--primary-foreground));
 		border: none;
@@ -247,9 +402,49 @@
 		transition: all 0.2s ease;
 	}
 
-	.add-button:hover {
+	.create-button:hover:not(:disabled) {
 		transform: scale(1.05);
 		box-shadow: 0 4px 12px hsl(var(--primary) / 0.3);
+	}
+
+	.create-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	/* Spinner */
+	.spinner {
+		width: 1rem;
+		height: 1rem;
+		border: 2px solid hsl(var(--primary-foreground) / 0.3);
+		border-top-color: hsl(var(--primary-foreground));
+		border-radius: 50%;
+		animation: spin 0.6s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	/* Preview */
+	.create-preview {
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
+	}
+
+	.preview-tag {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.25rem 0.75rem;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		border-radius: 9999px;
+		background: var(--tag-color);
+		color: white;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 	}
 
 	/* Search */
@@ -303,37 +498,5 @@
 		font-size: 0.875rem;
 		color: hsl(var(--muted-foreground));
 		margin-top: 1.5rem;
-	}
-
-	/* Empty CTA */
-	.empty-cta {
-		display: flex;
-		justify-content: center;
-		margin-top: 1rem;
-	}
-
-	/* Buttons */
-	.btn {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		padding: 0.625rem 1.25rem;
-		border-radius: 0.625rem;
-		font-weight: 600;
-		font-size: 0.875rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		border: none;
-		text-decoration: none;
-	}
-
-	.btn-primary {
-		background: hsl(var(--primary));
-		color: hsl(var(--primary-foreground));
-	}
-
-	.btn-primary:hover {
-		box-shadow: 0 4px 12px hsl(var(--primary) / 0.3);
 	}
 </style>
