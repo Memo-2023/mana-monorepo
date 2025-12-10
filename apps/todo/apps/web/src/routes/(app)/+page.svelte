@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { format, addDays, startOfDay } from 'date-fns';
+	import { format, addDays, subDays, startOfDay } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { ListChecks } from '@manacore/shared-icons';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -12,7 +12,7 @@
 	import CollapsibleSection from '$lib/components/CollapsibleSection.svelte';
 	import TaskEditModal from '$lib/components/TaskEditModal.svelte';
 	import { TaskListSkeleton } from '$lib/components/skeletons';
-	import type { Task } from '@todo/shared';
+	import type { Task, UpdateTaskInput } from '@todo/shared';
 
 	let isLoading = $state(true);
 	let editingTask = $state<Task | null>(null);
@@ -39,13 +39,24 @@
 	let todayTasks = $derived(tasksStore.todayTasks);
 	let completedTasks = $derived(tasksStore.completedTasks);
 
-	// Group upcoming tasks by day
+	// Tomorrow's tasks
+	let tomorrowDate = $derived(addDays(startOfDay(new Date()), 1));
+	let dayAfterTomorrowDate = $derived(addDays(startOfDay(new Date()), 2));
+	let tomorrowTasks = $derived(
+		tasksStore.tasks.filter((task) => {
+			if (!task.dueDate || task.isCompleted) return false;
+			const taskDate = startOfDay(new Date(task.dueDate));
+			return taskDate.getTime() === tomorrowDate.getTime();
+		})
+	);
+
+	// Group upcoming tasks by day (starting from day after tomorrow)
 	let groupedUpcomingTasks = $derived(() => {
 		const groups: { date: Date; label: string; tasks: Task[] }[] = [];
 		const today = startOfDay(new Date());
 
-		// Start from tomorrow (day 1) through day 7
-		for (let i = 1; i <= 7; i++) {
+		// Start from day after tomorrow (day 2) through day 7
+		for (let i = 2; i <= 7; i++) {
 			const date = addDays(today, i);
 			const dayTasks = tasksStore.tasks.filter((task) => {
 				if (!task.dueDate || task.isCompleted) return false;
@@ -54,13 +65,7 @@
 			});
 
 			if (dayTasks.length > 0) {
-				let label: string;
-				if (i === 1) {
-					label = 'Morgen';
-				} else {
-					label = format(date, 'EEEE, d. MMMM', { locale: de });
-				}
-
+				const label = format(date, 'EEEE, d. MMMM', { locale: de });
 				groups.push({ date, label, tasks: dayTasks });
 			}
 		}
@@ -68,7 +73,7 @@
 		return groups;
 	});
 
-	// Total upcoming count
+	// Total upcoming count (excluding tomorrow)
 	let upcomingCount = $derived(
 		groupedUpcomingTasks().reduce((sum, group) => sum + group.tasks.length, 0)
 	);
@@ -77,6 +82,7 @@
 	let allEmpty = $derived(
 		overdueTasks.length === 0 &&
 			todayTasks.length === 0 &&
+			tomorrowTasks.length === 0 &&
 			upcomingCount === 0 &&
 			completedTasks.length === 0
 	);
@@ -90,7 +96,7 @@
 		editingTask = null;
 	}
 
-	async function handleSaveTask(data: Partial<Task>) {
+	async function handleSaveTask(data: UpdateTaskInput) {
 		if (!editingTask) return;
 
 		try {
@@ -98,8 +104,8 @@
 			await tasksStore.updateTask(editingTask.id, data);
 
 			// Update labels if provided
-			if ('labelIds' in data) {
-				await tasksStore.updateLabels(editingTask.id, (data as any).labelIds);
+			if (data.labelIds !== undefined) {
+				await tasksStore.updateLabels(editingTask.id, data.labelIds);
 			}
 
 			closeEditModal();
@@ -114,6 +120,32 @@
 			closeEditModal();
 		} catch (error) {
 			console.error('Failed to delete task:', error);
+		}
+	}
+
+	// Drag and drop handler - uses optimistic updates for smooth UX
+	function handleTaskDrop(taskId: string, targetDate: Date | 'completed' | 'overdue') {
+		const task = tasksStore.tasks.find((t) => t.id === taskId);
+		if (!task) return;
+
+		if (targetDate === 'completed') {
+			// Mark task as completed (optimistic)
+			if (!task.isCompleted) {
+				tasksStore.updateTaskOptimistic(taskId, { isCompleted: true });
+			}
+		} else if (targetDate === 'overdue') {
+			// Set to yesterday (optimistic)
+			const yesterday = subDays(startOfDay(new Date()), 1);
+			tasksStore.updateTaskOptimistic(taskId, {
+				dueDate: yesterday.toISOString(),
+				isCompleted: task.isCompleted ? false : undefined,
+			});
+		} else {
+			// Set to specific date (optimistic)
+			tasksStore.updateTaskOptimistic(taskId, {
+				dueDate: targetDate.toISOString(),
+				isCompleted: task.isCompleted ? false : undefined,
+			});
 		}
 	}
 </script>
@@ -155,7 +187,13 @@
 					variant="warning"
 					defaultOpen={true}
 				>
-					<TaskList tasks={overdueTasks} onEditTask={openEditModal} />
+					<TaskList
+						tasks={overdueTasks}
+						enableDragDrop
+						dropTargetDate="overdue"
+						onTaskDrop={handleTaskDrop}
+						onEditTask={openEditModal}
+					/>
 				</CollapsibleSection>
 			{/if}
 
@@ -167,13 +205,30 @@
 				variant="default"
 				defaultOpen={true}
 			>
-				{#if todayTasks.length === 0}
-					<div class="text-center py-6 text-muted-foreground">
-						<p>Keine Aufgaben für heute</p>
-					</div>
-				{:else}
-					<TaskList tasks={todayTasks} onEditTask={openEditModal} />
-				{/if}
+				<TaskList
+					tasks={todayTasks}
+					enableDragDrop
+					dropTargetDate={startOfDay(new Date())}
+					onTaskDrop={handleTaskDrop}
+					onEditTask={openEditModal}
+				/>
+			</CollapsibleSection>
+
+			<!-- Tomorrow Section -->
+			<CollapsibleSection
+				title="Morgen"
+				count={tomorrowTasks.length}
+				icon="upcoming"
+				variant="default"
+				defaultOpen={true}
+			>
+				<TaskList
+					tasks={tomorrowTasks}
+					enableDragDrop
+					dropTargetDate={tomorrowDate}
+					onTaskDrop={handleTaskDrop}
+					onEditTask={openEditModal}
+				/>
 			</CollapsibleSection>
 
 			<!-- Upcoming Section -->
@@ -184,39 +239,49 @@
 				variant="default"
 				defaultOpen={true}
 			>
-				{#if upcomingCount === 0}
-					<div class="text-center py-6 text-muted-foreground">
-						<p>Keine anstehenden Aufgaben</p>
-					</div>
-				{:else}
-					<div class="space-y-4">
-						{#each groupedUpcomingTasks() as group}
-							<div>
-								<h3 class="text-sm font-medium text-muted-foreground mb-2 pl-2">
-									{group.label} ({group.tasks.length})
-								</h3>
-								<TaskList tasks={group.tasks} onEditTask={openEditModal} />
-							</div>
-						{/each}
-					</div>
-				{/if}
+				<div class="space-y-4">
+					{#each groupedUpcomingTasks() as group}
+						<div>
+							<h3 class="text-sm font-medium text-muted-foreground mb-2 pl-2">
+								{group.label} ({group.tasks.length})
+							</h3>
+							<TaskList
+								tasks={group.tasks}
+								enableDragDrop
+								dropTargetDate={group.date}
+								onTaskDrop={handleTaskDrop}
+								onEditTask={openEditModal}
+							/>
+						</div>
+					{/each}
+					{#if upcomingCount === 0}
+						<!-- Empty drop zone for day after tomorrow -->
+						<TaskList
+							tasks={[]}
+							enableDragDrop
+							dropTargetDate={dayAfterTomorrowDate}
+							onTaskDrop={handleTaskDrop}
+						/>
+					{/if}
+				</div>
 			</CollapsibleSection>
 
-			<!-- Completed Section - collapsed by default -->
+			<!-- Completed Section -->
 			<CollapsibleSection
 				title="Erledigt"
 				count={completedTasks.length}
 				icon="completed"
 				variant="success"
-				defaultOpen={false}
+				defaultOpen={true}
 			>
-				{#if completedTasks.length === 0}
-					<div class="text-center py-6 text-muted-foreground">
-						<p>Noch keine erledigten Aufgaben</p>
-					</div>
-				{:else}
-					<TaskList tasks={completedTasks} showCompleted onEditTask={openEditModal} />
-				{/if}
+				<TaskList
+					tasks={completedTasks}
+					enableDragDrop
+					dropTargetDate="completed"
+					onTaskDrop={handleTaskDrop}
+					showCompleted
+					onEditTask={openEditModal}
+				/>
 			</CollapsibleSection>
 		</div>
 	{/if}

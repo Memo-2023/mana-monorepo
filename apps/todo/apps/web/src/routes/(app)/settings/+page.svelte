@@ -6,6 +6,7 @@
 	import { todoSettings, type TodoView, type KanbanCardSize } from '$lib/stores/settings.svelte';
 	import { projectsStore } from '$lib/stores/projects.svelte';
 	import type { TaskPriority } from '@todo/shared';
+	import { PRIORITY_OPTIONS } from '@todo/shared';
 	import {
 		SettingsPage,
 		SettingsSection,
@@ -20,13 +21,8 @@
 		GlobalSettingsSection,
 	} from '@manacore/shared-ui';
 
-	// Options for selects
-	const priorityOptions = [
-		{ value: 'low', label: 'Niedrig' },
-		{ value: 'medium', label: 'Mittel' },
-		{ value: 'high', label: 'Hoch' },
-		{ value: 'urgent', label: 'Dringend' },
-	];
+	// Use shared priority options (without color)
+	const priorityOptions = PRIORITY_OPTIONS.map((p) => ({ value: p.value, label: p.label }));
 
 	const viewOptions = [
 		{ value: 'inbox', label: 'Inbox' },

@@ -42,11 +42,12 @@ export interface ParsedTaskWithIds {
 }
 
 // Priority patterns (task-specific)
+// Supports: !später, !normal, !wichtig, !dringend and shortcuts !, !!, !!!
 const PRIORITY_PATTERNS: { pattern: RegExp; priority: TaskPriority }[] = [
-	{ pattern: /!{3,}|!dringend|!urgent/i, priority: 'urgent' },
-	{ pattern: /!{2}|!hoch|!high/i, priority: 'high' },
-	{ pattern: /!mittel|!medium/i, priority: 'medium' },
-	{ pattern: /!niedrig|!low/i, priority: 'low' },
+	{ pattern: /!{3,}|!dringend/i, priority: 'urgent' },
+	{ pattern: /!{2}|!wichtig/i, priority: 'high' },
+	{ pattern: /!normal/i, priority: 'medium' },
+	{ pattern: /!später|!sp[aä]ter/i, priority: 'low' },
 ];
 
 /**
@@ -160,9 +161,9 @@ export function formatParsedTaskPreview(parsed: ParsedTask): string {
 
 	if (parsed.priority) {
 		const priorityLabels: Record<TaskPriority, string> = {
-			low: '🟢 Niedrig',
-			medium: '🟡 Mittel',
-			high: '🟠 Hoch',
+			low: '🟢 Später',
+			medium: '🟡 Normal',
+			high: '🟠 Wichtig',
 			urgent: '🔴 Dringend',
 		};
 		parts.push(priorityLabels[parsed.priority]);
