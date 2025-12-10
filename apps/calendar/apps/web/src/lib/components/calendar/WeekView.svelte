@@ -21,13 +21,16 @@
 		getWeek,
 	} from 'date-fns';
 	import { de, enUS, fr, es, it } from 'date-fns/locale';
-	import { locale } from 'svelte-i18n';
+	import { locale, _ } from 'svelte-i18n';
+
+	import type { CalendarEvent } from '@calendar/shared';
 
 	interface Props {
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
+		onEventClick?: (event: CalendarEvent) => void;
 	}
 
-	let { onQuickCreate }: Props = $props();
+	let { onQuickCreate, onEventClick }: Props = $props();
 
 	// Constants
 	const HOUR_HEIGHT = 60; // px - should match CSS --hour-height
@@ -162,7 +165,7 @@
 		return settingsStore.formatTime(d);
 	}
 
-	function handleEventClick(event: any, e: MouseEvent) {
+	function handleEventClick(event: CalendarEvent, e: MouseEvent) {
 		// Don't navigate if we just finished dragging or resizing, or if we moved
 		if (isDragging || isResizing || hasMoved) {
 			e.preventDefault();
@@ -173,7 +176,11 @@
 			}, 100);
 			return;
 		}
-		goto(`/?event=${event.id}`);
+		if (onEventClick) {
+			onEventClick(event);
+		} else {
+			goto(`/?event=${event.id}`);
+		}
 	}
 
 	function handleSlotClick(day: Date, hour: number, e: MouseEvent) {
@@ -473,7 +480,8 @@
 	<!-- Week number indicator (if enabled) -->
 	{#if settingsStore.showWeekNumbers}
 		<div class="week-number-indicator">
-			KW {weekNumber}
+			{$_('views.weekNumber')}
+			{weekNumber}
 		</div>
 	{/if}
 
@@ -482,7 +490,7 @@
 		<div class="all-day-row">
 			<div class="time-gutter">
 				{#if settingsStore.showWeekNumbers}
-					<span class="week-label">KW {weekNumber}</span>
+					<span class="week-label">{$_('views.weekNumber')} {weekNumber}</span>
 				{/if}
 			</div>
 			{#each days as day}
@@ -576,6 +584,7 @@
 									: getEventStyle(event)}
 							role="button"
 							tabindex="0"
+							aria-label={event.title || $_('calendar.draftEvent')}
 							onpointerdown={(e) => startDrag(event, e)}
 							onclick={(e) => !isDraft && handleEventClick(event, e)}
 							onkeydown={(e) => !isDraft && e.key === 'Enter' && goto(`/?event=${event.id}`)}
@@ -585,21 +594,23 @@
 								class="resize-handle top"
 								onpointerdown={(e) => startResize(event, 'top', e)}
 								role="slider"
-								aria-label="Startzeit ändern"
+								aria-label={$_('event.changeStartTime')}
 								tabindex="-1"
 							></div>
 
 							<span class="event-time">
 								{formatEventTime(event.startTime)} - {formatEventTime(event.endTime)}
 							</span>
-							<span class="event-title">{event.title || (isDraft ? '(Neuer Termin)' : '')}</span>
+							<span class="event-title"
+								>{event.title || (isDraft ? $_('calendar.draftEvent') : '')}</span
+							>
 
 							<!-- Bottom resize handle -->
 							<div
 								class="resize-handle bottom"
 								onpointerdown={(e) => startResize(event, 'bottom', e)}
 								role="slider"
-								aria-label="Endzeit ändern"
+								aria-label={$_('event.changeEndTime')}
 								tabindex="-1"
 							></div>
 						</div>

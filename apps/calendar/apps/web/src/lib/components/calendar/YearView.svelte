@@ -16,13 +16,14 @@
 		setMinutes,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
-	import type { CalendarViewType } from '@calendar/shared';
+	import type { CalendarViewType, CalendarEvent } from '@calendar/shared';
 
 	interface Props {
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
+		onEventClick?: (event: CalendarEvent) => void;
 	}
 
-	let { onQuickCreate }: Props = $props();
+	let { onQuickCreate, onEventClick }: Props = $props();
 
 	// Derived values
 	let year = $derived(viewStore.currentDate.getFullYear());

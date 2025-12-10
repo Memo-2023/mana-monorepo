@@ -1,16 +1,12 @@
 <script lang="ts">
-	import { toast } from '$lib/stores/toast';
-	import type { Toast } from '$lib/stores/toast';
+	import { toastStore, type Toast } from '$lib/stores/toast.svelte';
 	import { fly } from 'svelte/transition';
 
-	let toasts = $state<Toast[]>([]);
-
-	toast.subscribe((value) => {
-		toasts = value;
-	});
+	// Reactive getter from the runes-based store
+	let toasts = $derived(toastStore.toasts);
 
 	function handleClose(id: string) {
-		toast.remove(id);
+		toastStore.remove(id);
 	}
 
 	function getIcon(type: Toast['type']) {

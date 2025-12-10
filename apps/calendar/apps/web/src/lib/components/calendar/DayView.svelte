@@ -17,11 +17,14 @@
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
 
+	import type { CalendarEvent } from '@calendar/shared';
+
 	interface Props {
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
+		onEventClick?: (event: CalendarEvent) => void;
 	}
 
-	let { onQuickCreate }: Props = $props();
+	let { onQuickCreate, onEventClick }: Props = $props();
 
 	// Constants
 	const HOUR_HEIGHT = 60; // pixels per hour
@@ -358,7 +361,7 @@
 		return `top: ${top}%; height: ${height}%; background-color: ${color};`;
 	}
 
-	function handleEventClick(event: any, e: MouseEvent) {
+	function handleEventClick(event: CalendarEvent, e: MouseEvent) {
 		// Don't navigate if dragging or resizing, or if we moved
 		if (isDragging || isResizing || hasMoved) {
 			e.preventDefault();
@@ -368,7 +371,11 @@
 			}, 100);
 			return;
 		}
-		goto(`/?event=${event.id}`);
+		if (onEventClick) {
+			onEventClick(event);
+		} else {
+			goto(`/?event=${event.id}`);
+		}
 	}
 
 	function handleSlotClick(hour: number, e: MouseEvent) {

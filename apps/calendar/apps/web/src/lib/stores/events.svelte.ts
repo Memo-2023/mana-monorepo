@@ -5,6 +5,7 @@
 import type { CalendarEvent, CreateEventInput, UpdateEventInput } from '@calendar/shared';
 import * as api from '$lib/api/events';
 import { format, isWithinInterval, parseISO, isSameDay } from 'date-fns';
+import { toastStore } from './toast.svelte';
 
 // State
 let events = $state<CalendarEvent[]>([]);
@@ -45,6 +46,7 @@ export const eventsStore = {
 
 		if (result.error) {
 			error = result.error.message;
+			toastStore.error(`Termine konnten nicht geladen werden: ${result.error.message}`);
 		} else {
 			// API returns { events: [...] }
 			const data = result.data as { events: CalendarEvent[] } | null;
@@ -119,8 +121,11 @@ export const eventsStore = {
 	async createEvent(data: CreateEventInput) {
 		const result = await api.createEvent(data);
 
-		if (result.data) {
+		if (result.error) {
+			toastStore.error(`Termin konnte nicht erstellt werden: ${result.error.message}`);
+		} else if (result.data) {
 			events = [...events, result.data];
+			toastStore.success('Termin erstellt');
 		}
 
 		return result;
@@ -132,7 +137,9 @@ export const eventsStore = {
 	async updateEvent(id: string, data: UpdateEventInput) {
 		const result = await api.updateEvent(id, data);
 
-		if (result.data) {
+		if (result.error) {
+			toastStore.error(`Termin konnte nicht aktualisiert werden: ${result.error.message}`);
+		} else if (result.data) {
 			events = events.map((e) => (e.id === id ? result.data! : e));
 		}
 
@@ -145,8 +152,11 @@ export const eventsStore = {
 	async deleteEvent(id: string) {
 		const result = await api.deleteEvent(id);
 
-		if (!result.error) {
+		if (result.error) {
+			toastStore.error(`Termin konnte nicht gelöscht werden: ${result.error.message}`);
+		} else {
 			events = events.filter((e) => e.id !== id);
+			toastStore.success('Termin gelöscht');
 		}
 
 		return result;

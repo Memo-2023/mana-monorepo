@@ -23,12 +23,15 @@
 	const HOUR_HEIGHT = 60; // px - should match CSS --hour-height
 	const MINUTES_PER_SLOT = 15; // Snap to 15-minute intervals
 
+	import type { CalendarEvent } from '@calendar/shared';
+
 	// Props
 	interface Props {
 		dayCount: 5 | 10 | 14;
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
+		onEventClick?: (event: CalendarEvent) => void;
 	}
-	let { dayCount, onQuickCreate }: Props = $props();
+	let { dayCount, onQuickCreate, onEventClick }: Props = $props();
 
 	// Get date-fns locale based on current app locale
 	const dateLocales = { de, en: enUS, fr, es, it };
@@ -161,7 +164,7 @@
 		return settingsStore.formatTime(d);
 	}
 
-	function handleEventClick(event: any, e: MouseEvent) {
+	function handleEventClick(event: CalendarEvent, e: MouseEvent) {
 		// Don't navigate if we just finished dragging or resizing, or if we moved
 		if (isDragging || isResizing || hasMoved) {
 			e.preventDefault();
@@ -171,7 +174,11 @@
 			}, 100);
 			return;
 		}
-		goto(`/?event=${event.id}`);
+		if (onEventClick) {
+			onEventClick(event);
+		} else {
+			goto(`/?event=${event.id}`);
+		}
 	}
 
 	function handleSlotClick(day: Date, hour: number, e: MouseEvent) {

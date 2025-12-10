@@ -61,8 +61,8 @@
 
 <div class="todo-sidebar-section">
 	<!-- Header -->
-	<button type="button" class="section-header" onclick={toggleExpanded}>
-		<div class="header-left">
+	<div class="section-header">
+		<button type="button" class="header-toggle" onclick={toggleExpanded}>
 			{#if isExpanded}
 				<ChevronDown size={16} />
 			{:else}
@@ -78,7 +78,7 @@
 					<AlertTriangle size={12} />
 				</span>
 			{/if}
-		</div>
+		</button>
 		<button
 			type="button"
 			class="add-button"
@@ -87,7 +87,7 @@
 		>
 			<Plus size={16} />
 		</button>
-	</button>
+	</div>
 
 	<!-- Content -->
 	{#if isExpanded}
@@ -160,29 +160,31 @@
 		align-items: center;
 		justify-content: space-between;
 		width: 100%;
-		padding: 0.75rem 1rem;
+		padding: 0 0.5rem 0 0;
+	}
+
+	.header-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex: 1;
+		padding: 0.75rem 0.5rem 0.75rem 1rem;
 		border: none;
 		background: transparent;
+		color: hsl(var(--color-foreground));
 		cursor: pointer;
 		transition: background 150ms ease;
 	}
 
-	.section-header:hover {
+	.header-toggle:hover {
 		background: hsl(var(--color-muted) / 0.3);
 	}
 
-	.header-left {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		color: hsl(var(--color-foreground));
-	}
-
-	.header-left :global(svg) {
+	.header-toggle :global(svg) {
 		color: hsl(var(--color-muted-foreground));
 	}
 
-	.header-left :global(.section-icon) {
+	.header-toggle :global(.section-icon) {
 		color: hsl(var(--color-primary));
 	}
 

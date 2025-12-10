@@ -28,12 +28,16 @@
 		setMinutes,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { _ } from 'svelte-i18n';
+
+	import type { CalendarEvent } from '@calendar/shared';
 
 	interface Props {
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
+		onEventClick?: (event: CalendarEvent) => void;
 	}
 
-	let { onQuickCreate }: Props = $props();
+	let { onQuickCreate, onEventClick }: Props = $props();
 
 	// Get all days to display in the month grid (including days from prev/next months)
 	let allCalendarDays = $derived.by(() => {
@@ -219,7 +223,7 @@
 		}
 	}
 
-	function handleEventClick(event: any, e: MouseEvent) {
+	function handleEventClick(event: CalendarEvent, e: MouseEvent) {
 		// Don't navigate if dragging
 		if (isDragging) {
 			e.preventDefault();
@@ -227,7 +231,11 @@
 			return;
 		}
 		e.stopPropagation();
-		goto(`/?event=${event.id}`);
+		if (onEventClick) {
+			onEventClick(event);
+		} else {
+			goto(`/?event=${event.id}`);
+		}
 	}
 
 	function handleMoreClick(day: Date, e: MouseEvent) {
@@ -251,7 +259,6 @@
 			<div class="week-row">
 				{#each week as day}
 					{@const isDropTarget = isDragging && dragTargetDay && isSameDay(day, dragTargetDay)}
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<div
 						class="day-cell"
 						class:other-month={!isSameMonth(day, viewStore.currentDate)}
@@ -262,6 +269,9 @@
 						onkeydown={(e) => e.key === 'Enter' && handleDayClick(day, e as unknown as MouseEvent)}
 						role="button"
 						tabindex="0"
+						aria-label={$_('a11y.createEventOn', {
+							values: { date: format(day, 'EEEE, d. MMMM', { locale: de }) },
+						})}
 					>
 						<span class="day-number" class:today={isToday(day)}>
 							{format(day, 'd')}
@@ -300,14 +310,17 @@
 											)}</span
 										>
 									{/if}
-									<span class="event-title">{event.title || (isDraft ? '(Neuer Termin)' : '')}</span
+									<span class="event-title"
+										>{event.title || (isDraft ? $_('calendar.draftEvent') : '')}</span
 									>
 								</div>
 							{/each}
 
 							{#if eventsStore.getEventsForDay(day).length > 3}
 								<button class="more-events" onclick={(e) => handleMoreClick(day, e)}>
-									+{eventsStore.getEventsForDay(day).length - 3} mehr
+									{$_('views.moreEvents', {
+										values: { count: eventsStore.getEventsForDay(day).length - 3 },
+									})}
 								</button>
 							{/if}
 						</div>
