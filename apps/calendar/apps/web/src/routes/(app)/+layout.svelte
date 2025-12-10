@@ -9,12 +9,15 @@
 		PillDropdownItem,
 		CommandBarItem,
 		QuickAction,
+		CreatePreview,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { eventsStore } from '$lib/stores/events.svelte';
+	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import {
 		THEME_DEFINITIONS,
@@ -32,6 +35,11 @@
 	import { searchEvents } from '$lib/api/events';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import {
+		parseEventInput,
+		resolveEventIds,
+		formatParsedEventPreview,
+	} from '$lib/utils/event-parser';
 
 	// App switcher items
 	const appItems = getPillAppItems('calendar');
@@ -70,6 +78,54 @@
 
 	function handleCommandBarSelect(item: CommandBarItem) {
 		goto(`/event/${item.id}`);
+	}
+
+	// CommandBar Quick-Create handlers
+	function handleCommandBarParseCreate(query: string): CreatePreview | null {
+		if (!query.trim()) return null;
+
+		const parsed = parseEventInput(query);
+		if (!parsed.title) return null;
+
+		return {
+			title: parsed.title,
+			subtitle: formatParsedEventPreview(parsed),
+		};
+	}
+
+	async function handleCommandBarCreate(query: string): Promise<void> {
+		const parsed = parseEventInput(query);
+		if (!parsed.title) return;
+
+		// Resolve calendar and tag names to IDs
+		const calendars = calendarsStore.calendars.map((c) => ({ id: c.id, name: c.name }));
+		const tags = eventTagsStore.tags.map((t) => ({ id: t.id, name: t.name }));
+		const resolved = resolveEventIds(parsed, calendars, tags);
+
+		// Ensure we have a calendar
+		if (!resolved.calendarId) {
+			console.error('No calendar available');
+			return;
+		}
+
+		// Ensure we have start and end times
+		if (!resolved.startTime) {
+			// Default to now + 1 hour
+			const now = new Date();
+			resolved.startTime = now.toISOString();
+			const end = new Date(now.getTime() + 60 * 60 * 1000);
+			resolved.endTime = end.toISOString();
+		}
+
+		await eventsStore.createEvent({
+			calendarId: resolved.calendarId,
+			title: resolved.title,
+			startTime: resolved.startTime,
+			endTime: resolved.endTime || resolved.startTime,
+			isAllDay: resolved.isAllDay,
+			location: resolved.location,
+			tagIds: resolved.tagIds,
+		});
 	}
 
 	let isSidebarMode = $state(false);
@@ -127,6 +183,7 @@
 		{ href: '/', label: 'Kalender', icon: 'calendar' },
 		{ href: '/agenda', label: 'Agenda', icon: 'list' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
+		{ href: '/statistics', label: 'Statistiken', icon: 'bar-chart-3' },
 		{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
@@ -200,8 +257,9 @@
 		// Initialize view state
 		viewStore.initialize();
 
-		// Load calendars and user settings
+		// Load calendars, tags, and user settings
 		await calendarsStore.fetchCalendars();
+		await eventTagsStore.fetchTags();
 		await userSettings.load();
 
 		// Redirect to start page if on root and a custom start page is set
@@ -283,9 +341,13 @@
 		onSearch={handleCommandBarSearch}
 		onSelect={handleCommandBarSelect}
 		quickActions={commandBarQuickActions}
-		placeholder="Termin suchen..."
+		placeholder="Termin suchen oder erstellen..."
 		emptyText="Keine Termine gefunden"
 		searchingText="Suche..."
+		onCreate={handleCommandBarCreate}
+		onParseCreate={handleCommandBarParseCreate}
+		createText="Als Termin erstellen"
+		createShortcut="⌘↵"
 	/>
 </div>
 
