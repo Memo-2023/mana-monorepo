@@ -42,12 +42,12 @@ export interface ParsedTaskWithIds {
 }
 
 // Priority patterns (task-specific)
-// Supports: !später, !normal, !wichtig, !dringend and shortcuts !, !!, !!!
+// Supports: später, normal, wichtig, dringend (with or without !) and shortcuts !, !!, !!!
 const PRIORITY_PATTERNS: { pattern: RegExp; priority: TaskPriority }[] = [
-	{ pattern: /!{3,}|!dringend/i, priority: 'urgent' },
-	{ pattern: /!{2}|!wichtig/i, priority: 'high' },
-	{ pattern: /!normal/i, priority: 'medium' },
-	{ pattern: /!später|!sp[aä]ter/i, priority: 'low' },
+	{ pattern: /!{3,}|!?dringend\b/i, priority: 'urgent' },
+	{ pattern: /!{2}|!?wichtig\b/i, priority: 'high' },
+	{ pattern: /!?normal\b/i, priority: 'medium' },
+	{ pattern: /!?sp[aä]ter\b/i, priority: 'low' },
 ];
 
 /**
