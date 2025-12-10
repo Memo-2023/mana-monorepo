@@ -259,9 +259,11 @@ export const tasksStore = {
 			// Handle completion state change first
 			if (data.isCompleted !== undefined && data.isCompleted !== originalTask.isCompleted) {
 				if (data.isCompleted) {
-					await tasksApi.completeTask(id);
+					const updatedTask = await tasksApi.completeTask(id);
+					tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
 				} else {
-					await tasksApi.uncompleteTask(id);
+					const updatedTask = await tasksApi.uncompleteTask(id);
+					tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
 				}
 			}
 

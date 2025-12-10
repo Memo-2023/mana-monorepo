@@ -16,7 +16,7 @@
 		StorypointsSelector,
 		DurationPicker,
 		FunRatingPicker,
-		LabelSelector,
+		TagSelector,
 	} from './form';
 
 	interface Props {
@@ -227,10 +227,10 @@
 					</select>
 				</div>
 
-				<!-- Labels -->
+				<!-- Tags -->
 				<div class="form-section">
-					<label class="form-label">Labels</label>
-					<LabelSelector
+					<label class="form-label">Tags</label>
+					<TagSelector
 						selectedIds={selectedLabelIds}
 						onChange={(ids) => (selectedLabelIds = ids)}
 					/>

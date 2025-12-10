@@ -14,6 +14,7 @@
 		EXTENDED_THEME_VARIANTS,
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
+	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
@@ -77,8 +78,8 @@
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
-	// Navigation items for Zitare
-	const navItems: PillNavItem[] = [
+	// Base navigation items for Zitare
+	const baseNavItems: PillNavItem[] = [
 		{ href: '/', label: 'Zitate', icon: 'document' },
 		{ href: '/search', label: 'Suche', icon: 'search' },
 		{ href: '/authors', label: 'Autoren', icon: 'users' },
@@ -87,8 +88,13 @@
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
-	// Navigation shortcuts (Ctrl+1-6)
-	const navRoutes = navItems.map((item) => item.href);
+	// Navigation items filtered by visibility settings
+	const navItems = $derived(
+		filterHiddenNavItems('zitare', baseNavItems, userSettings.nav.hiddenNavItems)
+	);
+
+	// Navigation shortcuts (Ctrl+1-6) - use base items for consistent shortcuts
+	const navRoutes = baseNavItems.map((item) => item.href);
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;

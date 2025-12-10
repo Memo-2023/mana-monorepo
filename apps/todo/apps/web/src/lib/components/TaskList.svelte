@@ -25,6 +25,9 @@
 	// Local mutable state for dnd-zone
 	let items = $state<Task[]>([]);
 
+	// Track which task is being animated for completion
+	let animatingTaskId = $state<string | null>(null);
+
 	// Create a stable key from task IDs to detect real changes
 	let lastTaskIds = '';
 
@@ -54,8 +57,17 @@
 		const wasInThisList = tasks.some((t) => t.id === movedTaskId);
 
 		if (!wasInThisList && dropTargetDate && onTaskDrop) {
-			// Task moved FROM another section TO this section
-			onTaskDrop(movedTaskId, dropTargetDate);
+			// If dropping into completed section, animate first
+			if (dropTargetDate === 'completed') {
+				animatingTaskId = movedTaskId;
+				setTimeout(() => {
+					animatingTaskId = null;
+					onTaskDrop(movedTaskId, dropTargetDate);
+				}, 500);
+			} else {
+				// Task moved FROM another section TO this section
+				onTaskDrop(movedTaskId, dropTargetDate);
+			}
 		}
 
 		// Update local state and sync lastTaskIds to prevent $effect from reverting
@@ -97,6 +109,7 @@
 			<TaskItem
 				{task}
 				{showCompleted}
+				animateComplete={animatingTaskId === task.id}
 				onToggleComplete={() => handleToggleComplete(task)}
 				onDelete={() => handleDelete(task.id)}
 				onEdit={onEditTask ? () => onEditTask(task) : undefined}
@@ -114,6 +127,7 @@
 			<TaskItem
 				{task}
 				{showCompleted}
+				animateComplete={animatingTaskId === task.id}
 				onToggleComplete={() => handleToggleComplete(task)}
 				onDelete={() => handleDelete(task.id)}
 				onEdit={onEditTask ? () => onEditTask(task) : undefined}
@@ -143,9 +157,10 @@
 
 	.empty-placeholder {
 		color: var(--color-muted-foreground, #9ca3af);
-		font-size: 0.75rem;
+		font-size: 0.875rem;
 		padding: 1rem;
 		text-align: center;
+		opacity: 0.5;
 	}
 
 	:global(.task-drop-target) {

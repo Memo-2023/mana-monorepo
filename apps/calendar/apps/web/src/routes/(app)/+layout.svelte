@@ -25,6 +25,7 @@
 		EXTENDED_THEME_VARIANTS,
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
+	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
@@ -178,8 +179,8 @@
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
-	// Navigation items for Calendar
-	const navItems: PillNavItem[] = [
+	// Base navigation items for Calendar
+	const baseNavItems: PillNavItem[] = [
 		{ href: '/', label: 'Kalender', icon: 'calendar' },
 		{ href: '/agenda', label: 'Agenda', icon: 'list' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
@@ -189,8 +190,13 @@
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
-	// Navigation shortcuts (Ctrl+1-4)
-	const navRoutes = navItems.map((item) => item.href);
+	// Navigation items filtered by visibility settings
+	const navItems = $derived(
+		filterHiddenNavItems('calendar', baseNavItems, userSettings.nav.hiddenNavItems)
+	);
+
+	// Navigation shortcuts (Ctrl+1-4) - use base items for consistent shortcuts
+	const navRoutes = baseNavItems.map((item) => item.href);
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
