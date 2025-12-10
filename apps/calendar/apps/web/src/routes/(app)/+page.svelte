@@ -16,6 +16,7 @@
 	import YearView from '$lib/components/calendar/YearView.svelte';
 	import MiniCalendar from '$lib/components/calendar/MiniCalendar.svelte';
 	import CalendarSidebar from '$lib/components/calendar/CalendarSidebar.svelte';
+	import TodoSidebarSection from '$lib/components/calendar/TodoSidebarSection.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
 	import EventDetailModal from '$lib/components/event/EventDetailModal.svelte';
 	import { CalendarViewSkeleton } from '$lib/components/skeletons';
@@ -130,6 +131,8 @@
 		<MiniCalendar selectedDate={viewStore.currentDate} onDateSelect={handleDateSelect} />
 
 		<CalendarSidebar />
+
+		<TodoSidebarSection maxItems={5} />
 	</aside>
 
 	<!-- FAB when sidebar is collapsed -->
