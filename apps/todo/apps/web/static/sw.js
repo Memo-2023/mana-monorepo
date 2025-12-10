@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todo-v1';
+const CACHE_NAME = 'todo-v2';
 const OFFLINE_URL = '/offline.html';
 
 // Assets, die immer gecacht werden sollen
@@ -8,23 +8,16 @@ const STATIC_CACHE_URLS = ['/', '/offline.html', '/icons/icon.svg', '/manifest.j
 const CACHE_STRATEGIES = {
 	// Netzwerk zuerst, dann Cache (für HTML/Navigation)
 	networkFirst: [/\/$/, /\.html$/, /^\/kanban/, /^\/settings/, /^\/mana/, /^\/feedback/],
-	// Cache zuerst, dann Netzwerk (für Assets)
+	// Cache zuerst, dann Netzwerk (für Assets) - nur für gebaute Assets, nicht /src/
 	cacheFirst: [
-		/\.css$/,
-		/\.js$/,
+		/\/_app\//, // SvelteKit gebaute Assets
 		/\.woff2?$/,
 		/\.ttf$/,
 		/\.otf$/,
-		/\.svg$/,
-		/\.png$/,
-		/\.jpg$/,
-		/\.jpeg$/,
-		/\.webp$/,
 		/\.ico$/,
-		/\/_app\//,
 	],
-	// Nur Netzwerk (für API-Calls)
-	networkOnly: [/\/api\//, /localhost:3018/],
+	// Nur Netzwerk (für API-Calls und Dev-Server)
+	networkOnly: [/\/api\//, /localhost:3018/, /^\/src\//, /^\/@/, /^\/node_modules\//],
 };
 
 // Service Worker Installation

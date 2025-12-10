@@ -9,11 +9,13 @@
 		PillDropdownItem,
 		CommandBarItem,
 		QuickAction,
+		CreatePreview,
 	} from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { projectsStore } from '$lib/stores/projects.svelte';
 	import { labelsStore } from '$lib/stores/labels.svelte';
+	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { theme } from '$lib/stores/theme';
 	import {
 		isSidebarMode as sidebarModeStore,
@@ -28,6 +30,7 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getTasks } from '$lib/api/tasks';
+	import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from '$lib/utils/task-parser';
 
 	// App switcher items
 	const appItems = getPillAppItems('todo');
@@ -67,6 +70,35 @@
 
 	function handleCommandBarSelect(item: CommandBarItem) {
 		goto(`/task/${item.id}`);
+	}
+
+	// CommandBar create - parse input and show preview
+	function handleCommandBarParseCreate(query: string): CreatePreview | null {
+		if (!query.trim()) return null;
+
+		const parsed = parseTaskInput(query);
+		const preview = formatParsedTaskPreview(parsed);
+
+		return {
+			title: `"${parsed.title}" als Aufgabe erstellen`,
+			subtitle: preview || 'Neue Aufgabe',
+		};
+	}
+
+	// CommandBar create - actually create the task
+	async function handleCommandBarCreate(query: string): Promise<void> {
+		if (!query.trim()) return;
+
+		const parsed = parseTaskInput(query);
+		const resolved = resolveTaskIds(parsed, projectsStore.projects, labelsStore.labels);
+
+		await tasksStore.createTask({
+			title: resolved.title,
+			dueDate: resolved.dueDate,
+			priority: resolved.priority,
+			projectId: resolved.projectId,
+			labelIds: resolved.labelIds,
+		});
 	}
 
 	let isSidebarMode = $state(false);
@@ -326,9 +358,13 @@
 		onSearch={handleCommandBarSearch}
 		onSelect={handleCommandBarSelect}
 		quickActions={commandBarQuickActions}
-		placeholder="Aufgabe suchen..."
+		placeholder="Aufgabe suchen oder erstellen..."
 		emptyText="Keine Aufgaben gefunden"
 		searchingText="Suche..."
+		onCreate={handleCommandBarCreate}
+		onParseCreate={handleCommandBarParseCreate}
+		createText="Als Aufgabe erstellen"
+		createShortcut="⌘↵"
 	/>
 </div>
 

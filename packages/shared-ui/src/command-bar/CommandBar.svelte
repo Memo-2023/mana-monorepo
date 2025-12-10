@@ -19,6 +19,11 @@
 		onclick?: () => void;
 	}
 
+	export interface CreatePreview {
+		title: string;
+		subtitle: string;
+	}
+
 	interface Props {
 		open: boolean;
 		onClose: () => void;
@@ -28,6 +33,11 @@
 		placeholder?: string;
 		emptyText?: string;
 		searchingText?: string;
+		// New: Task creation support
+		onCreate?: (query: string) => Promise<void>;
+		onParseCreate?: (query: string) => CreatePreview | null;
+		createText?: string;
+		createShortcut?: string;
 	}
 
 	let {
@@ -39,14 +49,27 @@
 		placeholder = 'Suchen...',
 		emptyText = 'Keine Ergebnisse gefunden',
 		searchingText = 'Suche...',
+		onCreate,
+		onParseCreate,
+		createText = 'Als Eintrag erstellen',
+		createShortcut = '⌘↵',
 	}: Props = $props();
 
 	let searchQuery = $state('');
 	let results = $state<CommandBarItem[]>([]);
 	let loading = $state(false);
+	let creating = $state(false);
 	let selectedIndex = $state(0);
 	let searchTimeout: ReturnType<typeof setTimeout>;
 	let inputElement: HTMLInputElement;
+
+	// Computed create preview
+	let createPreview = $derived(
+		searchQuery.trim() && onParseCreate ? onParseCreate(searchQuery) : null
+	);
+
+	// Check if create option is selected (it's always first when available)
+	let isCreateSelected = $derived(selectedIndex === 0 && createPreview !== null);
 
 	// Reset state when modal opens
 	$effect(() => {
@@ -54,6 +77,7 @@
 			searchQuery = '';
 			results = [];
 			selectedIndex = 0;
+			creating = false;
 			setTimeout(() => inputElement?.focus(), 50);
 		}
 	});
@@ -82,6 +106,20 @@
 		}, 150);
 	}
 
+	async function handleCreate() {
+		if (!onCreate || !searchQuery.trim() || creating) return;
+
+		creating = true;
+		try {
+			await onCreate(searchQuery);
+			onClose();
+		} catch (error) {
+			console.error('Create error:', error);
+		} finally {
+			creating = false;
+		}
+	}
+
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
 			event.preventDefault();
@@ -89,10 +127,23 @@
 			return;
 		}
 
+		// Cmd/Ctrl+Enter to create directly
+		if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+			event.preventDefault();
+			if (onCreate && searchQuery.trim()) {
+				handleCreate();
+			}
+			return;
+		}
+
 		if (event.key === 'ArrowDown') {
 			event.preventDefault();
-			const maxIndex = searchQuery.trim() ? results.length - 1 : quickActions.length - 1;
-			selectedIndex = Math.min(selectedIndex + 1, maxIndex);
+			// Calculate max index including create option
+			const hasCreate = createPreview !== null;
+			const maxIndex = searchQuery.trim()
+				? (hasCreate ? 1 : 0) + results.length - 1
+				: quickActions.length - 1;
+			selectedIndex = Math.min(selectedIndex + 1, Math.max(0, maxIndex));
 			return;
 		}
 
@@ -104,8 +155,17 @@
 
 		if (event.key === 'Enter') {
 			event.preventDefault();
-			if (searchQuery.trim() && results.length > 0) {
-				selectItem(results[selectedIndex]);
+			if (searchQuery.trim()) {
+				// If create option is selected
+				if (isCreateSelected && onCreate) {
+					handleCreate();
+				} else if (results.length > 0) {
+					// Adjust index for results (subtract 1 if create option exists)
+					const resultIndex = createPreview !== null ? selectedIndex - 1 : selectedIndex;
+					if (resultIndex >= 0 && resultIndex < results.length) {
+						selectItem(results[resultIndex]);
+					}
+				}
 			} else if (!searchQuery.trim() && quickActions.length > 0) {
 				const action = quickActions[selectedIndex];
 				if (action.href) {
@@ -184,23 +244,63 @@
 			<!-- Results -->
 			{#if searchQuery.trim()}
 				<div class="command-results">
+					<!-- Create option (always first when available) -->
+					{#if createPreview && onCreate}
+						<button
+							type="button"
+							class="command-result create-option"
+							class:selected={selectedIndex === 0}
+							onclick={handleCreate}
+							onmouseenter={() => (selectedIndex = 0)}
+							disabled={creating}
+						>
+							<div class="result-avatar create-avatar">
+								{#if creating}
+									<div class="loading-spinner-small"></div>
+								{:else}
+									<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M12 4v16m8-8H4"
+										/>
+									</svg>
+								{/if}
+							</div>
+							<div class="result-info">
+								<div class="result-name">{createPreview.title}</div>
+								{#if createPreview.subtitle}
+									<div class="result-details">
+										<span>{createPreview.subtitle}</span>
+									</div>
+								{/if}
+							</div>
+							<kbd class="create-shortcut">{createShortcut}</kbd>
+						</button>
+					{/if}
+
 					{#if loading}
 						<div class="command-loading">
 							<div class="loading-spinner"></div>
 							<span>{searchingText}</span>
 						</div>
-					{:else if results.length === 0}
+					{:else if results.length === 0 && !createPreview}
 						<div class="command-empty">
 							<span>{emptyText}</span>
 						</div>
-					{:else}
+					{:else if results.length > 0}
+						<div class="results-divider">
+							<span>Suchergebnisse</span>
+						</div>
 						{#each results as item, index (item.id)}
+							{@const adjustedIndex = createPreview ? index + 1 : index}
 							<button
 								type="button"
 								class="command-result"
-								class:selected={index === selectedIndex}
+								class:selected={adjustedIndex === selectedIndex}
 								onclick={() => selectItem(item)}
-								onmouseenter={() => (selectedIndex = index)}
+								onmouseenter={() => (selectedIndex = adjustedIndex)}
 							>
 								<div class="result-avatar">
 									{#if item.imageUrl}
@@ -329,6 +429,9 @@
 				<div class="footer-hints">
 					<span><kbd>↑↓</kbd> Navigation</span>
 					<span><kbd>↵</kbd> Öffnen</span>
+					{#if onCreate}
+						<span><kbd>{createShortcut}</kbd> Erstellen</span>
+					{/if}
 					<span><kbd>ESC</kbd> Schließen</span>
 				</div>
 			</div>
@@ -449,10 +552,53 @@
 		animation: spin 0.8s linear infinite;
 	}
 
+	.loading-spinner-small {
+		width: 1rem;
+		height: 1rem;
+		border: 2px solid #444;
+		border-top-color: #10b981;
+		border-radius: 50%;
+		animation: spin 0.8s linear infinite;
+	}
+
 	@keyframes spin {
 		to {
 			transform: rotate(360deg);
 		}
+	}
+
+	/* Create option styles */
+	.create-option {
+		border-bottom: 1px solid #333;
+	}
+
+	.create-option.selected,
+	.create-option:hover {
+		background: rgba(16, 185, 129, 0.1);
+	}
+
+	.create-avatar {
+		background: #10b981;
+	}
+
+	.create-shortcut {
+		padding: 0.25rem 0.5rem;
+		font-size: 0.6875rem;
+		font-family: inherit;
+		background: #2a2a2a;
+		border: 1px solid #444;
+		border-radius: 4px;
+		color: #888;
+		flex-shrink: 0;
+	}
+
+	.results-divider {
+		padding: 0.5rem 1.25rem 0.25rem;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #666;
 	}
 
 	.command-result {
