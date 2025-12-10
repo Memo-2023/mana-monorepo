@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
 import { tasks, labels, taskLabels, projects } from '../db/schema';
@@ -54,21 +54,32 @@ export class NetworkService {
 
 		const projectMap = new Map(userProjects.map((p) => [p.id, p.name]));
 
-		// 3. Get labels for each task
+		// 3. Get all labels for all tasks in a single batch query (fix N+1)
+		const taskIds = userTasks.map(({ task }) => task.id);
 		const taskLabelsMap = new Map<string, { id: string; name: string; color: string | null }[]>();
 
-		for (const { task } of userTasks) {
-			const taskLabelRows = await this.db
+		if (taskIds.length > 0) {
+			const allTaskLabels = await this.db
 				.select({
-					id: labels.id,
-					name: labels.name,
-					color: labels.color,
+					taskId: taskLabels.taskId,
+					labelId: labels.id,
+					labelName: labels.name,
+					labelColor: labels.color,
 				})
 				.from(taskLabels)
 				.innerJoin(labels, eq(taskLabels.labelId, labels.id))
-				.where(eq(taskLabels.taskId, task.id));
+				.where(inArray(taskLabels.taskId, taskIds));
 
-			taskLabelsMap.set(task.id, taskLabelRows);
+			// Group labels by taskId
+			for (const row of allTaskLabels) {
+				const existing = taskLabelsMap.get(row.taskId) || [];
+				existing.push({
+					id: row.labelId,
+					name: row.labelName,
+					color: row.labelColor,
+				});
+				taskLabelsMap.set(row.taskId, existing);
+			}
 		}
 
 		// 4. Filter tasks that have at least one label

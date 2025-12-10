@@ -121,7 +121,6 @@ export const tasksStore = {
 		try {
 			// Fetch all tasks without filter - let frontend handle filtering
 			const allTasks = await tasksApi.getTasks({});
-			console.log('API response - all tasks:', allTasks.length);
 			tasks = allTasks;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to fetch all tasks';
@@ -236,6 +235,52 @@ export const tasksStore = {
 			error = e instanceof Error ? e.message : 'Failed to update task';
 			console.error('Failed to update task:', e);
 			throw e;
+		}
+	},
+
+	/**
+	 * Update task optimistically (for drag and drop)
+	 * Updates local state immediately, then syncs with server
+	 */
+	updateTaskOptimistic(
+		id: string,
+		data: {
+			dueDate?: string | null;
+			isCompleted?: boolean;
+		}
+	) {
+		// Optimistic update - immediately update local state
+		const originalTask = tasks.find((t) => t.id === id);
+		if (!originalTask) return;
+
+		tasks = tasks.map((t) => (t.id === id ? { ...t, ...data } : t));
+
+		// Sync with server in background
+		if (data.isCompleted !== undefined) {
+			const apiCall = data.isCompleted ? tasksApi.completeTask(id) : tasksApi.uncompleteTask(id);
+
+			apiCall
+				.then((updatedTask) => {
+					tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
+				})
+				.catch((e) => {
+					// Rollback on error
+					console.error('Failed to update task:', e);
+					tasks = tasks.map((t) => (t.id === id ? originalTask : t));
+				});
+		}
+
+		if (data.dueDate !== undefined) {
+			tasksApi
+				.updateTask(id, { dueDate: data.dueDate })
+				.then((updatedTask) => {
+					tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
+				})
+				.catch((e) => {
+					// Rollback on error
+					console.error('Failed to update task:', e);
+					tasks = tasks.map((t) => (t.id === id ? originalTask : t));
+				});
 		}
 	},
 
