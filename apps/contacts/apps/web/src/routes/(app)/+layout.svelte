@@ -9,6 +9,7 @@
 		PillDropdownItem,
 		CommandBarItem,
 		QuickAction,
+		CreatePreview,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -28,12 +29,20 @@
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import ContactDetailModal from '$lib/components/ContactDetailModal.svelte';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
-	import { contactsApi } from '$lib/api/contacts';
+	import { contactsApi, tagsApi } from '$lib/api/contacts';
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
 	import { contactsSettings } from '$lib/stores/settings.svelte';
+	import {
+		parseContactInput,
+		resolveContactIds,
+		formatParsedContactPreview,
+	} from '$lib/utils/contact-parser';
 
 	// Search modal state
 	let searchModalOpen = $state(false);
+
+	// Tags state for Quick-Create
+	let availableTags = $state<{ id: string; name: string }[]>([]);
 
 	// Check if we're on a contact detail route
 	const contactDetailMatch = $derived($page.url.pathname.match(/^\/contacts\/([0-9a-f-]{36})$/i));
@@ -102,6 +111,7 @@
 		{ href: '/', label: 'Kontakte', icon: 'users' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
+		{ href: '/statistics', label: 'Statistiken', icon: 'bar-chart-3' },
 		{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
@@ -193,6 +203,47 @@
 		goto(`/contacts/${item.id}`);
 	}
 
+	// CommandBar Quick-Create handlers
+	function handleCommandBarParseCreate(query: string): CreatePreview | null {
+		if (!query.trim()) return null;
+
+		const parsed = parseContactInput(query);
+		if (!parsed.displayName) return null;
+
+		return {
+			title: parsed.displayName,
+			subtitle: formatParsedContactPreview(parsed),
+		};
+	}
+
+	async function handleCommandBarCreate(query: string): Promise<void> {
+		const parsed = parseContactInput(query);
+		if (!parsed.displayName) return;
+
+		// Resolve tag names to IDs
+		const resolved = resolveContactIds(parsed, availableTags);
+
+		try {
+			const contact = await contactsStore.createContact({
+				displayName: resolved.displayName,
+				firstName: resolved.firstName,
+				lastName: resolved.lastName,
+				company: resolved.company,
+				email: resolved.email,
+				phone: resolved.phone,
+			});
+
+			// Add tags to the created contact
+			if (resolved.tagIds.length > 0 && contact) {
+				for (const tagId of resolved.tagIds) {
+					await tagsApi.addToContact(tagId, contact.id);
+				}
+			}
+		} catch (e) {
+			console.error('Failed to create contact:', e);
+		}
+	}
+
 	// CommandBar quick actions
 	const commandBarQuickActions: QuickAction[] = [
 		{
@@ -214,8 +265,16 @@
 			return;
 		}
 
-		// Load user settings
+		// Load user settings and tags
 		await userSettings.load();
+
+		// Load tags for Quick-Create
+		try {
+			const tagsResult = await tagsApi.list();
+			availableTags = (tagsResult.tags || []).map((t) => ({ id: t.id, name: t.name }));
+		} catch (e) {
+			console.error('Failed to load tags:', e);
+		}
 
 		// Initialize contacts settings and view mode
 		contactsSettings.initialize();
@@ -302,9 +361,13 @@
 		onSearch={handleCommandBarSearch}
 		onSelect={handleCommandBarSelect}
 		quickActions={commandBarQuickActions}
-		placeholder="Kontakt suchen..."
+		placeholder="Kontakt suchen oder erstellen..."
 		emptyText="Keine Kontakte gefunden"
 		searchingText="Suche..."
+		onCreate={handleCommandBarCreate}
+		onParseCreate={handleCommandBarParseCreate}
+		createText="Als Kontakt erstellen"
+		createShortcut="⌘↵"
 	/>
 </div>
 
