@@ -10,11 +10,21 @@
 	import SettingsCard from './SettingsCard.svelte';
 	import NavVisibilitySettings from './NavVisibilitySettings.svelte';
 
+	interface NavItem {
+		href: string;
+		label: string;
+		icon?: string;
+	}
+
 	interface Props {
 		/** User settings store instance */
 		userSettings: UserSettingsStore;
 		/** App ID for start page selection */
 		appId?: string;
+		/** Navigation items for visibility settings */
+		navItems?: NavItem[];
+		/** Items that should always be visible (e.g., home route) */
+		alwaysVisibleHrefs?: string[];
 		/** Whether to show navigation settings */
 		showNavigation?: boolean;
 		/** Whether to show nav visibility settings */
@@ -36,6 +46,8 @@
 	let {
 		userSettings,
 		appId,
+		navItems = [],
+		alwaysVisibleHrefs = [],
 		showNavigation = true,
 		showNavVisibility = true,
 		showTheme = true,
@@ -209,12 +221,12 @@
 					</div>
 				{/if}
 
-				{#if showNavVisibility && appId}
+				{#if showNavVisibility && appId && navItems.length > 0}
 					<!-- Navigation Visibility Settings -->
 					<div
 						class="space-y-4 {showNavigation ? 'pt-4 border-t border-[hsl(var(--border))]' : ''}"
 					>
-						<NavVisibilitySettings {userSettings} {appId} />
+						<NavVisibilitySettings {userSettings} {appId} {navItems} {alwaysVisibleHrefs} />
 					</div>
 				{/if}
 
