@@ -8,6 +8,7 @@ import { SpaceModule } from './space/space.module';
 import { DocumentModule } from './document/document.module';
 import { ModelModule } from './model/model.module';
 import { HealthModule } from './health/health.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
 	imports: [
@@ -23,6 +24,7 @@ import { HealthModule } from './health/health.module';
 		DocumentModule,
 		ModelModule,
 		HealthModule,
+		StorageModule,
 	],
 })
 export class AppModule {}
