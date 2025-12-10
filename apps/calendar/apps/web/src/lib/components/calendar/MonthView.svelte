@@ -3,6 +3,8 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { todosStore } from '$lib/stores/todos.svelte';
+	import TodoDayCell from './TodoDayCell.svelte';
 	import { goto } from '$app/navigation';
 	import {
 		format,
@@ -264,6 +266,11 @@
 						<span class="day-number" class:today={isToday(day)}>
 							{format(day, 'd')}
 						</span>
+
+						<!-- Todos for this day -->
+						{#if todosStore.serviceAvailable}
+							<TodoDayCell date={day} maxVisible={2} />
+						{/if}
 
 						<div class="day-events">
 							{#each getEventsForDay(day) as event}
