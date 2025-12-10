@@ -61,24 +61,26 @@
 
 <div class="todo-sidebar-section">
 	<!-- Header -->
-	<button type="button" class="section-header" onclick={toggleExpanded}>
-		<div class="header-left">
-			{#if isExpanded}
-				<ChevronDown size={16} />
-			{:else}
-				<ChevronRight size={16} />
-			{/if}
-			<CheckSquare size={16} class="section-icon" />
-			<span class="section-title">Aufgaben</span>
-			{#if totalActiveCount > 0}
-				<span class="count-badge">{totalActiveCount}</span>
-			{/if}
-			{#if overdueCount > 0}
-				<span class="overdue-badge" title="{overdueCount} überfällig">
-					<AlertTriangle size={12} />
-				</span>
-			{/if}
-		</div>
+	<div class="section-header">
+		<button type="button" class="header-toggle" onclick={toggleExpanded}>
+			<div class="header-left">
+				{#if isExpanded}
+					<ChevronDown size={16} />
+				{:else}
+					<ChevronRight size={16} />
+				{/if}
+				<CheckSquare size={16} class="section-icon" />
+				<span class="section-title">Aufgaben</span>
+				{#if totalActiveCount > 0}
+					<span class="count-badge">{totalActiveCount}</span>
+				{/if}
+				{#if overdueCount > 0}
+					<span class="overdue-badge" title="{overdueCount} überfällig">
+						<AlertTriangle size={12} />
+					</span>
+				{/if}
+			</div>
+		</button>
 		<button
 			type="button"
 			class="add-button"
@@ -87,7 +89,7 @@
 		>
 			<Plus size={16} />
 		</button>
-	</button>
+	</div>
 
 	<!-- Content -->
 	{#if isExpanded}
@@ -160,14 +162,21 @@
 		align-items: center;
 		justify-content: space-between;
 		width: 100%;
-		padding: 0.75rem 1rem;
+		padding: 0 1rem 0 0;
+	}
+
+	.header-toggle {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		padding: 0.75rem 0 0.75rem 1rem;
 		border: none;
 		background: transparent;
 		cursor: pointer;
 		transition: background 150ms ease;
 	}
 
-	.section-header:hover {
+	.header-toggle:hover {
 		background: hsl(var(--color-muted) / 0.3);
 	}
 

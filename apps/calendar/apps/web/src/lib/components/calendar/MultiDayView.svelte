@@ -564,9 +564,9 @@
 							<div
 								class="resize-handle top"
 								onpointerdown={(e) => startResize(event, 'top', e)}
-								role="slider"
+								role="separator"
+								aria-orientation="horizontal"
 								aria-label="Startzeit ändern"
-								tabindex="-1"
 							></div>
 
 							{#if columnClass !== 'very-compact'}
@@ -580,9 +580,9 @@
 							<div
 								class="resize-handle bottom"
 								onpointerdown={(e) => startResize(event, 'bottom', e)}
-								role="slider"
+								role="separator"
+								aria-orientation="horizontal"
 								aria-label="Endzeit ändern"
-								tabindex="-1"
 							></div>
 						</div>
 					{/each}
