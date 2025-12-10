@@ -1,9 +1,19 @@
-import { IsString, IsOptional, IsBoolean, MaxLength, IsObject } from 'class-validator';
+import {
+	IsString,
+	IsOptional,
+	IsBoolean,
+	MaxLength,
+	MinLength,
+	IsObject,
+	IsNotEmpty,
+} from 'class-validator';
 import type { ProjectSettings } from '../../db/schema/projects.schema';
 
 export class CreateProjectDto {
 	@IsString()
-	@MaxLength(255)
+	@IsNotEmpty({ message: 'Name darf nicht leer sein' })
+	@MinLength(1, { message: 'Name muss mindestens 1 Zeichen haben' })
+	@MaxLength(255, { message: 'Name darf maximal 255 Zeichen haben' })
 	name: string;
 
 	@IsOptional()

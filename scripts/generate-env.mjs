@@ -426,6 +426,8 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CALENDAR_BACKEND_PORT || '3014'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_TODO_BACKEND_URL: (env) =>
+				env.TODO_BACKEND_URL || `http://localhost:${env.TODO_BACKEND_PORT || '3018'}`,
 		},
 	},
 

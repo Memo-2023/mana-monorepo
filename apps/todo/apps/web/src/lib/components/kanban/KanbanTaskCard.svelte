@@ -2,6 +2,7 @@
 	import type { Task } from '@todo/shared';
 	import { format, isToday, isPast, isTomorrow } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { ConfirmationModal } from '@manacore/shared-ui';
 	import TaskEditModal from '../TaskEditModal.svelte';
 
 	interface Props {
@@ -15,6 +16,7 @@
 
 	// Modal state
 	let showModal = $state(false);
+	let showDeleteConfirm = $state(false);
 
 	// Inline edit state
 	let isEditingTitle = $state(false);
@@ -129,9 +131,12 @@
 
 	function handleContextDelete() {
 		showContextMenu = false;
-		if (confirm('Aufgabe wirklich löschen?')) {
-			onDelete?.();
-		}
+		showDeleteConfirm = true;
+	}
+
+	function confirmDelete() {
+		showDeleteConfirm = false;
+		onDelete?.();
 	}
 
 	// Modal handlers
@@ -306,6 +311,18 @@
 	onClose={handleModalClose}
 	onSave={handleModalSave}
 	onDelete={handleModalDelete}
+/>
+
+<!-- Delete confirmation modal -->
+<ConfirmationModal
+	visible={showDeleteConfirm}
+	onClose={() => (showDeleteConfirm = false)}
+	onConfirm={confirmDelete}
+	variant="danger"
+	title="Aufgabe löschen?"
+	message="Diese Aufgabe wird unwiderruflich gelöscht."
+	confirmLabel="Löschen"
+	cancelLabel="Abbrechen"
 />
 
 <style>

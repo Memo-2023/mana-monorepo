@@ -22,3 +22,6 @@ export * from './keyboard';
 
 // IndexedDB Cache
 export * from './cache';
+
+// Natural Language Parsers
+export * from './parsers';

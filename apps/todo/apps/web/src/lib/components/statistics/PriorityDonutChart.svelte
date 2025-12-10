@@ -22,9 +22,9 @@
 
 	// Priority labels
 	const PRIORITY_LABELS: Record<TaskPriority, string> = {
-		low: 'Niedrig',
-		medium: 'Mittel',
-		high: 'Hoch',
+		low: 'Später',
+		medium: 'Normal',
+		high: 'Wichtig',
 		urgent: 'Dringend',
 	};
 
@@ -98,49 +98,48 @@
 <div class="donut-container">
 	<h3 class="donut-title">Prioritäten</h3>
 
-	<div class="donut-content">
-		<div class="donut-chart">
-			<svg viewBox="0 0 {SIZE} {SIZE}" class="donut-svg">
-				{#each arcs as arc}
-					<path
-						d={arc.path}
-						fill={arc.color}
-						class="arc-segment"
-						class:hovered={hoveredSegment === arc.priority}
-						onmouseenter={() => (hoveredSegment = arc.priority)}
-						onmouseleave={() => (hoveredSegment = null)}
-						role="graphics-symbol"
-						aria-label="{PRIORITY_LABELS[arc.priority]}: {arc.count}"
-					>
-						<title>{PRIORITY_LABELS[arc.priority]}: {arc.count} ({arc.percentage}%)</title>
-					</path>
-				{/each}
-
-				<!-- Center text -->
-				<text x={CENTER} y={CENTER - 8} class="center-count">
-					{total}
-				</text>
-				<text x={CENTER} y={CENTER + 12} class="center-label"> Aktiv </text>
-			</svg>
-		</div>
-
-		<!-- Legend -->
-		<div class="donut-legend">
-			{#each data as item}
-				<div
-					class="legend-item"
-					class:active={hoveredSegment === item.priority}
-					onmouseenter={() => (hoveredSegment = item.priority)}
+	<!-- Chart centered -->
+	<div class="donut-chart">
+		<svg viewBox="0 0 {SIZE} {SIZE}" class="donut-svg">
+			{#each arcs as arc}
+				<path
+					d={arc.path}
+					fill={arc.color}
+					class="arc-segment"
+					class:hovered={hoveredSegment === arc.priority}
+					onmouseenter={() => (hoveredSegment = arc.priority)}
 					onmouseleave={() => (hoveredSegment = null)}
-					role="button"
-					tabindex="0"
+					role="graphics-symbol"
+					aria-label="{PRIORITY_LABELS[arc.priority]}: {arc.count}"
 				>
-					<span class="legend-color" style="background-color: {item.color}"></span>
-					<span class="legend-label">{PRIORITY_LABELS[item.priority]}</span>
-					<span class="legend-count">{item.count}</span>
-				</div>
+					<title>{PRIORITY_LABELS[arc.priority]}: {arc.count} ({arc.percentage}%)</title>
+				</path>
 			{/each}
-		</div>
+
+			<!-- Center text -->
+			<text x={CENTER} y={CENTER - 8} class="center-count">
+				{total}
+			</text>
+			<text x={CENTER} y={CENTER + 12} class="center-label"> Aktiv </text>
+		</svg>
+	</div>
+
+	<!-- Legend as horizontal grid below -->
+	<div class="donut-legend">
+		{#each data as item}
+			<div
+				class="legend-item"
+				class:active={hoveredSegment === item.priority}
+				onmouseenter={() => (hoveredSegment = item.priority)}
+				onmouseleave={() => (hoveredSegment = null)}
+				role="button"
+				tabindex="0"
+			>
+				<span class="legend-color" style="background-color: {item.color}"></span>
+				<span class="legend-label">{PRIORITY_LABELS[item.priority]}</span>
+				<span class="legend-count">{item.count}</span>
+			</div>
+		{/each}
 	</div>
 </div>
 
@@ -166,20 +165,10 @@
 		margin: 0 0 1rem 0;
 	}
 
-	.donut-content {
-		display: flex;
-		align-items: center;
-		gap: 1.5rem;
-	}
-
-	@media (max-width: 400px) {
-		.donut-content {
-			flex-direction: column;
-		}
-	}
-
 	.donut-chart {
-		flex-shrink: 0;
+		display: flex;
+		justify-content: center;
+		margin-bottom: 1rem;
 	}
 
 	.donut-svg {
@@ -215,11 +204,9 @@
 	}
 
 	.donut-legend {
-		display: flex;
-		flex-direction: column;
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
 		gap: 0.5rem;
-		flex: 1;
-		min-width: 0;
 	}
 
 	.legend-item {
@@ -238,20 +225,23 @@
 	}
 
 	.legend-color {
-		width: 12px;
-		height: 12px;
-		border-radius: 3px;
+		width: 10px;
+		height: 10px;
+		border-radius: 2px;
 		flex-shrink: 0;
 	}
 
 	.legend-label {
-		font-size: 0.875rem;
+		font-size: 0.75rem;
 		color: hsl(var(--foreground));
 		flex: 1;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.legend-count {
-		font-size: 0.875rem;
+		font-size: 0.75rem;
 		font-weight: 600;
 		color: hsl(var(--muted-foreground));
 	}

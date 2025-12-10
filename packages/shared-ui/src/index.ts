@@ -106,7 +106,26 @@ export {
 
 // Command Bar
 export { CommandBar } from './command-bar';
-export type { CommandBarItem, QuickAction } from './command-bar';
+export type { CommandBarItem, QuickAction, CreatePreview } from './command-bar';
 
 // Pages
 export { default as AppsPage } from './pages/AppsPage.svelte';
+
+// Charts - Statistics Visualization
+export {
+	StatsGrid,
+	ActivityHeatmap,
+	TrendLineChart,
+	DonutChart,
+	ProgressBars,
+	StatisticsSkeleton,
+	STAT_VARIANT_COLORS,
+} from './charts';
+export type {
+	StatVariant,
+	StatItem,
+	HeatmapDataPoint,
+	TrendDataPoint,
+	DonutSegment,
+	ProgressItem,
+} from './charts';

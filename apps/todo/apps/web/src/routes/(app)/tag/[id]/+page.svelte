@@ -15,16 +15,16 @@
 	let editingTask = $state<Task | null>(null);
 	let showEditModal = $state(false);
 
-	// Get label ID from URL
-	const labelId = $derived($page.params.id ?? '');
+	// Get tag ID from URL
+	const tagId = $derived($page.params.id ?? '');
 
-	// Get label from store
-	const label = $derived(labelsStore.getById(labelId));
+	// Get tag from store
+	const tag = $derived(labelsStore.getById(tagId));
 
-	// Get tasks with this label
-	const labelTasks = $derived(labelId ? tasksStore.getTasksByLabel(labelId) : []);
-	const incompleteTasks = $derived(labelTasks.filter((t) => !t.isCompleted));
-	const completedTasks = $derived(labelTasks.filter((t) => t.isCompleted));
+	// Get tasks with this tag
+	const tagTasks = $derived(tagId ? tasksStore.getTasksByLabel(tagId) : []);
+	const incompleteTasks = $derived(tagTasks.filter((t) => !t.isCompleted));
+	const completedTasks = $derived(tagTasks.filter((t) => t.isCompleted));
 
 	onMount(async () => {
 		if (!authStore.isAuthenticated) {
@@ -33,12 +33,12 @@
 		}
 
 		try {
-			// Ensure labels are loaded
+			// Ensure tags are loaded
 			if (labelsStore.labels.length === 0) {
 				await labelsStore.fetchLabels();
 			}
 
-			// Fetch all tasks to filter by label
+			// Fetch all tasks to filter by tag
 			await tasksStore.fetchAllTasks();
 		} catch (error) {
 			console.error('Failed to load data:', error);
@@ -88,7 +88,7 @@
 </script>
 
 <svelte:head>
-	<title>{label?.name || 'Label'} - Todo</title>
+	<title>{tag?.name || 'Tag'} - Todo</title>
 </svelte:head>
 
 <div class="page-container">
@@ -98,39 +98,39 @@
 			<CaretLeft size={20} weight="bold" />
 		</a>
 		<div class="header-content">
-			{#if label}
-				<div class="label-icon" style="background-color: {label.color}20">
-					<div class="label-dot" style="background-color: {label.color}"></div>
+			{#if tag}
+				<div class="tag-icon" style="background-color: {tag.color}20">
+					<div class="tag-dot" style="background-color: {tag.color}"></div>
 				</div>
-				<h1 class="title">{label.name}</h1>
+				<h1 class="title">{tag.name}</h1>
 			{:else}
-				<h1 class="title">Label</h1>
+				<h1 class="title">Tag</h1>
 			{/if}
 		</div>
-		<a href="/labels" class="manage-button" aria-label="Labels verwalten">
+		<a href="/tags" class="manage-button" aria-label="Tags verwalten">
 			<Tag size={20} weight="bold" />
 		</a>
 	</header>
 
 	{#if isLoading}
 		<TaskListSkeleton />
-	{:else if !label}
+	{:else if !tag}
 		<div class="empty-state">
 			<div class="empty-icon">
 				<Tag size={40} weight="light" />
 			</div>
-			<h2 class="empty-title">Label nicht gefunden</h2>
-			<p class="empty-description">Dieses Label existiert nicht mehr.</p>
-			<a href="/labels" class="btn btn-primary">Zu den Labels</a>
+			<h2 class="empty-title">Tag nicht gefunden</h2>
+			<p class="empty-description">Dieser Tag existiert nicht mehr.</p>
+			<a href="/tags" class="btn btn-primary">Zu den Tags</a>
 		</div>
-	{:else if labelTasks.length === 0}
+	{:else if tagTasks.length === 0}
 		<div class="empty-state">
-			<div class="empty-icon" style="background-color: {label.color}20">
-				<Tag size={40} weight="light" style="color: {label.color}" />
+			<div class="empty-icon" style="background-color: {tag.color}20">
+				<Tag size={40} weight="light" style="color: {tag.color}" />
 			</div>
 			<h2 class="empty-title">Keine Aufgaben</h2>
 			<p class="empty-description">
-				Es gibt keine Aufgaben mit dem Label "{label.name}".
+				Es gibt keine Aufgaben mit dem Tag "{tag.name}".
 			</p>
 			<a href="/" class="btn btn-primary">Aufgabe erstellen</a>
 		</div>
@@ -156,8 +156,8 @@
 		{/if}
 
 		<p class="task-count">
-			{labelTasks.length}
-			{labelTasks.length === 1 ? 'Aufgabe' : 'Aufgaben'}
+			{tagTasks.length}
+			{tagTasks.length === 1 ? 'Aufgabe' : 'Aufgaben'}
 		</p>
 	{/if}
 </div>
@@ -196,7 +196,7 @@
 		gap: 0.75rem;
 	}
 
-	.label-icon {
+	.tag-icon {
 		width: 2.5rem;
 		height: 2.5rem;
 		border-radius: 0.625rem;
@@ -205,7 +205,7 @@
 		justify-content: center;
 	}
 
-	.label-dot {
+	.tag-dot {
 		width: 1rem;
 		height: 1rem;
 		border-radius: 50%;

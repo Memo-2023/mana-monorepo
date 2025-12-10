@@ -9,11 +9,13 @@
 		PillDropdownItem,
 		CommandBarItem,
 		QuickAction,
+		CreatePreview,
 	} from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { projectsStore } from '$lib/stores/projects.svelte';
 	import { labelsStore } from '$lib/stores/labels.svelte';
+	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { theme } from '$lib/stores/theme';
 	import {
 		isSidebarMode as sidebarModeStore,
@@ -25,9 +27,11 @@
 		EXTENDED_THEME_VARIANTS,
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
+	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getTasks } from '$lib/api/tasks';
+	import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from '$lib/utils/task-parser';
 
 	// App switcher items
 	const appItems = getPillAppItems('todo');
@@ -67,6 +71,35 @@
 
 	function handleCommandBarSelect(item: CommandBarItem) {
 		goto(`/task/${item.id}`);
+	}
+
+	// CommandBar create - parse input and show preview
+	function handleCommandBarParseCreate(query: string): CreatePreview | null {
+		if (!query.trim()) return null;
+
+		const parsed = parseTaskInput(query);
+		const preview = formatParsedTaskPreview(parsed);
+
+		return {
+			title: `"${parsed.title}" als Aufgabe erstellen`,
+			subtitle: preview || 'Neue Aufgabe',
+		};
+	}
+
+	// CommandBar create - actually create the task
+	async function handleCommandBarCreate(query: string): Promise<void> {
+		if (!query.trim()) return;
+
+		const parsed = parseTaskInput(query);
+		const resolved = resolveTaskIds(parsed, projectsStore.projects, labelsStore.labels);
+
+		await tasksStore.createTask({
+			title: resolved.title,
+			dueDate: resolved.dueDate,
+			priority: resolved.priority,
+			projectId: resolved.projectId,
+			labelIds: resolved.labelIds,
+		});
 	}
 
 	let isSidebarMode = $state(false);
@@ -124,31 +157,33 @@
 		{ href: '/', label: 'Aufgaben', icon: 'list' },
 		{ href: '/kanban', label: 'Kanban', icon: 'columns' },
 		{ href: '/statistics', label: 'Statistiken', icon: 'chart' },
-		{ href: '/labels', label: 'Labels', icon: 'tag' },
+		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
-	// Navigation items (base items + dynamic label items in sidebar mode)
+	// Navigation items (base items + dynamic label items in sidebar mode, filtered by visibility settings)
 	const navItems = $derived.by(() => {
-		// In sidebar mode, add labels as sub-items if available
+		// Start with base items, filter out hidden ones
+		let items = filterHiddenNavItems('todo', baseNavItems, userSettings.nav.hiddenNavItems);
+
+		// In sidebar mode, add tags as sub-items if available
 		if (isSidebarMode && labelsStore.labels.length > 0) {
-			const labelItems: PillNavItem[] = labelsStore.labels.slice(0, 5).map((label) => ({
-				href: `/label/${label.id}`,
+			const tagItems: PillNavItem[] = labelsStore.labels.slice(0, 5).map((label) => ({
+				href: `/tag/${label.id}`,
 				label: label.name,
 				icon: 'tag',
 			}));
 
-			// Insert label items after "Labels" nav item
-			const items = [...baseNavItems];
-			const labelsIndex = items.findIndex((i) => i.href === '/labels');
-			if (labelsIndex !== -1 && labelItems.length > 0) {
-				items.splice(labelsIndex + 1, 0, ...labelItems);
+			// Insert tag items after "Tags" nav item
+			const tagsIndex = items.findIndex((i) => i.href === '/tags');
+			if (tagsIndex !== -1 && tagItems.length > 0) {
+				items = [...items];
+				items.splice(tagsIndex + 1, 0, ...tagItems);
 			}
-			return items;
 		}
-		return baseNavItems;
+		return items;
 	});
 
 	// Navigation shortcuts (Ctrl+1-6) - use base items for consistent shortcuts
@@ -183,16 +218,20 @@
 	function handleModeChange(isSidebar: boolean) {
 		isSidebarMode = isSidebar;
 		sidebarModeStore.set(isSidebar);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('todo-nav-sidebar', String(isSidebar));
+		try {
+			localStorage?.setItem('todo-nav-sidebar', String(isSidebar));
+		} catch {
+			// localStorage not available or quota exceeded
 		}
 	}
 
 	function handleCollapsedChange(collapsed: boolean) {
 		isCollapsed = collapsed;
 		collapsedStore.set(collapsed);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('todo-nav-collapsed', String(collapsed));
+		try {
+			localStorage?.setItem('todo-nav-collapsed', String(collapsed));
+		} catch {
+			// localStorage not available or quota exceeded
 		}
 	}
 
@@ -231,18 +270,26 @@
 			goto(userSettings.startPage, { replaceState: true });
 		}
 
-		// Initialize sidebar mode from localStorage
-		const savedSidebar = localStorage.getItem('todo-nav-sidebar');
-		if (savedSidebar === 'true') {
-			isSidebarMode = true;
-			sidebarModeStore.set(true);
+		// Initialize sidebar mode from localStorage (with error handling for private browsing)
+		try {
+			const savedSidebar = localStorage?.getItem('todo-nav-sidebar');
+			if (savedSidebar === 'true') {
+				isSidebarMode = true;
+				sidebarModeStore.set(true);
+			}
+		} catch {
+			// localStorage not available (private browsing, quota exceeded, etc.)
 		}
 
 		// Initialize collapsed state from localStorage
-		const savedCollapsed = localStorage.getItem('todo-nav-collapsed');
-		if (savedCollapsed === 'true') {
-			isCollapsed = true;
-			collapsedStore.set(true);
+		try {
+			const savedCollapsed = localStorage?.getItem('todo-nav-collapsed');
+			if (savedCollapsed === 'true') {
+				isCollapsed = true;
+				collapsedStore.set(true);
+			}
+		} catch {
+			// localStorage not available
 		}
 
 		// Register Service Worker for PWA
@@ -326,9 +373,13 @@
 		onSearch={handleCommandBarSearch}
 		onSelect={handleCommandBarSelect}
 		quickActions={commandBarQuickActions}
-		placeholder="Aufgabe suchen..."
+		placeholder="Aufgabe suchen oder erstellen..."
 		emptyText="Keine Aufgaben gefunden"
 		searchingText="Suche..."
+		onCreate={handleCommandBarCreate}
+		onParseCreate={handleCommandBarParseCreate}
+		createText="Als Aufgabe erstellen"
+		createShortcut="⌘↵"
 	/>
 </div>
 

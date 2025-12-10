@@ -1,6 +1,47 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 
+	// Syntax highlighting patterns for command keywords
+	interface HighlightPattern {
+		pattern: RegExp;
+		className: string;
+	}
+
+	const HIGHLIGHT_PATTERNS: HighlightPattern[] = [
+		// Priority keywords (Todo) - with specific colors per level
+		{ pattern: /(!{3,}|!?dringend)\b/gi, className: 'hl-priority-urgent' },
+		{ pattern: /(!{2}|!?wichtig)\b/gi, className: 'hl-priority-high' },
+		{ pattern: /!?normal\b/gi, className: 'hl-priority-medium' },
+		{ pattern: /!?sp[aä]ter\b/gi, className: 'hl-priority-low' },
+		// Tags
+		{ pattern: /#\w+/g, className: 'hl-tag' },
+		// Projects/Calendars/Companies (@reference)
+		{ pattern: /@\w+/g, className: 'hl-reference' },
+		// Date keywords
+		{
+			pattern:
+				/\b(heute|morgen|übermorgen|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|nächsten?\s+\w+|in\s+\d+\s+tagen?)\b/gi,
+			className: 'hl-date',
+		},
+		// Time patterns
+		{ pattern: /\b(\d{1,2}:\d{2}|um\s+\d{1,2}(\s*uhr)?|\d{1,2}\s*uhr)\b/gi, className: 'hl-time' },
+	];
+
+	function highlightText(text: string): string {
+		if (!text) return '';
+
+		let result = text;
+		// Escape HTML first
+		result = result.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+		// Apply highlights (process in order, avoiding double-highlighting)
+		for (const { pattern, className } of HIGHLIGHT_PATTERNS) {
+			result = result.replace(pattern, (match) => `<span class="${className}">${match}</span>`);
+		}
+
+		return result;
+	}
+
 	export interface CommandBarItem {
 		id: string;
 		title: string;
@@ -19,6 +60,11 @@
 		onclick?: () => void;
 	}
 
+	export interface CreatePreview {
+		title: string;
+		subtitle: string;
+	}
+
 	interface Props {
 		open: boolean;
 		onClose: () => void;
@@ -28,6 +74,11 @@
 		placeholder?: string;
 		emptyText?: string;
 		searchingText?: string;
+		// New: Task creation support
+		onCreate?: (query: string) => Promise<void>;
+		onParseCreate?: (query: string) => CreatePreview | null;
+		createText?: string;
+		createShortcut?: string;
 	}
 
 	let {
@@ -39,14 +90,30 @@
 		placeholder = 'Suchen...',
 		emptyText = 'Keine Ergebnisse gefunden',
 		searchingText = 'Suche...',
+		onCreate,
+		onParseCreate,
+		createText = 'Als Eintrag erstellen',
+		createShortcut = '⌘↵',
 	}: Props = $props();
 
 	let searchQuery = $state('');
 	let results = $state<CommandBarItem[]>([]);
 	let loading = $state(false);
+	let creating = $state(false);
 	let selectedIndex = $state(0);
 	let searchTimeout: ReturnType<typeof setTimeout>;
 	let inputElement: HTMLInputElement;
+
+	// Computed create preview
+	let createPreview = $derived(
+		searchQuery.trim() && onParseCreate ? onParseCreate(searchQuery) : null
+	);
+
+	// Highlighted text for overlay
+	let highlightedQuery = $derived(highlightText(searchQuery));
+
+	// Check if create option is selected (it's always first when available)
+	let isCreateSelected = $derived(selectedIndex === 0 && createPreview !== null);
 
 	// Reset state when modal opens
 	$effect(() => {
@@ -54,6 +121,7 @@
 			searchQuery = '';
 			results = [];
 			selectedIndex = 0;
+			creating = false;
 			setTimeout(() => inputElement?.focus(), 50);
 		}
 	});
@@ -82,6 +150,20 @@
 		}, 150);
 	}
 
+	async function handleCreate() {
+		if (!onCreate || !searchQuery.trim() || creating) return;
+
+		creating = true;
+		try {
+			await onCreate(searchQuery);
+			onClose();
+		} catch (error) {
+			console.error('Create error:', error);
+		} finally {
+			creating = false;
+		}
+	}
+
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
 			event.preventDefault();
@@ -89,10 +171,23 @@
 			return;
 		}
 
+		// Cmd/Ctrl+Enter to create directly
+		if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+			event.preventDefault();
+			if (onCreate && searchQuery.trim()) {
+				handleCreate();
+			}
+			return;
+		}
+
 		if (event.key === 'ArrowDown') {
 			event.preventDefault();
-			const maxIndex = searchQuery.trim() ? results.length - 1 : quickActions.length - 1;
-			selectedIndex = Math.min(selectedIndex + 1, maxIndex);
+			// Calculate max index including create option
+			const hasCreate = createPreview !== null;
+			const maxIndex = searchQuery.trim()
+				? (hasCreate ? 1 : 0) + results.length - 1
+				: quickActions.length - 1;
+			selectedIndex = Math.min(selectedIndex + 1, Math.max(0, maxIndex));
 			return;
 		}
 
@@ -104,8 +199,17 @@
 
 		if (event.key === 'Enter') {
 			event.preventDefault();
-			if (searchQuery.trim() && results.length > 0) {
-				selectItem(results[selectedIndex]);
+			if (searchQuery.trim()) {
+				// If create option is selected
+				if (isCreateSelected && onCreate) {
+					handleCreate();
+				} else if (results.length > 0) {
+					// Adjust index for results (subtract 1 if create option exists)
+					const resultIndex = createPreview !== null ? selectedIndex - 1 : selectedIndex;
+					if (resultIndex >= 0 && resultIndex < results.length) {
+						selectItem(results[resultIndex]);
+					}
+				}
 			} else if (!searchQuery.trim() && quickActions.length > 0) {
 				const action = quickActions[selectedIndex];
 				if (action.href) {
@@ -160,7 +264,7 @@
 		onkeydown={handleKeydown}
 	>
 		<div class="command-modal">
-			<!-- Search Input -->
+			<!-- Search Input with Syntax Highlighting -->
 			<div class="command-input-wrapper">
 				<svg class="command-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
@@ -170,37 +274,84 @@
 						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
 					/>
 				</svg>
-				<input
-					bind:this={inputElement}
-					type="text"
-					{placeholder}
-					bind:value={searchQuery}
-					oninput={handleSearch}
-					class="command-input"
-				/>
+				<div class="input-highlight-container">
+					<!-- Highlight backdrop (shows colored keywords) -->
+					<div class="input-highlight-backdrop" aria-hidden="true">
+						{@html highlightedQuery}&nbsp;
+					</div>
+					<!-- Actual input (transparent text, visible caret) -->
+					<input
+						bind:this={inputElement}
+						type="text"
+						{placeholder}
+						bind:value={searchQuery}
+						oninput={handleSearch}
+						class="command-input"
+					/>
+				</div>
 				<kbd class="command-shortcut">ESC</kbd>
 			</div>
 
 			<!-- Results -->
 			{#if searchQuery.trim()}
 				<div class="command-results">
+					<!-- Create option (always first when available) -->
+					{#if createPreview && onCreate}
+						<button
+							type="button"
+							class="command-result create-option"
+							class:selected={selectedIndex === 0}
+							onclick={handleCreate}
+							onmouseenter={() => (selectedIndex = 0)}
+							disabled={creating}
+						>
+							<div class="result-avatar create-avatar">
+								{#if creating}
+									<div class="loading-spinner-small"></div>
+								{:else}
+									<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M12 4v16m8-8H4"
+										/>
+									</svg>
+								{/if}
+							</div>
+							<div class="result-info">
+								<div class="result-name">{createPreview.title}</div>
+								{#if createPreview.subtitle}
+									<div class="result-details">
+										<span>{createPreview.subtitle}</span>
+									</div>
+								{/if}
+							</div>
+							<kbd class="create-shortcut">{createShortcut}</kbd>
+						</button>
+					{/if}
+
 					{#if loading}
 						<div class="command-loading">
 							<div class="loading-spinner"></div>
 							<span>{searchingText}</span>
 						</div>
-					{:else if results.length === 0}
+					{:else if results.length === 0 && !createPreview}
 						<div class="command-empty">
 							<span>{emptyText}</span>
 						</div>
-					{:else}
+					{:else if results.length > 0}
+						<div class="results-divider">
+							<span>Suchergebnisse</span>
+						</div>
 						{#each results as item, index (item.id)}
+							{@const adjustedIndex = createPreview ? index + 1 : index}
 							<button
 								type="button"
 								class="command-result"
-								class:selected={index === selectedIndex}
+								class:selected={adjustedIndex === selectedIndex}
 								onclick={() => selectItem(item)}
-								onmouseenter={() => (selectedIndex = index)}
+								onmouseenter={() => (selectedIndex = adjustedIndex)}
 							>
 								<div class="result-avatar">
 									{#if item.imageUrl}
@@ -329,6 +480,9 @@
 				<div class="footer-hints">
 					<span><kbd>↑↓</kbd> Navigation</span>
 					<span><kbd>↵</kbd> Öffnen</span>
+					{#if onCreate}
+						<span><kbd>{createShortcut}</kbd> Erstellen</span>
+					{/if}
 					<span><kbd>ESC</kbd> Schließen</span>
 				</div>
 			</div>
@@ -345,9 +499,9 @@
 		align-items: flex-start;
 		justify-content: center;
 		padding-top: 15vh;
-		background: rgba(0, 0, 0, 0.6);
-		backdrop-filter: blur(4px);
-		-webkit-backdrop-filter: blur(4px);
+		background: hsl(var(--color-background) / 0.8);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
 		animation: fadeIn 0.15s ease;
 	}
 
@@ -364,15 +518,15 @@
 		width: 100%;
 		max-width: 560px;
 		margin: 0 1rem;
-		background: #1a1a1a;
-		border: 1px solid #333;
+		background: hsl(var(--color-surface-elevated));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 12px;
 		box-shadow:
-			0 25px 50px -12px rgba(0, 0, 0, 0.5),
-			0 0 0 1px rgba(255, 255, 255, 0.1);
+			0 25px 50px -12px hsl(var(--color-background) / 0.5),
+			0 0 0 1px hsl(var(--color-border) / 0.5);
 		overflow: hidden;
 		animation: slideIn 0.2s ease;
-		color: #e5e5e5;
+		color: hsl(var(--color-foreground));
 	}
 
 	@keyframes slideIn {
@@ -391,37 +545,103 @@
 		align-items: center;
 		gap: 0.75rem;
 		padding: 1rem 1.25rem;
-		border-bottom: 1px solid #333;
+		border-bottom: 1px solid hsl(var(--color-border));
 	}
 
 	.command-icon {
 		width: 1.25rem;
 		height: 1.25rem;
-		color: #888;
+		color: hsl(var(--color-muted-foreground));
 		flex-shrink: 0;
 	}
 
-	.command-input {
+	/* Input with syntax highlighting overlay */
+	.input-highlight-container {
+		position: relative;
 		flex: 1;
+		min-width: 0;
+	}
+
+	.input-highlight-backdrop {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		font-size: 1rem;
+		font-family: inherit;
+		white-space: pre;
+		pointer-events: none;
+		color: hsl(var(--color-foreground));
+		overflow: hidden;
+	}
+
+	.command-input {
+		position: relative;
+		width: 100%;
 		border: none;
 		background: transparent;
 		font-size: 1rem;
-		color: #fff;
+		font-family: inherit;
+		color: transparent;
+		caret-color: hsl(var(--color-foreground));
 		outline: none;
+		z-index: 1;
 	}
 
 	.command-input::placeholder {
-		color: #666;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	/* Syntax highlighting colors - Priority levels with matching UI colors */
+	.input-highlight-backdrop :global(.hl-priority-urgent) {
+		color: #ef4444; /* red - Dringend */
+		font-weight: 600;
+	}
+
+	.input-highlight-backdrop :global(.hl-priority-high) {
+		color: #f97316; /* orange - Wichtig */
+		font-weight: 600;
+	}
+
+	.input-highlight-backdrop :global(.hl-priority-medium) {
+		color: #eab308; /* yellow - Normal */
+		font-weight: 600;
+	}
+
+	.input-highlight-backdrop :global(.hl-priority-low) {
+		color: #22c55e; /* green - Später */
+		font-weight: 600;
+	}
+
+	.input-highlight-backdrop :global(.hl-tag) {
+		color: hsl(var(--color-primary));
+		font-weight: 500;
+	}
+
+	.input-highlight-backdrop :global(.hl-reference) {
+		color: hsl(var(--color-success));
+		font-weight: 500;
+	}
+
+	.input-highlight-backdrop :global(.hl-date) {
+		color: hsl(262 83% 58%);
+		font-weight: 500;
+	}
+
+	.input-highlight-backdrop :global(.hl-time) {
+		color: hsl(262 83% 58%);
+		font-weight: 500;
 	}
 
 	.command-shortcut {
 		padding: 0.25rem 0.5rem;
 		font-size: 0.75rem;
 		font-family: inherit;
-		background: #2a2a2a;
-		border: 1px solid #444;
+		background: hsl(var(--color-surface));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 4px;
-		color: #888;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.command-results {
@@ -436,15 +656,24 @@
 		justify-content: center;
 		gap: 0.75rem;
 		padding: 2rem;
-		color: #888;
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.875rem;
 	}
 
 	.loading-spinner {
 		width: 1.25rem;
 		height: 1.25rem;
-		border: 2px solid #333;
-		border-top-color: #3b82f6;
+		border: 2px solid hsl(var(--color-border));
+		border-top-color: hsl(var(--color-primary));
+		border-radius: 50%;
+		animation: spin 0.8s linear infinite;
+	}
+
+	.loading-spinner-small {
+		width: 1rem;
+		height: 1rem;
+		border: 2px solid hsl(var(--color-border));
+		border-top-color: hsl(var(--color-success));
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
 	}
@@ -453,6 +682,40 @@
 		to {
 			transform: rotate(360deg);
 		}
+	}
+
+	/* Create option styles */
+	.create-option {
+		border-bottom: 1px solid hsl(var(--color-border));
+	}
+
+	.create-option.selected,
+	.create-option:hover {
+		background: hsl(var(--color-success) / 0.1);
+	}
+
+	.create-avatar {
+		background: hsl(var(--color-success));
+	}
+
+	.create-shortcut {
+		padding: 0.25rem 0.5rem;
+		font-size: 0.6875rem;
+		font-family: inherit;
+		background: hsl(var(--color-surface));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 4px;
+		color: hsl(var(--color-muted-foreground));
+		flex-shrink: 0;
+	}
+
+	.results-divider {
+		padding: 0.5rem 1.25rem 0.25rem;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.command-result {
@@ -466,12 +729,12 @@
 		cursor: pointer;
 		text-align: left;
 		transition: background 0.1s ease;
-		color: #e5e5e5;
+		color: hsl(var(--color-foreground));
 	}
 
 	.command-result:hover,
 	.command-result.selected {
-		background: #2a2a2a;
+		background: hsl(var(--color-surface-hover));
 	}
 
 	.result-avatar {
@@ -479,8 +742,8 @@
 		height: 40px;
 		min-width: 40px;
 		border-radius: 9999px;
-		background: #3b82f6;
-		color: #fff;
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -495,7 +758,7 @@
 
 	.result-name {
 		font-weight: 500;
-		color: #fff;
+		color: hsl(var(--color-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -505,7 +768,7 @@
 		display: flex;
 		gap: 0.5rem;
 		font-size: 0.8125rem;
-		color: #888;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.result-details span {
@@ -517,7 +780,7 @@
 	.result-favorite {
 		width: 1rem;
 		height: 1rem;
-		color: #ef4444;
+		color: hsl(var(--color-error));
 		flex-shrink: 0;
 	}
 
@@ -532,7 +795,7 @@
 		width: 100%;
 		padding: 0.75rem 1rem;
 		border-radius: 8px;
-		color: #e5e5e5;
+		color: hsl(var(--color-foreground));
 		background: transparent;
 		border: none;
 		cursor: pointer;
@@ -542,13 +805,13 @@
 
 	.quick-action:hover,
 	.quick-action.selected {
-		background: #2a2a2a;
+		background: hsl(var(--color-surface-hover));
 	}
 
 	.quick-action-icon {
 		width: 1.25rem;
 		height: 1.25rem;
-		color: #888;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.quick-action span {
@@ -560,30 +823,30 @@
 		padding: 0.125rem 0.375rem;
 		font-size: 0.6875rem;
 		font-family: inherit;
-		background: #2a2a2a;
-		border: 1px solid #444;
+		background: hsl(var(--color-surface));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 4px;
-		color: #888;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.command-footer {
 		padding: 0.75rem 1.25rem;
-		border-top: 1px solid #333;
-		background: #141414;
+		border-top: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 	}
 
 	.footer-hints {
 		display: flex;
 		gap: 1rem;
 		font-size: 0.75rem;
-		color: #666;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.footer-hints kbd {
 		padding: 0.125rem 0.25rem;
 		font-family: inherit;
-		background: #2a2a2a;
-		border: 1px solid #444;
+		background: hsl(var(--color-surface-elevated));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 3px;
 		margin-right: 0.25rem;
 	}

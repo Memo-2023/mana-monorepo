@@ -108,6 +108,7 @@ export interface UpdateTaskInput {
 	recurrenceEndDate?: string | null;
 	subtasks?: Subtask[] | null;
 	metadata?: TaskMetadata | null;
+	labelIds?: string[];
 }
 
 export interface QueryTasksInput {

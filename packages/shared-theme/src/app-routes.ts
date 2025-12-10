@@ -6,15 +6,17 @@
  */
 
 /**
- * Route definition with i18n label
+ * Route definition with label
  */
 export interface AppRoute {
 	/** Route path (e.g., '/stopwatch') */
 	path: string;
-	/** i18n key for the label (e.g., 'nav.stopwatch') */
-	labelKey: string;
+	/** Display label for the route (e.g., 'Stoppuhr') */
+	label: string;
 	/** Optional icon name */
 	icon?: string;
+	/** If true, this route cannot be hidden (e.g., Settings, Home) */
+	alwaysVisible?: boolean;
 }
 
 /**
@@ -37,13 +39,14 @@ export const APP_ROUTES: Record<string, AppRouteConfig> = {
 		appId: 'clock',
 		defaultRoute: '/',
 		availableRoutes: [
-			{ path: '/', labelKey: 'nav.dashboard', icon: 'home' },
-			{ path: '/alarms', labelKey: 'nav.alarms', icon: 'alarm' },
-			{ path: '/timers', labelKey: 'nav.timers', icon: 'timer' },
-			{ path: '/stopwatch', labelKey: 'nav.stopwatch', icon: 'stopwatch' },
-			{ path: '/pomodoro', labelKey: 'nav.pomodoro', icon: 'target' },
-			{ path: '/world-clock', labelKey: 'nav.worldClock', icon: 'globe' },
-			{ path: '/life', labelKey: 'nav.lifeClock', icon: 'heart' },
+			{ path: '/', label: 'Dashboard', icon: 'home', alwaysVisible: true },
+			{ path: '/alarms', label: 'Wecker', icon: 'alarm' },
+			{ path: '/timers', label: 'Timer', icon: 'timer' },
+			{ path: '/stopwatch', label: 'Stoppuhr', icon: 'stopwatch' },
+			{ path: '/pomodoro', label: 'Pomodoro', icon: 'target' },
+			{ path: '/world-clock', label: 'Weltuhr', icon: 'globe' },
+			{ path: '/life', label: 'Lebenszeit', icon: 'heart' },
+			{ path: '/settings', label: 'Einstellungen', icon: 'settings', alwaysVisible: true },
 		],
 	},
 
@@ -51,8 +54,11 @@ export const APP_ROUTES: Record<string, AppRouteConfig> = {
 		appId: 'calendar',
 		defaultRoute: '/',
 		availableRoutes: [
-			{ path: '/', labelKey: 'nav.month', icon: 'calendar' },
-			{ path: '/agenda', labelKey: 'nav.agenda', icon: 'list' },
+			{ path: '/', label: 'Kalender', icon: 'calendar', alwaysVisible: true },
+			{ path: '/agenda', label: 'Agenda', icon: 'list' },
+			{ path: '/tags', label: 'Tags', icon: 'tag' },
+			{ path: '/network', label: 'Netzwerk', icon: 'share' },
+			{ path: '/settings', label: 'Einstellungen', icon: 'settings', alwaysVisible: true },
 		],
 	},
 
@@ -60,20 +66,14 @@ export const APP_ROUTES: Record<string, AppRouteConfig> = {
 		appId: 'contacts',
 		defaultRoute: '/',
 		availableRoutes: [
-			{ path: '/', labelKey: 'nav.contacts', icon: 'users' },
-			{ path: '/groups', labelKey: 'nav.groups', icon: 'folder' },
-			{ path: '/favorites', labelKey: 'nav.favorites', icon: 'star' },
-		],
-	},
-
-	mail: {
-		appId: 'mail',
-		defaultRoute: '/',
-		availableRoutes: [
-			{ path: '/', labelKey: 'nav.inbox', icon: 'inbox' },
-			{ path: '/sent', labelKey: 'nav.sent', icon: 'send' },
-			{ path: '/drafts', labelKey: 'nav.drafts', icon: 'file' },
-			{ path: '/starred', labelKey: 'nav.starred', icon: 'star' },
+			{ path: '/', label: 'Kontakte', icon: 'users', alwaysVisible: true },
+			{ path: '/favorites', label: 'Favoriten', icon: 'star' },
+			{ path: '/tags', label: 'Tags', icon: 'tag' },
+			{ path: '/archive', label: 'Archiv', icon: 'archive' },
+			{ path: '/duplicates', label: 'Duplikate', icon: 'copy' },
+			{ path: '/data', label: 'Import/Export', icon: 'download' },
+			{ path: '/network', label: 'Netzwerk', icon: 'share' },
+			{ path: '/settings', label: 'Einstellungen', icon: 'settings', alwaysVisible: true },
 		],
 	},
 
@@ -81,21 +81,12 @@ export const APP_ROUTES: Record<string, AppRouteConfig> = {
 		appId: 'todo',
 		defaultRoute: '/',
 		availableRoutes: [
-			{ path: '/', labelKey: 'nav.all', icon: 'list' },
-			{ path: '/today', labelKey: 'nav.today', icon: 'calendar' },
-			{ path: '/upcoming', labelKey: 'nav.upcoming', icon: 'clock' },
-			{ path: '/completed', labelKey: 'nav.completed', icon: 'check' },
-		],
-	},
-
-	storage: {
-		appId: 'storage',
-		defaultRoute: '/',
-		availableRoutes: [
-			{ path: '/', labelKey: 'nav.home', icon: 'home' },
-			{ path: '/files', labelKey: 'nav.files', icon: 'folder' },
-			{ path: '/favorites', labelKey: 'nav.favorites', icon: 'star' },
-			{ path: '/shared', labelKey: 'nav.shared', icon: 'share' },
+			{ path: '/', label: 'Aufgaben', icon: 'list', alwaysVisible: true },
+			{ path: '/kanban', label: 'Kanban', icon: 'grid' },
+			{ path: '/labels', label: 'Labels', icon: 'tag' },
+			{ path: '/statistics', label: 'Statistiken', icon: 'chart' },
+			{ path: '/network', label: 'Netzwerk', icon: 'share' },
+			{ path: '/settings', label: 'Einstellungen', icon: 'settings', alwaysVisible: true },
 		],
 	},
 
@@ -103,10 +94,13 @@ export const APP_ROUTES: Record<string, AppRouteConfig> = {
 		appId: 'chat',
 		defaultRoute: '/chat',
 		availableRoutes: [
-			{ path: '/chat', labelKey: 'nav.chat', icon: 'message' },
-			{ path: '/spaces', labelKey: 'nav.spaces', icon: 'folder' },
-			{ path: '/templates', labelKey: 'nav.templates', icon: 'file' },
-			{ path: '/documents', labelKey: 'nav.documents', icon: 'document' },
+			{ path: '/chat', label: 'Chat', icon: 'message', alwaysVisible: true },
+			{ path: '/templates', label: 'Vorlagen', icon: 'file' },
+			{ path: '/spaces', label: 'Spaces', icon: 'folder' },
+			{ path: '/documents', label: 'Dokumente', icon: 'document' },
+			{ path: '/archive', label: 'Archiv', icon: 'archive' },
+			{ path: '/feedback', label: 'Feedback', icon: 'chat' },
+			{ path: '/settings', label: 'Einstellungen', icon: 'settings', alwaysVisible: true },
 		],
 	},
 
@@ -114,10 +108,14 @@ export const APP_ROUTES: Record<string, AppRouteConfig> = {
 		appId: 'picture',
 		defaultRoute: '/app/gallery',
 		availableRoutes: [
-			{ path: '/app/gallery', labelKey: 'nav.gallery', icon: 'image' },
-			{ path: '/app/generate', labelKey: 'nav.generate', icon: 'sparkle' },
-			{ path: '/app/board', labelKey: 'nav.board', icon: 'grid' },
-			{ path: '/app/explore', labelKey: 'nav.explore', icon: 'compass' },
+			{ path: '/app/gallery', label: 'Galerie', icon: 'image', alwaysVisible: true },
+			{ path: '/app/board', label: 'Moodboards', icon: 'grid' },
+			{ path: '/app/explore', label: 'Entdecken', icon: 'compass' },
+			{ path: '/app/generate', label: 'Generieren', icon: 'sparkle' },
+			{ path: '/app/upload', label: 'Upload', icon: 'upload' },
+			{ path: '/app/tags', label: 'Tags', icon: 'tag' },
+			{ path: '/app/archive', label: 'Archiv', icon: 'archive' },
+			{ path: '/app/settings', label: 'Einstellungen', icon: 'settings', alwaysVisible: true },
 		],
 	},
 
@@ -125,9 +123,10 @@ export const APP_ROUTES: Record<string, AppRouteConfig> = {
 		appId: 'manadeck',
 		defaultRoute: '/decks',
 		availableRoutes: [
-			{ path: '/decks', labelKey: 'nav.decks', icon: 'layers' },
-			{ path: '/explore', labelKey: 'nav.explore', icon: 'compass' },
-			{ path: '/progress', labelKey: 'nav.progress', icon: 'trending' },
+			{ path: '/decks', label: 'Decks', icon: 'layers', alwaysVisible: true },
+			{ path: '/explore', label: 'Entdecken', icon: 'compass' },
+			{ path: '/progress', label: 'Fortschritt', icon: 'trending' },
+			{ path: '/settings', label: 'Einstellungen', icon: 'settings', alwaysVisible: true },
 		],
 	},
 
@@ -135,24 +134,23 @@ export const APP_ROUTES: Record<string, AppRouteConfig> = {
 		appId: 'zitare',
 		defaultRoute: '/',
 		availableRoutes: [
-			{ path: '/', labelKey: 'nav.home', icon: 'home' },
-			{ path: '/quotes', labelKey: 'nav.quotes', icon: 'quote' },
-			{ path: '/favorites', labelKey: 'nav.favorites', icon: 'star' },
-			{ path: '/authors', labelKey: 'nav.authors', icon: 'users' },
-			{ path: '/lists', labelKey: 'nav.lists', icon: 'list' },
+			{ path: '/', label: 'Zitate', icon: 'quote', alwaysVisible: true },
+			{ path: '/search', label: 'Suche', icon: 'search' },
+			{ path: '/authors', label: 'Autoren', icon: 'users' },
+			{ path: '/favorites', label: 'Favoriten', icon: 'star' },
+			{ path: '/lists', label: 'Listen', icon: 'list' },
+			{ path: '/feedback', label: 'Feedback', icon: 'chat' },
+			{ path: '/settings', label: 'Einstellungen', icon: 'settings', alwaysVisible: true },
 		],
-	},
-
-	presi: {
-		appId: 'presi',
-		defaultRoute: '/',
-		availableRoutes: [{ path: '/', labelKey: 'nav.home', icon: 'home' }],
 	},
 
 	manacore: {
 		appId: 'manacore',
 		defaultRoute: '/',
-		availableRoutes: [{ path: '/', labelKey: 'nav.dashboard', icon: 'home' }],
+		availableRoutes: [
+			{ path: '/', label: 'Dashboard', icon: 'home', alwaysVisible: true },
+			{ path: '/settings', label: 'Einstellungen', icon: 'settings', alwaysVisible: true },
+		],
 	},
 };
 
@@ -198,4 +196,47 @@ export function getAvailableRoutes(appId: string): AppRoute[] {
  */
 export function getDefaultRoute(appId: string): string {
 	return APP_ROUTES[appId]?.defaultRoute ?? '/';
+}
+
+/**
+ * Filter hidden navigation items from a list of nav items
+ * @param appId The app identifier
+ * @param items Array of nav items with href property
+ * @param hiddenNavItems Hidden items config (appId -> hidden paths)
+ * @returns Filtered array with hidden items removed
+ */
+export function filterHiddenNavItems<T extends { href: string }>(
+	appId: string,
+	items: T[],
+	hiddenNavItems: Record<string, string[]> = {}
+): T[] {
+	const hidden = hiddenNavItems[appId] || [];
+	return items.filter((item) => !hidden.includes(item.href));
+}
+
+/**
+ * Get routes that can be hidden for a specific app
+ * (excludes routes marked as alwaysVisible)
+ * @param appId The app identifier
+ * @returns Array of routes that can be hidden
+ */
+export function getHideableRoutes(appId: string): AppRoute[] {
+	const config = APP_ROUTES[appId];
+	return config?.availableRoutes.filter((r) => !r.alwaysVisible) || [];
+}
+
+/**
+ * Check if a route is hidden for a specific app
+ * @param appId The app identifier
+ * @param path The route path
+ * @param hiddenNavItems Hidden items config
+ * @returns True if the route is hidden
+ */
+export function isRouteHidden(
+	appId: string,
+	path: string,
+	hiddenNavItems: Record<string, string[]> = {}
+): boolean {
+	const hidden = hiddenNavItems[appId] || [];
+	return hidden.includes(path);
 }

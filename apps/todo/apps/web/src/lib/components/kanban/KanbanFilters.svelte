@@ -36,19 +36,19 @@
 		},
 		{
 			value: 'high',
-			label: 'Hoch',
+			label: 'Wichtig',
 			color: 'text-orange-600 dark:text-orange-400',
 			bgColor: 'bg-orange-500',
 		},
 		{
 			value: 'medium',
-			label: 'Mittel',
+			label: 'Normal',
 			color: 'text-yellow-600 dark:text-yellow-400',
 			bgColor: 'bg-yellow-500',
 		},
 		{
 			value: 'low',
-			label: 'Niedrig',
+			label: 'Später',
 			color: 'text-blue-600 dark:text-blue-400',
 			bgColor: 'bg-blue-500',
 		},
@@ -184,10 +184,9 @@
 
 			<div class="h-6 w-px bg-border hidden sm:block"></div>
 
-			<!-- Labels filter -->
+			<!-- Tags filter -->
 			<div class="filter-group flex items-center gap-2 relative">
-				<span class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Labels</span
-				>
+				<span class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Tags</span>
 				<button
 					class="flex items-center gap-2 px-3 py-1.5 text-sm bg-background border border-border rounded-lg hover:border-primary/50 hover:bg-muted/50 transition-all"
 					onclick={() => (showLabelsDropdown = !showLabelsDropdown)}
@@ -234,7 +233,7 @@
 						class="absolute top-full left-0 mt-2 z-50 min-w-[220px] bg-popover border border-border rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2 duration-150"
 					>
 						{#if labelsStore.labels.length === 0}
-							<p class="text-sm text-muted-foreground p-3 text-center">Keine Labels vorhanden</p>
+							<p class="text-sm text-muted-foreground p-3 text-center">Keine Tags vorhanden</p>
 						{:else}
 							<div class="max-h-[200px] overflow-y-auto">
 								{#each labelsStore.labels as label}

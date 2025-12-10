@@ -8,14 +8,27 @@
 	import { getAvailableRoutes, getDefaultRoute } from '@manacore/shared-theme';
 	import SettingsSection from './SettingsSection.svelte';
 	import SettingsCard from './SettingsCard.svelte';
+	import NavVisibilitySettings from './NavVisibilitySettings.svelte';
+
+	interface NavItem {
+		href: string;
+		label: string;
+		icon?: string;
+	}
 
 	interface Props {
 		/** User settings store instance */
 		userSettings: UserSettingsStore;
 		/** App ID for start page selection */
 		appId?: string;
+		/** Navigation items for visibility settings */
+		navItems?: NavItem[];
+		/** Items that should always be visible (e.g., home route) */
+		alwaysVisibleHrefs?: string[];
 		/** Whether to show navigation settings */
 		showNavigation?: boolean;
+		/** Whether to show nav visibility settings */
+		showNavVisibility?: boolean;
 		/** Whether to show theme settings */
 		showTheme?: boolean;
 		/** Whether to show language settings */
@@ -33,7 +46,10 @@
 	let {
 		userSettings,
 		appId,
+		navItems = [],
+		alwaysVisibleHrefs = [],
 		showNavigation = true,
+		showNavVisibility = true,
 		showTheme = true,
 		showLanguage = true,
 		showGeneral = true,
@@ -205,10 +221,21 @@
 					</div>
 				{/if}
 
+				{#if showNavVisibility && appId && navItems.length > 0}
+					<!-- Navigation Visibility Settings -->
+					<div
+						class="space-y-4 {showNavigation ? 'pt-4 border-t border-[hsl(var(--border))]' : ''}"
+					>
+						<NavVisibilitySettings {userSettings} {appId} {navItems} {alwaysVisibleHrefs} />
+					</div>
+				{/if}
+
 				{#if showTheme}
 					<!-- Theme Settings -->
 					<div
-						class="space-y-4 {showNavigation ? 'pt-4 border-t border-[hsl(var(--border))]' : ''}"
+						class="space-y-4 {showNavigation || (showNavVisibility && appId)
+							? 'pt-4 border-t border-[hsl(var(--border))]'
+							: ''}"
 					>
 						<h3
 							class="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider"
@@ -266,7 +293,7 @@
 				{#if showLanguage}
 					<!-- Language Settings -->
 					<div
-						class="space-y-4 {showTheme || showNavigation
+						class="space-y-4 {showTheme || showNavigation || (showNavVisibility && appId)
 							? 'pt-4 border-t border-[hsl(var(--border))]'
 							: ''}"
 					>
@@ -303,7 +330,10 @@
 				{#if showGeneral}
 					<!-- General Settings -->
 					<div
-						class="space-y-4 {showLanguage || showTheme || showNavigation
+						class="space-y-4 {showLanguage ||
+						showTheme ||
+						showNavigation ||
+						(showNavVisibility && appId)
 							? 'pt-4 border-t border-[hsl(var(--border))]'
 							: ''}"
 					>
@@ -329,7 +359,7 @@
 								>
 									{#each availableRoutes as route}
 										<option value={route.path}>
-											{t(route.labelKey)}
+											{route.label}
 										</option>
 									{/each}
 								</select>

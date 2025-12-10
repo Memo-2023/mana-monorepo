@@ -12,6 +12,7 @@
 		EXTENDED_THEME_VARIANTS,
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
+	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
@@ -78,8 +79,8 @@
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
-	// Navigation items for Chat (settings moved to user dropdown)
-	const navItems: PillNavItem[] = [
+	// Base navigation items for Chat (settings moved to user dropdown)
+	const baseNavItems: PillNavItem[] = [
 		{ href: '/chat', label: 'Chat', icon: 'home' },
 		{ href: '/templates', label: 'Templates', icon: 'document' },
 		{ href: '/spaces', label: 'Spaces', icon: 'building' },
@@ -88,14 +89,19 @@
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
+	// Navigation items filtered by visibility settings
+	const navItems = $derived(
+		filterHiddenNavItems('chat', baseNavItems, userSettings.nav.hiddenNavItems)
+	);
+
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email);
 
 	// Check if current page is a chat page (needs full-width layout)
 	let isChatPage = $derived($page.url.pathname.startsWith('/chat'));
 
-	// Navigation shortcuts (Ctrl+1-5)
-	const navRoutes = navItems.map((item) => item.href);
+	// Navigation shortcuts (Ctrl+1-5) - use base items for consistent shortcuts
+	const navRoutes = baseNavItems.map((item) => item.href);
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;

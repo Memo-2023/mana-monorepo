@@ -18,6 +18,7 @@
 		EXTENDED_THEME_VARIANTS,
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
+	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -33,12 +34,17 @@
 	// Get theme state
 	let isDark = $derived(theme.isDark);
 
-	// Navigation items for ManaDeck (Mana and Profile are in user dropdown)
-	const navItems: PillNavItem[] = [
+	// Base navigation items for ManaDeck (Mana and Profile are in user dropdown)
+	const baseNavItems: PillNavItem[] = [
 		{ href: '/decks', label: 'Decks', icon: 'archive' },
 		{ href: '/explore', label: 'Explore', icon: 'search' },
 		{ href: '/progress', label: 'Progress', icon: 'chart' },
 	];
+
+	// Navigation items filtered by visibility settings
+	const navItems = $derived(
+		filterHiddenNavItems('manadeck', baseNavItems, userSettings.nav.hiddenNavItems)
+	);
 
 	// Get pinned themes from user settings (extended themes only)
 	let pinnedThemes = $derived<ThemeVariant[]>(

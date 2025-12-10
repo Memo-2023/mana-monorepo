@@ -33,9 +33,13 @@ export class TaskController {
 	}
 
 	@Get('completed')
-	async getCompleted(@CurrentUser() user: CurrentUserData, @Query('limit') limit?: number) {
-		const tasks = await this.taskService.getCompletedTasks(user.userId, limit ?? 50);
-		return { tasks };
+	async getCompleted(
+		@CurrentUser() user: CurrentUserData,
+		@Query('limit') limit?: number,
+		@Query('offset') offset?: number
+	) {
+		const result = await this.taskService.getCompletedTasks(user.userId, limit ?? 50, offset ?? 0);
+		return result;
 	}
 
 	@Get(':id')

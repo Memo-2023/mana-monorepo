@@ -240,6 +240,8 @@ export interface NavSettings {
 	desktopPosition: NavPosition;
 	/** Whether sidebar is collapsed */
 	sidebarCollapsed: boolean;
+	/** Hidden navigation items per app (appId -> list of hidden paths) */
+	hiddenNavItems?: Record<string, string[]>;
 }
 
 /**
@@ -323,7 +325,7 @@ export const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
  * Default global settings
  */
 export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
-	nav: { desktopPosition: 'top', sidebarCollapsed: false },
+	nav: { desktopPosition: 'top', sidebarCollapsed: false, hiddenNavItems: {} },
 	theme: { mode: 'system', colorScheme: 'ocean', pinnedThemes: [] },
 	locale: 'de',
 	general: DEFAULT_GENERAL_SETTINGS,
@@ -364,6 +366,12 @@ export interface UserSettingsStore {
 	setStartPage: (appId: string, path: string) => Promise<void>;
 	/** Update general settings */
 	updateGeneral: (settings: Partial<GeneralSettings>) => Promise<void>;
+	/** Get hidden nav items for a specific app */
+	getHiddenNavItemsForApp: (appId: string) => string[];
+	/** Toggle visibility of a navigation item */
+	toggleNavItemVisibility: (appId: string, href: string) => Promise<void>;
+	/** Set hidden nav items for an app */
+	setHiddenNavItems: (appId: string, hiddenHrefs: string[]) => Promise<void>;
 }
 
 /**
