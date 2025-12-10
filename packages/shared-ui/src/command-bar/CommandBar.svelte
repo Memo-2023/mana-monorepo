@@ -448,9 +448,9 @@
 		align-items: flex-start;
 		justify-content: center;
 		padding-top: 15vh;
-		background: rgba(0, 0, 0, 0.6);
-		backdrop-filter: blur(4px);
-		-webkit-backdrop-filter: blur(4px);
+		background: hsl(var(--color-background) / 0.8);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
 		animation: fadeIn 0.15s ease;
 	}
 
@@ -467,15 +467,15 @@
 		width: 100%;
 		max-width: 560px;
 		margin: 0 1rem;
-		background: #1a1a1a;
-		border: 1px solid #333;
+		background: hsl(var(--color-surface-elevated));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 12px;
 		box-shadow:
-			0 25px 50px -12px rgba(0, 0, 0, 0.5),
-			0 0 0 1px rgba(255, 255, 255, 0.1);
+			0 25px 50px -12px hsl(var(--color-background) / 0.5),
+			0 0 0 1px hsl(var(--color-border) / 0.5);
 		overflow: hidden;
 		animation: slideIn 0.2s ease;
-		color: #e5e5e5;
+		color: hsl(var(--color-foreground));
 	}
 
 	@keyframes slideIn {
@@ -494,13 +494,13 @@
 		align-items: center;
 		gap: 0.75rem;
 		padding: 1rem 1.25rem;
-		border-bottom: 1px solid #333;
+		border-bottom: 1px solid hsl(var(--color-border));
 	}
 
 	.command-icon {
 		width: 1.25rem;
 		height: 1.25rem;
-		color: #888;
+		color: hsl(var(--color-muted-foreground));
 		flex-shrink: 0;
 	}
 
@@ -509,22 +509,22 @@
 		border: none;
 		background: transparent;
 		font-size: 1rem;
-		color: #fff;
+		color: hsl(var(--color-foreground));
 		outline: none;
 	}
 
 	.command-input::placeholder {
-		color: #666;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.command-shortcut {
 		padding: 0.25rem 0.5rem;
 		font-size: 0.75rem;
 		font-family: inherit;
-		background: #2a2a2a;
-		border: 1px solid #444;
+		background: hsl(var(--color-surface));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 4px;
-		color: #888;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.command-results {
@@ -539,15 +539,15 @@
 		justify-content: center;
 		gap: 0.75rem;
 		padding: 2rem;
-		color: #888;
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.875rem;
 	}
 
 	.loading-spinner {
 		width: 1.25rem;
 		height: 1.25rem;
-		border: 2px solid #333;
-		border-top-color: #3b82f6;
+		border: 2px solid hsl(var(--color-border));
+		border-top-color: hsl(var(--color-primary));
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
 	}
@@ -555,8 +555,8 @@
 	.loading-spinner-small {
 		width: 1rem;
 		height: 1rem;
-		border: 2px solid #444;
-		border-top-color: #10b981;
+		border: 2px solid hsl(var(--color-border));
+		border-top-color: hsl(var(--color-success));
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
 	}
@@ -569,26 +569,26 @@
 
 	/* Create option styles */
 	.create-option {
-		border-bottom: 1px solid #333;
+		border-bottom: 1px solid hsl(var(--color-border));
 	}
 
 	.create-option.selected,
 	.create-option:hover {
-		background: rgba(16, 185, 129, 0.1);
+		background: hsl(var(--color-success) / 0.1);
 	}
 
 	.create-avatar {
-		background: #10b981;
+		background: hsl(var(--color-success));
 	}
 
 	.create-shortcut {
 		padding: 0.25rem 0.5rem;
 		font-size: 0.6875rem;
 		font-family: inherit;
-		background: #2a2a2a;
-		border: 1px solid #444;
+		background: hsl(var(--color-surface));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 4px;
-		color: #888;
+		color: hsl(var(--color-muted-foreground));
 		flex-shrink: 0;
 	}
 
@@ -598,7 +598,7 @@
 		font-weight: 500;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #666;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.command-result {
@@ -612,12 +612,12 @@
 		cursor: pointer;
 		text-align: left;
 		transition: background 0.1s ease;
-		color: #e5e5e5;
+		color: hsl(var(--color-foreground));
 	}
 
 	.command-result:hover,
 	.command-result.selected {
-		background: #2a2a2a;
+		background: hsl(var(--color-surface-hover));
 	}
 
 	.result-avatar {
@@ -625,8 +625,8 @@
 		height: 40px;
 		min-width: 40px;
 		border-radius: 9999px;
-		background: #3b82f6;
-		color: #fff;
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -641,7 +641,7 @@
 
 	.result-name {
 		font-weight: 500;
-		color: #fff;
+		color: hsl(var(--color-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -651,7 +651,7 @@
 		display: flex;
 		gap: 0.5rem;
 		font-size: 0.8125rem;
-		color: #888;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.result-details span {
@@ -663,7 +663,7 @@
 	.result-favorite {
 		width: 1rem;
 		height: 1rem;
-		color: #ef4444;
+		color: hsl(var(--color-error));
 		flex-shrink: 0;
 	}
 
@@ -678,7 +678,7 @@
 		width: 100%;
 		padding: 0.75rem 1rem;
 		border-radius: 8px;
-		color: #e5e5e5;
+		color: hsl(var(--color-foreground));
 		background: transparent;
 		border: none;
 		cursor: pointer;
@@ -688,13 +688,13 @@
 
 	.quick-action:hover,
 	.quick-action.selected {
-		background: #2a2a2a;
+		background: hsl(var(--color-surface-hover));
 	}
 
 	.quick-action-icon {
 		width: 1.25rem;
 		height: 1.25rem;
-		color: #888;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.quick-action span {
@@ -706,30 +706,30 @@
 		padding: 0.125rem 0.375rem;
 		font-size: 0.6875rem;
 		font-family: inherit;
-		background: #2a2a2a;
-		border: 1px solid #444;
+		background: hsl(var(--color-surface));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 4px;
-		color: #888;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.command-footer {
 		padding: 0.75rem 1.25rem;
-		border-top: 1px solid #333;
-		background: #141414;
+		border-top: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 	}
 
 	.footer-hints {
 		display: flex;
 		gap: 1rem;
 		font-size: 0.75rem;
-		color: #666;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.footer-hints kbd {
 		padding: 0.125rem 0.25rem;
 		font-family: inherit;
-		background: #2a2a2a;
-		border: 1px solid #444;
+		background: hsl(var(--color-surface-elevated));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 3px;
 		margin-right: 0.25rem;
 	}
