@@ -20,6 +20,7 @@
 		EXTENDED_THEME_VARIANTS,
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
+	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
@@ -106,8 +107,8 @@
 	// User email for user dropdown (fallback to 'Menü' when not logged in)
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
-	// Navigation items for Contacts
-	const navItems: PillNavItem[] = [
+	// Base navigation items for Contacts
+	const baseNavItems: PillNavItem[] = [
 		{ href: '/', label: 'Kontakte', icon: 'users' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
@@ -118,8 +119,13 @@
 		{ href: '/help', label: 'Hilfe', icon: 'help-circle' },
 	];
 
-	// Navigation shortcuts (Ctrl+1-5)
-	const navRoutes = navItems.map((item) => item.href);
+	// Navigation items filtered by visibility settings
+	const navItems = $derived(
+		filterHiddenNavItems('contacts', baseNavItems, userSettings.nav.hiddenNavItems)
+	);
+
+	// Navigation shortcuts (Ctrl+1-5) - use base items for consistent shortcuts
+	const navRoutes = baseNavItems.map((item) => item.href);
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;

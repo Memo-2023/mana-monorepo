@@ -27,6 +27,7 @@
 		EXTENDED_THEME_VARIANTS,
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
+	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getTasks } from '$lib/api/tasks';
@@ -156,31 +157,33 @@
 		{ href: '/', label: 'Aufgaben', icon: 'list' },
 		{ href: '/kanban', label: 'Kanban', icon: 'columns' },
 		{ href: '/statistics', label: 'Statistiken', icon: 'chart' },
-		{ href: '/labels', label: 'Labels', icon: 'tag' },
+		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
-	// Navigation items (base items + dynamic label items in sidebar mode)
+	// Navigation items (base items + dynamic label items in sidebar mode, filtered by visibility settings)
 	const navItems = $derived.by(() => {
-		// In sidebar mode, add labels as sub-items if available
+		// Start with base items, filter out hidden ones
+		let items = filterHiddenNavItems('todo', baseNavItems, userSettings.nav.hiddenNavItems);
+
+		// In sidebar mode, add tags as sub-items if available
 		if (isSidebarMode && labelsStore.labels.length > 0) {
-			const labelItems: PillNavItem[] = labelsStore.labels.slice(0, 5).map((label) => ({
-				href: `/label/${label.id}`,
+			const tagItems: PillNavItem[] = labelsStore.labels.slice(0, 5).map((label) => ({
+				href: `/tag/${label.id}`,
 				label: label.name,
 				icon: 'tag',
 			}));
 
-			// Insert label items after "Labels" nav item
-			const items = [...baseNavItems];
-			const labelsIndex = items.findIndex((i) => i.href === '/labels');
-			if (labelsIndex !== -1 && labelItems.length > 0) {
-				items.splice(labelsIndex + 1, 0, ...labelItems);
+			// Insert tag items after "Tags" nav item
+			const tagsIndex = items.findIndex((i) => i.href === '/tags');
+			if (tagsIndex !== -1 && tagItems.length > 0) {
+				items = [...items];
+				items.splice(tagsIndex + 1, 0, ...tagItems);
 			}
-			return items;
 		}
-		return baseNavItems;
+		return items;
 	});
 
 	// Navigation shortcuts (Ctrl+1-6) - use base items for consistent shortcuts

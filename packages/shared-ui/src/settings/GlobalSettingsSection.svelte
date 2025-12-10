@@ -214,7 +214,7 @@
 					<div
 						class="space-y-4 {showNavigation ? 'pt-4 border-t border-[hsl(var(--border))]' : ''}"
 					>
-						<NavVisibilitySettings {userSettings} {appId} {t} />
+						<NavVisibilitySettings {userSettings} {appId} />
 					</div>
 				{/if}
 
@@ -347,7 +347,7 @@
 								>
 									{#each availableRoutes as route}
 										<option value={route.path}>
-											{t(route.labelKey)}
+											{route.label}
 										</option>
 									{/each}
 								</select>

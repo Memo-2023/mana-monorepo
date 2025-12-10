@@ -7,12 +7,44 @@
 	interface Props {
 		task: Task;
 		showCompleted?: boolean;
+		animateComplete?: boolean;
 		onToggleComplete: () => void;
 		onDelete: () => void;
 		onEdit?: () => void;
 	}
 
-	let { task, showCompleted = false, onToggleComplete, onDelete, onEdit }: Props = $props();
+	let {
+		task,
+		showCompleted = false,
+		animateComplete = false,
+		onToggleComplete,
+		onDelete,
+		onEdit,
+	}: Props = $props();
+
+	// Animation state for completing
+	let isAnimatingComplete = $state(false);
+
+	// External animation trigger
+	$effect(() => {
+		if (animateComplete && !task.isCompleted) {
+			isAnimatingComplete = true;
+		}
+	});
+
+	function handleToggleClick() {
+		if (!task.isCompleted) {
+			// Animate before completing
+			isAnimatingComplete = true;
+			setTimeout(() => {
+				isAnimatingComplete = false;
+				onToggleComplete();
+			}, 500);
+		} else {
+			// Uncomplete immediately
+			onToggleComplete();
+		}
+	}
 
 	function handleContentClick() {
 		if (onEdit) {
@@ -58,7 +90,11 @@
 	});
 </script>
 
-<div class="task-item group" class:completed={task.isCompleted}>
+<div
+	class="task-item group"
+	class:completed={task.isCompleted}
+	class:completing={isAnimatingComplete}
+>
 	<!-- Drag handle -->
 	<div class="drag-handle">
 		<svg class="drag-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -73,9 +109,20 @@
 	></div>
 
 	<!-- Checkbox -->
-	<button class="task-checkbox" class:checked={task.isCompleted} onclick={onToggleComplete}>
-		{#if task.isCompleted}
-			<svg class="check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+	<button
+		class="task-checkbox"
+		class:checked={task.isCompleted}
+		class:animating={isAnimatingComplete}
+		onclick={handleToggleClick}
+	>
+		{#if task.isCompleted || isAnimatingComplete}
+			<svg
+				class="check-icon"
+				class:animate-check={isAnimatingComplete}
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
 			</svg>
 		{/if}
@@ -183,6 +230,17 @@
 		opacity: 0.6;
 	}
 
+	/* Completing animation */
+	.task-item.completing {
+		background: rgba(34, 197, 94, 0.15);
+		border-color: rgba(34, 197, 94, 0.3);
+	}
+
+	:global(.dark) .task-item.completing {
+		background: rgba(34, 197, 94, 0.2);
+		border-color: rgba(34, 197, 94, 0.4);
+	}
+
 	/* Drag handle */
 	.drag-handle {
 		cursor: grab;
@@ -258,10 +316,46 @@
 		border-color: #8b5cf6;
 	}
 
+	.task-checkbox.animating {
+		background: #22c55e;
+		border-color: #22c55e;
+		transform: scale(1.2);
+	}
+
 	.check-icon {
 		width: 0.75rem;
 		height: 0.75rem;
 		color: white;
+	}
+
+	.check-icon.animate-check {
+		animation: drawCheck 0.3s ease-out forwards;
+	}
+
+	.check-icon.animate-check path {
+		stroke-dasharray: 24;
+		stroke-dashoffset: 24;
+		animation: drawPath 0.3s ease-out forwards;
+	}
+
+	@keyframes drawPath {
+		to {
+			stroke-dashoffset: 0;
+		}
+	}
+
+	@keyframes drawCheck {
+		0% {
+			transform: scale(0.5);
+			opacity: 0;
+		}
+		50% {
+			transform: scale(1.2);
+		}
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
 	}
 
 	/* Content */

@@ -87,8 +87,8 @@
 		}
 	}
 
-	function handleLabelClick(tag: Tag) {
-		goto(`/label/${tag.id}`);
+	function handleTagClick(tag: Tag) {
+		goto(`/tag/${tag.id}`);
 	}
 
 	onMount(() => {
@@ -99,7 +99,7 @@
 </script>
 
 <svelte:head>
-	<title>Labels - Todo</title>
+	<title>Tags - Todo</title>
 </svelte:head>
 
 <div class="page-container">
@@ -108,8 +108,8 @@
 		<a href="/" class="back-button" aria-label="Zurück">
 			<CaretLeft size={20} weight="bold" />
 		</a>
-		<h1 class="title">Labels</h1>
-		<button onclick={openCreateModal} class="add-button" aria-label="Neues Label">
+		<h1 class="title">Tags</h1>
+		<button onclick={openCreateModal} class="add-button" aria-label="Neuer Tag">
 			<Plus size={20} weight="bold" />
 		</button>
 	</header>
@@ -119,7 +119,7 @@
 		<MagnifyingGlass size={20} class="search-icon" />
 		<input
 			type="text"
-			placeholder="Labels durchsuchen..."
+			placeholder="Tags durchsuchen..."
 			bind:value={searchQuery}
 			class="search-input"
 		/>
@@ -131,23 +131,23 @@
 		</div>
 	{/if}
 
-	<!-- Label List using shared component -->
+	<!-- Tag List using shared component -->
 	<TagList
 		tags={filteredLabels.map(labelToTag)}
 		loading={labelsStore.loading}
 		onEdit={openEditModal}
 		onDelete={handleDeleteFromList}
-		onClick={handleLabelClick}
-		emptyMessage={searchQuery ? 'Keine Labels gefunden' : 'Keine Labels vorhanden'}
+		onClick={handleTagClick}
+		emptyMessage={searchQuery ? 'Keine Tags gefunden' : 'Keine Tags vorhanden'}
 		emptyDescription={searchQuery
-			? `Kein Label für "${searchQuery}" gefunden`
-			: 'Erstelle dein erstes Label'}
+			? `Kein Tag für "${searchQuery}" gefunden`
+			: 'Erstelle deinen ersten Tag'}
 	/>
 
 	{#if !labelsStore.loading && labelsStore.labels.length > 0}
-		<p class="labels-count">
+		<p class="tags-count">
 			{labelsStore.labels.length}
-			{labelsStore.labels.length === 1 ? 'Label' : 'Labels'}
+			{labelsStore.labels.length === 1 ? 'Tag' : 'Tags'}
 		</p>
 	{/if}
 
@@ -155,7 +155,7 @@
 		<div class="empty-cta">
 			<button onclick={openCreateModal} class="btn btn-primary">
 				<Plus size={16} weight="bold" />
-				Neues Label
+				Neuer Tag
 			</button>
 		</div>
 	{/if}
@@ -168,14 +168,14 @@
 	onClose={closeModal}
 	onSave={handleSave}
 	onDelete={editingLabel ? handleDelete : undefined}
-	title={editingLabel ? 'Label bearbeiten' : 'Neues Label'}
+	title={editingLabel ? 'Tag bearbeiten' : 'Neuer Tag'}
 	saveLabel={editingLabel ? 'Speichern' : 'Erstellen'}
 	deleteLabel="Löschen"
 	cancelLabel="Abbrechen"
-	namePlaceholder="Label Name"
+	namePlaceholder="Tag Name"
 	colorLabel="Farbe"
 	previewLabel="Vorschau"
-	deleteConfirmMessage={`Label "${editingLabel?.name || ''}" wirklich löschen?`}
+	deleteConfirmMessage={`Tag "${editingLabel?.name || ''}" wirklich löschen?`}
 />
 
 <!-- Delete confirmation modal -->
@@ -187,8 +187,8 @@
 	}}
 	onConfirm={confirmDeleteLabel}
 	variant="danger"
-	title="Label löschen?"
-	message={`Das Label "${labelToDelete?.name ?? ''}" wird unwiderruflich gelöscht.`}
+	title="Tag löschen?"
+	message={`Der Tag "${labelToDelete?.name ?? ''}" wird unwiderruflich gelöscht.`}
 	confirmLabel="Löschen"
 	cancelLabel="Abbrechen"
 />
@@ -298,7 +298,7 @@
 	}
 
 	/* Count */
-	.labels-count {
+	.tags-count {
 		text-align: center;
 		font-size: 0.875rem;
 		color: hsl(var(--muted-foreground));

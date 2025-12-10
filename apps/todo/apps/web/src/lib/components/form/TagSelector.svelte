@@ -10,11 +10,11 @@
 
 	let showDropdown = $state(false);
 
-	function toggleLabel(labelId: string) {
-		if (selectedIds.includes(labelId)) {
-			onChange(selectedIds.filter((id) => id !== labelId));
+	function toggleTag(tagId: string) {
+		if (selectedIds.includes(tagId)) {
+			onChange(selectedIds.filter((id) => id !== tagId));
 		} else {
-			onChange([...selectedIds, labelId]);
+			onChange([...selectedIds, tagId]);
 		}
 	}
 
@@ -30,22 +30,22 @@
 
 <svelte:window onclick={handleWindowClick} />
 
-<div class="label-selector">
-	<button type="button" class="label-trigger" onclick={handleTriggerClick}>
+<div class="tag-selector">
+	<button type="button" class="tag-trigger" onclick={handleTriggerClick}>
 		{#if selectedIds.length === 0}
-			<span class="text-muted">Labels auswählen...</span>
+			<span class="text-muted">Tags auswählen...</span>
 		{:else}
-			<div class="selected-labels">
-				{#each selectedIds.slice(0, 3) as labelId}
-					{@const label = labelsStore.getById(labelId)}
-					{#if label}
-						<span class="label-tag" style="--label-color: {label.color}">
-							{label.name}
+			<div class="selected-tags">
+				{#each selectedIds.slice(0, 3) as tagId}
+					{@const tag = labelsStore.getById(tagId)}
+					{#if tag}
+						<span class="tag-chip" style="--tag-color: {tag.color}">
+							{tag.name}
 						</span>
 					{/if}
 				{/each}
 				{#if selectedIds.length > 3}
-					<span class="label-more">+{selectedIds.length - 3}</span>
+					<span class="tag-more">+{selectedIds.length - 3}</span>
 				{/if}
 			</div>
 		{/if}
@@ -55,19 +55,19 @@
 	</button>
 
 	{#if showDropdown}
-		<div class="label-dropdown" onclick={(e) => e.stopPropagation()} role="listbox">
-			{#each labelsStore.labels as label}
+		<div class="tag-dropdown" onclick={(e) => e.stopPropagation()} role="listbox">
+			{#each labelsStore.labels as tag}
 				<button
 					type="button"
-					class="label-option"
-					class:selected={selectedIds.includes(label.id)}
-					onclick={() => toggleLabel(label.id)}
+					class="tag-option"
+					class:selected={selectedIds.includes(tag.id)}
+					onclick={() => toggleTag(tag.id)}
 					role="option"
-					aria-selected={selectedIds.includes(label.id)}
+					aria-selected={selectedIds.includes(tag.id)}
 				>
-					<span class="label-dot" style="background-color: {label.color}"></span>
-					<span class="label-name">{label.name}</span>
-					{#if selectedIds.includes(label.id)}
+					<span class="tag-dot" style="background-color: {tag.color}"></span>
+					<span class="tag-name">{tag.name}</span>
+					{#if selectedIds.includes(tag.id)}
 						<svg class="check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path
 								stroke-linecap="round"
@@ -80,18 +80,18 @@
 				</button>
 			{/each}
 			{#if labelsStore.labels.length === 0}
-				<div class="no-labels">Keine Labels vorhanden</div>
+				<div class="no-tags">Keine Tags vorhanden</div>
 			{/if}
 		</div>
 	{/if}
 </div>
 
 <style>
-	.label-selector {
+	.tag-selector {
 		position: relative;
 	}
 
-	.label-trigger {
+	.tag-trigger {
 		width: 100%;
 		display: flex;
 		align-items: center;
@@ -104,12 +104,12 @@
 		transition: all 0.15s;
 	}
 
-	:global(.dark) .label-trigger {
+	:global(.dark) .tag-trigger {
 		background: rgba(255, 255, 255, 0.1);
 		border-color: rgba(255, 255, 255, 0.15);
 	}
 
-	.label-trigger:hover {
+	.tag-trigger:hover {
 		border-color: rgba(0, 0, 0, 0.25);
 	}
 
@@ -118,22 +118,22 @@
 		font-size: 0.875rem;
 	}
 
-	.selected-labels {
+	.selected-tags {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.375rem;
 	}
 
-	.label-tag {
+	.tag-chip {
 		font-size: 0.75rem;
 		padding: 0.125rem 0.5rem;
 		border-radius: 9999px;
-		background: color-mix(in srgb, var(--label-color) 15%, transparent);
-		color: var(--label-color);
+		background: color-mix(in srgb, var(--tag-color) 15%, transparent);
+		color: var(--tag-color);
 		font-weight: 500;
 	}
 
-	.label-more {
+	.tag-more {
 		font-size: 0.75rem;
 		color: #6b7280;
 	}
@@ -144,7 +144,7 @@
 		color: #9ca3af;
 	}
 
-	.label-dropdown {
+	.tag-dropdown {
 		position: absolute;
 		top: calc(100% + 0.5rem);
 		left: 0;
@@ -160,12 +160,12 @@
 		z-index: 10;
 	}
 
-	:global(.dark) .label-dropdown {
+	:global(.dark) .tag-dropdown {
 		background: rgba(40, 40, 40, 0.95);
 		border-color: rgba(255, 255, 255, 0.15);
 	}
 
-	.label-option {
+	.tag-option {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -179,32 +179,32 @@
 		text-align: left;
 	}
 
-	.label-option:hover {
+	.tag-option:hover {
 		background: rgba(0, 0, 0, 0.05);
 	}
 
-	:global(.dark) .label-option:hover {
+	:global(.dark) .tag-option:hover {
 		background: rgba(255, 255, 255, 0.1);
 	}
 
-	.label-option.selected {
+	.tag-option.selected {
 		background: rgba(139, 92, 246, 0.1);
 	}
 
-	.label-dot {
+	.tag-dot {
 		width: 0.625rem;
 		height: 0.625rem;
 		border-radius: 9999px;
 		flex-shrink: 0;
 	}
 
-	.label-name {
+	.tag-name {
 		flex: 1;
 		font-size: 0.875rem;
 		color: #374151;
 	}
 
-	:global(.dark) .label-name {
+	:global(.dark) .tag-name {
 		color: #e5e7eb;
 	}
 
@@ -214,7 +214,7 @@
 		color: #8b5cf6;
 	}
 
-	.no-labels {
+	.no-tags {
 		padding: 0.75rem;
 		text-align: center;
 		font-size: 0.875rem;
