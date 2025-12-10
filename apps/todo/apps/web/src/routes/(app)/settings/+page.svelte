@@ -125,7 +125,20 @@
 	</SettingsSection>
 
 	<!-- Global Settings Section (synced across all apps) -->
-	<GlobalSettingsSection {userSettings} appId="todo" />
+	<GlobalSettingsSection
+		{userSettings}
+		appId="todo"
+		navItems={[
+			{ href: '/', label: 'Aufgaben', icon: 'list' },
+			{ href: '/kanban', label: 'Kanban', icon: 'columns' },
+			{ href: '/statistics', label: 'Statistiken', icon: 'chart' },
+			{ href: '/tags', label: 'Tags', icon: 'tag' },
+			{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
+			{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
+			{ href: '/feedback', label: 'Feedback', icon: 'chat' },
+		]}
+		alwaysVisibleHrefs={['/', '/settings']}
+	/>
 
 	<!-- Task Behavior Section -->
 	<SettingsSection title="Task-Verhalten">
