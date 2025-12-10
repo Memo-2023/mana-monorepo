@@ -22,6 +22,7 @@ import { getDb } from '../db/connection';
 import { organizations, members, invitations } from '../db/schema/organizations.schema';
 import { users, sessions, accounts, verificationTokens, jwks } from '../db/schema/auth.schema';
 import type { JWTPayloadContext } from './types/better-auth.types';
+import { sendPasswordResetEmail, sendOrganizationInvitationEmail } from '../email/email-sender';
 
 /**
  * JWT Custom Payload Interface
@@ -96,19 +97,8 @@ export function createBetterAuth(databaseUrl: string) {
 			 *
 			 * @see https://www.better-auth.com/docs/authentication/email-password#password-reset
 			 */
-			sendResetPassword: async ({ user, url, token }) => {
-				// TODO: Implement email sending service (e.g., Resend, SendGrid)
-				// For now, log the reset URL for development
-				console.log('[Password Reset] User:', user.email);
-				console.log('[Password Reset] Reset URL:', url);
-				console.log('[Password Reset] Token:', token);
-
-				// In production, send an email like:
-				// await sendEmail({
-				//   to: user.email,
-				//   subject: 'Reset your password',
-				//   html: `<a href="${url}">Reset your password</a>`
-				// });
+			sendResetPassword: async ({ user, url }) => {
+				await sendPasswordResetEmail(user.email, url, user.name);
 			},
 		},
 
@@ -143,14 +133,16 @@ export function createBetterAuth(databaseUrl: string) {
 
 				// Email invitation handler
 				async sendInvitationEmail(data) {
-					const { email, organization } = data;
+					const { email, organization, inviter } = data;
+					const baseUrl = process.env.BASE_URL || 'http://localhost:3001';
+					const invitationUrl = `${baseUrl}/accept-invitation?id=${data.id}`;
 
-					// TODO: Implement email sending service
-					console.log('TODO: Send invitation email', {
-						to: email,
-						organization: organization.name,
-						invitationId: data.id,
-					});
+					await sendOrganizationInvitationEmail(
+						email,
+						organization.name,
+						invitationUrl,
+						inviter?.user?.name
+					);
 				},
 
 				// Custom roles and permissions

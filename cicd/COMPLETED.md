@@ -36,7 +36,7 @@ The Hive Mind collective intelligence system has completed the **design, plannin
 
 **What's Done**:
 
-- [x] Comprehensive Hetzner vs Coolify analysis (24+ web searches)
+- [x] Comprehensive Hetzner hosting analysis (24+ web searches)
 - [x] Cost comparison (4 hosting options evaluated)
 - [x] Performance benchmarks analyzed
 - [x] Security and compliance review (ISO 27001, GDPR)
@@ -407,7 +407,7 @@ The Hive Mind collective intelligence system has completed the **design, plannin
 
 - [ ] Hetzner account creation
 - [ ] Server provisioning
-- [ ] Coolify installation
+- [ ] Docker & Docker Compose installation
 - [ ] Domain configuration
 - [ ] SSL/TLS setup
 

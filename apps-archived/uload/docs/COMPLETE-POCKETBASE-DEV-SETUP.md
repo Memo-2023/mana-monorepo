@@ -451,8 +451,8 @@ NODE_ENV=development npm run dev
 | Feature | Development | Production |
 |---------|------------|------------|
 | PocketBase URL | http://localhost:8090 | https://pb.ulo.ad |
-| Database | Local SQLite | Cloud (Coolify) |
-| Redis | localhost:6379 | Coolify Redis |
+| Database | Local SQLite | Cloud (Docker) |
+| Redis | localhost:6379 | Docker Redis |
 | Stripe | Test keys | Live keys |
 | SSL | No (HTTP) | Yes (HTTPS) |
 | Auth | Test accounts | Real users |

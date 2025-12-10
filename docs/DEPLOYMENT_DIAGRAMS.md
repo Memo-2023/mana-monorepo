@@ -27,7 +27,7 @@
                    │ (Nginx/Static)                          │
                    ▼                                         ▼
           ┌──────────────────┐                      ┌──────────────────┐
-          │ Landing Servers  │                      │ Coolify/K8s LB   │
+          │ Landing Servers  │                      │ Docker/K8s LB    │
           │  - chat.app      │                      │  (Load Balancer) │
           │  - picture.app   │                      └────────┬─────────┘
           │  - memoro.app    │                               │
@@ -181,7 +181,7 @@ TOTAL BUILD TIME:
                                         │
                                         ▼
                            ┌─────────────────────────────────┐
-                           │  Cloudflare / Coolify Proxy     │
+                           │  Cloudflare / Nginx Proxy       │
                            │  - DDoS Protection              │
                            │  - SSL Termination              │
                            │  - Rate Limiting                │
@@ -237,7 +237,7 @@ NETWORK SECURITY RULES:
 
 SSL/TLS CONFIGURATION:
 
-  Certificate Provider: Let's Encrypt (Coolify auto-provision)
+  Certificate Provider: Let's Encrypt (Certbot auto-provision)
   Protocols: TLSv1.2, TLSv1.3
   Cipher Suites: HIGH:!aNULL:!MD5:!3DES
   HSTS: max-age=31536000; includeSubDomains; preload
@@ -270,7 +270,7 @@ SSL/TLS CONFIGURATION:
               │
               ▼
 ┌───────────────────────────┐
-│  Coolify Reverse Proxy    │
+│   Nginx Reverse Proxy     │
 │  - SSL termination        │
 │  - Route to container     │
 │  - Health check           │
@@ -400,7 +400,7 @@ CACHING STRATEGY:
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                         CI/CD DEPLOYMENT PIPELINE                                      │
-│                        (GitHub Actions → Coolify)                                      │
+│                        (GitHub Actions → Docker Compose)                               │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 
 [Developer]
@@ -464,7 +464,7 @@ CACHING STRATEGY:
 ┌───────────────────────────┐
 │  Deploy to Staging        │
 │  ┌─────────────────────┐  │
-│  │ SSH to Coolify      │  │
+│  │ SSH to server       │  │
 │  │ docker compose pull │  │
 │  │ docker compose up   │  │
 │  │ pnpm migration:run  │  │
@@ -604,7 +604,7 @@ DEPLOYMENT TIMELINE:
 
 ROLLBACK PROCEDURE (if needed):
   1. Detect issue (error spike, customer reports)
-  2. Run: coolify switch-deployment chat blue
+  2. Run: ./scripts/switch-deployment.sh chat blue
   3. Traffic reverts to BLUE (v1.5.2) in <30 seconds
   4. Investigate issue in GREEN (offline)
   5. Fix and redeploy when ready
@@ -881,8 +881,8 @@ SECURITY LEVELS:
 
 DEPLOYMENT STAGES:
   Development - Local Docker Compose
-  Staging     - Coolify (separate server)
-  Production  - Coolify (production server)
+  Staging     - Docker Compose (staging server)
+  Production  - Docker Compose (production server)
 
 ABBREVIATIONS:
   RTO  - Recovery Time Objective

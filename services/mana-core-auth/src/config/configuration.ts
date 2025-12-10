@@ -28,6 +28,12 @@ export default () => ({
 		publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
 	},
 
+	email: {
+		brevoApiKey: process.env.BREVO_API_KEY || '',
+		fromEmail: process.env.BREVO_FROM_EMAIL || 'noreply@manacore.app',
+		fromName: process.env.BREVO_FROM_NAME || 'Mana Core',
+	},
+
 	cors: {
 		origin: process.env.CORS_ORIGINS?.split(',') || [
 			'http://localhost:3000',

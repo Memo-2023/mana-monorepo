@@ -160,13 +160,13 @@ curl -X POST http://localhost:3001/api/personas/generate-images \
   }'
 ```
 
-## 🚢 Production Deployment (Hetzner + Coolify)
+## 🚢 Production Deployment (Hetzner VPS)
 
 1. Push to GitHub
-2. Connect repository in Coolify
+2. SSH to server and pull repository
 3. Set environment variables
-4. Deploy as Docker Compose stack
-5. Configure custom domain & SSL
+4. Deploy with Docker Compose
+5. Configure custom domain & SSL via Nginx/Certbot
 
 ## 📄 License
 
