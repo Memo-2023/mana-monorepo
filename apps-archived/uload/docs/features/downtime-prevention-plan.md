@@ -15,7 +15,7 @@ Das uLoad-Projekt war kürzlich komplett down, was zu kritischen Problemen gefü
 
 - **Frontend:** SvelteKit 2.22 mit Svelte 5.0
 - **Backend:** PocketBase (https://pb.ulo.ad)
-- **Hosting:** Hetzner VPS mit Docker Compose
+- **Hosting:** Hetzner VPS mit Coolify
 - **Database:** PocketBase SQLite mit persistentem Volume
 - **Deployment:** Docker mit Supervisor (Multi-Service Container)
 
@@ -29,7 +29,7 @@ Das uLoad-Projekt war kürzlich komplett down, was zu kritischen Problemen gefü
 2. **Single Server Setup**
    - Ein Hetzner VPS für gesamte Infrastruktur
    - Keine Redundanz oder Load Balancing
-   - Single server as Point of Failure
+   - Coolify als Single Point of Failure
 
 3. **Container Architecture**
    - SvelteKit und PocketBase in einem Container
@@ -370,8 +370,8 @@ jobs:
     steps:
       - name: Deploy to Primary
         run: |
-          # Docker Deployment
-          ssh deploy@server "cd /app && docker compose pull && docker compose up -d"
+          # Coolify Deployment
+          curl -X POST ${{ secrets.COOLIFY_WEBHOOK }}
 
       - name: Health Check
         run: |
@@ -389,7 +389,7 @@ jobs:
         if: failure()
         run: |
           # Automatisches Rollback bei Fehler
-          ssh deploy@server "cd /app && git checkout HEAD~1 && docker compose up -d"
+          curl -X POST ${{ secrets.COOLIFY_ROLLBACK_WEBHOOK }}
 ```
 
 ### 2. Monitoring & Alerting

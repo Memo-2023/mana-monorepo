@@ -1,6 +1,6 @@
 # =============================================================================
 # uload Web Application Dockerfile
-# Multi-stage build for production deployment
+# Multi-stage build for production deployment with Coolify
 #
 # IMPORTANT: This Dockerfile must be built from the MONOREPO ROOT, not from uload/
 #   docker build -f uload/Dockerfile -t uload-web .

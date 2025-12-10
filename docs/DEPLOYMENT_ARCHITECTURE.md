@@ -745,20 +745,20 @@ pnpm docker:down
 
 ---
 
-### 2. Production Orchestration (Docker Compose)
+### 2. Production Orchestration (Coolify)
 
-**Production Configuration:** `docker-compose.production.yml`
+**Coolify Configuration:** `.coolify/docker-compose.prod.yml`
 
 ```yaml
 version: '3.9'
 
-# Production Docker Compose Deployment
-# With:
-# - Automatic SSL (Certbot/Let's Encrypt)
+# Production Docker Compose for Coolify Deployment
+# Coolify will handle:
+# - Automatic SSL (Let's Encrypt)
 # - Health check monitoring
 # - Auto-restart on failure
+# - Log aggregation
 # - Resource limits
-# - Nginx reverse proxy
 
 services:
   chat-backend:
@@ -785,18 +785,19 @@ services:
       retries: 3
       start_period: 40s
     labels:
-      - "com.manacore.project=chat"
-      - "com.manacore.service=backend"
-      - "com.manacore.port=3002"
-      - "com.manacore.domain=api-chat.manacore.app"
+      - "coolify.managed=true"
+      - "coolify.project=chat"
+      - "coolify.service=backend"
+      - "coolify.port=3002"
+      - "coolify.domain=api-chat.manacore.app"
 ```
 
-**Docker Compose Deployment Strategy:**
+**Coolify Deployment Strategy:**
 
-1. **Per-project services**: Each project (chat, picture, etc.) deployed as separate service stack
-2. **Shared infrastructure**: PostgreSQL and Redis in dedicated compose file
-3. **Manual scaling**: Scale with `docker compose up --scale service=N`
-4. **Blue-green deployments**: Scripted zero-downtime deployment via Nginx
+1. **Per-project services**: Each project (chat, maerchenzauber, etc.) deployed as separate Coolify application
+2. **Resource pools**: Shared PostgreSQL and Redis as Coolify resources
+3. **Auto-scaling**: Configure horizontal scaling based on CPU/memory
+4. **Blue-green deployments**: Coolify's native zero-downtime deployment
 
 ---
 
@@ -966,7 +967,7 @@ k8s/
 │                                                                       │
 │  [Development]  →  [Staging]  →  [Production]                       │
 │       ↓               ↓              ↓                                │
-│   Local Docker    Docker        Docker/K8s                          │
+│   Local Docker    Coolify       Coolify/K8s                         │
 │   127.0.0.1       staging.*     app domains                          │
 │   Hot reload      Manual test   Blue-green                           │
 │   No SSL          Let's Encrypt Let's Encrypt                        │
@@ -1041,7 +1042,7 @@ k8s/
 │                     BLUE-GREEN DEPLOYMENT                        │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                   │
-│   [Load Balancer / Nginx Proxy]                                 │
+│   [Load Balancer / Coolify Proxy]                               │
 │              ↓                                                    │
 │   ┌──────────────────┐         ┌──────────────────┐            │
 │   │   BLUE (Live)    │         │  GREEN (Standby) │            │
@@ -1065,7 +1066,7 @@ k8s/
 
 ```bash
 # Instant rollback by switching traffic back to BLUE
-./scripts/switch-deployment.sh blue
+coolify switch-deployment blue
 
 # Or with Kubernetes
 kubectl set image deployment/chat-backend chat-backend=registry.manacore.app/chat-backend:v1.5.2
@@ -1245,8 +1246,8 @@ Development → Staging → Production
    # Manual trigger (after staging validation)
    kubectl exec -it chat-backend-pod -- pnpm migration:run
 
-   # Or automated (via deploy script)
-   ./scripts/deploy/deploy-hetzner.sh chat-backend --run-migrations
+   # Or automated (Coolify)
+   coolify deploy chat-backend --run-migrations
    ```
 
 **Migration Safety Rules:**
@@ -1418,7 +1419,7 @@ async updateCredits(userId: string, amount: number) {
 │   - https://docs.manacore.app        → API documentation       │
 │                                                                   │
 │   All domains:                                                   │
-│   - SSL via Let's Encrypt (Certbot auto-provision)             │
+│   - SSL via Let's Encrypt (Coolify auto-provision)             │
 │   - HTTP/2 enabled                                              │
 │   - HSTS headers (max-age=31536000)                            │
 │   - Cloudflare DNS (with proxy for DDoS protection)            │
@@ -1431,7 +1432,7 @@ async updateCredits(userId: string, amount: number) {
 ```
 Type    Name                    Target                           Proxy
 ─────────────────────────────────────────────────────────────────────
-A       chat.manacore.app       185.230.123.45 (Server IP)      Yes
+A       chat.manacore.app       185.230.123.45 (Coolify IP)     Yes
 A       app-chat.manacore.app   185.230.123.45                  Yes
 A       api-chat.manacore.app   185.230.123.45                  No*
 CNAME   *.manacore.app          manacore.app                    Yes
@@ -1443,14 +1444,16 @@ CNAME   *.manacore.app          manacore.app                    Yes
 
 ### 2. SSL/TLS Certificate Management
 
-**Automatic SSL (Certbot):**
+**Coolify Automatic SSL:**
 
-```bash
-# Install certbot
-apt-get install certbot python3-certbot-nginx
-
-# Configure auto-renewal
-systemctl enable certbot.timer
+```yaml
+# .coolify/settings.yml
+ssl:
+  provider: letsencrypt
+  email: devops@manacore.app
+  staging: false  # Use production Let's Encrypt
+  auto_renew: true
+  renewal_days_before: 30
 ```
 
 **Manual SSL (Certbot):**
@@ -1510,7 +1513,7 @@ server {
 - **Simplicity**: Each backend has its own domain
 - **Low traffic volume**: Gateway overhead not justified yet
 - **Independent scaling**: Services scale independently
-- **Nginx routing**: Reverse proxy handles routing
+- **Coolify routing**: Built-in reverse proxy handles routing
 
 **Future API Gateway (Kong/Traefik) - When to Adopt:**
 
@@ -1701,13 +1704,13 @@ location ~* \.(html)$ {
 **Secret Management:**
 
 - **Development:** `.env.development` (committed to git)
-- **Staging/Production:** Environment files or Kubernetes secrets
+- **Staging/Production:** Coolify secrets UI or Kubernetes secrets
 
 ```bash
-# Docker Compose secret injection via .env files
-# /opt/manacore/.env.production
-AZURE_OPENAI_API_KEY=secret123
-DATABASE_URL=postgresql://...
+# Coolify secret injection
+coolify env set chat-backend \
+  AZURE_OPENAI_API_KEY=secret123 \
+  DATABASE_URL=postgresql://...
 ```
 
 **Kubernetes Secrets:**
@@ -2160,14 +2163,14 @@ jobs:
       url: https://staging-chat.manacore.app
 
     steps:
-      - name: Deploy to Staging
+      - name: Deploy to Coolify (Staging)
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: ${{ secrets.STAGING_SSH_USER }}
-          key: ${{ secrets.STAGING_SSH_KEY }}
+          host: ${{ secrets.COOLIFY_STAGING_HOST }}
+          username: ${{ secrets.COOLIFY_SSH_USER }}
+          key: ${{ secrets.COOLIFY_SSH_KEY }}
           script: |
-            cd /opt/manacore/chat-staging
+            cd /var/lib/coolify/apps/chat-staging
             docker compose pull
             docker compose up -d --force-recreate
             docker compose exec -T chat-backend pnpm migration:run
@@ -2189,14 +2192,14 @@ jobs:
       url: https://chat.manacore.app
 
     steps:
-      - name: Deploy to Production
+      - name: Deploy to Coolify (Production)
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.PRODUCTION_HOST }}
-          username: ${{ secrets.PRODUCTION_SSH_USER }}
-          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          host: ${{ secrets.COOLIFY_PROD_HOST }}
+          username: ${{ secrets.COOLIFY_SSH_USER }}
+          key: ${{ secrets.COOLIFY_SSH_KEY }}
           script: |
-            cd /opt/manacore/chat-production
+            cd /var/lib/coolify/apps/chat-production
 
             # Blue-green deployment: Deploy to green environment
             docker compose -f docker-compose.green.yml pull
@@ -2211,8 +2214,8 @@ jobs:
             # Health check green environment
             curl -f http://localhost:3002/api/health || exit 1
 
-            # Switch traffic to green (update Nginx routing)
-            ./scripts/switch-deployment.sh chat green
+            # Switch traffic to green (update Coolify routing)
+            coolify switch-deployment chat green
 
             # Keep blue running for 1 hour (rollback window)
             # Decommission blue after validation
@@ -2353,9 +2356,8 @@ curl -f https://api-chat.manacore.app/api/health
 
 ```bash
 # 1. Provision new server (same specs)
-# 2. Install Docker + Docker Compose
-curl -fsSL https://get.docker.com | bash
-apt-get update && apt-get install -y docker-compose-plugin
+# 2. Install Docker + Coolify
+curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
 
 # 3. Clone repository
 git clone https://github.com/manacore/manacore-monorepo.git
@@ -2575,7 +2577,7 @@ services:
 
 ### 3. Secrets Management
 
-**Current:** Docker Compose environment files (encrypted at rest)
+**Current:** Coolify environment variables UI (encrypted at rest)
 
 **Future:** HashiCorp Vault or AWS Secrets Manager
 
@@ -2689,7 +2691,7 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 - [ ] Set up GitHub Actions workflows (per project)
 - [ ] Configure Docker image registry (GitHub Container Registry)
 - [ ] Implement automated testing in CI
-- [ ] Set up staging environment with Docker Compose
+- [ ] Set up staging environment on Coolify
 - [ ] Implement blue-green deployment scripts
 
 ### Phase 3: Production Deployment (Week 5-6)

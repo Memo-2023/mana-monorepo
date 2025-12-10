@@ -7,6 +7,7 @@
 	import { toast } from '$lib/stores/toast';
 	import { POPULAR_TIMEZONES } from '@clock/shared';
 	import WorldMap from '$lib/components/WorldMap.svelte';
+	import { WorldClockSkeleton } from '$lib/components/skeletons';
 
 	// State
 	let showAddModal = $state(false);
@@ -205,11 +206,7 @@
 
 	<!-- World Clock List -->
 	{#if worldClocksStore.loading}
-		<div class="flex justify-center py-12">
-			<div
-				class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent"
-			></div>
-		</div>
+		<WorldClockSkeleton />
 	{:else if worldClocksStore.sortedWorldClocks.length === 0}
 		<div class="card py-12 text-center">
 			<p class="text-lg text-muted-foreground">{$_('worldClock.noClocks')}</p>

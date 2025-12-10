@@ -7,7 +7,7 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { toast } from '$lib/stores/toast';
 	import EventForm from '$lib/components/event/EventForm.svelte';
-	import type { CreateEventInput } from '@calendar/shared';
+	import type { CreateEventInput, UpdateEventInput } from '@calendar/shared';
 	import { addHours, parseISO } from 'date-fns';
 
 	let initialStart = $state<Date | null>(null);
@@ -25,8 +25,9 @@
 		}
 	});
 
-	async function handleSave(data: CreateEventInput) {
-		const result = await eventsStore.createEvent(data);
+	async function handleSave(data: CreateEventInput | UpdateEventInput) {
+		// In create mode, data is always CreateEventInput
+		const result = await eventsStore.createEvent(data as CreateEventInput);
 
 		if (result.error) {
 			toast.error(`Fehler beim Erstellen: ${result.error.message}`);

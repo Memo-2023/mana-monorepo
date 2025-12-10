@@ -4,6 +4,7 @@
 	import KanbanColumnComponent from './KanbanColumn.svelte';
 	import AddColumnButton from './AddColumnButton.svelte';
 	import { kanbanStore } from '$lib/stores/kanban.svelte';
+	import { KanbanBoardSkeleton } from '$lib/components/skeletons';
 
 	interface Props {
 		projectId?: string;
@@ -116,7 +117,9 @@
 </script>
 
 <div class="kanban-board h-full">
-	{#if kanbanStore.error}
+	{#if kanbanStore.loading}
+		<KanbanBoardSkeleton />
+	{:else if kanbanStore.error}
 		<div
 			class="bg-destructive/10 text-destructive p-4 rounded-xl border border-destructive/20 flex items-center gap-3"
 		>

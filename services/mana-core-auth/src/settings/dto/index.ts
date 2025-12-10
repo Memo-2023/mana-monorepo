@@ -1,4 +1,12 @@
-import { IsOptional, IsString, IsObject, ValidateNested, IsBoolean, IsIn } from 'class-validator';
+import {
+	IsOptional,
+	IsString,
+	IsObject,
+	ValidateNested,
+	IsBoolean,
+	IsIn,
+	IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 // Nav settings
@@ -21,6 +29,11 @@ export class ThemeSettingsDto {
 	@IsOptional()
 	@IsString()
 	colorScheme?: string;
+
+	@IsOptional()
+	@IsArray()
+	@IsString({ each: true })
+	pinnedThemes?: string[];
 }
 
 // Global settings update
@@ -62,6 +75,7 @@ export interface NavSettings {
 export interface ThemeSettings {
 	mode: 'light' | 'dark' | 'system';
 	colorScheme: string;
+	pinnedThemes: string[];
 }
 
 export interface GlobalSettings {

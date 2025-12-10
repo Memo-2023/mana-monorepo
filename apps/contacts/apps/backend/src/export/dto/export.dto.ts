@@ -13,10 +13,6 @@ export class ExportRequestDto {
 
 	@IsOptional()
 	@IsUUID('4')
-	groupId?: string;
-
-	@IsOptional()
-	@IsUUID('4')
 	tagId?: string;
 
 	@IsOptional()

@@ -1,0 +1,27 @@
+{
+	"name": "@manacore/shared-tags",
+	"version": "0.1.0",
+	"description": "Shared tags client for Manacore apps - connects to central tags service",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsc",
+		"clean": "rm -rf dist",
+		"type-check": "tsc --noEmit",
+		"lint": "eslint ."
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	},
+	"keywords": [
+		"manacore",
+		"tags",
+		"labels"
+	],
+	"license": "MIT"
+}

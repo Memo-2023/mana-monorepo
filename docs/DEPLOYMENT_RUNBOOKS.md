@@ -29,24 +29,21 @@
 - [ ] GitHub account (for CI/CD)
 - [ ] Supabase projects created (one per product)
 
-### Step 1: Set up Docker & Docker Compose
+### Step 1: Set up Docker Compose
 
 ```bash
 # SSH into server
 ssh root@your-server-ip
 
-# Install Docker
-curl -fsSL https://get.docker.com | bash
-
-# Install Docker Compose plugin
-apt-get update && apt-get install -y docker-compose-plugin
+# Set up Docker Compose (automated installer)
+curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
 
 # Verify installation
-docker --version
-docker compose version
+coolify --version
 
-# Set up deployment directory
-mkdir -p /opt/manacore && cd /opt/manacore
+# Access Docker Compose configuration
+# Navigate to: http://your-server-ip:8000
+# Create admin account
 ```
 
 ### Step 2: Configure DNS
@@ -147,7 +144,7 @@ curl -X POST http://localhost:3001/api/auth/register \
   }'
 ```
 
-### Step 7: Configure SSL (Let's Encrypt)
+### Step 7: Configure SSL (Coolify Auto)
 
 In Docker Compose configuration:
 
@@ -285,8 +282,8 @@ docker compose --profile picture up -d
 # Step 7: Run database migrations
 docker compose exec picture-backend pnpm migration:run
 
-# Step 8: Configure Nginx routing
-# In Nginx configuration:
+# Step 8: Configure Coolify routing
+# In Docker Compose configuration:
 # - Add new application: picture-backend
 # - Domain: api-picture.manacore.app
 # - Port: 3005
@@ -367,9 +364,9 @@ curl -f http://localhost:3012/api/health
 # Step 9: Smoke tests on green
 ./scripts/smoke-test.sh http://localhost:3012
 
-# Step 10: Switch traffic to green (Nginx)
-# Update Nginx configuration to point to green:
-./scripts/switch-deployment.sh chat green
+# Step 10: Switch traffic to green (Coolify)
+# In Docker Compose configuration or via API:
+coolify switch-deployment chat green
 
 # Or manually update Nginx:
 sudo nano /etc/nginx/sites-available/api-chat.manacore.app
@@ -565,7 +562,7 @@ export async function up(db) {
 # (If blue environment still running)
 
 # Switch traffic back to blue
-./scripts/switch-deployment.sh chat blue
+coolify switch-deployment chat blue
 
 # Or manually update Nginx:
 sudo nano /etc/nginx/sites-available/api-chat.manacore.app
@@ -826,8 +823,8 @@ openssl s_client -connect api-chat.manacore.app:443 -servername api-chat.manacor
 # Manually renew certificate
 sudo certbot renew --force-renewal
 
-# Or check certbot logs:
-cat /var/log/letsencrypt/letsencrypt.log | tail -50
+# Or via Coolify:
+coolify ssl renew api-chat.manacore.app
 
 # Verification:
 curl -I https://api-chat.manacore.app
@@ -1006,7 +1003,7 @@ aws s3 cp env-backup-$(date +%Y%m%d).tar.gz.gpg \
 # Scenario: Complete server failure, restore to new server
 
 # Step 1: Provision new server
-# Install Docker, Docker Compose, dependencies
+# Install Docker, Coolify, dependencies
 
 # Step 2: Clone repository
 git clone https://github.com/manacore/manacore-monorepo.git

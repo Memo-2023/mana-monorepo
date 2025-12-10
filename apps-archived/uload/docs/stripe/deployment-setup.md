@@ -2,7 +2,7 @@
 
 ## Required Environment Variables
 
-Add these to your deployment platform:
+Add these to your deployment platform (e.g., Coolify):
 
 ```bash
 # Stripe API Keys (Test)

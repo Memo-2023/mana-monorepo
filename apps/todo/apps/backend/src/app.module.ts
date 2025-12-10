@@ -8,6 +8,7 @@ import { TaskModule } from './task/task.module';
 import { LabelModule } from './label/label.module';
 import { ReminderModule } from './reminder/reminder.module';
 import { KanbanModule } from './kanban/kanban.module';
+import { NetworkModule } from './network/network.module';
 
 @Module({
 	imports: [
@@ -23,6 +24,7 @@ import { KanbanModule } from './kanban/kanban.module';
 		LabelModule,
 		ReminderModule,
 		KanbanModule,
+		NetworkModule,
 	],
 })
 export class AppModule {}

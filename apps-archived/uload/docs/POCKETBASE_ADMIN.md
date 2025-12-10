@@ -4,7 +4,7 @@
 
 ### 1. Admin-Account erstellen
 
-In Docker container → uLoad App → **Terminal**:
+In Coolify Dashboard → uLoad App → **Terminal**:
 
 ```bash
 ./pocketbase superuser create

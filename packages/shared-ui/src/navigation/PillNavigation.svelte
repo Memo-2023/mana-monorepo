@@ -9,6 +9,98 @@
 	} from './types';
 	import PillDropdown from './PillDropdown.svelte';
 	import PillTabGroup from './PillTabGroup.svelte';
+	// Phosphor Icons (via shared-icons)
+	import {
+		House,
+		Users,
+		Tag,
+		Heart,
+		Gear,
+		ChatCircle,
+		Question,
+		ShareNetwork,
+		Bell,
+		Clock,
+		Timer,
+		Target,
+		Globe,
+		Tray,
+		Check,
+		CheckCircle,
+		Plus,
+		Columns,
+		Microphone,
+		CalendarBlank,
+		Folder,
+		Archive,
+		Upload,
+		MusicNote,
+		File,
+		ChartBar,
+		MagnifyingGlass,
+		List,
+		Compass,
+		Moon,
+		Sun,
+		SignOut,
+		CaretDown,
+		CaretUp,
+		CaretLeft,
+		Fire,
+		GridFour,
+		Palette,
+		CreditCard,
+		Buildings,
+		User,
+	} from '@manacore/shared-icons';
+
+	// Map icon names to Phosphor components
+	const phosphorIcons: Record<string, any> = {
+		home: House,
+		users: Users,
+		user: User,
+		tag: Tag,
+		heart: Heart,
+		settings: Gear,
+		chat: ChatCircle,
+		'help-circle': Question,
+		'share-2': ShareNetwork,
+		bell: Bell,
+		clock: Clock,
+		timer: Timer,
+		target: Target,
+		globe: Globe,
+		inbox: Tray,
+		check: Check,
+		checkCircle: CheckCircle,
+		plus: Plus,
+		columns: Columns,
+		kanban: Columns,
+		mic: Microphone,
+		calendar: CalendarBlank,
+		folder: Folder,
+		archive: Archive,
+		upload: Upload,
+		music: MusicNote,
+		document: File,
+		chart: ChartBar,
+		search: MagnifyingGlass,
+		list: List,
+		compass: Compass,
+		moon: Moon,
+		sun: Sun,
+		logout: SignOut,
+		chevronDown: CaretDown,
+		chevronUp: CaretUp,
+		chevronLeft: CaretLeft,
+		menu: List,
+		fire: Fire,
+		grid: GridFour,
+		gridSmall: GridFour,
+		palette: Palette,
+		creditCard: CreditCard,
+		building: Buildings,
+	};
 
 	// Convert app items to dropdown items (will be computed as derived)
 	function createAppDropdownItems(
@@ -325,6 +417,10 @@
 		palette:
 			'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01',
 		chat: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
+		'help-circle':
+			'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+		'share-2':
+			'M18 8a3 3 0 100-6 3 3 0 000 6zM6 15a3 3 0 100-6 3 3 0 000 6zM18 22a3 3 0 100-6 3 3 0 000 6zM8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98',
 	};
 
 	function getIconPath(name: string): string {
@@ -368,23 +464,10 @@
 									d="M12.3047 1C12.3392 1.04573 19.608 10.6706 19.6084 14.6953C19.6084 18.7293 16.3386 21.9998 12.3047 22C8.27061 22 5 18.7294 5 14.6953C5.00041 10.661 12.3047 1 12.3047 1ZM12.3047 7.3916C12.2811 7.42276 8.65234 12.2288 8.65234 14.2393C8.65241 16.2562 10.2877 17.8916 12.3047 17.8916C14.3217 17.8916 15.957 16.2562 15.957 14.2393C15.957 12.2301 12.3331 7.42917 12.3047 7.3916Z"
 								/>
 							</svg>
-						{:else if item.icon === 'settings'}
-							<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d={getIconPath('settings')}
-								/>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d={getIconPath('settingsInner')}
-								/>
-							</svg>
 						{:else if item.iconSvg}
 							{@html item.iconSvg}
+						{:else if phosphorIcons[item.icon]}
+							<svelte:component this={phosphorIcons[item.icon]} size={18} class="pill-icon" />
 						{:else}
 							<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
@@ -416,14 +499,18 @@
 				{:else if isNavItem(element)}
 					<a href={element.href} class="pill glass-pill" class:active={isActive(element.href)}>
 						{#if element.icon}
-							<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d={getIconPath(element.icon)}
-								/>
-							</svg>
+							{#if phosphorIcons[element.icon]}
+								<svelte:component this={phosphorIcons[element.icon]} size={18} class="pill-icon" />
+							{:else}
+								<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d={getIconPath(element.icon)}
+									/>
+								</svg>
+							{/if}
 						{/if}
 						<span class="pill-label">{element.label}</span>
 					</a>

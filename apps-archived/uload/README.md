@@ -12,7 +12,7 @@ A modern URL shortener and link management platform built with SvelteKit and Poc
 - **Frontend:** SvelteKit 2.0 + Svelte 5
 - **Backend:** PocketBase (embedded)
 - **Styling:** Tailwind CSS 4.0
-- **Deployment:** Docker Compose on Hetzner VPS
+- **Deployment:** Docker + Coolify on Hetzner VPS
 - **Database:** SQLite (via PocketBase)
 
 ## 📦 Features
@@ -59,7 +59,7 @@ docker-compose up --build
 - [Deployment Guide](./DEPLOYMENT.md) - Complete Docker Compose deployment instructions
 - [Lessons Learned](./DEPLOYMENT_LESSONS_LEARNED.md) - Troubleshooting and insights
 - [Domain Setup](./DOMAIN_SETUP_ULO_AD.md) - ulo.ad configuration
-- [Docker Setup](./DOCKER_SETUP.md) - Detailed Docker configuration
+- [Coolify Setup](./COOLIFY_SETUP.md) - Detailed Coolify configuration
 
 ## 🔧 Environment Variables
 
@@ -95,23 +95,23 @@ uload/
 
 ## 🚢 Deployment
 
-The application is deployed on Hetzner VPS using Docker Compose with GitHub Actions for CI/CD.
+The application is deployed on Hetzner VPS using Coolify with automatic deployments on push to main branch.
 
 ```bash
 # Commit and push to deploy
 git add .
 git commit -m "Update"
 git push origin main
-# GitHub Actions handles deployment
+# Coolify automatically deploys
 ```
 
 ### Manual Deployment Steps:
 
-1. Set DNS A record to your server IP
-2. Configure Nginx reverse proxy
+1. Set DNS A record to `91.99.221.179`
+2. Add domain in Coolify
 3. Update environment variables
-4. Enable SSL certificate via Certbot
-5. Deploy application with docker compose
+4. Enable SSL certificate
+5. Deploy application
 
 ## 📊 Monitoring
 
@@ -142,7 +142,7 @@ Common issues and solutions are documented in [DEPLOYMENT_LESSONS_LEARNED.md](./
 
 For support, check:
 
-- Application logs via `docker compose logs`
+- Application logs in Coolify
 - Health endpoint status
 - PocketBase admin panel
 

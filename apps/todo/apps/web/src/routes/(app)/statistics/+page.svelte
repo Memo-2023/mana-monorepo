@@ -8,6 +8,7 @@
 	import WeeklyTrendChart from '$lib/components/statistics/WeeklyTrendChart.svelte';
 	import PriorityDonutChart from '$lib/components/statistics/PriorityDonutChart.svelte';
 	import ProjectProgressBars from '$lib/components/statistics/ProjectProgressBars.svelte';
+	import { StatisticsSkeleton } from '$lib/components/skeletons';
 	import { BarChart3 } from 'lucide-svelte';
 
 	let loading = $state(true);
@@ -44,10 +45,7 @@
 	</header>
 
 	{#if loading}
-		<div class="loading-container">
-			<div class="loading-spinner"></div>
-			<p>Lade Statistiken...</p>
-		</div>
+		<StatisticsSkeleton />
 	{:else}
 		<!-- Quick Stats -->
 		<section class="stats-section">
@@ -153,31 +151,6 @@
 		font-size: 0.875rem;
 		color: hsl(var(--muted-foreground));
 		margin: 0.25rem 0 0 0;
-	}
-
-	.loading-container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 1rem;
-		padding: 4rem 2rem;
-		color: hsl(var(--muted-foreground));
-	}
-
-	.loading-spinner {
-		width: 32px;
-		height: 32px;
-		border: 3px solid hsl(var(--muted) / 0.3);
-		border-top-color: #8b5cf6;
-		border-radius: 50%;
-		animation: spin 0.8s linear infinite;
-	}
-
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
 	}
 
 	.stats-section {

@@ -11,6 +11,7 @@
 	import QuickAddTask from '$lib/components/QuickAddTask.svelte';
 	import CollapsibleSection from '$lib/components/CollapsibleSection.svelte';
 	import TaskEditModal from '$lib/components/TaskEditModal.svelte';
+	import { TaskListSkeleton } from '$lib/components/skeletons';
 	import type { Task } from '@todo/shared';
 
 	let isLoading = $state(true);
@@ -130,11 +131,7 @@
 	<QuickAddTask />
 
 	{#if isLoading || tasksStore.loading}
-		<div class="flex items-center justify-center py-12">
-			<div
-				class="animate-spin h-8 w-8 border-4 border-primary border-r-transparent rounded-full"
-			></div>
-		</div>
+		<TaskListSkeleton sections={3} tasksPerSection={3} />
 	{:else if tasksStore.error}
 		<div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
 			{tasksStore.error}

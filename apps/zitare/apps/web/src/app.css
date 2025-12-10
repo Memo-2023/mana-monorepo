@@ -4,6 +4,8 @@
 /* Scan shared packages for Tailwind classes */
 @source "../../../packages/shared-ui/src";
 @source "../../../packages/shared-theme-ui/src";
+@source "../../../packages/shared-theme-ui/src/components";
+@source "../../../packages/shared-theme-ui/src/pages";
 @source "../../../packages/web-ui/src";
 
 /* Zitare-specific CSS Variables */

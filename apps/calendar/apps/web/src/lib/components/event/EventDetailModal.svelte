@@ -4,10 +4,12 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { toast } from '$lib/stores/toast';
 	import EventForm from './EventForm.svelte';
+	import { TagBadge } from '@manacore/shared-ui';
 	import type { CalendarEvent, UpdateEventInput } from '@calendar/shared';
 	import * as api from '$lib/api/events';
 	import { format, parseISO } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { EventDetailSkeleton } from '$lib/components/skeletons';
 
 	interface Props {
 		eventId: string;
@@ -147,10 +149,7 @@
 <div class="modal-backdrop" onclick={handleBackdropClick}>
 	<div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="modal-title">
 		{#if loading}
-			<div class="modal-loading">
-				<div class="spinner"></div>
-				<p>Laden...</p>
-			</div>
+			<EventDetailSkeleton />
 		{:else if event}
 			<div class="modal-header">
 				<h2 id="modal-title" class="modal-title">
@@ -384,6 +383,30 @@
 							</div>
 						{/if}
 
+						<!-- Tags -->
+						{#if event.tags && event.tags.length > 0}
+							<div class="detail-row">
+								<span class="detail-icon">
+									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+										/>
+									</svg>
+								</span>
+								<div class="detail-content">
+									<span class="detail-label">Tags</span>
+									<div class="tags-display">
+										{#each event.tags as tag (tag.id)}
+											<TagBadge tag={{ name: tag.name, color: tag.color }} />
+										{/each}
+									</div>
+								</div>
+							</div>
+						{/if}
+
 						<!-- Teilnehmer -->
 						{#if event.metadata?.attendees && event.metadata.attendees.length > 0}
 							<div class="detail-row">
@@ -473,31 +496,6 @@
 		to {
 			opacity: 1;
 			transform: translateY(0) scale(1);
-		}
-	}
-
-	.modal-loading {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: 3rem;
-		gap: 1rem;
-		color: hsl(var(--color-muted-foreground));
-	}
-
-	.spinner {
-		width: 2rem;
-		height: 2rem;
-		border: 3px solid hsl(var(--color-border));
-		border-top-color: hsl(var(--color-primary));
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
-	}
-
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
 		}
 	}
 
@@ -690,5 +688,13 @@
 	.address-line {
 		font-size: 0.875rem;
 		color: hsl(var(--color-muted-foreground));
+	}
+
+	/* Tags display */
+	.tags-display {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: 0.25rem;
 	}
 </style>

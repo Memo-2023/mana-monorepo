@@ -433,7 +433,7 @@ INSERT INTO links (short_code, original_url, user_id) VALUES
 2. **Implement External Auth** - Replace PocketBase auth with external provider
 3. **Remove PocketBase Code** - Delete `backend/`, `pb_hooks/`, `pocketbase` binary
 4. **Update Documentation** - Update CLAUDE.md and README
-5. **Deploy to Production** - Push to Hetzner VPS
+5. **Deploy to Production** - Push to Coolify on Hetzner VPS
 
 ---
 

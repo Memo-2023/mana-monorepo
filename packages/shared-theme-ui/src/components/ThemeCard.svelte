@@ -1,7 +1,21 @@
 <script lang="ts">
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
-	import { Check, Lock, Clock, Star, Sparkle, Leaf, Hexagon, Waves } from '@manacore/shared-icons';
+	import {
+		Check,
+		Lock,
+		Clock,
+		Star,
+		Sparkle,
+		Leaf,
+		Hexagon,
+		Waves,
+		PushPin,
+		PushPinSlash,
+		Sun,
+		Moon,
+		Flower,
+	} from '@manacore/shared-icons';
 	import type { ThemeStatus } from '../types';
 	import ThemeColorPreview from './ThemeColorPreview.svelte';
 
@@ -11,6 +25,9 @@
 		leaf: Leaf,
 		hexagon: Hexagon,
 		waves: Waves,
+		sun: Sun,
+		moon: Moon,
+		flower: Flower,
 	} as const;
 
 	interface Props {
@@ -19,6 +36,12 @@
 		status?: ThemeStatus;
 		onClick?: () => void;
 		onUnlock?: () => void;
+		/** Whether this theme can be pinned (extended themes only) */
+		canPin?: boolean;
+		/** Whether this theme is currently pinned */
+		isPinned?: boolean;
+		/** Callback when pin status changes */
+		onTogglePin?: (variant: ThemeVariant) => void;
 		translations?: {
 			locked?: string;
 			comingSoon?: string;
@@ -26,6 +49,8 @@
 			unlock?: string;
 			lightPreview?: string;
 			darkPreview?: string;
+			pin?: string;
+			unpin?: string;
 		};
 	}
 
@@ -35,6 +60,9 @@
 		status = 'available',
 		onClick,
 		onUnlock,
+		canPin = false,
+		isPinned = false,
+		onTogglePin,
 		translations = {},
 	}: Props = $props();
 
@@ -45,6 +73,8 @@
 		unlock: translations.unlock ?? 'Freischalten',
 		lightPreview: translations.lightPreview ?? 'Hell',
 		darkPreview: translations.darkPreview ?? 'Dunkel',
+		pin: translations.pin ?? 'Anpinnen',
+		unpin: translations.unpin ?? 'Lösen',
 	};
 
 	const definition = $derived(THEME_DEFINITIONS[variant]);
@@ -63,6 +93,13 @@
 		e.stopPropagation();
 		if (onUnlock) {
 			onUnlock();
+		}
+	}
+
+	function handleTogglePin(e: MouseEvent) {
+		e.stopPropagation();
+		if (onTogglePin) {
+			onTogglePin(variant);
 		}
 	}
 </script>
@@ -97,6 +134,28 @@
 		>
 			<Check size={14} weight="bold" />
 		</div>
+	{/if}
+
+	<!-- Pin button for extended themes -->
+	{#if canPin && onTogglePin && isAvailable}
+		<button
+			type="button"
+			onclick={handleTogglePin}
+			class="absolute top-3 {isActive
+				? 'right-11'
+				: 'right-3'} w-6 h-6 flex items-center justify-center
+                  {isPinned
+				? 'bg-primary text-primary-foreground'
+				: 'bg-muted text-muted-foreground hover:text-foreground'}
+                  rounded-full transition-colors"
+			title={isPinned ? t.unpin : t.pin}
+		>
+			{#if isPinned}
+				<PushPin size={12} weight="fill" />
+			{:else}
+				<PushPinSlash size={12} />
+			{/if}
+		</button>
 	{/if}
 
 	<!-- Header -->

@@ -3,8 +3,13 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { PillNavigation, CommandBar } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		CommandBarItem,
+		QuickAction,
+	} from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { projectsStore } from '$lib/stores/projects.svelte';
@@ -14,14 +19,55 @@
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
 	} from '$lib/stores/navigation';
-	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import {
+		THEME_DEFINITIONS,
+		DEFAULT_THEME_VARIANTS,
+		EXTENDED_THEME_VARIANTS,
+	} from '@manacore/shared-theme';
+	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getTasks } from '$lib/api/tasks';
 
 	// App switcher items
 	const appItems = getPillAppItems('todo');
 
 	let { children } = $props();
+
+	// CommandBar state
+	let commandBarOpen = $state(false);
+
+	// CommandBar quick actions
+	const commandBarQuickActions: QuickAction[] = [
+		{ id: 'new', label: 'Neue Aufgabe erstellen', icon: 'plus', href: '/task/new', shortcut: 'N' },
+		{ id: 'kanban', label: 'Kanban-Board', icon: 'list', href: '/kanban' },
+		{ id: 'stats', label: 'Statistiken', icon: 'chart', href: '/statistics' },
+		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
+	];
+
+	// CommandBar search - search tasks
+	async function handleCommandBarSearch(query: string): Promise<CommandBarItem[]> {
+		if (!query.trim()) return [];
+
+		try {
+			const tasks = await getTasks({ search: query });
+			return tasks.slice(0, 10).map((task) => ({
+				id: task.id,
+				title: task.title,
+				subtitle: task.isCompleted
+					? '✓ Erledigt'
+					: task.dueDate
+						? new Date(task.dueDate).toLocaleDateString('de-DE')
+						: 'Kein Datum',
+			}));
+		} catch {
+			return [];
+		}
+	}
+
+	function handleCommandBarSelect(item: CommandBarItem) {
+		goto(`/task/${item.id}`);
+	}
 
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
@@ -29,9 +75,19 @@
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
 
+	// Get pinned themes from user settings (extended themes only)
+	let pinnedThemes = $derived<ThemeVariant[]>(
+		(userSettings.theme?.pinnedThemes || []).filter((t): t is ThemeVariant =>
+			EXTENDED_THEME_VARIANTS.includes(t as ThemeVariant)
+		)
+	);
+
+	// Visible themes in PillNav: default + pinned extended
+	let visibleThemes = $derived<ThemeVariant[]>([...DEFAULT_THEME_VARIANTS, ...pinnedThemes]);
+
 	// Theme variant dropdown items
 	let themeVariantItems = $derived<PillDropdownItem[]>([
-		...theme.variants.map((variant) => ({
+		...visibleThemes.map((variant) => ({
 			id: variant,
 			label: THEME_DEFINITIONS[variant].label,
 			icon: THEME_DEFINITIONS[variant].icon,
@@ -63,20 +119,50 @@
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
-	// Navigation items for Todo
-	const navItems: PillNavItem[] = [
+	// Base navigation items for Todo
+	const baseNavItems: PillNavItem[] = [
 		{ href: '/', label: 'Aufgaben', icon: 'list' },
 		{ href: '/kanban', label: 'Kanban', icon: 'columns' },
 		{ href: '/statistics', label: 'Statistiken', icon: 'chart' },
+		{ href: '/labels', label: 'Labels', icon: 'tag' },
+		{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
-	// Navigation shortcuts (Ctrl+1-6)
-	const navRoutes = navItems.map((item) => item.href);
+	// Navigation items (base items + dynamic label items in sidebar mode)
+	const navItems = $derived.by(() => {
+		// In sidebar mode, add labels as sub-items if available
+		if (isSidebarMode && labelsStore.labels.length > 0) {
+			const labelItems: PillNavItem[] = labelsStore.labels.slice(0, 5).map((label) => ({
+				href: `/label/${label.id}`,
+				label: label.name,
+				icon: 'tag',
+			}));
+
+			// Insert label items after "Labels" nav item
+			const items = [...baseNavItems];
+			const labelsIndex = items.findIndex((i) => i.href === '/labels');
+			if (labelsIndex !== -1 && labelItems.length > 0) {
+				items.splice(labelsIndex + 1, 0, ...labelItems);
+			}
+			return items;
+		}
+		return baseNavItems;
+	});
+
+	// Navigation shortcuts (Ctrl+1-6) - use base items for consistent shortcuts
+	const navRoutes = baseNavItems.map((item) => item.href);
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
+
+		// Cmd/Ctrl+K to open command bar (works even in inputs)
+		if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+			event.preventDefault();
+			commandBarOpen = true;
+			return;
+		}
 
 		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
 			return;
@@ -232,6 +318,18 @@
 			{@render children()}
 		</div>
 	</main>
+
+	<!-- Global Command Bar (Cmd/K) -->
+	<CommandBar
+		bind:open={commandBarOpen}
+		onClose={() => (commandBarOpen = false)}
+		onSearch={handleCommandBarSearch}
+		onSelect={handleCommandBarSelect}
+		quickActions={commandBarQuickActions}
+		placeholder="Aufgabe suchen..."
+		emptyText="Keine Aufgaben gefunden"
+		searchingText="Suche..."
+	/>
 </div>
 
 <style>

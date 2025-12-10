@@ -6,6 +6,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { waitLocale } from '$lib/i18n';
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
+	import { AppLoadingSkeleton } from '$lib/components/skeletons';
 
 	let { children } = $props();
 
@@ -28,14 +29,7 @@
 <ToastContainer />
 
 {#if $isLocaleLoading || loading}
-	<div class="flex min-h-screen items-center justify-center bg-background">
-		<div class="text-center">
-			<div
-				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
-			></div>
-			<p class="text-muted-foreground">Laden...</p>
-		</div>
-	</div>
+	<AppLoadingSkeleton />
 {:else}
 	<div class="min-h-screen bg-background text-foreground">
 		{@render children()}

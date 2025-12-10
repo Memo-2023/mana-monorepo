@@ -1,6 +1,7 @@
+import { browser } from '$app/environment';
 import { authStore } from '$lib/stores/auth.svelte';
-
-const API_BASE = 'http://localhost:3015/api/v1';
+import { API_BASE } from './config';
+import { createTagsClient, type Tag } from '@manacore/shared-tags';
 
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
 	const token = await authStore.getAccessToken();
@@ -57,22 +58,8 @@ export interface Contact {
 	updatedAt: string;
 }
 
-export interface ContactGroup {
-	id: string;
-	userId: string;
-	name: string;
-	description?: string | null;
-	color?: string | null;
-	createdAt: string;
-}
-
-export interface ContactTag {
-	id: string;
-	userId: string;
-	name: string;
-	color?: string | null;
-	createdAt: string;
-}
+// Re-export Tag as ContactTag for backward compatibility
+export type ContactTag = Tag;
 
 export interface ContactNote {
 	id: string;
@@ -98,7 +85,6 @@ export interface ContactFilters {
 	search?: string;
 	isFavorite?: boolean;
 	isArchived?: boolean;
-	groupId?: string;
 	tagId?: string;
 	limit?: number;
 	offset?: number;
@@ -111,7 +97,6 @@ export const contactsApi = {
 		if (filters.search) params.set('search', filters.search);
 		if (filters.isFavorite !== undefined) params.set('isFavorite', String(filters.isFavorite));
 		if (filters.isArchived !== undefined) params.set('isArchived', String(filters.isArchived));
-		if (filters.groupId) params.set('groupId', filters.groupId);
 		if (filters.tagId) params.set('tagId', filters.tagId);
 		if (filters.limit) params.set('limit', String(filters.limit));
 		if (filters.offset) params.set('offset', String(filters.offset));
@@ -162,74 +147,92 @@ export const contactsApi = {
 	},
 };
 
-// Groups API
-export const groupsApi = {
-	async list() {
-		return fetchWithAuth('/groups');
-	},
+// Tags API - Uses central Tags API from mana-core-auth
+// Contact-tag associations still use the Contacts backend
 
-	async get(id: string) {
-		return fetchWithAuth(`/groups/${id}`);
-	},
+// Get auth URL dynamically at runtime
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	return 'http://localhost:3001';
+}
 
-	async create(data: { name: string; description?: string; color?: string }) {
-		return fetchWithAuth('/groups', {
-			method: 'POST',
-			body: JSON.stringify(data),
+// Lazy-initialized tags client
+let _tagsClient: ReturnType<typeof createTagsClient> | null = null;
+
+function getTagsClient() {
+	if (!browser) return null;
+	if (!_tagsClient) {
+		_tagsClient = createTagsClient({
+			authUrl: getAuthUrl(),
+			getToken: async () => {
+				const token = await authStore.getAccessToken();
+				return token || '';
+			},
 		});
-	},
+	}
+	return _tagsClient;
+}
 
-	async update(id: string, data: { name?: string; description?: string; color?: string }) {
-		return fetchWithAuth(`/groups/${id}`, {
-			method: 'PATCH',
-			body: JSON.stringify(data),
-		});
-	},
-
-	async delete(id: string) {
-		return fetchWithAuth(`/groups/${id}`, {
-			method: 'DELETE',
-		});
-	},
-
-	async addContacts(groupId: string, contactIds: string[]) {
-		return fetchWithAuth(`/groups/${groupId}/contacts`, {
-			method: 'POST',
-			body: JSON.stringify({ contactIds }),
-		});
-	},
-
-	async removeContact(groupId: string, contactId: string) {
-		return fetchWithAuth(`/groups/${groupId}/contacts/${contactId}`, {
-			method: 'DELETE',
-		});
-	},
-};
-
-// Tags API
 export const tagsApi = {
-	async list() {
-		return fetchWithAuth('/tags');
+	// Get all tags from central Tags API
+	async list(): Promise<{ tags: ContactTag[] }> {
+		const client = getTagsClient();
+		if (!client) return { tags: [] };
+		const tags = await client.getAll();
+		return { tags };
 	},
 
-	async create(data: { name: string; color?: string }) {
-		return fetchWithAuth('/tags', {
+	// Create tag via central Tags API
+	async create(data: { name: string; color?: string }): Promise<{ tag: ContactTag }> {
+		const client = getTagsClient();
+		if (!client) throw new Error('Tags client not available');
+		const tag = await client.create(data);
+		return { tag };
+	},
+
+	// Update tag via central Tags API
+	async update(id: string, data: { name?: string; color?: string }): Promise<{ tag: ContactTag }> {
+		const client = getTagsClient();
+		if (!client) throw new Error('Tags client not available');
+		const tag = await client.update(id, data);
+		return { tag };
+	},
+
+	// Delete tag via central Tags API
+	async delete(id: string): Promise<{ success: boolean }> {
+		const client = getTagsClient();
+		if (!client) throw new Error('Tags client not available');
+		await client.delete(id);
+		return { success: true };
+	},
+
+	// Contact-tag associations still use Contacts backend
+	async addToContact(tagId: string, contactId: string): Promise<{ success: boolean }> {
+		return fetchWithAuth(`/tags/${tagId}/contacts/${contactId}`, {
 			method: 'POST',
-			body: JSON.stringify(data),
 		});
 	},
 
-	async update(id: string, data: { name?: string; color?: string }) {
-		return fetchWithAuth(`/tags/${id}`, {
-			method: 'PATCH',
-			body: JSON.stringify(data),
-		});
-	},
-
-	async delete(id: string) {
-		return fetchWithAuth(`/tags/${id}`, {
+	async removeFromContact(tagId: string, contactId: string): Promise<{ success: boolean }> {
+		return fetchWithAuth(`/tags/${tagId}/contacts/${contactId}`, {
 			method: 'DELETE',
 		});
+	},
+
+	async getForContact(contactId: string): Promise<{ tagIds: string[] }> {
+		return fetchWithAuth(`/tags/contact/${contactId}`);
+	},
+
+	// Create default tags via central Tags API
+	async createDefaults(): Promise<{ tags: ContactTag[] }> {
+		const client = getTagsClient();
+		if (!client) return { tags: [] };
+		const tags = await client.createDefaults();
+		return { tags };
 	},
 };
 
@@ -284,6 +287,37 @@ export const activitiesApi = {
 		return fetchWithAuth(`/contacts/${contactId}/activities`, {
 			method: 'POST',
 			body: JSON.stringify(data),
+		});
+	},
+};
+
+// Photo API
+export const photoApi = {
+	async upload(contactId: string, file: File): Promise<{ photoUrl: string }> {
+		const token = await authStore.getAccessToken();
+
+		const formData = new FormData();
+		formData.append('photo', file);
+
+		const response = await fetch(`${API_BASE}/contacts/${contactId}/photo`, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+			body: formData,
+		});
+
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({ message: 'Upload failed' }));
+			throw new Error(error.message || 'Upload failed');
+		}
+
+		return response.json();
+	},
+
+	async delete(contactId: string): Promise<void> {
+		await fetchWithAuth(`/contacts/${contactId}/photo`, {
+			method: 'DELETE',
 		});
 	},
 };

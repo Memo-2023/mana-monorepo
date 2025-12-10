@@ -75,9 +75,6 @@ const APP_CONFIGS = [
 			STRIPE_SECRET_KEY: (env) => env.STRIPE_SECRET_KEY,
 			STRIPE_PUBLISHABLE_KEY: (env) => env.STRIPE_PUBLISHABLE_KEY,
 			STRIPE_WEBHOOK_SECRET: (env) => env.STRIPE_WEBHOOK_SECRET,
-			BREVO_API_KEY: (env) => env.BREVO_API_KEY || '',
-			BREVO_FROM_EMAIL: (env) => env.BREVO_FROM_EMAIL || 'noreply@manacore.app',
-			BREVO_FROM_NAME: (env) => env.BREVO_FROM_NAME || 'Mana Core',
 			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
 			CREDITS_SIGNUP_BONUS: (env) => env.CREDITS_SIGNUP_BONUS,
 			CREDITS_DAILY_FREE: (env) => env.CREDITS_DAILY_FREE,
@@ -101,12 +98,6 @@ const APP_CONFIGS = [
 			GOOGLE_GENAI_API_KEY: (env) => env.GOOGLE_GENAI_API_KEY,
 			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			DATABASE_URL: (env) => env.CHAT_DATABASE_URL,
-			// S3 Storage (MinIO local, Hetzner production)
-			S3_ENDPOINT: (env) => env.S3_ENDPOINT,
-			S3_REGION: (env) => env.S3_REGION,
-			S3_ACCESS_KEY: (env) => env.S3_ACCESS_KEY,
-			S3_SECRET_KEY: (env) => env.S3_SECRET_KEY,
-			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
 		},
 	},
 

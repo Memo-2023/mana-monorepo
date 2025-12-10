@@ -5,6 +5,8 @@
 @source "../../../packages/shared/src";
 @source "../../../../../packages/shared-ui/src";
 @source "../../../../../packages/shared-theme-ui/src";
+@source "../../../../../packages/shared-theme-ui/src/components";
+@source "../../../../../packages/shared-theme-ui/src/pages";
 
 :root {
 	/* Todo App - Purple/Violet Theme */

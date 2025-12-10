@@ -73,4 +73,9 @@ export class UpdateEventDto {
 	@IsOptional()
 	@IsObject()
 	metadata?: EventMetadata;
+
+	@IsOptional()
+	@IsArray()
+	@IsUUID('4', { each: true })
+	tagIds?: string[];
 }

@@ -183,7 +183,7 @@ export const GET: RequestHandler = async () => {
 			next_steps: [
 				'1. Add REDIS_URL environment variable to your main app',
 				'2. Format: redis://username:password@host:port',
-				'3. Use the exact Redis service name from Docker Compose',
+				'3. Use the exact Redis service name from Coolify',
 				'4. Copy credentials from Redis service configuration',
 			],
 		},

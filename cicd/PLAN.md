@@ -525,7 +525,7 @@ Traffic → Blue → Switch traffic → Green
 - [x] ISO 27001 certified infrastructure
 - [x] SOC 2 Type II (Supabase)
 - [x] Automated backup retention policies
-- [x] Audit logs (GitHub Actions, Supabase)
+- [x] Audit logs (GitHub Actions, Coolify, Supabase)
 
 ---
 
@@ -676,7 +676,7 @@ Traffic → Blue → Switch traffic → Green
 
 - **Likelihood**: Medium (now addressed - migration complete)
 - **Impact**: Medium
-- **Mitigation**: Using Docker Compose for all deployments, keeping architecture simple
+- **Mitigation**: Completed migration from Coolify to Docker Compose, removed legacy artifacts
 - **Contingency**: Docker Compose provides simpler, more maintainable deployment
 
 ---

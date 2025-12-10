@@ -86,7 +86,7 @@ POCKETBASE_URL=http://127.0.0.1:8090
 # ENTFERNEN: supervisor config für pocketbase
 ```
 
-### Nginx Configuration:
+### Nginx in Coolify:
 
 ```nginx
 location /api/ {

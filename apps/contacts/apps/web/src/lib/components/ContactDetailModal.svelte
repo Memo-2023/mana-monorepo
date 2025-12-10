@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { contactsApi, type Contact } from '$lib/api/contacts';
+	import { contactsApi, photoApi, type Contact } from '$lib/api/contacts';
+	import ContactNotes from './ContactNotes.svelte';
+	import { ContactDetailSkeleton } from '$lib/components/skeletons';
 
 	interface Props {
 		contactId: string;
@@ -16,6 +18,8 @@
 	let editing = $state(false);
 	let saving = $state(false);
 	let deleting = $state(false);
+	let uploadingPhoto = $state(false);
+	let photoInput: HTMLInputElement;
 
 	// Edit form state
 	let firstName = $state('');
@@ -136,6 +140,59 @@
 		}
 	}
 
+	function handlePhotoClick() {
+		photoInput?.click();
+	}
+
+	async function handlePhotoChange(e: Event) {
+		const input = e.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file || !contact) return;
+
+		// Validate file type
+		if (!file.type.startsWith('image/')) {
+			error = 'Bitte wähle eine Bilddatei aus';
+			return;
+		}
+
+		// Validate file size (5MB)
+		if (file.size > 5 * 1024 * 1024) {
+			error = 'Das Bild darf maximal 5MB groß sein';
+			return;
+		}
+
+		uploadingPhoto = true;
+		error = null;
+
+		try {
+			const result = await photoApi.upload(contactId, file);
+			contact = { ...contact, photoUrl: result.photoUrl };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Fehler beim Hochladen';
+		} finally {
+			uploadingPhoto = false;
+			// Reset input to allow re-selecting same file
+			input.value = '';
+		}
+	}
+
+	async function handleDeletePhoto() {
+		if (!contact?.photoUrl) return;
+		if (!confirm('Foto wirklich entfernen?')) return;
+
+		uploadingPhoto = true;
+		error = null;
+
+		try {
+			await photoApi.delete(contactId);
+			contact = { ...contact, photoUrl: null };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Fehler beim Löschen';
+		} finally {
+			uploadingPhoto = false;
+		}
+	}
+
 	function handleBackdropClick(e: MouseEvent) {
 		if (e.target === e.currentTarget) {
 			onClose();
@@ -148,8 +205,14 @@
 		}
 	}
 
+	// Reload contact when contactId changes
+	$effect(() => {
+		if (contactId) {
+			loadContact();
+		}
+	});
+
 	onMount(() => {
-		loadContact();
 		document.body.style.overflow = 'hidden';
 		return () => {
 			document.body.style.overflow = '';
@@ -220,25 +283,7 @@
 		<!-- Modal Body -->
 		<div class="modal-body">
 			{#if loading}
-				<div class="loading-container">
-					<svg class="spinner-lg" viewBox="0 0 24 24" fill="none">
-						<circle
-							cx="12"
-							cy="12"
-							r="10"
-							stroke="currentColor"
-							stroke-width="3"
-							stroke-opacity="0.25"
-						/>
-						<path
-							d="M12 2a10 10 0 0 1 10 10"
-							stroke="currentColor"
-							stroke-width="3"
-							stroke-linecap="round"
-						/>
-					</svg>
-					<p class="loading-text">Lade Kontakt...</p>
-				</div>
+				<ContactDetailSkeleton />
 			{:else if error && !contact}
 				<div class="error-container">
 					<div class="error-icon-wrapper">
@@ -477,12 +522,105 @@
 						</div>
 					</form>
 				{:else}
+					<!-- Hidden file input for photo upload -->
+					<input
+						type="file"
+						accept="image/*"
+						bind:this={photoInput}
+						onchange={handlePhotoChange}
+						class="hidden-input"
+					/>
+
 					<!-- View Mode -->
 					<div class="profile-header">
 						<div class="avatar-wrapper">
-							<div class="avatar-circle avatar-large">
-								{initials()}
-							</div>
+							{#if contact.photoUrl}
+								<img
+									src={contact.photoUrl}
+									alt={getDisplayName()}
+									class="avatar-image avatar-large"
+								/>
+								<button
+									onclick={handleDeletePhoto}
+									disabled={uploadingPhoto}
+									class="photo-delete-btn"
+									aria-label="Foto entfernen"
+									title="Foto entfernen"
+								>
+									{#if uploadingPhoto}
+										<svg class="spinner-sm" viewBox="0 0 24 24" fill="none">
+											<circle
+												cx="12"
+												cy="12"
+												r="10"
+												stroke="currentColor"
+												stroke-width="3"
+												stroke-opacity="0.25"
+											/>
+											<path
+												d="M12 2a10 10 0 0 1 10 10"
+												stroke="currentColor"
+												stroke-width="3"
+												stroke-linecap="round"
+											/>
+										</svg>
+									{:else}
+										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M6 18L18 6M6 6l12 12"
+											/>
+										</svg>
+									{/if}
+								</button>
+							{:else}
+								<button
+									onclick={handlePhotoClick}
+									disabled={uploadingPhoto}
+									class="avatar-circle avatar-large avatar-upload-btn"
+									aria-label="Foto hochladen"
+									title="Foto hochladen"
+								>
+									{#if uploadingPhoto}
+										<svg class="spinner-lg" viewBox="0 0 24 24" fill="none">
+											<circle
+												cx="12"
+												cy="12"
+												r="10"
+												stroke="currentColor"
+												stroke-width="3"
+												stroke-opacity="0.25"
+											/>
+											<path
+												d="M12 2a10 10 0 0 1 10 10"
+												stroke="currentColor"
+												stroke-width="3"
+												stroke-linecap="round"
+											/>
+										</svg>
+									{:else}
+										<span class="avatar-initials">{initials()}</span>
+										<span class="avatar-upload-overlay">
+											<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+												/>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+												/>
+											</svg>
+										</span>
+									{/if}
+								</button>
+							{/if}
 							<button
 								onclick={handleToggleFavorite}
 								class="favorite-btn"
@@ -700,6 +838,9 @@
 								</div>
 							</section>
 						{/if}
+
+						<!-- Contact Notes (separate from contact.notes field) -->
+						<ContactNotes {contactId} />
 					</div>
 				{/if}
 			{/if}
@@ -915,6 +1056,102 @@
 		width: 100px;
 		height: 100px;
 		font-size: 2.5rem;
+	}
+
+	.avatar-image {
+		width: 100px;
+		height: 100px;
+		border-radius: 50%;
+		object-fit: cover;
+		box-shadow: 0 8px 24px hsl(var(--color-primary) / 0.3);
+	}
+
+	.avatar-upload-btn {
+		position: relative;
+		cursor: pointer;
+		border: none;
+		overflow: hidden;
+	}
+
+	.avatar-upload-btn:hover .avatar-upload-overlay {
+		opacity: 1;
+	}
+
+	.avatar-upload-btn:disabled {
+		cursor: not-allowed;
+	}
+
+	.avatar-initials {
+		position: relative;
+		z-index: 1;
+	}
+
+	.avatar-upload-overlay {
+		position: absolute;
+		inset: 0;
+		background: hsl(var(--color-foreground) / 0.6);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		opacity: 0;
+		transition: opacity 0.2s ease;
+		border-radius: 50%;
+	}
+
+	.avatar-upload-overlay svg {
+		width: 2rem;
+		height: 2rem;
+		color: white;
+	}
+
+	.photo-delete-btn {
+		position: absolute;
+		top: -4px;
+		right: -4px;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		background: hsl(var(--color-error));
+		border: 2px solid hsl(var(--color-background));
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		box-shadow: 0 2px 8px hsl(var(--color-foreground) / 0.1);
+	}
+
+	.photo-delete-btn:hover:not(:disabled) {
+		transform: scale(1.1);
+	}
+
+	.photo-delete-btn:disabled {
+		cursor: not-allowed;
+		opacity: 0.7;
+	}
+
+	.photo-delete-btn svg {
+		width: 0.875rem;
+		height: 0.875rem;
+		color: white;
+	}
+
+	.spinner-sm {
+		width: 0.875rem;
+		height: 0.875rem;
+		animation: spin 1s linear infinite;
+	}
+
+	.hidden-input {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 
 	.favorite-btn {

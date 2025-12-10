@@ -1,7 +1,8 @@
 # =============================================================================
 # uload Docker Compose - Production (standalone)
 # =============================================================================
-# Use this for production deployment with Docker Compose.
+# Use this for manual production deployment without Coolify.
+# For Docker Compose deployments, use docker-compose.coolify.yml instead.
 # =============================================================================
 
 services:
