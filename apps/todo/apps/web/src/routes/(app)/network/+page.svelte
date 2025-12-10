@@ -3,7 +3,6 @@
 	import { goto } from '$app/navigation';
 	import { networkStore, type SimulationNode } from '$lib/stores/network.svelte';
 	import { NetworkGraph, NetworkControls } from '@manacore/shared-ui';
-	import '$lib/i18n';
 
 	let graphComponent: NetworkGraph;
 	let controlsComponent: NetworkControls;
