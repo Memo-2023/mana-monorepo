@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ManaCoreModule } from '@mana-core/nestjs-integration';
 import { DatabaseModule } from './db/database.module';
 import { HealthModule } from './health/health.module';
 import { ModelModule } from './model/model.module';
@@ -18,6 +19,16 @@ import { BatchModule } from './batch/batch.module';
 		ConfigModule.forRoot({
 			isGlobal: true,
 			envFilePath: '.env',
+		}),
+		ManaCoreModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (configService: ConfigService) => ({
+				appId: configService.get('APP_ID', 'picture-app'),
+				serviceKey: configService.get('MANA_CORE_SERVICE_KEY', ''),
+				authUrl: configService.get('MANA_CORE_AUTH_URL', 'http://localhost:3001'),
+				debug: configService.get('NODE_ENV') === 'development',
+			}),
+			inject: [ConfigService],
 		}),
 		DatabaseModule,
 		HealthModule,

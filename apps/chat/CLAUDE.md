@@ -66,7 +66,7 @@ pnpm preview                     # Preview production build
 - **Mobile**: React Native 0.76.7 + Expo SDK 52, NativeWind, Expo Router
 - **Web**: SvelteKit 2.x, Svelte 5, Tailwind CSS 4
 - **Landing**: Astro 5.16, Tailwind CSS
-- **Backend**: NestJS 10, Google Gemini AI, Supabase
+- **Backend**: NestJS 10, OpenRouter/Gemini AI, Supabase
 - **Types**: TypeScript 5.x
 
 ## Architecture
@@ -89,11 +89,12 @@ pnpm preview                     # Preview production build
 #### Backend (.env)
 
 ```
-GOOGLE_GENAI_API_KEY=...
+OPENROUTER_API_KEY=...          # Get at https://openrouter.ai/keys
+GOOGLE_GENAI_API_KEY=...        # Optional: For Gemini models
 SUPABASE_URL=https://...
 SUPABASE_SERVICE_KEY=...
 PORT=3002
-DEV_BYPASS_AUTH=true  # Optional: Skip auth in development
+DEV_BYPASS_AUTH=true            # Optional: Skip auth in development
 ```
 
 #### Mobile (.env)
@@ -114,11 +115,33 @@ EXPO_PUBLIC_BACKEND_URL=http://localhost:3001
 
 ## AI Models Available
 
-| Model ID                             | Name                  | Description               | Default |
-| ------------------------------------ | --------------------- | ------------------------- | ------- |
-| 550e8400-e29b-41d4-a716-446655440101 | Gemini 2.5 Flash      | Fast, efficient responses | Yes     |
-| 550e8400-e29b-41d4-a716-446655440102 | Gemini 2.0 Flash-Lite | Ultra-lightweight model   | No      |
-| 550e8400-e29b-41d4-a716-446655440103 | Gemini 2.5 Pro        | Most capable model        | No      |
+### OpenRouter Models (Recommended)
+
+| Model ID | Name | Price | Best For |
+| -------- | ---- | ----- | -------- |
+| ...440201 | Llama 3.1 8B | $0.05/M | Everyday tasks, cheap |
+| ...440202 | Llama 3.1 70B | $0.35/M | Complex reasoning |
+| ...440203 | DeepSeek V3 | $0.14/M | Reasoning at low cost |
+| ...440204 | Mistral Small | $0.10/M | General tasks |
+| ...440205 | Claude 3.5 Sonnet | $3/M | Best quality |
+| ...440206 | GPT-4o Mini | $0.15/M | Balanced performance |
+
+### Google Gemini Models
+
+| Model ID | Name | Description | Default |
+| -------- | ---- | ----------- | ------- |
+| ...440101 | Gemini 2.5 Flash | Fast, efficient responses | Yes |
+| ...440102 | Gemini 2.0 Flash-Lite | Ultra-lightweight model | No |
+| ...440103 | Gemini 2.5 Pro | Most capable model | No |
+
+## OpenRouter Setup
+
+To enable OpenRouter models:
+
+- [ ] Get API key at https://openrouter.ai/keys
+- [ ] Add `OPENROUTER_API_KEY=sk-or-v1-xxx` to `apps/chat/apps/backend/.env`
+- [ ] Re-seed database: `pnpm --filter @chat/backend db:seed`
+- [ ] Test: `pnpm dev:chat:backend`
 
 ## Important Notes
 

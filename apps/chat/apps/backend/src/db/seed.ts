@@ -75,6 +75,87 @@ async function seed() {
 				isDefault: false,
 			},
 			// ============================================
+			// OpenRouter Models (Multi-provider, cost-effective)
+			// ============================================
+			{
+				id: '550e8400-e29b-41d4-a716-446655440201',
+				name: 'Llama 3.1 8B',
+				description: 'Fast & cheap - great for everyday tasks ($0.05/M tokens)',
+				provider: 'openrouter',
+				parameters: {
+					model: 'meta-llama/llama-3.1-8b-instruct',
+					temperature: 0.7,
+					max_tokens: 4096,
+				},
+				isActive: true,
+				isDefault: false,
+			},
+			{
+				id: '550e8400-e29b-41d4-a716-446655440202',
+				name: 'Llama 3.1 70B',
+				description: 'Powerful open model - complex reasoning ($0.35/M tokens)',
+				provider: 'openrouter',
+				parameters: {
+					model: 'meta-llama/llama-3.1-70b-instruct',
+					temperature: 0.7,
+					max_tokens: 8192,
+				},
+				isActive: true,
+				isDefault: false,
+			},
+			{
+				id: '550e8400-e29b-41d4-a716-446655440203',
+				name: 'DeepSeek V3',
+				description: 'Excellent reasoning at low cost ($0.14/M tokens)',
+				provider: 'openrouter',
+				parameters: {
+					model: 'deepseek/deepseek-chat',
+					temperature: 0.7,
+					max_tokens: 8192,
+				},
+				isActive: true,
+				isDefault: false,
+			},
+			{
+				id: '550e8400-e29b-41d4-a716-446655440204',
+				name: 'Mistral Small',
+				description: 'Fast European model - good for general tasks ($0.10/M tokens)',
+				provider: 'openrouter',
+				parameters: {
+					model: 'mistralai/mistral-small-24b-instruct-2501',
+					temperature: 0.7,
+					max_tokens: 4096,
+				},
+				isActive: true,
+				isDefault: false,
+			},
+			{
+				id: '550e8400-e29b-41d4-a716-446655440205',
+				name: 'Claude 3.5 Sonnet',
+				description: 'Best overall quality - coding & analysis ($3/M tokens)',
+				provider: 'openrouter',
+				parameters: {
+					model: 'anthropic/claude-3.5-sonnet',
+					temperature: 0.7,
+					max_tokens: 8192,
+				},
+				isActive: true,
+				isDefault: false,
+			},
+			{
+				id: '550e8400-e29b-41d4-a716-446655440206',
+				name: 'GPT-4o Mini',
+				description: 'OpenAI fast model - balanced performance ($0.15/M tokens)',
+				provider: 'openrouter',
+				parameters: {
+					model: 'openai/gpt-4o-mini',
+					temperature: 0.7,
+					max_tokens: 4096,
+				},
+				isActive: true,
+				isDefault: false,
+			},
+			// ============================================
 			// Azure OpenAI GPT-5 Family (Inactive - no deployment)
 			// ============================================
 			{
