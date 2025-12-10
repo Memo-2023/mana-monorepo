@@ -60,6 +60,7 @@
 			onclick: () => viewStore.goToToday(),
 		},
 		{ id: 'agenda', label: 'Agenda anzeigen', icon: 'list', href: '/agenda' },
+		{ id: 'tasks', label: 'Aufgaben anzeigen', icon: 'check-square', href: '/tasks' },
 		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
 	];
 
@@ -183,6 +184,7 @@
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/', label: 'Kalender', icon: 'calendar' },
 		{ href: '/agenda', label: 'Agenda', icon: 'list' },
+		{ href: '/tasks', label: 'Aufgaben', icon: 'check-square' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/statistics', label: 'Statistiken', icon: 'bar-chart-3' },
 		{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
