@@ -137,7 +137,8 @@ export interface CalendarEventWithCalendar extends CalendarEvent {
  * Data required to create a new event
  */
 export interface CreateEventInput {
-	calendarId: string;
+	/** Calendar ID. If not provided, the default calendar will be used (or created if none exists) */
+	calendarId?: string;
 	title: string;
 	description?: string;
 	location?: string;

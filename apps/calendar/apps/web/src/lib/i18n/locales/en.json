@@ -19,7 +19,9 @@
 		"month": "Month",
 		"year": "Year",
 		"agenda": "Agenda",
-		"weekdaysOnly": "Weekdays only"
+		"weekdaysOnly": "Weekdays only",
+		"weekNumber": "W",
+		"moreEvents": "+{count} more"
 	},
 	"calendar": {
 		"today": "Today",
@@ -27,7 +29,10 @@
 		"noEvents": "No events",
 		"allDay": "All day",
 		"myCalendars": "My Calendars",
-		"sharedCalendars": "Shared Calendars"
+		"sharedCalendars": "Shared Calendars",
+		"draftEvent": "(New Event)",
+		"hideSidebar": "Hide sidebar",
+		"showSidebar": "Show sidebar"
 	},
 	"event": {
 		"title": "Title",
@@ -41,7 +46,9 @@
 		"calendar": "Calendar",
 		"save": "Save",
 		"delete": "Delete",
-		"cancel": "Cancel"
+		"cancel": "Cancel",
+		"changeStartTime": "Change start time",
+		"changeEndTime": "Change end time"
 	},
 	"repeat": {
 		"none": "Don't repeat",

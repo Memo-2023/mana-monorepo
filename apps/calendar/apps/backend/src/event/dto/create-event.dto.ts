@@ -12,8 +12,9 @@ import {
 import type { EventMetadata } from '../../db/schema/events.schema';
 
 export class CreateEventDto {
+	@IsOptional()
 	@IsUUID()
-	calendarId: string;
+	calendarId?: string;
 
 	@IsString()
 	@MaxLength(500)

@@ -14,13 +14,21 @@ interface CreateTaskDto {
 
 interface UpdateTaskDto {
 	title?: string;
-	description?: string;
+	description?: string | null;
 	projectId?: string | null;
+	parentTaskId?: string | null;
 	dueDate?: string | null;
+	dueTime?: string | null;
+	startDate?: string | null;
 	priority?: TaskPriority;
 	status?: TaskStatus;
-	subtasks?: Subtask[];
+	isCompleted?: boolean;
+	order?: number;
+	subtasks?: Subtask[] | null;
 	recurrenceRule?: string | null;
+	recurrenceEndDate?: string | null;
+	metadata?: Record<string, unknown> | null;
+	labelIds?: string[];
 }
 
 interface TaskQuery {

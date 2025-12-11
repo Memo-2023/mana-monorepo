@@ -28,10 +28,8 @@
 	// Check if there are any routes to configure
 	const hasRoutes = $derived(hideableItems.length > 0);
 
-	function isRouteHidden(href: string): boolean {
-		const hidden = userSettings.getHiddenNavItemsForApp(appId);
-		return hidden.includes(href);
-	}
+	// Reactive: get hidden items from nav settings (triggers re-render when hiddenNavItems changes)
+	const hiddenItems = $derived(userSettings.nav.hiddenNavItems?.[appId] || []);
 
 	async function handleToggle(href: string): Promise<void> {
 		await userSettings.toggleNavItemVisibility(appId, href);
@@ -129,7 +127,7 @@
 
 		<div class="space-y-1">
 			{#each hideableItems as item (item.href)}
-				{@const hidden = isRouteHidden(item.href)}
+				{@const hidden = hiddenItems.includes(item.href)}
 				{@const iconPath = item.icon ? getIconPath(item.icon) : ''}
 				<label
 					class="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-[hsl(var(--muted))]/50 cursor-pointer transition-colors border border-transparent hover:border-[hsl(var(--border))]"

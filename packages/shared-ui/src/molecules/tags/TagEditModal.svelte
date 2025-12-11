@@ -79,22 +79,22 @@
 	<div class="space-y-6">
 		<!-- Name Input -->
 		<div>
-			<Input bind:value={name} placeholder={namePlaceholder} onkeydown={handleKeyDown} autofocus />
+			<Input bind:value={name} placeholder={namePlaceholder} onkeydown={handleKeyDown} />
 		</div>
 
 		<!-- Color Picker -->
 		<div>
-			<label class="block text-sm font-medium text-muted-foreground mb-3">
+			<span class="block text-sm font-medium text-muted-foreground mb-3">
 				{colorLabel}
-			</label>
+			</span>
 			<TagColorPicker selectedColor={color} onColorChange={(c) => (color = c)} />
 		</div>
 
 		<!-- Preview -->
 		<div>
-			<label class="block text-sm font-medium text-muted-foreground mb-3">
+			<span class="block text-sm font-medium text-muted-foreground mb-3">
 				{previewLabel}
-			</label>
+			</span>
 			<div class="flex items-center gap-2">
 				<TagBadge tag={previewTag} />
 			</div>

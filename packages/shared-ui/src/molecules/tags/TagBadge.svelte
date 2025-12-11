@@ -10,7 +10,7 @@
 		/** Alternative name field (for compatibility) */
 		text?: string;
 		/** Tag color (hex) */
-		color?: string;
+		color?: string | null;
 		/** Nested style object with color */
 		style?: { color?: string };
 	}
@@ -55,36 +55,64 @@
 	}
 </script>
 
-<span
-	class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium transition-all"
-	class:cursor-pointer={clickable}
-	class:hover:scale-105={clickable}
-	style="background-color: {tagColor}20; color: {tagColor}"
-	onclick={handleClick}
-	onkeydown={handleKeyDown}
-	role={clickable ? 'button' : undefined}
-	tabindex={clickable ? 0 : undefined}
->
-	<!-- Color indicator dot -->
-	<div class="h-2 w-2 rounded-full" style="background-color: {tagColor}"></div>
+{#if clickable}
+	<span
+		class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium transition-all cursor-pointer hover:scale-105"
+		style="background-color: {tagColor}20; color: {tagColor}"
+		onclick={handleClick}
+		onkeydown={handleKeyDown}
+		role="button"
+		tabindex="0"
+	>
+		<!-- Color indicator dot -->
+		<div class="h-2 w-2 rounded-full" style="background-color: {tagColor}"></div>
 
-	<span>{tagName}</span>
+		<span>{tagName}</span>
 
-	{#if removable}
-		<button
-			onclick={handleRemove}
-			class="ml-1 rounded-full hover:bg-black/10 p-0.5 transition-colors"
-			type="button"
-			aria-label="Remove tag"
-		>
-			<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M6 18L18 6M6 6l12 12"
-				/>
-			</svg>
-		</button>
-	{/if}
-</span>
+		{#if removable}
+			<button
+				onclick={handleRemove}
+				class="ml-1 rounded-full hover:bg-black/10 p-0.5 transition-colors"
+				type="button"
+				aria-label="Remove tag"
+			>
+				<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
+				</svg>
+			</button>
+		{/if}
+	</span>
+{:else}
+	<span
+		class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium"
+		style="background-color: {tagColor}20; color: {tagColor}"
+	>
+		<!-- Color indicator dot -->
+		<div class="h-2 w-2 rounded-full" style="background-color: {tagColor}"></div>
+
+		<span>{tagName}</span>
+
+		{#if removable}
+			<button
+				onclick={handleRemove}
+				class="ml-1 rounded-full hover:bg-black/10 p-0.5 transition-colors"
+				type="button"
+				aria-label="Remove tag"
+			>
+				<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
+				</svg>
+			</button>
+		{/if}
+	</span>
+{/if}

@@ -467,7 +467,8 @@
 						{:else if item.iconSvg}
 							{@html item.iconSvg}
 						{:else if phosphorIcons[item.icon]}
-							<svelte:component this={phosphorIcons[item.icon]} size={18} class="pill-icon" />
+							{@const IconComponent = phosphorIcons[item.icon]}
+							<IconComponent size={18} class="pill-icon" />
 						{:else}
 							<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
@@ -500,7 +501,8 @@
 					<a href={element.href} class="pill glass-pill" class:active={isActive(element.href)}>
 						{#if element.icon}
 							{#if phosphorIcons[element.icon]}
-								<svelte:component this={phosphorIcons[element.icon]} size={18} class="pill-icon" />
+								{@const IconComponent = phosphorIcons[element.icon]}
+								<IconComponent size={18} class="pill-icon" />
 							{:else}
 								<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path
@@ -1206,9 +1208,7 @@
 		min-height: 1rem;
 	}
 
-	.sidebar-container .toggle-pill {
-		margin-top: auto;
-	}
+	/* Note: .toggle-pill class may be applied dynamically */
 
 	/* Segmented control */
 	.segmented-control {

@@ -102,7 +102,7 @@
 	let creating = $state(false);
 	let selectedIndex = $state(0);
 	let searchTimeout: ReturnType<typeof setTimeout>;
-	let inputElement: HTMLInputElement;
+	let inputElement = $state<HTMLInputElement | null>(null);
 
 	// Computed create preview
 	let createPreview = $derived(
@@ -260,6 +260,7 @@
 		role="dialog"
 		aria-modal="true"
 		aria-label="Suchen"
+		tabindex="-1"
 		onclick={handleBackdropClick}
 		onkeydown={handleKeydown}
 	>

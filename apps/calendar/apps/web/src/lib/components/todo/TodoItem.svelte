@@ -95,6 +95,7 @@
 	}
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
 	class="todo-item"
 	class:completed={task.isCompleted}

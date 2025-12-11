@@ -211,14 +211,7 @@
 				>
 					<div class="form-group">
 						<label for="title">Titel</label>
-						<input
-							id="title"
-							type="text"
-							bind:value={title}
-							placeholder="Aufgabentitel"
-							required
-							autofocus
-						/>
+						<input id="title" type="text" bind:value={title} placeholder="Aufgabentitel" required />
 					</div>
 
 					<div class="form-group">
@@ -280,7 +273,7 @@
 					</div>
 
 					<div class="form-group">
-						<label>Priorität</label>
+						<span class="label-text">Priorität</span>
 						<div class="priority-options">
 							{#each Object.entries(PRIORITY_LABELS) as [key, label]}
 								<button
@@ -669,6 +662,12 @@
 	textarea {
 		resize: vertical;
 		min-height: 80px;
+	}
+
+	.label-text {
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: hsl(var(--color-foreground));
 	}
 
 	.priority-options {

@@ -100,8 +100,12 @@
 		if (!editingTask) return;
 
 		try {
-			// Update task
-			await tasksStore.updateTask(editingTask.id, data);
+			// Update task - cast metadata to be compatible with store type
+			const updateData = {
+				...data,
+				metadata: data.metadata as { [key: string]: unknown } | null | undefined,
+			};
+			await tasksStore.updateTask(editingTask.id, updateData);
 
 			// Update labels if provided
 			if (data.labelIds !== undefined) {

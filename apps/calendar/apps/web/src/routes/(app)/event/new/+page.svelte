@@ -34,6 +34,11 @@
 			return;
 		}
 
+		// Refresh calendars in case a default calendar was created
+		if (calendarsStore.calendars.length === 0) {
+			await calendarsStore.fetchCalendars();
+		}
+
 		toast.success('Termin erstellt');
 		goto('/');
 	}

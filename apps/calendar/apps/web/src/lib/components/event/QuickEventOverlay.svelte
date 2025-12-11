@@ -2,18 +2,25 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import type { LocationDetails } from '@calendar/shared';
+	import { toast } from '$lib/stores/toast';
+	import type { LocationDetails, CalendarEvent } from '@calendar/shared';
 	import { format, addMinutes, parseISO } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { tick, onMount, onDestroy } from 'svelte';
 
 	interface Props {
-		startTime: Date;
+		startTime?: Date;
+		event?: CalendarEvent;
 		onClose: () => void;
 		onCreated?: () => void;
+		onUpdated?: () => void;
+		onDeleted?: () => void;
 	}
 
-	let { startTime, onClose, onCreated }: Props = $props();
+	let { startTime, event, onClose, onCreated, onUpdated, onDeleted }: Props = $props();
+
+	// Mode: create or edit
+	let isEditMode = $derived(!!event);
 
 	// Input ref for programmatic focus
 	let titleInputRef = $state<HTMLInputElement | null>(null);
@@ -25,12 +32,17 @@
 	// Track when draft event was last modified (to ignore clicks after drag/resize)
 	let lastDraftUpdateTime = $state(0);
 
-	// Calculate position relative to draft event element
+	// Calculate position relative to draft event element or existing event
 	function updatePosition() {
 		if (typeof window === 'undefined') return;
 
-		const draftElement = document.querySelector('[data-event-id="__draft__"]');
-		if (!draftElement) {
+		// In edit mode, position relative to the existing event element
+		const eventSelector = isEditMode
+			? `[data-event-id="${event!.id}"]`
+			: '[data-event-id="__draft__"]';
+		const eventElement = document.querySelector(eventSelector);
+
+		if (!eventElement) {
 			// Fallback: center in viewport
 			const viewportWidth = window.innerWidth;
 			const viewportHeight = window.innerHeight;
@@ -42,7 +54,7 @@
 			return;
 		}
 
-		const rect = draftElement.getBoundingClientRect();
+		const rect = eventElement.getBoundingClientRect();
 		const overlayWidth = 380;
 		const maxOverlayHeight = 450;
 		const margin = 16;
@@ -79,7 +91,7 @@
 		positionInitialized = true;
 	}
 
-	// Handle clicks outside overlay (but allow clicks on draft event)
+	// Handle clicks outside overlay (but allow clicks on event)
 	function handleDocumentClick(e: MouseEvent) {
 		// Ignore clicks within 250ms of draft event update (drag/resize just ended)
 		if (Date.now() - lastDraftUpdateTime < 250) {
@@ -88,10 +100,13 @@
 
 		const target = e.target as HTMLElement;
 		const overlay = document.querySelector('.quick-event-overlay');
-		const draftEvent = document.querySelector('[data-event-id="__draft__"]');
+		const eventSelector = isEditMode
+			? `[data-event-id="${event!.id}"]`
+			: '[data-event-id="__draft__"]';
+		const eventElement = document.querySelector(eventSelector);
 
-		// Don't close if clicking on overlay or draft event
-		if (overlay?.contains(target) || draftEvent?.contains(target)) {
+		// Don't close if clicking on overlay or event element
+		if (overlay?.contains(target) || eventElement?.contains(target)) {
 			return;
 		}
 
@@ -115,18 +130,19 @@
 		document.removeEventListener('click', handleDocumentClick);
 	});
 
-	// Update position when draft event changes (user dragged it)
-	// Also track the update time to prevent closing overlay after drag/resize
+	// Update position when draft event changes (user dragged it) - only in create mode
 	$effect(() => {
-		const draft = eventsStore.draftEvent;
-		if (draft && positionInitialized) {
-			// Track when draft was updated (for click ignore logic)
-			lastDraftUpdateTime = Date.now();
+		if (!isEditMode) {
+			const draft = eventsStore.draftEvent;
+			if (draft && positionInitialized) {
+				// Track when draft was updated (for click ignore logic)
+				lastDraftUpdateTime = Date.now();
 
-			// Use requestAnimationFrame to wait for DOM update
-			requestAnimationFrame(() => {
-				updatePosition();
-			});
+				// Use requestAnimationFrame to wait for DOM update
+				requestAnimationFrame(() => {
+					updatePosition();
+				});
+			}
 		}
 	});
 
@@ -135,11 +151,15 @@
 		if (titleInputRef) {
 			tick().then(() => {
 				titleInputRef?.focus();
+				// Select all text in edit mode for easy replacement
+				if (isEditMode) {
+					titleInputRef?.select();
+				}
 			});
 		}
 	});
 
-	// Form state - initialize from draft event
+	// Form state - initialize from event (edit mode) or draft event (create mode)
 	let title = $state('');
 	let calendarId = $state('');
 	let description = $state('');
@@ -155,82 +175,132 @@
 	let locationCountry = $state('');
 	let submitting = $state(false);
 
-	// Date/time fields - derive from draft event
+	// Editable date/time strings (for form inputs)
+	let startDateStr = $state('');
+	let startTimeStr = $state('');
+	let endDateStr = $state('');
+	let endTimeStr = $state('');
+
+	// Initialize form state from event in edit mode
+	$effect(() => {
+		if (isEditMode && event) {
+			title = event.title || '';
+			calendarId = event.calendarId || '';
+			description = event.description || '';
+			location = event.location || '';
+			isAllDay = event.isAllDay || false;
+			allDayDisplayMode =
+				(event.metadata?.allDayDisplayMode as 'default' | 'header' | 'block') || 'default';
+
+			// Initialize location details
+			const loc = event.metadata?.locationDetails;
+			if (loc) {
+				showLocationDetails = true;
+				locationStreet = loc.street || '';
+				locationPostalCode = loc.postalCode || '';
+				locationCity = loc.city || '';
+				locationCountry = loc.country || '';
+			}
+
+			// Initialize time fields
+			const eventStart =
+				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+			const eventEnd = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+			startDateStr = format(eventStart, 'yyyy-MM-dd');
+			startTimeStr = format(eventStart, 'HH:mm');
+			endDateStr = format(eventEnd, 'yyyy-MM-dd');
+			endTimeStr = format(eventEnd, 'HH:mm');
+		}
+	});
+
+	// Date/time fields - derive from draft event (create mode) or event (edit mode)
 	let draftStart = $derived(() => {
+		if (isEditMode && event) {
+			return typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+		}
 		const draft = eventsStore.draftEvent;
 		if (draft) {
 			return typeof draft.startTime === 'string' ? parseISO(draft.startTime) : draft.startTime;
 		}
-		return startTime;
+		return startTime || new Date();
 	});
 
 	let draftEnd = $derived(() => {
+		if (isEditMode && event) {
+			return typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		}
 		const draft = eventsStore.draftEvent;
 		if (draft) {
 			return typeof draft.endTime === 'string' ? parseISO(draft.endTime) : draft.endTime;
 		}
-		return addMinutes(startTime, settingsStore.defaultEventDuration);
+		return addMinutes(startTime || new Date(), settingsStore.defaultEventDuration);
 	});
 
-	// Display date/time - derived from draft event
+	// Display date/time - derived from draft event or event
 	let displayStartDate = $derived(format(draftStart(), 'yyyy-MM-dd'));
 	let displayStartTime = $derived(format(draftStart(), 'HH:mm'));
 	let displayEndDate = $derived(format(draftEnd(), 'yyyy-MM-dd'));
 	let displayEndTime = $derived(format(draftEnd(), 'HH:mm'));
 
-	// Editable date/time strings (for form inputs)
-	let startDateStr = $state(format(startTime, 'yyyy-MM-dd'));
-	let startTimeStr = $state(format(startTime, 'HH:mm'));
-	let endDateStr = $state('');
-	let endTimeStr = $state('');
-
-	// Sync form fields from draft event when it changes (e.g., user drags it)
+	// Sync form fields from draft event when it changes (e.g., user drags it) - only in create mode
 	$effect(() => {
-		startDateStr = displayStartDate;
-		startTimeStr = displayStartTime;
-		endDateStr = displayEndDate;
-		endTimeStr = displayEndTime;
+		if (!isEditMode) {
+			startDateStr = displayStartDate;
+			startTimeStr = displayStartTime;
+			endDateStr = displayEndDate;
+			endTimeStr = displayEndTime;
+		}
 	});
 
-	// Set default calendar
+	// Set default calendar - only in create mode
 	$effect(() => {
-		if (!calendarId && calendarsStore.defaultCalendar?.id) {
+		if (!isEditMode && !calendarId && calendarsStore.defaultCalendar?.id) {
 			calendarId = calendarsStore.defaultCalendar.id;
 			// Update draft event with calendar
 			eventsStore.updateDraftEvent({ calendarId });
 		}
 	});
 
-	// Update draft event when title changes
+	// Update draft event when title changes - only in create mode
 	function handleTitleChange(e: Event) {
 		const target = e.target as HTMLInputElement;
 		title = target.value;
-		eventsStore.updateDraftEvent({ title: target.value });
+		if (!isEditMode) {
+			eventsStore.updateDraftEvent({ title: target.value });
+		}
 	}
 
 	// Update draft event when time fields change
 	function handleStartDateChange(e: Event) {
 		const target = e.target as HTMLInputElement;
 		startDateStr = target.value;
-		updateDraftTimes();
+		if (!isEditMode) {
+			updateDraftTimes();
+		}
 	}
 
 	function handleStartTimeChange(e: Event) {
 		const target = e.target as HTMLInputElement;
 		startTimeStr = target.value;
-		updateDraftTimes();
+		if (!isEditMode) {
+			updateDraftTimes();
+		}
 	}
 
 	function handleEndDateChange(e: Event) {
 		const target = e.target as HTMLInputElement;
 		endDateStr = target.value;
-		updateDraftTimes();
+		if (!isEditMode) {
+			updateDraftTimes();
+		}
 	}
 
 	function handleEndTimeChange(e: Event) {
 		const target = e.target as HTMLInputElement;
 		endTimeStr = target.value;
-		updateDraftTimes();
+		if (!isEditMode) {
+			updateDraftTimes();
+		}
 	}
 
 	function updateDraftTimes() {
@@ -252,13 +322,17 @@
 	function handleCalendarChange(e: Event) {
 		const target = e.target as HTMLSelectElement;
 		calendarId = target.value;
-		eventsStore.updateDraftEvent({ calendarId: target.value });
+		if (!isEditMode) {
+			eventsStore.updateDraftEvent({ calendarId: target.value });
+		}
 	}
 
 	// Update draft when all-day changes
 	function handleAllDayToggle() {
 		isAllDay = !isAllDay;
-		updateDraftTimes();
+		if (!isEditMode) {
+			updateDraftTimes();
+		}
 	}
 
 	// Overlay style
@@ -292,18 +366,32 @@
 						}
 					: undefined;
 
-			// Build metadata
-			let metadata: Record<string, unknown> | undefined = undefined;
+			// Build metadata - preserve existing metadata in edit mode
+			let metadata: Record<string, unknown> | undefined = isEditMode
+				? { ...(event?.metadata || {}) }
+				: undefined;
 
 			if (isAllDay && allDayDisplayMode !== 'default') {
-				metadata = { allDayDisplayMode: allDayDisplayMode as 'header' | 'block' };
+				metadata = {
+					...(metadata || {}),
+					allDayDisplayMode: allDayDisplayMode as 'header' | 'block',
+				};
+			} else if (metadata) {
+				delete metadata.allDayDisplayMode;
 			}
 
 			if (locationDetails) {
 				metadata = { ...(metadata || {}), locationDetails };
+			} else if (metadata) {
+				delete metadata.locationDetails;
 			}
 
-			await eventsStore.createEvent({
+			// Clean up empty metadata
+			if (metadata && Object.keys(metadata).length === 0) {
+				metadata = undefined;
+			}
+
+			const eventData = {
 				title: title.trim(),
 				calendarId,
 				startTime: startDateTime.toISOString(),
@@ -312,12 +400,56 @@
 				description: description.trim() || undefined,
 				location: location.trim() || undefined,
 				metadata,
-			});
+			};
 
-			onCreated?.();
+			if (isEditMode && event) {
+				// Update existing event
+				const result = await eventsStore.updateEvent(event.id, eventData);
+				if (result.error) {
+					toast.error(`Fehler beim Speichern: ${result.error.message}`);
+					return;
+				}
+				toast.success('Termin aktualisiert');
+				onUpdated?.();
+			} else {
+				// Create new event
+				await eventsStore.createEvent(eventData);
+				// Refresh calendars if none existed (in case default was created)
+				if (calendarsStore.calendars.length === 0) {
+					await calendarsStore.fetchCalendars();
+				}
+				onCreated?.();
+			}
+
 			onClose();
 		} catch (error) {
-			console.error('Failed to create event:', error);
+			console.error('Failed to save event:', error);
+			toast.error('Fehler beim Speichern');
+		} finally {
+			submitting = false;
+		}
+	}
+
+	async function handleDelete() {
+		if (!event) return;
+
+		if (!confirm('Möchten Sie diesen Termin wirklich löschen?')) {
+			return;
+		}
+
+		submitting = true;
+		try {
+			const result = await eventsStore.deleteEvent(event.id);
+			if (result.error) {
+				toast.error(`Fehler beim Löschen: ${result.error.message}`);
+				return;
+			}
+			toast.success('Termin gelöscht');
+			onDeleted?.();
+			onClose();
+		} catch (error) {
+			console.error('Failed to delete event:', error);
+			toast.error('Fehler beim Löschen');
 		} finally {
 			submitting = false;
 		}
@@ -338,22 +470,42 @@
 	style={overlayStyle}
 	role="dialog"
 	aria-modal="true"
-	aria-label="Termin erstellen"
+	aria-label={isEditMode ? 'Termin bearbeiten' : 'Termin erstellen'}
 >
 	<form onsubmit={handleSubmit}>
 		<!-- Header -->
 		<div class="overlay-header">
-			<span class="header-title">Neuer Termin</span>
-			<button type="button" class="close-btn" onclick={onClose} aria-label="Schließen">
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M6 18L18 6M6 6l12 12"
-					/>
-				</svg>
-			</button>
+			<span class="header-title">{isEditMode ? 'Termin bearbeiten' : 'Neuer Termin'}</span>
+			<div class="header-actions">
+				{#if isEditMode}
+					<button
+						type="button"
+						class="delete-btn"
+						onclick={handleDelete}
+						disabled={submitting}
+						aria-label="Löschen"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+							/>
+						</svg>
+					</button>
+				{/if}
+				<button type="button" class="close-btn" onclick={onClose} aria-label="Schließen">
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				</button>
+			</div>
 		</div>
 
 		<!-- Scrollable content -->
@@ -399,17 +551,22 @@
 					></div>
 				</div>
 				<div class="row-content">
-					<label class="field-label">Kalender</label>
-					<select class="field-select" value={calendarId} onchange={handleCalendarChange}>
-						{#each calendarsStore.calendars as cal}
-							<option value={cal.id}>{cal.name}</option>
-						{/each}
-					</select>
+					<span class="field-label">Kalender</span>
+					{#if calendarsStore.calendars.length > 0}
+						<select class="field-select" value={calendarId} onchange={handleCalendarChange}>
+							{#each calendarsStore.calendars as cal}
+								<option value={cal.id}>{cal.name}</option>
+							{/each}
+						</select>
+					{:else}
+						<span class="field-placeholder">Standardkalender wird erstellt</span>
+					{/if}
 				</div>
 			</div>
 
 			<!-- All day toggle -->
-			<div class="form-row clickable" onclick={handleAllDayToggle}>
+			<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions a11y_no_noninteractive_element_to_interactive_role -->
+			<div class="form-row clickable" onclick={handleAllDayToggle} role="button" tabindex="0">
 				<div class="row-icon">
 					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -437,7 +594,7 @@
 				<div class="form-row sub-row">
 					<div class="row-icon"></div>
 					<div class="row-content">
-						<label class="field-label">Anzeigeart</label>
+						<span class="field-label">Anzeigeart</span>
 						<select class="field-select" bind:value={allDayDisplayMode}>
 							<option value="default">Standard (aus Einstellungen)</option>
 							<option value="header">In Kopfzeile</option>
@@ -461,7 +618,7 @@
 				</div>
 				<div class="row-content datetime-row">
 					<div class="datetime-field">
-						<label class="field-label">Beginn</label>
+						<span class="field-label">Beginn</span>
 						<input
 							type="date"
 							class="field-input"
@@ -471,7 +628,7 @@
 					</div>
 					{#if !isAllDay}
 						<div class="datetime-field time-field">
-							<label class="field-label">Uhrzeit</label>
+							<span class="field-label">Uhrzeit</span>
 							<input
 								type="time"
 								class="field-input"
@@ -497,7 +654,7 @@
 				</div>
 				<div class="row-content datetime-row">
 					<div class="datetime-field">
-						<label class="field-label">Ende</label>
+						<span class="field-label">Ende</span>
 						<input
 							type="date"
 							class="field-input"
@@ -507,7 +664,7 @@
 					</div>
 					{#if !isAllDay}
 						<div class="datetime-field time-field">
-							<label class="field-label">Uhrzeit</label>
+							<span class="field-label">Uhrzeit</span>
 							<input
 								type="time"
 								class="field-input"
@@ -575,7 +732,7 @@
 					<div class="row-icon"></div>
 					<div class="row-content address-details-form">
 						<div class="address-field">
-							<label class="field-label">Straße</label>
+							<span class="field-label">Straße</span>
 							<input
 								type="text"
 								class="field-input"
@@ -585,7 +742,7 @@
 						</div>
 						<div class="address-row">
 							<div class="address-field postal">
-								<label class="field-label">PLZ</label>
+								<span class="field-label">PLZ</span>
 								<input
 									type="text"
 									class="field-input"
@@ -594,7 +751,7 @@
 								/>
 							</div>
 							<div class="address-field city">
-								<label class="field-label">Stadt</label>
+								<span class="field-label">Stadt</span>
 								<input
 									type="text"
 									class="field-input"
@@ -604,7 +761,7 @@
 							</div>
 						</div>
 						<div class="address-field">
-							<label class="field-label">Land</label>
+							<span class="field-label">Land</span>
 							<input
 								type="text"
 								class="field-input"
@@ -664,14 +821,14 @@
 		display: flex;
 		flex-direction: column;
 		animation: slideIn 150ms ease-out;
-		overflow: hidden; /* Prevent any content from overflowing */
+		overflow: hidden;
 	}
 
 	.quick-event-overlay form {
 		display: flex;
 		flex-direction: column;
 		flex: 1;
-		min-height: 0; /* Allow form to shrink below content size */
+		min-height: 0;
 		height: 100%;
 	}
 
@@ -701,7 +858,14 @@
 		color: hsl(var(--color-foreground));
 	}
 
-	.close-btn {
+	.header-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.close-btn,
+	.delete-btn {
 		padding: 0.375rem;
 		border: none;
 		background: transparent;
@@ -716,11 +880,21 @@
 		color: hsl(var(--color-foreground));
 	}
 
+	.delete-btn:hover {
+		background: hsl(var(--color-error) / 0.1);
+		color: hsl(var(--color-error));
+	}
+
+	.delete-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
 	.overlay-content {
 		flex: 1;
-		min-height: 0; /* Important for flex scroll */
+		min-height: 0;
 		overflow-y: auto;
-		overscroll-behavior: contain; /* Prevent scroll chaining to background */
+		overscroll-behavior: contain;
 		padding: 0.75rem 0;
 	}
 
@@ -839,6 +1013,14 @@
 	.field-input:focus {
 		outline: none;
 		border-color: hsl(var(--color-primary));
+	}
+
+	.field-placeholder {
+		display: block;
+		padding: 0.5rem 0.625rem;
+		font-size: 0.875rem;
+		color: hsl(var(--color-muted-foreground));
+		font-style: italic;
 	}
 
 	.field-input.full {

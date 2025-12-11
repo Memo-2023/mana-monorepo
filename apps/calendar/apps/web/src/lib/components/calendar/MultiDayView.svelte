@@ -25,6 +25,8 @@
 	const HOUR_HEIGHT = 60; // px - should match CSS --hour-height
 	const MINUTES_PER_SLOT = 15; // Snap to 15-minute intervals
 
+	import type { CalendarEvent } from '@calendar/shared';
+
 	// Props
 	interface Props {
 		dayCount: 5 | 10 | 14;
@@ -97,7 +99,7 @@
 
 	// ========== Drag & Drop State ==========
 	let isDragging = $state(false);
-	let draggedEvent = $state<any>(null);
+	let draggedEvent = $state<CalendarEvent | null>(null);
 	let dragOffsetMinutes = $state(0);
 	let dragTargetDay = $state<Date | null>(null);
 	let dragPreviewTop = $state(0);
@@ -105,7 +107,7 @@
 
 	// ========== Resize State ==========
 	let isResizing = $state(false);
-	let resizeEvent = $state<any>(null);
+	let resizeEvent = $state<CalendarEvent | null>(null);
 	let resizeEdge = $state<'top' | 'bottom'>('bottom');
 	let resizeOriginalStart = $state<Date | null>(null);
 	let resizeOriginalEnd = $state<Date | null>(null);
@@ -141,8 +143,11 @@
 	}
 
 	// Get display mode for an event (per-event override takes precedence over global setting)
-	function getEventDisplayMode(event: any): 'header' | 'block' {
-		return event.metadata?.allDayDisplayMode || settingsStore.allDayDisplayMode;
+	function getEventDisplayMode(event: CalendarEvent): 'header' | 'block' {
+		return (
+			(event.metadata as { allDayDisplayMode?: 'header' | 'block' } | null)?.allDayDisplayMode ||
+			settingsStore.allDayDisplayMode
+		);
 	}
 
 	// Split all-day events by display mode
@@ -159,7 +164,7 @@
 		days.some((day) => getHeaderAllDayEventsForDay(day).length > 0)
 	);
 
-	function getEventStyle(event: any) {
+	function getEventStyle(event: CalendarEvent) {
 		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
 		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
 
@@ -208,7 +213,7 @@
 		return settingsStore.formatTime(d);
 	}
 
-	function handleEventClick(event: any, e: MouseEvent) {
+	function handleEventClick(event: CalendarEvent, e: MouseEvent) {
 		// Don't navigate if we just finished dragging or resizing, or if we moved
 		if (isDragging || isResizing || hasMoved) {
 			e.preventDefault();
@@ -218,7 +223,11 @@
 			}, 100);
 			return;
 		}
-		goto(`/?event=${event.id}`);
+		if (onEventClick) {
+			onEventClick(event);
+		} else {
+			goto(`/?event=${event.id}`);
+		}
 	}
 
 	function handleSlotClick(day: Date, hour: number, e: MouseEvent) {
@@ -265,7 +274,7 @@
 		return Math.round(totalMinutes / MINUTES_PER_SLOT) * MINUTES_PER_SLOT;
 	}
 
-	function startDrag(event: any, e: PointerEvent) {
+	function startDrag(event: CalendarEvent, e: PointerEvent) {
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -368,7 +377,7 @@
 
 	// ========== Resize Functions ==========
 
-	function startResize(event: any, edge: 'top' | 'bottom', e: PointerEvent) {
+	function startResize(event: CalendarEvent, edge: 'top' | 'bottom', e: PointerEvent) {
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -872,6 +881,7 @@
 								onpointerdown={(e) => startResize(event, 'top', e)}
 								role="slider"
 								aria-label="Startzeit ändern"
+								aria-valuenow={0}
 								tabindex="-1"
 							></div>
 
@@ -888,6 +898,7 @@
 								onpointerdown={(e) => startResize(event, 'bottom', e)}
 								role="slider"
 								aria-label="Endzeit ändern"
+								aria-valuenow={0}
 								tabindex="-1"
 							></div>
 						</div>

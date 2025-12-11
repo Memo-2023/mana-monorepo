@@ -26,8 +26,6 @@
 	primaryColor="#8b5cf6"
 	onSignUp={handleSignUp}
 	{goto}
-	enableGoogle={false}
-	enableApple={false}
 	successRedirect="/"
 	loginPath="/login"
 	lightBackground="#f3e8ff"

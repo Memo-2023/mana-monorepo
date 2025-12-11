@@ -164,10 +164,7 @@
 		border-bottom: none;
 	}
 
-	/* Body */
-	.card__body {
-		/* Padding applied via variant classes above */
-	}
+	/* Body - padding applied via variant classes above */
 
 	/* Footer */
 	.card__footer {

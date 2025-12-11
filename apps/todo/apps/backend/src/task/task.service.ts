@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { eq, and, or, gte, lte, ilike, asc, desc, isNull, SQL, sql } from 'drizzle-orm';
+import { eq, and, or, gte, lte, ilike, asc, desc, isNull, SQL, sql, inArray } from 'drizzle-orm';
 import { RRule, RRuleSet, rrulestr } from 'rrule';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { type Database } from '../db/connection';
@@ -125,6 +125,11 @@ export class TaskService {
 			dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
 			dueTime: dto.dueTime,
 			startDate: dto.startDate ? new Date(dto.startDate) : null,
+			// Time-Blocking fields
+			scheduledDate: dto.scheduledDate ? new Date(dto.scheduledDate) : null,
+			scheduledStartTime: dto.scheduledStartTime,
+			scheduledEndTime: dto.scheduledEndTime,
+			estimatedDuration: dto.estimatedDuration,
 			priority: dto.priority ?? 'medium',
 			recurrenceRule: dto.recurrenceRule,
 			recurrenceEndDate: dto.recurrenceEndDate ? new Date(dto.recurrenceEndDate) : null,
@@ -160,6 +165,12 @@ export class TaskService {
 			startDate: dto.startDate
 				? new Date(dto.startDate)
 				: dto.startDate === null
+					? null
+					: undefined,
+			// Time-Blocking fields
+			scheduledDate: dto.scheduledDate
+				? new Date(dto.scheduledDate)
+				: dto.scheduledDate === null
 					? null
 					: undefined,
 			recurrenceEndDate: dto.recurrenceEndDate
@@ -477,10 +488,13 @@ export class TaskService {
 	}
 
 	async getUpcomingTasks(userId: string, days: number = 7): Promise<TaskWithLabels[]> {
+		// Ensure days is a valid number
+		const daysNum = typeof days === 'number' && !isNaN(days) ? days : 7;
+
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
-		const endDate = new Date(today);
-		endDate.setDate(endDate.getDate() + days);
+		const endDate = new Date(today.getTime());
+		endDate.setDate(endDate.getDate() + daysNum);
 
 		const result = await this.db.query.tasks.findMany({
 			where: and(
@@ -568,10 +582,11 @@ export class TaskService {
 
 		const taskIds = taskList.map((t) => t.id);
 
-		// Single query to get all task-label relationships
-		const allTaskLabels = await this.db.query.taskLabels.findMany({
-			where: or(...taskIds.map((id) => eq(taskLabels.taskId, id))),
-		});
+		// Single query to get all task-label relationships using inArray
+		const allTaskLabels = await this.db
+			.select()
+			.from(taskLabels)
+			.where(inArray(taskLabels.taskId, taskIds));
 
 		if (allTaskLabels.length === 0) {
 			// No labels for any task - return tasks with empty labels array
@@ -581,10 +596,8 @@ export class TaskService {
 		// Get unique label IDs
 		const uniqueLabelIds = [...new Set(allTaskLabels.map((tl) => tl.labelId))];
 
-		// Single query to get all labels
-		const allLabels = await this.db.query.labels.findMany({
-			where: or(...uniqueLabelIds.map((id) => eq(labels.id, id))),
-		});
+		// Single query to get all labels using inArray
+		const allLabels = await this.db.select().from(labels).where(inArray(labels.id, uniqueLabelIds));
 
 		// Create a map of labelId -> label for fast lookup
 		const labelMap = new Map(allLabels.map((l) => [l.id, l]));

@@ -61,7 +61,7 @@ export const todosStore = {
 	// ========== Derived Getters ==========
 
 	/**
-	 * Get todos for a specific day
+	 * Get todos for a specific day (by dueDate)
 	 */
 	getTodosForDay(date: Date): Task[] {
 		const currentTodos = todos ?? [];
@@ -348,7 +348,11 @@ export const todosStore = {
 
 		if (result.error) {
 			error = result.error.message;
-			serviceAvailable = false;
+			// Only set serviceAvailable to false if we have no todos yet
+			// (if fetchTodayTodos succeeded, we should still show the service as available)
+			if (todos.length === 0) {
+				serviceAvailable = false;
+			}
 		} else {
 			// Merge with existing todos (avoid duplicates)
 			const newTodos = result.data || [];
@@ -415,13 +419,20 @@ export const todosStore = {
 	},
 
 	/**
-	 * Delete a todo
+	 * Delete a todo (optimistic update)
 	 */
 	async deleteTodo(id: string) {
+		// Optimistic: remove todo immediately
+		const todoToDelete = todos.find((t) => t.id === id);
+		todos = todos.filter((t) => t.id !== id);
+
 		const result = await api.deleteTask(id);
 
-		if (!result.error) {
-			todos = todos.filter((t) => t.id !== id);
+		if (result.error) {
+			// Rollback: restore the todo on error
+			if (todoToDelete) {
+				todos = [...todos, todoToDelete];
+			}
 		}
 
 		return result;

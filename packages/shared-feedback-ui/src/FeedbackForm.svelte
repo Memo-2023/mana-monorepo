@@ -110,8 +110,6 @@
 		color: hsl(var(--color-foreground, 0 0% 17%));
 	}
 
-	.feedback-form__input,
-	.feedback-form__select,
 	.feedback-form__textarea {
 		padding: 0.75rem;
 		border: 1px solid hsl(var(--color-border, 0 0% 90%));
@@ -126,8 +124,6 @@
 		color: hsl(var(--color-muted-foreground, 0 0% 40%));
 	}
 
-	.feedback-form__input:focus,
-	.feedback-form__select:focus,
 	.feedback-form__textarea:focus {
 		outline: none;
 		border-color: hsl(var(--color-primary, 47 95% 58%));
