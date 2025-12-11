@@ -85,11 +85,20 @@ export class EventService {
 	}
 
 	async create(userId: string, dto: CreateEventDto): Promise<Event> {
-		// Verify user owns the calendar
-		const calendar = await this.calendarService.findByIdOrThrow(dto.calendarId, userId);
+		let calendarId = dto.calendarId;
+		let calendar;
+
+		// If no calendarId provided, get or create default calendar
+		if (!calendarId) {
+			calendar = await this.calendarService.getOrCreateDefaultCalendar(userId);
+			calendarId = calendar.id;
+		} else {
+			// Verify user owns the specified calendar
+			calendar = await this.calendarService.findByIdOrThrow(calendarId, userId);
+		}
 
 		const newEvent: NewEvent = {
-			calendarId: dto.calendarId,
+			calendarId,
 			userId,
 			title: dto.title,
 			description: dto.description,

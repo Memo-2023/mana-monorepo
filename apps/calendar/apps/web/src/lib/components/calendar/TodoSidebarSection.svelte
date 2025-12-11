@@ -5,7 +5,6 @@
 	import TodoDetailModal from '$lib/components/todo/TodoDetailModal.svelte';
 	import QuickAddTodo from '$lib/components/todo/QuickAddTodo.svelte';
 	import { ChevronDown, ChevronRight, Plus, CheckSquare, AlertTriangle } from 'lucide-svelte';
-	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -18,8 +17,8 @@
 	let showQuickAdd = $state(false);
 	let selectedTask = $state<Task | null>(null);
 
-	// Derived: combined overdue + today todos
-	const displayTodos = $derived(todosStore.getSidebarTodos(maxItems));
+	// Derived: all active todos (overdue + today + upcoming)
+	const displayTodos = $derived(todosStore.getSidebarTodos());
 	const overdueCount = $derived(todosStore.overdueTodos.length);
 	const totalActiveCount = $derived(todosStore.activeTodosCount);
 
@@ -27,6 +26,8 @@
 		// Fetch todos on mount
 		await todosStore.fetchTodayTodos();
 		await todosStore.fetchUpcomingTodos();
+		// Also fetch scheduled todos (including completed) for calendar display
+		await todosStore.fetchScheduledTodos();
 	});
 
 	function toggleExpanded() {
@@ -53,16 +54,12 @@
 	function handleQuickAddCancel() {
 		showQuickAdd = false;
 	}
-
-	function goToAllTasks() {
-		goto('/tasks');
-	}
 </script>
 
 <div class="todo-sidebar-section">
 	<!-- Header -->
-	<button type="button" class="section-header" onclick={toggleExpanded}>
-		<div class="header-left">
+	<div class="section-header">
+		<button type="button" class="header-toggle" onclick={toggleExpanded}>
 			{#if isExpanded}
 				<ChevronDown size={16} />
 			{:else}
@@ -78,7 +75,7 @@
 					<AlertTriangle size={12} />
 				</span>
 			{/if}
-		</div>
+		</button>
 		<button
 			type="button"
 			class="add-button"
@@ -87,7 +84,7 @@
 		>
 			<Plus size={16} />
 		</button>
-	</button>
+	</div>
 
 	<!-- Content -->
 	{#if isExpanded}
@@ -114,16 +111,11 @@
 							{task}
 							variant="compact"
 							showProject={false}
+							draggable={!task.isCompleted}
 							onclick={() => handleTaskClick(task)}
 						/>
 					{/each}
 				</div>
-
-				{#if totalActiveCount > maxItems}
-					<button type="button" class="show-all-button" onclick={goToAllTasks}>
-						Alle {totalActiveCount} anzeigen
-					</button>
-				{/if}
 			{/if}
 
 			<!-- Quick Add -->
@@ -160,29 +152,31 @@
 		align-items: center;
 		justify-content: space-between;
 		width: 100%;
-		padding: 0.75rem 1rem;
+		padding: 0 0.5rem 0 0;
+	}
+
+	.header-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex: 1;
+		padding: 0.75rem 0.5rem 0.75rem 1rem;
 		border: none;
 		background: transparent;
+		color: hsl(var(--color-foreground));
 		cursor: pointer;
 		transition: background 150ms ease;
 	}
 
-	.section-header:hover {
+	.header-toggle:hover {
 		background: hsl(var(--color-muted) / 0.3);
 	}
 
-	.header-left {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		color: hsl(var(--color-foreground));
-	}
-
-	.header-left :global(svg) {
+	.header-toggle :global(svg) {
 		color: hsl(var(--color-muted-foreground));
 	}
 
-	.header-left :global(.section-icon) {
+	.header-toggle :global(.section-icon) {
 		color: hsl(var(--color-primary));
 	}
 
@@ -234,6 +228,8 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
+		max-height: 300px;
+		overflow-y: auto;
 	}
 
 	.service-unavailable,
@@ -265,24 +261,6 @@
 		to {
 			transform: rotate(360deg);
 		}
-	}
-
-	.show-all-button {
-		width: 100%;
-		padding: 0.5rem;
-		margin-top: 0.5rem;
-		border: none;
-		background: transparent;
-		color: hsl(var(--color-primary));
-		font-size: 0.8125rem;
-		font-weight: 500;
-		cursor: pointer;
-		border-radius: var(--radius-md);
-		transition: background 150ms ease;
-	}
-
-	.show-all-button:hover {
-		background: hsl(var(--color-primary) / 0.1);
 	}
 
 	.quick-add-wrapper {

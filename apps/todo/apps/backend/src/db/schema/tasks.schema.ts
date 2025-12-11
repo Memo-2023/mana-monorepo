@@ -57,6 +57,12 @@ export const tasks = pgTable(
 		dueTime: varchar('due_time', { length: 5 }),
 		startDate: timestamp('start_date', { withTimezone: true }),
 
+		// Time-Blocking (for calendar integration)
+		scheduledDate: timestamp('scheduled_date', { withTimezone: true }),
+		scheduledStartTime: varchar('scheduled_start_time', { length: 5 }), // HH:mm
+		scheduledEndTime: varchar('scheduled_end_time', { length: 5 }), // HH:mm
+		estimatedDuration: integer('estimated_duration'), // in minutes
+
 		// Priority & Status
 		priority: varchar('priority', { length: 10 }).default('medium').$type<TaskPriority>(),
 		status: varchar('status', { length: 20 }).default('pending').$type<TaskStatus>(),
@@ -90,6 +96,7 @@ export const tasks = pgTable(
 		projectIdx: index('tasks_project_idx').on(table.projectId),
 		userIdx: index('tasks_user_idx').on(table.userId),
 		dueDateIdx: index('tasks_due_date_idx').on(table.dueDate),
+		scheduledDateIdx: index('tasks_scheduled_date_idx').on(table.scheduledDate),
 		statusIdx: index('tasks_status_idx').on(table.isCompleted, table.status),
 		parentIdx: index('tasks_parent_idx').on(table.parentTaskId),
 		orderIdx: index('tasks_order_idx').on(table.projectId, table.order),

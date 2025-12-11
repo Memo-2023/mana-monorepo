@@ -32,7 +32,7 @@ export interface Tag {
 export interface TagData {
 	name?: string;
 	text?: string;
-	color?: string;
+	color?: string | null;
 	style?: { color?: string };
 }
 

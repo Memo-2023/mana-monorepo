@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID } from 'svelte-dnd-action';
-	import type { KanbanColumn, Task, UpdateTaskInput } from '@todo/shared';
+	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID, type DndEvent } from 'svelte-dnd-action';
+	import type { KanbanColumn, Task } from '@todo/shared';
 	import KanbanTaskCard from './KanbanTaskCard.svelte';
 	import KanbanColumnHeader from './KanbanColumnHeader.svelte';
 	import QuickAddTaskInline from './QuickAddTaskInline.svelte';
@@ -36,13 +36,11 @@
 
 	const flipDurationMs = 200;
 
-	function handleDndConsider(e: CustomEvent<{ items: Task[] }>) {
+	function handleDndConsider(e: CustomEvent<DndEvent<Task>>) {
 		localTasks = e.detail.items;
 	}
 
-	function handleDndFinalize(
-		e: CustomEvent<{ items: Task[]; info: { id: string; source: { items: Task[] } } }>
-	) {
+	function handleDndFinalize(e: CustomEvent<DndEvent<Task>>) {
 		const newItems = e.detail.items.filter((t) => t.id !== SHADOW_PLACEHOLDER_ITEM_ID);
 		const movedTaskId = e.detail.info.id;
 
@@ -71,20 +69,21 @@
 		}
 	}
 
-	async function handleSaveTask(task: Task, data: UpdateTaskInput) {
-		// Transform data to match updateTask API (convert null to undefined)
-		const updateData: UpdateTaskInput = {};
+	async function handleSaveTask(task: Task, data: Partial<Task>) {
+		// Transform Partial<Task> to updateTask format
+		const updateData: Record<string, unknown> = {};
 		if (data.title !== undefined) updateData.title = data.title;
-		if (data.description !== undefined) updateData.description = data.description ?? undefined;
+		if (data.description !== undefined) updateData.description = data.description;
 		if (data.projectId !== undefined) updateData.projectId = data.projectId;
-		if (data.dueDate !== undefined) updateData.dueDate = data.dueDate ?? undefined;
+		if (data.dueDate !== undefined) {
+			updateData.dueDate = data.dueDate instanceof Date ? data.dueDate.toISOString() : data.dueDate;
+		}
 		if (data.priority !== undefined) updateData.priority = data.priority;
 		if (data.status !== undefined) updateData.status = data.status;
-		if (data.subtasks !== undefined) updateData.subtasks = data.subtasks ?? undefined;
-		if (data.recurrenceRule !== undefined)
-			updateData.recurrenceRule = data.recurrenceRule ?? undefined;
+		if (data.subtasks !== undefined) updateData.subtasks = data.subtasks;
+		if (data.recurrenceRule !== undefined) updateData.recurrenceRule = data.recurrenceRule;
 		if (data.metadata !== undefined) updateData.metadata = data.metadata;
-		if (data.labelIds !== undefined) updateData.labelIds = data.labelIds;
+		if (data.labels !== undefined) updateData.labelIds = data.labels?.map((l) => l.id);
 
 		await tasksStore.updateTask(task.id, updateData);
 	}

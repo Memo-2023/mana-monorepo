@@ -104,12 +104,6 @@
 		const tags = eventTagsStore.tags.map((t) => ({ id: t.id, name: t.name }));
 		const resolved = resolveEventIds(parsed, calendars, tags);
 
-		// Ensure we have a calendar
-		if (!resolved.calendarId) {
-			console.error('No calendar available');
-			return;
-		}
-
 		// Ensure we have start and end times
 		if (!resolved.startTime) {
 			// Default to now + 1 hour
@@ -119,8 +113,10 @@
 			resolved.endTime = end.toISOString();
 		}
 
+		// Create event - calendarId is now optional, backend will use/create default if not provided
 		await eventsStore.createEvent({
-			calendarId: resolved.calendarId,
+			// Only include calendarId if resolved (from command or default calendar)
+			...(resolved.calendarId ? { calendarId: resolved.calendarId } : {}),
 			title: resolved.title,
 			startTime: resolved.startTime,
 			endTime: resolved.endTime || resolved.startTime,
@@ -128,6 +124,11 @@
 			location: resolved.location,
 			tagIds: resolved.tagIds,
 		});
+
+		// Refresh calendars if none existed (in case default was created)
+		if (calendarsStore.calendars.length === 0) {
+			await calendarsStore.fetchCalendars();
+		}
 	}
 
 	let isSidebarMode = $state(false);

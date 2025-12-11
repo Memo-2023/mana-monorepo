@@ -16,6 +16,9 @@ export * from './ui';
 // Common utility types
 export * from './common';
 
+// Contact types for cross-app integration
+export * from './contact';
+
 // API types
 export interface User {
 	id: string;

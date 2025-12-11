@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { _ } from 'svelte-i18n';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
@@ -18,24 +19,24 @@
 	import CalendarSidebar from '$lib/components/calendar/CalendarSidebar.svelte';
 	import TodoSidebarSection from '$lib/components/calendar/TodoSidebarSection.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
-	import EventDetailModal from '$lib/components/event/EventDetailModal.svelte';
 	import { CalendarViewSkeleton } from '$lib/components/skeletons';
-	import { format, addMinutes } from 'date-fns';
-	import { de } from 'date-fns/locale';
+	import type { CalendarEvent } from '@calendar/shared';
+	import { addMinutes } from 'date-fns';
 
 	let initialized = $state(false);
 
-	// Quick event overlay state
-	let showQuickCreate = $state(false);
+	// Quick event overlay state - for both create and edit
+	let showQuickOverlay = $state(false);
 	let quickCreateDate = $state<Date>(new Date());
+	let editingEvent = $state<CalendarEvent | null>(null);
 
-	// Event modal state (local state for reactivity)
-	let selectedEventId = $state<string | null>(null);
-
-	// Derive modal open state from URL
-	let modalEventId = $derived($page.url.searchParams.get('event'));
+	// Generate a unique key for the overlay to force remount
+	let overlayKey = $state(0);
 
 	function handleQuickCreate(date: Date, position: { x: number; y: number }) {
+		// Close any existing overlay first
+		editingEvent = null;
+
 		quickCreateDate = date;
 
 		// Create draft event immediately so it appears in the grid
@@ -50,17 +51,36 @@
 			isAllDay: false,
 		});
 
-		showQuickCreate = true;
+		overlayKey++;
+		showQuickOverlay = true;
 	}
 
-	function handleQuickCreateClose() {
-		showQuickCreate = false;
+	function handleEventClick(event: CalendarEvent) {
+		// Close any existing overlay/draft first
+		eventsStore.clearDraftEvent();
+
+		editingEvent = event;
+		overlayKey++;
+		showQuickOverlay = true;
+	}
+
+	function handleQuickOverlayClose() {
+		showQuickOverlay = false;
+		editingEvent = null;
 		eventsStore.clearDraftEvent();
 	}
 
 	function handleEventCreated() {
 		// Event is automatically added to store, draft is cleared
 		eventsStore.clearDraftEvent();
+	}
+
+	function handleEventUpdated() {
+		// Event is automatically updated in store
+	}
+
+	function handleEventDeleted() {
+		// Event is automatically removed from store
 	}
 
 	onMount(async () => {
@@ -73,11 +93,6 @@
 		await eventsStore.fetchEvents(viewStore.viewRange.start, viewStore.viewRange.end);
 		initialized = true;
 	});
-
-	function handleEventModalClose() {
-		// Remove event param from URL
-		goto('/', { replaceState: true });
-	}
 
 	// Refetch events when view changes
 	$effect(() => {
@@ -96,7 +111,7 @@
 </script>
 
 <svelte:head>
-	<title>Kalender</title>
+	<title>{$_('app.name')}</title>
 </svelte:head>
 
 <div class="calendar-layout">
@@ -106,7 +121,7 @@
 		<button
 			class="sidebar-collapse-btn"
 			onclick={() => settingsStore.toggleSidebar()}
-			title="Sidebar ausblenden"
+			title={$_('calendar.hideSidebar')}
 		>
 			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -125,7 +140,7 @@
 			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
 			</svg>
-			Neuer Termin
+			{$_('calendar.newEvent')}
 		</button>
 
 		<MiniCalendar selectedDate={viewStore.currentDate} onDateSelect={handleDateSelect} />
@@ -141,7 +156,7 @@
 			<button
 				class="fab-expand"
 				onclick={() => settingsStore.toggleSidebar()}
-				title="Sidebar einblenden"
+				title={$_('calendar.showSidebar')}
 			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
@@ -152,7 +167,7 @@
 					/>
 				</svg>
 			</button>
-			<button class="fab-new-event" onclick={handleNewEvent} title="Neuer Termin">
+			<button class="fab-new-event" onclick={handleNewEvent} title={$_('calendar.newEvent')}>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
@@ -173,37 +188,49 @@
 			{#if !initialized}
 				<CalendarViewSkeleton />
 			{:else if viewStore.viewType === 'day'}
-				<DayView onQuickCreate={handleQuickCreate} />
+				<DayView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 			{:else if viewStore.viewType === '5day'}
-				<MultiDayView dayCount={5} onQuickCreate={handleQuickCreate} />
+				<MultiDayView
+					dayCount={5}
+					onQuickCreate={handleQuickCreate}
+					onEventClick={handleEventClick}
+				/>
 			{:else if viewStore.viewType === 'week'}
-				<WeekView onQuickCreate={handleQuickCreate} />
+				<WeekView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 			{:else if viewStore.viewType === '10day'}
-				<MultiDayView dayCount={10} onQuickCreate={handleQuickCreate} />
+				<MultiDayView
+					dayCount={10}
+					onQuickCreate={handleQuickCreate}
+					onEventClick={handleEventClick}
+				/>
 			{:else if viewStore.viewType === '14day'}
-				<MultiDayView dayCount={14} onQuickCreate={handleQuickCreate} />
+				<MultiDayView
+					dayCount={14}
+					onQuickCreate={handleQuickCreate}
+					onEventClick={handleEventClick}
+				/>
 			{:else if viewStore.viewType === 'month'}
-				<MonthView onQuickCreate={handleQuickCreate} />
+				<MonthView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 			{:else if viewStore.viewType === 'year'}
-				<YearView onQuickCreate={handleQuickCreate} />
+				<YearView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 			{:else}
-				<WeekView onQuickCreate={handleQuickCreate} />
+				<WeekView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 			{/if}
 		</div>
 	</div>
 
-	<!-- Quick Event Overlay -->
-	{#if showQuickCreate}
-		<QuickEventOverlay
-			startTime={quickCreateDate}
-			onClose={handleQuickCreateClose}
-			onCreated={handleEventCreated}
-		/>
-	{/if}
-
-	<!-- Event Detail Modal -->
-	{#if modalEventId}
-		<EventDetailModal eventId={modalEventId} onClose={handleEventModalClose} />
+	<!-- Quick Event Overlay (for both create and edit) -->
+	{#if showQuickOverlay}
+		{#key overlayKey}
+			<QuickEventOverlay
+				startTime={editingEvent ? undefined : quickCreateDate}
+				event={editingEvent ?? undefined}
+				onClose={handleQuickOverlayClose}
+				onCreated={handleEventCreated}
+				onUpdated={handleEventUpdated}
+				onDeleted={handleEventDeleted}
+			/>
+		{/key}
 	{/if}
 </div>
 

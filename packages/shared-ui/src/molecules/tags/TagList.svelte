@@ -83,6 +83,7 @@
 	<div class={layout === 'grid' ? gridClasses : listClasses}>
 		{#each tags as tag (tag.id)}
 			{@const color = getTagColor(tag)}
+			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 			<div
 				class="
 					group relative flex items-center gap-3 p-4

@@ -80,6 +80,7 @@
 	const isClickable = $derived(interactive || !!onclick);
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
 	class="data-card rounded-xl p-4 transition-colors {variantClasses[variant]} {isClickable
 		? 'cursor-pointer hover:bg-menu-hover'
@@ -153,6 +154,7 @@
 	.line-clamp-2 {
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}

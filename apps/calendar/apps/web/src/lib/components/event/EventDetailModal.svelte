@@ -145,8 +145,8 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-<div class="modal-backdrop" onclick={handleBackdropClick}>
+<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions a11y_no_noninteractive_element_to_interactive_role -->
+<div class="modal-backdrop" onclick={handleBackdropClick} role="button" tabindex="-1">
 	<div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="modal-title">
 		{#if loading}
 			<EventDetailSkeleton />
