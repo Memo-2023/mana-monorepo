@@ -38,6 +38,7 @@
 		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-theme": "workspace:*",
+		"@manacore/shared-types": "workspace:*",
 		"d3-force": "^3.0.0",
 		"d3-selection": "^3.0.0",
 		"d3-transition": "^3.0.0",

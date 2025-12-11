@@ -27,6 +27,8 @@
 		// Fetch todos on mount
 		await todosStore.fetchTodayTodos();
 		await todosStore.fetchUpcomingTodos();
+		// Also fetch scheduled todos (including completed) for calendar display
+		await todosStore.fetchScheduledTodos();
 	});
 
 	function toggleExpanded() {
@@ -114,6 +116,7 @@
 							{task}
 							variant="compact"
 							showProject={false}
+							draggable={!task.isCompleted}
 							onclick={() => handleTaskClick(task)}
 						/>
 					{/each}

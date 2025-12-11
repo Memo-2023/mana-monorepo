@@ -13,6 +13,7 @@
 		showProject?: boolean;
 		showDueDate?: boolean;
 		showPriority?: boolean;
+		draggable?: boolean;
 		onclick?: () => void;
 	}
 
@@ -22,6 +23,7 @@
 		showProject = true,
 		showDueDate = true,
 		showPriority = true,
+		draggable = false,
 		onclick,
 	}: Props = $props();
 
@@ -75,6 +77,22 @@
 			onclick();
 		}
 	}
+
+	function handleDragStart(e: DragEvent) {
+		if (!draggable || !e.dataTransfer) return;
+		// Store task data for drop target
+		e.dataTransfer.setData(
+			'application/json',
+			JSON.stringify({
+				type: 'sidebar-task',
+				taskId: task.id,
+				title: task.title,
+				priority: task.priority,
+				estimatedDuration: task.estimatedDuration || 30,
+			})
+		);
+		e.dataTransfer.effectAllowed = 'move';
+	}
 </script>
 
 <div
@@ -84,9 +102,12 @@
 	class:compact={variant === 'compact'}
 	class:minimal={variant === 'minimal'}
 	class:clickable={!!onclick}
+	class:draggable-task={draggable}
 	style="--priority-color: {priorityColor};"
 	onclick={handleClick}
 	onkeydown={handleKeydown}
+	ondragstart={handleDragStart}
+	draggable={draggable ? 'true' : 'false'}
 	role={onclick ? 'button' : 'listitem'}
 	tabindex={onclick ? 0 : -1}
 >
@@ -166,6 +187,15 @@
 	.todo-item.clickable:hover {
 		background: hsl(var(--color-muted) / 0.5);
 		transform: translateX(2px);
+	}
+
+	.todo-item.draggable-task {
+		cursor: grab;
+	}
+
+	.todo-item.draggable-task:active {
+		cursor: grabbing;
+		opacity: 0.7;
 	}
 
 	.todo-item.completed {

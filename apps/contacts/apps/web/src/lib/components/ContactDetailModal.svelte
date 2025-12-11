@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { contactsApi, photoApi, type Contact } from '$lib/api/contacts';
 	import ContactNotes from './ContactNotes.svelte';
+	import ContactTasks from './ContactTasks.svelte';
 	import { ContactDetailSkeleton } from '$lib/components/skeletons';
 
 	interface Props {
@@ -841,6 +842,9 @@
 
 						<!-- Contact Notes (separate from contact.notes field) -->
 						<ContactNotes {contactId} />
+
+						<!-- Tasks related to this contact -->
+						<ContactTasks {contactId} />
 					</div>
 				{/if}
 			{/if}

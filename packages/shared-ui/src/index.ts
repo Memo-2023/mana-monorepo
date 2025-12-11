@@ -39,6 +39,9 @@ export {
 // Feedback
 export { EmptyState } from './molecules';
 
+// Contacts
+export { ContactAvatar, ContactBadge, ContactSelector } from './molecules';
+
 // Layout
 export { ModalFooter, DataCard, PageHeader, KeyboardShortcutsPanel } from './molecules';
 

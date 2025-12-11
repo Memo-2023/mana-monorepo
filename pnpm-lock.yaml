@@ -253,6 +253,9 @@ importers:
       '@manacore/shared-theme-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-theme-ui
+      '@manacore/shared-types':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-types
       '@manacore/shared-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-ui
@@ -2655,6 +2658,9 @@ importers:
       '@manacore/shared-theme-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-theme-ui
+      '@manacore/shared-types':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-types
       '@manacore/shared-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-ui
@@ -2724,6 +2730,10 @@ importers:
         version: 6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)
 
   apps/todo/packages/shared:
+    dependencies:
+      '@manacore/shared-types':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-types
     devDependencies:
       typescript:
         specifier: ^5.9.3
@@ -3886,6 +3896,9 @@ importers:
 
   packages/shared-auth:
     dependencies:
+      '@manacore/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
       base64-js:
         specifier: ^1.5.1
         version: 1.5.1
@@ -4289,6 +4302,9 @@ importers:
       '@manacore/shared-theme':
         specifier: workspace:*
         version: link:../shared-theme
+      '@manacore/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
       d3-force:
         specifier: ^3.0.0
         version: 3.0.0

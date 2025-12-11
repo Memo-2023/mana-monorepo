@@ -7,8 +7,10 @@
 		EffectiveDuration,
 		UpdateTaskInput,
 	} from '@todo/shared';
+	import type { ContactReference, ContactOrManual } from '@manacore/shared-types';
 	import { STATUS_OPTIONS, RECURRENCE_OPTIONS } from '@todo/shared';
 	import { projectsStore } from '$lib/stores/projects.svelte';
+	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { format } from 'date-fns';
 	import SubtaskList from './SubtaskList.svelte';
 	import {
@@ -18,6 +20,7 @@
 		FunRatingPicker,
 		TagSelector,
 	} from './form';
+	import { ContactSelector } from '@manacore/shared-ui';
 
 	interface Props {
 		task: Task;
@@ -45,6 +48,10 @@
 	let storyPoints = $state<number | null>(null);
 	let effectiveDuration = $state<EffectiveDuration | null>(null);
 	let funRating = $state<number | null>(null);
+	// Contact associations
+	let assignee = $state<ContactOrManual[]>([]);
+	let involvedContacts = $state<ContactOrManual[]>([]);
+	let contactsAvailable = $state<boolean | null>(null);
 
 	// UI state
 	let isLoading = $state(false);
@@ -69,7 +76,15 @@
 			storyPoints = task.metadata?.storyPoints ?? null;
 			effectiveDuration = task.metadata?.effectiveDuration ?? null;
 			funRating = task.metadata?.funRating ?? null;
+			// Contact associations
+			assignee = task.metadata?.assignee ? [task.metadata.assignee] : [];
+			involvedContacts = task.metadata?.involvedContacts || [];
 			showDeleteConfirm = false;
+
+			// Check contacts availability
+			contactsStore.checkAvailability().then((available) => {
+				contactsAvailable = available;
+			});
 		}
 	});
 
@@ -88,11 +103,26 @@
 		}
 	}
 
+	// Extract ContactReference from ContactOrManual (filter out manual entries for now)
+	function toContactReference(contact: ContactOrManual): ContactReference | null {
+		if ('isManual' in contact && contact.isManual) {
+			return null; // Manual entries not stored as contacts
+		}
+		return contact as ContactReference;
+	}
+
 	async function handleSave() {
 		if (!title.trim()) return;
 
 		isLoading = true;
 		try {
+			// Convert assignee array to single ContactReference
+			const assigneeRef = assignee.length > 0 ? toContactReference(assignee[0]) : null;
+			// Convert involved contacts to array of ContactReferences
+			const involvedRefs = involvedContacts
+				.map(toContactReference)
+				.filter((c): c is ContactReference => c !== null);
+
 			const data: UpdateTaskInput = {
 				title: title.trim(),
 				description: description.trim() || null,
@@ -110,6 +140,8 @@
 					storyPoints: storyPoints ?? undefined,
 					effectiveDuration: effectiveDuration ?? undefined,
 					funRating: funRating ?? undefined,
+					assignee: assigneeRef ?? undefined,
+					involvedContacts: involvedRefs.length > 0 ? involvedRefs : undefined,
 				},
 				labelIds: selectedLabelIds,
 			};
@@ -177,6 +209,37 @@
 						placeholder="Beschreibung hinzufügen..."
 						rows="3"
 					></textarea>
+				</div>
+
+				<!-- Zuständige Person -->
+				<div class="form-section">
+					<label class="form-label">Zuständig</label>
+					<ContactSelector
+						selectedContacts={assignee}
+						onContactsChange={(contacts) => (assignee = contacts)}
+						onSearch={(q) => contactsStore.searchContacts(q)}
+						singleSelect={true}
+						allowManualEntry={false}
+						placeholder="Person zuweisen..."
+						addLabel="Zuweisen"
+						searchPlaceholder="Name oder E-Mail..."
+						isAvailable={contactsAvailable ?? false}
+					/>
+				</div>
+
+				<!-- Beteiligte Personen -->
+				<div class="form-section">
+					<label class="form-label">Beteiligte</label>
+					<ContactSelector
+						selectedContacts={involvedContacts}
+						onContactsChange={(contacts) => (involvedContacts = contacts)}
+						onSearch={(q) => contactsStore.searchContacts(q)}
+						allowManualEntry={false}
+						placeholder="Personen hinzufügen..."
+						addLabel="Person hinzufügen"
+						searchPlaceholder="Name oder E-Mail..."
+						isAvailable={contactsAvailable ?? false}
+					/>
 				</div>
 
 				<!-- Zeitplanung -->

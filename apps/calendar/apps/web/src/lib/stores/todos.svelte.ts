@@ -75,6 +75,50 @@ export const todosStore = {
 	},
 
 	/**
+	 * Get scheduled tasks for a specific day (by scheduledDate - for time-blocking)
+	 * Note: Includes completed tasks so they remain visible in the calendar
+	 */
+	getScheduledTasksForDay(date: Date): Task[] {
+		const currentTodos = todos ?? [];
+		if (!Array.isArray(currentTodos)) return [];
+
+		return currentTodos.filter((task) => {
+			if (!task.scheduledDate) return false;
+			const scheduledDate =
+				typeof task.scheduledDate === 'string' ? parseISO(task.scheduledDate) : task.scheduledDate;
+			return isSameDay(scheduledDate, date);
+		});
+	},
+
+	/**
+	 * Get scheduled tasks within a date range (for time-blocking)
+	 * Note: Includes completed tasks so they remain visible in the calendar
+	 */
+	getScheduledTasksInRange(start: Date, end: Date): Task[] {
+		const currentTodos = todos ?? [];
+		if (!Array.isArray(currentTodos)) return [];
+
+		return currentTodos.filter((task) => {
+			if (!task.scheduledDate) return false;
+			const scheduledDate =
+				typeof task.scheduledDate === 'string' ? parseISO(task.scheduledDate) : task.scheduledDate;
+			return isWithinInterval(scheduledDate, { start, end });
+		});
+	},
+
+	/**
+	 * Get unscheduled tasks (no scheduledDate - for sidebar drag source)
+	 */
+	get unscheduledForTimeBlocking(): Task[] {
+		const currentTodos = todos ?? [];
+		if (!Array.isArray(currentTodos)) return [];
+
+		return currentTodos
+			.filter((task) => !task.isCompleted && !task.scheduledDate)
+			.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
+	},
+
+	/**
 	 * Get todos within a date range
 	 */
 	getTodosInRange(start: Date, end: Date): Task[] {
@@ -202,14 +246,13 @@ export const todosStore = {
 
 	/**
 	 * Fetch todos for a date range
+	 * Note: Fetches both completed and uncompleted tasks so scheduled tasks remain visible
 	 */
 	async fetchTodos(startDate?: Date, endDate?: Date) {
 		loading = true;
 		error = null;
 
-		const query: TaskQuery = {
-			isCompleted: false,
-		};
+		const query: TaskQuery = {};
 
 		if (startDate) {
 			query.dueDateFrom = format(startDate, 'yyyy-MM-dd');
@@ -236,7 +279,7 @@ export const todosStore = {
 	},
 
 	/**
-	 * Fetch today's todos (shortcut)
+	 * Fetch today's todos (shortcut) - only uncompleted tasks
 	 */
 	async fetchTodayTodos() {
 		loading = true;
@@ -252,6 +295,40 @@ export const todosStore = {
 			const newTodos = result.data || [];
 			const existingIds = new Set(todos.map((t) => t.id));
 			const uniqueNew = newTodos.filter((t) => !existingIds.has(t.id));
+			todos = [...todos, ...uniqueNew];
+			serviceAvailable = true;
+		}
+
+		loading = false;
+		return result;
+	},
+
+	/**
+	 * Fetch all scheduled todos (including completed ones)
+	 * Used for calendar time-blocking to keep completed tasks visible
+	 */
+	async fetchScheduledTodos() {
+		loading = true;
+		error = null;
+
+		// Fetch all tasks without isCompleted filter - API will return all
+		const result = await api.getTasks({});
+
+		if (result.error) {
+			error = result.error.message;
+			serviceAvailable = false;
+		} else {
+			// Only keep tasks that have a scheduledDate (for time-blocking)
+			// Merge with existing todos (avoid duplicates)
+			const allTasks = result.data || [];
+			const scheduledTasks = allTasks.filter((t) => t.scheduledDate);
+			const existingIds = new Set(todos.map((t) => t.id));
+			const uniqueNew = scheduledTasks.filter((t) => !existingIds.has(t.id));
+			// Also update existing scheduled tasks (in case isCompleted changed)
+			todos = todos.map((existing) => {
+				const updated = scheduledTasks.find((t) => t.id === existing.id);
+				return updated || existing;
+			});
 			todos = [...todos, ...uniqueNew];
 			serviceAvailable = true;
 		}

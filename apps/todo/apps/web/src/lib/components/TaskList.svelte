@@ -28,18 +28,19 @@
 	// Track which task is being animated for completion
 	let animatingTaskId = $state<string | null>(null);
 
-	// Create a stable key from task IDs to detect real changes
-	let lastTaskIds = '';
+	// Create a stable key from task IDs and updatedAt to detect real changes
+	let lastTaskKey = '';
 
-	// Sync items with tasks only when the set of task IDs changes
+	// Sync items with tasks when IDs change OR when tasks are updated
 	$effect(() => {
-		const currentIds = tasks
-			.map((t) => t.id)
+		// Include updatedAt in the key to detect task updates
+		const currentKey = tasks
+			.map((t) => `${t.id}:${t.updatedAt || ''}`)
 			.sort()
 			.join(',');
-		if (currentIds !== lastTaskIds) {
+		if (currentKey !== lastTaskKey) {
 			items = [...tasks];
-			lastTaskIds = currentIds;
+			lastTaskKey = currentKey;
 		}
 	});
 
@@ -70,10 +71,10 @@
 			}
 		}
 
-		// Update local state and sync lastTaskIds to prevent $effect from reverting
+		// Update local state and sync lastTaskKey to prevent $effect from reverting
 		items = newItems;
-		lastTaskIds = newItems
-			.map((t) => t.id)
+		lastTaskKey = newItems
+			.map((t) => `${t.id}:${t.updatedAt || ''}`)
 			.sort()
 			.join(',');
 	}
