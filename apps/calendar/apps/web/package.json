@@ -31,6 +31,7 @@
 	"dependencies": {
 		"@calendar/shared": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
+		"@manacore/shared-types": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-feedback-service": "workspace:*",

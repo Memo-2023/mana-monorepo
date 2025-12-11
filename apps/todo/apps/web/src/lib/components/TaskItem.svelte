@@ -3,6 +3,7 @@
 	import { format, isToday, isPast, isTomorrow } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { projectsStore } from '$lib/stores/projects.svelte';
+	import { ContactAvatar } from '@manacore/shared-ui';
 
 	interface Props {
 		task: Task;
@@ -164,6 +165,33 @@
 			</div>
 		{/if}
 	</button>
+
+	<!-- Assignee and involved contacts -->
+	{#if task.metadata?.assignee || (task.metadata?.involvedContacts && task.metadata.involvedContacts.length > 0)}
+		<div class="contacts-display">
+			{#if task.metadata?.assignee}
+				<div class="assignee-avatar" title="Zuständig: {task.metadata.assignee.displayName}">
+					<ContactAvatar
+						name={task.metadata.assignee.displayName}
+						photoUrl={task.metadata.assignee.photoUrl}
+						size="xs"
+					/>
+				</div>
+			{/if}
+			{#if task.metadata?.involvedContacts && task.metadata.involvedContacts.length > 0}
+				<div class="involved-avatars">
+					{#each task.metadata.involvedContacts.slice(0, 2) as contact}
+						<div class="involved-avatar" title="Beteiligt: {contact.displayName}">
+							<ContactAvatar name={contact.displayName} photoUrl={contact.photoUrl} size="xs" />
+						</div>
+					{/each}
+					{#if task.metadata.involvedContacts.length > 2}
+						<span class="more-contacts">+{task.metadata.involvedContacts.length - 2}</span>
+					{/if}
+				</div>
+			{/if}
+		</div>
+	{/if}
 
 	<!-- Due date (always on the right) -->
 	{#if dueDateText()}
@@ -422,6 +450,58 @@
 		background: color-mix(in srgb, var(--label-color) 15%, transparent);
 		color: var(--label-color);
 		font-weight: 500;
+	}
+
+	/* Contacts display */
+	.contacts-display {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		flex-shrink: 0;
+	}
+
+	.assignee-avatar {
+		position: relative;
+	}
+
+	.assignee-avatar::after {
+		content: '';
+		position: absolute;
+		bottom: -1px;
+		right: -1px;
+		width: 6px;
+		height: 6px;
+		background: #8b5cf6;
+		border-radius: 50%;
+		border: 1px solid white;
+	}
+
+	:global(.dark) .assignee-avatar::after {
+		border-color: rgba(30, 30, 30, 1);
+	}
+
+	.involved-avatars {
+		display: flex;
+		align-items: center;
+	}
+
+	.involved-avatar {
+		margin-left: -0.375rem;
+	}
+
+	.involved-avatar:first-child {
+		margin-left: 0;
+	}
+
+	.more-contacts {
+		font-size: 0.625rem;
+		color: #6b7280;
+		margin-left: 0.25rem;
+		font-weight: 500;
+	}
+
+	:global(.dark) .more-contacts {
+		color: #9ca3af;
 	}
 
 	/* Due date */

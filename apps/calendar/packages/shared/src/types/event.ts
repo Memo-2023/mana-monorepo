@@ -1,10 +1,21 @@
 /**
+ * Event attendee RSVP status
+ */
+export type AttendeeStatus = 'accepted' | 'declined' | 'tentative' | 'pending';
+
+/**
  * Event attendee information
  */
 export interface EventAttendee {
 	email: string;
 	name?: string;
-	status?: 'accepted' | 'declined' | 'tentative' | 'pending';
+	status?: AttendeeStatus;
+	/** Contact reference for linked contacts */
+	contactId?: string;
+	/** Cached photo URL from contact */
+	photoUrl?: string;
+	/** Cached company from contact */
+	company?: string;
 }
 
 /**

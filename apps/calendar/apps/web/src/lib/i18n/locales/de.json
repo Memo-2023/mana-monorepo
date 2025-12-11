@@ -110,6 +110,11 @@
 		"medium": "Normal",
 		"low": "Später"
 	},
+	"todo": {
+		"task": "Aufgabe",
+		"markComplete": "Als erledigt markieren",
+		"markIncomplete": "Als unerledigt markieren"
+	},
 	"a11y": {
 		"createEventOn": "Termin erstellen am {date}",
 		"slotTime": "{day} {time}"

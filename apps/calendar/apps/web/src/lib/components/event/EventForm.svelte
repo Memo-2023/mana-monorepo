@@ -4,12 +4,14 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
 	import { TagSelector, type Tag } from '@manacore/shared-ui';
+	import AttendeeSelector from './AttendeeSelector.svelte';
 	import type {
 		CalendarEvent,
 		CreateEventInput,
 		UpdateEventInput,
 		LocationDetails,
 		EventTag,
+		EventAttendee,
 	} from '@calendar/shared';
 	import { format, addMinutes, parseISO } from 'date-fns';
 
@@ -48,6 +50,9 @@
 			color: t.color,
 		})) || []
 	);
+
+	// Attendees state
+	let attendees = $state<EventAttendee[]>(event?.metadata?.attendees || []);
 
 	// Convert EventTag to Tag type for shared-ui components
 	function eventTagToTag(tag: EventTag): Tag {
@@ -165,6 +170,13 @@
 			metadata.locationDetails = locationDetails;
 		} else {
 			delete metadata.locationDetails;
+		}
+
+		// Add attendees
+		if (attendees.length > 0) {
+			metadata.attendees = attendees;
+		} else {
+			delete metadata.attendees;
 		}
 
 		// Only include metadata if it has properties
@@ -393,6 +405,15 @@
 			/>
 		</div>
 	{/if}
+
+	<!-- Teilnehmer -->
+	<div class="flex flex-col gap-2">
+		<span class="text-sm font-medium text-foreground">Teilnehmer</span>
+		<AttendeeSelector
+			{attendees}
+			onAttendeesChange={(newAttendees) => (attendees = newAttendees)}
+		/>
+	</div>
 
 	<div class="flex justify-end gap-3 pt-4 border-t border-border">
 		<button

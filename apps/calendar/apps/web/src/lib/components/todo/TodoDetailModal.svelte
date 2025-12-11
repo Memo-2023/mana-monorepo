@@ -5,7 +5,18 @@
 	import { toast } from '$lib/stores/toast';
 	import TodoCheckbox from './TodoCheckbox.svelte';
 	import PriorityBadge from './PriorityBadge.svelte';
-	import { X, Calendar, Clock, Folder, Tag, Trash2, CheckSquare, AlertCircle } from 'lucide-svelte';
+	import {
+		X,
+		Calendar,
+		Clock,
+		Folder,
+		Tag,
+		Trash2,
+		CheckSquare,
+		AlertCircle,
+		CalendarClock,
+		Timer,
+	} from 'lucide-svelte';
 	import { format, parseISO } from 'date-fns';
 	import { de } from 'date-fns/locale';
 
@@ -30,6 +41,14 @@
 	let dueTime = $state(initialTask.dueTime || '');
 	let priority = $state<TaskPriority>(initialTask.priority);
 
+	// Time-Blocking fields
+	let scheduledDate = $state(
+		initialTask.scheduledDate ? formatDateForInput(initialTask.scheduledDate) : ''
+	);
+	let scheduledStartTime = $state(initialTask.scheduledStartTime || '');
+	let scheduledEndTime = $state(initialTask.scheduledEndTime || '');
+	let estimatedDuration = $state(initialTask.estimatedDuration?.toString() || '');
+
 	// Sync form state when task changes
 	$effect(() => {
 		title = task.title;
@@ -37,6 +56,11 @@
 		dueDate = task.dueDate ? formatDateForInput(task.dueDate) : '';
 		dueTime = task.dueTime || '';
 		priority = task.priority;
+		// Time-Blocking
+		scheduledDate = task.scheduledDate ? formatDateForInput(task.scheduledDate) : '';
+		scheduledStartTime = task.scheduledStartTime || '';
+		scheduledEndTime = task.scheduledEndTime || '';
+		estimatedDuration = task.estimatedDuration?.toString() || '';
 	});
 
 	function formatDateForInput(date: string | Date | null | undefined): string {
@@ -76,6 +100,11 @@
 			dueDate: dueDate || null,
 			dueTime: dueTime || null,
 			priority,
+			// Time-Blocking
+			scheduledDate: scheduledDate || null,
+			scheduledStartTime: scheduledStartTime || null,
+			scheduledEndTime: scheduledEndTime || null,
+			estimatedDuration: estimatedDuration ? parseInt(estimatedDuration, 10) : null,
 		};
 
 		const result = await todosStore.updateTodo(task.id, updateData);
@@ -115,6 +144,11 @@
 		dueDate = task.dueDate ? formatDateForInput(task.dueDate) : '';
 		dueTime = task.dueTime || '';
 		priority = task.priority;
+		// Time-Blocking
+		scheduledDate = task.scheduledDate ? formatDateForInput(task.scheduledDate) : '';
+		scheduledStartTime = task.scheduledStartTime || '';
+		scheduledEndTime = task.scheduledEndTime || '';
+		estimatedDuration = task.estimatedDuration?.toString() || '';
 		isEditing = true;
 	}
 
@@ -202,6 +236,42 @@
 						</div>
 					</div>
 
+					<!-- Time-Blocking Section -->
+					<div class="form-section">
+						<span class="section-label">
+							<CalendarClock size={16} />
+							Zeitplanung (Time-Blocking)
+						</span>
+						<div class="form-row">
+							<div class="form-group">
+								<label for="scheduledDate">Geplantes Datum</label>
+								<input id="scheduledDate" type="date" bind:value={scheduledDate} />
+							</div>
+							<div class="form-group">
+								<label for="estimatedDuration">Dauer (Min.)</label>
+								<input
+									id="estimatedDuration"
+									type="number"
+									min="5"
+									max="480"
+									step="5"
+									bind:value={estimatedDuration}
+									placeholder="30"
+								/>
+							</div>
+						</div>
+						<div class="form-row">
+							<div class="form-group">
+								<label for="scheduledStartTime">Startzeit</label>
+								<input id="scheduledStartTime" type="time" bind:value={scheduledStartTime} />
+							</div>
+							<div class="form-group">
+								<label for="scheduledEndTime">Endzeit</label>
+								<input id="scheduledEndTime" type="time" bind:value={scheduledEndTime} />
+							</div>
+						</div>
+					</div>
+
 					<div class="form-group">
 						<span class="label-text">Priorität</span>
 						<div class="priority-options">
@@ -237,6 +307,29 @@
 							<div class="detail-item">
 								<Clock size={16} />
 								<span>{task.dueTime} Uhr</span>
+							</div>
+						{/if}
+
+						<!-- Time-Blocking Display -->
+						{#if task.scheduledDate}
+							<div class="detail-item scheduled">
+								<CalendarClock size={16} />
+								<span>
+									Geplant: {formatDisplayDate(task.scheduledDate)}
+									{#if task.scheduledStartTime}
+										um {task.scheduledStartTime}
+										{#if task.scheduledEndTime}
+											- {task.scheduledEndTime}
+										{/if}
+									{/if}
+								</span>
+							</div>
+						{/if}
+
+						{#if task.estimatedDuration}
+							<div class="detail-item">
+								<Timer size={16} />
+								<span>Geschätzte Dauer: {task.estimatedDuration} Min.</span>
 							</div>
 						{/if}
 
@@ -425,6 +518,17 @@
 		flex-shrink: 0;
 	}
 
+	.detail-item.scheduled {
+		background: hsl(var(--color-primary) / 0.1);
+		padding: 0.5rem 0.75rem;
+		border-radius: var(--radius-md);
+		border-left: 3px solid hsl(var(--color-primary));
+	}
+
+	.detail-item.scheduled :global(svg) {
+		color: hsl(var(--color-primary));
+	}
+
 	.labels-row {
 		align-items: flex-start;
 	}
@@ -510,9 +614,35 @@
 		gap: 1rem;
 	}
 
+	.form-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		padding: 0.75rem;
+		background: hsl(var(--color-muted) / 0.3);
+		border-radius: var(--radius-md);
+		border: 1px solid hsl(var(--color-border) / 0.5);
+	}
+
+	.section-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.025em;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.section-label :global(svg) {
+		color: hsl(var(--color-primary));
+	}
+
 	input[type='text'],
 	input[type='date'],
 	input[type='time'],
+	input[type='number'],
 	textarea {
 		padding: 0.5rem 0.75rem;
 		border: 1px solid hsl(var(--color-border));

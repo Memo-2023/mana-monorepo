@@ -156,8 +156,11 @@ export class TaskService {
 			await this.projectService.findByIdOrThrow(dto.projectId, userId);
 		}
 
+		// Extract labelIds before spreading dto (it's not a db column)
+		const { labelIds, ...dtoWithoutLabels } = dto;
+
 		const updateData: Partial<NewTask> = {
-			...dto,
+			...dtoWithoutLabels,
 			dueDate: dto.dueDate ? new Date(dto.dueDate) : dto.dueDate === null ? null : undefined,
 			startDate: dto.startDate
 				? new Date(dto.startDate)
@@ -191,6 +194,11 @@ export class TaskService {
 			.set(updateData)
 			.where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
 			.returning();
+
+		// Update labels if provided
+		if (labelIds !== undefined) {
+			await this.updateTaskLabels(id, userId, labelIds);
+		}
 
 		return this.loadTaskLabels(updated);
 	}
@@ -420,6 +428,41 @@ export class TaskService {
 
 	async getInboxTasks(userId: string): Promise<TaskWithLabels[]> {
 		return this.findAll(userId, { isCompleted: false });
+	}
+
+	/**
+	 * Finds all tasks where the given contact is either the assignee or involved.
+	 * Searches in metadata->assignee->contactId and metadata->involvedContacts array.
+	 */
+	async findByContact(
+		userId: string,
+		contactId: string,
+		includeCompleted: boolean = false
+	): Promise<TaskWithLabels[]> {
+		// Build conditions for the query
+		const conditions: SQL[] = [eq(tasks.userId, userId)];
+
+		// Optionally exclude completed tasks
+		if (!includeCompleted) {
+			conditions.push(eq(tasks.isCompleted, false));
+		}
+
+		// Search for contactId in metadata->assignee->contactId OR in metadata->involvedContacts array
+		const contactCondition = or(
+			// Check if assignee.contactId matches
+			sql`${tasks.metadata}->>'assignee' IS NOT NULL AND ${tasks.metadata}->'assignee'->>'contactId' = ${contactId}`,
+			// Check if contactId exists in involvedContacts array
+			sql`${tasks.metadata}->'involvedContacts' @> ${JSON.stringify([{ contactId }])}::jsonb`
+		);
+
+		conditions.push(contactCondition as SQL);
+
+		const result = await this.db.query.tasks.findMany({
+			where: and(...conditions),
+			orderBy: [asc(tasks.dueDate), asc(tasks.order)],
+		});
+
+		return this.loadTaskLabelsBatch(result);
 	}
 
 	async getTodayTasks(userId: string): Promise<TaskWithLabels[]> {

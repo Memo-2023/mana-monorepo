@@ -102,7 +102,22 @@
 		"country": "Country",
 		"website": "Website",
 		"birthday": "Birthday",
-		"notes": "Notes"
+		"notes": "Notes",
+		"tasks": {
+			"title": "Tasks",
+			"assigned": "Assigned",
+			"involved": "Involved",
+			"empty": "No tasks for this contact",
+			"serviceUnavailable": "Todo service unavailable",
+			"error": "Failed to load tasks",
+			"overdue": "Overdue",
+			"dueToday": "Today",
+			"tomorrow": "Tomorrow",
+			"showCompleted": "Completed",
+			"showMore": "Show {count} more",
+			"markComplete": "Mark as complete",
+			"markIncomplete": "Mark as incomplete"
+		}
 	},
 	"groups": {
 		"title": "Groups",

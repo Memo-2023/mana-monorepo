@@ -70,6 +70,10 @@ export {
 } from './interceptors/fetchInterceptor';
 export type { FetchInterceptorConfig } from './interceptors/fetchInterceptor';
 
+// Contacts client for cross-app integration
+export { ContactsClient, createContactsClient } from './clients/contactsClient';
+export type { ContactsClientConfig, ContactSearchOptions } from './clients/contactsClient';
+
 /**
  * Initialize auth service with all adapters for web
  *
