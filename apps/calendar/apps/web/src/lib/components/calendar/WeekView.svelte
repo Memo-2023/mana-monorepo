@@ -4,7 +4,6 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
-	import TodoRow from './TodoRow.svelte';
 	import TaskBlock from './TaskBlock.svelte';
 	import { goto } from '$app/navigation';
 	import {
@@ -830,18 +829,6 @@
 		</div>
 	{/if}
 
-	<!-- Todos row (shown per day, below all-day events) -->
-	{#if todosStore.serviceAvailable}
-		<div class="todos-row">
-			<div class="time-gutter"></div>
-			{#each days as day}
-				<div class="todos-cell">
-					<TodoRow date={day} maxVisible={2} />
-				</div>
-			{/each}
-		</div>
-	{/if}
-
 	<!-- Day headers -->
 	<div class="day-headers">
 		<div class="time-gutter"></div>
@@ -1041,18 +1028,6 @@
 		text-overflow: ellipsis;
 		border: none;
 		cursor: pointer;
-	}
-
-	/* Todos row */
-	.todos-row {
-		display: flex;
-		border-bottom: 1px solid hsl(var(--color-border) / 0.5);
-	}
-
-	.todos-cell {
-		flex: 1;
-		border-left: 1px solid hsl(var(--color-border));
-		min-height: 0;
 	}
 
 	/* Block-style all-day events (displayed as full-day blocks in the grid) */

@@ -5,6 +5,7 @@
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import type { CalendarViewType } from '@calendar/shared';
+	import { PillTimeRangeSelector, PillViewSwitcher } from '@manacore/shared-ui';
 
 	// View type labels
 	const viewLabels: Record<CalendarViewType, string> = {
@@ -28,6 +29,22 @@
 		'month',
 		'year',
 	];
+
+	// Convert to ViewOptions for PillViewSwitcher
+	const viewOptions = visibleViews.map((type) => ({
+		id: type,
+		label: viewLabels[type],
+		title: viewLabels[type],
+	}));
+
+	// Hours change handlers
+	function handleStartHourChange(hour: number) {
+		settingsStore.set('dayStartHour', hour);
+	}
+
+	function handleEndHourChange(hour: number) {
+		settingsStore.set('dayEndHour', hour);
+	}
 
 	// Format title based on view type
 	let title = $derived.by(() => {
@@ -70,18 +87,24 @@
 		}
 	});
 
-	function handleViewChange(type: CalendarViewType) {
-		viewStore.setViewType(type);
+	function handleViewChange(type: string) {
+		viewStore.setViewType(type as CalendarViewType);
 	}
 </script>
 
 <header class="calendar-header" class:nav-collapsed={$isNavCollapsed}>
 	<div class="header-left">
-		<button class="today-btn" onclick={() => viewStore.goToToday()}> Heute </button>
+		<button
+			class="pill glass-pill today-btn"
+			onclick={() => viewStore.goToToday()}
+			title="Zum heutigen Tag springen"
+		>
+			Heute
+		</button>
 
-		<div class="nav-buttons">
+		<div class="nav-buttons glass-pill">
 			<button class="nav-btn" onclick={() => viewStore.goToPrevious()} aria-label="Zurück">
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -90,8 +113,9 @@
 					/>
 				</svg>
 			</button>
+			<div class="nav-divider"></div>
 			<button class="nav-btn" onclick={() => viewStore.goToNext()} aria-label="Weiter">
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 				</svg>
 			</button>
@@ -101,11 +125,11 @@
 	</div>
 
 	<div class="header-right">
-		<!-- Filter toggles -->
-		<div class="filter-toggles">
+		<!-- Filter toggles as pills -->
+		<div class="filter-pills">
 			<!-- Weekdays only toggle -->
 			<button
-				class="filter-toggle"
+				class="pill glass-pill filter-pill"
 				class:active={settingsStore.showOnlyWeekdays}
 				onclick={() => settingsStore.set('showOnlyWeekdays', !settingsStore.showOnlyWeekdays)}
 				title="Nur Wochentage anzeigen (Mo-Fr)"
@@ -113,28 +137,40 @@
 				Mo-Fr
 			</button>
 
-			<!-- Filter hours toggle -->
+			<!-- Hours filter toggle -->
 			<button
-				class="filter-toggle"
+				class="pill glass-pill filter-pill"
 				class:active={settingsStore.filterHoursEnabled}
 				onclick={() => settingsStore.set('filterHoursEnabled', !settingsStore.filterHoursEnabled)}
-				title="Stunden filtern ({settingsStore.dayStartHour}-{settingsStore.dayEndHour} Uhr)"
+				title="Stundenfilter ein/aus"
 			>
-				{settingsStore.dayStartHour}-{settingsStore.dayEndHour}
+				<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+					/>
+				</svg>
 			</button>
+
+			<!-- Hours time range selector -->
+			<PillTimeRangeSelector
+				startHour={settingsStore.dayStartHour}
+				endHour={settingsStore.dayEndHour}
+				onStartHourChange={handleStartHourChange}
+				onEndHourChange={handleEndHourChange}
+				direction="down"
+			/>
 		</div>
 
-		<div class="view-selector">
-			{#each visibleViews as type}
-				<button
-					class="view-btn"
-					class:active={viewStore.viewType === type}
-					onclick={() => handleViewChange(type)}
-				>
-					{viewLabels[type]}
-				</button>
-			{/each}
-		</div>
+		<!-- View selector -->
+		<PillViewSwitcher
+			options={viewOptions}
+			value={viewStore.viewType}
+			onChange={handleViewChange}
+			primaryColor="#3b82f6"
+		/>
 	</div>
 </header>
 
@@ -144,9 +180,10 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 0.75rem 1rem;
-		background: hsl(var(--color-background));
-		border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+		background: transparent;
 		transition: padding-left 300ms ease;
+		gap: 1rem;
+		flex-wrap: wrap;
 	}
 
 	.calendar-header.nav-collapsed {
@@ -156,132 +193,188 @@
 	.header-left {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.today-btn {
-		padding: 0.25rem 0.625rem;
-		border: 1px solid hsl(var(--color-border));
-		background: transparent;
-		border-radius: var(--radius-sm);
-		font-size: 0.75rem;
-		font-weight: 500;
-		color: hsl(var(--color-foreground));
-		cursor: pointer;
-		transition: all 150ms ease;
-	}
-
-	.today-btn:hover {
-		background: hsl(var(--color-muted));
-	}
-
-	.nav-buttons {
-		display: flex;
-		gap: 0.125rem;
-	}
-
-	.nav-btn {
-		padding: 0.25rem;
-		border: none;
-		background: transparent;
-		border-radius: var(--radius-sm);
-		color: hsl(var(--color-muted-foreground));
-		cursor: pointer;
-		transition: all 150ms ease;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.nav-btn:hover {
-		background: hsl(var(--color-muted));
-		color: hsl(var(--color-foreground));
+		gap: 0.75rem;
 	}
 
 	.header-title {
-		font-size: 1.25rem;
+		font-size: 1.125rem;
 		font-weight: 600;
 		color: hsl(var(--color-foreground));
 		margin: 0;
+		white-space: nowrap;
 	}
 
 	.header-right {
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
+		flex-wrap: wrap;
 	}
 
-	.view-selector {
+	/* Glass pill base styles */
+	.pill {
 		display: flex;
-		background: hsl(var(--color-muted));
-		border-radius: var(--radius-md);
-		padding: 0.125rem;
-	}
-
-	.view-btn {
-		padding: 0.25rem 0.625rem;
-		border: none;
-		background: transparent;
-		border-radius: var(--radius-sm);
-		font-size: 0.75rem;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.5rem 0.875rem;
+		border-radius: 9999px;
+		font-size: 0.875rem;
 		font-weight: 500;
-		color: hsl(var(--color-muted-foreground));
+		white-space: nowrap;
+		text-decoration: none;
+		transition: all 0.2s;
+		border: none;
 		cursor: pointer;
-		transition: all 150ms ease;
 	}
 
-	.view-btn:hover {
-		color: hsl(var(--color-foreground));
+	.glass-pill {
+		background: rgba(255, 255, 255, 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		color: #374151;
 	}
 
-	.view-btn.active {
-		background: hsl(var(--color-background));
-		color: hsl(var(--color-foreground));
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+	:global(.dark) .glass-pill {
+		background: rgba(255, 255, 255, 0.12);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		color: #f3f4f6;
 	}
 
-	.filter-toggles {
+	.glass-pill:hover {
+		background: rgba(255, 255, 255, 0.95);
+		border-color: rgba(0, 0, 0, 0.15);
+		transform: translateY(-1px);
+		box-shadow:
+			0 10px 15px -3px rgba(0, 0, 0, 0.1),
+			0 4px 6px -2px rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.dark) .glass-pill:hover {
+		background: rgba(255, 255, 255, 0.2);
+		border-color: rgba(255, 255, 255, 0.25);
+	}
+
+	/* Today button */
+	.today-btn {
+		padding: 0.375rem 0.75rem;
+		font-size: 0.8125rem;
+	}
+
+	/* Navigation buttons group */
+	.nav-buttons {
 		display: flex;
-		gap: 0.25rem;
+		align-items: center;
+		padding: 0;
+		gap: 0;
 	}
 
-	.filter-toggle {
-		padding: 0.25rem 0.5rem;
-		border: 1px solid hsl(var(--color-border));
+	.nav-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.375rem 0.5rem;
 		background: transparent;
-		border-radius: var(--radius-sm);
-		font-size: 0.6875rem;
-		font-weight: 600;
-		color: hsl(var(--color-muted-foreground));
+		border: none;
 		cursor: pointer;
-		transition: all 150ms ease;
+		color: inherit;
+		transition: background 0.2s;
 	}
 
-	.filter-toggle:hover {
-		background: hsl(var(--color-muted));
-		color: hsl(var(--color-foreground));
+	.nav-btn:first-child {
+		border-radius: 9999px 0 0 9999px;
 	}
 
-	.filter-toggle.active {
-		background: hsl(var(--color-primary));
-		color: hsl(var(--color-primary-foreground));
-		border-color: hsl(var(--color-primary));
+	.nav-btn:last-child {
+		border-radius: 0 9999px 9999px 0;
 	}
 
-	@media (max-width: 640px) {
+	.nav-btn:hover {
+		background: rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.dark) .nav-btn:hover {
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	.nav-icon {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	.nav-divider {
+		width: 1px;
+		height: 1rem;
+		background: rgba(0, 0, 0, 0.15);
+	}
+
+	:global(.dark) .nav-divider {
+		background: rgba(255, 255, 255, 0.2);
+	}
+
+	/* Filter pills */
+	.filter-pills {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.filter-pill {
+		padding: 0.375rem 0.625rem;
+		font-size: 0.75rem;
+	}
+
+	.filter-pill.active {
+		background: color-mix(in srgb, #3b82f6 20%, white 80%);
+		border-color: #3b82f6;
+		color: #3b82f6;
+	}
+
+	:global(.dark) .filter-pill.active {
+		background: color-mix(in srgb, #3b82f6 30%, transparent 70%);
+		border-color: #3b82f6;
+		color: #3b82f6;
+	}
+
+	.pill-icon {
+		width: 0.875rem;
+		height: 0.875rem;
+	}
+
+	/* Responsive */
+	@media (max-width: 900px) {
 		.calendar-header {
 			flex-direction: column;
-			gap: 0.5rem;
-			padding: 0.5rem;
+			align-items: flex-start;
+			gap: 0.75rem;
+			padding: 0.75rem;
 		}
 
 		.header-left {
 			width: 100%;
-			justify-content: space-between;
+			justify-content: flex-start;
+		}
+
+		.header-right {
+			width: 100%;
+			justify-content: flex-start;
 		}
 
 		.header-title {
+			font-size: 1rem;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.header-title {
 			font-size: 0.875rem;
+		}
+
+		.filter-pills {
+			flex-wrap: wrap;
 		}
 	}
 </style>

@@ -5,6 +5,8 @@
 	import { onMount } from 'svelte';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { userSettings } from '$lib/stores/user-settings.svelte';
+	import { settingsStore } from '$lib/stores/settings.svelte';
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
 	import { AppLoadingSkeleton } from '$lib/components/skeletons';
 
@@ -23,6 +25,18 @@
 		await authStore.initialize();
 
 		loading = false;
+	});
+
+	// Load user settings when authenticated
+	$effect(() => {
+		if (authStore.isAuthenticated) {
+			userSettings.load().then(() => {
+				// Enable cloud sync for calendar settings after user settings are loaded
+				settingsStore.enableCloudSync();
+			});
+		} else {
+			settingsStore.disableCloudSync();
+		}
 	});
 </script>
 

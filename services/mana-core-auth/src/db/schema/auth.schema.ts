@@ -141,9 +141,13 @@ export const userSettings = authSchema.table('user_settings', {
 		})
 		.notNull(),
 
-	// Per-app overrides
+	// Per-app overrides (applies to all devices)
 	// { "calendar": { nav: {...}, theme: {...} }, "chat": {...} }
 	appOverrides: jsonb('app_overrides').default({}).notNull(),
+
+	// Per-device settings (device-specific app settings)
+	// { "device-abc-123": { deviceName: "MacBook", deviceType: "desktop", lastSeen: "...", apps: { "calendar": { dayStartHour: 6, ... } } } }
+	deviceSettings: jsonb('device_settings').default({}).notNull(),
 
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

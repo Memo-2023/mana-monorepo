@@ -70,6 +70,34 @@ export class UpdateAppOverrideDto {
 	theme?: ThemeSettingsDto;
 }
 
+// Device settings update
+export class UpdateDeviceAppSettingsDto {
+	@IsOptional()
+	@IsString()
+	deviceName?: string;
+
+	@IsOptional()
+	@IsIn(['desktop', 'mobile', 'tablet'])
+	deviceType?: 'desktop' | 'mobile' | 'tablet';
+
+	@IsObject()
+	settings: Record<string, unknown>;
+}
+
+// Register/update device info
+export class RegisterDeviceDto {
+	@IsString()
+	deviceId: string;
+
+	@IsOptional()
+	@IsString()
+	deviceName?: string;
+
+	@IsOptional()
+	@IsIn(['desktop', 'mobile', 'tablet'])
+	deviceType?: 'desktop' | 'mobile' | 'tablet';
+}
+
 // Response types (for documentation)
 export interface NavSettings {
 	desktopPosition: 'top' | 'bottom';
@@ -94,7 +122,29 @@ export interface AppOverride {
 	theme?: Partial<ThemeSettings>;
 }
 
+// Device-specific app settings
+export interface DeviceAppSettings {
+	deviceName: string;
+	deviceType: 'desktop' | 'mobile' | 'tablet';
+	lastSeen: string;
+	apps: Record<string, Record<string, unknown>>;
+}
+
+// Device info for listing
+export interface DeviceInfo {
+	deviceId: string;
+	deviceName: string;
+	deviceType: 'desktop' | 'mobile' | 'tablet';
+	lastSeen: string;
+	appCount: number;
+}
+
 export interface UserSettingsResponse {
 	globalSettings: GlobalSettings;
 	appOverrides: Record<string, AppOverride>;
+	deviceSettings: Record<string, DeviceAppSettings>;
+}
+
+export interface DevicesListResponse {
+	devices: DeviceInfo[];
 }

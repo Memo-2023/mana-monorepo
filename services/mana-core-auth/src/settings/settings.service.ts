@@ -6,9 +6,13 @@ import { userSettings } from '../db/schema';
 import {
 	type UpdateGlobalSettingsDto,
 	type UpdateAppOverrideDto,
+	type UpdateDeviceAppSettingsDto,
 	type GlobalSettings,
 	type AppOverride,
+	type DeviceAppSettings,
+	type DeviceInfo,
 	type UserSettingsResponse,
+	type DevicesListResponse,
 } from './dto';
 
 // Default settings for new users
@@ -46,6 +50,7 @@ export class SettingsService {
 			return {
 				globalSettings: existing.globalSettings as GlobalSettings,
 				appOverrides: existing.appOverrides as Record<string, AppOverride>,
+				deviceSettings: (existing.deviceSettings as Record<string, DeviceAppSettings>) || {},
 			};
 		}
 
@@ -56,6 +61,7 @@ export class SettingsService {
 				userId,
 				globalSettings: DEFAULT_GLOBAL_SETTINGS,
 				appOverrides: {},
+				deviceSettings: {},
 			})
 			.returning();
 
@@ -64,6 +70,7 @@ export class SettingsService {
 		return {
 			globalSettings: created.globalSettings as GlobalSettings,
 			appOverrides: created.appOverrides as Record<string, AppOverride>,
+			deviceSettings: (created.deviceSettings as Record<string, DeviceAppSettings>) || {},
 		};
 	}
 
@@ -101,6 +108,7 @@ export class SettingsService {
 		return {
 			globalSettings: updated.globalSettings as GlobalSettings,
 			appOverrides: updated.appOverrides as Record<string, AppOverride>,
+			deviceSettings: (updated.deviceSettings as Record<string, DeviceAppSettings>) || {},
 		};
 	}
 
@@ -155,6 +163,7 @@ export class SettingsService {
 		return {
 			globalSettings: updated.globalSettings as GlobalSettings,
 			appOverrides: updated.appOverrides as Record<string, AppOverride>,
+			deviceSettings: (updated.deviceSettings as Record<string, DeviceAppSettings>) || {},
 		};
 	}
 
@@ -186,6 +195,185 @@ export class SettingsService {
 		return {
 			globalSettings: updated.globalSettings as GlobalSettings,
 			appOverrides: updated.appOverrides as Record<string, AppOverride>,
+			deviceSettings: (updated.deviceSettings as Record<string, DeviceAppSettings>) || {},
+		};
+	}
+
+	// ============================================================================
+	// Device Settings Methods
+	// ============================================================================
+
+	/**
+	 * Get list of all devices for a user
+	 */
+	async getDevices(userId: string): Promise<DevicesListResponse> {
+		const current = await this.getSettings(userId);
+		const deviceSettings = current.deviceSettings || {};
+
+		const devices: DeviceInfo[] = Object.entries(deviceSettings).map(([deviceId, device]) => ({
+			deviceId,
+			deviceName: device.deviceName || 'Unbekanntes Gerät',
+			deviceType: device.deviceType || 'desktop',
+			lastSeen: device.lastSeen || new Date().toISOString(),
+			appCount: Object.keys(device.apps || {}).length,
+		}));
+
+		// Sort by lastSeen descending
+		devices.sort((a, b) => new Date(b.lastSeen).getTime() - new Date(a.lastSeen).getTime());
+
+		return { devices };
+	}
+
+	/**
+	 * Get settings for a specific device and app
+	 */
+	async getDeviceAppSettings(
+		userId: string,
+		deviceId: string,
+		appId: string
+	): Promise<Record<string, unknown>> {
+		const current = await this.getSettings(userId);
+		const deviceSettings = current.deviceSettings || {};
+		const device = deviceSettings[deviceId];
+
+		if (!device || !device.apps || !device.apps[appId]) {
+			return {};
+		}
+
+		return device.apps[appId];
+	}
+
+	/**
+	 * Update settings for a specific device and app
+	 */
+	async updateDeviceAppSettings(
+		userId: string,
+		deviceId: string,
+		appId: string,
+		dto: UpdateDeviceAppSettingsDto
+	): Promise<UserSettingsResponse> {
+		const db = this.getDb();
+
+		// Get current settings
+		const current = await this.getSettings(userId);
+		const deviceSettings = { ...(current.deviceSettings || {}) };
+
+		// Get or create device entry
+		const existingDevice = deviceSettings[deviceId] || {
+			deviceName: dto.deviceName || 'Unbekanntes Gerät',
+			deviceType: dto.deviceType || 'desktop',
+			lastSeen: new Date().toISOString(),
+			apps: {},
+		};
+
+		// Update device info if provided
+		const updatedDevice: DeviceAppSettings = {
+			deviceName: dto.deviceName || existingDevice.deviceName,
+			deviceType: dto.deviceType || existingDevice.deviceType,
+			lastSeen: new Date().toISOString(),
+			apps: {
+				...existingDevice.apps,
+				[appId]: {
+					...(existingDevice.apps?.[appId] || {}),
+					...dto.settings,
+				},
+			},
+		};
+
+		deviceSettings[deviceId] = updatedDevice;
+
+		// Update in database
+		const [updated] = await db
+			.update(userSettings)
+			.set({
+				deviceSettings,
+				updatedAt: new Date(),
+			})
+			.where(eq(userSettings.userId, userId))
+			.returning();
+
+		this.logger.debug(
+			`Updated device settings for user ${userId}, device ${deviceId}, app ${appId}`
+		);
+
+		return {
+			globalSettings: updated.globalSettings as GlobalSettings,
+			appOverrides: updated.appOverrides as Record<string, AppOverride>,
+			deviceSettings: (updated.deviceSettings as Record<string, DeviceAppSettings>) || {},
+		};
+	}
+
+	/**
+	 * Remove a device entirely
+	 */
+	async removeDevice(userId: string, deviceId: string): Promise<UserSettingsResponse> {
+		const db = this.getDb();
+
+		// Get current settings
+		const current = await this.getSettings(userId);
+		const deviceSettings = { ...(current.deviceSettings || {}) };
+
+		// Remove the device
+		delete deviceSettings[deviceId];
+
+		// Update in database
+		const [updated] = await db
+			.update(userSettings)
+			.set({
+				deviceSettings,
+				updatedAt: new Date(),
+			})
+			.where(eq(userSettings.userId, userId))
+			.returning();
+
+		this.logger.debug(`Removed device ${deviceId} for user ${userId}`);
+
+		return {
+			globalSettings: updated.globalSettings as GlobalSettings,
+			appOverrides: updated.appOverrides as Record<string, AppOverride>,
+			deviceSettings: (updated.deviceSettings as Record<string, DeviceAppSettings>) || {},
+		};
+	}
+
+	/**
+	 * Remove app settings from a specific device
+	 */
+	async removeDeviceAppSettings(
+		userId: string,
+		deviceId: string,
+		appId: string
+	): Promise<UserSettingsResponse> {
+		const db = this.getDb();
+
+		// Get current settings
+		const current = await this.getSettings(userId);
+		const deviceSettings = { ...(current.deviceSettings || {}) };
+
+		if (deviceSettings[deviceId]?.apps) {
+			const device = { ...deviceSettings[deviceId] };
+			const apps = { ...device.apps };
+			delete apps[appId];
+			device.apps = apps;
+			device.lastSeen = new Date().toISOString();
+			deviceSettings[deviceId] = device;
+		}
+
+		// Update in database
+		const [updated] = await db
+			.update(userSettings)
+			.set({
+				deviceSettings,
+				updatedAt: new Date(),
+			})
+			.where(eq(userSettings.userId, userId))
+			.returning();
+
+		this.logger.debug(`Removed app ${appId} settings from device ${deviceId} for user ${userId}`);
+
+		return {
+			globalSettings: updated.globalSettings as GlobalSettings,
+			appOverrides: updated.appOverrides as Record<string, AppOverride>,
+			deviceSettings: (updated.deviceSettings as Record<string, DeviceAppSettings>) || {},
 		};
 	}
 }
