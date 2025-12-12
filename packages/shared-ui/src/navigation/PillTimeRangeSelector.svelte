@@ -1,4 +1,14 @@
 <script lang="ts">
+	// Portal action - moves element to body to escape stacking contexts
+	function portal(node: HTMLElement) {
+		document.body.appendChild(node);
+		return {
+			destroy() {
+				node.remove();
+			},
+		};
+	}
+
 	interface Props {
 		/** Start hour (0-23) */
 		startHour: number;
@@ -14,6 +24,12 @@
 		labelFormat?: 'range' | 'icon';
 		/** Embedded mode - no background/border, for use inside a parent bar */
 		embedded?: boolean;
+		/** Toggle mode - click toggles active state, right-click/long-press opens dropdown */
+		toggleMode?: boolean;
+		/** Whether the filter is active (only used in toggleMode) */
+		active?: boolean;
+		/** Called when toggle state changes (only used in toggleMode) */
+		onToggle?: () => void;
 	}
 
 	let {
@@ -24,13 +40,18 @@
 		direction = 'down',
 		labelFormat = 'range',
 		embedded = false,
+		toggleMode = false,
+		active = false,
+		onToggle,
 	}: Props = $props();
 
 	let isOpen = $state(false);
 	let triggerButton: HTMLButtonElement;
 	let dropdownPosition = $state({ top: 0, left: 0 });
+	let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+	let isLongPress = $state(false);
 
-	function toggle() {
+	function openDropdown() {
 		if (triggerButton) {
 			const rect = triggerButton.getBoundingClientRect();
 			if (direction === 'down') {
@@ -45,7 +66,51 @@
 				};
 			}
 		}
-		isOpen = !isOpen;
+		isOpen = true;
+	}
+
+	function handleClick() {
+		if (toggleMode) {
+			// In toggle mode, click toggles the filter
+			if (!isLongPress) {
+				onToggle?.();
+			}
+			isLongPress = false;
+		} else {
+			// Normal mode - click opens dropdown
+			openDropdown();
+		}
+	}
+
+	function handleContextMenu(e: MouseEvent) {
+		if (toggleMode) {
+			e.preventDefault();
+			openDropdown();
+		}
+	}
+
+	function handlePointerDown() {
+		if (toggleMode) {
+			isLongPress = false;
+			longPressTimer = setTimeout(() => {
+				isLongPress = true;
+				openDropdown();
+			}, 500);
+		}
+	}
+
+	function handlePointerUp() {
+		if (longPressTimer) {
+			clearTimeout(longPressTimer);
+			longPressTimer = null;
+		}
+	}
+
+	function handlePointerLeave() {
+		if (longPressTimer) {
+			clearTimeout(longPressTimer);
+			longPressTimer = null;
+		}
 	}
 
 	function close() {
@@ -78,12 +143,17 @@
 <div class="pill-time-selector">
 	<button
 		bind:this={triggerButton}
-		onclick={toggle}
+		onclick={handleClick}
+		oncontextmenu={handleContextMenu}
+		onpointerdown={handlePointerDown}
+		onpointerup={handlePointerUp}
+		onpointerleave={handlePointerLeave}
 		class="trigger-button"
 		class:pill={!embedded}
 		class:glass-pill={!embedded}
 		class:embedded-btn={embedded}
-		title="Zeitbereich auswählen"
+		class:active={toggleMode && active}
+		title={toggleMode ? 'Klick: Ein/Aus | Rechtsklick: Zeitbereich' : 'Zeitbereich auswählen'}
 	>
 		<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
@@ -96,35 +166,42 @@
 		{#if label}
 			<span class="pill-label">{label}</span>
 		{/if}
-		<svg
-			class="chevron-icon"
-			class:rotated={isOpen}
-			fill="none"
-			stroke="currentColor"
-			viewBox="0 0 24 24"
-		>
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-		</svg>
+		{#if !toggleMode}
+			<svg
+				class="chevron-icon"
+				class:rotated={isOpen}
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+			</svg>
+		{/if}
 	</button>
 
 	{#if isOpen}
+		<!-- Backdrop - portal to body -->
 		<button
+			use:portal
 			class="backdrop"
 			onclick={close}
 			onkeydown={(e) => e.key === 'Escape' && close()}
 			aria-label="Close"
+			style="z-index: 99990;"
 		></button>
 
+		<!-- Dropdown - portal to body -->
 		<div
+			use:portal
 			class="dropdown glass-dropdown"
 			class:dropdown-up={direction === 'up'}
-			style="top: {dropdownPosition.top}px; left: {dropdownPosition.left}px;"
+			style="top: {dropdownPosition.top}px; left: {dropdownPosition.left}px; z-index: 99991;"
 		>
 			<div class="dropdown-header">Zeitbereich</div>
 
 			<div class="time-selectors">
 				<div class="time-column">
-					<label class="column-label">Von</label>
+					<span class="column-label">Von</span>
 					<div class="hour-list">
 						{#each startHours as hour}
 							<button
@@ -143,7 +220,7 @@
 				<div class="time-divider"></div>
 
 				<div class="time-column">
-					<label class="column-label">Bis</label>
+					<span class="column-label">Bis</span>
 					<div class="hour-list">
 						{#each endHours as hour}
 							<button
@@ -258,6 +335,29 @@
 
 	:global(.dark) .embedded-btn:hover {
 		background: rgba(255, 255, 255, 0.1);
+	}
+
+	/* Active state for toggle mode */
+	.embedded-btn.active {
+		background: color-mix(in srgb, var(--color-primary-500, #3b82f6) 15%, transparent 85%);
+		color: var(--color-primary-500, #3b82f6);
+	}
+
+	:global(.dark) .embedded-btn.active {
+		background: color-mix(in srgb, var(--color-primary-500, #3b82f6) 25%, transparent 75%);
+		color: var(--color-primary-400, #60a5fa);
+	}
+
+	.glass-pill.active {
+		background: color-mix(in srgb, var(--color-primary-500, #3b82f6) 15%, white 85%);
+		border-color: var(--color-primary-500, #3b82f6);
+		color: var(--color-primary-500, #3b82f6);
+	}
+
+	:global(.dark) .glass-pill.active {
+		background: color-mix(in srgb, var(--color-primary-500, #3b82f6) 30%, transparent 70%);
+		border-color: var(--color-primary-400, #60a5fa);
+		color: var(--color-primary-400, #60a5fa);
 	}
 
 	.chevron-icon {

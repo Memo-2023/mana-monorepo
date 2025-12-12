@@ -68,9 +68,63 @@
 		return () => clearInterval(interval);
 	});
 
-	let timedEvents = $derived(
-		eventsStore.getEventsForDay(viewStore.currentDate).filter((e) => !e.isAllDay)
-	);
+	// Get timed events, filtering out those outside visible range when hour filter is enabled
+	let timedEvents = $derived.by(() => {
+		const allEvents = eventsStore.getEventsForDay(viewStore.currentDate).filter((e) => !e.isAllDay);
+
+		if (settingsStore.filterHoursEnabled) {
+			const visibleStartMinutes = settingsStore.dayStartHour * 60;
+			const visibleEndMinutes = settingsStore.dayEndHour * 60;
+
+			return allEvents.filter((event) => {
+				const start =
+					typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+				const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+
+				const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
+				const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
+
+				// Event overlaps with visible range
+				return eventStartMinutes < visibleEndMinutes && eventEndMinutes > visibleStartMinutes;
+			});
+		}
+
+		return allEvents;
+	});
+
+	// Get events that are completely outside the visible time range
+	let overflowEvents = $derived.by(() => {
+		if (!settingsStore.filterHoursEnabled) {
+			return { before: [] as CalendarEvent[], after: [] as CalendarEvent[] };
+		}
+
+		const allEvents = eventsStore.getEventsForDay(viewStore.currentDate).filter((e) => !e.isAllDay);
+		const before: CalendarEvent[] = [];
+		const after: CalendarEvent[] = [];
+
+		const visibleStartMinutes = settingsStore.dayStartHour * 60;
+		const visibleEndMinutes = settingsStore.dayEndHour * 60;
+
+		for (const event of allEvents) {
+			const start =
+				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+			const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+
+			const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
+			const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
+
+			// Event ends before visible range starts
+			if (eventEndMinutes <= visibleStartMinutes) {
+				before.push(event);
+			}
+			// Event starts after visible range ends
+			else if (eventStartMinutes >= visibleEndMinutes) {
+				after.push(event);
+			}
+		}
+
+		return { before, after };
+	});
 
 	let allDayEvents = $derived(
 		eventsStore.getEventsForDay(viewStore.currentDate).filter((e) => e.isAllDay)
@@ -813,6 +867,39 @@
 				/>
 			{/each}
 
+			<!-- Overflow indicators for events outside visible time range -->
+			{#if overflowEvents.before.length > 0}
+				<div class="overflow-indicator top" title="{overflowEvents.before.length} Termin(e) früher">
+					{#each overflowEvents.before as event}
+						<div
+							class="overflow-line"
+							style="background-color: {calendarsStore.getColor(event.calendarId)}"
+							title="{format(
+								typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime,
+								'HH:mm'
+							)} {event.title}"
+						></div>
+					{/each}
+				</div>
+			{/if}
+			{#if overflowEvents.after.length > 0}
+				<div
+					class="overflow-indicator bottom"
+					title="{overflowEvents.after.length} Termin(e) später"
+				>
+					{#each overflowEvents.after as event}
+						<div
+							class="overflow-line"
+							style="background-color: {calendarsStore.getColor(event.calendarId)}"
+							title="{format(
+								typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime,
+								'HH:mm'
+							)} {event.title}"
+						></div>
+					{/each}
+				</div>
+			{/if}
+
 			<!-- Current time indicator -->
 			{#if isToday(viewStore.currentDate)}
 				<div class="time-indicator" style="top: {currentTimePosition}%"></div>
@@ -1105,5 +1192,40 @@
 
 	.hour-slot:hover {
 		background: hsl(var(--color-muted) / 0.2);
+	}
+
+	/* Overflow indicators for events outside visible time range */
+	.overflow-indicator {
+		position: absolute;
+		left: 4px;
+		right: 4px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		z-index: 5;
+		padding: 2px;
+	}
+
+	.overflow-indicator.top {
+		top: 0;
+	}
+
+	.overflow-indicator.bottom {
+		bottom: 0;
+	}
+
+	.overflow-line {
+		height: 3px;
+		border-radius: 2px;
+		opacity: 0.7;
+		cursor: pointer;
+		transition:
+			opacity 0.15s ease,
+			height 0.15s ease;
+	}
+
+	.overflow-line:hover {
+		opacity: 1;
+		height: 5px;
 	}
 </style>

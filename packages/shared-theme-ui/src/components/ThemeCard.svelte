@@ -104,10 +104,12 @@
 	}
 </script>
 
-<button
-	type="button"
-	onclick={handleClick}
-	disabled={!isAvailable}
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<div
+	onclick={isAvailable ? handleClick : undefined}
+	role="button"
+	tabindex={isAvailable ? 0 : -1}
+	aria-disabled={!isAvailable}
 	class="relative w-full p-4 rounded-xl border-2 transition-all text-left
          {isActive
 		? 'border-primary bg-primary/5 ring-2 ring-primary/20'
@@ -161,12 +163,8 @@
 	<!-- Header -->
 	<div class="flex items-center gap-2 mb-3">
 		{#if definition.icon && themeIcons[definition.icon as keyof typeof themeIcons]}
-			<svelte:component
-				this={themeIcons[definition.icon as keyof typeof themeIcons]}
-				size={20}
-				weight="duotone"
-				class="text-primary"
-			/>
+			{@const IconComponent = themeIcons[definition.icon as keyof typeof themeIcons]}
+			<IconComponent size={20} weight="duotone" class="text-primary" />
 		{/if}
 		<span class="font-semibold text-foreground">{definition.label}</span>
 	</div>
@@ -207,4 +205,4 @@
 			{t.comingSoon}
 		</div>
 	{/if}
-</button>
+</div>

@@ -175,8 +175,8 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-<div class="modal-backdrop" onclick={handleBackdropClick}>
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<div class="modal-backdrop" onclick={handleBackdropClick} role="presentation">
 	<div class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true">
 		<!-- Header -->
 		<div class="modal-header">

@@ -2,6 +2,16 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { goto } from '$app/navigation';
 
+	// Portal action - moves element to body to escape stacking contexts
+	function portal(node: HTMLElement) {
+		document.body.appendChild(node);
+		return {
+			destroy() {
+				node.remove();
+			},
+		};
+	}
+
 	interface Props {
 		direction?: 'up' | 'down';
 		embedded?: boolean;
@@ -80,20 +90,23 @@
 	</button>
 
 	{#if isOpen}
-		<!-- Backdrop -->
+		<!-- Backdrop - portal to body -->
 		<button
+			use:portal
 			class="menu-backdrop"
 			onclick={close}
 			onkeydown={(e) => e.key === 'Escape' && close()}
 			aria-label="Close dropdown"
+			style="z-index: 99990;"
 		></button>
 
-		<!-- Dropdown -->
+		<!-- Dropdown - portal to body -->
 		<div
+			use:portal
 			class="dropdown-container"
 			class:dropdown-up={direction === 'up'}
 			class:dropdown-down={direction === 'down'}
-			style="top: {dropdownPosition.top}px; left: {dropdownPosition.left}px;"
+			style="top: {dropdownPosition.top}px; left: {dropdownPosition.left}px; z-index: 99991;"
 		>
 			<div class="dropdown-header">
 				<span class="header-title">Kalender</span>

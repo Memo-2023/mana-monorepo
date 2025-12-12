@@ -14,6 +14,12 @@
 	import { onMount, tick } from 'svelte';
 	import SunCalc from 'suncalc';
 
+	interface Props {
+		isSidebarMode?: boolean;
+	}
+
+	let { isSidebarMode = false }: Props = $props();
+
 	// Get event count for a day (max 5 dots displayed)
 	function getEventCount(date: Date): number {
 		const events = eventsStore.getEventsForDay(date, false);
@@ -208,7 +214,7 @@
 	});
 </script>
 
-<div class="date-strip-wrapper">
+<div class="date-strip-wrapper" class:sidebar-mode={isSidebarMode}>
 	{#if !isTodayVisible}
 		<button onclick={goToToday} title="Zum heutigen Tag" class="today-button"> Heute </button>
 	{/if}
@@ -273,7 +279,7 @@
 <style>
 	.date-strip-wrapper {
 		position: fixed;
-		bottom: calc(200px + env(safe-area-inset-bottom, 0px));
+		bottom: calc(200px + env(safe-area-inset-bottom, 0px)); /* Above InputBar */
 		left: 0;
 		right: 0;
 		z-index: 48;
@@ -281,6 +287,12 @@
 		flex-direction: column;
 		align-items: center;
 		pointer-events: none;
+		transition: bottom 0.3s ease;
+	}
+
+	/* When PillNav is in sidebar mode, no PillNav/Toolbar at bottom - just InputBar */
+	.date-strip-wrapper.sidebar-mode {
+		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.today-button {
