@@ -9,6 +9,7 @@
 		PillTimeRangeSelector,
 		PillViewSwitcher,
 	} from '@manacore/shared-ui';
+	import PillCalendarSelector from './PillCalendarSelector.svelte';
 
 	// View type labels
 	const viewLabels: Record<CalendarViewType, string> = {
@@ -55,6 +56,11 @@
 </script>
 
 <PillToolbar position="bottom" bottomOffset="70px">
+	<!-- Calendar selector -->
+	<PillCalendarSelector direction="up" embedded={true} />
+
+	<PillToolbarDivider />
+
 	<!-- Today button -->
 	<PillToolbarButton onclick={() => viewStore.goToToday()} title="Zum heutigen Tag springen">
 		Heute

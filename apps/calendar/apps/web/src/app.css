@@ -42,18 +42,18 @@
 /* Hour slot in day/week view */
 .hour-slot {
 	height: var(--hour-height);
-	border-bottom: 1px solid hsl(var(--color-border) / 0.5);
+	border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
 	position: relative;
 }
 
 .hour-slot:hover {
-	background-color: hsl(var(--color-muted) / 0.3);
+	background-color: color-mix(in srgb, var(--color-muted) 30%, transparent);
 }
 
 /* Event card in calendar */
 .event-card {
-	background-color: hsl(var(--color-primary));
-	color: hsl(var(--color-primary-foreground));
+	background-color: var(--color-primary);
+	color: var(--color-primary-foreground);
 	border-radius: var(--radius-sm);
 	padding: 2px 6px;
 	font-size: 0.75rem;
@@ -70,17 +70,17 @@
 /* Day cell in month view */
 .day-cell {
 	min-height: 100px;
-	border: 1px solid hsl(var(--color-border));
+	border: 1px solid var(--color-border);
 	padding: var(--spacing-xs);
 	transition: background-color var(--transition-fast);
 }
 
 .day-cell:hover {
-	background-color: hsl(var(--color-muted) / 0.3);
+	background-color: color-mix(in srgb, var(--color-muted) 30%, transparent);
 }
 
 .day-cell.today {
-	background-color: hsl(var(--color-primary) / 0.1);
+	background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 
 .day-cell.other-month {
@@ -93,7 +93,7 @@
 	left: 0;
 	right: 0;
 	height: 2px;
-	background-color: hsl(var(--color-error));
+	background-color: var(--color-error);
 	z-index: 10;
 }
 
@@ -105,7 +105,7 @@
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
-	background-color: hsl(var(--color-error));
+	background-color: var(--color-error);
 }
 
 /* Mini calendar */
@@ -125,24 +125,24 @@
 }
 
 .mini-calendar .day:hover {
-	background-color: hsl(var(--color-muted));
+	background-color: var(--color-muted);
 }
 
 .mini-calendar .day.today {
-	background-color: hsl(var(--color-primary));
-	color: hsl(var(--color-primary-foreground));
+	background-color: var(--color-primary);
+	color: var(--color-primary-foreground);
 }
 
 .mini-calendar .day.selected {
-	border: 2px solid hsl(var(--color-primary));
+	border: 2px solid var(--color-primary);
 }
 
 /* Card styles */
 .card {
-	background-color: hsl(var(--color-surface));
+	background-color: var(--color-surface);
 	border-radius: var(--radius-lg);
 	padding: var(--spacing-lg);
-	border: 1px solid hsl(var(--color-border));
+	border: 1px solid var(--color-border);
 }
 
 /* Button styles */
@@ -161,12 +161,12 @@
 }
 
 .btn-primary {
-	background: hsl(var(--color-primary));
-	color: hsl(var(--color-primary-foreground));
+	background: var(--color-primary);
+	color: var(--color-primary-foreground);
 }
 
 .btn-primary:hover {
-	background: hsl(var(--color-primary) / 0.9);
+	filter: brightness(0.9);
 }
 
 .btn-primary:disabled {
@@ -175,21 +175,21 @@
 }
 
 .btn-secondary {
-	background: hsl(var(--color-secondary));
-	color: hsl(var(--color-secondary-foreground));
+	background: var(--color-secondary);
+	color: var(--color-secondary-foreground);
 }
 
 .btn-secondary:hover {
-	background: hsl(var(--color-secondary) / 0.8);
+	filter: brightness(0.9);
 }
 
 .btn-ghost {
 	background: transparent;
-	color: hsl(var(--color-foreground));
+	color: var(--color-foreground);
 }
 
 .btn-ghost:hover {
-	background: hsl(var(--color-muted));
+	background: var(--color-muted);
 }
 
 .btn-icon {
@@ -206,21 +206,21 @@
 	display: block;
 	width: 100%;
 	padding: 0.5rem 0.75rem;
-	border: 2px solid hsl(var(--color-border));
+	border: 2px solid var(--color-border);
 	border-radius: var(--radius-md);
-	background-color: hsl(var(--color-background));
-	color: hsl(var(--color-foreground));
+	background-color: var(--color-background);
+	color: var(--color-foreground);
 	font-size: 0.875rem;
 	transition: border-color var(--transition-fast);
 }
 
 .input:focus {
 	outline: none;
-	border-color: hsl(var(--color-primary));
+	border-color: var(--color-primary);
 }
 
 .input::placeholder {
-	color: hsl(var(--color-muted-foreground));
+	color: var(--color-muted-foreground);
 }
 
 /* Select styling */
@@ -235,7 +235,7 @@ select.input {
 
 /* Text colors */
 .text-destructive {
-	color: hsl(var(--color-error));
+	color: var(--color-error);
 }
 
 /* Scrollbar styling */

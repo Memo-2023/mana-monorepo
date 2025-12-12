@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 	import { _ } from 'svelte-i18n';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
@@ -9,14 +8,11 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { isSidebarMode as sidebarModeStore } from '$lib/stores/navigation';
-	import CalendarHeader from '$lib/components/calendar/CalendarHeader.svelte';
 	import WeekView from '$lib/components/calendar/WeekView.svelte';
 	import DayView from '$lib/components/calendar/DayView.svelte';
 	import MonthView from '$lib/components/calendar/MonthView.svelte';
 	import MultiDayView from '$lib/components/calendar/MultiDayView.svelte';
 	import YearView from '$lib/components/calendar/YearView.svelte';
-	import MiniCalendar from '$lib/components/calendar/MiniCalendar.svelte';
-	import CalendarSidebar from '$lib/components/calendar/CalendarSidebar.svelte';
 	import TodoSidebarSection from '$lib/components/calendar/TodoSidebarSection.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
 	import { CalendarViewSkeleton } from '$lib/components/skeletons';
@@ -100,14 +96,6 @@
 			eventsStore.fetchEvents(viewStore.viewRange.start, viewStore.viewRange.end);
 		}
 	});
-
-	function handleDateSelect(date: Date) {
-		viewStore.setDate(date);
-	}
-
-	function handleNewEvent() {
-		goto('/event/new');
-	}
 </script>
 
 <svelte:head>
@@ -133,20 +121,6 @@
 			</svg>
 		</button>
 
-		<button
-			class="w-full mb-4 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-primary-foreground bg-primary hover:bg-primary/90 transition-colors"
-			onclick={handleNewEvent}
-		>
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
-			{$_('calendar.newEvent')}
-		</button>
-
-		<MiniCalendar selectedDate={viewStore.currentDate} onDateSelect={handleDateSelect} />
-
-		<CalendarSidebar />
-
 		<TodoSidebarSection maxItems={5} />
 	</aside>
 
@@ -167,23 +141,11 @@
 					/>
 				</svg>
 			</button>
-			<button class="fab-new-event" onclick={handleNewEvent} title={$_('calendar.newEvent')}>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 4v16m8-8H4"
-					/>
-				</svg>
-			</button>
 		</div>
 	{/if}
 
 	<!-- Main Calendar Area -->
 	<div class="calendar-main" class:expanded={settingsStore.sidebarCollapsed}>
-		<CalendarHeader />
-
 		<div class="calendar-content">
 			{#if !initialized}
 				<CalendarViewSkeleton />
@@ -317,8 +279,7 @@
 		}
 	}
 
-	.fab-expand,
-	.fab-new-event {
+	.fab-expand {
 		width: 48px;
 		height: 48px;
 		border-radius: var(--radius-full);
@@ -329,9 +290,6 @@
 		cursor: pointer;
 		transition: all 150ms ease;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	}
-
-	.fab-expand {
 		background: hsl(var(--color-surface));
 		color: hsl(var(--color-foreground));
 		border: 1px solid hsl(var(--color-border));
@@ -339,16 +297,6 @@
 
 	.fab-expand:hover {
 		background: hsl(var(--color-muted));
-		transform: scale(1.05);
-	}
-
-	.fab-new-event {
-		background: hsl(var(--color-primary));
-		color: hsl(var(--color-primary-foreground));
-	}
-
-	.fab-new-event:hover {
-		background: hsl(var(--color-primary) / 0.9);
 		transform: scale(1.05);
 	}
 

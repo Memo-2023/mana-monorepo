@@ -120,6 +120,7 @@
 		if (!scrollContainer || isLoadingMore) return;
 
 		checkTodayVisibility();
+		updateVisibleMonth();
 
 		const { scrollLeft, clientWidth } = scrollContainer;
 		const dayWidth = 54;
@@ -135,14 +136,28 @@
 		}
 	}
 
-	function getMonthLabel(day: Date, index: number): string | null {
-		if (day.getDate() === 1 || index === 0) {
-			if (day.getMonth() === 0 && day.getDate() === 1) {
-				return format(day, 'MMM yyyy', { locale: de });
+	// Get the month of the center visible day
+	let visibleMonth = $state(format(new Date(), 'MMMM yyyy', { locale: de }));
+
+	function updateVisibleMonth() {
+		if (!scrollContainer) return;
+
+		const containerRect = scrollContainer.getBoundingClientRect();
+		const centerX = containerRect.left + containerRect.width / 2;
+
+		// Find the day element closest to center
+		const dayElements = scrollContainer.querySelectorAll('.day-item');
+		for (const el of dayElements) {
+			const rect = el.getBoundingClientRect();
+			if (rect.left <= centerX && rect.right >= centerX) {
+				const dateStr = el.getAttribute('data-date');
+				if (dateStr) {
+					const date = new Date(dateStr);
+					visibleMonth = format(date, 'MMMM yyyy', { locale: de });
+				}
+				break;
 			}
-			return format(day, 'MMM', { locale: de });
 		}
-		return null;
 	}
 
 	onMount(() => {
@@ -156,20 +171,20 @@
 	{/if}
 
 	<div class="date-strip-container">
+		<!-- Month label above the days -->
+		<div class="month-header">
+			<span class="month-label">{visibleMonth}</span>
+		</div>
+
+		<!-- Days row -->
 		<div class="days-scroll" bind:this={scrollContainer} onscroll={handleScroll}>
-			{#each days as day, index}
-				{@const monthLabel = getMonthLabel(day, index)}
+			{#each days as day}
 				{@const dayIsToday = isToday(day)}
 				{@const dayIsSelected = isSameDay(day, currentDate)}
 				{@const dayIsWeekend = day.getDay() === 0 || day.getDay() === 6}
 				{@const dayInRange = isWithinInterval(day, { start: viewRange.start, end: viewRange.end })}
 				{@const dayIsRangeStart = isSameDay(day, viewRange.start)}
 				{@const dayIsRangeEnd = isSameDay(day, viewRange.end)}
-				{#if monthLabel}
-					<div class="month-marker">
-						<span class="month-label">{monthLabel}</span>
-					</div>
-				{/if}
 				<button
 					class="day-item"
 					class:weekend={dayIsWeekend}
@@ -235,7 +250,7 @@
 
 	.date-strip-container {
 		display: flex;
-		align-items: center;
+		flex-direction: column;
 		background: var(--color-surface, #ffffff);
 		border-radius: 16px;
 		margin: 0 1rem;
@@ -245,6 +260,19 @@
 		pointer-events: auto;
 		max-width: calc(100vw - 2rem);
 		overflow: hidden;
+	}
+
+	.month-header {
+		display: flex;
+		justify-content: center;
+		padding: 0.25rem 0 0.5rem;
+	}
+
+	.month-label {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-foreground, #1f2937);
+		white-space: nowrap;
 	}
 
 	.days-scroll {
@@ -260,25 +288,6 @@
 
 	.days-scroll::-webkit-scrollbar {
 		display: none;
-	}
-
-	.month-marker {
-		display: flex;
-		align-items: center;
-		padding: 0 0.5rem;
-		flex-shrink: 0;
-	}
-
-	.month-label {
-		font-size: 0.6875rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		color: #3b82f6;
-		white-space: nowrap;
-		padding: 0.25rem 0.5rem;
-		background: rgba(59, 130, 246, 0.1);
-		border-radius: 4px;
 	}
 
 	.day-item {
@@ -374,8 +383,7 @@
 		}
 
 		.month-label {
-			font-size: 0.625rem;
-			padding: 0.125rem 0.375rem;
+			font-size: 0.75rem;
 		}
 	}
 </style>
