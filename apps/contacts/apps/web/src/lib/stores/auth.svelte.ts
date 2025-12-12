@@ -8,8 +8,8 @@ import { initializeWebAuth } from '@manacore/shared-auth';
 import type { UserData } from '@manacore/shared-auth';
 
 // Initialize Mana Core Auth only on the client side
-// TODO: Use PUBLIC_MANA_CORE_AUTH_URL from env when available
 const MANA_AUTH_URL = 'http://localhost:3001';
+const BACKEND_URL = 'http://localhost:3015';
 
 // Lazy initialization to avoid SSR issues with localStorage
 let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
@@ -18,7 +18,10 @@ let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null =
 function getAuthService() {
 	if (!browser) return null;
 	if (!_authService) {
-		const auth = initializeWebAuth({ baseUrl: MANA_AUTH_URL });
+		const auth = initializeWebAuth({
+			baseUrl: MANA_AUTH_URL,
+			backendUrl: BACKEND_URL, // Enables automatic token refresh on 401 responses
+		});
 		_authService = auth.authService;
 		_tokenManager = auth.tokenManager;
 	}
