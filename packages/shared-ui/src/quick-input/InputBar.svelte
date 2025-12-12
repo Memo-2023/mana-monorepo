@@ -57,6 +57,8 @@
 		appIcon?: string;
 		primaryColor?: string;
 		autoFocus?: boolean;
+		/** Bottom offset from viewport bottom (default: '70px') */
+		bottomOffset?: string;
 	}
 
 	let {
@@ -72,6 +74,7 @@
 		appIcon = 'search',
 		primaryColor = '#8b5cf6',
 		autoFocus = true,
+		bottomOffset = '70px',
 	}: Props = $props();
 
 	let searchQuery = $state('');
@@ -239,7 +242,10 @@
 	}
 </script>
 
-<div class="quick-input-bar" style="--primary-color: {primaryColor}">
+<div
+	class="quick-input-bar"
+	style="--primary-color: {primaryColor}; --bottom-offset: {bottomOffset}"
+>
 	<!-- Results Panel (above input) -->
 	{#if showPanel}
 		<div class="results-panel" transition:slide={{ duration: 150 }}>
@@ -411,15 +417,15 @@
 <style>
 	.quick-input-bar {
 		position: fixed;
-		top: 0;
+		bottom: calc(var(--bottom-offset, 70px) + env(safe-area-inset-bottom, 0px));
 		left: 0;
 		right: 0;
 		z-index: 90;
 		padding: 0.75rem 1rem;
-		padding-top: calc(0.75rem + env(safe-area-inset-top));
 		pointer-events: none;
 		/* Fixed height to prevent layout shift when results appear */
 		height: 72px;
+		transition: bottom 0.3s ease;
 	}
 
 	.input-container,
@@ -588,11 +594,11 @@
 	/* Results Panel */
 	.results-panel {
 		position: absolute;
-		top: 100%;
+		bottom: 100%;
 		left: 1rem;
 		right: 1rem;
 		max-width: 700px;
-		margin: 0.5rem auto 0;
+		margin: 0 auto 0.5rem;
 		max-height: 320px;
 		overflow-y: auto;
 		background: rgba(255, 255, 255, 0.95);

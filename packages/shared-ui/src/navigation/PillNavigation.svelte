@@ -1191,37 +1191,85 @@
 		flex-direction: column;
 		align-items: stretch;
 		gap: 0.5rem;
+		width: 100%;
 	}
 
+	/* All buttons in sidebar toolbar - full width, left aligned */
 	.sidebar-toolbar-content :global(.pill-toolbar-btn),
-	.sidebar-toolbar-content :global(.pill-dropdown .trigger-button) {
+	.sidebar-toolbar-content :global(.pill-dropdown .trigger-button),
+	.sidebar-toolbar-content :global(button) {
 		width: 100%;
 		justify-content: flex-start;
+		text-align: left;
 		background: transparent;
 		border: 1px solid transparent;
 		box-shadow: none;
 	}
 
 	.sidebar-toolbar-content :global(.pill-toolbar-btn:hover),
-	.sidebar-toolbar-content :global(.pill-dropdown .trigger-button:hover) {
+	.sidebar-toolbar-content :global(.pill-dropdown .trigger-button:hover),
+	.sidebar-toolbar-content :global(button:hover) {
 		background: rgba(0, 0, 0, 0.05);
 	}
 
 	:global(.dark) .sidebar-toolbar-content :global(.pill-toolbar-btn:hover),
-	:global(.dark) .sidebar-toolbar-content :global(.pill-dropdown .trigger-button:hover) {
+	:global(.dark) .sidebar-toolbar-content :global(.pill-dropdown .trigger-button:hover),
+	:global(.dark) .sidebar-toolbar-content :global(button:hover) {
 		background: rgba(255, 255, 255, 0.1);
 	}
 
-	/* Style for PillViewSwitcher in sidebar */
+	/* Style for PillViewSwitcher in sidebar - vertical layout */
 	.sidebar-toolbar-content :global(.pill-view-switcher) {
 		flex-direction: column;
 		gap: 0.25rem;
+		width: 100%;
+		padding: 0;
+		background: transparent;
+		border: none;
+		box-shadow: none;
 	}
 
-	.sidebar-toolbar-content :global(.pill-view-switcher .view-option) {
+	/* Hide the sliding indicator in vertical mode */
+	.sidebar-toolbar-content :global(.pill-view-switcher .sliding-indicator) {
+		display: none;
+	}
+
+	.sidebar-toolbar-content :global(.pill-view-switcher .switcher-btn) {
 		width: 100%;
 		justify-content: flex-start;
+		padding: 0.5rem 0.875rem;
 		border-radius: 9999px;
+		background: transparent;
+		border: 1px solid transparent;
+	}
+
+	.sidebar-toolbar-content :global(.pill-view-switcher .switcher-btn:hover) {
+		background: rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.dark) .sidebar-toolbar-content :global(.pill-view-switcher .switcher-btn:hover) {
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	.sidebar-toolbar-content :global(.pill-view-switcher .switcher-btn.active) {
+		background: color-mix(in srgb, var(--pill-primary-color, #3b82f6) 15%, transparent 85%);
+		border-color: color-mix(in srgb, var(--pill-primary-color, #3b82f6) 25%, transparent 75%);
+	}
+
+	:global(.dark) .sidebar-toolbar-content :global(.pill-view-switcher .switcher-btn.active) {
+		background: color-mix(in srgb, var(--pill-primary-color, #3b82f6) 25%, transparent 75%);
+		border-color: color-mix(in srgb, var(--pill-primary-color, #3b82f6) 35%, transparent 65%);
+	}
+
+	/* PillTimeRangeSelector in sidebar */
+	.sidebar-toolbar-content :global(.pill-time-range-selector),
+	.sidebar-toolbar-content :global(.pill-dropdown) {
+		width: 100%;
+	}
+
+	/* PillCalendarSelector in sidebar */
+	.sidebar-toolbar-content :global(.calendar-selector) {
+		width: 100%;
 	}
 
 	/* Mobile: Sidebar container adjustments */

@@ -50,6 +50,7 @@
 	.pill-toolbar.position-bottom {
 		top: auto;
 		bottom: var(--toolbar-bottom-offset, 70px);
+		transition: bottom 0.3s ease;
 	}
 
 	/* Mobile: always position above bottom nav */
