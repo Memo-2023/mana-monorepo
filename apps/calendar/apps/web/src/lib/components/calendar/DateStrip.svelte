@@ -98,7 +98,7 @@
 		}
 	});
 
-	async function scrollToDate(date: Date) {
+	async function scrollToDate(date: Date, instant = false) {
 		await tick();
 
 		const targetDate = startOfDay(date);
@@ -115,7 +115,7 @@
 		);
 		if (dayElement) {
 			dayElement.scrollIntoView({
-				behavior: 'smooth',
+				behavior: instant ? 'instant' : 'smooth',
 				inline: 'center',
 				block: 'nearest',
 			});
@@ -185,7 +185,7 @@
 		}
 	}
 
-	// Get the month of the center visible day
+	// Get the month of the center visible day (initial: today)
 	let visibleMonth = $state(format(new Date(), 'MMMM yyyy', { locale: de }));
 
 	function updateVisibleMonth() {
@@ -209,20 +209,28 @@
 		}
 	}
 
-	onMount(() => {
-		scrollToDate(viewStore.currentDate);
+	onMount(async () => {
+		// Always scroll to today on mount, then update the visible month
+		const today = new Date();
+		await scrollToDate(today, true);
+		updateVisibleMonth();
+		checkTodayVisibility();
 	});
 </script>
 
 <div class="date-strip-wrapper" class:sidebar-mode={isSidebarMode}>
-	{#if !isTodayVisible}
-		<button onclick={goToToday} title="Zum heutigen Tag" class="today-button"> Heute </button>
-	{/if}
-
 	<div class="date-strip-container">
 		<!-- Month label -->
 		<div class="month-header">
-			<span class="month-label">{visibleMonth}</span>
+			<span class="month-label">
+				{#if !isTodayVisible}
+					<button onclick={goToToday} title="Zum heutigen Tag" class="today-button">
+						<span class="today-label">Heute</span>
+						<span class="today-date">{format(new Date(), 'd. MMM', { locale: de })}</span>
+					</button>
+				{/if}
+				{visibleMonth}
+			</span>
 		</div>
 
 		<!-- Days row -->
@@ -296,25 +304,47 @@
 	}
 
 	.today-button {
-		padding: 0.25rem 0.75rem;
-		background: transparent;
-		border: 1px solid #d1d5db;
+		position: absolute;
+		right: 100%;
+		top: 50%;
+		transform: translateY(-50%);
+		margin-right: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 0.375rem 0.875rem;
+		background: rgba(59, 130, 246, 0.1);
+		border: 1px solid rgba(59, 130, 246, 0.3);
 		border-radius: 9999px;
 		cursor: pointer;
-		color: #9ca3af;
-		font-size: 0.6875rem;
-		font-weight: 600;
-		margin-bottom: 0.375rem;
+		color: #3b82f6;
 		pointer-events: auto;
 		transition: all 0.2s ease;
 	}
 
 	.today-button:hover {
-		background: rgba(59, 130, 246, 0.1);
+		background: #3b82f6;
 		border-color: #3b82f6;
-		color: #3b82f6;
-		transform: translateY(-1px);
-		box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+		color: white;
+		transform: translateY(-50%) scale(1.02);
+		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+	}
+
+	.today-button:hover .today-date {
+		color: rgba(255, 255, 255, 0.85);
+	}
+
+	.today-label {
+		font-size: 0.6875rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.025em;
+	}
+
+	.today-date {
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: #60a5fa;
 	}
 
 	.date-strip-container {
@@ -323,11 +353,12 @@
 		background: var(--color-surface, #ffffff);
 		border-radius: 16px;
 		margin: 0 1rem;
-		padding: 0.5rem;
+		padding: 0.5rem 1.5rem;
 		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 		border: 1px solid var(--color-border, #e5e7eb);
 		pointer-events: auto;
 		max-width: calc(100vw - 2rem);
+		min-width: 420px;
 		overflow: hidden;
 	}
 
@@ -340,10 +371,13 @@
 	}
 
 	.month-label {
+		position: relative;
 		font-size: 1.125rem;
 		font-weight: 600;
 		color: var(--color-foreground, #1f2937);
 		white-space: nowrap;
+		min-width: 150px;
+		text-align: center;
 	}
 
 	.month-divider {
