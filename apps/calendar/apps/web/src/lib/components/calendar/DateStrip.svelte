@@ -166,14 +166,25 @@
 </script>
 
 <div class="date-strip-wrapper">
-	{#if !isTodayVisible}
-		<button class="today-btn-floating" onclick={goToToday} title="Zum heutigen Tag"> Heute </button>
-	{/if}
-
 	<div class="date-strip-container">
-		<!-- Month label above the days -->
+		<!-- Month label with today button -->
 		<div class="month-header">
 			<span class="month-label">{visibleMonth}</span>
+			{#if !isTodayVisible}
+				<button class="today-btn" onclick={goToToday} title="Zum heutigen Tag">
+					<svg
+						class="today-icon"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<circle cx="12" cy="12" r="10" />
+						<path d="M12 6v6l4 2" />
+					</svg>
+					Heute
+				</button>
+			{/if}
 		</div>
 
 		<!-- Days row -->
@@ -185,6 +196,10 @@
 				{@const dayInRange = isWithinInterval(day, { start: viewRange.start, end: viewRange.end })}
 				{@const dayIsRangeStart = isSameDay(day, viewRange.start)}
 				{@const dayIsRangeEnd = isSameDay(day, viewRange.end)}
+				{@const isFirstOfMonth = day.getDate() === 1}
+				{#if isFirstOfMonth}
+					<div class="month-divider"></div>
+				{/if}
 				<button
 					class="day-item"
 					class:weekend={dayIsWeekend}
@@ -224,30 +239,6 @@
 		pointer-events: none;
 	}
 
-	.today-btn-floating {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.5rem 1rem;
-		background: #3b82f6;
-		border: none;
-		border-radius: 9999px;
-		cursor: pointer;
-		color: white;
-		font-size: 0.8125rem;
-		font-weight: 600;
-		white-space: nowrap;
-		transition: all 0.2s ease;
-		pointer-events: auto;
-		margin-bottom: 0.5rem;
-		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-	}
-
-	.today-btn-floating:hover {
-		background: #2563eb;
-		transform: scale(1.05);
-	}
-
 	.date-strip-container {
 		display: flex;
 		flex-direction: column;
@@ -264,15 +255,52 @@
 
 	.month-header {
 		display: flex;
+		align-items: center;
 		justify-content: center;
-		padding: 0.25rem 0 0.5rem;
+		gap: 0.5rem;
+		padding: 0.25rem 0.5rem 0.5rem;
 	}
 
 	.month-label {
-		font-size: 0.875rem;
+		font-size: 1.125rem;
 		font-weight: 600;
 		color: var(--color-foreground, #1f2937);
 		white-space: nowrap;
+	}
+
+	.today-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.3125rem 0.625rem;
+		background: var(--color-muted, #f3f4f6);
+		border: 1.5px solid var(--color-border, #e5e7eb);
+		border-radius: 9999px;
+		cursor: pointer;
+		color: var(--color-muted-foreground, #6b7280);
+		font-size: 0.75rem;
+		font-weight: 500;
+		white-space: nowrap;
+		transition: all 0.15s ease;
+	}
+
+	.today-btn:hover {
+		background: var(--color-surface-hover, #e5e7eb);
+		color: var(--color-foreground, #1f2937);
+		border-color: var(--color-border-strong, #d1d5db);
+	}
+
+	.today-icon {
+		width: 14px;
+		height: 14px;
+	}
+
+	.month-divider {
+		width: 1px;
+		height: 40px;
+		background: var(--color-border, #e5e7eb);
+		margin: 0 0.5rem;
+		flex-shrink: 0;
 	}
 
 	.days-scroll {
@@ -364,9 +392,23 @@
 			padding: 0.375rem;
 		}
 
-		.today-btn-floating {
-			padding: 0.375rem 0.75rem;
-			font-size: 0.75rem;
+		.month-label {
+			font-size: 1rem;
+		}
+
+		.month-header-side {
+			min-width: 60px;
+		}
+
+		.today-btn {
+			padding: 0.1875rem 0.5rem;
+			font-size: 0.6875rem;
+			gap: 0.25rem;
+		}
+
+		.today-icon {
+			width: 12px;
+			height: 12px;
 		}
 
 		.day-item {
@@ -382,8 +424,9 @@
 			font-size: 0.6875rem;
 		}
 
-		.month-label {
-			font-size: 0.75rem;
+		.month-divider {
+			height: 32px;
+			margin: 0 0.375rem;
 		}
 	}
 </style>
