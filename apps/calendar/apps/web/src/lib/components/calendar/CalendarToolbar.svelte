@@ -55,7 +55,7 @@
 	}
 </script>
 
-<PillToolbar position="bottom" bottomOffset="70px">
+<PillToolbar position="bottom" bottomOffset="140px">
 	<!-- Calendar selector -->
 	<PillCalendarSelector direction="up" embedded={true} />
 

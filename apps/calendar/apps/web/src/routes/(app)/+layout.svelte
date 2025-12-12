@@ -8,7 +8,6 @@
 		PillNavItem,
 		PillDropdownItem,
 		QuickInputItem,
-		QuickAction,
 		CreatePreview,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
@@ -34,6 +33,7 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { searchEvents } from '$lib/api/events';
+	import { searchStore } from '$lib/stores/search.svelte';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import {
@@ -49,19 +49,7 @@
 
 	let { children } = $props();
 
-	// QuickInputBar quick actions
-	const quickActions: QuickAction[] = [
-		{
-			id: 'today',
-			label: 'Heute',
-			icon: 'calendar',
-			onclick: () => viewStore.goToToday(),
-		},
-		{ id: 'agenda', label: 'Agenda', icon: 'list', href: '/agenda' },
-		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
-	];
-
-	// QuickInputBar search - search events
+	// InputBar search - search events
 	async function handleSearch(query: string): Promise<QuickInputItem[]> {
 		if (!query.trim()) return [];
 
@@ -76,7 +64,17 @@
 	}
 
 	function handleSelect(item: QuickInputItem) {
+		searchStore.clear();
 		goto(`/event/${item.id}`);
+	}
+
+	// Update search store when search changes (for calendar view highlighting)
+	function handleSearchChange(query: string, results: QuickInputItem[]) {
+		if (!query.trim()) {
+			searchStore.clear();
+		} else {
+			searchStore.setSearch(query, results);
+		}
 	}
 
 	// QuickInputBar Quick-Create handlers
@@ -347,11 +345,11 @@
 		</div>
 	</main>
 
-	<!-- Global Quick Input Bar -->
+	<!-- Global Input Bar -->
 	<QuickInputBar
 		onSearch={handleSearch}
 		onSelect={handleSelect}
-		{quickActions}
+		onSearchChange={handleSearchChange}
 		placeholder="Neuer Termin oder suchen..."
 		emptyText="Keine Termine gefunden"
 		searchingText="Suche..."
@@ -360,7 +358,7 @@
 		createText="Erstellen"
 		appIcon="calendar"
 		primaryColor="#3b82f6"
-		autoFocus={false}
+		autoFocus={true}
 	/>
 </div>
 

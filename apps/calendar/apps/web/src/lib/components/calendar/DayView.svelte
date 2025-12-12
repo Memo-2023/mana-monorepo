@@ -3,6 +3,7 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
 	import TaskBlock from './TaskBlock.svelte';
 	import { goto } from '$app/navigation';
@@ -677,6 +678,8 @@
 				{#each headerAllDayEvents as event}
 					<button
 						class="all-day-event"
+						class:search-highlighted={searchStore.isEventHighlighted(event.id)}
+						class:search-dimmed={searchStore.isEventDimmed(event.id)}
 						style="background-color: {calendarsStore.getColor(event.calendarId)}"
 						onclick={(e) => handleEventClick(event, e)}
 					>
@@ -719,6 +722,8 @@
 			{#each blockAllDayEvents as event}
 				<button
 					class="all-day-block-event"
+					class:search-highlighted={searchStore.isEventHighlighted(event.id)}
+					class:search-dimmed={searchStore.isEventDimmed(event.id)}
 					style="background-color: {calendarsStore.getColor(event.calendarId)}"
 					onclick={(e) => handleEventClick(event, e)}
 				>
@@ -731,12 +736,16 @@
 				{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
 				{@const isBeingResized = isResizing && resizeEvent?.id === event.id}
 				{@const isDraft = eventsStore.isDraftEvent(event.id)}
+				{@const isSearchHighlighted = searchStore.isEventHighlighted(event.id)}
+				{@const isSearchDimmed = searchStore.isEventDimmed(event.id)}
 				<!-- svelte-ignore a11y_click_events_have_key_events -->
 				<div
 					class="event-card"
 					class:dragging={isBeingDragged}
 					class:resizing={isBeingResized}
 					class:draft={isDraft}
+					class:search-highlighted={isSearchHighlighted}
+					class:search-dimmed={isSearchDimmed}
 					data-event-id={event.id}
 					style={isBeingDragged
 						? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
@@ -844,6 +853,18 @@
 		border-radius: var(--radius-sm);
 		border: none;
 		cursor: pointer;
+		transition: opacity 0.15s ease;
+	}
+
+	.all-day-event.search-highlighted {
+		outline: 2px solid hsl(var(--color-primary));
+		outline-offset: 1px;
+		box-shadow: 0 0 0 3px hsl(var(--color-primary) / 0.3);
+	}
+
+	.all-day-event.search-dimmed {
+		opacity: 0.35;
+		filter: grayscale(0.3);
 	}
 
 	/* Block-style all-day events (displayed as full-day blocks in the grid) */
@@ -868,6 +889,17 @@
 
 	.all-day-block-event:hover {
 		opacity: 0.5;
+	}
+
+	.all-day-block-event.search-highlighted {
+		opacity: 0.6;
+		outline: 2px solid hsl(var(--color-primary));
+		outline-offset: 1px;
+	}
+
+	.all-day-block-event.search-dimmed {
+		opacity: 0.15;
+		filter: grayscale(0.5);
 	}
 
 	.all-day-block-event .event-title {
@@ -967,6 +999,21 @@
 		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: -1px;
 		animation: pulse-outline 1.5s ease-in-out infinite;
+	}
+
+	/* Search highlighting */
+	.event-card.search-highlighted {
+		outline: 2px solid hsl(var(--color-primary));
+		outline-offset: 1px;
+		box-shadow:
+			0 0 0 4px hsl(var(--color-primary) / 0.3),
+			0 4px 12px rgba(0, 0, 0, 0.25);
+		z-index: 10;
+	}
+
+	.event-card.search-dimmed {
+		opacity: 0.35;
+		filter: grayscale(0.3);
 	}
 
 	@keyframes pulse-outline {

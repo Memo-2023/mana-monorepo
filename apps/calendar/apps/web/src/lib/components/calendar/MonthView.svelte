@@ -3,6 +3,7 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore } from '$lib/stores/todos.svelte';
 	import TodoDayCell from './TodoDayCell.svelte';
 	import { goto } from '$app/navigation';
@@ -286,11 +287,15 @@
 							{#each getEventsForDay(day) as event}
 								{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
 								{@const isDraft = eventsStore.isDraftEvent(event.id)}
+								{@const isSearchHighlighted = searchStore.isEventHighlighted(event.id)}
+								{@const isSearchDimmed = searchStore.isEventDimmed(event.id)}
 								<!-- svelte-ignore a11y_click_events_have_key_events -->
 								<div
 									class="event-pill"
 									class:dragging={isBeingDragged}
 									class:draft={isDraft}
+									class:search-highlighted={isSearchHighlighted}
+									class:search-dimmed={isSearchDimmed}
 									data-event-id={event.id}
 									style="background-color: {calendarsStore.getColor(event.calendarId)}"
 									onpointerdown={(e) => startDrag(event, e)}
@@ -456,6 +461,20 @@
 		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: -1px;
 		animation: pulse-outline 1.5s ease-in-out infinite;
+	}
+
+	/* Search highlighting */
+	.event-pill.search-highlighted {
+		outline: 2px solid hsl(var(--color-primary));
+		outline-offset: 1px;
+		box-shadow: 0 0 0 3px hsl(var(--color-primary) / 0.3);
+		z-index: 10;
+		transform: scale(1.02);
+	}
+
+	.event-pill.search-dimmed {
+		opacity: 0.35;
+		filter: grayscale(0.3);
 	}
 
 	@keyframes pulse-outline {
