@@ -7,6 +7,7 @@ import { browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
 
 const MANA_AUTH_URL = env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+const BACKEND_URL = env.PUBLIC_BACKEND_URL || 'http://localhost:3006';
 
 export interface UserData {
 	id: string;
@@ -28,7 +29,10 @@ async function getAuthService() {
 	if (!_authService) {
 		try {
 			const { initializeWebAuth } = await import('@manacore/shared-auth');
-			const auth = initializeWebAuth({ baseUrl: MANA_AUTH_URL });
+			const auth = initializeWebAuth({
+				baseUrl: MANA_AUTH_URL,
+				backendUrl: BACKEND_URL, // Enables automatic token refresh on 401 responses
+			});
 			_authService = auth.authService;
 			_tokenManager = auth.tokenManager;
 		} catch (error) {
