@@ -136,7 +136,61 @@
 	let daysContainerEl: HTMLDivElement;
 
 	function getEventsForDay(day: Date) {
-		return eventsStore.getEventsForDay(day).filter((e) => !e.isAllDay);
+		const allEvents = eventsStore.getEventsForDay(day).filter((e) => !e.isAllDay);
+
+		// If hour filtering is enabled, only show events that overlap with visible range
+		if (settingsStore.filterHoursEnabled) {
+			const visibleStartMinutes = settingsStore.dayStartHour * 60;
+			const visibleEndMinutes = settingsStore.dayEndHour * 60;
+
+			return allEvents.filter((event) => {
+				const start =
+					typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+				const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+
+				const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
+				const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
+
+				// Event overlaps with visible range
+				return eventStartMinutes < visibleEndMinutes && eventEndMinutes > visibleStartMinutes;
+			});
+		}
+
+		return allEvents;
+	}
+
+	// Get events that are completely outside the visible time range
+	function getOverflowEventsForDay(day: Date): { before: CalendarEvent[]; after: CalendarEvent[] } {
+		if (!settingsStore.filterHoursEnabled) {
+			return { before: [], after: [] };
+		}
+
+		const allEvents = eventsStore.getEventsForDay(day).filter((e) => !e.isAllDay);
+		const before: CalendarEvent[] = [];
+		const after: CalendarEvent[] = [];
+
+		const visibleStartMinutes = settingsStore.dayStartHour * 60;
+		const visibleEndMinutes = settingsStore.dayEndHour * 60;
+
+		for (const event of allEvents) {
+			const start =
+				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+			const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+
+			const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
+			const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
+
+			// Event ends before visible range starts
+			if (eventEndMinutes <= visibleStartMinutes) {
+				before.push(event);
+			}
+			// Event starts after visible range ends
+			else if (eventStartMinutes >= visibleEndMinutes) {
+				after.push(event);
+			}
+		}
+
+		return { before, after };
 	}
 
 	function getAllDayEventsForDay(day: Date) {
@@ -961,6 +1015,36 @@
 						</div>
 					{/if}
 
+					<!-- Overflow indicators for events outside visible time range -->
+					{#if true}
+						{@const overflow = getOverflowEventsForDay(day)}
+						{#if overflow.before.length > 0}
+							<div class="overflow-indicator top" title="{overflow.before.length} Termin(e) früher">
+								{#each overflow.before as event}
+									<div
+										class="overflow-line"
+										style="background-color: {calendarsStore.getColor(event.calendarId)}"
+										title="{formatEventTime(event.startTime)} {event.title}"
+									></div>
+								{/each}
+							</div>
+						{/if}
+						{#if overflow.after.length > 0}
+							<div
+								class="overflow-indicator bottom"
+								title="{overflow.after.length} Termin(e) später"
+							>
+								{#each overflow.after as event}
+									<div
+										class="overflow-line"
+										style="background-color: {calendarsStore.getColor(event.calendarId)}"
+										title="{formatEventTime(event.startTime)} {event.title}"
+									></div>
+								{/each}
+							</div>
+						{/if}
+					{/if}
+
 					<!-- Current time indicator -->
 					{#if isToday(day)}
 						<div class="time-indicator" style="top: {currentTimePosition}%"></div>
@@ -1290,27 +1374,6 @@
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 	}
 
-	/* Task drag ghost */
-	.task-drag-ghost {
-		position: absolute;
-		left: 2px;
-		right: 2px;
-		padding: 4px 6px;
-		background: hsl(var(--color-surface) / 0.8);
-		border: 2px dashed hsl(var(--color-primary));
-		border-radius: var(--radius-sm);
-		opacity: 0.7;
-		pointer-events: none;
-		z-index: 50;
-		overflow: hidden;
-	}
-
-	.task-drag-ghost .task-title {
-		font-size: 0.7rem;
-		font-weight: 500;
-		color: hsl(var(--color-foreground));
-	}
-
 	/* Sidebar task drop target */
 	.day-column.drop-target {
 		background: hsl(var(--color-primary) / 0.15);
@@ -1407,5 +1470,50 @@
 		height: 10px;
 		border-radius: 50%;
 		background: hsl(var(--color-error));
+	}
+
+	/* Overflow indicators for events outside visible time range */
+	.overflow-indicator {
+		position: absolute;
+		left: 2px;
+		right: 2px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		z-index: 5;
+		padding: 2px;
+	}
+
+	.overflow-indicator.top {
+		top: 0;
+	}
+
+	.overflow-indicator.bottom {
+		bottom: 0;
+	}
+
+	.overflow-line {
+		height: 3px;
+		border-radius: 2px;
+		opacity: 0.7;
+		cursor: pointer;
+		transition:
+			opacity 0.15s ease,
+			height 0.15s ease;
+	}
+
+	.overflow-line:hover {
+		opacity: 1;
+		height: 5px;
+	}
+
+	.compact .overflow-line,
+	.very-compact .overflow-line {
+		height: 2px;
+	}
+
+	.compact .overflow-line:hover,
+	.very-compact .overflow-line:hover {
+		height: 4px;
 	}
 </style>

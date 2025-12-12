@@ -31,8 +31,8 @@ export interface PillDropdownItem {
 	icon?: string;
 	/** Image URL for icon (data URL or regular URL) */
 	imageUrl?: string;
-	/** Click handler */
-	onClick?: () => void;
+	/** Click handler (receives optional MouseEvent for modifier key detection) */
+	onClick?: (event?: MouseEvent) => void;
 	/** Whether item is disabled */
 	disabled?: boolean;
 	/** Whether item should be styled as danger/destructive */
@@ -43,6 +43,10 @@ export interface PillDropdownItem {
 	divider?: boolean;
 	/** Nested submenu items */
 	submenu?: PillDropdownItem[];
+	/** Whether to show a split button for opening in panel */
+	showSplitButton?: boolean;
+	/** Click handler for split button */
+	onSplitClick?: () => void;
 }
 
 export interface PillAppItem {

@@ -4,6 +4,11 @@
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import {
+		SplitPaneContainer,
+		setSplitPanelContext,
+		DEFAULT_APPS,
+	} from '@manacore/shared-splitscreen';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
@@ -28,6 +33,7 @@
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
+		isToolbarCollapsed as toolbarCollapsedStore,
 	} from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
@@ -42,10 +48,19 @@
 		formatParsedEventPreview,
 	} from '$lib/utils/event-parser';
 	import CalendarToolbar from '$lib/components/calendar/CalendarToolbar.svelte';
+	import CalendarToolbarContent from '$lib/components/calendar/CalendarToolbarContent.svelte';
 	import DateStrip from '$lib/components/calendar/DateStrip.svelte';
 
 	// App switcher items
 	const appItems = getPillAppItems('calendar');
+
+	// Split-Panel Store für Split-Screen Feature
+	const splitPanel = setSplitPanelContext('calendar', DEFAULT_APPS);
+
+	// Handler für Split-Screen Panel-Öffnung
+	function handleOpenInPanel(appId: string, url: string) {
+		splitPanel.openPanel(appId);
+	}
 
 	let { children } = $props();
 
@@ -128,6 +143,7 @@
 
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
+	let isToolbarCollapsed = $state(false);
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -234,6 +250,19 @@
 		}
 	}
 
+	function handleToolbarModeChange(isSidebar: boolean) {
+		// Sync toolbar mode with nav mode
+		handleModeChange(isSidebar);
+	}
+
+	function handleToolbarCollapsedChange(collapsed: boolean) {
+		isToolbarCollapsed = collapsed;
+		toolbarCollapsedStore.set(collapsed);
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem('calendar-toolbar-collapsed', String(collapsed));
+		}
+	}
+
 	function handleToggleTheme() {
 		theme.toggleMode();
 	}
@@ -253,6 +282,9 @@
 			goto('/login');
 			return;
 		}
+
+		// Initialize split-panel from URL/localStorage
+		splitPanel.initialize();
 
 		// Initialize view state
 		viewStore.initialize();
@@ -281,86 +313,114 @@
 			isCollapsed = true;
 			collapsedStore.set(true);
 		}
+
+		// Initialize toolbar collapsed state from localStorage
+		const savedToolbarCollapsed = localStorage.getItem('calendar-toolbar-collapsed');
+		if (savedToolbarCollapsed === 'true') {
+			isToolbarCollapsed = true;
+			toolbarCollapsedStore.set(true);
+		}
 	});
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="layout-container">
-	<PillNavigation
-		items={navItems}
-		currentPath={$page.url.pathname}
-		appName="Kalender"
-		homeRoute="/"
-		onToggleTheme={handleToggleTheme}
-		{isDark}
-		{isSidebarMode}
-		onModeChange={handleModeChange}
-		{isCollapsed}
-		onCollapsedChange={handleCollapsedChange}
-		desktopPosition="bottom"
-		showThemeToggle={true}
-		showThemeVariants={true}
-		{themeVariantItems}
-		{currentThemeVariantLabel}
-		themeMode={theme.mode}
-		onThemeModeChange={handleThemeModeChange}
-		showLanguageSwitcher={true}
-		{languageItems}
-		{currentLanguageLabel}
-		showLogout={authStore.isAuthenticated}
-		onLogout={handleLogout}
-		loginHref="/login"
-		primaryColor="#3b82f6"
-		showAppSwitcher={true}
-		{appItems}
-		{userEmail}
-		settingsHref="/settings"
-		manaHref="/mana"
-		profileHref="/profile"
-		allAppsHref="/apps"
-	/>
-
-	<!-- Date strip (only on main calendar page) -->
-	{#if showCalendarToolbar}
-		<DateStrip />
-	{/if}
-
-	<!-- Calendar toolbar (only on main calendar page) -->
-	{#if showCalendarToolbar}
-		<CalendarToolbar />
-	{/if}
-
-	<main
-		class="main-content bg-background"
-		class:sidebar-mode={isSidebarMode && !isCollapsed}
-		class:floating-mode={!isSidebarMode && !isCollapsed}
-		class:has-toolbar={showCalendarToolbar}
-	>
-		<div
-			class="content-wrapper"
-			class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}
+<SplitPaneContainer>
+	<div class="layout-container">
+		<PillNavigation
+			items={navItems}
+			currentPath={$page.url.pathname}
+			appName="Kalender"
+			homeRoute="/"
+			onToggleTheme={handleToggleTheme}
+			{isDark}
+			{isSidebarMode}
+			onModeChange={handleModeChange}
+			{isCollapsed}
+			onCollapsedChange={handleCollapsedChange}
+			desktopPosition="bottom"
+			showThemeToggle={true}
+			showThemeVariants={true}
+			{themeVariantItems}
+			{currentThemeVariantLabel}
+			themeMode={theme.mode}
+			onThemeModeChange={handleThemeModeChange}
+			showLanguageSwitcher={true}
+			{languageItems}
+			{currentLanguageLabel}
+			showLogout={authStore.isAuthenticated}
+			onLogout={handleLogout}
+			loginHref="/login"
+			primaryColor="#3b82f6"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			manaHref="/mana"
+			profileHref="/profile"
+			allAppsHref="/apps"
+			onOpenInPanel={handleOpenInPanel}
 		>
-			{@render children()}
-		</div>
-	</main>
+			{#snippet toolbarContent()}
+				{#if showCalendarToolbar}
+					<CalendarToolbarContent vertical={true} />
+				{/if}
+			{/snippet}
+		</PillNavigation>
 
-	<!-- Global Input Bar -->
-	<QuickInputBar
-		onSearch={handleSearch}
-		onSelect={handleSelect}
-		onSearchChange={handleSearchChange}
-		placeholder="Neuer Termin oder suchen..."
-		emptyText="Keine Termine gefunden"
-		searchingText="Suche..."
-		onCreate={handleCreate}
-		onParseCreate={handleParseCreate}
-		createText="Erstellen"
-		appIcon="calendar"
-		primaryColor="#3b82f6"
-		autoFocus={true}
-	/>
-</div>
+		<!-- Date strip (only on main calendar page) -->
+		{#if showCalendarToolbar}
+			<DateStrip {isSidebarMode} />
+		{/if}
+
+		<!-- Calendar toolbar (only on main calendar page, not in sidebar mode) -->
+		{#if showCalendarToolbar && !isSidebarMode}
+			<CalendarToolbar
+				{isSidebarMode}
+				isCollapsed={isToolbarCollapsed}
+				onModeChange={handleToolbarModeChange}
+				onCollapsedChange={handleToolbarCollapsedChange}
+			/>
+		{/if}
+
+		<main
+			class="main-content bg-background"
+			class:sidebar-mode={isSidebarMode && !isCollapsed}
+			class:floating-mode={!isSidebarMode && !isCollapsed}
+			class:has-toolbar={showCalendarToolbar}
+		>
+			<div
+				class="content-wrapper"
+				class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}
+			>
+				{@render children()}
+			</div>
+		</main>
+
+		<!-- Global Input Bar -->
+		<QuickInputBar
+			onSearch={handleSearch}
+			onSelect={handleSelect}
+			onSearchChange={handleSearchChange}
+			placeholder="Neuer Termin oder suchen..."
+			emptyText="Keine Termine gefunden"
+			searchingText="Suche..."
+			onCreate={handleCreate}
+			onParseCreate={handleParseCreate}
+			createText="Erstellen"
+			appIcon="calendar"
+			primaryColor="#3b82f6"
+			autoFocus={true}
+			bottomOffset={showCalendarToolbar
+				? isSidebarMode
+					? '0px'
+					: '130px'
+				: isSidebarMode
+					? '0px'
+					: '70px'}
+		/>
+	</div>
+</SplitPaneContainer>
 
 <style>
 	.layout-container {

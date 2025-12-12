@@ -10,6 +10,7 @@ Dieses Verzeichnis dokumentiert zentrale Services, die von allen Manacore-Apps g
 | **Theming** | Theme-Varianten, Dark Mode, Accessibility, Custom Themes | [THEMING.md](./THEMING.md) |
 | **Help** | Zentrale Hilfeseite mit FAQ, Features, Shortcuts, Changelog | [HELP.md](./HELP.md) |
 | **Command Bar** | Globale Schnellsuche und Navigation (Cmd/Ctrl+K) | [COMMAND-BAR.md](./COMMAND-BAR.md) |
+| **Split-Screen** | Zwei Apps nebeneinander im Browser (iFrame-basiert) | [SPLIT-SCREEN.md](./SPLIT-SCREEN.md) |
 
 ## Architektur-Prinzipien
 
@@ -80,6 +81,7 @@ pnpm db:push
 | `@manacore/shared-help-content` | Content-Loader, Parser, Merger, Suche |
 | `@manacore/shared-help-ui` | Svelte UI-Komponenten für Hilfeseite |
 | `@manacore/shared-help-mobile` | React Native Komponenten für Hilfe |
+| `@manacore/shared-splitscreen` | Split-Screen Container, Store, Komponenten |
 
 ## Hinzufügen neuer zentraler Services
 

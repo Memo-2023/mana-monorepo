@@ -109,7 +109,8 @@
 	function createAppDropdownItems(
 		apps: PillAppItem[],
 		allAppsUrl?: string,
-		allAppsText?: string
+		allAppsText?: string,
+		openInPanelHandler?: (appId: string, url: string) => void
 	): PillDropdownItem[] {
 		const items: PillDropdownItem[] = apps.map((app) => ({
 			id: app.id,
@@ -117,7 +118,19 @@
 			// Use image icon if available, otherwise use grid as fallback
 			imageUrl: app.icon,
 			icon: app.icon ? undefined : 'grid',
-			onClick: () => {
+			onClick: (event?: MouseEvent) => {
+				// Check for modifier keys (Ctrl/Cmd + Click opens in panel)
+				if (
+					event &&
+					(event.ctrlKey || event.metaKey) &&
+					openInPanelHandler &&
+					app.url &&
+					!app.isCurrent
+				) {
+					openInPanelHandler(app.id, app.url);
+					return;
+				}
+
 				if (app.isCurrent) {
 					// Navigate to home route for current app
 					window.location.href = '/';
@@ -127,6 +140,10 @@
 			},
 			active: app.isCurrent,
 			disabled: false,
+			// Show split button if handler is provided and app is not current
+			showSplitButton: !!openInPanelHandler && !app.isCurrent && !!app.url,
+			onSplitClick:
+				openInPanelHandler && app.url ? () => openInPanelHandler(app.id, app.url!) : undefined,
 		}));
 
 		// Add "All Apps" link at the end if href is provided
@@ -228,6 +245,10 @@
 		showA11yQuickToggles?: boolean;
 		/** Desktop navigation position (mobile always at bottom) */
 		desktopPosition?: 'top' | 'bottom';
+		/** Called when an app should be opened in a split panel */
+		onOpenInPanel?: (appId: string, url: string) => void;
+		/** Toolbar content snippet (shown in sidebar mode) */
+		toolbarContent?: Snippet;
 	}
 
 	let {
@@ -270,6 +291,8 @@
 		onA11yReduceMotionChange,
 		showA11yQuickToggles = false,
 		desktopPosition = 'top',
+		onOpenInPanel,
+		toolbarContent,
 	}: Props = $props();
 
 	// Type guards for elements
@@ -320,8 +343,15 @@
 		}
 	});
 
-	// Dropdown direction: up on mobile (nav at bottom), down on desktop/sidebar
-	const dropdownDirection = $derived<'up' | 'down'>(isMobile && !isSidebarMode ? 'up' : 'down');
+	// Dropdown direction: up when nav is at bottom (mobile or desktop-bottom), down otherwise
+	const dropdownDirection = $derived<'up' | 'down'>(
+		// Mobile: always up (nav at bottom) unless in sidebar mode
+		(isMobile && !isSidebarMode) ||
+			// Desktop with bottom position: up unless in sidebar mode
+			(!isMobile && desktopPosition === 'bottom' && !isSidebarMode)
+			? 'up'
+			: 'down'
+	);
 
 	function toggleSidebarMode() {
 		const newValue = !isSidebarMode;
@@ -412,7 +442,14 @@
 		chevronDown: 'M19 9l-7 7-7-7',
 		chevronUp: 'M5 15l7-7 7 7',
 		chevronLeft: 'M15 19l-7-7 7-7',
+		chevronRight: 'M9 5l7 7-7 7',
 		menu: 'M4 6h16M4 12h16M4 18h16',
+		// Layout icons
+		sidebar: 'M3 3h7v18H3V3zm9 0h9v18h-9V3z', // Sidebar layout icon
+		layoutBottom: 'M3 3h18v9H3V3zm0 12h18v6H3v-6z', // Bottom bar layout icon
+		panelRight: 'M9 3h12v18H9V3zM3 3h3v18H3V3z', // Panel right icon
+		minimize: 'M4 12h16', // Minimize (minus) icon
+		maximize: 'M4 8h16M4 16h16', // Two lines for expand
 		fire: 'M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z',
 		grid: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z',
 		gridSmall:
@@ -442,7 +479,7 @@
 			<!-- Logo pill / App Switcher -->
 			{#if showAppSwitcher && appItems.length > 0}
 				<PillDropdown
-					items={createAppDropdownItems(appItems, allAppsHref, allAppsLabel)}
+					items={createAppDropdownItems(appItems, allAppsHref, allAppsLabel, onOpenInPanel)}
 					direction={dropdownDirection}
 					label={appName}
 					icon="grid"
@@ -770,28 +807,24 @@
 			<!-- Control Button (right position in horizontal mode, bottom in sidebar mode) -->
 			{#if !isSidebarMode}
 				<div class="pill glass-pill segmented-control">
-					<button onclick={collapseNav} class="segment-btn" title="Collapse navigation">
+					<button onclick={collapseNav} class="segment-btn" title="Navigation minimieren">
 						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
 								stroke-width="2"
-								d={getIconPath('chevronLeft')}
+								d={getIconPath('chevronRight')}
 							/>
 						</svg>
 					</button>
 					<div class="segment-divider"></div>
-					<button
-						onclick={toggleSidebarMode}
-						class="segment-btn"
-						title="Switch to sidebar navigation"
-					>
+					<button onclick={toggleSidebarMode} class="segment-btn" title="Zur Sidebar wechseln">
 						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
 								stroke-width="2"
-								d={getIconPath('chevronDown')}
+								d={getIconPath('sidebar')}
 							/>
 						</svg>
 					</button>
@@ -800,26 +833,37 @@
 
 			<!-- Control Button (bottom position in sidebar mode) -->
 			{#if isSidebarMode}
+				<!-- Toolbar content (if provided) -->
+				{#if toolbarContent}
+					<div class="pill-divider sidebar-divider"></div>
+					<div class="sidebar-toolbar-content">
+						{@render toolbarContent()}
+					</div>
+				{/if}
 				<div class="sidebar-spacer"></div>
 				<div class="pill glass-pill segmented-control sidebar-segmented">
-					<button onclick={toggleSidebarMode} class="segment-btn" title="Switch to top navigation">
+					<button
+						onclick={toggleSidebarMode}
+						class="segment-btn"
+						title="Zur Bottom-Navigation wechseln"
+					>
 						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
 								stroke-width="2"
-								d={getIconPath('chevronUp')}
+								d={getIconPath('layoutBottom')}
 							/>
 						</svg>
 					</button>
 					<div class="segment-divider"></div>
-					<button onclick={collapseNav} class="segment-btn" title="Collapse navigation">
+					<button onclick={collapseNav} class="segment-btn" title="Sidebar minimieren">
 						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
 								stroke-width="2"
-								d={getIconPath('chevronLeft')}
+								d={getIconPath('chevronRight')}
 							/>
 						</svg>
 					</button>
@@ -1097,6 +1141,89 @@
 		height: 100%;
 	}
 
+	/* Toolbar content in sidebar mode */
+	.sidebar-toolbar-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 0.5rem 0;
+		max-height: 40vh;
+		overflow-y: auto;
+		overflow-x: hidden;
+		scrollbar-width: thin;
+		scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+	}
+
+	.sidebar-toolbar-content::-webkit-scrollbar {
+		width: 4px;
+	}
+
+	.sidebar-toolbar-content::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.sidebar-toolbar-content::-webkit-scrollbar-thumb {
+		background: rgba(0, 0, 0, 0.2);
+		border-radius: 4px;
+	}
+
+	:global(.dark) .sidebar-toolbar-content {
+		scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+	}
+
+	:global(.dark) .sidebar-toolbar-content::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.2);
+	}
+
+	.sidebar-toolbar-content :global(.toolbar-bar) {
+		flex-direction: column;
+		background: transparent;
+		backdrop-filter: none;
+		border: none;
+		box-shadow: none;
+		border-radius: 0;
+		padding: 0;
+		gap: 0.5rem;
+	}
+
+	.sidebar-toolbar-content :global(.toolbar-content) {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.5rem;
+	}
+
+	.sidebar-toolbar-content :global(.pill-toolbar-btn),
+	.sidebar-toolbar-content :global(.pill-dropdown .trigger-button) {
+		width: 100%;
+		justify-content: flex-start;
+		background: transparent;
+		border: 1px solid transparent;
+		box-shadow: none;
+	}
+
+	.sidebar-toolbar-content :global(.pill-toolbar-btn:hover),
+	.sidebar-toolbar-content :global(.pill-dropdown .trigger-button:hover) {
+		background: rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.dark) .sidebar-toolbar-content :global(.pill-toolbar-btn:hover),
+	:global(.dark) .sidebar-toolbar-content :global(.pill-dropdown .trigger-button:hover) {
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	/* Style for PillViewSwitcher in sidebar */
+	.sidebar-toolbar-content :global(.pill-view-switcher) {
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.sidebar-toolbar-content :global(.pill-view-switcher .view-option) {
+		width: 100%;
+		justify-content: flex-start;
+		border-radius: 9999px;
+	}
+
 	/* Mobile: Sidebar container adjustments */
 	@media (max-width: 768px) {
 		.sidebar-container {
@@ -1286,17 +1413,17 @@
 		margin: 0;
 	}
 
-	/* FAB for collapsed state */
+	/* FAB for collapsed state - positioned at right */
 	.nav-fab {
 		position: fixed;
 		top: 0;
-		left: 0;
+		right: 0;
 		z-index: 1001;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		padding: 0.875rem;
-		border-radius: 0 0 1rem 0;
+		border-radius: 0 0 0 1rem;
 		cursor: pointer;
 		border: none;
 	}
@@ -1306,17 +1433,17 @@
 		.nav-fab.desktop-bottom {
 			top: auto;
 			bottom: 0;
-			border-radius: 0 1rem 0 0;
+			border-radius: 1rem 0 0 0;
 		}
 	}
 
-	/* Mobile: FAB always at bottom left */
+	/* Mobile: FAB always at bottom right */
 	@media (max-width: 768px) {
 		.nav-fab {
 			top: auto;
 			bottom: 0;
-			left: 0;
-			border-radius: 0 1rem 0 0;
+			right: 0;
+			border-radius: 1rem 0 0 0;
 			padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.875rem);
 		}
 	}

@@ -4,6 +4,11 @@
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import {
+		SplitPaneContainer,
+		setSplitPanelContext,
+		DEFAULT_APPS,
+	} from '@manacore/shared-splitscreen';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
@@ -35,6 +40,14 @@
 
 	// App switcher items
 	const appItems = getPillAppItems('todo');
+
+	// Split-Panel Store für Split-Screen Feature
+	const splitPanel = setSplitPanelContext('todo', DEFAULT_APPS);
+
+	// Handler für Split-Screen Panel-Öffnung
+	function handleOpenInPanel(appId: string, url: string) {
+		splitPanel.openPanel(appId);
+	}
 
 	let { children } = $props();
 
@@ -246,6 +259,9 @@
 			return;
 		}
 
+		// Initialize split-panel from URL/localStorage
+		splitPanel.initialize();
+
 		// Load data
 		await Promise.all([
 			projectsStore.fetchProjects(),
@@ -310,67 +326,70 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="layout-container">
-	<PillNavigation
-		items={navItems}
-		currentPath={$page.url.pathname}
-		appName="Todo"
-		homeRoute="/"
-		onToggleTheme={handleToggleTheme}
-		{isDark}
-		{isSidebarMode}
-		onModeChange={handleModeChange}
-		{isCollapsed}
-		onCollapsedChange={handleCollapsedChange}
-		desktopPosition={userSettings.nav.desktopPosition}
-		showThemeToggle={true}
-		showThemeVariants={true}
-		{themeVariantItems}
-		{currentThemeVariantLabel}
-		themeMode={theme.mode}
-		onThemeModeChange={handleThemeModeChange}
-		showLanguageSwitcher={true}
-		{languageItems}
-		{currentLanguageLabel}
-		showLogout={authStore.isAuthenticated}
-		onLogout={handleLogout}
-		loginHref="/login"
-		primaryColor="#8b5cf6"
-		showAppSwitcher={true}
-		{appItems}
-		{userEmail}
-		settingsHref="/settings"
-		manaHref="/mana"
-		profileHref="/profile"
-		allAppsHref="/apps"
-	/>
+<SplitPaneContainer>
+	<div class="layout-container">
+		<PillNavigation
+			items={navItems}
+			currentPath={$page.url.pathname}
+			appName="Todo"
+			homeRoute="/"
+			onToggleTheme={handleToggleTheme}
+			{isDark}
+			{isSidebarMode}
+			onModeChange={handleModeChange}
+			{isCollapsed}
+			onCollapsedChange={handleCollapsedChange}
+			desktopPosition={userSettings.nav.desktopPosition}
+			showThemeToggle={true}
+			showThemeVariants={true}
+			{themeVariantItems}
+			{currentThemeVariantLabel}
+			themeMode={theme.mode}
+			onThemeModeChange={handleThemeModeChange}
+			showLanguageSwitcher={true}
+			{languageItems}
+			{currentLanguageLabel}
+			showLogout={authStore.isAuthenticated}
+			onLogout={handleLogout}
+			loginHref="/login"
+			primaryColor="#8b5cf6"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			manaHref="/mana"
+			profileHref="/profile"
+			allAppsHref="/apps"
+			onOpenInPanel={handleOpenInPanel}
+		/>
 
-	<main
-		class="main-content bg-background"
-		class:sidebar-mode={isSidebarMode && !isCollapsed}
-		class:floating-mode={!isSidebarMode && !isCollapsed}
-	>
-		<div class="content-wrapper" class:full-width={$page.url.pathname === '/kanban'}>
-			{@render children()}
-		</div>
-	</main>
+		<main
+			class="main-content bg-background"
+			class:sidebar-mode={isSidebarMode && !isCollapsed}
+			class:floating-mode={!isSidebarMode && !isCollapsed}
+		>
+			<div class="content-wrapper" class:full-width={$page.url.pathname === '/kanban'}>
+				{@render children()}
+			</div>
+		</main>
 
-	<!-- Global Quick Input Bar -->
-	<QuickInputBar
-		onSearch={handleSearch}
-		onSelect={handleSelect}
-		{quickActions}
-		placeholder="Neue Aufgabe oder suchen..."
-		emptyText="Keine Aufgaben gefunden"
-		searchingText="Suche..."
-		onCreate={handleCreate}
-		onParseCreate={handleParseCreate}
-		createText="Erstellen"
-		appIcon="todo"
-		primaryColor="#8b5cf6"
-		autoFocus={true}
-	/>
-</div>
+		<!-- Global Quick Input Bar -->
+		<QuickInputBar
+			onSearch={handleSearch}
+			onSelect={handleSelect}
+			{quickActions}
+			placeholder="Neue Aufgabe oder suchen..."
+			emptyText="Keine Aufgaben gefunden"
+			searchingText="Suche..."
+			onCreate={handleCreate}
+			onParseCreate={handleParseCreate}
+			createText="Erstellen"
+			appIcon="todo"
+			primaryColor="#8b5cf6"
+			autoFocus={true}
+		/>
+	</div>
+</SplitPaneContainer>
 
 <style>
 	.layout-container {

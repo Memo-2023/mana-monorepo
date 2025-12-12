@@ -4,6 +4,11 @@
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import {
+		SplitPaneContainer,
+		setSplitPanelContext,
+		DEFAULT_APPS,
+	} from '@manacore/shared-splitscreen';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
@@ -49,6 +54,14 @@
 
 	// App switcher items
 	const appItems = getPillAppItems('contacts');
+
+	// Split-Panel Store für Split-Screen Feature
+	const splitPanel = setSplitPanelContext('contacts', DEFAULT_APPS);
+
+	// Handler für Split-Screen Panel-Öffnung
+	function handleOpenInPanel(appId: string, url: string) {
+		splitPanel.openPanel(appId);
+	}
 
 	let { children } = $props();
 
@@ -254,6 +267,9 @@
 			return;
 		}
 
+		// Initialize split-panel from URL/localStorage
+		splitPanel.initialize();
+
 		// Load user settings and tags
 		await userSettings.load();
 
@@ -287,78 +303,81 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<!-- Navigation Layout -->
-<div class="layout-container">
-	<!-- Shadow gradient above navigation -->
-	<div class="nav-shadow-gradient"></div>
+<SplitPaneContainer>
+	<!-- Navigation Layout -->
+	<div class="layout-container">
+		<!-- Shadow gradient above navigation -->
+		<div class="nav-shadow-gradient"></div>
 
-	<!-- Floating/Sidebar Pill Navigation -->
-	<PillNavigation
-		items={navItems}
-		currentPath={$page.url.pathname}
-		appName="Contacts"
-		homeRoute="/"
-		onToggleTheme={handleToggleTheme}
-		{isDark}
-		{isSidebarMode}
-		onModeChange={handleModeChange}
-		{isCollapsed}
-		onCollapsedChange={handleCollapsedChange}
-		desktopPosition={userSettings.nav.desktopPosition}
-		showThemeToggle={true}
-		showThemeVariants={true}
-		{themeVariantItems}
-		{currentThemeVariantLabel}
-		themeMode={theme.mode}
-		onThemeModeChange={handleThemeModeChange}
-		showLanguageSwitcher={true}
-		{languageItems}
-		{currentLanguageLabel}
-		showLogout={authStore.isAuthenticated}
-		onLogout={handleLogout}
-		loginHref="/login"
-		primaryColor="#3b82f6"
-		showAppSwitcher={true}
-		{appItems}
-		{userEmail}
-		settingsHref="/settings"
-		manaHref="/mana"
-		profileHref="/profile"
-		allAppsHref="/apps"
-	/>
+		<!-- Floating/Sidebar Pill Navigation -->
+		<PillNavigation
+			items={navItems}
+			currentPath={$page.url.pathname}
+			appName="Contacts"
+			homeRoute="/"
+			onToggleTheme={handleToggleTheme}
+			{isDark}
+			{isSidebarMode}
+			onModeChange={handleModeChange}
+			{isCollapsed}
+			onCollapsedChange={handleCollapsedChange}
+			desktopPosition={userSettings.nav.desktopPosition}
+			showThemeToggle={true}
+			showThemeVariants={true}
+			{themeVariantItems}
+			{currentThemeVariantLabel}
+			themeMode={theme.mode}
+			onThemeModeChange={handleThemeModeChange}
+			showLanguageSwitcher={true}
+			{languageItems}
+			{currentLanguageLabel}
+			showLogout={authStore.isAuthenticated}
+			onLogout={handleLogout}
+			loginHref="/login"
+			primaryColor="#3b82f6"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			manaHref="/mana"
+			profileHref="/profile"
+			allAppsHref="/apps"
+			onOpenInPanel={handleOpenInPanel}
+		/>
 
-	<!-- Main Content with dynamic padding based on nav mode -->
-	<main
-		class="main-content bg-background"
-		class:sidebar-mode={isSidebarMode && !isCollapsed}
-		class:floating-mode={!isSidebarMode}
-	>
-		<div class="content-wrapper">
-			{@render children()}
-		</div>
-	</main>
+		<!-- Main Content with dynamic padding based on nav mode -->
+		<main
+			class="main-content bg-background"
+			class:sidebar-mode={isSidebarMode && !isCollapsed}
+			class:floating-mode={!isSidebarMode}
+		>
+			<div class="content-wrapper">
+				{@render children()}
+			</div>
+		</main>
 
-	<!-- Contact Detail Modal -->
-	{#if showContactModal && modalContactId}
-		<ContactDetailModal contactId={modalContactId} onClose={handleCloseContactModal} />
-	{/if}
+		<!-- Contact Detail Modal -->
+		{#if showContactModal && modalContactId}
+			<ContactDetailModal contactId={modalContactId} onClose={handleCloseContactModal} />
+		{/if}
 
-	<!-- Global Quick Input Bar -->
-	<QuickInputBar
-		onSearch={handleSearch}
-		onSelect={handleSelect}
-		{quickActions}
-		placeholder="Neuer Kontakt oder suchen..."
-		emptyText="Keine Kontakte gefunden"
-		searchingText="Suche..."
-		onCreate={handleCreate}
-		onParseCreate={handleParseCreate}
-		createText="Erstellen"
-		appIcon="contacts"
-		primaryColor="#3b82f6"
-		autoFocus={false}
-	/>
-</div>
+		<!-- Global Quick Input Bar -->
+		<QuickInputBar
+			onSearch={handleSearch}
+			onSelect={handleSelect}
+			{quickActions}
+			placeholder="Neuer Kontakt oder suchen..."
+			emptyText="Keine Kontakte gefunden"
+			searchingText="Suche..."
+			onCreate={handleCreate}
+			onParseCreate={handleParseCreate}
+			createText="Erstellen"
+			appIcon="contacts"
+			primaryColor="#3b82f6"
+			autoFocus={false}
+		/>
+	</div>
+</SplitPaneContainer>
 
 <style>
 	.layout-container {
