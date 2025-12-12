@@ -16,9 +16,10 @@
 
 	interface Props {
 		isSidebarMode?: boolean;
+		isToolbarExpanded?: boolean;
 	}
 
-	let { isSidebarMode = false }: Props = $props();
+	let { isSidebarMode = false, isToolbarExpanded = false }: Props = $props();
 
 	// Get event count for a day (max 5 dots displayed)
 	function getEventCount(date: Date): number {
@@ -218,7 +219,11 @@
 	});
 </script>
 
-<div class="date-strip-wrapper" class:sidebar-mode={isSidebarMode}>
+<div
+	class="date-strip-wrapper"
+	class:sidebar-mode={isSidebarMode}
+	class:toolbar-expanded={isToolbarExpanded}
+>
 	<div class="date-strip-container">
 		<!-- Month label -->
 		<div class="month-header">
@@ -295,12 +300,21 @@
 		flex-direction: column;
 		align-items: center;
 		pointer-events: none;
-		transition: bottom 0.3s ease;
+		transition: bottom 0.2s ease;
+	}
+
+	/* When toolbar is expanded, push DateStrip up */
+	.date-strip-wrapper.toolbar-expanded {
+		bottom: calc(200px + env(safe-area-inset-bottom, 0px)); /* Extra 60px for toolbar */
 	}
 
 	/* When PillNav is in sidebar mode, no PillNav at bottom - just InputBar */
 	.date-strip-wrapper.sidebar-mode {
 		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.date-strip-wrapper.sidebar-mode.toolbar-expanded {
+		bottom: calc(130px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.today-button {

@@ -20,22 +20,13 @@
 		onModeChange?.(!isSidebarMode);
 	}
 
-	function collapseToolbar() {
-		onCollapsedChange?.(true);
-	}
-
-	function expandToolbar() {
-		onCollapsedChange?.(false);
-	}
-
 	function toggleToolbar() {
 		onCollapsedChange?.(!isCollapsed);
 	}
 </script>
 
-<!-- Toolbar Container - positioned next to InputBar -->
-<div class="toolbar-container" class:sidebar-mode={isSidebarMode}>
-	<!-- FAB Button (always visible) -->
+<!-- FAB Button - positioned next to InputBar -->
+<div class="fab-container" class:sidebar-mode={isSidebarMode} class:expanded={!isCollapsed}>
 	<button
 		onclick={toggleToolbar}
 		class="toolbar-fab glass-pill"
@@ -52,20 +43,21 @@
 					d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
 				/>
 			{:else}
-				<!-- Close icon -->
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M6 18L18 6M6 6l12 12"
-				/>
+				<!-- Chevron down icon -->
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 			{/if}
 		</svg>
 	</button>
+</div>
 
-	<!-- Expanded Toolbar Panel (opens above) -->
-	{#if !isCollapsed}
-		<div class="toolbar-panel glass-panel" transition:slide={{ duration: 200 }}>
+<!-- Expanded Toolbar Panel - below InputBar, pushes content up -->
+{#if !isCollapsed}
+	<div
+		class="toolbar-bar glass-panel"
+		class:sidebar-mode={isSidebarMode}
+		transition:slide={{ duration: 200 }}
+	>
+		<div class="toolbar-content">
 			<CalendarToolbarContent />
 
 			<div class="toolbar-divider"></div>
@@ -97,32 +89,73 @@
 				</svg>
 			</button>
 		</div>
-	{/if}
-</div>
+	</div>
+{/if}
 
 <style>
-	/* Container positioned next to InputBar */
-	.toolbar-container {
+	/* FAB Container - positioned next to InputBar */
+	.fab-container {
 		position: fixed;
 		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
 		right: calc(50% - 350px - 60px); /* Right of InputBar (max-width 700px / 2 + gap) */
 		z-index: 91; /* Above InputBar (90) */
-		display: flex;
-		flex-direction: column;
-		align-items: flex-end;
-		gap: 0.5rem;
 		pointer-events: none;
+		transition: bottom 0.2s ease;
 	}
 
-	.toolbar-container.sidebar-mode {
+	/* When expanded, move FAB up with InputBar */
+	.fab-container.expanded {
+		bottom: calc(130px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.fab-container.sidebar-mode {
 		bottom: calc(0px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.fab-container.sidebar-mode.expanded {
+		bottom: calc(60px + env(safe-area-inset-bottom, 0px));
 	}
 
 	/* Responsive positioning */
 	@media (max-width: 900px) {
-		.toolbar-container {
+		.fab-container {
 			right: 1rem;
 		}
+	}
+
+	/* Toolbar Bar - full width below InputBar */
+	.toolbar-bar {
+		position: fixed;
+		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+		left: 0;
+		right: 0;
+		z-index: 89; /* Below InputBar (90) */
+		display: flex;
+		justify-content: center;
+		padding: 0.5rem 1rem;
+	}
+
+	.toolbar-bar.sidebar-mode {
+		bottom: calc(0px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.toolbar-content {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		background: rgba(255, 255, 255, 0.92);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.08);
+		border-radius: 1rem;
+		white-space: nowrap;
+	}
+
+	:global(.dark) .toolbar-content {
+		background: rgba(30, 30, 30, 0.92);
+		border: 1px solid rgba(255, 255, 255, 0.15);
 	}
 
 	/* Glass styling */
@@ -141,17 +174,7 @@
 	}
 
 	.glass-panel {
-		background: rgba(255, 255, 255, 0.92);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-		border-radius: 1rem;
-	}
-
-	:global(.dark) .glass-panel {
-		background: rgba(30, 30, 30, 0.92);
-		border: 1px solid rgba(255, 255, 255, 0.15);
+		background: transparent;
 	}
 
 	/* FAB Button */
@@ -190,16 +213,6 @@
 
 	.toolbar-fab:hover .fab-icon {
 		color: hsl(var(--color-foreground));
-	}
-
-	/* Toolbar Panel (opens above FAB) */
-	.toolbar-panel {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.75rem;
-		pointer-events: auto;
-		white-space: nowrap;
 	}
 
 	.toolbar-divider {

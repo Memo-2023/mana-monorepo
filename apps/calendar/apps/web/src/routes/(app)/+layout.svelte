@@ -369,7 +369,7 @@
 
 		<!-- Date strip (only on main calendar page) -->
 		{#if showCalendarToolbar}
-			<DateStrip {isSidebarMode} />
+			<DateStrip {isSidebarMode} isToolbarExpanded={!isToolbarCollapsed} />
 		{/if}
 
 		<!-- Calendar toolbar (only on main calendar page, not in sidebar mode) -->
@@ -410,7 +410,11 @@
 			appIcon="calendar"
 			primaryColor="#3b82f6"
 			autoFocus={true}
-			bottomOffset={isSidebarMode ? '0px' : '70px'}
+			bottomOffset={isSidebarMode
+				? '0px'
+				: showCalendarToolbar && !isToolbarCollapsed
+					? '130px'
+					: '70px'}
 		/>
 	</div>
 </SplitPaneContainer>
