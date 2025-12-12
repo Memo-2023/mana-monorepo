@@ -4,4 +4,3 @@ export * from './feedback.schema';
 export * from './organizations.schema';
 export * from './referrals.schema';
 export * from './tags.schema';
-export * from './themes.schema';
