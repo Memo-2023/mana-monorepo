@@ -1,6 +1,6 @@
 # Central Theming System
 
-Das zentrale Theming-System ermöglicht einheitliches Aussehen und Benutzereinstellungen über alle Manacore-Apps hinweg. Es besteht aus mehreren Schichten: Theme-Varianten, Light/Dark-Modus, Accessibility-Einstellungen und Custom Themes.
+Das zentrale Theming-System ermöglicht einheitliches Aussehen und Benutzereinstellungen über alle Manacore-Apps hinweg. Es besteht aus mehreren Schichten: Theme-Varianten, Light/Dark-Modus und Accessibility-Einstellungen.
 
 ## Architektur
 
@@ -13,11 +13,6 @@ Das zentrale Theming-System ermöglicht einheitliches Aussehen und Benutzereinst
 │  │  - nav: { desktopPosition, sidebarCollapsed }       │   │
 │  │  - locale: "de"                                      │   │
 │  │  - general: { startPages, sounds, etc. }            │   │
-│  └─────────────────────────────────────────────────────┘   │
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │  custom_themes Tabelle (Community Themes)            │   │
-│  │  - lightColors, darkColors, author, downloads, etc.  │   │
 │  └─────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
                              │
@@ -45,18 +40,18 @@ Es gibt 8 vordefinierte Theme-Varianten:
 ### Standard-Varianten (PillNav)
 | Name | Farbe | Icon | Hue |
 |------|-------|------|-----|
-| `lume` | Gold ✨ | sparkle | 47 |
-| `nature` | Grün 🌿 | leaf | 122 |
-| `stone` | Blau-Grau 🪨 | hexagon | 200 |
-| `ocean` | Blau 🌊 | waves | 199 |
+| `lume` | Gold | sparkle | 47 |
+| `nature` | Grün | leaf | 122 |
+| `stone` | Blau-Grau | hexagon | 200 |
+| `ocean` | Blau | waves | 199 |
 
 ### Erweiterte Varianten (Themes-Seite)
 | Name | Farbe | Icon | Hue |
 |------|-------|------|-----|
-| `sunset` | Coral/Orange 🌅 | sun | 15 |
-| `midnight` | Violett 🌙 | moon | 260 |
-| `rose` | Pink 🌹 | flower | 340 |
-| `lavender` | Lavendel 💜 | sparkle | 270 |
+| `sunset` | Coral/Orange | sun | 15 |
+| `midnight` | Violett | moon | 260 |
+| `rose` | Pink | flower | 340 |
+| `lavender` | Lavendel | sparkle | 270 |
 
 ## Theme-Modus
 
@@ -223,55 +218,6 @@ a11y.resetAll();
 - Respektiert `prefers-reduced-motion`
 - Kann manuell überschrieben werden
 
-## Custom Themes
-
-### Custom Themes Store
-
-```typescript
-import { createCustomThemesStore } from '@manacore/shared-theme';
-
-export const customThemes = createCustomThemesStore({
-  authUrl: 'http://localhost:3001',
-  getAccessToken: () => authStore.getAccessToken(),
-});
-
-// Eigene Themes laden
-await customThemes.loadCustomThemes();
-
-// Theme erstellen
-const newTheme = await customThemes.createTheme({
-  name: 'Mein Theme',
-  emoji: '🎨',
-  lightColors: { primary: '200 80% 50%', ... },
-  darkColors: { primary: '200 70% 60%', ... },
-});
-
-// Community Themes durchsuchen
-await customThemes.browseCommunity({
-  sort: 'popular',
-  search: 'dark',
-});
-
-// Theme herunterladen
-await customThemes.downloadTheme(themeId);
-
-// Theme anwenden
-customThemes.applyCustomTheme(theme);
-```
-
-### Theme Editor
-
-Der Theme Editor erlaubt das visuelle Erstellen von Themes:
-
-**Hauptfarben (immer sichtbar):**
-- Primary, Background, Surface, Foreground
-- Error, Success, Warning
-
-**Erweiterte Farben (zugeklappt):**
-- PrimaryForeground, Secondary, SecondaryForeground
-- SurfaceHover, SurfaceElevated, Muted, MutedForeground
-- Border, BorderStrong, Input, Ring
-
 ## UI-Komponenten
 
 ### ThemePage
@@ -285,10 +231,13 @@ Vollständige Themes-Seite mit allen Optionen:
 </script>
 
 <ThemePage
-  themeStore={theme}
+  currentVariant={theme.variant}
+  onSelectTheme={(v) => theme.setVariant(v)}
+  showModeSelector={true}
+  currentMode={theme.mode}
+  onModeChange={(m) => theme.setMode(m)}
   a11yStore={a11y}
-  showAccessibility={true}
-  showPinnedThemes={true}
+  showA11ySettings={true}
 />
 ```
 
@@ -406,7 +355,6 @@ theme: {
 | `src/a11y-constants.ts` | A11y Konstanten |
 | `src/a11y-utils.ts` | A11y Helper |
 | `src/user-settings-store.svelte.ts` | Server-Sync Store |
-| `src/custom-themes-store.svelte.ts` | Custom Themes Store |
 | `src/utils.ts` | Theme Utilities |
 | `src/app-routes.ts` | Start-Page Konfiguration |
 
@@ -420,11 +368,7 @@ theme: {
 | `src/components/ThemeCard.svelte` | Theme-Vorschau Karte |
 | `src/components/ThemeGrid.svelte` | Grid von Theme-Karten |
 | `src/components/A11ySettings.svelte` | A11y Einstellungen |
-| `src/components/editor/` | Theme Editor Komponenten |
-| `src/components/community/` | Community Themes Komponenten |
 | `src/pages/ThemePage.svelte` | Vollständige Themes-Seite |
-| `src/pages/ThemeEditorPage.svelte` | Theme Editor Seite |
-| `src/pages/CommunityThemesPage.svelte` | Community Themes |
 
 ## Integration in eine App
 
@@ -485,7 +429,15 @@ export const a11y = createA11yStore({
   import { theme, a11y } from '$lib/stores/theme';
 </script>
 
-<ThemePage themeStore={theme} a11yStore={a11y} />
+<ThemePage
+  currentVariant={theme.variant}
+  onSelectTheme={(v) => theme.setVariant(v)}
+  showModeSelector={true}
+  currentMode={theme.mode}
+  onModeChange={(m) => theme.setMode(m)}
+  a11yStore={a11y}
+  showA11ySettings={true}
+/>
 ```
 
 ## Vorteile
@@ -493,5 +445,4 @@ export const a11y = createA11yStore({
 - **Konsistenz:** Alle Apps sehen einheitlich aus
 - **User Experience:** Theme-Einstellungen werden gespeichert
 - **Accessibility:** Barrierefreiheit ist eingebaut
-- **Anpassbarkeit:** Nutzer können eigene Themes erstellen
-- **Community:** Themes können geteilt werden
+- **Einfachheit:** 8 vordefinierte Themes zur Auswahl

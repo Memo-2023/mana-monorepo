@@ -12,19 +12,8 @@ export { default as ThemeGrid } from './components/ThemeGrid.svelte';
 export { default as A11ySettings } from './components/A11ySettings.svelte';
 export { default as A11yQuickToggles } from './components/A11yQuickToggles.svelte';
 
-// Theme Editor Components
-export { default as ColorPicker } from './components/editor/ColorPicker.svelte';
-export { default as ThemeEditor } from './components/editor/ThemeEditor.svelte';
-export { default as ThemeLivePreview } from './components/editor/ThemeLivePreview.svelte';
-
-// Community Theme Components
-export { default as ThemeCommunityCard } from './components/community/ThemeCommunityCard.svelte';
-export { default as CommunityThemeGallery } from './components/community/CommunityThemeGallery.svelte';
-
 // Pages
 export { default as ThemePage } from './pages/ThemePage.svelte';
-export { default as ThemeEditorPage } from './pages/ThemeEditorPage.svelte';
-export { default as CommunityThemesPage } from './pages/CommunityThemesPage.svelte';
 
 // Types
 export type {

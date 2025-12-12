@@ -359,7 +359,7 @@ export const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
  * Default global settings
  */
 export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
-	nav: { desktopPosition: 'top', sidebarCollapsed: false, hiddenNavItems: {} },
+	nav: { desktopPosition: 'bottom', sidebarCollapsed: false, hiddenNavItems: {} },
 	theme: { mode: 'system', colorScheme: 'ocean', pinnedThemes: [] },
 	locale: 'de',
 	general: DEFAULT_GENERAL_SETTINGS,
