@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import type { QuickInputItem, QuickAction, CreatePreview } from './types';
+	import type { QuickInputItem, CreatePreview } from './types';
 
 	// Syntax highlighting patterns for command keywords
 	interface HighlightPattern {
@@ -50,7 +49,7 @@
 		onSelect: (item: QuickInputItem) => void;
 		onParseCreate?: (query: string) => CreatePreview | null;
 		onCreate?: (query: string) => Promise<void>;
-		quickActions?: QuickAction[];
+		onSearchChange?: (query: string, results: QuickInputItem[]) => void;
 		placeholder?: string;
 		emptyText?: string;
 		searchingText?: string;
@@ -65,7 +64,7 @@
 		onSelect,
 		onParseCreate,
 		onCreate,
-		quickActions = [],
+		onSearchChange,
 		placeholder = 'Suchen oder erstellen...',
 		emptyText = 'Keine Ergebnisse gefunden',
 		searchingText = 'Suche...',
@@ -96,10 +95,9 @@
 	// Check if create option is selected (it's always first when available)
 	let isCreateSelected = $derived(selectedIndex === 0 && createPreview !== null);
 
-	// Show panel when focused or has results
+	// Show panel only when there's actual input
 	$effect(() => {
-		showPanel =
-			isFocused && (searchQuery.trim().length > 0 || quickActions.length > 0 || results.length > 0);
+		showPanel = isFocused && searchQuery.trim().length > 0;
 	});
 
 	// Auto-focus on mount
@@ -115,6 +113,7 @@
 		if (!searchQuery.trim()) {
 			results = [];
 			loading = false;
+			onSearchChange?.('', []);
 			return;
 		}
 
@@ -124,9 +123,11 @@
 			try {
 				results = await onSearch(searchQuery);
 				selectedIndex = 0;
+				onSearchChange?.(searchQuery, results);
 			} catch (e) {
 				console.error('Search error:', e);
 				results = [];
+				onSearchChange?.(searchQuery, []);
 			} finally {
 				loading = false;
 			}
@@ -142,6 +143,7 @@
 			searchQuery = '';
 			results = [];
 			selectedIndex = 0;
+			onSearchChange?.('', []);
 			// Keep focus for rapid entry
 			inputElement?.focus();
 		} catch (error) {
@@ -156,6 +158,7 @@
 			event.preventDefault();
 			searchQuery = '';
 			results = [];
+			onSearchChange?.('', []);
 			inputElement?.blur();
 			return;
 		}
@@ -171,11 +174,8 @@
 
 		if (event.key === 'ArrowDown') {
 			event.preventDefault();
-			// Calculate max index including create option
 			const hasCreate = createPreview !== null;
-			const maxIndex = searchQuery.trim()
-				? (hasCreate ? 1 : 0) + results.length - 1
-				: quickActions.length - 1;
+			const maxIndex = (hasCreate ? 1 : 0) + results.length - 1;
 			selectedIndex = Math.min(selectedIndex + 1, Math.max(0, maxIndex));
 			return;
 		}
@@ -199,15 +199,6 @@
 						selectItem(results[resultIndex]);
 					}
 				}
-			} else if (!searchQuery.trim() && quickActions.length > 0) {
-				const action = quickActions[selectedIndex];
-				if (action.href) {
-					goto(action.href);
-					inputElement?.blur();
-				} else if (action.onclick) {
-					action.onclick();
-					inputElement?.blur();
-				}
 			}
 			return;
 		}
@@ -217,6 +208,7 @@
 		onSelect(item);
 		searchQuery = '';
 		results = [];
+		onSearchChange?.('', []);
 		inputElement?.blur();
 	}
 
@@ -226,15 +218,6 @@
 			return (parts[0][0] + parts[1][0]).toUpperCase();
 		}
 		return item.title.substring(0, 2).toUpperCase();
-	}
-
-	function handleQuickAction(action: QuickAction) {
-		if (action.href) {
-			goto(action.href);
-		} else if (action.onclick) {
-			action.onclick();
-		}
-		inputElement?.blur();
 	}
 
 	function handleFocus() {
@@ -260,121 +243,7 @@
 	<!-- Results Panel (above input) -->
 	{#if showPanel}
 		<div class="results-panel" transition:slide={{ duration: 150 }}>
-			{#if !searchQuery.trim() && quickActions.length > 0}
-				<!-- Quick Actions when no search -->
-				<div class="quick-actions-grid">
-					{#each quickActions as action, index (action.id)}
-						<button
-							type="button"
-							class="quick-action"
-							class:selected={index === selectedIndex}
-							onclick={() => handleQuickAction(action)}
-							onmouseenter={() => (selectedIndex = index)}
-						>
-							<div class="quick-action-icon">
-								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									{#if action.icon === 'plus'}
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M12 4v16m8-8H4"
-										/>
-									{:else if action.icon === 'columns' || action.icon === 'kanban'}
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
-										/>
-									{:else if action.icon === 'chart' || action.icon === 'stats'}
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-										/>
-									{:else if action.icon === 'settings'}
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-										/>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-										/>
-									{:else if action.icon === 'calendar'}
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-										/>
-									{:else if action.icon === 'clock'}
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-										/>
-									{:else if action.icon === 'users'}
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-										/>
-									{:else if action.icon === 'list'}
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M4 6h16M4 10h16M4 14h16M4 18h16"
-										/>
-									{:else if action.icon === 'check'}
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-										/>
-									{:else if action.icon === 'heart'}
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-										/>
-									{:else if action.icon === 'tag'}
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-										/>
-									{:else}
-										<!-- Default search icon -->
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-										/>
-									{/if}
-								</svg>
-							</div>
-							<span class="quick-action-label">{action.label}</span>
-							{#if action.shortcut}
-								<kbd>{action.shortcut}</kbd>
-							{/if}
-						</button>
-					{/each}
-				</div>
-			{:else if searchQuery.trim()}
+			{#if searchQuery.trim()}
 				<!-- Create option (always first when available) -->
 				{#if createPreview && onCreate}
 					<button
@@ -542,20 +411,18 @@
 <style>
 	.quick-input-bar {
 		position: fixed;
-		bottom: 0;
+		bottom: 70px; /* Above PillNav on desktop */
 		left: 0;
 		right: 0;
 		z-index: 90;
 		padding: 0.75rem 1rem;
-		padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
 		pointer-events: none;
 	}
 
 	.input-container,
 	.results-panel,
 	.submit-btn,
-	.result-item,
-	.quick-action {
+	.result-item {
 		pointer-events: auto;
 	}
 
@@ -563,25 +430,31 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-		padding: 0.75rem 1rem;
-		background: hsl(var(--color-surface) / 0.85);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
-		border: 1px solid hsl(var(--color-border) / 0.5);
+		padding: 0.5rem 1rem;
+		background: rgba(255, 255, 255, 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
 		border-radius: 9999px;
-		max-width: 600px;
+		max-width: 700px;
 		margin: 0 auto;
 		box-shadow:
-			0 4px 20px hsl(var(--color-background) / 0.3),
-			0 0 0 1px hsl(var(--color-border) / 0.2);
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 		transition: all 0.2s ease;
+	}
+
+	:global(.dark) .input-container {
+		background: rgba(255, 255, 255, 0.12);
+		border: 1px solid rgba(255, 255, 255, 0.15);
 	}
 
 	.input-container:focus-within {
 		border-color: var(--primary-color);
 		box-shadow:
-			0 4px 20px hsl(var(--color-background) / 0.3),
-			0 0 0 2px color-mix(in srgb, var(--primary-color) 30%, transparent);
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06),
+			0 0 0 2px color-mix(in srgb, var(--primary-color) 25%, transparent);
 	}
 
 	.app-icon {
@@ -713,78 +586,23 @@
 		bottom: 100%;
 		left: 1rem;
 		right: 1rem;
-		max-width: 600px;
+		max-width: 700px;
 		margin: 0 auto 0.5rem;
 		max-height: 320px;
 		overflow-y: auto;
-		background: hsl(var(--color-surface) / 0.95);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
+		background: rgba(255, 255, 255, 0.95);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
 		border-radius: 1rem;
-		border: 1px solid hsl(var(--color-border));
+		border: 1px solid rgba(0, 0, 0, 0.1);
 		box-shadow:
-			0 -4px 20px hsl(var(--color-background) / 0.3),
-			0 0 0 1px hsl(var(--color-border) / 0.2);
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 	}
 
-	/* Quick Actions Grid */
-	.quick-actions-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-		gap: 0.5rem;
-		padding: 0.75rem;
-	}
-
-	.quick-action {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 1rem 0.75rem;
-		border-radius: 0.75rem;
-		color: hsl(var(--color-foreground));
-		background: transparent;
-		border: 1px solid transparent;
-		cursor: pointer;
-		text-align: center;
-		transition: all 0.15s ease;
-	}
-
-	.quick-action:hover,
-	.quick-action.selected {
-		background: hsl(var(--color-surface-hover));
-		border-color: hsl(var(--color-border));
-	}
-
-	.quick-action-icon {
-		width: 2rem;
-		height: 2rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 0.5rem;
-		background: color-mix(in srgb, var(--primary-color) 15%, transparent);
-		color: var(--primary-color);
-	}
-
-	.quick-action-icon svg {
-		width: 1.25rem;
-		height: 1.25rem;
-	}
-
-	.quick-action-label {
-		font-size: 0.8125rem;
-		font-weight: 500;
-	}
-
-	.quick-action kbd {
-		padding: 0.125rem 0.375rem;
-		font-size: 0.6875rem;
-		font-family: inherit;
-		background: hsl(var(--color-surface));
-		border: 1px solid hsl(var(--color-border));
-		border-radius: 4px;
-		color: hsl(var(--color-muted-foreground));
+	:global(.dark) .results-panel {
+		background: rgba(30, 30, 30, 0.95);
+		border: 1px solid rgba(255, 255, 255, 0.15);
 	}
 
 	/* Result Items */
@@ -930,15 +748,10 @@
 		}
 	}
 
-	/* Mobile: Above PillNav */
+	/* Mobile adjustments */
 	@media (max-width: 768px) {
 		.quick-input-bar {
-			bottom: 70px;
-			padding-bottom: 0.75rem;
-		}
-
-		.quick-actions-grid {
-			grid-template-columns: repeat(2, 1fr);
+			bottom: calc(70px + env(safe-area-inset-bottom));
 		}
 	}
 </style>

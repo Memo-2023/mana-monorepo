@@ -118,8 +118,8 @@ export {
 export { CommandBar } from './command-bar';
 export type { CommandBarItem } from './command-bar';
 
-// Quick Input Bar
-export { QuickInputBar } from './quick-input';
+// Input Bar
+export { InputBar, QuickInputBar } from './quick-input';
 export type { QuickInputItem, QuickAction, CreatePreview } from './quick-input';
 
 // Pages
