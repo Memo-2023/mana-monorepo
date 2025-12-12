@@ -915,8 +915,6 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		height: 100%;
-		overflow: hidden;
 	}
 
 	.all-day-section {
@@ -1010,7 +1008,6 @@
 		display: flex;
 		width: 100%;
 		max-width: 800px;
-		overflow-y: auto;
 	}
 
 	.time-column {

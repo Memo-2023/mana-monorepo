@@ -313,11 +313,11 @@
 			collapsedStore.set(true);
 		}
 
-		// Initialize toolbar collapsed state from localStorage
+		// Initialize toolbar collapsed state from localStorage (default is now collapsed)
 		const savedToolbarCollapsed = localStorage.getItem('calendar-toolbar-collapsed');
-		if (savedToolbarCollapsed === 'true') {
-			isToolbarCollapsed = true;
-			toolbarCollapsedStore.set(true);
+		if (savedToolbarCollapsed === 'false') {
+			isToolbarCollapsed = false;
+			toolbarCollapsedStore.set(false);
 		}
 	});
 </script>
@@ -423,10 +423,6 @@
 	}
 
 	.main-content {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		min-height: 0;
 		transition: all 300ms ease;
 		position: relative;
 		/* Space for QuickInputBar at bottom */
@@ -437,12 +433,12 @@
 		padding-top: 70px;
 	}
 
-	/* Extra padding when DateStrip + Toolbar are at bottom */
+	/* Extra padding when DateStrip is at bottom (toolbar is now a FAB) */
 	.main-content.floating-mode.has-toolbar {
 		padding-top: 0;
 		padding-bottom: calc(
-			280px + env(safe-area-inset-bottom)
-		); /* DateStrip + Toolbar + PillNav + QuickInputBar */
+			220px + env(safe-area-inset-bottom)
+		); /* DateStrip + PillNav + QuickInputBar */
 	}
 
 	@media (max-width: 768px) {
@@ -452,8 +448,8 @@
 		}
 		.main-content.has-toolbar {
 			padding-bottom: calc(
-				250px + env(safe-area-inset-bottom)
-			); /* DateStrip + Toolbar + BottomNav + QuickInputBar */
+				200px + env(safe-area-inset-bottom)
+			); /* DateStrip + BottomNav + QuickInputBar */
 		}
 		.main-content.floating-mode.has-toolbar {
 			padding-top: 70px;
@@ -465,8 +461,6 @@
 	}
 
 	.content-wrapper {
-		flex: 1;
-		min-height: 0;
 		max-width: 100%;
 		margin-left: auto;
 		margin-right: auto;

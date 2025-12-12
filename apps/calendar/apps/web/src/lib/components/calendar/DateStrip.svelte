@@ -287,7 +287,7 @@
 <style>
 	.date-strip-wrapper {
 		position: fixed;
-		bottom: calc(200px + env(safe-area-inset-bottom, 0px)); /* Above InputBar */
+		bottom: calc(140px + env(safe-area-inset-bottom, 0px)); /* Above InputBar + PillNav */
 		left: 0;
 		right: 0;
 		z-index: 48;
@@ -298,7 +298,7 @@
 		transition: bottom 0.3s ease;
 	}
 
-	/* When PillNav is in sidebar mode, no PillNav/Toolbar at bottom - just InputBar */
+	/* When PillNav is in sidebar mode, no PillNav at bottom - just InputBar */
 	.date-strip-wrapper.sidebar-mode {
 		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
 	}
