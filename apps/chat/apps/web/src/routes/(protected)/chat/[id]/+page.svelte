@@ -28,15 +28,17 @@
 	let showVersionsModal = $state(false);
 	let showDocumentPanel = $state(true);
 
-	// Track current request to prevent race conditions
-	let currentLoadId = $state(0);
+	// Track current request to prevent race conditions (not reactive to avoid effect loops)
+	let currentLoadId = 0;
+	let lastLoadedConversationId = '';
 
 	const conversationId = $derived($page.params.id ?? '');
 	const isDocumentMode = $derived(conversation?.documentMode ?? false);
 
 	// React to conversationId changes with race condition protection
 	$effect(() => {
-		if (conversationId) {
+		if (conversationId && conversationId !== lastLoadedConversationId) {
+			lastLoadedConversationId = conversationId;
 			loadData(conversationId);
 		}
 	});
