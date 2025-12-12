@@ -11,6 +11,42 @@
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { onMount, tick } from 'svelte';
+	import SunCalc from 'suncalc';
+
+	// Moon phase emojis (8 phases)
+	const MOON_EMOJIS = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
+
+	// Get moon emoji for a date
+	function getMoonEmoji(date: Date): string {
+		const moonData = SunCalc.getMoonIllumination(date);
+		// phase: 0 = new moon, 0.25 = first quarter, 0.5 = full moon, 0.75 = last quarter
+		const phaseIndex = Math.floor(moonData.phase * 8) % 8;
+		return MOON_EMOJIS[phaseIndex];
+	}
+
+	// Check if this is a significant moon phase (new, first quarter, full, last quarter)
+	function isSignificantMoonPhase(date: Date): { significant: boolean; emoji: string } {
+		const moonData = SunCalc.getMoonIllumination(date);
+		const phase = moonData.phase;
+		// Lunar cycle is ~29.53 days, so 1 day = ~0.0339
+		// Use half a day tolerance (~0.017) to ensure only 1 day is marked
+		const tolerance = 0.017;
+
+		if (phase < tolerance || phase > 1 - tolerance) {
+			return { significant: true, emoji: '🌑' }; // New moon
+		}
+		if (Math.abs(phase - 0.25) < tolerance) {
+			return { significant: true, emoji: '🌓' }; // First quarter
+		}
+		if (Math.abs(phase - 0.5) < tolerance) {
+			return { significant: true, emoji: '🌕' }; // Full moon
+		}
+		if (Math.abs(phase - 0.75) < tolerance) {
+			return { significant: true, emoji: '🌗' }; // Last quarter
+		}
+
+		return { significant: false, emoji: '' };
+	}
 
 	// Reactive view range - needed to trigger re-renders
 	let viewRange = $derived(viewStore.viewRange);
@@ -166,25 +202,14 @@
 </script>
 
 <div class="date-strip-wrapper">
+	{#if !isTodayVisible}
+		<button onclick={goToToday} title="Zum heutigen Tag" class="today-button"> Heute </button>
+	{/if}
+
 	<div class="date-strip-container">
-		<!-- Month label with today button -->
+		<!-- Month label -->
 		<div class="month-header">
 			<span class="month-label">{visibleMonth}</span>
-			{#if !isTodayVisible}
-				<button class="today-btn" onclick={goToToday} title="Zum heutigen Tag">
-					<svg
-						class="today-icon"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-					>
-						<circle cx="12" cy="12" r="10" />
-						<path d="M12 6v6l4 2" />
-					</svg>
-					Heute
-				</button>
-			{/if}
 		</div>
 
 		<!-- Days row -->
@@ -197,6 +222,7 @@
 				{@const dayIsRangeStart = isSameDay(day, viewRange.start)}
 				{@const dayIsRangeEnd = isSameDay(day, viewRange.end)}
 				{@const isFirstOfMonth = day.getDate() === 1}
+				{@const moonPhase = isSignificantMoonPhase(day)}
 				{#if isFirstOfMonth}
 					<div class="month-divider"></div>
 				{/if}
@@ -214,6 +240,9 @@
 						? 'background: #3b82f6; color: white; border-radius: 10px; font-weight: 700; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);'
 						: ''}
 				>
+					{#if moonPhase.significant}
+						<span class="moon-indicator">{moonPhase.emoji}</span>
+					{/if}
 					<span class="day-weekday" style={dayIsToday ? 'opacity: 1; color: white;' : ''}
 						>{format(day, 'EE', { locale: de })}</span
 					>
@@ -229,14 +258,36 @@
 <style>
 	.date-strip-wrapper {
 		position: fixed;
-		bottom: calc(130px + env(safe-area-inset-bottom, 0px));
+		bottom: calc(200px + env(safe-area-inset-bottom, 0px));
 		left: 0;
 		right: 0;
-		z-index: 998;
+		z-index: 48;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		pointer-events: none;
+	}
+
+	.today-button {
+		padding: 0.25rem 0.75rem;
+		background: transparent;
+		border: 1px solid #d1d5db;
+		border-radius: 9999px;
+		cursor: pointer;
+		color: #9ca3af;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		margin-bottom: 0.375rem;
+		pointer-events: auto;
+		transition: all 0.2s ease;
+	}
+
+	.today-button:hover {
+		background: rgba(59, 130, 246, 0.1);
+		border-color: #3b82f6;
+		color: #3b82f6;
+		transform: translateY(-1px);
+		box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
 	}
 
 	.date-strip-container {
@@ -268,33 +319,6 @@
 		white-space: nowrap;
 	}
 
-	.today-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.3125rem 0.625rem;
-		background: var(--color-muted, #f3f4f6);
-		border: 1.5px solid var(--color-border, #e5e7eb);
-		border-radius: 9999px;
-		cursor: pointer;
-		color: var(--color-muted-foreground, #6b7280);
-		font-size: 0.75rem;
-		font-weight: 500;
-		white-space: nowrap;
-		transition: all 0.15s ease;
-	}
-
-	.today-btn:hover {
-		background: var(--color-surface-hover, #e5e7eb);
-		color: var(--color-foreground, #1f2937);
-		border-color: var(--color-border-strong, #d1d5db);
-	}
-
-	.today-icon {
-		width: 14px;
-		height: 14px;
-	}
-
 	.month-divider {
 		width: 1px;
 		height: 40px;
@@ -308,10 +332,12 @@
 		align-items: center;
 		gap: 2px;
 		overflow-x: auto;
+		overflow-y: visible;
 		scrollbar-width: none;
 		-ms-overflow-style: none;
 		scroll-behavior: auto;
-		padding: 0.25rem;
+		padding: 1.25rem 0.25rem 0.25rem;
+		margin-top: -1rem;
 	}
 
 	.days-scroll::-webkit-scrollbar {
@@ -333,6 +359,16 @@
 		color: var(--color-foreground, #1f2937);
 		transition: all 0.15s ease;
 		flex-shrink: 0;
+		position: relative;
+	}
+
+	.moon-indicator {
+		position: absolute;
+		top: -16px;
+		left: 50%;
+		transform: translateX(-50%);
+		font-size: 1.125rem;
+		line-height: 1;
 	}
 
 	.day-item:hover {
@@ -396,24 +432,14 @@
 			font-size: 1rem;
 		}
 
-		.month-header-side {
-			min-width: 60px;
-		}
-
-		.today-btn {
-			padding: 0.1875rem 0.5rem;
-			font-size: 0.6875rem;
-			gap: 0.25rem;
-		}
-
-		.today-icon {
-			width: 12px;
-			height: 12px;
-		}
-
 		.day-item {
 			min-width: 44px;
 			height: 52px;
+		}
+
+		.moon-indicator {
+			font-size: 1rem;
+			top: -14px;
 		}
 
 		.day-number {
