@@ -184,6 +184,16 @@ export class EventService {
 			conditions.push(inArray(events.calendarId, query.calendarIds));
 		}
 
+		// Search filter - search in title and description
+		if (query.search) {
+			conditions.push(
+				or(
+					ilike(events.title, `%${query.search}%`),
+					ilike(events.description, `%${query.search}%`)
+				) as any
+			);
+		}
+
 		const result = await this.db
 			.select({
 				event: events,

@@ -411,12 +411,15 @@
 <style>
 	.quick-input-bar {
 		position: fixed;
-		bottom: 70px; /* Above PillNav on desktop */
+		top: 0;
 		left: 0;
 		right: 0;
 		z-index: 90;
 		padding: 0.75rem 1rem;
+		padding-top: calc(0.75rem + env(safe-area-inset-top));
 		pointer-events: none;
+		/* Fixed height to prevent layout shift when results appear */
+		height: 72px;
 	}
 
 	.input-container,
@@ -430,7 +433,7 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-		padding: 0.5rem 1rem;
+		padding: 0.75rem 1.25rem;
 		background: rgba(255, 255, 255, 0.85);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
@@ -442,6 +445,8 @@
 			0 4px 6px -1px rgba(0, 0, 0, 0.1),
 			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 		transition: all 0.2s ease;
+		/* Fixed height to prevent size changes */
+		height: 54px;
 	}
 
 	:global(.dark) .input-container {
@@ -481,7 +486,7 @@
 		left: 0;
 		right: 0;
 		bottom: 0;
-		font-size: 1rem;
+		font-size: 1.125rem;
 		font-family: inherit;
 		white-space: pre;
 		pointer-events: none;
@@ -495,7 +500,7 @@
 		width: 100%;
 		border: none;
 		background: transparent;
-		font-size: 1rem;
+		font-size: 1.125rem;
 		font-family: inherit;
 		color: transparent;
 		caret-color: hsl(var(--color-foreground));
@@ -583,11 +588,11 @@
 	/* Results Panel */
 	.results-panel {
 		position: absolute;
-		bottom: 100%;
+		top: 100%;
 		left: 1rem;
 		right: 1rem;
 		max-width: 700px;
-		margin: 0 auto 0.5rem;
+		margin: 0.5rem auto 0;
 		max-height: 320px;
 		overflow-y: auto;
 		background: rgba(255, 255, 255, 0.95);
@@ -745,13 +750,6 @@
 	@keyframes spin {
 		to {
 			transform: rotate(360deg);
-		}
-	}
-
-	/* Mobile adjustments */
-	@media (max-width: 768px) {
-		.quick-input-bar {
-			bottom: calc(70px + env(safe-area-inset-bottom));
 		}
 	}
 </style>

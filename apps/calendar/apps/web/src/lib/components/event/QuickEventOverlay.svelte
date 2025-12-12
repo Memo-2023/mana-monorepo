@@ -8,6 +8,16 @@
 	import { de } from 'date-fns/locale';
 	import { tick, onMount, onDestroy } from 'svelte';
 
+	// Portal action - moves element to body to escape stacking contexts
+	function portal(node: HTMLElement) {
+		document.body.appendChild(node);
+		return {
+			destroy() {
+				node.remove();
+			},
+		};
+	}
+
 	interface Props {
 		startTime?: Date;
 		event?: CalendarEvent;
@@ -465,9 +475,11 @@
 <svelte:window onkeydown={handleKeydown} />
 
 <!-- Overlay (no blocking backdrop - allows interaction with calendar) -->
+<!-- Portal to body to escape stacking contexts -->
 <div
+	use:portal
 	class="quick-event-overlay"
-	style={overlayStyle}
+	style="{overlayStyle} z-index: 99999;"
 	role="dialog"
 	aria-modal="true"
 	aria-label={isEditMode ? 'Termin bearbeiten' : 'Termin erstellen'}
@@ -817,7 +829,7 @@
 		box-shadow:
 			0 20px 60px rgba(0, 0, 0, 0.2),
 			0 4px 16px rgba(0, 0, 0, 0.1);
-		z-index: 1001;
+		z-index: 99999 !important;
 		display: flex;
 		flex-direction: column;
 		animation: slideIn 150ms ease-out;

@@ -372,7 +372,6 @@
 	.main-content {
 		transition: all 300ms ease;
 		position: relative;
-		z-index: 0;
 		/* Space for QuickInputBar at bottom */
 		padding-bottom: calc(80px + env(safe-area-inset-bottom));
 	}

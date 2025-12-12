@@ -23,17 +23,22 @@ export async function getEvents(params: QueryEventsParams) {
 	if (params.search) {
 		searchParams.set('search', params.search);
 	}
-	return fetchApi<CalendarEvent[]>(`/events?${searchParams.toString()}`);
+	const result = await fetchApi<{ events: CalendarEvent[] }>(`/events?${searchParams.toString()}`);
+	if (result.error || !result.data) {
+		return { data: null, error: result.error };
+	}
+	return { data: result.data.events, error: null };
 }
 
 export async function searchEvents(query: string, limit: number = 10) {
-	// Search events within the next year
-	const now = new Date();
+	// Search events within a wide range (1 year past to 1 year future)
+	const oneYearAgo = new Date();
+	oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 	const oneYearFromNow = new Date();
 	oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
 
 	return getEvents({
-		startDate: now.toISOString(),
+		startDate: oneYearAgo.toISOString(),
 		endDate: oneYearFromNow.toISOString(),
 		search: query,
 	});
