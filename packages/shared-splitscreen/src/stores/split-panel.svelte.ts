@@ -74,7 +74,7 @@ export function createSplitPanelStore(
 	// Reactive state using Svelte 5 runes
 	let isActive = $state(false);
 	let rightPanel = $state<PanelConfig | null>(null);
-	let dividerPosition = $state(DIVIDER_CONSTRAINTS.DEFAULT);
+	let dividerPosition = $state<number>(DIVIDER_CONSTRAINTS.DEFAULT);
 	let isMobile = $state(false);
 
 	// Storage config for persistence

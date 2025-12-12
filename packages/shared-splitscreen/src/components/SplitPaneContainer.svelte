@@ -5,7 +5,6 @@
 	 */
 
 	import type { Snippet } from 'svelte';
-	import { onMount } from 'svelte';
 	import { getSplitPanelContext } from '../stores/split-panel.svelte.js';
 	import AppPanel from './AppPanel.svelte';
 	import PanelControls from './PanelControls.svelte';
@@ -20,6 +19,9 @@
 
 	const splitPanel = getSplitPanelContext();
 
+	// Track if resize handle is being dragged - used to disable iframe pointer events
+	let isResizing = $state(false);
+
 	// Grid template based on divider position
 	let gridTemplate = $derived(
 		splitPanel.isActive && splitPanel.rightPanel ? `${splitPanel.dividerPosition}% 6px 1fr` : '1fr'
@@ -32,13 +34,23 @@
 	function handleReset() {
 		splitPanel.resetDividerPosition();
 	}
+
+	function handleDragStateChange(isDragging: boolean) {
+		isResizing = isDragging;
+	}
 </script>
 
 <div
 	class="split-pane-container {className}"
 	class:split-active={splitPanel.isActive && splitPanel.rightPanel}
+	class:resizing={isResizing}
 	style:--grid-template={gridTemplate}
 >
+	<!-- Overlay during resize to capture all mouse events -->
+	{#if isResizing}
+		<div class="resize-overlay"></div>
+	{/if}
+
 	<div class="main-panel">
 		{@render children()}
 	</div>
@@ -48,9 +60,10 @@
 			position={splitPanel.dividerPosition}
 			onResize={handleResize}
 			onReset={handleReset}
+			onDragStateChange={handleDragStateChange}
 		/>
 
-		<div class="side-panel">
+		<div class="side-panel" class:resizing={isResizing}>
 			<AppPanel panel={splitPanel.rightPanel} />
 			<PanelControls
 				panelName={splitPanel.rightPanel.name || splitPanel.rightPanel.appId}
@@ -69,6 +82,15 @@
 		height: 100%;
 		min-height: 0;
 		overflow: hidden;
+		position: relative;
+	}
+
+	/* Transparent overlay during resize - captures all mouse events */
+	.resize-overlay {
+		position: absolute;
+		inset: 0;
+		z-index: 100;
+		cursor: col-resize;
 	}
 
 	.main-panel {
@@ -87,6 +109,11 @@
 		min-width: 0;
 		min-height: 0;
 		overflow: hidden;
+	}
+
+	/* Disable iframe pointer events during resize to prevent event stealing */
+	.side-panel.resizing :global(iframe) {
+		pointer-events: none;
 	}
 
 	/* Ensure proper stacking */

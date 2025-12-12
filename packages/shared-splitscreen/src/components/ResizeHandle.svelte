@@ -10,16 +10,22 @@
 		position: number;
 		onResize: (position: number) => void;
 		onReset: () => void;
+		onDragStateChange?: (isDragging: boolean) => void;
 	}
 
-	let { position, onResize, onReset }: Props = $props();
+	let { position, onResize, onReset, onDragStateChange }: Props = $props();
 
 	let isDragging = $state(false);
+
+	function setDragging(value: boolean) {
+		isDragging = value;
+		onDragStateChange?.(value);
+	}
 	let containerRef: HTMLElement | null = null;
 
 	function handleMouseDown(event: MouseEvent) {
 		event.preventDefault();
-		isDragging = true;
+		setDragging(true);
 
 		const handleMouseMove = (e: MouseEvent) => {
 			if (!containerRef) return;
@@ -39,7 +45,7 @@
 		};
 
 		const handleMouseUp = () => {
-			isDragging = false;
+			setDragging(false);
 			document.removeEventListener('mousemove', handleMouseMove);
 			document.removeEventListener('mouseup', handleMouseUp);
 		};
@@ -50,7 +56,7 @@
 
 	function handleTouchStart(event: TouchEvent) {
 		event.preventDefault();
-		isDragging = true;
+		setDragging(true);
 
 		const handleTouchMove = (e: TouchEvent) => {
 			if (!containerRef || !e.touches[0]) return;
@@ -70,7 +76,7 @@
 		};
 
 		const handleTouchEnd = () => {
-			isDragging = false;
+			setDragging(false);
 			document.removeEventListener('touchmove', handleTouchMove);
 			document.removeEventListener('touchend', handleTouchEnd);
 		};
