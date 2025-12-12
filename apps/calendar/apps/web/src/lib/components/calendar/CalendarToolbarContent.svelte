@@ -37,6 +37,7 @@
 		'14day',
 		'month',
 		'year',
+		'agenda',
 	];
 
 	// Convert to ViewOptions for PillViewSwitcher

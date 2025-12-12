@@ -13,6 +13,7 @@
 	import MonthView from '$lib/components/calendar/MonthView.svelte';
 	import MultiDayView from '$lib/components/calendar/MultiDayView.svelte';
 	import YearView from '$lib/components/calendar/YearView.svelte';
+	import AgendaView from '$lib/components/calendar/AgendaView.svelte';
 	import TodoSidebarSection from '$lib/components/calendar/TodoSidebarSection.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
 	import { CalendarViewSkeleton } from '$lib/components/skeletons';
@@ -175,6 +176,8 @@
 				<MonthView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 			{:else if viewStore.viewType === 'year'}
 				<YearView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
+			{:else if viewStore.viewType === 'agenda'}
+				<AgendaView onEventClick={handleEventClick} />
 			{:else}
 				<WeekView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 			{/if}
@@ -201,6 +204,7 @@
 		display: flex;
 		gap: 1.5rem;
 		width: 100%;
+		height: 100%;
 		position: relative;
 	}
 
@@ -305,10 +309,12 @@
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
+		min-height: 0;
 		background: hsl(var(--color-surface));
 		border-radius: var(--radius-lg);
 		border: 1px solid hsl(var(--color-border));
 		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+		overflow: hidden;
 	}
 
 	.calendar-main.expanded {
@@ -318,6 +324,8 @@
 
 	.calendar-content {
 		flex: 1;
+		min-height: 0;
+		overflow: hidden;
 	}
 
 	@media (max-width: 1024px) {

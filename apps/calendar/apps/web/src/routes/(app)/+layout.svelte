@@ -143,7 +143,7 @@
 
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
-	let isToolbarCollapsed = $state(false);
+	let isToolbarCollapsed = $state(true); // Default to collapsed - FAB next to InputBar
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -198,7 +198,6 @@
 	// Base navigation items for Calendar
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/', label: 'Kalender', icon: 'calendar' },
-		{ href: '/agenda', label: 'Agenda', icon: 'list' },
 		{ href: '/tasks', label: 'Aufgaben', icon: 'check-square' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/statistics', label: 'Statistiken', icon: 'bar-chart-3' },
@@ -411,13 +410,7 @@
 			appIcon="calendar"
 			primaryColor="#3b82f6"
 			autoFocus={true}
-			bottomOffset={showCalendarToolbar
-				? isSidebarMode
-					? '0px'
-					: '130px'
-				: isSidebarMode
-					? '0px'
-					: '70px'}
+			bottomOffset={isSidebarMode ? '0px' : '70px'}
 		/>
 	</div>
 </SplitPaneContainer>
@@ -430,6 +423,10 @@
 	}
 
 	.main-content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
 		transition: all 300ms ease;
 		position: relative;
 		/* Space for QuickInputBar at bottom */
@@ -468,6 +465,8 @@
 	}
 
 	.content-wrapper {
+		flex: 1;
+		min-height: 0;
 		max-width: 100%;
 		margin-left: auto;
 		margin-right: auto;
@@ -496,5 +495,7 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
+		flex: 1;
+		min-height: 0;
 	}
 </style>

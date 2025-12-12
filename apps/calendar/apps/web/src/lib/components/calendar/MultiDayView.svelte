@@ -1168,6 +1168,10 @@
 	.day-headers {
 		display: flex;
 		border-bottom: 1px solid hsl(var(--color-border));
+		position: sticky;
+		top: 0;
+		z-index: 10;
+		background: hsl(var(--color-background));
 	}
 
 	.time-gutter {

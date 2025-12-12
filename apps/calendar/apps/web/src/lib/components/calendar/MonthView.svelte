@@ -338,12 +338,15 @@
 	.month-view {
 		display: flex;
 		flex-direction: column;
+		height: 100%;
+		overflow: hidden;
 	}
 
 	.weekday-headers {
 		display: grid;
 		grid-template-columns: repeat(var(--column-count, 7), 1fr);
 		border-bottom: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-background));
 	}
 
 	.weekday-header {
@@ -359,6 +362,7 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
+		overflow-y: auto;
 	}
 
 	.week-row {

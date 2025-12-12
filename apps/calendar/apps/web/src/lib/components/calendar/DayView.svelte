@@ -914,12 +914,17 @@
 	.day-view {
 		display: flex;
 		flex-direction: column;
+		align-items: center;
+		height: 100%;
+		overflow: hidden;
 	}
 
 	.all-day-section {
 		display: flex;
 		border-bottom: 1px solid hsl(var(--color-border));
 		padding: 0.5rem 0;
+		width: 100%;
+		max-width: 800px;
 	}
 
 	.all-day-label {
@@ -960,13 +965,14 @@
 	.all-day-block-event {
 		position: absolute;
 		top: 0;
-		left: 4px;
-		right: 4px;
+		left: 8px;
+		width: calc(100% - 16px);
+		max-width: 400px;
 		bottom: 0;
 		padding: 8px 12px;
 		color: white;
 		border: none;
-		border-radius: var(--radius-sm);
+		border-radius: var(--radius-md);
 		text-align: left;
 		cursor: pointer;
 		z-index: 0;
@@ -1002,16 +1008,19 @@
 	.time-grid {
 		flex: 1;
 		display: flex;
+		width: 100%;
+		max-width: 800px;
+		overflow-y: auto;
 	}
 
 	.time-column {
-		width: var(--time-column-width);
+		width: 50px;
 		flex-shrink: 0;
 	}
 
 	.time-label {
 		height: var(--hour-height);
-		padding-right: 0.5rem;
+		padding-right: 0.75rem;
 		text-align: right;
 		font-size: 0.75rem;
 		color: hsl(var(--color-muted-foreground));
@@ -1020,9 +1029,9 @@
 	}
 
 	.time-gutter {
-		width: var(--time-column-width);
+		width: 50px;
 		flex-shrink: 0;
-		padding-right: 0.5rem;
+		padding-right: 0.75rem;
 		text-align: right;
 	}
 
@@ -1030,6 +1039,7 @@
 		flex: 1;
 		position: relative;
 		border-left: 1px solid hsl(var(--color-border));
+		max-width: 600px;
 	}
 
 	.day-column.today {
@@ -1044,8 +1054,9 @@
 
 	.event-card {
 		position: absolute;
-		left: 4px;
-		right: 4px;
+		left: 8px;
+		width: calc(100% - 16px);
+		max-width: 400px;
 		color: white;
 		border: none;
 		text-align: left;
@@ -1054,11 +1065,12 @@
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
-		padding: 4px 8px;
-		border-radius: var(--radius-sm);
+		padding: 6px 10px;
+		border-radius: var(--radius-md);
 		overflow: hidden;
 		touch-action: none;
 		user-select: none;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 		transition:
 			box-shadow 150ms ease,
 			opacity 150ms ease;
