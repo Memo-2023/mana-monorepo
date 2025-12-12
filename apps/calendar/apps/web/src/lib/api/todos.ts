@@ -3,10 +3,15 @@
  * Allows Calendar app to fetch/manage todos from the Todo service
  */
 
-import { browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
+import { createApiClient, buildQueryString } from './base-client';
 
 const TODO_API_BASE = env.PUBLIC_TODO_BACKEND_URL || 'http://localhost:3018';
+
+const todoClient = createApiClient({
+	baseUrl: TODO_API_BASE,
+	apiPrefix: '/api/v1',
+});
 
 // ============================================
 // Types (mirrored from @todo/shared for cross-app use)
@@ -68,6 +73,11 @@ export interface Task {
 	dueDate?: string | null;
 	dueTime?: string | null;
 	startDate?: string | null;
+	// Time-Blocking (for calendar integration)
+	scheduledDate?: string | null;
+	scheduledStartTime?: string | null; // HH:mm format
+	scheduledEndTime?: string | null; // HH:mm format
+	estimatedDuration?: number | null; // Duration in minutes
 	priority: TaskPriority;
 	status: TaskStatus;
 	isCompleted: boolean;
@@ -92,6 +102,11 @@ export interface CreateTaskInput {
 	projectId?: string | null;
 	dueDate?: string | null;
 	dueTime?: string | null;
+	// Time-Blocking
+	scheduledDate?: string | null;
+	scheduledStartTime?: string | null;
+	scheduledEndTime?: string | null;
+	estimatedDuration?: number | null;
 	priority?: TaskPriority;
 	labelIds?: string[];
 	subtasks?: Omit<Subtask, 'id'>[];
@@ -105,6 +120,11 @@ export interface UpdateTaskInput {
 	projectId?: string | null;
 	dueDate?: string | null;
 	dueTime?: string | null;
+	// Time-Blocking
+	scheduledDate?: string | null;
+	scheduledStartTime?: string | null;
+	scheduledEndTime?: string | null;
+	estimatedDuration?: number | null;
 	priority?: TaskPriority;
 	status?: TaskStatus;
 	isCompleted?: boolean;
@@ -150,78 +170,10 @@ interface LabelsResponse {
 }
 
 // ============================================
-// API Client
+// API Client (using shared base client)
 // ============================================
 
-type FetchOptions = {
-	method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-	body?: unknown;
-	token?: string;
-};
-
-async function fetchTodoApi<T>(
-	endpoint: string,
-	options: FetchOptions = {}
-): Promise<{ data: T | null; error: Error | null }> {
-	const { method = 'GET', body, token } = options;
-
-	let authToken = token;
-	if (!authToken && browser) {
-		authToken = localStorage.getItem('@auth/appToken') || undefined;
-	}
-
-	try {
-		const headers: Record<string, string> = {
-			'Content-Type': 'application/json',
-		};
-
-		if (authToken) {
-			headers['Authorization'] = `Bearer ${authToken}`;
-		}
-
-		const response = await fetch(`${TODO_API_BASE}/api/v1${endpoint}`, {
-			method,
-			headers,
-			body: body ? JSON.stringify(body) : undefined,
-		});
-
-		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({}));
-			return {
-				data: null,
-				error: new Error(errorData.message || `Todo API error: ${response.status}`),
-			};
-		}
-
-		// Handle empty responses (204 No Content)
-		if (response.status === 204) {
-			return { data: null, error: null };
-		}
-
-		const data = await response.json();
-		return { data, error: null };
-	} catch (error) {
-		return {
-			data: null,
-			error: error instanceof Error ? error : new Error('Failed to connect to Todo service'),
-		};
-	}
-}
-
-// ============================================
-// Helper Functions
-// ============================================
-
-function buildQueryString(query: TaskQuery): string {
-	const params = new URLSearchParams();
-	Object.entries(query).forEach(([key, value]) => {
-		if (value !== undefined && value !== null) {
-			params.append(key, String(value));
-		}
-	});
-	const queryString = params.toString();
-	return queryString ? `?${queryString}` : '';
-}
+const fetchTodoApi = todoClient.fetchApi;
 
 // ============================================
 // Task API Functions
@@ -230,7 +182,7 @@ function buildQueryString(query: TaskQuery): string {
 export async function getTasks(
 	query: TaskQuery = {}
 ): Promise<{ data: Task[] | null; error: Error | null }> {
-	const queryString = buildQueryString(query);
+	const queryString = buildQueryString(query as Record<string, unknown>);
 	const result = await fetchTodoApi<TasksResponse>(`/tasks${queryString}`);
 	return {
 		data: result.data?.tasks || null,

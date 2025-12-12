@@ -83,6 +83,7 @@
 	</button>
 {:else}
 	<form class="quick-add-form" onsubmit={handleSubmit}>
+		<!-- svelte-ignore a11y_autofocus -->
 		<input
 			bind:this={inputRef}
 			bind:value={title}

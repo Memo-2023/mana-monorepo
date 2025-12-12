@@ -16,6 +16,8 @@
 		onBirthdayFilterChange: (filter: BirthdayFilter) => void;
 		selectedCompany: string | null;
 		onCompanyChange: (company: string | null) => void;
+		/** When embedded in a toolbar, renders as just a button without background container */
+		embedded?: boolean;
 	}
 
 	let {
@@ -28,6 +30,7 @@
 		onBirthdayFilterChange,
 		selectedCompany,
 		onCompanyChange,
+		embedded = false,
 	}: Props = $props();
 
 	let tags = $state<ContactTag[]>([]);
@@ -81,37 +84,150 @@
 	});
 </script>
 
-<div class="filter-bar">
-	<!-- Filter Toggle Button -->
-	<button
-		type="button"
-		class="filter-toggle"
-		class:active={showFilters || activeFilterCount > 0}
-		onclick={() => (showFilters = !showFilters)}
-	>
-		<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-			/>
-		</svg>
-		<span>{$_('filters.title')}</span>
-		{#if activeFilterCount > 0}
-			<span class="filter-badge">{activeFilterCount}</span>
-		{/if}
-	</button>
+{#if embedded}
+	<!-- Embedded mode: just the button for use in a toolbar -->
+	<div class="filter-bar-embedded">
+		<button
+			type="button"
+			class="filter-toggle-embedded"
+			class:active={showFilters || activeFilterCount > 0}
+			onclick={() => (showFilters = !showFilters)}
+			title={$_('filters.title')}
+		>
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+				/>
+			</svg>
+			{#if activeFilterCount > 0}
+				<span class="filter-badge-embedded">{activeFilterCount}</span>
+			{/if}
+		</button>
 
-	<!-- Filter Pills (shown when filters are active) -->
-	{#if activeFilterCount > 0 && !showFilters}
-		<div class="active-filters">
-			{#if selectedTagId}
-				{@const tag = tags.find((t) => t.id === selectedTagId)}
-				{#if tag}
-					<button type="button" class="filter-pill" onclick={() => onTagChange(null)}>
-						<span class="pill-color" style="background: {tag.color || '#6366f1'}"></span>
-						{tag.name}
+		<!-- Dropdown panel for embedded mode -->
+		{#if showFilters}
+			<div class="filter-dropdown">
+				<!-- Tags Filter -->
+				<div class="filter-section">
+					<label class="filter-label">{$_('filters.tag')}</label>
+					<select
+						class="filter-select"
+						value={selectedTagId || ''}
+						onchange={(e) => onTagChange(e.currentTarget.value || null)}
+					>
+						<option value="">{$_('filters.allTags')}</option>
+						{#each tags as tag}
+							<option value={tag.id}>{tag.name}</option>
+						{/each}
+					</select>
+				</div>
+
+				<!-- Contact Info Filter -->
+				<div class="filter-section">
+					<label class="filter-label">{$_('filters.contactInfo')}</label>
+					<select
+						class="filter-select"
+						value={contactFilter}
+						onchange={(e) => onContactFilterChange(e.currentTarget.value as ContactFilter)}
+					>
+						<option value="all">{$_('filters.contact.all')}</option>
+						<option value="favorites">{$_('filters.contact.favorites')}</option>
+						<option value="hasPhone">{$_('filters.contact.hasPhone')}</option>
+						<option value="hasEmail">{$_('filters.contact.hasEmail')}</option>
+						<option value="incomplete">{$_('filters.contact.incomplete')}</option>
+					</select>
+				</div>
+
+				<!-- Birthday Filter -->
+				<div class="filter-section">
+					<label class="filter-label">{$_('filters.birthdayLabel')}</label>
+					<select
+						class="filter-select"
+						value={birthdayFilter}
+						onchange={(e) => onBirthdayFilterChange(e.currentTarget.value as BirthdayFilter)}
+					>
+						<option value="all">{$_('filters.birthday.all')}</option>
+						<option value="today">{$_('filters.birthday.today')}</option>
+						<option value="thisWeek">{$_('filters.birthday.thisWeek')}</option>
+						<option value="thisMonth">{$_('filters.birthday.thisMonth')}</option>
+					</select>
+				</div>
+
+				<!-- Company Filter -->
+				{#if companies.length > 0}
+					<div class="filter-section">
+						<label class="filter-label">{$_('filters.company')}</label>
+						<select
+							class="filter-select"
+							value={selectedCompany || ''}
+							onchange={(e) => onCompanyChange(e.currentTarget.value || null)}
+						>
+							<option value="">{$_('filters.allCompanies')}</option>
+							{#each companies as company}
+								<option value={company}>{company}</option>
+							{/each}
+						</select>
+					</div>
+				{/if}
+
+				<!-- Clear Filters -->
+				{#if activeFilterCount > 0}
+					<button type="button" class="clear-filters-btn" onclick={clearAllFilters}>
+						{$_('filters.clearAll')}
+					</button>
+				{/if}
+			</div>
+		{/if}
+	</div>
+{:else}
+	<div class="filter-bar">
+		<!-- Filter Toggle Button -->
+		<button
+			type="button"
+			class="filter-toggle"
+			class:active={showFilters || activeFilterCount > 0}
+			onclick={() => (showFilters = !showFilters)}
+		>
+			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+				/>
+			</svg>
+			<span>{$_('filters.title')}</span>
+			{#if activeFilterCount > 0}
+				<span class="filter-badge">{activeFilterCount}</span>
+			{/if}
+		</button>
+
+		<!-- Filter Pills (shown when filters are active) -->
+		{#if activeFilterCount > 0 && !showFilters}
+			<div class="active-filters">
+				{#if selectedTagId}
+					{@const tag = tags.find((t) => t.id === selectedTagId)}
+					{#if tag}
+						<button type="button" class="filter-pill" onclick={() => onTagChange(null)}>
+							<span class="pill-color" style="background: {tag.color || '#6366f1'}"></span>
+							{tag.name}
+							<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
+							</svg>
+						</button>
+					{/if}
+				{/if}
+				{#if contactFilter !== 'all' && contactFilter !== 'favorites'}
+					<button type="button" class="filter-pill" onclick={() => onContactFilterChange('all')}>
+						{$_(`filters.contact.${contactFilter}`)}
 						<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
 								stroke-linecap="round"
@@ -122,129 +238,201 @@
 						</svg>
 					</button>
 				{/if}
-			{/if}
-			{#if contactFilter !== 'all' && contactFilter !== 'favorites'}
-				<button type="button" class="filter-pill" onclick={() => onContactFilterChange('all')}>
-					{$_(`filters.contact.${contactFilter}`)}
-					<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
+				{#if birthdayFilter !== 'all'}
+					<button type="button" class="filter-pill" onclick={() => onBirthdayFilterChange('all')}>
+						{$_(`filters.birthday.${birthdayFilter}`)}
+						<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
+						</svg>
+					</button>
+				{/if}
+				{#if selectedCompany}
+					<button type="button" class="filter-pill" onclick={() => onCompanyChange(null)}>
+						{selectedCompany}
+						<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
+						</svg>
+					</button>
+				{/if}
+				<button type="button" class="clear-all-btn" onclick={clearAllFilters}>
+					{$_('filters.clearAll')}
 				</button>
-			{/if}
-			{#if birthdayFilter !== 'all'}
-				<button type="button" class="filter-pill" onclick={() => onBirthdayFilterChange('all')}>
-					{$_(`filters.birthday.${birthdayFilter}`)}
-					<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
-				</button>
-			{/if}
-			{#if selectedCompany}
-				<button type="button" class="filter-pill" onclick={() => onCompanyChange(null)}>
-					{selectedCompany}
-					<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
-				</button>
-			{/if}
-			<button type="button" class="clear-all-btn" onclick={clearAllFilters}>
-				{$_('filters.clearAll')}
-			</button>
-		</div>
-	{/if}
-
-	<!-- Expanded Filter Panel -->
-	{#if showFilters}
-		<div class="filter-panel">
-			<!-- Tags Filter -->
-			<div class="filter-section">
-				<label class="filter-label">{$_('filters.tag')}</label>
-				<select
-					class="filter-select"
-					value={selectedTagId || ''}
-					onchange={(e) => onTagChange(e.currentTarget.value || null)}
-				>
-					<option value="">{$_('filters.allTags')}</option>
-					{#each tags as tag}
-						<option value={tag.id}>{tag.name}</option>
-					{/each}
-				</select>
 			</div>
+		{/if}
 
-			<!-- Contact Info Filter -->
-			<div class="filter-section">
-				<label class="filter-label">{$_('filters.contactInfo')}</label>
-				<select
-					class="filter-select"
-					value={contactFilter}
-					onchange={(e) => onContactFilterChange(e.currentTarget.value as ContactFilter)}
-				>
-					<option value="all">{$_('filters.contact.all')}</option>
-					<option value="favorites">{$_('filters.contact.favorites')}</option>
-					<option value="hasPhone">{$_('filters.contact.hasPhone')}</option>
-					<option value="hasEmail">{$_('filters.contact.hasEmail')}</option>
-					<option value="incomplete">{$_('filters.contact.incomplete')}</option>
-				</select>
-			</div>
-
-			<!-- Birthday Filter -->
-			<div class="filter-section">
-				<label class="filter-label">{$_('filters.birthdayLabel')}</label>
-				<select
-					class="filter-select"
-					value={birthdayFilter}
-					onchange={(e) => onBirthdayFilterChange(e.currentTarget.value as BirthdayFilter)}
-				>
-					<option value="all">{$_('filters.birthday.all')}</option>
-					<option value="today">{$_('filters.birthday.today')}</option>
-					<option value="thisWeek">{$_('filters.birthday.thisWeek')}</option>
-					<option value="thisMonth">{$_('filters.birthday.thisMonth')}</option>
-				</select>
-			</div>
-
-			<!-- Company Filter -->
-			{#if companies.length > 0}
+		<!-- Expanded Filter Panel -->
+		{#if showFilters}
+			<div class="filter-panel">
+				<!-- Tags Filter -->
 				<div class="filter-section">
-					<label class="filter-label">{$_('filters.company')}</label>
+					<label class="filter-label">{$_('filters.tag')}</label>
 					<select
 						class="filter-select"
-						value={selectedCompany || ''}
-						onchange={(e) => onCompanyChange(e.currentTarget.value || null)}
+						value={selectedTagId || ''}
+						onchange={(e) => onTagChange(e.currentTarget.value || null)}
 					>
-						<option value="">{$_('filters.allCompanies')}</option>
-						{#each companies as company}
-							<option value={company}>{company}</option>
+						<option value="">{$_('filters.allTags')}</option>
+						{#each tags as tag}
+							<option value={tag.id}>{tag.name}</option>
 						{/each}
 					</select>
 				</div>
-			{/if}
 
-			<!-- Clear Filters -->
-			{#if activeFilterCount > 0}
-				<button type="button" class="clear-filters-btn" onclick={clearAllFilters}>
-					{$_('filters.clearAll')}
-				</button>
-			{/if}
-		</div>
-	{/if}
-</div>
+				<!-- Contact Info Filter -->
+				<div class="filter-section">
+					<label class="filter-label">{$_('filters.contactInfo')}</label>
+					<select
+						class="filter-select"
+						value={contactFilter}
+						onchange={(e) => onContactFilterChange(e.currentTarget.value as ContactFilter)}
+					>
+						<option value="all">{$_('filters.contact.all')}</option>
+						<option value="favorites">{$_('filters.contact.favorites')}</option>
+						<option value="hasPhone">{$_('filters.contact.hasPhone')}</option>
+						<option value="hasEmail">{$_('filters.contact.hasEmail')}</option>
+						<option value="incomplete">{$_('filters.contact.incomplete')}</option>
+					</select>
+				</div>
+
+				<!-- Birthday Filter -->
+				<div class="filter-section">
+					<label class="filter-label">{$_('filters.birthdayLabel')}</label>
+					<select
+						class="filter-select"
+						value={birthdayFilter}
+						onchange={(e) => onBirthdayFilterChange(e.currentTarget.value as BirthdayFilter)}
+					>
+						<option value="all">{$_('filters.birthday.all')}</option>
+						<option value="today">{$_('filters.birthday.today')}</option>
+						<option value="thisWeek">{$_('filters.birthday.thisWeek')}</option>
+						<option value="thisMonth">{$_('filters.birthday.thisMonth')}</option>
+					</select>
+				</div>
+
+				<!-- Company Filter -->
+				{#if companies.length > 0}
+					<div class="filter-section">
+						<label class="filter-label">{$_('filters.company')}</label>
+						<select
+							class="filter-select"
+							value={selectedCompany || ''}
+							onchange={(e) => onCompanyChange(e.currentTarget.value || null)}
+						>
+							<option value="">{$_('filters.allCompanies')}</option>
+							{#each companies as company}
+								<option value={company}>{company}</option>
+							{/each}
+						</select>
+					</div>
+				{/if}
+
+				<!-- Clear Filters -->
+				{#if activeFilterCount > 0}
+					<button type="button" class="clear-filters-btn" onclick={clearAllFilters}>
+						{$_('filters.clearAll')}
+					</button>
+				{/if}
+			</div>
+		{/if}
+	</div>
+{/if}
 
 <style>
+	/* Embedded mode styles */
+	.filter-bar-embedded {
+		position: relative;
+		display: flex;
+		align-items: center;
+	}
+
+	.filter-toggle-embedded {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.25rem;
+		padding: 0.5rem;
+		background: transparent;
+		border: none;
+		border-radius: 9999px;
+		cursor: pointer;
+		color: #374151;
+		transition: all 0.15s ease;
+	}
+
+	:global(.dark) .filter-toggle-embedded {
+		color: #f3f4f6;
+	}
+
+	.filter-toggle-embedded:hover {
+		background: rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.dark) .filter-toggle-embedded:hover {
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	.filter-toggle-embedded.active {
+		background: color-mix(in srgb, #3b82f6 15%, transparent 85%);
+		color: #3b82f6;
+	}
+
+	.filter-toggle-embedded :global(svg) {
+		width: 1rem;
+		height: 1rem;
+		flex-shrink: 0;
+	}
+
+	.filter-badge-embedded {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 1rem;
+		height: 1rem;
+		padding: 0 0.25rem;
+		font-size: 0.625rem;
+		font-weight: 600;
+		color: white;
+		background: #3b82f6;
+		border-radius: 9999px;
+	}
+
+	.filter-dropdown {
+		position: absolute;
+		top: calc(100% + 0.5rem);
+		left: 50%;
+		transform: translateX(-50%);
+		min-width: 280px;
+		padding: 1rem;
+		background: rgba(255, 255, 255, 0.95);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		border-radius: 0.75rem;
+		box-shadow:
+			0 10px 25px -5px rgba(0, 0, 0, 0.1),
+			0 8px 10px -6px rgba(0, 0, 0, 0.1);
+		z-index: 50;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	:global(.dark) .filter-dropdown {
+		background: rgba(30, 30, 30, 0.95);
+		border-color: rgba(255, 255, 255, 0.1);
+	}
+
+	/* Standard mode styles */
 	.filter-bar {
 		display: flex;
 		align-items: center;

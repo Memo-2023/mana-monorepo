@@ -9,6 +9,10 @@ import {
 	IsDateString,
 	IsNotEmpty,
 	ValidateNested,
+	IsInt,
+	Min,
+	Max,
+	Matches,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { TaskPriority } from '../../db/schema/tasks.schema';
@@ -46,6 +50,27 @@ export class CreateTaskDto {
 	@IsOptional()
 	@IsDateString()
 	startDate?: string | null;
+
+	// Time-Blocking fields
+	@IsOptional()
+	@IsDateString()
+	scheduledDate?: string | null;
+
+	@IsOptional()
+	@IsString()
+	@Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'scheduledStartTime must be in HH:mm format' })
+	scheduledStartTime?: string | null;
+
+	@IsOptional()
+	@IsString()
+	@Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'scheduledEndTime must be in HH:mm format' })
+	scheduledEndTime?: string | null;
+
+	@IsOptional()
+	@IsInt()
+	@Min(1)
+	@Max(1440) // Max 24 hours in minutes
+	estimatedDuration?: number | null;
 
 	@IsOptional()
 	@IsEnum(['low', 'medium', 'high', 'urgent'])

@@ -4,12 +4,8 @@
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
 	import { goto } from '$app/navigation';
-	import ViewModeToggle from '$lib/components/ViewModeToggle.svelte';
-	import SortToggle, { type SortField } from '$lib/components/SortToggle.svelte';
-	import FilterBar, {
-		type ContactFilter,
-		type BirthdayFilter,
-	} from '$lib/components/FilterBar.svelte';
+	import type { ContactFilter, BirthdayFilter } from '$lib/components/FilterBar.svelte';
+	import ContactsToolbar, { type SortField } from '$lib/components/ContactsToolbar.svelte';
 	import ContactListView from '$lib/components/views/ContactListView.svelte';
 	import ContactGridView from '$lib/components/views/ContactGridView.svelte';
 	import ContactAlphabetView from '$lib/components/views/ContactAlphabetView.svelte';
@@ -31,9 +27,6 @@
 	let contactFilter = $state<ContactFilter>('all');
 	let birthdayFilter = $state<BirthdayFilter>('all');
 	let selectedCompany = $state<string | null>(null);
-
-	// Count favorites for quick filter button
-	let favoritesCount = $derived(contactsStore.contacts.filter((c) => c.isFavorite).length);
 
 	// Batch selection state
 	let selectionMode = $state(false);
@@ -277,32 +270,7 @@
 
 <div class="space-y-6">
 	<!-- Header -->
-	<div class="flex items-center justify-between flex-wrap gap-4">
-		<h1 class="text-2xl font-bold text-foreground">{$_('contacts.title')}</h1>
-		<div class="flex items-center gap-2">
-			<!-- Selection Mode Toggle -->
-			<button
-				type="button"
-				onclick={toggleSelectionMode}
-				class="btn {selectionMode ? 'btn-primary' : 'btn-secondary'} flex items-center gap-2"
-				title={selectionMode ? 'Auswahl beenden' : 'Mehrere auswählen'}
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-					/>
-				</svg>
-				<span class="hidden sm:inline">{selectionMode ? 'Fertig' : 'Auswählen'}</span>
-			</button>
-			<a href="/contacts/new" class="btn btn-primary flex items-center gap-2">
-				<span>+</span>
-				<span>{$_('contacts.new')}</span>
-			</a>
-		</div>
-	</div>
+	<h1 class="text-2xl font-bold text-foreground">{$_('contacts.title')}</h1>
 
 	<!-- Batch Actions Bar (shown when in selection mode) -->
 	{#if selectionMode}
@@ -381,78 +349,54 @@
 		</div>
 	{/if}
 
-	<!-- Search, Filters and View Toggle -->
-	<div class="flex items-center gap-4 flex-wrap">
-		<div class="relative flex-1 min-w-[200px]">
-			<input
-				type="text"
-				placeholder={$_('contacts.search')}
-				bind:value={searchQuery}
-				oninput={handleSearch}
-				class="input w-full pl-10"
-			/>
-			<svg
-				class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-				/>
-			</svg>
-		</div>
-		<!-- Quick Favorites Filter -->
-		<button
-			type="button"
-			class="favorites-quick-btn"
-			class:active={contactFilter === 'favorites'}
-			onclick={() => (contactFilter = contactFilter === 'favorites' ? 'all' : 'favorites')}
-			title={contactFilter === 'favorites' ? 'Alle Kontakte anzeigen' : 'Nur Favoriten anzeigen'}
-		>
-			<svg
-				class="w-5 h-5"
-				class:filled={contactFilter === 'favorites'}
-				fill={contactFilter === 'favorites' ? 'currentColor' : 'none'}
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-				/>
-			</svg>
-			{#if favoritesCount > 0}
-				<span class="favorites-count">{favoritesCount}</span>
-			{/if}
-		</button>
-		<FilterBar
-			contacts={contactsStore.contacts}
-			{selectedTagId}
-			onTagChange={(id) => {
-				selectedTagId = id;
-				if (id) {
-					contactsStore.setTagId(id);
-				} else {
-					contactsStore.setTagId(undefined);
-				}
-				contactsStore.loadContacts();
-			}}
-			{contactFilter}
-			onContactFilterChange={(f) => (contactFilter = f)}
-			{birthdayFilter}
-			onBirthdayFilterChange={(f) => (birthdayFilter = f)}
-			{selectedCompany}
-			onCompanyChange={(c) => (selectedCompany = c)}
+	<!-- Search Bar -->
+	<div class="relative">
+		<input
+			type="text"
+			placeholder={$_('contacts.search')}
+			bind:value={searchQuery}
+			oninput={handleSearch}
+			class="input w-full pl-10"
 		/>
-		<SortToggle value={sortField} onchange={(v) => (sortField = v)} />
-		<ViewModeToggle />
+		<svg
+			class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+			fill="none"
+			stroke="currentColor"
+			viewBox="0 0 24 24"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+			/>
+		</svg>
 	</div>
+
+	<!-- Unified Toolbar -->
+	<ContactsToolbar
+		contacts={contactsStore.contacts}
+		{sortField}
+		onSortFieldChange={(v) => (sortField = v)}
+		{contactFilter}
+		onContactFilterChange={(f) => (contactFilter = f)}
+		{birthdayFilter}
+		onBirthdayFilterChange={(f) => (birthdayFilter = f)}
+		{selectedTagId}
+		onTagChange={(id) => {
+			selectedTagId = id;
+			if (id) {
+				contactsStore.setTagId(id);
+			} else {
+				contactsStore.setTagId(undefined);
+			}
+			contactsStore.loadContacts();
+		}}
+		{selectedCompany}
+		onCompanyChange={(c) => (selectedCompany = c)}
+		{selectionMode}
+		onToggleSelectionMode={toggleSelectionMode}
+	/>
 
 	<!-- Loading state with skeleton -->
 	{#if contactsStore.loading}
@@ -563,57 +507,6 @@
 	.batch-btn-danger:hover:not(:disabled) {
 		background: hsl(var(--color-error) / 0.15);
 		color: hsl(var(--color-error));
-	}
-
-	/* Favorites Quick Filter Button */
-	.favorites-quick-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.5rem 0.75rem;
-		background: hsl(var(--background) / 0.75);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid hsl(var(--border) / 0.5);
-		border-radius: 9999px;
-		color: hsl(var(--muted-foreground));
-		cursor: pointer;
-		transition: all 0.2s ease;
-		font-size: 0.875rem;
-		font-weight: 500;
-	}
-
-	.favorites-quick-btn:hover {
-		color: hsl(var(--foreground));
-		border-color: hsl(var(--border));
-	}
-
-	.favorites-quick-btn.active {
-		color: #ef4444;
-		border-color: #ef4444 / 0.5;
-		background: hsl(0 84% 60% / 0.1);
-	}
-
-	.favorites-quick-btn.active:hover {
-		background: hsl(0 84% 60% / 0.15);
-	}
-
-	.favorites-count {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-width: 1.25rem;
-		height: 1.25rem;
-		padding: 0 0.375rem;
-		font-size: 0.6875rem;
-		font-weight: 600;
-		background: hsl(var(--muted));
-		border-radius: 9999px;
-	}
-
-	.favorites-quick-btn.active .favorites-count {
-		background: #ef4444;
-		color: white;
 	}
 
 	/* Infinite scroll */

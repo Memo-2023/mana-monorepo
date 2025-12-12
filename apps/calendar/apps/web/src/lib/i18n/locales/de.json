@@ -19,7 +19,9 @@
 		"month": "Monat",
 		"year": "Jahr",
 		"agenda": "Agenda",
-		"weekdaysOnly": "Nur Wochentage"
+		"weekdaysOnly": "Nur Wochentage",
+		"weekNumber": "KW",
+		"moreEvents": "+{count} mehr"
 	},
 	"calendar": {
 		"today": "Heute",
@@ -27,7 +29,10 @@
 		"noEvents": "Keine Termine",
 		"allDay": "Ganztägig",
 		"myCalendars": "Meine Kalender",
-		"sharedCalendars": "Geteilte Kalender"
+		"sharedCalendars": "Geteilte Kalender",
+		"draftEvent": "(Neuer Termin)",
+		"hideSidebar": "Sidebar ausblenden",
+		"showSidebar": "Sidebar einblenden"
 	},
 	"event": {
 		"title": "Titel",
@@ -41,7 +46,9 @@
 		"calendar": "Kalender",
 		"save": "Speichern",
 		"delete": "Löschen",
-		"cancel": "Abbrechen"
+		"cancel": "Abbrechen",
+		"changeStartTime": "Startzeit ändern",
+		"changeEndTime": "Endzeit ändern"
 	},
 	"repeat": {
 		"none": "Nicht wiederholen",
@@ -86,5 +93,30 @@
 		"search": "Suchen",
 		"error": "Fehler",
 		"success": "Erfolgreich"
+	},
+	"errors": {
+		"loadEvents": "Termine konnten nicht geladen werden",
+		"createEvent": "Termin konnte nicht erstellt werden",
+		"updateEvent": "Termin konnte nicht aktualisiert werden",
+		"deleteEvent": "Termin konnte nicht gelöscht werden"
+	},
+	"success": {
+		"eventCreated": "Termin erstellt",
+		"eventDeleted": "Termin gelöscht"
+	},
+	"priority": {
+		"urgent": "Dringend",
+		"high": "Wichtig",
+		"medium": "Normal",
+		"low": "Später"
+	},
+	"todo": {
+		"task": "Aufgabe",
+		"markComplete": "Als erledigt markieren",
+		"markIncomplete": "Als unerledigt markieren"
+	},
+	"a11y": {
+		"createEventOn": "Termin erstellen am {date}",
+		"slotTime": "{day} {time}"
 	}
 }

@@ -1,0 +1,223 @@
+<script lang="ts">
+	import { tick } from 'svelte';
+
+	export interface ViewOption {
+		/** Unique identifier */
+		id: string;
+		/** Display label */
+		label: string;
+		/** Optional icon name */
+		icon?: string;
+		/** Optional tooltip */
+		title?: string;
+		/** Whether this option is disabled */
+		disabled?: boolean;
+	}
+
+	interface Props {
+		/** Available view options */
+		options: ViewOption[];
+		/** Currently selected view id */
+		value: string;
+		/** Called when view changes */
+		onChange: (id: string) => void;
+		/** Primary color for active state */
+		primaryColor?: string;
+		/** Embedded mode - no background/border, for use inside a parent bar */
+		embedded?: boolean;
+	}
+
+	let { options, value, onChange, primaryColor = '#3b82f6', embedded = false }: Props = $props();
+
+	let containerRef = $state<HTMLDivElement | null>(null);
+	let indicatorStyle = $state('');
+
+	// Update indicator position when value changes
+	$effect(() => {
+		if (containerRef && value) {
+			tick().then(updateIndicator);
+		}
+	});
+
+	function updateIndicator() {
+		if (!containerRef) return;
+
+		const activeButton = containerRef.querySelector(`[data-id="${value}"]`) as HTMLButtonElement;
+		if (activeButton) {
+			const containerRect = containerRef.getBoundingClientRect();
+			const buttonRect = activeButton.getBoundingClientRect();
+
+			const left = buttonRect.left - containerRect.left;
+			const width = buttonRect.width;
+
+			indicatorStyle = `left: ${left}px; width: ${width}px;`;
+		}
+	}
+
+	function handleClick(optionId: string, disabled?: boolean) {
+		if (!disabled) {
+			onChange(optionId);
+		}
+	}
+
+	// Icon SVG paths
+	const icons: Record<string, string> = {
+		day: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+		week: 'M4 6h16M4 10h16M4 14h16M4 18h16',
+		month:
+			'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z',
+		year: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
+		agenda:
+			'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01',
+		list: 'M4 6h16M4 10h16M4 14h16M4 18h16',
+		grid: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z',
+		calendar:
+			'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+	};
+
+	function getIconPath(name: string): string {
+		return icons[name] || '';
+	}
+</script>
+
+<div
+	class="pill-view-switcher"
+	class:glass-pill={!embedded}
+	class:embedded-switcher={embedded}
+	style="--switcher-primary-color: {primaryColor}"
+	bind:this={containerRef}
+>
+	<!-- Sliding indicator -->
+	<div class="sliding-indicator" style={indicatorStyle}></div>
+
+	<!-- Options -->
+	{#each options as option}
+		<button
+			data-id={option.id}
+			onclick={() => handleClick(option.id, option.disabled)}
+			class="switcher-btn"
+			class:active={value === option.id}
+			class:disabled={option.disabled}
+			title={option.title || option.label}
+			disabled={option.disabled}
+		>
+			{#if option.icon && getIconPath(option.icon)}
+				<svg class="switcher-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d={getIconPath(option.icon)}
+					/>
+				</svg>
+			{/if}
+			<span class="switcher-label">{option.label}</span>
+		</button>
+	{/each}
+</div>
+
+<style>
+	.pill-view-switcher {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		padding: 0.1875rem;
+		border-radius: 9999px;
+		gap: 0.125rem;
+	}
+
+	.glass-pill {
+		background: rgba(255, 255, 255, 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	}
+
+	:global(.dark) .glass-pill {
+		background: rgba(255, 255, 255, 0.12);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+	}
+
+	/* Embedded mode - no background/border */
+	.embedded-switcher {
+		background: transparent;
+		border: none;
+		box-shadow: none;
+		padding: 0;
+		gap: 0;
+	}
+
+	/* Sliding indicator */
+	.sliding-indicator {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		border-radius: 9999px;
+		background: color-mix(in srgb, var(--switcher-primary-color) 15%, white 85%);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+		z-index: 0;
+	}
+
+	:global(.dark) .sliding-indicator {
+		background: color-mix(in srgb, var(--switcher-primary-color) 25%, transparent 75%);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+	}
+
+	.switcher-btn {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.25rem;
+		padding: 0.5rem 0.875rem;
+		background: transparent;
+		border: none;
+		border-radius: 9999px;
+		cursor: pointer;
+		color: #6b7280;
+		font-size: 0.875rem;
+		font-weight: 500;
+		white-space: nowrap;
+		transition: color 0.15s ease;
+	}
+
+	:global(.dark) .switcher-btn {
+		color: #9ca3af;
+	}
+
+	.switcher-btn:hover:not(.disabled) {
+		color: #374151;
+	}
+
+	:global(.dark) .switcher-btn:hover:not(.disabled) {
+		color: #e5e7eb;
+	}
+
+	.switcher-btn.active {
+		color: var(--switcher-primary-color);
+	}
+
+	:global(.dark) .switcher-btn.active {
+		color: var(--switcher-primary-color);
+	}
+
+	.switcher-btn.disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
+	.switcher-icon {
+		width: 1rem;
+		height: 1rem;
+		flex-shrink: 0;
+	}
+
+	.switcher-label {
+		line-height: 1;
+	}
+</style>

@@ -3,12 +3,16 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, CommandBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import {
+		SplitPaneContainer,
+		setSplitPanelContext,
+		DEFAULT_APPS,
+	} from '@manacore/shared-splitscreen';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
-		CommandBarItem,
-		QuickAction,
+		QuickInputItem,
 		CreatePreview,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
@@ -29,11 +33,13 @@
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
+		isToolbarCollapsed as toolbarCollapsedStore,
 	} from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { searchEvents } from '$lib/api/events';
+	import { searchStore } from '$lib/stores/search.svelte';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import {
@@ -41,31 +47,25 @@
 		resolveEventIds,
 		formatParsedEventPreview,
 	} from '$lib/utils/event-parser';
+	import CalendarToolbar from '$lib/components/calendar/CalendarToolbar.svelte';
+	import CalendarToolbarContent from '$lib/components/calendar/CalendarToolbarContent.svelte';
+	import DateStrip from '$lib/components/calendar/DateStrip.svelte';
 
 	// App switcher items
 	const appItems = getPillAppItems('calendar');
 
+	// Split-Panel Store für Split-Screen Feature
+	const splitPanel = setSplitPanelContext('calendar', DEFAULT_APPS);
+
+	// Handler für Split-Screen Panel-Öffnung
+	function handleOpenInPanel(appId: string, url: string) {
+		splitPanel.openPanel(appId);
+	}
+
 	let { children } = $props();
 
-	// CommandBar state
-	let commandBarOpen = $state(false);
-
-	// CommandBar quick actions (no search for calendar yet)
-	const commandBarQuickActions: QuickAction[] = [
-		{ id: 'new', label: 'Neuen Termin erstellen', icon: 'plus', href: '/event/new', shortcut: 'N' },
-		{
-			id: 'today',
-			label: 'Zu Heute springen',
-			icon: 'calendar',
-			onclick: () => viewStore.goToToday(),
-		},
-		{ id: 'agenda', label: 'Agenda anzeigen', icon: 'list', href: '/agenda' },
-		{ id: 'tasks', label: 'Aufgaben anzeigen', icon: 'check-square', href: '/tasks' },
-		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
-	];
-
-	// CommandBar search - search events
-	async function handleCommandBarSearch(query: string): Promise<CommandBarItem[]> {
+	// InputBar search - search events
+	async function handleSearch(query: string): Promise<QuickInputItem[]> {
 		if (!query.trim()) return [];
 
 		const result = await searchEvents(query);
@@ -78,24 +78,34 @@
 		}));
 	}
 
-	function handleCommandBarSelect(item: CommandBarItem) {
+	function handleSelect(item: QuickInputItem) {
+		searchStore.clear();
 		goto(`/event/${item.id}`);
 	}
 
-	// CommandBar Quick-Create handlers
-	function handleCommandBarParseCreate(query: string): CreatePreview | null {
+	// Update search store when search changes (for calendar view highlighting)
+	function handleSearchChange(query: string, results: QuickInputItem[]) {
+		if (!query.trim()) {
+			searchStore.clear();
+		} else {
+			searchStore.setSearch(query, results);
+		}
+	}
+
+	// QuickInputBar Quick-Create handlers
+	function handleParseCreate(query: string): CreatePreview | null {
 		if (!query.trim()) return null;
 
 		const parsed = parseEventInput(query);
 		if (!parsed.title) return null;
 
 		return {
-			title: parsed.title,
+			title: `"${parsed.title}" erstellen`,
 			subtitle: formatParsedEventPreview(parsed),
 		};
 	}
 
-	async function handleCommandBarCreate(query: string): Promise<void> {
+	async function handleCreate(query: string): Promise<void> {
 		const parsed = parseEventInput(query);
 		if (!parsed.title) return;
 
@@ -103,12 +113,6 @@
 		const calendars = calendarsStore.calendars.map((c) => ({ id: c.id, name: c.name }));
 		const tags = eventTagsStore.tags.map((t) => ({ id: t.id, name: t.name }));
 		const resolved = resolveEventIds(parsed, calendars, tags);
-
-		// Ensure we have a calendar
-		if (!resolved.calendarId) {
-			console.error('No calendar available');
-			return;
-		}
 
 		// Ensure we have start and end times
 		if (!resolved.startTime) {
@@ -119,8 +123,10 @@
 			resolved.endTime = end.toISOString();
 		}
 
+		// Create event - calendarId is now optional, backend will use/create default if not provided
 		await eventsStore.createEvent({
-			calendarId: resolved.calendarId,
+			// Only include calendarId if resolved (from command or default calendar)
+			...(resolved.calendarId ? { calendarId: resolved.calendarId } : {}),
 			title: resolved.title,
 			startTime: resolved.startTime,
 			endTime: resolved.endTime || resolved.startTime,
@@ -128,13 +134,22 @@
 			location: resolved.location,
 			tagIds: resolved.tagIds,
 		});
+
+		// Refresh calendars if none existed (in case default was created)
+		if (calendarsStore.calendars.length === 0) {
+			await calendarsStore.fetchCalendars();
+		}
 	}
 
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
+	let isToolbarCollapsed = $state(false);
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
+
+	// Show toolbar only on calendar main page
+	let showCalendarToolbar = $derived($page.url.pathname === '/');
 
 	// Get pinned themes from user settings (extended themes only)
 	let pinnedThemes = $derived<ThemeVariant[]>(
@@ -203,13 +218,6 @@
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
 
-		// Cmd/Ctrl+K to open command bar (works even in inputs)
-		if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-			event.preventDefault();
-			commandBarOpen = true;
-			return;
-		}
-
 		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
 			return;
 		}
@@ -242,6 +250,19 @@
 		}
 	}
 
+	function handleToolbarModeChange(isSidebar: boolean) {
+		// Sync toolbar mode with nav mode
+		handleModeChange(isSidebar);
+	}
+
+	function handleToolbarCollapsedChange(collapsed: boolean) {
+		isToolbarCollapsed = collapsed;
+		toolbarCollapsedStore.set(collapsed);
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem('calendar-toolbar-collapsed', String(collapsed));
+		}
+	}
+
 	function handleToggleTheme() {
 		theme.toggleMode();
 	}
@@ -261,6 +282,9 @@
 			goto('/login');
 			return;
 		}
+
+		// Initialize split-panel from URL/localStorage
+		splitPanel.initialize();
 
 		// Initialize view state
 		viewStore.initialize();
@@ -289,75 +313,114 @@
 			isCollapsed = true;
 			collapsedStore.set(true);
 		}
+
+		// Initialize toolbar collapsed state from localStorage
+		const savedToolbarCollapsed = localStorage.getItem('calendar-toolbar-collapsed');
+		if (savedToolbarCollapsed === 'true') {
+			isToolbarCollapsed = true;
+			toolbarCollapsedStore.set(true);
+		}
 	});
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="layout-container">
-	<PillNavigation
-		items={navItems}
-		currentPath={$page.url.pathname}
-		appName="Kalender"
-		homeRoute="/"
-		onToggleTheme={handleToggleTheme}
-		{isDark}
-		{isSidebarMode}
-		onModeChange={handleModeChange}
-		{isCollapsed}
-		onCollapsedChange={handleCollapsedChange}
-		desktopPosition={userSettings.nav.desktopPosition}
-		showThemeToggle={true}
-		showThemeVariants={true}
-		{themeVariantItems}
-		{currentThemeVariantLabel}
-		themeMode={theme.mode}
-		onThemeModeChange={handleThemeModeChange}
-		showLanguageSwitcher={true}
-		{languageItems}
-		{currentLanguageLabel}
-		showLogout={authStore.isAuthenticated}
-		onLogout={handleLogout}
-		loginHref="/login"
-		primaryColor="#3b82f6"
-		showAppSwitcher={true}
-		{appItems}
-		{userEmail}
-		settingsHref="/settings"
-		manaHref="/mana"
-		profileHref="/profile"
-		allAppsHref="/apps"
-	/>
-
-	<main
-		class="main-content bg-background"
-		class:sidebar-mode={isSidebarMode && !isCollapsed}
-		class:floating-mode={!isSidebarMode && !isCollapsed}
-	>
-		<div
-			class="content-wrapper"
-			class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}
+<SplitPaneContainer>
+	<div class="layout-container">
+		<PillNavigation
+			items={navItems}
+			currentPath={$page.url.pathname}
+			appName="Kalender"
+			homeRoute="/"
+			onToggleTheme={handleToggleTheme}
+			{isDark}
+			{isSidebarMode}
+			onModeChange={handleModeChange}
+			{isCollapsed}
+			onCollapsedChange={handleCollapsedChange}
+			desktopPosition="bottom"
+			showThemeToggle={true}
+			showThemeVariants={true}
+			{themeVariantItems}
+			{currentThemeVariantLabel}
+			themeMode={theme.mode}
+			onThemeModeChange={handleThemeModeChange}
+			showLanguageSwitcher={true}
+			{languageItems}
+			{currentLanguageLabel}
+			showLogout={authStore.isAuthenticated}
+			onLogout={handleLogout}
+			loginHref="/login"
+			primaryColor="#3b82f6"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			manaHref="/mana"
+			profileHref="/profile"
+			allAppsHref="/apps"
+			onOpenInPanel={handleOpenInPanel}
 		>
-			{@render children()}
-		</div>
-	</main>
+			{#snippet toolbarContent()}
+				{#if showCalendarToolbar}
+					<CalendarToolbarContent vertical={true} />
+				{/if}
+			{/snippet}
+		</PillNavigation>
 
-	<!-- Global Command Bar (Cmd/K) -->
-	<CommandBar
-		bind:open={commandBarOpen}
-		onClose={() => (commandBarOpen = false)}
-		onSearch={handleCommandBarSearch}
-		onSelect={handleCommandBarSelect}
-		quickActions={commandBarQuickActions}
-		placeholder="Termin suchen oder erstellen..."
-		emptyText="Keine Termine gefunden"
-		searchingText="Suche..."
-		onCreate={handleCommandBarCreate}
-		onParseCreate={handleCommandBarParseCreate}
-		createText="Als Termin erstellen"
-		createShortcut="⌘↵"
-	/>
-</div>
+		<!-- Date strip (only on main calendar page) -->
+		{#if showCalendarToolbar}
+			<DateStrip {isSidebarMode} />
+		{/if}
+
+		<!-- Calendar toolbar (only on main calendar page, not in sidebar mode) -->
+		{#if showCalendarToolbar && !isSidebarMode}
+			<CalendarToolbar
+				{isSidebarMode}
+				isCollapsed={isToolbarCollapsed}
+				onModeChange={handleToolbarModeChange}
+				onCollapsedChange={handleToolbarCollapsedChange}
+			/>
+		{/if}
+
+		<main
+			class="main-content bg-background"
+			class:sidebar-mode={isSidebarMode && !isCollapsed}
+			class:floating-mode={!isSidebarMode && !isCollapsed}
+			class:has-toolbar={showCalendarToolbar}
+		>
+			<div
+				class="content-wrapper"
+				class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}
+			>
+				{@render children()}
+			</div>
+		</main>
+
+		<!-- Global Input Bar -->
+		<QuickInputBar
+			onSearch={handleSearch}
+			onSelect={handleSelect}
+			onSearchChange={handleSearchChange}
+			placeholder="Neuer Termin oder suchen..."
+			emptyText="Keine Termine gefunden"
+			searchingText="Suche..."
+			onCreate={handleCreate}
+			onParseCreate={handleParseCreate}
+			createText="Erstellen"
+			appIcon="calendar"
+			primaryColor="#3b82f6"
+			autoFocus={true}
+			bottomOffset={showCalendarToolbar
+				? isSidebarMode
+					? '0px'
+					: '130px'
+				: isSidebarMode
+					? '0px'
+					: '70px'}
+		/>
+	</div>
+</SplitPaneContainer>
 
 <style>
 	.layout-container {
@@ -369,11 +432,35 @@
 	.main-content {
 		transition: all 300ms ease;
 		position: relative;
-		z-index: 0;
+		/* Space for QuickInputBar at bottom */
+		padding-bottom: calc(80px + env(safe-area-inset-bottom));
 	}
 
 	.main-content.floating-mode {
 		padding-top: 70px;
+	}
+
+	/* Extra padding when DateStrip + Toolbar are at bottom */
+	.main-content.floating-mode.has-toolbar {
+		padding-top: 0;
+		padding-bottom: calc(
+			280px + env(safe-area-inset-bottom)
+		); /* DateStrip + Toolbar + PillNav + QuickInputBar */
+	}
+
+	@media (max-width: 768px) {
+		/* On mobile, toolbars are at bottom, extra padding at bottom instead */
+		.main-content {
+			padding-bottom: calc(150px + env(safe-area-inset-bottom)); /* PillNav + QuickInputBar */
+		}
+		.main-content.has-toolbar {
+			padding-bottom: calc(
+				250px + env(safe-area-inset-bottom)
+			); /* DateStrip + Toolbar + BottomNav + QuickInputBar */
+		}
+		.main-content.floating-mode.has-toolbar {
+			padding-top: 70px;
+		}
 	}
 
 	.main-content.sidebar-mode {

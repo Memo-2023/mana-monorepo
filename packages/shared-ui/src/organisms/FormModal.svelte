@@ -84,6 +84,7 @@
 </script>
 
 <Modal {visible} {onClose} {title} {icon} {maxWidth}>
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<form onsubmit={handleSubmit} onkeydown={handleKeydown} class="space-y-4">
 		<!-- Error message -->
 		{#if error}

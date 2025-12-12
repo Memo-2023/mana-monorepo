@@ -4,12 +4,14 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
 	import { TagSelector, type Tag } from '@manacore/shared-ui';
+	import AttendeeSelector from './AttendeeSelector.svelte';
 	import type {
 		CalendarEvent,
 		CreateEventInput,
 		UpdateEventInput,
 		LocationDetails,
 		EventTag,
+		EventAttendee,
 	} from '@calendar/shared';
 	import { format, addMinutes, parseISO } from 'date-fns';
 
@@ -48,6 +50,9 @@
 			color: t.color,
 		})) || []
 	);
+
+	// Attendees state
+	let attendees = $state<EventAttendee[]>(event?.metadata?.attendees || []);
 
 	// Convert EventTag to Tag type for shared-ui components
 	function eventTagToTag(tag: EventTag): Tag {
@@ -131,7 +136,7 @@
 		e.preventDefault();
 
 		if (!title.trim()) return;
-		if (!calendarId) return;
+		// calendarId is now optional - backend will use/create default calendar if not provided
 
 		const startDateTime = new Date(`${startDate}T${isAllDay ? '00:00' : startTime}`);
 		const endDateTime = new Date(`${endDate}T${isAllDay ? '23:59' : endTime}`);
@@ -167,6 +172,13 @@
 			delete metadata.locationDetails;
 		}
 
+		// Add attendees
+		if (attendees.length > 0) {
+			metadata.attendees = attendees;
+		} else {
+			delete metadata.attendees;
+		}
+
 		// Only include metadata if it has properties
 		const finalMetadata = Object.keys(metadata).length > 0 ? metadata : undefined;
 
@@ -177,7 +189,8 @@
 			isAllDay,
 			startTime: startDateTime.toISOString(),
 			endTime: endDateTime.toISOString(),
-			calendarId,
+			// Only include calendarId if set - backend will use default if not provided
+			...(calendarId ? { calendarId } : {}),
 			metadata: finalMetadata,
 			tagIds: selectedTags.length > 0 ? selectedTags.map((t) => t.id) : undefined,
 		};
@@ -202,15 +215,19 @@
 
 	<div class="flex flex-col gap-2">
 		<label for="calendar" class="text-sm font-medium text-foreground">Kalender</label>
-		<select
-			id="calendar"
-			class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
-			bind:value={calendarId}
-		>
-			{#each calendarsStore.calendars as cal}
-				<option value={cal.id}>{cal.name}</option>
-			{/each}
-		</select>
+		{#if calendarsStore.calendars.length > 0}
+			<select
+				id="calendar"
+				class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
+				bind:value={calendarId}
+			>
+				{#each calendarsStore.calendars as cal}
+					<option value={cal.id}>{cal.name}</option>
+				{/each}
+			</select>
+		{:else}
+			<p class="text-sm text-muted-foreground italic">Standardkalender wird automatisch erstellt</p>
+		{/if}
 	</div>
 
 	<div class="flex flex-col gap-2">
@@ -378,7 +395,7 @@
 	<!-- Tags -->
 	{#if availableTags.length > 0 || eventTagsStore.loading}
 		<div class="flex flex-col gap-2">
-			<label class="text-sm font-medium text-foreground">Tags</label>
+			<span class="text-sm font-medium text-foreground">Tags</span>
 			<TagSelector
 				tags={availableTags}
 				{selectedTags}
@@ -388,6 +405,15 @@
 			/>
 		</div>
 	{/if}
+
+	<!-- Teilnehmer -->
+	<div class="flex flex-col gap-2">
+		<span class="text-sm font-medium text-foreground">Teilnehmer</span>
+		<AttendeeSelector
+			{attendees}
+			onAttendeesChange={(newAttendees) => (attendees = newAttendees)}
+		/>
+	</div>
 
 	<div class="flex justify-end gap-3 pt-4 border-t border-border">
 		<button
@@ -400,7 +426,7 @@
 		<button
 			type="submit"
 			class="px-4 py-2 rounded-lg font-medium text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-			disabled={submitting || !title.trim() || !calendarId}
+			disabled={submitting || !title.trim()}
 		>
 			{mode === 'create' ? 'Erstellen' : 'Speichern'}
 		</button>

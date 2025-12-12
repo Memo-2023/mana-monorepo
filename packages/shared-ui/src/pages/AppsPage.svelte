@@ -156,6 +156,7 @@
 
 <!-- Modal -->
 {#if selectedAppIndex !== null}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div class="modal-overlay" onclick={closeModal} role="dialog" aria-modal="true" tabindex="-1">
 		<button onclick={closeModal} class="modal-close-btn" aria-label="Close modal">
 			<svg
@@ -383,6 +384,7 @@
 		margin: 0;
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}

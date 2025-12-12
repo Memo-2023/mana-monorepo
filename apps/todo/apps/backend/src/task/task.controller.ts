@@ -42,6 +42,20 @@ export class TaskController {
 		return result;
 	}
 
+	@Get('by-contact/:contactId')
+	async getByContact(
+		@CurrentUser() user: CurrentUserData,
+		@Param('contactId') contactId: string,
+		@Query('includeCompleted') includeCompleted?: string
+	) {
+		const tasks = await this.taskService.findByContact(
+			user.userId,
+			contactId,
+			includeCompleted === 'true'
+		);
+		return { tasks };
+	}
+
 	@Get(':id')
 	async findOne(@CurrentUser() user: CurrentUserData, @Param('id') id: string) {
 		const task = await this.taskService.findByIdOrThrow(id, user.userId);

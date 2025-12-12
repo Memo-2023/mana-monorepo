@@ -3,6 +3,7 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore } from '$lib/stores/todos.svelte';
 	import TodoDayCell from './TodoDayCell.svelte';
 	import { goto } from '$app/navigation';
@@ -17,9 +18,6 @@
 		isToday,
 		isSameDay,
 		isWeekend,
-		setYear,
-		setMonth,
-		setDate,
 		getHours,
 		getMinutes,
 		differenceInMinutes,
@@ -28,12 +26,16 @@
 		setMinutes,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { _ } from 'svelte-i18n';
+
+	import type { CalendarEvent } from '@calendar/shared';
 
 	interface Props {
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
+		onEventClick?: (event: CalendarEvent) => void;
 	}
 
-	let { onQuickCreate }: Props = $props();
+	let { onQuickCreate, onEventClick }: Props = $props();
 
 	// Get all days to display in the month grid (including days from prev/next months)
 	let allCalendarDays = $derived.by(() => {
@@ -76,7 +78,7 @@
 	// Drag & Drop State
 	// ============================================================================
 	let isDragging = $state(false);
-	let draggedEvent = $state<any>(null);
+	let draggedEvent = $state<CalendarEvent | null>(null);
 	let dragTargetDay = $state<Date | null>(null);
 	let monthViewRef = $state<HTMLElement | null>(null);
 
@@ -219,7 +221,7 @@
 		}
 	}
 
-	function handleEventClick(event: any, e: MouseEvent) {
+	function handleEventClick(event: CalendarEvent, e: MouseEvent) {
 		// Don't navigate if dragging
 		if (isDragging) {
 			e.preventDefault();
@@ -227,7 +229,11 @@
 			return;
 		}
 		e.stopPropagation();
-		goto(`/?event=${event.id}`);
+		if (onEventClick) {
+			onEventClick(event);
+		} else {
+			goto(`/?event=${event.id}`);
+		}
 	}
 
 	function handleMoreClick(day: Date, e: MouseEvent) {
@@ -251,7 +257,6 @@
 			<div class="week-row">
 				{#each week as day}
 					{@const isDropTarget = isDragging && dragTargetDay && isSameDay(day, dragTargetDay)}
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<div
 						class="day-cell"
 						class:other-month={!isSameMonth(day, viewStore.currentDate)}
@@ -262,6 +267,9 @@
 						onkeydown={(e) => e.key === 'Enter' && handleDayClick(day, e as unknown as MouseEvent)}
 						role="button"
 						tabindex="0"
+						aria-label={$_('a11y.createEventOn', {
+							values: { date: format(day, 'EEEE, d. MMMM', { locale: de }) },
+						})}
 					>
 						<span class="day-number" class:today={isToday(day)}>
 							{format(day, 'd')}
@@ -276,10 +284,15 @@
 							{#each getEventsForDay(day) as event}
 								{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
 								{@const isDraft = eventsStore.isDraftEvent(event.id)}
+								{@const isSearchHighlighted = searchStore.isEventHighlighted(event.id)}
+								{@const isSearchDimmed = searchStore.isEventDimmed(event.id)}
+								<!-- svelte-ignore a11y_click_events_have_key_events -->
 								<div
 									class="event-pill"
 									class:dragging={isBeingDragged}
 									class:draft={isDraft}
+									class:search-highlighted={isSearchHighlighted}
+									class:search-dimmed={isSearchDimmed}
 									data-event-id={event.id}
 									style="background-color: {calendarsStore.getColor(event.calendarId)}"
 									onpointerdown={(e) => startDrag(event, e)}
@@ -300,14 +313,17 @@
 											)}</span
 										>
 									{/if}
-									<span class="event-title">{event.title || (isDraft ? '(Neuer Termin)' : '')}</span
+									<span class="event-title"
+										>{event.title || (isDraft ? $_('calendar.draftEvent') : '')}</span
 									>
 								</div>
 							{/each}
 
 							{#if eventsStore.getEventsForDay(day).length > 3}
 								<button class="more-events" onclick={(e) => handleMoreClick(day, e)}>
-									+{eventsStore.getEventsForDay(day).length - 3} mehr
+									{$_('views.moreEvents', {
+										values: { count: eventsStore.getEventsForDay(day).length - 3 },
+									})}
 								</button>
 							{/if}
 						</div>
@@ -442,6 +458,20 @@
 		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: -1px;
 		animation: pulse-outline 1.5s ease-in-out infinite;
+	}
+
+	/* Search highlighting */
+	.event-pill.search-highlighted {
+		outline: 2px solid hsl(var(--color-primary));
+		outline-offset: 1px;
+		box-shadow: 0 0 0 3px hsl(var(--color-primary) / 0.3);
+		z-index: 10;
+		transform: scale(1.02);
+	}
+
+	.event-pill.search-dimmed {
+		opacity: 0.35;
+		filter: grayscale(0.3);
 	}
 
 	@keyframes pulse-outline {

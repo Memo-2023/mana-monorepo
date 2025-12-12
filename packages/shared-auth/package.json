@@ -15,6 +15,7 @@
 		"lint": "eslint ."
 	},
 	"dependencies": {
+		"@manacore/shared-types": "workspace:*",
 		"base64-js": "^1.5.1"
 	},
 	"devDependencies": {

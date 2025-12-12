@@ -5,7 +5,7 @@
 	import { NetworkGraph, NetworkControls } from '@manacore/shared-ui';
 	import '$lib/i18n';
 
-	let graphComponent: NetworkGraph;
+	let graphComponent = $state<NetworkGraph | null>(null);
 	let controlsComponent: NetworkControls;
 	let graphContainer: HTMLDivElement;
 
@@ -172,7 +172,11 @@
 		<div class="info-panel">
 			<div class="info-header">
 				<h3>{networkStore.selectedNode.name}</h3>
-				<button class="close-btn" onclick={() => networkStore.selectNode(null)}>
+				<button
+					class="close-btn"
+					onclick={() => networkStore.selectNode(null)}
+					aria-label="Schließen"
+				>
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"

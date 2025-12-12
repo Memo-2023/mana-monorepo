@@ -1,41 +1,38 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { _ } from 'svelte-i18n';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { isSidebarMode as sidebarModeStore } from '$lib/stores/navigation';
-	import CalendarHeader from '$lib/components/calendar/CalendarHeader.svelte';
 	import WeekView from '$lib/components/calendar/WeekView.svelte';
 	import DayView from '$lib/components/calendar/DayView.svelte';
 	import MonthView from '$lib/components/calendar/MonthView.svelte';
 	import MultiDayView from '$lib/components/calendar/MultiDayView.svelte';
 	import YearView from '$lib/components/calendar/YearView.svelte';
-	import MiniCalendar from '$lib/components/calendar/MiniCalendar.svelte';
-	import CalendarSidebar from '$lib/components/calendar/CalendarSidebar.svelte';
 	import TodoSidebarSection from '$lib/components/calendar/TodoSidebarSection.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
-	import EventDetailModal from '$lib/components/event/EventDetailModal.svelte';
 	import { CalendarViewSkeleton } from '$lib/components/skeletons';
-	import { format, addMinutes } from 'date-fns';
-	import { de } from 'date-fns/locale';
+	import type { CalendarEvent } from '@calendar/shared';
+	import { addMinutes } from 'date-fns';
 
 	let initialized = $state(false);
 
-	// Quick event overlay state
-	let showQuickCreate = $state(false);
+	// Quick event overlay state - for both create and edit
+	let showQuickOverlay = $state(false);
 	let quickCreateDate = $state<Date>(new Date());
+	let editingEvent = $state<CalendarEvent | null>(null);
 
-	// Event modal state (local state for reactivity)
-	let selectedEventId = $state<string | null>(null);
-
-	// Derive modal open state from URL
-	let modalEventId = $derived($page.url.searchParams.get('event'));
+	// Generate a unique key for the overlay to force remount
+	let overlayKey = $state(0);
 
 	function handleQuickCreate(date: Date, position: { x: number; y: number }) {
+		// Close any existing overlay first
+		editingEvent = null;
+
 		quickCreateDate = date;
 
 		// Create draft event immediately so it appears in the grid
@@ -50,17 +47,36 @@
 			isAllDay: false,
 		});
 
-		showQuickCreate = true;
+		overlayKey++;
+		showQuickOverlay = true;
 	}
 
-	function handleQuickCreateClose() {
-		showQuickCreate = false;
+	function handleEventClick(event: CalendarEvent) {
+		// Close any existing overlay/draft first
+		eventsStore.clearDraftEvent();
+
+		editingEvent = event;
+		overlayKey++;
+		showQuickOverlay = true;
+	}
+
+	function handleQuickOverlayClose() {
+		showQuickOverlay = false;
+		editingEvent = null;
 		eventsStore.clearDraftEvent();
 	}
 
 	function handleEventCreated() {
 		// Event is automatically added to store, draft is cleared
 		eventsStore.clearDraftEvent();
+	}
+
+	function handleEventUpdated() {
+		// Event is automatically updated in store
+	}
+
+	function handleEventDeleted() {
+		// Event is automatically removed from store
 	}
 
 	onMount(async () => {
@@ -74,29 +90,16 @@
 		initialized = true;
 	});
 
-	function handleEventModalClose() {
-		// Remove event param from URL
-		goto('/', { replaceState: true });
-	}
-
 	// Refetch events when view changes
 	$effect(() => {
 		if (initialized && authStore.isAuthenticated) {
 			eventsStore.fetchEvents(viewStore.viewRange.start, viewStore.viewRange.end);
 		}
 	});
-
-	function handleDateSelect(date: Date) {
-		viewStore.setDate(date);
-	}
-
-	function handleNewEvent() {
-		goto('/event/new');
-	}
 </script>
 
 <svelte:head>
-	<title>Kalender</title>
+	<title>{$_('app.name')}</title>
 </svelte:head>
 
 <div class="calendar-layout">
@@ -106,7 +109,7 @@
 		<button
 			class="sidebar-collapse-btn"
 			onclick={() => settingsStore.toggleSidebar()}
-			title="Sidebar ausblenden"
+			title={$_('calendar.hideSidebar')}
 		>
 			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -118,20 +121,6 @@
 			</svg>
 		</button>
 
-		<button
-			class="w-full mb-4 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-primary-foreground bg-primary hover:bg-primary/90 transition-colors"
-			onclick={handleNewEvent}
-		>
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
-			Neuer Termin
-		</button>
-
-		<MiniCalendar selectedDate={viewStore.currentDate} onDateSelect={handleDateSelect} />
-
-		<CalendarSidebar />
-
 		<TodoSidebarSection maxItems={5} />
 	</aside>
 
@@ -141,7 +130,7 @@
 			<button
 				class="fab-expand"
 				onclick={() => settingsStore.toggleSidebar()}
-				title="Sidebar einblenden"
+				title={$_('calendar.showSidebar')}
 			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
@@ -152,58 +141,58 @@
 					/>
 				</svg>
 			</button>
-			<button class="fab-new-event" onclick={handleNewEvent} title="Neuer Termin">
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 4v16m8-8H4"
-					/>
-				</svg>
-			</button>
 		</div>
 	{/if}
 
 	<!-- Main Calendar Area -->
 	<div class="calendar-main" class:expanded={settingsStore.sidebarCollapsed}>
-		<CalendarHeader />
-
 		<div class="calendar-content">
 			{#if !initialized}
 				<CalendarViewSkeleton />
 			{:else if viewStore.viewType === 'day'}
-				<DayView onQuickCreate={handleQuickCreate} />
+				<DayView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 			{:else if viewStore.viewType === '5day'}
-				<MultiDayView dayCount={5} onQuickCreate={handleQuickCreate} />
+				<MultiDayView
+					dayCount={5}
+					onQuickCreate={handleQuickCreate}
+					onEventClick={handleEventClick}
+				/>
 			{:else if viewStore.viewType === 'week'}
-				<WeekView onQuickCreate={handleQuickCreate} />
+				<WeekView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 			{:else if viewStore.viewType === '10day'}
-				<MultiDayView dayCount={10} onQuickCreate={handleQuickCreate} />
+				<MultiDayView
+					dayCount={10}
+					onQuickCreate={handleQuickCreate}
+					onEventClick={handleEventClick}
+				/>
 			{:else if viewStore.viewType === '14day'}
-				<MultiDayView dayCount={14} onQuickCreate={handleQuickCreate} />
+				<MultiDayView
+					dayCount={14}
+					onQuickCreate={handleQuickCreate}
+					onEventClick={handleEventClick}
+				/>
 			{:else if viewStore.viewType === 'month'}
-				<MonthView onQuickCreate={handleQuickCreate} />
+				<MonthView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 			{:else if viewStore.viewType === 'year'}
-				<YearView onQuickCreate={handleQuickCreate} />
+				<YearView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 			{:else}
-				<WeekView onQuickCreate={handleQuickCreate} />
+				<WeekView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 			{/if}
 		</div>
 	</div>
 
-	<!-- Quick Event Overlay -->
-	{#if showQuickCreate}
-		<QuickEventOverlay
-			startTime={quickCreateDate}
-			onClose={handleQuickCreateClose}
-			onCreated={handleEventCreated}
-		/>
-	{/if}
-
-	<!-- Event Detail Modal -->
-	{#if modalEventId}
-		<EventDetailModal eventId={modalEventId} onClose={handleEventModalClose} />
+	<!-- Quick Event Overlay (for both create and edit) -->
+	{#if showQuickOverlay}
+		{#key overlayKey}
+			<QuickEventOverlay
+				startTime={editingEvent ? undefined : quickCreateDate}
+				event={editingEvent ?? undefined}
+				onClose={handleQuickOverlayClose}
+				onCreated={handleEventCreated}
+				onUpdated={handleEventUpdated}
+				onDeleted={handleEventDeleted}
+			/>
+		{/key}
 	{/if}
 </div>
 
@@ -290,8 +279,7 @@
 		}
 	}
 
-	.fab-expand,
-	.fab-new-event {
+	.fab-expand {
 		width: 48px;
 		height: 48px;
 		border-radius: var(--radius-full);
@@ -302,9 +290,6 @@
 		cursor: pointer;
 		transition: all 150ms ease;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	}
-
-	.fab-expand {
 		background: hsl(var(--color-surface));
 		color: hsl(var(--color-foreground));
 		border: 1px solid hsl(var(--color-border));
@@ -312,16 +297,6 @@
 
 	.fab-expand:hover {
 		background: hsl(var(--color-muted));
-		transform: scale(1.05);
-	}
-
-	.fab-new-event {
-		background: hsl(var(--color-primary));
-		color: hsl(var(--color-primary-foreground));
-	}
-
-	.fab-new-event:hover {
-		background: hsl(var(--color-primary) / 0.9);
 		transform: scale(1.05);
 	}
 

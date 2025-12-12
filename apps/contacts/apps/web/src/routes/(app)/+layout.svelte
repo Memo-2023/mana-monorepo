@@ -3,11 +3,16 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, CommandBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import {
+		SplitPaneContainer,
+		setSplitPanelContext,
+		DEFAULT_APPS,
+	} from '@manacore/shared-splitscreen';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
-		CommandBarItem,
+		QuickInputItem,
 		QuickAction,
 		CreatePreview,
 	} from '@manacore/shared-ui';
@@ -39,9 +44,6 @@
 		formatParsedContactPreview,
 	} from '$lib/utils/contact-parser';
 
-	// Search modal state
-	let searchModalOpen = $state(false);
-
 	// Tags state for Quick-Create
 	let availableTags = $state<{ id: string; name: string }[]>([]);
 
@@ -52,6 +54,14 @@
 
 	// App switcher items
 	const appItems = getPillAppItems('contacts');
+
+	// Split-Panel Store für Split-Screen Feature
+	const splitPanel = setSplitPanelContext('contacts', DEFAULT_APPS);
+
+	// Handler für Split-Screen Panel-Öffnung
+	function handleOpenInPanel(appId: string, url: string) {
+		splitPanel.openPanel(appId);
+	}
 
 	let { children } = $props();
 
@@ -130,13 +140,6 @@
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
 
-		// Cmd/Ctrl+K to open search (works even in inputs)
-		if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-			event.preventDefault();
-			searchModalOpen = true;
-			return;
-		}
-
 		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
 			return;
 		}
@@ -188,8 +191,8 @@
 		goto('/', { replaceState: false });
 	}
 
-	// CommandBar search function
-	async function handleCommandBarSearch(query: string): Promise<CommandBarItem[]> {
+	// QuickInputBar search function
+	async function handleSearch(query: string): Promise<QuickInputItem[]> {
 		const response = await contactsApi.list({ search: query, limit: 10 });
 		return (response.contacts || []).map((contact: any) => ({
 			id: contact.id,
@@ -204,25 +207,25 @@
 		}));
 	}
 
-	// CommandBar item selection
-	function handleCommandBarSelect(item: CommandBarItem) {
+	// QuickInputBar item selection
+	function handleSelect(item: QuickInputItem) {
 		goto(`/contacts/${item.id}`);
 	}
 
-	// CommandBar Quick-Create handlers
-	function handleCommandBarParseCreate(query: string): CreatePreview | null {
+	// QuickInputBar Quick-Create handlers
+	function handleParseCreate(query: string): CreatePreview | null {
 		if (!query.trim()) return null;
 
 		const parsed = parseContactInput(query);
 		if (!parsed.displayName) return null;
 
 		return {
-			title: parsed.displayName,
+			title: `"${parsed.displayName}" erstellen`,
 			subtitle: formatParsedContactPreview(parsed),
 		};
 	}
 
-	async function handleCommandBarCreate(query: string): Promise<void> {
+	async function handleCreate(query: string): Promise<void> {
 		const parsed = parseContactInput(query);
 		if (!parsed.displayName) return;
 
@@ -250,18 +253,11 @@
 		}
 	}
 
-	// CommandBar quick actions
-	const commandBarQuickActions: QuickAction[] = [
-		{
-			id: 'new',
-			label: 'Neuen Kontakt erstellen',
-			icon: 'plus',
-			href: '/contacts/new',
-			shortcut: 'N',
-		},
-		{ id: 'favorites', label: 'Favoriten anzeigen', icon: 'heart', href: '/favorites' },
-		{ id: 'tags', label: 'Tags verwalten', icon: 'tag', href: '/tags' },
-		{ id: 'import', label: 'Kontakte importieren', icon: 'upload', href: '/data?tab=import' },
+	// QuickInputBar quick actions
+	const quickActions: QuickAction[] = [
+		{ id: 'favorites', label: 'Favoriten', icon: 'heart', href: '/favorites' },
+		{ id: 'tags', label: 'Tags', icon: 'tag', href: '/tags' },
+		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
 	];
 
 	onMount(async () => {
@@ -270,6 +266,9 @@
 			goto('/login');
 			return;
 		}
+
+		// Initialize split-panel from URL/localStorage
+		splitPanel.initialize();
 
 		// Load user settings and tags
 		await userSettings.load();
@@ -304,78 +303,81 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<!-- Navigation Layout -->
-<div class="layout-container">
-	<!-- Shadow gradient above navigation -->
-	<div class="nav-shadow-gradient"></div>
+<SplitPaneContainer>
+	<!-- Navigation Layout -->
+	<div class="layout-container">
+		<!-- Shadow gradient above navigation -->
+		<div class="nav-shadow-gradient"></div>
 
-	<!-- Floating/Sidebar Pill Navigation -->
-	<PillNavigation
-		items={navItems}
-		currentPath={$page.url.pathname}
-		appName="Contacts"
-		homeRoute="/"
-		onToggleTheme={handleToggleTheme}
-		{isDark}
-		{isSidebarMode}
-		onModeChange={handleModeChange}
-		{isCollapsed}
-		onCollapsedChange={handleCollapsedChange}
-		desktopPosition={userSettings.nav.desktopPosition}
-		showThemeToggle={true}
-		showThemeVariants={true}
-		{themeVariantItems}
-		{currentThemeVariantLabel}
-		themeMode={theme.mode}
-		onThemeModeChange={handleThemeModeChange}
-		showLanguageSwitcher={true}
-		{languageItems}
-		{currentLanguageLabel}
-		showLogout={authStore.isAuthenticated}
-		onLogout={handleLogout}
-		loginHref="/login"
-		primaryColor="#3b82f6"
-		showAppSwitcher={true}
-		{appItems}
-		{userEmail}
-		settingsHref="/settings"
-		manaHref="/mana"
-		profileHref="/profile"
-		allAppsHref="/apps"
-	/>
+		<!-- Floating/Sidebar Pill Navigation -->
+		<PillNavigation
+			items={navItems}
+			currentPath={$page.url.pathname}
+			appName="Contacts"
+			homeRoute="/"
+			onToggleTheme={handleToggleTheme}
+			{isDark}
+			{isSidebarMode}
+			onModeChange={handleModeChange}
+			{isCollapsed}
+			onCollapsedChange={handleCollapsedChange}
+			desktopPosition={userSettings.nav.desktopPosition}
+			showThemeToggle={true}
+			showThemeVariants={true}
+			{themeVariantItems}
+			{currentThemeVariantLabel}
+			themeMode={theme.mode}
+			onThemeModeChange={handleThemeModeChange}
+			showLanguageSwitcher={true}
+			{languageItems}
+			{currentLanguageLabel}
+			showLogout={authStore.isAuthenticated}
+			onLogout={handleLogout}
+			loginHref="/login"
+			primaryColor="#3b82f6"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			manaHref="/mana"
+			profileHref="/profile"
+			allAppsHref="/apps"
+			onOpenInPanel={handleOpenInPanel}
+		/>
 
-	<!-- Main Content with dynamic padding based on nav mode -->
-	<main
-		class="main-content bg-background"
-		class:sidebar-mode={isSidebarMode && !isCollapsed}
-		class:floating-mode={!isSidebarMode}
-	>
-		<div class="content-wrapper">
-			{@render children()}
-		</div>
-	</main>
+		<!-- Main Content with dynamic padding based on nav mode -->
+		<main
+			class="main-content bg-background"
+			class:sidebar-mode={isSidebarMode && !isCollapsed}
+			class:floating-mode={!isSidebarMode}
+		>
+			<div class="content-wrapper">
+				{@render children()}
+			</div>
+		</main>
 
-	<!-- Contact Detail Modal -->
-	{#if showContactModal && modalContactId}
-		<ContactDetailModal contactId={modalContactId} onClose={handleCloseContactModal} />
-	{/if}
+		<!-- Contact Detail Modal -->
+		{#if showContactModal && modalContactId}
+			<ContactDetailModal contactId={modalContactId} onClose={handleCloseContactModal} />
+		{/if}
 
-	<!-- Global Search Modal (Cmd/K) -->
-	<CommandBar
-		bind:open={searchModalOpen}
-		onClose={() => (searchModalOpen = false)}
-		onSearch={handleCommandBarSearch}
-		onSelect={handleCommandBarSelect}
-		quickActions={commandBarQuickActions}
-		placeholder="Kontakt suchen oder erstellen..."
-		emptyText="Keine Kontakte gefunden"
-		searchingText="Suche..."
-		onCreate={handleCommandBarCreate}
-		onParseCreate={handleCommandBarParseCreate}
-		createText="Als Kontakt erstellen"
-		createShortcut="⌘↵"
-	/>
-</div>
+		<!-- Global Quick Input Bar -->
+		<QuickInputBar
+			onSearch={handleSearch}
+			onSelect={handleSelect}
+			{quickActions}
+			placeholder="Neuer Kontakt oder suchen..."
+			emptyText="Keine Kontakte gefunden"
+			searchingText="Suche..."
+			onCreate={handleCreate}
+			onParseCreate={handleParseCreate}
+			createText="Erstellen"
+			appIcon="contacts"
+			primaryColor="#3b82f6"
+			autoFocus={false}
+		/>
+	</div>
+</SplitPaneContainer>
 
 <style>
 	.layout-container {

@@ -303,11 +303,45 @@ export interface AppOverride {
 }
 
 /**
+ * Device type for device-specific settings
+ */
+export type DeviceType = 'desktop' | 'mobile' | 'tablet';
+
+/**
+ * Device-specific app settings
+ */
+export interface DeviceAppSettings {
+	deviceName: string;
+	deviceType: DeviceType;
+	lastSeen: string;
+	apps: Record<string, Record<string, unknown>>;
+}
+
+/**
+ * Device info for listing
+ */
+export interface DeviceInfo {
+	deviceId: string;
+	deviceName: string;
+	deviceType: DeviceType;
+	lastSeen: string;
+	appCount: number;
+}
+
+/**
  * Full user settings response from API
  */
 export interface UserSettingsResponse {
 	globalSettings: GlobalSettings;
 	appOverrides: Record<string, AppOverride>;
+	deviceSettings: Record<string, DeviceAppSettings>;
+}
+
+/**
+ * Devices list response
+ */
+export interface DevicesListResponse {
+	devices: DeviceInfo[];
 }
 
 /**
@@ -325,7 +359,7 @@ export const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
  * Default global settings
  */
 export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
-	nav: { desktopPosition: 'top', sidebarCollapsed: false, hiddenNavItems: {} },
+	nav: { desktopPosition: 'bottom', sidebarCollapsed: false, hiddenNavItems: {} },
 	theme: { mode: 'system', colorScheme: 'ocean', pinnedThemes: [] },
 	locale: 'de',
 	general: DEFAULT_GENERAL_SETTINGS,
@@ -353,6 +387,12 @@ export interface UserSettingsStore {
 	readonly syncing: boolean;
 	/** Whether settings are loaded */
 	readonly loaded: boolean;
+	/** Current device ID */
+	readonly deviceId: string;
+	/** All device settings */
+	readonly deviceSettings: Record<string, DeviceAppSettings>;
+	/** Current device's app settings */
+	readonly currentDeviceAppSettings: Record<string, unknown>;
 
 	/** Load settings from server */
 	load: () => Promise<void>;
@@ -372,6 +412,14 @@ export interface UserSettingsStore {
 	toggleNavItemVisibility: (appId: string, href: string) => Promise<void>;
 	/** Set hidden nav items for an app */
 	setHiddenNavItems: (appId: string, hiddenHrefs: string[]) => Promise<void>;
+	/** Update device-specific app settings */
+	updateDeviceAppSettings: (settings: Record<string, unknown>) => Promise<void>;
+	/** Get device-specific app settings */
+	getDeviceAppSettings: () => Record<string, unknown>;
+	/** List all devices */
+	getDevices: () => Promise<DeviceInfo[]>;
+	/** Remove a device */
+	removeDevice: (deviceId: string) => Promise<void>;
 }
 
 /**
@@ -384,261 +432,8 @@ export interface UserSettingsStoreConfig {
 	authUrl: string;
 	/** Function to get current access token */
 	getAccessToken: () => Promise<string | null>;
+	/** Optional device name (auto-detected if not provided) */
+	deviceName?: string;
+	/** Optional device type (auto-detected if not provided) */
+	deviceType?: DeviceType;
 }
-
-// ============================================================================
-// Custom & Community Themes Types
-// ============================================================================
-
-/**
- * Partial theme colors for API DTOs (some fields optional)
- */
-export interface ThemeColorsInput {
-	primary: HSLValue;
-	primaryForeground?: HSLValue;
-	background: HSLValue;
-	foreground: HSLValue;
-	surface: HSLValue;
-	surfaceHover?: HSLValue;
-	surfaceElevated?: HSLValue;
-	muted?: HSLValue;
-	mutedForeground?: HSLValue;
-	border?: HSLValue;
-	borderStrong?: HSLValue;
-	secondary?: HSLValue;
-	secondaryForeground?: HSLValue;
-	input?: HSLValue;
-	ring?: HSLValue;
-	error: HSLValue;
-	success: HSLValue;
-	warning: HSLValue;
-}
-
-/**
- * User-created custom theme
- */
-export interface CustomTheme {
-	id: string;
-	userId: string;
-	name: string;
-	description?: string;
-	emoji: string;
-	icon: string;
-	lightColors: ThemeColors;
-	darkColors: ThemeColors;
-	baseVariant?: ThemeVariant;
-	isPublished: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-}
-
-/**
- * Input for creating a new custom theme
- */
-export interface CreateCustomThemeInput {
-	name: string;
-	description?: string;
-	emoji?: string;
-	icon?: string;
-	lightColors: ThemeColorsInput;
-	darkColors: ThemeColorsInput;
-	baseVariant?: ThemeVariant;
-}
-
-/**
- * Input for updating a custom theme
- */
-export interface UpdateCustomThemeInput {
-	name?: string;
-	description?: string;
-	emoji?: string;
-	icon?: string;
-	lightColors?: ThemeColorsInput;
-	darkColors?: ThemeColorsInput;
-	baseVariant?: ThemeVariant;
-}
-
-/**
- * Community theme shared publicly
- */
-export interface CommunityTheme {
-	id: string;
-	authorId?: string;
-	authorName?: string;
-	name: string;
-	description?: string;
-	emoji: string;
-	icon: string;
-	lightColors: ThemeColors;
-	darkColors: ThemeColors;
-	baseVariant?: ThemeVariant;
-	downloadCount: number;
-	averageRating: number;
-	ratingCount: number;
-	status: 'pending' | 'approved' | 'rejected' | 'featured';
-	isFeatured: boolean;
-	tags: string[];
-	createdAt: Date;
-	publishedAt?: Date;
-	/** User-specific fields (when authenticated) */
-	isFavorited?: boolean;
-	isDownloaded?: boolean;
-	userRating?: number;
-}
-
-/**
- * Query parameters for browsing community themes
- */
-export interface CommunityThemeQuery {
-	page?: number;
-	limit?: number;
-	sort?: 'popular' | 'recent' | 'rating' | 'downloads';
-	search?: string;
-	tags?: string[];
-	authorId?: string;
-	featuredOnly?: boolean;
-}
-
-/**
- * Paginated response for community themes
- */
-export interface PaginatedCommunityThemes {
-	themes: CommunityTheme[];
-	total: number;
-	page: number;
-	limit: number;
-	totalPages: number;
-}
-
-/**
- * Input for publishing a theme to the community
- */
-export interface PublishThemeInput {
-	tags?: string[];
-	description?: string;
-}
-
-/**
- * Theme editor state for UI
- */
-export interface ThemeEditorState {
-	/** Theme being edited */
-	theme: Partial<CreateCustomThemeInput>;
-	/** Currently editing light or dark colors */
-	editingMode: EffectiveMode;
-	/** Currently selected color key */
-	selectedColorKey: keyof ThemeColors | null;
-	/** Is preview mode active */
-	isPreviewing: boolean;
-	/** Has unsaved changes */
-	isDirty: boolean;
-}
-
-/**
- * Custom themes store interface
- */
-export interface CustomThemesStore {
-	/** User's custom themes */
-	readonly customThemes: CustomTheme[];
-	/** Community themes (from current query) */
-	readonly communityThemes: CommunityTheme[];
-	/** User's favorited themes */
-	readonly favorites: CommunityTheme[];
-	/** User's downloaded themes */
-	readonly downloaded: CommunityTheme[];
-	/** Pagination info */
-	readonly pagination: { page: number; totalPages: number; total: number };
-	/** Loading state */
-	readonly loading: boolean;
-	/** Error state */
-	readonly error: string | null;
-
-	// Custom theme operations
-	loadCustomThemes: () => Promise<void>;
-	createTheme: (input: CreateCustomThemeInput) => Promise<CustomTheme>;
-	updateTheme: (id: string, input: UpdateCustomThemeInput) => Promise<CustomTheme>;
-	deleteTheme: (id: string) => Promise<void>;
-	publishTheme: (id: string, input?: PublishThemeInput) => Promise<CommunityTheme>;
-
-	// Community theme operations
-	browseCommunity: (query?: CommunityThemeQuery) => Promise<void>;
-	downloadTheme: (id: string) => Promise<CommunityTheme>;
-	rateTheme: (
-		id: string,
-		rating: number
-	) => Promise<{ averageRating: number; ratingCount: number }>;
-	toggleFavorite: (id: string) => Promise<{ isFavorited: boolean }>;
-	loadFavorites: () => Promise<void>;
-	loadDownloaded: () => Promise<void>;
-
-	// Apply theme
-	applyCustomTheme: (theme: CustomTheme | CommunityTheme) => void;
-	clearCustomTheme: () => void;
-}
-
-/**
- * Custom themes store configuration
- */
-export interface CustomThemesStoreConfig {
-	/** Auth service base URL */
-	authUrl: string;
-	/** Function to get current access token */
-	getAccessToken: () => Promise<string | null>;
-	/** Theme store to apply custom themes to */
-	themeStore?: ThemeStore;
-}
-
-/**
- * Main colors for the simplified editor view
- * These are the 7 most important colors users typically want to customize
- */
-export const MAIN_THEME_COLORS: (keyof ThemeColors)[] = [
-	'primary',
-	'background',
-	'surface',
-	'foreground',
-	'error',
-	'success',
-	'warning',
-];
-
-/**
- * Extended/advanced colors (collapsed by default in editor)
- */
-export const EXTENDED_THEME_COLORS: (keyof ThemeColors)[] = [
-	'primaryForeground',
-	'secondary',
-	'secondaryForeground',
-	'surfaceHover',
-	'surfaceElevated',
-	'muted',
-	'mutedForeground',
-	'border',
-	'borderStrong',
-	'input',
-	'ring',
-];
-
-/**
- * Color labels for the editor UI
- */
-export const THEME_COLOR_LABELS: Record<keyof ThemeColors, string> = {
-	primary: 'Primary',
-	primaryForeground: 'Primary Text',
-	secondary: 'Secondary',
-	secondaryForeground: 'Secondary Text',
-	background: 'Background',
-	foreground: 'Text',
-	surface: 'Surface',
-	surfaceHover: 'Surface Hover',
-	surfaceElevated: 'Elevated Surface',
-	muted: 'Muted',
-	mutedForeground: 'Muted Text',
-	border: 'Border',
-	borderStrong: 'Border Strong',
-	error: 'Error',
-	success: 'Success',
-	warning: 'Warning',
-	input: 'Input',
-	ring: 'Focus Ring',
-};

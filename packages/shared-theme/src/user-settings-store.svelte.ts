@@ -7,12 +7,74 @@ import type {
 	ThemeSettings,
 	UserSettingsResponse,
 	GeneralSettings,
+	DeviceAppSettings,
+	DeviceInfo,
+	DeviceType,
+	DevicesListResponse,
 } from './types';
 import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_GENERAL_SETTINGS } from './types';
 import { isBrowser } from './utils';
 import { getStartPage as getStartPageFromConfig } from './app-routes';
 
 const STORAGE_KEY_PREFIX = 'manacore-user-settings';
+const DEVICE_ID_KEY = 'manacore-device-id';
+
+/**
+ * Generate a unique device ID
+ */
+function generateDeviceId(): string {
+	return 'dev_' + crypto.randomUUID().replace(/-/g, '').substring(0, 16);
+}
+
+/**
+ * Get or create device ID from localStorage
+ */
+function getOrCreateDeviceId(): string {
+	if (!isBrowser()) return 'server';
+	try {
+		let deviceId = localStorage.getItem(DEVICE_ID_KEY);
+		if (!deviceId) {
+			deviceId = generateDeviceId();
+			localStorage.setItem(DEVICE_ID_KEY, deviceId);
+		}
+		return deviceId;
+	} catch {
+		return generateDeviceId();
+	}
+}
+
+/**
+ * Detect device type based on user agent and screen size
+ */
+function detectDeviceType(): DeviceType {
+	if (!isBrowser()) return 'desktop';
+	const ua = navigator.userAgent.toLowerCase();
+	const isMobile = /mobile|iphone|ipod|android.*mobile|windows phone/i.test(ua);
+	const isTablet = /tablet|ipad|android(?!.*mobile)/i.test(ua);
+	if (isTablet) return 'tablet';
+	if (isMobile) return 'mobile';
+	return 'desktop';
+}
+
+/**
+ * Detect device name based on user agent
+ */
+function detectDeviceName(): string {
+	if (!isBrowser()) return 'Server';
+	const ua = navigator.userAgent;
+	// Try to extract device/browser info
+	if (/iPhone/.test(ua)) return 'iPhone';
+	if (/iPad/.test(ua)) return 'iPad';
+	if (/Android/.test(ua)) {
+		const match = ua.match(/Android.*;\s*([^;)]+)/);
+		if (match) return match[1].trim();
+		return 'Android Gerät';
+	}
+	if (/Mac/.test(ua)) return 'Mac';
+	if (/Windows/.test(ua)) return 'Windows PC';
+	if (/Linux/.test(ua)) return 'Linux PC';
+	return 'Unbekanntes Gerät';
+}
 
 /**
  * Create a User Settings store for your app
@@ -41,12 +103,18 @@ const STORAGE_KEY_PREFIX = 'manacore-user-settings';
  * ```
  */
 export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSettingsStore {
-	const { appId, authUrl, getAccessToken } = config;
+	const { appId, authUrl, getAccessToken, deviceName, deviceType } = config;
 	const storageKey = `${STORAGE_KEY_PREFIX}-${appId}`;
+
+	// Device info (initialized once)
+	const deviceId = getOrCreateDeviceId();
+	const detectedDeviceType = deviceType || detectDeviceType();
+	const detectedDeviceName = deviceName || detectDeviceName();
 
 	// State
 	let globalSettings = $state<GlobalSettings>({ ...DEFAULT_GLOBAL_SETTINGS });
 	let appOverrides = $state<Record<string, AppOverride>>({});
+	let deviceSettings = $state<Record<string, DeviceAppSettings>>({});
 	let syncing = $state(false);
 	let loaded = $state(false);
 
@@ -88,6 +156,7 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 				JSON.stringify({
 					globalSettings,
 					appOverrides,
+					deviceSettings,
 					timestamp: Date.now(),
 				})
 			);
@@ -110,6 +179,9 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 				}
 				if (data.appOverrides) {
 					appOverrides = data.appOverrides;
+				}
+				if (data.deviceSettings) {
+					deviceSettings = data.deviceSettings;
 				}
 				return true;
 			}
@@ -165,6 +237,7 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 			if (data?.success) {
 				globalSettings = { ...DEFAULT_GLOBAL_SETTINGS, ...data.globalSettings };
 				appOverrides = data.appOverrides || {};
+				deviceSettings = data.deviceSettings || {};
 				saveToStorage();
 				loaded = true;
 			}
@@ -205,6 +278,7 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 			if (data?.success) {
 				globalSettings = { ...DEFAULT_GLOBAL_SETTINGS, ...data.globalSettings };
 				appOverrides = data.appOverrides || {};
+				deviceSettings = data.deviceSettings || {};
 				saveToStorage();
 			} else {
 				// Rollback on failure
@@ -242,6 +316,7 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 			if (data?.success) {
 				globalSettings = { ...DEFAULT_GLOBAL_SETTINGS, ...data.globalSettings };
 				appOverrides = data.appOverrides || {};
+				deviceSettings = data.deviceSettings || {};
 				saveToStorage();
 			} else {
 				// Rollback on failure
@@ -303,6 +378,7 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 			if (data?.success) {
 				globalSettings = { ...DEFAULT_GLOBAL_SETTINGS, ...data.globalSettings };
 				appOverrides = data.appOverrides || {};
+				deviceSettings = data.deviceSettings || {};
 				saveToStorage();
 			} else {
 				// Rollback on failure
@@ -354,6 +430,108 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 		} as Partial<GlobalSettings>);
 	}
 
+	// ============================================================================
+	// Device Settings Functions
+	// ============================================================================
+
+	/**
+	 * Update device-specific app settings for current device
+	 */
+	async function updateDeviceAppSettings(settings: Record<string, unknown>): Promise<void> {
+		// Optimistic update
+		const previousDeviceSettings = { ...deviceSettings };
+		const existingDevice = deviceSettings[deviceId] || {
+			deviceName: detectedDeviceName,
+			deviceType: detectedDeviceType,
+			lastSeen: new Date().toISOString(),
+			apps: {},
+		};
+
+		deviceSettings = {
+			...deviceSettings,
+			[deviceId]: {
+				...existingDevice,
+				lastSeen: new Date().toISOString(),
+				apps: {
+					...existingDevice.apps,
+					[appId]: {
+						...(existingDevice.apps?.[appId] || {}),
+						...settings,
+					},
+				},
+			},
+		};
+		saveToStorage();
+
+		syncing = true;
+		try {
+			const data = await apiRequest<UserSettingsResponse & { success: boolean }>(
+				'PATCH',
+				`/device/${deviceId}/${appId}`,
+				{
+					deviceName: detectedDeviceName,
+					deviceType: detectedDeviceType,
+					settings,
+				}
+			);
+
+			if (data?.success) {
+				globalSettings = { ...DEFAULT_GLOBAL_SETTINGS, ...data.globalSettings };
+				appOverrides = data.appOverrides || {};
+				deviceSettings = data.deviceSettings || {};
+				saveToStorage();
+			} else {
+				// Rollback on failure
+				deviceSettings = previousDeviceSettings;
+				saveToStorage();
+			}
+		} finally {
+			syncing = false;
+		}
+	}
+
+	/**
+	 * Get device-specific app settings for current device
+	 */
+	function getDeviceAppSettings(): Record<string, unknown> {
+		const device = deviceSettings[deviceId];
+		if (!device?.apps?.[appId]) return {};
+		return device.apps[appId];
+	}
+
+	/**
+	 * Get list of all devices
+	 */
+	async function getDevices(): Promise<DeviceInfo[]> {
+		const data = await apiRequest<DevicesListResponse & { success: boolean }>('GET', '/devices');
+		if (data?.success) {
+			return data.devices;
+		}
+		return [];
+	}
+
+	/**
+	 * Remove a device
+	 */
+	async function removeDevice(targetDeviceId: string): Promise<void> {
+		syncing = true;
+		try {
+			const data = await apiRequest<UserSettingsResponse & { success: boolean }>(
+				'DELETE',
+				`/device/${targetDeviceId}`
+			);
+
+			if (data?.success) {
+				globalSettings = { ...DEFAULT_GLOBAL_SETTINGS, ...data.globalSettings };
+				appOverrides = data.appOverrides || {};
+				deviceSettings = data.deviceSettings || {};
+				saveToStorage();
+			}
+		} finally {
+			syncing = false;
+		}
+	}
+
 	return {
 		get nav() {
 			return nav;
@@ -382,6 +560,17 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 		get loaded() {
 			return loaded;
 		},
+		get deviceId() {
+			return deviceId;
+		},
+		get deviceSettings() {
+			return deviceSettings;
+		},
+		get currentDeviceAppSettings() {
+			const device = deviceSettings[deviceId];
+			if (!device?.apps?.[appId]) return {};
+			return device.apps[appId];
+		},
 
 		load,
 		updateGlobal,
@@ -392,5 +581,9 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 		getHiddenNavItemsForApp,
 		toggleNavItemVisibility,
 		setHiddenNavItems,
+		updateDeviceAppSettings,
+		getDeviceAppSettings,
+		getDevices,
+		removeDevice,
 	};
 }

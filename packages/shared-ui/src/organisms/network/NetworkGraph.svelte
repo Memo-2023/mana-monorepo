@@ -256,6 +256,7 @@
 	export { resetZoom, zoomIn, zoomOut, focusOnSelectedNode };
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
 	bind:this={containerElement}
 	class="network-graph-container"
@@ -265,11 +266,14 @@
 	role="application"
 	aria-label="Network Graph"
 >
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<svg
 		bind:this={svgElement}
 		class="network-graph-svg"
 		style="width: 100%; height: 100%;"
 		onclick={handleBackgroundClick}
+		role="img"
+		aria-label="Network graph visualization"
 	>
 		<g transform="translate({transform.x}, {transform.y}) scale({transform.k})">
 			<!-- Links -->
@@ -280,6 +284,7 @@
 					{@const targetId = typeof link.target === 'string' ? link.target : link.target.id}
 					{@const isHighlighted =
 						selectedNodeId && (sourceId === selectedNodeId || targetId === selectedNodeId)}
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<!-- Invisible wider line for easier hover -->
 					<line
 						x1={coords.x1}

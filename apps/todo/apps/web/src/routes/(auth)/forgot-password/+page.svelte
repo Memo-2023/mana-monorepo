@@ -11,20 +11,20 @@
 	// Get translations based on current locale
 	const translations = $derived(getForgotPasswordTranslations($locale || 'de'));
 
-	async function handleResetPassword(email: string) {
+	async function handleForgotPassword(email: string) {
 		return authStore.resetPassword(email);
 	}
 </script>
 
 <svelte:head>
-	<title>{translations.title} | Todo</title>
+	<title>{translations.titleForm} | Todo</title>
 </svelte:head>
 
 <ForgotPasswordPage
 	appName="Todo"
 	logo={TodoLogo}
 	primaryColor="#8b5cf6"
-	onResetPassword={handleResetPassword}
+	onForgotPassword={handleForgotPassword}
 	{goto}
 	loginPath="/login"
 	lightBackground="#f3e8ff"

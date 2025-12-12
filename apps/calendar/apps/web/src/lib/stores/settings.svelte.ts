@@ -1,10 +1,13 @@
 /**
  * Settings Store - Manages user preferences for the calendar app
- * Uses Svelte 5 runes and localStorage for persistence
+ * Uses Svelte 5 runes with:
+ * - localStorage for immediate persistence
+ * - userSettings store for cloud sync (device-specific)
  */
 
 import { browser } from '$app/environment';
 import type { CalendarViewType } from '@calendar/shared';
+import { userSettings } from './user-settings.svelte';
 
 // Settings types
 export type WeekStartDay = 0 | 1; // 0 = Sunday, 1 = Monday
@@ -78,6 +81,34 @@ function saveSettings(settings: CalendarAppSettings) {
 
 // State
 let settings = $state<CalendarAppSettings>(loadSettings());
+let cloudSyncEnabled = $state(false);
+let initialSyncDone = $state(false);
+
+/**
+ * Sync settings to cloud (device-specific)
+ */
+async function syncToCloud() {
+	if (!cloudSyncEnabled || !browser) return;
+
+	try {
+		await userSettings.updateDeviceAppSettings(settings as unknown as Record<string, unknown>);
+	} catch (e) {
+		console.error('Failed to sync calendar settings to cloud:', e);
+	}
+}
+
+/**
+ * Load settings from cloud (device-specific)
+ */
+function loadFromCloud(): Partial<CalendarAppSettings> | null {
+	if (!userSettings.loaded) return null;
+
+	const cloudSettings = userSettings.currentDeviceAppSettings;
+	if (cloudSettings && Object.keys(cloudSettings).length > 0) {
+		return cloudSettings as unknown as Partial<CalendarAppSettings>;
+	}
+	return null;
+}
 
 export const settingsStore = {
 	// Getters
@@ -120,6 +151,36 @@ export const settingsStore = {
 	get sidebarCollapsed() {
 		return settings.sidebarCollapsed;
 	},
+	get cloudSyncEnabled() {
+		return cloudSyncEnabled;
+	},
+
+	/**
+	 * Enable cloud sync and load settings from cloud
+	 */
+	enableCloudSync() {
+		cloudSyncEnabled = true;
+
+		// On first sync, prefer cloud settings over local if they exist
+		if (!initialSyncDone) {
+			const cloudSettings = loadFromCloud();
+			if (cloudSettings && Object.keys(cloudSettings).length > 0) {
+				settings = { ...DEFAULT_SETTINGS, ...settings, ...cloudSettings };
+				saveSettings(settings);
+			} else {
+				// No cloud settings yet, push local settings to cloud
+				syncToCloud();
+			}
+			initialSyncDone = true;
+		}
+	},
+
+	/**
+	 * Disable cloud sync
+	 */
+	disableCloudSync() {
+		cloudSyncEnabled = false;
+	},
 
 	/**
 	 * Toggle sidebar collapsed state
@@ -127,6 +188,7 @@ export const settingsStore = {
 	toggleSidebar() {
 		settings = { ...settings, sidebarCollapsed: !settings.sidebarCollapsed };
 		saveSettings(settings);
+		syncToCloud();
 	},
 
 	/**
@@ -143,6 +205,7 @@ export const settingsStore = {
 	set<K extends keyof CalendarAppSettings>(key: K, value: CalendarAppSettings[K]) {
 		settings = { ...settings, [key]: value };
 		saveSettings(settings);
+		syncToCloud();
 	},
 
 	/**
@@ -151,6 +214,7 @@ export const settingsStore = {
 	update(updates: Partial<CalendarAppSettings>) {
 		settings = { ...settings, ...updates };
 		saveSettings(settings);
+		syncToCloud();
 	},
 
 	/**
@@ -159,6 +223,7 @@ export const settingsStore = {
 	reset() {
 		settings = { ...DEFAULT_SETTINGS };
 		saveSettings(settings);
+		syncToCloud();
 	},
 
 	/**

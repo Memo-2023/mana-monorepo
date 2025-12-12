@@ -25,6 +25,7 @@ export const MANACORE_SHARED_PACKAGES = [
 	'@manacore/shared-profile-ui',
 	'@manacore/shared-i18n',
 	'@manacore/shared-api-client',
+	'@manacore/shared-splitscreen',
 ] as const;
 
 export interface ViteConfigOptions {

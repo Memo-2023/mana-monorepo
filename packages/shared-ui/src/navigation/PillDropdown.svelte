@@ -13,6 +13,8 @@
 		header?: Snippet;
 		/** Optional footer content (e.g., a11y toggles) */
 		footer?: Snippet;
+		/** Show only the icon without label */
+		iconOnly?: boolean;
 	}
 
 	let {
@@ -24,6 +26,7 @@
 		onToggle,
 		header,
 		footer,
+		iconOnly = false,
 	}: Props = $props();
 
 	let internalOpen = $state(false);
@@ -69,13 +72,21 @@
 		openSubmenuId = openSubmenuId === itemId ? null : itemId;
 	}
 
-	function handleItemClick(item: PillDropdownItem) {
+	function handleItemClick(item: PillDropdownItem, event: MouseEvent) {
 		if (item.submenu && item.submenu.length > 0) {
 			toggleSubmenu(item.id);
 			return;
 		}
 		if (item.onClick) {
-			item.onClick();
+			item.onClick(event);
+		}
+		close();
+	}
+
+	function handleSplitClick(item: PillDropdownItem, event: MouseEvent) {
+		event.stopPropagation();
+		if (item.onSplitClick) {
+			item.onSplitClick();
 		}
 		close();
 	}
@@ -123,13 +134,20 @@
 
 <div class="pill-dropdown">
 	<!-- Trigger Button -->
-	<button bind:this={triggerButton} onclick={toggle} class="pill glass-pill trigger-button">
+	<button
+		bind:this={triggerButton}
+		onclick={toggle}
+		class="pill glass-pill trigger-button"
+		class:icon-only={iconOnly}
+	>
 		{#if icon}
 			<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={getIcon(icon)} />
 			</svg>
 		{/if}
-		<span class="pill-label">{label}</span>
+		{#if !iconOnly}
+			<span class="pill-label">{label}</span>
+		{/if}
 		<svg
 			class="chevron-icon"
 			class:rotated={open}
@@ -148,7 +166,11 @@
 
 	{#if open}
 		<!-- Backdrop -->
-		<button class="menu-backdrop" onclick={close} onkeydown={(e) => e.key === 'Escape' && close()}
+		<button
+			class="menu-backdrop"
+			onclick={close}
+			onkeydown={(e) => e.key === 'Escape' && close()}
+			aria-label="Close dropdown"
 		></button>
 
 		<!-- Dropdown items -->
@@ -172,58 +194,79 @@
 						style="animation-delay: {(header ? i + 1 : i) * 15}ms"
 					></div>
 				{:else}
-					<button
-						onclick={() => handleItemClick(item)}
-						class="pill glass-pill fan-pill"
-						class:danger-pill={item.danger}
-						class:active-pill={item.active}
-						class:has-submenu={item.submenu && item.submenu.length > 0}
-						class:submenu-open={openSubmenuId === item.id}
+					<div
+						class="fan-pill-wrapper"
+						class:has-split-button={item.showSplitButton}
 						style="animation-delay: {(header ? i + 1 : i) * 15}ms"
 					>
-						{#if item.imageUrl}
-							<img src={item.imageUrl} alt="" class="pill-image-icon" />
-						{:else if item.icon === 'mana'}
-							<svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor">
-								<path d={getIcon('mana')} />
-							</svg>
-						{:else if item.icon}
-							<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d={getIcon(item.icon)}
-								/>
-							</svg>
-						{/if}
-						<span class="pill-label">{item.label}</span>
-						{#if item.active}
-							<svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d={getIcon('check')}
-								/>
-							</svg>
-						{:else if item.submenu && item.submenu.length > 0}
-							<svg
-								class="chevron-submenu"
-								class:rotated={openSubmenuId === item.id}
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
+						<button
+							onclick={(e) => handleItemClick(item, e)}
+							class="pill glass-pill fan-pill"
+							class:danger-pill={item.danger}
+							class:active-pill={item.active}
+							class:has-submenu={item.submenu && item.submenu.length > 0}
+							class:submenu-open={openSubmenuId === item.id}
+						>
+							{#if item.imageUrl}
+								<img src={item.imageUrl} alt="" class="pill-image-icon" />
+							{:else if item.icon === 'mana'}
+								<svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor">
+									<path d={getIcon('mana')} />
+								</svg>
+							{:else if item.icon}
+								<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d={getIcon(item.icon)}
+									/>
+								</svg>
+							{/if}
+							<span class="pill-label">{item.label}</span>
+							{#if item.active}
+								<svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d={getIcon('check')}
+									/>
+								</svg>
+							{:else if item.submenu && item.submenu.length > 0}
+								<svg
+									class="chevron-submenu"
+									class:rotated={openSubmenuId === item.id}
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d={getIcon('chevronDown')}
+									/>
+								</svg>
+							{/if}
+						</button>
+						{#if item.showSplitButton && item.onSplitClick}
+							<button
+								onclick={(e) => handleSplitClick(item, e)}
+								class="split-button glass-pill"
+								title="Open in split panel (Ctrl/Cmd+Click)"
 							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d={getIcon('chevronDown')}
-								/>
-							</svg>
+								<svg class="split-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 4H5a1 1 0 00-1 1v14a1 1 0 001 1h4a1 1 0 001-1V5a1 1 0 00-1-1zM19 4h-4a1 1 0 00-1 1v14a1 1 0 001 1h4a1 1 0 001-1V5a1 1 0 00-1-1z"
+									/>
+								</svg>
+							</button>
 						{/if}
-					</button>
+					</div>
 					<!-- Submenu items -->
 					{#if item.submenu && item.submenu.length > 0 && openSubmenuId === item.id}
 						<div class="submenu-container">
@@ -275,6 +318,10 @@
 	.trigger-button {
 		position: relative;
 		z-index: 10;
+	}
+
+	.trigger-button.icon-only {
+		padding: 0.5rem 0.625rem;
 	}
 
 	.chevron-icon {
@@ -496,6 +543,61 @@
 	.submenu-item .pill-label {
 		flex: 1;
 		text-align: left;
+	}
+
+	/* Split button wrapper */
+	.fan-pill-wrapper {
+		display: flex;
+		align-items: stretch;
+		gap: 2px;
+		animation: fanIn 0.15s ease-out forwards;
+		opacity: 0;
+		transform: translateY(10px);
+	}
+
+	.fan-up .fan-pill-wrapper {
+		transform: translateY(-10px);
+	}
+
+	.fan-pill-wrapper .fan-pill {
+		animation: none;
+		opacity: 1;
+		transform: none;
+	}
+
+	.fan-pill-wrapper.has-split-button .fan-pill {
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
+		flex: 1;
+	}
+
+	.split-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem;
+		border-top-left-radius: 0;
+		border-bottom-left-radius: 0;
+		border-top-right-radius: 9999px;
+		border-bottom-right-radius: 9999px;
+		cursor: pointer;
+		border: none;
+		transition: all 0.2s;
+	}
+
+	.split-button:hover {
+		background: var(--color-primary-100, rgba(59, 130, 246, 0.15));
+		border-color: var(--color-primary-200, rgba(59, 130, 246, 0.3));
+	}
+
+	:global(.dark) .split-button:hover {
+		background: var(--color-primary-900, rgba(59, 130, 246, 0.2));
+		border-color: var(--color-primary-800, rgba(59, 130, 246, 0.4));
+	}
+
+	.split-icon {
+		width: 0.875rem;
+		height: 0.875rem;
 	}
 
 	/* Footer for custom content (e.g., a11y toggles) */

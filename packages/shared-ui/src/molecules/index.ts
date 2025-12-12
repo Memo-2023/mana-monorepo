@@ -39,6 +39,9 @@ export {
 // Feedback components
 export { EmptyState } from './feedback';
 
+// Contact components
+export { ContactAvatar, ContactBadge, ContactSelector } from './contacts';
+
 // Layout components
 export { default as ModalFooter } from './ModalFooter.svelte';
 export { default as DataCard } from './DataCard.svelte';

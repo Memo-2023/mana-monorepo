@@ -1,4 +1,5 @@
 import type { Label } from './label';
+import type { ContactReference } from '@manacore/shared-types';
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
@@ -26,6 +27,9 @@ export interface TaskMetadata {
 	storyPoints?: number | null; // Fibonacci: 1, 2, 3, 5, 8, 13, 21
 	effectiveDuration?: EffectiveDuration | null; // Actual time spent
 	funRating?: number | null; // 1-10 scale
+	// Contact associations
+	assignee?: ContactReference | null; // Person responsible for the task
+	involvedContacts?: ContactReference[]; // Other people involved
 }
 
 export interface Task {
@@ -42,6 +46,12 @@ export interface Task {
 	dueDate?: Date | string | null;
 	dueTime?: string | null; // HH:mm format
 	startDate?: Date | string | null;
+
+	// Time-Blocking (for calendar integration)
+	scheduledDate?: Date | string | null; // Date when task is scheduled
+	scheduledStartTime?: string | null; // HH:mm format - when to start
+	scheduledEndTime?: string | null; // HH:mm format - when to end
+	estimatedDuration?: number | null; // Duration in minutes
 
 	// Priority & Status
 	priority: TaskPriority;
@@ -84,6 +94,11 @@ export interface CreateTaskInput {
 	dueDate?: string | null;
 	dueTime?: string | null;
 	startDate?: string | null;
+	// Time-Blocking
+	scheduledDate?: string | null;
+	scheduledStartTime?: string | null;
+	scheduledEndTime?: string | null;
+	estimatedDuration?: number | null;
 	priority?: TaskPriority;
 	recurrenceRule?: string | null;
 	recurrenceEndDate?: string | null;
@@ -100,6 +115,11 @@ export interface UpdateTaskInput {
 	dueDate?: string | null;
 	dueTime?: string | null;
 	startDate?: string | null;
+	// Time-Blocking
+	scheduledDate?: string | null;
+	scheduledStartTime?: string | null;
+	scheduledEndTime?: string | null;
+	estimatedDuration?: number | null;
 	priority?: TaskPriority;
 	status?: TaskStatus;
 	isCompleted?: boolean;

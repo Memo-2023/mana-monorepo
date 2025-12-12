@@ -238,6 +238,9 @@ importers:
       '@manacore/shared-profile-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-profile-ui
+      '@manacore/shared-splitscreen':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-splitscreen
       '@manacore/shared-subscription-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-subscription-ui
@@ -253,6 +256,9 @@ importers:
       '@manacore/shared-theme-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-theme-ui
+      '@manacore/shared-types':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-types
       '@manacore/shared-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-ui
@@ -271,6 +277,9 @@ importers:
       lucide-svelte:
         specifier: ^0.559.0
         version: 0.559.0(svelte@5.44.0)
+      suncalc:
+        specifier: ^1.9.0
+        version: 1.9.0
       svelte-dnd-action:
         specifier: ^0.9.68
         version: 0.9.68(svelte@5.44.0)
@@ -296,6 +305,9 @@ importers:
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.25
+      '@types/suncalc':
+        specifier: ^1.9.2
+        version: 1.9.2
       prettier:
         specifier: ^3.1.1
         version: 3.6.2
@@ -1073,6 +1085,9 @@ importers:
       '@manacore/shared-profile-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-profile-ui
+      '@manacore/shared-splitscreen':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-splitscreen
       '@manacore/shared-subscription-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-subscription-ui
@@ -2640,6 +2655,9 @@ importers:
       '@manacore/shared-profile-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-profile-ui
+      '@manacore/shared-splitscreen':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-splitscreen
       '@manacore/shared-subscription-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-subscription-ui
@@ -2655,6 +2673,9 @@ importers:
       '@manacore/shared-theme-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-theme-ui
+      '@manacore/shared-types':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-types
       '@manacore/shared-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-ui
@@ -2724,6 +2745,10 @@ importers:
         version: 6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)
 
   apps/todo/packages/shared:
+    dependencies:
+      '@manacore/shared-types':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-types
     devDependencies:
       typescript:
         specifier: ^5.9.3
@@ -3886,6 +3911,9 @@ importers:
 
   packages/shared-auth:
     dependencies:
+      '@manacore/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
       base64-js:
         specifier: ^1.5.1
         version: 1.5.1
@@ -4167,6 +4195,18 @@ importers:
         specifier: ^5.7.3
         version: 5.9.3
 
+  packages/shared-splitscreen:
+    devDependencies:
+      svelte:
+        specifier: ^5.0.0
+        version: 5.44.0
+      svelte-check:
+        specifier: ^4.0.0
+        version: 4.3.4(picomatch@4.0.3)(svelte@5.44.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
   packages/shared-storage:
     dependencies:
       '@aws-sdk/client-s3':
@@ -4289,6 +4329,9 @@ importers:
       '@manacore/shared-theme':
         specifier: workspace:*
         version: link:../shared-theme
+      '@manacore/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
       d3-force:
         specifier: ^3.0.0
         version: 3.0.0
@@ -9795,6 +9838,9 @@ packages:
 
   '@types/stats.js@0.17.4':
     resolution: {integrity: sha512-jIBvWWShCvlBqBNIZt0KAshWpvSjhkwkEu4ZUcASoAvhmrgAUI2t1dXrjSL4xXVLB4FznPrIsX3nKXFl/Dt4vA==}
+
+  '@types/suncalc@1.9.2':
+    resolution: {integrity: sha512-ATAGBHHfA1TlE2tjfidLyTcysjoT2JHHEAmWRULh73SU9UTn++j5fqHEW16X6Y/2Li87jEQXzgu4R/OOdlDqzw==}
 
   '@types/superagent@8.1.9':
     resolution: {integrity: sha512-pTVjI73witn+9ILmoJdajHGW2jkSaOzhiFYF1Rd3EQ94kymLqB9PjD9ISg7WaALC7+dCHT0FGe9T2LktLq/3GQ==}
@@ -18077,6 +18123,9 @@ packages:
 
   suf-log@2.5.3:
     resolution: {integrity: sha512-KvC8OPjzdNOe+xQ4XWJV2whQA0aM1kGVczMQ8+dStAO6KfEB140JEVQ9dE76ONZ0/Ylf67ni4tILPJB41U0eow==}
+
+  suncalc@1.9.0:
+    resolution: {integrity: sha512-vMJ8Byp1uIPoj+wb9c1AdK4jpkSKVAywgHX0lqY7zt6+EWRRC3Z+0Ucfjy/0yxTVO1hwwchZe4uoFNqrIC24+A==}
 
   superagent@10.2.3:
     resolution: {integrity: sha512-y/hkYGeXAj7wUMjxRbB21g/l6aAEituGXM9Rwl4o20+SX3e8YOSV6BxFXl+dL3Uk0mjSL3kCbNkwURm8/gEDig==}
@@ -27790,6 +27839,8 @@ snapshots:
   '@types/stack-utils@2.0.3': {}
 
   '@types/stats.js@0.17.4': {}
+
+  '@types/suncalc@1.9.2': {}
 
   '@types/superagent@8.1.9':
     dependencies:
@@ -41554,6 +41605,8 @@ snapshots:
   suf-log@2.5.3:
     dependencies:
       s.color: 0.0.15
+
+  suncalc@1.9.0: {}
 
   superagent@10.2.3:
     dependencies:

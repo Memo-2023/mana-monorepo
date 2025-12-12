@@ -39,6 +39,9 @@ export {
 // Feedback
 export { EmptyState } from './molecules';
 
+// Contacts
+export { ContactAvatar, ContactBadge, ContactSelector } from './molecules';
+
 // Layout
 export { ModalFooter, DataCard, PageHeader, KeyboardShortcutsPanel } from './molecules';
 
@@ -76,6 +79,12 @@ export {
 	SidebarSection,
 	PillNavigation,
 	PillDropdown,
+	PillTabGroup,
+	PillTimeRangeSelector,
+	PillViewSwitcher,
+	PillToolbar,
+	PillToolbarButton,
+	PillToolbarDivider,
 } from './navigation';
 export type {
 	NavItem,
@@ -87,6 +96,7 @@ export type {
 	PillDropdownItem,
 	PillNavElement,
 	PillNavigationProps,
+	PillTabOption,
 } from './navigation';
 
 // Settings
@@ -104,9 +114,13 @@ export {
 	GlobalSettingsSection,
 } from './settings';
 
-// Command Bar
+// Command Bar (deprecated - use QuickInputBar)
 export { CommandBar } from './command-bar';
-export type { CommandBarItem, QuickAction, CreatePreview } from './command-bar';
+export type { CommandBarItem } from './command-bar';
+
+// Input Bar
+export { InputBar, QuickInputBar } from './quick-input';
+export type { QuickInputItem, QuickAction, CreatePreview } from './quick-input';
 
 // Pages
 export { default as AppsPage } from './pages/AppsPage.svelte';
