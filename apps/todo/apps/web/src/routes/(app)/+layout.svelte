@@ -3,11 +3,11 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, CommandBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
-		CommandBarItem,
+		QuickInputItem,
 		QuickAction,
 		CreatePreview,
 	} from '@manacore/shared-ui';
@@ -38,19 +38,15 @@
 
 	let { children } = $props();
 
-	// CommandBar state
-	let commandBarOpen = $state(false);
-
-	// CommandBar quick actions
-	const commandBarQuickActions: QuickAction[] = [
-		{ id: 'new', label: 'Neue Aufgabe erstellen', icon: 'plus', href: '/task/new', shortcut: 'N' },
-		{ id: 'kanban', label: 'Kanban-Board', icon: 'list', href: '/kanban' },
-		{ id: 'stats', label: 'Statistiken', icon: 'chart', href: '/statistics' },
+	// QuickInputBar quick actions
+	const quickActions: QuickAction[] = [
+		{ id: 'kanban', label: 'Kanban', icon: 'kanban', href: '/kanban' },
+		{ id: 'stats', label: 'Statistik', icon: 'chart', href: '/statistics' },
 		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
 	];
 
-	// CommandBar search - search tasks
-	async function handleCommandBarSearch(query: string): Promise<CommandBarItem[]> {
+	// QuickInputBar search - search tasks
+	async function handleSearch(query: string): Promise<QuickInputItem[]> {
 		if (!query.trim()) return [];
 
 		try {
@@ -69,25 +65,25 @@
 		}
 	}
 
-	function handleCommandBarSelect(item: CommandBarItem) {
+	function handleSelect(item: QuickInputItem) {
 		goto(`/task/${item.id}`);
 	}
 
-	// CommandBar create - parse input and show preview
-	function handleCommandBarParseCreate(query: string): CreatePreview | null {
+	// QuickInputBar create - parse input and show preview
+	function handleParseCreate(query: string): CreatePreview | null {
 		if (!query.trim()) return null;
 
 		const parsed = parseTaskInput(query);
 		const preview = formatParsedTaskPreview(parsed);
 
 		return {
-			title: `"${parsed.title}" als Aufgabe erstellen`,
+			title: `"${parsed.title}" erstellen`,
 			subtitle: preview || 'Neue Aufgabe',
 		};
 	}
 
-	// CommandBar create - actually create the task
-	async function handleCommandBarCreate(query: string): Promise<void> {
+	// QuickInputBar create - actually create the task
+	async function handleCreate(query: string): Promise<void> {
 		if (!query.trim()) return;
 
 		const parsed = parseTaskInput(query);
@@ -191,13 +187,6 @@
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
-
-		// Cmd/Ctrl+K to open command bar (works even in inputs)
-		if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-			event.preventDefault();
-			commandBarOpen = true;
-			return;
-		}
 
 		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
 			return;
@@ -366,20 +355,20 @@
 		</div>
 	</main>
 
-	<!-- Global Command Bar (Cmd/K) -->
-	<CommandBar
-		bind:open={commandBarOpen}
-		onClose={() => (commandBarOpen = false)}
-		onSearch={handleCommandBarSearch}
-		onSelect={handleCommandBarSelect}
-		quickActions={commandBarQuickActions}
-		placeholder="Aufgabe suchen oder erstellen..."
+	<!-- Global Quick Input Bar -->
+	<QuickInputBar
+		onSearch={handleSearch}
+		onSelect={handleSelect}
+		{quickActions}
+		placeholder="Neue Aufgabe oder suchen..."
 		emptyText="Keine Aufgaben gefunden"
 		searchingText="Suche..."
-		onCreate={handleCommandBarCreate}
-		onParseCreate={handleCommandBarParseCreate}
-		createText="Als Aufgabe erstellen"
-		createShortcut="⌘↵"
+		onCreate={handleCreate}
+		onParseCreate={handleParseCreate}
+		createText="Erstellen"
+		appIcon="todo"
+		primaryColor="#8b5cf6"
+		autoFocus={true}
 	/>
 </div>
 
@@ -394,6 +383,8 @@
 		transition: all 300ms ease;
 		position: relative;
 		z-index: 0;
+		/* Space for QuickInputBar at bottom */
+		padding-bottom: calc(80px + env(safe-area-inset-bottom));
 	}
 
 	.main-content.floating-mode {
@@ -436,6 +427,13 @@
 		.content-wrapper.full-width {
 			padding-left: 0;
 			padding-right: 0;
+		}
+	}
+
+	/* Mobile: More space for QuickInputBar + PillNav */
+	@media (max-width: 768px) {
+		.main-content {
+			padding-bottom: calc(150px + env(safe-area-inset-bottom));
 		}
 	}
 </style>

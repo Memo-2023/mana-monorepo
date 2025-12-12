@@ -3,11 +3,11 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, CommandBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
-		CommandBarItem,
+		QuickInputItem,
 		QuickAction,
 		CreatePreview,
 	} from '@manacore/shared-ui';
@@ -38,9 +38,6 @@
 		resolveContactIds,
 		formatParsedContactPreview,
 	} from '$lib/utils/contact-parser';
-
-	// Search modal state
-	let searchModalOpen = $state(false);
 
 	// Tags state for Quick-Create
 	let availableTags = $state<{ id: string; name: string }[]>([]);
@@ -130,13 +127,6 @@
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
 
-		// Cmd/Ctrl+K to open search (works even in inputs)
-		if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-			event.preventDefault();
-			searchModalOpen = true;
-			return;
-		}
-
 		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
 			return;
 		}
@@ -188,8 +178,8 @@
 		goto('/', { replaceState: false });
 	}
 
-	// CommandBar search function
-	async function handleCommandBarSearch(query: string): Promise<CommandBarItem[]> {
+	// QuickInputBar search function
+	async function handleSearch(query: string): Promise<QuickInputItem[]> {
 		const response = await contactsApi.list({ search: query, limit: 10 });
 		return (response.contacts || []).map((contact: any) => ({
 			id: contact.id,
@@ -204,25 +194,25 @@
 		}));
 	}
 
-	// CommandBar item selection
-	function handleCommandBarSelect(item: CommandBarItem) {
+	// QuickInputBar item selection
+	function handleSelect(item: QuickInputItem) {
 		goto(`/contacts/${item.id}`);
 	}
 
-	// CommandBar Quick-Create handlers
-	function handleCommandBarParseCreate(query: string): CreatePreview | null {
+	// QuickInputBar Quick-Create handlers
+	function handleParseCreate(query: string): CreatePreview | null {
 		if (!query.trim()) return null;
 
 		const parsed = parseContactInput(query);
 		if (!parsed.displayName) return null;
 
 		return {
-			title: parsed.displayName,
+			title: `"${parsed.displayName}" erstellen`,
 			subtitle: formatParsedContactPreview(parsed),
 		};
 	}
 
-	async function handleCommandBarCreate(query: string): Promise<void> {
+	async function handleCreate(query: string): Promise<void> {
 		const parsed = parseContactInput(query);
 		if (!parsed.displayName) return;
 
@@ -250,18 +240,11 @@
 		}
 	}
 
-	// CommandBar quick actions
-	const commandBarQuickActions: QuickAction[] = [
-		{
-			id: 'new',
-			label: 'Neuen Kontakt erstellen',
-			icon: 'plus',
-			href: '/contacts/new',
-			shortcut: 'N',
-		},
-		{ id: 'favorites', label: 'Favoriten anzeigen', icon: 'heart', href: '/favorites' },
-		{ id: 'tags', label: 'Tags verwalten', icon: 'tag', href: '/tags' },
-		{ id: 'import', label: 'Kontakte importieren', icon: 'upload', href: '/data?tab=import' },
+	// QuickInputBar quick actions
+	const quickActions: QuickAction[] = [
+		{ id: 'favorites', label: 'Favoriten', icon: 'heart', href: '/favorites' },
+		{ id: 'tags', label: 'Tags', icon: 'tag', href: '/tags' },
+		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
 	];
 
 	onMount(async () => {
@@ -360,20 +343,20 @@
 		<ContactDetailModal contactId={modalContactId} onClose={handleCloseContactModal} />
 	{/if}
 
-	<!-- Global Search Modal (Cmd/K) -->
-	<CommandBar
-		bind:open={searchModalOpen}
-		onClose={() => (searchModalOpen = false)}
-		onSearch={handleCommandBarSearch}
-		onSelect={handleCommandBarSelect}
-		quickActions={commandBarQuickActions}
-		placeholder="Kontakt suchen oder erstellen..."
+	<!-- Global Quick Input Bar -->
+	<QuickInputBar
+		onSearch={handleSearch}
+		onSelect={handleSelect}
+		{quickActions}
+		placeholder="Neuer Kontakt oder suchen..."
 		emptyText="Keine Kontakte gefunden"
 		searchingText="Suche..."
-		onCreate={handleCommandBarCreate}
-		onParseCreate={handleCommandBarParseCreate}
-		createText="Als Kontakt erstellen"
-		createShortcut="⌘↵"
+		onCreate={handleCreate}
+		onParseCreate={handleParseCreate}
+		createText="Erstellen"
+		appIcon="contacts"
+		primaryColor="#3b82f6"
+		autoFocus={false}
 	/>
 </div>
 

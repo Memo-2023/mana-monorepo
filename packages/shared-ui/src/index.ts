@@ -79,6 +79,12 @@ export {
 	SidebarSection,
 	PillNavigation,
 	PillDropdown,
+	PillTabGroup,
+	PillTimeRangeSelector,
+	PillViewSwitcher,
+	PillToolbar,
+	PillToolbarButton,
+	PillToolbarDivider,
 } from './navigation';
 export type {
 	NavItem,
@@ -90,6 +96,7 @@ export type {
 	PillDropdownItem,
 	PillNavElement,
 	PillNavigationProps,
+	PillTabOption,
 } from './navigation';
 
 // Settings
@@ -107,9 +114,13 @@ export {
 	GlobalSettingsSection,
 } from './settings';
 
-// Command Bar
+// Command Bar (deprecated - use QuickInputBar)
 export { CommandBar } from './command-bar';
-export type { CommandBarItem, QuickAction, CreatePreview } from './command-bar';
+export type { CommandBarItem } from './command-bar';
+
+// Quick Input Bar
+export { QuickInputBar } from './quick-input';
+export type { QuickInputItem, QuickAction, CreatePreview } from './quick-input';
 
 // Pages
 export { default as AppsPage } from './pages/AppsPage.svelte';
