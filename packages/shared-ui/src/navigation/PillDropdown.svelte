@@ -13,6 +13,8 @@
 		header?: Snippet;
 		/** Optional footer content (e.g., a11y toggles) */
 		footer?: Snippet;
+		/** Show only the icon without label */
+		iconOnly?: boolean;
 	}
 
 	let {
@@ -24,6 +26,7 @@
 		onToggle,
 		header,
 		footer,
+		iconOnly = false,
 	}: Props = $props();
 
 	let internalOpen = $state(false);
@@ -123,13 +126,20 @@
 
 <div class="pill-dropdown">
 	<!-- Trigger Button -->
-	<button bind:this={triggerButton} onclick={toggle} class="pill glass-pill trigger-button">
+	<button
+		bind:this={triggerButton}
+		onclick={toggle}
+		class="pill glass-pill trigger-button"
+		class:icon-only={iconOnly}
+	>
 		{#if icon}
 			<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={getIcon(icon)} />
 			</svg>
 		{/if}
-		<span class="pill-label">{label}</span>
+		{#if !iconOnly}
+			<span class="pill-label">{label}</span>
+		{/if}
 		<svg
 			class="chevron-icon"
 			class:rotated={open}
@@ -279,6 +289,10 @@
 	.trigger-button {
 		position: relative;
 		z-index: 10;
+	}
+
+	.trigger-button.icon-only {
+		padding: 0.5rem 0.625rem;
 	}
 
 	.chevron-icon {

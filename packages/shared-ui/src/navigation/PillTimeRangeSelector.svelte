@@ -174,7 +174,6 @@
 
 	.trigger-button {
 		position: relative;
-		z-index: 10;
 	}
 
 	.pill {

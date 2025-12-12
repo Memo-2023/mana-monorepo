@@ -39,7 +39,7 @@
 		top: var(--toolbar-top-offset, 70px);
 		left: 0;
 		right: 0;
-		z-index: 999;
+		z-index: 50;
 		padding: 0.375rem 1rem;
 		pointer-events: none;
 		display: flex;
@@ -68,12 +68,7 @@
 		padding: 0.25rem;
 		pointer-events: auto;
 		max-width: 100%;
-		overflow-x: auto;
-		scrollbar-width: none;
-	}
-
-	.toolbar-bar::-webkit-scrollbar {
-		display: none;
+		overflow: visible;
 	}
 
 	.glass-pill {

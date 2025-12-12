@@ -27,6 +27,7 @@
 		Tray,
 		Check,
 		CheckCircle,
+		CheckSquare,
 		Plus,
 		Columns,
 		Microphone,
@@ -73,6 +74,7 @@
 		inbox: Tray,
 		check: Check,
 		checkCircle: CheckCircle,
+		'check-square': CheckSquare,
 		plus: Plus,
 		columns: Columns,
 		kanban: Columns,
@@ -84,6 +86,7 @@
 		music: MusicNote,
 		document: File,
 		chart: ChartBar,
+		'bar-chart-3': ChartBar,
 		search: MagnifyingGlass,
 		list: List,
 		compass: Compass,
@@ -443,6 +446,7 @@
 					direction={dropdownDirection}
 					label={appName}
 					icon="grid"
+					iconOnly={!isSidebarMode}
 				/>
 			{:else}
 				<a href={homeRoute} class="pill glass-pill logo-pill">
@@ -853,6 +857,9 @@
 		z-index: 1000;
 		padding: 0.75rem 0 1.5rem;
 		pointer-events: none;
+		/* Container query context */
+		container-type: inline-size;
+		container-name: pillnav;
 	}
 
 	/* Desktop bottom position */
@@ -882,6 +889,25 @@
 		-ms-overflow-style: none;
 		pointer-events: auto;
 		padding: 0.5rem 2rem;
+		/* Default: left-aligned with fit-content */
+		width: fit-content;
+		max-width: 100%;
+	}
+
+	/* Center when container has enough space (> 600px) */
+	@container pillnav (min-width: 600px) {
+		.pill-nav-container:not(.sidebar-container) {
+			margin-left: auto;
+			margin-right: auto;
+		}
+	}
+
+	/* Larger screens: always centered */
+	@container pillnav (min-width: 900px) {
+		.pill-nav-container:not(.sidebar-container) {
+			margin-left: auto;
+			margin-right: auto;
+		}
 	}
 
 	.pill-nav-container::-webkit-scrollbar {
