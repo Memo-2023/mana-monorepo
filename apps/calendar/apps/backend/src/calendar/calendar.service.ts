@@ -113,12 +113,56 @@ export class CalendarService {
 			return updated;
 		}
 
-		// Create a new default calendar
-		return this.create(userId, {
-			name: 'Mein Kalender',
-			isDefault: true,
-			color: '#3B82F6',
-		});
+		// Create default calendars for new user
+		await this.createDefaultCalendars(userId);
+
+		// Return the default one
+		const defaultCal = await this.db
+			.select()
+			.from(calendars)
+			.where(and(eq(calendars.userId, userId), eq(calendars.isDefault, true)));
+
+		return defaultCal[0];
+	}
+
+	/**
+	 * Create default calendars for a new user
+	 */
+	async createDefaultCalendars(userId: string): Promise<Calendar[]> {
+		const defaultCalendars = [
+			{
+				name: 'Persönlich',
+				color: '#3B82F6', // Blue
+				isDefault: true,
+				description: 'Private Termine',
+			},
+			{
+				name: 'Beruf',
+				color: '#10B981', // Green
+				isDefault: false,
+				description: 'Arbeit, Meetings, Projekte',
+			},
+			{
+				name: 'Familie',
+				color: '#F97316', // Orange
+				isDefault: false,
+				description: 'Familientermine, Geburtstage',
+			},
+			{
+				name: 'Freizeit',
+				color: '#8B5CF6', // Violet
+				isDefault: false,
+				description: 'Hobbies, Sport, Events',
+			},
+		];
+
+		const created: Calendar[] = [];
+		for (const cal of defaultCalendars) {
+			const calendar = await this.create(userId, cal);
+			created.push(calendar);
+		}
+
+		return created;
 	}
 
 	private async clearDefaultCalendar(userId: string): Promise<void> {

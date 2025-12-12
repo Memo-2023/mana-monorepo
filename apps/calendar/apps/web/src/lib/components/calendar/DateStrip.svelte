@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { viewStore } from '$lib/stores/view.svelte';
+	import { eventsStore } from '$lib/stores/events.svelte';
 	import {
 		format,
 		isToday,
@@ -12,6 +13,12 @@
 	import { de } from 'date-fns/locale';
 	import { onMount, tick } from 'svelte';
 	import SunCalc from 'suncalc';
+
+	// Get event count for a day (max 5 dots displayed)
+	function getEventCount(date: Date): number {
+		const events = eventsStore.getEventsForDay(date, false);
+		return Math.min(events.length, 5); // Cap at 5 dots
+	}
 
 	// Moon phase emojis (8 phases)
 	const MOON_EMOJIS = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
@@ -223,6 +230,7 @@
 				{@const dayIsRangeEnd = isSameDay(day, viewRange.end)}
 				{@const isFirstOfMonth = day.getDate() === 1}
 				{@const moonPhase = isSignificantMoonPhase(day)}
+				{@const eventCount = getEventCount(day)}
 				{#if isFirstOfMonth}
 					<div class="month-divider"></div>
 				{/if}
@@ -249,6 +257,13 @@
 					<span class="day-number" style={dayIsToday ? 'color: white;' : ''}
 						>{format(day, 'd')}</span
 					>
+					{#if eventCount > 0}
+						<div class="event-dots" style={dayIsToday ? 'opacity: 0.9;' : ''}>
+							{#each Array(eventCount) as _, i}
+								<span class="event-dot" style={dayIsToday ? 'background: white;' : ''}></span>
+							{/each}
+						</div>
+					{/if}
 				</button>
 			{/each}
 		</div>
@@ -369,6 +384,21 @@
 		transform: translateX(-50%);
 		font-size: 1.125rem;
 		line-height: 1;
+	}
+
+	.event-dots {
+		display: flex;
+		gap: 2px;
+		justify-content: center;
+		margin-top: 2px;
+	}
+
+	.event-dot {
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background: #3b82f6;
+		opacity: 0.7;
 	}
 
 	.day-item:hover {
