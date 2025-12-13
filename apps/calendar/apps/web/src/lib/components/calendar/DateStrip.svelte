@@ -293,19 +293,19 @@
 	.date-strip-wrapper {
 		position: fixed;
 		bottom: calc(140px + env(safe-area-inset-bottom, 0px)); /* Above InputBar + PillNav */
-		left: 0;
-		right: 0;
+		left: 1rem;
+		right: 1rem;
 		z-index: 48;
 		display: flex;
 		flex-direction: column;
-		align-items: center;
+		align-items: stretch;
 		pointer-events: none;
 		transition: bottom 0.2s ease;
 	}
 
 	/* When toolbar is expanded, push DateStrip up */
 	.date-strip-wrapper.toolbar-expanded {
-		bottom: calc(200px + env(safe-area-inset-bottom, 0px)); /* Extra 60px for toolbar */
+		bottom: calc(220px + env(safe-area-inset-bottom, 0px)); /* Extra space for toolbar */
 	}
 
 	/* When PillNav is in sidebar mode, no PillNav at bottom - just InputBar */
@@ -314,7 +314,7 @@
 	}
 
 	.date-strip-wrapper.sidebar-mode.toolbar-expanded {
-		bottom: calc(130px + env(safe-area-inset-bottom, 0px));
+		bottom: calc(150px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.today-button {
@@ -366,13 +366,12 @@
 		flex-direction: column;
 		background: var(--color-surface, #ffffff);
 		border-radius: 16px;
-		margin: 0 1rem;
-		padding: 0.5rem 1.5rem;
+		margin: 0;
+		padding: 0.5rem 0;
 		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 		border: 1px solid var(--color-border, #e5e7eb);
 		pointer-events: auto;
-		max-width: calc(100vw - 2rem);
-		min-width: 420px;
+		width: 100%;
 		overflow: hidden;
 	}
 
@@ -411,7 +410,7 @@
 		scrollbar-width: none;
 		-ms-overflow-style: none;
 		scroll-behavior: auto;
-		padding: 1.25rem 0.25rem 0.25rem;
+		padding: 1.25rem 1rem 0.25rem;
 		margin-top: -1rem;
 	}
 
@@ -513,9 +512,15 @@
 
 	/* Responsive */
 	@media (max-width: 640px) {
+		.date-strip-wrapper {
+			left: 0.5rem;
+			right: 0.5rem;
+		}
+
 		.date-strip-container {
-			margin: 0 0.5rem;
-			padding: 0.375rem;
+			margin: 0;
+			padding: 0.375rem 0;
+			width: 100%;
 		}
 
 		.month-label {

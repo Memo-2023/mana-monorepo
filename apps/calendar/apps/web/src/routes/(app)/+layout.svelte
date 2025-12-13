@@ -413,7 +413,7 @@
 			bottomOffset={isSidebarMode
 				? '0px'
 				: showCalendarToolbar && !isToolbarCollapsed
-					? '130px'
+					? '150px'
 					: '70px'}
 		/>
 	</div>

@@ -107,7 +107,7 @@
 
 	/* When expanded, move FAB up with InputBar */
 	.fab-container.expanded {
-		bottom: calc(130px + 9px + env(safe-area-inset-bottom, 0px));
+		bottom: calc(150px + 9px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.fab-container.sidebar-mode {
@@ -135,7 +135,6 @@
 		display: flex;
 		justify-content: center;
 		padding: 0.5rem 1rem;
-		padding-top: 8rem; /* Space between InputBar and toolbar (~128px) */
 	}
 
 	.toolbar-bar.sidebar-mode {
