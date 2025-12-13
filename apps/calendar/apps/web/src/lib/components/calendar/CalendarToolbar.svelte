@@ -146,11 +146,11 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.5rem 1rem;
-		background: rgba(255, 255, 255, 0.92);
+		background: hsl(var(--color-surface) / 0.92);
 		backdrop-filter: blur(16px);
 		-webkit-backdrop-filter: blur(16px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
+		box-shadow: 0 -2px 16px hsl(var(--color-foreground) / 0.08);
 		border-radius: 1rem;
 		white-space: nowrap;
 		max-width: calc(100vw - 2rem);
@@ -164,24 +164,14 @@
 		display: none; /* Chrome/Safari */
 	}
 
-	:global(.dark) .toolbar-content {
-		background: rgba(30, 30, 30, 0.92);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-	}
-
 	/* Glass styling */
 	.glass-pill {
-		background: rgba(255, 255, 255, 0.85);
+		background: hsl(var(--color-surface) / 0.85);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
+		box-shadow: 0 2px 8px hsl(var(--color-foreground) / 0.08);
 		border-radius: 9999px;
-	}
-
-	:global(.dark) .glass-pill {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
 	}
 
 	.glass-panel {
@@ -203,19 +193,15 @@
 
 	.toolbar-fab:hover {
 		transform: scale(1.05);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		box-shadow: 0 4px 12px hsl(var(--color-foreground) / 0.15);
 	}
 
 	.toolbar-fab.active {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .toolbar-fab.active {
-		background: rgba(255, 255, 255, 0.15);
+		background: hsl(var(--color-muted));
 	}
 
 	.toolbar-fab.active .fab-icon {
-		color: hsl(var(--color-muted-foreground));
+		color: hsl(var(--color-primary));
 	}
 
 	.fab-icon {
@@ -232,12 +218,8 @@
 	.toolbar-divider {
 		width: 1px;
 		height: 1.5rem;
-		background: rgba(0, 0, 0, 0.1);
+		background: hsl(var(--color-border));
 		margin: 0 0.25rem;
-	}
-
-	:global(.dark) .toolbar-divider {
-		background: rgba(255, 255, 255, 0.15);
 	}
 
 	/* Layout toggle button */

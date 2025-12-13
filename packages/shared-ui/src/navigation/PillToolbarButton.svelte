@@ -49,28 +49,20 @@
 		border: none;
 		border-radius: 9999px;
 		cursor: pointer;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		font-size: 0.875rem;
 		font-weight: 500;
 		white-space: nowrap;
 		transition: all 0.15s ease;
 	}
 
-	:global(.dark) .toolbar-btn {
-		color: #f3f4f6;
-	}
-
 	.toolbar-btn:hover:not(:disabled) {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .toolbar-btn:hover:not(:disabled) {
-		background: rgba(255, 255, 255, 0.1);
+		background: hsl(var(--color-foreground) / 0.05);
 	}
 
 	.toolbar-btn.active {
-		background: color-mix(in srgb, #3b82f6 15%, transparent 85%);
-		color: #3b82f6;
+		background: hsl(var(--color-primary) / 0.15);
+		color: hsl(var(--color-primary));
 	}
 
 	.toolbar-btn.icon-only {

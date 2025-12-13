@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
+	import { settingsStore } from '$lib/stores/settings.svelte';
+	import DateStripContextMenu from './DateStripContextMenu.svelte';
 	import {
 		format,
 		isToday,
@@ -13,6 +15,14 @@
 	import { de } from 'date-fns/locale';
 	import { onMount, tick } from 'svelte';
 	import SunCalc from 'suncalc';
+
+	// Context menu reference
+	let contextMenu: DateStripContextMenu;
+
+	function handleContextMenu(e: MouseEvent) {
+		e.preventDefault();
+		contextMenu?.show(e.clientX, e.clientY);
+	}
 
 	interface Props {
 		isSidebarMode?: boolean;
@@ -223,8 +233,10 @@
 	class="date-strip-wrapper"
 	class:sidebar-mode={isSidebarMode}
 	class:toolbar-expanded={isToolbarExpanded}
+	class:compact={settingsStore.dateStripCompact}
 >
-	<div class="date-strip-container">
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="date-strip-container" oncontextmenu={handleContextMenu}>
 		<!-- Month label -->
 		<div class="month-header">
 			<span class="month-label">
@@ -250,12 +262,12 @@
 				{@const isFirstOfMonth = day.getDate() === 1}
 				{@const moonPhase = isSignificantMoonPhase(day)}
 				{@const eventCount = getEventCount(day)}
-				{#if isFirstOfMonth}
+				{#if isFirstOfMonth && settingsStore.dateStripShowMonthDividers}
 					<div class="month-divider"></div>
 				{/if}
 				<button
 					class="day-item"
-					class:weekend={dayIsWeekend}
+					class:weekend={dayIsWeekend && settingsStore.dateStripHighlightWeekends}
 					class:selected={dayIsSelected && !dayIsToday}
 					class:in-range={dayInRange && !dayIsToday}
 					class:range-start={dayIsRangeStart && !dayIsToday}
@@ -263,23 +275,17 @@
 					data-date={format(day, 'yyyy-MM-dd')}
 					data-is-today={dayIsToday}
 					onclick={() => handleDayClick(day)}
-					style={dayIsToday
-						? 'background: #3b82f6; color: white; border-radius: 10px; font-weight: 700; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);'
-						: ''}
+					class:is-today={dayIsToday}
 				>
 					{#if moonPhase.significant}
 						<span class="moon-indicator">{moonPhase.emoji}</span>
 					{/if}
-					<span class="day-weekday" style={dayIsToday ? 'opacity: 1; color: white;' : ''}
-						>{format(day, 'EE', { locale: de })}</span
-					>
-					<span class="day-number" style={dayIsToday ? 'color: white;' : ''}
-						>{format(day, 'd')}</span
-					>
+					<span class="day-weekday">{format(day, 'EE', { locale: de })}</span>
+					<span class="day-number">{format(day, 'd')}</span>
 					{#if eventCount > 0}
-						<div class="event-dots" style={dayIsToday ? 'opacity: 0.9;' : ''}>
+						<div class="event-dots">
 							{#each Array(eventCount) as _, i}
-								<span class="event-dot" style={dayIsToday ? 'background: white;' : ''}></span>
+								<span class="event-dot"></span>
 							{/each}
 						</div>
 					{/if}
@@ -327,21 +333,21 @@
 		flex-direction: column;
 		align-items: center;
 		padding: 0.375rem 0.875rem;
-		background: rgba(59, 130, 246, 0.1);
-		border: 1px solid rgba(59, 130, 246, 0.3);
+		background: hsl(var(--color-primary) / 0.1);
+		border: 1px solid hsl(var(--color-primary) / 0.3);
 		border-radius: 9999px;
 		cursor: pointer;
-		color: #3b82f6;
+		color: hsl(var(--color-primary));
 		pointer-events: auto;
 		transition: all 0.2s ease;
 	}
 
 	.today-button:hover {
-		background: #3b82f6;
-		border-color: #3b82f6;
-		color: white;
+		background: hsl(var(--color-primary));
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
 		transform: translateY(-50%) scale(1.02);
-		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+		box-shadow: 0 4px 12px hsl(var(--color-primary) / 0.3);
 	}
 
 	.today-button:hover .today-date {
@@ -358,7 +364,7 @@
 	.today-date {
 		font-size: 0.75rem;
 		font-weight: 500;
-		color: #60a5fa;
+		color: hsl(var(--color-primary) / 0.8);
 	}
 
 	.date-strip-container {
@@ -464,7 +470,7 @@
 		width: 4px;
 		height: 4px;
 		border-radius: 50%;
-		background: #3b82f6;
+		background: hsl(var(--color-primary));
 		opacity: 0.7;
 	}
 
@@ -478,13 +484,13 @@
 
 	.day-item.selected {
 		background: var(--color-muted, #f3f4f6);
-		color: #3b82f6;
+		color: hsl(var(--color-primary));
 		font-weight: 600;
 	}
 
 	/* View range highlighting */
 	.day-item.in-range {
-		background: rgba(59, 130, 246, 0.15);
+		background: hsl(var(--color-primary) / 0.15);
 		border-radius: 0;
 	}
 
@@ -501,7 +507,33 @@
 	}
 
 	.day-item.in-range:hover {
-		background: rgba(59, 130, 246, 0.25);
+		background: hsl(var(--color-primary) / 0.25);
+	}
+
+	/* Today styling */
+	.day-item.is-today {
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
+		border-radius: 10px;
+		font-weight: 700;
+		box-shadow: 0 2px 8px hsl(var(--color-primary) / 0.4);
+	}
+
+	.day-item.is-today .day-weekday {
+		opacity: 1;
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
+	}
+
+	.day-item.is-today .day-number {
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
+	}
+
+	.day-item.is-today .event-dots {
+		opacity: 0.9;
+	}
+
+	.day-item.is-today .event-dot {
+		background: hsl(var(--color-primary-foreground, 0 0% 100%));
 	}
 
 	.day-weekday {

@@ -21,13 +21,11 @@
 		value: string;
 		/** Called when view changes */
 		onChange: (id: string) => void;
-		/** Primary color for active state */
-		primaryColor?: string;
 		/** Embedded mode - no background/border, for use inside a parent bar */
 		embedded?: boolean;
 	}
 
-	let { options, value, onChange, primaryColor = '#3b82f6', embedded = false }: Props = $props();
+	let { options, value, onChange, embedded = false }: Props = $props();
 
 	let containerRef = $state<HTMLDivElement | null>(null);
 	let indicatorStyle = $state('');
@@ -84,7 +82,6 @@
 	class="pill-view-switcher"
 	class:glass-pill={!embedded}
 	class:embedded-switcher={embedded}
-	style="--switcher-primary-color: {primaryColor}"
 	bind:this={containerRef}
 >
 	<!-- Sliding indicator -->
@@ -127,18 +124,13 @@
 	}
 
 	.glass-pill {
-		background: rgba(255, 255, 255, 0.85);
+		background: hsl(var(--color-surface) / 0.85);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid hsl(var(--color-border));
 		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-	}
-
-	:global(.dark) .glass-pill {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
+			0 4px 6px -1px hsl(var(--color-foreground) / 0.1),
+			0 2px 4px -1px hsl(var(--color-foreground) / 0.06);
 	}
 
 	/* Embedded mode - no background/border */
@@ -156,15 +148,10 @@
 		top: 0;
 		bottom: 0;
 		border-radius: 9999px;
-		background: color-mix(in srgb, var(--switcher-primary-color) 15%, white 85%);
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		background: hsl(var(--color-primary) / 0.15);
+		box-shadow: 0 1px 3px hsl(var(--color-foreground) / 0.1);
 		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 		z-index: 0;
-	}
-
-	:global(.dark) .sliding-indicator {
-		background: color-mix(in srgb, var(--switcher-primary-color) 25%, transparent 75%);
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 	}
 
 	.switcher-btn {
@@ -179,31 +166,19 @@
 		border: none;
 		border-radius: 9999px;
 		cursor: pointer;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.875rem;
 		font-weight: 500;
 		white-space: nowrap;
 		transition: color 0.15s ease;
 	}
 
-	:global(.dark) .switcher-btn {
-		color: #9ca3af;
-	}
-
 	.switcher-btn:hover:not(.disabled) {
-		color: #374151;
-	}
-
-	:global(.dark) .switcher-btn:hover:not(.disabled) {
-		color: #e5e7eb;
+		color: hsl(var(--color-foreground));
 	}
 
 	.switcher-btn.active {
-		color: var(--switcher-primary-color);
-	}
-
-	:global(.dark) .switcher-btn.active {
-		color: var(--switcher-primary-color);
+		color: hsl(var(--color-primary));
 	}
 
 	.switcher-btn.disabled {

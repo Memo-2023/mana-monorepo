@@ -55,7 +55,6 @@
 		searchingText?: string;
 		createText?: string;
 		appIcon?: string;
-		primaryColor?: string;
 		autoFocus?: boolean;
 		/** Bottom offset from viewport bottom (default: '70px') */
 		bottomOffset?: string;
@@ -74,7 +73,6 @@
 		searchingText = 'Suche...',
 		createText = 'Erstellen',
 		appIcon = 'search',
-		primaryColor = '#8b5cf6',
 		autoFocus = true,
 		bottomOffset = '70px',
 		hasFabRight = false,
@@ -248,7 +246,7 @@
 <div
 	class="quick-input-bar"
 	class:has-fab-right={hasFabRight}
-	style="--primary-color: {primaryColor}; --bottom-offset: {bottomOffset}"
+	style="--bottom-offset: {bottomOffset}"
 >
 	<!-- Results Panel (above input) -->
 	{#if showPanel}
@@ -451,32 +449,27 @@
 		align-items: center;
 		gap: 0.75rem;
 		padding: 0.75rem 1.25rem;
-		background: rgba(255, 255, 255, 0.85);
+		background: hsl(var(--color-surface) / 0.85);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 9999px;
 		max-width: 700px;
 		margin: 0 auto;
 		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
+			0 4px 6px -1px hsl(var(--color-foreground) / 0.1),
+			0 2px 4px -1px hsl(var(--color-foreground) / 0.06);
 		transition: all 0.2s ease;
 		/* Fixed height to prevent size changes */
 		height: 54px;
 	}
 
-	:global(.dark) .input-container {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-	}
-
 	.input-container:focus-within {
-		border-color: var(--primary-color);
+		border-color: hsl(var(--color-primary));
 		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06),
-			0 0 0 2px color-mix(in srgb, var(--primary-color) 25%, transparent);
+			0 4px 6px -1px hsl(var(--color-foreground) / 0.1),
+			0 2px 4px -1px hsl(var(--color-foreground) / 0.06),
+			0 0 0 2px hsl(var(--color-primary) / 0.25);
 	}
 
 	.app-icon {
@@ -530,29 +523,29 @@
 		color: hsl(var(--color-muted-foreground));
 	}
 
-	/* Syntax highlighting colors */
+	/* Syntax highlighting colors - using theme-aware semantic colors */
 	.input-highlight-backdrop :global(.hl-priority-urgent) {
-		color: #ef4444;
+		color: hsl(var(--color-error, 0 84% 60%));
 		font-weight: 600;
 	}
 
 	.input-highlight-backdrop :global(.hl-priority-high) {
-		color: #f97316;
+		color: hsl(var(--color-warning, 25 95% 53%));
 		font-weight: 600;
 	}
 
 	.input-highlight-backdrop :global(.hl-priority-medium) {
-		color: #eab308;
+		color: hsl(var(--color-warning, 48 96% 53%));
 		font-weight: 600;
 	}
 
 	.input-highlight-backdrop :global(.hl-priority-low) {
-		color: #22c55e;
+		color: hsl(var(--color-success, 142 71% 45%));
 		font-weight: 600;
 	}
 
 	.input-highlight-backdrop :global(.hl-tag) {
-		color: var(--primary-color);
+		color: hsl(var(--color-primary));
 		font-weight: 500;
 	}
 
@@ -562,12 +555,12 @@
 	}
 
 	.input-highlight-backdrop :global(.hl-date) {
-		color: hsl(262 83% 58%);
+		color: hsl(var(--color-accent, 262 83% 58%));
 		font-weight: 500;
 	}
 
 	.input-highlight-backdrop :global(.hl-time) {
-		color: hsl(262 83% 58%);
+		color: hsl(var(--color-accent, 262 83% 58%));
 		font-weight: 500;
 	}
 
@@ -575,8 +568,8 @@
 		width: 2rem;
 		height: 2rem;
 		border-radius: 9999px;
-		background: var(--primary-color);
-		color: white;
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
 		border: none;
 		cursor: pointer;
 		display: flex;
@@ -612,19 +605,14 @@
 		margin: 0 auto 0.5rem;
 		max-height: 320px;
 		overflow-y: auto;
-		background: rgba(255, 255, 255, 0.95);
+		background: hsl(var(--color-surface) / 0.95);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
 		border-radius: 1rem;
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid hsl(var(--color-border));
 		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-	}
-
-	:global(.dark) .results-panel {
-		background: rgba(30, 30, 30, 0.95);
-		border: 1px solid rgba(255, 255, 255, 0.15);
+			0 4px 6px -1px hsl(var(--color-foreground) / 0.1),
+			0 2px 4px -1px hsl(var(--color-foreground) / 0.06);
 	}
 
 	/* Result Items */
@@ -661,8 +649,8 @@
 		height: 36px;
 		min-width: 36px;
 		border-radius: 9999px;
-		background: var(--primary-color);
-		color: white;
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -750,7 +738,7 @@
 		width: 1.25rem;
 		height: 1.25rem;
 		border: 2px solid hsl(var(--color-border));
-		border-top-color: var(--primary-color);
+		border-top-color: hsl(var(--color-primary));
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
 	}
