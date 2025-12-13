@@ -836,40 +836,43 @@
 	class:compact={columnClass === 'compact'}
 	class:very-compact={columnClass === 'very-compact'}
 >
-	<!-- All-day events row (only shown when there are header-mode all-day events) -->
-	{#if hasAnyHeaderAllDayEvents}
-		<div class="all-day-row">
+	<!-- Sticky header container -->
+	<div class="sticky-header">
+		<!-- Day headers -->
+		<div class="day-headers">
 			<div class="time-gutter"></div>
 			{#each days as day}
-				<div class="all-day-cell">
-					{#each getHeaderAllDayEventsForDay(day) as event}
-						<button
-							class="all-day-event"
-							class:search-highlighted={searchStore.isEventHighlighted(event.id)}
-							class:search-dimmed={searchStore.isEventDimmed(event.id)}
-							style="background-color: {calendarsStore.getColor(event.calendarId)}"
-							onclick={(e) => handleEventClick(event, e)}
-							title={event.title}
-						>
-							{event.title}
-						</button>
-					{/each}
+				<div class="day-header" class:today={isToday(day)}>
+					<span class="day-name"
+						>{format(day, columnClass === 'very-compact' ? 'EEEEE' : 'EEE', { locale: de })}</span
+					>
+					<span class="day-number" class:today={isToday(day)}>{format(day, 'd')}</span>
 				</div>
 			{/each}
 		</div>
-	{/if}
 
-	<!-- Day headers -->
-	<div class="day-headers">
-		<div class="time-gutter"></div>
-		{#each days as day}
-			<div class="day-header" class:today={isToday(day)}>
-				<span class="day-name"
-					>{format(day, columnClass === 'very-compact' ? 'EEEEE' : 'EEE', { locale: de })}</span
-				>
-				<span class="day-number" class:today={isToday(day)}>{format(day, 'd')}</span>
+		<!-- All-day events row (only shown when there are header-mode all-day events) -->
+		{#if hasAnyHeaderAllDayEvents}
+			<div class="all-day-row">
+				<div class="time-gutter"></div>
+				{#each days as day}
+					<div class="all-day-cell">
+						{#each getHeaderAllDayEventsForDay(day) as event}
+							<button
+								class="all-day-event"
+								class:search-highlighted={searchStore.isEventHighlighted(event.id)}
+								class:search-dimmed={searchStore.isEventDimmed(event.id)}
+								style="background-color: {calendarsStore.getColor(event.calendarId)}"
+								onclick={(e) => handleEventClick(event, e)}
+								title={event.title}
+							>
+								{event.title}
+							</button>
+						{/each}
+					</div>
+				{/each}
 			</div>
-		{/each}
+		{/if}
 	</div>
 
 	<!-- Time grid -->
@@ -1073,6 +1076,13 @@
 		flex-direction: column;
 	}
 
+	.sticky-header {
+		position: sticky;
+		top: 0;
+		z-index: 10;
+		background: hsl(var(--color-background));
+	}
+
 	.all-day-row {
 		display: flex;
 		border-bottom: 1px solid hsl(var(--color-border));
@@ -1090,6 +1100,7 @@
 	}
 
 	.all-day-event {
+		width: 100%;
 		padding: 2px 6px;
 		font-size: 0.75rem;
 		color: white;
@@ -1099,8 +1110,8 @@
 		text-overflow: ellipsis;
 		border: none;
 		cursor: pointer;
-		max-width: 100%;
 		transition: opacity 0.15s ease;
+		text-align: left;
 	}
 
 	.all-day-event.search-highlighted {
@@ -1178,10 +1189,6 @@
 	.day-headers {
 		display: flex;
 		border-bottom: 1px solid hsl(var(--color-border));
-		position: sticky;
-		top: 0;
-		z-index: 10;
-		background: hsl(var(--color-background));
 	}
 
 	.time-gutter {
