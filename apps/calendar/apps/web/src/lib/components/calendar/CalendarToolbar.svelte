@@ -93,11 +93,13 @@
 {/if}
 
 <style>
-	/* FAB Container - positioned next to InputBar */
+	/* FAB Container - positioned next to InputBar (aligned with input-container) */
 	.fab-container {
 		position: fixed;
-		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
-		right: calc(50% - 350px - 60px); /* Right of InputBar (max-width 700px / 2 + gap) */
+		bottom: calc(
+			70px + 9px + env(safe-area-inset-bottom, 0px)
+		); /* 70px offset + 9px to align with input-container */
+		right: calc(50% - 350px - 70px); /* Right of InputBar (max-width 700px / 2 + gap) */
 		z-index: 91; /* Above InputBar (90) */
 		pointer-events: none;
 		transition: bottom 0.2s ease;
@@ -105,15 +107,15 @@
 
 	/* When expanded, move FAB up with InputBar */
 	.fab-container.expanded {
-		bottom: calc(130px + env(safe-area-inset-bottom, 0px));
+		bottom: calc(130px + 9px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.fab-container.sidebar-mode {
-		bottom: calc(0px + env(safe-area-inset-bottom, 0px));
+		bottom: calc(0px + 9px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.fab-container.sidebar-mode.expanded {
-		bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+		bottom: calc(60px + 9px + env(safe-area-inset-bottom, 0px));
 	}
 
 	/* Responsive positioning */
@@ -177,13 +179,13 @@
 		background: transparent;
 	}
 
-	/* FAB Button */
+	/* FAB Button - same height as InputBar (54px) */
 	.toolbar-fab {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 2.75rem;
-		height: 2.75rem;
+		width: 54px;
+		height: 54px;
 		cursor: pointer;
 		border: none;
 		transition: all 0.2s ease;
@@ -205,8 +207,8 @@
 	}
 
 	.fab-icon {
-		width: 1.25rem;
-		height: 1.25rem;
+		width: 1.5rem;
+		height: 1.5rem;
 		color: hsl(var(--color-muted-foreground));
 		transition: color 0.2s ease;
 	}

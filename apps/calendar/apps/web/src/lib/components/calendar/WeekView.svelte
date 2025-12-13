@@ -1250,7 +1250,7 @@
 		font-size: 0.75rem;
 		color: hsl(var(--color-muted-foreground));
 		position: relative;
-		top: -0.5em;
+		top: 0.25em;
 	}
 
 	.days-container {
