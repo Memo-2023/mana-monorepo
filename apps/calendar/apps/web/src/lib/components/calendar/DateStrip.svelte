@@ -412,6 +412,14 @@
 		scroll-behavior: auto;
 		padding: 1.25rem 1rem 0.25rem;
 		margin-top: -1rem;
+		mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+		-webkit-mask-image: linear-gradient(
+			to right,
+			transparent 0%,
+			black 8%,
+			black 92%,
+			transparent 100%
+		);
 	}
 
 	.days-scroll::-webkit-scrollbar {
