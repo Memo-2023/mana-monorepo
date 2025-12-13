@@ -305,7 +305,7 @@
 
 	/* When toolbar is expanded, push DateStrip up */
 	.date-strip-wrapper.toolbar-expanded {
-		bottom: calc(220px + env(safe-area-inset-bottom, 0px)); /* Extra space for toolbar */
+		bottom: calc(210px + env(safe-area-inset-bottom, 0px)); /* Extra space for toolbar */
 	}
 
 	/* When PillNav is in sidebar mode, no PillNav at bottom - just InputBar */
@@ -314,7 +314,7 @@
 	}
 
 	.date-strip-wrapper.sidebar-mode.toolbar-expanded {
-		bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+		bottom: calc(140px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.today-button {
