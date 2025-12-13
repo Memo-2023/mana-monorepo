@@ -207,12 +207,15 @@
 	}
 
 	.toolbar-fab.active {
-		background: #3b82f6;
-		border-color: #3b82f6;
+		background: rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.dark) .toolbar-fab.active {
+		background: rgba(255, 255, 255, 0.15);
 	}
 
 	.toolbar-fab.active .fab-icon {
-		color: white;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.fab-icon {

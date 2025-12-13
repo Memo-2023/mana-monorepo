@@ -415,6 +415,7 @@
 				: showCalendarToolbar && !isToolbarCollapsed
 					? '140px'
 					: '70px'}
+			hasFabRight={showCalendarToolbar && !isSidebarMode}
 		/>
 	</div>
 </SplitPaneContainer>

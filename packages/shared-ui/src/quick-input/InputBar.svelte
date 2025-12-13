@@ -59,6 +59,8 @@
 		autoFocus?: boolean;
 		/** Bottom offset from viewport bottom (default: '70px') */
 		bottomOffset?: string;
+		/** Whether to leave space for a FAB button on the right side on mobile (default: false) */
+		hasFabRight?: boolean;
 	}
 
 	let {
@@ -75,6 +77,7 @@
 		primaryColor = '#8b5cf6',
 		autoFocus = true,
 		bottomOffset = '70px',
+		hasFabRight = false,
 	}: Props = $props();
 
 	let searchQuery = $state('');
@@ -244,6 +247,7 @@
 
 <div
 	class="quick-input-bar"
+	class:has-fab-right={hasFabRight}
 	style="--primary-color: {primaryColor}; --bottom-offset: {bottomOffset}"
 >
 	<!-- Results Panel (above input) -->
@@ -426,6 +430,13 @@
 		/* Fixed height to prevent layout shift when results appear */
 		height: 72px;
 		transition: bottom 0.3s ease;
+	}
+
+	/* Leave space for FAB on mobile */
+	@media (max-width: 900px) {
+		.quick-input-bar.has-fab-right {
+			padding-right: calc(54px + 1rem + 0.75rem); /* FAB width + FAB right margin + gap */
+		}
 	}
 
 	.input-container,
