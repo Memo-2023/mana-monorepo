@@ -105,11 +105,18 @@
 					class="menu-item"
 					class:disabled={item.disabled}
 					class:danger={item.variant === 'danger'}
+					class:has-toggle={item.toggle}
 					onclick={() => handleItemClick(item)}
 					role="menuitem"
 					disabled={item.disabled}
 				>
-					{#if item.icon}
+					{#if item.toggle}
+						<span class="item-toggle" class:checked={item.checked}>
+							<span class="toggle-track">
+								<span class="toggle-thumb"></span>
+							</span>
+						</span>
+					{:else if item.icon}
 						<span class="item-icon">
 							<item.icon size={16} />
 						</span>
@@ -131,12 +138,9 @@
 		min-width: 180px;
 		max-width: 280px;
 		padding: 0.375rem;
-		background: hsl(var(--color-surface));
+		background: var(--color-surface-elevated-3);
 		border: 1px solid hsl(var(--color-border));
 		border-radius: var(--radius-lg);
-		box-shadow:
-			0 10px 38px -10px rgba(0, 0, 0, 0.35),
-			0 10px 20px -15px rgba(0, 0, 0, 0.2);
 	}
 
 	.menu-item {
@@ -204,5 +208,45 @@
 		height: 1px;
 		margin: 0.375rem 0.5rem;
 		background: hsl(var(--color-border));
+	}
+
+	/* Toggle switch styles */
+	.menu-item.has-toggle {
+		gap: 0.5rem;
+	}
+
+	.item-toggle {
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
+	}
+
+	.toggle-track {
+		position: relative;
+		width: 28px;
+		height: 16px;
+		background: hsl(var(--color-muted));
+		border-radius: 8px;
+		transition: background-color 150ms ease;
+	}
+
+	.toggle-thumb {
+		position: absolute;
+		top: 2px;
+		left: 2px;
+		width: 12px;
+		height: 12px;
+		background: hsl(var(--color-background));
+		border-radius: 50%;
+		transition: transform 150ms ease;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+	}
+
+	.item-toggle.checked .toggle-track {
+		background: hsl(var(--color-primary));
+	}
+
+	.item-toggle.checked .toggle-thumb {
+		transform: translateX(12px);
 	}
 </style>

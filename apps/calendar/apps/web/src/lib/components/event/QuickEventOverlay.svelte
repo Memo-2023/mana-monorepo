@@ -1070,12 +1070,9 @@
 		position: fixed;
 		width: 380px;
 		max-height: 450px;
-		background: hsl(var(--color-surface-elevated-2));
+		background: var(--color-surface-elevated-2);
 		border: 1px solid hsl(var(--color-border));
 		border-radius: var(--radius-lg);
-		box-shadow:
-			0 20px 60px hsl(var(--color-foreground) / 0.2),
-			0 4px 16px hsl(var(--color-foreground) / 0.1);
 		z-index: 99999 !important;
 		display: flex;
 		flex-direction: column;
@@ -1320,12 +1317,15 @@
 	.overlay-actions {
 		display: flex;
 		align-items: center;
-		justify-content: flex-end;
 		gap: 0.75rem;
 		padding: 1rem 1.25rem;
 		border-top: 1px solid hsl(var(--color-border));
-		background: hsl(var(--color-surface));
+		background: var(--color-surface-elevated-2);
 		flex-shrink: 0;
+	}
+
+	.overlay-actions .btn-primary {
+		flex: 1;
 	}
 
 	.btn-ghost {

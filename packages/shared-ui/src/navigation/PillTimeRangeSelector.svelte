@@ -389,13 +389,10 @@
 	}
 
 	.glass-dropdown {
-		background: hsl(var(--color-surface) / 0.95);
+		background: color-mix(in srgb, var(--color-surface-elevated-1) 95%, transparent);
 		backdrop-filter: blur(16px);
 		-webkit-backdrop-filter: blur(16px);
 		border: 1px solid hsl(var(--color-border));
-		box-shadow:
-			0 20px 25px -5px hsl(var(--color-foreground) / 0.1),
-			0 10px 10px -5px hsl(var(--color-foreground) / 0.04);
 	}
 
 	.dropdown-header {
