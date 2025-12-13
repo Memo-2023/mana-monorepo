@@ -153,6 +153,15 @@
 		box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.08);
 		border-radius: 1rem;
 		white-space: nowrap;
+		max-width: calc(100vw - 2rem);
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none; /* Firefox */
+		-ms-overflow-style: none; /* IE/Edge */
+	}
+
+	.toolbar-content::-webkit-scrollbar {
+		display: none; /* Chrome/Safari */
 	}
 
 	:global(.dark) .toolbar-content {

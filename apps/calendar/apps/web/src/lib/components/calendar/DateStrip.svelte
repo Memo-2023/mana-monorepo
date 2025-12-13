@@ -293,8 +293,8 @@
 	.date-strip-wrapper {
 		position: fixed;
 		bottom: calc(140px + env(safe-area-inset-bottom, 0px)); /* Above InputBar + PillNav */
-		left: 1rem;
-		right: 1rem;
+		left: 0;
+		right: 0;
 		z-index: 48;
 		display: flex;
 		flex-direction: column;
@@ -513,8 +513,8 @@
 	/* Responsive */
 	@media (max-width: 640px) {
 		.date-strip-wrapper {
-			left: 0.5rem;
-			right: 0.5rem;
+			left: 0;
+			right: 0;
 		}
 
 		.date-strip-container {
