@@ -2,8 +2,17 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { toast } from '$lib/stores/toast';
-	import type { LocationDetails, CalendarEvent } from '@calendar/shared';
+	import type {
+		LocationDetails,
+		CalendarEvent,
+		ResponsiblePerson,
+		EventAttendee,
+	} from '@calendar/shared';
+	import type { ContactSummary, ContactOrManual, ManualContactEntry } from '@manacore/shared-types';
+	import { ContactSelector, ContactAvatar } from '@manacore/shared-ui';
+	import { Users } from 'lucide-svelte';
 	import { format, addMinutes, parseISO } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { tick, onMount, onDestroy } from 'svelte';
@@ -109,6 +118,13 @@
 		}
 
 		const target = e.target as HTMLElement;
+
+		// If target was removed from DOM by state change (e.g., button that toggles its own visibility),
+		// ignore the click to prevent false "outside" detection
+		if (!target.isConnected) {
+			return;
+		}
+
 		const overlay = document.querySelector('.quick-event-overlay');
 		const eventSelector = isEditMode
 			? `[data-event-id="${event!.id}"]`
@@ -185,6 +201,19 @@
 	let locationCountry = $state('');
 	let submitting = $state(false);
 
+	// People state
+	let responsiblePerson = $state<ResponsiblePerson | null>(null);
+	let attendees = $state<EventAttendee[]>([]);
+	let showPeopleSelector = $state(false);
+	let contactsAvailable = $state<boolean | null>(null);
+
+	// Check contacts availability
+	$effect(() => {
+		contactsStore.checkAvailability().then((available) => {
+			contactsAvailable = available;
+		});
+	});
+
 	// Editable date/time strings (for form inputs)
 	let startDateStr = $state('');
 	let startTimeStr = $state('');
@@ -211,6 +240,10 @@
 				locationCity = loc.city || '';
 				locationCountry = loc.country || '';
 			}
+
+			// Initialize people
+			responsiblePerson = event.metadata?.responsiblePerson || null;
+			attendees = event.metadata?.attendees || [];
 
 			// Initialize time fields
 			const eventStart =
@@ -348,6 +381,112 @@
 	// Overlay style
 	let overlayStyle = $derived(`left: ${overlayPosition.left}px; top: ${overlayPosition.top}px;`);
 
+	// People helpers
+	function handleContactSearch(query: string): Promise<ContactSummary[]> {
+		return contactsStore.searchContacts(query);
+	}
+
+	function handleResponsiblePersonChange(contacts: ContactOrManual[]) {
+		if (contacts.length === 0) {
+			responsiblePerson = null;
+			return;
+		}
+		const contact = contacts[0];
+		if ('isManual' in contact && contact.isManual) {
+			const manual = contact as ManualContactEntry;
+			responsiblePerson = { email: manual.email, name: manual.name };
+		} else {
+			const ref = contact as {
+				contactId: string;
+				displayName: string;
+				email?: string;
+				photoUrl?: string;
+				company?: string;
+			};
+			responsiblePerson = {
+				email: ref.email || '',
+				name: ref.displayName,
+				contactId: ref.contactId,
+				photoUrl: ref.photoUrl,
+				company: ref.company,
+			};
+		}
+	}
+
+	function handleAttendeesChange(contacts: ContactOrManual[]) {
+		attendees = contacts.map((contact) => {
+			if ('isManual' in contact && contact.isManual) {
+				const manual = contact as ManualContactEntry;
+				const existing = attendees.find((a) => a.email === manual.email);
+				return {
+					email: manual.email,
+					name: manual.name,
+					status: existing?.status || ('pending' as const),
+				};
+			}
+			const ref = contact as {
+				contactId: string;
+				displayName: string;
+				email?: string;
+				photoUrl?: string;
+				company?: string;
+			};
+			const existing = attendees.find(
+				(a) => a.contactId === ref.contactId || a.email === ref.email
+			);
+			return {
+				email: ref.email || '',
+				name: ref.displayName,
+				status: existing?.status || ('pending' as const),
+				contactId: ref.contactId,
+				photoUrl: ref.photoUrl,
+				company: ref.company,
+			};
+		});
+	}
+
+	// Convert to ContactOrManual for selectors
+	const responsibleAsContact = $derived<ContactOrManual[]>(
+		responsiblePerson
+			? responsiblePerson.contactId
+				? [
+						{
+							contactId: responsiblePerson.contactId,
+							displayName: responsiblePerson.name || responsiblePerson.email,
+							email: responsiblePerson.email,
+							photoUrl: responsiblePerson.photoUrl,
+							company: responsiblePerson.company,
+							fetchedAt: new Date().toISOString(),
+						},
+					]
+				: [
+						{
+							email: responsiblePerson.email,
+							name: responsiblePerson.name,
+							isManual: true as const,
+						},
+					]
+			: []
+	);
+
+	const attendeesAsContacts = $derived<ContactOrManual[]>(
+		attendees.map((a) =>
+			a.contactId
+				? {
+						contactId: a.contactId,
+						displayName: a.name || a.email,
+						email: a.email,
+						photoUrl: a.photoUrl,
+						company: a.company,
+						fetchedAt: new Date().toISOString(),
+					}
+				: { email: a.email, name: a.name, isManual: true as const }
+		)
+	);
+
+	// Count of people assigned
+	const peopleCount = $derived((responsiblePerson ? 1 : 0) + attendees.length);
+
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 		if (!title.trim() || !calendarId) return;
@@ -394,6 +533,20 @@
 				metadata = { ...(metadata || {}), locationDetails };
 			} else if (metadata) {
 				delete metadata.locationDetails;
+			}
+
+			// Add responsible person
+			if (responsiblePerson) {
+				metadata = { ...(metadata || {}), responsiblePerson };
+			} else if (metadata) {
+				delete metadata.responsiblePerson;
+			}
+
+			// Add attendees
+			if (attendees.length > 0) {
+				metadata = { ...(metadata || {}), attendees };
+			} else if (metadata) {
+				delete metadata.attendees;
 			}
 
 			// Clean up empty metadata
@@ -577,6 +730,95 @@
 						</select>
 					{:else}
 						<span class="field-placeholder">Standardkalender wird erstellt</span>
+					{/if}
+				</div>
+			</div>
+
+			<!-- People (compact) -->
+			<div class="form-row">
+				<div class="row-icon">
+					<Users class="icon" size={18} />
+				</div>
+				<div class="row-content">
+					<!-- Responsible person - always show directly -->
+					<div class="people-subsection">
+						<span class="field-label">Verantwortlich</span>
+						{#if responsiblePerson}
+							<div class="person-chip">
+								<ContactAvatar
+									photoUrl={responsiblePerson.photoUrl}
+									name={responsiblePerson.name || responsiblePerson.email}
+									size="xs"
+								/>
+								<span class="person-name">{responsiblePerson.name || responsiblePerson.email}</span>
+								<button
+									type="button"
+									class="remove-person"
+									onclick={() => (responsiblePerson = null)}>×</button
+								>
+							</div>
+						{:else}
+							<ContactSelector
+								selectedContacts={[]}
+								onContactsChange={handleResponsiblePersonChange}
+								onSearch={handleContactSearch}
+								allowManualEntry={true}
+								placeholder="Person auswählen..."
+								addLabel="Auswählen"
+								searchPlaceholder="Name oder E-Mail..."
+								isAvailable={contactsAvailable ?? false}
+								singleSelect={true}
+							/>
+						{/if}
+					</div>
+
+					<!-- Attendees - show when expanded or when there are attendees -->
+					{#if showPeopleSelector || attendees.length > 0}
+						<div class="people-subsection">
+							<span class="field-label">Teilnehmer</span>
+							{#if attendees.length > 0}
+								<div class="people-chips">
+									{#each attendees as attendee (attendee.email)}
+										<div class="person-chip">
+											<ContactAvatar
+												photoUrl={attendee.photoUrl}
+												name={attendee.name || attendee.email}
+												size="xs"
+											/>
+											<span class="person-name">{attendee.name || attendee.email}</span>
+											<button
+												type="button"
+												class="remove-person"
+												onclick={() =>
+													(attendees = attendees.filter((a) => a.email !== attendee.email))}
+												>×</button
+											>
+										</div>
+									{/each}
+								</div>
+							{/if}
+							<ContactSelector
+								selectedContacts={attendeesAsContacts}
+								onContactsChange={handleAttendeesChange}
+								onSearch={handleContactSearch}
+								allowManualEntry={true}
+								placeholder={attendees.length > 0
+									? 'Weitere hinzufügen...'
+									: 'Teilnehmer hinzufügen...'}
+								addLabel="Hinzufügen"
+								searchPlaceholder="Name oder E-Mail..."
+								isAvailable={contactsAvailable ?? false}
+							/>
+						</div>
+					{:else}
+						<!-- Show expand button for attendees -->
+						<button
+							type="button"
+							class="add-attendees-btn"
+							onclick={() => (showPeopleSelector = true)}
+						>
+							+ Teilnehmer hinzufügen
+						</button>
 					{/if}
 				</div>
 			</div>
@@ -828,12 +1070,12 @@
 		position: fixed;
 		width: 380px;
 		max-height: 450px;
-		background: hsl(var(--color-surface));
+		background: hsl(var(--color-surface-elevated-2));
 		border: 1px solid hsl(var(--color-border));
 		border-radius: var(--radius-lg);
 		box-shadow:
-			0 20px 60px rgba(0, 0, 0, 0.2),
-			0 4px 16px rgba(0, 0, 0, 0.1);
+			0 20px 60px hsl(var(--color-foreground) / 0.2),
+			0 4px 16px hsl(var(--color-foreground) / 0.1);
 		z-index: 99999 !important;
 		display: flex;
 		flex-direction: column;
@@ -1202,5 +1444,79 @@
 
 	.address-field.city {
 		flex: 1;
+	}
+
+	/* People section */
+	.add-attendees-btn {
+		margin-top: 0.5rem;
+		padding: 0.25rem 0;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-muted-foreground));
+		font-size: 0.8125rem;
+		cursor: pointer;
+		transition: color 150ms;
+		text-align: left;
+	}
+
+	.add-attendees-btn:hover {
+		color: hsl(var(--color-primary));
+	}
+
+	.people-subsection {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+
+	.people-chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+		margin-bottom: 0.25rem;
+	}
+
+	.person-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+		background: hsl(var(--color-muted) / 0.5);
+		border-radius: var(--radius-full);
+		font-size: 0.8125rem;
+		color: hsl(var(--color-foreground));
+	}
+
+	.person-name {
+		max-width: 120px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.remove-person {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 16px;
+		height: 16px;
+		padding: 0;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-muted-foreground));
+		font-size: 1rem;
+		line-height: 1;
+		cursor: pointer;
+		border-radius: var(--radius-full);
+		transition: all 150ms;
+	}
+
+	.remove-person:hover {
+		background: hsl(var(--color-error) / 0.1);
+		color: hsl(var(--color-error));
+	}
+
+	.people-subsection + .people-subsection {
+		margin-top: 0.75rem;
 	}
 </style>

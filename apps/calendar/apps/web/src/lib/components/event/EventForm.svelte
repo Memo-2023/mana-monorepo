@@ -5,6 +5,7 @@
 	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
 	import { TagSelector, type Tag } from '@manacore/shared-ui';
 	import AttendeeSelector from './AttendeeSelector.svelte';
+	import ResponsiblePersonSelector from './ResponsiblePersonSelector.svelte';
 	import type {
 		CalendarEvent,
 		CreateEventInput,
@@ -12,6 +13,7 @@
 		LocationDetails,
 		EventTag,
 		EventAttendee,
+		ResponsiblePerson,
 	} from '@calendar/shared';
 	import { format, addMinutes, parseISO } from 'date-fns';
 
@@ -49,6 +51,11 @@
 			name: t.name,
 			color: t.color,
 		})) || []
+	);
+
+	// Responsible person state
+	let responsiblePerson = $state<ResponsiblePerson | null>(
+		event?.metadata?.responsiblePerson || null
 	);
 
 	// Attendees state
@@ -170,6 +177,13 @@
 			metadata.locationDetails = locationDetails;
 		} else {
 			delete metadata.locationDetails;
+		}
+
+		// Add responsible person
+		if (responsiblePerson) {
+			metadata.responsiblePerson = responsiblePerson;
+		} else {
+			delete metadata.responsiblePerson;
 		}
 
 		// Add attendees
@@ -405,6 +419,15 @@
 			/>
 		</div>
 	{/if}
+
+	<!-- Verantwortliche Person -->
+	<div class="flex flex-col gap-2">
+		<span class="text-sm font-medium text-foreground">Verantwortliche Person</span>
+		<ResponsiblePersonSelector
+			{responsiblePerson}
+			onResponsiblePersonChange={(person) => (responsiblePerson = person)}
+		/>
+	</div>
 
 	<!-- Teilnehmer -->
 	<div class="flex flex-col gap-2">
