@@ -262,8 +262,11 @@
 				{@const isFirstOfMonth = day.getDate() === 1}
 				{@const moonPhase = isSignificantMoonPhase(day)}
 				{@const eventCount = getEventCount(day)}
-				{#if isFirstOfMonth && settingsStore.dateStripShowMonthDividers}
-					<div class="month-divider"></div>
+				{#if isFirstOfMonth}
+					<div
+						class="month-divider"
+						class:show-line={settingsStore.dateStripShowMonthDividers}
+					></div>
 				{/if}
 				<button
 					class="day-item"
@@ -277,12 +280,14 @@
 					onclick={() => handleDayClick(day)}
 					class:is-today={dayIsToday}
 				>
-					{#if moonPhase.significant}
+					{#if moonPhase.significant && settingsStore.dateStripShowMoonPhases}
 						<span class="moon-indicator">{moonPhase.emoji}</span>
 					{/if}
-					<span class="day-weekday">{format(day, 'EE', { locale: de })}</span>
+					{#if settingsStore.dateStripShowWeekday}
+						<span class="day-weekday">{format(day, 'EE', { locale: de })}</span>
+					{/if}
 					<span class="day-number">{format(day, 'd')}</span>
-					{#if eventCount > 0}
+					{#if eventCount > 0 && settingsStore.dateStripShowEventIndicators}
 						<div class="event-dots">
 							{#each Array(eventCount) as _, i}
 								<span class="event-dot"></span>
@@ -294,6 +299,8 @@
 		</div>
 	</div>
 </div>
+
+<DateStripContextMenu bind:this={contextMenu} />
 
 <style>
 	.date-strip-wrapper {
@@ -333,25 +340,23 @@
 		flex-direction: column;
 		align-items: center;
 		padding: 0.375rem 0.875rem;
-		background: hsl(var(--color-primary) / 0.1);
-		border: 1px solid hsl(var(--color-primary) / 0.3);
+		background: hsl(var(--color-surface) / 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 9999px;
 		cursor: pointer;
 		color: hsl(var(--color-primary));
 		pointer-events: auto;
 		transition: all 0.2s ease;
+		box-shadow: 0 2px 8px hsl(var(--color-foreground) / 0.08);
 	}
 
 	.today-button:hover {
-		background: hsl(var(--color-primary));
-		border-color: hsl(var(--color-primary));
-		color: hsl(var(--color-primary-foreground, 0 0% 100%));
+		background: hsl(var(--color-surface) / 0.95);
+		border-color: hsl(var(--color-primary) / 0.3);
 		transform: translateY(-50%) scale(1.02);
-		box-shadow: 0 4px 12px hsl(var(--color-primary) / 0.3);
-	}
-
-	.today-button:hover .today-date {
-		color: rgba(255, 255, 255, 0.85);
+		box-shadow: 0 4px 12px hsl(var(--color-foreground) / 0.12);
 	}
 
 	.today-label {
@@ -364,7 +369,7 @@
 	.today-date {
 		font-size: 0.75rem;
 		font-weight: 500;
-		color: hsl(var(--color-primary) / 0.8);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.date-strip-container {
@@ -402,9 +407,13 @@
 	.month-divider {
 		width: 1px;
 		height: 40px;
-		background: var(--color-border, #e5e7eb);
+		background: transparent;
 		margin: 0 0.5rem;
 		flex-shrink: 0;
+	}
+
+	.month-divider.show-line {
+		background: hsl(var(--color-border));
 	}
 
 	.days-scroll {
@@ -479,7 +488,11 @@
 	}
 
 	.day-item.weekend {
-		color: var(--color-muted-foreground, #6b7280);
+		background: hsl(var(--color-muted) / 0.5);
+	}
+
+	.day-item.weekend:hover {
+		background: hsl(var(--color-muted) / 0.8);
 	}
 
 	.day-item.selected {
@@ -589,5 +602,63 @@
 			height: 32px;
 			margin: 0 0.375rem;
 		}
+	}
+
+	/* Compact mode */
+	.date-strip-wrapper.compact .date-strip-container {
+		padding: 0.25rem 0;
+	}
+
+	.date-strip-wrapper.compact .month-header {
+		padding: 0.125rem 0.5rem 0.25rem;
+	}
+
+	.date-strip-wrapper.compact .month-label {
+		font-size: 0.875rem;
+	}
+
+	.date-strip-wrapper.compact .day-item {
+		min-width: 40px;
+		height: 44px;
+		padding: 0.25rem;
+	}
+
+	.date-strip-wrapper.compact .day-weekday {
+		font-size: 0.625rem;
+	}
+
+	.date-strip-wrapper.compact .day-number {
+		font-size: 0.875rem;
+	}
+
+	.date-strip-wrapper.compact .moon-indicator {
+		font-size: 0.875rem;
+		top: -12px;
+	}
+
+	.date-strip-wrapper.compact .month-divider {
+		height: 28px;
+	}
+
+	.date-strip-wrapper.compact .event-dot {
+		width: 3px;
+		height: 3px;
+	}
+
+	.date-strip-wrapper.compact .month-header {
+		padding-top: 0.375rem;
+	}
+
+	.date-strip-wrapper.compact .today-button {
+		padding: 0.25rem 0.625rem;
+		margin-right: 1rem;
+	}
+
+	.date-strip-wrapper.compact .today-label {
+		font-size: 0.5625rem;
+	}
+
+	.date-strip-wrapper.compact .today-date {
+		font-size: 0.625rem;
 	}
 </style>

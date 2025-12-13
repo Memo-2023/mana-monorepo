@@ -26,6 +26,14 @@ export interface CalendarAppSettings {
 	dayEndHour: number; // Last visible hour (0-23)
 	allDayDisplayMode: AllDayDisplayMode; // How to display all-day events
 
+	// DateStrip settings
+	dateStripShowMoonPhases: boolean; // Show moon phase indicators
+	dateStripShowEventIndicators: boolean; // Show event dot indicators
+	dateStripShowWeekday: boolean; // Show weekday names (Mo, Di, Mi...)
+	dateStripHighlightWeekends: boolean; // Visually highlight weekend days
+	dateStripShowMonthDividers: boolean; // Show vertical dividers between months
+	dateStripCompact: boolean; // Use compact/smaller DateStrip
+
 	// UI settings
 	sidebarCollapsed: boolean;
 
@@ -44,6 +52,14 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	dayStartHour: 6,
 	dayEndHour: 20,
 	allDayDisplayMode: 'header',
+	// DateStrip defaults
+	dateStripShowMoonPhases: true,
+	dateStripShowEventIndicators: true,
+	dateStripShowWeekday: true,
+	dateStripHighlightWeekends: true,
+	dateStripShowMonthDividers: true,
+	dateStripCompact: false,
+	// UI defaults
 	sidebarCollapsed: false,
 	defaultEventDuration: 60,
 	defaultReminder: 15,
@@ -141,6 +157,25 @@ export const settingsStore = {
 	},
 	get allDayDisplayMode() {
 		return settings.allDayDisplayMode;
+	},
+	// DateStrip settings
+	get dateStripShowMoonPhases() {
+		return settings.dateStripShowMoonPhases;
+	},
+	get dateStripShowEventIndicators() {
+		return settings.dateStripShowEventIndicators;
+	},
+	get dateStripShowWeekday() {
+		return settings.dateStripShowWeekday;
+	},
+	get dateStripHighlightWeekends() {
+		return settings.dateStripHighlightWeekends;
+	},
+	get dateStripShowMonthDividers() {
+		return settings.dateStripShowMonthDividers;
+	},
+	get dateStripCompact() {
+		return settings.dateStripCompact;
 	},
 	get defaultEventDuration() {
 		return settings.defaultEventDuration;

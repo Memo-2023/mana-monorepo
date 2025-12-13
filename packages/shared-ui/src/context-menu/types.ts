@@ -20,6 +20,10 @@ export interface ContextMenuItem {
 	action?: () => void;
 	/** Additional data attached to the item */
 	data?: unknown;
+	/** Show a toggle switch (for boolean settings) */
+	toggle?: boolean;
+	/** Current toggle state (only used when toggle is true) */
+	checked?: boolean;
 }
 
 export interface ContextMenuState<T = unknown> {
