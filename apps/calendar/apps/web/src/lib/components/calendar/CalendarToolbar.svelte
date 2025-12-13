@@ -135,7 +135,7 @@
 		display: flex;
 		justify-content: center;
 		padding: 0.5rem 1rem;
-		padding-top: 5rem; /* Extra space between InputBar and toolbar */
+		padding-top: 8rem; /* Space between InputBar and toolbar (~128px) */
 	}
 
 	.toolbar-bar.sidebar-mode {
