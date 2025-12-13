@@ -5,6 +5,7 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
+	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import TaskBlock from './TaskBlock.svelte';
 	import { goto } from '$app/navigation';
 	import {
@@ -297,6 +298,14 @@
 		} else {
 			goto(`/event/new?start=${startTime.toISOString()}`);
 		}
+	}
+
+	function handleEventContextMenu(event: CalendarEvent, e: MouseEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+		// Don't show context menu for draft events
+		if (eventsStore.isDraftEvent(event.id)) return;
+		eventContextMenuStore.show(event, e.clientX, e.clientY);
 	}
 
 	// ========== Drag & Drop Functions ==========
@@ -935,6 +944,7 @@
 							tabindex="0"
 							onpointerdown={(e) => startDrag(event, e)}
 							onclick={(e) => !isDraft && handleEventClick(event, e)}
+							oncontextmenu={(e) => handleEventContextMenu(event, e)}
 							onkeydown={(e) => !isDraft && e.key === 'Enter' && goto(`/?event=${event.id}`)}
 							title={`${formatEventTime(event.startTime)} - ${formatEventTime(event.endTime)}: ${event.title || (isDraft ? '(Neuer Termin)' : '')}`}
 						>

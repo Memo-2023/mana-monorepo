@@ -50,6 +50,8 @@
 	import CalendarToolbar from '$lib/components/calendar/CalendarToolbar.svelte';
 	import CalendarToolbarContent from '$lib/components/calendar/CalendarToolbarContent.svelte';
 	import DateStrip from '$lib/components/calendar/DateStrip.svelte';
+	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
+	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 
 	// App switcher items
 	const appItems = getPillAppItems('calendar');
@@ -275,6 +277,11 @@
 		goto('/login');
 	}
 
+	// Context menu edit handler - navigate to event
+	function handleContextMenuEdit(event: { id: string }) {
+		goto(`/?event=${event.id}`);
+	}
+
 	onMount(async () => {
 		// Redirect to login if not authenticated
 		if (!authStore.isAuthenticated) {
@@ -408,7 +415,6 @@
 			onParseCreate={handleParseCreate}
 			createText="Erstellen"
 			appIcon="calendar"
-			primaryColor="#3b82f6"
 			autoFocus={true}
 			bottomOffset={isSidebarMode
 				? '0px'
@@ -419,6 +425,9 @@
 		/>
 	</div>
 </SplitPaneContainer>
+
+<!-- Global Event Context Menu - rendered at top level for proper z-index -->
+<EventContextMenu onEdit={handleContextMenuEdit} />
 
 <style>
 	.layout-container {
@@ -456,8 +465,8 @@
 				200px + env(safe-area-inset-bottom)
 			); /* DateStrip + BottomNav + QuickInputBar */
 		}
-		.main-content.floating-mode.has-toolbar {
-			padding-top: 70px;
+		.main-content.floating-mode {
+			padding-top: 0; /* No top padding on mobile - everything is at bottom */
 		}
 	}
 
