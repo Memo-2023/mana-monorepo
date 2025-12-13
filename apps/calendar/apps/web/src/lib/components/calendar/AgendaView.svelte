@@ -2,6 +2,8 @@
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
+	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import { format, parseISO, isToday, isTomorrow, startOfDay } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import type { CalendarEvent } from '@calendar/shared';
@@ -65,6 +67,18 @@
 			onEventClick(event);
 		}
 	}
+
+	function handleEventContextMenu(event: CalendarEvent, e: MouseEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+		eventContextMenuStore.show(event, e.clientX, e.clientY);
+	}
+
+	function handleContextMenuEdit(event: CalendarEvent) {
+		if (onEventClick) {
+			onEventClick(event);
+		}
+	}
 </script>
 
 <div class="agenda-view">
@@ -90,7 +104,11 @@
 
 					<div class="events-for-date">
 						{#each group.events as event}
-							<button class="event-item" onclick={() => handleEventClick(event)}>
+							<button
+								class="event-item"
+								onclick={() => handleEventClick(event)}
+								oncontextmenu={(e) => handleEventContextMenu(event, e)}
+							>
 								<div
 									class="color-bar"
 									style="background-color: {calendarsStore.getColor(event.calendarId)}"
@@ -153,6 +171,8 @@
 		</div>
 	{/if}
 </div>
+
+<EventContextMenu onEdit={handleContextMenuEdit} />
 
 <style>
 	.agenda-view {

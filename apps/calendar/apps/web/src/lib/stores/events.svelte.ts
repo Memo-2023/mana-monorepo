@@ -48,9 +48,10 @@ export const eventsStore = {
 			error = result.error.message;
 			toastStore.error(`Termine konnten nicht geladen werden: ${result.error.message}`);
 		} else {
-			// API returns { events: [...] }
-			const data = result.data as { events: CalendarEvent[] } | null;
-			events = data?.events || [];
+			// API returns events array directly (already extracted in api/events.ts)
+			const eventsData = result.data as CalendarEvent[] | null;
+			console.log('[Events Store] Loaded events:', eventsData?.length, eventsData);
+			events = eventsData || [];
 			loadedRange = { start: startDate, end: endDate };
 		}
 
@@ -121,11 +122,8 @@ export const eventsStore = {
 	async createEvent(data: CreateEventInput) {
 		const result = await api.createEvent(data);
 
-		if (result.error) {
-			toastStore.error(`Termin konnte nicht erstellt werden: ${result.error.message}`);
-		} else if (result.data) {
+		if (result.data) {
 			events = [...events, result.data];
-			toastStore.success('Termin erstellt');
 		}
 
 		return result;

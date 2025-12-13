@@ -23,7 +23,14 @@ export async function getEvents(params: QueryEventsParams) {
 	if (params.search) {
 		searchParams.set('search', params.search);
 	}
+	console.log('[Calendar API] Fetching events:', params);
 	const result = await fetchApi<{ events: CalendarEvent[] }>(`/events?${searchParams.toString()}`);
+	console.log(
+		'[Calendar API] Fetch events result:',
+		result.data?.events?.length,
+		'events',
+		result.error
+	);
 	if (result.error || !result.data) {
 		return { data: null, error: result.error };
 	}
@@ -57,11 +64,14 @@ export async function getEventsByCalendar(calendarId: string) {
 }
 
 export async function createEvent(data: CreateEventInput) {
+	console.log('[Calendar API] Creating event:', data);
 	const result = await fetchApi<{ event: CalendarEvent }>('/events', {
 		method: 'POST',
 		body: data,
 	});
+	console.log('[Calendar API] Create event result:', result);
 	if (result.error || !result.data) {
+		console.error('[Calendar API] Create event failed:', result.error);
 		return { data: null, error: result.error };
 	}
 	return { data: result.data.event, error: null };

@@ -111,7 +111,7 @@
 				>
 					{#if item.icon}
 						<span class="item-icon">
-							{@render item.icon()}
+							<item.icon size={16} />
 						</span>
 					{/if}
 					<span class="item-label">{item.label}</span>

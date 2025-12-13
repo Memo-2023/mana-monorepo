@@ -5,7 +5,9 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
+	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import TaskBlock from './TaskBlock.svelte';
+	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import { goto } from '$app/navigation';
 	import {
 		format,
@@ -298,6 +300,19 @@
 			onQuickCreate(startTime, { x: e.clientX, y: e.clientY });
 		} else {
 			goto(`/event/new?start=${startTime.toISOString()}`);
+		}
+	}
+
+	function handleEventContextMenu(event: CalendarEvent, e: MouseEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+		if (eventsStore.isDraftEvent(event.id)) return;
+		eventContextMenuStore.show(event, e.clientX, e.clientY);
+	}
+
+	function handleContextMenuEdit(event: CalendarEvent) {
+		if (onEventClick) {
+			onEventClick(event);
 		}
 	}
 
@@ -970,6 +985,7 @@
 							onpointerdown={(e) => startDrag(event, e)}
 							onclick={(e) => !isDraft && handleEventClick(event, e)}
 							onkeydown={(e) => !isDraft && e.key === 'Enter' && goto(`/?event=${event.id}`)}
+							oncontextmenu={(e) => handleEventContextMenu(event, e)}
 						>
 							<!-- Top resize handle -->
 							<div
@@ -1085,6 +1101,8 @@
 		</div>
 	</div>
 </div>
+
+<EventContextMenu onEdit={handleContextMenuEdit} />
 
 <style>
 	.week-view {

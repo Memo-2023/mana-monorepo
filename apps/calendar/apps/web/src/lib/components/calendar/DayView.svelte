@@ -5,7 +5,9 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
+	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import TaskBlock from './TaskBlock.svelte';
+	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import { goto } from '$app/navigation';
 	import {
 		format,
@@ -719,6 +721,20 @@
 			goto(`/event/new?start=${startTime.toISOString()}`);
 		}
 	}
+
+	function handleEventContextMenu(event: CalendarEvent, e: MouseEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+		// Don't show context menu for draft events
+		if (eventsStore.isDraftEvent(event.id)) return;
+		eventContextMenuStore.show(event, e.clientX, e.clientY);
+	}
+
+	function handleContextMenuEdit(event: CalendarEvent) {
+		if (onEventClick) {
+			onEventClick(event);
+		}
+	}
 </script>
 
 <div class="day-view">
@@ -808,6 +824,7 @@
 							: getEventStyle(event)}
 					onpointerdown={(e) => startDrag(event, e)}
 					onclick={(e) => !isDraft && handleEventClick(event, e)}
+					oncontextmenu={(e) => handleEventContextMenu(event, e)}
 					role="button"
 					tabindex="0"
 				>
@@ -909,6 +926,9 @@
 		</div>
 	</div>
 </div>
+
+<!-- Event Context Menu -->
+<EventContextMenu onEdit={handleContextMenuEdit} />
 
 <style>
 	.day-view {

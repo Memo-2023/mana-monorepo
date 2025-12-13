@@ -423,11 +423,16 @@
 				onUpdated?.();
 			} else {
 				// Create new event
-				await eventsStore.createEvent(eventData);
+				const result = await eventsStore.createEvent(eventData);
+				if (result.error) {
+					toast.error(`Fehler beim Erstellen: ${result.error.message}`);
+					return;
+				}
 				// Refresh calendars if none existed (in case default was created)
 				if (calendarsStore.calendars.length === 0) {
 					await calendarsStore.fetchCalendars();
 				}
+				toast.success('Termin erstellt');
 				onCreated?.();
 			}
 

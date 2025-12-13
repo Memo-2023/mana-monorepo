@@ -1,12 +1,13 @@
-import type { Snippet } from 'svelte';
+import type { Component } from 'svelte';
 
 export interface ContextMenuItem {
 	/** Unique identifier for the item */
 	id: string;
 	/** Display label */
 	label: string;
-	/** Icon snippet to render */
-	icon?: Snippet;
+	/** Icon component to render (Phosphor icon or any Svelte component) */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	icon?: Component<any>;
 	/** Keyboard shortcut hint */
 	shortcut?: string;
 	/** Whether the item is disabled */
