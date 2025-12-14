@@ -1,5 +1,10 @@
 <script lang="ts">
-	import type { ThemeVariant, ThemeMode, A11yStore } from '@manacore/shared-theme';
+	import type {
+		ThemeVariant,
+		ThemeMode,
+		A11yStore,
+		UserSettingsStore,
+	} from '@manacore/shared-theme';
 	import { ArrowLeft, Sun, Moon, Desktop } from '@manacore/shared-icons';
 	import type { ThemeCardData, ThemePageTranslations, A11yTranslations } from '../types';
 	import { defaultTranslations, defaultA11yTranslations } from '../types';

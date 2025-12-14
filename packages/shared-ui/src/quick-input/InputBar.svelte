@@ -60,6 +60,8 @@
 		bottomOffset?: string;
 		/** Whether to leave space for a FAB button on the right side on mobile (default: false) */
 		hasFabRight?: boolean;
+		/** Whether to leave space for a FAB button on the left side on mobile (default: false) */
+		hasFabLeft?: boolean;
 	}
 
 	let {
@@ -76,6 +78,7 @@
 		autoFocus = true,
 		bottomOffset = '70px',
 		hasFabRight = false,
+		hasFabLeft = false,
 	}: Props = $props();
 
 	let searchQuery = $state('');
@@ -246,6 +249,7 @@
 <div
 	class="quick-input-bar"
 	class:has-fab-right={hasFabRight}
+	class:has-fab-left={hasFabLeft}
 	style="--bottom-offset: {bottomOffset}"
 >
 	<!-- Results Panel (above input) -->
@@ -434,6 +438,9 @@
 	@media (max-width: 900px) {
 		.quick-input-bar.has-fab-right {
 			padding-right: calc(54px + 1rem + 0.75rem); /* FAB width + FAB right margin + gap */
+		}
+		.quick-input-bar.has-fab-left {
+			padding-left: calc(54px + 1rem + 0.75rem); /* FAB width + FAB left margin + gap */
 		}
 	}
 
