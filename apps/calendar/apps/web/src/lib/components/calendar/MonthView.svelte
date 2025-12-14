@@ -9,6 +9,7 @@
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import TodoDayCell from './TodoDayCell.svelte';
 	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
+	import { useBirthdayPopover } from '$lib/composables';
 	import { goto } from '$app/navigation';
 	import {
 		format,
@@ -267,22 +268,11 @@
 	// ============================================================================
 	// Birthday Functions
 	// ============================================================================
-	let selectedBirthday = $state<BirthdayEvent | null>(null);
-	let birthdayPopoverPosition = $state<{ x: number; y: number }>({ x: 0, y: 0 });
+	const birthdayPopover = useBirthdayPopover();
 
 	function getBirthdaysForDay(day: Date): BirthdayEvent[] {
 		if (!settingsStore.showBirthdays) return [];
 		return birthdaysStore.getBirthdaysForDay(day);
-	}
-
-	function handleBirthdayClick(birthday: BirthdayEvent, e: MouseEvent) {
-		e.stopPropagation();
-		selectedBirthday = birthday;
-		birthdayPopoverPosition = { x: e.clientX, y: e.clientY };
-	}
-
-	function closeBirthdayPopover() {
-		selectedBirthday = null;
 	}
 </script>
 
@@ -368,7 +358,7 @@
 								<!-- svelte-ignore a11y_click_events_have_key_events -->
 								<div
 									class="event-pill birthday-pill"
-									onclick={(e) => handleBirthdayClick(birthday, e)}
+									onclick={(e) => birthdayPopover.handleBirthdayClick(birthday, e)}
 									role="button"
 									tabindex="0"
 								>
@@ -396,11 +386,11 @@
 </div>
 
 <!-- Birthday Popover -->
-{#if selectedBirthday}
+{#if birthdayPopover.selectedBirthday}
 	<BirthdayPopover
-		birthday={selectedBirthday}
-		position={birthdayPopoverPosition}
-		onClose={closeBirthdayPopover}
+		birthday={birthdayPopover.selectedBirthday}
+		position={birthdayPopover.popoverPosition}
+		onClose={birthdayPopover.closePopover}
 	/>
 {/if}
 

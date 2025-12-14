@@ -8,10 +8,7 @@
 	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
-	import {
-		useVisibleHours,
-		useCurrentTimeIndicator,
-	} from '$lib/composables/useVisibleHours.svelte';
+	import { useVisibleHours, useCurrentTimeIndicator, useBirthdayPopover } from '$lib/composables';
 	import { toDate } from '$lib/utils/eventDateHelpers';
 	import { HOUR_HEIGHT_PX, SNAP_INTERVAL_MINUTES } from '$lib/utils/calendarConstants';
 	import {
@@ -127,9 +124,8 @@
 	// Reference to the days container for position calculations
 	let daysContainerEl: HTMLDivElement;
 
-	// Birthday Popover State
-	let selectedBirthday = $state<BirthdayEvent | null>(null);
-	let birthdayPopoverPosition = $state<{ x: number; y: number }>({ x: 0, y: 0 });
+	// Birthday Popover (using composable)
+	const birthdayPopover = useBirthdayPopover();
 
 	// Get birthdays for a day (if enabled in settings)
 	function getBirthdaysForDay(day: Date): BirthdayEvent[] {
@@ -141,18 +137,6 @@
 	let hasAnyBirthdays = $derived(
 		settingsStore.showBirthdays && days.some((day) => getBirthdaysForDay(day).length > 0)
 	);
-
-	// Handle birthday click - show popover
-	function handleBirthdayClick(birthday: BirthdayEvent, e: MouseEvent) {
-		e.stopPropagation();
-		selectedBirthday = birthday;
-		birthdayPopoverPosition = { x: e.clientX, y: e.clientY };
-	}
-
-	// Close birthday popover
-	function closeBirthdayPopover() {
-		selectedBirthday = null;
-	}
 
 	function getEventsForDay(day: Date): CalendarEvent[] {
 		return getVisibleTimedEvents(
@@ -909,7 +893,7 @@
 						{#each getBirthdaysForDay(day) as birthday}
 							<button
 								class="all-day-event birthday-event"
-								onclick={(e) => handleBirthdayClick(birthday, e)}
+								onclick={(e) => birthdayPopover.handleBirthdayClick(birthday, e)}
 							>
 								🎂 {birthday.displayName}
 								{#if settingsStore.showBirthdayAge && birthday.age > 0}
@@ -1116,11 +1100,11 @@
 <EventContextMenu onEdit={handleContextMenuEdit} />
 
 <!-- Birthday Popover -->
-{#if selectedBirthday}
+{#if birthdayPopover.selectedBirthday}
 	<BirthdayPopover
-		birthday={selectedBirthday}
-		position={birthdayPopoverPosition}
-		onClose={closeBirthdayPopover}
+		birthday={birthdayPopover.selectedBirthday}
+		position={birthdayPopover.popoverPosition}
+		onClose={birthdayPopover.closePopover}
 	/>
 {/if}
 
