@@ -85,6 +85,17 @@
 </script>
 
 {#if visible}
+	<!-- Backdrop to block clicks on elements behind -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="context-menu-backdrop"
+		onclick={onClose}
+		oncontextmenu={(e) => {
+			e.preventDefault();
+			onClose();
+		}}
+	></div>
+
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		bind:this={menuElement}
@@ -132,6 +143,14 @@
 {/if}
 
 <style>
+	.context-menu-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 9998;
+		/* Transparent backdrop - just blocks clicks */
+		background: transparent;
+	}
+
 	.context-menu {
 		position: fixed;
 		z-index: 9999;
