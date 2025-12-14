@@ -52,6 +52,7 @@
 	import CalendarToolbar from '$lib/components/calendar/CalendarToolbar.svelte';
 	import CalendarToolbarContent from '$lib/components/calendar/CalendarToolbarContent.svelte';
 	import DateStrip from '$lib/components/calendar/DateStrip.svelte';
+	import DateStripFab from '$lib/components/calendar/DateStripFab.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 
@@ -387,7 +388,11 @@
 
 		<!-- Date strip (only on main calendar page) -->
 		{#if showCalendarToolbar}
-			<DateStrip {isSidebarMode} isToolbarExpanded={!isToolbarCollapsed} />
+			{#if settingsStore.dateStripCollapsed}
+				<DateStripFab {isSidebarMode} isToolbarExpanded={!isToolbarCollapsed} />
+			{:else}
+				<DateStrip {isSidebarMode} isToolbarExpanded={!isToolbarCollapsed} />
+			{/if}
 		{/if}
 
 		<!-- Calendar toolbar (only on main calendar page, not in sidebar mode) -->
@@ -433,6 +438,7 @@
 					? '140px'
 					: '70px'}
 			hasFabRight={showCalendarToolbar && !isSidebarMode}
+			hasFabLeft={showCalendarToolbar && !isSidebarMode && settingsStore.dateStripCollapsed}
 		/>
 	</div>
 </SplitPaneContainer>
@@ -516,5 +522,33 @@
 		flex-direction: column;
 		flex: 1;
 		min-height: 0;
+	}
+
+	/* Adjust InputBar when FABs are visible (toolbar FAB on right, DateStripFab on left) */
+	/* For a centered InputBar with max-width 450px, left edge is at 50% - 225px */
+	/* DateStripFab is positioned at: 50% - 225px - 8px gap - 54px fab width */
+	/* Note: In sidebar mode, InputBar uses default 700px max-width */
+	:global(.quick-input-bar.has-fab-right .input-container),
+	:global(.quick-input-bar.has-fab-left .input-container) {
+		max-width: 450px;
+	}
+
+	/* On smaller screens (<900px), FABs move to fixed positions (left: 1rem, right: 1rem) */
+	@media (max-width: 900px) {
+		:global(.quick-input-bar.has-fab-right .input-container) {
+			max-width: calc(100% - 140px); /* 54px FAB + padding */
+			margin-left: auto;
+			margin-right: 0;
+		}
+		:global(.quick-input-bar.has-fab-left .input-container) {
+			max-width: calc(100% - 140px); /* 54px FAB + padding */
+			margin-left: 0;
+			margin-right: auto;
+		}
+		:global(.quick-input-bar.has-fab-right.has-fab-left .input-container) {
+			max-width: calc(100% - 200px); /* Both FABs */
+			margin-left: auto;
+			margin-right: auto;
+		}
 	}
 </style>
