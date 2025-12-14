@@ -30,6 +30,7 @@
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { _ } from 'svelte-i18n';
+	import { filterByVisibleCalendars } from '$lib/utils/eventFiltering';
 
 	import type { CalendarEvent } from '@calendar/shared';
 
@@ -194,17 +195,18 @@
 	// ============================================================================
 	// Event Handlers
 	// ============================================================================
-	function getEventsForDay(day: Date) {
-		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
-		return eventsStore
-			.getEventsForDay(day)
-			.filter((e) => visibleCalendarIds.has(e.calendarId))
-			.slice(0, 3); // Max 3 events shown
+	function getEventsForDay(day: Date): CalendarEvent[] {
+		return filterByVisibleCalendars(
+			eventsStore.getEventsForDay(day),
+			calendarsStore.visibleCalendars
+		).slice(0, 3); // Max 3 events shown
 	}
 
-	function getAllEventsForDay(day: Date) {
-		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
-		return eventsStore.getEventsForDay(day).filter((e) => visibleCalendarIds.has(e.calendarId));
+	function getAllEventsForDay(day: Date): CalendarEvent[] {
+		return filterByVisibleCalendars(
+			eventsStore.getEventsForDay(day),
+			calendarsStore.visibleCalendars
+		);
 	}
 
 	function handleDayClick(day: Date, e: MouseEvent) {

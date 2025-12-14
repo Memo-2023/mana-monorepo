@@ -11,6 +11,13 @@
 		useCurrentTimeIndicator,
 	} from '$lib/composables/useVisibleHours.svelte';
 	import { toDate } from '$lib/utils/eventDateHelpers';
+	import { HOUR_HEIGHT_PX, SNAP_INTERVAL_MINUTES } from '$lib/utils/calendarConstants';
+	import {
+		getVisibleTimedEvents,
+		getVisibleAllDayEvents,
+		getVisibleOverflowEvents,
+		type OverflowEvents,
+	} from '$lib/utils/eventFiltering';
 	import TaskBlock from './TaskBlock.svelte';
 	import { goto } from '$app/navigation';
 	import {
@@ -27,9 +34,9 @@
 	import { de, enUS, fr, es, it } from 'date-fns/locale';
 	import { locale } from 'svelte-i18n';
 
-	// Constants
-	const HOUR_HEIGHT = 60; // px - should match CSS --hour-height
-	const MINUTES_PER_SLOT = 15; // Snap to 15-minute intervals
+	// Use shared constants
+	const HOUR_HEIGHT = HOUR_HEIGHT_PX;
+	const MINUTES_PER_SLOT = SNAP_INTERVAL_MINUTES;
 
 	import type { CalendarEvent } from '@calendar/shared';
 
@@ -119,75 +126,35 @@
 	// Reference to the days container for position calculations
 	let daysContainerEl: HTMLDivElement;
 
-	function getEventsForDay(day: Date) {
-		// Filter by visible calendars first
-		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
-		const allEvents = eventsStore
-			.getEventsForDay(day)
-			.filter((e) => !e.isAllDay && visibleCalendarIds.has(e.calendarId));
-
-		// If hour filtering is enabled, only show events that overlap with visible range
-		if (settingsStore.filterHoursEnabled) {
-			const visibleStartMinutes = settingsStore.dayStartHour * 60;
-			const visibleEndMinutes = settingsStore.dayEndHour * 60;
-
-			return allEvents.filter((event) => {
-				const start = toDate(event.startTime);
-				const end = toDate(event.endTime);
-
-				const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
-				const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
-
-				// Event overlaps with visible range
-				return eventStartMinutes < visibleEndMinutes && eventEndMinutes > visibleStartMinutes;
-			});
-		}
-
-		return allEvents;
+	function getEventsForDay(day: Date): CalendarEvent[] {
+		return getVisibleTimedEvents(
+			eventsStore.getEventsForDay(day),
+			calendarsStore.visibleCalendars,
+			{
+				filterHoursEnabled: settingsStore.filterHoursEnabled,
+				dayStartHour: settingsStore.dayStartHour,
+				dayEndHour: settingsStore.dayEndHour,
+			}
+		);
 	}
 
-	// Get events that are completely outside the visible time range
-	function getOverflowEventsForDay(day: Date): { before: CalendarEvent[]; after: CalendarEvent[] } {
+	function getOverflowEventsForDay(day: Date): OverflowEvents {
 		if (!settingsStore.filterHoursEnabled) {
 			return { before: [], after: [] };
 		}
-
-		// Filter by visible calendars
-		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
-		const allEvents = eventsStore
-			.getEventsForDay(day)
-			.filter((e) => !e.isAllDay && visibleCalendarIds.has(e.calendarId));
-		const before: CalendarEvent[] = [];
-		const after: CalendarEvent[] = [];
-
-		const visibleStartMinutes = settingsStore.dayStartHour * 60;
-		const visibleEndMinutes = settingsStore.dayEndHour * 60;
-
-		for (const event of allEvents) {
-			const start = toDate(event.startTime);
-			const end = toDate(event.endTime);
-
-			const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
-			const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
-
-			// Event ends before visible range starts
-			if (eventEndMinutes <= visibleStartMinutes) {
-				before.push(event);
-			}
-			// Event starts after visible range ends
-			else if (eventStartMinutes >= visibleEndMinutes) {
-				after.push(event);
-			}
-		}
-
-		return { before, after };
+		return getVisibleOverflowEvents(
+			eventsStore.getEventsForDay(day),
+			calendarsStore.visibleCalendars,
+			settingsStore.dayStartHour,
+			settingsStore.dayEndHour
+		);
 	}
 
-	function getAllDayEventsForDay(day: Date) {
-		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
-		return eventsStore
-			.getEventsForDay(day)
-			.filter((e) => e.isAllDay && visibleCalendarIds.has(e.calendarId));
+	function getAllDayEventsForDay(day: Date): CalendarEvent[] {
+		return getVisibleAllDayEvents(
+			eventsStore.getEventsForDay(day),
+			calendarsStore.visibleCalendars
+		);
 	}
 
 	// Get display mode for an event (per-event override takes precedence over global setting)
