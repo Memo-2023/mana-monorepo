@@ -193,7 +193,16 @@
 	// Event Handlers
 	// ============================================================================
 	function getEventsForDay(day: Date) {
-		return eventsStore.getEventsForDay(day).slice(0, 3); // Max 3 events shown
+		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
+		return eventsStore
+			.getEventsForDay(day)
+			.filter((e) => visibleCalendarIds.has(e.calendarId))
+			.slice(0, 3); // Max 3 events shown
+	}
+
+	function getAllEventsForDay(day: Date) {
+		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
+		return eventsStore.getEventsForDay(day).filter((e) => visibleCalendarIds.has(e.calendarId));
 	}
 
 	function handleDayClick(day: Date, e: MouseEvent) {
@@ -329,10 +338,10 @@
 								</div>
 							{/each}
 
-							{#if eventsStore.getEventsForDay(day).length > 3}
+							{#if getAllEventsForDay(day).length > 3}
 								<button class="more-events" onclick={(e) => handleMoreClick(day, e)}>
 									{$_('views.moreEvents', {
-										values: { count: eventsStore.getEventsForDay(day).length - 3 },
+										values: { count: getAllEventsForDay(day).length - 3 },
 									})}
 								</button>
 							{/if}

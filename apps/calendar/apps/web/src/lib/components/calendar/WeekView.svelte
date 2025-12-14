@@ -119,7 +119,11 @@
 	let daysContainerEl: HTMLDivElement;
 
 	function getEventsForDay(day: Date) {
-		const allEvents = eventsStore.getEventsForDay(day).filter((e) => !e.isAllDay);
+		// Filter by visible calendars first
+		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
+		const allEvents = eventsStore
+			.getEventsForDay(day)
+			.filter((e) => !e.isAllDay && visibleCalendarIds.has(e.calendarId));
 
 		// If hour filtering is enabled, only show events that overlap with visible range
 		if (settingsStore.filterHoursEnabled) {
@@ -147,7 +151,11 @@
 			return { before: [], after: [] };
 		}
 
-		const allEvents = eventsStore.getEventsForDay(day).filter((e) => !e.isAllDay);
+		// Filter by visible calendars
+		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
+		const allEvents = eventsStore
+			.getEventsForDay(day)
+			.filter((e) => !e.isAllDay && visibleCalendarIds.has(e.calendarId));
 		const before: CalendarEvent[] = [];
 		const after: CalendarEvent[] = [];
 
@@ -175,7 +183,10 @@
 	}
 
 	function getAllDayEventsForDay(day: Date) {
-		return eventsStore.getEventsForDay(day).filter((e) => e.isAllDay);
+		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
+		return eventsStore
+			.getEventsForDay(day)
+			.filter((e) => e.isAllDay && visibleCalendarIds.has(e.calendarId));
 	}
 
 	// Get display mode for an event (per-event override takes precedence over global setting)

@@ -47,7 +47,11 @@
 
 	// Get timed events, filtering out those outside visible range when hour filter is enabled
 	let timedEvents = $derived.by(() => {
-		const allEvents = eventsStore.getEventsForDay(viewStore.currentDate).filter((e) => !e.isAllDay);
+		// Filter by visible calendars first
+		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
+		const allEvents = eventsStore
+			.getEventsForDay(viewStore.currentDate)
+			.filter((e) => !e.isAllDay && visibleCalendarIds.has(e.calendarId));
 
 		if (settingsStore.filterHoursEnabled) {
 			const visibleStartMinutes = settingsStore.dayStartHour * 60;
@@ -74,7 +78,11 @@
 			return { before: [] as CalendarEvent[], after: [] as CalendarEvent[] };
 		}
 
-		const allEvents = eventsStore.getEventsForDay(viewStore.currentDate).filter((e) => !e.isAllDay);
+		// Filter by visible calendars
+		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
+		const allEvents = eventsStore
+			.getEventsForDay(viewStore.currentDate)
+			.filter((e) => !e.isAllDay && visibleCalendarIds.has(e.calendarId));
 		const before: CalendarEvent[] = [];
 		const after: CalendarEvent[] = [];
 
@@ -101,9 +109,12 @@
 		return { before, after };
 	});
 
-	let allDayEvents = $derived(
-		eventsStore.getEventsForDay(viewStore.currentDate).filter((e) => e.isAllDay)
-	);
+	let allDayEvents = $derived.by(() => {
+		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
+		return eventsStore
+			.getEventsForDay(viewStore.currentDate)
+			.filter((e) => e.isAllDay && visibleCalendarIds.has(e.calendarId));
+	});
 
 	// Get display mode for an event (per-event override takes precedence over global setting)
 	function getEventDisplayMode(event: CalendarEvent): 'header' | 'block' {

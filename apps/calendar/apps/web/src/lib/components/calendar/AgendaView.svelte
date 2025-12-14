@@ -20,12 +20,18 @@
 		const currentEvents = eventsStore.events ?? [];
 		if (!Array.isArray(currentEvents)) return [];
 
+		// Filter by visible calendars
+		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
+
 		// Filter events that start from current date onwards
 		const startDate = startOfDay(viewStore.currentDate);
 
 		const groups: Map<string, CalendarEvent[]> = new Map();
 
 		for (const event of currentEvents) {
+			// Skip events from hidden calendars
+			if (!visibleCalendarIds.has(event.calendarId)) continue;
+
 			const start = toDate(event.startTime);
 
 			// Skip events before the start date
