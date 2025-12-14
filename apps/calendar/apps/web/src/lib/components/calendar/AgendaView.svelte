@@ -10,10 +10,15 @@
 	import type { CalendarEvent } from '@calendar/shared';
 
 	interface Props {
+		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
+		date?: Date;
 		onEventClick?: (event: CalendarEvent) => void;
 	}
 
-	let { onEventClick }: Props = $props();
+	let { date, onEventClick }: Props = $props();
+
+	// Use provided date or fall back to viewStore
+	let effectiveDate = $derived(date ?? viewStore.currentDate);
 
 	// Group events by date
 	let groupedEvents = $derived.by(() => {
@@ -24,7 +29,7 @@
 		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
 
 		// Filter events that start from current date onwards
-		const startDate = startOfDay(viewStore.currentDate);
+		const startDate = startOfDay(effectiveDate);
 
 		const groups: Map<string, CalendarEvent[]> = new Map();
 

@@ -43,11 +43,31 @@
 	// Props
 	interface Props {
 		dayCount: 5 | 10 | 14;
+		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
+		date?: Date;
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
 		onEventClick?: (event: CalendarEvent) => void;
 		onTaskClick?: (task: Task) => void;
 	}
-	let { dayCount, onQuickCreate, onEventClick, onTaskClick }: Props = $props();
+	let { dayCount, date, onQuickCreate, onEventClick, onTaskClick }: Props = $props();
+
+	// Use provided date or fall back to viewStore
+	let effectiveDate = $derived(date ?? viewStore.currentDate);
+
+	// Calculate view range based on effective date
+	let effectiveViewRange = $derived.by(() => {
+		if (date) {
+			// Calculate range for the provided date based on day count
+			const end = new Date(date);
+			end.setDate(end.getDate() + dayCount - 1);
+			return {
+				start: date,
+				end: end,
+			};
+		}
+		// Use viewStore range when no date override
+		return viewStore.viewRange;
+	});
 
 	// Get date-fns locale based on current app locale
 	const dateLocales = { de, en: enUS, fr, es, it };
@@ -58,8 +78,8 @@
 	// Generate days based on view range, optionally filtering weekends
 	let allDays = $derived(
 		eachDayOfInterval({
-			start: viewStore.viewRange.start,
-			end: viewStore.viewRange.end,
+			start: effectiveViewRange.start,
+			end: effectiveViewRange.end,
 		})
 	);
 

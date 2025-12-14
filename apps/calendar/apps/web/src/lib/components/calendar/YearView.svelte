@@ -19,14 +19,19 @@
 	import type { CalendarViewType, CalendarEvent } from '@calendar/shared';
 
 	interface Props {
+		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
+		date?: Date;
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
 		onEventClick?: (event: CalendarEvent) => void;
 	}
 
-	let { onQuickCreate, onEventClick }: Props = $props();
+	let { date, onQuickCreate, onEventClick }: Props = $props();
+
+	// Use provided date or fall back to viewStore
+	let effectiveDate = $derived(date ?? viewStore.currentDate);
 
 	// Derived values
-	let year = $derived(viewStore.currentDate.getFullYear());
+	let year = $derived(effectiveDate.getFullYear());
 
 	let months = $derived(Array.from({ length: 12 }, (_, i) => new Date(year, i, 1)));
 

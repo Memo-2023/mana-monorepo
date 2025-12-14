@@ -8,12 +8,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { isSidebarMode as sidebarModeStore } from '$lib/stores/navigation';
-	import WeekView from '$lib/components/calendar/WeekView.svelte';
-	import DayView from '$lib/components/calendar/DayView.svelte';
-	import MonthView from '$lib/components/calendar/MonthView.svelte';
-	import MultiDayView from '$lib/components/calendar/MultiDayView.svelte';
-	import YearView from '$lib/components/calendar/YearView.svelte';
-	import AgendaView from '$lib/components/calendar/AgendaView.svelte';
+	import ViewCarousel from '$lib/components/calendar/ViewCarousel.svelte';
 	import TodoSidebarSection from '$lib/components/calendar/TodoSidebarSection.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
 	import { CalendarViewSkeleton } from '$lib/components/skeletons';
@@ -150,36 +145,8 @@
 		<div class="calendar-content">
 			{#if !initialized}
 				<CalendarViewSkeleton />
-			{:else if viewStore.viewType === 'day'}
-				<DayView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
-			{:else if viewStore.viewType === '5day'}
-				<MultiDayView
-					dayCount={5}
-					onQuickCreate={handleQuickCreate}
-					onEventClick={handleEventClick}
-				/>
-			{:else if viewStore.viewType === 'week'}
-				<WeekView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
-			{:else if viewStore.viewType === '10day'}
-				<MultiDayView
-					dayCount={10}
-					onQuickCreate={handleQuickCreate}
-					onEventClick={handleEventClick}
-				/>
-			{:else if viewStore.viewType === '14day'}
-				<MultiDayView
-					dayCount={14}
-					onQuickCreate={handleQuickCreate}
-					onEventClick={handleEventClick}
-				/>
-			{:else if viewStore.viewType === 'month'}
-				<MonthView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
-			{:else if viewStore.viewType === 'year'}
-				<YearView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
-			{:else if viewStore.viewType === 'agenda'}
-				<AgendaView onEventClick={handleEventClick} />
 			{:else}
-				<WeekView onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
+				<ViewCarousel onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 			{/if}
 		</div>
 	</div>

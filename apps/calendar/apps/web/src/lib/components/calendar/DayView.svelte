@@ -27,12 +27,17 @@
 	import type { CalendarEvent } from '@calendar/shared';
 
 	interface Props {
+		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
+		date?: Date;
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
 		onEventClick?: (event: CalendarEvent) => void;
 		onTaskClick?: (task: Task) => void;
 	}
 
-	let { onQuickCreate, onEventClick, onTaskClick }: Props = $props();
+	let { date, onQuickCreate, onEventClick, onTaskClick }: Props = $props();
+
+	// Use provided date or fall back to viewStore
+	let effectiveDate = $derived(date ?? viewStore.currentDate);
 
 	// Use shared constants
 	const HOUR_HEIGHT = HOUR_HEIGHT_PX;
@@ -55,7 +60,7 @@
 	// Get timed events, filtering out those outside visible range when hour filter is enabled
 	let timedEvents = $derived(
 		getVisibleTimedEvents(
-			eventsStore.getEventsForDay(viewStore.currentDate),
+			eventsStore.getEventsForDay(effectiveDate),
 			calendarsStore.visibleCalendars,
 			{
 				filterHoursEnabled: settingsStore.filterHoursEnabled,
@@ -71,7 +76,7 @@
 			return { before: [], after: [] };
 		}
 		return getVisibleOverflowEvents(
-			eventsStore.getEventsForDay(viewStore.currentDate),
+			eventsStore.getEventsForDay(effectiveDate),
 			calendarsStore.visibleCalendars,
 			settingsStore.dayStartHour,
 			settingsStore.dayEndHour
@@ -80,7 +85,7 @@
 
 	let allDayEvents = $derived(
 		getVisibleAllDayEvents(
-			eventsStore.getEventsForDay(viewStore.currentDate),
+			eventsStore.getEventsForDay(effectiveDate),
 			calendarsStore.visibleCalendars
 		)
 	);
@@ -106,7 +111,7 @@
 	// Get birthdays for current day (if enabled in settings)
 	let birthdays = $derived.by(() => {
 		if (!settingsStore.showBirthdays) return [];
-		return birthdaysStore.getBirthdaysForDay(viewStore.currentDate);
+		return birthdaysStore.getBirthdaysForDay(effectiveDate);
 	});
 
 	// ============================================================================
@@ -225,7 +230,7 @@
 		const duration = differenceInMinutes(end, start);
 
 		// Create new start time on same day
-		let newStart = new Date(viewStore.currentDate);
+		let newStart = new Date(effectiveDate);
 		newStart = setHours(newStart, Math.floor(clampedMinutes / 60));
 		newStart = setMinutes(newStart, clampedMinutes % 60);
 		newStart.setSeconds(0, 0);
@@ -327,7 +332,7 @@
 				firstVisibleHour * 60,
 				Math.min(adjustedMinutes, origEndMinutes - SNAP_MINUTES)
 			);
-			newStart = setHours(new Date(viewStore.currentDate), Math.floor(newStartMinutes / 60));
+			newStart = setHours(new Date(effectiveDate), Math.floor(newStartMinutes / 60));
 			newStart = setMinutes(newStart, newStartMinutes % 60);
 			newStart.setSeconds(0, 0);
 		} else {
@@ -335,7 +340,7 @@
 				lastVisibleHour * 60,
 				Math.max(adjustedMinutes, origStartMinutes + SNAP_MINUTES)
 			);
-			newEnd = setHours(new Date(viewStore.currentDate), Math.floor(newEndMinutes / 60));
+			newEnd = setHours(new Date(effectiveDate), Math.floor(newEndMinutes / 60));
 			newEnd = setMinutes(newEnd, newEndMinutes % 60);
 			newEnd.setSeconds(0, 0);
 		}
@@ -586,7 +591,7 @@
 			const endTime = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
 
 			await todosStore.updateTodo(data.taskId, {
-				scheduledDate: format(viewStore.currentDate, 'yyyy-MM-dd'),
+				scheduledDate: format(effectiveDate, 'yyyy-MM-dd'),
 				scheduledStartTime: startTime,
 				scheduledEndTime: endTime,
 				estimatedDuration: duration,
@@ -659,7 +664,7 @@
 	 * Get scheduled tasks for current day
 	 */
 	function getScheduledTasks(): Task[] {
-		return todosStore.getScheduledTasksForDay(viewStore.currentDate);
+		return todosStore.getScheduledTasksForDay(effectiveDate);
 	}
 
 	function handleEventClick(event: CalendarEvent, e: MouseEvent) {
@@ -683,7 +688,7 @@
 		// Don't create event if dragging or resizing
 		if (isDragging || isResizing) return;
 
-		const startTime = new Date(viewStore.currentDate);
+		const startTime = new Date(effectiveDate);
 		startTime.setHours(hour, 0, 0, 0);
 
 		if (onQuickCreate) {
@@ -756,7 +761,7 @@
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="day-column"
-			class:today={isToday(viewStore.currentDate)}
+			class:today={isToday(effectiveDate)}
 			class:drop-target={isSidebarDropTarget}
 			bind:this={dayColumnRef}
 			ondragover={handleSidebarDragOver}
@@ -855,7 +860,7 @@
 			{/if}
 
 			<!-- Current time indicator -->
-			{#if isToday(viewStore.currentDate)}
+			{#if isToday(effectiveDate)}
 				<div class="time-indicator" style="top: {currentTimePosition}%"></div>
 			{/if}
 		</div>

@@ -36,16 +36,21 @@
 	import type { CalendarEvent } from '@calendar/shared';
 
 	interface Props {
+		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
+		date?: Date;
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
 		onEventClick?: (event: CalendarEvent) => void;
 	}
 
-	let { onQuickCreate, onEventClick }: Props = $props();
+	let { date, onQuickCreate, onEventClick }: Props = $props();
+
+	// Use provided date or fall back to viewStore
+	let effectiveDate = $derived(date ?? viewStore.currentDate);
 
 	// Get all days to display in the month grid (including days from prev/next months)
 	let allCalendarDays = $derived.by(() => {
-		const monthStart = startOfMonth(viewStore.currentDate);
-		const monthEnd = endOfMonth(viewStore.currentDate);
+		const monthStart = startOfMonth(effectiveDate);
+		const monthEnd = endOfMonth(effectiveDate);
 		const calendarStart = startOfWeek(monthStart, { weekStartsOn: settingsStore.weekStartsOn });
 		const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: settingsStore.weekStartsOn });
 
@@ -85,7 +90,6 @@
 	let isDragging = $state(false);
 	let draggedEvent = $state<CalendarEvent | null>(null);
 	let dragTargetDay = $state<Date | null>(null);
-	let monthViewRef = $state<HTMLElement | null>(null);
 
 	// Store for day cell refs
 	let dayCellRefs = $state<Map<string, HTMLElement>>(new Map());
@@ -276,7 +280,7 @@
 	}
 </script>
 
-<div class="month-view" style="--column-count: {columnCount}" bind:this={monthViewRef}>
+<div class="month-view" style="--column-count: {columnCount}">
 	<!-- Week day headers -->
 	<div class="weekday-headers">
 		{#each weekDays as day}
@@ -292,7 +296,7 @@
 					{@const isDropTarget = isDragging && dragTargetDay && isSameDay(day, dragTargetDay)}
 					<div
 						class="day-cell"
-						class:other-month={!isSameMonth(day, viewStore.currentDate)}
+						class:other-month={!isSameMonth(day, effectiveDate)}
 						class:today={isToday(day)}
 						class:drop-target={isDropTarget}
 						use:bindDayCellRef={day}

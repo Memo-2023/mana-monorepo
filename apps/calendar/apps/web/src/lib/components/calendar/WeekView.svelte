@@ -32,6 +32,8 @@
 		setHours,
 		setMinutes,
 		getWeek,
+		startOfWeek,
+		endOfWeek,
 	} from 'date-fns';
 	import { de, enUS, fr, es, it } from 'date-fns/locale';
 	import { locale, _ } from 'svelte-i18n';
@@ -39,12 +41,31 @@
 	import type { CalendarEvent } from '@calendar/shared';
 
 	interface Props {
+		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
+		date?: Date;
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
 		onEventClick?: (event: CalendarEvent) => void;
 		onTaskClick?: (task: Task) => void;
 	}
 
-	let { onQuickCreate, onEventClick, onTaskClick }: Props = $props();
+	let { date, onQuickCreate, onEventClick, onTaskClick }: Props = $props();
+
+	// Use provided date or fall back to viewStore
+	let effectiveDate = $derived(date ?? viewStore.currentDate);
+
+	// Calculate view range based on effective date
+	let effectiveViewRange = $derived.by(() => {
+		if (date) {
+			// Calculate range for the provided date
+			const weekStartsOn = settingsStore.weekStartsOn;
+			return {
+				start: startOfWeek(date, { weekStartsOn }),
+				end: endOfWeek(date, { weekStartsOn }),
+			};
+		}
+		// Use viewStore range when no date override
+		return viewStore.viewRange;
+	});
 
 	// Use shared constants
 	const HOUR_HEIGHT = HOUR_HEIGHT_PX;
@@ -59,8 +80,8 @@
 	// Generate days of the week, optionally filtering weekends
 	let allDays = $derived(
 		eachDayOfInterval({
-			start: viewStore.viewRange.start,
-			end: viewStore.viewRange.end,
+			start: effectiveViewRange.start,
+			end: effectiveViewRange.end,
 		})
 	);
 
@@ -70,7 +91,7 @@
 
 	// Get week number for display
 	let weekNumber = $derived(
-		getWeek(viewStore.viewRange.start, { weekStartsOn: settingsStore.weekStartsOn })
+		getWeek(effectiveViewRange.start, { weekStartsOn: settingsStore.weekStartsOn })
 	);
 
 	// Use composables for hour filtering and time indicator
