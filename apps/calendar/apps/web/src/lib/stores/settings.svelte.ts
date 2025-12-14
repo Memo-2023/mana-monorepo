@@ -34,6 +34,7 @@ export interface CalendarAppSettings {
 	dateStripShowMonthDividers: boolean; // Show vertical dividers between months
 	dateStripCompact: boolean; // Use compact/smaller DateStrip
 	dateStripShowWeekNumbers: boolean; // Show week numbers at start of week
+	dateStripCollapsed: boolean; // Whether DateStrip is minimized to FAB
 
 	// Birthday settings (cross-app integration with Contacts)
 	showBirthdays: boolean; // Show contact birthdays in calendar
@@ -41,6 +42,9 @@ export interface CalendarAppSettings {
 
 	// UI settings
 	sidebarCollapsed: boolean;
+
+	// Quick View Pill settings
+	quickViewPillViews: CalendarViewType[]; // Views shown in quick switcher
 
 	// Event defaults
 	defaultEventDuration: number; // in minutes
@@ -65,11 +69,15 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	dateStripShowMonthDividers: true,
 	dateStripCompact: false,
 	dateStripShowWeekNumbers: false,
+	dateStripCollapsed: false,
 	// Birthday defaults
 	showBirthdays: true,
 	showBirthdayAge: true,
 	// UI defaults
 	sidebarCollapsed: false,
+	// Quick View Pill defaults
+	quickViewPillViews: ['week', 'month', 'agenda'],
+	// Event defaults
 	defaultEventDuration: 60,
 	defaultReminder: 15,
 };
@@ -189,6 +197,9 @@ export const settingsStore = {
 	get dateStripShowWeekNumbers() {
 		return settings.dateStripShowWeekNumbers;
 	},
+	get dateStripCollapsed() {
+		return settings.dateStripCollapsed;
+	},
 	// Birthday settings
 	get showBirthdays() {
 		return settings.showBirthdays;
@@ -204,6 +215,9 @@ export const settingsStore = {
 	},
 	get sidebarCollapsed() {
 		return settings.sidebarCollapsed;
+	},
+	get quickViewPillViews() {
+		return settings.quickViewPillViews;
 	},
 	get cloudSyncEnabled() {
 		return cloudSyncEnabled;

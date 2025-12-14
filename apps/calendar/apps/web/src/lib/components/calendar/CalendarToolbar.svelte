@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ExpandableToolbar } from '@manacore/shared-ui';
 	import CalendarToolbarContent from './CalendarToolbarContent.svelte';
+	import ViewModePill from './ViewModePill.svelte';
 
 	interface Props {
 		isSidebarMode?: boolean;
@@ -58,6 +59,11 @@
 		</button>
 	{/snippet}
 </ExpandableToolbar>
+
+<!-- View Mode Pill - positioned to the left of the FAB -->
+{#if !isSidebarMode}
+	<ViewModePill {isSidebarMode} isToolbarExpanded={!isCollapsed} />
+{/if}
 
 <style>
 	/* Layout toggle button - app-specific style */
