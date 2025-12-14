@@ -13,6 +13,21 @@
 		networkStore.setSearch(contactsFilterStore.searchQuery);
 	});
 
+	// Refocus view when search results change
+	let previousNodeCount = $state(0);
+	$effect(() => {
+		const currentNodeCount = networkStore.nodes.length;
+		const hasSearch = contactsFilterStore.searchQuery.length > 0;
+
+		// If search is active and node count changed, reset zoom to show all results
+		if (hasSearch && currentNodeCount !== previousNodeCount && currentNodeCount > 0) {
+			setTimeout(() => {
+				graphComponent?.resetZoom();
+			}, 100);
+		}
+		previousNodeCount = currentNodeCount;
+	});
+
 	let graphComponent: NetworkGraph;
 	let graphContainer: HTMLDivElement;
 
@@ -179,10 +194,10 @@
 		flex-direction: column;
 	}
 
-	/* Floating Controls */
+	/* Floating Controls - positioned above QuickInputBar and PillNav */
 	.controls-wrapper {
-		position: absolute;
-		top: 1rem;
+		position: fixed;
+		bottom: calc(140px + env(safe-area-inset-bottom));
 		left: 50%;
 		transform: translateX(-50%);
 		z-index: 10;
@@ -192,7 +207,7 @@
 	/* Error Banner */
 	.error-banner {
 		position: absolute;
-		top: 5rem;
+		top: 1rem;
 		left: 50%;
 		transform: translateX(-50%);
 		z-index: 10;
@@ -219,9 +234,11 @@
 	/* Modal Sidebar Wrapper - Override modal positioning */
 	.modal-sidebar-wrapper {
 		position: fixed;
-		top: 5rem; /* Below the pill nav */
+		top: 1rem;
 		right: 1rem;
-		bottom: 1rem;
+		bottom: calc(
+			200px + env(safe-area-inset-bottom)
+		); /* Above controls + QuickInputBar + PillNav */
 		width: 400px;
 		max-width: calc(100vw - 2rem);
 		z-index: 50;
@@ -291,7 +308,7 @@
 
 	@media (max-width: 768px) {
 		.controls-wrapper {
-			top: 1rem;
+			bottom: calc(160px + env(safe-area-inset-bottom));
 			width: calc(100% - 2rem);
 			max-width: none;
 		}
