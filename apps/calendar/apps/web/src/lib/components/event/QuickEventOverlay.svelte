@@ -361,15 +361,6 @@
 		});
 	}
 
-	// Update draft when calendar changes
-	function handleCalendarChange(e: Event) {
-		const target = e.target as HTMLSelectElement;
-		calendarId = target.value;
-		if (!isEditMode) {
-			eventsStore.updateDraftEvent({ calendarId: target.value });
-		}
-	}
-
 	// Update draft when all-day changes
 	function handleAllDayToggle() {
 		isAllDay = !isAllDay;
@@ -711,26 +702,31 @@
 				</span>
 			</div>
 
-			<!-- Calendar select -->
-			<div class="form-row">
-				<div class="row-icon">
-					<div
-						class="calendar-dot"
-						style="background-color: {calendarsStore.getColor(calendarId)}"
-					></div>
-				</div>
-				<div class="row-content">
-					<span class="field-label">Kalender</span>
-					{#if calendarsStore.calendars.length > 0}
-						<select class="field-select" value={calendarId} onchange={handleCalendarChange}>
-							{#each calendarsStore.calendars as cal}
-								<option value={cal.id}>{cal.name}</option>
-							{/each}
-						</select>
-					{:else}
-						<span class="field-placeholder">Standardkalender wird erstellt</span>
-					{/if}
-				</div>
+			<!-- Calendar pills -->
+			<div class="calendar-pills-container">
+				{#if calendarsStore.calendars.length > 0}
+					<div class="calendar-pills-scroll">
+						{#each calendarsStore.calendars as cal}
+							<button
+								type="button"
+								class="calendar-pill"
+								class:active={calendarId === cal.id}
+								onclick={() => {
+									calendarId = cal.id;
+									if (!isEditMode) {
+										eventsStore.updateDraftEvent({ calendarId: cal.id });
+									}
+								}}
+							>
+								<span class="calendar-pill-dot" style="background-color: {cal.color || '#3b82f6'}"
+								></span>
+								<span class="calendar-pill-name">{cal.name}</span>
+							</button>
+						{/each}
+					</div>
+				{:else}
+					<span class="field-placeholder">Standardkalender wird erstellt</span>
+				{/if}
 			</div>
 
 			<!-- People (compact) -->
@@ -1223,6 +1219,63 @@
 		width: 14px;
 		height: 14px;
 		border-radius: 50%;
+	}
+
+	/* Calendar pills */
+	.calendar-pills-container {
+		padding: 0.5rem 0;
+		border-bottom: 1px solid hsl(var(--color-border));
+	}
+
+	.calendar-pills-scroll {
+		display: flex;
+		gap: 0.5rem;
+		overflow-x: auto;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+		padding: 0 1.25rem 2px;
+	}
+
+	.calendar-pills-scroll::-webkit-scrollbar {
+		display: none;
+	}
+
+	.calendar-pill {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.375rem 0.75rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 9999px;
+		background: transparent;
+		color: hsl(var(--color-muted-foreground));
+		font-size: 0.8125rem;
+		font-weight: 500;
+		white-space: nowrap;
+		cursor: pointer;
+		transition: all 150ms;
+		flex-shrink: 0;
+	}
+
+	.calendar-pill:hover {
+		background: hsl(var(--color-muted) / 0.3);
+		color: hsl(var(--color-foreground));
+	}
+
+	.calendar-pill.active {
+		background: hsl(var(--color-primary) / 0.1);
+		border-color: hsl(var(--color-primary) / 0.3);
+		color: hsl(var(--color-primary));
+	}
+
+	.calendar-pill-dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+
+	.calendar-pill-name {
 	}
 
 	.row-content {

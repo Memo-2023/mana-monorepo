@@ -116,6 +116,23 @@ export const calendarsStore = {
 	},
 
 	/**
+	 * Set a calendar as the default
+	 */
+	async setAsDefault(id: string) {
+		const result = await api.updateCalendar(id, { isDefault: true });
+
+		if (result.data) {
+			// Update local state: set this one as default, remove default from others
+			calendars = getCalendarsArray().map((c) => ({
+				...c,
+				isDefault: c.id === id,
+			}));
+		}
+
+		return result;
+	},
+
+	/**
 	 * Get calendar by ID
 	 */
 	getById(id: string) {
