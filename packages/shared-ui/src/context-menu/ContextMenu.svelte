@@ -89,9 +89,19 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="context-menu-backdrop"
-		onclick={onClose}
+		onpointerdown={(e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			onClose();
+		}}
+		onclick={(e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			onClose();
+		}}
 		oncontextmenu={(e) => {
 			e.preventDefault();
+			e.stopPropagation();
 			onClose();
 		}}
 	></div>
@@ -149,6 +159,8 @@
 		z-index: 9998;
 		/* Transparent backdrop - just blocks clicks */
 		background: transparent;
+		/* Ensure backdrop can receive events even when parent has pointer-events: none */
+		pointer-events: auto;
 	}
 
 	.context-menu {
@@ -160,6 +172,8 @@
 		background: var(--color-surface-elevated-3);
 		border: 1px solid hsl(var(--color-border));
 		border-radius: var(--radius-lg);
+		/* Ensure menu can receive events even when parent has pointer-events: none */
+		pointer-events: auto;
 	}
 
 	.menu-item {

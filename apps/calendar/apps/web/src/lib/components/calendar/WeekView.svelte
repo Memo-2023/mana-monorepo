@@ -20,6 +20,7 @@
 	import EventCard from './EventCard.svelte';
 	import TaskBlock from './TaskBlock.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
+	import CalendarHeaderContextMenu from './CalendarHeaderContextMenu.svelte';
 	import { goto } from '$app/navigation';
 	import {
 		format,

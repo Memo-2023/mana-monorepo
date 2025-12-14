@@ -172,3 +172,22 @@ export type {
 // Context Menu
 export { ContextMenu, createContextMenuState } from './context-menu';
 export type { ContextMenuItem, ContextMenuState } from './context-menu';
+
+// Help Components
+export {
+	HelpModal,
+	KeyboardShortcutsPanel as HelpKeyboardShortcutsPanel,
+	SyntaxHelpPanel,
+	COMMON_SHORTCUTS,
+	COMMON_SYNTAX,
+	DEFAULT_LIVE_EXAMPLE,
+} from './help';
+export type {
+	KeyboardShortcut as HelpKeyboardShortcut,
+	ShortcutCategory,
+	SyntaxColor,
+	SyntaxExample,
+	SyntaxPattern,
+	SyntaxGroup,
+	HelpModalConfig,
+} from './help';
