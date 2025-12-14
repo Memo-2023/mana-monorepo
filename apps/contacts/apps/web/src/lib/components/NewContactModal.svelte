@@ -4,6 +4,7 @@
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 	import SocialMediaFields from './forms/SocialMediaFields.svelte';
+	import DateFields from './forms/DateFields.svelte';
 
 	interface Props {
 		onClose: () => void;
@@ -34,6 +35,10 @@
 	let postalCode = $state('');
 	let country = $state('');
 	let notes = $state('');
+
+	// Dates
+	let birthday = $state('');
+	let customDates = $state<Array<{ id: string; label: string; date: string }>>([]);
 
 	// Social Media
 	let linkedin = $state('');
@@ -136,6 +141,9 @@
 				postalCode: postalCode || null,
 				country: country || null,
 				notes: notes || null,
+				// Dates
+				birthday: birthday || null,
+				customDates: customDates.filter((d) => d.label && d.date),
 				// Social Media
 				linkedin: linkedin || null,
 				twitter: twitter || null,
@@ -532,6 +540,9 @@
 						placeholder="Notizen zum Kontakt..."
 					></textarea>
 				</section>
+
+				<!-- Dates Section -->
+				<DateFields bind:birthday bind:customDates />
 
 				<!-- Social Media Section -->
 				<SocialMediaFields

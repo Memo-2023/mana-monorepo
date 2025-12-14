@@ -31,6 +31,7 @@ export const contacts = pgTable('contacts', {
 	birthday: date('birthday'),
 	notes: text('notes'),
 	photoUrl: varchar('photo_url', { length: 500 }),
+	customDates: jsonb('custom_dates').$type<CustomDate[]>().default([]),
 
 	// Social Media
 	linkedin: varchar('linkedin', { length: 255 }),
@@ -65,3 +66,9 @@ export const contacts = pgTable('contacts', {
 
 export type Contact = typeof contacts.$inferSelect;
 export type NewContact = typeof contacts.$inferInsert;
+
+export interface CustomDate {
+	id: string;
+	label: string;
+	date: string;
+}

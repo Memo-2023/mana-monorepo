@@ -6,6 +6,7 @@
 	import ContactTasks from './ContactTasks.svelte';
 	import { ContactDetailSkeleton } from '$lib/components/skeletons';
 	import SocialMediaFields from './forms/SocialMediaFields.svelte';
+	import DateFields from './forms/DateFields.svelte';
 	import SocialMediaLinks from './SocialMediaLinks.svelte';
 
 	interface Props {
@@ -37,6 +38,10 @@
 	let postalCode = $state('');
 	let country = $state('');
 	let notes = $state('');
+
+	// Dates
+	let birthday = $state('');
+	let customDates = $state<Array<{ id: string; label: string; date: string }>>([]);
 
 	// Social Media
 	let linkedin = $state('');
@@ -87,6 +92,9 @@
 		postalCode = contact.postalCode || '';
 		country = contact.country || '';
 		notes = contact.notes || '';
+		// Dates
+		birthday = contact.birthday || '';
+		customDates = contact.customDates ? [...contact.customDates] : [];
 		// Social Media
 		linkedin = contact.linkedin || '';
 		twitter = contact.twitter || '';
@@ -142,6 +150,9 @@
 				postalCode: postalCode || null,
 				country: country || null,
 				notes: notes || null,
+				// Dates
+				birthday: birthday || null,
+				customDates: customDates.filter((d) => d.label && d.date),
 				// Social Media
 				linkedin: linkedin || null,
 				twitter: twitter || null,
@@ -523,6 +534,9 @@
 							<textarea bind:value={notes} rows="4" class="input textarea"></textarea>
 						</section>
 
+						<!-- Dates Section -->
+						<DateFields bind:birthday bind:customDates />
+
 						<!-- Social Media Section -->
 						<SocialMediaFields
 							bind:linkedin
@@ -877,6 +891,56 @@
 										</div>
 									{/if}
 									{#if contact.country}<div class="address-line">{contact.country}</div>{/if}
+								</div>
+							</section>
+						{/if}
+
+						{#if contact.birthday || (contact.customDates && contact.customDates.length > 0)}
+							<section class="detail-section">
+								<div class="section-header">
+									<div class="section-icon">
+										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+											/>
+										</svg>
+									</div>
+									<h3 class="section-title">Daten</h3>
+								</div>
+								<div class="detail-list">
+									{#if contact.birthday}
+										<div class="detail-item">
+											<div class="detail-content">
+												<span class="detail-label">Geburtstag</span>
+												<span class="detail-value"
+													>{new Date(contact.birthday).toLocaleDateString('de-DE', {
+														day: 'numeric',
+														month: 'long',
+														year: 'numeric',
+													})}</span
+												>
+											</div>
+										</div>
+									{/if}
+									{#if contact.customDates}
+										{#each contact.customDates as customDate}
+											<div class="detail-item">
+												<div class="detail-content">
+													<span class="detail-label">{customDate.label}</span>
+													<span class="detail-value"
+														>{new Date(customDate.date).toLocaleDateString('de-DE', {
+															day: 'numeric',
+															month: 'long',
+															year: 'numeric',
+														})}</span
+													>
+												</div>
+											</div>
+										{/each}
+									{/if}
 								</div>
 							</section>
 						{/if}

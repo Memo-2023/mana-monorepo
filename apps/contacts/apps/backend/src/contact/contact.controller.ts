@@ -20,8 +20,22 @@ import {
 	IsDateString,
 	IsUUID,
 	MaxLength,
+	IsArray,
+	ValidateNested,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
+
+class CustomDateDto {
+	@IsUUID()
+	id: string;
+
+	@IsString()
+	@MaxLength(100)
+	label: string;
+
+	@IsDateString()
+	date: string;
+}
 
 class CreateContactDto {
 	@IsString()
@@ -106,6 +120,12 @@ class CreateContactDto {
 	@IsString()
 	@IsOptional()
 	notes?: string;
+
+	@IsArray()
+	@IsOptional()
+	@ValidateNested({ each: true })
+	@Type(() => CustomDateDto)
+	customDates?: CustomDateDto[];
 
 	// Social Media
 	@IsString()

@@ -25,6 +25,11 @@ export interface Contact {
 	birthday?: string | null;
 	notes?: string | null;
 	photoUrl?: string | null;
+	customDates?: Array<{
+		id: string;
+		label: string;
+		date: string;
+	}> | null;
 	// Social Media
 	linkedin?: string | null;
 	twitter?: string | null;
