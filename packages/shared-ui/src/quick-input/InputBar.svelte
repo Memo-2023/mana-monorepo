@@ -2,6 +2,11 @@
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import type { QuickInputItem, CreatePreview } from './types';
+	import InputBarContextMenu from './InputBarContextMenu.svelte';
+	import { getInputBarSettingsStore } from './inputBarSettings.svelte';
+
+	// Settings store
+	const settingsStore = getInputBarSettingsStore();
 
 	// Syntax highlighting patterns for command keywords
 	interface HighlightPattern {
@@ -44,6 +49,11 @@
 		return result;
 	}
 
+	interface DefaultOption {
+		id: string;
+		label: string;
+	}
+
 	interface Props {
 		onSearch: (query: string) => Promise<QuickInputItem[]>;
 		onSelect: (item: QuickInputItem) => void;
@@ -55,13 +65,26 @@
 		searchingText?: string;
 		createText?: string;
 		appIcon?: string;
-		autoFocus?: boolean;
 		/** Bottom offset from viewport bottom (default: '70px') */
 		bottomOffset?: string;
 		/** Whether to leave space for a FAB button on the right side on mobile (default: false) */
 		hasFabRight?: boolean;
 		/** Whether to leave space for a FAB button on the left side on mobile (default: false) */
 		hasFabLeft?: boolean;
+		/** Enable context menu on right-click (default: true) */
+		enableContextMenu?: boolean;
+		/** App-specific default options for context menu (e.g., calendars) */
+		defaultOptions?: DefaultOption[];
+		/** Currently selected default option ID */
+		selectedDefaultId?: string;
+		/** Label for the default option selector (e.g., "Standard-Kalender") */
+		defaultOptionLabel?: string;
+		/** Callback when default option changes */
+		onDefaultChange?: (id: string) => void;
+		/** Callback to show keyboard shortcuts help */
+		onShowShortcuts?: () => void;
+		/** Callback to show syntax help */
+		onShowSyntaxHelp?: () => void;
 	}
 
 	let {
@@ -75,11 +98,20 @@
 		searchingText = 'Suche...',
 		createText = 'Erstellen',
 		appIcon = 'search',
-		autoFocus = true,
 		bottomOffset = '70px',
 		hasFabRight = false,
 		hasFabLeft = false,
+		enableContextMenu = true,
+		defaultOptions = [],
+		selectedDefaultId,
+		defaultOptionLabel = 'Standard-Kalender',
+		onDefaultChange,
+		onShowShortcuts,
+		onShowSyntaxHelp,
 	}: Props = $props();
+
+	// Use settings for autoFocus
+	let effectiveAutoFocus = $derived(settingsStore.autoFocus);
 
 	let searchQuery = $state('');
 	let results = $state<QuickInputItem[]>([]);
@@ -91,13 +123,20 @@
 	let searchTimeout: ReturnType<typeof setTimeout>;
 	let inputElement = $state<HTMLInputElement | null>(null);
 
+	// Context menu state
+	let contextMenuVisible = $state(false);
+	let contextMenuX = $state(0);
+	let contextMenuY = $state(0);
+
 	// Computed create preview
 	let createPreview = $derived(
 		searchQuery.trim() && onParseCreate ? onParseCreate(searchQuery) : null
 	);
 
-	// Highlighted text for overlay
-	let highlightedQuery = $derived(highlightText(searchQuery));
+	// Highlighted text for overlay (respects syntax highlighting setting)
+	let highlightedQuery = $derived(
+		settingsStore.syntaxHighlighting ? highlightText(searchQuery) : searchQuery
+	);
 
 	// Check if create option is selected (it's always first when available)
 	let isCreateSelected = $derived(selectedIndex === 0 && createPreview !== null);
@@ -107,12 +146,18 @@
 		showPanel = isFocused && searchQuery.trim().length > 0;
 	});
 
-	// Auto-focus on mount
+	// Auto-focus on mount (respects autoFocus setting)
 	onMount(() => {
-		if (autoFocus) {
+		if (effectiveAutoFocus) {
 			setTimeout(() => inputElement?.focus(), 100);
 		}
 	});
+
+	// Handler for settings changes (to trigger re-render)
+	function handleSettingsChange() {
+		// Force reactivity update by accessing the store
+		settingsStore.refresh();
+	}
 
 	async function handleSearch() {
 		clearTimeout(searchTimeout);
@@ -244,6 +289,22 @@
 			isFocused = false;
 		}, 150);
 	}
+
+	// Context menu handlers
+	function handleContextMenu(event: MouseEvent) {
+		if (!enableContextMenu) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		contextMenuX = event.clientX;
+		contextMenuY = event.clientY;
+		contextMenuVisible = true;
+	}
+
+	function handleContextMenuClose() {
+		contextMenuVisible = false;
+	}
 </script>
 
 <div
@@ -340,7 +401,8 @@
 	{/if}
 
 	<!-- Input Bar (always visible) -->
-	<div class="input-container">
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="input-container" oncontextmenu={handleContextMenu}>
 		<div class="app-icon">
 			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				{#if appIcon === 'check-square' || appIcon === 'todo'}
@@ -418,6 +480,21 @@
 			</button>
 		{/if}
 	</div>
+
+	<!-- Context Menu -->
+	<InputBarContextMenu
+		visible={contextMenuVisible}
+		x={contextMenuX}
+		y={contextMenuY}
+		onClose={handleContextMenuClose}
+		onSettingsChange={handleSettingsChange}
+		{defaultOptions}
+		{selectedDefaultId}
+		{defaultOptionLabel}
+		{onDefaultChange}
+		{onShowShortcuts}
+		{onShowSyntaxHelp}
+	/>
 </div>
 
 <style>

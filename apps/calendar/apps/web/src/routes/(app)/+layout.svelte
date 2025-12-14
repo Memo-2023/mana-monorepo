@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, InputBarHelpModal } from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -149,6 +149,42 @@
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
 	let isToolbarCollapsed = $state(true); // Default to collapsed - FAB next to InputBar
+
+	// InputBar help modal state
+	let helpModalOpen = $state(false);
+	let helpModalMode = $state<'shortcuts' | 'syntax'>('shortcuts');
+
+	function handleShowShortcuts() {
+		helpModalMode = 'shortcuts';
+		helpModalOpen = true;
+	}
+
+	function handleShowSyntaxHelp() {
+		helpModalMode = 'syntax';
+		helpModalOpen = true;
+	}
+
+	function handleCloseHelpModal() {
+		helpModalOpen = false;
+	}
+
+	// Default calendar for InputBar quick create
+	let selectedDefaultCalendarId = $derived(
+		calendarsStore.calendars.find((c) => c.isDefault)?.id || calendarsStore.calendars[0]?.id
+	);
+
+	function handleDefaultCalendarChange(id: string) {
+		// Update the default calendar via API
+		calendarsStore.setAsDefault(id);
+	}
+
+	// Calendar options for InputBar context menu
+	let calendarOptions = $derived(
+		calendarsStore.calendars.map((c) => ({
+			id: c.id,
+			label: c.name,
+		}))
+	);
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -431,7 +467,6 @@
 			onParseCreate={handleParseCreate}
 			createText="Erstellen"
 			appIcon="calendar"
-			autoFocus={true}
 			bottomOffset={isSidebarMode
 				? '0px'
 				: showCalendarToolbar && !isToolbarCollapsed
@@ -439,12 +474,21 @@
 					: '70px'}
 			hasFabRight={showCalendarToolbar && !isSidebarMode}
 			hasFabLeft={showCalendarToolbar && !isSidebarMode && settingsStore.dateStripCollapsed}
+			defaultOptions={calendarOptions}
+			selectedDefaultId={selectedDefaultCalendarId}
+			defaultOptionLabel="Standard-Kalender"
+			onDefaultChange={handleDefaultCalendarChange}
+			onShowShortcuts={handleShowShortcuts}
+			onShowSyntaxHelp={handleShowSyntaxHelp}
 		/>
 	</div>
 </SplitPaneContainer>
 
 <!-- Global Event Context Menu - rendered at top level for proper z-index -->
 <EventContextMenu onEdit={handleContextMenuEdit} />
+
+<!-- InputBar Help Modal -->
+<InputBarHelpModal open={helpModalOpen} onClose={handleCloseHelpModal} mode={helpModalMode} />
 
 <style>
 	.layout-container {

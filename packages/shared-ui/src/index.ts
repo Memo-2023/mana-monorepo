@@ -124,8 +124,28 @@ export { CommandBar } from './command-bar';
 export type { CommandBarItem } from './command-bar';
 
 // Input Bar
-export { InputBar, QuickInputBar } from './quick-input';
-export type { QuickInputItem, QuickAction, CreatePreview } from './quick-input';
+export {
+	InputBar,
+	QuickInputBar,
+	InputBarContextMenu,
+	InputBarHelpModal,
+	// Recent history
+	getRecentTags,
+	getRecentReferences,
+	addRecentTag,
+	addRecentReference,
+	extractAndSaveFromInput,
+	clearRecentHistory,
+	createRecentInputHistoryStore,
+	// Settings
+	loadInputBarSettings,
+	saveInputBarSettings,
+	updateInputBarSetting,
+	resetInputBarSettings,
+	createInputBarSettingsStore,
+	getInputBarSettingsStore,
+} from './quick-input';
+export type { QuickInputItem, QuickAction, CreatePreview, InputBarSettings } from './quick-input';
 
 // Pages
 export { default as AppsPage } from './pages/AppsPage.svelte';
