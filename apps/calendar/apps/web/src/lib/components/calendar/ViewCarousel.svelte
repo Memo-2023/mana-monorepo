@@ -18,22 +18,38 @@
 
 	let { onQuickCreate, onEventClick, disableSwipe = false }: Props = $props();
 
-	// Swipe tracking
+	// Swipe tracking state
 	let offsetX = $state(0);
-	let startX = 0;
+	let startX = $state(0);
 	let isSwiping = $state(false);
-	let isLocked = false; // Prevent rapid double-navigation
+	let isAnimating = $state(false);
+	let animatingDirection: 'prev' | 'next' | null = null;
 
-	// Container ref
+	// Velocity tracking for momentum
+	let lastX = 0;
+	let lastTime = 0;
+	let velocity = 0;
+
+	// Animation frame tracking
+	let animationFrameId: number | null = null;
+	let pendingCallback: (() => void) | null = null;
+
+	// Container refs
 	let viewportEl: HTMLDivElement;
 	let viewportWidth = $state(0);
 
-	// Threshold: 15% of viewport width triggers navigation
+	// Threshold: 15% of viewport width or high velocity triggers navigation
 	const SNAP_THRESHOLD = 0.15;
-	const LOCK_DURATION = 150; // ms to wait after navigation
+	const VELOCITY_THRESHOLD = 0.5; // px/ms - increased for faster swipes
+	// Animation speed (px/ms) - constant speed for linear feel
+	const ANIMATION_SPEED = 3.0; // increased for snappier feel
+	// Debounce for wheel events
+	const WHEEL_DEBOUNCE_MS = 50; // reduced for faster response
+	let wheelDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 	// Calculate dates for previous/current/next views
 	let prevDate = $derived(getOffsetDate(viewStore.currentDate, viewStore.viewType, -1));
+	let currentDate = $derived(viewStore.currentDate);
 	let nextDate = $derived(getOffsetDate(viewStore.currentDate, viewStore.viewType, 1));
 
 	// Update viewport width on mount and resize
@@ -54,9 +70,9 @@
 
 	// Wheel handler (trackpad horizontal scroll)
 	function handleWheel(e: WheelEvent) {
-		if (disableSwipe || isLocked) return;
+		if (disableSwipe) return;
 
-		// Only handle horizontal scrolling
+		// Only handle horizontal scrolling (deltaX dominant)
 		if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
 
 		// Don't interfere with event dragging
@@ -65,52 +81,60 @@
 
 		e.preventDefault();
 
-		// Update offset while scrolling
-		offsetX -= e.deltaX;
+		// If animating, check if we should chain navigation
+		if (isAnimating) {
+			const scrollDirection = e.deltaX < 0 ? 'next' : 'prev';
+			if (scrollDirection === animatingDirection && Math.abs(e.deltaX) > 10) {
+				// Chain navigation - immediately go to next page in same direction
+				chainNavigation(scrollDirection);
+			}
+			return;
+		}
+
+		// Simple direct offset update
+		offsetX += e.deltaX * -1;
 		offsetX = Math.max(-viewportWidth, Math.min(viewportWidth, offsetX));
 
-		// Check if threshold reached - instant switch
-		const threshold = viewportWidth * SNAP_THRESHOLD;
-
-		if (offsetX > threshold) {
-			navigateTo('prev');
-		} else if (offsetX < -threshold) {
-			navigateTo('next');
-		}
-	}
-
-	function navigateTo(direction: 'prev' | 'next') {
-		// Lock to prevent double navigation
-		isLocked = true;
-		offsetX = 0;
-
-		if (direction === 'prev') {
-			viewStore.goToPrevious();
-		} else {
-			viewStore.goToNext();
-		}
-
-		// Unlock after short delay
-		setTimeout(() => {
-			isLocked = false;
-		}, LOCK_DURATION);
+		// Debounced snap
+		if (wheelDebounceTimer) clearTimeout(wheelDebounceTimer);
+		wheelDebounceTimer = setTimeout(snapToPage, WHEEL_DEBOUNCE_MS);
 	}
 
 	// Touch handlers
 	function handleTouchStart(e: TouchEvent) {
-		if (disableSwipe || isLocked) return;
+		if (disableSwipe || isAnimating) return;
 
+		// Don't interfere with event dragging
 		const target = e.target as HTMLElement;
 		if (target.closest('[data-event-id]') || target.closest('[data-dragging]')) return;
 
 		startX = e.touches[0].clientX;
+		lastX = startX;
+		lastTime = performance.now();
+		velocity = 0;
 		isSwiping = true;
+
+		if (wheelDebounceTimer) {
+			clearTimeout(wheelDebounceTimer);
+			wheelDebounceTimer = null;
+		}
 	}
 
 	function handleTouchMove(e: TouchEvent) {
-		if (!isSwiping || disableSwipe || isLocked) return;
+		if (!isSwiping || disableSwipe) return;
 
 		const currentX = e.touches[0].clientX;
+		const currentTime = performance.now();
+
+		// Calculate velocity (px/ms)
+		const dt = currentTime - lastTime;
+		if (dt > 0) {
+			velocity = (currentX - lastX) / dt;
+		}
+
+		lastX = currentX;
+		lastTime = currentTime;
+
 		offsetX = currentX - startX;
 		offsetX = Math.max(-viewportWidth, Math.min(viewportWidth, offsetX));
 	}
@@ -118,24 +142,146 @@
 	function handleTouchEnd() {
 		if (!isSwiping) return;
 		isSwiping = false;
-
-		const threshold = viewportWidth * SNAP_THRESHOLD;
-
-		if (offsetX > threshold) {
-			navigateTo('prev');
-		} else if (offsetX < -threshold) {
-			navigateTo('next');
-		} else {
-			offsetX = 0;
-		}
+		snapToPage();
 	}
 
 	function handleTouchCancel() {
+		if (!isSwiping) return;
 		isSwiping = false;
-		offsetX = 0;
+		isAnimating = true;
+		animateToOffset(0, () => {
+			isAnimating = false;
+		});
 	}
 
-	// Computed style
+	// Chain navigation - immediately complete current and start next
+	function chainNavigation(direction: 'prev' | 'next') {
+		// Cancel current animation
+		if (animationFrameId !== null) {
+			cancelAnimationFrame(animationFrameId);
+			animationFrameId = null;
+		}
+
+		// Complete current navigation immediately (without resetting state flags)
+		if (animatingDirection === 'prev') {
+			viewStore.goToPrevious();
+		} else if (animatingDirection === 'next') {
+			viewStore.goToNext();
+		}
+
+		// Reset and start new animation for another page in same direction
+		offsetX = direction === 'prev' ? viewportWidth * 0.4 : -viewportWidth * 0.4;
+		animatingDirection = direction;
+
+		const targetOffset = direction === 'prev' ? viewportWidth : -viewportWidth;
+		pendingCallback = () => {
+			if (direction === 'prev') {
+				viewStore.goToPrevious();
+			} else {
+				viewStore.goToNext();
+			}
+			offsetX = 0;
+			isAnimating = false;
+			animatingDirection = null;
+			pendingCallback = null;
+		};
+
+		animateToOffset(targetOffset, pendingCallback);
+	}
+
+	// Snap to page based on current offset and velocity
+	function snapToPage() {
+		if (isAnimating || viewportWidth === 0) return;
+
+		const threshold = viewportWidth * SNAP_THRESHOLD;
+		const hasHighVelocity = Math.abs(velocity) > VELOCITY_THRESHOLD;
+
+		// Determine direction based on position and velocity
+		let targetPage: 'prev' | 'next' | 'current' = 'current';
+
+		if (offsetX > threshold || (hasHighVelocity && velocity > 0 && offsetX > 0)) {
+			targetPage = 'prev';
+		} else if (offsetX < -threshold || (hasHighVelocity && velocity < 0 && offsetX < 0)) {
+			targetPage = 'next';
+		}
+
+		isAnimating = true;
+		animatingDirection = targetPage === 'current' ? null : targetPage;
+
+		if (targetPage === 'prev') {
+			pendingCallback = () => {
+				viewStore.goToPrevious();
+				offsetX = 0;
+				isAnimating = false;
+				animatingDirection = null;
+				pendingCallback = null;
+			};
+			animateToOffset(viewportWidth, pendingCallback);
+		} else if (targetPage === 'next') {
+			pendingCallback = () => {
+				viewStore.goToNext();
+				offsetX = 0;
+				isAnimating = false;
+				animatingDirection = null;
+				pendingCallback = null;
+			};
+			animateToOffset(-viewportWidth, pendingCallback);
+		} else {
+			pendingCallback = () => {
+				isAnimating = false;
+				animatingDirection = null;
+				pendingCallback = null;
+			};
+			animateToOffset(0, pendingCallback);
+		}
+	}
+
+	function animateToOffset(targetX: number, onComplete: () => void) {
+		// Cancel any existing animation
+		if (animationFrameId !== null) {
+			cancelAnimationFrame(animationFrameId);
+		}
+
+		const startX = offsetX;
+		const distance = targetX - startX;
+		const direction = Math.sign(distance);
+		const absDistance = Math.abs(distance);
+
+		// If already at target, complete immediately
+		if (absDistance < 1) {
+			offsetX = targetX;
+			onComplete();
+			return;
+		}
+
+		let lastFrameTime = performance.now();
+
+		function tick() {
+			const now = performance.now();
+			const dt = now - lastFrameTime;
+			lastFrameTime = now;
+
+			// Move at constant speed
+			const step = ANIMATION_SPEED * dt * direction;
+			offsetX += step;
+
+			// Check if we've reached or passed the target
+			const reachedTarget =
+				(direction > 0 && offsetX >= targetX) || (direction < 0 && offsetX <= targetX);
+
+			if (reachedTarget) {
+				offsetX = targetX;
+				animationFrameId = null;
+				onComplete();
+			} else {
+				animationFrameId = requestAnimationFrame(tick);
+			}
+		}
+
+		animationFrameId = requestAnimationFrame(tick);
+	}
+
+	// Computed styles
 	let trackStyle = $derived(`transform: translateX(calc(-33.333% + ${offsetX}px))`);
 </script>
 
@@ -171,7 +317,7 @@
 			{/if}
 		</div>
 
-		<!-- Current View -->
+		<!-- Current View (main interactive view) -->
 		<div class="carousel-page current">
 			{#if viewStore.viewType === 'day'}
 				<DayView {onQuickCreate} {onEventClick} />
@@ -240,11 +386,13 @@
 		overflow: hidden;
 	}
 
+	/* Inactive pages have reduced interactivity for performance */
 	.carousel-page.inactive {
 		pointer-events: none;
 	}
 
 	.carousel-page.current {
+		/* Always interactive */
 		pointer-events: auto;
 	}
 </style>
