@@ -3,6 +3,8 @@
 	import type { Contact } from '$lib/api/contacts';
 	import type { SortField } from '$lib/components/SortToggle.svelte';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
+	import { isSidebarMode } from '$lib/stores/navigation';
+	import { contactsFilterStore } from '$lib/stores/filter.svelte';
 
 	interface Props {
 		contacts: Contact[];
@@ -25,6 +27,14 @@
 		sortField = 'lastName',
 		showNewContactCard = true,
 	}: Props = $props();
+
+	// Derived state for toolbar positioning
+	let isToolbarExpanded = $derived(!contactsFilterStore.isToolbarCollapsed);
+	let isAlphabetNavCollapsed = $derived(contactsFilterStore.isAlphabetNavCollapsed);
+
+	function toggleAlphabetNav() {
+		contactsFilterStore.toggleAlphabetNav();
+	}
 
 	function handleCheckboxClick(e: MouseEvent, id: string) {
 		e.stopPropagation();
@@ -251,28 +261,67 @@
 		{/each}
 	</div>
 
-	<!-- Alphabet Quick Jump (like DateStrip) -->
-	<div class="alphabet-nav">
-		<div class="alphabet-nav-container">
-			{#each alphabet as letter}
-				<button
-					type="button"
-					class="alphabet-nav-btn"
-					class:active={availableLetters.includes(letter)}
-					class:disabled={!availableLetters.includes(letter)}
-					onclick={() => availableLetters.includes(letter) && scrollToLetter(letter)}
-					disabled={!availableLetters.includes(letter)}
-				>
-					{letter}
-				</button>
-			{/each}
-			{#if availableLetters.includes('#')}
-				<button type="button" class="alphabet-nav-btn active" onclick={() => scrollToLetter('#')}>
-					#
-				</button>
-			{/if}
-		</div>
+	<!-- Alphabet FAB (when collapsed) - positioned left of InputBar -->
+	<div
+		class="alphabet-fab-container"
+		class:sidebar-mode={$isSidebarMode}
+		class:toolbar-expanded={isToolbarExpanded}
+	>
+		<button
+			onclick={toggleAlphabetNav}
+			class="alphabet-fab"
+			class:active={!isAlphabetNavCollapsed}
+			title={isAlphabetNavCollapsed
+				? 'Alphabet-Navigation öffnen'
+				: 'Alphabet-Navigation schließen'}
+		>
+			<svg class="fab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				{#if isAlphabetNavCollapsed}
+					<!-- ABC/Alphabet icon -->
+					<text x="3" y="17" font-size="12" font-weight="bold" fill="currentColor" stroke="none"
+						>AZ</text
+					>
+				{:else}
+					<!-- Chevron down icon -->
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M19 9l-7 7-7-7"
+					/>
+				{/if}
+			</svg>
+		</button>
 	</div>
+
+	<!-- Alphabet Quick Jump (like DateStrip) - hidden when collapsed -->
+	{#if !isAlphabetNavCollapsed}
+		<div
+			class="alphabet-nav"
+			class:sidebar-mode={$isSidebarMode}
+			class:toolbar-expanded={isToolbarExpanded}
+		>
+			<div class="alphabet-nav-container">
+				{#each alphabet as letter}
+					<button
+						type="button"
+						class="alphabet-nav-btn"
+						class:active={availableLetters.includes(letter)}
+						class:disabled={!availableLetters.includes(letter)}
+						onclick={() => availableLetters.includes(letter) && scrollToLetter(letter)}
+						disabled={!availableLetters.includes(letter)}
+					>
+						{letter}
+					</button>
+				{/each}
+				{#if availableLetters.includes('#')}
+					<button type="button" class="alphabet-nav-btn active" onclick={() => scrollToLetter('#')}>
+						#
+					</button>
+				{/if}
+			</div>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -491,6 +540,21 @@
 		container-name: alphabetnav;
 	}
 
+	/* When toolbar is expanded, push Alphabet-Nav up (+70px) */
+	.alphabet-nav.toolbar-expanded {
+		bottom: calc(210px + env(safe-area-inset-bottom, 0px));
+	}
+
+	/* When PillNav is in sidebar mode, only InputBar at bottom */
+	.alphabet-nav.sidebar-mode {
+		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+	}
+
+	/* Sidebar mode + toolbar expanded */
+	.alphabet-nav.sidebar-mode.toolbar-expanded {
+		bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+	}
+
 	.alphabet-nav-container {
 		display: flex;
 		flex-direction: row;
@@ -598,5 +662,79 @@
 
 	.new-contact-card .contact-name {
 		font-size: 0.875rem;
+	}
+
+	/* Alphabet FAB - positioned left of InputBar */
+	.alphabet-fab-container {
+		position: fixed;
+		bottom: calc(70px + 9px + env(safe-area-inset-bottom, 0px)); /* Align with InputBar */
+		left: calc(50% - 350px - 70px); /* Left of InputBar (max-width 700px / 2 + gap) */
+		z-index: 49; /* Below InputBar (90) and ExpandableToolbar FAB (91), above alphabet-nav (48) */
+		pointer-events: none;
+		transition: bottom 0.2s ease;
+	}
+
+	/* Responsive positioning for FAB */
+	@media (max-width: 900px) {
+		.alphabet-fab-container {
+			left: 1rem;
+		}
+	}
+
+	/* When toolbar is expanded, move FAB up */
+	.alphabet-fab-container.toolbar-expanded {
+		bottom: calc(140px + 9px + env(safe-area-inset-bottom, 0px));
+	}
+
+	/* Sidebar mode */
+	.alphabet-fab-container.sidebar-mode {
+		bottom: calc(9px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.alphabet-fab-container.sidebar-mode.toolbar-expanded {
+		bottom: calc(70px + 9px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.alphabet-fab {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 54px;
+		height: 54px;
+		cursor: pointer;
+		border: none;
+		transition: all 0.2s ease;
+		pointer-events: auto;
+		/* Glass pill styling */
+		background: hsl(var(--background) / 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid hsl(var(--border));
+		box-shadow: 0 2px 8px hsl(var(--foreground) / 0.08);
+		border-radius: 9999px;
+	}
+
+	.alphabet-fab:hover {
+		transform: scale(1.05);
+		box-shadow: 0 4px 12px hsl(var(--foreground) / 0.15);
+	}
+
+	.alphabet-fab.active {
+		background: hsl(var(--muted));
+	}
+
+	.alphabet-fab.active .fab-icon {
+		color: hsl(var(--primary));
+	}
+
+	.alphabet-fab .fab-icon {
+		width: 1.5rem;
+		height: 1.5rem;
+		color: hsl(var(--muted-foreground));
+		transition: color 0.2s ease;
+	}
+
+	.alphabet-fab:hover .fab-icon {
+		color: hsl(var(--foreground));
 	}
 </style>

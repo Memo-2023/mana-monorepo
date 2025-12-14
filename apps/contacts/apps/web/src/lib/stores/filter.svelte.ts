@@ -16,6 +16,7 @@ export interface ContactsFilterState {
 	selectedTagId: string | null;
 	selectedCompany: string | null;
 	isToolbarCollapsed: boolean;
+	isAlphabetNavCollapsed: boolean;
 	searchQuery: string;
 }
 
@@ -26,6 +27,7 @@ const DEFAULT_STATE: ContactsFilterState = {
 	selectedTagId: null,
 	selectedCompany: null,
 	isToolbarCollapsed: true,
+	isAlphabetNavCollapsed: false,
 	searchQuery: '',
 };
 
@@ -80,6 +82,9 @@ export const contactsFilterStore = {
 	get isToolbarCollapsed() {
 		return state.isToolbarCollapsed;
 	},
+	get isAlphabetNavCollapsed() {
+		return state.isAlphabetNavCollapsed;
+	},
 	get searchQuery() {
 		return state.searchQuery;
 	},
@@ -117,6 +122,16 @@ export const contactsFilterStore = {
 
 	toggleToolbar() {
 		state = { ...state, isToolbarCollapsed: !state.isToolbarCollapsed };
+		saveState(state);
+	},
+
+	setAlphabetNavCollapsed(value: boolean) {
+		state = { ...state, isAlphabetNavCollapsed: value };
+		saveState(state);
+	},
+
+	toggleAlphabetNav() {
+		state = { ...state, isAlphabetNavCollapsed: !state.isAlphabetNavCollapsed };
 		saveState(state);
 	},
 
