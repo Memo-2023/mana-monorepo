@@ -2,10 +2,16 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { networkStore, type SimulationNode } from '$lib/stores/network.svelte';
+	import { contactsFilterStore } from '$lib/stores/filter.svelte';
 	import { NetworkGraph, NetworkControls } from '@manacore/shared-ui';
 	import ContactDetailModal from '$lib/components/ContactDetailModal.svelte';
 	import { NetworkGraphSkeleton } from '$lib/components/skeletons';
 	import '$lib/i18n';
+
+	// Sync global search to network store
+	$effect(() => {
+		networkStore.setSearch(contactsFilterStore.searchQuery);
+	});
 
 	let graphComponent: NetworkGraph;
 	let controlsComponent: NetworkControls;
@@ -110,7 +116,7 @@
 	<div class="controls-wrapper">
 		<NetworkControls
 			bind:this={controlsComponent}
-			searchQuery={networkStore.searchQuery}
+			showSearch={false}
 			tags={networkStore.uniqueTags}
 			selectedTagId={networkStore.filterTagId}
 			subtitles={networkStore.uniqueCompanies}
@@ -120,9 +126,7 @@
 			linkCount={networkStore.links.length}
 			nodeLabel="Kontakte"
 			linkLabel="Verbindungen"
-			searchPlaceholder="Kontakt suchen..."
 			minStrength={networkStore.minStrength}
-			onSearch={handleSearch}
 			onTagFilter={handleTagFilter}
 			onSubtitleFilter={handleSubtitleFilter}
 			onStrengthFilter={handleStrengthFilter}
@@ -189,8 +193,9 @@
 	/* Floating Controls */
 	.controls-wrapper {
 		position: absolute;
-		top: 5rem; /* Below the nav */
-		left: 1rem;
+		top: 1rem;
+		left: 50%;
+		transform: translateX(-50%);
 		z-index: 10;
 		max-width: calc(100% - 2rem);
 	}
@@ -297,8 +302,8 @@
 
 	@media (max-width: 768px) {
 		.controls-wrapper {
-			top: 6rem; /* Larger nav on mobile */
-			width: calc(100% - 1rem);
+			top: 1rem;
+			width: calc(100% - 2rem);
 			max-width: none;
 		}
 	}

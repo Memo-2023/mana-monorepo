@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import type { Contact } from '$lib/api/contacts';
+	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 
 	interface Props {
 		contacts: Contact[];
@@ -9,6 +10,7 @@
 		selectionMode?: boolean;
 		selectedIds?: Set<string>;
 		onToggleSelection?: (id: string) => void;
+		showNewContactCard?: boolean;
 	}
 
 	let {
@@ -18,6 +20,7 @@
 		selectionMode = false,
 		selectedIds = new Set(),
 		onToggleSelection,
+		showNewContactCard = true,
 	}: Props = $props();
 
 	function getInitials(contact: Contact) {
@@ -41,6 +44,39 @@
 </script>
 
 <div class="space-y-2">
+	<!-- New Contact Card -->
+	{#if showNewContactCard && !selectionMode}
+		<div
+			role="button"
+			tabindex="0"
+			onclick={() => newContactModalStore.open()}
+			onkeydown={(e) => e.key === 'Enter' && newContactModalStore.open()}
+			class="contact-card new-contact-card w-full text-left cursor-pointer"
+		>
+			<!-- Plus Avatar -->
+			<div class="avatar new-contact-avatar">
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 4v16m8-8H4"
+					/>
+				</svg>
+			</div>
+
+			<!-- Text -->
+			<div class="flex-1 min-w-0">
+				<div class="font-medium text-foreground">
+					{$_('contacts.new')}
+				</div>
+				<div class="text-sm text-muted-foreground">
+					{$_('contacts.addFirst')}
+				</div>
+			</div>
+		</div>
+	{/if}
+
 	{#each contacts as contact (contact.id)}
 		<div
 			role="button"
@@ -153,5 +189,22 @@
 	:global(.contact-card.selected) {
 		background: hsl(var(--color-primary) / 0.1) !important;
 		border-color: hsl(var(--color-primary) / 0.3) !important;
+	}
+
+	/* New Contact Card */
+	.new-contact-card {
+		border-style: dashed;
+		border-color: hsl(var(--color-primary) / 0.4);
+		background: hsl(var(--color-primary) / 0.05);
+	}
+
+	.new-contact-card:hover {
+		border-color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.1);
+	}
+
+	.new-contact-avatar {
+		background: hsl(var(--color-primary) / 0.15);
+		color: hsl(var(--color-primary));
 	}
 </style>

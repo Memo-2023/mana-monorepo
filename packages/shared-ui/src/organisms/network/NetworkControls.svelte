@@ -15,6 +15,7 @@
 		linkLabel?: string;
 		searchPlaceholder?: string;
 		minStrength?: number;
+		showSearch?: boolean;
 		onSearch?: (query: string) => void;
 		onTagFilter?: (tagId: string | null) => void;
 		onSubtitleFilter?: (subtitle: string | null) => void;
@@ -39,6 +40,7 @@
 		linkLabel = 'Verbindungen',
 		searchPlaceholder = 'Suchen...',
 		minStrength = 0,
+		showSearch = true,
 		onSearch,
 		onTagFilter,
 		onSubtitleFilter,
@@ -122,22 +124,24 @@
 
 <div class="network-controls">
 	<!-- Search bar -->
-	<div class="search-container">
-		<Search size={18} class="search-icon" />
-		<input
-			bind:this={searchInputElement}
-			type="text"
-			placeholder={searchPlaceholder}
-			value={searchInput}
-			oninput={handleSearchInput}
-			class="search-input"
-		/>
-		{#if searchInput}
-			<button onclick={clearSearch} class="clear-btn" aria-label="Suche löschen">
-				<X size={16} />
-			</button>
-		{/if}
-	</div>
+	{#if showSearch}
+		<div class="search-container">
+			<Search size={18} class="search-icon" />
+			<input
+				bind:this={searchInputElement}
+				type="text"
+				placeholder={searchPlaceholder}
+				value={searchInput}
+				oninput={handleSearchInput}
+				class="search-input"
+			/>
+			{#if searchInput}
+				<button onclick={clearSearch} class="clear-btn" aria-label="Suche löschen">
+					<X size={16} />
+				</button>
+			{/if}
+		</div>
+	{/if}
 
 	<!-- Filter toggle -->
 	{#if tags.length > 0 || subtitles.length > 0}

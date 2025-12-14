@@ -49,6 +49,20 @@ export interface Contact {
 	birthday?: string | null;
 	notes?: string | null;
 	photoUrl?: string | null;
+	// Social Media
+	linkedin?: string | null;
+	twitter?: string | null;
+	facebook?: string | null;
+	instagram?: string | null;
+	xing?: string | null;
+	github?: string | null;
+	youtube?: string | null;
+	tiktok?: string | null;
+	telegram?: string | null;
+	whatsapp?: string | null;
+	signal?: string | null;
+	discord?: string | null;
+	bluesky?: string | null;
 	isFavorite: boolean;
 	isArchived: boolean;
 	organizationId?: string | null;

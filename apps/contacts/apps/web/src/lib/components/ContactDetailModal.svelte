@@ -36,6 +36,22 @@
 	let country = $state('');
 	let notes = $state('');
 
+	// Social Media
+	let linkedin = $state('');
+	let twitter = $state('');
+	let facebook = $state('');
+	let instagram = $state('');
+	let xing = $state('');
+	let github = $state('');
+	let youtube = $state('');
+	let tiktok = $state('');
+	let telegram = $state('');
+	let whatsapp = $state('');
+	let signal = $state('');
+	let discord = $state('');
+	let bluesky = $state('');
+	let socialSectionOpen = $state(false);
+
 	const initials = $derived(() => {
 		if (!contact) return '?';
 		const f = contact.firstName?.[0] || '';

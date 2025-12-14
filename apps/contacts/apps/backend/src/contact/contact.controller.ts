@@ -107,6 +107,72 @@ class CreateContactDto {
 	@IsOptional()
 	notes?: string;
 
+	// Social Media
+	@IsString()
+	@IsOptional()
+	@MaxLength(255)
+	linkedin?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	twitter?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(255)
+	facebook?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	instagram?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(255)
+	xing?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	github?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(255)
+	youtube?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	tiktok?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	telegram?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(50)
+	whatsapp?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(50)
+	signal?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	discord?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	bluesky?: string;
+
 	@IsUUID()
 	@IsOptional()
 	organizationId?: string;

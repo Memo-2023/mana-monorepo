@@ -88,6 +88,7 @@ export {
 	PillToolbar,
 	PillToolbarButton,
 	PillToolbarDivider,
+	ExpandableToolbar,
 } from './navigation';
 export type {
 	NavItem,
@@ -100,6 +101,7 @@ export type {
 	PillNavElement,
 	PillNavigationProps,
 	PillTabOption,
+	ExpandableToolbarProps,
 } from './navigation';
 
 // Settings

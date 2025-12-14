@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { onMount } from 'svelte';
+	import { fly } from 'svelte/transition';
 	import { tagsApi, type ContactTag, type Contact } from '$lib/api/contacts';
 
 	export type ContactFilter = 'all' | 'favorites' | 'hasPhone' | 'hasEmail' | 'incomplete';
@@ -36,6 +37,35 @@
 	let tags = $state<ContactTag[]>([]);
 	let showFilters = $state(false);
 	let loadingTags = $state(true);
+
+	// Portal action - moves element to body to escape overflow constraints
+	function portal(node: HTMLElement) {
+		document.body.appendChild(node);
+		return {
+			destroy() {
+				node.remove();
+			},
+		};
+	}
+
+	// For embedded mode: trigger button ref and dropdown position
+	let triggerRef: HTMLButtonElement | undefined = $state();
+	let dropdownPosition = $state({ top: 0, left: 0 });
+
+	function toggleFilters() {
+		if (!showFilters && triggerRef) {
+			const rect = triggerRef.getBoundingClientRect();
+			dropdownPosition = {
+				top: rect.top - 8, // Position above the button
+				left: rect.left + rect.width / 2, // Center horizontally
+			};
+		}
+		showFilters = !showFilters;
+	}
+
+	function closeFilters() {
+		showFilters = false;
+	}
 
 	// Extract unique companies from contacts
 	let companies = $derived.by(() => {
@@ -88,10 +118,11 @@
 	<!-- Embedded mode: just the button for use in a toolbar -->
 	<div class="filter-bar-embedded">
 		<button
+			bind:this={triggerRef}
 			type="button"
 			class="filter-toggle-embedded"
 			class:active={showFilters || activeFilterCount > 0}
-			onclick={() => (showFilters = !showFilters)}
+			onclick={toggleFilters}
 			title={$_('filters.title')}
 		>
 			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,9 +138,23 @@
 			{/if}
 		</button>
 
-		<!-- Dropdown panel for embedded mode -->
+		<!-- Portal: Backdrop for click-outside -->
 		{#if showFilters}
-			<div class="filter-dropdown">
+			<button
+				use:portal
+				type="button"
+				class="filter-backdrop"
+				onclick={closeFilters}
+				aria-label="Close filters"
+			></button>
+
+			<!-- Portal: Dropdown panel -->
+			<div
+				use:portal
+				class="filter-dropdown-portal"
+				style="top: {dropdownPosition.top}px; left: {dropdownPosition.left}px;"
+				transition:fly={{ duration: 150, y: 8 }}
+			>
 				<!-- Tags Filter -->
 				<div class="filter-section">
 					<label class="filter-label">{$_('filters.tag')}</label>
@@ -406,30 +451,94 @@
 		border-radius: 9999px;
 	}
 
-	.filter-dropdown {
-		position: absolute;
-		top: calc(100% + 0.5rem);
-		left: 50%;
-		transform: translateX(-50%);
-		min-width: 280px;
-		padding: 1rem;
-		background: rgba(255, 255, 255, 0.95);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		border-radius: 0.75rem;
-		box-shadow:
-			0 10px 25px -5px rgba(0, 0, 0, 0.1),
-			0 8px 10px -6px rgba(0, 0, 0, 0.1);
-		z-index: 50;
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
+	/* Portal backdrop - full screen invisible button for click-outside */
+	:global(.filter-backdrop) {
+		position: fixed;
+		inset: 0;
+		z-index: 99990;
+		background: transparent;
+		border: none;
+		cursor: default;
 	}
 
-	:global(.dark) .filter-dropdown {
-		background: rgba(30, 30, 30, 0.95);
-		border-color: rgba(255, 255, 255, 0.1);
+	/* Portal dropdown - unified with ContextMenu design */
+	:global(.filter-dropdown-portal) {
+		position: fixed;
+		transform: translate(-50%, -100%);
+		min-width: 280px;
+		max-width: 320px;
+		padding: 0.375rem;
+		background: var(--color-surface-elevated-3, hsl(var(--color-surface)));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: var(--radius-lg, 0.75rem);
+		box-shadow:
+			0 10px 25px -5px rgba(0, 0, 0, 0.15),
+			0 8px 10px -6px rgba(0, 0, 0, 0.1);
+		z-index: 99991;
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	/* Portal dropdown sections - unified with ContextMenu item design */
+	:global(.filter-dropdown-portal) .filter-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding: 0.375rem 0.5rem;
+		border-radius: var(--radius-md, 0.5rem);
+	}
+
+	:global(.filter-dropdown-portal) .filter-label {
+		font-size: 0.6875rem;
+		font-weight: 600;
+		color: hsl(var(--color-muted-foreground));
+		text-transform: uppercase;
+		letter-spacing: 0.025em;
+	}
+
+	:global(.filter-dropdown-portal) .filter-select {
+		width: 100%;
+		padding: 0.5rem 0.625rem;
+		font-size: 0.8125rem;
+		color: hsl(var(--color-foreground));
+		background: hsl(var(--color-muted) / 0.5);
+		border: 1px solid transparent;
+		border-radius: var(--radius-md, 0.5rem);
+		cursor: pointer;
+		transition: all 100ms ease;
+	}
+
+	:global(.filter-dropdown-portal) .filter-select:hover {
+		background: hsl(var(--color-muted));
+	}
+
+	:global(.filter-dropdown-portal) .filter-select:focus {
+		outline: none;
+		border-color: hsl(var(--color-primary) / 0.5);
+		background: hsl(var(--color-muted));
+	}
+
+	:global(.filter-dropdown-portal) .clear-filters-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		margin-top: 0.25rem;
+		padding: 0.5rem 0.625rem;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: hsl(var(--color-muted-foreground));
+		background: transparent;
+		border: none;
+		border-radius: var(--radius-md, 0.5rem);
+		cursor: pointer;
+		transition: all 100ms ease;
+	}
+
+	:global(.filter-dropdown-portal) .clear-filters-btn:hover {
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
 	}
 
 	/* Standard mode styles */

@@ -3,9 +3,8 @@
 	import { _ } from 'svelte-i18n';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
+	import { contactsFilterStore } from '$lib/stores/filter.svelte';
 	import { goto } from '$app/navigation';
-	import type { ContactFilter, BirthdayFilter } from '$lib/components/FilterBar.svelte';
-	import ContactsToolbar, { type SortField } from '$lib/components/ContactsToolbar.svelte';
 	import ContactListView from '$lib/components/views/ContactListView.svelte';
 	import ContactGridView from '$lib/components/views/ContactGridView.svelte';
 	import ContactAlphabetView from '$lib/components/views/ContactAlphabetView.svelte';
@@ -13,20 +12,9 @@
 	import { batchApi } from '$lib/api/batch';
 	import { toasts } from '$lib/stores/toast';
 
-	let searchQuery = $state('');
-	let sortField = $state<SortField>('lastName');
-	let searchTimeout: ReturnType<typeof setTimeout>;
-
 	// Infinite scroll
-	let scrollContainer: HTMLDivElement;
 	let intersectionObserver: IntersectionObserver | null = null;
 	let loadMoreTrigger: HTMLDivElement;
-
-	// Filter state
-	let selectedTagId = $state<string | null>(null);
-	let contactFilter = $state<ContactFilter>('all');
-	let birthdayFilter = $state<BirthdayFilter>('all');
-	let selectedCompany = $state<string | null>(null);
 
 	// Batch selection state
 	let selectionMode = $state(false);
@@ -73,11 +61,31 @@
 		return !contact.phone && !contact.mobile && !contact.email;
 	}
 
-	// Filtered and sorted contacts
+	// Filtered and sorted contacts (using filter store)
 	let filteredContacts = $derived.by(() => {
 		let result = [...contactsStore.contacts];
 
-		// Apply contact filter
+		// Apply search filter from InputBar
+		const searchQuery = contactsFilterStore.searchQuery?.toLowerCase().trim();
+		if (searchQuery) {
+			result = result.filter((c) => {
+				const searchFields = [
+					c.firstName,
+					c.lastName,
+					c.displayName,
+					c.nickname,
+					c.company,
+					c.email,
+					c.phone,
+					c.mobile,
+					c.city,
+				];
+				return searchFields.some((field) => field?.toLowerCase().includes(searchQuery));
+			});
+		}
+
+		// Apply contact filter from store
+		const contactFilter = contactsFilterStore.contactFilter;
 		if (contactFilter === 'favorites') {
 			result = result.filter((c) => c.isFavorite);
 		} else if (contactFilter === 'hasPhone') {
@@ -88,7 +96,8 @@
 			result = result.filter((c) => isContactIncomplete(c));
 		}
 
-		// Apply birthday filter
+		// Apply birthday filter from store
+		const birthdayFilter = contactsFilterStore.birthdayFilter;
 		if (birthdayFilter === 'today') {
 			result = result.filter((c) => isBirthdayToday(c.birthday));
 		} else if (birthdayFilter === 'thisWeek') {
@@ -97,7 +106,8 @@
 			result = result.filter((c) => isBirthdayThisMonth(c.birthday));
 		}
 
-		// Apply company filter
+		// Apply company filter from store
+		const selectedCompany = contactsFilterStore.selectedCompany;
 		if (selectedCompany) {
 			result = result.filter((c) => c.company === selectedCompany);
 		}
@@ -105,8 +115,9 @@
 		return result;
 	});
 
-	// Sorted contacts based on selected sort field
+	// Sorted contacts based on selected sort field from store
 	let sortedContacts = $derived.by(() => {
+		const sortField = contactsFilterStore.sortField;
 		return [...filteredContacts].sort((a, b) => {
 			const aValue =
 				(sortField === 'firstName'
@@ -121,14 +132,6 @@
 			return aValue.localeCompare(bValue, 'de');
 		});
 	});
-
-	function handleSearch() {
-		clearTimeout(searchTimeout);
-		searchTimeout = setTimeout(() => {
-			contactsStore.setSearch(searchQuery);
-			contactsStore.loadContacts();
-		}, 300);
-	}
 
 	async function handleToggleFavorite(e: MouseEvent, id: string) {
 		e.stopPropagation();
@@ -266,6 +269,21 @@
 			intersectionObserver.observe(loadMoreTrigger);
 		}
 	});
+
+	// Reload contacts when tag filter changes (tag filtering is server-side)
+	let lastTagId: string | null = null;
+	$effect(() => {
+		const currentTagId = contactsFilterStore.selectedTagId;
+		if (currentTagId !== lastTagId) {
+			lastTagId = currentTagId;
+			if (currentTagId) {
+				contactsStore.setTagId(currentTagId);
+			} else {
+				contactsStore.setTagId(undefined);
+			}
+			contactsStore.loadContacts();
+		}
+	});
 </script>
 
 <div class="space-y-6">
@@ -349,55 +367,6 @@
 		</div>
 	{/if}
 
-	<!-- Search Bar -->
-	<div class="relative">
-		<input
-			type="text"
-			placeholder={$_('contacts.search')}
-			bind:value={searchQuery}
-			oninput={handleSearch}
-			class="input w-full pl-10"
-		/>
-		<svg
-			class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
-			fill="none"
-			stroke="currentColor"
-			viewBox="0 0 24 24"
-		>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-			/>
-		</svg>
-	</div>
-
-	<!-- Unified Toolbar -->
-	<ContactsToolbar
-		contacts={contactsStore.contacts}
-		{sortField}
-		onSortFieldChange={(v) => (sortField = v)}
-		{contactFilter}
-		onContactFilterChange={(f) => (contactFilter = f)}
-		{birthdayFilter}
-		onBirthdayFilterChange={(f) => (birthdayFilter = f)}
-		{selectedTagId}
-		onTagChange={(id) => {
-			selectedTagId = id;
-			if (id) {
-				contactsStore.setTagId(id);
-			} else {
-				contactsStore.setTagId(undefined);
-			}
-			contactsStore.loadContacts();
-		}}
-		{selectedCompany}
-		onCompanyChange={(c) => (selectedCompany = c)}
-		{selectionMode}
-		onToggleSelectionMode={toggleSelectionMode}
-	/>
-
 	<!-- Loading state with skeleton -->
 	{#if contactsStore.loading}
 		{#if viewModeStore.mode === 'grid'}
@@ -434,7 +403,7 @@
 				{selectionMode}
 				{selectedIds}
 				onToggleSelection={toggleSelection}
-				{sortField}
+				sortField={contactsFilterStore.sortField}
 			/>
 		{:else}
 			<ContactListView
