@@ -13,6 +13,7 @@ import { userSettings } from './user-settings.svelte';
 export type WeekStartDay = 0 | 1; // 0 = Sunday, 1 = Monday
 export type TimeFormat = '24h' | '12h';
 export type AllDayDisplayMode = 'header' | 'block'; // header = separate row, block = full day block in grid
+export type WeekdayFormat = 'full' | 'short' | 'hidden';
 
 export interface CalendarAppSettings {
 	// View settings
@@ -25,6 +26,12 @@ export interface CalendarAppSettings {
 	dayStartHour: number; // First visible hour (0-23)
 	dayEndHour: number; // Last visible hour (0-23)
 	allDayDisplayMode: AllDayDisplayMode; // How to display all-day events
+
+	// Header settings
+	headerCompact: boolean; // Compact header display
+	headerWeekdayFormat: WeekdayFormat; // Weekday display format
+	headerShowDate: boolean; // Show date in header
+	headerAlwaysShowMonth: boolean; // Always show month (e.g., "13.12.")
 
 	// DateStrip settings
 	dateStripShowMoonPhases: boolean; // Show moon phase indicators
@@ -61,6 +68,11 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	dayStartHour: 6,
 	dayEndHour: 20,
 	allDayDisplayMode: 'header',
+	// Header defaults
+	headerCompact: false,
+	headerWeekdayFormat: 'full',
+	headerShowDate: true,
+	headerAlwaysShowMonth: false,
 	// DateStrip defaults
 	dateStripShowMoonPhases: true,
 	dateStripShowEventIndicators: true,
@@ -174,6 +186,19 @@ export const settingsStore = {
 	},
 	get allDayDisplayMode() {
 		return settings.allDayDisplayMode;
+	},
+	// Header settings
+	get headerCompact() {
+		return settings.headerCompact;
+	},
+	get headerWeekdayFormat() {
+		return settings.headerWeekdayFormat;
+	},
+	get headerShowDate() {
+		return settings.headerShowDate;
+	},
+	get headerAlwaysShowMonth() {
+		return settings.headerAlwaysShowMonth;
 	},
 	// DateStrip settings
 	get dateStripShowMoonPhases() {
