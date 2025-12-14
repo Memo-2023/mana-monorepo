@@ -6,18 +6,15 @@
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
+	import {
+		useVisibleHours,
+		useCurrentTimeIndicator,
+	} from '$lib/composables/useVisibleHours.svelte';
+	import { toDate } from '$lib/utils/eventDateHelpers';
 	import TaskBlock from './TaskBlock.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import { goto } from '$app/navigation';
-	import {
-		format,
-		isToday,
-		parseISO,
-		differenceInMinutes,
-		addMinutes,
-		setHours,
-		setMinutes,
-	} from 'date-fns';
+	import { format, isToday, differenceInMinutes, addMinutes, setHours, setMinutes } from 'date-fns';
 	import { de } from 'date-fns/locale';
 
 	import type { CalendarEvent } from '@calendar/shared';
@@ -34,41 +31,19 @@
 	const HOUR_HEIGHT = 60; // pixels per hour
 	const SNAP_MINUTES = 15; // snap to 15-minute intervals
 
-	// Generate hours (filtered based on settings)
-	let allHours = Array.from({ length: 24 }, (_, i) => i);
-	let hours = $derived(
-		settingsStore.filterHoursEnabled
-			? allHours.filter((h) => h >= settingsStore.dayStartHour && h < settingsStore.dayEndHour)
-			: allHours
-	);
+	// Use composables for hour filtering and time indicator
+	const visibleHours = useVisibleHours();
+	const timeIndicator = useCurrentTimeIndicator();
 
-	// Calculate visible hours range for positioning
-	let firstVisibleHour = $derived(
-		settingsStore.filterHoursEnabled ? settingsStore.dayStartHour : 0
-	);
-	let lastVisibleHour = $derived(settingsStore.filterHoursEnabled ? settingsStore.dayEndHour : 24);
-	let totalVisibleHours = $derived(lastVisibleHour - firstVisibleHour);
-
-	// Helper to convert minutes to percentage position (accounting for hidden hours)
-	function minutesToPercent(minutes: number): number {
-		const adjustedMinutes = minutes - firstVisibleHour * 60;
-		return (adjustedMinutes / (totalVisibleHours * 60)) * 100;
-	}
+	// Destructure for convenience (these are reactive getters)
+	let hours = $derived(visibleHours.hours);
+	let firstVisibleHour = $derived(visibleHours.firstVisibleHour);
+	let lastVisibleHour = $derived(visibleHours.lastVisibleHour);
+	let totalVisibleHours = $derived(visibleHours.totalVisibleHours);
+	const minutesToPercent = visibleHours.minutesToPercent;
 
 	// Current time indicator position
-	let now = $state(new Date());
-	let currentTimePosition = $derived.by(() => {
-		const minutes = now.getHours() * 60 + now.getMinutes();
-		return minutesToPercent(minutes);
-	});
-
-	// Update current time every minute
-	$effect(() => {
-		const interval = setInterval(() => {
-			now = new Date();
-		}, 60000);
-		return () => clearInterval(interval);
-	});
+	let currentTimePosition = $derived(minutesToPercent(timeIndicator.currentMinutes));
 
 	// Get timed events, filtering out those outside visible range when hour filter is enabled
 	let timedEvents = $derived.by(() => {
@@ -79,9 +54,8 @@
 			const visibleEndMinutes = settingsStore.dayEndHour * 60;
 
 			return allEvents.filter((event) => {
-				const start =
-					typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-				const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+				const start = toDate(event.startTime);
+				const end = toDate(event.endTime);
 
 				const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
 				const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
@@ -108,9 +82,8 @@
 		const visibleEndMinutes = settingsStore.dayEndHour * 60;
 
 		for (const event of allEvents) {
-			const start =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-			const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+			const start = toDate(event.startTime);
+			const end = toDate(event.endTime);
 
 			const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
 			const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
@@ -212,8 +185,8 @@
 		e.preventDefault();
 		e.stopPropagation();
 
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
 		const duration = differenceInMinutes(end, start);
 
@@ -257,14 +230,8 @@
 			Math.min(newStartMinutes, lastVisibleHour * 60 - 30)
 		);
 
-		const start =
-			typeof draggedEvent.startTime === 'string'
-				? parseISO(draggedEvent.startTime)
-				: draggedEvent.startTime;
-		const end =
-			typeof draggedEvent.endTime === 'string'
-				? parseISO(draggedEvent.endTime)
-				: draggedEvent.endTime;
+		const start = toDate(draggedEvent.startTime);
+		const end = toDate(draggedEvent.endTime);
 		const duration = differenceInMinutes(end, start);
 
 		// Create new start time on same day
@@ -303,8 +270,8 @@
 		resizeEdge = edge;
 		hasMoved = false;
 
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 		resizeOriginalStart = start;
 		resizeOriginalEnd = end;
 
@@ -647,8 +614,8 @@
 	// Event Styling
 	// ============================================================================
 	function getEventStyle(event: CalendarEvent) {
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
 		const duration = differenceInMinutes(end, start);
@@ -840,14 +807,8 @@
 					></div>
 
 					<span class="event-time">
-						{format(
-							typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime,
-							'HH:mm'
-						)} -
-						{format(
-							typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime,
-							'HH:mm'
-						)}
+						{format(toDate(event.startTime), 'HH:mm')} -
+						{format(toDate(event.endTime), 'HH:mm')}
 					</span>
 					<span class="event-title">{event.title || (isDraft ? '(Neuer Termin)' : '')}</span>
 					{#if event.location}
@@ -893,10 +854,7 @@
 						<div
 							class="overflow-line"
 							style="background-color: {calendarsStore.getColor(event.calendarId)}"
-							title="{format(
-								typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime,
-								'HH:mm'
-							)} {event.title}"
+							title="{format(toDate(event.startTime), 'HH:mm')} {event.title}"
 						></div>
 					{/each}
 				</div>
@@ -910,10 +868,7 @@
 						<div
 							class="overflow-line"
 							style="background-color: {calendarsStore.getColor(event.calendarId)}"
-							title="{format(
-								typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime,
-								'HH:mm'
-							)} {event.title}"
+							title="{format(toDate(event.startTime), 'HH:mm')} {event.title}"
 						></div>
 					{/each}
 				</div>

@@ -22,6 +22,7 @@
 		isBefore,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { toDate } from '$lib/utils/eventDateHelpers';
 	import { CheckSquare, AlertTriangle, Plus } from 'lucide-svelte';
 
 	// State
@@ -47,8 +48,7 @@
 			const currentEvents = eventsStore.events ?? [];
 			if (Array.isArray(currentEvents)) {
 				for (const event of currentEvents) {
-					const start =
-						typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+					const start = toDate(event.startTime);
 					const dateKey = format(start, 'yyyy-MM-dd');
 
 					if (!groups.has(dateKey)) {
@@ -100,14 +100,8 @@
 
 					// Sort events by time
 					if (a.type === 'event' && b.type === 'event' && a.event && b.event) {
-						const aStart =
-							typeof a.event.startTime === 'string'
-								? parseISO(a.event.startTime)
-								: a.event.startTime;
-						const bStart =
-							typeof b.event.startTime === 'string'
-								? parseISO(b.event.startTime)
-								: b.event.startTime;
+						const aStart = toDate(a.event.startTime);
+						const bStart = toDate(b.event.startTime);
 						return aStart.getTime() - bStart.getTime();
 					}
 

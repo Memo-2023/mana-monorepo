@@ -7,39 +7,55 @@ interface SearchItem {
 	[key: string]: unknown;
 }
 
-class SearchStore {
-	// Current search query
-	query = $state('');
+// State
+let query = $state('');
+let matchingEventIds = $state<Set<string>>(new Set());
+let isSearching = $state(false);
 
-	// Event IDs that match the search
-	matchingEventIds = $state<Set<string>>(new Set());
-
-	// Whether search is active (user is typing in InputBar)
-	isSearching = $state(false);
-
-	// Set search query and matching items (events or any items with an id)
-	setSearch(query: string, matchingItems: SearchItem[]) {
-		this.query = query;
-		this.matchingEventIds = new Set(matchingItems.map((item) => item.id));
-		this.isSearching = query.trim().length > 0;
-	}
-
-	// Clear search
-	clear() {
-		this.query = '';
-		this.matchingEventIds = new Set();
-		this.isSearching = false;
-	}
-
-	// Check if an event matches the search
-	isEventHighlighted(eventId: string): boolean {
-		return this.isSearching && this.matchingEventIds.has(eventId);
-	}
-
-	// Check if an event should be dimmed (search active but event doesn't match)
-	isEventDimmed(eventId: string): boolean {
-		return this.isSearching && !this.matchingEventIds.has(eventId);
-	}
+/**
+ * Set search query and matching items (events or any items with an id)
+ */
+function setSearch(newQuery: string, matchingItems: SearchItem[]) {
+	query = newQuery;
+	matchingEventIds = new Set(matchingItems.map((item) => item.id));
+	isSearching = newQuery.trim().length > 0;
 }
 
-export const searchStore = new SearchStore();
+/**
+ * Clear search
+ */
+function clear() {
+	query = '';
+	matchingEventIds = new Set();
+	isSearching = false;
+}
+
+/**
+ * Check if an event matches the search
+ */
+function isEventHighlighted(eventId: string): boolean {
+	return isSearching && matchingEventIds.has(eventId);
+}
+
+/**
+ * Check if an event should be dimmed (search active but event doesn't match)
+ */
+function isEventDimmed(eventId: string): boolean {
+	return isSearching && !matchingEventIds.has(eventId);
+}
+
+export const searchStore = {
+	get query() {
+		return query;
+	},
+	get matchingEventIds() {
+		return matchingEventIds;
+	},
+	get isSearching() {
+		return isSearching;
+	},
+	setSearch,
+	clear,
+	isEventHighlighted,
+	isEventDimmed,
+};

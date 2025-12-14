@@ -15,7 +15,8 @@
 		EventAttendee,
 		ResponsiblePerson,
 	} from '@calendar/shared';
-	import { format, addMinutes, parseISO } from 'date-fns';
+	import { format, addMinutes } from 'date-fns';
+	import { toDate } from '$lib/utils/eventDateHelpers';
 
 	interface Props {
 		mode: 'create' | 'edit';
@@ -104,9 +105,8 @@
 	// Initialize date/time fields using settings for default duration
 	$effect(() => {
 		if (event) {
-			const start =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-			const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+			const start = toDate(event.startTime);
+			const end = toDate(event.endTime);
 			startDate = format(start, 'yyyy-MM-dd');
 			startTime = format(start, 'HH:mm');
 			endDate = format(end, 'yyyy-MM-dd');

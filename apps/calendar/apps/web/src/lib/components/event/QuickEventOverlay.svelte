@@ -3,7 +3,7 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toast.svelte';
 	import type {
 		LocationDetails,
 		CalendarEvent,
@@ -13,8 +13,9 @@
 	import type { ContactSummary, ContactOrManual, ManualContactEntry } from '@manacore/shared-types';
 	import { ContactSelector, ContactAvatar } from '@manacore/shared-ui';
 	import { Users } from 'lucide-svelte';
-	import { format, addMinutes, parseISO } from 'date-fns';
+	import { format, addMinutes } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { toDate } from '$lib/utils/eventDateHelpers';
 	import { tick, onMount, onDestroy } from 'svelte';
 
 	// Portal action - moves element to body to escape stacking contexts
@@ -246,9 +247,8 @@
 			attendees = event.metadata?.attendees || [];
 
 			// Initialize time fields
-			const eventStart =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-			const eventEnd = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+			const eventStart = toDate(event.startTime);
+			const eventEnd = toDate(event.endTime);
 			startDateStr = format(eventStart, 'yyyy-MM-dd');
 			startTimeStr = format(eventStart, 'HH:mm');
 			endDateStr = format(eventEnd, 'yyyy-MM-dd');
@@ -259,7 +259,7 @@
 	// Date/time fields - derive from draft event (create mode) or event (edit mode)
 	let draftStart = $derived(() => {
 		if (isEditMode && event) {
-			return typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+			return toDate(event.startTime);
 		}
 		const draft = eventsStore.draftEvent;
 		if (draft) {
@@ -270,7 +270,7 @@
 
 	let draftEnd = $derived(() => {
 		if (isEditMode && event) {
-			return typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+			return toDate(event.endTime);
 		}
 		const draft = eventsStore.draftEvent;
 		if (draft) {

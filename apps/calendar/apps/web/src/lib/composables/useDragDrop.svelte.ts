@@ -4,7 +4,8 @@
  */
 
 import type { CalendarEvent } from '@calendar/shared';
-import { parseISO, differenceInMinutes, addMinutes, setHours, setMinutes } from 'date-fns';
+import { differenceInMinutes, addMinutes, setHours, setMinutes } from 'date-fns';
+import { toDate } from '$lib/utils/eventDateHelpers';
 import { eventsStore } from '$lib/stores/events.svelte';
 
 export interface DragDropConfig {
@@ -107,8 +108,8 @@ export function useDragDrop(getConfig: () => DragDropConfig) {
 		draggedEvent = event;
 		hasMoved = false;
 
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 		const duration = differenceInMinutes(end, start);
 
 		// Calculate initial preview position
@@ -158,14 +159,8 @@ export function useDragDrop(getConfig: () => DragDropConfig) {
 		}
 
 		const config = getConfig();
-		const start =
-			typeof draggedEvent.startTime === 'string'
-				? parseISO(draggedEvent.startTime)
-				: draggedEvent.startTime;
-		const end =
-			typeof draggedEvent.endTime === 'string'
-				? parseISO(draggedEvent.endTime)
-				: draggedEvent.endTime;
+		const start = toDate(draggedEvent.startTime);
+		const end = toDate(draggedEvent.endTime);
 		const duration = differenceInMinutes(end, start);
 
 		// Calculate new start time

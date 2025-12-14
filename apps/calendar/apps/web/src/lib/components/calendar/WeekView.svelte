@@ -6,17 +6,20 @@
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
+	import {
+		useVisibleHours,
+		useCurrentTimeIndicator,
+	} from '$lib/composables/useVisibleHours.svelte';
+	import { toDate } from '$lib/utils/eventDateHelpers';
 	import TaskBlock from './TaskBlock.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import { goto } from '$app/navigation';
 	import {
 		format,
 		eachDayOfInterval,
-		startOfDay,
 		isToday,
 		isWeekend,
 		isSameDay,
-		parseISO,
 		differenceInMinutes,
 		addMinutes,
 		setHours,
@@ -63,41 +66,19 @@
 		getWeek(viewStore.viewRange.start, { weekStartsOn: settingsStore.weekStartsOn })
 	);
 
-	// Generate hours (filtered based on settings)
-	let allHours = Array.from({ length: 24 }, (_, i) => i);
-	let hours = $derived(
-		settingsStore.filterHoursEnabled
-			? allHours.filter((h) => h >= settingsStore.dayStartHour && h < settingsStore.dayEndHour)
-			: allHours
-	);
+	// Use composables for hour filtering and time indicator
+	const visibleHours = useVisibleHours();
+	const timeIndicator = useCurrentTimeIndicator();
 
-	// Calculate visible hours range for positioning
-	let firstVisibleHour = $derived(
-		settingsStore.filterHoursEnabled ? settingsStore.dayStartHour : 0
-	);
-	let lastVisibleHour = $derived(settingsStore.filterHoursEnabled ? settingsStore.dayEndHour : 24);
-	let totalVisibleHours = $derived(lastVisibleHour - firstVisibleHour);
-
-	// Helper to convert minutes to percentage position (accounting for hidden hours)
-	function minutesToPercent(minutes: number): number {
-		const adjustedMinutes = minutes - firstVisibleHour * 60;
-		return (adjustedMinutes / (totalVisibleHours * 60)) * 100;
-	}
+	// Destructure for convenience (these are reactive getters)
+	let hours = $derived(visibleHours.hours);
+	let firstVisibleHour = $derived(visibleHours.firstVisibleHour);
+	let lastVisibleHour = $derived(visibleHours.lastVisibleHour);
+	let totalVisibleHours = $derived(visibleHours.totalVisibleHours);
+	const minutesToPercent = visibleHours.minutesToPercent;
 
 	// Current time indicator position
-	let now = $state(new Date());
-	let currentTimePosition = $derived.by(() => {
-		const minutes = now.getHours() * 60 + now.getMinutes();
-		return minutesToPercent(minutes);
-	});
-
-	// Update current time every minute
-	$effect(() => {
-		const interval = setInterval(() => {
-			now = new Date();
-		}, 60000);
-		return () => clearInterval(interval);
-	});
+	let currentTimePosition = $derived(minutesToPercent(timeIndicator.currentMinutes));
 
 	// Drag & Drop State
 	let isDragging = $state(false);
@@ -145,9 +126,8 @@
 			const visibleEndMinutes = settingsStore.dayEndHour * 60;
 
 			return allEvents.filter((event) => {
-				const start =
-					typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-				const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+				const start = toDate(event.startTime);
+				const end = toDate(event.endTime);
 
 				const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
 				const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
@@ -174,9 +154,8 @@
 		const visibleEndMinutes = settingsStore.dayEndHour * 60;
 
 		for (const event of allEvents) {
-			const start =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-			const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+			const start = toDate(event.startTime);
+			const end = toDate(event.endTime);
 
 			const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
 			const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
@@ -221,8 +200,8 @@
 	);
 
 	function getEventStyle(event: CalendarEvent) {
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
 		const duration = differenceInMinutes(end, start);
@@ -267,8 +246,7 @@
 	}
 
 	function formatEventTime(date: Date | string): string {
-		const d = typeof date === 'string' ? parseISO(date) : date;
-		return settingsStore.formatTime(d);
+		return settingsStore.formatTime(toDate(date));
 	}
 
 	function handleEventClick(event: CalendarEvent, e: MouseEvent) {
@@ -354,8 +332,8 @@
 		draggedEvent = event;
 		hasMoved = false;
 
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 		const duration = differenceInMinutes(end, start);
 
 		// Calculate initial preview position
@@ -405,14 +383,8 @@
 			return;
 		}
 
-		const start =
-			typeof draggedEvent.startTime === 'string'
-				? parseISO(draggedEvent.startTime)
-				: draggedEvent.startTime;
-		const end =
-			typeof draggedEvent.endTime === 'string'
-				? parseISO(draggedEvent.endTime)
-				: draggedEvent.endTime;
+		const start = toDate(draggedEvent.startTime);
+		const end = toDate(draggedEvent.endTime);
 		const duration = differenceInMinutes(end, start);
 
 		// Calculate new start time
@@ -458,8 +430,8 @@
 		resizeEdge = edge;
 		hasMoved = false;
 
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 
 		resizeOriginalStart = start;
 		resizeOriginalEnd = end;

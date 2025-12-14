@@ -59,7 +59,6 @@ export function createApiClient(config: ApiClientConfig) {
 			}
 
 			const url = `${baseUrl}${apiPrefix}${endpoint}`;
-			console.log(`[API Client] ${method} ${url}`, { hasToken: !!authToken });
 
 			const response = await fetch(url, {
 				method,

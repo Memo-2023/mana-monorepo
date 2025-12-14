@@ -6,6 +6,7 @@
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import { format, parseISO, isToday, isTomorrow, startOfDay } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { toDate } from '$lib/utils/eventDateHelpers';
 	import type { CalendarEvent } from '@calendar/shared';
 
 	interface Props {
@@ -25,8 +26,7 @@
 		const groups: Map<string, CalendarEvent[]> = new Map();
 
 		for (const event of currentEvents) {
-			const start =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+			const start = toDate(event.startTime);
 
 			// Skip events before the start date
 			if (start < startDate) continue;
@@ -45,8 +45,8 @@
 			.map(([dateKey, events]) => ({
 				date: parseISO(dateKey),
 				events: events.sort((a, b) => {
-					const aStart = typeof a.startTime === 'string' ? parseISO(a.startTime) : a.startTime;
-					const bStart = typeof b.startTime === 'string' ? parseISO(b.startTime) : b.startTime;
+					const aStart = toDate(a.startTime);
+					const bStart = toDate(b.startTime);
 					return aStart.getTime() - bStart.getTime();
 				}),
 			}));
@@ -118,13 +118,8 @@
 										{#if event.isAllDay}
 											Ganztägig
 										{:else}
-											{format(
-												typeof event.startTime === 'string'
-													? parseISO(event.startTime)
-													: event.startTime,
-												'HH:mm'
-											)} - {format(
-												typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime,
+											{format(toDate(event.startTime), 'HH:mm')} - {format(
+												toDate(event.endTime),
 												'HH:mm'
 											)}
 										{/if}

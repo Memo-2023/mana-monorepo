@@ -4,7 +4,8 @@
 
 import type { CalendarEvent, CreateEventInput, UpdateEventInput } from '@calendar/shared';
 import * as api from '$lib/api/events';
-import { format, isWithinInterval, parseISO, isSameDay } from 'date-fns';
+import { format, isWithinInterval, isSameDay } from 'date-fns';
+import { toDate } from '$lib/utils/eventDateHelpers';
 import { toastStore } from './toast.svelte';
 
 // State
@@ -68,9 +69,8 @@ export const eventsStore = {
 		if (!Array.isArray(currentEvents)) return [];
 
 		const result = currentEvents.filter((event) => {
-			const eventStart =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-			const eventEnd = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+			const eventStart = toDate(event.startTime);
+			const eventEnd = toDate(event.endTime);
 
 			// For all-day events, check if day falls within event range
 			if (event.isAllDay) {
@@ -86,10 +86,7 @@ export const eventsStore = {
 
 		// Include draft event if it exists and is on this day
 		if (includeDraft && draftEvent) {
-			const draftStart =
-				typeof draftEvent.startTime === 'string'
-					? parseISO(draftEvent.startTime)
-					: draftEvent.startTime;
+			const draftStart = toDate(draftEvent.startTime);
 			if (isSameDay(date, draftStart)) {
 				result.push(draftEvent);
 			}
@@ -107,9 +104,8 @@ export const eventsStore = {
 		if (!Array.isArray(currentEvents)) return [];
 
 		return currentEvents.filter((event) => {
-			const eventStart =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-			const eventEnd = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+			const eventStart = toDate(event.startTime);
+			const eventEnd = toDate(event.endTime);
 
 			// Check if event overlaps with the range
 			return eventStart <= end && eventEnd >= start;

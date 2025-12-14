@@ -11,11 +11,11 @@
 		eachDayOfInterval,
 		isSameMonth,
 		isToday,
-		parseISO,
 		setHours,
 		setMinutes,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { toDate } from '$lib/utils/eventDateHelpers';
 	import type { CalendarViewType, CalendarEvent } from '@calendar/shared';
 
 	interface Props {
@@ -58,8 +58,7 @@
 		const events = eventsStore.events ?? [];
 
 		for (const event of events) {
-			const start =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+			const start = toDate(event.startTime);
 			const key = format(start, 'yyyy-MM-dd');
 			counts.set(key, (counts.get(key) || 0) + 1);
 		}

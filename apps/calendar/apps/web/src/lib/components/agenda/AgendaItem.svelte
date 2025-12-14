@@ -7,8 +7,9 @@
 	import TodoCheckbox from '$lib/components/todo/TodoCheckbox.svelte';
 	import PriorityBadge from '$lib/components/todo/PriorityBadge.svelte';
 	import { Calendar, MapPin, Clock } from 'lucide-svelte';
-	import { format, parseISO } from 'date-fns';
+	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { toDate } from '$lib/utils/eventDateHelpers';
 
 	type ItemType = 'event' | 'todo';
 
@@ -29,8 +30,8 @@
 		if (!event) return '';
 		if (event.isAllDay) return 'Ganztägig';
 
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 
 		return `${format(start, 'HH:mm')} - ${format(end, 'HH:mm')}`;
 	});

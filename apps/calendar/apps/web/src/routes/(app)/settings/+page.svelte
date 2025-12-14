@@ -6,7 +6,7 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import type { TimeFormat, AllDayDisplayMode } from '$lib/stores/settings.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toast.svelte';
 	import { GlobalSettingsSection } from '@manacore/shared-ui';
 	import type { CalendarViewType, Calendar } from '@calendar/shared';
 
