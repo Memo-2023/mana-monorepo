@@ -17,6 +17,7 @@
 		getVisibleOverflowEvents,
 		type OverflowEvents,
 	} from '$lib/utils/eventFiltering';
+	import EventCard from './EventCard.svelte';
 	import TaskBlock from './TaskBlock.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import { goto } from '$app/navigation';
@@ -201,9 +202,11 @@
 		const top = minutesToPercent(startMinutes);
 		const height = Math.max((duration / (totalVisibleHours * 60)) * 100, 2); // Min 2% height
 
-		const color = calendarsStore.getColor(event.calendarId);
+		return `top: ${top}%; height: ${height}%;`;
+	}
 
-		return `top: ${top}%; height: ${height}%; background-color: ${color};`;
+	function formatEventTimeRange(event: CalendarEvent): string {
+		return `${formatEventTime(event.startTime)} - ${formatEventTime(event.endTime)}`;
 	}
 
 	/**
@@ -955,60 +958,27 @@
 					{#each getEventsForDay(day) as event (event.id)}
 						{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
 						{@const isBeingResized = isResizing && resizeEvent?.id === event.id}
-						{@const isDraft = eventsStore.isDraftEvent(event.id)}
 						{@const isCrossDayDrag =
-							isBeingDragged && dragTargetDay && !isSameDay(day, dragTargetDay)}
-						{@const isSearchHighlighted = searchStore.isEventHighlighted(event.id)}
-						{@const isSearchDimmed = searchStore.isEventDimmed(event.id)}
-						<div
-							class="event-card"
-							class:dragging={isBeingDragged && !isCrossDayDrag}
-							class:dragging-source={isCrossDayDrag}
-							class:resizing={isBeingResized}
-							class:draft={isDraft}
-							class:search-highlighted={isSearchHighlighted}
-							class:search-dimmed={isSearchDimmed}
-							data-event-id={event.id}
+							isBeingDragged && dragTargetDay !== null && !isSameDay(day, dragTargetDay)}
+						<EventCard
+							{event}
 							style={isBeingDragged && !isCrossDayDrag
-								? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
+								? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%;`
 								: isBeingResized
-									? `top: ${resizePreviewTop}%; height: ${resizePreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
+									? `top: ${resizePreviewTop}%; height: ${resizePreviewHeight}%;`
 									: getEventStyle(event)}
-							role="button"
-							tabindex="0"
-							aria-label={event.title || $_('calendar.draftEvent')}
-							onpointerdown={(e) => startDrag(event, e)}
-							onclick={(e) => !isDraft && handleEventClick(event, e)}
-							onkeydown={(e) => !isDraft && e.key === 'Enter' && goto(`/?event=${event.id}`)}
-							oncontextmenu={(e) => handleEventContextMenu(event, e)}
-						>
-							<!-- Top resize handle -->
-							<div
-								class="resize-handle top"
-								onpointerdown={(e) => startResize(event, 'top', e)}
-								role="slider"
-								aria-label={$_('event.changeStartTime')}
-								aria-valuenow={0}
-								tabindex="-1"
-							></div>
-
-							<span class="event-time">
-								{formatEventTime(event.startTime)} - {formatEventTime(event.endTime)}
-							</span>
-							<span class="event-title"
-								>{event.title || (isDraft ? $_('calendar.draftEvent') : '')}</span
-							>
-
-							<!-- Bottom resize handle -->
-							<div
-								class="resize-handle bottom"
-								onpointerdown={(e) => startResize(event, 'bottom', e)}
-								role="slider"
-								aria-label={$_('event.changeEndTime')}
-								aria-valuenow={0}
-								tabindex="-1"
-							></div>
-						</div>
+							color={calendarsStore.getColor(event.calendarId)}
+							isDragging={isBeingDragged && !isCrossDayDrag}
+							isDraggingSource={isCrossDayDrag}
+							isResizing={isBeingResized}
+							isSearchHighlighted={searchStore.isEventHighlighted(event.id)}
+							isSearchDimmed={searchStore.isEventDimmed(event.id)}
+							formattedTime={formatEventTimeRange(event)}
+							onClick={handleEventClick}
+							onPointerDown={startDrag}
+							onContextMenu={handleEventContextMenu}
+							onResizeStart={startResize}
+						/>
 					{/each}
 
 					<!-- Scheduled Tasks (Time-Blocking) -->
@@ -1046,15 +1016,13 @@
 
 					<!-- Drag preview (solid) for cross-day dragging - shows where event will be -->
 					{#if isDragging && draggedEvent && dragTargetDay && isSameDay(day, dragTargetDay) && !getEventsForDay(day).some((e) => e.id === draggedEvent!.id)}
-						<div
-							class="event-card drag-preview"
-							style="top: {dragPreviewTop}%; height: {dragPreviewHeight}%; background-color: {calendarsStore.getColor(
-								draggedEvent.calendarId
-							)};"
-						>
-							<span class="event-time">{formatEventTime(draggedEvent.startTime)}</span>
-							<span class="event-title">{draggedEvent.title}</span>
-						</div>
+						<EventCard
+							event={draggedEvent}
+							style="top: {dragPreviewTop}%; height: {dragPreviewHeight}%;"
+							color={calendarsStore.getColor(draggedEvent.calendarId)}
+							isDragging={true}
+							formattedTime={formatEventTimeRange(draggedEvent)}
+						/>
 					{/if}
 
 					<!-- Overflow indicators for events outside visible time range -->
@@ -1327,140 +1295,6 @@
 
 	.hour-slot:hover {
 		background: hsl(var(--color-muted) / 0.3);
-	}
-
-	.event-card {
-		position: absolute;
-		left: 2px;
-		right: 2px;
-		padding: 2px 4px;
-		color: white;
-		border: none;
-		border-radius: var(--radius-sm);
-		text-align: left;
-		cursor: grab;
-		z-index: 1;
-		overflow: hidden;
-		transition:
-			box-shadow 0.15s ease,
-			opacity 0.15s ease;
-		touch-action: none;
-		user-select: none;
-	}
-
-	.event-card:hover {
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-	}
-
-	.event-card.dragging {
-		cursor: grabbing;
-		opacity: 0.9;
-		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-		z-index: 100;
-	}
-
-	.event-card.resizing {
-		opacity: 0.85;
-		z-index: 100;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-		outline: 2px dashed rgba(255, 255, 255, 0.6);
-		outline-offset: -2px;
-	}
-
-	/* Ghost style for source position during cross-day drag */
-	.event-card.dragging-source {
-		opacity: 0.4;
-		background: transparent !important;
-		border: 2px dashed hsl(var(--color-border));
-		pointer-events: none;
-	}
-
-	.event-card.dragging-source .event-title,
-	.event-card.dragging-source .event-time {
-		opacity: 0.5;
-	}
-
-	/* Solid preview at target position during cross-day drag */
-	.event-card.drag-preview {
-		pointer-events: none;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-	}
-
-	/* Search highlighting */
-	.event-card.search-highlighted {
-		outline: 2px solid hsl(var(--color-primary));
-		outline-offset: 1px;
-		box-shadow:
-			0 0 0 4px hsl(var(--color-primary) / 0.3),
-			0 4px 12px rgba(0, 0, 0, 0.25);
-		z-index: 10;
-	}
-
-	.event-card.search-dimmed {
-		opacity: 0.35;
-		filter: grayscale(0.3);
-	}
-
-	.event-card.draft {
-		outline: 2px solid hsl(var(--color-primary));
-		outline-offset: -1px;
-		animation: pulse-outline 1.5s ease-in-out infinite;
-	}
-
-	@keyframes pulse-outline {
-		0%,
-		100% {
-			outline-color: hsl(var(--color-primary));
-		}
-		50% {
-			outline-color: hsl(var(--color-primary) / 0.5);
-		}
-	}
-
-	.event-time {
-		font-size: 0.65rem;
-		opacity: 0.9;
-		display: block;
-	}
-
-	.event-title {
-		display: block;
-		font-size: 0.75rem;
-		font-weight: 500;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	/* Resize handles */
-	.resize-handle {
-		position: absolute;
-		left: 0;
-		right: 0;
-		height: 8px;
-		cursor: ns-resize;
-		opacity: 0;
-		transition: opacity 0.15s ease;
-		z-index: 2;
-	}
-
-	.resize-handle.top {
-		top: 0;
-		border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-	}
-
-	.resize-handle.bottom {
-		bottom: 0;
-		border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-	}
-
-	.event-card:hover .resize-handle {
-		opacity: 1;
-		background: rgba(255, 255, 255, 0.3);
-	}
-
-	.resize-handle:hover {
-		background: rgba(255, 255, 255, 0.5) !important;
 	}
 
 	.time-indicator {

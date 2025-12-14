@@ -17,6 +17,7 @@
 		getVisibleOverflowEvents,
 		type OverflowEvents,
 	} from '$lib/utils/eventFiltering';
+	import EventCard from './EventCard.svelte';
 	import TaskBlock from './TaskBlock.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import { goto } from '$app/navigation';
@@ -625,9 +626,11 @@
 		const top = minutesToPercent(startMinutes);
 		const height = Math.max((duration / (totalVisibleHours * 60)) * 100, 1.5); // minimum ~20px at 60px/hour
 
-		const color = calendarsStore.getColor(event.calendarId);
+		return `top: ${top}%; height: ${height}%;`;
+	}
 
-		return `top: ${top}%; height: ${height}%; background-color: ${color};`;
+	function formatEventTime(event: CalendarEvent): string {
+		return `${format(toDate(event.startTime), 'HH:mm')} - ${format(toDate(event.endTime), 'HH:mm')}`;
 	}
 
 	/**
@@ -782,63 +785,27 @@
 			{/each}
 
 			<!-- Timed events -->
-			{#each timedEvents as event}
+			{#each timedEvents as event (event.id)}
 				{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
 				{@const isBeingResized = isResizing && resizeEvent?.id === event.id}
-				{@const isDraft = eventsStore.isDraftEvent(event.id)}
-				{@const isSearchHighlighted = searchStore.isEventHighlighted(event.id)}
-				{@const isSearchDimmed = searchStore.isEventDimmed(event.id)}
-				<!-- svelte-ignore a11y_click_events_have_key_events -->
-				<div
-					class="event-card"
-					class:dragging={isBeingDragged}
-					class:resizing={isBeingResized}
-					class:draft={isDraft}
-					class:search-highlighted={isSearchHighlighted}
-					class:search-dimmed={isSearchDimmed}
-					data-event-id={event.id}
+				<EventCard
+					{event}
 					style={isBeingDragged
-						? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
+						? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%;`
 						: isBeingResized
-							? `top: ${resizePreviewTop}%; height: ${resizePreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
+							? `top: ${resizePreviewTop}%; height: ${resizePreviewHeight}%;`
 							: getEventStyle(event)}
-					onpointerdown={(e) => startDrag(event, e)}
-					onclick={(e) => !isDraft && handleEventClick(event, e)}
-					oncontextmenu={(e) => handleEventContextMenu(event, e)}
-					role="button"
-					tabindex="0"
-				>
-					<!-- Top resize handle -->
-					<div
-						class="resize-handle top"
-						onpointerdown={(e) => startResize(event, 'top', e)}
-						role="separator"
-						aria-orientation="horizontal"
-						aria-label="Startzeit ändern"
-						aria-valuenow={0}
-						tabindex="-1"
-					></div>
-
-					<span class="event-time">
-						{format(toDate(event.startTime), 'HH:mm')} -
-						{format(toDate(event.endTime), 'HH:mm')}
-					</span>
-					<span class="event-title">{event.title || (isDraft ? '(Neuer Termin)' : '')}</span>
-					{#if event.location}
-						<span class="event-location">{event.location}</span>
-					{/if}
-
-					<!-- Bottom resize handle -->
-					<div
-						class="resize-handle bottom"
-						onpointerdown={(e) => startResize(event, 'bottom', e)}
-						role="separator"
-						aria-orientation="horizontal"
-						aria-label="Endzeit ändern"
-						aria-valuenow={0}
-						tabindex="-1"
-					></div>
-				</div>
+					color={calendarsStore.getColor(event.calendarId)}
+					isDragging={isBeingDragged}
+					isResizing={isBeingResized}
+					isSearchHighlighted={searchStore.isEventHighlighted(event.id)}
+					isSearchDimmed={searchStore.isEventDimmed(event.id)}
+					formattedTime={formatEventTime(event)}
+					onClick={handleEventClick}
+					onPointerDown={startDrag}
+					onContextMenu={handleEventContextMenu}
+					onResizeStart={startResize}
+				/>
 			{/each}
 
 			<!-- Scheduled Tasks (Time-Blocking) -->
@@ -1044,127 +1011,6 @@
 		background: hsl(var(--color-primary) / 0.15);
 		outline: 2px dashed hsl(var(--color-primary));
 		outline-offset: -2px;
-	}
-
-	.event-card {
-		position: absolute;
-		left: 8px;
-		width: calc(100% - 16px);
-		max-width: 400px;
-		color: white;
-		border: none;
-		text-align: left;
-		cursor: grab;
-		z-index: 1;
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		padding: 6px 10px;
-		border-radius: var(--radius-md);
-		overflow: hidden;
-		touch-action: none;
-		user-select: none;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-		transition:
-			box-shadow 150ms ease,
-			opacity 150ms ease;
-	}
-
-	.event-card:hover {
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	}
-
-	.event-card.dragging {
-		cursor: grabbing;
-		opacity: 0.9;
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-		z-index: 100;
-	}
-
-	.event-card.resizing {
-		cursor: ns-resize;
-		opacity: 0.85;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-		z-index: 100;
-		outline: 2px dashed rgba(255, 255, 255, 0.6);
-		outline-offset: -2px;
-	}
-
-	.event-card.draft {
-		outline: 2px solid hsl(var(--color-primary));
-		outline-offset: -1px;
-		animation: pulse-outline 1.5s ease-in-out infinite;
-	}
-
-	/* Search highlighting */
-	.event-card.search-highlighted {
-		outline: 2px solid hsl(var(--color-primary));
-		outline-offset: 1px;
-		box-shadow:
-			0 0 0 4px hsl(var(--color-primary) / 0.3),
-			0 4px 12px rgba(0, 0, 0, 0.25);
-		z-index: 10;
-	}
-
-	.event-card.search-dimmed {
-		opacity: 0.35;
-		filter: grayscale(0.3);
-	}
-
-	@keyframes pulse-outline {
-		0%,
-		100% {
-			outline-color: hsl(var(--color-primary));
-		}
-		50% {
-			outline-color: hsl(var(--color-primary) / 0.5);
-		}
-	}
-
-	/* Resize Handles */
-	.resize-handle {
-		position: absolute;
-		left: 0;
-		right: 0;
-		height: 8px;
-		cursor: ns-resize;
-		opacity: 0;
-		transition: opacity 150ms ease;
-		z-index: 10;
-	}
-
-	.resize-handle.top {
-		top: 0;
-		border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-	}
-
-	.resize-handle.bottom {
-		bottom: 0;
-		border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-	}
-
-	.event-card:hover .resize-handle {
-		opacity: 1;
-		background: rgba(255, 255, 255, 0.3);
-	}
-
-	.resize-handle:hover {
-		background: rgba(255, 255, 255, 0.5) !important;
-	}
-
-	.event-time {
-		font-size: 0.75rem;
-		opacity: 0.9;
-	}
-
-	.event-title {
-		font-size: 0.875rem;
-		font-weight: 500;
-	}
-
-	.event-location {
-		font-size: 0.75rem;
-		opacity: 0.8;
 	}
 
 	/* Time indicator */
