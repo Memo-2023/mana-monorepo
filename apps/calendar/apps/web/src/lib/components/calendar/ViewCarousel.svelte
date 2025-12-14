@@ -23,6 +23,7 @@
 	let startX = $state(0);
 	let isSwiping = $state(false);
 	let isAnimating = $state(false);
+	let animatingDirection: 'prev' | 'next' | null = null;
 
 	// Velocity tracking for momentum
 	let lastX = 0;
@@ -31,6 +32,7 @@
 
 	// Animation frame tracking
 	let animationFrameId: number | null = null;
+	let pendingCallback: (() => void) | null = null;
 
 	// Container refs
 	let viewportEl: HTMLDivElement;
@@ -38,11 +40,11 @@
 
 	// Threshold: 15% of viewport width or high velocity triggers navigation
 	const SNAP_THRESHOLD = 0.15;
-	const VELOCITY_THRESHOLD = 0.3; // px/ms
+	const VELOCITY_THRESHOLD = 0.5; // px/ms - increased for faster swipes
 	// Animation speed (px/ms) - constant speed for linear feel
-	const ANIMATION_SPEED = 2.5;
+	const ANIMATION_SPEED = 3.0; // increased for snappier feel
 	// Debounce for wheel events
-	const WHEEL_DEBOUNCE_MS = 80;
+	const WHEEL_DEBOUNCE_MS = 50; // reduced for faster response
 	let wheelDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 	// Calculate dates for previous/current/next views
@@ -68,7 +70,7 @@
 
 	// Wheel handler (trackpad horizontal scroll)
 	function handleWheel(e: WheelEvent) {
-		if (disableSwipe || isAnimating) return;
+		if (disableSwipe) return;
 
 		// Only handle horizontal scrolling (deltaX dominant)
 		if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
@@ -78,6 +80,16 @@
 		if (target.closest('[data-event-id]') || target.closest('[data-dragging]')) return;
 
 		e.preventDefault();
+
+		// If animating, check if we should chain navigation
+		if (isAnimating) {
+			const scrollDirection = e.deltaX < 0 ? 'next' : 'prev';
+			if (scrollDirection === animatingDirection && Math.abs(e.deltaX) > 10) {
+				// Chain navigation - immediately go to next page in same direction
+				chainNavigation(scrollDirection);
+			}
+			return;
+		}
 
 		// Simple direct offset update
 		offsetX += e.deltaX * -1;
@@ -142,6 +154,41 @@
 		});
 	}
 
+	// Chain navigation - immediately complete current and start next
+	function chainNavigation(direction: 'prev' | 'next') {
+		// Cancel current animation
+		if (animationFrameId !== null) {
+			cancelAnimationFrame(animationFrameId);
+			animationFrameId = null;
+		}
+
+		// Complete current navigation immediately (without resetting state flags)
+		if (animatingDirection === 'prev') {
+			viewStore.goToPrevious();
+		} else if (animatingDirection === 'next') {
+			viewStore.goToNext();
+		}
+
+		// Reset and start new animation for another page in same direction
+		offsetX = direction === 'prev' ? viewportWidth * 0.4 : -viewportWidth * 0.4;
+		animatingDirection = direction;
+
+		const targetOffset = direction === 'prev' ? viewportWidth : -viewportWidth;
+		pendingCallback = () => {
+			if (direction === 'prev') {
+				viewStore.goToPrevious();
+			} else {
+				viewStore.goToNext();
+			}
+			offsetX = 0;
+			isAnimating = false;
+			animatingDirection = null;
+			pendingCallback = null;
+		};
+
+		animateToOffset(targetOffset, pendingCallback);
+	}
+
 	// Snap to page based on current offset and velocity
 	function snapToPage() {
 		if (isAnimating || viewportWidth === 0) return;
@@ -159,23 +206,33 @@
 		}
 
 		isAnimating = true;
+		animatingDirection = targetPage === 'current' ? null : targetPage;
 
 		if (targetPage === 'prev') {
-			animateToOffset(viewportWidth, () => {
+			pendingCallback = () => {
 				viewStore.goToPrevious();
 				offsetX = 0;
 				isAnimating = false;
-			});
+				animatingDirection = null;
+				pendingCallback = null;
+			};
+			animateToOffset(viewportWidth, pendingCallback);
 		} else if (targetPage === 'next') {
-			animateToOffset(-viewportWidth, () => {
+			pendingCallback = () => {
 				viewStore.goToNext();
 				offsetX = 0;
 				isAnimating = false;
-			});
+				animatingDirection = null;
+				pendingCallback = null;
+			};
+			animateToOffset(-viewportWidth, pendingCallback);
 		} else {
-			animateToOffset(0, () => {
+			pendingCallback = () => {
 				isAnimating = false;
-			});
+				animatingDirection = null;
+				pendingCallback = null;
+			};
+			animateToOffset(0, pendingCallback);
 		}
 	}
 
