@@ -35,6 +35,10 @@ export interface CalendarAppSettings {
 	dateStripCompact: boolean; // Use compact/smaller DateStrip
 	dateStripShowWeekNumbers: boolean; // Show week numbers at start of week
 
+	// Birthday settings (cross-app integration with Contacts)
+	showBirthdays: boolean; // Show contact birthdays in calendar
+	showBirthdayAge: boolean; // Show age in birthday events
+
 	// UI settings
 	sidebarCollapsed: boolean;
 
@@ -61,6 +65,9 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	dateStripShowMonthDividers: true,
 	dateStripCompact: false,
 	dateStripShowWeekNumbers: false,
+	// Birthday defaults
+	showBirthdays: true,
+	showBirthdayAge: true,
 	// UI defaults
 	sidebarCollapsed: false,
 	defaultEventDuration: 60,
@@ -181,6 +188,13 @@ export const settingsStore = {
 	},
 	get dateStripShowWeekNumbers() {
 		return settings.dateStripShowWeekNumbers;
+	},
+	// Birthday settings
+	get showBirthdays() {
+		return settings.showBirthdays;
+	},
+	get showBirthdayAge() {
+		return settings.showBirthdayAge;
 	},
 	get defaultEventDuration() {
 		return settings.defaultEventDuration;

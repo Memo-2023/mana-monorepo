@@ -5,7 +5,9 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
+	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
+	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
 	import {
 		useVisibleHours,
 		useCurrentTimeIndicator,
@@ -117,6 +119,33 @@
 
 	// Reference to the days container for position calculations
 	let daysContainerEl: HTMLDivElement;
+
+	// Birthday Popover State
+	let selectedBirthday = $state<BirthdayEvent | null>(null);
+	let birthdayPopoverPosition = $state<{ x: number; y: number }>({ x: 0, y: 0 });
+
+	// Get birthdays for a day (if enabled in settings)
+	function getBirthdaysForDay(day: Date): BirthdayEvent[] {
+		if (!settingsStore.showBirthdays) return [];
+		return birthdaysStore.getBirthdaysForDay(day);
+	}
+
+	// Check if there are any birthdays to show in the all-day row
+	let hasAnyBirthdays = $derived(
+		settingsStore.showBirthdays && days.some((day) => getBirthdaysForDay(day).length > 0)
+	);
+
+	// Handle birthday click - show popover
+	function handleBirthdayClick(birthday: BirthdayEvent, e: MouseEvent) {
+		e.stopPropagation();
+		selectedBirthday = birthday;
+		birthdayPopoverPosition = { x: e.clientX, y: e.clientY };
+	}
+
+	// Close birthday popover
+	function closeBirthdayPopover() {
+		selectedBirthday = null;
+	}
 
 	function getEventsForDay(day: Date) {
 		// Filter by visible calendars first
@@ -888,8 +917,8 @@
 			{/each}
 		</div>
 
-		<!-- All-day events row (only shown when there are header-mode all-day events) -->
-		{#if hasAnyHeaderAllDayEvents}
+		<!-- All-day events row (shown when there are header-mode all-day events or birthdays) -->
+		{#if hasAnyHeaderAllDayEvents || hasAnyBirthdays}
 			<div class="all-day-row">
 				<div class="time-gutter">
 					{#if settingsStore.showWeekNumbers}
@@ -907,6 +936,18 @@
 								onclick={() => goto(`/?event=${event.id}`)}
 							>
 								{event.title}
+							</button>
+						{/each}
+						<!-- Birthdays -->
+						{#each getBirthdaysForDay(day) as birthday}
+							<button
+								class="all-day-event birthday-event"
+								onclick={(e) => handleBirthdayClick(birthday, e)}
+							>
+								🎂 {birthday.displayName}
+								{#if settingsStore.showBirthdayAge && birthday.age > 0}
+									<span class="birthday-age">({birthday.age})</span>
+								{/if}
 							</button>
 						{/each}
 					</div>
@@ -1107,6 +1148,15 @@
 
 <EventContextMenu onEdit={handleContextMenuEdit} />
 
+<!-- Birthday Popover -->
+{#if selectedBirthday}
+	<BirthdayPopover
+		birthday={selectedBirthday}
+		position={birthdayPopoverPosition}
+		onClose={closeBirthdayPopover}
+	/>
+{/if}
+
 <style>
 	.week-view {
 		display: flex;
@@ -1163,6 +1213,20 @@
 	.all-day-event.search-dimmed {
 		opacity: 0.35;
 		filter: grayscale(0.3);
+	}
+
+	/* Birthday events in all-day row */
+	.all-day-event.birthday-event {
+		background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+	}
+
+	.all-day-event.birthday-event:hover {
+		opacity: 0.9;
+	}
+
+	.birthday-age {
+		opacity: 0.85;
+		font-size: 0.7rem;
 	}
 
 	/* Block-style all-day events (displayed as full-day blocks in the grid) */

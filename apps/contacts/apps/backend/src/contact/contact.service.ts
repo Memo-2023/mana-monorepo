@@ -1,9 +1,18 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { eq, and, or, ilike, desc, sql } from 'drizzle-orm';
+import { eq, and, or, ilike, desc, sql, isNotNull } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
 import { contacts } from '../db/schema';
 import type { Contact, NewContact } from '../db/schema';
+
+export interface ContactBirthdaySummary {
+	id: string;
+	displayName: string | null;
+	firstName: string | null;
+	lastName: string | null;
+	birthday: string;
+	photoUrl: string | null;
+}
 
 export interface ContactFilters {
 	search?: string;
@@ -147,5 +156,35 @@ export class ContactService {
 			.where(and(eq(contacts.userId, userId), eq(contacts.isArchived, isArchived)));
 
 		return Number(result[0]?.count || 0);
+	}
+
+	/**
+	 * Find all contacts with birthdays (for calendar integration)
+	 * Returns only essential fields for lightweight transfer
+	 */
+	async findWithBirthdays(userId: string): Promise<ContactBirthdaySummary[]> {
+		const result = await this.db
+			.select({
+				id: contacts.id,
+				displayName: contacts.displayName,
+				firstName: contacts.firstName,
+				lastName: contacts.lastName,
+				birthday: contacts.birthday,
+				photoUrl: contacts.photoUrl,
+			})
+			.from(contacts)
+			.where(
+				and(
+					eq(contacts.userId, userId),
+					eq(contacts.isArchived, false),
+					isNotNull(contacts.birthday)
+				)
+			)
+			.orderBy(contacts.lastName, contacts.firstName);
+
+		return result.map((c) => ({
+			...c,
+			birthday: c.birthday || '',
+		}));
 	}
 }

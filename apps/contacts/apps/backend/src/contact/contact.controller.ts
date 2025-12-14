@@ -234,6 +234,16 @@ export class ContactController {
 		return { contacts, total };
 	}
 
+	/**
+	 * Get all contacts with birthdays (for calendar integration)
+	 * Returns lightweight data: id, displayName, firstName, lastName, birthday, photoUrl
+	 */
+	@Get('birthdays')
+	async getBirthdays(@CurrentUser() user: CurrentUserData) {
+		const contacts = await this.contactService.findWithBirthdays(user.userId);
+		return { contacts };
+	}
+
 	@Get(':id')
 	async findOne(@CurrentUser() user: CurrentUserData, @Param('id', ParseUUIDPipe) id: string) {
 		const contact = await this.contactService.findById(id, user.userId);

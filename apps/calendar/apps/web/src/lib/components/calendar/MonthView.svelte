@@ -5,8 +5,10 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore } from '$lib/stores/todos.svelte';
+	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import TodoDayCell from './TodoDayCell.svelte';
+	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
 	import { goto } from '$app/navigation';
 	import {
 		format,
@@ -259,6 +261,27 @@
 		if (eventsStore.isDraftEvent(event.id)) return;
 		eventContextMenuStore.show(event, e.clientX, e.clientY);
 	}
+
+	// ============================================================================
+	// Birthday Functions
+	// ============================================================================
+	let selectedBirthday = $state<BirthdayEvent | null>(null);
+	let birthdayPopoverPosition = $state<{ x: number; y: number }>({ x: 0, y: 0 });
+
+	function getBirthdaysForDay(day: Date): BirthdayEvent[] {
+		if (!settingsStore.showBirthdays) return [];
+		return birthdaysStore.getBirthdaysForDay(day);
+	}
+
+	function handleBirthdayClick(birthday: BirthdayEvent, e: MouseEvent) {
+		e.stopPropagation();
+		selectedBirthday = birthday;
+		birthdayPopoverPosition = { x: e.clientX, y: e.clientY };
+	}
+
+	function closeBirthdayPopover() {
+		selectedBirthday = null;
+	}
 </script>
 
 <div class="month-view" style="--column-count: {columnCount}" bind:this={monthViewRef}>
@@ -338,6 +361,23 @@
 								</div>
 							{/each}
 
+							<!-- Birthdays -->
+							{#each getBirthdaysForDay(day) as birthday}
+								<!-- svelte-ignore a11y_click_events_have_key_events -->
+								<div
+									class="event-pill birthday-pill"
+									onclick={(e) => handleBirthdayClick(birthday, e)}
+									role="button"
+									tabindex="0"
+								>
+									🎂
+									<span class="event-title">{birthday.displayName}</span>
+									{#if settingsStore.showBirthdayAge && birthday.age > 0}
+										<span class="birthday-age">({birthday.age})</span>
+									{/if}
+								</div>
+							{/each}
+
 							{#if getAllEventsForDay(day).length > 3}
 								<button class="more-events" onclick={(e) => handleMoreClick(day, e)}>
 									{$_('views.moreEvents', {
@@ -352,6 +392,15 @@
 		{/each}
 	</div>
 </div>
+
+<!-- Birthday Popover -->
+{#if selectedBirthday}
+	<BirthdayPopover
+		birthday={selectedBirthday}
+		position={birthdayPopoverPosition}
+		onClose={closeBirthdayPopover}
+	/>
+{/if}
 
 <style>
 	.month-view {
@@ -536,5 +585,20 @@
 		background-color: hsl(var(--color-primary) / 0.2) !important;
 		outline: 2px dashed hsl(var(--color-primary));
 		outline-offset: -2px;
+	}
+
+	/* Birthday pills */
+	.event-pill.birthday-pill {
+		background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+		cursor: pointer;
+	}
+
+	.event-pill.birthday-pill:hover {
+		opacity: 0.9;
+	}
+
+	.birthday-age {
+		opacity: 0.85;
+		font-size: 0.65rem;
 	}
 </style>

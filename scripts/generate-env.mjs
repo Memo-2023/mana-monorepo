@@ -428,6 +428,9 @@ const APP_CONFIGS = [
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_TODO_BACKEND_URL: (env) =>
 				env.TODO_BACKEND_URL || `http://localhost:${env.TODO_BACKEND_PORT || '3018'}`,
+			// Cross-app integration: Contacts service for birthdays
+			PUBLIC_CONTACTS_API_URL: (env) => `http://localhost:${env.CONTACTS_BACKEND_PORT || '3015'}`,
+			PUBLIC_CONTACTS_WEB_URL: () => 'http://localhost:5184',
 		},
 	},
 

@@ -6,6 +6,8 @@
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
+	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
+	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
 	import {
 		useVisibleHours,
 		useCurrentTimeIndicator,
@@ -130,6 +132,28 @@
 	);
 
 	let blockAllDayEvents = $derived(allDayEvents.filter((e) => getEventDisplayMode(e) === 'block'));
+
+	// Birthday Popover State
+	let selectedBirthday = $state<BirthdayEvent | null>(null);
+	let birthdayPopoverPosition = $state<{ x: number; y: number }>({ x: 0, y: 0 });
+
+	// Get birthdays for current day (if enabled in settings)
+	let birthdays = $derived.by(() => {
+		if (!settingsStore.showBirthdays) return [];
+		return birthdaysStore.getBirthdaysForDay(viewStore.currentDate);
+	});
+
+	// Handle birthday click - show popover
+	function handleBirthdayClick(birthday: BirthdayEvent, e: MouseEvent) {
+		e.stopPropagation();
+		selectedBirthday = birthday;
+		birthdayPopoverPosition = { x: e.clientX, y: e.clientY };
+	}
+
+	// Close birthday popover
+	function closeBirthdayPopover() {
+		selectedBirthday = null;
+	}
 
 	// ============================================================================
 	// Drag & Drop State
@@ -729,8 +753,8 @@
 </script>
 
 <div class="day-view">
-	<!-- Header-style all-day events -->
-	{#if headerAllDayEvents.length > 0}
+	<!-- Header-style all-day events and birthdays -->
+	{#if headerAllDayEvents.length > 0 || birthdays.length > 0}
 		<div class="all-day-section">
 			<div class="time-gutter">
 				<span class="all-day-label">Ganztägig</span>
@@ -745,6 +769,18 @@
 						onclick={(e) => handleEventClick(event, e)}
 					>
 						{event.title}
+					</button>
+				{/each}
+				<!-- Birthdays -->
+				{#each birthdays as birthday}
+					<button
+						class="all-day-event birthday-event"
+						onclick={(e) => handleBirthdayClick(birthday, e)}
+					>
+						🎂 {birthday.displayName}
+						{#if settingsStore.showBirthdayAge && birthday.age > 0}
+							<span class="birthday-age">({birthday.age})</span>
+						{/if}
 					</button>
 				{/each}
 			</div>
@@ -908,6 +944,15 @@
 
 <!-- Event Context Menu -->
 <EventContextMenu onEdit={handleContextMenuEdit} />
+
+<!-- Birthday Popover -->
+{#if selectedBirthday}
+	<BirthdayPopover
+		birthday={selectedBirthday}
+		position={birthdayPopoverPosition}
+		onClose={closeBirthdayPopover}
+	/>
+{/if}
 
 <style>
 	.day-view {
@@ -1237,5 +1282,19 @@
 	.overflow-line:hover {
 		opacity: 1;
 		height: 5px;
+	}
+
+	/* Birthday events in all-day row */
+	.all-day-event.birthday-event {
+		background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+	}
+
+	.all-day-event.birthday-event:hover {
+		opacity: 0.9;
+	}
+
+	.birthday-age {
+		opacity: 0.85;
+		font-size: 0.7rem;
 	}
 </style>

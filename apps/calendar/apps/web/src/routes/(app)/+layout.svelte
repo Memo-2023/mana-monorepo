@@ -23,6 +23,8 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { birthdaysStore } from '$lib/stores/birthdays.svelte';
+	import { browser } from '$app/environment';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -282,6 +284,13 @@
 		goto(`/?event=${event.id}`);
 	}
 
+	// Reactive effect: load birthdays when setting is enabled
+	$effect(() => {
+		if (browser && settingsStore.showBirthdays && authStore.isAuthenticated) {
+			birthdaysStore.fetchBirthdays();
+		}
+	});
+
 	onMount(async () => {
 		// Redirect to login if not authenticated
 		if (!authStore.isAuthenticated) {
@@ -299,6 +308,8 @@
 		await calendarsStore.fetchCalendars();
 		await eventTagsStore.fetchTags();
 		await userSettings.load();
+
+		// Note: Birthdays are loaded via reactive $effect when showBirthdays is enabled
 
 		// Redirect to start page if on root and a custom start page is set
 		const currentPath = window.location.pathname;

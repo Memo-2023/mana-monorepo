@@ -7,7 +7,13 @@
 	import type { TimeFormat, AllDayDisplayMode } from '$lib/stores/settings.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { toast } from '$lib/stores/toast.svelte';
-	import { GlobalSettingsSection, SettingsSection, SettingsCard } from '@manacore/shared-ui';
+	import {
+		GlobalSettingsSection,
+		SettingsSection,
+		SettingsCard,
+		FilterDropdown,
+		type FilterDropdownOption,
+	} from '@manacore/shared-ui';
 	import type { CalendarViewType, Calendar } from '@calendar/shared';
 
 	// Calendar management state
@@ -144,6 +150,47 @@
 		{ value: 60, label: '1 Stunde' },
 		{ value: 1440, label: '1 Tag' },
 	];
+
+	// FilterDropdown options
+	let viewOptions = $derived<FilterDropdownOption[]>(
+		Object.entries(viewLabels).map(([value, label]) => ({ value, label }))
+	);
+
+	let durationDropdownOptions = $derived<FilterDropdownOption[]>(
+		durationOptions.map((duration) => ({
+			value: String(duration),
+			label:
+				duration >= 60
+					? `${duration / 60} Stunde${duration > 60 ? 'n' : ''}`
+					: `${duration} Minuten`,
+		}))
+	);
+
+	let reminderDropdownOptions = $derived<FilterDropdownOption[]>(
+		reminderOptions.map((opt) => ({
+			value: String(opt.value),
+			label: opt.label,
+		}))
+	);
+
+	// Dynamic hour options (filtered by the other value)
+	let hourStartOptions = $derived<FilterDropdownOption[]>(
+		Array.from({ length: 24 }, (_, i) => i)
+			.filter((hour) => hour < settingsStore.dayEndHour)
+			.map((hour) => ({
+				value: String(hour),
+				label: `${hour.toString().padStart(2, '0')}:00`,
+			}))
+	);
+
+	let hourEndOptions = $derived<FilterDropdownOption[]>(
+		Array.from({ length: 24 }, (_, i) => i + 1)
+			.filter((hour) => hour > settingsStore.dayStartHour)
+			.map((hour) => ({
+				value: String(hour),
+				label: `${hour.toString().padStart(2, '0')}:00`,
+			}))
+	);
 </script>
 
 <svelte:head>
@@ -348,15 +395,12 @@
 						<span class="setting-label">Standard-Ansicht</span>
 						<span class="setting-description">Ansicht beim Öffnen des Kalenders</span>
 					</div>
-					<select
-						class="select-input"
+					<FilterDropdown
+						options={viewOptions}
 						value={settingsStore.defaultView}
-						onchange={(e) => handleViewChange(e.currentTarget.value as CalendarViewType)}
-					>
-						{#each Object.entries(viewLabels) as [value, label]}
-							<option {value}>{label}</option>
-						{/each}
-					</select>
+						onChange={(v) => handleViewChange(v as CalendarViewType)}
+						placeholder="Ansicht wählen"
+					/>
 				</div>
 
 				<div class="setting-item">
@@ -438,35 +482,23 @@
 						</div>
 						<div class="hour-range-inputs">
 							<div class="hour-input-group">
-								<label for="start-hour">Von</label>
-								<select
-									id="start-hour"
-									class="select-input hour-select"
-									value={settingsStore.dayStartHour}
-									onchange={(e) => settingsStore.set('dayStartHour', Number(e.currentTarget.value))}
-								>
-									{#each Array.from({ length: 24 }, (_, i) => i) as hour}
-										{#if hour < settingsStore.dayEndHour}
-											<option value={hour}>{hour.toString().padStart(2, '0')}:00</option>
-										{/if}
-									{/each}
-								</select>
+								<span class="hour-label">Von</span>
+								<FilterDropdown
+									options={hourStartOptions}
+									value={String(settingsStore.dayStartHour)}
+									onChange={(v) => settingsStore.set('dayStartHour', Number(v))}
+									placeholder="Start"
+								/>
 							</div>
 							<span class="hour-separator">–</span>
 							<div class="hour-input-group">
-								<label for="end-hour">Bis</label>
-								<select
-									id="end-hour"
-									class="select-input hour-select"
-									value={settingsStore.dayEndHour}
-									onchange={(e) => settingsStore.set('dayEndHour', Number(e.currentTarget.value))}
-								>
-									{#each Array.from({ length: 24 }, (_, i) => i + 1) as hour}
-										{#if hour > settingsStore.dayStartHour}
-											<option value={hour}>{hour.toString().padStart(2, '0')}:00</option>
-										{/if}
-									{/each}
-								</select>
+								<span class="hour-label">Bis</span>
+								<FilterDropdown
+									options={hourEndOptions}
+									value={String(settingsStore.dayEndHour)}
+									onChange={(v) => settingsStore.set('dayEndHour', Number(v))}
+									placeholder="Ende"
+								/>
 							</div>
 						</div>
 					</div>
@@ -517,19 +549,12 @@
 						<span class="setting-label">Standard-Dauer</span>
 						<span class="setting-description">Voreingestellte Dauer für neue Termine</span>
 					</div>
-					<select
-						class="select-input"
-						value={settingsStore.defaultEventDuration}
-						onchange={(e) => handleEventDurationChange(Number(e.currentTarget.value))}
-					>
-						{#each durationOptions as duration}
-							<option value={duration}>
-								{duration >= 60
-									? `${duration / 60} Stunde${duration > 60 ? 'n' : ''}`
-									: `${duration} Minuten`}
-							</option>
-						{/each}
-					</select>
+					<FilterDropdown
+						options={durationDropdownOptions}
+						value={String(settingsStore.defaultEventDuration)}
+						onChange={(v) => handleEventDurationChange(Number(v))}
+						placeholder="Dauer wählen"
+					/>
 				</div>
 
 				<div class="setting-item">
@@ -537,16 +562,64 @@
 						<span class="setting-label">Standard-Erinnerung</span>
 						<span class="setting-description">Voreingestellte Erinnerung für neue Termine</span>
 					</div>
-					<select
-						class="select-input"
-						value={settingsStore.defaultReminder}
-						onchange={(e) => handleReminderChange(Number(e.currentTarget.value))}
-					>
-						{#each reminderOptions as option}
-							<option value={option.value}>{option.label}</option>
-						{/each}
-					</select>
+					<FilterDropdown
+						options={reminderDropdownOptions}
+						value={String(settingsStore.defaultReminder)}
+						onChange={(v) => handleReminderChange(Number(v))}
+						placeholder="Erinnerung wählen"
+					/>
 				</div>
+			</div>
+		</SettingsCard>
+	</SettingsSection>
+
+	<!-- Geburtstage -->
+	<SettingsSection title="Geburtstage">
+		{#snippet icon()}
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z"
+				/>
+			</svg>
+		{/snippet}
+		<SettingsCard>
+			<div class="p-5 space-y-4">
+				<div class="setting-item">
+					<label class="toggle-setting">
+						<input
+							type="checkbox"
+							checked={settingsStore.showBirthdays}
+							onchange={() => settingsStore.set('showBirthdays', !settingsStore.showBirthdays)}
+						/>
+						<div class="toggle-info">
+							<span class="setting-label">Geburtstage anzeigen</span>
+							<span class="setting-description">Geburtstage aus Kontakten im Kalender anzeigen</span
+							>
+						</div>
+					</label>
+				</div>
+
+				{#if settingsStore.showBirthdays}
+					<div class="setting-item birthday-age-setting">
+						<label class="toggle-setting">
+							<input
+								type="checkbox"
+								checked={settingsStore.showBirthdayAge}
+								onchange={() =>
+									settingsStore.set('showBirthdayAge', !settingsStore.showBirthdayAge)}
+							/>
+							<div class="toggle-info">
+								<span class="setting-label">Alter anzeigen</span>
+								<span class="setting-description"
+									>Das Alter der Person bei Geburtstagen anzeigen</span
+								>
+							</div>
+						</label>
+					</div>
+				{/if}
 			</div>
 		</SettingsCard>
 	</SettingsSection>
@@ -643,24 +716,6 @@
 		color: hsl(var(--color-muted-foreground));
 	}
 
-	/* Select input */
-	.select-input {
-		width: 100%;
-		max-width: 250px;
-		padding: 0.5rem 0.75rem;
-		border: 2px solid hsl(var(--color-border));
-		border-radius: var(--radius-md);
-		background: hsl(var(--color-background));
-		color: hsl(var(--color-foreground));
-		font-size: 0.875rem;
-		cursor: pointer;
-	}
-
-	.select-input:focus {
-		outline: none;
-		border-color: hsl(var(--color-primary));
-	}
-
 	/* Button group */
 	.button-group {
 		display: flex;
@@ -745,13 +800,9 @@
 		gap: 0.25rem;
 	}
 
-	.hour-input-group label {
+	.hour-label {
 		font-size: 0.75rem;
 		color: hsl(var(--color-muted-foreground));
-	}
-
-	.hour-select {
-		width: 100px;
 	}
 
 	.hour-separator {
@@ -1014,5 +1065,12 @@
 		text-align: center;
 		padding: 1.5rem;
 		color: hsl(var(--color-muted-foreground));
+	}
+
+	/* Birthday age setting (indented sub-setting) */
+	.birthday-age-setting {
+		padding-left: 2rem;
+		border-left: 2px solid hsl(var(--color-primary) / 0.3);
+		margin-left: 0.5rem;
 	}
 </style>
