@@ -23,12 +23,14 @@
 	let startX = $state(0);
 	let isSwiping = $state(false);
 	let isAnimating = $state(false);
-	let animationDuration = $state(0);
 
 	// Velocity tracking for momentum
 	let lastX = 0;
 	let lastTime = 0;
 	let velocity = 0;
+
+	// Animation frame tracking
+	let animationFrameId: number | null = null;
 
 	// Container refs
 	let viewportEl: HTMLDivElement;
@@ -37,6 +39,8 @@
 	// Threshold: 15% of viewport width or high velocity triggers navigation
 	const SNAP_THRESHOLD = 0.15;
 	const VELOCITY_THRESHOLD = 0.3; // px/ms
+	// Animation speed (px/ms) - constant speed for linear feel
+	const ANIMATION_SPEED = 2.5;
 	// Debounce for wheel events
 	const WHEEL_DEBOUNCE_MS = 80;
 	let wheelDebounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -132,9 +136,8 @@
 	function handleTouchCancel() {
 		if (!isSwiping) return;
 		isSwiping = false;
-		const distance = Math.abs(offsetX);
 		isAnimating = true;
-		animateToOffset(0, distance, () => {
+		animateToOffset(0, () => {
 			isAnimating = false;
 		});
 	}
@@ -158,42 +161,71 @@
 		isAnimating = true;
 
 		if (targetPage === 'prev') {
-			const distance = viewportWidth - offsetX;
-			animateToOffset(viewportWidth, distance, () => {
+			animateToOffset(viewportWidth, () => {
 				viewStore.goToPrevious();
 				offsetX = 0;
 				isAnimating = false;
 			});
 		} else if (targetPage === 'next') {
-			const distance = viewportWidth + offsetX;
-			animateToOffset(-viewportWidth, distance, () => {
+			animateToOffset(-viewportWidth, () => {
 				viewStore.goToNext();
 				offsetX = 0;
 				isAnimating = false;
 			});
 		} else {
-			const distance = Math.abs(offsetX);
-			animateToOffset(0, distance, () => {
+			animateToOffset(0, () => {
 				isAnimating = false;
 			});
 		}
 	}
 
-	function animateToOffset(targetX: number, distance: number, onComplete: () => void) {
-		// Calculate duration based on distance (faster for shorter distances)
-		// Min 80ms, max 200ms, scales with distance
-		const baseDuration = 150;
-		const duration = Math.min(200, Math.max(80, (distance / viewportWidth) * baseDuration));
-		animationDuration = duration;
+	function animateToOffset(targetX: number, onComplete: () => void) {
+		// Cancel any existing animation
+		if (animationFrameId !== null) {
+			cancelAnimationFrame(animationFrameId);
+		}
 
-		offsetX = targetX;
-		setTimeout(onComplete, duration);
+		const startX = offsetX;
+		const distance = targetX - startX;
+		const direction = Math.sign(distance);
+		const absDistance = Math.abs(distance);
+
+		// If already at target, complete immediately
+		if (absDistance < 1) {
+			offsetX = targetX;
+			onComplete();
+			return;
+		}
+
+		let lastFrameTime = performance.now();
+
+		function tick() {
+			const now = performance.now();
+			const dt = now - lastFrameTime;
+			lastFrameTime = now;
+
+			// Move at constant speed
+			const step = ANIMATION_SPEED * dt * direction;
+			offsetX += step;
+
+			// Check if we've reached or passed the target
+			const reachedTarget =
+				(direction > 0 && offsetX >= targetX) || (direction < 0 && offsetX <= targetX);
+
+			if (reachedTarget) {
+				offsetX = targetX;
+				animationFrameId = null;
+				onComplete();
+			} else {
+				animationFrameId = requestAnimationFrame(tick);
+			}
+		}
+
+		animationFrameId = requestAnimationFrame(tick);
 	}
 
 	// Computed styles
-	let trackStyle = $derived(
-		`transform: translateX(calc(-33.333% + ${offsetX}px)); --duration: ${animationDuration}ms`
-	);
+	let trackStyle = $derived(`transform: translateX(calc(-33.333% + ${offsetX}px))`);
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -206,7 +238,7 @@
 	ontouchend={handleTouchEnd}
 	ontouchcancel={handleTouchCancel}
 >
-	<div class="carousel-track" class:animating={isAnimating} style={trackStyle}>
+	<div class="carousel-track" style={trackStyle}>
 		<!-- Previous View -->
 		<div class="carousel-page" class:inactive={!isSwiping && offsetX <= 0}>
 			{#if viewStore.viewType === 'day'}
@@ -288,10 +320,6 @@
 		width: 300%;
 		height: 100%;
 		will-change: transform;
-	}
-
-	.carousel-track.animating {
-		transition: transform var(--duration, 150ms) linear;
 	}
 
 	.carousel-page {
