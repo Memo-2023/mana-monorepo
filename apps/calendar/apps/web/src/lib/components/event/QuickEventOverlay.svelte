@@ -11,7 +11,13 @@
 		EventAttendee,
 	} from '@calendar/shared';
 	import type { ContactSummary, ContactOrManual, ManualContactEntry } from '@manacore/shared-types';
-	import { ContactSelector, ContactAvatar, ConfirmationPopover } from '@manacore/shared-ui';
+	import {
+		ContactSelector,
+		ContactAvatar,
+		ConfirmationPopover,
+		FilterDropdown,
+		type FilterDropdownOption,
+	} from '@manacore/shared-ui';
 	import { Users } from 'lucide-svelte';
 	import { format, addMinutes } from 'date-fns';
 	import { de } from 'date-fns/locale';
@@ -207,6 +213,13 @@
 	let attendees = $state<EventAttendee[]>([]);
 	let showPeopleSelector = $state(false);
 	let contactsAvailable = $state<boolean | null>(null);
+
+	// All-day display mode options
+	const displayModeOptions: FilterDropdownOption[] = [
+		{ value: 'default', label: 'Standard (aus Einstellungen)' },
+		{ value: 'header', label: 'In Kopfzeile' },
+		{ value: 'block', label: 'Als Tagesblock' },
+	];
 
 	// Check contacts availability
 	$effect(() => {
@@ -849,11 +862,13 @@
 					<div class="row-icon"></div>
 					<div class="row-content">
 						<span class="field-label">Anzeigeart</span>
-						<select class="field-select" bind:value={allDayDisplayMode}>
-							<option value="default">Standard (aus Einstellungen)</option>
-							<option value="header">In Kopfzeile</option>
-							<option value="block">Als Tagesblock</option>
-						</select>
+						<FilterDropdown
+							options={displayModeOptions}
+							value={allDayDisplayMode}
+							onChange={(v) =>
+								(allDayDisplayMode = (v as 'default' | 'header' | 'block') || 'default')}
+							placeholder="Anzeigeart wählen"
+						/>
 					</div>
 				</div>
 			{/if}
@@ -1306,7 +1321,6 @@
 		margin-bottom: 0.25rem;
 	}
 
-	.field-select,
 	.field-input {
 		width: 100%;
 		padding: 0.5rem 0.625rem;
@@ -1317,7 +1331,6 @@
 		font-size: 0.875rem;
 	}
 
-	.field-select:focus,
 	.field-input:focus {
 		outline: none;
 		border-color: hsl(var(--color-primary));

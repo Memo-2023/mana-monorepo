@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
-	import { Moon, Calendar, Eye, Columns, ArrowsIn } from '@manacore/shared-icons';
+	import { Moon, Calendar, Eye, Columns, ArrowsIn, ArrowsOut } from '@manacore/shared-icons';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 
 	// Context menu state
@@ -76,6 +76,17 @@
 				toggle: true,
 				checked: settingsStore.dateStripCompact,
 				action: () => toggleSetting('dateStripCompact'),
+			},
+			{
+				id: 'divider-3',
+				label: '',
+				type: 'divider',
+			},
+			{
+				id: 'minimize',
+				label: settingsStore.dateStripCollapsed ? 'Erweitern' : 'Minimieren',
+				icon: settingsStore.dateStripCollapsed ? ArrowsOut : ArrowsIn,
+				action: () => toggleSetting('dateStripCollapsed'),
 			},
 		];
 	});
