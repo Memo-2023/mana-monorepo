@@ -6,10 +6,7 @@
 import { browser } from '$app/environment';
 import { initializeWebAuth } from '@manacore/shared-auth';
 import type { UserData } from '@manacore/shared-auth';
-
-// Initialize Mana Core Auth only on the client side
-// TODO: Use PUBLIC_MANA_CORE_AUTH_URL from env when available
-const MANA_AUTH_URL = 'http://localhost:3001';
+import { MANA_AUTH_URL } from '$lib/api/config';
 
 // Lazy initialization to avoid SSR issues with localStorage
 let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;

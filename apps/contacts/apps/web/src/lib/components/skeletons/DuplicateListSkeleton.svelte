@@ -6,6 +6,7 @@
 
 	import { SkeletonBox } from '@manacore/shared-ui';
 	import DuplicateGroupSkeleton from './DuplicateGroupSkeleton.svelte';
+	import { calculateFadeOpacity } from './utils';
 
 	interface Props {
 		/** Number of duplicate groups to show */
@@ -17,12 +18,6 @@
 	}
 
 	let { count = 3, fadeEffect = true, minOpacity = 0.4 }: Props = $props();
-
-	function calculateOpacity(index: number): number {
-		if (!fadeEffect) return 1;
-		const fadeStep = (1 - minOpacity) / Math.max(count - 1, 1);
-		return Math.max(minOpacity, 1 - index * fadeStep);
-	}
 </script>
 
 <div class="space-y-6" role="status" aria-label="Duplikate werden geladen...">
@@ -39,7 +34,10 @@
 	<!-- Duplicate groups skeleton -->
 	<div class="space-y-4">
 		{#each Array(count) as _, i}
-			<DuplicateGroupSkeleton contactCount={2 + (i % 2)} opacity={calculateOpacity(i)} />
+			<DuplicateGroupSkeleton
+				contactCount={2 + (i % 2)}
+				opacity={fadeEffect ? calculateFadeOpacity(i, count, minOpacity) : 1}
+			/>
 		{/each}
 	</div>
 </div>

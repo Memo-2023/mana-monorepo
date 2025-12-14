@@ -5,6 +5,9 @@
  * Built on top of @manacore/shared-ui skeleton primitives.
  */
 
+// Utilities
+export { calculateFadeOpacity } from './utils';
+
 // Contact List/Grid Skeletons
 export { default as ContactRowSkeleton } from './ContactRowSkeleton.svelte';
 export { default as ContactListSkeleton } from './ContactListSkeleton.svelte';
@@ -14,10 +17,6 @@ export { default as ContactGridSkeleton } from './ContactGridSkeleton.svelte';
 // Tag Skeletons
 export { default as TagCardSkeleton } from './TagCardSkeleton.svelte';
 export { default as TagGridSkeleton } from './TagGridSkeleton.svelte';
-
-// Favorite Skeletons
-export { default as FavoriteCardSkeleton } from './FavoriteCardSkeleton.svelte';
-export { default as FavoriteGridSkeleton } from './FavoriteGridSkeleton.svelte';
 
 // Duplicate Skeletons
 export { default as DuplicateGroupSkeleton } from './DuplicateGroupSkeleton.svelte';

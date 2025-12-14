@@ -5,6 +5,8 @@
 	import ContactNotes from './ContactNotes.svelte';
 	import ContactTasks from './ContactTasks.svelte';
 	import { ContactDetailSkeleton } from '$lib/components/skeletons';
+	import SocialMediaFields from './forms/SocialMediaFields.svelte';
+	import SocialMediaLinks from './SocialMediaLinks.svelte';
 
 	interface Props {
 		contactId: string;
@@ -50,7 +52,6 @@
 	let signal = $state('');
 	let discord = $state('');
 	let bluesky = $state('');
-	let socialSectionOpen = $state(false);
 
 	const initials = $derived(() => {
 		if (!contact) return '?';
@@ -100,22 +101,6 @@
 		signal = contact.signal || '';
 		discord = contact.discord || '';
 		bluesky = contact.bluesky || '';
-		// Auto-open social section if any social field has data
-		socialSectionOpen = !!(
-			contact.linkedin ||
-			contact.twitter ||
-			contact.facebook ||
-			contact.instagram ||
-			contact.xing ||
-			contact.github ||
-			contact.youtube ||
-			contact.tiktok ||
-			contact.telegram ||
-			contact.whatsapp ||
-			contact.signal ||
-			contact.discord ||
-			contact.bluesky
-		);
 	}
 
 	function getDisplayName() {
@@ -538,213 +523,22 @@
 							<textarea bind:value={notes} rows="4" class="input textarea"></textarea>
 						</section>
 
-						<!-- Social Media Section (Collapsible) -->
-						<section class="form-section">
-							<button
-								type="button"
-								class="section-header section-header-toggle"
-								onclick={() => (socialSectionOpen = !socialSectionOpen)}
-							>
-								<div class="section-icon">
-									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
-										/>
-									</svg>
-								</div>
-								<h2 class="section-title">Social Media</h2>
-								<svg
-									class="chevron-icon"
-									class:chevron-open={socialSectionOpen}
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M19 9l-7 7-7-7"
-									/>
-								</svg>
-							</button>
-							{#if socialSectionOpen}
-								<div class="social-grid">
-									<div class="form-field">
-										<label for="linkedin" class="label social-label">
-											<span class="social-icon-label">in</span>
-											LinkedIn
-										</label>
-										<input
-											id="linkedin"
-											type="url"
-											bind:value={linkedin}
-											class="input"
-											placeholder="https://linkedin.com/in/..."
-										/>
-									</div>
-									<div class="form-field">
-										<label for="twitter" class="label social-label">
-											<span class="social-icon-label">X</span>
-											Twitter / X
-										</label>
-										<input
-											id="twitter"
-											type="text"
-											bind:value={twitter}
-											class="input"
-											placeholder="@username"
-										/>
-									</div>
-									<div class="form-field">
-										<label for="facebook" class="label social-label">
-											<span class="social-icon-label">f</span>
-											Facebook
-										</label>
-										<input
-											id="facebook"
-											type="url"
-											bind:value={facebook}
-											class="input"
-											placeholder="https://facebook.com/..."
-										/>
-									</div>
-									<div class="form-field">
-										<label for="instagram" class="label social-label">
-											<span class="social-icon-label">ig</span>
-											Instagram
-										</label>
-										<input
-											id="instagram"
-											type="text"
-											bind:value={instagram}
-											class="input"
-											placeholder="@username"
-										/>
-									</div>
-									<div class="form-field">
-										<label for="xing" class="label social-label">
-											<span class="social-icon-label">xi</span>
-											Xing
-										</label>
-										<input
-											id="xing"
-											type="url"
-											bind:value={xing}
-											class="input"
-											placeholder="https://xing.com/profile/..."
-										/>
-									</div>
-									<div class="form-field">
-										<label for="github" class="label social-label">
-											<span class="social-icon-label">gh</span>
-											GitHub
-										</label>
-										<input
-											id="github"
-											type="text"
-											bind:value={github}
-											class="input"
-											placeholder="username"
-										/>
-									</div>
-									<div class="form-field">
-										<label for="youtube" class="label social-label">
-											<span class="social-icon-label">yt</span>
-											YouTube
-										</label>
-										<input
-											id="youtube"
-											type="url"
-											bind:value={youtube}
-											class="input"
-											placeholder="https://youtube.com/@..."
-										/>
-									</div>
-									<div class="form-field">
-										<label for="tiktok" class="label social-label">
-											<span class="social-icon-label">tt</span>
-											TikTok
-										</label>
-										<input
-											id="tiktok"
-											type="text"
-											bind:value={tiktok}
-											class="input"
-											placeholder="@username"
-										/>
-									</div>
-									<div class="form-field">
-										<label for="telegram" class="label social-label">
-											<span class="social-icon-label">tg</span>
-											Telegram
-										</label>
-										<input
-											id="telegram"
-											type="text"
-											bind:value={telegram}
-											class="input"
-											placeholder="@username"
-										/>
-									</div>
-									<div class="form-field">
-										<label for="whatsapp" class="label social-label">
-											<span class="social-icon-label">wa</span>
-											WhatsApp
-										</label>
-										<input
-											id="whatsapp"
-											type="tel"
-											bind:value={whatsapp}
-											class="input"
-											placeholder="+49..."
-										/>
-									</div>
-									<div class="form-field">
-										<label for="signal" class="label social-label">
-											<span class="social-icon-label">sg</span>
-											Signal
-										</label>
-										<input
-											id="signal"
-											type="tel"
-											bind:value={signal}
-											class="input"
-											placeholder="+49..."
-										/>
-									</div>
-									<div class="form-field">
-										<label for="discord" class="label social-label">
-											<span class="social-icon-label">dc</span>
-											Discord
-										</label>
-										<input
-											id="discord"
-											type="text"
-											bind:value={discord}
-											class="input"
-											placeholder="username#1234"
-										/>
-									</div>
-									<div class="form-field">
-										<label for="bluesky" class="label social-label">
-											<span class="social-icon-label">bs</span>
-											Bluesky
-										</label>
-										<input
-											id="bluesky"
-											type="text"
-											bind:value={bluesky}
-											class="input"
-											placeholder="@handle.bsky.social"
-										/>
-									</div>
-								</div>
-							{/if}
-						</section>
+						<!-- Social Media Section -->
+						<SocialMediaFields
+							bind:linkedin
+							bind:twitter
+							bind:facebook
+							bind:instagram
+							bind:xing
+							bind:github
+							bind:youtube
+							bind:tiktok
+							bind:telegram
+							bind:whatsapp
+							bind:signal
+							bind:discord
+							bind:bluesky
+						/>
 
 						<!-- Action Buttons -->
 						<div class="actions">
@@ -1108,176 +902,7 @@
 							</section>
 						{/if}
 
-						{#if contact.linkedin || contact.twitter || contact.facebook || contact.instagram || contact.xing || contact.github || contact.youtube || contact.tiktok || contact.telegram || contact.whatsapp || contact.signal || contact.discord || contact.bluesky}
-							<section class="detail-section">
-								<div class="section-header">
-									<div class="section-icon">
-										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
-											/>
-										</svg>
-									</div>
-									<h3 class="section-title">Social Media</h3>
-								</div>
-								<div class="social-links-grid">
-									{#if contact.linkedin}
-										<a
-											href={contact.linkedin.startsWith('http')
-												? contact.linkedin
-												: `https://linkedin.com/in/${contact.linkedin}`}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="social-link"
-										>
-											<span class="social-badge">in</span>
-											<span class="social-link-text">LinkedIn</span>
-										</a>
-									{/if}
-									{#if contact.twitter}
-										<a
-											href={contact.twitter.startsWith('http')
-												? contact.twitter
-												: `https://x.com/${contact.twitter.replace('@', '')}`}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="social-link"
-										>
-											<span class="social-badge">X</span>
-											<span class="social-link-text">Twitter / X</span>
-										</a>
-									{/if}
-									{#if contact.facebook}
-										<a
-											href={contact.facebook.startsWith('http')
-												? contact.facebook
-												: `https://facebook.com/${contact.facebook}`}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="social-link"
-										>
-											<span class="social-badge">f</span>
-											<span class="social-link-text">Facebook</span>
-										</a>
-									{/if}
-									{#if contact.instagram}
-										<a
-											href={contact.instagram.startsWith('http')
-												? contact.instagram
-												: `https://instagram.com/${contact.instagram.replace('@', '')}`}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="social-link"
-										>
-											<span class="social-badge">ig</span>
-											<span class="social-link-text">Instagram</span>
-										</a>
-									{/if}
-									{#if contact.xing}
-										<a
-											href={contact.xing.startsWith('http')
-												? contact.xing
-												: `https://xing.com/profile/${contact.xing}`}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="social-link"
-										>
-											<span class="social-badge">xi</span>
-											<span class="social-link-text">Xing</span>
-										</a>
-									{/if}
-									{#if contact.github}
-										<a
-											href={contact.github.startsWith('http')
-												? contact.github
-												: `https://github.com/${contact.github}`}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="social-link"
-										>
-											<span class="social-badge">gh</span>
-											<span class="social-link-text">GitHub</span>
-										</a>
-									{/if}
-									{#if contact.youtube}
-										<a
-											href={contact.youtube.startsWith('http')
-												? contact.youtube
-												: `https://youtube.com/@${contact.youtube}`}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="social-link"
-										>
-											<span class="social-badge">yt</span>
-											<span class="social-link-text">YouTube</span>
-										</a>
-									{/if}
-									{#if contact.tiktok}
-										<a
-											href={contact.tiktok.startsWith('http')
-												? contact.tiktok
-												: `https://tiktok.com/@${contact.tiktok.replace('@', '')}`}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="social-link"
-										>
-											<span class="social-badge">tt</span>
-											<span class="social-link-text">TikTok</span>
-										</a>
-									{/if}
-									{#if contact.telegram}
-										<a
-											href={`https://t.me/${contact.telegram.replace('@', '')}`}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="social-link"
-										>
-											<span class="social-badge">tg</span>
-											<span class="social-link-text">Telegram</span>
-										</a>
-									{/if}
-									{#if contact.whatsapp}
-										<a
-											href={`https://wa.me/${contact.whatsapp.replace(/[^0-9]/g, '')}`}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="social-link"
-										>
-											<span class="social-badge">wa</span>
-											<span class="social-link-text">WhatsApp</span>
-										</a>
-									{/if}
-									{#if contact.signal}
-										<span class="social-link social-link-static">
-											<span class="social-badge">sg</span>
-											<span class="social-link-text">{contact.signal}</span>
-										</span>
-									{/if}
-									{#if contact.discord}
-										<span class="social-link social-link-static">
-											<span class="social-badge">dc</span>
-											<span class="social-link-text">{contact.discord}</span>
-										</span>
-									{/if}
-									{#if contact.bluesky}
-										<a
-											href={contact.bluesky.startsWith('http')
-												? contact.bluesky
-												: `https://bsky.app/profile/${contact.bluesky.replace('@', '')}`}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="social-link"
-										>
-											<span class="social-badge">bs</span>
-											<span class="social-link-text">Bluesky</span>
-										</a>
-									{/if}
-								</div>
-							</section>
-						{/if}
+						<SocialMediaLinks {contact} />
 
 						<!-- Contact Notes (separate from contact.notes field) -->
 						<ContactNotes {contactId} />
@@ -1980,123 +1605,6 @@
 
 		.quick-actions {
 			gap: 1rem;
-		}
-
-		.social-grid {
-			grid-template-columns: 1fr;
-		}
-	}
-
-	/* Social Media Section */
-	.section-header-toggle {
-		width: 100%;
-		background: none;
-		border: none;
-		cursor: pointer;
-		border-bottom: 1px solid hsl(var(--color-border) / 0.5);
-		margin-bottom: 0;
-	}
-
-	.section-header-toggle:hover {
-		background: hsl(var(--color-surface-hover) / 0.3);
-		margin: 0 -1rem;
-		padding: 0 1rem 0.625rem;
-		width: calc(100% + 2rem);
-		border-radius: 0.5rem 0.5rem 0 0;
-	}
-
-	.chevron-icon {
-		width: 1rem;
-		height: 1rem;
-		margin-left: auto;
-		color: hsl(var(--color-muted-foreground));
-		transition: transform 0.2s ease;
-	}
-
-	.chevron-open {
-		transform: rotate(180deg);
-	}
-
-	.social-grid {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 0.75rem;
-		padding-top: 0.75rem;
-	}
-
-	.social-label {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.social-icon-label {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 1.25rem;
-		height: 1.25rem;
-		border-radius: 0.25rem;
-		background: hsl(var(--color-primary) / 0.1);
-		color: hsl(var(--color-primary));
-		font-size: 0.625rem;
-		font-weight: 700;
-		text-transform: lowercase;
-	}
-
-	/* Social Links in View Mode */
-	.social-links-grid {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 0.5rem;
-	}
-
-	.social-link {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.625rem;
-		background: hsl(var(--color-muted) / 0.5);
-		border-radius: 0.5rem;
-		text-decoration: none;
-		color: inherit;
-		transition: all 0.2s ease;
-	}
-
-	.social-link:hover:not(.social-link-static) {
-		background: hsl(var(--color-primary) / 0.1);
-		color: hsl(var(--color-primary));
-	}
-
-	.social-link-static {
-		cursor: default;
-	}
-
-	.social-badge {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 1.5rem;
-		height: 1.5rem;
-		border-radius: 0.375rem;
-		background: hsl(var(--color-primary) / 0.15);
-		color: hsl(var(--color-primary));
-		font-size: 0.625rem;
-		font-weight: 700;
-		flex-shrink: 0;
-	}
-
-	.social-link-text {
-		font-size: 0.8125rem;
-		font-weight: 500;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	@media (max-width: 480px) {
-		.social-links-grid {
-			grid-template-columns: 1fr;
 		}
 	}
 </style>

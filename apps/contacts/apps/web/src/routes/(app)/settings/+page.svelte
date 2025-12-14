@@ -25,9 +25,9 @@
 
 	// Options for selects
 	const viewOptions = [
-		{ value: 'list', label: 'Liste' },
 		{ value: 'grid', label: 'Kacheln' },
 		{ value: 'alphabet', label: 'Alphabetisch' },
+		{ value: 'network', label: 'Netzwerk' },
 	];
 
 	const sortByOptions = [
@@ -63,7 +63,6 @@
 	const startPageLabels: Record<string, string> = {
 		'nav.contacts': 'Kontakte',
 		'nav.groups': 'Gruppen',
-		'nav.favorites': 'Favoriten',
 	};
 
 	function translateLabel(key: string): string {

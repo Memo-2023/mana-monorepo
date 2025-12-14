@@ -5,6 +5,7 @@
 	 */
 
 	import ContactRowSkeleton from './ContactRowSkeleton.svelte';
+	import { calculateFadeOpacity } from './utils';
 
 	interface Props {
 		/** Number of skeleton rows to show */
@@ -16,16 +17,10 @@
 	}
 
 	let { count = 8, fadeEffect = true, minOpacity = 0.3 }: Props = $props();
-
-	function calculateOpacity(index: number): number {
-		if (!fadeEffect) return 1;
-		const fadeStep = (1 - minOpacity) / Math.max(count - 1, 1);
-		return Math.max(minOpacity, 1 - index * fadeStep);
-	}
 </script>
 
 <div class="space-y-2" role="status" aria-label="Kontakte werden geladen...">
 	{#each Array(count) as _, i}
-		<ContactRowSkeleton opacity={calculateOpacity(i)} />
+		<ContactRowSkeleton opacity={fadeEffect ? calculateFadeOpacity(i, count, minOpacity) : 1} />
 	{/each}
 </div>

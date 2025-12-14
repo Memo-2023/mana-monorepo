@@ -17,14 +17,14 @@
 </script>
 
 <svelte:head>
-	<title>{translations.title} | Contacts</title>
+	<title>{translations.titleForm} | Contacts</title>
 </svelte:head>
 
 <ForgotPasswordPage
 	appName="Contacts"
 	logo={ContactsLogo}
 	primaryColor="#3b82f6"
-	onResetPassword={handleResetPassword}
+	onForgotPassword={handleResetPassword}
 	{goto}
 	loginPath="/login"
 	lightBackground="#eff6ff"

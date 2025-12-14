@@ -1,32 +1,8 @@
 import { browser } from '$app/environment';
 import { authStore } from '$lib/stores/auth.svelte';
-import { API_BASE } from './config';
+import { MANA_AUTH_URL } from './config';
+import { fetchWithAuth, fetchWithAuthFormData } from './client';
 import { createTagsClient, type Tag } from '@manacore/shared-tags';
-
-async function fetchWithAuth(url: string, options: RequestInit = {}) {
-	const token = await authStore.getAccessToken();
-
-	const headers: HeadersInit = {
-		'Content-Type': 'application/json',
-		...(options.headers || {}),
-	};
-
-	if (token) {
-		(headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
-	}
-
-	const response = await fetch(`${API_BASE}${url}`, {
-		...options,
-		headers,
-	});
-
-	if (!response.ok) {
-		const error = await response.json().catch(() => ({ message: 'Request failed' }));
-		throw new Error(error.message || 'Request failed');
-	}
-
-	return response.json();
-}
 
 export interface Contact {
 	id: string;
@@ -63,6 +39,8 @@ export interface Contact {
 	signal?: string | null;
 	discord?: string | null;
 	bluesky?: string | null;
+	// Tags (populated by API)
+	tags?: Array<{ id: string; name: string; color: string | null }>;
 	isFavorite: boolean;
 	isArchived: boolean;
 	organizationId?: string | null;
@@ -104,9 +82,19 @@ export interface ContactFilters {
 	offset?: number;
 }
 
+// API Response types
+interface ContactResponse {
+	contact: Contact;
+}
+
+interface ContactListResponse {
+	contacts: Contact[];
+	total: number;
+}
+
 // Contacts API
 export const contactsApi = {
-	async list(filters: ContactFilters = {}) {
+	async list(filters: ContactFilters = {}): Promise<ContactListResponse> {
 		const params = new URLSearchParams();
 		if (filters.search) params.set('search', filters.search);
 		if (filters.isFavorite !== undefined) params.set('isFavorite', String(filters.isFavorite));
@@ -116,16 +104,16 @@ export const contactsApi = {
 		if (filters.offset) params.set('offset', String(filters.offset));
 
 		const query = params.toString();
-		return fetchWithAuth(`/contacts${query ? `?${query}` : ''}`);
+		return fetchWithAuth<ContactListResponse>(`/contacts${query ? `?${query}` : ''}`);
 	},
 
 	async get(id: string): Promise<Contact> {
-		const response = await fetchWithAuth(`/contacts/${id}`);
+		const response = await fetchWithAuth<ContactResponse>(`/contacts/${id}`);
 		return response.contact;
 	},
 
 	async create(data: Partial<Contact>): Promise<Contact> {
-		const response = await fetchWithAuth('/contacts', {
+		const response = await fetchWithAuth<ContactResponse>('/contacts', {
 			method: 'POST',
 			body: JSON.stringify(data),
 		});
@@ -133,7 +121,7 @@ export const contactsApi = {
 	},
 
 	async update(id: string, data: Partial<Contact>): Promise<Contact> {
-		const response = await fetchWithAuth(`/contacts/${id}`, {
+		const response = await fetchWithAuth<ContactResponse>(`/contacts/${id}`, {
 			method: 'PATCH',
 			body: JSON.stringify(data),
 		});
@@ -147,14 +135,14 @@ export const contactsApi = {
 	},
 
 	async toggleFavorite(id: string): Promise<Contact> {
-		const response = await fetchWithAuth(`/contacts/${id}/favorite`, {
+		const response = await fetchWithAuth<ContactResponse>(`/contacts/${id}/favorite`, {
 			method: 'POST',
 		});
 		return response.contact;
 	},
 
 	async toggleArchive(id: string): Promise<Contact> {
-		const response = await fetchWithAuth(`/contacts/${id}/archive`, {
+		const response = await fetchWithAuth<ContactResponse>(`/contacts/${id}/archive`, {
 			method: 'POST',
 		});
 		return response.contact;
@@ -164,16 +152,6 @@ export const contactsApi = {
 // Tags API - Uses central Tags API from mana-core-auth
 // Contact-tag associations still use the Contacts backend
 
-// Get auth URL dynamically at runtime
-function getAuthUrl(): string {
-	if (browser && typeof window !== 'undefined') {
-		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
-			.__PUBLIC_MANA_CORE_AUTH_URL__;
-		return injectedUrl || 'http://localhost:3001';
-	}
-	return 'http://localhost:3001';
-}
-
 // Lazy-initialized tags client
 let _tagsClient: ReturnType<typeof createTagsClient> | null = null;
 
@@ -181,7 +159,7 @@ function getTagsClient() {
 	if (!browser) return null;
 	if (!_tagsClient) {
 		_tagsClient = createTagsClient({
-			authUrl: getAuthUrl(),
+			authUrl: MANA_AUTH_URL,
 			getToken: async () => {
 				const token = await authStore.getAccessToken();
 				return token || '';
@@ -226,19 +204,19 @@ export const tagsApi = {
 
 	// Contact-tag associations still use Contacts backend
 	async addToContact(tagId: string, contactId: string): Promise<{ success: boolean }> {
-		return fetchWithAuth(`/tags/${tagId}/contacts/${contactId}`, {
+		return fetchWithAuth<{ success: boolean }>(`/tags/${tagId}/contacts/${contactId}`, {
 			method: 'POST',
 		});
 	},
 
 	async removeFromContact(tagId: string, contactId: string): Promise<{ success: boolean }> {
-		return fetchWithAuth(`/tags/${tagId}/contacts/${contactId}`, {
+		return fetchWithAuth<{ success: boolean }>(`/tags/${tagId}/contacts/${contactId}`, {
 			method: 'DELETE',
 		});
 	},
 
 	async getForContact(contactId: string): Promise<{ tagIds: string[] }> {
-		return fetchWithAuth(`/tags/contact/${contactId}`);
+		return fetchWithAuth<{ tagIds: string[] }>(`/tags/contact/${contactId}`);
 	},
 
 	// Create default tags via central Tags API
@@ -250,44 +228,68 @@ export const tagsApi = {
 	},
 };
 
+// Notes API Response types
+interface NotesListResponse {
+	notes: ContactNote[];
+}
+
+interface NoteResponse {
+	note: ContactNote;
+}
+
 // Notes API
 export const notesApi = {
-	async list(contactId: string) {
-		return fetchWithAuth(`/contacts/${contactId}/notes`);
+	async list(contactId: string): Promise<NotesListResponse> {
+		return fetchWithAuth<NotesListResponse>(`/contacts/${contactId}/notes`);
 	},
 
-	async create(contactId: string, data: { content: string; isPinned?: boolean }) {
-		return fetchWithAuth(`/contacts/${contactId}/notes`, {
+	async create(
+		contactId: string,
+		data: { content: string; isPinned?: boolean }
+	): Promise<NoteResponse> {
+		return fetchWithAuth<NoteResponse>(`/contacts/${contactId}/notes`, {
 			method: 'POST',
 			body: JSON.stringify(data),
 		});
 	},
 
-	async update(noteId: string, data: { content?: string; isPinned?: boolean }) {
-		return fetchWithAuth(`/notes/${noteId}`, {
+	async update(
+		noteId: string,
+		data: { content?: string; isPinned?: boolean }
+	): Promise<NoteResponse> {
+		return fetchWithAuth<NoteResponse>(`/notes/${noteId}`, {
 			method: 'PATCH',
 			body: JSON.stringify(data),
 		});
 	},
 
-	async delete(noteId: string) {
-		return fetchWithAuth(`/notes/${noteId}`, {
+	async delete(noteId: string): Promise<void> {
+		await fetchWithAuth(`/notes/${noteId}`, {
 			method: 'DELETE',
 		});
 	},
 
-	async togglePin(noteId: string) {
-		return fetchWithAuth(`/notes/${noteId}/pin`, {
+	async togglePin(noteId: string): Promise<NoteResponse> {
+		return fetchWithAuth<NoteResponse>(`/notes/${noteId}/pin`, {
 			method: 'POST',
 		});
 	},
 };
 
+// Activities API Response types
+interface ActivitiesListResponse {
+	activities: ContactActivity[];
+}
+
+interface ActivityResponse {
+	activity: ContactActivity;
+}
+
 // Activities API
 export const activitiesApi = {
-	async list(contactId: string, limit?: number) {
+	async list(contactId: string, limit?: number): Promise<ActivitiesListResponse> {
 		const params = limit ? `?limit=${limit}` : '';
-		return fetchWithAuth(`/contacts/${contactId}/activities${params}`);
+		return fetchWithAuth<ActivitiesListResponse>(`/contacts/${contactId}/activities${params}`);
 	},
 
 	async create(
@@ -297,8 +299,8 @@ export const activitiesApi = {
 			description?: string;
 			metadata?: Record<string, unknown>;
 		}
-	) {
-		return fetchWithAuth(`/contacts/${contactId}/activities`, {
+	): Promise<ActivityResponse> {
+		return fetchWithAuth<ActivityResponse>(`/contacts/${contactId}/activities`, {
 			method: 'POST',
 			body: JSON.stringify(data),
 		});
@@ -308,25 +310,13 @@ export const activitiesApi = {
 // Photo API
 export const photoApi = {
 	async upload(contactId: string, file: File): Promise<{ photoUrl: string }> {
-		const token = await authStore.getAccessToken();
-
 		const formData = new FormData();
 		formData.append('photo', file);
 
-		const response = await fetch(`${API_BASE}/contacts/${contactId}/photo`, {
+		return fetchWithAuthFormData<{ photoUrl: string }>(`/contacts/${contactId}/photo`, {
 			method: 'POST',
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
 			body: formData,
 		});
-
-		if (!response.ok) {
-			const error = await response.json().catch(() => ({ message: 'Upload failed' }));
-			throw new Error(error.message || 'Upload failed');
-		}
-
-		return response.json();
 	},
 
 	async delete(contactId: string): Promise<void> {

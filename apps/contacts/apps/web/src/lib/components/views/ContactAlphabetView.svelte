@@ -5,6 +5,8 @@
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 	import { isSidebarMode } from '$lib/stores/navigation';
 	import { contactsFilterStore } from '$lib/stores/filter.svelte';
+	import { contactsSettings } from '$lib/stores/settings.svelte';
+	import AlphabetNavContextMenu from '$lib/components/AlphabetNavContextMenu.svelte';
 
 	interface Props {
 		contacts: Contact[];
@@ -36,12 +38,27 @@
 		contactsFilterStore.toggleAlphabetNav();
 	}
 
+	// Context menu for alphabet nav
+	let alphabetContextMenu: AlphabetNavContextMenu;
+
+	function handleAlphabetContextMenu(e: MouseEvent) {
+		e.preventDefault();
+		alphabetContextMenu?.show(e.clientX, e.clientY);
+	}
+
 	function handleCheckboxClick(e: MouseEvent, id: string) {
 		e.stopPropagation();
 		onToggleSelection?.(id);
 	}
 
-	const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+	// Alphabet with optional reverse order
+	let alphabet = $derived.by(() => {
+		let letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+		if (contactsSettings.alphabetNavReverseOrder) {
+			letters = letters.reverse();
+		}
+		return letters;
+	});
 
 	function getInitials(contact: Contact) {
 		const first = contact.firstName?.[0] || '';
@@ -267,13 +284,15 @@
 		class:sidebar-mode={$isSidebarMode}
 		class:toolbar-expanded={isToolbarExpanded}
 	>
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<button
 			onclick={toggleAlphabetNav}
+			oncontextmenu={handleAlphabetContextMenu}
 			class="alphabet-fab"
 			class:active={!isAlphabetNavCollapsed}
 			title={isAlphabetNavCollapsed
-				? 'Alphabet-Navigation öffnen'
-				: 'Alphabet-Navigation schließen'}
+				? 'Alphabet-Navigation öffnen (Rechtsklick für Optionen)'
+				: 'Alphabet-Navigation schließen (Rechtsklick für Optionen)'}
 		>
 			<svg class="fab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				{#if isAlphabetNavCollapsed}
@@ -301,27 +320,44 @@
 			class:sidebar-mode={$isSidebarMode}
 			class:toolbar-expanded={isToolbarExpanded}
 		>
-			<div class="alphabet-nav-container">
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div
+				class="alphabet-nav-container"
+				class:compact={contactsSettings.alphabetNavCompact}
+				oncontextmenu={handleAlphabetContextMenu}
+			>
 				{#each alphabet as letter}
+					{@const isActive = availableLetters.includes(letter)}
+					{@const shouldHide = contactsSettings.alphabetNavHideInactive && !isActive}
+					{#if !shouldHide}
+						<button
+							type="button"
+							class="alphabet-nav-btn"
+							class:active={isActive}
+							class:disabled={!isActive}
+							class:compact={contactsSettings.alphabetNavCompact}
+							onclick={() => isActive && scrollToLetter(letter)}
+							disabled={!isActive}
+						>
+							{letter}
+						</button>
+					{/if}
+				{/each}
+				{#if contactsSettings.alphabetNavShowHash && availableLetters.includes('#')}
 					<button
 						type="button"
-						class="alphabet-nav-btn"
-						class:active={availableLetters.includes(letter)}
-						class:disabled={!availableLetters.includes(letter)}
-						onclick={() => availableLetters.includes(letter) && scrollToLetter(letter)}
-						disabled={!availableLetters.includes(letter)}
+						class="alphabet-nav-btn active"
+						class:compact={contactsSettings.alphabetNavCompact}
+						onclick={() => scrollToLetter('#')}
 					>
-						{letter}
-					</button>
-				{/each}
-				{#if availableLetters.includes('#')}
-					<button type="button" class="alphabet-nav-btn active" onclick={() => scrollToLetter('#')}>
 						#
 					</button>
 				{/if}
 			</div>
 		</div>
 	{/if}
+
+	<AlphabetNavContextMenu bind:this={alphabetContextMenu} />
 </div>
 
 <style>
@@ -329,6 +365,8 @@
 		display: block;
 		position: relative;
 		padding-bottom: 10rem; /* Space for fixed alphabet nav + InputBar */
+		max-width: 600px;
+		margin: 0 auto;
 	}
 
 	.alphabet-sections {
@@ -630,6 +668,17 @@
 		background: transparent;
 	}
 
+	/* Compact mode for alphabet nav */
+	.alphabet-nav-container.compact {
+		padding: 0.375rem 1rem;
+	}
+
+	.alphabet-nav-btn.compact {
+		min-width: 36px;
+		height: 40px;
+		font-size: 0.9375rem;
+	}
+
 	/* New Contact Card */
 	.new-contact-section {
 		margin-bottom: 1rem;
@@ -668,10 +717,18 @@
 	.alphabet-fab-container {
 		position: fixed;
 		bottom: calc(70px + 9px + env(safe-area-inset-bottom, 0px)); /* Align with InputBar */
-		left: calc(50% - 350px - 70px); /* Left of InputBar (max-width 700px / 2 + gap) */
+		/* InputBar is 450px when toolbar is shown: left edge at 50% - 225px, minus gap and fab width */
+		left: calc(50% - 225px - 8px - 54px);
 		z-index: 49; /* Below InputBar (90) and ExpandableToolbar FAB (91), above alphabet-nav (48) */
 		pointer-events: none;
-		transition: bottom 0.2s ease;
+		transition:
+			bottom 0.2s ease,
+			left 0.2s ease;
+	}
+
+	/* Sidebar mode - InputBar is 700px wide, position accordingly */
+	.alphabet-fab-container.sidebar-mode {
+		left: calc(50% - 350px - 8px - 54px); /* Left of 700px InputBar */
 	}
 
 	/* Responsive positioning for FAB */

@@ -13,7 +13,6 @@
 		PillNavItem,
 		PillDropdownItem,
 		QuickInputItem,
-		QuickAction,
 		CreatePreview,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
@@ -47,8 +46,6 @@
 		formatParsedContactPreview,
 	} from '$lib/utils/contact-parser';
 	import ContactsToolbar from '$lib/components/ContactsToolbar.svelte';
-	import NetworkToolbar from '$lib/components/NetworkToolbar.svelte';
-	import { networkStore } from '$lib/stores/network.svelte';
 
 	// Tags state for Quick-Create
 	let availableTags = $state<{ id: string; name: string }[]>([]);
@@ -77,22 +74,15 @@
 	// Show toolbar only on main contacts page
 	const showContactsToolbar = $derived($page.url.pathname === '/' && !isSidebarMode);
 
-	// Show network toolbar only on network page
-	const showNetworkToolbar = $derived($page.url.pathname === '/network' && !isSidebarMode);
-
-	// Check if any toolbar is expanded
-	const isAnyToolbarExpanded = $derived(
-		(showContactsToolbar && !contactsFilterStore.isToolbarCollapsed) ||
-			(showNetworkToolbar && !networkStore.isToolbarCollapsed)
+	// Check if toolbar is expanded
+	const isToolbarExpanded = $derived(
+		showContactsToolbar && !contactsFilterStore.isToolbarCollapsed
 	);
 
 	// Dynamic bottom offset based on toolbar state
 	const inputBarBottomOffset = $derived(
-		isSidebarMode ? '0px' : isAnyToolbarExpanded ? '140px' : '70px'
+		isSidebarMode ? '0px' : isToolbarExpanded ? '140px' : '70px'
 	);
-
-	// Show FAB when any toolbar is active
-	const showToolbarFab = $derived(showContactsToolbar || showNetworkToolbar);
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -147,9 +137,7 @@
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/', label: 'Kontakte', icon: 'users' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
-		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
 		{ href: '/statistics', label: 'Statistiken', icon: 'bar-chart-3' },
-		{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 		{ href: '/help', label: 'Hilfe', icon: 'help-circle' },
@@ -270,13 +258,6 @@
 		});
 	}
 
-	// QuickInputBar quick actions
-	const quickActions: QuickAction[] = [
-		{ id: 'favorites', label: 'Favoriten', icon: 'heart', href: '/favorites' },
-		{ id: 'tags', label: 'Tags', icon: 'tag', href: '/tags' },
-		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
-	];
-
 	onMount(async () => {
 		// Redirect to login if not authenticated
 		if (!authStore.isAuthenticated) {
@@ -386,7 +367,6 @@
 			onSearch={handleSearch}
 			onSelect={handleSelect}
 			onSearchChange={(query) => contactsFilterStore.setSearchQuery(query)}
-			{quickActions}
 			placeholder="Neuer Kontakt oder suchen..."
 			emptyText="Keine Kontakte gefunden"
 			searchingText="Suche..."
@@ -394,20 +374,14 @@
 			onParseCreate={handleParseCreate}
 			createText="Erstellen"
 			appIcon="contacts"
-			primaryColor="#3b82f6"
 			autoFocus={true}
 			bottomOffset={inputBarBottomOffset}
-			hasFabRight={showToolbarFab}
+			hasFabRight={showContactsToolbar}
 		/>
 
 		<!-- Contacts Toolbar (FAB + expandable bar) - only on main page -->
 		{#if showContactsToolbar}
 			<ContactsToolbar {isSidebarMode} contacts={contactsStore.contacts} />
-		{/if}
-
-		<!-- Network Toolbar (FAB + expandable bar) - only on network page -->
-		{#if showNetworkToolbar}
-			<NetworkToolbar {isSidebarMode} />
 		{/if}
 	</div>
 </SplitPaneContainer>
@@ -444,9 +418,7 @@
 	}
 
 	.content-wrapper {
-		max-width: 900px;
-		margin-left: auto;
-		margin-right: auto;
+		/* No max-width - let individual views control their own width */
 		padding: 1rem;
 	}
 
@@ -459,6 +431,25 @@
 	@media (min-width: 1024px) {
 		.content-wrapper {
 			padding: 2rem;
+		}
+	}
+
+	/* Adjust InputBar when toolbar elements (view-mode-pill + FAB) are visible */
+	/* Pill left edge is at: 50% - 238px from right edge of viewport */
+	/* This means from center, there's 238px to the pill's left edge */
+	/* For a centered InputBar with max-width W, right edge is at: center + W/2 */
+	/* We need: center + W/2 < center + 238 - 12px gap, so W/2 < 226, W < 452px */
+	:global(.quick-input-bar.has-fab-right .input-container) {
+		max-width: 450px;
+	}
+
+	/* On smaller screens (<900px), the FAB + pill move to right: 1rem position */
+	/* So we need fixed padding instead */
+	@media (max-width: 900px) {
+		:global(.quick-input-bar.has-fab-right .input-container) {
+			max-width: calc(100% - 200px); /* ~120px pill + 8px + 54px FAB + 18px gap */
+			margin-left: 0;
+			margin-right: auto;
 		}
 	}
 </style>

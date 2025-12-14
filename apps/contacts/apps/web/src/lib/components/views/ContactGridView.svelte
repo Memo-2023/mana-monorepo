@@ -246,6 +246,8 @@
 		border-radius: var(--radius-lg);
 		cursor: pointer;
 		transition: all var(--transition-base);
+		/* Equal height cards */
+		min-height: 280px;
 	}
 
 	.grid-card:hover {
@@ -318,7 +320,7 @@
 	.grid-actions {
 		display: flex;
 		gap: 0.5rem;
-		margin-top: 1rem;
+		margin-top: auto; /* Push to bottom of card */
 		padding-top: 1rem;
 		border-top: 1px solid hsl(var(--border));
 		width: 100%;

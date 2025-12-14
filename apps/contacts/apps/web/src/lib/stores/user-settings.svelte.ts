@@ -9,8 +9,7 @@
 
 import { createUserSettingsStore } from '@manacore/shared-theme';
 import { authStore } from './auth.svelte';
-
-const MANA_AUTH_URL = 'http://localhost:3001';
+import { MANA_AUTH_URL } from '$lib/api/config';
 
 export const userSettings = createUserSettingsStore({
 	appId: 'contacts',

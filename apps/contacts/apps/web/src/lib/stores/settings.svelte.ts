@@ -8,7 +8,7 @@ import { browser } from '$app/environment';
 // Settings types
 export type ContactSortBy = 'name' | 'company' | 'created' | 'updated';
 export type ContactSortOrder = 'asc' | 'desc';
-export type ContactView = 'grid' | 'alphabet';
+export type ContactView = 'grid' | 'alphabet' | 'network';
 export type DateFormat = 'dd.MM.yyyy' | 'MM/dd/yyyy' | 'yyyy-MM-dd';
 
 export interface ContactsAppSettings {
@@ -55,6 +55,16 @@ export interface ContactsAppSettings {
 	privacyMode: boolean;
 	/** Require confirmation before sharing contact */
 	confirmBeforeSharing: boolean;
+
+	// Alphabet Navigation Settings
+	/** Hide letters that have no contacts */
+	alphabetNavHideInactive: boolean;
+	/** Use compact/smaller alphabet buttons */
+	alphabetNavCompact: boolean;
+	/** Reverse letter order (Z-A instead of A-Z) */
+	alphabetNavReverseOrder: boolean;
+	/** Show # symbol for non-letter names */
+	alphabetNavShowHash: boolean;
 }
 
 const DEFAULT_SETTINGS: ContactsAppSettings = {
@@ -84,6 +94,12 @@ const DEFAULT_SETTINGS: ContactsAppSettings = {
 	// Privacy
 	privacyMode: false,
 	confirmBeforeSharing: true,
+
+	// Alphabet Navigation
+	alphabetNavHideInactive: false,
+	alphabetNavCompact: false,
+	alphabetNavReverseOrder: false,
+	alphabetNavShowHash: true,
 };
 
 const STORAGE_KEY = 'contacts-settings';
@@ -185,6 +201,20 @@ export const contactsSettings = {
 	},
 	get confirmBeforeSharing() {
 		return settings.confirmBeforeSharing;
+	},
+
+	// Alphabet Navigation
+	get alphabetNavHideInactive() {
+		return settings.alphabetNavHideInactive;
+	},
+	get alphabetNavCompact() {
+		return settings.alphabetNavCompact;
+	},
+	get alphabetNavReverseOrder() {
+		return settings.alphabetNavReverseOrder;
+	},
+	get alphabetNavShowHash() {
+		return settings.alphabetNavShowHash;
 	},
 
 	/**

@@ -1,30 +1,4 @@
-import { authStore } from '$lib/stores/auth.svelte';
-import { API_BASE } from './config';
-
-async function fetchWithAuth(url: string, options: RequestInit = {}) {
-	const token = await authStore.getAccessToken();
-
-	const headers: HeadersInit = {
-		'Content-Type': 'application/json',
-		...(options.headers || {}),
-	};
-
-	if (token) {
-		(headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
-	}
-
-	const response = await fetch(`${API_BASE}${url}`, {
-		...options,
-		headers,
-	});
-
-	if (!response.ok) {
-		const error = await response.json().catch(() => ({ message: 'Request failed' }));
-		throw new Error(error.message || 'Request failed');
-	}
-
-	return response.json();
-}
+import { fetchWithAuth } from './client';
 
 export interface BatchResult {
 	success: number;

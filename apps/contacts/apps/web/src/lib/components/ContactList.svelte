@@ -5,12 +5,17 @@
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
 	import { contactsFilterStore } from '$lib/stores/filter.svelte';
 	import { goto } from '$app/navigation';
-	import ContactListView from '$lib/components/views/ContactListView.svelte';
 	import ContactGridView from '$lib/components/views/ContactGridView.svelte';
 	import ContactAlphabetView from '$lib/components/views/ContactAlphabetView.svelte';
-	import { ContactListSkeleton, ContactGridSkeleton } from '$lib/components/skeletons';
+	import ContactNetworkView from '$lib/components/views/ContactNetworkView.svelte';
+	import {
+		ContactListSkeleton,
+		ContactGridSkeleton,
+		NetworkGraphSkeleton,
+	} from '$lib/components/skeletons';
 	import { batchApi } from '$lib/api/batch';
 	import { toasts } from '$lib/stores/toast';
+	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 
 	// Infinite scroll
 	let intersectionObserver: IntersectionObserver | null = null;
@@ -288,7 +293,7 @@
 
 <div class="space-y-6">
 	<!-- Header -->
-	<h1 class="text-2xl font-bold text-foreground">{$_('contacts.title')}</h1>
+	<h1 class="text-2xl font-bold text-foreground text-center">{$_('contacts.title')}</h1>
 
 	<!-- Batch Actions Bar (shown when in selection mode) -->
 	{#if selectionMode}
@@ -369,7 +374,9 @@
 
 	<!-- Loading state with skeleton -->
 	{#if contactsStore.loading}
-		{#if viewModeStore.mode === 'grid'}
+		{#if viewModeStore.mode === 'network'}
+			<NetworkGraphSkeleton />
+		{:else if viewModeStore.mode === 'grid'}
 			<ContactGridSkeleton count={8} />
 		{:else}
 			<ContactListSkeleton count={10} />
@@ -380,13 +387,15 @@
 			<div class="text-6xl mb-4">👤</div>
 			<h2 class="text-xl font-semibold text-foreground mb-2">{$_('contacts.noContacts')}</h2>
 			<p class="text-muted-foreground mb-4">{$_('contacts.addFirst')}</p>
-			<a href="/contacts/new" class="btn btn-primary">
+			<button type="button" onclick={() => newContactModalStore.open()} class="btn btn-primary">
 				{$_('contacts.new')}
-			</a>
+			</button>
 		</div>
 	{:else}
 		<!-- Contacts View -->
-		{#if viewModeStore.mode === 'grid'}
+		{#if viewModeStore.mode === 'network'}
+			<ContactNetworkView />
+		{:else if viewModeStore.mode === 'grid'}
 			<ContactGridView
 				contacts={sortedContacts}
 				onContactClick={handleContactClick}
@@ -395,7 +404,7 @@
 				{selectedIds}
 				onToggleSelection={toggleSelection}
 			/>
-		{:else if viewModeStore.mode === 'alphabet'}
+		{:else}
 			<ContactAlphabetView
 				contacts={sortedContacts}
 				onContactClick={handleContactClick}
@@ -405,19 +414,10 @@
 				onToggleSelection={toggleSelection}
 				sortField={contactsFilterStore.sortField}
 			/>
-		{:else}
-			<ContactListView
-				contacts={sortedContacts}
-				onContactClick={handleContactClick}
-				onToggleFavorite={handleToggleFavorite}
-				{selectionMode}
-				{selectedIds}
-				onToggleSelection={toggleSelection}
-			/>
 		{/if}
 
-		<!-- Infinite scroll trigger & loading more indicator -->
-		{#if contactsStore.hasMore}
+		<!-- Infinite scroll trigger & loading more indicator (not for network view) -->
+		{#if viewModeStore.mode !== 'network' && contactsStore.hasMore}
 			<div bind:this={loadMoreTrigger} class="load-more-trigger">
 				{#if contactsStore.loadingMore}
 					<div class="loading-more">
@@ -428,11 +428,13 @@
 			</div>
 		{/if}
 
-		<!-- Total count -->
-		<p class="text-sm text-muted-foreground text-center">
-			{contactsStore.contacts.length} / {contactsStore.total}
-			{contactsStore.total === 1 ? $_('contacts.contact') : $_('contacts.contactsPlural')}
-		</p>
+		<!-- Total count (not for network view) -->
+		{#if viewModeStore.mode !== 'network'}
+			<p class="text-sm text-muted-foreground text-center">
+				{contactsStore.contacts.length} / {contactsStore.total}
+				{contactsStore.total === 1 ? $_('contacts.contact') : $_('contacts.contactsPlural')}
+			</p>
+		{/if}
 	{/if}
 </div>
 

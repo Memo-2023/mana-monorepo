@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { contactsApi, type Contact } from '$lib/api/contacts';
+	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 
 	interface Props {
 		open: boolean;
@@ -196,7 +197,14 @@
 			{:else}
 				<!-- Quick Actions when no search -->
 				<div class="quick-actions-list">
-					<a href="/contacts/new" class="quick-action" onclick={onClose}>
+					<button
+						type="button"
+						class="quick-action"
+						onclick={() => {
+							onClose();
+							newContactModalStore.open();
+						}}
+					>
 						<svg class="quick-action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
 								stroke-linecap="round"
@@ -207,18 +215,7 @@
 						</svg>
 						<span>Neuen Kontakt erstellen</span>
 						<kbd>N</kbd>
-					</a>
-					<a href="/favorites" class="quick-action" onclick={onClose}>
-						<svg class="quick-action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-							/>
-						</svg>
-						<span>Favoriten anzeigen</span>
-					</a>
+					</button>
 					<a href="/tags" class="quick-action" onclick={onClose}>
 						<svg class="quick-action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
