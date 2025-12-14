@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import type { CommandBarItem, QuickAction, CreatePreview } from './CommandBar.types';
 
 	// Syntax highlighting patterns for command keywords
 	interface HighlightPattern {
@@ -40,29 +41,6 @@
 		}
 
 		return result;
-	}
-
-	export interface CommandBarItem {
-		id: string;
-		title: string;
-		subtitle?: string;
-		icon?: string;
-		imageUrl?: string;
-		isFavorite?: boolean;
-	}
-
-	export interface QuickAction {
-		id: string;
-		label: string;
-		href?: string;
-		icon: string;
-		shortcut?: string;
-		onclick?: () => void;
-	}
-
-	export interface CreatePreview {
-		title: string;
-		subtitle: string;
 	}
 
 	interface Props {

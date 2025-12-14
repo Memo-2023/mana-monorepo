@@ -17,14 +17,21 @@ import type {
 	SimulationNode as SharedSimulationNode,
 	SimulationLink as SharedSimulationLink,
 } from '@manacore/shared-ui';
-import { NetworkGraph } from '@manacore/shared-ui';
 
 // Re-export types from shared-ui for convenience
 export type SimulationNode = SharedSimulationNode;
 export type SimulationLink = SharedSimulationLink;
 
+// Interface for NetworkGraph component zoom methods
+interface NetworkGraphZoomMethods {
+	zoomIn(): void;
+	zoomOut(): void;
+	resetZoom(): void;
+	focusOnSelectedNode(): void;
+}
+
 // Graph component reference for zoom controls
-let graphComponentRef: NetworkGraph | null = null;
+let graphComponentRef: NetworkGraphZoomMethods | null = null;
 
 // localStorage key for toolbar state
 const TOOLBAR_STORAGE_KEY = 'network-toolbar-state';
@@ -215,7 +222,7 @@ export const networkStore = {
 	/**
 	 * Register graph component reference for zoom controls
 	 */
-	setGraphComponent(component: NetworkGraph | null) {
+	setGraphComponent(component: NetworkGraphZoomMethods | null) {
 		graphComponentRef = component;
 	},
 
