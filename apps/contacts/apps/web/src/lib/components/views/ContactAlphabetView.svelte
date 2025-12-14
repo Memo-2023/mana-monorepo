@@ -116,7 +116,6 @@
 				<div class="contact-info">
 					<div class="contact-main-row">
 						<span class="contact-name">{$_('contacts.new')}</span>
-						<span class="contact-company-inline">{$_('contacts.addFirst')}</span>
 					</div>
 				</div>
 			</div>
@@ -298,7 +297,7 @@
 		padding: 0.375rem 0.875rem;
 		margin-bottom: 0.75rem;
 		position: sticky;
-		top: 80px;
+		top: 8px;
 		z-index: 10;
 		/* Glass pill effect */
 		background: hsl(var(--background) / 0.75);
@@ -307,12 +306,6 @@
 		border: 1px solid hsl(var(--border) / 0.5);
 		border-radius: 9999px;
 		box-shadow: 0 2px 8px hsl(var(--foreground) / 0.05);
-	}
-
-	@media (max-width: 768px) {
-		.section-header {
-			top: 90px;
-		}
 	}
 
 	.section-letter {
@@ -493,6 +486,9 @@
 		align-items: stretch;
 		pointer-events: none;
 		transition: bottom 0.2s ease;
+		/* Container query context */
+		container-type: inline-size;
+		container-name: alphabetnav;
 	}
 
 	.alphabet-nav-container {
@@ -500,27 +496,31 @@
 		flex-direction: row;
 		align-items: center;
 		gap: 2px;
-		padding: 0.5rem 0;
+		padding: 0.5rem 1.5rem;
 		overflow-x: auto;
 		scrollbar-width: none;
 		-ms-overflow-style: none;
 		scroll-behavior: smooth;
-		/* Glass container like DateStrip */
-		background: var(--color-surface, hsl(var(--background)));
+		/* Glass container with blur effect */
+		background: hsl(var(--background) / 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
 		border-radius: 16px;
 		margin: 0 1rem;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-		border: 1px solid hsl(var(--border));
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+		border: 1px solid hsl(var(--border) / 0.6);
 		pointer-events: auto;
-		/* Fade effect at edges */
-		mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-		-webkit-mask-image: linear-gradient(
-			to right,
-			transparent 0%,
-			black 5%,
-			black 95%,
-			transparent 100%
-		);
+		/* Default: left-aligned with fit-content */
+		width: fit-content;
+		max-width: calc(100% - 2rem);
+	}
+
+	/* Center when container has enough space */
+	@container alphabetnav (min-width: 600px) {
+		.alphabet-nav-container {
+			margin-left: auto;
+			margin-right: auto;
+		}
 	}
 
 	.alphabet-nav-container::-webkit-scrollbar {
@@ -575,7 +575,6 @@
 		border-style: dashed;
 		border-color: hsl(var(--primary) / 0.4);
 		background: hsl(var(--primary) / 0.05);
-		max-width: 280px;
 	}
 
 	.new-contact-card:hover {
@@ -599,9 +598,5 @@
 
 	.new-contact-card .contact-name {
 		font-size: 0.875rem;
-	}
-
-	.new-contact-card .contact-company-inline {
-		font-size: 0.75rem;
 	}
 </style>
