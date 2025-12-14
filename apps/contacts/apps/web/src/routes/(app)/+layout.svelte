@@ -374,7 +374,6 @@
 			onParseCreate={handleParseCreate}
 			createText="Erstellen"
 			appIcon="contacts"
-			autoFocus={true}
 			bottomOffset={inputBarBottomOffset}
 			hasFabRight={showContactsToolbar}
 		/>
