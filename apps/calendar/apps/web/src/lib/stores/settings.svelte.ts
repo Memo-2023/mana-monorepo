@@ -33,6 +33,7 @@ export interface CalendarAppSettings {
 	dateStripHighlightWeekends: boolean; // Visually highlight weekend days
 	dateStripShowMonthDividers: boolean; // Show vertical dividers between months
 	dateStripCompact: boolean; // Use compact/smaller DateStrip
+	dateStripShowWeekNumbers: boolean; // Show week numbers at start of week
 
 	// UI settings
 	sidebarCollapsed: boolean;
@@ -59,6 +60,7 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	dateStripHighlightWeekends: true,
 	dateStripShowMonthDividers: true,
 	dateStripCompact: false,
+	dateStripShowWeekNumbers: false,
 	// UI defaults
 	sidebarCollapsed: false,
 	defaultEventDuration: 60,
@@ -176,6 +178,9 @@ export const settingsStore = {
 	},
 	get dateStripCompact() {
 		return settings.dateStripCompact;
+	},
+	get dateStripShowWeekNumbers() {
+		return settings.dateStripShowWeekNumbers;
 	},
 	get defaultEventDuration() {
 		return settings.defaultEventDuration;

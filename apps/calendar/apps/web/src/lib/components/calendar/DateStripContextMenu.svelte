@@ -36,6 +36,14 @@
 				action: () => toggleSetting('dateStripShowWeekday'),
 			},
 			{
+				id: 'week-numbers',
+				label: 'Kalenderwochen',
+				icon: Calendar,
+				toggle: true,
+				checked: settingsStore.dateStripShowWeekNumbers,
+				action: () => toggleSetting('dateStripShowWeekNumbers'),
+			},
+			{
 				id: 'divider-1',
 				label: '',
 				type: 'divider',
