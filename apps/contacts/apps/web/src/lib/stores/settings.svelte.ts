@@ -8,7 +8,7 @@ import { browser } from '$app/environment';
 // Settings types
 export type ContactSortBy = 'name' | 'company' | 'created' | 'updated';
 export type ContactSortOrder = 'asc' | 'desc';
-export type ContactView = 'list' | 'grid' | 'alphabet';
+export type ContactView = 'grid' | 'alphabet';
 export type DateFormat = 'dd.MM.yyyy' | 'MM/dd/yyyy' | 'yyyy-MM-dd';
 
 export interface ContactsAppSettings {

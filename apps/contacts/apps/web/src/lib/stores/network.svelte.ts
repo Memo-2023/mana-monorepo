@@ -17,10 +17,42 @@ import type {
 	SimulationNode as SharedSimulationNode,
 	SimulationLink as SharedSimulationLink,
 } from '@manacore/shared-ui';
+import { NetworkGraph } from '@manacore/shared-ui';
 
 // Re-export types from shared-ui for convenience
 export type SimulationNode = SharedSimulationNode;
 export type SimulationLink = SharedSimulationLink;
+
+// Graph component reference for zoom controls
+let graphComponentRef: NetworkGraph | null = null;
+
+// localStorage key for toolbar state
+const TOOLBAR_STORAGE_KEY = 'network-toolbar-state';
+
+// Load toolbar state from localStorage
+function loadToolbarState(): boolean {
+	if (!browser) return true;
+	try {
+		const stored = localStorage.getItem(TOOLBAR_STORAGE_KEY);
+		if (stored) {
+			const parsed = JSON.parse(stored);
+			return parsed.isCollapsed ?? true;
+		}
+	} catch {
+		// Ignore parse errors
+	}
+	return true;
+}
+
+// Save toolbar state to localStorage
+function saveToolbarState(isCollapsed: boolean) {
+	if (!browser) return;
+	try {
+		localStorage.setItem(TOOLBAR_STORAGE_KEY, JSON.stringify({ isCollapsed }));
+	} catch {
+		// Ignore storage errors
+	}
+}
 
 // State
 let nodes = $state<SimulationNode[]>([]);
@@ -37,6 +69,7 @@ let tickCounter = $state(0); // Used to trigger reactivity on simulation tick
 let simulationInitialized = false;
 let dataLoaded = false; // Prevent double loading
 let lastDimensions = { width: 0, height: 0 };
+let isToolbarCollapsed = $state(loadToolbarState());
 
 // Derived state for filtering
 const filteredNodes = $derived.by(() => {
@@ -158,6 +191,60 @@ export const networkStore = {
 	},
 	get uniqueTags() {
 		return uniqueTags;
+	},
+	get isToolbarCollapsed() {
+		return isToolbarCollapsed;
+	},
+
+	/**
+	 * Set toolbar collapsed state
+	 */
+	setToolbarCollapsed(value: boolean) {
+		isToolbarCollapsed = value;
+		saveToolbarState(value);
+	},
+
+	/**
+	 * Toggle toolbar collapsed state
+	 */
+	toggleToolbar() {
+		isToolbarCollapsed = !isToolbarCollapsed;
+		saveToolbarState(isToolbarCollapsed);
+	},
+
+	/**
+	 * Register graph component reference for zoom controls
+	 */
+	setGraphComponent(component: NetworkGraph | null) {
+		graphComponentRef = component;
+	},
+
+	/**
+	 * Zoom in on the graph
+	 */
+	zoomIn() {
+		graphComponentRef?.zoomIn();
+	},
+
+	/**
+	 * Zoom out on the graph
+	 */
+	zoomOut() {
+		graphComponentRef?.zoomOut();
+	},
+
+	/**
+	 * Reset zoom to fit all nodes
+	 */
+	resetZoom() {
+		graphComponentRef?.resetZoom();
+	},
+
+	/**
+	 * Focus on the currently selected node
+	 */
+	focusOnSelected() {
+		graphComponentRef?.focusOnSelectedNode();
 	},
 
 	/**

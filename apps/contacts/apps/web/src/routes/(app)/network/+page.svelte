@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { networkStore, type SimulationNode } from '$lib/stores/network.svelte';
 	import { contactsFilterStore } from '$lib/stores/filter.svelte';
-	import { NetworkGraph, NetworkControls } from '@manacore/shared-ui';
+	import { NetworkGraph } from '@manacore/shared-ui';
 	import ContactDetailModal from '$lib/components/ContactDetailModal.svelte';
 	import { NetworkGraphSkeleton } from '$lib/components/skeletons';
 	import '$lib/i18n';
@@ -62,37 +62,10 @@
 		networkStore.releaseNode(node.id);
 	}
 
-	function handleZoomIn() {
-		graphComponent?.zoomIn();
-	}
-
-	function handleZoomOut() {
-		graphComponent?.zoomOut();
-	}
-
-	function handleResetZoom() {
-		graphComponent?.resetZoom();
-	}
-
-	function handleFocusSelected() {
-		graphComponent?.focusOnSelectedNode();
-	}
-
-	function handleTagFilter(tagId: string | null) {
-		networkStore.setFilterTag(tagId);
-	}
-
-	function handleSubtitleFilter(company: string | null) {
-		networkStore.setFilterCompany(company);
-	}
-
-	function handleStrengthFilter(strength: number) {
-		networkStore.setMinStrength(strength);
-	}
-
-	function handleClearFilters() {
-		networkStore.clearFilters();
-	}
+	// Register graph component with store when it changes
+	$effect(() => {
+		networkStore.setGraphComponent(graphComponent);
+	});
 
 	// Initialize simulation when data is loaded and container is ready
 	$effect(() => {
@@ -109,6 +82,7 @@
 	});
 
 	onDestroy(() => {
+		networkStore.setGraphComponent(null);
 		networkStore.stopSimulation();
 	});
 </script>
@@ -118,31 +92,6 @@
 </svelte:head>
 
 <div class="network-page">
-	<!-- Controls (floating) -->
-	<div class="controls-wrapper">
-		<NetworkControls
-			showSearch={false}
-			tags={networkStore.uniqueTags}
-			selectedTagId={networkStore.filterTagId}
-			subtitles={networkStore.uniqueCompanies}
-			selectedSubtitle={networkStore.filterCompany}
-			subtitleLabel="Firma"
-			nodeCount={networkStore.nodes.length}
-			linkCount={networkStore.links.length}
-			nodeLabel="Kontakte"
-			linkLabel="Verbindungen"
-			minStrength={networkStore.minStrength}
-			onTagFilter={handleTagFilter}
-			onSubtitleFilter={handleSubtitleFilter}
-			onStrengthFilter={handleStrengthFilter}
-			onZoomIn={handleZoomIn}
-			onZoomOut={handleZoomOut}
-			onResetZoom={handleResetZoom}
-			onFocusSelected={handleFocusSelected}
-			onClearFilters={handleClearFilters}
-		/>
-	</div>
-
 	<!-- Error Banner -->
 	{#if networkStore.error}
 		<div class="error-banner" role="alert">
@@ -192,16 +141,6 @@
 		inset: 0;
 		display: flex;
 		flex-direction: column;
-	}
-
-	/* Floating Controls - positioned above QuickInputBar and PillNav */
-	.controls-wrapper {
-		position: fixed;
-		bottom: calc(140px + env(safe-area-inset-bottom));
-		left: 50%;
-		transform: translateX(-50%);
-		z-index: 10;
-		max-width: calc(100% - 2rem);
 	}
 
 	/* Error Banner */
@@ -303,14 +242,6 @@
 				opacity: 1;
 				transform: translateY(0);
 			}
-		}
-	}
-
-	@media (max-width: 768px) {
-		.controls-wrapper {
-			bottom: calc(160px + env(safe-area-inset-bottom));
-			width: calc(100% - 2rem);
-			max-width: none;
 		}
 	}
 </style>

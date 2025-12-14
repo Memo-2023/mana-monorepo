@@ -16,7 +16,7 @@ function getInitialMode(): ViewMode {
 
 	// First check if there's a session-specific preference
 	const sessionMode = sessionStorage.getItem(STORAGE_KEY);
-	if (sessionMode === 'list' || sessionMode === 'grid' || sessionMode === 'alphabet') {
+	if (sessionMode === 'grid' || sessionMode === 'alphabet') {
 		return sessionMode;
 	}
 
@@ -57,7 +57,7 @@ export const viewModeStore = {
 
 		// Check if there's a session preference
 		const sessionMode = sessionStorage.getItem(STORAGE_KEY);
-		if (sessionMode === 'list' || sessionMode === 'grid' || sessionMode === 'alphabet') {
+		if (sessionMode === 'grid' || sessionMode === 'alphabet') {
 			mode = sessionMode;
 		} else {
 			// Use default from settings

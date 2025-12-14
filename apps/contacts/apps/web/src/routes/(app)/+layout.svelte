@@ -47,6 +47,8 @@
 		formatParsedContactPreview,
 	} from '$lib/utils/contact-parser';
 	import ContactsToolbar from '$lib/components/ContactsToolbar.svelte';
+	import NetworkToolbar from '$lib/components/NetworkToolbar.svelte';
+	import { networkStore } from '$lib/stores/network.svelte';
 
 	// Tags state for Quick-Create
 	let availableTags = $state<{ id: string; name: string }[]>([]);
@@ -75,14 +77,22 @@
 	// Show toolbar only on main contacts page
 	const showContactsToolbar = $derived($page.url.pathname === '/' && !isSidebarMode);
 
+	// Show network toolbar only on network page
+	const showNetworkToolbar = $derived($page.url.pathname === '/network' && !isSidebarMode);
+
+	// Check if any toolbar is expanded
+	const isAnyToolbarExpanded = $derived(
+		(showContactsToolbar && !contactsFilterStore.isToolbarCollapsed) ||
+			(showNetworkToolbar && !networkStore.isToolbarCollapsed)
+	);
+
 	// Dynamic bottom offset based on toolbar state
 	const inputBarBottomOffset = $derived(
-		isSidebarMode
-			? '0px'
-			: showContactsToolbar && !contactsFilterStore.isToolbarCollapsed
-				? '140px'
-				: '70px'
+		isSidebarMode ? '0px' : isAnyToolbarExpanded ? '140px' : '70px'
 	);
+
+	// Show FAB when any toolbar is active
+	const showToolbarFab = $derived(showContactsToolbar || showNetworkToolbar);
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -387,12 +397,17 @@
 			primaryColor="#3b82f6"
 			autoFocus={true}
 			bottomOffset={inputBarBottomOffset}
-			hasFabRight={showContactsToolbar}
+			hasFabRight={showToolbarFab}
 		/>
 
 		<!-- Contacts Toolbar (FAB + expandable bar) - only on main page -->
 		{#if showContactsToolbar}
 			<ContactsToolbar {isSidebarMode} contacts={contactsStore.contacts} />
+		{/if}
+
+		<!-- Network Toolbar (FAB + expandable bar) - only on network page -->
+		{#if showNetworkToolbar}
+			<NetworkToolbar {isSidebarMode} />
 		{/if}
 	</div>
 </SplitPaneContainer>
