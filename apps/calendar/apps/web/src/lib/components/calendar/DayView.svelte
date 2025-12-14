@@ -140,6 +140,7 @@
 	let resizeOriginalEnd = $state<Date | null>(null);
 	let resizePreviewTop = $state(0);
 	let resizePreviewHeight = $state(0);
+	let resizeOffsetMinutes = $state(0);
 
 	// Track if we actually moved during drag/resize (to prevent click on simple mousedown/up)
 	let hasMoved = $state(false);
@@ -276,9 +277,18 @@
 		resizeOriginalEnd = end;
 
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
+		const endMinutes = end.getHours() * 60 + end.getMinutes();
 		const duration = differenceInMinutes(end, start);
 		resizePreviewTop = minutesToPercent(startMinutes);
 		resizePreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
+
+		// Calculate offset between snapped click position and actual event boundary
+		const clickMinutes = getMinutesFromY(e.clientY);
+		if (edge === 'top') {
+			resizeOffsetMinutes = clickMinutes - startMinutes;
+		} else {
+			resizeOffsetMinutes = clickMinutes - endMinutes;
+		}
 
 		document.addEventListener('pointermove', handleResizeMove);
 		document.addEventListener('pointerup', handleResizeEnd);
@@ -289,18 +299,19 @@
 
 		hasMoved = true;
 		const mouseMinutes = getMinutesFromY(e.clientY);
-		const snappedMinutes = snapToGrid(mouseMinutes);
+		// Apply offset to prevent jumping when drag starts
+		const adjustedMinutes = snapToGrid(mouseMinutes - resizeOffsetMinutes);
 
 		const origStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
 		const origEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
 
 		if (resizeEdge === 'top') {
-			const newStartMinutes = Math.min(snappedMinutes, origEndMinutes - SNAP_MINUTES);
+			const newStartMinutes = Math.min(adjustedMinutes, origEndMinutes - SNAP_MINUTES);
 			const clampedStart = Math.max(firstVisibleHour * 60, newStartMinutes);
 			resizePreviewTop = minutesToPercent(clampedStart);
 			resizePreviewHeight = ((origEndMinutes - clampedStart) / (totalVisibleHours * 60)) * 100;
 		} else {
-			const newEndMinutes = Math.max(snappedMinutes, origStartMinutes + SNAP_MINUTES);
+			const newEndMinutes = Math.max(adjustedMinutes, origStartMinutes + SNAP_MINUTES);
 			const clampedEnd = Math.min(lastVisibleHour * 60, newEndMinutes);
 			resizePreviewHeight = ((clampedEnd - origStartMinutes) / (totalVisibleHours * 60)) * 100;
 		}
@@ -313,7 +324,8 @@
 		}
 
 		const mouseMinutes = getMinutesFromY(e.clientY);
-		const snappedMinutes = snapToGrid(mouseMinutes);
+		// Apply offset to prevent jumping
+		const adjustedMinutes = snapToGrid(mouseMinutes - resizeOffsetMinutes);
 
 		const origStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
 		const origEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
@@ -324,7 +336,7 @@
 		if (resizeEdge === 'top') {
 			const newStartMinutes = Math.max(
 				firstVisibleHour * 60,
-				Math.min(snappedMinutes, origEndMinutes - SNAP_MINUTES)
+				Math.min(adjustedMinutes, origEndMinutes - SNAP_MINUTES)
 			);
 			newStart = setHours(new Date(viewStore.currentDate), Math.floor(newStartMinutes / 60));
 			newStart = setMinutes(newStart, newStartMinutes % 60);
@@ -332,7 +344,7 @@
 		} else {
 			const newEndMinutes = Math.min(
 				lastVisibleHour * 60,
-				Math.max(snappedMinutes, origStartMinutes + SNAP_MINUTES)
+				Math.max(adjustedMinutes, origStartMinutes + SNAP_MINUTES)
 			);
 			newEnd = setHours(new Date(viewStore.currentDate), Math.floor(newEndMinutes / 60));
 			newEnd = setMinutes(newEnd, newEndMinutes % 60);
@@ -362,6 +374,7 @@
 		resizeEvent = null;
 		resizeOriginalStart = null;
 		resizeOriginalEnd = null;
+		resizeOffsetMinutes = 0;
 		hasMoved = false;
 		document.removeEventListener('pointermove', handleDragMove);
 		document.removeEventListener('pointerup', handleDragEnd);
