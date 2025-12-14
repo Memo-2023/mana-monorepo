@@ -14,7 +14,6 @@
 	});
 
 	let graphComponent: NetworkGraph;
-	let controlsComponent: NetworkControls;
 	let graphContainer: HTMLDivElement;
 
 	function handleNodeClick(node: SimulationNode) {
@@ -64,14 +63,6 @@
 		graphComponent?.focusOnSelectedNode();
 	}
 
-	function handleFocusSearch() {
-		controlsComponent?.focusSearch();
-	}
-
-	function handleSearch(query: string) {
-		networkStore.setSearch(query);
-	}
-
 	function handleTagFilter(tagId: string | null) {
 		networkStore.setFilterTag(tagId);
 	}
@@ -115,7 +106,6 @@
 	<!-- Controls (floating) -->
 	<div class="controls-wrapper">
 		<NetworkControls
-			bind:this={controlsComponent}
 			showSearch={false}
 			tags={networkStore.uniqueTags}
 			selectedTagId={networkStore.filterTagId}
@@ -169,7 +159,6 @@
 				onDragStart={handleDragStart}
 				onDrag={handleDrag}
 				onDragEnd={handleDragEnd}
-				onFocusSearch={handleFocusSearch}
 			/>
 		{/if}
 	</div>
