@@ -47,3 +47,6 @@ export { default as ModalFooter } from './ModalFooter.svelte';
 export { default as DataCard } from './DataCard.svelte';
 export { default as PageHeader } from './PageHeader.svelte';
 export { default as KeyboardShortcutsPanel } from './KeyboardShortcutsPanel.svelte';
+
+// Confirmation
+export { default as ConfirmationPopover } from './ConfirmationPopover.svelte';

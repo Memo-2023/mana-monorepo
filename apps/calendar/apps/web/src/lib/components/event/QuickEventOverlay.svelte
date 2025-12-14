@@ -11,7 +11,7 @@
 		EventAttendee,
 	} from '@calendar/shared';
 	import type { ContactSummary, ContactOrManual, ManualContactEntry } from '@manacore/shared-types';
-	import { ContactSelector, ContactAvatar } from '@manacore/shared-ui';
+	import { ContactSelector, ContactAvatar, ConfirmationPopover } from '@manacore/shared-ui';
 	import { Users } from 'lucide-svelte';
 	import { format, addMinutes } from 'date-fns';
 	import { de } from 'date-fns/locale';
@@ -263,7 +263,7 @@
 		}
 		const draft = eventsStore.draftEvent;
 		if (draft) {
-			return typeof draft.startTime === 'string' ? parseISO(draft.startTime) : draft.startTime;
+			return toDate(draft.startTime);
 		}
 		return startTime || new Date();
 	});
@@ -274,7 +274,7 @@
 		}
 		const draft = eventsStore.draftEvent;
 		if (draft) {
-			return typeof draft.endTime === 'string' ? parseISO(draft.endTime) : draft.endTime;
+			return toDate(draft.endTime);
 		}
 		return addMinutes(startTime || new Date(), settingsStore.defaultEventDuration);
 	});
@@ -601,10 +601,6 @@
 	async function handleDelete() {
 		if (!event) return;
 
-		if (!confirm('Möchten Sie diesen Termin wirklich löschen?')) {
-			return;
-		}
-
 		submitting = true;
 		try {
 			const result = await eventsStore.deleteEvent(event.id);
@@ -648,22 +644,25 @@
 			<span class="header-title">{isEditMode ? 'Termin bearbeiten' : 'Neuer Termin'}</span>
 			<div class="header-actions">
 				{#if isEditMode}
-					<button
-						type="button"
-						class="delete-btn"
-						onclick={handleDelete}
-						disabled={submitting}
-						aria-label="Löschen"
+					<ConfirmationPopover
+						onConfirm={handleDelete}
+						variant="danger"
+						title="Termin löschen?"
+						confirmLabel="Löschen"
+						loading={submitting}
+						placement="bottom"
 					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-							/>
-						</svg>
-					</button>
+						<button type="button" class="delete-btn" disabled={submitting} aria-label="Löschen">
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+								/>
+							</svg>
+						</button>
+					</ConfirmationPopover>
 				{/if}
 				<button type="button" class="close-btn" onclick={onClose} aria-label="Schließen">
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

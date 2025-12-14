@@ -45,6 +45,9 @@ export { ContactAvatar, ContactBadge, ContactSelector } from './molecules';
 // Layout
 export { ModalFooter, DataCard, PageHeader, KeyboardShortcutsPanel } from './molecules';
 
+// Confirmation (inline popover)
+export { ConfirmationPopover } from './molecules';
+
 // Organisms
 export { Modal, ConfirmationModal, FormModal, AppSlider } from './organisms';
 export type { AppItem } from './organisms';
