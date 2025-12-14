@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { viewStore } from '$lib/stores/view.svelte';
+	import { getOffsetDate } from '$lib/utils/dateNavigation';
 	import WeekView from './WeekView.svelte';
 	import DayView from './DayView.svelte';
 	import MonthView from './MonthView.svelte';
@@ -18,8 +19,9 @@
 	let { onQuickCreate, onEventClick, disableSwipe = false }: Props = $props();
 
 	// Swipe tracking
+	let offsetX = $state(0);
 	let startX = 0;
-	let isSwiping = false;
+	let isSwiping = $state(false);
 
 	// Container ref
 	let viewportEl: HTMLDivElement;
@@ -27,6 +29,10 @@
 
 	// Threshold: 15% of viewport width triggers navigation
 	const SNAP_THRESHOLD = 0.15;
+
+	// Calculate dates for previous/current/next views
+	let prevDate = $derived(getOffsetDate(viewStore.currentDate, viewStore.viewType, -1));
+	let nextDate = $derived(getOffsetDate(viewStore.currentDate, viewStore.viewType, 1));
 
 	// Update viewport width on mount and resize
 	$effect(() => {
@@ -45,8 +51,6 @@
 	});
 
 	// Wheel handler (trackpad horizontal scroll)
-	let accumulatedDelta = 0;
-
 	function handleWheel(e: WheelEvent) {
 		if (disableSwipe) return;
 
@@ -59,16 +63,19 @@
 
 		e.preventDefault();
 
-		accumulatedDelta += e.deltaX;
+		// Update offset while scrolling
+		offsetX -= e.deltaX;
+		offsetX = Math.max(-viewportWidth, Math.min(viewportWidth, offsetX));
 
+		// Check if threshold reached - instant switch
 		const threshold = viewportWidth * SNAP_THRESHOLD;
 
-		if (accumulatedDelta > threshold) {
-			viewStore.goToNext();
-			accumulatedDelta = 0;
-		} else if (accumulatedDelta < -threshold) {
+		if (offsetX > threshold) {
 			viewStore.goToPrevious();
-			accumulatedDelta = 0;
+			offsetX = 0;
+		} else if (offsetX < -threshold) {
+			viewStore.goToNext();
+			offsetX = 0;
 		}
 	}
 
@@ -83,24 +90,37 @@
 		isSwiping = true;
 	}
 
-	function handleTouchEnd(e: TouchEvent) {
+	function handleTouchMove(e: TouchEvent) {
+		if (!isSwiping || disableSwipe) return;
+
+		const currentX = e.touches[0].clientX;
+		offsetX = currentX - startX;
+		offsetX = Math.max(-viewportWidth, Math.min(viewportWidth, offsetX));
+	}
+
+	function handleTouchEnd() {
 		if (!isSwiping) return;
 		isSwiping = false;
 
-		const endX = e.changedTouches[0].clientX;
-		const deltaX = endX - startX;
 		const threshold = viewportWidth * SNAP_THRESHOLD;
 
-		if (deltaX > threshold) {
+		if (offsetX > threshold) {
 			viewStore.goToPrevious();
-		} else if (deltaX < -threshold) {
+		} else if (offsetX < -threshold) {
 			viewStore.goToNext();
 		}
+
+		// Instant reset
+		offsetX = 0;
 	}
 
 	function handleTouchCancel() {
 		isSwiping = false;
+		offsetX = 0;
 	}
+
+	// Computed style
+	let trackStyle = $derived(`transform: translateX(calc(-33.333% + ${offsetX}px))`);
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -109,28 +129,76 @@
 	bind:this={viewportEl}
 	onwheel={handleWheel}
 	ontouchstart={handleTouchStart}
+	ontouchmove={handleTouchMove}
 	ontouchend={handleTouchEnd}
 	ontouchcancel={handleTouchCancel}
 >
-	{#if viewStore.viewType === 'day'}
-		<DayView {onQuickCreate} {onEventClick} />
-	{:else if viewStore.viewType === '5day'}
-		<MultiDayView dayCount={5} {onQuickCreate} {onEventClick} />
-	{:else if viewStore.viewType === 'week'}
-		<WeekView {onQuickCreate} {onEventClick} />
-	{:else if viewStore.viewType === '10day'}
-		<MultiDayView dayCount={10} {onQuickCreate} {onEventClick} />
-	{:else if viewStore.viewType === '14day'}
-		<MultiDayView dayCount={14} {onQuickCreate} {onEventClick} />
-	{:else if viewStore.viewType === 'month'}
-		<MonthView {onQuickCreate} {onEventClick} />
-	{:else if viewStore.viewType === 'year'}
-		<YearView {onQuickCreate} {onEventClick} />
-	{:else if viewStore.viewType === 'agenda'}
-		<AgendaView {onEventClick} />
-	{:else}
-		<WeekView {onQuickCreate} {onEventClick} />
-	{/if}
+	<div class="carousel-track" style={trackStyle}>
+		<!-- Previous View -->
+		<div class="carousel-page" class:inactive={!isSwiping && offsetX <= 0}>
+			{#if viewStore.viewType === 'day'}
+				<DayView date={prevDate} />
+			{:else if viewStore.viewType === '5day'}
+				<MultiDayView dayCount={5} date={prevDate} />
+			{:else if viewStore.viewType === 'week'}
+				<WeekView date={prevDate} />
+			{:else if viewStore.viewType === '10day'}
+				<MultiDayView dayCount={10} date={prevDate} />
+			{:else if viewStore.viewType === '14day'}
+				<MultiDayView dayCount={14} date={prevDate} />
+			{:else if viewStore.viewType === 'month'}
+				<MonthView date={prevDate} />
+			{:else if viewStore.viewType === 'year'}
+				<YearView date={prevDate} />
+			{:else if viewStore.viewType === 'agenda'}
+				<AgendaView date={prevDate} />
+			{/if}
+		</div>
+
+		<!-- Current View -->
+		<div class="carousel-page current">
+			{#if viewStore.viewType === 'day'}
+				<DayView {onQuickCreate} {onEventClick} />
+			{:else if viewStore.viewType === '5day'}
+				<MultiDayView dayCount={5} {onQuickCreate} {onEventClick} />
+			{:else if viewStore.viewType === 'week'}
+				<WeekView {onQuickCreate} {onEventClick} />
+			{:else if viewStore.viewType === '10day'}
+				<MultiDayView dayCount={10} {onQuickCreate} {onEventClick} />
+			{:else if viewStore.viewType === '14day'}
+				<MultiDayView dayCount={14} {onQuickCreate} {onEventClick} />
+			{:else if viewStore.viewType === 'month'}
+				<MonthView {onQuickCreate} {onEventClick} />
+			{:else if viewStore.viewType === 'year'}
+				<YearView {onQuickCreate} {onEventClick} />
+			{:else if viewStore.viewType === 'agenda'}
+				<AgendaView {onEventClick} />
+			{:else}
+				<WeekView {onQuickCreate} {onEventClick} />
+			{/if}
+		</div>
+
+		<!-- Next View -->
+		<div class="carousel-page" class:inactive={!isSwiping && offsetX >= 0}>
+			{#if viewStore.viewType === 'day'}
+				<DayView date={nextDate} />
+			{:else if viewStore.viewType === '5day'}
+				<MultiDayView dayCount={5} date={nextDate} />
+			{:else if viewStore.viewType === 'week'}
+				<WeekView date={nextDate} />
+			{:else if viewStore.viewType === '10day'}
+				<MultiDayView dayCount={10} date={nextDate} />
+			{:else if viewStore.viewType === '14day'}
+				<MultiDayView dayCount={14} date={nextDate} />
+			{:else if viewStore.viewType === 'month'}
+				<MonthView date={nextDate} />
+			{:else if viewStore.viewType === 'year'}
+				<YearView date={nextDate} />
+			{:else if viewStore.viewType === 'agenda'}
+				<AgendaView date={nextDate} />
+			{/if}
+		</div>
+	</div>
 </div>
 
 <style>
@@ -140,5 +208,27 @@
 		overflow: hidden;
 		position: relative;
 		touch-action: pan-y;
+	}
+
+	.carousel-track {
+		display: flex;
+		width: 300%;
+		height: 100%;
+		will-change: transform;
+	}
+
+	.carousel-page {
+		width: 33.333%;
+		height: 100%;
+		flex-shrink: 0;
+		overflow: hidden;
+	}
+
+	.carousel-page.inactive {
+		pointer-events: none;
+	}
+
+	.carousel-page.current {
+		pointer-events: auto;
 	}
 </style>
