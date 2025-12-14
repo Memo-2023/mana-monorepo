@@ -170,7 +170,18 @@
 		<SettingsCard>
 			<div class="p-5">
 				<div class="calendars-toolbar">
-					<button class="btn btn-primary btn-sm" onclick={() => (showNewCalendarForm = true)}>
+					<button
+						class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary))]/90"
+						onclick={() => (showNewCalendarForm = true)}
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 4v16m8-8H4"
+							/>
+						</svg>
 						Neuer Kalender
 					</button>
 				</div>
@@ -579,10 +590,13 @@
 		max-width: 600px;
 		margin: 0 auto;
 		padding-bottom: 2rem;
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
 	}
 
 	.page-header {
-		margin-bottom: 1.5rem;
+		margin-bottom: 0;
 	}
 
 	.page-header h1 {

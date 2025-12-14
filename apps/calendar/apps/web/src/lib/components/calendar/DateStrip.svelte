@@ -488,11 +488,23 @@
 	}
 
 	.day-item.weekend {
-		background: hsl(var(--color-muted) / 0.5);
+		background: transparent;
+		border: 1px solid hsl(var(--color-border));
 	}
 
 	.day-item.weekend:hover {
-		background: hsl(var(--color-muted) / 0.8);
+		background: hsl(var(--color-muted) / 0.3);
+		border-color: hsl(var(--color-muted-foreground) / 0.5);
+	}
+
+	/* Weekend + in-range combination */
+	.day-item.weekend.in-range {
+		background: hsl(var(--color-primary) / 0.15);
+		border: 1px solid hsl(var(--color-primary) / 0.4);
+	}
+
+	.day-item.weekend.in-range:hover {
+		background: hsl(var(--color-primary) / 0.25);
 	}
 
 	.day-item.selected {
