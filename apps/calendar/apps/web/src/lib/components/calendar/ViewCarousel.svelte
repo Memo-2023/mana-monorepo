@@ -28,10 +28,10 @@
 	let viewportEl: HTMLDivElement;
 	let viewportWidth = $state(0);
 
-	// Threshold: 15% of viewport width triggers navigation
-	const SNAP_THRESHOLD = 0.15;
-	// Debounce time for wheel events
-	const WHEEL_DEBOUNCE_MS = 150;
+	// Threshold: 20% of viewport width triggers navigation
+	const SNAP_THRESHOLD = 0.2;
+	// Debounce for wheel events
+	const WHEEL_DEBOUNCE_MS = 100;
 	let wheelDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 	// Calculate dates for previous/current/next views
@@ -68,17 +68,13 @@
 
 		e.preventDefault();
 
-		// Update offset (invert for natural scrolling direction)
+		// Simple direct offset update
 		offsetX += e.deltaX * -1;
-
-		// Clamp to max 1 page in each direction
 		offsetX = Math.max(-viewportWidth, Math.min(viewportWidth, offsetX));
 
-		// Debounced snap check
+		// Debounced snap
 		if (wheelDebounceTimer) clearTimeout(wheelDebounceTimer);
-		wheelDebounceTimer = setTimeout(() => {
-			snapToPage();
-		}, WHEEL_DEBOUNCE_MS);
+		wheelDebounceTimer = setTimeout(snapToPage, WHEEL_DEBOUNCE_MS);
 	}
 
 	// Touch handlers
@@ -92,7 +88,6 @@
 		startX = e.touches[0].clientX;
 		isSwiping = true;
 
-		// Cancel any pending wheel snap
 		if (wheelDebounceTimer) {
 			clearTimeout(wheelDebounceTimer);
 			wheelDebounceTimer = null;
@@ -102,10 +97,7 @@
 	function handleTouchMove(e: TouchEvent) {
 		if (!isSwiping || disableSwipe) return;
 
-		const currentX = e.touches[0].clientX;
-		offsetX = currentX - startX;
-
-		// Clamp to max 1 page in each direction
+		offsetX = e.touches[0].clientX - startX;
 		offsetX = Math.max(-viewportWidth, Math.min(viewportWidth, offsetX));
 	}
 
@@ -118,7 +110,6 @@
 	function handleTouchCancel() {
 		if (!isSwiping) return;
 		isSwiping = false;
-		// Snap back to current on cancel
 		animateToOffset(0, () => {});
 	}
 
@@ -153,8 +144,7 @@
 
 	function animateToOffset(targetX: number, onComplete: () => void) {
 		offsetX = targetX;
-		// Wait for CSS transition to complete
-		setTimeout(onComplete, 300);
+		setTimeout(onComplete, 200);
 	}
 
 	// Computed transform style
@@ -256,7 +246,7 @@
 	}
 
 	.carousel-track.animating {
-		transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+		transition: transform 200ms ease-out;
 	}
 
 	.carousel-page {
