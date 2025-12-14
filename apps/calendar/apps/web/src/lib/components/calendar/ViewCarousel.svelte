@@ -22,6 +22,7 @@
 	let offsetX = $state(0);
 	let startX = 0;
 	let isSwiping = $state(false);
+	let isLocked = false; // Prevent rapid double-navigation
 
 	// Container ref
 	let viewportEl: HTMLDivElement;
@@ -29,6 +30,7 @@
 
 	// Threshold: 15% of viewport width triggers navigation
 	const SNAP_THRESHOLD = 0.15;
+	const LOCK_DURATION = 150; // ms to wait after navigation
 
 	// Calculate dates for previous/current/next views
 	let prevDate = $derived(getOffsetDate(viewStore.currentDate, viewStore.viewType, -1));
@@ -52,7 +54,7 @@
 
 	// Wheel handler (trackpad horizontal scroll)
 	function handleWheel(e: WheelEvent) {
-		if (disableSwipe) return;
+		if (disableSwipe || isLocked) return;
 
 		// Only handle horizontal scrolling
 		if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
@@ -71,17 +73,32 @@
 		const threshold = viewportWidth * SNAP_THRESHOLD;
 
 		if (offsetX > threshold) {
-			viewStore.goToPrevious();
-			offsetX = 0;
+			navigateTo('prev');
 		} else if (offsetX < -threshold) {
-			viewStore.goToNext();
-			offsetX = 0;
+			navigateTo('next');
 		}
+	}
+
+	function navigateTo(direction: 'prev' | 'next') {
+		// Lock to prevent double navigation
+		isLocked = true;
+		offsetX = 0;
+
+		if (direction === 'prev') {
+			viewStore.goToPrevious();
+		} else {
+			viewStore.goToNext();
+		}
+
+		// Unlock after short delay
+		setTimeout(() => {
+			isLocked = false;
+		}, LOCK_DURATION);
 	}
 
 	// Touch handlers
 	function handleTouchStart(e: TouchEvent) {
-		if (disableSwipe) return;
+		if (disableSwipe || isLocked) return;
 
 		const target = e.target as HTMLElement;
 		if (target.closest('[data-event-id]') || target.closest('[data-dragging]')) return;
@@ -91,7 +108,7 @@
 	}
 
 	function handleTouchMove(e: TouchEvent) {
-		if (!isSwiping || disableSwipe) return;
+		if (!isSwiping || disableSwipe || isLocked) return;
 
 		const currentX = e.touches[0].clientX;
 		offsetX = currentX - startX;
@@ -105,13 +122,12 @@
 		const threshold = viewportWidth * SNAP_THRESHOLD;
 
 		if (offsetX > threshold) {
-			viewStore.goToPrevious();
+			navigateTo('prev');
 		} else if (offsetX < -threshold) {
-			viewStore.goToNext();
+			navigateTo('next');
+		} else {
+			offsetX = 0;
 		}
-
-		// Instant reset
-		offsetX = 0;
 	}
 
 	function handleTouchCancel() {
