@@ -23,15 +23,22 @@
 	let startX = $state(0);
 	let isSwiping = $state(false);
 	let isAnimating = $state(false);
+	let animationDuration = $state(0);
+
+	// Velocity tracking for momentum
+	let lastX = 0;
+	let lastTime = 0;
+	let velocity = 0;
 
 	// Container refs
 	let viewportEl: HTMLDivElement;
 	let viewportWidth = $state(0);
 
-	// Threshold: 20% of viewport width triggers navigation
-	const SNAP_THRESHOLD = 0.2;
+	// Threshold: 15% of viewport width or high velocity triggers navigation
+	const SNAP_THRESHOLD = 0.15;
+	const VELOCITY_THRESHOLD = 0.3; // px/ms
 	// Debounce for wheel events
-	const WHEEL_DEBOUNCE_MS = 100;
+	const WHEEL_DEBOUNCE_MS = 80;
 	let wheelDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 	// Calculate dates for previous/current/next views
@@ -86,6 +93,9 @@
 		if (target.closest('[data-event-id]') || target.closest('[data-dragging]')) return;
 
 		startX = e.touches[0].clientX;
+		lastX = startX;
+		lastTime = performance.now();
+		velocity = 0;
 		isSwiping = true;
 
 		if (wheelDebounceTimer) {
@@ -97,7 +107,19 @@
 	function handleTouchMove(e: TouchEvent) {
 		if (!isSwiping || disableSwipe) return;
 
-		offsetX = e.touches[0].clientX - startX;
+		const currentX = e.touches[0].clientX;
+		const currentTime = performance.now();
+
+		// Calculate velocity (px/ms)
+		const dt = currentTime - lastTime;
+		if (dt > 0) {
+			velocity = (currentX - lastX) / dt;
+		}
+
+		lastX = currentX;
+		lastTime = currentTime;
+
+		offsetX = currentX - startX;
 		offsetX = Math.max(-viewportWidth, Math.min(viewportWidth, offsetX));
 	}
 
@@ -110,45 +132,68 @@
 	function handleTouchCancel() {
 		if (!isSwiping) return;
 		isSwiping = false;
-		animateToOffset(0, () => {});
+		const distance = Math.abs(offsetX);
+		isAnimating = true;
+		animateToOffset(0, distance, () => {
+			isAnimating = false;
+		});
 	}
 
-	// Snap to page based on current offset
+	// Snap to page based on current offset and velocity
 	function snapToPage() {
 		if (isAnimating || viewportWidth === 0) return;
 
-		isAnimating = true;
 		const threshold = viewportWidth * SNAP_THRESHOLD;
+		const hasHighVelocity = Math.abs(velocity) > VELOCITY_THRESHOLD;
 
-		if (offsetX > threshold) {
-			// Snap to previous
-			animateToOffset(viewportWidth, () => {
+		// Determine direction based on position and velocity
+		let targetPage: 'prev' | 'next' | 'current' = 'current';
+
+		if (offsetX > threshold || (hasHighVelocity && velocity > 0 && offsetX > 0)) {
+			targetPage = 'prev';
+		} else if (offsetX < -threshold || (hasHighVelocity && velocity < 0 && offsetX < 0)) {
+			targetPage = 'next';
+		}
+
+		isAnimating = true;
+
+		if (targetPage === 'prev') {
+			const distance = viewportWidth - offsetX;
+			animateToOffset(viewportWidth, distance, () => {
 				viewStore.goToPrevious();
 				offsetX = 0;
 				isAnimating = false;
 			});
-		} else if (offsetX < -threshold) {
-			// Snap to next
-			animateToOffset(-viewportWidth, () => {
+		} else if (targetPage === 'next') {
+			const distance = viewportWidth + offsetX;
+			animateToOffset(-viewportWidth, distance, () => {
 				viewStore.goToNext();
 				offsetX = 0;
 				isAnimating = false;
 			});
 		} else {
-			// Snap back to current
-			animateToOffset(0, () => {
+			const distance = Math.abs(offsetX);
+			animateToOffset(0, distance, () => {
 				isAnimating = false;
 			});
 		}
 	}
 
-	function animateToOffset(targetX: number, onComplete: () => void) {
+	function animateToOffset(targetX: number, distance: number, onComplete: () => void) {
+		// Calculate duration based on distance (faster for shorter distances)
+		// Min 80ms, max 200ms, scales with distance
+		const baseDuration = 150;
+		const duration = Math.min(200, Math.max(80, (distance / viewportWidth) * baseDuration));
+		animationDuration = duration;
+
 		offsetX = targetX;
-		setTimeout(onComplete, 200);
+		setTimeout(onComplete, duration);
 	}
 
-	// Computed transform style
-	let transformStyle = $derived(`transform: translateX(calc(-33.333% + ${offsetX}px))`);
+	// Computed styles
+	let trackStyle = $derived(
+		`transform: translateX(calc(-33.333% + ${offsetX}px)); --duration: ${animationDuration}ms`
+	);
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -161,7 +206,7 @@
 	ontouchend={handleTouchEnd}
 	ontouchcancel={handleTouchCancel}
 >
-	<div class="carousel-track" class:animating={isAnimating} style={transformStyle}>
+	<div class="carousel-track" class:animating={isAnimating} style={trackStyle}>
 		<!-- Previous View -->
 		<div class="carousel-page" class:inactive={!isSwiping && offsetX <= 0}>
 			{#if viewStore.viewType === 'day'}
@@ -246,7 +291,7 @@
 	}
 
 	.carousel-track.animating {
-		transition: transform 200ms ease-out;
+		transition: transform var(--duration, 150ms) linear;
 	}
 
 	.carousel-page {
