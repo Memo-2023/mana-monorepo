@@ -2,14 +2,16 @@
  * API Client for Picture Backend
  * Replaces direct Supabase calls with backend API calls.
  *
- * Token handling: Uses authStore.getValidToken() which automatically
- * refreshes expired tokens before making requests.
+ * Token handling:
+ * - Uses authStore.getValidToken() which automatically refreshes expired tokens
+ * - The fetch interceptor (setupFetchInterceptor) handles 401 responses by refreshing and retrying
+ * - If refresh fails, the request fails and user should be redirected to login
  */
 
 import { env } from '$env/dynamic/public';
 import { authStore } from '$lib/stores/auth.svelte';
 
-const API_BASE = env.PUBLIC_BACKEND_URL || 'http://localhost:3003';
+const API_BASE = env.PUBLIC_BACKEND_URL || 'http://localhost:3006';
 
 type FetchOptions = {
 	method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';

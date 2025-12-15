@@ -81,13 +81,21 @@ export type { ContactsClientConfig, ContactSearchOptions } from './clients/conta
  * ```typescript
  * import { initializeWebAuth } from '@manacore/shared-auth';
  *
+ * // Basic setup (interceptor only for auth URL)
  * const { authService, tokenManager } = initializeWebAuth({
- *   baseUrl: 'https://api.example.com',
+ *   baseUrl: 'https://auth.example.com',
+ * });
+ *
+ * // With backend URL (interceptor for both auth and backend - recommended)
+ * const { authService, tokenManager } = initializeWebAuth({
+ *   baseUrl: 'https://auth.example.com',
+ *   backendUrl: 'https://api.example.com',
  * });
  * ```
  */
 export function initializeWebAuth(config: {
 	baseUrl: string;
+	backendUrl?: string;
 	storageKeys?: Partial<import('./types').StorageKeys>;
 }) {
 	// Set up adapters
@@ -99,8 +107,15 @@ export function initializeWebAuth(config: {
 	const authService = _createAuthService(config);
 	const tokenManager = _createTokenManager(authService);
 
-	// Set up interceptor
+	// Set up interceptor for auth URL
 	_setupFetchInterceptor(authService, tokenManager);
+
+	// Set up interceptor for backend URL if provided (for automatic token refresh on 401)
+	if (config.backendUrl) {
+		_setupFetchInterceptor(authService, tokenManager, {
+			backendUrl: config.backendUrl,
+		});
+	}
 
 	return { authService, tokenManager };
 }

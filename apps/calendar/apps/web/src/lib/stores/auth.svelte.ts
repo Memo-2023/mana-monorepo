@@ -20,6 +20,16 @@ function getAuthUrl(): string {
 	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
 }
 
+// Get backend URL dynamically at runtime
+function getBackendUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
+			.__PUBLIC_BACKEND_URL__;
+		return injectedUrl || 'http://localhost:3014';
+	}
+	return process.env.PUBLIC_BACKEND_URL || 'http://localhost:3014';
+}
+
 // Lazy initialization to avoid SSR issues with localStorage
 let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
 let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null = null;
@@ -27,7 +37,10 @@ let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null =
 function getAuthService() {
 	if (!browser) return null;
 	if (!_authService) {
-		const auth = initializeWebAuth({ baseUrl: getAuthUrl() });
+		const auth = initializeWebAuth({
+			baseUrl: getAuthUrl(),
+			backendUrl: getBackendUrl(), // Enables automatic token refresh on 401 responses
+		});
 		_authService = auth.authService;
 		_tokenManager = auth.tokenManager;
 	}

@@ -201,8 +201,9 @@ async function makeRequestWithToken(
 }
 
 /**
- * Check if response indicates token expiration
- * Only return true for explicit token expiration, not generic unauthorized errors
+ * Check if response indicates a token issue that warrants a refresh attempt
+ * Any 401 response should trigger a refresh attempt - if the refresh fails,
+ * then we know the session is truly invalid
  */
 function isTokenExpiredResponse(responseData: Record<string, unknown>): boolean {
 	const error = responseData.error as Record<string, unknown> | undefined;
@@ -211,13 +212,21 @@ function isTokenExpiredResponse(responseData: Record<string, unknown>): boolean 
 	).toLowerCase();
 	const errorCode = String(responseData.code || error?.code || '');
 
-	// Only trigger refresh for explicit token expiration messages
+	// Trigger refresh for any token-related auth error
+	// This includes:
+	// - Explicit expiration: "jwt expired", "token expired"
+	// - Generic validation failures: "invalid token", "token validation failed"
+	// - Backend passthrough errors: "exp claim", "claim timestamp"
 	return (
 		errorMessage.includes('jwt expired') ||
 		errorMessage.includes('token expired') ||
 		errorMessage.includes('token has expired') ||
+		errorMessage.includes('invalid token') ||
+		errorMessage.includes('token validation failed') ||
+		errorMessage.includes('claim') || // Catches jose errors like "exp claim timestamp check failed"
 		errorCode === 'PGRST301' ||
-		errorCode === 'TOKEN_EXPIRED'
+		errorCode === 'TOKEN_EXPIRED' ||
+		errorCode === 'ERR_JWT_EXPIRED'
 	);
 }
 

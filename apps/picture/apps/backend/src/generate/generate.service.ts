@@ -8,7 +8,7 @@ import {
 	Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { eq, and, count } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { CreditClientService } from '@mana-core/nestjs-integration';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
@@ -18,7 +18,6 @@ import { ReplicateService, GenerationParams } from './replicate.service';
 import { StorageService } from '../upload/storage.service';
 import { GenerateImageDto } from './dto/generate.dto';
 
-const FREE_GENERATIONS_LIMIT = 3;
 const CREDITS_PER_GENERATION = 10;
 
 export interface GenerateResponse {
@@ -26,14 +25,14 @@ export interface GenerateResponse {
 	status: string;
 	image?: Image;
 	creditsUsed?: number;
-	freeGenerationsRemaining?: number;
 }
 
 @Injectable()
 export class GenerateService {
 	private readonly logger = new Logger(GenerateService.name);
 	private readonly webhookBaseUrl: string;
-	private readonly isStaging: boolean;
+	private readonly isProduction: boolean;
+	private readonly canUseWebhooks: boolean;
 
 	constructor(
 		@Inject(DATABASE_CONNECTION) private readonly db: Database,
@@ -44,65 +43,41 @@ export class GenerateService {
 	) {
 		this.webhookBaseUrl =
 			this.configService.get<string>('WEBHOOK_BASE_URL') || 'http://localhost:3003';
-		// Freemium/credit system only enforced in staging
-		this.isStaging = this.configService.get<string>('NODE_ENV') === 'staging';
+		// Credit system only enforced in production
+		this.isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+		// Replicate requires HTTPS webhooks - detect if we can use them
+		this.canUseWebhooks = this.webhookBaseUrl.startsWith('https://');
+		if (!this.canUseWebhooks) {
+			this.logger.warn(
+				`Webhook URL is not HTTPS (${this.webhookBaseUrl}). Falling back to sync mode for all generations.`
+			);
+		}
 	}
 
 	/**
-	 * Get count of completed generations for a user
-	 */
-	private async getUserGenerationCount(userId: string): Promise<number> {
-		const result = await this.db
-			.select({ count: count() })
-			.from(imageGenerations)
-			.where(and(eq(imageGenerations.userId, userId), eq(imageGenerations.status, 'completed')));
-		return result[0]?.count ?? 0;
-	}
-
-	/**
-	 * Check if user can generate (has free generations or credits)
-	 * Returns: { canGenerate, isFree, freeRemaining, creditsRequired }
+	 * Check if user has enough credits to generate
+	 * Credits are only enforced in production (NODE_ENV=production)
 	 */
 	async checkGenerationAccess(userId: string): Promise<{
 		canGenerate: boolean;
-		isFree: boolean;
-		freeGenerationsRemaining: number;
 		creditsRequired: number;
 		currentBalance?: number;
 	}> {
-		const completedCount = await this.getUserGenerationCount(userId);
-		const freeRemaining = Math.max(0, FREE_GENERATIONS_LIMIT - completedCount);
-
-		// If user has free generations, they can proceed
-		if (freeRemaining > 0) {
+		// In development, skip credit check (users get 150 free credits on signup anyway)
+		if (!this.isProduction) {
 			return {
 				canGenerate: true,
-				isFree: true,
-				freeGenerationsRemaining: freeRemaining,
-				creditsRequired: 0,
-			};
-		}
-
-		// No free generations - check credits (only in staging)
-		if (!this.isStaging) {
-			// In development/production without credit enforcement, allow generation
-			return {
-				canGenerate: true,
-				isFree: false,
-				freeGenerationsRemaining: 0,
 				creditsRequired: CREDITS_PER_GENERATION,
 			};
 		}
 
-		// In staging, check actual credit balance
+		// In production, check actual credit balance
 		try {
 			const balance = await this.creditClient.getBalance(userId);
 			const hasEnoughCredits = balance.balance >= CREDITS_PER_GENERATION;
 
 			return {
 				canGenerate: hasEnoughCredits,
-				isFree: false,
-				freeGenerationsRemaining: 0,
 				creditsRequired: CREDITS_PER_GENERATION,
 				currentBalance: balance.balance,
 			};
@@ -111,8 +86,6 @@ export class GenerateService {
 			// On error, allow generation (fail open for better UX)
 			return {
 				canGenerate: true,
-				isFree: false,
-				freeGenerationsRemaining: 0,
 				creditsRequired: CREDITS_PER_GENERATION,
 			};
 		}
@@ -123,7 +96,7 @@ export class GenerateService {
 	 */
 	async generateImage(userId: string, dto: GenerateImageDto): Promise<GenerateResponse> {
 		try {
-			// Check if user can generate (freemium/credit check)
+			// Check if user has enough credits (only enforced in production)
 			const access = await this.checkGenerationAccess(userId);
 
 			if (!access.canGenerate) {
@@ -168,7 +141,6 @@ export class GenerateService {
 				.returning();
 
 			const generation = generationResult[0];
-			const isFreeGeneration = access.isFree;
 
 			// Build generation params
 			const generationParams: GenerationParams = {
@@ -186,25 +158,29 @@ export class GenerateService {
 				style: dto.style,
 			};
 
-			// If waitForResult is true, use synchronous generation with polling
-			if (dto.waitForResult) {
+			// Use sync mode if:
+			// 1. Client explicitly requested waitForResult
+			// 2. Webhooks are not available (no HTTPS URL)
+			const useSyncMode = dto.waitForResult || !this.canUseWebhooks;
+
+			if (useSyncMode) {
+				if (!this.canUseWebhooks && !dto.waitForResult) {
+					this.logger.debug('Using sync mode because webhooks are not available (no HTTPS)');
+				}
+
 				const result = await this.generateSync(generation, generationParams);
 
-				// Consume credits after successful generation (if not free)
-				if (result.status === 'completed' && !isFreeGeneration && this.isStaging) {
+				// Consume credits after successful generation (only in production)
+				if (result.status === 'completed' && this.isProduction) {
 					await this.consumeCreditsForGeneration(userId, generation.id);
 					result.creditsUsed = CREDITS_PER_GENERATION;
 				}
-
-				// Add free generations remaining info
-				const newAccess = await this.checkGenerationAccess(userId);
-				result.freeGenerationsRemaining = newAccess.freeGenerationsRemaining;
 
 				return result;
 			}
 
 			// Otherwise use async generation with webhook (credits consumed on webhook completion)
-			return this.generateAsync(generation, model, generationParams, isFreeGeneration);
+			return this.generateAsync(generation, model, generationParams);
 		} catch (error) {
 			if (error instanceof NotFoundException || error instanceof HttpException) {
 				throw error;
@@ -329,8 +305,7 @@ export class GenerateService {
 	private async generateAsync(
 		generation: ImageGeneration,
 		model: any,
-		params: GenerationParams,
-		isFreeGeneration: boolean
+		params: GenerationParams
 	): Promise<GenerateResponse> {
 		try {
 			const webhookUrl = `${this.webhookBaseUrl}/api/generate/webhook`;
@@ -342,15 +317,12 @@ export class GenerateService {
 				webhookUrl
 			);
 
-			// Update generation with prediction ID and free generation flag (in metadata)
+			// Update generation with prediction ID
 			await this.db
 				.update(imageGenerations)
 				.set({
 					replicatePredictionId: prediction.id,
 					status: 'processing',
-					// Store isFreeGeneration in a way that can be retrieved in webhook
-					// We'll use the errorMessage field temporarily for metadata (cleared on success)
-					errorMessage: isFreeGeneration ? 'FREE_GENERATION' : null,
 				})
 				.where(eq(imageGenerations.id, generation.id));
 
@@ -514,7 +486,7 @@ export class GenerateService {
 
 	async handleWebhook(body: any): Promise<{ received: boolean }> {
 		try {
-			const { id, status, output, error, metrics } = body;
+			const { id, status, output, error } = body;
 
 			if (!id) {
 				return { received: false };
@@ -534,14 +506,11 @@ export class GenerateService {
 
 			const generation = result[0];
 
-			// Check if this was a free generation (stored in errorMessage field temporarily)
-			const isFreeGeneration = generation.errorMessage === 'FREE_GENERATION';
-
 			if (status === 'succeeded' && output) {
 				await this.processCompletedGeneration(generation, output);
 
-				// Consume credits for paid generations in staging
-				if (!isFreeGeneration && this.isStaging) {
+				// Consume credits in production
+				if (this.isProduction) {
 					await this.consumeCreditsForGeneration(generation.userId, generation.id);
 				}
 			} else if (status === 'failed') {
