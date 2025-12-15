@@ -154,7 +154,8 @@ export const authStore = {
 	 */
 	async validateReferralCode(code: string) {
 		try {
-			const response = await fetch(`${getAuthUrl()}/api/v1/referrals/validate/${code}`);
+			const authUrl = await getAuthUrl();
+			const response = await fetch(`${authUrl}/api/v1/referrals/validate/${code}`);
 			if (!response.ok) {
 				return { valid: false, error: 'Invalid code' };
 			}
