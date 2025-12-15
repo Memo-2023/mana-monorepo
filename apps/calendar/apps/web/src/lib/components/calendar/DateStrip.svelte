@@ -26,16 +26,13 @@
 		contextMenu?.show(e.clientX, e.clientY);
 	}
 
-	function handleMinimize() {
-		settingsStore.set('dateStripCollapsed', true);
-	}
-
 	interface Props {
 		isSidebarMode?: boolean;
 		isToolbarExpanded?: boolean;
+		hasTagStrip?: boolean; // Whether TagStrip is visible below
 	}
 
-	let { isSidebarMode = false, isToolbarExpanded = false }: Props = $props();
+	let { isSidebarMode = false, isToolbarExpanded = false, hasTagStrip = false }: Props = $props();
 
 	// Get event count for a day (max 5 dots displayed)
 	function getEventCount(date: Date): number {
@@ -251,14 +248,8 @@
 	class:sidebar-mode={isSidebarMode}
 	class:toolbar-expanded={isToolbarExpanded}
 	class:compact={settingsStore.dateStripCompact}
+	class:has-tag-strip={hasTagStrip}
 >
-	<!-- Minimize button at left edge -->
-	<button class="minimize-btn" onclick={handleMinimize} title="Datumsleiste minimieren">
-		<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-		</svg>
-	</button>
-
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="date-strip-container" oncontextmenu={handleContextMenu}>
 		<!-- Month label -->
@@ -356,6 +347,23 @@
 
 	.date-strip-wrapper.sidebar-mode.toolbar-expanded {
 		bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+	}
+
+	/* When TagStrip is visible below, add extra offset */
+	.date-strip-wrapper.has-tag-strip {
+		bottom: calc(210px + env(safe-area-inset-bottom, 0px)); /* +70px for TagStrip */
+	}
+
+	.date-strip-wrapper.has-tag-strip.toolbar-expanded {
+		bottom: calc(280px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.date-strip-wrapper.has-tag-strip.sidebar-mode {
+		bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.date-strip-wrapper.has-tag-strip.sidebar-mode.toolbar-expanded {
+		bottom: calc(210px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.today-button {
@@ -724,48 +732,5 @@
 
 	.date-strip-wrapper.compact .today-date {
 		font-size: 0.625rem;
-	}
-
-	/* Minimize button */
-	.minimize-btn {
-		position: absolute;
-		left: 0.5rem;
-		bottom: 34%;
-		transform: translateY(50%);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 36px;
-		height: 36px;
-		background: transparent;
-		border: none;
-		border-radius: 8px;
-		cursor: pointer;
-		color: hsl(var(--color-muted-foreground));
-		pointer-events: auto;
-		transition: all 0.15s ease;
-		z-index: 10;
-	}
-
-	.minimize-btn:hover {
-		background: hsl(var(--color-muted) / 0.8);
-		color: hsl(var(--color-foreground));
-	}
-
-	.minimize-btn:active {
-		transform: translateY(50%) scale(0.95);
-	}
-
-	@media (max-width: 640px) {
-		.minimize-btn {
-			left: 0.25rem;
-			width: 32px;
-			height: 32px;
-		}
-
-		.minimize-btn svg {
-			width: 18px;
-			height: 18px;
-		}
 	}
 </style>

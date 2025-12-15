@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and, inArray, isNull, asc } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
 import { eventTags, eventToTags } from '../db/schema';
@@ -115,5 +115,32 @@ export class EventTagService {
 			.select()
 			.from(eventTags)
 			.where(and(inArray(eventTags.id, ids), eq(eventTags.userId, userId)));
+	}
+
+	async findByGroupId(groupId: string | null, userId: string): Promise<EventTag[]> {
+		const condition =
+			groupId === null
+				? and(isNull(eventTags.groupId), eq(eventTags.userId, userId))
+				: and(eq(eventTags.groupId, groupId), eq(eventTags.userId, userId));
+
+		return this.db
+			.select()
+			.from(eventTags)
+			.where(condition)
+			.orderBy(asc(eventTags.sortOrder), asc(eventTags.name));
+	}
+
+	async updateTagGroup(tagId: string, userId: string, groupId: string | null): Promise<EventTag> {
+		const [tag] = await this.db
+			.update(eventTags)
+			.set({ groupId, updatedAt: new Date() })
+			.where(and(eq(eventTags.id, tagId), eq(eventTags.userId, userId)))
+			.returning();
+
+		if (!tag) {
+			throw new NotFoundException('Tag not found');
+		}
+
+		return tag;
 	}
 }

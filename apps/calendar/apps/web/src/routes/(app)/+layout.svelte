@@ -656,8 +656,10 @@
 					onCollapsedChange={handleToolbarCollapsedChange}
 				/>
 			{/if}
+		{/if}
 
-			<!-- Global Input Bar -->
+		<!-- Global Input Bar (hidden via CSS in immersive mode to prevent re-mount focus) -->
+		<div class="input-bar-wrapper" class:hidden={settingsStore.immersiveModeEnabled}>
 			<QuickInputBar
 				onSearch={handleSearch}
 				onSelect={handleSelect}
@@ -688,7 +690,7 @@
 				onShowShortcuts={handleShowShortcuts}
 				onShowSyntaxHelp={handleShowSyntaxHelp}
 			/>
-		{/if}
+		</div>
 
 		<!-- Immersive Mode Toggle (always visible on main calendar page) -->
 		<ImmersiveModeToggle
@@ -728,7 +730,8 @@
 	.layout-container {
 		display: flex;
 		flex-direction: column;
-		min-height: 100vh;
+		height: 100vh;
+		overflow: hidden;
 	}
 
 	/* Mobile: Fixed viewport, no scroll */
@@ -745,6 +748,11 @@
 		position: relative;
 		/* Space for QuickInputBar at bottom */
 		padding-bottom: calc(80px + env(safe-area-inset-bottom));
+		/* Flex container for children */
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
 	}
 
 	.main-content.floating-mode {
@@ -801,6 +809,11 @@
 		padding: 1rem;
 		position: relative;
 		z-index: 0;
+		/* Flex for calendar layout */
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
 	}
 
 	/* Mobile: no padding, full height */

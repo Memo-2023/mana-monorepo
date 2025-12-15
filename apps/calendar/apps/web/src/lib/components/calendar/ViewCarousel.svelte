@@ -440,5 +440,8 @@
 	.carousel-page.current {
 		/* Always interactive */
 		pointer-events: auto;
+		/* Enable vertical scrolling for keyboard navigation */
+		overflow-y: auto;
+		overflow-x: hidden;
 	}
 </style>

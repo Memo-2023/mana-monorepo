@@ -33,6 +33,20 @@ export interface ResponsiblePerson {
 }
 
 /**
+ * Event tag group for organizing tags
+ */
+export interface EventTagGroup {
+	id: string;
+	userId: string;
+	name: string;
+	color: string;
+	sortOrder: number;
+	tagCount?: number;
+	createdAt: Date | string;
+	updatedAt: Date | string;
+}
+
+/**
  * Event tag with color
  */
 export interface EventTag {
@@ -40,6 +54,8 @@ export interface EventTag {
 	userId: string;
 	name: string;
 	color: string;
+	groupId?: string | null;
+	sortOrder?: number;
 	createdAt: Date | string;
 	updatedAt: Date | string;
 }

@@ -7,9 +7,16 @@
 	interface Props {
 		isSidebarMode?: boolean;
 		isToolbarExpanded?: boolean;
+		isMobile?: boolean;
+		hasTagStrip?: boolean;
 	}
 
-	let { isSidebarMode = false, isToolbarExpanded = false }: Props = $props();
+	let {
+		isSidebarMode = false,
+		isToolbarExpanded = false,
+		isMobile = false,
+		hasTagStrip = false,
+	}: Props = $props();
 
 	let contextMenu: DateStripContextMenu;
 
@@ -30,6 +37,8 @@
 	class="datestrip-fab-container"
 	class:sidebar-mode={isSidebarMode}
 	class:toolbar-expanded={isToolbarExpanded}
+	class:mobile={isMobile}
+	class:has-tag-strip={hasTagStrip}
 >
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<button
@@ -76,6 +85,52 @@
 	@media (max-width: 900px) {
 		.datestrip-fab-container {
 			left: 1rem;
+		}
+	}
+
+	/* Mobile: Position in row above InputBar, left of ViewModePill */
+	/* InputBar is at bottom: 70px (above PillNav), so controls go above that */
+	.datestrip-fab-container.mobile {
+		/* Above PillNav (70px) + InputBar (72px) + gap (8px), to the left of center */
+		bottom: calc(70px + 72px + 8px + env(safe-area-inset-bottom, 0px));
+		left: calc(50% - 100px - 54px - 8px);
+	}
+
+	.datestrip-fab-container.mobile.toolbar-expanded {
+		bottom: calc(70px + 72px + 70px + 8px + env(safe-area-inset-bottom, 0px));
+	}
+
+	/* When TagStrip is visible, add 70px offset */
+	.datestrip-fab-container.has-tag-strip {
+		bottom: calc(140px + 9px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.datestrip-fab-container.has-tag-strip.toolbar-expanded {
+		bottom: calc(210px + 9px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.datestrip-fab-container.has-tag-strip.sidebar-mode {
+		bottom: calc(70px + 9px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.datestrip-fab-container.has-tag-strip.mobile {
+		bottom: calc(140px + 72px + 8px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.datestrip-fab-container.has-tag-strip.mobile.toolbar-expanded {
+		bottom: calc(140px + 72px + 70px + 8px + env(safe-area-inset-bottom, 0px));
+	}
+
+	/* Fallback for CSS-only mobile detection */
+	@media (max-width: 640px) {
+		.datestrip-fab-container:not(.mobile) {
+			/* Above PillNav (70px) + InputBar (72px) + gap (8px), to the left of center */
+			bottom: calc(70px + 72px + 8px + env(safe-area-inset-bottom, 0px));
+			left: calc(50% - 100px - 54px - 8px);
+		}
+
+		.datestrip-fab-container:not(.mobile).toolbar-expanded {
+			bottom: calc(70px + 72px + 70px + 8px + env(safe-area-inset-bottom, 0px));
 		}
 	}
 

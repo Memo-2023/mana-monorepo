@@ -536,32 +536,61 @@
 
 			<!-- Navigation Items -->
 			{#each items as item}
-				<a href={item.href} class="pill glass-pill" class:active={isActive(item.href)}>
-					{#if item.icon}
-						{#if item.icon === 'mana'}
-							<svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor">
-								<path
-									d="M12.3047 1C12.3392 1.04573 19.608 10.6706 19.6084 14.6953C19.6084 18.7293 16.3386 21.9998 12.3047 22C8.27061 22 5 18.7294 5 14.6953C5.00041 10.661 12.3047 1 12.3047 1ZM12.3047 7.3916C12.2811 7.42276 8.65234 12.2288 8.65234 14.2393C8.65241 16.2562 10.2877 17.8916 12.3047 17.8916C14.3217 17.8916 15.957 16.2562 15.957 14.2393C15.957 12.2301 12.3331 7.42917 12.3047 7.3916Z"
-								/>
-							</svg>
-						{:else if item.iconSvg}
-							{@html item.iconSvg}
-						{:else if phosphorIcons[item.icon]}
-							{@const IconComponent = phosphorIcons[item.icon]}
-							<IconComponent size={18} class="pill-icon" />
-						{:else}
-							<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d={getIconPath(item.icon)}
-								/>
-							</svg>
+				{#if item.onClick}
+					<button onclick={item.onClick} class="pill glass-pill" class:active={item.active}>
+						{#if item.icon}
+							{#if item.icon === 'mana'}
+								<svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor">
+									<path
+										d="M12.3047 1C12.3392 1.04573 19.608 10.6706 19.6084 14.6953C19.6084 18.7293 16.3386 21.9998 12.3047 22C8.27061 22 5 18.7294 5 14.6953C5.00041 10.661 12.3047 1 12.3047 1ZM12.3047 7.3916C12.2811 7.42276 8.65234 12.2288 8.65234 14.2393C8.65241 16.2562 10.2877 17.8916 12.3047 17.8916C14.3217 17.8916 15.957 16.2562 15.957 14.2393C15.957 12.2301 12.3331 7.42917 12.3047 7.3916Z"
+									/>
+								</svg>
+							{:else if item.iconSvg}
+								{@html item.iconSvg}
+							{:else if phosphorIcons[item.icon]}
+								{@const IconComponent = phosphorIcons[item.icon]}
+								<IconComponent size={18} class="pill-icon" />
+							{:else}
+								<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d={getIconPath(item.icon)}
+									/>
+								</svg>
+							{/if}
 						{/if}
-					{/if}
-					<span class="pill-label">{item.label}</span>
-				</a>
+						<span class="pill-label">{item.label}</span>
+					</button>
+				{:else}
+					<a href={item.href} class="pill glass-pill" class:active={isActive(item.href)}>
+						{#if item.icon}
+							{#if item.icon === 'mana'}
+								<svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor">
+									<path
+										d="M12.3047 1C12.3392 1.04573 19.608 10.6706 19.6084 14.6953C19.6084 18.7293 16.3386 21.9998 12.3047 22C8.27061 22 5 18.7294 5 14.6953C5.00041 10.661 12.3047 1 12.3047 1ZM12.3047 7.3916C12.2811 7.42276 8.65234 12.2288 8.65234 14.2393C8.65241 16.2562 10.2877 17.8916 12.3047 17.8916C14.3217 17.8916 15.957 16.2562 15.957 14.2393C15.957 12.2301 12.3331 7.42917 12.3047 7.3916Z"
+									/>
+								</svg>
+							{:else if item.iconSvg}
+								{@html item.iconSvg}
+							{:else if phosphorIcons[item.icon]}
+								{@const IconComponent = phosphorIcons[item.icon]}
+								<IconComponent size={18} class="pill-icon" />
+							{:else}
+								<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d={getIconPath(item.icon)}
+									/>
+								</svg>
+							{/if}
+						{/if}
+						<span class="pill-label">{item.label}</span>
+					</a>
+				{/if}
 			{/each}
 
 			<!-- Additional Elements (Tab Groups, Dividers) -->

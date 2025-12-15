@@ -7,7 +7,6 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import { isSidebarMode as sidebarModeStore } from '$lib/stores/navigation';
 	import ViewCarousel from '$lib/components/calendar/ViewCarousel.svelte';
 	import TodoSidebarSection from '$lib/components/calendar/TodoSidebarSection.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
@@ -120,26 +119,6 @@
 		<TodoSidebarSection maxItems={5} />
 	</aside>
 
-	<!-- Desktop: FAB when sidebar is collapsed -->
-	{#if settingsStore.sidebarCollapsed}
-		<div class="sidebar-fab desktop-only" class:pill-sidebar={$sidebarModeStore}>
-			<button
-				class="fab-expand"
-				onclick={() => settingsStore.toggleSidebar()}
-				title={$_('calendar.showSidebar')}
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-					/>
-				</svg>
-			</button>
-		</div>
-	{/if}
-
 	<!-- Main Calendar Area -->
 	<div class="calendar-main" class:expanded={settingsStore.sidebarCollapsed}>
 		<div class="calendar-content">
@@ -179,6 +158,8 @@
 		display: flex;
 		gap: 1.5rem;
 		width: 100%;
+		flex: 1;
+		min-height: 0;
 		position: relative;
 	}
 
@@ -238,59 +219,13 @@
 		color: hsl(var(--color-foreground));
 	}
 
-	/* FAB container */
-	.sidebar-fab {
-		position: fixed;
-		left: 1rem;
-		bottom: 1rem;
-		flex-direction: column;
-		gap: 0.5rem;
-		z-index: 50;
-		animation: fab-slide-in 300ms cubic-bezier(0.4, 0, 0.2, 1);
-		transition: left 300ms cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	.sidebar-fab.pill-sidebar {
-		left: 195px;
-	}
-
-	@keyframes fab-slide-in {
-		from {
-			opacity: 0;
-			transform: translateX(-20px) scale(0.8);
-		}
-		to {
-			opacity: 1;
-			transform: translateX(0) scale(1);
-		}
-	}
-
-	.fab-expand {
-		width: 48px;
-		height: 48px;
-		border-radius: var(--radius-full);
-		border: none;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		transition: all 150ms ease;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-		background: hsl(var(--color-surface));
-		color: hsl(var(--color-foreground));
-		border: 1px solid hsl(var(--color-border));
-	}
-
-	.fab-expand:hover {
-		background: hsl(var(--color-muted));
-		transform: scale(1.05);
-	}
-
 	.calendar-main {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
+		min-height: 0;
+		overflow: hidden;
 		background: hsl(var(--color-surface));
 		border-radius: var(--radius-lg);
 		border: 1px solid hsl(var(--color-border));
@@ -304,6 +239,8 @@
 
 	.calendar-content {
 		flex: 1;
+		min-height: 0;
+		overflow: hidden;
 	}
 
 	/* Mobile: Bottom Todo Section */

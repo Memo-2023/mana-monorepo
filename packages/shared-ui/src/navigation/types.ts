@@ -14,12 +14,16 @@ export interface KeyboardShortcut {
 export interface PillNavItem {
 	/** Display label for the navigation item */
 	label: string;
-	/** URL to navigate to */
+	/** URL to navigate to (ignored if onClick is provided) */
 	href: string;
 	/** Icon name (predefined) or 'mana' for special mana icon */
 	icon?: string;
 	/** Custom SVG icon HTML (for custom icons) */
 	iconSvg?: string;
+	/** Click handler - if provided, prevents navigation and calls this instead */
+	onClick?: () => void;
+	/** Whether this item is currently active/selected (for toggle buttons) */
+	active?: boolean;
 }
 
 export interface PillDropdownItem {

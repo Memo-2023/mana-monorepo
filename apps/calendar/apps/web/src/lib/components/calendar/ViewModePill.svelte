@@ -7,9 +7,10 @@
 	interface Props {
 		isSidebarMode?: boolean;
 		isToolbarExpanded?: boolean;
+		isMobile?: boolean;
 	}
 
-	let { isSidebarMode = false, isToolbarExpanded = false }: Props = $props();
+	let { isSidebarMode = false, isToolbarExpanded = false, isMobile = false }: Props = $props();
 
 	let contextMenu: ViewModePillContextMenu;
 
@@ -55,6 +56,7 @@
 	class="view-mode-pill"
 	class:sidebar-mode={isSidebarMode}
 	class:toolbar-expanded={isToolbarExpanded}
+	class:mobile={isMobile}
 	oncontextmenu={handleContextMenu}
 >
 	{#each enabledViews as view}
@@ -165,6 +167,39 @@
 	@media (max-width: 900px) {
 		.view-mode-pill {
 			right: calc(1rem + 54px + 8px);
+		}
+	}
+
+	/* Mobile: ViewModePill moves above InputBar as its own row */
+	/* InputBar is at bottom: 70px (above PillNav), so controls go above that */
+	.view-mode-pill.mobile {
+		/* Position centered above InputBar */
+		right: auto;
+		left: 50%;
+		transform: translateX(-50%);
+		/* Above PillNav (70px) + InputBar (72px) + gap (8px) */
+		bottom: calc(70px + 72px + 8px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.view-mode-pill.mobile.toolbar-expanded {
+		/* Move up when toolbar is expanded (add toolbar height 70px) */
+		bottom: calc(70px + 72px + 70px + 8px + env(safe-area-inset-bottom, 0px));
+	}
+
+	/* Fallback for CSS-only mobile detection */
+	@media (max-width: 640px) {
+		.view-mode-pill:not(.mobile) {
+			/* Position centered above InputBar */
+			right: auto;
+			left: 50%;
+			transform: translateX(-50%);
+			/* Above PillNav (70px) + InputBar (72px) + gap (8px) */
+			bottom: calc(70px + 72px + 8px + env(safe-area-inset-bottom, 0px));
+		}
+
+		.view-mode-pill:not(.mobile).toolbar-expanded {
+			/* Move up when toolbar is expanded (add toolbar height 70px) */
+			bottom: calc(70px + 72px + 70px + 8px + env(safe-area-inset-bottom, 0px));
 		}
 	}
 

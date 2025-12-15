@@ -6,6 +6,7 @@ import { HealthModule } from './health/health.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { EventModule } from './event/event.module';
 import { EventTagModule } from './event-tag/event-tag.module';
+import { EventTagGroupModule } from './event-tag-group/event-tag-group.module';
 import { ReminderModule } from './reminder/reminder.module';
 import { ShareModule } from './share/share.module';
 import { NetworkModule } from './network/network.module';
@@ -22,6 +23,7 @@ import { NetworkModule } from './network/network.module';
 		CalendarModule,
 		EventModule,
 		EventTagModule,
+		EventTagGroupModule,
 		ReminderModule,
 		ShareModule,
 		NetworkModule,
