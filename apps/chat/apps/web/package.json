@@ -45,6 +45,7 @@
 		"@manacore/shared-ui": "workspace:*",
 		"@manacore/shared-utils": "workspace:*",
 		"marked": "^17.0.0",
-		"svelte-i18n": "^4.0.1"
+		"svelte-i18n": "^4.0.1",
+		"zod": "^3.25.76"
 	}
 }
