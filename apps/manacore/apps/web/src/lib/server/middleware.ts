@@ -1,4 +1,4 @@
-import { MIDDLEWARE_URL } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 /**
  * Server-side only middleware client
@@ -12,6 +12,8 @@ export async function callMiddleware(
 		headers?: Record<string, string>;
 	} = {}
 ) {
+	const MIDDLEWARE_URL =
+		env.MIDDLEWARE_URL || 'https://mana-core-middleware-111768794939.europe-west3.run.app';
 	const url = `${MIDDLEWARE_URL}${endpoint}`;
 
 	const response = await fetch(url, {
