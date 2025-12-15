@@ -265,25 +265,25 @@
 					}}
 				>
 					<!-- Time -->
-					<div class="mb-4">
-						<label class="mb-1 block text-sm font-medium">{$_('alarm.time')}</label>
+					<label class="mb-4 block">
+						<span class="mb-1 block text-sm font-medium">{$_('alarm.time')}</span>
 						<input type="time" class="input time-input" bind:value={editTime} />
-					</div>
+					</label>
 
 					<!-- Label -->
-					<div class="mb-4">
-						<label class="mb-1 block text-sm font-medium">{$_('alarm.label')}</label>
+					<label class="mb-4 block">
+						<span class="mb-1 block text-sm font-medium">{$_('alarm.label')}</span>
 						<input
 							type="text"
 							class="input"
 							placeholder="Arbeit, Sport, etc."
 							bind:value={editLabel}
 						/>
-					</div>
+					</label>
 
 					<!-- Repeat Days -->
 					<div class="mb-4">
-						<label class="mb-2 block text-sm font-medium">{$_('alarm.repeat')}</label>
+						<div class="mb-2 text-sm font-medium">{$_('alarm.repeat')}</div>
 						<div class="day-selector">
 							{#each dayNames as day, i}
 								<button
@@ -298,25 +298,25 @@
 					</div>
 
 					<!-- Sound -->
-					<div class="mb-4">
-						<label class="mb-1 block text-sm font-medium">{$_('alarm.sound')}</label>
+					<label class="mb-4 block">
+						<span class="mb-1 block text-sm font-medium">{$_('alarm.sound')}</span>
 						<select class="input" bind:value={editSound}>
 							{#each ALARM_SOUNDS as sound}
 								<option value={sound.id}>{sound.nameDE}</option>
 							{/each}
 						</select>
-					</div>
+					</label>
 
 					<!-- Snooze -->
-					<div class="mb-6">
-						<label class="mb-1 block text-sm font-medium">{$_('alarm.snooze')}</label>
+					<label class="mb-6 block">
+						<span class="mb-1 block text-sm font-medium">{$_('alarm.snooze')}</span>
 						<select class="input" bind:value={editSnoozeMinutes}>
 							<option value={5}>5 Minuten</option>
 							<option value={10}>10 Minuten</option>
 							<option value={15}>15 Minuten</option>
 							<option value={30}>30 Minuten</option>
 						</select>
-					</div>
+					</label>
 
 					<!-- Actions -->
 					<div class="flex gap-3">

@@ -33,6 +33,7 @@
 				<div class="w-3 h-3 rounded-full bg-muted-foreground"></div>
 				<span class="text-sm font-medium text-foreground">Neue Spalte</span>
 			</div>
+			<!-- svelte-ignore a11y_autofocus -->
 			<input
 				type="text"
 				bind:value={newName}

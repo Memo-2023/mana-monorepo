@@ -56,6 +56,7 @@
 	let showFilters = $state(false);
 	let showKeyboardHelp = $state(false);
 	let strengthValue = $state(minStrength);
+	// svelte-ignore non_reactive_update - Element reference doesn't need reactivity
 	let searchInputElement: HTMLInputElement;
 
 	// Sync searchInput with external searchQuery

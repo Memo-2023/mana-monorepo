@@ -147,6 +147,7 @@
 					d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
 				/>
 			</svg>
+			<!-- svelte-ignore a11y_autofocus - Intentional for search page UX -->
 			<input
 				type="text"
 				placeholder="Zitate oder Autoren suchen..."

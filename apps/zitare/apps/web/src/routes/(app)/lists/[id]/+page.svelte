@@ -37,7 +37,7 @@
 	let listQuotes = $derived(
 		list
 			? quotesDE
-					.filter((quote) => list.quoteIds.includes(quote.id))
+					.filter((quote) => list!.quoteIds.includes(quote.id))
 					.map((quote) => ({
 						...quote,
 						author: authorsDE.find((a) => a.id === quote.authorId),
@@ -126,7 +126,7 @@
 		if (list) {
 			const count = selectedQuoteIds.size;
 			selectedQuoteIds.forEach((quoteId) => {
-				listsStore.addQuoteToList(list.id, quoteId);
+				listsStore.addQuoteToList(list!.id, quoteId);
 			});
 			toast.success(`${count} ${count === 1 ? 'Zitat' : 'Zitate'} hinzugefügt!`);
 			closeAddQuotesModal();
@@ -359,8 +359,17 @@
 
 <!-- Edit List Modal -->
 {#if showEditModal}
-	<div class="modal-overlay" onclick={closeEditModal}>
-		<div class="modal" onclick={(e) => e.stopPropagation()}>
+	<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
+	<div
+		class="modal-overlay"
+		onclick={closeEditModal}
+		onkeydown={(e) => e.key === 'Escape' && closeEditModal()}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
+	>
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_click_events_have_key_events -->
+		<div class="modal" onclick={(e) => e.stopPropagation()} onkeydown={() => {}} role="document">
 			<div class="modal-header">
 				<h3>Liste bearbeiten</h3>
 				<button class="close-btn" onclick={closeEditModal} aria-label="Schließen">
@@ -423,8 +432,22 @@
 
 <!-- Add Quotes Modal -->
 {#if showAddQuotesModal}
-	<div class="modal-overlay" onclick={closeAddQuotesModal}>
-		<div class="modal modal-large" onclick={(e) => e.stopPropagation()}>
+	<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
+	<div
+		class="modal-overlay"
+		onclick={closeAddQuotesModal}
+		onkeydown={(e) => e.key === 'Escape' && closeAddQuotesModal()}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
+	>
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_click_events_have_key_events -->
+		<div
+			class="modal modal-large"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={() => {}}
+			role="document"
+		>
 			<div class="modal-header">
 				<h3>Zitate hinzufügen</h3>
 				<button class="close-btn" onclick={closeAddQuotesModal} aria-label="Schließen">

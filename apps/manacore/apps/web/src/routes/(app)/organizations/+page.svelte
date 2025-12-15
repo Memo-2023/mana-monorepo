@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { Card, Button, PageHeader } from '@manacore/shared-ui';
 	import type { PageData } from './$types';
+	import type { Organization } from './+page.server';
 
 	let { data }: { data: PageData } = $props();
 
-	function getAvailableCredits(org: any) {
-		return org.total_credits - org.used_credits;
+	function getAvailableCredits(org: Organization) {
+		return (org.total_credits || 0) - (org.used_credits || 0);
 	}
 
 	function getRoleBadgeColor(role: string) {
@@ -77,8 +78,10 @@
 								<div class="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
 									<div
 										class="h-full rounded-full bg-primary-600 transition-all"
-										style="width: {((org.total_credits - org.used_credits) / org.total_credits) *
-											100}%"
+										style="width: {org.total_credits
+											? (((org.total_credits || 0) - (org.used_credits || 0)) / org.total_credits) *
+												100
+											: 0}%"
 									></div>
 								</div>
 							</div>

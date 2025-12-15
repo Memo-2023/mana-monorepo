@@ -19,6 +19,7 @@
 		Clock,
 		CalendarCheck,
 		Hourglass,
+		type Icon as LucideIcon,
 	} from 'lucide-svelte';
 	import { subDays, addDays } from 'date-fns';
 
@@ -39,42 +40,42 @@
 			id: 'eventsToday',
 			label: 'Heute',
 			value: calendarStatisticsStore.eventsToday,
-			icon: CalendarDays,
+			icon: CalendarDays as any,
 			variant: 'success',
 		},
 		{
 			id: 'eventsThisWeek',
 			label: 'Diese Woche',
 			value: calendarStatisticsStore.eventsThisWeek,
-			icon: Calendar,
+			icon: Calendar as any,
 			variant: 'primary',
 		},
 		{
 			id: 'upcoming',
 			label: 'Anstehend (7 Tage)',
 			value: calendarStatisticsStore.upcomingEvents,
-			icon: CalendarCheck,
+			icon: CalendarCheck as any,
 			variant: 'info',
 		},
 		{
 			id: 'busyHours',
 			label: 'Stunden/Woche',
 			value: `${calendarStatisticsStore.busyHoursThisWeek}h`,
-			icon: Clock,
+			icon: Clock as any,
 			variant: 'neutral',
 		},
 		{
 			id: 'calendars',
 			label: 'Kalender',
 			value: calendarStatisticsStore.totalCalendars,
-			icon: Calendar,
+			icon: Calendar as any,
 			variant: 'accent',
 		},
 		{
 			id: 'avgDuration',
 			label: 'Ø Dauer (Min)',
 			value: calendarStatisticsStore.averageEventDuration,
-			icon: Hourglass,
+			icon: Hourglass as any,
 			variant: 'info',
 		},
 	]);

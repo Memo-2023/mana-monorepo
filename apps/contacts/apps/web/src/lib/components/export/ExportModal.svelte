@@ -49,10 +49,14 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if isOpen}
-	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
 		onclick={handleBackdropClick}
+		onkeydown={(e) => e.key === 'Escape' && onClose()}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
 	>
 		<div class="bg-card rounded-xl shadow-xl w-full max-w-md p-6 space-y-6">
 			<!-- Header -->
@@ -62,6 +66,7 @@
 					type="button"
 					onclick={onClose}
 					class="text-muted-foreground hover:text-foreground transition-colors"
+					aria-label={$_('common.close')}
 				>
 					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -92,8 +97,10 @@
 
 			<!-- Format Selection -->
 			<div class="space-y-3">
-				<label class="block text-sm font-medium text-foreground">{$_('export.format')}</label>
-				<div class="grid grid-cols-2 gap-3">
+				<span class="block text-sm font-medium text-foreground" id="format-label"
+					>{$_('export.format')}</span
+				>
+				<div class="grid grid-cols-2 gap-3" role="group" aria-labelledby="format-label">
 					<button
 						type="button"
 						onclick={() => (format = 'vcard')}

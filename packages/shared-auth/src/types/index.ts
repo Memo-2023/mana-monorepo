@@ -48,6 +48,7 @@ export interface DecodedToken {
  */
 export interface UserData {
 	id: string;
+	sub: string; // JWT subject (user ID)
 	email: string;
 	role: string;
 }

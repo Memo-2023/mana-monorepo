@@ -1230,12 +1230,6 @@
 		flex-shrink: 0;
 	}
 
-	.calendar-dot {
-		width: 14px;
-		height: 14px;
-		border-radius: 50%;
-	}
-
 	/* Calendar pills */
 	.calendar-pills-container {
 		padding: 0.5rem 0;
@@ -1288,9 +1282,6 @@
 		height: 10px;
 		border-radius: 50%;
 		flex-shrink: 0;
-	}
-
-	.calendar-pill-name {
 	}
 
 	.row-content {

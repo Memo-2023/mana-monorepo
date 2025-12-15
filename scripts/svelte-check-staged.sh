@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Run svelte-check on web apps that have staged .svelte files
 # This catches a11y warnings, Svelte 5 issues, and import errors before CI
 
@@ -13,23 +13,33 @@ if [ -z "$STAGED_SVELTE" ]; then
 fi
 
 # Find unique web app directories that have changes
-declare -A WEB_APPS
+WEB_APPS=""
 
 for file in $STAGED_SVELTE; do
     # Extract the web app path (e.g., apps/todo/apps/web)
+    app_path=""
     if [[ $file =~ ^(apps/[^/]+/apps/web)/ ]]; then
-        WEB_APPS["${BASH_REMATCH[1]}"]=1
+        app_path="${BASH_REMATCH[1]}"
     elif [[ $file =~ ^(games/[^/]+/apps/web)/ ]]; then
-        WEB_APPS["${BASH_REMATCH[1]}"]=1
+        app_path="${BASH_REMATCH[1]}"
     elif [[ $file =~ ^(packages/[^/]+)/ ]]; then
         # For shared packages, check all web apps that might use them
-        # This is a simplified approach - just warn
         echo "⚠️  Changes in shared package: $file"
         echo "   Consider running: pnpm run build:check to verify all web apps"
     fi
+
+    # Add to list if not already present
+    if [ -n "$app_path" ]; then
+        if [[ ! " $WEB_APPS " =~ " $app_path " ]]; then
+            WEB_APPS="$WEB_APPS $app_path"
+        fi
+    fi
 done
 
-if [ ${#WEB_APPS[@]} -eq 0 ]; then
+# Trim leading space
+WEB_APPS=$(echo "$WEB_APPS" | xargs)
+
+if [ -z "$WEB_APPS" ]; then
     echo "No web app changes detected"
     exit 0
 fi
@@ -37,7 +47,7 @@ fi
 echo "🔍 Running svelte-check on affected web apps..."
 FAILED=0
 
-for app in "${!WEB_APPS[@]}"; do
+for app in $WEB_APPS; do
     if [ -f "$app/package.json" ]; then
         echo ""
         echo "━━━ Checking $app ━━━"
@@ -46,7 +56,8 @@ for app in "${!WEB_APPS[@]}"; do
         PKG_NAME=$(node -p "require('./$app/package.json').name" 2>/dev/null || echo "")
 
         if [ -n "$PKG_NAME" ]; then
-            # Run svelte-check with threshold to fail on warnings
+            # Run svelte-check - fails on both errors AND warnings
+            # This ensures no a11y issues or Svelte problems slip through
             if ! pnpm --filter "$PKG_NAME" exec svelte-check --tsconfig ./tsconfig.json --threshold warning 2>&1; then
                 echo "❌ svelte-check failed for $app"
                 FAILED=1

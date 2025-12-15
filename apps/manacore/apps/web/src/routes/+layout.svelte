@@ -6,12 +6,12 @@
 
 	let { children } = $props();
 
-	onMount(async () => {
+	onMount(() => {
 		// Initialize theme
 		const cleanupTheme = theme.initialize();
 
-		// Initialize auth
-		await authStore.initialize();
+		// Initialize auth (non-blocking)
+		authStore.initialize();
 
 		return () => {
 			cleanupTheme();

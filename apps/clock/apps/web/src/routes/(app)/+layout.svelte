@@ -69,7 +69,8 @@
 
 		try {
 			// Search alarms
-			const alarms = await alarmsApi.getAll();
+			const alarmsResponse = await alarmsApi.getAll();
+			const alarms = alarmsResponse.data || [];
 			const matchingAlarms = alarms
 				.filter((alarm) => alarm.label?.toLowerCase().includes(queryLower))
 				.slice(0, 5)
@@ -81,7 +82,8 @@
 			results.push(...matchingAlarms);
 
 			// Search timers
-			const timers = await timersApi.getAll();
+			const timersResponse = await timersApi.getAll();
+			const timers = timersResponse.data || [];
 			const matchingTimers = timers
 				.filter((timer) => timer.label?.toLowerCase().includes(queryLower))
 				.slice(0, 5)

@@ -121,6 +121,7 @@
 							style="background-color: {focused.color}"
 						></div>
 						{#if editingLabelId === focused.id}
+							<!-- svelte-ignore a11y_autofocus -->
 							<input
 								type="text"
 								class="bg-transparent border-b border-primary text-lg font-medium focus:outline-none"
@@ -141,6 +142,7 @@
 					<button
 						class="text-muted-foreground hover:text-error transition-colors p-1"
 						onclick={() => stopwatchesStore.delete(focused.id)}
+						aria-label="Delete stopwatch"
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -341,6 +343,7 @@
 										e.stopPropagation();
 										stopwatchesStore.delete(sw.id);
 									}}
+									aria-label="Delete stopwatch"
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -397,6 +400,7 @@
 											e.stopPropagation();
 											stopwatchesStore.reset(sw.id);
 										}}
+										aria-label="Reset stopwatch"
 									>
 										<svg
 											xmlns="http://www.w3.org/2000/svg"

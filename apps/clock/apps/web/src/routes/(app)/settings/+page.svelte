@@ -49,7 +49,7 @@
 		<h2 class="mb-4 text-lg font-semibold">{$_('settings.clockFormat')}</h2>
 
 		<div>
-			<label class="mb-2 block text-sm font-medium">Zeitformat</label>
+			<div class="mb-2 text-sm font-medium">Zeitformat</div>
 			<div class="flex gap-2">
 				<button
 					class="btn btn-sm"

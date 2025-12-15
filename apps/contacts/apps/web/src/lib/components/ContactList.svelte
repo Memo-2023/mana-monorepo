@@ -19,6 +19,7 @@
 
 	// Infinite scroll
 	let intersectionObserver: IntersectionObserver | null = null;
+	// svelte-ignore non_reactive_update - Element reference doesn't need reactivity
 	let loadMoreTrigger: HTMLDivElement;
 
 	// Batch selection state

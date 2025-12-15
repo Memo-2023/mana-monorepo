@@ -23,6 +23,7 @@
 	let saving = $state(false);
 	let deleting = $state(false);
 	let uploadingPhoto = $state(false);
+	// svelte-ignore non_reactive_update - Element reference doesn't need reactivity
 	let photoInput: HTMLInputElement;
 
 	// Edit form state
@@ -1089,25 +1090,11 @@
 	}
 
 	/* Loading */
-	.loading-container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: 4rem 2rem;
-		gap: 1rem;
-	}
-
 	.spinner-lg {
 		width: 3rem;
 		height: 3rem;
 		color: hsl(var(--color-primary));
 		animation: spin 1s linear infinite;
-	}
-
-	.loading-text {
-		color: hsl(var(--color-muted-foreground));
-		font-size: 0.9375rem;
 	}
 
 	/* Error */

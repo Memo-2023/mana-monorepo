@@ -123,7 +123,7 @@ export const authStore = {
 			const userData = await authService.getUserFromToken();
 			user = userData;
 
-			return { success: true, error: null };
+			return { success: true };
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 			return { success: false, error: errorMessage };
@@ -148,7 +148,7 @@ export const authStore = {
 
 			// Mana Core Auth requires separate login after signup
 			if (result.needsVerification) {
-				return { success: true, error: null, needsVerification: true };
+				return { success: true, needsVerification: true };
 			}
 
 			// Auto sign in after successful signup
@@ -196,7 +196,7 @@ export const authStore = {
 				return { success: false, error: result.error || 'Password reset failed' };
 			}
 
-			return { success: true, error: null };
+			return { success: true };
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 			return { success: false, error: errorMessage };

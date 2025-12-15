@@ -210,20 +210,6 @@
 		margin: 0 auto var(--spacing-xl);
 	}
 
-	.header-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--spacing-md);
-		margin-bottom: var(--spacing-lg);
-	}
-
-	h2 {
-		font-size: 2rem;
-		margin: 0;
-		color: rgb(var(--color-text-primary));
-	}
-
 	.search-fab {
 		display: flex;
 		align-items: center;
@@ -403,14 +389,6 @@
 		.header-container {
 			max-width: 100%;
 			margin-bottom: var(--spacing-lg);
-		}
-
-		.header-row {
-			margin-bottom: var(--spacing-md);
-		}
-
-		h2 {
-			font-size: 1.5rem;
 		}
 
 		.search-fab {

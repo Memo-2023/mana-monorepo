@@ -40,12 +40,15 @@
 		onclick={() => showKeyboardShortcuts.set(false)}
 		role="presentation"
 	>
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_click_events_have_key_events a11y_interactive_supports_focus -->
 		<div
 			class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-gray-200/50 bg-white/95 p-8 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/95"
 			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.key === 'Escape' && showKeyboardShortcuts.set(false)}
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="shortcuts-title"
+			tabindex="-1"
 		>
 			<!-- Header -->
 			<div class="mb-6 flex items-center justify-between">

@@ -66,12 +66,15 @@
 	></div>
 
 	<!-- Modal -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_click_events_have_key_events a11y_interactive_supports_focus -->
 	<div
 		class="fixed left-1/2 top-1/2 z-[80] w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-3xl border border-gray-200/50 bg-white/95 p-6 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/95"
 		transition:fly={{ y: 20, duration: 200 }}
 		onclick={(e) => e.stopPropagation()}
+		onkeydown={(e) => e.key === 'Escape' && onClose()}
 		role="dialog"
 		aria-modal="true"
+		tabindex="-1"
 	>
 		<!-- Header -->
 		<div class="mb-6 flex items-center justify-between">
@@ -90,9 +93,7 @@
 			<!-- Image Count -->
 			<div>
 				<div class="mb-3 flex items-center justify-between">
-					<label class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-						Anzahl Bilder
-					</label>
+					<div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Anzahl Bilder</div>
 					{#if localSettings.imageCount > 1}
 						<span
 							class="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
@@ -123,9 +124,9 @@
 
 			<!-- Aspect Ratio -->
 			<div>
-				<label class="mb-3 block text-sm font-semibold text-gray-900 dark:text-gray-100">
+				<div class="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
 					Seitenverhältnis
-				</label>
+				</div>
 				<div class="grid grid-cols-3 gap-3">
 					{#each aspectRatios as ratio}
 						<button
@@ -179,24 +180,26 @@
 
 			<!-- Steps Slider -->
 			<div>
-				<div class="mb-3 flex items-center justify-between">
-					<label class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-						Schritte (Steps)
-					</label>
-					<span
-						class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-					>
-						{localSettings.steps}
-					</span>
-				</div>
-				<input
-					type="range"
-					min="20"
-					max="150"
-					step="5"
-					bind:value={localSettings.steps}
-					class="h-2 w-full appearance-none rounded-lg bg-gray-200 dark:bg-gray-700 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:dark:bg-blue-500 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:dark:bg-blue-500"
-				/>
+				<label class="block">
+					<div class="mb-3 flex items-center justify-between">
+						<span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+							Schritte (Steps)
+						</span>
+						<span
+							class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+						>
+							{localSettings.steps}
+						</span>
+					</div>
+					<input
+						type="range"
+						min="20"
+						max="150"
+						step="5"
+						bind:value={localSettings.steps}
+						class="h-2 w-full appearance-none rounded-lg bg-gray-200 dark:bg-gray-700 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:dark:bg-blue-500 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:dark:bg-blue-500"
+					/>
+				</label>
 				<div class="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
 					<span>20 (Schnell)</span>
 					<span>150 (Höchste Qualität)</span>
@@ -205,24 +208,26 @@
 
 			<!-- Guidance Scale Slider -->
 			<div>
-				<div class="mb-3 flex items-center justify-between">
-					<label class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-						Guidance Scale
-					</label>
-					<span
-						class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-					>
-						{localSettings.guidanceScale}
-					</span>
-				</div>
-				<input
-					type="range"
-					min="1"
-					max="20"
-					step="0.5"
-					bind:value={localSettings.guidanceScale}
-					class="h-2 w-full appearance-none rounded-lg bg-gray-200 dark:bg-gray-700 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:dark:bg-blue-500 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:dark:bg-blue-500"
-				/>
+				<label class="block">
+					<div class="mb-3 flex items-center justify-between">
+						<span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+							Guidance Scale
+						</span>
+						<span
+							class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+						>
+							{localSettings.guidanceScale}
+						</span>
+					</div>
+					<input
+						type="range"
+						min="1"
+						max="20"
+						step="0.5"
+						bind:value={localSettings.guidanceScale}
+						class="h-2 w-full appearance-none rounded-lg bg-gray-200 dark:bg-gray-700 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:dark:bg-blue-500 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:dark:bg-blue-500"
+					/>
+				</label>
 				<div class="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
 					<span>1 (Kreativ)</span>
 					<span>20 (Präzise)</span>

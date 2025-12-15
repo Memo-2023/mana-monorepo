@@ -20,7 +20,8 @@
 	let circumference = $derived(2 * Math.PI * radius);
 	let dashOffset = $derived(circumference - (percentage / 100) * circumference);
 
-	// Animation
+	// Animation - intentionally captures initial circumference for animation start
+	// svelte-ignore state_referenced_locally
 	let animatedOffset = $state(circumference);
 	let mounted = $state(false);
 

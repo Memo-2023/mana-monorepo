@@ -223,6 +223,7 @@
 					<button
 						class="absolute right-3 top-3 text-muted-foreground hover:text-error p-0.5"
 						onclick={() => removeCity(clock.id)}
+						aria-label="Remove city"
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -269,7 +270,11 @@
 			<div class="card w-full max-w-md max-h-[80vh] flex flex-col">
 				<div class="flex items-center justify-between mb-4">
 					<h2 class="text-xl font-semibold">{$_('worldClock.add')}</h2>
-					<button class="text-muted-foreground hover:text-foreground p-0.5" onclick={closeAddModal}>
+					<button
+						class="text-muted-foreground hover:text-foreground p-0.5"
+						onclick={closeAddModal}
+						aria-label="Close modal"
+					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							class="h-4 w-4"

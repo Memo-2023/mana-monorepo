@@ -219,8 +219,17 @@
 
 <!-- Create List Modal -->
 {#if showCreateModal}
-	<div class="modal-overlay" onclick={closeCreateModal}>
-		<div class="modal" onclick={(e) => e.stopPropagation()}>
+	<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
+	<div
+		class="modal-overlay"
+		onclick={closeCreateModal}
+		onkeydown={(e) => e.key === 'Escape' && closeCreateModal()}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
+	>
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_click_events_have_key_events -->
+		<div class="modal" onclick={(e) => e.stopPropagation()} onkeydown={() => {}} role="document">
 			<div class="modal-header">
 				<h3>Neue Liste erstellen</h3>
 				<button class="close-btn" onclick={closeCreateModal} aria-label="Schließen">
@@ -281,26 +290,6 @@
 	.header-container {
 		max-width: 900px;
 		margin: 0 auto var(--spacing-xl);
-	}
-
-	.header-row {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: var(--spacing-md);
-		margin-bottom: var(--spacing-lg);
-	}
-
-	h2 {
-		font-size: 2rem;
-		margin: 0 0 var(--spacing-xs) 0;
-		color: rgb(var(--color-text-primary));
-	}
-
-	.subtitle {
-		font-size: 0.875rem;
-		color: rgb(var(--color-text-secondary));
-		margin: 0;
 	}
 
 	.create-fab {
@@ -644,10 +633,6 @@
 
 		.header-container {
 			max-width: 100%;
-		}
-
-		h2 {
-			font-size: 1.5rem;
 		}
 
 		.create-fab {

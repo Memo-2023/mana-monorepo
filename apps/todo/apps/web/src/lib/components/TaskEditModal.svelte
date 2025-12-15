@@ -168,7 +168,15 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if open}
-	<div class="modal-backdrop" onclick={handleBackdropClick} role="dialog" aria-modal="true">
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+	<div
+		class="modal-backdrop"
+		onclick={handleBackdropClick}
+		onkeydown={() => {}}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
+	>
 		<div class="modal-container">
 			<!-- Header -->
 			<div class="modal-header">
@@ -213,7 +221,7 @@
 
 				<!-- Zuständige Person -->
 				<div class="form-section">
-					<label class="form-label">Zuständig</label>
+					<div class="form-label">Zuständig</div>
 					<ContactSelector
 						selectedContacts={assignee}
 						onContactsChange={(contacts) => (assignee = contacts)}
@@ -229,7 +237,7 @@
 
 				<!-- Beteiligte Personen -->
 				<div class="form-section">
-					<label class="form-label">Beteiligte</label>
+					<div class="form-label">Beteiligte</div>
 					<ContactSelector
 						selectedContacts={involvedContacts}
 						onContactsChange={(contacts) => (involvedContacts = contacts)}
@@ -244,7 +252,7 @@
 
 				<!-- Zeitplanung -->
 				<div class="form-section">
-					<label class="form-label">Zeitplanung</label>
+					<div class="form-label">Zeitplanung</div>
 					<div class="form-row">
 						<div class="form-field">
 							<label class="form-sublabel" for="due-date">Fälligkeitsdatum</label>
@@ -263,7 +271,7 @@
 
 				<!-- Priorität -->
 				<div class="form-section">
-					<label class="form-label">Priorität</label>
+					<div class="form-label">Priorität</div>
 					<PrioritySelector value={priority} onChange={(p) => (priority = p)} />
 				</div>
 
@@ -292,7 +300,7 @@
 
 				<!-- Tags -->
 				<div class="form-section">
-					<label class="form-label">Tags</label>
+					<div class="form-label">Tags</div>
 					<TagSelector
 						selectedIds={selectedLabelIds}
 						onChange={(ids) => (selectedLabelIds = ids)}
@@ -301,7 +309,7 @@
 
 				<!-- Subtasks -->
 				<div class="form-section">
-					<label class="form-label">Subtasks</label>
+					<div class="form-label">Subtasks</div>
 					<SubtaskList {subtasks} onChange={handleSubtasksChange} />
 				</div>
 
@@ -329,22 +337,22 @@
 
 				<!-- Storypoints -->
 				<div class="form-section">
-					<label class="form-label">Storypoints</label>
+					<div class="form-label">Storypoints</div>
 					<StorypointsSelector value={storyPoints} onChange={(v) => (storyPoints = v)} />
 				</div>
 
 				<!-- Effektive Dauer -->
 				<div class="form-section">
-					<label class="form-label">Effektive Dauer</label>
+					<div class="form-label">Effektive Dauer</div>
 					<DurationPicker value={effectiveDuration} onChange={(v) => (effectiveDuration = v)} />
 				</div>
 
 				<!-- Spaß-Faktor -->
 				<div class="form-section">
-					<label class="form-label">
+					<div class="form-label">
 						Spaß-Faktor{#if funRating !== null}: <span class="fun-rating-value">{funRating}</span
 							>{/if}
-					</label>
+					</div>
 					<FunRatingPicker value={funRating} onChange={(v) => (funRating = v)} />
 				</div>
 			</div>

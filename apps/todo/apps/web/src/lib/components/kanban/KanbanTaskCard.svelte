@@ -157,19 +157,19 @@
 
 <svelte:window onclick={handleClickOutside} />
 
-<div
+<button
+	type="button"
 	class="kanban-card group"
 	class:completed={task.isCompleted}
 	onclick={handleCardClick}
 	oncontextmenu={handleContextMenu}
-	role="button"
-	tabindex="0"
 >
 	<!-- Priority indicator -->
 	<div class="priority-dot" style="background-color: {priorityColors[task.priority]}"></div>
 
 	<!-- Checkbox -->
 	{#if onToggleComplete}
+		<!-- svelte-ignore node_invalid_placement_ssr -->
 		<button class="task-checkbox" class:checked={task.isCompleted} onclick={onToggleComplete}>
 			{#if task.isCompleted}
 				<svg class="check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,6 +200,8 @@
 				class="task-title"
 				class:line-through={task.isCompleted}
 				ondblclick={handleTitleDoubleClick}
+				role="button"
+				tabindex="0"
 			>
 				{task.title}
 			</span>
@@ -276,14 +278,18 @@
 			{/if}
 		</div>
 	{/if}
-</div>
+</button>
 
 <!-- Context Menu -->
 {#if showContextMenu}
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		class="context-menu"
 		style="left: {contextMenuX}px; top: {contextMenuY}px"
 		onclick={(e) => e.stopPropagation()}
+		onkeydown={() => {}}
+		role="menu"
+		tabindex="-1"
 	>
 		<button class="context-item" onclick={handleContextEdit}>
 			<svg class="context-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">

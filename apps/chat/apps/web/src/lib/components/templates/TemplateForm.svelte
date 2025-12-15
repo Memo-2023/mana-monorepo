@@ -66,11 +66,11 @@
 		onSubmit({
 			id: template?.id,
 			name,
-			description: description.trim() || null,
+			description: description.trim() || undefined,
 			systemPrompt: systemPrompt,
-			initialQuestion: initialQuestion.trim() || null,
+			initialQuestion: initialQuestion.trim() || undefined,
 			color: selectedColor,
-			modelId: selectedModelId || null,
+			modelId: selectedModelId || undefined,
 			documentMode: documentMode,
 		});
 	}
@@ -169,8 +169,8 @@
 
 		<!-- Color -->
 		<div>
-			<label class="block text-sm font-medium text-foreground mb-2"> Farbe </label>
-			<div class="flex flex-wrap gap-2">
+			<span class="block text-sm font-medium text-foreground mb-2" id="color-label">Farbe</span>
+			<div class="flex flex-wrap gap-2" role="group" aria-labelledby="color-label">
 				{#each TEMPLATE_COLORS as color}
 					<button
 						type="button"

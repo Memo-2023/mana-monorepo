@@ -18,7 +18,7 @@
 					<span class="text-3xl">{def.icon}</span>
 					<div>
 						<h3 class="font-semibold">{def.label}</h3>
-						<p class="text-sm text-muted-foreground">{def.description}</p>
+						<p class="text-sm text-muted-foreground">{def.emoji}</p>
 					</div>
 				</div>
 				{#if theme.variant === variant}

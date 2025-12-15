@@ -151,13 +151,19 @@
 
 		<!-- Delete Confirmation Modal -->
 		{#if showDeleteConfirm}
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
 				class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
 				onclick={() => (showDeleteConfirm = false)}
+				role="dialog"
+				aria-modal="true"
+				tabindex="-1"
 			>
+				<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_click_events_have_key_events -->
 				<div
 					class="bg-surface-elevated rounded-lg shadow-xl max-w-md w-full mx-4 p-6"
 					onclick={(e) => e.stopPropagation()}
+					role="document"
 				>
 					<h3 class="text-xl font-semibold mb-2">Delete Deck?</h3>
 					<p class="text-muted-foreground mb-6">
