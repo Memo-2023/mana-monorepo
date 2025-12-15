@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Search, ZoomIn, ZoomOut, RotateCcw, Filter, X, Focus, Keyboard } from 'lucide-svelte';
+	import { Search, ZoomIn, ZoomOut, RotateCcw, Filter, X, Focus, Keyboard } from '@lucide/svelte';
 	import type { NetworkTag } from './network.types';
 
 	interface Props {

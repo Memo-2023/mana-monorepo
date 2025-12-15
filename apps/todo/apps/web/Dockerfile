@@ -37,6 +37,8 @@ COPY packages/shared-profile-ui ./packages/shared-profile-ui
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
 COPY packages/shared-tags ./packages/shared-tags
+COPY packages/shared-splitscreen ./packages/shared-splitscreen
+COPY packages/shared-types ./packages/shared-types
 
 # Copy todo packages and web
 COPY apps/todo/packages ./apps/todo/packages
