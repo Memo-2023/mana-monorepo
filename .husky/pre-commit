@@ -1,2 +1,5 @@
 pnpm exec lint-staged
 pnpm run type-check
+
+# Run svelte-check on staged web apps (catches a11y, imports, Svelte 5 issues)
+./scripts/svelte-check-staged.sh
