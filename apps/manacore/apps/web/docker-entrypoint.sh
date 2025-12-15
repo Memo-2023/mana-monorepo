@@ -15,8 +15,11 @@ CALENDAR_API_URL=${CALENDAR_API_URL:-"http://localhost:3016"}
 CLOCK_API_URL=${CLOCK_API_URL:-"http://localhost:3017"}
 CONTACTS_API_URL=${CONTACTS_API_URL:-"http://localhost:3015"}
 
+# Ensure the directory exists (it should from the build, but be safe)
+mkdir -p build/client
+
 # Generate config.json from template
-cat > /app/build/client/config.json <<EOF
+cat > build/client/config.json <<EOF
 {
   "API_BASE_URL": "${API_BASE_URL}",
   "AUTH_URL": "${AUTH_URL}",
@@ -28,7 +31,7 @@ cat > /app/build/client/config.json <<EOF
 EOF
 
 echo "✅ Runtime configuration generated:"
-cat /app/build/client/config.json
+cat build/client/config.json
 
 echo ""
 echo "🚀 Starting Node server..."
