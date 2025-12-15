@@ -14,12 +14,16 @@ export interface KeyboardShortcut {
 export interface PillNavItem {
 	/** Display label for the navigation item */
 	label: string;
-	/** URL to navigate to */
+	/** URL to navigate to (ignored if onClick is provided) */
 	href: string;
 	/** Icon name (predefined) or 'mana' for special mana icon */
 	icon?: string;
 	/** Custom SVG icon HTML (for custom icons) */
 	iconSvg?: string;
+	/** Click handler - if provided, prevents navigation and calls this instead */
+	onClick?: () => void;
+	/** Whether this item is currently active/selected (for toggle buttons) */
+	active?: boolean;
 }
 
 export interface PillDropdownItem {
@@ -92,6 +96,8 @@ export interface PillTabGroupConfig {
 	onChange: (id: string) => void;
 	/** Optional section label (shown above in sidebar mode) */
 	sectionLabel?: string;
+	/** Called on right-click (context menu) - receives click coordinates */
+	onContextMenu?: (x: number, y: number) => void;
 }
 
 export interface PillDivider {
@@ -137,6 +143,10 @@ export interface PillNavigationProps {
 	showThemeToggle?: boolean;
 	/** Primary color for active state */
 	primaryColor?: string;
+	/** Elements to prepend before nav items (tab groups, dividers, nav items) */
+	prependElements?: PillNavElement[];
+	/** Additional elements to show after nav items (tab groups, dividers) */
+	elements?: PillNavElement[];
 }
 
 export interface NavItem {

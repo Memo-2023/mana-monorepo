@@ -5,7 +5,11 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore } from '$lib/stores/todos.svelte';
+	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
+	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import TodoDayCell from './TodoDayCell.svelte';
+	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
+	import { useBirthdayPopover } from '$lib/composables';
 	import { goto } from '$app/navigation';
 	import {
 		format,
@@ -27,20 +31,26 @@
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { _ } from 'svelte-i18n';
+	import { filterByVisibleCalendars } from '$lib/utils/eventFiltering';
 
 	import type { CalendarEvent } from '@calendar/shared';
 
 	interface Props {
+		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
+		date?: Date;
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
 		onEventClick?: (event: CalendarEvent) => void;
 	}
 
-	let { onQuickCreate, onEventClick }: Props = $props();
+	let { date, onQuickCreate, onEventClick }: Props = $props();
+
+	// Use provided date or fall back to viewStore
+	let effectiveDate = $derived(date ?? viewStore.currentDate);
 
 	// Get all days to display in the month grid (including days from prev/next months)
 	let allCalendarDays = $derived.by(() => {
-		const monthStart = startOfMonth(viewStore.currentDate);
-		const monthEnd = endOfMonth(viewStore.currentDate);
+		const monthStart = startOfMonth(effectiveDate);
+		const monthEnd = endOfMonth(effectiveDate);
 		const calendarStart = startOfWeek(monthStart, { weekStartsOn: settingsStore.weekStartsOn });
 		const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: settingsStore.weekStartsOn });
 
@@ -80,7 +90,6 @@
 	let isDragging = $state(false);
 	let draggedEvent = $state<CalendarEvent | null>(null);
 	let dragTargetDay = $state<Date | null>(null);
-	let monthViewRef = $state<HTMLElement | null>(null);
 
 	// Store for day cell refs
 	let dayCellRefs = $state<Map<string, HTMLElement>>(new Map());
@@ -191,8 +200,18 @@
 	// ============================================================================
 	// Event Handlers
 	// ============================================================================
-	function getEventsForDay(day: Date) {
-		return eventsStore.getEventsForDay(day).slice(0, 3); // Max 3 events shown
+	function getEventsForDay(day: Date): CalendarEvent[] {
+		return filterByVisibleCalendars(
+			eventsStore.getEventsForDay(day),
+			calendarsStore.visibleCalendars
+		).slice(0, 3); // Max 3 events shown
+	}
+
+	function getAllEventsForDay(day: Date): CalendarEvent[] {
+		return filterByVisibleCalendars(
+			eventsStore.getEventsForDay(day),
+			calendarsStore.visibleCalendars
+		);
 	}
 
 	function handleDayClick(day: Date, e: MouseEvent) {
@@ -241,9 +260,27 @@
 		viewStore.setDate(day);
 		viewStore.setViewType('day');
 	}
+
+	function handleEventContextMenu(event: CalendarEvent, e: MouseEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+		// Don't show context menu for draft events
+		if (eventsStore.isDraftEvent(event.id)) return;
+		eventContextMenuStore.show(event, e.clientX, e.clientY);
+	}
+
+	// ============================================================================
+	// Birthday Functions
+	// ============================================================================
+	const birthdayPopover = useBirthdayPopover();
+
+	function getBirthdaysForDay(day: Date): BirthdayEvent[] {
+		if (!settingsStore.showBirthdays) return [];
+		return birthdaysStore.getBirthdaysForDay(day);
+	}
 </script>
 
-<div class="month-view" style="--column-count: {columnCount}" bind:this={monthViewRef}>
+<div class="month-view" style="--column-count: {columnCount}">
 	<!-- Week day headers -->
 	<div class="weekday-headers">
 		{#each weekDays as day}
@@ -259,7 +296,7 @@
 					{@const isDropTarget = isDragging && dragTargetDay && isSameDay(day, dragTargetDay)}
 					<div
 						class="day-cell"
-						class:other-month={!isSameMonth(day, viewStore.currentDate)}
+						class:other-month={!isSameMonth(day, effectiveDate)}
 						class:today={isToday(day)}
 						class:drop-target={isDropTarget}
 						use:bindDayCellRef={day}
@@ -297,6 +334,7 @@
 									style="background-color: {calendarsStore.getColor(event.calendarId)}"
 									onpointerdown={(e) => startDrag(event, e)}
 									onclick={(e) => !isDraft && handleEventClick(event, e)}
+									oncontextmenu={(e) => handleEventContextMenu(event, e)}
 									role="button"
 									tabindex="0"
 								>
@@ -319,10 +357,27 @@
 								</div>
 							{/each}
 
-							{#if eventsStore.getEventsForDay(day).length > 3}
+							<!-- Birthdays -->
+							{#each getBirthdaysForDay(day) as birthday}
+								<!-- svelte-ignore a11y_click_events_have_key_events -->
+								<div
+									class="event-pill birthday-pill"
+									onclick={(e) => birthdayPopover.handleBirthdayClick(birthday, e)}
+									role="button"
+									tabindex="0"
+								>
+									🎂
+									<span class="event-title">{birthday.displayName}</span>
+									{#if settingsStore.showBirthdayAge && birthday.age > 0}
+										<span class="birthday-age">({birthday.age})</span>
+									{/if}
+								</div>
+							{/each}
+
+							{#if getAllEventsForDay(day).length > 3}
 								<button class="more-events" onclick={(e) => handleMoreClick(day, e)}>
 									{$_('views.moreEvents', {
-										values: { count: eventsStore.getEventsForDay(day).length - 3 },
+										values: { count: getAllEventsForDay(day).length - 3 },
 									})}
 								</button>
 							{/if}
@@ -334,6 +389,15 @@
 	</div>
 </div>
 
+<!-- Birthday Popover -->
+{#if birthdayPopover.selectedBirthday}
+	<BirthdayPopover
+		birthday={birthdayPopover.selectedBirthday}
+		position={birthdayPopover.popoverPosition}
+		onClose={birthdayPopover.closePopover}
+	/>
+{/if}
+
 <style>
 	.month-view {
 		display: flex;
@@ -344,6 +408,10 @@
 		display: grid;
 		grid-template-columns: repeat(var(--column-count, 7), 1fr);
 		border-bottom: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-background));
+		position: sticky;
+		top: 0;
+		z-index: 10;
 	}
 
 	.weekday-header {
@@ -513,5 +581,20 @@
 		background-color: hsl(var(--color-primary) / 0.2) !important;
 		outline: 2px dashed hsl(var(--color-primary));
 		outline-offset: -2px;
+	}
+
+	/* Birthday pills */
+	.event-pill.birthday-pill {
+		background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+		cursor: pointer;
+	}
+
+	.event-pill.birthday-pill:hover {
+		opacity: 0.9;
+	}
+
+	.birthday-age {
+		opacity: 0.85;
+		font-size: 0.65rem;
 	}
 </style>

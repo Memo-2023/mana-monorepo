@@ -11,22 +11,27 @@
 		eachDayOfInterval,
 		isSameMonth,
 		isToday,
-		parseISO,
 		setHours,
 		setMinutes,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { toDate } from '$lib/utils/eventDateHelpers';
 	import type { CalendarViewType, CalendarEvent } from '@calendar/shared';
 
 	interface Props {
+		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
+		date?: Date;
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
 		onEventClick?: (event: CalendarEvent) => void;
 	}
 
-	let { onQuickCreate, onEventClick }: Props = $props();
+	let { date, onQuickCreate, onEventClick }: Props = $props();
+
+	// Use provided date or fall back to viewStore
+	let effectiveDate = $derived(date ?? viewStore.currentDate);
 
 	// Derived values
-	let year = $derived(viewStore.currentDate.getFullYear());
+	let year = $derived(effectiveDate.getFullYear());
 
 	let months = $derived(Array.from({ length: 12 }, (_, i) => new Date(year, i, 1)));
 
@@ -58,8 +63,7 @@
 		const events = eventsStore.events ?? [];
 
 		for (const event of events) {
-			const start =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+			const start = toDate(event.startTime);
 			const key = format(start, 'yyyy-MM-dd');
 			counts.set(key, (counts.get(key) || 0) + 1);
 		}

@@ -20,8 +20,22 @@ import {
 	IsDateString,
 	IsUUID,
 	MaxLength,
+	IsArray,
+	ValidateNested,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
+
+class CustomDateDto {
+	@IsUUID()
+	id: string;
+
+	@IsString()
+	@MaxLength(100)
+	label: string;
+
+	@IsDateString()
+	date: string;
+}
 
 class CreateContactDto {
 	@IsString()
@@ -107,6 +121,78 @@ class CreateContactDto {
 	@IsOptional()
 	notes?: string;
 
+	@IsArray()
+	@IsOptional()
+	@ValidateNested({ each: true })
+	@Type(() => CustomDateDto)
+	customDates?: CustomDateDto[];
+
+	// Social Media
+	@IsString()
+	@IsOptional()
+	@MaxLength(255)
+	linkedin?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	twitter?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(255)
+	facebook?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	instagram?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(255)
+	xing?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	github?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(255)
+	youtube?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	tiktok?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	telegram?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(50)
+	whatsapp?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(50)
+	signal?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	discord?: string;
+
+	@IsString()
+	@IsOptional()
+	@MaxLength(100)
+	bluesky?: string;
+
 	@IsUUID()
 	@IsOptional()
 	organizationId?: string;
@@ -166,6 +252,16 @@ export class ContactController {
 		const contacts = await this.contactService.findByUserId(user.userId, query);
 		const total = await this.contactService.count(user.userId, query.isArchived);
 		return { contacts, total };
+	}
+
+	/**
+	 * Get all contacts with birthdays (for calendar integration)
+	 * Returns lightweight data: id, displayName, firstName, lastName, birthday, photoUrl
+	 */
+	@Get('birthdays')
+	async getBirthdays(@CurrentUser() user: CurrentUserData) {
+		const contacts = await this.contactService.findWithBirthdays(user.userId);
+		return { contacts };
 	}
 
 	@Get(':id')

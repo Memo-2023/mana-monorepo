@@ -10,13 +10,20 @@ export type ViewMode = ContactView;
 
 const STORAGE_KEY = 'contacts-view-mode';
 
+// Valid view modes
+const VALID_MODES: ViewMode[] = ['grid', 'alphabet', 'network'];
+
+function isValidMode(mode: string | null): mode is ViewMode {
+	return mode !== null && VALID_MODES.includes(mode as ViewMode);
+}
+
 // Get initial mode: current session preference > settings default > 'alphabet'
 function getInitialMode(): ViewMode {
 	if (!browser) return 'alphabet';
 
 	// First check if there's a session-specific preference
 	const sessionMode = sessionStorage.getItem(STORAGE_KEY);
-	if (sessionMode === 'list' || sessionMode === 'grid' || sessionMode === 'alphabet') {
+	if (isValidMode(sessionMode)) {
 		return sessionMode;
 	}
 
@@ -57,7 +64,7 @@ export const viewModeStore = {
 
 		// Check if there's a session preference
 		const sessionMode = sessionStorage.getItem(STORAGE_KEY);
-		if (sessionMode === 'list' || sessionMode === 'grid' || sessionMode === 'alphabet') {
+		if (isValidMode(sessionMode)) {
 			mode = sessionMode;
 		} else {
 			// Use default from settings

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, type Component } from 'svelte';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { contactsStatisticsStore } from '$lib/stores/statistics.svelte';
-	import { tagsApi } from '$lib/api/tags';
+	import { tagsApi } from '$lib/api/contacts';
 	import {
 		StatsGrid,
 		ActivityHeatmap,
@@ -12,7 +12,7 @@
 		StatisticsSkeleton,
 		type StatItem,
 	} from '@manacore/shared-ui';
-	import { BarChart3, Users, Star, UserPlus, Cake, Mail, CheckCircle } from 'lucide-svelte';
+	import { BarChart3, Users, Star, UserPlus, Cake, Mail, CircleCheck } from 'lucide-svelte';
 
 	let loading = $state(true);
 
@@ -22,47 +22,48 @@
 	});
 
 	// Build stats items for StatsGrid
+	// Note: Cast icons to Component to satisfy type requirements
 	let statsItems = $derived<StatItem[]>([
 		{
 			id: 'total',
 			label: 'Gesamt',
 			value: contactsStatisticsStore.totalContacts,
-			icon: Users,
+			icon: Users as unknown as Component,
 			variant: 'primary',
 		},
 		{
 			id: 'favorites',
 			label: 'Favoriten',
 			value: contactsStatisticsStore.favoriteContacts,
-			icon: Star,
+			icon: Star as unknown as Component,
 			variant: 'accent',
 		},
 		{
 			id: 'recentlyAdded',
 			label: 'Neu (7 Tage)',
 			value: contactsStatisticsStore.recentlyAdded,
-			icon: UserPlus,
+			icon: UserPlus as unknown as Component,
 			variant: 'success',
 		},
 		{
 			id: 'birthdays',
 			label: 'Geburtstage',
 			value: contactsStatisticsStore.birthdaysThisMonth,
-			icon: Cake,
+			icon: Cake as unknown as Component,
 			variant: 'info',
 		},
 		{
 			id: 'withEmail',
 			label: 'Mit E-Mail',
 			value: contactsStatisticsStore.contactsWithEmail,
-			icon: Mail,
+			icon: Mail as unknown as Component,
 			variant: 'neutral',
 		},
 		{
 			id: 'completeness',
 			label: 'Vollständigkeit',
 			value: `${contactsStatisticsStore.completenessRate}%`,
-			icon: CheckCircle,
+			icon: CircleCheck as unknown as Component,
 			variant: contactsStatisticsStore.completenessRate >= 70 ? 'success' : 'danger',
 		},
 	]);
@@ -76,8 +77,8 @@
 
 		// Fetch tags
 		try {
-			const tagsResult = await tagsApi.list();
-			contactsStatisticsStore.setTags(tagsResult);
+			const { tags } = await tagsApi.list();
+			contactsStatisticsStore.setTags(tags);
 		} catch (e) {
 			console.error('Failed to load tags:', e);
 		}

@@ -1,132 +1,70 @@
 /**
- * Event Tags API Client - Uses central Tags API from mana-core-auth
+ * Event Tags API Client - Uses Calendar Backend API
  *
- * This module wraps the central Tags API to provide backward-compatible
- * "event tags" interface for the Calendar app. Tags are now unified
- * across all Manacore apps (Todo, Calendar, Contacts).
+ * This module provides the event tags interface for the Calendar app,
+ * using the calendar backend's /event-tags endpoint which supports
+ * tag groups (groupId).
  */
 
-import { browser } from '$app/environment';
-import {
-	createTagsClient,
-	type Tag,
-	type CreateTagInput,
-	type UpdateTagInput,
-} from '@manacore/shared-tags';
-import { authStore } from '$lib/stores/auth.svelte';
+import { fetchApi } from './client';
+import type { EventTag } from '@calendar/shared';
 
-// Re-export Tag as EventTag for backward compatibility
-export type EventTag = Tag;
-export type CreateEventTagInput = CreateTagInput;
-export type UpdateEventTagInput = UpdateTagInput;
+// Re-export EventTag from shared
+export type { EventTag };
 
-// Get auth URL dynamically at runtime
-function getAuthUrl(): string {
-	if (browser && typeof window !== 'undefined') {
-		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
-			.__PUBLIC_MANA_CORE_AUTH_URL__;
-		return injectedUrl || 'http://localhost:3001';
-	}
-	return 'http://localhost:3001';
+export interface CreateEventTagInput {
+	name: string;
+	color?: string;
+	groupId?: string | null;
 }
 
-// Lazy-initialized client
-let _tagsClient: ReturnType<typeof createTagsClient> | null = null;
-
-function getTagsClient() {
-	if (!browser) return null;
-	if (!_tagsClient) {
-		_tagsClient = createTagsClient({
-			authUrl: getAuthUrl(),
-			getToken: async () => {
-				const token = await authStore.getAccessToken();
-				return token || '';
-			},
-		});
-	}
-	return _tagsClient;
+export interface UpdateEventTagInput {
+	name?: string;
+	color?: string;
+	groupId?: string | null;
 }
 
 export async function getEventTags() {
-	const client = getTagsClient();
-	if (!client) return { data: null, error: null };
-	try {
-		const tags = await client.getAll();
-		return { data: tags, error: null };
-	} catch (e) {
-		return {
-			data: null,
-			error: { message: e instanceof Error ? e.message : 'Failed to fetch tags' },
-		};
+	const result = await fetchApi<{ tags: EventTag[] }>('/event-tags');
+	if (result.error || !result.data) {
+		return { data: null, error: result.error };
 	}
+	return { data: result.data.tags, error: null };
 }
 
 export async function getEventTag(id: string) {
-	const client = getTagsClient();
-	if (!client) return { data: null, error: null };
-	try {
-		const tag = await client.getById(id);
-		return { data: tag, error: null };
-	} catch (e) {
-		return {
-			data: null,
-			error: { message: e instanceof Error ? e.message : 'Failed to fetch tag' },
-		};
+	const result = await fetchApi<{ tag: EventTag }>(`/event-tags/${id}`);
+	if (result.error || !result.data) {
+		return { data: null, error: result.error };
 	}
+	return { data: result.data.tag, error: null };
 }
 
 export async function createEventTag(data: CreateEventTagInput) {
-	const client = getTagsClient();
-	if (!client) return { data: null, error: { message: 'Tags client not available' } };
-	try {
-		const tag = await client.create(data);
-		return { data: tag, error: null };
-	} catch (e) {
-		return {
-			data: null,
-			error: { message: e instanceof Error ? e.message : 'Failed to create tag' },
-		};
+	const result = await fetchApi<{ tag: EventTag }>('/event-tags', {
+		method: 'POST',
+		body: data,
+	});
+	if (result.error || !result.data) {
+		return { data: null, error: result.error };
 	}
+	return { data: result.data.tag, error: null };
 }
 
 export async function updateEventTag(id: string, data: UpdateEventTagInput) {
-	const client = getTagsClient();
-	if (!client) return { data: null, error: { message: 'Tags client not available' } };
-	try {
-		const tag = await client.update(id, data);
-		return { data: tag, error: null };
-	} catch (e) {
-		return {
-			data: null,
-			error: { message: e instanceof Error ? e.message : 'Failed to update tag' },
-		};
+	const result = await fetchApi<{ tag: EventTag }>(`/event-tags/${id}`, {
+		method: 'PUT',
+		body: data,
+	});
+	if (result.error || !result.data) {
+		return { data: null, error: result.error };
 	}
+	return { data: result.data.tag, error: null };
 }
 
 export async function deleteEventTag(id: string) {
-	const client = getTagsClient();
-	if (!client) return { data: null, error: { message: 'Tags client not available' } };
-	try {
-		await client.delete(id);
-		return { data: { success: true }, error: null };
-	} catch (e) {
-		return {
-			data: null,
-			error: { message: e instanceof Error ? e.message : 'Failed to delete tag' },
-		};
-	}
-}
-
-export async function createDefaultEventTags() {
-	const client = getTagsClient();
-	if (!client) return { data: null, error: null };
-	try {
-		const tags = await client.createDefaults();
-		return { data: tags, error: null };
-	} catch (e) {
-		return {
-			data: null,
-			error: { message: e instanceof Error ? e.message : 'Failed to create default tags' },
-		};
-	}
+	const result = await fetchApi<{ success: boolean }>(`/event-tags/${id}`, {
+		method: 'DELETE',
+	});
+	return result;
 }

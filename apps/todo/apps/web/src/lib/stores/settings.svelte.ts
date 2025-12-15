@@ -58,6 +58,10 @@ export interface TodoAppSettings {
 	dailyGoal: number | null;
 	/** Show productivity streak */
 	showStreak: boolean;
+
+	// Immersive Mode
+	/** Fullscreen mode - hides all UI elements */
+	immersiveModeEnabled: boolean;
 }
 
 const DEFAULT_SETTINGS: TodoAppSettings = {
@@ -89,6 +93,9 @@ const DEFAULT_SETTINGS: TodoAppSettings = {
 	pomodoroEnabled: false,
 	dailyGoal: null,
 	showStreak: false,
+
+	// Immersive Mode
+	immersiveModeEnabled: false,
 };
 
 const STORAGE_KEY = 'todo-settings';
@@ -196,6 +203,19 @@ export const todoSettings = {
 	},
 	get showStreak() {
 		return settings.showStreak;
+	},
+
+	// Immersive Mode
+	get immersiveModeEnabled() {
+		return settings.immersiveModeEnabled;
+	},
+
+	/**
+	 * Toggle Immersive Mode (fullscreen, hide all UI)
+	 */
+	toggleImmersiveMode() {
+		settings = { ...settings, immersiveModeEnabled: !settings.immersiveModeEnabled };
+		saveSettings(settings);
 	},
 
 	/**

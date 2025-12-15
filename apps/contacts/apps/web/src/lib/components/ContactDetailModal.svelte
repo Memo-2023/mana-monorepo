@@ -5,6 +5,9 @@
 	import ContactNotes from './ContactNotes.svelte';
 	import ContactTasks from './ContactTasks.svelte';
 	import { ContactDetailSkeleton } from '$lib/components/skeletons';
+	import SocialMediaFields from './forms/SocialMediaFields.svelte';
+	import DateFields from './forms/DateFields.svelte';
+	import SocialMediaLinks from './SocialMediaLinks.svelte';
 
 	interface Props {
 		contactId: string;
@@ -35,6 +38,25 @@
 	let postalCode = $state('');
 	let country = $state('');
 	let notes = $state('');
+
+	// Dates
+	let birthday = $state('');
+	let customDates = $state<Array<{ id: string; label: string; date: string }>>([]);
+
+	// Social Media
+	let linkedin = $state('');
+	let twitter = $state('');
+	let facebook = $state('');
+	let instagram = $state('');
+	let xing = $state('');
+	let github = $state('');
+	let youtube = $state('');
+	let tiktok = $state('');
+	let telegram = $state('');
+	let whatsapp = $state('');
+	let signal = $state('');
+	let discord = $state('');
+	let bluesky = $state('');
 
 	const initials = $derived(() => {
 		if (!contact) return '?';
@@ -70,6 +92,23 @@
 		postalCode = contact.postalCode || '';
 		country = contact.country || '';
 		notes = contact.notes || '';
+		// Dates
+		birthday = contact.birthday || '';
+		customDates = contact.customDates ? [...contact.customDates] : [];
+		// Social Media
+		linkedin = contact.linkedin || '';
+		twitter = contact.twitter || '';
+		facebook = contact.facebook || '';
+		instagram = contact.instagram || '';
+		xing = contact.xing || '';
+		github = contact.github || '';
+		youtube = contact.youtube || '';
+		tiktok = contact.tiktok || '';
+		telegram = contact.telegram || '';
+		whatsapp = contact.whatsapp || '';
+		signal = contact.signal || '';
+		discord = contact.discord || '';
+		bluesky = contact.bluesky || '';
 	}
 
 	function getDisplayName() {
@@ -111,6 +150,23 @@
 				postalCode: postalCode || null,
 				country: country || null,
 				notes: notes || null,
+				// Dates
+				birthday: birthday || null,
+				customDates: customDates.filter((d) => d.label && d.date),
+				// Social Media
+				linkedin: linkedin || null,
+				twitter: twitter || null,
+				facebook: facebook || null,
+				instagram: instagram || null,
+				xing: xing || null,
+				github: github || null,
+				youtube: youtube || null,
+				tiktok: tiktok || null,
+				telegram: telegram || null,
+				whatsapp: whatsapp || null,
+				signal: signal || null,
+				discord: discord || null,
+				bluesky: bluesky || null,
 			});
 			editing = false;
 		} catch (e) {
@@ -478,6 +534,26 @@
 							<textarea bind:value={notes} rows="4" class="input textarea"></textarea>
 						</section>
 
+						<!-- Dates Section -->
+						<DateFields bind:birthday bind:customDates />
+
+						<!-- Social Media Section -->
+						<SocialMediaFields
+							bind:linkedin
+							bind:twitter
+							bind:facebook
+							bind:instagram
+							bind:xing
+							bind:github
+							bind:youtube
+							bind:tiktok
+							bind:telegram
+							bind:whatsapp
+							bind:signal
+							bind:discord
+							bind:bluesky
+						/>
+
 						<!-- Action Buttons -->
 						<div class="actions">
 							<button
@@ -819,6 +895,56 @@
 							</section>
 						{/if}
 
+						{#if contact.birthday || (contact.customDates && contact.customDates.length > 0)}
+							<section class="detail-section">
+								<div class="section-header">
+									<div class="section-icon">
+										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+											/>
+										</svg>
+									</div>
+									<h3 class="section-title">Daten</h3>
+								</div>
+								<div class="detail-list">
+									{#if contact.birthday}
+										<div class="detail-item">
+											<div class="detail-content">
+												<span class="detail-label">Geburtstag</span>
+												<span class="detail-value"
+													>{new Date(contact.birthday).toLocaleDateString('de-DE', {
+														day: 'numeric',
+														month: 'long',
+														year: 'numeric',
+													})}</span
+												>
+											</div>
+										</div>
+									{/if}
+									{#if contact.customDates}
+										{#each contact.customDates as customDate}
+											<div class="detail-item">
+												<div class="detail-content">
+													<span class="detail-label">{customDate.label}</span>
+													<span class="detail-value"
+														>{new Date(customDate.date).toLocaleDateString('de-DE', {
+															day: 'numeric',
+															month: 'long',
+															year: 'numeric',
+														})}</span
+													>
+												</div>
+											</div>
+										{/each}
+									{/if}
+								</div>
+							</section>
+						{/if}
+
 						{#if contact.notes}
 							<section class="detail-section">
 								<div class="section-header">
@@ -839,6 +965,8 @@
 								</div>
 							</section>
 						{/if}
+
+						<SocialMediaLinks {contact} />
 
 						<!-- Contact Notes (separate from contact.notes field) -->
 						<ContactNotes {contactId} />

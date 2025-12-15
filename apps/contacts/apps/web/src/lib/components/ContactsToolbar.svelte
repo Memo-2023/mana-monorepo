@@ -1,185 +1,40 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
-	import { goto } from '$app/navigation';
-	import { contactsStore } from '$lib/stores/contacts.svelte';
-	import { viewModeStore, type ViewMode } from '$lib/stores/view-mode.svelte';
-	import {
-		PillToolbar,
-		PillToolbarButton,
-		PillToolbarDivider,
-		PillViewSwitcher,
-	} from '@manacore/shared-ui';
-	import FilterBar, {
-		type ContactFilter,
-		type BirthdayFilter,
-	} from '$lib/components/FilterBar.svelte';
+	import { ExpandableToolbar } from '@manacore/shared-ui';
+	import ContactsToolbarContent from './ContactsToolbarContent.svelte';
+	import { contactsFilterStore } from '$lib/stores/filter.svelte';
+	import { viewModeStore } from '$lib/stores/view-mode.svelte';
 	import type { Contact } from '$lib/api/contacts';
 
-	export type SortField = 'firstName' | 'lastName';
-
 	interface Props {
+		isSidebarMode?: boolean;
 		contacts: Contact[];
-		sortField: SortField;
-		onSortFieldChange: (field: SortField) => void;
-		contactFilter: ContactFilter;
-		onContactFilterChange: (filter: ContactFilter) => void;
-		birthdayFilter: BirthdayFilter;
-		onBirthdayFilterChange: (filter: BirthdayFilter) => void;
-		selectedTagId: string | null;
-		onTagChange: (tagId: string | null) => void;
-		selectedCompany: string | null;
-		onCompanyChange: (company: string | null) => void;
-		/** Selection mode state */
-		selectionMode: boolean;
-		/** Toggle selection mode callback */
-		onToggleSelectionMode: () => void;
 	}
 
-	let {
-		contacts,
-		sortField,
-		onSortFieldChange,
-		contactFilter,
-		onContactFilterChange,
-		birthdayFilter,
-		onBirthdayFilterChange,
-		selectedTagId,
-		onTagChange,
-		selectedCompany,
-		onCompanyChange,
-		selectionMode,
-		onToggleSelectionMode,
-	}: Props = $props();
+	let { isSidebarMode = false, contacts }: Props = $props();
 
-	// Count favorites for quick filter button
-	let favoritesCount = $derived(contactsStore.contacts.filter((c) => c.isFavorite).length);
-	let showFavorites = $derived(contactFilter === 'favorites');
+	// Use store for collapsed state
+	let isCollapsed = $derived(contactsFilterStore.isToolbarCollapsed);
 
-	// Sort options
-	const sortOptions = [
-		{ id: 'firstName', label: $_('sort.firstName'), title: $_('sort.firstName') },
-		{ id: 'lastName', label: $_('sort.lastName'), title: $_('sort.lastName') },
-	];
-
-	// View mode options
-	const viewOptions = [
-		{ id: 'list', label: '', title: $_('views.list'), icon: 'list' },
-		{ id: 'grid', label: '', title: $_('views.grid'), icon: 'grid' },
-		{ id: 'alphabet', label: '', title: $_('views.alphabet'), icon: 'alphabet' },
-	];
-
-	function toggleFavorites() {
-		if (contactFilter === 'favorites') {
-			onContactFilterChange('all');
-		} else {
-			onContactFilterChange('favorites');
-		}
-	}
-
-	function handleSortChange(value: string) {
-		onSortFieldChange(value as SortField);
-	}
-
-	function handleViewModeChange(value: string) {
-		viewModeStore.setMode(value as ViewMode);
+	function handleCollapsedChange(collapsed: boolean) {
+		contactsFilterStore.setToolbarCollapsed(collapsed);
 	}
 </script>
 
-<PillToolbar topOffset="70px">
-	<!-- New Contact Button -->
-	<PillToolbarButton onclick={() => goto('/contacts/new')} title={$_('contacts.new')}>
-		<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-		</svg>
-		<span class="btn-label">{$_('contacts.new')}</span>
-	</PillToolbarButton>
+<!-- Main Expandable Toolbar (uses its own fixed positioning) -->
+<ExpandableToolbar
+	{isCollapsed}
+	onCollapsedChange={handleCollapsedChange}
+	{isSidebarMode}
+	collapsedTitle="Filter & Optionen"
+	expandedTitle="Schließen"
+>
+	<ContactsToolbarContent {contacts} />
+</ExpandableToolbar>
 
-	<PillToolbarDivider />
-
-	<!-- Selection Mode Toggle -->
-	<PillToolbarButton
-		onclick={onToggleSelectionMode}
-		active={selectionMode}
-		title={selectionMode ? 'Auswahl beenden' : 'Mehrere auswählen'}
-	>
-		<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-			/>
-		</svg>
-	</PillToolbarButton>
-
-	<PillToolbarDivider />
-
-	<!-- Favorites Toggle -->
-	<PillToolbarButton
-		onclick={toggleFavorites}
-		active={showFavorites}
-		title={$_('filters.contact.favorites')}
-	>
-		<svg fill={showFavorites ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-			/>
-		</svg>
-		{#if favoritesCount > 0}
-			<span class="count">{favoritesCount}</span>
-		{/if}
-	</PillToolbarButton>
-
-	<PillToolbarDivider />
-
-	<!-- Filter Dropdown -->
-	<FilterBar
-		{contacts}
-		{selectedTagId}
-		{onTagChange}
-		{contactFilter}
-		{onContactFilterChange}
-		{birthdayFilter}
-		{onBirthdayFilterChange}
-		{selectedCompany}
-		{onCompanyChange}
-		embedded={true}
-	/>
-
-	<PillToolbarDivider />
-
-	<!-- Sort Toggle -->
-	<PillViewSwitcher
-		options={sortOptions}
-		value={sortField}
-		onChange={handleSortChange}
-		primaryColor="#6366f1"
-		embedded={true}
-	/>
-
-	<PillToolbarDivider />
-
-	<!-- View Mode -->
-	<div class="view-mode-buttons">
-		<button
-			type="button"
-			class="view-btn"
-			class:active={viewModeStore.mode === 'list'}
-			onclick={() => viewModeStore.setMode('list')}
-			title={$_('views.list')}
-		>
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 6h16M4 12h16M4 18h16"
-				/>
-			</svg>
-		</button>
+<!-- View Mode Pill - positioned to the LEFT of the FAB -->
+{#if !isSidebarMode}
+	<div class="view-mode-pill" class:expanded={!isCollapsed}>
 		<button
 			type="button"
 			class="view-btn"
@@ -212,29 +67,57 @@
 				/>
 			</svg>
 		</button>
+		<button
+			type="button"
+			class="view-btn"
+			class:active={viewModeStore.mode === 'network'}
+			onclick={() => viewModeStore.setMode('network')}
+			title={$_('views.network')}
+		>
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+				/>
+			</svg>
+		</button>
 	</div>
-</PillToolbar>
+{/if}
 
 <style>
-	.btn-label {
-		display: none;
-	}
-
-	@media (min-width: 640px) {
-		.btn-label {
-			display: inline;
-		}
-	}
-
-	.count {
-		font-size: 0.75rem;
-		font-weight: 600;
-	}
-
-	.view-mode-buttons {
+	/* View Mode Pill - positioned to the LEFT of the FAB (which is at right: calc(50% - 350px - 70px)) */
+	.view-mode-pill {
+		position: fixed;
+		/* Same vertical alignment as FAB: bottom offset + 9px + safe-area */
+		bottom: calc(70px + 9px + env(safe-area-inset-bottom, 0px));
+		/* Position to the left of the FAB: FAB is at right: calc(50% - 350px - 70px), FAB width is 54px, gap is 8px */
+		right: calc(50% - 350px - 70px + 54px + 8px);
+		z-index: 91;
 		display: flex;
 		align-items: center;
 		gap: 0.125rem;
+		padding: 0.375rem;
+		background: hsl(var(--color-surface) / 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 9999px;
+		box-shadow: 0 2px 8px hsl(var(--color-foreground) / 0.08);
+		transition: bottom 0.2s ease;
+	}
+
+	/* When toolbar is expanded, move pill up with FAB */
+	.view-mode-pill.expanded {
+		bottom: calc(70px + 70px + 9px + env(safe-area-inset-bottom, 0px));
+	}
+
+	/* Responsive - on smaller screens, position relative to viewport edge */
+	@media (max-width: 900px) {
+		.view-mode-pill {
+			right: calc(1rem + 54px + 8px); /* FAB at right: 1rem, FAB width 54px, gap 8px */
+		}
 	}
 
 	.view-btn {
@@ -246,29 +129,22 @@
 		border: none;
 		border-radius: 9999px;
 		cursor: pointer;
-		color: #374151;
+		color: hsl(var(--color-muted-foreground));
 		transition: all 0.15s ease;
 	}
 
-	:global(.dark) .view-btn {
-		color: #f3f4f6;
-	}
-
 	.view-btn:hover {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .view-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
+		background: hsl(var(--color-muted) / 0.5);
+		color: hsl(var(--color-foreground));
 	}
 
 	.view-btn.active {
-		background: color-mix(in srgb, #6366f1 15%, transparent 85%);
-		color: #6366f1;
+		background: color-mix(in srgb, #3b82f6 15%, transparent 85%);
+		color: #3b82f6;
 	}
 
 	.view-btn :global(svg) {
-		width: 1rem;
-		height: 1rem;
+		width: 1.125rem;
+		height: 1.125rem;
 	}
 </style>

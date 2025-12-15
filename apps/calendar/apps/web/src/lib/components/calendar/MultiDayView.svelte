@@ -5,6 +5,19 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
+	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
+	import {
+		useVisibleHours,
+		useCurrentTimeIndicator,
+	} from '$lib/composables/useVisibleHours.svelte';
+	import { toDate } from '$lib/utils/eventDateHelpers';
+	import { HOUR_HEIGHT_PX, SNAP_INTERVAL_MINUTES } from '$lib/utils/calendarConstants';
+	import {
+		getVisibleTimedEvents,
+		getVisibleAllDayEvents,
+		getVisibleOverflowEvents,
+		type OverflowEvents,
+	} from '$lib/utils/eventFiltering';
 	import TaskBlock from './TaskBlock.svelte';
 	import { goto } from '$app/navigation';
 	import {
@@ -12,7 +25,6 @@
 		eachDayOfInterval,
 		isToday,
 		isSameDay,
-		parseISO,
 		differenceInMinutes,
 		isWeekend,
 		addMinutes,
@@ -22,20 +34,40 @@
 	import { de, enUS, fr, es, it } from 'date-fns/locale';
 	import { locale } from 'svelte-i18n';
 
-	// Constants
-	const HOUR_HEIGHT = 60; // px - should match CSS --hour-height
-	const MINUTES_PER_SLOT = 15; // Snap to 15-minute intervals
+	// Use shared constants
+	const HOUR_HEIGHT = HOUR_HEIGHT_PX;
+	const MINUTES_PER_SLOT = SNAP_INTERVAL_MINUTES;
 
 	import type { CalendarEvent } from '@calendar/shared';
 
 	// Props
 	interface Props {
-		dayCount: 5 | 10 | 14;
+		dayCount: number;
+		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
+		date?: Date;
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
 		onEventClick?: (event: CalendarEvent) => void;
 		onTaskClick?: (task: Task) => void;
 	}
-	let { dayCount, onQuickCreate, onEventClick, onTaskClick }: Props = $props();
+	let { dayCount, date, onQuickCreate, onEventClick, onTaskClick }: Props = $props();
+
+	// Use provided date or fall back to viewStore
+	let effectiveDate = $derived(date ?? viewStore.currentDate);
+
+	// Calculate view range based on effective date
+	let effectiveViewRange = $derived.by(() => {
+		if (date) {
+			// Calculate range for the provided date based on day count
+			const end = new Date(date);
+			end.setDate(end.getDate() + dayCount - 1);
+			return {
+				start: date,
+				end: end,
+			};
+		}
+		// Use viewStore range when no date override
+		return viewStore.viewRange;
+	});
 
 	// Get date-fns locale based on current app locale
 	const dateLocales = { de, en: enUS, fr, es, it };
@@ -46,8 +78,8 @@
 	// Generate days based on view range, optionally filtering weekends
 	let allDays = $derived(
 		eachDayOfInterval({
-			start: viewStore.viewRange.start,
-			end: viewStore.viewRange.end,
+			start: effectiveViewRange.start,
+			end: effectiveViewRange.end,
 		})
 	);
 
@@ -55,47 +87,26 @@
 		settingsStore.showOnlyWeekdays ? allDays.filter((day) => !isWeekend(day)) : allDays
 	);
 
-	// Generate hours (filtered based on settings)
-	let allHours = Array.from({ length: 24 }, (_, i) => i);
-	let hours = $derived(
-		settingsStore.filterHoursEnabled
-			? allHours.filter((h) => h >= settingsStore.dayStartHour && h < settingsStore.dayEndHour)
-			: allHours
-	);
+	// Use composables for hour filtering and time indicator
+	const visibleHours = useVisibleHours();
+	const timeIndicator = useCurrentTimeIndicator();
 
-	// Calculate visible hours range for positioning
-	let firstVisibleHour = $derived(
-		settingsStore.filterHoursEnabled ? settingsStore.dayStartHour : 0
-	);
-	let lastVisibleHour = $derived(settingsStore.filterHoursEnabled ? settingsStore.dayEndHour : 24);
-	let totalVisibleHours = $derived(lastVisibleHour - firstVisibleHour);
-
-	// Helper to convert minutes to percentage position (accounting for hidden hours)
-	function minutesToPercent(minutes: number): number {
-		const adjustedMinutes = minutes - firstVisibleHour * 60;
-		return (adjustedMinutes / (totalVisibleHours * 60)) * 100;
-	}
+	// Destructure for convenience (these are reactive getters)
+	let hours = $derived(visibleHours.hours);
+	let firstVisibleHour = $derived(visibleHours.firstVisibleHour);
+	let lastVisibleHour = $derived(visibleHours.lastVisibleHour);
+	let totalVisibleHours = $derived(visibleHours.totalVisibleHours);
+	const minutesToPercent = visibleHours.minutesToPercent;
 
 	// Current time indicator position
-	let now = $state(new Date());
-	let currentTimePosition = $derived.by(() => {
-		const minutes = now.getHours() * 60 + now.getMinutes();
-		return minutesToPercent(minutes);
-	});
-
-	// Update current time every minute
-	$effect(() => {
-		const interval = setInterval(() => {
-			now = new Date();
-		}, 60000);
-		return () => clearInterval(interval);
-	});
+	let currentTimePosition = $derived(minutesToPercent(timeIndicator.currentMinutes));
 
 	// Determine column width based on day count
 	let columnClass = $derived.by(() => {
 		if (days.length <= 5) return 'normal';
 		if (days.length <= 10) return 'compact';
-		return 'very-compact';
+		if (days.length <= 14) return 'very-compact';
+		return 'ultra-compact';
 	});
 
 	// ========== Drag & Drop State ==========
@@ -114,6 +125,7 @@
 	let resizeOriginalEnd = $state<Date | null>(null);
 	let resizePreviewTop = $state(0);
 	let resizePreviewHeight = $state(0);
+	let resizeOffsetMinutes = $state(0);
 
 	// Track if we actually moved during drag/resize (to prevent click on simple mousedown/up)
 	let hasMoved = $state(false);
@@ -135,66 +147,35 @@
 	// Reference to the days container for position calculations
 	let daysContainerEl: HTMLDivElement;
 
-	function getEventsForDay(day: Date) {
-		const allEvents = eventsStore.getEventsForDay(day).filter((e) => !e.isAllDay);
-
-		// If hour filtering is enabled, only show events that overlap with visible range
-		if (settingsStore.filterHoursEnabled) {
-			const visibleStartMinutes = settingsStore.dayStartHour * 60;
-			const visibleEndMinutes = settingsStore.dayEndHour * 60;
-
-			return allEvents.filter((event) => {
-				const start =
-					typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-				const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
-
-				const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
-				const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
-
-				// Event overlaps with visible range
-				return eventStartMinutes < visibleEndMinutes && eventEndMinutes > visibleStartMinutes;
-			});
-		}
-
-		return allEvents;
+	function getEventsForDay(day: Date): CalendarEvent[] {
+		return getVisibleTimedEvents(
+			eventsStore.getEventsForDay(day),
+			calendarsStore.visibleCalendars,
+			{
+				filterHoursEnabled: settingsStore.filterHoursEnabled,
+				dayStartHour: settingsStore.dayStartHour,
+				dayEndHour: settingsStore.dayEndHour,
+			}
+		);
 	}
 
-	// Get events that are completely outside the visible time range
-	function getOverflowEventsForDay(day: Date): { before: CalendarEvent[]; after: CalendarEvent[] } {
+	function getOverflowEventsForDay(day: Date): OverflowEvents {
 		if (!settingsStore.filterHoursEnabled) {
 			return { before: [], after: [] };
 		}
-
-		const allEvents = eventsStore.getEventsForDay(day).filter((e) => !e.isAllDay);
-		const before: CalendarEvent[] = [];
-		const after: CalendarEvent[] = [];
-
-		const visibleStartMinutes = settingsStore.dayStartHour * 60;
-		const visibleEndMinutes = settingsStore.dayEndHour * 60;
-
-		for (const event of allEvents) {
-			const start =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-			const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
-
-			const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
-			const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
-
-			// Event ends before visible range starts
-			if (eventEndMinutes <= visibleStartMinutes) {
-				before.push(event);
-			}
-			// Event starts after visible range ends
-			else if (eventStartMinutes >= visibleEndMinutes) {
-				after.push(event);
-			}
-		}
-
-		return { before, after };
+		return getVisibleOverflowEvents(
+			eventsStore.getEventsForDay(day),
+			calendarsStore.visibleCalendars,
+			settingsStore.dayStartHour,
+			settingsStore.dayEndHour
+		);
 	}
 
-	function getAllDayEventsForDay(day: Date) {
-		return eventsStore.getEventsForDay(day).filter((e) => e.isAllDay);
+	function getAllDayEventsForDay(day: Date): CalendarEvent[] {
+		return getVisibleAllDayEvents(
+			eventsStore.getEventsForDay(day),
+			calendarsStore.visibleCalendars
+		);
 	}
 
 	// Get display mode for an event (per-event override takes precedence over global setting)
@@ -220,8 +201,8 @@
 	);
 
 	function getEventStyle(event: CalendarEvent) {
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
 		const duration = differenceInMinutes(end, start);
@@ -264,8 +245,7 @@
 	}
 
 	function formatEventTime(date: Date | string): string {
-		const d = typeof date === 'string' ? parseISO(date) : date;
-		return settingsStore.formatTime(d);
+		return settingsStore.formatTime(toDate(date));
 	}
 
 	function handleEventClick(event: CalendarEvent, e: MouseEvent) {
@@ -297,6 +277,14 @@
 		} else {
 			goto(`/event/new?start=${startTime.toISOString()}`);
 		}
+	}
+
+	function handleEventContextMenu(event: CalendarEvent, e: MouseEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+		// Don't show context menu for draft events
+		if (eventsStore.isDraftEvent(event.id)) return;
+		eventContextMenuStore.show(event, e.clientX, e.clientY);
 	}
 
 	// ========== Drag & Drop Functions ==========
@@ -337,8 +325,8 @@
 		draggedEvent = event;
 		hasMoved = false;
 
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 		const duration = differenceInMinutes(end, start);
 
 		// Calculate initial preview position
@@ -388,14 +376,8 @@
 			return;
 		}
 
-		const start =
-			typeof draggedEvent.startTime === 'string'
-				? parseISO(draggedEvent.startTime)
-				: draggedEvent.startTime;
-		const end =
-			typeof draggedEvent.endTime === 'string'
-				? parseISO(draggedEvent.endTime)
-				: draggedEvent.endTime;
+		const start = toDate(draggedEvent.startTime);
+		const end = toDate(draggedEvent.endTime);
 		const duration = differenceInMinutes(end, start);
 
 		// Calculate new start time
@@ -441,17 +423,26 @@
 		resizeEdge = edge;
 		hasMoved = false;
 
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 
 		resizeOriginalStart = start;
 		resizeOriginalEnd = end;
 
 		// Set initial preview
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
+		const endMinutes = end.getHours() * 60 + end.getMinutes();
 		const duration = differenceInMinutes(end, start);
 		resizePreviewTop = minutesToPercent(startMinutes);
 		resizePreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
+
+		// Calculate offset between snapped click position and actual event boundary
+		const clickMinutes = getMinutesFromY(e.clientY);
+		if (edge === 'top') {
+			resizeOffsetMinutes = clickMinutes - startMinutes;
+		} else {
+			resizeOffsetMinutes = clickMinutes - endMinutes;
+		}
 
 		document.addEventListener('pointermove', handleResizeMove);
 		document.addEventListener('pointerup', handleResizeEnd);
@@ -462,6 +453,8 @@
 
 		hasMoved = true;
 		const currentMinutes = getMinutesFromY(e.clientY);
+		// Apply offset to prevent jumping when drag starts
+		const adjustedMinutes = currentMinutes - resizeOffsetMinutes;
 		const originalStartMinutes =
 			resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
 		const originalEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
@@ -470,7 +463,7 @@
 			// Resize from bottom - change end time
 			const newEndMinutes = Math.max(
 				originalStartMinutes + 15,
-				Math.min(lastVisibleHour * 60, currentMinutes)
+				Math.min(lastVisibleHour * 60, adjustedMinutes)
 			);
 			const newDuration = newEndMinutes - originalStartMinutes;
 			resizePreviewHeight = (newDuration / (totalVisibleHours * 60)) * 100;
@@ -478,7 +471,7 @@
 			// Resize from top - change start time
 			const newStartMinutes = Math.max(
 				firstVisibleHour * 60,
-				Math.min(originalEndMinutes - 15, currentMinutes)
+				Math.min(originalEndMinutes - 15, adjustedMinutes)
 			);
 			const newDuration = originalEndMinutes - newStartMinutes;
 			resizePreviewTop = minutesToPercent(newStartMinutes);
@@ -495,11 +488,14 @@
 			resizeEvent = null;
 			resizeOriginalStart = null;
 			resizeOriginalEnd = null;
+			resizeOffsetMinutes = 0;
 			hasMoved = false;
 			return;
 		}
 
 		const currentMinutes = getMinutesFromY(e.clientY);
+		// Apply offset to prevent jumping
+		const adjustedMinutes = currentMinutes - resizeOffsetMinutes;
 		const originalStartMinutes =
 			resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
 		const originalEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
@@ -510,7 +506,7 @@
 		if (resizeEdge === 'bottom') {
 			const newEndMinutes = Math.max(
 				originalStartMinutes + 15,
-				Math.min(lastVisibleHour * 60, currentMinutes)
+				Math.min(lastVisibleHour * 60, adjustedMinutes)
 			);
 			const newHours = Math.floor(newEndMinutes / 60);
 			const newMins = newEndMinutes % 60;
@@ -519,7 +515,7 @@
 		} else {
 			const newStartMinutes = Math.max(
 				firstVisibleHour * 60,
-				Math.min(originalEndMinutes - 15, currentMinutes)
+				Math.min(originalEndMinutes - 15, adjustedMinutes)
 			);
 			const newHours = Math.floor(newStartMinutes / 60);
 			const newMins = newStartMinutes % 60;
@@ -545,6 +541,7 @@
 		resizeEvent = null;
 		resizeOriginalStart = null;
 		resizeOriginalEnd = null;
+		resizeOffsetMinutes = 0;
 		hasMoved = false;
 	}
 
@@ -807,6 +804,7 @@
 			resizeEvent = null;
 			resizeOriginalStart = null;
 			resizeOriginalEnd = null;
+			resizeOffsetMinutes = 0;
 			isTaskDragging = false;
 			draggedTask = null;
 			taskDragTargetDay = null;
@@ -826,41 +824,45 @@
 	class="multi-day-view"
 	class:compact={columnClass === 'compact'}
 	class:very-compact={columnClass === 'very-compact'}
+	class:ultra-compact={columnClass === 'ultra-compact'}
 >
-	<!-- All-day events row (only shown when there are header-mode all-day events) -->
-	{#if hasAnyHeaderAllDayEvents}
-		<div class="all-day-row">
+	<!-- Sticky header container -->
+	<div class="sticky-header">
+		<!-- Day headers -->
+		<div class="day-headers">
 			<div class="time-gutter"></div>
 			{#each days as day}
-				<div class="all-day-cell">
-					{#each getHeaderAllDayEventsForDay(day) as event}
-						<button
-							class="all-day-event"
-							class:search-highlighted={searchStore.isEventHighlighted(event.id)}
-							class:search-dimmed={searchStore.isEventDimmed(event.id)}
-							style="background-color: {calendarsStore.getColor(event.calendarId)}"
-							onclick={(e) => handleEventClick(event, e)}
-							title={event.title}
-						>
-							{event.title}
-						</button>
-					{/each}
+				<div class="day-header" class:today={isToday(day)}>
+					<span class="day-name"
+						>{format(day, columnClass === 'very-compact' ? 'EEEEE' : 'EEE', { locale: de })}</span
+					>
+					<span class="day-number" class:today={isToday(day)}>{format(day, 'd')}</span>
 				</div>
 			{/each}
 		</div>
-	{/if}
 
-	<!-- Day headers -->
-	<div class="day-headers">
-		<div class="time-gutter"></div>
-		{#each days as day}
-			<div class="day-header" class:today={isToday(day)}>
-				<span class="day-name"
-					>{format(day, columnClass === 'very-compact' ? 'EEEEE' : 'EEE', { locale: de })}</span
-				>
-				<span class="day-number" class:today={isToday(day)}>{format(day, 'd')}</span>
+		<!-- All-day events row (only shown when there are header-mode all-day events) -->
+		{#if hasAnyHeaderAllDayEvents}
+			<div class="all-day-row">
+				<div class="time-gutter"></div>
+				{#each days as day}
+					<div class="all-day-cell">
+						{#each getHeaderAllDayEventsForDay(day) as event}
+							<button
+								class="all-day-event"
+								class:search-highlighted={searchStore.isEventHighlighted(event.id)}
+								class:search-dimmed={searchStore.isEventDimmed(event.id)}
+								style="background-color: {calendarsStore.getColor(event.calendarId)}"
+								onclick={(e) => handleEventClick(event, e)}
+								title={event.title}
+							>
+								{event.title}
+							</button>
+						{/each}
+					</div>
+				{/each}
 			</div>
-		{/each}
+		{/if}
 	</div>
 
 	<!-- Time grid -->
@@ -935,6 +937,7 @@
 							tabindex="0"
 							onpointerdown={(e) => startDrag(event, e)}
 							onclick={(e) => !isDraft && handleEventClick(event, e)}
+							oncontextmenu={(e) => handleEventContextMenu(event, e)}
 							onkeydown={(e) => !isDraft && e.key === 'Enter' && goto(`/?event=${event.id}`)}
 							title={`${formatEventTime(event.startTime)} - ${formatEventTime(event.endTime)}: ${event.title || (isDraft ? '(Neuer Termin)' : '')}`}
 						>
@@ -1063,6 +1066,13 @@
 		flex-direction: column;
 	}
 
+	.sticky-header {
+		position: sticky;
+		top: 0;
+		z-index: 10;
+		background: hsl(var(--color-background));
+	}
+
 	.all-day-row {
 		display: flex;
 		border-bottom: 1px solid hsl(var(--color-border));
@@ -1080,6 +1090,7 @@
 	}
 
 	.all-day-event {
+		width: 100%;
 		padding: 2px 6px;
 		font-size: 0.75rem;
 		color: white;
@@ -1089,8 +1100,8 @@
 		text-overflow: ellipsis;
 		border: none;
 		cursor: pointer;
-		max-width: 100%;
 		transition: opacity 0.15s ease;
+		text-align: left;
 	}
 
 	.all-day-event.search-highlighted {
@@ -1249,7 +1260,7 @@
 		font-size: 0.75rem;
 		color: hsl(var(--color-muted-foreground));
 		position: relative;
-		top: -0.5em;
+		top: 0.25em;
 	}
 
 	.compact .time-label,
@@ -1517,5 +1528,62 @@
 	.compact .overflow-line:hover,
 	.very-compact .overflow-line:hover {
 		height: 4px;
+	}
+
+	/* Ultra-compact mode for 14+ days */
+	.ultra-compact .day-header {
+		padding: 0.0625rem;
+	}
+
+	.ultra-compact .day-name {
+		font-size: 0.55rem;
+	}
+
+	.ultra-compact .day-number {
+		font-size: 0.75rem;
+		width: 20px;
+		height: 20px;
+	}
+
+	.ultra-compact .time-label {
+		font-size: 0.55rem;
+		padding-right: 0.125rem;
+	}
+
+	.ultra-compact .event-card {
+		left: 0;
+		right: 0;
+		padding: 0 1px;
+	}
+
+	.ultra-compact .event-title {
+		font-size: 0.5rem;
+	}
+
+	.ultra-compact .all-day-event {
+		padding: 1px 2px;
+		font-size: 0.55rem;
+	}
+
+	.ultra-compact .all-day-block-event {
+		left: 0;
+		right: 0;
+		padding: 1px 2px;
+	}
+
+	.ultra-compact .all-day-block-event .event-title {
+		font-size: 0.5rem;
+	}
+
+	.ultra-compact .resize-handle {
+		height: 4px;
+	}
+
+	.ultra-compact .overflow-line {
+		height: 1px;
+	}
+
+	.ultra-compact .overflow-line:hover {
+		height: 3px;
 	}
 </style>

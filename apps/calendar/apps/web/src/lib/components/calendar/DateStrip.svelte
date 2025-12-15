@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
+	import { settingsStore } from '$lib/stores/settings.svelte';
+	import DateStripContextMenu from './DateStripContextMenu.svelte';
 	import {
 		format,
 		isToday,
@@ -9,16 +11,28 @@
 		subDays,
 		startOfDay,
 		isWithinInterval,
+		getWeek,
+		startOfWeek,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { onMount, tick } from 'svelte';
 	import SunCalc from 'suncalc';
 
-	interface Props {
-		isSidebarMode?: boolean;
+	// Context menu reference
+	let contextMenu: DateStripContextMenu;
+
+	function handleContextMenu(e: MouseEvent) {
+		e.preventDefault();
+		contextMenu?.show(e.clientX, e.clientY);
 	}
 
-	let { isSidebarMode = false }: Props = $props();
+	interface Props {
+		isSidebarMode?: boolean;
+		isToolbarExpanded?: boolean;
+		hasTagStrip?: boolean; // Whether TagStrip is visible below
+	}
+
+	let { isSidebarMode = false, isToolbarExpanded = false, hasTagStrip = false }: Props = $props();
 
 	// Get event count for a day (max 5 dots displayed)
 	function getEventCount(date: Date): number {
@@ -61,6 +75,17 @@
 		return { significant: false, emoji: '' };
 	}
 
+	// Check if a date is the first day of the week (respects weekStartsOn setting)
+	function isFirstDayOfWeek(date: Date): boolean {
+		const weekStart = startOfWeek(date, { weekStartsOn: settingsStore.weekStartsOn });
+		return isSameDay(date, weekStart);
+	}
+
+	// Get week number for a date
+	function getWeekNumber(date: Date): number {
+		return getWeek(date, { weekStartsOn: settingsStore.weekStartsOn });
+	}
+
 	// Reactive view range - needed to trigger re-renders
 	let viewRange = $derived(viewStore.viewRange);
 	let currentDate = $derived(viewStore.currentDate);
@@ -98,7 +123,7 @@
 		}
 	});
 
-	async function scrollToDate(date: Date) {
+	async function scrollToDate(date: Date, instant = false) {
 		await tick();
 
 		const targetDate = startOfDay(date);
@@ -115,7 +140,7 @@
 		);
 		if (dayElement) {
 			dayElement.scrollIntoView({
-				behavior: 'smooth',
+				behavior: instant ? 'instant' : 'smooth',
 				inline: 'center',
 				block: 'nearest',
 			});
@@ -185,7 +210,7 @@
 		}
 	}
 
-	// Get the month of the center visible day
+	// Get the month of the center visible day (initial: today)
 	let visibleMonth = $state(format(new Date(), 'MMMM yyyy', { locale: de }));
 
 	function updateVisibleMonth() {
@@ -209,20 +234,35 @@
 		}
 	}
 
-	onMount(() => {
-		scrollToDate(viewStore.currentDate);
+	onMount(async () => {
+		// Always scroll to today on mount, then update the visible month
+		const today = new Date();
+		await scrollToDate(today, true);
+		updateVisibleMonth();
+		checkTodayVisibility();
 	});
 </script>
 
-<div class="date-strip-wrapper" class:sidebar-mode={isSidebarMode}>
-	{#if !isTodayVisible}
-		<button onclick={goToToday} title="Zum heutigen Tag" class="today-button"> Heute </button>
-	{/if}
-
-	<div class="date-strip-container">
+<div
+	class="date-strip-wrapper"
+	class:sidebar-mode={isSidebarMode}
+	class:toolbar-expanded={isToolbarExpanded}
+	class:compact={settingsStore.dateStripCompact}
+	class:has-tag-strip={hasTagStrip}
+>
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="date-strip-container" oncontextmenu={handleContextMenu}>
 		<!-- Month label -->
 		<div class="month-header">
-			<span class="month-label">{visibleMonth}</span>
+			<span class="month-label">
+				{#if !isTodayVisible}
+					<button onclick={goToToday} title="Zum heutigen Tag" class="today-button">
+						<span class="today-label">Heute</span>
+						<span class="today-date">{format(new Date(), 'd. MMM', { locale: de })}</span>
+					</button>
+				{/if}
+				{visibleMonth}
+			</span>
 		</div>
 
 		<!-- Days row -->
@@ -237,12 +277,16 @@
 				{@const isFirstOfMonth = day.getDate() === 1}
 				{@const moonPhase = isSignificantMoonPhase(day)}
 				{@const eventCount = getEventCount(day)}
+				{@const showWeekNumber = settingsStore.dateStripShowWeekNumbers && isFirstDayOfWeek(day)}
 				{#if isFirstOfMonth}
-					<div class="month-divider"></div>
+					<div
+						class="month-divider"
+						class:show-line={settingsStore.dateStripShowMonthDividers}
+					></div>
 				{/if}
 				<button
 					class="day-item"
-					class:weekend={dayIsWeekend}
+					class:weekend={dayIsWeekend && settingsStore.dateStripHighlightWeekends}
 					class:selected={dayIsSelected && !dayIsToday}
 					class:in-range={dayInRange && !dayIsToday}
 					class:range-start={dayIsRangeStart && !dayIsToday}
@@ -250,23 +294,22 @@
 					data-date={format(day, 'yyyy-MM-dd')}
 					data-is-today={dayIsToday}
 					onclick={() => handleDayClick(day)}
-					style={dayIsToday
-						? 'background: #3b82f6; color: white; border-radius: 10px; font-weight: 700; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);'
-						: ''}
+					class:is-today={dayIsToday}
 				>
-					{#if moonPhase.significant}
+					{#if showWeekNumber}
+						<span class="week-number-label">KW {getWeekNumber(day)}</span>
+					{/if}
+					{#if moonPhase.significant && settingsStore.dateStripShowMoonPhases}
 						<span class="moon-indicator">{moonPhase.emoji}</span>
 					{/if}
-					<span class="day-weekday" style={dayIsToday ? 'opacity: 1; color: white;' : ''}
-						>{format(day, 'EE', { locale: de })}</span
-					>
-					<span class="day-number" style={dayIsToday ? 'color: white;' : ''}
-						>{format(day, 'd')}</span
-					>
-					{#if eventCount > 0}
-						<div class="event-dots" style={dayIsToday ? 'opacity: 0.9;' : ''}>
+					{#if settingsStore.dateStripShowWeekday}
+						<span class="day-weekday">{format(day, 'EE', { locale: de })}</span>
+					{/if}
+					<span class="day-number">{format(day, 'd')}</span>
+					{#if eventCount > 0 && settingsStore.dateStripShowEventIndicators}
+						<div class="event-dots">
 							{#each Array(eventCount) as _, i}
-								<span class="event-dot" style={dayIsToday ? 'background: white;' : ''}></span>
+								<span class="event-dot"></span>
 							{/each}
 						</div>
 					{/if}
@@ -276,45 +319,93 @@
 	</div>
 </div>
 
+<DateStripContextMenu bind:this={contextMenu} />
+
 <style>
 	.date-strip-wrapper {
 		position: fixed;
-		bottom: calc(200px + env(safe-area-inset-bottom, 0px)); /* Above InputBar */
+		bottom: calc(140px + env(safe-area-inset-bottom, 0px)); /* Above InputBar + PillNav */
 		left: 0;
 		right: 0;
 		z-index: 48;
 		display: flex;
 		flex-direction: column;
-		align-items: center;
+		align-items: stretch;
 		pointer-events: none;
-		transition: bottom 0.3s ease;
+		transition: bottom 0.2s ease;
 	}
 
-	/* When PillNav is in sidebar mode, no PillNav/Toolbar at bottom - just InputBar */
+	/* When toolbar is expanded, push DateStrip up */
+	.date-strip-wrapper.toolbar-expanded {
+		bottom: calc(210px + env(safe-area-inset-bottom, 0px)); /* Extra space for toolbar */
+	}
+
+	/* When PillNav is in sidebar mode, no PillNav at bottom - just InputBar */
 	.date-strip-wrapper.sidebar-mode {
 		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
 	}
 
+	.date-strip-wrapper.sidebar-mode.toolbar-expanded {
+		bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+	}
+
+	/* When TagStrip is visible below, add extra offset */
+	.date-strip-wrapper.has-tag-strip {
+		bottom: calc(210px + env(safe-area-inset-bottom, 0px)); /* +70px for TagStrip */
+	}
+
+	.date-strip-wrapper.has-tag-strip.toolbar-expanded {
+		bottom: calc(280px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.date-strip-wrapper.has-tag-strip.sidebar-mode {
+		bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.date-strip-wrapper.has-tag-strip.sidebar-mode.toolbar-expanded {
+		bottom: calc(210px + env(safe-area-inset-bottom, 0px));
+	}
+
 	.today-button {
-		padding: 0.25rem 0.75rem;
-		background: transparent;
-		border: 1px solid #d1d5db;
+		position: absolute;
+		right: 100%;
+		top: 50%;
+		transform: translateY(-50%);
+		margin-right: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 0.375rem 0.875rem;
+		background: hsl(var(--color-surface) / 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 9999px;
 		cursor: pointer;
-		color: #9ca3af;
-		font-size: 0.6875rem;
-		font-weight: 600;
-		margin-bottom: 0.375rem;
+		color: hsl(var(--color-primary));
 		pointer-events: auto;
 		transition: all 0.2s ease;
+		box-shadow: 0 2px 8px hsl(var(--color-foreground) / 0.08);
 	}
 
 	.today-button:hover {
-		background: rgba(59, 130, 246, 0.1);
-		border-color: #3b82f6;
-		color: #3b82f6;
-		transform: translateY(-1px);
-		box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+		background: hsl(var(--color-surface) / 0.95);
+		border-color: hsl(var(--color-primary) / 0.3);
+		transform: translateY(-50%) scale(1.02);
+		box-shadow: 0 4px 12px hsl(var(--color-foreground) / 0.12);
+	}
+
+	.today-label {
+		font-size: 0.6875rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.025em;
+	}
+
+	.today-date {
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.date-strip-container {
@@ -322,12 +413,12 @@
 		flex-direction: column;
 		background: var(--color-surface, #ffffff);
 		border-radius: 16px;
-		margin: 0 1rem;
-		padding: 0.5rem;
+		margin: 0;
+		padding: 0.5rem 0;
 		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 		border: 1px solid var(--color-border, #e5e7eb);
 		pointer-events: auto;
-		max-width: calc(100vw - 2rem);
+		width: 100%;
 		overflow: hidden;
 	}
 
@@ -340,18 +431,25 @@
 	}
 
 	.month-label {
+		position: relative;
 		font-size: 1.125rem;
 		font-weight: 600;
 		color: var(--color-foreground, #1f2937);
 		white-space: nowrap;
+		min-width: 150px;
+		text-align: center;
 	}
 
 	.month-divider {
 		width: 1px;
 		height: 40px;
-		background: var(--color-border, #e5e7eb);
+		background: transparent;
 		margin: 0 0.5rem;
 		flex-shrink: 0;
+	}
+
+	.month-divider.show-line {
+		background: hsl(var(--color-border));
 	}
 
 	.days-scroll {
@@ -363,8 +461,16 @@
 		scrollbar-width: none;
 		-ms-overflow-style: none;
 		scroll-behavior: auto;
-		padding: 1.25rem 0.25rem 0.25rem;
+		padding: 1.25rem 1rem 0.25rem;
 		margin-top: -1rem;
+		mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+		-webkit-mask-image: linear-gradient(
+			to right,
+			transparent 0%,
+			black 8%,
+			black 92%,
+			transparent 100%
+		);
 	}
 
 	.days-scroll::-webkit-scrollbar {
@@ -398,6 +504,20 @@
 		line-height: 1;
 	}
 
+	.week-number-label {
+		position: absolute;
+		top: -14px;
+		left: 50%;
+		transform: translateX(-50%);
+		font-size: 0.5625rem;
+		font-weight: 600;
+		color: hsl(var(--color-muted-foreground));
+		white-space: nowrap;
+		pointer-events: none;
+		text-transform: uppercase;
+		letter-spacing: 0.02em;
+	}
+
 	.event-dots {
 		display: flex;
 		gap: 2px;
@@ -409,7 +529,7 @@
 		width: 4px;
 		height: 4px;
 		border-radius: 50%;
-		background: #3b82f6;
+		background: hsl(var(--color-primary));
 		opacity: 0.7;
 	}
 
@@ -418,18 +538,34 @@
 	}
 
 	.day-item.weekend {
-		color: var(--color-muted-foreground, #6b7280);
+		background: transparent;
+		border: 1px solid hsl(var(--color-border));
+	}
+
+	.day-item.weekend:hover {
+		background: hsl(var(--color-muted) / 0.3);
+		border-color: hsl(var(--color-muted-foreground) / 0.5);
+	}
+
+	/* Weekend + in-range combination */
+	.day-item.weekend.in-range {
+		background: hsl(var(--color-primary) / 0.15);
+		border: 1px solid hsl(var(--color-primary) / 0.4);
+	}
+
+	.day-item.weekend.in-range:hover {
+		background: hsl(var(--color-primary) / 0.25);
 	}
 
 	.day-item.selected {
 		background: var(--color-muted, #f3f4f6);
-		color: #3b82f6;
+		color: hsl(var(--color-primary));
 		font-weight: 600;
 	}
 
 	/* View range highlighting */
 	.day-item.in-range {
-		background: rgba(59, 130, 246, 0.15);
+		background: hsl(var(--color-primary) / 0.15);
 		border-radius: 0;
 	}
 
@@ -446,7 +582,33 @@
 	}
 
 	.day-item.in-range:hover {
-		background: rgba(59, 130, 246, 0.25);
+		background: hsl(var(--color-primary) / 0.25);
+	}
+
+	/* Today styling */
+	.day-item.is-today {
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
+		border-radius: 10px;
+		font-weight: 700;
+		box-shadow: 0 2px 8px hsl(var(--color-primary) / 0.4);
+	}
+
+	.day-item.is-today .day-weekday {
+		opacity: 1;
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
+	}
+
+	.day-item.is-today .day-number {
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
+	}
+
+	.day-item.is-today .event-dots {
+		opacity: 0.9;
+	}
+
+	.day-item.is-today .event-dot {
+		background: hsl(var(--color-primary-foreground, 0 0% 100%));
 	}
 
 	.day-weekday {
@@ -465,9 +627,15 @@
 
 	/* Responsive */
 	@media (max-width: 640px) {
+		.date-strip-wrapper {
+			left: 0;
+			right: 0;
+		}
+
 		.date-strip-container {
-			margin: 0 0.5rem;
-			padding: 0.375rem;
+			margin: 0;
+			padding: 0.375rem 0;
+			width: 100%;
 		}
 
 		.month-label {
@@ -484,6 +652,11 @@
 			top: -14px;
 		}
 
+		.week-number-label {
+			top: -12px;
+			font-size: 0.5rem;
+		}
+
 		.day-number {
 			font-size: 1rem;
 		}
@@ -496,5 +669,68 @@
 			height: 32px;
 			margin: 0 0.375rem;
 		}
+	}
+
+	/* Compact mode */
+	.date-strip-wrapper.compact .date-strip-container {
+		padding: 0.25rem 0;
+	}
+
+	.date-strip-wrapper.compact .month-header {
+		padding: 0.125rem 0.5rem 0.25rem;
+	}
+
+	.date-strip-wrapper.compact .month-label {
+		font-size: 0.875rem;
+	}
+
+	.date-strip-wrapper.compact .day-item {
+		min-width: 40px;
+		height: 44px;
+		padding: 0.25rem;
+	}
+
+	.date-strip-wrapper.compact .day-weekday {
+		font-size: 0.625rem;
+	}
+
+	.date-strip-wrapper.compact .day-number {
+		font-size: 0.875rem;
+	}
+
+	.date-strip-wrapper.compact .moon-indicator {
+		font-size: 0.875rem;
+		top: -12px;
+	}
+
+	.date-strip-wrapper.compact .week-number-label {
+		top: -10px;
+		font-size: 0.5rem;
+	}
+
+	.date-strip-wrapper.compact .month-divider {
+		height: 28px;
+	}
+
+	.date-strip-wrapper.compact .event-dot {
+		width: 3px;
+		height: 3px;
+	}
+
+	.date-strip-wrapper.compact .month-header {
+		padding-top: 0.375rem;
+	}
+
+	.date-strip-wrapper.compact .today-button {
+		padding: 0.25rem 0.625rem;
+		margin-right: 1rem;
+	}
+
+	.date-strip-wrapper.compact .today-label {
+		font-size: 0.5625rem;
+	}
+
+	.date-strip-wrapper.compact .today-date {
+		font-size: 0.625rem;
 	}
 </style>

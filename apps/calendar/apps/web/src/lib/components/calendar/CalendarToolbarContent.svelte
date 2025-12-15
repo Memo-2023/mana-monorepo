@@ -37,6 +37,7 @@
 		'14day',
 		'month',
 		'year',
+		'agenda',
 	];
 
 	// Convert to ViewOptions for PillViewSwitcher
@@ -100,7 +101,6 @@
 		options={viewOptions}
 		value={viewStore.viewType}
 		onChange={handleViewChange}
-		primaryColor="#3b82f6"
 		embedded={true}
 	/>
 </div>
@@ -154,21 +154,12 @@
 	}
 
 	.toolbar-content.vertical :global(.pill-view-switcher .switcher-btn:hover) {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .toolbar-content.vertical :global(.pill-view-switcher .switcher-btn:hover) {
-		background: rgba(255, 255, 255, 0.1);
+		background: hsl(var(--color-foreground) / 0.05);
 	}
 
 	.toolbar-content.vertical :global(.pill-view-switcher .switcher-btn.active) {
-		background: color-mix(in srgb, #3b82f6 15%, transparent 85%);
-		border-color: color-mix(in srgb, #3b82f6 25%, transparent 75%);
-	}
-
-	:global(.dark) .toolbar-content.vertical :global(.pill-view-switcher .switcher-btn.active) {
-		background: color-mix(in srgb, #3b82f6 25%, transparent 75%);
-		border-color: color-mix(in srgb, #3b82f6 35%, transparent 65%);
+		background: hsl(var(--color-primary) / 0.15);
+		border-color: hsl(var(--color-primary) / 0.25);
 	}
 
 	/* PillTimeRangeSelector in vertical mode */

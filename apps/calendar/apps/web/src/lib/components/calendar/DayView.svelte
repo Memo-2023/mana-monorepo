@@ -5,129 +5,89 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
-	import TaskBlock from './TaskBlock.svelte';
-	import { goto } from '$app/navigation';
+	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
+	import { birthdaysStore } from '$lib/stores/birthdays.svelte';
+	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
+	import { useVisibleHours, useCurrentTimeIndicator, useBirthdayPopover } from '$lib/composables';
+	import { toDate } from '$lib/utils/eventDateHelpers';
+	import { HOUR_HEIGHT_PX, SNAP_INTERVAL_MINUTES } from '$lib/utils/calendarConstants';
 	import {
-		format,
-		isToday,
-		parseISO,
-		differenceInMinutes,
-		addMinutes,
-		setHours,
-		setMinutes,
-	} from 'date-fns';
+		getVisibleTimedEvents,
+		getVisibleAllDayEvents,
+		getVisibleOverflowEvents,
+		type OverflowEvents,
+	} from '$lib/utils/eventFiltering';
+	import EventCard from './EventCard.svelte';
+	import TaskBlock from './TaskBlock.svelte';
+	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
+	import { goto } from '$app/navigation';
+	import { format, isToday, differenceInMinutes, addMinutes, setHours, setMinutes } from 'date-fns';
 	import { de } from 'date-fns/locale';
 
 	import type { CalendarEvent } from '@calendar/shared';
 
 	interface Props {
+		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
+		date?: Date;
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
 		onEventClick?: (event: CalendarEvent) => void;
 		onTaskClick?: (task: Task) => void;
 	}
 
-	let { onQuickCreate, onEventClick, onTaskClick }: Props = $props();
+	let { date, onQuickCreate, onEventClick, onTaskClick }: Props = $props();
 
-	// Constants
-	const HOUR_HEIGHT = 60; // pixels per hour
-	const SNAP_MINUTES = 15; // snap to 15-minute intervals
+	// Use provided date or fall back to viewStore
+	let effectiveDate = $derived(date ?? viewStore.currentDate);
 
-	// Generate hours (filtered based on settings)
-	let allHours = Array.from({ length: 24 }, (_, i) => i);
-	let hours = $derived(
-		settingsStore.filterHoursEnabled
-			? allHours.filter((h) => h >= settingsStore.dayStartHour && h < settingsStore.dayEndHour)
-			: allHours
-	);
+	// Use shared constants
+	const HOUR_HEIGHT = HOUR_HEIGHT_PX;
+	const SNAP_MINUTES = SNAP_INTERVAL_MINUTES;
 
-	// Calculate visible hours range for positioning
-	let firstVisibleHour = $derived(
-		settingsStore.filterHoursEnabled ? settingsStore.dayStartHour : 0
-	);
-	let lastVisibleHour = $derived(settingsStore.filterHoursEnabled ? settingsStore.dayEndHour : 24);
-	let totalVisibleHours = $derived(lastVisibleHour - firstVisibleHour);
+	// Use composables for hour filtering and time indicator
+	const visibleHours = useVisibleHours();
+	const timeIndicator = useCurrentTimeIndicator();
 
-	// Helper to convert minutes to percentage position (accounting for hidden hours)
-	function minutesToPercent(minutes: number): number {
-		const adjustedMinutes = minutes - firstVisibleHour * 60;
-		return (adjustedMinutes / (totalVisibleHours * 60)) * 100;
-	}
+	// Destructure for convenience (these are reactive getters)
+	let hours = $derived(visibleHours.hours);
+	let firstVisibleHour = $derived(visibleHours.firstVisibleHour);
+	let lastVisibleHour = $derived(visibleHours.lastVisibleHour);
+	let totalVisibleHours = $derived(visibleHours.totalVisibleHours);
+	const minutesToPercent = visibleHours.minutesToPercent;
 
 	// Current time indicator position
-	let now = $state(new Date());
-	let currentTimePosition = $derived.by(() => {
-		const minutes = now.getHours() * 60 + now.getMinutes();
-		return minutesToPercent(minutes);
-	});
-
-	// Update current time every minute
-	$effect(() => {
-		const interval = setInterval(() => {
-			now = new Date();
-		}, 60000);
-		return () => clearInterval(interval);
-	});
+	let currentTimePosition = $derived(minutesToPercent(timeIndicator.currentMinutes));
 
 	// Get timed events, filtering out those outside visible range when hour filter is enabled
-	let timedEvents = $derived.by(() => {
-		const allEvents = eventsStore.getEventsForDay(viewStore.currentDate).filter((e) => !e.isAllDay);
-
-		if (settingsStore.filterHoursEnabled) {
-			const visibleStartMinutes = settingsStore.dayStartHour * 60;
-			const visibleEndMinutes = settingsStore.dayEndHour * 60;
-
-			return allEvents.filter((event) => {
-				const start =
-					typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-				const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
-
-				const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
-				const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
-
-				// Event overlaps with visible range
-				return eventStartMinutes < visibleEndMinutes && eventEndMinutes > visibleStartMinutes;
-			});
-		}
-
-		return allEvents;
-	});
+	let timedEvents = $derived(
+		getVisibleTimedEvents(
+			eventsStore.getEventsForDay(effectiveDate),
+			calendarsStore.visibleCalendars,
+			{
+				filterHoursEnabled: settingsStore.filterHoursEnabled,
+				dayStartHour: settingsStore.dayStartHour,
+				dayEndHour: settingsStore.dayEndHour,
+			}
+		)
+	);
 
 	// Get events that are completely outside the visible time range
-	let overflowEvents = $derived.by(() => {
+	let overflowEvents = $derived.by((): OverflowEvents => {
 		if (!settingsStore.filterHoursEnabled) {
-			return { before: [] as CalendarEvent[], after: [] as CalendarEvent[] };
+			return { before: [], after: [] };
 		}
-
-		const allEvents = eventsStore.getEventsForDay(viewStore.currentDate).filter((e) => !e.isAllDay);
-		const before: CalendarEvent[] = [];
-		const after: CalendarEvent[] = [];
-
-		const visibleStartMinutes = settingsStore.dayStartHour * 60;
-		const visibleEndMinutes = settingsStore.dayEndHour * 60;
-
-		for (const event of allEvents) {
-			const start =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-			const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
-
-			const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
-			const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
-
-			// Event ends before visible range starts
-			if (eventEndMinutes <= visibleStartMinutes) {
-				before.push(event);
-			}
-			// Event starts after visible range ends
-			else if (eventStartMinutes >= visibleEndMinutes) {
-				after.push(event);
-			}
-		}
-
-		return { before, after };
+		return getVisibleOverflowEvents(
+			eventsStore.getEventsForDay(effectiveDate),
+			calendarsStore.visibleCalendars,
+			settingsStore.dayStartHour,
+			settingsStore.dayEndHour
+		);
 	});
 
 	let allDayEvents = $derived(
-		eventsStore.getEventsForDay(viewStore.currentDate).filter((e) => e.isAllDay)
+		getVisibleAllDayEvents(
+			eventsStore.getEventsForDay(effectiveDate),
+			calendarsStore.visibleCalendars
+		)
 	);
 
 	// Get display mode for an event (per-event override takes precedence over global setting)
@@ -144,6 +104,15 @@
 	);
 
 	let blockAllDayEvents = $derived(allDayEvents.filter((e) => getEventDisplayMode(e) === 'block'));
+
+	// Birthday Popover (using composable)
+	const birthdayPopover = useBirthdayPopover();
+
+	// Get birthdays for current day (if enabled in settings)
+	let birthdays = $derived.by(() => {
+		if (!settingsStore.showBirthdays) return [];
+		return birthdaysStore.getBirthdaysForDay(effectiveDate);
+	});
 
 	// ============================================================================
 	// Drag & Drop State
@@ -165,6 +134,7 @@
 	let resizeOriginalEnd = $state<Date | null>(null);
 	let resizePreviewTop = $state(0);
 	let resizePreviewHeight = $state(0);
+	let resizeOffsetMinutes = $state(0);
 
 	// Track if we actually moved during drag/resize (to prevent click on simple mousedown/up)
 	let hasMoved = $state(false);
@@ -210,8 +180,8 @@
 		e.preventDefault();
 		e.stopPropagation();
 
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
 		const duration = differenceInMinutes(end, start);
 
@@ -255,18 +225,12 @@
 			Math.min(newStartMinutes, lastVisibleHour * 60 - 30)
 		);
 
-		const start =
-			typeof draggedEvent.startTime === 'string'
-				? parseISO(draggedEvent.startTime)
-				: draggedEvent.startTime;
-		const end =
-			typeof draggedEvent.endTime === 'string'
-				? parseISO(draggedEvent.endTime)
-				: draggedEvent.endTime;
+		const start = toDate(draggedEvent.startTime);
+		const end = toDate(draggedEvent.endTime);
 		const duration = differenceInMinutes(end, start);
 
 		// Create new start time on same day
-		let newStart = new Date(viewStore.currentDate);
+		let newStart = new Date(effectiveDate);
 		newStart = setHours(newStart, Math.floor(clampedMinutes / 60));
 		newStart = setMinutes(newStart, clampedMinutes % 60);
 		newStart.setSeconds(0, 0);
@@ -301,15 +265,24 @@
 		resizeEdge = edge;
 		hasMoved = false;
 
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 		resizeOriginalStart = start;
 		resizeOriginalEnd = end;
 
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
+		const endMinutes = end.getHours() * 60 + end.getMinutes();
 		const duration = differenceInMinutes(end, start);
 		resizePreviewTop = minutesToPercent(startMinutes);
 		resizePreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
+
+		// Calculate offset between snapped click position and actual event boundary
+		const clickMinutes = getMinutesFromY(e.clientY);
+		if (edge === 'top') {
+			resizeOffsetMinutes = clickMinutes - startMinutes;
+		} else {
+			resizeOffsetMinutes = clickMinutes - endMinutes;
+		}
 
 		document.addEventListener('pointermove', handleResizeMove);
 		document.addEventListener('pointerup', handleResizeEnd);
@@ -320,18 +293,19 @@
 
 		hasMoved = true;
 		const mouseMinutes = getMinutesFromY(e.clientY);
-		const snappedMinutes = snapToGrid(mouseMinutes);
+		// Apply offset to prevent jumping when drag starts
+		const adjustedMinutes = snapToGrid(mouseMinutes - resizeOffsetMinutes);
 
 		const origStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
 		const origEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
 
 		if (resizeEdge === 'top') {
-			const newStartMinutes = Math.min(snappedMinutes, origEndMinutes - SNAP_MINUTES);
+			const newStartMinutes = Math.min(adjustedMinutes, origEndMinutes - SNAP_MINUTES);
 			const clampedStart = Math.max(firstVisibleHour * 60, newStartMinutes);
 			resizePreviewTop = minutesToPercent(clampedStart);
 			resizePreviewHeight = ((origEndMinutes - clampedStart) / (totalVisibleHours * 60)) * 100;
 		} else {
-			const newEndMinutes = Math.max(snappedMinutes, origStartMinutes + SNAP_MINUTES);
+			const newEndMinutes = Math.max(adjustedMinutes, origStartMinutes + SNAP_MINUTES);
 			const clampedEnd = Math.min(lastVisibleHour * 60, newEndMinutes);
 			resizePreviewHeight = ((clampedEnd - origStartMinutes) / (totalVisibleHours * 60)) * 100;
 		}
@@ -344,7 +318,8 @@
 		}
 
 		const mouseMinutes = getMinutesFromY(e.clientY);
-		const snappedMinutes = snapToGrid(mouseMinutes);
+		// Apply offset to prevent jumping
+		const adjustedMinutes = snapToGrid(mouseMinutes - resizeOffsetMinutes);
 
 		const origStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
 		const origEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
@@ -355,17 +330,17 @@
 		if (resizeEdge === 'top') {
 			const newStartMinutes = Math.max(
 				firstVisibleHour * 60,
-				Math.min(snappedMinutes, origEndMinutes - SNAP_MINUTES)
+				Math.min(adjustedMinutes, origEndMinutes - SNAP_MINUTES)
 			);
-			newStart = setHours(new Date(viewStore.currentDate), Math.floor(newStartMinutes / 60));
+			newStart = setHours(new Date(effectiveDate), Math.floor(newStartMinutes / 60));
 			newStart = setMinutes(newStart, newStartMinutes % 60);
 			newStart.setSeconds(0, 0);
 		} else {
 			const newEndMinutes = Math.min(
 				lastVisibleHour * 60,
-				Math.max(snappedMinutes, origStartMinutes + SNAP_MINUTES)
+				Math.max(adjustedMinutes, origStartMinutes + SNAP_MINUTES)
 			);
-			newEnd = setHours(new Date(viewStore.currentDate), Math.floor(newEndMinutes / 60));
+			newEnd = setHours(new Date(effectiveDate), Math.floor(newEndMinutes / 60));
 			newEnd = setMinutes(newEnd, newEndMinutes % 60);
 			newEnd.setSeconds(0, 0);
 		}
@@ -393,6 +368,7 @@
 		resizeEvent = null;
 		resizeOriginalStart = null;
 		resizeOriginalEnd = null;
+		resizeOffsetMinutes = 0;
 		hasMoved = false;
 		document.removeEventListener('pointermove', handleDragMove);
 		document.removeEventListener('pointerup', handleDragEnd);
@@ -615,7 +591,7 @@
 			const endTime = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
 
 			await todosStore.updateTodo(data.taskId, {
-				scheduledDate: format(viewStore.currentDate, 'yyyy-MM-dd'),
+				scheduledDate: format(effectiveDate, 'yyyy-MM-dd'),
 				scheduledStartTime: startTime,
 				scheduledEndTime: endTime,
 				estimatedDuration: duration,
@@ -645,8 +621,8 @@
 	// Event Styling
 	// ============================================================================
 	function getEventStyle(event: CalendarEvent) {
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 
 		const startMinutes = start.getHours() * 60 + start.getMinutes();
 		const duration = differenceInMinutes(end, start);
@@ -655,9 +631,11 @@
 		const top = minutesToPercent(startMinutes);
 		const height = Math.max((duration / (totalVisibleHours * 60)) * 100, 1.5); // minimum ~20px at 60px/hour
 
-		const color = calendarsStore.getColor(event.calendarId);
+		return `top: ${top}%; height: ${height}%;`;
+	}
 
-		return `top: ${top}%; height: ${height}%; background-color: ${color};`;
+	function formatEventTime(event: CalendarEvent): string {
+		return `${format(toDate(event.startTime), 'HH:mm')} - ${format(toDate(event.endTime), 'HH:mm')}`;
 	}
 
 	/**
@@ -686,7 +664,7 @@
 	 * Get scheduled tasks for current day
 	 */
 	function getScheduledTasks(): Task[] {
-		return todosStore.getScheduledTasksForDay(viewStore.currentDate);
+		return todosStore.getScheduledTasksForDay(effectiveDate);
 	}
 
 	function handleEventClick(event: CalendarEvent, e: MouseEvent) {
@@ -710,7 +688,7 @@
 		// Don't create event if dragging or resizing
 		if (isDragging || isResizing) return;
 
-		const startTime = new Date(viewStore.currentDate);
+		const startTime = new Date(effectiveDate);
 		startTime.setHours(hour, 0, 0, 0);
 
 		if (onQuickCreate) {
@@ -719,11 +697,25 @@
 			goto(`/event/new?start=${startTime.toISOString()}`);
 		}
 	}
+
+	function handleEventContextMenu(event: CalendarEvent, e: MouseEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+		// Don't show context menu for draft events
+		if (eventsStore.isDraftEvent(event.id)) return;
+		eventContextMenuStore.show(event, e.clientX, e.clientY);
+	}
+
+	function handleContextMenuEdit(event: CalendarEvent) {
+		if (onEventClick) {
+			onEventClick(event);
+		}
+	}
 </script>
 
 <div class="day-view">
-	<!-- Header-style all-day events -->
-	{#if headerAllDayEvents.length > 0}
+	<!-- Header-style all-day events and birthdays -->
+	{#if headerAllDayEvents.length > 0 || birthdays.length > 0}
 		<div class="all-day-section">
 			<div class="time-gutter">
 				<span class="all-day-label">Ganztägig</span>
@@ -738,6 +730,18 @@
 						onclick={(e) => handleEventClick(event, e)}
 					>
 						{event.title}
+					</button>
+				{/each}
+				<!-- Birthdays -->
+				{#each birthdays as birthday}
+					<button
+						class="all-day-event birthday-event"
+						onclick={(e) => birthdayPopover.handleBirthdayClick(birthday, e)}
+					>
+						🎂 {birthday.displayName}
+						{#if settingsStore.showBirthdayAge && birthday.age > 0}
+							<span class="birthday-age">({birthday.age})</span>
+						{/if}
 					</button>
 				{/each}
 			</div>
@@ -757,7 +761,7 @@
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="day-column"
-			class:today={isToday(viewStore.currentDate)}
+			class:today={isToday(effectiveDate)}
 			class:drop-target={isSidebarDropTarget}
 			bind:this={dayColumnRef}
 			ondragover={handleSidebarDragOver}
@@ -786,68 +790,27 @@
 			{/each}
 
 			<!-- Timed events -->
-			{#each timedEvents as event}
+			{#each timedEvents as event (event.id)}
 				{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
 				{@const isBeingResized = isResizing && resizeEvent?.id === event.id}
-				{@const isDraft = eventsStore.isDraftEvent(event.id)}
-				{@const isSearchHighlighted = searchStore.isEventHighlighted(event.id)}
-				{@const isSearchDimmed = searchStore.isEventDimmed(event.id)}
-				<!-- svelte-ignore a11y_click_events_have_key_events -->
-				<div
-					class="event-card"
-					class:dragging={isBeingDragged}
-					class:resizing={isBeingResized}
-					class:draft={isDraft}
-					class:search-highlighted={isSearchHighlighted}
-					class:search-dimmed={isSearchDimmed}
-					data-event-id={event.id}
+				<EventCard
+					{event}
 					style={isBeingDragged
-						? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
+						? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%;`
 						: isBeingResized
-							? `top: ${resizePreviewTop}%; height: ${resizePreviewHeight}%; background-color: ${calendarsStore.getColor(event.calendarId)};`
+							? `top: ${resizePreviewTop}%; height: ${resizePreviewHeight}%;`
 							: getEventStyle(event)}
-					onpointerdown={(e) => startDrag(event, e)}
-					onclick={(e) => !isDraft && handleEventClick(event, e)}
-					role="button"
-					tabindex="0"
-				>
-					<!-- Top resize handle -->
-					<div
-						class="resize-handle top"
-						onpointerdown={(e) => startResize(event, 'top', e)}
-						role="separator"
-						aria-orientation="horizontal"
-						aria-label="Startzeit ändern"
-						aria-valuenow={0}
-						tabindex="-1"
-					></div>
-
-					<span class="event-time">
-						{format(
-							typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime,
-							'HH:mm'
-						)} -
-						{format(
-							typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime,
-							'HH:mm'
-						)}
-					</span>
-					<span class="event-title">{event.title || (isDraft ? '(Neuer Termin)' : '')}</span>
-					{#if event.location}
-						<span class="event-location">{event.location}</span>
-					{/if}
-
-					<!-- Bottom resize handle -->
-					<div
-						class="resize-handle bottom"
-						onpointerdown={(e) => startResize(event, 'bottom', e)}
-						role="separator"
-						aria-orientation="horizontal"
-						aria-label="Endzeit ändern"
-						aria-valuenow={0}
-						tabindex="-1"
-					></div>
-				</div>
+					color={calendarsStore.getColor(event.calendarId)}
+					isDragging={isBeingDragged}
+					isResizing={isBeingResized}
+					isSearchHighlighted={searchStore.isEventHighlighted(event.id)}
+					isSearchDimmed={searchStore.isEventDimmed(event.id)}
+					formattedTime={formatEventTime(event)}
+					onClick={handleEventClick}
+					onPointerDown={startDrag}
+					onContextMenu={handleEventContextMenu}
+					onResizeStart={startResize}
+				/>
 			{/each}
 
 			<!-- Scheduled Tasks (Time-Blocking) -->
@@ -876,10 +839,7 @@
 						<div
 							class="overflow-line"
 							style="background-color: {calendarsStore.getColor(event.calendarId)}"
-							title="{format(
-								typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime,
-								'HH:mm'
-							)} {event.title}"
+							title="{format(toDate(event.startTime), 'HH:mm')} {event.title}"
 						></div>
 					{/each}
 				</div>
@@ -893,33 +853,45 @@
 						<div
 							class="overflow-line"
 							style="background-color: {calendarsStore.getColor(event.calendarId)}"
-							title="{format(
-								typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime,
-								'HH:mm'
-							)} {event.title}"
+							title="{format(toDate(event.startTime), 'HH:mm')} {event.title}"
 						></div>
 					{/each}
 				</div>
 			{/if}
 
 			<!-- Current time indicator -->
-			{#if isToday(viewStore.currentDate)}
+			{#if isToday(effectiveDate)}
 				<div class="time-indicator" style="top: {currentTimePosition}%"></div>
 			{/if}
 		</div>
 	</div>
 </div>
 
+<!-- Event Context Menu -->
+<EventContextMenu onEdit={handleContextMenuEdit} />
+
+<!-- Birthday Popover -->
+{#if birthdayPopover.selectedBirthday}
+	<BirthdayPopover
+		birthday={birthdayPopover.selectedBirthday}
+		position={birthdayPopover.popoverPosition}
+		onClose={birthdayPopover.closePopover}
+	/>
+{/if}
+
 <style>
 	.day-view {
 		display: flex;
 		flex-direction: column;
+		align-items: center;
 	}
 
 	.all-day-section {
 		display: flex;
 		border-bottom: 1px solid hsl(var(--color-border));
 		padding: 0.5rem 0;
+		width: 100%;
+		max-width: 800px;
 	}
 
 	.all-day-label {
@@ -960,13 +932,14 @@
 	.all-day-block-event {
 		position: absolute;
 		top: 0;
-		left: 4px;
-		right: 4px;
+		left: 8px;
+		width: calc(100% - 16px);
+		max-width: 400px;
 		bottom: 0;
 		padding: 8px 12px;
 		color: white;
 		border: none;
-		border-radius: var(--radius-sm);
+		border-radius: var(--radius-md);
 		text-align: left;
 		cursor: pointer;
 		z-index: 0;
@@ -1002,27 +975,29 @@
 	.time-grid {
 		flex: 1;
 		display: flex;
+		width: 100%;
+		max-width: 800px;
 	}
 
 	.time-column {
-		width: var(--time-column-width);
+		width: 50px;
 		flex-shrink: 0;
 	}
 
 	.time-label {
 		height: var(--hour-height);
-		padding-right: 0.5rem;
+		padding-right: 0.75rem;
 		text-align: right;
 		font-size: 0.75rem;
 		color: hsl(var(--color-muted-foreground));
 		position: relative;
-		top: -0.5em;
+		top: 0.25em;
 	}
 
 	.time-gutter {
-		width: var(--time-column-width);
+		width: 50px;
 		flex-shrink: 0;
-		padding-right: 0.5rem;
+		padding-right: 0.75rem;
 		text-align: right;
 	}
 
@@ -1030,6 +1005,7 @@
 		flex: 1;
 		position: relative;
 		border-left: 1px solid hsl(var(--color-border));
+		max-width: 600px;
 	}
 
 	.day-column.today {
@@ -1040,125 +1016,6 @@
 		background: hsl(var(--color-primary) / 0.15);
 		outline: 2px dashed hsl(var(--color-primary));
 		outline-offset: -2px;
-	}
-
-	.event-card {
-		position: absolute;
-		left: 4px;
-		right: 4px;
-		color: white;
-		border: none;
-		text-align: left;
-		cursor: grab;
-		z-index: 1;
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		padding: 4px 8px;
-		border-radius: var(--radius-sm);
-		overflow: hidden;
-		touch-action: none;
-		user-select: none;
-		transition:
-			box-shadow 150ms ease,
-			opacity 150ms ease;
-	}
-
-	.event-card:hover {
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	}
-
-	.event-card.dragging {
-		cursor: grabbing;
-		opacity: 0.9;
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-		z-index: 100;
-	}
-
-	.event-card.resizing {
-		cursor: ns-resize;
-		opacity: 0.85;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-		z-index: 100;
-		outline: 2px dashed rgba(255, 255, 255, 0.6);
-		outline-offset: -2px;
-	}
-
-	.event-card.draft {
-		outline: 2px solid hsl(var(--color-primary));
-		outline-offset: -1px;
-		animation: pulse-outline 1.5s ease-in-out infinite;
-	}
-
-	/* Search highlighting */
-	.event-card.search-highlighted {
-		outline: 2px solid hsl(var(--color-primary));
-		outline-offset: 1px;
-		box-shadow:
-			0 0 0 4px hsl(var(--color-primary) / 0.3),
-			0 4px 12px rgba(0, 0, 0, 0.25);
-		z-index: 10;
-	}
-
-	.event-card.search-dimmed {
-		opacity: 0.35;
-		filter: grayscale(0.3);
-	}
-
-	@keyframes pulse-outline {
-		0%,
-		100% {
-			outline-color: hsl(var(--color-primary));
-		}
-		50% {
-			outline-color: hsl(var(--color-primary) / 0.5);
-		}
-	}
-
-	/* Resize Handles */
-	.resize-handle {
-		position: absolute;
-		left: 0;
-		right: 0;
-		height: 8px;
-		cursor: ns-resize;
-		opacity: 0;
-		transition: opacity 150ms ease;
-		z-index: 10;
-	}
-
-	.resize-handle.top {
-		top: 0;
-		border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-	}
-
-	.resize-handle.bottom {
-		bottom: 0;
-		border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-	}
-
-	.event-card:hover .resize-handle {
-		opacity: 1;
-		background: rgba(255, 255, 255, 0.3);
-	}
-
-	.resize-handle:hover {
-		background: rgba(255, 255, 255, 0.5) !important;
-	}
-
-	.event-time {
-		font-size: 0.75rem;
-		opacity: 0.9;
-	}
-
-	.event-title {
-		font-size: 0.875rem;
-		font-weight: 500;
-	}
-
-	.event-location {
-		font-size: 0.75rem;
-		opacity: 0.8;
 	}
 
 	/* Time indicator */
@@ -1229,5 +1086,19 @@
 	.overflow-line:hover {
 		opacity: 1;
 		height: 5px;
+	}
+
+	/* Birthday events in all-day row */
+	.all-day-event.birthday-event {
+		background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+	}
+
+	.all-day-event.birthday-event:hover {
+		opacity: 0.9;
+	}
+
+	.birthday-age {
+		opacity: 0.85;
+		font-size: 0.7rem;
 	}
 </style>

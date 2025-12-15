@@ -3,6 +3,32 @@
  * Reusable logic extracted from components
  */
 
+// Visible hours and time indicator
+export { useVisibleHours, useCurrentTimeIndicator } from './useVisibleHours.svelte';
+
+// Event drag/drop and resize (comprehensive composable)
+export {
+	useEventDragDrop,
+	type EventDragDropConfig,
+	type EventDragState,
+	type EventResizeState,
+} from './useEventDragDrop.svelte';
+
+// Task drag/drop and resize
+export { useTaskDragDrop, type TaskDragDropConfig } from './useTaskDragDrop.svelte';
+
+// Sidebar task drop handling
+export { useSidebarDrop, type SidebarDropConfig } from './useSidebarDrop.svelte';
+
+// Keyboard handling
+export { useCalendarKeyboard, type CancellableOperation } from './useCalendarKeyboard.svelte';
+
+// Birthday popover management
+export { useBirthdayPopover } from './useBirthdayPopover.svelte';
+
+// Swipe/scroll navigation for view switching
+export { useSwipeNavigation, type SwipeNavigationOptions } from './useSwipeNavigation.svelte';
+
+// Legacy exports (kept for backwards compatibility, may be removed later)
 export { useDragDrop, type DragDropConfig, type DragState } from './useDragDrop.svelte';
 export { useResize, type ResizeConfig, type ResizeState } from './useResize.svelte';
-export { useTaskDragDrop } from './useTaskDragDrop.svelte';

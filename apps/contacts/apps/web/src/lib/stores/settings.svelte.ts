@@ -8,7 +8,7 @@ import { browser } from '$app/environment';
 // Settings types
 export type ContactSortBy = 'name' | 'company' | 'created' | 'updated';
 export type ContactSortOrder = 'asc' | 'desc';
-export type ContactView = 'list' | 'grid' | 'alphabet';
+export type ContactView = 'grid' | 'alphabet' | 'network';
 export type DateFormat = 'dd.MM.yyyy' | 'MM/dd/yyyy' | 'yyyy-MM-dd';
 
 export interface ContactsAppSettings {
@@ -55,6 +55,20 @@ export interface ContactsAppSettings {
 	privacyMode: boolean;
 	/** Require confirmation before sharing contact */
 	confirmBeforeSharing: boolean;
+
+	// Alphabet Navigation Settings
+	/** Hide letters that have no contacts */
+	alphabetNavHideInactive: boolean;
+	/** Use compact/smaller alphabet buttons */
+	alphabetNavCompact: boolean;
+	/** Reverse letter order (Z-A instead of A-Z) */
+	alphabetNavReverseOrder: boolean;
+	/** Show # symbol for non-letter names */
+	alphabetNavShowHash: boolean;
+
+	// Immersive Mode
+	/** Fullscreen mode - hides all UI elements */
+	immersiveModeEnabled: boolean;
 }
 
 const DEFAULT_SETTINGS: ContactsAppSettings = {
@@ -84,6 +98,15 @@ const DEFAULT_SETTINGS: ContactsAppSettings = {
 	// Privacy
 	privacyMode: false,
 	confirmBeforeSharing: true,
+
+	// Alphabet Navigation
+	alphabetNavHideInactive: false,
+	alphabetNavCompact: false,
+	alphabetNavReverseOrder: false,
+	alphabetNavShowHash: true,
+
+	// Immersive Mode
+	immersiveModeEnabled: false,
 };
 
 const STORAGE_KEY = 'contacts-settings';
@@ -185,6 +208,33 @@ export const contactsSettings = {
 	},
 	get confirmBeforeSharing() {
 		return settings.confirmBeforeSharing;
+	},
+
+	// Alphabet Navigation
+	get alphabetNavHideInactive() {
+		return settings.alphabetNavHideInactive;
+	},
+	get alphabetNavCompact() {
+		return settings.alphabetNavCompact;
+	},
+	get alphabetNavReverseOrder() {
+		return settings.alphabetNavReverseOrder;
+	},
+	get alphabetNavShowHash() {
+		return settings.alphabetNavShowHash;
+	},
+
+	// Immersive Mode
+	get immersiveModeEnabled() {
+		return settings.immersiveModeEnabled;
+	},
+
+	/**
+	 * Toggle Immersive Mode (fullscreen, hide all UI)
+	 */
+	toggleImmersiveMode() {
+		settings = { ...settings, immersiveModeEnabled: !settings.immersiveModeEnabled };
+		saveSettings(settings);
 	},
 
 	/**

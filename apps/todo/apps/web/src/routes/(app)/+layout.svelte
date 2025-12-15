@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, ImmersiveModeToggle } from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -18,6 +18,7 @@
 	} from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
+	import { todoSettings } from '$lib/stores/settings.svelte';
 	import { projectsStore } from '$lib/stores/projects.svelte';
 	import { labelsStore } from '$lib/stores/labels.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
@@ -215,6 +216,18 @@
 				}
 			}
 		}
+
+		// F = Toggle Immersive Mode (no modifier keys)
+		if (
+			(event.key === 'f' || event.key === 'F') &&
+			!event.ctrlKey &&
+			!event.metaKey &&
+			!event.shiftKey &&
+			!event.altKey
+		) {
+			event.preventDefault();
+			todoSettings.toggleImmersiveMode();
+		}
 	}
 
 	function handleModeChange(isSidebar: boolean) {
@@ -261,6 +274,9 @@
 
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
+
+		// Initialize todo settings
+		todoSettings.initialize();
 
 		// Load data
 		await Promise.all([
@@ -328,66 +344,80 @@
 
 <SplitPaneContainer>
 	<div class="layout-container">
-		<PillNavigation
-			items={navItems}
-			currentPath={$page.url.pathname}
-			appName="Todo"
-			homeRoute="/"
-			onToggleTheme={handleToggleTheme}
-			{isDark}
-			{isSidebarMode}
-			onModeChange={handleModeChange}
-			{isCollapsed}
-			onCollapsedChange={handleCollapsedChange}
-			desktopPosition={userSettings.nav.desktopPosition}
-			showThemeToggle={true}
-			showThemeVariants={true}
-			{themeVariantItems}
-			{currentThemeVariantLabel}
-			themeMode={theme.mode}
-			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={true}
-			{languageItems}
-			{currentLanguageLabel}
-			showLogout={authStore.isAuthenticated}
-			onLogout={handleLogout}
-			loginHref="/login"
-			primaryColor="#8b5cf6"
-			showAppSwitcher={true}
-			{appItems}
-			{userEmail}
-			settingsHref="/settings"
-			manaHref="/mana"
-			profileHref="/profile"
-			allAppsHref="/apps"
-			onOpenInPanel={handleOpenInPanel}
+		<!-- UI Elements (hidden in immersive mode) -->
+		{#if !todoSettings.immersiveModeEnabled}
+			<PillNavigation
+				items={navItems}
+				currentPath={$page.url.pathname}
+				appName="Todo"
+				homeRoute="/"
+				onToggleTheme={handleToggleTheme}
+				{isDark}
+				{isSidebarMode}
+				onModeChange={handleModeChange}
+				{isCollapsed}
+				onCollapsedChange={handleCollapsedChange}
+				desktopPosition={userSettings.nav.desktopPosition}
+				showThemeToggle={true}
+				showThemeVariants={true}
+				{themeVariantItems}
+				{currentThemeVariantLabel}
+				themeMode={theme.mode}
+				onThemeModeChange={handleThemeModeChange}
+				showLanguageSwitcher={true}
+				{languageItems}
+				{currentLanguageLabel}
+				showLogout={authStore.isAuthenticated}
+				onLogout={handleLogout}
+				loginHref="/login"
+				primaryColor="#8b5cf6"
+				showAppSwitcher={true}
+				{appItems}
+				{userEmail}
+				settingsHref="/settings"
+				manaHref="/mana"
+				profileHref="/profile"
+				allAppsHref="/apps"
+				onOpenInPanel={handleOpenInPanel}
+			/>
+
+			<!-- Global Quick Input Bar -->
+			<QuickInputBar
+				onSearch={handleSearch}
+				onSelect={handleSelect}
+				{quickActions}
+				placeholder="Neue Aufgabe oder suchen..."
+				emptyText="Keine Aufgaben gefunden"
+				searchingText="Suche..."
+				onCreate={handleCreate}
+				onParseCreate={handleParseCreate}
+				createText="Erstellen"
+				appIcon="todo"
+				primaryColor="#8b5cf6"
+				autoFocus={true}
+			/>
+		{/if}
+
+		<!-- Immersive Mode Toggle (always visible) -->
+		<ImmersiveModeToggle
+			isImmersive={todoSettings.immersiveModeEnabled}
+			onToggle={() => todoSettings.toggleImmersiveMode()}
 		/>
 
 		<main
 			class="main-content bg-background"
 			class:sidebar-mode={isSidebarMode && !isCollapsed}
 			class:floating-mode={!isSidebarMode && !isCollapsed}
+			class:immersive={todoSettings.immersiveModeEnabled}
 		>
-			<div class="content-wrapper" class:full-width={$page.url.pathname === '/kanban'}>
+			<div
+				class="content-wrapper"
+				class:full-width={$page.url.pathname === '/kanban'}
+				class:immersive={todoSettings.immersiveModeEnabled}
+			>
 				{@render children()}
 			</div>
 		</main>
-
-		<!-- Global Quick Input Bar -->
-		<QuickInputBar
-			onSearch={handleSearch}
-			onSelect={handleSelect}
-			{quickActions}
-			placeholder="Neue Aufgabe oder suchen..."
-			emptyText="Keine Aufgaben gefunden"
-			searchingText="Suche..."
-			onCreate={handleCreate}
-			onParseCreate={handleParseCreate}
-			createText="Erstellen"
-			appIcon="todo"
-			primaryColor="#8b5cf6"
-			autoFocus={true}
-		/>
 	</div>
 </SplitPaneContainer>
 
@@ -412,6 +442,19 @@
 
 	.main-content.sidebar-mode {
 		padding-left: 180px;
+	}
+
+	/* Immersive mode - fullscreen, no padding */
+	.main-content.immersive {
+		padding: 0 !important;
+		height: 100vh;
+		width: 100vw;
+	}
+
+	.content-wrapper.immersive {
+		padding: 0;
+		max-width: none;
+		height: 100%;
 	}
 
 	.content-wrapper {

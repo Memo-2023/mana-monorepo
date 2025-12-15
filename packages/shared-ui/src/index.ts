@@ -2,8 +2,8 @@
 export { Text, Button, Badge, Card } from './atoms';
 
 // Molecules
-export { Toggle, Input, Select, Textarea, Checkbox } from './molecules';
-export type { SelectOption } from './molecules';
+export { Toggle, Input, Select, Textarea, Checkbox, FilterDropdown } from './molecules';
+export type { SelectOption, FilterDropdownOption } from './molecules';
 
 // Stats
 export { GlassCard, StatRow } from './molecules';
@@ -45,6 +45,9 @@ export { ContactAvatar, ContactBadge, ContactSelector } from './molecules';
 // Layout
 export { ModalFooter, DataCard, PageHeader, KeyboardShortcutsPanel } from './molecules';
 
+// Confirmation (inline popover)
+export { ConfirmationPopover } from './molecules';
+
 // Organisms
 export { Modal, ConfirmationModal, FormModal, AppSlider } from './organisms';
 export type { AppItem } from './organisms';
@@ -85,6 +88,7 @@ export {
 	PillToolbar,
 	PillToolbarButton,
 	PillToolbarDivider,
+	ExpandableToolbar,
 } from './navigation';
 export type {
 	NavItem,
@@ -97,6 +101,8 @@ export type {
 	PillNavElement,
 	PillNavigationProps,
 	PillTabOption,
+	PillTabGroupConfig,
+	ExpandableToolbarProps,
 } from './navigation';
 
 // Settings
@@ -119,8 +125,28 @@ export { CommandBar } from './command-bar';
 export type { CommandBarItem } from './command-bar';
 
 // Input Bar
-export { InputBar, QuickInputBar } from './quick-input';
-export type { QuickInputItem, QuickAction, CreatePreview } from './quick-input';
+export {
+	InputBar,
+	QuickInputBar,
+	InputBarContextMenu,
+	InputBarHelpModal,
+	// Recent history
+	getRecentTags,
+	getRecentReferences,
+	addRecentTag,
+	addRecentReference,
+	extractAndSaveFromInput,
+	clearRecentHistory,
+	createRecentInputHistoryStore,
+	// Settings
+	loadInputBarSettings,
+	saveInputBarSettings,
+	updateInputBarSetting,
+	resetInputBarSettings,
+	createInputBarSettingsStore,
+	getInputBarSettingsStore,
+} from './quick-input';
+export type { QuickInputItem, QuickAction, CreatePreview, InputBarSettings } from './quick-input';
 
 // Pages
 export { default as AppsPage } from './pages/AppsPage.svelte';
@@ -143,3 +169,29 @@ export type {
 	DonutSegment,
 	ProgressItem,
 } from './charts';
+
+// Context Menu
+export { ContextMenu, createContextMenuState } from './context-menu';
+export type { ContextMenuItem, ContextMenuState } from './context-menu';
+
+// Help Components
+export {
+	HelpModal,
+	KeyboardShortcutsPanel as HelpKeyboardShortcutsPanel,
+	SyntaxHelpPanel,
+	COMMON_SHORTCUTS,
+	COMMON_SYNTAX,
+	DEFAULT_LIVE_EXAMPLE,
+} from './help';
+export type {
+	KeyboardShortcut as HelpKeyboardShortcut,
+	ShortcutCategory,
+	SyntaxColor,
+	SyntaxExample,
+	SyntaxPattern,
+	SyntaxGroup,
+	HelpModalConfig,
+} from './help';
+
+// Immersive Mode
+export { default as ImmersiveModeToggle } from './components/ImmersiveModeToggle.svelte';

@@ -4,7 +4,8 @@
 
 import type { CalendarEvent, CreateEventInput, UpdateEventInput } from '@calendar/shared';
 import * as api from '$lib/api/events';
-import { format, isWithinInterval, parseISO, isSameDay } from 'date-fns';
+import { format, isWithinInterval, isSameDay } from 'date-fns';
+import { toDate } from '$lib/utils/eventDateHelpers';
 import { toastStore } from './toast.svelte';
 
 // State
@@ -48,9 +49,10 @@ export const eventsStore = {
 			error = result.error.message;
 			toastStore.error(`Termine konnten nicht geladen werden: ${result.error.message}`);
 		} else {
-			// API returns { events: [...] }
-			const data = result.data as { events: CalendarEvent[] } | null;
-			events = data?.events || [];
+			// API returns events array directly (already extracted in api/events.ts)
+			const eventsData = result.data as CalendarEvent[] | null;
+			console.log('[Events Store] Loaded events:', eventsData?.length, eventsData);
+			events = eventsData || [];
 			loadedRange = { start: startDate, end: endDate };
 		}
 
@@ -67,9 +69,8 @@ export const eventsStore = {
 		if (!Array.isArray(currentEvents)) return [];
 
 		const result = currentEvents.filter((event) => {
-			const eventStart =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-			const eventEnd = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+			const eventStart = toDate(event.startTime);
+			const eventEnd = toDate(event.endTime);
 
 			// For all-day events, check if day falls within event range
 			if (event.isAllDay) {
@@ -85,10 +86,7 @@ export const eventsStore = {
 
 		// Include draft event if it exists and is on this day
 		if (includeDraft && draftEvent) {
-			const draftStart =
-				typeof draftEvent.startTime === 'string'
-					? parseISO(draftEvent.startTime)
-					: draftEvent.startTime;
+			const draftStart = toDate(draftEvent.startTime);
 			if (isSameDay(date, draftStart)) {
 				result.push(draftEvent);
 			}
@@ -106,9 +104,8 @@ export const eventsStore = {
 		if (!Array.isArray(currentEvents)) return [];
 
 		return currentEvents.filter((event) => {
-			const eventStart =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-			const eventEnd = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+			const eventStart = toDate(event.startTime);
+			const eventEnd = toDate(event.endTime);
 
 			// Check if event overlaps with the range
 			return eventStart <= end && eventEnd >= start;
@@ -121,11 +118,8 @@ export const eventsStore = {
 	async createEvent(data: CreateEventInput) {
 		const result = await api.createEvent(data);
 
-		if (result.error) {
-			toastStore.error(`Termin konnte nicht erstellt werden: ${result.error.message}`);
-		} else if (result.data) {
+		if (result.data) {
 			events = [...events, result.data];
-			toastStore.success('Termin erstellt');
 		}
 
 		return result;

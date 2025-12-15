@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, ImmersiveModeToggle } from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -13,7 +13,6 @@
 		PillNavItem,
 		PillDropdownItem,
 		QuickInputItem,
-		QuickAction,
 		CreatePreview,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
@@ -34,15 +33,19 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import ContactDetailModal from '$lib/components/ContactDetailModal.svelte';
+	import NewContactModal from '$lib/components/NewContactModal.svelte';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
+	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 	import { contactsApi, tagsApi } from '$lib/api/contacts';
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
 	import { contactsSettings } from '$lib/stores/settings.svelte';
+	import { contactsFilterStore } from '$lib/stores/filter.svelte';
 	import {
 		parseContactInput,
 		resolveContactIds,
 		formatParsedContactPreview,
 	} from '$lib/utils/contact-parser';
+	import ContactsToolbar from '$lib/components/ContactsToolbar.svelte';
 
 	// Tags state for Quick-Create
 	let availableTags = $state<{ id: string; name: string }[]>([]);
@@ -67,6 +70,19 @@
 
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
+
+	// Show toolbar only on main contacts page
+	const showContactsToolbar = $derived($page.url.pathname === '/' && !isSidebarMode);
+
+	// Check if toolbar is expanded
+	const isToolbarExpanded = $derived(
+		showContactsToolbar && !contactsFilterStore.isToolbarCollapsed
+	);
+
+	// Dynamic bottom offset based on toolbar state
+	const inputBarBottomOffset = $derived(
+		isSidebarMode ? '0px' : isToolbarExpanded ? '140px' : '70px'
+	);
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -121,9 +137,7 @@
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/', label: 'Kontakte', icon: 'users' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
-		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
 		{ href: '/statistics', label: 'Statistiken', icon: 'bar-chart-3' },
-		{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 		{ href: '/help', label: 'Hilfe', icon: 'help-circle' },
@@ -153,6 +167,18 @@
 					goto(route);
 				}
 			}
+		}
+
+		// F = Toggle Immersive Mode (no modifier keys)
+		if (
+			(event.key === 'f' || event.key === 'F') &&
+			!event.ctrlKey &&
+			!event.metaKey &&
+			!event.shiftKey &&
+			!event.altKey
+		) {
+			event.preventDefault();
+			contactsSettings.toggleImmersiveMode();
 		}
 	}
 
@@ -227,38 +253,22 @@
 
 	async function handleCreate(query: string): Promise<void> {
 		const parsed = parseContactInput(query);
-		if (!parsed.displayName) return;
-
-		// Resolve tag names to IDs
-		const resolved = resolveContactIds(parsed, availableTags);
-
-		try {
-			const contact = await contactsStore.createContact({
-				displayName: resolved.displayName,
-				firstName: resolved.firstName,
-				lastName: resolved.lastName,
-				company: resolved.company,
-				email: resolved.email,
-				phone: resolved.phone,
-			});
-
-			// Add tags to the created contact
-			if (resolved.tagIds.length > 0 && contact) {
-				for (const tagId of resolved.tagIds) {
-					await tagsApi.addToContact(tagId, contact.id);
-				}
-			}
-		} catch (e) {
-			console.error('Failed to create contact:', e);
+		if (!parsed.displayName) {
+			// If no query, just open empty modal
+			newContactModalStore.open();
+			return;
 		}
-	}
 
-	// QuickInputBar quick actions
-	const quickActions: QuickAction[] = [
-		{ id: 'favorites', label: 'Favoriten', icon: 'heart', href: '/favorites' },
-		{ id: 'tags', label: 'Tags', icon: 'tag', href: '/tags' },
-		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
-	];
+		// Open modal with prefilled data
+		newContactModalStore.open({
+			displayName: parsed.displayName,
+			firstName: parsed.firstName || undefined,
+			lastName: parsed.lastName || undefined,
+			email: parsed.email || undefined,
+			phone: parsed.phone || undefined,
+			company: parsed.company || undefined,
+		});
+	}
 
 	onMount(async () => {
 		// Redirect to login if not authenticated
@@ -281,9 +291,10 @@
 			console.error('Failed to load tags:', e);
 		}
 
-		// Initialize contacts settings and view mode
+		// Initialize contacts settings, view mode, and filter store
 		contactsSettings.initialize();
 		viewModeStore.initialize();
+		contactsFilterStore.initialize();
 
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('contacts-nav-sidebar');
@@ -306,43 +317,70 @@
 <SplitPaneContainer>
 	<!-- Navigation Layout -->
 	<div class="layout-container">
-		<!-- Shadow gradient above navigation -->
-		<div class="nav-shadow-gradient"></div>
+		<!-- UI Elements (hidden in immersive mode) -->
+		{#if !contactsSettings.immersiveModeEnabled}
+			<!-- Floating/Sidebar Pill Navigation (at bottom) -->
+			<PillNavigation
+				items={navItems}
+				currentPath={$page.url.pathname}
+				appName="Contacts"
+				homeRoute="/"
+				onToggleTheme={handleToggleTheme}
+				{isDark}
+				{isSidebarMode}
+				onModeChange={handleModeChange}
+				{isCollapsed}
+				onCollapsedChange={handleCollapsedChange}
+				desktopPosition="bottom"
+				showThemeToggle={true}
+				showThemeVariants={true}
+				{themeVariantItems}
+				{currentThemeVariantLabel}
+				themeMode={theme.mode}
+				onThemeModeChange={handleThemeModeChange}
+				showLanguageSwitcher={true}
+				{languageItems}
+				{currentLanguageLabel}
+				showLogout={authStore.isAuthenticated}
+				onLogout={handleLogout}
+				loginHref="/login"
+				primaryColor="#3b82f6"
+				showAppSwitcher={true}
+				{appItems}
+				{userEmail}
+				settingsHref="/settings"
+				manaHref="/mana"
+				profileHref="/profile"
+				allAppsHref="/apps"
+				onOpenInPanel={handleOpenInPanel}
+			/>
 
-		<!-- Floating/Sidebar Pill Navigation -->
-		<PillNavigation
-			items={navItems}
-			currentPath={$page.url.pathname}
-			appName="Contacts"
-			homeRoute="/"
-			onToggleTheme={handleToggleTheme}
-			{isDark}
-			{isSidebarMode}
-			onModeChange={handleModeChange}
-			{isCollapsed}
-			onCollapsedChange={handleCollapsedChange}
-			desktopPosition={userSettings.nav.desktopPosition}
-			showThemeToggle={true}
-			showThemeVariants={true}
-			{themeVariantItems}
-			{currentThemeVariantLabel}
-			themeMode={theme.mode}
-			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={true}
-			{languageItems}
-			{currentLanguageLabel}
-			showLogout={authStore.isAuthenticated}
-			onLogout={handleLogout}
-			loginHref="/login"
-			primaryColor="#3b82f6"
-			showAppSwitcher={true}
-			{appItems}
-			{userEmail}
-			settingsHref="/settings"
-			manaHref="/mana"
-			profileHref="/profile"
-			allAppsHref="/apps"
-			onOpenInPanel={handleOpenInPanel}
+			<!-- Global Quick Input Bar -->
+			<QuickInputBar
+				onSearch={handleSearch}
+				onSelect={handleSelect}
+				onSearchChange={(query) => contactsFilterStore.setSearchQuery(query)}
+				placeholder="Neuer Kontakt oder suchen..."
+				emptyText="Keine Kontakte gefunden"
+				searchingText="Suche..."
+				onCreate={handleCreate}
+				onParseCreate={handleParseCreate}
+				createText="Erstellen"
+				appIcon="contacts"
+				bottomOffset={inputBarBottomOffset}
+				hasFabRight={showContactsToolbar}
+			/>
+
+			<!-- Contacts Toolbar (FAB + expandable bar) - only on main page -->
+			{#if showContactsToolbar}
+				<ContactsToolbar {isSidebarMode} contacts={contactsStore.contacts} />
+			{/if}
+		{/if}
+
+		<!-- Immersive Mode Toggle (always visible) -->
+		<ImmersiveModeToggle
+			isImmersive={contactsSettings.immersiveModeEnabled}
+			onToggle={() => contactsSettings.toggleImmersiveMode()}
 		/>
 
 		<!-- Main Content with dynamic padding based on nav mode -->
@@ -350,8 +388,9 @@
 			class="main-content bg-background"
 			class:sidebar-mode={isSidebarMode && !isCollapsed}
 			class:floating-mode={!isSidebarMode}
+			class:immersive={contactsSettings.immersiveModeEnabled}
 		>
-			<div class="content-wrapper">
+			<div class="content-wrapper" class:immersive={contactsSettings.immersiveModeEnabled}>
 				{@render children()}
 			</div>
 		</main>
@@ -361,21 +400,10 @@
 			<ContactDetailModal contactId={modalContactId} onClose={handleCloseContactModal} />
 		{/if}
 
-		<!-- Global Quick Input Bar -->
-		<QuickInputBar
-			onSearch={handleSearch}
-			onSelect={handleSelect}
-			{quickActions}
-			placeholder="Neuer Kontakt oder suchen..."
-			emptyText="Keine Kontakte gefunden"
-			searchingText="Suche..."
-			onCreate={handleCreate}
-			onParseCreate={handleParseCreate}
-			createText="Erstellen"
-			appIcon="contacts"
-			primaryColor="#3b82f6"
-			autoFocus={false}
-		/>
+		<!-- New Contact Modal -->
+		{#if newContactModalStore.isOpen}
+			<NewContactModal onClose={() => newContactModalStore.close()} />
+		{/if}
 	</div>
 </SplitPaneContainer>
 
@@ -389,17 +417,19 @@
 	.main-content {
 		flex: 1;
 		transition: all 300ms ease;
+		/* Space for QuickInputBar + PillNav at bottom */
+		padding-bottom: calc(150px + env(safe-area-inset-bottom));
 	}
 
-	/* Floating nav mode - add top padding for fixed nav */
+	/* Floating nav mode - nav is at bottom, no top padding needed */
 	.main-content.floating-mode {
-		padding-top: 80px;
+		padding-top: 0;
 	}
 
-	/* Extra padding on mobile for larger nav */
+	/* Extra bottom padding on mobile */
 	@media (max-width: 768px) {
-		.main-content.floating-mode {
-			padding-top: 90px;
+		.main-content {
+			padding-bottom: calc(160px + env(safe-area-inset-bottom));
 		}
 	}
 
@@ -408,10 +438,20 @@
 		padding-left: 180px;
 	}
 
+	/* Immersive mode - fullscreen, no padding */
+	.main-content.immersive {
+		padding: 0 !important;
+		height: 100vh;
+		width: 100vw;
+	}
+
+	.content-wrapper.immersive {
+		padding: 0;
+		height: 100%;
+	}
+
 	.content-wrapper {
-		max-width: 900px;
-		margin-left: auto;
-		margin-right: auto;
+		/* No max-width - let individual views control their own width */
 		padding: 1rem;
 	}
 
@@ -427,26 +467,22 @@
 		}
 	}
 
-	/* Shadow gradient above pill navigation */
-	.nav-shadow-gradient {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 80px;
-		background: linear-gradient(
-			to bottom,
-			hsl(var(--background)) 0%,
-			hsl(var(--background)) 50%,
-			hsl(var(--background) / 0) 100%
-		);
-		pointer-events: none;
-		z-index: 40;
+	/* Adjust InputBar when toolbar elements (view-mode-pill + FAB) are visible */
+	/* Pill left edge is at: 50% - 238px from right edge of viewport */
+	/* This means from center, there's 238px to the pill's left edge */
+	/* For a centered InputBar with max-width W, right edge is at: center + W/2 */
+	/* We need: center + W/2 < center + 238 - 12px gap, so W/2 < 226, W < 452px */
+	:global(.quick-input-bar.has-fab-right .input-container) {
+		max-width: 450px;
 	}
 
-	@media (max-width: 768px) {
-		.nav-shadow-gradient {
-			height: 90px;
+	/* On smaller screens (<900px), the FAB + pill move to right: 1rem position */
+	/* So we need fixed padding instead */
+	@media (max-width: 900px) {
+		:global(.quick-input-bar.has-fab-right .input-container) {
+			max-width: calc(100% - 200px); /* ~120px pill + 8px + 54px FAB + 18px gap */
+			margin-left: 0;
+			margin-right: auto;
 		}
 	}
 </style>

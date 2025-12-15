@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Calendar, CheckSquare, Filter } from 'lucide-svelte';
+	import { FilterDropdown, type FilterDropdownOption } from '@manacore/shared-ui';
 
 	interface Props {
 		showEvents: boolean;
@@ -19,10 +20,10 @@
 		onRangeChange,
 	}: Props = $props();
 
-	const rangeOptions = [
-		{ value: '7' as const, label: '7 Tage' },
-		{ value: '30' as const, label: '30 Tage' },
-		{ value: 'all' as const, label: 'Alle' },
+	const rangeOptions: FilterDropdownOption[] = [
+		{ value: '7', label: '7 Tage' },
+		{ value: '30', label: '30 Tage' },
+		{ value: 'all', label: 'Alle' },
 	];
 </script>
 
@@ -53,15 +54,13 @@
 	<div class="filter-group">
 		<div class="range-selector">
 			<Filter size={14} />
-			<select
+			<FilterDropdown
+				options={rangeOptions}
 				value={timeRange}
-				onchange={(e) =>
-					onRangeChange?.((e.target as HTMLSelectElement).value as '7' | '30' | 'all')}
-			>
-				{#each rangeOptions as option}
-					<option value={option.value}>{option.label}</option>
-				{/each}
-			</select>
+				onChange={(v) => onRangeChange?.(v as '7' | '30' | 'all')}
+				placeholder="Zeitraum"
+				embedded={true}
+			/>
 		</div>
 	</div>
 </div>
@@ -120,21 +119,6 @@
 		align-items: center;
 		gap: 0.5rem;
 		color: hsl(var(--color-muted-foreground));
-	}
-
-	.range-selector select {
-		padding: 0.375rem 0.75rem;
-		border-radius: var(--radius-md);
-		border: 1px solid hsl(var(--color-border));
-		background: hsl(var(--color-surface));
-		color: hsl(var(--color-foreground));
-		font-size: 0.8125rem;
-		cursor: pointer;
-	}
-
-	.range-selector select:focus {
-		outline: none;
-		border-color: hsl(var(--color-primary));
 	}
 
 	@media (max-width: 480px) {

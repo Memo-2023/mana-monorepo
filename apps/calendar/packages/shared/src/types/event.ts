@@ -19,6 +19,34 @@ export interface EventAttendee {
 }
 
 /**
+ * Responsible person for an event (single person accountable for the event)
+ */
+export interface ResponsiblePerson {
+	email: string;
+	name?: string;
+	/** Contact reference for linked contacts */
+	contactId?: string;
+	/** Cached photo URL from contact */
+	photoUrl?: string;
+	/** Cached company from contact */
+	company?: string;
+}
+
+/**
+ * Event tag group for organizing tags
+ */
+export interface EventTagGroup {
+	id: string;
+	userId: string;
+	name: string;
+	color: string;
+	sortOrder: number;
+	tagCount?: number;
+	createdAt: Date | string;
+	updatedAt: Date | string;
+}
+
+/**
  * Event tag with color
  */
 export interface EventTag {
@@ -26,6 +54,8 @@ export interface EventTag {
 	userId: string;
 	name: string;
 	color: string;
+	groupId?: string | null;
+	sortOrder?: number;
 	createdAt: Date | string;
 	updatedAt: Date | string;
 }
@@ -57,7 +87,9 @@ export interface EventMetadata {
 	url?: string;
 	/** Video conference URL (Zoom, Meet, etc.) */
 	conferenceUrl?: string;
-	/** Event attendees */
+	/** Responsible person for this event */
+	responsiblePerson?: ResponsiblePerson;
+	/** Event attendees/participants */
 	attendees?: EventAttendee[];
 	/** Event organizer email */
 	organizer?: string;

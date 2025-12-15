@@ -1,4 +1,4 @@
-import { IsString, IsOptional, MaxLength } from 'class-validator';
+import { IsString, IsOptional, MaxLength, IsUUID } from 'class-validator';
 
 export class CreateEventTagDto {
 	@IsString()
@@ -9,4 +9,8 @@ export class CreateEventTagDto {
 	@IsOptional()
 	@MaxLength(7)
 	color?: string;
+
+	@IsUUID()
+	@IsOptional()
+	groupId?: string;
 }

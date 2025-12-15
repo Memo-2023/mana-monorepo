@@ -2,6 +2,11 @@
 	import { _ } from 'svelte-i18n';
 	import type { Contact } from '$lib/api/contacts';
 	import type { SortField } from '$lib/components/SortToggle.svelte';
+	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
+	import { isSidebarMode } from '$lib/stores/navigation';
+	import { contactsFilterStore } from '$lib/stores/filter.svelte';
+	import { contactsSettings } from '$lib/stores/settings.svelte';
+	import AlphabetNavContextMenu from '$lib/components/AlphabetNavContextMenu.svelte';
 
 	interface Props {
 		contacts: Contact[];
@@ -11,6 +16,7 @@
 		selectedIds?: Set<string>;
 		onToggleSelection?: (id: string) => void;
 		sortField?: SortField;
+		showNewContactCard?: boolean;
 	}
 
 	let {
@@ -21,14 +27,38 @@
 		selectedIds = new Set(),
 		onToggleSelection,
 		sortField = 'lastName',
+		showNewContactCard = true,
 	}: Props = $props();
+
+	// Derived state for toolbar positioning
+	let isToolbarExpanded = $derived(!contactsFilterStore.isToolbarCollapsed);
+	let isAlphabetNavCollapsed = $derived(contactsFilterStore.isAlphabetNavCollapsed);
+
+	function toggleAlphabetNav() {
+		contactsFilterStore.toggleAlphabetNav();
+	}
+
+	// Context menu for alphabet nav
+	let alphabetContextMenu: AlphabetNavContextMenu;
+
+	function handleAlphabetContextMenu(e: MouseEvent) {
+		e.preventDefault();
+		alphabetContextMenu?.show(e.clientX, e.clientY);
+	}
 
 	function handleCheckboxClick(e: MouseEvent, id: string) {
 		e.stopPropagation();
 		onToggleSelection?.(id);
 	}
 
-	const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+	// Alphabet with optional reverse order
+	let alphabet = $derived.by(() => {
+		let letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+		if (contactsSettings.alphabetNavReverseOrder) {
+			letters = letters.reverse();
+		}
+		return letters;
+	});
 
 	function getInitials(contact: Contact) {
 		const first = contact.firstName?.[0] || '';
@@ -87,6 +117,38 @@
 </script>
 
 <div class="alphabet-view">
+	<!-- New Contact Card at top -->
+	{#if showNewContactCard && !selectionMode}
+		<div class="new-contact-section">
+			<div
+				role="button"
+				tabindex="0"
+				onclick={() => newContactModalStore.open()}
+				onkeydown={(e) => e.key === 'Enter' && newContactModalStore.open()}
+				class="alphabet-contact-card new-contact-card"
+			>
+				<!-- Plus Avatar -->
+				<div class="avatar-sm new-contact-avatar">
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 4v16m8-8H4"
+						/>
+					</svg>
+				</div>
+
+				<!-- Text -->
+				<div class="contact-info">
+					<div class="contact-main-row">
+						<span class="contact-name">{$_('contacts.new')}</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/if}
+
 	<!-- Contacts grouped by letter -->
 	<div class="alphabet-sections">
 		{#each availableLetters as letter}
@@ -142,30 +204,46 @@
 
 							<!-- Contact Info -->
 							<div class="contact-info">
-								<div class="contact-name">
-									{getDisplayName(contact)}
-								</div>
-								<div class="contact-details">
-									{#if contact.jobTitle && contact.company}
-										<span>{contact.jobTitle} @ {contact.company}</span>
-									{:else if contact.company}
-										<span>{contact.company}</span>
-									{:else if contact.email}
-										<span>{contact.email}</span>
+								<div class="contact-main-row">
+									<span class="contact-name">{getDisplayName(contact)}</span>
+									{#if contact.isFavorite}
+										<svg class="favorite-badge" fill="currentColor" viewBox="0 0 24 24">
+											<path
+												d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+											/>
+										</svg>
+									{/if}
+									{#if contact.company}
+										<span class="contact-company-inline">@ {contact.company}</span>
 									{/if}
 								</div>
+								{#if contact.tags && contact.tags.length > 0}
+									<div class="contact-tags-row">
+										{#each contact.tags.slice(0, 3) as tag}
+											<span
+												class="tag-chip"
+												style="--tag-color: {tag.color || 'hsl(var(--primary))'}"
+											>
+												{tag.name}
+											</span>
+										{/each}
+										{#if contact.tags.length > 3}
+											<span class="tag-chip more-tags">+{contact.tags.length - 3}</span>
+										{/if}
+									</div>
+								{/if}
 							</div>
 
-							<!-- Quick Actions -->
-							<div class="quick-actions">
+							<!-- Action Icons (right side) -->
+							<div class="contact-actions">
 								{#if contact.phone || contact.mobile}
 									<a
 										href="tel:{contact.mobile || contact.phone}"
 										onclick={(e) => e.stopPropagation()}
-										class="quick-action-btn"
-										title={$_('contacts.call')}
+										class="action-chip"
+										title={contact.mobile || contact.phone}
 									>
-										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path
 												stroke-linecap="round"
 												stroke-linejoin="round"
@@ -179,10 +257,10 @@
 									<a
 										href="mailto:{contact.email}"
 										onclick={(e) => e.stopPropagation()}
-										class="quick-action-btn"
-										title={$_('contacts.email')}
+										class="action-chip"
+										title={contact.email}
 									>
-										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path
 												stroke-linecap="round"
 												stroke-linejoin="round"
@@ -192,28 +270,6 @@
 										</svg>
 									</a>
 								{/if}
-								<button
-									onclick={(e) => onToggleFavorite(e, contact.id)}
-									class="quick-action-btn"
-									title={contact.isFavorite ? $_('contacts.unfavorite') : $_('contacts.favorite')}
-								>
-									{#if contact.isFavorite}
-										<svg class="w-4 h-4 text-red-500 fill-current" viewBox="0 0 24 24">
-											<path
-												d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-											/>
-										</svg>
-									{:else}
-										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-											/>
-										</svg>
-									{/if}
-								</button>
 							</div>
 						</div>
 					{/each}
@@ -222,37 +278,98 @@
 		{/each}
 	</div>
 
-	<!-- Alphabet Quick Jump -->
-	<div class="alphabet-nav">
-		{#each alphabet as letter}
-			<button
-				type="button"
-				class="alphabet-nav-btn"
-				class:active={availableLetters.includes(letter)}
-				class:disabled={!availableLetters.includes(letter)}
-				onclick={() => availableLetters.includes(letter) && scrollToLetter(letter)}
-				disabled={!availableLetters.includes(letter)}
-			>
-				{letter}
-			</button>
-		{/each}
-		{#if availableLetters.includes('#')}
-			<button type="button" class="alphabet-nav-btn active" onclick={() => scrollToLetter('#')}>
-				#
-			</button>
-		{/if}
+	<!-- Alphabet FAB (when collapsed) - positioned left of InputBar -->
+	<div
+		class="alphabet-fab-container"
+		class:sidebar-mode={$isSidebarMode}
+		class:toolbar-expanded={isToolbarExpanded}
+	>
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<button
+			onclick={toggleAlphabetNav}
+			oncontextmenu={handleAlphabetContextMenu}
+			class="alphabet-fab"
+			class:active={!isAlphabetNavCollapsed}
+			title={isAlphabetNavCollapsed
+				? 'Alphabet-Navigation öffnen (Rechtsklick für Optionen)'
+				: 'Alphabet-Navigation schließen (Rechtsklick für Optionen)'}
+		>
+			<svg class="fab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				{#if isAlphabetNavCollapsed}
+					<!-- ABC/Alphabet icon -->
+					<text x="3" y="17" font-size="12" font-weight="bold" fill="currentColor" stroke="none"
+						>AZ</text
+					>
+				{:else}
+					<!-- Chevron down icon -->
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M19 9l-7 7-7-7"
+					/>
+				{/if}
+			</svg>
+		</button>
 	</div>
+
+	<!-- Alphabet Quick Jump (like DateStrip) - hidden when collapsed -->
+	{#if !isAlphabetNavCollapsed}
+		<div
+			class="alphabet-nav"
+			class:sidebar-mode={$isSidebarMode}
+			class:toolbar-expanded={isToolbarExpanded}
+		>
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div
+				class="alphabet-nav-container"
+				class:compact={contactsSettings.alphabetNavCompact}
+				oncontextmenu={handleAlphabetContextMenu}
+			>
+				{#each alphabet as letter}
+					{@const isActive = availableLetters.includes(letter)}
+					{@const shouldHide = contactsSettings.alphabetNavHideInactive && !isActive}
+					{#if !shouldHide}
+						<button
+							type="button"
+							class="alphabet-nav-btn"
+							class:active={isActive}
+							class:disabled={!isActive}
+							class:compact={contactsSettings.alphabetNavCompact}
+							onclick={() => isActive && scrollToLetter(letter)}
+							disabled={!isActive}
+						>
+							{letter}
+						</button>
+					{/if}
+				{/each}
+				{#if contactsSettings.alphabetNavShowHash && availableLetters.includes('#')}
+					<button
+						type="button"
+						class="alphabet-nav-btn active"
+						class:compact={contactsSettings.alphabetNavCompact}
+						onclick={() => scrollToLetter('#')}
+					>
+						#
+					</button>
+				{/if}
+			</div>
+		</div>
+	{/if}
+
+	<AlphabetNavContextMenu bind:this={alphabetContextMenu} />
 </div>
 
 <style>
 	.alphabet-view {
-		display: flex;
-		gap: 1rem;
+		display: block;
 		position: relative;
+		padding-bottom: 10rem; /* Space for fixed alphabet nav + InputBar */
+		max-width: 600px;
+		margin: 0 auto;
 	}
 
 	.alphabet-sections {
-		flex: 1;
 		min-width: 0;
 	}
 
@@ -267,7 +384,7 @@
 		padding: 0.375rem 0.875rem;
 		margin-bottom: 0.75rem;
 		position: sticky;
-		top: 80px;
+		top: 8px;
 		z-index: 10;
 		/* Glass pill effect */
 		background: hsl(var(--background) / 0.75);
@@ -276,12 +393,6 @@
 		border: 1px solid hsl(var(--border) / 0.5);
 		border-radius: 9999px;
 		box-shadow: 0 2px 8px hsl(var(--foreground) / 0.05);
-	}
-
-	@media (max-width: 768px) {
-		.section-header {
-			top: 90px;
-		}
 	}
 
 	.section-letter {
@@ -303,20 +414,17 @@
 		gap: 0.5rem;
 	}
 
-	.section-contacts .alphabet-contact-card:last-child {
-		margin-bottom: 1rem;
-	}
-
 	.alphabet-contact-card {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
-		padding: 0.75rem 1rem;
+		gap: 0.625rem;
+		padding: 0.5rem 0.75rem;
 		background-color: hsl(var(--card));
 		border: 1px solid hsl(var(--border));
 		border-radius: var(--radius-md);
 		cursor: pointer;
 		transition: all var(--transition-fast);
+		min-width: 0;
 	}
 
 	.alphabet-contact-card:hover {
@@ -325,9 +433,9 @@
 	}
 
 	.avatar-sm {
-		width: 52px;
-		height: 52px;
-		min-width: 52px;
+		width: 36px;
+		height: 36px;
+		min-width: 36px;
 		border-radius: var(--radius-full);
 		background-color: hsl(var(--primary));
 		color: hsl(var(--primary-foreground));
@@ -335,58 +443,99 @@
 		align-items: center;
 		justify-content: center;
 		font-weight: 600;
-		font-size: 1.125rem;
+		font-size: 0.8125rem;
+		flex-shrink: 0;
 	}
 
 	.contact-info {
 		flex: 1;
 		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.contact-main-row {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		flex-wrap: wrap;
 	}
 
 	.contact-name {
 		font-weight: 500;
+		font-size: 0.9375rem;
 		color: hsl(var(--foreground));
 		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
 	}
 
-	.contact-details {
-		font-size: 0.875rem;
+	.favorite-badge {
+		width: 0.8125rem;
+		height: 0.8125rem;
+		color: hsl(var(--destructive, 0 84% 60%));
+		flex-shrink: 0;
+	}
+
+	.contact-company-inline {
+		font-size: 0.8125rem;
 		color: hsl(var(--muted-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 
-	.quick-actions {
+	.contact-tags-row {
 		display: flex;
+		align-items: center;
 		gap: 0.25rem;
-		opacity: 0;
-		transition: opacity var(--transition-fast);
+		flex-wrap: wrap;
 	}
 
-	.alphabet-contact-card:hover .quick-actions {
-		opacity: 1;
+	.tag-chip {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.0625rem 0.375rem;
+		font-size: 0.625rem;
+		font-weight: 500;
+		border-radius: 9999px;
+		background: var(--tag-color, hsl(var(--primary)));
+		color: white;
+		white-space: nowrap;
 	}
 
-	.quick-action-btn {
+	.tag-chip.more-tags {
+		background: hsl(var(--muted));
+		color: hsl(var(--muted-foreground));
+	}
+
+	.contact-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		flex-shrink: 0;
+	}
+
+	.action-chip {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		width: 2rem;
 		height: 2rem;
 		border-radius: var(--radius-full);
-		background-color: hsl(var(--muted));
+		background: hsl(var(--muted));
 		color: hsl(var(--muted-foreground));
-		transition: all var(--transition-fast);
-		border: none;
-		cursor: pointer;
+		text-decoration: none;
+		transition: all 0.15s ease;
 	}
 
-	.quick-action-btn:hover {
-		background-color: hsl(var(--primary));
+	.action-chip:hover {
+		background: hsl(var(--primary));
 		color: hsl(var(--primary-foreground));
+	}
+
+	.action-icon {
+		width: 1rem;
+		height: 1rem;
 	}
 
 	.selection-checkbox {
@@ -412,44 +561,93 @@
 		border-color: hsl(var(--primary) / 0.3);
 	}
 
-	/* Alphabet Navigation */
+	/* Alphabet Navigation - Horizontal strip above InputBar + PillNav (like DateStrip) */
 	.alphabet-nav {
-		position: sticky;
-		top: 80px;
+		position: fixed;
+		bottom: calc(140px + env(safe-area-inset-bottom, 0px)); /* Above PillNav + InputBar */
+		left: 0;
+		right: 0;
+		z-index: 48;
 		display: flex;
 		flex-direction: column;
-		gap: 0.125rem;
-		padding: 0.5rem 0.25rem;
-		height: fit-content;
-		/* Glass effect */
-		background: hsl(var(--background) / 0.75);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid hsl(var(--border) / 0.5);
-		border-radius: var(--radius-lg);
-		box-shadow: 0 2px 8px hsl(var(--foreground) / 0.05);
+		align-items: stretch;
+		pointer-events: none;
+		transition: bottom 0.2s ease;
+		/* Container query context */
+		container-type: inline-size;
+		container-name: alphabetnav;
 	}
 
-	@media (min-width: 769px) and (max-width: 1024px) {
-		.alphabet-nav {
-			top: 80px;
+	/* When toolbar is expanded, push Alphabet-Nav up (+70px) */
+	.alphabet-nav.toolbar-expanded {
+		bottom: calc(210px + env(safe-area-inset-bottom, 0px));
+	}
+
+	/* When PillNav is in sidebar mode, only InputBar at bottom */
+	.alphabet-nav.sidebar-mode {
+		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+	}
+
+	/* Sidebar mode + toolbar expanded */
+	.alphabet-nav.sidebar-mode.toolbar-expanded {
+		bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.alphabet-nav-container {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 2px;
+		padding: 0.5rem 1.5rem;
+		overflow-x: auto;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+		scroll-behavior: smooth;
+		/* Glass container with blur effect */
+		background: hsl(var(--background) / 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border-radius: 16px;
+		margin: 0 1rem;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+		border: 1px solid hsl(var(--border) / 0.6);
+		pointer-events: auto;
+		/* Default: left-aligned with fit-content */
+		width: fit-content;
+		max-width: calc(100% - 2rem);
+	}
+
+	/* Center when container has enough space */
+	@container alphabetnav (min-width: 600px) {
+		.alphabet-nav-container {
+			margin-left: auto;
+			margin-right: auto;
 		}
 	}
 
+	.alphabet-nav-container::-webkit-scrollbar {
+		display: none;
+	}
+
 	.alphabet-nav-btn {
-		width: 1.75rem;
-		height: 1.5rem;
+		min-width: 44px;
+		height: 52px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 0.75rem;
-		font-weight: 500;
+		font-size: 1.125rem;
+		font-weight: 600;
 		color: hsl(var(--muted-foreground));
 		background: transparent;
 		border: none;
-		border-radius: var(--radius-sm);
+		border-radius: 10px;
 		cursor: pointer;
-		transition: all var(--transition-fast);
+		transition: all 0.15s ease;
+		flex-shrink: 0;
+	}
+
+	.alphabet-nav-btn:hover {
+		background: hsl(var(--muted));
 	}
 
 	.alphabet-nav-btn.active {
@@ -462,44 +660,138 @@
 	}
 
 	.alphabet-nav-btn.disabled {
-		color: hsl(var(--muted-foreground) / 0.3);
+		color: hsl(var(--muted-foreground) / 0.2);
 		cursor: default;
 	}
 
-	/* Mobile: Hide alphabet nav, show horizontal version at bottom */
-	@media (max-width: 768px) {
-		.alphabet-view {
-			flex-direction: column;
-		}
+	.alphabet-nav-btn.disabled:hover {
+		background: transparent;
+	}
 
-		.alphabet-nav {
-			position: fixed;
-			bottom: 0;
-			left: 0;
-			right: 0;
-			flex-direction: row;
-			flex-wrap: wrap;
-			justify-content: center;
-			gap: 0.25rem;
-			padding: 0.5rem;
-			border-radius: 0;
-			border-left: none;
-			border-right: none;
-			border-bottom: none;
-			z-index: 50;
-		}
+	/* Compact mode for alphabet nav */
+	.alphabet-nav-container.compact {
+		padding: 0.375rem 1rem;
+	}
 
-		.alphabet-nav-btn {
-			width: 1.5rem;
-			height: 1.5rem;
-		}
+	.alphabet-nav-btn.compact {
+		min-width: 36px;
+		height: 40px;
+		font-size: 0.9375rem;
+	}
 
-		.alphabet-sections {
-			padding-bottom: 4rem;
-		}
+	/* New Contact Card */
+	.new-contact-section {
+		margin-bottom: 1rem;
+	}
 
-		.quick-actions {
-			opacity: 1;
+	.new-contact-card {
+		border-style: dashed;
+		border-color: hsl(var(--primary) / 0.4);
+		background: hsl(var(--primary) / 0.05);
+	}
+
+	.new-contact-card:hover {
+		border-color: hsl(var(--primary));
+		background: hsl(var(--primary) / 0.1);
+	}
+
+	.new-contact-avatar {
+		background: hsl(var(--primary) / 0.15);
+		color: hsl(var(--primary));
+	}
+
+	.new-contact-avatar svg {
+		width: 1.125rem;
+		height: 1.125rem;
+	}
+
+	.new-contact-card .contact-info {
+		gap: 0;
+	}
+
+	.new-contact-card .contact-name {
+		font-size: 0.875rem;
+	}
+
+	/* Alphabet FAB - positioned left of InputBar */
+	.alphabet-fab-container {
+		position: fixed;
+		bottom: calc(70px + 9px + env(safe-area-inset-bottom, 0px)); /* Align with InputBar */
+		/* InputBar is 450px when toolbar is shown: left edge at 50% - 225px, minus gap and fab width */
+		left: calc(50% - 225px - 8px - 54px);
+		z-index: 49; /* Below InputBar (90) and ExpandableToolbar FAB (91), above alphabet-nav (48) */
+		pointer-events: none;
+		transition:
+			bottom 0.2s ease,
+			left 0.2s ease;
+	}
+
+	/* Sidebar mode - InputBar is 700px wide, position accordingly */
+	.alphabet-fab-container.sidebar-mode {
+		left: calc(50% - 350px - 8px - 54px); /* Left of 700px InputBar */
+	}
+
+	/* Responsive positioning for FAB */
+	@media (max-width: 900px) {
+		.alphabet-fab-container {
+			left: 1rem;
 		}
+	}
+
+	/* When toolbar is expanded, move FAB up */
+	.alphabet-fab-container.toolbar-expanded {
+		bottom: calc(140px + 9px + env(safe-area-inset-bottom, 0px));
+	}
+
+	/* Sidebar mode */
+	.alphabet-fab-container.sidebar-mode {
+		bottom: calc(9px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.alphabet-fab-container.sidebar-mode.toolbar-expanded {
+		bottom: calc(70px + 9px + env(safe-area-inset-bottom, 0px));
+	}
+
+	.alphabet-fab {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 54px;
+		height: 54px;
+		cursor: pointer;
+		border: none;
+		transition: all 0.2s ease;
+		pointer-events: auto;
+		/* Glass pill styling */
+		background: hsl(var(--background) / 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid hsl(var(--border));
+		box-shadow: 0 2px 8px hsl(var(--foreground) / 0.08);
+		border-radius: 9999px;
+	}
+
+	.alphabet-fab:hover {
+		transform: scale(1.05);
+		box-shadow: 0 4px 12px hsl(var(--foreground) / 0.15);
+	}
+
+	.alphabet-fab.active {
+		background: hsl(var(--muted));
+	}
+
+	.alphabet-fab.active .fab-icon {
+		color: hsl(var(--primary));
+	}
+
+	.alphabet-fab .fab-icon {
+		width: 1.5rem;
+		height: 1.5rem;
+		color: hsl(var(--muted-foreground));
+		transition: color 0.2s ease;
+	}
+
+	.alphabet-fab:hover .fab-icon {
+		color: hsl(var(--foreground));
 	}
 </style>

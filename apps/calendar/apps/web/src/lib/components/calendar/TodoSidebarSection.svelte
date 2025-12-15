@@ -158,6 +158,18 @@
 		border-radius: var(--radius-lg);
 		border: 1px solid hsl(var(--color-border));
 		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	/* Mobile: Full-bleed ohne Rundungen */
+	@media (max-width: 768px) {
+		.todo-sidebar-section {
+			border-radius: 0;
+			border: none;
+			border-top: 1px solid hsl(var(--color-border));
+		}
 	}
 
 	.section-header {
@@ -240,12 +252,18 @@
 
 	.section-content {
 		padding: 0 0.5rem 0.5rem;
+		flex: 1;
+		overflow-y: auto;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.todo-list {
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
+		flex: 1;
 	}
 
 	.service-unavailable,
@@ -258,6 +276,7 @@
 		padding: 1.5rem 1rem;
 		color: hsl(var(--color-muted-foreground));
 		font-size: 0.8125rem;
+		flex: 1;
 	}
 
 	.service-unavailable {

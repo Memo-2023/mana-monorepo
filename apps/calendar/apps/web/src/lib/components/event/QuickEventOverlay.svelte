@@ -2,10 +2,26 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import { toast } from '$lib/stores/toast';
-	import type { LocationDetails, CalendarEvent } from '@calendar/shared';
-	import { format, addMinutes, parseISO } from 'date-fns';
+	import { contactsStore } from '$lib/stores/contacts.svelte';
+	import { toast } from '$lib/stores/toast.svelte';
+	import type {
+		LocationDetails,
+		CalendarEvent,
+		ResponsiblePerson,
+		EventAttendee,
+	} from '@calendar/shared';
+	import type { ContactSummary, ContactOrManual, ManualContactEntry } from '@manacore/shared-types';
+	import {
+		ContactSelector,
+		ContactAvatar,
+		ConfirmationPopover,
+		FilterDropdown,
+		type FilterDropdownOption,
+	} from '@manacore/shared-ui';
+	import { Users } from 'lucide-svelte';
+	import { format, addMinutes } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { toDate } from '$lib/utils/eventDateHelpers';
 	import { tick, onMount, onDestroy } from 'svelte';
 
 	// Portal action - moves element to body to escape stacking contexts
@@ -109,6 +125,13 @@
 		}
 
 		const target = e.target as HTMLElement;
+
+		// If target was removed from DOM by state change (e.g., button that toggles its own visibility),
+		// ignore the click to prevent false "outside" detection
+		if (!target.isConnected) {
+			return;
+		}
+
 		const overlay = document.querySelector('.quick-event-overlay');
 		const eventSelector = isEditMode
 			? `[data-event-id="${event!.id}"]`
@@ -185,6 +208,26 @@
 	let locationCountry = $state('');
 	let submitting = $state(false);
 
+	// People state
+	let responsiblePerson = $state<ResponsiblePerson | null>(null);
+	let attendees = $state<EventAttendee[]>([]);
+	let showPeopleSelector = $state(false);
+	let contactsAvailable = $state<boolean | null>(null);
+
+	// All-day display mode options
+	const displayModeOptions: FilterDropdownOption[] = [
+		{ value: 'default', label: 'Standard (aus Einstellungen)' },
+		{ value: 'header', label: 'In Kopfzeile' },
+		{ value: 'block', label: 'Als Tagesblock' },
+	];
+
+	// Check contacts availability
+	$effect(() => {
+		contactsStore.checkAvailability().then((available) => {
+			contactsAvailable = available;
+		});
+	});
+
 	// Editable date/time strings (for form inputs)
 	let startDateStr = $state('');
 	let startTimeStr = $state('');
@@ -212,10 +255,13 @@
 				locationCountry = loc.country || '';
 			}
 
+			// Initialize people
+			responsiblePerson = event.metadata?.responsiblePerson || null;
+			attendees = event.metadata?.attendees || [];
+
 			// Initialize time fields
-			const eventStart =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-			const eventEnd = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+			const eventStart = toDate(event.startTime);
+			const eventEnd = toDate(event.endTime);
 			startDateStr = format(eventStart, 'yyyy-MM-dd');
 			startTimeStr = format(eventStart, 'HH:mm');
 			endDateStr = format(eventEnd, 'yyyy-MM-dd');
@@ -226,22 +272,22 @@
 	// Date/time fields - derive from draft event (create mode) or event (edit mode)
 	let draftStart = $derived(() => {
 		if (isEditMode && event) {
-			return typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
+			return toDate(event.startTime);
 		}
 		const draft = eventsStore.draftEvent;
 		if (draft) {
-			return typeof draft.startTime === 'string' ? parseISO(draft.startTime) : draft.startTime;
+			return toDate(draft.startTime);
 		}
 		return startTime || new Date();
 	});
 
 	let draftEnd = $derived(() => {
 		if (isEditMode && event) {
-			return typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+			return toDate(event.endTime);
 		}
 		const draft = eventsStore.draftEvent;
 		if (draft) {
-			return typeof draft.endTime === 'string' ? parseISO(draft.endTime) : draft.endTime;
+			return toDate(draft.endTime);
 		}
 		return addMinutes(startTime || new Date(), settingsStore.defaultEventDuration);
 	});
@@ -328,15 +374,6 @@
 		});
 	}
 
-	// Update draft when calendar changes
-	function handleCalendarChange(e: Event) {
-		const target = e.target as HTMLSelectElement;
-		calendarId = target.value;
-		if (!isEditMode) {
-			eventsStore.updateDraftEvent({ calendarId: target.value });
-		}
-	}
-
 	// Update draft when all-day changes
 	function handleAllDayToggle() {
 		isAllDay = !isAllDay;
@@ -347,6 +384,112 @@
 
 	// Overlay style
 	let overlayStyle = $derived(`left: ${overlayPosition.left}px; top: ${overlayPosition.top}px;`);
+
+	// People helpers
+	function handleContactSearch(query: string): Promise<ContactSummary[]> {
+		return contactsStore.searchContacts(query);
+	}
+
+	function handleResponsiblePersonChange(contacts: ContactOrManual[]) {
+		if (contacts.length === 0) {
+			responsiblePerson = null;
+			return;
+		}
+		const contact = contacts[0];
+		if ('isManual' in contact && contact.isManual) {
+			const manual = contact as ManualContactEntry;
+			responsiblePerson = { email: manual.email, name: manual.name };
+		} else {
+			const ref = contact as {
+				contactId: string;
+				displayName: string;
+				email?: string;
+				photoUrl?: string;
+				company?: string;
+			};
+			responsiblePerson = {
+				email: ref.email || '',
+				name: ref.displayName,
+				contactId: ref.contactId,
+				photoUrl: ref.photoUrl,
+				company: ref.company,
+			};
+		}
+	}
+
+	function handleAttendeesChange(contacts: ContactOrManual[]) {
+		attendees = contacts.map((contact) => {
+			if ('isManual' in contact && contact.isManual) {
+				const manual = contact as ManualContactEntry;
+				const existing = attendees.find((a) => a.email === manual.email);
+				return {
+					email: manual.email,
+					name: manual.name,
+					status: existing?.status || ('pending' as const),
+				};
+			}
+			const ref = contact as {
+				contactId: string;
+				displayName: string;
+				email?: string;
+				photoUrl?: string;
+				company?: string;
+			};
+			const existing = attendees.find(
+				(a) => a.contactId === ref.contactId || a.email === ref.email
+			);
+			return {
+				email: ref.email || '',
+				name: ref.displayName,
+				status: existing?.status || ('pending' as const),
+				contactId: ref.contactId,
+				photoUrl: ref.photoUrl,
+				company: ref.company,
+			};
+		});
+	}
+
+	// Convert to ContactOrManual for selectors
+	const responsibleAsContact = $derived<ContactOrManual[]>(
+		responsiblePerson
+			? responsiblePerson.contactId
+				? [
+						{
+							contactId: responsiblePerson.contactId,
+							displayName: responsiblePerson.name || responsiblePerson.email,
+							email: responsiblePerson.email,
+							photoUrl: responsiblePerson.photoUrl,
+							company: responsiblePerson.company,
+							fetchedAt: new Date().toISOString(),
+						},
+					]
+				: [
+						{
+							email: responsiblePerson.email,
+							name: responsiblePerson.name,
+							isManual: true as const,
+						},
+					]
+			: []
+	);
+
+	const attendeesAsContacts = $derived<ContactOrManual[]>(
+		attendees.map((a) =>
+			a.contactId
+				? {
+						contactId: a.contactId,
+						displayName: a.name || a.email,
+						email: a.email,
+						photoUrl: a.photoUrl,
+						company: a.company,
+						fetchedAt: new Date().toISOString(),
+					}
+				: { email: a.email, name: a.name, isManual: true as const }
+		)
+	);
+
+	// Count of people assigned
+	const peopleCount = $derived((responsiblePerson ? 1 : 0) + attendees.length);
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -396,6 +539,20 @@
 				delete metadata.locationDetails;
 			}
 
+			// Add responsible person
+			if (responsiblePerson) {
+				metadata = { ...(metadata || {}), responsiblePerson };
+			} else if (metadata) {
+				delete metadata.responsiblePerson;
+			}
+
+			// Add attendees
+			if (attendees.length > 0) {
+				metadata = { ...(metadata || {}), attendees };
+			} else if (metadata) {
+				delete metadata.attendees;
+			}
+
 			// Clean up empty metadata
 			if (metadata && Object.keys(metadata).length === 0) {
 				metadata = undefined;
@@ -423,11 +580,16 @@
 				onUpdated?.();
 			} else {
 				// Create new event
-				await eventsStore.createEvent(eventData);
+				const result = await eventsStore.createEvent(eventData);
+				if (result.error) {
+					toast.error(`Fehler beim Erstellen: ${result.error.message}`);
+					return;
+				}
 				// Refresh calendars if none existed (in case default was created)
 				if (calendarsStore.calendars.length === 0) {
 					await calendarsStore.fetchCalendars();
 				}
+				toast.success('Termin erstellt');
 				onCreated?.();
 			}
 
@@ -442,10 +604,6 @@
 
 	async function handleDelete() {
 		if (!event) return;
-
-		if (!confirm('Möchten Sie diesen Termin wirklich löschen?')) {
-			return;
-		}
 
 		submitting = true;
 		try {
@@ -490,22 +648,25 @@
 			<span class="header-title">{isEditMode ? 'Termin bearbeiten' : 'Neuer Termin'}</span>
 			<div class="header-actions">
 				{#if isEditMode}
-					<button
-						type="button"
-						class="delete-btn"
-						onclick={handleDelete}
-						disabled={submitting}
-						aria-label="Löschen"
+					<ConfirmationPopover
+						onConfirm={handleDelete}
+						variant="danger"
+						title="Termin löschen?"
+						confirmLabel="Löschen"
+						loading={submitting}
+						placement="bottom"
 					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-							/>
-						</svg>
-					</button>
+						<button type="button" class="delete-btn" disabled={submitting} aria-label="Löschen">
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+								/>
+							</svg>
+						</button>
+					</ConfirmationPopover>
 				{/if}
 				<button type="button" class="close-btn" onclick={onClose} aria-label="Schließen">
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -554,24 +715,118 @@
 				</span>
 			</div>
 
-			<!-- Calendar select -->
+			<!-- Calendar pills -->
+			<div class="calendar-pills-container">
+				{#if calendarsStore.calendars.length > 0}
+					<div class="calendar-pills-scroll">
+						{#each calendarsStore.calendars as cal}
+							<button
+								type="button"
+								class="calendar-pill"
+								class:active={calendarId === cal.id}
+								onclick={() => {
+									calendarId = cal.id;
+									if (!isEditMode) {
+										eventsStore.updateDraftEvent({ calendarId: cal.id });
+									}
+								}}
+							>
+								<span class="calendar-pill-dot" style="background-color: {cal.color || '#3b82f6'}"
+								></span>
+								<span class="calendar-pill-name">{cal.name}</span>
+							</button>
+						{/each}
+					</div>
+				{:else}
+					<span class="field-placeholder">Standardkalender wird erstellt</span>
+				{/if}
+			</div>
+
+			<!-- People (compact) -->
 			<div class="form-row">
 				<div class="row-icon">
-					<div
-						class="calendar-dot"
-						style="background-color: {calendarsStore.getColor(calendarId)}"
-					></div>
+					<Users class="icon" size={18} />
 				</div>
 				<div class="row-content">
-					<span class="field-label">Kalender</span>
-					{#if calendarsStore.calendars.length > 0}
-						<select class="field-select" value={calendarId} onchange={handleCalendarChange}>
-							{#each calendarsStore.calendars as cal}
-								<option value={cal.id}>{cal.name}</option>
-							{/each}
-						</select>
+					<!-- Responsible person - always show directly -->
+					<div class="people-subsection">
+						<span class="field-label">Verantwortlich</span>
+						{#if responsiblePerson}
+							<div class="person-chip">
+								<ContactAvatar
+									photoUrl={responsiblePerson.photoUrl}
+									name={responsiblePerson.name || responsiblePerson.email}
+									size="xs"
+								/>
+								<span class="person-name">{responsiblePerson.name || responsiblePerson.email}</span>
+								<button
+									type="button"
+									class="remove-person"
+									onclick={() => (responsiblePerson = null)}>×</button
+								>
+							</div>
+						{:else}
+							<ContactSelector
+								selectedContacts={[]}
+								onContactsChange={handleResponsiblePersonChange}
+								onSearch={handleContactSearch}
+								allowManualEntry={true}
+								placeholder="Person auswählen..."
+								addLabel="Auswählen"
+								searchPlaceholder="Name oder E-Mail..."
+								isAvailable={contactsAvailable ?? false}
+								singleSelect={true}
+							/>
+						{/if}
+					</div>
+
+					<!-- Attendees - show when expanded or when there are attendees -->
+					{#if showPeopleSelector || attendees.length > 0}
+						<div class="people-subsection">
+							<span class="field-label">Teilnehmer</span>
+							{#if attendees.length > 0}
+								<div class="people-chips">
+									{#each attendees as attendee (attendee.email)}
+										<div class="person-chip">
+											<ContactAvatar
+												photoUrl={attendee.photoUrl}
+												name={attendee.name || attendee.email}
+												size="xs"
+											/>
+											<span class="person-name">{attendee.name || attendee.email}</span>
+											<button
+												type="button"
+												class="remove-person"
+												onclick={() =>
+													(attendees = attendees.filter((a) => a.email !== attendee.email))}
+												>×</button
+											>
+										</div>
+									{/each}
+								</div>
+							{/if}
+							<ContactSelector
+								selectedContacts={attendeesAsContacts}
+								onContactsChange={handleAttendeesChange}
+								onSearch={handleContactSearch}
+								allowManualEntry={true}
+								placeholder={attendees.length > 0
+									? 'Weitere hinzufügen...'
+									: 'Teilnehmer hinzufügen...'}
+								addLabel="Hinzufügen"
+								searchPlaceholder="Name oder E-Mail..."
+								isAvailable={contactsAvailable ?? false}
+							/>
+						</div>
 					{:else}
-						<span class="field-placeholder">Standardkalender wird erstellt</span>
+						<!-- Show expand button for attendees -->
+						<button
+							type="button"
+							class="add-attendees-btn"
+							onclick={() => (showPeopleSelector = true)}
+						>
+							+ Teilnehmer hinzufügen
+						</button>
 					{/if}
 				</div>
 			</div>
@@ -607,11 +862,13 @@
 					<div class="row-icon"></div>
 					<div class="row-content">
 						<span class="field-label">Anzeigeart</span>
-						<select class="field-select" bind:value={allDayDisplayMode}>
-							<option value="default">Standard (aus Einstellungen)</option>
-							<option value="header">In Kopfzeile</option>
-							<option value="block">Als Tagesblock</option>
-						</select>
+						<FilterDropdown
+							options={displayModeOptions}
+							value={allDayDisplayMode}
+							onChange={(v) =>
+								(allDayDisplayMode = (v as 'default' | 'header' | 'block') || 'default')}
+							placeholder="Anzeigeart wählen"
+						/>
 					</div>
 				</div>
 			{/if}
@@ -823,12 +1080,9 @@
 		position: fixed;
 		width: 380px;
 		max-height: 450px;
-		background: hsl(var(--color-surface));
+		background: var(--color-surface-elevated-2);
 		border: 1px solid hsl(var(--color-border));
 		border-radius: var(--radius-lg);
-		box-shadow:
-			0 20px 60px rgba(0, 0, 0, 0.2),
-			0 4px 16px rgba(0, 0, 0, 0.1);
 		z-index: 99999 !important;
 		display: flex;
 		flex-direction: column;
@@ -982,6 +1236,63 @@
 		border-radius: 50%;
 	}
 
+	/* Calendar pills */
+	.calendar-pills-container {
+		padding: 0.5rem 0;
+		border-bottom: 1px solid hsl(var(--color-border));
+	}
+
+	.calendar-pills-scroll {
+		display: flex;
+		gap: 0.5rem;
+		overflow-x: auto;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+		padding: 0 1.25rem 2px;
+	}
+
+	.calendar-pills-scroll::-webkit-scrollbar {
+		display: none;
+	}
+
+	.calendar-pill {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.375rem 0.75rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 9999px;
+		background: transparent;
+		color: hsl(var(--color-muted-foreground));
+		font-size: 0.8125rem;
+		font-weight: 500;
+		white-space: nowrap;
+		cursor: pointer;
+		transition: all 150ms;
+		flex-shrink: 0;
+	}
+
+	.calendar-pill:hover {
+		background: hsl(var(--color-muted) / 0.3);
+		color: hsl(var(--color-foreground));
+	}
+
+	.calendar-pill.active {
+		background: hsl(var(--color-primary) / 0.1);
+		border-color: hsl(var(--color-primary) / 0.3);
+		color: hsl(var(--color-primary));
+	}
+
+	.calendar-pill-dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+
+	.calendar-pill-name {
+	}
+
 	.row-content {
 		flex: 1;
 		min-width: 0;
@@ -1010,7 +1321,6 @@
 		margin-bottom: 0.25rem;
 	}
 
-	.field-select,
 	.field-input {
 		width: 100%;
 		padding: 0.5rem 0.625rem;
@@ -1021,7 +1331,6 @@
 		font-size: 0.875rem;
 	}
 
-	.field-select:focus,
 	.field-input:focus {
 		outline: none;
 		border-color: hsl(var(--color-primary));
@@ -1073,12 +1382,15 @@
 	.overlay-actions {
 		display: flex;
 		align-items: center;
-		justify-content: flex-end;
 		gap: 0.75rem;
 		padding: 1rem 1.25rem;
 		border-top: 1px solid hsl(var(--color-border));
-		background: hsl(var(--color-surface));
+		background: var(--color-surface-elevated-2);
 		flex-shrink: 0;
+	}
+
+	.overlay-actions .btn-primary {
+		flex: 1;
 	}
 
 	.btn-ghost {
@@ -1197,5 +1509,79 @@
 
 	.address-field.city {
 		flex: 1;
+	}
+
+	/* People section */
+	.add-attendees-btn {
+		margin-top: 0.5rem;
+		padding: 0.25rem 0;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-muted-foreground));
+		font-size: 0.8125rem;
+		cursor: pointer;
+		transition: color 150ms;
+		text-align: left;
+	}
+
+	.add-attendees-btn:hover {
+		color: hsl(var(--color-primary));
+	}
+
+	.people-subsection {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+
+	.people-chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+		margin-bottom: 0.25rem;
+	}
+
+	.person-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+		background: hsl(var(--color-muted) / 0.5);
+		border-radius: var(--radius-full);
+		font-size: 0.8125rem;
+		color: hsl(var(--color-foreground));
+	}
+
+	.person-name {
+		max-width: 120px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.remove-person {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 16px;
+		height: 16px;
+		padding: 0;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-muted-foreground));
+		font-size: 1rem;
+		line-height: 1;
+		cursor: pointer;
+		border-radius: var(--radius-full);
+		transition: all 150ms;
+	}
+
+	.remove-person:hover {
+		background: hsl(var(--color-error) / 0.1);
+		color: hsl(var(--color-error));
+	}
+
+	.people-subsection + .people-subsection {
+		margin-top: 0.75rem;
 	}
 </style>

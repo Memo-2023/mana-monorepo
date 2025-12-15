@@ -2,13 +2,14 @@
 	import { goto } from '$app/navigation';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toast.svelte';
 	import EventForm from './EventForm.svelte';
 	import { TagBadge } from '@manacore/shared-ui';
 	import type { CalendarEvent, UpdateEventInput } from '@calendar/shared';
 	import * as api from '$lib/api/events';
-	import { format, parseISO } from 'date-fns';
+	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { toDate } from '$lib/utils/eventDateHelpers';
 	import { EventDetailSkeleton } from '$lib/components/skeletons';
 
 	interface Props {
@@ -99,8 +100,8 @@
 		if (event.isAllDay) {
 			return 'Ganztägig';
 		}
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 		return `${format(start, 'PPPp', { locale: de })} - ${format(end, 'p', { locale: de })}`;
 	}
 

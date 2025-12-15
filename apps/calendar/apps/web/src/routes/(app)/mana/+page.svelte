@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { SubscriptionPage } from '@manacore/shared-subscription-ui';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toast.svelte';
 
 	function handleSubscribe(planId: string) {
 		console.log('Subscribe to plan:', planId);

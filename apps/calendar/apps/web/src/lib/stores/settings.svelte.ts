@@ -13,6 +13,7 @@ import { userSettings } from './user-settings.svelte';
 export type WeekStartDay = 0 | 1; // 0 = Sunday, 1 = Monday
 export type TimeFormat = '24h' | '12h';
 export type AllDayDisplayMode = 'header' | 'block'; // header = separate row, block = full day block in grid
+export type WeekdayFormat = 'full' | 'short' | 'hidden';
 
 export interface CalendarAppSettings {
 	// View settings
@@ -26,8 +27,38 @@ export interface CalendarAppSettings {
 	dayEndHour: number; // Last visible hour (0-23)
 	allDayDisplayMode: AllDayDisplayMode; // How to display all-day events
 
+	// Header settings
+	headerCompact: boolean; // Compact header display
+	headerWeekdayFormat: WeekdayFormat; // Weekday display format
+	headerShowDate: boolean; // Show date in header
+	headerAlwaysShowMonth: boolean; // Always show month (e.g., "13.12.")
+
+	// DateStrip settings
+	dateStripShowMoonPhases: boolean; // Show moon phase indicators
+	dateStripShowEventIndicators: boolean; // Show event dot indicators
+	dateStripShowWeekday: boolean; // Show weekday names (Mo, Di, Mi...)
+	dateStripHighlightWeekends: boolean; // Visually highlight weekend days
+	dateStripShowMonthDividers: boolean; // Show vertical dividers between months
+	dateStripCompact: boolean; // Use compact/smaller DateStrip
+	dateStripShowWeekNumbers: boolean; // Show week numbers at start of week
+	dateStripCollapsed: boolean; // Whether DateStrip is minimized to FAB
+
+	// TagStrip settings
+	tagStripCollapsed: boolean; // Whether TagStrip is hidden
+
+	// Immersive Mode settings
+	immersiveModeEnabled: boolean; // Fullscreen mode - hides all UI elements
+
+	// Birthday settings (cross-app integration with Contacts)
+	showBirthdays: boolean; // Show contact birthdays in calendar
+	showBirthdayAge: boolean; // Show age in birthday events
+
 	// UI settings
 	sidebarCollapsed: boolean;
+
+	// Quick View Pill settings
+	quickViewPillViews: CalendarViewType[]; // Views shown in quick switcher
+	customDayCount: number; // Custom day count for 'custom' view type (1-365)
 
 	// Event defaults
 	defaultEventDuration: number; // in minutes
@@ -44,7 +75,33 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	dayStartHour: 6,
 	dayEndHour: 20,
 	allDayDisplayMode: 'header',
+	// Header defaults
+	headerCompact: false,
+	headerWeekdayFormat: 'full',
+	headerShowDate: true,
+	headerAlwaysShowMonth: false,
+	// DateStrip defaults
+	dateStripShowMoonPhases: true,
+	dateStripShowEventIndicators: true,
+	dateStripShowWeekday: true,
+	dateStripHighlightWeekends: true,
+	dateStripShowMonthDividers: true,
+	dateStripCompact: false,
+	dateStripShowWeekNumbers: false,
+	dateStripCollapsed: false,
+	// TagStrip defaults
+	tagStripCollapsed: true, // Hidden by default
+	// Immersive Mode defaults
+	immersiveModeEnabled: false,
+	// Birthday defaults
+	showBirthdays: true,
+	showBirthdayAge: true,
+	// UI defaults
 	sidebarCollapsed: false,
+	// Quick View Pill defaults
+	quickViewPillViews: ['week', 'month', 'agenda'],
+	customDayCount: 30, // Default: 30 days (1 month)
+	// Event defaults
 	defaultEventDuration: 60,
 	defaultReminder: 15,
 };
@@ -142,6 +199,59 @@ export const settingsStore = {
 	get allDayDisplayMode() {
 		return settings.allDayDisplayMode;
 	},
+	// Header settings
+	get headerCompact() {
+		return settings.headerCompact;
+	},
+	get headerWeekdayFormat() {
+		return settings.headerWeekdayFormat;
+	},
+	get headerShowDate() {
+		return settings.headerShowDate;
+	},
+	get headerAlwaysShowMonth() {
+		return settings.headerAlwaysShowMonth;
+	},
+	// DateStrip settings
+	get dateStripShowMoonPhases() {
+		return settings.dateStripShowMoonPhases;
+	},
+	get dateStripShowEventIndicators() {
+		return settings.dateStripShowEventIndicators;
+	},
+	get dateStripShowWeekday() {
+		return settings.dateStripShowWeekday;
+	},
+	get dateStripHighlightWeekends() {
+		return settings.dateStripHighlightWeekends;
+	},
+	get dateStripShowMonthDividers() {
+		return settings.dateStripShowMonthDividers;
+	},
+	get dateStripCompact() {
+		return settings.dateStripCompact;
+	},
+	get dateStripShowWeekNumbers() {
+		return settings.dateStripShowWeekNumbers;
+	},
+	get dateStripCollapsed() {
+		return settings.dateStripCollapsed;
+	},
+	// TagStrip settings
+	get tagStripCollapsed() {
+		return settings.tagStripCollapsed;
+	},
+	// Immersive Mode settings
+	get immersiveModeEnabled() {
+		return settings.immersiveModeEnabled;
+	},
+	// Birthday settings
+	get showBirthdays() {
+		return settings.showBirthdays;
+	},
+	get showBirthdayAge() {
+		return settings.showBirthdayAge;
+	},
 	get defaultEventDuration() {
 		return settings.defaultEventDuration;
 	},
@@ -150,6 +260,12 @@ export const settingsStore = {
 	},
 	get sidebarCollapsed() {
 		return settings.sidebarCollapsed;
+	},
+	get quickViewPillViews() {
+		return settings.quickViewPillViews;
+	},
+	get customDayCount() {
+		return settings.customDayCount;
 	},
 	get cloudSyncEnabled() {
 		return cloudSyncEnabled;
@@ -187,6 +303,24 @@ export const settingsStore = {
 	 */
 	toggleSidebar() {
 		settings = { ...settings, sidebarCollapsed: !settings.sidebarCollapsed };
+		saveSettings(settings);
+		syncToCloud();
+	},
+
+	/**
+	 * Toggle TagStrip visibility
+	 */
+	toggleTagStrip() {
+		settings = { ...settings, tagStripCollapsed: !settings.tagStripCollapsed };
+		saveSettings(settings);
+		syncToCloud();
+	},
+
+	/**
+	 * Toggle Immersive Mode (fullscreen, hide all UI)
+	 */
+	toggleImmersiveMode() {
+		settings = { ...settings, immersiveModeEnabled: !settings.immersiveModeEnabled };
 		saveSettings(settings);
 		syncToCloud();
 	},

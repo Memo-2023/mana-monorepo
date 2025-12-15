@@ -3,30 +3,23 @@
 	import { _ } from 'svelte-i18n';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
+	import { contactsFilterStore } from '$lib/stores/filter.svelte';
 	import { goto } from '$app/navigation';
-	import type { ContactFilter, BirthdayFilter } from '$lib/components/FilterBar.svelte';
-	import ContactsToolbar, { type SortField } from '$lib/components/ContactsToolbar.svelte';
-	import ContactListView from '$lib/components/views/ContactListView.svelte';
 	import ContactGridView from '$lib/components/views/ContactGridView.svelte';
 	import ContactAlphabetView from '$lib/components/views/ContactAlphabetView.svelte';
-	import { ContactListSkeleton, ContactGridSkeleton } from '$lib/components/skeletons';
+	import ContactNetworkView from '$lib/components/views/ContactNetworkView.svelte';
+	import {
+		ContactListSkeleton,
+		ContactGridSkeleton,
+		NetworkGraphSkeleton,
+	} from '$lib/components/skeletons';
 	import { batchApi } from '$lib/api/batch';
 	import { toasts } from '$lib/stores/toast';
-
-	let searchQuery = $state('');
-	let sortField = $state<SortField>('lastName');
-	let searchTimeout: ReturnType<typeof setTimeout>;
+	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 
 	// Infinite scroll
-	let scrollContainer: HTMLDivElement;
 	let intersectionObserver: IntersectionObserver | null = null;
 	let loadMoreTrigger: HTMLDivElement;
-
-	// Filter state
-	let selectedTagId = $state<string | null>(null);
-	let contactFilter = $state<ContactFilter>('all');
-	let birthdayFilter = $state<BirthdayFilter>('all');
-	let selectedCompany = $state<string | null>(null);
 
 	// Batch selection state
 	let selectionMode = $state(false);
@@ -73,11 +66,31 @@
 		return !contact.phone && !contact.mobile && !contact.email;
 	}
 
-	// Filtered and sorted contacts
+	// Filtered and sorted contacts (using filter store)
 	let filteredContacts = $derived.by(() => {
 		let result = [...contactsStore.contacts];
 
-		// Apply contact filter
+		// Apply search filter from InputBar
+		const searchQuery = contactsFilterStore.searchQuery?.toLowerCase().trim();
+		if (searchQuery) {
+			result = result.filter((c) => {
+				const searchFields = [
+					c.firstName,
+					c.lastName,
+					c.displayName,
+					c.nickname,
+					c.company,
+					c.email,
+					c.phone,
+					c.mobile,
+					c.city,
+				];
+				return searchFields.some((field) => field?.toLowerCase().includes(searchQuery));
+			});
+		}
+
+		// Apply contact filter from store
+		const contactFilter = contactsFilterStore.contactFilter;
 		if (contactFilter === 'favorites') {
 			result = result.filter((c) => c.isFavorite);
 		} else if (contactFilter === 'hasPhone') {
@@ -88,7 +101,8 @@
 			result = result.filter((c) => isContactIncomplete(c));
 		}
 
-		// Apply birthday filter
+		// Apply birthday filter from store
+		const birthdayFilter = contactsFilterStore.birthdayFilter;
 		if (birthdayFilter === 'today') {
 			result = result.filter((c) => isBirthdayToday(c.birthday));
 		} else if (birthdayFilter === 'thisWeek') {
@@ -97,7 +111,8 @@
 			result = result.filter((c) => isBirthdayThisMonth(c.birthday));
 		}
 
-		// Apply company filter
+		// Apply company filter from store
+		const selectedCompany = contactsFilterStore.selectedCompany;
 		if (selectedCompany) {
 			result = result.filter((c) => c.company === selectedCompany);
 		}
@@ -105,8 +120,9 @@
 		return result;
 	});
 
-	// Sorted contacts based on selected sort field
+	// Sorted contacts based on selected sort field from store
 	let sortedContacts = $derived.by(() => {
+		const sortField = contactsFilterStore.sortField;
 		return [...filteredContacts].sort((a, b) => {
 			const aValue =
 				(sortField === 'firstName'
@@ -121,14 +137,6 @@
 			return aValue.localeCompare(bValue, 'de');
 		});
 	});
-
-	function handleSearch() {
-		clearTimeout(searchTimeout);
-		searchTimeout = setTimeout(() => {
-			contactsStore.setSearch(searchQuery);
-			contactsStore.loadContacts();
-		}, 300);
-	}
 
 	async function handleToggleFavorite(e: MouseEvent, id: string) {
 		e.stopPropagation();
@@ -266,11 +274,26 @@
 			intersectionObserver.observe(loadMoreTrigger);
 		}
 	});
+
+	// Reload contacts when tag filter changes (tag filtering is server-side)
+	let lastTagId: string | null = null;
+	$effect(() => {
+		const currentTagId = contactsFilterStore.selectedTagId;
+		if (currentTagId !== lastTagId) {
+			lastTagId = currentTagId;
+			if (currentTagId) {
+				contactsStore.setTagId(currentTagId);
+			} else {
+				contactsStore.setTagId(undefined);
+			}
+			contactsStore.loadContacts();
+		}
+	});
 </script>
 
 <div class="space-y-6">
 	<!-- Header -->
-	<h1 class="text-2xl font-bold text-foreground">{$_('contacts.title')}</h1>
+	<h1 class="text-2xl font-bold text-foreground text-center">{$_('contacts.title')}</h1>
 
 	<!-- Batch Actions Bar (shown when in selection mode) -->
 	{#if selectionMode}
@@ -349,58 +372,11 @@
 		</div>
 	{/if}
 
-	<!-- Search Bar -->
-	<div class="relative">
-		<input
-			type="text"
-			placeholder={$_('contacts.search')}
-			bind:value={searchQuery}
-			oninput={handleSearch}
-			class="input w-full pl-10"
-		/>
-		<svg
-			class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
-			fill="none"
-			stroke="currentColor"
-			viewBox="0 0 24 24"
-		>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-			/>
-		</svg>
-	</div>
-
-	<!-- Unified Toolbar -->
-	<ContactsToolbar
-		contacts={contactsStore.contacts}
-		{sortField}
-		onSortFieldChange={(v) => (sortField = v)}
-		{contactFilter}
-		onContactFilterChange={(f) => (contactFilter = f)}
-		{birthdayFilter}
-		onBirthdayFilterChange={(f) => (birthdayFilter = f)}
-		{selectedTagId}
-		onTagChange={(id) => {
-			selectedTagId = id;
-			if (id) {
-				contactsStore.setTagId(id);
-			} else {
-				contactsStore.setTagId(undefined);
-			}
-			contactsStore.loadContacts();
-		}}
-		{selectedCompany}
-		onCompanyChange={(c) => (selectedCompany = c)}
-		{selectionMode}
-		onToggleSelectionMode={toggleSelectionMode}
-	/>
-
 	<!-- Loading state with skeleton -->
 	{#if contactsStore.loading}
-		{#if viewModeStore.mode === 'grid'}
+		{#if viewModeStore.mode === 'network'}
+			<NetworkGraphSkeleton />
+		{:else if viewModeStore.mode === 'grid'}
 			<ContactGridSkeleton count={8} />
 		{:else}
 			<ContactListSkeleton count={10} />
@@ -411,13 +387,15 @@
 			<div class="text-6xl mb-4">👤</div>
 			<h2 class="text-xl font-semibold text-foreground mb-2">{$_('contacts.noContacts')}</h2>
 			<p class="text-muted-foreground mb-4">{$_('contacts.addFirst')}</p>
-			<a href="/contacts/new" class="btn btn-primary">
+			<button type="button" onclick={() => newContactModalStore.open()} class="btn btn-primary">
 				{$_('contacts.new')}
-			</a>
+			</button>
 		</div>
 	{:else}
 		<!-- Contacts View -->
-		{#if viewModeStore.mode === 'grid'}
+		{#if viewModeStore.mode === 'network'}
+			<ContactNetworkView />
+		{:else if viewModeStore.mode === 'grid'}
 			<ContactGridView
 				contacts={sortedContacts}
 				onContactClick={handleContactClick}
@@ -426,7 +404,7 @@
 				{selectedIds}
 				onToggleSelection={toggleSelection}
 			/>
-		{:else if viewModeStore.mode === 'alphabet'}
+		{:else}
 			<ContactAlphabetView
 				contacts={sortedContacts}
 				onContactClick={handleContactClick}
@@ -434,21 +412,12 @@
 				{selectionMode}
 				{selectedIds}
 				onToggleSelection={toggleSelection}
-				{sortField}
-			/>
-		{:else}
-			<ContactListView
-				contacts={sortedContacts}
-				onContactClick={handleContactClick}
-				onToggleFavorite={handleToggleFavorite}
-				{selectionMode}
-				{selectedIds}
-				onToggleSelection={toggleSelection}
+				sortField={contactsFilterStore.sortField}
 			/>
 		{/if}
 
-		<!-- Infinite scroll trigger & loading more indicator -->
-		{#if contactsStore.hasMore}
+		<!-- Infinite scroll trigger & loading more indicator (not for network view) -->
+		{#if viewModeStore.mode !== 'network' && contactsStore.hasMore}
 			<div bind:this={loadMoreTrigger} class="load-more-trigger">
 				{#if contactsStore.loadingMore}
 					<div class="loading-more">
@@ -459,11 +428,13 @@
 			</div>
 		{/if}
 
-		<!-- Total count -->
-		<p class="text-sm text-muted-foreground text-center">
-			{contactsStore.contacts.length} / {contactsStore.total}
-			{contactsStore.total === 1 ? $_('contacts.contact') : $_('contacts.contactsPlural')}
-		</p>
+		<!-- Total count (not for network view) -->
+		{#if viewModeStore.mode !== 'network'}
+			<p class="text-sm text-muted-foreground text-center">
+				{contactsStore.contacts.length} / {contactsStore.total}
+				{contactsStore.total === 1 ? $_('contacts.contact') : $_('contacts.contactsPlural')}
+			</p>
+		{/if}
 	{/if}
 </div>
 

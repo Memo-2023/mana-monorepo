@@ -33,6 +33,11 @@
   --color-surface: var(--theme-surface);
   --color-surface-hover: var(--theme-surface-hover);
   --color-surface-elevated: var(--theme-surface-elevated);
+
+  /* Elevation system - progressively lighter surfaces for overlays */
+  --color-surface-elevated-1: var(--theme-surface-elevated-1);
+  --color-surface-elevated-2: var(--theme-surface-elevated-2);
+  --color-surface-elevated-3: var(--theme-surface-elevated-3);
   --color-muted: var(--theme-muted);
   --color-muted-foreground: var(--theme-muted-foreground);
   --color-border: var(--theme-border);
@@ -129,6 +134,10 @@
   --theme-surface: hsl(0 0% 100%);
   --theme-surface-hover: hsl(0 0% 96%);
   --theme-surface-elevated: hsl(0 0% 100%);
+  /* Elevation system - progressively lighter surfaces for overlays */
+  --theme-surface-elevated-1: hsl(0 0% 100%);
+  --theme-surface-elevated-2: hsl(0 0% 100%);
+  --theme-surface-elevated-3: hsl(0 0% 100%);
   --theme-muted: hsl(0 0% 90%);
   --theme-muted-foreground: hsl(0 0% 40%);
   --theme-border: hsl(0 0% 90%);
@@ -192,6 +201,10 @@
   --theme-surface: hsl(0 0% 12%);
   --theme-surface-hover: hsl(0 0% 16%);
   --theme-surface-elevated: hsl(0 0% 14%);
+  /* Elevation system - progressively lighter surfaces for overlays */
+  --theme-surface-elevated-1: hsl(0 0% 16%);
+  --theme-surface-elevated-2: hsl(0 0% 20%);
+  --theme-surface-elevated-3: hsl(0 0% 24%);
   --theme-muted: hsl(0 0% 20%);
   --theme-muted-foreground: hsl(0 0% 60%);
   --theme-border: hsl(0 0% 26%);
@@ -244,6 +257,9 @@
   --theme-surface: hsl(0 0% 100%);
   --theme-surface-hover: hsl(0 0% 96%);
   --theme-surface-elevated: hsl(0 0% 100%);
+  --theme-surface-elevated-1: hsl(0 0% 100%);
+  --theme-surface-elevated-2: hsl(0 0% 100%);
+  --theme-surface-elevated-3: hsl(0 0% 100%);
   --theme-muted: hsl(0 0% 90%);
   --theme-muted-foreground: hsl(0 0% 40%);
   --theme-border: hsl(0 0% 90%);
@@ -275,6 +291,9 @@
   --theme-surface: hsl(0 0% 12%);
   --theme-surface-hover: hsl(0 0% 16%);
   --theme-surface-elevated: hsl(0 0% 14%);
+  --theme-surface-elevated-1: hsl(0 0% 16%);
+  --theme-surface-elevated-2: hsl(0 0% 20%);
+  --theme-surface-elevated-3: hsl(0 0% 24%);
   --theme-muted: hsl(0 0% 20%);
   --theme-muted-foreground: hsl(0 0% 60%);
   --theme-border: hsl(0 0% 26%);
@@ -306,6 +325,9 @@
   --theme-surface: hsl(0 0% 100%);
   --theme-surface-hover: hsl(120 25% 95%);
   --theme-surface-elevated: hsl(0 0% 100%);
+  --theme-surface-elevated-1: hsl(0 0% 100%);
+  --theme-surface-elevated-2: hsl(0 0% 100%);
+  --theme-surface-elevated-3: hsl(0 0% 100%);
   --theme-muted: hsl(120 25% 95%);
   --theme-muted-foreground: hsl(122 20% 40%);
   --theme-border: hsl(120 25% 91%);
@@ -337,6 +359,9 @@
   --theme-surface: hsl(120 10% 12%);
   --theme-surface-hover: hsl(120 10% 16%);
   --theme-surface-elevated: hsl(120 10% 14%);
+  --theme-surface-elevated-1: hsl(120 10% 16%);
+  --theme-surface-elevated-2: hsl(120 10% 20%);
+  --theme-surface-elevated-3: hsl(120 10% 24%);
   --theme-muted: hsl(120 10% 20%);
   --theme-muted-foreground: hsl(120 10% 60%);
   --theme-border: hsl(120 10% 25%);
@@ -368,6 +393,9 @@
   --theme-surface: hsl(0 0% 100%);
   --theme-surface-hover: hsl(200 10% 94%);
   --theme-surface-elevated: hsl(0 0% 100%);
+  --theme-surface-elevated-1: hsl(0 0% 100%);
+  --theme-surface-elevated-2: hsl(0 0% 100%);
+  --theme-surface-elevated-3: hsl(0 0% 100%);
   --theme-muted: hsl(200 10% 94%);
   --theme-muted-foreground: hsl(200 10% 45%);
   --theme-border: hsl(200 10% 88%);
@@ -399,6 +427,9 @@
   --theme-surface: hsl(200 10% 12%);
   --theme-surface-hover: hsl(200 10% 16%);
   --theme-surface-elevated: hsl(200 10% 14%);
+  --theme-surface-elevated-1: hsl(200 10% 16%);
+  --theme-surface-elevated-2: hsl(200 10% 20%);
+  --theme-surface-elevated-3: hsl(200 10% 24%);
   --theme-muted: hsl(200 10% 20%);
   --theme-muted-foreground: hsl(200 10% 60%);
   --theme-border: hsl(200 10% 25%);
@@ -430,6 +461,9 @@
   --theme-surface: hsl(0 0% 100%);
   --theme-surface-hover: hsl(199 100% 94%);
   --theme-surface-elevated: hsl(0 0% 100%);
+  --theme-surface-elevated-1: hsl(0 0% 100%);
+  --theme-surface-elevated-2: hsl(0 0% 100%);
+  --theme-surface-elevated-3: hsl(0 0% 100%);
   --theme-muted: hsl(199 100% 94%);
   --theme-muted-foreground: hsl(199 50% 40%);
   --theme-border: hsl(199 71% 87%);
@@ -461,6 +495,9 @@
   --theme-surface: hsl(199 30% 12%);
   --theme-surface-hover: hsl(199 30% 16%);
   --theme-surface-elevated: hsl(199 30% 14%);
+  --theme-surface-elevated-1: hsl(199 30% 16%);
+  --theme-surface-elevated-2: hsl(199 30% 20%);
+  --theme-surface-elevated-3: hsl(199 30% 24%);
   --theme-muted: hsl(199 20% 20%);
   --theme-muted-foreground: hsl(199 20% 60%);
   --theme-border: hsl(199 20% 25%);
@@ -493,6 +530,9 @@
     --theme-surface: hsl(0 0% 12%);
     --theme-surface-hover: hsl(0 0% 16%);
     --theme-surface-elevated: hsl(0 0% 14%);
+    --theme-surface-elevated-1: hsl(0 0% 16%);
+    --theme-surface-elevated-2: hsl(0 0% 20%);
+    --theme-surface-elevated-3: hsl(0 0% 24%);
     --theme-muted: hsl(0 0% 20%);
     --theme-muted-foreground: hsl(0 0% 60%);
     --theme-border: hsl(0 0% 26%);

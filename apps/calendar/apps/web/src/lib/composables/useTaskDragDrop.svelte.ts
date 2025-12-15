@@ -1,306 +1,321 @@
 /**
- * Composable for Task Drag & Drop in Calendar Views
- * Handles dragging tasks to reschedule and resizing to change duration
+ * Task Drag & Drop + Resize Composable
+ * Extracts duplicated task drag/resize logic from WeekView, DayView, MultiDayView
+ *
+ * Uses document-level event listeners for smooth drag operations across the entire screen.
  */
 
-import type { Task, UpdateTaskInput } from '$lib/api/todos';
+import type { Task } from '$lib/stores/todos.svelte';
 import { todosStore } from '$lib/stores/todos.svelte';
-import { format, parseISO, addMinutes, differenceInMinutes, setHours, setMinutes } from 'date-fns';
+import { format } from 'date-fns';
+import { SNAP_INTERVAL_MINUTES } from '$lib/utils/calendarConstants';
 
-const SNAP_MINUTES = 15;
-
-interface UseTaskDragDropOptions {
-	/** Minimum snap interval in minutes */
+export interface TaskDragDropConfig {
+	/** Reference to the container element for position calculations */
+	containerEl: HTMLElement | null;
+	/** Array of visible days (for multi-day views) or single day (for day view) */
+	days: Date[];
+	/** First visible hour (for filtered hours mode) */
+	firstVisibleHour: number;
+	/** Total visible hours */
+	totalVisibleHours: number;
+	/** Minutes per snap interval (default: 15) */
 	snapMinutes?: number;
-	/** Callback when task is updated */
-	onTaskUpdate?: (task: Task) => void;
 }
 
-export function useTaskDragDrop(options: UseTaskDragDropOptions = {}) {
-	const snapMinutes = options.snapMinutes ?? SNAP_MINUTES;
-
-	// Drag state
-	let isDragging = $state(false);
+export function useTaskDragDrop(getConfig: () => TaskDragDropConfig) {
+	// ========== Drag State ==========
+	let isTaskDragging = $state(false);
 	let draggedTask = $state<Task | null>(null);
-	let dragStartY = $state(0);
-	let dragTargetDay = $state<Date | null>(null);
-	let dragPreviewTop = $state(0);
-	let dragPreviewHeight = $state(0);
+	let taskDragTargetDay = $state<Date | null>(null);
+	let taskDragPreviewTop = $state(0);
+	let taskDragPreviewHeight = $state(0);
 
-	// Resize state
-	let isResizing = $state(false);
+	// ========== Resize State ==========
+	let isTaskResizing = $state(false);
 	let resizeTask = $state<Task | null>(null);
-	let resizeEdge = $state<'top' | 'bottom'>('bottom');
-	let resizeStartY = $state(0);
-	let resizePreviewTop = $state(0);
-	let resizePreviewHeight = $state(0);
+	let taskResizeEdge = $state<'top' | 'bottom'>('bottom');
+	let taskResizePreviewTop = $state(0);
+	let taskResizePreviewHeight = $state(0);
 
-	// Track if we actually moved
+	// Track if we actually moved during drag/resize
 	let hasMoved = $state(false);
 
-	/**
-	 * Start dragging a task
-	 */
-	function startDrag(
-		task: Task,
-		e: PointerEvent,
-		gridElement: HTMLElement,
-		firstVisibleHour: number,
-		totalVisibleHours: number
-	) {
+	// ========== Helper Functions ==========
+
+	function getSnapMinutes(): number {
+		return getConfig().snapMinutes ?? SNAP_INTERVAL_MINUTES;
+	}
+
+	function formatTime(hours: number, minutes: number): string {
+		return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+	}
+
+	// ========== Drag Functions ==========
+
+	function startDrag(task: Task, e: PointerEvent) {
 		e.preventDefault();
-		isDragging = true;
+
+		const config = getConfig();
+		isTaskDragging = true;
 		draggedTask = task;
-		dragStartY = e.clientY;
 		hasMoved = false;
 
-		// Calculate initial position
+		// Initialize preview position from task's current time
 		if (task.scheduledStartTime) {
 			const [h, m] = task.scheduledStartTime.split(':').map(Number);
-			const startMinutes = h * 60 + m - firstVisibleHour * 60;
-			dragPreviewTop = (startMinutes / (totalVisibleHours * 60)) * 100;
+			const startMinutes = h * 60 + m - config.firstVisibleHour * 60;
+			taskDragPreviewTop = (startMinutes / (config.totalVisibleHours * 60)) * 100;
 		}
 
-		// Calculate height from duration
 		const duration = task.estimatedDuration || 30;
-		dragPreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
+		taskDragPreviewHeight = (duration / (config.totalVisibleHours * 60)) * 100;
 
-		// Capture pointer
-		(e.target as HTMLElement).setPointerCapture(e.pointerId);
+		document.addEventListener('pointermove', handleDragMove);
+		document.addEventListener('pointerup', handleDragEnd);
 	}
 
-	/**
-	 * Handle drag move
-	 */
-	function onDragMove(
-		e: PointerEvent,
-		gridElement: HTMLElement,
-		day: Date,
-		firstVisibleHour: number,
-		totalVisibleHours: number
-	) {
-		if (!isDragging || !draggedTask) return;
+	function handleDragMove(e: PointerEvent) {
+		if (!isTaskDragging || !draggedTask) return;
 
+		const config = getConfig();
 		hasMoved = true;
-		dragTargetDay = day;
 
-		const rect = gridElement.getBoundingClientRect();
+		// Find which day column we're over
+		if (config.containerEl) {
+			const dayColumns = config.containerEl.querySelectorAll('.day-column');
+			for (let i = 0; i < dayColumns.length; i++) {
+				const col = dayColumns[i];
+				const rect = col.getBoundingClientRect();
+				if (e.clientX >= rect.left && e.clientX <= rect.right) {
+					taskDragTargetDay = config.days[i];
+					break;
+				}
+			}
+		}
+
+		// Calculate vertical position
+		const targetColumn = config.containerEl?.querySelector('.day-column');
+		if (!targetColumn) return;
+
+		const rect = targetColumn.getBoundingClientRect();
 		const relativeY = e.clientY - rect.top;
-		const percentY = (relativeY / rect.height) * 100;
+		const percentY = Math.max(0, Math.min(100, (relativeY / rect.height) * 100));
 
 		// Snap to intervals
-		const minutesPerPercent = (totalVisibleHours * 60) / 100;
-		const rawMinutes = percentY * minutesPerPercent + firstVisibleHour * 60;
+		const minutesPerPercent = (config.totalVisibleHours * 60) / 100;
+		const rawMinutes = percentY * minutesPerPercent;
+		const snapMinutes = getSnapMinutes();
 		const snappedMinutes = Math.round(rawMinutes / snapMinutes) * snapMinutes;
-
-		dragPreviewTop = ((snappedMinutes - firstVisibleHour * 60) / (totalVisibleHours * 60)) * 100;
+		taskDragPreviewTop = (snappedMinutes / (config.totalVisibleHours * 60)) * 100;
 	}
 
-	/**
-	 * End drag and update task
-	 */
-	async function endDrag(firstVisibleHour: number, totalVisibleHours: number) {
-		if (!isDragging || !draggedTask || !hasMoved) {
-			isDragging = false;
-			draggedTask = null;
-			dragTargetDay = null;
+	async function handleDragEnd() {
+		document.removeEventListener('pointermove', handleDragMove);
+		document.removeEventListener('pointerup', handleDragEnd);
+
+		if (!isTaskDragging || !draggedTask || !hasMoved) {
+			cleanupDrag();
 			return;
 		}
 
-		// Calculate new time from position
-		const minutesFromMidnight =
-			(dragPreviewTop / 100) * (totalVisibleHours * 60) + firstVisibleHour * 60;
-		const hours = Math.floor(minutesFromMidnight / 60);
-		const minutes = Math.round(minutesFromMidnight % 60);
+		const config = getConfig();
 
-		const newStartTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+		// Calculate new time from position
+		const minutesFromStart = (taskDragPreviewTop / 100) * (config.totalVisibleHours * 60);
+		const totalMinutes = config.firstVisibleHour * 60 + minutesFromStart;
+		const hours = Math.floor(totalMinutes / 60);
+		const minutes = Math.round(totalMinutes % 60);
+
+		const newStartTime = formatTime(hours, minutes);
 
 		// Calculate end time based on duration
 		const duration = draggedTask.estimatedDuration || 30;
-		const endMinutes = minutesFromMidnight + duration;
-		const endHours = Math.floor(endMinutes / 60);
-		const endMins = Math.round(endMinutes % 60);
-		const newEndTime = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+		const endTotalMinutes = totalMinutes + duration;
+		const endHours = Math.floor(endTotalMinutes / 60);
+		const endMins = Math.round(endTotalMinutes % 60);
+		const newEndTime = formatTime(endHours, endMins);
 
-		const updateData: UpdateTaskInput = {
-			scheduledDate: dragTargetDay
-				? format(dragTargetDay, 'yyyy-MM-dd')
-				: draggedTask.scheduledDate,
+		await todosStore.updateTodo(draggedTask.id, {
+			scheduledDate: taskDragTargetDay ? format(taskDragTargetDay, 'yyyy-MM-dd') : undefined,
 			scheduledStartTime: newStartTime,
 			scheduledEndTime: newEndTime,
-		};
+		});
 
-		const result = await todosStore.updateTodo(draggedTask.id, updateData);
-		if (result.data) {
-			options.onTaskUpdate?.(result.data);
-		}
+		cleanupDrag();
+	}
 
-		isDragging = false;
+	function cleanupDrag() {
+		isTaskDragging = false;
 		draggedTask = null;
-		dragTargetDay = null;
+		taskDragTargetDay = null;
 		hasMoved = false;
 	}
 
-	/**
-	 * Start resizing a task
-	 */
-	function startResize(
-		task: Task,
-		edge: 'top' | 'bottom',
-		e: PointerEvent,
-		firstVisibleHour: number,
-		totalVisibleHours: number
-	) {
+	// ========== Resize Functions ==========
+
+	function startResize(task: Task, edge: 'top' | 'bottom', e: PointerEvent) {
 		e.preventDefault();
 		e.stopPropagation();
-		isResizing = true;
+
+		const config = getConfig();
+		isTaskResizing = true;
 		resizeTask = task;
-		resizeEdge = edge;
-		resizeStartY = e.clientY;
+		taskResizeEdge = edge;
 		hasMoved = false;
 
 		// Initialize preview position
 		if (task.scheduledStartTime) {
 			const [h, m] = task.scheduledStartTime.split(':').map(Number);
-			const startMinutes = h * 60 + m - firstVisibleHour * 60;
-			resizePreviewTop = (startMinutes / (totalVisibleHours * 60)) * 100;
+			const startMinutes = h * 60 + m - config.firstVisibleHour * 60;
+			taskResizePreviewTop = (startMinutes / (config.totalVisibleHours * 60)) * 100;
 		}
 
 		const duration = task.estimatedDuration || 30;
-		resizePreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
+		taskResizePreviewHeight = (duration / (config.totalVisibleHours * 60)) * 100;
 
-		(e.target as HTMLElement).setPointerCapture(e.pointerId);
+		document.addEventListener('pointermove', handleResizeMove);
+		document.addEventListener('pointerup', handleResizeEnd);
 	}
 
-	/**
-	 * Handle resize move
-	 */
-	function onResizeMove(
-		e: PointerEvent,
-		gridElement: HTMLElement,
-		firstVisibleHour: number,
-		totalVisibleHours: number
-	) {
-		if (!isResizing || !resizeTask) return;
+	function handleResizeMove(e: PointerEvent) {
+		if (!isTaskResizing || !resizeTask) return;
 
+		const config = getConfig();
 		hasMoved = true;
 
-		const rect = gridElement.getBoundingClientRect();
+		const targetColumn = config.containerEl?.querySelector('.day-column');
+		if (!targetColumn) return;
+
+		const rect = targetColumn.getBoundingClientRect();
 		const relativeY = e.clientY - rect.top;
 		const percentY = Math.max(0, Math.min(100, (relativeY / rect.height) * 100));
 
-		const minutesPerPercent = (totalVisibleHours * 60) / 100;
+		const minutesPerPercent = (config.totalVisibleHours * 60) / 100;
+		const snapMinutes = getSnapMinutes();
 
-		if (resizeEdge === 'top') {
+		if (taskResizeEdge === 'top') {
 			// Adjust start time, keep end fixed
-			const originalEndPercent = resizePreviewTop + resizePreviewHeight;
+			const originalEndPercent = taskResizePreviewTop + taskResizePreviewHeight;
 			const rawMinutes = percentY * minutesPerPercent;
 			const snappedMinutes = Math.round(rawMinutes / snapMinutes) * snapMinutes;
-			resizePreviewTop = (snappedMinutes / (totalVisibleHours * 60)) * 100;
-			resizePreviewHeight = Math.max(2, originalEndPercent - resizePreviewTop);
+			taskResizePreviewTop = (snappedMinutes / (config.totalVisibleHours * 60)) * 100;
+			taskResizePreviewHeight = Math.max(2, originalEndPercent - taskResizePreviewTop);
 		} else {
 			// Adjust end time, keep start fixed
 			const rawMinutes = percentY * minutesPerPercent;
 			const snappedMinutes = Math.round(rawMinutes / snapMinutes) * snapMinutes;
-			const newBottom = (snappedMinutes / (totalVisibleHours * 60)) * 100;
-			resizePreviewHeight = Math.max(2, newBottom - resizePreviewTop);
+			const newBottom = (snappedMinutes / (config.totalVisibleHours * 60)) * 100;
+			taskResizePreviewHeight = Math.max(2, newBottom - taskResizePreviewTop);
 		}
 	}
 
-	/**
-	 * End resize and update task
-	 */
-	async function endResize(firstVisibleHour: number, totalVisibleHours: number) {
-		if (!isResizing || !resizeTask || !hasMoved) {
-			isResizing = false;
-			resizeTask = null;
+	async function handleResizeEnd() {
+		document.removeEventListener('pointermove', handleResizeMove);
+		document.removeEventListener('pointerup', handleResizeEnd);
+
+		if (!isTaskResizing || !resizeTask || !hasMoved) {
+			cleanupResize();
 			return;
 		}
 
+		const config = getConfig();
+
 		// Calculate new times from position
 		const startMinutes =
-			(resizePreviewTop / 100) * (totalVisibleHours * 60) + firstVisibleHour * 60;
+			(taskResizePreviewTop / 100) * (config.totalVisibleHours * 60) + config.firstVisibleHour * 60;
 		const endMinutes =
-			((resizePreviewTop + resizePreviewHeight) / 100) * (totalVisibleHours * 60) +
-			firstVisibleHour * 60;
+			((taskResizePreviewTop + taskResizePreviewHeight) / 100) * (config.totalVisibleHours * 60) +
+			config.firstVisibleHour * 60;
 
 		const startHours = Math.floor(startMinutes / 60);
 		const startMins = Math.round(startMinutes % 60);
 		const endHours = Math.floor(endMinutes / 60);
 		const endMins = Math.round(endMinutes % 60);
 
-		const newStartTime = `${startHours.toString().padStart(2, '0')}:${startMins.toString().padStart(2, '0')}`;
-		const newEndTime = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+		const newStartTime = formatTime(startHours, startMins);
+		const newEndTime = formatTime(endHours, endMins);
 		const newDuration = Math.round(endMinutes - startMinutes);
 
-		const updateData: UpdateTaskInput = {
+		await todosStore.updateTodo(resizeTask.id, {
 			scheduledStartTime: newStartTime,
 			scheduledEndTime: newEndTime,
 			estimatedDuration: newDuration,
-		};
+		});
 
-		const result = await todosStore.updateTodo(resizeTask.id, updateData);
-		if (result.data) {
-			options.onTaskUpdate?.(result.data);
-		}
+		cleanupResize();
+	}
 
-		isResizing = false;
+	function cleanupResize() {
+		isTaskResizing = false;
 		resizeTask = null;
 		hasMoved = false;
+	}
+
+	// ========== Combined Cleanup ==========
+
+	function cleanup() {
+		document.removeEventListener('pointermove', handleDragMove);
+		document.removeEventListener('pointerup', handleDragEnd);
+		document.removeEventListener('pointermove', handleResizeMove);
+		document.removeEventListener('pointerup', handleResizeEnd);
+		cleanupDrag();
+		cleanupResize();
 	}
 
 	/**
-	 * Cancel any ongoing drag/resize
+	 * Cancel any active drag/resize operation
 	 */
 	function cancel() {
-		isDragging = false;
-		isResizing = false;
-		draggedTask = null;
-		resizeTask = null;
-		dragTargetDay = null;
-		hasMoved = false;
+		if (isTaskDragging || isTaskResizing) {
+			cleanup();
+		}
 	}
 
 	return {
-		// State getters
-		get isDragging() {
-			return isDragging;
+		// Drag state (reactive getters)
+		get isTaskDragging() {
+			return isTaskDragging;
 		},
 		get draggedTask() {
 			return draggedTask;
 		},
-		get dragTargetDay() {
-			return dragTargetDay;
+		get taskDragTargetDay() {
+			return taskDragTargetDay;
 		},
-		get dragPreviewTop() {
-			return dragPreviewTop;
+		get taskDragPreviewTop() {
+			return taskDragPreviewTop;
 		},
-		get dragPreviewHeight() {
-			return dragPreviewHeight;
+		get taskDragPreviewHeight() {
+			return taskDragPreviewHeight;
 		},
-		get isResizing() {
-			return isResizing;
+
+		// Resize state (reactive getters)
+		get isTaskResizing() {
+			return isTaskResizing;
 		},
 		get resizeTask() {
 			return resizeTask;
 		},
-		get resizePreviewTop() {
-			return resizePreviewTop;
+		get taskResizeEdge() {
+			return taskResizeEdge;
 		},
-		get resizePreviewHeight() {
-			return resizePreviewHeight;
+		get taskResizePreviewTop() {
+			return taskResizePreviewTop;
 		},
+		get taskResizePreviewHeight() {
+			return taskResizePreviewHeight;
+		},
+
+		// Shared state
 		get hasMoved() {
 			return hasMoved;
 		},
 
 		// Methods
 		startDrag,
-		onDragMove,
-		endDrag,
 		startResize,
-		onResizeMove,
-		endResize,
 		cancel,
+		cleanup,
 	};
 }

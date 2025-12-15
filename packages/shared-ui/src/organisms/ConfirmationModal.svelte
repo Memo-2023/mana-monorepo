@@ -162,8 +162,8 @@
 				onclick={onClose}
 				disabled={loading}
 				class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm
-					   bg-black/5 dark:bg-white/10 text-foreground
-					   hover:bg-black/10 dark:hover:bg-white/20 hover:shadow-md
+					   bg-foreground/5 text-foreground
+					   hover:bg-foreground/10 hover:shadow-md
 					   transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0
 					   disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
 			>

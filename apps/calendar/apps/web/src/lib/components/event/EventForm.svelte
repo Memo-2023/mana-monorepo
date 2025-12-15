@@ -3,8 +3,14 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
-	import { TagSelector, type Tag } from '@manacore/shared-ui';
+	import {
+		TagSelector,
+		FilterDropdown,
+		type Tag,
+		type FilterDropdownOption,
+	} from '@manacore/shared-ui';
 	import AttendeeSelector from './AttendeeSelector.svelte';
+	import ResponsiblePersonSelector from './ResponsiblePersonSelector.svelte';
 	import type {
 		CalendarEvent,
 		CreateEventInput,
@@ -12,8 +18,10 @@
 		LocationDetails,
 		EventTag,
 		EventAttendee,
+		ResponsiblePerson,
 	} from '@calendar/shared';
-	import { format, addMinutes, parseISO } from 'date-fns';
+	import { format, addMinutes } from 'date-fns';
+	import { toDate } from '$lib/utils/eventDateHelpers';
 
 	interface Props {
 		mode: 'create' | 'edit';
@@ -51,6 +59,11 @@
 		})) || []
 	);
 
+	// Responsible person state
+	let responsiblePerson = $state<ResponsiblePerson | null>(
+		event?.metadata?.responsiblePerson || null
+	);
+
 	// Attendees state
 	let attendees = $state<EventAttendee[]>(event?.metadata?.attendees || []);
 
@@ -70,6 +83,18 @@
 
 	// Derived available tags for TagSelector
 	let availableTags = $derived(eventTagsStore.tags.map(eventTagToTag));
+
+	// Calendar options for FilterDropdown
+	let calendarOptions = $derived<FilterDropdownOption[]>(
+		calendarsStore.calendars.map((cal) => ({ value: cal.id, label: cal.name }))
+	);
+
+	// All-day display mode options
+	const displayModeOptions: FilterDropdownOption[] = [
+		{ value: 'default', label: 'Standard (aus Einstellungen)' },
+		{ value: 'header', label: 'In Kopfzeile' },
+		{ value: 'block', label: 'Als Tagesblock' },
+	];
 
 	// Auto-expand location details if any field is filled
 	$effect(() => {
@@ -97,9 +122,8 @@
 	// Initialize date/time fields using settings for default duration
 	$effect(() => {
 		if (event) {
-			const start =
-				typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-			const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+			const start = toDate(event.startTime);
+			const end = toDate(event.endTime);
 			startDate = format(start, 'yyyy-MM-dd');
 			startTime = format(start, 'HH:mm');
 			endDate = format(end, 'yyyy-MM-dd');
@@ -172,6 +196,13 @@
 			delete metadata.locationDetails;
 		}
 
+		// Add responsible person
+		if (responsiblePerson) {
+			metadata.responsiblePerson = responsiblePerson;
+		} else {
+			delete metadata.responsiblePerson;
+		}
+
 		// Add attendees
 		if (attendees.length > 0) {
 			metadata.attendees = attendees;
@@ -214,17 +245,14 @@
 	</div>
 
 	<div class="flex flex-col gap-2">
-		<label for="calendar" class="text-sm font-medium text-foreground">Kalender</label>
+		<span class="text-sm font-medium text-foreground">Kalender</span>
 		{#if calendarsStore.calendars.length > 0}
-			<select
-				id="calendar"
-				class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
-				bind:value={calendarId}
-			>
-				{#each calendarsStore.calendars as cal}
-					<option value={cal.id}>{cal.name}</option>
-				{/each}
-			</select>
+			<FilterDropdown
+				options={calendarOptions}
+				value={calendarId}
+				onChange={(v) => (calendarId = typeof v === 'string' ? v : '')}
+				placeholder="Kalender wählen"
+			/>
 		{:else}
 			<p class="text-sm text-muted-foreground italic">Standardkalender wird automatisch erstellt</p>
 		{/if}
@@ -239,16 +267,13 @@
 
 	{#if isAllDay}
 		<div class="flex flex-col gap-2">
-			<label for="displayMode" class="text-sm font-medium text-foreground">Anzeigeart</label>
-			<select
-				id="displayMode"
-				class="w-full px-3 py-2 border-2 border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary transition-colors"
-				bind:value={allDayDisplayMode}
-			>
-				<option value="default">Standard (aus Einstellungen)</option>
-				<option value="header">In Kopfzeile</option>
-				<option value="block">Als Tagesblock</option>
-			</select>
+			<span class="text-sm font-medium text-foreground">Anzeigeart</span>
+			<FilterDropdown
+				options={displayModeOptions}
+				value={allDayDisplayMode}
+				onChange={(v) => (allDayDisplayMode = (v as 'default' | 'header' | 'block') || 'default')}
+				placeholder="Anzeigeart wählen"
+			/>
 		</div>
 	{/if}
 
@@ -405,6 +430,15 @@
 			/>
 		</div>
 	{/if}
+
+	<!-- Verantwortliche Person -->
+	<div class="flex flex-col gap-2">
+		<span class="text-sm font-medium text-foreground">Verantwortliche Person</span>
+		<ResponsiblePersonSelector
+			{responsiblePerson}
+			onResponsiblePersonChange={(person) => (responsiblePerson = person)}
+		/>
+	</div>
 
 	<!-- Teilnehmer -->
 	<div class="flex flex-col gap-2">

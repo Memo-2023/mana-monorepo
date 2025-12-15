@@ -4,7 +4,6 @@
 
 	const modes: { id: ViewMode; icon: string; label: string }[] = [
 		{ id: 'alphabet', icon: 'alphabet', label: 'views.alphabet' },
-		{ id: 'list', icon: 'list', label: 'views.list' },
 		{ id: 'grid', icon: 'grid', label: 'views.grid' },
 	];
 </script>
@@ -18,16 +17,7 @@
 			onclick={() => viewModeStore.setMode(mode.id)}
 			title={$_(mode.label)}
 		>
-			{#if mode.icon === 'list'}
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 6h16M4 12h16M4 18h16"
-					/>
-				</svg>
-			{:else if mode.icon === 'grid'}
+			{#if mode.icon === 'grid'}
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"

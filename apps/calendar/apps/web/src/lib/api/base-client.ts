@@ -58,7 +58,9 @@ export function createApiClient(config: ApiClientConfig) {
 				headers['Authorization'] = `Bearer ${authToken}`;
 			}
 
-			const response = await fetch(`${baseUrl}${apiPrefix}${endpoint}`, {
+			const url = `${baseUrl}${apiPrefix}${endpoint}`;
+
+			const response = await fetch(url, {
 				method,
 				headers,
 				body: isFormData ? (body as FormData) : body ? JSON.stringify(body) : undefined,

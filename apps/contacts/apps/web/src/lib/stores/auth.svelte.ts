@@ -7,9 +7,28 @@ import { browser } from '$app/environment';
 import { initializeWebAuth } from '@manacore/shared-auth';
 import type { UserData } from '@manacore/shared-auth';
 
-// Initialize Mana Core Auth only on the client side
-const MANA_AUTH_URL = 'http://localhost:3001';
-const BACKEND_URL = 'http://localhost:3015';
+// Get auth URL dynamically at runtime - fallback for SSR and client
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		// Client-side: use injected window variable (set by hooks.server.ts)
+		// Falls back to localhost for local development
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	// Server-side (SSR): use Docker internal URL for container-to-container communication
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+}
+
+// Get backend URL dynamically at runtime
+function getBackendUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
+			.__PUBLIC_BACKEND_URL__;
+		return injectedUrl || 'http://localhost:3015';
+	}
+	return process.env.PUBLIC_BACKEND_URL || 'http://localhost:3015';
+}
 
 // Lazy initialization to avoid SSR issues with localStorage
 let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
@@ -19,8 +38,8 @@ function getAuthService() {
 	if (!browser) return null;
 	if (!_authService) {
 		const auth = initializeWebAuth({
-			baseUrl: MANA_AUTH_URL,
-			backendUrl: BACKEND_URL, // Enables automatic token refresh on 401 responses
+			baseUrl: getAuthUrl(),
+			backendUrl: getBackendUrl(), // Enables automatic token refresh on 401 responses
 		});
 		_authService = auth.authService;
 		_tokenManager = auth.tokenManager;

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import type { Contact } from '$lib/api/contacts';
+	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 
 	interface Props {
 		contacts: Contact[];
@@ -9,6 +10,7 @@
 		selectionMode?: boolean;
 		selectedIds?: Set<string>;
 		onToggleSelection?: (id: string) => void;
+		showNewContactCard?: boolean;
 	}
 
 	let {
@@ -18,6 +20,7 @@
 		selectionMode = false,
 		selectedIds = new Set(),
 		onToggleSelection,
+		showNewContactCard = true,
 	}: Props = $props();
 
 	function handleCheckboxClick(e: MouseEvent, id: string) {
@@ -58,6 +61,35 @@
 </script>
 
 <div class="contact-grid">
+	<!-- New Contact Card -->
+	{#if showNewContactCard && !selectionMode}
+		<div
+			role="button"
+			tabindex="0"
+			onclick={() => newContactModalStore.open()}
+			onkeydown={(e) => e.key === 'Enter' && newContactModalStore.open()}
+			class="grid-card new-contact-card"
+		>
+			<!-- Plus Avatar -->
+			<div class="grid-avatar new-contact-avatar">
+				<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 4v16m8-8H4"
+					/>
+				</svg>
+			</div>
+
+			<!-- Info -->
+			<div class="grid-info">
+				<h3 class="grid-name">{$_('contacts.new')}</h3>
+				<p class="grid-job">{$_('contacts.addFirst')}</p>
+			</div>
+		</div>
+	{/if}
+
 	{#each contacts as contact (contact.id)}
 		<div
 			role="button"
@@ -214,6 +246,8 @@
 		border-radius: var(--radius-lg);
 		cursor: pointer;
 		transition: all var(--transition-base);
+		/* Equal height cards */
+		min-height: 280px;
 	}
 
 	.grid-card:hover {
@@ -286,7 +320,7 @@
 	.grid-actions {
 		display: flex;
 		gap: 0.5rem;
-		margin-top: 1rem;
+		margin-top: auto; /* Push to bottom of card */
 		padding-top: 1rem;
 		border-top: 1px solid hsl(var(--border));
 		width: 100%;
@@ -334,5 +368,23 @@
 	.grid-card.selected {
 		background: hsl(var(--primary) / 0.1) !important;
 		border-color: hsl(var(--primary) / 0.3) !important;
+	}
+
+	/* New Contact Card */
+	.new-contact-card {
+		border-style: dashed;
+		border-color: hsl(var(--primary) / 0.4);
+		background: hsl(var(--primary) / 0.05);
+	}
+
+	.new-contact-card:hover {
+		border-color: hsl(var(--primary));
+		background: hsl(var(--primary) / 0.1);
+		transform: translateY(-4px);
+	}
+
+	.new-contact-avatar {
+		background: hsl(var(--primary) / 0.15);
+		color: hsl(var(--primary));
 	}
 </style>

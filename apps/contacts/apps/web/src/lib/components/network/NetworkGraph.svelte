@@ -347,15 +347,15 @@
 							{node.name}
 						</text>
 
-						<!-- Company label -->
-						{#if node.company}
+						<!-- Company label (uses subtitle field) -->
+						{#if node.subtitle}
 							<text
 								y={isSelected ? 56 : 50}
 								class="node-company"
 								text-anchor="middle"
 								font-size="9"
 							>
-								{node.company}
+								{node.subtitle}
 							</text>
 						{/if}
 					</g>

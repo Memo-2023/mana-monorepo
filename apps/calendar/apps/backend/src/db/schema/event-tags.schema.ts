@@ -1,5 +1,15 @@
-import { pgTable, uuid, text, timestamp, varchar, primaryKey, index } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	uuid,
+	text,
+	timestamp,
+	varchar,
+	primaryKey,
+	index,
+	integer,
+} from 'drizzle-orm/pg-core';
 import { events } from './events.schema';
+import { eventTagGroups } from './event-tag-groups.schema';
 
 /**
  * Event tags table - stores user-defined tags with colors
@@ -11,11 +21,14 @@ export const eventTags = pgTable(
 		userId: text('user_id').notNull(),
 		name: varchar('name', { length: 100 }).notNull(),
 		color: varchar('color', { length: 7 }).default('#3B82F6'),
+		groupId: uuid('group_id').references(() => eventTagGroups.id, { onDelete: 'set null' }),
+		sortOrder: integer('sort_order').default(0),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 	},
 	(table) => ({
 		userIdx: index('event_tags_user_idx').on(table.userId),
+		groupIdx: index('event_tags_group_idx').on(table.groupId),
 	})
 );
 

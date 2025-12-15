@@ -4,17 +4,41 @@
 
 import type { Calendar, CreateCalendarInput, UpdateCalendarInput } from '@calendar/shared';
 import * as api from '$lib/api/calendars';
+import { BIRTHDAY_CALENDAR } from '$lib/api/birthdays';
+import { settingsStore } from './settings.svelte';
 
 // State
 let calendars = $state<Calendar[]>([]);
 let loading = $state(false);
 let error = $state<string | null>(null);
 
+// Virtual birthday calendar (created dynamically based on settings)
+const birthdayCalendar: Calendar = {
+	id: BIRTHDAY_CALENDAR.id,
+	userId: '',
+	name: BIRTHDAY_CALENDAR.name,
+	color: BIRTHDAY_CALENDAR.color,
+	isDefault: false,
+	isVisible: true, // Visibility controlled by settingsStore.showBirthdays
+	createdAt: new Date().toISOString(),
+	updatedAt: new Date().toISOString(),
+};
+
 // Helper to safely get calendars array (Svelte 5 runes safety)
 function getCalendarsArray(): Calendar[] {
 	const arr = calendars ?? [];
 	return Array.isArray(arr) ? arr : [];
 }
+
+// Derived: all calendars including virtual birthday calendar
+const allCalendars = $derived.by(() => {
+	const userCalendars = getCalendarsArray();
+	// Add virtual birthday calendar if birthdays are enabled in settings
+	if (settingsStore.showBirthdays) {
+		return [...userCalendars, { ...birthdayCalendar, isVisible: true }];
+	}
+	return userCalendars;
+});
 
 // Derived: visible calendars
 const visibleCalendars = $derived(getCalendarsArray().filter((c) => c.isVisible));
@@ -30,6 +54,9 @@ export const calendarsStore = {
 	get calendars() {
 		return calendars;
 	},
+	get allCalendars() {
+		return allCalendars;
+	},
 	get visibleCalendars() {
 		return visibleCalendars;
 	},
@@ -41,6 +68,9 @@ export const calendarsStore = {
 	},
 	get error() {
 		return error;
+	},
+	get birthdayCalendarId() {
+		return BIRTHDAY_CALENDAR.id;
 	},
 
 	/**
@@ -116,6 +146,23 @@ export const calendarsStore = {
 	},
 
 	/**
+	 * Set a calendar as the default
+	 */
+	async setAsDefault(id: string) {
+		const result = await api.updateCalendar(id, { isDefault: true });
+
+		if (result.data) {
+			// Update local state: set this one as default, remove default from others
+			calendars = getCalendarsArray().map((c) => ({
+				...c,
+				isDefault: c.id === id,
+			}));
+		}
+
+		return result;
+	},
+
+	/**
 	 * Get calendar by ID
 	 */
 	getById(id: string) {
@@ -126,7 +173,26 @@ export const calendarsStore = {
 	 * Get calendar color by ID (with fallback)
 	 */
 	getColor(id: string) {
+		// Handle virtual birthday calendar
+		if (id === BIRTHDAY_CALENDAR.id) {
+			return BIRTHDAY_CALENDAR.color;
+		}
 		const calendar = getCalendarsArray().find((c) => c.id === id);
 		return calendar?.color || '#3b82f6';
+	},
+
+	/**
+	 * Toggle birthday calendar visibility
+	 * (This updates the settings store, not the calendar itself)
+	 */
+	toggleBirthdaysVisibility() {
+		settingsStore.set('showBirthdays', !settingsStore.showBirthdays);
+	},
+
+	/**
+	 * Check if a calendar ID is the virtual birthday calendar
+	 */
+	isBirthdayCalendar(id: string) {
+		return id === BIRTHDAY_CALENDAR.id;
 	},
 };

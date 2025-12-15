@@ -268,34 +268,22 @@
 	}
 
 	.glass-pill {
-		background: rgba(255, 255, 255, 0.85);
+		background: hsl(var(--color-surface) / 0.85);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid hsl(var(--color-border));
 		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-		color: #374151;
-	}
-
-	:global(.dark) .glass-pill {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		color: #f3f4f6;
+			0 4px 6px -1px hsl(var(--color-foreground) / 0.1),
+			0 2px 4px -1px hsl(var(--color-foreground) / 0.06);
+		color: hsl(var(--color-foreground));
 	}
 
 	.glass-pill:hover {
-		background: rgba(255, 255, 255, 0.95);
-		border-color: rgba(0, 0, 0, 0.15);
+		background: hsl(var(--color-surface) / 0.95);
 		transform: translateY(-1px);
 		box-shadow:
-			0 10px 15px -3px rgba(0, 0, 0, 0.1),
-			0 4px 6px -2px rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .glass-pill:hover {
-		background: rgba(255, 255, 255, 0.2);
-		border-color: rgba(255, 255, 255, 0.25);
+			0 10px 15px -3px hsl(var(--color-foreground) / 0.1),
+			0 4px 6px -2px hsl(var(--color-foreground) / 0.05);
 	}
 
 	.pill-icon {
@@ -322,42 +310,23 @@
 		cursor: pointer;
 		transition: all 0.15s ease;
 		background: transparent;
-		color: #374151;
-	}
-
-	:global(.dark) .embedded-btn {
-		color: #f3f4f6;
+		color: hsl(var(--color-foreground));
 	}
 
 	.embedded-btn:hover {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .embedded-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
+		background: hsl(var(--color-foreground) / 0.05);
 	}
 
 	/* Active state for toggle mode */
 	.embedded-btn.active {
-		background: color-mix(in srgb, var(--color-primary-500, #3b82f6) 15%, transparent 85%);
-		color: var(--color-primary-500, #3b82f6);
-	}
-
-	:global(.dark) .embedded-btn.active {
-		background: color-mix(in srgb, var(--color-primary-500, #3b82f6) 25%, transparent 75%);
-		color: var(--color-primary-400, #60a5fa);
+		background: hsl(var(--color-primary) / 0.15);
+		color: hsl(var(--color-primary));
 	}
 
 	.glass-pill.active {
-		background: color-mix(in srgb, var(--color-primary-500, #3b82f6) 15%, white 85%);
-		border-color: var(--color-primary-500, #3b82f6);
-		color: var(--color-primary-500, #3b82f6);
-	}
-
-	:global(.dark) .glass-pill.active {
-		background: color-mix(in srgb, var(--color-primary-500, #3b82f6) 30%, transparent 70%);
-		border-color: var(--color-primary-400, #60a5fa);
-		color: var(--color-primary-400, #60a5fa);
+		background: hsl(var(--color-primary) / 0.15);
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
 	}
 
 	.chevron-icon {
@@ -420,18 +389,10 @@
 	}
 
 	.glass-dropdown {
-		background: rgba(255, 255, 255, 0.95);
+		background: color-mix(in srgb, var(--color-surface-elevated-1) 95%, transparent);
 		backdrop-filter: blur(16px);
 		-webkit-backdrop-filter: blur(16px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow:
-			0 20px 25px -5px rgba(0, 0, 0, 0.1),
-			0 10px 10px -5px rgba(0, 0, 0, 0.04);
-	}
-
-	:global(.dark) .glass-dropdown {
-		background: rgba(30, 30, 30, 0.95);
-		border: 1px solid rgba(255, 255, 255, 0.15);
+		border: 1px solid hsl(var(--color-border));
 	}
 
 	.dropdown-header {
@@ -440,13 +401,8 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #6b7280;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-	}
-
-	:global(.dark) .dropdown-header {
-		color: #9ca3af;
-		border-bottom-color: rgba(255, 255, 255, 0.1);
+		color: hsl(var(--color-muted-foreground));
+		border-bottom: 1px solid hsl(var(--color-border));
 	}
 
 	.time-selectors {
@@ -467,12 +423,8 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 		padding: 0 0.5rem;
-	}
-
-	:global(.dark) .column-label {
-		color: #9ca3af;
 	}
 
 	.hour-list {
@@ -509,32 +461,19 @@
 		border-radius: 0.5rem;
 		font-size: 0.8125rem;
 		font-weight: 500;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
 		text-align: left;
 	}
 
-	:global(.dark) .hour-option {
-		color: #e5e7eb;
-	}
-
 	.hour-option:hover:not(.disabled) {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .hour-option:hover:not(.disabled) {
-		background: rgba(255, 255, 255, 0.1);
+		background: hsl(var(--color-foreground) / 0.05);
 	}
 
 	.hour-option.active {
-		background: color-mix(in srgb, var(--color-primary-500, #3b82f6) 20%, white 80%);
-		color: var(--color-primary-500, #3b82f6);
-	}
-
-	:global(.dark) .hour-option.active {
-		background: color-mix(in srgb, var(--color-primary-500, #3b82f6) 30%, transparent 70%);
-		color: var(--color-primary-500, #3b82f6);
+		background: hsl(var(--color-primary) / 0.2);
+		color: hsl(var(--color-primary));
 	}
 
 	.hour-option.disabled {
@@ -544,27 +483,19 @@
 
 	.time-divider {
 		width: 1px;
-		background: rgba(0, 0, 0, 0.1);
+		background: hsl(var(--color-border));
 		margin: 0.5rem 0;
-	}
-
-	:global(.dark) .time-divider {
-		background: rgba(255, 255, 255, 0.1);
 	}
 
 	.dropdown-footer {
 		padding: 0.5rem 1rem;
-		border-top: 1px solid rgba(0, 0, 0, 0.1);
+		border-top: 1px solid hsl(var(--color-border));
 		text-align: center;
-	}
-
-	:global(.dark) .dropdown-footer {
-		border-top-color: rgba(255, 255, 255, 0.1);
 	}
 
 	.current-range {
 		font-size: 0.8125rem;
 		font-weight: 600;
-		color: var(--color-primary-500, #3b82f6);
+		color: hsl(var(--color-primary));
 	}
 </style>

@@ -4,7 +4,8 @@
  */
 
 import type { CalendarEvent } from '@calendar/shared';
-import { parseISO, differenceInMinutes, setHours, setMinutes } from 'date-fns';
+import { differenceInMinutes, setHours, setMinutes } from 'date-fns';
+import { toDate } from '$lib/utils/eventDateHelpers';
 import { eventsStore } from '$lib/stores/events.svelte';
 
 export interface ResizeConfig {
@@ -86,8 +87,8 @@ export function useResize(getConfig: () => ResizeConfig) {
 		resizeEdge = edge;
 		hasMoved = false;
 
-		const start = typeof event.startTime === 'string' ? parseISO(event.startTime) : event.startTime;
-		const end = typeof event.endTime === 'string' ? parseISO(event.endTime) : event.endTime;
+		const start = toDate(event.startTime);
+		const end = toDate(event.endTime);
 
 		resizeOriginalStart = start;
 		resizeOriginalEnd = end;

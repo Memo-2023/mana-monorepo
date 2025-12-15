@@ -10,6 +10,8 @@ export { default as PillViewSwitcher } from './PillViewSwitcher.svelte';
 export { default as PillToolbar } from './PillToolbar.svelte';
 export { default as PillToolbarButton } from './PillToolbarButton.svelte';
 export { default as PillToolbarDivider } from './PillToolbarDivider.svelte';
+export { ExpandableToolbar } from './expandable-toolbar';
+export type { ExpandableToolbarProps } from './expandable-toolbar';
 export type {
 	NavItem,
 	NavbarProps,
