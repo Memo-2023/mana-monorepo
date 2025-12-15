@@ -190,6 +190,9 @@
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 p-4"
 		onclick={closeLightbox}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
 	>
 		<div class="relative max-h-full max-w-6xl">
 			<img

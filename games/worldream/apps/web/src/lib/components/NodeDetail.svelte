@@ -253,8 +253,8 @@
 
 	const contentFields = getContentFields();
 
-	// Check if layout should be side-by-side
-	const isSideBySide = node.kind === 'character' || node.kind === 'object';
+	// Check if layout should be side-by-side (reactive to node changes)
+	const isSideBySide = $derived(node.kind === 'character' || node.kind === 'object');
 </script>
 
 {#if !isSideBySide && (node.kind === 'world' || node.kind === 'place') && !loadingImages && (images.length > 0 || node.image_url)}

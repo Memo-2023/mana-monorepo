@@ -108,6 +108,9 @@
 				<div
 					class="fixed inset-0 bg-slate-500 bg-opacity-75 transition-opacity"
 					onclick={toggleDialog}
+					role="button"
+					tabindex="-1"
+					aria-label="Close dialog"
 				></div>
 
 				<!-- Modal panel -->
