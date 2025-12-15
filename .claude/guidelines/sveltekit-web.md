@@ -799,18 +799,20 @@ Docker containers can reach each other by service name (`mana-core-auth`), but b
 
 ### Apps Using This Pattern Correctly
 
-- ✅ `chat/apps/web` - Has `hooks.server.ts` with runtime injection
-- ✅ `todo/apps/web` - Fixed
-- ✅ `calendar/apps/web` - Fixed
-- ✅ `clock/apps/web` - Fixed
+All web apps with backends now use the runtime injection pattern:
 
-### Apps That Still Need Fixing
+- ✅ `chat/apps/web`
+- ✅ `picture/apps/web`
+- ✅ `zitare/apps/web`
+- ✅ `contacts/apps/web`
+- ✅ `calendar/apps/web`
+- ✅ `clock/apps/web`
+- ✅ `todo/apps/web`
 
-- ❌ `contacts/apps/web`
-- ❌ `manadeck/apps/web`
-- ❌ `manacore/apps/web`
-- ❌ `zitare/apps/web`
-- ❌ `picture/apps/web`
+### Apps That May Need Fixing
+
+- ❓ `manadeck/apps/web` - Check if using dynamic URLs
+- ❓ `manacore/apps/web` - Check if using dynamic URLs
 
 ### Quick Checklist for New SvelteKit Apps
 
