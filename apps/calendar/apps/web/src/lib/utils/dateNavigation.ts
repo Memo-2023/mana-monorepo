@@ -14,6 +14,7 @@ import {
 	subMonths,
 	subYears,
 } from 'date-fns';
+import { settingsStore } from '$lib/stores/settings.svelte';
 
 /**
  * Calculate a date offset based on the current view type
@@ -35,6 +36,9 @@ export function getOffsetDate(date: Date, viewType: CalendarViewType, offset: nu
 		case 'day':
 			return offset > 0 ? addDays(date, offset) : subDays(date, Math.abs(offset));
 
+		case '3day':
+			return offset > 0 ? addDays(date, offset * 3) : subDays(date, Math.abs(offset) * 3);
+
 		case '5day':
 			return offset > 0 ? addDays(date, offset * 5) : subDays(date, Math.abs(offset) * 5);
 
@@ -46,6 +50,23 @@ export function getOffsetDate(date: Date, viewType: CalendarViewType, offset: nu
 
 		case '14day':
 			return offset > 0 ? addDays(date, offset * 14) : subDays(date, Math.abs(offset) * 14);
+
+		case '30day':
+			return offset > 0 ? addDays(date, offset * 30) : subDays(date, Math.abs(offset) * 30);
+
+		case '60day':
+			return offset > 0 ? addDays(date, offset * 60) : subDays(date, Math.abs(offset) * 60);
+
+		case '90day':
+			return offset > 0 ? addDays(date, offset * 90) : subDays(date, Math.abs(offset) * 90);
+
+		case '365day':
+			return offset > 0 ? addDays(date, offset * 365) : subDays(date, Math.abs(offset) * 365);
+
+		case 'custom': {
+			const days = settingsStore.customDayCount;
+			return offset > 0 ? addDays(date, offset * days) : subDays(date, Math.abs(offset) * days);
+		}
 
 		case 'month':
 			return offset > 0 ? addMonths(date, offset) : subMonths(date, Math.abs(offset));

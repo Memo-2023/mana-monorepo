@@ -43,6 +43,9 @@ export interface CalendarAppSettings {
 	dateStripShowWeekNumbers: boolean; // Show week numbers at start of week
 	dateStripCollapsed: boolean; // Whether DateStrip is minimized to FAB
 
+	// TagStrip settings
+	tagStripCollapsed: boolean; // Whether TagStrip is hidden
+
 	// Birthday settings (cross-app integration with Contacts)
 	showBirthdays: boolean; // Show contact birthdays in calendar
 	showBirthdayAge: boolean; // Show age in birthday events
@@ -52,6 +55,7 @@ export interface CalendarAppSettings {
 
 	// Quick View Pill settings
 	quickViewPillViews: CalendarViewType[]; // Views shown in quick switcher
+	customDayCount: number; // Custom day count for 'custom' view type (1-365)
 
 	// Event defaults
 	defaultEventDuration: number; // in minutes
@@ -82,6 +86,8 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	dateStripCompact: false,
 	dateStripShowWeekNumbers: false,
 	dateStripCollapsed: false,
+	// TagStrip defaults
+	tagStripCollapsed: true, // Hidden by default
 	// Birthday defaults
 	showBirthdays: true,
 	showBirthdayAge: true,
@@ -89,6 +95,7 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	sidebarCollapsed: false,
 	// Quick View Pill defaults
 	quickViewPillViews: ['week', 'month', 'agenda'],
+	customDayCount: 30, // Default: 30 days (1 month)
 	// Event defaults
 	defaultEventDuration: 60,
 	defaultReminder: 15,
@@ -225,6 +232,10 @@ export const settingsStore = {
 	get dateStripCollapsed() {
 		return settings.dateStripCollapsed;
 	},
+	// TagStrip settings
+	get tagStripCollapsed() {
+		return settings.tagStripCollapsed;
+	},
 	// Birthday settings
 	get showBirthdays() {
 		return settings.showBirthdays;
@@ -243,6 +254,9 @@ export const settingsStore = {
 	},
 	get quickViewPillViews() {
 		return settings.quickViewPillViews;
+	},
+	get customDayCount() {
+		return settings.customDayCount;
 	},
 	get cloudSyncEnabled() {
 		return cloudSyncEnabled;
@@ -280,6 +294,15 @@ export const settingsStore = {
 	 */
 	toggleSidebar() {
 		settings = { ...settings, sidebarCollapsed: !settings.sidebarCollapsed };
+		saveSettings(settings);
+		syncToCloud();
+	},
+
+	/**
+	 * Toggle TagStrip visibility
+	 */
+	toggleTagStrip() {
+		settings = { ...settings, tagStripCollapsed: !settings.tagStripCollapsed };
 		saveSettings(settings);
 		syncToCloud();
 	},

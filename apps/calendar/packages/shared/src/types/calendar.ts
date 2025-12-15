@@ -1,9 +1,28 @@
 /**
+ * Calendar view types
+ */
+export type CalendarViewType =
+	| 'day'
+	| '3day'
+	| '5day'
+	| 'week'
+	| '10day'
+	| '14day'
+	| '30day'
+	| '60day'
+	| '90day'
+	| '365day'
+	| 'month'
+	| 'year'
+	| 'agenda'
+	| 'custom';
+
+/**
  * Calendar settings stored in JSONB
  */
 export interface CalendarSettings {
 	/** Default view when opening the calendar */
-	defaultView?: 'day' | '5day' | 'week' | '10day' | '14day' | 'month' | 'year' | 'agenda';
+	defaultView?: CalendarViewType;
 	/** 0 = Sunday, 1 = Monday */
 	weekStartsOn?: 0 | 1;
 	/** Show week numbers in calendar views */
@@ -56,19 +75,6 @@ export interface UpdateCalendarInput {
 	timezone?: string;
 	settings?: CalendarSettings;
 }
-
-/**
- * Calendar view types
- */
-export type CalendarViewType =
-	| 'day'
-	| '5day'
-	| 'week'
-	| '10day'
-	| '14day'
-	| 'month'
-	| 'year'
-	| 'agenda';
 
 /**
  * Default calendar colors

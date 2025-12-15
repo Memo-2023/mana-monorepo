@@ -38,6 +38,11 @@ const viewRange = $derived.by(() => {
 				start: startOfDay(currentDate),
 				end: endOfDay(currentDate),
 			};
+		case '3day':
+			return {
+				start: startOfDay(currentDate),
+				end: endOfDay(addDays(currentDate, 2)),
+			};
 		case '5day':
 			return {
 				start: startOfDay(currentDate),
@@ -58,6 +63,33 @@ const viewRange = $derived.by(() => {
 				start: startOfDay(currentDate),
 				end: endOfDay(addDays(currentDate, 13)),
 			};
+		case '30day':
+			return {
+				start: startOfDay(currentDate),
+				end: endOfDay(addDays(currentDate, 29)),
+			};
+		case '60day':
+			return {
+				start: startOfDay(currentDate),
+				end: endOfDay(addDays(currentDate, 59)),
+			};
+		case '90day':
+			return {
+				start: startOfDay(currentDate),
+				end: endOfDay(addDays(currentDate, 89)),
+			};
+		case '365day':
+			return {
+				start: startOfDay(currentDate),
+				end: endOfDay(addDays(currentDate, 364)),
+			};
+		case 'custom': {
+			const customDays = settingsStore.customDayCount;
+			return {
+				start: startOfDay(currentDate),
+				end: endOfDay(addDays(currentDate, customDays - 1)),
+			};
+		}
 		case 'month':
 			return {
 				start: startOfMonth(currentDate),
@@ -108,7 +140,22 @@ export const viewStore = {
 		const savedView = localStorage.getItem('calendar-view-type');
 		if (
 			savedView &&
-			['day', '5day', 'week', '10day', '14day', 'month', 'year', 'agenda'].includes(savedView)
+			[
+				'day',
+				'3day',
+				'5day',
+				'week',
+				'10day',
+				'14day',
+				'30day',
+				'60day',
+				'90day',
+				'365day',
+				'month',
+				'year',
+				'agenda',
+				'custom',
+			].includes(savedView)
 		) {
 			viewType = savedView as CalendarViewType;
 		} else {
@@ -149,6 +196,9 @@ export const viewStore = {
 			case 'day':
 				currentDate = subDays(currentDate, 1);
 				break;
+			case '3day':
+				currentDate = subDays(currentDate, 3);
+				break;
 			case '5day':
 				currentDate = subDays(currentDate, 5);
 				break;
@@ -160,6 +210,21 @@ export const viewStore = {
 				break;
 			case '14day':
 				currentDate = subDays(currentDate, 14);
+				break;
+			case '30day':
+				currentDate = subDays(currentDate, 30);
+				break;
+			case '60day':
+				currentDate = subDays(currentDate, 60);
+				break;
+			case '90day':
+				currentDate = subDays(currentDate, 90);
+				break;
+			case '365day':
+				currentDate = subDays(currentDate, 365);
+				break;
+			case 'custom':
+				currentDate = subDays(currentDate, settingsStore.customDayCount);
 				break;
 			case 'month':
 				currentDate = subMonths(currentDate, 1);
@@ -181,6 +246,9 @@ export const viewStore = {
 			case 'day':
 				currentDate = addDays(currentDate, 1);
 				break;
+			case '3day':
+				currentDate = addDays(currentDate, 3);
+				break;
 			case '5day':
 				currentDate = addDays(currentDate, 5);
 				break;
@@ -192,6 +260,21 @@ export const viewStore = {
 				break;
 			case '14day':
 				currentDate = addDays(currentDate, 14);
+				break;
+			case '30day':
+				currentDate = addDays(currentDate, 30);
+				break;
+			case '60day':
+				currentDate = addDays(currentDate, 60);
+				break;
+			case '90day':
+				currentDate = addDays(currentDate, 90);
+				break;
+			case '365day':
+				currentDate = addDays(currentDate, 365);
+				break;
+			case 'custom':
+				currentDate = addDays(currentDate, settingsStore.customDayCount);
 				break;
 			case 'month':
 				currentDate = addMonths(currentDate, 1);

@@ -55,6 +55,7 @@
 	import CalendarToolbarContent from '$lib/components/calendar/CalendarToolbarContent.svelte';
 	import DateStrip from '$lib/components/calendar/DateStrip.svelte';
 	import DateStripFab from '$lib/components/calendar/DateStripFab.svelte';
+	import TagStrip from '$lib/components/calendar/TagStrip.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import ViewModePillContextMenu from '$lib/components/calendar/ViewModePillContextMenu.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
@@ -249,14 +250,32 @@
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
+	// Toggle TagStrip visibility
+	function handleTagsToggle() {
+		settingsStore.toggleTagStrip();
+	}
+
+	// Tags button active state (show as active when TagStrip is visible)
+	let isTagStripVisible = $derived(!settingsStore.tagStripCollapsed);
+
+	// Offset for elements above TagStrip (70px when visible)
+	let tagStripOffset = $derived(showCalendarToolbar && !settingsStore.tagStripCollapsed ? 70 : 0);
+
 	// Base navigation items for Calendar (without Kalender/Aufgaben - handled by tab group)
-	const baseNavItems: PillNavItem[] = [
-		{ href: '/tags', label: 'Tags', icon: 'tag' },
+	// Note: Tags uses onClick to toggle TagStrip visibility instead of navigating
+	let baseNavItems = $derived<PillNavItem[]>([
+		{
+			href: '/tags',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagsToggle,
+			active: isTagStripVisible,
+		},
 		{ href: '/statistics', label: 'Statistiken', icon: 'bar-chart-3' },
 		{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
-	];
+	]);
 
 	// Navigation items filtered by visibility settings
 	const navItems = $derived(
@@ -292,6 +311,10 @@
 		week: '7',
 		'10day': '10',
 		'14day': '14',
+		'30day': '30',
+		'60day': '60',
+		'90day': '90',
+		'365day': '365',
 		month: 'M',
 		year: 'Y',
 		agenda: 'L',
@@ -306,6 +329,10 @@
 		week: 'Wochenansicht',
 		'10day': '10-Tage-Ansicht',
 		'14day': '14-Tage-Ansicht',
+		'30day': '30-Tage-Ansicht',
+		'60day': '60-Tage-Ansicht',
+		'90day': '90-Tage-Ansicht',
+		'365day': '365-Tage-Ansicht',
 		month: 'Monatsansicht',
 		year: 'Jahresansicht',
 		agenda: 'Agenda',
@@ -543,10 +570,24 @@
 		<!-- Date strip (only on main calendar page) -->
 		{#if showCalendarToolbar}
 			{#if settingsStore.dateStripCollapsed}
-				<DateStripFab {isSidebarMode} isToolbarExpanded={!isToolbarCollapsed} {isMobile} />
+				<DateStripFab
+					{isSidebarMode}
+					isToolbarExpanded={!isToolbarCollapsed}
+					{isMobile}
+					hasTagStrip={!settingsStore.tagStripCollapsed}
+				/>
 			{:else}
-				<DateStrip {isSidebarMode} isToolbarExpanded={!isToolbarCollapsed} />
+				<DateStrip
+					{isSidebarMode}
+					isToolbarExpanded={!isToolbarCollapsed}
+					hasTagStrip={!settingsStore.tagStripCollapsed}
+				/>
 			{/if}
+		{/if}
+
+		<!-- Tag strip (only on main calendar page, when not collapsed) - directly above PillNav -->
+		{#if showCalendarToolbar && !settingsStore.tagStripCollapsed}
+			<TagStrip {isSidebarMode} />
 		{/if}
 
 		<!-- Calendar toolbar (only on main calendar page, not in sidebar mode) -->
@@ -555,6 +596,7 @@
 				{isSidebarMode}
 				isCollapsed={isToolbarCollapsed}
 				{isMobile}
+				bottomOffset={settingsStore.tagStripCollapsed ? '70px' : '140px'}
 				onModeChange={handleToolbarModeChange}
 				onCollapsedChange={handleToolbarCollapsedChange}
 			/>
@@ -587,12 +629,12 @@
 			createText="Erstellen"
 			appIcon="calendar"
 			bottomOffset={isMobile
-				? '70px'
+				? `${70 + tagStripOffset}px`
 				: isSidebarMode
-					? '0px'
+					? `${tagStripOffset}px`
 					: showCalendarToolbar && !isToolbarCollapsed
-						? '140px'
-						: '70px'}
+						? `${140 + tagStripOffset}px`
+						: `${70 + tagStripOffset}px`}
 			hasFabRight={showCalendarToolbar && !isSidebarMode}
 			hasFabLeft={!isMobile &&
 				showCalendarToolbar &&

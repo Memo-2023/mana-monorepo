@@ -42,7 +42,7 @@
 
 	// Props
 	interface Props {
-		dayCount: 5 | 10 | 14;
+		dayCount: number;
 		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
 		date?: Date;
 		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
@@ -105,7 +105,8 @@
 	let columnClass = $derived.by(() => {
 		if (days.length <= 5) return 'normal';
 		if (days.length <= 10) return 'compact';
-		return 'very-compact';
+		if (days.length <= 14) return 'very-compact';
+		return 'ultra-compact';
 	});
 
 	// ========== Drag & Drop State ==========
@@ -823,6 +824,7 @@
 	class="multi-day-view"
 	class:compact={columnClass === 'compact'}
 	class:very-compact={columnClass === 'very-compact'}
+	class:ultra-compact={columnClass === 'ultra-compact'}
 >
 	<!-- Sticky header container -->
 	<div class="sticky-header">
@@ -1526,5 +1528,62 @@
 	.compact .overflow-line:hover,
 	.very-compact .overflow-line:hover {
 		height: 4px;
+	}
+
+	/* Ultra-compact mode for 14+ days */
+	.ultra-compact .day-header {
+		padding: 0.0625rem;
+	}
+
+	.ultra-compact .day-name {
+		font-size: 0.55rem;
+	}
+
+	.ultra-compact .day-number {
+		font-size: 0.75rem;
+		width: 20px;
+		height: 20px;
+	}
+
+	.ultra-compact .time-label {
+		font-size: 0.55rem;
+		padding-right: 0.125rem;
+	}
+
+	.ultra-compact .event-card {
+		left: 0;
+		right: 0;
+		padding: 0 1px;
+	}
+
+	.ultra-compact .event-title {
+		font-size: 0.5rem;
+	}
+
+	.ultra-compact .all-day-event {
+		padding: 1px 2px;
+		font-size: 0.55rem;
+	}
+
+	.ultra-compact .all-day-block-event {
+		left: 0;
+		right: 0;
+		padding: 1px 2px;
+	}
+
+	.ultra-compact .all-day-block-event .event-title {
+		font-size: 0.5rem;
+	}
+
+	.ultra-compact .resize-handle {
+		height: 4px;
+	}
+
+	.ultra-compact .overflow-line {
+		height: 1px;
+	}
+
+	.ultra-compact .overflow-line:hover {
+		height: 3px;
 	}
 </style>

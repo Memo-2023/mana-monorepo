@@ -101,7 +101,7 @@
 						</svg>
 					{/if}
 				{/if}
-				{#if option.label && isSidebarMode}
+				{#if option.label}
 					<span class="tab-label">{option.label}</span>
 				{/if}
 			</button>

@@ -311,6 +311,14 @@
 				<MultiDayView dayCount={10} date={prevDate} />
 			{:else if viewStore.viewType === '14day'}
 				<MultiDayView dayCount={14} date={prevDate} />
+			{:else if viewStore.viewType === '30day'}
+				<MultiDayView dayCount={30} date={prevDate} />
+			{:else if viewStore.viewType === '60day'}
+				<MultiDayView dayCount={60} date={prevDate} />
+			{:else if viewStore.viewType === '90day'}
+				<MultiDayView dayCount={90} date={prevDate} />
+			{:else if viewStore.viewType === '365day'}
+				<MultiDayView dayCount={365} date={prevDate} />
 			{:else if viewStore.viewType === 'custom'}
 				<MultiDayView dayCount={settingsStore.customDayCount} date={prevDate} />
 			{:else if viewStore.viewType === 'month'}
@@ -336,6 +344,14 @@
 				<MultiDayView dayCount={10} {onQuickCreate} {onEventClick} />
 			{:else if viewStore.viewType === '14day'}
 				<MultiDayView dayCount={14} {onQuickCreate} {onEventClick} />
+			{:else if viewStore.viewType === '30day'}
+				<MultiDayView dayCount={30} {onQuickCreate} {onEventClick} />
+			{:else if viewStore.viewType === '60day'}
+				<MultiDayView dayCount={60} {onQuickCreate} {onEventClick} />
+			{:else if viewStore.viewType === '90day'}
+				<MultiDayView dayCount={90} {onQuickCreate} {onEventClick} />
+			{:else if viewStore.viewType === '365day'}
+				<MultiDayView dayCount={365} {onQuickCreate} {onEventClick} />
 			{:else if viewStore.viewType === 'custom'}
 				<MultiDayView dayCount={settingsStore.customDayCount} {onQuickCreate} {onEventClick} />
 			{:else if viewStore.viewType === 'month'}
@@ -363,6 +379,14 @@
 				<MultiDayView dayCount={10} date={nextDate} />
 			{:else if viewStore.viewType === '14day'}
 				<MultiDayView dayCount={14} date={nextDate} />
+			{:else if viewStore.viewType === '30day'}
+				<MultiDayView dayCount={30} date={nextDate} />
+			{:else if viewStore.viewType === '60day'}
+				<MultiDayView dayCount={60} date={nextDate} />
+			{:else if viewStore.viewType === '90day'}
+				<MultiDayView dayCount={90} date={nextDate} />
+			{:else if viewStore.viewType === '365day'}
+				<MultiDayView dayCount={365} date={nextDate} />
 			{:else if viewStore.viewType === 'custom'}
 				<MultiDayView dayCount={settingsStore.customDayCount} date={nextDate} />
 			{:else if viewStore.viewType === 'month'}
