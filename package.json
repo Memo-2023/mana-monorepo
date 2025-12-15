@@ -16,6 +16,7 @@
 		"clean": "turbo run clean",
 		"format": "prettier --config .prettierrc.json --write \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
 		"format:check": "prettier --config .prettierrc.json --check \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
+		"validate:runtime-config": "node scripts/validate-runtime-config.mjs",
 		"svelte-check": "./scripts/svelte-check-staged.sh",
 		"build:check": "./scripts/build-check-staged.sh",
 		"build:check:all": "./scripts/build-check-staged.sh --all",
