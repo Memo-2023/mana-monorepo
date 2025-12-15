@@ -1,26 +1,23 @@
 <script lang="ts">
-	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { ChevronDown, ChevronUp } from 'lucide-svelte';
 
 	interface Props {
-		/** Whether to show the toggle (only on main calendar page) */
+		/** Whether immersive mode is currently enabled */
+		isImmersive: boolean;
+		/** Callback to toggle immersive mode */
+		onToggle: () => void;
+		/** Whether to show the toggle (e.g., only on main page) */
 		visible?: boolean;
 	}
 
-	let { visible = true }: Props = $props();
-
-	let isImmersive = $derived(settingsStore.immersiveModeEnabled);
-
-	function toggle() {
-		settingsStore.toggleImmersiveMode();
-	}
+	let { isImmersive, onToggle, visible = true }: Props = $props();
 </script>
 
 {#if visible}
 	<button
 		class="immersive-toggle"
 		class:immersive={isImmersive}
-		onclick={toggle}
+		onclick={onToggle}
 		title={isImmersive ? 'UI anzeigen (F)' : 'UI verstecken (F)'}
 	>
 		{#if isImmersive}

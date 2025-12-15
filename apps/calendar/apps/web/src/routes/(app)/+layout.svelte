@@ -3,7 +3,12 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, QuickInputBar, InputBarHelpModal } from '@manacore/shared-ui';
+	import {
+		PillNavigation,
+		QuickInputBar,
+		InputBarHelpModal,
+		ImmersiveModeToggle,
+	} from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -58,7 +63,6 @@
 	import TagStrip from '$lib/components/calendar/TagStrip.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import ViewModePillContextMenu from '$lib/components/calendar/ViewModePillContextMenu.svelte';
-	import ImmersiveModeToggle from '$lib/components/calendar/ImmersiveModeToggle.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import type { CalendarViewType } from '@calendar/shared';
 
@@ -687,7 +691,11 @@
 		{/if}
 
 		<!-- Immersive Mode Toggle (always visible on main calendar page) -->
-		<ImmersiveModeToggle visible={showCalendarToolbar} />
+		<ImmersiveModeToggle
+			isImmersive={settingsStore.immersiveModeEnabled}
+			onToggle={() => settingsStore.toggleImmersiveMode()}
+			visible={showCalendarToolbar}
+		/>
 
 		<main
 			class="main-content bg-background"

@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, ImmersiveModeToggle } from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -168,6 +168,18 @@
 				}
 			}
 		}
+
+		// F = Toggle Immersive Mode (no modifier keys)
+		if (
+			(event.key === 'f' || event.key === 'F') &&
+			!event.ctrlKey &&
+			!event.metaKey &&
+			!event.shiftKey &&
+			!event.altKey
+		) {
+			event.preventDefault();
+			contactsSettings.toggleImmersiveMode();
+		}
 	}
 
 	function handleModeChange(isSidebar: boolean) {
@@ -305,40 +317,70 @@
 <SplitPaneContainer>
 	<!-- Navigation Layout -->
 	<div class="layout-container">
-		<!-- Floating/Sidebar Pill Navigation (at bottom) -->
-		<PillNavigation
-			items={navItems}
-			currentPath={$page.url.pathname}
-			appName="Contacts"
-			homeRoute="/"
-			onToggleTheme={handleToggleTheme}
-			{isDark}
-			{isSidebarMode}
-			onModeChange={handleModeChange}
-			{isCollapsed}
-			onCollapsedChange={handleCollapsedChange}
-			desktopPosition="bottom"
-			showThemeToggle={true}
-			showThemeVariants={true}
-			{themeVariantItems}
-			{currentThemeVariantLabel}
-			themeMode={theme.mode}
-			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={true}
-			{languageItems}
-			{currentLanguageLabel}
-			showLogout={authStore.isAuthenticated}
-			onLogout={handleLogout}
-			loginHref="/login"
-			primaryColor="#3b82f6"
-			showAppSwitcher={true}
-			{appItems}
-			{userEmail}
-			settingsHref="/settings"
-			manaHref="/mana"
-			profileHref="/profile"
-			allAppsHref="/apps"
-			onOpenInPanel={handleOpenInPanel}
+		<!-- UI Elements (hidden in immersive mode) -->
+		{#if !contactsSettings.immersiveModeEnabled}
+			<!-- Floating/Sidebar Pill Navigation (at bottom) -->
+			<PillNavigation
+				items={navItems}
+				currentPath={$page.url.pathname}
+				appName="Contacts"
+				homeRoute="/"
+				onToggleTheme={handleToggleTheme}
+				{isDark}
+				{isSidebarMode}
+				onModeChange={handleModeChange}
+				{isCollapsed}
+				onCollapsedChange={handleCollapsedChange}
+				desktopPosition="bottom"
+				showThemeToggle={true}
+				showThemeVariants={true}
+				{themeVariantItems}
+				{currentThemeVariantLabel}
+				themeMode={theme.mode}
+				onThemeModeChange={handleThemeModeChange}
+				showLanguageSwitcher={true}
+				{languageItems}
+				{currentLanguageLabel}
+				showLogout={authStore.isAuthenticated}
+				onLogout={handleLogout}
+				loginHref="/login"
+				primaryColor="#3b82f6"
+				showAppSwitcher={true}
+				{appItems}
+				{userEmail}
+				settingsHref="/settings"
+				manaHref="/mana"
+				profileHref="/profile"
+				allAppsHref="/apps"
+				onOpenInPanel={handleOpenInPanel}
+			/>
+
+			<!-- Global Quick Input Bar -->
+			<QuickInputBar
+				onSearch={handleSearch}
+				onSelect={handleSelect}
+				onSearchChange={(query) => contactsFilterStore.setSearchQuery(query)}
+				placeholder="Neuer Kontakt oder suchen..."
+				emptyText="Keine Kontakte gefunden"
+				searchingText="Suche..."
+				onCreate={handleCreate}
+				onParseCreate={handleParseCreate}
+				createText="Erstellen"
+				appIcon="contacts"
+				bottomOffset={inputBarBottomOffset}
+				hasFabRight={showContactsToolbar}
+			/>
+
+			<!-- Contacts Toolbar (FAB + expandable bar) - only on main page -->
+			{#if showContactsToolbar}
+				<ContactsToolbar {isSidebarMode} contacts={contactsStore.contacts} />
+			{/if}
+		{/if}
+
+		<!-- Immersive Mode Toggle (always visible) -->
+		<ImmersiveModeToggle
+			isImmersive={contactsSettings.immersiveModeEnabled}
+			onToggle={() => contactsSettings.toggleImmersiveMode()}
 		/>
 
 		<!-- Main Content with dynamic padding based on nav mode -->
@@ -346,8 +388,9 @@
 			class="main-content bg-background"
 			class:sidebar-mode={isSidebarMode && !isCollapsed}
 			class:floating-mode={!isSidebarMode}
+			class:immersive={contactsSettings.immersiveModeEnabled}
 		>
-			<div class="content-wrapper">
+			<div class="content-wrapper" class:immersive={contactsSettings.immersiveModeEnabled}>
 				{@render children()}
 			</div>
 		</main>
@@ -360,27 +403,6 @@
 		<!-- New Contact Modal -->
 		{#if newContactModalStore.isOpen}
 			<NewContactModal onClose={() => newContactModalStore.close()} />
-		{/if}
-
-		<!-- Global Quick Input Bar -->
-		<QuickInputBar
-			onSearch={handleSearch}
-			onSelect={handleSelect}
-			onSearchChange={(query) => contactsFilterStore.setSearchQuery(query)}
-			placeholder="Neuer Kontakt oder suchen..."
-			emptyText="Keine Kontakte gefunden"
-			searchingText="Suche..."
-			onCreate={handleCreate}
-			onParseCreate={handleParseCreate}
-			createText="Erstellen"
-			appIcon="contacts"
-			bottomOffset={inputBarBottomOffset}
-			hasFabRight={showContactsToolbar}
-		/>
-
-		<!-- Contacts Toolbar (FAB + expandable bar) - only on main page -->
-		{#if showContactsToolbar}
-			<ContactsToolbar {isSidebarMode} contacts={contactsStore.contacts} />
 		{/if}
 	</div>
 </SplitPaneContainer>
@@ -414,6 +436,18 @@
 	/* Sidebar mode - add left padding for sidebar nav */
 	.main-content.sidebar-mode {
 		padding-left: 180px;
+	}
+
+	/* Immersive mode - fullscreen, no padding */
+	.main-content.immersive {
+		padding: 0 !important;
+		height: 100vh;
+		width: 100vw;
+	}
+
+	.content-wrapper.immersive {
+		padding: 0;
+		height: 100%;
 	}
 
 	.content-wrapper {

@@ -192,3 +192,6 @@ export type {
 	SyntaxGroup,
 	HelpModalConfig,
 } from './help';
+
+// Immersive Mode
+export { default as ImmersiveModeToggle } from './components/ImmersiveModeToggle.svelte';

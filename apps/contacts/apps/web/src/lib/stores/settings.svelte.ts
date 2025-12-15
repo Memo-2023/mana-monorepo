@@ -65,6 +65,10 @@ export interface ContactsAppSettings {
 	alphabetNavReverseOrder: boolean;
 	/** Show # symbol for non-letter names */
 	alphabetNavShowHash: boolean;
+
+	// Immersive Mode
+	/** Fullscreen mode - hides all UI elements */
+	immersiveModeEnabled: boolean;
 }
 
 const DEFAULT_SETTINGS: ContactsAppSettings = {
@@ -100,6 +104,9 @@ const DEFAULT_SETTINGS: ContactsAppSettings = {
 	alphabetNavCompact: false,
 	alphabetNavReverseOrder: false,
 	alphabetNavShowHash: true,
+
+	// Immersive Mode
+	immersiveModeEnabled: false,
 };
 
 const STORAGE_KEY = 'contacts-settings';
@@ -215,6 +222,19 @@ export const contactsSettings = {
 	},
 	get alphabetNavShowHash() {
 		return settings.alphabetNavShowHash;
+	},
+
+	// Immersive Mode
+	get immersiveModeEnabled() {
+		return settings.immersiveModeEnabled;
+	},
+
+	/**
+	 * Toggle Immersive Mode (fullscreen, hide all UI)
+	 */
+	toggleImmersiveMode() {
+		settings = { ...settings, immersiveModeEnabled: !settings.immersiveModeEnabled };
+		saveSettings(settings);
 	},
 
 	/**
