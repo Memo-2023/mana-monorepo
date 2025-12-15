@@ -92,6 +92,8 @@ export interface PillTabGroupConfig {
 	onChange: (id: string) => void;
 	/** Optional section label (shown above in sidebar mode) */
 	sectionLabel?: string;
+	/** Called on right-click (context menu) - receives click coordinates */
+	onContextMenu?: (x: number, y: number) => void;
 }
 
 export interface PillDivider {
@@ -137,6 +139,10 @@ export interface PillNavigationProps {
 	showThemeToggle?: boolean;
 	/** Primary color for active state */
 	primaryColor?: string;
+	/** Elements to prepend before nav items (tab groups, dividers, nav items) */
+	prependElements?: PillNavElement[];
+	/** Additional elements to show after nav items (tab groups, dividers) */
+	elements?: PillNavElement[];
 }
 
 export interface NavItem {

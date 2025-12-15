@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { viewStore } from '$lib/stores/view.svelte';
+	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { getOffsetDate } from '$lib/utils/dateNavigation';
 	import WeekView from './WeekView.svelte';
 	import DayView from './DayView.svelte';
@@ -300,6 +301,8 @@
 		<div class="carousel-page" class:inactive={!isSwiping && offsetX <= 0}>
 			{#if viewStore.viewType === 'day'}
 				<DayView date={prevDate} />
+			{:else if viewStore.viewType === '3day'}
+				<MultiDayView dayCount={3} date={prevDate} />
 			{:else if viewStore.viewType === '5day'}
 				<MultiDayView dayCount={5} date={prevDate} />
 			{:else if viewStore.viewType === 'week'}
@@ -308,6 +311,8 @@
 				<MultiDayView dayCount={10} date={prevDate} />
 			{:else if viewStore.viewType === '14day'}
 				<MultiDayView dayCount={14} date={prevDate} />
+			{:else if viewStore.viewType === 'custom'}
+				<MultiDayView dayCount={settingsStore.customDayCount} date={prevDate} />
 			{:else if viewStore.viewType === 'month'}
 				<MonthView date={prevDate} />
 			{:else if viewStore.viewType === 'year'}
@@ -321,6 +326,8 @@
 		<div class="carousel-page current">
 			{#if viewStore.viewType === 'day'}
 				<DayView {onQuickCreate} {onEventClick} />
+			{:else if viewStore.viewType === '3day'}
+				<MultiDayView dayCount={3} {onQuickCreate} {onEventClick} />
 			{:else if viewStore.viewType === '5day'}
 				<MultiDayView dayCount={5} {onQuickCreate} {onEventClick} />
 			{:else if viewStore.viewType === 'week'}
@@ -329,6 +336,8 @@
 				<MultiDayView dayCount={10} {onQuickCreate} {onEventClick} />
 			{:else if viewStore.viewType === '14day'}
 				<MultiDayView dayCount={14} {onQuickCreate} {onEventClick} />
+			{:else if viewStore.viewType === 'custom'}
+				<MultiDayView dayCount={settingsStore.customDayCount} {onQuickCreate} {onEventClick} />
 			{:else if viewStore.viewType === 'month'}
 				<MonthView {onQuickCreate} {onEventClick} />
 			{:else if viewStore.viewType === 'year'}
@@ -344,6 +353,8 @@
 		<div class="carousel-page" class:inactive={!isSwiping && offsetX >= 0}>
 			{#if viewStore.viewType === 'day'}
 				<DayView date={nextDate} />
+			{:else if viewStore.viewType === '3day'}
+				<MultiDayView dayCount={3} date={nextDate} />
 			{:else if viewStore.viewType === '5day'}
 				<MultiDayView dayCount={5} date={nextDate} />
 			{:else if viewStore.viewType === 'week'}
@@ -352,6 +363,8 @@
 				<MultiDayView dayCount={10} date={nextDate} />
 			{:else if viewStore.viewType === '14day'}
 				<MultiDayView dayCount={14} date={nextDate} />
+			{:else if viewStore.viewType === 'custom'}
+				<MultiDayView dayCount={settingsStore.customDayCount} date={nextDate} />
 			{:else if viewStore.viewType === 'month'}
 				<MonthView date={nextDate} />
 			{:else if viewStore.viewType === 'year'}
@@ -384,6 +397,15 @@
 		height: 100%;
 		flex-shrink: 0;
 		overflow: hidden;
+	}
+
+	/* Mobile: Allow vertical scrolling within calendar page */
+	@media (max-width: 768px) {
+		.carousel-page {
+			overflow-y: auto;
+			overflow-x: hidden;
+			-webkit-overflow-scrolling: touch;
+		}
 	}
 
 	/* Inactive pages have reduced interactivity for performance */

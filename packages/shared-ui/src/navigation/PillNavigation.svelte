@@ -200,6 +200,8 @@
 		showThemeToggle?: boolean;
 		/** Primary color for active state (CSS custom property or hex) */
 		primaryColor?: string;
+		/** Elements to prepend before nav items (tab groups, dividers, nav items) */
+		prependElements?: PillNavElement[];
 		/** Additional elements (tab groups, dividers) to show after nav items */
 		elements?: PillNavElement[];
 		/** Show logout button */
@@ -269,6 +271,7 @@
 		showLanguageSwitcher = false,
 		showThemeToggle = true,
 		primaryColor,
+		prependElements = [],
 		elements = [],
 		showLogout = true,
 		themeVariantItems = [],
@@ -495,6 +498,42 @@
 				</a>
 			{/if}
 
+			<!-- Prepended Elements (Tab Groups, Dividers, Nav Items) -->
+			{#each prependElements as element}
+				{#if isTabGroup(element)}
+					<PillTabGroup
+						options={element.options}
+						value={element.value}
+						onChange={element.onChange}
+						sectionLabel={element.sectionLabel}
+						onContextMenu={element.onContextMenu}
+						{isSidebarMode}
+						{primaryColor}
+					/>
+				{:else if isDivider(element)}
+					<div class="pill-divider" class:sidebar-divider={isSidebarMode}></div>
+				{:else if isNavItem(element)}
+					<a href={element.href} class="pill glass-pill" class:active={isActive(element.href)}>
+						{#if element.icon}
+							{#if phosphorIcons[element.icon]}
+								{@const IconComponent = phosphorIcons[element.icon]}
+								<IconComponent size={18} class="pill-icon" />
+							{:else}
+								<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d={getIconPath(element.icon)}
+									/>
+								</svg>
+							{/if}
+						{/if}
+						<span class="pill-label">{element.label}</span>
+					</a>
+				{/if}
+			{/each}
+
 			<!-- Navigation Items -->
 			{#each items as item}
 				<a href={item.href} class="pill glass-pill" class:active={isActive(item.href)}>
@@ -533,6 +572,7 @@
 						value={element.value}
 						onChange={element.onChange}
 						sectionLabel={element.sectionLabel}
+						onContextMenu={element.onContextMenu}
 						{isSidebarMode}
 						{primaryColor}
 					/>

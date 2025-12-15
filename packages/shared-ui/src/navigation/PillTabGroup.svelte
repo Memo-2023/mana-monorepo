@@ -14,6 +14,8 @@
 		isSidebarMode?: boolean;
 		/** Primary color for active state */
 		primaryColor?: string;
+		/** Called on right-click (context menu) - receives click coordinates */
+		onContextMenu?: (x: number, y: number) => void;
 	}
 
 	let {
@@ -23,7 +25,15 @@
 		sectionLabel,
 		isSidebarMode = false,
 		primaryColor,
+		onContextMenu,
 	}: Props = $props();
+
+	function handleContextMenu(event: MouseEvent) {
+		if (onContextMenu) {
+			event.preventDefault();
+			onContextMenu(event.clientX, event.clientY);
+		}
+	}
 
 	// Icon SVG paths (same as PillNavigation)
 	const icons: Record<string, string> = {
@@ -38,6 +48,10 @@
 		fire: 'M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z',
 		trending: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
 		single: 'M4 6h16M4 12h16M4 18h16',
+		calendar:
+			'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+		'check-square':
+			'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
 	};
 
 	function getIconPath(name: string): string {
@@ -51,7 +65,8 @@
 	}
 </script>
 
-<div class="pill-tab-group" class:sidebar-mode={isSidebarMode}>
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="pill-tab-group" class:sidebar-mode={isSidebarMode} oncontextmenu={handleContextMenu}>
 	{#if sectionLabel && isSidebarMode}
 		<p class="section-label">{sectionLabel}</p>
 	{/if}

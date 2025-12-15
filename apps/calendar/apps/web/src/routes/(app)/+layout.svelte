@@ -14,6 +14,8 @@
 		PillDropdownItem,
 		QuickInputItem,
 		CreatePreview,
+		PillTabGroupConfig,
+		PillNavElement,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -54,7 +56,9 @@
 	import DateStrip from '$lib/components/calendar/DateStrip.svelte';
 	import DateStripFab from '$lib/components/calendar/DateStripFab.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
+	import ViewModePillContextMenu from '$lib/components/calendar/ViewModePillContextMenu.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
+	import type { CalendarViewType } from '@calendar/shared';
 
 	// App switcher items
 	const appItems = getPillAppItems('calendar');
@@ -150,6 +154,15 @@
 	let isCollapsed = $state(false);
 	let isToolbarCollapsed = $state(true); // Default to collapsed - FAB next to InputBar
 
+	// Mobile detection for responsive layout
+	let isMobile = $state(false);
+
+	function updateMobileState() {
+		if (browser) {
+			isMobile = window.innerWidth <= 640;
+		}
+	}
+
 	// InputBar help modal state
 	let helpModalOpen = $state(false);
 	let helpModalMode = $state<'shortcuts' | 'syntax'>('shortcuts');
@@ -236,10 +249,8 @@
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
-	// Base navigation items for Calendar
+	// Base navigation items for Calendar (without Kalender/Aufgaben - handled by tab group)
 	const baseNavItems: PillNavItem[] = [
-		{ href: '/', label: 'Kalender', icon: 'calendar' },
-		{ href: '/tasks', label: 'Aufgaben', icon: 'check-square' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/statistics', label: 'Statistiken', icon: 'bar-chart-3' },
 		{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
@@ -252,9 +263,103 @@
 		filterHiddenNavItems('calendar', baseNavItems, userSettings.nav.hiddenNavItems)
 	);
 
-	// Navigation shortcuts (Ctrl+1-4) - use base items for consistent shortcuts
-	const navRoutes = baseNavItems.map((item) => item.href);
+	// Active tab based on sidebar state: 'tasks' when sidebar is open, 'calendar' when closed
+	let activeTab = $derived(settingsStore.sidebarCollapsed ? 'calendar' : 'tasks');
 
+	// Tab group for Kalender/Aufgaben
+	let calendarTasksTabGroup = $derived<PillTabGroupConfig>({
+		type: 'tabs',
+		options: [
+			{ id: 'calendar', icon: 'calendar', label: 'Kalender', title: 'Kalender anzeigen' },
+			{ id: 'tasks', icon: 'check-square', label: 'Aufgaben', title: 'Aufgaben-Sidebar öffnen' },
+		],
+		value: activeTab,
+		onChange: handleTabChange,
+	});
+
+	// View switcher context menu
+	let viewContextMenu: ViewModePillContextMenu;
+
+	function handleViewContextMenu(x: number, y: number) {
+		viewContextMenu?.show(x, y);
+	}
+
+	// View labels for tabs (numbers for day views, letters for others)
+	const viewLabels: Record<CalendarViewType, string> = {
+		day: '1',
+		'3day': '3',
+		'5day': '5',
+		week: '7',
+		'10day': '10',
+		'14day': '14',
+		month: 'M',
+		year: 'Y',
+		agenda: 'L',
+		custom: '', // Will be set dynamically
+	};
+
+	// View titles for tooltips
+	const viewTitles: Record<CalendarViewType, string> = {
+		day: 'Tagesansicht',
+		'3day': '3-Tage-Ansicht',
+		'5day': '5-Tage-Ansicht',
+		week: 'Wochenansicht',
+		'10day': '10-Tage-Ansicht',
+		'14day': '14-Tage-Ansicht',
+		month: 'Monatsansicht',
+		year: 'Jahresansicht',
+		agenda: 'Agenda',
+		custom: 'Benutzerdefiniert',
+	};
+
+	// Get enabled views from settings
+	let enabledViews = $derived(settingsStore.quickViewPillViews);
+
+	// Get label for a view (dynamic for custom)
+	function getViewLabel(view: CalendarViewType): string {
+		if (view === 'custom') {
+			return String(settingsStore.customDayCount);
+		}
+		return viewLabels[view];
+	}
+
+	// View switcher tab group (only shown on calendar main page)
+	let viewSwitcherTabGroup = $derived<PillTabGroupConfig>({
+		type: 'tabs',
+		options: enabledViews.map((view) => ({
+			id: view,
+			label: getViewLabel(view),
+			title: view === 'custom' ? `${settingsStore.customDayCount}-Tage-Ansicht` : viewTitles[view],
+		})),
+		value: viewStore.viewType,
+		onChange: (id) => viewStore.setViewType(id as CalendarViewType),
+		onContextMenu: handleViewContextMenu,
+	});
+
+	// Prepended elements (tab groups at the start of navigation)
+	let prependElements = $derived<PillNavElement[]>(
+		showCalendarToolbar ? [calendarTasksTabGroup, viewSwitcherTabGroup] : [calendarTasksTabGroup]
+	);
+
+	// Handle tab change: toggle sidebar for tasks, close for calendar
+	function handleTabChange(tabId: string) {
+		// Always navigate to main calendar page if not there
+		if ($page.url.pathname !== '/') {
+			goto('/');
+		}
+
+		if (tabId === 'tasks') {
+			// Toggle behavior: if sidebar is already open, close it
+			settingsStore.toggleSidebar();
+		} else if (tabId === 'calendar') {
+			// Kalender-Tab: close sidebar if open
+			if (!settingsStore.sidebarCollapsed) {
+				settingsStore.toggleSidebar();
+			}
+		}
+	}
+
+	// Navigation shortcuts (Ctrl+1 = Kalender, Ctrl+2 = Aufgaben toggle, Ctrl+3+ = other nav items)
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
 
@@ -264,9 +369,18 @@
 
 		if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
 			const num = parseInt(event.key);
-			if (num >= 1 && num <= navRoutes.length) {
+			if (num === 1) {
+				// Ctrl+1: Kalender (close sidebar)
 				event.preventDefault();
-				const route = navRoutes[num - 1];
+				handleTabChange('calendar');
+			} else if (num === 2) {
+				// Ctrl+2: Aufgaben (toggle sidebar)
+				event.preventDefault();
+				handleTabChange('tasks');
+			} else if (num >= 3 && num <= baseNavItems.length + 2) {
+				// Ctrl+3+: other nav items (offset by 2 for the tab group)
+				event.preventDefault();
+				const route = baseNavItems[num - 3]?.href;
 				if (route) {
 					goto(route);
 				}
@@ -374,15 +488,19 @@
 			isToolbarCollapsed = false;
 			toolbarCollapsedStore.set(false);
 		}
+
+		// Initialize mobile state
+		updateMobileState();
 	});
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} onresize={updateMobileState} />
 
 <SplitPaneContainer>
 	<div class="layout-container">
 		<PillNavigation
 			items={navItems}
+			{prependElements}
 			currentPath={$page.url.pathname}
 			appName="Kalender"
 			homeRoute="/"
@@ -425,7 +543,7 @@
 		<!-- Date strip (only on main calendar page) -->
 		{#if showCalendarToolbar}
 			{#if settingsStore.dateStripCollapsed}
-				<DateStripFab {isSidebarMode} isToolbarExpanded={!isToolbarCollapsed} />
+				<DateStripFab {isSidebarMode} isToolbarExpanded={!isToolbarCollapsed} {isMobile} />
 			{:else}
 				<DateStrip {isSidebarMode} isToolbarExpanded={!isToolbarCollapsed} />
 			{/if}
@@ -436,6 +554,7 @@
 			<CalendarToolbar
 				{isSidebarMode}
 				isCollapsed={isToolbarCollapsed}
+				{isMobile}
 				onModeChange={handleToolbarModeChange}
 				onCollapsedChange={handleToolbarCollapsedChange}
 			/>
@@ -467,13 +586,18 @@
 			onParseCreate={handleParseCreate}
 			createText="Erstellen"
 			appIcon="calendar"
-			bottomOffset={isSidebarMode
-				? '0px'
-				: showCalendarToolbar && !isToolbarCollapsed
-					? '140px'
-					: '70px'}
+			bottomOffset={isMobile
+				? '70px'
+				: isSidebarMode
+					? '0px'
+					: showCalendarToolbar && !isToolbarCollapsed
+						? '140px'
+						: '70px'}
 			hasFabRight={showCalendarToolbar && !isSidebarMode}
-			hasFabLeft={showCalendarToolbar && !isSidebarMode && settingsStore.dateStripCollapsed}
+			hasFabLeft={!isMobile &&
+				showCalendarToolbar &&
+				!isSidebarMode &&
+				settingsStore.dateStripCollapsed}
 			defaultOptions={calendarOptions}
 			selectedDefaultId={selectedDefaultCalendarId}
 			defaultOptionLabel="Standard-Kalender"
@@ -487,6 +611,9 @@
 <!-- Global Event Context Menu - rendered at top level for proper z-index -->
 <EventContextMenu onEdit={handleContextMenuEdit} />
 
+<!-- View Mode Context Menu -->
+<ViewModePillContextMenu bind:this={viewContextMenu} />
+
 <!-- InputBar Help Modal -->
 <InputBarHelpModal open={helpModalOpen} onClose={handleCloseHelpModal} mode={helpModalMode} />
 
@@ -495,6 +622,15 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
+	}
+
+	/* Mobile: Fixed viewport, no scroll */
+	@media (max-width: 768px) {
+		.layout-container {
+			height: 100vh;
+			max-height: 100vh;
+			overflow: hidden;
+		}
 	}
 
 	.main-content {
@@ -517,17 +653,33 @@
 	}
 
 	@media (max-width: 768px) {
-		/* On mobile, toolbars are at bottom, extra padding at bottom instead */
+		/* On mobile, fixed height layout - no page scroll */
 		.main-content {
-			padding-bottom: calc(150px + env(safe-area-inset-bottom)); /* PillNav + QuickInputBar */
+			height: calc(100vh - 70px); /* Full height minus bottom nav */
+			overflow: hidden;
+			padding-bottom: 0;
+			display: flex;
+			flex-direction: column;
 		}
 		.main-content.has-toolbar {
-			padding-bottom: calc(
-				200px + env(safe-area-inset-bottom)
-			); /* DateStrip + BottomNav + QuickInputBar */
+			height: calc(100vh - 70px);
+			padding-bottom: 0;
 		}
 		.main-content.floating-mode {
 			padding-top: 0; /* No top padding on mobile - everything is at bottom */
+		}
+	}
+
+	/* Mobile: Fixed height, internal scrolling only */
+	@media (max-width: 640px) {
+		.main-content {
+			height: calc(100vh - 70px);
+			overflow: hidden;
+			padding-bottom: 0;
+		}
+		.main-content.has-toolbar {
+			height: calc(100vh - 70px);
+			padding-bottom: 0;
 		}
 	}
 
@@ -542,6 +694,17 @@
 		padding: 1rem;
 		position: relative;
 		z-index: 0;
+	}
+
+	/* Mobile: no padding, full height */
+	@media (max-width: 768px) {
+		.content-wrapper {
+			padding: 0;
+			height: 100%;
+			overflow: hidden;
+			display: flex;
+			flex-direction: column;
+		}
 	}
 
 	@media (min-width: 640px) {
@@ -593,6 +756,21 @@
 			max-width: calc(100% - 200px); /* Both FABs */
 			margin-left: auto;
 			margin-right: auto;
+		}
+	}
+
+	/* Mobile: InputBar in its own row (above PillNav), Settings FAB stays next to InputBar */
+	@media (max-width: 640px) {
+		/* InputBar takes all available space up to the FAB */
+		:global(.quick-input-bar.has-fab-right .input-container) {
+			max-width: none;
+			width: 100%;
+			margin: 0;
+		}
+
+		:global(.quick-input-bar.has-fab-right) {
+			padding-left: 1rem;
+			padding-right: calc(54px + 1rem + 8px); /* FAB width + margin + gap */
 		}
 	}
 </style>

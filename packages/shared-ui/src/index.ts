@@ -101,6 +101,7 @@ export type {
 	PillNavElement,
 	PillNavigationProps,
 	PillTabOption,
+	PillTabGroupConfig,
 	ExpandableToolbarProps,
 } from './navigation';
 

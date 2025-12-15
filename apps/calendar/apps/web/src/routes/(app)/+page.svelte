@@ -99,8 +99,8 @@
 </svelte:head>
 
 <div class="calendar-layout">
-	<!-- Left Sidebar -->
-	<aside class="calendar-sidebar" class:collapsed={settingsStore.sidebarCollapsed}>
+	<!-- Desktop: Left Sidebar -->
+	<aside class="calendar-sidebar desktop-only" class:collapsed={settingsStore.sidebarCollapsed}>
 		<!-- Collapse button at top -->
 		<button
 			class="sidebar-collapse-btn"
@@ -120,9 +120,9 @@
 		<TodoSidebarSection maxItems={5} />
 	</aside>
 
-	<!-- FAB when sidebar is collapsed -->
+	<!-- Desktop: FAB when sidebar is collapsed -->
 	{#if settingsStore.sidebarCollapsed}
-		<div class="sidebar-fab" class:pill-sidebar={$sidebarModeStore}>
+		<div class="sidebar-fab desktop-only" class:pill-sidebar={$sidebarModeStore}>
 			<button
 				class="fab-expand"
 				onclick={() => settingsStore.toggleSidebar()}
@@ -151,6 +151,14 @@
 		</div>
 	</div>
 
+	<!-- Mobile: Bottom Todo Section -->
+	<aside
+		class="calendar-sidebar-mobile mobile-only"
+		class:collapsed={settingsStore.sidebarCollapsed}
+	>
+		<TodoSidebarSection maxItems={3} />
+	</aside>
+
 	<!-- Quick Event Overlay (for both create and edit) -->
 	{#if showQuickOverlay}
 		{#key overlayKey}
@@ -174,10 +182,19 @@
 		position: relative;
 	}
 
+	/* Desktop only elements */
+	.desktop-only {
+		display: flex;
+	}
+
+	/* Mobile only elements - hidden by default */
+	.mobile-only {
+		display: none;
+	}
+
 	.calendar-sidebar {
 		width: 260px;
 		flex-shrink: 0;
-		display: flex;
 		flex-direction: column;
 		gap: 1rem;
 		position: relative;
@@ -226,7 +243,6 @@
 		position: fixed;
 		left: 1rem;
 		bottom: 1rem;
-		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
 		z-index: 50;
@@ -290,13 +306,105 @@
 		flex: 1;
 	}
 
-	@media (max-width: 1024px) {
-		.calendar-sidebar {
-			display: none;
+	/* Mobile: Bottom Todo Section */
+	.calendar-sidebar-mobile {
+		width: 100%;
+		flex-direction: column;
+		background: hsl(var(--color-surface));
+		border-top: 1px solid hsl(var(--color-border));
+		padding: 0.75rem;
+		overflow-y: auto;
+		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.calendar-sidebar-mobile.collapsed {
+		height: 0;
+		flex: 0;
+		padding: 0;
+		opacity: 0;
+		overflow: hidden;
+		border: none;
+	}
+
+	/* Mobile Layout - 50/50 Splitscreen */
+	@media (max-width: 768px) {
+		.calendar-layout {
+			flex-direction: column;
+			gap: 0;
+			flex: 1;
+			height: 100%; /* Fill parent container */
+			min-height: 0;
+			overflow: hidden;
 		}
 
-		.sidebar-fab {
+		/* Hide desktop elements on mobile */
+		.desktop-only {
+			display: none !important;
+		}
+
+		/* Show mobile elements */
+		.mobile-only {
 			display: flex;
+		}
+
+		/* Calendar container */
+		.calendar-main {
+			border-radius: 0;
+			border: none;
+			min-height: 0;
+			overflow: hidden;
+		}
+
+		/* When todos are visible: 50/50 split */
+		.calendar-layout:has(.calendar-sidebar-mobile:not(.collapsed)) .calendar-main {
+			flex: 0 0 50%;
+			height: 50%;
+		}
+
+		/* When todos are collapsed: calendar takes full space */
+		.calendar-layout:has(.calendar-sidebar-mobile.collapsed) .calendar-main {
+			flex: 1;
+			height: 100%;
+		}
+
+		/* Calendar content must scroll internally */
+		.calendar-content {
+			height: 100%;
+			overflow-y: auto;
+		}
+
+		/* Todos section takes other half */
+		.calendar-sidebar-mobile {
+			display: flex;
+			flex-direction: column;
+			flex: 0 0 50%;
+			height: 50%;
+			max-height: none;
+			border-radius: 0;
+			margin-bottom: 0;
+			padding: 0;
+			border-top: none;
+			overflow: hidden;
+		}
+
+		/* Make TodoSidebarSection fill the container */
+		.calendar-sidebar-mobile > :global(*) {
+			flex: 1;
+			min-height: 0;
+		}
+
+		.calendar-sidebar-mobile.collapsed {
+			flex: 0;
+			height: 0;
+			padding: 0;
+			border: none;
+		}
+	}
+
+	/* Tablet: Keep desktop layout but smaller sidebar */
+	@media (min-width: 769px) and (max-width: 1024px) {
+		.calendar-sidebar {
+			width: 220px;
 		}
 	}
 </style>
