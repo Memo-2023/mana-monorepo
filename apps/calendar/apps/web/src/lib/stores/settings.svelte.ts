@@ -46,6 +46,9 @@ export interface CalendarAppSettings {
 	// TagStrip settings
 	tagStripCollapsed: boolean; // Whether TagStrip is hidden
 
+	// Immersive Mode settings
+	immersiveModeEnabled: boolean; // Fullscreen mode - hides all UI elements
+
 	// Birthday settings (cross-app integration with Contacts)
 	showBirthdays: boolean; // Show contact birthdays in calendar
 	showBirthdayAge: boolean; // Show age in birthday events
@@ -88,6 +91,8 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	dateStripCollapsed: false,
 	// TagStrip defaults
 	tagStripCollapsed: true, // Hidden by default
+	// Immersive Mode defaults
+	immersiveModeEnabled: false,
 	// Birthday defaults
 	showBirthdays: true,
 	showBirthdayAge: true,
@@ -236,6 +241,10 @@ export const settingsStore = {
 	get tagStripCollapsed() {
 		return settings.tagStripCollapsed;
 	},
+	// Immersive Mode settings
+	get immersiveModeEnabled() {
+		return settings.immersiveModeEnabled;
+	},
 	// Birthday settings
 	get showBirthdays() {
 		return settings.showBirthdays;
@@ -303,6 +312,15 @@ export const settingsStore = {
 	 */
 	toggleTagStrip() {
 		settings = { ...settings, tagStripCollapsed: !settings.tagStripCollapsed };
+		saveSettings(settings);
+		syncToCloud();
+	},
+
+	/**
+	 * Toggle Immersive Mode (fullscreen, hide all UI)
+	 */
+	toggleImmersiveMode() {
+		settings = { ...settings, immersiveModeEnabled: !settings.immersiveModeEnabled };
 		saveSettings(settings);
 		syncToCloud();
 	},

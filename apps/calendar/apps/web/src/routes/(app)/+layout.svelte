@@ -58,6 +58,7 @@
 	import TagStrip from '$lib/components/calendar/TagStrip.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import ViewModePillContextMenu from '$lib/components/calendar/ViewModePillContextMenu.svelte';
+	import ImmersiveModeToggle from '$lib/components/calendar/ImmersiveModeToggle.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import type { CalendarViewType } from '@calendar/shared';
 
@@ -413,6 +414,54 @@
 				}
 			}
 		}
+
+		// F = Toggle Immersive Mode (no modifier keys)
+		if (
+			(event.key === 'f' || event.key === 'F') &&
+			!event.ctrlKey &&
+			!event.metaKey &&
+			!event.shiftKey &&
+			!event.altKey
+		) {
+			event.preventDefault();
+			settingsStore.toggleImmersiveMode();
+		}
+
+		// Arrow keys for calendar navigation (only on main calendar page, no modifiers)
+		if (
+			showCalendarToolbar &&
+			!event.ctrlKey &&
+			!event.metaKey &&
+			!event.shiftKey &&
+			!event.altKey
+		) {
+			if (event.key === 'ArrowLeft') {
+				event.preventDefault();
+				viewStore.goToPrevious();
+			} else if (event.key === 'ArrowRight') {
+				event.preventDefault();
+				viewStore.goToNext();
+			} else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+				// Scroll calendar view up/down - scroll to top/bottom
+				const scrollContainer = document.querySelector('.carousel-page.current');
+				if (scrollContainer) {
+					event.preventDefault();
+					if (event.key === 'ArrowDown') {
+						// Scroll to bottom
+						scrollContainer.scrollTo({
+							top: scrollContainer.scrollHeight,
+							behavior: 'smooth',
+						});
+					} else {
+						// Scroll to top
+						scrollContainer.scrollTo({
+							top: 0,
+							behavior: 'smooth',
+						});
+					}
+				}
+			}
+		}
 	}
 
 	function handleModeChange(isSidebar: boolean) {
@@ -525,128 +574,136 @@
 
 <SplitPaneContainer>
 	<div class="layout-container">
-		<PillNavigation
-			items={navItems}
-			{prependElements}
-			currentPath={$page.url.pathname}
-			appName="Kalender"
-			homeRoute="/"
-			onToggleTheme={handleToggleTheme}
-			{isDark}
-			{isSidebarMode}
-			onModeChange={handleModeChange}
-			{isCollapsed}
-			onCollapsedChange={handleCollapsedChange}
-			desktopPosition="bottom"
-			showThemeToggle={true}
-			showThemeVariants={true}
-			{themeVariantItems}
-			{currentThemeVariantLabel}
-			themeMode={theme.mode}
-			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={true}
-			{languageItems}
-			{currentLanguageLabel}
-			showLogout={authStore.isAuthenticated}
-			onLogout={handleLogout}
-			loginHref="/login"
-			primaryColor="#3b82f6"
-			showAppSwitcher={true}
-			{appItems}
-			{userEmail}
-			settingsHref="/settings"
-			manaHref="/mana"
-			profileHref="/profile"
-			allAppsHref="/apps"
-			onOpenInPanel={handleOpenInPanel}
-		>
-			{#snippet toolbarContent()}
-				{#if showCalendarToolbar}
-					<CalendarToolbarContent vertical={true} />
-				{/if}
-			{/snippet}
-		</PillNavigation>
+		<!-- UI Elements (hidden in immersive mode) -->
+		{#if !settingsStore.immersiveModeEnabled}
+			<PillNavigation
+				items={navItems}
+				{prependElements}
+				currentPath={$page.url.pathname}
+				appName="Kalender"
+				homeRoute="/"
+				onToggleTheme={handleToggleTheme}
+				{isDark}
+				{isSidebarMode}
+				onModeChange={handleModeChange}
+				{isCollapsed}
+				onCollapsedChange={handleCollapsedChange}
+				desktopPosition="bottom"
+				showThemeToggle={true}
+				showThemeVariants={true}
+				{themeVariantItems}
+				{currentThemeVariantLabel}
+				themeMode={theme.mode}
+				onThemeModeChange={handleThemeModeChange}
+				showLanguageSwitcher={true}
+				{languageItems}
+				{currentLanguageLabel}
+				showLogout={authStore.isAuthenticated}
+				onLogout={handleLogout}
+				loginHref="/login"
+				primaryColor="#3b82f6"
+				showAppSwitcher={true}
+				{appItems}
+				{userEmail}
+				settingsHref="/settings"
+				manaHref="/mana"
+				profileHref="/profile"
+				allAppsHref="/apps"
+				onOpenInPanel={handleOpenInPanel}
+			>
+				{#snippet toolbarContent()}
+					{#if showCalendarToolbar}
+						<CalendarToolbarContent vertical={true} />
+					{/if}
+				{/snippet}
+			</PillNavigation>
 
-		<!-- Date strip (only on main calendar page) -->
-		{#if showCalendarToolbar}
-			{#if settingsStore.dateStripCollapsed}
-				<DateStripFab
+			<!-- Date strip (only on main calendar page) -->
+			{#if showCalendarToolbar}
+				{#if settingsStore.dateStripCollapsed}
+					<DateStripFab
+						{isSidebarMode}
+						isToolbarExpanded={!isToolbarCollapsed}
+						{isMobile}
+						hasTagStrip={!settingsStore.tagStripCollapsed}
+					/>
+				{:else}
+					<DateStrip
+						{isSidebarMode}
+						isToolbarExpanded={!isToolbarCollapsed}
+						hasTagStrip={!settingsStore.tagStripCollapsed}
+					/>
+				{/if}
+			{/if}
+
+			<!-- Tag strip (only on main calendar page, when not collapsed) - directly above PillNav -->
+			{#if showCalendarToolbar && !settingsStore.tagStripCollapsed}
+				<TagStrip {isSidebarMode} />
+			{/if}
+
+			<!-- Calendar toolbar (only on main calendar page, not in sidebar mode) -->
+			{#if showCalendarToolbar && !isSidebarMode}
+				<CalendarToolbar
 					{isSidebarMode}
-					isToolbarExpanded={!isToolbarCollapsed}
+					isCollapsed={isToolbarCollapsed}
 					{isMobile}
-					hasTagStrip={!settingsStore.tagStripCollapsed}
-				/>
-			{:else}
-				<DateStrip
-					{isSidebarMode}
-					isToolbarExpanded={!isToolbarCollapsed}
-					hasTagStrip={!settingsStore.tagStripCollapsed}
+					bottomOffset={settingsStore.tagStripCollapsed ? '70px' : '140px'}
+					onModeChange={handleToolbarModeChange}
+					onCollapsedChange={handleToolbarCollapsedChange}
 				/>
 			{/if}
-		{/if}
 
-		<!-- Tag strip (only on main calendar page, when not collapsed) - directly above PillNav -->
-		{#if showCalendarToolbar && !settingsStore.tagStripCollapsed}
-			<TagStrip {isSidebarMode} />
-		{/if}
-
-		<!-- Calendar toolbar (only on main calendar page, not in sidebar mode) -->
-		{#if showCalendarToolbar && !isSidebarMode}
-			<CalendarToolbar
-				{isSidebarMode}
-				isCollapsed={isToolbarCollapsed}
-				{isMobile}
-				bottomOffset={settingsStore.tagStripCollapsed ? '70px' : '140px'}
-				onModeChange={handleToolbarModeChange}
-				onCollapsedChange={handleToolbarCollapsedChange}
+			<!-- Global Input Bar -->
+			<QuickInputBar
+				onSearch={handleSearch}
+				onSelect={handleSelect}
+				onSearchChange={handleSearchChange}
+				placeholder="Neuer Termin oder suchen..."
+				emptyText="Keine Termine gefunden"
+				searchingText="Suche..."
+				onCreate={handleCreate}
+				onParseCreate={handleParseCreate}
+				createText="Erstellen"
+				appIcon="calendar"
+				bottomOffset={isMobile
+					? `${70 + tagStripOffset}px`
+					: isSidebarMode
+						? `${tagStripOffset}px`
+						: showCalendarToolbar && !isToolbarCollapsed
+							? `${140 + tagStripOffset}px`
+							: `${70 + tagStripOffset}px`}
+				hasFabRight={showCalendarToolbar && !isSidebarMode}
+				hasFabLeft={!isMobile &&
+					showCalendarToolbar &&
+					!isSidebarMode &&
+					settingsStore.dateStripCollapsed}
+				defaultOptions={calendarOptions}
+				selectedDefaultId={selectedDefaultCalendarId}
+				defaultOptionLabel="Standard-Kalender"
+				onDefaultChange={handleDefaultCalendarChange}
+				onShowShortcuts={handleShowShortcuts}
+				onShowSyntaxHelp={handleShowSyntaxHelp}
 			/>
 		{/if}
+
+		<!-- Immersive Mode Toggle (always visible on main calendar page) -->
+		<ImmersiveModeToggle visible={showCalendarToolbar} />
 
 		<main
 			class="main-content bg-background"
 			class:sidebar-mode={isSidebarMode && !isCollapsed}
 			class:floating-mode={!isSidebarMode && !isCollapsed}
 			class:has-toolbar={showCalendarToolbar}
+			class:immersive={settingsStore.immersiveModeEnabled}
 		>
 			<div
 				class="content-wrapper"
 				class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}
+				class:immersive={settingsStore.immersiveModeEnabled}
 			>
 				{@render children()}
 			</div>
 		</main>
-
-		<!-- Global Input Bar -->
-		<QuickInputBar
-			onSearch={handleSearch}
-			onSelect={handleSelect}
-			onSearchChange={handleSearchChange}
-			placeholder="Neuer Termin oder suchen..."
-			emptyText="Keine Termine gefunden"
-			searchingText="Suche..."
-			onCreate={handleCreate}
-			onParseCreate={handleParseCreate}
-			createText="Erstellen"
-			appIcon="calendar"
-			bottomOffset={isMobile
-				? `${70 + tagStripOffset}px`
-				: isSidebarMode
-					? `${tagStripOffset}px`
-					: showCalendarToolbar && !isToolbarCollapsed
-						? `${140 + tagStripOffset}px`
-						: `${70 + tagStripOffset}px`}
-			hasFabRight={showCalendarToolbar && !isSidebarMode}
-			hasFabLeft={!isMobile &&
-				showCalendarToolbar &&
-				!isSidebarMode &&
-				settingsStore.dateStripCollapsed}
-			defaultOptions={calendarOptions}
-			selectedDefaultId={selectedDefaultCalendarId}
-			defaultOptionLabel="Standard-Kalender"
-			onDefaultChange={handleDefaultCalendarChange}
-			onShowShortcuts={handleShowShortcuts}
-			onShowSyntaxHelp={handleShowSyntaxHelp}
-		/>
 	</div>
 </SplitPaneContainer>
 
@@ -771,6 +828,22 @@
 		flex-direction: column;
 		flex: 1;
 		min-height: 0;
+	}
+
+	/* Immersive Mode - fullscreen, no UI elements visible */
+	.main-content.immersive {
+		padding: 0 !important;
+		height: 100vh !important;
+		width: 100vw;
+		transition: padding 300ms ease;
+	}
+
+	.content-wrapper.immersive {
+		padding: 0 !important;
+		margin: 0;
+		height: 100vh;
+		width: 100vw;
+		max-width: 100vw;
 	}
 
 	/* Adjust InputBar when FABs are visible (toolbar FAB on right, DateStripFab on left) */
