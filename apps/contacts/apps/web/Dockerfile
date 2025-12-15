@@ -2,7 +2,7 @@
 FROM node:20-alpine AS builder
 
 # Build arguments for SvelteKit static env vars
-ARG PUBLIC_BACKEND_URL=http://chat-backend:3002
+ARG PUBLIC_BACKEND_URL=http://contacts-backend:3015
 ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-core-auth:3001
 
 # Set as environment variables for build
@@ -19,27 +19,30 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
-# Copy shared packages needed by chat web
+# Copy shared packages needed by contacts web
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
 COPY packages/shared-feedback-service ./packages/shared-feedback-service
-COPY packages/shared-feedback-types ./packages/shared-feedback-types
 COPY packages/shared-feedback-ui ./packages/shared-feedback-ui
+COPY packages/shared-help-content ./packages/shared-help-content
+COPY packages/shared-help-types ./packages/shared-help-types
+COPY packages/shared-help-ui ./packages/shared-help-ui
 COPY packages/shared-i18n ./packages/shared-i18n
 COPY packages/shared-icons ./packages/shared-icons
+COPY packages/shared-profile-ui ./packages/shared-profile-ui
+COPY packages/shared-splitscreen ./packages/shared-splitscreen
+COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
+COPY packages/shared-tags ./packages/shared-tags
 COPY packages/shared-tailwind ./packages/shared-tailwind
 COPY packages/shared-theme ./packages/shared-theme
 COPY packages/shared-theme-ui ./packages/shared-theme-ui
-COPY packages/shared-subscription-types ./packages/shared-subscription-types
-COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
-COPY packages/shared-profile-ui ./packages/shared-profile-ui
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
 
-# Copy chat packages
-COPY apps/chat/packages ./apps/chat/packages
-COPY apps/chat/apps/web ./apps/chat/apps/web
+# Copy contacts packages
+COPY apps/contacts/packages ./apps/contacts/packages
+COPY apps/contacts/apps/web ./apps/contacts/apps/web
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
@@ -49,27 +52,27 @@ WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
 
 # Build the web app
-WORKDIR /app/apps/chat/apps/web
+WORKDIR /app/apps/contacts/apps/web
 RUN pnpm build
 
 # Production stage
 FROM node:20-alpine AS production
 
 # Keep same directory structure as builder so pnpm symlinks resolve correctly
-WORKDIR /app/apps/chat/apps/web
+WORKDIR /app/apps/contacts/apps/web
 
 # Copy the pnpm store that symlinks point to (at /app/node_modules/.pnpm)
 COPY --from=builder /app/node_modules/.pnpm /app/node_modules/.pnpm
 
 # Copy the app's node_modules (contains symlinks to the pnpm store)
-COPY --from=builder /app/apps/chat/apps/web/node_modules ./node_modules
+COPY --from=builder /app/apps/contacts/apps/web/node_modules ./node_modules
 
 # Copy built application
-COPY --from=builder /app/apps/chat/apps/web/build ./build
-COPY --from=builder /app/apps/chat/apps/web/package.json ./
+COPY --from=builder /app/apps/contacts/apps/web/build ./build
+COPY --from=builder /app/apps/contacts/apps/web/package.json ./
 
 # Copy entrypoint script for runtime config generation
-COPY apps/chat/apps/web/docker-entrypoint.sh /usr/local/bin/
+COPY apps/contacts/apps/web/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Expose port

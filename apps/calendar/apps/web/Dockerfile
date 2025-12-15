@@ -70,6 +70,10 @@ COPY --from=builder /app/apps/calendar/apps/web/node_modules ./node_modules
 COPY --from=builder /app/apps/calendar/apps/web/build ./build
 COPY --from=builder /app/apps/calendar/apps/web/package.json ./
 
+# Copy entrypoint script for runtime config generation
+COPY apps/calendar/apps/web/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Expose port
 EXPOSE 5186
 
@@ -81,6 +85,9 @@ ENV HOST=0.0.0.0
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:5186/health || exit 1
+
+# Use entrypoint to generate runtime config
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Run the app
 CMD ["node", "build"]

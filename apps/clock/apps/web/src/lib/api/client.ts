@@ -1,10 +1,10 @@
 /**
  * API Client for Clock backend
+ * Uses runtime configuration for 12-factor compliance
  */
 
 import { authStore } from '$lib/stores/auth.svelte';
-
-const API_URL = 'http://localhost:3017/api/v1';
+import { getApiBaseUrl } from '$lib/config/runtime';
 
 export interface ApiResponse<T> {
 	data?: T;
@@ -17,6 +17,7 @@ export async function fetchApi<T>(
 ): Promise<ApiResponse<T>> {
 	try {
 		const token = await authStore.getAccessToken();
+		const apiBaseUrl = await getApiBaseUrl();
 
 		const headers: HeadersInit = {
 			'Content-Type': 'application/json',
@@ -27,7 +28,7 @@ export async function fetchApi<T>(
 			(headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
 		}
 
-		const response = await fetch(`${API_URL}${endpoint}`, {
+		const response = await fetch(`${apiBaseUrl}/api/v1${endpoint}`, {
 			...options,
 			headers,
 		});

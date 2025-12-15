@@ -68,6 +68,10 @@ COPY --from=builder /app/apps/clock/apps/web/node_modules ./node_modules
 COPY --from=builder /app/apps/clock/apps/web/build ./build
 COPY --from=builder /app/apps/clock/apps/web/package.json ./
 
+# Copy entrypoint script for runtime config generation
+COPY apps/clock/apps/web/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Expose port
 EXPOSE 5187
 
@@ -79,6 +83,9 @@ ENV HOST=0.0.0.0
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:5187/health || exit 1
+
+# Use entrypoint to generate runtime config
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Run the app
 CMD ["node", "build"]

@@ -69,6 +69,10 @@ COPY --from=builder /app/apps/manacore/apps/web/node_modules ./node_modules
 COPY --from=builder /app/apps/manacore/apps/web/build ./build
 COPY --from=builder /app/apps/manacore/apps/web/package.json ./
 
+# Copy entrypoint script for runtime config generation
+COPY apps/manacore/apps/web/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Expose port
 EXPOSE 5173
 
@@ -80,6 +84,9 @@ ENV HOST=0.0.0.0
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:5173/health || exit 1
+
+# Use entrypoint to generate runtime config
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Run the app
 CMD ["node", "build"]

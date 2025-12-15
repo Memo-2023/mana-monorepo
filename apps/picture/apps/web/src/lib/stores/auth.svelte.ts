@@ -1,13 +1,10 @@
 /**
  * Auth Store - Manages authentication state using Svelte 5 runes
- * Now using Mana Core Auth instead of Supabase Auth
+ * Uses Mana Core Auth with runtime configuration
  */
 
 import { browser } from '$app/environment';
-import { env } from '$env/dynamic/public';
-
-const MANA_AUTH_URL = env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
-const BACKEND_URL = env.PUBLIC_BACKEND_URL || 'http://localhost:3006';
+import { getAuthUrl, getBackendUrl } from '$lib/config/runtime';
 
 export interface UserData {
 	id: string;
@@ -28,10 +25,12 @@ async function getAuthService() {
 	if (!browser) return null;
 	if (!_authService) {
 		try {
+			const authUrl = await getAuthUrl();
+			const backendUrl = await getBackendUrl();
 			const { initializeWebAuth } = await import('@manacore/shared-auth');
 			const auth = initializeWebAuth({
-				baseUrl: MANA_AUTH_URL,
-				backendUrl: BACKEND_URL, // Enables automatic token refresh on 401 responses
+				baseUrl: authUrl,
+				backendUrl: backendUrl, // Enables automatic token refresh on 401 responses
 			});
 			_authService = auth.authService;
 			_tokenManager = auth.tokenManager;

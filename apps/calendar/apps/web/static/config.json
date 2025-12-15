@@ -1,0 +1,4 @@
+{
+	"BACKEND_URL": "http://localhost:3016",
+	"AUTH_URL": "http://localhost:3001"
+}

@@ -15,6 +15,10 @@
 	let loading = $state(true);
 
 	onMount(async () => {
+		// Initialize runtime config first (12-factor pattern)
+		const { initializeConfig } = await import('$lib/config/runtime');
+		await initializeConfig();
+
 		// Wait for i18n locale to be loaded
 		await waitLocale();
 

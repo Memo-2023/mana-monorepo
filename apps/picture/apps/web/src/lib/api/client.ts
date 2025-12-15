@@ -6,12 +6,12 @@
  * - Uses authStore.getValidToken() which automatically refreshes expired tokens
  * - The fetch interceptor (setupFetchInterceptor) handles 401 responses by refreshing and retrying
  * - If refresh fails, the request fails and user should be redirected to login
+ *
+ * Uses runtime configuration for 12-factor compliance.
  */
 
-import { env } from '$env/dynamic/public';
 import { authStore } from '$lib/stores/auth.svelte';
-
-const API_BASE = env.PUBLIC_BACKEND_URL || 'http://localhost:3006';
+import { getBackendUrl } from '$lib/config/runtime';
 
 type FetchOptions = {
 	method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
@@ -29,6 +29,9 @@ export async function fetchApi<T>(
 	// Get a valid token (auto-refreshes if expired)
 	const authToken = token || (await authStore.getValidToken());
 
+	// Get backend URL from runtime config
+	const backendUrl = await getBackendUrl();
+
 	try {
 		const headers: Record<string, string> = {};
 
@@ -41,7 +44,7 @@ export async function fetchApi<T>(
 			headers['Authorization'] = `Bearer ${authToken}`;
 		}
 
-		const response = await fetch(`${API_BASE}/api/v1${endpoint}`, {
+		const response = await fetch(`${backendUrl}/api/v1${endpoint}`, {
 			method,
 			headers,
 			body: isFormData ? (body as FormData) : body ? JSON.stringify(body) : undefined,
@@ -81,6 +84,9 @@ export async function uploadFile(
 	// Get a valid token (auto-refreshes if expired)
 	const authToken = token || (await authStore.getValidToken());
 
+	// Get backend URL from runtime config
+	const backendUrl = await getBackendUrl();
+
 	try {
 		const formData = new FormData();
 		formData.append('file', file);
@@ -90,7 +96,7 @@ export async function uploadFile(
 			headers['Authorization'] = `Bearer ${authToken}`;
 		}
 
-		const response = await fetch(`${API_BASE}/api/v1${endpoint}`, {
+		const response = await fetch(`${backendUrl}/api/v1${endpoint}`, {
 			method: 'POST',
 			headers,
 			body: formData,
@@ -125,6 +131,9 @@ export async function uploadFiles(
 	// Get a valid token (auto-refreshes if expired)
 	const authToken = token || (await authStore.getValidToken());
 
+	// Get backend URL from runtime config
+	const backendUrl = await getBackendUrl();
+
 	try {
 		const formData = new FormData();
 		files.forEach((file) => {
@@ -136,7 +145,7 @@ export async function uploadFiles(
 			headers['Authorization'] = `Bearer ${authToken}`;
 		}
 
-		const response = await fetch(`${API_BASE}/api/v1${endpoint}`, {
+		const response = await fetch(`${backendUrl}/api/v1${endpoint}`, {
 			method: 'POST',
 			headers,
 			body: formData,
