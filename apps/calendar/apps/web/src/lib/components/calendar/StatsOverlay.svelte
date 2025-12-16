@@ -57,8 +57,8 @@
 	});
 </script>
 
-<!-- Only show when heatmap is enabled -->
-{#if heatmapStore.enabled}
+<!-- Only show when heatmap is enabled AND sidebar is collapsed (stats shown in sidebar otherwise) -->
+{#if heatmapStore.enabled && settingsStore.sidebarCollapsed}
 	<div class="stats-overlay" class:collapsed>
 		{#if collapsed}
 			<!-- Collapsed: Just a small FAB -->

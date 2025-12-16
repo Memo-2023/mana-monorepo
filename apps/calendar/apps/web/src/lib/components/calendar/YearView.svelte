@@ -183,12 +183,18 @@
 			<div class="days-grid" role="grid" aria-label={format(month, 'MMMM', { locale: de })}>
 				{#each getMonthDays(month) as day}
 					{@const eventCount = getEventCount(day)}
+					{@const heatmapLevel = getHeatmapLevel(day)}
 					<button
 						class="day"
 						class:other-month={!isSameMonth(day, month)}
 						class:today={isToday(day)}
-						class:has-events={eventCount > 0}
-						class:has-many-events={eventCount > 3}
+						class:has-events={eventCount > 0 && !heatmapStore.enabled}
+						class:has-many-events={eventCount > 3 && !heatmapStore.enabled}
+						class:heatmap-1={heatmapLevel === 1}
+						class:heatmap-2={heatmapLevel === 2}
+						class:heatmap-3={heatmapLevel === 3}
+						class:heatmap-4={heatmapLevel === 4}
+						class:heatmap-5={heatmapLevel === 5}
 						role="gridcell"
 						tabindex="0"
 						aria-label="{format(day, 'd. MMMM', { locale: de })}{eventCount > 0
@@ -335,6 +341,61 @@
 	.day.has-many-events::after {
 		width: 8px;
 		border-radius: 2px;
+	}
+
+	/* Heatmap levels - GitHub contribution graph style */
+	.day.heatmap-1 {
+		background: hsl(var(--color-primary) / 0.15);
+	}
+	.day.heatmap-2 {
+		background: hsl(var(--color-primary) / 0.3);
+	}
+	.day.heatmap-3 {
+		background: hsl(var(--color-primary) / 0.5);
+	}
+	.day.heatmap-4 {
+		background: hsl(var(--color-primary) / 0.7);
+		color: hsl(var(--color-primary-foreground));
+	}
+	.day.heatmap-5 {
+		background: hsl(var(--color-primary) / 0.9);
+		color: hsl(var(--color-primary-foreground));
+	}
+
+	/* Heatmap hover states */
+	.day.heatmap-1:hover {
+		background: hsl(var(--color-primary) / 0.25);
+	}
+	.day.heatmap-2:hover {
+		background: hsl(var(--color-primary) / 0.4);
+	}
+	.day.heatmap-3:hover {
+		background: hsl(var(--color-primary) / 0.6);
+	}
+	.day.heatmap-4:hover {
+		background: hsl(var(--color-primary) / 0.8);
+	}
+	.day.heatmap-5:hover {
+		background: hsl(var(--color-primary) / 0.95);
+	}
+
+	/* Today with heatmap - add ring to distinguish */
+	.day.today.heatmap-1,
+	.day.today.heatmap-2,
+	.day.today.heatmap-3,
+	.day.today.heatmap-4,
+	.day.today.heatmap-5 {
+		outline: 2px solid hsl(var(--color-primary));
+		outline-offset: 1px;
+	}
+
+	/* Other month days with heatmap - more muted */
+	.day.other-month.heatmap-1,
+	.day.other-month.heatmap-2,
+	.day.other-month.heatmap-3,
+	.day.other-month.heatmap-4,
+	.day.other-month.heatmap-5 {
+		opacity: 0.5;
 	}
 
 	/* Context Menu */
