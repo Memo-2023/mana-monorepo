@@ -1,0 +1,35 @@
+{
+	"name": "@manacore/better-auth-types",
+	"version": "1.0.0",
+	"description": "Centralized Better Auth type definitions for the Mana Core monorepo",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsc",
+		"clean": "rm -rf dist",
+		"type-check": "tsc --noEmit"
+	},
+	"peerDependencies": {
+		"better-auth": "^1.4.0"
+	},
+	"peerDependenciesMeta": {
+		"better-auth": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"typescript": "^5.7.2"
+	},
+	"keywords": [
+		"manacore",
+		"better-auth",
+		"types",
+		"authentication",
+		"jwt"
+	],
+	"license": "MIT"
+}

@@ -8,11 +8,15 @@
 		"build": "tsc",
 		"clean": "rm -rf dist",
 		"prepublishOnly": "pnpm build",
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"type-check": "tsc --noEmit"
 	},
 	"files": [
 		"dist"
 	],
+	"dependencies": {
+		"@manacore/better-auth-types": "workspace:*"
+	},
 	"peerDependencies": {
 		"@nestjs/common": "^10.0.0 || ^11.0.0",
 		"@nestjs/config": "^3.0.0 || ^4.0.0"
