@@ -342,6 +342,84 @@ docker logs <container-name>
 docker inspect <container-name> | grep -A 20 Health
 ```
 
+### SvelteKit Pre-Compressed Config Files (IMPORTANT)
+
+**Symptom:** Browser calls `localhost:3001` instead of staging URLs, even though:
+- Server logs show correct config was generated
+- `docker exec <container> cat .../config.json` shows correct values
+- `curl https://app.staging.manacore.ai/config.json` shows wrong (localhost) values
+
+**Root Cause:** SvelteKit pre-compresses static files during build:
+- `config.json` - raw file (overwritten by entrypoint ✓)
+- `config.json.br` - Brotli compressed (stale from build ✗)
+- `config.json.gz` - Gzip compressed (stale from build ✗)
+
+When browsers send `Accept-Encoding: gzip, br`, SvelteKit serves the pre-compressed versions, which contain the old localhost values from build time.
+
+**Solution (Permanent):** The `docker-entrypoint.sh` must delete pre-compressed files:
+```bash
+# After generating config.json, remove stale compressed versions
+rm -f /app/apps/<app>/apps/web/build/client/config.json.br
+rm -f /app/apps/<app>/apps/web/build/client/config.json.gz
+```
+
+**Solution (Quick Fix):** For immediate fix without redeploying:
+```bash
+# Remove compressed files and restart
+docker exec <app>-web-staging rm -f /app/apps/<app>/apps/web/build/client/config.json.br /app/apps/<app>/apps/web/build/client/config.json.gz
+docker restart <app>-web-staging
+docker restart caddy  # Clear any Caddy cache
+```
+
+**Diagnosis Commands:**
+```bash
+# Check if pre-compressed files exist
+docker exec <app>-web-staging ls -la /app/apps/<app>/apps/web/build/client/config.json*
+
+# Test what browser receives (from local machine, not server)
+curl https://<app>.staging.manacore.ai/config.json
+
+# Compare file content vs HTTP response
+docker exec <app>-web-staging cat /app/apps/<app>/apps/web/build/client/config.json
+# vs
+curl https://<app>.staging.manacore.ai/config.json
+```
+
+### Caddy Response Caching
+
+**Symptom:** After fixing config.json on the server, `curl` still returns old values
+
+**Solution:**
+```bash
+# Restart Caddy to clear any cached responses
+docker restart caddy
+```
+
+### Disk Space Full (Docker)
+
+**Symptom:** CI/CD deployment fails with "no space left on device"
+
+**Cause:** Docker images, containers, and build cache accumulating over time
+
+**Solution (Immediate):**
+```bash
+ssh -i ~/.ssh/hetzner_deploy_key deploy@46.224.108.214
+
+# Check disk usage
+df -h
+
+# Clean up all unused Docker resources
+docker system prune -af --volumes
+docker builder prune -af
+```
+
+**Solution (Preventive):** Set up a weekly cleanup cronjob:
+```bash
+crontab -e
+# Add this line (runs every Sunday at 3 AM):
+0 3 * * 0 docker system prune -af --volumes >> /home/deploy/docker-cleanup.log 2>&1
+```
+
 ## Adding a New App to Staging
 
 ### 1. Update DNS (if needed)
@@ -376,30 +454,109 @@ newapp-web:
     - "<WEB_PORT>:<WEB_PORT>"
 ```
 
-### 4. Implement hooks.server.ts
+### 4. Create docker-entrypoint.sh (CRITICAL)
 
-Copy the runtime env var pattern from an existing app:
-```typescript
-import type { Handle } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
+Create `apps/<app>/apps/web/docker-entrypoint.sh`:
+```bash
+#!/bin/sh
+set -e
 
-export const handle: Handle = async ({ event, resolve }) => {
-    const authUrlClient = env.PUBLIC_MANA_CORE_AUTH_URL_CLIENT || '';
-    const backendUrlClient = env.PUBLIC_BACKEND_URL_CLIENT || '';
+echo "🔧 Generating runtime configuration..."
 
-    return resolve(event, {
-        transformPageChunk: ({ html }) => {
-            const envScript = `<script>
-window.__PUBLIC_MANA_CORE_AUTH_URL__ = "${authUrlClient}";
-window.__PUBLIC_BACKEND_URL__ = "${backendUrlClient}";
-</script>`;
-            return html.replace('<head>', `<head>${envScript}`);
-        },
-    });
-};
+# Environment variables with development defaults
+BACKEND_URL=${BACKEND_URL:-"http://localhost:<PORT>"}
+AUTH_URL=${AUTH_URL:-"http://localhost:3001"}
+
+echo "📝 Config values:"
+echo "   BACKEND_URL: $BACKEND_URL"
+echo "   AUTH_URL: $AUTH_URL"
+
+# Generate config.json from environment variables
+cat > /app/apps/<app>/apps/web/build/client/config.json <<EOF
+{
+  "BACKEND_URL": "${BACKEND_URL}",
+  "AUTH_URL": "${AUTH_URL}"
+}
+EOF
+
+echo "✅ Configuration generated at /app/apps/<app>/apps/web/build/client/config.json"
+cat /app/apps/<app>/apps/web/build/client/config.json
+
+# CRITICAL: Remove pre-compressed versions (SvelteKit serves these instead of raw file)
+rm -f /app/apps/<app>/apps/web/build/client/config.json.br
+rm -f /app/apps/<app>/apps/web/build/client/config.json.gz
+echo "🗑️  Removed stale pre-compressed config files"
+
+echo "🚀 Starting <App> web app..."
+exec "$@"
 ```
 
-### 5. Deploy
+Make sure the Dockerfile copies and uses this entrypoint:
+```dockerfile
+COPY apps/<app>/apps/web/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["node", "build"]
+```
+
+### 5. Create static/config.json for local development
+
+Create `apps/<app>/apps/web/static/config.json` for local dev (this gets overwritten at runtime in Docker):
+```json
+{
+  "BACKEND_URL": "http://localhost:<PORT>",
+  "AUTH_URL": "http://localhost:3001"
+}
+```
+
+### 6. Implement runtime.ts config loader
+
+Create `apps/<app>/apps/web/src/lib/config/runtime.ts`:
+```typescript
+import { browser, dev } from '$app/environment';
+
+export interface RuntimeConfig {
+  BACKEND_URL: string;
+  AUTH_URL: string;
+}
+
+const DEV_CONFIG: RuntimeConfig = {
+  BACKEND_URL: 'http://localhost:<PORT>',
+  AUTH_URL: 'http://localhost:3001',
+};
+
+let cachedConfig: RuntimeConfig | null = null;
+
+export async function getConfig(): Promise<RuntimeConfig> {
+  if (!browser) return DEV_CONFIG;
+  if (cachedConfig) return cachedConfig;
+
+  try {
+    const res = await fetch('/config.json');
+    if (!res.ok) {
+      if (dev) return DEV_CONFIG;
+      throw new Error(`Failed to load config: ${res.status}`);
+    }
+    cachedConfig = await res.json();
+    return cachedConfig!;
+  } catch (error) {
+    if (dev) return DEV_CONFIG;
+    throw error;
+  }
+}
+
+export async function getAuthUrl(): Promise<string> {
+  const config = await getConfig();
+  return config.AUTH_URL;
+}
+
+export async function getBackendUrl(): Promise<string> {
+  const config = await getConfig();
+  return config.BACKEND_URL;
+}
+```
+
+### 7. Deploy
 
 1. Sync Caddyfile: `scp ... Caddyfile.staging deploy@server:~/Caddyfile`
 2. Reload Caddy: `docker exec caddy caddy reload --config /etc/caddy/Caddyfile`
