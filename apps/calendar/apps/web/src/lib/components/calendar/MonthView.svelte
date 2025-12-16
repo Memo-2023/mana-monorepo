@@ -402,6 +402,8 @@
 	.month-view {
 		display: flex;
 		flex-direction: column;
+		height: 100%;
+		min-height: 0;
 	}
 
 	.weekday-headers {
@@ -427,13 +429,14 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
+		min-height: 0;
 	}
 
 	.week-row {
-		flex: 1;
+		flex: 1 1 0;
 		display: grid;
 		grid-template-columns: repeat(var(--column-count, 7), 1fr);
-		min-height: 100px;
+		min-height: 0;
 	}
 
 	.day-cell {
@@ -447,6 +450,8 @@
 		display: flex;
 		flex-direction: column;
 		transition: background-color var(--transition-fast);
+		min-height: 0;
+		overflow: hidden;
 	}
 
 	.day-cell:first-child {
