@@ -65,6 +65,7 @@
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import ViewModePillContextMenu from '$lib/components/calendar/ViewModePillContextMenu.svelte';
 	import StatsOverlay from '$lib/components/calendar/StatsOverlay.svelte';
+	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import { heatmapStore } from '$lib/stores/heatmap.svelte';
 	import type { CalendarViewType } from '@calendar/shared';
@@ -175,6 +176,9 @@
 	// InputBar help modal state
 	let helpModalOpen = $state(false);
 	let helpModalMode = $state<'shortcuts' | 'syntax'>('shortcuts');
+
+	// Settings modal state
+	let showSettingsModal = $state(false);
 
 	function handleShowShortcuts() {
 		helpModalMode = 'shortcuts';
@@ -287,7 +291,12 @@
 			onClick: () => heatmapStore.toggle(),
 			active: heatmapStore.enabled,
 		},
-		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
+		{
+			href: '/',
+			label: 'Einstellungen',
+			icon: 'settings',
+			onClick: () => (showSettingsModal = true),
+		},
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	]);
 
@@ -758,6 +767,13 @@
 
 <!-- Stats Overlay (shown when heatmap is enabled) -->
 <StatsOverlay />
+
+<!-- Settings Modal -->
+<SettingsModal
+	visible={showSettingsModal}
+	onClose={() => (showSettingsModal = false)}
+	{isSidebarMode}
+/>
 
 <style>
 	.layout-container {
