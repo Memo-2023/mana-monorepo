@@ -33,6 +33,11 @@ EOF
 echo "✅ Runtime configuration generated:"
 cat build/client/config.json
 
+# Remove pre-compressed versions (SvelteKit serves these instead of the raw file)
+rm -f build/client/config.json.br
+rm -f build/client/config.json.gz
+echo "🗑️  Removed stale pre-compressed config files"
+
 echo ""
 echo "🚀 Starting Node server..."
 

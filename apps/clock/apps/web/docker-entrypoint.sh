@@ -22,5 +22,10 @@ EOF
 echo "✅ Configuration generated at /app/apps/clock/apps/web/build/client/config.json"
 cat /app/apps/clock/apps/web/build/client/config.json
 
+# Remove pre-compressed versions (SvelteKit serves these instead of the raw file)
+rm -f /app/apps/clock/apps/web/build/client/config.json.br
+rm -f /app/apps/clock/apps/web/build/client/config.json.gz
+echo "🗑️  Removed stale pre-compressed config files"
+
 echo "🚀 Starting Clock web app..."
 exec "$@"
