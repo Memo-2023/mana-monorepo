@@ -3,15 +3,22 @@
  * Allows Calendar app to fetch contact birthdays for display
  */
 
-import { env } from '$env/dynamic/public';
 import { createApiClient } from './base-client';
+import { getContactsApiUrl } from '$lib/config/runtime';
 
-const CONTACTS_API_BASE = env.PUBLIC_CONTACTS_API_URL || 'http://localhost:3015';
+// Lazy-initialized client (runtime config is async)
+let contactsClient: ReturnType<typeof createApiClient> | null = null;
 
-const contactsClient = createApiClient({
-	baseUrl: CONTACTS_API_BASE,
-	apiPrefix: '/api/v1',
-});
+async function getContactsClient() {
+	if (!contactsClient) {
+		const contactsApiUrl = await getContactsApiUrl();
+		contactsClient = createApiClient({
+			baseUrl: contactsApiUrl,
+			apiPrefix: '/api/v1',
+		});
+	}
+	return contactsClient;
+}
 
 // ============================================
 // Types for Birthday Integration
@@ -61,7 +68,13 @@ interface BirthdaysResponse {
 // API Functions
 // ============================================
 
-const fetchContactsApi = contactsClient.fetchApi;
+async function fetchContactsApi<T>(
+	endpoint: string,
+	options?: Parameters<ReturnType<typeof createApiClient>['fetchApi']>[1]
+) {
+	const client = await getContactsClient();
+	return client.fetchApi<T>(endpoint, options);
+}
 
 /**
  * Fetch all contacts with birthdays from Contacts service

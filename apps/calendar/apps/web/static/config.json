@@ -1,4 +1,6 @@
 {
 	"BACKEND_URL": "http://localhost:3016",
-	"AUTH_URL": "http://localhost:3001"
+	"AUTH_URL": "http://localhost:3001",
+	"TODO_API_URL": "http://localhost:3018",
+	"CONTACTS_API_URL": "http://localhost:3015"
 }

@@ -319,6 +319,8 @@ services:
       # These vars are used by docker-entrypoint.sh to generate /config.json
       BACKEND_URL: https://calendar-api.staging.manacore.ai
       AUTH_URL: https://auth.staging.manacore.ai
+      TODO_API_URL: https://todo-api.staging.manacore.ai
+      CONTACTS_API_URL: https://contacts-api.staging.manacore.ai
     ports:
       - "5186:5186"
     healthcheck:

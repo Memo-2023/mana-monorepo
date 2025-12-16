@@ -13,6 +13,8 @@ import { z } from 'zod';
 export interface RuntimeConfig {
 	BACKEND_URL: string;
 	AUTH_URL: string;
+	TODO_API_URL: string;
+	CONTACTS_API_URL: string;
 }
 
 /**
@@ -22,6 +24,8 @@ export interface RuntimeConfig {
 const ConfigSchema = z.object({
 	BACKEND_URL: z.string().url().min(1, 'BACKEND_URL must be a valid URL'),
 	AUTH_URL: z.string().url().min(1, 'AUTH_URL must be a valid URL'),
+	TODO_API_URL: z.string().url().min(1, 'TODO_API_URL must be a valid URL'),
+	CONTACTS_API_URL: z.string().url().min(1, 'CONTACTS_API_URL must be a valid URL'),
 });
 
 /**
@@ -34,6 +38,8 @@ const ConfigSchema = z.object({
 const DEV_CONFIG: RuntimeConfig = {
 	BACKEND_URL: 'http://localhost:3016',
 	AUTH_URL: 'http://localhost:3001',
+	TODO_API_URL: 'http://localhost:3018',
+	CONTACTS_API_URL: 'http://localhost:3015',
 };
 
 let cachedConfig: RuntimeConfig | null = null;
@@ -105,6 +111,29 @@ export async function getAuthUrl(): Promise<string> {
 export async function getBackendUrl(): Promise<string> {
 	const config = await loadConfig();
 	return config.BACKEND_URL;
+}
+
+/**
+ * Get todo service URL
+ */
+export async function getTodoApiUrl(): Promise<string> {
+	const config = await loadConfig();
+	return config.TODO_API_URL;
+}
+
+/**
+ * Get contacts service URL
+ */
+export async function getContactsApiUrl(): Promise<string> {
+	const config = await loadConfig();
+	return config.CONTACTS_API_URL;
+}
+
+/**
+ * Get full runtime config
+ */
+export async function getConfig(): Promise<RuntimeConfig> {
+	return loadConfig();
 }
 
 /**

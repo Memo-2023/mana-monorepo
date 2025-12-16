@@ -6,16 +6,22 @@ echo "🔧 Generating runtime configuration..."
 # Environment variables with development defaults
 BACKEND_URL=${BACKEND_URL:-"http://localhost:3016"}
 AUTH_URL=${AUTH_URL:-"http://localhost:3001"}
+TODO_API_URL=${TODO_API_URL:-"http://localhost:3018"}
+CONTACTS_API_URL=${CONTACTS_API_URL:-"http://localhost:3015"}
 
 echo "📝 Config values:"
 echo "   BACKEND_URL: $BACKEND_URL"
 echo "   AUTH_URL: $AUTH_URL"
+echo "   TODO_API_URL: $TODO_API_URL"
+echo "   CONTACTS_API_URL: $CONTACTS_API_URL"
 
 # Generate config.json from environment variables
 cat > /app/apps/calendar/apps/web/build/client/config.json <<EOF
 {
   "BACKEND_URL": "${BACKEND_URL}",
-  "AUTH_URL": "${AUTH_URL}"
+  "AUTH_URL": "${AUTH_URL}",
+  "TODO_API_URL": "${TODO_API_URL}",
+  "CONTACTS_API_URL": "${CONTACTS_API_URL}"
 }
 EOF
 

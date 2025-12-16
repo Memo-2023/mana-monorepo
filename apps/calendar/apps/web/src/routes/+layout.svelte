@@ -16,8 +16,14 @@
 
 	onMount(async () => {
 		// Initialize runtime config first (12-factor pattern)
-		const { initializeConfig } = await import('$lib/config/runtime');
+		const { initializeConfig, getConfig } = await import('$lib/config/runtime');
 		await initializeConfig();
+
+		// Inject config into window for stores that need synchronous access
+		const config = await getConfig();
+		(
+			window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string }
+		).__PUBLIC_MANA_CORE_AUTH_URL__ = config.AUTH_URL;
 
 		// Wait for i18n locale to be loaded
 		await waitLocale();
