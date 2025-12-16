@@ -174,7 +174,9 @@
 												{#each Array.isArray(data[field.key]) ? data[field.key] : [] as item}
 													<span class="inline-block px-2 py-0.5 bg-theme-elevated rounded text-sm">
 														{field.type === 'multiselect'
-															? field.config.choices?.find((c) => c.value === item)?.label || item
+															? field.config.choices?.find(
+																	(c: { value: any; label: string }) => c.value === item
+																)?.label || item
 															: item}
 													</span>
 												{/each}

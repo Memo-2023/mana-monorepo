@@ -7,6 +7,7 @@
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
 	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
+	import { heatmapStore } from '$lib/stores/heatmap.svelte';
 	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
 	import { useVisibleHours, useCurrentTimeIndicator, useBirthdayPopover } from '$lib/composables';
 	import { toDate } from '$lib/utils/eventDateHelpers';
@@ -886,9 +887,21 @@
 		<div class="day-headers">
 			<div class="time-gutter"></div>
 			{#each days as day}
-				<div class="day-header" class:today={isToday(day)}>
+				{@const heatmapLevel = heatmapStore.enabled ? heatmapStore.getLevel(day) : 0}
+				<div
+					class="day-header"
+					class:today={isToday(day)}
+					class:heatmap-1={heatmapLevel === 1}
+					class:heatmap-2={heatmapLevel === 2}
+					class:heatmap-3={heatmapLevel === 3}
+					class:heatmap-4={heatmapLevel === 4}
+					class:heatmap-5={heatmapLevel === 5}
+				>
 					<span class="day-name">{format(day, 'EEE', { locale: currentDateLocale })}</span>
 					<span class="day-number" class:today={isToday(day)}>{format(day, 'd')}</span>
+					{#if heatmapStore.enabled && heatmapLevel > 0}
+						<span class="heatmap-badge">{heatmapStore.getDisplayValue(day)}</span>
+					{/if}
 				</div>
 			{/each}
 		</div>
@@ -1240,6 +1253,41 @@
 		align-items: center;
 		padding: 0.5rem;
 		border-left: 1px solid hsl(var(--color-border));
+		transition: background-color 150ms ease;
+	}
+
+	/* Heatmap level colors for day headers */
+	.day-header.heatmap-1 {
+		background-color: hsl(var(--color-primary) / 0.1);
+	}
+	.day-header.heatmap-2 {
+		background-color: hsl(var(--color-primary) / 0.2);
+	}
+	.day-header.heatmap-3 {
+		background-color: hsl(var(--color-primary) / 0.35);
+	}
+	.day-header.heatmap-4 {
+		background-color: hsl(var(--color-primary) / 0.5);
+	}
+	.day-header.heatmap-5 {
+		background-color: hsl(var(--color-primary) / 0.65);
+	}
+
+	.heatmap-badge {
+		font-size: 0.625rem;
+		font-weight: 600;
+		color: hsl(var(--color-muted-foreground));
+		padding: 1px 6px;
+		background: hsl(var(--color-muted) / 0.5);
+		border-radius: var(--radius-sm);
+		margin-top: 0.25rem;
+	}
+
+	/* Better contrast for higher heatmap levels */
+	.day-header.heatmap-4 .heatmap-badge,
+	.day-header.heatmap-5 .heatmap-badge {
+		background: hsl(var(--color-background) / 0.8);
+		color: hsl(var(--color-foreground));
 	}
 
 	.day-name {

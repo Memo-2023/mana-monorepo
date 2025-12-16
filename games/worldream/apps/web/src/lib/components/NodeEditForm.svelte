@@ -213,8 +213,8 @@
 
 	const config = getFieldConfig();
 	const fields = config.fields;
-	const optionalFields = fields.filter((f) => f.optional);
-	const requiredFields = fields.filter((f) => !f.optional);
+	const optionalFields = fields.filter((f) => 'optional' in f && f.optional);
+	const requiredFields = fields.filter((f) => !('optional' in f) || !f.optional);
 
 	let hasOptionalContent = $derived(
 		optionalFields.some((field) => contentFields[field.key]?.trim())

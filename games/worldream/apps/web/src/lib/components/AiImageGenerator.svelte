@@ -6,7 +6,7 @@
 		title?: string;
 		description?: string;
 		appearance?: string;
-		prompt?: string;
+		prompt?: string | null;
 		imagePrompt?: string;
 		imageUrl?: string | null;
 		onImageGenerated?: (imageUrl: string) => void;
@@ -17,7 +17,7 @@
 		title = '',
 		description = '',
 		appearance = '',
-		prompt = $bindable(''),
+		prompt = $bindable(null),
 		imagePrompt = $bindable(''),
 		imageUrl = $bindable(null),
 		onImageGenerated,
@@ -64,8 +64,6 @@
 	function getImageClass() {
 		const aspectRatio = getAspectRatio();
 		switch (aspectRatio) {
-			case '21:9':
-				return 'w-full aspect-[21/9]'; // 21:9 ultrawide aspect ratio
 			case '16:9':
 				return 'w-full aspect-video'; // 16:9 aspect ratio
 			case '9:16':
@@ -183,7 +181,7 @@
 
 	function resetImage() {
 		generatedImageUrl = null;
-		imagePrompt = null;
+		imagePrompt = '';
 		error = null;
 	}
 </script>
@@ -331,7 +329,7 @@
 		<button
 			type="button"
 			onclick={generateImage}
-			disabled={loading || (!title && !prompt) || (appearance && !imagePrompt)}
+			disabled={loading || (!title && !prompt) || (!!appearance && !imagePrompt)}
 			class="border-theme-border-default flex w-full items-center justify-center rounded-md border bg-theme-surface px-4 py-3 text-sm font-medium text-theme-text-primary shadow-sm hover:bg-theme-interactive-hover focus:outline-none focus:ring-2 focus:ring-theme-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 		>
 			{#if loading}

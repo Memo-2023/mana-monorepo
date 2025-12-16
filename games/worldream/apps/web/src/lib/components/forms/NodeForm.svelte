@@ -304,10 +304,11 @@
 	);
 
 	// Check optional fields for collapsible section
-	let hasOptionalContent = $derived(() => {
-		const optionalFields = getFieldsForKind(kind).filter((f) => f.optional);
-		return optionalFields.some((field) => contentFields[field.key]?.trim());
-	});
+	let hasOptionalContent = $derived(
+		getFieldsForKind(kind)
+			.filter((f) => 'optional' in f && f.optional)
+			.some((field) => contentFields[field.key]?.trim())
+	);
 
 	// Auto-show form when AI generates content
 	$effect(() => {
@@ -525,8 +526,8 @@
 
 	const config = getKindConfig();
 	const fields = config.fields;
-	const optionalFields = fields.filter((f) => f.optional);
-	const requiredFields = fields.filter((f) => !f.optional);
+	const optionalFields = fields.filter((f) => 'optional' in f && f.optional);
+	const requiredFields = fields.filter((f) => !('optional' in f) || !f.optional);
 </script>
 
 <div class="mx-auto max-w-4xl">
@@ -793,7 +794,7 @@
 			<div class="border-t pt-6">
 				<h2 class="mb-4 text-lg font-medium text-theme-text-primary">Benutzerdefinierte Felder</h2>
 				<CustomFieldsManager
-					node={initialData}
+					node={initialData as ContentNode}
 					nodeSlug={initialData?.slug}
 					nodeKind={kind}
 					{worldSlug}

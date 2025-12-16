@@ -544,7 +544,9 @@
 													references={node.content.references}
 												/>
 											{:else if field.key.includes('text') || field.key === 'references'}
-												{@html parseReferences(node.content[field.key])}
+												{@html typeof node.content[field.key] === 'string'
+													? parseReferences(node.content[field.key] as string)
+													: ''}
 											{:else}
 												<p class="whitespace-pre-wrap">{node.content[field.key]}</p>
 											{/if}
@@ -805,7 +807,9 @@
 												references={node.content.references}
 											/>
 										{:else if field.key.includes('text') || field.key === 'references'}
-											{@html parseReferences(node.content[field.key])}
+											{@html typeof node.content[field.key] === 'string'
+												? parseReferences(node.content[field.key] as string)
+												: ''}
 										{:else}
 											<p class="whitespace-pre-wrap">{node.content[field.key]}</p>
 										{/if}

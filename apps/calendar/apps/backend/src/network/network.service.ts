@@ -24,7 +24,7 @@ export interface NetworkNode {
 export interface NetworkLink {
 	source: string;
 	target: string;
-	type: 'tag';
+	type: 'tag' | 'calendar' | 'date' | 'location';
 	strength: number;
 	sharedTags: string[];
 }
@@ -114,14 +114,8 @@ export class NetworkService {
 			eventTagsMap.set(event.id, tags);
 		}
 
-		// 5. Filter events that have at least one tag
-		const eventsWithTagsList = eventsData.filter((e) => {
-			const tags = eventTagsMap.get(e.event.id) || [];
-			return tags.length > 0;
-		});
-
-		// 6. Build nodes
-		const nodes: NetworkNode[] = eventsWithTagsList.map(({ event }) => {
+		// 5. Build nodes from ALL events (not just those with tags)
+		const nodes: NetworkNode[] = eventsData.map(({ event }) => {
 			const tags = eventTagsMap.get(event.id) || [];
 			return {
 				id: event.id,
@@ -134,41 +128,88 @@ export class NetworkService {
 			};
 		});
 
-		// 7. Build links based on shared tags
+		// 6. Build links based on multiple criteria
 		const links: NetworkLink[] = [];
 		const connectionCounts = new Map<string, number>();
+		const linkSet = new Set<string>(); // Track unique links to avoid duplicates
 
-		for (let i = 0; i < nodes.length; i++) {
-			for (let j = i + 1; j < nodes.length; j++) {
+		for (let i = 0; i < eventsData.length; i++) {
+			for (let j = i + 1; j < eventsData.length; j++) {
+				const event1 = eventsData[i].event;
+				const event2 = eventsData[j].event;
 				const node1 = nodes[i];
 				const node2 = nodes[j];
+				const linkKey = `${event1.id}-${event2.id}`;
 
-				// Find shared tags
-				const sharedTags = node1.tags
-					.filter((t1) => node2.tags.some((t2) => t2.id === t1.id))
-					.map((t) => t.name);
+				// Skip if link already exists
+				if (linkSet.has(linkKey)) continue;
 
-				if (sharedTags.length > 0) {
-					// Calculate strength based on number of shared tags
-					const maxTags = Math.max(node1.tags.length, node2.tags.length);
-					const strength = Math.round((sharedTags.length / maxTags) * 100);
+				let linked = false;
+				let linkType: 'tag' | 'calendar' | 'date' | 'location' = 'tag';
+				let strength = 0;
+				const sharedTags: string[] = [];
 
+				// 6a. Check for shared tags (highest priority)
+				const tags1 = eventTagsMap.get(event1.id) || [];
+				const tags2 = eventTagsMap.get(event2.id) || [];
+				const commonTags = tags1.filter((t1) => tags2.some((t2) => t2.id === t1.id));
+
+				if (commonTags.length > 0) {
+					linked = true;
+					linkType = 'tag';
+					const maxTags = Math.max(tags1.length, tags2.length);
+					strength = Math.round((commonTags.length / maxTags) * 100);
+					sharedTags.push(...commonTags.map((t) => t.name));
+				}
+
+				// 6b. Check for same calendar (if not already linked)
+				if (!linked && event1.calendarId === event2.calendarId) {
+					linked = true;
+					linkType = 'calendar';
+					strength = 50;
+				}
+
+				// 6c. Check for same date (if not already linked)
+				if (!linked) {
+					const date1 = new Date(event1.startTime).toDateString();
+					const date2 = new Date(event2.startTime).toDateString();
+					if (date1 === date2) {
+						linked = true;
+						linkType = 'date';
+						strength = 40;
+					}
+				}
+
+				// 6d. Check for same location (if not already linked and both have location)
+				if (
+					!linked &&
+					event1.location &&
+					event2.location &&
+					event1.location.toLowerCase() === event2.location.toLowerCase()
+				) {
+					linked = true;
+					linkType = 'location';
+					strength = 60;
+				}
+
+				if (linked) {
 					links.push({
-						source: node1.id,
-						target: node2.id,
-						type: 'tag',
+						source: event1.id,
+						target: event2.id,
+						type: linkType,
 						strength,
 						sharedTags,
 					});
+					linkSet.add(linkKey);
 
 					// Update connection counts
-					connectionCounts.set(node1.id, (connectionCounts.get(node1.id) || 0) + 1);
-					connectionCounts.set(node2.id, (connectionCounts.get(node2.id) || 0) + 1);
+					connectionCounts.set(event1.id, (connectionCounts.get(event1.id) || 0) + 1);
+					connectionCounts.set(event2.id, (connectionCounts.get(event2.id) || 0) + 1);
 				}
 			}
 		}
 
-		// 8. Update connection counts in nodes
+		// 7. Update connection counts in nodes
 		for (const node of nodes) {
 			node.connectionCount = connectionCounts.get(node.id) || 0;
 		}

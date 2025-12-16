@@ -166,6 +166,7 @@
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
 		transition:fade={{ duration: 200 }}
 		onclick={onClose}
+		onkeydown={(e) => e.key === 'Enter' && onClose()}
 		role="dialog"
 		aria-modal="true"
 		tabindex="-1"

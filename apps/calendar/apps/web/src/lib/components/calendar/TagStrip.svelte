@@ -4,7 +4,7 @@
 	import { eventTagGroupsStore } from '$lib/stores/event-tag-groups.svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { DotsThree, Plus } from '@manacore/shared-icons';
+	import { DotsThree, Plus, X } from '@manacore/shared-icons';
 	import TagStripModal from './TagStripModal.svelte';
 
 	interface Props {
@@ -16,9 +16,15 @@
 	let showModal = $state(false);
 
 	function handleTagClick(tagId: string) {
-		// Navigate to tags page with the tag selected for editing
-		goto(`/tags?edit=${tagId}`);
+		// Toggle tag selection for filtering calendar view
+		settingsStore.toggleTagSelection(tagId);
 	}
+
+	function isTagSelected(tagId: string): boolean {
+		return settingsStore.isTagSelected(tagId);
+	}
+
+	const hasSelectedTags = $derived(settingsStore.hasSelectedTags);
 
 	function handleOpenModal() {
 		showModal = true;
@@ -58,10 +64,22 @@
 
 <div class="tag-strip-wrapper" class:sidebar-mode={isSidebarMode}>
 	<div class="tag-strip-container">
+		<!-- Clear Filter Button (always rendered to prevent layout shift) -->
+		<button
+			class="clear-filter-pill glass-tag"
+			class:hidden={!hasSelectedTags}
+			onclick={() => settingsStore.clearTagSelection()}
+			title="Filter löschen"
+			disabled={!hasSelectedTags}
+		>
+			<X size={16} weight="bold" />
+			<span class="tag-name">Filter</span>
+		</button>
+
 		<!-- More Pill (opens modal) -->
 		<button class="more-pill glass-tag" onclick={handleOpenModal} title="Alle Tags anzeigen">
 			<DotsThree size={18} weight="bold" />
-			<span class="tag-name">Mehr</span>
+			<span class="tag-name">Alle Tags</span>
 		</button>
 
 		{#if eventTagsStore.loading}
@@ -75,6 +93,7 @@
 			{#each sortedTags as tag (tag.id)}
 				<button
 					class="tag-pill glass-tag"
+					class:selected={isTagSelected(tag.id)}
 					onclick={() => handleTagClick(tag.id)}
 					title={tag.name}
 					style="--tag-color: {tag.color || '#3b82f6'}"
@@ -91,6 +110,7 @@
 				title="Neuer Tag"
 			>
 				<Plus size={16} weight="bold" />
+				<span class="tag-name">Neuer Tag</span>
 			</button>
 		{/if}
 	</div>
@@ -141,7 +161,8 @@
 
 	.tag-pill,
 	.more-pill,
-	.create-pill {
+	.create-pill,
+	.clear-filter-pill {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -150,32 +171,87 @@
 		transition: all 0.15s ease;
 	}
 
-	/* More pill with muted style */
-	.more-pill {
-		color: #6b7280;
+	/* Selected tag state */
+	.tag-pill.selected {
+		background: var(--tag-color) !important;
+		border-color: var(--tag-color) !important;
 	}
 
-	.more-pill .tag-name {
-		color: #6b7280;
+	.tag-pill.selected .tag-dot {
+		background-color: white;
+	}
+
+	.tag-pill.selected .tag-name {
+		color: white;
+	}
+
+	/* Clear filter pill */
+	.clear-filter-pill {
+		color: #ef4444;
+		background: rgba(239, 68, 68, 0.1) !important;
+		border-color: rgba(239, 68, 68, 0.3) !important;
+	}
+
+	.clear-filter-pill .tag-name {
+		color: #ef4444;
 		font-weight: 600;
 	}
 
+	:global(.dark) .clear-filter-pill {
+		color: #f87171;
+		background: rgba(239, 68, 68, 0.15) !important;
+		border-color: rgba(239, 68, 68, 0.3) !important;
+	}
+
+	:global(.dark) .clear-filter-pill .tag-name {
+		color: #f87171;
+	}
+
+	.clear-filter-pill:hover:not(.hidden) {
+		background: rgba(239, 68, 68, 0.2) !important;
+		border-color: rgba(239, 68, 68, 0.5) !important;
+	}
+
+	/* Hidden state for clear filter pill (prevents layout shift) */
+	.clear-filter-pill.hidden {
+		visibility: hidden;
+		pointer-events: none;
+	}
+
+	/* More pill with neutral style */
+	.more-pill {
+		color: #374151;
+	}
+
+	.more-pill .tag-name {
+		color: #374151;
+		font-weight: 500;
+	}
+
 	:global(.dark) .more-pill {
-		color: #9ca3af;
+		color: #f3f4f6;
 	}
 
 	:global(.dark) .more-pill .tag-name {
-		color: #9ca3af;
+		color: #f3f4f6;
 	}
 
-	/* Create pill with primary accent */
+	/* Create pill with neutral style */
 	.create-pill {
-		color: #3b82f6;
-		padding: 0.5rem !important;
+		color: #374151;
+	}
+
+	.create-pill .tag-name {
+		color: #374151;
+		font-weight: 500;
 	}
 
 	:global(.dark) .create-pill {
-		color: #60a5fa;
+		color: #f3f4f6;
+	}
+
+	:global(.dark) .create-pill .tag-name {
+		color: #f3f4f6;
 	}
 
 	/* Glass tag styling - same as PillNavigation pills */

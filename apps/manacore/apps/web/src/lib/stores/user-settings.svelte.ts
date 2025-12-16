@@ -11,17 +11,17 @@ import { createUserSettingsStore } from '@manacore/shared-theme';
 import { authStore } from './auth.svelte';
 import { getAuthUrl } from '$lib/config/runtime';
 
+// Initialize auth URL from runtime config
+let authUrl = 'http://localhost:3001'; // default fallback
+getAuthUrl().then((url) => {
+	authUrl = url;
+});
+
 // Create store with async initialization
 export const userSettings = createUserSettingsStore({
 	appId: 'manacore',
-	authUrl: 'http://localhost:3001', // Will be updated after config loads
+	get authUrl() {
+		return authUrl;
+	},
 	getAccessToken: () => authStore.getAccessToken(),
-});
-
-// Update auth URL after runtime config loads
-getAuthUrl().then((url) => {
-	// Update the store's auth URL after config loads
-	if (userSettings.settings) {
-		(userSettings.settings as { authUrl: string }).authUrl = url;
-	}
 });

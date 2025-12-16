@@ -45,6 +45,7 @@ export interface CalendarAppSettings {
 
 	// TagStrip settings
 	tagStripCollapsed: boolean; // Whether TagStrip is hidden
+	selectedTagIds: string[]; // Tags selected for filtering calendar view
 
 	// Immersive Mode settings
 	immersiveModeEnabled: boolean; // Fullscreen mode - hides all UI elements
@@ -91,6 +92,7 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	dateStripCollapsed: false,
 	// TagStrip defaults
 	tagStripCollapsed: true, // Hidden by default
+	selectedTagIds: [], // No tags selected by default
 	// Immersive Mode defaults
 	immersiveModeEnabled: false,
 	// Birthday defaults
@@ -241,6 +243,12 @@ export const settingsStore = {
 	get tagStripCollapsed() {
 		return settings.tagStripCollapsed;
 	},
+	get selectedTagIds() {
+		return settings.selectedTagIds;
+	},
+	get hasSelectedTags() {
+		return settings.selectedTagIds.length > 0;
+	},
 	// Immersive Mode settings
 	get immersiveModeEnabled() {
 		return settings.immersiveModeEnabled;
@@ -312,6 +320,34 @@ export const settingsStore = {
 	 */
 	toggleTagStrip() {
 		settings = { ...settings, tagStripCollapsed: !settings.tagStripCollapsed };
+		saveSettings(settings);
+		syncToCloud();
+	},
+
+	/**
+	 * Toggle a tag selection for filtering
+	 */
+	toggleTagSelection(tagId: string) {
+		const currentIds = settings.selectedTagIds;
+		const isSelected = currentIds.includes(tagId);
+		const newIds = isSelected ? currentIds.filter((id) => id !== tagId) : [...currentIds, tagId];
+		settings = { ...settings, selectedTagIds: newIds };
+		saveSettings(settings);
+		syncToCloud();
+	},
+
+	/**
+	 * Check if a tag is selected
+	 */
+	isTagSelected(tagId: string): boolean {
+		return settings.selectedTagIds.includes(tagId);
+	},
+
+	/**
+	 * Clear all tag selections
+	 */
+	clearTagSelection() {
+		settings = { ...settings, selectedTagIds: [] };
 		saveSettings(settings);
 		syncToCloud();
 	},

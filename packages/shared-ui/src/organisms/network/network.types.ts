@@ -52,7 +52,7 @@ export interface NetworkLink {
 export interface SimulationLink {
 	source: string | SimulationNode;
 	target: string | SimulationNode;
-	type: 'tag';
+	type: string; // e.g., 'tag', 'calendar', 'date', 'location', etc.
 	strength: number;
 	sharedTags: string[];
 	index?: number;

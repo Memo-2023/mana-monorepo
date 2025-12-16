@@ -23,7 +23,7 @@ export interface NetworkNode {
 export interface NetworkLink {
 	source: string;
 	target: string;
-	type: 'tag';
+	type: 'tag' | 'calendar' | 'date' | 'location';
 	strength: number;
 	sharedTags: string[];
 }

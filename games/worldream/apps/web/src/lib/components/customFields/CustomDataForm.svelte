@@ -215,7 +215,7 @@
 	function renderNumberField(field: CustomFieldDefinition, value: any, error: string | undefined) {
 		return `
 			<div class="flex items-center gap-2">
-				${field.config.prefix ? `<span class="text-sm text-theme-text-secondary">${field.config.prefix}</span>` : ''}
+				${field.display?.prefix ? `<span class="text-sm text-theme-text-secondary">${field.display.prefix}</span>` : ''}
 				<input
 					type="number"
 					value="${value ?? field.config.default ?? ''}"
@@ -224,7 +224,7 @@
 					step="${field.config.step ?? 1}"
 					onchange="this.dispatchEvent(new CustomEvent('fieldchange', { detail: parseFloat(this.value) }))"
 					${readonly ? 'disabled' : ''}
-					class="flex-1 px-3 py-2 border ${error ? 'border-theme-error' : 'border-theme-border-default'} 
+					class="flex-1 px-3 py-2 border ${error ? 'border-theme-error' : 'border-theme-border-default'}
 						rounded-md bg-theme-surface disabled:opacity-50"
 				/>
 				${field.config.unit ? `<span class="text-sm text-theme-text-secondary">${field.config.unit}</span>` : ''}
@@ -454,35 +454,44 @@
 						{/if}
 
 						<!-- Field Component -->
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
 						<div
 							class="field-component"
-							onfieldchange={(e: CustomEvent) => handleFieldChange(field.key, e.detail)}
-							onmultiselectchange={(e: CustomEvent) => {
-								const current = formData[field.key] || [];
-								if (e.detail.checked) {
-									handleFieldChange(field.key, [...current, e.detail.value]);
-								} else {
-									handleFieldChange(
-										field.key,
-										current.filter((v) => v !== e.detail.value)
-									);
-								}
-							}}
-							onlistitemchange={(e: CustomEvent) => {
-								const items = [...(formData[field.key] || [])];
-								items[e.detail.index] = e.detail.value;
-								handleFieldChange(field.key, items);
-							}}
-							onlistitemremove={(e: CustomEvent) => {
-								const items = [...(formData[field.key] || [])];
-								items.splice(e.detail, 1);
-								handleFieldChange(field.key, items);
-							}}
-							onlistitemadd={() => {
-								const items = [...(formData[field.key] || [])];
-								items.push(getDefaultValueForType(field.config.item_type || 'text'));
-								handleFieldChange(field.key, items);
-							}}
+							{...{
+								onfieldchange: (e: Event) => {
+									const customEvent = e as CustomEvent;
+									handleFieldChange(field.key, customEvent.detail);
+								},
+								onmultiselectchange: (e: Event) => {
+									const customEvent = e as CustomEvent;
+									const current = formData[field.key] || [];
+									if (customEvent.detail.checked) {
+										handleFieldChange(field.key, [...current, customEvent.detail.value]);
+									} else {
+										handleFieldChange(
+											field.key,
+											current.filter((v: any) => v !== customEvent.detail.value)
+										);
+									}
+								},
+								onlistitemchange: (e: Event) => {
+									const customEvent = e as CustomEvent;
+									const items = [...(formData[field.key] || [])];
+									items[customEvent.detail.index] = customEvent.detail.value;
+									handleFieldChange(field.key, items);
+								},
+								onlistitemremove: (e: Event) => {
+									const customEvent = e as CustomEvent;
+									const items = [...(formData[field.key] || [])];
+									items.splice(customEvent.detail, 1);
+									handleFieldChange(field.key, items);
+								},
+								onlistitemadd: () => {
+									const items = [...(formData[field.key] || [])];
+									items.push(getDefaultValueForType(field.config.item_type || 'text'));
+									handleFieldChange(field.key, items);
+								},
+							} as any}
 						>
 							{@html getFieldComponent(field)}
 						</div>

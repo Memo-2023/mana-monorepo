@@ -78,8 +78,8 @@ async function loadConfig(): Promise<RuntimeConfig> {
 			if (!dev) {
 				const result = ConfigSchema.safeParse(config);
 				if (!result.success) {
-					const errors = result.error.errors
-						.map((e: { path: (string | number)[]; message: string }) => `${e.path.join('.')}: ${e.message}`)
+					const errors = result.error.issues
+						.map((e) => `${e.path.join('.')}: ${e.message}`)
 						.join(', ');
 					throw new Error(`[Picture] Invalid config.json schema: ${errors}`);
 				}

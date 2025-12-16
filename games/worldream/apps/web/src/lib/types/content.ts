@@ -6,6 +6,12 @@ export interface GenerationContext {
 	userPrompt: string;
 	systemPrompt: string;
 	worldContext?: string;
+	worldDetails?: {
+		title: string;
+		summary?: string;
+		appearance?: string;
+		lore?: string;
+	};
 	selectedCharacters?: Array<{
 		name: string;
 		slug: string;
@@ -15,6 +21,14 @@ export interface GenerationContext {
 		motivations?: string;
 		capabilities?: string;
 	}>;
+	selectedPlace?: {
+		name: string;
+		slug: string;
+		summary?: string;
+		appearance?: string;
+		capabilities?: string;
+		constraints?: string;
+	};
 	model: string;
 	timestamp: string;
 }

@@ -44,6 +44,7 @@
 		isNavCollapsed as collapsedStore,
 		isToolbarCollapsed as toolbarCollapsedStore,
 	} from '$lib/stores/navigation';
+	import { viewModeStore } from '$lib/stores/view-mode.svelte';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -63,7 +64,10 @@
 	import TagStrip from '$lib/components/calendar/TagStrip.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import ViewModePillContextMenu from '$lib/components/calendar/ViewModePillContextMenu.svelte';
+	import StatsOverlay from '$lib/components/calendar/StatsOverlay.svelte';
+	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
+	import { heatmapStore } from '$lib/stores/heatmap.svelte';
 	import type { CalendarViewType } from '@calendar/shared';
 
 	// App switcher items
@@ -173,6 +177,9 @@
 	let helpModalOpen = $state(false);
 	let helpModalMode = $state<'shortcuts' | 'syntax'>('shortcuts');
 
+	// Settings modal state
+	let showSettingsModal = $state(false);
+
 	function handleShowShortcuts() {
 		helpModalMode = 'shortcuts';
 		helpModalOpen = true;
@@ -268,6 +275,7 @@
 
 	// Base navigation items for Calendar (without Kalender/Aufgaben - handled by tab group)
 	// Note: Tags uses onClick to toggle TagStrip visibility instead of navigating
+	// Note: Statistiken uses onClick to toggle heatmap mode (shows stats overlay + event density)
 	let baseNavItems = $derived<PillNavItem[]>([
 		{
 			href: '/tags',
@@ -276,9 +284,19 @@
 			onClick: handleTagsToggle,
 			active: isTagStripVisible,
 		},
-		{ href: '/statistics', label: 'Statistiken', icon: 'bar-chart-3' },
-		{ href: '/network', label: 'Netzwerk', icon: 'share-2' },
-		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
+		{
+			href: '/',
+			label: 'Statistiken',
+			icon: 'flame',
+			onClick: () => heatmapStore.toggle(),
+			active: heatmapStore.enabled,
+		},
+		{
+			href: '/',
+			label: 'Einstellungen',
+			icon: 'settings',
+			onClick: () => (showSettingsModal = true),
+		},
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	]);
 
@@ -355,16 +373,37 @@
 		return viewLabels[view];
 	}
 
+	// Handle view/mode change - switches between calendar views and network mode
+	function handleViewModeChange(id: string) {
+		if (id === 'network') {
+			viewModeStore.setMode('network');
+		} else {
+			// Switch to calendar mode and set the view type
+			viewModeStore.setMode('calendar');
+			viewStore.setViewType(id as CalendarViewType);
+		}
+	}
+
+	// Current view value - shows 'network' when in network mode, otherwise the calendar view type
+	let currentViewValue = $derived(
+		viewModeStore.mode === 'network' ? 'network' : viewStore.viewType
+	);
+
 	// View switcher tab group (only shown on calendar main page)
+	// Includes calendar views + network option
 	let viewSwitcherTabGroup = $derived<PillTabGroupConfig>({
 		type: 'tabs',
-		options: enabledViews.map((view) => ({
-			id: view,
-			label: getViewLabel(view),
-			title: view === 'custom' ? `${settingsStore.customDayCount}-Tage-Ansicht` : viewTitles[view],
-		})),
-		value: viewStore.viewType,
-		onChange: (id) => viewStore.setViewType(id as CalendarViewType),
+		options: [
+			...enabledViews.map((view) => ({
+				id: view,
+				label: getViewLabel(view),
+				title:
+					view === 'custom' ? `${settingsStore.customDayCount}-Tage-Ansicht` : viewTitles[view],
+			})),
+			{ id: 'network', label: 'N', title: 'Netzwerk-Ansicht' },
+		],
+		value: currentViewValue,
+		onChange: handleViewModeChange,
 		onContextMenu: handleViewContextMenu,
 	});
 
@@ -725,6 +764,16 @@
 
 <!-- InputBar Help Modal -->
 <InputBarHelpModal open={helpModalOpen} onClose={handleCloseHelpModal} mode={helpModalMode} />
+
+<!-- Stats Overlay (shown when heatmap is enabled) -->
+<StatsOverlay />
+
+<!-- Settings Modal -->
+<SettingsModal
+	visible={showSettingsModal}
+	onClose={() => (showSettingsModal = false)}
+	{isSidebarMode}
+/>
 
 <style>
 	.layout-container {

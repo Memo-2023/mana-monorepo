@@ -7,13 +7,12 @@
 
 	let { children } = $props();
 
-	onMount(async () => {
+	onMount(() => {
 		// Initialize runtime config first (12-factor pattern)
-		await initializeConfig();
+		initializeConfig();
 
 		// Initialize theme
-		const cleanup = theme.initialize();
-		return cleanup;
+		return theme.initialize();
 	});
 </script>
 

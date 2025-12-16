@@ -27,7 +27,7 @@
 
 	async function loadCharacter() {
 		try {
-			node = await NodeService.get(slug);
+			if (slug) node = await NodeService.get(slug);
 
 			// Ensure it's a character and belongs to this world
 			if (node && node.kind !== 'character') {
