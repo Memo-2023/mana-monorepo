@@ -12,6 +12,7 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 # Copy shared packages
+COPY packages/better-auth-types ./packages/better-auth-types
 COPY packages/shared-errors ./packages/shared-errors
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
 
@@ -22,6 +23,9 @@ COPY apps/todo/apps/backend ./apps/todo/apps/backend
 RUN pnpm install --frozen-lockfile
 
 # Build shared packages first
+WORKDIR /app/packages/better-auth-types
+RUN pnpm build
+
 WORKDIR /app/packages/shared-errors
 RUN pnpm build
 
