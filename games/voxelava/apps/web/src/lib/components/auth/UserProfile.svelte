@@ -49,7 +49,7 @@
 		}
 	}
 
-	// Passwort ändern
+	// Passwort ändern - TODO: Implement when Mana Core Auth supports password change for logged-in users
 	async function handlePasswordChange() {
 		// Validierung
 		if (!newPassword || !confirmNewPassword) {
@@ -67,30 +67,10 @@
 			return;
 		}
 
-		try {
-			isPasswordChanging = true;
-			passwordChangeError = '';
-
-			const success = await AuthService.updatePassword(newPassword);
-
-			if (success) {
-				passwordChangeSuccess = 'Passwort erfolgreich geändert.';
-				newPassword = '';
-				confirmNewPassword = '';
-				// Nach kurzer Verzögerung Passwort-Änderung ausblenden
-				setTimeout(() => {
-					showPasswordChange = false;
-					passwordChangeSuccess = '';
-				}, 3000);
-			} else {
-				passwordChangeError = 'Fehler beim Ändern des Passworts.';
-			}
-		} catch (error) {
-			console.error('Password change error:', error);
-			passwordChangeError = 'Ein Fehler ist aufgetreten. Bitte versuche es später erneut.';
-		} finally {
-			isPasswordChanging = false;
-		}
+		// Note: Password change is not yet supported by Mana Core Auth
+		// Use the "Passwort zurücksetzen" feature on the login page instead
+		passwordChangeError =
+			'Passwortänderung ist noch nicht verfügbar. Bitte nutze "Passwort vergessen" auf der Anmeldeseite.';
 	}
 
 	// Abmelden

@@ -51,13 +51,13 @@ export interface LevelMetadata {
 	/** Beschreibung des Levels */
 	description: string;
 	/** ID des Benutzers, der das Level erstellt hat */
-	userId: string;
+	userId: string | null;
 	/** Zeitpunkt der Erstellung des Levels */
-	createdAt: string;
+	createdAt: string | null;
 	/** Zeitpunkt der letzten Aktualisierung des Levels */
-	updatedAt: string;
+	updatedAt: string | null;
 	/** Gibt an, ob das Level öffentlich ist */
-	isPublic?: boolean;
+	isPublic?: boolean | null;
 	/** Anzahl der Aufrufe des Levels */
 	playCount: number;
 	/** Anzahl der Likes des Levels */
