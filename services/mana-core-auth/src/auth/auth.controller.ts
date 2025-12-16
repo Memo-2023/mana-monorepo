@@ -10,6 +10,7 @@ import {
 	HttpCode,
 	HttpStatus,
 } from '@nestjs/common';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { BetterAuthService } from './services/better-auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -21,6 +22,26 @@ import { SetActiveOrganizationDto } from './dto/set-active-organization.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+
+/**
+ * Rate Limiting Configuration
+ *
+ * Security-focused rate limits for auth endpoints:
+ * - Login: 5 attempts per minute (brute force protection)
+ * - Register: 10 per hour (spam prevention)
+ * - Password reset: 3 per 5 minutes (enumeration protection)
+ * - Token validation: No limit (high-frequency internal operation)
+ */
+const RATE_LIMITS = {
+	/** 5 login attempts per 60 seconds */
+	LOGIN: { limit: 5, ttl: 60000 },
+	/** 10 registrations per hour */
+	REGISTER: { limit: 10, ttl: 3600000 },
+	/** 3 password reset requests per 5 minutes */
+	PASSWORD_RESET: { limit: 3, ttl: 300000 },
+	/** 5 B2B registrations per hour */
+	B2B_REGISTER: { limit: 5, ttl: 3600000 },
+} as const;
 
 /**
  * Auth Controller
@@ -55,8 +76,11 @@ export class AuthController {
 	 * Register a new B2C user (individual)
 	 *
 	 * Creates a user account and initializes their credit balance.
+	 *
+	 * Rate limit: 10 registrations per hour per IP (spam prevention)
 	 */
 	@Post('register')
+	@Throttle({ default: RATE_LIMITS.REGISTER })
 	async register(@Body() registerDto: RegisterDto) {
 		return this.betterAuthService.registerB2C({
 			email: registerDto.email,
@@ -69,8 +93,11 @@ export class AuthController {
 	 * Sign in with email and password
 	 *
 	 * Returns user data and JWT token.
+	 *
+	 * Rate limit: 5 attempts per minute per IP (brute force protection)
 	 */
 	@Post('login')
+	@Throttle({ default: RATE_LIMITS.LOGIN })
 	@HttpCode(HttpStatus.OK)
 	async login(@Body() loginDto: LoginDto) {
 		return this.betterAuthService.signIn({
@@ -121,8 +148,11 @@ export class AuthController {
 	 * Validate a token
 	 *
 	 * Checks if a token is valid and returns the payload.
+	 *
+	 * No rate limiting - high-frequency internal operation used by all backends.
 	 */
 	@Post('validate')
+	@SkipThrottle()
 	@HttpCode(HttpStatus.OK)
 	async validate(@Body() body: { token: string }) {
 		return this.betterAuthService.validateToken(body.token);
@@ -133,8 +163,11 @@ export class AuthController {
 	 *
 	 * Returns public keys for JWT verification.
 	 * This is a passthrough to Better Auth's JWKS.
+	 *
+	 * No rate limiting - cacheable public keys for JWT verification.
 	 */
 	@Get('jwks')
+	@SkipThrottle()
 	async getJwks() {
 		return this.betterAuthService.getJwks();
 	}
@@ -148,8 +181,11 @@ export class AuthController {
 	 *
 	 * Initiates the password reset flow by sending an email with a reset link.
 	 * Always returns success to prevent email enumeration attacks.
+	 *
+	 * Rate limit: 3 requests per 5 minutes per IP (enumeration protection)
 	 */
 	@Post('forgot-password')
+	@Throttle({ default: RATE_LIMITS.PASSWORD_RESET })
 	@HttpCode(HttpStatus.OK)
 	async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
 		return this.betterAuthService.requestPasswordReset(
@@ -181,8 +217,11 @@ export class AuthController {
 	 *
 	 * Creates an organization with the registering user as owner.
 	 * Also creates organization credit balance.
+	 *
+	 * Rate limit: 5 B2B registrations per hour per IP (spam prevention)
 	 */
 	@Post('register/b2b')
+	@Throttle({ default: RATE_LIMITS.B2B_REGISTER })
 	async registerB2B(@Body() registerDto: RegisterB2BDto) {
 		return this.betterAuthService.registerB2B(registerDto);
 	}

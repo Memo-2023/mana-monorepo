@@ -55,8 +55,11 @@ import type {
 	TokenPayload,
 	OrganizationMember,
 	Organization,
-	BetterAuthAPI,
 	CreateOrganizationResponse,
+	// BetterAuthAPI provides typed methods for all Better Auth operations
+	// Note: AuthAPI (inferred) is also available but doesn't expose all methods
+	BetterAuthAPI,
+	// BetterAuthUser includes the role field (deprecated - use AuthUser when $Infer works)
 	BetterAuthUser,
 } from '../types/better-auth.types';
 import * as jwt from 'jsonwebtoken';
@@ -87,8 +90,14 @@ export class BetterAuthService {
 
 	/**
 	 * Typed accessor for Better Auth API methods
-	 * Better Auth's plugins add methods dynamically, so we provide
-	 * a typed accessor to avoid casting throughout the service.
+	 *
+	 * Better Auth's plugins add methods dynamically. This accessor provides
+	 * typed access to all API methods including those from organization
+	 * and JWT plugins.
+	 *
+	 * Note: We use BetterAuthAPI interface which is manually maintained.
+	 * In the future, this could be replaced with inferred types once
+	 * Better Auth's $Infer fully supports API type inference.
 	 *
 	 * @see https://www.better-auth.com/docs/concepts/typescript
 	 */

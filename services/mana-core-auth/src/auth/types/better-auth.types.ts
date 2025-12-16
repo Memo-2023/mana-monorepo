@@ -3,16 +3,18 @@
  *
  * This file provides types for Better Auth integration.
  *
- * STRATEGY: Import base types from Better Auth packages, extend only when needed.
+ * STRATEGY (2024-12 UPDATE):
+ * Use inferred types from Better Auth's $Infer pattern when possible.
+ * Manual interfaces are kept only for service-layer DTOs and result types.
  *
- * From 'better-auth/types':
- * - User, Session, Account, Auth, BetterAuthOptions, etc.
+ * INFERRED TYPES (prefer these):
+ * - AuthUser, AuthSession, AuthAPI - from better-auth.config.ts
  *
  * From 'better-auth/plugins/organization':
  * - Organization, Member, Invitation, OrganizationRole, InvitationStatus
  *
  * This file defines:
- * 1. Extended types (adding fields Better Auth doesn't have)
+ * 1. Re-exports of inferred types from config
  * 2. API response/request types for our service layer
  * 3. Service-specific DTOs and result types
  * 4. Type guards for runtime safety
@@ -22,7 +24,12 @@
  */
 
 // =============================================================================
-// Import core types from Better Auth packages
+// Import inferred types from Better Auth config
+// =============================================================================
+import type { AuthUser, AuthSession, AuthAPI } from '../better-auth.config';
+
+// =============================================================================
+// Import base types from Better Auth packages
 // =============================================================================
 import type { User, Session } from 'better-auth/types';
 import type {
@@ -32,6 +39,9 @@ import type {
 	OrganizationRole as BetterAuthOrganizationRole,
 	InvitationStatus as BetterAuthInvitationStatus,
 } from 'better-auth/plugins/organization';
+
+// Re-export inferred types as primary types
+export type { AuthUser, AuthSession, AuthAPI };
 
 // Re-export base types for convenience
 export type { User, Session };
@@ -45,7 +55,9 @@ export type {
 
 /**
  * Extended User type with our additional fields
- * Better Auth's User type is the base, we extend it for our app
+ *
+ * @deprecated Use AuthUser (inferred from config) instead.
+ * This type is kept for backward compatibility but may be removed in future.
  */
 export interface BetterAuthUser extends User {
 	role?: string;
@@ -53,7 +65,9 @@ export interface BetterAuthUser extends User {
 
 /**
  * Extended Session type with organization support
- * Better Auth's Session type is the base, organization plugin adds activeOrganizationId
+ *
+ * @deprecated Use AuthSession (inferred from config) instead.
+ * This type is kept for backward compatibility but may be removed in future.
  */
 export interface BetterAuthSession extends Session {
 	activeOrganizationId?: string | null;
@@ -62,6 +76,9 @@ export interface BetterAuthSession extends Session {
 
 /**
  * JWT Payload context passed to definePayload
+ *
+ * @deprecated Better Auth now infers this type automatically from config.
+ * This type is kept for backward compatibility but may be removed in future.
  */
 export interface JWTPayloadContext {
 	user: BetterAuthUser;
@@ -265,6 +282,10 @@ export interface AuthenticatedRequest<TBody = unknown, TQuery = unknown> {
 
 /**
  * Typed Better Auth API interface
+ *
+ * @deprecated Use AuthAPI (inferred from config) instead.
+ * This interface is manually maintained and may become out of sync with Better Auth.
+ * The inferred type from BetterAuthInstance['api'] is always accurate.
  *
  * This interface describes the methods available on auth.api
  * when using the organization plugin.

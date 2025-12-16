@@ -18,10 +18,37 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { jwt } from 'better-auth/plugins/jwt';
 import { organization } from 'better-auth/plugins/organization';
+import { z } from 'zod';
 import { getDb } from '../db/connection';
 import { organizations, members, invitations } from '../db/schema/organizations.schema';
 import { users, sessions, accounts, verificationTokens, jwks } from '../db/schema/auth.schema';
-import type { JWTPayloadContext } from './types/better-auth.types';
+
+/**
+ * User role schema with Zod runtime validation
+ *
+ * Ensures only valid role values can be assigned to users.
+ * This provides defense-in-depth alongside `input: false`.
+ *
+ * Valid roles:
+ * - 'user': Standard user (default)
+ * - 'admin': Administrator with elevated privileges
+ * - 'service': Service account for automated systems
+ */
+export const userRoleSchema = z.enum(['user', 'admin', 'service'], {
+	errorMap: () => ({ message: 'Invalid user role. Must be one of: user, admin, service' }),
+});
+
+/**
+ * Inferred TypeScript type from Zod schema
+ */
+export type UserRole = z.infer<typeof userRoleSchema>;
+
+/**
+ * Type guard to check if a value is a valid UserRole
+ */
+export function isValidUserRole(role: unknown): role is UserRole {
+	return userRoleSchema.safeParse(role).success;
+}
 
 /**
  * JWT Custom Payload Interface
@@ -121,6 +148,39 @@ export function createBetterAuth(databaseUrl: string) {
 		// Base URL for callbacks and redirects
 		baseURL: process.env.BASE_URL || 'http://localhost:3001',
 
+		/**
+		 * User Additional Fields
+		 *
+		 * Define custom user fields that Better Auth should be aware of.
+		 * This enables proper type inference via $Infer pattern.
+		 *
+		 * @see https://www.better-auth.com/docs/concepts/database#additional-fields
+		 */
+		user: {
+			additionalFields: {
+				/**
+				 * User role (user, admin, service)
+				 *
+				 * Security:
+				 * - input=false prevents clients from setting their own role
+				 * - Zod validator ensures only valid role values are accepted
+				 *
+				 * Roles must be assigned server-side only.
+				 *
+				 * @see userRoleSchema for valid values
+				 */
+				role: {
+					type: 'string',
+					required: false,
+					defaultValue: 'user',
+					input: false, // Clients cannot set role during registration
+					validator: {
+						input: userRoleSchema, // Runtime validation with Zod
+					},
+				},
+			},
+		},
+
 		// Plugins
 		plugins: [
 			/**
@@ -205,11 +265,11 @@ export function createBetterAuth(databaseUrl: string) {
 					 *
 					 * Only includes static user info that doesn't change frequently.
 					 */
-					definePayload({ user, session }: JWTPayloadContext) {
+					definePayload({ user, session }) {
 						return {
 							sub: user.id,
 							email: user.email,
-							role: (user as { role?: string }).role || 'user',
+							role: user.role ?? 'user',
 							sid: session.id,
 						};
 					},
@@ -223,3 +283,23 @@ export function createBetterAuth(databaseUrl: string) {
  * Export type for Better Auth instance
  */
 export type BetterAuthInstance = ReturnType<typeof createBetterAuth>;
+
+/**
+ * Inferred types from Better Auth instance
+ *
+ * These types are automatically derived from the auth configuration,
+ * including all plugins and additional fields. Use these instead of
+ * manual interface definitions.
+ *
+ * @see https://www.better-auth.com/docs/concepts/typescript
+ */
+export type AuthSession = BetterAuthInstance['$Infer']['Session'];
+export type AuthUser = AuthSession['user'];
+
+/**
+ * Inferred API type from Better Auth instance
+ *
+ * This type includes all methods from core auth and plugins
+ * (organization, jwt, etc.). Use this instead of manual BetterAuthAPI interface.
+ */
+export type AuthAPI = BetterAuthInstance['api'];
