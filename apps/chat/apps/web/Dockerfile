@@ -20,6 +20,7 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 # Copy shared packages needed by chat web
+COPY packages/better-auth-types ./packages/better-auth-types
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
@@ -45,6 +46,9 @@ COPY apps/chat/apps/web ./apps/chat/apps/web
 RUN pnpm install --frozen-lockfile
 
 # Build shared packages that need building
+WORKDIR /app/packages/better-auth-types
+RUN pnpm build || true
+
 WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
 
