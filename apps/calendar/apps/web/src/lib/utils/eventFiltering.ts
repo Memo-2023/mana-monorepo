@@ -114,7 +114,7 @@ export function getOverflowEvents(
 }
 
 /**
- * Combined filter: Get visible timed events for a day with optional hour filtering
+ * Combined filter: Get visible timed events for a day with optional hour and tag filtering
  */
 export function getVisibleTimedEvents(
 	events: CalendarEvent[],
@@ -123,6 +123,7 @@ export function getVisibleTimedEvents(
 		filterHoursEnabled?: boolean;
 		dayStartHour?: number;
 		dayEndHour?: number;
+		selectedTagIds?: string[];
 	}
 ): CalendarEvent[] {
 	let filtered = filterByVisibleCalendars(events, visibleCalendars);
@@ -136,18 +137,57 @@ export function getVisibleTimedEvents(
 		filtered = filterByHourRange(filtered, options.dayStartHour, options.dayEndHour);
 	}
 
+	// Apply tag filter if tags are selected
+	if (options?.selectedTagIds) {
+		filtered = filterByTags(filtered, options.selectedTagIds);
+	}
+
 	return filtered;
 }
 
 /**
- * Combined filter: Get visible all-day events for a day
+ * Combined filter: Get visible all-day events for a day with optional tag filtering
  */
 export function getVisibleAllDayEvents(
 	events: CalendarEvent[],
-	visibleCalendars: Calendar[]
+	visibleCalendars: Calendar[],
+	options?: {
+		selectedTagIds?: string[];
+	}
 ): CalendarEvent[] {
 	let filtered = filterByVisibleCalendars(events, visibleCalendars);
-	return filterAllDayEvents(filtered);
+	filtered = filterAllDayEvents(filtered);
+
+	// Apply tag filter if tags are selected
+	if (options?.selectedTagIds) {
+		filtered = filterByTags(filtered, options.selectedTagIds);
+	}
+
+	return filtered;
+}
+
+/**
+ * Filter events by selected tag IDs
+ * If no tags are selected (empty array), returns all events
+ * If tags are selected, returns only events that have at least one of the selected tags
+ */
+export function filterByTags(events: CalendarEvent[], selectedTagIds: string[]): CalendarEvent[] {
+	// If no tags are selected, show all events
+	if (selectedTagIds.length === 0) {
+		return events;
+	}
+
+	const selectedTagSet = new Set(selectedTagIds);
+
+	return events.filter((event) => {
+		// If event has no tags, don't show it when filtering by tags
+		if (!event.tags || event.tags.length === 0) {
+			return false;
+		}
+
+		// Check if event has at least one of the selected tags
+		return event.tags.some((tag) => selectedTagSet.has(tag.id));
+	});
 }
 
 /**

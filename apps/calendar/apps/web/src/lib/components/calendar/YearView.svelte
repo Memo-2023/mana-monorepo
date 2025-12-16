@@ -16,6 +16,7 @@
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { toDate } from '$lib/utils/eventDateHelpers';
+	import { filterByTags } from '$lib/utils/eventFiltering';
 	import type { CalendarViewType, CalendarEvent } from '@calendar/shared';
 
 	interface Props {
@@ -60,7 +61,10 @@
 	// Precompute event counts for performance
 	let eventCountsByDay = $derived.by(() => {
 		const counts = new Map<string, number>();
-		const events = eventsStore.events ?? [];
+		let events = eventsStore.events ?? [];
+
+		// Apply tag filter if tags are selected
+		events = filterByTags(events, settingsStore.selectedTagIds);
 
 		for (const event of events) {
 			const start = toDate(event.startTime);

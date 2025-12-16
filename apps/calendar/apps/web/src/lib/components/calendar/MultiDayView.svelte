@@ -155,6 +155,7 @@
 				filterHoursEnabled: settingsStore.filterHoursEnabled,
 				dayStartHour: settingsStore.dayStartHour,
 				dayEndHour: settingsStore.dayEndHour,
+				selectedTagIds: settingsStore.selectedTagIds,
 			}
 		);
 	}
@@ -174,7 +175,10 @@
 	function getAllDayEventsForDay(day: Date): CalendarEvent[] {
 		return getVisibleAllDayEvents(
 			eventsStore.getEventsForDay(day),
-			calendarsStore.visibleCalendars
+			calendarsStore.visibleCalendars,
+			{
+				selectedTagIds: settingsStore.selectedTagIds,
+			}
 		);
 	}
 

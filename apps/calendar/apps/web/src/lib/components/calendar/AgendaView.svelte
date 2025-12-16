@@ -2,7 +2,9 @@
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
+	import { filterByTags } from '$lib/utils/eventFiltering';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import { format, parseISO, isToday, isTomorrow, startOfDay } from 'date-fns';
 	import { de } from 'date-fns/locale';
@@ -33,6 +35,9 @@
 
 		const groups: Map<string, CalendarEvent[]> = new Map();
 
+		// Get selected tag IDs for filtering
+		const selectedTagIds = settingsStore.selectedTagIds;
+
 		for (const event of currentEvents) {
 			// Skip events from hidden calendars
 			if (!visibleCalendarIds.has(event.calendarId)) continue;
@@ -50,17 +55,21 @@
 			groups.get(dateKey)!.push(event);
 		}
 
-		// Sort groups by date
+		// Sort groups by date and apply tag filtering
 		return Array.from(groups.entries())
 			.sort(([a], [b]) => a.localeCompare(b))
 			.map(([dateKey, events]) => ({
 				date: parseISO(dateKey),
-				events: events.sort((a, b) => {
-					const aStart = toDate(a.startTime);
-					const bStart = toDate(b.startTime);
-					return aStart.getTime() - bStart.getTime();
-				}),
-			}));
+				events: filterByTags(
+					events.sort((a, b) => {
+						const aStart = toDate(a.startTime);
+						const bStart = toDate(b.startTime);
+						return aStart.getTime() - bStart.getTime();
+					}),
+					selectedTagIds
+				),
+			}))
+			.filter((group) => group.events.length > 0); // Remove empty groups after tag filtering
 	});
 
 	function formatDateHeader(date: Date) {
