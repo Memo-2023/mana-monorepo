@@ -4,19 +4,19 @@ import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
 import { contacts } from '../db/schema';
 import {
-	createContactsStorage,
-	generateUserFileKey,
+	createUnifiedStorage,
 	getContentType,
 	validateFileSize,
 	validateFileExtension,
 	IMAGE_EXTENSIONS,
+	APPS,
 } from '@manacore/shared-storage';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 @Injectable()
 export class PhotoService {
-	private storage = createContactsStorage();
+	private storage = createUnifiedStorage();
 
 	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {}
 
@@ -66,19 +66,22 @@ export class PhotoService {
 			}
 		}
 
-		// Generate unique key for the new photo
+		// Generate unique key for the new photo: {userId}/contacts/{contactId}.{ext}
 		const filename = `${contactId}.${extension}`;
-		const key = generateUserFileKey(userId, filename);
+		const key = `${userId}/${APPS.CONTACTS}/${filename}`;
 
 		// Upload to S3
 		const contentType = getContentType(filename);
-		await this.storage.upload(key, file.buffer, {
+		const result = await this.storage.upload(key, file.buffer, {
 			contentType,
 			public: true,
 		});
 
-		// Generate the URL (for MinIO, construct it manually)
-		const photoUrl = `http://localhost:9000/contacts-storage/${key}`;
+		// Get URL from storage client or construct manually
+		const photoUrl =
+			result.url ||
+			this.storage.getPublicUrl(key) ||
+			`${process.env.MANACORE_STORAGE_PUBLIC_URL || 'http://localhost:9000/manacore-storage'}/${key}`;
 
 		// Update contact with photo URL
 		await this.db
@@ -125,8 +128,12 @@ export class PhotoService {
 	}
 
 	private extractKeyFromUrl(url: string): string | null {
-		// Extract key from URLs like http://localhost:9000/contacts-storage/users/xxx/file.jpg
-		const match = url.match(/contacts-storage\/(.+)$/);
-		return match ? match[1] : null;
+		// Extract key from URLs like http://localhost:9000/manacore-storage/userId/contacts/file.jpg
+		// Also support old format: http://localhost:9000/contacts-storage/users/xxx/file.jpg
+		const unifiedMatch = url.match(/manacore-storage\/(.+)$/);
+		if (unifiedMatch) return unifiedMatch[1];
+
+		const legacyMatch = url.match(/contacts-storage\/(.+)$/);
+		return legacyMatch ? legacyMatch[1] : null;
 	}
 }

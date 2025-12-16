@@ -1,11 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-	createPictureStorage,
-	StorageClient,
-	generateUserFileKey,
-	getContentType,
-} from '@manacore/shared-storage';
+import { createUnifiedStorage, StorageClient, APPS } from '@manacore/shared-storage';
 
 export type StorageMode = 's3';
 
@@ -18,15 +13,15 @@ export class StorageService implements OnModuleInit {
 	constructor(private configService: ConfigService) {
 		// Get public URL from config
 		this.publicUrl = this.configService.get<string>(
-			'STORAGE_PUBLIC_URL',
-			'http://localhost:9000/picture-storage'
+			'MANACORE_STORAGE_PUBLIC_URL',
+			'http://localhost:9000/manacore-storage'
 		);
 	}
 
 	onModuleInit() {
-		// Initialize storage client
-		this.storage = createPictureStorage(this.publicUrl);
-		this.logger.log(`Storage initialized with @manacore/shared-storage (bucket: picture-storage)`);
+		// Initialize unified storage client
+		this.storage = createUnifiedStorage(this.publicUrl);
+		this.logger.log(`Storage initialized with @manacore/shared-storage (bucket: manacore-storage)`);
 	}
 
 	async uploadFile(
@@ -38,7 +33,8 @@ export class StorageService implements OnModuleInit {
 		const timestamp = Date.now();
 		const randomId = Math.random().toString(36).substring(2, 10);
 		const ext = filename.split('.').pop() || 'jpg';
-		const storagePath = `${userId}/${timestamp}-${randomId}.${ext}`;
+		// Path: {userId}/picture/{timestamp}-{randomId}.{ext}
+		const storagePath = `${userId}/${APPS.PICTURE}/${timestamp}-${randomId}.${ext}`;
 
 		const result = await this.storage.upload(storagePath, buffer, {
 			contentType,
@@ -82,7 +78,8 @@ export class StorageService implements OnModuleInit {
 	async uploadBoardThumbnail(boardId: string, dataUrl: string): Promise<string> {
 		const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, '');
 		const buffer = Buffer.from(base64Data, 'base64');
-		const storagePath = `boards/${boardId}/thumbnail-${Date.now()}.png`;
+		// Path: boards/picture/{boardId}/thumbnail-{timestamp}.png
+		const storagePath = `boards/${APPS.PICTURE}/${boardId}/thumbnail-${Date.now()}.png`;
 
 		const result = await this.storage.upload(storagePath, buffer, {
 			contentType: 'image/png',

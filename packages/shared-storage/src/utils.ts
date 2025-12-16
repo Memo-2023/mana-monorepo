@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { extname } from 'path';
+import type { AppName } from './types';
 
 /**
  * Generate a unique file key with optional folder structure
@@ -21,6 +22,30 @@ export function generateFileKey(filename: string, ...folders: string[]): string 
 	}
 
 	return key;
+}
+
+/**
+ * Generate a storage key for the unified bucket structure
+ *
+ * @example
+ * generateStorageKey('user-123', 'picture', 'photo.jpg')
+ * // => 'user-123/picture/a1b2c3d4-e5f6-7890-abcd-ef1234567890.jpg'
+ *
+ * generateStorageKey('user-123', 'chat', 'document.pdf', 'attachments')
+ * // => 'user-123/chat/attachments/a1b2c3d4-e5f6-7890-abcd-ef1234567890.pdf'
+ */
+export function generateStorageKey(
+	userId: string,
+	appName: AppName | string,
+	filename: string,
+	...subfolders: string[]
+): string {
+	const ext = extname(filename);
+	const uuid = randomUUID();
+	const file = `${uuid}${ext}`;
+
+	const parts = [userId, appName, ...subfolders, file];
+	return parts.join('/');
 }
 
 /**
