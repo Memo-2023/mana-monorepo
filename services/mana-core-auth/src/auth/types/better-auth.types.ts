@@ -268,11 +268,29 @@ export interface AuthenticatedRequest<TBody = unknown, TQuery = unknown> {
  *
  * This interface describes the methods available on auth.api
  * when using the organization plugin.
+ *
+ * @see https://www.better-auth.com/docs/concepts/typescript
  */
 export interface BetterAuthAPI {
 	// Core auth methods
 	signUpEmail(params: { body: SignUpEmailBody }): Promise<SignUpResponse>;
 	signInEmail(params: { body: { email: string; password: string } }): Promise<SignInResponse>;
+	signOut(params: AuthenticatedRequest): Promise<{ success: boolean }>;
+	getSession(
+		params: AuthenticatedRequest
+	): Promise<{ user: BetterAuthUser; session: BetterAuthSession }>;
+
+	// Password reset methods
+	requestPasswordReset(params: {
+		body: { email: string; redirectTo?: string };
+	}): Promise<{ status: boolean }>;
+	resetPassword(params: {
+		body: { newPassword: string; token: string };
+	}): Promise<{ status: boolean }>;
+
+	// JWT methods
+	signJWT(params: { body: { payload: Record<string, unknown> } }): Promise<{ token: string }>;
+	getJwks(): Promise<{ keys: unknown[] }>;
 
 	// Organization methods
 	createOrganization(

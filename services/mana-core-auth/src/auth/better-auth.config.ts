@@ -91,8 +91,8 @@ export function createBetterAuth(databaseUrl: string) {
 			 * Password Reset Configuration
 			 *
 			 * Better Auth provides password reset via:
-			 * - auth.api.forgetPassword({ email }) - Sends reset email
-			 * - auth.api.resetPassword({ newPassword, token }) - Resets password
+			 * - auth.api.requestPasswordReset({ body: { email } }) - Sends reset email
+			 * - auth.api.resetPassword({ body: { newPassword, token } }) - Resets password
 			 *
 			 * @see https://www.better-auth.com/docs/authentication/email-password#password-reset
 			 */
