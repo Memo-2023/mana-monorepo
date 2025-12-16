@@ -78,6 +78,10 @@ services:
       BREVO_API_KEY: ${BREVO_API_KEY}
       EMAIL_SENDER_ADDRESS: ${EMAIL_SENDER_ADDRESS:-noreply@manacore.ai}
       EMAIL_SENDER_NAME: ${EMAIL_SENDER_NAME:-ManaCore}
+      # Base URL for auth callbacks (password reset, email verification)
+      BASE_URL: ${BASE_URL:-https://auth.staging.manacore.ai}
+      # Frontend URL for password reset and email verification links
+      FRONTEND_URL: ${FRONTEND_URL:-https://staging.manacore.ai}
       # CORS - Allow all staging web app origins (HTTPS domains + localhost for dev)
       CORS_ORIGINS: https://chat.staging.manacore.ai,https://staging.manacore.ai,https://calendar.staging.manacore.ai,https://clock.staging.manacore.ai,https://todo.staging.manacore.ai,http://localhost:3000,http://localhost:5173,http://localhost:5186,http://localhost:5187,http://localhost:5188
     ports:

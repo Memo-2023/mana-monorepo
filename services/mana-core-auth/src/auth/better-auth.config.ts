@@ -126,13 +126,20 @@ export function createBetterAuth(databaseUrl: string) {
 			 * Set BREVO_API_KEY environment variable to enable email sending.
 			 * Without the API key, emails are logged to console (dev mode).
 			 *
+			 * The reset URL points to the frontend's reset-password page, not the API.
+			 * Set FRONTEND_URL environment variable for production.
+			 *
 			 * @see https://www.better-auth.com/docs/authentication/email-password#password-reset
 			 */
-			sendResetPassword: async ({ user, url }) => {
+			sendResetPassword: async ({ user, token }) => {
+				// Construct URL pointing to frontend's reset-password page
+				const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+				const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+
 				await sendPasswordResetEmail({
 					email: user.email,
 					name: user.name || undefined,
-					resetUrl: url,
+					resetUrl,
 				});
 			},
 		},

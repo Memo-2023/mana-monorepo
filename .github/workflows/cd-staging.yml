@@ -116,6 +116,11 @@ jobs:
           EMAIL_SENDER_ADDRESS=noreply@manacore.ai
           EMAIL_SENDER_NAME=ManaCore
 
+          # Base URL for auth callbacks (password reset, email verification)
+          BASE_URL=https://auth.staging.manacore.ai
+          # Frontend URL for password reset and email verification links
+          FRONTEND_URL=https://staging.manacore.ai
+
           # Supabase
           SUPABASE_URL=${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}

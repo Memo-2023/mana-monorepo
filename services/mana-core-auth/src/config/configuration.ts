@@ -52,7 +52,12 @@ export default () => ({
 
 	email: {
 		brevoApiKey: process.env.BREVO_API_KEY || '',
-		senderAddress: process.env.EMAIL_SENDER_ADDRESS || 'noreply@manacore.app',
+		senderAddress: process.env.EMAIL_SENDER_ADDRESS || 'noreply@manacore.ai',
 		senderName: process.env.EMAIL_SENDER_NAME || 'ManaCore',
+	},
+
+	urls: {
+		baseUrl: process.env.BASE_URL || 'http://localhost:3001',
+		frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
 	},
 });

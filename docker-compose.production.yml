@@ -19,6 +19,13 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      # Brevo Email Service
+      BREVO_API_KEY: ${BREVO_API_KEY}
+      EMAIL_SENDER_ADDRESS: ${EMAIL_SENDER_ADDRESS:-noreply@manacore.ai}
+      EMAIL_SENDER_NAME: ${EMAIL_SENDER_NAME:-ManaCore}
+      # URLs
+      BASE_URL: ${BASE_URL:-https://auth.manacore.ai}
+      FRONTEND_URL: ${FRONTEND_URL:-https://manacore.ai}
     ports:
       - "127.0.0.1:3001:3001"
     healthcheck:
