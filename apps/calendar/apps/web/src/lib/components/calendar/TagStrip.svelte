@@ -218,40 +218,40 @@
 		pointer-events: none;
 	}
 
-	/* More pill with muted style */
+	/* More pill with neutral style */
 	.more-pill {
-		color: #6b7280;
+		color: #374151;
 	}
 
 	.more-pill .tag-name {
-		color: #6b7280;
-		font-weight: 600;
+		color: #374151;
+		font-weight: 500;
 	}
 
 	:global(.dark) .more-pill {
-		color: #9ca3af;
+		color: #f3f4f6;
 	}
 
 	:global(.dark) .more-pill .tag-name {
-		color: #9ca3af;
+		color: #f3f4f6;
 	}
 
-	/* Create pill with primary accent */
+	/* Create pill with neutral style */
 	.create-pill {
-		color: #3b82f6;
+		color: #374151;
 	}
 
 	.create-pill .tag-name {
-		color: #3b82f6;
-		font-weight: 600;
+		color: #374151;
+		font-weight: 500;
 	}
 
 	:global(.dark) .create-pill {
-		color: #60a5fa;
+		color: #f3f4f6;
 	}
 
 	:global(.dark) .create-pill .tag-name {
-		color: #60a5fa;
+		color: #f3f4f6;
 	}
 
 	/* Glass tag styling - same as PillNavigation pills */
