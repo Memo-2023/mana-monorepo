@@ -111,6 +111,11 @@ jobs:
           JWT_PUBLIC_KEY=${{ secrets.JWT_PUBLIC_KEY }}
           JWT_PRIVATE_KEY=${{ secrets.JWT_PRIVATE_KEY }}
 
+          # Brevo Email Service
+          BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+          EMAIL_SENDER_ADDRESS=noreply@manacore.ai
+          EMAIL_SENDER_NAME=ManaCore
+
           # Supabase
           SUPABASE_URL=${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}

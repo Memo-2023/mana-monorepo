@@ -22,6 +22,7 @@ import { z } from 'zod';
 import { getDb } from '../db/connection';
 import { organizations, members, invitations } from '../db/schema/organizations.schema';
 import { users, sessions, accounts, verificationTokens, jwks } from '../db/schema/auth.schema';
+import { sendPasswordResetEmail, sendOrganizationInviteEmail } from '../email/brevo-client';
 
 /**
  * User role schema with Zod runtime validation
@@ -121,21 +122,18 @@ export function createBetterAuth(databaseUrl: string) {
 			 * - auth.api.requestPasswordReset({ body: { email } }) - Sends reset email
 			 * - auth.api.resetPassword({ body: { newPassword, token } }) - Resets password
 			 *
+			 * Uses Brevo API to send transactional emails.
+			 * Set BREVO_API_KEY environment variable to enable email sending.
+			 * Without the API key, emails are logged to console (dev mode).
+			 *
 			 * @see https://www.better-auth.com/docs/authentication/email-password#password-reset
 			 */
-			sendResetPassword: async ({ user, url, token }) => {
-				// TODO: Implement email sending service (e.g., Resend, SendGrid)
-				// For now, log the reset URL for development
-				console.log('[Password Reset] User:', user.email);
-				console.log('[Password Reset] Reset URL:', url);
-				console.log('[Password Reset] Token:', token);
-
-				// In production, send an email like:
-				// await sendEmail({
-				//   to: user.email,
-				//   subject: 'Reset your password',
-				//   html: `<a href="${url}">Reset your password</a>`
-				// });
+			sendResetPassword: async ({ user, url }) => {
+				await sendPasswordResetEmail({
+					email: user.email,
+					name: user.name || undefined,
+					resetUrl: url,
+				});
 			},
 		},
 
@@ -201,15 +199,24 @@ export function createBetterAuth(databaseUrl: string) {
 				// Allow users to create their own organizations
 				allowUserToCreateOrganization: true,
 
-				// Email invitation handler
+				/**
+				 * Email invitation handler
+				 *
+				 * Uses Brevo API to send organization invitation emails.
+				 * Set BREVO_API_KEY environment variable to enable email sending.
+				 * Without the API key, emails are logged to console (dev mode).
+				 */
 				async sendInvitationEmail(data) {
-					const { email, organization } = data;
+					const { email, organization, role, inviter } = data;
+					const baseUrl = process.env.BASE_URL || 'http://localhost:3001';
+					const inviteUrl = `${baseUrl}/accept-invitation?id=${data.id}`;
 
-					// TODO: Implement email sending service
-					console.log('TODO: Send invitation email', {
-						to: email,
-						organization: organization.name,
-						invitationId: data.id,
+					await sendOrganizationInviteEmail({
+						email,
+						organizationName: organization.name,
+						inviterName: inviter?.user?.name || undefined,
+						inviteUrl,
+						role: role || 'member',
 					});
 				},
 
