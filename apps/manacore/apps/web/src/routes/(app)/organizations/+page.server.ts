@@ -1,5 +1,15 @@
 import type { PageServerLoad } from './$types';
 
+export interface Organization {
+	id: string;
+	name: string;
+	user_role?: string;
+	total_credits?: number;
+	used_credits?: number;
+	team_count?: number;
+	created_at: string;
+}
+
 /**
  * Organizations page server load
  *
@@ -10,6 +20,6 @@ export const load: PageServerLoad = async () => {
 	// Return empty data - auth is handled client-side
 	// TODO: Implement client-side data fetching with Mana Core Auth token
 	return {
-		organizations: [],
+		organizations: [] as Organization[],
 	};
 };

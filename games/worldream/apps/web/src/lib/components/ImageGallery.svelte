@@ -190,16 +190,23 @@
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 p-4"
 		onclick={closeLightbox}
+		onkeydown={(e) => e.key === 'Enter' && closeLightbox()}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
 	>
 		<div class="relative max-h-full max-w-6xl">
 			<img
 				src={selectedImage.image_url}
 				alt="Vollbild"
 				class="max-h-[90vh] max-w-full object-contain"
-				onclick={(e) => e.stopPropagation()}
 			/>
 
-			<button onclick={closeLightbox} class="absolute right-4 top-4 text-white hover:text-gray-300">
+			<button
+				onclick={closeLightbox}
+				aria-label="Close lightbox"
+				class="absolute right-4 top-4 text-white hover:text-gray-300"
+			>
 				<svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"

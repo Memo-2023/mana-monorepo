@@ -100,6 +100,7 @@
 	const lifeYears = getLifeYears();
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
 <article
 	class="author-card"
 	class:enhanced={variant === 'enhanced'}
@@ -358,6 +359,7 @@
 		color: rgba(255, 255, 255, 0.7);
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}

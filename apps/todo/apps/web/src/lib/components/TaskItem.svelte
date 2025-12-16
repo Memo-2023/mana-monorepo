@@ -210,7 +210,7 @@
 	{/if}
 
 	<!-- Delete button -->
-	<button class="delete-btn" onclick={onDelete}>
+	<button class="delete-btn" onclick={onDelete} aria-label="Aufgabe löschen">
 		<svg class="delete-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 			<path
 				stroke-linecap="round"

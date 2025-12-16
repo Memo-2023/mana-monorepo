@@ -49,4 +49,10 @@ export default () => ({
 	ai: {
 		geminiApiKey: process.env.GOOGLE_GENAI_API_KEY || '',
 	},
+
+	email: {
+		brevoApiKey: process.env.BREVO_API_KEY || '',
+		senderAddress: process.env.EMAIL_SENDER_ADDRESS || 'noreply@manacore.app',
+		senderName: process.env.EMAIL_SENDER_NAME || 'ManaCore',
+	},
 });

@@ -60,6 +60,7 @@
 
 		<!-- Name (editable) -->
 		{#if isEditing}
+			<!-- svelte-ignore a11y_autofocus -->
 			<input
 				type="text"
 				bind:value={editName}
@@ -96,6 +97,7 @@
 			<button
 				class="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all"
 				onclick={() => (showMenu = !showMenu)}
+				aria-label="Spaltenmenü öffnen"
 			>
 				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 					<path
@@ -167,6 +169,7 @@
 											: 'border-transparent'}"
 										style="background-color: {color}"
 										onclick={() => handleColorSelect(color)}
+										aria-label="Farbe {color} auswählen"
 									></button>
 								{/each}
 							</div>
@@ -209,6 +212,7 @@
 			showMenu = false;
 			showColorPicker = false;
 		}}
+		aria-label="Menü schließen"
 	></button>
 {/if}
 

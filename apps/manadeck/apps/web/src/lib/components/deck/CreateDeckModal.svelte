@@ -3,11 +3,11 @@
 	import { deckStore } from '$lib/stores/deckStore.svelte';
 
 	interface Props {
-		open?: boolean;
-		onClose?: () => void;
+		visible: boolean;
+		onClose: () => void;
 	}
 
-	let { open = $bindable(false), onClose }: Props = $props();
+	let { visible, onClose }: Props = $props();
 
 	let title = $state('');
 	let description = $state('');
@@ -42,13 +42,12 @@
 			tags = '';
 
 			// Close modal
-			open = false;
-			onClose?.();
+			onClose();
 		}
 	}
 </script>
 
-<Modal bind:open title="Create New Deck" {onClose}>
+<Modal {visible} title="Create New Deck" {onClose}>
 	<form
 		onsubmit={(e) => {
 			e.preventDefault();
@@ -59,8 +58,9 @@
 		<Input label="Deck Title" bind:value={title} placeholder="e.g., Spanish Vocabulary" required />
 
 		<div class="space-y-2">
-			<label class="text-sm font-medium">Description</label>
+			<label for="deck-description" class="text-sm font-medium">Description</label>
 			<textarea
+				id="deck-description"
 				bind:value={description}
 				placeholder="What is this deck about?"
 				class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -96,8 +96,7 @@
 				type="button"
 				variant="ghost"
 				onclick={() => {
-					open = false;
-					onClose?.();
+					onClose();
 				}}
 			>
 				Cancel

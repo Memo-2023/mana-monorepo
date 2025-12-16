@@ -74,6 +74,10 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      # Brevo Email Service
+      BREVO_API_KEY: ${BREVO_API_KEY}
+      EMAIL_SENDER_ADDRESS: ${EMAIL_SENDER_ADDRESS:-noreply@manacore.ai}
+      EMAIL_SENDER_NAME: ${EMAIL_SENDER_NAME:-ManaCore}
       # CORS - Allow all staging web app origins (HTTPS domains + localhost for dev)
       CORS_ORIGINS: https://chat.staging.manacore.ai,https://staging.manacore.ai,https://calendar.staging.manacore.ai,https://clock.staging.manacore.ai,https://todo.staging.manacore.ai,http://localhost:3000,http://localhost:5173,http://localhost:5186,http://localhost:5187,http://localhost:5188
     ports:
@@ -137,12 +141,10 @@ services:
     environment:
       NODE_ENV: staging
       PORT: 3000
-      # Server-side URLs (Docker internal network)
-      PUBLIC_BACKEND_URL: http://chat-backend:3002
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      # Client-side URLs (browser access via HTTPS staging domains)
-      PUBLIC_BACKEND_URL_CLIENT: https://chat-api.staging.manacore.ai
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
+      # Runtime config generation (12-factor pattern)
+      # These vars are used by docker-entrypoint.sh to generate /config.json
+      BACKEND_URL: https://chat-api.staging.manacore.ai
+      AUTH_URL: https://auth.staging.manacore.ai
     ports:
       - "3000:3000"
     healthcheck:
@@ -173,16 +175,14 @@ services:
     environment:
       NODE_ENV: staging
       PORT: 5173
-      # Auth URLs
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
-      # Backend URLs for dashboard widgets
-      PUBLIC_TODO_API_URL: http://todo-backend:3018
-      PUBLIC_TODO_API_URL_CLIENT: https://todo-api.staging.manacore.ai
-      PUBLIC_CALENDAR_API_URL: http://calendar-backend:3016
-      PUBLIC_CALENDAR_API_URL_CLIENT: https://calendar-api.staging.manacore.ai
-      PUBLIC_CLOCK_API_URL: http://clock-backend:3017
-      PUBLIC_CLOCK_API_URL_CLIENT: https://clock-api.staging.manacore.ai
+      # Runtime config generation (12-factor pattern)
+      # These vars are used by docker-entrypoint.sh to generate /config.json
+      API_BASE_URL: https://staging.manacore.ai
+      AUTH_URL: https://auth.staging.manacore.ai
+      TODO_API_URL: https://todo-api.staging.manacore.ai
+      CALENDAR_API_URL: https://calendar-api.staging.manacore.ai
+      CLOCK_API_URL: https://clock-api.staging.manacore.ai
+      CONTACTS_API_URL: https://contacts-api.staging.manacore.ai
     ports:
       - "5173:5173"
     healthcheck:
@@ -315,10 +315,12 @@ services:
     environment:
       NODE_ENV: staging
       PORT: 5186
-      PUBLIC_BACKEND_URL: http://calendar-backend:3016
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://calendar-api.staging.manacore.ai
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
+      # Runtime config generation (12-factor pattern)
+      # These vars are used by docker-entrypoint.sh to generate /config.json
+      BACKEND_URL: https://calendar-api.staging.manacore.ai
+      AUTH_URL: https://auth.staging.manacore.ai
+      TODO_API_URL: https://todo-api.staging.manacore.ai
+      CONTACTS_API_URL: https://contacts-api.staging.manacore.ai
     ports:
       - "5186:5186"
     healthcheck:
@@ -383,10 +385,10 @@ services:
     environment:
       NODE_ENV: staging
       PORT: 5187
-      PUBLIC_BACKEND_URL: http://clock-backend:3017
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://clock-api.staging.manacore.ai
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
+      # Runtime config generation (12-factor pattern)
+      # These vars are used by docker-entrypoint.sh to generate /config.json
+      API_BASE_URL: https://clock-api.staging.manacore.ai
+      AUTH_URL: https://auth.staging.manacore.ai
     ports:
       - "5187:5187"
     healthcheck:

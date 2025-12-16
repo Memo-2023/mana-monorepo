@@ -253,8 +253,8 @@
 
 	const contentFields = getContentFields();
 
-	// Check if layout should be side-by-side
-	const isSideBySide = node.kind === 'character' || node.kind === 'object';
+	// Check if layout should be side-by-side (reactive to node changes)
+	const isSideBySide = $derived(node.kind === 'character' || node.kind === 'object');
 </script>
 
 {#if !isSideBySide && (node.kind === 'world' || node.kind === 'place') && !loadingImages && (images.length > 0 || node.image_url)}
@@ -544,7 +544,9 @@
 													references={node.content.references}
 												/>
 											{:else if field.key.includes('text') || field.key === 'references'}
-												{@html parseReferences(node.content[field.key])}
+												{@html typeof node.content[field.key] === 'string'
+													? parseReferences(node.content[field.key] as string)
+													: ''}
 											{:else}
 												<p class="whitespace-pre-wrap">{node.content[field.key]}</p>
 											{/if}
@@ -805,7 +807,9 @@
 												references={node.content.references}
 											/>
 										{:else if field.key.includes('text') || field.key === 'references'}
-											{@html parseReferences(node.content[field.key])}
+											{@html typeof node.content[field.key] === 'string'
+												? parseReferences(node.content[field.key] as string)
+												: ''}
 										{:else}
 											<p class="whitespace-pre-wrap">{node.content[field.key]}</p>
 										{/if}

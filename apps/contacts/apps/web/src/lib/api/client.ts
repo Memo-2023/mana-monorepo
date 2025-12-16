@@ -1,9 +1,10 @@
 /**
  * Centralized API client with authentication
+ * Uses runtime configuration for 12-factor compliance
  */
 
 import { authStore } from '$lib/stores/auth.svelte';
-import { API_BASE } from './config';
+import { getApiBase } from './config';
 
 /**
  * Make an authenticated API request
@@ -16,6 +17,7 @@ export async function fetchWithAuth<T = unknown>(
 	options: RequestInit = {}
 ): Promise<T> {
 	const token = await authStore.getAccessToken();
+	const apiBase = await getApiBase();
 
 	const headers: HeadersInit = {
 		'Content-Type': 'application/json',
@@ -26,7 +28,7 @@ export async function fetchWithAuth<T = unknown>(
 		(headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
 	}
 
-	const response = await fetch(`${API_BASE}${url}`, {
+	const response = await fetch(`${apiBase}${url}`, {
 		...options,
 		headers,
 	});
@@ -48,6 +50,7 @@ export async function fetchWithAuthFormData<T = unknown>(
 	options: RequestInit = {}
 ): Promise<T> {
 	const token = await authStore.getAccessToken();
+	const apiBase = await getApiBase();
 
 	const headers: HeadersInit = {
 		...(options.headers || {}),
@@ -57,7 +60,7 @@ export async function fetchWithAuthFormData<T = unknown>(
 		(headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
 	}
 
-	const response = await fetch(`${API_BASE}${url}`, {
+	const response = await fetch(`${apiBase}${url}`, {
 		...options,
 		headers,
 	});

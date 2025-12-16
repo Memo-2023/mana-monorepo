@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Search, ZoomIn, ZoomOut, RotateCcw, Filter, X, Focus, Keyboard } from 'lucide-svelte';
+	import { Search, ZoomIn, ZoomOut, RotateCcw, Filter, X, Focus, Keyboard } from '@lucide/svelte';
 	import type { NetworkTag } from './network.types';
 
 	interface Props {
@@ -56,6 +56,7 @@
 	let showFilters = $state(false);
 	let showKeyboardHelp = $state(false);
 	let strengthValue = $state(minStrength);
+	// svelte-ignore non_reactive_update - Element reference doesn't need reactivity
 	let searchInputElement: HTMLInputElement;
 
 	// Sync searchInput with external searchQuery

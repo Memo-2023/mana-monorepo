@@ -5,6 +5,7 @@
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import { onMount } from 'svelte';
 	import { initPostHog, analytics } from '$lib/analytics/posthog';
+	import { initializeConfig } from '$lib/config/runtime';
 
 	// Import and initialize theme
 	import { theme } from '$lib/stores/theme';
@@ -15,25 +16,28 @@
 	let { children, data } = $props();
 
 	onMount(() => {
-		// Initialize theme (applies CSS variables and loads from localStorage)
-		const cleanupTheme = theme.initialize();
+		// Initialize runtime config first (12-factor pattern)
+		initializeConfig().then(() => {
+			// Initialize theme (applies CSS variables and loads from localStorage)
+			const cleanupTheme = theme.initialize();
 
-		// Initialize PostHog
-		initPostHog();
+			// Initialize PostHog
+			initPostHog();
 
-		// Initialize auth with Mana Core
-		authStore.initialize().then(() => {
-			// Identify user in PostHog if logged in
-			if (authStore.user) {
-				analytics.identify(authStore.user.id, {
-					email: authStore.user.email,
-				});
-			}
+			// Initialize auth with Mana Core
+			authStore.initialize().then(() => {
+				// Identify user in PostHog if logged in
+				if (authStore.user) {
+					analytics.identify(authStore.user.id, {
+						email: authStore.user.email,
+					});
+				}
+			});
+
+			return () => {
+				cleanupTheme();
+			};
 		});
-
-		return () => {
-			cleanupTheme();
-		};
 	});
 </script>
 

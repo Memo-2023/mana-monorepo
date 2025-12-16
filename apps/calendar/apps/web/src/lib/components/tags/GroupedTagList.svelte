@@ -77,8 +77,8 @@
 			{#if groupTags.length > 0}
 				<div class="group-section">
 					<!-- Group Header -->
-					<button type="button" onclick={() => toggleGroup(group.id)} class="group-header">
-						<div class="flex items-center gap-2">
+					<div class="group-header">
+						<button type="button" onclick={() => toggleGroup(group.id)} class="group-toggle">
 							{#if isExpanded(group.id)}
 								<CaretDown size={16} weight="bold" class="text-muted-foreground" />
 							{:else}
@@ -90,21 +90,18 @@
 							></div>
 							<span class="font-medium">{group.name}</span>
 							<span class="text-xs text-muted-foreground">({groupTags.length})</span>
-						</div>
+						</button>
 						{#if onEditGroup}
 							<button
 								type="button"
-								onclick={(e) => {
-									e.stopPropagation();
-									onEditGroup(group);
-								}}
+								onclick={() => onEditGroup(group)}
 								class="edit-group-btn"
 								aria-label="Gruppe bearbeiten"
 							>
 								<Pencil size={14} />
 							</button>
 						{/if}
-					</button>
+					</div>
 
 					<!-- Tags in this group -->
 					{#if isExpanded(group.id)}

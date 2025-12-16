@@ -71,10 +71,10 @@ export interface Template {
 	id: string;
 	userId: string;
 	name: string;
-	description: string | null;
+	description?: string;
 	systemPrompt: string;
-	initialQuestion: string | null;
-	modelId: string | null;
+	initialQuestion?: string;
+	modelId?: string;
 	color: string;
 	isDefault: boolean;
 	documentMode: boolean;

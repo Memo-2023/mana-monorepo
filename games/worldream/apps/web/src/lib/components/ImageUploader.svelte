@@ -90,6 +90,7 @@
 			<div class="mb-4 flex items-center justify-between">
 				<h3 class="text-lg font-medium text-theme-text-primary">Neues Bild generieren</h3>
 				<button
+					aria-label="Close generator"
 					onclick={toggleGenerator}
 					class="text-theme-text-tertiary hover:text-theme-text-primary"
 				>

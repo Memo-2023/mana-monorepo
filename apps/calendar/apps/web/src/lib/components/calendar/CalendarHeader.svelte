@@ -94,11 +94,11 @@
 	}
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <header
 	class="calendar-header"
 	class:compact={settingsStore.headerCompact}
 	oncontextmenu={handleContextMenu}
-	role="banner"
 >
 	<h1 class="header-title">{title}</h1>
 </header>

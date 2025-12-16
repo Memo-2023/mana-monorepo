@@ -166,11 +166,16 @@
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
 		transition:fade={{ duration: 200 }}
 		onclick={onClose}
+		onkeydown={(e) => e.key === 'Enter' && onClose()}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
 	>
 		<div
 			class="relative w-full max-w-3xl rounded-lg bg-theme-surface p-6 shadow-xl"
 			transition:scale={{ duration: 200, start: 0.95 }}
 			onclick={(e) => e.stopPropagation()}
+			role="document"
 		>
 			<!-- Header -->
 			<div class="mb-6 flex items-center justify-between">
@@ -200,6 +205,8 @@
 				ondragleave={handleDragLeave}
 				ondragover={handleDragOver}
 				ondrop={handleDrop}
+				role="region"
+				aria-label="Datei-Upload-Bereich"
 			>
 				<svg
 					class="mx-auto mb-4 h-12 w-12 text-theme-text-secondary"

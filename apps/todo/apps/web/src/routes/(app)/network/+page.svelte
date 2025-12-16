@@ -4,8 +4,8 @@
 	import { networkStore, type SimulationNode } from '$lib/stores/network.svelte';
 	import { NetworkGraph, NetworkControls } from '@manacore/shared-ui';
 
-	let graphComponent: NetworkGraph;
-	let controlsComponent: NetworkControls;
+	let graphComponent = $state<NetworkGraph>();
+	let controlsComponent = $state<NetworkControls>();
 	let graphContainer: HTMLDivElement;
 
 	function handleNodeClick(node: SimulationNode) {
@@ -172,7 +172,11 @@
 		<div class="info-panel">
 			<div class="info-header">
 				<h3>{networkStore.selectedNode.name}</h3>
-				<button class="close-btn" onclick={() => networkStore.selectNode(null)}>
+				<button
+					class="close-btn"
+					onclick={() => networkStore.selectNode(null)}
+					aria-label="Schließen"
+				>
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"

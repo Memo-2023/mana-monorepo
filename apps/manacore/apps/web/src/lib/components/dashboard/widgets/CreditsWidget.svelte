@@ -9,22 +9,22 @@
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
 
-	let state = $state<'loading' | 'success' | 'error'>('loading');
+	let loadingState = $state<'loading' | 'success' | 'error'>('loading');
 	let data = $state<CreditBalance | null>(null);
 	let error = $state<string | null>(null);
 	let retrying = $state(false);
 
 	async function load() {
-		state = 'loading';
+		loadingState = 'loading';
 		retrying = true;
 
 		try {
 			const balance = await creditsService.getBalance();
 			data = balance;
-			state = 'success';
+			loadingState = 'success';
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load credits';
-			state = 'error';
+			loadingState = 'error';
 		} finally {
 			retrying = false;
 		}
@@ -43,9 +43,9 @@
 		{$_('dashboard.widgets.credits.title')}
 	</h3>
 
-	{#if state === 'loading'}
+	{#if loadingState === 'loading'}
 		<WidgetSkeleton lines={3} />
-	{:else if state === 'error'}
+	{:else if loadingState === 'error'}
 		<WidgetError {error} onRetry={load} {retrying} />
 	{:else if data}
 		<div class="space-y-3">

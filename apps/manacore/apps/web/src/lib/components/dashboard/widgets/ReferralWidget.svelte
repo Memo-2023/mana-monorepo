@@ -9,7 +9,7 @@
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
 
-	let state = $state<'loading' | 'success' | 'error'>('loading');
+	let loadingState = $state<'loading' | 'success' | 'error'>('loading');
 	let stats = $state<ReferralStats | null>(null);
 	let code = $state<ReferralCode | null>(null);
 	let error = $state<string | null>(null);
@@ -17,7 +17,7 @@
 	let copied = $state(false);
 
 	async function load() {
-		state = 'loading';
+		loadingState = 'loading';
 		retrying = true;
 
 		try {
@@ -27,10 +27,10 @@
 			]);
 			stats = statsData;
 			code = codeData;
-			state = 'success';
+			loadingState = 'success';
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load referral data';
-			state = 'error';
+			loadingState = 'error';
 		} finally {
 			retrying = false;
 		}
@@ -81,9 +81,9 @@
 		{$_('dashboard.widgets.referral.title')}
 	</h3>
 
-	{#if state === 'loading'}
+	{#if loadingState === 'loading'}
 		<WidgetSkeleton lines={4} />
-	{:else if state === 'error'}
+	{:else if loadingState === 'error'}
 		<WidgetError {error} onRetry={load} {retrying} />
 	{:else if stats && code}
 		<div class="space-y-4">

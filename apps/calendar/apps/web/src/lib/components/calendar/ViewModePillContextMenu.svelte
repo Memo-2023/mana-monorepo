@@ -183,9 +183,10 @@
 
 {#if visible}
 	<!-- Backdrop to block clicks on elements behind -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
 	<div
 		class="context-menu-backdrop"
+		role="presentation"
 		onpointerdown={(e) => {
 			e.preventDefault();
 			e.stopPropagation();
@@ -384,6 +385,7 @@
 	}
 	.custom-input[type='number'] {
 		-moz-appearance: textfield;
+		appearance: textfield;
 	}
 
 	.custom-unit {

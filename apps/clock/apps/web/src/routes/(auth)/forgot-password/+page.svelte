@@ -1,35 +1,28 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { locale } from 'svelte-i18n';
 	import { ForgotPasswordPage } from '@manacore/shared-auth-ui';
+	import { getForgotPasswordTranslations } from '@manacore/shared-i18n';
+	import { ClockLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import '$lib/i18n';
 
-	let error = $state('');
-	let success = $state(false);
-	let loading = $state(false);
+	// Get translations based on current locale
+	const translations = $derived(getForgotPasswordTranslations($locale || 'de'));
 
-	async function handleResetPassword(email: string) {
-		loading = true;
-		error = '';
-		success = false;
-
-		const result = await authStore.resetPassword(email);
-
-		if (result.success) {
-			success = true;
-		} else {
-			error = result.error || 'Passwort-Zurücksetzung fehlgeschlagen';
-		}
-
-		loading = false;
+	async function handleForgotPassword(email: string) {
+		return authStore.resetPassword(email);
 	}
 </script>
 
 <ForgotPasswordPage
 	appName="Clock"
-	appLogo=""
-	{loading}
-	{error}
-	{success}
-	onSubmit={handleResetPassword}
-	loginHref="/login"
+	logo={ClockLogo}
+	primaryColor="#f59e0b"
+	onForgotPassword={handleForgotPassword}
+	{goto}
+	loginPath="/login"
+	lightBackground="#fef3c7"
+	darkBackground="#1f1612"
+	{translations}
 />

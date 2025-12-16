@@ -10,7 +10,7 @@
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
 
-	let state = $state<'loading' | 'success' | 'error'>('loading');
+	let loadingState = $state<'loading' | 'success' | 'error'>('loading');
 	let data = $state<Favorite | null>(null);
 	let error = $state<string | null>(null);
 	let retrying = $state(false);
@@ -21,18 +21,18 @@
 	const zitareUrl = isDev ? APP_URLS.zitare.dev : APP_URLS.zitare.prod;
 
 	async function load() {
-		state = 'loading';
+		loadingState = 'loading';
 		retrying = true;
 
 		const result = await zitareService.getRandomFavorite();
 
 		if (result.data) {
 			data = result.data;
-			state = 'success';
+			loadingState = 'success';
 			retryCount = 0;
 		} else {
 			error = result.error;
-			state = 'error';
+			loadingState = 'error';
 
 			// Don't retry if service is unavailable (network error)
 			const isServiceUnavailable = error?.includes('nicht erreichbar');
@@ -58,7 +58,7 @@
 			<span>=�</span>
 			{$_('dashboard.widgets.zitare.title')}
 		</h3>
-		{#if state === 'success' && data}
+		{#if loadingState === 'success' && data}
 			<button
 				type="button"
 				onclick={loadNewQuote}
@@ -73,9 +73,9 @@
 		{/if}
 	</div>
 
-	{#if state === 'loading'}
+	{#if loadingState === 'loading'}
 		<WidgetSkeleton lines={3} />
-	{:else if state === 'error'}
+	{:else if loadingState === 'error'}
 		<WidgetError {error} onRetry={load} {retrying} />
 	{:else if !data}
 		<div class="py-6 text-center">

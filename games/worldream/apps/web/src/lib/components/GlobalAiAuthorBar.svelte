@@ -570,7 +570,7 @@
 							kind={aiState.currentNode.kind}
 							title={aiState.currentNode.title}
 							description={aiState.currentNode.summary}
-							appearance={aiState.currentNode.content?.appearance}
+							appearance={aiState.currentNode.content?.appearance || undefined}
 							bind:imageUrl
 							bind:prompt={generatedPrompt}
 							onImageGenerated={handleImageGenerated}

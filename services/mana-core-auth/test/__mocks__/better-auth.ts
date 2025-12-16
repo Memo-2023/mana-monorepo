@@ -53,67 +53,75 @@ interface MockInvitation {
 }
 
 // Mock API responses
+// Note: Better Auth API returns data directly (not wrapped in { data: ... })
 const createMockApi = () => ({
 	// Auth endpoints
 	signUpEmail: jest.fn().mockResolvedValue({
-		data: {
-			user: {
-				id: 'mock-user-id',
-				email: 'mock@example.com',
-				name: 'Mock User',
-				role: 'user',
-				createdAt: new Date(),
-			},
-			session: {
-				token: 'mock-session-token',
-				expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-			},
-		},
-	}),
-
-	signInEmail: jest.fn().mockResolvedValue({
-		data: {
-			user: {
-				id: 'mock-user-id',
-				email: 'mock@example.com',
-				name: 'Mock User',
-				role: 'user',
-			},
-			session: {
-				token: 'mock-session-token',
-				expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-			},
-		},
-	}),
-
-	signOut: jest.fn().mockResolvedValue({ success: true }),
-
-	// Organization endpoints
-	createOrganization: jest.fn().mockResolvedValue({
-		data: {
-			id: 'mock-org-id',
-			name: 'Mock Organization',
-			slug: 'mock-organization',
+		user: {
+			id: 'mock-user-id',
+			email: 'mock@example.com',
+			name: 'Mock User',
+			role: 'user',
 			createdAt: new Date(),
 		},
-	}),
-
-	listOrganizations: jest.fn().mockResolvedValue({
-		data: [],
-	}),
-
-	inviteMember: jest.fn().mockResolvedValue({
-		data: {
-			id: 'mock-invitation-id',
-			email: 'invitee@example.com',
-			role: 'member',
-			status: 'pending',
+		session: {
+			id: 'mock-session-id',
+			token: 'mock-session-token',
 			expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 		},
 	}),
 
+	signInEmail: jest.fn().mockResolvedValue({
+		user: {
+			id: 'mock-user-id',
+			email: 'mock@example.com',
+			name: 'Mock User',
+			role: 'user',
+		},
+		session: {
+			id: 'mock-session-id',
+			token: 'mock-session-token',
+			expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+		},
+		token: 'mock-access-token',
+	}),
+
+	signOut: jest.fn().mockResolvedValue({ success: true }),
+
+	getSession: jest.fn().mockResolvedValue({
+		user: {
+			id: 'mock-user-id',
+			email: 'mock@example.com',
+			name: 'Mock User',
+			role: 'user',
+		},
+		session: {
+			id: 'mock-session-id',
+			token: 'mock-session-token',
+			expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+		},
+	}),
+
+	// Organization endpoints
+	createOrganization: jest.fn().mockResolvedValue({
+		id: 'mock-org-id',
+		name: 'Mock Organization',
+		slug: 'mock-organization',
+		createdAt: new Date(),
+	}),
+
+	listOrganizations: jest.fn().mockResolvedValue([]),
+
+	inviteMember: jest.fn().mockResolvedValue({
+		id: 'mock-invitation-id',
+		email: 'invitee@example.com',
+		role: 'member',
+		status: 'pending',
+		expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+	}),
+
 	acceptInvitation: jest.fn().mockResolvedValue({
-		data: {
+		member: {
 			id: 'mock-member-id',
 			organizationId: 'mock-org-id',
 			userId: 'mock-user-id',
@@ -121,23 +129,35 @@ const createMockApi = () => ({
 		},
 	}),
 
-	listOrganizationMembers: jest.fn().mockResolvedValue({
-		data: [],
+	getFullOrganization: jest.fn().mockResolvedValue({
+		id: 'mock-org-id',
+		name: 'Mock Organization',
+		slug: 'mock-organization',
+		members: [],
 	}),
+
+	listOrganizationMembers: jest.fn().mockResolvedValue([]),
 
 	removeMember: jest.fn().mockResolvedValue({ success: true }),
 
 	setActiveOrganization: jest.fn().mockResolvedValue({
-		data: {
-			session: {
-				activeOrganizationId: 'mock-org-id',
-			},
+		userId: 'mock-user-id',
+		activeOrganizationId: 'mock-org-id',
+		session: {
+			id: 'mock-session-id',
+			activeOrganizationId: 'mock-org-id',
 		},
 	}),
 
-	getActiveOrganization: jest.fn().mockResolvedValue({
-		data: null,
-	}),
+	getActiveOrganization: jest.fn().mockResolvedValue(null),
+
+	// JWT methods
+	signJWT: jest.fn().mockResolvedValue({ token: 'mock-jwt-token' }),
+	getJwks: jest.fn().mockResolvedValue({ keys: [] }),
+
+	// Password reset methods
+	requestPasswordReset: jest.fn().mockResolvedValue({ status: true }),
+	resetPassword: jest.fn().mockResolvedValue({ status: true }),
 });
 
 // Mock auth instance

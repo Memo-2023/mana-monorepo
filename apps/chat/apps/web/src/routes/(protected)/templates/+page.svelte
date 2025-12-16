@@ -81,11 +81,11 @@
 			await templatesStore.createTemplate({
 				userId: authStore.user.id,
 				name: data.name!,
-				description: data.description ?? null,
+				description: data.description,
 				systemPrompt: data.systemPrompt!,
-				initialQuestion: data.initialQuestion ?? null,
+				initialQuestion: data.initialQuestion,
 				color: data.color!,
-				modelId: data.modelId ?? null,
+				modelId: data.modelId,
 				isDefault: false,
 				documentMode: data.documentMode ?? false,
 			});

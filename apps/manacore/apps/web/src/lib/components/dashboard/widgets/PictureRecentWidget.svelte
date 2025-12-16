@@ -9,7 +9,7 @@
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
 
-	let state = $state<'loading' | 'success' | 'error'>('loading');
+	let loadingState = $state<'loading' | 'success' | 'error'>('loading');
 	let data = $state<GeneratedImage[]>([]);
 	let error = $state<string | null>(null);
 	let retrying = $state(false);
@@ -18,18 +18,18 @@
 	const MAX_DISPLAY = 6;
 
 	async function load() {
-		state = 'loading';
+		loadingState = 'loading';
 		retrying = true;
 
 		const result = await pictureService.getRecentGenerations(MAX_DISPLAY);
 
 		if (result.data) {
 			data = result.data;
-			state = 'success';
+			loadingState = 'success';
 			retryCount = 0;
 		} else {
 			error = result.error;
-			state = 'error';
+			loadingState = 'error';
 
 			// Don't retry if service is unavailable (network error)
 			const isServiceUnavailable = error?.includes('nicht erreichbar');
@@ -74,9 +74,9 @@
 		</h3>
 	</div>
 
-	{#if state === 'loading'}
+	{#if loadingState === 'loading'}
 		<WidgetSkeleton lines={3} />
-	{:else if state === 'error'}
+	{:else if loadingState === 'error'}
 		<WidgetError {error} onRetry={load} {retrying} />
 	{:else if data.length === 0}
 		<div class="py-6 text-center">

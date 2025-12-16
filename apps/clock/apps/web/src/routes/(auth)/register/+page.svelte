@@ -1,38 +1,29 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { locale } from 'svelte-i18n';
 	import { RegisterPage } from '@manacore/shared-auth-ui';
+	import { getRegisterTranslations } from '@manacore/shared-i18n';
+	import { ClockLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import '$lib/i18n';
 
-	let error = $state('');
-	let loading = $state(false);
+	// Get translations based on current locale
+	const translations = $derived(getRegisterTranslations($locale || 'de'));
 
-	async function handleRegister(email: string, password: string) {
-		loading = true;
-		error = '';
-
-		const result = await authStore.signUp(email, password);
-
-		if (result.success) {
-			if (result.needsVerification) {
-				// Show verification message or redirect to verification page
-				goto('/login?registered=true');
-			} else {
-				goto('/');
-			}
-		} else {
-			error = result.error || 'Registrierung fehlgeschlagen';
-		}
-
-		loading = false;
+	async function handleSignUp(email: string, password: string) {
+		return authStore.signUp(email, password);
 	}
 </script>
 
 <RegisterPage
 	appName="Clock"
-	appLogo=""
-	{loading}
-	{error}
-	onSubmit={handleRegister}
-	loginHref="/login"
+	logo={ClockLogo}
+	primaryColor="#f59e0b"
+	onSignUp={handleSignUp}
+	{goto}
+	successRedirect="/"
+	loginPath="/login"
+	lightBackground="#fef3c7"
+	darkBackground="#1f1612"
+	{translations}
 />

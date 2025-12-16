@@ -74,4 +74,4 @@
 </div>
 
 <!-- Create Deck Modal -->
-<CreateDeckModal bind:open={showCreateModal} />
+<CreateDeckModal visible={showCreateModal} onClose={() => (showCreateModal = false)} />

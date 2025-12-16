@@ -107,6 +107,7 @@
 					{#if editingId === conv.id}
 						<!-- Edit Mode -->
 						<div class="flex items-center gap-1 px-3 py-2 mx-2">
+							<!-- svelte-ignore a11y_autofocus - Intentional for edit mode UX -->
 							<input
 								type="text"
 								bind:value={editTitle}

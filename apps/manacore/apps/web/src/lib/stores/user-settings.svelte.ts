@@ -7,22 +7,21 @@
  * - localStorage caching for offline support
  */
 
-import { browser } from '$app/environment';
 import { createUserSettingsStore } from '@manacore/shared-theme';
 import { authStore } from './auth.svelte';
+import { getAuthUrl } from '$lib/config/runtime';
 
-// Get auth URL dynamically at runtime
-function getAuthUrl(): string {
-	if (browser && typeof window !== 'undefined') {
-		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
-			.__PUBLIC_MANA_CORE_AUTH_URL__;
-		return injectedUrl || 'http://localhost:3001';
-	}
-	return 'http://localhost:3001';
-}
+// Initialize auth URL from runtime config
+let authUrl = 'http://localhost:3001'; // default fallback
+getAuthUrl().then((url) => {
+	authUrl = url;
+});
 
+// Create store with async initialization
 export const userSettings = createUserSettingsStore({
 	appId: 'manacore',
-	authUrl: getAuthUrl(),
+	get authUrl() {
+		return authUrl;
+	},
 	getAccessToken: () => authStore.getAccessToken(),
 });

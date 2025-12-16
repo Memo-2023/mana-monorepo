@@ -445,12 +445,6 @@
 	}
 
 	/* Loading & Empty */
-	.loading {
-		display: flex;
-		justify-content: center;
-		padding: 1.5rem;
-	}
-
 	.spinner {
 		width: 1.25rem;
 		height: 1.25rem;

@@ -76,6 +76,7 @@ export function getUserFromToken(token: string, storedEmail?: string): UserData 
 
 		return {
 			id: payload.sub,
+			sub: payload.sub,
 			email: email || 'user@example.com',
 			role: payload.role || 'user',
 		};

@@ -126,13 +126,13 @@
 		</h3>
 		<div class="mini-trend">
 			{#each miniTrend as day}
-				<div class="trend-bar-container" title="{day.label}: {day.count} Events">
+				<div class="trend-bar-container" title="{day.label || ''}: {day.count} Events">
 					<div
 						class="trend-bar"
 						style="height: {(day.count / maxTrendValue) * 100}%"
 						class:has-events={day.count > 0}
 					></div>
-					<span class="trend-label">{day.label.charAt(0)}</span>
+					<span class="trend-label">{day.label?.charAt(0) || ''}</span>
 				</div>
 			{/each}
 		</div>

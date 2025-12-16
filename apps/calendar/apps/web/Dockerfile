@@ -20,6 +20,7 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 # Copy shared packages needed by calendar web
+COPY packages/better-auth-types ./packages/better-auth-types
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
@@ -47,6 +48,9 @@ COPY apps/calendar/apps/web ./apps/calendar/apps/web
 RUN pnpm install --frozen-lockfile
 
 # Build shared packages that need building
+WORKDIR /app/packages/better-auth-types
+RUN pnpm build || true
+
 WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
 
@@ -70,6 +74,10 @@ COPY --from=builder /app/apps/calendar/apps/web/node_modules ./node_modules
 COPY --from=builder /app/apps/calendar/apps/web/build ./build
 COPY --from=builder /app/apps/calendar/apps/web/package.json ./
 
+# Copy entrypoint script for runtime config generation
+COPY apps/calendar/apps/web/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Expose port
 EXPOSE 5186
 
@@ -81,6 +89,9 @@ ENV HOST=0.0.0.0
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:5186/health || exit 1
+
+# Use entrypoint to generate runtime config
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Run the app
 CMD ["node", "build"]

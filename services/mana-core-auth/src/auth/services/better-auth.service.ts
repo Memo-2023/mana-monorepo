@@ -55,12 +55,12 @@ import type {
 	TokenPayload,
 	OrganizationMember,
 	Organization,
-	BetterAuthAPI,
-	SignUpResponse,
-	SignInResponse,
 	CreateOrganizationResponse,
+	// BetterAuthAPI provides typed methods for all Better Auth operations
+	// Note: AuthAPI (inferred) is also available but doesn't expose all methods
+	BetterAuthAPI,
+	// BetterAuthUser includes the role field (deprecated - use AuthUser when $Infer works)
 	BetterAuthUser,
-	BetterAuthSession,
 } from '../types/better-auth.types';
 import * as jwt from 'jsonwebtoken';
 import { jwtVerify, createRemoteJWKSet } from 'jose';
@@ -89,11 +89,19 @@ export class BetterAuthService {
 	private databaseUrl: string;
 
 	/**
-	 * Typed accessor for organization plugin API methods
-	 * Better Auth's organization plugin adds methods dynamically, so we provide
-	 * a typed accessor to avoid casting throughout the service.
+	 * Typed accessor for Better Auth API methods
+	 *
+	 * Better Auth's plugins add methods dynamically. This accessor provides
+	 * typed access to all API methods including those from organization
+	 * and JWT plugins.
+	 *
+	 * Note: We use BetterAuthAPI interface which is manually maintained.
+	 * In the future, this could be replaced with inferred types once
+	 * Better Auth's $Infer fully supports API type inference.
+	 *
+	 * @see https://www.better-auth.com/docs/concepts/typescript
 	 */
-	private get orgApi(): BetterAuthAPI {
+	private get api(): BetterAuthAPI {
 		return this.auth.api as unknown as BetterAuthAPI;
 	}
 
@@ -245,7 +253,7 @@ export class BetterAuthService {
 		try {
 			// Better Auth organization plugin uses auth.api.inviteMember
 			// See: https://www.better-auth.com/docs/plugins/organization
-			const result = await this.orgApi.inviteMember({
+			const result = await this.api.inviteMember({
 				body: {
 					email: dto.employeeEmail,
 					role: dto.role,
@@ -286,7 +294,7 @@ export class BetterAuthService {
 		try {
 			// Better Auth organization plugin uses auth.api.acceptInvitation
 			// See: https://www.better-auth.com/docs/plugins/organization
-			const result = await this.orgApi.acceptInvitation({
+			const result = await this.api.acceptInvitation({
 				body: { invitationId: dto.invitationId },
 				headers: {
 					authorization: `Bearer ${dto.userToken}`,
@@ -324,7 +332,7 @@ export class BetterAuthService {
 		try {
 			// Better Auth uses getFullOrganization to get org with members
 			// See: https://www.better-auth.com/docs/plugins/organization
-			const result = await this.orgApi.getFullOrganization({
+			const result = await this.api.getFullOrganization({
 				query: { organizationId },
 			});
 
@@ -353,7 +361,7 @@ export class BetterAuthService {
 			// Better Auth organization plugin uses auth.api.removeMember
 			// Accepts memberIdOrEmail parameter
 			// See: https://www.better-auth.com/docs/plugins/organization
-			await this.orgApi.removeMember({
+			await this.api.removeMember({
 				body: {
 					memberIdOrEmail: dto.memberId,
 					organizationId: dto.organizationId,
@@ -388,7 +396,7 @@ export class BetterAuthService {
 		try {
 			// Better Auth organization plugin uses auth.api.setActiveOrganization
 			// See: https://www.better-auth.com/docs/plugins/organization
-			const result = await this.orgApi.setActiveOrganization({
+			const result = await this.api.setActiveOrganization({
 				body: { organizationId: dto.organizationId },
 				headers: {
 					authorization: `Bearer ${dto.userToken}`,
@@ -441,10 +449,8 @@ export class BetterAuthService {
 			// Generate JWT access token using Better Auth's JWT plugin
 			let accessToken = '';
 			try {
-				const api = this.auth.api as any;
-
 				// Use Better Auth's signJWT with the jwks table
-				const jwtResult = await api.signJWT({
+				const jwtResult = await this.api.signJWT({
 					body: {
 						payload: {
 							sub: user.id,
@@ -537,7 +543,7 @@ export class BetterAuthService {
 	async signOut(token: string): Promise<SignOutResult> {
 		try {
 			// Better Auth uses auth.api.signOut
-			await (this.auth.api as any).signOut({
+			await this.api.signOut({
 				headers: {
 					authorization: `Bearer ${token}`,
 				},
@@ -564,7 +570,7 @@ export class BetterAuthService {
 	async getSession(token: string): Promise<GetSessionResult> {
 		try {
 			// Better Auth uses auth.api.getSession
-			const result = await (this.auth.api as any).getSession({
+			const result = await this.api.getSession({
 				headers: {
 					authorization: `Bearer ${token}`,
 				},
@@ -602,7 +608,7 @@ export class BetterAuthService {
 	 */
 	async listOrganizations(token: string): Promise<ListOrganizationsResult> {
 		try {
-			const result = await this.orgApi.listOrganizations({
+			const result = await this.api.listOrganizations({
 				headers: {
 					authorization: `Bearer ${token}`,
 				},
@@ -633,7 +639,7 @@ export class BetterAuthService {
 		token?: string
 	): Promise<Organization & { members?: OrganizationMember[] }> {
 		try {
-			const result = await this.orgApi.getFullOrganization({
+			const result = await this.api.getFullOrganization({
 				query: { organizationId },
 				...(token && {
 					headers: {
@@ -864,9 +870,9 @@ export class BetterAuthService {
 		redirectTo?: string
 	): Promise<{ success: boolean; message: string }> {
 		try {
-			// Better Auth's forgetPassword method
+			// Better Auth's requestPasswordReset method
 			// See: https://www.better-auth.com/docs/authentication/email-password#password-reset
-			await (this.auth.api as any).forgetPassword({
+			await this.api.requestPasswordReset({
 				body: {
 					email,
 					redirectTo,
@@ -906,7 +912,7 @@ export class BetterAuthService {
 		try {
 			// Better Auth's resetPassword method
 			// See: https://www.better-auth.com/docs/authentication/email-password#password-reset
-			await (this.auth.api as any).resetPassword({
+			await this.api.resetPassword({
 				body: {
 					token,
 					newPassword,
@@ -941,12 +947,9 @@ export class BetterAuthService {
 	 */
 	async getJwks(): Promise<{ keys: unknown[] }> {
 		try {
-			// Better Auth exposes JWKS via auth.api
-			const api = this.auth.api as any;
-
 			// Try to get JWKS from Better Auth
-			if (api.getJwks) {
-				const result = await api.getJwks();
+			const result = await this.api.getJwks();
+			if (result) {
 				return result;
 			}
 
