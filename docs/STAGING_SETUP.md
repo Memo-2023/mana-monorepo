@@ -315,6 +315,7 @@ docker compose up -d --force-recreate
 **Solution:**
 1. Add the HTTPS domain to `CORS_ORIGINS` in docker-compose.yml
 2. Recreate backend containers
+3. See [CORS Configuration Guide](./CORS_CONFIGURATION_GUIDE.md) for detailed instructions
 
 ### Caddy SSL Certificate Issues
 
@@ -593,6 +594,7 @@ docker exec <container-name> printenv | grep -E 'CLIENT|CORS'
 
 ## Related Documentation
 
+- [CORS Configuration Guide](./CORS_CONFIGURATION_GUIDE.md) - Solving CORS issues once and for all
 - [Local Development Guide](./LOCAL_DEVELOPMENT.md)
 - [CI/CD Deployment Guide](./DEPLOYMENT.md)
 - [Environment Variables](./ENVIRONMENT_VARIABLES.md)

@@ -1,25 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { createCorsConfig } from '@manacore/shared-nestjs-cors';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 
-	// Enable CORS for mobile and web apps
-	const corsOrigins = process.env.CORS_ORIGINS?.split(',').map((origin) => origin.trim()) || [
-		'http://localhost:3000',
-		'http://localhost:5173',
-		'http://localhost:5177',
-		'http://localhost:8081',
-		'exp://localhost:8081',
-		'http://localhost:3001',
-	];
-
-	app.enableCors({
-		origin: corsOrigins,
-		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-		credentials: true,
-	});
+	// Enable CORS with centralized configuration
+	app.enableCors(
+		createCorsConfig({
+			corsOriginsEnv: process.env.CORS_ORIGINS,
+		})
+	);
 
 	// Enable validation
 	app.useGlobalPipes(

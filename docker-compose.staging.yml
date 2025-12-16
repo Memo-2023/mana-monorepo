@@ -114,6 +114,8 @@ services:
       PORT: 3002
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/chat
       MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      # CORS - Allow chat web app and main web app to access backend
+      CORS_ORIGINS: https://chat.staging.manacore.ai,https://staging.manacore.ai,http://localhost:3000,http://localhost:5173
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
