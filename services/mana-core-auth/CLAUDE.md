@@ -117,8 +117,10 @@ Key points:
 | ------------------------------------------ | ------------------------------------------------ |
 | `src/auth/better-auth.config.ts`           | Better Auth configuration with JWT + Org plugins |
 | `src/auth/services/better-auth.service.ts` | Main auth service - ALL auth logic here          |
+| `src/auth/types/better-auth.types.ts`      | Type definitions (inferred + manual)             |
 | `src/db/schema/auth.schema.ts`             | User, session, account, jwks tables              |
 | `docs/AUTHENTICATION_ARCHITECTURE.md`      | Comprehensive auth documentation                 |
+| `docs/BETTER_AUTH_TYPING_IMPROVEMENTS.md`  | TypeScript typing decisions and limitations      |
 
 ## Environment Variables
 
@@ -156,6 +158,36 @@ Other services call `POST /api/v1/auth/validate` with the JWT. The validation us
 - `sid` (session ID)
 
 For dynamic data (credits, org info), create API endpoints instead.
+
+### Better Auth TypeScript Types
+
+**READ FIRST:** `docs/BETTER_AUTH_TYPING_IMPROVEMENTS.md`
+
+**Prefer inferred types:**
+```typescript
+import type { AuthUser, AuthSession } from '../better-auth.config';
+```
+
+**Known limitation:** `$Infer` doesn't expose plugin API methods. The manual `BetterAuthAPI` interface is required:
+```typescript
+// This is necessary - Better Auth's $Infer doesn't work for API methods
+private get api(): BetterAuthAPI {
+  return this.auth.api as unknown as BetterAuthAPI;
+}
+```
+
+**Adding user fields:**
+```typescript
+// In better-auth.config.ts
+user: {
+  additionalFields: {
+    myField: {
+      type: 'string',
+      input: false,  // SECURITY: prevents client from setting
+    },
+  },
+},
+```
 
 ## Debugging
 
