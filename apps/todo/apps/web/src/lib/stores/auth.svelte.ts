@@ -143,16 +143,16 @@ export const authStore = {
 	},
 
 	/**
-	 * Sign up with email and password
+	 * Sign up with email, password, and name
 	 */
-	async signUp(email: string, password: string) {
+	async signUp(email: string, password: string, name: string) {
 		const authService = getAuthService();
 		if (!authService) {
 			return { success: false, error: 'Auth not available on server', needsVerification: false };
 		}
 
 		try {
-			const result = await authService.signUp(email, password);
+			const result = await authService.signUp(email, password, name);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Signup failed', needsVerification: false };

@@ -10,8 +10,8 @@
 
 	const translations = $derived(getRegisterTranslations($locale || 'de'));
 
-	async function handleSignUp(email: string, password: string) {
-		return authStore.signUp(email, password);
+	async function handleSignUp(email: string, password: string, name: string) {
+		return authStore.signUp(email, password, name);
 	}
 </script>
 

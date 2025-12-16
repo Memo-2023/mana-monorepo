@@ -115,7 +115,7 @@ export const authStore = {
 		}
 	},
 
-	async signUp(email: string, password: string): Promise<AuthResult> {
+	async signUp(email: string, password: string, name: string): Promise<AuthResult> {
 		const authService = await getAuthService();
 		if (!authService) {
 			return { success: false, error: 'Auth service not available' };
@@ -123,7 +123,7 @@ export const authStore = {
 
 		try {
 			loading = true;
-			const result = await authService.signUp(email, password);
+			const result = await authService.signUp(email, password, name);
 
 			if (result.success) {
 				// Auto-login after signup

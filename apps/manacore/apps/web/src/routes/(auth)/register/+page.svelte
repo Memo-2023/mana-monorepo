@@ -9,8 +9,13 @@
 	// Get referral code from URL if present
 	let initialReferralCode = $derived($page.url.searchParams.get('ref') || '');
 
-	async function handleSignUp(email: string, password: string, referralCode?: string) {
-		return authStore.signUp(email, password, referralCode);
+	async function handleSignUp(
+		email: string,
+		password: string,
+		name: string,
+		referralCode?: string
+	) {
+		return authStore.signUp(email, password, name, referralCode);
 	}
 
 	async function handleValidateReferralCode(code: string) {

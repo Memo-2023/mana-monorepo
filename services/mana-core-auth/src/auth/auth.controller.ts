@@ -85,7 +85,7 @@ export class AuthController {
 		return this.betterAuthService.registerB2C({
 			email: registerDto.email,
 			password: registerDto.password,
-			name: registerDto.name || '',
+			name: registerDto.name,
 		});
 	}
 

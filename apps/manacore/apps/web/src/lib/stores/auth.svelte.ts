@@ -116,19 +116,20 @@ export const authStore = {
 	},
 
 	/**
-	 * Sign up with email and password
+	 * Sign up with email, password and name
 	 * @param email User email
 	 * @param password User password
+	 * @param name User's display name
 	 * @param referralCode Optional referral code for bonus credits
 	 */
-	async signUp(email: string, password: string, referralCode?: string) {
+	async signUp(email: string, password: string, name: string, referralCode?: string) {
 		const authService = await getAuthService();
 		if (!authService) {
 			return { success: false, error: 'Auth not available on server', needsVerification: false };
 		}
 
 		try {
-			const result = await authService.signUp(email, password, referralCode);
+			const result = await authService.signUp(email, password, name, referralCode);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Signup failed', needsVerification: false };

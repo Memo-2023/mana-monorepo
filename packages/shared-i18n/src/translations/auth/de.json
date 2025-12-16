@@ -25,6 +25,9 @@
 	},
 	"register": {
 		"title": "Konto erstellen",
+		"namePlaceholder": "Name",
+		"nameRequired": "Name ist erforderlich",
+		"nameTooShort": "Name muss mindestens 2 Zeichen lang sein",
 		"emailPlaceholder": "E-Mail",
 		"passwordPlaceholder": "Passwort",
 		"confirmPasswordPlaceholder": "Passwort bestätigen",

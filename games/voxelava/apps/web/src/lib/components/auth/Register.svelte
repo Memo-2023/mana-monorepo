@@ -6,6 +6,7 @@
 	const dispatch = createEventDispatcher();
 
 	// Formular-Zustände
+	let name = '';
 	let email = '';
 	let password = '';
 	let confirmPassword = '';
@@ -16,8 +17,13 @@
 	// Formular absenden
 	async function handleSubmit() {
 		// Validierung
-		if (!email || !password || !confirmPassword) {
+		if (!name || !email || !password || !confirmPassword) {
 			errorMessage = 'Bitte fülle alle Felder aus.';
+			return;
+		}
+
+		if (name.length < 2) {
+			errorMessage = 'Der Name muss mindestens 2 Zeichen lang sein.';
 			return;
 		}
 
@@ -35,12 +41,13 @@
 			isLoading = true;
 			errorMessage = '';
 
-			const success = await AuthService.register(email, password);
+			const success = await AuthService.register(email, password, name);
 
 			if (success) {
 				successMessage =
 					'Registrierung erfolgreich! Bitte überprüfe deine E-Mails, um dein Konto zu bestätigen.';
 				// Formular zurücksetzen
+				name = '';
 				email = '';
 				password = '';
 				confirmPassword = '';
@@ -83,6 +90,19 @@
 	{/if}
 
 	<form on:submit|preventDefault={handleSubmit}>
+		<div class="form-group">
+			<label for="name">Name</label>
+			<input
+				type="text"
+				id="name"
+				bind:value={name}
+				placeholder="Dein Name"
+				disabled={isLoading}
+				required
+				minlength="2"
+			/>
+		</div>
+
 		<div class="form-group">
 			<label for="email">E-Mail</label>
 			<input
