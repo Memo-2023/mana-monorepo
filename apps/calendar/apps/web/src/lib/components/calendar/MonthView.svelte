@@ -7,6 +7,7 @@
 	import { todosStore } from '$lib/stores/todos.svelte';
 	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
+	import { heatmapStore } from '$lib/stores/heatmap.svelte';
 	import TodoDayCell from './TodoDayCell.svelte';
 	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
 	import { useBirthdayPopover } from '$lib/composables';
@@ -297,11 +298,17 @@
 			<div class="week-row">
 				{#each week as day}
 					{@const isDropTarget = isDragging && dragTargetDay && isSameDay(day, dragTargetDay)}
+					{@const heatmapLevel = heatmapStore.enabled ? heatmapStore.getLevel(day) : 0}
 					<div
 						class="day-cell"
 						class:other-month={!isSameMonth(day, effectiveDate)}
 						class:today={isToday(day)}
 						class:drop-target={isDropTarget}
+						class:heatmap-1={heatmapLevel === 1}
+						class:heatmap-2={heatmapLevel === 2}
+						class:heatmap-3={heatmapLevel === 3}
+						class:heatmap-4={heatmapLevel === 4}
+						class:heatmap-5={heatmapLevel === 5}
 						use:bindDayCellRef={day}
 						onclick={(e) => handleDayClick(day, e)}
 						onkeydown={(e) => e.key === 'Enter' && handleDayClick(day, e as unknown as MouseEvent)}
@@ -311,9 +318,14 @@
 							values: { date: format(day, 'EEEE, d. MMMM', { locale: de }) },
 						})}
 					>
-						<span class="day-number" class:today={isToday(day)}>
-							{format(day, 'd')}
-						</span>
+						<div class="day-header">
+							<span class="day-number" class:today={isToday(day)}>
+								{format(day, 'd')}
+							</span>
+							{#if heatmapStore.enabled && heatmapLevel > 0}
+								<span class="heatmap-count">{heatmapStore.getDisplayValue(day)}</span>
+							{/if}
+						</div>
 
 						<!-- Todos for this day -->
 						{#if todosStore.serviceAvailable}
@@ -473,6 +485,13 @@
 		opacity: 0.5;
 	}
 
+	.day-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 0.25rem;
+	}
+
 	.day-number {
 		font-size: 0.875rem;
 		font-weight: 500;
@@ -482,12 +501,53 @@
 		align-items: center;
 		justify-content: center;
 		border-radius: var(--radius-full);
-		margin-bottom: 0.25rem;
 	}
 
 	.day-number.today {
 		background: hsl(var(--color-primary));
 		color: hsl(var(--color-primary-foreground));
+	}
+
+	.heatmap-count {
+		font-size: 0.65rem;
+		font-weight: 600;
+		color: hsl(var(--color-muted-foreground));
+		padding: 2px 6px;
+		background: hsl(var(--color-muted) / 0.5);
+		border-radius: var(--radius-sm);
+	}
+
+	/* Heatmap level colors */
+	.day-cell.heatmap-1 {
+		background-color: hsl(var(--color-primary) / 0.1);
+	}
+	.day-cell.heatmap-2 {
+		background-color: hsl(var(--color-primary) / 0.2);
+	}
+	.day-cell.heatmap-3 {
+		background-color: hsl(var(--color-primary) / 0.35);
+	}
+	.day-cell.heatmap-4 {
+		background-color: hsl(var(--color-primary) / 0.5);
+	}
+	.day-cell.heatmap-5 {
+		background-color: hsl(var(--color-primary) / 0.65);
+	}
+
+	/* Heatmap hover states - slightly lighter on hover */
+	.day-cell.heatmap-1:hover,
+	.day-cell.heatmap-2:hover,
+	.day-cell.heatmap-3:hover,
+	.day-cell.heatmap-4:hover,
+	.day-cell.heatmap-5:hover {
+		filter: brightness(1.05);
+	}
+
+	/* Heatmap count styling for higher levels (better contrast) */
+	.day-cell.heatmap-4 .heatmap-count,
+	.day-cell.heatmap-5 .heatmap-count {
+		background: hsl(var(--color-background) / 0.8);
+		color: hsl(var(--color-foreground));
 	}
 
 	.day-events {

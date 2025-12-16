@@ -10,12 +10,10 @@
 	let graphContainer: HTMLDivElement;
 
 	function handleNodeClick(node: SimulationNode) {
-		// Select node (highlight connections)
 		networkStore.selectNode(node.id);
 	}
 
 	function handleNodeDoubleClick(node: SimulationNode) {
-		// Navigate to event detail page
 		goto(`/event/${node.id}`);
 	}
 
@@ -95,11 +93,7 @@
 	});
 </script>
 
-<svelte:head>
-	<title>Netzwerk - Kalender</title>
-</svelte:head>
-
-<div class="network-page">
+<div class="network-view">
 	<!-- Controls (floating) -->
 	<div class="controls-wrapper">
 		<NetworkControls
@@ -175,7 +169,7 @@
 				<button
 					class="close-btn"
 					onclick={() => networkStore.selectNode(null)}
-					aria-label="Schließen"
+					aria-label="Schlie\u00dfen"
 				>
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -213,17 +207,21 @@
 </div>
 
 <style>
-	.network-page {
-		position: fixed;
-		inset: 0;
+	.network-view {
+		position: relative;
+		width: 100%;
+		height: 100%;
 		display: flex;
 		flex-direction: column;
+		background: hsl(var(--color-background));
+		border-radius: var(--radius-lg);
+		overflow: hidden;
 	}
 
 	/* Floating Controls */
 	.controls-wrapper {
 		position: absolute;
-		top: 5rem; /* Below the nav */
+		top: 1rem;
 		left: 1rem;
 		z-index: 10;
 		max-width: calc(100% - 2rem);
@@ -232,7 +230,7 @@
 	/* Error Banner */
 	.error-banner {
 		position: absolute;
-		top: 5rem;
+		top: 1rem;
 		left: 50%;
 		transform: translateX(-50%);
 		z-index: 10;
@@ -247,7 +245,7 @@
 		backdrop-filter: blur(8px);
 	}
 
-	/* Graph Container - Full screen */
+	/* Graph Container - Full size within parent */
 	.graph-container {
 		flex: 1;
 		width: 100%;
@@ -284,8 +282,8 @@
 
 	/* Info Panel */
 	.info-panel {
-		position: fixed;
-		top: 5rem;
+		position: absolute;
+		top: 1rem;
 		right: 1rem;
 		bottom: 1rem;
 		width: 320px;
@@ -392,7 +390,7 @@
 			right: 0;
 			bottom: 0;
 			height: auto;
-			max-height: 50vh;
+			max-height: 50%;
 			border-radius: 1rem 1rem 0 0;
 			animation: slideInUp 0.2s ease-out;
 		}
@@ -411,8 +409,7 @@
 
 	@media (max-width: 768px) {
 		.controls-wrapper {
-			top: 6rem;
-			width: calc(100% - 1rem);
+			width: calc(100% - 2rem);
 			max-width: none;
 		}
 	}

@@ -2,6 +2,7 @@
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { heatmapStore, type HeatmapLevel } from '$lib/stores/heatmap.svelte';
 	import {
 		format,
 		startOfMonth,
@@ -92,6 +93,12 @@
 	function getEventCount(day: Date): number {
 		const key = format(day, 'yyyy-MM-dd');
 		return eventCountsByDay.get(key) || 0;
+	}
+
+	// Get heatmap level for a day (when heatmap is enabled)
+	function getHeatmapLevel(day: Date): HeatmapLevel {
+		if (!heatmapStore.enabled) return 0;
+		return heatmapStore.getLevel(day);
 	}
 
 	// Event handlers

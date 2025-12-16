@@ -7,7 +7,9 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { viewModeStore } from '$lib/stores/view-mode.svelte';
 	import ViewCarousel from '$lib/components/calendar/ViewCarousel.svelte';
+	import NetworkView from '$lib/components/calendar/NetworkView.svelte';
 	import TodoSidebarSection from '$lib/components/calendar/TodoSidebarSection.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
 	import { CalendarViewSkeleton } from '$lib/components/skeletons';
@@ -97,63 +99,79 @@
 	<title>{$_('app.name')}</title>
 </svelte:head>
 
-<div class="calendar-layout">
-	<!-- Desktop: Left Sidebar -->
-	<aside class="calendar-sidebar desktop-only" class:collapsed={settingsStore.sidebarCollapsed}>
-		<!-- Collapse button at top -->
-		<button
-			class="sidebar-collapse-btn"
-			onclick={() => settingsStore.toggleSidebar()}
-			title={$_('calendar.hideSidebar')}
-		>
-			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-				/>
-			</svg>
-		</button>
-
-		<TodoSidebarSection maxItems={5} />
-	</aside>
-
-	<!-- Main Calendar Area -->
-	<div class="calendar-main" class:expanded={settingsStore.sidebarCollapsed}>
-		<div class="calendar-content">
-			{#if !initialized}
-				<CalendarViewSkeleton />
-			{:else}
-				<ViewCarousel onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
-			{/if}
-		</div>
+{#if viewModeStore.mode === 'network'}
+	<!-- Network View Mode -->
+	<div class="network-layout">
+		<NetworkView />
 	</div>
+{:else}
+	<!-- Calendar View Mode -->
+	<div class="calendar-layout">
+		<!-- Desktop: Left Sidebar -->
+		<aside class="calendar-sidebar desktop-only" class:collapsed={settingsStore.sidebarCollapsed}>
+			<!-- Collapse button at top -->
+			<button
+				class="sidebar-collapse-btn"
+				onclick={() => settingsStore.toggleSidebar()}
+				title={$_('calendar.hideSidebar')}
+			>
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+					/>
+				</svg>
+			</button>
 
-	<!-- Mobile: Bottom Todo Section -->
-	<aside
-		class="calendar-sidebar-mobile mobile-only"
-		class:collapsed={settingsStore.sidebarCollapsed}
-	>
-		<TodoSidebarSection maxItems={3} />
-	</aside>
+			<TodoSidebarSection maxItems={5} />
+		</aside>
 
-	<!-- Quick Event Overlay (for both create and edit) -->
-	{#if showQuickOverlay}
-		{#key overlayKey}
-			<QuickEventOverlay
-				startTime={editingEvent ? undefined : quickCreateDate}
-				event={editingEvent ?? undefined}
-				onClose={handleQuickOverlayClose}
-				onCreated={handleEventCreated}
-				onUpdated={handleEventUpdated}
-				onDeleted={handleEventDeleted}
-			/>
-		{/key}
-	{/if}
-</div>
+		<!-- Main Calendar Area -->
+		<div class="calendar-main" class:expanded={settingsStore.sidebarCollapsed}>
+			<div class="calendar-content">
+				{#if !initialized}
+					<CalendarViewSkeleton />
+				{:else}
+					<ViewCarousel onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
+				{/if}
+			</div>
+		</div>
+
+		<!-- Mobile: Bottom Todo Section -->
+		<aside
+			class="calendar-sidebar-mobile mobile-only"
+			class:collapsed={settingsStore.sidebarCollapsed}
+		>
+			<TodoSidebarSection maxItems={3} />
+		</aside>
+
+		<!-- Quick Event Overlay (for both create and edit) -->
+		{#if showQuickOverlay}
+			{#key overlayKey}
+				<QuickEventOverlay
+					startTime={editingEvent ? undefined : quickCreateDate}
+					event={editingEvent ?? undefined}
+					onClose={handleQuickOverlayClose}
+					onCreated={handleEventCreated}
+					onUpdated={handleEventUpdated}
+					onDeleted={handleEventDeleted}
+				/>
+			{/key}
+		{/if}
+	</div>
+{/if}
 
 <style>
+	/* Network Layout - Full height without sidebar */
+	.network-layout {
+		width: 100%;
+		height: 100%;
+		flex: 1;
+		min-height: 0;
+	}
+
 	.calendar-layout {
 		display: flex;
 		gap: 1.5rem;
