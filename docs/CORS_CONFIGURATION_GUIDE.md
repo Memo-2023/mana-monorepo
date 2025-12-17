@@ -36,6 +36,7 @@ packages/shared-nestjs-cors/
 
 ✅ **Automatic development origins** - Works in dev without configuration
 ✅ **Staging/production via env var** - `CORS_ORIGINS` for deployed environments
+✅ **Cross-app communication bundle** - Enable all ManaCore apps with one flag
 ✅ **Mobile app support** - Includes `exp://` and custom protocols
 ✅ **Prevents duplicates** - Deduplicates origin lists
 ✅ **Consistent security** - Same methods, headers, credentials across all apps
@@ -54,6 +55,10 @@ packages/shared-nestjs-cors/
 ```
 
 ### 2. Update main.ts
+
+#### Option A: Basic Setup (Single App)
+
+For apps that only need to be accessed by their own frontend:
 
 ```typescript
 // apps/{app}/apps/backend/src/main.ts
@@ -76,6 +81,38 @@ async function bootstrap() {
 bootstrap();
 ```
 
+#### Option B: Cross-App Communication (Recommended for Shared Services)
+
+For backends that need to communicate with multiple ManaCore apps:
+
+```typescript
+// apps/{app}/apps/backend/src/main.ts
+import { NestFactory } from '@nestjs/core';
+import { createCorsConfig } from '@manacore/shared-nestjs-cors';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // Enable CORS with ALL ManaCore apps (staging + production)
+  app.enableCors(
+    createCorsConfig({
+      corsOriginsEnv: process.env.CORS_ORIGINS,
+      includeAllManaApps: true,  // 🎯 Enables cross-app communication
+    })
+  );
+
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+**When to use `includeAllManaApps: true`:**
+- ✅ Shared services (auth, notifications, file storage)
+- ✅ APIs that need to be called from multiple apps
+- ✅ Apps with cross-app navigation or embedded widgets
+- ❌ Simple single-purpose apps with dedicated frontend (saves bandwidth)
+
 ### 3. Configure Staging Environment
 
 ```yaml
@@ -87,6 +124,8 @@ chat-backend:
 ```
 
 ## Default Origins
+
+### Development Origins
 
 The utility automatically includes these development origins:
 
@@ -102,6 +141,104 @@ The utility automatically includes these development origins:
   'exp://localhost:8081',     // Expo mobile (exp:// protocol)
 ]
 ```
+
+### ManaCore App Bundles
+
+When using `includeAllManaApps: true`, the following origin bundles are automatically included:
+
+#### Staging Bundle (`MANACORE_STAGING_ORIGINS`)
+
+```typescript
+[
+  'https://staging.manacore.ai',           // Main web
+  'https://auth.staging.manacore.ai',      // Auth service
+  'https://chat.staging.manacore.ai',      // Chat app
+  'https://chat-api.staging.manacore.ai',
+  'https://picture.staging.manacore.ai',   // Picture app
+  'https://picture-api.staging.manacore.ai',
+  'https://zitare.staging.manacore.ai',    // Zitare app
+  'https://zitare-api.staging.manacore.ai',
+  'https://contacts.staging.manacore.ai',  // Contacts app
+  'https://contacts-api.staging.manacore.ai',
+  'https://calendar.staging.manacore.ai',  // Calendar app
+  'https://calendar-api.staging.manacore.ai',
+  'https://clock.staging.manacore.ai',     // Clock app
+  'https://clock-api.staging.manacore.ai',
+  'https://todo.staging.manacore.ai',      // Todo app
+  'https://todo-api.staging.manacore.ai',
+]
+```
+
+#### Production Bundle (`MANACORE_PRODUCTION_ORIGINS`)
+
+```typescript
+[
+  'https://manacore.ai',           // Main web
+  'https://auth.manacore.ai',      // Auth service
+  'https://chat.manacore.ai',      // Chat app
+  'https://chat-api.manacore.ai',
+  'https://picture.manacore.ai',   // Picture app
+  'https://picture-api.manacore.ai',
+  // ... all other production apps
+]
+```
+
+#### Combined Bundle (`MANACORE_ALL_APP_ORIGINS`)
+
+When `includeAllManaApps: true`, both staging and production bundles are included automatically.
+
+**Benefits:**
+- 🎯 One-line configuration enables all cross-app communication
+- 🔄 Automatically stays in sync as new apps are added
+- 🚀 No need to manually update CORS_ORIGINS for each app
+- ✅ Works in both staging and production environments
+
+## Cross-App Communication
+
+### Problem: Apps Need to Call Each Other
+
+In a microservices architecture, apps often need to communicate:
+- **Chat app** fetches user profiles from **Contacts API**
+- **Calendar app** sends notifications via **Notifications service**
+- **Picture app** uses **Auth service** for authentication
+
+Without proper CORS setup, each backend would need to manually list every other app:
+
+```yaml
+# ❌ OLD WAY: Manually list every app (tedious and error-prone)
+chat-backend:
+  environment:
+    CORS_ORIGINS: https://chat.staging.manacore.ai,https://contacts.staging.manacore.ai,https://calendar.staging.manacore.ai,https://picture.staging.manacore.ai,https://zitare.staging.manacore.ai,...
+```
+
+### Solution: Use `includeAllManaApps: true`
+
+Enable cross-app communication with one flag:
+
+```typescript
+// ✅ NEW WAY: One flag enables all ManaCore apps
+app.enableCors(
+  createCorsConfig({
+    corsOriginsEnv: process.env.CORS_ORIGINS,
+    includeAllManaApps: true,  // 🎯 Automatically includes all apps
+  })
+);
+```
+
+This automatically allows requests from:
+- All staging apps (`*.staging.manacore.ai`)
+- All production apps (`*.manacore.ai`)
+- All development ports (`localhost:*`)
+
+### When to Use Cross-App Bundle
+
+| Use Case | `includeAllManaApps` |
+|----------|----------------------|
+| **Shared services** (Auth, Notifications, Storage) | ✅ `true` |
+| **Public APIs** called by multiple apps | ✅ `true` |
+| **Apps with embedded widgets** from other apps | ✅ `true` |
+| **Simple apps** with dedicated frontend only | ❌ `false` |
+| **Third-party integrations** (webhooks) | ❌ `false` (use `additionalOrigins`) |
 
 ## Deployment Checklist
 

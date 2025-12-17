@@ -17,6 +17,12 @@ export interface CorsConfigOptions {
 	 * Additional origins to always allow (e.g., for mobile apps).
 	 */
 	additionalOrigins?: string[];
+
+	/**
+	 * Include all ManaCore app origins for cross-app communication.
+	 * When true, automatically includes all staging and production URLs.
+	 */
+	includeAllManaApps?: boolean;
 }
 
 /**
@@ -50,6 +56,91 @@ const DEFAULT_DEV_ORIGINS = [
 ];
 
 /**
+ * All ManaCore staging app origins.
+ * Use this bundle to allow cross-app communication in staging environment.
+ */
+export const MANACORE_STAGING_ORIGINS = [
+	// Main apps
+	'https://staging.manacore.ai', // Main web
+	'https://auth.staging.manacore.ai', // Auth service
+
+	// Chat app
+	'https://chat.staging.manacore.ai',
+	'https://chat-api.staging.manacore.ai',
+
+	// Picture app
+	'https://picture.staging.manacore.ai',
+	'https://picture-api.staging.manacore.ai',
+
+	// Zitare app
+	'https://zitare.staging.manacore.ai',
+	'https://zitare-api.staging.manacore.ai',
+
+	// Contacts app
+	'https://contacts.staging.manacore.ai',
+	'https://contacts-api.staging.manacore.ai',
+
+	// Calendar app
+	'https://calendar.staging.manacore.ai',
+	'https://calendar-api.staging.manacore.ai',
+
+	// Clock app
+	'https://clock.staging.manacore.ai',
+	'https://clock-api.staging.manacore.ai',
+
+	// Todo app
+	'https://todo.staging.manacore.ai',
+	'https://todo-api.staging.manacore.ai',
+];
+
+/**
+ * All ManaCore production app origins.
+ * Use this bundle to allow cross-app communication in production environment.
+ */
+export const MANACORE_PRODUCTION_ORIGINS = [
+	// Main apps
+	'https://manacore.ai', // Main web
+	'https://auth.manacore.ai', // Auth service
+
+	// Chat app
+	'https://chat.manacore.ai',
+	'https://chat-api.manacore.ai',
+
+	// Picture app
+	'https://picture.manacore.ai',
+	'https://picture-api.manacore.ai',
+
+	// Zitare app
+	'https://zitare.manacore.ai',
+	'https://zitare-api.manacore.ai',
+
+	// Contacts app
+	'https://contacts.manacore.ai',
+	'https://contacts-api.manacore.ai',
+
+	// Calendar app
+	'https://calendar.manacore.ai',
+	'https://calendar-api.manacore.ai',
+
+	// Clock app
+	'https://clock.manacore.ai',
+	'https://clock-api.manacore.ai',
+
+	// Todo app
+	'https://todo.manacore.ai',
+	'https://todo-api.manacore.ai',
+];
+
+/**
+ * Combined bundle of all ManaCore app origins (staging + production).
+ * Use this for maximum cross-app compatibility across all environments.
+ */
+export const MANACORE_ALL_APP_ORIGINS = [
+	...MANACORE_STAGING_ORIGINS,
+	...MANACORE_PRODUCTION_ORIGINS,
+];
+
+/**
  * Creates a standardized CORS configuration for NestJS apps.
  *
  * This utility provides a consistent CORS setup across all ManaCore backends,
@@ -65,6 +156,14 @@ const DEFAULT_DEV_ORIGINS = [
  * const app = await NestFactory.create(AppModule);
  * app.enableCors(createCorsConfig({
  *   corsOriginsEnv: process.env.CORS_ORIGINS
+ * }));
+ * ```
+ *
+ * ### With cross-app communication bundle (enables all ManaCore apps)
+ * ```typescript
+ * app.enableCors(createCorsConfig({
+ *   corsOriginsEnv: process.env.CORS_ORIGINS,
+ *   includeAllManaApps: true  // Includes all staging + production app URLs
  * }));
  * ```
  *
@@ -93,11 +192,21 @@ const DEFAULT_DEV_ORIGINS = [
  *
  * ## Staging/Production Setup
  *
+ * ### Simple setup (no cross-app communication needed)
  * In docker-compose.staging.yml:
  * ```yaml
  * chat-backend:
  *   environment:
  *     CORS_ORIGINS: https://chat.staging.manacore.ai,https://chat-api.staging.manacore.ai
+ * ```
+ *
+ * ### Cross-app setup (allow all ManaCore apps to communicate)
+ * ```typescript
+ * // main.ts
+ * app.enableCors(createCorsConfig({
+ *   corsOriginsEnv: process.env.CORS_ORIGINS,
+ *   includeAllManaApps: true  // No need to list each app individually
+ * }));
  * ```
  *
  * @param options - Configuration options
@@ -108,6 +217,7 @@ export function createCorsConfig(options: CorsConfigOptions = {}): CorsOptions {
 		corsOriginsEnv,
 		developmentOrigins = DEFAULT_DEV_ORIGINS,
 		additionalOrigins = [],
+		includeAllManaApps = false,
 	} = options;
 
 	// Parse CORS_ORIGINS from environment
@@ -119,7 +229,12 @@ export function createCorsConfig(options: CorsConfigOptions = {}): CorsOptions {
 		: [];
 
 	// Combine all origins
-	const allOrigins = [...envOrigins, ...developmentOrigins, ...additionalOrigins];
+	const allOrigins = [
+		...envOrigins,
+		...developmentOrigins,
+		...additionalOrigins,
+		...(includeAllManaApps ? MANACORE_ALL_APP_ORIGINS : []),
+	];
 
 	// Remove duplicates
 	const uniqueOrigins = Array.from(new Set(allOrigins));
@@ -145,6 +260,7 @@ export function createCorsConfigWithCallback(options: CorsConfigOptions = {}): C
 		corsOriginsEnv,
 		developmentOrigins = DEFAULT_DEV_ORIGINS,
 		additionalOrigins = [],
+		includeAllManaApps = false,
 	} = options;
 
 	const envOrigins = corsOriginsEnv
@@ -154,7 +270,12 @@ export function createCorsConfigWithCallback(options: CorsConfigOptions = {}): C
 				.filter(Boolean)
 		: [];
 
-	const allOrigins = [...envOrigins, ...developmentOrigins, ...additionalOrigins];
+	const allOrigins = [
+		...envOrigins,
+		...developmentOrigins,
+		...additionalOrigins,
+		...(includeAllManaApps ? MANACORE_ALL_APP_ORIGINS : []),
+	];
 	const uniqueOrigins = Array.from(new Set(allOrigins));
 
 	return {

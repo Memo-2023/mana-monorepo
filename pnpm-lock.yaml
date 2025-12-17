@@ -4507,6 +4507,9 @@ importers:
       '@google/generative-ai':
         specifier: ^0.24.1
         version: 0.24.1
+      '@manacore/shared-nestjs-cors':
+        specifier: workspace:*
+        version: link:../../packages/shared-nestjs-cors
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.20(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
