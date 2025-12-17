@@ -2,10 +2,11 @@ import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-option
 
 export interface CorsConfigOptions {
 	/**
-	 * Comma-separated list of allowed origins from environment variable.
+	 * Allowed origins from environment variable.
+	 * Can be a comma-separated string or an array of origins.
 	 * If not provided, uses development defaults.
 	 */
-	corsOriginsEnv?: string;
+	corsOriginsEnv?: string | string[];
 
 	/**
 	 * Default origins for development. Only used if corsOriginsEnv is not provided.
@@ -220,12 +221,14 @@ export function createCorsConfig(options: CorsConfigOptions = {}): CorsOptions {
 		includeAllManaApps = false,
 	} = options;
 
-	// Parse CORS_ORIGINS from environment
+	// Parse CORS_ORIGINS from environment (handles both string and array)
 	const envOrigins = corsOriginsEnv
-		? corsOriginsEnv
-				.split(',')
-				.map((origin) => origin.trim())
-				.filter(Boolean)
+		? Array.isArray(corsOriginsEnv)
+			? corsOriginsEnv.map((origin) => origin.trim()).filter(Boolean)
+			: corsOriginsEnv
+					.split(',')
+					.map((origin) => origin.trim())
+					.filter(Boolean)
 		: [];
 
 	// Combine all origins
@@ -263,11 +266,14 @@ export function createCorsConfigWithCallback(options: CorsConfigOptions = {}): C
 		includeAllManaApps = false,
 	} = options;
 
+	// Parse CORS_ORIGINS from environment (handles both string and array)
 	const envOrigins = corsOriginsEnv
-		? corsOriginsEnv
-				.split(',')
-				.map((origin) => origin.trim())
-				.filter(Boolean)
+		? Array.isArray(corsOriginsEnv)
+			? corsOriginsEnv.map((origin) => origin.trim()).filter(Boolean)
+			: corsOriginsEnv
+					.split(',')
+					.map((origin) => origin.trim())
+					.filter(Boolean)
 		: [];
 
 	const allOrigins = [
