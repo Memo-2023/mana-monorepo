@@ -1,36 +1,18 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { locale } from 'svelte-i18n';
-	import { LoginPage, setGoogleClientId } from '@manacore/shared-auth-ui';
+	import { LoginPage } from '@manacore/shared-auth-ui';
 	import { getLoginTranslations } from '@manacore/shared-i18n';
 	import PictureLogo from '$lib/components/branding/PictureLogo.svelte';
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { onMount } from 'svelte';
-	import { PUBLIC_GOOGLE_CLIENT_ID, PUBLIC_APPLE_CLIENT_ID } from '$env/static/public';
 
 	// Get translations based on current locale
 	const translations = $derived(getLoginTranslations($locale || 'de'));
 
-	onMount(() => {
-		if (PUBLIC_GOOGLE_CLIENT_ID) {
-			setGoogleClientId(PUBLIC_GOOGLE_CLIENT_ID);
-		}
-	});
-
 	async function handleSignIn(email: string, password: string) {
 		return authStore.signIn(email, password);
-	}
-
-	async function handleSignInWithGoogle() {
-		// TODO: Implement OAuth with Mana Core Auth when ready
-		return { success: false, error: 'Google Sign-In not yet implemented' };
-	}
-
-	async function handleSignInWithApple() {
-		// TODO: Implement OAuth with Mana Core Auth when ready
-		return { success: false, error: 'Apple Sign-In not yet implemented' };
 	}
 </script>
 
@@ -43,11 +25,9 @@
 	logo={PictureLogo}
 	primaryColor="#3b82f6"
 	onSignIn={handleSignIn}
-	onSignInWithGoogle={PUBLIC_GOOGLE_CLIENT_ID ? handleSignInWithGoogle : undefined}
-	onSignInWithApple={PUBLIC_APPLE_CLIENT_ID ? handleSignInWithApple : undefined}
 	{goto}
-	enableGoogle={!!PUBLIC_GOOGLE_CLIENT_ID}
-	enableApple={!!PUBLIC_APPLE_CLIENT_ID}
+	enableGoogle={false}
+	enableApple={false}
 	successRedirect="/app/gallery"
 	registerPath="/auth/signup"
 	forgotPasswordPath="/auth/forgot-password"

@@ -174,6 +174,26 @@ export const authStore = {
 		}
 	},
 
+	async confirmResetPassword(token: string, newPassword: string): Promise<AuthResult> {
+		const authService = await getAuthService();
+		if (!authService) {
+			return { success: false, error: 'Auth service not available' };
+		}
+
+		try {
+			const result = await authService.resetPassword(token, newPassword);
+			return {
+				success: result.success,
+				error: result.error,
+			};
+		} catch (error) {
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : 'Password reset failed',
+			};
+		}
+	},
+
 	/**
 	 * Get access token for API calls (raw token, no refresh)
 	 * @deprecated Use getValidToken() instead for automatic refresh

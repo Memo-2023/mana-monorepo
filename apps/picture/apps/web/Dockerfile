@@ -35,6 +35,7 @@ COPY packages/shared-theme-ui ./packages/shared-theme-ui
 COPY packages/shared-subscription-types ./packages/shared-subscription-types
 COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
 COPY packages/shared-profile-ui ./packages/shared-profile-ui
+COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
 
