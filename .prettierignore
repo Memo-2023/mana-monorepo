@@ -1,3 +1,6 @@
+# Agent knowledge files (contain code examples in markdown)
+**/.agent/
+
 # Build outputs and generated files
 dist/
 build/

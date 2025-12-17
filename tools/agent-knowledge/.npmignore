@@ -1,0 +1,17 @@
+# Development files
+node_modules/
+.git/
+.github/
+test/
+coverage/
+*.log
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,4 +1,7 @@
 packages:
+  # Development tools
+  - 'tools/*'
+
   # Product applications (root level)
   - 'apps/*'
 

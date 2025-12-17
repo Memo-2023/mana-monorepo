@@ -1,0 +1,334 @@
+version: "1.0"
+last_updated: "2025-12-16"
+
+agents:
+  - path: "packages/shared-stores/"
+    agent_dir: "packages/shared-stores/.agent"
+    name: "Shared Stores Agent"
+    watches:
+      - "packages/shared-stores//**"
+  - path: "packages/shared-feedback-ui/"
+    agent_dir: "packages/shared-feedback-ui/.agent"
+    name: "Agent: Feedback UI Package"
+    watches:
+      - "packages/shared-feedback-ui//**"
+  - path: "packages/nutriphi-database/"
+    agent_dir: "packages/nutriphi-database/.agent"
+    name: "NutriPhi Database Expert"
+    watches:
+      - "packages/nutriphi-database//**"
+  - path: "packages/shared-feedback-types/"
+    agent_dir: "packages/shared-feedback-types/.agent"
+    name: "Agent: Feedback Types Package"
+    watches:
+      - "packages/shared-feedback-types//**"
+  - path: "packages/shared-help-types/"
+    agent_dir: "packages/shared-help-types/.agent"
+    name: "Shared Help Types Expert"
+    watches:
+      - "packages/shared-help-types//**"
+  - path: "packages/shared-i18n/"
+    agent_dir: "packages/shared-i18n/.agent"
+    name: "Shared i18n Agent"
+    watches:
+      - "packages/shared-i18n//**"
+  - path: "packages/shared-types/"
+    agent_dir: "packages/shared-types/.agent"
+    name: "Shared Types Expert"
+    watches:
+      - "packages/shared-types//**"
+  - path: "packages/shared-help-ui/"
+    agent_dir: "packages/shared-help-ui/.agent"
+    name: "Shared Help UI Expert"
+    watches:
+      - "packages/shared-help-ui//**"
+  - path: "packages/shared-subscription-ui/"
+    agent_dir: "packages/shared-subscription-ui/.agent"
+    name: "Shared Subscription UI Agent"
+    watches:
+      - "packages/shared-subscription-ui//**"
+  - path: "packages/shared-profile-ui/"
+    agent_dir: "packages/shared-profile-ui/.agent"
+    name: "@manacore/shared-profile-ui Agent"
+    watches:
+      - "packages/shared-profile-ui//**"
+  - path: "packages/shared-tailwind/"
+    agent_dir: "packages/shared-tailwind/.agent"
+    name: "Agent: @manacore/shared-tailwind"
+    watches:
+      - "packages/shared-tailwind//**"
+  - path: "packages/manadeck-database/"
+    agent_dir: "packages/manadeck-database/.agent"
+    name: "ManaDeck Database Expert"
+    watches:
+      - "packages/manadeck-database//**"
+  - path: "packages/shared-supabase/"
+    agent_dir: "packages/shared-supabase/.agent"
+    name: "Shared Supabase Expert"
+    watches:
+      - "packages/shared-supabase//**"
+  - path: "packages/shared-vite-config/"
+    agent_dir: "packages/shared-vite-config/.agent"
+    name: "Shared Vite Config Agent"
+    watches:
+      - "packages/shared-vite-config//**"
+  - path: "packages/shared-config/"
+    agent_dir: "packages/shared-config/.agent"
+    name: "Shared Config Agent"
+    watches:
+      - "packages/shared-config//**"
+  - path: "packages/shared-landing-ui/"
+    agent_dir: "packages/shared-landing-ui/.agent"
+    name: "@manacore/shared-landing-ui Agent"
+    watches:
+      - "packages/shared-landing-ui//**"
+  - path: "packages/mana-core-nestjs-integration/"
+    agent_dir: "packages/mana-core-nestjs-integration/.agent"
+    name: "Mana Core NestJS Integration Agent"
+    watches:
+      - "packages/mana-core-nestjs-integration//**"
+  - path: "packages/shared-tags/"
+    agent_dir: "packages/shared-tags/.agent"
+    name: "Shared Tags Expert"
+    watches:
+      - "packages/shared-tags//**"
+  - path: "packages/shared-utils/"
+    agent_dir: "packages/shared-utils/.agent"
+    name: "Shared Utils Agent"
+    watches:
+      - "packages/shared-utils//**"
+  - path: "packages/shared-auth-stores/"
+    agent_dir: "packages/shared-auth-stores/.agent"
+    name: "Agent: @manacore/shared-auth-stores"
+    watches:
+      - "packages/shared-auth-stores//**"
+  - path: "packages/shared-theme/"
+    agent_dir: "packages/shared-theme/.agent"
+    name: "Agent: @manacore/shared-theme"
+    watches:
+      - "packages/shared-theme//**"
+  - path: "packages/eslint-config/"
+    agent_dir: "packages/eslint-config/.agent"
+    name: "ESLint Config Agent"
+    watches:
+      - "packages/eslint-config//**"
+  - path: "packages/shared-credit-service/"
+    agent_dir: "packages/shared-credit-service/.agent"
+    name: "Shared Credit Service Agent"
+    watches:
+      - "packages/shared-credit-service//**"
+  - path: "packages/shared-nestjs-auth/"
+    agent_dir: "packages/shared-nestjs-auth/.agent"
+    name: "Agent: @manacore/shared-nestjs-auth"
+    watches:
+      - "packages/shared-nestjs-auth//**"
+  - path: "packages/shared-splitscreen/"
+    agent_dir: "packages/shared-splitscreen/.agent"
+    name: "@manacore/shared-splitscreen Agent"
+    watches:
+      - "packages/shared-splitscreen//**"
+  - path: "packages/shared-api-client/"
+    agent_dir: "packages/shared-api-client/.agent"
+    name: "Shared API Client Expert"
+    watches:
+      - "packages/shared-api-client//**"
+  - path: "packages/uload-database/"
+    agent_dir: "packages/uload-database/.agent"
+    name: "ULoad Database Expert"
+    watches:
+      - "packages/uload-database//**"
+  - path: "packages/shared-theme-ui/"
+    agent_dir: "packages/shared-theme-ui/.agent"
+    name: "Agent: @manacore/shared-theme-ui"
+    watches:
+      - "packages/shared-theme-ui//**"
+  - path: "packages/shared-icons/"
+    agent_dir: "packages/shared-icons/.agent"
+    name: "@manacore/shared-icons Agent"
+    watches:
+      - "packages/shared-icons//**"
+  - path: "packages/shared-errors/"
+    agent_dir: "packages/shared-errors/.agent"
+    name: "Shared Errors Agent"
+    watches:
+      - "packages/shared-errors//**"
+  - path: "packages/shared-auth/"
+    agent_dir: "packages/shared-auth/.agent"
+    name: "Shared Auth Expert"
+    watches:
+      - "packages/shared-auth//**"
+  - path: "packages/shared-subscription-types/"
+    agent_dir: "packages/shared-subscription-types/.agent"
+    name: "Shared Subscription Types Agent"
+    watches:
+      - "packages/shared-subscription-types//**"
+  - path: "packages/shared-help-content/"
+    agent_dir: "packages/shared-help-content/.agent"
+    name: "Shared Help Content Expert"
+    watches:
+      - "packages/shared-help-content//**"
+  - path: "packages/test-config/"
+    agent_dir: "packages/test-config/.agent"
+    name: "Test Config Agent"
+    watches:
+      - "packages/test-config//**"
+  - path: "packages/shared-storage/"
+    agent_dir: "packages/shared-storage/.agent"
+    name: "Shared Storage Agent"
+    watches:
+      - "packages/shared-storage//**"
+  - path: "packages/shared-branding/"
+    agent_dir: "packages/shared-branding/.agent"
+    name: "Agent: @manacore/shared-branding"
+    watches:
+      - "packages/shared-branding//**"
+  - path: "packages/shared-help-mobile/"
+    agent_dir: "packages/shared-help-mobile/.agent"
+    name: "Shared Help Mobile Expert"
+    watches:
+      - "packages/shared-help-mobile//**"
+  - path: "packages/shared-ui/"
+    agent_dir: "packages/shared-ui/.agent"
+    name: "@manacore/shared-ui Agent"
+    watches:
+      - "packages/shared-ui//**"
+  - path: "packages/shared-auth-ui/"
+    agent_dir: "packages/shared-auth-ui/.agent"
+    name: "Agent: @manacore/shared-auth-ui"
+    watches:
+      - "packages/shared-auth-ui//**"
+  - path: "packages/better-auth-types/"
+    agent_dir: "packages/better-auth-types/.agent"
+    name: "Better Auth Types Agent"
+    watches:
+      - "packages/better-auth-types//**"
+  - path: "packages/news-database/"
+    agent_dir: "packages/news-database/.agent"
+    name: "News Database Expert"
+    watches:
+      - "packages/news-database//**"
+  - path: "packages/shared-feedback-service/"
+    agent_dir: "packages/shared-feedback-service/.agent"
+    name: "Agent: Feedback Service Package"
+    watches:
+      - "packages/shared-feedback-service//**"
+  - path: "games/worldream/"
+    agent_dir: "games/worldream/.agent"
+    name: "Root"
+    watches:
+      - "games/worldream//**"
+  - path: "games/mana-games/"
+    agent_dir: "games/mana-games/.agent"
+    name: "Root"
+    watches:
+      - "games/mana-games//**"
+  - path: "games/whopixels/"
+    agent_dir: "games/whopixels/.agent"
+    name: "Root"
+    watches:
+      - "games/whopixels//**"
+  - path: "games/figgos/"
+    agent_dir: "games/figgos/.agent"
+    name: "Root"
+    watches:
+      - "games/figgos//**"
+  - path: "games/voxelava/"
+    agent_dir: "games/voxelava/.agent"
+    name: "Root"
+    watches:
+      - "games/voxelava//**"
+  - path: "apps/calendar/packages/shared/"
+    agent_dir: "apps/calendar/packages/shared/.agent"
+    name: "Calendar Shared Package Agent"
+    watches:
+      - "apps/calendar/packages/shared//**"
+  - path: "apps/calendar/"
+    agent_dir: "apps/calendar/.agent"
+    name: "Root"
+    watches:
+      - "apps/calendar//**"
+  - path: "apps/context/"
+    agent_dir: "apps/context/.agent"
+    name: "Root"
+    watches:
+      - "apps/context//**"
+  - path: "apps/zitare/packages/web-ui/"
+    agent_dir: "apps/zitare/packages/web-ui/.agent"
+    name: "Agent: @zitare/web-ui"
+    watches:
+      - "apps/zitare/packages/web-ui//**"
+  - path: "apps/zitare/packages/content/"
+    agent_dir: "apps/zitare/packages/content/.agent"
+    name: "@zitare/content - Static Content Data Package"
+    watches:
+      - "apps/zitare/packages/content//**"
+  - path: "apps/zitare/packages/shared/"
+    agent_dir: "apps/zitare/packages/shared/.agent"
+    name: "Agent: @zitare/shared"
+    watches:
+      - "apps/zitare/packages/shared//**"
+  - path: "apps/zitare/"
+    agent_dir: "apps/zitare/.agent"
+    name: "Root"
+    watches:
+      - "apps/zitare//**"
+  - path: "apps/chat/packages/chat-types/"
+    agent_dir: "apps/chat/packages/chat-types/.agent"
+    name: "Chat Types Package Agent"
+    watches:
+      - "apps/chat/packages/chat-types//**"
+  - path: "apps/chat/"
+    agent_dir: "apps/chat/.agent"
+    name: "Root"
+    watches:
+      - "apps/chat//**"
+  - path: "apps/contacts/"
+    agent_dir: "apps/contacts/.agent"
+    name: "Root"
+    watches:
+      - "apps/contacts//**"
+  - path: "apps/picture/packages/mobile-ui/"
+    agent_dir: "apps/picture/packages/mobile-ui/.agent"
+    name: "Mobile UI Package Agent"
+    watches:
+      - "apps/picture/packages/mobile-ui//**"
+  - path: "apps/picture/packages/shared/"
+    agent_dir: "apps/picture/packages/shared/.agent"
+    name: "Shared Package Agent"
+    watches:
+      - "apps/picture/packages/shared//**"
+  - path: "apps/picture/packages/design-tokens/"
+    agent_dir: "apps/picture/packages/design-tokens/.agent"
+    name: "Design Tokens Package Agent"
+    watches:
+      - "apps/picture/packages/design-tokens//**"
+  - path: "apps/picture/"
+    agent_dir: "apps/picture/.agent"
+    name: "Root"
+    watches:
+      - "apps/picture//**"
+  - path: "apps/todo/packages/shared/"
+    agent_dir: "apps/todo/packages/shared/.agent"
+    name: "Todo Shared Expert"
+    watches:
+      - "apps/todo/packages/shared//**"
+  - path: "apps/todo/"
+    agent_dir: "apps/todo/.agent"
+    name: "Root"
+    watches:
+      - "apps/todo//**"
+  - path: "apps/clock/packages/shared/"
+    agent_dir: "apps/clock/packages/shared/.agent"
+    name: "Clock Shared Package Agent"
+    watches:
+      - "apps/clock/packages/shared//**"
+  - path: "apps/clock/"
+    agent_dir: "apps/clock/.agent"
+    name: "Root"
+    watches:
+      - "apps/clock//**"
+  - path: "services/mana-core-auth/"
+    agent_dir: "services/mana-core-auth/.agent"
+    name: "Root"
+    watches:
+      - "services/mana-core-auth//**"

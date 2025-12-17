@@ -47,6 +47,12 @@ export default [
 			// Documentation examples
 			'docs/test-examples/**',
 
+			// Agent knowledge files (documentation with code examples)
+			'**/.agent/**',
+
+			// CLI tools (use console, have different patterns)
+			'tools/**',
+
 			// Games with specific runtime environments
 			'games/whopixels/**',
 

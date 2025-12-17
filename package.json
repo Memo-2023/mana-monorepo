@@ -175,7 +175,11 @@
 		"cf:login": "npx wrangler login",
 		"cf:projects:list": "npx wrangler pages project list",
 		"cf:projects:create": "echo 'Creating Cloudflare Pages projects...' && npx wrangler pages project create chat-landing --production-branch=main && npx wrangler pages project create picture-landing --production-branch=main && npx wrangler pages project create manacore-landing --production-branch=main && npx wrangler pages project create manadeck-landing --production-branch=main && npx wrangler pages project create zitare-landing --production-branch=main",
-		"prepare": "husky"
+		"prepare": "husky",
+		"agents:update": "node tools/agent-knowledge/bin/cli.js update --claude",
+		"agents:status": "node tools/agent-knowledge/bin/cli.js status",
+		"agents:scan": "node tools/agent-knowledge/bin/cli.js scan",
+		"agents:init": "node tools/agent-knowledge/bin/cli.js scan --init-claude --template standard"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.1",
