@@ -22,6 +22,7 @@ on:
           - manadeck-backend
           - nutriphi-backend
           - news-api
+          - picture-backend
       environment:
         description: 'Deployment environment'
         required: true
@@ -269,7 +270,7 @@ jobs:
 
             if [ "$SERVICE" == "all" ]; then
               # Rolling update for all services
-              for service in mana-core-auth maerchenzauber-backend chat-backend manadeck-backend nutriphi-backend news-api; do
+              for service in mana-core-auth maerchenzauber-backend chat-backend manadeck-backend nutriphi-backend news-api picture-backend; do
                 echo "Deploying \$service..."
                 docker compose up -d --no-deps --scale \$service=2 \$service
                 sleep 10

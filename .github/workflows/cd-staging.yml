@@ -31,6 +31,8 @@ on:
           - calendar-web
           - clock-backend
           - clock-web
+          - picture-backend
+          - picture-web
   workflow_call:
 
 permissions:
@@ -138,6 +140,12 @@ jobs:
           S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}
           MANACORE_STORAGE_PUBLIC_URL=${{ secrets.MANACORE_STORAGE_PUBLIC_URL }}
 
+          # Replicate API (for Picture app AI image generation)
+          REPLICATE_API_TOKEN=${{ secrets.REPLICATE_API_TOKEN }}
+
+          # Mana Core Service Key (for credit system)
+          MANA_CORE_SERVICE_KEY=${{ secrets.MANA_CORE_SERVICE_KEY }}
+
           # Environment
           NODE_ENV=staging
           EOF
@@ -216,6 +224,9 @@ jobs:
 
             # Create clock database (for clock-backend service)
             docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE clock;" 2>/dev/null || echo "clock database already exists"
+
+            # Create picture database (for picture-backend service)
+            docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE picture;" 2>/dev/null || echo "picture database already exists"
 
             echo "✅ Databases ready"
           EOF
@@ -349,6 +360,8 @@ jobs:
             check_health calendar-web http://localhost:5186/health || exit 1
             check_health clock-backend http://localhost:3017/api/v1/health || exit 1
             check_health clock-web http://localhost:5187/health || exit 1
+            check_health picture-backend http://localhost:3006/api/v1/health || exit 1
+            check_health picture-web http://localhost:5175/health || exit 1
 
             echo ""
             echo "✅ All health checks passed!"

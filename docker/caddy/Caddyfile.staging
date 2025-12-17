@@ -43,3 +43,11 @@ todo.staging.manacore.ai {
 todo-api.staging.manacore.ai {
     reverse_proxy localhost:3018
 }
+
+# Picture
+picture.staging.manacore.ai {
+    reverse_proxy localhost:5175
+}
+picture-api.staging.manacore.ai {
+    reverse_proxy localhost:3006
+}
