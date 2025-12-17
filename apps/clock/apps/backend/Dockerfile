@@ -15,6 +15,7 @@ COPY pnpm-lock.yaml ./
 COPY packages/better-auth-types ./packages/better-auth-types
 COPY packages/shared-errors ./packages/shared-errors
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
+COPY packages/shared-nestjs-cors ./packages/shared-nestjs-cors
 
 # Copy clock packages and backend
 COPY apps/clock/packages ./apps/clock/packages

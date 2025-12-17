@@ -13,8 +13,10 @@ COPY pnpm-lock.yaml ./
 
 # Copy shared packages
 COPY packages/better-auth-types ./packages/better-auth-types
+COPY packages/mana-core-nestjs-integration ./packages/mana-core-nestjs-integration
 COPY packages/shared-errors ./packages/shared-errors
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
+COPY packages/shared-nestjs-cors ./packages/shared-nestjs-cors
 COPY packages/shared-storage ./packages/shared-storage
 
 # Copy chat backend
@@ -25,6 +27,9 @@ RUN pnpm install --frozen-lockfile
 
 # Build shared packages first
 WORKDIR /app/packages/better-auth-types
+RUN pnpm build
+
+WORKDIR /app/packages/mana-core-nestjs-integration
 RUN pnpm build
 
 WORKDIR /app/packages/shared-errors
