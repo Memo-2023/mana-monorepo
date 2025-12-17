@@ -20,6 +20,10 @@ COPY services/mana-core-auth ./services/mana-core-auth
 # Install all dependencies (including devDependencies for build)
 RUN pnpm install --frozen-lockfile
 
+# Build shared packages first
+WORKDIR /app/packages/shared-nestjs-cors
+RUN pnpm build
+
 # Build the application
 WORKDIR /app/services/mana-core-auth
 RUN pnpm build

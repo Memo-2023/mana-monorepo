@@ -38,6 +38,9 @@ RUN pnpm build
 WORKDIR /app/packages/shared-nestjs-auth
 RUN pnpm build
 
+WORKDIR /app/packages/shared-nestjs-cors
+RUN pnpm build
+
 WORKDIR /app/packages/shared-storage
 RUN pnpm build
 
@@ -69,11 +72,11 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 WORKDIR /app/apps/picture/apps/backend
 
 # Expose port
-EXPOSE 3003
+EXPOSE 3006
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3003/api/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3006/api/v1/health || exit 1
 
 # Run entrypoint script
 ENTRYPOINT ["docker-entrypoint.sh"]

@@ -33,6 +33,9 @@ RUN pnpm build
 WORKDIR /app/packages/shared-nestjs-auth
 RUN pnpm build
 
+WORKDIR /app/packages/shared-nestjs-cors
+RUN pnpm build
+
 # Build the backend
 WORKDIR /app/apps/todo/apps/backend
 RUN pnpm build

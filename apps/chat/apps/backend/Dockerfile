@@ -38,6 +38,9 @@ RUN pnpm build
 WORKDIR /app/packages/shared-nestjs-auth
 RUN pnpm build
 
+WORKDIR /app/packages/shared-nestjs-cors
+RUN pnpm build
+
 WORKDIR /app/packages/shared-storage
 RUN pnpm build
 
