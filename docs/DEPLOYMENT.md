@@ -113,9 +113,8 @@ STAGING_SUPABASE_ANON_KEY=<anon-key>
 STAGING_SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 STAGING_AZURE_OPENAI_ENDPOINT=https://xxx.openai.azure.com
 STAGING_AZURE_OPENAI_API_KEY=<api-key>
-STAGING_JWT_SECRET=<jwt-secret>
-STAGING_JWT_PUBLIC_KEY=<public-key>
-STAGING_JWT_PRIVATE_KEY=<private-key>
+# Note: JWT keys are managed automatically by Better Auth (EdDSA)
+# Keys are stored in auth.jwks table - no manual configuration needed
 ```
 
 #### Production Environment

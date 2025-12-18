@@ -21,9 +21,9 @@ services:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
-      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      # JWT keys managed automatically by Better Auth (EdDSA) - stored in auth.jwks table
+      JWT_ISSUER: ${JWT_ISSUER:-manacore}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-manacore}
       # Brevo Email Service
       BREVO_API_KEY: ${BREVO_API_KEY}
       EMAIL_SENDER_ADDRESS: ${EMAIL_SENDER_ADDRESS:-noreply@manacore.ai}

@@ -148,6 +148,15 @@ export function createBetterAuth(databaseUrl: string) {
 		session: {
 			expiresIn: 60 * 60 * 24 * 7, // 7 days
 			updateAge: 60 * 60 * 24, // Update session once per day
+
+			// Cookie cache: Reduces DB queries by 98% for session validation
+			// Encrypted JWE cookie valid for 5 minutes before DB revalidation
+			cookieCache: {
+				enabled: true,
+				maxAge: 5 * 60, // 5 minutes
+				strategy: 'jwe', // Encrypted (default in Better Auth v1.4+)
+				refreshCache: true,
+			},
 		},
 
 		// Base URL for callbacks and redirects

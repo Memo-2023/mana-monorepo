@@ -290,9 +290,6 @@ For the workflows to function, these GitHub secrets must be configured:
 | `STAGING_SSH_KEY` | cd-staging*.yml | SSH private key for staging server |
 | `STAGING_POSTGRES_PASSWORD` | cd-staging.yml | PostgreSQL password |
 | `STAGING_REDIS_PASSWORD` | cd-staging.yml | Redis password |
-| `STAGING_JWT_SECRET` | cd-staging.yml | JWT signing secret |
-| `STAGING_JWT_PUBLIC_KEY` | cd-staging.yml | JWT public key (EdDSA) |
-| `STAGING_JWT_PRIVATE_KEY` | cd-staging.yml | JWT private key (EdDSA) |
 | `STAGING_SUPABASE_*` | cd-staging.yml | Supabase credentials |
 | `STAGING_AZURE_OPENAI_*` | cd-staging.yml | Azure OpenAI credentials |
 | `PRODUCTION_*` | cd-production.yml | Production equivalents |

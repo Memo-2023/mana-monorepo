@@ -36,9 +36,10 @@ cp .env.example .env
 ```env
 POSTGRES_PASSWORD=your-secure-password-here
 REDIS_PASSWORD=your-redis-password-here
-JWT_PRIVATE_KEY="your-private-key-here"
-JWT_PUBLIC_KEY="your-public-key-here"
 ```
+
+> **Note:** JWT signing keys are managed automatically by Better Auth (EdDSA/Ed25519).
+> No manual key generation is required - keys are stored in the `auth.jwks` database table.
 
 ## Step 3: Start Infrastructure (30 seconds)
 
@@ -328,8 +329,15 @@ pnpm db:studio
 ### Required
 
 - `DATABASE_URL` - PostgreSQL connection string
-- `JWT_PRIVATE_KEY` - RS256 private key (PEM format)
-- `JWT_PUBLIC_KEY` - RS256 public key (PEM format)
+
+### JWT Configuration (all optional - Better Auth manages keys automatically)
+
+- `JWT_ISSUER` - JWT issuer claim (default: manacore)
+- `JWT_AUDIENCE` - JWT audience claim (default: manacore)
+- `JWT_ACCESS_TOKEN_EXPIRY` - Access token lifetime (default: 15m)
+- `JWT_REFRESH_TOKEN_EXPIRY` - Refresh token lifetime (default: 7d)
+
+> **Note:** JWT signing uses EdDSA (Ed25519) via Better Auth. Keys are auto-generated and stored in `auth.jwks` table.
 
 ### Optional (have defaults)
 

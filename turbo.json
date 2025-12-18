@@ -1,13 +1,7 @@
 {
 	"$schema": "https://turbo.build/schema.json",
 	"concurrency": "5",
-	"globalEnv": [
-		"NODE_ENV",
-		"MANA_CORE_AUTH_URL",
-		"JWT_PUBLIC_KEY",
-		"AZURE_OPENAI_ENDPOINT",
-		"AZURE_OPENAI_API_KEY"
-	],
+	"globalEnv": ["NODE_ENV", "MANA_CORE_AUTH_URL", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_API_KEY"],
 	"tasks": {
 		"dev": {
 			"cache": false,

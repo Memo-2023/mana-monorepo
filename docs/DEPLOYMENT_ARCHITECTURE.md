@@ -573,8 +573,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-devpassword}
-      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
-      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      # JWT keys managed automatically by Better Auth (EdDSA) - stored in auth.jwks table
     depends_on:
       postgres:
         condition: service_healthy
@@ -1689,7 +1688,6 @@ location ~* \.(html)$ {
 | | `PORT` | 3001 | 3001 | 3001 | No |
 | | `DATABASE_URL` | `postgresql://localhost:5432/manacore` | `postgresql://staging-db/manacore` | `postgresql://prod-db/manacore` | Yes |
 | | `REDIS_HOST` | localhost | redis | redis | No |
-| | `JWT_PRIVATE_KEY` | (dev key) | (staging key) | (prod key) | Yes |
 | | `STRIPE_SECRET_KEY` | `sk_test_...` | `sk_test_...` | `sk_live_...` | Yes |
 | **chat-backend** |
 | | `PORT` | 3002 | 3002 | 3002 | No |

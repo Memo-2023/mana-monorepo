@@ -8,6 +8,7 @@ import { CreditsModule } from './credits/credits.module';
 import { EmailModule } from './email/email.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { ReferralsModule } from './referrals/referrals.module';
+import { SecurityModule } from './security/security.module';
 import { SettingsModule } from './settings/settings.module';
 import { TagsModule } from './tags/tags.module';
 import { AiModule } from './ai/ai.module';
@@ -33,6 +34,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 		FeedbackModule,
 		HealthModule,
 		ReferralsModule,
+		SecurityModule,
 		SettingsModule,
 		TagsModule,
 	],

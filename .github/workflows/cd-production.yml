@@ -180,9 +180,7 @@ jobs:
 
           # Mana Core Auth
           MANA_SERVICE_URL=${{ secrets.PRODUCTION_MANA_SERVICE_URL }}
-          JWT_SECRET=${{ secrets.PRODUCTION_JWT_SECRET }}
-          JWT_PUBLIC_KEY=${{ secrets.PRODUCTION_JWT_PUBLIC_KEY }}
-          JWT_PRIVATE_KEY=${{ secrets.PRODUCTION_JWT_PRIVATE_KEY }}
+          # JWT keys managed automatically by Better Auth (EdDSA) - stored in auth.jwks table
 
           # Supabase
           SUPABASE_URL=${{ secrets.PRODUCTION_SUPABASE_URL }}

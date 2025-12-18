@@ -109,9 +109,7 @@ jobs:
 
           # Mana Core Auth - Configuration
           MANA_SERVICE_URL=http://mana-core-auth:3001
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
-          JWT_PUBLIC_KEY=${{ secrets.JWT_PUBLIC_KEY }}
-          JWT_PRIVATE_KEY=${{ secrets.JWT_PRIVATE_KEY }}
+          # JWT keys managed automatically by Better Auth (EdDSA) - stored in auth.jwks table
 
           # Brevo Email Service
           BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}

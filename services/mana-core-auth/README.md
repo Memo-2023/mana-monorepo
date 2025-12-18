@@ -4,11 +4,12 @@ Central authentication and credit management system for the Mana Universe ecosys
 
 ## Features
 
-- **JWT-based Authentication** (RS256 algorithm)
+- **JWT-based Authentication** (EdDSA/Ed25519 via Better Auth)
   - User registration and login
   - Refresh token rotation
   - Multi-session management
   - Device tracking
+  - Automatic key management via JWKS
 
 - **Credit System**
   - User balance management
@@ -199,13 +200,16 @@ See `.env.example` for all available configuration options.
 Key variables:
 
 - `DATABASE_URL` - PostgreSQL connection string
-- `JWT_PUBLIC_KEY` - RS256 public key (PEM format)
-- `JWT_PRIVATE_KEY` - RS256 private key (PEM format)
+- `JWT_ISSUER` - JWT issuer claim (default: manacore)
+- `JWT_AUDIENCE` - JWT audience claim (default: manacore)
 - `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` - Redis configuration
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` - Stripe integration
 - `CORS_ORIGINS` - Allowed origins for CORS
 - `CREDITS_SIGNUP_BONUS` - Free credits on signup (default: 150)
 - `CREDITS_DAILY_FREE` - Daily free credits (default: 5)
+
+> **Note:** JWT signing keys are managed automatically by Better Auth using EdDSA (Ed25519).
+> Keys are stored in the `auth.jwks` database table - no manual key configuration needed.
 
 ## Development
 
@@ -259,13 +263,15 @@ pnpm format
 
 ## Security Considerations
 
-1. **JWT Keys**: Generate strong RS256 keys and keep private key secure
+1. **JWT Keys**: Managed automatically by Better Auth (EdDSA/Ed25519) - keys stored in `auth.jwks` table
 2. **Database**: Use strong passwords and enable SSL in production
 3. **Redis**: Always set a password for Redis
 4. **CORS**: Only allow trusted origins
 5. **Rate Limiting**: Configured via Traefik and NestJS throttler
 6. **RLS Policies**: Enforce data isolation at database level
 7. **HTTPS**: Always use SSL/TLS in production (via Traefik)
+8. **Security Headers**: OWASP-compliant headers (HSTS, CSP, X-Frame-Options)
+9. **Security Audit Logging**: Login events tracked in `auth.security_events` table
 
 ## Monitoring
 

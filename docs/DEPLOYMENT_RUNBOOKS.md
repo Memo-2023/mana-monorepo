@@ -87,23 +87,12 @@ nano .env.production
 
 # Required variables (never commit real values to git):
 # - DATABASE_URL (Supabase connection strings)
-# - JWT_PRIVATE_KEY (generate new RSA key pair)
 # - AZURE_OPENAI_API_KEY
 # - STRIPE_SECRET_KEY
 # - REDIS_PASSWORD (use strong password)
-```
-
-**Generate JWT Keys:**
-
-```bash
-# Generate RSA key pair for JWT signing
-ssh-keygen -t rsa -b 4096 -m PEM -f jwt_key
-# Private key: jwt_key
-# Public key: jwt_key.pub
-
-# Convert to single-line format for .env
-cat jwt_key | tr '\n' '|'    # Replace | with \n in .env
-cat jwt_key.pub | tr '\n' '|'
+#
+# Note: JWT keys are managed automatically by Better Auth (EdDSA)
+# Keys are stored in auth.jwks table - no manual configuration needed
 ```
 
 ### Step 5: Deploy Shared Infrastructure

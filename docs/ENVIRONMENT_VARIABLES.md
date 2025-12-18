@@ -61,8 +61,6 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 | Variable | Description | Used By |
 |----------|-------------|---------|
 | `MANA_CORE_AUTH_URL` | Auth service URL | All apps |
-| `JWT_PRIVATE_KEY` | JWT signing key | mana-core-auth |
-| `JWT_PUBLIC_KEY` | JWT verification key | All backends |
 | `POSTGRES_USER` | Database user | Docker, backends |
 | `POSTGRES_PASSWORD` | Database password | Docker, backends |
 | `REDIS_HOST` | Redis host | mana-core-auth |

@@ -7,9 +7,8 @@ export default () => ({
 	},
 
 	jwt: {
-		// Convert \n string literals to actual newlines for PEM format
-		publicKey: (process.env.JWT_PUBLIC_KEY || '').replace(/\\n/g, '\n'),
-		privateKey: (process.env.JWT_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+		// Note: Better Auth manages JWT keys automatically via JWKS (EdDSA/Ed25519)
+		// Keys are stored in auth.jwks table - no manual key configuration needed
 		accessTokenExpiry: process.env.JWT_ACCESS_TOKEN_EXPIRY || '15m',
 		refreshTokenExpiry: process.env.JWT_REFRESH_TOKEN_EXPIRY || '7d',
 		issuer: process.env.JWT_ISSUER || 'manacore',

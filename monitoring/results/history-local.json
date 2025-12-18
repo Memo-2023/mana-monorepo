@@ -1,0 +1,68 @@
+[
+	{
+		"environment": "local",
+		"url": "http://localhost:3001",
+		"timestamp": "2025-12-18T20:37:03Z",
+		"status": "fail",
+		"tests": {
+			"health": {
+				"test": "health",
+				"status": "pass",
+				"httpCode": 200,
+				"response": {
+					"status": "ok",
+					"timestamp": "2025-12-18T20:37:03.965Z"
+				}
+			},
+			"jwks": {
+				"test": "jwks",
+				"status": "pass",
+				"httpCode": 200,
+				"algorithm": "EdDSA"
+			},
+			"security_headers": {
+				"test": "security_headers",
+				"status": "pass",
+				"headers": ["HSTS", "X-Content-Type-Options", "X-Frame-Options", "CSP"]
+			},
+			"response_time": {
+				"test": "response_time",
+				"status": "fail",
+				"time_ms": 9999
+			}
+		}
+	},
+	{
+		"environment": "local",
+		"url": "http://localhost:3001",
+		"timestamp": "2025-12-18T20:37:28Z",
+		"status": "healthy",
+		"tests": {
+			"health": {
+				"test": "health",
+				"status": "pass",
+				"httpCode": 200,
+				"response": {
+					"status": "ok",
+					"timestamp": "2025-12-18T20:37:28.972Z"
+				}
+			},
+			"jwks": {
+				"test": "jwks",
+				"status": "pass",
+				"httpCode": 200,
+				"algorithm": "EdDSA"
+			},
+			"security_headers": {
+				"test": "security_headers",
+				"status": "pass",
+				"headers": ["HSTS", "X-Content-Type-Options", "X-Frame-Options", "CSP"]
+			},
+			"response_time": {
+				"test": "response_time",
+				"status": "pass",
+				"time_ms": 1
+			}
+		}
+	}
+]

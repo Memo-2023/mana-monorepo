@@ -470,6 +470,9 @@ export interface SignInDto {
 	password: string;
 	deviceId?: string;
 	deviceName?: string;
+	rememberMe?: boolean;
+	ipAddress?: string;
+	userAgent?: string;
 }
 
 /**

@@ -15,43 +15,13 @@ Before testing, make sure you have:
 
 ---
 
-## Step 1: Generate JWT Keys for Mana Core Auth
+## Step 1: Configure Environment Variables
 
-Mana Core Auth requires RS256 JWT keys. Generate them first:
+> **Note:** JWT keys are managed automatically by Better Auth (EdDSA/Ed25519).
+> Keys are auto-generated on first startup and stored in the `auth.jwks` database table.
+> No manual key generation is required.
 
-```bash
-cd mana-core-auth
-chmod +x scripts/generate-keys.sh
-./scripts/generate-keys.sh
-```
-
-**You'll see output like:**
-
-```
-Generating RS256 key pair...
-Keys generated successfully!
-
-Private key: private.pem
-Public key: public.pem
-
-Add these to your .env file:
-
-JWT_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKC...
------END RSA PRIVATE KEY-----"
-
-JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
-MIIBIjANBg...
------END PUBLIC KEY-----"
-```
-
-**Copy these keys - you'll need them in the next step!**
-
----
-
-## Step 2: Configure Environment Variables
-
-### 2.1 Mana Core Auth
+### 1.1 Mana Core Auth
 
 ```bash
 cd mana-core-auth
@@ -64,16 +34,11 @@ Edit `mana-core-auth/.env` and add:
 # Database
 DATABASE_URL=postgresql://manacore:password@localhost:5432/manacore
 
-# Paste the keys from Step 1
-JWT_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
-YOUR_PRIVATE_KEY_HERE
------END RSA PRIVATE KEY-----"
+# JWT settings (keys are auto-managed by Better Auth)
+JWT_ISSUER=manacore
+JWT_AUDIENCE=manacore
 
-JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
-YOUR_PUBLIC_KEY_HERE
------END PUBLIC KEY-----"
-
-# Other settings (use defaults for now)
+# Other settings
 REDIS_PASSWORD=
 CORS_ORIGINS=http://localhost:5173,http://localhost:8081
 PORT=3001

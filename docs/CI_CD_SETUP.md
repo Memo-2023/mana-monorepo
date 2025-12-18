@@ -108,38 +108,16 @@ STAGING_AZURE_OPENAI_API_KEY=<your-api-key>
 STAGING_AZURE_OPENAI_API_VERSION=2024-12-01-preview
 ```
 
-#### JWT Configuration (Staging)
+#### JWT Configuration
 
-Generate JWT keys:
-```bash
-# Generate private key
-openssl genrsa -out jwt-private.pem 2048
-
-# Extract public key
-openssl rsa -in jwt-private.pem -pubout -out jwt-public.pem
-
-# Generate secret
-openssl rand -hex 32
-
-# View private key (copy to STAGING_JWT_PRIVATE_KEY)
-cat jwt-private.pem
-
-# View public key (copy to STAGING_JWT_PUBLIC_KEY)
-cat jwt-public.pem
-```
-
-Add to GitHub:
-```
-STAGING_JWT_SECRET=<hex-secret>
-STAGING_JWT_PUBLIC_KEY=<public-key-content>
-STAGING_JWT_PRIVATE_KEY=<private-key-content>
-```
+**Note:** JWT keys are managed automatically by Better Auth (EdDSA/Ed25519).
+Keys are auto-generated on first startup and stored in the `auth.jwks` database table.
+No manual key generation or configuration is required.
 
 #### Production Secrets
 
-Repeat all the above for production with `PRODUCTION_` prefix.
-
-**Important**: Use different values for production! Never reuse staging credentials.
+For production, configure the same secrets as staging with `PRODUCTION_` prefix.
+Use different values for production - never reuse staging credentials.
 
 #### Optional: Turbo Cache
 

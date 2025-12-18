@@ -591,10 +591,11 @@ coverage/
 **Key Secrets Required**:
 - `POSTGRES_PASSWORD`
 - `REDIS_PASSWORD`
-- `JWT_PRIVATE_KEY`, `JWT_PUBLIC_KEY`
 - `AZURE_OPENAI_API_KEY`
 - `GOOGLE_GENAI_API_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
+
+> **Note:** JWT keys are managed automatically by Better Auth (EdDSA) and stored in the `auth.jwks` database table.
 
 ---
 
