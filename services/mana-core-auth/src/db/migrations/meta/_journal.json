@@ -8,6 +8,13 @@
 			"when": 1766081368788,
 			"tag": "0000_naive_scorpion",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1734555600000,
+			"tag": "0001_add_missing_session_columns",
+			"breakpoints": true
 		}
 	]
 }

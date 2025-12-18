@@ -1,0 +1,15 @@
+{
+	"id": "0001_add_missing_session_columns",
+	"prevId": "0000_naive_scorpion",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {},
+	"enums": {},
+	"schemas": {},
+	"sequences": {},
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	}
+}
