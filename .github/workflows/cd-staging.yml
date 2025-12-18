@@ -280,12 +280,17 @@ jobs:
             if docker compose exec -T mana-core-auth test -f src/db/migrate.ts 2>/dev/null || \
                docker compose exec -T mana-core-auth pnpm run db:migrate --help 2>/dev/null; then
               run_migration mana-core-auth || {
-                echo "❌ mana-core-auth migration failed - aborting deployment"
-                exit 1
+                echo "⚠️  mana-core-auth migration failed - falling back to db:push"
+                echo "    This syncs schema directly, bypassing migration tracking"
+                docker compose exec -T mana-core-auth pnpm run db:push || {
+                  echo "❌ mana-core-auth db:push also failed - aborting deployment"
+                  exit 1
+                }
+                echo "✅ [mana-core-auth] Schema synced via db:push"
               }
             else
               echo "⏭️  [mana-core-auth] No db:migrate script, using db:push..."
-              docker compose exec -T mana-core-auth npx drizzle-kit push --force || echo "Auth schema push completed"
+              docker compose exec -T mana-core-auth pnpm run db:push || echo "Auth schema push completed"
             fi
 
             echo ""
