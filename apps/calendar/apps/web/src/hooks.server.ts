@@ -11,6 +11,8 @@ const PUBLIC_MANA_CORE_AUTH_URL_CLIENT =
 	process.env.PUBLIC_MANA_CORE_AUTH_URL_CLIENT || process.env.PUBLIC_MANA_CORE_AUTH_URL || '';
 const PUBLIC_BACKEND_URL_CLIENT =
 	process.env.PUBLIC_BACKEND_URL_CLIENT || process.env.PUBLIC_BACKEND_URL || '';
+const PUBLIC_CONTACTS_API_URL_CLIENT =
+	process.env.PUBLIC_CONTACTS_API_URL_CLIENT || process.env.PUBLIC_CONTACTS_API_URL || '';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	return resolve(event, {
@@ -20,6 +22,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			const envScript = `<script>
 window.__PUBLIC_MANA_CORE_AUTH_URL__ = "${PUBLIC_MANA_CORE_AUTH_URL_CLIENT}";
 window.__PUBLIC_BACKEND_URL__ = "${PUBLIC_BACKEND_URL_CLIENT}";
+window.__PUBLIC_CONTACTS_API_URL__ = "${PUBLIC_CONTACTS_API_URL_CLIENT}";
 </script>`;
 			return html.replace('<head>', `<head>${envScript}`);
 		},
