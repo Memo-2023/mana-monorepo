@@ -22,6 +22,13 @@
 			"when": 1734560000000,
 			"tag": "0002_fix_session_columns",
 			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1734600000000,
+			"tag": "0003_add_error_logs",
+			"breakpoints": true
 		}
 	]
 }

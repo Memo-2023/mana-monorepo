@@ -6,6 +6,7 @@ import configuration from './config/configuration';
 import { AuthModule } from './auth/auth.module';
 import { CreditsModule } from './credits/credits.module';
 import { EmailModule } from './email/email.module';
+import { ErrorLogsModule } from './error-logs/error-logs.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { ReferralsModule } from './referrals/referrals.module';
 import { SecurityModule } from './security/security.module';
@@ -31,6 +32,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 		AuthModule,
 		CreditsModule,
 		EmailModule,
+		ErrorLogsModule,
 		FeedbackModule,
 		HealthModule,
 		ReferralsModule,
