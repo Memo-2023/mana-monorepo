@@ -7,7 +7,7 @@ export default defineConfig({
 	dbCredentials: {
 		url: process.env.DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/manacore',
 	},
-	schemaFilter: ['auth', 'credits', 'referrals', 'public'],
+	schemaFilter: ['auth', 'credits', 'error_logs', 'referrals', 'public'],
 	verbose: true,
 	strict: true,
 });

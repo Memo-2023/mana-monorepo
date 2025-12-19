@@ -15,7 +15,9 @@
 		"test:watch": "jest --watch",
 		"test:cov": "jest --coverage",
 		"test:e2e": "jest --config ./test/jest-e2e.json",
-		"db:push": "drizzle-kit push",
+		"db:push": "node scripts/safe-db-push.mjs",
+		"db:push:force": "node scripts/safe-db-push.mjs --force",
+		"db:push:unsafe": "drizzle-kit push",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "tsx src/db/migrate.ts",
 		"db:studio": "drizzle-kit studio"
