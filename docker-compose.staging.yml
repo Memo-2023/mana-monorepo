@@ -219,7 +219,7 @@ services:
   # ============================================
 
   todo-backend:
-    image: ${DOCKER_REGISTRY:-ghcr.io/memo-2023}/todo-backend:${TODO_VERSION:-latest}
+    image: ${DOCKER_REGISTRY:-ghcr.io/memo-2023}/todo-backend:${TODO_BACKEND_VERSION:-latest}
     container_name: todo-backend-staging
     restart: unless-stopped
     depends_on:
@@ -231,15 +231,11 @@ services:
       NODE_ENV: staging
       PORT: 3018
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/todo
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: ${POSTGRES_USER:-postgres}
       MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      CORS_ORIGINS: https://todo.staging.manacore.ai,https://staging.manacore.ai,http://localhost:5188,http://localhost:5173
     ports:
       - "3018:3018"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3018/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3018/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -262,10 +258,12 @@ services:
     environment:
       NODE_ENV: staging
       PORT: 5188
+      # Server-side URLs (Docker internal network)
       PUBLIC_BACKEND_URL: http://todo-backend:3018
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://todo-api.staging.manacore.ai
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
+      # Client-side URLs (browser access via public IP)
+      PUBLIC_BACKEND_URL_CLIENT: http://46.224.108.214:3018
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://46.224.108.214:3001
     ports:
       - "5188:5188"
     healthcheck:

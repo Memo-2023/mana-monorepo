@@ -1,23 +1,8 @@
 #!/bin/sh
 set -e
 
-echo "=== Todo Backend Entrypoint ==="
+echo "Starting Todo Backend..."
+echo "Environment: ${NODE_ENV:-development}"
+echo "Port: ${PORT:-3018}"
 
-# Wait for PostgreSQL to be ready
-echo "Waiting for PostgreSQL..."
-until pg_isready -h ${DB_HOST:-postgres} -p ${DB_PORT:-5432} -U ${DB_USER:-postgres} 2>/dev/null; do
-  echo "PostgreSQL is unavailable - sleeping"
-  sleep 2
-done
-echo "PostgreSQL is up!"
-
-cd /app/apps/todo/apps/backend
-
-# Run schema push
-echo "Pushing database schema..."
-npx drizzle-kit push --force
-echo "Schema push completed!"
-
-# Execute the main command
-echo "Starting application..."
 exec "$@"
