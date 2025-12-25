@@ -206,7 +206,7 @@ jobs:
       matrix: ${{ fromJSON(needs.parse-deployment.outputs.matrix) }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Check Dockerfile exists
         id: check
@@ -279,7 +279,7 @@ jobs:
       url: https://staging.manacore.app
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
