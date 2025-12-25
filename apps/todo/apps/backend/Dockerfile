@@ -33,7 +33,7 @@ RUN pnpm build
 WORKDIR /app/packages/shared-nestjs-cors
 RUN pnpm build
 
-# Build the backend
+# Build the backend (includes compiling todo shared TypeScript)
 WORKDIR /app/apps/todo/apps/backend
 RUN pnpm build
 

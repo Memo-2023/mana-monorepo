@@ -15,7 +15,28 @@ import { Test } from '@nestjs/testing';
 import type { TestingModule } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
 import { BetterAuthService } from '../../src/auth/services/better-auth.service';
+import { SecurityEventsService } from '../../src/security-events/security-events.service';
+import { ReferralCodeService } from '../../src/referrals/referral-code.service';
+import { ReferralTierService } from '../../src/referrals/referral-tier.service';
+import { ReferralTrackingService } from '../../src/referrals/referral-tracking.service';
 import configuration from '../../src/config/configuration';
+
+// Mock services that BetterAuthService depends on
+const mockSecurityEventsService = {
+	logEvent: jest.fn().mockResolvedValue(undefined),
+};
+
+const mockReferralCodeService = {
+	createAutoCode: jest.fn().mockResolvedValue({ id: 'code-123', code: 'ABC123' }),
+};
+
+const mockReferralTierService = {
+	getTierBenefits: jest.fn().mockResolvedValue({ maxReferrals: 10 }),
+};
+
+const mockReferralTrackingService = {
+	trackReferral: jest.fn().mockResolvedValue(undefined),
+};
 
 describe('Role Security Integration Tests', () => {
 	let betterAuthService: BetterAuthService;
@@ -29,7 +50,13 @@ describe('Role Security Integration Tests', () => {
 					isGlobal: true,
 				}),
 			],
-			providers: [BetterAuthService],
+			providers: [
+				BetterAuthService,
+				{ provide: SecurityEventsService, useValue: mockSecurityEventsService },
+				{ provide: ReferralCodeService, useValue: mockReferralCodeService },
+				{ provide: ReferralTierService, useValue: mockReferralTierService },
+				{ provide: ReferralTrackingService, useValue: mockReferralTrackingService },
+			],
 		}).compile();
 
 		betterAuthService = module.get<BetterAuthService>(BetterAuthService);
