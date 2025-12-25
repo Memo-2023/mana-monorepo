@@ -140,7 +140,7 @@ jobs:
                   web)
                     # Apps with their own Dockerfiles (need monorepo root for shared packages)
                     case "$PROJECT" in
-                      manacore|todo|calendar|clock)
+                      manacore|todo|calendar)
                         DOCKERFILE_PATH="apps/$PROJECT/apps/web/Dockerfile"
                         CONTEXT_PATH="."
                         ;;
@@ -174,7 +174,6 @@ jobs:
                     manacore) PORT="5173" ;;
                     todo) PORT="5188" ;;
                     calendar) PORT="5186" ;;
-                    clock) PORT="5187" ;;
                     *) PORT="5173" ;;  # default SvelteKit port
                   esac
                 fi

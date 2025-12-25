@@ -29,8 +29,6 @@ on:
           - todo-web
           - calendar-backend
           - calendar-web
-          - clock-backend
-          - clock-web
           - picture-backend
           - picture-web
   workflow_call:
@@ -220,9 +218,6 @@ jobs:
             # Create calendar database (for calendar-backend service)
             docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE calendar;" 2>/dev/null || echo "calendar database already exists"
 
-            # Create clock database (for clock-backend service)
-            docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE clock;" 2>/dev/null || echo "clock database already exists"
-
             # Create picture database (for picture-backend service)
             docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE picture;" 2>/dev/null || echo "picture database already exists"
 
@@ -361,8 +356,6 @@ jobs:
             check_health todo-web http://localhost:5188/health || exit 1
             check_health calendar-backend http://localhost:3016/api/v1/health || exit 1
             check_health calendar-web http://localhost:5186/health || exit 1
-            check_health clock-backend http://localhost:3017/api/v1/health || exit 1
-            check_health clock-web http://localhost:5187/health || exit 1
             check_health picture-backend http://localhost:3006/api/v1/health || exit 1
             check_health picture-web http://localhost:5175/health || exit 1
 
