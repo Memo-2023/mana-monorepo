@@ -11,10 +11,15 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
-# Copy shared packages (todo-backend uses shared-nestjs-auth)
+# Copy shared packages (core packages for NestJS backends)
 COPY packages/shared-errors ./packages/shared-errors
+COPY packages/better-auth-types ./packages/better-auth-types
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
 COPY packages/shared-nestjs-cors ./packages/shared-nestjs-cors
+
+# Copy build script
+COPY docker/shared/build-shared-packages.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/build-shared-packages.sh
 
 # Copy todo shared package and backend
 COPY apps/todo/packages/shared ./apps/todo/packages/shared
@@ -23,13 +28,10 @@ COPY apps/todo/apps/backend ./apps/todo/apps/backend
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build shared packages first
-WORKDIR /app/packages/shared-errors
-RUN pnpm build
+# Build shared packages in dependency order
+RUN build-shared-packages.sh
 
-WORKDIR /app/packages/shared-nestjs-auth
-RUN pnpm build
-
+# Build todo shared package
 WORKDIR /app/apps/todo/packages/shared
 RUN pnpm build
 
