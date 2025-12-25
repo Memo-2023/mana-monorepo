@@ -244,7 +244,7 @@ jobs:
       - name: Build and push
         if: steps.check.outputs.exists == 'true'
         id: build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context_path }}
           file: ${{ matrix.dockerfile_path }}
