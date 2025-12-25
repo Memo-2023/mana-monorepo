@@ -23,6 +23,7 @@ module.exports = {
 	moduleNameMapper: {
 		'^src/(.*)$': '<rootDir>/$1',
 		'^nanoid$': '<rootDir>/../test/__mocks__/nanoid.ts',
+		'^jose$': '<rootDir>/../test/__mocks__/jose.ts',
 		'^better-auth$': '<rootDir>/../test/__mocks__/better-auth.ts',
 		'^better-auth/types$': '<rootDir>/../test/__mocks__/better-auth.ts',
 		'^better-auth/plugins$': '<rootDir>/../test/__mocks__/better-auth-plugins.ts',

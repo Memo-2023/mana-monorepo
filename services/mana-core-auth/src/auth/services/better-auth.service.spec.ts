@@ -15,6 +15,11 @@ import { ConfigService } from '@nestjs/config';
 import { ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { BetterAuthService } from './better-auth.service';
 import { createMockConfigService } from '../../__tests__/utils/test-helpers';
+import { silentError } from '../../__tests__/utils/silent-error.decorator';
+import { SecurityEventsService } from '../../security/security-events.service';
+import { ReferralCodeService } from '../../referrals/services/referral-code.service';
+import { ReferralTierService } from '../../referrals/services/referral-tier.service';
+import { ReferralTrackingService } from '../../referrals/services/referral-tracking.service';
 
 // Mock nanoid before importing factories
 jest.mock('nanoid', () => ({
@@ -43,6 +48,23 @@ jest.mock('../better-auth.config', () => ({
 		api: mockAuthApi,
 	})),
 }));
+
+// Mock services
+const mockSecurityEventsService = {
+	logEvent: jest.fn().mockResolvedValue(undefined),
+};
+
+const mockReferralCodeService = {
+	createAutoCode: jest.fn().mockResolvedValue({ id: 'code-123', code: 'ABC123' }),
+};
+
+const mockReferralTierService = {
+	initializeUserTier: jest.fn().mockResolvedValue({ id: 'tier-123', tier: 'bronze' }),
+};
+
+const mockReferralTrackingService = {
+	applyReferral: jest.fn().mockResolvedValue({ success: true }),
+};
 
 describe('BetterAuthService', () => {
 	let service: BetterAuthService;
@@ -76,6 +98,22 @@ describe('BetterAuthService', () => {
 						'database.url': 'postgresql://test:test@localhost:5432/test',
 					}),
 				},
+				{
+					provide: SecurityEventsService,
+					useValue: mockSecurityEventsService,
+				},
+				{
+					provide: ReferralCodeService,
+					useValue: mockReferralCodeService,
+				},
+				{
+					provide: ReferralTierService,
+					useValue: mockReferralTierService,
+				},
+				{
+					provide: ReferralTrackingService,
+					useValue: mockReferralTrackingService,
+				},
 			],
 		}).compile();
 
@@ -85,6 +123,7 @@ describe('BetterAuthService', () => {
 
 	afterEach(() => {
 		jest.clearAllMocks();
+		jest.restoreAllMocks();
 	});
 
 	describe('registerB2C', () => {
@@ -637,7 +676,9 @@ describe('BetterAuthService', () => {
 		it('should return empty array on error', async () => {
 			mockAuthApi.getFullOrganization.mockRejectedValue(new Error('Database error'));
 
-			const result = await service.getOrganizationMembers('org-123');
+			const result = await silentError(async () => {
+				return await service.getOrganizationMembers('org-123');
+			});
 
 			// Should not throw, but return empty array
 			expect(result).toEqual([]);
@@ -931,7 +972,9 @@ describe('BetterAuthService', () => {
 			});
 
 			// Should not throw - registration should complete despite credit error
-			const result = await service.registerB2C(registerDto);
+			const result = await silentError(async () => {
+				return await service.registerB2C(registerDto);
+			});
 
 			expect(result.user.id).toBe('user-123');
 		});

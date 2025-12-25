@@ -24,6 +24,7 @@ export interface JWTVerifyResult {
 		alg: string;
 		typ?: string;
 	};
+	key?: any; // Optional key from ResolvedKey
 }
 
 /**

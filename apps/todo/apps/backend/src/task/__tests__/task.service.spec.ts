@@ -3,10 +3,29 @@ import { NotFoundException } from '@nestjs/common';
 import { TaskService } from '../task.service';
 import { ProjectService } from '../../project/project.service';
 import { DATABASE_CONNECTION } from '../../db/database.module';
+import { taskLabels, labels } from '../../db/schema';
 
-// Mock database
-const mockSelectFrom = jest.fn().mockReturnThis();
-const mockSelectWhere = jest.fn();
+// Table-aware mock for imperative query builder
+let currentSelectTable: any = null;
+
+const mockSelectWhere = jest.fn().mockImplementation(() => {
+	// Return appropriate data based on currentSelectTable
+	if (currentSelectTable === taskLabels) {
+		// Return empty array by default for task-label relationships
+		return Promise.resolve([]);
+	}
+	if (currentSelectTable === labels) {
+		// Return empty array by default for label details
+		return Promise.resolve([]);
+	}
+	// For count queries or other uses
+	return Promise.resolve([]);
+});
+
+const mockSelectFrom = jest.fn().mockImplementation((table) => {
+	currentSelectTable = table;
+	return { where: mockSelectWhere };
+});
 
 const mockDb = {
 	query: {
@@ -23,7 +42,6 @@ const mockDb = {
 	},
 	select: jest.fn().mockReturnValue({
 		from: mockSelectFrom,
-		where: mockSelectWhere,
 	}),
 	insert: jest.fn().mockReturnThis(),
 	update: jest.fn().mockReturnThis(),
@@ -61,6 +79,18 @@ describe('TaskService', () => {
 
 		// Reset all mocks before each test
 		jest.clearAllMocks();
+		currentSelectTable = null;
+
+		// Reset default behavior for mockSelectWhere
+		mockSelectWhere.mockImplementation(() => {
+			if (currentSelectTable === taskLabels) {
+				return Promise.resolve([]);
+			}
+			if (currentSelectTable === labels) {
+				return Promise.resolve([]);
+			}
+			return Promise.resolve([]);
+		});
 	});
 
 	it('should be defined', () => {
@@ -488,28 +518,37 @@ describe('TaskService', () => {
 				{ id: 'task-2', title: 'Task 2', userId },
 			];
 
-			const mockTaskLabels = [
+			const mockTaskLabelsData = [
 				{ taskId: 'task-1', labelId: 'label-1' },
 				{ taskId: 'task-1', labelId: 'label-2' },
 				{ taskId: 'task-2', labelId: 'label-1' },
 			];
 
-			const mockLabels = [
+			const mockLabelsData = [
 				{ id: 'label-1', name: 'Important', color: '#ff0000' },
 				{ id: 'label-2', name: 'Work', color: '#0000ff' },
 			];
 
 			mockDb.query.tasks.findMany.mockResolvedValue(mockTasks);
-			mockDb.query.taskLabels.findMany.mockResolvedValue(mockTaskLabels);
-			mockDb.query.labels.findMany.mockResolvedValue(mockLabels);
+
+			// Mock imperative query builder for loadTaskLabelsBatch
+			mockSelectWhere.mockImplementation(() => {
+				if (currentSelectTable === taskLabels) {
+					return Promise.resolve(mockTaskLabelsData);
+				}
+				if (currentSelectTable === labels) {
+					return Promise.resolve(mockLabelsData);
+				}
+				return Promise.resolve([]);
+			});
 
 			const result = await service.findAll(userId);
 
 			expect(result[0].labels).toHaveLength(2);
 			expect(result[1].labels).toHaveLength(1);
-			// Should only make 2 queries for labels (taskLabels + labels), not N+1
-			expect(mockDb.query.taskLabels.findMany).toHaveBeenCalledTimes(1);
-			expect(mockDb.query.labels.findMany).toHaveBeenCalledTimes(1);
+			// Should only make 2 queries for labels (via imperative API), not N+1
+			expect(mockSelectFrom).toHaveBeenCalledWith(taskLabels);
+			expect(mockSelectFrom).toHaveBeenCalledWith(labels);
 		});
 	});
 });

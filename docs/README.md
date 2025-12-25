@@ -18,6 +18,7 @@ Welcome to the Manacore monorepo documentation. This guide helps you find exactl
 | **Configure CI/CD** | [CI/CD Setup](CI_CD_SETUP.md) |
 | **Work with runtime config** | [Runtime Config](RUNTIME_CONFIG.md) |
 | **Self-host the platform** | [Self-Hosting Guide](SELF-HOSTING-GUIDE.md) |
+| **Run and write tests** | [Testing Guide](TESTING_GUIDE.md) |
 
 ## 📁 Documentation Structure
 
@@ -53,7 +54,8 @@ CI/CD, staging, production deployment, and operational procedures.
 - [I18N](I18N.md) - Internationalization
 - [User Settings](USER_SETTINGS.md) - User settings architecture
 - [Self-Hosting Guide](SELF-HOSTING-GUIDE.md) - Self-hosting instructions
-- [Testing Guide](TESTING.md) - Testing strategies
+- [Testing Guide](TESTING_GUIDE.md) - Comprehensive testing documentation
+- [Testing Quick Reference](TESTING_QUICK_REFERENCE.md) - Common testing commands and patterns
 
 ### Project-Specific
 - [ManaDeck Postgres Migration](MANADECK_POSTGRES_MIGRATION.md) - ManaDeck database migration
@@ -89,4 +91,4 @@ When updating documentation:
 
 ---
 
-**Last Updated:** 2025-12-16
+**Last Updated:** 2025-12-25
