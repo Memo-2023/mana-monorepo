@@ -31,11 +31,7 @@ RUN pnpm install --frozen-lockfile
 # Build shared packages in dependency order
 RUN build-shared-packages.sh
 
-# Build todo shared package
-WORKDIR /app/apps/todo/packages/shared
-RUN pnpm build
-
-# Build the backend
+# Build the backend (includes compiling todo shared TypeScript)
 WORKDIR /app/apps/todo/apps/backend
 RUN pnpm build
 
