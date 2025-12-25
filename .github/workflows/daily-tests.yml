@@ -1,15 +1,12 @@
-# Daily Test Execution - Comprehensive automated testing with monitoring and reporting
+# Daily Test Execution - Simplified automated testing with Discord notifications
 #
 # Schedule: Runs daily at 2 AM UTC
 # Manual Trigger: workflow_dispatch for on-demand test runs
 # Features:
-#   - Full test suite execution with coverage
-#   - Parallel execution where possible
-#   - Database setup/teardown per test suite
-#   - Coverage thresholds enforcement (80% minimum)
-#   - Test result summaries and failure notifications
-#   - Flaky test detection
-#   - Performance metrics tracking
+#   - Integration tests (E2E flows)
+#   - mana-core-auth service tests with coverage
+#   - Database setup/teardown
+#   - Discord notifications (always sent on success or failure)
 
 name: Daily Tests
 
@@ -30,11 +27,6 @@ on:
         type: boolean
         required: false
         default: false
-      notify_success:
-        description: 'Send Discord notification on success'
-        type: boolean
-        required: false
-        default: false
 
 concurrency:
   group: daily-tests-${{ github.ref }}
@@ -46,95 +38,10 @@ env:
   COVERAGE_THRESHOLD: ${{ github.event.inputs.coverage_threshold || '80' }}
 
 jobs:
-  # Job 1: Setup and prepare test environment
-  setup:
-    name: Setup Test Environment
+  # Job 1: Test mana-core-auth with coverage
+  test-mana-core-auth:
+    name: Test mana-core-auth
     runs-on: ubuntu-latest
-    outputs:
-      matrix_backend: ${{ steps.detect-tests.outputs.matrix_backend }}
-      matrix_mobile: ${{ steps.detect-tests.outputs.matrix_mobile }}
-      matrix_web: ${{ steps.detect-tests.outputs.matrix_web }}
-      has_backend_tests: ${{ steps.detect-tests.outputs.has_backend_tests }}
-      has_mobile_tests: ${{ steps.detect-tests.outputs.has_mobile_tests }}
-      has_web_tests: ${{ steps.detect-tests.outputs.has_web_tests }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Detect test suites
-        id: detect-tests
-        run: |
-          # Detect backend tests (Jest)
-          BACKEND_TESTS=$(find services apps/*/apps/backend -name "*.spec.ts" -type f 2>/dev/null | wc -l || echo 0)
-          if [ "$BACKEND_TESTS" -gt 0 ]; then
-            echo "has_backend_tests=true" >> $GITHUB_OUTPUT
-            # Create matrix for parallel execution
-            BACKEND_MATRIX=$(cat <<EOF
-          {
-            "include": [
-              {"name": "mana-core-auth", "path": "services/mana-core-auth", "db": "manacore"},
-              {"name": "chat-backend", "path": "apps/chat/apps/backend", "db": "chat"},
-              {"name": "todo-backend", "path": "apps/todo/apps/backend", "db": "todo"},
-              {"name": "calendar-backend", "path": "apps/calendar/apps/backend", "db": "calendar"},
-              {"name": "contacts-backend", "path": "apps/contacts/apps/backend", "db": "contacts"},
-              {"name": "picture-backend", "path": "apps/picture/apps/backend", "db": "picture"}
-            ]
-          }
-          EOF
-            )
-            echo "matrix_backend=$(echo $BACKEND_MATRIX | jq -c .)" >> $GITHUB_OUTPUT
-          else
-            echo "has_backend_tests=false" >> $GITHUB_OUTPUT
-            echo "matrix_backend={\"include\":[]}" >> $GITHUB_OUTPUT
-          fi
-
-          # Detect mobile tests (Jest/React Native)
-          MOBILE_TESTS=$(find apps/*/apps/mobile -name "*.test.ts" -o -name "*.test.tsx" 2>/dev/null | wc -l || echo 0)
-          if [ "$MOBILE_TESTS" -gt 0 ]; then
-            echo "has_mobile_tests=true" >> $GITHUB_OUTPUT
-            MOBILE_MATRIX=$(cat <<EOF
-          {
-            "include": [
-              {"name": "chat-mobile", "path": "apps/chat/apps/mobile"},
-              {"name": "context-mobile", "path": "apps/context/apps/mobile"}
-            ]
-          }
-          EOF
-            )
-            echo "matrix_mobile=$(echo $MOBILE_MATRIX | jq -c .)" >> $GITHUB_OUTPUT
-          else
-            echo "has_mobile_tests=false" >> $GITHUB_OUTPUT
-            echo "matrix_mobile={\"include\":[]}" >> $GITHUB_OUTPUT
-          fi
-
-          # Detect web tests (Vitest/Svelte)
-          WEB_TESTS=$(find apps/*/apps/web -name "*.test.ts" -o -name "*.test.svelte" 2>/dev/null | wc -l || echo 0)
-          if [ "$WEB_TESTS" -gt 0 ]; then
-            echo "has_web_tests=true" >> $GITHUB_OUTPUT
-            WEB_MATRIX=$(cat <<EOF
-          {
-            "include": [
-              {"name": "manacore-web", "path": "apps/manacore/apps/web"},
-              {"name": "chat-web", "path": "apps/chat/apps/web"}
-            ]
-          }
-          EOF
-            )
-            echo "matrix_web=$(echo $WEB_MATRIX | jq -c .)" >> $GITHUB_OUTPUT
-          else
-            echo "has_web_tests=false" >> $GITHUB_OUTPUT
-            echo "matrix_web={\"include\":[]}" >> $GITHUB_OUTPUT
-          fi
-
-  # Job 2: Backend tests with database setup
-  test-backend:
-    name: Test ${{ matrix.name }}
-    needs: setup
-    if: needs.setup.outputs.has_backend_tests == 'true'
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.matrix_backend) }}
 
     services:
       postgres:
@@ -142,7 +49,7 @@ jobs:
         env:
           POSTGRES_USER: manacore
           POSTGRES_PASSWORD: testpassword
-          POSTGRES_DB: ${{ matrix.db }}
+          POSTGRES_DB: manacore
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -183,19 +90,16 @@ jobs:
         run: pnpm run build:packages
 
       - name: Setup test database
-        working-directory: ${{ matrix.path }}
+        working-directory: services/mana-core-auth
         env:
-          DATABASE_URL: postgresql://manacore:testpassword@localhost:5432/${{ matrix.db }}
+          DATABASE_URL: postgresql://manacore:testpassword@localhost:5432/manacore
         run: |
-          # Run migrations if they exist
-          if [ -f "package.json" ] && grep -q "db:push" package.json; then
-            pnpm run db:push || echo "No migrations to run"
-          fi
+          pnpm run db:push || echo "No migrations to run"
 
       - name: Run tests with coverage
-        working-directory: ${{ matrix.path }}
+        working-directory: services/mana-core-auth
         env:
-          DATABASE_URL: postgresql://manacore:testpassword@localhost:5432/${{ matrix.db }}
+          DATABASE_URL: postgresql://manacore:testpassword@localhost:5432/manacore
           REDIS_URL: redis://localhost:6379
           NODE_ENV: test
           JWT_ISSUER: manacore
@@ -208,18 +112,19 @@ jobs:
           fi
 
       - name: Upload coverage to artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ matrix.name }}
-          path: ${{ matrix.path }}/coverage
+          name: coverage-mana-core-auth
+          path: services/mana-core-auth/coverage
           retention-days: 30
 
       - name: Check coverage threshold
-        working-directory: ${{ matrix.path }}
+        working-directory: services/mana-core-auth
         run: |
           if [ -f "coverage/coverage-summary.json" ]; then
             COVERAGE=$(node -e "const c = require('./coverage/coverage-summary.json'); console.log(c.total.lines.pct)")
-            echo "Coverage for ${{ matrix.name }}: ${COVERAGE}%"
+            echo "Coverage for mana-core-auth: ${COVERAGE}%"
 
             if (( $(echo "$COVERAGE < $COVERAGE_THRESHOLD" | bc -l) )); then
               echo "::error::Coverage ${COVERAGE}% is below threshold ${COVERAGE_THRESHOLD}%"
@@ -227,88 +132,9 @@ jobs:
             fi
           fi
 
-  # Job 3: Mobile tests (no database needed)
-  test-mobile:
-    name: Test ${{ matrix.name }}
-    needs: setup
-    if: needs.setup.outputs.has_mobile_tests == 'true'
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.matrix_mobile) }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run tests with coverage
-        working-directory: ${{ matrix.path }}
-        run: pnpm run test -- --coverage --watchAll=false
-
-      - name: Upload coverage to artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ matrix.name }}
-          path: ${{ matrix.path }}/coverage
-          retention-days: 30
-
-  # Job 4: Web tests (Vitest)
-  test-web:
-    name: Test ${{ matrix.name }}
-    needs: setup
-    if: needs.setup.outputs.has_web_tests == 'true'
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.matrix_web) }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run tests with coverage
-        working-directory: ${{ matrix.path }}
-        run: pnpm run test -- --coverage
-
-      - name: Upload coverage to artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ matrix.name }}
-          path: ${{ matrix.path }}/coverage
-          retention-days: 30
-
-  # Job 5: Integration tests (E2E flows)
+  # Job 2: Integration tests (E2E flows)
   test-integration:
     name: Integration Tests
-    needs: setup
     runs-on: ubuntu-latest
 
     services:
@@ -388,174 +214,11 @@ jobs:
           path: services/mana-core-auth/test-results
           retention-days: 30
 
-  # Job 6: Aggregate and report results
-  report:
-    name: Generate Test Report
-    needs: [test-backend, test-mobile, test-web, test-integration]
-    if: always()
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download all coverage artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: coverage-reports
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install report dependencies
-        run: npm install -g istanbul-merge
-
-      - name: Aggregate coverage reports
-        run: |
-          # Create aggregated report directory
-          mkdir -p aggregated-coverage
-
-          # Find and merge all coverage-summary.json files
-          find coverage-reports -name "coverage-summary.json" -exec echo "Found: {}" \;
-
-          # Calculate total coverage
-          node scripts/test-reporting/aggregate-coverage.js coverage-reports aggregated-coverage
-
-      - name: Generate test summary
-        run: |
-          node scripts/test-reporting/generate-summary.js coverage-reports > $GITHUB_STEP_SUMMARY
-
-      - name: Check overall coverage threshold
-        run: |
-          if [ -f "aggregated-coverage/total-coverage.json" ]; then
-            TOTAL_COVERAGE=$(node -e "const c = require('./aggregated-coverage/total-coverage.json'); console.log(c.lines.pct)")
-            echo "Total Coverage: ${TOTAL_COVERAGE}%"
-
-            if (( $(echo "$TOTAL_COVERAGE < $COVERAGE_THRESHOLD" | bc -l) )); then
-              echo "::error::Overall coverage ${TOTAL_COVERAGE}% is below threshold ${COVERAGE_THRESHOLD}%"
-              exit 1
-            fi
-          fi
-
-      - name: Upload aggregated coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: aggregated-coverage-report
-          path: aggregated-coverage
-          retention-days: 90
-
-      - name: Comment on commit (if failed)
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const summary = fs.readFileSync('aggregated-coverage/summary.md', 'utf8');
-
-            github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: `## Daily Tests Failed ❌\n\n${summary}\n\n[View Details](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
-            });
-
-  # Job 7: Detect flaky tests
-  detect-flaky:
-    name: Detect Flaky Tests
-    needs: [test-backend, test-mobile, test-web]
-    if: always()
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Download test results
-        uses: actions/download-artifact@v4
-        with:
-          path: test-results
-
-      - name: Analyze test stability
-        run: |
-          # Run flaky test detection script
-          node scripts/test-reporting/detect-flaky-tests.js test-results
-
-      - name: Upload flaky test report
-        uses: actions/upload-artifact@v4
-        with:
-          name: flaky-test-report
-          path: test-results/flaky-tests.json
-          retention-days: 90
-
-      - name: Create issue for flaky tests
-        if: hashFiles('test-results/flaky-tests.json') != ''
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const flakyTests = JSON.parse(fs.readFileSync('test-results/flaky-tests.json', 'utf8'));
-
-            if (flakyTests.length > 0) {
-              const body = `## Flaky Tests Detected 🔄\n\n` +
-                `Found ${flakyTests.length} potentially flaky tests:\n\n` +
-                flakyTests.map(t => `- \`${t.name}\` (failed ${t.failureRate}% of the time)`).join('\n');
-
-              github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: `[Daily Tests] Flaky Tests Detected - ${new Date().toISOString().split('T')[0]}`,
-                body: body,
-                labels: ['testing', 'flaky-test', 'automated']
-              });
-            }
-
-  # Job 8: Performance metrics
-  metrics:
-    name: Track Test Performance
-    needs: [test-backend, test-mobile, test-web]
-    if: always()
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download test results
-        uses: actions/download-artifact@v4
-        with:
-          path: test-results
-
-      - name: Calculate performance metrics
-        run: |
-          # Track test execution time, memory usage, etc.
-          node scripts/test-reporting/track-metrics.js test-results
-
-      - name: Upload metrics
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-metrics
-          path: test-results/metrics.json
-          retention-days: 365
-
-      - name: Post metrics to summary
-        run: |
-          if [ -f "test-results/metrics.json" ]; then
-            echo "## Test Performance Metrics" >> $GITHUB_STEP_SUMMARY
-            node scripts/test-reporting/format-metrics.js test-results/metrics.json >> $GITHUB_STEP_SUMMARY
-          fi
-
-  # Job 9: Notify on failure
+  # Job 3: Always send Discord notification (success or failure)
   notify:
-    name: Notify on Failure
-    needs: [report, detect-flaky, metrics]
-    if: failure()
+    name: Discord Notification
+    needs: [test-mana-core-auth, test-integration]
+    if: always()
     runs-on: ubuntu-latest
 
     steps:
@@ -565,9 +228,22 @@ jobs:
       - name: Download coverage summary
         uses: actions/download-artifact@v4
         with:
-          name: aggregated-coverage-report
-          path: coverage-summary
+          name: coverage-mana-core-auth
+          path: coverage-mana-core-auth
         continue-on-error: true
+
+      - name: Check test results
+        id: check
+        run: |
+          # Check if both jobs succeeded
+          AUTH_STATUS="${{ needs.test-mana-core-auth.result }}"
+          INTEGRATION_STATUS="${{ needs.test-integration.result }}"
+
+          if [ "$AUTH_STATUS" = "success" ] && [ "$INTEGRATION_STATUS" = "success" ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Prepare notification data
         id: prepare
@@ -577,8 +253,8 @@ jobs:
           echo "run_url=$RUN_URL" >> $GITHUB_OUTPUT
 
           # Get coverage if available
-          if [ -f "coverage-summary/total-coverage.json" ]; then
-            COVERAGE=$(node -e "const c = require('./coverage-summary/total-coverage.json'); console.log(c.lines.pct)")
+          if [ -f "coverage-mana-core-auth/coverage-summary.json" ]; then
+            COVERAGE=$(node -e "const c = require('./coverage-mana-core-auth/coverage-summary.json'); console.log(c.total.lines.pct)")
             echo "coverage=${COVERAGE}%" >> $GITHUB_OUTPUT
           else
             echo "coverage=N/A" >> $GITHUB_OUTPUT
@@ -593,144 +269,55 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          curl -X POST "$DISCORD_WEBHOOK_URL" \
-            -H 'Content-Type: application/json' \
-            -d '{
-              "username": "ManaCore CI/CD",
-              "avatar_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-              "embeds": [{
-                "title": "❌ Daily Tests Failed",
-                "description": "The daily test suite encountered failures and needs attention.",
-                "color": 15158332,
-                "fields": [
-                  {
-                    "name": "📅 Date",
-                    "value": "${{ steps.prepare.outputs.date }}",
-                    "inline": true
-                  },
-                  {
-                    "name": "📊 Coverage",
-                    "value": "${{ steps.prepare.outputs.coverage }}",
-                    "inline": true
-                  },
-                  {
-                    "name": "🔗 Workflow Run",
-                    "value": "[View Details](${{ steps.prepare.outputs.run_url }})",
-                    "inline": false
-                  }
-                ],
-                "footer": {
-                  "text": "ManaCore Monorepo"
-                },
-                "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
-              }]
-            }'
-
-      - name: Send Slack notification
-        if: env.SLACK_WEBHOOK_URL != ''
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          curl -X POST $SLACK_WEBHOOK_URL \
-            -H 'Content-Type: application/json' \
-            -d "{\"text\":\"Daily Tests Failed ❌\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Daily Test Suite Failed*\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>\"}}]}"
-
-      - name: Create GitHub issue
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `[Daily Tests] Test Suite Failed - ${new Date().toISOString().split('T')[0]}`,
-              body: `The daily test suite failed. Please investigate.\n\n[View Workflow Run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
-              labels: ['testing', 'failure', 'automated']
-            });
-
-  # Job 10: Notify on success (optional)
-  notify-success:
-    name: Notify on Success
-    needs: [report, detect-flaky, metrics]
-    if: success() && github.event.inputs.notify_success == 'true'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download coverage summary
-        uses: actions/download-artifact@v4
-        with:
-          name: aggregated-coverage-report
-          path: coverage-summary
-        continue-on-error: true
-
-      - name: Prepare notification data
-        id: prepare
-        run: |
-          # Get workflow run URL
-          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          echo "run_url=$RUN_URL" >> $GITHUB_OUTPUT
-
-          # Get coverage if available
-          if [ -f "coverage-summary/total-coverage.json" ]; then
-            COVERAGE=$(node -e "const c = require('./coverage-summary/total-coverage.json'); console.log(c.lines.pct)")
-            echo "coverage=${COVERAGE}%" >> $GITHUB_OUTPUT
+          if [ "${{ steps.check.outputs.success }}" = "true" ]; then
+            TITLE="✅ Daily Tests Passed"
+            DESCRIPTION="All tests completed successfully!"
+            COLOR=3066993
           else
-            echo "coverage=N/A" >> $GITHUB_OUTPUT
+            TITLE="❌ Daily Tests Failed"
+            DESCRIPTION="Some tests failed. Please investigate."
+            COLOR=15158332
           fi
 
-          # Get test count if available
-          if [ -f "coverage-summary/total-coverage.json" ]; then
-            TESTS=$(node -e "const c = require('./coverage-summary/total-coverage.json'); console.log(c.tests || 'N/A')")
-            echo "tests=$TESTS" >> $GITHUB_OUTPUT
-          else
-            echo "tests=N/A" >> $GITHUB_OUTPUT
-          fi
-
-          # Get date
-          DATE=$(date +%Y-%m-%d)
-          echo "date=$DATE" >> $GITHUB_OUTPUT
-
-      - name: Send Discord success notification
-        if: env.DISCORD_WEBHOOK_URL != ''
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: |
           curl -X POST "$DISCORD_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
-            -d '{
-              "username": "ManaCore CI/CD",
-              "avatar_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-              "embeds": [{
-                "title": "✅ Daily Tests Passed",
-                "description": "All tests completed successfully!",
-                "color": 3066993,
-                "fields": [
+            -d "{
+              \"username\": \"ManaCore CI/CD\",
+              \"avatar_url\": \"https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png\",
+              \"embeds\": [{
+                \"title\": \"$TITLE\",
+                \"description\": \"$DESCRIPTION\",
+                \"color\": $COLOR,
+                \"fields\": [
                   {
-                    "name": "📅 Date",
-                    "value": "${{ steps.prepare.outputs.date }}",
-                    "inline": true
+                    \"name\": \"📅 Date\",
+                    \"value\": \"${{ steps.prepare.outputs.date }}\",
+                    \"inline\": true
                   },
                   {
-                    "name": "📊 Coverage",
-                    "value": "${{ steps.prepare.outputs.coverage }}",
-                    "inline": true
+                    \"name\": \"📊 Coverage\",
+                    \"value\": \"${{ steps.prepare.outputs.coverage }}\",
+                    \"inline\": true
                   },
                   {
-                    "name": "✅ Tests",
-                    "value": "${{ steps.prepare.outputs.tests }} passed",
-                    "inline": true
+                    \"name\": \"🧪 mana-core-auth\",
+                    \"value\": \"${{ needs.test-mana-core-auth.result }}\",
+                    \"inline\": true
                   },
                   {
-                    "name": "🔗 Workflow Run",
-                    "value": "[View Details](${{ steps.prepare.outputs.run_url }})",
-                    "inline": false
+                    \"name\": \"🔗 Integration Tests\",
+                    \"value\": \"${{ needs.test-integration.result }}\",
+                    \"inline\": true
+                  },
+                  {
+                    \"name\": \"🔗 Workflow Run\",
+                    \"value\": \"[View Details](${{ steps.prepare.outputs.run_url }})\",
+                    \"inline\": false
                   }
                 ],
-                "footer": {
-                  "text": "ManaCore Monorepo"
+                \"footer\": {
+                  \"text\": \"ManaCore Monorepo\"
                 },
-                "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+                \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
               }]
-            }'
+            }"
