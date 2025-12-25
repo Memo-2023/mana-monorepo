@@ -718,10 +718,15 @@ export class BetterAuthService {
 			// Revoke old session (refresh token rotation)
 			await db.update(sessions).set({ revokedAt: new Date() }).where(eq(sessions.id, session.id));
 
-			// Generate new session
+			// Generate new session with sliding window expiration
 			const sessionId = randomUUID();
 			const newRefreshToken = nanoid(64);
-			const refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+			// Sliding window: Extend from NOW, preserving rememberMe preference
+			// This allows active users to stay signed in indefinitely
+			const wasRememberMe = session.rememberMe ?? false;
+			const extensionDays = wasRememberMe ? 30 : 7;
+			const refreshTokenExpiresAt = new Date(Date.now() + extensionDays * 24 * 60 * 60 * 1000);
 			const accessTokenExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
 			await db.insert(sessions).values({
@@ -729,12 +734,13 @@ export class BetterAuthService {
 				userId: user.id,
 				token: sessionId,
 				refreshToken: newRefreshToken,
-				refreshTokenExpiresAt,
+				refreshTokenExpiresAt, // Extends with each refresh (sliding window)
 				ipAddress: session.ipAddress,
 				userAgent: session.userAgent,
 				deviceId: session.deviceId,
 				deviceName: session.deviceName,
 				expiresAt: accessTokenExpiresAt,
+				rememberMe: wasRememberMe, // Preserve remember me flag
 			});
 
 			// Generate new JWT using Better Auth's JWT plugin (EdDSA)
