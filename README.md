@@ -34,8 +34,6 @@ All services are deployed to staging at `*.staging.manacore.ai`.
 | **Picture** | https://picture-landing.pages.dev |
 | **ManaCore** | https://manacore-landing.pages.dev |
 | **ManaDeck** | https://manadeck-landing.pages.dev |
-| **Zitare** | https://zitare-landing.pages.dev |
-| **Presi** | https://presi-landing.pages.dev |
 
 ## Projects
 
@@ -44,12 +42,13 @@ All services are deployed to staging at `*.staging.manacore.ai`.
 | **manacore** | Multi-app ecosystem platform | Expo, SvelteKit |
 | **chat** | AI chat application | NestJS, Expo, SvelteKit |
 | **calendar** | Calendar & scheduling | NestJS, SvelteKit |
-| **clock** | World clock, timers, alarms | NestJS, SvelteKit |
-| **todo** | Task management | NestJS, SvelteKit |
 | **contacts** | Contact management | NestJS, SvelteKit |
+| **context** | AI document context | Expo |
 | **manadeck** | Card/deck management | NestJS, Expo, SvelteKit |
+| **nutriphi** | Nutrition tracking (planned) | - |
 | **picture** | AI image generation | NestJS, Expo, SvelteKit |
-| **zitare** | Daily inspiration quotes | NestJS, Expo, SvelteKit |
+| **storage** | Cloud storage (planned) | - |
+| **todo** | Task management | NestJS, SvelteKit |
 
 ## Getting Started
 
@@ -79,8 +78,9 @@ Use `dev:*:full` commands to start any app with automatic database setup:
 ```bash
 pnpm docker:up           # Start PostgreSQL, Redis, MinIO
 pnpm dev:chat:full       # Start chat with auth + auto DB setup
+pnpm dev:picture:full    # Start picture with auth + auto DB setup
 pnpm dev:calendar:full   # Start calendar with auth + auto DB setup
-pnpm dev:clock:full      # Start clock with auth + auto DB setup
+pnpm dev:contacts:full   # Start contacts with auth + auto DB setup
 pnpm dev:todo:full       # Start todo with auth + auto DB setup
 pnpm dev:manacore:full   # Start manacore with all backends
 ```
@@ -119,21 +119,26 @@ Located in `packages/`:
 
 ```
 manacore-monorepo/
-├── apps/                    # Active product applications
-│   ├── manacore/            # Central dashboard
-│   ├── chat/                # AI chat app
-│   ├── calendar/            # Calendar app
-│   ├── clock/               # Clock/timer app
-│   ├── todo/                # Task management
+├── apps/                    # Active product applications (10 apps)
+│   ├── calendar/            # Calendar & scheduling
+│   ├── chat/                # AI chat
 │   ├── contacts/            # Contact management
-│   ├── manadeck/            # Card/deck app
+│   ├── context/             # AI document context
+│   ├── manacore/            # Multi-app dashboard
+│   ├── manadeck/            # Card/deck management
+│   ├── nutriphi/            # Nutrition (planned)
 │   ├── picture/             # AI image generation
-│   └── zitare/              # Daily quotes
-├── apps-archived/           # Archived projects
-├── games/                   # Game projects
+│   ├── storage/             # Cloud storage (planned)
+│   └── todo/                # Task management
+├── games/                   # Game projects (5 games)
+│   ├── figgos/              # Collectible figures
+│   ├── mana-games/          # Browser games
+│   ├── voxel-lava/          # 3D voxel game
+│   ├── whopixels/           # Pixel art editor
+│   └── worldream/           # World building
 ├── services/
 │   └── mana-core-auth/      # Central auth service
-├── packages/                # Shared packages
+├── packages/                # Shared packages (@manacore/*)
 ├── docker/                  # Docker configuration
 └── .github/workflows/       # CI/CD pipelines
 ```

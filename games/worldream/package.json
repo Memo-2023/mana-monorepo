@@ -1,7 +1,0 @@
-{
-	"name": "worldream",
-	"private": true,
-	"scripts": {
-		"dev": "turbo run dev"
-	}
-}

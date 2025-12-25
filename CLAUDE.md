@@ -17,12 +17,23 @@ Multi-app SaaS monorepo with shared packages and centralized authentication.
 
 ```
 manacore-monorepo/
-├── apps/                    # Active SaaS applications
+├── apps/                    # Active SaaS applications (10 apps)
+│   ├── calendar/            # Calendar & scheduling
 │   ├── chat/                # AI chat (backend, mobile, web, landing)
-│   ├── picture/             # AI image generation
-│   ├── zitare/              # Daily quotes
 │   ├── contacts/            # Contact management
-│   └── ...
+│   ├── context/             # AI document context (mobile only)
+│   ├── manacore/            # Multi-app dashboard
+│   ├── manadeck/            # Card/deck management
+│   ├── nutriphi/            # Nutrition tracking (planned)
+│   ├── picture/             # AI image generation
+│   ├── storage/             # Cloud storage (planned)
+│   └── todo/                # Task management
+├── games/                   # Game projects (5 games)
+│   ├── figgos/              # Collectible figure game
+│   ├── mana-games/          # Browser games platform
+│   ├── voxel-lava/          # 3D voxel game
+│   ├── whopixels/           # Pixel art editor
+│   └── worldream/           # World building
 ├── services/
 │   └── mana-core-auth/      # Central auth service (port 3001)
 ├── packages/                # Shared packages (@manacore/*)
@@ -38,9 +49,10 @@ pnpm docker:up
 
 # Start any app with automatic DB setup
 pnpm dev:chat:full       # Chat with auth + backend + web
-pnpm dev:zitare:full     # Zitare with auth + backend + web
 pnpm dev:picture:full    # Picture with auth + backend + web
+pnpm dev:calendar:full   # Calendar with auth + backend + web
 pnpm dev:contacts:full   # Contacts with auth + backend + web
+pnpm dev:todo:full       # Todo with auth + backend + web
 ```
 
 ## Technology Stack

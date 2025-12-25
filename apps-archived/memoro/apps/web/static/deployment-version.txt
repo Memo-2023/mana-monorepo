@@ -1,2 +1,0 @@
-Deployment Version: 2025-11-17-00:26
-POST and GET handlers for Apple Sign-In callback implemented
