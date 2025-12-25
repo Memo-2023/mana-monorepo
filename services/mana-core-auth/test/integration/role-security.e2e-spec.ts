@@ -15,10 +15,12 @@ import { Test } from '@nestjs/testing';
 import type { TestingModule } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
 import { BetterAuthService } from '../../src/auth/services/better-auth.service';
-import { SecurityEventsService } from '../../src/security-events/security-events.service';
-import { ReferralCodeService } from '../../src/referrals/referral-code.service';
-import { ReferralTierService } from '../../src/referrals/referral-tier.service';
-import { ReferralTrackingService } from '../../src/referrals/referral-tracking.service';
+import { SecurityEventsService } from '../../src/security-events';
+import {
+	ReferralCodeService,
+	ReferralTierService,
+	ReferralTrackingService,
+} from '../../src/referrals/services';
 import configuration from '../../src/config/configuration';
 
 // Mock services that BetterAuthService depends on
