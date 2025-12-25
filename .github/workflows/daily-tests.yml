@@ -93,8 +93,7 @@ jobs:
         working-directory: services/mana-core-auth
         env:
           DATABASE_URL: postgresql://manacore:testpassword@localhost:5432/manacore
-        run: |
-          pnpm run db:push || echo "No migrations to run"
+        run: pnpm run db:migrate
 
       - name: Run tests with coverage
         working-directory: services/mana-core-auth
@@ -184,13 +183,10 @@ jobs:
         run: pnpm run build:packages
 
       - name: Setup databases for integration tests
+        working-directory: services/mana-core-auth
         env:
           DATABASE_URL: postgresql://manacore:testpassword@localhost:5432/manacore
-        run: |
-          # Setup auth database
-          cd services/mana-core-auth
-          pnpm run db:push || echo "Auth DB setup skipped"
-          cd ../..
+        run: pnpm run db:migrate
 
       - name: Run integration tests
         env:
