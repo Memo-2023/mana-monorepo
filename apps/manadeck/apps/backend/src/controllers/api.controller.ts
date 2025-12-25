@@ -11,9 +11,9 @@ import {
 	Logger,
 	BadRequestException,
 } from '@nestjs/common';
-import { AuthGuard } from '@mana-core/nestjs-integration/guards';
-import { CurrentUser } from '@mana-core/nestjs-integration/decorators';
-import { CreditClientService } from '@mana-core/nestjs-integration';
+import { AuthGuard } from '@manacore/nestjs-integration/guards';
+import { CurrentUser } from '@manacore/nestjs-integration/decorators';
+import { CreditClientService } from '@manacore/nestjs-integration';
 import { isOk, CreditError, ServiceError } from '@manacore/shared-errors';
 import {
 	CreditOperationType,

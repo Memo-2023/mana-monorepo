@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { eq } from 'drizzle-orm';
-import { CreditClientService } from '@mana-core/nestjs-integration';
+import { CreditClientService } from '@manacore/nestjs-integration';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
 import { imageGenerations, images, models } from '../db/schema';

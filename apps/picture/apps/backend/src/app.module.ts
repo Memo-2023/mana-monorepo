@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ManaCoreModule } from '@mana-core/nestjs-integration';
+import { ManaCoreModule } from '@manacore/nestjs-integration';
 import { DatabaseModule } from './db/database.module';
 import { HealthModule } from './health/health.module';
 import { ModelModule } from './model/model.module';

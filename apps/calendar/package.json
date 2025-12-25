@@ -4,7 +4,7 @@
 	"private": true,
 	"description": "Calendar App - Personal and Shared Calendars with CalDAV/iCal Sync",
 	"scripts": {
-		"dev": "turbo run dev",
+		"dev": "pnpm run --filter=@calendar/* --parallel dev",
 		"dev:backend": "pnpm --filter @calendar/backend dev",
 		"dev:web": "pnpm --filter @calendar/web dev",
 		"dev:landing": "pnpm --filter @calendar/landing dev",

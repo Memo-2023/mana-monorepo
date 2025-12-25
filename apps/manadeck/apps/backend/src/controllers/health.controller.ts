@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { HealthCheckService, HttpHealthIndicator, HealthCheck } from '@nestjs/terminus';
 import { ConfigService } from '@nestjs/config';
-import { Public } from '@mana-core/nestjs-integration/decorators';
+import { Public } from '@manacore/nestjs-integration/decorators';
 
 @Controller('health')
 export class HealthController {

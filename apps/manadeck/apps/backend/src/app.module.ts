@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClsModule } from 'nestjs-cls';
 import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
-import { ManaCoreModule } from '@mana-core/nestjs-integration';
+import { ManaCoreModule } from '@manacore/nestjs-integration';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ApiController } from './controllers/api.controller';

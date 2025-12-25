@@ -1,13 +1,13 @@
 {
 	"name": "@manacore/shared-nestjs-auth",
 	"version": "1.0.0",
+	"private": true,
 	"description": "Shared authentication utilities for NestJS backends - JWT validation via Mana Core Auth",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "tsc",
 		"clean": "rm -rf dist",
-		"prepublishOnly": "pnpm build",
 		"lint": "eslint .",
 		"type-check": "tsc --noEmit"
 	},

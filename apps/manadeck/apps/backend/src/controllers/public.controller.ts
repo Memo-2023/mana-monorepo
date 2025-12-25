@@ -1,6 +1,6 @@
 import { Controller, Get, UseGuards, Query, Logger } from '@nestjs/common';
-import { OptionalAuthGuard } from '@mana-core/nestjs-integration/guards';
-import { CurrentUser, Public } from '@mana-core/nestjs-integration/decorators';
+import { OptionalAuthGuard } from '@manacore/nestjs-integration/guards';
+import { CurrentUser, Public } from '@manacore/nestjs-integration/decorators';
 import { DeckRepository, UserStatsRepository, DeckTemplateRepository } from '../database';
 
 @Controller('public')

@@ -4,6 +4,6 @@
 	"private": true,
 	"description": "Chat project - AI chat application with mobile, web and landing",
 	"scripts": {
-		"dev": "turbo run dev"
+		"dev": "pnpm run --filter=@chat/* --parallel dev"
 	}
 }

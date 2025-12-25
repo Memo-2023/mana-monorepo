@@ -1,6 +1,7 @@
 {
-	"name": "@mana-core/nestjs-integration",
+	"name": "@manacore/nestjs-integration",
 	"version": "1.0.0",
+	"private": true,
 	"description": "NestJS integration package for Mana Core authentication and credits",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",

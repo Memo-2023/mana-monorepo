@@ -16,6 +16,7 @@
 		"clean": "turbo run clean",
 		"format": "prettier --config .prettierrc.json --write \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
 		"format:check": "prettier --config .prettierrc.json --check \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
+		"validate:monorepo": "node scripts/validate-monorepo.mjs",
 		"validate:runtime-config": "node scripts/validate-runtime-config.mjs",
 		"svelte-check": "./scripts/svelte-check-staged.sh",
 		"build:check": "./scripts/build-check-staged.sh",
@@ -160,8 +161,8 @@
 	"pnpm": {
 		"peerDependencyRules": {
 			"allowedVersions": {
-				"@mana-core/nestjs-integration>@nestjs/common": "^11.0.0",
-				"@mana-core/nestjs-integration>@nestjs/core": "^11.0.0",
+				"@manacore/nestjs-integration>@nestjs/common": "^11.0.0",
+				"@manacore/nestjs-integration>@nestjs/core": "^11.0.0",
 				"react-native>react": ">=18.0.0",
 				"react-native>@types/react": ">=18.0.0",
 				"@sveltejs/vite-plugin-svelte>vite": ">=6.0.0",

@@ -4,13 +4,10 @@
 	"private": true,
 	"description": "Todo App - Task Management for ManaCore Ecosystem",
 	"scripts": {
-		"dev": "turbo run dev",
+		"dev": "pnpm run --filter=@todo/* --parallel dev",
 		"dev:backend": "pnpm --filter @todo/backend dev",
 		"dev:web": "pnpm --filter @todo/web dev",
 		"dev:landing": "pnpm --filter @todo/landing dev",
-		"build": "turbo run build",
-		"lint": "turbo run lint",
-		"clean": "turbo run clean",
 		"db:push": "pnpm --filter @todo/backend db:push",
 		"db:studio": "pnpm --filter @todo/backend db:studio",
 		"db:seed": "pnpm --filter @todo/backend db:seed"

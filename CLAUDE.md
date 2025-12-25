@@ -149,11 +149,40 @@ Generated from `.env.development` via `pnpm setup:env` (auto-runs after install)
 pnpm install              # Install dependencies
 pnpm dev:{app}:full       # Start app with DB setup
 pnpm type-check           # Type check all packages
+pnpm lint                 # Lint all packages
 pnpm format               # Format code
 pnpm build                # Build all packages
 pnpm docker:up            # Start local infrastructure
 pnpm setup:env            # Regenerate .env files
+pnpm validate:monorepo    # Validate monorepo best practices
 ```
+
+## Validation & CI
+
+### Monorepo Best Practices Validation
+
+The `validate:monorepo` command checks for common monorepo issues:
+
+```bash
+pnpm validate:monorepo
+```
+
+**What it checks:**
+1. **No Turborepo recursion** - Ensures child packages don't have `turbo run` commands (prevents infinite loops)
+2. **Private packages** - All internal packages in `packages/` and `services/` have `"private": true`
+3. **Workspace protocol** - All internal dependencies use `workspace:*` (no hardcoded versions)
+4. **No obsolete scripts** - Warns about `prepublishOnly` in private packages
+
+**When it runs:**
+- Locally: `pnpm validate:monorepo`
+- CI/CD: Automatically on every PR (`.github/workflows/ci.yml`)
+
+**Example output:**
+```
+✅ All checks passed! Monorepo follows best practices.
+```
+
+This prevents issues before they reach production! 🛡️
 
 ## Documentation
 

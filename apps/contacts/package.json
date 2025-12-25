@@ -4,7 +4,7 @@
 	"private": true,
 	"description": "Contacts App - Contact Management with Manacore Integration",
 	"scripts": {
-		"dev": "turbo run dev",
+		"dev": "pnpm run --filter=@contacts/* --parallel dev",
 		"dev:backend": "pnpm --filter @contacts/backend dev",
 		"dev:web": "pnpm --filter @contacts/web dev",
 		"dev:landing": "pnpm --filter @contacts/landing dev",

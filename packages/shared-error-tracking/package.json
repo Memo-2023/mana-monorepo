@@ -1,6 +1,7 @@
 {
 	"name": "@manacore/shared-error-tracking",
 	"version": "1.0.0",
+	"private": true,
 	"description": "Centralized error tracking for ManaCore applications - NestJS and frontend clients",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -25,7 +26,6 @@
 	"scripts": {
 		"build": "tsc",
 		"clean": "rm -rf dist",
-		"prepublishOnly": "pnpm build",
 		"lint": "eslint .",
 		"type-check": "tsc --noEmit"
 	},
