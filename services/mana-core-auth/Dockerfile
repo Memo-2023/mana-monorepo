@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 
 # Install pnpm
 RUN npm install -g pnpm@9.15.0
@@ -29,7 +29,7 @@ WORKDIR /app/services/mana-core-auth
 RUN pnpm build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:25-alpine AS production
 
 # Install pnpm
 RUN npm install -g pnpm@9.15.0
