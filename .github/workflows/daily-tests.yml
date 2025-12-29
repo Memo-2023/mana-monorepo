@@ -112,7 +112,7 @@ jobs:
 
       - name: Upload coverage to artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-mana-core-auth
           path: services/mana-core-auth/coverage
@@ -204,7 +204,7 @@ jobs:
 
       - name: Upload integration test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: integration-test-results
           path: services/mana-core-auth/test-results
