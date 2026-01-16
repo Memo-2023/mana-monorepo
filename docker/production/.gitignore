@@ -1,0 +1,8 @@
+# Never commit production secrets
+.env
+*.env.local
+
+# Backup files (stored on server, not in git)
+backups/
+*.sql
+*.sql.gz

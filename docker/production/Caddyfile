@@ -1,0 +1,169 @@
+# ManaCore Production Reverse Proxy
+# Domain: manacore.ai
+#
+# Features:
+#   - Automatic HTTPS via Let's Encrypt
+#   - HTTP/2 and HTTP/3 support
+#   - Gzip compression
+#   - Security headers
+#   - Health check endpoints
+#
+# Reload: docker exec manacore-caddy caddy reload --config /etc/caddy/Caddyfile
+
+# Global options
+{
+	email admin@manacore.ai
+	# Uncomment for staging/testing Let's Encrypt (higher rate limits)
+	# acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+# Common security headers snippet
+(security_headers) {
+	header {
+		# Security headers
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		X-XSS-Protection "1; mode=block"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# Remove server identification
+		-Server
+	}
+}
+
+# Common compression snippet
+(compression) {
+	encode gzip zstd
+}
+
+# ============================================
+# Auth Service
+# ============================================
+
+auth.manacore.ai {
+	import security_headers
+	import compression
+
+	reverse_proxy mana-core-auth:3001 {
+		health_uri /api/v1/health
+		health_interval 30s
+	}
+}
+
+# ============================================
+# Main Dashboard
+# ============================================
+
+app.manacore.ai {
+	import security_headers
+	import compression
+
+	reverse_proxy manacore-web:5173 {
+		health_uri /health
+		health_interval 30s
+	}
+}
+
+# Redirect root domain to app
+manacore.ai {
+	redir https://app.manacore.ai{uri} permanent
+}
+
+www.manacore.ai {
+	redir https://app.manacore.ai{uri} permanent
+}
+
+# ============================================
+# Chat App
+# ============================================
+
+chat.manacore.ai {
+	import security_headers
+	import compression
+
+	reverse_proxy chat-web:3000 {
+		health_uri /health
+		health_interval 30s
+	}
+}
+
+chat-api.manacore.ai {
+	import security_headers
+	import compression
+
+	reverse_proxy chat-backend:3002 {
+		health_uri /api/v1/health
+		health_interval 30s
+	}
+}
+
+# ============================================
+# Todo App
+# ============================================
+
+todo.manacore.ai {
+	import security_headers
+	import compression
+
+	reverse_proxy todo-web:5188 {
+		health_uri /health
+		health_interval 30s
+	}
+}
+
+todo-api.manacore.ai {
+	import security_headers
+	import compression
+
+	reverse_proxy todo-backend:3018 {
+		health_uri /api/v1/health
+		health_interval 30s
+	}
+}
+
+# ============================================
+# Calendar App
+# ============================================
+
+calendar.manacore.ai {
+	import security_headers
+	import compression
+
+	reverse_proxy calendar-web:5186 {
+		health_uri /health
+		health_interval 30s
+	}
+}
+
+calendar-api.manacore.ai {
+	import security_headers
+	import compression
+
+	reverse_proxy calendar-backend:3016 {
+		health_uri /api/v1/health
+		health_interval 30s
+	}
+}
+
+# ============================================
+# Clock App
+# ============================================
+
+clock.manacore.ai {
+	import security_headers
+	import compression
+
+	reverse_proxy clock-web:5187 {
+		health_uri /health
+		health_interval 30s
+	}
+}
+
+clock-api.manacore.ai {
+	import security_headers
+	import compression
+
+	reverse_proxy clock-backend:3017 {
+		health_uri /api/v1/health
+		health_interval 30s
+	}
+}
