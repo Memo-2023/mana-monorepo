@@ -39,7 +39,6 @@
 <div class="quick-add-inline">
 	{#if isAdding}
 		<div class="add-form p-3">
-			<!-- svelte-ignore a11y_autofocus -->
 			<input
 				bind:this={inputRef}
 				bind:value={title}
@@ -72,7 +71,6 @@
 						title = '';
 						isAdding = false;
 					}}
-					aria-label="Abbrechen"
 				>
 					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path

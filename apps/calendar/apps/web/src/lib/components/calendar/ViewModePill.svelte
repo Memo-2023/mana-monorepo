@@ -26,37 +26,25 @@
 	// View labels (short versions for pill)
 	const viewLabels: Record<CalendarViewType, string> = {
 		day: '1',
-		'3day': '3',
 		'5day': '5',
 		week: '7',
 		'10day': '10',
 		'14day': '14',
-		'30day': '30',
-		'60day': '60',
-		'90day': '90',
-		'365day': '365',
 		month: 'M',
 		year: 'Y',
 		agenda: 'A',
-		custom: '',
 	};
 
 	// View titles for tooltip
 	const viewTitles: Record<CalendarViewType, string> = {
 		day: 'Tagesansicht',
-		'3day': '3-Tage-Ansicht',
 		'5day': '5-Tage-Ansicht',
 		week: 'Wochenansicht',
 		'10day': '10-Tage-Ansicht',
 		'14day': '14-Tage-Ansicht',
-		'30day': '30-Tage-Ansicht',
-		'60day': '60-Tage-Ansicht',
-		'90day': '90-Tage-Ansicht',
-		'365day': '365-Tage-Ansicht',
 		month: 'Monatsansicht',
 		year: 'Jahresansicht',
 		agenda: 'Agenda',
-		custom: 'Benutzerdefiniert',
 	};
 
 	// Get enabled views from settings

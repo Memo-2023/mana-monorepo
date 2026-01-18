@@ -15,7 +15,6 @@
 	let loading = $state(false);
 	let selectedIndex = $state(0);
 	let searchTimeout: ReturnType<typeof setTimeout>;
-	// svelte-ignore non_reactive_update - Element reference doesn't need reactivity
 	let inputElement: HTMLInputElement;
 
 	// Reset state when modal opens
@@ -110,13 +109,12 @@
 </script>
 
 {#if open}
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_interactive_supports_focus -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		class="search-backdrop"
 		role="dialog"
 		aria-modal="true"
 		aria-label="Kontakt suchen"
-		tabindex="-1"
 		onclick={handleBackdropClick}
 		onkeydown={handleKeydown}
 	>

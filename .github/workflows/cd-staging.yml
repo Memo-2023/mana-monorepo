@@ -31,8 +31,6 @@ on:
           - calendar-web
           - clock-backend
           - clock-web
-          - picture-backend
-          - picture-web
   workflow_call:
 
 permissions:
@@ -100,49 +98,28 @@ jobs:
           POSTGRES_PORT=5432
           POSTGRES_DB=manacore
           POSTGRES_USER=postgres
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_PASSWORD=${{ secrets.STAGING_POSTGRES_PASSWORD }}
 
           # Redis - Configuration
           REDIS_HOST=redis
           REDIS_PORT=6379
-          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          REDIS_PASSWORD=${{ secrets.STAGING_REDIS_PASSWORD }}
 
           # Mana Core Auth - Configuration
           MANA_SERVICE_URL=http://mana-core-auth:3001
-          # JWT keys managed automatically by Better Auth (EdDSA) - stored in auth.jwks table
-
-          # Brevo Email Service
-          BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
-          EMAIL_SENDER_ADDRESS=noreply@manacore.ai
-          EMAIL_SENDER_NAME=ManaCore
-
-          # Base URL for auth callbacks (password reset, email verification)
-          BASE_URL=https://auth.staging.manacore.ai
-          # Frontend URL for password reset and email verification links
-          FRONTEND_URL=https://staging.manacore.ai
+          JWT_SECRET=${{ secrets.STAGING_JWT_SECRET }}
+          JWT_PUBLIC_KEY=${{ secrets.STAGING_JWT_PUBLIC_KEY }}
+          JWT_PRIVATE_KEY=${{ secrets.STAGING_JWT_PRIVATE_KEY }}
 
           # Supabase
-          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_URL=${{ secrets.STAGING_SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.STAGING_SUPABASE_SERVICE_ROLE_KEY }}
 
           # Azure OpenAI
-          AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}
-          AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_ENDPOINT=${{ secrets.STAGING_AZURE_OPENAI_ENDPOINT }}
+          AZURE_OPENAI_API_KEY=${{ secrets.STAGING_AZURE_OPENAI_API_KEY }}
           AZURE_OPENAI_API_VERSION=2024-12-01-preview
-
-          # Hetzner Object Storage (S3-compatible)
-          S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}
-          S3_REGION=${{ secrets.S3_REGION }}
-          S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}
-          MANACORE_STORAGE_PUBLIC_URL=${{ secrets.MANACORE_STORAGE_PUBLIC_URL }}
-
-          # Replicate API (for Picture app AI image generation)
-          REPLICATE_API_TOKEN=${{ secrets.REPLICATE_API_TOKEN }}
-
-          # Mana Core Service Key (for credit system)
-          MANA_CORE_SERVICE_KEY=${{ secrets.MANA_CORE_SERVICE_KEY }}
 
           # Environment
           NODE_ENV=staging
@@ -223,9 +200,6 @@ jobs:
             # Create clock database (for clock-backend service)
             docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE clock;" 2>/dev/null || echo "clock database already exists"
 
-            # Create picture database (for picture-backend service)
-            docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE picture;" 2>/dev/null || echo "picture database already exists"
-
             echo "✅ Databases ready"
           EOF
 
@@ -280,17 +254,12 @@ jobs:
             if docker compose exec -T mana-core-auth test -f src/db/migrate.ts 2>/dev/null || \
                docker compose exec -T mana-core-auth pnpm run db:migrate --help 2>/dev/null; then
               run_migration mana-core-auth || {
-                echo "⚠️  mana-core-auth migration failed - falling back to db:push"
-                echo "    This syncs schema directly, bypassing migration tracking"
-                docker compose exec -T mana-core-auth pnpm run db:push || {
-                  echo "❌ mana-core-auth db:push also failed - aborting deployment"
-                  exit 1
-                }
-                echo "✅ [mana-core-auth] Schema synced via db:push"
+                echo "❌ mana-core-auth migration failed - aborting deployment"
+                exit 1
               }
             else
               echo "⏭️  [mana-core-auth] No db:migrate script, using db:push..."
-              docker compose exec -T mana-core-auth pnpm run db:push || echo "Auth schema push completed"
+              docker compose exec -T mana-core-auth npx drizzle-kit push --force || echo "Auth schema push completed"
             fi
 
             echo ""
@@ -363,8 +332,6 @@ jobs:
             check_health calendar-web http://localhost:5186/health || exit 1
             check_health clock-backend http://localhost:3017/api/v1/health || exit 1
             check_health clock-web http://localhost:5187/health || exit 1
-            check_health picture-backend http://localhost:3006/api/v1/health || exit 1
-            check_health picture-web http://localhost:5175/health || exit 1
 
             echo ""
             echo "✅ All health checks passed!"

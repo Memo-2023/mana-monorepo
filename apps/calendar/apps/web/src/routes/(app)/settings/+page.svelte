@@ -128,19 +128,13 @@
 	// View labels
 	const viewLabels: Record<CalendarViewType, string> = {
 		day: 'Tag',
-		'3day': '3 Tage',
 		'5day': '5 Tage',
 		week: 'Woche',
 		'10day': '10 Tage',
 		'14day': '14 Tage',
-		'30day': '30 Tage',
-		'60day': '60 Tage',
-		'90day': '90 Tage',
-		'365day': '365 Tage',
 		month: 'Monat',
 		year: 'Jahr',
 		agenda: 'Agenda',
-		custom: 'Benutzerdefiniert',
 	};
 
 	// Duration options in minutes

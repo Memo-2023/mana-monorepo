@@ -4,8 +4,7 @@
 
 interface SearchItem {
 	id: string;
-	title?: string;
-	subtitle?: string;
+	[key: string]: unknown;
 }
 
 // State

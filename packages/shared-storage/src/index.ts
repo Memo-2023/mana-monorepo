@@ -4,17 +4,23 @@ export { StorageClient } from './client';
 // Factory functions
 export {
 	createStorageClient,
-	createUnifiedStorage,
 	getStorageConfig,
-	UNIFIED_BUCKET,
-	APPS,
+	createPictureStorage,
+	createChatStorage,
+	createManaDeckStorage,
+	createNutriPhiStorage,
+	createPresiStorage,
+	createCalendarStorage,
+	createContactsStorage,
+	createStorageStorage,
+	createMailStorage,
+	createInventoryStorage,
 } from './factory';
 
 // Utilities
 export {
 	generateFileKey,
 	generateUserFileKey,
-	generateStorageKey,
 	getContentType,
 	validateFileSize,
 	validateFileExtension,
@@ -25,12 +31,13 @@ export {
 } from './utils';
 
 // Types
-export type {
-	StorageConfig,
-	BucketConfig,
-	AppName,
-	UploadOptions,
-	PresignedUrlOptions,
-	UploadResult,
-	FileInfo,
+export {
+	BUCKETS,
+	type StorageConfig,
+	type BucketConfig,
+	type BucketName,
+	type UploadOptions,
+	type PresignedUrlOptions,
+	type UploadResult,
+	type FileInfo,
 } from './types';

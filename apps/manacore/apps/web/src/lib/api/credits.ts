@@ -1,12 +1,11 @@
 /**
  * Credits Service for ManaCore Web App
  * Handles credit balance, transactions, and packages
- *
- * Uses runtime configuration for 12-factor compliance
  */
 
 import { authStore } from '$lib/stores/auth.svelte';
-import { getAuthUrl } from '$lib/config/runtime';
+
+const MANA_AUTH_URL = 'http://localhost:3001'; // TODO: Use PUBLIC_MANA_CORE_AUTH_URL from env
 
 // Types
 export interface CreditBalance {
@@ -53,9 +52,8 @@ export interface CreditPurchase {
 // Helper function for authenticated requests
 async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 	const token = await authStore.getAccessToken();
-	const authUrl = await getAuthUrl();
 
-	const response = await fetch(`${authUrl}${endpoint}`, {
+	const response = await fetch(`${MANA_AUTH_URL}${endpoint}`, {
 		...options,
 		headers: {
 			'Content-Type': 'application/json',
@@ -101,8 +99,7 @@ export const creditsService = {
 	 * Get available credit packages (public endpoint)
 	 */
 	async getPackages(): Promise<CreditPackage[]> {
-		const authUrl = await getAuthUrl();
-		const response = await fetch(`${authUrl}/api/v1/credits/packages`);
+		const response = await fetch(`${MANA_AUTH_URL}/api/v1/credits/packages`);
 		if (!response.ok) {
 			throw new Error('Failed to fetch packages');
 		}

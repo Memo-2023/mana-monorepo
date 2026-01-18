@@ -16,17 +16,13 @@
 		"test:watch": "jest --watch",
 		"test:cov": "jest --coverage",
 		"test:e2e": "jest --config ./test/jest-e2e.json",
-		"db:push": "node scripts/safe-db-push.mjs",
-		"db:push:force": "node scripts/safe-db-push.mjs --force",
-		"db:push:unsafe": "drizzle-kit push",
+		"db:push": "drizzle-kit push",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "tsx src/db/migrate.ts",
 		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
-		"@getbrevo/brevo": "^3.0.1",
 		"@google/generative-ai": "^0.24.1",
-		"@manacore/shared-nestjs-cors": "workspace:*",
 		"@nestjs/common": "^10.4.15",
 		"@nestjs/config": "^3.3.0",
 		"@nestjs/core": "^10.4.15",

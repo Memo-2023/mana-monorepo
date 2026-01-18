@@ -47,7 +47,6 @@ export const sessions = authSchema.table('sessions', {
 	deviceName: text('device_name'),
 	lastActivityAt: timestamp('last_activity_at', { withTimezone: true }).defaultNow(),
 	revokedAt: timestamp('revoked_at', { withTimezone: true }),
-	rememberMe: boolean('remember_me').default(false),
 });
 
 // Accounts table (for OAuth providers and credentials - Better Auth schema)

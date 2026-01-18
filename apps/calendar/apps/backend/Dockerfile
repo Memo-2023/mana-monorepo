@@ -12,10 +12,8 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 # Copy shared packages
-COPY packages/better-auth-types ./packages/better-auth-types
 COPY packages/shared-errors ./packages/shared-errors
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
-COPY packages/shared-nestjs-cors ./packages/shared-nestjs-cors
 
 # Copy calendar packages and backend
 COPY apps/calendar/packages ./apps/calendar/packages
@@ -25,16 +23,10 @@ COPY apps/calendar/apps/backend ./apps/calendar/apps/backend
 RUN pnpm install --frozen-lockfile
 
 # Build shared packages first
-WORKDIR /app/packages/better-auth-types
-RUN pnpm build
-
 WORKDIR /app/packages/shared-errors
 RUN pnpm build
 
 WORKDIR /app/packages/shared-nestjs-auth
-RUN pnpm build
-
-WORKDIR /app/packages/shared-nestjs-cors
 RUN pnpm build
 
 # Build the backend

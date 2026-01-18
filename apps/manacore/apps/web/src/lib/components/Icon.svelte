@@ -1,23 +1,34 @@
 <script lang="ts">
 	/**
-	 * Icon Component - Wrapper for phosphor-svelte icons
-	 * NOTE: This is a legacy wrapper. Use phosphor-svelte icons directly instead.
-	 * Example: import { House, User } from '@manacore/shared-icons';
+	 * Icon Component - Re-exports from @manacore/shared-icons
+	 * This wrapper ensures backward compatibility with existing imports
 	 */
+	import { iconPaths } from '@manacore/shared-icons';
 
 	interface Props {
-		name: string;
+		name: keyof typeof iconPaths;
 		size?: number;
 		class?: string;
 		color?: string;
 	}
 
 	let { name, size = 24, class: className = '', color }: Props = $props();
+
+	const path = $derived(iconPaths[name]);
 </script>
 
-<span
-	class="text-orange-500"
-	title="Icon component is deprecated. Use direct imports from @manacore/shared-icons instead."
->
-	⚠ {name}
-</span>
+{#if path}
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		width={size}
+		height={size}
+		fill={color || 'currentColor'}
+		viewBox="0 0 256 256"
+		class={className}
+		aria-hidden="true"
+	>
+		{@html path}
+	</svg>
+{:else}
+	<span class="text-red-500" title="Icon '{name}' not found">⚠</span>
+{/if}

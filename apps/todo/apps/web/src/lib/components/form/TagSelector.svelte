@@ -55,14 +55,7 @@
 	</button>
 
 	{#if showDropdown}
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-		<div
-			class="tag-dropdown"
-			onclick={(e) => e.stopPropagation()}
-			onkeydown={() => {}}
-			role="listbox"
-			tabindex="-1"
-		>
+		<div class="tag-dropdown" onclick={(e) => e.stopPropagation()} role="listbox">
 			{#each labelsStore.labels as tag}
 				<button
 					type="button"

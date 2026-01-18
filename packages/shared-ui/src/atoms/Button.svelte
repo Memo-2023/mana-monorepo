@@ -1,14 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	type ButtonVariant =
-		| 'primary'
-		| 'secondary'
-		| 'ghost'
-		| 'danger'
-		| 'destructive'
-		| 'outline'
-		| 'success';
+	type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline' | 'success';
 	type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
 
 	interface Props {
@@ -38,7 +31,6 @@
 		secondary: 'bg-menu text-theme hover:bg-menu-hover border-theme',
 		ghost: 'bg-transparent text-theme hover:bg-menu-hover border-transparent',
 		danger: 'bg-red-600 text-white hover:bg-red-700 border-transparent',
-		destructive: 'bg-red-600 text-white hover:bg-red-700 border-transparent',
 		outline: 'bg-transparent text-primary border-primary hover:bg-primary/10',
 		success: 'bg-green-600 text-white hover:bg-green-700 border-transparent',
 	};

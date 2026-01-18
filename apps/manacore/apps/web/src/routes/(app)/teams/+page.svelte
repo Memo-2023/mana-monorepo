@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { Card, Button, PageHeader } from '@manacore/shared-ui';
 	import type { PageData } from './$types';
-	import type { Team } from './+page.server';
 
 	let { data }: { data: PageData } = $props();
 
-	function getAvailableCredits(team: Team) {
-		return (team.allocated_credits || 0) - (team.used_credits || 0);
+	function getAvailableCredits(team: any) {
+		return team.allocated_credits - team.used_credits;
 	}
 
 	function getRoleBadgeColor(role: string) {
@@ -75,9 +74,7 @@
 								<div class="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
 									<div
 										class="h-full rounded-full bg-primary-600 transition-all"
-										style="width: {team.allocated_credits
-											? (getAvailableCredits(team) / team.allocated_credits) * 100
-											: 0}%"
+										style="width: {(getAvailableCredits(team) / team.allocated_credits) * 100}%"
 									></div>
 								</div>
 							</div>

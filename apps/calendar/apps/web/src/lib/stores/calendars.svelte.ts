@@ -20,7 +20,6 @@ const birthdayCalendar: Calendar = {
 	color: BIRTHDAY_CALENDAR.color,
 	isDefault: false,
 	isVisible: true, // Visibility controlled by settingsStore.showBirthdays
-	timezone: 'UTC',
 	createdAt: new Date().toISOString(),
 	updatedAt: new Date().toISOString(),
 };

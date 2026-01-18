@@ -6,26 +6,18 @@ RUN npm install -g pnpm@9.15.0
 
 WORKDIR /app
 
-# Copy root workspace files
-COPY pnpm-workspace.yaml ./
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-
-# Copy shared packages
-COPY packages/shared-nestjs-cors ./packages/shared-nestjs-cors
-
-# Copy mana-core-auth service
-COPY services/mana-core-auth ./services/mana-core-auth
+# Copy package files for mana-core-auth only (standalone build)
+COPY services/mana-core-auth/package.json ./
 
 # Install all dependencies (including devDependencies for build)
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
-# Build shared packages first
-WORKDIR /app/packages/shared-nestjs-cors
-RUN pnpm build
+# Copy source code
+COPY services/mana-core-auth/src ./src
+COPY services/mana-core-auth/tsconfig*.json ./
+COPY services/mana-core-auth/nest-cli.json ./
 
 # Build the application
-WORKDIR /app/services/mana-core-auth
 RUN pnpm build
 
 # Production stage
@@ -36,15 +28,17 @@ RUN npm install -g pnpm@9.15.0
 
 WORKDIR /app
 
-# Copy everything from builder (including node_modules)
-COPY --from=builder /app/pnpm-workspace.yaml ./
+# Copy package files
 COPY --from=builder /app/package.json ./
-COPY --from=builder /app/pnpm-lock.yaml ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/services/mana-core-auth ./services/mana-core-auth
 
-WORKDIR /app/services/mana-core-auth
+# Install production dependencies + tsx for migrations
+RUN pnpm install --prod && pnpm add tsx
+
+# Copy built application
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/src/db ./src/db
+COPY services/mana-core-auth/drizzle.config.ts ./
+COPY services/mana-core-auth/docker-entrypoint.sh ./
 
 # Make entrypoint executable
 RUN chmod +x ./docker-entrypoint.sh

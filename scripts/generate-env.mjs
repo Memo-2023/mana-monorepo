@@ -66,7 +66,8 @@ const APP_CONFIGS = [
 			REDIS_HOST: (env) => env.REDIS_HOST,
 			REDIS_PORT: (env) => env.REDIS_PORT,
 			REDIS_PASSWORD: (env) => env.REDIS_PASSWORD || '',
-			// JWT keys managed by Better Auth (EdDSA) - stored in auth.jwks table
+			JWT_PRIVATE_KEY: (env) => env.JWT_PRIVATE_KEY,
+			JWT_PUBLIC_KEY: (env) => env.JWT_PUBLIC_KEY,
 			JWT_ACCESS_TOKEN_EXPIRY: (env) => env.JWT_ACCESS_TOKEN_EXPIRY,
 			JWT_REFRESH_TOKEN_EXPIRY: (env) => env.JWT_REFRESH_TOKEN_EXPIRY,
 			JWT_ISSUER: (env) => env.JWT_ISSUER,
@@ -172,7 +173,7 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_SUPABASE_URL: (env) => env.MANACORE_SUPABASE_URL,
 			PUBLIC_SUPABASE_ANON_KEY: (env) => env.MANACORE_SUPABASE_ANON_KEY,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MIDDLEWARE_URL: (env) => env.MANA_CORE_AUTH_URL,
 		},
 	},
 
@@ -340,7 +341,7 @@ const APP_CONFIGS = [
 			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			DEV_BYPASS_AUTH: () => 'true',
 			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
-			// JWT keys fetched via JWKS from MANA_CORE_AUTH_URL/api/v1/auth/jwks
+			JWT_PUBLIC_KEY: (env) => env.JWT_PUBLIC_KEY,
 			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
 		},
 	},

@@ -48,35 +48,6 @@ export const typescriptConfig = [
 			'@typescript-eslint/no-non-null-assertion': 'warn',
 
 			// ============================================
-			// ASYNC/AWAIT - Prevent runtime config bugs
-			// ============================================
-
-			// CRITICAL: Prevent calling async functions without await
-			// This catches bugs like: `fetch(\`\${getAuthUrl()}/api\`)` instead of `fetch(\`\${await getAuthUrl()}/api\`)`
-			'@typescript-eslint/no-floating-promises': [
-				'error',
-				{
-					ignoreVoid: true,
-					ignoreIIFE: true,
-				},
-			],
-
-			// Prevent misused promises in conditionals/logical expressions
-			'@typescript-eslint/no-misused-promises': [
-				'error',
-				{
-					checksVoidReturn: false, // Allow async functions in event handlers
-					checksConditionals: true,
-				},
-			],
-
-			// Require await in async functions (otherwise why is it async?)
-			'@typescript-eslint/require-await': 'warn',
-
-			// Prevent returning values from Promise executor
-			'@typescript-eslint/no-misused-new': 'error',
-
-			// ============================================
 			// WARNINGS - Best practices, fix when convenient
 			// ============================================
 

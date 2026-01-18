@@ -1,16 +1,6 @@
 // Types
 export * from './types';
 
-// Better Auth field definitions for client type inference
-export {
-	userAdditionalFields,
-	type UserRole,
-	type OrganizationRole,
-	type UserWithAdditionalFields,
-	isValidUserRole,
-	isValidOrganizationRole,
-} from './better-auth-fields';
-
 // Core utilities
 import { createAuthService as _createAuthService } from './core/authService';
 export { createAuthService } from './core/authService';

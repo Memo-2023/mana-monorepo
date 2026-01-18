@@ -71,6 +71,7 @@ ALL_DATABASES=(
     "techbase"
     "voxel_lava"
     "figgos"
+    "planta"
 )
 
 # Check if specific service requested
@@ -136,9 +137,13 @@ setup_service() {
             create_db_if_not_exists "figgos"
             push_schema "@figgos/backend" "figgos"
             ;;
+        planta)
+            create_db_if_not_exists "planta"
+            push_schema "@planta/backend" "planta"
+            ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"
-            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, finance, voxel-lava, figgos"
+            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, finance, voxel-lava, figgos, planta"
             exit 1
             ;;
     esac
@@ -162,7 +167,7 @@ echo -e "\n${GREEN}Step 2: Pushing schemas${NC}"
 echo "--------------------------------------"
 
 # Push schemas for all known services
-for service in auth chat zitare contacts calendar clock todo manadeck picture mail moodlit finance voxel-lava figgos; do
+for service in auth chat zitare contacts calendar clock todo manadeck picture mail moodlit finance voxel-lava figgos planta; do
     setup_service "$service" 2>/dev/null || true
 done
 

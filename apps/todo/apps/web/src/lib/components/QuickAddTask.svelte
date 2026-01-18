@@ -183,14 +183,7 @@
 				</button>
 
 				{#if showDatePicker}
-					<!-- svelte-ignore a11y_no_static_element_interactions a11y_interactive_supports_focus -->
-					<div
-						class="dropdown"
-						onclick={(e) => e.stopPropagation()}
-						onkeydown={() => {}}
-						role="menu"
-						tabindex="-1"
-					>
+					<div class="dropdown" onclick={(e) => e.stopPropagation()} role="menu">
 						{#each dateOptions as option}
 							<button
 								type="button"
@@ -234,14 +227,7 @@
 				</button>
 
 				{#if showPriorityPicker}
-					<!-- svelte-ignore a11y_no_static_element_interactions a11y_interactive_supports_focus -->
-					<div
-						class="dropdown"
-						onclick={(e) => e.stopPropagation()}
-						onkeydown={() => {}}
-						role="menu"
-						tabindex="-1"
-					>
+					<div class="dropdown" onclick={(e) => e.stopPropagation()} role="menu">
 						{#each PRIORITY_OPTIONS as priority}
 							<button
 								type="button"
@@ -286,14 +272,7 @@
 				</button>
 
 				{#if showProjectPicker}
-					<!-- svelte-ignore a11y_no_static_element_interactions a11y_interactive_supports_focus -->
-					<div
-						class="dropdown"
-						onclick={(e) => e.stopPropagation()}
-						onkeydown={() => {}}
-						role="menu"
-						tabindex="-1"
-					>
+					<div class="dropdown" onclick={(e) => e.stopPropagation()} role="menu">
 						<button
 							type="button"
 							class="dropdown-item"

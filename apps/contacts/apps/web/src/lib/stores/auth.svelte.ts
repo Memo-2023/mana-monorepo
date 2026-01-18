@@ -1,24 +1,45 @@
 /**
  * Auth Store - Manages authentication state using Svelte 5 runes
- * Uses Mana Core Auth with runtime configuration
+ * Uses Mana Core Auth
  */
 
 import { browser } from '$app/environment';
-import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
-import { getAuthUrl, getBackendUrl } from '$lib/config/runtime';
+import { initializeWebAuth } from '@manacore/shared-auth';
+import type { UserData } from '@manacore/shared-auth';
+
+// Get auth URL dynamically at runtime - fallback for SSR and client
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		// Client-side: use injected window variable (set by hooks.server.ts)
+		// Falls back to localhost for local development
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	// Server-side (SSR): use Docker internal URL for container-to-container communication
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+}
+
+// Get backend URL dynamically at runtime
+function getBackendUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
+			.__PUBLIC_BACKEND_URL__;
+		return injectedUrl || 'http://localhost:3015';
+	}
+	return process.env.PUBLIC_BACKEND_URL || 'http://localhost:3015';
+}
 
 // Lazy initialization to avoid SSR issues with localStorage
 let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
 let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null = null;
 
-async function getAuthService() {
+function getAuthService() {
 	if (!browser) return null;
 	if (!_authService) {
-		const authUrl = await getAuthUrl();
-		const backendUrl = await getBackendUrl();
 		const auth = initializeWebAuth({
-			baseUrl: authUrl,
-			backendUrl: backendUrl, // Enables automatic token refresh on 401 responses
+			baseUrl: getAuthUrl(),
+			backendUrl: getBackendUrl(), // Enables automatic token refresh on 401 responses
 		});
 		_authService = auth.authService;
 		_tokenManager = auth.tokenManager;
@@ -26,10 +47,10 @@ async function getAuthService() {
 	return _authService;
 }
 
-async function getTokenManager() {
+function getTokenManager() {
 	if (!browser) return null;
 	// Ensure auth service is initialized first
-	await getAuthService();
+	getAuthService();
 	return _tokenManager;
 }
 
@@ -59,7 +80,7 @@ export const authStore = {
 	async initialize() {
 		if (initialized) return;
 
-		const authService = await getAuthService();
+		const authService = getAuthService();
 		if (!authService) {
 			initialized = true;
 			loading = false;
@@ -86,7 +107,7 @@ export const authStore = {
 	 * Sign in with email and password
 	 */
 	async signIn(email: string, password: string) {
-		const authService = await getAuthService();
+		const authService = getAuthService();
 		if (!authService) {
 			return { success: false, error: 'Auth not available on server' };
 		}
@@ -110,16 +131,16 @@ export const authStore = {
 	},
 
 	/**
-	 * Sign up with email, password, and name
+	 * Sign up with email and password
 	 */
-	async signUp(email: string, password: string, name: string) {
-		const authService = await getAuthService();
+	async signUp(email: string, password: string) {
+		const authService = getAuthService();
 		if (!authService) {
 			return { success: false, error: 'Auth not available on server', needsVerification: false };
 		}
 
 		try {
-			const result = await authService.signUp(email, password, name);
+			const result = await authService.signUp(email, password);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Signup failed', needsVerification: false };
@@ -143,7 +164,7 @@ export const authStore = {
 	 * Sign out
 	 */
 	async signOut() {
-		const authService = await getAuthService();
+		const authService = getAuthService();
 		if (!authService) {
 			user = null;
 			return;
@@ -163,7 +184,7 @@ export const authStore = {
 	 * Send password reset email
 	 */
 	async resetPassword(email: string) {
-		const authService = await getAuthService();
+		const authService = getAuthService();
 		if (!authService) {
 			return { success: false, error: 'Auth not available on server' };
 		}
@@ -187,7 +208,7 @@ export const authStore = {
 	 * @deprecated Use getValidToken() instead for automatic refresh
 	 */
 	async getAccessToken() {
-		const authService = await getAuthService();
+		const authService = getAuthService();
 		if (!authService) {
 			return null;
 		}
@@ -199,7 +220,7 @@ export const authStore = {
 	 * Automatically refreshes if the token is expired or about to expire
 	 */
 	async getValidToken(): Promise<string | null> {
-		const tokenManager = await getTokenManager();
+		const tokenManager = getTokenManager();
 		if (!tokenManager) {
 			return null;
 		}

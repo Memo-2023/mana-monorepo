@@ -73,26 +73,19 @@ export interface FileInfo {
 }
 
 /**
- * Unified bucket name for all Manacore storage
- * Structure: manacore-storage/{userId}/{appName}/...
+ * Predefined bucket names for each project
  */
-export const UNIFIED_BUCKET = 'manacore-storage';
-
-/**
- * App identifiers for folder structure within the unified bucket
- */
-export const APPS = {
-	PICTURE: 'picture',
-	CHAT: 'chat',
-	MANADECK: 'manadeck',
-	NUTRIPHI: 'nutriphi',
-	PRESI: 'presi',
-	CALENDAR: 'calendar',
-	CONTACTS: 'contacts',
-	STORAGE: 'storage',
-	MAIL: 'mail',
-	INVENTORY: 'inventory',
-	MANACORE: 'manacore',
+export const BUCKETS = {
+	PICTURE: 'picture-storage',
+	CHAT: 'chat-storage',
+	MANADECK: 'manadeck-storage',
+	NUTRIPHI: 'nutriphi-storage',
+	PRESI: 'presi-storage',
+	CALENDAR: 'calendar-storage',
+	CONTACTS: 'contacts-storage',
+	STORAGE: 'storage-storage',
+	MAIL: 'mail-storage',
+	INVENTORY: 'inventory-storage',
 } as const;
 
-export type AppName = (typeof APPS)[keyof typeof APPS];
+export type BucketName = (typeof BUCKETS)[keyof typeof BUCKETS];

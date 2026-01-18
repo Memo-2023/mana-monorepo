@@ -6,12 +6,10 @@
  *
  * Token handling: Uses authStore.getValidToken() which automatically
  * refreshes expired tokens before making requests.
- *
- * Uses runtime configuration for 12-factor compliance.
  */
 
+import { env } from '$env/dynamic/public';
 import { authStore } from '$lib/stores/auth.svelte';
-import { getBackendUrl } from '$lib/config/runtime';
 import type {
 	Conversation,
 	Message,
@@ -37,6 +35,8 @@ export type {
 	ChatCompletionResponse,
 };
 
+const API_BASE = env.PUBLIC_BACKEND_URL || 'http://localhost:3002';
+
 type FetchOptions = {
 	method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
 	body?: unknown;
@@ -56,11 +56,8 @@ async function fetchApi<T>(
 		return { data: null, error: new Error('No authentication token') };
 	}
 
-	// Get backend URL from runtime config
-	const backendUrl = await getBackendUrl();
-
 	try {
-		const response = await fetch(`${backendUrl}/api/v1${endpoint}`, {
+		const response = await fetch(`${API_BASE}/api/v1${endpoint}`, {
 			method,
 			headers: {
 				'Content-Type': 'application/json',

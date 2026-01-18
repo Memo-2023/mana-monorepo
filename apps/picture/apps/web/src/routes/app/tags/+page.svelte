@@ -187,20 +187,15 @@
 
 <!-- Create Tag Modal -->
 {#if showCreateModal}
-	<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
 		onclick={() => (showCreateModal = false)}
-		onkeydown={(e) => e.key === 'Escape' && (showCreateModal = false)}
 		role="presentation"
 	>
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_interactive_supports_focus -->
 		<div
 			class="w-full max-w-md rounded-3xl border border-gray-200/50 bg-white/95 p-6 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/95"
 			onclick={(e) => e.stopPropagation()}
-			onkeydown={() => {}}
 			role="dialog"
-			tabindex="-1"
 		>
 			<h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Neuer Tag</h2>
 
@@ -222,7 +217,9 @@
 				</div>
 
 				<div>
-					<div class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Farbe</div>
+					<label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+						Farbe
+					</label>
 					<div class="flex flex-wrap gap-3">
 						{#each predefinedColors as color}
 							<button
@@ -261,20 +258,15 @@
 
 <!-- Edit Tag Modal -->
 {#if showEditModal && editingTag}
-	<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
 		onclick={() => (showEditModal = false)}
-		onkeydown={(e) => e.key === 'Escape' && (showEditModal = false)}
 		role="presentation"
 	>
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_interactive_supports_focus -->
 		<div
 			class="w-full max-w-md rounded-3xl border border-gray-200/50 bg-white/95 p-6 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/95"
 			onclick={(e) => e.stopPropagation()}
-			onkeydown={() => {}}
 			role="dialog"
-			tabindex="-1"
 		>
 			<h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Tag bearbeiten</h2>
 
@@ -295,7 +287,9 @@
 				</div>
 
 				<div>
-					<div class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Farbe</div>
+					<label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+						Farbe
+					</label>
 					<div class="flex flex-wrap gap-3">
 						{#each predefinedColors as color}
 							<button

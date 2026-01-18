@@ -9,7 +9,7 @@
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
 
-	let loadingState = $state<'loading' | 'success' | 'error'>('loading');
+	let state = $state<'loading' | 'success' | 'error'>('loading');
 	let data = $state<CalendarEvent[]>([]);
 	let error = $state<string | null>(null);
 	let retrying = $state(false);
@@ -18,18 +18,18 @@
 	const MAX_DISPLAY = 5;
 
 	async function load() {
-		loadingState = 'loading';
+		state = 'loading';
 		retrying = true;
 
 		const result = await calendarService.getUpcomingEvents(7);
 
 		if (result.data) {
 			data = result.data;
-			loadingState = 'success';
+			state = 'success';
 			retryCount = 0;
 		} else {
 			error = result.error;
-			loadingState = 'error';
+			state = 'error';
 
 			// Don't retry if service is unavailable (network error)
 			const isServiceUnavailable = error?.includes('nicht erreichbar');
@@ -88,9 +88,9 @@
 		{/if}
 	</div>
 
-	{#if loadingState === 'loading'}
+	{#if state === 'loading'}
 		<WidgetSkeleton lines={4} />
-	{:else if loadingState === 'error'}
+	{:else if state === 'error'}
 		<WidgetError {error} onRetry={load} {retrying} />
 	{:else if (data || []).length === 0}
 		<div class="py-6 text-center">

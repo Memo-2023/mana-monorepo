@@ -74,10 +74,6 @@
 	}
 
 	onMount(async () => {
-		// Initialize runtime config first (12-factor pattern)
-		const { initializeConfig } = await import('$lib/config/runtime');
-		await initializeConfig();
-
 		// Setup global error handling
 		setupGlobalErrorHandling();
 

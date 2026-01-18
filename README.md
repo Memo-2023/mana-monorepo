@@ -2,53 +2,14 @@
 
 Monorepo containing all Manacore projects with shared packages and unified tooling.
 
-## Staging URLs
-
-All services are deployed to staging at `*.staging.manacore.ai`.
-
-### Web Applications
-
-| App | Staging URL | Description |
-|-----|-------------|-------------|
-| **ManaCore** | https://staging.manacore.ai | Central dashboard for all Mana apps |
-| **Chat** | https://chat.staging.manacore.ai | AI chat application |
-| **Calendar** | https://calendar.staging.manacore.ai | Calendar and scheduling |
-| **Clock** | https://clock.staging.manacore.ai | World clock, timers, alarms |
-| **Todo** | https://todo.staging.manacore.ai | Task management |
-
-### Backend APIs
-
-| Service | Staging URL | Port |
-|---------|-------------|------|
-| **Auth** | https://auth.staging.manacore.ai | 3001 |
-| **Chat API** | https://chat-api.staging.manacore.ai | 3002 |
-| **Calendar API** | https://calendar-api.staging.manacore.ai | 3016 |
-| **Clock API** | https://clock-api.staging.manacore.ai | 3017 |
-| **Todo API** | https://todo-api.staging.manacore.ai | 3018 |
-
-### Landing Pages (Cloudflare Pages)
-
-| Project | URL |
-|---------|-----|
-| **Chat** | https://chat-landing-90m.pages.dev |
-| **Picture** | https://picture-landing.pages.dev |
-| **ManaCore** | https://manacore-landing.pages.dev |
-| **ManaDeck** | https://manadeck-landing.pages.dev |
-
 ## Projects
 
-| Project | Description | Tech Stack |
-|---------|-------------|------------|
-| **manacore** | Multi-app ecosystem platform | Expo, SvelteKit |
-| **chat** | AI chat application | NestJS, Expo, SvelteKit |
-| **calendar** | Calendar & scheduling | NestJS, SvelteKit |
-| **contacts** | Contact management | NestJS, SvelteKit |
-| **context** | AI document context | Expo |
-| **manadeck** | Card/deck management | NestJS, Expo, SvelteKit |
-| **nutriphi** | Nutrition tracking (planned) | - |
-| **picture** | AI image generation | NestJS, Expo, SvelteKit |
-| **storage** | Cloud storage (planned) | - |
-| **todo** | Task management | NestJS, SvelteKit |
+| Project            | Description                     | Tech Stack                     |
+| ------------------ | ------------------------------- | ------------------------------ |
+| **maerchenzauber** | AI-powered story generation app | NestJS, Expo, SvelteKit, Astro |
+| **manacore**       | Multi-app ecosystem platform    | Expo, SvelteKit, Astro         |
+| **manadeck**       | Card/deck management app        | NestJS, Expo, SvelteKit        |
+| **memoro**         | Voice memo & AI analysis app    | Expo, SvelteKit, Astro         |
 
 ## Getting Started
 
@@ -56,7 +17,6 @@ All services are deployed to staging at `*.staging.manacore.ai`.
 
 - Node.js 20+
 - pnpm 9.15.0+
-- Docker (for local development)
 
 ### Installation
 
@@ -64,83 +24,71 @@ All services are deployed to staging at `*.staging.manacore.ai`.
 # Install pnpm globally (if not installed)
 npm install -g pnpm
 
-# Install all dependencies (also generates .env files)
+# Install all dependencies
 pnpm install
-
-# Start Docker infrastructure
-pnpm docker:up
 ```
 
-### Quick Start
-
-Use `dev:*:full` commands to start any app with automatic database setup:
+### Development
 
 ```bash
-pnpm docker:up           # Start PostgreSQL, Redis, MinIO
-pnpm dev:chat:full       # Start chat with auth + auto DB setup
-pnpm dev:picture:full    # Start picture with auth + auto DB setup
-pnpm dev:calendar:full   # Start calendar with auth + auto DB setup
-pnpm dev:contacts:full   # Start contacts with auth + auto DB setup
-pnpm dev:todo:full       # Start todo with auth + auto DB setup
-pnpm dev:manacore:full   # Start manacore with all backends
-```
+# Start all projects in dev mode
+pnpm run dev
 
-### Development Commands
+# Start a specific project
+pnpm run maerchenzauber:dev
+pnpm run manacore:dev
+pnpm run manadeck:dev
+pnpm run memoro:dev
 
-```bash
 # Build all projects
-pnpm build
+pnpm run build
+
+# Run tests
+pnpm run test
 
 # Type check
-pnpm type-check
-
-# Lint
-pnpm lint
+pnpm run type-check
 
 # Format code
-pnpm format
+pnpm run format
 ```
 
 ## Shared Packages
 
 Located in `packages/`:
 
-| Package | Description |
-|---------|-------------|
-| `@manacore/shared-auth` | Client-side auth for web/mobile |
-| `@manacore/shared-nestjs-auth` | NestJS JWT validation guards |
-| `@manacore/shared-ui` | Shared Svelte UI components |
-| `@manacore/shared-storage` | S3-compatible storage (MinIO/Hetzner) |
-| `@manacore/shared-types` | Common TypeScript types |
-| `@manacore/shared-utils` | Utility functions |
-| `@manacore/shared-theme` | Theme configuration |
+| Package                     | Description                             |
+| --------------------------- | --------------------------------------- |
+| `@manacore/shared-types`    | Common TypeScript types                 |
+| `@manacore/shared-supabase` | Unified Supabase client                 |
+| `@manacore/shared-utils`    | Utility functions (date, string, async) |
+| `@manacore/shared-ui`       | React Native UI components              |
+
+### Using Shared Packages
+
+```typescript
+// In any project
+import { User, ApiResponse } from '@manacore/shared-types';
+import { createSupabaseClient } from '@manacore/shared-supabase';
+import { formatDate, truncate, retry } from '@manacore/shared-utils';
+```
 
 ## Repository Structure
 
 ```
 manacore-monorepo/
-├── apps/                    # Active product applications (10 apps)
-│   ├── calendar/            # Calendar & scheduling
-│   ├── chat/                # AI chat
-│   ├── contacts/            # Contact management
-│   ├── context/             # AI document context
-│   ├── manacore/            # Multi-app dashboard
-│   ├── manadeck/            # Card/deck management
-│   ├── nutriphi/            # Nutrition (planned)
-│   ├── picture/             # AI image generation
-│   ├── storage/             # Cloud storage (planned)
-│   └── todo/                # Task management
-├── games/                   # Game projects (5 games)
-│   ├── figgos/              # Collectible figures
-│   ├── mana-games/          # Browser games
-│   ├── voxel-lava/          # 3D voxel game
-│   ├── whopixels/           # Pixel art editor
-│   └── worldream/           # World building
-├── services/
-│   └── mana-core-auth/      # Central auth service
-├── packages/                # Shared packages (@manacore/*)
-├── docker/                  # Docker configuration
-└── .github/workflows/       # CI/CD pipelines
+├── packages/                 # Shared packages
+│   ├── shared-types/         # TypeScript types
+│   ├── shared-supabase/      # Supabase utilities
+│   ├── shared-utils/         # Common utilities
+│   └── shared-ui/            # React Native components
+├── maerchenzauber/           # Storyteller project
+├── manacore/                 # Manacore apps project
+├── manadeck/                 # ManaDeck project
+├── memoro/                   # Memoro project
+├── turbo.json                # Turborepo configuration
+├── pnpm-workspace.yaml       # Workspace configuration
+└── package.json              # Root package
 ```
 
 ## Tooling
@@ -148,48 +96,28 @@ manacore-monorepo/
 - **Package Manager:** pnpm 9.15.0
 - **Build System:** Turborepo
 - **Formatting:** Prettier
-- **Linting:** ESLint
-- **Git Hooks:** Husky (pre-commit, pre-push)
-- **Node Version:** 20+
+- **Node Version:** 20 (see .nvmrc)
 
 ## Adding Dependencies
 
 ```bash
-# Add to workspace root (dev tools only)
+# Add to root (dev tools)
 pnpm add -D <package> -w
 
 # Add to specific project
-pnpm add <package> --filter @chat/web
+pnpm add <package> --filter maerchenzauber
 
 # Add to shared package
 pnpm add <package> --filter @manacore/shared-utils
 ```
 
-## Deployment
+## Contributing
 
-### Deploy Landing Pages
-
-```bash
-pnpm deploy:landing:chat
-pnpm deploy:landing:picture
-pnpm deploy:landing:manacore
-pnpm deploy:landing:all    # Deploy all landing pages
-```
-
-### Deploy to Staging
-
-```bash
-# Tag-based deployment (triggers CI/CD)
-git tag chat-staging-v1.0.0
-git push origin chat-staging-v1.0.0
-```
-
-## Documentation
-
-- [CLAUDE.md](CLAUDE.md) - Detailed development guidelines
-- [docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md) - Local setup guide
-- [COMMANDS.md](COMMANDS.md) - All available commands
-- [cicd/DEPLOYMENT.md](cicd/DEPLOYMENT.md) - Deployment documentation
+1. Create a feature branch
+2. Make changes
+3. Run `pnpm run format` and `pnpm run type-check`
+4. Commit with conventional commit messages
+5. Create pull request
 
 ## License
 

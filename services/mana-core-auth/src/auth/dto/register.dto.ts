@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, MaxLength } from 'class-validator';
+import { IsEmail, IsString, MinLength, MaxLength, IsOptional } from 'class-validator';
 
 export class RegisterDto {
 	@IsEmail()
@@ -10,7 +10,7 @@ export class RegisterDto {
 	password: string;
 
 	@IsString()
-	@MinLength(2, { message: 'Name must be at least 2 characters' })
+	@IsOptional()
 	@MaxLength(255)
-	name: string;
+	name?: string;
 }

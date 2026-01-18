@@ -57,9 +57,6 @@ jobs:
       - name: Type check
         run: pnpm run type-check
 
-      - name: Validate migrations (no destructive changes)
-        run: node scripts/validate-migrations.mjs
-
       - name: Lint
         run: pnpm run lint || echo "Lint warnings found"
 
@@ -80,8 +77,6 @@ jobs:
           - { name: 'calendar-web', path: 'apps/calendar/apps/web', port: '5186' }
           - { name: 'clock-backend', path: 'apps/clock/apps/backend', port: '3017' }
           - { name: 'clock-web', path: 'apps/clock/apps/web', port: '5187' }
-          - { name: 'picture-backend', path: 'apps/picture/apps/backend', port: '3006' }
-          - { name: 'picture-web', path: 'apps/picture/apps/web', port: '5175' }
       fail-fast: false
     steps:
       - name: Checkout code

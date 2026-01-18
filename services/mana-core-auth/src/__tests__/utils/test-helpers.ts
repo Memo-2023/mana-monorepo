@@ -12,8 +12,8 @@ import { ConfigService } from '@nestjs/config';
 export const createMockConfigService = (overrides: Record<string, any> = {}): ConfigService => {
 	const defaultConfig: Record<string, any> = {
 		'database.url': 'postgresql://test:test@localhost:5432/test',
-		// Note: JWT keys are managed automatically by Better Auth (EdDSA/Ed25519)
-		// Keys are stored in auth.jwks table - no manual configuration needed
+		'jwt.privateKey': 'mock-private-key',
+		'jwt.publicKey': 'mock-public-key',
 		'jwt.accessTokenExpiry': '15m',
 		'jwt.refreshTokenExpiry': '7d',
 		'jwt.issuer': 'mana-core',
@@ -23,7 +23,6 @@ export const createMockConfigService = (overrides: Record<string, any> = {}): Co
 		'redis.host': 'localhost',
 		'redis.port': 6379,
 		'redis.password': 'test',
-		BASE_URL: 'http://localhost:3001',
 		...overrides,
 	};
 

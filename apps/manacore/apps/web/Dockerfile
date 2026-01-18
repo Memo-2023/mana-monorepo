@@ -20,7 +20,6 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 # Copy shared packages needed by manacore web
-COPY packages/better-auth-types ./packages/better-auth-types
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
@@ -47,9 +46,6 @@ COPY apps/manacore/apps/web ./apps/manacore/apps/web
 RUN pnpm install --frozen-lockfile
 
 # Build shared packages that need building
-WORKDIR /app/packages/better-auth-types
-RUN pnpm build || true
-
 WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
 
@@ -73,10 +69,6 @@ COPY --from=builder /app/apps/manacore/apps/web/node_modules ./node_modules
 COPY --from=builder /app/apps/manacore/apps/web/build ./build
 COPY --from=builder /app/apps/manacore/apps/web/package.json ./
 
-# Copy entrypoint script for runtime config generation
-COPY apps/manacore/apps/web/docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
 # Expose port
 EXPOSE 5173
 
@@ -88,9 +80,6 @@ ENV HOST=0.0.0.0
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:5173/health || exit 1
-
-# Use entrypoint to generate runtime config
-ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Run the app
 CMD ["node", "build"]

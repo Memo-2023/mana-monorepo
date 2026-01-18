@@ -179,8 +179,7 @@
 
 <PillToolbar topOffset="70px">
 	<!-- Quick Add Input -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="quick-add-section" onclick={(e) => e.stopPropagation()} onkeydown={() => {}}>
+	<div class="quick-add-section" onclick={(e) => e.stopPropagation()}>
 		<div class="quick-add-input-wrapper">
 			<svg class="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -225,14 +224,7 @@
 					</button>
 
 					{#if showDatePicker}
-						<!-- svelte-ignore a11y_no_static_element_interactions -->
-						<div
-							class="dropdown"
-							onclick={(e) => e.stopPropagation()}
-							onkeydown={() => {}}
-							role="menu"
-							tabindex="-1"
-						>
+						<div class="dropdown" onclick={(e) => e.stopPropagation()}>
 							{#each dateOptions as option}
 								<button
 									type="button"
@@ -272,14 +264,7 @@
 					</button>
 
 					{#if showPriorityPicker}
-						<!-- svelte-ignore a11y_no_static_element_interactions -->
-						<div
-							class="dropdown"
-							onclick={(e) => e.stopPropagation()}
-							onkeydown={() => {}}
-							role="menu"
-							tabindex="-1"
-						>
+						<div class="dropdown" onclick={(e) => e.stopPropagation()}>
 							{#each PRIORITY_OPTIONS as priority}
 								<button
 									type="button"
@@ -325,14 +310,7 @@
 					</button>
 
 					{#if showProjectPicker}
-						<!-- svelte-ignore a11y_no_static_element_interactions -->
-						<div
-							class="dropdown"
-							onclick={(e) => e.stopPropagation()}
-							onkeydown={() => {}}
-							role="menu"
-							tabindex="-1"
-						>
+						<div class="dropdown" onclick={(e) => e.stopPropagation()}>
 							<button
 								type="button"
 								class="dropdown-item"
@@ -398,8 +376,7 @@
 	<PillToolbarDivider />
 
 	<!-- Filter Button -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="filter-dropdown-container" onclick={(e) => e.stopPropagation()} onkeydown={() => {}}>
+	<div class="filter-dropdown-container" onclick={(e) => e.stopPropagation()}>
 		<PillToolbarButton
 			onclick={() => {
 				showFilterDropdown = !showFilterDropdown;
@@ -422,14 +399,7 @@
 		</PillToolbarButton>
 
 		{#if showFilterDropdown}
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div
-				class="filter-dropdown"
-				onclick={(e) => e.stopPropagation()}
-				onkeydown={() => {}}
-				role="menu"
-				tabindex="-1"
-			>
+			<div class="filter-dropdown" onclick={(e) => e.stopPropagation()}>
 				<div class="filter-section">
 					<div class="filter-section-header">Priorität</div>
 					<div class="filter-chips">
@@ -477,6 +447,7 @@
 		options={sortOptions}
 		value={sortBy}
 		onChange={handleSortChange}
+		primaryColor="#8b5cf6"
 		embedded={true}
 	/>
 

@@ -25,9 +25,6 @@
 	},
 	"register": {
 		"title": "Crear Cuenta",
-		"namePlaceholder": "Nombre",
-		"nameRequired": "El nombre es obligatorio",
-		"nameTooShort": "El nombre debe tener al menos 2 caracteres",
 		"emailPlaceholder": "Correo electrónico",
 		"passwordPlaceholder": "Contraseña",
 		"confirmPasswordPlaceholder": "Confirmar Contraseña",

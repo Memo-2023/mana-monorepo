@@ -40,9 +40,6 @@ export interface AuthTranslations {
 	};
 	register: {
 		title: string;
-		namePlaceholder: string;
-		nameRequired: string;
-		nameTooShort: string;
 		emailPlaceholder: string;
 		passwordPlaceholder: string;
 		confirmPasswordPlaceholder: string;

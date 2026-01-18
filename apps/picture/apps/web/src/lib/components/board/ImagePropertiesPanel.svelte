@@ -178,7 +178,9 @@
 				<!-- Prompt Info -->
 				{#if selectedImageItem.image.prompt}
 					<div class="mb-6">
-						<div class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Prompt</div>
+						<label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+							Prompt
+						</label>
 						<p
 							class="rounded-lg bg-gray-50 p-3 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-300"
 						>
@@ -190,33 +192,35 @@
 
 			<!-- Position -->
 			<div class="mb-6">
-				<div class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Position</div>
+				<label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+					Position
+				</label>
 				<div class="grid grid-cols-2 gap-3">
-					<label class="block">
-						<span class="mb-1 block text-xs text-gray-500 dark:text-gray-400">X</span>
+					<div>
+						<label class="mb-1 block text-xs text-gray-500 dark:text-gray-400">X</label>
 						<input
 							type="number"
 							bind:value={positionX}
 							onchange={() => handlePositionChange('x', positionX)}
 							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
 						/>
-					</label>
-					<label class="block">
-						<span class="mb-1 block text-xs text-gray-500 dark:text-gray-400">Y</span>
+					</div>
+					<div>
+						<label class="mb-1 block text-xs text-gray-500 dark:text-gray-400">Y</label>
 						<input
 							type="number"
 							bind:value={positionY}
 							onchange={() => handlePositionChange('y', positionY)}
 							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
 						/>
-					</label>
+					</div>
 				</div>
 			</div>
 
 			<!-- Scale -->
 			<div class="mb-6">
 				<div class="mb-2 flex items-center justify-between">
-					<div class="text-sm font-medium text-gray-700 dark:text-gray-300">Skalierung</div>
+					<label class="text-sm font-medium text-gray-700 dark:text-gray-300"> Skalierung </label>
 					<button
 						onclick={() => (lockAspectRatio = !lockAspectRatio)}
 						class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
@@ -225,8 +229,8 @@
 					</button>
 				</div>
 				<div class="grid grid-cols-2 gap-3">
-					<label class="block">
-						<span class="mb-1 block text-xs text-gray-500 dark:text-gray-400">Breite %</span>
+					<div>
+						<label class="mb-1 block text-xs text-gray-500 dark:text-gray-400">Breite %</label>
 						<input
 							type="number"
 							bind:value={scaleX}
@@ -235,9 +239,9 @@
 							max="500"
 							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
 						/>
-					</label>
-					<label class="block">
-						<span class="mb-1 block text-xs text-gray-500 dark:text-gray-400">Höhe %</span>
+					</div>
+					<div>
+						<label class="mb-1 block text-xs text-gray-500 dark:text-gray-400">Höhe %</label>
 						<input
 							type="number"
 							bind:value={scaleY}
@@ -247,33 +251,31 @@
 							disabled={lockAspectRatio}
 							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
 						/>
-					</label>
+					</div>
 				</div>
-				<label class="block">
-					<input
-						type="range"
-						bind:value={scaleX}
-						oninput={() => handleScaleChange('x', scaleX)}
-						min="10"
-						max="300"
-						class="mt-3 w-full"
-					/>
-				</label>
+				<input
+					type="range"
+					bind:value={scaleX}
+					oninput={() => handleScaleChange('x', scaleX)}
+					min="10"
+					max="300"
+					class="mt-3 w-full"
+				/>
 			</div>
 
 			<!-- Rotation -->
 			<div class="mb-6">
 				<label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
 					Rotation: {rotation}°
-					<input
-						type="range"
-						bind:value={rotation}
-						oninput={() => handleRotationChange(rotation)}
-						min="0"
-						max="360"
-						class="w-full"
-					/>
 				</label>
+				<input
+					type="range"
+					bind:value={rotation}
+					oninput={() => handleRotationChange(rotation)}
+					min="0"
+					max="360"
+					class="w-full"
+				/>
 				<div class="mt-2 grid grid-cols-4 gap-2">
 					<button
 						onclick={() => {
@@ -318,22 +320,22 @@
 			<div class="mb-6">
 				<label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
 					Deckkraft: {opacity}%
-					<input
-						type="range"
-						bind:value={opacity}
-						oninput={() => handleOpacityChange(opacity)}
-						min="0"
-						max="100"
-						class="w-full"
-					/>
 				</label>
+				<input
+					type="range"
+					bind:value={opacity}
+					oninput={() => handleOpacityChange(opacity)}
+					min="0"
+					max="100"
+					class="w-full"
+				/>
 			</div>
 
 			<!-- Layer Order -->
 			<div class="mb-6">
-				<div class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+				<label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
 					Layer-Reihenfolge
-				</div>
+				</label>
 				<div class="grid grid-cols-2 gap-2">
 					<button
 						onclick={() => handleLayerChange('top')}

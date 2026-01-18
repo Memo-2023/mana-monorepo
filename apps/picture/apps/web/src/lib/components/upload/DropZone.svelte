@@ -94,13 +94,11 @@
 <div class="space-y-6">
 	<!-- Drop Zone -->
 	{#if !uploading && previews.length === 0}
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
 			ondragover={handleDragOver}
 			ondragleave={handleDragLeave}
 			ondrop={handleDrop}
 			onclick={() => fileInput?.click()}
-			onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && fileInput?.click()}
 			class="flex min-h-[400px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 transition-all {isDragging
 				? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'
 				: 'border-gray-300 bg-gray-50/50 hover:border-gray-400 dark:border-gray-700 dark:bg-gray-800/50 dark:hover:border-gray-600'}"

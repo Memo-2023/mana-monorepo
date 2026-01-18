@@ -2,18 +2,34 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import { createCorsConfigWithCallback } from '@manacore/shared-nestjs-cors';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-	// Enable CORS with centralized configuration (callback mode for mobile app support)
-	app.enableCors(
-		createCorsConfigWithCallback({
-			corsOriginsEnv: process.env.CORS_ORIGINS,
-		})
-	);
+	// Enable CORS for mobile and web apps
+	const allowedOrigins = process.env.CORS_ORIGINS?.split(',').map((origin) => origin.trim()) || [
+		'http://localhost:3000',
+		'http://localhost:5173',
+		'http://localhost:5174',
+		'http://localhost:5175',
+		'http://localhost:8081',
+		'exp://localhost:8081',
+		'http://localhost:3001',
+	];
+
+	app.enableCors({
+		origin: (origin, callback) => {
+			// Allow requests with no origin (like mobile apps or curl)
+			if (!origin || allowedOrigins.includes(origin)) {
+				callback(null, origin || '*');
+			} else {
+				callback(null, false);
+			}
+		},
+		methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+		credentials: true,
+	});
 
 	// Enable validation
 	app.useGlobalPipes(

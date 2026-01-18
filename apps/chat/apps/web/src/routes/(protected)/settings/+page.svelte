@@ -166,24 +166,9 @@
 		</SettingsCard>
 
 		<div class="flex flex-wrap gap-4 text-sm mt-2">
-			<button
-				onclick={() => alert('Datenschutz-Seite wird bald verfügbar sein.')}
-				class="text-[hsl(var(--primary))] hover:underline"
-			>
-				Datenschutz
-			</button>
-			<button
-				onclick={() => alert('Nutzungsbedingungen werden bald verfügbar sein.')}
-				class="text-[hsl(var(--primary))] hover:underline"
-			>
-				Nutzungsbedingungen
-			</button>
-			<button
-				onclick={() => alert('Hilfe & Support wird bald verfügbar sein.')}
-				class="text-[hsl(var(--primary))] hover:underline"
-			>
-				Hilfe & Support
-			</button>
+			<a href="#" class="text-[hsl(var(--primary))] hover:underline">Datenschutz</a>
+			<a href="#" class="text-[hsl(var(--primary))] hover:underline">Nutzungsbedingungen</a>
+			<a href="#" class="text-[hsl(var(--primary))] hover:underline">Hilfe & Support</a>
 		</div>
 	</SettingsSection>
 </SettingsPage>

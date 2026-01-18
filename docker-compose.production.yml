@@ -1,10 +1,5 @@
 version: '3.9'
 
-# To add more services:
-#   1. Add service block below
-#   2. Add to cd-production.yml workflow_dispatch options
-#   3. Add Caddy routes to production Caddyfile
-
 services:
   # ============================================
   # Backend Services (Production)
@@ -21,16 +16,9 @@ services:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
-      # JWT keys managed automatically by Better Auth (EdDSA) - stored in auth.jwks table
-      JWT_ISSUER: ${JWT_ISSUER:-manacore}
-      JWT_AUDIENCE: ${JWT_AUDIENCE:-manacore}
-      # Brevo Email Service
-      BREVO_API_KEY: ${BREVO_API_KEY}
-      EMAIL_SENDER_ADDRESS: ${EMAIL_SENDER_ADDRESS:-noreply@manacore.ai}
-      EMAIL_SENDER_NAME: ${EMAIL_SENDER_NAME:-ManaCore}
-      # URLs
-      BASE_URL: ${BASE_URL:-https://auth.manacore.ai}
-      FRONTEND_URL: ${FRONTEND_URL:-https://manacore.ai}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
     ports:
       - "127.0.0.1:3001:3001"
     healthcheck:
@@ -239,53 +227,6 @@ services:
         reservations:
           cpus: '0.5'
           memory: 256M
-
-  picture-backend:
-    image: ${DOCKER_REGISTRY:-ghcr.io/memo-2023}/picture-backend:${PICTURE_VERSION:-latest}
-    container_name: picture-backend-prod
-    restart: always
-    depends_on:
-      mana-core-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3006
-      DATABASE_URL: ${PICTURE_DATABASE_URL}
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      # Replicate API for AI image generation
-      REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN}
-      # S3/MinIO storage
-      S3_ENDPOINT: ${S3_ENDPOINT}
-      S3_REGION: ${S3_REGION}
-      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
-      S3_SECRET_KEY: ${S3_SECRET_KEY}
-      MANACORE_STORAGE_PUBLIC_URL: ${MANACORE_STORAGE_PUBLIC_URL}
-      # Credit system
-      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      APP_ID: picture
-    ports:
-      - "127.0.0.1:3007:3006"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3006/api/v1/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    networks:
-      - manacore-prod
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "50m"
-        max-file: "5"
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 1G
-        reservations:
-          cpus: '1'
-          memory: 512M
 
   # ============================================
   # Monitoring (Optional but recommended)

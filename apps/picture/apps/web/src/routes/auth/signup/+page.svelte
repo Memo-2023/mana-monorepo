@@ -8,8 +8,8 @@
 	// Default to German
 	const translations = getRegisterTranslations('de');
 
-	async function handleSignUp(email: string, password: string, name: string) {
-		return authStore.signUp(email, password, name);
+	async function handleSignUp(email: string, password: string) {
+		return authStore.signUp(email, password);
 	}
 </script>
 

@@ -212,7 +212,6 @@
 	export { resetZoom, zoomIn, zoomOut };
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
 	bind:this={containerElement}
 	class="network-graph-container"
@@ -254,7 +253,6 @@
 					{@const isSelected = node.id === networkStore.selectedNodeId}
 					{@const isConnected = isConnectedToSelected(node.id, graphLinks)}
 					{@const isDimmed = networkStore.selectedNodeId && !isConnected}
-					<!-- svelte-ignore a11y_click_events_have_key_events -->
 					<g
 						transform="translate({node.x ?? 0}, {node.y ?? 0})"
 						class="node"
@@ -264,7 +262,6 @@
 						onmousedown={(e) => handleDragStart(e, node)}
 						onclick={() => handleNodeClick(node)}
 						ondblclick={() => handleNodeDoubleClick(node)}
-						onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleNodeClick(node)}
 						role="button"
 						tabindex="0"
 						aria-label={node.name}

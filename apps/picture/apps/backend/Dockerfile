@@ -12,12 +12,7 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 # Copy shared packages
-COPY packages/better-auth-types ./packages/better-auth-types
-COPY packages/mana-core-nestjs-integration ./packages/mana-core-nestjs-integration
 COPY packages/shared-errors ./packages/shared-errors
-COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
-COPY packages/shared-nestjs-cors ./packages/shared-nestjs-cors
-COPY packages/shared-storage ./packages/shared-storage
 
 # Copy picture backend
 COPY apps/picture/apps/backend ./apps/picture/apps/backend
@@ -26,22 +21,7 @@ COPY apps/picture/apps/backend ./apps/picture/apps/backend
 RUN pnpm install --frozen-lockfile
 
 # Build shared packages first
-WORKDIR /app/packages/better-auth-types
-RUN pnpm build
-
-WORKDIR /app/packages/mana-core-nestjs-integration
-RUN pnpm build
-
 WORKDIR /app/packages/shared-errors
-RUN pnpm build
-
-WORKDIR /app/packages/shared-nestjs-auth
-RUN pnpm build
-
-WORKDIR /app/packages/shared-nestjs-cors
-RUN pnpm build
-
-WORKDIR /app/packages/shared-storage
 RUN pnpm build
 
 # Build the backend
@@ -72,11 +52,11 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 WORKDIR /app/apps/picture/apps/backend
 
 # Expose port
-EXPOSE 3006
+EXPOSE 3003
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3006/api/v1/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3003/api/health || exit 1
 
 # Run entrypoint script
 ENTRYPOINT ["docker-entrypoint.sh"]

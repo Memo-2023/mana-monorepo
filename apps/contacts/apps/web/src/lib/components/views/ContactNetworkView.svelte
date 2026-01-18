@@ -37,7 +37,6 @@
 		previousNodeCount = currentNodeCount;
 	});
 
-	// svelte-ignore non_reactive_update - Component reference doesn't need reactivity
 	let graphComponent: NetworkGraph;
 	let graphContainer: HTMLDivElement;
 

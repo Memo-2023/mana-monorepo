@@ -385,6 +385,7 @@
 			<QuickInputBar
 				onSearch={handleSearch}
 				onSelect={handleSelect}
+				{quickActions}
 				placeholder="Neue Aufgabe oder suchen..."
 				emptyText="Keine Aufgaben gefunden"
 				searchingText="Suche..."
@@ -392,6 +393,8 @@
 				onParseCreate={handleParseCreate}
 				createText="Erstellen"
 				appIcon="todo"
+				primaryColor="#8b5cf6"
+				autoFocus={true}
 			/>
 		{/if}
 

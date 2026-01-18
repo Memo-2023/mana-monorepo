@@ -11,27 +11,24 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
-# Copy shared packages (core packages for NestJS backends)
+# Copy shared packages
 COPY packages/shared-errors ./packages/shared-errors
-COPY packages/better-auth-types ./packages/better-auth-types
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
-COPY packages/shared-nestjs-cors ./packages/shared-nestjs-cors
 
-# Copy build script
-COPY docker/shared/build-shared-packages.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/build-shared-packages.sh
-
-# Copy todo shared package and backend
-COPY apps/todo/packages/shared ./apps/todo/packages/shared
+# Copy todo backend
 COPY apps/todo/apps/backend ./apps/todo/apps/backend
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build shared packages in dependency order
-RUN build-shared-packages.sh
+# Build shared packages first
+WORKDIR /app/packages/shared-errors
+RUN pnpm build
 
-# Build the backend (includes compiling todo shared TypeScript)
+WORKDIR /app/packages/shared-nestjs-auth
+RUN pnpm build
+
+# Build the backend
 WORKDIR /app/apps/todo/apps/backend
 RUN pnpm build
 
@@ -50,7 +47,7 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/pnpm-lock.yaml ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/apps/todo ./apps/todo
+COPY --from=builder /app/apps/todo/apps/backend ./apps/todo/apps/backend
 
 # Copy entrypoint script
 COPY apps/todo/apps/backend/docker-entrypoint.sh /usr/local/bin/
@@ -63,7 +60,7 @@ EXPOSE 3018
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3018/api/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3018/api/v1/health || exit 1
 
 # Run entrypoint script
 ENTRYPOINT ["docker-entrypoint.sh"]

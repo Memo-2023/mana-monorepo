@@ -248,15 +248,12 @@
 
 {#if image}
 	<!-- Fullscreen Viewer -->
-	<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events a11y_interactive_supports_focus -->
 	<div
 		class="fixed inset-0 z-50 bg-black"
 		transition:fade={{ duration: 200 }}
 		onclick={onClose}
-		onkeydown={(e) => e.key === 'Escape' && onClose()}
 		role="dialog"
 		aria-modal="true"
-		tabindex="-1"
 	>
 		<!-- Close Button -->
 		<button
@@ -336,13 +333,11 @@
 			{/if}
 
 			<!-- Image -->
-			<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 			<img
 				src={image.publicUrl}
 				alt={image.prompt}
 				class="max-h-full max-w-full object-contain"
 				onclick={(e) => e.stopPropagation()}
-				onkeydown={() => {}}
 			/>
 
 			<!-- Next Button -->
@@ -361,15 +356,10 @@
 		</div>
 
 		<!-- Bottom Bar with Info -->
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-		<div
-			class="fixed bottom-0 left-0 right-0 z-[60] p-4"
-			onclick={(e) => e.stopPropagation()}
-			onkeydown={() => {}}
-		>
+		<div class="fixed bottom-0 left-0 right-0 z-[60] p-4">
 			<div class="mx-auto max-w-4xl">
 				<!-- Prompt Preview (always visible) -->
-				<div class="mb-2" role="document">
+				<div class="mb-2" onclick={(e) => e.stopPropagation()}>
 					<p class="text-center text-sm text-white/90">
 						{image.prompt}
 					</p>
@@ -379,8 +369,8 @@
 				{#if showInfo}
 					<div
 						class="rounded-2xl bg-white/10 p-6 backdrop-blur-xl"
+						onclick={(e) => e.stopPropagation()}
 						transition:fly={{ y: 20, duration: 200 }}
-						role="document"
 					>
 						<div class="grid gap-4 md:grid-cols-2">
 							<!-- Left Column -->
@@ -468,23 +458,17 @@
 
 	<!-- Tag Modal -->
 	{#if showTagModal}
-		<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events a11y_interactive_supports_focus -->
 		<div
 			class="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4"
 			transition:fade={{ duration: 200 }}
 			onclick={closeTagModal}
-			onkeydown={(e) => e.key === 'Escape' && closeTagModal()}
 			role="dialog"
 			aria-modal="true"
-			tabindex="-1"
 		>
-			<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 			<div
 				class="w-full max-w-lg rounded-2xl bg-white p-6 dark:bg-gray-800"
 				onclick={(e) => e.stopPropagation()}
-				onkeydown={() => {}}
 				transition:fly={{ y: 20, duration: 200 }}
-				role="document"
 			>
 				<div class="mb-4 flex items-center justify-between">
 					<h2 class="text-xl font-semibold text-gray-900 dark:text-white">Tags verwalten</h2>
@@ -550,23 +534,17 @@
 
 	<!-- Publish Modal -->
 	{#if showPublishModal && image}
-		<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events a11y_interactive_supports_focus -->
 		<div
 			class="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4"
 			transition:fade={{ duration: 200 }}
 			onclick={closePublishModal}
-			onkeydown={(e) => e.key === 'Escape' && closePublishModal()}
 			role="dialog"
 			aria-modal="true"
-			tabindex="-1"
 		>
-			<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 			<div
 				class="w-full max-w-md rounded-2xl bg-white p-6 dark:bg-gray-800"
 				onclick={(e) => e.stopPropagation()}
-				onkeydown={() => {}}
 				transition:fly={{ y: 20, duration: 200 }}
-				role="document"
 			>
 				<div class="mb-4 flex items-center justify-between">
 					<h2 class="text-xl font-semibold text-gray-900 dark:text-white">

@@ -31,7 +31,6 @@ import { balances, organizationBalances } from '../../db/schema/credits.schema';
 import { ReferralCodeService } from '../../referrals/services/referral-code.service';
 import { ReferralTierService } from '../../referrals/services/referral-tier.service';
 import { ReferralTrackingService } from '../../referrals/services/referral-tracking.service';
-import { SecurityEventsService } from '../../security/security-events.service';
 import { hasUser, hasToken, hasMember, hasMembers, hasSession } from '../types/better-auth.types';
 import type {
 	RegisterB2CDto,
@@ -56,13 +55,14 @@ import type {
 	TokenPayload,
 	OrganizationMember,
 	Organization,
-	CreateOrganizationResponse,
-	// BetterAuthAPI provides typed methods for all Better Auth operations
-	// Note: AuthAPI (inferred) is also available but doesn't expose all methods
 	BetterAuthAPI,
-	// BetterAuthUser includes the role field (deprecated - use AuthUser when $Infer works)
+	SignUpResponse,
+	SignInResponse,
+	CreateOrganizationResponse,
 	BetterAuthUser,
+	BetterAuthSession,
 } from '../types/better-auth.types';
+import * as jwt from 'jsonwebtoken';
 import { jwtVerify, createRemoteJWKSet } from 'jose';
 
 // Re-export DTOs and result types for external use
@@ -89,25 +89,16 @@ export class BetterAuthService {
 	private databaseUrl: string;
 
 	/**
-	 * Typed accessor for Better Auth API methods
-	 *
-	 * Better Auth's plugins add methods dynamically. This accessor provides
-	 * typed access to all API methods including those from organization
-	 * and JWT plugins.
-	 *
-	 * Note: We use BetterAuthAPI interface which is manually maintained.
-	 * In the future, this could be replaced with inferred types once
-	 * Better Auth's $Infer fully supports API type inference.
-	 *
-	 * @see https://www.better-auth.com/docs/concepts/typescript
+	 * Typed accessor for organization plugin API methods
+	 * Better Auth's organization plugin adds methods dynamically, so we provide
+	 * a typed accessor to avoid casting throughout the service.
 	 */
-	private get api(): BetterAuthAPI {
+	private get orgApi(): BetterAuthAPI {
 		return this.auth.api as unknown as BetterAuthAPI;
 	}
 
 	constructor(
 		private configService: ConfigService,
-		private securityEventsService: SecurityEventsService,
 		@Optional()
 		@Inject(forwardRef(() => ReferralCodeService))
 		private referralCodeService: ReferralCodeService,
@@ -254,7 +245,7 @@ export class BetterAuthService {
 		try {
 			// Better Auth organization plugin uses auth.api.inviteMember
 			// See: https://www.better-auth.com/docs/plugins/organization
-			const result = await this.api.inviteMember({
+			const result = await this.orgApi.inviteMember({
 				body: {
 					email: dto.employeeEmail,
 					role: dto.role,
@@ -295,7 +286,7 @@ export class BetterAuthService {
 		try {
 			// Better Auth organization plugin uses auth.api.acceptInvitation
 			// See: https://www.better-auth.com/docs/plugins/organization
-			const result = await this.api.acceptInvitation({
+			const result = await this.orgApi.acceptInvitation({
 				body: { invitationId: dto.invitationId },
 				headers: {
 					authorization: `Bearer ${dto.userToken}`,
@@ -333,7 +324,7 @@ export class BetterAuthService {
 		try {
 			// Better Auth uses getFullOrganization to get org with members
 			// See: https://www.better-auth.com/docs/plugins/organization
-			const result = await this.api.getFullOrganization({
+			const result = await this.orgApi.getFullOrganization({
 				query: { organizationId },
 			});
 
@@ -362,7 +353,7 @@ export class BetterAuthService {
 			// Better Auth organization plugin uses auth.api.removeMember
 			// Accepts memberIdOrEmail parameter
 			// See: https://www.better-auth.com/docs/plugins/organization
-			await this.api.removeMember({
+			await this.orgApi.removeMember({
 				body: {
 					memberIdOrEmail: dto.memberId,
 					organizationId: dto.organizationId,
@@ -397,7 +388,7 @@ export class BetterAuthService {
 		try {
 			// Better Auth organization plugin uses auth.api.setActiveOrganization
 			// See: https://www.better-auth.com/docs/plugins/organization
-			const result = await this.api.setActiveOrganization({
+			const result = await this.orgApi.setActiveOrganization({
 				body: { organizationId: dto.organizationId },
 				headers: {
 					authorization: `Bearer ${dto.userToken}`,
@@ -447,53 +438,68 @@ export class BetterAuthService {
 			const session = hasSession(result) ? result.session : null;
 			const sessionToken = session?.token || (hasToken(result) ? result.token : '');
 
-			// Generate JWT access token using Better Auth's JWT plugin (EdDSA)
-			const jwtResult = await this.api.signJWT({
-				body: {
-					payload: {
+			// Generate JWT access token using Better Auth's JWT plugin
+			let accessToken = '';
+			try {
+				const api = this.auth.api as any;
+
+				// Use Better Auth's signJWT with the jwks table
+				const jwtResult = await api.signJWT({
+					body: {
+						payload: {
+							sub: user.id,
+							email: user.email,
+							role: (user as BetterAuthUser).role || 'user',
+							sid: session?.id || '',
+						},
+					},
+				});
+
+				accessToken = jwtResult?.token || '';
+
+				// Fallback to manual JWT if Better Auth fails
+				if (!accessToken) {
+					throw new Error('Better Auth signJWT returned empty token');
+				}
+			} catch (jwtError) {
+				console.warn('[signIn] Better Auth signJWT failed, using manual JWT generation:', jwtError);
+
+				// Fallback: Generate JWT manually using jsonwebtoken
+				const privateKey = this.configService.get<string>('jwt.privateKey');
+				const issuer = this.configService.get<string>('jwt.issuer') || 'manacore';
+				const audience = this.configService.get<string>('jwt.audience') || 'manacore';
+
+				console.log('[signIn] Private key exists:', !!privateKey);
+				console.log('[signIn] Private key length:', privateKey?.length);
+				console.log('[signIn] Private key starts with:', privateKey?.substring(0, 30));
+				console.log('[signIn] Issuer:', issuer);
+				console.log('[signIn] Audience:', audience);
+
+				if (privateKey) {
+					const payload = {
 						sub: user.id,
 						email: user.email,
 						role: (user as BetterAuthUser).role || 'user',
 						sid: session?.id || '',
-					},
-				},
-			});
+					};
 
-			const accessToken = jwtResult?.token;
+					accessToken = jwt.sign(payload, privateKey, {
+						algorithm: 'RS256',
+						expiresIn: '15m',
+						issuer,
+						audience,
+					});
 
-			if (!accessToken) {
-				throw new UnauthorizedException('Failed to generate access token');
+					console.log('[signIn] Generated JWT (first 50 chars):', accessToken?.substring(0, 50));
+					// Decode to verify
+					const decoded = jwt.decode(accessToken, { complete: true });
+					console.log('[signIn] Generated JWT header:', decoded?.header);
+					console.log('[signIn] Generated JWT payload:', decoded?.payload);
+				} else {
+					console.error('[signIn] No JWT private key configured');
+					accessToken = sessionToken;
+				}
 			}
-
-			// Handle "Remember Me" - extend session expiration to 30 days
-			if (dto.rememberMe && session?.id) {
-				const db = getDb(this.databaseUrl);
-				const { sessions } = await import('../../db/schema');
-				const { eq } = await import('drizzle-orm');
-
-				const extendedExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
-
-				await db
-					.update(sessions)
-					.set({
-						expiresAt: extendedExpiresAt,
-						rememberMe: true,
-					})
-					.where(eq(sessions.id, session.id));
-			}
-
-			// Log successful login for security audit
-			await this.securityEventsService.logEvent({
-				userId: user.id,
-				eventType: 'login_success',
-				ipAddress: dto.ipAddress,
-				userAgent: dto.userAgent,
-				metadata: {
-					deviceId: dto.deviceId,
-					deviceName: dto.deviceName,
-					rememberMe: dto.rememberMe,
-				},
-			});
 
 			return {
 				user: {
@@ -507,14 +513,6 @@ export class BetterAuthService {
 				expiresIn: 15 * 60, // 15 minutes in seconds
 			};
 		} catch (error: unknown) {
-			// Log failed login attempt for security audit
-			await this.securityEventsService.logEvent({
-				eventType: 'login_failure',
-				ipAddress: dto.ipAddress,
-				userAgent: dto.userAgent,
-				metadata: { email: dto.email },
-			});
-
 			if (error instanceof Error) {
 				if (
 					error.message?.includes('invalid') ||
@@ -539,7 +537,7 @@ export class BetterAuthService {
 	async signOut(token: string): Promise<SignOutResult> {
 		try {
 			// Better Auth uses auth.api.signOut
-			await this.api.signOut({
+			await (this.auth.api as any).signOut({
 				headers: {
 					authorization: `Bearer ${token}`,
 				},
@@ -566,7 +564,7 @@ export class BetterAuthService {
 	async getSession(token: string): Promise<GetSessionResult> {
 		try {
 			// Better Auth uses auth.api.getSession
-			const result = await this.api.getSession({
+			const result = await (this.auth.api as any).getSession({
 				headers: {
 					authorization: `Bearer ${token}`,
 				},
@@ -604,7 +602,7 @@ export class BetterAuthService {
 	 */
 	async listOrganizations(token: string): Promise<ListOrganizationsResult> {
 		try {
-			const result = await this.api.listOrganizations({
+			const result = await this.orgApi.listOrganizations({
 				headers: {
 					authorization: `Bearer ${token}`,
 				},
@@ -635,7 +633,7 @@ export class BetterAuthService {
 		token?: string
 	): Promise<Organization & { members?: OrganizationMember[] }> {
 		try {
-			const result = await this.api.getFullOrganization({
+			const result = await this.orgApi.getFullOrganization({
 				query: { organizationId },
 				...(token && {
 					headers: {
@@ -743,23 +741,30 @@ export class BetterAuthService {
 				rememberMe: wasRememberMe, // Preserve remember me flag
 			});
 
-			// Generate new JWT using Better Auth's JWT plugin (EdDSA)
-			const jwtResult = await this.api.signJWT({
-				body: {
-					payload: {
-						sub: user.id,
-						email: user.email,
-						role: user.role,
-						sid: sessionId,
-					},
-				},
-			});
-
-			const accessToken = jwtResult?.token;
-
-			if (!accessToken) {
-				throw new UnauthorizedException('Failed to generate access token');
+			// Generate new JWT
+			const privateKey = this.configService.get<string>('jwt.privateKey');
+			if (!privateKey) {
+				throw new Error('JWT private key not configured');
 			}
+
+			const accessTokenExpiry = this.configService.get<string>('jwt.accessTokenExpiry') || '15m';
+			const issuer = this.configService.get<string>('jwt.issuer');
+			const audience = this.configService.get<string>('jwt.audience');
+
+			const tokenPayload: Record<string, unknown> = {
+				sub: user.id,
+				email: user.email,
+				role: user.role,
+				sessionId,
+				...(session.deviceId && { deviceId: session.deviceId }),
+			};
+
+			const accessToken = jwt.sign(tokenPayload, privateKey, {
+				algorithm: 'RS256' as const,
+				expiresIn: accessTokenExpiry as jwt.SignOptions['expiresIn'],
+				...(issuer && { issuer }),
+				...(audience && { audience }),
+			});
 
 			return {
 				user: {
@@ -801,9 +806,17 @@ export class BetterAuthService {
 	 */
 	async validateToken(token: string): Promise<ValidateTokenResult> {
 		try {
+			console.log('[validateToken] Token (first 50 chars):', token?.substring(0, 50));
+
+			// Decode to check the algorithm
+			const decoded = jwt.decode(token, { complete: true });
+			console.log('[validateToken] Decoded header:', decoded?.header);
+
 			// Use our JWKS endpoint (NestJS prefix: /api/v1)
 			const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
 			const jwksUrl = new URL('/api/v1/auth/jwks', baseUrl);
+
+			console.log('[validateToken] Using JWKS from:', jwksUrl.toString());
 
 			// Create JWKS fetcher
 			const JWKS = createRemoteJWKSet(jwksUrl);
@@ -812,11 +825,17 @@ export class BetterAuthService {
 			const issuer = this.configService.get<string>('jwt.issuer') || baseUrl;
 			const audience = this.configService.get<string>('jwt.audience') || baseUrl;
 
-			// Verify using jose library with Better Auth's JWKS (EdDSA)
+			console.log('[validateToken] Issuer:', issuer);
+			console.log('[validateToken] Audience:', audience);
+
+			// Verify using jose library with Better Auth's JWKS
 			const { payload } = await jwtVerify(token, JWKS, {
 				issuer,
 				audience,
 			});
+
+			console.log('[validateToken] Verification SUCCESS');
+			console.log('[validateToken] Payload:', payload);
 
 			return {
 				valid: true,
@@ -824,6 +843,7 @@ export class BetterAuthService {
 			};
 		} catch (error: unknown) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			console.error('[validateToken] Verification FAILED:', errorMessage);
 			return {
 				valid: false,
 				error: errorMessage,
@@ -850,9 +870,9 @@ export class BetterAuthService {
 		redirectTo?: string
 	): Promise<{ success: boolean; message: string }> {
 		try {
-			// Better Auth's requestPasswordReset method
+			// Better Auth's forgetPassword method
 			// See: https://www.better-auth.com/docs/authentication/email-password#password-reset
-			await this.api.requestPasswordReset({
+			await (this.auth.api as any).forgetPassword({
 				body: {
 					email,
 					redirectTo,
@@ -892,7 +912,7 @@ export class BetterAuthService {
 		try {
 			// Better Auth's resetPassword method
 			// See: https://www.better-auth.com/docs/authentication/email-password#password-reset
-			await this.api.resetPassword({
+			await (this.auth.api as any).resetPassword({
 				body: {
 					token,
 					newPassword,
@@ -927,9 +947,12 @@ export class BetterAuthService {
 	 */
 	async getJwks(): Promise<{ keys: unknown[] }> {
 		try {
+			// Better Auth exposes JWKS via auth.api
+			const api = this.auth.api as any;
+
 			// Try to get JWKS from Better Auth
-			const result = await this.api.getJwks();
-			if (result) {
+			if (api.getJwks) {
+				const result = await api.getJwks();
 				return result;
 			}
 

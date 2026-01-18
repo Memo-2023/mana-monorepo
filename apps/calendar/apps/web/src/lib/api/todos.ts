@@ -3,22 +3,15 @@
  * Allows Calendar app to fetch/manage todos from the Todo service
  */
 
+import { env } from '$env/dynamic/public';
 import { createApiClient, buildQueryString } from './base-client';
-import { getTodoApiUrl } from '$lib/config/runtime';
 
-// Lazy-initialized client (runtime config is async)
-let todoClient: ReturnType<typeof createApiClient> | null = null;
+const TODO_API_BASE = env.PUBLIC_TODO_BACKEND_URL || 'http://localhost:3018';
 
-async function getTodoClient() {
-	if (!todoClient) {
-		const todoApiUrl = await getTodoApiUrl();
-		todoClient = createApiClient({
-			baseUrl: todoApiUrl,
-			apiPrefix: '/api/v1',
-		});
-	}
-	return todoClient;
-}
+const todoClient = createApiClient({
+	baseUrl: TODO_API_BASE,
+	apiPrefix: '/api/v1',
+});
 
 // ============================================
 // Types (mirrored from @todo/shared for cross-app use)
@@ -180,13 +173,7 @@ interface LabelsResponse {
 // API Client (using shared base client)
 // ============================================
 
-async function fetchTodoApi<T>(
-	endpoint: string,
-	options?: Parameters<ReturnType<typeof createApiClient>['fetchApi']>[1]
-) {
-	const client = await getTodoClient();
-	return client.fetchApi<T>(endpoint, options);
-}
+const fetchTodoApi = todoClient.fetchApi;
 
 // ============================================
 // Task API Functions

@@ -175,7 +175,6 @@
 	<div class="mb-6 flex items-center justify-between px-4 sm:px-6 lg:px-8">
 		<div class="editable-title">
 			{#if isEditingTitle}
-				<!-- svelte-ignore a11y_autofocus -->
 				<input
 					type="text"
 					bind:value={editTitle}
@@ -260,28 +259,13 @@
 
 <!-- Create Board Modal -->
 {#if showCreateBoard}
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<div
-		class="modal-overlay"
-		onclick={() => (showCreateBoard = false)}
-		onkeydown={(e) => e.key === 'Escape' && (showCreateBoard = false)}
-		role="dialog"
-		aria-modal="true"
-		tabindex="-1"
-	>
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-		<div
-			class="modal-content"
-			onclick={(e) => e.stopPropagation()}
-			onkeydown={() => {}}
-			role="document"
-		>
+	<div class="modal-overlay" onclick={() => (showCreateBoard = false)}>
+		<div class="modal-content" onclick={(e) => e.stopPropagation()}>
 			<h2 class="modal-title">Neues Board erstellen</h2>
 
 			<div class="modal-body">
 				<label class="input-label">
 					Name
-					<!-- svelte-ignore a11y_autofocus -->
 					<input
 						type="text"
 						bind:value={newBoardName}

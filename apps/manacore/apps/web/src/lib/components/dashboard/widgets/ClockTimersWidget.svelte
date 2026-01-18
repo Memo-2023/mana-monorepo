@@ -9,7 +9,7 @@
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
 
-	let loadingState = $state<'loading' | 'success' | 'error'>('loading');
+	let state = $state<'loading' | 'success' | 'error'>('loading');
 	let timers = $state<Timer[]>([]);
 	let alarms = $state<Alarm[]>([]);
 	let stats = $state<ClockStats | null>(null);
@@ -18,7 +18,7 @@
 	let retryCount = $state(0);
 
 	async function load() {
-		loadingState = 'loading';
+		state = 'loading';
 		retrying = true;
 
 		const [timersResult, alarmsResult, statsResult] = await Promise.all([
@@ -31,11 +31,11 @@
 			timers = timersResult.data;
 			alarms = alarmsResult.data.slice(0, 3);
 			stats = statsResult.data;
-			loadingState = 'success';
+			state = 'success';
 			retryCount = 0;
 		} else {
 			error = timersResult.error || alarmsResult.error || statsResult.error;
-			loadingState = 'error';
+			state = 'error';
 
 			// Don't retry if service is unavailable (network error)
 			const isServiceUnavailable = error?.includes('nicht erreichbar');
@@ -79,9 +79,9 @@
 		</h3>
 	</div>
 
-	{#if loadingState === 'loading'}
+	{#if state === 'loading'}
 		<WidgetSkeleton lines={3} />
-	{:else if loadingState === 'error'}
+	{:else if state === 'error'}
 		<WidgetError {error} onRetry={load} {retrying} />
 	{:else if timers.length === 0 && alarms.length === 0}
 		<div class="py-6 text-center">

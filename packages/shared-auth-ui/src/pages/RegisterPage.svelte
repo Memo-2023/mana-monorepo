@@ -8,9 +8,6 @@
 	/** Translation strings for the register page */
 	export interface RegisterTranslations {
 		title: string;
-		namePlaceholder: string;
-		nameRequired: string;
-		nameTooShort: string;
 		emailPlaceholder: string;
 		passwordPlaceholder: string;
 		confirmPasswordPlaceholder: string;
@@ -49,9 +46,6 @@
 	/** Default English translations */
 	const defaultTranslations: RegisterTranslations = {
 		title: 'Create Account',
-		namePlaceholder: 'Name',
-		nameRequired: 'Name is required',
-		nameTooShort: 'Name must be at least 2 characters',
 		emailPlaceholder: 'Email',
 		passwordPlaceholder: 'Password',
 		confirmPasswordPlaceholder: 'Confirm Password',
@@ -87,13 +81,8 @@
 		logo: Component<{ size?: number; color?: string }>;
 		/** Primary color (hex) */
 		primaryColor: string;
-		/** Sign up function (with name and optional referral code) */
-		onSignUp: (
-			email: string,
-			password: string,
-			name: string,
-			referralCode?: string
-		) => Promise<AuthResult>;
+		/** Sign up function (with optional referral code) */
+		onSignUp: (email: string, password: string, referralCode?: string) => Promise<AuthResult>;
 		/** Navigation function */
 		goto: (path: string) => void;
 		/** Success redirect path */
@@ -143,7 +132,6 @@
 	let error = $state<string | null>(null);
 	let success = $state(false);
 	let needsVerification = $state(false);
-	let name = $state('');
 	let email = $state('');
 	let password = $state('');
 	let confirmPassword = $state('');
@@ -261,18 +249,6 @@
 		success = false;
 
 		// Validation
-		if (!name) {
-			error = t.nameRequired;
-			loading = false;
-			return;
-		}
-
-		if (name.length < 2) {
-			error = t.nameTooShort;
-			loading = false;
-			return;
-		}
-
 		if (!email) {
 			error = t.emailRequired;
 			loading = false;
@@ -317,7 +293,7 @@
 
 		// Pass referral code if valid
 		const validReferralCode = referralValidation?.valid ? referralCode : undefined;
-		const result = await onSignUp(email, password, name, validReferralCode);
+		const result = await onSignUp(email, password, validReferralCode);
 
 		loading = false;
 
@@ -325,7 +301,6 @@
 			if (result.needsVerification) {
 				needsVerification = true;
 				success = true;
-				name = '';
 				password = '';
 				confirmPassword = '';
 			} else {
@@ -434,24 +409,6 @@
 			>
 				<div class="mb-2">
 					<input
-						type="text"
-						bind:value={name}
-						placeholder={t.namePlaceholder}
-						required
-						minlength={2}
-						class="h-14 w-full rounded-xl border px-4 text-lg transition-colors focus:outline-none focus:ring-2"
-						style="background-color: {isDark
-							? 'rgba(0, 0, 0, 0.2)'
-							: 'rgba(255, 255, 255, 0.8)'}; border-color: {isDark
-							? 'rgba(255, 255, 255, 0.2)'
-							: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
-							? '#ffffff'
-							: '#000000'}; --tw-ring-color: {primaryColor};"
-					/>
-				</div>
-
-				<div class="mb-2">
-					<input
 						type="email"
 						bind:value={email}
 						placeholder={t.emailPlaceholder}
@@ -487,8 +444,7 @@
 						<button
 							type="button"
 							onclick={() => (showPassword = !showPassword)}
-							class="absolute top-1/2 -translate-y-1/2 right-4 flex items-center justify-center transition-colors"
-							style="color: {isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'};"
+							class="absolute inset-y-0 right-0 flex items-center justify-center w-14 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
 							aria-label={showPassword ? t.hidePassword : t.showPassword}
 						>
 							{#if showPassword}
@@ -520,8 +476,7 @@
 						<button
 							type="button"
 							onclick={() => (showConfirmPassword = !showConfirmPassword)}
-							class="absolute top-1/2 -translate-y-1/2 right-4 flex items-center justify-center transition-colors"
-							style="color: {isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'};"
+							class="absolute inset-y-0 right-0 flex items-center justify-center w-14 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
 							aria-label={showConfirmPassword ? t.hidePassword : t.showPassword}
 						>
 							{#if showConfirmPassword}

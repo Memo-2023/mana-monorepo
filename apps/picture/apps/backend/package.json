@@ -22,7 +22,6 @@
 		"@manacore/nestjs-integration": "workspace:*",
 		"@manacore/shared-errors": "workspace:*",
 		"@manacore/shared-nestjs-auth": "workspace:*",
-		"@manacore/shared-nestjs-cors": "workspace:*",
 		"@manacore/shared-storage": "workspace:*",
 		"@nestjs/common": "^10.4.15",
 		"@nestjs/config": "^3.3.0",

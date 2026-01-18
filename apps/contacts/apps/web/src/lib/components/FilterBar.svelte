@@ -157,10 +157,9 @@
 			>
 				<!-- Tags Filter -->
 				<div class="filter-section">
-					<span class="filter-label" id="tag-filter-label">{$_('filters.tag')}</span>
+					<label class="filter-label">{$_('filters.tag')}</label>
 					<select
 						class="filter-select"
-						aria-labelledby="tag-filter-label"
 						value={selectedTagId || ''}
 						onchange={(e) => onTagChange(e.currentTarget.value || null)}
 					>
@@ -173,10 +172,9 @@
 
 				<!-- Contact Info Filter -->
 				<div class="filter-section">
-					<span class="filter-label" id="contact-filter-label">{$_('filters.contactInfo')}</span>
+					<label class="filter-label">{$_('filters.contactInfo')}</label>
 					<select
 						class="filter-select"
-						aria-labelledby="contact-filter-label"
 						value={contactFilter}
 						onchange={(e) => onContactFilterChange(e.currentTarget.value as ContactFilter)}
 					>
@@ -190,10 +188,9 @@
 
 				<!-- Birthday Filter -->
 				<div class="filter-section">
-					<span class="filter-label" id="birthday-filter-label">{$_('filters.birthdayLabel')}</span>
+					<label class="filter-label">{$_('filters.birthdayLabel')}</label>
 					<select
 						class="filter-select"
-						aria-labelledby="birthday-filter-label"
 						value={birthdayFilter}
 						onchange={(e) => onBirthdayFilterChange(e.currentTarget.value as BirthdayFilter)}
 					>
@@ -207,10 +204,9 @@
 				<!-- Company Filter -->
 				{#if companies.length > 0}
 					<div class="filter-section">
-						<span class="filter-label" id="company-filter-label">{$_('filters.company')}</span>
+						<label class="filter-label">{$_('filters.company')}</label>
 						<select
 							class="filter-select"
-							aria-labelledby="company-filter-label"
 							value={selectedCompany || ''}
 							onchange={(e) => onCompanyChange(e.currentTarget.value || null)}
 						>
@@ -324,10 +320,9 @@
 			<div class="filter-panel">
 				<!-- Tags Filter -->
 				<div class="filter-section">
-					<span class="filter-label" id="tag-filter-label">{$_('filters.tag')}</span>
+					<label class="filter-label">{$_('filters.tag')}</label>
 					<select
 						class="filter-select"
-						aria-labelledby="tag-filter-label"
 						value={selectedTagId || ''}
 						onchange={(e) => onTagChange(e.currentTarget.value || null)}
 					>
@@ -340,10 +335,9 @@
 
 				<!-- Contact Info Filter -->
 				<div class="filter-section">
-					<span class="filter-label" id="contact-filter-label">{$_('filters.contactInfo')}</span>
+					<label class="filter-label">{$_('filters.contactInfo')}</label>
 					<select
 						class="filter-select"
-						aria-labelledby="contact-filter-label"
 						value={contactFilter}
 						onchange={(e) => onContactFilterChange(e.currentTarget.value as ContactFilter)}
 					>
@@ -357,10 +351,9 @@
 
 				<!-- Birthday Filter -->
 				<div class="filter-section">
-					<span class="filter-label" id="birthday-filter-label">{$_('filters.birthdayLabel')}</span>
+					<label class="filter-label">{$_('filters.birthdayLabel')}</label>
 					<select
 						class="filter-select"
-						aria-labelledby="birthday-filter-label"
 						value={birthdayFilter}
 						onchange={(e) => onBirthdayFilterChange(e.currentTarget.value as BirthdayFilter)}
 					>
@@ -374,10 +367,9 @@
 				<!-- Company Filter -->
 				{#if companies.length > 0}
 					<div class="filter-section">
-						<span class="filter-label" id="company-filter-label">{$_('filters.company')}</span>
+						<label class="filter-label">{$_('filters.company')}</label>
 						<select
 							class="filter-select"
-							aria-labelledby="company-filter-label"
 							value={selectedCompany || ''}
 							onchange={(e) => onCompanyChange(e.currentTarget.value || null)}
 						>

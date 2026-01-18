@@ -109,7 +109,6 @@
 					<button
 						class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition-colors"
 						onclick={() => onSearchChange('')}
-						aria-label="Suche leeren"
 					>
 						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path
@@ -228,14 +227,8 @@
 				</button>
 
 				{#if showLabelsDropdown}
-					<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_no_static_element_interactions -->
-					<div
-						class="fixed inset-0 z-40"
-						onclick={() => (showLabelsDropdown = false)}
-						onkeydown={(e) => e.key === 'Escape' && (showLabelsDropdown = false)}
-						role="presentation"
-						tabindex="-1"
-					></div>
+					<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+					<div class="fixed inset-0 z-40" onclick={() => (showLabelsDropdown = false)}></div>
 					<div
 						class="absolute top-full left-0 mt-2 z-50 min-w-[220px] bg-popover border border-border rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2 duration-150"
 					>

@@ -1,27 +1,12 @@
 /**
- * NestJS Auth Types
- *
- * Re-exports centralized types from @manacore/better-auth-types
- * plus NestJS-specific configuration interfaces.
+ * User data extracted from JWT token
  */
-
-// Re-export centralized types
-export type {
-	CurrentUserData,
-	StrictCurrentUserData,
-	JWTPayload,
-	StrictJWTPayload,
-	UserRole,
-	OrganizationRole,
-	TokenValidationResponse,
-} from '@manacore/better-auth-types';
-
-export {
-	isValidUserRole,
-	isValidOrganizationRole,
-	jwtPayloadToCurrentUser,
-	jwtPayloadToStrictCurrentUser,
-} from '@manacore/better-auth-types';
+export interface CurrentUserData {
+	userId: string;
+	email: string;
+	role: string;
+	sessionId?: string;
+}
 
 /**
  * Configuration for the auth module
@@ -33,4 +18,23 @@ export interface AuthModuleConfig {
 	devBypassAuth?: boolean;
 	/** Test user ID for development mode */
 	devUserId?: string;
+}
+
+/**
+ * Response from token validation endpoint
+ */
+export interface TokenValidationResponse {
+	valid: boolean;
+	payload?: {
+		sub: string;
+		email: string;
+		role: string;
+		sessionId?: string;
+		sid?: string;
+		iat?: number;
+		exp?: number;
+		iss?: string;
+		aud?: string;
+	};
+	error?: string;
 }

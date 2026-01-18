@@ -11,8 +11,8 @@
 	// Get translations based on current locale
 	const translations = $derived(getRegisterTranslations($locale || 'de'));
 
-	async function handleSignUp(email: string, password: string, name: string) {
-		return authStore.signUp(email, password, name);
+	async function handleSignUp(email: string, password: string) {
+		return authStore.signUp(email, password);
 	}
 </script>
 

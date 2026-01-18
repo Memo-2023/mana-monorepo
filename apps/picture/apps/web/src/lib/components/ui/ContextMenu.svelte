@@ -263,14 +263,11 @@
 />
 
 {#if $contextMenu.visible}
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_interactive_supports_focus -->
 	<div
 		class="fixed z-[60] min-w-[200px] rounded-2xl border border-gray-200/50 bg-white/95 py-2 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/95"
 		style="left: {$contextMenu.x}px; top: {$contextMenu.y}px;"
 		onclick={(e) => e.stopPropagation()}
-		onkeydown={() => {}}
 		role="menu"
-		tabindex="-1"
 	>
 		{#each menuItems as item}
 			{#if item.divider}
@@ -317,16 +314,13 @@
 
 	<!-- Tag Submenu -->
 	{#if $contextMenu.showTagSubmenu}
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_interactive_supports_focus -->
 		<div
 			bind:this={tagSubmenuElement}
 			class="fixed z-[70] max-h-[400px] min-w-[220px] overflow-y-auto rounded-2xl border border-gray-200/50 bg-white/95 py-2 shadow-2xl backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/95"
 			style="left: {$contextMenu.submenuX}px; top: {$contextMenu.submenuY}px;"
 			onclick={(e) => e.stopPropagation()}
-			onkeydown={() => {}}
 			onmouseleave={hideTagSubmenu}
 			role="menu"
-			tabindex="-1"
 		>
 			{#if $tags.length === 0}
 				<div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Keine Tags vorhanden</div>

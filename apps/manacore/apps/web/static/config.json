@@ -1,8 +1,0 @@
-{
-	"API_BASE_URL": "http://localhost:5173",
-	"AUTH_URL": "http://localhost:3001",
-	"TODO_API_URL": "http://localhost:3018",
-	"CALENDAR_API_URL": "http://localhost:3016",
-	"CLOCK_API_URL": "http://localhost:3017",
-	"CONTACTS_API_URL": "http://localhost:3015"
-}

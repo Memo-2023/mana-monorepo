@@ -17,7 +17,6 @@
 	},
 	"dependencies": {
 		"@manacore/shared-types": "workspace:*",
-		"@manacore/better-auth-types": "workspace:*",
 		"base64-js": "^1.5.1"
 	},
 	"devDependencies": {

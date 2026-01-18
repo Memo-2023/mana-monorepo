@@ -7,8 +7,9 @@ export default () => ({
 	},
 
 	jwt: {
-		// Note: Better Auth manages JWT keys automatically via JWKS (EdDSA/Ed25519)
-		// Keys are stored in auth.jwks table - no manual key configuration needed
+		// Convert \n string literals to actual newlines for PEM format
+		publicKey: (process.env.JWT_PUBLIC_KEY || '').replace(/\\n/g, '\n'),
+		privateKey: (process.env.JWT_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
 		accessTokenExpiry: process.env.JWT_ACCESS_TOKEN_EXPIRY || '15m',
 		refreshTokenExpiry: process.env.JWT_REFRESH_TOKEN_EXPIRY || '7d',
 		issuer: process.env.JWT_ISSUER || 'manacore',
@@ -47,16 +48,5 @@ export default () => ({
 
 	ai: {
 		geminiApiKey: process.env.GOOGLE_GENAI_API_KEY || '',
-	},
-
-	email: {
-		brevoApiKey: process.env.BREVO_API_KEY || '',
-		senderAddress: process.env.EMAIL_SENDER_ADDRESS || 'noreply@manacore.ai',
-		senderName: process.env.EMAIL_SENDER_NAME || 'ManaCore',
-	},
-
-	urls: {
-		baseUrl: process.env.BASE_URL || 'http://localhost:3001',
-		frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
 	},
 });

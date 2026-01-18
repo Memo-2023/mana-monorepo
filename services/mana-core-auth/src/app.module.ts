@@ -5,11 +5,8 @@ import { APP_FILTER } from '@nestjs/core';
 import configuration from './config/configuration';
 import { AuthModule } from './auth/auth.module';
 import { CreditsModule } from './credits/credits.module';
-import { EmailModule } from './email/email.module';
-import { ErrorLogsModule } from './error-logs/error-logs.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { ReferralsModule } from './referrals/referrals.module';
-import { SecurityModule } from './security/security.module';
 import { SettingsModule } from './settings/settings.module';
 import { TagsModule } from './tags/tags.module';
 import { AiModule } from './ai/ai.module';
@@ -31,12 +28,9 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 		AiModule,
 		AuthModule,
 		CreditsModule,
-		EmailModule,
-		ErrorLogsModule,
 		FeedbackModule,
 		HealthModule,
 		ReferralsModule,
-		SecurityModule,
 		SettingsModule,
 		TagsModule,
 	],

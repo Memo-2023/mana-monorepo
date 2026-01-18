@@ -404,6 +404,28 @@
 		opacity: 1;
 	}
 
+	/* Loading */
+	.loading-container {
+		display: flex;
+		justify-content: center;
+		padding: 4rem 0;
+	}
+
+	.spinner {
+		width: 2.5rem;
+		height: 2.5rem;
+		border: 3px solid hsl(var(--color-muted));
+		border-top-color: hsl(var(--color-primary));
+		border-radius: 50%;
+		animation: spin 0.8s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
 	/* Empty State */
 	.empty-state {
 		display: flex;

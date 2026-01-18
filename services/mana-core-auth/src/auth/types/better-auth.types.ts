@@ -3,18 +3,16 @@
  *
  * This file provides types for Better Auth integration.
  *
- * STRATEGY (2024-12 UPDATE):
- * Use inferred types from Better Auth's $Infer pattern when possible.
- * Manual interfaces are kept only for service-layer DTOs and result types.
+ * STRATEGY: Import base types from Better Auth packages, extend only when needed.
  *
- * INFERRED TYPES (prefer these):
- * - AuthUser, AuthSession, AuthAPI - from better-auth.config.ts
+ * From 'better-auth/types':
+ * - User, Session, Account, Auth, BetterAuthOptions, etc.
  *
  * From 'better-auth/plugins/organization':
  * - Organization, Member, Invitation, OrganizationRole, InvitationStatus
  *
  * This file defines:
- * 1. Re-exports of inferred types from config
+ * 1. Extended types (adding fields Better Auth doesn't have)
  * 2. API response/request types for our service layer
  * 3. Service-specific DTOs and result types
  * 4. Type guards for runtime safety
@@ -24,12 +22,7 @@
  */
 
 // =============================================================================
-// Import inferred types from Better Auth config
-// =============================================================================
-import type { AuthUser, AuthSession, AuthAPI } from '../better-auth.config';
-
-// =============================================================================
-// Import base types from Better Auth packages
+// Import core types from Better Auth packages
 // =============================================================================
 import type { User, Session } from 'better-auth/types';
 import type {
@@ -39,9 +32,6 @@ import type {
 	OrganizationRole as BetterAuthOrganizationRole,
 	InvitationStatus as BetterAuthInvitationStatus,
 } from 'better-auth/plugins/organization';
-
-// Re-export inferred types as primary types
-export type { AuthUser, AuthSession, AuthAPI };
 
 // Re-export base types for convenience
 export type { User, Session };
@@ -55,9 +45,7 @@ export type {
 
 /**
  * Extended User type with our additional fields
- *
- * @deprecated Use AuthUser (inferred from config) instead.
- * This type is kept for backward compatibility but may be removed in future.
+ * Better Auth's User type is the base, we extend it for our app
  */
 export interface BetterAuthUser extends User {
 	role?: string;
@@ -65,9 +53,7 @@ export interface BetterAuthUser extends User {
 
 /**
  * Extended Session type with organization support
- *
- * @deprecated Use AuthSession (inferred from config) instead.
- * This type is kept for backward compatibility but may be removed in future.
+ * Better Auth's Session type is the base, organization plugin adds activeOrganizationId
  */
 export interface BetterAuthSession extends Session {
 	activeOrganizationId?: string | null;
@@ -76,9 +62,6 @@ export interface BetterAuthSession extends Session {
 
 /**
  * JWT Payload context passed to definePayload
- *
- * @deprecated Better Auth now infers this type automatically from config.
- * This type is kept for backward compatibility but may be removed in future.
  */
 export interface JWTPayloadContext {
 	user: BetterAuthUser;
@@ -283,35 +266,13 @@ export interface AuthenticatedRequest<TBody = unknown, TQuery = unknown> {
 /**
  * Typed Better Auth API interface
  *
- * @deprecated Use AuthAPI (inferred from config) instead.
- * This interface is manually maintained and may become out of sync with Better Auth.
- * The inferred type from BetterAuthInstance['api'] is always accurate.
- *
  * This interface describes the methods available on auth.api
  * when using the organization plugin.
- *
- * @see https://www.better-auth.com/docs/concepts/typescript
  */
 export interface BetterAuthAPI {
 	// Core auth methods
 	signUpEmail(params: { body: SignUpEmailBody }): Promise<SignUpResponse>;
 	signInEmail(params: { body: { email: string; password: string } }): Promise<SignInResponse>;
-	signOut(params: AuthenticatedRequest): Promise<{ success: boolean }>;
-	getSession(
-		params: AuthenticatedRequest
-	): Promise<{ user: BetterAuthUser; session: BetterAuthSession }>;
-
-	// Password reset methods
-	requestPasswordReset(params: {
-		body: { email: string; redirectTo?: string };
-	}): Promise<{ status: boolean }>;
-	resetPassword(params: {
-		body: { newPassword: string; token: string };
-	}): Promise<{ status: boolean }>;
-
-	// JWT methods
-	signJWT(params: { body: { payload: Record<string, unknown> } }): Promise<{ token: string }>;
-	getJwks(): Promise<{ keys: unknown[] }>;
 
 	// Organization methods
 	createOrganization(
@@ -470,9 +431,6 @@ export interface SignInDto {
 	password: string;
 	deviceId?: string;
 	deviceName?: string;
-	rememberMe?: boolean;
-	ipAddress?: string;
-	userAgent?: string;
 }
 
 /**

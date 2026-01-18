@@ -22,7 +22,6 @@ on:
           - manadeck-backend
           - nutriphi-backend
           - news-api
-          - picture-backend
       environment:
         description: 'Deployment environment'
         required: true
@@ -180,7 +179,9 @@ jobs:
 
           # Mana Core Auth
           MANA_SERVICE_URL=${{ secrets.PRODUCTION_MANA_SERVICE_URL }}
-          # JWT keys managed automatically by Better Auth (EdDSA) - stored in auth.jwks table
+          JWT_SECRET=${{ secrets.PRODUCTION_JWT_SECRET }}
+          JWT_PUBLIC_KEY=${{ secrets.PRODUCTION_JWT_PUBLIC_KEY }}
+          JWT_PRIVATE_KEY=${{ secrets.PRODUCTION_JWT_PRIVATE_KEY }}
 
           # Supabase
           SUPABASE_URL=${{ secrets.PRODUCTION_SUPABASE_URL }}
@@ -268,7 +269,7 @@ jobs:
 
             if [ "$SERVICE" == "all" ]; then
               # Rolling update for all services
-              for service in mana-core-auth maerchenzauber-backend chat-backend manadeck-backend nutriphi-backend news-api picture-backend; do
+              for service in mana-core-auth maerchenzauber-backend chat-backend manadeck-backend nutriphi-backend news-api; do
                 echo "Deploying \$service..."
                 docker compose up -d --no-deps --scale \$service=2 \$service
                 sleep 10

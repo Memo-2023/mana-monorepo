@@ -92,10 +92,10 @@ export const authStore = {
 	},
 
 	/**
-	 * Sign up with email, password, and name
+	 * Sign up with email and password
 	 */
-	async signUp(email: string, password: string, name: string) {
-		const result = await authService.signUp(email, password, name);
+	async signUp(email: string, password: string) {
+		const result = await authService.signUp(email, password);
 		if (result.success && !result.needsVerification) {
 			const userData = await authService.getUserFromToken();
 			user = toManaUser(userData);

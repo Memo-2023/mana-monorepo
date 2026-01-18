@@ -16,8 +16,6 @@
 		class?: string;
 		id?: string;
 		name?: string;
-		minlength?: number;
-		maxlength?: number;
 	}
 
 	let {
@@ -35,8 +33,6 @@
 		class: className = '',
 		id = `input-${Math.random().toString(36).slice(2, 9)}`,
 		name,
-		minlength,
-		maxlength,
 	}: Props = $props();
 
 	function handleInput(e: Event) {
@@ -69,8 +65,6 @@
 		{placeholder}
 		{disabled}
 		{required}
-		{minlength}
-		{maxlength}
 		autocomplete={autocomplete as HTMLInputAttributes['autocomplete']}
 		oninput={handleInput}
 		onchange={handleChange}

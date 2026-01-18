@@ -217,20 +217,8 @@
 <svelte:window onkeydown={handleKeydown} onclick={handleClickOutside} />
 
 <!-- Trigger wrapper -->
-<div
-	class="confirmation-popover-trigger"
-	bind:this={triggerRef}
-	onclick={handleTriggerClick}
-	onkeydown={(e) => {
-		if (e.key === 'Enter' || e.key === ' ') {
-			e.preventDefault();
-			handleTriggerClick(e as unknown as MouseEvent);
-		}
-	}}
-	role="button"
-	tabindex="0"
-	aria-expanded={visible}
->
+<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+<div class="confirmation-popover-trigger" bind:this={triggerRef} onclick={handleTriggerClick}>
 	{@render children()}
 </div>
 

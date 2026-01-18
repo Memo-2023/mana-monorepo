@@ -1,12 +1,11 @@
 /**
  * Referrals Service for ManaCore Web App
  * Handles referral codes, stats, and referral tracking
- *
- * Uses runtime configuration for 12-factor compliance
  */
 
 import { authStore } from '$lib/stores/auth.svelte';
-import { getAuthUrl } from '$lib/config/runtime';
+
+const MANA_AUTH_URL = 'http://localhost:3001'; // TODO: Use PUBLIC_MANA_CORE_AUTH_URL from env
 
 // Types
 export interface ReferralStats {
@@ -55,9 +54,8 @@ export interface ReferralValidation {
 // Helper function for authenticated requests
 async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 	const token = await authStore.getAccessToken();
-	const authUrl = await getAuthUrl();
 
-	const response = await fetch(`${authUrl}${endpoint}`, {
+	const response = await fetch(`${MANA_AUTH_URL}${endpoint}`, {
 		...options,
 		headers: {
 			'Content-Type': 'application/json',
@@ -111,8 +109,7 @@ export const referralsService = {
 	 */
 	async validateCode(code: string): Promise<ReferralValidation> {
 		try {
-			const authUrl = await getAuthUrl();
-			const response = await fetch(`${authUrl}/api/v1/referrals/validate/${code}`);
+			const response = await fetch(`${MANA_AUTH_URL}/api/v1/referrals/validate/${code}`);
 			if (!response.ok) {
 				return { valid: false, error: 'Invalid code' };
 			}

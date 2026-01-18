@@ -1,10 +1,13 @@
 /**
  * Auth Store - Manages authentication state using Svelte 5 runes
- * Uses Mana Core Auth with runtime configuration
+ * Now using Mana Core Auth instead of Supabase Auth
  */
 
 import { browser } from '$app/environment';
-import { getAuthUrl, getBackendUrl } from '$lib/config/runtime';
+import { env } from '$env/dynamic/public';
+
+const MANA_AUTH_URL = env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+const BACKEND_URL = env.PUBLIC_BACKEND_URL || 'http://localhost:3006';
 
 export interface UserData {
 	id: string;
@@ -25,12 +28,10 @@ async function getAuthService() {
 	if (!browser) return null;
 	if (!_authService) {
 		try {
-			const authUrl = await getAuthUrl();
-			const backendUrl = await getBackendUrl();
 			const { initializeWebAuth } = await import('@manacore/shared-auth');
 			const auth = initializeWebAuth({
-				baseUrl: authUrl,
-				backendUrl: backendUrl, // Enables automatic token refresh on 401 responses
+				baseUrl: MANA_AUTH_URL,
+				backendUrl: BACKEND_URL, // Enables automatic token refresh on 401 responses
 			});
 			_authService = auth.authService;
 			_tokenManager = auth.tokenManager;
@@ -115,7 +116,7 @@ export const authStore = {
 		}
 	},
 
-	async signUp(email: string, password: string, name: string): Promise<AuthResult> {
+	async signUp(email: string, password: string): Promise<AuthResult> {
 		const authService = await getAuthService();
 		if (!authService) {
 			return { success: false, error: 'Auth service not available' };
@@ -123,7 +124,7 @@ export const authStore = {
 
 		try {
 			loading = true;
-			const result = await authService.signUp(email, password, name);
+			const result = await authService.signUp(email, password);
 
 			if (result.success) {
 				// Auto-login after signup
@@ -162,26 +163,6 @@ export const authStore = {
 
 		try {
 			const result = await authService.forgotPassword(email);
-			return {
-				success: result.success,
-				error: result.error,
-			};
-		} catch (error) {
-			return {
-				success: false,
-				error: error instanceof Error ? error.message : 'Password reset failed',
-			};
-		}
-	},
-
-	async confirmResetPassword(token: string, newPassword: string): Promise<AuthResult> {
-		const authService = await getAuthService();
-		if (!authService) {
-			return { success: false, error: 'Auth service not available' };
-		}
-
-		try {
-			const result = await authService.resetPassword(token, newPassword);
 			return {
 				success: result.success,
 				error: result.error,

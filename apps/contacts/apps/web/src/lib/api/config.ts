@@ -1,33 +1,13 @@
+import { PUBLIC_BACKEND_URL, PUBLIC_MANA_CORE_AUTH_URL } from '$env/static/public';
+
 /**
  * API Configuration
- * Uses runtime configuration for 12-factor compliance
+ * Uses environment variables with fallbacks for development
  */
-
-import { getBackendUrl, getAuthUrl } from '$lib/config/runtime';
-
-/**
- * Get API base URL with /api/v1 suffix
- */
-export async function getApiBase(): Promise<string> {
-	const backendUrl = await getBackendUrl();
-	return `${backendUrl}/api/v1`;
-}
+export const API_BASE = `${PUBLIC_BACKEND_URL || 'http://localhost:3015'}/api/v1`;
 
 /**
- * Get Mana Core Auth URL
+ * Mana Core Auth URL
+ * Central authentication service URL
  */
-export async function getManaAuthUrl(): Promise<string> {
-	return await getAuthUrl();
-}
-
-/**
- * @deprecated Use getApiBase() instead for runtime config
- * This export is kept for backward compatibility
- */
-export const API_BASE = 'http://localhost:3015/api/v1';
-
-/**
- * @deprecated Use getManaAuthUrl() instead for runtime config
- * This export is kept for backward compatibility
- */
-export const MANA_AUTH_URL = 'http://localhost:3001';
+export const MANA_AUTH_URL = PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';

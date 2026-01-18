@@ -91,7 +91,7 @@
 	let userEmail = $derived(authStore.user?.email);
 
 	// Navigation shortcuts (Ctrl+1-5)
-	const navRoutes = $derived(navItems.map((item) => item.href));
+	const navRoutes = navItems.map((item) => item.href);
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;

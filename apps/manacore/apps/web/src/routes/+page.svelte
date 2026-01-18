@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import type { PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	let { data } = $props();
 
 	$effect(() => {
-		// Redirect to dashboard if already logged in, otherwise go to login
-		// Auth is handled client-side via Mana Core Auth
-		goto('/dashboard');
+		if (!data.session) {
+			goto('/login');
+		} else {
+			goto('/dashboard');
+		}
 	});
 </script>
 

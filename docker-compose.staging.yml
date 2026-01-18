@@ -8,7 +8,6 @@
 #   1. Copy the service block from docker-compose.staging.full.yml
 #   2. Add corresponding health check in .github/workflows/cd-staging.yml
 #   3. Add service to workflow_dispatch options in cd-staging.yml
-#   4. Add Caddy routes to docker/caddy/Caddyfile.staging
 
 services:
   # ============================================
@@ -72,19 +71,11 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-      # JWT keys managed automatically by Better Auth (EdDSA) - stored in auth.jwks table
-      JWT_ISSUER: ${JWT_ISSUER:-manacore}
-      JWT_AUDIENCE: ${JWT_AUDIENCE:-manacore}
-      # Brevo Email Service
-      BREVO_API_KEY: ${BREVO_API_KEY}
-      EMAIL_SENDER_ADDRESS: ${EMAIL_SENDER_ADDRESS:-noreply@manacore.ai}
-      EMAIL_SENDER_NAME: ${EMAIL_SENDER_NAME:-ManaCore}
-      # Base URL for auth callbacks (password reset, email verification)
-      BASE_URL: ${BASE_URL:-https://auth.staging.manacore.ai}
-      # Frontend URL for password reset and email verification links
-      FRONTEND_URL: ${FRONTEND_URL:-https://staging.manacore.ai}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
       # CORS - Allow all staging web app origins (HTTPS domains + localhost for dev)
-      CORS_ORIGINS: https://chat.staging.manacore.ai,https://staging.manacore.ai,https://calendar.staging.manacore.ai,https://clock.staging.manacore.ai,https://todo.staging.manacore.ai,https://picture.staging.manacore.ai,http://localhost:3000,http://localhost:5173,http://localhost:5175,http://localhost:5186,http://localhost:5187,http://localhost:5188
+      CORS_ORIGINS: https://chat.staging.manacore.ai,https://staging.manacore.ai,https://calendar.staging.manacore.ai,https://clock.staging.manacore.ai,https://todo.staging.manacore.ai,http://localhost:3000,http://localhost:5173,http://localhost:5186,http://localhost:5187,http://localhost:5188
     ports:
       - "3001:3001"
     healthcheck:
@@ -115,8 +106,6 @@ services:
       PORT: 3002
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/chat
       MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      # CORS - Allow chat web app and main web app to access backend
-      CORS_ORIGINS: https://chat.staging.manacore.ai,https://staging.manacore.ai,http://localhost:3000,http://localhost:5173
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
@@ -148,12 +137,12 @@ services:
     environment:
       NODE_ENV: staging
       PORT: 3000
-      # Runtime config - for docker-entrypoint.sh (/config.json)
-      BACKEND_URL: https://chat-api.staging.manacore.ai
-      AUTH_URL: https://auth.staging.manacore.ai
-      # Runtime config - for hooks.server.ts (window.__PUBLIC_*__ injection)
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
+      # Server-side URLs (Docker internal network)
+      PUBLIC_BACKEND_URL: http://chat-backend:3002
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      # Client-side URLs (browser access via HTTPS staging domains)
       PUBLIC_BACKEND_URL_CLIENT: https://chat-api.staging.manacore.ai
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
     ports:
       - "3000:3000"
     healthcheck:
@@ -184,20 +173,16 @@ services:
     environment:
       NODE_ENV: staging
       PORT: 5173
-      # Runtime config - for docker-entrypoint.sh (/config.json)
-      API_BASE_URL: https://staging.manacore.ai
-      AUTH_URL: https://auth.staging.manacore.ai
-      TODO_API_URL: https://todo-api.staging.manacore.ai
-      CALENDAR_API_URL: https://calendar-api.staging.manacore.ai
-      CLOCK_API_URL: https://clock-api.staging.manacore.ai
-      CONTACTS_API_URL: https://contacts-api.staging.manacore.ai
-      PICTURE_API_URL: https://picture-api.staging.manacore.ai
-      # Runtime config - for hooks.server.ts (window.__PUBLIC_*__ injection)
+      # Auth URLs
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
+      # Backend URLs for dashboard widgets
+      PUBLIC_TODO_API_URL: http://todo-backend:3018
       PUBLIC_TODO_API_URL_CLIENT: https://todo-api.staging.manacore.ai
+      PUBLIC_CALENDAR_API_URL: http://calendar-backend:3016
       PUBLIC_CALENDAR_API_URL_CLIENT: https://calendar-api.staging.manacore.ai
+      PUBLIC_CLOCK_API_URL: http://clock-backend:3017
       PUBLIC_CLOCK_API_URL_CLIENT: https://clock-api.staging.manacore.ai
-      PUBLIC_CONTACTS_API_URL_CLIENT: https://contacts-api.staging.manacore.ai
     ports:
       - "5173:5173"
     healthcheck:
@@ -328,15 +313,10 @@ services:
     environment:
       NODE_ENV: staging
       PORT: 5186
-      # Runtime config - for docker-entrypoint.sh (/config.json)
-      BACKEND_URL: https://calendar-api.staging.manacore.ai
-      AUTH_URL: https://auth.staging.manacore.ai
-      TODO_API_URL: https://todo-api.staging.manacore.ai
-      CONTACTS_API_URL: https://contacts-api.staging.manacore.ai
-      # Runtime config - for hooks.server.ts (window.__PUBLIC_*__ injection)
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
+      PUBLIC_BACKEND_URL: http://calendar-backend:3016
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://calendar-api.staging.manacore.ai
-      PUBLIC_CONTACTS_API_URL_CLIENT: https://contacts-api.staging.manacore.ai
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
     ports:
       - "5186:5186"
     healthcheck:
@@ -401,97 +381,14 @@ services:
     environment:
       NODE_ENV: staging
       PORT: 5187
-      # Runtime config - for docker-entrypoint.sh (/config.json)
-      API_BASE_URL: https://clock-api.staging.manacore.ai
-      AUTH_URL: https://auth.staging.manacore.ai
-      # Runtime config - for hooks.server.ts (window.__PUBLIC_*__ injection)
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
+      PUBLIC_BACKEND_URL: http://clock-backend:3017
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://clock-api.staging.manacore.ai
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
     ports:
       - "5187:5187"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5187/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    networks:
-      - manacore-network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  # ============================================
-  # Picture App
-  # ============================================
-
-  picture-backend:
-    image: ${DOCKER_REGISTRY:-ghcr.io/memo-2023}/picture-backend:${PICTURE_VERSION:-latest}
-    container_name: picture-backend-staging
-    restart: unless-stopped
-    depends_on:
-      mana-core-auth:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    environment:
-      NODE_ENV: staging
-      PORT: 3006
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/picture
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: ${POSTGRES_USER:-postgres}
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      CORS_ORIGINS: https://picture.staging.manacore.ai,https://staging.manacore.ai,http://localhost:5175,http://localhost:5173
-      # Replicate API for AI image generation
-      REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN}
-      # S3/MinIO storage
-      S3_ENDPOINT: ${S3_ENDPOINT}
-      S3_REGION: ${S3_REGION}
-      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
-      S3_SECRET_KEY: ${S3_SECRET_KEY}
-      MANACORE_STORAGE_PUBLIC_URL: ${MANACORE_STORAGE_PUBLIC_URL}
-      # Credit system
-      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      APP_ID: picture
-    ports:
-      - "3006:3006"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3006/api/v1/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    networks:
-      - manacore-network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  picture-web:
-    image: ${DOCKER_REGISTRY:-ghcr.io/memo-2023}/picture-web:${PICTURE_WEB_VERSION:-latest}
-    container_name: picture-web-staging
-    restart: unless-stopped
-    depends_on:
-      picture-backend:
-        condition: service_healthy
-    environment:
-      NODE_ENV: staging
-      PORT: 5175
-      # Runtime config - for docker-entrypoint.sh (/config.json)
-      BACKEND_URL: https://picture-api.staging.manacore.ai
-      AUTH_URL: https://auth.staging.manacore.ai
-      # Runtime config - for hooks.server.ts (window.__PUBLIC_*__ injection)
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
-      PUBLIC_BACKEND_URL_CLIENT: https://picture-api.staging.manacore.ai
-    ports:
-      - "5175:5175"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5175/health"]
       interval: 30s
       timeout: 10s
       retries: 3

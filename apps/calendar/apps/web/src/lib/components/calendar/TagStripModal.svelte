@@ -421,7 +421,6 @@
 						<div class="edit-form">
 							<div class="form-row">
 								<div class="color-preview" style="background-color: {newTagColor}"></div>
-								<!-- svelte-ignore a11y_autofocus -->
 								<input
 									type="text"
 									bind:value={newTagName}
@@ -432,8 +431,8 @@
 								/>
 							</div>
 							<div class="form-row">
-								<label for="new-tag-group" class="form-label">Gruppe</label>
-								<select id="new-tag-group" bind:value={newTagGroupId} class="group-select">
+								<label class="form-label">Gruppe</label>
+								<select bind:value={newTagGroupId} class="group-select">
 									<option value={null}>Keine Gruppe</option>
 									{#each eventTagGroupsStore.groups as group (group.id)}
 										<option value={group.id}>{group.name}</option>
@@ -472,7 +471,6 @@
 						<div class="edit-form">
 							<div class="form-row">
 								<div class="color-preview" style="background-color: {editTagColor}"></div>
-								<!-- svelte-ignore a11y_autofocus -->
 								<input
 									type="text"
 									bind:value={editTagName}
@@ -483,8 +481,8 @@
 								/>
 							</div>
 							<div class="form-row">
-								<label for="edit-tag-group" class="form-label">Gruppe</label>
-								<select id="edit-tag-group" bind:value={editTagGroupId} class="group-select">
+								<label class="form-label">Gruppe</label>
+								<select bind:value={editTagGroupId} class="group-select">
 									<option value={null}>Keine Gruppe</option>
 									{#each eventTagGroupsStore.groups as group (group.id)}
 										<option value={group.id}>{group.name}</option>
@@ -526,7 +524,6 @@
 						<div class="edit-form">
 							<div class="form-row">
 								<div class="color-preview" style="background-color: {editGroupColor}"></div>
-								<!-- svelte-ignore a11y_autofocus -->
 								<input
 									type="text"
 									bind:value={editGroupName}
@@ -716,7 +713,6 @@
 							<div class="new-group-form">
 								<div class="form-row">
 									<div class="color-preview" style="background-color: {newGroupColor}"></div>
-									<!-- svelte-ignore a11y_autofocus -->
 									<input
 										type="text"
 										bind:value={newGroupName}

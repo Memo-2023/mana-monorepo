@@ -9,7 +9,7 @@
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
 
-	let loadingState = $state<'loading' | 'success' | 'error'>('loading');
+	let state = $state<'loading' | 'success' | 'error'>('loading');
 	let progress = $state<LearningProgress | null>(null);
 	let decks = $state<Deck[]>([]);
 	let error = $state<string | null>(null);
@@ -17,7 +17,7 @@
 	let retryCount = $state(0);
 
 	async function load() {
-		loadingState = 'loading';
+		state = 'loading';
 		retrying = true;
 
 		const [progressResult, decksResult] = await Promise.all([
@@ -28,11 +28,11 @@
 		if (progressResult.data && decksResult.data) {
 			progress = progressResult.data;
 			decks = decksResult.data;
-			loadingState = 'success';
+			state = 'success';
 			retryCount = 0;
 		} else {
 			error = progressResult.error || decksResult.error;
-			loadingState = 'error';
+			state = 'error';
 
 			// Don't retry if service is unavailable (network error)
 			const isServiceUnavailable = error?.includes('nicht erreichbar');
@@ -55,10 +55,10 @@
 	);
 
 	// Get decks with due cards
-	const decksWithDue = $derived(decks.filter((d: Deck) => d.dueCount > 0).slice(0, 3));
+	const decksWithDue = $derived(decks.filter((d) => d.dueCount > 0).slice(0, 3));
 
 	// Total due cards
-	const totalDue = $derived(decks.reduce((sum: number, d: Deck) => sum + d.dueCount, 0));
+	const totalDue = $derived(decks.reduce((sum, d) => sum + d.dueCount, 0));
 </script>
 
 <div>
@@ -69,9 +69,9 @@
 		</h3>
 	</div>
 
-	{#if loadingState === 'loading'}
+	{#if state === 'loading'}
 		<WidgetSkeleton lines={4} />
-	{:else if loadingState === 'error'}
+	{:else if state === 'error'}
 		<WidgetError {error} onRetry={load} {retrying} />
 	{:else if !progress || decks.length === 0}
 		<div class="py-6 text-center">
