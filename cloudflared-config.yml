@@ -1,0 +1,30 @@
+tunnel: bb0ea86d-8253-4a54-838b-107bb7945be9
+credentials-file: /Users/mana/.cloudflared/bb0ea86d-8253-4a54-838b-107bb7945be9.json
+
+ingress:
+  # SSH Access (requires cloudflared on client)
+  - hostname: ssh.mana.how
+    service: ssh://localhost:22
+
+  # Web Services
+  - hostname: auth.mana.how
+    service: http://localhost:3001
+  - hostname: mana.how
+    service: http://localhost:5173
+  - hostname: chat.mana.how
+    service: http://localhost:3000
+  - hostname: chat-api.mana.how
+    service: http://localhost:3002
+  - hostname: todo.mana.how
+    service: http://localhost:5188
+  - hostname: todo-api.mana.how
+    service: http://localhost:3018
+  - hostname: calendar.mana.how
+    service: http://localhost:5186
+  - hostname: calendar-api.mana.how
+    service: http://localhost:3016
+  - hostname: clock.mana.how
+    service: http://localhost:5187
+  - hostname: clock-api.mana.how
+    service: http://localhost:3017
+  - service: http_status:404

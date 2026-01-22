@@ -1,0 +1,329 @@
+# ManaCore Mac Mini Configuration
+# Domain: mana.how (via Cloudflare Tunnel)
+
+services:
+  # ============================================
+  # Infrastructure Services
+  # ============================================
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: manacore-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: manacore
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-manacore123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: manacore-redis
+    restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis123}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Auth Service
+  # ============================================
+
+  mana-core-auth:
+    image: ghcr.io/memo-2023/mana-core-auth:latest
+    container_name: mana-core-auth
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/manacore_auth
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-change-me}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:-}
+      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # ManaCore Dashboard
+  # ============================================
+
+  manacore-web:
+    image: ghcr.io/memo-2023/manacore-web:latest
+    container_name: manacore-web
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5173
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_TODO_API_URL: http://todo-backend:3018
+      PUBLIC_TODO_API_URL_CLIENT: https://todo-api.mana.how
+      PUBLIC_CALENDAR_API_URL: http://calendar-backend:3016
+      PUBLIC_CALENDAR_API_URL_CLIENT: https://calendar-api.mana.how
+      PUBLIC_CLOCK_API_URL: http://clock-backend:3017
+      PUBLIC_CLOCK_API_URL_CLIENT: https://clock-api.mana.how
+    ports:
+      - "5173:5173"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5173/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Chat App
+  # ============================================
+
+  chat-backend:
+    image: ghcr.io/memo-2023/chat-backend:latest
+    container_name: chat-backend
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/chat
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
+      AZURE_OPENAI_API_VERSION: 2024-12-01-preview
+      CORS_ORIGINS: https://chat.mana.how,https://mana.how
+    ports:
+      - "3002:3002"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  chat-web:
+    image: ghcr.io/memo-2023/chat-web:latest
+    container_name: chat-web
+    restart: always
+    depends_on:
+      chat-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      PUBLIC_BACKEND_URL: http://chat-backend:3002
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://chat-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Todo App
+  # ============================================
+
+  todo-backend:
+    image: ghcr.io/memo-2023/todo-backend:latest
+    container_name: todo-backend
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3018
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/todo
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      CORS_ORIGINS: https://todo.mana.how,https://mana.how
+    ports:
+      - "3018:3018"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3018/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  todo-web:
+    image: ghcr.io/memo-2023/todo-web:latest
+    container_name: todo-web
+    restart: always
+    depends_on:
+      todo-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5188
+      PUBLIC_BACKEND_URL: http://todo-backend:3018
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://todo-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5188:5188"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5188/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Calendar App
+  # ============================================
+
+  calendar-backend:
+    image: ghcr.io/memo-2023/calendar-backend:latest
+    container_name: calendar-backend
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3016
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/calendar
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      CORS_ORIGINS: https://calendar.mana.how,https://mana.how
+    ports:
+      - "3016:3016"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3016/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  calendar-web:
+    image: ghcr.io/memo-2023/calendar-web:latest
+    container_name: calendar-web
+    restart: always
+    depends_on:
+      calendar-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5186
+      PUBLIC_BACKEND_URL: http://calendar-backend:3016
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://calendar-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5186:5186"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5186/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Clock App
+  # ============================================
+
+  clock-backend:
+    image: ghcr.io/memo-2023/clock-backend:latest
+    container_name: clock-backend
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3017
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/clock
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      CORS_ORIGINS: https://clock.mana.how,https://mana.how
+    ports:
+      - "3017:3017"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3017/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  clock-web:
+    image: ghcr.io/memo-2023/clock-web:latest
+    container_name: clock-web
+    restart: always
+    depends_on:
+      clock-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5187
+      PUBLIC_BACKEND_URL: http://clock-backend:3017
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://clock-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5187:5187"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5187/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# ============================================
+# Volumes
+# ============================================
+
+volumes:
+  postgres_data:
+    name: manacore-postgres
+  redis_data:
+    name: manacore-redis

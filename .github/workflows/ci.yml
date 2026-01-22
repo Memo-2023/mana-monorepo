@@ -61,6 +61,7 @@ jobs:
         run: pnpm run lint || echo "Lint warnings found"
 
   # Build Docker images - only on push to dev/main (not PRs)
+  # Multi-arch build: linux/amd64 (Hetzner) + linux/arm64 (Mac Mini)
   build-docker-images:
     name: Build ${{ matrix.service.name }}
     runs-on: ubuntu-latest
@@ -69,6 +70,7 @@ jobs:
       matrix:
         service:
           - { name: 'mana-core-auth', path: 'services/mana-core-auth', port: '3001' }
+          - { name: 'manacore-web', path: 'apps/manacore/apps/web', port: '5173' }
           - { name: 'chat-backend', path: 'apps/chat/apps/backend', port: '3002' }
           - { name: 'chat-web', path: 'apps/chat/apps/web', port: '3000' }
           - { name: 'todo-backend', path: 'apps/todo/apps/backend', port: '3018' }
@@ -81,6 +83,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -118,6 +123,7 @@ jobs:
         with:
           context: .
           file: ${{ matrix.service.path }}/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
