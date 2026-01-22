@@ -16,10 +16,12 @@ import { ConflictException, NotFoundException, ForbiddenException } from '@nestj
 import { BetterAuthService } from './better-auth.service';
 import { createMockConfigService } from '../../__tests__/utils/test-helpers';
 import { silentError } from '../../__tests__/utils/silent-error.decorator';
-import { SecurityEventsService } from '../../security/security-events.service';
-import { ReferralCodeService } from '../../referrals/services/referral-code.service';
-import { ReferralTierService } from '../../referrals/services/referral-tier.service';
-import { ReferralTrackingService } from '../../referrals/services/referral-tracking.service';
+
+// Mock services that are not yet implemented
+const SecurityEventsService = jest.fn();
+const ReferralCodeService = jest.fn();
+const ReferralTierService = jest.fn();
+const ReferralTrackingService = jest.fn();
 
 // Mock nanoid before importing factories
 jest.mock('nanoid', () => ({
