@@ -20,6 +20,7 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 # Copy shared packages needed by chat web
+COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
