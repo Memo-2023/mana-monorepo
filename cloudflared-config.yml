@@ -2,6 +2,11 @@ tunnel: bb0ea86d-8253-4a54-838b-107bb7945be9
 credentials-file: /Users/mana/.cloudflared/bb0ea86d-8253-4a54-838b-107bb7945be9.json
 
 ingress:
+  # SSH Access (requires cloudflared on client)
+  - hostname: ssh.mana.how
+    service: ssh://localhost:22
+
+  # Web Services
   - hostname: auth.mana.how
     service: http://localhost:3001
   - hostname: mana.how
