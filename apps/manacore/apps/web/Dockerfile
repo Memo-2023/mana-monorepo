@@ -51,6 +51,7 @@ RUN pnpm build || true
 
 # Build the web app
 WORKDIR /app/apps/manacore/apps/web
+RUN pnpm exec svelte-kit sync
 RUN pnpm build
 
 # Production stage
