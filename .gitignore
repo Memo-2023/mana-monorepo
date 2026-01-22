@@ -96,3 +96,7 @@ yarn.lock
 # Claude Flow metrics
 .claude-flow/
 .claude-flow/metrics/
+
+# Mac Mini deployment
+.env.macmini
+ssh-key-command.txt
