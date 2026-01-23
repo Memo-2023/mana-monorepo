@@ -34,6 +34,7 @@ export const ui = {
 		'nav.forWhom': 'Für wen?',
 		'nav.references': 'Referenzen',
 		'nav.privacy': 'Datenschutz',
+		'nav.devlog': 'Devlog',
 
 		// Buttons
 		'button.startFree': 'Kostenlos testen',
@@ -113,6 +114,7 @@ export const ui = {
 		'nav.forWhom': 'For whom?',
 		'nav.references': 'References',
 		'nav.privacy': 'Privacy',
+		'nav.devlog': 'Devlog',
 
 		// Buttons
 		'button.startFree': 'Start for free',
@@ -191,6 +193,7 @@ export const ui = {
 		'nav.forWhom': 'Per chi?',
 		'nav.references': 'Referenze',
 		'nav.privacy': 'Privacy',
+		'nav.devlog': 'Devlog',
 
 		// Buttons
 		'button.startFree': 'Prova gratuita',
@@ -272,6 +275,7 @@ export const ui = {
 		'nav.forWhom': 'Pour qui?',
 		'nav.references': 'Références',
 		'nav.privacy': 'Confidentialité',
+		'nav.devlog': 'Devlog',
 
 		// Buttons
 		'button.startFree': 'Essai gratuit',
@@ -355,6 +359,7 @@ export const ui = {
 		'nav.forWhom': '¿Para quién?',
 		'nav.references': 'Referencias',
 		'nav.privacy': 'Privacidad',
+		'nav.devlog': 'Devlog',
 
 		// Buttons
 		'button.startFree': 'Prueba gratuita',

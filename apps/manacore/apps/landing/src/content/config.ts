@@ -142,6 +142,21 @@ const contextCollection = defineCollection({
 	}),
 });
 
+const devlogCollection = defineCollection({
+	type: 'content',
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		date: z.date(),
+		author: z.string().default('Till Schneider'),
+		category: z.enum(['release', 'infrastructure', 'feature', 'bugfix', 'update']),
+		tags: z.array(z.string()).optional(),
+		featured: z.boolean().default(false),
+		commits: z.number().optional(),
+		readTime: z.number().optional(),
+	}),
+});
+
 export const collections = {
 	apps: appsCollection,
 	branchen: targetGroupsCollection,
@@ -150,4 +165,5 @@ export const collections = {
 	clients: clientsCollection,
 	mission: missionCollection,
 	context: contextCollection,
+	devlog: devlogCollection,
 };
