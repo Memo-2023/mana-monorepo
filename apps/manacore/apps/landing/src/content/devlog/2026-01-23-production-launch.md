@@ -1,18 +1,29 @@
 ---
 title: 'Production Launch: 7 Apps Live auf mana.how'
-description: 'Mac Mini Server Setup, n8n Workflow Automation, Devlog, Monitoring Stack und Landing Pages - ein produktiver Tag mit 30 Commits'
+description: 'Mac Mini Server Setup, Guest Mode, n8n Workflow Automation, Devlog und Monitoring Stack - ein produktiver Tag mit 43 Commits'
 date: 2026-01-23
 author: 'Till Schneider'
 category: 'release'
-tags: ['deployment', 'docker', 'monitoring', 'mac-mini', 'n8n', 'devlog', 'infrastructure']
+tags:
+  [
+    'deployment',
+    'docker',
+    'monitoring',
+    'mac-mini',
+    'n8n',
+    'guest-mode',
+    'devlog',
+    'infrastructure',
+  ]
 featured: true
-commits: 30
-readTime: 10
+commits: 43
+readTime: 12
 ---
 
 Heute war ein sehr produktiver Tag mit Fokus auf die **Produktivstellung der ManaCore Apps auf dem Mac Mini Server**. Die wichtigsten Errungenschaften:
 
 - **7 Apps live** auf https://mana.how (Auth, Dashboard, Chat, Todo, Calendar, Clock, Contacts)
+- **Session-First Guest Mode** - Apps ohne Anmeldung nutzbar
 - **n8n Workflow Automation** für automatisierte Prozesse
 - **Devlog Section** auf der ManaCore Landing Page
 - **Monitoring Stack** eingerichtet (Prometheus, Grafana, Umami Analytics)
@@ -41,6 +52,38 @@ Implementierung eines Benachrichtigungssystems:
 - **Telegram Bot** für sofortige Alerts
 - **Email Backup** via Gmail SMTP (msmtp)
 - Automatische Benachrichtigung bei Service-Ausfällen
+
+---
+
+## Session-First Guest Mode
+
+Großes UX-Update: **Alle Apps sind jetzt ohne Anmeldung nutzbar!**
+
+### Konzept
+
+Nutzer können Calendar, Chat, Clock und Todo sofort verwenden - ohne Account. Daten werden im `sessionStorage` gespeichert und beim Schließen des Tabs gelöscht.
+
+### Implementierung
+
+| Komponente            | Beschreibung                                    |
+| --------------------- | ----------------------------------------------- |
+| `AuthGateModal`       | Modal für Login-Aufforderung bei Cloud-Features |
+| `session-*.svelte.ts` | Session-basierte Stores für temporäre Daten     |
+| Guest Mode Banner     | Zeigt Anzahl der lokalen Items + Login-CTA      |
+
+### Features
+
+- **Sofortige Nutzung** ohne Registrierung
+- **Daten-Migration** beim Login (Session → Cloud)
+- **Return URL Handling** - Nach Login zurück zur vorherigen Seite
+- **Item Counter** im Banner zeigt gespeicherte Einträge
+
+### Betroffene Apps
+
+- ✅ Calendar (Events, Kalender)
+- ✅ Chat (Conversations)
+- ✅ Clock (Timer, Alarme)
+- ✅ Todo (Tasks, Projekte)
 
 ---
 
@@ -221,6 +264,7 @@ Einheitliches Pricing für alle Mana Apps:
 - ✅ **SSL Zertifikate** - Automatisch via Cloudflare
 - ✅ **Devlog implementiert** - Content Collections + Landing Page Integration
 - ✅ **n8n eingerichtet** - Workflow Automation Platform
+- ✅ **Guest Mode** - Session-first UX für alle Apps
 
 ---
 
