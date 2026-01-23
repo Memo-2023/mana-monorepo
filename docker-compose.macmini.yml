@@ -39,6 +39,25 @@ services:
       timeout: 5s
       retries: 5
 
+  minio:
+    image: minio/minio:latest
+    container_name: manacore-minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
   # ============================================
   # Auth Service
   # ============================================
@@ -337,6 +356,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 3015
@@ -346,6 +367,12 @@ services:
       DB_USER: postgres
       MANA_CORE_AUTH_URL: http://mana-core-auth:3001
       CORS_ORIGINS: https://contacts.mana.how,https://mana.how,https://calendar.mana.how
+      # S3/MinIO Storage for contact photos
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      S3_BUCKET: contacts-photos
     ports:
       - "3015:3015"
     healthcheck:
@@ -515,6 +542,8 @@ volumes:
     name: manacore-postgres
   redis_data:
     name: manacore-redis
+  minio_data:
+    name: manacore-minio
   prometheus_data:
     name: manacore-prometheus
   grafana_data:
