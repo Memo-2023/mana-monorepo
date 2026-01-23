@@ -1,21 +1,22 @@
 ---
-title: 'Production Launch: 6 Apps Live auf mana.how'
-description: 'Mac Mini Server Setup, Contacts App Deployment, Monitoring Stack und Landing Pages - ein produktiver Tag mit 26 Commits'
+title: 'Production Launch: 7 Apps Live auf mana.how'
+description: 'Mac Mini Server Setup, n8n Workflow Automation, Devlog, Monitoring Stack und Landing Pages - ein produktiver Tag mit 30 Commits'
 date: 2026-01-23
 author: 'Till Schneider'
 category: 'release'
-tags: ['deployment', 'docker', 'monitoring', 'mac-mini', 'contacts', 'infrastructure']
+tags: ['deployment', 'docker', 'monitoring', 'mac-mini', 'n8n', 'devlog', 'infrastructure']
 featured: true
-commits: 26
-readTime: 8
+commits: 30
+readTime: 10
 ---
 
 Heute war ein sehr produktiver Tag mit Fokus auf die **Produktivstellung der ManaCore Apps auf dem Mac Mini Server**. Die wichtigsten Errungenschaften:
 
-- **6 Apps live** auf https://mana.how (Auth, Dashboard, Chat, Todo, Calendar, Clock)
-- **Contacts App** vollständig deployed (Backend + Web)
+- **7 Apps live** auf https://mana.how (Auth, Dashboard, Chat, Todo, Calendar, Clock, Contacts)
+- **n8n Workflow Automation** für automatisierte Prozesse
+- **Devlog Section** auf der ManaCore Landing Page
 - **Monitoring Stack** eingerichtet (Prometheus, Grafana, Umami Analytics)
-- **Notification System** für Health Checks (Telegram + Email)
+- **Telegram Stats Bot** für Analytics-Benachrichtigungen
 - **Shared Landing UI** für einheitliche Landing Pages
 
 ---
@@ -91,6 +92,59 @@ Integration von Umami Web Analytics in alle Apps:
 - Tracking Script in allen Web Apps und Landing Pages
 - URL geändert zu stats.mana.how
 
+### Telegram Stats Bot
+
+Neuer Bot für automatische Analytics-Reports:
+
+- Tägliche Zusammenfassungen der Besucher-Statistiken
+- Integration mit Umami API
+- Konfigurierbare Benachrichtigungszeiten
+
+---
+
+## n8n Workflow Automation
+
+Einrichtung von **n8n** als zentrale Workflow-Automation-Plattform:
+
+- **Container:** `manacore-n8n` auf Port 5678
+- **Datenbank:** Eigene PostgreSQL-Datenbank `n8n`
+- **URL:** https://n8n.mana.how
+
+### Geplante Automationen
+
+- Backup-Workflows für Datenbanken
+- Health-Check-Benachrichtigungen
+- Deployment-Pipelines
+- Analytics-Reports
+
+---
+
+## Devlog auf der Landing Page
+
+Neues **Devlog-System** auf der ManaCore Landing Page implementiert:
+
+### Astro Content Collections
+
+- Schema für Devlog-Einträge mit Kategorien, Tags, Commits, Lesezeit
+- Dynamische Routen für einzelne Einträge (`/devlog/[slug]`)
+- Sortierung nach Datum
+
+### Homepage-Integration
+
+- Devlog-Section auf der Startseite mit den 3 neuesten Einträgen
+- Kategorie-Badges mit Farbkodierung
+- Navigation-Link im Header
+
+### Kategorien
+
+| Kategorie      | Farbe  | Verwendung                |
+| -------------- | ------ | ------------------------- |
+| Release        | Grün   | Neue Versionen            |
+| Infrastructure | Blau   | Server, DevOps            |
+| Feature        | Lila   | Neue Funktionen           |
+| Bugfix         | Orange | Fehlerbehebungen          |
+| Update         | Grau   | Allgemeine Aktualisierung |
+
 ---
 
 ## Landing Pages & Shared Components
@@ -142,6 +196,7 @@ Einheitliches Pricing für alle Mana Apps:
 | Prometheus       | manacore-prometheus | 9090      | ✅     |
 | Grafana          | manacore-grafana    | 3100      | ✅     |
 | Umami            | manacore-umami      | 3200      | ✅     |
+| n8n              | manacore-n8n        | 5678      | ✅     |
 
 ### Live URLs
 
@@ -156,14 +211,23 @@ Einheitliches Pricing für alle Mana Apps:
 | Contacts  | https://contacts.mana.how | https://contacts-api.mana.how |
 | Grafana   | https://grafana.mana.how  | -                             |
 | Analytics | https://stats.mana.how    | -                             |
+| n8n       | https://n8n.mana.how      | -                             |
+
+---
+
+## Erledigte Aufgaben
+
+- ✅ **DNS konfiguriert** - Alle Subdomains via Cloudflare Tunnel
+- ✅ **SSL Zertifikate** - Automatisch via Cloudflare
+- ✅ **Devlog implementiert** - Content Collections + Landing Page Integration
+- ✅ **n8n eingerichtet** - Workflow Automation Platform
 
 ---
 
 ## Nächste Schritte
 
-1. **DNS konfigurieren** für mana.how Domain
-2. **SSL Zertifikate** einrichten (Caddy/Let's Encrypt)
-3. **Grafana Dashboards** erstellen
-4. **Backup-Strategie** implementieren
-5. **Mobile Apps** testen mit neuen APIs
-6. **Landing Pages** auf Cloudflare Pages deployen
+1. **Grafana Dashboards** erstellen für alle Services
+2. **Backup-Strategie** implementieren (n8n Workflow)
+3. **Mobile Apps** testen mit neuen Production APIs
+4. **Landing Pages** auf Cloudflare Pages deployen
+5. **n8n Workflows** für automatische Reports erstellen
