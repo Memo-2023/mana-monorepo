@@ -256,6 +256,9 @@ services:
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://calendar-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      # Cross-app integrations
+      PUBLIC_TODO_BACKEND_URL: https://todo-api.mana.how
+      PUBLIC_CONTACTS_API_URL: https://contacts-api.mana.how
     ports:
       - "5186:5186"
     healthcheck:
