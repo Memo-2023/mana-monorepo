@@ -1,0 +1,23 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import ManaPricingSection from '@manacore/shared-landing-ui/sections/ManaPricingSection.astro';
+---
+
+<Layout
+	title="Preise - ManaChat"
+	description="Transparente Preise für ManaChat - Wähle den passenden Mana-Plan für deine KI-Chat-Nutzung."
+>
+	<Navigation />
+
+	<main class="pt-20">
+		<ManaPricingSection
+			showOneTime={true}
+			showTrustIndicators={true}
+			ctaBaseUrl="https://app.manacore.io/register"
+		/>
+	</main>
+
+	<Footer />
+</Layout>

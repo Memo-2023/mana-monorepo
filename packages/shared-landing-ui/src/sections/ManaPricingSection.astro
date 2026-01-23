@@ -1,0 +1,1066 @@
+---
+/**
+ * ManaPricingSection - Unified Mana pricing display for all landing pages
+ *
+ * Usage:
+ * ```astro
+ * <ManaPricingSection
+ *   showOneTime={true}
+ *   showTrustIndicators={true}
+ *   ctaBaseUrl="https://app.manacore.io"
+ * />
+ * ```
+ *
+ * Or with custom translations:
+ * ```astro
+ * import { englishPricingTranslations } from '@manacore/shared-landing-ui/data/pricing';
+ * <ManaPricingSection
+ *   translations={englishPricingTranslations}
+ * />
+ * ```
+ */
+
+import {
+	pricingPlans,
+	defaultPricingTranslations,
+	type PricingTranslations,
+} from '../data/pricing';
+
+interface Props {
+	showOneTime?: boolean;
+	showTrustIndicators?: boolean;
+	ctaBaseUrl?: string;
+	translations?: Partial<PricingTranslations>;
+	class?: string;
+}
+
+const {
+	showOneTime = true,
+	showTrustIndicators = true,
+	ctaBaseUrl = '/register',
+	translations: customTranslations = {},
+	class: className = '',
+} = Astro.props;
+
+const t = { ...defaultPricingTranslations, ...customTranslations };
+---
+
+<section class:list={['mana-pricing-section', className]}>
+	<div class="mana-pricing-container">
+		<!-- Header -->
+		<div class="mana-pricing-header">
+			<div class="mana-pricing-icon-wrapper">
+				<svg class="mana-pricing-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+					></path>
+				</svg>
+			</div>
+			<h2 class="mana-pricing-title">{t.sectionTitle}</h2>
+			<p class="mana-pricing-subtitle">{t.sectionSubtitle}</p>
+		</div>
+
+		<!-- Billing Toggle -->
+		<div class="mana-billing-toggle-wrapper">
+			<div class="mana-billing-toggle">
+				<button id="mana-monthly-tab" class="mana-billing-tab active" data-billing="monthly">
+					<svg class="mana-billing-tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+						></path>
+					</svg>
+					{t.monthly}
+				</button>
+				<button id="mana-yearly-tab" class="mana-billing-tab" data-billing="yearly">
+					<svg class="mana-billing-tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+					</svg>
+					{t.yearly}
+					<span class="mana-yearly-badge">{t.yearlyDiscount}</span>
+				</button>
+			</div>
+		</div>
+
+		<!-- Monthly Plans -->
+		<div id="mana-monthly-plans" class="mana-pricing-content">
+			<div class="mana-pricing-grid mana-pricing-grid-3">
+				{
+					pricingPlans.monthly.slice(0, 3).map((plan) => (
+						<div class:list={['mana-pricing-card', { popular: plan.popular }]}>
+							{plan.popular && <div class="mana-popular-badge">Beliebt</div>}
+							<div class="mana-card-icon">
+								<span>{plan.icon}</span>
+							</div>
+							<h3 class="mana-card-name">{plan.name}</h3>
+							<div class="mana-card-price">
+								<span class="mana-price-value">
+									{plan.price === 0 ? t.free : plan.price.toString().replace('.', ',')}
+								</span>
+								{plan.price > 0 && <span class="mana-price-currency">€</span>}
+							</div>
+							{plan.price > 0 && <p class="mana-price-period">{t.perMonth}</p>}
+
+							<div class="mana-card-stats">
+								<div class="mana-stat mana-stat-blue">
+									<span class="mana-stat-label">{t.startMana}</span>
+									<span class="mana-stat-value">{plan.startMana.toLocaleString('de-DE')}</span>
+								</div>
+								<div class="mana-stat mana-stat-green">
+									<span class="mana-stat-label">{t.regeneration}</span>
+									<span class="mana-stat-value">
+										{plan.regeneration} {t.manaPerDay}
+									</span>
+								</div>
+								<div class="mana-stat mana-stat-purple">
+									<span class="mana-stat-label">{t.maxStorage}</span>
+									<span class="mana-stat-value">{plan.storage.toLocaleString('de-DE')}</span>
+								</div>
+							</div>
+
+							<ul class="mana-card-features">
+								{plan.features.map((feature) => (
+									<li>
+										<svg
+											class="mana-feature-check"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M5 13l4 4L19 7"
+											/>
+										</svg>
+										{feature}
+									</li>
+								))}
+							</ul>
+
+							<a
+								href={plan.price === 0 ? ctaBaseUrl : `${ctaBaseUrl}?plan=${plan.id}`}
+								class="mana-card-cta"
+							>
+								{plan.price === 0 ? t.getStarted : t.selectPlan}
+							</a>
+						</div>
+					))
+				}
+			</div>
+			{
+				pricingPlans.monthly.length > 3 && (
+					<div class="mana-pricing-grid mana-pricing-grid-2">
+						{pricingPlans.monthly.slice(3).map((plan) => (
+							<div class:list={['mana-pricing-card', { popular: plan.popular }]}>
+								{plan.popular && <div class="mana-popular-badge">Beliebt</div>}
+								<div class="mana-card-icon">
+									<span>{plan.icon}</span>
+								</div>
+								<h3 class="mana-card-name">{plan.name}</h3>
+								<div class="mana-card-price">
+									<span class="mana-price-value">{plan.price.toString().replace('.', ',')}</span>
+									<span class="mana-price-currency">€</span>
+								</div>
+								<p class="mana-price-period">{t.perMonth}</p>
+
+								<div class="mana-card-stats">
+									<div class="mana-stat mana-stat-blue">
+										<span class="mana-stat-label">{t.startMana}</span>
+										<span class="mana-stat-value">{plan.startMana.toLocaleString('de-DE')}</span>
+									</div>
+									<div class="mana-stat mana-stat-green">
+										<span class="mana-stat-label">{t.regeneration}</span>
+										<span class="mana-stat-value">
+											{plan.regeneration} {t.manaPerDay}
+										</span>
+									</div>
+									<div class="mana-stat mana-stat-purple">
+										<span class="mana-stat-label">{t.maxStorage}</span>
+										<span class="mana-stat-value">{plan.storage.toLocaleString('de-DE')}</span>
+									</div>
+								</div>
+
+								<ul class="mana-card-features">
+									{plan.features.map((feature) => (
+										<li>
+											<svg
+												class="mana-feature-check"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M5 13l4 4L19 7"
+												/>
+											</svg>
+											{feature}
+										</li>
+									))}
+								</ul>
+
+								<a href={`${ctaBaseUrl}?plan=${plan.id}`} class="mana-card-cta">
+									{t.selectPlan}
+								</a>
+							</div>
+						))}
+					</div>
+				)
+			}
+		</div>
+
+		<!-- Yearly Plans -->
+		<div id="mana-yearly-plans" class="mana-pricing-content hidden">
+			<div class="mana-pricing-grid mana-pricing-grid-3">
+				{
+					pricingPlans.yearly.slice(0, 3).map((plan) => (
+						<div class:list={['mana-pricing-card', { popular: plan.popular }]}>
+							{plan.popular && <div class="mana-popular-badge">Beliebt</div>}
+							<div class="mana-card-icon">
+								<span>{plan.icon}</span>
+							</div>
+							<h3 class="mana-card-name">{plan.name}</h3>
+							<div class="mana-card-price">
+								<span class="mana-price-value">
+									{plan.price === 0 ? t.free : plan.price.toString().replace('.', ',')}
+								</span>
+								{plan.price > 0 && <span class="mana-price-currency">€</span>}
+							</div>
+							{plan.price > 0 && <p class="mana-price-period">{t.perYear}</p>}
+							{plan.monthlyEquivalent && plan.monthlyEquivalent > 0 && (
+								<p class="mana-price-equivalent">
+									{plan.monthlyEquivalent.toFixed(2).replace('.', ',')} {t.perMonthEquivalent}
+								</p>
+							)}
+
+							<div class="mana-card-stats">
+								<div class="mana-stat mana-stat-blue">
+									<span class="mana-stat-label">{t.startMana}</span>
+									<span class="mana-stat-value">{plan.startMana.toLocaleString('de-DE')}</span>
+								</div>
+								<div class="mana-stat mana-stat-green">
+									<span class="mana-stat-label">{t.regeneration}</span>
+									<span class="mana-stat-value">
+										{plan.regeneration} {t.manaPerDay}
+									</span>
+								</div>
+								<div class="mana-stat mana-stat-purple">
+									<span class="mana-stat-label">{t.maxStorage}</span>
+									<span class="mana-stat-value">{plan.storage.toLocaleString('de-DE')}</span>
+								</div>
+							</div>
+
+							<ul class="mana-card-features">
+								{plan.features.map((feature) => (
+									<li>
+										<svg
+											class="mana-feature-check"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M5 13l4 4L19 7"
+											/>
+										</svg>
+										{feature}
+									</li>
+								))}
+							</ul>
+
+							<a
+								href={
+									plan.price === 0 ? ctaBaseUrl : `${ctaBaseUrl}?plan=${plan.id}&billing=yearly`
+								}
+								class="mana-card-cta"
+							>
+								{plan.price === 0 ? t.getStarted : t.selectPlan}
+							</a>
+						</div>
+					))
+				}
+			</div>
+			{
+				pricingPlans.yearly.length > 3 && (
+					<div class="mana-pricing-grid mana-pricing-grid-2">
+						{pricingPlans.yearly.slice(3).map((plan) => (
+							<div class:list={['mana-pricing-card', { popular: plan.popular }]}>
+								{plan.popular && <div class="mana-popular-badge">Beliebt</div>}
+								<div class="mana-card-icon">
+									<span>{plan.icon}</span>
+								</div>
+								<h3 class="mana-card-name">{plan.name}</h3>
+								<div class="mana-card-price">
+									<span class="mana-price-value">{plan.price.toString().replace('.', ',')}</span>
+									<span class="mana-price-currency">€</span>
+								</div>
+								<p class="mana-price-period">{t.perYear}</p>
+								{plan.monthlyEquivalent && (
+									<p class="mana-price-equivalent">
+										{plan.monthlyEquivalent.toFixed(2).replace('.', ',')} {t.perMonthEquivalent}
+									</p>
+								)}
+
+								<div class="mana-card-stats">
+									<div class="mana-stat mana-stat-blue">
+										<span class="mana-stat-label">{t.startMana}</span>
+										<span class="mana-stat-value">{plan.startMana.toLocaleString('de-DE')}</span>
+									</div>
+									<div class="mana-stat mana-stat-green">
+										<span class="mana-stat-label">{t.regeneration}</span>
+										<span class="mana-stat-value">
+											{plan.regeneration} {t.manaPerDay}
+										</span>
+									</div>
+									<div class="mana-stat mana-stat-purple">
+										<span class="mana-stat-label">{t.maxStorage}</span>
+										<span class="mana-stat-value">{plan.storage.toLocaleString('de-DE')}</span>
+									</div>
+								</div>
+
+								<ul class="mana-card-features">
+									{plan.features.map((feature) => (
+										<li>
+											<svg
+												class="mana-feature-check"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M5 13l4 4L19 7"
+												/>
+											</svg>
+											{feature}
+										</li>
+									))}
+								</ul>
+
+								<a href={`${ctaBaseUrl}?plan=${plan.id}&billing=yearly`} class="mana-card-cta">
+									{t.selectPlan}
+								</a>
+							</div>
+						))}
+					</div>
+				)
+			}
+		</div>
+
+		<!-- One-time Purchases -->
+		{
+			showOneTime && (
+				<div class="mana-onetime-section">
+					<div class="mana-onetime-header">
+						<div class="mana-onetime-icon-wrapper">
+							<svg class="mana-onetime-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+								/>
+							</svg>
+						</div>
+						<h3 class="mana-onetime-title">{t.oneTimeTitle}</h3>
+						<p class="mana-onetime-subtitle">{t.oneTimeSubtitle}</p>
+					</div>
+
+					<div class="mana-pricing-grid mana-pricing-grid-4">
+						{pricingPlans.oneTime.map((pkg) => (
+							<div class="mana-package-card">
+								<div class="mana-package-icon">
+									<span>{pkg.icon}</span>
+								</div>
+								<h4 class="mana-package-name">{pkg.name}</h4>
+								<div class="mana-package-price">
+									<span class="mana-price-value">{pkg.price.toString().replace('.', ',')}</span>
+									<span class="mana-price-currency">€</span>
+								</div>
+								<div class="mana-package-mana">
+									<span class="mana-mana-value">{pkg.mana.toLocaleString('de-DE')}</span>
+									<span class="mana-mana-label">{t.manaCredits}</span>
+								</div>
+								<a href={`${ctaBaseUrl}?package=${pkg.id}`} class="mana-card-cta">
+									{t.selectPlan}
+								</a>
+							</div>
+						))}
+					</div>
+				</div>
+			)
+		}
+
+		<!-- Trust Indicators -->
+		{
+			showTrustIndicators && (
+				<div class="mana-trust-section">
+					<h3 class="mana-trust-title">{t.trustTitle}</h3>
+					<div class="mana-trust-grid">
+						<div class="mana-trust-item">
+							<div class="mana-trust-icon mana-trust-icon-green">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+									/>
+								</svg>
+							</div>
+							<p class="mana-trust-label">{t.trustSavings}</p>
+							<p class="mana-trust-desc">{t.trustSavingsDesc}</p>
+						</div>
+						<div class="mana-trust-item">
+							<div class="mana-trust-icon mana-trust-icon-blue">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+									/>
+								</svg>
+							</div>
+							<p class="mana-trust-label">{t.trustTeam}</p>
+							<p class="mana-trust-desc">{t.trustTeamDesc}</p>
+						</div>
+						<div class="mana-trust-item">
+							<div class="mana-trust-icon mana-trust-icon-purple">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+									/>
+								</svg>
+							</div>
+							<p class="mana-trust-label">{t.trustControl}</p>
+							<p class="mana-trust-desc">{t.trustControlDesc}</p>
+						</div>
+						<div class="mana-trust-item">
+							<div class="mana-trust-icon mana-trust-icon-orange">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M13 10V3L4 14h7v7l9-11h-7z"
+									/>
+								</svg>
+							</div>
+							<p class="mana-trust-label">{t.trustInstant}</p>
+							<p class="mana-trust-desc">{t.trustInstantDesc}</p>
+						</div>
+					</div>
+				</div>
+			)
+		}
+	</div>
+</section>
+
+<style>
+	.mana-pricing-section {
+		position: relative;
+		background: linear-gradient(
+			180deg,
+			var(--color-background-page) 0%,
+			var(--color-background-card) 100%
+		);
+		padding: 120px 0;
+		overflow: hidden;
+	}
+
+	.mana-pricing-container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 24px;
+	}
+
+	/* Header */
+	.mana-pricing-header {
+		text-align: center;
+		margin-bottom: 60px;
+	}
+
+	.mana-pricing-icon-wrapper {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 64px;
+		height: 64px;
+		background: var(--color-primary-glow);
+		border-radius: 16px;
+		margin-bottom: 20px;
+	}
+
+	.mana-pricing-icon {
+		width: 32px;
+		height: 32px;
+		color: var(--color-primary);
+	}
+
+	.mana-pricing-title {
+		font-size: clamp(2rem, 4vw, 2.75rem);
+		font-weight: 800;
+		color: var(--color-text-primary);
+		margin: 0 0 16px 0;
+		line-height: 1.2;
+	}
+
+	.mana-pricing-subtitle {
+		font-size: clamp(1rem, 2vw, 1.25rem);
+		color: var(--color-text-secondary);
+		max-width: 700px;
+		margin: 0 auto;
+		line-height: 1.6;
+	}
+
+	/* Billing Toggle */
+	.mana-billing-toggle-wrapper {
+		display: flex;
+		justify-content: center;
+		margin-bottom: 48px;
+	}
+
+	.mana-billing-toggle {
+		display: inline-flex;
+		background: var(--color-background-card);
+		border: 1px solid var(--color-border);
+		border-radius: 16px;
+		padding: 6px;
+	}
+
+	.mana-billing-tab {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 12px 24px;
+		border: none;
+		border-radius: 12px;
+		font-size: 1rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		background: transparent;
+		color: var(--color-text-secondary);
+	}
+
+	.mana-billing-tab:hover {
+		color: var(--color-text-primary);
+	}
+
+	.mana-billing-tab.active {
+		background: var(--color-primary);
+		color: white;
+	}
+
+	.mana-billing-tab-icon {
+		width: 20px;
+		height: 20px;
+	}
+
+	.mana-yearly-badge {
+		font-size: 0.75rem;
+		font-weight: 600;
+		background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+		color: white;
+		padding: 4px 10px;
+		border-radius: 20px;
+		margin-left: 8px;
+	}
+
+	/* Pricing Grid */
+	.mana-pricing-content.hidden {
+		display: none;
+	}
+
+	.mana-pricing-grid {
+		display: grid;
+		gap: 24px;
+		margin-bottom: 32px;
+	}
+
+	.mana-pricing-grid-3 {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	.mana-pricing-grid-2 {
+		grid-template-columns: repeat(2, 1fr);
+		max-width: 800px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.mana-pricing-grid-4 {
+		grid-template-columns: repeat(4, 1fr);
+	}
+
+	@media (max-width: 1024px) {
+		.mana-pricing-grid-3,
+		.mana-pricing-grid-4 {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	@media (max-width: 640px) {
+		.mana-pricing-grid-3,
+		.mana-pricing-grid-2,
+		.mana-pricing-grid-4 {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	/* Pricing Card */
+	.mana-pricing-card {
+		position: relative;
+		background: var(--color-background-card);
+		border: 1px solid var(--color-border);
+		border-radius: 20px;
+		padding: 32px;
+		text-align: center;
+		transition: all 0.3s ease;
+	}
+
+	.mana-pricing-card:hover {
+		border-color: var(--color-primary);
+		transform: translateY(-4px);
+		box-shadow: 0 12px 40px -12px var(--color-primary-glow);
+	}
+
+	.mana-pricing-card.popular {
+		border-color: var(--color-primary);
+		box-shadow: 0 0 0 1px var(--color-primary-glow);
+	}
+
+	.mana-popular-badge {
+		position: absolute;
+		top: -12px;
+		left: 50%;
+		transform: translateX(-50%);
+		background: var(--color-primary);
+		color: white;
+		font-size: 0.75rem;
+		font-weight: 600;
+		padding: 6px 16px;
+		border-radius: 20px;
+	}
+
+	.mana-card-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 64px;
+		height: 64px;
+		background: var(--color-primary-glow);
+		border-radius: 16px;
+		margin-bottom: 16px;
+		font-size: 2rem;
+	}
+
+	.mana-card-name {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: var(--color-text-primary);
+		margin: 0 0 16px 0;
+	}
+
+	.mana-card-price {
+		display: flex;
+		align-items: baseline;
+		justify-content: center;
+		gap: 4px;
+		margin-bottom: 4px;
+	}
+
+	.mana-price-value {
+		font-size: 2.5rem;
+		font-weight: 800;
+		color: var(--color-primary);
+	}
+
+	.mana-price-currency {
+		font-size: 1.5rem;
+		color: var(--color-text-secondary);
+	}
+
+	.mana-price-period {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		margin: 0 0 8px 0;
+	}
+
+	.mana-price-equivalent {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary);
+		margin: 0 0 16px 0;
+	}
+
+	/* Stats */
+	.mana-card-stats {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		margin-bottom: 24px;
+	}
+
+	.mana-stat {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 12px 16px;
+		border-radius: 12px;
+	}
+
+	.mana-stat-blue {
+		background: rgba(59, 130, 246, 0.1);
+	}
+
+	.mana-stat-green {
+		background: rgba(16, 185, 129, 0.1);
+	}
+
+	.mana-stat-purple {
+		background: rgba(139, 92, 246, 0.1);
+	}
+
+	.mana-stat-label {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary);
+	}
+
+	.mana-stat-value {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--color-text-primary);
+	}
+
+	/* Features */
+	.mana-card-features {
+		list-style: none;
+		padding: 0;
+		margin: 0 0 24px 0;
+		text-align: left;
+	}
+
+	.mana-card-features li {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		font-size: 0.9375rem;
+		color: var(--color-text-secondary);
+		margin-bottom: 10px;
+	}
+
+	.mana-feature-check {
+		flex-shrink: 0;
+		width: 18px;
+		height: 18px;
+		color: #10b981;
+		margin-top: 2px;
+	}
+
+	/* CTA Button */
+	.mana-card-cta {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		padding: 14px 24px;
+		border: 2px solid var(--color-border);
+		border-radius: 12px;
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--color-text-primary);
+		text-decoration: none;
+		transition: all 0.3s ease;
+	}
+
+	.mana-card-cta:hover {
+		border-color: var(--color-primary);
+		background: var(--color-primary-glow);
+		color: var(--color-primary);
+	}
+
+	/* One-time Section */
+	.mana-onetime-section {
+		margin-top: 80px;
+		padding-top: 80px;
+		border-top: 1px solid var(--color-border);
+	}
+
+	.mana-onetime-header {
+		text-align: center;
+		margin-bottom: 48px;
+	}
+
+	.mana-onetime-icon-wrapper {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 64px;
+		height: 64px;
+		background: rgba(139, 92, 246, 0.1);
+		border-radius: 16px;
+		margin-bottom: 20px;
+	}
+
+	.mana-onetime-icon {
+		width: 32px;
+		height: 32px;
+		color: #8b5cf6;
+	}
+
+	.mana-onetime-title {
+		font-size: 1.75rem;
+		font-weight: 700;
+		color: var(--color-text-primary);
+		margin: 0 0 12px 0;
+	}
+
+	.mana-onetime-subtitle {
+		font-size: 1rem;
+		color: var(--color-text-secondary);
+		max-width: 600px;
+		margin: 0 auto;
+	}
+
+	/* Package Card */
+	.mana-package-card {
+		background: var(--color-background-card);
+		border: 1px solid var(--color-border);
+		border-radius: 20px;
+		padding: 32px 24px;
+		text-align: center;
+		transition: all 0.3s ease;
+	}
+
+	.mana-package-card:hover {
+		border-color: #8b5cf6;
+		transform: translateY(-4px);
+		box-shadow: 0 12px 40px -12px rgba(139, 92, 246, 0.3);
+	}
+
+	.mana-package-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 56px;
+		height: 56px;
+		background: rgba(139, 92, 246, 0.1);
+		border-radius: 14px;
+		margin-bottom: 16px;
+		font-size: 1.75rem;
+	}
+
+	.mana-package-name {
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: var(--color-text-primary);
+		margin: 0 0 12px 0;
+	}
+
+	.mana-package-price {
+		display: flex;
+		align-items: baseline;
+		justify-content: center;
+		gap: 4px;
+		margin-bottom: 16px;
+	}
+
+	.mana-package-mana {
+		background: rgba(139, 92, 246, 0.1);
+		border-radius: 12px;
+		padding: 16px;
+		margin-bottom: 20px;
+	}
+
+	.mana-mana-value {
+		display: block;
+		font-size: 2rem;
+		font-weight: 800;
+		color: #8b5cf6;
+	}
+
+	.mana-mana-label {
+		display: block;
+		font-size: 0.875rem;
+		color: var(--color-text-secondary);
+		margin-top: 4px;
+	}
+
+	/* Trust Section */
+	.mana-trust-section {
+		margin-top: 80px;
+		padding-top: 80px;
+		border-top: 1px solid var(--color-border);
+	}
+
+	.mana-trust-title {
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: var(--color-text-primary);
+		text-align: center;
+		margin: 0 0 48px 0;
+	}
+
+	.mana-trust-grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 32px;
+	}
+
+	@media (max-width: 768px) {
+		.mana-trust-grid {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	@media (max-width: 480px) {
+		.mana-trust-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.mana-trust-item {
+		text-align: center;
+	}
+
+	.mana-trust-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 56px;
+		height: 56px;
+		border-radius: 14px;
+		margin-bottom: 16px;
+		transition: transform 0.3s ease;
+	}
+
+	.mana-trust-item:hover .mana-trust-icon {
+		transform: scale(1.1);
+	}
+
+	.mana-trust-icon svg {
+		width: 28px;
+		height: 28px;
+	}
+
+	.mana-trust-icon-green {
+		background: rgba(16, 185, 129, 0.1);
+		color: #10b981;
+	}
+
+	.mana-trust-icon-blue {
+		background: rgba(59, 130, 246, 0.1);
+		color: #3b82f6;
+	}
+
+	.mana-trust-icon-purple {
+		background: rgba(139, 92, 246, 0.1);
+		color: #8b5cf6;
+	}
+
+	.mana-trust-icon-orange {
+		background: rgba(249, 115, 22, 0.1);
+		color: #f97316;
+	}
+
+	.mana-trust-label {
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--color-text-primary);
+		margin: 0 0 8px 0;
+	}
+
+	.mana-trust-desc {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary);
+		margin: 0;
+	}
+
+	/* Responsive */
+	@media (max-width: 768px) {
+		.mana-pricing-section {
+			padding: 80px 0;
+		}
+
+		.mana-billing-tab {
+			padding: 10px 16px;
+			font-size: 0.9375rem;
+		}
+
+		.mana-yearly-badge {
+			display: none;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.mana-pricing-section {
+			padding: 60px 0;
+		}
+
+		.mana-pricing-header {
+			margin-bottom: 40px;
+		}
+
+		.mana-pricing-card {
+			padding: 24px;
+		}
+
+		.mana-card-icon {
+			width: 56px;
+			height: 56px;
+			font-size: 1.75rem;
+		}
+
+		.mana-price-value {
+			font-size: 2rem;
+		}
+	}
+</style>
+
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		const monthlyTab = document.getElementById('mana-monthly-tab');
+		const yearlyTab = document.getElementById('mana-yearly-tab');
+		const monthlyPlans = document.getElementById('mana-monthly-plans');
+		const yearlyPlans = document.getElementById('mana-yearly-plans');
+
+		function switchBilling(billing: 'monthly' | 'yearly') {
+			if (billing === 'monthly') {
+				monthlyTab?.classList.add('active');
+				yearlyTab?.classList.remove('active');
+				monthlyPlans?.classList.remove('hidden');
+				yearlyPlans?.classList.add('hidden');
+			} else {
+				yearlyTab?.classList.add('active');
+				monthlyTab?.classList.remove('active');
+				yearlyPlans?.classList.remove('hidden');
+				monthlyPlans?.classList.add('hidden');
+			}
+		}
+
+		monthlyTab?.addEventListener('click', () => switchBilling('monthly'));
+		yearlyTab?.addEventListener('click', () => switchBilling('yearly'));
+	});
+</script>

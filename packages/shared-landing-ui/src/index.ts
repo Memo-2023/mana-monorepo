@@ -29,6 +29,10 @@
  * import TimelineSection from '@manacore/shared-landing-ui/sections/TimelineSection.astro';
  * import MasonryGridSection from '@manacore/shared-landing-ui/sections/MasonryGridSection.astro';
  * import PrinciplesSection from '@manacore/shared-landing-ui/sections/PrinciplesSection.astro';
+ * import ManaPricingSection from '@manacore/shared-landing-ui/sections/ManaPricingSection.astro';
+ *
+ * // Data
+ * import { pricingPlans, defaultPricingTranslations, englishPricingTranslations } from '@manacore/shared-landing-ui/data/pricing';
  *
  * // Layouts
  * import Footer from '@manacore/shared-landing-ui/layouts/Footer.astro';
@@ -53,3 +57,4 @@
 
 export * from './utils/index';
 export * from './i18n/index';
+export * from './data/pricing';
