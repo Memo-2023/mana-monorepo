@@ -21,7 +21,7 @@ fi
 echo ""
 echo "Next steps:"
 echo "1. Start Umami: docker compose -f docker-compose.macmini.yml up -d umami"
-echo "2. Access Umami at: https://analytics.mana.how"
+echo "2. Access Umami at: https://stats.mana.how"
 echo "3. Default login: admin / umami"
 echo "4. Change the password immediately!"
 echo "5. Create websites and get tracking IDs for your apps"

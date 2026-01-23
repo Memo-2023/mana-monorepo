@@ -85,6 +85,6 @@ grafana.mana.how {
     reverse_proxy localhost:3100
 }
 
-analytics.mana.how {
+stats.mana.how {
     reverse_proxy localhost:3200
 }

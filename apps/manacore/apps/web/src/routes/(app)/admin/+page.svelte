@@ -26,7 +26,7 @@
 		},
 		{
 			name: 'Umami Analytics',
-			url: 'https://analytics.mana.how',
+			url: 'https://stats.mana.how',
 			description: 'Web Analytics',
 			icon: 'analytics' as const,
 		},

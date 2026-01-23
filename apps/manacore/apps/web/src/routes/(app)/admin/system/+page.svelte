@@ -33,7 +33,7 @@
 		},
 		{
 			name: 'Umami Analytics',
-			url: 'https://analytics.mana.how',
+			url: 'https://stats.mana.how',
 			description: 'Web analytics dashboard',
 			icon: 'analytics' as const,
 		},
@@ -73,7 +73,7 @@
 			{ name: 'PostgreSQL', status: 'healthy', url: '-' },
 			{ name: 'Redis', status: 'healthy', url: '-' },
 			{ name: 'Grafana', status: 'healthy', url: 'https://grafana.mana.how' },
-			{ name: 'Umami', status: 'healthy', url: 'https://analytics.mana.how' },
+			{ name: 'Umami', status: 'healthy', url: 'https://stats.mana.how' },
 		];
 
 		loading = false;
