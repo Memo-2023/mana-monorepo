@@ -25,3 +25,6 @@ export * from './cache';
 
 // Natural Language Parsers
 export * from './parsers';
+
+// Umami Analytics
+export * from './analytics';
