@@ -4,6 +4,9 @@
 
 set -e
 
+# Ensure PATH includes docker
+export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
+
 LOG_FILE="/tmp/manacore-startup.log"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
