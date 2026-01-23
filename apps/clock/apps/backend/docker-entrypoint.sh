@@ -15,7 +15,7 @@ cd /app/apps/clock/apps/backend
 
 # Run schema push
 echo "Pushing database schema..."
-npx drizzle-kit push --force
+npx drizzle-kit push --config drizzle.config.ts --force
 echo "Schema push completed!"
 
 # Execute the main command
