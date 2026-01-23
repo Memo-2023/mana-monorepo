@@ -31,6 +31,7 @@ on:
           - calendar-web
           - clock-backend
           - clock-web
+          - telegram-stats-bot
   workflow_call:
 
 permissions:

@@ -61,6 +61,7 @@ jobs:
       clock-web: ${{ steps.changes.outputs.clock-web }}
       contacts-backend: ${{ steps.changes.outputs.contacts-backend }}
       contacts-web: ${{ steps.changes.outputs.contacts-web }}
+      telegram-stats-bot: ${{ steps.changes.outputs.telegram-stats-bot }}
       any-changes: ${{ steps.changes.outputs.any-changes }}
     steps:
       - name: Checkout code
@@ -86,6 +87,7 @@ jobs:
             echo "clock-web=true" >> $GITHUB_OUTPUT
             echo "contacts-backend=true" >> $GITHUB_OUTPUT
             echo "contacts-web=true" >> $GITHUB_OUTPUT
+            echo "telegram-stats-bot=true" >> $GITHUB_OUTPUT
             echo "any-changes=true" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -115,6 +117,7 @@ jobs:
             echo "clock-web=true" >> $GITHUB_OUTPUT
             echo "contacts-backend=true" >> $GITHUB_OUTPUT
             echo "contacts-web=true" >> $GITHUB_OUTPUT
+            echo "telegram-stats-bot=true" >> $GITHUB_OUTPUT
             echo "any-changes=true" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -242,6 +245,14 @@ jobs:
             echo "contacts-web=false" >> $GITHUB_OUTPUT
           fi
 
+          # telegram-stats-bot
+          TELEGRAM_STATS_BOT_CHANGED=$(check_pattern "services/telegram-stats-bot/")
+          if [ "$COMMON_CHANGED" == "true" ] || [ "$TELEGRAM_STATS_BOT_CHANGED" == "true" ]; then
+            echo "telegram-stats-bot=true" >> $GITHUB_OUTPUT
+          else
+            echo "telegram-stats-bot=false" >> $GITHUB_OUTPUT
+          fi
+
           # Check if any service needs building
           if grep -q "=true" $GITHUB_OUTPUT; then
             echo "any-changes=true" >> $GITHUB_OUTPUT
@@ -267,6 +278,7 @@ jobs:
           echo "| clock-web | ${{ steps.changes.outputs.clock-web }} |" >> $GITHUB_STEP_SUMMARY
           echo "| contacts-backend | ${{ steps.changes.outputs.contacts-backend }} |" >> $GITHUB_STEP_SUMMARY
           echo "| contacts-web | ${{ steps.changes.outputs.contacts-web }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| telegram-stats-bot | ${{ steps.changes.outputs.telegram-stats-bot }} |" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
   # Validation job - runs on PRs
@@ -648,6 +660,35 @@ jobs:
         with:
           context: .
           file: apps/contacts/apps/web/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-telegram-stats-bot:
+    name: Build telegram-stats-bot
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.telegram-stats-bot == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/telegram-stats-bot
+          tags: type=raw,value=latest
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: services/telegram-stats-bot/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
