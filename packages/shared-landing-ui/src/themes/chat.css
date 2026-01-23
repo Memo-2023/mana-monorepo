@@ -1,0 +1,80 @@
+/**
+ * Chat Theme - Blue
+ * AI chat application
+ */
+:root {
+  /* Primary colors - Vibrant Blue */
+  --color-primary: #0ea5e9;
+  --color-primary-hover: #0284c7;
+  --color-primary-glow: rgba(14, 165, 233, 0.3);
+
+  /* Text colors */
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #64748b;
+
+  /* Background colors - Dark slate */
+  --color-background-page: #0f172a;
+  --color-background-card: #1e293b;
+  --color-background-card-hover: #334155;
+
+  /* Border colors */
+  --color-border: rgba(14, 165, 233, 0.2);
+  --color-border-hover: rgba(14, 165, 233, 0.4);
+}
+
+/* Light mode support */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-primary: #0284c7;
+    --color-primary-hover: #0369a1;
+    --color-primary-glow: rgba(2, 132, 199, 0.2);
+
+    --color-text-primary: #0c4a6e;
+    --color-text-secondary: #0369a1;
+    --color-text-muted: #0ea5e9;
+
+    --color-background-page: #f0f9ff;
+    --color-background-card: #ffffff;
+    --color-background-card-hover: #e0f2fe;
+
+    --color-border: #bae6fd;
+    --color-border-hover: #7dd3fc;
+  }
+}
+
+/* Force dark mode class */
+.dark {
+  --color-primary: #0ea5e9;
+  --color-primary-hover: #38bdf8;
+  --color-primary-glow: rgba(14, 165, 233, 0.3);
+
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #64748b;
+
+  --color-background-page: #0f172a;
+  --color-background-card: #1e293b;
+  --color-background-card-hover: #334155;
+
+  --color-border: rgba(14, 165, 233, 0.2);
+  --color-border-hover: rgba(14, 165, 233, 0.4);
+}
+
+/* Force light mode class */
+.light {
+  --color-primary: #0284c7;
+  --color-primary-hover: #0369a1;
+  --color-primary-glow: rgba(2, 132, 199, 0.2);
+
+  --color-text-primary: #0c4a6e;
+  --color-text-secondary: #0369a1;
+  --color-text-muted: #0ea5e9;
+
+  --color-background-page: #f0f9ff;
+  --color-background-card: #ffffff;
+  --color-background-card-hover: #e0f2fe;
+
+  --color-border: #bae6fd;
+  --color-border-hover: #7dd3fc;
+}

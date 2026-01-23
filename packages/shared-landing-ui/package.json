@@ -9,12 +9,17 @@
 		"./atoms/*": "./src/atoms/*",
 		"./sections/*": "./src/sections/*",
 		"./layouts/*": "./src/layouts/*",
+		"./templates/*": "./src/templates/*",
 		"./utils": "./src/utils/index.ts",
+		"./i18n": "./src/i18n/index.ts",
 		"./themes": "./src/themes/index.css",
 		"./themes/memoro": "./src/themes/memoro.css",
 		"./themes/manacore": "./src/themes/manacore.css",
 		"./themes/maerchenzauber": "./src/themes/maerchenzauber.css",
-		"./themes/manadeck": "./src/themes/manadeck.css"
+		"./themes/manadeck": "./src/themes/manadeck.css",
+		"./themes/picture": "./src/themes/picture.css",
+		"./themes/chat": "./src/themes/chat.css",
+		"./themes/zitare": "./src/themes/zitare.css"
 	},
 	"files": [
 		"src"

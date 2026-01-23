@@ -1,0 +1,72 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LegalPageTemplate from '@manacore/shared-landing-ui/templates/LegalPageTemplate.astro';
+---
+
+<Layout title="Datenschutzerklärung - ManaChat">
+	<LegalPageTemplate
+		title="Datenschutzerklärung"
+		backLink="/"
+		backText="Zurück zur Startseite"
+		lastUpdatedText="Zuletzt aktualisiert"
+	>
+		<h2>1. Einleitung</h2>
+		<p>
+			Diese Datenschutzerklärung informiert Sie über die Art, den Umfang und den Zweck der
+			Verarbeitung personenbezogener Daten innerhalb unserer ManaChat-Anwendung.
+		</p>
+
+		<h2>2. Verantwortlicher</h2>
+		<p>
+			Verantwortlich für die Datenverarbeitung ist:<br />
+			Mana Technologies<br />
+			Musterstraße 1<br />
+			12345 Musterstadt<br />
+			Deutschland<br />
+			E-Mail: privacy@mana.how
+		</p>
+
+		<h2>3. Erhobene Daten</h2>
+		<p>Wir erheben folgende Daten:</p>
+		<ul>
+			<li>E-Mail-Adresse bei Registrierung</li>
+			<li>Chat-Verläufe und Konversationen</li>
+			<li>Nutzungsstatistiken zur Verbesserung der App</li>
+			<li>Geräteinformationen für die Synchronisierung</li>
+		</ul>
+
+		<h2>4. Zweck der Datenverarbeitung</h2>
+		<p>Ihre Daten werden verwendet für:</p>
+		<ul>
+			<li>Bereitstellung des KI-Chat-Dienstes</li>
+			<li>Speicherung Ihrer Konversationen</li>
+			<li>Synchronisierung über Geräte hinweg</li>
+			<li>Kommunikation bezüglich Ihres Kontos</li>
+		</ul>
+
+		<h2>5. KI-Datenverarbeitung</h2>
+		<p>
+			Ihre Chat-Nachrichten werden an KI-Dienste (OpenRouter) zur Verarbeitung übermittelt. Diese
+			Dienste nutzen Ihre Daten nicht für das Training ihrer Modelle.
+		</p>
+
+		<h2>6. Datenspeicherung</h2>
+		<p>
+			Ihre Daten werden auf sicheren Servern in der Europäischen Union gespeichert. Wir verwenden
+			Verschlüsselung für alle übertragenen und gespeicherten Daten.
+		</p>
+
+		<h2>7. Ihre Rechte</h2>
+		<p>Sie haben folgende Rechte:</p>
+		<ul>
+			<li>Auskunft über Ihre gespeicherten Daten</li>
+			<li>Berichtigung unrichtiger Daten</li>
+			<li>Löschung Ihrer Daten und Chat-Verläufe</li>
+			<li>Export Ihrer Konversationen</li>
+			<li>Widerruf der Einwilligung</li>
+		</ul>
+
+		<h2>8. Kontakt</h2>
+		<p>Bei Fragen zum Datenschutz kontaktieren Sie uns unter: privacy@mana.how</p>
+	</LegalPageTemplate>
+</Layout>

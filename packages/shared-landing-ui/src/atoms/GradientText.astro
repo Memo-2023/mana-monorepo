@@ -1,0 +1,82 @@
+---
+/**
+ * GradientText - Text with gradient color effect
+ *
+ * Usage:
+ * ```astro
+ * <GradientText>Highlighted Text</GradientText>
+ * <GradientText as="span" gradient="secondary">Custom Gradient</GradientText>
+ * ```
+ */
+
+interface Props {
+	as?: 'span' | 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'div';
+	gradient?: 'primary' | 'secondary' | 'accent' | 'rainbow';
+	class?: string;
+}
+
+const { as: Element = 'span', gradient = 'primary', class: className = '' } = Astro.props;
+---
+
+<Element class:list={['gradient-text', `gradient-${gradient}`, className]}>
+	<slot />
+</Element>
+
+<style>
+	.gradient-text {
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		display: inline-block;
+	}
+
+	.gradient-primary {
+		background: linear-gradient(
+			135deg,
+			var(--color-primary) 0%,
+			var(--color-primary-hover) 50%,
+			var(--color-primary) 100%
+		);
+	}
+
+	.gradient-secondary {
+		background: linear-gradient(
+			135deg,
+			var(--color-text-primary) 0%,
+			var(--color-primary) 50%,
+			var(--color-text-primary) 100%
+		);
+	}
+
+	.gradient-accent {
+		background: linear-gradient(135deg, #f97316 0%, #ec4899 50%, #8b5cf6 100%);
+	}
+
+	.gradient-rainbow {
+		background: linear-gradient(
+			135deg,
+			#ef4444 0%,
+			#f97316 15%,
+			#eab308 30%,
+			#22c55e 45%,
+			#3b82f6 60%,
+			#8b5cf6 75%,
+			#ec4899 90%,
+			#ef4444 100%
+		);
+		background-size: 200% 200%;
+		animation: rainbow-shift 8s ease infinite;
+	}
+
+	@keyframes rainbow-shift {
+		0% {
+			background-position: 0% 50%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
+		100% {
+			background-position: 0% 50%;
+		}
+	}
+</style>

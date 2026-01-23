@@ -1,0 +1,225 @@
+---
+/**
+ * LegalPageTemplate - Base template for legal pages (Privacy, Terms, Cookies, Imprint)
+ *
+ * Usage:
+ * ```astro
+ * <LegalPageTemplate
+ *   title="Privacy Policy"
+ *   backLink="/"
+ *   backText="Back to Home"
+ *   lastUpdatedText="Last Updated"
+ *   lastUpdated={new Date()}
+ * >
+ *   <div set:html={content} />
+ * </LegalPageTemplate>
+ * ```
+ */
+
+interface Props {
+	title: string;
+	backLink?: string;
+	backText?: string;
+	lastUpdatedText?: string;
+	lastUpdated?: Date;
+	class?: string;
+}
+
+const {
+	title,
+	backLink = '/',
+	backText = 'Back to Home',
+	lastUpdatedText = 'Last Updated',
+	lastUpdated = new Date(),
+	class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['legal-page', className]}>
+	<div class="legal-container">
+		<!-- Back Button -->
+		<a href={backLink} class="legal-back-link">
+			<svg class="legal-back-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"
+				></path>
+			</svg>
+			<span>{backText}</span>
+		</a>
+
+		<!-- Page Header -->
+		<div class="legal-header">
+			<h1 class="legal-title">{title}</h1>
+			<p class="legal-date">{lastUpdatedText}: {lastUpdated.toLocaleDateString()}</p>
+		</div>
+
+		<!-- Content -->
+		<div class="legal-prose">
+			<div class="legal-content">
+				<slot />
+			</div>
+		</div>
+	</div>
+</div>
+
+<style>
+	.legal-page {
+		min-height: 100vh;
+		background: var(--color-background-page);
+		padding: 96px 0;
+	}
+
+	.legal-container {
+		max-width: 896px;
+		margin: 0 auto;
+		padding: 0 16px;
+	}
+
+	.legal-back-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 32px;
+		color: var(--color-primary);
+		text-decoration: none;
+		transition: color 0.2s ease;
+	}
+
+	.legal-back-link:hover {
+		color: var(--color-primary-hover);
+	}
+
+	.legal-back-icon {
+		width: 20px;
+		height: 20px;
+	}
+
+	.legal-header {
+		margin-bottom: 48px;
+	}
+
+	.legal-title {
+		font-size: clamp(2rem, 5vw, 3rem);
+		font-weight: 700;
+		color: var(--color-text-primary);
+		margin: 0 0 16px 0;
+	}
+
+	.legal-date {
+		color: var(--color-text-muted);
+		margin: 0;
+	}
+
+	.legal-content {
+		background: var(--color-background-card);
+		border: 1px solid var(--color-border);
+		border-radius: 16px;
+		padding: 32px;
+	}
+
+	@media (min-width: 768px) {
+		.legal-content {
+			padding: 48px;
+		}
+	}
+
+	/* Prose styling for content */
+	:global(.legal-prose) {
+		color: var(--color-text-secondary);
+	}
+
+	:global(.legal-prose h2) {
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: var(--color-text-primary);
+		margin-top: 32px;
+		margin-bottom: 16px;
+	}
+
+	:global(.legal-prose h2:first-child) {
+		margin-top: 0;
+	}
+
+	:global(.legal-prose h3) {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: var(--color-text-primary);
+		margin-top: 24px;
+		margin-bottom: 12px;
+	}
+
+	:global(.legal-prose p) {
+		margin-bottom: 16px;
+		line-height: 1.7;
+		color: var(--color-text-secondary);
+	}
+
+	:global(.legal-prose ul),
+	:global(.legal-prose ol) {
+		margin-bottom: 16px;
+		padding-left: 24px;
+	}
+
+	:global(.legal-prose ul) {
+		list-style-type: disc;
+	}
+
+	:global(.legal-prose ol) {
+		list-style-type: decimal;
+	}
+
+	:global(.legal-prose li) {
+		margin-bottom: 8px;
+		line-height: 1.6;
+		color: var(--color-text-secondary);
+	}
+
+	:global(.legal-prose a) {
+		color: var(--color-primary);
+		text-decoration: none;
+		transition: color 0.2s ease;
+	}
+
+	:global(.legal-prose a:hover) {
+		color: var(--color-primary-hover);
+	}
+
+	:global(.legal-prose strong) {
+		font-weight: 600;
+		color: var(--color-text-primary);
+	}
+
+	:global(.legal-prose blockquote) {
+		border-left: 4px solid var(--color-primary);
+		padding-left: 16px;
+		margin: 24px 0;
+		font-style: italic;
+		color: var(--color-text-muted);
+	}
+
+	:global(.legal-prose code) {
+		background: var(--color-background-page);
+		padding: 2px 6px;
+		border-radius: 4px;
+		font-size: 0.875em;
+		font-family: monospace;
+	}
+
+	:global(.legal-prose table) {
+		width: 100%;
+		border-collapse: collapse;
+		margin: 24px 0;
+	}
+
+	:global(.legal-prose th),
+	:global(.legal-prose td) {
+		padding: 12px;
+		border: 1px solid var(--color-border);
+		text-align: left;
+	}
+
+	:global(.legal-prose th) {
+		background: var(--color-background-page);
+		font-weight: 600;
+		color: var(--color-text-primary);
+	}
+</style>

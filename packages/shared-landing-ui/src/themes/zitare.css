@@ -1,0 +1,80 @@
+/**
+ * Zitare Theme - Green/Teal
+ * Daily inspiration quotes app
+ */
+:root {
+  /* Primary colors - Teal/Emerald */
+  --color-primary: #14b8a6;
+  --color-primary-hover: #0d9488;
+  --color-primary-glow: rgba(20, 184, 166, 0.3);
+
+  /* Text colors */
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #64748b;
+
+  /* Background colors - Dark with teal tint */
+  --color-background-page: #0a1a18;
+  --color-background-card: #132d2a;
+  --color-background-card-hover: #1a3f3b;
+
+  /* Border colors */
+  --color-border: rgba(20, 184, 166, 0.2);
+  --color-border-hover: rgba(20, 184, 166, 0.4);
+}
+
+/* Light mode support */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-primary: #0d9488;
+    --color-primary-hover: #0f766e;
+    --color-primary-glow: rgba(13, 148, 136, 0.2);
+
+    --color-text-primary: #134e4a;
+    --color-text-secondary: #0f766e;
+    --color-text-muted: #14b8a6;
+
+    --color-background-page: #f0fdfa;
+    --color-background-card: #ffffff;
+    --color-background-card-hover: #ccfbf1;
+
+    --color-border: #99f6e4;
+    --color-border-hover: #5eead4;
+  }
+}
+
+/* Force dark mode class */
+.dark {
+  --color-primary: #14b8a6;
+  --color-primary-hover: #2dd4bf;
+  --color-primary-glow: rgba(20, 184, 166, 0.3);
+
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #64748b;
+
+  --color-background-page: #0a1a18;
+  --color-background-card: #132d2a;
+  --color-background-card-hover: #1a3f3b;
+
+  --color-border: rgba(20, 184, 166, 0.2);
+  --color-border-hover: rgba(20, 184, 166, 0.4);
+}
+
+/* Force light mode class */
+.light {
+  --color-primary: #0d9488;
+  --color-primary-hover: #0f766e;
+  --color-primary-glow: rgba(13, 148, 136, 0.2);
+
+  --color-text-primary: #134e4a;
+  --color-text-secondary: #0f766e;
+  --color-text-muted: #14b8a6;
+
+  --color-background-page: #f0fdfa;
+  --color-background-card: #ffffff;
+  --color-background-card-hover: #ccfbf1;
+
+  --color-border: #99f6e4;
+  --color-border-hover: #5eead4;
+}

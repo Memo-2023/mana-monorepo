@@ -1,0 +1,178 @@
+---
+/**
+ * LanguageSwitcher - Dropdown for language selection
+ *
+ * Usage:
+ * ```astro
+ * <LanguageSwitcher
+ *   currentLang="en"
+ *   languages={{ de: 'Deutsch', en: 'English', fr: 'Français', it: 'Italiano', es: 'Español' }}
+ *   getLocalizedPath={(lang) => `/${lang}${currentPath}`}
+ * />
+ * ```
+ */
+
+export interface LanguageOption {
+	code: string;
+	label: string;
+}
+
+interface Props {
+	currentLang: string;
+	languages: Record<string, string>;
+	getLocalizedPath?: (lang: string) => string;
+	class?: string;
+}
+
+const {
+	currentLang,
+	languages,
+	getLocalizedPath = (lang) => `/${lang}`,
+	class: className = '',
+} = Astro.props;
+
+const languageEntries = Object.entries(languages);
+---
+
+<div class:list={['language-switcher', className]}>
+	<button class="language-trigger" aria-haspopup="true" aria-expanded="false">
+		<span class="language-current">{languages[currentLang] || currentLang.toUpperCase()}</span>
+		<svg class="language-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"
+			></path>
+		</svg>
+	</button>
+
+	<div class="language-dropdown" role="menu">
+		{
+			languageEntries.map(([code, label]) => (
+				<a
+					href={getLocalizedPath(code)}
+					class:list={['language-option', { 'language-option-active': code === currentLang }]}
+					role="menuitem"
+					data-lang={code}
+				>
+					{label}
+				</a>
+			))
+		}
+	</div>
+</div>
+
+<style>
+	.language-switcher {
+		position: relative;
+		display: inline-block;
+	}
+
+	.language-trigger {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 8px 12px;
+		background: transparent;
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		color: var(--color-text-secondary);
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.language-trigger:hover {
+		border-color: var(--color-border-hover);
+		color: var(--color-text-primary);
+	}
+
+	.language-trigger:focus {
+		outline: none;
+		border-color: var(--color-primary);
+		box-shadow: 0 0 0 2px var(--color-primary-glow);
+	}
+
+	.language-chevron {
+		width: 16px;
+		height: 16px;
+		transition: transform 0.2s ease;
+	}
+
+	.language-switcher.open .language-chevron {
+		transform: rotate(180deg);
+	}
+
+	.language-dropdown {
+		position: absolute;
+		top: calc(100% + 4px);
+		right: 0;
+		min-width: 140px;
+		background: var(--color-background-card);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+		opacity: 0;
+		visibility: hidden;
+		transform: translateY(-8px);
+		transition: all 0.2s ease;
+		z-index: 100;
+		overflow: hidden;
+	}
+
+	.language-switcher.open .language-dropdown {
+		opacity: 1;
+		visibility: visible;
+		transform: translateY(0);
+	}
+
+	.language-option {
+		display: block;
+		padding: 10px 16px;
+		color: var(--color-text-secondary);
+		text-decoration: none;
+		font-size: 0.875rem;
+		transition: all 0.15s ease;
+	}
+
+	.language-option:hover {
+		background: var(--color-background-card-hover);
+		color: var(--color-text-primary);
+	}
+
+	.language-option-active {
+		color: var(--color-primary);
+		background: var(--color-primary-glow);
+	}
+
+	.language-option-active:hover {
+		background: var(--color-primary-glow);
+		color: var(--color-primary);
+	}
+</style>
+
+<script>
+	// Toggle dropdown on click
+	document.querySelectorAll('.language-switcher').forEach((switcher) => {
+		const trigger = switcher.querySelector('.language-trigger');
+
+		trigger?.addEventListener('click', (e) => {
+			e.stopPropagation();
+			switcher.classList.toggle('open');
+		});
+	});
+
+	// Close dropdown when clicking outside
+	document.addEventListener('click', () => {
+		document.querySelectorAll('.language-switcher.open').forEach((switcher) => {
+			switcher.classList.remove('open');
+		});
+	});
+
+	// Close on escape key
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape') {
+			document.querySelectorAll('.language-switcher.open').forEach((switcher) => {
+				switcher.classList.remove('open');
+			});
+		}
+	});
+</script>
