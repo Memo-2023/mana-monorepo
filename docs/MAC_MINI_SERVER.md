@@ -1,0 +1,394 @@
+# Mac Mini Server Setup
+
+Dokumentation des Mac Mini als Self-Hosted Server für ManaCore Apps.
+
+## Übersicht
+
+Der Mac Mini dient als Self-Hosted Server für alle ManaCore-Anwendungen. Er ist über Cloudflare Tunnel öffentlich erreichbar und führt automatische Health Checks mit Benachrichtigungen durch.
+
+### Architektur
+
+```
+Internet
+    │
+    ▼
+Cloudflare Tunnel (cloudflared)
+    │
+    ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Mac Mini (mana-server)                                     │
+│                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐                  │
+│  │   PostgreSQL    │  │     Redis       │                  │
+│  │   (Docker)      │  │    (Docker)     │                  │
+│  └─────────────────┘  └─────────────────┘                  │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  Docker Container                                    │   │
+│  │  ├── mana-core-auth     (Port 3001)                 │   │
+│  │  ├── dashboard-web      (Port 5173)                 │   │
+│  │  ├── chat-backend       (Port 3002)                 │   │
+│  │  ├── chat-web           (Port 3000)                 │   │
+│  │  ├── todo-backend       (Port 3018)                 │   │
+│  │  ├── todo-web           (Port 5188)                 │   │
+│  │  ├── calendar-backend   (Port 3016)                 │   │
+│  │  ├── calendar-web       (Port 5186)                 │   │
+│  │  ├── clock-backend      (Port 3017)                 │   │
+│  │  └── clock-web          (Port 5187)                 │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  LaunchAgents (Autostart)                           │   │
+│  │  ├── cloudflared        (Tunnel)                    │   │
+│  │  ├── docker-startup     (Container beim Boot)       │   │
+│  │  └── health-check       (alle 5 Minuten)            │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Öffentliche URLs
+
+| Service | URL |
+|---------|-----|
+| Dashboard | https://mana.how |
+| Auth API | https://auth.mana.how |
+| Chat | https://chat.mana.how |
+| Todo | https://todo.mana.how |
+| Calendar | https://calendar.mana.how |
+| Clock | https://clock.mana.how |
+
+## SSH-Zugang
+
+### Verbindung
+
+```bash
+ssh mana-server
+```
+
+Die SSH-Verbindung läuft über Cloudflare Access (konfiguriert in `~/.ssh/config`):
+
+```
+Host mana-server
+    HostName mac-mini.mana.how
+    User till
+    ProxyCommand /opt/homebrew/bin/cloudflared access ssh --hostname %h
+```
+
+### Projekt-Verzeichnis
+
+```bash
+cd ~/projects/manacore-monorepo
+```
+
+## Wichtige Befehle
+
+### Status & Monitoring
+
+```bash
+# Übersicht aller Services
+./scripts/mac-mini/status.sh
+
+# Health Check manuell ausführen
+./scripts/mac-mini/health-check.sh
+
+# Docker Container Status
+docker ps
+
+# Logs eines Containers
+docker logs manacore-chat-backend
+docker logs -f manacore-chat-backend  # Live-Logs
+```
+
+### Service Management
+
+```bash
+# Alle Container neustarten
+./scripts/mac-mini/restart.sh
+
+# Alle Container stoppen
+./scripts/mac-mini/stop.sh
+
+# Einzelnen Container neustarten
+docker restart manacore-chat-backend
+
+# Neueste Images pullen und Container aktualisieren
+./scripts/mac-mini/deploy.sh
+```
+
+### Autostart Management
+
+```bash
+# LaunchAgents Status prüfen
+launchctl list | grep -E "(cloudflare|manacore)"
+
+# Health Check manuell triggern
+launchctl start com.manacore.health-check
+
+# Service neuladen
+launchctl unload ~/Library/LaunchAgents/com.manacore.docker-startup.plist
+launchctl load ~/Library/LaunchAgents/com.manacore.docker-startup.plist
+```
+
+## Autostart-Konfiguration
+
+Drei LaunchAgents sorgen für automatischen Betrieb:
+
+### 1. Cloudflare Tunnel
+
+**Datei:** `~/Library/LaunchAgents/com.cloudflare.cloudflared.plist`
+
+- Startet beim Login
+- Hält den Tunnel zu Cloudflare offen
+- Automatischer Neustart bei Absturz
+
+### 2. Docker Container Startup
+
+**Datei:** `~/Library/LaunchAgents/com.manacore.docker-startup.plist`
+
+- Startet beim Login
+- Wartet auf Docker Desktop
+- Führt `docker compose up -d` aus
+- Erstellt fehlende Datenbanken automatisch
+
+### 3. Health Check
+
+**Datei:** `~/Library/LaunchAgents/com.manacore.health-check.plist`
+
+- Läuft alle 5 Minuten
+- Prüft alle Services (HTTP + Docker)
+- Sendet Benachrichtigungen bei Fehlern
+
+### Setup neu ausführen
+
+Falls die LaunchAgents neu eingerichtet werden müssen:
+
+```bash
+./scripts/mac-mini/setup-autostart.sh
+```
+
+## Benachrichtigungen
+
+### Konfiguration
+
+**Datei:** `.env.notifications`
+
+```bash
+# Telegram
+TELEGRAM_BOT_TOKEN=xxx
+TELEGRAM_CHAT_ID=xxx
+
+# Email
+EMAIL_TO=your@email.com
+EMAIL_FROM=manacore@mana.how
+
+# ntfy.sh (optional)
+NTFY_TOPIC=your-topic
+```
+
+### Telegram Bot
+
+- **Bot:** @alterts_mana_bot
+- **Chat ID:** 7117174865
+- Sendet Alerts mit:
+  - Fehlgeschlagene Services
+  - Hostname und Zeitstempel
+  - Anleitung zur Fehlersuche
+
+### Email
+
+- Verwendet `msmtp` als SMTP-Client
+- Konfiguration in `~/.msmtprc`
+- Gmail mit App-Password
+
+### Benachrichtigung testen
+
+```bash
+# Test-Nachricht senden
+curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+  -d "chat_id=${TELEGRAM_CHAT_ID}" \
+  -d "text=Test notification"
+```
+
+## Docker Compose
+
+**Datei:** `docker-compose.macmini.yml`
+
+### Container-Namen
+
+| Container | Service |
+|-----------|---------|
+| manacore-postgres | PostgreSQL Datenbank |
+| manacore-redis | Redis Cache |
+| manacore-auth | Auth Service |
+| manacore-dashboard-web | Dashboard |
+| manacore-chat-backend | Chat API |
+| manacore-chat-web | Chat Frontend |
+| manacore-todo-backend | Todo API |
+| manacore-todo-web | Todo Frontend |
+| manacore-calendar-backend | Calendar API |
+| manacore-calendar-web | Calendar Frontend |
+| manacore-clock-backend | Clock API |
+| manacore-clock-web | Clock Frontend |
+
+### Nützliche Docker-Befehle
+
+```bash
+# Alle Container starten
+docker compose -f docker-compose.macmini.yml up -d
+
+# Alle Container stoppen
+docker compose -f docker-compose.macmini.yml down
+
+# Container neustarten
+docker compose -f docker-compose.macmini.yml restart
+
+# Neueste Images pullen
+docker compose -f docker-compose.macmini.yml pull
+
+# Logs aller Container
+docker compose -f docker-compose.macmini.yml logs -f
+
+# Einzelnen Service neustarten
+docker compose -f docker-compose.macmini.yml restart chat-backend
+```
+
+## Cloudflare Tunnel
+
+### Konfiguration
+
+**Datei:** `~/.cloudflared/config.yml`
+
+```yaml
+tunnel: manacore-tunnel
+credentials-file: ~/.cloudflared/credentials.json
+
+ingress:
+  - hostname: mana.how
+    service: http://localhost:5173
+  - hostname: auth.mana.how
+    service: http://localhost:3001
+  - hostname: chat.mana.how
+    service: http://localhost:3000
+  # ... weitere Services
+  - service: http_status:404
+```
+
+### Tunnel Status
+
+```bash
+# Prüfen ob cloudflared läuft
+pgrep -x cloudflared
+
+# Tunnel-Logs
+tail -f ~/.cloudflared/cloudflared.log
+```
+
+## Troubleshooting
+
+### Container startet nicht
+
+```bash
+# Logs prüfen
+docker logs manacore-<service-name>
+
+# Container manuell starten
+docker start manacore-<service-name>
+
+# Bei Problemen: Container neu erstellen
+docker compose -f docker-compose.macmini.yml up -d --force-recreate <service-name>
+```
+
+### Tunnel nicht erreichbar
+
+```bash
+# cloudflared Status
+pgrep -x cloudflared
+
+# cloudflared neustarten
+launchctl stop com.cloudflare.cloudflared
+launchctl start com.cloudflare.cloudflared
+
+# Logs prüfen
+tail -100 ~/.cloudflared/cloudflared.log
+```
+
+### Datenbank-Probleme
+
+```bash
+# PostgreSQL Status
+docker exec manacore-postgres pg_isready -U postgres
+
+# Datenbanken auflisten
+docker exec manacore-postgres psql -U postgres -c "\l"
+
+# Datenbank manuell erstellen
+docker exec manacore-postgres psql -U postgres -c "CREATE DATABASE chat_db;"
+```
+
+### Health Check Fehler
+
+```bash
+# Health Check manuell ausführen
+./scripts/mac-mini/health-check.sh
+
+# Einzelnen Service testen
+curl -s http://localhost:3002/api/v1/health
+curl -s http://localhost:3000/
+```
+
+## Wartung
+
+### Updates einspielen
+
+```bash
+# Neuesten Code holen
+git pull
+
+# Neue Images pullen und deployen
+./scripts/mac-mini/deploy.sh
+```
+
+### Backup
+
+Die PostgreSQL-Datenbank sollte regelmäßig gesichert werden:
+
+```bash
+# Backup erstellen
+docker exec manacore-postgres pg_dumpall -U postgres > backup_$(date +%Y%m%d).sql
+
+# Backup wiederherstellen
+cat backup_20260123.sql | docker exec -i manacore-postgres psql -U postgres
+```
+
+### Logs aufräumen
+
+```bash
+# Docker Logs beschränken (bereits in compose konfiguriert)
+# max-size: 10m, max-file: 3
+
+# Alte Docker Images entfernen
+docker image prune -a
+```
+
+## Skript-Übersicht
+
+| Skript | Beschreibung |
+|--------|--------------|
+| `setup-autostart.sh` | Richtet LaunchAgents ein (einmalig) |
+| `setup-notifications.sh` | Interaktives Notification-Setup |
+| `startup.sh` | Wird von launchd beim Boot aufgerufen |
+| `health-check.sh` | Prüft Services, sendet Alerts |
+| `status.sh` | Zeigt Übersicht aller Services |
+| `restart.sh` | Startet alle Container neu |
+| `stop.sh` | Stoppt alle Container |
+| `deploy.sh` | Pullt neue Images und startet neu |
+
+## Chronologie der Einrichtung
+
+1. **Docker Setup** - PostgreSQL, Redis, App-Container
+2. **Cloudflare Tunnel** - Öffentliche Erreichbarkeit
+3. **SSH via Cloudflare Access** - Sicherer Remote-Zugang
+4. **LaunchAgents** - Autostart bei Boot
+5. **Health Checks** - Automatische Überwachung
+6. **Telegram Notifications** - Alerts bei Fehlern
+7. **Email Notifications** - Redundante Benachrichtigung
