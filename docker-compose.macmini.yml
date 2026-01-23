@@ -63,7 +63,7 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-${JWT_SECRET:-your-jwt-secret-change-me}}
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-}
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:-}
-      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how
+      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how
     ports:
       - "3001:3001"
     healthcheck:
@@ -95,6 +95,8 @@ services:
       PUBLIC_CALENDAR_API_URL_CLIENT: https://calendar-api.mana.how
       PUBLIC_CLOCK_API_URL: http://clock-backend:3017
       PUBLIC_CLOCK_API_URL_CLIENT: https://clock-api.mana.how
+      PUBLIC_CONTACTS_API_URL: http://contacts-backend:3015
+      PUBLIC_CONTACTS_API_URL_CLIENT: https://contacts-api.mana.how
     ports:
       - "5173:5173"
     healthcheck:
@@ -317,6 +319,60 @@ services:
       - "5187:5187"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5187/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Contacts App
+  # ============================================
+
+  contacts-backend:
+    image: ghcr.io/memo-2023/contacts-backend:latest
+    container_name: contacts-backend
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3015
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/contacts
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      CORS_ORIGINS: https://contacts.mana.how,https://mana.how,https://calendar.mana.how
+    ports:
+      - "3015:3015"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3015/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  contacts-web:
+    image: ghcr.io/memo-2023/contacts-web:latest
+    container_name: contacts-web
+    restart: always
+    depends_on:
+      contacts-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5184
+      PUBLIC_BACKEND_URL: http://contacts-backend:3015
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://contacts-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5184:5184"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5184/health"]
       interval: 30s
       timeout: 10s
       retries: 3
