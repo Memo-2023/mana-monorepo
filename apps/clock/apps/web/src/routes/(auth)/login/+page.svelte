@@ -1,15 +1,20 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
-	import { RegisterPage } from '@manacore/shared-auth-ui';
+	import { LoginPage } from '@manacore/shared-auth-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import '$lib/i18n';
 
 	let error = $state('');
 	let loading = $state(false);
 
-	// Get redirect URL from sessionStorage (set by AuthGateModal in guest mode)
+	// Get redirect URL from query params or sessionStorage (set by AuthGateModal in guest mode)
 	const redirectTo = $derived.by(() => {
+		const queryRedirect = $page.url.searchParams.get('redirectTo');
+		if (queryRedirect) return queryRedirect;
+
+		// Check sessionStorage for return URL (from guest mode)
 		if (browser) {
 			const sessionRedirect = sessionStorage.getItem('auth-return-url');
 			if (sessionRedirect) {
@@ -18,35 +23,32 @@
 				return sessionRedirect;
 			}
 		}
+
 		return '/';
 	});
 
-	async function handleRegister(email: string, password: string) {
+	async function handleLogin(email: string, password: string) {
 		loading = true;
 		error = '';
 
-		const result = await authStore.signUp(email, password);
+		const result = await authStore.signIn(email, password);
 
 		if (result.success) {
-			if (result.needsVerification) {
-				// Show verification message or redirect to verification page
-				goto('/login?registered=true');
-			} else {
-				goto(redirectTo);
-			}
+			goto(redirectTo);
 		} else {
-			error = result.error || 'Registrierung fehlgeschlagen';
+			error = result.error || 'Anmeldung fehlgeschlagen';
 		}
 
 		loading = false;
 	}
 </script>
 
-<RegisterPage
+<LoginPage
 	appName="Clock"
 	appLogo=""
 	{loading}
 	{error}
-	onSubmit={handleRegister}
-	loginHref="/login"
+	onSubmit={handleLogin}
+	registerHref="/register"
+	forgotPasswordHref="/forgot-password"
 />

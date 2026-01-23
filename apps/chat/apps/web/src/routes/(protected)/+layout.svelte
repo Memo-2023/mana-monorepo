@@ -5,6 +5,8 @@
 	import { locale } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
+	import { conversationsStore } from '$lib/stores/conversations.svelte';
+	import { sessionConversationsStore } from '$lib/stores/session-conversations.svelte';
 	import { theme } from '$lib/stores/theme';
 	import {
 		THEME_DEFINITIONS,
@@ -22,6 +24,7 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
 	import type { LayoutData } from './$types';
 
 	// App switcher items
@@ -32,6 +35,14 @@
 	let isChecking = $state(true);
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
+
+	// Guest mode state
+	let showAuthGateModal = $state(false);
+	let authGateAction = $state<'save' | 'sync' | 'ai' | 'feature'>('ai');
+
+	// Check if in guest mode
+	let isGuestMode = $derived(!authStore.isAuthenticated);
+	let sessionConversationCount = $derived(sessionConversationsStore.count);
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -151,7 +162,7 @@
 		goto('/login');
 	}
 
-	// Check auth on mount and redirect if not authenticated
+	// Initialize on mount - supports both authenticated and guest mode
 	onMount(async () => {
 		// Initialize theme
 		theme.initialize();
@@ -172,19 +183,20 @@
 
 		await authStore.initialize();
 
-		if (!authStore.isAuthenticated) {
-			const redirectTo = encodeURIComponent(data.pathname || '/chat');
-			goto(`/login?redirectTo=${redirectTo}`);
-			return;
-		}
+		// Load user settings if authenticated
+		if (authStore.isAuthenticated) {
+			await userSettings.load();
 
-		// Load user settings
-		await userSettings.load();
+			// Check for session conversations to migrate
+			if (conversationsStore.hasSessionConversations) {
+				await conversationsStore.migrateSessionConversations();
+			}
 
-		// Redirect to start page if on /chat and a custom start page is set
-		const currentPath = window.location.pathname;
-		if (currentPath === '/chat' && userSettings.startPage && userSettings.startPage !== '/chat') {
-			goto(userSettings.startPage, { replaceState: true });
+			// Redirect to start page if on /chat and a custom start page is set
+			const currentPath = window.location.pathname;
+			if (currentPath === '/chat' && userSettings.startPage && userSettings.startPage !== '/chat') {
+				goto(userSettings.startPage, { replaceState: true });
+			}
 		}
 
 		isChecking = false;
@@ -204,8 +216,22 @@
 		</div>
 	</div>
 {:else}
+	<!-- Guest Mode Banner -->
+	{#if isGuestMode}
+		<div class="guest-banner">
+			<span>
+				Du bist im Gast-Modus.
+				{#if sessionConversationCount > 0}
+					{sessionConversationCount}
+					{sessionConversationCount === 1 ? 'Unterhaltung' : 'Unterhaltungen'} in dieser Session.
+				{/if}
+			</span>
+			<button onclick={() => goto('/login')}>Anmelden</button>
+		</div>
+	{/if}
+
 	<!-- Navigation Layout -->
-	<div class="layout-container">
+	<div class="layout-container" class:has-guest-banner={isGuestMode}>
 		<!-- Floating/Sidebar Pill Navigation -->
 		<PillNavigation
 			items={navItems}
@@ -257,13 +283,57 @@
 			{/if}
 		</main>
 	</div>
+
+	<!-- Auth Gate Modal -->
+	<AuthGateModal
+		open={showAuthGateModal}
+		action={authGateAction}
+		conversationCount={sessionConversationCount}
+		onClose={() => (showAuthGateModal = false)}
+	/>
 {/if}
 
 <style>
+	.guest-banner {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		z-index: 60;
+		background-color: #3b82f6;
+		color: white;
+		padding: 0.5rem 1rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		font-size: 0.875rem;
+	}
+
+	.guest-banner button {
+		background-color: white;
+		color: #3b82f6;
+		padding: 0.25rem 0.75rem;
+		border-radius: 0.375rem;
+		font-weight: 500;
+		font-size: 0.875rem;
+		border: none;
+		cursor: pointer;
+		transition: background-color 0.15s;
+	}
+
+	.guest-banner button:hover {
+		background-color: #f0f9ff;
+	}
+
 	.layout-container {
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
+	}
+
+	.layout-container.has-guest-banner {
+		padding-top: 40px;
 	}
 
 	.main-content {

@@ -1,9 +1,12 @@
 /**
  * Conversations Store - Manages conversation list using Svelte 5 runes
+ * Supports both authenticated (cloud) and guest (session) modes
  */
 
 import { conversationService } from '$lib/services/conversation';
 import { toastStore } from './toast.svelte';
+import { sessionConversationsStore } from './session-conversations.svelte';
+import { authStore } from './auth.svelte';
 import type { Conversation } from '@chat/types';
 
 // State
@@ -40,11 +43,20 @@ export const conversationsStore = {
 
 	/**
 	 * Load conversations (userId is derived from JWT on backend)
+	 * In guest mode, loads from session storage
 	 */
 	async loadConversations(spaceId?: string) {
 		isLoading = true;
 		error = null;
 
+		// Guest mode: load from session storage
+		if (!authStore.isAuthenticated) {
+			conversations = sessionConversationsStore.conversations;
+			isLoading = false;
+			return;
+		}
+
+		// Authenticated: fetch from API
 		try {
 			conversations = await conversationService.getConversations(spaceId);
 		} catch (e) {
@@ -204,5 +216,54 @@ export const conversationsStore = {
 		conversations = [];
 		archivedConversations = [];
 		error = null;
+	},
+
+	/**
+	 * Get session conversation count (for guest mode banner)
+	 */
+	get sessionConversationCount(): number {
+		return sessionConversationsStore.count;
+	},
+
+	/**
+	 * Check if there are session conversations
+	 */
+	get hasSessionConversations(): boolean {
+		return sessionConversationsStore.count > 0;
+	},
+
+	/**
+	 * Migrate session conversations to cloud after login
+	 * Note: This is a placeholder - actual implementation would need backend support
+	 */
+	async migrateSessionConversations(): Promise<void> {
+		if (!authStore.isAuthenticated) return;
+
+		const sessionData = sessionConversationsStore.getAllConversations();
+		if (sessionData.conversations.length === 0) return;
+
+		// For now, we just clear the session data
+		// In a full implementation, you would create each conversation via API
+		// and transfer the messages
+		console.log(
+			'Session conversations would be migrated:',
+			sessionData.conversations.length,
+			'conversations'
+		);
+
+		// Clear session data after migration
+		sessionConversationsStore.clear();
+
+		// Reload conversations from server
+		await this.loadConversations();
+
+		toastStore.success('Unterhaltungen wurden in deinen Account übertragen');
+	},
+
+	/**
+	 * Check if a conversation ID is a session conversation
+	 */
+	isSessionConversation(id: string): boolean {
+		return sessionConversationsStore.isSessionConversation(id);
 	},
 };

@@ -1,11 +1,26 @@
 /**
  * Calendars Store - Manages user calendars using Svelte 5 runes
+ * Supports both authenticated (cloud) and guest (session) modes
  */
 
 import type { Calendar, CreateCalendarInput, UpdateCalendarInput } from '@calendar/shared';
 import * as api from '$lib/api/calendars';
 import { BIRTHDAY_CALENDAR } from '$lib/api/birthdays';
 import { settingsStore } from './settings.svelte';
+import { authStore } from './auth.svelte';
+
+// Guest calendar for unauthenticated users
+const GUEST_CALENDAR: Calendar = {
+	id: 'session-calendar',
+	userId: 'guest',
+	name: 'Mein Kalender',
+	color: '#3b82f6',
+	isDefault: true,
+	isVisible: true,
+	timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+	createdAt: new Date().toISOString(),
+	updatedAt: new Date().toISOString(),
+};
 
 // State
 let calendars = $state<Calendar[]>([]);
@@ -20,6 +35,7 @@ const birthdayCalendar: Calendar = {
 	color: BIRTHDAY_CALENDAR.color,
 	isDefault: false,
 	isVisible: true, // Visibility controlled by settingsStore.showBirthdays
+	timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 	createdAt: new Date().toISOString(),
 	updatedAt: new Date().toISOString(),
 };
@@ -75,11 +91,20 @@ export const calendarsStore = {
 
 	/**
 	 * Fetch all calendars
+	 * In guest mode, returns a default local calendar
 	 */
 	async fetchCalendars() {
 		loading = true;
 		error = null;
 
+		// Guest mode: return local calendar only
+		if (!authStore.isAuthenticated) {
+			calendars = [GUEST_CALENDAR];
+			loading = false;
+			return { data: { calendars: [GUEST_CALENDAR] }, error: null };
+		}
+
+		// Authenticated: fetch from API
 		const result = await api.getCalendars();
 
 		if (result.error) {
@@ -194,5 +219,19 @@ export const calendarsStore = {
 	 */
 	isBirthdayCalendar(id: string) {
 		return id === BIRTHDAY_CALENDAR.id;
+	},
+
+	/**
+	 * Check if a calendar ID is the guest calendar
+	 */
+	isGuestCalendar(id: string) {
+		return id === GUEST_CALENDAR.id;
+	},
+
+	/**
+	 * Get the guest calendar ID
+	 */
+	get guestCalendarId() {
+		return GUEST_CALENDAR.id;
 	},
 };

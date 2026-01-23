@@ -38,6 +38,8 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getTasks } from '$lib/api/tasks';
 	import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from '$lib/utils/task-parser';
+	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
+	import { sessionTasksStore } from '$lib/stores/session-tasks.svelte';
 
 	// App switcher items
 	const appItems = getPillAppItems('todo');
@@ -265,30 +267,47 @@
 		goto('/login');
 	}
 
-	onMount(async () => {
-		// Redirect to login if not authenticated
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
+	// Auth gate modal state
+	let showAuthGateModal = $state(false);
+	let authGateAction = $state<'save' | 'sync' | 'feature'>('save');
 
+	// Show auth gate modal (can be called from child components)
+	function showAuthGate(action: 'save' | 'sync' | 'feature' = 'save') {
+		authGateAction = action;
+		showAuthGateModal = true;
+	}
+
+	// Session tasks indicator
+	let sessionTaskCount = $derived(sessionTasksStore.count);
+
+	onMount(async () => {
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
 
 		// Initialize todo settings
 		todoSettings.initialize();
 
-		// Load data
-		await Promise.all([
-			projectsStore.fetchProjects(),
-			labelsStore.fetchLabels(),
-			userSettings.load(),
-		]);
+		// Initialize session tasks for guest mode
+		sessionTasksStore.initialize();
 
-		// Redirect to start page if on root and a custom start page is set
-		const currentPath = window.location.pathname;
-		if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
-			goto(userSettings.startPage, { replaceState: true });
+		// Load projects (works in both guest and authenticated mode)
+		await projectsStore.fetchProjects();
+
+		// Only fetch labels and user settings if authenticated
+		if (authStore.isAuthenticated) {
+			await Promise.all([labelsStore.fetchLabels(), userSettings.load()]);
+
+			// Check for session tasks to migrate after login
+			if (tasksStore.hasSessionTasks) {
+				const defaultProject = projectsStore.inboxProject;
+				await tasksStore.migrateSessionTasks(defaultProject?.id);
+			}
+
+			// Redirect to start page if on root and a custom start page is set
+			const currentPath = window.location.pathname;
+			if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
+				goto(userSettings.startPage, { replaceState: true });
+			}
 		}
 
 		// Initialize sidebar mode from localStorage (with error handling for private browsing)
@@ -344,6 +363,38 @@
 
 <SplitPaneContainer>
 	<div class="layout-container">
+		<!-- Guest Mode Banner -->
+		{#if !authStore.isAuthenticated}
+			<div
+				class="guest-banner bg-primary/10 border-primary/20 fixed top-0 right-0 left-0 z-50 flex items-center justify-between border-b px-4 py-2"
+			>
+				<div class="flex items-center gap-2 text-sm">
+					<svg class="text-primary h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
+					</svg>
+					<span class="text-foreground">
+						<strong>Gast-Modus</strong>
+						{#if sessionTaskCount > 0}
+							- {sessionTaskCount}
+							{sessionTaskCount === 1 ? 'Aufgabe' : 'Aufgaben'} lokal gespeichert
+						{:else}
+							- Aufgaben werden nur in diesem Tab gespeichert
+						{/if}
+					</span>
+				</div>
+				<button
+					onclick={() => showAuthGate('sync')}
+					class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1 text-sm font-medium transition-colors"
+				>
+					Anmelden
+				</button>
+			</div>
+		{/if}
 		<!-- UI Elements (hidden in immersive mode) -->
 		{#if !todoSettings.immersiveModeEnabled}
 			<PillNavigation
@@ -421,7 +472,24 @@
 	</div>
 </SplitPaneContainer>
 
+<!-- Auth Gate Modal -->
+<AuthGateModal
+	visible={showAuthGateModal}
+	onClose={() => (showAuthGateModal = false)}
+	action={authGateAction}
+/>
+
 <style>
+	/* Guest banner styling */
+	.guest-banner {
+		height: 40px;
+		min-height: 40px;
+	}
+
+	/* Offset content when guest banner is visible */
+	.layout-container:has(.guest-banner) .main-content.floating-mode {
+		padding-top: calc(70px + 40px);
+	}
 	.layout-container {
 		display: flex;
 		flex-direction: column;

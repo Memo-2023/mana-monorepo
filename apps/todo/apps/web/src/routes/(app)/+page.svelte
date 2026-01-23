@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 	import { format, addDays, subDays, startOfDay } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { ListChecks } from '@manacore/shared-icons';
-	import { authStore } from '$lib/stores/auth.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import TaskList from '$lib/components/TaskList.svelte';
@@ -18,14 +16,10 @@
 	let editingTask = $state<Task | null>(null);
 
 	onMount(async () => {
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
 		viewStore.setToday();
 
 		try {
+			// Fetch tasks (works in both guest and authenticated mode)
 			await tasksStore.fetchAllTasks();
 		} catch (error) {
 			console.error('Failed to load tasks:', error);

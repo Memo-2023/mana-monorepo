@@ -1,9 +1,24 @@
 /**
  * Projects Store - Manages project state using Svelte 5 runes
+ * Supports both authenticated (cloud) and guest (session) modes
  */
 
 import type { Project } from '@todo/shared';
 import * as projectsApi from '$lib/api/projects';
+import { authStore } from './auth.svelte';
+
+// Guest inbox project for unauthenticated users
+const GUEST_INBOX: Project = {
+	id: 'session-inbox',
+	userId: 'guest',
+	name: 'Inbox',
+	color: '#6b7280',
+	order: 0,
+	isArchived: false,
+	isDefault: true,
+	createdAt: new Date().toISOString(),
+	updatedAt: new Date().toISOString(),
+};
 
 // State
 let projects = $state<Project[]>([]);
@@ -45,10 +60,20 @@ export const projectsStore = {
 
 	/**
 	 * Fetch all projects from API
+	 * In guest mode, returns a default inbox project
 	 */
 	async fetchProjects() {
 		loading = true;
 		error = null;
+
+		// Guest mode: return local inbox only
+		if (!authStore.isAuthenticated) {
+			projects = [GUEST_INBOX];
+			loading = false;
+			return;
+		}
+
+		// Authenticated: fetch from API
 		try {
 			projects = await projectsApi.getProjects();
 		} catch (e) {
@@ -169,5 +194,19 @@ export const projectsStore = {
 		projects = [];
 		loading = false;
 		error = null;
+	},
+
+	/**
+	 * Check if a project ID is the guest inbox
+	 */
+	isGuestInbox(id: string) {
+		return id === GUEST_INBOX.id;
+	},
+
+	/**
+	 * Get the guest inbox ID
+	 */
+	get guestInboxId() {
+		return GUEST_INBOX.id;
 	},
 };

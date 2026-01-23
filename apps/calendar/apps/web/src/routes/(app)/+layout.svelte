@@ -66,8 +66,10 @@
 	import ViewModePillContextMenu from '$lib/components/calendar/ViewModePillContextMenu.svelte';
 	import StatsOverlay from '$lib/components/calendar/StatsOverlay.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
+	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import { heatmapStore } from '$lib/stores/heatmap.svelte';
+	import { sessionEventsStore } from '$lib/stores/session-events.svelte';
 	import type { CalendarViewType } from '@calendar/shared';
 
 	// App switcher items
@@ -561,30 +563,53 @@
 		}
 	});
 
-	onMount(async () => {
-		// Redirect to login if not authenticated
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
+	// Auth gate modal state
+	let showAuthGateModal = $state(false);
+	let authGateAction = $state<'save' | 'sync' | 'feature'>('save');
 
+	// Show auth gate modal (can be called from child components)
+	function showAuthGate(action: 'save' | 'sync' | 'feature' = 'save') {
+		authGateAction = action;
+		showAuthGateModal = true;
+	}
+
+	// Session events indicator
+	let hasSessionEvents = $derived(sessionEventsStore.hasEvents);
+	let sessionEventCount = $derived(sessionEventsStore.count);
+
+	onMount(async () => {
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
 
 		// Initialize view state
 		viewStore.initialize();
 
-		// Load calendars, tags, and user settings
+		// Initialize session events for guest mode
+		sessionEventsStore.initialize();
+
+		// Load calendars and tags (works in both guest and authenticated mode)
 		await calendarsStore.fetchCalendars();
-		await eventTagsStore.fetchTags();
-		await userSettings.load();
+
+		// Only fetch tags and user settings if authenticated
+		if (authStore.isAuthenticated) {
+			await eventTagsStore.fetchTags();
+			await userSettings.load();
+
+			// Check for session events to migrate after login
+			if (eventsStore.hasSessionEvents) {
+				const defaultCalendar = calendarsStore.defaultCalendar;
+				await eventsStore.migrateSessionEvents(defaultCalendar?.id);
+			}
+		}
 
 		// Note: Birthdays are loaded via reactive $effect when showBirthdays is enabled
 
-		// Redirect to start page if on root and a custom start page is set
-		const currentPath = window.location.pathname;
-		if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
-			goto(userSettings.startPage, { replaceState: true });
+		// Redirect to start page if on root and a custom start page is set (only if authenticated)
+		if (authStore.isAuthenticated) {
+			const currentPath = window.location.pathname;
+			if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
+				goto(userSettings.startPage, { replaceState: true });
+			}
 		}
 
 		// Initialize sidebar mode from localStorage
@@ -617,6 +642,38 @@
 
 <SplitPaneContainer>
 	<div class="layout-container">
+		<!-- Guest Mode Banner -->
+		{#if !authStore.isAuthenticated}
+			<div
+				class="guest-banner bg-primary/10 border-primary/20 fixed top-0 right-0 left-0 z-50 flex items-center justify-between border-b px-4 py-2"
+			>
+				<div class="flex items-center gap-2 text-sm">
+					<svg class="text-primary h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
+					</svg>
+					<span class="text-foreground">
+						<strong>Gast-Modus</strong>
+						{#if sessionEventCount > 0}
+							- {sessionEventCount}
+							{sessionEventCount === 1 ? 'Termin' : 'Termine'} lokal gespeichert
+						{:else}
+							- Termine werden nur in diesem Tab gespeichert
+						{/if}
+					</span>
+				</div>
+				<button
+					onclick={() => showAuthGate('sync')}
+					class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1 text-sm font-medium transition-colors"
+				>
+					Anmelden
+				</button>
+			</div>
+		{/if}
 		<!-- UI Elements (hidden in immersive mode) -->
 		{#if !settingsStore.immersiveModeEnabled}
 			<PillNavigation
@@ -775,12 +832,34 @@
 	{isSidebarMode}
 />
 
+<!-- Auth Gate Modal -->
+<AuthGateModal
+	visible={showAuthGateModal}
+	onClose={() => (showAuthGateModal = false)}
+	action={authGateAction}
+/>
+
 <style>
 	.layout-container {
 		display: flex;
 		flex-direction: column;
 		height: 100vh;
 		overflow: hidden;
+	}
+
+	/* Guest banner styling */
+	.guest-banner {
+		height: 40px;
+		min-height: 40px;
+	}
+
+	/* Offset content when guest banner is visible */
+	.layout-container:has(.guest-banner) .main-content {
+		margin-top: 40px;
+	}
+
+	.layout-container:has(.guest-banner) .main-content.floating-mode {
+		padding-top: calc(70px + 40px);
 	}
 
 	/* Mobile: Fixed viewport, no scroll */

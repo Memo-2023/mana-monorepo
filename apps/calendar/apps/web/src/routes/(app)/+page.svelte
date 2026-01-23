@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
-	import { authStore } from '$lib/stores/auth.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
 	import { heatmapStore } from '$lib/stores/heatmap.svelte';
@@ -79,19 +77,14 @@
 	}
 
 	onMount(async () => {
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
-		// Fetch events for current view range
+		// Fetch events for current view range (works in both guest and authenticated mode)
 		await eventsStore.fetchEvents(viewStore.viewRange.start, viewStore.viewRange.end);
 		initialized = true;
 	});
 
 	// Refetch events when view changes
 	$effect(() => {
-		if (initialized && authStore.isAuthenticated) {
+		if (initialized) {
 			eventsStore.fetchEvents(viewStore.viewRange.start, viewStore.viewRange.end);
 		}
 	});
