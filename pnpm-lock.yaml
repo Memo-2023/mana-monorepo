@@ -771,6 +771,52 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  apps/clock/apps/landing:
+    dependencies:
+      '@astrojs/check':
+        specifier: ^0.9.0
+        version: 0.9.5(prettier-plugin-astro@0.14.1)(prettier@3.6.2)(typescript@5.9.3)
+      '@manacore/shared-landing-ui':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-landing-ui
+      astro:
+        specifier: ^5.16.0
+        version: 5.16.0(@netlify/blobs@10.4.1)(@types/node@20.19.25)(ioredis@5.8.2)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.3)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+    devDependencies:
+      '@astrojs/tailwind':
+        specifier: ^6.0.2
+        version: 6.0.2(astro@5.16.0(@netlify/blobs@10.4.1)(@types/node@20.19.25)(ioredis@5.8.2)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.3)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1))(tailwindcss@3.4.18(tsx@4.20.6)(yaml@2.8.1))(ts-node@10.9.2(@types/node@20.19.25)(typescript@5.9.3))
+      '@tailwindcss/typography':
+        specifier: ^0.5.18
+        version: 0.5.19(tailwindcss@3.4.18(tsx@4.20.6)(yaml@2.8.1))
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.25
+      eslint:
+        specifier: ^9.0.0
+        version: 9.39.1(jiti@2.6.1)
+      eslint-config-prettier:
+        specifier: ^9.1.0
+        version: 9.1.2(eslint@9.39.1(jiti@2.6.1))
+      eslint-plugin-astro:
+        specifier: ^1.0.0
+        version: 1.5.0(eslint@9.39.1(jiti@2.6.1))
+      prettier:
+        specifier: ^3.6.2
+        version: 3.6.2
+      prettier-plugin-astro:
+        specifier: ^0.14.1
+        version: 0.14.1
+      prettier-plugin-tailwindcss:
+        specifier: ^0.6.14
+        version: 0.6.14(prettier-plugin-astro@0.14.1)(prettier-plugin-svelte@3.4.0(prettier@3.6.2)(svelte@5.44.0))(prettier@3.6.2)
+      tailwindcss:
+        specifier: ^3.4.0
+        version: 3.4.18(tsx@4.20.6)(yaml@2.8.1)
+
   apps/clock/apps/web:
     dependencies:
       '@clock/shared':
@@ -1073,9 +1119,9 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1(svelte@5.44.0)
     devDependencies:
-      '@sveltejs/adapter-auto':
-        specifier: ^3.0.0
-        version: 3.3.1(@sveltejs/kit@2.49.0(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)))(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)))
+      '@sveltejs/adapter-node':
+        specifier: ^5.0.0
+        version: 5.4.0(@sveltejs/kit@2.49.0(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)))(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)))
       '@sveltejs/kit':
         specifier: ^2.0.0
         version: 2.49.0(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)))(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))
