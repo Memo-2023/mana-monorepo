@@ -40,7 +40,6 @@ echo "Time: $(date)"
 echo ""
 
 echo "Infrastructure:"
-check_service "PostgreSQL" "http://localhost:5432" 2 || true  # Will fail but that's ok for TCP
 # Check postgres via docker
 if docker exec manacore-postgres pg_isready -U postgres >/dev/null 2>&1; then
     echo -e "  ${GREEN}[OK]${NC} PostgreSQL"
@@ -60,27 +59,27 @@ fi
 echo ""
 echo "Auth & Dashboard:"
 check_service "Auth API" "http://localhost:3001/api/v1/health"
-check_service "Dashboard Web" "http://localhost:5173/health"
+check_service "Dashboard Web" "http://localhost:5173/"  # SvelteKit - check root
 
 echo ""
 echo "Chat:"
 check_service "Chat Backend" "http://localhost:3002/api/v1/health"
-check_service "Chat Web" "http://localhost:3000/health"
+check_service "Chat Web" "http://localhost:3000/"  # SvelteKit - check root
 
 echo ""
 echo "Todo:"
-check_service "Todo Backend" "http://localhost:3018/api/health"
-check_service "Todo Web" "http://localhost:5188/health"
+check_service "Todo Backend" "http://localhost:3018/api/v1/health"
+check_service "Todo Web" "http://localhost:5188/"  # SvelteKit - check root
 
 echo ""
 echo "Calendar:"
 check_service "Calendar Backend" "http://localhost:3016/api/v1/health"
-check_service "Calendar Web" "http://localhost:5186/health"
+check_service "Calendar Web" "http://localhost:5186/"  # SvelteKit - check root
 
 echo ""
 echo "Clock:"
 check_service "Clock Backend" "http://localhost:3017/api/v1/health"
-check_service "Clock Web" "http://localhost:5187/health"
+check_service "Clock Web" "http://localhost:5187/"  # SvelteKit - check root
 
 echo ""
 echo "Cloudflare Tunnel:"
