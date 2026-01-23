@@ -1,0 +1,90 @@
+# ManaCore Production Reverse Proxy
+# Domain: mana.how
+# Server: 46.224.108.214
+#
+# Deploy to: ~/Caddyfile on production server
+# Reload with: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
+
+# ============================================
+# Auth Service
+# ============================================
+auth.mana.how {
+    reverse_proxy localhost:3001
+}
+
+# ============================================
+# ManaCore Dashboard (Main)
+# ============================================
+mana.how {
+    reverse_proxy localhost:5173
+}
+
+www.mana.how {
+    redir https://mana.how{uri} permanent
+}
+
+# ============================================
+# Chat App
+# ============================================
+chat.mana.how {
+    reverse_proxy localhost:3000
+}
+
+chat-api.mana.how {
+    reverse_proxy localhost:3002
+}
+
+# ============================================
+# Todo App
+# ============================================
+todo.mana.how {
+    reverse_proxy localhost:5188
+}
+
+todo-api.mana.how {
+    reverse_proxy localhost:3018
+}
+
+# ============================================
+# Calendar App
+# ============================================
+calendar.mana.how {
+    reverse_proxy localhost:5186
+}
+
+calendar-api.mana.how {
+    reverse_proxy localhost:3016
+}
+
+# ============================================
+# Clock App
+# ============================================
+clock.mana.how {
+    reverse_proxy localhost:5187
+}
+
+clock-api.mana.how {
+    reverse_proxy localhost:3017
+}
+
+# ============================================
+# Contacts App
+# ============================================
+contacts.mana.how {
+    reverse_proxy localhost:5184
+}
+
+contacts-api.mana.how {
+    reverse_proxy localhost:3015
+}
+
+# ============================================
+# Monitoring & Analytics
+# ============================================
+grafana.mana.how {
+    reverse_proxy localhost:3100
+}
+
+analytics.mana.how {
+    reverse_proxy localhost:3200
+}

@@ -1,0 +1,124 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import UserTable from '$lib/components/admin/UserTable.svelte';
+
+	interface User {
+		id: string;
+		email: string;
+		name?: string;
+		createdAt: string;
+		lastActiveAt?: string;
+		role: string;
+	}
+
+	let users = $state<User[]>([]);
+	let loading = $state(true);
+	let error = $state<string | null>(null);
+	let searchQuery = $state('');
+
+	let filteredUsers = $derived(
+		searchQuery
+			? users.filter(
+					(u) =>
+						u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+						u.name?.toLowerCase().includes(searchQuery.toLowerCase())
+				)
+			: users
+	);
+
+	onMount(async () => {
+		try {
+			// TODO: Replace with actual API call
+			// const response = await fetch('/api/admin/users');
+			// users = await response.json();
+
+			// Mock data for now
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			users = [
+				{
+					id: '1',
+					email: 'admin@mana.how',
+					name: 'Admin User',
+					createdAt: '2024-01-15T10:00:00Z',
+					lastActiveAt: new Date().toISOString(),
+					role: 'admin',
+				},
+				{
+					id: '2',
+					email: 'user1@example.com',
+					name: 'Max Mustermann',
+					createdAt: '2024-06-20T14:30:00Z',
+					lastActiveAt: new Date(Date.now() - 3600000).toISOString(),
+					role: 'user',
+				},
+				{
+					id: '3',
+					email: 'user2@example.com',
+					name: 'Erika Musterfrau',
+					createdAt: '2024-09-01T08:15:00Z',
+					lastActiveAt: new Date(Date.now() - 86400000).toISOString(),
+					role: 'user',
+				},
+				{
+					id: '4',
+					email: 'user3@example.com',
+					createdAt: '2024-12-10T16:45:00Z',
+					lastActiveAt: new Date(Date.now() - 172800000).toISOString(),
+					role: 'user',
+				},
+				{
+					id: '5',
+					email: 'newuser@example.com',
+					name: 'New User',
+					createdAt: new Date(Date.now() - 86400000).toISOString(),
+					role: 'user',
+				},
+			];
+		} catch (e) {
+			error = 'Failed to load users';
+		} finally {
+			loading = false;
+		}
+	});
+</script>
+
+<div class="space-y-6">
+	<!-- Search & Filters -->
+	<div class="flex items-center gap-4">
+		<div class="relative flex-1 max-w-md">
+			<svg
+				class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+				/>
+			</svg>
+			<input
+				type="text"
+				placeholder="Search users..."
+				bind:value={searchQuery}
+				class="w-full pl-10 pr-4 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+			/>
+		</div>
+		<span class="text-sm text-muted-foreground">
+			{filteredUsers.length} of {users.length} users
+		</span>
+	</div>
+
+	<!-- User Table -->
+	<UserTable users={filteredUsers} {loading} />
+
+	{#if error}
+		<div
+			class="rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20 p-4"
+		>
+			<p class="text-sm text-red-600 dark:text-red-400">{error}</p>
+		</div>
+	{/if}
+</div>

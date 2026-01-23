@@ -1,0 +1,498 @@
+{
+	"annotations": {
+		"list": []
+	},
+	"editable": true,
+	"fiscalYearStartMonth": 0,
+	"graphTooltip": 0,
+	"id": null,
+	"links": [],
+	"panels": [
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+			"id": 1,
+			"panels": [],
+			"title": "System Overview",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{ "color": "green", "value": null },
+							{ "color": "yellow", "value": 70 },
+							{ "color": "red", "value": 85 }
+						]
+					},
+					"unit": "percent"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 6, "w": 6, "x": 0, "y": 1 },
+			"id": 2,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "auto",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+					"refId": "A"
+				}
+			],
+			"title": "CPU Usage",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{ "color": "green", "value": null },
+							{ "color": "yellow", "value": 70 },
+							{ "color": "red", "value": 85 }
+						]
+					},
+					"unit": "percent"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 6, "w": 6, "x": 6, "y": 1 },
+			"id": 3,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "auto",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+					"refId": "A"
+				}
+			],
+			"title": "Memory Usage",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{ "color": "green", "value": null },
+							{ "color": "yellow", "value": 70 },
+							{ "color": "red", "value": 85 }
+						]
+					},
+					"unit": "percent"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 6, "w": 6, "x": 12, "y": 1 },
+			"id": 4,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "auto",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "(1 - (node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})) * 100",
+					"refId": "A"
+				}
+			],
+			"title": "Disk Usage",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "green", "value": null }]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 6, "w": 6, "x": 18, "y": 1 },
+			"id": 5,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "none",
+				"justifyMode": "auto",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "count(container_last_seen{name=~\".+\"})",
+					"refId": "A"
+				}
+			],
+			"title": "Running Containers",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"custom": {
+						"axisBorderShow": false,
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 10,
+						"gradientMode": "none",
+						"hideFrom": { "legend": false, "tooltip": false, "viz": false },
+						"insertNulls": false,
+						"lineInterpolation": "linear",
+						"lineWidth": 1,
+						"pointSize": 5,
+						"scaleDistribution": { "type": "linear" },
+						"showPoints": "never",
+						"spanNulls": false,
+						"stacking": { "group": "A", "mode": "none" },
+						"thresholdsStyle": { "mode": "off" }
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "green", "value": null }]
+					},
+					"unit": "percent"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 8, "w": 12, "x": 0, "y": 7 },
+			"id": 6,
+			"options": {
+				"legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+				"tooltip": { "mode": "single", "sort": "none" }
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+					"legendFormat": "CPU",
+					"refId": "A"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+					"legendFormat": "Memory",
+					"refId": "B"
+				}
+			],
+			"title": "CPU & Memory Over Time",
+			"type": "timeseries"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"custom": {
+						"axisBorderShow": false,
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 10,
+						"gradientMode": "none",
+						"hideFrom": { "legend": false, "tooltip": false, "viz": false },
+						"insertNulls": false,
+						"lineInterpolation": "linear",
+						"lineWidth": 1,
+						"pointSize": 5,
+						"scaleDistribution": { "type": "linear" },
+						"showPoints": "never",
+						"spanNulls": false,
+						"stacking": { "group": "A", "mode": "none" },
+						"thresholdsStyle": { "mode": "off" }
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "green", "value": null }]
+					},
+					"unit": "Bps"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 8, "w": 12, "x": 12, "y": 7 },
+			"id": 7,
+			"options": {
+				"legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+				"tooltip": { "mode": "single", "sort": "none" }
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|br.*|docker.*\"}[5m])",
+					"legendFormat": "Receive {{device}}",
+					"refId": "A"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|br.*|docker.*\"}[5m])",
+					"legendFormat": "Transmit {{device}}",
+					"refId": "B"
+				}
+			],
+			"title": "Network I/O",
+			"type": "timeseries"
+		},
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 },
+			"id": 8,
+			"panels": [],
+			"title": "Database",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "green", "value": null }]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 6, "w": 6, "x": 0, "y": 16 },
+			"id": 9,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "auto",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "pg_stat_activity_count{state=\"active\"}",
+					"refId": "A"
+				}
+			],
+			"title": "PostgreSQL Active Connections",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "green", "value": null }]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 6, "w": 6, "x": 6, "y": 16 },
+			"id": 10,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "auto",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "redis_connected_clients",
+					"refId": "A"
+				}
+			],
+			"title": "Redis Connected Clients",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "green", "value": null }]
+					},
+					"unit": "decbytes"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 6, "w": 6, "x": 12, "y": 16 },
+			"id": 11,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "auto",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "redis_memory_used_bytes",
+					"refId": "A"
+				}
+			],
+			"title": "Redis Memory Usage",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "green", "value": null }]
+					},
+					"unit": "percent"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 6, "w": 6, "x": 18, "y": 16 },
+			"id": 12,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "auto",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "pg_stat_database_blks_hit{datname!~\"template.*|postgres\"} / (pg_stat_database_blks_hit{datname!~\"template.*|postgres\"} + pg_stat_database_blks_read{datname!~\"template.*|postgres\"}) * 100",
+					"legendFormat": "{{datname}}",
+					"refId": "A"
+				}
+			],
+			"title": "PostgreSQL Cache Hit Ratio",
+			"type": "stat"
+		}
+	],
+	"refresh": "30s",
+	"schemaVersion": 38,
+	"tags": ["manacore", "system"],
+	"templating": {
+		"list": [
+			{
+				"current": { "selected": false, "text": "Prometheus", "value": "Prometheus" },
+				"hide": 0,
+				"includeAll": false,
+				"multi": false,
+				"name": "datasource",
+				"options": [],
+				"query": "prometheus",
+				"refresh": 1,
+				"regex": "",
+				"skipUrlSync": false,
+				"type": "datasource"
+			}
+		]
+	},
+	"time": { "from": "now-1h", "to": "now" },
+	"timepicker": {},
+	"timezone": "browser",
+	"title": "System Overview",
+	"uid": "system-overview",
+	"version": 1,
+	"weekStart": ""
+}

@@ -1,0 +1,88 @@
+# ManaCore Prometheus Configuration
+# Scrapes metrics from all services
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Alertmanager configuration (optional, for future use)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: []
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Host system metrics via node-exporter
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'mac-mini'
+
+  # Docker container metrics via cAdvisor
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  # PostgreSQL metrics
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  # Redis metrics
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  # ============================================
+  # Application Backends (after /metrics added)
+  # ============================================
+
+  # Auth Service
+  - job_name: 'mana-core-auth'
+    static_configs:
+      - targets: ['mana-core-auth:3001']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Chat Backend
+  - job_name: 'chat-backend'
+    static_configs:
+      - targets: ['chat-backend:3002']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Todo Backend
+  - job_name: 'todo-backend'
+    static_configs:
+      - targets: ['todo-backend:3018']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Calendar Backend
+  - job_name: 'calendar-backend'
+    static_configs:
+      - targets: ['calendar-backend:3016']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Clock Backend
+  - job_name: 'clock-backend'
+    static_configs:
+      - targets: ['clock-backend:3017']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Contacts Backend
+  - job_name: 'contacts-backend'
+    static_configs:
+      - targets: ['contacts-backend:3015']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
