@@ -42,3 +42,6 @@ function createToastStore() {
 }
 
 export const toasts = createToastStore();
+
+// Alias for compatibility with different import styles
+export const toast = toasts;
