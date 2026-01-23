@@ -533,6 +533,83 @@ services:
       retries: 3
       start_period: 40s
 
+  # ============================================
+  # n8n Workflow Automation
+  # ============================================
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: manacore-n8n
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: postgres
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-manacore123}
+      # Security
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-change-me-n8n-encryption-key}
+      N8N_USER_MANAGEMENT_JWT_SECRET: ${N8N_JWT_SECRET:-change-me-n8n-jwt-secret}
+      # URLs
+      N8N_HOST: n8n.mana.how
+      N8N_PROTOCOL: https
+      WEBHOOK_URL: https://n8n.mana.how/
+      # Settings
+      N8N_BASIC_AUTH_ACTIVE: "false"
+      N8N_PORT: 5678
+      GENERIC_TIMEZONE: Europe/Berlin
+      TZ: Europe/Berlin
+      # Disable telemetry
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    ports:
+      - "5678:5678"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Telegram Stats Bot
+  # ============================================
+
+  telegram-stats-bot:
+    image: ghcr.io/memo-2023/telegram-stats-bot:latest
+    container_name: manacore-telegram-stats-bot
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      umami:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3300
+      TZ: Europe/Berlin
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+      UMAMI_API_URL: http://umami:3000
+      UMAMI_USERNAME: ${UMAMI_USERNAME:-admin}
+      UMAMI_PASSWORD: ${UMAMI_PASSWORD}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/manacore_auth
+    ports:
+      - "3300:3300"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3300/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
 # ============================================
 # Volumes
 # ============================================
@@ -548,3 +625,5 @@ volumes:
     name: manacore-prometheus
   grafana_data:
     name: manacore-grafana
+  n8n_data:
+    name: manacore-n8n
