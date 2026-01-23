@@ -172,7 +172,7 @@
 		"deploy:landing:manadeck": "pnpm --filter @manadeck/landing build && npx wrangler pages deploy apps/manadeck/apps/landing/dist --project-name=manadeck-landing",
 		"deploy:landing:zitare": "pnpm --filter @zitare/landing build && npx wrangler pages deploy apps/zitare/apps/landing/dist --project-name=zitare-landing",
 		"deploy:landing:presi": "pnpm --filter @presi/landing build && npx wrangler pages deploy apps/presi/apps/landing/dist --project-name=presi-landing",
-		"deploy:landing:clock": "pnpm --filter @clock/landing build && npx wrangler pages deploy apps/clock/apps/landing/dist --project-name=clock-landing",
+		"deploy:landing:clock": "pnpm --filter @clock/landing build && npx wrangler pages deploy apps/clock/apps/landing/dist --project-name=clocks-landing",
 		"deploy:landing:mail": "pnpm --filter @mail/landing build && npx wrangler pages deploy apps/mail/apps/landing/dist --project-name=mail-landing",
 		"deploy:landing:moodlit": "pnpm --filter @moodlit/landing build && npx wrangler pages deploy apps/moodlit/apps/landing/dist --project-name=moodlit-landing",
 		"deploy:landing:all": "pnpm deploy:landing:chat && pnpm deploy:landing:picture && pnpm deploy:landing:manacore && pnpm deploy:landing:manadeck && pnpm deploy:landing:zitare && pnpm deploy:landing:presi && pnpm deploy:landing:clock && pnpm deploy:landing:mail",
