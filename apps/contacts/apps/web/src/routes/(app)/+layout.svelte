@@ -46,6 +46,8 @@
 		formatParsedContactPreview,
 	} from '$lib/utils/contact-parser';
 	import ContactsToolbar from '$lib/components/ContactsToolbar.svelte';
+	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
+	import { sessionContactsStore } from '$lib/stores/session-contacts.svelte';
 
 	// Tags state for Quick-Create
 	let availableTags = $state<{ id: string; name: string }[]>([]);
@@ -211,6 +213,19 @@
 		goto('/login');
 	}
 
+	// Auth gate modal state
+	let showAuthGateModal = $state(false);
+	let authGateAction = $state<'save' | 'sync' | 'feature'>('save');
+
+	// Show auth gate modal (can be called from child components)
+	function showAuthGate(action: 'save' | 'sync' | 'feature' = 'save') {
+		authGateAction = action;
+		showAuthGateModal = true;
+	}
+
+	// Session contacts indicator
+	let sessionContactCount = $derived(sessionContactsStore.count);
+
 	async function handleCloseContactModal() {
 		// Refresh contacts list in case something was changed
 		await contactsStore.loadContacts();
@@ -271,43 +286,68 @@
 	}
 
 	onMount(async () => {
-		// Redirect to login if not authenticated
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
-
-		// Load user settings and tags
-		await userSettings.load();
-
-		// Load tags for Quick-Create
-		try {
-			const tagsResult = await tagsApi.list();
-			availableTags = (tagsResult.tags || []).map((t) => ({ id: t.id, name: t.name }));
-		} catch (e) {
-			console.error('Failed to load tags:', e);
-		}
 
 		// Initialize contacts settings, view mode, and filter store
 		contactsSettings.initialize();
 		viewModeStore.initialize();
 		contactsFilterStore.initialize();
 
+		// Initialize session contacts for guest mode
+		sessionContactsStore.initialize();
+
+		// Only fetch user data if authenticated
+		if (authStore.isAuthenticated) {
+			// Load user settings and tags
+			await userSettings.load();
+
+			// Load tags for Quick-Create
+			try {
+				const tagsResult = await tagsApi.list();
+				availableTags = (tagsResult.tags || []).map((t) => ({ id: t.id, name: t.name }));
+			} catch (e) {
+				console.error('Failed to load tags:', e);
+			}
+
+			// Check for session contacts to migrate after login
+			if (sessionContactsStore.hasContacts) {
+				// Migrate session contacts to cloud
+				const sessionContacts = sessionContactsStore.getAllContacts();
+				for (const contact of sessionContacts) {
+					try {
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
+						const { id, userId, createdAt, updatedAt, ...contactData } = contact;
+						await contactsStore.createContact(contactData);
+					} catch (e) {
+						console.error('Failed to migrate session contact:', e);
+					}
+				}
+				// Clear session contacts after migration
+				sessionContactsStore.clear();
+			}
+		}
+
 		// Initialize sidebar mode from localStorage
-		const savedSidebar = localStorage.getItem('contacts-nav-sidebar');
-		if (savedSidebar === 'true') {
-			isSidebarMode = true;
-			sidebarModeStore.set(true);
+		try {
+			const savedSidebar = localStorage?.getItem('contacts-nav-sidebar');
+			if (savedSidebar === 'true') {
+				isSidebarMode = true;
+				sidebarModeStore.set(true);
+			}
+		} catch {
+			// localStorage not available (private browsing, quota exceeded, etc.)
 		}
 
 		// Initialize collapsed state from localStorage
-		const savedCollapsed = localStorage.getItem('contacts-nav-collapsed');
-		if (savedCollapsed === 'true') {
-			isCollapsed = true;
-			collapsedStore.set(true);
+		try {
+			const savedCollapsed = localStorage?.getItem('contacts-nav-collapsed');
+			if (savedCollapsed === 'true') {
+				isCollapsed = true;
+				collapsedStore.set(true);
+			}
+		} catch {
+			// localStorage not available
 		}
 	});
 </script>
@@ -317,6 +357,38 @@
 <SplitPaneContainer>
 	<!-- Navigation Layout -->
 	<div class="layout-container">
+		<!-- Guest Mode Banner -->
+		{#if !authStore.isAuthenticated}
+			<div
+				class="guest-banner bg-primary/10 border-primary/20 fixed top-0 right-0 left-0 z-50 flex items-center justify-between border-b px-4 py-2"
+			>
+				<div class="flex items-center gap-2 text-sm">
+					<svg class="text-primary h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
+					</svg>
+					<span class="text-foreground">
+						<strong>Gast-Modus</strong>
+						{#if sessionContactCount > 0}
+							- {sessionContactCount}
+							{sessionContactCount === 1 ? 'Kontakt' : 'Kontakte'} lokal gespeichert
+						{:else}
+							- Kontakte werden nur in diesem Tab gespeichert
+						{/if}
+					</span>
+				</div>
+				<button
+					onclick={() => showAuthGate('sync')}
+					class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1 text-sm font-medium transition-colors"
+				>
+					Anmelden
+				</button>
+			</div>
+		{/if}
 		<!-- UI Elements (hidden in immersive mode) -->
 		{#if !contactsSettings.immersiveModeEnabled}
 			<!-- Floating/Sidebar Pill Navigation (at bottom) -->
@@ -407,7 +479,25 @@
 	</div>
 </SplitPaneContainer>
 
+<!-- Auth Gate Modal -->
+<AuthGateModal
+	visible={showAuthGateModal}
+	onClose={() => (showAuthGateModal = false)}
+	action={authGateAction}
+/>
+
 <style>
+	/* Guest banner styling */
+	.guest-banner {
+		height: 40px;
+		min-height: 40px;
+	}
+
+	/* Offset content when guest banner is visible */
+	.layout-container:has(.guest-banner) .main-content {
+		padding-top: 40px;
+	}
+
 	.layout-container {
 		display: flex;
 		flex-direction: column;

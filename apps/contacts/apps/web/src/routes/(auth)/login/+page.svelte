@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
+	import { onMount } from 'svelte';
 	import { LoginPage } from '@manacore/shared-auth-ui';
 	import { getLoginTranslations } from '@manacore/shared-i18n';
 	import { ContactsLogo } from '@manacore/shared-branding';
@@ -10,8 +11,20 @@
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import '$lib/i18n';
 
-	// Get redirect URL from query params
-	const redirectTo = $derived($page.url.searchParams.get('redirectTo') || '/');
+	// Get redirect URL from query params or sessionStorage
+	let redirectTo = $state('/');
+
+	onMount(() => {
+		// Check sessionStorage first (set by AuthGateModal)
+		const storedReturnUrl = sessionStorage.getItem('auth-return-url');
+		if (storedReturnUrl) {
+			redirectTo = storedReturnUrl;
+			sessionStorage.removeItem('auth-return-url');
+		} else {
+			// Fall back to query params
+			redirectTo = $page.url.searchParams.get('redirectTo') || '/';
+		}
+	});
 
 	// Get translations based on current locale
 	const translations = $derived(getLoginTranslations($locale || 'de'));
