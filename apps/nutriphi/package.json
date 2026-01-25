@@ -1,0 +1,19 @@
+{
+	"name": "nutriphi",
+	"version": "1.0.0",
+	"private": true,
+	"description": "NutriPhi - AI-powered nutrition tracking with photo analysis",
+	"scripts": {
+		"dev": "pnpm run --filter=@nutriphi/* --parallel dev",
+		"dev:backend": "pnpm --filter @nutriphi/backend dev",
+		"dev:web": "pnpm --filter @nutriphi/web dev",
+		"dev:landing": "pnpm --filter @nutriphi/landing dev",
+		"db:push": "pnpm --filter @nutriphi/backend db:push",
+		"db:studio": "pnpm --filter @nutriphi/backend db:studio",
+		"db:seed": "pnpm --filter @nutriphi/backend db:seed"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	},
+	"packageManager": "pnpm@9.15.0"
+}
