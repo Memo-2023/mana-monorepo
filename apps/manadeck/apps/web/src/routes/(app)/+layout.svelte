@@ -41,9 +41,9 @@
 		{ href: '/progress', label: 'Progress', icon: 'chart' },
 	];
 
-	// Navigation items filtered by visibility settings
+	// Navigation items filtered by visibility settings (with fallback for guest mode)
 	const navItems = $derived(
-		filterHiddenNavItems('manadeck', baseNavItems, userSettings.nav.hiddenNavItems)
+		filterHiddenNavItems('manadeck', baseNavItems, userSettings.nav?.hiddenNavItems || {})
 	);
 
 	// Get pinned themes from user settings (extended themes only)
@@ -208,7 +208,7 @@
 			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
-			desktopPosition={userSettings.nav.desktopPosition}
+			desktopPosition={userSettings.nav?.desktopPosition || 'bottom'}
 			showThemeToggle={true}
 			showThemeVariants={true}
 			{themeVariantItems}

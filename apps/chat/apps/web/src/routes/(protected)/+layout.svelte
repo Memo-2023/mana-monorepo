@@ -100,9 +100,9 @@
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
-	// Navigation items filtered by visibility settings
+	// Navigation items filtered by visibility settings (with fallback for guest mode)
 	const navItems = $derived(
-		filterHiddenNavItems('chat', baseNavItems, userSettings.nav.hiddenNavItems)
+		filterHiddenNavItems('chat', baseNavItems, userSettings.nav?.hiddenNavItems || {})
 	);
 
 	// User email for user dropdown
@@ -244,7 +244,7 @@
 			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
-			desktopPosition={userSettings.nav.desktopPosition}
+			desktopPosition={userSettings.nav?.desktopPosition || 'bottom'}
 			showThemeToggle={true}
 			showThemeVariants={true}
 			{themeVariantItems}

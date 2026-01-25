@@ -145,9 +145,9 @@
 		{ href: '/help', label: 'Hilfe', icon: 'help-circle' },
 	];
 
-	// Navigation items filtered by visibility settings
+	// Navigation items filtered by visibility settings (with fallback for guest mode)
 	const navItems = $derived(
-		filterHiddenNavItems('contacts', baseNavItems, userSettings.nav.hiddenNavItems)
+		filterHiddenNavItems('contacts', baseNavItems, userSettings.nav?.hiddenNavItems || {})
 	);
 
 	// Navigation shortcuts (Ctrl+1-5) - use base items for consistent shortcuts

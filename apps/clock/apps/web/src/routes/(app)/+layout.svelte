@@ -188,9 +188,9 @@
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
-	// Navigation items filtered by visibility settings
+	// Navigation items filtered by visibility settings (with fallback for guest mode)
 	const navItems = $derived(
-		filterHiddenNavItems('clock', baseNavItems, userSettings.nav.hiddenNavItems)
+		filterHiddenNavItems('clock', baseNavItems, userSettings.nav?.hiddenNavItems || {})
 	);
 
 	// Navigation shortcuts (Ctrl+1-9) - use base items for consistent shortcuts
@@ -309,7 +309,7 @@
 		currentPath={$page.url.pathname}
 		appName="Clock"
 		homeRoute="/"
-		desktopPosition={userSettings.nav.desktopPosition}
+		desktopPosition={userSettings.nav?.desktopPosition || 'bottom'}
 		onToggleTheme={handleToggleTheme}
 		{isDark}
 		{isSidebarMode}

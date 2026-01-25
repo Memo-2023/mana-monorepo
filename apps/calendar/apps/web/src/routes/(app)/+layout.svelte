@@ -302,9 +302,9 @@
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	]);
 
-	// Navigation items filtered by visibility settings
+	// Navigation items filtered by visibility settings (with fallback for guest mode)
 	const navItems = $derived(
-		filterHiddenNavItems('calendar', baseNavItems, userSettings.nav.hiddenNavItems)
+		filterHiddenNavItems('calendar', baseNavItems, userSettings.nav?.hiddenNavItems || {})
 	);
 
 	// Active tab based on sidebar state: 'tasks' when sidebar is open, 'calendar' when closed

@@ -105,9 +105,9 @@
 		{ href: '/app/archive', label: 'Archiv', icon: 'archive' },
 	];
 
-	// Navigation items filtered by visibility settings
+	// Navigation items filtered by visibility settings (with fallback for guest mode)
 	const navItems = $derived(
-		filterHiddenNavItems('picture', baseNavItems, userSettings.nav.hiddenNavItems)
+		filterHiddenNavItems('picture', baseNavItems, userSettings.nav?.hiddenNavItems || {})
 	);
 
 	// View mode options for tab group
@@ -267,7 +267,7 @@
 				onModeChange={handleModeChange}
 				{isCollapsed}
 				onCollapsedChange={handleCollapsedChange}
-				desktopPosition={userSettings.nav.desktopPosition}
+				desktopPosition={userSettings.nav?.desktopPosition || 'bottom'}
 				showThemeToggle={true}
 				showThemeVariants={true}
 				{themeVariantItems}

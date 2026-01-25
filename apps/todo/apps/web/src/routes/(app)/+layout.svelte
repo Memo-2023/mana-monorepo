@@ -177,8 +177,8 @@
 
 	// Navigation items (base items + dynamic label items in sidebar mode, filtered by visibility settings)
 	const navItems = $derived.by(() => {
-		// Start with base items, filter out hidden ones
-		let items = filterHiddenNavItems('todo', baseNavItems, userSettings.nav.hiddenNavItems);
+		// Start with base items, filter out hidden ones (with fallback for guest mode)
+		let items = filterHiddenNavItems('todo', baseNavItems, userSettings.nav?.hiddenNavItems || {});
 
 		// In sidebar mode, add tags as sub-items if available
 		if (isSidebarMode && labelsStore.labels.length > 0) {
@@ -408,7 +408,7 @@
 				onModeChange={handleModeChange}
 				{isCollapsed}
 				onCollapsedChange={handleCollapsedChange}
-				desktopPosition={userSettings.nav.desktopPosition}
+				desktopPosition={userSettings.nav?.desktopPosition || 'bottom'}
 				showThemeToggle={true}
 				showThemeVariants={true}
 				{themeVariantItems}
