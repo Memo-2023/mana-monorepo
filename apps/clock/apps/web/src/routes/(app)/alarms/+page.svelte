@@ -81,9 +81,8 @@
 	}
 
 	onMount(async () => {
-		if (authStore.isAuthenticated) {
-			await alarmsStore.fetchAlarms();
-		}
+		// Load alarms - works for both authenticated and guest mode
+		await alarmsStore.fetchAlarms();
 	});
 
 	function openEditModal(alarm: Alarm) {

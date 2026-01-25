@@ -28,9 +28,8 @@
 	let allTimers = $derived([...timersStore.timers, ...localTimers]);
 
 	onMount(async () => {
-		if (authStore.isAuthenticated) {
-			await timersStore.fetchTimers();
-		}
+		// Load timers - works for both authenticated and guest mode
+		await timersStore.fetchTimers();
 	});
 
 	onDestroy(() => {
