@@ -733,9 +733,9 @@ services:
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ~/.docker/config.json:/config.json:ro
     environment:
       TZ: Europe/Berlin
+      DOCKER_API_VERSION: "1.45"              # Match Docker Desktop API version
       WATCHTOWER_POLL_INTERVAL: 300           # Check every 5 minutes
       WATCHTOWER_CLEANUP: "true"              # Remove old images
       WATCHTOWER_INCLUDE_STOPPED: "false"     # Only update running containers
