@@ -8,10 +8,7 @@
 	let isLoading = $state(true);
 
 	onMount(async () => {
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
+		// No auth redirect - guest mode allowed
 		isLoading = false;
 	});
 
