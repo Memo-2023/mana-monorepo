@@ -723,6 +723,32 @@ services:
       retries: 3
       start_period: 40s
 
+  # ============================================
+  # Auto-Update (Watchtower)
+  # ============================================
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: manacore-watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.docker/config.json:/config.json:ro
+    environment:
+      TZ: Europe/Berlin
+      WATCHTOWER_POLL_INTERVAL: 300           # Check every 5 minutes
+      WATCHTOWER_CLEANUP: "true"              # Remove old images
+      WATCHTOWER_INCLUDE_STOPPED: "false"     # Only update running containers
+      WATCHTOWER_NO_STARTUP_MESSAGE: "false"  # Log startup message
+      WATCHTOWER_NOTIFICATIONS: shoutrrr
+      WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL:-}  # Optional: telegram://token@telegram?chats=chatid
+      WATCHTOWER_NOTIFICATION_TEMPLATE: |
+        {{- if .Updated -}}
+        🚀 *ManaCore Update*
+        Updated: {{range .Updated}}{{.Name}} {{end}}
+        {{- end -}}
+    command: --label-enable=false  # Update all containers (not just labeled ones)
+
 # ============================================
 # Volumes
 # ============================================

@@ -549,16 +549,34 @@ npx wrangler pages project add-domain chat-landing chat.manacore.app
 
 ## Server Access
 
-### Hetzner Staging Server
+### Mac Mini Production Server
 
-SSH access for deployment troubleshooting, log inspection, and service management:
+The production environment runs on a Mac Mini, accessible via Cloudflare Tunnel.
+
+**Domain:** mana.how
+**SSH:** `ssh mana-server` (requires cloudflared and SSH config)
 
 ```bash
-ssh -i ~/.ssh/hetzner_deploy_key deploy@46.224.108.214
+# SSH config (~/.ssh/config)
+Host mana-server
+    HostName mac-mini.mana.how
+    User till
+    ProxyCommand /opt/homebrew/bin/cloudflared access ssh --hostname %h
 ```
 
-**User:** `deploy`
-**Key:** `~/.ssh/hetzner_deploy_key`
+#### Useful Commands
+
+```bash
+ssh mana-server                              # Connect to server
+cd ~/projects/manacore-monorepo
+
+./scripts/mac-mini/status.sh                 # Check all services
+./scripts/mac-mini/deploy.sh                 # Pull & restart containers
+./scripts/mac-mini/health-check.sh           # Run health checks
+docker compose -f docker-compose.macmini.yml logs -f  # View logs
+```
+
+For detailed server documentation, see **[docs/MAC_MINI_SERVER.md](docs/MAC_MINI_SERVER.md)**.
 
 ## Adding Dependencies
 
