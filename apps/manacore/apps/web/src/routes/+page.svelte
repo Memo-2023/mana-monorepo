@@ -15,6 +15,6 @@
 <div class="flex min-h-screen items-center justify-center">
 	<div class="text-center">
 		<h1 class="mb-4">ManaCore</h1>
-		<p class="text-gray-600 dark:text-gray-400">Loading...</p>
+		<p class="text-gray-600 dark:text-gray-400">Redirecting...</p>
 	</div>
 </div>
