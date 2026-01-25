@@ -82,7 +82,7 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-${JWT_SECRET:-your-jwt-secret-change-me}}
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-}
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:-}
-      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how
+      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://storage.mana.how,https://presi.mana.how
     ports:
       - "3001:3001"
     healthcheck:
@@ -400,6 +400,119 @@ services:
       - "5184:5184"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5184/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Presi App (Presentations)
+  # ============================================
+
+  presi-backend:
+    image: ghcr.io/memo-2023/presi-backend:latest
+    container_name: presi-backend
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3008
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/presi
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      CORS_ORIGINS: https://presi.mana.how,https://mana.how
+    ports:
+      - "3008:3008"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3008/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  presi-web:
+    image: ghcr.io/memo-2023/presi-web:latest
+    container_name: presi-web
+    restart: always
+    depends_on:
+      presi-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5178
+      PUBLIC_BACKEND_URL: http://presi-backend:3008
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://presi-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5178:5178"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5178/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Storage App (Cloud Drive)
+  # ============================================
+
+  storage-backend:
+    image: ghcr.io/memo-2023/storage-backend:latest
+    container_name: storage-backend
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3019
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/storage
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      CORS_ORIGINS: https://storage.mana.how,https://mana.how
+      # S3/MinIO Storage
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      S3_BUCKET: storage-storage
+      STORAGE_S3_PUBLIC_URL: https://storage-files.mana.how
+      MAX_FILE_SIZE: 104857600
+      MAX_FILES_PER_UPLOAD: 10
+    ports:
+      - "3019:3019"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3019/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  storage-web:
+    image: ghcr.io/memo-2023/storage-web:latest
+    container_name: storage-web
+    restart: always
+    depends_on:
+      storage-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5185
+      PUBLIC_BACKEND_URL: http://storage-backend:3019
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://storage-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5185:5185"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5185/health"]
       interval: 30s
       timeout: 10s
       retries: 3
