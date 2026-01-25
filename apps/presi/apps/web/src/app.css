@@ -1,0 +1,39 @@
+@import "tailwindcss";
+@import "@manacore/shared-tailwind/themes.css";
+
+/* Scan shared packages for Tailwind classes */
+@source "../../../../packages/shared-ui/src";
+@source "../../../../packages/shared-auth-ui/src";
+@source "../../../../packages/shared-branding/src";
+
+/* Presi-specific styles */
+.slide-container {
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+}
+
+.presentation-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background-color: hsl(var(--color-background));
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--color-surface));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--color-border));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--color-muted-foreground));
+}
