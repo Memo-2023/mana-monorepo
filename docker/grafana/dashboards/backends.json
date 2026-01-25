@@ -61,8 +61,8 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "rate(container_cpu_usage_seconds_total{name=~\".+\"}[5m]) * 100",
-					"legendFormat": "{{name}}",
+					"expr": "sum(rate(container_cpu_usage_seconds_total{id=~\"/docker/.+\"}[5m])) by (id) * 100",
+					"legendFormat": "{{id}}",
 					"refId": "A"
 				}
 			],
@@ -114,8 +114,8 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "container_memory_usage_bytes{name=~\".+\"}",
-					"legendFormat": "{{name}}",
+					"expr": "container_memory_usage_bytes{id=~\"/docker/.+\"}",
+					"legendFormat": "{{id}}",
 					"refId": "A"
 				}
 			],

@@ -11,6 +11,8 @@ pnpm dev:picture:full
 pnpm dev:calendar:full
 pnpm dev:contacts:full
 pnpm dev:todo:full
+pnpm dev:presi:full
+pnpm dev:storage:full
 
 pnpm dev:manacore:app # Nur ManaCore Web
 pnpm dev:manacore:backends # Alle 7 Backends für Dashboard-Widgets

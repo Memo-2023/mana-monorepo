@@ -52,8 +52,10 @@ async function bootstrap() {
 		})
 	);
 
-	// API prefix
-	app.setGlobalPrefix('api/v1');
+	// API prefix (exclude metrics endpoint for Prometheus scraping)
+	app.setGlobalPrefix('api/v1', {
+		exclude: ['metrics', 'health'],
+	});
 
 	const port = process.env.PORT || 3017;
 	await app.listen(port);
