@@ -64,6 +64,7 @@ ALL_DATABASES=(
     "todo"
     "manadeck"
     "storage"
+    "presi"
     "mail"
     "moodlit"
     "finance"
@@ -146,9 +147,17 @@ setup_service() {
             create_db_if_not_exists "nutriphi"
             push_schema "@nutriphi/backend" "nutriphi"
             ;;
+        presi)
+            create_db_if_not_exists "presi"
+            push_schema "@presi/backend" "presi"
+            ;;
+        storage)
+            create_db_if_not_exists "storage"
+            push_schema "@storage/backend" "storage"
+            ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"
-            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, finance, voxel-lava, figgos, planta, nutriphi"
+            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, finance, voxel-lava, figgos, planta, nutriphi, presi, storage"
             exit 1
             ;;
     esac
@@ -172,7 +181,7 @@ echo -e "\n${GREEN}Step 2: Pushing schemas${NC}"
 echo "--------------------------------------"
 
 # Push schemas for all known services
-for service in auth chat zitare contacts calendar clock todo manadeck picture mail moodlit finance voxel-lava figgos planta nutriphi; do
+for service in auth chat zitare contacts calendar clock todo manadeck picture mail moodlit finance voxel-lava figgos planta nutriphi presi storage; do
     setup_service "$service" 2>/dev/null || true
 done
 
