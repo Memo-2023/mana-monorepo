@@ -84,7 +84,7 @@ export function createBetterAuth(databaseUrl: string) {
 		emailAndPassword: {
 			enabled: true,
 			requireEmailVerification: false, // Can enable later
-			minPasswordLength: 12,
+			minPasswordLength: 8,
 			maxPasswordLength: 128,
 
 			/**
