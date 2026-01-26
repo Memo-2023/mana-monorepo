@@ -33,7 +33,23 @@ async function seed() {
 
 		const modelData = [
 			// ============================================
-			// OpenRouter Models (All models via OpenRouter)
+			// Local Ollama Models (Free, runs on Mac Mini)
+			// ============================================
+			{
+				id: '550e8400-e29b-41d4-a716-446655440101',
+				name: 'Gemma 3 4B (Lokal)',
+				description: 'Schnelles lokales Modell - kostenlos, läuft auf Mac Mini',
+				provider: 'ollama',
+				parameters: {
+					model: 'gemma3:4b',
+					temperature: 0.7,
+					max_tokens: 4096,
+				},
+				isActive: true,
+				isDefault: true, // Default model - free and local
+			},
+			// ============================================
+			// OpenRouter Models (Cloud, paid)
 			// ============================================
 			{
 				id: '550e8400-e29b-41d4-a716-446655440201',
@@ -46,7 +62,7 @@ async function seed() {
 					max_tokens: 4096,
 				},
 				isActive: true,
-				isDefault: true, // Default model - fast and cost-effective
+				isDefault: false,
 			},
 			{
 				id: '550e8400-e29b-41d4-a716-446655440202',

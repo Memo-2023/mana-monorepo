@@ -70,7 +70,7 @@ pnpm preview                     # Preview production build
 - **Mobile**: React Native 0.76.7 + Expo SDK 52, NativeWind, Expo Router
 - **Web**: SvelteKit 2.x, Svelte 5, Tailwind CSS 4
 - **Landing**: Astro 5.16, Tailwind CSS
-- **Backend**: NestJS 10, OpenRouter AI, Drizzle ORM, PostgreSQL
+- **Backend**: NestJS 10, OpenRouter AI + Ollama (local), Drizzle ORM, PostgreSQL
 - **Auth**: Mana Core Auth (JWT)
 - **Types**: TypeScript 5.x
 
@@ -94,8 +94,12 @@ pnpm preview                     # Preview production build
 #### Backend (.env)
 
 ```env
-# Required - All AI models via OpenRouter
+# Cloud AI models via OpenRouter (optional if using only local models)
 OPENROUTER_API_KEY=sk-or-v1-xxx    # Get at https://openrouter.ai/keys
+
+# Local AI via Ollama (optional, defaults to localhost:11434)
+OLLAMA_URL=http://localhost:11434  # Or http://host.docker.internal:11434 in Docker
+OLLAMA_TIMEOUT=120000              # Timeout in ms (default: 120s)
 
 # Database (uses shared Docker PostgreSQL)
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/chat
@@ -129,13 +133,19 @@ PUBLIC_BACKEND_URL=http://localhost:3002
 - **Styling**: Tailwind CSS everywhere
 - **Formatting**: 100 char line limit, 2 space tabs, single quotes
 
-## AI Models Available (via OpenRouter)
+## AI Models Available
 
-All models are accessed through OpenRouter, providing access to 100+ models with a single API key.
+### Local Models (Ollama - Free)
+
+| Model ID | Name | Provider | Best For |
+| -------- | ---- | -------- | -------- |
+| ...440101 | Gemma 3 4B (Lokal) | ollama | Everyday tasks (default) - runs on Mac Mini |
+
+### Cloud Models (OpenRouter - Paid)
 
 | Model ID | Name | Price | Best For |
 | -------- | ---- | ----- | -------- |
-| ...440201 | Llama 3.1 8B | $0.05/M | Everyday tasks (default) |
+| ...440201 | Llama 3.1 8B | $0.05/M | Fast cloud alternative |
 | ...440202 | Llama 3.1 70B | $0.35/M | Complex reasoning |
 | ...440203 | DeepSeek V3 | $0.14/M | Reasoning at low cost |
 | ...440204 | Mistral Small | $0.10/M | General tasks |

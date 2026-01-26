@@ -9,18 +9,20 @@ import { models } from '../db/schema/models.schema';
 import type { Model } from '../db/schema/models.schema';
 import { ChatCompletionDto } from './dto/chat-completion.dto';
 import type { ChatCompletionResponseDto } from './dto/chat-completion.dto';
+import { OllamaService } from './ollama.service';
 
 @Injectable()
 export class ChatService {
 	private readonly logger = new Logger(ChatService.name);
-	// OpenRouter config (primary provider)
+	// OpenRouter config (cloud provider)
 	private readonly openRouterClient: OpenAI | null = null;
 
 	constructor(
 		private configService: ConfigService,
-		@Inject(DATABASE_CONNECTION) private readonly db: Database
+		@Inject(DATABASE_CONNECTION) private readonly db: Database,
+		private readonly ollamaService: OllamaService
 	) {
-		// OpenRouter setup (primary and only provider)
+		// OpenRouter setup (cloud provider)
 		const openRouterApiKey = this.configService.get<string>('OPENROUTER_API_KEY');
 		if (openRouterApiKey) {
 			this.openRouterClient = new OpenAI({
@@ -33,7 +35,7 @@ export class ChatService {
 			});
 			this.logger.log('OpenRouter client initialized');
 		} else {
-			this.logger.error('OPENROUTER_API_KEY is not set - Chat will not work!');
+			this.logger.warn('OPENROUTER_API_KEY not set - only local Ollama models will work');
 		}
 	}
 
@@ -69,11 +71,46 @@ export class ChatService {
 
 		// Log user context for tracking (optional)
 		if (userId) {
-			this.logger.log(`User ${userId} creating chat completion with model ${dto.modelId}`);
+			this.logger.log(
+				`User ${userId} creating chat completion with model ${dto.modelId} (${model.provider})`
+			);
 		}
 
-		// All models go through OpenRouter
-		return this.createOpenRouterCompletion(model, dto);
+		// Route to appropriate provider based on model configuration
+		switch (model.provider) {
+			case 'ollama':
+				return this.createOllamaCompletion(model, dto);
+			case 'openrouter':
+			default:
+				return this.createOpenRouterCompletion(model, dto);
+		}
+	}
+
+	private async createOllamaCompletion(
+		model: Model,
+		dto: ChatCompletionDto
+	): AsyncResult<ChatCompletionResponseDto> {
+		const params = model.parameters as {
+			model?: string;
+			temperature?: number;
+			max_tokens?: number;
+		} | null;
+
+		const modelName = params?.model || 'gemma3:4b';
+		const temperature = dto.temperature ?? params?.temperature ?? 0.7;
+		const maxTokens = dto.maxTokens ?? params?.max_tokens ?? 4096;
+
+		this.logger.log(`Sending request to Ollama model: ${modelName}`);
+
+		return this.ollamaService.createChatCompletion(
+			modelName,
+			dto.messages.map((msg) => ({
+				role: msg.role as 'system' | 'user' | 'assistant',
+				content: msg.content,
+			})),
+			temperature,
+			maxTokens
+		);
 	}
 
 	private async createOpenRouterCompletion(
