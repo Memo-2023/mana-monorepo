@@ -870,13 +870,14 @@ export class BetterAuthService {
 		redirectTo?: string
 	): Promise<{ success: boolean; message: string }> {
 		try {
-			// Better Auth's forgetPassword method
+			// Better Auth's requestPasswordReset endpoint
 			// See: https://www.better-auth.com/docs/authentication/email-password#password-reset
-			await (this.auth.api as any).forgetPassword({
+			await (this.auth.api as any).requestPasswordReset({
 				body: {
 					email,
 					redirectTo,
 				},
+				headers: new Headers(),
 			});
 
 			// Always return success to prevent email enumeration
