@@ -740,7 +740,7 @@ services:
       WATCHTOWER_CLEANUP: "true"              # Remove old images
       WATCHTOWER_INCLUDE_STOPPED: "false"     # Only update running containers
       WATCHTOWER_NOTIFICATIONS: shoutrrr
-      WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL:-}  # telegram://token@telegram?chats=chatid
+      WATCHTOWER_NOTIFICATION_URL: "telegram://${TELEGRAM_BOT_TOKEN}@telegram?chats=${TELEGRAM_CHAT_ID}"
 
 # ============================================
 # Volumes
