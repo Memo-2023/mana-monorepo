@@ -150,6 +150,11 @@ services:
       PORT: 3002
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/chat
       MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      # Local Ollama for Gemma 3 4B (runs natively on Mac Mini)
+      OLLAMA_URL: http://host.docker.internal:11434
+      OLLAMA_TIMEOUT: 120000
+      # Cloud providers (optional)
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       SUPABASE_URL: ${SUPABASE_URL:-}
       SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
       AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
