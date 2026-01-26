@@ -1,0 +1,245 @@
+groups:
+  - name: service_alerts
+    rules:
+      # Service Down Alert
+      - alert: ServiceDown
+        expr: up{job=~"mana-core-auth|chat-backend|todo-backend|calendar-backend|clock-backend|contacts-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} has been down for more than 1 minute."
+
+      # High Error Rate (> 5% of requests are 5xx)
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) by (job)
+          / sum(rate(http_requests_total[5m])) by (job) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate on {{ $labels.job }}"
+          description: "{{ $labels.job }} has error rate of {{ $value | humanizePercentage }} (> 5%)"
+
+      # Very High Error Rate (> 20% of requests are 5xx)
+      - alert: VeryHighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) by (job)
+          / sum(rate(http_requests_total[5m])) by (job) > 0.20
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Very high error rate on {{ $labels.job }}"
+          description: "{{ $labels.job }} has error rate of {{ $value | humanizePercentage }} (> 20%)"
+
+      # Slow Response Time (p95 > 2s)
+      - alert: SlowResponseTime
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow response time on {{ $labels.job }}"
+          description: "{{ $labels.job }} p95 response time is {{ $value | humanizeDuration }}"
+
+      # Very Slow Response Time (p95 > 5s)
+      - alert: VerySlowResponseTime
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)) > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Very slow response time on {{ $labels.job }}"
+          description: "{{ $labels.job }} p95 response time is {{ $value | humanizeDuration }}"
+
+      # High Memory Usage (Node.js heap > 500MB)
+      - alert: HighHeapMemory
+        expr: nodejs_heap_size_used_bytes > 500 * 1024 * 1024
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High heap memory on {{ $labels.job }}"
+          description: "{{ $labels.job }} heap usage is {{ $value | humanize1024 }}B"
+
+      # Event Loop Lag (> 100ms)
+      - alert: HighEventLoopLag
+        expr: nodejs_eventloop_lag_seconds > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High event loop lag on {{ $labels.job }}"
+          description: "{{ $labels.job }} event loop lag is {{ $value | humanizeDuration }}"
+
+  - name: infrastructure_alerts
+    rules:
+      # High CPU Usage (> 80%)
+      - alert: HighCPUUsage
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on host"
+          description: "CPU usage is {{ $value | humanize }}%"
+
+      # Very High CPU Usage (> 95%)
+      - alert: VeryHighCPUUsage
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Very high CPU usage on host"
+          description: "CPU usage is {{ $value | humanize }}%"
+
+      # High Memory Usage (> 85%)
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on host"
+          description: "Memory usage is {{ $value | humanize }}%"
+
+      # Very High Memory Usage (> 95%)
+      - alert: VeryHighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Very high memory usage on host"
+          description: "Memory usage is {{ $value | humanize }}%"
+
+      # High Disk Usage (> 80%)
+      - alert: HighDiskUsage
+        expr: |
+          (1 - (node_filesystem_avail_bytes{mountpoint=~"/host_mnt/Users|/"}
+          / node_filesystem_size_bytes{mountpoint=~"/host_mnt/Users|/"})) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk usage on {{ $labels.mountpoint }}"
+          description: "Disk usage is {{ $value | humanize }}%"
+
+      # Very High Disk Usage (> 90%)
+      - alert: VeryHighDiskUsage
+        expr: |
+          (1 - (node_filesystem_avail_bytes{mountpoint=~"/host_mnt/Users|/"}
+          / node_filesystem_size_bytes{mountpoint=~"/host_mnt/Users|/"})) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Very high disk usage on {{ $labels.mountpoint }}"
+          description: "Disk usage is {{ $value | humanize }}%"
+
+  - name: database_alerts
+    rules:
+      # PostgreSQL Down
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL has been down for more than 1 minute."
+
+      # Redis Down
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis has been down for more than 1 minute."
+
+      # PostgreSQL High Connections (> 80)
+      - alert: PostgreSQLHighConnections
+        expr: sum(pg_stat_activity_count) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High PostgreSQL connections"
+          description: "PostgreSQL has {{ $value }} connections (> 80)"
+
+      # PostgreSQL Low Cache Hit Ratio (< 90%)
+      - alert: PostgreSQLLowCacheHitRatio
+        expr: |
+          avg(pg_stat_database_blks_hit{datname!~"template.*|postgres"}
+          / (pg_stat_database_blks_hit{datname!~"template.*|postgres"}
+          + pg_stat_database_blks_read{datname!~"template.*|postgres"} + 0.0001)) * 100 < 90
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL low cache hit ratio"
+          description: "PostgreSQL cache hit ratio is {{ $value | humanize }}%"
+
+      # Redis High Memory (> 1GB)
+      - alert: RedisHighMemory
+        expr: redis_memory_used_bytes > 1024 * 1024 * 1024
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis high memory usage"
+          description: "Redis memory usage is {{ $value | humanize1024 }}B"
+
+      # Redis Blocked Clients
+      - alert: RedisBlockedClients
+        expr: redis_blocked_clients > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis has blocked clients"
+          description: "Redis has {{ $value }} blocked clients"
+
+  - name: container_alerts
+    rules:
+      # Container High CPU (> 80% of limit)
+      - alert: ContainerHighCPU
+        expr: |
+          sum(rate(container_cpu_usage_seconds_total{id=~"/docker/.+"}[5m])) by (name) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} high CPU"
+          description: "Container {{ $labels.name }} CPU usage is {{ $value | humanize }}%"
+
+      # Container High Memory (> 80% of limit)
+      - alert: ContainerHighMemory
+        expr: |
+          container_memory_usage_bytes{id=~"/docker/.+"}
+          / container_spec_memory_limit_bytes{id=~"/docker/.+"} * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} high memory"
+          description: "Container {{ $labels.name }} memory usage is {{ $value | humanize }}%"
+
+      # Container Restart
+      - alert: ContainerRestarted
+        expr: |
+          increase(container_start_time_seconds{id=~"/docker/.+"}[5m]) > 0
+        for: 0m
+        labels:
+          severity: info
+        annotations:
+          summary: "Container {{ $labels.name }} restarted"
+          description: "Container {{ $labels.name }} has restarted."
