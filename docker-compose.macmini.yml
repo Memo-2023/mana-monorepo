@@ -740,10 +740,8 @@ services:
       WATCHTOWER_POLL_INTERVAL: 300           # Check every 5 minutes
       WATCHTOWER_CLEANUP: "true"              # Remove old images
       WATCHTOWER_INCLUDE_STOPPED: "false"     # Only update running containers
-      WATCHTOWER_NOTIFICATION_REPORT: "true"  # Send notification on every run (for testing)
-      WATCHTOWER_NOTIFICATIONS: shoutrrr
-      # URL from .env.macmini with URL-encoded colon (%3A) in bot token
-      WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL}
+      # Notifications disabled - shoutrrr has URL parsing issues with Telegram bot tokens
+      # Auto-deployment works fine. Set up n8n webhook workflow for notifications if needed.
 
 # ============================================
 # Volumes
