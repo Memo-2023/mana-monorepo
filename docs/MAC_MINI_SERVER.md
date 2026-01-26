@@ -45,11 +45,18 @@ Cloudflare Tunnel (cloudflared)
 │  └─────────────────────────────────────────────────────┘   │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
+│  │  Native Services                                    │   │
+│  │  ├── Ollama             (Port 11434) - LLM          │   │
+│  │  └── Telegram Ollama Bot (Port 3301) - Chat Bot     │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
 │  │  LaunchAgents (Autostart)                           │   │
-│  │  ├── cloudflared        (Tunnel)                    │   │
-│  │  ├── ollama             (LLM Service)               │   │
-│  │  ├── docker-startup     (Container beim Boot)       │   │
-│  │  └── health-check       (alle 5 Minuten)            │   │
+│  │  ├── cloudflared            (Tunnel)                │   │
+│  │  ├── ollama                 (LLM Service)           │   │
+│  │  ├── telegram-ollama-bot    (Chat Bot)              │   │
+│  │  ├── docker-startup         (Container beim Boot)   │   │
+│  │  └── health-check           (alle 5 Minuten)        │   │
 │  └─────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -139,7 +146,7 @@ launchctl load ~/Library/LaunchAgents/com.manacore.docker-startup.plist
 
 ## Autostart-Konfiguration
 
-Drei LaunchAgents sorgen für automatischen Betrieb:
+Fünf LaunchAgents sorgen für automatischen Betrieb:
 
 ### 1. Cloudflare Tunnel
 
@@ -165,6 +172,22 @@ Drei LaunchAgents sorgen für automatischen Betrieb:
 - Läuft alle 5 Minuten
 - Prüft alle Services (HTTP + Docker)
 - Sendet Benachrichtigungen bei Fehlern
+
+### 4. Ollama
+
+**Datei:** `~/Library/LaunchAgents/homebrew.mxcl.ollama.plist`
+
+- Startet beim Login
+- LLM-Server auf Port 11434
+- Metal GPU-Beschleunigung
+
+### 5. Telegram Ollama Bot
+
+**Datei:** `~/Library/LaunchAgents/com.manacore.telegram-ollama-bot.plist`
+
+- Startet beim Login
+- Telegram Bot auf Port 3301
+- Verbindet zu Ollama für LLM-Anfragen
 
 ### Setup neu ausführen
 
@@ -501,6 +524,79 @@ curl http://localhost:11434/api/version
 /opt/homebrew/bin/brew services restart ollama
 ```
 
+## Telegram Ollama Bot
+
+Telegram Bot für Interaktion mit dem lokalen Ollama LLM.
+
+### Bot-Info
+
+| | |
+|--|--|
+| **Telegram** | [@chat_mana_bot](https://t.me/chat_mana_bot) |
+| **Port** | 3301 |
+| **Health** | http://localhost:3301/health |
+| **Code** | `services/telegram-ollama-bot/` |
+
+### Telegram-Befehle
+
+| Befehl | Beschreibung |
+|--------|--------------|
+| `/start` | Hilfe anzeigen |
+| `/help` | Alle Befehle |
+| `/models` | Verfügbare Modelle anzeigen |
+| `/model [name]` | Modell wechseln |
+| `/mode [modus]` | System-Prompt ändern |
+| `/clear` | Chat-Verlauf löschen |
+| `/status` | Ollama-Status prüfen |
+
+### Modi
+
+| Modus | Beschreibung |
+|-------|--------------|
+| `default` | Allgemeiner Assistent |
+| `classify` | Text-Klassifizierung |
+| `summarize` | Zusammenfassungen |
+| `translate` | Übersetzungen |
+| `code` | Programmier-Hilfe |
+
+### LaunchAgent
+
+**Datei:** `~/Library/LaunchAgents/com.manacore.telegram-ollama-bot.plist`
+
+- Startet automatisch beim Login
+- Neustart bei Absturz (KeepAlive)
+- Logs: `~/Library/Logs/telegram-ollama-bot.log`
+
+### Bot Management
+
+```bash
+# Status prüfen
+curl http://localhost:3301/health
+
+# Logs anzeigen
+tail -f ~/Library/Logs/telegram-ollama-bot.log
+
+# Bot neustarten
+launchctl stop com.manacore.telegram-ollama-bot
+launchctl start com.manacore.telegram-ollama-bot
+
+# Bot manuell starten (für Debugging)
+cd ~/projects/manacore-monorepo/services/telegram-ollama-bot
+TELEGRAM_BOT_TOKEN=xxx OLLAMA_URL=http://localhost:11434 node dist/main.js
+```
+
+### Bot aktualisieren
+
+```bash
+cd ~/projects/manacore-monorepo
+git pull
+cd services/telegram-ollama-bot
+pnpm install
+pnpm build
+launchctl stop com.manacore.telegram-ollama-bot
+launchctl start com.manacore.telegram-ollama-bot
+```
+
 ## Chronologie der Einrichtung
 
 1. **Docker Setup** - PostgreSQL, Redis, App-Container
@@ -511,3 +607,4 @@ curl http://localhost:11434/api/version
 6. **Telegram Notifications** - Alerts bei Fehlern
 7. **Email Notifications** - Redundante Benachrichtigung
 8. **Ollama** - Lokale LLM-Inferenz (Gemma 3 4B)
+9. **Telegram Ollama Bot** - Chat-Interface für Ollama
