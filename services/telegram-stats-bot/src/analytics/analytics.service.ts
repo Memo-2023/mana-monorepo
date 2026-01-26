@@ -1,17 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { UmamiService, UmamiStats } from '../umami/umami.service';
+import { UsersService, UserStats } from '../users/users.service';
 import {
 	formatDailyReport,
 	formatWeeklyReport,
 	formatRealtimeReport,
 	formatStatsOverview,
+	formatUsersReportCompact,
 } from './formatters';
 
 @Injectable()
 export class AnalyticsService {
 	private readonly logger = new Logger(AnalyticsService.name);
 
-	constructor(private readonly umamiService: UmamiService) {}
+	constructor(
+		private readonly umamiService: UmamiService,
+		private readonly usersService: UsersService
+	) {}
 
 	private getStartOfDay(date: Date = new Date()): Date {
 		const start = new Date(date);
@@ -75,7 +80,15 @@ export class AnalyticsService {
 	async generateDailyReport(): Promise<string> {
 		try {
 			const stats = await this.getTodayStats();
-			return formatDailyReport(stats, new Date());
+			let report = formatDailyReport(stats, new Date());
+
+			// Add user stats to daily report
+			const userStats = await this.usersService.getUserStats();
+			if (userStats) {
+				report += formatUsersReportCompact(userStats);
+			}
+
+			return report;
 		} catch (error) {
 			this.logger.error('Failed to generate daily report:', error);
 			return '❌ Fehler beim Erstellen des Daily Reports';

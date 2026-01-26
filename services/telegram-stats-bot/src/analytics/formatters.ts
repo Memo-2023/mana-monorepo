@@ -203,27 +203,103 @@ Verfügbare Befehle:
 • Weekly: Jeden Montag um 9:00`;
 }
 
+export interface DailyRegistration {
+	date: string;
+	count: number;
+}
+
 export interface UserStats {
 	totalUsers: number;
 	verifiedUsers: number;
 	todayNewUsers: number;
+	yesterdayNewUsers: number;
 	weekNewUsers: number;
+	lastWeekNewUsers: number;
 	monthNewUsers: number;
+	dailyRegistrations: DailyRegistration[];
+}
+
+function createMiniBarChart(dailyRegistrations: DailyRegistration[]): string[] {
+	if (dailyRegistrations.length === 0) return [];
+
+	const maxCount = Math.max(...dailyRegistrations.map((d) => d.count), 1);
+	const barChars = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
+
+	// Fill in missing days and sort
+	const last7Days: DailyRegistration[] = [];
+	for (let i = 6; i >= 0; i--) {
+		const date = new Date();
+		date.setDate(date.getDate() - i);
+		const dateStr = date.toISOString().split('T')[0];
+		const found = dailyRegistrations.find((d) => d.date === dateStr);
+		last7Days.push({ date: dateStr, count: found?.count || 0 });
+	}
+
+	const bars = last7Days.map((d) => {
+		const index = Math.floor((d.count / maxCount) * (barChars.length - 1));
+		return barChars[Math.max(0, index)];
+	});
+
+	const dayLabels = last7Days.map((d) => {
+		const date = new Date(d.date);
+		return ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+	});
+
+	return [`<code>${bars.join('')}</code>`, `<code>${dayLabels.join('')}</code>`];
 }
 
 export function formatUsersReport(stats: UserStats): string {
+	const verificationRate =
+		stats.totalUsers > 0 ? Math.round((stats.verifiedUsers / stats.totalUsers) * 100) : 0;
+
+	// Calculate trends
+	const dailyTrend =
+		stats.yesterdayNewUsers > 0
+			? ((stats.todayNewUsers - stats.yesterdayNewUsers) / stats.yesterdayNewUsers) * 100
+			: stats.todayNewUsers > 0
+				? 100
+				: 0;
+
+	const weeklyTrend =
+		stats.lastWeekNewUsers > 0
+			? ((stats.weekNewUsers - stats.lastWeekNewUsers) / stats.lastWeekNewUsers) * 100
+			: stats.weekNewUsers > 0
+				? 100
+				: 0;
+
 	const lines: string[] = [
 		'👥 <b>ManaCore User Statistics</b>',
 		'━━━━━━━━━━━━━━━━━━━━',
 		'',
-		`👤 <b>Gesamt:</b> ${formatNumber(stats.totalUsers)}`,
-		`✅ <b>Verifiziert:</b> ${formatNumber(stats.verifiedUsers)}`,
+		'<b>📊 Übersicht</b>',
+		`  👤 Gesamt: <b>${formatNumber(stats.totalUsers)}</b>`,
+		`  ✅ Verifiziert: ${formatNumber(stats.verifiedUsers)} (${verificationRate}%)`,
 		'',
-		'<b>📊 Neue Registrierungen:</b>',
-		`  Heute: +${formatNumber(stats.todayNewUsers)}`,
-		`  Diese Woche: +${formatNumber(stats.weekNewUsers)}`,
+		'<b>📈 Neue Registrierungen</b>',
+		`  Heute:        <b>+${formatNumber(stats.todayNewUsers)}</b> ${formatChangeEmoji(dailyTrend)}`,
+		`  Gestern:      +${formatNumber(stats.yesterdayNewUsers)}`,
+		`  Diese Woche:  +${formatNumber(stats.weekNewUsers)} ${formatChange(weeklyTrend)} ${formatChangeEmoji(weeklyTrend)}`,
 		`  Dieser Monat: +${formatNumber(stats.monthNewUsers)}`,
 	];
 
+	// Add mini bar chart for last 7 days
+	if (stats.dailyRegistrations.length > 0) {
+		lines.push('');
+		lines.push('<b>📅 Letzte 7 Tage</b>');
+		lines.push(...createMiniBarChart(stats.dailyRegistrations));
+	}
+
 	return lines.join('\n');
+}
+
+export function formatUsersReportCompact(stats: UserStats): string {
+	const verificationRate =
+		stats.totalUsers > 0 ? Math.round((stats.verifiedUsers / stats.totalUsers) * 100) : 0;
+
+	return [
+		'',
+		'<b>👥 Registrierte User</b>',
+		`  Gesamt: <b>${formatNumber(stats.totalUsers)}</b> (${verificationRate}% verifiziert)`,
+		`  Heute: +${formatNumber(stats.todayNewUsers)} | Woche: +${formatNumber(stats.weekNewUsers)} | Monat: +${formatNumber(stats.monthNewUsers)}`,
+	].join('\n');
 }
