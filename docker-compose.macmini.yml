@@ -82,6 +82,13 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-${JWT_SECRET:-your-jwt-secret-change-me}}
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-}
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:-}
+      BASE_URL: https://auth.mana.how
+      # SMTP for transactional emails (Brevo)
+      SMTP_HOST: smtp-relay.brevo.com
+      SMTP_PORT: 587
+      SMTP_USER: ${SMTP_USER:-94cde5002@smtp-brevo.com}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM: ManaCore <noreply@mana.how>
       CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://storage.mana.how,https://presi.mana.how
     ports:
       - "3001:3001"
