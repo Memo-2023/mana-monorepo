@@ -37,6 +37,8 @@ ingress:
     service: http://localhost:3100
   - hostname: stats.mana.how
     service: http://localhost:3200
+  - hostname: pushgateway.mana.how
+    service: http://localhost:9091
   - hostname: n8n.mana.how
     service: http://localhost:5678
 
