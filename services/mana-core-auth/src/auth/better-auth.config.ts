@@ -98,7 +98,13 @@ export function createBetterAuth(databaseUrl: string) {
 			 * Sends verification email when user registers.
 			 * User must verify email before they can log in.
 			 */
-			sendVerificationEmail: async ({ user, url }) => {
+			sendVerificationEmail: async ({
+				user,
+				url,
+			}: {
+				user: { email: string; name: string };
+				url: string;
+			}) => {
 				await sendVerificationEmail(user.email, url, user.name);
 			},
 
@@ -111,7 +117,13 @@ export function createBetterAuth(databaseUrl: string) {
 			 *
 			 * @see https://www.better-auth.com/docs/authentication/email-password#password-reset
 			 */
-			sendResetPassword: async ({ user, url }) => {
+			sendResetPassword: async ({
+				user,
+				url,
+			}: {
+				user: { email: string; name: string };
+				url: string;
+			}) => {
 				await sendPasswordResetEmail(user.email, url, user.name);
 			},
 		},
