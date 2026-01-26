@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { format, addDays, subDays, startOfDay } from 'date-fns';
 	import { de } from 'date-fns/locale';
-	import { ListChecks } from '@manacore/shared-icons';
+	import { ListChecks, Sparkle, ArrowDown } from '@manacore/shared-icons';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import TaskList from '$lib/components/TaskList.svelte';
@@ -80,6 +80,30 @@
 			completedTasks.length === 0
 	);
 
+	// Section visibility logic - show only sections with tasks (except "Today" which is always shown when not all empty)
+	let showTodaySection = $derived(todayTasks.length > 0 || !allEmpty);
+	let showTomorrowSection = $derived(tomorrowTasks.length > 0);
+	let showUpcomingSection = $derived(upcomingCount > 0);
+	let showCompletedSection = $derived(completedTasks.length > 0);
+
+	// Onboarding tip: show when user has 1-3 active tasks
+	let totalActiveTasks = $derived(
+		overdueTasks.length + todayTasks.length + tomorrowTasks.length + upcomingCount
+	);
+	let showOnboardingTip = $derived(totalActiveTasks > 0 && totalActiveTasks <= 3);
+
+	// Syntax example snippets for empty state
+	const syntaxExamples = [
+		{ text: 'Meeting morgen 14 Uhr', description: 'Datum & Uhrzeit' },
+		{ text: 'Einkaufen #privat', description: 'Mit Label' },
+		{ text: 'Wichtig erledigen !hoch', description: 'Mit Priorität' },
+	];
+
+	// Handle clicking a syntax example
+	function handleExampleClick(text: string) {
+		window.dispatchEvent(new CustomEvent('quick-input-set', { detail: { text } }));
+	}
+
 	// Modal handlers
 	function openEditModal(task: Task) {
 		editingTask = task;
@@ -152,11 +176,6 @@
 </svelte:head>
 
 <div class="unified-view">
-	<header class="mb-6">
-		<h1 class="text-2xl font-bold text-foreground">Meine Aufgaben</h1>
-		<p class="text-muted-foreground text-sm mt-1">Alle deine Aufgaben auf einen Blick</p>
-	</header>
-
 	{#if isLoading || tasksStore.loading}
 		<TaskListSkeleton sections={3} tasksPerSection={3} />
 	{:else if tasksStore.error}
@@ -164,12 +183,42 @@
 			{tasksStore.error}
 		</div>
 	{:else if allEmpty}
-		<div class="text-center py-12">
-			<div class="flex justify-center mb-4 text-muted-foreground">
-				<ListChecks size={48} weight="light" />
+		<!-- Enhanced empty state -->
+		<div class="empty-state-container">
+			<div class="empty-state-content">
+				<!-- Animated icon -->
+				<div class="empty-state-icon">
+					<Sparkle size={56} weight="duotone" />
+				</div>
+
+				<!-- Motivational message -->
+				<h2 class="empty-state-title">Bereit für einen produktiven Tag</h2>
+
+				<!-- Call to action with arrow -->
+				<div class="empty-state-cta">
+					<p class="empty-state-cta-text">Tippe unten um loszulegen...</p>
+					<div class="empty-state-arrow">
+						<ArrowDown size={20} weight="bold" />
+					</div>
+				</div>
+
+				<!-- Syntax examples -->
+				<div class="empty-state-examples">
+					<p class="examples-label">Schnellstart-Tipps</p>
+					<div class="examples-grid">
+						{#each syntaxExamples as example}
+							<button
+								type="button"
+								class="example-chip"
+								onclick={() => handleExampleClick(example.text)}
+								title={example.description}
+							>
+								{example.text}
+							</button>
+						{/each}
+					</div>
+				</div>
 			</div>
-			<h3 class="text-lg font-medium text-foreground mb-2">Noch keine Aufgaben</h3>
-			<p class="text-muted-foreground">Erstelle deine erste Aufgabe mit dem Eingabefeld oben.</p>
 		</div>
 	{:else}
 		<div class="space-y-2">
@@ -192,92 +241,101 @@
 				</CollapsibleSection>
 			{/if}
 
-			<!-- Today Section -->
-			<CollapsibleSection
-				title="Heute"
-				count={todayTasks.length}
-				icon="today"
-				variant="default"
-				defaultOpen={true}
-			>
-				<TaskList
-					tasks={todayTasks}
-					enableDragDrop
-					dropTargetDate={startOfDay(new Date())}
-					onTaskDrop={handleTaskDrop}
-					onEditTask={openEditModal}
-				/>
-			</CollapsibleSection>
+			<!-- Today Section - always visible when there are any tasks -->
+			{#if showTodaySection}
+				<CollapsibleSection
+					title="Heute"
+					count={todayTasks.length}
+					icon="today"
+					variant="default"
+					defaultOpen={true}
+				>
+					<TaskList
+						tasks={todayTasks}
+						enableDragDrop
+						dropTargetDate={startOfDay(new Date())}
+						onTaskDrop={handleTaskDrop}
+						onEditTask={openEditModal}
+					/>
+				</CollapsibleSection>
+			{/if}
 
-			<!-- Tomorrow Section -->
-			<CollapsibleSection
-				title="Morgen"
-				count={tomorrowTasks.length}
-				icon="upcoming"
-				variant="default"
-				defaultOpen={true}
-			>
-				<TaskList
-					tasks={tomorrowTasks}
-					enableDragDrop
-					dropTargetDate={tomorrowDate}
-					onTaskDrop={handleTaskDrop}
-					onEditTask={openEditModal}
-				/>
-			</CollapsibleSection>
+			<!-- Tomorrow Section - only show if there are tasks -->
+			{#if showTomorrowSection}
+				<CollapsibleSection
+					title="Morgen"
+					count={tomorrowTasks.length}
+					icon="upcoming"
+					variant="default"
+					defaultOpen={true}
+				>
+					<TaskList
+						tasks={tomorrowTasks}
+						enableDragDrop
+						dropTargetDate={tomorrowDate}
+						onTaskDrop={handleTaskDrop}
+						onEditTask={openEditModal}
+					/>
+				</CollapsibleSection>
+			{/if}
 
-			<!-- Upcoming Section -->
-			<CollapsibleSection
-				title="Demnächst"
-				count={upcomingCount}
-				icon="upcoming"
-				variant="default"
-				defaultOpen={true}
-			>
-				<div class="space-y-4">
-					{#each groupedUpcomingTasks() as group}
-						<div>
-							<h3 class="text-sm font-medium text-muted-foreground mb-2 pl-2">
-								{group.label} ({group.tasks.length})
-							</h3>
-							<TaskList
-								tasks={group.tasks}
-								enableDragDrop
-								dropTargetDate={group.date}
-								onTaskDrop={handleTaskDrop}
-								onEditTask={openEditModal}
-							/>
-						</div>
-					{/each}
-					{#if upcomingCount === 0}
-						<!-- Empty drop zone for day after tomorrow -->
-						<TaskList
-							tasks={[]}
-							enableDragDrop
-							dropTargetDate={dayAfterTomorrowDate}
-							onTaskDrop={handleTaskDrop}
-						/>
-					{/if}
+			<!-- Upcoming Section - only show if there are tasks -->
+			{#if showUpcomingSection}
+				<CollapsibleSection
+					title="Demnächst"
+					count={upcomingCount}
+					icon="upcoming"
+					variant="default"
+					defaultOpen={true}
+				>
+					<div class="space-y-4">
+						{#each groupedUpcomingTasks() as group}
+							<div>
+								<h3 class="text-sm font-medium text-muted-foreground mb-2 pl-2">
+									{group.label} ({group.tasks.length})
+								</h3>
+								<TaskList
+									tasks={group.tasks}
+									enableDragDrop
+									dropTargetDate={group.date}
+									onTaskDrop={handleTaskDrop}
+									onEditTask={openEditModal}
+								/>
+							</div>
+						{/each}
+					</div>
+				</CollapsibleSection>
+			{/if}
+
+			<!-- Completed Section - only show if there are completed tasks -->
+			{#if showCompletedSection}
+				<CollapsibleSection
+					title="Erledigt"
+					count={completedTasks.length}
+					icon="completed"
+					variant="success"
+					defaultOpen={true}
+				>
+					<TaskList
+						tasks={completedTasks}
+						enableDragDrop
+						dropTargetDate="completed"
+						onTaskDrop={handleTaskDrop}
+						showCompleted
+						onEditTask={openEditModal}
+					/>
+				</CollapsibleSection>
+			{/if}
+
+			<!-- Onboarding tip for users with 1-3 tasks -->
+			{#if showOnboardingTip}
+				<div class="onboarding-tip">
+					<span class="onboarding-tip-icon">💡</span>
+					<span class="onboarding-tip-text">
+						Tipp: Nutze <code>#tags</code> und <code>!priorität</code> für bessere Organisation
+					</span>
 				</div>
-			</CollapsibleSection>
-
-			<!-- Completed Section -->
-			<CollapsibleSection
-				title="Erledigt"
-				count={completedTasks.length}
-				icon="completed"
-				variant="success"
-				defaultOpen={true}
-			>
-				<TaskList
-					tasks={completedTasks}
-					enableDragDrop
-					dropTargetDate="completed"
-					onTaskDrop={handleTaskDrop}
-					showCompleted
-					onEditTask={openEditModal}
-				/>
-			</CollapsibleSection>
+			{/if}
 		</div>
 	{/if}
 </div>
@@ -296,5 +354,149 @@
 <style>
 	.unified-view {
 		padding-bottom: 100px;
+	}
+
+	/* Empty state container */
+	.empty-state-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 60vh;
+		padding: 2rem;
+	}
+
+	.empty-state-content {
+		text-align: center;
+		max-width: 400px;
+	}
+
+	.empty-state-icon {
+		display: flex;
+		justify-content: center;
+		margin-bottom: 1.5rem;
+		color: hsl(var(--color-primary));
+		animation: float 3s ease-in-out infinite;
+	}
+
+	@keyframes float {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(-8px);
+		}
+	}
+
+	.empty-state-title {
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: hsl(var(--color-foreground));
+		margin-bottom: 1.5rem;
+	}
+
+	.empty-state-cta {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 1rem 1.5rem;
+		background: hsl(var(--color-surface-hover));
+		border-radius: 0.75rem;
+		margin-bottom: 2rem;
+	}
+
+	.empty-state-cta-text {
+		color: hsl(var(--color-muted-foreground));
+		font-size: 0.9375rem;
+	}
+
+	.empty-state-arrow {
+		color: hsl(var(--color-primary));
+		animation: bounce 2s ease-in-out infinite;
+	}
+
+	@keyframes bounce {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(4px);
+		}
+	}
+
+	.empty-state-examples {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.examples-label {
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.examples-grid {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.5rem;
+	}
+
+	.example-chip {
+		padding: 0.5rem 0.875rem;
+		font-size: 0.875rem;
+		font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, monospace;
+		background: hsl(var(--color-surface));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 9999px;
+		color: hsl(var(--color-foreground));
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.example-chip:hover {
+		background: hsl(var(--color-primary) / 0.1);
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
+		transform: translateY(-1px);
+	}
+
+	.example-chip:active {
+		transform: translateY(0);
+	}
+
+	/* Onboarding tip */
+	.onboarding-tip {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.875rem 1rem;
+		margin-top: 1rem;
+		background: hsl(var(--color-primary) / 0.08);
+		border: 1px solid hsl(var(--color-primary) / 0.2);
+		border-radius: 0.75rem;
+		font-size: 0.875rem;
+	}
+
+	.onboarding-tip-icon {
+		flex-shrink: 0;
+	}
+
+	.onboarding-tip-text {
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.onboarding-tip-text code {
+		padding: 0.125rem 0.375rem;
+		font-size: 0.8125rem;
+		font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, monospace;
+		background: hsl(var(--color-primary) / 0.15);
+		border-radius: 0.25rem;
+		color: hsl(var(--color-primary));
 	}
 </style>

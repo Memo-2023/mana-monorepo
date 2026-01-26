@@ -153,6 +153,26 @@
 		}
 	});
 
+	// Listen for external quick-input-set events (e.g., from empty state examples)
+	$effect(() => {
+		const handler = (e: Event) => {
+			const customEvent = e as CustomEvent<{ text: string }>;
+			if (customEvent.detail?.text) {
+				searchQuery = customEvent.detail.text;
+				// Trigger search for the new text
+				handleSearch();
+				// Focus the input after a short delay
+				setTimeout(() => inputElement?.focus(), 50);
+			}
+		};
+
+		window.addEventListener('quick-input-set', handler);
+
+		return () => {
+			window.removeEventListener('quick-input-set', handler);
+		};
+	});
+
 	// Handler for settings changes (to trigger re-render)
 	function handleSettingsChange() {
 		// Force reactivity update by accessing the store
