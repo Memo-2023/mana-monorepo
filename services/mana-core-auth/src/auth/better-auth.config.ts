@@ -85,28 +85,12 @@ export function createBetterAuth(databaseUrl: string) {
 			},
 		}),
 
-		// Email/password authentication with email verification and password reset
+		// Email/password authentication with password reset
 		emailAndPassword: {
 			enabled: true,
 			requireEmailVerification: true,
 			minPasswordLength: 8,
 			maxPasswordLength: 128,
-
-			/**
-			 * Email Verification
-			 *
-			 * Sends verification email when user registers.
-			 * User must verify email before they can log in.
-			 */
-			sendVerificationEmail: async ({
-				user,
-				url,
-			}: {
-				user: { email: string; name: string };
-				url: string;
-			}) => {
-				await sendVerificationEmail(user.email, url, user.name);
-			},
 
 			/**
 			 * Password Reset Configuration
@@ -125,6 +109,26 @@ export function createBetterAuth(databaseUrl: string) {
 				url: string;
 			}) => {
 				await sendPasswordResetEmail(user.email, url, user.name);
+			},
+		},
+
+		/**
+		 * Email Verification Configuration
+		 *
+		 * Sends verification email when user registers.
+		 * User must verify email before they can log in.
+		 */
+		emailVerification: {
+			sendOnSignUp: true,
+			autoSignInAfterVerification: true,
+			sendVerificationEmail: async ({
+				user,
+				url,
+			}: {
+				user: { email: string; name: string };
+				url: string;
+			}) => {
+				await sendVerificationEmail(user.email, url, user.name);
 			},
 		},
 
