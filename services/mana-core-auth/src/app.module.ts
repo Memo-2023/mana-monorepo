@@ -11,6 +11,7 @@ import { SettingsModule } from './settings/settings.module';
 import { TagsModule } from './tags/tags.module';
 import { AiModule } from './ai/ai.module';
 import { HealthModule } from './health/health.module';
+import { MetricsModule } from './metrics';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 @Module({
@@ -25,6 +26,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 				limit: 100, // 100 requests per minute
 			},
 		]),
+		MetricsModule,
 		AiModule,
 		AuthModule,
 		CreditsModule,

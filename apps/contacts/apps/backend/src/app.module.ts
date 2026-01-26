@@ -13,6 +13,7 @@ import { DuplicatesModule } from './duplicates/duplicates.module';
 import { PhotoModule } from './photo/photo.module';
 import { BatchModule } from './batch/batch.module';
 import { NetworkModule } from './network/network.module';
+import { MetricsModule } from './metrics';
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { NetworkModule } from './network/network.module';
 			isGlobal: true,
 			envFilePath: '.env',
 		}),
+		MetricsModule,
 		DatabaseModule,
 		ContactModule,
 		TagModule,

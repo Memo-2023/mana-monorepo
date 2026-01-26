@@ -7,6 +7,7 @@ import { AlarmModule } from './alarm/alarm.module';
 import { TimerModule } from './timer/timer.module';
 import { WorldClockModule } from './world-clock/world-clock.module';
 import { PresetModule } from './preset/preset.module';
+import { MetricsModule } from './metrics';
 
 @Module({
 	imports: [
@@ -15,6 +16,7 @@ import { PresetModule } from './preset/preset.module';
 			envFilePath: '.env',
 		}),
 		ScheduleModule.forRoot(),
+		MetricsModule,
 		DatabaseModule,
 		HealthModule,
 		AlarmModule,

@@ -8,6 +8,7 @@ import { SpaceModule } from './space/space.module';
 import { DocumentModule } from './document/document.module';
 import { ModelModule } from './model/model.module';
 import { HealthModule } from './health/health.module';
+import { MetricsModule } from './metrics';
 
 @Module({
 	imports: [
@@ -15,6 +16,7 @@ import { HealthModule } from './health/health.module';
 			isGlobal: true,
 			envFilePath: '.env',
 		}),
+		MetricsModule,
 		DatabaseModule,
 		ChatModule,
 		ConversationModule,

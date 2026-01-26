@@ -10,6 +10,7 @@ import { EventTagGroupModule } from './event-tag-group/event-tag-group.module';
 import { ReminderModule } from './reminder/reminder.module';
 import { ShareModule } from './share/share.module';
 import { NetworkModule } from './network/network.module';
+import { MetricsModule } from './metrics';
 
 @Module({
 	imports: [
@@ -18,6 +19,7 @@ import { NetworkModule } from './network/network.module';
 			envFilePath: '.env',
 		}),
 		ScheduleModule.forRoot(),
+		MetricsModule,
 		DatabaseModule,
 		HealthModule,
 		CalendarModule,

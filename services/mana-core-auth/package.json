@@ -42,6 +42,7 @@
 		"jsonwebtoken": "^9.0.2",
 		"nanoid": "^5.0.9",
 		"postgres": "^3.4.5",
+		"prom-client": "^15.1.0",
 		"redis": "^4.7.0",
 		"reflect-metadata": "^0.2.2",
 		"rxjs": "^7.8.1",
