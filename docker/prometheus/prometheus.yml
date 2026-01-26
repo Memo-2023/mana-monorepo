@@ -90,3 +90,11 @@ scrape_configs:
       - targets: ['contacts-backend:3015']
     metrics_path: '/metrics'
     scrape_interval: 30s
+
+  # ============================================
+  # CI/CD Metrics via Pushgateway
+  # ============================================
+  - job_name: 'pushgateway'
+    honor_labels: true
+    static_configs:
+      - targets: ['pushgateway:9091']
