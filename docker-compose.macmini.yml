@@ -740,10 +740,11 @@ services:
       WATCHTOWER_POLL_INTERVAL: 300           # Check every 5 minutes
       WATCHTOWER_CLEANUP: "true"              # Remove old images
       WATCHTOWER_INCLUDE_STOPPED: "false"     # Only update running containers
-      WATCHTOWER_DEBUG: "true"                # Enable debug logging
+      WATCHTOWER_NOTIFICATION_REPORT: "true"  # Always send notification on update
+      # Notifications via generic webhook to n8n (which forwards to Telegram)
+      # This avoids URL parsing issues with Telegram bot tokens containing colons
       WATCHTOWER_NOTIFICATIONS: shoutrrr
-      WATCHTOWER_NOTIFICATION_URL: "telegram://${TELEGRAM_BOT_TOKEN}@telegram/?chats=${TELEGRAM_CHAT_ID}"
-      WATCHTOWER_NOTIFICATION_REPORT: "true"  # Always send notification (for testing)
+      WATCHTOWER_NOTIFICATION_URL: "generic+http://n8n:5678/webhook/watchtower"
 
 # ============================================
 # Volumes
