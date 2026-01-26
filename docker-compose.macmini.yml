@@ -543,6 +543,18 @@ services:
       timeout: 10s
       retries: 3
 
+  pushgateway:
+    image: prom/pushgateway:v1.7.0
+    container_name: manacore-pushgateway
+    restart: always
+    ports:
+      - "9091:9091"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9091/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   grafana:
     image: grafana/grafana:10.4.1
     container_name: manacore-grafana
@@ -729,7 +741,7 @@ services:
   # ============================================
 
   watchtower:
-    image: containrrr/watchtower
+    image: nickfedor/watchtower:latest
     container_name: manacore-watchtower
     restart: always
     volumes:
@@ -742,6 +754,8 @@ services:
       - WATCHTOWER_INCLUDE_STOPPED=false
       - WATCHTOWER_NOTIFICATIONS=shoutrrr
       - WATCHTOWER_NOTIFICATION_URL=telegram://${TELEGRAM_BOT_TOKEN}@telegram?chats=${TELEGRAM_CHAT_ID}
+      - WATCHTOWER_NOTIFICATION_REPORT=true
+      - WATCHTOWER_NOTIFICATION_TEMPLATE={{- if .Report -}}{{- with .Report -}}{{- if or .Updated .Failed -}}🐳 ManaCore Watchtower{{- if .Updated }} | ✅ Updated:{{range .Updated}} {{.Name}}{{end}}{{- end -}}{{- if .Failed }} | ❌ Failed:{{range .Failed}} {{.Name}}{{end}}{{- end -}}{{- end -}}{{- end -}}{{- end -}}
 
 # ============================================
 # Volumes
