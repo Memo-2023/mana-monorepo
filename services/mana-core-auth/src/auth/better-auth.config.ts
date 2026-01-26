@@ -22,7 +22,11 @@ import { getDb } from '../db/connection';
 import { organizations, members, invitations } from '../db/schema/organizations.schema';
 import { users, sessions, accounts, verificationTokens, jwks } from '../db/schema/auth.schema';
 import type { JWTPayloadContext } from './types/better-auth.types';
-import { sendPasswordResetEmail, sendInvitationEmail } from '../email/email.service';
+import {
+	sendPasswordResetEmail,
+	sendInvitationEmail,
+	sendVerificationEmail,
+} from '../email/email.service';
 
 /**
  * JWT Custom Payload Interface
@@ -81,19 +85,29 @@ export function createBetterAuth(databaseUrl: string) {
 			},
 		}),
 
-		// Email/password authentication with password reset
+		// Email/password authentication with email verification and password reset
 		emailAndPassword: {
 			enabled: true,
-			requireEmailVerification: false, // Can enable later
+			requireEmailVerification: true,
 			minPasswordLength: 8,
 			maxPasswordLength: 128,
+
+			/**
+			 * Email Verification
+			 *
+			 * Sends verification email when user registers.
+			 * User must verify email before they can log in.
+			 */
+			sendVerificationEmail: async ({ user, url }) => {
+				await sendVerificationEmail(user.email, url, user.name);
+			},
 
 			/**
 			 * Password Reset Configuration
 			 *
 			 * Better Auth provides password reset via:
-			 * - auth.api.forgetPassword({ email }) - Sends reset email
-			 * - auth.api.resetPassword({ newPassword, token }) - Resets password
+			 * - auth.api.requestPasswordReset({ body: { email } }) - Sends reset email
+			 * - auth.api.resetPassword({ body: { newPassword, token } }) - Resets password
 			 *
 			 * @see https://www.better-auth.com/docs/authentication/email-password#password-reset
 			 */

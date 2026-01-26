@@ -177,6 +177,54 @@ export async function sendInvitationEmail(
 }
 
 /**
+ * Send email verification email
+ */
+export async function sendVerificationEmail(
+	email: string,
+	verificationUrl: string,
+	userName?: string
+): Promise<boolean> {
+	const name = userName || email.split('@')[0];
+
+	return sendEmail({
+		to: email,
+		subject: 'E-Mail bestätigen - ManaCore',
+		html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="color: #2563eb; margin: 0;">ManaCore</h1>
+  </div>
+
+  <p>Hallo ${name},</p>
+
+  <p>Willkommen bei ManaCore! Bitte bestätige deine E-Mail-Adresse, um deinen Account zu aktivieren:</p>
+
+  <div style="text-align: center; margin: 30px 0;">
+    <a href="${verificationUrl}" style="background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">E-Mail bestätigen</a>
+  </div>
+
+  <p style="color: #666; font-size: 14px;">Dieser Link ist 24 Stunden gültig. Falls du dich nicht bei ManaCore registriert hast, kannst du diese E-Mail ignorieren.</p>
+
+  <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+  <p style="color: #999; font-size: 12px; text-align: center;">
+    Diese E-Mail wurde automatisch von ManaCore gesendet.<br>
+    Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:<br>
+    <a href="${verificationUrl}" style="color: #2563eb; word-break: break-all;">${verificationUrl}</a>
+  </p>
+</body>
+</html>
+`,
+	});
+}
+
+/**
  * Send welcome/verification email
  */
 export async function sendWelcomeEmail(
