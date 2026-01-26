@@ -16,12 +16,12 @@ Cloudflare Tunnel (cloudflared)
     │
     ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  Mac Mini (mana-server)                                     │
+│  Mac Mini M4 (mana-server)                                  │
 │                                                             │
-│  ┌─────────────────┐  ┌─────────────────┐                  │
-│  │   PostgreSQL    │  │     Redis       │                  │
-│  │   (Docker)      │  │    (Docker)     │                  │
-│  └─────────────────┘  └─────────────────┘                  │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌────────────┐  │
+│  │   PostgreSQL    │  │     Redis       │  │   Ollama   │  │
+│  │   (Docker)      │  │    (Docker)     │  │  (nativ)   │  │
+│  └─────────────────┘  └─────────────────┘  └────────────┘  │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  Docker Container                                    │   │
@@ -36,10 +36,18 @@ Cloudflare Tunnel (cloudflared)
 │  │  ├── clock-backend      (Port 3017)                 │   │
 │  │  └── clock-web          (Port 5187)                 │   │
 │  └─────────────────────────────────────────────────────┘   │
+│                           ▲                                 │
+│                           │ host.docker.internal:11434      │
+│                           ▼                                 │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  Ollama (Port 11434) - Gemma 3 4B                   │   │
+│  │  ~53 t/s Generation | Metal GPU Acceleration        │   │
+│  └─────────────────────────────────────────────────────┘   │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  LaunchAgents (Autostart)                           │   │
 │  │  ├── cloudflared        (Tunnel)                    │   │
+│  │  ├── ollama             (LLM Service)               │   │
 │  │  ├── docker-startup     (Container beim Boot)       │   │
 │  │  └── health-check       (alle 5 Minuten)            │   │
 │  └─────────────────────────────────────────────────────┘   │
@@ -383,6 +391,116 @@ docker image prune -a
 | `stop.sh` | Stoppt alle Container |
 | `deploy.sh` | Pullt neue Images und startet neu |
 
+## Ollama (Lokale KI)
+
+Ollama läuft nativ auf dem Mac Mini für lokale LLM-Inferenz (Klassifizierung, Text-Analyse, etc.).
+
+### Hardware
+
+- **Chip:** Apple M4 (10 Cores)
+- **RAM:** 16 GB Unified Memory
+
+### Installation
+
+```bash
+# Bereits installiert via Homebrew
+/opt/homebrew/bin/brew install ollama
+/opt/homebrew/bin/brew services start ollama
+```
+
+### Konfiguration
+
+**LaunchAgent:** `~/Library/LaunchAgents/homebrew.mxcl.ollama.plist`
+
+Optimierungen bereits aktiviert:
+- `OLLAMA_FLASH_ATTENTION=1` - Schnellere Attention-Berechnung
+- `OLLAMA_KV_CACHE_TYPE=q8_0` - Effizienterer KV-Cache
+
+### Verfügbare Modelle
+
+| Modell | Größe | Zweck |
+|--------|-------|-------|
+| gemma3:4b | 3.3 GB | Klassifizierung, kurze Antworten |
+
+```bash
+# Modelle auflisten
+/opt/homebrew/bin/ollama list
+
+# Neues Modell herunterladen
+/opt/homebrew/bin/ollama pull gemma3:12b
+```
+
+### Performance (gemessen)
+
+| Metrik | Wert |
+|--------|------|
+| Text Generation | ~53 tokens/sec |
+| Prompt Processing | ~260 tokens/sec |
+| Latenz (kurze Anfrage) | ~0.4 sec |
+
+### API-Zugriff
+
+**Lokaler Endpunkt:** `http://localhost:11434`
+
+```bash
+# Generate API
+curl http://localhost:11434/api/generate -d '{
+  "model": "gemma3:4b",
+  "prompt": "Klassifiziere: Newsletter oder Spam?",
+  "stream": false
+}'
+
+# OpenAI-kompatible API
+curl http://localhost:11434/v1/chat/completions -d '{
+  "model": "gemma3:4b",
+  "messages": [{"role": "user", "content": "Hallo"}]
+}'
+```
+
+### Zugriff aus Docker-Containern
+
+Docker-Container können Ollama über `host.docker.internal` erreichen:
+
+```bash
+# Aus einem Container heraus
+curl http://host.docker.internal:11434/api/generate -d '...'
+```
+
+Oder in Docker Compose Environment-Variablen:
+```yaml
+environment:
+  OLLAMA_URL: http://host.docker.internal:11434
+```
+
+### Ollama Management
+
+```bash
+# Service Status
+/opt/homebrew/bin/brew services info ollama
+
+# Service neustarten
+/opt/homebrew/bin/brew services restart ollama
+
+# Logs prüfen
+tail -f /opt/homebrew/var/log/ollama.log
+
+# Modell entfernen
+/opt/homebrew/bin/ollama rm gemma3:4b
+```
+
+### Troubleshooting
+
+```bash
+# Prüfen ob Ollama läuft
+curl http://localhost:11434/api/version
+
+# GPU-Nutzung prüfen (sollte Metal verwenden)
+/opt/homebrew/bin/ollama ps
+
+# Bei Problemen: Service neustarten
+/opt/homebrew/bin/brew services restart ollama
+```
+
 ## Chronologie der Einrichtung
 
 1. **Docker Setup** - PostgreSQL, Redis, App-Container
@@ -392,3 +510,4 @@ docker image prune -a
 5. **Health Checks** - Automatische Überwachung
 6. **Telegram Notifications** - Alerts bei Fehlern
 7. **Email Notifications** - Redundante Benachrichtigung
+8. **Ollama** - Lokale LLM-Inferenz (Gemma 3 4B)
