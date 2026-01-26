@@ -735,13 +735,13 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      TZ: Europe/Berlin
-      DOCKER_API_VERSION: "1.45"              # Match Docker Desktop API version
-      WATCHTOWER_POLL_INTERVAL: 300           # Check every 5 minutes
-      WATCHTOWER_CLEANUP: "true"              # Remove old images
-      WATCHTOWER_INCLUDE_STOPPED: "false"     # Only update running containers
-      # Notifications disabled - shoutrrr has URL parsing issues with Telegram bot tokens
-      # Auto-deployment works fine. Set up n8n webhook workflow for notifications if needed.
+      - TZ=Europe/Berlin
+      - DOCKER_API_VERSION=1.45
+      - WATCHTOWER_POLL_INTERVAL=300
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_INCLUDE_STOPPED=false
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr
+      - WATCHTOWER_NOTIFICATION_URL=telegram://${TELEGRAM_BOT_TOKEN}@telegram?chats=${TELEGRAM_CHAT_ID}
 
 # ============================================
 # Volumes
