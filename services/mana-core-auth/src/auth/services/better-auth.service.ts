@@ -939,6 +939,48 @@ export class BetterAuthService {
 	}
 
 	/**
+	 * Verify email with token
+	 *
+	 * Verifies the user's email using the token from the verification email.
+	 * Uses Better Auth's verifyEmail API.
+	 *
+	 * @param token - Verification token from email link
+	 * @returns Success status
+	 */
+	async verifyEmail(token: string): Promise<{ success: boolean; error?: string }> {
+		try {
+			// Better Auth's verifyEmail method
+			// See: https://www.better-auth.com/docs/authentication/email-verification
+			const api = this.auth.api as any;
+
+			const result = await api.verifyEmail({
+				query: { token },
+			});
+
+			console.log('[verifyEmail] Result:', result);
+
+			return {
+				success: true,
+			};
+		} catch (error: unknown) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			console.error('[verifyEmail] Error:', errorMessage);
+
+			if (errorMessage.includes('invalid') || errorMessage.includes('expired')) {
+				return {
+					success: false,
+					error: 'invalid_or_expired_token',
+				};
+			}
+
+			return {
+				success: false,
+				error: 'verification_failed',
+			};
+		}
+	}
+
+	/**
 	 * Get JWKS (JSON Web Key Set)
 	 *
 	 * Returns public keys for JWT verification.

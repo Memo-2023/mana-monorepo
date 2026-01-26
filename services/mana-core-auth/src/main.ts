@@ -79,9 +79,10 @@ async function bootstrap() {
 		})
 	);
 
-	// Global prefix (exclude metrics endpoint)
+	// Global prefix (exclude metrics, health, and Better Auth native routes)
+	// Better Auth generates verification URLs with /api/auth/* prefix
 	app.setGlobalPrefix('api/v1', {
-		exclude: ['metrics', 'health'],
+		exclude: ['metrics', 'health', 'api/auth/(.*)'],
 	});
 
 	const port = configService.get<number>('port') || 3001;
