@@ -31,10 +31,16 @@ export class UsersService implements OnModuleInit {
 	async onModuleInit() {
 		if (this.databaseUrl) {
 			try {
+				// Mask password in logs
+				const maskedUrl = this.databaseUrl.replace(/:([^@]+)@/, ':****@');
+				this.logger.log(`Connecting to database: ${maskedUrl}`);
 				this.sql = postgres(this.databaseUrl);
-				this.logger.log('Database connection initialized');
+				// Test connection
+				await this.sql`SELECT 1`;
+				this.logger.log('Database connection initialized and tested successfully');
 			} catch (error) {
-				this.logger.warn('Failed to initialize database connection:', error);
+				this.logger.error('Failed to initialize database connection:', error);
+				this.sql = null;
 			}
 		} else {
 			this.logger.warn('DATABASE_URL not configured, user stats will be unavailable');

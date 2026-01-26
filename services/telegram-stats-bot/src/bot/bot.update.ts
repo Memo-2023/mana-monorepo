@@ -67,13 +67,21 @@ export class BotUpdate {
 		this.logger.log(`/users command from ${ctx.from?.id}`);
 		await ctx.reply('👥 Lade User-Statistiken...');
 
-		const stats = await this.usersService.getUserStats();
-		if (!stats) {
-			await ctx.reply('❌ Datenbank nicht verfügbar');
-			return;
-		}
+		try {
+			const stats = await this.usersService.getUserStats();
+			if (!stats) {
+				this.logger.warn('User stats returned null - database may not be configured');
+				await ctx.reply('❌ Datenbank nicht verfügbar. Prüfe DATABASE_URL Konfiguration.');
+				return;
+			}
 
-		const report = formatUsersReport(stats);
-		await ctx.replyWithHTML(report);
+			const report = formatUsersReport(stats);
+			await ctx.replyWithHTML(report);
+		} catch (error) {
+			this.logger.error('Failed to get user stats:', error);
+			await ctx.reply(
+				`❌ Fehler beim Laden der User-Statistiken: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`
+			);
+		}
 	}
 }
