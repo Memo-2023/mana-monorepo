@@ -1,51 +1,32 @@
 <script lang="ts">
 	import '../app.css';
-	// Initialize i18n early - must be imported before any component that uses $_
-	import { waitLocale } from '$lib/i18n';
-	import { onMount } from 'svelte';
+	import '$lib/i18n';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { userSettings } from '$lib/stores/user-settings.svelte';
-	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
 	import { AppLoadingSkeleton } from '$lib/components/skeletons';
+	import { isLoading as i18nLoading } from 'svelte-i18n';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
 
 	let loading = $state(true);
+	let appReady = $derived(!loading && !$i18nLoading);
 
 	onMount(async () => {
-		// Wait for i18n locale to be loaded
-		await waitLocale();
-
-		// Initialize theme
 		theme.initialize();
-
-		// Initialize auth
 		await authStore.initialize();
-
 		loading = false;
-	});
-
-	// Load user settings when authenticated
-	$effect(() => {
-		if (authStore.isAuthenticated) {
-			userSettings.load().then(() => {
-				// Enable cloud sync for calendar settings after user settings are loaded
-				settingsStore.enableCloudSync();
-			});
-		} else {
-			settingsStore.disableCloudSync();
-		}
 	});
 </script>
 
-<ToastContainer />
-
-{#if loading}
+{#if !appReady}
 	<AppLoadingSkeleton />
 {:else}
-	<div class="min-h-screen bg-background text-foreground">
+	<div class="h-screen flex flex-col bg-background text-foreground overflow-hidden">
 		{@render children()}
 	</div>
 {/if}
+
+<ToastContainer />

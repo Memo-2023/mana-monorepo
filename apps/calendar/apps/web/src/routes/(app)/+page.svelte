@@ -76,15 +76,25 @@
 		// Event is automatically removed from store
 	}
 
+	// Track view changes to refetch events
+	let lastViewType = $state(viewStore.viewType);
+	let lastDateKey = $state(viewStore.currentDate.toDateString());
+
 	onMount(async () => {
 		// Fetch events for current view range (works in both guest and authenticated mode)
 		await eventsStore.fetchEvents(viewStore.viewRange.start, viewStore.viewRange.end);
 		initialized = true;
 	});
 
-	// Refetch events when view changes
+	// Refetch events when view type or date changes
 	$effect(() => {
-		if (initialized) {
+		const currentViewType = viewStore.viewType;
+		const currentDateKey = viewStore.currentDate.toDateString();
+
+		// Only refetch if view actually changed
+		if (initialized && (currentViewType !== lastViewType || currentDateKey !== lastDateKey)) {
+			lastViewType = currentViewType;
+			lastDateKey = currentDateKey;
 			eventsStore.fetchEvents(viewStore.viewRange.start, viewStore.viewRange.end);
 		}
 	});
@@ -224,20 +234,20 @@
 		width: 24px;
 		height: 24px;
 		border-radius: var(--radius-full);
-		background: hsl(var(--color-surface));
-		border: 1px solid hsl(var(--color-border));
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		cursor: pointer;
 		z-index: 10;
 		transition: all 150ms ease;
-		color: hsl(var(--color-muted-foreground));
+		color: var(--color-muted-foreground);
 	}
 
 	.sidebar-collapse-btn:hover {
-		background: hsl(var(--color-muted));
-		color: hsl(var(--color-foreground));
+		background: var(--color-muted);
+		color: var(--color-foreground);
 	}
 
 	.calendar-main {
@@ -247,9 +257,9 @@
 		min-width: 0;
 		min-height: 0;
 		overflow: hidden;
-		background: hsl(var(--color-surface));
+		background: var(--color-surface);
 		border-radius: var(--radius-lg);
-		border: 1px solid hsl(var(--color-border));
+		border: 1px solid var(--color-border);
 		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
@@ -268,8 +278,8 @@
 	.calendar-sidebar-mobile {
 		width: 100%;
 		flex-direction: column;
-		background: hsl(var(--color-surface));
-		border-top: 1px solid hsl(var(--color-border));
+		background: var(--color-surface);
+		border-top: 1px solid var(--color-border);
 		padding: 0.75rem;
 		overflow-y: auto;
 		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -290,22 +300,19 @@
 			flex-direction: column;
 			gap: 0;
 			flex: 1;
-			height: 100%; /* Fill parent container */
+			height: 100%;
 			min-height: 0;
 			overflow: hidden;
 		}
 
-		/* Hide desktop elements on mobile */
 		.desktop-only {
 			display: none !important;
 		}
 
-		/* Show mobile elements */
 		.mobile-only {
 			display: flex;
 		}
 
-		/* Calendar container */
 		.calendar-main {
 			border-radius: 0;
 			border: none;
@@ -313,25 +320,21 @@
 			overflow: hidden;
 		}
 
-		/* When todos are visible: 50/50 split */
 		.calendar-layout:has(.calendar-sidebar-mobile:not(.collapsed)) .calendar-main {
 			flex: 0 0 50%;
 			height: 50%;
 		}
 
-		/* When todos are collapsed: calendar takes full space */
 		.calendar-layout:has(.calendar-sidebar-mobile.collapsed) .calendar-main {
 			flex: 1;
 			height: 100%;
 		}
 
-		/* Calendar content must scroll internally */
 		.calendar-content {
 			height: 100%;
 			overflow-y: auto;
 		}
 
-		/* Todos section takes other half */
 		.calendar-sidebar-mobile {
 			display: flex;
 			flex-direction: column;
@@ -345,7 +348,6 @@
 			overflow: hidden;
 		}
 
-		/* Make TodoSidebarSection fill the container */
 		.calendar-sidebar-mobile > :global(*) {
 			flex: 1;
 			min-height: 0;
@@ -359,7 +361,6 @@
 		}
 	}
 
-	/* Tablet: Keep desktop layout but smaller sidebar */
 	@media (min-width: 769px) and (max-width: 1024px) {
 		.calendar-sidebar {
 			width: 220px;

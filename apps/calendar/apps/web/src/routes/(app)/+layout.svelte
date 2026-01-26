@@ -854,13 +854,11 @@
 	}
 
 	/* Offset content when guest banner is visible */
-	.layout-container:has(.guest-banner) .main-content {
-		margin-top: 40px;
+	.layout-container:has(.guest-banner) {
+		padding-top: 40px;
 	}
 
-	.layout-container:has(.guest-banner) .main-content.floating-mode {
-		padding-top: calc(70px + 40px);
-	}
+	/* Floating mode already has padding-top, no extra adjustment needed since container handles banner offset */
 
 	/* Mobile: Fixed viewport, no scroll */
 	@media (max-width: 768px) {
@@ -868,6 +866,12 @@
 			height: 100vh;
 			max-height: 100vh;
 			overflow: hidden;
+		}
+
+		.layout-container:has(.guest-banner) {
+			height: calc(100vh - 40px);
+			margin-top: 40px;
+			padding-top: 0;
 		}
 	}
 
@@ -977,6 +981,11 @@
 		flex-direction: column;
 		flex: 1;
 		min-height: 0;
+	}
+
+	/* Calendar fills entire screen - UI elements float on top */
+	.main-content:has(.content-wrapper.calendar-expanded) {
+		padding-bottom: 0 !important;
 	}
 
 	/* Immersive Mode - fullscreen, no UI elements visible */
