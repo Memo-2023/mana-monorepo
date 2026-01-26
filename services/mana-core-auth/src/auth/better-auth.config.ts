@@ -139,7 +139,7 @@ export function createBetterAuth(databaseUrl: string) {
 					await sendInvitationEmail(
 						email,
 						organization.name,
-						inviter?.name || 'Ein Teammitglied',
+						inviter?.user?.name || 'Ein Teammitglied',
 						inviteUrl
 					);
 				},
