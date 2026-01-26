@@ -54,13 +54,10 @@
 	]);
 
 	onMount(async () => {
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
+		// Load user settings and projects from server (only if authenticated)
+		if (authStore.isAuthenticated) {
+			await Promise.all([userSettings.load(), projectsStore.fetchProjects()]);
 		}
-
-		// Load user settings and projects from server
-		await Promise.all([userSettings.load(), projectsStore.fetchProjects()]);
 
 		// Initialize todo settings from localStorage
 		todoSettings.initialize();

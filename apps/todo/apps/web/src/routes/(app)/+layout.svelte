@@ -13,7 +13,6 @@
 		PillNavItem,
 		PillDropdownItem,
 		QuickInputItem,
-		QuickAction,
 		CreatePreview,
 	} from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -26,7 +25,9 @@
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
+		isToolbarCollapsed as toolbarCollapsedStore,
 	} from '$lib/stores/navigation';
+	import TodoToolbar from '$lib/components/TodoToolbar.svelte';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -53,13 +54,6 @@
 	}
 
 	let { children } = $props();
-
-	// QuickInputBar quick actions
-	const quickActions: QuickAction[] = [
-		{ id: 'kanban', label: 'Kanban', icon: 'kanban', href: '/kanban' },
-		{ id: 'stats', label: 'Statistik', icon: 'chart', href: '/statistics' },
-		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
-	];
 
 	// QuickInputBar search - search tasks
 	async function handleSearch(query: string): Promise<QuickInputItem[]> {
@@ -116,6 +110,7 @@
 
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
+	let isToolbarCollapsed = $state(true);
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -252,6 +247,16 @@
 		}
 	}
 
+	function handleToolbarCollapsedChange(collapsed: boolean) {
+		isToolbarCollapsed = collapsed;
+		toolbarCollapsedStore.set(collapsed);
+		try {
+			localStorage?.setItem('todo-toolbar-collapsed', String(collapsed));
+		} catch {
+			// localStorage not available or quota exceeded
+		}
+	}
+
 	function handleToggleTheme() {
 		theme.toggleMode();
 	}
@@ -327,6 +332,17 @@
 			if (savedCollapsed === 'true') {
 				isCollapsed = true;
 				collapsedStore.set(true);
+			}
+		} catch {
+			// localStorage not available
+		}
+
+		// Initialize toolbar collapsed state from localStorage
+		try {
+			const savedToolbarCollapsed = localStorage?.getItem('todo-toolbar-collapsed');
+			if (savedToolbarCollapsed === 'false') {
+				isToolbarCollapsed = false;
+				toolbarCollapsedStore.set(false);
 			}
 		} catch {
 			// localStorage not available
@@ -436,7 +452,6 @@
 			<QuickInputBar
 				onSearch={handleSearch}
 				onSelect={handleSelect}
-				{quickActions}
 				placeholder="Neue Aufgabe oder suchen..."
 				emptyText="Keine Aufgaben gefunden"
 				searchingText="Suche..."
@@ -444,8 +459,17 @@
 				onParseCreate={handleParseCreate}
 				createText="Erstellen"
 				appIcon="todo"
-				primaryColor="#8b5cf6"
-				autoFocus={true}
+				hasFabRight={true}
+				bottomOffset={isToolbarCollapsed ? '70px' : '140px'}
+			/>
+
+			<!-- Todo Toolbar (ExpandableToolbar FAB) -->
+			<TodoToolbar
+				{isSidebarMode}
+				isCollapsed={isToolbarCollapsed}
+				onCollapsedChange={handleToolbarCollapsedChange}
+				onModeChange={handleModeChange}
+				bottomOffset="70px"
 			/>
 		{/if}
 

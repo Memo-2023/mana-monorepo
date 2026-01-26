@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { goto } from '$app/navigation';
 	import type { TaskPriority } from '@todo/shared';
-	import { authStore } from '$lib/stores/auth.svelte';
 	import { kanbanStore } from '$lib/stores/kanban.svelte';
 	import { KanbanBoard, KanbanFilters, BoardNavigation } from '$lib/components/kanban';
 
@@ -124,11 +122,6 @@
 	];
 
 	onMount(async () => {
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
 		// Check initial mobile state
 		checkMobile();
 		window.addEventListener('resize', checkMobile);

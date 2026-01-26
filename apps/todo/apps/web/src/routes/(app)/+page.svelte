@@ -8,7 +8,6 @@
 	import TaskList from '$lib/components/TaskList.svelte';
 	import CollapsibleSection from '$lib/components/CollapsibleSection.svelte';
 	import TaskEditModal from '$lib/components/TaskEditModal.svelte';
-	import TodoToolbar from '$lib/components/TodoToolbar.svelte';
 	import { TaskListSkeleton } from '$lib/components/skeletons';
 	import type { Task, UpdateTaskInput } from '@todo/shared';
 
@@ -157,9 +156,6 @@
 		<h1 class="text-2xl font-bold text-foreground">Meine Aufgaben</h1>
 		<p class="text-muted-foreground text-sm mt-1">Alle deine Aufgaben auf einen Blick</p>
 	</header>
-
-	<!-- Unified Toolbar with Quick Add -->
-	<TodoToolbar />
 
 	{#if isLoading || tasksStore.loading}
 		<TaskListSkeleton sections={3} tasksPerSection={3} />
