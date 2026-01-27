@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
 	import { LoginPage, setGoogleClientId } from '@manacore/shared-auth-ui';
 	import { getLoginTranslations } from '@manacore/shared-i18n';
@@ -32,6 +33,10 @@
 		// TODO: Implement OAuth with Mana Core Auth when ready
 		return { success: false, error: 'Apple Sign-In not yet implemented' };
 	}
+
+	// Read verification status from query params (set after email verification)
+	const verified = $derived($page.url.searchParams.get('verified') === 'true');
+	const initialEmail = $derived($page.url.searchParams.get('email') || '');
 </script>
 
 <svelte:head>
@@ -54,6 +59,8 @@
 	lightBackground="#f0f9ff"
 	darkBackground="#0c1929"
 	{translations}
+	{verified}
+	{initialEmail}
 >
 	{#snippet headerControls()}
 		<LanguageSelector />

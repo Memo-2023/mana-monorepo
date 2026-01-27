@@ -29,6 +29,7 @@
 		googleSignInFailed: string;
 		signInSuccess: string;
 		googleSignInSuccess: string;
+		emailVerified?: string;
 	}
 
 	const defaultTranslations: LoginTranslations = {
@@ -54,6 +55,7 @@
 		googleSignInFailed: 'Google sign in failed',
 		signInSuccess: 'Successfully signed in. Redirecting...',
 		googleSignInSuccess: 'Successfully signed in with Google. Redirecting...',
+		emailVerified: 'Email successfully verified! Please sign in.',
 	};
 
 	interface Props {
@@ -74,6 +76,10 @@
 		appSlider?: Snippet;
 		headerControls?: Snippet;
 		translations?: Partial<LoginTranslations>;
+		/** Show email verified success banner */
+		verified?: boolean;
+		/** Pre-fill email field (e.g., after email verification) */
+		initialEmail?: string;
 	}
 
 	let {
@@ -94,6 +100,8 @@
 		appSlider,
 		headerControls,
 		translations = {},
+		verified = false,
+		initialEmail = '',
 	}: Props = $props();
 
 	const t = $derived({ ...defaultTranslations, ...translations });
@@ -101,7 +109,7 @@
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let errorField = $state<'email' | 'password' | 'general' | null>(null);
-	let email = $state('');
+	let email = $state(initialEmail);
 	let password = $state('');
 	let showPassword = $state(false);
 	let rememberMe = $state(false);
@@ -110,6 +118,7 @@
 	let emailInput: HTMLInputElement;
 	let passwordInput: HTMLInputElement;
 	let successAnnouncement = $state('');
+	let showVerifiedBanner = $state(verified);
 
 	// Theme state - can be toggled manually, defaults to system preference
 	let userThemePreference = $state<'light' | 'dark' | null>(null);
@@ -145,7 +154,12 @@
 	}
 
 	$effect(() => {
-		if (emailInput) emailInput.focus();
+		// Focus password field if email is pre-filled, otherwise focus email
+		if (initialEmail && passwordInput) {
+			passwordInput.focus();
+		} else if (emailInput) {
+			emailInput.focus();
+		}
 	});
 
 	function isValidEmail(email: string): boolean {
@@ -296,6 +310,21 @@
 		<!-- Form Section -->
 		<div class="form-section">
 			<div class="form-card" class:shake={shakeError}>
+				{#if showVerifiedBanner}
+					<div class="verified-banner" role="status" aria-live="polite">
+						<Check size={18} class="text-green-500 shrink-0" />
+						<p>{t.emailVerified}</p>
+						<button
+							type="button"
+							class="verified-banner-close"
+							onclick={() => (showVerifiedBanner = false)}
+							aria-label="Close"
+						>
+							&times;
+						</button>
+					</div>
+				{/if}
+
 				<div class="form-header">
 					<h2 class="form-title">{t.title}</h2>
 					<p class="form-subtitle">{t.subtitle}</p>
@@ -610,6 +639,39 @@
 
 	.light .form-subtitle {
 		color: rgba(0, 0, 0, 0.6);
+	}
+
+	.verified-banner {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem;
+		margin-bottom: 1rem;
+		border-radius: 0.75rem;
+		background: rgba(34, 197, 94, 0.15);
+		border: 1px solid rgba(34, 197, 94, 0.3);
+		color: #22c55e;
+		font-size: 0.875rem;
+		position: relative;
+	}
+
+	.verified-banner-close {
+		position: absolute;
+		right: 0.5rem;
+		top: 50%;
+		transform: translateY(-50%);
+		background: none;
+		border: none;
+		color: #22c55e;
+		font-size: 1.25rem;
+		cursor: pointer;
+		padding: 0.25rem;
+		line-height: 1;
+		opacity: 0.7;
+	}
+
+	.verified-banner-close:hover {
+		opacity: 1;
 	}
 
 	.error-message {

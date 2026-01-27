@@ -31,6 +31,10 @@
 	// Get translations based on current locale
 	const translations = $derived(getLoginTranslations($locale || 'de'));
 
+	// Read verification status from query params (set after email verification)
+	const verified = $derived($page.url.searchParams.get('verified') === 'true');
+	const initialEmail = $derived($page.url.searchParams.get('email') || '');
+
 	async function handleSignIn(email: string, password: string) {
 		return authStore.signIn(email, password);
 	}
@@ -54,6 +58,8 @@
 	lightBackground="#f3e8ff"
 	darkBackground="#1e1b4b"
 	{translations}
+	{verified}
+	{initialEmail}
 >
 	{#snippet headerControls()}
 		<LanguageSelector />

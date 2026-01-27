@@ -26,6 +26,10 @@
 	// German translations (NutriPhi is German-focused)
 	const translations = $derived(getLoginTranslations('de'));
 
+	// Read verification status from query params (set after email verification)
+	const verified = $derived($page.url.searchParams.get('verified') === 'true');
+	const initialEmail = $derived($page.url.searchParams.get('email') || '');
+
 	async function handleSignIn(email: string, password: string) {
 		return authStore.signIn(email, password);
 	}
@@ -49,4 +53,6 @@
 	lightBackground="#dcfce7"
 	darkBackground="#052e16"
 	{translations}
+	{verified}
+	{initialEmail}
 />

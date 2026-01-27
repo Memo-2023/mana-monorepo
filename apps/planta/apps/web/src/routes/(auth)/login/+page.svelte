@@ -1,11 +1,27 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
+
+	// Read verification status from query params (set after email verification)
+	const verified = $derived($page.url.searchParams.get('verified') === 'true');
+	const initialEmailFromUrl = $derived($page.url.searchParams.get('email') || '');
 
 	let email = $state('');
 	let password = $state('');
 	let error = $state('');
 	let loading = $state(false);
+	let showVerifiedBanner = $state(false);
+
+	// Initialize email from URL if provided
+	$effect(() => {
+		if (initialEmailFromUrl && !email) {
+			email = initialEmailFromUrl;
+		}
+		if (verified) {
+			showVerifiedBanner = true;
+		}
+	});
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -22,9 +38,28 @@
 
 		loading = false;
 	}
+
+	function dismissBanner() {
+		showVerifiedBanner = false;
+	}
 </script>
 
 <form onsubmit={handleSubmit} class="space-y-4">
+	{#if showVerifiedBanner}
+		<div
+			class="relative rounded-md bg-green-100 p-3 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-200"
+		>
+			<button
+				type="button"
+				onclick={dismissBanner}
+				class="absolute right-2 top-2 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200"
+			>
+				×
+			</button>
+			E-Mail erfolgreich bestätigt! Du kannst dich jetzt anmelden.
+		</div>
+	{/if}
+
 	{#if error}
 		<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
 			{error}

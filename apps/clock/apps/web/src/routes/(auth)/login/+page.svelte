@@ -9,6 +9,10 @@
 	let error = $state('');
 	let loading = $state(false);
 
+	// Read verification status from query params (set after email verification)
+	const verified = $derived($page.url.searchParams.get('verified') === 'true');
+	const initialEmail = $derived($page.url.searchParams.get('email') || '');
+
 	// Get redirect URL from query params or sessionStorage (set by AuthGateModal in guest mode)
 	const redirectTo = $derived.by(() => {
 		const queryRedirect = $page.url.searchParams.get('redirectTo');
@@ -51,4 +55,6 @@
 	onSubmit={handleLogin}
 	registerHref="/register"
 	forgotPasswordHref="/forgot-password"
+	{verified}
+	{initialEmail}
 />
