@@ -48,6 +48,7 @@
 	import ContactsToolbar from '$lib/components/ContactsToolbar.svelte';
 	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
 	import { sessionContactsStore } from '$lib/stores/session-contacts.svelte';
+	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 
 	// Tags state for Quick-Create
 	let availableTags = $state<{ id: string; name: string }[]>([]);
@@ -217,6 +218,9 @@
 	let showAuthGateModal = $state(false);
 	let authGateAction = $state<'save' | 'sync' | 'feature'>('save');
 
+	// Guest welcome modal state
+	let showGuestWelcome = $state(false);
+
 	// Show auth gate modal (can be called from child components)
 	function showAuthGate(action: 'save' | 'sync' | 'feature' = 'save') {
 		authGateAction = action;
@@ -296,6 +300,11 @@
 
 		// Initialize session contacts for guest mode
 		sessionContactsStore.initialize();
+
+		// Show guest welcome modal for unauthenticated users
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('contacts')) {
+			showGuestWelcome = true;
+		}
 
 		// Only fetch user data if authenticated
 		if (authStore.isAuthenticated) {
@@ -484,6 +493,23 @@
 	visible={showAuthGateModal}
 	onClose={() => (showAuthGateModal = false)}
 	action={authGateAction}
+/>
+
+<!-- Guest Welcome Modal -->
+<GuestWelcomeModal
+	appId="contacts"
+	visible={showGuestWelcome}
+	onClose={() => (showGuestWelcome = false)}
+	onLogin={() => {
+		showGuestWelcome = false;
+		goto('/login');
+	}}
+	onRegister={() => {
+		showGuestWelcome = false;
+		goto('/register');
+	}}
+	helpHref="/help"
+	locale={currentLocale === 'en' ? 'en' : 'de'}
 />
 
 <style>

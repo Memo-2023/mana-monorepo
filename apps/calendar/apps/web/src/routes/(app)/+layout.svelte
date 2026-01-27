@@ -70,6 +70,7 @@
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import { heatmapStore } from '$lib/stores/heatmap.svelte';
 	import { sessionEventsStore } from '$lib/stores/session-events.svelte';
+	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import type { CalendarViewType } from '@calendar/shared';
 
 	// App switcher items
@@ -567,6 +568,9 @@
 	let showAuthGateModal = $state(false);
 	let authGateAction = $state<'save' | 'sync' | 'feature'>('save');
 
+	// Guest welcome modal state
+	let showGuestWelcome = $state(false);
+
 	// Show auth gate modal (can be called from child components)
 	function showAuthGate(action: 'save' | 'sync' | 'feature' = 'save') {
 		authGateAction = action;
@@ -586,6 +590,11 @@
 
 		// Initialize session events for guest mode
 		sessionEventsStore.initialize();
+
+		// Show guest welcome modal for unauthenticated users
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('calendar')) {
+			showGuestWelcome = true;
+		}
 
 		// Load calendars and tags (works in both guest and authenticated mode)
 		await calendarsStore.fetchCalendars();
@@ -837,6 +846,23 @@
 	visible={showAuthGateModal}
 	onClose={() => (showAuthGateModal = false)}
 	action={authGateAction}
+/>
+
+<!-- Guest Welcome Modal -->
+<GuestWelcomeModal
+	appId="calendar"
+	visible={showGuestWelcome}
+	onClose={() => (showGuestWelcome = false)}
+	onLogin={() => {
+		showGuestWelcome = false;
+		goto('/login');
+	}}
+	onRegister={() => {
+		showGuestWelcome = false;
+		goto('/register');
+	}}
+	helpHref="/help"
+	locale={currentLocale === 'en' ? 'en' : 'de'}
 />
 
 <style>

@@ -41,6 +41,7 @@
 	import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from '$lib/utils/task-parser';
 	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
 	import { sessionTasksStore } from '$lib/stores/session-tasks.svelte';
+	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 
 	// App switcher items
 	const appItems = getPillAppItems('todo');
@@ -276,6 +277,9 @@
 	let showAuthGateModal = $state(false);
 	let authGateAction = $state<'save' | 'sync' | 'feature'>('save');
 
+	// Guest welcome modal state
+	let showGuestWelcome = $state(false);
+
 	// Show auth gate modal (can be called from child components)
 	function showAuthGate(action: 'save' | 'sync' | 'feature' = 'save') {
 		authGateAction = action;
@@ -284,6 +288,9 @@
 
 	// Session tasks indicator
 	let sessionTaskCount = $derived(sessionTasksStore.count);
+
+	// Language for GuestWelcomeModal
+	let currentLocale = $derived($locale || 'de');
 
 	onMount(async () => {
 		// Initialize split-panel from URL/localStorage
@@ -294,6 +301,11 @@
 
 		// Initialize session tasks for guest mode
 		sessionTasksStore.initialize();
+
+		// Show guest welcome modal for unauthenticated users
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('todo')) {
+			showGuestWelcome = true;
+		}
 
 		// Load projects (works in both guest and authenticated mode)
 		await projectsStore.fetchProjects();
@@ -501,6 +513,23 @@
 	visible={showAuthGateModal}
 	onClose={() => (showAuthGateModal = false)}
 	action={authGateAction}
+/>
+
+<!-- Guest Welcome Modal -->
+<GuestWelcomeModal
+	appId="todo"
+	visible={showGuestWelcome}
+	onClose={() => (showGuestWelcome = false)}
+	onLogin={() => {
+		showGuestWelcome = false;
+		goto('/login');
+	}}
+	onRegister={() => {
+		showGuestWelcome = false;
+		goto('/register');
+	}}
+	helpHref="/help"
+	locale={currentLocale === 'en' ? 'en' : 'de'}
 />
 
 <style>

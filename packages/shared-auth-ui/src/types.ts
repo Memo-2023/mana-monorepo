@@ -60,3 +60,20 @@ export interface AuthResult {
 	error?: string;
 	needsVerification?: boolean;
 }
+
+/**
+ * Translation strings for the guest welcome modal
+ */
+export interface GuestWelcomeTranslations {
+	title: string;
+	guestModeTitle: string;
+	whatYouCanDo: string;
+	dataWarningTitle: string;
+	dataWarningText: string;
+	loginButton: string;
+	registerButton: string;
+	helpButton: string;
+	continueAsGuest: string;
+	/** App-specific feature list (array of strings) */
+	features?: string[];
+}

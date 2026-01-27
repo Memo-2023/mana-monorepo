@@ -34,6 +34,7 @@
 	import { alarmsApi } from '$lib/api/alarms';
 	import { timersApi } from '$lib/api/timers';
 	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
+	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 
 	// App switcher items
 	const appItems = getPillAppItems('clock');
@@ -122,9 +123,15 @@
 	let showAuthGateModal = $state(false);
 	let authGateAction = $state<'save' | 'sync' | 'feature'>('save');
 
+	// Guest welcome modal state
+	let showGuestWelcome = $state(false);
+
 	// Check if in guest mode
 	let isGuestMode = $derived(!authStore.isAuthenticated);
 	let sessionItemCount = $derived(sessionAlarmsStore.count + sessionTimersStore.count);
+
+	// Language for GuestWelcomeModal
+	let currentLocale = $derived($locale || 'de');
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -266,6 +273,11 @@
 			collapsedStore.set(true);
 		}
 
+		// Show guest welcome modal for unauthenticated users
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('clock')) {
+			showGuestWelcome = true;
+		}
+
 		// Load user settings if authenticated
 		if (authStore.isAuthenticated) {
 			await userSettings.load();
@@ -366,6 +378,23 @@
 		action={authGateAction}
 		itemCount={sessionItemCount}
 		onClose={() => (showAuthGateModal = false)}
+	/>
+
+	<!-- Guest Welcome Modal -->
+	<GuestWelcomeModal
+		appId="clock"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => {
+			showGuestWelcome = false;
+			goto('/login');
+		}}
+		onRegister={() => {
+			showGuestWelcome = false;
+			goto('/register');
+		}}
+		helpHref="/help"
+		locale={currentLocale === 'en' ? 'en' : 'de'}
 	/>
 </div>
 

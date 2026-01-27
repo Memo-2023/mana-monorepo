@@ -25,6 +25,7 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
+	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import type { LayoutData } from './$types';
 
 	// App switcher items
@@ -39,6 +40,9 @@
 	// Guest mode state
 	let showAuthGateModal = $state(false);
 	let authGateAction = $state<'save' | 'sync' | 'ai' | 'feature'>('ai');
+
+	// Guest welcome modal state
+	let showGuestWelcome = $state(false);
 
 	// Check if in guest mode
 	let isGuestMode = $derived(!authStore.isAuthenticated);
@@ -93,6 +97,7 @@
 	// Base navigation items for Chat (settings moved to user dropdown)
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/chat', label: 'Chat', icon: 'home' },
+		{ href: '/compare', label: 'Vergleichen', icon: 'scale' },
 		{ href: '/templates', label: 'Templates', icon: 'document' },
 		{ href: '/spaces', label: 'Spaces', icon: 'building' },
 		{ href: '/documents', label: 'Dokumente', icon: 'archive' },
@@ -182,6 +187,11 @@
 		}
 
 		await authStore.initialize();
+
+		// Show guest welcome modal for unauthenticated users
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('chat')) {
+			showGuestWelcome = true;
+		}
 
 		// Load user settings if authenticated
 		if (authStore.isAuthenticated) {
@@ -290,6 +300,23 @@
 		action={authGateAction}
 		conversationCount={sessionConversationCount}
 		onClose={() => (showAuthGateModal = false)}
+	/>
+
+	<!-- Guest Welcome Modal -->
+	<GuestWelcomeModal
+		appId="chat"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => {
+			showGuestWelcome = false;
+			goto('/login');
+		}}
+		onRegister={() => {
+			showGuestWelcome = false;
+			goto('/register');
+		}}
+		helpHref="/help"
+		locale={currentLocale === 'en' ? 'en' : 'de'}
 	/>
 {/if}
 

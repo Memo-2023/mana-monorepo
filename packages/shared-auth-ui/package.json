@@ -23,7 +23,8 @@
 	"peerDependencies": {
 		"svelte": "^5.0.0",
 		"@manacore/shared-auth": "workspace:*",
-		"@manacore/shared-icons": "workspace:*"
+		"@manacore/shared-icons": "workspace:*",
+		"@manacore/shared-branding": "workspace:*"
 	},
 	"devDependencies": {
 		"svelte": "^5.16.0",
