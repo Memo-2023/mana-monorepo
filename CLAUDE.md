@@ -47,7 +47,6 @@ These projects are temporarily archived and excluded from the workspace. To re-a
 | Project            | Description                      |
 | ------------------ | -------------------------------- |
 | **bauntown**       | Community website for developers |
-| **maerchenzauber** | AI story generation              |
 | **memoro**         | Voice memo & AI analysis         |
 | **news**           | News aggregation                 |
 | **nutriphi**       | Nutrition tracking               |
@@ -134,7 +133,6 @@ manacore-monorepo/
 │   └── ...
 ├── apps-archived/           # Archived apps (excluded from workspace)
 │   ├── bauntown/
-│   ├── maerchenzauber/
 │   ├── memoro/
 │   ├── news/
 │   ├── nutriphi/

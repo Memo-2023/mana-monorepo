@@ -18,7 +18,6 @@ export {
 	MemoroLogo,
 	ManaCoreLogo,
 	ManaDeckLogo,
-	StorytellerLogo,
 	UloadLogo,
 	ChatLogo,
 	PresiLogo,

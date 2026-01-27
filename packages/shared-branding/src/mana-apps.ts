@@ -99,23 +99,6 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 	},
 	{
-		id: 'maerchenzauber',
-		name: 'Märchenzauber',
-		description: {
-			de: 'KI Geschichten',
-			en: 'AI Stories',
-		},
-		longDescription: {
-			de: 'Erstelle magische, personalisierte Geschichten für Kinder mit KI-gestütztem Storytelling.',
-			en: 'Create magical, personalized stories for children with AI-powered storytelling.',
-		},
-		icon: APP_ICONS.maerchenzauber,
-		color: '#FF6B9D',
-		comingSoon: true,
-		status: 'beta',
-		archived: true,
-	},
-	{
 		id: 'picture',
 		name: 'ManaPicture',
 		description: {
@@ -381,7 +364,6 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	memoro: { dev: 'http://localhost:5175', prod: 'https://memoro.manacore.app' },
 	presi: { dev: 'http://localhost:5176', prod: 'https://presi.manacore.app' },
 	manadeck: { dev: 'http://localhost:5177', prod: 'https://manadeck.manacore.app' },
-	maerchenzauber: { dev: 'http://localhost:5178', prod: 'https://maerchenzauber.manacore.app' },
 	picture: { dev: 'http://localhost:5185', prod: 'https://picture.manacore.app' },
 	zitare: { dev: 'http://localhost:5180', prod: 'https://zitare.manacore.app' },
 	wisekeep: { dev: 'http://localhost:5181', prod: 'https://wisekeep.manacore.app' },

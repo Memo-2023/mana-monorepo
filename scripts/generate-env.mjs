@@ -93,6 +93,7 @@ const APP_CONFIGS = [
 			DEV_BYPASS_AUTH: () => 'true',
 			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
 			OPENROUTER_API_KEY: (env) => env.OPENROUTER_API_KEY,
+			OLLAMA_URL: (env) => env.OLLAMA_URL || 'http://localhost:11434',
 			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			DATABASE_URL: (env) => env.CHAT_DATABASE_URL,
 		},
@@ -117,44 +118,6 @@ const APP_CONFIGS = [
 			PUBLIC_SUPABASE_URL: (env) => env.CHAT_SUPABASE_URL,
 			PUBLIC_SUPABASE_ANON_KEY: (env) => env.CHAT_SUPABASE_ANON_KEY,
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CHAT_BACKEND_PORT || '3002'}`,
-		},
-	},
-
-	// Maerchenzauber Backend
-	{
-		path: 'apps/maerchenzauber/apps/backend/.env',
-		vars: {
-			NODE_ENV: () => 'development',
-			PORT: (env) => env.MAERCHENZAUBER_BACKEND_PORT || '3003',
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			APP_ID: (env) => env.MAERCHENZAUBER_APP_ID,
-			MAERCHENZAUBER_SUPABASE_URL: (env) => env.MAERCHENZAUBER_SUPABASE_URL,
-			MAERCHENZAUBER_SUPABASE_ANON_KEY: (env) => env.MAERCHENZAUBER_SUPABASE_ANON_KEY,
-			MAERCHENZAUBER_JWT_SECRET: (env) => env.MAERCHENZAUBER_JWT_SECRET,
-			MAERCHENZAUBER_AZURE_OPENAI_KEY: (env) => env.MAERCHENZAUBER_AZURE_OPENAI_KEY,
-			MAERCHENZAUBER_AZURE_OPENAI_ENDPOINT: (env) => env.MAERCHENZAUBER_AZURE_OPENAI_ENDPOINT,
-			MAERCHENZAUBER_REPLICATE_API_KEY: (env) => env.MAERCHENZAUBER_REPLICATE_API_KEY,
-			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
-		},
-	},
-
-	// Maerchenzauber Mobile
-	{
-		path: 'apps/maerchenzauber/apps/mobile/.env',
-		vars: {
-			EXPO_PUBLIC_STORYTELLER_BACKEND_URL: (env) =>
-				`http://localhost:${env.MAERCHENZAUBER_BACKEND_PORT || '3003'}`,
-			EXPO_ROUTER_APP_ROOT: () => 'app',
-		},
-	},
-
-	// Maerchenzauber Web
-	{
-		path: 'apps/maerchenzauber/apps/web/.env',
-		vars: {
-			PUBLIC_SUPABASE_URL: (env) => env.MAERCHENZAUBER_SUPABASE_URL,
-			PUBLIC_SUPABASE_ANON_KEY: (env) => env.MAERCHENZAUBER_SUPABASE_ANON_KEY,
-			PUBLIC_API_URL: (env) => `http://localhost:${env.MAERCHENZAUBER_BACKEND_PORT || '3003'}`,
 		},
 	},
 
