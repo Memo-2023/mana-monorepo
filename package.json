@@ -208,6 +208,10 @@
 		"cf:login": "npx wrangler login",
 		"cf:projects:list": "npx wrangler pages project list",
 		"cf:projects:create": "echo 'Creating Cloudflare Pages projects...' && npx wrangler pages project create chat-landing --production-branch=main && npx wrangler pages project create picture-landing --production-branch=main && npx wrangler pages project create manacore-landing --production-branch=main && npx wrangler pages project create manadeck-landing --production-branch=main && npx wrangler pages project create zitare-landing --production-branch=main",
+		"dev:projectdoc": "pnpm --filter @manacore/telegram-project-doc-bot start:dev",
+		"dev:projectdoc:full": "./scripts/setup-databases.sh projectdoc && pnpm dev:projectdoc",
+		"projectdoc:db:push": "pnpm --filter @manacore/telegram-project-doc-bot db:push",
+		"projectdoc:db:studio": "pnpm --filter @manacore/telegram-project-doc-bot db:studio",
 		"prepare": "husky"
 	},
 	"devDependencies": {

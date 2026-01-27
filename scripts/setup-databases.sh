@@ -74,6 +74,7 @@ ALL_DATABASES=(
     "figgos"
     "planta"
     "nutriphi"
+    "projectdoc"
 )
 
 # Check if specific service requested
@@ -154,6 +155,10 @@ setup_service() {
         storage)
             create_db_if_not_exists "storage"
             push_schema "@storage/backend" "storage"
+            ;;
+        projectdoc)
+            create_db_if_not_exists "projectdoc"
+            push_schema "@manacore/telegram-project-doc-bot" "projectdoc"
             ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"
