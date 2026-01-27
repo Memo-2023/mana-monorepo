@@ -14,6 +14,7 @@ This directory contains comprehensive guidelines for working in the Mana Univers
 | [SvelteKit Web](./guidelines/sveltekit-web.md) | Svelte 5 runes, stores, routing |
 | [Expo Mobile](./guidelines/expo-mobile.md) | React Native, NativeWind, navigation |
 | [Authentication](./guidelines/authentication.md) | Mana Core Auth integration |
+| [Design & UX](./guidelines/design-ux.md) | UI patterns, animations, accessibility |
 
 ## Core Principles
 

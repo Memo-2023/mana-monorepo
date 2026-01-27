@@ -25,6 +25,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | [`.claude/guidelines/sveltekit-web.md`](.claude/guidelines/sveltekit-web.md) | Svelte 5 runes, stores |
 | [`.claude/guidelines/expo-mobile.md`](.claude/guidelines/expo-mobile.md) | React Native, NativeWind |
 | [`.claude/guidelines/authentication.md`](.claude/guidelines/authentication.md) | Mana Core Auth integration |
+| [`.claude/guidelines/design-ux.md`](.claude/guidelines/design-ux.md) | UI patterns, animations, a11y |
 
 **Always consult these guidelines before making changes.**
 
