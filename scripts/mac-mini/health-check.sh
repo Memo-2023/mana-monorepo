@@ -226,7 +226,7 @@ check_service "Storage Web" "http://localhost:5185/health"
 
 echo ""
 echo "Presi:"
-check_service "Presi Backend" "http://localhost:3008/api/health"
+check_service "Presi Backend" "http://localhost:3008/api/v1/health"
 check_service "Presi Web" "http://localhost:5178/health"
 
 echo ""
