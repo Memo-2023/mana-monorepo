@@ -20,6 +20,11 @@ export default () => ({
 	openai: {
 		apiKey: process.env.OPENAI_API_KEY,
 	},
+	stt: {
+		provider: process.env.STT_PROVIDER || 'local', // 'local' or 'openai'
+		localUrl: process.env.STT_LOCAL_URL || 'http://localhost:3020',
+		model: process.env.STT_MODEL || 'whisper', // 'whisper' or 'voxtral'
+	},
 	llm: {
 		provider: process.env.LLM_PROVIDER || 'ollama',
 		ollama: {

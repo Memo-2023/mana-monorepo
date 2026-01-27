@@ -1,10 +1,19 @@
-import { pgTable, uuid, text, timestamp, integer, jsonb, boolean } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	uuid,
+	text,
+	timestamp,
+	integer,
+	bigint,
+	jsonb,
+	boolean,
+} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Projects table
 export const projects = pgTable('projects', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	telegramUserId: integer('telegram_user_id').notNull(),
+	telegramUserId: bigint('telegram_user_id', { mode: 'number' }).notNull(),
 	name: text('name').notNull(),
 	description: text('description'),
 	status: text('status').default('active').notNull(), // active, archived, completed
