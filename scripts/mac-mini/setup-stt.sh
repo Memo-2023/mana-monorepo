@@ -60,7 +60,7 @@ cat > "$PLIST_PATH" << EOF
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>$STT_DIR/.venv/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <string>/opt/homebrew/bin:$STT_DIR/.venv/bin:/usr/local/bin:/usr/bin:/bin</string>
         <key>PORT</key>
         <string>3020</string>
         <key>WHISPER_MODEL</key>
