@@ -24,7 +24,7 @@ class TranscriptionResult:
     segments: Optional[list] = None
 
 
-def get_whisper_model(model_name: str = "large-v3-turbo", batch_size: int = 12):
+def get_whisper_model(model_name: str = "large-v3", batch_size: int = 12):
     """Get or create Whisper model instance (singleton pattern)."""
     global _whisper_model
 
@@ -54,7 +54,7 @@ def get_whisper_model(model_name: str = "large-v3-turbo", batch_size: int = 12):
 def transcribe_audio(
     audio_path: str,
     language: Optional[str] = None,
-    model_name: str = "large-v3-turbo",
+    model_name: str = "large-v3",
 ) -> TranscriptionResult:
     """
     Transcribe audio file using Lightning Whisper MLX.
@@ -105,7 +105,7 @@ async def transcribe_audio_bytes(
     audio_bytes: bytes,
     filename: str,
     language: Optional[str] = None,
-    model_name: str = "large-v3-turbo",
+    model_name: str = "large-v3",
 ) -> TranscriptionResult:
     """
     Transcribe audio from bytes (for API uploads).
@@ -142,20 +142,15 @@ async def transcribe_audio_bytes(
             pass
 
 
-# Available models for reference
+# Available models for Lightning Whisper MLX
 AVAILABLE_MODELS = [
     "tiny",
-    "tiny.en",
-    "base",
-    "base.en",
     "small",
-    "small.en",
+    "base",
     "medium",
-    "medium.en",
     "large",
     "large-v2",
-    "large-v3",
-    "large-v3-turbo",  # Recommended for Mac Mini
+    "large-v3",  # Recommended for Mac Mini
     "distil-small.en",
     "distil-medium.en",
     "distil-large-v2",

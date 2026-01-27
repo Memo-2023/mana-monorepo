@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 # Environment
 PORT = int(os.getenv("PORT", "3020"))
-DEFAULT_WHISPER_MODEL = os.getenv("WHISPER_MODEL", "large-v3-turbo")
+DEFAULT_WHISPER_MODEL = os.getenv("WHISPER_MODEL", "large-v3")
 PRELOAD_MODELS = os.getenv("PRELOAD_MODELS", "false").lower() == "true"
 CORS_ORIGINS = os.getenv(
     "CORS_ORIGINS",

@@ -64,7 +64,7 @@ cat > "$PLIST_PATH" << EOF
         <key>PORT</key>
         <string>3020</string>
         <key>WHISPER_MODEL</key>
-        <string>large-v3-turbo</string>
+        <string>large-v3</string>
         <key>PRELOAD_MODELS</key>
         <string>false</string>
         <key>CORS_ORIGINS</key>

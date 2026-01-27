@@ -89,13 +89,13 @@ python -c "import mlx; print(f'   MLX installed')" 2>/dev/null || echo "   MLX n
 python -c "import fastapi; print(f'   FastAPI {fastapi.__version__}')"
 
 echo ""
-echo "6. Downloading Whisper model (large-v3-turbo)..."
-echo "   This will download ~1.6 GB on first run..."
+echo "6. Downloading Whisper model (large-v3)..."
+echo "   This will download ~2.9 GB on first run..."
 # Pre-download the model
 python -c "
 from lightning_whisper_mlx import LightningWhisperMLX
 print('   Initializing Whisper model...')
-whisper = LightningWhisperMLX(model='large-v3-turbo', batch_size=12)
+whisper = LightningWhisperMLX(model='large-v3', batch_size=12)
 print('   Whisper model ready!')
 " || echo "   Note: Model will be downloaded on first transcription request"
 
