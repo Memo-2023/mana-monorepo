@@ -46,6 +46,7 @@ check_launchd() {
 check_launchd "com.cloudflare.cloudflared" "Cloudflared Tunnel"
 check_launchd "com.manacore.docker-startup" "Docker Startup"
 check_launchd "com.manacore.health-check" "Health Check (5min)"
+check_launchd "com.manacore.stt" "STT Service (Whisper/Voxtral)"
 
 # ============================================
 # Docker Status
@@ -81,6 +82,27 @@ if docker info >/dev/null 2>&1; then
             echo -e "  ${RED}$line${NC}"
         fi
     done
+fi
+
+# ============================================
+# Native Services (non-Docker)
+# ============================================
+echo ""
+echo -e "${BOLD}Native Services:${NC}"
+
+# Ollama
+if curl -s --max-time 2 http://localhost:11434/api/tags >/dev/null 2>&1; then
+    OLLAMA_MODELS=$(curl -s http://localhost:11434/api/tags | grep -o '"name":"[^"]*"' | wc -l | tr -d ' ')
+    echo -e "  ${GREEN}[Running]${NC} Ollama (${OLLAMA_MODELS} models)"
+else
+    echo -e "  ${YELLOW}[Stopped]${NC} Ollama"
+fi
+
+# STT Service
+if curl -s --max-time 2 http://localhost:3020/health >/dev/null 2>&1; then
+    echo -e "  ${GREEN}[Running]${NC} STT Service (port 3020)"
+else
+    echo -e "  ${YELLOW}[Stopped]${NC} STT Service"
 fi
 
 # ============================================

@@ -23,6 +23,7 @@ cd ~/projects/manacore-monorepo
 | Script | Purpose |
 |--------|---------|
 | `setup-autostart.sh` | Configure automatic startup on boot (run once) |
+| `setup-stt.sh` | Setup STT service (Whisper + Voxtral) |
 | `startup.sh` | Main startup script (called by launchd) |
 | `health-check.sh` | Check all services health |
 | `status.sh` | Show full system status |
@@ -143,6 +144,7 @@ Three services are configured to run automatically:
 | Cloudflared | `com.cloudflare.cloudflared` | Tunnel to Cloudflare |
 | Docker Startup | `com.manacore.docker-startup` | Start containers on boot |
 | Health Check | `com.manacore.health-check` | Check every 5 minutes |
+| STT Service | `com.manacore.stt` | Speech-to-Text (Whisper + Voxtral) |
 
 ### Manual Service Control
 
@@ -238,4 +240,49 @@ Once running, services are available at:
 | Calendar API | https://calendar-api.mana.how |
 | Clock | https://clock.mana.how |
 | Clock API | https://clock-api.mana.how |
+| STT API | http://localhost:3020 (internal only) |
 | SSH | ssh mac-mini (via cloudflared) |
+
+## Native Services (non-Docker)
+
+### Ollama (LLM)
+
+Ollama runs natively on Mac Mini for LLM inference:
+
+```bash
+# Check status
+curl http://localhost:11434/api/tags
+
+# List models
+ollama list
+
+# Pull a model
+ollama pull gemma3:4b
+```
+
+### STT Service (Speech-to-Text)
+
+The STT service provides Whisper and Voxtral transcription:
+
+```bash
+# Setup (first time)
+./scripts/mac-mini/setup-stt.sh
+
+# Check status
+curl http://localhost:3020/health
+
+# Transcribe audio
+curl -X POST http://localhost:3020/transcribe \
+  -F "file=@audio.mp3" \
+  -F "language=de"
+
+# View logs
+tail -f /tmp/manacore-stt.log
+```
+
+**Available endpoints:**
+- `POST /transcribe` - Whisper transcription (recommended)
+- `POST /transcribe/voxtral` - Voxtral transcription
+- `POST /transcribe/auto` - Auto-select model
+- `GET /health` - Health check
+- `GET /models` - List available models
