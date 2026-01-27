@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
-	import { browser } from '$app/environment';
+	import { browser, dev } from '$app/environment';
 	import { LoginPage } from '@manacore/shared-auth-ui';
 	import { getLoginTranslations } from '@manacore/shared-i18n';
 	import { ChatLogo } from '@manacore/shared-branding';
@@ -10,6 +10,10 @@
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import '$lib/i18n';
+
+	// Dev credentials - pre-filled in development mode
+	const DEV_EMAIL = 'dev@manacore.local';
+	const DEV_PASSWORD = 'devpassword123';
 
 	// Get redirect URL from query params or sessionStorage (set by AuthGateModal in guest mode)
 	const redirectTo = $derived.by(() => {
@@ -34,7 +38,10 @@
 
 	// Read verification status from query params (set after email verification)
 	const verified = $derived($page.url.searchParams.get('verified') === 'true');
-	const initialEmail = $derived($page.url.searchParams.get('email') || '');
+
+	// In dev mode, pre-fill with dev credentials unless email is provided via query param
+	const initialEmail = $derived($page.url.searchParams.get('email') || (dev ? DEV_EMAIL : ''));
+	const initialPassword = $derived(dev ? DEV_PASSWORD : '');
 
 	async function handleSignIn(email: string, password: string) {
 		return authStore.signIn(email, password);
@@ -61,6 +68,7 @@
 	{translations}
 	{verified}
 	{initialEmail}
+	{initialPassword}
 >
 	{#snippet headerControls()}
 		<LanguageSelector />

@@ -80,6 +80,8 @@
 		verified?: boolean;
 		/** Pre-fill email field (e.g., after email verification) */
 		initialEmail?: string;
+		/** Pre-fill password field (for dev mode) */
+		initialPassword?: string;
 	}
 
 	let {
@@ -102,6 +104,7 @@
 		translations = {},
 		verified = false,
 		initialEmail = '',
+		initialPassword = '',
 	}: Props = $props();
 
 	const t = $derived({ ...defaultTranslations, ...translations });
@@ -110,7 +113,7 @@
 	let error = $state<string | null>(null);
 	let errorField = $state<'email' | 'password' | 'general' | null>(null);
 	let email = $state(initialEmail);
-	let password = $state('');
+	let password = $state(initialPassword);
 	let showPassword = $state(false);
 	let rememberMe = $state(false);
 	let showSuccess = $state(false);
