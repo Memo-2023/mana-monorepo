@@ -101,7 +101,7 @@ async function bootstrap() {
 	await app.listen(port);
 
 	logger.log(`Todo API is running on: http://localhost:${port}`);
-	logger.log(`Health check: http://localhost:${port}/api/v1/health`);
+	logger.log(`Health check: http://localhost:${port}/health`);
 }
 
 bootstrap();
