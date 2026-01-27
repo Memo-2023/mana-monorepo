@@ -351,7 +351,7 @@ export function formatHelpMessage(): string {
  */
 export function formatStatusMessage(
 	isLinked: boolean,
-	username?: string,
+	username?: string | null,
 	lastActive?: Date
 ): string {
 	if (!isLinked) {
