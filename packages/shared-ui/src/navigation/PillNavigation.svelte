@@ -53,6 +53,7 @@
 		CreditCard,
 		Buildings,
 		User,
+		Scales,
 	} from '@manacore/shared-icons';
 
 	// Map icon names to Phosphor components
@@ -103,6 +104,7 @@
 		palette: Palette,
 		creditCard: CreditCard,
 		building: Buildings,
+		scale: Scales,
 	};
 
 	// Convert app items to dropdown items (will be computed as derived)

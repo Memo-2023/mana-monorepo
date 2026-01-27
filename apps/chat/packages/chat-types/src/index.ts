@@ -45,7 +45,7 @@ export interface AIModel {
 	id: string;
 	name: string;
 	description?: string;
-	provider: 'gemini' | 'azure' | 'openai';
+	provider: 'gemini' | 'azure' | 'openai' | 'ollama' | 'openrouter';
 	parameters: AIModelParameters;
 	isActive: boolean;
 	isDefault: boolean;
@@ -124,4 +124,17 @@ export interface Document {
 
 export interface DocumentWithConversation extends Document {
 	conversationTitle: string;
+}
+
+// Model Comparison Types
+export type CompareModelStatus = 'pending' | 'loading' | 'complete' | 'error';
+
+export interface CompareModelResult {
+	modelId: string;
+	modelName: string;
+	status: CompareModelStatus;
+	response?: string;
+	error?: string;
+	duration?: number;
+	usage?: TokenUsage;
 }
