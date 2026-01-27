@@ -1,3 +1,4 @@
+import { browser } from '$app/environment';
 import type { ManaUser } from '$lib/types/auth';
 import { authService, tokenManager } from '$lib/auth';
 import type { UserData } from '$lib/auth';
@@ -95,7 +96,9 @@ export const authStore = {
 	 * Sign up with email and password
 	 */
 	async signUp(email: string, password: string) {
-		const result = await authService.signUp(email, password);
+		// Pass the current app URL for post-verification redirect
+		const sourceAppUrl = browser ? window.location.origin : undefined;
+		const result = await authService.signUp(email, password, undefined, sourceAppUrl);
 		if (result.success && !result.needsVerification) {
 			const userData = await authService.getUserFromToken();
 			user = toManaUser(userData);

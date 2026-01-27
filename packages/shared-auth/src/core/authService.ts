@@ -107,12 +107,21 @@ export function createAuthService(config: AuthServiceConfig) {
 		 * @param email User email
 		 * @param password User password
 		 * @param referralCode Optional referral code for bonus credits
+		 * @param sourceAppUrl Optional URL of the app where the user is registering
 		 */
-		async signUp(email: string, password: string, referralCode?: string): Promise<AuthResult> {
+		async signUp(
+			email: string,
+			password: string,
+			referralCode?: string,
+			sourceAppUrl?: string
+		): Promise<AuthResult> {
 			try {
 				const body: Record<string, string> = { email, password };
 				if (referralCode) {
 					body.referralCode = referralCode;
+				}
+				if (sourceAppUrl) {
+					body.sourceAppUrl = sourceAppUrl;
 				}
 
 				const response = await fetch(`${baseUrl}${endpoints.signUp}`, {

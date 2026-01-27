@@ -32,6 +32,7 @@ import { ReferralCodeService } from '../../referrals/services/referral-code.serv
 import { ReferralTierService } from '../../referrals/services/referral-tier.service';
 import { ReferralTrackingService } from '../../referrals/services/referral-tracking.service';
 import { hasUser, hasToken, hasMember, hasMembers, hasSession } from '../types/better-auth.types';
+import { sourceAppStore } from '../stores/source-app.store';
 import type {
 	RegisterB2CDto,
 	RegisterB2BDto,
@@ -125,6 +126,11 @@ export class BetterAuthService {
 	 */
 	async registerB2C(dto: RegisterB2CDto): Promise<RegisterB2CResult> {
 		try {
+			// Store source app URL before registration (for email verification redirect)
+			if (dto.sourceAppUrl) {
+				sourceAppStore.set(dto.email, dto.sourceAppUrl);
+			}
+
 			// Create user via Better Auth
 			const result = await this.auth.api.signUpEmail({
 				body: {
@@ -945,9 +951,9 @@ export class BetterAuthService {
 	 * Uses Better Auth's verifyEmail API.
 	 *
 	 * @param token - Verification token from email link
-	 * @returns Success status
+	 * @returns Success status and user email
 	 */
-	async verifyEmail(token: string): Promise<{ success: boolean; error?: string }> {
+	async verifyEmail(token: string): Promise<{ success: boolean; email?: string; error?: string }> {
 		try {
 			// Better Auth's verifyEmail method
 			// See: https://www.better-auth.com/docs/authentication/email-verification
@@ -959,8 +965,12 @@ export class BetterAuthService {
 
 			console.log('[verifyEmail] Result:', result);
 
+			// Extract email from result if available
+			const email = result?.user?.email || result?.email;
+
 			return {
 				success: true,
+				email,
 			};
 		} catch (error: unknown) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -1018,6 +1028,23 @@ export class BetterAuthService {
 			console.error('[getJwks] Error:', error);
 			return { keys: [] };
 		}
+	}
+
+	// =========================================================================
+	// Source App URL Methods
+	// =========================================================================
+
+	/**
+	 * Get and remove source app URL for an email
+	 *
+	 * Used after email verification to redirect user to the correct app.
+	 * The entry is deleted after retrieval to prevent re-use.
+	 *
+	 * @param email - User's email address
+	 * @returns Source app URL or null if not found
+	 */
+	getSourceAppUrl(email: string): string | null {
+		return sourceAppStore.getAndDelete(email);
 	}
 
 	// =========================================================================

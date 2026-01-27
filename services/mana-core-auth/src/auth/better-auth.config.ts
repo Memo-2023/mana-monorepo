@@ -27,6 +27,7 @@ import {
 	sendInvitationEmail,
 	sendVerificationEmail,
 } from '../email/email.service';
+import { sourceAppStore } from './stores/source-app.store';
 
 /**
  * JWT Custom Payload Interface
@@ -117,6 +118,9 @@ export function createBetterAuth(databaseUrl: string) {
 		 *
 		 * Sends verification email when user registers.
 		 * User must verify email before they can log in.
+		 *
+		 * The verification URL is modified to include redirectTo parameter
+		 * so users are redirected back to the app they registered from.
 		 */
 		emailVerification: {
 			sendOnSignUp: true,
@@ -128,7 +132,20 @@ export function createBetterAuth(databaseUrl: string) {
 				user: { email: string; name: string };
 				url: string;
 			}) => {
-				await sendVerificationEmail(user.email, url, user.name);
+				// Check if we have a source app URL stored for this user
+				// Note: We get the URL without deleting it here since it might be needed
+				// during the verification process in the passthrough controller
+				const sourceAppUrl = sourceAppStore.get(user.email);
+
+				// Modify verification URL to include redirectTo parameter
+				let verificationUrl = url;
+				if (sourceAppUrl) {
+					const urlObj = new URL(url);
+					urlObj.searchParams.set('redirectTo', sourceAppUrl);
+					verificationUrl = urlObj.toString();
+				}
+
+				await sendVerificationEmail(user.email, verificationUrl, user.name);
 			},
 		},
 

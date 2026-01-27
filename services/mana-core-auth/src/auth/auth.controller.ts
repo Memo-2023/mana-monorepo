@@ -62,6 +62,7 @@ export class AuthController {
 			email: registerDto.email,
 			password: registerDto.password,
 			name: registerDto.name || '',
+			sourceAppUrl: registerDto.sourceAppUrl,
 		});
 	}
 
