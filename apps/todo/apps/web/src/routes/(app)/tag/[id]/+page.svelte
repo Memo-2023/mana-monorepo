@@ -7,13 +7,9 @@
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { labelsStore } from '$lib/stores/labels.svelte';
 	import TaskList from '$lib/components/TaskList.svelte';
-	import TaskEditModal from '$lib/components/TaskEditModal.svelte';
 	import { TaskListSkeleton } from '$lib/components/skeletons';
-	import type { Task, Label } from '@todo/shared';
 
 	let isLoading = $state(true);
-	let editingTask = $state<Task | null>(null);
-	let showEditModal = $state(false);
 
 	// Get tag ID from URL
 	const tagId = $derived($page.params.id ?? '');
@@ -46,45 +42,6 @@
 
 		isLoading = false;
 	});
-
-	// Modal handlers
-	function openEditModal(task: Task) {
-		editingTask = task;
-		showEditModal = true;
-	}
-
-	function closeEditModal() {
-		showEditModal = false;
-		editingTask = null;
-	}
-
-	function handleSaveTask(data: Partial<Task>) {
-		if (!editingTask) return;
-
-		// Extract only the fields that updateTask accepts
-		const updateData = {
-			title: data.title,
-			description: data.description ?? undefined,
-			projectId: data.projectId,
-			dueDate: typeof data.dueDate === 'string' ? data.dueDate : data.dueDate?.toISOString(),
-			priority: data.priority,
-			status: data.status,
-			subtasks: data.subtasks ?? undefined,
-			recurrenceRule: data.recurrenceRule,
-		};
-
-		tasksStore.updateTask(editingTask.id, updateData).catch((error) => {
-			console.error('Failed to update task:', error);
-		});
-		closeEditModal();
-	}
-
-	function handleDeleteTask(taskId: string) {
-		tasksStore.deleteTask(taskId).catch((error) => {
-			console.error('Failed to delete task:', error);
-		});
-		closeEditModal();
-	}
 </script>
 
 <svelte:head>
@@ -141,7 +98,7 @@
 				<h2 class="section-title">
 					Offen ({incompleteTasks.length})
 				</h2>
-				<TaskList tasks={incompleteTasks} onEditTask={openEditModal} />
+				<TaskList tasks={incompleteTasks} />
 			</section>
 		{/if}
 
@@ -151,7 +108,7 @@
 				<h2 class="section-title completed">
 					Erledigt ({completedTasks.length})
 				</h2>
-				<TaskList tasks={completedTasks} showCompleted={true} onEditTask={openEditModal} />
+				<TaskList tasks={completedTasks} showCompleted={true} />
 			</section>
 		{/if}
 
@@ -161,17 +118,6 @@
 		</p>
 	{/if}
 </div>
-
-<!-- Task Edit Modal -->
-{#if editingTask}
-	<TaskEditModal
-		task={editingTask}
-		open={showEditModal}
-		onClose={closeEditModal}
-		onSave={handleSaveTask}
-		onDelete={handleDeleteTask}
-	/>
-{/if}
 
 <style>
 	.page-container {

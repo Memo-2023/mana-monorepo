@@ -2,17 +2,15 @@
 	import { onMount } from 'svelte';
 	import { format, addDays, subDays, startOfDay } from 'date-fns';
 	import { de } from 'date-fns/locale';
-	import { ListChecks, Sparkle, ArrowDown } from '@manacore/shared-icons';
+	import { Sparkle, ArrowDown } from '@manacore/shared-icons';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import TaskList from '$lib/components/TaskList.svelte';
 	import CollapsibleSection from '$lib/components/CollapsibleSection.svelte';
-	import TaskEditModal from '$lib/components/TaskEditModal.svelte';
 	import { TaskListSkeleton } from '$lib/components/skeletons';
-	import type { Task, UpdateTaskInput } from '@todo/shared';
+	import type { Task } from '@todo/shared';
 
 	let isLoading = $state(true);
-	let editingTask = $state<Task | null>(null);
 
 	onMount(async () => {
 		viewStore.setToday();
@@ -102,46 +100,6 @@
 	// Handle clicking a syntax example
 	function handleExampleClick(text: string) {
 		window.dispatchEvent(new CustomEvent('quick-input-set', { detail: { text } }));
-	}
-
-	// Modal handlers
-	function openEditModal(task: Task) {
-		editingTask = task;
-	}
-
-	function closeEditModal() {
-		editingTask = null;
-	}
-
-	async function handleSaveTask(data: UpdateTaskInput) {
-		if (!editingTask) return;
-
-		try {
-			// Update task - cast metadata to be compatible with store type
-			const updateData = {
-				...data,
-				metadata: data.metadata as { [key: string]: unknown } | null | undefined,
-			};
-			await tasksStore.updateTask(editingTask.id, updateData);
-
-			// Update labels if provided
-			if (data.labelIds !== undefined) {
-				await tasksStore.updateLabels(editingTask.id, data.labelIds);
-			}
-
-			closeEditModal();
-		} catch (error) {
-			console.error('Failed to save task:', error);
-		}
-	}
-
-	async function handleDeleteTask(taskId: string) {
-		try {
-			await tasksStore.deleteTask(taskId);
-			closeEditModal();
-		} catch (error) {
-			console.error('Failed to delete task:', error);
-		}
 	}
 
 	// Drag and drop handler - uses optimistic updates for smooth UX
@@ -236,7 +194,6 @@
 						enableDragDrop
 						dropTargetDate="overdue"
 						onTaskDrop={handleTaskDrop}
-						onEditTask={openEditModal}
 					/>
 				</CollapsibleSection>
 			{/if}
@@ -255,7 +212,6 @@
 						enableDragDrop
 						dropTargetDate={startOfDay(new Date())}
 						onTaskDrop={handleTaskDrop}
-						onEditTask={openEditModal}
 					/>
 				</CollapsibleSection>
 			{/if}
@@ -274,7 +230,6 @@
 						enableDragDrop
 						dropTargetDate={tomorrowDate}
 						onTaskDrop={handleTaskDrop}
-						onEditTask={openEditModal}
 					/>
 				</CollapsibleSection>
 			{/if}
@@ -299,7 +254,6 @@
 									enableDragDrop
 									dropTargetDate={group.date}
 									onTaskDrop={handleTaskDrop}
-									onEditTask={openEditModal}
 								/>
 							</div>
 						{/each}
@@ -322,7 +276,6 @@
 						dropTargetDate="completed"
 						onTaskDrop={handleTaskDrop}
 						showCompleted
-						onEditTask={openEditModal}
 					/>
 				</CollapsibleSection>
 			{/if}
@@ -339,17 +292,6 @@
 		</div>
 	{/if}
 </div>
-
-<!-- Task Edit Modal -->
-{#if editingTask}
-	<TaskEditModal
-		task={editingTask}
-		open={true}
-		onClose={closeEditModal}
-		onSave={handleSaveTask}
-		onDelete={handleDeleteTask}
-	/>
-{/if}
 
 <style>
 	.unified-view {

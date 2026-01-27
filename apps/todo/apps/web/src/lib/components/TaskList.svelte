@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID } from 'svelte-dnd-action';
-	import type { Task } from '@todo/shared';
+	import type { Task, UpdateTaskInput } from '@todo/shared';
 	import TaskItem from './TaskItem.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 
@@ -21,6 +21,43 @@
 		onEditTask,
 		onTaskDrop,
 	}: Props = $props();
+
+	// Track which task is expanded for inline editing
+	let expandedTaskId = $state<string | null>(null);
+
+	function handleExpandTask(taskId: string) {
+		// Toggle - if same task clicked, collapse it
+		if (expandedTaskId === taskId) {
+			expandedTaskId = null;
+		} else {
+			expandedTaskId = taskId;
+		}
+	}
+
+	function handleCollapseTask() {
+		expandedTaskId = null;
+	}
+
+	async function handleSaveTask(taskId: string, data: UpdateTaskInput) {
+		try {
+			// Update task
+			const updateData = {
+				...data,
+				metadata: data.metadata as { [key: string]: unknown } | null | undefined,
+			};
+			await tasksStore.updateTask(taskId, updateData);
+
+			// Update labels if provided
+			if (data.labelIds !== undefined) {
+				await tasksStore.updateLabels(taskId, data.labelIds);
+			}
+
+			// Collapse after save
+			expandedTaskId = null;
+		} catch (error) {
+			console.error('Failed to save task:', error);
+		}
+	}
 
 	// Local mutable state for dnd-zone
 	let items = $state<Task[]>([]);
@@ -111,9 +148,12 @@
 				{task}
 				{showCompleted}
 				animateComplete={animatingTaskId === task.id}
+				isExpanded={expandedTaskId === task.id}
 				onToggleComplete={() => handleToggleComplete(task)}
 				onDelete={() => handleDelete(task.id)}
-				onEdit={onEditTask ? () => onEditTask(task) : undefined}
+				onExpand={() => handleExpandTask(task.id)}
+				onCollapse={handleCollapseTask}
+				onSave={(data) => handleSaveTask(task.id, data)}
 			/>
 		{/each}
 		{#if items.length === 0}
@@ -129,9 +169,12 @@
 				{task}
 				{showCompleted}
 				animateComplete={animatingTaskId === task.id}
+				isExpanded={expandedTaskId === task.id}
 				onToggleComplete={() => handleToggleComplete(task)}
 				onDelete={() => handleDelete(task.id)}
-				onEdit={onEditTask ? () => onEditTask(task) : undefined}
+				onExpand={() => handleExpandTask(task.id)}
+				onCollapse={handleCollapseTask}
+				onSave={(data) => handleSaveTask(task.id, data)}
 			/>
 		{/each}
 	</div>
@@ -140,7 +183,7 @@
 <style>
 	.task-list {
 		min-height: 60px;
-		padding: 0.25rem;
+		padding: 0;
 		border-radius: 0.5rem;
 		transition: background-color 0.15s ease;
 	}

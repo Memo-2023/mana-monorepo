@@ -523,7 +523,6 @@
 	.main-content {
 		transition: all 300ms ease;
 		position: relative;
-		z-index: 0;
 		/* Space for QuickInputBar at bottom */
 		padding-bottom: calc(80px + env(safe-area-inset-bottom));
 	}
@@ -554,8 +553,6 @@
 		margin-left: auto;
 		margin-right: auto;
 		padding: 1rem;
-		position: relative;
-		z-index: 0;
 	}
 
 	.content-wrapper.full-width {

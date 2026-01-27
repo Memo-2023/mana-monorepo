@@ -385,7 +385,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		z-index: 50;
+		z-index: 9995;
 		padding: 4rem 2rem;
 	}
 
@@ -409,19 +409,18 @@
 		border: 1px solid rgba(255, 255, 255, 0.15);
 	}
 
-	/* Mobile: Full screen from bottom, above QuickAdd bar */
+	/* Mobile: Full screen from bottom, modal covers all UI elements */
 	@media (max-width: 640px) {
 		.modal-backdrop {
 			align-items: flex-end;
 			padding: 0;
-			/* QuickAdd is at bottom: 70px + ~60px height = 130px, plus PillNav */
-			padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 140px);
 		}
 
 		.modal-container {
 			max-width: 100%;
-			max-height: calc(100vh - 160px); /* Account for QuickAdd + PillNav */
+			max-height: calc(100vh - 60px - env(safe-area-inset-top, 0px));
 			border-radius: 1.5rem 1.5rem 0 0;
+			margin-bottom: env(safe-area-inset-bottom, 0px);
 		}
 	}
 
