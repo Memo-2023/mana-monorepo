@@ -191,28 +191,43 @@ fi
 
 echo ""
 echo "Auth & Dashboard:"
-check_service "Auth API" "http://localhost:3001/api/v1/health"
-check_service "Dashboard Web" "http://localhost:5173/"
+check_service "Auth API" "http://localhost:3001/health"
+check_service "Dashboard Web" "http://localhost:5173/health"
 
 echo ""
 echo "Chat:"
-check_service "Chat Backend" "http://localhost:3002/api/v1/health"
-check_service "Chat Web" "http://localhost:3000/"
+check_service "Chat Backend" "http://localhost:3002/health"
+check_service "Chat Web" "http://localhost:3000/health"
 
 echo ""
 echo "Todo:"
-check_service "Todo Backend" "http://localhost:3018/api/v1/health"
-check_service "Todo Web" "http://localhost:5188/"
+check_service "Todo Backend" "http://localhost:3018/health"
+check_service "Todo Web" "http://localhost:5188/health"
 
 echo ""
 echo "Calendar:"
-check_service "Calendar Backend" "http://localhost:3016/api/v1/health"
-check_service "Calendar Web" "http://localhost:5186/"
+check_service "Calendar Backend" "http://localhost:3016/health"
+check_service "Calendar Web" "http://localhost:5186/health"
 
 echo ""
 echo "Clock:"
-check_service "Clock Backend" "http://localhost:3017/api/v1/health"
-check_service "Clock Web" "http://localhost:5187/"
+check_service "Clock Backend" "http://localhost:3017/health"
+check_service "Clock Web" "http://localhost:5187/health"
+
+echo ""
+echo "Contacts:"
+check_service "Contacts Backend" "http://localhost:3015/health"
+check_service "Contacts Web" "http://localhost:5184/health"
+
+echo ""
+echo "Storage:"
+check_service "Storage Backend" "http://localhost:3019/api/v1/health"
+check_service "Storage Web" "http://localhost:5185/health"
+
+echo ""
+echo "Presi:"
+check_service "Presi Backend" "http://localhost:3008/api/health"
+check_service "Presi Web" "http://localhost:5178/health"
 
 echo ""
 echo "Cloudflare Tunnel:"
