@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, RequestMethod } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
@@ -83,7 +83,13 @@ async function bootstrap() {
 	// Better Auth generates verification URLs with /api/auth/* prefix
 	// OIDC Provider requires routes without prefix: /.well-known/*, /api/oidc/*
 	app.setGlobalPrefix('api/v1', {
-		exclude: ['metrics', 'health', 'api/auth/(.*)', '.well-known/(.*)', 'api/oidc/(.*)'],
+		exclude: [
+			{ path: 'metrics', method: RequestMethod.ALL },
+			{ path: 'health', method: RequestMethod.ALL },
+			{ path: 'api/auth/(.*)', method: RequestMethod.ALL },
+			{ path: '.well-known/(.*)', method: RequestMethod.ALL },
+			{ path: 'api/oidc/(.*)', method: RequestMethod.ALL },
+		],
 	});
 
 	const port = configService.get<number>('port') || 3001;
