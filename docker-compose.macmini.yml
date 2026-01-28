@@ -976,6 +976,35 @@ services:
       start_period: 40s
 
   # ============================================
+  # Matrix Todo Bot (GDPR-compliant Task Management)
+  # ============================================
+
+  matrix-todo-bot:
+    image: matrix-todo-bot:latest
+    container_name: manacore-matrix-todo-bot
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3314
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_TODO_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_TODO_BOT_ROOMS:-}
+    volumes:
+      - matrix_todo_bot_data:/app/data
+    ports:
+      - "3314:3314"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3314/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
   # Auto-Update (Watchtower)
   # ============================================
 
@@ -1023,3 +1052,5 @@ volumes:
     name: manacore-matrix-stats-bot
   matrix_project_doc_bot_data:
     name: manacore-matrix-project-doc-bot
+  matrix_todo_bot_data:
+    name: manacore-matrix-todo-bot
