@@ -1,5 +1,6 @@
 # Build stage
-FROM node:20-alpine AS builder
+# Using node:20-slim instead of alpine for DuckDB glibc compatibility
+FROM node:20-slim AS builder
 
 # Install pnpm
 RUN npm install -g pnpm@9.15.0
@@ -21,7 +22,8 @@ COPY services/mana-core-auth/nest-cli.json ./
 RUN pnpm build
 
 # Production stage
-FROM node:20-alpine AS production
+# Using node:20-slim instead of alpine for DuckDB glibc compatibility
+FROM node:20-slim AS production
 
 # Install pnpm
 RUN npm install -g pnpm@9.15.0
@@ -43,9 +45,9 @@ COPY services/mana-core-auth/docker-entrypoint.sh ./
 # Make entrypoint executable
 RUN chmod +x ./docker-entrypoint.sh
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nestjs -u 1001
+# Create non-root user (Debian syntax)
+RUN groupadd -g 1001 nodejs && \
+    useradd -u 1001 -g nodejs nestjs
 
 # Change ownership
 RUN chown -R nestjs:nodejs /app
