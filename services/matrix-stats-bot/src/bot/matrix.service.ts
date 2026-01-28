@@ -6,8 +6,7 @@ import {
 	AutojoinRoomsMixin,
 	RichConsoleLogger,
 	LogService,
-	MessageEvent,
-	RoomEvent,
+	LogLevel,
 } from 'matrix-bot-sdk';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { UsersService } from '../users/users.service';
@@ -38,7 +37,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 
 		LogService.setLogger(new RichConsoleLogger());
-		LogService.setLevel(LogService.LogLevel.INFO);
+		LogService.setLevel(LogLevel.INFO);
 
 		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
 		this.client = new MatrixClient(homeserverUrl!, accessToken, storage);
@@ -61,10 +60,10 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleRoomMessage(roomId: string, event: RoomEvent<MessageEvent>) {
+	private async handleRoomMessage(roomId: string, event: any) {
 		if (event.sender === this.botUserId) return;
 
-		const content = event.content;
+		const content = event.content as { msgtype?: string; body?: string };
 		if (content.msgtype !== 'm.text') return;
 
 		const body = content.body;

@@ -6,8 +6,7 @@ import {
 	AutojoinRoomsMixin,
 	RichConsoleLogger,
 	LogService,
-	MessageEvent,
-	RoomEvent,
+	LogLevel,
 } from 'matrix-bot-sdk';
 import { OllamaService } from '../ollama/ollama.service';
 import { SYSTEM_PROMPTS } from '../config/configuration';
@@ -45,7 +44,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 
 		// Setup logging
 		LogService.setLogger(new RichConsoleLogger());
-		LogService.setLevel(LogService.LogLevel.INFO);
+		LogService.setLevel(LogLevel.INFO);
 
 		// Storage for sync token persistence
 		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
@@ -91,7 +90,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		return this.sessions.get(senderId)!;
 	}
 
-	private async handleRoomMessage(roomId: string, event: RoomEvent<MessageEvent>) {
+	private async handleRoomMessage(roomId: string, event: any) {
 		// Ignore messages from self
 		if (event.sender === this.botUserId) return;
 
@@ -102,7 +101,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 
 		// Only handle text messages
-		const content = event.content;
+		const content = event.content as { msgtype?: string; body?: string };
 		if (content.msgtype !== 'm.text') return;
 
 		const body = content.body;
@@ -151,7 +150,10 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 				break;
 
 			default:
-				await this.sendMessage(roomId, `Unbekannter Befehl: !${command}\n\nVerwende !help für eine Liste der Befehle.`);
+				await this.sendMessage(
+					roomId,
+					`Unbekannter Befehl: !${command}\n\nVerwende !help für eine Liste der Befehle.`
+				);
 		}
 	}
 
@@ -197,13 +199,19 @@ Schreibe einfach eine Nachricht und ich antworte!
 			})
 			.join('\n');
 
-		await this.sendMessage(roomId, `**Verfügbare Modelle:**\n\n${modelList}\n\nWechseln mit: \`!model [name]\``);
+		await this.sendMessage(
+			roomId,
+			`**Verfügbare Modelle:**\n\n${modelList}\n\nWechseln mit: \`!model [name]\``
+		);
 	}
 
 	private async setModel(roomId: string, sender: string, modelName: string) {
 		if (!modelName) {
 			const session = this.getSession(sender);
-			await this.sendMessage(roomId, `Aktuelles Modell: \`${session.model}\`\n\nVerwendung: \`!model gemma3:4b\``);
+			await this.sendMessage(
+				roomId,
+				`Aktuelles Modell: \`${session.model}\`\n\nVerwendung: \`!model gemma3:4b\``
+			);
 			return;
 		}
 
@@ -212,7 +220,10 @@ Schreibe einfach eine Nachricht und ich antworte!
 
 		if (!exists) {
 			const available = models.map((m) => m.name).join(', ');
-			await this.sendMessage(roomId, `Modell "${modelName}" nicht gefunden.\n\nVerfügbar: ${available}`);
+			await this.sendMessage(
+				roomId,
+				`Modell "${modelName}" nicht gefunden.\n\nVerfügbar: ${available}`
+			);
 			return;
 		}
 
@@ -230,14 +241,21 @@ Schreibe einfach eine Nachricht und ich antworte!
 		if (!mode) {
 			const session = this.getSession(sender);
 			const currentMode =
-				Object.entries(SYSTEM_PROMPTS).find(([_, v]) => v === session.systemPrompt)?.[0] || 'custom';
-			await this.sendMessage(roomId, `Aktueller Modus: \`${currentMode}\`\n\nVerfügbar: ${availableModes.join(', ')}`);
+				Object.entries(SYSTEM_PROMPTS).find(([_, v]) => v === session.systemPrompt)?.[0] ||
+				'custom';
+			await this.sendMessage(
+				roomId,
+				`Aktueller Modus: \`${currentMode}\`\n\nVerfügbar: ${availableModes.join(', ')}`
+			);
 			return;
 		}
 
 		const normalizedMode = mode.toLowerCase();
 		if (!SYSTEM_PROMPTS[normalizedMode]) {
-			await this.sendMessage(roomId, `Unbekannter Modus: ${mode}\n\nVerfügbar: ${availableModes.join(', ')}`);
+			await this.sendMessage(
+				roomId,
+				`Unbekannter Modus: ${mode}\n\nVerfügbar: ${availableModes.join(', ')}`
+			);
 			return;
 		}
 
@@ -277,7 +295,7 @@ Schreibe einfach eine Nachricht und ich antworte!
 		const session = this.getSession(sender);
 
 		// Send typing indicator
-		await this.client.sendTyping(roomId, true, 30000);
+		await this.client.setTyping(roomId, true, 30000);
 
 		try {
 			// Add user message to history
@@ -300,12 +318,12 @@ Schreibe einfach eine Nachricht und ich antworte!
 			session.history.push({ role: 'assistant', content: response });
 
 			// Stop typing indicator
-			await this.client.sendTyping(roomId, false);
+			await this.client.setTyping(roomId, false);
 
 			// Send response (Matrix has higher message limits than Telegram)
 			await this.sendMessage(roomId, response);
 		} catch (error) {
-			await this.client.sendTyping(roomId, false);
+			await this.client.setTyping(roomId, false);
 			this.logger.error(`Error processing message:`, error);
 			const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
 			await this.sendMessage(roomId, `❌ Fehler: ${errorMessage}`);
@@ -325,16 +343,18 @@ Schreibe einfach eine Nachricht und ich antworte!
 	}
 
 	private markdownToHtml(markdown: string): string {
-		return markdown
-			// Code blocks
-			.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-			// Inline code
-			.replace(/`([^`]+)`/g, '<code>$1</code>')
-			// Bold
-			.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-			// Italic
-			.replace(/\*([^*]+)\*/g, '<em>$1</em>')
-			// Line breaks
-			.replace(/\n/g, '<br/>');
+		return (
+			markdown
+				// Code blocks
+				.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+				// Inline code
+				.replace(/`([^`]+)`/g, '<code>$1</code>')
+				// Bold
+				.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+				// Italic
+				.replace(/\*([^*]+)\*/g, '<em>$1</em>')
+				// Line breaks
+				.replace(/\n/g, '<br/>')
+		);
 	}
 }

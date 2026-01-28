@@ -27,7 +27,7 @@ export class TranscriptionService {
 		}
 
 		// Create a File-like object for the API
-		const file = new File([audioBuffer], 'audio.ogg', { type: 'audio/ogg' });
+		const file = new File([new Uint8Array(audioBuffer)], 'audio.ogg', { type: 'audio/ogg' });
 
 		const response = await this.openai.audio.transcriptions.create({
 			file,

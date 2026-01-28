@@ -6,8 +6,7 @@ import {
 	AutojoinRoomsMixin,
 	RichConsoleLogger,
 	LogService,
-	MessageEvent,
-	RoomEvent,
+	LogLevel,
 } from 'matrix-bot-sdk';
 import { ProjectService } from '../project/project.service';
 import { MediaService } from '../media/media.service';
@@ -44,7 +43,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 
 		LogService.setLogger(new RichConsoleLogger());
-		LogService.setLevel(LogService.LogLevel.INFO);
+		LogService.setLevel(LogLevel.INFO);
 
 		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
 		this.client = new MatrixClient(homeserverUrl!, accessToken, storage);
@@ -71,15 +70,15 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		return this.allowedUsers.includes(userId);
 	}
 
-	private async handleRoomMessage(roomId: string, event: RoomEvent<MessageEvent>) {
+	private async handleRoomMessage(roomId: string, event: any) {
 		if (event.sender === this.botUserId) return;
 		if (!this.isAllowed(event.sender)) return;
 
-		const content = event.content;
+		const content = event.content as { msgtype?: string; body?: string; url?: string; info?: any };
 		const msgtype = content.msgtype;
 
 		if (msgtype === 'm.text') {
-			const body = content.body;
+			const body = content.body || '';
 			if (body.startsWith('!')) {
 				await this.handleCommand(roomId, event.sender, body);
 			} else {
@@ -167,7 +166,10 @@ ${styles}
 
 	private async createProject(roomId: string, sender: string, name: string) {
 		if (!name) {
-			await this.sendMessage(roomId, 'Verwendung: `!new Projektname`\n\nBeispiel: `!new Gartenhaus-Renovierung`');
+			await this.sendMessage(
+				roomId,
+				'Verwendung: `!new Projektname`\n\nBeispiel: `!new Gartenhaus-Renovierung`'
+			);
 			return;
 		}
 
@@ -185,7 +187,10 @@ ${styles}
 			);
 		} catch (error) {
 			this.logger.error('Failed to create project:', error);
-			await this.sendMessage(roomId, `❌ Fehler: ${error instanceof Error ? error.message : 'Unbekannt'}`);
+			await this.sendMessage(
+				roomId,
+				`❌ Fehler: ${error instanceof Error ? error.message : 'Unbekannt'}`
+			);
 		}
 	}
 
@@ -208,12 +213,18 @@ ${styles}
 			})
 		);
 
-		await this.sendMessage(roomId, `**📂 Deine Projekte:**\n\n${projectList.join('\n\n')}\n\nWechseln mit: \`!switch [ID]\``);
+		await this.sendMessage(
+			roomId,
+			`**📂 Deine Projekte:**\n\n${projectList.join('\n\n')}\n\nWechseln mit: \`!switch [ID]\``
+		);
 	}
 
 	private async switchProject(roomId: string, sender: string, idPrefix: string) {
 		if (!idPrefix) {
-			await this.sendMessage(roomId, 'Verwendung: `!switch [ID]`\n\nZeige Projekte mit `!projects`');
+			await this.sendMessage(
+				roomId,
+				'Verwendung: `!switch [ID]`\n\nZeige Projekte mit `!projects`'
+			);
 			return;
 		}
 
@@ -278,7 +289,10 @@ ${styles}
 			.map(([key, value]) => `**${key}** - ${value.name}\n_${value.prompt.slice(0, 80)}..._`)
 			.join('\n\n');
 
-		await this.sendMessage(roomId, `**📝 Verfügbare Blog-Stile:**\n\n${styles}\n\nVerwendung: \`!generate [stil]\``);
+		await this.sendMessage(
+			roomId,
+			`**📝 Verfügbare Blog-Stile:**\n\n${styles}\n\nVerwendung: \`!generate [stil]\``
+		);
 	}
 
 	private async generateBlogpost(roomId: string, sender: string, style: string) {
@@ -300,18 +314,21 @@ ${styles}
 		}
 
 		await this.sendMessage(roomId, '🚀 Generiere Blogbeitrag...\n\nDas kann einen Moment dauern.');
-		await this.client.sendTyping(roomId, true, 60000);
+		await this.client.setTyping(roomId, true, 60000);
 
 		try {
 			const content = await this.generationService.generateBlogpost(projectId, selectedStyle);
-			await this.client.sendTyping(roomId, false);
+			await this.client.setTyping(roomId, false);
 
 			await this.sendMessage(roomId, content);
 			await this.sendMessage(roomId, '✅ Blogbeitrag erstellt!\n\nExportieren mit `!export`');
 		} catch (error) {
-			await this.client.sendTyping(roomId, false);
+			await this.client.setTyping(roomId, false);
 			this.logger.error('Generation failed:', error);
-			await this.sendMessage(roomId, `❌ Fehler: ${error instanceof Error ? error.message : 'Unbekannt'}`);
+			await this.sendMessage(
+				roomId,
+				`❌ Fehler: ${error instanceof Error ? error.message : 'Unbekannt'}`
+			);
 		}
 	}
 
@@ -324,7 +341,10 @@ ${styles}
 
 		const latest = await this.generationService.getLatestGeneration(projectId);
 		if (!latest) {
-			await this.sendMessage(roomId, 'Noch kein Blogbeitrag generiert.\n\nErstelle einen mit `!generate`');
+			await this.sendMessage(
+				roomId,
+				'Noch kein Blogbeitrag generiert.\n\nErstelle einen mit `!generate`'
+			);
 			return;
 		}
 
@@ -404,7 +424,13 @@ ${styles}
 			const contentType = content.info?.mimetype || 'audio/ogg';
 			const duration = Math.round((content.info?.duration || 0) / 1000);
 
-			const item = await this.mediaService.processVoice(projectId, buffer, contentType, mxcUrl, duration);
+			const item = await this.mediaService.processVoice(
+				projectId,
+				buffer,
+				contentType,
+				mxcUrl,
+				duration
+			);
 
 			const stats = await this.projectService.getStats(projectId);
 			let reply = `✅ Sprachnotiz gespeichert! (${stats.voices} gesamt)`;
