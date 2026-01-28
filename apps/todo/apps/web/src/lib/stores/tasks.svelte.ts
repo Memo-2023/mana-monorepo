@@ -1,13 +1,14 @@
 /**
  * Tasks Store - Manages task state using Svelte 5 runes
- * Supports both authenticated (cloud) and guest (session) modes
+ * Authenticated users: tasks from API
+ * Demo mode: static sample tasks to showcase the app
  */
 
 import type { Task, TaskPriority, TaskStatus, Subtask } from '@todo/shared';
 import * as tasksApi from '$lib/api/tasks';
 import { isToday, isPast, isFuture, startOfDay, addDays } from 'date-fns';
-import { sessionTasksStore } from './session-tasks.svelte';
 import { authStore } from './auth.svelte';
+import { generateDemoTasks, isDemoTask } from '$lib/data/demo-tasks';
 
 // State
 let tasks = $state<Task[]>([]);
@@ -117,16 +118,15 @@ export const tasksStore = {
 
 	/**
 	 * Fetch all tasks (incomplete + completed) for unified view
-	 * In guest mode, only shows session tasks
+	 * In demo mode, shows static sample tasks
 	 */
 	async fetchAllTasks() {
 		loading = true;
 		error = null;
 
-		// Guest mode: load session tasks only
+		// Demo mode: load static demo tasks
 		if (!authStore.isAuthenticated) {
-			sessionTasksStore.initialize();
-			tasks = sessionTasksStore.tasks;
+			tasks = generateDemoTasks();
 			loading = false;
 			return;
 		}
@@ -201,7 +201,7 @@ export const tasksStore = {
 
 	/**
 	 * Create a new task
-	 * If not authenticated, creates a session task (local only)
+	 * Requires authentication - demo mode shows auth gate
 	 */
 	async createTask(data: {
 		title: string;
@@ -215,18 +215,9 @@ export const tasksStore = {
 	}) {
 		error = null;
 
-		// Guest mode: create session task
+		// Demo mode: require authentication
 		if (!authStore.isAuthenticated) {
-			const sessionTask = sessionTasksStore.createTask({
-				title: data.title,
-				description: data.description,
-				projectId: data.projectId || 'session-inbox',
-				dueDate: data.dueDate,
-				priority: data.priority,
-				subtasks: data.subtasks as Subtask[],
-			});
-			tasks = [...tasks, sessionTask];
-			return sessionTask;
+			return { error: 'auth_required' as const };
 		}
 
 		// Authenticated: create via API
@@ -243,7 +234,7 @@ export const tasksStore = {
 
 	/**
 	 * Update an existing task
-	 * Handles both session tasks (local) and cloud tasks
+	 * Demo tasks require authentication
 	 */
 	async updateTask(
 		id: string,
@@ -268,14 +259,9 @@ export const tasksStore = {
 	) {
 		error = null;
 
-		// Session task: update locally
-		if (sessionTasksStore.isSessionTask(id)) {
-			const updated = sessionTasksStore.updateTask(id, data);
-			if (updated) {
-				tasks = tasks.map((t) => (t.id === id ? updated : t));
-				return updated;
-			}
-			throw new Error('Task not found');
+		// Demo task: require authentication
+		if (isDemoTask(id)) {
+			return { error: 'auth_required' as const };
 		}
 
 		// Cloud task: update via API
@@ -293,6 +279,7 @@ export const tasksStore = {
 	/**
 	 * Update task optimistically (for drag and drop)
 	 * Updates local state immediately, then syncs with server
+	 * Demo tasks require authentication
 	 */
 	async updateTaskOptimistic(
 		id: string,
@@ -301,6 +288,11 @@ export const tasksStore = {
 			isCompleted?: boolean;
 		}
 	) {
+		// Demo task: require authentication
+		if (isDemoTask(id)) {
+			return { error: 'auth_required' as const };
+		}
+
 		// Optimistic update - immediately update local state
 		const originalTask = tasks.find((t) => t.id === id);
 		if (!originalTask) return;
@@ -333,16 +325,14 @@ export const tasksStore = {
 
 	/**
 	 * Delete a task
-	 * Handles both session tasks (local) and cloud tasks
+	 * Demo tasks require authentication
 	 */
 	async deleteTask(id: string) {
 		error = null;
 
-		// Session task: delete locally
-		if (sessionTasksStore.isSessionTask(id)) {
-			sessionTasksStore.deleteTask(id);
-			tasks = tasks.filter((t) => t.id !== id);
-			return;
+		// Demo task: require authentication
+		if (isDemoTask(id)) {
+			return { error: 'auth_required' as const };
 		}
 
 		// Cloud task: delete via API
@@ -358,19 +348,14 @@ export const tasksStore = {
 
 	/**
 	 * Mark task as complete
-	 * Handles both session tasks (local) and cloud tasks
+	 * Demo tasks require authentication
 	 */
 	async completeTask(id: string) {
 		error = null;
 
-		// Session task: complete locally
-		if (sessionTasksStore.isSessionTask(id)) {
-			const completed = sessionTasksStore.completeTask(id);
-			if (completed) {
-				tasks = tasks.map((t) => (t.id === id ? completed : t));
-				return completed;
-			}
-			throw new Error('Task not found');
+		// Demo task: require authentication
+		if (isDemoTask(id)) {
+			return { error: 'auth_required' as const };
 		}
 
 		// Cloud task: complete via API
@@ -387,19 +372,14 @@ export const tasksStore = {
 
 	/**
 	 * Mark task as incomplete
-	 * Handles both session tasks (local) and cloud tasks
+	 * Demo tasks require authentication
 	 */
 	async uncompleteTask(id: string) {
 		error = null;
 
-		// Session task: uncomplete locally
-		if (sessionTasksStore.isSessionTask(id)) {
-			const uncompleted = sessionTasksStore.uncompleteTask(id);
-			if (uncompleted) {
-				tasks = tasks.map((t) => (t.id === id ? uncompleted : t));
-				return uncompleted;
-			}
-			throw new Error('Task not found');
+		// Demo task: require authentication
+		if (isDemoTask(id)) {
+			return { error: 'auth_required' as const };
 		}
 
 		// Cloud task: uncomplete via API
@@ -491,63 +471,9 @@ export const tasksStore = {
 	},
 
 	/**
-	 * Check if a task is a session task (local only)
+	 * Check if a task is a demo task (static sample data)
 	 */
-	isSessionTask(taskId: string) {
-		return sessionTasksStore.isSessionTask(taskId);
-	},
-
-	/**
-	 * Migrate session tasks to cloud after login
-	 * Call this after successful authentication
-	 */
-	async migrateSessionTasks(defaultProjectId?: string) {
-		const sessionTasks = sessionTasksStore.getAllTasks();
-		if (sessionTasks.length === 0) return { migrated: 0, failed: 0 };
-
-		let migrated = 0;
-		let failed = 0;
-
-		for (const sessionTask of sessionTasks) {
-			try {
-				await tasksApi.createTask({
-					title: sessionTask.title,
-					description: sessionTask.description || undefined,
-					projectId: defaultProjectId || undefined,
-					dueDate: sessionTask.dueDate ? String(sessionTask.dueDate) : undefined,
-					priority: sessionTask.priority,
-					subtasks: sessionTask.subtasks?.map((s) => ({
-						title: s.title,
-						isCompleted: s.isCompleted,
-						order: s.order,
-					})),
-				});
-				migrated++;
-			} catch {
-				failed++;
-			}
-		}
-
-		// Clear session tasks after migration
-		if (migrated > 0) {
-			sessionTasksStore.clear();
-			console.log(`Migrated ${migrated} tasks to cloud`);
-		}
-
-		return { migrated, failed };
-	},
-
-	/**
-	 * Get count of pending session tasks
-	 */
-	get sessionTaskCount() {
-		return sessionTasksStore.count;
-	},
-
-	/**
-	 * Check if there are pending session tasks to migrate
-	 */
-	get hasSessionTasks() {
-		return sessionTasksStore.count > 0;
+	isDemoTask(taskId: string) {
+		return isDemoTask(taskId);
 	},
 };

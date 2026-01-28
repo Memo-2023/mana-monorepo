@@ -62,10 +62,16 @@
 	}
 
 	async function handleToggleComplete(task: Task) {
+		let result;
 		if (task.isCompleted) {
-			await tasksStore.uncompleteTask(task.id);
+			result = await tasksStore.uncompleteTask(task.id);
 		} else {
-			await tasksStore.completeTask(task.id);
+			result = await tasksStore.completeTask(task.id);
+		}
+
+		// Show auth gate if authentication required (demo mode)
+		if (result && 'error' in result && result.error === 'auth_required') {
+			window.dispatchEvent(new CustomEvent('show-auth-gate'));
 		}
 	}
 
@@ -85,7 +91,12 @@
 		if (data.metadata !== undefined) updateData.metadata = data.metadata;
 		if (data.labels !== undefined) updateData.labelIds = data.labels?.map((l) => l.id);
 
-		await tasksStore.updateTask(task.id, updateData);
+		const result = await tasksStore.updateTask(task.id, updateData);
+
+		// Show auth gate if authentication required (demo mode)
+		if (result && 'error' in result && result.error === 'auth_required') {
+			window.dispatchEvent(new CustomEvent('show-auth-gate'));
+		}
 	}
 
 	async function handleDeleteTask(task: Task) {

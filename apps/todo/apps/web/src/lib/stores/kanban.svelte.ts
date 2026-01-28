@@ -5,6 +5,7 @@
 import type { KanbanBoard, KanbanColumn, Task } from '@todo/shared';
 import * as kanbanApi from '$lib/api/kanban';
 import * as tasksApi from '$lib/api/tasks';
+import { authStore } from './auth.svelte';
 
 // Board state
 let boards = $state<KanbanBoard[]>([]);
@@ -418,9 +419,16 @@ export const kanbanStore = {
 
 	/**
 	 * Create a new task in a specific column
+	 * Requires authentication - demo mode shows auth gate
 	 */
 	async createTaskInColumn(columnId: string, title: string, projectId?: string) {
 		error = null;
+
+		// Demo mode: require authentication
+		if (!authStore.isAuthenticated) {
+			return { error: 'auth_required' as const };
+		}
+
 		try {
 			// Find the column to get its default status
 			const column = columns.find((c) => c.id === columnId);

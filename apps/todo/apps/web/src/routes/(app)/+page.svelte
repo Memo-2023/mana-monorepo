@@ -103,28 +103,34 @@
 	}
 
 	// Drag and drop handler - uses optimistic updates for smooth UX
-	function handleTaskDrop(taskId: string, targetDate: Date | 'completed' | 'overdue') {
+	async function handleTaskDrop(taskId: string, targetDate: Date | 'completed' | 'overdue') {
 		const task = tasksStore.tasks.find((t) => t.id === taskId);
 		if (!task) return;
 
+		let result;
 		if (targetDate === 'completed') {
 			// Mark task as completed (optimistic)
 			if (!task.isCompleted) {
-				tasksStore.updateTaskOptimistic(taskId, { isCompleted: true });
+				result = await tasksStore.updateTaskOptimistic(taskId, { isCompleted: true });
 			}
 		} else if (targetDate === 'overdue') {
 			// Set to yesterday (optimistic)
 			const yesterday = subDays(startOfDay(new Date()), 1);
-			tasksStore.updateTaskOptimistic(taskId, {
+			result = await tasksStore.updateTaskOptimistic(taskId, {
 				dueDate: yesterday.toISOString(),
 				isCompleted: task.isCompleted ? false : undefined,
 			});
 		} else {
 			// Set to specific date (optimistic)
-			tasksStore.updateTaskOptimistic(taskId, {
+			result = await tasksStore.updateTaskOptimistic(taskId, {
 				dueDate: targetDate.toISOString(),
 				isCompleted: task.isCompleted ? false : undefined,
 			});
+		}
+
+		// Show auth gate if authentication required (demo mode)
+		if (result && 'error' in result && result.error === 'auth_required') {
+			window.dispatchEvent(new CustomEvent('show-auth-gate'));
 		}
 	}
 </script>

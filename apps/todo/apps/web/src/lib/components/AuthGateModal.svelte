@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { sessionTasksStore } from '$lib/stores/session-tasks.svelte';
 
 	interface Props {
 		visible: boolean;
@@ -16,7 +15,7 @@
 		save: {
 			title: 'Anmelden um zu speichern',
 			description:
-				'Melde dich an, um deine Aufgaben in der Cloud zu speichern und auf allen Geräten zu synchronisieren.',
+				'Im Demo-Modus kannst du die App erkunden. Melde dich an, um eigene Aufgaben zu erstellen und zu speichern.',
 			icon: 'cloud',
 		},
 		sync: {
@@ -33,7 +32,6 @@
 	};
 
 	let currentMessage = $derived(messages[action]);
-	let sessionTaskCount = $derived(sessionTasksStore.count);
 
 	function handleLogin() {
 		// Store return URL for redirect after login
@@ -121,21 +119,7 @@
 				{currentMessage.description}
 			</p>
 
-			<!-- Session tasks info -->
-			{#if sessionTaskCount > 0}
-				<div class="bg-muted/50 mb-6 rounded-lg p-3 text-center text-sm">
-					<span class="text-muted-foreground">
-						Du hast <strong class="text-foreground">{sessionTaskCount}</strong>
-						{sessionTaskCount === 1 ? 'Aufgabe' : 'Aufgaben'} in dieser Sitzung erstellt.
-					</span>
-					<br />
-					<span class="text-muted-foreground text-xs">
-						Diese werden nach der Anmeldung in deinen Account übernommen.
-					</span>
-				</div>
-			{/if}
-
-			<!-- Buttons -->
+				<!-- Buttons -->
 			<div class="flex flex-col gap-3">
 				<button
 					onclick={handleLogin}
@@ -159,8 +143,8 @@
 
 			<!-- Info text -->
 			<p class="text-muted-foreground mt-4 text-center text-xs">
-				Du kannst weiterhin Aufgaben erstellen. Diese werden lokal gespeichert und gehen beim
-				Schließen des Tabs verloren.
+				Du kannst die Demo-Aufgaben ansehen, aber um eigene Aufgaben zu erstellen benötigst du ein
+				Konto.
 			</p>
 		</div>
 	</div>

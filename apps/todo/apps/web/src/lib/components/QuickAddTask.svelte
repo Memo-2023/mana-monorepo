@@ -60,12 +60,18 @@
 		isLoading = true;
 
 		try {
-			await tasksStore.createTask({
+			const result = await tasksStore.createTask({
 				title,
 				projectId: selectedProjectId,
 				dueDate: selectedDate.toISOString(),
 				priority: selectedPriority,
 			});
+
+			// Show auth gate if authentication required (demo mode)
+			if (result && 'error' in result && result.error === 'auth_required') {
+				window.dispatchEvent(new CustomEvent('show-auth-gate'));
+				return;
+			}
 
 			// Reset form
 			inputValue = '';

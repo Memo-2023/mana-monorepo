@@ -79,7 +79,12 @@
 		// Get projectId from current board if available
 		const currentBoard = kanbanStore.currentBoard;
 		const taskProjectId = currentBoard?.projectId ?? projectId;
-		await kanbanStore.createTaskInColumn(columnId, title, taskProjectId ?? undefined);
+		const result = await kanbanStore.createTaskInColumn(columnId, title, taskProjectId ?? undefined);
+
+		// Show auth gate if authentication required (demo mode)
+		if (result && 'error' in result && result.error === 'auth_required') {
+			window.dispatchEvent(new CustomEvent('show-auth-gate'));
+		}
 	}
 
 	async function handleTaskMove(taskId: string, toColumnId: string, order: number) {
