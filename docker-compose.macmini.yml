@@ -89,7 +89,7 @@ services:
       SMTP_USER: ${SMTP_USER:-94cde5002@smtp-brevo.com}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM: ManaCore <noreply@mana.how>
-      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://storage.mana.how,https://presi.mana.how
+      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://storage.mana.how,https://presi.mana.how,https://nutriphi.mana.how
       # DuckDB Analytics (Business Metrics)
       DUCKDB_PATH: /data/analytics/metrics.duckdb
     volumes:
@@ -529,6 +529,61 @@ services:
       - "5185:5185"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5185/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # NutriPhi App (AI Nutrition Tracking)
+  # ============================================
+
+  nutriphi-backend:
+    image: ghcr.io/memo-2023/nutriphi-backend:latest
+    container_name: nutriphi-backend
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3023
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/nutriphi
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      CORS_ORIGINS: https://nutriphi.mana.how,https://mana.how
+    ports:
+      - "3023:3023"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3023/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nutriphi-web:
+    image: ghcr.io/memo-2023/nutriphi-web:latest
+    container_name: nutriphi-web
+    restart: always
+    depends_on:
+      nutriphi-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5189
+      PUBLIC_BACKEND_URL: http://nutriphi-backend:3023
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://nutriphi-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5189:5189"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5189/health"]
       interval: 30s
       timeout: 10s
       retries: 3

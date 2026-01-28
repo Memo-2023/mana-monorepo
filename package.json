@@ -206,7 +206,7 @@
 		"deploy:landing:clock": "pnpm --filter @clock/landing build && npx wrangler pages deploy apps/clock/apps/landing/dist --project-name=clocks-landing",
 		"deploy:landing:mail": "pnpm --filter @mail/landing build && npx wrangler pages deploy apps/mail/apps/landing/dist --project-name=mail-landing",
 		"deploy:landing:moodlit": "pnpm --filter @moodlit/landing build && npx wrangler pages deploy apps/moodlit/apps/landing/dist --project-name=moodlit-landing",
-		"deploy:landing:all": "pnpm deploy:landing:calendar && pnpm deploy:landing:chat && pnpm deploy:landing:picture && pnpm deploy:landing:manacore && pnpm deploy:landing:manadeck && pnpm deploy:landing:zitare && pnpm deploy:landing:presi && pnpm deploy:landing:clock && pnpm deploy:landing:mail",
+		"deploy:landing:all": "pnpm deploy:landing:calendar && pnpm deploy:landing:chat && pnpm deploy:landing:picture && pnpm deploy:landing:manacore && pnpm deploy:landing:manadeck && pnpm deploy:landing:zitare && pnpm deploy:landing:presi && pnpm deploy:landing:clock && pnpm deploy:landing:mail && pnpm deploy:landing:nutriphi",
 		"cf:login": "npx wrangler login",
 		"cf:projects:list": "npx wrangler pages project list",
 		"cf:projects:create": "echo 'Creating Cloudflare Pages projects...' && npx wrangler pages project create chat-landing --production-branch=main && npx wrangler pages project create picture-landing --production-branch=main && npx wrangler pages project create manacore-landing --production-branch=main && npx wrangler pages project create manadeck-landing --production-branch=main && npx wrangler pages project create zitare-landing --production-branch=main",
