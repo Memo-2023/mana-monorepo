@@ -11,6 +11,7 @@ Dokumentation aller Telegram-Bots im ManaCore Monorepo.
 | [telegram-project-doc-bot](#telegram-project-doc-bot) | 3302 | Projektdokumentation & Blogpost-Generierung | ✅ Aktiv |
 | [telegram-calendar-bot](#telegram-calendar-bot) | 3303 | Kalender-Termine & Erinnerungen | 🚧 In Entwicklung |
 | [telegram-contacts-bot](#telegram-contacts-bot) | 3304 | Kontaktsuche & Geburtstags-Erinnerungen | 🚧 In Entwicklung |
+| [telegram-chat-bot](#telegram-chat-bot) | 3305 | AI-Chat mit verschiedenen Modellen | 🚧 In Entwicklung |
 
 ## Gemeinsame Architektur
 
