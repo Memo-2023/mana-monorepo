@@ -159,7 +159,7 @@ app_service_config_files: []
 
 report_stats: false
 enable_metrics: true
-metrics_port: 9000
+metrics_port: 9002
 
 # ============================================
 # Caching

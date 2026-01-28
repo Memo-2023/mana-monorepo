@@ -1,7 +1,7 @@
 /**
  * Centralized logging utility
  * - Development: Logs to console
- * - Production: Can be integrated with Sentry, LogRocket, etc.
+ * - Production: Logs to console (can be extended for custom error tracking)
  */
 
 const isDevelopment = __DEV__;
@@ -38,7 +38,7 @@ export const logger = {
 	 */
 	error: (...args: any[]) => {
 		console.error('[ERROR]', ...args);
-		// TODO: Send to error tracking service (Sentry, etc.)
+		// In production: can be extended for custom error tracking
 	},
 
 	/**

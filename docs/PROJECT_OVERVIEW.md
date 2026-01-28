@@ -226,7 +226,7 @@ Memoro transformiert Audio-Aufnahmen in strukturierte, durchsuchbare Inhalte mit
 | Audio      | expo-audio, Azure Speech Services |
 | State      | Zustand                           |
 | Payments   | RevenueCat                        |
-| Analytics  | PostHog, Sentry                   |
+| Analytics  | Umami (self-hosted)               |
 | i18n       | react-i18next (32 Sprachen)       |
 
 #### Projektstruktur

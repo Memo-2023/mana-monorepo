@@ -774,7 +774,7 @@ services:
       - synapse_data:/data
     ports:
       - "8008:8008"
-      - "9000:9000"
+      - "9002:9002"  # Metrics (9000 used by MinIO)
     healthcheck:
       test: ["CMD", "curl", "-fSs", "http://localhost:8008/health"]
       interval: 30s

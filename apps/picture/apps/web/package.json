@@ -33,7 +33,6 @@
 		"@picture/design-tokens": "workspace:*",
 		"@picture/shared": "workspace:*",
 		"konva": "^10.0.2",
-		"posthog-js": "^1.273.1",
 		"svelte-i18n": "^4.0.1"
 	},
 	"devDependencies": {
