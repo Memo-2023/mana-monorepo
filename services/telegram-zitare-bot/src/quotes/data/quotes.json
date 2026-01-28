@@ -1,0 +1,166 @@
+[
+	{
+		"id": "q001",
+		"text": "Das Leben ist das, was passiert, während du andere Pläne machst.",
+		"authorId": "a001"
+	},
+	{
+		"id": "q002",
+		"text": "Der einzige Weg, großartige Arbeit zu leisten, ist zu lieben, was man tut.",
+		"authorId": "a002"
+	},
+	{
+		"id": "q003",
+		"text": "In der Mitte der Schwierigkeit liegt die Möglichkeit.",
+		"authorId": "a003"
+	},
+	{
+		"id": "q004",
+		"text": "Sei du selbst die Veränderung, die du dir wünschst für diese Welt.",
+		"authorId": "a004"
+	},
+	{
+		"id": "q005",
+		"text": "Es ist nicht genug zu wissen – man muss auch anwenden. Es ist nicht genug zu wollen – man muss auch tun.",
+		"authorId": "a005"
+	},
+	{
+		"id": "q006",
+		"text": "Die Zukunft gehört denen, die an die Schönheit ihrer Träume glauben.",
+		"authorId": "a006"
+	},
+	{
+		"id": "q007",
+		"text": "Nicht weil es schwer ist, wagen wir es nicht, sondern weil wir es nicht wagen, ist es schwer.",
+		"authorId": "a007"
+	},
+	{
+		"id": "q008",
+		"text": "Wer kämpft, kann verlieren. Wer nicht kämpft, hat schon verloren.",
+		"authorId": "a008"
+	},
+	{
+		"id": "q009",
+		"text": "Das Glück deines Lebens hängt von der Beschaffenheit deiner Gedanken ab.",
+		"authorId": "a009"
+	},
+	{ "id": "q010", "text": "Alles, was du dir vorstellen kannst, ist real.", "authorId": "a010" },
+	{
+		"id": "q011",
+		"text": "Es gibt nur zwei Tage im Jahr, an denen man nichts tun kann. Der eine ist Gestern, der andere Morgen.",
+		"authorId": "a011"
+	},
+	{ "id": "q012", "text": "Der Weg ist das Ziel.", "authorId": "a012" },
+	{
+		"id": "q013",
+		"text": "Lerne aus der Vergangenheit, lebe in der Gegenwart, hoffe für die Zukunft.",
+		"authorId": "a003"
+	},
+	{
+		"id": "q014",
+		"text": "Erfolg ist nicht endgültig, Misserfolg ist nicht fatal: Es ist der Mut weiterzumachen, der zählt.",
+		"authorId": "a013"
+	},
+	{
+		"id": "q015",
+		"text": "Die beste Zeit, einen Baum zu pflanzen, war vor zwanzig Jahren. Die zweitbeste Zeit ist jetzt.",
+		"authorId": "a014"
+	},
+	{
+		"id": "q016",
+		"text": "Hab keine Angst, langsam zu gehen. Hab nur Angst, stehen zu bleiben.",
+		"authorId": "a014"
+	},
+	{
+		"id": "q017",
+		"text": "Man muss das Unmögliche versuchen, um das Mögliche zu erreichen.",
+		"authorId": "a015"
+	},
+	{
+		"id": "q018",
+		"text": "Die größte Ehre im Leben liegt nicht darin, niemals zu fallen, sondern jedes Mal wieder aufzustehen.",
+		"authorId": "a016"
+	},
+	{
+		"id": "q019",
+		"text": "Wer immer tut, was er schon kann, bleibt immer das, was er schon ist.",
+		"authorId": "a017"
+	},
+	{
+		"id": "q020",
+		"text": "Phantasie ist wichtiger als Wissen, denn Wissen ist begrenzt.",
+		"authorId": "a003"
+	},
+	{
+		"id": "q021",
+		"text": "Es ist nicht wichtig, wie langsam du gehst, solange du nicht stehen bleibst.",
+		"authorId": "a012"
+	},
+	{
+		"id": "q022",
+		"text": "Der Mensch, der den Berg versetzte, war derselbe, der anfing, kleine Steine wegzutragen.",
+		"authorId": "a012"
+	},
+	{
+		"id": "q023",
+		"text": "Wenn der Wind der Veränderung weht, bauen die einen Mauern und die anderen Windmühlen.",
+		"authorId": "a014"
+	},
+	{
+		"id": "q024",
+		"text": "Ein Tropfen Liebe ist mehr als ein Ozean Verstand.",
+		"authorId": "a018"
+	},
+	{ "id": "q025", "text": "Glück ist kein Zufall, sondern eine Entscheidung.", "authorId": "a019" },
+	{
+		"id": "q026",
+		"text": "Die Kraft liegt nicht im Körper, sondern im Willen.",
+		"authorId": "a020"
+	},
+	{ "id": "q027", "text": "Jeder Tag ist ein neuer Anfang.", "authorId": "a021" },
+	{
+		"id": "q028",
+		"text": "Das Geheimnis des Glücks liegt nicht im Besitz, sondern im Geben.",
+		"authorId": "a022"
+	},
+	{ "id": "q029", "text": "Wer nicht an Wunder glaubt, ist kein Realist.", "authorId": "a023" },
+	{
+		"id": "q030",
+		"text": "Es sind nicht die Jahre in deinem Leben, die zählen. Es ist das Leben in deinen Jahren.",
+		"authorId": "a024"
+	},
+	{
+		"id": "q031",
+		"text": "Das Schicksal mischt die Karten, aber wir spielen.",
+		"authorId": "a025"
+	},
+	{ "id": "q032", "text": "Nur wer sein Ziel kennt, findet den Weg.", "authorId": "a026" },
+	{ "id": "q033", "text": "Das Leben ist zu kurz für später.", "authorId": "a027" },
+	{
+		"id": "q034",
+		"text": "Wer nach den Sternen greift, wird nicht im Schlamm stecken bleiben.",
+		"authorId": "a028"
+	},
+	{
+		"id": "q035",
+		"text": "Die beste Brücke zwischen Verzweiflung und Hoffnung ist eine gute Nachtruhe.",
+		"authorId": "a029"
+	},
+	{
+		"id": "q036",
+		"text": "Es gibt keine Grenzen. Weder für Gedanken noch für Gefühle. Es ist die Angst, die immer Grenzen setzt.",
+		"authorId": "a030"
+	},
+	{ "id": "q037", "text": "Mut steht am Anfang des Handelns, Glück am Ende.", "authorId": "a031" },
+	{
+		"id": "q038",
+		"text": "Das Lächeln, das du aussendest, kehrt zu dir zurück.",
+		"authorId": "a032"
+	},
+	{
+		"id": "q039",
+		"text": "Gib jedem Tag die Chance, der schönste deines Lebens zu werden.",
+		"authorId": "a033"
+	},
+	{ "id": "q040", "text": "Wer wagt, gewinnt.", "authorId": "a034" }
+]
