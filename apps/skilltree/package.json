@@ -1,0 +1,14 @@
+{
+	"name": "skilltree",
+	"version": "1.0.0",
+	"private": true,
+	"description": "SkillTree - Gamified Personal Skill Tracking",
+	"scripts": {
+		"dev": "pnpm run --filter=@skilltree/* --parallel dev",
+		"dev:web": "pnpm --filter @skilltree/web dev"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	},
+	"packageManager": "pnpm@9.15.0"
+}
