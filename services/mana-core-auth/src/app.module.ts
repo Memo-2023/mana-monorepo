@@ -12,6 +12,7 @@ import { TagsModule } from './tags/tags.module';
 import { AiModule } from './ai/ai.module';
 import { HealthModule } from './health/health.module';
 import { MetricsModule } from './metrics';
+import { AnalyticsModule } from './analytics';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 @Module({
@@ -27,6 +28,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 			},
 		]),
 		MetricsModule,
+		AnalyticsModule,
 		AiModule,
 		AuthModule,
 		CreditsModule,

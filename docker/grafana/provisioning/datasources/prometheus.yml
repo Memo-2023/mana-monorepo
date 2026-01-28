@@ -1,5 +1,6 @@
 # Grafana Datasource Provisioning
-# Auto-configures Prometheus as the default datasource
+# Auto-configures VictoriaMetrics as the default datasource
+# VictoriaMetrics is 100% Prometheus-compatible, using same type
 
 apiVersion: 1
 
@@ -7,9 +8,19 @@ datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://prometheus:9090
+    url: http://victoriametrics:8428
     isDefault: true
     editable: true
     jsonData:
       timeInterval: "15s"
       httpMethod: POST
+
+  # Business Metrics API (DuckDB via mana-core-auth)
+  - name: Business Metrics
+    type: yesoreyeram-infinity-datasource
+    access: proxy
+    url: http://mana-core-auth:3001
+    isDefault: false
+    editable: true
+    jsonData:
+      datasource_mode: "basic"

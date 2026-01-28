@@ -607,6 +607,30 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.TECHBASE_BACKEND_PORT || '3021'}`,
 		},
 	},
+
+	// Zitare Telegram Bot
+	{
+		path: 'services/telegram-zitare-bot/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.ZITARE_BOT_PORT || '3303',
+			TELEGRAM_BOT_TOKEN: (env) => env.ZITARE_BOT_TELEGRAM_TOKEN,
+			DATABASE_URL: (env) => env.ZITARE_BOT_DATABASE_URL,
+		},
+	},
+
+	// Todo Telegram Bot
+	{
+		path: 'services/telegram-todo-bot/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.TODO_BOT_PORT || '3304',
+			TELEGRAM_BOT_TOKEN: (env) => env.TODO_BOT_TELEGRAM_TOKEN,
+			DATABASE_URL: (env) => env.TODO_BOT_DATABASE_URL,
+			TODO_API_URL: (env) => env.TODO_BOT_API_URL || 'http://localhost:3018',
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
 ];
 
 function main() {

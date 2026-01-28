@@ -90,6 +90,10 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM: ManaCore <noreply@mana.how>
       CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://storage.mana.how,https://presi.mana.how
+      # DuckDB Analytics (Business Metrics)
+      DUCKDB_PATH: /data/analytics/metrics.duckdb
+    volumes:
+      - analytics_data:/data/analytics
     ports:
       - "3001:3001"
     healthcheck:
@@ -534,23 +538,28 @@ services:
   # Monitoring Stack
   # ============================================
 
-  prometheus:
-    image: prom/prometheus:v2.51.0
-    container_name: manacore-prometheus
+  # VictoriaMetrics - High-performance Prometheus replacement
+  # See docs/decisions/001-monitoring-stack-upgrade.md for details
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.99.0
+    container_name: manacore-victoriametrics
     restart: always
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=30d'
-      - '--web.enable-lifecycle'
+      - '-storageDataPath=/storage'
+      - '-retentionPeriod=2y'
+      - '-httpListenAddr=:8428'
+      - '-promscrape.config=/etc/prometheus/prometheus.yml'
+      - '-promscrape.config.strictParse=false'
+      - '-selfScrapeInterval=15s'
+      - '-search.latencyOffset=0s'
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./docker/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
-      - prometheus_data:/prometheus
+      - victoriametrics_data:/storage
     ports:
-      - "9090:9090"
+      - "8428:8428"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9090/-/healthy"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8428/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -572,7 +581,7 @@ services:
     container_name: manacore-grafana
     restart: always
     depends_on:
-      prometheus:
+      victoriametrics:
         condition: service_healthy
     environment:
       GF_SECURITY_ADMIN_USER: admin
@@ -943,10 +952,12 @@ volumes:
     name: manacore-redis
   minio_data:
     name: manacore-minio
-  prometheus_data:
-    name: manacore-prometheus
+  victoriametrics_data:
+    name: manacore-victoriametrics
   grafana_data:
     name: manacore-grafana
+  analytics_data:
+    name: manacore-analytics
   n8n_data:
     name: manacore-n8n
   synapse_data:

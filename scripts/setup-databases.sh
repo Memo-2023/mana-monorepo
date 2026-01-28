@@ -75,6 +75,9 @@ ALL_DATABASES=(
     "planta"
     "nutriphi"
     "projectdoc"
+    "zitare_bot"
+    "todo_bot"
+    "nutriphi_bot"
 )
 
 # Check if specific service requested
@@ -160,9 +163,21 @@ setup_service() {
             create_db_if_not_exists "projectdoc"
             push_schema "@manacore/telegram-project-doc-bot" "projectdoc"
             ;;
+        zitare_bot|zitare-bot)
+            create_db_if_not_exists "zitare_bot"
+            push_schema "@manacore/telegram-zitare-bot" "zitare-bot"
+            ;;
+        todo_bot|todo-bot)
+            create_db_if_not_exists "todo_bot"
+            push_schema "@manacore/telegram-todo-bot" "todo-bot"
+            ;;
+        nutriphi_bot|nutriphi-bot)
+            create_db_if_not_exists "nutriphi_bot"
+            push_schema "@manacore/telegram-nutriphi-bot" "nutriphi-bot"
+            ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"
-            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, finance, voxel-lava, figgos, planta, nutriphi, presi, storage"
+            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, finance, voxel-lava, figgos, planta, nutriphi, presi, storage, projectdoc, zitare_bot, todo_bot, nutriphi_bot"
             exit 1
             ;;
     esac

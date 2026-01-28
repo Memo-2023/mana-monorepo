@@ -1,0 +1,439 @@
+{
+	"annotations": {
+		"list": []
+	},
+	"editable": true,
+	"fiscalYearStartMonth": 0,
+	"graphTooltip": 1,
+	"id": null,
+	"links": [
+		{
+			"asDropdown": false,
+			"icon": "external link",
+			"includeVars": false,
+			"keepTime": true,
+			"tags": [],
+			"targetBlank": true,
+			"title": "Analytics API",
+			"url": "http://localhost:3001/api/analytics/health",
+			"type": "link"
+		}
+	],
+	"panels": [
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+			"id": 1,
+			"panels": [],
+			"title": "Business KPIs (Long-term Storage via DuckDB)",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"description": "Current total users from Prometheus (real-time)",
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "thresholds" },
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "blue", "value": null }]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 5, "w": 6, "x": 0, "y": 1 },
+			"id": 2,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "auto",
+				"orientation": "horizontal",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "auth_users_total",
+					"legendFormat": "Total Users",
+					"refId": "A"
+				}
+			],
+			"title": "Total Users (Real-time)",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"description": "Verified users from Prometheus",
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "thresholds" },
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "green", "value": null }]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 5, "w": 6, "x": 6, "y": 1 },
+			"id": 3,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "auto",
+				"orientation": "horizontal",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "auth_users_verified",
+					"legendFormat": "Verified",
+					"refId": "A"
+				}
+			],
+			"title": "Verified Users",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"description": "Verification rate percentage",
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "thresholds" },
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{ "color": "red", "value": null },
+							{ "color": "yellow", "value": 50 },
+							{ "color": "green", "value": 80 }
+						]
+					},
+					"unit": "percentunit"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 5, "w": 6, "x": 12, "y": 1 },
+			"id": 4,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "auto",
+				"orientation": "horizontal",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "auth_users_verified / auth_users_total",
+					"legendFormat": "Verification Rate",
+					"refId": "A"
+				}
+			],
+			"title": "Verification Rate",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"description": "New users registered today",
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "thresholds" },
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "orange", "value": null }]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 5, "w": 6, "x": 18, "y": 1 },
+			"id": 5,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "auto",
+				"orientation": "horizontal",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "auth_users_created_today",
+					"legendFormat": "Today",
+					"refId": "A"
+				}
+			],
+			"title": "New Users Today",
+			"type": "stat"
+		},
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 },
+			"id": 6,
+			"panels": [],
+			"title": "User Growth Trends",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"description": "User growth over the selected time range",
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"custom": {
+						"axisBorderShow": false,
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 20,
+						"gradientMode": "opacity",
+						"hideFrom": { "legend": false, "tooltip": false, "viz": false },
+						"insertNulls": false,
+						"lineInterpolation": "smooth",
+						"lineWidth": 2,
+						"pointSize": 5,
+						"scaleDistribution": { "type": "linear" },
+						"showPoints": "auto",
+						"spanNulls": false,
+						"stacking": { "group": "A", "mode": "none" },
+						"thresholdsStyle": { "mode": "off" }
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "green", "value": null }]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 10, "w": 16, "x": 0, "y": 7 },
+			"id": 7,
+			"options": {
+				"legend": {
+					"calcs": ["lastNotNull", "min", "max"],
+					"displayMode": "table",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": { "mode": "multi", "sort": "desc" }
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "auth_users_total",
+					"legendFormat": "Total Users",
+					"refId": "A"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "auth_users_verified",
+					"legendFormat": "Verified Users",
+					"refId": "B"
+				}
+			],
+			"title": "User Growth Over Time",
+			"type": "timeseries"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"description": "New registrations by period",
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "thresholds" },
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "purple", "value": null }]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 5, "w": 8, "x": 16, "y": 7 },
+			"id": 8,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "none",
+				"justifyMode": "auto",
+				"orientation": "horizontal",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name"
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "auth_users_created_today",
+					"legendFormat": "Today",
+					"refId": "A"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "auth_users_created_this_week",
+					"legendFormat": "This Week",
+					"refId": "B"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "auth_users_created_this_month",
+					"legendFormat": "This Month",
+					"refId": "C"
+				}
+			],
+			"title": "New Registrations",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"description": "Verification rate over time",
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"custom": {
+						"axisBorderShow": false,
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 20,
+						"gradientMode": "opacity",
+						"hideFrom": { "legend": false, "tooltip": false, "viz": false },
+						"insertNulls": false,
+						"lineInterpolation": "smooth",
+						"lineWidth": 2,
+						"pointSize": 5,
+						"scaleDistribution": { "type": "linear" },
+						"showPoints": "auto",
+						"spanNulls": false,
+						"stacking": { "group": "A", "mode": "none" },
+						"thresholdsStyle": { "mode": "off" }
+					},
+					"mappings": [],
+					"max": 1,
+					"min": 0,
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "green", "value": null }]
+					},
+					"unit": "percentunit"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 5, "w": 8, "x": 16, "y": 12 },
+			"id": 9,
+			"options": {
+				"legend": {
+					"calcs": ["mean"],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": { "mode": "single", "sort": "none" }
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "auth_users_verified / auth_users_total",
+					"legendFormat": "Verification Rate",
+					"refId": "A"
+				}
+			],
+			"title": "Verification Rate Trend",
+			"type": "timeseries"
+		},
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 17 },
+			"id": 10,
+			"panels": [],
+			"title": "Data Retention Info",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"gridPos": { "h": 4, "w": 24, "x": 0, "y": 18 },
+			"id": 11,
+			"options": {
+				"code": {
+					"language": "plaintext",
+					"showLineNumbers": false,
+					"showMiniMap": false
+				},
+				"content": "## Data Retention Policy\n\n| Data Source | Retention | Purpose |\n|-------------|-----------|----------|\n| **VictoriaMetrics** | 2 Years | Operative metrics (CPU, Memory, Requests, Latency) |\n| **DuckDB** | Unlimited | Business KPIs (User growth, Feature usage) |\n\n**API Endpoints:**\n- `GET /api/analytics/health` - Service health\n- `GET /api/analytics/latest` - Latest metrics snapshot\n- `GET /api/analytics/growth?days=90` - User growth data\n- `GET /api/analytics/monthly?months=12` - Monthly aggregates\n- `POST /api/analytics/snapshot` - Trigger manual snapshot",
+				"mode": "markdown"
+			},
+			"pluginVersion": "10.4.1",
+			"title": "About Business Metrics",
+			"type": "text"
+		}
+	],
+	"refresh": "1m",
+	"schemaVersion": 38,
+	"tags": ["manacore", "business", "kpi", "duckdb"],
+	"templating": {
+		"list": [
+			{
+				"current": { "selected": false, "text": "Prometheus", "value": "Prometheus" },
+				"hide": 0,
+				"includeAll": false,
+				"multi": false,
+				"name": "datasource",
+				"options": [],
+				"query": "prometheus",
+				"refresh": 1,
+				"regex": "",
+				"skipUrlSync": false,
+				"type": "datasource"
+			}
+		]
+	},
+	"time": { "from": "now-30d", "to": "now" },
+	"timepicker": {},
+	"timezone": "browser",
+	"title": "Business Metrics",
+	"uid": "business-metrics",
+	"version": 1,
+	"weekStart": ""
+}

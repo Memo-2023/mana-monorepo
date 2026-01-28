@@ -45,3 +45,6 @@ coverage/
 .cache/
 tmp/
 temp/
+
+# DuckDB local data
+data/
