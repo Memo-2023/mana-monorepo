@@ -769,7 +769,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      SYNAPSE_CONFIG_PATH: /data/homeserver.yaml
+      SYNAPSE_CONFIG_PATH: /config/homeserver.yaml
       TZ: Europe/Berlin
       # Secrets (override in .env)
       SYNAPSE_DB_PASSWORD: ${SYNAPSE_DB_PASSWORD:-synapse-secure-password}
@@ -778,8 +778,8 @@ services:
       SYNAPSE_MACAROON_SECRET: ${SYNAPSE_MACAROON_SECRET:-change-me-macaroon-secret}
       SYNAPSE_REGISTRATION_SECRET: ${SYNAPSE_REGISTRATION_SECRET:-change-me-registration-secret}
     volumes:
-      - ./docker/matrix/homeserver.yaml:/data/homeserver.yaml:ro
-      - ./docker/matrix/log.config.yaml:/data/log.config.yaml:ro
+      - ./docker/matrix/homeserver.yaml:/config/homeserver.yaml:ro
+      - ./docker/matrix/log.config.yaml:/config/log.config.yaml:ro
       - ./docker/matrix/data:/data
     ports:
       - "8008:8008"
