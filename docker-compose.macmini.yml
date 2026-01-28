@@ -780,7 +780,7 @@ services:
     volumes:
       - ./docker/matrix/homeserver.yaml:/data/homeserver.yaml:ro
       - ./docker/matrix/log.config.yaml:/data/log.config.yaml:ro
-      - synapse_data:/data
+      - ./docker/matrix/data:/data
     ports:
       - "8008:8008"
       - "9002:9002"  # Metrics (9000 used by MinIO)
