@@ -28,6 +28,7 @@ import {
 	sendVerificationEmail,
 } from '../email/email.service';
 import { sourceAppStore } from './stores/source-app.store';
+import { passwordResetRedirectStore } from './stores/password-reset-redirect.store';
 
 /**
  * JWT Custom Payload Interface
@@ -100,6 +101,9 @@ export function createBetterAuth(databaseUrl: string) {
 			 * - auth.api.requestPasswordReset({ body: { email } }) - Sends reset email
 			 * - auth.api.resetPassword({ body: { newPassword, token } }) - Resets password
 			 *
+			 * The reset URL is modified to include callbackURL parameter
+			 * so users are redirected back to the app they requested reset from.
+			 *
 			 * @see https://www.better-auth.com/docs/authentication/email-password#password-reset
 			 */
 			sendResetPassword: async ({
@@ -109,7 +113,18 @@ export function createBetterAuth(databaseUrl: string) {
 				user: { email: string; name: string };
 				url: string;
 			}) => {
-				await sendPasswordResetEmail(user.email, url, user.name);
+				// Check if we have a redirect URL stored for this user's password reset request
+				const redirectUrl = passwordResetRedirectStore.get(user.email);
+
+				// Modify reset URL to include callbackURL parameter
+				let resetUrl = url;
+				if (redirectUrl) {
+					const urlObj = new URL(url);
+					urlObj.searchParams.set('callbackURL', redirectUrl);
+					resetUrl = urlObj.toString();
+				}
+
+				await sendPasswordResetEmail(user.email, resetUrl, user.name);
 			},
 		},
 

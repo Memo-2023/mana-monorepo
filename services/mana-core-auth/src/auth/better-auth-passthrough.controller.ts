@@ -6,12 +6,13 @@
  *
  * Routes handled:
  * - GET /api/auth/verify-email - Email verification from verification emails
+ * - GET /api/auth/reset-password/:token - Password reset from reset emails
  *
  * This is necessary because Better Auth generates URLs with `/api/auth/*`
  * but our NestJS API uses `/api/v1/*` as the global prefix.
  */
 
-import { Controller, Get, Query, Res, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Param, Query, Res, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { BetterAuthService } from './services/better-auth.service';
 
@@ -114,6 +115,52 @@ export class BetterAuthPassthroughController {
 		} catch (error) {
 			console.error('[verify-email] Error:', error);
 			return res.redirect(`${fallbackUrl}/verification-failed?error=verification_failed`);
+		}
+	}
+
+	/**
+	 * Handle password reset link from email
+	 *
+	 * Better Auth sends password reset emails with links to:
+	 * {baseURL}/api/auth/reset-password/{token}?callbackURL=...
+	 *
+	 * This endpoint:
+	 * 1. Extracts the reset token from the URL
+	 * 2. Redirects the user to the frontend /reset-password page with the token
+	 * 3. The frontend then shows a form to enter the new password
+	 * 4. Frontend submits to POST /api/v1/auth/reset-password with token + newPassword
+	 */
+	@Get('reset-password/:token')
+	async resetPassword(
+		@Param('token') token: string,
+		@Query('callbackURL') callbackURL: string | undefined,
+		@Res() res: Response
+	) {
+		const fallbackUrl = process.env.FRONTEND_URL || this.defaultFrontendUrl;
+
+		try {
+			if (!token) {
+				return res.redirect(`${fallbackUrl}/login?error=missing_reset_token`);
+			}
+
+			// Determine redirect URL:
+			// 1. First try the callbackURL query param (from the email link)
+			// 2. Fall back to default frontend URL
+			let baseUrl = this.validateRedirectUrl(callbackURL);
+
+			if (!baseUrl) {
+				baseUrl = fallbackUrl;
+			}
+
+			// Redirect to frontend's reset-password page with token
+			const resetUrl = new URL('/reset-password', baseUrl);
+			resetUrl.searchParams.set('token', token);
+
+			console.log(`[reset-password] Redirecting to: ${resetUrl.toString()}`);
+			return res.redirect(resetUrl.toString());
+		} catch (error) {
+			console.error('[reset-password] Error:', error);
+			return res.redirect(`${fallbackUrl}/login?error=reset_failed`);
 		}
 	}
 }

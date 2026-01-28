@@ -33,6 +33,7 @@ import { ReferralTierService } from '../../referrals/services/referral-tier.serv
 import { ReferralTrackingService } from '../../referrals/services/referral-tracking.service';
 import { hasUser, hasToken, hasMember, hasMembers, hasSession } from '../types/better-auth.types';
 import { sourceAppStore } from '../stores/source-app.store';
+import { passwordResetRedirectStore } from '../stores/password-reset-redirect.store';
 import type {
 	RegisterB2CDto,
 	RegisterB2BDto,
@@ -876,6 +877,11 @@ export class BetterAuthService {
 		redirectTo?: string
 	): Promise<{ success: boolean; message: string }> {
 		try {
+			// Store the redirect URL so sendResetPassword callback can include it in the email link
+			if (redirectTo) {
+				passwordResetRedirectStore.set(email, redirectTo);
+			}
+
 			// Better Auth's requestPasswordReset endpoint
 			// See: https://www.better-auth.com/docs/authentication/email-password#password-reset
 			await (this.auth.api as any).requestPasswordReset({

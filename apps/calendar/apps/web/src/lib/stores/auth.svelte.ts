@@ -192,7 +192,32 @@ export const authStore = {
 		}
 
 		try {
-			const result = await authService.forgotPassword(email);
+			// Pass current app origin so user is redirected back here after clicking email link
+			const redirectTo = browser ? window.location.origin : undefined;
+			const result = await authService.forgotPassword(email, redirectTo);
+
+			if (!result.success) {
+				return { success: false, error: result.error || 'Password reset failed' };
+			}
+
+			return { success: true };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
+		}
+	},
+
+	/**
+	 * Reset password with token (from email link)
+	 */
+	async resetPasswordWithToken(token: string, newPassword: string) {
+		const authService = getAuthService();
+		if (!authService) {
+			return { success: false, error: 'Auth not available on server' };
+		}
+
+		try {
+			const result = await authService.resetPassword(token, newPassword);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Password reset failed' };

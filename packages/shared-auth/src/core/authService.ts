@@ -181,13 +181,15 @@ export function createAuthService(config: AuthServiceConfig) {
 
 		/**
 		 * Send password reset email
+		 * @param email - User's email address
+		 * @param redirectTo - Optional URL to redirect after password reset (current app origin)
 		 */
-		async forgotPassword(email: string): Promise<AuthResult> {
+		async forgotPassword(email: string, redirectTo?: string): Promise<AuthResult> {
 			try {
 				const response = await fetch(`${baseUrl}${endpoints.forgotPassword}`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ email }),
+					body: JSON.stringify({ email, redirectTo }),
 				});
 
 				if (!response.ok) {
