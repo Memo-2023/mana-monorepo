@@ -48,7 +48,6 @@ export class ShareController {
 
 	@Get('shares/invitations')
 	async getInvitations(@CurrentUser() user: CurrentUserData) {
-		// TODO: Get user email from auth service
 		const invitations = await this.shareService.findPendingInvitations(
 			user.userId,
 			user.email || ''

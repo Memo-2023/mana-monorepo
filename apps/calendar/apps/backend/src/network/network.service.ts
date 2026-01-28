@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { eq } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
@@ -36,6 +36,7 @@ export interface NetworkGraphResponse {
 
 @Injectable()
 export class NetworkService {
+	private readonly logger = new Logger(NetworkService.name);
 	private authUrl: string;
 
 	constructor(
@@ -59,14 +60,14 @@ export class NetworkService {
 			});
 
 			if (!response.ok) {
-				console.error('Failed to fetch tags from central API:', response.status);
+				this.logger.warn(`Failed to fetch tags from central API: ${response.status}`);
 				return new Map();
 			}
 
 			const tags: Tag[] = await response.json();
 			return new Map(tags.map((t) => [t.id, t]));
 		} catch (error) {
-			console.error('Error fetching tags from central API:', error);
+			this.logger.error('Error fetching tags from central API', error);
 			return new Map();
 		}
 	}

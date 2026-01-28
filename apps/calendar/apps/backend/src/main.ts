@@ -73,7 +73,7 @@ async function bootstrap() {
 		exclude: ['metrics', 'health'],
 	});
 
-	const port = process.env.PORT || 3016;
+	const port = process.env.PORT || 3014;
 	await app.listen(port);
 	console.log(`Calendar backend running on http://localhost:${port}`);
 }

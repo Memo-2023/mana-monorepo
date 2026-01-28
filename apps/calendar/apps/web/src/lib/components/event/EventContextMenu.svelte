@@ -102,7 +102,7 @@
 	}
 
 	function handleChangeCalendar() {
-		// TODO: Implement calendar picker modal
+		// Workaround: cycles through calendars until modal is implemented
 		const event = eventContextMenuStore.targetEvent;
 		if (!event) return;
 
@@ -119,7 +119,7 @@
 	}
 
 	function handleChangeColor() {
-		// TODO: Implement color picker modal
+		// Workaround: cycles through colors until modal is implemented
 		const event = eventContextMenuStore.targetEvent;
 		if (!event) return;
 

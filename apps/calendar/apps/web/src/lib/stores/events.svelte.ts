@@ -74,7 +74,6 @@ export const eventsStore = {
 		} else {
 			// API returns events array directly (already extracted in api/events.ts)
 			const eventsData = result.data as CalendarEvent[] | null;
-			console.log('[Events Store] Loaded events:', eventsData?.length, eventsData);
 			events = eventsData || [];
 			loadedRange = { start: startDate, end: endDate };
 		}

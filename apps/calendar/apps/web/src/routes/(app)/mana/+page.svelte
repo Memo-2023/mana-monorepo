@@ -3,12 +3,10 @@
 	import { toast } from '$lib/stores/toast.svelte';
 
 	function handleSubscribe(planId: string) {
-		console.log('Subscribe to plan:', planId);
 		toast.info(`Abo "${planId}" ausgewählt. Bezahlsystem wird noch integriert.`);
 	}
 
 	function handleBuyPackage(packageId: string) {
-		console.log('Buy package:', packageId);
 		toast.info(`Paket "${packageId}" ausgewählt. Bezahlsystem wird noch integriert.`);
 	}
 </script>
