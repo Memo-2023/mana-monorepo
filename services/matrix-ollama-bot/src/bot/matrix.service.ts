@@ -149,6 +149,10 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 				await this.sendStatus(roomId, sender);
 				break;
 
+			case 'all':
+				await this.handleAllModels(roomId, sender, argString);
+				break;
+
 			default:
 				await this.sendMessage(
 					roomId,
@@ -158,12 +162,13 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 	}
 
 	private async sendHelp(roomId: string) {
-		const helpText = `**Ollama Bot - Lokale KI (DSGVO-konform)**
+		const helpText = `**Mana Chat - Lokale KI (DSGVO-konform)**
 
 **Befehle:**
 - \`!help\` - Diese Hilfe anzeigen
 - \`!models\` - Verfügbare Modelle anzeigen
 - \`!model [name]\` - Modell wechseln
+- \`!all [frage]\` - **Alle Modelle vergleichen**
 - \`!mode [modus]\` - System-Prompt ändern
 - \`!clear\` - Chat-Verlauf löschen
 - \`!status\` - Ollama Status prüfen
@@ -177,6 +182,9 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 
 **Verwendung:**
 Schreibe einfach eine Nachricht und ich antworte!
+
+**Beispiel Modellvergleich:**
+\`!all Was ist der Sinn des Lebens?\`
 
 **Aktuelles Modell:** \`${this.ollamaService.getDefaultModel()}\``;
 
@@ -289,6 +297,73 @@ Schreibe einfach eine Nachricht und ich antworte!
 **DSGVO:** ✅ Alle Daten lokal`;
 
 		await this.sendMessage(roomId, statusText);
+	}
+
+	private async handleAllModels(roomId: string, sender: string, message: string) {
+		if (!message.trim()) {
+			await this.sendMessage(
+				roomId,
+				`**Verwendung:** \`!all [Deine Frage]\`\n\nBeispiel: \`!all Was ist 2+2?\`\n\nDie Frage wird an alle Modelle gesendet und du siehst die Antworten zum Vergleich.`
+			);
+			return;
+		}
+
+		const models = await this.ollamaService.listModels();
+		if (models.length === 0) {
+			await this.sendMessage(roomId, '❌ Keine Modelle gefunden. Ist Ollama gestartet?');
+			return;
+		}
+
+		await this.sendMessage(
+			roomId,
+			`🔄 **Vergleiche ${models.length} Modelle...**\n\nFrage: "${message}"`
+		);
+
+		// Send typing indicator
+		await this.client.setTyping(roomId, true, 300000);
+
+		const session = this.getSession(sender);
+		const messages: { role: 'user' | 'assistant' | 'system'; content: string }[] = [
+			{ role: 'system', content: session.systemPrompt },
+			{ role: 'user', content: message },
+		];
+
+		const results: { model: string; response: string; duration: number; error?: string }[] = [];
+
+		for (const model of models) {
+			const startTime = Date.now();
+			try {
+				this.logger.log(`Querying model ${model.name}...`);
+				const response = await this.ollamaService.chat(messages, model.name);
+				const duration = Date.now() - startTime;
+				results.push({ model: model.name, response, duration });
+			} catch (error) {
+				const duration = Date.now() - startTime;
+				const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
+				results.push({ model: model.name, response: '', duration, error: errorMessage });
+			}
+		}
+
+		await this.client.setTyping(roomId, false);
+
+		// Format results
+		let resultText = `**📊 Modellvergleich**\n\n**Frage:** "${message}"\n\n---\n\n`;
+
+		for (const result of results) {
+			const durationSec = (result.duration / 1000).toFixed(1);
+			if (result.error) {
+				resultText += `**${result.model}** ⏱️ ${durationSec}s\n❌ Fehler: ${result.error}\n\n---\n\n`;
+			} else {
+				// Truncate long responses for readability
+				const truncatedResponse =
+					result.response.length > 500
+						? result.response.substring(0, 500) + '...'
+						: result.response;
+				resultText += `**${result.model}** ⏱️ ${durationSec}s\n${truncatedResponse}\n\n---\n\n`;
+			}
+		}
+
+		await this.sendMessage(roomId, resultText);
 	}
 
 	private async handleChat(roomId: string, sender: string, message: string) {
