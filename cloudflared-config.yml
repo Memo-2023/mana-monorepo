@@ -31,6 +31,10 @@ ingress:
     service: http://localhost:5184
   - hostname: contacts-api.mana.how
     service: http://localhost:3015
+  - hostname: nutriphi.mana.how
+    service: http://localhost:5189
+  - hostname: nutriphi-api.mana.how
+    service: http://localhost:3023
 
   # Monitoring & Tools
   - hostname: grafana.mana.how
