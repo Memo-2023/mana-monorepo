@@ -24,6 +24,14 @@ const NON_CHAT_MODELS = ['deepseek-r1:1.5b'];
 // Models that support vision/image input
 const VISION_MODELS = ['llava', 'llava:7b', 'llava:13b', 'bakllava', 'moondream'];
 
+// Natural language keywords that trigger commands (German + English)
+const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
+	{ keywords: ['hilfe', 'help', 'was kannst du', 'befehle', 'commands'], command: 'help' },
+	{ keywords: ['modelle', 'models', 'welche modelle', 'liste modelle'], command: 'models' },
+	{ keywords: ['status', 'verbindung', 'connection', 'online'], command: 'status' },
+	{ keywords: ['lösche verlauf', 'clear', 'neustart', 'reset', 'vergiss alles'], command: 'clear' },
+];
+
 @Injectable()
 export class MatrixService implements OnModuleInit, OnModuleDestroy {
 	private readonly logger = new Logger(MatrixService.name);
@@ -59,8 +67,20 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		// Create Matrix client
 		this.client = new MatrixClient(homeserverUrl!, accessToken, storage);
 
-		// Auto-join rooms when invited
-		AutojoinRoomsMixin.setupOnClient(this.client);
+		// Auto-join rooms when invited and send welcome
+		this.client.on('room.invite', async (roomId: string) => {
+			this.logger.log(`Invited to room ${roomId}, joining...`);
+			await this.client.joinRoom(roomId);
+
+			// Wait a bit for the join to complete, then send intro and pin help
+			setTimeout(async () => {
+				try {
+					await this.sendBotIntroduction(roomId);
+				} catch (error) {
+					this.logger.error(`Failed to send introduction to ${roomId}:`, error);
+				}
+			}, 2000);
+		});
 
 		// Get bot's user ID
 		this.botUserId = await this.client.getUserId();
@@ -69,9 +89,108 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		// Setup message handler
 		this.client.on('room.message', this.handleRoomMessage.bind(this));
 
+		// Setup room join handler for welcome message
+		this.client.on('room.join', this.handleRoomJoin.bind(this));
+
 		// Start the client
 		await this.client.start();
 		this.logger.log('Matrix bot started successfully');
+	}
+
+	private async handleRoomJoin(roomId: string, event: any) {
+		// Only send welcome when someone else joins (not the bot itself)
+		if (event.state_key === this.botUserId) return;
+		if (!this.isRoomAllowed(roomId)) return;
+
+		this.logger.log(`User ${event.state_key} joined room ${roomId}`);
+
+		// Send welcome message
+		await this.sendWelcomeMessage(roomId, event.state_key);
+	}
+
+	private async sendWelcomeMessage(roomId: string, userId: string) {
+		const welcomeText = `👋 **Willkommen im Mana Chat, ${this.extractUsername(userId)}!**
+
+Ich bin **Manai**, deine lokale KI-Assistentin (100% DSGVO-konform).
+
+**So nutzt du mich:**
+• Schreib einfach eine Nachricht - ich antworte!
+• Sag "hilfe" oder "modelle" für mehr Infos
+• Oder nutze Befehle wie \`!help\`
+
+**Quick Start:**
+• "Was ist TypeScript?" → Ich erkläre es dir
+• "modelle" → Zeigt verfügbare KI-Modelle
+• \`!all Erkläre Recursion\` → Vergleicht alle Modelle
+
+Viel Spaß! 🚀`;
+
+		await this.sendMessage(roomId, welcomeText);
+	}
+
+	private extractUsername(userId: string): string {
+		// Extract username from @user:server.com format
+		const match = userId.match(/@([^:]+)/);
+		return match ? match[1] : userId;
+	}
+
+	private async sendBotIntroduction(roomId: string) {
+		const introText = `🤖 **Hallo! Ich bin Manai, eure lokale KI-Assistentin.**
+
+Alle Daten bleiben auf diesem Server - 100% DSGVO-konform!
+
+**Quick Start:**
+• Schreibt einfach eine Nachricht
+• Sagt "hilfe" für alle Befehle
+• Sagt "modelle" um KI-Modelle zu sehen
+
+Ich pinne jetzt die Hilfe für euch an! 📌`;
+
+		await this.sendMessage(roomId, introText);
+
+		// Pin the help message
+		await this.pinHelpMessage(roomId);
+	}
+
+	private async pinHelpMessage(roomId: string) {
+		try {
+			// Send the help message and get its event ID
+			const helpContent = this.getHelpContent();
+			const htmlBody = this.markdownToHtml(helpContent);
+
+			const eventId = await this.client.sendMessage(roomId, {
+				msgtype: 'm.text',
+				body: helpContent,
+				format: 'org.matrix.custom.html',
+				formatted_body: htmlBody,
+			});
+
+			// Pin the message
+			await this.client.sendStateEvent(roomId, 'm.room.pinned_events', '', {
+				pinned: [eventId],
+			});
+
+			this.logger.log(`Pinned help message in room ${roomId}`);
+		} catch (error) {
+			this.logger.error(`Failed to pin help message in ${roomId}:`, error);
+		}
+	}
+
+	private getHelpContent(): string {
+		return `📌 **Manai - Befehls-Übersicht**
+
+**Einfach sagen:**
+• "hilfe" - Diese Übersicht
+• "modelle" - Verfügbare KI-Modelle
+• "status" - Bot-Status
+• "lösche verlauf" - Chat zurücksetzen
+
+**Power-User (mit !):**
+• \`!model [name]\` - Modell wechseln
+• \`!all [frage]\` - Alle Modelle vergleichen
+• \`!vision [frage]\` - Bild analysieren
+
+**Nutzung:** Einfach schreiben und ich antworte!`;
 	}
 
 	async onModuleDestroy() {
@@ -137,14 +256,38 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 
 		this.logger.log(`Message from ${event.sender} in ${roomId}: ${body.substring(0, 50)}...`);
 
-		// Handle commands
+		// Handle commands with ! prefix
 		if (body.startsWith('!')) {
 			await this.handleCommand(roomId, event.sender, body);
 			return;
 		}
 
+		// Check for natural language keywords
+		const keywordCommand = this.detectKeywordCommand(body);
+		if (keywordCommand) {
+			await this.handleCommand(roomId, event.sender, `!${keywordCommand}`);
+			return;
+		}
+
 		// Regular chat message
 		await this.handleChat(roomId, event.sender, body);
+	}
+
+	private detectKeywordCommand(message: string): string | null {
+		const lowerMessage = message.toLowerCase().trim();
+
+		// Only match if the message is short (likely a command, not a question containing a keyword)
+		if (lowerMessage.length > 50) return null;
+
+		for (const { keywords, command } of KEYWORD_COMMANDS) {
+			for (const keyword of keywords) {
+				if (lowerMessage === keyword || lowerMessage.startsWith(keyword + ' ')) {
+					this.logger.log(`Detected keyword "${keyword}" -> command "${command}"`);
+					return command;
+				}
+			}
+		}
+		return null;
 	}
 
 	private async handleCommand(roomId: string, sender: string, body: string) {
@@ -189,6 +332,11 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 				await this.handleVisionAll(roomId, sender, argString);
 				break;
 
+			case 'pin':
+				await this.pinHelpMessage(roomId);
+				await this.sendMessage(roomId, '📌 Hilfe wurde angepinnt!');
+				break;
+
 			default:
 				await this.sendMessage(
 					roomId,
@@ -198,37 +346,30 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 	}
 
 	private async sendHelp(roomId: string) {
-		const helpText = `**Mana Chat - Lokale KI (DSGVO-konform)**
+		const helpText = `**Manai - Lokale KI (100% DSGVO-konform)**
 
-**Befehle:**
-- \`!help\` - Diese Hilfe anzeigen
-- \`!models\` - Verfügbare Modelle anzeigen
-- \`!model [name]\` - Modell wechseln
-- \`!all [frage]\` - **Alle Chat-Modelle vergleichen**
-- \`!mode [modus]\` - System-Prompt ändern
-- \`!clear\` - Chat-Verlauf löschen
-- \`!status\` - Ollama Status prüfen
+**Einfache Befehle** (sag einfach):
+• "hilfe" - Diese Hilfe
+• "modelle" - Verfügbare KI-Modelle
+• "status" - Verbindungsstatus
+• "lösche verlauf" - Chat zurücksetzen
 
-**Bild-Analyse (Vision):**
-1. Sende ein Bild in den Chat
-2. Nutze dann:
-   - \`!vision [frage]\` - Bild analysieren
-   - \`!vision:all [frage]\` - **Alle Vision-Modelle vergleichen**
+**Power-User Befehle** (mit !):
+• \`!model [name]\` - Modell wechseln
+• \`!all [frage]\` - Alle Modelle vergleichen
+• \`!mode [modus]\` - Modus ändern (default/code/translate/summarize)
 
-**Modi:**
-- \`default\` - Allgemeiner Assistent
-- \`classify\` - Text-Klassifizierung
-- \`summarize\` - Zusammenfassungen
-- \`translate\` - Übersetzungen
-- \`code\` - Programmier-Hilfe
+**Bild-Analyse:**
+1. Sende ein Bild
+2. Dann: \`!vision [frage]\` oder \`!vision:all [frage]\`
 
 **Verwendung:**
 Schreibe einfach eine Nachricht und ich antworte!
 
 **Beispiele:**
-- \`!all Was ist der Sinn des Lebens?\`
-- [Bild senden] → \`!vision Was siehst du?\`
-- [Bild senden] → \`!vision:all Beschreibe das Bild\`
+• "Was ist Kubernetes?" → Direkte Antwort
+• "modelle" → Zeigt alle Modelle
+• \`!all Erkläre Docker\` → Vergleicht alle Modelle
 
 **Aktuelles Modell:** \`${this.ollamaService.getDefaultModel()}\``;
 
