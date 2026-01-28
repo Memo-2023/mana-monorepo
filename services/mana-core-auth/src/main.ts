@@ -79,10 +79,11 @@ async function bootstrap() {
 		})
 	);
 
-	// Global prefix (exclude metrics, health, and Better Auth native routes)
+	// Global prefix (exclude metrics, health, Better Auth native routes, and OIDC routes)
 	// Better Auth generates verification URLs with /api/auth/* prefix
+	// OIDC Provider requires routes without prefix: /.well-known/*, /api/oidc/*
 	app.setGlobalPrefix('api/v1', {
-		exclude: ['metrics', 'health', 'api/auth/(.*)'],
+		exclude: ['metrics', 'health', 'api/auth/(.*)', '.well-known/(.*)', 'api/oidc/(.*)'],
 	});
 
 	const port = configService.get<number>('port') || 3001;

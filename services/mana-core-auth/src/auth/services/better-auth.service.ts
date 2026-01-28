@@ -1184,4 +1184,73 @@ export class BetterAuthService {
 			console.error('[initializeUserReferrals] Error setting up referrals:', error);
 		}
 	}
+
+	// =========================================================================
+	// OIDC Provider Methods
+	// =========================================================================
+
+	/**
+	 * Handle OIDC request by forwarding to Better Auth's handler
+	 *
+	 * This method converts an Express request to a Fetch Request,
+	 * passes it to Better Auth's handler, and returns the response.
+	 *
+	 * @param req - Express request
+	 * @returns Response data from Better Auth
+	 */
+	async handleOidcRequest(req: import('express').Request): Promise<{
+		status: number;
+		headers: Record<string, string>;
+		body: unknown;
+	}> {
+		try {
+			// Convert Express request to Fetch Request
+			const url = new URL(
+				req.originalUrl,
+				this.configService.get<string>('BASE_URL') ||
+					`http://localhost:${this.configService.get<number>('PORT') || 3001}`
+			);
+
+			const headers = new Headers();
+			for (const [key, value] of Object.entries(req.headers)) {
+				if (value) {
+					headers.set(key, Array.isArray(value) ? value[0] : value);
+				}
+			}
+
+			// Create Fetch Request
+			const fetchRequest = new Request(url.toString(), {
+				method: req.method,
+				headers,
+				body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
+			});
+
+			// Call Better Auth's handler
+			const response = await this.auth.handler(fetchRequest);
+
+			// Convert Response to our format
+			const responseHeaders: Record<string, string> = {};
+			response.headers.forEach((value, key) => {
+				responseHeaders[key] = value;
+			});
+
+			// Get body
+			let body: unknown;
+			const contentType = response.headers.get('content-type');
+			if (contentType?.includes('application/json')) {
+				body = await response.json();
+			} else {
+				body = await response.text();
+			}
+
+			return {
+				status: response.status,
+				headers: responseHeaders,
+				body,
+			};
+		} catch (error) {
+			console.error('[handleOidcRequest] Error:', error);
+			throw error;
+		}
+	}
 }
