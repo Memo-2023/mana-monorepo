@@ -38,21 +38,21 @@ export function createMockDb(): jest.Mocked<Database> {
  */
 export function setupMockDbQuery<T>(mockDb: jest.Mocked<Database>, data: T[]): void {
 	// For SELECT queries - the final method in the chain resolves to data
-	mockDb.where.mockResolvedValueOnce(data);
+	(mockDb as any).where.mockResolvedValueOnce(data);
 }
 
 /**
  * Setup mock database for INSERT operations
  */
 export function setupMockDbInsert<T>(mockDb: jest.Mocked<Database>, data: T[]): void {
-	mockDb.returning.mockResolvedValueOnce(data);
+	(mockDb as any).returning.mockResolvedValueOnce(data);
 }
 
 /**
  * Setup mock database for UPDATE operations
  */
 export function setupMockDbUpdate<T>(mockDb: jest.Mocked<Database>, data: T[]): void {
-	mockDb.returning.mockResolvedValueOnce(data);
+	(mockDb as any).returning.mockResolvedValueOnce(data);
 }
 
 /**

@@ -9,6 +9,7 @@ import { EventTagModule } from './event-tag/event-tag.module';
 import { EventTagGroupModule } from './event-tag-group/event-tag-group.module';
 import { ReminderModule } from './reminder/reminder.module';
 import { ShareModule } from './share/share.module';
+import { SyncModule } from './sync/sync.module';
 import { NetworkModule } from './network/network.module';
 import { MetricsModule } from './metrics';
 import { EmailModule } from './email/email.module';
@@ -32,6 +33,7 @@ import { NotificationModule } from './notification/notification.module';
 		EventTagGroupModule,
 		ReminderModule,
 		ShareModule,
+		SyncModule,
 		NetworkModule,
 	],
 })
