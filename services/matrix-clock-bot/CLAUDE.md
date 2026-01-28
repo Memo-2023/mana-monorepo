@@ -30,7 +30,7 @@ pnpm type-check       # Check TypeScript types
 ```
 services/matrix-clock-bot/
 ├── src/
-│   ├── main.ts               # Application entry point (port 3317)
+│   ├── main.ts               # Application entry point (port 3318)
 │   ├── app.module.ts         # Root module
 │   ├── health.controller.ts  # Health check endpoint
 │   ├── config/
@@ -94,7 +94,7 @@ Voice notes are transcribed and parsed as commands.
 
 ```env
 # Server
-PORT=3317
+PORT=3318
 
 # Matrix
 MATRIX_HOMESERVER_URL=http://localhost:8008
@@ -133,7 +133,7 @@ STT_URL=http://localhost:3020
 docker build -f services/matrix-clock-bot/Dockerfile -t matrix-clock-bot services/matrix-clock-bot
 
 # Run
-docker run -p 3317:3317 \
+docker run -p 3318:3318 \
   -e MATRIX_HOMESERVER_URL=http://synapse:8008 \
   -e MATRIX_ACCESS_TOKEN=syt_xxx \
   -e CLOCK_API_URL=http://clock-backend:3017/api/v1 \
@@ -145,7 +145,7 @@ docker run -p 3317:3317 \
 ## Health Check
 
 ```bash
-curl http://localhost:3317/health
+curl http://localhost:3318/health
 ```
 
 ## Authentication

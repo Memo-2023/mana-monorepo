@@ -1100,6 +1100,37 @@ services:
       start_period: 40s
 
   # ============================================
+  # Matrix Clock Bot (GDPR-compliant Time Tracking)
+  # ============================================
+
+  matrix-clock-bot:
+    image: matrix-clock-bot:latest
+    container_name: manacore-matrix-clock-bot
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3318
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_CLOCK_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_CLOCK_BOT_ROOMS:-}
+      CLOCK_API_URL: http://host.docker.internal:3017/api/v1
+      STT_URL: http://mana-stt:3020
+    volumes:
+      - matrix_clock_bot_data:/app/data
+    ports:
+      - "3318:3318"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3318/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
   # Auto-Update (Watchtower)
   # ============================================
 
@@ -1155,3 +1186,5 @@ volumes:
     name: manacore-matrix-nutriphi-bot
   matrix_zitare_bot_data:
     name: manacore-matrix-zitare-bot
+  matrix_clock_bot_data:
+    name: manacore-matrix-clock-bot
