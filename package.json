@@ -195,6 +195,7 @@
 		"docker:logs:chat": "docker compose -f docker-compose.dev.yml --env-file .env.development logs -f chat-backend",
 		"docker:ps": "docker compose -f docker-compose.dev.yml --env-file .env.development ps -a",
 		"docker:clean": "docker compose -f docker-compose.dev.yml --env-file .env.development --profile all down -v",
+		"deploy:landing:todo": "pnpm --filter @todo/landing build && npx wrangler pages deploy apps/todo/apps/landing/dist --project-name=todo-landing",
 		"deploy:landing:calendar": "pnpm --filter @calendar/landing build && npx wrangler pages deploy apps/calendar/apps/landing/dist --project-name=calendars-landing",
 		"deploy:landing:chat": "pnpm --filter @chat/landing build && npx wrangler pages deploy apps/chat/apps/landing/dist --project-name=chat-landing",
 		"deploy:landing:picture": "pnpm --filter @picture/landing build && npx wrangler pages deploy apps/picture/apps/landing/dist --project-name=picture-landing",
