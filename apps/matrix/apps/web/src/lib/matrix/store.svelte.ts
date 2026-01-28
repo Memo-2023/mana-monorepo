@@ -353,6 +353,264 @@ class MatrixStore {
 		}
 	}
 
+	/**
+	 * Send a file/image to current room
+	 */
+	async sendFile(
+		file: File,
+		onProgress?: (progress: number) => void
+	): Promise<boolean> {
+		if (!this._client || !this._currentRoomId) return false;
+
+		try {
+			// Upload to Matrix media repo
+			const uploadResponse = await this._client.uploadContent(file, {
+				progressHandler: (progress) => {
+					if (onProgress) {
+						onProgress(Math.round((progress.loaded / progress.total) * 100));
+					}
+				},
+			});
+
+			const mxcUrl = uploadResponse.content_uri;
+
+			// Determine message type based on MIME type
+			const isImage = file.type.startsWith('image/');
+			const isVideo = file.type.startsWith('video/');
+			const isAudio = file.type.startsWith('audio/');
+
+			let msgtype = 'm.file';
+			if (isImage) msgtype = 'm.image';
+			if (isVideo) msgtype = 'm.video';
+			if (isAudio) msgtype = 'm.audio';
+
+			// Build content based on type
+			const content: Record<string, unknown> = {
+				msgtype,
+				body: file.name,
+				filename: file.name,
+				info: {
+					mimetype: file.type,
+					size: file.size,
+				},
+				url: mxcUrl,
+			};
+
+			// Add dimensions for images
+			if (isImage) {
+				const dimensions = await this.getImageDimensions(file);
+				if (dimensions) {
+					(content.info as Record<string, unknown>).w = dimensions.width;
+					(content.info as Record<string, unknown>).h = dimensions.height;
+				}
+			}
+
+			await this._client.sendMessage(this._currentRoomId, content);
+			return true;
+		} catch (err) {
+			this._error = err instanceof Error ? err.message : 'Failed to send file';
+			return false;
+		}
+	}
+
+	/**
+	 * Get image dimensions
+	 */
+	private getImageDimensions(file: File): Promise<{ width: number; height: number } | null> {
+		return new Promise((resolve) => {
+			if (!file.type.startsWith('image/')) {
+				resolve(null);
+				return;
+			}
+
+			const img = new Image();
+			img.onload = () => {
+				resolve({ width: img.width, height: img.height });
+				URL.revokeObjectURL(img.src);
+			};
+			img.onerror = () => resolve(null);
+			img.src = URL.createObjectURL(file);
+		});
+	}
+
+	/**
+	 * Get HTTP URL for Matrix media (mxc:// URLs)
+	 */
+	getMediaUrl(mxcUrl: string, width?: number, height?: number): string | null {
+		if (!this._client || !mxcUrl?.startsWith('mxc://')) return null;
+
+		if (width && height) {
+			return this._client.mxcUrlToHttp(mxcUrl, width, height, 'scale') || null;
+		}
+		return this._client.mxcUrlToHttp(mxcUrl) || null;
+	}
+
+	/**
+	 * Reply to a message
+	 */
+	async replyToMessage(eventId: string, body: string): Promise<boolean> {
+		if (!this._client || !this._currentRoomId) return false;
+
+		const room = this._client.getRoom(this._currentRoomId);
+		const originalEvent = room?.findEventById(eventId);
+		if (!originalEvent) return false;
+
+		try {
+			const content = {
+				msgtype: 'm.text',
+				body: `> <${originalEvent.getSender()}> ${originalEvent.getContent().body}\n\n${body}`,
+				format: 'org.matrix.custom.html',
+				formatted_body: `<mx-reply><blockquote><a href="https://matrix.to/#/${this._currentRoomId}/${eventId}">In reply to</a> <a href="https://matrix.to/#/${originalEvent.getSender()}">${originalEvent.getSender()}</a><br>${originalEvent.getContent().body}</blockquote></mx-reply>${body}`,
+				'm.relates_to': {
+					'm.in_reply_to': {
+						event_id: eventId,
+					},
+				},
+			};
+
+			await this._client.sendMessage(this._currentRoomId, content);
+			return true;
+		} catch (err) {
+			this._error = err instanceof Error ? err.message : 'Failed to send reply';
+			return false;
+		}
+	}
+
+	/**
+	 * Edit a message
+	 */
+	async editMessage(eventId: string, newBody: string): Promise<boolean> {
+		if (!this._client || !this._currentRoomId) return false;
+
+		try {
+			const content = {
+				msgtype: 'm.text',
+				body: `* ${newBody}`,
+				'm.new_content': {
+					msgtype: 'm.text',
+					body: newBody,
+				},
+				'm.relates_to': {
+					rel_type: 'm.replace',
+					event_id: eventId,
+				},
+			};
+
+			await this._client.sendMessage(this._currentRoomId, content);
+			return true;
+		} catch (err) {
+			this._error = err instanceof Error ? err.message : 'Failed to edit message';
+			return false;
+		}
+	}
+
+	/**
+	 * Delete (redact) a message
+	 */
+	async deleteMessage(eventId: string, reason?: string): Promise<boolean> {
+		if (!this._client || !this._currentRoomId) return false;
+
+		try {
+			await this._client.redactEvent(this._currentRoomId, eventId, undefined, { reason });
+			return true;
+		} catch (err) {
+			this._error = err instanceof Error ? err.message : 'Failed to delete message';
+			return false;
+		}
+	}
+
+	/**
+	 * React to a message with an emoji
+	 */
+	async reactToMessage(eventId: string, emoji: string): Promise<boolean> {
+		if (!this._client || !this._currentRoomId) return false;
+
+		try {
+			await this._client.sendEvent(this._currentRoomId, 'm.reaction', {
+				'm.relates_to': {
+					rel_type: 'm.annotation',
+					event_id: eventId,
+					key: emoji,
+				},
+			});
+			return true;
+		} catch (err) {
+			this._error = err instanceof Error ? err.message : 'Failed to react';
+			return false;
+		}
+	}
+
+	// ─────────────────────────────────────────────────────────
+	// User Actions
+	// ─────────────────────────────────────────────────────────
+
+	/**
+	 * Invite a user to a room
+	 */
+	async inviteUser(roomId: string, userId: string): Promise<boolean> {
+		if (!this._client) return false;
+
+		try {
+			await this._client.invite(roomId, userId);
+			return true;
+		} catch (err) {
+			this._error = err instanceof Error ? err.message : 'Failed to invite user';
+			return false;
+		}
+	}
+
+	/**
+	 * Kick a user from a room
+	 */
+	async kickUser(roomId: string, userId: string, reason?: string): Promise<boolean> {
+		if (!this._client) return false;
+
+		try {
+			await this._client.kick(roomId, userId, reason);
+			return true;
+		} catch (err) {
+			this._error = err instanceof Error ? err.message : 'Failed to kick user';
+			return false;
+		}
+	}
+
+	/**
+	 * Search for users by name or ID
+	 */
+	async searchUsers(query: string, limit = 10): Promise<{ userId: string; displayName?: string; avatarUrl?: string }[]> {
+		if (!this._client || !query.trim()) return [];
+
+		try {
+			const result = await this._client.searchUserDirectory({ term: query, limit });
+			return result.results.map((user) => ({
+				userId: user.user_id,
+				displayName: user.display_name,
+				avatarUrl: user.avatar_url ? this.getMediaUrl(user.avatar_url, 40, 40) || undefined : undefined,
+			}));
+		} catch {
+			return [];
+		}
+	}
+
+	/**
+	 * Get room members
+	 */
+	getRoomMembers(roomId?: string): RoomMember[] {
+		const id = roomId || this._currentRoomId;
+		if (!this._client || !id) return [];
+
+		const room = this._client.getRoom(id);
+		if (!room) return [];
+
+		return room.getMembersWithMembership('join').map((member) => ({
+			userId: member.userId,
+			displayName: member.name || member.userId,
+			avatarUrl: member.getAvatarUrl(this._client!.baseUrl, 40, 40, 'scale', false, false) || undefined,
+			membership: member.membership as RoomMember['membership'],
+			powerLevel: room.getMemberPowerLevel(member.userId),
+		}));
+	}
+
 	// ─────────────────────────────────────────────────────────
 	// Cleanup
 	// ─────────────────────────────────────────────────────────
@@ -417,18 +675,52 @@ class MatrixStore {
 	private eventToSimpleMessage(event: MatrixEvent): SimpleMessage {
 		const content = event.getContent();
 		const relatesTo = content['m.relates_to'];
+		const msgtype = content.msgtype || 'm.text';
+
+		// Check if message was redacted
+		const isRedacted = event.isRedacted();
+
+		// Extract media info for file/image/video/audio messages
+		let media: SimpleMessage['media'] = undefined;
+		if (['m.image', 'm.file', 'm.video', 'm.audio'].includes(msgtype) && content.url) {
+			const info = content.info || {};
+			media = {
+				mxcUrl: content.url,
+				mimetype: info.mimetype,
+				size: info.size,
+				width: info.w,
+				height: info.h,
+				filename: content.filename || content.body,
+				thumbnailUrl: info.thumbnail_url,
+				duration: info.duration,
+			};
+		}
+
+		// Get reply-to body if this is a reply
+		let replyToBody: string | undefined;
+		const replyToId = relatesTo?.['m.in_reply_to']?.event_id;
+		if (replyToId) {
+			const room = this._client?.getRoom(event.getRoomId() || '');
+			const replyEvent = room?.findEventById(replyToId);
+			if (replyEvent) {
+				replyToBody = replyEvent.getContent().body;
+			}
+		}
 
 		return {
 			id: event.getId() || '',
 			sender: event.getSender() || '',
 			senderName: this.getSenderName(event),
-			body: content.body || '',
+			body: isRedacted ? 'Message deleted' : (content.body || ''),
 			formattedBody: content.formatted_body,
 			timestamp: event.getTs(),
-			type: content.msgtype || 'm.text',
+			type: msgtype,
 			isOwn: event.getSender() === this._client?.getUserId(),
-			replyTo: relatesTo?.['m.in_reply_to']?.event_id,
+			replyTo: replyToId,
+			replyToBody,
 			edited: !!event.replacingEvent(),
+			redacted: isRedacted,
+			media,
 		};
 	}
 

@@ -16,6 +16,20 @@ export interface MatrixCredentials {
 }
 
 /**
+ * Media info for files/images
+ */
+export interface MediaInfo {
+	mxcUrl: string;
+	mimetype?: string;
+	size?: number;
+	width?: number;
+	height?: number;
+	filename?: string;
+	thumbnailUrl?: string;
+	duration?: number; // For audio/video
+}
+
+/**
  * Simplified message for UI rendering
  */
 export interface SimpleMessage {
@@ -28,7 +42,10 @@ export interface SimpleMessage {
 	type: MessageType;
 	isOwn: boolean;
 	replyTo?: string;
+	replyToBody?: string;
 	edited?: boolean;
+	redacted?: boolean;
+	media?: MediaInfo;
 }
 
 export type MessageType = 'm.text' | 'm.image' | 'm.file' | 'm.audio' | 'm.video' | 'm.emote' | 'm.notice';

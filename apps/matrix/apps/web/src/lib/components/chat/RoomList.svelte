@@ -3,6 +3,12 @@
 	import RoomItem from './RoomItem.svelte';
 	import { Search, Plus, Users, MessageCircle } from 'lucide-svelte';
 
+	interface Props {
+		onCreateRoom?: () => void;
+	}
+
+	let { onCreateRoom }: Props = $props();
+
 	let search = $state('');
 	let showDMs = $state(true);
 
@@ -68,9 +74,9 @@
 
 	<!-- New Room Button -->
 	<div class="border-t border-base-300 p-3">
-		<button class="btn btn-ghost btn-sm w-full justify-start">
+		<button class="btn btn-ghost btn-sm w-full justify-start" onclick={onCreateRoom}>
 			<Plus class="h-4 w-4" />
-			{showDMs ? 'Start new chat' : 'Join or create room'}
+			{showDMs ? 'Neuen Chat starten' : 'Raum erstellen'}
 		</button>
 	</div>
 </div>

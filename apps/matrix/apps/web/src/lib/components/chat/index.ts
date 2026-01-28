@@ -5,3 +5,5 @@ export { default as Timeline } from './Timeline.svelte';
 export { default as Message } from './Message.svelte';
 export { default as MessageInput } from './MessageInput.svelte';
 export { default as TypingIndicator } from './TypingIndicator.svelte';
+export { default as CreateRoomDialog } from './CreateRoomDialog.svelte';
+export { default as RoomSettingsPanel } from './RoomSettingsPanel.svelte';

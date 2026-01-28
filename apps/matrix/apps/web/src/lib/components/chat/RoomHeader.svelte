@@ -4,9 +4,10 @@
 
 	interface Props {
 		onMenuClick?: () => void;
+		onInfoClick?: () => void;
 	}
 
-	let { onMenuClick }: Props = $props();
+	let { onMenuClick, onInfoClick }: Props = $props();
 
 	let room = $derived(matrixStore.currentSimpleRoom);
 </script>
@@ -57,7 +58,7 @@
 			<button class="btn btn-ghost btn-sm" title="Video call" disabled>
 				<Video class="h-5 w-5" />
 			</button>
-			<button class="btn btn-ghost btn-sm" title="Room info">
+			<button class="btn btn-ghost btn-sm" title="Room info" onclick={onInfoClick}>
 				<Info class="h-5 w-5" />
 			</button>
 		</div>

@@ -1,9 +1,16 @@
 <script lang="ts">
-	import { matrixStore } from '$lib/matrix';
+	import { matrixStore, type SimpleMessage } from '$lib/matrix';
 	import Message from './Message.svelte';
 	import TypingIndicator from './TypingIndicator.svelte';
 	import { onMount, tick } from 'svelte';
 	import { Loader2, ArrowDown } from 'lucide-svelte';
+
+	interface Props {
+		onReply?: (message: SimpleMessage) => void;
+		onEdit?: (message: SimpleMessage) => void;
+	}
+
+	let { onReply, onEdit }: Props = $props();
 
 	let container: HTMLDivElement;
 	let showScrollButton = $state(false);
@@ -86,7 +93,7 @@
 				{@const showAvatar = !prevMessage || prevMessage.sender !== message.sender}
 				{@const showTimestamp =
 					!prevMessage || message.timestamp - prevMessage.timestamp > 5 * 60 * 1000}
-				<Message {message} {showAvatar} {showTimestamp} />
+				<Message {message} {showAvatar} {showTimestamp} {onReply} {onEdit} />
 			{:else}
 				<div class="flex h-full flex-col items-center justify-center text-base-content/50">
 					<p>No messages yet</p>
