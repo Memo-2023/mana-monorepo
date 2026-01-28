@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Todo Backend API
+  todo-backend:
+    build:
+      context: ../..
+      dockerfile: apps/todo/apps/backend/Dockerfile
+    container_name: todo-backend
+    restart: unless-stopped
+    ports:
+      - "3018:3018"
+    environment:
+      - NODE_ENV=production
+      - PORT=3018
+      - DATABASE_URL=${DATABASE_URL}
+      - MANA_CORE_AUTH_URL=${MANA_CORE_AUTH_URL}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3018/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - todo-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.todo-api.rule=Host(`todo-api.mana.how`)"
+      - "traefik.http.routers.todo-api.tls=true"
+      - "traefik.http.routers.todo-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.todo-api.loadbalancer.server.port=3018"
+
+  # Todo Web App (SvelteKit with Node adapter)
+  todo-web:
+    build:
+      context: ../..
+      dockerfile: apps/todo/apps/web/Dockerfile
+    container_name: todo-web
+    restart: unless-stopped
+    ports:
+      - "5188:5188"
+    environment:
+      - NODE_ENV=production
+      - PORT=5188
+      - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
+      - PUBLIC_MANA_CORE_AUTH_URL=${PUBLIC_MANA_CORE_AUTH_URL}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5188"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - todo-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.todo-web.rule=Host(`todo.mana.how`)"
+      - "traefik.http.routers.todo-web.tls=true"
+      - "traefik.http.routers.todo-web.tls.certresolver=letsencrypt"
+      - "traefik.http.services.todo-web.loadbalancer.server.port=5188"
+
+networks:
+  todo-network:
+    external: true
+    name: manacore-network

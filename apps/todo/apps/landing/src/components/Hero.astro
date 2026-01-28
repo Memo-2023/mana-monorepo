@@ -1,0 +1,146 @@
+---
+// Hero section for Todo landing page
+---
+
+<section class="relative overflow-hidden py-20 md:py-32">
+	<!-- Background gradient -->
+	<div class="absolute inset-0 bg-gradient-to-b from-primary-950/30 via-dark-bg to-dark-bg"></div>
+
+	<!-- Grid pattern -->
+	<div class="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10"></div>
+
+	<div class="container relative">
+		<div class="mx-auto max-w-4xl text-center">
+			<!-- Badge -->
+			<div
+				class="mb-8 inline-flex items-center gap-2 rounded-full border border-primary-500/30 bg-primary-500/10 px-4 py-2 text-sm text-primary-400"
+			>
+				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+					></path>
+				</svg>
+				<span>Smart Task-Management</span>
+			</div>
+
+			<!-- Headline -->
+			<h1 class="mb-6 text-4xl font-bold leading-tight md:text-6xl lg:text-7xl">
+				Erledige mehr mit
+				<span class="gradient-text">weniger Stress</span>
+			</h1>
+
+			<!-- Subheadline -->
+			<p class="mx-auto mb-10 max-w-2xl text-lg text-gray-400 md:text-xl">
+				Projekte, Unteraufgaben, Kanban-Boards, wiederkehrende Tasks und smarte Erinnerungen - alles
+				an einem Ort. Behalte den Überblick über alles, was wichtig ist.
+			</p>
+
+			<!-- CTA Buttons -->
+			<div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
+				<a href="#" class="btn btn-primary group text-lg">
+					Kostenlos starten
+					<svg
+						class="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+					</svg>
+				</a>
+				<a href="#features" class="btn btn-secondary"> Funktionen entdecken </a>
+			</div>
+
+			<!-- Social proof -->
+			<div class="mt-16 flex flex-col items-center gap-4">
+				<div class="flex -space-x-2">
+					{
+						[1, 2, 3, 4, 5].map((i) => (
+							<div class="h-10 w-10 rounded-full border-2 border-dark-bg bg-gradient-to-br from-primary-400 to-primary-600" />
+						))
+					}
+				</div>
+				<p class="text-sm text-gray-500">
+					<span class="font-semibold text-white">500+</span> Nutzer vertrauen Todo
+				</p>
+			</div>
+		</div>
+
+		<!-- Preview mockup -->
+		<div class="relative mx-auto mt-16 max-w-5xl">
+			<div
+				class="absolute -inset-4 rounded-2xl bg-gradient-to-r from-primary-500/20 via-transparent to-primary-500/20 blur-3xl"
+			>
+			</div>
+			<div class="relative rounded-xl border border-dark-border bg-dark-card p-2 shadow-2xl">
+				<div class="flex gap-2 px-4 py-3">
+					<div class="h-3 w-3 rounded-full bg-red-500"></div>
+					<div class="h-3 w-3 rounded-full bg-yellow-500"></div>
+					<div class="h-3 w-3 rounded-full bg-green-500"></div>
+				</div>
+				<div class="aspect-[16/9] overflow-hidden rounded-lg bg-dark-surface">
+					<!-- Task list preview -->
+					<div class="p-6">
+						<div class="mb-4 flex items-center justify-between">
+							<h3 class="text-xl font-semibold">Heute</h3>
+							<div class="flex gap-2">
+								<button class="rounded-lg bg-primary-500 px-3 py-1 text-sm">+ Aufgabe</button>
+							</div>
+						</div>
+						<div class="space-y-3">
+							{
+								[
+									{ title: 'Meeting mit Team vorbereiten', priority: 'high', done: true },
+									{ title: 'E-Mails beantworten', priority: 'medium', done: false },
+									{ title: 'Projekt-Dokumentation aktualisieren', priority: 'low', done: false },
+									{ title: 'Code-Review durchführen', priority: 'high', done: false },
+									{ title: 'Sprint Planning vorbereiten', priority: 'medium', done: false },
+								].map((task) => (
+									<div class="flex items-center gap-3 rounded-lg bg-dark-card p-3">
+										<div
+											class={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${
+												task.done
+													? 'border-primary-500 bg-primary-500'
+													: task.priority === 'high'
+														? 'border-red-500'
+														: task.priority === 'medium'
+															? 'border-yellow-500'
+															: 'border-gray-500'
+											}`}
+										>
+											{task.done && (
+												<svg
+													class="h-3 w-3 text-white"
+													fill="none"
+													stroke="currentColor"
+													viewBox="0 0 24 24"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="3"
+														d="M5 13l4 4L19 7"
+													/>
+												</svg>
+											)}
+										</div>
+										<span class={task.done ? 'text-gray-500 line-through' : 'text-white'}>
+											{task.title}
+										</span>
+									</div>
+								))
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

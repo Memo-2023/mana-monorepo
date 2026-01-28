@@ -1,0 +1,253 @@
+---
+import Layout from '@layouts/Layout.astro';
+import Hero from '@components/Hero.astro';
+import Features from '@components/Features.astro';
+import CTA from '@components/CTA.astro';
+import Footer from '@components/Footer.astro';
+
+// Try to import shared components if available
+let StepsSection: any = null;
+let PricingSection: any = null;
+try {
+	const shared = await import('@manacore/shared-landing-ui/sections/StepsSection.astro');
+	StepsSection = shared.default;
+} catch {
+	// Shared component not available
+}
+try {
+	const shared = await import('@manacore/shared-landing-ui/sections/PricingSection.astro');
+	PricingSection = shared.default;
+} catch {
+	// Shared component not available
+}
+
+// Steps data
+const steps = [
+	{
+		number: '1',
+		title: 'Aufgabe erfassen',
+		description:
+			'Erstelle Aufgaben mit natürlicher Sprache. Füge Fälligkeiten, Prioritäten und Tags hinzu - alles in einem Schritt.',
+		image: '/screenshots/quick-add.png',
+	},
+	{
+		number: '2',
+		title: 'Organisieren',
+		description:
+			'Ordne Aufgaben in Projekte ein, füge Unteraufgaben hinzu und nutze das Kanban-Board für visuelle Workflows.',
+		image: '/screenshots/organize.png',
+	},
+	{
+		number: '3',
+		title: 'Erledigen',
+		description:
+			'Arbeite deine Tasks ab, verfolge deinen Fortschritt in Statistiken und feiere deine Erfolge.',
+		image: '/screenshots/complete.png',
+	},
+];
+
+// Pricing data
+const pricingPlans = [
+	{
+		name: 'Free',
+		price: '0',
+		period: '/Monat',
+		description: 'Perfekt für Einzelpersonen',
+		features: [
+			{ text: '3 Projekte', included: true },
+			{ text: 'Unbegrenzte Aufgaben', included: true },
+			{ text: 'Labels & Tags', included: true },
+			{ text: 'Web-App Zugang', included: true },
+			{ text: 'Kanban-Boards', included: false },
+			{ text: 'Wiederkehrende Tasks', included: false },
+		],
+		cta: {
+			text: 'Kostenlos starten',
+			href: '#',
+		},
+	},
+	{
+		name: 'Pro',
+		price: '4,99',
+		period: '/Monat',
+		description: 'Für Power-User',
+		features: [
+			{ text: 'Unbegrenzte Projekte', included: true },
+			{ text: 'Unbegrenzte Aufgaben', included: true },
+			{ text: 'Kanban-Boards', included: true },
+			{ text: 'Wiederkehrende Tasks', included: true },
+			{ text: 'Statistiken & Heatmaps', included: true },
+			{ text: 'Priority Support', included: true },
+		],
+		cta: {
+			text: 'Pro starten',
+			href: '#',
+		},
+		highlighted: true,
+		badge: 'Beliebt',
+	},
+	{
+		name: 'Team',
+		price: '9,99',
+		period: '/Monat',
+		description: 'Für Teams & Unternehmen',
+		features: [
+			{ text: 'Alles aus Pro', included: true },
+			{ text: 'Team-Verwaltung', included: true },
+			{ text: 'Geteilte Projekte', included: true },
+			{ text: 'API-Zugang', included: true },
+			{ text: 'Admin-Dashboard', included: true },
+			{ text: 'SLA Garantie', included: true },
+		],
+		cta: {
+			text: 'Team erstellen',
+			href: '#',
+		},
+	},
+];
+---
+
+<Layout
+	title="Todo - Smart Task Management"
+	description="Organisiere deine Aufgaben intelligent. Projekte, Unteraufgaben, Kanban-Boards, wiederkehrende Tasks und smarte Erinnerungen. Kostenlos starten."
+>
+	<Hero />
+	<Features />
+
+	{
+		StepsSection && (
+			<StepsSection
+				id="how-it-works"
+				title="So einfach geht's"
+				subtitle="In drei Schritten zur Produktivität"
+				steps={steps}
+				showImages={false}
+				alternateLayout={true}
+				class="bg-dark-surface"
+			/>
+		)
+	}
+
+	{
+		!StepsSection && (
+			<section id="how-it-works" class="bg-dark-surface">
+				<div class="container">
+					<div class="mx-auto mb-16 max-w-3xl text-center">
+						<span class="mb-4 inline-block text-sm font-medium uppercase tracking-wider text-primary-400">
+							So funktioniert's
+						</span>
+						<h2 class="mb-6 text-3xl font-bold md:text-4xl">So einfach geht's</h2>
+						<p class="text-lg text-gray-400">In drei Schritten zur Produktivität</p>
+					</div>
+
+					<div class="grid gap-8 md:grid-cols-3">
+						{steps.map((step) => (
+							<div class="text-center">
+								<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-500/20 text-2xl font-bold text-primary-400">
+									{step.number}
+								</div>
+								<h3 class="mb-3 text-xl font-semibold">{step.title}</h3>
+								<p class="text-gray-400">{step.description}</p>
+							</div>
+						))}
+					</div>
+				</div>
+			</section>
+		)
+	}
+
+	{
+		PricingSection && (
+			<PricingSection
+				id="pricing"
+				title="Einfache, transparente Preise"
+				subtitle="Starte kostenlos, upgrade wenn du mehr brauchst"
+				plans={pricingPlans}
+				class="bg-dark-bg"
+			/>
+		)
+	}
+
+	{
+		!PricingSection && (
+			<section id="pricing" class="bg-dark-bg">
+				<div class="container">
+					<div class="mx-auto mb-16 max-w-3xl text-center">
+						<span class="mb-4 inline-block text-sm font-medium uppercase tracking-wider text-primary-400">
+							Preise
+						</span>
+						<h2 class="mb-6 text-3xl font-bold md:text-4xl">Einfache, transparente Preise</h2>
+						<p class="text-lg text-gray-400">Starte kostenlos, upgrade wenn du mehr brauchst</p>
+					</div>
+
+					<div class="mx-auto grid max-w-5xl gap-8 md:grid-cols-3">
+						{pricingPlans.map((plan) => (
+							<div
+								class={`relative rounded-xl border p-6 ${plan.highlighted ? 'border-primary-500 bg-primary-500/10' : 'border-dark-border bg-dark-card'}`}
+							>
+								{plan.badge && (
+									<div class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary-500 px-3 py-1 text-xs font-medium text-white">
+										{plan.badge}
+									</div>
+								)}
+								<h3 class="mb-2 text-xl font-semibold">{plan.name}</h3>
+								<p class="mb-4 text-sm text-gray-400">{plan.description}</p>
+								<div class="mb-6">
+									<span class="text-4xl font-bold">{plan.price}&euro;</span>
+									<span class="text-gray-500">{plan.period}</span>
+								</div>
+								<ul class="mb-8 space-y-3">
+									{plan.features.map((feature) => (
+										<li
+											class={`flex items-center gap-2 text-sm ${feature.included ? 'text-white' : 'text-gray-600'}`}
+										>
+											{feature.included ? (
+												<svg
+													class="h-5 w-5 text-green-500"
+													fill="none"
+													stroke="currentColor"
+													viewBox="0 0 24 24"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M5 13l4 4L19 7"
+													/>
+												</svg>
+											) : (
+												<svg
+													class="h-5 w-5 text-gray-600"
+													fill="none"
+													stroke="currentColor"
+													viewBox="0 0 24 24"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M6 18L18 6M6 6l12 12"
+													/>
+												</svg>
+											)}
+											{feature.text}
+										</li>
+									))}
+								</ul>
+								<a
+									href={plan.cta.href}
+									class={`btn w-full ${plan.highlighted ? 'btn-primary' : 'btn-secondary'}`}
+								>
+									{plan.cta.text}
+								</a>
+							</div>
+						))}
+					</div>
+				</div>
+			</section>
+		)
+	}
+
+	<CTA />
+	<Footer />
+</Layout>
