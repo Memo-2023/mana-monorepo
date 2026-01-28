@@ -55,6 +55,7 @@ Dieser Plan dokumentiert Features und Code, die überdurchschnittlich viel Kompl
 
 #### ✅ 1.2 Session Events → Demo-Modus (2024-01-28)
 
+**Commit:** `cef83216`
 **Ersparnis:** ~150 Zeilen (netto, nach Abzug der neuen Demo-Events-Datei)
 
 **Beschreibung:**
@@ -228,6 +229,6 @@ Cross-App API-Integration für Geburtstage. Ersetzbar durch manuelles Eintragen 
 
 | Datum | Aktion | Commit |
 |-------|--------|--------|
-| 2024-01-28 | Session Events → Demo-Modus | pending |
+| 2024-01-28 | Session Events → Demo-Modus | `cef83216` |
 | 2024-01-28 | Network View entfernt | `9a93ca0c` |
 | 2024-01-28 | Statistiken & Heatmap entfernt | `2f3473b7` |
