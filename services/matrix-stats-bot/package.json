@@ -4,6 +4,14 @@
 	"description": "Matrix bot for analytics from Umami - GDPR compliant",
 	"private": true,
 	"license": "MIT",
+	"pnpm": {
+		"neverBuiltDependencies": [
+			"@matrix-org/matrix-sdk-crypto-nodejs"
+		],
+		"overrides": {
+			"@matrix-org/matrix-sdk-crypto-nodejs": "npm:empty-npm-package@1.0.0"
+		}
+	},
 	"scripts": {
 		"prebuild": "rimraf dist",
 		"build": "nest build",
