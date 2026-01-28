@@ -15,7 +15,14 @@ interface UserSession {
 	systemPrompt: string;
 	model: string;
 	history: { role: 'user' | 'assistant'; content: string }[];
+	pendingImage?: { url: string; mimeType: string };
 }
+
+// Models excluded from !all comparison (specialized, not for general chat)
+const NON_CHAT_MODELS = ['deepseek-r1:1.5b'];
+
+// Models that support vision/image input
+const VISION_MODELS = ['llava', 'llava:7b', 'llava:13b', 'bakllava', 'moondream'];
 
 @Injectable()
 export class MatrixService implements OnModuleInit, OnModuleDestroy {
@@ -100,8 +107,29 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 			return;
 		}
 
+		const content = event.content as {
+			msgtype?: string;
+			body?: string;
+			url?: string;
+			info?: { mimetype?: string };
+		};
+
+		// Handle image messages - store for later use with !vision
+		if (content.msgtype === 'm.image' && content.url) {
+			const session = this.getSession(event.sender);
+			session.pendingImage = {
+				url: content.url,
+				mimeType: content.info?.mimetype || 'image/png',
+			};
+			this.logger.log(`Image received from ${event.sender}, stored for !vision command`);
+			await this.sendMessage(
+				roomId,
+				`📷 Bild empfangen! Nutze jetzt:\n- \`!vision [Frage zum Bild]\` - Bild mit einem Modell analysieren\n- \`!vision:all [Frage]\` - Bild mit allen Vision-Modellen vergleichen`
+			);
+			return;
+		}
+
 		// Only handle text messages
-		const content = event.content as { msgtype?: string; body?: string };
 		if (content.msgtype !== 'm.text') return;
 
 		const body = content.body;
@@ -153,6 +181,14 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 				await this.handleAllModels(roomId, sender, argString);
 				break;
 
+			case 'vision':
+				await this.handleVision(roomId, sender, argString);
+				break;
+
+			case 'vision:all':
+				await this.handleVisionAll(roomId, sender, argString);
+				break;
+
 			default:
 				await this.sendMessage(
 					roomId,
@@ -168,10 +204,16 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 - \`!help\` - Diese Hilfe anzeigen
 - \`!models\` - Verfügbare Modelle anzeigen
 - \`!model [name]\` - Modell wechseln
-- \`!all [frage]\` - **Alle Modelle vergleichen**
+- \`!all [frage]\` - **Alle Chat-Modelle vergleichen**
 - \`!mode [modus]\` - System-Prompt ändern
 - \`!clear\` - Chat-Verlauf löschen
 - \`!status\` - Ollama Status prüfen
+
+**Bild-Analyse (Vision):**
+1. Sende ein Bild in den Chat
+2. Nutze dann:
+   - \`!vision [frage]\` - Bild analysieren
+   - \`!vision:all [frage]\` - **Alle Vision-Modelle vergleichen**
 
 **Modi:**
 - \`default\` - Allgemeiner Assistent
@@ -183,8 +225,10 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 **Verwendung:**
 Schreibe einfach eine Nachricht und ich antworte!
 
-**Beispiel Modellvergleich:**
-\`!all Was ist der Sinn des Lebens?\`
+**Beispiele:**
+- \`!all Was ist der Sinn des Lebens?\`
+- [Bild senden] → \`!vision Was siehst du?\`
+- [Bild senden] → \`!vision:all Beschreibe das Bild\`
 
 **Aktuelles Modell:** \`${this.ollamaService.getDefaultModel()}\``;
 
@@ -303,20 +347,26 @@ Schreibe einfach eine Nachricht und ich antworte!
 		if (!message.trim()) {
 			await this.sendMessage(
 				roomId,
-				`**Verwendung:** \`!all [Deine Frage]\`\n\nBeispiel: \`!all Was ist 2+2?\`\n\nDie Frage wird an alle Modelle gesendet und du siehst die Antworten zum Vergleich.`
+				`**Verwendung:** \`!all [Deine Frage]\`\n\nBeispiel: \`!all Was ist 2+2?\`\n\nDie Frage wird an alle Chat-Modelle gesendet und du siehst die Antworten zum Vergleich.`
 			);
 			return;
 		}
 
-		const models = await this.ollamaService.listModels();
+		const allModels = await this.ollamaService.listModels();
+		// Filter out non-chat models (OCR, specialized models)
+		const models = allModels.filter((m) => !NON_CHAT_MODELS.includes(m.name));
+
 		if (models.length === 0) {
-			await this.sendMessage(roomId, '❌ Keine Modelle gefunden. Ist Ollama gestartet?');
+			await this.sendMessage(roomId, '❌ Keine Chat-Modelle gefunden. Ist Ollama gestartet?');
 			return;
 		}
 
+		const skipped = allModels.length - models.length;
+		const skippedNote = skipped > 0 ? ` (${skipped} spezialisierte Modelle übersprungen)` : '';
+
 		await this.sendMessage(
 			roomId,
-			`🔄 **Vergleiche ${models.length} Modelle...**\n\nFrage: "${message}"`
+			`🔄 **Vergleiche ${models.length} Chat-Modelle...**${skippedNote}\n\nFrage: "${message}"`
 		);
 
 		// Send typing indicator
@@ -403,6 +453,154 @@ Schreibe einfach eine Nachricht und ich antworte!
 			const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
 			await this.sendMessage(roomId, `❌ Fehler: ${errorMessage}`);
 		}
+	}
+
+	private async handleVision(roomId: string, sender: string, prompt: string) {
+		const session = this.getSession(sender);
+
+		if (!session.pendingImage) {
+			await this.sendMessage(
+				roomId,
+				`❌ Kein Bild vorhanden!\n\nSende zuerst ein Bild, dann nutze \`!vision [Frage zum Bild]\``
+			);
+			return;
+		}
+
+		if (!prompt.trim()) {
+			await this.sendMessage(
+				roomId,
+				`**Verwendung:** \`!vision [Deine Frage zum Bild]\`\n\nBeispiel: \`!vision Was siehst du auf diesem Bild?\``
+			);
+			return;
+		}
+
+		// Find available vision models
+		const allModels = await this.ollamaService.listModels();
+		const visionModels = allModels.filter((m) => VISION_MODELS.some((v) => m.name.includes(v)));
+
+		if (visionModels.length === 0) {
+			await this.sendMessage(
+				roomId,
+				`❌ Keine Vision-Modelle gefunden!\n\nInstalliere ein Vision-Modell mit:\n\`ollama pull llava\``
+			);
+			return;
+		}
+
+		const model = visionModels[0].name;
+		await this.sendMessage(roomId, `🔍 Analysiere Bild mit \`${model}\`...`);
+		await this.client.setTyping(roomId, true, 120000);
+
+		try {
+			// Download image from Matrix
+			const imageData = await this.downloadMatrixImage(session.pendingImage.url);
+
+			const response = await this.ollamaService.chatWithImage(prompt, imageData, model);
+
+			await this.client.setTyping(roomId, false);
+			await this.sendMessage(roomId, `**${model}:**\n\n${response}`);
+		} catch (error) {
+			await this.client.setTyping(roomId, false);
+			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
+			await this.sendMessage(roomId, `❌ Fehler bei der Bildanalyse: ${errorMsg}`);
+		}
+	}
+
+	private async handleVisionAll(roomId: string, sender: string, prompt: string) {
+		const session = this.getSession(sender);
+
+		if (!session.pendingImage) {
+			await this.sendMessage(
+				roomId,
+				`❌ Kein Bild vorhanden!\n\nSende zuerst ein Bild, dann nutze \`!vision:all [Frage zum Bild]\``
+			);
+			return;
+		}
+
+		if (!prompt.trim()) {
+			await this.sendMessage(
+				roomId,
+				`**Verwendung:** \`!vision:all [Deine Frage zum Bild]\`\n\nBeispiel: \`!vision:all Beschreibe was du siehst\``
+			);
+			return;
+		}
+
+		// Find available vision models
+		const allModels = await this.ollamaService.listModels();
+		const visionModels = allModels.filter((m) => VISION_MODELS.some((v) => m.name.includes(v)));
+
+		if (visionModels.length === 0) {
+			await this.sendMessage(
+				roomId,
+				`❌ Keine Vision-Modelle gefunden!\n\nInstalliere Vision-Modelle mit:\n\`ollama pull llava\`\n\`ollama pull moondream\``
+			);
+			return;
+		}
+
+		await this.sendMessage(
+			roomId,
+			`🔄 **Vergleiche ${visionModels.length} Vision-Modelle...**\n\nFrage: "${prompt}"`
+		);
+		await this.client.setTyping(roomId, true, 300000);
+
+		try {
+			// Download image from Matrix once
+			const imageData = await this.downloadMatrixImage(session.pendingImage.url);
+
+			const results: { model: string; response: string; duration: number; error?: string }[] = [];
+
+			for (const model of visionModels) {
+				const startTime = Date.now();
+				try {
+					this.logger.log(`Querying vision model ${model.name}...`);
+					const response = await this.ollamaService.chatWithImage(prompt, imageData, model.name);
+					const duration = Date.now() - startTime;
+					results.push({ model: model.name, response, duration });
+				} catch (error) {
+					const duration = Date.now() - startTime;
+					const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
+					results.push({ model: model.name, response: '', duration, error: errorMessage });
+				}
+			}
+
+			await this.client.setTyping(roomId, false);
+
+			// Format results
+			let resultText = `**📊 Vision-Modellvergleich**\n\n**Frage:** "${prompt}"\n\n---\n\n`;
+
+			for (const result of results) {
+				const durationSec = (result.duration / 1000).toFixed(1);
+				if (result.error) {
+					resultText += `**${result.model}** ⏱️ ${durationSec}s\n❌ Fehler: ${result.error}\n\n---\n\n`;
+				} else {
+					const truncatedResponse =
+						result.response.length > 500
+							? result.response.substring(0, 500) + '...'
+							: result.response;
+					resultText += `**${result.model}** ⏱️ ${durationSec}s\n${truncatedResponse}\n\n---\n\n`;
+				}
+			}
+
+			await this.sendMessage(roomId, resultText);
+		} catch (error) {
+			await this.client.setTyping(roomId, false);
+			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
+			await this.sendMessage(roomId, `❌ Fehler: ${errorMsg}`);
+		}
+	}
+
+	private async downloadMatrixImage(mxcUrl: string): Promise<string> {
+		// Convert mxc:// URL to HTTP URL and download
+		const httpUrl = this.client.mxcToHttp(mxcUrl);
+		this.logger.log(`Downloading image from ${httpUrl}`);
+
+		const response = await fetch(httpUrl);
+		if (!response.ok) {
+			throw new Error(`Failed to download image: ${response.status}`);
+		}
+
+		const buffer = await response.arrayBuffer();
+		const base64 = Buffer.from(buffer).toString('base64');
+		return base64;
 	}
 
 	private async sendMessage(roomId: string, message: string) {

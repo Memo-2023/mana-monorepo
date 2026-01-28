@@ -91,4 +91,48 @@ export class OllamaService implements OnModuleInit {
 	getDefaultModel(): string {
 		return this.defaultModel;
 	}
+
+	async chatWithImage(prompt: string, imageBase64: string, model?: string): Promise<string> {
+		const selectedModel = model || this.defaultModel;
+
+		try {
+			const response = await fetch(`${this.baseUrl}/api/chat`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					model: selectedModel,
+					messages: [
+						{
+							role: 'user',
+							content: prompt,
+							images: [imageBase64],
+						},
+					],
+					stream: false,
+				}),
+				signal: AbortSignal.timeout(this.timeout),
+			});
+
+			if (!response.ok) {
+				throw new Error(`Ollama API error: ${response.status}`);
+			}
+
+			const data = await response.json();
+
+			// Log performance metrics
+			if (data.eval_count && data.eval_duration) {
+				const tokensPerSec = (data.eval_count / data.eval_duration) * 1e9;
+				this.logger.debug(
+					`Vision: Generated ${data.eval_count} tokens at ${tokensPerSec.toFixed(1)} t/s`
+				);
+			}
+
+			return data.message?.content || '';
+		} catch (error) {
+			if (error instanceof Error && error.name === 'TimeoutError') {
+				throw new Error('Ollama Timeout - Bildanalyse dauerte zu lange');
+			}
+			throw error;
+		}
+	}
 }

@@ -12,9 +12,12 @@
 			"@matrix-org/matrix-sdk-crypto-nodejs": "npm:empty-npm-package@1.0.0"
 		}
 	},
+	"overrides": {
+		"@matrix-org/matrix-sdk-crypto-nodejs": "npm:empty-npm-package@1.0.0"
+	},
 	"scripts": {
-		"prebuild": "rimraf dist",
-		"build": "nest build",
+		"prebuild": "rm -rf dist || true",
+		"build": "tsc -p tsconfig.build.json",
 		"format": "prettier --write \"src/**/*.ts\"",
 		"start": "nest start",
 		"start:dev": "nest start --watch",
@@ -36,7 +39,6 @@
 		"@nestjs/cli": "^10.4.9",
 		"@nestjs/schematics": "^10.2.3",
 		"@types/node": "^22.10.5",
-		"rimraf": "^6.0.1",
 		"typescript": "^5.7.3"
 	}
 }

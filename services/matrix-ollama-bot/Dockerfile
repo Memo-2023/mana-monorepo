@@ -3,37 +3,31 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+# Copy package files (exclude pnpm-lock.yaml to use npm)
+COPY package.json ./
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
-
-# Install dependencies (ignore optional native modules)
-RUN pnpm install --frozen-lockfile --ignore-scripts || pnpm install --ignore-scripts
+# Install dependencies using npm (more compatible with standard tooling)
+RUN npm install
 
 # Copy source
 COPY . .
 
-# Build
-RUN pnpm build
+# Build using TypeScript
+RUN rm -rf dist && npx tsc -p tsconfig.build.json
 
 # Production stage
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
-
 # Create data directory for bot storage
 RUN mkdir -p /app/data
 
 # Copy package files
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json ./
 
-# Install production dependencies only (ignore optional native modules)
-RUN pnpm install --prod --frozen-lockfile --ignore-scripts || pnpm install --prod --ignore-scripts
+# Install production dependencies only
+RUN npm install --omit=dev
 
 # Copy built files
 COPY --from=builder /app/dist ./dist
