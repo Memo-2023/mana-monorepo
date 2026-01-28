@@ -1201,7 +1201,7 @@ export class BetterAuthService {
 	 * - /api/oidc/authorize → /api/auth/oauth2/authorize
 	 * - /api/oidc/token → /api/auth/oauth2/token
 	 * - /api/oidc/userinfo → /api/auth/oauth2/userinfo
-	 * - /api/oidc/jwks → /api/auth/oauth2/jwks
+	 * - /api/oidc/jwks → /api/auth/jwks (JWKS is at basePath, not oauth2)
 	 *
 	 * @param req - Express request
 	 * @returns Response data from Better Auth
@@ -1219,6 +1219,10 @@ export class BetterAuthService {
 			// Map .well-known to Better Auth's basePath
 			if (mappedPath.startsWith('/.well-known/')) {
 				mappedPath = `/api/auth${mappedPath}`;
+			}
+			// Map /api/oidc/jwks to /api/auth/jwks (JWKS is not under oauth2)
+			else if (mappedPath.startsWith('/api/oidc/jwks')) {
+				mappedPath = mappedPath.replace('/api/oidc/jwks', '/api/auth/jwks');
 			}
 			// Map /api/oidc/* to /api/auth/oauth2/*
 			else if (mappedPath.startsWith('/api/oidc/')) {
